@@ -14,10 +14,12 @@ import {
   isODataRequestTab,
   isAuthenticationRequestTab,
   isConsoleTab,
-  isFirewallTab
+  isFirewallTab,
+  isMiniBrowserTab
 } from '../../../../../shared/types/editor'
 import { ConsolePanel } from '../../Console'
 import { FirewallPanel } from '../../Firewall'
+import { MiniBrowserPanel } from '../../MiniBrowser'
 import {
   HTTPRequestTabView,
   GraphQLRequestTabView,
@@ -372,6 +374,18 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       )
     }
 
+    // Mini browser tab — codicon `browser` + "Mini browser" label.
+    // Singleton, no dirty indicator (the navigated URL is persisted
+    // directly on the tab object via the workbench tree).
+    if (isMiniBrowserTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <IconView icon={{ type: 'codicon', value: 'browser' }} size={14} />
+          <span>Mini browser</span>
+        </span>
+      )
+    }
+
     return null
   }, [renderDirtyIndicator])
 
@@ -503,6 +517,36 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     }
     return undefined
   }, [getEnvironmentFolderById])
+
+  /** Persist the Mini browser's current URL on its tab record so
+   * reopening the workbench restores the navigation state. Walks the
+   * tree (including nested split containers) to locate the tab by id,
+   * then replaces it with an updated copy. No-op when the URL hasn't
+   * actually changed so we don't churn the workbench-tree subscribers. */
+  const updateMiniBrowserUrl = useCallback((tabId: string, url: string): void => {
+    const updateGroups = (nodes: typeof tree.groups): typeof tree.groups =>
+      nodes.map((node) => {
+        if (isTabGroupNode(node)) {
+          const target = node.tabs.find((t) => t.id === tabId)
+          if (!target) return node
+          const current = (target as RestormEditorTab & { url?: string }).url
+          if (current === url) return node
+          return {
+            ...node,
+            tabs: node.tabs.map((t) => (t.id === tabId ? { ...t, url } as EditorTab : t))
+          }
+        }
+        if (isContainerNode(node)) {
+          return { ...node, groups: updateGroups(node.groups) }
+        }
+        return node
+      })
+    const nextGroups = updateGroups(tree.groups)
+    if (nextGroups === tree.groups) return
+    const nextTree = { ...tree, groups: nextGroups }
+    if (onTreeChange) onTreeChange(nextTree)
+    else setLocalTree(nextTree)
+  }, [tree, onTreeChange])
 
   // Render tab content based on tab type
   const renderTabContent = useCallback((tab: RestormEditorTab): React.ReactNode => {
@@ -811,9 +855,21 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       return <FirewallPanel />
     }
 
+    // Mini browser tab — singleton, identified by `tabType: 'mini-browser'`.
+    // The currently-navigated URL is stored on the tab itself; we update
+    // it through the workbench tree so reopening restores the same page.
+    if (isMiniBrowserTab(effectiveTab)) {
+      return (
+        <MiniBrowserPanel
+          {...(effectiveTab.url !== undefined ? { initialUrl: effectiveTab.url } : {})}
+          onUrlChange={(url) => { updateMiniBrowserUrl(effectiveTab.id, url) }}
+        />
+      )
+    }
+
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite])
+  }, [onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, updateMiniBrowserUrl])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(

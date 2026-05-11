@@ -123,6 +123,18 @@ export interface FirewallTab extends BaseRestormTab {
   tabType: 'firewall'
 }
 
+/** Tab displaying the Mini browser (address bar + back + refresh +
+ * iframe). Singleton — `View → Mini browser` focuses the existing
+ * tab if one is open. The currently-navigated `url` is persisted
+ * on the tab itself so reopening the workbench restores it. */
+export interface MiniBrowserTab extends BaseRestormTab {
+  tabType: 'mini-browser'
+  /** URL currently loaded into the iframe. Optional so a freshly
+   * opened tab can sit on a blank "type an address" state until
+   * the user enters something. */
+  url?: string
+}
+
 /** Legacy tab type for backward compatibility */
 export interface LegacyTab extends BaseRestormTab {
   tabType?: undefined
@@ -142,6 +154,7 @@ export type RestormEditorTab =
   | AuthenticationRequestTab
   | ConsoleTab
   | FirewallTab
+  | MiniBrowserTab
   | LegacyTab
 
 /** Stable singleton id for the Console workbench tab.
@@ -151,6 +164,10 @@ export const CONSOLE_TAB_ID = 'console:singleton'
 /** Stable singleton id for the Firewall admin workbench tab.
  * `View → Firewall` and the focus-or-create logic both key off this. */
 export const FIREWALL_TAB_ID = 'firewall:singleton'
+
+/** Stable singleton id for the Mini browser workbench tab.
+ * `View → Mini browser` and the focus-or-create logic both key off this. */
+export const MINI_BROWSER_TAB_ID = 'mini-browser:singleton'
 
 /** @deprecated Use RestormEditorTab instead */
 export type restormEditorTab = RestormEditorTab
@@ -208,4 +225,9 @@ export function isConsoleTab(tab: RestormEditorTab): tab is ConsoleTab {
 /** Type guard for FirewallTab */
 export function isFirewallTab(tab: RestormEditorTab): tab is FirewallTab {
   return tab.tabType === 'firewall'
+}
+
+/** Type guard for MiniBrowserTab */
+export function isMiniBrowserTab(tab: RestormEditorTab): tab is MiniBrowserTab {
+  return tab.tabType === 'mini-browser'
 }

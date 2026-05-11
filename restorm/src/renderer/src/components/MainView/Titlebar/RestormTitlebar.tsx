@@ -41,6 +41,10 @@ export interface RestormTitlebarProps {
    * as Console, but no specific placement constraint — the host
    * just appends to the focused group. */
   onOpenFirewall: () => void
+  /** Open / focus the Mini browser singleton tab. Wired to
+   * `View → Mini browser`. Same singleton-or-focus pattern as
+   * Firewall. */
+  onOpenMiniBrowser: () => void
 }
 
 /**
@@ -63,7 +67,8 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   onOpenRecentFile,
   onSearchResultClick,
   onOpenConsole,
-  onOpenFirewall
+  onOpenFirewall,
+  onOpenMiniBrowser
 }) => {
   const { t } = useTranslation()
   const { showSettingsModal } = useSettingsModal()
@@ -212,6 +217,11 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
               data-testid="titlebar-menu-item-firewall"
               title={t('menuBar.firewall', 'Firewall')}
               onClick={onOpenFirewall}
+            />
+            <MenuItem
+              data-testid="titlebar-menu-item-mini-browser"
+              title={t('menuBar.miniBrowser', 'Mini browser')}
+              onClick={onOpenMiniBrowser}
             />
             <MenuItemSeparator data-testid="titlebar-menu-separator-view-1" />
             <MenuItem data-testid="titlebar-menu-item-zoom-in" title={t('menuBar.zoomIn')} shortcut="Ctrl++" disabled />

@@ -65,7 +65,7 @@ import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayloa
 import { getResponseHistoryList } from './services/GraphQLIntegration'
 import type { EditorTab, WorkbenchTree, GroupNode, TabGroupNode, ContainerGroupNode } from 'electron-core-ui/renderer'
 import { isContainerNode, isTabGroupNode } from 'electron-core-ui/renderer'
-import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, type ConsoleTab, type FirewallTab } from '../../shared/types/editor'
+import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, type ConsoleTab, type FirewallTab, type MiniBrowserTab } from '../../shared/types/editor'
 import { findGroupIdForTab, hasGroupWithId, updateGroupById } from './utils/workbenchHelpers'
 
 /**
@@ -433,6 +433,53 @@ const App: React.FC = () => {
    * just append to the focused group (or the first available
    * `TabGroupNode` if no focus). Activate-existing-or-create.
    */
+  const handleOpenMiniBrowser = useCallback(() => {
+    setWorkbenchTree(prev => {
+      const existingGroupId = findGroupIdForTab(prev.groups, MINI_BROWSER_TAB_ID)
+      if (existingGroupId !== null) {
+        return {
+          ...prev,
+          groups: updateGroupById(prev.groups, existingGroupId, group => ({ ...group, activeTabId: MINI_BROWSER_TAB_ID }))
+        }
+      }
+      const miniBrowserTab: MiniBrowserTab = {
+        id: MINI_BROWSER_TAB_ID,
+        tabType: 'mini-browser',
+        title: 'Mini browser',
+        titleString: 'Mini browser'
+      }
+      const findFirstTabGroup = (nodes: GroupNode[]): TabGroupNode | null => {
+        for (const node of nodes) {
+          if (isTabGroupNode(node)) return node
+          if (isContainerNode(node)) {
+            const inner = findFirstTabGroup(node.groups)
+            if (inner !== null) return inner
+          }
+        }
+        return null
+      }
+      const targetId = focusedGroupId !== null && hasGroupWithId(prev.groups, focusedGroupId)
+        ? focusedGroupId
+        : (findFirstTabGroup(prev.groups)?.id ?? null)
+      if (targetId !== null) {
+        return {
+          ...prev,
+          groups: updateGroupById(prev.groups, targetId, group => ({
+            ...group,
+            tabs: [...group.tabs, miniBrowserTab],
+            activeTabId: MINI_BROWSER_TAB_ID
+          }))
+        }
+      }
+      const newGroup: TabGroupNode = {
+        id: `mini-browser-group-${String(Date.now())}-${crypto.randomUUID().slice(0, 8)}`,
+        tabs: [miniBrowserTab],
+        activeTabId: MINI_BROWSER_TAB_ID
+      }
+      return { ...prev, groups: [newGroup] }
+    })
+  }, [setWorkbenchTree, focusedGroupId])
+
   const handleOpenFirewall = useCallback(() => {
     setWorkbenchTree(prev => {
       const existingGroupId = findGroupIdForTab(prev.groups, FIREWALL_TAB_ID)
@@ -1827,6 +1874,7 @@ const App: React.FC = () => {
         onSearchResultClick={handleSearchResultClick}
         onOpenConsole={handleOpenConsole}
         onOpenFirewall={handleOpenFirewall}
+        onOpenMiniBrowser={handleOpenMiniBrowser}
       />
 
       {fileName ? (
