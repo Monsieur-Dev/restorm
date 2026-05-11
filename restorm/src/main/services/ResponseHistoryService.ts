@@ -930,7 +930,18 @@ class ResponseHistoryService {
     }
 
     const data = await writer.close()
-    await fs.writeFile(archivePath, Buffer.from(data))
+    // Atomic publish: write to a sibling tmp file then `rename` over the
+    // live archive. `fs.writeFile` truncates+writes which is NOT atomic
+    // — a concurrent reader (`list` / `getDetail`, neither of which goes
+    // through `writeQueue`) can land between the truncate and the final
+    // flush and see a partial zip, surfacing as
+    // "End of central directory not found" from `ZipReader`. `rename`
+    // on POSIX (and on Windows since Node 10+) atomically swaps the
+    // inode, so any concurrent read sees either the old or the new
+    // archive, never a half-written one.
+    const tmpPath = `${archivePath}.tmp-${process.pid}-${Date.now()}`
+    await fs.writeFile(tmpPath, Buffer.from(data))
+    await fs.rename(tmpPath, archivePath)
   }
 
   private async queueWrite<T>(fn: () => Promise<T>): Promise<T> {
