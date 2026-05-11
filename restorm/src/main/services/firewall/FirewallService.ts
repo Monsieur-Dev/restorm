@@ -76,6 +76,26 @@ class FirewallService {
 				callback({ cancel: false })
 				return
 			}
+			// Skip requests originating from the Mini browser's
+			// `<iframe>` — the firewall is meant to gate restorm's
+			// own outbound calls (HTTP / GraphQL / WebSocket
+			// executions, auth prefetch, import fetches), not
+			// arbitrary third-party browsing inside the embedded
+			// iframe. Without this bypass the user would have to
+			// click "Allow" for every CSS / font / XHR an embedded
+			// page makes — dozens of prompts per page load.
+			//
+			// Heuristic: the request's owning frame is a non-main
+			// frame whose document URL is an external `http(s)://`
+			// origin (i.e. not the renderer's own Vite / app
+			// origin). Internal iframes used by Monaco / devtools
+			// load via `vscode-resource:` / `devtools://` and don't
+			// match. The top-level renderer document is always the
+			// main frame, so it short-circuits cleanly here too.
+			if (isMiniBrowserIframeRequest(details)) {
+				callback({ cancel: false })
+				return
+			}
 			let record: RequestRecord | null = null
 			try {
 				record = this.recordFromWebRequest(details)
@@ -250,6 +270,69 @@ const VITE_DEV_ORIGIN = (() => {
 function isViteDevOrigin(rawUrl: string): boolean {
 	if (VITE_DEV_ORIGIN === null) return false
 	try { return new URL(rawUrl).origin === VITE_DEV_ORIGIN } catch { return false }
+}
+
+/**
+ * Detect requests that originated from the Mini browser's `<iframe>`
+ * (rendering arbitrary third-party content like the artifactsmmo
+ * game UI). The firewall stays out of those — the user opened the
+ * Mini browser explicitly, prompting for every CSS/font/XHR the
+ * embedded page makes would be unworkable.
+ *
+ * Conditions, all required:
+ *   1. The request belongs to a frame Chromium can identify
+ *      (`details.frame` populated — null for some service-worker
+ *      paths, which we leave to the rest of the filter chain).
+ *   2. That frame is NOT the top-level renderer — i.e. it's a
+ *      subframe. The Mini browser renders the third-party page
+ *      inside an `<iframe>`, so the frame chain is
+ *      `top (restorm) → iframe (third-party)`. Requests whose
+ *      `frame === frame.top` are restorm's own renderer making the
+ *      call and stay under firewall control.
+ *   3. The subframe's document URL is an external `http(s)://`
+ *      origin. Internal Chromium iframes used by Monaco / devtools
+ *      load via `vscode-resource:` / `devtools://` / `chrome-extension://`
+ *      and don't match. The Vite dev origin is excluded so a
+ *      hypothetical dev-mode iframe pointing at `localhost:5173`
+ *      wouldn't accidentally bypass the firewall.
+ */
+function isMiniBrowserIframeRequest(details: OnBeforeRequestListenerDetails): boolean {
+	// (1) Iframe navigation itself — the request that fetches the
+	//     iframe's main HTML document. At this point `details.frame`
+	//     still points at the parent (top) frame because the iframe
+	//     document doesn't exist yet, so the frame-based check below
+	//     would miss this navigation. Detect it via
+	//     `resourceType === 'subFrame'` and confirm the destination
+	//     is an external http(s) origin (the Mini browser is the only
+	//     surface in restorm that points an iframe at one).
+	if (details.resourceType === 'subFrame' && isExternalHttpUrl(details.url)) {
+		return true
+	}
+	// (2) Sub-resource of an already-loaded iframe (CSS, JS, font,
+	//     XHR, fetch, …). `details.frame` is the iframe's frame, not
+	//     the top one. `frame === frame.top` ⇒ main frame (restorm
+	//     itself); any other frame is a subframe.
+	const frame = details.frame
+	if (!frame) return false
+	if (frame === frame.top) return false
+	const frameUrl = frame.url
+	if (typeof frameUrl !== 'string' || frameUrl === '') return false
+	return isExternalHttpUrl(frameUrl)
+}
+
+/**
+ * `true` iff the URL parses as http(s) AND its origin is NOT the
+ * Vite dev origin. Used to distinguish a third-party page (which the
+ * Mini browser is meant to load) from restorm's own renderer / dev
+ * assets / internal `vscode-resource:` / `devtools://` URLs.
+ */
+function isExternalHttpUrl(rawUrl: string): boolean {
+	let parsed: URL
+	try { parsed = new URL(rawUrl) } catch { return false }
+	const scheme = parsed.protocol.replace(/:$/, '').toLowerCase()
+	if (scheme !== 'http' && scheme !== 'https') return false
+	if (VITE_DEV_ORIGIN !== null && parsed.origin === VITE_DEV_ORIGIN) return false
+	return true
 }
 
 function inferProtocol(parsed: URL | null): RequestRecordProtocol {
