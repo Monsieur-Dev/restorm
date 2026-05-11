@@ -12,6 +12,7 @@ import { subscribeWithSelector } from 'zustand/middleware'
 import type { EnvironmentFolder, FolderItem, Environment, Request, Folder } from '../../../shared/types/collections'
 import { isAnyFolder, isEnvironmentFolder, isRequest } from '../../../shared/types/collections'
 import { migrateApiUpdateForCollections } from '../../../shared/utils/migrateApiUpdate'
+import { cloneForEventBus } from '../utils/cloneForEventBus'
 
 // ============================================================================
 // Types
@@ -271,7 +272,11 @@ export const useRestormStore = create<RestormState>()(
       if (api?.syncCollections) {
         // Strip reactive proxies before sending over IPC — they
         // serialize fine but the receiving side wants plain objects.
-        void api.syncCollections(JSON.parse(JSON.stringify(collections)) as unknown[])
+        // `cloneForEventBus` instead of `JSON.parse(JSON.stringify(...))`
+        // so `PasswordValue.toJSON()` doesn't get called along the way
+        // — main needs the plaintext to resolve handlebars + to write
+        // the `.restorm.env` sidecar correctly on the next save.
+        void api.syncCollections(cloneForEventBus(collections) as unknown[])
       }
     },
     
