@@ -294,18 +294,22 @@ function isViteDevOrigin(rawUrl: string): boolean {
  * match the http(s) test either.
  */
 function isMiniBrowserIframeRequest(details: OnBeforeRequestListenerDetails): boolean {
-	// (1) Subframe navigation itself — the request that fetches the
-	//     iframe's main HTML document. At this point `details.frame`
-	//     still points at the parent (top) frame because the iframe
-	//     document doesn't exist yet, so the frame-based check below
-	//     would miss this navigation. Detect it via
-	//     `resourceType === 'subFrame'` and confirm the destination
-	//     is an external http(s) origin (the Mini browser is the only
-	//     surface in restorm that points an iframe at one).
-	if (details.resourceType === 'subFrame' && isExternalHttpUrl(details.url)) {
+	// (1) Navigation request itself — the very first fetch that loads
+	//     the Mini browser surface's main HTML document. With an
+	//     `<iframe>` `resourceType === 'subFrame'`; with an Electron
+	//     `<webview>` it's `mainFrame` (the webview is its own
+	//     top-level browsing context, not a subframe of restorm's
+	//     renderer). In both shapes, `details.frame.url` is still
+	//     `about:blank` at this point so the frame-based check below
+	//     would miss it. Use the resource-type + destination-URL
+	//     signal instead: only the Mini browser surface ever points
+	//     a top-level / sub-frame navigation at an external http(s)
+	//     origin (restorm's own renderer never navigates away from
+	//     the Vite / app origin).
+	if ((details.resourceType === 'subFrame' || details.resourceType === 'mainFrame') && isExternalHttpUrl(details.url)) {
 		return true
 	}
-	// (2) Sub-resource of an already-loaded Mini browser frame (CSS,
+	// (2) Sub-resource of an already-loaded Mini browser surface (CSS,
 	//     JS, font, XHR, fetch, WS, …). When the Mini browser uses an
 	//     `<iframe>`, `details.frame` is the iframe's frame (not the
 	//     parent). When it uses an Electron `<webview>`, the tag is
