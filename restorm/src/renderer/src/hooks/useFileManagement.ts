@@ -328,7 +328,16 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     }
 
     if (hasRealChanges) {
-      const secrets = collectPasswordSecretsFromCollections(plainData)
+      // Collect from the live in-memory tree (not `plainData`).
+      // `JSON.parse(JSON.stringify(rootItems))` runs every
+      // `PasswordValue.toJSON()`, which strips the plaintext —
+      // collecting from `plainData` would always see an empty
+      // string for every secret, even when the user just typed
+      // a real value. The live tree still holds the plaintext on
+      // the `PasswordValue` instances; `isPasswordValueType` /
+      // `getPasswordString` accept both class instances and the
+      // POJO shape so the walker works on either.
+      const secrets = collectPasswordSecretsFromCollections({ collections: rootItems })
       const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
       const saved = await saveFile(dataForChecksum)
       if (!saved) return false
@@ -549,7 +558,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       const saved = hasRealChanges ? await saveFile(dataForChecksum) : true
       if (!saved) return false
       if (hasRealChanges && filePath) {
-        const secrets = collectPasswordSecretsFromCollections(plainData)
+        const secrets = collectPasswordSecretsFromCollections({ collections: rootItems })
         const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
         await window.restorm?.secrets.write(`${filePath}.env`, envContent)
       }
@@ -657,7 +666,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
             logger.info('[useFileManagement] File saved successfully', { path: result.path })
             setIsOpenedAsFolder(false)
             if (result.path) {
-              const secrets = collectPasswordSecretsFromCollections(plainData)
+              const secrets = collectPasswordSecretsFromCollections({ collections: rootItems })
               const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
               await window.restorm?.secrets.write(`${result.path}.env`, envContent)
             }
@@ -699,7 +708,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       const dataForSave = prepareForSerialization(plainData)
       const saved = await saveFile(dataForSave)
       if (saved && filePath) {
-        const secrets = collectPasswordSecretsFromCollections(plainData)
+        const secrets = collectPasswordSecretsFromCollections({ collections: rootItems })
         const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
         await window.restorm?.secrets.write(`${filePath}.env`, envContent)
       }
@@ -974,7 +983,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       const saved = await saveFile(dataForSave)
       if (saved) {
         if (filePath) {
-          const secrets = collectPasswordSecretsFromCollections(plainData)
+          const secrets = collectPasswordSecretsFromCollections({ collections: rootItems })
           const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
           await window.restorm?.secrets.write(`${filePath}.env`, envContent)
         }

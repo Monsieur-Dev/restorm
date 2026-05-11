@@ -291,6 +291,13 @@ export const ImportSelectionTree: React.FC<ImportSelectionTreeProps> = ({
       onItemClick={() => { /* handled by Toggle */ }}
       onItemContextMenu={() => { /* selection tree is read-only here */ }}
       {...(dataTestId && { 'data-testid': dataTestId })}
+      // The import modal wraps the tree in a drop zone that takes
+      // a paste-like dropped spec; a row drag that crosses into the
+      // drop zone would otherwise activate it and replace the
+      // preview with the row's serialised payload. The tree itself
+      // is purely a selection surface — no row-level reorder
+      // makes sense here — so we disable drag on every row.
+      disableDrag
     />
   )
 }

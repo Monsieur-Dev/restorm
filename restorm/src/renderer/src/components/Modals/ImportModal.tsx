@@ -14,7 +14,7 @@ import {
   type KeyValueTableRow
 } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
-import type { FolderItem, EnvironmentFolder } from '../../../../shared/types/collections'
+import type { FolderItem, EnvironmentFolder, Folder } from '../../../../shared/types/collections'
 import { isEnvironmentFolder, isRequest } from '../../../../shared/types/collections'
 import type { AuthenticationRequest } from '../../../../shared/models'
 import { logger } from 'electron-core-ui/renderer'
@@ -483,10 +483,10 @@ export function ImportModal({
       const attachedTree = attach(selectedItems)
       const firstFolderIdx = attachedTree.findIndex((item) => 'items' in item)
       if (firstFolderIdx >= 0) {
-        const firstFolder = attachedTree[firstFolderIdx] as Extract<FolderItem, { items: FolderItem[] }>
+        const firstFolder = attachedTree[firstFolderIdx] as Folder
         finalItems = [
           ...attachedTree.slice(0, firstFolderIdx),
-          { ...firstFolder, items: [attachedAuth as unknown as FolderItem, ...firstFolder.items] },
+          { ...firstFolder, items: [attachedAuth as unknown as FolderItem, ...firstFolder.items] } as FolderItem,
           ...attachedTree.slice(firstFolderIdx + 1)
         ]
       } else {

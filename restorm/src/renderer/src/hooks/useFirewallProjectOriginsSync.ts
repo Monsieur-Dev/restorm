@@ -87,7 +87,7 @@ function collectEnvironmentContexts(items: (EnvironmentFolder | Folder | Request
 	const out: EnvContext[] = []
 	const visit = (item: EnvironmentFolder | Folder | Request): void => {
 		if (isEnvironmentFolder(item)) {
-			const folder = item as EnvironmentFolder & { environments?: { variables?: { key: string; value: string }[] }[] }
+			const folder = item
 			const envs = Array.isArray(folder.environments) ? folder.environments : []
 			for (const env of envs) {
 				const ctx: EnvContext = {}

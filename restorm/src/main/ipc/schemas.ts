@@ -10,7 +10,17 @@ const persistenceFormatArg = z.enum(['json', 'json5', 'yaml'])
 const keyValueSchema = z.object({
   id: z.string().optional(),
   key: z.string(),
-  value: z.string()
+  value: z.string(),
+  /**
+   * Whether the value is an `ExpressionValue` and should be run
+   * through the handlebars resolver at request time. Defaults to
+   * `false` — a plain `StringValue` is sent verbatim. The renderer
+   * derives this from the persisted `ValueType` subclass; main
+   * reconstructs the right `ValueType` instance on receipt so the
+   * resolver behaves consistently across the IPC boundary.
+   */
+  isExpression: z.boolean().optional(),
+  enabled: z.boolean().optional()
 })
 
 // ==========================================================================

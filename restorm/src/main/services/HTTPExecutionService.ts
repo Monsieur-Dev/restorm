@@ -135,9 +135,13 @@ class HTTPExecutionService {
               continue
             }
             if (h.key) {
-              // Resolve header value using environment context
-              const resolvedValue = contextService.resolveValue(h.value, requestId)
-              headers[h.key] = resolvedValue
+              // Type-aware resolution: only `ExpressionValue` rows
+              // get handlebars-substituted; a `StringValue` row
+              // ships verbatim. The old `resolveValue(h.value, …)`
+              // path always ran the resolver regardless of type,
+              // so a user who handcrafted `{{token}}` as a plain
+              // string saw it silently expanded on send.
+              headers[h.key] = contextService.resolveKeyValueForRequest(h, requestId)
             }
           }
         }

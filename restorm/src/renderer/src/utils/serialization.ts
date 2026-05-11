@@ -5,6 +5,7 @@
 
 import type { RuntimeId } from '../../../shared/types/collections'
 import { normalizeDocumentValuesForPersistence } from '../../../shared/utils/valuePersistence'
+import { normalizeValueType } from './normalizeValueType'
 
 /**
  * Generate a unique identifier (UUID v4)
@@ -81,6 +82,7 @@ export function generateIds<T>(obj: T): T {
 
     const record = value as Record<string, unknown>
     const result: Record<string, unknown> = { ...record }
+    const isKeyValueLike = shouldHaveId(record) && 'key' in record && 'value' in record && typeof record['key'] === 'string'
 
     if (shouldHaveId(record)) {
       const existing = typeof record['id'] === 'string' ? record['id'] : undefined
@@ -91,7 +93,17 @@ export function generateIds<T>(obj: T): T {
     }
 
     for (const [key, v] of Object.entries(result)) {
-      if (key !== 'id' && typeof v === 'object' && v !== null) {
+      if (key === 'id') continue
+      if (isKeyValueLike && key === 'value') {
+        // Rehydrate persisted ValueType POJOs (`{ type, value, … }`)
+        // into real class instances. The runtime UI (cell renderers,
+        // resolve paths) uses `instanceof` checks that fail on plain
+        // objects, so without this step a loaded `ExpressionValue`
+        // renders as a plain string and never substitutes.
+        result['value'] = normalizeValueType(v)
+        continue
+      }
+      if (typeof v === 'object' && v !== null) {
         result[key] = walk(v)
       }
     }

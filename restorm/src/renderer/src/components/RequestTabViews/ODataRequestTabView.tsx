@@ -57,6 +57,7 @@ import {
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import { useAuthRequestResolver } from '../../contexts/authRequestResolverContext'
 import type { KeyValueData } from '../../types/global.d'
+import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
@@ -150,12 +151,7 @@ const ODATA_VERSION_BY_INDEX: ODataVersion[] = ['v4', 'v3', 'v2']
 const ODATA_OPERATION_KIND_BY_INDEX: ODataOperationKind[] = ['entity-set', 'function', 'action', 'batch']
 
 function toKeyValueData(kvs: readonly KeyValue[]): KeyValueData[] {
-  return kvs.map((kv) => ({
-    id: kv.id,
-    key: kv.key,
-    value: kv.value.toString(),
-    enabled: kv.enabled
-  }))
+  return toKeyValueDataShared(kvs)
 }
 
 function tryParseJson(raw: string): unknown {

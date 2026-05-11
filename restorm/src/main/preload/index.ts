@@ -273,9 +273,9 @@ contextBridge.exposeInMainWorld('restorm', {
       requestId: string,
       environmentId: string | null,
       requestData: {
-        headers?: { id?: string; key: string; value: string }[]
-        params?: { id?: string; key: string; value: string }[]
-        pathParams?: { id?: string; key: string; value: string }[]
+        headers?: { id?: string; key: string; value: string; enabled?: boolean; isExpression?: boolean }[]
+        params?: { id?: string; key: string; value: string; enabled?: boolean; isExpression?: boolean }[]
+        pathParams?: { id?: string; key: string; value: string; enabled?: boolean; isExpression?: boolean }[]
       }
     ): Promise<void> => {
       await ipcRenderer.invoke('context:register-request', requestId, environmentId, requestData)

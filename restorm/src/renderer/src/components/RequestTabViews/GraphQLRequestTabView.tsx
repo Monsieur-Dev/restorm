@@ -1,3 +1,4 @@
+import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useRequestReset } from '../../hooks/useRequestReset'
 import { useTranslation } from 'react-i18next'
@@ -18,7 +19,7 @@ import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { GraphQLRequest, GraphQLResponse, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
-import type { GraphQLExecutionResult, KeyValueData } from '../../types/global.d'
+import type { GraphQLExecutionResult } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { useRestormStore } from '../../store/restormStore'
@@ -96,8 +97,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
     
     logger.debug('[GraphQLRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
 
-    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
-      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
+    const toKeyValueData = toKeyValueDataShared
 
     void restormContext.registerRequest(requestId, currentEnvId, {
       headers: toKeyValueData(currentRequest.headers)
@@ -159,8 +159,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
 
   // Notify ContextService when URL, query or variables change
   useEffect(() => {
-    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
-      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
+    const toKeyValueData = toKeyValueDataShared
 
     void window.restorm?.context.updateFullRequestData(request.id, {
       url,

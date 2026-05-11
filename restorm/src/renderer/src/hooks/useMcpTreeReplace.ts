@@ -61,7 +61,7 @@ export function useMcpTreeReplace(input: UseMcpTreeReplaceInput): void {
       const next: (EnvironmentFolder | Folder | Request)[] = []
       for (const raw of payload) {
         const r = reifyItem(raw)
-        if (r !== null) next.push(r as EnvironmentFolder | Folder | Request)
+        if (r !== null) next.push(r)
       }
       // Flip the flag BEFORE setRootItems. The downstream zustand
       // `setCollections` effect reads it on the next render to pick

@@ -178,7 +178,8 @@ const ListViewInner: React.FC<ListViewProps> = ({
   onItemRename,
   onItemMouseEnter,
   onItemMouseLeave,
-  onDeleteRequest
+  onDeleteRequest,
+  disableDrag = false
 }) => {
   const rootTestId = dataTestId ?? 'list-view'
   const scrollableTestId = scrollableTestIdProp ?? `${rootTestId}-scrollable`
@@ -820,7 +821,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
                 aria-level={depth + 1}
                 aria-expanded={!isLeaf ? isExpanded : undefined}
                 aria-selected={isSelected}
-                draggable={!isEditing}
+                draggable={!isEditing && !disableDrag}
                 onClick={handleRowClick}
                 onDoubleClick={handleRowDoubleClick}
                 onMouseEnter={handleRowMouseEnter}
@@ -828,16 +829,18 @@ const ListViewInner: React.FC<ListViewProps> = ({
                 onContextMenu={(event): void => {
                   handleContextMenu(flat, event)
                 }}
-                onDragStart={(event): void => {
-                  handleDragStart(flat, event)
-                }}
-                onDragOver={(event): void => {
-                  handleDragOver(flat, event)
-                }}
-                onDragLeave={handleDragLeave}
-                onDrop={(event): void => {
-                  handleDrop(flat, event)
-                }}
+                {...(disableDrag ? {} : {
+                  onDragStart: (event: React.DragEvent<HTMLDivElement>): void => {
+                    handleDragStart(flat, event)
+                  },
+                  onDragOver: (event: React.DragEvent<HTMLDivElement>): void => {
+                    handleDragOver(flat, event)
+                  },
+                  onDragLeave: handleDragLeave,
+                  onDrop: (event: React.DragEvent<HTMLDivElement>): void => {
+                    handleDrop(flat, event)
+                  }
+                })}
               >
                 {/* Indents positioned absolutely to span full row height */}
                 <div className="list-view-indents" aria-hidden="true">

@@ -440,27 +440,33 @@ function extractEnvironment(
 ): Environment {
   const variables: KeyValue[] = []
 
-  // Add collection variables
+  // Add collection variables. `createTypedKeyValue` promotes any value
+  // containing `{{...}}` to an `ExpressionValue` so Postman templates
+  // (`{{protocol}}://{{host}}`, `{{token}}`, …) actually substitute at
+  // runtime instead of being persisted as literal strings.
   for (const v of collection.variable ?? []) {
     if (v.key && v.value !== undefined) {
       // If user provided a baseUrl, skip the collection's baseUrl
       if (v.key === 'baseUrl' && baseUrl) {
         continue
       }
-      variables.push({
+      const description = extractDescription(v.description)
+      variables.push(createTypedKeyValue({
         key: v.key,
-        value: v.value,
-        description: extractDescription(v.description) || undefined
-      })
+        value: typeof v.value === 'string' ? v.value : String(v.value),
+        enabled: true,
+        ...(description ? { description } : {})
+      }))
     }
   }
 
   // If baseUrl provided, add it at the beginning
   if (baseUrl) {
-    variables.unshift({
+    variables.unshift(createTypedKeyValue({
       key: 'baseUrl',
-      value: baseUrl
-    })
+      value: baseUrl,
+      enabled: true
+    }))
   }
 
   // Extract domain name for environment name

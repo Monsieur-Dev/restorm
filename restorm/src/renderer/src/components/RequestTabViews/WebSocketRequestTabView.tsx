@@ -1,3 +1,4 @@
+import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { useRequestReset } from '../../hooks/useRequestReset'
 import { useTranslation } from 'react-i18next'
@@ -19,7 +20,7 @@ import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { WebSocketRequest, WebSocketResponse, WebSocketMessage, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
-import type { WebSocketExecutionResult, WebSocketMessageItem, KeyValueData } from '../../types/global.d'
+import type { WebSocketExecutionResult, WebSocketMessageItem } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { useRestormStore } from '../../store/restormStore'
@@ -85,8 +86,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     const currentRequest = requestRef.current
     logger.debug('[WebSocketRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
 
-    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
-      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
+    const toKeyValueData = toKeyValueDataShared
 
     void window.restorm?.context.registerRequest(requestId, currentEnvId, {
       headers: toKeyValueData(currentRequest.headers)
@@ -148,8 +148,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
 
   // Notify ContextService when URL, event or message changes
   useEffect(() => {
-    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
-      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
+    const toKeyValueData = toKeyValueDataShared
 
     void window.restorm?.context.updateFullRequestData(request.id, {
       url,

@@ -411,22 +411,27 @@ function extractEnvironments(
   for (const env of envResources) {
     const variables: KeyValue[] = []
 
-    // Convert environment data to KeyValue pairs
+    // Convert environment data to KeyValue pairs. `createTypedKeyValue`
+    // promotes any value containing `{{...}}` to an `ExpressionValue` so
+    // Insomnia templates (`{{ _.host }}`, `{{ _.token }}`, …) actually
+    // substitute at runtime instead of being persisted as literal strings.
     for (const [key, value] of Object.entries(env.data)) {
       // Skip baseUrl if user provided one
       if (key === 'baseUrl' && baseUrl) {
         continue
       }
       if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-        variables.push({
+        variables.push(createTypedKeyValue({
           key,
-          value: String(value)
-        })
+          value: String(value),
+          enabled: true
+        }))
       } else if (value !== null && typeof value === 'object') {
-        variables.push({
+        variables.push(createTypedKeyValue({
           key,
-          value: JSON.stringify(value)
-        })
+          value: JSON.stringify(value),
+          enabled: true
+        }))
       }
     }
 

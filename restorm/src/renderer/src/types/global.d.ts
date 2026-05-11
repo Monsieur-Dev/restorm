@@ -206,6 +206,15 @@ export interface KeyValueData {
   value: string
   /** Whether this key-value is enabled (default: true) */
   enabled?: boolean | undefined
+  /**
+   * Whether the value is an `ExpressionValue` and should be run
+   * through handlebars at request time. Defaults to `false` —
+   * `StringValue` is sent verbatim. Source-of-truth lives in the
+   * renderer's persisted `KeyValue.value` (`isExpressionValue`
+   * predicate); main reconstructs the matching `ValueType` instance
+   * on receipt.
+   */
+  isExpression?: boolean | undefined
 }
 
 /** Variable transformation result from context service */

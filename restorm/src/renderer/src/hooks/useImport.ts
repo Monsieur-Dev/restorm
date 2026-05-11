@@ -6,6 +6,8 @@ import React, { useCallback, useState } from 'react'
 import { eventBus, logger } from 'electron-core-ui/renderer'
 import { DocumentEvents } from '../services/DocumentEvents'
 import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
+import { processAfterDeserialization } from '../utils/serialization'
+import { cloneForEventBus } from '../utils/cloneForEventBus'
 import type { Folder, EnvironmentFolder, Environment, Request, FolderItem } from '../../../shared/types/collections'
 
 export interface UseImportOptions {
@@ -124,10 +126,18 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         envFolderId: string,
         parentEnvironmentId: string | null
       ): void => {
+        // `cloneForEventBus` instead of `JSON.parse(JSON.stringify(...))`:
+        // the latter calls `PasswordValue.toJSON()` which drops the
+        // plaintext, so main-side `ContextService` would receive every
+        // secret as an empty string and templated headers like
+        // `Bearer {{JWTBearer_token}}` would substitute to `Bearer `
+        // on the wire. The custom walker copies own enumerable props
+        // (so the `value` field survives), never invokes `toJSON`, and
+        // tolerates the reactive Proxy graph in any environment.
         eventBus.emitSync(DocumentEvents.ENVIRONMENT_CREATED, {
           id: env.id,
           type: 'environment',
-          document: JSON.parse(JSON.stringify(env)) as Environment,
+          document: cloneForEventBus(env),
           parentFolderId: envFolderId,
           parentEnvironmentId: parentEnvironmentId ?? undefined
         })
@@ -169,7 +179,10 @@ export function useImport(options: UseImportOptions): UseImportReturn {
           eventBus.emitSync(DocumentEvents.FOLDER_CREATED, {
             id: folder.id,
             type: 'folder',
-            document: JSON.parse(JSON.stringify(folder)) as Folder | EnvironmentFolder
+            // See `emitEnvironmentTree` — `cloneForEventBus` preserves
+            // PasswordValue secrets so main-side ContextService can
+            // substitute templated headers correctly.
+            document: cloneForEventBus(folder)
           })
           emitNestedEnvironments(folder)
         } else {
@@ -177,12 +190,20 @@ export function useImport(options: UseImportOptions): UseImportReturn {
           eventBus.emitSync(DocumentEvents.REQUEST_CREATED, {
             id: request.id,
             type: 'request',
-            document: JSON.parse(JSON.stringify(request)) as Request
+            document: cloneForEventBus(request)
           })
         }
       }
 
-      const regenerated = items.map((item) => regenerateIds(item))
+      // Imported items arrive over IPC as plain JSON — `ExpressionValue`
+      // instances created by the main-side importer survive only as
+      // `{ type: 'expression', value }` POJOs after structured clone.
+      // Run them through the same deserialisation pass we use for
+      // file loads so KeyValue ids are stable and every `ValueType`
+      // becomes a real class instance before reaching the renderer's
+      // `instanceof`-driven cell renderers.
+      const rehydrated = processAfterDeserialization(items)
+      const regenerated = rehydrated.map((item) => regenerateIds(item))
       const itemsWithNewIds = regenerated.map((item) => remapAuthRefs(item))
 
       logger.debug('[useImport] Items with new IDs', { count: itemsWithNewIds.length })

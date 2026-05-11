@@ -123,7 +123,7 @@ export type OAS3PathItem = Partial<Record<HttpMethod, OAS3Operation>> & {
  * normaliser maps those onto Swagger 2.0's flow keys
  * (`application` / `accessCode`) so the doc viewer's rendering
  * doesn't have to special-case the version. */
-interface OAS3SecurityScheme {
+export interface OAS3SecurityScheme {
   type: 'apiKey' | 'http' | 'oauth2' | 'openIdConnect'
   description?: string
   // apiKey

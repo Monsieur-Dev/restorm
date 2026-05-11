@@ -12,6 +12,8 @@ import { resolveRequestURL, type URLResolutionInput } from './services/request/H
 import { httpExecutionService, type HTTPExecutionInput } from './services/HTTPExecutionService'
 import { authPrefetchOneShot, resolveProducedHeaders } from './services/AuthenticationPrefetch'
 import { AuthenticationRequest } from '../shared/models/requests/AuthenticationRequest'
+import { StringValue, ExpressionValue } from '../shared/types/valueTypes'
+import type { KeyValue } from '../shared/types/baseTypes'
 import { authenticationCacheService } from './services/AuthenticationCacheService'
 import { graphqlExecutionService, type GraphQLExecutionInput } from './services/GraphQLExecutionService'
 import { soapExecutionService, type SOAPExecutionInput } from './services/SOAPExecutionService'
@@ -59,6 +61,68 @@ function isPlainAuthPayload(value: unknown): value is Parameters<typeof Authenti
 
 function getE2EMockedFolderPath(): string | null {
   return process.env['E2E_MOCK_SAVE_FOLDER'] ?? null
+}
+
+interface KeyValueRowFromIpc {
+  id?: string | undefined
+  key: string
+  value: string
+  enabled?: boolean | undefined
+  isExpression?: boolean | undefined
+}
+
+/**
+ * Rehydrate an IPC-serialised KeyValue row back to the canonical
+ * `KeyValue` shape with a real `ValueType` subclass. The renderer
+ * flattens `KeyValue.value` to a string on the way to main, but
+ * carries the `isExpression` bit so we know whether to materialise
+ * an `ExpressionValue` (which the resolver will run through
+ * handlebars) or a plain `StringValue` (which the resolver will
+ * pass through verbatim).
+ */
+function rehydrateKeyValueRow(row: KeyValueRowFromIpc): KeyValue {
+  const value = row.isExpression === true ? new ExpressionValue(row.value) : new StringValue(row.value)
+  return {
+    ...(row.id !== undefined ? { id: row.id } : {}),
+    key: row.key,
+    value,
+    ...(row.enabled !== undefined ? { enabled: row.enabled } : {})
+  }
+}
+
+/**
+ * Walk an IPC `FullRequestData` payload and rehydrate every
+ * KeyValue group + body form-fields back to real `KeyValue`s with
+ * `ValueType` instances. The `context:update-full-request-data`
+ * handler used to forward the renderer payload verbatim, so any
+ * header / param / form-data field with `isExpression: true`
+ * landed in `ContextService.keyValueGroups` as a bare string —
+ * the runtime `resolveKeyValueForRequest` then read `kv.value`
+ * (a string) and `isExpressionValue` returned false, so handlebars
+ * never fired and the wire shipped `Bearer {{token}}` literally.
+ *
+ * `register-request` and `update-request-keyvalues` already
+ * rehydrate; this mirrors the same pass for the third entry point.
+ */
+function rehydrateFullRequestData(data: unknown): unknown {
+  if (typeof data !== 'object' || data === null) return data
+  const record = data as Record<string, unknown>
+  const out: Record<string, unknown> = { ...record }
+  for (const group of ['headers', 'params', 'pathParams', 'metadata'] as const) {
+    const rows = record[group]
+    if (Array.isArray(rows)) {
+      out[group] = rows.map((row) => rehydrateKeyValueRow(row as KeyValueRowFromIpc))
+    }
+  }
+  // Body fields (`form-data` / `x-www-form-urlencoded`) keep their
+  // wire shape — `{ key: string, value: string }`. The downstream
+  // `HTTPExecutionService` runs them through `resolveValue(field.value)`
+  // which expects a raw string, and the in-form template usage is
+  // identical regardless of declared `ValueType`. Rehydrating them
+  // here would force every executor to unwrap via `toString()` and
+  // crashes the resolver's `rawValue.includes('{{')` branch on the
+  // first send.
+  return out
 }
 
 /**
@@ -544,11 +608,20 @@ export function registerRestormIPC(deps: {
   })
 
   validatedHandle('context:register-request', contextRegisterRequestArgs, (_event, [requestId, environmentId, requestData]) => {
+    // The IPC payload carries `value: string` plus an optional
+    // `isExpression` flag — rehydrate each row to a real KeyValue
+    // with the matching ValueType subclass so downstream
+    // `resolveKeyValue` reads the right type. Without this, every
+    // value would arrive as a bare string and the resolver
+    // couldn't distinguish a templated `ExpressionValue` from a
+    // verbatim `StringValue` (a `StringValue("{{token}}")` would
+    // get handlebars-substituted at send time even though the
+    // product rule is "templating is opt-in via expression").
     contextService.registerRequest(requestId, environmentId, {
       id: requestId,
-      headers: requestData.headers,
-      params: requestData.params,
-      pathParams: requestData.pathParams
+      headers: requestData.headers?.map(rehydrateKeyValueRow),
+      params: requestData.params?.map(rehydrateKeyValueRow),
+      pathParams: requestData.pathParams?.map(rehydrateKeyValueRow)
     })
   })
 
@@ -565,11 +638,12 @@ export function registerRestormIPC(deps: {
   })
 
   validatedHandle('context:update-request-keyvalues', contextUpdateRequestKeyValuesArgs, (_event, [requestId, groupName, keyValues, sourceId]) => {
-    contextService.updateRequestKeyValues(requestId, groupName, keyValues, sourceId)
+    contextService.updateRequestKeyValues(requestId, groupName, keyValues.map(rehydrateKeyValueRow), sourceId)
   })
 
   validatedHandle('context:update-full-request-data', contextUpdateFullRequestDataArgs, (_event, [requestId, data, sourceId]) => {
-    contextService.updateFullRequestData(requestId, data as Parameters<typeof contextService.updateFullRequestData>[1], sourceId)
+    const rehydrated = rehydrateFullRequestData(data)
+    contextService.updateFullRequestData(requestId, rehydrated as Parameters<typeof contextService.updateFullRequestData>[1], sourceId)
   })
 
   validatedHandle('context:get-resolved-url', contextGetResolvedUrlArgs, (_event, [requestId]) => {

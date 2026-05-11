@@ -211,6 +211,15 @@ export interface ListViewProps {
    * Called when the Delete key is pressed on the active item.
    */
   onDeleteRequest?: (payload: ListViewItemEventPayload) => void
+
+  /**
+   * When `true`, rows are no longer draggable and the drop handlers
+   * are no-ops. Use for read-only / selection-only views (e.g. an
+   * import preview tree) where accidental drags would interfere
+   * with a surrounding drop target. Default `false` — rows keep the
+   * standard drag-to-reorder UX.
+   */
+  disableDrag?: boolean
 }
 
 export interface ListViewItemProps {

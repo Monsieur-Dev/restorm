@@ -32,7 +32,7 @@ import { mapToBadgeType } from '../../utils/badgeUtils'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
-import { normalizeValueType } from '../../utils/normalizeValueType'
+import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import { buildHttpResponseViewData } from './HTTPResponsePanel'
 import { HTTPRequestBodySection } from './HTTPRequestBodySection'
 import type { HTTPRequestBody } from '../../../../shared/types/requestPrimitives'
@@ -223,14 +223,11 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   // Keep requestIdRef in sync for guard checks in other effects
   useEffect(() => { requestIdRef.current = request.id }, [request.id])
 
-  // Convert KeyValue arrays to plain objects for IPC
+  // Convert KeyValue arrays to plain objects for IPC. Shared with
+  // the other request tabs so `isExpression` propagation stays
+  // consistent.
   const toKeyValueData = useCallback((kvs: KeyValue[]): KeyValueData[] =>
-    kvs.map(kv => {
-      const result: KeyValueData = { key: kv.key, value: normalizeValueType(kv.value as unknown).toString() }
-      if (kv.id !== undefined) result.id = kv.id
-      if (kv.enabled !== undefined) result.enabled = kv.enabled
-      return result
-    }), [])
+    toKeyValueDataShared(kvs), [])
 
   // Own-echo handling: during an active typing burst we buffer the latest resolved URL /
   // code snippets in refs (no setState → no re-render). After a short idle delay we apply the

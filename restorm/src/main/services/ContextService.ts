@@ -891,6 +891,14 @@ class ContextService {
   /**
    * Resolve a single value using the request's environment context
    * Used by HTTPExecutionService to resolve headers, body, etc.
+   *
+   * NOTE: this overload doesn't know the value's `ValueType` so it
+   * always runs the resolver — fine for body templates and the URL
+   * (which are expression-shaped by construction) but WRONG for
+   * header / param `KeyValue.value`, where a `StringValue` must
+   * stay verbatim. Header / param resolution should use
+   * `resolveKeyValueForRequest` instead so the type-aware gate in
+   * `resolveKeyValue` fires.
    */
   resolveValue(value: string, requestId: string): string {
     const ctx = this.requestContexts.get(requestId)
@@ -904,6 +912,26 @@ class ContextService {
     }
 
     return this.transformValue(value, envContext)
+  }
+
+  /**
+   * Type-aware resolution of a `KeyValue`. Only an `ExpressionValue`
+   * runs through Handlebars; every other ValueType (StringValue,
+   * PasswordValue, …) is returned literally via `toString()`.
+   * Mirrors `resolveKeyValue` but exposed publicly so HTTP / SOAP /
+   * GraphQL execution services can opt into the strict gate
+   * instead of the always-resolves shortcut.
+   */
+  resolveKeyValueForRequest(kv: KeyValue, requestId: string): string {
+    const ctx = this.requestContexts.get(requestId)
+    if (!ctx?.environmentId) {
+      return kv.value.toString()
+    }
+    const envContext = this.transformedContexts.get(ctx.environmentId)
+    if (!envContext) {
+      return kv.value.toString()
+    }
+    return this.resolveKeyValue(kv, envContext)
   }
 
   /**

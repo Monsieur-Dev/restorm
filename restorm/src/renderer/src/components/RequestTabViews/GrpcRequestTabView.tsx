@@ -1,3 +1,4 @@
+import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { useRequestReset } from '../../hooks/useRequestReset'
 import { useTranslation } from 'react-i18next'
@@ -18,7 +19,7 @@ import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { GrpcRequest, GrpcResponse, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
-import type { GRPCExecutionResult, KeyValueData } from '../../types/global.d'
+import type { GRPCExecutionResult } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { useRestormStore } from '../../store/restormStore'
@@ -81,8 +82,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
     const currentRequest = requestRef.current
     logger.debug('[GrpcRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
 
-    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
-      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
+    const toKeyValueData = toKeyValueDataShared
 
     void window.restorm?.context.registerRequest(requestId, currentEnvId, {
       headers: toKeyValueData(currentRequest.metadata)
@@ -144,8 +144,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
 
   // Notify ContextService when URL or request message changes
   useEffect(() => {
-    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
-      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
+    const toKeyValueData = toKeyValueDataShared
 
     void window.restorm?.context.updateFullRequestData(request.id, {
       url,

@@ -127,8 +127,20 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
     }
   }, [mergedOptions.vertical, mergedOptions.horizontal]);
 
+  // Hover state — keeps the scrollbar visible as long as the mouse
+  // is inside the component, even after wheel / scroll activity
+  // has settled. Without this, the inactivity timeout would fade
+  // the bar out while the user is clearly still interacting with
+  // the surface (the mouse hasn't even left).
+  const isHoveringRef = useRef(false);
+
   // Hide scrollbars with delay
   const hideScrollbars = useCallback((): void => {
+    // If the mouse is still inside the component, don't schedule a
+    // hide — the auto-fade is reserved for the "user moved away or
+    // never hovered" case. Pointer-leave fires its own hideScrollbars
+    // and sets `isHoveringRef.current = false` first.
+    if (isHoveringRef.current) return;
     // Clear existing timeout
     if (hideTimeoutRef.current) {
       clearTimeout(hideTimeoutRef.current);
@@ -412,11 +424,13 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
 
   // Handle mouse enter
   const handleMouseEnter = useCallback((): void => {
+    isHoveringRef.current = true;
     showScrollbars();
   }, [showScrollbars]);
 
   // Handle mouse leave
   const handleMouseLeave = useCallback((): void => {
+    isHoveringRef.current = false;
     hideScrollbars();
   }, [hideScrollbars]);
 
@@ -479,24 +493,42 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
     showScrollbars();
   }, [scrollTop, scrollLeft, contentWidth, containerWidth, mergedOptions.mouseWheelSmoothScroll, smoothScrollTo, showScrollbars]);
 
+  // Helper: cancel any in-flight spring loop and re-sync the target
+  // ref to the current live scroll position. Called whenever the
+  // user takes direct control (slider drag, track-click autoscroll)
+  // so the spring doesn't fight the manual interaction by pulling
+  // scrollTop back toward an old wheel-driven target.
+  const cancelSpringAndSyncTarget = useCallback((): void => {
+    if (animationFrameRef.current !== null) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    if (contentRef.current) {
+      targetScrollTopRef.current = contentRef.current.scrollTop;
+      targetScrollLeftRef.current = contentRef.current.scrollLeft;
+    }
+  }, []);
+
   // Drag handlers
   const handleVerticalSliderMouseDown = useCallback((event: React.MouseEvent): void => {
     event.preventDefault();
     event.stopPropagation();
+    cancelSpringAndSyncTarget();
     setIsDraggingVertical(true);
     setDragStartY(event.clientY);
     setDragStartScrollTop(scrollTop);
     showScrollbars();
-  }, [scrollTop, showScrollbars]);
+  }, [scrollTop, showScrollbars, cancelSpringAndSyncTarget]);
 
   const handleHorizontalSliderMouseDown = useCallback((event: React.MouseEvent): void => {
     event.preventDefault();
     event.stopPropagation();
+    cancelSpringAndSyncTarget();
     setIsDraggingHorizontal(true);
     setDragStartX(event.clientX);
     setDragStartScrollLeft(scrollLeft);
     showScrollbars();
-  }, [scrollLeft, showScrollbars]);
+  }, [scrollLeft, showScrollbars, cancelSpringAndSyncTarget]);
 
   // Track-click autoscroll. Clicking the rail above / below the
   // thumb scrolls one viewport in that direction; holding the
@@ -524,6 +556,7 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
     if (event.target !== event.currentTarget) return;
     event.preventDefault();
     if (!contentRef.current) return;
+    cancelSpringAndSyncTarget();
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
     const cursorY = event.clientY - rect.top;
     trackCursorYRef.current = cursorY;
@@ -566,12 +599,13 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
       document.removeEventListener('pointerup', onPointerUp);
     };
     document.addEventListener('pointerup', onPointerUp);
-  }, [containerHeight, contentHeight, verticalSliderPosition, verticalSliderSize, mergedOptions.verticalHasArrows, mergedOptions.arrowSize, stopTrackAutoScroll, showScrollbars]);
+  }, [containerHeight, contentHeight, verticalSliderPosition, verticalSliderSize, mergedOptions.verticalHasArrows, mergedOptions.arrowSize, stopTrackAutoScroll, showScrollbars, cancelSpringAndSyncTarget]);
 
   const handleHorizontalRailMouseDown = useCallback((event: React.MouseEvent): void => {
     if (event.target !== event.currentTarget) return;
     event.preventDefault();
     if (!contentRef.current) return;
+    cancelSpringAndSyncTarget();
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
     const cursorX = event.clientX - rect.left;
     trackCursorXRef.current = cursorX;
@@ -608,7 +642,7 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
       document.removeEventListener('pointerup', onPointerUp);
     };
     document.addEventListener('pointerup', onPointerUp);
-  }, [containerWidth, contentWidth, horizontalSliderPosition, horizontalSliderSize, mergedOptions.horizontalHasArrows, mergedOptions.arrowSize, stopTrackAutoScroll, showScrollbars]);
+  }, [containerWidth, contentWidth, horizontalSliderPosition, horizontalSliderSize, mergedOptions.horizontalHasArrows, mergedOptions.arrowSize, stopTrackAutoScroll, showScrollbars, cancelSpringAndSyncTarget]);
 
   // Cleanup on unmount: any pending interval / timeout would
   // otherwise outlive the component and leak.
@@ -764,6 +798,15 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
           maxHeight: mergedOptions.fitContent ? style?.maxHeight : undefined,
           overflow: 'auto',
           position: 'relative',
+          // While the user is dragging the scrollbar thumb, the
+          // mouse can wander OFF the rail and onto whatever is
+          // underneath — child rows would then receive hover /
+          // mouseenter events the user didn't intend. Suppress
+          // pointer events on the content area during a drag so
+          // hover state stays frozen on whatever it was before
+          // the drag began. The scrollbar lives outside this div
+          // so its own listeners keep working.
+          pointerEvents: (isDraggingVertical || isDraggingHorizontal) ? 'none' : undefined,
         }}
         onScroll={handleScroll}
         {...domProps}
