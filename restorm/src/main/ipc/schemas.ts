@@ -299,11 +299,18 @@ export const findStopArgs = z.tuple([
 // API Update (per-folder periodic spec re-check)
 // ==========================================================================
 
+// `apiUpdate:set-settings` is a PATCH operation — the IPC handler
+// passes the payload straight to `updateFolderConfig` which spreads
+// it into the existing `apiUpdate` config. Every field is optional
+// so partial patches (e.g. `{ sourceHeaders }` from the
+// refresh-from-source flow, or just `{ autoCheckEnabled: true }`
+// from the settings toggle) are accepted without forcing the
+// caller to read the whole config first.
 const apiUpdateConfigSchema = z.object({
-  sourceUrl: z.string(),
+  sourceUrl: z.string().optional(),
   sourceHeaders: z.record(z.string(), z.string()).optional(),
-  autoCheckEnabled: z.boolean(),
-  interval: z.enum(['hourly', 'every6h', 'daily', 'weekly', 'never']),
+  autoCheckEnabled: z.boolean().optional(),
+  interval: z.enum(['hourly', 'every6h', 'daily', 'weekly', 'never']).optional(),
   lastCheckedAt: z.number().optional(),
   lastImportedSpecVersion: z.string().optional(),
   lastImportedSpecHash: z.string().optional()

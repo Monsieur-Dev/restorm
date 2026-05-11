@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, InputBox, SelectBox, Toggle } from 'electron-core-ui/renderer'
+import { Button, InputBox, KeyValueTable, SelectBox, Toggle, type KeyValueTableHandle, type KeyValueTableRow } from 'electron-core-ui/renderer'
 import type { ApiUpdateConfig, ApiUpdateInterval, ApiUpdateState } from '../../../../shared/types/baseTypes'
 
 /**
@@ -42,6 +42,7 @@ export const ApiUpdateSettingsSection: React.FC<Props> = ({ folderId, config, de
   const api = getApiUpdateApi()
   const [state, setState] = useState<ApiUpdateState>({ kind: 'idle' })
   const [pendingSourceUrl, setPendingSourceUrl] = useState(config?.sourceUrl ?? defaultSourceUrl ?? '')
+  const headersTableRef = useRef<KeyValueTableHandle | null>(null)
 
   useEffect(() => {
     if (!api) return
@@ -92,25 +93,6 @@ export const ApiUpdateSettingsSection: React.FC<Props> = ({ folderId, config, de
   }, [pendingSourceUrl, config?.sourceUrl, onSettingsChange])
 
   const headerEntries = Object.entries(config?.sourceHeaders ?? {})
-  const handleHeaderChange = useCallback((index: number, key: string, value: string): void => {
-    const next: Record<string, string> = {}
-    headerEntries.forEach(([k, v], i) => {
-      if (i === index) {
-        if (key) next[key] = value
-      } else {
-        next[k] = v
-      }
-    })
-    if (index === headerEntries.length && key) next[key] = value
-    onSettingsChange({ sourceHeaders: next })
-  }, [headerEntries, onSettingsChange])
-  const handleHeaderRemove = useCallback((index: number): void => {
-    const next: Record<string, string> = {}
-    headerEntries.forEach(([k, v], i) => {
-      if (i !== index) next[k] = v
-    })
-    onSettingsChange({ sourceHeaders: next })
-  }, [headerEntries, onSettingsChange])
 
   const handleCheckNow = useCallback(async () => {
     if (!api) return
@@ -191,32 +173,44 @@ export const ApiUpdateSettingsSection: React.FC<Props> = ({ folderId, config, de
 
         <div className="api-update-headers" data-testid="home-api-update-headers">
           <span className="api-update-label">Headers</span>
-          <div className="api-update-headers-list">
-            {headerEntries.map(([key, value], idx) => (
-              <div className="api-update-header-row" key={`${key}-${idx}`}>
-                <InputBox
-                  value={key}
-                  onChange={(next) => { handleHeaderChange(idx, next, value) }}
-                  options={{ type: 'text', ariaLabel: 'Header name' }}
-                />
-                <InputBox
-                  value={value}
-                  onChange={(next) => { handleHeaderChange(idx, key, next) }}
-                  options={{ type: 'text', ariaLabel: 'Header value' }}
-                />
-                <Button
-                  icon="trash"
-                  options={{ ariaLabel: 'Remove header' }}
-                  onClick={() => { handleHeaderRemove(idx) }}
-                >Remove</Button>
-              </div>
-            ))}
-            <Button
-              icon="add"
-              onClick={() => { handleHeaderChange(headerEntries.length, '', '') }}
-              data-testid="home-api-update-add-header"
-            >Add header</Button>
-          </div>
+          {/* Same KV table the Import modal's "Add custom headers"
+              uses, for visual + behavioural consistency on the
+              `sourceHeaders` field. Replaces an ad-hoc renderer
+              whose "Add header" button no-op'd on empty key + value
+              because the underlying `handleHeaderChange` skipped
+              empty keys before they could be typed in. */}
+          <KeyValueTable
+            ref={headersTableRef}
+            data-testid="home-api-update-headers-table"
+            showDescription={false}
+            initialRows={headerEntries.map(([key, value]) => ({
+              id: key,
+              key,
+              value,
+              enabled: true
+            }))}
+            onRowsChange={(rows: KeyValueTableRow[]) => {
+              const next: Record<string, string> = {}
+              for (const row of rows) {
+                if (!(row.enabled ?? true)) continue
+                const k = row.key.trim()
+                if (k.length === 0) continue
+                next[k] = row.value
+              }
+              onSettingsChange({ sourceHeaders: next })
+            }}
+          />
+          {/* Add-row button — the KeyValueTable renders nothing when
+              `initialRows` is empty, so we surface an explicit
+              "Add header" trigger that calls into the table's
+              imperative handle to insert a new empty row the user
+              can then fill. */}
+          <Button
+            icon="add"
+            options={{ ariaLabel: 'Add header' }}
+            data-testid="home-api-update-add-header"
+            onClick={() => { headersTableRef.current?.addRow() }}
+          >Add header</Button>
         </div>
 
         <div className="api-update-state-row" data-testid="home-api-update-state">

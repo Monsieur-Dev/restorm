@@ -2102,7 +2102,7 @@ const App: React.FC = () => {
               const folder = rootItems.find(
                 (c): c is EnvironmentFolder => isEnvironmentFolder(c) && c.id === targetId
               )
-              const apiUpdate = (folder as unknown as { apiUpdate?: { sourceUrl?: string; authenticationRequestId?: string } } | undefined)?.apiUpdate
+              const apiUpdate = (folder as unknown as { apiUpdate?: { sourceUrl?: string; authenticationRequestId?: string; sourceHeaders?: Record<string, string> } } | undefined)?.apiUpdate
               const sourceUrl = apiUpdate?.sourceUrl ?? ''
               // The resolver returns the shared/types AuthenticationRequest
               // (data shape, no class methods), while RefreshContext —
@@ -2116,6 +2116,7 @@ const App: React.FC = () => {
               const refreshContext: RefreshContext = {
                 sourceUrl,
                 ...(authReq ? { authenticationRequest: authReq } : {}),
+                ...(apiUpdate?.sourceHeaders ? { sourceHeaders: apiUpdate.sourceHeaders } : {}),
                 targetFolderId: targetId,
                 onApplied: (updatedFolder) => {
                   // Splice the apply payload onto the existing env
