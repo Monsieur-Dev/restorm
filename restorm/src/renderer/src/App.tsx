@@ -90,6 +90,7 @@ import { useMcpNavigation } from './hooks/useMcpNavigation'
 import { useMcpTreeReplace } from './hooks/useMcpTreeReplace'
 import { useMcpRunRequest } from './hooks/useMcpRunRequest'
 import { useMcpRequestPatch } from './hooks/useMcpRequestPatch'
+import { useMcpMiniBrowserBridge } from './hooks/useMcpMiniBrowserBridge'
 import { useMcpFolderPatch } from './hooks/useMcpFolderPatch'
 import { RestormSidebar } from './components/MainView/Sidebar/RestormSidebar'
 import { RestormWorkbenchContainer } from './components/MainView/Workbench/RestormWorkbenchContainer'
@@ -1127,6 +1128,33 @@ const App: React.FC = () => {
   const bumpTabContentVersionRef = useRef<(itemId: string) => void>(() => { /* not yet wired */ })
   const bumpTabContentVersionStable = useCallback((itemId: string) => { bumpTabContentVersionRef.current(itemId) }, [])
   useMcpRequestPatch({ enabled: mcpEnabled, rootItems, bumpTabContentVersionFor: bumpTabContentVersionStable })
+  // MCP `mini_browser_*` bridge — main fires `mcp:mini-browser-open`
+  // / `mcp:mini-browser-execute`; this hook responds by opening the
+  // singleton tab + mutating its `url` (which also seeds the webview's
+  // initial `src`), or by running JS inside the webview guest and
+  // replying with the result.
+  const setMiniBrowserUrlForMcp = useCallback((url: string): void => {
+    setWorkbenchTree(prev => {
+      const visit = (nodes: GroupNode[]): GroupNode[] => nodes.map((node) => {
+        if (isTabGroupNode(node)) {
+          const idx = node.tabs.findIndex((t) => t.id === MINI_BROWSER_TAB_ID)
+          if (idx < 0) return node
+          const target = node.tabs[idx] as MiniBrowserTab
+          if (target.url === url) return node
+          const nextTab: MiniBrowserTab = { ...target, url, persistedState: { url } }
+          return { ...node, tabs: [...node.tabs.slice(0, idx), nextTab, ...node.tabs.slice(idx + 1)] }
+        }
+        if (isContainerNode(node)) return { ...node, groups: visit(node.groups) }
+        return node
+      })
+      return { ...prev, groups: visit(prev.groups) }
+    })
+  }, [])
+  useMcpMiniBrowserBridge({
+    enabled: mcpEnabled,
+    openMiniBrowser: handleOpenMiniBrowser,
+    setMiniBrowserUrl: setMiniBrowserUrlForMcp
+  })
   useMcpFolderPatch({ enabled: mcpEnabled, rootItems, bumpTabContentVersionFor: bumpTabContentVersionStable })
   // MCP `set_favorite` listener — call the same toggle/remove path the
   // sidebar buttons use, then bump the tab content version so the H1

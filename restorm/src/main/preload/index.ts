@@ -825,6 +825,29 @@ contextBridge.exposeInMainWorld('restorm', {
       const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; favorite: boolean | null }) }
       ipcRenderer.on('mcp:set-favorite', handler)
       return () => { ipcRenderer.off('mcp:set-favorite', handler) }
+    },
+    /** Subscribe to MCP `open_mini_browser`. Payload optionally carries
+     * `{ url }` to navigate the Mini browser webview to once the
+     * singleton tab is mounted. */
+    onMcpOpenMiniBrowser: (callback: (payload: { url?: string }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback((payload ?? {}) as { url?: string }) }
+      ipcRenderer.on('mcp:mini-browser-open', handler)
+      return () => { ipcRenderer.off('mcp:mini-browser-open', handler) }
+    },
+    /** Subscribe to MCP `mini_browser_execute`. Payload
+     * `{ requestId, code }`. The renderer is expected to run the
+     * script inside the Mini browser webview's guest context (via
+     * `webview.executeJavaScript`) and reply via
+     * `restorm.runtime.replyMiniBrowserExecute({ requestId, result, error })`. */
+    onMcpMiniBrowserExecute: (callback: (payload: { requestId: string; code: string }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { requestId: string; code: string }) }
+      ipcRenderer.on('mcp:mini-browser-execute', handler)
+      return () => { ipcRenderer.off('mcp:mini-browser-execute', handler) }
+    },
+    /** Send the result of a `mini_browser_execute` script back to main.
+     * `error` is set when the script threw or the webview wasn't ready. */
+    replyMiniBrowserExecute: (payload: { requestId: string; result?: unknown; error?: string }): void => {
+      ipcRenderer.send('mcp:mini-browser-execute-reply', payload)
     }
   },
   import: {
