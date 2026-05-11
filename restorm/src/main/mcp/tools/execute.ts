@@ -24,7 +24,7 @@
 
 import { z } from 'zod'
 import { BrowserWindow } from 'electron'
-import { McpService } from 'electron-core-ui'
+import { McpService, logger } from 'electron-core-ui'
 import { collectionStore } from '../../services/CollectionStore'
 import { contextService } from '../../services/ContextService'
 import type { FullRequestData } from '../../services/ContextServiceTypes'
@@ -201,10 +201,16 @@ function flushRequestStateToContext(req: Request): void {
   // No-op when the request hasn't been registered with ContextService
   // yet (typical in the unit test harness; in real usage `mcp:open-tab`
   // triggers the renderer's `registerRequest` before this runs).
-  // Swallow logger failures the same way — vitest's main-side stubs
-  // don't expose `app.isPackaged`.
   if (contextService.getRequestContext(req.id) === undefined) return
-  try { contextService.updateFullRequestData(req.id, data as FullRequestData) } catch { /* best-effort */ }
+  try {
+    contextService.updateFullRequestData(req.id, data as FullRequestData)
+  } catch (err) {
+    // Vitest's main-side stubs don't expose `app.isPackaged`, so the
+    // logger initialisation inside `updateFullRequestData`'s warn path
+    // throws. In production the same call works fine — surface the
+    // error rather than masking real flush regressions.
+    logger.debug('[mcp:run_request] flushRequestStateToContext skipped', { error: String(err) })
+  }
 }
 
 /**

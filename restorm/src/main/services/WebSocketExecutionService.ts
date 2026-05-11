@@ -96,8 +96,8 @@ class WebSocketExecutionService {
               continue
             }
             if (h.key) {
-              const resolvedValue = contextService.resolveValue(h.value, requestId)
-              headers[h.key] = resolvedValue
+              // Type-aware: see `HTTPExecutionService`.
+              headers[h.key] = contextService.resolveKeyValueForRequest(h, requestId)
             }
           }
         }

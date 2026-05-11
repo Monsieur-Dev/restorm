@@ -165,8 +165,13 @@ class HTTPExecutionService {
           const params = new URLSearchParams()
           for (const field of bodyData.fields) {
             if (field.key) {
+              // `field.value` arrives either as a raw string (renderer
+              // IPC path) or a `ValueType` instance (main-side flush
+              // path). Coerce uniformly — body templates always run
+              // through handlebars regardless of declared type.
+              const rawValue = typeof field.value === 'string' ? field.value : field.value.toString()
               const resolvedKey = contextService.resolveValue(field.key, requestId)
-              const resolvedValue = contextService.resolveValue(field.value, requestId)
+              const resolvedValue = contextService.resolveValue(rawValue, requestId)
               params.append(resolvedKey, resolvedValue)
             }
           }
@@ -544,7 +549,20 @@ class HTTPExecutionService {
     for (const h of headerSource) {
       if (h.enabled === false) continue
       if (!h.key) continue
-      headers[h.key] = resolveForAuth(extractString(h.value))
+      // When the auth request IS registered with ContextService, use
+      // the type-aware path (gates substitution on `ExpressionValue`
+      // vs `StringValue`, same invariant as the main request headers).
+      // Otherwise fall back to the unconditional resolve — the auth
+      // never reached `register-request`, so we don't have a `KeyValue`
+      // with a real `ValueType` to gate on anyway (the renderer-import
+      // path lands here for spec-fetch auth).
+      if (contextService.getRequestContext(resolutionRequestId)) {
+        headers[h.key] = contextService.resolveKeyValueForRequest(h, resolutionRequestId)
+      } else if (parentRequestId && contextService.getRequestContext(parentRequestId)) {
+        headers[h.key] = contextService.resolveKeyValueForRequest(h, parentRequestId)
+      } else {
+        headers[h.key] = extractString(h.value)
+      }
     }
 
     // Build body.
@@ -557,8 +575,14 @@ class HTTPExecutionService {
         const params = new URLSearchParams()
         for (const field of bodyData.fields) {
           if (!field.key) continue
+          // `field.value` typed as `ValueType` — `flushRequestStateToContext`
+          // pushes the live class instance through, while the legacy
+          // renderer→IPC path lands a `string`. Coerce uniformly so
+          // `resolveValue` (which expects a string template) sees the
+          // raw template either way.
+          const rawValue = typeof field.value === 'string' ? field.value : field.value.toString()
           const k = contextService.resolveValue(field.key, resolutionRequestId)
-          const v = contextService.resolveValue(field.value, resolutionRequestId)
+          const v = contextService.resolveValue(rawValue, resolutionRequestId)
           params.append(k, v)
         }
         body = params.toString()

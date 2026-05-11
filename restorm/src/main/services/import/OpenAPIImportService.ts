@@ -798,9 +798,15 @@ function createOpenApi3Environment(spec: OAS3Spec, overrideBaseUrl?: string, sou
   // for basic, `schemeName` for apiKey) by reading the imported
   // request's `Authorization` header. Empty default — the user fills
   // it in once after import.
+  //
+  // Seeded as `PasswordValue` so the plaintext lands in the sibling
+  // `.restorm.env` on save (and is masked in the UI), matching the
+  // rest of restorm's secret-handling story. A `StringValue` would
+  // round-trip through the main `.restorm` document and leave the
+  // token sitting in plaintext on disk.
   for (const varName of collectSecuritySchemeVariableNames(spec.components?.securitySchemes)) {
     if (rootVariables.some((kv) => kv.key === varName)) continue
-    rootVariables.push(kvOfType(varName, new StringValue('')))
+    rootVariables.push(kvOfType(varName, new PasswordValue('')))
   }
 
   const subEnvironments: Environment['subEnvironments'] = servers.slice(1).map((server, idx) => {

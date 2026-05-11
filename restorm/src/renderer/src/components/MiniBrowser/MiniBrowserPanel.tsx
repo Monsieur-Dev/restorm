@@ -47,7 +47,6 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ initialUrl, 
   // sees the same `src` and skips the re-render.
   const [refreshNonce, setRefreshNonce] = useState(0)
 
-  const iframeRef = useRef<HTMLIFrameElement | null>(null)
   const lastPersistedRef = useRef<string>(initialUrl ?? '')
 
   // Sync committed URL back into the parent tab — but only when it
@@ -80,7 +79,15 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ initialUrl, 
     const normalised = normaliseUrl(url)
     if (normalised === '') return
     setAddressBar(normalised)
-    setHistory((prev) => (committedUrl !== '' && committedUrl !== normalised ? [...prev, committedUrl] : prev))
+    setHistory((prev) => {
+      if (committedUrl === '' || committedUrl === normalised) return prev
+      const next = [...prev, committedUrl]
+      // Cap the back-stack so a session of compulsive Go-pressing
+      // doesn't grow it without bound. 100 is generous for any
+      // realistic developer use of the Mini browser; the oldest
+      // entry slides out FIFO-style.
+      return next.length > 100 ? next.slice(next.length - 100) : next
+    })
     setCommittedUrl(normalised)
   }, [committedUrl])
 
@@ -174,7 +181,6 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ initialUrl, 
         ) : (
           <iframe
             key={iframeKey}
-            ref={iframeRef}
             className="mini-browser-panel__iframe"
             src={committedUrl}
             title="Mini browser"

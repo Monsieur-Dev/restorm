@@ -790,9 +790,11 @@ function createSwaggerEnvironment(spec: SwaggerSpec, overrideBaseUrl: string | u
   // `<schemeName>_credentials` (basic), or `<schemeName>` (apiKey).
   // See `applySwaggerSecurityToRequest` for the matching header
   // template that consumes these.
+  // Seeded as `PasswordValue` (same rationale as the OpenAPI 3.x
+  // importer): plaintext lands in `.restorm.env`, masked in the UI.
   for (const varName of collectSwaggerSecuritySchemeVariableNames(spec.securityDefinitions)) {
     if (rootVariables.some((kv) => kv.key === varName)) continue
-    rootVariables.push(kvOfType(varName, new StringValue('')))
+    rootVariables.push(kvOfType(varName, new PasswordValue('')))
   }
 
   // Sub-environments only override `scheme`. Skip sub-envs whose variables
