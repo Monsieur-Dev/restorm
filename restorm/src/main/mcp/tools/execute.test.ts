@@ -104,7 +104,7 @@ afterEach(() => {
 // ---------------------------------------------------------------------------
 
 describe('execute tools — run_request (unary)', () => {
-  for (const protocol of ['http', 'odata', 'graphql', 'soap', 'grpc', 'auth'] as const) {
+  for (const protocol of ['http', 'odata', 'soap', 'auth'] as const) {
     it(`returns the freshly-stored history entry shape for ${protocol}`, async () => {
       vi.useFakeTimers()
       mockState.findById.mockReturnValue({ id: 'r1', name: 'r', type: protocol })
@@ -118,10 +118,17 @@ describe('execute tools — run_request (unary)', () => {
           type: protocol,
           statusCode: 200,
           statusText: 'OK',
-          responseHeaders: { 'content-type': 'application/json' },
-          body: '{"hello":"world"}',
-          durationMs: 12,
-          requestUrl: 'http://api/foo'
+          responseHeaders: [
+            { key: 'content-type', value: 'application/json' }
+          ],
+          responseBody: '{"hello":"world"}',
+          timings: { startedAt: '2026-05-11T00:00:00.000Z', durationMs: 12 },
+          requestUrl: 'http://api/foo',
+          requestMethod: 'GET',
+          requestHeaders: [{ key: 'Authorization', value: 'Bearer x' }],
+          requestParams: [{ key: 'q', value: '1' }],
+          requestPathParams: [],
+          requestBody: { type: 'text', content: '' }
         }
       })
 
@@ -138,12 +145,78 @@ describe('execute tools — run_request (unary)', () => {
         protocol,
         success: true,
         status: 200,
+        statusText: 'OK',
         body: { hello: 'world' },
         bodyContentType: 'application/json',
-        durationMs: 12
+        durationMs: 12,
+        requestUrl: 'http://api/foo',
+        request: {
+          method: 'GET',
+          url: 'http://api/foo',
+          headers: [{ key: 'Authorization', value: 'Bearer x' }],
+          params: [{ key: 'q', value: '1' }]
+        }
       })
     })
   }
+
+  it('returns parsed { data, errors } for graphql', async () => {
+    vi.useFakeTimers()
+    mockState.findById.mockReturnValue({ id: 'r1', name: 'r', type: 'graphql' })
+    mockState.list
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ guid: 'g-new' }])
+    mockState.getDetail.mockResolvedValue({
+      requestId: 'r1',
+      success: true,
+      response: {
+        type: 'graphql',
+        statusCode: 200,
+        responseHeaders: [{ key: 'content-type', value: 'application/json' }],
+        data: { user: { id: 42 } },
+        errors: undefined,
+        timings: { startedAt: '2026-05-11T00:00:00.000Z', durationMs: 7 },
+        requestUrl: 'http://api/graphql'
+      }
+    })
+
+    const mcp = new FakeMcpService()
+    registerExecutionTools(mcp as unknown as McpService)
+    const promise = mcp.invoke('run_request', { id: 'r1' }) as Promise<unknown>
+    await vi.advanceTimersByTimeAsync(700)
+    const { payload } = parseReply(await promise) as { payload: { body?: { data?: unknown } } }
+    expect(payload.body?.data).toEqual({ user: { id: 42 } })
+  })
+
+  it('returns the gRPC responseMessage as body', async () => {
+    vi.useFakeTimers()
+    mockState.findById.mockReturnValue({ id: 'r1', name: 'r', type: 'grpc' })
+    mockState.list
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ guid: 'g-new' }])
+    mockState.getDetail.mockResolvedValue({
+      requestId: 'r1',
+      success: true,
+      response: {
+        type: 'grpc',
+        statusCode: 0,
+        responseHeaders: [],
+        responseMessage: '{"reply":"pong"}',
+        contentType: 'application/json',
+        timings: { startedAt: '2026-05-11T00:00:00.000Z', durationMs: 3 },
+        requestUrl: 'grpc://api/Foo/Ping',
+        requestMethod: 'Ping',
+        requestMetadata: []
+      }
+    })
+
+    const mcp = new FakeMcpService()
+    registerExecutionTools(mcp as unknown as McpService)
+    const promise = mcp.invoke('run_request', { id: 'r1' }) as Promise<unknown>
+    await vi.advanceTimersByTimeAsync(700)
+    const { payload } = parseReply(await promise) as { payload: { body?: unknown } }
+    expect(payload.body).toEqual({ reply: 'pong' })
+  })
 
   it('opens the tab + clicks Send via the renderer broadcasts', async () => {
     vi.useFakeTimers()

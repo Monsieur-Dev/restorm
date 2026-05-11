@@ -51,30 +51,98 @@ function errorReply(message: string): { content: { type: 'text'; text: string }[
  * The history detail already contains everything the AI needs (status,
  * headers, body, timings, URL) — we just rename a few fields and parse
  * JSON bodies in-place so the caller doesn't get a string-of-JSON.
+ *
+ * Field mapping: history details follow the per-protocol shapes in
+ * `responseHistory.ts` — bodies live under `responseBody` (HTTP/OData/SOAP)
+ * or `data`/`errors` (GraphQL) or `responseMessage` (gRPC) or `messages`
+ * (WebSocket); `responseHeaders` is an *array* of `{ key, value }` pairs,
+ * not a flat object; `durationMs` is nested under `timings`.
  */
+function pickHeaderValue(headers: unknown, name: string): string {
+  if (!Array.isArray(headers)) return ''
+  const lower = name.toLowerCase()
+  for (const entry of headers as { key?: string; value?: string }[]) {
+    if (typeof entry.key === 'string' && entry.key.toLowerCase() === lower) {
+      return typeof entry.value === 'string' ? entry.value : ''
+    }
+  }
+  return ''
+}
+
+function pickBody(response: Record<string, unknown>): { raw: unknown; isString: boolean } {
+  // GraphQL: structured already
+  if ('data' in response || 'errors' in response) {
+    return { raw: { data: response['data'], errors: response['errors'] }, isString: false }
+  }
+  // gRPC
+  if (typeof response['responseMessage'] === 'string') {
+    return { raw: response['responseMessage'], isString: true }
+  }
+  // WebSocket
+  if (Array.isArray(response['messages'])) {
+    return { raw: response['messages'], isString: false }
+  }
+  // HTTP / OData / SOAP
+  if (typeof response['responseBody'] === 'string') {
+    return { raw: response['responseBody'], isString: true }
+  }
+  return { raw: undefined, isString: false }
+}
+
 function shapeHistoryDetail(detail: unknown): unknown {
   if (!detail || typeof detail !== 'object') return detail
   const d = detail as Record<string, unknown>
   const response = (d['response'] ?? {}) as Record<string, unknown>
-  let parsedBody: unknown = response['body']
-  const headers = response['responseHeaders'] ?? {}
-  const headersObj = headers as Record<string, string | string[]>
-  const ct = headersObj['content-type'] ?? headersObj['Content-Type'] ?? ''
-  const contentType = Array.isArray(ct) ? ct[0] ?? '' : ct
-  if (typeof response['body'] === 'string' && /application\/(json|.*\+json)/i.test(contentType)) {
-    try { parsedBody = JSON.parse(response['body']) } catch { /* keep as string */ }
+
+  const responseHeaders = response['responseHeaders']
+  const contentType = typeof response['contentType'] === 'string'
+    ? response['contentType']
+    : pickHeaderValue(responseHeaders, 'content-type')
+
+  const { raw, isString } = pickBody(response)
+  let parsedBody: unknown = raw
+  if (isString && typeof raw === 'string' && /application\/(json|.*\+json)/i.test(contentType)) {
+    try { parsedBody = JSON.parse(raw) } catch { /* keep as string */ }
   }
+
+  const timings = (response['timings'] ?? {}) as Record<string, unknown>
+  const durationMs = typeof timings['durationMs'] === 'number'
+    ? timings['durationMs']
+    : typeof response['durationMs'] === 'number' ? response['durationMs'] : undefined
+
+  // Echo the request data the renderer actually sent — so the caller
+  // sees exactly what hit the wire, including handlebars-resolved URL,
+  // path/query params, headers, and body. Field availability is
+  // protocol-specific (e.g. GraphQL has no `requestParams`); the
+  // consumer can ignore missing keys.
+  const requestMeta = (d['requestMeta'] ?? {}) as Record<string, unknown>
+  const sentRequest = {
+    method: response['requestMethod'] ?? requestMeta['method'],
+    url: response['requestUrl'],
+    headers: response['requestHeaders'],
+    params: response['requestParams'],
+    pathParams: response['requestPathParams'],
+    body: response['requestBody'],
+    // protocol-specific extras when present
+    soapAction: response['requestSoapAction'],
+    grpcMethod: response['requestMethod'],
+    grpcMessage: response['requestMessage'],
+    grpcMetadata: response['requestMetadata']
+  }
+
   return {
     requestId: d['requestId'],
     protocol: response['type'] ?? 'http',
     success: d['success'] === true,
     status: response['statusCode'] ?? null,
     statusText: response['statusText'],
-    headers: response['responseHeaders'],
+    headers: responseHeaders,
     body: parsedBody,
     bodyContentType: contentType || undefined,
-    durationMs: response['durationMs'],
-    requestUrl: response['requestUrl']
+    durationMs,
+    requestUrl: response['requestUrl'],
+    request: sentRequest,
+    error: response['error']
   }
 }
 
@@ -280,11 +348,14 @@ export function registerExecutionTools(mcp: McpService): void {
       description:
         'Execute the request with the given id and return its structured response. ' +
         'Unary protocols (HTTP / OData / GraphQL / SOAP / gRPC) return ' +
-        '`{ status, statusText, headers, body, durationMs, protocol, error? }`; JSON bodies ' +
-        'are parsed in-place. Streaming protocols (WebSocket) return the first frames + a ' +
-        '`continuationToken` — pass it to `read_stream` to pull more, or `cancel_request(id)` ' +
-        'to disconnect. The response is also persisted to the request\'s history (visible in ' +
-        'the UI) and replayed live in the response panel.',
+        '`{ status, statusText, headers, body, bodyContentType, durationMs, protocol, ' +
+        'requestUrl, request: { method, url, headers, params, pathParams, body, ... }, error? }`; ' +
+        'JSON bodies are parsed in-place. The `request` echo reflects exactly what hit the ' +
+        'wire (handlebars-resolved URL, sent headers/params/body) so callers can audit the ' +
+        'call without a second `get_response` round-trip. Streaming protocols (WebSocket) ' +
+        'return the first frames + a `continuationToken` — pass it to `read_stream` to pull ' +
+        'more, or `cancel_request(id)` to disconnect. The response is also persisted to the ' +
+        'request\'s history (visible in the UI) and replayed live in the response panel.',
       inputSchema: {
         id: z.string().min(1).describe('Request id (from list_requests / search).'),
         timeoutMs: z.coerce.number().int().min(500).max(120_000).optional().describe(
