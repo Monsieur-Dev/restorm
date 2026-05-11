@@ -37,6 +37,23 @@ export interface EditorTab {
 	 * Useful when tab metadata (breadcrumbs, icons) changes without changing the tab ID.
 	 */
 	contentVersion?: number;
+	/**
+	 * Opt-in per-tab persistence payload. When set, `extractWorkbenchState`
+	 * stores it alongside the tab id in the autosave, and the matching
+	 * `rebuildTab(tabId, data)` callback receives it back on restore.
+	 *
+	 * Use this for tab-local state that doesn't belong in the tab id
+	 * (which is a stable identifier shared by tab-switcher / split /
+	 * dnd) — typical examples: the currently-loaded URL on a mini
+	 * browser tab, the scroll position of a markdown preview, the
+	 * active sub-tab inside a multi-pane editor.
+	 *
+	 * Must be JSON-serialisable. ECUI doesn't inspect the value, it
+	 * just round-trips it through the persistence layer (which uses
+	 * `JSON.stringify` internally). Consumers that need richer types
+	 * (Dates, Maps, …) should encode them themselves.
+	 */
+	persistedState?: unknown;
 }
 
 export interface EditorGroup {

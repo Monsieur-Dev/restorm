@@ -533,7 +533,15 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           if (current === url) return node
           return {
             ...node,
-            tabs: node.tabs.map((t) => (t.id === tabId ? { ...t, url } as EditorTab : t))
+            // Mirror the URL into `persistedState` as well, so ECUI's
+            // workbench autosave captures it under `tabData[N]` and the
+            // matching `handleRebuildTab(MINI_BROWSER_TAB_ID, data)`
+            // call restores the navigation state on file reopen.
+            tabs: node.tabs.map((t) => (
+              t.id === tabId
+                ? ({ ...t, url, persistedState: { url } } as EditorTab)
+                : t
+            ))
           }
         }
         if (isContainerNode(node)) {

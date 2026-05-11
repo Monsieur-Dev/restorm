@@ -93,7 +93,20 @@ function collectEnvironmentContexts(items: (EnvironmentFolder | Folder | Request
 				const ctx: EnvContext = {}
 				const vars = Array.isArray(env.variables) ? env.variables : []
 				for (const v of vars) {
-					if (typeof v.key === 'string' && typeof v.value === 'string') ctx[v.key] = v.value
+					if (typeof v.key !== 'string') continue
+					// `v.value` is a `ValueType` instance (StringValue,
+					// ExpressionValue, NumericValue, …), never a plain
+					// string. A naive `typeof v.value === 'string'` gate
+					// here would skip every variable, leaving the env
+					// context empty — so the URL substitution below
+					// would never resolve `{{baseUrl}}/...`, the parsed
+					// origin would be null, the project-origin set would
+					// stay empty, and the firewall would prompt on every
+					// authenticated request. Use the universal
+					// `toString()` on ValueType.
+					const raw = (v.value as { toString?: () => string } | undefined)
+					const str = typeof raw?.toString === 'function' ? raw.toString() : ''
+					if (str !== '') ctx[v.key] = str
 				}
 				out.push(ctx)
 			}

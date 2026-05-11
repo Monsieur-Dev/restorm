@@ -30,8 +30,12 @@ This folder contains:
 - Persistence:
   - `workbenchId?: string`
   - `autosave?: boolean`
-  - `onRebuildTab?: (tabId: string) => EditorTab | null`
+  - `onRebuildTab?: (tabId: string, data?: unknown) => EditorTab | null` — receives the optional per-tab `persistedState` round-tripped through the autosave (see below).
   - `onStateRestored?: (tree: WorkbenchTree | null) => void`
+
+#### Round-tripping per-tab state
+
+Each `EditorTab` may set an opt-in `persistedState?: unknown` field. ECUI captures it on every autosave (parallel array next to `tabIds`) and feeds it back into the second argument of `onRebuildTab(tabId, data)` on restore. Use it for tab-local state that doesn't belong in the tab id — e.g. a Mini browser's current URL, a markdown preview's scroll position, the active sub-tab inside a multi-pane editor. The payload must be JSON-serialisable; ECUI treats it as opaque.
 - Sizing:
   - `onSizesChange?: (nodeId: string, sizes: number[]) => void`
 - Tab callbacks / extensibility:

@@ -56,7 +56,7 @@ import type {
   FirewallTab,
   BreadcrumbItem
 } from '../../../shared/types/editor'
-import { CONSOLE_TAB_ID, FIREWALL_TAB_ID } from '../../../shared/types/editor'
+import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, type MiniBrowserTab } from '../../../shared/types/editor'
 
 export interface UseWorkbenchTabsOptions {
   rootItems: (EnvironmentFolder | Folder | Request)[]
@@ -420,7 +420,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
   }, [])
 
   // Rebuild tab callback for workbench autosave
-  const handleRebuildTab = useCallback((tabId: string): EditorTab | null => {
+  const handleRebuildTab = useCallback((tabId: string, data?: unknown): EditorTab | null => {
     // Console singleton: not tied to any tree item, so it doesn't go
     // through `parseTabId`. The tab content (xterm + toolbar) is
     // owned by `RestormWorkbench` based on the `tabType: 'console'`
@@ -443,6 +443,22 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
         title: 'Firewall',
         titleString: 'Firewall'
       } as FirewallTab
+    }
+    // Mini browser singleton — same singleton-shell pattern, but it
+    // round-trips a navigated URL via ECUI's per-tab `persistedState`
+    // (see `extractWorkbenchState` / `RebuildTabCallback`). Without
+    // this branch the tab silently dropped on every file reopen.
+    if (tabId === MINI_BROWSER_TAB_ID) {
+      const url = typeof (data as { url?: unknown } | undefined)?.url === 'string'
+        ? (data as { url: string }).url
+        : undefined
+      return {
+        id: MINI_BROWSER_TAB_ID,
+        tabType: 'mini-browser',
+        title: 'Mini browser',
+        titleString: 'Mini browser',
+        ...(url !== undefined ? { url, persistedState: { url } } : {})
+      } as MiniBrowserTab
     }
     const parsed = parseTabId(tabId)
     if (!parsed) return null
