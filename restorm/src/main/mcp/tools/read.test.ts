@@ -223,6 +223,30 @@ describe('read tools — search', () => {
     const { isError } = parseReply(mcp.invoke('search', { query: '' }))
     expect(isError).toBe(true)
   })
+
+  it('enriches request-kind matches with method + url', () => {
+    mockState.findById.mockImplementation((id: string) => {
+      if (id === 'r1') return { id: 'r1', name: 'List users', type: 'http', method: 'GET', url: '{{baseUrl}}/users', headers: [], params: [], pathParams: [] }
+      if (id === 'r2') return { id: 'r2', name: 'Create user', type: 'http', method: 'POST', url: '{{baseUrl}}/users', headers: [], params: [], pathParams: [] }
+      return null
+    })
+    const mcp = new FakeMcpService()
+    registerReadTools(mcp as unknown as McpService)
+    const { payload } = parseReply(mcp.invoke('search', { query: 'u', kinds: ['request'] })) as { payload: { matches: { id: string; method?: string; url?: string }[] } }
+    expect(payload.matches).toEqual([
+      expect.objectContaining({ id: 'r1', method: 'GET', url: '{{baseUrl}}/users' }),
+      expect.objectContaining({ id: 'r2', method: 'POST', url: '{{baseUrl}}/users' })
+    ])
+  })
+
+  it('does not enrich non-request matches with method/url', () => {
+    const mcp = new FakeMcpService()
+    registerReadTools(mcp as unknown as McpService)
+    const { payload } = parseReply(mcp.invoke('search', { query: 'u', kinds: ['folder'] })) as { payload: { matches: { id: string; method?: string; url?: string }[] } }
+    expect(payload.matches).toHaveLength(1)
+    expect(payload.matches[0]).not.toHaveProperty('method')
+    expect(payload.matches[0]).not.toHaveProperty('url')
+  })
 })
 
 describe('read tools — get_active_env', () => {
