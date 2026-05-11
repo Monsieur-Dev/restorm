@@ -26,12 +26,16 @@ import { z } from 'zod'
 import { BrowserWindow } from 'electron'
 import { McpService } from 'electron-core-ui'
 import { collectionStore } from '../../services/CollectionStore'
+import { contextService } from '../../services/ContextService'
+import type { FullRequestData } from '../../services/ContextServiceTypes'
 import { responseHistoryService } from '../../services'
 import { httpExecutionService } from '../../services/HTTPExecutionService'
 import { graphqlExecutionService } from '../../services/GraphQLExecutionService'
 import { soapExecutionService } from '../../services/SOAPExecutionService'
 import { grpcExecutionService } from '../../services/GRPCExecutionService'
 import { websocketExecutionService } from '../../services/WebSocketExecutionService'
+import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataRequest, isAuthenticationRequest, isWebSocketRequest } from '../../../shared/types/collections'
+import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, AuthenticationRequest } from '../../../shared/types/collections'
 import { isRequest, type FolderItem, type Request } from '../../../shared/models'
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
@@ -126,6 +130,84 @@ function decodeStreamToken(token: string): { requestId: string; cursor: number }
 }
 
 /**
+ * Build a `FullRequestData` payload from the live `Request` class
+ * instance held in `CollectionStore` and push it into `ContextService`
+ * so the next `HTTPExecutionService` read reflects the latest fields.
+ *
+ * Why this exists: the renderer's `HTTPRequestTabView` is supposed to
+ * call `updateFullRequestData` on every field change, but the chain
+ * relies on the tab being mounted AND its body / headers / URL state
+ * effects firing in the right order. When MCP calls
+ * `update_request(... body ...)` and then `run_request` back-to-back,
+ * the renderer's mount-time `useState` may have already captured the
+ * pre-patch body, and the post-patch `transport-replaced` event
+ * doesn't always re-flush before the Send click fires. The result is
+ * `HTTPExecutionService` reading a stale `fullData.body` (the symptom:
+ * subsequent `Action Move` requests send the previous coordinates and
+ * the API answers "already at destination"). Pushing from main here
+ * sidesteps the renderer entirely and keeps the executor authoritative.
+ */
+function flushRequestStateToContext(req: Request): void {
+  // Headers / params / pathParams / metadata are common across most
+  // protocols — pull them off whichever shape the request takes.
+  const headers = (req as { headers?: unknown }).headers
+  const params = (req as { params?: unknown }).params
+  const pathParams = (req as { pathParams?: unknown }).pathParams
+  const metadata = (req as { metadata?: unknown }).metadata
+
+  const data: Partial<FullRequestData> & { id: string } = {
+    id: req.id,
+    url: (req as { url?: string }).url ?? '',
+    headers: Array.isArray(headers) ? (headers as FullRequestData['headers']) : []
+  }
+  if (isHTTPRequest(req) || isAuthenticationRequest(req)) {
+    const http = req as HTTPRequest | AuthenticationRequest
+    data.requestType = req.type === 'auth' ? 'auth' : 'http'
+    data.method = http.method
+    if (Array.isArray(params)) data.params = params as FullRequestData['params']
+    if (Array.isArray(pathParams)) data.pathParams = pathParams as FullRequestData['pathParams']
+    if (http.body !== undefined) data.body = http.body as FullRequestData['body']
+  } else if (isGraphQLRequest(req)) {
+    const gql = req as GraphQLRequest
+    data.requestType = 'graphql'
+    data.operationType = gql.operationType
+    data.query = gql.query
+    data.variables = gql.variables
+  } else if (isGrpcRequest(req)) {
+    const grpc = req as GrpcRequest
+    data.requestType = 'grpc'
+    data.service = grpc.service
+    data.grpcMethod = grpc.method
+    data.callType = grpc.callType
+    data.requestMessage = grpc.requestMessage
+    if (Array.isArray(metadata)) data.metadata = metadata as FullRequestData['metadata']
+  } else if (isSoapRequest(req)) {
+    const soap = req as SoapRequest
+    data.requestType = 'soap'
+    data.soapAction = soap.soapAction
+    data.soapService = soap.service
+    data.operation = soap.operation
+    data.soapBody = (soap as { body?: unknown }).body as string | undefined
+  } else if (isODataRequest(req)) {
+    data.requestType = 'odata'
+    if (Array.isArray(params)) data.params = params as FullRequestData['params']
+    if (Array.isArray(pathParams)) data.pathParams = pathParams as FullRequestData['pathParams']
+  } else if (isWebSocketRequest(req)) {
+    const ws = req as WebSocketRequest
+    data.requestType = 'websocket'
+    if ('event' in ws) (data as { event?: unknown }).event = (ws as { event?: unknown }).event
+    if ('message' in ws) (data as { message?: unknown }).message = (ws as { message?: unknown }).message
+  }
+  // No-op when the request hasn't been registered with ContextService
+  // yet (typical in the unit test harness; in real usage `mcp:open-tab`
+  // triggers the renderer's `registerRequest` before this runs).
+  // Swallow logger failures the same way — vitest's main-side stubs
+  // don't expose `app.isPackaged`.
+  if (contextService.getRequestContext(req.id) === undefined) return
+  try { contextService.updateFullRequestData(req.id, data as FullRequestData) } catch { /* best-effort */ }
+}
+
+/**
  * Run a unary (single-response) request by delegating to the renderer's
  * Send button + waiting for the new history entry to land. Used by HTTP /
  * OData / GraphQL / SOAP / gRPC + the auth request type.
@@ -135,6 +217,11 @@ async function runUnaryRequest(req: Request, timeoutMs: number): Promise<unknown
   // Tab activation needs a render tick before the Send button is
   // mounted — give React time to flush the activation render.
   await delay(400)
+  // Make sure ContextService sees the latest body / headers / URL
+  // before the renderer-side Send click — see helper for the full
+  // reason. Without this, an `update_request` immediately followed by
+  // `run_request` can ship the pre-patch body.
+  flushRequestStateToContext(req)
   const before = await responseHistoryService.list(req.id)
   const baselineGuid = before[0]?.guid ?? null
   dispatchSendInRenderer(req.id)
