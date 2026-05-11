@@ -3,7 +3,7 @@ import { IconView } from 'electron-core-ui/renderer'
 import './miniBrowserPanel.css'
 
 interface MiniBrowserPanelProps {
-  /** URL persisted on the workbench tab. The iframe loads this on
+  /** URL persisted on the workbench tab. The webview loads this on
    * mount, and any user-driven navigation pushes the new URL back
    * through `onUrlChange` so the workbench tree state stays in sync. */
   initialUrl?: string
@@ -16,36 +16,50 @@ interface MiniBrowserPanelProps {
 }
 
 /**
- * Tiny webview chrome — address bar, back, refresh, and an
- * `<iframe>` rendering whatever URL the user committed.
+ * Electron webview tag — process-isolated guest browser, used by the
+ * Mini browser instead of a plain `<iframe>`. Reasons spelled out in
+ * `MainWindow.createWindow`: cross-site iframe storage is partitioned
+ * by Chromium so a third-party SPA can't read its own localStorage
+ * (e.g. login forms that persist a JWT silently fail). A webview has
+ * its own top-level browsing context, so storage / cookies / IndexedDB
+ * all work as if the user typed the URL in a real browser tab.
  *
- * Why `<iframe>` (not `<webview>`): the user asked for a literal
- * iframe and the goal is mostly developer-facing — viewing API
- * playgrounds, docs, and the artifactsmmo game UI side-by-side
- * with their restorm session. Sites that set `X-Frame-Options: DENY`
- * or `frame-ancestors 'none'` won't render; that's a known
- * limitation of the iframe transport (we surface it via the
- * `onError` overlay).
+ * React already ships `WebViewHTMLAttributes` / `HTMLWebViewElement`
+ * intrinsics, so the `<webview>` element type-checks out of the box —
+ * we only need a runtime-shape interface for the navigation methods
+ * we call imperatively via the ref.
+ */
+interface WebviewNavigateEvent {
+  url?: string
+}
+interface WebviewElement extends HTMLElement {
+  src: string
+  reload: () => void
+  goBack: () => void
+  goForward: () => void
+  canGoBack: () => boolean
+  canGoForward: () => boolean
+  getURL: () => string
+}
+
+/**
+ * Tiny webview chrome — address bar, back, refresh, and an Electron
+ * `<webview>` rendering whatever URL the user committed.
  */
 export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ initialUrl, onUrlChange }) => {
   // Address bar text (what the user is typing) vs committed URL
-  // (what the iframe is actually loading). Decoupled so backspacing
-  // through the address bar doesn't blank the iframe.
+  // (what the webview is actually loading). Decoupled so backspacing
+  // through the address bar doesn't blank the webview.
   const [addressBar, setAddressBar] = useState(initialUrl ?? '')
   const [committedUrl, setCommittedUrl] = useState(initialUrl ?? '')
 
-  // History stack for the back button. We only push on commits the
-  // user actively triggered (Enter / Go / refresh / replace), not on
-  // sub-resource loads — the iframe doesn't expose its navigation
-  // events cross-origin, so a "true" browser history is impossible
-  // here. This stack tracks the addresses the user typed, which is
-  // good enough for the "go back to the previous URL I tried" UX.
-  const [history, setHistory] = useState<string[]>([])
-
-  // Refresh nonce so clicking the refresh button forces the iframe
-  // to reload even when the URL hasn't changed. Without this, React
-  // sees the same `src` and skips the re-render.
-  const [refreshNonce, setRefreshNonce] = useState(0)
+  // `<webview>` exposes its own navigation history (`goBack` / `canGoBack`),
+  // so unlike the previous iframe implementation we don't need a manual
+  // URL stack. Track only the back-availability flag for the toolbar
+  // disabled state — it has to live in React state because `canGoBack`
+  // isn't reactive.
+  const webviewRef = useRef<WebviewElement | null>(null)
+  const [canGoBack, setCanGoBack] = useState(false)
 
   const lastPersistedRef = useRef<string>(initialUrl ?? '')
 
@@ -79,17 +93,8 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ initialUrl, 
     const normalised = normaliseUrl(url)
     if (normalised === '') return
     setAddressBar(normalised)
-    setHistory((prev) => {
-      if (committedUrl === '' || committedUrl === normalised) return prev
-      const next = [...prev, committedUrl]
-      // Cap the back-stack so a session of compulsive Go-pressing
-      // doesn't grow it without bound. 100 is generous for any
-      // realistic developer use of the Mini browser; the oldest
-      // entry slides out FIFO-style.
-      return next.length > 100 ? next.slice(next.length - 100) : next
-    })
     setCommittedUrl(normalised)
-  }, [committedUrl])
+  }, [])
 
   const handleSubmit = useCallback((e: React.SyntheticEvent): void => {
     e.preventDefault()
@@ -97,33 +102,43 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ initialUrl, 
   }, [addressBar, commit])
 
   const handleRefresh = useCallback((): void => {
-    if (committedUrl === '') return
-    setRefreshNonce((n) => n + 1)
-    // No `commit` here — refresh shouldn't push the same URL onto
-    // the back stack a second time.
-  }, [committedUrl])
-
-  const handleBack = useCallback((): void => {
-    setHistory((prev) => {
-      if (prev.length === 0) return prev
-      const next = prev.slice(0, -1)
-      const previousUrl = prev[prev.length - 1]
-      if (previousUrl !== undefined) {
-        setAddressBar(previousUrl)
-        setCommittedUrl(previousUrl)
-      }
-      return next
-    })
+    webviewRef.current?.reload()
   }, [])
 
-  const canGoBack = history.length > 0
-  const canRefresh = committedUrl !== ''
+  const handleBack = useCallback((): void => {
+    webviewRef.current?.goBack()
+  }, [])
 
-  // `key` change forces the iframe to remount on refresh — simpler
-  // and more reliable than poking `contentWindow.location.reload()`
-  // which throws under cross-origin (no permission to touch the
-  // child frame's location).
-  const iframeKey = `${committedUrl}::${String(refreshNonce)}`
+  // Mirror webview navigation back into address bar + committed URL +
+  // the parent tab. `did-navigate` fires for top-level navigations
+  // (link clicks, form submits, location.href = ...). `did-navigate-in-page`
+  // covers SPA route changes (history.pushState / replaceState) so the
+  // address bar stays accurate inside single-page apps like
+  // play.artifactsmmo.com.
+  useEffect(() => {
+    const webview = webviewRef.current
+    if (!webview) return
+    const refreshBackState = (): void => { setCanGoBack(webview.canGoBack()) }
+    const handleNavigate = (raw: Event): void => {
+      const e = raw as unknown as WebviewNavigateEvent
+      if (typeof e.url === 'string' && e.url !== '') {
+        setAddressBar(e.url)
+        setCommittedUrl(e.url)
+      }
+      refreshBackState()
+    }
+    const handleStopLoading = (): void => { refreshBackState() }
+    webview.addEventListener('did-navigate', handleNavigate)
+    webview.addEventListener('did-navigate-in-page', handleNavigate)
+    webview.addEventListener('did-stop-loading', handleStopLoading)
+    return () => {
+      webview.removeEventListener('did-navigate', handleNavigate)
+      webview.removeEventListener('did-navigate-in-page', handleNavigate)
+      webview.removeEventListener('did-stop-loading', handleStopLoading)
+    }
+  }, [])
+
+  const canRefresh = committedUrl !== ''
 
   return (
     <div className="mini-browser-panel" data-testid="mini-browser-panel">
@@ -179,13 +194,14 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ initialUrl, 
             Enter an address above to start browsing.
           </div>
         ) : (
-          <iframe
-            key={iframeKey}
+          // No `allowpopups` — Mini browser intentionally swallows
+          // window.open calls (we'd have no chrome to host them). Users
+          // who want a new tab can paste the URL into the address bar.
+          <webview
+            ref={webviewRef as unknown as React.RefObject<HTMLWebViewElement>}
             className="mini-browser-panel__iframe"
             src={committedUrl}
-            title="Mini browser"
             data-testid="mini-browser-iframe"
-            sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
           />
         )}
       </div>
