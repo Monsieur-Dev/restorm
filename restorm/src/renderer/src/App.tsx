@@ -1081,9 +1081,15 @@ const App: React.FC = () => {
   // Both no-op when MCP is disabled. `envByFolder` stays empty for now —
   // populating it requires per-folder env-selector state we don't track
   // centrally yet; `get_active_env` falls back to the folder's first env.
+  // `resolveActiveTabId` walks the workbench tree (handling split groups
+  // and the focused-vs-first-active fallback) so MCP callers get the real
+  // tab id they'd need to pass to `close_tab`. The old `tabId: null`
+  // left the snapshot half-populated (`itemId` set, `tabId` null), which
+  // looked like a stale-cache bug from the agent's side.
+  const mcpActiveTabId = resolveActiveTabId(workbenchTree.groups, focusedGroupId) ?? null
   useMcpActiveStateBridge({
     enabled: mcpEnabled,
-    tabId: null,
+    tabId: mcpActiveTabId,
     itemId: activeRequest?.id ?? null,
     kind: activeRequest ? 'request' : null,
     envByFolder: {}
