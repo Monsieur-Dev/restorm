@@ -67,6 +67,21 @@ class ConsoleFeedStore {
 	}
 
 	private append(record: RequestRecord): void {
+		// Layer B's main-process interceptor emits a placeholder record
+		// when the verdict resolves (body still unknown — `http.request`
+		// doesn't carry it in its args) and re-emits the same `id` once
+		// `req.end()` flushes. Dedupe by `id` so the second emit
+		// replaces the first in place, otherwise every POST would
+		// surface as TWO console lines (one body-less, one complete).
+		// Walk from the tail since updates almost always target the
+		// most-recent record.
+		for (let i = this.buffer.length - 1; i >= 0; i--) {
+			if (this.buffer[i]?.id === record.id) {
+				this.buffer[i] = record
+				this.scheduleFlush()
+				return
+			}
+		}
 		this.buffer.push(record)
 		// Trim only when materially over the cap (BUFFER_LIMIT * 1.1)
 		// so we amortise the splice-cost over many records instead
