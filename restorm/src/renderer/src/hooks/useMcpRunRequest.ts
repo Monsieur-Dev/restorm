@@ -65,6 +65,16 @@ function clickSendButton(): boolean {
   return false
 }
 
+// Cold-open of a never-mounted request tab can take longer than a
+// single tick — Monaco bundles, Handlebars resolvers, large body
+// previews, and React StrictMode's double-render all contend with
+// the first paint. A flat `setTimeout(100)` after `mcp:run-request`
+// would fire before the Send button was in the DOM, hit nothing, and
+// silently no-op — leaving main to time out at 30s with an opaque
+// "renderer did not produce a response" error. Poll instead.
+const CLICK_RETRY_INTERVAL_MS = 50
+const CLICK_TIMEOUT_MS = 5000
+
 export function useMcpRunRequest(input: UseMcpRunRequestInput): void {
   const { enabled } = input
 
@@ -74,16 +84,16 @@ export function useMcpRunRequest(input: UseMcpRunRequestInput): void {
     const api = root.restorm?.runtime
     if (!api) return
     const off = api.onMcpRunRequest(({ itemId }) => {
-      // Tab activation arrives via the parallel `mcp:open-tab` event
-      // main fires; React re-renders the panel before this listener
-      // runs, so by the time we look for the Send button it's mounted.
-      // A short tick gives React time to flush the activation render.
-      setTimeout(() => {
-        const ok = clickSendButton()
-        if (!ok) {
-          logger.warn('[mcp:run-request] no Send button found in DOM', { itemId })
+      const deadline = Date.now() + CLICK_TIMEOUT_MS
+      const tryClick = (): void => {
+        if (clickSendButton()) return
+        if (Date.now() >= deadline) {
+          logger.warn('[mcp:run-request] no Send button found in DOM after retries', { itemId, waitedMs: CLICK_TIMEOUT_MS })
+          return
         }
-      }, 100)
+        setTimeout(tryClick, CLICK_RETRY_INTERVAL_MS)
+      }
+      tryClick()
     })
     return off
   }, [enabled])
