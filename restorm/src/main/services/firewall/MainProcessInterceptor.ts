@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto'
 import { logger, graphQLService } from 'electron-core-ui'
 import { firewallService } from './FirewallService'
 import { permissionService } from './PermissionService'
+import { isFirewallBypassed } from './firewallBypass'
 import { DeniedClientRequest } from './DeniedClientRequest'
 import { BufferingClientRequest } from './BufferingClientRequest'
 import { captureOriginHint } from './stackOrigin'
@@ -329,6 +330,17 @@ function patchFetch(): void {
 
 		const originHint = captureOriginHint(2)
 		if (originHint !== null) record.originHint = originHint
+		// User-initiated outbound traffic (Import dialog, request runner,
+		// mini-browser navigation) is treated as pre-authorised — the
+		// firewall exists to gate background traffic, not the very fetch
+		// the user just typed a URL for. Still emit the record for audit
+		// visibility, then forward to the real fetch without a verdict
+		// roundtrip. See `firewallBypass.ts` for the call-site contract.
+		if (isFirewallBypassed()) {
+			record.verdict = 'allow'
+			firewallService.emit(record)
+			return originalFetch(input, init)
+		}
 		const cls = permissionService.classify({
 			scheme: record.protocol,
 			host: record.host,

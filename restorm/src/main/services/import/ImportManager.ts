@@ -13,6 +13,7 @@ import { logger } from 'electron-core-ui/main'
 import type { EnvironmentFolder, FolderItem } from '../../../shared/models'
 import { isRequest, isAnyFolder, isHTTPRequest, isAuthenticationRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest } from '../../../shared/types/collections'
 import { disableEmptyKeyValues } from '../../../shared/utils/emptyKeyValueHelper'
+import { withFirewallBypass } from '../firewall/firewallBypass'
 
 // ============================================================================
 // Types
@@ -359,7 +360,12 @@ export async function importFrom(
           headers: redactedHeaders,
           headerCount: Object.keys(options.extraHeaders ?? {}).length
         })
-        const response = await fetch(input, fetchInit)
+        // Import is user-initiated (URL paste / drag-drop on the
+        // Import modal) — bypass the firewall so we don't ask the
+        // user to authorise the very fetch they just typed a URL
+        // for, and so a fresh project with empty `projectOrigins`
+        // doesn't dead-end on auto-deny.
+        const response = await withFirewallBypass(() => fetch(input, fetchInit))
         logger.info('[ImportManager] fetch response', {
           url: input,
           status: response.status,
@@ -447,7 +453,10 @@ export async function tryAllImports(
   try {
     if (isUrl) {
       source = input
-      const response = await fetch(input)
+      // Same firewall bypass rationale as `importFromUrl` above —
+      // user typed / dropped the URL, that's the authorisation
+      // signal.
+      const response = await withFirewallBypass(() => fetch(input))
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`)
       }
