@@ -40,7 +40,13 @@ const mockState = {
 
 vi.mock('../../services/CollectionStore', () => ({
   collectionStore: {
-    findById: (id: string) => mockState.findById(id)
+    findById: (id: string) => mockState.findById(id),
+    // `flushRequestStateToContext` calls this when registering a
+    // freshly-resolved request inline (cold open_project case). Tests
+    // don't care about env folders → return null and the helper falls
+    // back to a null environmentId, which is the same shape the
+    // renderer uses when no env has been chosen yet.
+    findParentFolder: (_id: string) => null
   }
 }))
 

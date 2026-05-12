@@ -24,7 +24,7 @@
 
 import { z } from 'zod'
 import { BrowserWindow } from 'electron'
-import { McpService, logger } from 'electron-core-ui'
+import { McpService } from 'electron-core-ui'
 import { collectionStore } from '../../services/CollectionStore'
 import { contextService } from '../../services/ContextService'
 import type { FullRequestData } from '../../services/ContextServiceTypes'
@@ -34,8 +34,8 @@ import { graphqlExecutionService } from '../../services/GraphQLExecutionService'
 import { soapExecutionService } from '../../services/SOAPExecutionService'
 import { grpcExecutionService } from '../../services/GRPCExecutionService'
 import { websocketExecutionService } from '../../services/WebSocketExecutionService'
-import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataRequest, isAuthenticationRequest, isWebSocketRequest } from '../../../shared/types/collections'
-import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, AuthenticationRequest } from '../../../shared/types/collections'
+import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataRequest, isAuthenticationRequest, isWebSocketRequest, isEnvironmentFolder } from '../../../shared/types/collections'
+import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, AuthenticationRequest, KeyValue, EnvironmentFolder } from '../../../shared/types/collections'
 import { isRequest, type FolderItem, type Request } from '../../../shared/models'
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
@@ -275,19 +275,70 @@ function flushRequestStateToContext(req: Request): void {
     if ('event' in ws) (data as { event?: unknown }).event = (ws as { event?: unknown }).event
     if ('message' in ws) (data as { message?: unknown }).message = (ws as { message?: unknown }).message
   }
-  // No-op when the request hasn't been registered with ContextService
-  // yet (typical in the unit test harness; in real usage `mcp:open-tab`
-  // triggers the renderer's `registerRequest` before this runs).
-  if (contextService.getRequestContext(req.id) === undefined) return
+  // If the request isn't registered with ContextService yet, register
+  // it inline. Until recently we bailed out here on the assumption
+  // that `mcp:open-tab` would race the renderer's `registerRequest`
+  // call ahead of our dispatch — that's true only when restorm has
+  // already been running and the tree is reactive. On a *cold*
+  // open_project → run_request sequence the renderer is still
+  // hydrating, the request tab hasn't mounted, and
+  // `getResolvedUrl` returns undefined → the executor short-circuits
+  // with "No resolved URL found for this request" before the user
+  // even sees what happened.
+  //
+  // Find the request's env-folder ancestor, pick its first
+  // environment as a sane default (the renderer applies a richer
+  // "selected env" cache when it mounts; the first env is the same
+  // fallback the renderer uses if no selection has been recorded
+  // yet), and register inline.
+  if (contextService.getRequestContext(req.id) === undefined) {
+    try {
+      const envFolder = findEnvFolderAncestor(req.id)
+      const envId = envFolder?.environments[0]?.id ?? null
+      const headersArr = Array.isArray(headers) ? (headers as KeyValue[]) : []
+      const paramsArr = Array.isArray(params) ? (params as KeyValue[]) : []
+      const pathParamsArr = Array.isArray(pathParams) ? (pathParams as KeyValue[]) : []
+      contextService.registerRequest(req.id, envId, {
+        id: req.id,
+        headers: headersArr,
+        params: paramsArr,
+        pathParams: pathParamsArr
+      })
+    } catch {
+      // Vitest's main-side stubs don't expose `app.isPackaged`, so
+      // the logger initialisation inside `registerRequest` throws —
+      // and the `logger.debug` we'd use to surface this also throws
+      // for the same reason. In production this never fires (Electron
+      // populates `app.isPackaged`); silently skip so the rest of the
+      // dispatch can proceed against whatever state the renderer has.
+    }
+  }
   try {
     contextService.updateFullRequestData(req.id, data as FullRequestData)
-  } catch (err) {
+  } catch {
     // Vitest's main-side stubs don't expose `app.isPackaged`, so the
-    // logger initialisation inside `updateFullRequestData`'s warn path
-    // throws. In production the same call works fine — surface the
-    // error rather than masking real flush regressions.
-    logger.debug('[mcp:run_request] flushRequestStateToContext skipped', { error: String(err) })
+    // logger initialisation inside `updateFullRequestData`'s warn
+    // path throws — and any `logger.debug` we'd use to report it
+    // also throws for the same reason. In production this never
+    // fires (Electron populates `app.isPackaged`); silently skip.
   }
+}
+
+/**
+ * Walk parent folders until an `EnvironmentFolder` is found. Bounded
+ * iteration so a malformed tree (cycle, missing parent) can't loop
+ * forever — restorm trees are at most a handful of levels deep in
+ * practice.
+ */
+function findEnvFolderAncestor(itemId: string): EnvironmentFolder | null {
+  let cursor = itemId
+  for (let i = 0; i < 32; i++) {
+    const parent = collectionStore.findParentFolder(cursor)
+    if (!parent) return null
+    if (isEnvironmentFolder(parent)) return parent
+    cursor = parent.id
+  }
+  return null
 }
 
 /**
