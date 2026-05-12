@@ -166,4 +166,46 @@ export function registerWorkbenchTabTools(mcp: McpService): void {
       return jsonReply({ added: parsed, list: 'blacklist' })
     }
   )
+
+  mcp.registerTool(
+    'firewall_list_pending_prompts',
+    {
+      title: 'List firewall prompts awaiting a user decision',
+      description:
+        'Return every outbound-request prompt currently waiting on the user to click Allow / Deny ' +
+        '(or auto-deny on timeout). Each entry is ' +
+        '`{ promptId, origin, source, startedAt, originHint? }` — `promptId` is the key you pass ' +
+        'back to `firewall_resolve_prompt` to answer one programmatically. Empty array when no ' +
+        'prompt is in flight. Useful when a `run_request` looks stalled — surface the pending ' +
+        'prompt to the user (or auto-allow it after they\'ve given a higher-level "go ahead").',
+      inputSchema: {} as Record<string, unknown>
+    },
+    () => {
+      return jsonReply({ pending: permissionService.listPendingPrompts() })
+    }
+  )
+
+  mcp.registerTool(
+    'firewall_resolve_prompt',
+    {
+      title: 'Resolve a pending firewall prompt programmatically',
+      description:
+        'Answer a single firewall prompt without waiting for the user to click. Pass the ' +
+        '`promptId` returned by `firewall_list_pending_prompts` and the verdict you want to ' +
+        'apply (`"allow"` or `"deny"`). Persists the decision to the matching list ' +
+        '(same as a real user click), so future calls to the same origin short-circuit.',
+      inputSchema: {
+        promptId: z.string().min(1).describe('promptId from `firewall_list_pending_prompts`.'),
+        verdict: z.enum(['allow', 'deny']).describe('Decision to apply (and persist).')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const promptId = typeof args['promptId'] === 'string' ? args['promptId'] : ''
+      const verdict = args['verdict']
+      if (!promptId) return errorReply('promptId is required')
+      if (verdict !== 'allow' && verdict !== 'deny') return errorReply('verdict must be "allow" or "deny"')
+      permissionService.resolvePrompt(promptId, verdict)
+      return jsonReply({ resolved: promptId, verdict })
+    }
+  )
 }
