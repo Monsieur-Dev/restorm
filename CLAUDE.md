@@ -29,6 +29,18 @@ The verification loop:
 
 If step 4 contradicts step 1, **say so honestly and keep iterating** instead of declaring victory. False "it's fixed" claims waste the user's attention twice — once on the false claim, once on rediscovering the bug.
 
+## No commit without a test pass
+
+**Never commit a behavioural change without exercising it first.** Lint + typecheck are the floor, not the ceiling — they catch syntax and type drift, not "does this fix actually fix the bug." Before staging a commit that asserts a fix, you owe at least one of:
+
+- **Unit test**: add or update a `*.test.ts` that fails before your change and passes after. The diff makes the regression-protection visible to reviewers.
+- **E2E test**: extend / add a `tests/e2e/bdd/...` scenario for user-visible flows. Slower, but the only honest way to prove an Electron / Monaco / IPC interaction.
+- **MCP-driven manual repro**: drive restorm via the MCP tools (`screenshot`, `run_request`, `evaluate`, `dom-query`, …) to reproduce the bug on the running build, apply the fix, restart restorm if it touches main-process code (HMR doesn't pick up `src/main/`), and re-run the same MCP-driven steps to confirm the new behaviour. Take a screenshot of the green state if visual.
+
+If you can't reach a green test before commit, **say so in the chat**: explain what blocked the verification, propose an asymmetric reviewer ask (e.g. "I can repro locally but the e2e harness can't load the Monaco editor in headless mode, please sanity-check manually"). Don't paper over it by pushing and hoping CI will tell you.
+
+This is non-negotiable for fixes that wire across processes (main ↔ renderer ↔ IPC), touch the firewall pipeline, or change persistence — those are the paths where lint+typecheck have historically lied and the bug only surfaces under live execution.
+
 ## Commits
 
 Pre-commit hooks run the full test suite, which takes a long time (~5–6 min on a healthy host). **NEVER** interrupt or cancel a commit in progress — wait for it to finish, even if it seems slow.
