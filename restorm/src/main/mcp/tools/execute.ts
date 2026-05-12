@@ -61,18 +61,27 @@ function errorReply(message: string): { content: { type: 'text'; text: string }[
 const BODY_TRUNCATION_THRESHOLD_BYTES = 50 * 1024
 const BODY_INLINE_PREVIEW_BYTES = 4 * 1024
 
-function maybeTruncateBody(shaped: unknown): unknown {
+async function maybeTruncateBody(shaped: unknown): Promise<unknown> {
   if (!shaped || typeof shaped !== 'object') return shaped
   const obj = shaped as Record<string, unknown> & { body?: unknown }
   if (obj.body === undefined || obj.body === null) return shaped
   const serialised = typeof obj.body === 'string'
     ? obj.body
     : JSON.stringify(obj.body)
-  if (serialised.length <= BODY_TRUNCATION_THRESHOLD_BYTES) return shaped
+  if (serialised.length <= BODY_TRUNCATION_THRESHOLD_BYTES) {
+    // Make the negative answer explicit at the result root so callers
+    // can branch on `result.bodyTruncated === false` without falling
+    // back to `'bodyTruncated' in result` semantics.
+    return { ...obj, bodyTruncated: false }
+  }
 
   const requestId = typeof obj.requestId === 'string' ? obj.requestId : 'request'
   const safeId = requestId.replace(/[^A-Za-z0-9._-]/g, '_').slice(0, 64)
-  const fileName = `restorm-mcp-body-${safeId}-${Date.now()}.json`
+  // Add a random suffix on top of `Date.now()` so two truncations of
+  // the same requestId in the same millisecond (run_batch, racing
+  // retries) don't clobber each other's spill files.
+  const suffix = Math.random().toString(36).slice(2, 10)
+  const fileName = `restorm-mcp-body-${safeId}-${Date.now()}-${suffix}.json`
   const filePath = path.join(os.tmpdir(), fileName)
   // Persist the body in its prettiest form: pretty-print JSON when we
   // had structured data, otherwise the raw string. The caller can
@@ -81,7 +90,7 @@ function maybeTruncateBody(shaped: unknown): unknown {
     ? obj.body
     : JSON.stringify(obj.body, null, 2)
   try {
-    fs.writeFileSync(filePath, persisted, 'utf-8')
+    await fs.promises.writeFile(filePath, persisted, 'utf-8')
   } catch (err) {
     // Persistence failed — keep the original body. The harness's own
     // spillover still has us covered; we just lose the structured
@@ -435,7 +444,7 @@ async function runUnaryRequest(req: Request, timeoutMs: number): Promise<unknown
   if (detail === null) {
     return { error: { code: 'HISTORY_GONE', message: `history entry ${fresh.guid} disappeared between detection and read` } }
   }
-  return maybeTruncateBody(shapeHistoryDetail(detail))
+  return await maybeTruncateBody(shapeHistoryDetail(detail))
 }
 
 /**

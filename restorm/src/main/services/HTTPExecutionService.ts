@@ -188,7 +188,7 @@ class HTTPExecutionService {
             // intentional. The warning is a tripwire in case that path
             // ever stops claiming these requests and they accidentally
             // fall through to the plain executor.
-            logger.warn('[HTTPExecutionService] body type requires a dedicated handler and is not yet routed through this executor', {
+            logger.warn('[HTTPExecutionService] body type uses a dedicated handler and is not routed through this executor', {
               requestId,
               bodyType: bodyData.type
             })

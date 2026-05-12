@@ -211,7 +211,9 @@ export function registerWriteTools(mcp: McpService): void {
           'Partial request shape. Whitelisted top-level keys: url, method, headers, params, ' +
           'pathParams, body, name, description, query, variables, service, callType, ' +
           'requestMessage, metadata, soapAction, operation, soapBody, protocol, event, message. ' +
-          '`id` and `type` are dropped silently — protected.'
+          '`id` and `type` are dropped silently — protected. `body.type` must be one of ' +
+          '`text` / `file` / `form-data` / `x-www-form-urlencoded` (the canonical HTTPRequestBody ' +
+          'discriminator values); to send a JSON payload use `{type: "text", content: "{…json…}"}`.'
         )
       } as Record<string, unknown>
     },
@@ -483,7 +485,7 @@ export function registerWriteTools(mcp: McpService): void {
         key: z.string().min(1).describe('Variable key (e.g. "JWTBearer_token").'),
         value: z
           .record(z.string(), z.unknown())
-          .describe('Persisted `ValueType` POJO, e.g. `{ "type": "password", "value": "<the-secret>" }` or `{ "type": "expression", "value": "Bearer {{token}}" }`.'),
+          .describe('Persisted `ValueType` POJO, e.g. `{ "type": "password", "value": "<the-secret>" }` or `{ "type": "expression", "value": "Bearer {{token}}" }`. A bare string is rejected — wrap plain text in `{ "type": "string", "value": "…" }`.'),
         enabled: z.boolean().optional().describe('Default true.'),
         description: z.string().optional().describe('Free-text description shown next to the variable.')
       } as Record<string, unknown>
