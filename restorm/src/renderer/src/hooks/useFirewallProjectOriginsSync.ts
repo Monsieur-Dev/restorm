@@ -94,18 +94,20 @@ function collectEnvironmentContexts(items: (EnvironmentFolder | Folder | Request
 				const vars = Array.isArray(env.variables) ? env.variables : []
 				for (const v of vars) {
 					if (typeof v.key !== 'string') continue
-					// `v.value` is a `ValueType` instance (StringValue,
-					// ExpressionValue, NumericValue, …), never a plain
-					// string. A naive `typeof v.value === 'string'` gate
-					// here would skip every variable, leaving the env
-					// context empty — so the URL substitution below
-					// would never resolve `{{baseUrl}}/...`, the parsed
-					// origin would be null, the project-origin set would
-					// stay empty, and the firewall would prompt on every
-					// authenticated request. Use the universal
-					// `toString()` on ValueType.
-					const raw = (v.value as { toString?: () => string } | undefined)
-					const str = typeof raw?.toString === 'function' ? raw.toString() : ''
+					// `v.value` can arrive in three shapes depending on where
+					// in the load pipeline we run:
+					//   - `ValueType` class instance (StringValue, ExpressionValue,
+					//     NumericValue, …) once the renderer's `makeReactive*`
+					//     pass has reified the tree
+					//   - plain POJO `{ type, value }` straight off the wire
+					//     (file-open IPC, MCP `update_folder`, etc.) before
+					//     reification fires
+					//   - the raw string when an importer cut a corner
+					// Extracting requires probing all three: the instance has
+					// a meaningful `toString()`, the POJO needs `.value`
+					// pulled out explicitly (its `.toString()` returns
+					// `"[object Object]"`), and a raw string is itself.
+					const str = extractValueString(v.value)
 					if (str !== '') ctx[v.key] = str
 				}
 				out.push(ctx)
@@ -119,6 +121,32 @@ function collectEnvironmentContexts(items: (EnvironmentFolder | Folder | Request
 	}
 	for (const item of items) visit(item)
 	return out
+}
+
+/**
+ * Coerce a `KeyValue.value` of unknown shape (live `ValueType` instance,
+ * POJO `{ type, value }`, raw string, …) into the plain string the
+ * firewall origin sync needs. Skipping any of these shapes makes the
+ * env context drop the variable — and a missing `baseUrl` mapping
+ * tanks every project-origin resolution that needs handlebars
+ * substitution (which is most of them).
+ */
+function extractValueString(value: unknown): string {
+	if (typeof value === 'string') return value
+	if (value === null || value === undefined) return ''
+	if (typeof value === 'object') {
+		// POJO shape from the wire — `{ type: 'string', value: '...' }`.
+		const inner = (value as { value?: unknown }).value
+		if (typeof inner === 'string') return inner
+		// Live `ValueType` instance — `.toString()` returns the stored
+		// string. Skip if it falls through to `Object.prototype.toString`
+		// (which yields the useless `"[object Object]"`).
+		const toStr = (value as { toString?: () => string }).toString
+		if (typeof toStr === 'function' && toStr !== Object.prototype.toString) {
+			return toStr.call(value)
+		}
+	}
+	return ''
 }
 
 function extractRawUrl(request: Request): string | null {
