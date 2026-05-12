@@ -232,6 +232,28 @@ export function registerWriteTools(mcp: McpService): void {
       // by the old one, and `type` change would mismatch the class
       // instance with the actual request kind.
       const { id: _id, type: _type, ...rawSafePatch } = patchRaw as Record<string, unknown>
+      // Reject `body.type` values the executor / UI can't render. The
+      // 4 canonical types form the entire `HTTPRequestBody` union; a
+      // caller stuffing anything else (e.g. `'json'`) used to land in
+      // an empty body editor and reach the wire as a payload-less
+      // POST, surfacing as a generic 4xx from the upstream server.
+      const VALID_BODY_TYPES = ['text', 'file', 'form-data', 'x-www-form-urlencoded'] as const
+      const patchedBody = (rawSafePatch as { body?: unknown }).body
+      if (patchedBody !== undefined && patchedBody !== null) {
+        if (typeof patchedBody !== 'object' || Array.isArray(patchedBody)) {
+          return errorReply('body must be an object')
+        }
+        const bodyType = (patchedBody as { type?: unknown }).type
+        if (
+          bodyType !== undefined &&
+          (typeof bodyType !== 'string' ||
+            !(VALID_BODY_TYPES as readonly string[]).includes(bodyType))
+        ) {
+          return errorReply(
+            `body.type must be one of: ${VALID_BODY_TYPES.join(', ')} (got: ${JSON.stringify(bodyType)})`
+          )
+        }
+      }
       const safePatch = reifyKeyValueArrays(rawSafePatch)
       const updated = collectionStore.updateRequest(id, safePatch as Partial<Request>)
       if (!updated) return errorReply(`updateRequest failed for ${id}`)
@@ -459,7 +481,9 @@ export function registerWriteTools(mcp: McpService): void {
       inputSchema: {
         envId: z.string().min(1).describe('Environment id.'),
         key: z.string().min(1).describe('Variable key (e.g. "JWTBearer_token").'),
-        value: z.unknown().describe('Persisted `ValueType` POJO, e.g. `{ "type": "password", "value": "<the-secret>" }` or `{ "type": "expression", "value": "Bearer {{token}}" }`.'),
+        value: z
+          .record(z.string(), z.unknown())
+          .describe('Persisted `ValueType` POJO, e.g. `{ "type": "password", "value": "<the-secret>" }` or `{ "type": "expression", "value": "Bearer {{token}}" }`.'),
         enabled: z.boolean().optional().describe('Default true.'),
         description: z.string().optional().describe('Free-text description shown next to the variable.')
       } as Record<string, unknown>
@@ -513,6 +537,13 @@ export function registerWriteTools(mcp: McpService): void {
         }
         return undefined
       })()
+      // Notify ContextService that this env's variables changed so the
+      // handlebars context is rebuilt. `updateFolder({})` with an empty
+      // patch wouldn't pass the `patchTouchesEnvironments` gate inside
+      // CollectionStore, so the per-env `ENVIRONMENT_UPDATED` event
+      // would never fire and the resolved URLs / available variables
+      // would keep using the previous env snapshot.
+      collectionStore.updateEnvironment(envId, {})
       if (ownerFolderId !== undefined) {
         collectionStore.updateFolder(ownerFolderId, {} as never)
         for (const win of BrowserWindow.getAllWindows()) {
@@ -552,6 +583,9 @@ export function registerWriteTools(mcp: McpService): void {
       env.variables = env.variables.filter((v) => v.key !== key)
       const removed = env.variables.length < before
       if (removed) {
+        // Same reason as set_env_variable: signal ContextService that
+        // env.variables changed so the handlebars context is rebuilt.
+        collectionStore.updateEnvironment(envId, {})
         broadcastTreeReplace()
         triggerSave()
       }

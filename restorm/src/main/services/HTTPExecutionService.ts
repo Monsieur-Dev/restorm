@@ -159,26 +159,57 @@ class HTTPExecutionService {
         }
       } else if (requestContext?.fullData?.body) {
         const bodyData = requestContext.fullData.body
-        if (bodyData.type === 'text') {
-          body = contextService.resolveValue(bodyData.content, requestId)
-        } else if (bodyData.type === 'x-www-form-urlencoded') {
-          const params = new URLSearchParams()
-          for (const field of bodyData.fields) {
-            if (field.key) {
-              // `field.value` arrives either as a raw string (renderer
-              // IPC path) or a `ValueType` instance (main-side flush
-              // path). Coerce uniformly — body templates always run
-              // through handlebars regardless of declared type.
-              const rawValue = typeof field.value === 'string' ? field.value : field.value.toString()
-              const resolvedKey = contextService.resolveValue(field.key, requestId)
-              const resolvedValue = contextService.resolveValue(rawValue, requestId)
-              params.append(resolvedKey, resolvedValue)
+        switch (bodyData.type) {
+          case 'text':
+            body = contextService.resolveValue(bodyData.content, requestId)
+            break
+          case 'x-www-form-urlencoded': {
+            const params = new URLSearchParams()
+            for (const field of bodyData.fields) {
+              if (field.key) {
+                // `field.value` arrives either as a raw string (renderer
+                // IPC path) or a `ValueType` instance (main-side flush
+                // path). Coerce uniformly — body templates always run
+                // through handlebars regardless of declared type.
+                const rawValue = typeof field.value === 'string' ? field.value : field.value.toString()
+                const resolvedKey = contextService.resolveValue(field.key, requestId)
+                const resolvedValue = contextService.resolveValue(rawValue, requestId)
+                params.append(resolvedKey, resolvedValue)
+              }
+            }
+            body = params.toString()
+            headers['Content-Type'] ??= 'application/x-www-form-urlencoded'
+            break
+          }
+          case 'form-data':
+          case 'file':
+            // `form-data` and `file` reach the wire through a dedicated
+            // upload path elsewhere; leaving `body` undefined here is
+            // intentional. The warning is a tripwire in case that path
+            // ever stops claiming these requests and they accidentally
+            // fall through to the plain executor.
+            logger.warn('[HTTPExecutionService] body type requires a dedicated handler and is not yet routed through this executor', {
+              requestId,
+              bodyType: bodyData.type
+            })
+            break
+          default: {
+            // Compile-time exhaustiveness: forces the developer to
+            // re-visit this switch whenever a new variant is added to
+            // `HTTPRequestBody`. The runtime branch defends against
+            // bad persisted state / MCP callers that bypass schema
+            // checks — used to drop silently and surface as a generic
+            // upstream 4xx.
+            const _exhaustive: never = bodyData
+            const unknownType = (bodyData as { type?: unknown }).type
+            return {
+              requestId,
+              success: false,
+              error: `Unknown body type: ${JSON.stringify(unknownType)}. Valid values: text, file, form-data, x-www-form-urlencoded.`,
+              timings: { startedAt, durationMs: Date.now() - startTime }
             }
           }
-          body = params.toString()
-          headers['Content-Type'] ??= 'application/x-www-form-urlencoded'
         }
-        // Note: form-data and file modes require special handling
       }
 
       // Inject auth headers (fresh or cached) before dispatching.

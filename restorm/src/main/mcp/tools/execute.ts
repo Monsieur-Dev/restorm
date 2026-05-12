@@ -23,6 +23,9 @@
  */
 
 import { z } from 'zod'
+import * as fs from 'node:fs'
+import * as os from 'node:os'
+import * as path from 'node:path'
 import { BrowserWindow } from 'electron'
 import { McpService } from 'electron-core-ui'
 import { collectionStore } from '../../services/CollectionStore'
@@ -44,6 +47,71 @@ function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] 
 
 function errorReply(message: string): { content: { type: 'text'; text: string }[]; isError: true } {
   return { content: [{ type: 'text', text: message }], isError: true }
+}
+
+/**
+ * Bodies larger than this threshold get spilled to a temp file and the
+ * inline `body` field shrinks to a preview + path hint. The MCP harness
+ * caps tool-result token counts; a single ~200 KiB response (e.g.
+ * `/my/logs`) used to trip a generic spillover that drops the whole
+ * structured result behind an opaque file read. Truncating *just the
+ * body* preserves the typed fields (status, headers, durationMs, …) so
+ * the caller can still branch on them without paying the round-trip.
+ */
+const BODY_TRUNCATION_THRESHOLD_BYTES = 50 * 1024
+const BODY_INLINE_PREVIEW_BYTES = 4 * 1024
+
+function maybeTruncateBody(shaped: unknown): unknown {
+  if (!shaped || typeof shaped !== 'object') return shaped
+  const obj = shaped as Record<string, unknown> & { body?: unknown }
+  if (obj.body === undefined || obj.body === null) return shaped
+  const serialised = typeof obj.body === 'string'
+    ? obj.body
+    : JSON.stringify(obj.body)
+  if (serialised.length <= BODY_TRUNCATION_THRESHOLD_BYTES) return shaped
+
+  const requestId = typeof obj.requestId === 'string' ? obj.requestId : 'request'
+  const safeId = requestId.replace(/[^A-Za-z0-9._-]/g, '_').slice(0, 64)
+  const fileName = `restorm-mcp-body-${safeId}-${Date.now()}.json`
+  const filePath = path.join(os.tmpdir(), fileName)
+  // Persist the body in its prettiest form: pretty-print JSON when we
+  // had structured data, otherwise the raw string. The caller can
+  // Read the file directly without re-parsing.
+  const persisted = typeof obj.body === 'string'
+    ? obj.body
+    : JSON.stringify(obj.body, null, 2)
+  try {
+    fs.writeFileSync(filePath, persisted, 'utf-8')
+  } catch (err) {
+    // Persistence failed — keep the original body. The harness's own
+    // spillover still has us covered; we just lose the structured
+    // typed-fields-preserved nicety.
+    return {
+      ...obj,
+      bodyTruncated: false,
+      bodySpillError: err instanceof Error ? err.message : String(err)
+    }
+  }
+
+  const previewSlice = serialised.slice(0, BODY_INLINE_PREVIEW_BYTES)
+  const inlineBody = typeof obj.body === 'string'
+    ? `${previewSlice}\n…<body truncated at ${BODY_INLINE_PREVIEW_BYTES} bytes; full ${serialised.length} bytes at ${filePath}>…`
+    : {
+        _truncated: true,
+        _previewBytes: BODY_INLINE_PREVIEW_BYTES,
+        _totalBytes: serialised.length,
+        _filePath: filePath,
+        _preview: previewSlice
+      }
+
+  return {
+    ...obj,
+    body: inlineBody,
+    bodyTruncated: true,
+    bodyTotalBytes: serialised.length,
+    bodySpilledPath: filePath,
+    bodySpilledHint: `Full response body written to ${filePath} (${serialised.length} bytes). Read it directly when the inline preview is insufficient.`
+  }
 }
 
 /**
@@ -367,7 +435,7 @@ async function runUnaryRequest(req: Request, timeoutMs: number): Promise<unknown
   if (detail === null) {
     return { error: { code: 'HISTORY_GONE', message: `history entry ${fresh.guid} disappeared between detection and read` } }
   }
-  return shapeHistoryDetail(detail)
+  return maybeTruncateBody(shapeHistoryDetail(detail))
 }
 
 /**

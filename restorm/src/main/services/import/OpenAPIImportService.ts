@@ -315,7 +315,21 @@ function schemaToSample(
   } else {
     inferredType = workingSchema.type
   }
-  inferredType ??= workingSchema.properties ? 'object' : workingSchema.items ? 'array' : 'string'
+  // Default-type fallback ladder. A schema that carries no `type` but
+  // *does* carry a `format` / `enum` is almost certainly a string
+  // (think `{format: 'date-time'}` or `{enum: ['a','b']}`). A schema
+  // that is genuinely empty (`{}`) is OpenAPI's "any" — for JSON
+  // request bodies the FastAPI-style action endpoint expects `{}`,
+  // not `""`, so default to `'object'` rather than `'string'`. The
+  // old default of `'string'` made imported action bodies render as
+  // `'""'` and the server then rejected the request with 422 "Field
+  // required".
+  inferredType ??=
+    workingSchema.properties ? 'object'
+      : workingSchema.items ? 'array'
+      : workingSchema.format ? 'string'
+      : Array.isArray(workingSchema.enum) && workingSchema.enum.length > 0 ? 'string'
+      : 'object'
 
   switch (inferredType) {
     case 'object': {
