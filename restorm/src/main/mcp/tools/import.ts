@@ -23,6 +23,7 @@ import { collectionStore, pubsub, PUBSUB_TOPICS } from '../../services/Collectio
 import { DocumentEvents, type DocumentChangedPayload } from '../../services/DocumentEvents'
 import { importFrom } from '../../services/import/ImportManager'
 import { isAnyFolder, isEnvironmentFolder, isRequest, type FolderItem, type EnvironmentFolder, type Environment } from '../../../shared/models'
+import { cloneForEventBus } from '../../../shared/utils/cloneForEventBus'
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
   return { content: [{ type: 'text', text: JSON.stringify(value, null, 2) }] }
@@ -48,9 +49,17 @@ function triggerSave(): void {
  * cache yet.
  */
 export function broadcastTreeReplace(): void {
-  // Plain JSON serialisation — class instances would lose their
-  // prototype across the IPC boundary anyway; renderer reifies.
-  const tree = JSON.parse(JSON.stringify(collectionStore.getCollections())) as unknown
+  // `cloneForEventBus` over `JSON.parse(JSON.stringify(...))`: the
+  // latter calls `PasswordValue.toJSON()` which strips the plaintext,
+  // so the renderer would receive a password-less tree and
+  // `setRootItems(reactiveWrap(tree))` would orphan every plaintext
+  // the user had typed into the previous reactive tree. The custom
+  // walker copies own enumerable props (so the `value` field
+  // survives), never touches `toJSON`. Class instances still arrive
+  // on the renderer side as POJOs (constructors lost over IPC
+  // anyway), but with `{ type, value }` intact — `normalizeValueType`
+  // re-instantiates them on reify.
+  const tree = cloneForEventBus(collectionStore.getCollections()) as unknown
   for (const win of BrowserWindow.getAllWindows()) {
     if (!win.isDestroyed()) win.webContents.send('mcp:tree-replace', tree)
   }

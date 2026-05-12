@@ -34,6 +34,18 @@ export interface UseMcpTreeReplaceInput {
    * roundtrip that would otherwise clobber main's class instances).
    */
   mcpDrivenRef: { current: boolean }
+  /**
+   * Invalidate every workbench tab's content cache after `setRootItems`.
+   * `EditorGroupView` caches each tab's rendered React element keyed
+   * by `tab.contentVersion`; without bumping it, the cached element
+   * still closes over the pre-replace `folder` / `request` reference,
+   * so the user keeps seeing the orphaned tree even though
+   * `rootItems` now points at the fresh reactive graph. The most
+   * visible symptom: password edits stay stuck in the cached env
+   * folder and the save flow (which reads `rootItems`) writes an
+   * empty `.env`.
+   */
+  bumpAllTabContentVersions: () => void
 }
 
 function reifyItem(raw: unknown): FolderItem | null {
@@ -49,7 +61,7 @@ function reifyItem(raw: unknown): FolderItem | null {
 }
 
 export function useMcpTreeReplace(input: UseMcpTreeReplaceInput): void {
-  const { enabled, setRootItems, mcpDrivenRef } = input
+  const { enabled, setRootItems, mcpDrivenRef, bumpAllTabContentVersions } = input
 
   useEffect(() => {
     if (!enabled) return
@@ -69,7 +81,11 @@ export function useMcpTreeReplace(input: UseMcpTreeReplaceInput): void {
       // happens on the same effect after the call lands.
       mcpDrivenRef.current = true
       setRootItems(next)
+      // Invalidate every workbench tab's cached content so the next
+      // render re-runs `renderTabContent` against the fresh
+      // `rootItems`. See the prop doc for the full rationale.
+      bumpAllTabContentVersions()
     })
     return off
-  }, [enabled, setRootItems, mcpDrivenRef])
+  }, [enabled, setRootItems, mcpDrivenRef, bumpAllTabContentVersions])
 }

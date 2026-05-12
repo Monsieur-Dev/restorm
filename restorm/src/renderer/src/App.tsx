@@ -1120,7 +1120,9 @@ const App: React.FC = () => {
   // mutations — roundtripping would clobber its class instances).
   // The hook flips the ref true; the effect reads + resets it.
   const mcpDrivenRef = useRef(false)
-  useMcpTreeReplace({ enabled: mcpEnabled, setRootItems, mcpDrivenRef })
+  const bumpAllTabContentVersionsRef = useRef<() => void>(() => { /* not yet wired */ })
+  const bumpAllTabContentVersionsStable = useCallback((): void => { bumpAllTabContentVersionsRef.current() }, [])
+  useMcpTreeReplace({ enabled: mcpEnabled, setRootItems, mcpDrivenRef, bumpAllTabContentVersions: bumpAllTabContentVersionsStable })
   useMcpRunRequest({ enabled: mcpEnabled })
   // Forward-ref dance: `bumpTabContentVersionFor` is declared further
   // down (depends on `setWorkbenchTree`). Hand the patch hook a stable
@@ -1224,8 +1226,35 @@ const App: React.FC = () => {
       return { ...prev, groups: walk(prev.groups) }
     })
   }, [])
-  // Patch the forward-ref consumed by `useMcpRequestPatch` (above).
+  /**
+   * Bump every workbench tab's `contentVersion`. Used after a full
+   * tree replacement (`mcp:tree-replace`): the renderer just swapped
+   * `rootItems` for a fresh reactive tree, so every cached tab
+   * content (held by `EditorGroupView`'s tabContentCache) is now
+   * holding a stale folder/request reference. Without invalidating
+   * those caches, `RestormWorkbench`'s `reactiveFolder ?? effectiveTab.folder`
+   * conditional would still surface the OLD reference (the cached
+   * React element was rendered with the pre-replace closure), and
+   * the user would see the live tree's stale snapshot — for env
+   * folders that means password edits stuck in the orphaned tree
+   * never reach `rootItems` and the save flow writes an empty `.env`.
+   */
+  const bumpAllTabContentVersions = useCallback((): void => {
+    setWorkbenchTree((prev) => {
+      const walk = (nodes: GroupNode[]): GroupNode[] => nodes.map((n) => {
+        if (isContainerNode(n)) return { ...n, groups: walk(n.groups) }
+        if (!isTabGroupNode(n)) return n
+        const tabs = n.tabs.map((tab) => ({ ...tab, contentVersion: (tab.contentVersion ?? 0) + 1 }))
+        return { ...n, tabs }
+      })
+      return { ...prev, groups: walk(prev.groups) }
+    })
+  }, [])
+
+  // Patch the forward-refs consumed by `useMcpRequestPatch` /
+  // `useMcpTreeReplace` (above).
   useEffect(() => { bumpTabContentVersionRef.current = bumpTabContentVersionFor }, [bumpTabContentVersionFor])
+  useEffect(() => { bumpAllTabContentVersionsRef.current = bumpAllTabContentVersions }, [bumpAllTabContentVersions])
 
   const handleToggleFavorite = useCallback((itemId: string): void => {
     if (!projectUuid) return

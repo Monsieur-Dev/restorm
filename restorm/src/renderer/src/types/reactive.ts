@@ -390,7 +390,17 @@ function createDocumentProxyHandler(
  *      `MarkdownEditor` → `onChange('')` right after mount doesn't
  *      spuriously flip an otherwise-clean document dirty when its
  *      `notes`/`documentation` were previously `undefined`.
- *   3. Structural deep-equal for objects/arrays via JSON.
+ *   3. Structural deep-equal for objects/arrays — must run through
+ *      `cloneForEventBus` first, then `JSON.stringify`. A raw
+ *      `JSON.stringify` invokes `PasswordValue.toJSON()` which
+ *      strips the plaintext, so two `PasswordValue` instances with
+ *      different secrets stringify to the SAME `{"type":"password"}`
+ *      shape — the proxy reports "no change" and `emitUpdate` is
+ *      skipped, meaning a user typing into a password field never
+ *      reaches `ContextService` / `CollectionStore` (and the save
+ *      flow writes an empty `.env`). `cloneForEventBus` copies the
+ *      `value` field as a normal property so the serialised diff
+ *      actually sees the password change.
  */
 function sameProxyValue(a: unknown, b: unknown): boolean {
   if (a === b) return true
@@ -401,7 +411,7 @@ function sameProxyValue(a: unknown, b: unknown): boolean {
   if (typeof a !== typeof b) return false
   if (typeof a !== 'object') return false
   try {
-    return JSON.stringify(a) === JSON.stringify(b)
+    return JSON.stringify(cloneForEventBus(a)) === JSON.stringify(cloneForEventBus(b))
   } catch {
     return false
   }
