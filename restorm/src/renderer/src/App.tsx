@@ -91,6 +91,8 @@ import { useMcpTreeReplace } from './hooks/useMcpTreeReplace'
 import { useMcpRunRequest } from './hooks/useMcpRunRequest'
 import { useMcpRequestPatch } from './hooks/useMcpRequestPatch'
 import { useMcpMiniBrowserBridge } from './hooks/useMcpMiniBrowserBridge'
+import { useMcpWorkbenchTabsBridge } from './hooks/useMcpWorkbenchTabsBridge'
+import { clearConsoleFeed } from './components/Console/useConsoleFeed'
 import { useMcpFolderPatch } from './hooks/useMcpFolderPatch'
 import { RestormSidebar } from './components/MainView/Sidebar/RestormSidebar'
 import { RestormWorkbenchContainer } from './components/MainView/Workbench/RestormWorkbenchContainer'
@@ -1154,6 +1156,12 @@ const App: React.FC = () => {
     enabled: mcpEnabled,
     openMiniBrowser: handleOpenMiniBrowser,
     setMiniBrowserUrl: setMiniBrowserUrlForMcp
+  })
+  useMcpWorkbenchTabsBridge({
+    enabled: mcpEnabled,
+    openConsole: handleOpenConsole,
+    clearConsoleFeed,
+    openFirewall: handleOpenFirewall
   })
   useMcpFolderPatch({ enabled: mcpEnabled, rootItems, bumpTabContentVersionFor: bumpTabContentVersionStable })
   // MCP `set_favorite` listener — call the same toggle/remove path the

@@ -123,3 +123,14 @@ export function useConsoleFeed(): {
 	const clear = useCallback(() => { store.clear() }, [])
 	return { records, clear }
 }
+
+/**
+ * Imperative escape hatch: wipe the singleton store from outside a
+ * component. Used by the MCP `console_clear` bridge in `App.tsx`
+ * where there's no `useConsoleFeed()` call site to hold the hook's
+ * `clear` over — the IPC handler needs a stable reference it can
+ * invoke from anywhere.
+ */
+export function clearConsoleFeed(): void {
+	store.clear()
+}

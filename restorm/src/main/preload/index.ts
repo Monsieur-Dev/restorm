@@ -848,6 +848,24 @@ contextBridge.exposeInMainWorld('restorm', {
      * `error` is set when the script threw or the webview wasn't ready. */
     replyMiniBrowserExecute: (payload: { requestId: string; result?: unknown; error?: string }): void => {
       ipcRenderer.send('mcp:mini-browser-execute-reply', payload)
+    },
+    /** Subscribe to MCP `open_console` — open / focus the singleton Console tab. */
+    onMcpOpenConsole: (callback: () => void): (() => void) => {
+      const handler = (): void => { callback() }
+      ipcRenderer.on('mcp:open-console', handler)
+      return () => { ipcRenderer.off('mcp:open-console', handler) }
+    },
+    /** Subscribe to MCP `console_clear` — wipe the renderer-side feed. */
+    onMcpConsoleClear: (callback: () => void): (() => void) => {
+      const handler = (): void => { callback() }
+      ipcRenderer.on('mcp:console-clear', handler)
+      return () => { ipcRenderer.off('mcp:console-clear', handler) }
+    },
+    /** Subscribe to MCP `open_firewall` — open / focus the singleton Firewall tab. */
+    onMcpOpenFirewall: (callback: () => void): (() => void) => {
+      const handler = (): void => { callback() }
+      ipcRenderer.on('mcp:open-firewall', handler)
+      return () => { ipcRenderer.off('mcp:open-firewall', handler) }
     }
   },
   import: {
