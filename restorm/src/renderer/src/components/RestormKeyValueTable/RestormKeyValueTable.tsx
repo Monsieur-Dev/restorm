@@ -531,21 +531,12 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
         nextValue = new StringValue(raw)
       }
 
-      // Auto-track the enabled flag against value emptiness so the
-      // user doesn't have to remember to uncheck rows they just
-      // cleared (and doesn't keep a stale checked-but-empty row that
-      // would silently send `?name=` to APIs which reject it). Only
-      // override when the *emptiness* of the value changed on this
-      // edit — when emptiness didn't flip (e.g. the user just
-      // re-toggled the checkbox on an already-empty row to opt in
-      // to an explicit `?filter=`), we respect their choice.
-      const prevEmpty = currentType === undefined || currentType.toString().trim() === ''
-      const nextEmpty = nextValue.toString().trim() === ''
-      let nextEnabled = r.enabled
-      if (prevEmpty !== nextEmpty) {
-        nextEnabled = !nextEmpty
-      }
-
+      // Auto-toggle of the enabled flag against value emptiness now
+      // lives inside `KeyValueTable.updateData` (via the
+      // `autoToggleEnabledOnEmpty` prop we set above), so the local
+      // state + the visible checkbox stay in sync. Doing it here
+      // would only update the upstream data layer and leave the
+      // checkbox visually checked.
       if (rowId) {
         valueTypeByRowIdRef.current.set(rowId, nextValue)
       }
@@ -555,7 +546,7 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
         key: r.key,
         value: nextValue,
         description: r.description,
-        enabled: nextEnabled
+        enabled: r.enabled
       }
     })
 
@@ -874,6 +865,7 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
         onRowsChange={handleRowsChange}
         renderKeyCell={KeyCellRenderer}
         renderValueCell={ValueCellRenderer}
+        autoToggleEnabledOnEmpty
         {...(persistenceId && { persistenceId })}
         {...(dataTestId && { 'data-testid': dataTestId })}
       />

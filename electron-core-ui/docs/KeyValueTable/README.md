@@ -81,6 +81,15 @@ export interface KeyValueTableProps {
    * produced-headers table).
    */
   showEnabledToggle?: boolean
+  /**
+   * When `true`, the enabled-toggle is auto-managed against the
+   * value column: typing into an empty value re-enables the row,
+   * clearing a non-empty value disables it. Off by default —
+   * consumers that legitimately want a checked-but-empty row
+   * (e.g. `?filter=` to reset a server-side default) should leave
+   * this off.
+   */
+  autoToggleEnabledOnEmpty?: boolean
 }
 
 export interface KeyValueTableHandle {

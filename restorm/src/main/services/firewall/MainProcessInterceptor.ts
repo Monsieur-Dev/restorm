@@ -341,6 +341,17 @@ function recordFromFetchArgs(input: RequestInfo | URL, init: RequestInit | undef
 
 	let parsed: URL | null = null
 	try { parsed = new URL(raw) } catch { return null }
+	// Inline resources (`data:application/wasm;base64,...`,
+	// `data:image/png;base64,...`) and other non-network schemes
+	// (`blob:`, `file:`, `chrome-extension:`, `vscode-resource:`)
+	// aren't real outbound traffic — they live inside the page. The
+	// Chromium webRequest listener gates on `isNetworkScheme` for the
+	// same reason; the fetch + http monkey-patches were missing the
+	// symmetric gate, so a renderer fetching a data: URL surfaced as a
+	// garbage `curl -X GET 'data:...'` record in the Console panel
+	// (with the full base64 payload echoed back). Drop it cleanly.
+	const lowerProtocol = parsed.protocol.toLowerCase()
+	if (lowerProtocol !== 'http:' && lowerProtocol !== 'https:') return null
 	if (isInternalGraphqlEndpoint(raw)) return null
 	const host = parsed.hostname.toLowerCase()
 	const protocol: RequestRecordProtocol = parsed.protocol === 'https:' ? 'https' : 'http'
