@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 import {
   Button,
   StatusbarElement,
-  getContrastColor
+  getContrastColor,
+  useStatusbarTooltip
 } from 'electron-core-ui/renderer'
 import type { Environment } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
@@ -72,6 +73,14 @@ interface EnvPopoverProps {
 
 const EnvPopoverList: React.FC<EnvPopoverProps> = ({ rows, selectedEnvId, applyToAll, onApplyToAllChange, onSelect }) => {
   const { t } = useTranslation()
+  // Auto-dismiss the popover after the user picks an env. The
+  // "Apply to all" toggle below stays open on click because it
+  // doesn't go through `handleEnvClick`.
+  const { closeTooltip } = useStatusbarTooltip()
+  const handleEnvClick = useCallback((envId: string): void => {
+    onSelect(envId)
+    closeTooltip()
+  }, [onSelect, closeTooltip])
   return (
     <div
       role="listbox"
@@ -113,7 +122,7 @@ const EnvPopoverList: React.FC<EnvPopoverProps> = ({ rows, selectedEnvId, applyT
               align="left"
               backgroundColor={envGradient(bg)}
               {...(env.icon ? { icon: env.icon } : {})}
-              onClick={(): void => { onSelect(env.id) }}
+              onClick={(): void => { handleEnvClick(env.id) }}
               style={{
                 color: fg,
                 // The `small line` variants set `padding: 0` so the text
