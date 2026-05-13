@@ -11,6 +11,7 @@ import { Sash } from '../Sash';
 import type { SashEvent, IVerticalSashLayoutProvider, IHorizontalSashLayoutProvider } from '../Sash';
 import { saveWorkbenchState, loadWorkbenchState, clearWorkbenchState, rebuildWorkbenchTree } from './persistence';
 import type { RebuildTabCallback } from './persistence';
+import { WorkbenchResizeContext, useWorkbenchResize } from './WorkbenchResizeContext';
 import './styles/tabs.css';
 
 export interface EditorWorkbenchProps extends EditorWorkbenchCallbacks {
@@ -213,11 +214,12 @@ const GroupContainer: React.FC<{
 }> = ({ node, callbacks, renderLeaf, onNodeSizesChange, dataTestIdBase }) => {
 	const isVertical = node.orientation === 'vertical';
 	const ref = useRef<HTMLDivElement | null>(null);
+	const { setResizing } = useWorkbenchResize();
 
 	const handleSizesChange = useCallback((newSizes: number[]) => {
 		onNodeSizesChange?.(node.id, newSizes);
 	}, [node.id, onNodeSizesChange]);
-	
+
 	const { sizes, onSashStart, onSashChange } = useSplitSizes(
 		node.groups.length,
 		isVertical,
@@ -225,6 +227,22 @@ const GroupContainer: React.FC<{
 		node.sizes,
 		handleSizesChange
 	);
+
+	// Wrappers around the internal sash handlers that also flip the
+	// workbench-wide resize flag. Tab bodies subscribe via
+	// `WorkbenchResizeContext` and switch to `display: none` for the
+	// duration, skipping per-mousemove layout for every heavy embed.
+	// Wired on the Sash's `onStart` and `onEnd` props.
+	const handleSashStart = useCallback((index: number) => {
+		return (event: SashEvent): void => {
+			setResizing(true);
+			onSashStart(index)(event);
+		};
+	}, [onSashStart, setResizing]);
+
+	const handleSashEnd = useCallback((): void => {
+		setResizing(false);
+	}, [setResizing]);
 
 	// Create layout provider for each sash
 	const createLayoutProvider = useCallback((index: number): IVerticalSashLayoutProvider | IHorizontalSashLayoutProvider => {
@@ -311,8 +329,9 @@ const GroupContainer: React.FC<{
 						<Sash
 							orientation={isVertical ? 'vertical' : 'horizontal'}
 							layoutProvider={createLayoutProvider(i)}
-							onStart={onSashStart(i)}
+							onStart={handleSashStart(i)}
 							onChange={onSashChange(i)}
+							onEnd={handleSashEnd}
 							state="enabled"
 							{...(dataTestIdBase && { 'data-testid': `${dataTestIdBase}-sash-${node.id}-${i}` })}
 						/>
@@ -976,31 +995,44 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		testId
 	]);
 
+	// Workbench-wide "any sash currently dragging" flag. Tab bodies
+	// listen on this via `WorkbenchResizeContext` and switch to
+	// `display: none` for the duration, so heavy embeds (Monaco,
+	// Electron webviews, ResizeObserver-driven charts) skip layout on
+	// every mousemove. State lives at the top level because there is
+	// only ever one active drag — nested `GroupContainer`s all share
+	// the same flag.
+	const [isResizing, setIsResizing] = useState(false);
+	const resizeContextValue = useMemo(() => ({ isResizing, setResizing: setIsResizing }), [isResizing]);
+
 	return (
-		<div
-			className={`part editor ${className ?? ''}`}
-			{...(testId && {
-				'data-testid': testId,
-				'data-root-orientation': tree.orientation,
-				'data-root-group-count': String(tree.groups.length),
-				'data-focused-group-id': effectiveFocusedGroupId ?? ''
-			})}
-			style={{ display: 'flex', flex: 1, minWidth: 0, minHeight: 0, ...style }}
-		>
-			<div className="content" style={{ display: 'flex', flex: 1, minWidth: 0, minHeight: 0 }}>
-				{tree.groups.length === 0 ? (
-					emptyFallback ?? null
-				) : (
-					<GroupContainer
-						node={{ id: 'root', orientation: tree.orientation, groups: tree.groups, sizes: tree.sizes }}
-						callbacks={extCallbacks}
-						renderLeaf={leafRenderer}
-						onNodeSizesChange={onSizesChange}
-						dataTestIdBase={testId}
-					/>
-				)}
+		<WorkbenchResizeContext.Provider value={resizeContextValue}>
+			<div
+				className={`part editor ${className ?? ''}`}
+				{...(testId && {
+					'data-testid': testId,
+					'data-root-orientation': tree.orientation,
+					'data-root-group-count': String(tree.groups.length),
+					'data-focused-group-id': effectiveFocusedGroupId ?? '',
+					'data-is-resizing': isResizing ? 'true' : 'false'
+				})}
+				style={{ display: 'flex', flex: 1, minWidth: 0, minHeight: 0, ...style }}
+			>
+				<div className="content" style={{ display: 'flex', flex: 1, minWidth: 0, minHeight: 0 }}>
+					{tree.groups.length === 0 ? (
+						emptyFallback ?? null
+					) : (
+						<GroupContainer
+							node={{ id: 'root', orientation: tree.orientation, groups: tree.groups, sizes: tree.sizes }}
+							callbacks={extCallbacks}
+							renderLeaf={leafRenderer}
+							onNodeSizesChange={onSizesChange}
+							dataTestIdBase={testId}
+						/>
+					)}
+				</div>
 			</div>
-		</div>
+		</WorkbenchResizeContext.Provider>
 	);
 });
 

@@ -152,7 +152,14 @@ const SashInner: React.FC<SashProps> = ({
 		e.preventDefault();
 		e.stopPropagation();
 
-		// Disable pointer events on iframes during drag
+		// Disable pointer events on iframes during drag — otherwise the
+		// iframe document captures mousemove/mouseup and the Sash never
+		// finishes the gesture. Webview muting (display:none) is *not*
+		// done here on purpose: consumers that own a layout containing
+		// heavy embeds should hide their tab contents wholesale via the
+		// Sash's `onStart` / `onEnd` callbacks — see the workbench in
+		// restorm for the pattern. Per-element muting at this layer
+		// would only address part of the relayout problem.
 		const iframes = document.getElementsByTagName('iframe');
 		for (const iframe of iframes) {
 			iframe.classList.add('pointer-events-disabled');
