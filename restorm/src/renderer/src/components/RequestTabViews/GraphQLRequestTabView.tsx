@@ -34,10 +34,17 @@ import { toasterService } from 'electron-core-ui/renderer'
 
 export interface GraphQLRequestTabViewProps {
   request: GraphQLRequest
+  /** See HTTPRequestTabView for the contract — opaque map of paneId
+   * (here: 'query' | 'variables' | 'headers') to its persisted
+   * collapsed state. */
+  initialPanelCollapsed?: Record<string, boolean>
+  onPanelCollapsedChange?: (map: Record<string, boolean>) => void
 }
 
 export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
-  request
+  request,
+  initialPanelCollapsed,
+  onPanelCollapsedChange
 }) => {
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
@@ -56,6 +63,34 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<GraphQLResponse | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+
+  // See HTTPRequestTabView for the pattern. GraphQL has only a
+  // collapsible headers pane today (query + variables don't collapse),
+  // but we still round-trip the full map so future Pane additions
+  // need no extra plumbing.
+  const [panelCollapsed, setPanelCollapsed] = useState<{
+    query: boolean
+    variables: boolean
+    headers: boolean
+  }>(() => {
+    const seed = initialPanelCollapsed ?? {}
+    return {
+      query: typeof seed['query'] === 'boolean' ? seed['query'] : false,
+      variables: typeof seed['variables'] === 'boolean' ? seed['variables'] : false,
+      headers: typeof seed['headers'] === 'boolean' ? seed['headers'] : request.headers.length === 0
+    }
+  })
+  const onPanelCollapsedChangeRef = useRef(onPanelCollapsedChange)
+  useEffect(() => { onPanelCollapsedChangeRef.current = onPanelCollapsedChange }, [onPanelCollapsedChange])
+  const handlePanelCollapsedChange = useCallback((arr: boolean[]) => {
+    const next = {
+      query: arr[0] ?? false,
+      variables: arr[1] ?? false,
+      headers: arr[2] ?? false
+    }
+    setPanelCollapsed(next)
+    onPanelCollapsedChangeRef.current?.(next)
+  }, [])
 
   const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
@@ -242,8 +277,13 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   
   // Request content (SplitView with Query, Variables, Headers)
   const requestContent = (
-    <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }} data-testid="graphql-request-splitview">
-      <Pane title={t('graphql.tabs.query')} initialSize={0.5} minSize={150} data-testid="graphql-query-pane">
+    <SplitView
+      orientation="vertical"
+      style={{ width: '100%', height: '100%' }}
+      data-testid="graphql-request-splitview"
+      onCollapsedChange={handlePanelCollapsedChange}
+    >
+      <Pane title={t('graphql.tabs.query')} initialSize={0.5} minSize={150} collapsed={panelCollapsed.query} data-testid="graphql-query-pane">
         <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
           <CodeEditor
             height="100%"
@@ -255,7 +295,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
           />
         </div>
       </Pane>
-      <Pane title={t('graphql.tabs.variables')} initialSize={0.25} minSize={100} data-testid="graphql-variables-pane">
+      <Pane title={t('graphql.tabs.variables')} initialSize={0.25} minSize={100} collapsed={panelCollapsed.variables} data-testid="graphql-variables-pane">
         <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
           <CodeEditor
             height="100%"
@@ -271,7 +311,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         title={t('graphql.tabs.headers')}
         initialSize={0.25}
         minSize={100}
-        collapsed={request.headers.length === 0}
+        collapsed={panelCollapsed.headers}
         data-testid="graphql-headers-pane"
         headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
           <Button

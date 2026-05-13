@@ -33,10 +33,16 @@ import { DEFAULT_WS_TIMEOUT_MS } from '../../../../shared/config/constants'
 
 export interface WebSocketRequestTabViewProps {
   request: WebSocketRequest
+  /** See HTTPRequestTabView for the contract — opaque map of paneId
+   * (here: 'message' | 'headers') to its persisted collapsed state. */
+  initialPanelCollapsed?: Record<string, boolean>
+  onPanelCollapsedChange?: (map: Record<string, boolean>) => void
 }
 
 export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = ({
-  request
+  request,
+  initialPanelCollapsed,
+  onPanelCollapsedChange
 }) => {
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
@@ -55,6 +61,22 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<WebSocketResponse | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+
+  // See HTTPRequestTabView for the contract.
+  const [panelCollapsed, setPanelCollapsed] = useState<{ message: boolean; headers: boolean }>(() => {
+    const seed = initialPanelCollapsed ?? {}
+    return {
+      message: typeof seed['message'] === 'boolean' ? seed['message'] : false,
+      headers: typeof seed['headers'] === 'boolean' ? seed['headers'] : request.headers.length === 0
+    }
+  })
+  const onPanelCollapsedChangeRef = useRef(onPanelCollapsedChange)
+  useEffect(() => { onPanelCollapsedChangeRef.current = onPanelCollapsedChange }, [onPanelCollapsedChange])
+  const handlePanelCollapsedChange = useCallback((arr: boolean[]) => {
+    const next = { message: arr[0] ?? false, headers: arr[1] ?? false }
+    setPanelCollapsed(next)
+    onPanelCollapsedChangeRef.current?.(next)
+  }, [])
 
   const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
@@ -240,8 +262,13 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
 
   // Request content (SplitView with Message, Headers)
   const requestContent = (
-    <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }} data-testid="websocket-request-split-view">
-      <Pane title={t('websocket.tabs.message')} initialSize={0.7} minSize={150} data-testid="websocket-message-pane">
+    <SplitView
+      orientation="vertical"
+      style={{ width: '100%', height: '100%' }}
+      data-testid="websocket-request-split-view"
+      onCollapsedChange={handlePanelCollapsedChange}
+    >
+      <Pane title={t('websocket.tabs.message')} initialSize={0.7} minSize={150} collapsed={panelCollapsed.message} data-testid="websocket-message-pane">
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {(request.protocol === 'socketio' || request.protocol === 'mqtt') && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 4px' }}>
@@ -272,7 +299,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         title={t('websocket.tabs.headers')}
         initialSize={0.3}
         minSize={100}
-        collapsed={request.headers.length === 0}
+        collapsed={panelCollapsed.headers}
         data-testid="websocket-headers-pane"
         headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
           <Button

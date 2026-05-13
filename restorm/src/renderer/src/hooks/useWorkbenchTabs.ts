@@ -539,6 +539,28 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
       const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, requestItem.id)
       const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
 
+      // Round-trip the per-pane collapsed map for request tabs (HTTP /
+      // GraphQL / gRPC / SOAP / WebSocket / OData / Auth) — ECUI's
+      // workbench autosave hands us back whatever was on
+      // `EditorTab.persistedState` at save time. Restorm writes the
+      // map there each time the user toggles a pane in any request
+      // tab view; on file reopen we re-attach it so the matching
+      // RequestTabView reads it as initial state instead of computing
+      // the empty-section heuristic.
+      const persistedPanelCollapsed = (() => {
+        if (!data || typeof data !== 'object') return undefined
+        const map = (data as { panelCollapsed?: unknown }).panelCollapsed
+        if (!map || typeof map !== 'object') return undefined
+        const out: Record<string, boolean> = {}
+        for (const [k, v] of Object.entries(map)) {
+          if (typeof v === 'boolean') out[k] = v
+        }
+        return Object.keys(out).length > 0 ? out : undefined
+      })()
+      const persistedPersistedState = persistedPanelCollapsed !== undefined
+        ? { panelCollapsed: persistedPanelCollapsed }
+        : undefined
+
       if (isHTTPRequest(requestItem)) {
         return {
           id: tabId,
@@ -548,7 +570,9 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
           request: requestItem,
           breadcrumbs,
           environments,
-          allowFullscreen: true
+          allowFullscreen: true,
+          ...(persistedPanelCollapsed ? { panelCollapsed: persistedPanelCollapsed } : {}),
+          ...(persistedPersistedState ? { persistedState: persistedPersistedState } : {})
         } as HTTPRequestTab
       }
       if (isGraphQLRequest(requestItem)) {
@@ -560,7 +584,9 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
           request: requestItem,
           breadcrumbs,
           environments,
-          allowFullscreen: true
+          allowFullscreen: true,
+          ...(persistedPanelCollapsed ? { panelCollapsed: persistedPanelCollapsed } : {}),
+          ...(persistedPersistedState ? { persistedState: persistedPersistedState } : {})
         } as GraphQLRequestTab
       }
       if (isGrpcRequest(requestItem)) {
@@ -572,7 +598,9 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
           request: requestItem,
           breadcrumbs,
           environments,
-          allowFullscreen: true
+          allowFullscreen: true,
+          ...(persistedPanelCollapsed ? { panelCollapsed: persistedPanelCollapsed } : {}),
+          ...(persistedPersistedState ? { persistedState: persistedPersistedState } : {})
         } as GrpcRequestTab
       }
       if (isSoapRequest(requestItem)) {
@@ -584,7 +612,9 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
           request: requestItem,
           breadcrumbs,
           environments,
-          allowFullscreen: true
+          allowFullscreen: true,
+          ...(persistedPanelCollapsed ? { panelCollapsed: persistedPanelCollapsed } : {}),
+          ...(persistedPersistedState ? { persistedState: persistedPersistedState } : {})
         } as SoapRequestTab
       }
       if (isWebSocketRequest(requestItem)) {
@@ -596,7 +626,9 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
           request: requestItem,
           breadcrumbs,
           environments,
-          allowFullscreen: true
+          allowFullscreen: true,
+          ...(persistedPanelCollapsed ? { panelCollapsed: persistedPanelCollapsed } : {}),
+          ...(persistedPersistedState ? { persistedState: persistedPersistedState } : {})
         } as WebSocketRequestTab
       }
       if (isODataRequest(requestItem)) {
@@ -608,7 +640,9 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
           request: requestItem,
           breadcrumbs,
           environments,
-          allowFullscreen: true
+          allowFullscreen: true,
+          ...(persistedPanelCollapsed ? { panelCollapsed: persistedPanelCollapsed } : {}),
+          ...(persistedPersistedState ? { persistedState: persistedPersistedState } : {})
         } as ODataRequestTab
       }
       if (isAuthenticationRequest(requestItem)) {

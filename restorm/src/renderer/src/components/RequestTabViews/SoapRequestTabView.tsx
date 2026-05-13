@@ -34,10 +34,16 @@ import { toasterService } from 'electron-core-ui/renderer'
 
 export interface SoapRequestTabViewProps {
   request: SoapRequest
+  /** See HTTPRequestTabView for the contract — opaque map of paneId
+   * (here: 'body' | 'headers') to its persisted collapsed state. */
+  initialPanelCollapsed?: Record<string, boolean>
+  onPanelCollapsedChange?: (map: Record<string, boolean>) => void
 }
 
 export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
-  request
+  request,
+  initialPanelCollapsed,
+  onPanelCollapsedChange
 }) => {
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
@@ -55,6 +61,22 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<SoapResponse | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+
+  // See HTTPRequestTabView for the contract.
+  const [panelCollapsed, setPanelCollapsed] = useState<{ body: boolean; headers: boolean }>(() => {
+    const seed = initialPanelCollapsed ?? {}
+    return {
+      body: typeof seed['body'] === 'boolean' ? seed['body'] : false,
+      headers: typeof seed['headers'] === 'boolean' ? seed['headers'] : request.headers.length === 0
+    }
+  })
+  const onPanelCollapsedChangeRef = useRef(onPanelCollapsedChange)
+  useEffect(() => { onPanelCollapsedChangeRef.current = onPanelCollapsedChange }, [onPanelCollapsedChange])
+  const handlePanelCollapsedChange = useCallback((arr: boolean[]) => {
+    const next = { body: arr[0] ?? false, headers: arr[1] ?? false }
+    setPanelCollapsed(next)
+    onPanelCollapsedChangeRef.current?.(next)
+  }, [])
 
   const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
@@ -228,8 +250,13 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
   
   // Request content (SplitView with Body, Headers)
   const requestContent = (
-    <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }} data-testid="soap-request-split-view">
-      <Pane title={t('soap.tabs.body')} initialSize={0.7} minSize={150} data-testid="soap-request-body-pane">
+    <SplitView
+      orientation="vertical"
+      style={{ width: '100%', height: '100%' }}
+      data-testid="soap-request-split-view"
+      onCollapsedChange={handlePanelCollapsedChange}
+    >
+      <Pane title={t('soap.tabs.body')} initialSize={0.7} minSize={150} collapsed={panelCollapsed.body} data-testid="soap-request-body-pane">
         <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
           <CodeEditor
             height="100%"
@@ -245,7 +272,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
         title={t('soap.tabs.headers')}
         initialSize={0.3}
         minSize={100}
-        collapsed={request.headers.length === 0}
+        collapsed={panelCollapsed.headers}
         data-testid="soap-request-headers-pane"
         headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
           <Button

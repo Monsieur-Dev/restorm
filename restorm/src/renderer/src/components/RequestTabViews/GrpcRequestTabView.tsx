@@ -31,10 +31,16 @@ import { findOperationForRoute } from '../../../../shared/utils/findOperationFor
 
 export interface GrpcRequestTabViewProps {
   request: GrpcRequest
+  /** See HTTPRequestTabView for the contract — opaque map of paneId
+   * (here: 'message' | 'metadata') to its persisted collapsed state. */
+  initialPanelCollapsed?: Record<string, boolean>
+  onPanelCollapsedChange?: (map: Record<string, boolean>) => void
 }
 
 export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
-  request
+  request,
+  initialPanelCollapsed,
+  onPanelCollapsedChange
 }) => {
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
@@ -52,6 +58,22 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<GrpcResponse | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+
+  // See HTTPRequestTabView for the contract.
+  const [panelCollapsed, setPanelCollapsed] = useState<{ message: boolean; metadata: boolean }>(() => {
+    const seed = initialPanelCollapsed ?? {}
+    return {
+      message: typeof seed['message'] === 'boolean' ? seed['message'] : false,
+      metadata: typeof seed['metadata'] === 'boolean' ? seed['metadata'] : request.metadata.length === 0
+    }
+  })
+  const onPanelCollapsedChangeRef = useRef(onPanelCollapsedChange)
+  useEffect(() => { onPanelCollapsedChangeRef.current = onPanelCollapsedChange }, [onPanelCollapsedChange])
+  const handlePanelCollapsedChange = useCallback((arr: boolean[]) => {
+    const next = { message: arr[0] ?? false, metadata: arr[1] ?? false }
+    setPanelCollapsed(next)
+    onPanelCollapsedChangeRef.current?.(next)
+  }, [])
 
   const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
@@ -224,8 +246,13 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
 
   // Request content (SplitView with Message, Metadata)
   const requestContent = (
-    <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }} data-testid="grpc-request-content-splitview">
-      <Pane title={t('grpc.tabs.message')} initialSize={0.7} minSize={150} data-testid="grpc-message-pane">
+    <SplitView
+      orientation="vertical"
+      style={{ width: '100%', height: '100%' }}
+      data-testid="grpc-request-content-splitview"
+      onCollapsedChange={handlePanelCollapsedChange}
+    >
+      <Pane title={t('grpc.tabs.message')} initialSize={0.7} minSize={150} collapsed={panelCollapsed.message} data-testid="grpc-message-pane">
         <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
           <CodeEditor
             height="100%"
@@ -241,7 +268,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
         title={t('grpc.tabs.metadata')}
         initialSize={0.3}
         minSize={100}
-        collapsed={request.metadata.length === 0}
+        collapsed={panelCollapsed.metadata}
         data-testid="grpc-metadata-pane"
         headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
           <Button

@@ -52,6 +52,22 @@ export interface HTTPRequestTabViewProps {
    * every HTTP field but adds a Configuration tab surfaced via
    * `additionalRequestTabs`. */
   request: HTTPRequest | AuthenticationRequest
+  /**
+   * Optional seed for the per-pane collapsed state. When provided
+   * (typically by the workbench from `EditorTab.panelCollapsed`,
+   * which is round-tripped via `EditorTab.persistedState` on
+   * file save/reopen), the initial state of every Pane comes from
+   * this map; otherwise the per-section heuristic runs. Either way,
+   * once the user toggles a pane the local state takes over.
+   */
+  initialPanelCollapsed?: Record<string, boolean>
+  /**
+   * Fired with the full collapsed map whenever the user toggles any
+   * pane. Wired by the workbench to persist the value back onto the
+   * tab so it survives both response-panel mount/unmount AND a full
+   * file reopen.
+   */
+  onPanelCollapsedChange?: (map: Record<string, boolean>) => void
 }
 
 function buildRequestBodyFromHistory(body: { type: string; content?: string; path?: string; fields?: { key: string; value: string; enabled?: boolean }[] } | undefined): HTTPResponse['requestBody'] {
@@ -102,7 +118,9 @@ function getBodyFilePath(request: HTTPRequest | AuthenticationRequest): string {
 }
 
 export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
-  request
+  request,
+  initialPanelCollapsed,
+  onPanelCollapsedChange
 }) => {
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
@@ -167,26 +185,41 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   // (collapsed when the corresponding section has no rows) but are
   // only evaluated ONCE on mount. After that the user's toggle wins
   // even if they later add a row.
+  // Initial state: user's persisted value wins per pane, then fall
+  // back to the empty-section heuristic. We snapshot `initialPanelCollapsed`
+  // once (lazy useState initializer) so later prop changes don't blow
+  // away in-flight local toggles — same contract as the SplitView's
+  // legacy uncontrolled `collapsed` prop.
   const [panelCollapsed, setPanelCollapsed] = useState<{
     headers: boolean
     pathParams: boolean
     params: boolean
     body: boolean
-  }>(() => ({
-    headers: request.headers.length === 0,
-    pathParams: (request.pathParams?.length ?? 0) === 0,
-    params: request.params.length === 0,
-    body: false
-  }))
+  }>(() => {
+    const seed = initialPanelCollapsed ?? {}
+    return {
+      headers: typeof seed['headers'] === 'boolean' ? seed['headers'] : request.headers.length === 0,
+      pathParams: typeof seed['pathParams'] === 'boolean' ? seed['pathParams'] : (request.pathParams?.length ?? 0) === 0,
+      params: typeof seed['params'] === 'boolean' ? seed['params'] : request.params.length === 0,
+      body: typeof seed['body'] === 'boolean' ? seed['body'] : false
+    }
+  })
+  const onPanelCollapsedChangeRef = useRef(onPanelCollapsedChange)
+  useEffect(() => { onPanelCollapsedChangeRef.current = onPanelCollapsedChange }, [onPanelCollapsedChange])
   const handlePanelCollapsedChange = useCallback((arr: boolean[]) => {
     // SplitView fires this with the array in pane render order:
     // headers, pathParams, params, body.
-    setPanelCollapsed({
+    const next = {
       headers: arr[0] ?? false,
       pathParams: arr[1] ?? false,
       params: arr[2] ?? false,
       body: arr[3] ?? false
-    })
+    }
+    setPanelCollapsed(next)
+    // Mirror up to the workbench tab so the value persists across
+    // SplitView remounts (response panel toggle) AND a full file
+    // close+reopen via ECUI's `EditorTab.persistedState`.
+    onPanelCollapsedChangeRef.current?.(next)
   }, [])
 
   const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
