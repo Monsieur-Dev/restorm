@@ -5,7 +5,7 @@ import { useSetting } from '../../hooks/useSettings';
 import type { EditorGroup, EditorWorkbenchCallbacks, SplitDirection } from './types';
 import { getEditorDragData, isEditorDragEvent } from './dnd';
 import { getTabTitleString } from './utils';
-import { useWorkbenchResize, computeTabDisplay } from './WorkbenchResizeContext';
+import { useIsWorkbenchResizing, computeTabDisplay } from './WorkbenchResizeContext';
 
 /**
  * Hard-memoised slot for cached tab content. `tabContentCache` already
@@ -48,8 +48,9 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 	// Hide every tab body — including the active one — while a sash is
 	// being dragged. Heavy embeds (Monaco, Electron `<webview>`,
 	// ResizeObserver-driven charts) otherwise relayout on every
-	// mousemove and visibly lag the drag.
-	const { isResizing } = useWorkbenchResize();
+	// mousemove and visibly lag the drag. Module-level signal (not
+	// React Context) — see WorkbenchResizeContext.tsx for why.
+	const isResizing = useIsWorkbenchResizing();
 
 	// Cache rendered tab contents — render each tab only once, then reuse.
 	// This prevents React from unmounting/remounting heavy components (Monaco editors, etc.)
