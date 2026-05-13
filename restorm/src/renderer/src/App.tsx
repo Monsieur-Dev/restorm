@@ -1835,6 +1835,21 @@ const App: React.FC = () => {
       })
     }
 
+    // Workbench-tab cache invalidation on env changes. Every request
+    // tab's `EnvironmentProvider` reads `liveEnvironments` off the
+    // reactive env-folder at render time, but the cached React element
+    // captures that array reference. Without invalidation, a newly-
+    // created env (Forgeaude in the original repro) never reaches the
+    // request tab's `setAvailableEnvironments` IPC even though the env
+    // exists in ContextService, and `{{name}}` resolves to empty on
+    // dispatch. Bumping every tab's contentVersion forces the cached
+    // tab content to regenerate with the live env list — React still
+    // reconciles same-type components in place so useState (incl. the
+    // panelCollapsed map landed in eb56963a) survives.
+    const handleEnvStructureChanged = (): void => {
+      bumpAllTabContentVersionsRef.current()
+    }
+
     const subscriptions = [
       eventBus.subscribe(DocumentEvents.FOLDER_UPDATED, handleFolderOrRequestUpdated),
       eventBus.subscribe(DocumentEvents.REQUEST_UPDATED, handleFolderOrRequestUpdated),
@@ -1847,7 +1862,12 @@ const App: React.FC = () => {
       eventBus.subscribe(DocumentEvents.ENVIRONMENT_CREATED, handleUpsertImmediate),
       eventBus.subscribe(DocumentEvents.FOLDER_DELETED, handleDelete),
       eventBus.subscribe(DocumentEvents.REQUEST_DELETED, handleDelete),
-      eventBus.subscribe(DocumentEvents.ENVIRONMENT_DELETED, handleDelete)
+      eventBus.subscribe(DocumentEvents.ENVIRONMENT_DELETED, handleDelete),
+      // Bump tab contentVersion so request tabs re-derive their live
+      // env list when the env tree mutates — see comment above.
+      eventBus.subscribe(DocumentEvents.ENVIRONMENT_CREATED, handleEnvStructureChanged),
+      eventBus.subscribe(DocumentEvents.ENVIRONMENT_UPDATED, handleEnvStructureChanged),
+      eventBus.subscribe(DocumentEvents.ENVIRONMENT_DELETED, handleEnvStructureChanged)
     ]
 
     const timersMap = dirtyChecksumTimersRef.current
