@@ -154,6 +154,41 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   const [httpResponse, setHttpResponse] = useState<HTTPResponse | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
 
+  // Lift the SplitView's per-pane collapsed state up into
+  // HTTPRequestTabView so it survives the SplitView's remount when
+  // `BaseRequestTabView` swaps `<div>` for `<VerticalSashContainer>`
+  // on first-response (and vice-versa). Each Pane is rendered with
+  // `collapsed={panelCollapsed[paneId]}`, which puts the SplitView
+  // in fully-controlled mode (see ECUI `collapsedLogic.ts`) — every
+  // toggle round-trips through this state, every remount re-hydrates
+  // from it.
+  //
+  // The initial values mirror the previous render-time heuristic
+  // (collapsed when the corresponding section has no rows) but are
+  // only evaluated ONCE on mount. After that the user's toggle wins
+  // even if they later add a row.
+  const [panelCollapsed, setPanelCollapsed] = useState<{
+    headers: boolean
+    pathParams: boolean
+    params: boolean
+    body: boolean
+  }>(() => ({
+    headers: request.headers.length === 0,
+    pathParams: (request.pathParams?.length ?? 0) === 0,
+    params: request.params.length === 0,
+    body: false
+  }))
+  const handlePanelCollapsedChange = useCallback((arr: boolean[]) => {
+    // SplitView fires this with the array in pane render order:
+    // headers, pathParams, params, body.
+    setPanelCollapsed({
+      headers: arr[0] ?? false,
+      pathParams: arr[1] ?? false,
+      params: arr[2] ?? false,
+      body: arr[3] ?? false
+    })
+  }, [])
+
   const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
   // Backend-provided resolved URL and code snippets
@@ -715,13 +750,22 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       })
   }, [request.id])
 
-  // Request content (SplitView with Panes)
+  // Request content (SplitView with Panes). Every Pane provides an
+  // explicit `collapsed` from `panelCollapsed` → SplitView runs in
+  // controlled mode (see ECUI `collapsedLogic.ts`). `onCollapsedChange`
+  // updates HTTPRequestTabView's state, which survives the SplitView
+  // remount that happens when the response panel toggles.
   const requestContent = (
-    <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }} data-testid="http-request-split-view">
+    <SplitView
+      orientation="vertical"
+      style={{ width: '100%', height: '100%' }}
+      data-testid="http-request-split-view"
+      onCollapsedChange={handlePanelCollapsedChange}
+    >
       <Pane
         title={t('requestTab.tabs.headers')}
         initialSize={0.2}
-        collapsed={request.headers.length === 0}
+        collapsed={panelCollapsed.headers}
         minSize={150}
         data-testid="http-request-headers-pane"
         headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
@@ -752,7 +796,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       <Pane
         title={t('requestTab.tabs.pathParams')}
         initialSize={0.2}
-        collapsed={(request.pathParams?.length ?? 0) === 0}
+        collapsed={panelCollapsed.pathParams}
         minSize={150}
         data-testid="http-request-path-params-pane"
         headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
@@ -786,7 +830,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       <Pane
         title={t('requestTab.tabs.params')}
         initialSize={0.2}
-        collapsed={request.params.length === 0}
+        collapsed={panelCollapsed.params}
         minSize={150}
         data-testid="http-request-params-pane"
         headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
@@ -817,7 +861,12 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           data-testid="http-request-query-params-table"
         />
       </Pane>
-      <Pane title={t('requestTab.tabs.body')} initialSize={0.4} data-testid="http-request-body-pane">
+      <Pane
+        title={t('requestTab.tabs.body')}
+        initialSize={0.4}
+        collapsed={panelCollapsed.body}
+        data-testid="http-request-body-pane"
+      >
         <HTTPRequestBodySection
           bodyMode={bodyMode}
           onBodyModeChange={setBodyMode}
