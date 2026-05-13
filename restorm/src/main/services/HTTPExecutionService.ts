@@ -10,6 +10,7 @@ import { BrowserWindow } from 'electron'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
 import { authenticationCacheService, type ResolvedAuthShape } from './AuthenticationCacheService'
+import { withFirewallBypass } from './firewall/firewallBypass'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../shared/config/constants'
 import type { AuthenticationRequest } from '../../shared/models/requests/AuthenticationRequest'
 
@@ -372,7 +373,15 @@ class HTTPExecutionService {
     timeout: number
     signal: AbortSignal
   }): Promise<{ statusCode: number; statusText: string; headers: Record<string, string | string[]>; body: string }> {
-    return new Promise((resolve, reject) => {
+    // The Send-button dispatch is by definition a user-initiated
+    // outbound — same trust tier as a URL pasted into Import or typed
+    // into the mini-browser. Wrap the actual http.request call inside
+    // `withFirewallBypass` so the firewall interceptor short-circuits
+    // to `allow` instead of either popping a duplicate prompt the user
+    // already answered by clicking Send, or (worse) hanging silently
+    // on a non-whitelisted origin like `httpbin.org` because the
+    // main-process intercept path can't surface a toast.
+    return withFirewallBypass(() => new Promise((resolve, reject) => {
       const { url, method, headers, body, timeout, signal } = options
       
       const isHttps = url.protocol === 'https:'
@@ -444,7 +453,7 @@ class HTTPExecutionService {
       }
 
       request.end()
-    })
+    }))
   }
 
   /**
