@@ -71,6 +71,44 @@ colors:
     value: "#767676"
     description: Input placeholder foreground
 
+  # Input validation states — used by form fields when a field is in
+  # error / warning / info state. VS Code Light+ defaults.
+  - id: inputValidation.errorBackground
+    value: "#FDE7E7"
+    description: Input validation error background (pale red)
+
+  - id: inputValidation.errorBorder
+    value: "#BE1100"
+    description: Input validation error border
+
+  - id: inputValidation.errorForeground
+    value: "#A1260D"
+    description: Input validation error foreground
+
+  - id: inputValidation.warningBackground
+    value: "#FFFCE5"
+    description: Input validation warning background (pale yellow)
+
+  - id: inputValidation.warningBorder
+    value: "#B89500"
+    description: Input validation warning border
+
+  - id: inputValidation.warningForeground
+    value: "#7A6307"
+    description: Input validation warning foreground
+
+  - id: inputValidation.infoBackground
+    value: "#E1F0FF"
+    description: Input validation info background (pale blue)
+
+  - id: inputValidation.infoBorder
+    value: "#007ACC"
+    description: Input validation info border
+
+  - id: inputValidation.infoForeground
+    value: "#316BCD"
+    description: Input validation info foreground
+
   # Toggle / input option active styles (used by checkbox/toggle)
   - id: inputOption.activeBackground
     value: "#BED6ED"
@@ -156,6 +194,10 @@ colors:
   - id: list.focusAndSelectionOutline
     value: "#90C2F9"
     description: List focus and selection outline
+
+  - id: list.dropBackground
+    value: "#D6EBFF"
+    description: List drop target background (drag-and-drop preview)
 
   # Button colors
   - id: button.background
@@ -247,6 +289,10 @@ colors:
     value: "#333333"
     description: Active tab foreground
 
+  - id: tab.activeTextColor
+    value: "#333333"
+    description: Active tab text color (used by tab strips that distinguish the text color from the foreground token)
+
   - id: tab.activeBorder
     value: "#0078d4"
     description: Active tab border
@@ -280,6 +326,22 @@ colors:
     description: Border color used when dragging tabs
 
   # Menu colors
+  - id: menu.background
+    value: "#ffffff"
+    description: Menu background (matches editor surface on light themes — without this the menu is transparent and the workbench bleeds through)
+
+  - id: menu.foreground
+    value: "#3B3B3B"
+    description: Menu foreground (matches the global `foreground` token)
+
+  - id: menu.selectionBackground
+    value: "#0090F1"
+    description: Menu item hover/selection background (VS Code Light+ accent)
+
+  - id: menu.separatorBackground
+    value: "#D4D4D4"
+    description: Divider lines between menu sections
+
   - id: menu.border
     value: "#D4D4D4"
     description: Menu border
@@ -362,6 +424,10 @@ colors:
   - id: widget.border
     value: "#d4d4d4"
     description: Widget border
+
+  - id: window.border
+    value: "#C8C8C8"
+    description: Native-window border color (used by the title bar / drag region)
 
   # Panels
   - id: panel.border
