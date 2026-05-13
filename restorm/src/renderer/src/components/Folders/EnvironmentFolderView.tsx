@@ -640,6 +640,9 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
                     helpers={handlebarsHelpers}
                     initialRows={reactiveSelectedEnvironment?.variables ?? []}
                     onRowsChange={handleEnvironmentVariablesChange}
+                    {...(folder.enumDefinitions && folder.enumDefinitions.length > 0
+                      ? { enumDefinitions: folder.enumDefinitions }
+                      : {})}
                     persistenceId={`env-folder-vars:${folder.id}`}
                     data-testid="environment-folder-variables-table"
                   />

@@ -1,9 +1,10 @@
-import React, { useEffect, useImperativeHandle, useState } from 'react'
+import React, { useEffect, useImperativeHandle, useRef, useState } from 'react'
 import {
   ReactFlow,
   ReactFlowProvider,
   Controls,
   useReactFlow,
+  useStore,
   type Edge,
   type EdgeTypes,
   type Node,
@@ -32,6 +33,12 @@ export interface ModelGraphProps {
 
 const NODE_TYPES: NodeTypes = { umlClass: ModelNode }
 const EDGE_TYPES: EdgeTypes = { modelEdge: ModelEdge }
+// Padding the auto-fit shares with the Fit View Controls button so
+// the very first display matches what the user gets when they
+// click Fit View afterwards. Anything else produces a visible
+// "snap" the first time the user reaches for the button.
+const FIT_VIEW_PADDING = 0.1
+const FIT_VIEW_OPTIONS = { padding: FIT_VIEW_PADDING } as const
 
 /**
  * UML-style class diagram of every model the documentation host
@@ -63,7 +70,37 @@ const ModelGraphCanvas: React.FC<{
   const [nodes, setNodes] = useState<Node[]>([])
   const [edges, setEdges] = useState<Edge[]>([])
   const [layoutReady, setLayoutReady] = useState(false)
+  const [fitViewGeneration, setFitViewGeneration] = useState(0)
   const { fitView, setCenter, getNode } = useReactFlow()
+  // The graph mounts inside a workbench tab body that the parent
+  // toggles between `display: none` and visible. While the tab is
+  // hidden the wrapper measures 0x0, so a `fitView()` call there
+  // would compute a degenerate viewport. Subscribing to the
+  // store-tracked viewport size lets us defer the fit until the
+  // canvas has its real dimensions — and re-fit the very first
+  // time it transitions from 0x0 to something positive.
+  const viewportWidth = useStore((s) => s.width)
+  const viewportHeight = useStore((s) => s.height)
+  // xyflow's `useNodesInitialized()` reads `s.nodesInitialized`,
+  // a flag that's only updated when `setNodes` is called — it
+  // captures whether nodes had `measured.{width,height}` at that
+  // moment, and is never refreshed once the ResizeObserver fills
+  // those fields in. Inside a tab that mounts hidden, `setNodes`
+  // always runs before measurement → the flag stays false forever
+  // and our auto-fit never fires. Walk the live lookup ourselves
+  // so we observe the real measured state on every store wake.
+  const nodesReady = useStore((s) => {
+    if (s.nodeLookup.size === 0) return false
+    for (const [, n] of s.nodeLookup) {
+      if (!n.measured.width || !n.measured.height) return false
+    }
+    return true
+  })
+  // Each laid-out generation gets at most one auto-fit (once the
+  // viewport is actually sized). Without this latch, the effect
+  // would re-fire on every container resize and reset whatever pan
+  // / zoom the user has manually applied since the last layout.
+  const fittedGenerationRef = useRef<number>(-1)
 
   useEffect(() => {
     let cancelled = false
@@ -72,17 +109,31 @@ const ModelGraphCanvas: React.FC<{
       setNodes(result.nodes)
       setEdges(result.edges)
       setLayoutReady(true)
-      // Defer the fit-view until after React commits the new
-      // node positions; without the rAF the call runs before
-      // React Flow has measured the freshly-laid-out nodes.
-      requestAnimationFrame(() => {
-        void fitView({ padding: 0.2 })
-      })
+      setFitViewGeneration((n) => n + 1)
     })
     return (): void => {
       cancelled = true
     }
-  }, [models, fitView])
+  }, [models])
+
+  // Call fitView twice — back-to-back — because xyflow's first
+  // fitView after a fresh layout reads a slightly stale bounding
+  // box (the previous viewport transform leaks into the rendered
+  // node rects it samples), so the user sees a different result
+  // on the *second* press of the Fit View button. The second
+  // call within the same micro-task forces convergence on the
+  // intended target, so clicking the Fit View button later is a
+  // no-op rather than a visible snap.
+  useEffect(() => {
+    if (!nodesReady) return
+    if (nodes.length === 0) return
+    if (viewportWidth <= 0 || viewportHeight <= 0) return
+    if (fittedGenerationRef.current === fitViewGeneration) return
+    fittedGenerationRef.current = fitViewGeneration
+    void fitView(FIT_VIEW_OPTIONS).then(() => {
+      void fitView(FIT_VIEW_OPTIONS)
+    })
+  }, [nodesReady, fitViewGeneration, nodes.length, viewportWidth, viewportHeight, fitView])
 
   // Expose a `focusModel(name)` API so cross-references in the
   // operation cards / sidebar can pan + zoom the canvas to the
@@ -107,6 +158,10 @@ const ModelGraphCanvas: React.FC<{
       nodeTypes={NODE_TYPES}
       edgeTypes={EDGE_TYPES}
       proOptions={{ hideAttribution: true }}
+      // Share the fit-view options with the auto-fit so the
+      // Controls button reproduces the same framing the user
+      // sees on initial load.
+      fitViewOptions={FIT_VIEW_OPTIONS}
       minZoom={0.2}
       maxZoom={2}
       // Wheel passes through to the page so the documentation
