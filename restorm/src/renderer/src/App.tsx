@@ -1108,6 +1108,7 @@ const App: React.FC = () => {
     enabled: mcpEnabled,
     rootItems,
     setExpandedIds,
+    setSelectedItemId,
     openFolderTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
