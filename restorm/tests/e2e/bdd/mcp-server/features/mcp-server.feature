@@ -11,7 +11,8 @@ Feature: MCP server end-to-end
     When I send the MCP tools-list request
     Then the MCP tool list should include "run_request"
     And the MCP tool list should include "cancel_request"
-    And the MCP tool list should include "run_batch"
+    And the MCP tool list should include "run_request_batch"
+    And the MCP tool list should include "batch"
     And the MCP tool list should include "read_stream"
     And the MCP tool list should include "get_response_history"
     And the MCP tool list should include "get_response"

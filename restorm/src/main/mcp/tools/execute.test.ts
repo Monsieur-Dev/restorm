@@ -345,10 +345,10 @@ describe('execute tools — cancel_request', () => {
 })
 
 // ---------------------------------------------------------------------------
-// run_batch — order preservation, partial-on-unknown, mixed protocols
+// run_request_batch — order preservation, partial-on-unknown, mixed protocols
 // ---------------------------------------------------------------------------
 
-describe('execute tools — run_batch', () => {
+describe('execute tools — run_request_batch', () => {
   it('runs requests sequentially and preserves input order', async () => {
     vi.useFakeTimers()
     const reqs: Record<string, unknown> = {
@@ -367,7 +367,7 @@ describe('execute tools — run_batch', () => {
 
     const mcp = new FakeMcpService()
     registerExecutionTools(mcp as unknown as McpService)
-    const promise = mcp.invoke('run_batch', { ids: ['a', 'b', 'c'] }) as Promise<unknown>
+    const promise = mcp.invoke('run_request_batch', { ids: ['a', 'b', 'c'] }) as Promise<unknown>
     // 3 requests × (400ms tab + 200ms poll)
     await vi.advanceTimersByTimeAsync(3_000)
     const { payload } = parseReply(await promise) as { payload: { ranCount: number; results: { requestId: string }[] } }
@@ -386,7 +386,7 @@ describe('execute tools — run_batch', () => {
 
     const mcp = new FakeMcpService()
     registerExecutionTools(mcp as unknown as McpService)
-    const promise = mcp.invoke('run_batch', { ids: ['a', 'ghost', 'c'] }) as Promise<unknown>
+    const promise = mcp.invoke('run_request_batch', { ids: ['a', 'ghost', 'c'] }) as Promise<unknown>
     await vi.advanceTimersByTimeAsync(1_000)
     const { payload } = parseReply(await promise) as { payload: { ranCount: number; requestedCount: number; error?: { code: string } } }
     expect(payload.ranCount).toBe(1)
@@ -397,7 +397,7 @@ describe('execute tools — run_batch', () => {
   it('rejects an empty array', async () => {
     const mcp = new FakeMcpService()
     registerExecutionTools(mcp as unknown as McpService)
-    const { isError } = parseReply(await mcp.invoke('run_batch', { ids: [] }))
+    const { isError } = parseReply(await mcp.invoke('run_request_batch', { ids: [] }))
     expect(isError).toBe(true)
   })
 })

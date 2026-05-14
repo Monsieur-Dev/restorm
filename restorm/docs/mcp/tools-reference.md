@@ -91,7 +91,7 @@ I/O tools — the AI can ping endpoints and read responses.
 |---|---|
 | `run_request` | Execute a request and return the structured response. Unary protocols (HTTP / OData / GraphQL / SOAP / gRPC) return `{ status, statusText, headers, body, durationMs, protocol, error? }` with JSON bodies parsed in-place. Streaming (WebSocket) returns the first frames + a `continuationToken`. |
 | `cancel_request` | Abort the in-flight execution. Routes to the matching execution service per protocol. Safe to call when nothing is in flight (returns `cancelled: false`). |
-| `run_batch` | Sequential `run_request` over an array of ids. Preserves input order, partial-on-unknown (returns the partial array + an error envelope). |
+| `run_request_batch` | Sequential `run_request` over an array of ids. Preserves input order, partial-on-unknown (returns the partial array + an error envelope). Not to be confused with the generic [`batch`](#batch) tool. |
 | `read_stream` | Pull more frames from a streaming request started by `run_request`. Pass the `continuationToken`; returns the next slice + a fresh token. `done: true` when the connection closed. `cursorReset: true` if the buffer was rebuilt mid-session and the cursor overshot. |
 | `get_response_history` | Lightweight summary of stored responses for a request: `[{ guid, requestId, status, durationMs, executedAt, protocol, pinned }]`. |
 | `get_response` | Full payload of a stored response. Already redacted by `ResponseHistoryService` when the project's "redact secrets" setting is on (default on). |

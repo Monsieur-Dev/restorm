@@ -126,6 +126,14 @@ mcp.registerResource(
 
 The handler can be sync or async; both branches are funneled through the same finalization. `mimeType` resolution order: handler return value → resource config → `application/json` default for text payloads (no default for blob payloads — set `mimeType` explicitly when you mean binary).
 
+### `invokeTool(name, args, extra?)`
+
+Invokes a registered tool by name from inside the host process, returning whatever the tool's handler returns (sync value or `Promise`). Throws if `name` is not registered. Used by the built-in `batch` tool to chain calls without a round-trip through the HTTP transport; consuming apps can also use it to compose tools.
+
+```typescript
+const result = await Promise.resolve(mcp.invokeTool('screenshot', {}))
+```
+
 ## Built-in tools
 
 ### `screenshot`
@@ -351,6 +359,47 @@ Appends a `<style>` tag with arbitrary CSS rules. Useful to debug hover/focus/ac
 ### `wait`
 
 Block for `ms` milliseconds. Use only when nothing else fits — prefer `wait-for` (DOM condition) or `refresh` (waits for `did-finish-load`). Capped at 30000 ms.
+
+### `batch`
+
+Chains multiple MCP tool calls into a single request. Runs each step in order; the next step only fires after the previous one resolves **and** the renderer has had an implicit "1 frame + 1 microtask" settle (override per step with `waitFor`, or skip globally via `skipImplicitSettle`). Aborts on the first step that throws or returns `isError: true` — subsequent steps are skipped.
+
+```jsonc
+{
+  "steps": [
+    { "name": "dispatch-event", "args": { "selector": ".open-btn", "type": "click" },
+      "waitFor": { "selector": ".modal" } },
+    { "name": "screenshot" }
+  ],
+  "windowId": 1,              // optional — window for the implicit settle frame-tick
+  "skipImplicitSettle": false // optional — drop the inter-step settle
+}
+```
+
+Per-step `waitFor` overrides the implicit settle. Pick one shape:
+
+| shape | meaning |
+| --- | --- |
+| `{ ms }` | Fixed delay in ms |
+| `{ selector, timeoutMs?, pollMs? }` | Poll until at least one element matches `selector` |
+| `{ predicate, timeoutMs?, pollMs? }` | Poll until the JS expression evaluates truthy in the renderer |
+
+`timeoutMs` defaults to 5000 (a timed-out / throwing `waitFor` aborts the batch). The response aggregates every step's `content` parts in order — embedded images / resources reach the client inline — followed by a final text part with the structured envelope:
+
+```jsonc
+{
+  "ranCount": 2,
+  "totalCount": 2,
+  "aborted": false,
+  "abortedAt": null,
+  "results": [
+    { "index": 0, "name": "dispatch-event", "ok": true },
+    { "index": 1, "name": "screenshot", "ok": true }
+  ]
+}
+```
+
+When a step is `screencast-stop`, the recorded `.webm` is read from disk and inlined as a `resource` content part (base64 `blob` + `video/webm` `mimeType`), so a `screencast-start → actions → screencast-stop` chain returns the video bytes without a follow-up file read. Not to be confused with consuming-app tools like restorm's `run_request_batch`, which batches HTTP / protocol requests.
 
 ### `get-windows`
 

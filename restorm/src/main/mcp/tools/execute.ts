@@ -78,7 +78,7 @@ async function maybeTruncateBody(shaped: unknown): Promise<unknown> {
   const requestId = typeof obj.requestId === 'string' ? obj.requestId : 'request'
   const safeId = requestId.replace(/[^A-Za-z0-9._-]/g, '_').slice(0, 64)
   // Add a random suffix on top of `Date.now()` so two truncations of
-  // the same requestId in the same millisecond (run_batch, racing
+  // the same requestId in the same millisecond (run_request_batch, racing
   // retries) don't clobber each other's spill files.
   const suffix = Math.random().toString(36).slice(2, 10)
   const fileName = `restorm-mcp-body-${safeId}-${Date.now()}-${suffix}.json`
@@ -582,7 +582,7 @@ export function registerExecutionTools(mcp: McpService): void {
   )
 
   mcp.registerTool(
-    'run_batch',
+    'run_request_batch',
     {
       title: 'Run a list of requests sequentially',
       description:
@@ -590,7 +590,8 @@ export function registerExecutionTools(mcp: McpService): void {
         'a time, in input order, and returns the array of results in the same order. Stops ' +
         'early on an unknown id (returns the partial array + an `error` field). Distinct from ' +
         'OData `$batch` (which has its own semantics and is invoked via a single `odata-batch` ' +
-        'request).',
+        'request). Not to be confused with the generic `batch` tool which chains arbitrary MCP ' +
+        'tool calls.',
       inputSchema: {
         ids: z.array(z.string().min(1)).min(1).describe('Ordered list of request ids to run.'),
         timeoutMs: z.coerce.number().int().min(500).max(120_000).optional().describe(
@@ -632,7 +633,7 @@ export function registerExecutionTools(mcp: McpService): void {
             result = await runStreamingWebsocketRequest(req, 2_000)
             break
           default:
-            result = { error: { code: 'UNKNOWN_PROTOCOL', message: `protocol "${(req as { type?: string }).type ?? '?'}" not supported by run_batch` } }
+            result = { error: { code: 'UNKNOWN_PROTOCOL', message: `protocol "${(req as { type?: string }).type ?? '?'}" not supported by run_request_batch` } }
         }
         results.push(result)
       }

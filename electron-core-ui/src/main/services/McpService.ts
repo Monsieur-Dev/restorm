@@ -1,7 +1,7 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http'
 import { timingSafeEqual } from 'node:crypto'
 import { AsyncLocalStorage } from 'node:async_hooks'
-import { writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join as pathJoin } from 'node:path'
 import { app, BrowserWindow, dialog as electronDialog } from 'electron'
@@ -378,6 +378,19 @@ export class McpService {
       throw new Error(`McpService.registerTool: tool "${name}" already registered`)
     }
     this.tools.push({ name, config, handler })
+  }
+
+  /**
+   * Invoke a registered tool by name from inside the host process. The
+   * built-in `batch` tool uses this to chain calls without going back
+   * out through the HTTP transport. Throws if the tool is unknown.
+   */
+  invokeTool(name: string, args: Record<string, unknown>, extra: unknown = {}): unknown {
+    const entry = this.tools.find((t) => t.name === name)
+    if (!entry) {
+      throw new Error(`McpService.invokeTool: tool "${name}" is not registered`)
+    }
+    return entry.handler(args, extra)
   }
 
   /**
@@ -1493,6 +1506,157 @@ export class McpService {
         return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] }
       }
     )
+
+    this.registerTool(
+      'batch',
+      {
+        title: 'Chain MCP tool calls in one request',
+        description:
+          'Run a sequence of MCP tool calls in order, with an implicit "1 frame + 1 microtask" ' +
+          'settle in the renderer between each step (override per step with `waitFor`, or skip ' +
+          'globally via `skipImplicitSettle`). Aborts on the first step that throws or returns ' +
+          '`isError: true`; subsequent steps are skipped. The response aggregates every step\'s ' +
+          '`content` parts in order (so embedded images / resources reach the client inline) plus ' +
+          'a final text part with the structured envelope `{ ranCount, totalCount, aborted, ' +
+          'abortedAt, results }`. When a step is `screencast-stop`, the recorded `.webm` is read ' +
+          'from disk and inlined as a `resource` content part so the caller gets the video bytes ' +
+          'without a follow-up file read. Use to package `click → wait-for → screenshot` or ' +
+          '`screencast-start → actions → screencast-stop` into one round-trip. Not to be confused ' +
+          'with `run_request_batch`, which runs HTTP / protocol requests.',
+        inputSchema: {
+          steps: z.array(z.object({
+            name: z.string().min(1).describe('Registered MCP tool name to invoke.'),
+            args: z.record(z.string(), z.unknown()).optional().describe('Arguments forwarded to the tool. Defaults to `{}`.'),
+            waitFor: z.object({
+              ms: z.coerce.number().int().min(0).max(60_000).optional().describe('Fixed delay in ms.'),
+              selector: z.string().optional().describe('CSS selector to wait for. Resolves once at least one match exists.'),
+              predicate: z.string().optional().describe('JavaScript expression evaluated in the renderer. Resolves when it returns truthy.'),
+              timeoutMs: z.coerce.number().int().min(50).max(60_000).optional().describe('Max wait when polling `selector` / `predicate`. Default 5000.'),
+              pollMs: z.coerce.number().int().min(20).max(2000).optional().describe('Poll interval when watching `selector` / `predicate`. Default 100.')
+            }).optional().describe(
+              'Overrides the implicit "1 frame + 1 microtask" settle after this step. Pick one ' +
+              'shape: `ms` for a fixed delay, `selector` to wait for an element to be present, or ' +
+              '`predicate` for a JS expression evaluated in the renderer.'
+            )
+          })).min(1).describe('Ordered list of steps. Must contain at least one entry.'),
+          windowId: windowIdSchema,
+          skipImplicitSettle: z.coerce.boolean().optional().describe(
+            'Skip the implicit "1 frame + 1 microtask" wait between steps. Default false. Steps ' +
+            'with their own `waitFor` always use the override regardless of this flag.'
+          )
+        } as Record<string, unknown>
+      },
+      async (args) => {
+        const stepsRaw = args['steps']
+        if (!Array.isArray(stepsRaw) || stepsRaw.length === 0) {
+          return { content: [{ type: 'text', text: 'steps must be a non-empty array' }], isError: true }
+        }
+        const windowId = typeof args['windowId'] === 'number' ? args['windowId'] : undefined
+        const skipImplicitSettle = args['skipImplicitSettle'] === true
+
+        interface Step { name: string; args?: Record<string, unknown>; waitFor?: Record<string, unknown> }
+        const steps: Step[] = stepsRaw.map((s) => s as Step)
+
+        const aggregatedContent: Record<string, unknown>[] = []
+        const envelope: { index: number; name: string; ok: boolean; error?: string }[] = []
+        let aborted = false
+        let abortedAt: number | null = null
+
+        for (let i = 0; i < steps.length; i++) {
+          const step = steps[i]
+          if (!step || typeof step.name !== 'string' || step.name.length === 0) {
+            const rawName: unknown = step?.name
+            envelope.push({ index: i, name: typeof rawName === 'string' ? rawName : '', ok: false, error: 'step.name must be a non-empty string' })
+            aborted = true
+            abortedAt = i
+            break
+          }
+
+          let stepResult: unknown
+          try {
+            stepResult = await Promise.resolve(this.invokeTool(step.name, step.args ?? {}))
+          } catch (err) {
+            envelope.push({ index: i, name: step.name, ok: false, error: err instanceof Error ? err.message : String(err) })
+            aborted = true
+            abortedAt = i
+            break
+          }
+
+          const r = (stepResult ?? {}) as Record<string, unknown>
+          const isErr = r['isError'] === true
+          const content = Array.isArray(r['content']) ? r['content'] as Record<string, unknown>[] : []
+
+          if (isErr) {
+            const firstText = content.find((c) => c['type'] === 'text')
+            const errText = firstText && typeof firstText['text'] === 'string' ? firstText['text'] : `step ${i} (${step.name}) reported isError`
+            envelope.push({ index: i, name: step.name, ok: false, error: errText })
+            // include the error content so callers see what the tool said
+            aggregatedContent.push(...content)
+            aborted = true
+            abortedAt = i
+            break
+          }
+
+          envelope.push({ index: i, name: step.name, ok: true })
+          aggregatedContent.push(...content)
+
+          // Special case: screencast-stop returns a .webm on disk. Inline the
+          // bytes as a `resource` content part so the caller doesn't need a
+          // follow-up file read. Silent-skip on any parse / IO failure — the
+          // path is still in the text part above.
+          if (step.name === 'screencast-stop') {
+            const textPart = content.find((c) => c['type'] === 'text')
+            const textVal = textPart && typeof textPart['text'] === 'string' ? textPart['text'] : null
+            if (textVal) {
+              try {
+                const parsed = JSON.parse(textVal) as { path?: unknown; mimeType?: unknown }
+                if (typeof parsed.path === 'string' && parsed.path.length > 0) {
+                  const blob = readFileSync(parsed.path).toString('base64')
+                  aggregatedContent.push({
+                    type: 'resource',
+                    resource: {
+                      uri: `file://${parsed.path}`,
+                      mimeType: typeof parsed.mimeType === 'string' ? parsed.mimeType : 'video/webm',
+                      blob
+                    }
+                  })
+                }
+              } catch (err) {
+                logger.warn('batch: failed to inline screencast .webm', { error: String(err) })
+              }
+            }
+          }
+
+          // Post-step settle.
+          const waitFor = step.waitFor && typeof step.waitFor === 'object' ? step.waitFor : null
+          if (waitFor) {
+            try {
+              await runStepWait(waitFor, windowId)
+            } catch (err) {
+              envelope.push({ index: i, name: `${step.name}#waitFor`, ok: false, error: err instanceof Error ? err.message : String(err) })
+              aborted = true
+              abortedAt = i
+              break
+            }
+          } else if (!skipImplicitSettle) {
+            await runImplicitSettle(windowId)
+          }
+        }
+
+        aggregatedContent.push({
+          type: 'text',
+          text: JSON.stringify({
+            ranCount: envelope.filter((e) => e.ok).length,
+            totalCount: steps.length,
+            aborted,
+            abortedAt,
+            results: envelope
+          }, null, 2)
+        })
+
+        return aborted ? { content: aggregatedContent, isError: true } : { content: aggregatedContent }
+      }
+    )
   }
 
   private async handleRequest(req: IncomingMessage, res: ServerResponse): Promise<void> {
@@ -1745,4 +1909,81 @@ function timingSafeStringEq(a: string, b: string): boolean {
   const bb = Buffer.from(b, 'utf8')
   if (ab.length !== bb.length) return false
   return timingSafeEqual(ab, bb)
+}
+
+/**
+ * One frame of paint + one microtask flush in the target renderer. Used
+ * by the `batch` tool between steps so the next call sees the DOM after
+ * React has reconciled the previous step's effects. Silent no-op when
+ * no window is available (main-process-only tool chains still benefit
+ * from the awaitable boundary).
+ */
+async function runImplicitSettle(windowId: number | undefined): Promise<void> {
+  const win = pickWindow(windowId)
+  if (!win || win.isDestroyed()) return
+  try {
+    await win.webContents.executeJavaScript(
+      `new Promise((resolve) => requestAnimationFrame(() => setTimeout(() => resolve(null), 0)))`,
+      true
+    )
+  } catch {
+    // Renderer torn down mid-batch — let the next step's executeJavaScript
+    // surface the real error rather than masking it here.
+  }
+}
+
+/**
+ * Honours a step's explicit `waitFor`: a fixed `ms` delay, polling for a
+ * `selector` to appear, or polling a JS `predicate` until truthy. Times
+ * out after `timeoutMs` (default 5000) and throws so the batch reports
+ * the failure.
+ */
+async function runStepWait(waitFor: Record<string, unknown>, windowId: number | undefined): Promise<void> {
+  const ms = typeof waitFor['ms'] === 'number' ? waitFor['ms'] : null
+  const selector = typeof waitFor['selector'] === 'string' ? waitFor['selector'] : null
+  const predicate = typeof waitFor['predicate'] === 'string' ? waitFor['predicate'] : null
+  const rawTimeout = typeof waitFor['timeoutMs'] === 'number' ? waitFor['timeoutMs'] : 5000
+  const timeoutMs = Math.max(0, Math.min(60_000, Math.floor(rawTimeout)))
+  const rawPoll = typeof waitFor['pollMs'] === 'number' ? waitFor['pollMs'] : 100
+  const pollMs = Math.max(20, Math.min(2000, Math.floor(rawPoll)))
+
+  if (ms !== null) {
+    await new Promise((resolve) => setTimeout(resolve, Math.max(0, Math.min(60_000, Math.floor(ms)))))
+    return
+  }
+
+  if (selector === null && predicate === null) {
+    throw new Error('waitFor requires one of `ms`, `selector`, or `predicate`')
+  }
+
+  const win = pickWindow(windowId)
+  if (!win || win.isDestroyed()) {
+    throw new Error('waitFor needs a live BrowserWindow but none is available')
+  }
+
+  const code = selector !== null
+    ? `(async (sel, timeoutMs, pollMs) => {
+        const deadline = Date.now() + timeoutMs;
+        while (Date.now() < deadline) {
+          if (document.querySelector(sel)) return { ok: true };
+          await new Promise(r => setTimeout(r, pollMs));
+        }
+        return { ok: false, timedOut: true, mode: 'selector', selector: sel };
+      })(${JSON.stringify(selector)}, ${timeoutMs}, ${pollMs})`
+    : `(async (expr, timeoutMs, pollMs) => {
+        const deadline = Date.now() + timeoutMs;
+        const evaluate = new Function('return (' + expr + ')');
+        while (Date.now() < deadline) {
+          try { if (evaluate()) return { ok: true }; } catch (e) { return { ok: false, errored: true, message: String(e && e.message || e) }; }
+          await new Promise(r => setTimeout(r, pollMs));
+        }
+        return { ok: false, timedOut: true, mode: 'predicate' };
+      })(${JSON.stringify(predicate)}, ${timeoutMs}, ${pollMs})`
+
+  const result = (await win.webContents.executeJavaScript(code, true)) as { ok: boolean; timedOut?: boolean; errored?: boolean; message?: string }
+  if (!result.ok) {
+    if (result.errored) throw new Error(`waitFor predicate threw: ${result.message ?? '?'}`)
+    if (result.timedOut) throw new Error(`waitFor timed out after ${timeoutMs}ms`)
+    throw new Error('waitFor failed')
+  }
 }
