@@ -9,6 +9,18 @@
  * 10 px Monaco scroll.
  */
 
+/*
+ * Inset the text rows from the terminal's left edge. `.xterm-viewport`
+ * paints the panel background and runs flush to the edge; `.xterm-screen`
+ * holds the glyph rows. A left margin on the screen leaves a gutter of
+ * background between the edge and the first character. The screen is
+ * already narrower than the viewport by the scrollbar gutter (~17 px),
+ * so a 10 px shift stays within the terminal bounds — no glyph clipping.
+ */
+.xterm .xterm-screen {
+	margin-left: 10px;
+}
+
 .xterm .xterm-viewport {
 	scrollbar-width: thin;
 	scrollbar-color: var(--scrollbarSlider-background, rgb(121, 121, 121, 0.4)) transparent;
