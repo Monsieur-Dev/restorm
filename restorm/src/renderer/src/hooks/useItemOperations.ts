@@ -434,7 +434,6 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       const folder: Folder = {
         id,
         name,
-        documentation: '',
         tags: [],
         configuration: {},
         items: []
@@ -530,7 +529,6 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     const newFolder: Folder = {
       id: generateUniqueId(),
       name: t('sidebar.newFolder'),
-      documentation: '',
       tags: [],
       configuration: {},
       items: []
@@ -550,7 +548,6 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       name: t('sidebar.newEnvironmentFolder'),
       folderType: 'environment',
       fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
-      documentation: '',
       tags: [],
       configuration: {},
       environments: [],

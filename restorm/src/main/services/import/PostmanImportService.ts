@@ -339,7 +339,6 @@ function itemToHTTPRequest(item: PostmanItem, pathPrefix: string): HTTPRequest {
     type: 'http',
     id: generateId(`postman:request:${pathPrefix}:${item.name}`),
     name: item.name,
-    documentation: '',
     tags: [],
     method: toHTTPMethod(request?.method),
     url: rawUrl,
@@ -391,7 +390,6 @@ function itemToGraphQLRequest(item: PostmanItem, pathPrefix: string): GraphQLReq
     type: 'graphql',
     id: generateId(`postman:graphql:${pathPrefix}:${item.name}`),
     name: item.name,
-    documentation: '',
     tags: [],
     url: rawUrl,
     operationType,
@@ -416,7 +414,6 @@ function convertItem(item: PostmanItem, pathPrefix: string): Folder | Request {
     const folder: Folder = {
       id: generateId(`postman:folder:${folderPath}`),
       name: item.name,
-      documentation: '',
       tags: [],
       configuration: {},
       items: item.item.map(child => convertItem(child, folderPath))
@@ -559,7 +556,6 @@ export function importPostman(
     importSource: 'postman',
     id: generateId(`postman:root:${collection.info.name}`),
     name: collection.info.name,
-    documentation: '',
     tags: [],
     configuration: {},
     environments: [environment],

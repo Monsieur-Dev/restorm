@@ -566,7 +566,6 @@ export function importOData(content: string, options: ODataImportOptions = {}): 
     return {
       id: generateId(`odata:folder:set:${set.name}`),
       name: set.name,
-      documentation: `OData entity set: ${set.entityType}`,
       tags: ['odata', set.name],
       configuration: {},
       items
@@ -581,7 +580,6 @@ export function importOData(content: string, options: ODataImportOptions = {}): 
     extraFolders.push({
       id: generateId(`odata:folder:actions:${apiTitle}`),
       name: 'Actions',
-      documentation: 'OData actions (POST with JSON body)',
       tags: ['odata', 'action'],
       configuration: {},
       items: actions.map((op) => buildActionRequest(op, schema.version))
@@ -591,7 +589,6 @@ export function importOData(content: string, options: ODataImportOptions = {}): 
     extraFolders.push({
       id: generateId(`odata:folder:functions:${apiTitle}`),
       name: 'Functions',
-      documentation: 'OData functions (GET with inlined parameters)',
       tags: ['odata', 'function'],
       configuration: {},
       items: functions.map((op) => buildFunctionRequest(op, schema.version))
@@ -623,7 +620,6 @@ export function importOData(content: string, options: ODataImportOptions = {}): 
     fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     id: generateId(`odata:root:${apiTitle}`),
     name: apiTitle,
-    documentation: `# ${apiTitle}\n\nImported OData ${schema.version} service with ${schema.entitySets.length} entity sets, ${actions.length} actions, and ${functions.length} functions.`,
     tags: ['odata'],
     configuration: {},
     environments: [environment],

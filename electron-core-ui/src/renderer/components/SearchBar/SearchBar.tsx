@@ -27,6 +27,12 @@ export interface SearchBarProps {
   renderTooltipContent?: (result: SearchResult) => React.ReactNode
   /** Custom renderer for method/type badge. If not provided, uses default request-type-badge styling. */
   renderBadge?: (method: string) => React.ReactNode
+  /** Delay in milliseconds before the result tooltip hides after
+   * the pointer leaves it. Defaults to 300 ms — bump it when the
+   * tooltip hosts an interactive surface the user may drag (e.g.
+   * a pannable canvas) so a brief excursion outside the bounds
+   * doesn't dismiss it. */
+  tooltipHideDelayMs?: number
 }
 
 /** Debounce delay in milliseconds */
@@ -39,7 +45,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   placeholder,
   searchFn,
   renderTooltipContent,
-  renderBadge
+  renderBadge,
+  tooltipHideDelayMs = 300
 }) => {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
@@ -95,14 +102,19 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     }
   }, [])
 
-  // Schedule tooltip hide after 300ms
+  // Schedule tooltip hide after the configured delay (default 300ms).
+  // Bumping the delay lets consumers host interactive surfaces
+  // (e.g. a pannable canvas) where a transient cursor excursion
+  // outside the tooltip — like a fast pan that pushes the cursor
+  // past the screen edge for a single frame — would otherwise
+  // dismiss the tooltip mid-interaction.
   const scheduleHideTooltip = useCallback(() => {
     clearHideTooltipTimeout()
     hideTooltipTimeoutRef.current = setTimeout(() => {
       setHoveredResultId(null)
       setIsTooltipHovered(false)
-    }, 300)
-  }, [clearHideTooltipTimeout])
+    }, tooltipHideDelayMs)
+  }, [clearHideTooltipTimeout, tooltipHideDelayMs])
 
   // Tooltip mouse enter handler
   const handleTooltipMouseEnter = useCallback(() => {

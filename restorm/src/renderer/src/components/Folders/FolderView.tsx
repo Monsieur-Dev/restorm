@@ -89,14 +89,9 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder, onFolderChange }
     // imported spec (`pet`, `store`, `user` for the Petstore), use
     // that group's description as the scope's blurb — readers
     // expect the tag-level prose ("Everything about your Pets"),
-    // not a repeat of the folder name. The user's own
-    // `folder.documentation` wins when it's set, so manual notes
-    // override the spec.
+    // not a repeat of the folder name.
     const matchingGroup = apiDoc.groups[folder.name]
-    const scopeDescription =
-      folder.documentation.length > 0
-        ? folder.documentation
-        : matchingGroup?.description ?? undefined
+    const scopeDescription = matchingGroup?.description ?? undefined
 
     return (
       <DocumentationHost

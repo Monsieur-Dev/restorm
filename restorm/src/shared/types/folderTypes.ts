@@ -1,11 +1,11 @@
 import type { RuntimeId, Icon, Environment, FolderConfiguration, EnumDefinition, ImportSourceType, ApiUpdateConfig } from './baseTypes'
 import type { Request } from './requests/index'
+import type { ApiDocumentation } from './apiDocumentation'
 
 export interface Folder {
   id: RuntimeId
   name: string
   icon?: Icon
-  documentation: string
   notes?: string
   tags: string[]
   configuration: FolderConfiguration
@@ -23,6 +23,12 @@ export interface EnvironmentFolder extends Folder {
   environments: Environment[]
   tagColors?: Record<string, string>
   enumDefinitions?: EnumDefinition[]
+  /** Structured API documentation populated by spec importers
+   * (OpenAPI / AsyncAPI / GraphQL / gRPC reflection / SOAP /
+   * OData). Drives the Docs tab on every request, env-folder, and
+   * sub-folder under this env folder. Absent on manually-created
+   * env folders. */
+  apiDocumentation?: ApiDocumentation
   /** How this folder was created (swagger, grpc, graphql, etc.). Absent for manually created folders. */
   importSource?: ImportSourceType
   /**

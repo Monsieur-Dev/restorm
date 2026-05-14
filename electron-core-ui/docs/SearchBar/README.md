@@ -37,6 +37,15 @@ export interface SearchBarProps {
 
   /** Custom renderer for method/type badge. If not provided, uses default request-type-badge styling. */
   renderBadge?: (method: string) => React.ReactNode
+
+  /**
+   * Delay in milliseconds before the result tooltip hides after the
+   * pointer leaves it. Defaults to `300`. Increase it when the
+   * tooltip hosts an interactive surface the user may drag (e.g. a
+   * pannable canvas) so a brief excursion outside the bounds doesn't
+   * dismiss the tooltip mid-interaction.
+   */
+  tooltipHideDelayMs?: number
 }
 ```
 

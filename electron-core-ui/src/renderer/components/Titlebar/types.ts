@@ -31,6 +31,11 @@ export interface TitlebarProps {
   /** Optional test id for the internal SearchBar (when enabled). */
   searchBarTestId?: string
 
+  /** Forwarded to the internal SearchBar as `tooltipHideDelayMs` —
+   * how long after the pointer leaves the result tooltip before it
+   * hides. Defaults to 300ms when omitted. */
+  searchTooltipHideDelayMs?: number
+
   /** Optional test id for the internal CustomWCO. */
   customWcoTestId?: string
 

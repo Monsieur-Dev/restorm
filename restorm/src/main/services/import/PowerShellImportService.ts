@@ -161,7 +161,6 @@ function parsePowerShellCommand(psCommand: string): HTTPRequest | null {
       headers,
       params,
       body,
-      documentation: `Imported from PowerShell command`,
       tags: ['powershell-import']
     }
 
@@ -222,7 +221,6 @@ export function importPowerShell(
 
   const folder = new EnvironmentFolder({
     name: options.folderName ?? 'PowerShell Imports',
-    documentation: `Imported from ${requests.length} PowerShell command(s)`,
     tags: ['powershell'],
     items: requests,
     environments: []

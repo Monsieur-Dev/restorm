@@ -173,7 +173,6 @@ export function registerImportTools(mcp: McpService): void {
               name: result.format ? `Imported (${result.format})` : 'Imported',
               folderType: 'environment',
               fileFormatVersion: 1,
-              documentation: '',
               tags: [],
               configuration: {} as EnvironmentFolder['configuration'],
               items: [item],

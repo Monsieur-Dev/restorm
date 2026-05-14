@@ -130,12 +130,11 @@ describe('OpenAPIImportService — 3.1 dispatching', () => {
     expect(folder.apiDocumentation?.api.title).toBe('Petstore 3.1')
   })
 
-  it('exposes webhooks as a separate "Webhooks" folder marked documentation-only', () => {
+  it('exposes webhooks as a separate "Webhooks" folder tagged for visual filtering', () => {
     const folder = importOpenAPI(loadFixture('petstore-3.1.json') as OAS31Spec)
     const webhooksFolder = folder.items.find((it) => 'items' in it && (it as Folder).name === 'Webhooks') as Folder | undefined
     expect(webhooksFolder).toBeDefined()
     expect(webhooksFolder?.tags).toContain('webhook')
-    expect(webhooksFolder?.documentation).toContain('Documentation-only')
   })
 })
 

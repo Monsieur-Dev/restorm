@@ -10,6 +10,7 @@ import {
   graphqlField,
   TreatEmptyAsUndefined
 } from 'electron-core-ui/decorators'
+// TreatEmptyAsUndefined remains in use on `notes`; keep the import.
 import type { RuntimeId, Icon, FolderConfiguration, BaseFolderItem } from './types'
 
 /**
@@ -34,12 +35,6 @@ export class Folder {
 
   /** Optional icon for the folder */
   icon?: Icon
-
-  /** Documentation describing the folder contents */
-  @graphqlField({ type: 'String', nullable: true })
-  @searchable.property({ weight: 1 })
-  @TreatEmptyAsUndefined()
-  documentation = ''
 
   /** Optional user notes */
   @graphqlField({ type: 'String', nullable: true })
@@ -75,7 +70,6 @@ export class Folder {
       id: this.id,
       name: this.name,
       icon: this.icon,
-      documentation: this.documentation,
       notes: this.notes,
       tags: this.tags,
       configuration: this.configuration,

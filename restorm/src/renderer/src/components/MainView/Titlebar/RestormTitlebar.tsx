@@ -119,6 +119,12 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
       onSearchResultClick={onSearchResultClick}
       renderSearchTooltipContent={renderSearchTooltipContent}
       renderSearchBadge={(method) => <Badge type={mapToBadgeType(method)} />}
+      // The search popover hosts a draggable model graph; a fast pan
+      // can push the cursor past the popover bounds for a frame
+      // before pointer-lock pulls it back, which would dismiss it
+      // with the default 300ms grace. 1s is comfortably above that
+      // transient window without feeling sticky on normal exits.
+      searchTooltipHideDelayMs={1000}
       leftContent={
         <MenuBar data-testid="titlebar-menubar">
           <MenuBarItem title={t('menuBar.file')} data-testid="titlebar-menubar-item-file">

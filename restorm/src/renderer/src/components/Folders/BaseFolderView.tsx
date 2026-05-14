@@ -3,8 +3,7 @@ import { useTranslation } from 'react-i18next'
 import {
   Tabs,
   type Tab,
-  MarkdownEditor,
-  MarkdownViewer
+  MarkdownEditor
 } from 'electron-core-ui/renderer'
 import type { Folder, EnvironmentFolder } from '../../../../shared/types/collections'
 
@@ -25,9 +24,9 @@ export interface BaseFolderViewProps {
   /** Callback receiving the setActiveTabId function when the component mounts. */
   onSwitchTabReady?: (switchTab: (tabId: string) => void) => void
   /** Structured documentation content rendered as the Docs tab.
-   * When provided, it replaces the legacy markdown render of
-   * `folder.documentation`. EnvironmentFolderView and FolderView
-   * use this to surface a `<DocumentationHost />`. */
+   * EnvironmentFolderView and FolderView use this to surface a
+   * `<DocumentationHost />`. The Docs tab is omitted when this is
+   * undefined — there's no fallback markdown source. */
   docsContent?: React.ReactNode
 }
 
@@ -45,10 +44,7 @@ export const BaseFolderView: React.FC<BaseFolderViewProps> = ({
   const { t } = useTranslation()
   const testIdBase = `folder-view-${folder.id}`
 
-  const userDocs = folder.documentation
-  const hasStructuredDocs = docsContent !== undefined && docsContent !== null
-  const hasMarkdownDocs = userDocs.trim().length > 0
-  const hasDocs = hasStructuredDocs || hasMarkdownDocs
+  const hasDocs = docsContent !== undefined && docsContent !== null
 
   const defaultTabId = defaultActiveTabId
     ?? additionalTabs[0]?.id
@@ -71,22 +67,13 @@ export const BaseFolderView: React.FC<BaseFolderViewProps> = ({
     docsTabs.push({
       id: 'docs',
       label: t('folderView.tabs.docs'),
-      // Structured docs own their own scroll contexts (Dock-bounded
+      // DocumentationHost owns its own scroll contexts (Dock-bounded
       // sidebar + an inner ScrollableElement on the main column),
-      // so the Tabs wrapper must NOT wrap them in an outer
+      // so the Tabs wrapper must NOT wrap it in an outer
       // ScrollableElement — that would unbound the Dock's height
       // and starve the inner sidebar of overflow to scroll.
-      // Legacy markdown stays in the outer wrapper so the existing
-      // Markdown editor + viewer keep their natural scroll.
-      useScrollableElement: !hasStructuredDocs,
-      content: hasStructuredDocs
-        ? docsContent
-        : (
-          <MarkdownViewer
-            value={userDocs || `# ${folder.name}\n\nNo documentation available.`}
-            data-testid={`${testIdBase}-markdown-viewer-docs`}
-          />
-        )
+      useScrollableElement: false,
+      content: docsContent
     })
   }
   docsTabs.push({

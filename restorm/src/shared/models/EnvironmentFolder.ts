@@ -52,12 +52,6 @@ export class EnvironmentFolder {
    */
   fileFormatVersion: number = CURRENT_FILE_FORMAT_VERSION
 
-  /** Documentation describing the folder contents */
-  @graphqlField({ type: 'String', nullable: true })
-  @searchable.property({ weight: 1 })
-  @TreatEmptyAsUndefined()
-  documentation = ''
-
   /** Optional user notes */
   @graphqlField({ type: 'String', nullable: true })
   @searchable.property({ weight: 0.5 })
@@ -119,7 +113,6 @@ export class EnvironmentFolder {
     id?: RuntimeId
     name?: string
     icon?: Icon
-    documentation?: string
     notes?: string
     tags?: string[]
     tagColors?: Record<string, string>
@@ -136,7 +129,6 @@ export class EnvironmentFolder {
       ...(obj.id !== undefined && { id: obj.id }),
       name: obj.name ?? '',
       ...(obj.icon !== undefined && { icon: obj.icon }),
-      documentation: obj.documentation ?? '',
       ...(obj.notes !== undefined && { notes: obj.notes }),
       tags: obj.tags ?? [],
       tagColors: obj.tagColors ?? {},
@@ -181,7 +173,6 @@ export class EnvironmentFolder {
       icon: this.icon,
       folderType: this.folderType,
       fileFormatVersion: this.fileFormatVersion,
-      documentation: this.documentation,
       notes: this.notes,
       tags: this.tags,
       tagColors: this.tagColors,

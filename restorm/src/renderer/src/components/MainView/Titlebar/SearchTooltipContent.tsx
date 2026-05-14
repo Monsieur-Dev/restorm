@@ -1,5 +1,20 @@
 /**
- * SearchTooltipContent - Custom tooltip content for search results in restorm
+ * SearchTooltipContent — popover content for a search result.
+ *
+ * Behaviour:
+ * - request: when the parent env-folder owns an `apiDocumentation` AND
+ *   the request's route matches an operation, render the
+ *   `DocumentationHost` filtered to that route — the popover becomes
+ *   the same Docs surface the request tab view shows. Otherwise fall
+ *   back to the legacy method+URL+headers+body summary built from the
+ *   search metadata.
+ * - env-folder: when `apiDocumentation` is present, render the full
+ *   `DocumentationHost` (folder-scoped). Otherwise fall back to the
+ *   notes-only popover.
+ * - plain folder: notes-only popover (folders don't carry structured
+ *   docs).
+ *
+ * Bookmark ribbon + breadcrumb are always kept regardless of branch.
  */
 
 import React, { useMemo } from 'react'
@@ -10,12 +25,17 @@ import type { RestormSearchMetadata } from '../../../services/SearchIndexService
 import requestDetailsTemplate from '../../../resources/templates/search/request-details.hbs?raw'
 import { Badge } from '../../common/Badge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
+import { DocumentationHost } from '../../documentation/DocumentationHost'
+import { useRestormStore } from '../../../store/restormStore'
+import { findOperationForRoute, type RouteLike } from '../../../../../shared/utils/findOperationForRoute'
+import { routeFromRequest } from '../../../hooks/routeFromRequest'
+import { resolveUrlAgainstEnv, flattenEnvVars } from '../../../../../shared/utils/resolveUrlAgainstEnv'
+import { isEnvironmentFolder, isRequest } from '../../../../../shared/types/folderTypes'
+import type { EnvironmentFolder, Folder } from '../../../../../shared/types/collections'
+import type { Request } from '../../../../../shared/types/collections'
 import './SearchTooltipContent.css'
 
-// Compile the Handlebars template
 const compiledTemplate = Handlebars.compile(requestDetailsTemplate)
-
-// Register Handlebars helper for equality check
 Handlebars.registerHelper('ifEquals', function (this: unknown, arg1: unknown, arg2: unknown, options: Handlebars.HelperOptions) {
   return arg1 === arg2 ? options.fn(this) : options.inverse(this)
 })
@@ -25,49 +45,201 @@ interface SearchTooltipContentProps {
 }
 
 /**
- * Renders the tooltip content for a search result with tabs for Request, Documentation, and Notes
+ * Pull the request and its parent env-folder out of the live
+ * collections tree. We need the parent's `apiDocumentation` + the
+ * env's variables to env-resolve the route before matching it
+ * against the doc — the same path the request tab view takes.
  */
+function findRequestWithParent(
+  collections: EnvironmentFolder[],
+  requestId: string
+): { request: Request; parent: EnvironmentFolder } | null {
+  for (const envFolder of collections) {
+    const found = walkFolder(envFolder, requestId)
+    if (found) return { request: found, parent: envFolder }
+  }
+  return null
+}
+
+function walkFolder(folder: Folder | EnvironmentFolder, requestId: string): Request | null {
+  for (const item of folder.items) {
+    if (isRequest(item) && item.id === requestId) return item
+    if (!isRequest(item)) {
+      const inner = walkFolder(item, requestId)
+      if (inner) return inner
+    }
+  }
+  return null
+}
+
+function findFolderInTree(
+  collections: EnvironmentFolder[],
+  folderId: string
+): Folder | EnvironmentFolder | null {
+  for (const envFolder of collections) {
+    if (envFolder.id === folderId) return envFolder
+    const inner = walkForFolder(envFolder, folderId)
+    if (inner) return inner
+  }
+  return null
+}
+
+function walkForFolder(folder: Folder | EnvironmentFolder, folderId: string): Folder | EnvironmentFolder | null {
+  for (const item of folder.items) {
+    if (isRequest(item)) continue
+    if (item.id === folderId) return item
+    const inner = walkForFolder(item, folderId)
+    if (inner) return inner
+  }
+  return null
+}
+
+/** Env-resolve the request's route using the parent env-folder's
+ * first environment, so `{{baseUrl}}/...` becomes a literal URL the
+ * matcher can regex against the operations. Path-params that aren't
+ * in the env stay literal — `findOperationForRoute` handles that. */
+function resolvedRouteFromRequest(request: Request, parent: EnvironmentFolder): RouteLike {
+  const route = routeFromRequest(request)
+  if (route.url === undefined) return route
+  const env = parent.environments[0]
+  if (!env) return route
+  const flat: Record<string, string> = {}
+  for (const kv of env.variables) {
+    const v: unknown = kv.value
+    if (typeof v === 'string') flat[kv.key] = v
+    else if (typeof v === 'number' || typeof v === 'boolean') flat[kv.key] = String(v)
+  }
+  return { ...route, url: resolveUrlAgainstEnv(route.url, flattenEnvVars(flat)) }
+}
+
 export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ result }) => {
   const { t } = useTranslation()
-  const { category, icon, title: resultTitle, description, metadata } = result
-  
-  // Cast metadata to our restorm-specific type
-  const restormMetadata = metadata as RestormSearchMetadata | undefined
+  const { category, icon, id: resultId, title: resultTitle, metadata } = result
+  const collections = useRestormStore((state) => state.collections)
 
-  // Generate request details markdown from metadata
+  const restormMetadata = metadata as RestormSearchMetadata | undefined
+  const notes = restormMetadata?.notes
+  const breadcrumb = restormMetadata?.breadcrumb ?? []
+  const ribbonBookmarks: Bookmark[] = useMemo(
+    () => (restormMetadata?.tags ?? []).map((label) => ({ label })),
+    [restormMetadata]
+  )
+
   const requestDetailsMarkdown = useMemo(() => {
     if (!restormMetadata) return ''
     return compiledTemplate(restormMetadata)
   }, [restormMetadata])
 
+  // Resolve the request → parent → apiDocumentation chain so we can
+  // decide whether the popover surfaces structured docs.
+  const docContent = useMemo<React.ReactNode | null>(() => {
+    if (category === 'request') {
+      const lookup = findRequestWithParent(collections, resultId)
+      if (!lookup) return null
+      const apiDoc = lookup.parent.apiDocumentation
+      if (!apiDoc) return null
+      const route = resolvedRouteFromRequest(lookup.request, lookup.parent)
+      if (!findOperationForRoute(apiDoc, route)) return null
+      return (
+        <DocumentationHost
+          apiDocumentation={apiDoc}
+          filters={[route]}
+          testId="search-tooltip-documentation-host"
+        />
+      )
+    }
+    if (category === 'folder') {
+      const folder = findFolderInTree(collections, resultId)
+      if (!folder) return null
+      // Only env-folders carry structured `apiDocumentation`. Plain
+      // folders without one fall through to the notes-only popover.
+      if (!isEnvironmentFolder(folder)) return null
+      const apiDoc = folder.apiDocumentation
+      if (!apiDoc) return null
+      return (
+        <DocumentationHost
+          apiDocumentation={apiDoc}
+          scopeTitle={folder.name}
+          showApiInfo
+          testId="search-tooltip-documentation-host"
+        />
+      )
+    }
+    return null
+  }, [category, collections, resultId])
+
+  const Header = (
+    <>
+      {ribbonBookmarks.length > 0 && (
+        <BookmarkRibbonStack
+          bookmarks={ribbonBookmarks}
+          editable={false}
+          data-testid="search-bookmarks"
+        />
+      )}
+      {breadcrumb.length > 0 && (
+        <div className="search-tooltip-breadcrumb">
+          {breadcrumb.map((item, index) => (
+            <React.Fragment key={index}>
+              {index > 0 && <span className="breadcrumb-separator">/</span>}
+              <span className="breadcrumb-item">{item}</span>
+            </React.Fragment>
+          ))}
+        </div>
+      )}
+    </>
+  )
+
+  // Structured-docs branch: keep only the bookmark + breadcrumb; the
+  // method/title row and the rest of the legacy preview are dropped.
+  // The DocumentationHost itself surfaces title + method + parameters
+  // + responses + models in a much richer layout.
+  //
+  // Hard-cap the popover height so the tooltip positioning system
+  // can compute a beak anchored to the source row — when the popover
+  // is allowed to grow to natural content height (~1200px+ for a
+  // route with many parameters / models), the beak math falls out of
+  // alignment with the hovered element and the tooltip extends past
+  // the viewport. `overflow: hidden` is required so the inner
+  // `DocumentationHost`'s ScrollableElement gets a bounded parent
+  // and can actually scroll instead of overflowing.
+  //
+  // The wheel handler stops propagation so the SearchBar's results
+  // listview (which lives behind the popover) doesn't intercept the
+  // event and `preventDefault` it before the inner ScrollableElement
+  // can react — otherwise the user can't scroll the doc.
+  if (docContent) {
+    return (
+      <div
+        style={{
+          position: 'relative',
+          height: 'min(640px, calc(100vh - 90px))',
+          maxHeight: 'calc(100vh - 90px)',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden'
+        }}
+        onWheelCapture={(e) => { e.stopPropagation() }}
+        data-testid="search-tooltip-with-docs"
+      >
+        {Header}
+        <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+          {docContent}
+        </div>
+      </div>
+    )
+  }
+
   if (category === 'request' && icon) {
     const method = icon.toUpperCase()
-    const tags = restormMetadata?.tags ?? []
-    const notes = restormMetadata?.notes
-    const breadcrumb = restormMetadata?.breadcrumb ?? []
-
-    // Build tabs for request tooltip - order matters (first tab is default)
-    const tabs: Tab[] = []
-    
-    // Show Documentation tab first if description exists (default tab)
-    if (description) {
-      tabs.push({
-        id: 'documentation',
-        label: t('requestTab.tabs.docs'),
-        content: <MarkdownViewer value={description} style={{ maxHeight: 'calc(100vh - 200px)' }} data-testid="markdown-viewer-documentation" />,
+    const tabs: Tab[] = [
+      {
+        id: 'request',
+        label: t('requestTab.tabs.requestLayout'),
+        content: <MarkdownViewer value={requestDetailsMarkdown || t('search.tooltip.noDetails', 'No details available')} style={{ maxHeight: 'calc(100vh - 200px)' }} data-testid="markdown-viewer-request" />,
         useScrollableElement: false
-      })
-    }
-    
-    // Request tab
-    tabs.push({
-      id: 'request',
-      label: t('requestTab.tabs.requestLayout'),
-      content: <MarkdownViewer value={requestDetailsMarkdown || t('search.tooltip.noDetails', 'No details available')} style={{ maxHeight: 'calc(100vh - 200px)' }} data-testid="markdown-viewer-request" />,
-      useScrollableElement: false
-    })
-    
-    // Show Notes tab only if notes exist
+      }
+    ]
     if (notes) {
       tabs.push({
         id: 'notes',
@@ -77,95 +249,35 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
       })
     }
 
-    const ribbonBookmarks: Bookmark[] = tags.map((t) => ({ label: t }))
-
     return (
       <div style={{ position: 'relative', maxHeight: 'calc(100vh - 90px)', display: 'flex', flexDirection: 'column' }}>
-        {/* Readonly bookmark ribbons hang from the top-right of the
-         * tooltip, matching the workbench tab header treatment. */}
-        {ribbonBookmarks.length > 0 && (
-          <BookmarkRibbonStack
-            bookmarks={ribbonBookmarks}
-            editable={false}
-            data-testid="search-bookmarks"
-          />
-        )}
-        {/* Breadcrumb */}
-        {breadcrumb.length > 0 && (
-          <div className="search-tooltip-breadcrumb">
-            {breadcrumb.map((item, index) => (
-              <React.Fragment key={index}>
-                {index > 0 && <span className="breadcrumb-separator">/</span>}
-                <span className="breadcrumb-item">{item}</span>
-              </React.Fragment>
-            ))}
-          </div>
-        )}
-        {/* Method + title row (tags moved to the top-right ribbon stack). */}
+        {Header}
         <div style={{ marginBottom: 8, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
           <Badge type={mapToBadgeType(method)} />
           <strong style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{resultTitle}</strong>
         </div>
-        {/* Tabs - first tab in array is selected by default */}
         <Tabs tabs={tabs} data-testid="tabs-request-tooltip" />
       </div>
     )
   }
 
-  // Folder or other category
-  const folderTags = restormMetadata?.tags ?? []
-  const folderNotes = restormMetadata?.notes
-  const folderBreadcrumb = restormMetadata?.breadcrumb ?? []
-  
-  // Build tabs for folder tooltip - order matters (first tab is default)
+  // Folder / env-folder without structured docs — title + notes if any.
   const folderTabs: Tab[] = []
-  
-  // Documentation first if exists (default tab)
-  if (description) {
-    folderTabs.push({
-      id: 'documentation',
-      label: t('folderView.tabs.docs'),
-      content: <MarkdownViewer value={description} style={{ maxHeight: 'calc(100vh - 200px)' }} data-testid="markdown-viewer-documentation" />,
-      useScrollableElement: false
-    })
-  }
-  
-  if (folderNotes) {
+  if (notes) {
     folderTabs.push({
       id: 'notes',
       label: t('folderView.tabs.notes'),
-      content: <MarkdownViewer value={folderNotes} style={{ maxHeight: 'calc(100vh - 200px)' }} data-testid="markdown-viewer-notes" />,
+      content: <MarkdownViewer value={notes} style={{ maxHeight: 'calc(100vh - 200px)' }} data-testid="markdown-viewer-notes" />,
       useScrollableElement: false
     })
   }
 
-  const folderRibbonBookmarks: Bookmark[] = folderTags.map((t) => ({ label: t }))
-
   return (
     <div style={{ position: 'relative', maxHeight: 'calc(100vh - 90px)', display: 'flex', flexDirection: 'column' }}>
-      {folderRibbonBookmarks.length > 0 && (
-        <BookmarkRibbonStack
-          bookmarks={folderRibbonBookmarks}
-          editable={false}
-          data-testid="search-bookmarks"
-        />
-      )}
-      {/* Breadcrumb */}
-      {folderBreadcrumb.length > 0 && (
-        <div className="search-tooltip-breadcrumb">
-          {folderBreadcrumb.map((item, index) => (
-            <React.Fragment key={index}>
-              {index > 0 && <span className="breadcrumb-separator">/</span>}
-              <span className="breadcrumb-item">{item}</span>
-            </React.Fragment>
-          ))}
-        </div>
-      )}
-      {/* Title (tags moved to the top-right ribbon stack). */}
+      {Header}
       <div style={{ marginBottom: 8, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
         <strong style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{resultTitle}</strong>
       </div>
-      {/* Content with tabs or direct display */}
       {folderTabs.length > 0 ? (
         <Tabs tabs={folderTabs} data-testid="tabs-folder-tooltip" />
       ) : (

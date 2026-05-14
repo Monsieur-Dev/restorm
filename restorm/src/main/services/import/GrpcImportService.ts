@@ -289,7 +289,6 @@ function methodToRequest(
     type: 'grpc',
     id: generateId(`${collectionName}:grpc:${fullServiceName}:${method.name}`),
     name: method.name,
-    documentation: '',
     tags: [getCallType(method)],
     url: baseUrl,
     service: fullServiceName,
@@ -328,7 +327,6 @@ export function importGrpc(protoContent: string, options: GrpcImportOptions = {}
     const serviceFolder: Folder = {
       id: generateId(`${name}:folder:grpc:${service.name}`),
       name: service.name,
-      documentation: '',
       tags: ['service'],
       configuration: {},
       items: service.methods.map(method =>
@@ -365,7 +363,6 @@ export function importGrpc(protoContent: string, options: GrpcImportOptions = {}
     importSource: 'grpc',
     id: generateId(`${name}:folder:grpc:root`),
     name,
-    documentation: '',
     tags: [],
     configuration: {},
     environments: [environment],

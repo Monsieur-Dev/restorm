@@ -43,7 +43,6 @@ export function parseCurlCommand(curlCommand: string): {
   headers: KeyValue[]
   params: KeyValue[]
   body?: HTTPRequestBody
-  documentation: string
   tags: string[]
 } | null {
   try {
@@ -232,7 +231,6 @@ export function parseCurlCommand(curlCommand: string): {
       headers,
       params,
       ...(body ? { body } : {}),
-      documentation: 'Imported from curl command',
       tags: ['curl-import']
     }
   } catch {

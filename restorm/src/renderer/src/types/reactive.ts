@@ -19,7 +19,6 @@ import { isAnyFolder, isHTTPRequest, isRequest, isGraphQLRequest, isGrpcRequest,
 const FOLDER_INDEXABLE_KEYS = new Set([
   'name',
   'icon',
-  'documentation',
   'notes',
   'tags',
   // `tagColors` isn't a searchable field, but it *is* part of the folder
@@ -41,7 +40,6 @@ const FOLDER_INDEXABLE_KEYS = new Set([
 /** Properties that trigger re-indexing when modified (HTTP requests) */
 const HTTP_REQUEST_INDEXABLE_KEYS = new Set([
   'name',
-  'documentation',
   'notes',
   'tags',
   'authenticationRequestId',
@@ -56,7 +54,6 @@ const HTTP_REQUEST_INDEXABLE_KEYS = new Set([
 /** Properties that trigger re-indexing when modified (GraphQL requests) */
 const GRAPHQL_REQUEST_INDEXABLE_KEYS = new Set([
   'name',
-  'documentation',
   'notes',
   'tags',
   'authenticationRequestId',
@@ -70,7 +67,6 @@ const GRAPHQL_REQUEST_INDEXABLE_KEYS = new Set([
 /** Properties that trigger re-indexing when modified (gRPC requests) */
 const GRPC_REQUEST_INDEXABLE_KEYS = new Set([
   'name',
-  'documentation',
   'notes',
   'tags',
   'authenticationRequestId',
@@ -85,7 +81,6 @@ const GRPC_REQUEST_INDEXABLE_KEYS = new Set([
 /** Properties that trigger re-indexing when modified (SOAP requests) */
 const SOAP_REQUEST_INDEXABLE_KEYS = new Set([
   'name',
-  'documentation',
   'notes',
   'tags',
   'authenticationRequestId',
@@ -100,7 +95,6 @@ const SOAP_REQUEST_INDEXABLE_KEYS = new Set([
 /** Properties that trigger re-indexing when modified (WebSocket requests) */
 const WEBSOCKET_REQUEST_INDEXABLE_KEYS = new Set([
   'name',
-  'documentation',
   'notes',
   'tags',
   'authenticationRequestId',
@@ -114,7 +108,6 @@ const WEBSOCKET_REQUEST_INDEXABLE_KEYS = new Set([
 /** Properties that trigger re-indexing when modified (OData requests) */
 const ODATA_REQUEST_INDEXABLE_KEYS = new Set([
   'name',
-  'documentation',
   'notes',
   'tags',
   'authenticationRequestId',
@@ -136,7 +129,6 @@ const ODATA_REQUEST_INDEXABLE_KEYS = new Set([
  * Auth requests mirror HTTP requests and add auth-specific fields. */
 const AUTH_REQUEST_INDEXABLE_KEYS = new Set([
   'name',
-  'documentation',
   'notes',
   'tags',
   'authenticationRequestId',

@@ -94,7 +94,6 @@ export function useRequestCreationApi(opts: UseRequestCreationApiOptions): Reque
           const newTagFolder: Folder = {
             id: generateId(`folder:tag:${operation.group}`),
             name: operation.group,
-            documentation: '',
             tags: [operation.group],
             configuration: {},
             items: []

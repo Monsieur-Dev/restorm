@@ -568,7 +568,6 @@ function operationToRequest(
     type: 'http',
     id: generateId(`request:${method}:${path}`),
     name: operation.summary ?? operation.operationId ?? `${method.toUpperCase()} ${path}`,
-    documentation: '',
     tags: operation.tags ?? [],
     method: toHTTPMethod(method),
     url: buildUrl(path, parameters),
@@ -825,13 +824,13 @@ function buildSwaggerFolderItems(spec: SwaggerSpec, enumLookup?: Map<string, str
   // Create tag folders map
   const tagFolders = new Map<string, Folder>()
 
-  // Create folders for each tag — documentation is left empty; it's compiled on demand
-  // from the root folder's apiDocumentation when a tag folder maps to a group.
+  // Create folders for each tag — structured documentation is compiled on
+  // demand from the root folder's apiDocumentation when a tag folder maps to
+  // a group.
   for (const tag of spec.tags ?? []) {
     tagFolders.set(tag.name, {
       id: generateId(`folder:tag:${tag.name}`),
       name: tag.name,
-      documentation: '',
       tags: [tag.name],
       configuration: {},
       items: []
@@ -842,7 +841,6 @@ function buildSwaggerFolderItems(spec: SwaggerSpec, enumLookup?: Map<string, str
   const untaggedFolder: Folder = {
     id: generateId('folder:untagged:Other'),
     name: 'Other',
-    documentation: '',
     tags: [],
     configuration: {},
     items: []
@@ -874,7 +872,6 @@ function buildSwaggerFolderItems(spec: SwaggerSpec, enumLookup?: Map<string, str
           folder = {
             id: generateId(`folder:tag:${tagName}`),
             name: tagName,
-            documentation: '',
             tags: [tagName],
             configuration: {},
             items: []
@@ -981,7 +978,6 @@ export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions =
     fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     id: generateId(`folder:root:${spec.info.title}`),
     name: spec.info.title,
-    documentation: '',
     tags: [],
     configuration: {},
     environments: [newEnvironment],

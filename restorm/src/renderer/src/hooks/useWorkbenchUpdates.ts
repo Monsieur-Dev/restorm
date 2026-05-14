@@ -156,7 +156,6 @@ export function useWorkbenchUpdates(options: UseWorkbenchUpdatesOptions): UseWor
       if (updatedFolder.notes !== undefined) {
         folder.notes = updatedFolder.notes
       }
-      folder.documentation = updatedFolder.documentation
       folder.tags = updatedFolder.tags
       folder.name = updatedFolder.name
     }
@@ -200,7 +199,6 @@ export function useWorkbenchUpdates(options: UseWorkbenchUpdatesOptions): UseWor
       if (updatedFolder.notes !== undefined) {
         reactiveFolder.notes = updatedFolder.notes
       }
-      reactiveFolder.documentation = updatedFolder.documentation
       reactiveFolder.tags = updatedFolder.tags
       reactiveFolder.name = updatedFolder.name
     }

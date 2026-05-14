@@ -69,7 +69,6 @@ export function importCurl(
 
   const folder = new EnvironmentFolder({
     name: options.folderName ?? 'cURL Imports',
-    documentation: `Imported from ${requests.length} curl command(s)`,
     tags: ['curl'],
     items: requests,
     environments: []

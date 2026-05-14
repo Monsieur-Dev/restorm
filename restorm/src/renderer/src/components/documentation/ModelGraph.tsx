@@ -71,7 +71,19 @@ const ModelGraphCanvas: React.FC<{
   const [edges, setEdges] = useState<Edge[]>([])
   const [layoutReady, setLayoutReady] = useState(false)
   const [fitViewGeneration, setFitViewGeneration] = useState(0)
-  const { fitView, setCenter, getNode } = useReactFlow()
+  const { fitView, setCenter, getNode, getViewport, setViewport } = useReactFlow()
+  const reactFlowWrapperRef = useRef<HTMLDivElement | null>(null)
+  // Pan with cursor invisibility via Pointer Lock — solves the
+  // "popover closes mid-drag" problem when the model graph lives
+  // inside a tooltip / popover. xyflow's built-in d3-zoom pan reads
+  // `clientX/Y`, which freezes once the pointer is locked, so we
+  // disable `panOnDrag` and drive the viewport ourselves from the
+  // `movementX/Y` deltas that pointer-lock still delivers. As a
+  // side benefit, the cursor disappears for the duration of the
+  // drag (the user explicitly asked for this — it makes the
+  // limitlessly-large canvas feel less constrained by the popover
+  // bounds).
+  const isPanningRef = useRef(false)
   // The graph mounts inside a workbench tab body that the parent
   // toggles between `display: none` and visible. While the tab is
   // hidden the wrapper measures 0x0, so a `fitView()` call there
@@ -151,7 +163,107 @@ const ModelGraphCanvas: React.FC<{
     }
   }), [getNode, setCenter])
 
+  // Pointer-lock pan: replaces xyflow's `panOnDrag` (which reads
+  // `clientX/Y` through d3-zoom — those freeze the moment we lock
+  // the pointer). We capture `pointerdown` on the React Flow pane,
+  // request lock, accumulate `movementX/Y` deltas into the
+  // viewport, and release on `pointerup`. While locked, the
+  // cursor is invisible and pinned, so the user can drag the
+  // canvas an arbitrary distance without the surrounding popover
+  // ever registering a `mouseleave` and closing.
+  useEffect(() => {
+    const wrapper = reactFlowWrapperRef.current
+    if (!wrapper) return
+    const pane = wrapper.querySelector<HTMLElement>('.react-flow__pane')
+    if (!pane) return
+
+    const onPointerDown = (e: PointerEvent): void => {
+      if (e.button !== 0) return
+      const target = e.target
+      if (!(target instanceof Element)) return
+      // Only kick in on the empty pane (not on a node, edge label,
+      // or the Controls bar). The pane is the largest clickable
+      // child of React Flow; if the user clicked anywhere else,
+      // we let the default handler run (e.g. zoom/fit buttons).
+      if (target.closest('.react-flow__controls')) return
+      if (target.closest('.react-flow__minimap')) return
+      isPanningRef.current = true
+      // Capture the pointer so move/up events stay routed to the
+      // pane even when the physical cursor would leave its bounds
+      // — this is what keeps the surrounding popover from closing
+      // mid-drag. Pointer Lock layers on top to make the cursor
+      // disappear + freeze in place. If the lock request is denied
+      // (e.g. document isn't focused), the capture still handles
+      // the "drag past the edge" case, just with a visible cursor.
+      try {
+        pane.setPointerCapture(e.pointerId)
+      } catch {
+        // Some hosts reject setPointerCapture if the pointer is
+        // released between the test and the call — non-fatal.
+      }
+      const lockResult = pane.requestPointerLock() as Promise<void> | undefined
+      if (lockResult && typeof lockResult.catch === 'function') {
+        lockResult.catch(() => { /* keep panning via setPointerCapture */ })
+      }
+      e.preventDefault()
+    }
+
+    const onPointerMove = (e: PointerEvent): void => {
+      if (!isPanningRef.current) return
+      // `movementX/Y` is the delta from the previous event
+      // regardless of whether the pointer is locked, so the pan
+      // works identically in both cases. Without pointer lock the
+      // cursor remains visible but `setPointerCapture` keeps
+      // mousemove events flowing past the popover boundary.
+      const vp = getViewport()
+      void setViewport({
+        x: vp.x + e.movementX,
+        y: vp.y + e.movementY,
+        zoom: vp.zoom
+      })
+    }
+
+    const endPan = (e?: PointerEvent): void => {
+      if (!isPanningRef.current) return
+      isPanningRef.current = false
+      if (document.pointerLockElement === pane) {
+        document.exitPointerLock()
+      }
+      if (e && pane.hasPointerCapture(e.pointerId)) {
+        pane.releasePointerCapture(e.pointerId)
+      }
+    }
+
+    pane.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('pointermove', onPointerMove)
+    document.addEventListener('pointerup', endPan)
+    // `pointerlockchange` fires when the user presses Escape (the
+    // browser-imposed unlock shortcut) — clear our flag so the
+    // next mousedown re-locks instead of thinking we're still
+    // dragging.
+    const onLockChange = (): void => {
+      if (document.pointerLockElement !== pane) {
+        isPanningRef.current = false
+      }
+    }
+    document.addEventListener('pointerlockchange', onLockChange)
+
+    return (): void => {
+      pane.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('pointermove', onPointerMove)
+      document.removeEventListener('pointerup', endPan)
+      document.removeEventListener('pointerlockchange', onLockChange)
+      if (document.pointerLockElement === pane) {
+        document.exitPointerLock()
+      }
+    }
+  }, [getViewport, setViewport, layoutReady])
+
   return (
+    <div
+      ref={reactFlowWrapperRef}
+      style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', minHeight: 0 }}
+    >
     <ReactFlow
       nodes={nodes}
       edges={edges}
@@ -174,12 +286,11 @@ const ModelGraphCanvas: React.FC<{
       zoomActivationKeyCode={['Control', 'Meta']}
       zoomOnPinch
       preventScrolling={false}
-      // Drag the viewport from anywhere — including over a node —
-      // when the user holds the mouse button. Combined with
-      // `nodesDraggable={false}`, this means click-drag on a node
-      // moves the camera, not the node, so the user can pan
-      // without aiming for empty space.
-      panOnDrag
+      // Disable xyflow's built-in pan — we drive panning ourselves
+      // via Pointer Lock + `movementX/Y` (see the effect above).
+      // Leaving this on would race with our custom handler and
+      // produce double-applied deltas.
+      panOnDrag={false}
       nodesDraggable={false}
       nodesConnectable={false}
       elementsSelectable={false}
@@ -200,5 +311,6 @@ const ModelGraphCanvas: React.FC<{
     >
       <Controls showInteractive={false} />
     </ReactFlow>
+    </div>
   )
 }

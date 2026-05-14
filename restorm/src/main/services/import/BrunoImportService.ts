@@ -402,7 +402,6 @@ function brunoToHTTPRequest(request: BrunoRequest, pathPrefix: string): HTTPRequ
     type: 'http',
     id: generateId(`bruno:request:${pathPrefix}:${request.meta.name}`),
     name: request.meta.name,
-    documentation: '',
     tags: [],
     method: toHTTPMethod(request.method),
     url: request.url,
@@ -440,7 +439,6 @@ function brunoToGraphQLRequest(request: BrunoRequest, pathPrefix: string): Graph
     type: 'graphql',
     id: generateId(`bruno:graphql:${pathPrefix}:${request.meta.name}`),
     name: request.meta.name,
-    documentation: '',
     tags: [],
     url: request.url,
     operationType,
@@ -538,7 +536,6 @@ export function importBruno(
         folder = {
           id: generateId(`bruno:folder:${folderPath}`),
           name: folderName,
-          documentation: '',
           tags: [],
           configuration: {},
           items: []
@@ -607,7 +604,6 @@ export function importBruno(
     importSource: 'bruno',
     id: generateId(`bruno:root:${collectionName}`),
     name: collectionName,
-    documentation: '',
     tags: [],
     configuration: {},
     environments: [environment],
@@ -688,7 +684,6 @@ export function importBrunoFromJson(
         const folder: Folder = {
           id: generateId(`bruno:folder:${pathPrefix}/${item.name}`),
           name: item.name,
-          documentation: '',
           tags: [],
           configuration: {},
           items: convertItems(item.items as typeof data.items, `${pathPrefix}/${item.name}`)
@@ -753,7 +748,6 @@ export function importBrunoFromJson(
                   type: 'graphql',
                   id: generateId(`bruno:graphql:${pathPrefix}/${item.name}`),
                   name: item.name,
-                  documentation: '',
                   tags: [],
                   url: req.url,
                   operationType,
@@ -774,7 +768,6 @@ export function importBrunoFromJson(
           type: 'http',
           id: generateId(`bruno:request:${pathPrefix}/${item.name}`),
           name: item.name,
-          documentation: '',
           tags: [],
           method: toHTTPMethod(req.method),
           url: req.url,
@@ -868,7 +861,6 @@ export function importBrunoFromJson(
     importSource: 'bruno',
     id: generateId(`bruno:root:${collectionName}`),
     name: collectionName,
-    documentation: '',
     tags: [],
     configuration: {},
     environments: [environment],

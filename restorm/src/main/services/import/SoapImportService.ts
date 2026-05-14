@@ -234,7 +234,6 @@ function operationToRequest(
     type: 'soap',
     id: generateId(`${collectionName}:soap:${service.name}:${operation.name}`),
     name: operation.name,
-    documentation: '',
     tags: ['soap'],
     url: baseUrl,
     soapAction: operation.soapAction,
@@ -281,10 +280,8 @@ export function importSoap(wsdlContent: string, options: SoapImportOptions = {})
     
     // Merge operation info from binding and portType
     const operations = binding.operations.map(bindingOp => {
-      const portTypeOp = portType.operations.find(op => op.name === bindingOp.name)
       return {
-        ...bindingOp,
-        documentation: portTypeOp?.documentation
+        ...bindingOp
       }
     })
     
@@ -293,7 +290,6 @@ export function importSoap(wsdlContent: string, options: SoapImportOptions = {})
     const serviceFolder: Folder = {
       id: generateId(`${name}:folder:soap:${service.name}`),
       name: service.name,
-      documentation: '',
       tags: ['service'],
       configuration: {},
       items: operations.map(op =>
@@ -351,7 +347,6 @@ export function importSoap(wsdlContent: string, options: SoapImportOptions = {})
     importSource: 'wsdl',
     id: generateId(`${name}:folder:soap:root`),
     name,
-    documentation: '',
     tags: [],
     configuration: {},
     environments: [environment],

@@ -22,6 +22,7 @@ const Titlebar: React.FC<TitlebarProps> = ({
   renderSearchBadge,
   searchFn,
   searchBarTestId,
+  searchTooltipHideDelayMs,
   customWcoTestId,
   customWcoPlatform,
   showNavigation
@@ -129,6 +130,7 @@ const Titlebar: React.FC<TitlebarProps> = ({
             {...(searchFn ? { searchFn } : {})}
             {...(renderSearchTooltipContent ? { renderTooltipContent: renderSearchTooltipContent } : {})}
             {...(renderSearchBadge ? { renderBadge: renderSearchBadge } : {})}
+            {...(searchTooltipHideDelayMs !== undefined ? { tooltipHideDelayMs: searchTooltipHideDelayMs } : {})}
           />
         ) : (
           centerContent ?? <span className="titlebar-title" data-testid={titleTestId}>{title}</span>

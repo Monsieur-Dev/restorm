@@ -73,7 +73,6 @@ export function buildRequestFromOperation(operation: OperationDocumentation): HT
     type: 'http',
     id,
     name,
-    documentation: '',
     tags: operation.group !== undefined ? [operation.group] : [],
     method: toHTTPMethod(operation.match.method),
     url,

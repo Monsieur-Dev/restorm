@@ -37,8 +37,7 @@ export interface DocumentationHostProps {
    * the route summary is the H1. */
   scopeTitle?: string
   /** Optional markdown rendered immediately under the scope title.
-   * Pulled from `apiDocumentation.api.description` for env folders
-   * and from the user-authored `folder.documentation` for folders. */
+   * Pulled from `apiDocumentation.api.description` for env folders. */
   scopeDescription?: string
   /** Wired by multi-route hosts (folder doc) to spawn a fresh
    * pre-configured request from any route block. When provided,

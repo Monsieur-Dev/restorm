@@ -249,7 +249,6 @@ function fieldToRequest(
     type: 'graphql',
     id: generateId(`${collectionName}:graphql:${operationType}:${field.name}`),
     name: field.name,
-    documentation: '',
     tags: [operationType],
     url: baseUrl,
     operationType,
@@ -299,7 +298,6 @@ export function importGraphQL(schemaString: string, options: GraphQLImportOption
     const queriesFolder: Folder = {
       id: generateId(`${name}:folder:graphql:queries`),
       name: 'Queries',
-      documentation: '',
       tags: ['query'],
       configuration: {},
       items: schema.queries.map(field => fieldToRequest(field, 'query', baseUrl, name))
@@ -311,7 +309,6 @@ export function importGraphQL(schemaString: string, options: GraphQLImportOption
     const mutationsFolder: Folder = {
       id: generateId(`${name}:folder:graphql:mutations`),
       name: 'Mutations',
-      documentation: '',
       tags: ['mutation'],
       configuration: {},
       items: schema.mutations.map(field => fieldToRequest(field, 'mutation', baseUrl, name))
@@ -323,7 +320,6 @@ export function importGraphQL(schemaString: string, options: GraphQLImportOption
     const subscriptionsFolder: Folder = {
       id: generateId(`${name}:folder:graphql:subscriptions`),
       name: 'Subscriptions',
-      documentation: '',
       tags: ['subscription'],
       configuration: {},
       items: schema.subscriptions.map(field => fieldToRequest(field, 'subscription', baseUrl, name))
@@ -359,7 +355,6 @@ export function importGraphQL(schemaString: string, options: GraphQLImportOption
     importSource: 'graphql',
     id: generateId(`${name}:folder:graphql:root`),
     name,
-    documentation: '',
     tags: [],
     configuration: {},
     environments: [environment],

@@ -284,7 +284,7 @@ export function registerWriteTools(mcp: McpService): void {
       title: 'Update arbitrary fields on a folder or env-folder',
       description:
         'Apply a partial-patch to an existing folder. Whitelisted fields cover both Folder and ' +
-        'EnvironmentFolder shapes: `name`, `documentation`, `notes`, `tags`, `tagColors`, ' +
+        'EnvironmentFolder shapes: `name`, `notes`, `tags`, `tagColors`, ' +
         '`configuration`, `environments` (env-folders only), `enumDefinitions`, `apiUpdate`. ' +
         '`id`, `items` and `folderType` are protected (use create / move / delete for those). ' +
         'Triggers an MCP-driven refresh so an open folder tab repaints.',

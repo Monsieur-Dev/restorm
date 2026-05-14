@@ -280,7 +280,6 @@ function requestToHTTPRequest(request: InsomniaRequest): HTTPRequest {
     type: 'http',
     id: generateId(`insomnia:request:${request._id}`),
     name: request.name,
-    documentation: '',
     tags: [],
     method: toHTTPMethod(request.method),
     url: request.url,
@@ -332,7 +331,6 @@ function requestToGraphQLRequest(request: InsomniaRequest): GraphQLRequest {
     type: 'graphql',
     id: generateId(`insomnia:graphql:${request._id}`),
     name: request.name,
-    documentation: '',
     tags: [],
     url: request.url,
     operationType,
@@ -366,7 +364,6 @@ function buildFolderTree(
     const folder: Folder = {
       id: generateId(`insomnia:folder:${group._id}`),
       name: group.name,
-      documentation: '',
       tags: [],
       configuration: {},
       items: buildFolderTree(resources, group._id)
@@ -545,7 +542,6 @@ export function importInsomnia(
     importSource: 'insomnia',
     id: generateId(`insomnia:root:${workspaceName}`),
     name: workspaceName,
-    documentation: '',
     tags: [],
     configuration: {},
     environments,

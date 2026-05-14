@@ -175,7 +175,6 @@ class CollectionStore {
       const envFolder = new EnvironmentFolder({
         id: newFolder.id,
         name: newFolder.name,
-        documentation: newFolder.documentation,
         notes: newFolder.notes,
         tags: newFolder.tags,
         items: [],

@@ -508,7 +508,6 @@ function operationToRequest(
     type: 'http',
     id: generateId(`request:${method}:${path}`),
     name: operation.summary ?? operation.operationId ?? `${method.toUpperCase()} ${path}`,
-    documentation: '',
     tags: operation.tags ?? [],
     method: toHTTPMethod(method),
     url: buildUrl(path, parameters),
@@ -617,7 +616,6 @@ function buildFolderItems(spec: OAS3Spec, enumLookup?: Map<string, string>): Fol
     tagFolders.set(tag.name, {
       id: generateId(`folder:tag:${tag.name}`),
       name: tag.name,
-      documentation: '',
       tags: [tag.name],
       configuration: {},
       items: []
@@ -627,7 +625,6 @@ function buildFolderItems(spec: OAS3Spec, enumLookup?: Map<string, string>): Fol
   const untaggedFolder: Folder = {
     id: generateId('folder:untagged:Other'),
     name: 'Other',
-    documentation: '',
     tags: [],
     configuration: {},
     items: []
@@ -650,7 +647,6 @@ function buildFolderItems(spec: OAS3Spec, enumLookup?: Map<string, string>): Fol
           folder = {
             id: generateId(`folder:tag:${tagName}`),
             name: tagName,
-            documentation: '',
             tags: [tagName],
             configuration: {},
             items: []
@@ -670,7 +666,6 @@ function buildFolderItems(spec: OAS3Spec, enumLookup?: Map<string, string>): Fol
     webhooksFolder = {
       id: generateId('folder:webhooks'),
       name: 'Webhooks',
-      documentation: 'Documentation-only — webhooks are incoming events.',
       tags: ['webhook'],
       configuration: {},
       items: []
@@ -915,7 +910,6 @@ export function importOpenAPI(
     fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     id: generateId(`folder:root:${spec.info.title}`),
     name: spec.info.title,
-    documentation: '',
     tags: [],
     configuration: {},
     environments: [newEnvironment],

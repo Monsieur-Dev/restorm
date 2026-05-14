@@ -24,7 +24,6 @@ export interface BaseRequest {
   id: RuntimeId
   name: string
   icon?: Icon
-  documentation: string
   notes?: string
   tags: string[]
   /** When set, the execution engine resolves this id to an
