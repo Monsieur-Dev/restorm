@@ -139,7 +139,13 @@ const ModalInner: React.FC<ModalProps> = ({
       onTransitionEnd={(event) => {
         if (event.target !== event.currentTarget) return
         if (event.propertyName !== 'opacity') return
-        if (overlayState === 'closing') {
+        // `!isOpen` guards a close that was superseded by a re-open
+        // mid-fade: the cancelled fade-out still fires `transitionend`,
+        // but if `isOpen` flipped back true the open-branch effect is
+        // already driving `overlayState` back to `open` — tearing the
+        // modal down (or firing `onClosed`) here would wipe the
+        // re-opened state.
+        if (overlayState === 'closing' && !isOpen) {
           setIsRendered(false)
           setOverlayState('closed')
           onClosed?.()
