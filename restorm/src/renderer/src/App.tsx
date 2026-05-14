@@ -22,7 +22,9 @@ import {
   useDraftsRestored,
   useDirtyUnitsSet,
   cleanseForPersistence,
-  toasterService
+  toasterService,
+  useMcpMiniBrowserBridge,
+  type MiniBrowserBridgeApi
 } from 'electron-core-ui/renderer'
 import { PROJECT_UUID_KEY } from '../../shared/config/projectUuid'
 import { HTTPRequest } from '../../shared/models/requests/HTTPRequest'
@@ -90,7 +92,6 @@ import { useMcpNavigation } from './hooks/useMcpNavigation'
 import { useMcpTreeReplace } from './hooks/useMcpTreeReplace'
 import { useMcpRunRequest } from './hooks/useMcpRunRequest'
 import { useMcpRequestPatch } from './hooks/useMcpRequestPatch'
-import { useMcpMiniBrowserBridge } from './hooks/useMcpMiniBrowserBridge'
 import { useMcpWorkbenchTabsBridge } from './hooks/useMcpWorkbenchTabsBridge'
 import { clearConsoleFeed } from './components/Console/useConsoleFeed'
 import { useMcpFolderPatch } from './hooks/useMcpFolderPatch'
@@ -1157,6 +1158,10 @@ const App: React.FC = () => {
   }, [])
   useMcpMiniBrowserBridge({
     enabled: mcpEnabled,
+    // `window.restorm.runtime` carries the Mini browser IPC bridge
+    // methods; the runtime block isn't fully typed in window.d.ts, so
+    // narrow it to the bridge shape the hook needs.
+    bridge: (window as { restorm?: { runtime?: MiniBrowserBridgeApi } }).restorm?.runtime,
     openMiniBrowser: handleOpenMiniBrowser,
     setMiniBrowserUrl: setMiniBrowserUrlForMcp
   })

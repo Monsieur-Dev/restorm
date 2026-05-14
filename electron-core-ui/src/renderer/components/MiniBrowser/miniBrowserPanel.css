@@ -4,7 +4,7 @@
   width: 100%;
   height: 100%;
   background-color: var(--vscode-editor-background, #1e1e1e);
-  color: var(--vscode-foreground, #cccccc);
+  color: var(--vscode-foreground, #ccc);
 }
 
 .mini-browser-panel__toolbar {
@@ -12,7 +12,7 @@
   align-items: center;
   gap: 6px;
   padding: 6px 8px;
-  border-bottom: 1px solid var(--vscode-editorWidget-border, rgba(255, 255, 255, 0.12));
+  border-bottom: 1px solid var(--vscode-editorWidget-border, rgb(255, 255, 255, 0.12));
   background-color: var(--vscode-editorWidget-background, #252526);
   flex: 0 0 auto;
 }
@@ -26,7 +26,7 @@
   padding: 0;
   border: 1px solid var(--vscode-button-border, transparent);
   background-color: var(--vscode-button-secondaryBackground, #3a3d41);
-  color: var(--vscode-button-secondaryForeground, #cccccc);
+  color: var(--vscode-button-secondaryForeground, #ccc);
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 80ms ease;
@@ -43,20 +43,20 @@
 
 .mini-browser-panel__button--primary {
   background-color: var(--vscode-button-background, #0e639c);
-  color: var(--vscode-button-foreground, #ffffff);
+  color: var(--vscode-button-foreground, #fff);
 }
 
 .mini-browser-panel__button--primary:hover:not(:disabled) {
-  background-color: var(--vscode-button-hoverBackground, #1177bb);
+  background-color: var(--vscode-button-hoverBackground, #17b);
 }
 
 .mini-browser-panel__address {
   flex: 1 1 auto;
   height: 28px;
   padding: 0 8px;
-  border: 1px solid var(--vscode-input-border, rgba(255, 255, 255, 0.12));
+  border: 1px solid var(--vscode-input-border, rgb(255, 255, 255, 0.12));
   background-color: var(--vscode-input-background, #3c3c3c);
-  color: var(--vscode-input-foreground, #cccccc);
+  color: var(--vscode-input-foreground, #ccc);
   border-radius: 4px;
   font-size: 13px;
   font-family: var(--vscode-font-family, system-ui);
@@ -78,7 +78,7 @@
   width: 100%;
   height: 100%;
   border: 0;
-  background-color: #ffffff;
+  background-color: #fff;
 }
 
 .mini-browser-panel__placeholder {

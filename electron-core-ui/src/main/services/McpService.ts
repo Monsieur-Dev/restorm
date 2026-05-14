@@ -4,11 +4,16 @@ import { AsyncLocalStorage } from 'node:async_hooks'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join as pathJoin } from 'node:path'
-import { app, BrowserWindow, dialog as electronDialog } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog as electronDialog } from 'electron'
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 import { z } from 'zod'
 import { logger } from './LoggerService'
+import {
+  MINI_BROWSER_OPEN_CHANNEL,
+  MINI_BROWSER_EXECUTE_CHANNEL,
+  MINI_BROWSER_EXECUTE_REPLY_CHANNEL
+} from '../../types/ipcChannels'
 
 export interface McpServiceOptions {
   /**
@@ -1657,6 +1662,61 @@ export class McpService {
         return aborted ? { content: aggregatedContent, isError: true } : { content: aggregatedContent }
       }
     )
+
+    this.registerTool(
+      'open_mini_browser',
+      {
+        title: 'Open the Mini browser workbench tab',
+        description:
+          'Open (or focus, if already open) the singleton Mini browser tab in the active window. ' +
+          'Optional `url` navigates the embedded webview to that address. The host renderer ' +
+          'normalises bare hosts (e.g. `example.com`) the same way as user-typed addresses. ' +
+          'Requires the host app to wire `useMcpMiniBrowserBridge` to the Mini browser IPC channels.',
+        inputSchema: {
+          url: z.string().min(1).optional().describe(
+            'Optional URL to navigate to immediately. Accepts bare hosts (e.g. `example.com`).'
+          )
+        } as Record<string, unknown>
+      },
+      (args) => {
+        const url = typeof args['url'] === 'string' ? args['url'] : null
+        for (const win of BrowserWindow.getAllWindows()) {
+          if (!win.isDestroyed()) win.webContents.send(MINI_BROWSER_OPEN_CHANNEL, url !== null ? { url } : {})
+        }
+        return {
+          content: [{ type: 'text', text: JSON.stringify({ opened: true, ...(url !== null ? { url } : {}) }, null, 2) }]
+        }
+      }
+    )
+
+    this.registerTool(
+      'mini_browser_execute',
+      {
+        title: 'Run a script inside the Mini browser guest',
+        description:
+          'Execute a JavaScript expression inside the Mini browser\'s `<webview>` guest context ' +
+          '(NOT the host renderer) and return the result. Wraps Electron\'s ' +
+          '`webview.executeJavaScript(code)`. Use it to fill login forms in the embedded site, ' +
+          'extract a token from the page\'s `localStorage`, click a button, or read a DOM node. ' +
+          'The result is whatever the expression resolves to (JSON-serialisable values come back ' +
+          'as-is; functions and circular refs become `null`). Returns an error if no Mini browser ' +
+          'tab is open or the webview hasn\'t finished its initial load.',
+        inputSchema: {
+          code: z.string().min(1).describe('JavaScript expression to evaluate in the guest context. Wrap multi-statement code in an IIFE.'),
+          timeoutMs: z.coerce.number().int().min(500).max(60_000).optional().describe('Max time to wait for the renderer to forward the result. Default 5000ms.')
+        } as Record<string, unknown>
+      },
+      async (args) => {
+        const code = typeof args['code'] === 'string' ? args['code'] : ''
+        if (!code) return { content: [{ type: 'text', text: 'code is required' }], isError: true }
+        const timeoutMs = typeof args['timeoutMs'] === 'number' ? args['timeoutMs'] : 5_000
+        const outcome = await executeInMiniBrowser(code, timeoutMs)
+        if (outcome.ok) {
+          return { content: [{ type: 'text', text: JSON.stringify({ result: outcome.result }, null, 2) }] }
+        }
+        return { content: [{ type: 'text', text: outcome.error }], isError: true }
+      }
+    )
   }
 
   private async handleRequest(req: IncomingMessage, res: ServerResponse): Promise<void> {
@@ -1909,6 +1969,44 @@ function timingSafeStringEq(a: string, b: string): boolean {
   const bb = Buffer.from(b, 'utf8')
   if (ab.length !== bb.length) return false
   return timingSafeEqual(ab, bb)
+}
+
+/**
+ * Round-trip executor for the `mini_browser_execute` tool: broadcast a
+ * request with a unique id to every renderer window, wait for the first
+ * matching reply on the `-reply` channel, then resolve. Times out
+ * cleanly so an agent doesn't hang on a window with no webview mounted.
+ */
+function executeInMiniBrowser(
+  code: string,
+  timeoutMs: number
+): Promise<{ ok: true; result: unknown } | { ok: false; error: string }> {
+  const requestId = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+  return new Promise((resolve) => {
+    let settled = false
+    const handler = (_e: unknown, payload: unknown): void => {
+      if (settled) return
+      const p = payload as { requestId?: string; result?: unknown; error?: string }
+      if (p.requestId !== requestId) return
+      settled = true
+      ipcMain.off(MINI_BROWSER_EXECUTE_REPLY_CHANNEL, handler)
+      if (typeof p.error === 'string' && p.error.length > 0) {
+        resolve({ ok: false, error: p.error })
+      } else {
+        resolve({ ok: true, result: p.result })
+      }
+    }
+    ipcMain.on(MINI_BROWSER_EXECUTE_REPLY_CHANNEL, handler)
+    for (const win of BrowserWindow.getAllWindows()) {
+      if (!win.isDestroyed()) win.webContents.send(MINI_BROWSER_EXECUTE_CHANNEL, { requestId, code })
+    }
+    setTimeout(() => {
+      if (settled) return
+      settled = true
+      ipcMain.off(MINI_BROWSER_EXECUTE_REPLY_CHANNEL, handler)
+      resolve({ ok: false, error: `mini_browser_execute: no renderer reply within ${timeoutMs}ms — is the Mini browser tab open?` })
+    }, timeoutMs)
+  })
 }
 
 /**

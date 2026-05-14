@@ -1,1 +1,0 @@
-export { MiniBrowserPanel } from './MiniBrowserPanel'

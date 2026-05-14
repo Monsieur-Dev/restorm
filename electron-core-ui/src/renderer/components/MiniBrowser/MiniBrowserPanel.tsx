@@ -1,14 +1,14 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { IconView } from 'electron-core-ui/renderer'
+import { IconView } from '../IconView'
 import './miniBrowserPanel.css'
 
-interface MiniBrowserPanelProps {
-  /** URL persisted on the workbench tab. The webview loads this on
+export interface MiniBrowserPanelProps {
+  /** URL persisted on the host's tab. The webview loads this on
    * mount, and any user-driven navigation pushes the new URL back
-   * through `onUrlChange` so the workbench tree state stays in sync. */
+   * through `onUrlChange` so the host's tab state stays in sync. */
   initialUrl?: string
   /** Persist the latest committed URL on the parent tab so reopening
-   * the workbench restores the same page. Called after a refresh, a
+   * the panel restores the same page. Called after a refresh, a
    * back navigation, or a manual address-bar submit — NOT on every
    * keystroke (typing in the address bar shouldn't churn the
    * persistence layer). */
@@ -17,12 +17,11 @@ interface MiniBrowserPanelProps {
 
 /**
  * Electron webview tag — process-isolated guest browser, used by the
- * Mini browser instead of a plain `<iframe>`. Reasons spelled out in
- * `MainWindow.createWindow`: cross-site iframe storage is partitioned
- * by Chromium so a third-party SPA can't read its own localStorage
- * (e.g. login forms that persist a JWT silently fail). A webview has
- * its own top-level browsing context, so storage / cookies / IndexedDB
- * all work as if the user typed the URL in a real browser tab.
+ * Mini browser instead of a plain `<iframe>`. Cross-site iframe storage
+ * is partitioned by Chromium so a third-party SPA can't read its own
+ * localStorage (e.g. login forms that persist a JWT silently fail). A
+ * webview has its own top-level browsing context, so storage / cookies /
+ * IndexedDB all work as if the user typed the URL in a real browser tab.
  *
  * React already ships `WebViewHTMLAttributes` / `HTMLWebViewElement`
  * intrinsics, so the `<webview>` element type-checks out of the box —
@@ -54,10 +53,9 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ initialUrl, 
   const [committedUrl, setCommittedUrl] = useState(initialUrl ?? '')
 
   // `<webview>` exposes its own navigation history (`goBack` / `canGoBack`),
-  // so unlike the previous iframe implementation we don't need a manual
-  // URL stack. Track only the back-availability flag for the toolbar
-  // disabled state — it has to live in React state because `canGoBack`
-  // isn't reactive.
+  // so unlike a plain iframe we don't need a manual URL stack. Track only
+  // the back-availability flag for the toolbar disabled state — it has to
+  // live in React state because `canGoBack` isn't reactive.
   const webviewRef = useRef<WebviewElement | null>(null)
   const [canGoBack, setCanGoBack] = useState(false)
 
@@ -113,8 +111,7 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ initialUrl, 
   // the parent tab. `did-navigate` fires for top-level navigations
   // (link clicks, form submits, location.href = ...). `did-navigate-in-page`
   // covers SPA route changes (history.pushState / replaceState) so the
-  // address bar stays accurate inside single-page apps like
-  // play.artifactsmmo.com.
+  // address bar stays accurate inside single-page apps.
   useEffect(() => {
     const webview = webviewRef.current
     if (!webview) return

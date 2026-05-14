@@ -7,6 +7,11 @@ import { createCoreUIAPI } from '../../../../electron-core-ui/src/preload/api'
 import { createElectronAPI } from '../../../../electron-core-ui/src/preload/electronAPI'
 import type { PersistenceFormat } from '../../../../electron-core-ui/src/main/services/PersistenceService'
 import {
+  MINI_BROWSER_OPEN_CHANNEL,
+  MINI_BROWSER_EXECUTE_CHANNEL,
+  MINI_BROWSER_EXECUTE_REPLY_CHANNEL
+} from '../../../../electron-core-ui/src/types/ipcChannels'
+import {
   FIREWALL_IPC,
   FIREWALL_REQUEST_RECORD_CHANNEL,
   type FirewallOrigin,
@@ -831,8 +836,8 @@ contextBridge.exposeInMainWorld('restorm', {
      * singleton tab is mounted. */
     onMcpOpenMiniBrowser: (callback: (payload: { url?: string }) => void): (() => void) => {
       const handler = (_e: unknown, payload: unknown): void => { callback((payload ?? {}) as { url?: string }) }
-      ipcRenderer.on('mcp:mini-browser-open', handler)
-      return () => { ipcRenderer.off('mcp:mini-browser-open', handler) }
+      ipcRenderer.on(MINI_BROWSER_OPEN_CHANNEL, handler)
+      return () => { ipcRenderer.off(MINI_BROWSER_OPEN_CHANNEL, handler) }
     },
     /** Subscribe to MCP `mini_browser_execute`. Payload
      * `{ requestId, code }`. The renderer is expected to run the
@@ -841,13 +846,13 @@ contextBridge.exposeInMainWorld('restorm', {
      * `restorm.runtime.replyMiniBrowserExecute({ requestId, result, error })`. */
     onMcpMiniBrowserExecute: (callback: (payload: { requestId: string; code: string }) => void): (() => void) => {
       const handler = (_e: unknown, payload: unknown): void => { callback(payload as { requestId: string; code: string }) }
-      ipcRenderer.on('mcp:mini-browser-execute', handler)
-      return () => { ipcRenderer.off('mcp:mini-browser-execute', handler) }
+      ipcRenderer.on(MINI_BROWSER_EXECUTE_CHANNEL, handler)
+      return () => { ipcRenderer.off(MINI_BROWSER_EXECUTE_CHANNEL, handler) }
     },
     /** Send the result of a `mini_browser_execute` script back to main.
      * `error` is set when the script threw or the webview wasn't ready. */
     replyMiniBrowserExecute: (payload: { requestId: string; result?: unknown; error?: string }): void => {
-      ipcRenderer.send('mcp:mini-browser-execute-reply', payload)
+      ipcRenderer.send(MINI_BROWSER_EXECUTE_REPLY_CHANNEL, payload)
     },
     /** Subscribe to MCP `open_console` — open / focus the singleton Console tab. */
     onMcpOpenConsole: (callback: () => void): (() => void) => {

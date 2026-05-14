@@ -401,6 +401,27 @@ Per-step `waitFor` overrides the implicit settle. Pick one shape:
 
 When a step is `screencast-stop`, the recorded `.webm` is read from disk and inlined as a `resource` content part (base64 `blob` + `video/webm` `mimeType`), so a `screencast-start → actions → screencast-stop` chain returns the video bytes without a follow-up file read. Not to be confused with consuming-app tools like restorm's `run_request_batch`, which batches HTTP / protocol requests.
 
+### `open_mini_browser`
+
+Broadcasts `MINI_BROWSER_OPEN_CHANNEL` to open / focus the host app's Mini browser panel. Optional `url` navigates the embedded webview immediately (bare hosts like `example.com` are normalised by the renderer). Requires the host to render `MiniBrowserPanel` and wire `useMcpMiniBrowserBridge` — see the [MiniBrowser doc](../MiniBrowser/README.md).
+
+```jsonc
+{ "url": "https://example.com" }   // url optional
+```
+
+### `mini_browser_execute`
+
+Runs a JavaScript expression inside the Mini browser's `<webview>` **guest** context (not the host renderer) and returns the result. Broadcasts `MINI_BROWSER_EXECUTE_CHANNEL` with a request id, waits for the renderer's reply on `MINI_BROWSER_EXECUTE_REPLY_CHANNEL`. Use it to fill a login form in the embedded site, read a token from the page's `localStorage`, click a button, etc.
+
+```jsonc
+{
+  "code": "(() => localStorage.getItem('jwt'))()",
+  "timeoutMs": 5000   // optional, default 5000, max 60000
+}
+```
+
+Returns an error if no Mini browser tab is open or the webview hasn't finished its initial load.
+
 ### `get-windows`
 
 Returns every active `BrowserWindow` with its `id` (= `webContents.id`), `title`, `bounds`, and focus / visible / minimized / maximized / fullscreen / always-on-top / devtools flags.

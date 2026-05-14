@@ -62,6 +62,10 @@ export type { VariableInputBoxProps, VariableDefinition } from './VariableInputB
 export { CodeEditor, bootstrapMonaco } from './CodeEditor'
 export type { CodeEditorProps, CodeEditorRef } from './CodeEditor'
 
+// MiniBrowser exports
+export { MiniBrowserPanel } from './MiniBrowser'
+export type { MiniBrowserPanelProps } from './MiniBrowser'
+
 // Settings exports
 export { SettingsPage, SettingsModalProvider, useSettingsModal } from './Settings'
 
