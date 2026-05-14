@@ -30,6 +30,7 @@ function updateReactiveProperty<T extends object, K extends keyof T>(obj: T, key
 import { BaseFolderView } from './BaseFolderView'
 import type { ApiDocumentation, OperationDocumentation } from '../../../../shared/types/apiDocumentation'
 import { DocumentationHost } from '../documentation/DocumentationHost'
+import { mergeEnumDefinitionsIntoModels } from '../documentation/mergeEnumDefinitions'
 import { useRequestCreation } from '../../contexts/useRequestCreation'
 
 /** Generate a unique ID for a new environment */
@@ -794,7 +795,12 @@ const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ fold
     content: <EnvironmentConfigPanel folder={folder} onFolderChange={onFolderChange} />
   }
 
-  const apiDocumentation = (folder as unknown as { apiDocumentation?: unknown }).apiDocumentation as ApiDocumentation | undefined
+  const rawApiDocumentation = (folder as unknown as { apiDocumentation?: unknown }).apiDocumentation as ApiDocumentation | undefined
+  const apiDocumentation = useMemo(() => (
+    rawApiDocumentation !== undefined
+      ? mergeEnumDefinitionsIntoModels(rawApiDocumentation, folder.enumDefinitions)
+      : undefined
+  ), [rawApiDocumentation, folder.enumDefinitions])
 
   // Structured documentation viewer for the whole API spec. No
   // filters → host renders the API title + every operation +

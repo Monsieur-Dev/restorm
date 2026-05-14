@@ -8,6 +8,7 @@ import type { RouteLike } from '../../../../shared/utils/findOperationForRoute'
 import { useRestormStore } from '../../store/restormStore'
 import { routeFromRequest } from '../../hooks/routeFromRequest'
 import { DocumentationHost } from '../documentation/DocumentationHost'
+import { mergeEnumDefinitionsIntoModels } from '../documentation/mergeEnumDefinitions'
 import { useRequestCreation } from '../../contexts/useRequestCreation'
 import { BaseFolderView } from './BaseFolderView'
 
@@ -78,8 +79,9 @@ export const FolderView: React.FC<FolderViewProps> = ({ folder, onFolderChange }
   const docsContent = useMemo(() => {
     void collections
     const owning = findOwningEnvironmentFolder(folder.id)
-    const apiDoc = owning ? apiDocFromItem(owning) : undefined
-    if (!apiDoc) return undefined
+    const rawApiDoc = owning ? apiDocFromItem(owning) : undefined
+    if (!rawApiDoc) return undefined
+    const apiDoc = mergeEnumDefinitionsIntoModels(rawApiDoc, owning?.enumDefinitions)
 
     const requests = collectRequests(folder)
     if (requests.length === 0) return undefined

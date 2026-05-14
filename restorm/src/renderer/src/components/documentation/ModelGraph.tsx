@@ -160,6 +160,23 @@ const ModelGraphCanvas: React.FC<{
       const cx = node.position.x + width / 2
       const cy = node.position.y + height / 2
       void setCenter(cx, cy, { zoom: 1, duration: 350 })
+      // After the pan finishes, flash the destination node's border
+      // twice so the user can locate the target even when it's
+      // already on screen (no pan happens) — the eye otherwise has
+      // no anchor to spot which card was "focused".
+      const wrapper = reactFlowWrapperRef.current
+      window.setTimeout(() => {
+        const nodeEl = wrapper?.querySelector<HTMLElement>(
+          `[data-testid="documentation-host-model-node-${CSS.escape(name)}"]`
+        )
+        if (!nodeEl) return
+        // Toggle the class off and force a reflow before re-adding
+        // it so a second `focusModel` call on the same node always
+        // restarts the animation from frame 0.
+        nodeEl.classList.remove('documentation-host-model-node--flash')
+        void nodeEl.offsetWidth
+        nodeEl.classList.add('documentation-host-model-node--flash')
+      }, 350)
     }
   }), [getNode, setCenter])
 
@@ -181,12 +198,16 @@ const ModelGraphCanvas: React.FC<{
       if (e.button !== 0) return
       const target = e.target
       if (!(target instanceof Element)) return
-      // Only kick in on the empty pane (not on a node, edge label,
-      // or the Controls bar). The pane is the largest clickable
-      // child of React Flow; if the user clicked anywhere else,
-      // we let the default handler run (e.g. zoom/fit buttons).
+      // Skip the Controls bar and minimap so their click handlers
+      // (zoom buttons, viewport thumbnail) fire normally.
       if (target.closest('.react-flow__controls')) return
       if (target.closest('.react-flow__minimap')) return
+      // Skip clicks on interactive elements inside nodes — most
+      // notably `ModelRefLink` buttons that cross-reference other
+      // models. Without this guard we `preventDefault`+capture the
+      // pointer, swallowing the click and the user sees nothing
+      // happen when they hit the link.
+      if (target.closest('button, a, input, select, textarea, [role="button"]')) return
       isPanningRef.current = true
       // Capture the pointer so move/up events stay routed to the
       // pane even when the physical cursor would leave its bounds

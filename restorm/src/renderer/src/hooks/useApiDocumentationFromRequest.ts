@@ -16,6 +16,7 @@ import type { RouteLike } from '../../../shared/utils/findOperationForRoute'
 import { resolveUrlAgainstEnv, flattenEnvVars } from '../../../shared/utils/resolveUrlAgainstEnv'
 import type { EnvironmentFolder } from '../../../shared/types/folderTypes'
 import { routeFromRequest } from './routeFromRequest'
+import { mergeEnumDefinitionsIntoModels } from '../components/documentation/mergeEnumDefinitions'
 
 function apiDocFromItem(item: unknown): ApiDocumentation | undefined {
   if (item && typeof item === 'object' && 'apiDocumentation' in item) {
@@ -81,7 +82,10 @@ export function useApiDocumentationFromRequest(request: Request | null): ApiDocu
   return useMemo<ApiDocumentationFromRequest>(() => {
     if (!request) return { apiDocumentation: undefined, route: undefined }
     const folder = findOwningEnvironmentFolder(request.id)
-    const apiDoc = folder ? apiDocFromItem(folder) : undefined
+    const rawApiDoc = folder ? apiDocFromItem(folder) : undefined
+    const apiDoc = rawApiDoc !== undefined
+      ? mergeEnumDefinitionsIntoModels(rawApiDoc, folder?.enumDefinitions)
+      : undefined
     const route = routeFromRequest(request)
     if (route.url !== undefined) {
       const envVars = flattenEnvVars(envVarsFromFolder(folder))

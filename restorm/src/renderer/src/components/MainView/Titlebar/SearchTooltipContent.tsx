@@ -26,6 +26,7 @@ import requestDetailsTemplate from '../../../resources/templates/search/request-
 import { Badge } from '../../common/Badge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { DocumentationHost } from '../../documentation/DocumentationHost'
+import { mergeEnumDefinitionsIntoModels } from '../../documentation/mergeEnumDefinitions'
 import { useRestormStore } from '../../../store/restormStore'
 import { findOperationForRoute, type RouteLike } from '../../../../../shared/utils/findOperationForRoute'
 import { routeFromRequest } from '../../../hooks/routeFromRequest'
@@ -136,8 +137,9 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
     if (category === 'request') {
       const lookup = findRequestWithParent(collections, resultId)
       if (!lookup) return null
-      const apiDoc = lookup.parent.apiDocumentation
-      if (!apiDoc) return null
+      const rawApiDoc = lookup.parent.apiDocumentation
+      if (!rawApiDoc) return null
+      const apiDoc = mergeEnumDefinitionsIntoModels(rawApiDoc, lookup.parent.enumDefinitions)
       const route = resolvedRouteFromRequest(lookup.request, lookup.parent)
       if (!findOperationForRoute(apiDoc, route)) return null
       return (
@@ -154,8 +156,9 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
       // Only env-folders carry structured `apiDocumentation`. Plain
       // folders without one fall through to the notes-only popover.
       if (!isEnvironmentFolder(folder)) return null
-      const apiDoc = folder.apiDocumentation
-      if (!apiDoc) return null
+      const rawApiDoc = folder.apiDocumentation
+      if (!rawApiDoc) return null
+      const apiDoc = mergeEnumDefinitionsIntoModels(rawApiDoc, folder.enumDefinitions)
       return (
         <DocumentationHost
           apiDocumentation={apiDoc}
