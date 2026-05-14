@@ -16,6 +16,7 @@ Feature: MCP server end-to-end
     And the MCP tool list should include "read_stream"
     And the MCP tool list should include "get_response_history"
     And the MCP tool list should include "get_response"
+    And the MCP tool list should include "set_tab_maximized"
 
     When I call MCP create_project with name "mcp-e2e"
     Then the workbench should not show the welcome screen
@@ -29,3 +30,12 @@ Feature: MCP server end-to-end
     Then the MCP run_request reply should report status 200
     And the response panel should show a non-empty body
     And the response history panel should show at least 1 entry
+
+    # `set_tab_maximized` drives `EditorWorkbench`'s fullscreen handle:
+    # maximizing opens the request tab in the shared fullscreen modal,
+    # restoring closes it back to its split-pane slot.
+    When I open the first imported request as a workbench tab via MCP
+    And I maximize the current workbench tab via MCP
+    Then the fullscreen workbench modal should be visible
+    When I restore the maximized workbench tab via MCP
+    Then the fullscreen workbench modal should be hidden

@@ -14,7 +14,8 @@ import {
   MINI_BROWSER_EXECUTE_CHANNEL,
   MINI_BROWSER_EXECUTE_REPLY_CHANNEL,
   CONSOLE_OPEN_CHANNEL,
-  CONSOLE_CLEAR_CHANNEL
+  CONSOLE_CLEAR_CHANNEL,
+  SET_TAB_MAXIMIZED_CHANNEL
 } from '../../types/ipcChannels'
 
 export interface McpServiceOptions {
@@ -1762,6 +1763,40 @@ export class McpService {
           if (!win.isDestroyed()) win.webContents.send(CONSOLE_CLEAR_CHANNEL, {})
         }
         return { content: [{ type: 'text', text: JSON.stringify({ cleared: true }, null, 2) }] }
+      }
+    )
+
+    this.registerTool(
+      'set_tab_maximized',
+      {
+        title: 'Maximize or restore a workbench tab',
+        description:
+          'Open a workbench tab fullscreen (in the same modal a double-click on the tab opens), ' +
+          'or restore it back to its normal split-pane slot. The maximized and normal views share ' +
+          'one React instance, so no edits / responses / scroll state are lost in either direction. ' +
+          'Pass `maximized: true` with a `tabId` to maximize; pass `maximized: false` to restore ' +
+          '(the `tabId` is ignored on restore — at most one tab can be maximized at a time). ' +
+          'Only tabs the host marked maximizable (`allowFullscreen`) will actually maximize. ' +
+          'Broadcasts SET_TAB_MAXIMIZED_CHANNEL — requires the host to wire `EditorWorkbench`\'s ' +
+          '`setFullscreenTabId` handle to it.',
+        inputSchema: {
+          tabId: z.string().min(1).optional().describe('Id of the tab to maximize. Required when `maximized` is true; ignored when false.'),
+          maximized: z.coerce.boolean().describe('true to maximize the tab, false to restore the currently-maximized tab.')
+        } as Record<string, unknown>
+      },
+      (args) => {
+        // `batch` / `invokeTool` bypass the SDK's Zod validation, so
+        // re-check the contract here rather than trusting `args`.
+        const maximized = args['maximized'] === true || args['maximized'] === 'true'
+        const tabId = typeof args['tabId'] === 'string' && args['tabId'].length > 0 ? args['tabId'] : null
+        if (maximized && tabId === null) {
+          return { content: [{ type: 'text', text: 'tabId is required when maximized is true' }], isError: true }
+        }
+        const payload = { tabId: maximized ? tabId : null, maximized }
+        for (const win of BrowserWindow.getAllWindows()) {
+          if (!win.isDestroyed()) win.webContents.send(SET_TAB_MAXIMIZED_CHANNEL, payload)
+        }
+        return { content: [{ type: 'text', text: JSON.stringify(payload, null, 2) }] }
       }
     )
   }

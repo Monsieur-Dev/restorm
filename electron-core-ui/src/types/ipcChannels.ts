@@ -19,3 +19,11 @@ export const CONSOLE_OPEN_CHANNEL = 'mcp:open-console'
 
 /** MCP `console_clear` → renderer: wipe the Console feed buffer. */
 export const CONSOLE_CLEAR_CHANNEL = 'mcp:console-clear'
+
+/**
+ * MCP `set_tab_maximized` → renderer: maximize (open fullscreen) or
+ * restore a workbench tab. Payload `{ tabId: string, maximized: boolean }`
+ * — `maximized: false` restores; the `tabId` is ignored on restore
+ * since only one tab can be maximized at a time.
+ */
+export const SET_TAB_MAXIMIZED_CHANNEL = 'mcp:set-tab-maximized'

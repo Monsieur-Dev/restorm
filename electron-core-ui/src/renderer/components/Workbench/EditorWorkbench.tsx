@@ -83,6 +83,13 @@ export interface EditorWorkbenchHandle {
 	 * @returns true if clear was successful
 	 */
 	clearState: () => Promise<boolean>;
+	/**
+	 * Maximize (open fullscreen) a workbench tab by id, or restore the
+	 * currently-maximized tab by passing `null`. Mirrors what a
+	 * double-click on the tab does — same `allowFullscreen` gate, same
+	 * fullscreen modal. Drives the workbench-wide `fullscreenTabId`.
+	 */
+	setFullscreenTabId: (tabId: string | null) => void;
 }
 
 // Local splitter hook for any container
@@ -366,7 +373,15 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 }, ref) => {
 	// Internal focus state when component is uncontrolled
 	const [internalFocusedGroupId, setInternalFocusedGroupId] = useState<string | null>(null);
-	
+
+	// Which tab is currently maximized (fullscreen modal), workbench-wide
+	// — at most one across all split-pane groups. Lifted here (rather
+	// than living in each `EditorGroupView`) so it can be driven
+	// imperatively via the handle, e.g. by the `set_tab_maximized` MCP
+	// tool. Each `EditorGroupView` opens its modal only when this id
+	// names one of its own tabs.
+	const [fullscreenTabId, setFullscreenTabId] = useState<string | null>(null);
+
 	// Track if workbench state has been restored
 	const restoredRef = useRef(false);
 
@@ -417,7 +432,8 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 	useImperativeHandle(ref, () => ({
 		saveState: saveStateImpl,
 		loadState: loadStateImpl,
-		clearState: clearStateImpl
+		clearState: clearStateImpl,
+		setFullscreenTabId
 	}), [saveStateImpl, loadStateImpl, clearStateImpl]);
 	
 	// Tracks whether the initial restore (if any) has completed. The
@@ -974,6 +990,8 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 				onCloseOthersInGroup={handleCloseOthersInGroup}
 				hasFocus={hasFocus}
 				onFocusRequested={handleFocusRequested}
+				fullscreenTabId={fullscreenTabId}
+				onChangeFullscreenTabId={setFullscreenTabId}
 				{...(testId && { 'data-testid': testId })}
 				{...extras}
 			/>
@@ -992,6 +1010,7 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		extCallbacks.getTabContextMenuItems,
 		extCallbacks.disableTabDetach,
 		effectiveFocusedGroupId,
+		fullscreenTabId,
 		testId
 	]);
 

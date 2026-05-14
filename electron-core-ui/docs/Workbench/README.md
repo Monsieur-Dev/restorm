@@ -46,6 +46,19 @@ Each `EditorTab` may set an opt-in `persistedState?: unknown` field. ECUI captur
   - `onDetachToNewWindow?: (tabId: string, groupId: string, cursorX?: number, cursorY?: number) => void`
   - `onWorkbenchTabDropped?: (tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }) => boolean | Promise<boolean>`
 
+#### Imperative handle (`EditorWorkbenchHandle`)
+
+`EditorWorkbench` is a `forwardRef` — attach a ref to reach its imperative API:
+
+- `saveState(): Promise<boolean>` — manually flush the workbench tree to storage.
+- `loadState(): Promise<WorkbenchTree | null>` — manually restore from storage.
+- `clearState(): Promise<boolean>` — drop the persisted state.
+- `setFullscreenTabId(tabId: string | null): void` — maximize a tab into the fullscreen modal (`tabId`), or restore whatever is maximized (`null`). Mirrors a double-click on the tab: same `allowFullscreen` gate, same modal. The maximized and normal views share one React instance — relocated by `appendChild`, never remounted — so no editor / response / scroll state is lost in either direction. Use this to drive maximize from outside the workbench (e.g. wired to the MCP `set_tab_maximized` tool).
+
+#### Maximizing a tab (`allowFullscreen`)
+
+A tab opts into maximize by setting `allowFullscreen: true` on its `EditorTab`. Maximizable tabs respond to a double-click on their tab header (and to `setFullscreenTabId`) by opening their content in a fullscreen [`Modal`](../Modal/README.md). At most one tab across all split panes can be maximized at a time. The maximized state is workbench-wide (owned by `EditorWorkbench`), not per-group.
+
 ## Testing
 
 When `data-testid` is provided, `EditorWorkbench` exposes stable hooks for E2E tests.

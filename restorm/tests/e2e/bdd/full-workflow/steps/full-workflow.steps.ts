@@ -2623,3 +2623,31 @@ Then('exactly one console tab should be open', async () => {
   if (!page) throw new Error('app must be launched')
   await expect(page.locator('[data-testid*="tabs-tab-console:singleton"]:not([data-testid*="-label"]):not([data-testid*="-close"])')).toHaveCount(1)
 })
+
+When('I double-click the console workbench tab', async () => {
+  if (!page) throw new Error('app must be launched')
+  const tab = page
+    .locator('[data-testid*="tabs-tab-console:singleton"]:not([data-testid*="-label"]):not([data-testid*="-close"])')
+    .first()
+  await tab.waitFor({ state: 'visible', timeout: 5_000 })
+  await tab.dblclick()
+})
+
+Then('the fullscreen workbench modal should be visible', async () => {
+  if (!page) throw new Error('app must be launched')
+  // The workbench fullscreen modal is the ECUI `Modal` with the
+  // default `data-testid`, so its overlay is `modal-overlay`.
+  await expect(page.locator('[data-testid="modal-overlay"]').first()).toBeVisible({ timeout: 10_000 })
+})
+
+When('I close the fullscreen workbench modal', async () => {
+  if (!page) throw new Error('app must be launched')
+  await page.locator('[data-testid="modal-close"]').first().click()
+})
+
+Then('the fullscreen workbench modal should be hidden', async () => {
+  if (!page) throw new Error('app must be launched')
+  // `Modal` unmounts its content once the close animation finishes,
+  // so the overlay leaves the DOM entirely.
+  await expect(page.locator('[data-testid="modal-overlay"]')).toHaveCount(0, { timeout: 10_000 })
+})

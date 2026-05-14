@@ -11,7 +11,8 @@ import {
   MINI_BROWSER_EXECUTE_CHANNEL,
   MINI_BROWSER_EXECUTE_REPLY_CHANNEL,
   CONSOLE_OPEN_CHANNEL,
-  CONSOLE_CLEAR_CHANNEL
+  CONSOLE_CLEAR_CHANNEL,
+  SET_TAB_MAXIMIZED_CHANNEL
 } from '../../../../electron-core-ui/src/types/ipcChannels'
 import {
   FIREWALL_IPC,
@@ -873,6 +874,16 @@ contextBridge.exposeInMainWorld('restorm', {
       const handler = (): void => { callback() }
       ipcRenderer.on('mcp:open-firewall', handler)
       return () => { ipcRenderer.off('mcp:open-firewall', handler) }
+    },
+    /** Subscribe to MCP `set_tab_maximized` — maximize a workbench tab
+     * by id, or restore the maximized tab when `maximized` is false
+     * (`tabId` is then `null`). */
+    onMcpSetTabMaximized: (callback: (payload: { tabId: string | null; maximized: boolean }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => {
+        callback((payload ?? { tabId: null, maximized: false }) as { tabId: string | null; maximized: boolean })
+      }
+      ipcRenderer.on(SET_TAB_MAXIMIZED_CHANNEL, handler)
+      return () => { ipcRenderer.off(SET_TAB_MAXIMIZED_CHANNEL, handler) }
     }
   },
   import: {

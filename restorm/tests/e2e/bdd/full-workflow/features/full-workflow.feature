@@ -632,5 +632,17 @@ Feature: Full workflow end-to-end scenario
     When I open the console via the view menu
     Then exactly one console tab should be open
 
+    # ─── Maximize / restore a special tab ───────────────────────────
+    # Console / Firewall / Mini browser tabs opt into `allowFullscreen`,
+    # so a double-click maximizes them into the shared fullscreen modal
+    # — the same React instance, so no panel state is lost. Restoring
+    # via the modal close button drops the content back into its slot.
+    When I double-click the console workbench tab
+    Then the fullscreen workbench modal should be visible
+    And the console panel should be visible
+    When I close the fullscreen workbench modal
+    Then the fullscreen workbench modal should be hidden
+    And the console panel should be visible
+
     When I close the app
     Then no errors should have been logged

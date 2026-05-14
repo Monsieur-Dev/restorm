@@ -29,6 +29,7 @@ let lastReply: McpToolReply | null = null
 let lastReplyPayload: unknown = null
 let importedFolderId: string | null = null
 let firstRequestId: string | null = null
+let currentTabId: string | null = null
 
 function parsedReply(reply: McpToolReply): unknown {
   const text = reply.content?.[0]?.text ?? ''
@@ -290,6 +291,66 @@ Then(
     const reply = await callMcpTool(discovery, 'get_response_history', { requestId: firstRequestId })
     const payload = parsedReply(reply) as { count?: number; entries?: { guid: string }[] }
     expect((payload.entries ?? []).length).toBeGreaterThanOrEqual(n)
+  }
+)
+
+When(
+  'I open the first imported request as a workbench tab via MCP',
+  async ({ callMcpTool }) => {
+    if (!discovery || !firstRequestId) throw new Error('list_requests must run first')
+    const opened = await callMcpTool(discovery, 'open_tab', { itemId: firstRequestId })
+    expect(opened.isError ?? false).toBe(false)
+    // `get_current_tab` reads the renderer-pushed active-tab snapshot —
+    // the workbench tab id is what `set_tab_maximized` needs to target.
+    const cur = await callMcpTool(discovery, 'get_current_tab', {})
+    const payload = parsedReply(cur) as { tabId?: string | null }
+    if (typeof payload.tabId !== 'string' || payload.tabId.length === 0) {
+      throw new Error(`get_current_tab returned no tabId: ${JSON.stringify(payload)}`)
+    }
+    currentTabId = payload.tabId
+  }
+)
+
+When(
+  'I maximize the current workbench tab via MCP',
+  async ({ callMcpTool }) => {
+    if (!discovery || !currentTabId) throw new Error('open the request tab first')
+    lastReply = await callMcpTool(discovery, 'set_tab_maximized', { tabId: currentTabId, maximized: true })
+    lastReplyPayload = parsedReply(lastReply)
+    expect(lastReply.isError ?? false).toBe(false)
+    expect(lastReplyPayload).toMatchObject({ tabId: currentTabId, maximized: true })
+  }
+)
+
+When(
+  'I restore the maximized workbench tab via MCP',
+  async ({ callMcpTool }) => {
+    if (!discovery) throw new Error('launch first')
+    lastReply = await callMcpTool(discovery, 'set_tab_maximized', { maximized: false })
+    lastReplyPayload = parsedReply(lastReply)
+    expect(lastReply.isError ?? false).toBe(false)
+    expect(lastReplyPayload).toMatchObject({ tabId: null, maximized: false })
+  }
+)
+
+Then(
+  'the fullscreen workbench modal should be visible',
+  async () => {
+    if (!page) throw new Error('launch first')
+    // The workbench fullscreen modal is the ECUI `Modal` with the
+    // default `data-testid`, so its overlay is `modal-overlay`.
+    await expect(page.locator('[data-testid="modal-overlay"]').first()).toBeVisible({ timeout: 10_000 })
+  }
+)
+
+Then(
+  'the fullscreen workbench modal should be hidden',
+  async () => {
+    if (!page) throw new Error('launch first')
+    // `Modal` unmounts its content once the close animation finishes,
+    // so the overlay leaves the DOM entirely — `toHaveCount(0)` with a
+    // generous window absorbs the fade-out transition.
+    await expect(page.locator('[data-testid="modal-overlay"]')).toHaveCount(0, { timeout: 10_000 })
   }
 )
 

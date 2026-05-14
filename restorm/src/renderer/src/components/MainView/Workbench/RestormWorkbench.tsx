@@ -125,6 +125,9 @@ export interface RestormWorkbenchHandle {
   saveState: () => Promise<boolean>
   loadState: () => Promise<WorkbenchTree | null>
   clearState: () => Promise<boolean>
+  /** Maximize a workbench tab into the fullscreen modal, or restore
+   * the maximized tab with `null`. Forwards to `EditorWorkbench`. */
+  setFullscreenTabId: (tabId: string | null) => void
 }
 
 const EditorWorkbenchAny = EditorWorkbench as unknown as React.ForwardRefExoticComponent<Record<string, unknown> & React.RefAttributes<EditorWorkbenchHandle>>
@@ -180,7 +183,8 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   useImperativeHandle(ref, () => ({
     saveState: async () => editorWorkbenchRef.current?.saveState() ?? false,
     loadState: async () => editorWorkbenchRef.current?.loadState() ?? null,
-    clearState: async () => editorWorkbenchRef.current?.clearState() ?? false
+    clearState: async () => editorWorkbenchRef.current?.clearState() ?? false,
+    setFullscreenTabId: (tabId: string | null) => { editorWorkbenchRef.current?.setFullscreenTabId(tabId) }
   }), [])
 
   useEffect(() => {

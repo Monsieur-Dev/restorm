@@ -412,7 +412,8 @@ const App: React.FC = () => {
         id: CONSOLE_TAB_ID,
         tabType: 'console',
         title: 'Console',
-        titleString: 'Console'
+        titleString: 'Console',
+        allowFullscreen: true
       }
       const newGroup: TabGroupNode = {
         id: `console-group-${String(Date.now())}-${crypto.randomUUID().slice(0, 8)}`,
@@ -460,7 +461,8 @@ const App: React.FC = () => {
         id: MINI_BROWSER_TAB_ID,
         tabType: 'mini-browser',
         title: 'Mini browser',
-        titleString: 'Mini browser'
+        titleString: 'Mini browser',
+        allowFullscreen: true
       }
       const findFirstTabGroup = (nodes: GroupNode[]): TabGroupNode | null => {
         for (const node of nodes) {
@@ -507,7 +509,8 @@ const App: React.FC = () => {
         id: FIREWALL_TAB_ID,
         tabType: 'firewall',
         title: 'Firewall',
-        titleString: 'Firewall'
+        titleString: 'Firewall',
+        allowFullscreen: true
       }
       // Find the focused group (or the first TabGroupNode anywhere
       // in the tree) and append. Walks containers recursively for
@@ -1175,11 +1178,18 @@ const App: React.FC = () => {
     openMiniBrowser: handleOpenMiniBrowser,
     setMiniBrowserUrl: setMiniBrowserUrlForMcp
   })
+  // MCP `set_tab_maximized` — drive the workbench-wide fullscreen tab
+  // through `EditorWorkbench`'s imperative handle. `maximized: false`
+  // arrives with `tabId: null`, which restores whatever is maximized.
+  const handleSetTabMaximized = useCallback((payload: { tabId: string | null; maximized: boolean }) => {
+    workbenchRef.current?.setFullscreenTabId(payload.maximized ? payload.tabId : null)
+  }, [workbenchRef])
   useMcpWorkbenchTabsBridge({
     enabled: mcpEnabled,
     openConsole: handleOpenConsole,
     clearConsoleFeed,
-    openFirewall: handleOpenFirewall
+    openFirewall: handleOpenFirewall,
+    setTabMaximized: handleSetTabMaximized
   })
   useMcpFolderPatch({ enabled: mcpEnabled, rootItems, bumpTabContentVersionFor: bumpTabContentVersionStable })
   // MCP `set_favorite` listener — call the same toggle/remove path the

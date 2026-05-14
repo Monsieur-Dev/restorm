@@ -430,6 +430,17 @@ Broadcasts `CONSOLE_OPEN_CHANNEL` to open / focus the host app's Console panel (
 
 Broadcasts `CONSOLE_CLEAR_CHANNEL` to wipe the renderer-side Console feed buffer — same effect as the toolbar's Clear button. The host wires it to `clearConsoleFeed()`. Useful to reset the log before a focused experiment. No parameters.
 
+### `set_tab_maximized`
+
+Broadcasts `SET_TAB_MAXIMIZED_CHANNEL` to open a workbench tab fullscreen (in the same modal a double-click on the tab opens) or restore it back to its split-pane slot. The maximized and normal views share one React instance, so no edits / responses / scroll state are lost in either direction. Requires the host to wire `EditorWorkbench`'s `setFullscreenTabId` imperative handle to the channel — see the [Workbench doc](../Workbench/README.md).
+
+```jsonc
+{ "tabId": "request-id:abc", "maximized": true }   // maximize
+{ "maximized": false }                             // restore (tabId ignored)
+```
+
+`tabId` is required when `maximized` is `true`; on restore it is ignored since at most one tab can be maximized at a time. Only tabs the host marked maximizable (`allowFullscreen`) actually maximize.
+
 ### `get-windows`
 
 Returns every active `BrowserWindow` with its `id` (= `webContents.id`), `title`, `bounds`, and focus / visible / minimized / maximized / fullscreen / always-on-top / devtools flags.

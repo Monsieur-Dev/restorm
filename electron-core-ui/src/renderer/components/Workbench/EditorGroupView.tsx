@@ -134,23 +134,34 @@ export interface EditorGroupViewProps extends EditorWorkbenchCallbacks {
 	 */
 	onFocusRequested?: (groupId: string) => void;
 	/**
+	 * Workbench-wide id of the maximized tab (lifted to `EditorWorkbench`
+	 * so it can be driven imperatively). This group opens its fullscreen
+	 * modal only when this id names one of its own tabs.
+	 */
+	fullscreenTabId?: string | null;
+	/**
+	 * Set / clear the workbench-wide maximized tab id. Pass `null` to
+	 * restore. Called on tab double-click and on modal close.
+	 */
+	onChangeFullscreenTabId?: (tabId: string | null) => void;
+	/**
 	 * Optional test id base for stable E2E selectors.
 	 */
 	'data-testid'?: string;
 }
 
 export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
-	const { group, renderTabContent, onSplitTab, onActivateTab, hasFocus = false, onFocusRequested, 'data-testid': dataTestId } = props;
+	const { group, renderTabContent, onSplitTab, onActivateTab, hasFocus = false, onFocusRequested, fullscreenTabId = null, onChangeFullscreenTabId, 'data-testid': dataTestId } = props;
 	const [splitTarget, setSplitTarget] = useState<SplitDirection | 'center' | undefined>(undefined);
 	const [isEditorDrag, setIsEditorDrag] = useState<boolean>(false);
-	// `fullscreenTabId` drives the modal's `isOpen` — it clears the
-	// instant the user clicks close. `modalOwnerTabId` is "the tab
-	// whose content currently lives in the modal body": it is set on
-	// double-click and only cleared once the modal body is truly gone
-	// (after the close animation). The two are deliberately separate so
-	// the content stays parented to the fading modal instead of being
-	// yanked back to the normal slot mid-animation.
-	const [fullscreenTabId, setFullscreenTabId] = useState<string | null>(null);
+	// `fullscreenTabId` (a prop, owned by `EditorWorkbench`) drives the
+	// modal's `isOpen` — it clears the instant the user clicks close, or
+	// when an imperative `set_tab_maximized` restore lands. `modalOwnerTabId`
+	// is "the tab whose content currently lives in the modal body": it is
+	// adopted from `fullscreenTabId` and only cleared once the modal body
+	// is truly gone (after the close animation). The two are deliberately
+	// separate so the content stays parented to the fading modal instead
+	// of being yanked back to the normal slot mid-animation.
 	const [modalOwnerTabId, setModalOwnerTabId] = useState<string | null>(null);
 	// DOM node of the fullscreen modal's body — a callback ref keeps
 	// this in state so `PortaledTabContent` re-runs its relocation
@@ -197,36 +208,53 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 		return result;
 	}, [group.tabs, renderTabContent, tabContentCache, tabVersionCache]);
 
-	// Handle tab double-click for fullscreen modal
+	// Handle tab double-click for fullscreen modal. Only flips the lifted
+	// `fullscreenTabId` — `modalOwnerTabId` is adopted from it during
+	// render (see below), the same path the imperative `set_tab_maximized`
+	// MCP tool takes.
 	const handleTabDoubleClick = useCallback((tabId: string) => {
 		const tab = group.tabs.find((t) => t.id === tabId);
 		if (tab?.allowFullscreen) {
-			setFullscreenTabId(tabId);
-			setModalOwnerTabId(tabId);
+			onChangeFullscreenTabId?.(tabId);
 		}
-	}, [group.tabs]);
+	}, [group.tabs, onChangeFullscreenTabId]);
 
-	// Get the fullscreen tab
+	// Resolve the lifted `fullscreenTabId` against THIS group's tabs.
+	// Only tabs that opted into `allowFullscreen` qualify, so an
+	// imperative `set_tab_maximized` call can't maximize a tab the app
+	// never marked maximizable.
 	const fullscreenTab = useMemo(() => {
 		if (!fullscreenTabId) return null;
-		return group.tabs.find((t) => t.id === fullscreenTabId) ?? null;
+		return group.tabs.find((t) => t.id === fullscreenTabId && t.allowFullscreen) ?? null;
 	}, [fullscreenTabId, group.tabs]);
+
+	// Adopt the resolved id into `modalOwnerTabId` during render (React's
+	// "adjusting state while rendering" pattern). This is what makes the
+	// imperative path work: `set_tab_maximized` only flips the
+	// `fullscreenTabId` prop — it never runs `handleTabDoubleClick` — so
+	// `modalOwnerTabId` would otherwise never catch up. We only ever
+	// *adopt* here, never clear: releasing ownership stays the job of
+	// `handleModalClosed` so the content lingers in the fading modal.
+	if (fullscreenTab && modalOwnerTabId !== fullscreenTab.id) {
+		setModalOwnerTabId(fullscreenTab.id);
+	}
 
 	// Fired by the Modal once its close animation has fully finished
 	// (driven by the overlay's `transitionend`). This is the single
-	// point where modal ownership is released: clearing
-	// `modalOwnerTabId` only here keeps the maximized content parented
-	// to the fading modal instead of snapping back to the normal slot
-	// mid-animation. `fullscreenTabId` is cleared too — for a normal
-	// `onClose` it is already null (harmless no-op); for the case where
-	// the maximized tab was closed externally, the modal closed via
-	// `isOpen` without `onClose` ever firing, so this clears the
-	// otherwise-stale id. Using `onClosed` (a real `transitionend`)
-	// rather than the modal body's ref-detach keeps this robust against
-	// React StrictMode's mount/unmount probing.
+	// point where modal ownership is released: clearing `modalOwnerTabId`
+	// only here keeps the maximized content parented to the fading modal
+	// instead of snapping back to the normal slot mid-animation. It
+	// deliberately does NOT touch the lifted `fullscreenTabId` prop — a
+	// normal close already cleared it via `onClose`, and for an
+	// externally-closed tab the id is left stale but inert (tab ids are
+	// never reused, and no group resolves a missing tab). Leaving it
+	// alone also means one split pane's close can never clobber a
+	// maximize that meanwhile moved to another pane's tab. Using
+	// `onClosed` (a real `transitionend`) rather than the modal body's
+	// ref-detach keeps this robust against React StrictMode's
+	// mount/unmount probing.
 	const handleModalClosed = useCallback(() => {
 		setModalOwnerTabId(null);
-		setFullscreenTabId(null);
 	}, []);
 
 	// Wrapper around onActivateTab that also requests focus for this group
@@ -498,7 +526,7 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 			<Modal
 				isOpen={fullscreenTab !== null}
 				onClose={() => {
-					setFullscreenTabId(null);
+					onChangeFullscreenTabId?.(null);
 				}}
 				onClosed={handleModalClosed}
 				title={fullscreenTab?.fullscreenModalTitle ?? (fullscreenTab ? getTabTitleString(fullscreenTab, '') : '')}

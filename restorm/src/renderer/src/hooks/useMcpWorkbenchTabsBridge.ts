@@ -1,8 +1,8 @@
 /**
- * Bridge MCP `open_console` / `console_clear` / `open_firewall`
- * tools into the renderer. Symmetric to `useMcpMiniBrowserBridge`:
- * main pushes the work onto IPC channels, this hook subscribes
- * and runs the real React / store side-effects.
+ * Bridge MCP `open_console` / `console_clear` / `open_firewall` /
+ * `set_tab_maximized` tools into the renderer. Symmetric to
+ * `useMcpMiniBrowserBridge`: main pushes the work onto IPC channels,
+ * this hook subscribes and runs the real React / store side-effects.
  */
 
 import { useEffect } from 'react'
@@ -11,6 +11,7 @@ interface RestormWorkbenchTabsBridge {
   onMcpOpenConsole: (cb: () => void) => () => void
   onMcpConsoleClear: (cb: () => void) => () => void
   onMcpOpenFirewall: (cb: () => void) => () => void
+  onMcpSetTabMaximized: (cb: (payload: { tabId: string | null; maximized: boolean }) => void) => () => void
 }
 
 export interface UseMcpWorkbenchTabsBridgeInput {
@@ -21,10 +22,16 @@ export interface UseMcpWorkbenchTabsBridgeInput {
   clearConsoleFeed: () => void
   /** Triggered when MCP asks to open the singleton Firewall tab. */
   openFirewall: () => void
+  /**
+   * Triggered when MCP asks to maximize a workbench tab (`tabId` set,
+   * `maximized: true`) or restore the maximized tab (`tabId: null`,
+   * `maximized: false`).
+   */
+  setTabMaximized: (payload: { tabId: string | null; maximized: boolean }) => void
 }
 
 export function useMcpWorkbenchTabsBridge(input: UseMcpWorkbenchTabsBridgeInput): void {
-  const { enabled, openConsole, clearConsoleFeed, openFirewall } = input
+  const { enabled, openConsole, clearConsoleFeed, openFirewall, setTabMaximized } = input
 
   useEffect(() => {
     if (!enabled) return
@@ -34,7 +41,8 @@ export function useMcpWorkbenchTabsBridge(input: UseMcpWorkbenchTabsBridgeInput)
     const offOpenConsole = api.onMcpOpenConsole(() => { openConsole() })
     const offConsoleClear = api.onMcpConsoleClear(() => { clearConsoleFeed() })
     const offOpenFirewall = api.onMcpOpenFirewall(() => { openFirewall() })
+    const offSetTabMaximized = api.onMcpSetTabMaximized((payload) => { setTabMaximized(payload) })
 
-    return () => { offOpenConsole(); offConsoleClear(); offOpenFirewall() }
-  }, [enabled, openConsole, clearConsoleFeed, openFirewall])
+    return () => { offOpenConsole(); offConsoleClear(); offOpenFirewall(); offSetTabMaximized() }
+  }, [enabled, openConsole, clearConsoleFeed, openFirewall, setTabMaximized])
 }

@@ -430,7 +430,8 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
         id: CONSOLE_TAB_ID,
         tabType: 'console',
         title: 'Console',
-        titleString: 'Console'
+        titleString: 'Console',
+        allowFullscreen: true
       } as ConsoleTab
     }
     // Firewall singleton — same pattern as Console: not tied to
@@ -441,7 +442,8 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
         id: FIREWALL_TAB_ID,
         tabType: 'firewall',
         title: 'Firewall',
-        titleString: 'Firewall'
+        titleString: 'Firewall',
+        allowFullscreen: true
       } as FirewallTab
     }
     // Mini browser singleton — same singleton-shell pattern, but it
@@ -457,6 +459,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
         tabType: 'mini-browser',
         title: 'Mini browser',
         titleString: 'Mini browser',
+        allowFullscreen: true,
         ...(url !== undefined ? { url, persistedState: { url } } : {})
       } as MiniBrowserTab
     }
