@@ -23,6 +23,11 @@ const CachedTabContentSlot = React.memo<{ content: React.ReactNode }>(
 );
 CachedTabContentSlot.displayName = 'CachedTabContentSlot';
 
+// Shared flex-fill style for the detached host node and the modal
+// body mount point — both need to stretch to their parent so the
+// embedded tab content lays out the same maximized as it does inline.
+const FLEX_FILL_CSS_TEXT = 'display:flex; flex-direction:column; flex:1; min-height:0; min-width:0; width:100%; height:100%;';
+
 /**
  * Renders a tab's content into a *stable detached host node* and then
  * physically relocates that node between the normal split-view slot
@@ -35,13 +40,21 @@ CachedTabContentSlot.displayName = 'CachedTabContentSlot';
  * React state, so an HTTP response, in-flight edits, etc. would not
  * survive the transition in either direction.
  *
- * Instead, the content is `createPortal`'d into `hostRef.current`, a
- * `<div>` created exactly once. That portal container never changes,
- * so React never remounts the content — it keeps the same fibers and
- * the same state. A `useLayoutEffect` just moves the host `<div>`'s
- * DOM parent: into the modal body while maximized, back into the
- * normal slot otherwise. Moving a DOM node with `appendChild` does not
- * touch React's tree, so no state is lost in either direction.
+ * Instead, the content is `createPortal`'d into a `<div>` host created
+ * exactly once. That portal container never changes, so React never
+ * remounts the content — it keeps the same fibers and the same state.
+ * A `useLayoutEffect` just moves the host `<div>`'s DOM parent: into
+ * the modal body while maximized, back into the normal slot otherwise.
+ * Moving a DOM node with `appendChild` does not touch React's tree, so
+ * no state is lost in either direction.
+ *
+ * `isMaximized` here is NOT `fullscreenTabId === tab.id` — it is
+ * "this tab currently owns the modal body". The distinction matters
+ * because the modal has a close animation: `fullscreenTabId` clears
+ * the instant the user clicks close, but the modal body stays mounted
+ * through the fade-out. Relocating on `fullscreenTabId` would yank the
+ * content back into the normal slot mid-fade, leaving an empty modal
+ * fading out. See `modalOwnerTabId` in `EditorGroupView`.
  */
 const PortaledTabContent: React.FC<{
 	content: React.ReactNode;
@@ -55,7 +68,7 @@ const PortaledTabContent: React.FC<{
 	// changes, so React never remounts the content.
 	const [host] = useState<HTMLDivElement>(() => {
 		const node = document.createElement('div');
-		node.style.cssText = 'display:flex; flex-direction:column; flex:1; min-height:0; min-width:0; width:100%; height:100%;';
+		node.style.cssText = FLEX_FILL_CSS_TEXT;
 		return node;
 	});
 	const slotElRef = useRef<HTMLDivElement | null>(null);
@@ -63,10 +76,12 @@ const PortaledTabContent: React.FC<{
 	// Callback ref on the normal slot. Stable identity (`host` never
 	// changes), so it fires only on mount / unmount — not on every
 	// re-render. The mount-time `appendChild` runs during the commit's
-	// layout phase *before* the portal content's own layout effects
-	// (the slot `<div>` is rendered before the portal in JSX order), so
-	// embedded editors mount with the host already attached to the
-	// document and measure their size correctly first time.
+	// layout phase, while the slot `<div>`'s ref attaches *before* the
+	// portal content's own layout effects fire — which holds ONLY
+	// because the slot `<div>` precedes the `createPortal(...)` in JSX
+	// order below. Do NOT reorder them: that ordering is what lets
+	// embedded editors (Monaco, etc.) mount with the host already in
+	// the document and measure their size correctly first time.
 	const slotRef = useCallback((el: HTMLDivElement | null) => {
 		slotElRef.current = el;
 		if (el && host.parentElement !== el) {
@@ -74,16 +89,23 @@ const PortaledTabContent: React.FC<{
 		}
 	}, [host]);
 
-	// Relocate on maximize toggle: into the modal body while maximized,
-	// back into the normal slot otherwise. The content is already
-	// mounted, so this is a pure DOM move — React's tree is untouched,
-	// no remount, no state loss in either direction.
+	// Relocate on maximize toggle: into the modal body while this tab
+	// owns the modal, back into the normal slot otherwise. The content
+	// is already mounted, so this is a pure DOM move — React's tree is
+	// untouched, no remount, no state loss in either direction.
 	useLayoutEffect(() => {
 		const target = isMaximized ? modalBody : slotElRef.current;
 		if (target && host.parentElement !== target) {
 			target.appendChild(host);
 		}
 	}, [isMaximized, modalBody, host]);
+
+	// On unmount (tab closed) the portal tears the React content down,
+	// but the detached host `<div>` itself has no React owner — drop it
+	// from whatever DOM parent it last sat in so it can be GC'd.
+	useLayoutEffect(() => {
+		return () => { host.remove(); };
+	}, [host]);
 
 	return (
 		<>
@@ -121,7 +143,15 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 	const { group, renderTabContent, onSplitTab, onActivateTab, hasFocus = false, onFocusRequested, 'data-testid': dataTestId } = props;
 	const [splitTarget, setSplitTarget] = useState<SplitDirection | 'center' | undefined>(undefined);
 	const [isEditorDrag, setIsEditorDrag] = useState<boolean>(false);
+	// `fullscreenTabId` drives the modal's `isOpen` — it clears the
+	// instant the user clicks close. `modalOwnerTabId` is "the tab
+	// whose content currently lives in the modal body": it is set on
+	// double-click and only cleared once the modal body is truly gone
+	// (after the close animation). The two are deliberately separate so
+	// the content stays parented to the fading modal instead of being
+	// yanked back to the normal slot mid-animation.
 	const [fullscreenTabId, setFullscreenTabId] = useState<string | null>(null);
+	const [modalOwnerTabId, setModalOwnerTabId] = useState<string | null>(null);
 	// DOM node of the fullscreen modal's body — a callback ref keeps
 	// this in state so `PortaledTabContent` re-runs its relocation
 	// effect the moment the modal mounts / unmounts its body.
@@ -172,6 +202,7 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 		const tab = group.tabs.find((t) => t.id === tabId);
 		if (tab?.allowFullscreen) {
 			setFullscreenTabId(tabId);
+			setModalOwnerTabId(tabId);
 		}
 	}, [group.tabs]);
 
@@ -180,6 +211,23 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 		if (!fullscreenTabId) return null;
 		return group.tabs.find((t) => t.id === fullscreenTabId) ?? null;
 	}, [fullscreenTabId, group.tabs]);
+
+	// Fired by the Modal once its close animation has fully finished
+	// (driven by the overlay's `transitionend`). This is the single
+	// point where modal ownership is released: clearing
+	// `modalOwnerTabId` only here keeps the maximized content parented
+	// to the fading modal instead of snapping back to the normal slot
+	// mid-animation. `fullscreenTabId` is cleared too — for a normal
+	// `onClose` it is already null (harmless no-op); for the case where
+	// the maximized tab was closed externally, the modal closed via
+	// `isOpen` without `onClose` ever firing, so this clears the
+	// otherwise-stale id. Using `onClosed` (a real `transitionend`)
+	// rather than the modal body's ref-detach keeps this robust against
+	// React StrictMode's mount/unmount probing.
+	const handleModalClosed = useCallback(() => {
+		setModalOwnerTabId(null);
+		setFullscreenTabId(null);
+	}, []);
 
 	// Wrapper around onActivateTab that also requests focus for this group
 	const handleActivateTab = useCallback((tabId: string, groupId: string) => {
@@ -420,7 +468,7 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 								content={content}
 								isActive={isActive}
 								isResizing={isResizing}
-								isMaximized={fullscreenTabId === tab.id}
+								isMaximized={modalOwnerTabId === tab.id}
 								modalBody={modalBody}
 							/>
 						);
@@ -452,6 +500,7 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 				onClose={() => {
 					setFullscreenTabId(null);
 				}}
+				onClosed={handleModalClosed}
 				title={fullscreenTab?.fullscreenModalTitle ?? (fullscreenTab ? getTabTitleString(fullscreenTab, '') : '')}
 			>
 				{/*

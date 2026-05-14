@@ -29,6 +29,15 @@ export interface ModalProps {
   isOpen: boolean
   /** Called when the user requests to close the modal (Esc key or close button). */
   onClose: () => void
+  /**
+   * Called once the close animation has finished and the modal has
+   * fully unmounted its content — the "really closed" signal, as
+   * opposed to `onClose` (fired the instant a close is requested).
+   * Use it when something outside the modal must only react after the
+   * fade completes. Driven by the overlay's `transitionend`, so it is
+   * robust against React StrictMode's mount/unmount probing.
+   */
+  onClosed?: () => void
   /** Modal body content. Usually a layout or form. */
   children: React.ReactNode
   /** Modal size: 'full' for fullscreen-like, 'dialog' for compact dialog box */
@@ -42,6 +51,7 @@ export interface ModalProps {
 - Keyboard handling:
   - When `isOpen` is `true`, a `keydown` listener is attached to `window`.
   - Pressing `Escape` invokes `onClose()`.
+- `onClose` vs `onClosed`: `onClose` fires when the user *requests* a close (start of the fade-out); `onClosed` fires after the fade-out animation completes and the content has unmounted. Most consumers only need `onClose`.
 
 ## Basic Usage
 

@@ -13,6 +13,17 @@ export interface ModalProps {
   children: React.ReactNode
   /** Modal size: 'full' for fullscreen-like, 'dialog' for compact dialog box */
   size?: ModalSize
+  /**
+   * Fired once the close animation has finished and the modal has
+   * fully unmounted its content — i.e. the "really closed" signal, as
+   * opposed to `onClose` which fires the instant the user requests a
+   * close (start of the fade-out). Use this when something outside the
+   * modal must only react after the fade completes. Driven by the
+   * overlay's `transitionend`, so it is robust against React
+   * StrictMode's mount/unmount probing (which never synthesises
+   * transition events).
+   */
+  onClosed?: () => void
   /** Optional test id applied to the modal container. Defaults to `modal`. */
   'data-testid'?: string
 }
@@ -23,6 +34,7 @@ const ModalInner: React.FC<ModalProps> = ({
   onClose,
   children,
   size = 'full',
+  onClosed,
   'data-testid': dataTestId
 }) => {
   const [isRendered, setIsRendered] = useState(isOpen)
@@ -130,6 +142,7 @@ const ModalInner: React.FC<ModalProps> = ({
         if (overlayState === 'closing') {
           setIsRendered(false)
           setOverlayState('closed')
+          onClosed?.()
         }
       }}
     >
