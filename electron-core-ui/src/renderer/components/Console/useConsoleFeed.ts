@@ -70,12 +70,20 @@ export class ConsoleFeedStore {
   }
 
   /**
-   * Register the IPC source the store pulls records from. Called once
-   * at renderer bootstrap by the host. If a consumer already
-   * subscribed before the source was wired, this kicks off the source
-   * subscription immediately so no records are missed.
+   * Register the IPC source the store pulls records from. Normally
+   * called once at renderer bootstrap by the host. If a consumer
+   * already subscribed before the source was wired, this kicks off the
+   * source subscription immediately so no records are missed. Calling
+   * it again (e.g. an HMR re-eval of the host's bootstrap module)
+   * tears down the previous source's subscription before swapping —
+   * otherwise the stale source would keep feeding and the new one
+   * would never get subscribed.
    */
   setSource = (source: ConsoleFeedSource): void => {
+    if (this.sourceUnsub !== null) {
+      this.sourceUnsub()
+      this.sourceUnsub = null
+    }
     this.source = source
     if (this.listeners.size > 0) this.ensureSourceSubscription()
   }

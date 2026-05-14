@@ -140,6 +140,26 @@ describe('ConsoleFeedStore', () => {
     expect(listener).not.toHaveBeenCalled()
   })
 
+  it('a second setSource swaps the feed — old source unsubscribed, new one live', async () => {
+    const store = new ConsoleFeedStore()
+    const sourceA = makeSource()
+    const sourceB = makeSource()
+    store.setSource(sourceA)
+    store.subscribe(vi.fn())
+    expect(sourceA.subscribed()).toBe(true)
+
+    // Re-register with a different source (e.g. HMR re-eval of bootstrap).
+    store.setSource(sourceB)
+    expect(sourceA.subscribed()).toBe(false) // old source torn down
+    expect(sourceB.subscribed()).toBe(true)  // new source live
+
+    // Records from the stale source must NOT land; the new one must.
+    sourceA.emit(rec('stale'))
+    sourceB.emit(rec('fresh'))
+    await vi.runAllTimersAsync()
+    expect(store.getSnapshot().map((r) => r.id)).toEqual(['fresh'])
+  })
+
   it('unsubscribe removes the listener', async () => {
     const store = new ConsoleFeedStore()
     const source = makeSource()

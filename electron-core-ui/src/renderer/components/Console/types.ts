@@ -5,6 +5,11 @@
  * a minimal, widened shape: any app-specific record type (e.g.
  * restorm's `RequestRecord`) that carries these fields structurally
  * satisfies `ConsoleRecord` with no conversion.
+ *
+ * The optional fields use `?:` (property may be absent) rather than
+ * `| undefined` — under `exactOptionalPropertyTypes` a consumer record
+ * must keep its matching fields `?:`-style for structural assignment
+ * to hold.
  */
 export interface ConsoleRecord {
   /** Stable identifier. Updates to an existing record (e.g. patching

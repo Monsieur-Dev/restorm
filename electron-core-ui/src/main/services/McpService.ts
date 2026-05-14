@@ -391,6 +391,11 @@ export class McpService {
    * Invoke a registered tool by name from inside the host process. The
    * built-in `batch` tool uses this to chain calls without going back
    * out through the HTTP transport. Throws if the tool is unknown.
+   *
+   * NOTE: this calls the handler directly, so it BYPASSES the SDK's
+   * Zod `inputSchema` validation that an HTTP `tools/call` would run.
+   * Tool handlers must therefore defensively coerce / clamp their own
+   * args rather than trusting the schema (the built-ins do).
    */
   invokeTool(name: string, args: Record<string, unknown>, extra: unknown = {}): unknown {
     const entry = this.tools.find((t) => t.name === name)
@@ -1711,7 +1716,11 @@ export class McpService {
       async (args) => {
         const code = typeof args['code'] === 'string' ? args['code'] : ''
         if (!code) return { content: [{ type: 'text', text: 'code is required' }], isError: true }
-        const timeoutMs = typeof args['timeoutMs'] === 'number' ? args['timeoutMs'] : 5_000
+        // Clamp here too: when `batch` calls this via `invokeTool`, the
+        // SDK's Zod validation is bypassed, so a bad `timeoutMs` (0,
+        // negative, huge) would otherwise reach `executeInMiniBrowser`.
+        const rawTimeout = typeof args['timeoutMs'] === 'number' ? args['timeoutMs'] : 5_000
+        const timeoutMs = Math.max(500, Math.min(60_000, Math.floor(rawTimeout)))
         const outcome = await executeInMiniBrowser(code, timeoutMs)
         if (outcome.ok) {
           return { content: [{ type: 'text', text: JSON.stringify({ result: outcome.result }, null, 2) }] }
