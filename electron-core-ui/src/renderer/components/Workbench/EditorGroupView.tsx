@@ -1,4 +1,5 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { EditorTabs } from './EditorTabs';
 import { Modal } from '../Modal';
 import { useSetting } from '../../hooks/useSettings';
@@ -22,6 +23,84 @@ const CachedTabContentSlot = React.memo<{ content: React.ReactNode }>(
 );
 CachedTabContentSlot.displayName = 'CachedTabContentSlot';
 
+/**
+ * Renders a tab's content into a *stable detached host node* and then
+ * physically relocates that node between the normal split-view slot
+ * and the fullscreen modal body via `appendChild`.
+ *
+ * Why the detached host node: double-clicking a tab opens its content
+ * "maximized" in a modal. Rendering the content a second time (a fresh
+ * `renderTabContent` call) would mount a SEPARATE component instance —
+ * the maximized view and the normal view would each have their own
+ * React state, so an HTTP response, in-flight edits, etc. would not
+ * survive the transition in either direction.
+ *
+ * Instead, the content is `createPortal`'d into `hostRef.current`, a
+ * `<div>` created exactly once. That portal container never changes,
+ * so React never remounts the content — it keeps the same fibers and
+ * the same state. A `useLayoutEffect` just moves the host `<div>`'s
+ * DOM parent: into the modal body while maximized, back into the
+ * normal slot otherwise. Moving a DOM node with `appendChild` does not
+ * touch React's tree, so no state is lost in either direction.
+ */
+const PortaledTabContent: React.FC<{
+	content: React.ReactNode;
+	isActive: boolean;
+	isResizing: boolean;
+	isMaximized: boolean;
+	modalBody: HTMLElement | null;
+}> = ({ content, isActive, isResizing, isMaximized, modalBody }) => {
+	// Stable detached host node, created exactly once per instance via
+	// a `useState` lazy initializer — the portal container never
+	// changes, so React never remounts the content.
+	const [host] = useState<HTMLDivElement>(() => {
+		const node = document.createElement('div');
+		node.style.cssText = 'display:flex; flex-direction:column; flex:1; min-height:0; min-width:0; width:100%; height:100%;';
+		return node;
+	});
+	const slotElRef = useRef<HTMLDivElement | null>(null);
+
+	// Callback ref on the normal slot. Stable identity (`host` never
+	// changes), so it fires only on mount / unmount — not on every
+	// re-render. The mount-time `appendChild` runs during the commit's
+	// layout phase *before* the portal content's own layout effects
+	// (the slot `<div>` is rendered before the portal in JSX order), so
+	// embedded editors mount with the host already attached to the
+	// document and measure their size correctly first time.
+	const slotRef = useCallback((el: HTMLDivElement | null) => {
+		slotElRef.current = el;
+		if (el && host.parentElement !== el) {
+			el.appendChild(host);
+		}
+	}, [host]);
+
+	// Relocate on maximize toggle: into the modal body while maximized,
+	// back into the normal slot otherwise. The content is already
+	// mounted, so this is a pure DOM move — React's tree is untouched,
+	// no remount, no state loss in either direction.
+	useLayoutEffect(() => {
+		const target = isMaximized ? modalBody : slotElRef.current;
+		if (target && host.parentElement !== target) {
+			target.appendChild(host);
+		}
+	}, [isMaximized, modalBody, host]);
+
+	return (
+		<>
+			<div
+				ref={slotRef}
+				style={{
+					display: isMaximized ? 'none' : computeTabDisplay(isActive, isResizing),
+					flex: 1,
+					minHeight: 0
+				}}
+			/>
+			{createPortal(<CachedTabContentSlot content={content} />, host)}
+		</>
+	);
+};
+PortaledTabContent.displayName = 'PortaledTabContent';
+
 export interface EditorGroupViewProps extends EditorWorkbenchCallbacks {
 	group: EditorGroup;
 	/**
@@ -43,6 +122,10 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 	const [splitTarget, setSplitTarget] = useState<SplitDirection | 'center' | undefined>(undefined);
 	const [isEditorDrag, setIsEditorDrag] = useState<boolean>(false);
 	const [fullscreenTabId, setFullscreenTabId] = useState<string | null>(null);
+	// DOM node of the fullscreen modal's body — a callback ref keeps
+	// this in state so `PortaledTabContent` re-runs its relocation
+	// effect the moment the modal mounts / unmounts its body.
+	const [modalBody, setModalBody] = useState<HTMLDivElement | null>(null);
 	const contentRef = useRef<HTMLDivElement | null>(null);
 	const [advancedEffects] = useSetting('appearance:advancedVisualEffects');
 	// Hide every tab body — including the active one — while a sash is
@@ -279,7 +362,7 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 					// When clicking on interactive elements, onFocusCapture will handle it
 					const target = e.target as HTMLElement;
 					const isContainerClick = target === contentRef.current;
-					
+
 					// If clicking on the container itself (background), request focus
 					// Monaco clicks will be handled by onFocusCapture when Monaco receives focus
 					if (isContainerClick && onFocusRequested) {
@@ -319,6 +402,12 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 				 * Sorting locally by tab id pins each pane's DOM
 				 * position so a same-group reorder never moves any
 				 * content-panel child.
+				 *
+				 * Each pane is a `PortaledTabContent`: it portals the
+				 * cached content into a stable detached host node, so
+				 * the double-click "maximize" modal can show the SAME
+				 * component instance (same React state) rather than a
+				 * freshly-mounted copy.
 				 */}
 				{[...group.tabs]
 					.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
@@ -326,16 +415,14 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 						const isActive = tab.id === group.activeTabId;
 						const content = tabContents.get(tab.id);
 						return (
-							<div
+							<PortaledTabContent
 								key={tab.id}
-								style={{
-									display: computeTabDisplay(isActive, isResizing),
-									flex: 1,
-									minHeight: 0
-								}}
-							>
-								<CachedTabContentSlot content={content} />
-							</div>
+								content={content}
+								isActive={isActive}
+								isResizing={isResizing}
+								isMaximized={fullscreenTabId === tab.id}
+								modalBody={modalBody}
+							/>
 						);
 					})}
 				</div>
@@ -361,15 +448,22 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 				/>
 			</div>
 			<Modal
-				isOpen={fullscreenTabId !== null}
+				isOpen={fullscreenTab !== null}
 				onClose={() => {
 					setFullscreenTabId(null);
 				}}
 				title={fullscreenTab?.fullscreenModalTitle ?? (fullscreenTab ? getTabTitleString(fullscreenTab, '') : '')}
 			>
-				{fullscreenTab ? (
-					renderTabContent?.(fullscreenTab) ?? fullscreenTab.content ?? <span>{fullscreenTab.title}</span>
-				) : null}
+				{/*
+				 * Empty mount point. `PortaledTabContent` relocates the
+				 * maximized tab's host node into this div via
+				 * `appendChild` — no `renderTabContent` call here, so the
+				 * maximized view shares the normal view's instance + state.
+				 */}
+				<div
+					ref={setModalBody}
+					style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, width: '100%', height: '100%' }}
+				/>
 			</Modal>
 		</div>
 	);
