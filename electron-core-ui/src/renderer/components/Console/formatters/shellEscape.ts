@@ -4,7 +4,7 @@
  * the value get the standard `'\''` dance.
  */
 export function shellSingleQuote(value: string): string {
-	return `'${value.replace(/'/g, "'\\''")}'`
+  return `'${value.replace(/'/g, "'\\''")}'`
 }
 
 /**
@@ -13,5 +13,5 @@ export function shellSingleQuote(value: string): string {
  * quotes pass through as-is so JSON inside doesn't double-escape.
  */
 export function powershellSingleQuote(value: string): string {
-	return `'${value.replace(/'/g, "''")}'`
+  return `'${value.replace(/'/g, "''")}'`
 }

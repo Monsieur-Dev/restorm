@@ -11,7 +11,7 @@
 
 .xterm .xterm-viewport {
 	scrollbar-width: thin;
-	scrollbar-color: var(--scrollbarSlider-background, rgba(121, 121, 121, 0.4)) transparent;
+	scrollbar-color: var(--scrollbarSlider-background, rgb(121, 121, 121, 0.4)) transparent;
 }
 
 .xterm .xterm-viewport::-webkit-scrollbar {
@@ -24,16 +24,16 @@
 }
 
 .xterm .xterm-viewport::-webkit-scrollbar-thumb {
-	background-color: var(--scrollbarSlider-background, rgba(121, 121, 121, 0.4));
+	background-color: var(--scrollbarSlider-background, rgb(121, 121, 121, 0.4));
 	border-radius: 5px;
 }
 
 .xterm .xterm-viewport::-webkit-scrollbar-thumb:hover {
-	background-color: var(--scrollbarSlider-hoverBackground, rgba(100, 100, 100, 0.7));
+	background-color: var(--scrollbarSlider-hoverBackground, rgb(100, 100, 100, 0.7));
 }
 
 .xterm .xterm-viewport::-webkit-scrollbar-thumb:active {
-	background-color: var(--scrollbarSlider-activeBackground, rgba(191, 191, 191, 0.4));
+	background-color: var(--scrollbarSlider-activeBackground, rgb(191, 191, 191, 0.4));
 }
 
 /*
@@ -83,6 +83,7 @@
 	caret-color: transparent !important;
 	pointer-events: none !important;
 }
+
 .xterm .composition-view {
 	display: none !important;
 }

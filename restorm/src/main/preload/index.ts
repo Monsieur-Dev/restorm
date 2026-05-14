@@ -9,7 +9,9 @@ import type { PersistenceFormat } from '../../../../electron-core-ui/src/main/se
 import {
   MINI_BROWSER_OPEN_CHANNEL,
   MINI_BROWSER_EXECUTE_CHANNEL,
-  MINI_BROWSER_EXECUTE_REPLY_CHANNEL
+  MINI_BROWSER_EXECUTE_REPLY_CHANNEL,
+  CONSOLE_OPEN_CHANNEL,
+  CONSOLE_CLEAR_CHANNEL
 } from '../../../../electron-core-ui/src/types/ipcChannels'
 import {
   FIREWALL_IPC,
@@ -857,14 +859,14 @@ contextBridge.exposeInMainWorld('restorm', {
     /** Subscribe to MCP `open_console` — open / focus the singleton Console tab. */
     onMcpOpenConsole: (callback: () => void): (() => void) => {
       const handler = (): void => { callback() }
-      ipcRenderer.on('mcp:open-console', handler)
-      return () => { ipcRenderer.off('mcp:open-console', handler) }
+      ipcRenderer.on(CONSOLE_OPEN_CHANNEL, handler)
+      return () => { ipcRenderer.off(CONSOLE_OPEN_CHANNEL, handler) }
     },
     /** Subscribe to MCP `console_clear` — wipe the renderer-side feed. */
     onMcpConsoleClear: (callback: () => void): (() => void) => {
       const handler = (): void => { callback() }
-      ipcRenderer.on('mcp:console-clear', handler)
-      return () => { ipcRenderer.off('mcp:console-clear', handler) }
+      ipcRenderer.on(CONSOLE_CLEAR_CHANNEL, handler)
+      return () => { ipcRenderer.off(CONSOLE_CLEAR_CHANNEL, handler) }
     },
     /** Subscribe to MCP `open_firewall` — open / focus the singleton Firewall tab. */
     onMcpOpenFirewall: (callback: () => void): (() => void) => {

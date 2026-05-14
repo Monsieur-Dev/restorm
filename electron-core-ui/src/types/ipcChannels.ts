@@ -13,3 +13,9 @@ export const MINI_BROWSER_EXECUTE_CHANNEL = 'mcp:mini-browser-execute'
 
 /** Renderer → main: result of a `mini_browser_execute` script. */
 export const MINI_BROWSER_EXECUTE_REPLY_CHANNEL = 'mcp:mini-browser-execute-reply'
+
+/** MCP `open_console` → renderer: open / focus the Console tab. */
+export const CONSOLE_OPEN_CHANNEL = 'mcp:open-console'
+
+/** MCP `console_clear` → renderer: wipe the Console feed buffer. */
+export const CONSOLE_CLEAR_CHANNEL = 'mcp:console-clear'

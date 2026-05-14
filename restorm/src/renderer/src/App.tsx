@@ -24,7 +24,10 @@ import {
   cleanseForPersistence,
   toasterService,
   useMcpMiniBrowserBridge,
-  type MiniBrowserBridgeApi
+  clearConsoleFeed,
+  registerConsoleFeedSource,
+  type MiniBrowserBridgeApi,
+  type ConsoleFeedSource
 } from 'electron-core-ui/renderer'
 import { PROJECT_UUID_KEY } from '../../shared/config/projectUuid'
 import { HTTPRequest } from '../../shared/models/requests/HTTPRequest'
@@ -93,7 +96,6 @@ import { useMcpTreeReplace } from './hooks/useMcpTreeReplace'
 import { useMcpRunRequest } from './hooks/useMcpRunRequest'
 import { useMcpRequestPatch } from './hooks/useMcpRequestPatch'
 import { useMcpWorkbenchTabsBridge } from './hooks/useMcpWorkbenchTabsBridge'
-import { clearConsoleFeed } from './components/Console/useConsoleFeed'
 import { useMcpFolderPatch } from './hooks/useMcpFolderPatch'
 import { RestormSidebar } from './components/MainView/Sidebar/RestormSidebar'
 import { RestormWorkbenchContainer } from './components/MainView/Workbench/RestormWorkbenchContainer'
@@ -155,6 +157,14 @@ import {
   isAuthenticationRequest
 } from '../../shared/types/collections'
 import { buildRequestPath } from './utils/requestPath'
+
+// Wire the ECUI Console feed to restorm's firewall IPC channel. The
+// store subscribes lazily on the first `useConsoleFeed` consumer, so
+// registering at module-eval time (preload has already run) is safe.
+// `window.api.firewall` is exposed by the preload but not declared on
+// `window.api`'s type — cast through the known shape.
+const firewallFeed = (window as unknown as { api?: { firewall?: ConsoleFeedSource } }).api?.firewall
+if (firewallFeed) registerConsoleFeedSource(firewallFeed)
 
 const MIN_LEFT_WIDTH = 180
 

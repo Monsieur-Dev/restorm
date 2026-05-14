@@ -422,6 +422,14 @@ Runs a JavaScript expression inside the Mini browser's `<webview>` **guest** con
 
 Returns an error if no Mini browser tab is open or the webview hasn't finished its initial load.
 
+### `open_console`
+
+Broadcasts `CONSOLE_OPEN_CHANNEL` to open / focus the host app's Console panel (the read-only audit feed of intercepted network traffic). Requires the host to render `ConsolePanel` and wire its tab — see the [Console doc](../Console/README.md). No parameters.
+
+### `console_clear`
+
+Broadcasts `CONSOLE_CLEAR_CHANNEL` to wipe the renderer-side Console feed buffer — same effect as the toolbar's Clear button. The host wires it to `clearConsoleFeed()`. Useful to reset the log before a focused experiment. No parameters.
+
 ### `get-windows`
 
 Returns every active `BrowserWindow` with its `id` (= `webContents.id`), `title`, `bounds`, and focus / visible / minimized / maximized / fullscreen / always-on-top / devtools flags.

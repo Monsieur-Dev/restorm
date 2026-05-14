@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
-import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, IconView, TabSwitcherOverlay, navigationService, useFeature, MiniBrowserPanel, type ContextMenuItem } from 'electron-core-ui/renderer'
+import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, IconView, TabSwitcherOverlay, navigationService, useFeature, MiniBrowserPanel, ConsolePanel, type ContextMenuItem } from 'electron-core-ui/renderer'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback, TabSwitcherItem } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
 import type { RestormEditorTab, BreadcrumbItem } from '../../../../../shared/types/editor'
@@ -17,7 +17,6 @@ import {
   isFirewallTab,
   isMiniBrowserTab
 } from '../../../../../shared/types/editor'
-import { ConsolePanel } from '../../Console'
 import { FirewallPanel } from '../../Firewall'
 import {
   HTTPRequestTabView,

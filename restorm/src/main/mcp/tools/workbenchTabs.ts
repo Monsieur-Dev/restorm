@@ -1,7 +1,7 @@
 /**
- * MCP tools for the singleton workbench tabs that don't map to a
- * tree item — Console, Firewall, (Mini browser lives in
- * `./miniBrowser.ts` because it has heavier semantics).
+ * MCP tools for the singleton Firewall workbench tab + the firewall
+ * rule control plane. (`open_console` / `console_clear` and the Mini
+ * browser tools are now `McpService` built-ins in electron-core-ui.)
  *
  * Each tool either broadcasts an IPC the renderer turns into a
  * `setWorkbenchTree` mutation, or reaches into a main-side service
@@ -55,39 +55,6 @@ function parseOriginString(raw: string): FirewallOrigin | null {
 }
 
 export function registerWorkbenchTabTools(mcp: McpService): void {
-  mcp.registerTool(
-    'open_console',
-    {
-      title: 'Open the Console workbench tab',
-      description:
-        'Open (or focus, if already open) the singleton Console tab in the active window. The ' +
-        'Console panel shows every outbound request the firewall intercepted, formatted as ' +
-        'curl / powershell. Use it to surface what restorm sent so the user can see what the ' +
-        'agent did.',
-      inputSchema: {} as Record<string, unknown>
-    },
-    () => {
-      broadcast('mcp:open-console')
-      return jsonReply({ opened: true })
-    }
-  )
-
-  mcp.registerTool(
-    'console_clear',
-    {
-      title: 'Clear the Console panel',
-      description:
-        'Wipe the renderer-side console feed buffer. Same effect as clicking the toolbar ' +
-        '"Clear" button. Useful to reset the log before running a focused experiment so the ' +
-        'next read-back is uncluttered.',
-      inputSchema: {} as Record<string, unknown>
-    },
-    () => {
-      broadcast('mcp:console-clear')
-      return jsonReply({ cleared: true })
-    }
-  )
-
   mcp.registerTool(
     'open_firewall',
     {

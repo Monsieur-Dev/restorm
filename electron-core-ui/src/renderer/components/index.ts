@@ -66,6 +66,10 @@ export type { CodeEditorProps, CodeEditorRef } from './CodeEditor'
 export { MiniBrowserPanel } from './MiniBrowser'
 export type { MiniBrowserPanelProps } from './MiniBrowser'
 
+// Console exports
+export { ConsolePanel, Console, ConsoleToolbar, useConsoleFeed, registerConsoleFeedSource, clearConsoleFeed, ConsoleFeedStore, renderRecord } from './Console'
+export type { ConsolePanelProps, ConsoleProps, ConsoleToolbarProps, ConsoleFeedSource, ConsoleRecord, ConsoleShell, RecordRenderer } from './Console'
+
 // Settings exports
 export { SettingsPage, SettingsModalProvider, useSettingsModal } from './Settings'
 

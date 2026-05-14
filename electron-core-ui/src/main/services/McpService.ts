@@ -12,7 +12,9 @@ import { logger } from './LoggerService'
 import {
   MINI_BROWSER_OPEN_CHANNEL,
   MINI_BROWSER_EXECUTE_CHANNEL,
-  MINI_BROWSER_EXECUTE_REPLY_CHANNEL
+  MINI_BROWSER_EXECUTE_REPLY_CHANNEL,
+  CONSOLE_OPEN_CHANNEL,
+  CONSOLE_CLEAR_CHANNEL
 } from '../../types/ipcChannels'
 
 export interface McpServiceOptions {
@@ -1715,6 +1717,42 @@ export class McpService {
           return { content: [{ type: 'text', text: JSON.stringify({ result: outcome.result }, null, 2) }] }
         }
         return { content: [{ type: 'text', text: outcome.error }], isError: true }
+      }
+    )
+
+    this.registerTool(
+      'open_console',
+      {
+        title: 'Open the Console workbench tab',
+        description:
+          'Open (or focus, if already open) the host app\'s Console panel. The Console shows the ' +
+          'audit feed of intercepted outbound requests, formatted as curl / powershell. Broadcasts ' +
+          'CONSOLE_OPEN_CHANNEL — requires the host to render `ConsolePanel` and wire its tab.',
+        inputSchema: {} as Record<string, unknown>
+      },
+      () => {
+        for (const win of BrowserWindow.getAllWindows()) {
+          if (!win.isDestroyed()) win.webContents.send(CONSOLE_OPEN_CHANNEL, {})
+        }
+        return { content: [{ type: 'text', text: JSON.stringify({ opened: true }, null, 2) }] }
+      }
+    )
+
+    this.registerTool(
+      'console_clear',
+      {
+        title: 'Clear the Console panel',
+        description:
+          'Wipe the renderer-side Console feed buffer. Same effect as clicking the toolbar ' +
+          '"Clear" button. Broadcasts CONSOLE_CLEAR_CHANNEL — the host wires it to ' +
+          '`clearConsoleFeed()`. Useful to reset the log before a focused experiment.',
+        inputSchema: {} as Record<string, unknown>
+      },
+      () => {
+        for (const win of BrowserWindow.getAllWindows()) {
+          if (!win.isDestroyed()) win.webContents.send(CONSOLE_CLEAR_CHANNEL, {})
+        }
+        return { content: [{ type: 'text', text: JSON.stringify({ cleared: true }, null, 2) }] }
       }
     )
   }
