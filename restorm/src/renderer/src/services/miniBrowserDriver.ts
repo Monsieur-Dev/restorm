@@ -30,6 +30,7 @@ export const miniBrowserDriver: MiniBrowserDriver = {
   goBack: (tabId) => bridge()?.miniBrowser.goBack(tabId) ?? Promise.resolve(ok),
   goForward: (tabId) => bridge()?.miniBrowser.goForward(tabId) ?? Promise.resolve(ok),
   getState: (tabId) => bridge()?.miniBrowser.getState(tabId) ?? Promise.resolve(null),
+  capture: (tabId) => bridge()?.miniBrowser.capture(tabId) ?? Promise.resolve(null),
   onDidNavigate: (callback) => bridge()?.miniBrowser.onDidNavigate(callback) ?? noopUnsub,
   onDidStopLoading: (callback) => bridge()?.miniBrowser.onDidStopLoading(callback) ?? noopUnsub,
   onUserInteraction: (callback) => bridge()?.miniBrowser.onUserInteraction(callback) ?? noopUnsub

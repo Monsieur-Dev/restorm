@@ -53,6 +53,7 @@ declare global {
         goBack: (tabId: string) => Promise<{ ok: boolean }>
         goForward: (tabId: string) => Promise<{ ok: boolean }>
         getState: (tabId: string) => Promise<{ url: string; canGoBack: boolean; canGoForward: boolean } | null>
+        capture: (tabId: string) => Promise<string | null>
         onDidNavigate: (callback: (result: { tabId: string; url: string }) => void) => () => void
         onDidStopLoading: (callback: (result: { tabId: string; canGoBack: boolean; canGoForward: boolean }) => void) => () => void
         onUserInteraction: (callback: (result: { tabId: string }) => void) => () => void

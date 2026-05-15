@@ -212,6 +212,35 @@ class MiniBrowserService {
 	}
 
 	/**
+	 * Take a PNG snapshot of the current page and return it as a data
+	 * URL. Used by the renderer to paint a still image of the page in
+	 * place of the live `WebContentsView` for the duration of any HTML5
+	 * drag gesture: native compositor views sit on top of every HTML
+	 * pixel, so an ongoing drag would otherwise lose its drop overlays
+	 * and ghost image the instant the cursor crossed the view's rect.
+	 * The renderer caches the returned data URL and refreshes it
+	 * proactively so the swap on `dragstart` is instantaneous.
+	 *
+	 * Resolves to `null` when the view doesn't exist or the capture
+	 * fails (early in the view's lifetime before its first paint, or
+	 * when the contents are being torn down). The renderer treats
+	 * `null` as "no cache" and falls back to hiding the view without a
+	 * placeholder image.
+	 */
+	async capturePage(tabId: string): Promise<string | null> {
+		const state = this.views.get(tabId)
+		if (!state) return null
+		try {
+			const image = await state.view.webContents.capturePage()
+			if (image.isEmpty()) return null
+			return image.toDataURL()
+		} catch (err) {
+			logger.warn('[MiniBrowserService] capturePage failed', { tabId, error: String(err) })
+			return null
+		}
+	}
+
+	/**
 	 * Synchronous snapshot of the current URL / navigation state. The
 	 * renderer uses this on mount to seed its toolbar UI before the
 	 * first `did-navigate` event fires.

@@ -46,7 +46,8 @@ import {
   findInPageArgs, findStopArgs,
   miniBrowserCreateArgs, miniBrowserDestroyArgs, miniBrowserSetBoundsArgs,
   miniBrowserNavigateArgs, miniBrowserReloadArgs,
-  miniBrowserGoBackArgs, miniBrowserGoForwardArgs, miniBrowserGetStateArgs
+  miniBrowserGoBackArgs, miniBrowserGoForwardArgs, miniBrowserGetStateArgs,
+  miniBrowserCaptureArgs
 } from './ipc/schemas'
 
 /**
@@ -1071,6 +1072,10 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('miniBrowser:get-state', miniBrowserGetStateArgs, (_event, [tabId]) => {
     return miniBrowserService.getState(tabId)
+  })
+
+  validatedHandle('miniBrowser:capture', miniBrowserCaptureArgs, async (_event, [tabId]) => {
+    return await miniBrowserService.capturePage(tabId)
   })
 
   validatedHandle('import:import', importImportArgs, async (_event, [input]) => {

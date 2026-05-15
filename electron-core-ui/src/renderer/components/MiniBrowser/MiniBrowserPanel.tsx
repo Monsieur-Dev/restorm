@@ -38,6 +38,13 @@ export interface MiniBrowserDriver {
    * the first `did-navigate` event arrives. Returns `null` when the
    * driver hasn't seen this tabId yet. */
   getState: (tabId: string) => Promise<{ url: string; canGoBack: boolean; canGoForward: boolean } | null>
+  /** PNG data URL of the current page. The panel uses this to paint a
+   * still snapshot in place of the live view during HTML5 drag
+   * gestures — native compositor views paint above HTML, so a real
+   * drag overlay would otherwise be occluded. Returns `null` when the
+   * view is empty / not ready; the panel then falls back to plain hide
+   * without a placeholder image. */
+  capture: (tabId: string) => Promise<string | null>
   onDidNavigate: (callback: (result: { tabId: string; url: string }) => void) => () => void
   onDidStopLoading: (callback: (result: { tabId: string; canGoBack: boolean; canGoForward: boolean }) => void) => () => void
   /** Fires when the embedded page receives a user interaction (click /
@@ -92,6 +99,26 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ tabId, initi
   const wrapperRef = useRef<HTMLDivElement | null>(null)
   const slotRef = useRef<HTMLDivElement | null>(null)
   const lastPersistedRef = useRef<string>(initialUrl ?? '')
+  // Set while ANY HTML5 drag gesture is in flight in the host window —
+  // the layout-tracking effect below collapses the content view to a
+  // zero-size rect for the duration, so the renderer's drag overlays
+  // (drop indicators, ghost image) are not occluded by the
+  // OS-compositor-level view that would otherwise sit on top of every
+  // HTML pixel. A ref (not state) so toggling it doesn't trigger a
+  // re-render of the toolbar.
+  const dragHiddenRef = useRef(false)
+  // Most-recently-captured PNG data URL of the page. Refreshed every
+  // few seconds while the panel is visible so the snapshot painted in
+  // place of the live view on `dragstart` looks identical to what the
+  // user just saw — no white flash. `null` until the first capture
+  // succeeds.
+  const snapshotRef = useRef<string | null>(null)
+  // The data URL actually painted on the slot RIGHT NOW (the one the
+  // user sees during a drag). Mirrors `snapshotRef.current` while a
+  // drag is in flight, cleared on drag end. Lives in state — and not
+  // a ref — because flipping it has to re-render the slot to apply /
+  // remove the `background-image` style.
+  const [snapshotPainted, setSnapshotPainted] = useState<string | null>(null)
 
   // Sync committed URL back into the parent tab — but only when it
   // actually differs from the last value we persisted. Initial mount
@@ -206,6 +233,33 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ tabId, initi
     }
   }, [driver, tabId])
 
+  // Pro-actively refresh the snapshot cache while the panel is
+  // visible. The snapshot is what gets painted in place of the live
+  // view during HTML5 drag gestures — pre-capturing means the swap on
+  // `dragstart` is instantaneous instead of waiting ~100-200 ms for
+  // `capturePage` to round-trip. 2 s is a compromise between
+  // freshness and capture cost (a static page burns a `BitmapBuffer`
+  // round-trip every tick; 2 s is rare enough not to matter and
+  // recent enough that the snapshot won't look stale). The first
+  // capture fires after a 1 s delay so the page has time to paint
+  // anything at all on first navigate.
+  useEffect(() => {
+    let cancelled = false
+    const refresh = (): void => {
+      void driver.capture(tabId).then((dataUrl) => {
+        if (cancelled) return
+        if (dataUrl) snapshotRef.current = dataUrl
+      })
+    }
+    const initial = setTimeout(refresh, 1000)
+    const interval = setInterval(refresh, 2000)
+    return () => {
+      cancelled = true
+      clearTimeout(initial)
+      clearInterval(interval)
+    }
+  }, [driver, tabId])
+
   // Bridge guest-page interactions to the host workbench: when the
   // user clicks inside the embedded page, the host content view fires
   // a `focus` event. We re-dispatch a synthetic `mousedown` on the
@@ -238,8 +292,14 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ tabId, initi
     let last: { x: number; y: number; width: number; height: number } | null = null
     const push = (): void => {
       raf = null
+      // During a drag gesture, collapse to zero so the OS-level content
+      // view stops occluding the renderer's drop-indicator / drag-image
+      // overlays. The slot's natural rect is restored on dragend by
+      // forcing an immediate re-push from the dragend handler.
       const rect = el.getBoundingClientRect()
-      const next = { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
+      const next = dragHiddenRef.current
+        ? { x: 0, y: 0, width: 0, height: 0 }
+        : { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
       if (last?.x === next.x && last.y === next.y && last.width === next.width && last.height === next.height) {
         return
       }
@@ -286,10 +346,40 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ tabId, initi
     // 4 number comparisons every 100 ms — negligible for a Mini browser
     // that's typically open in 1–2 tabs at most.
     const poll = setInterval(push, 100)
+    // Hide the OS-level content view for the duration of any HTML5
+    // drag gesture in this window. WebContentsView paints at the
+    // compositor layer, above every HTML pixel, so drop-zone
+    // highlights and the system drag image are invisible / wiped out
+    // when the cursor passes over the view's rect. Collapsing to a
+    // zero-size rect on dragstart and restoring on dragend keeps the
+    // renderer's overlays visible without needing a separate
+    // setVisible IPC. A cached PNG snapshot of the page (refreshed
+    // proactively by the effect below) is painted in place of the
+    // collapsed view so the user keeps seeing the page during the
+    // drag — without the snapshot the slot would briefly flash to its
+    // empty background colour.
+    const onDragStart = (): void => {
+      if (dragHiddenRef.current) return
+      dragHiddenRef.current = true
+      if (snapshotRef.current) setSnapshotPainted(snapshotRef.current)
+      push()
+    }
+    const onDragEnd = (): void => {
+      if (!dragHiddenRef.current) return
+      dragHiddenRef.current = false
+      setSnapshotPainted(null)
+      push()
+    }
+    document.addEventListener('dragstart', onDragStart, true)
+    document.addEventListener('dragend', onDragEnd, true)
+    document.addEventListener('drop', onDragEnd, true)
     return () => {
       ro.disconnect()
       mo.disconnect()
       clearInterval(poll)
+      document.removeEventListener('dragstart', onDragStart, true)
+      document.removeEventListener('dragend', onDragEnd, true)
+      document.removeEventListener('drop', onDragEnd, true)
       window.removeEventListener('resize', onWindowResize)
       if (raf !== null) cancelAnimationFrame(raf)
       // No `setBounds(0,0,0,0)` on cleanup: the slot's
@@ -369,6 +459,10 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ tabId, initi
           className="mini-browser-panel__slot"
           data-testid="mini-browser-slot"
           {...(committedUrl === '' ? { 'data-empty': 'true' } : {})}
+          {...(snapshotPainted !== null ? { 'data-snapshot-visible': 'true' } : {})}
+          style={snapshotPainted !== null
+            ? { backgroundImage: `url(${snapshotPainted})`, backgroundSize: '100% 100%', backgroundPosition: 'top left', backgroundRepeat: 'no-repeat' }
+            : undefined}
         >
           {committedUrl === '' ? (
             <div className="mini-browser-panel__placeholder" data-testid="mini-browser-placeholder">

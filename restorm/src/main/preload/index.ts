@@ -395,6 +395,13 @@ contextBridge.exposeInMainWorld('restorm', {
     getState: async (tabId: string): Promise<{ url: string; canGoBack: boolean; canGoForward: boolean } | null> => {
       return await ipcRenderer.invoke('miniBrowser:get-state', tabId) as { url: string; canGoBack: boolean; canGoForward: boolean } | null
     },
+    /** PNG data URL of the current page. Used by the panel to paint a
+     * still image of the page in place of the live view during HTML5
+     * drag gestures (the OS-compositor-level view paints above HTML
+     * pixels, so a real drag overlay would otherwise be occluded). */
+    capture: async (tabId: string): Promise<string | null> => {
+      return await ipcRenderer.invoke('miniBrowser:capture', tabId) as string | null
+    },
     onDidNavigate: (callback: (result: { tabId: string; url: string }) => void): (() => void) => {
       const handler = (_event: Electron.IpcRendererEvent, result: { tabId: string; url: string }): void => {
         callback(result)
