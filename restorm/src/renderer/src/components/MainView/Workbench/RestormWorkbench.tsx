@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
 import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, IconView, TabSwitcherOverlay, navigationService, useFeature, MiniBrowserPanel, ConsolePanel, type ContextMenuItem } from 'electron-core-ui/renderer'
+import { miniBrowserDriver } from '../../../services/miniBrowserDriver'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback, TabSwitcherItem } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
 import type { RestormEditorTab, BreadcrumbItem } from '../../../../../shared/types/editor'
@@ -976,8 +977,10 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isMiniBrowserTab(effectiveTab)) {
       return (
         <MiniBrowserPanel
+          tabId={effectiveTab.id}
           {...(effectiveTab.url !== undefined ? { initialUrl: effectiveTab.url } : {})}
           onUrlChange={(url) => { updateMiniBrowserUrl(effectiveTab.id, url) }}
+          driver={miniBrowserDriver}
         />
       )
     }

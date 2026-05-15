@@ -359,6 +359,72 @@ contextBridge.exposeInMainWorld('restorm', {
       await ipcRenderer.invoke('context:clear-all')
     }
   },
+  miniBrowser: {
+    /** Create a `WebContentsView` for a Mini-Browser tab, attached to
+     * the calling window's `contentView`. Idempotent — a duplicate call
+     * for the same `tabId` is a no-op. */
+    create: async (tabId: string, initialUrl?: string): Promise<{ ok: boolean }> => {
+      return await ipcRenderer.invoke('miniBrowser:create', tabId, initialUrl) as { ok: boolean }
+    },
+    /** Tear down the view (close its contents, free the slot). Called
+     * on the Mini-Browser tab's final unmount — NOT on cross-group
+     * moves (those are pure `setBounds` updates). */
+    destroy: async (tabId: string): Promise<{ ok: boolean }> => {
+      return await ipcRenderer.invoke('miniBrowser:destroy', tabId) as { ok: boolean }
+    },
+    /** Position the view in window-coordinate space (DIP). The panel's
+     * `ResizeObserver` on its placeholder slot drives this every time
+     * the slot's rect changes. A zero-size rect hides the view. */
+    setBounds: async (tabId: string, bounds: { x: number; y: number; width: number; height: number }): Promise<{ ok: boolean }> => {
+      return await ipcRenderer.invoke('miniBrowser:set-bounds', tabId, bounds) as { ok: boolean }
+    },
+    navigate: async (tabId: string, url: string): Promise<{ ok: boolean }> => {
+      return await ipcRenderer.invoke('miniBrowser:navigate', tabId, url) as { ok: boolean }
+    },
+    reload: async (tabId: string): Promise<{ ok: boolean }> => {
+      return await ipcRenderer.invoke('miniBrowser:reload', tabId) as { ok: boolean }
+    },
+    goBack: async (tabId: string): Promise<{ ok: boolean }> => {
+      return await ipcRenderer.invoke('miniBrowser:go-back', tabId) as { ok: boolean }
+    },
+    goForward: async (tabId: string): Promise<{ ok: boolean }> => {
+      return await ipcRenderer.invoke('miniBrowser:go-forward', tabId) as { ok: boolean }
+    },
+    /** Synchronous URL + back/forward snapshot. Used to seed the
+     * toolbar before the first `did-navigate` event lands. */
+    getState: async (tabId: string): Promise<{ url: string; canGoBack: boolean; canGoForward: boolean } | null> => {
+      return await ipcRenderer.invoke('miniBrowser:get-state', tabId) as { url: string; canGoBack: boolean; canGoForward: boolean } | null
+    },
+    onDidNavigate: (callback: (result: { tabId: string; url: string }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, result: { tabId: string; url: string }): void => {
+        callback(result)
+      }
+      ipcRenderer.on('miniBrowser:did-navigate', handler)
+      ipcRenderer.on('miniBrowser:did-navigate-in-page', handler)
+      return () => {
+        ipcRenderer.removeListener('miniBrowser:did-navigate', handler)
+        ipcRenderer.removeListener('miniBrowser:did-navigate-in-page', handler)
+      }
+    },
+    onDidStopLoading: (callback: (result: { tabId: string; canGoBack: boolean; canGoForward: boolean }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, result: { tabId: string; canGoBack: boolean; canGoForward: boolean }): void => {
+        callback(result)
+      }
+      ipcRenderer.on('miniBrowser:did-stop-loading', handler)
+      return () => {
+        ipcRenderer.removeListener('miniBrowser:did-stop-loading', handler)
+      }
+    },
+    onUserInteraction: (callback: (result: { tabId: string }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, result: { tabId: string }): void => {
+        callback(result)
+      }
+      ipcRenderer.on('miniBrowser:user-interaction', handler)
+      return () => {
+        ipcRenderer.removeListener('miniBrowser:user-interaction', handler)
+      }
+    }
+  },
   http: {
     /** Execute an HTTP request */
     execute: async (input: { requestId: string; method: string; timeout?: number; authRequest?: unknown; requestPath?: string }): Promise<{

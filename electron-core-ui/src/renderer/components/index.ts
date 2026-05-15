@@ -64,7 +64,7 @@ export type { CodeEditorProps, CodeEditorRef } from './CodeEditor'
 
 // MiniBrowser exports
 export { MiniBrowserPanel } from './MiniBrowser'
-export type { MiniBrowserPanelProps } from './MiniBrowser'
+export type { MiniBrowserPanelProps, MiniBrowserDriver } from './MiniBrowser'
 
 // Console exports
 export { ConsolePanel, Console, ConsoleToolbar, useConsoleFeed, registerConsoleFeedSource, clearConsoleFeed, ConsoleFeedStore, renderRecord } from './Console'

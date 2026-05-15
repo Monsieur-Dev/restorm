@@ -349,3 +349,24 @@ export const apiUpdatePreviewTreeArgs = z.tuple([folderIdArg])
  * truth for the project tree; this handler just mirrors it into the
  * main-side CollectionStore. */
 export const collectionsSyncArgs = z.tuple([z.array(z.unknown())])
+
+// ==========================================================================
+// MiniBrowser — main-process `WebContentsView` lifecycle
+// ==========================================================================
+
+const tabIdArg = z.string()
+const miniBrowserBoundsSchema = z.object({
+  x: z.number(),
+  y: z.number(),
+  width: z.number(),
+  height: z.number()
+})
+
+export const miniBrowserCreateArgs = z.tuple([tabIdArg, z.string().optional()])
+export const miniBrowserDestroyArgs = z.tuple([tabIdArg])
+export const miniBrowserSetBoundsArgs = z.tuple([tabIdArg, miniBrowserBoundsSchema])
+export const miniBrowserNavigateArgs = z.tuple([tabIdArg, z.string()])
+export const miniBrowserReloadArgs = z.tuple([tabIdArg])
+export const miniBrowserGoBackArgs = z.tuple([tabIdArg])
+export const miniBrowserGoForwardArgs = z.tuple([tabIdArg])
+export const miniBrowserGetStateArgs = z.tuple([tabIdArg])

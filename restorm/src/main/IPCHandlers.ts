@@ -5,6 +5,7 @@ import { join, relative, dirname } from 'path'
 import { promises as fs, existsSync, statSync, rmSync } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
 import { contextService, responseHistoryService } from './services'
+import { miniBrowserService } from './services/MiniBrowserService'
 import { assertPathWithinParent } from './utils/pathSecurity'
 import { saveFolderStructure, loadFolderStructure, attachDraftStoreForFolder, attachDraftStoreForFile } from './FileOperations'
 import type { PersistenceFormat } from 'electron-core-ui'
@@ -42,7 +43,10 @@ import {
   responsesHistoryListArgs, responsesHistoryGetArgs,
   responsesHistoryTogglePinArgs,
   importPreviewArgs, importImportArgs,
-  findInPageArgs, findStopArgs
+  findInPageArgs, findStopArgs,
+  miniBrowserCreateArgs, miniBrowserDestroyArgs, miniBrowserSetBoundsArgs,
+  miniBrowserNavigateArgs, miniBrowserReloadArgs,
+  miniBrowserGoBackArgs, miniBrowserGoForwardArgs, miniBrowserGetStateArgs
 } from './ipc/schemas'
 
 /**
@@ -1014,6 +1018,59 @@ export function registerRestormIPC(deps: {
     const win = BrowserWindow.fromWebContents(event.sender)
     win?.webContents.stopFindInPage(action)
     return { ok: true }
+  })
+
+  // ==========================================================================
+  // MiniBrowser — main-process `WebContentsView` lifecycle. Each Mini-
+  // Browser tab in the renderer is backed by one WebContentsView here;
+  // the renderer doesn't host the embedded page in its own DOM at all,
+  // so cross-group tab moves are just `setBounds` updates instead of
+  // re-parenting a `<webview>` (which Chromium would tear down on every
+  // move). See `services/MiniBrowserService.ts` for the full rationale.
+  // ==========================================================================
+
+  validatedHandle('miniBrowser:create', miniBrowserCreateArgs, (event, [tabId, initialUrl]) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (!win) {
+      logger.warn('[IPC] miniBrowser:create: no owner BrowserWindow', { tabId })
+      return { ok: false }
+    }
+    miniBrowserService.create(tabId, win, initialUrl)
+    return { ok: true }
+  })
+
+  validatedHandle('miniBrowser:destroy', miniBrowserDestroyArgs, (_event, [tabId]) => {
+    miniBrowserService.destroy(tabId)
+    return { ok: true }
+  })
+
+  validatedHandle('miniBrowser:set-bounds', miniBrowserSetBoundsArgs, (_event, [tabId, bounds]) => {
+    miniBrowserService.setBounds(tabId, bounds)
+    return { ok: true }
+  })
+
+  validatedHandle('miniBrowser:navigate', miniBrowserNavigateArgs, (_event, [tabId, url]) => {
+    miniBrowserService.navigate(tabId, url)
+    return { ok: true }
+  })
+
+  validatedHandle('miniBrowser:reload', miniBrowserReloadArgs, (_event, [tabId]) => {
+    miniBrowserService.reload(tabId)
+    return { ok: true }
+  })
+
+  validatedHandle('miniBrowser:go-back', miniBrowserGoBackArgs, (_event, [tabId]) => {
+    miniBrowserService.goBack(tabId)
+    return { ok: true }
+  })
+
+  validatedHandle('miniBrowser:go-forward', miniBrowserGoForwardArgs, (_event, [tabId]) => {
+    miniBrowserService.goForward(tabId)
+    return { ok: true }
+  })
+
+  validatedHandle('miniBrowser:get-state', miniBrowserGetStateArgs, (_event, [tabId]) => {
+    return miniBrowserService.getState(tabId)
   })
 
   validatedHandle('import:import', importImportArgs, async (_event, [input]) => {
