@@ -142,7 +142,16 @@ const TabsInner: React.FC<TabsProps> = ({
         display: 'flex',
         flexDirection: 'column',
         width: '100%',
-        height: '100%'
+        height: '100%',
+        // `min-height: 0` is required when this wrapper is a flex item
+        // in its own parent (which it almost always is — the workbench
+        // tab content area, every embedded folder/env-folder view).
+        // Without it, the flex-item default `min-height: auto` forces
+        // the wrapper to grow to its natural min-content height when
+        // ANY descendant of an inner scrollable produces a min-content
+        // larger than the parent's available space. The visible effect
+        // is a pane that's a few pixels taller than its siblings.
+        minHeight: 0
       }}
       {...(dataTestId && {
         'data-testid': dataTestId,

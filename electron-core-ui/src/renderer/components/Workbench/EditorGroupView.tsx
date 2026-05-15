@@ -281,7 +281,7 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 				'data-active-tab-id': group.activeTabId ?? '',
 				'data-tab-count': String(group.tabs.length)
 			})}
-			style={{ display: 'flex', flexDirection: 'column', minWidth: 0, position: 'relative', height: '100%' }}
+			style={{ display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0, position: 'relative', height: '100%' }}
 		>
 			<div className="title" style={{ display: 'flex' }}>
 				<EditorTabs
