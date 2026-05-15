@@ -83,6 +83,29 @@ export function flattenTabs(tree: WorkbenchTree): EditorTab[] {
 	return out;
 }
 
+/**
+ * Every group's `activeTabId` flattened. Drives the workbench's
+ * lazy-mount policy: a tab's React subtree is materialised the first
+ * time it appears here (= becomes the visible tab of its group) and
+ * stays mounted thereafter. Tabs that have never been visible — e.g.
+ * extras opened in the background by a tree-replace — pay no React
+ * cost until the user activates them.
+ */
+export function collectActiveTabIds(tree: WorkbenchTree): string[] {
+	const out: string[] = [];
+	const walk = (nodes: GroupNode[]): void => {
+		for (const node of nodes) {
+			if (isTabGroupNode(node)) {
+				if (node.activeTabId) out.push(node.activeTabId);
+			} else {
+				walk(node.groups);
+			}
+		}
+	};
+	walk(tree.groups);
+	return out;
+}
+
 export function findGroup(tree: WorkbenchTree, groupId: string): FindResult {
 	const rec = (parent: ContainerGroupNode | null, groups: GroupNode[], path: number[]): FindResult => {
 		for (let i = 0; i < groups.length; i++) {

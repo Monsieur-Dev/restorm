@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useImperativeHandle, useLayoutEffect, us
 import type { ContainerGroupNode, EditorGroup, EditorTab, EditorWorkbenchCallbacks, GroupNode, SplitDirection, WorkbenchTree } from './types';
 import { isContainerNode, isTabGroupNode } from './types';
 import { EditorGroupView } from './EditorGroupView';
-import { cloneTree, flattenTabs, insertTabAt, moveTabToAdjacentGroup, normalizeTree, removeTab } from './tree';
+import { cloneTree, collectActiveTabIds, flattenTabs, insertTabAt, moveTabToAdjacentGroup, normalizeTree, removeTab } from './tree';
 import { TabContentHost, FLEX_FILL_CSS_TEXT } from './TabContentHost';
 import { Modal } from '../Modal';
 import { getTabTitleString } from './utils';
@@ -426,6 +426,46 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 	const [tabVersionCache] = useState(() => new Map<string, number>());
 
 	const allTabs = useMemo(() => flattenTabs(tree), [tree]);
+
+	// Lazy-mount policy: a tab is materialised (its React subtree
+	// mounted via the `TabContentHost` portal) the first time it appears
+	// as a group's `activeTabId` — i.e. the first time it would be
+	// visible to the user. It stays mounted thereafter, so subsequent
+	// switches back to it are instant and any state (response, scroll,
+	// editor selection) survives. Tabs that have never been visible —
+	// e.g. siblings of the active tab, or extras opened in the
+	// background by an MCP tree-replace — pay zero React cost until the
+	// user actually activates them. `fullscreenTabId` is added too so
+	// imperative `set_tab_maximized` mounts an unvisited tab.
+	//
+	// The "newly-active" check is done DURING RENDER (not in a
+	// `useEffect`) so the same render that flipped a slot's display to
+	// `flex` also commits its portal — otherwise the user would see one
+	// frame of empty tab content before the effect fired. Calling
+	// `setState` during render is a supported React pattern as long as
+	// it's gated by a comparison.
+	const [mountedTabIds, setMountedTabIds] = useState<Set<string>>(
+		() => new Set([...collectActiveTabIds(tree), ...(fullscreenTabId ? [fullscreenTabId] : [])])
+	);
+	const newlyActiveTabIds = [...collectActiveTabIds(tree), ...(fullscreenTabId ? [fullscreenTabId] : [])]
+		.filter((id) => !mountedTabIds.has(id));
+	if (newlyActiveTabIds.length > 0) {
+		setMountedTabIds((prev) => {
+			// StrictMode replays the setter — re-check membership against
+			// `prev` (not the stale closure `mountedTabIds`) and bail out
+			// with the same reference when there's nothing new to add, so
+			// React doesn't schedule an extra render on the replay.
+			let changed = false;
+			const next = new Set(prev);
+			for (const id of newlyActiveTabIds) {
+				if (!next.has(id)) {
+					next.add(id);
+					changed = true;
+				}
+			}
+			return changed ? next : prev;
+		});
+	}
 
 	// Stable id-sorted order for rendering the `TabContentHost` portals.
 	// Rendering them in tree order would let a tab REORDER (within a
@@ -1185,14 +1225,20 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 			 * order) — see the `orderedTabs` comment: a stable sibling
 			 * order is what keeps a tab reorder from moving a portal
 			 * fiber and tearing down its embedded editors.
+			 *
+			 * Filtered by `mountedTabIds` (lazy-once): a tab is only
+			 * portalled once it has appeared as a group's active tab.
+			 * Once mounted it stays so for the lifetime of this
+			 * workbench — switching away just toggles the slot's
+			 * display, never tears down the subtree.
 			 */}
-			{orderedTabs.map((tab) => (
+			{orderedTabs.map((tab) => mountedTabIds.has(tab.id) ? (
 				<TabContentHost
 					key={tab.id}
 					host={getTabHost(tab.id)}
 					content={tabContents.get(tab.id)}
 				/>
-			))}
+			) : null)}
 			<Modal
 				isOpen={fullscreenTab !== null}
 				onClose={() => { setFullscreenTabId(null); }}

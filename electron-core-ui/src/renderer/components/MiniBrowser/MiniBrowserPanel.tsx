@@ -33,6 +33,10 @@ export interface MiniBrowserPanelProps {
 interface WebviewNavigateEvent {
   url?: string
 }
+interface WebviewConsoleMessageEvent {
+  message?: string
+  level?: number
+}
 interface WebviewElement extends HTMLElement {
   src: string
   reload: () => void
@@ -41,7 +45,20 @@ interface WebviewElement extends HTMLElement {
   canGoBack: () => boolean
   canGoForward: () => boolean
   getURL: () => string
+  executeJavaScript: (code: string) => Promise<unknown>
 }
+
+/**
+ * Sentinel string written by the guest-page content script on every
+ * pointer-down inside the embedded web page, picked up via the host's
+ * `console-message` event. Lets us reflect "user interacted with the
+ * page" back up the host's React tree without an Electron preload
+ * (which would require build wiring + IPC plumbing on every consumer).
+ *
+ * The string is deliberately unusual so a real `console.log` from a
+ * loaded page is extremely unlikely to false-trigger.
+ */
+const GUEST_INTERACTION_MARKER = '__ecui_mini_browser_user_interaction__'
 
 /**
  * Tiny webview chrome — address bar, back, refresh, and an Electron
@@ -108,11 +125,25 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ initialUrl, 
     webviewRef.current?.goBack()
   }, [])
 
+  const wrapperRef = useRef<HTMLDivElement | null>(null)
+
   // Mirror webview navigation back into address bar + committed URL +
   // the parent tab. `did-navigate` fires for top-level navigations
   // (link clicks, form submits, location.href = ...). `did-navigate-in-page`
   // covers SPA route changes (history.pushState / replaceState) so the
   // address bar stays accurate inside single-page apps.
+  //
+  // Also injects a one-line content script on every `dom-ready` that
+  // forwards in-page pointer-downs back to the host (via the
+  // `console-message` channel — Chromium routes guest console output
+  // to the embedder, and that's the lowest-friction back-channel
+  // available without a preload). The host catches the marker string
+  // and re-fires a `mousedown` on the panel wrapper so the workbench's
+  // own activate-on-click listener (which lives on the group's
+  // placeholder, a DOM ancestor of this wrapper) sees the interaction
+  // and focuses the owning tab — same UX as clicking inside a regular
+  // tab's body. Without this dance the click happens entirely inside
+  // the guest's process and the host never knows.
   useEffect(() => {
     const webview = webviewRef.current
     if (!webview) return
@@ -126,20 +157,49 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ initialUrl, 
       refreshBackState()
     }
     const handleStopLoading = (): void => { refreshBackState() }
+    const handleDomReady = (): void => {
+      // Run with `capture: true` and `passive: true` so we never
+      // interfere with the guest page's own click handling, and the
+      // listener can be installed exactly once per dom-ready (a fresh
+      // navigation re-fires `dom-ready` and re-installs us — that's
+      // expected).
+      const code = `
+        (function(){
+          if (window.__ecuiMiniBrowserInstalled) return;
+          window.__ecuiMiniBrowserInstalled = true;
+          document.addEventListener('mousedown', function(){
+            console.log(${JSON.stringify(GUEST_INTERACTION_MARKER)});
+          }, { capture: true, passive: true });
+        })();
+      `
+      webview.executeJavaScript(code).catch(() => { /* ignore — about: pages reject */ })
+    }
+    const handleConsoleMessage = (raw: Event): void => {
+      const e = raw as unknown as WebviewConsoleMessageEvent
+      if (e.message !== GUEST_INTERACTION_MARKER) return
+      // Re-fire a real mousedown on the wrapper so the workbench's own
+      // activate-on-click listener (attached natively on the group's
+      // placeholder) picks it up — DOM bubbling does the rest.
+      wrapperRef.current?.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }))
+    }
     webview.addEventListener('did-navigate', handleNavigate)
     webview.addEventListener('did-navigate-in-page', handleNavigate)
     webview.addEventListener('did-stop-loading', handleStopLoading)
+    webview.addEventListener('dom-ready', handleDomReady)
+    webview.addEventListener('console-message', handleConsoleMessage)
     return () => {
       webview.removeEventListener('did-navigate', handleNavigate)
       webview.removeEventListener('did-navigate-in-page', handleNavigate)
       webview.removeEventListener('did-stop-loading', handleStopLoading)
+      webview.removeEventListener('dom-ready', handleDomReady)
+      webview.removeEventListener('console-message', handleConsoleMessage)
     }
   }, [])
 
   const canRefresh = committedUrl !== ''
 
   return (
-    <div className="mini-browser-panel" data-testid="mini-browser-panel">
+    <div ref={wrapperRef} className="mini-browser-panel" data-testid="mini-browser-panel">
       {/* Toolbar uses ECUI primitives (`Button` + `InputBox`) wrapped in
        * `ControlGroup` so back / refresh / address / go render as a
        * single joined strip (shared borders, no gaps) — the visual

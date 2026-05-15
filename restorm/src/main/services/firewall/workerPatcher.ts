@@ -156,7 +156,13 @@ function patchWorkerConstructor(requireFlag: string[]): boolean {
 		})
 		return true
 	} catch (err) {
-		logger.warn('FirewallService: could not patch worker_threads.Worker; spawned workers will not inherit the firewall (Restorm does not spawn workers itself, so this is defensive-only)', { error: String(err) })
+		// Downgraded from warn → debug: Restorm does not spawn workers,
+		// so this patch is defensive-only. Surfacing it at WARN level
+		// added noise to every startup without flagging any actual
+		// problem (Electron sometimes locks `worker_threads.Worker` to
+		// non-configurable). If a future feature starts spawning workers,
+		// re-elevate this and re-audit the inheritance contract.
+		logger.debug('FirewallService: could not patch worker_threads.Worker; spawned workers will not inherit the firewall (defensive-only, Restorm does not spawn workers)', { error: String(err) })
 		return false
 	}
 }
@@ -190,7 +196,11 @@ function patchChildProcessFork(requireFlag: string[]): boolean {
 		})
 		return true
 	} catch (err) {
-		logger.warn('FirewallService: could not patch child_process.fork; forked children will not inherit the firewall (Restorm does not fork children itself, so this is defensive-only)', { error: String(err) })
+		// Same rationale as the `worker_threads` patch above — Restorm
+		// doesn't fork its own children, so this is defensive-only.
+		// Logged at debug level to keep startup quiet; re-elevate if a
+		// feature starts forking.
+		logger.debug('FirewallService: could not patch child_process.fork; forked children will not inherit the firewall (defensive-only, Restorm does not fork children)', { error: String(err) })
 		return false
 	}
 }

@@ -486,7 +486,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
             tabs={mergedTabs}
             activeTabId={effectiveCompactTabId}
             onTabChange={handleCompactTabChange}
-            keepMounted
+            mountStrategy="lazy-once"
           />
         </div>
       ) : showResponsePanel ? (
@@ -506,7 +506,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
                 tabs={requestTabs}
                 activeTabId={effectiveActiveTabId}
                 onTabChange={setActiveTabId}
-                keepMounted
+                mountStrategy="lazy-once"
               />
             </div>
           }
@@ -523,7 +523,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
                 tabs={responseTabs}
                 activeTabId={effectiveResponseTabId}
                 onTabChange={handleResponseTabChange}
-                keepMounted
+                mountStrategy="lazy-once"
               />
             </div>
           }
@@ -540,7 +540,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
             tabs={requestTabs}
             activeTabId={effectiveActiveTabId}
             onTabChange={setActiveTabId}
-            keepMounted
+            mountStrategy="lazy-once"
           />
         </div>
       )}

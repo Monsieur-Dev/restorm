@@ -108,15 +108,28 @@ describe('EditorWorkbench — tab content survives relocation (StrictMode)', () 
 			groups: [{ id: 'g1', tabs, activeTabId }]
 		})
 
-		// Initial mount under StrictMode.
+		// Initial mount under StrictMode. The workbench is lazy-once: only
+		// the active tab of each group is mounted initially. To exercise
+		// the "both tabs survive a reorder / cross-group move" invariant
+		// we first need to visit B so it gets materialised.
 		const { rerender } = render(
 			<StrictMode>
 				<EditorWorkbench tree={oneGroup([tab('A'), tab('B')], 'A')} renderTabContent={renderTabContent} />
 			</StrictMode>
 		)
-		// Both contents are in the document and effect-connected. (A
-		// `host.remove()` on StrictMode's simulated unmount would have
-		// left them detached.)
+		// A (the active tab) is mounted, B is NOT yet (lazy-once policy).
+		expect(screen.getByTestId('content-A').isConnected).toBe(true)
+		expect(screen.queryByTestId('content-B'), 'B has never been active — must NOT be mounted yet').toBeNull()
+		expect(netConnections('A')).toBe(1)
+		expect(netConnections('B')).toBe(0)
+
+		// Activate B → it materialises. After this point both should
+		// survive the same invariants as the original test.
+		rerender(
+			<StrictMode>
+				<EditorWorkbench tree={oneGroup([tab('A'), tab('B')], 'B')} renderTabContent={renderTabContent} />
+			</StrictMode>
+		)
 		expect(screen.getByTestId('content-A').isConnected).toBe(true)
 		expect(screen.getByTestId('content-B').isConnected).toBe(true)
 		expect(netConnections('A')).toBe(1)

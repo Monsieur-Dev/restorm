@@ -691,6 +691,12 @@ Then('the pet response should fail with a 401', async () => {
   // The Infos pane carries a stable status-code line. The body may
   // still hold the previous Rex payload if the response panel doesn't
   // render error JSON inline, so inspect the Infos tab text.
+  //
+  // Click the Infos tab header first: the response `<Tabs>` uses
+  // `mountStrategy="lazy-once"`, so Infos is not in the DOM until
+  // visited. Without this click the response strip's textContent
+  // doesn't include the status code yet.
+  await p.locator('[data-testid="base-request-tabs-response-tab-infos"]').click()
   const infos = p.locator('[data-testid="base-request-tabs-response"]:visible').first()
   await expect(infos).toContainText('401', { timeout: 15000 })
 })
@@ -741,7 +747,10 @@ When('I send the authentication request directly', async () => {
 Then('no authentication-failure toast should appear', async () => {
   const p = requirePage()
   // Wait for the auth response to land (status 401 in the visible
-  // Infos pane confirms the call round-tripped).
+  // Infos pane confirms the call round-tripped). The response Tabs
+  // uses `mountStrategy="lazy-once"`, so Infos has to be visited
+  // before its status-code line is in the DOM.
+  await p.locator('[data-testid="base-request-tabs-response-tab-infos"]').click()
   await expect(p.locator('[data-testid="base-request-tabs-response"]:visible').first())
     .toContainText('401', { timeout: 15000 })
   // Then assert the toast hasn't reappeared. Wait a fixed window so a

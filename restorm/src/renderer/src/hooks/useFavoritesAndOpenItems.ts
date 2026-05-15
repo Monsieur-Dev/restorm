@@ -139,7 +139,12 @@ export function useFavoritesAndOpenItems(
       const row = itemToRow(id)
       if (!row) {
         if (!warnedOnce) {
-          logger.warn('Favorite id refers to an unknown item — skipping', { id })
+          // Debug-level: a dangling favorite isn't actionable for the
+          // end user (it just won't appear in the Favorites view).
+          // Surfacing it at WARN added noise on every refresh; downgrade
+          // means it still surfaces with verbose logging when we need
+          // to debug a stale persistence file.
+          logger.debug('Favorite id refers to an unknown item — skipping', { id })
           warnedOnce = true
         }
         continue

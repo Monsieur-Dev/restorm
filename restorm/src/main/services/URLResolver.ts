@@ -21,9 +21,16 @@ export function resolveUrl(
   envContext: TransformedContext,
   transformValue: TransformValueFn
 ): ResolvedUrlResult {
-  // Build cumulative context with path params (non-encoded for resolution)
+  // Build cumulative context with path params (non-encoded for resolution).
+  // Path params override env vars for the same key — request-level
+  // overrides always win over the inherited environment chain.
   const cumulativeContext = { ...envContext }
   const pathParams = data.pathParams ?? []
+  // Track which keys were set (or overridden) by a path param, so we
+  // can URL-encode just those when building the URL-template context.
+  // Env values stay verbatim — the user typed them deliberately and
+  // may use characters (`,`, `:`) that `encodeURIComponent` mangles.
+  const pathParamKeys = new Set<string>()
 
   for (const pp of pathParams) {
     // Skip disabled path params (enabled defaults to true if undefined)
@@ -41,16 +48,20 @@ export function resolveUrl(
         : raw
       // Store non-encoded value for next iterations (last value wins for same key)
       cumulativeContext[resolvedKey] = resolvedValue
+      pathParamKeys.add(resolvedKey)
     }
   }
 
-  // Build URL context with URL-encoded values
+  // Build URL context with URL-encoded values. The previous version
+  // gated the override behind `!(key in envContext)`, which dropped
+  // path-param overrides for keys also defined in the env — env's
+  // value silently won. The contract is the opposite: request path
+  // params always override env (a path-param `name=Glaude` must win
+  // over an env `name=Forgeaude`), so the override is unconditional.
   const fullContext = { ...envContext }
-  for (const [key, value] of Object.entries(cumulativeContext)) {
-    if (!(key in envContext)) {
-      // Only encode path param values, not env values
-      fullContext[key] = encodeURIComponent(value)
-    }
+  for (const key of pathParamKeys) {
+    const value = cumulativeContext[key] ?? ''
+    fullContext[key] = encodeURIComponent(value)
   }
 
   // Transform the URL template
