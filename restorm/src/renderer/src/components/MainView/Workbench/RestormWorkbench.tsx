@@ -170,6 +170,15 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   const isControlled = onTreeChange !== undefined
   const [localTree, setLocalTree] = useState<WorkbenchTree>(initialTree)
   const tree = isControlled ? initialTree : localTree
+  // Always-current view of the tree, for callbacks baked into tab
+  // content. `EditorWorkbench` caches each tab's rendered content
+  // workbench-wide and that cache survives the tab being moved between
+  // groups — so a callback that *closed over* `tree` would keep
+  // computing against the tab's pre-move position and snap it back.
+  // `treeRef` is read instead, so those callbacks always see where the
+  // tab actually is now.
+  const treeRef = useRef<WorkbenchTree>(tree)
+  useEffect(() => { treeRef.current = tree }, [tree])
   const lastTabCountRef = useRef<number>(0)
   // Per-group active-tab tracker so we can detect activations in any
   // split pane (not just `groups[0]`) when the tree mutates
@@ -540,7 +549,8 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       for (const k of aKeys) if (a[k] !== b[k]) return false
       return true
     }
-    const updateGroups = (nodes: typeof tree.groups): typeof tree.groups =>
+    const currentTree = treeRef.current
+    const updateGroups = (nodes: typeof currentTree.groups): typeof currentTree.groups =>
       nodes.map((node) => {
         if (isTabGroupNode(node)) {
           const target = node.tabs.find((t) => t.id === tabId)
@@ -568,12 +578,12 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         }
         return node
       })
-    const nextGroups = updateGroups(tree.groups)
-    if (nextGroups === tree.groups) return
-    const nextTree = { ...tree, groups: nextGroups }
+    const nextGroups = updateGroups(currentTree.groups)
+    if (nextGroups === currentTree.groups) return
+    const nextTree = { ...currentTree, groups: nextGroups }
     if (onTreeChange) onTreeChange(nextTree)
     else setLocalTree(nextTree)
-  }, [tree, onTreeChange])
+  }, [onTreeChange])
 
   /** Persist the Mini browser's current URL on its tab record so
    * reopening the workbench restores the navigation state. Walks the
@@ -581,7 +591,8 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
    * then replaces it with an updated copy. No-op when the URL hasn't
    * actually changed so we don't churn the workbench-tree subscribers. */
   const updateMiniBrowserUrl = useCallback((tabId: string, url: string): void => {
-    const updateGroups = (nodes: typeof tree.groups): typeof tree.groups =>
+    const currentTree = treeRef.current
+    const updateGroups = (nodes: typeof currentTree.groups): typeof currentTree.groups =>
       nodes.map((node) => {
         if (isTabGroupNode(node)) {
           const target = node.tabs.find((t) => t.id === tabId)
@@ -606,12 +617,12 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         }
         return node
       })
-    const nextGroups = updateGroups(tree.groups)
-    if (nextGroups === tree.groups) return
-    const nextTree = { ...tree, groups: nextGroups }
+    const nextGroups = updateGroups(currentTree.groups)
+    if (nextGroups === currentTree.groups) return
+    const nextTree = { ...currentTree, groups: nextGroups }
     if (onTreeChange) onTreeChange(nextTree)
     else setLocalTree(nextTree)
-  }, [tree, onTreeChange])
+  }, [onTreeChange])
 
   // Render tab content based on tab type
   const renderTabContent = useCallback((tab: RestormEditorTab): React.ReactNode => {

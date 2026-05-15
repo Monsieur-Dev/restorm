@@ -2,7 +2,10 @@ import React, { useCallback, useEffect, useImperativeHandle, useLayoutEffect, us
 import type { ContainerGroupNode, EditorGroup, EditorTab, EditorWorkbenchCallbacks, GroupNode, SplitDirection, WorkbenchTree } from './types';
 import { isContainerNode, isTabGroupNode } from './types';
 import { EditorGroupView } from './EditorGroupView';
-import { cloneTree, insertTabAt, moveTabToAdjacentGroup, normalizeTree, removeTab } from './tree';
+import { cloneTree, flattenTabs, insertTabAt, moveTabToAdjacentGroup, normalizeTree, removeTab } from './tree';
+import { TabContentHost, FLEX_FILL_CSS_TEXT } from './TabContentHost';
+import { Modal } from '../Modal';
+import { getTabTitleString } from './utils';
 import { computeDropIndex } from './dnd';
 import { getCurrentWindowBounds } from './ipc';
 import { onWorkbenchTabDropped } from './ipc';
@@ -375,12 +378,141 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 	const [internalFocusedGroupId, setInternalFocusedGroupId] = useState<string | null>(null);
 
 	// Which tab is currently maximized (fullscreen modal), workbench-wide
-	// — at most one across all split-pane groups. Lifted here (rather
-	// than living in each `EditorGroupView`) so it can be driven
-	// imperatively via the handle, e.g. by the `set_tab_maximized` MCP
-	// tool. Each `EditorGroupView` opens its modal only when this id
-	// names one of its own tabs.
+	// — at most one across all split-pane groups. Lifted here so it can
+	// be driven imperatively via the handle, e.g. by the
+	// `set_tab_maximized` MCP tool.
 	const [fullscreenTabId, setFullscreenTabId] = useState<string | null>(null);
+	// `modalOwnerTabId` is "the tab whose content currently lives in the
+	// modal body": adopted from `fullscreenTabId`, but only released once
+	// the modal's close animation has finished — so the content stays
+	// parented to the fading modal instead of snapping back to its slot
+	// mid-animation. `modalBody` is the modal's body DOM node, kept in
+	// state so the relocation re-runs the moment the modal mounts it.
+	const [modalOwnerTabId, setModalOwnerTabId] = useState<string | null>(null);
+	const [modalBody, setModalBody] = useState<HTMLDivElement | null>(null);
+
+	// ─── Workbench-wide tab content ownership ───────────────────────
+	// Tab content is rendered ONCE here, above the split-pane tree, into
+	// a per-tab detached host `<div>`. Each `EditorGroupView` only
+	// provides an empty `TabSlot`, which relocates the host node into
+	// itself (or into the modal body, while maximized). This is what
+	// lets a tab move between groups — or in/out of the fullscreen
+	// modal — without React ever unmounting its subtree, so an HTTP
+	// response / in-flight edits survive the move.
+
+	// Stable per-tab host nodes. A ref (not state): the map is mutated
+	// in place and never drives a re-render on its own.
+	const hostNodesRef = useRef<Map<string, HTMLDivElement>>(new Map());
+	const getTabHost = useCallback((tabId: string): HTMLDivElement => {
+		let host = hostNodesRef.current.get(tabId);
+		if (!host) {
+			host = document.createElement('div');
+			host.style.cssText = FLEX_FILL_CSS_TEXT;
+			// Stable per-tab marker — survives every relocation (group ↔
+			// group, slot ↔ modal) because the node itself is only ever
+			// moved, never recreated. Handy for debugging and a precise
+			// E2E hook for "the tab kept its single instance".
+			host.setAttribute('data-tab-host-id', tabId);
+			hostNodesRef.current.set(tabId, host);
+		}
+		return host;
+	}, []);
+
+	// Render-cache: render each tab's content once, reuse the same React
+	// element until its `contentVersion` bumps. Same intent as the
+	// previous per-`EditorGroupView` cache, lifted to cover every tab in
+	// the tree regardless of which group holds it.
+	const [tabContentCache] = useState(() => new Map<string, React.ReactNode>());
+	const [tabVersionCache] = useState(() => new Map<string, number>());
+
+	const allTabs = useMemo(() => flattenTabs(tree), [tree]);
+
+	// Stable id-sorted order for rendering the `TabContentHost` portals.
+	// Rendering them in tree order would let a tab REORDER (within a
+	// group, or a cross-group move) shuffle the `<TabContentHost>`
+	// siblings — and React's `Placement` move of a portal-bearing fiber
+	// disconnects + reconnects that subtree's passive effects, which
+	// re-runs `@monaco-editor/react`'s mount effect against an already-
+	// disposed editor ("InstantiationService has been disposed" /
+	// "reading 'domNode'"). An id-keyed sort pins each portal's sibling
+	// position so no reorder ever moves one. (Mirrors the same id-sort
+	// `EditorGroupView` applies to its `TabSlot`s.)
+	const orderedTabs = useMemo(
+		() => [...allTabs].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)),
+		[allTabs]
+	);
+
+	// Hoist to a stable local so the content memo can depend on the
+	// callback itself rather than on the per-render `extCallbacks` rest
+	// object (which would defeat the memo).
+	const renderTabContent = extCallbacks.renderTabContent;
+
+	// This memo mutates `tabContentCache` / `tabVersionCache` /
+	// `hostNodesRef` as a side effect (a render-cache write + a prune of
+	// closed tabs). React StrictMode double-invokes `useMemo`, so EVERY
+	// mutation here MUST stay idempotent across a repeated call: cache
+	// writes are keyed + version-guarded, prunes are membership-guarded,
+	// and `host.remove()` is a no-op on an already-detached node. Keep
+	// it that way — a non-idempotent mutation would misbehave under the
+	// double-invoke.
+	const tabContents = useMemo(() => {
+		const tabIds = new Set(allTabs.map((t) => t.id));
+		// Prune caches + host nodes for tabs that left the tree (closed).
+		for (const k of tabContentCache.keys()) {
+			if (!tabIds.has(k)) {
+				tabContentCache.delete(k);
+				tabVersionCache.delete(k);
+			}
+		}
+		for (const k of [...hostNodesRef.current.keys()]) {
+			if (!tabIds.has(k)) {
+				hostNodesRef.current.get(k)?.remove();
+				hostNodesRef.current.delete(k);
+			}
+		}
+		const result = new Map<string, React.ReactNode>();
+		for (const tab of allTabs) {
+			const cachedVersion = tabVersionCache.get(tab.id);
+			const currentVersion = tab.contentVersion ?? 0;
+			let content = tabContentCache.get(tab.id);
+			if (!content || cachedVersion !== currentVersion) {
+				content = renderTabContent?.(tab) ?? tab.content ?? <span>{tab.title}</span>;
+				tabContentCache.set(tab.id, content);
+				tabVersionCache.set(tab.id, currentVersion);
+			}
+			result.set(tab.id, content);
+		}
+		return result;
+	}, [allTabs, renderTabContent, tabContentCache, tabVersionCache]);
+
+	// Resolve `fullscreenTabId` against the whole tree. Only tabs that
+	// opted into `allowFullscreen` qualify, so an imperative
+	// `set_tab_maximized` call can't maximize a tab the app never marked
+	// maximizable.
+	const fullscreenTab = useMemo(() => {
+		if (!fullscreenTabId) return null;
+		return allTabs.find((t) => t.id === fullscreenTabId && t.allowFullscreen) ?? null;
+	}, [fullscreenTabId, allTabs]);
+
+	// Adopt the resolved id into `modalOwnerTabId` during render (React's
+	// "adjusting state while rendering" pattern). We only ever *adopt*
+	// here, never clear: releasing ownership is `handleModalClosed`'s
+	// job, so the content lingers in the fading modal.
+	if (fullscreenTab && modalOwnerTabId !== fullscreenTab.id) {
+		setModalOwnerTabId(fullscreenTab.id);
+	}
+
+	// Fired by the Modal once its close animation has fully finished.
+	// Single point where modal ownership is released — keeps the
+	// maximized content parented to the fading modal instead of snapping
+	// back to its slot mid-animation. Does NOT touch `fullscreenTabId`:
+	// a normal close already cleared it via `onClose`, and an
+	// externally-closed tab leaves an inert stale id (tab ids are never
+	// reused). Driven by `onClosed` (a real `transitionend`) so it is
+	// robust against React StrictMode's mount/unmount probing.
+	const handleModalClosed = useCallback(() => {
+		setModalOwnerTabId(null);
+	}, []);
 
 	// Track if workbench state has been restored
 	const restoredRef = useRef(false);
@@ -963,9 +1095,10 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		if (extCallbacks.onDetachToNewWindow) {
 			extras['onDetachToNewWindow'] = extCallbacks.onDetachToNewWindow;
 		}
-		if (extCallbacks.renderTabContent) {
-			extras['renderTabContent'] = extCallbacks.renderTabContent;
-		}
+		// NOTE: `renderTabContent` is intentionally NOT forwarded to
+		// `EditorGroupView` — tab content is rendered once at this level
+		// (see `tabContents` + `TabContentHost`), the group only renders
+		// empty slots.
 		if (extCallbacks.renderTabTitle) {
 			extras['renderTabTitle'] = extCallbacks.renderTabTitle;
 		}
@@ -990,8 +1123,10 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 				onCloseOthersInGroup={handleCloseOthersInGroup}
 				hasFocus={hasFocus}
 				onFocusRequested={handleFocusRequested}
-				fullscreenTabId={fullscreenTabId}
 				onChangeFullscreenTabId={setFullscreenTabId}
+				maximizedTabId={modalOwnerTabId}
+				modalBody={modalBody}
+				getTabHost={getTabHost}
 				{...(testId && { 'data-testid': testId })}
 				{...extras}
 			/>
@@ -1004,13 +1139,14 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		handleActivate,
 		handleFocusRequested,
 		extCallbacks.onDetachToNewWindow,
-		extCallbacks.renderTabContent,
 		extCallbacks.renderTabTitle,
 		extCallbacks.onGetTabContent,
 		extCallbacks.getTabContextMenuItems,
 		extCallbacks.disableTabDetach,
 		effectiveFocusedGroupId,
-		fullscreenTabId,
+		modalOwnerTabId,
+		modalBody,
+		getTabHost,
 		testId
 	]);
 
@@ -1038,6 +1174,42 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 					/>
 				)}
 			</div>
+			{/*
+			 * Tab content portals — rendered AFTER `GroupContainer` on
+			 * purpose: a `TabSlot`'s ref attaches before these commit, so
+			 * a tab's host node is already inside its slot (and the
+			 * document) when the portal content mounts — embedded editors
+			 * (Monaco, …) measure their size correctly first time.
+			 *
+			 * Rendered in `orderedTabs` (id-sorted), NOT `allTabs` (tree
+			 * order) — see the `orderedTabs` comment: a stable sibling
+			 * order is what keeps a tab reorder from moving a portal
+			 * fiber and tearing down its embedded editors.
+			 */}
+			{orderedTabs.map((tab) => (
+				<TabContentHost
+					key={tab.id}
+					host={getTabHost(tab.id)}
+					content={tabContents.get(tab.id)}
+				/>
+			))}
+			<Modal
+				isOpen={fullscreenTab !== null}
+				onClose={() => { setFullscreenTabId(null); }}
+				onClosed={handleModalClosed}
+				title={fullscreenTab?.fullscreenModalTitle ?? (fullscreenTab ? getTabTitleString(fullscreenTab, '') : '')}
+			>
+				{/*
+				 * Empty mount point. The maximized tab's `TabContentHost`
+				 * relocates its host node into this div via `appendChild`
+				 * — the modal shows the SAME instance as the normal view,
+				 * never a freshly-mounted copy.
+				 */}
+				<div
+					ref={setModalBody}
+					style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, width: '100%', height: '100%' }}
+				/>
+			</Modal>
 		</div>
 	);
 });

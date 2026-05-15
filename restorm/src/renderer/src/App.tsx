@@ -1233,7 +1233,7 @@ const App: React.FC = () => {
   }, [projectUuid, favoritesVersion])
 
   // Bump `contentVersion` on every workbench tab whose underlying
-  // request matches `itemId`. EditorGroupView caches each tab's
+  // request matches `itemId`. EditorWorkbench caches each tab's
   // rendered React tree until contentVersion flips — without this, a
   // favorite toggle wouldn't propagate to the H1 star toggle (the
   // cached node still holds the old `isFavorite` prop).
@@ -1256,7 +1256,7 @@ const App: React.FC = () => {
    * Bump every workbench tab's `contentVersion`. Used after a full
    * tree replacement (`mcp:tree-replace`): the renderer just swapped
    * `rootItems` for a fresh reactive tree, so every cached tab
-   * content (held by `EditorGroupView`'s tabContentCache) is now
+   * content (held by `EditorWorkbench`'s tabContentCache) is now
    * holding a stale folder/request reference. Without invalidating
    * those caches, `RestormWorkbench`'s `reactiveFolder ?? effectiveTab.folder`
    * conditional would still surface the OLD reference (the cached

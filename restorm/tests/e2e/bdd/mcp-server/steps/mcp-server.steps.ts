@@ -303,14 +303,23 @@ When(
     if (!discovery || !firstRequestId) throw new Error('list_requests must run first')
     const opened = await callMcpTool(discovery, 'open_tab', { itemId: firstRequestId })
     expect(opened.isError ?? false).toBe(false)
-    // `get_current_tab` reads the renderer-pushed active-tab snapshot —
-    // the workbench tab id is what `set_tab_maximized` needs to target.
-    const cur = await callMcpTool(discovery, 'get_current_tab', {})
-    const payload = parsedReply(cur) as { tabId?: string | null }
-    if (typeof payload.tabId !== 'string' || payload.tabId.length === 0) {
-      throw new Error(`get_current_tab returned no tabId: ${JSON.stringify(payload)}`)
+    // `get_current_tab` reads the renderer-pushed active-tab snapshot,
+    // which lags the `open_tab` IPC. Poll until it reflects the request
+    // we just opened (matched by `itemId`) rather than trusting the
+    // first read — otherwise a stale snapshot from an earlier step
+    // (e.g. the Console / Mini browser tab) leaks into `currentTabId`.
+    const deadline = Date.now() + 10_000
+    let payload: { tabId?: string | null; itemId?: string | null } = {}
+    while (Date.now() < deadline) {
+      const cur = await callMcpTool(discovery, 'get_current_tab', {})
+      payload = parsedReply(cur) as { tabId?: string | null; itemId?: string | null }
+      if (payload.itemId === firstRequestId && typeof payload.tabId === 'string' && payload.tabId.length > 0) {
+        currentTabId = payload.tabId
+        return
+      }
+      await page?.waitForTimeout(150)
     }
-    currentTabId = payload.tabId
+    throw new Error(`get_current_tab never reflected the opened request ${firstRequestId}: ${JSON.stringify(payload)}`)
   }
 )
 
@@ -397,6 +406,71 @@ When(
       .click()
     await expect(page.locator('[data-testid="base-request-tabs-response"]').first())
       .toHaveAttribute('data-active-tab-id', tabId, { timeout: 10_000 })
+  }
+)
+
+When(
+  'I mark the request tab\'s host node',
+  async () => {
+    if (!page || !currentTabId) throw new Error('open the request tab first')
+    // Probe on the workbench-owned host `<div>` (`data-tab-host-id`).
+    // The host node is what the refactor pins: a cross-group move
+    // relocates this exact node by `appendChild` instead of rebuilding
+    // it, so the probe attribute set here survives the move iff the
+    // refactor's invariant holds. (DOM nodes *inside* the host can
+    // legitimately rearrange when restorm flips between split and
+    // compact layout in a narrow destination group — proving "the
+    // tab's React subtree didn't remount" lives in the unit test for
+    // `EditorWorkbench` under StrictMode, not in this e2e step.)
+    const marked = await page.evaluate((tabId) => {
+      const host = document.querySelector(`[data-tab-host-id="${tabId}"]`)
+      if (!host) return false
+      host.setAttribute('data-e2e-host-probe', 'cross-group-probe')
+      return true
+    }, currentTabId)
+    expect(marked, `host node for tab "${currentTabId}" not found`).toBe(true)
+  }
+)
+
+When(
+  'I send the active workbench tab to the next group',
+  async () => {
+    if (!page) throw new Error('launch first')
+    // Ctrl+Alt+Right sends the active tab to the adjacent group,
+    // creating one on demand. The tab's host node must be relocated
+    // (appendChild), not remounted — that is what this move exercises.
+    await page.keyboard.press('Control+Alt+ArrowRight')
+    // Let React flush the controlled focus / tree change.
+    await page.waitForTimeout(500)
+  }
+)
+
+Then(
+  'the request tab\'s host node is the same relocated instance',
+  async () => {
+    if (!page || !currentTabId) throw new Error('open the request tab first')
+    const result = await page.evaluate((tabId) => {
+      const host = document.querySelector(`[data-tab-host-id="${tabId}"]`)
+      return {
+        found: host !== null,
+        probed: host?.getAttribute('data-e2e-host-probe') === 'cross-group-probe',
+        connected: host?.isConnected === true
+      }
+    }, currentTabId)
+    // Same node (probe survived) + still attached to the document =
+    // the host was relocated, not rebuilt.
+    expect(result).toEqual({ found: true, probed: true, connected: true })
+  }
+)
+
+Then(
+  'the request tab content is still rendered',
+  async () => {
+    if (!page) throw new Error('launch first')
+    // `base-request-tabs-request` is rendered in every layout (split,
+    // compact, no-response), so visibility is layout-independent.
+    await expect(page.locator('[data-testid="base-request-tabs-request"]').first())
+      .toBeVisible({ timeout: 10_000 })
   }
 )
 

@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { IconView } from '../IconView'
+import { Button } from '../Button'
+import { ControlGroup } from '../ControlGroup'
+import { InputBox } from '../InputBox'
 import './miniBrowserPanel.css'
 
 export interface MiniBrowserPanelProps {
@@ -94,8 +96,7 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ initialUrl, 
     setCommittedUrl(normalised)
   }, [])
 
-  const handleSubmit = useCallback((e: React.SyntheticEvent): void => {
-    e.preventDefault()
+  const handleSubmit = useCallback((): void => {
     commit(addressBar)
   }, [addressBar, commit])
 
@@ -139,52 +140,56 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ initialUrl, 
 
   return (
     <div className="mini-browser-panel" data-testid="mini-browser-panel">
-      <form className="mini-browser-panel__toolbar" onSubmit={handleSubmit}>
-        <button
-          type="button"
-          className="mini-browser-panel__button"
-          disabled={!canGoBack}
-          onClick={handleBack}
-          aria-label="Back"
-          title="Back"
-          data-testid="mini-browser-button-back"
-        >
-          <IconView icon={{ type: 'codicon', value: 'arrow-left' }} size={14} />
-        </button>
-        <button
-          type="button"
-          className="mini-browser-panel__button"
-          disabled={!canRefresh}
-          onClick={handleRefresh}
-          aria-label="Refresh"
-          title="Refresh"
-          data-testid="mini-browser-button-refresh"
-        >
-          <IconView icon={{ type: 'codicon', value: 'refresh' }} size={14} />
-        </button>
-        <input
-          className="mini-browser-panel__address"
-          type="text"
-          spellCheck={false}
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-          value={addressBar}
-          placeholder="https://example.com"
-          onChange={(e) => { setAddressBar(e.target.value) }}
-          aria-label="Address"
-          data-testid="mini-browser-address"
-        />
-        <button
-          type="submit"
-          className="mini-browser-panel__button mini-browser-panel__button--primary"
-          aria-label="Go"
-          title="Go"
-          data-testid="mini-browser-button-go"
-        >
-          <IconView icon={{ type: 'codicon', value: 'arrow-right' }} size={14} />
-        </button>
-      </form>
+      {/* Toolbar uses ECUI primitives (`Button` + `InputBox`) wrapped in
+       * `ControlGroup` so back / refresh / address / go render as a
+       * single joined strip (shared borders, no gaps) — the visual
+       * idiom the rest of the app uses for address-bar-shaped toolbars.
+       * The hand-rolled `<button>` / `<input>` it replaced rendered with
+       * default UA colors, which clashed with the workbench theme. */}
+      <div className="mini-browser-panel__toolbar">
+        <ControlGroup className="mini-browser-panel__controls">
+          <Button
+            icon="arrow-left"
+            disabled={!canGoBack}
+            onClick={handleBack}
+            options={{ ariaLabel: 'Back', title: 'Back' }}
+            data-testid="mini-browser-button-back"
+          />
+          <Button
+            icon="refresh"
+            disabled={!canRefresh}
+            onClick={handleRefresh}
+            options={{ ariaLabel: 'Refresh', title: 'Refresh' }}
+            data-testid="mini-browser-button-refresh"
+          />
+          <InputBox
+            className="mini-browser-panel__address"
+            value={addressBar}
+            onChange={(v) => { setAddressBar(v) }}
+            // Address bar feels broken with the default 200ms debounce
+            // — a fast type-then-Enter would commit a stale value.
+            changeDebounceMs={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                handleSubmit()
+              }
+            }}
+            options={{
+              placeholder: 'https://example.com',
+              ariaLabel: 'Address'
+            }}
+            data-testid="mini-browser-address"
+          />
+          <Button
+            emphasis={1}
+            icon="arrow-right"
+            onClick={handleSubmit}
+            options={{ ariaLabel: 'Go', title: 'Go' }}
+            data-testid="mini-browser-button-go"
+          />
+        </ControlGroup>
+      </div>
       <div className="mini-browser-panel__frame">
         {committedUrl === '' ? (
           <div className="mini-browser-panel__placeholder" data-testid="mini-browser-placeholder">

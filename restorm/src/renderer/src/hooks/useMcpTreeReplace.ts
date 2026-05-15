@@ -36,7 +36,7 @@ export interface UseMcpTreeReplaceInput {
   mcpDrivenRef: { current: boolean }
   /**
    * Invalidate every workbench tab's content cache after `setRootItems`.
-   * `EditorGroupView` caches each tab's rendered React element keyed
+   * `EditorWorkbench` caches each tab's rendered React element keyed
    * by `tab.contentVersion`; without bumping it, the cached element
    * still closes over the pre-replace `folder` / `request` reference,
    * so the user keeps seeing the orphaned tree even though

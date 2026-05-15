@@ -84,13 +84,23 @@
 	color: var(--tab-activeForeground);
 }
 
-/* Apply opacity only to label-name content when dimmed */
-.workbench .part.editor > .content .editor-group-container > .title .tabs-container.dimmed > .tab .label-name {
+/* Fade the label-name (which carries the method badge in restorm-style
+ * tabs) for non-prominent tabs:
+ *  - every tab in an unfocused group (`.tabs-container.dimmed`), and
+ *  - every inactive tab in *any* group.
+ * The net effect is "only the active tab of the focused group is at
+ * full opacity"; everything else fades to 0.5. Without the inactive-tab
+ * rule, the badge of an unselected tab inside the focused group would
+ * shout louder than the active tab of an adjacent unfocused group. */
+.workbench .part.editor > .content .editor-group-container > .title .tabs-container.dimmed > .tab .label-name,
+.workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab:not(.active) .label-name {
 	opacity: 0.5;
 }
 
-/* Icons inside label-name should always be white and have full opacity even when dimmed */
-.workbench .part.editor > .content .editor-group-container > .title .tabs-container.dimmed > .tab .label-name .codicon-file {
+/* Icons inside label-name should always be white and have full opacity
+ * regardless of whether the tab / group is faded. */
+.workbench .part.editor > .content .editor-group-container > .title .tabs-container.dimmed > .tab .label-name .codicon-file,
+.workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab:not(.active) .label-name .codicon-file {
 	opacity: 1 !important;
 	color: #fff !important;
 }

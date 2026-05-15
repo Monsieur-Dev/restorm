@@ -78,3 +78,17 @@ Feature: MCP server end-to-end
 
     When I run an MCP batch of open_console then get_current_tab
     Then the MCP batch reply should report 2 of 2 steps ran
+
+    # ── Cross-group move preserves the tab's React instance ──
+    # Sending a tab to another group must relocate its workbench-owned
+    # host node, NOT remount the tab. We mark the host node, move the
+    # tab, then assert the very same node is still in the document — a
+    # remount would have built a fresh host and the marker would be
+    # gone. (Asserting on rendered sub-tabs is unreliable here: the
+    # narrow destination group flips the request tab into its compact
+    # layout, a legitimate responsive change.)
+    When I open the first imported request as a workbench tab via MCP
+    And I mark the request tab's host node
+    And I send the active workbench tab to the next group
+    Then the request tab's host node is the same relocated instance
+    And the request tab content is still rendered

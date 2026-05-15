@@ -60,6 +60,29 @@ export function cloneTree(tree: WorkbenchTree): WorkbenchTree {
 	return clone;
 }
 
+/**
+ * Every tab across the whole tree, in depth-first group order.
+ *
+ * `EditorWorkbench` renders the tab *content* once per entry here
+ * (above the split-pane tree), so a tab keeps its single React instance
+ * no matter which group currently holds it — moving a tab between
+ * groups becomes a pure DOM relocation instead of an unmount/remount.
+ */
+export function flattenTabs(tree: WorkbenchTree): EditorTab[] {
+	const out: EditorTab[] = [];
+	const walk = (nodes: GroupNode[]): void => {
+		for (const node of nodes) {
+			if (isTabGroupNode(node)) {
+				out.push(...node.tabs);
+			} else {
+				walk(node.groups);
+			}
+		}
+	};
+	walk(tree.groups);
+	return out;
+}
+
 export function findGroup(tree: WorkbenchTree, groupId: string): FindResult {
 	const rec = (parent: ContainerGroupNode | null, groups: GroupNode[], path: number[]): FindResult => {
 		for (let i = 0; i < groups.length; i++) {

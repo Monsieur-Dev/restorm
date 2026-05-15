@@ -3,75 +3,47 @@
   flex-direction: column;
   width: 100%;
   height: 100%;
-  background-color: var(--vscode-editor-background, #1e1e1e);
-  color: var(--vscode-foreground, #ccc);
+  background-color: var(--editor-background);
+  color: var(--foreground);
 }
 
 .mini-browser-panel__toolbar {
   display: flex;
   align-items: center;
-  gap: 6px;
   padding: 6px 8px;
-  border-bottom: 1px solid var(--vscode-editorWidget-border, rgb(255, 255, 255, 0.12));
-  background-color: var(--vscode-editorWidget-background, #252526);
+  border-bottom: 1px solid var(--editorWidget-border);
+  background-color: var(--editorWidget-background);
   flex: 0 0 auto;
 }
 
-.mini-browser-panel__button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border: 1px solid var(--vscode-button-border, transparent);
-  background-color: var(--vscode-button-secondaryBackground, #3a3d41);
-  color: var(--vscode-button-secondaryForeground, #ccc);
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 80ms ease;
+/*
+ * Address bar lives inside an ECUI `ControlGroup` that joins the back /
+ * refresh / address / go widgets into one continuous strip. The group
+ * spans the toolbar width so the address field grows; intrinsic buttons
+ * sit flush against the input's borders (no gap).
+ */
+.mini-browser-panel__controls {
+  width: 100%;
 }
 
-.mini-browser-panel__button:hover:not(:disabled) {
-  background-color: var(--vscode-button-secondaryHoverBackground, #45494e);
-}
-
-.mini-browser-panel__button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.mini-browser-panel__button--primary {
-  background-color: var(--vscode-button-background, #0e639c);
-  color: var(--vscode-button-foreground, #fff);
-}
-
-.mini-browser-panel__button--primary:hover:not(:disabled) {
-  background-color: var(--vscode-button-hoverBackground, #17b);
-}
-
+/* The address `InputBox` is the only growable child — buttons stay at
+ * their intrinsic width. `min-width: 0` lets the input shrink below its
+ * content size so long URLs don't push the trailing Go button out of
+ * the toolbar. */
 .mini-browser-panel__address {
   flex: 1 1 auto;
-  height: 28px;
-  padding: 0 8px;
-  border: 1px solid var(--vscode-input-border, rgb(255, 255, 255, 0.12));
-  background-color: var(--vscode-input-background, #3c3c3c);
-  color: var(--vscode-input-foreground, #ccc);
-  border-radius: 4px;
-  font-size: 13px;
-  font-family: var(--vscode-font-family, system-ui);
-  outline: none;
+  min-width: 0;
 }
 
-.mini-browser-panel__address:focus {
-  border-color: var(--vscode-focusBorder, #007fd4);
+.mini-browser-panel__controls > .button-container {
+  flex: 0 0 auto;
 }
 
 .mini-browser-panel__frame {
   flex: 1 1 auto;
   position: relative;
   min-height: 0;
-  background-color: var(--vscode-editor-background, #1e1e1e);
+  background-color: var(--editor-background);
 }
 
 .mini-browser-panel__iframe {
@@ -88,6 +60,6 @@
   width: 100%;
   height: 100%;
   font-size: 13px;
-  color: var(--vscode-descriptionForeground, #989898);
+  color: var(--descriptionForeground);
   user-select: none;
 }
