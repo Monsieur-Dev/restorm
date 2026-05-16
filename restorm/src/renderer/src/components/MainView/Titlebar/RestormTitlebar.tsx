@@ -217,16 +217,19 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
             <MenuItem
               data-testid="titlebar-menu-item-console"
               title={t('menuBar.console', 'Console')}
+              icon={<span className="codicon codicon-terminal" aria-hidden="true" />}
               onClick={onOpenConsole}
             />
             <MenuItem
               data-testid="titlebar-menu-item-firewall"
               title={t('menuBar.firewall', 'Firewall')}
+              icon={<span className="codicon codicon-shield" aria-hidden="true" />}
               onClick={onOpenFirewall}
             />
             <MenuItem
               data-testid="titlebar-menu-item-mini-browser"
               title={t('menuBar.miniBrowser', 'Mini browser')}
+              icon={<span className="codicon codicon-browser" aria-hidden="true" />}
               onClick={onOpenMiniBrowser}
             />
             <MenuItemSeparator data-testid="titlebar-menu-separator-view-1" />
