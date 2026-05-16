@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import Workbench from '../Workbench/Workbench'
 import { Button } from '../Button'
+import { useOverlayPresence } from '../../hooks/useOverlayPresence'
 import './modal.css'
 
 export type ModalSize = 'full' | 'dialog'
@@ -41,6 +42,13 @@ const ModalInner: React.FC<ModalProps> = ({
   const [overlayState, setOverlayState] = useState<'open' | 'closing' | 'closed'>('closed')
   const wasOpenRef = useRef(isOpen)
   const rafIdsRef = useRef<number[]>([])
+  // Announce the modal's overlay footprint to listeners
+  // (`MiniBrowserPanel` collapses its content view while a modal sits
+  // over it). Active while the modal is rendered — including the
+  // fade-out closing phase — so the view stays collapsed until the
+  // overlay fully detaches.
+  const overlayRef = useRef<HTMLDivElement>(null)
+  useOverlayPresence(overlayRef, isRendered)
 
   const rootTestId = dataTestId ?? 'modal'
   const overlayTestId = `${rootTestId}-overlay`
@@ -133,6 +141,7 @@ const ModalInner: React.FC<ModalProps> = ({
 
   const content = (
     <div
+      ref={overlayRef}
       className={overlayClassName}
       data-state={overlayState}
       data-testid={overlayTestId}

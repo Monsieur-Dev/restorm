@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback, useLayoutEffect, useEffect, useMe
 import { createPortal } from 'react-dom'
 import { ScrollableElement } from '../ScrollableElement'
 import { useFilterableDropdown } from '../../hooks/useFilterableDropdown'
+import { useOverlayPresence } from '../../hooks/useOverlayPresence'
 import { DropdownFilterRow } from '../DropdownFilterRow'
 import './multiSelectCombo.css'
 
@@ -89,6 +90,7 @@ const MultiSelectCombo: React.FC<MultiSelectComboProps> = ({
   const [focusedIndex, setFocusedIndex] = useState(0)
   const triggerRef = useRef<HTMLDivElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  useOverlayPresence(dropdownRef, isOpen)
   const portalContainerRef = useRef<Element | null>(null)
   const [pos, setPos] = useState({ top: 0, left: 0, width: 0 })
 

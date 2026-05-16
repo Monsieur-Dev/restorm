@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from
 import { Button } from '../Button'
 import { ControlGroup } from '../ControlGroup'
 import { InputBox } from '../InputBox'
+import { overlayPresenceService } from '../../services/overlayPresenceService'
 import './miniBrowserPanel.css'
 
 /**
@@ -107,6 +108,16 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ tabId, initi
   // HTML pixel. A ref (not state) so toggling it doesn't trigger a
   // re-render of the toolbar.
   const dragHiddenRef = useRef(false)
+  // Set when any HTML overlay (popover, tooltip, toaster, modal,
+  // search dropdown — anything portalled into `document.body` outside
+  // the React root) has a rect that intersects the content view's
+  // slot. Same compositor-stacking limitation as a drag: the view
+  // paints above every HTML pixel, so overlays that should sit on top
+  // of it are invisible without this hide. Detection runs from a
+  // MutationObserver on body subtree + a window resize listener, so
+  // the hide fires the instant an overlay appears and clears the
+  // instant it goes away.
+  const overlayHiddenRef = useRef(false)
   // Most-recently-captured PNG data URL of the page. Refreshed every
   // few seconds while the panel is visible so the snapshot painted in
   // place of the live view on `dragstart` looks identical to what the
@@ -292,12 +303,17 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ tabId, initi
     let last: { x: number; y: number; width: number; height: number } | null = null
     const push = (): void => {
       raf = null
-      // During a drag gesture, collapse to zero so the OS-level content
-      // view stops occluding the renderer's drop-indicator / drag-image
-      // overlays. The slot's natural rect is restored on dragend by
-      // forcing an immediate re-push from the dragend handler.
+      // Collapse to zero whenever an HTML layer needs to paint over the
+      // content view's region — a drag gesture in flight OR an HTML
+      // overlay (popover, tooltip, toaster, modal, …) currently sitting
+      // on the slot. Both share the same compositor-stacking problem:
+      // the OS-level view paints above every HTML pixel, so the
+      // renderer's z-index'd elements would be invisible without this
+      // hide. The natural rect is restored on whichever signal cleared
+      // (dragend, overlay-removed) by an immediate re-push.
       const rect = el.getBoundingClientRect()
-      const next = dragHiddenRef.current
+      const hidden = dragHiddenRef.current || overlayHiddenRef.current
+      const next = hidden
         ? { x: 0, y: 0, width: 0, height: 0 }
         : { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
       if (last?.x === next.x && last.y === next.y && last.width === next.width && last.height === next.height) {
@@ -345,7 +361,6 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ tabId, initi
     // skips IPC when the rect is unchanged, so the steady-state cost is
     // 4 number comparisons every 100 ms — negligible for a Mini browser
     // that's typically open in 1–2 tabs at most.
-    const poll = setInterval(push, 100)
     // Hide the OS-level content view for the duration of any HTML5
     // drag gesture in this window. WebContentsView paints at the
     // compositor layer, above every HTML pixel, so drop-zone
@@ -373,14 +388,61 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ tabId, initi
     document.addEventListener('dragstart', onDragStart, true)
     document.addEventListener('dragend', onDragEnd, true)
     document.addEventListener('drop', onDragEnd, true)
+    // Hide whenever an HTML overlay registered with the global
+    // `overlayPresenceService` has a rect that intersects the slot.
+    // The service is fed by `useOverlayPresence` calls inside every
+    // ECUI portal-creating component (Modal, Tooltip, Toaster,
+    // SelectBox dropdown, MultiSelectCombo dropdown, …) — i.e. the
+    // signal is structural ("a portal mounted") rather than DOM-probed,
+    // so a small tooltip floating off-centre of a large slot is just
+    // as reliably detected as a full-cover modal. The intersection
+    // test still needs to run against the live geometry of both rects:
+    // an overlay may move (re-position tooltip on hover) or the slot
+    // may shrink (window resize), so we run the check every time the
+    // overlay set changes AND every time the layout polls fire.
+    const computeOverlayHidden = (): boolean => {
+      const slot = el.getBoundingClientRect()
+      if (slot.width === 0 || slot.height === 0) return false
+      for (const overlay of overlayPresenceService.snapshot()) {
+        const rect = overlay.getRect()
+        if (!rect || rect.width === 0 || rect.height === 0) continue
+        const intersects =
+          rect.right > slot.x && rect.left < slot.x + slot.width &&
+          rect.bottom > slot.y && rect.top < slot.y + slot.height
+        if (intersects) return true
+      }
+      return false
+    }
+    const refreshOverlayHidden = (): void => {
+      const next = computeOverlayHidden()
+      if (next === overlayHiddenRef.current) return
+      overlayHiddenRef.current = next
+      if (next && snapshotRef.current) setSnapshotPainted(snapshotRef.current)
+      if (!next) setSnapshotPainted(null)
+      push()
+    }
+    const unsubscribeOverlay = overlayPresenceService.subscribe(refreshOverlayHidden)
+    const onResize = (): void => { refreshOverlayHidden() }
+    window.addEventListener('resize', onResize)
+    // Poll handles three things at once: catches slot rect changes
+    // that ResizeObserver / MutationObserver miss (cross-row tab moves),
+    // catches overlay rect changes that the service can't notify on
+    // (its register/unregister model doesn't know when an existing
+    // overlay grows / shrinks — e.g. a search dropdown's results pane
+    // expanding mid-typing), and re-pushes the slot rect to the host
+    // driver. 100 ms is fast enough that the user perceives the hide
+    // as instantaneous while staying well within the cost budget.
+    const poll = setInterval(() => { refreshOverlayHidden(); push() }, 100)
     return () => {
       ro.disconnect()
       mo.disconnect()
+      unsubscribeOverlay()
       clearInterval(poll)
       document.removeEventListener('dragstart', onDragStart, true)
       document.removeEventListener('dragend', onDragEnd, true)
       document.removeEventListener('drop', onDragEnd, true)
       window.removeEventListener('resize', onWindowResize)
+      window.removeEventListener('resize', onResize)
       if (raf !== null) cancelAnimationFrame(raf)
       // No `setBounds(0,0,0,0)` on cleanup: the slot's
       // `ResizeObserver` already fires with a zero-size rect when the
@@ -404,7 +466,6 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ tabId, initi
       <div className="mini-browser-panel__toolbar">
         <ControlGroup className="mini-browser-panel__controls">
           <Button
-            small
             icon="arrow-left"
             disabled={!canGoBack}
             onClick={handleBack}
@@ -438,7 +499,6 @@ export const MiniBrowserPanel: React.FC<MiniBrowserPanelProps> = ({ tabId, initi
             data-testid="mini-browser-address"
           />
           <Button
-            small
             emphasis={1}
             icon="arrow-right"
             onClick={handleSubmit}

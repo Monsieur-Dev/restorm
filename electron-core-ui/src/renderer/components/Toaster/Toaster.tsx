@@ -15,6 +15,7 @@ import { Toast } from './Toast'
 import { ToasterInteractionContext } from './ToasterInteractionContext'
 import { toasterService, TOASTER_DEFAULTS } from './ToasterService'
 import type { Toast as ToastData, ToasterProps } from './types'
+import { useOverlayPresence } from '../../hooks/useOverlayPresence'
 import './toaster.css'
 
 const DEFAULT_ENTER = 200
@@ -186,6 +187,12 @@ export const Toaster: React.FC<ToasterProps> = ({
   // are shown regardless (and are un-hidden by `setShowFrame(true)`).
   const visibleToasts = showFrame ? toasts : toasts.filter((t) => !t.hidden)
   const wantsRender = showFrame || visibleToasts.length > 0
+  // Register the visible toast cluster with the overlay-presence service
+  // so the MiniBrowser (or any other compositor-level surface) can step
+  // out of its way. Only when there's at least one toast on screen —
+  // when the toaster is empty, there's nothing for us to occlude.
+  const toasterRootRef = useRef<HTMLDivElement>(null)
+  useOverlayPresence(toasterRootRef, visibleToasts.length > 0)
 
   // Mount/unmount fade: keep the component in the DOM for `exitMs`
   // after `wantsRender` goes false so the fade-out CSS has time to
@@ -260,6 +267,7 @@ export const Toaster: React.FC<ToasterProps> = ({
   const content = (
     <Workbench className="toaster-workbench" border={false}>
       <div
+        ref={toasterRootRef}
         className={rootClass}
         data-position={position}
         data-showframe={showFrame ? 'true' : 'false'}

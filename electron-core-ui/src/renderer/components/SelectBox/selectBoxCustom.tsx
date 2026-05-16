@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback, useLayoutEffect, useMe
 import { createPortal } from 'react-dom'
 import { isMacintosh } from '../../hooks/usePlatform'
 import { useFilterableDropdown } from '../../hooks/useFilterableDropdown'
+import { useOverlayPresence } from '../../hooks/useOverlayPresence'
 import { DropdownFilterRow } from '../DropdownFilterRow'
 import { SelectBoxListProps, ISelectOptionItem } from './types'
 import { ScrollableElement } from '../ScrollableElement'
@@ -82,6 +83,7 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLDivElement>(null)
   const portalContainerRef = useRef<Element | null>(null)
+  useOverlayPresence(dropdownRef, isVisible)
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 })
 
   // Handle selection change

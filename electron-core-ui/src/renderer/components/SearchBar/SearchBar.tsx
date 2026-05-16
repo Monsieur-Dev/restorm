@@ -10,6 +10,7 @@ import { ScrollableElement } from '../ScrollableElement'
 import InputBox from '../InputBox/InputBox'
 import { searchService, type SearchResult, type GroupedResults } from '../../services/SearchService'
 import { logger } from '../../services/logger'
+import { useOverlayPresence } from '../../hooks/useOverlayPresence'
 import './searchBar.css'
 
 export interface SearchBarProps {
@@ -57,6 +58,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
   const containerRef = useRef<HTMLDivElement>(null)
   const openBoxRef = useRef<HTMLDivElement>(null)
+  useOverlayPresence(openBoxRef, isOpen)
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
   const closedRef = useRef<HTMLDivElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
