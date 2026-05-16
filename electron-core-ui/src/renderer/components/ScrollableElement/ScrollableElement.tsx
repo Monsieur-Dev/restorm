@@ -378,10 +378,6 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
   const handleWheel = useCallback((event: WheelEvent): void => {
     if (!mergedOptions.handleMouseWheel || !contentRef.current) return;
 
-    event.preventDefault();
-    event.stopPropagation();
-    showScrollbars();
-
     let deltaX = event.deltaX;
     let deltaY = event.deltaY;
 
@@ -390,6 +386,37 @@ const ScrollableElementInner: React.FC<ScrollableElementProps> = ({
       deltaX = deltaY;
       deltaY = 0;
     }
+
+    // Scroll chaining: if this scrollable can't move in the wheel's
+    // direction (either because the content already fits, or because
+    // we're pinned at the matching edge), bail BEFORE `preventDefault`
+    // + `stopPropagation` so the event bubbles up to whatever outer
+    // scrollable can take it. Native browsers do this for nested
+    // `overflow: auto` containers; without it, a nested ScrollableElement
+    // — e.g. a ListView dropped inside an outer tab-panel ScrollableElement —
+    // swallows every wheel event the cursor lands on, even when it has
+    // nothing to scroll itself, and the outer container only scrolls
+    // when the cursor sits exactly over its scrollbar.
+    //
+    // Comparing against the spring target (when a smooth-scroll is in
+    // flight) instead of the live `scrollTop` matters during a burst:
+    // the next wheel tick fires before the spring has moved the live
+    // value off zero, but the target already encodes the planned scroll.
+    const maxScrollTop = Math.max(0, contentHeight - containerHeight);
+    const maxScrollLeft = Math.max(0, contentWidth - containerWidth);
+    const currentTop = animationFrameRef.current !== null
+      ? targetScrollTopRef.current
+      : contentRef.current.scrollTop;
+    const currentLeft = animationFrameRef.current !== null
+      ? targetScrollLeftRef.current
+      : contentRef.current.scrollLeft;
+    const canScrollY = (deltaY > 0 && currentTop < maxScrollTop) || (deltaY < 0 && currentTop > 0);
+    const canScrollX = (deltaX > 0 && currentLeft < maxScrollLeft) || (deltaX < 0 && currentLeft > 0);
+    if (!canScrollY && !canScrollX) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    showScrollbars();
 
     if (mergedOptions.mouseWheelSmoothScroll) {
       // Burst-safe accumulation. The spring loop (`ensureSpringRunning`
