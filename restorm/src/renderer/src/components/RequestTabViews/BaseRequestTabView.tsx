@@ -44,7 +44,7 @@ export interface BaseRequestTabViewProps {
   infosContent?: ReactNode | undefined
   /** Content for the "Response" tab in response panel */
   responseContent?: ReactNode | undefined
-  /** JSON data for JsonCrack tab (if any) */
+  /** JSON data for the Graph tab (if any) */
   jsonData?: unknown
   /** Extra request-side tabs inserted after the "Request" tab and
    * before Docs. Each tab is rendered verbatim. Used by the auth
@@ -292,7 +292,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
     return JSON.stringify(jsonData, null, 2)
   }, [jsonData])
 
-  // Build response tabs (Response, Infos, JsonCrack)
+  // Build response tabs (Response, Infos, Graph)
   const responseTabs: Tab[] = useMemo(() => {
     const hasResponse = showResponse || isLoading
 
@@ -372,17 +372,17 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
       )
     })
 
-    // Show JsonCrack tab once it has been seen at least once
+    // Show Graph tab once it has been seen at least once
     if (formattedJson || hadJsonOnce) {
       tabs.push({
-        id: 'jsoncrack',
-        label: t('requestTab.responses.tabs.jsoncrack'),
+        id: 'graph',
+        label: t('requestTab.responses.tabs.graph'),
         useScrollableElement: false,
         content: formattedJson ? (
           <JsonViewer
             json={formattedJson}
             darkTheme={isDarkTheme}
-            data-testid="base-request-jsoncrack"
+            data-testid="base-request-graph"
           />
         ) : loadingPlaceholder
       })

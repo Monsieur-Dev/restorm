@@ -49,9 +49,10 @@ window.addEventListener('unhandledrejection', (event) => {
   }
 })
 
-// Filter noisy React warnings coming from third-party libraries (e.g. jsoncrack-react)
-// about keys being spread into JSX or defaultProps deprecation on function components.
-// These are harmless in our context and clutter the console.
+// Filter noisy React warnings coming from third-party libraries about
+// keys being spread into JSX or defaultProps deprecation on function
+// components. These are harmless in our context and clutter the
+// console.
 const originalConsoleError = window.console.error.bind(window.console)
 window.console.error = (...args: unknown[]): void => {
   const first = args[0]
@@ -60,10 +61,6 @@ window.console.error = (...args: unknown[]): void => {
       return
     }
     if (first.includes('Support for defaultProps will be removed from function components in a future major release')) {
-      return
-    }
-    // jsoncrack-react internally passes width/style to React.Fragment (library bug)
-    if (first.includes('supplied to `React.Fragment`')) {
       return
     }
   }

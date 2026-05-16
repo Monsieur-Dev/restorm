@@ -426,14 +426,14 @@ export const ResponseHistoryTab: React.FC<ResponseHistoryTabProps> = ({
 
     if (formattedJson) {
       tabs.push({
-        id: 'jsoncrack',
-        label: t('requestTab.responses.tabs.jsoncrack'),
+        id: 'graph',
+        label: t('requestTab.responses.tabs.graph'),
         useScrollableElement: false,
         content: (
           <JsonViewer
             json={formattedJson}
             darkTheme={isDarkTheme}
-            data-testid="history-jsoncrack"
+            data-testid="history-graph"
           />
         )
       })

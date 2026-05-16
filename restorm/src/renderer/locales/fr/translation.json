@@ -215,7 +215,7 @@
         "response": "Réponse",
         "prettyfied": "Formattée",
         "requestBody": "Corps de la requête",
-        "jsoncrack": "JSONCrack"
+        "graph": "Graphe"
       },
       "loading": "Envoi de la requête...",
       "noResponse": "Cliquez sur Envoyer pour exécuter la requête",

@@ -17,7 +17,7 @@
  * Response chrome surfaces `@odata.count` / `@odata.nextLink` in the
  * Infos tab (alongside status, duration, headers, and operation
  * kind), renders the JSON body in a full-height Monaco editor on the
- * Response tab, and feeds the parsed value into the JsonCrack tab.
+ * Response tab, and feeds the parsed value into the Graph tab.
  *
  * History is recorded via `ResponseHistoryService` as a dedicated
  * `'odata'` entry; the same builder drives live rendering and

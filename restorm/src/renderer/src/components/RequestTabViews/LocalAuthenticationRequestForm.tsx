@@ -478,7 +478,7 @@ export const LocalAuthenticationRequestForm: React.FC<LocalAuthenticationRequest
       const durationMs = Date.now() - startedAt
       // Detect JSON payloads so `buildHttpResponseViewData` pretty-
       // prints the body with `JSON.stringify(_, null, 2)` and the
-      // JsonCrack tab receives parsed data. `auth:prefetch` doesn't
+      // Graph tab receives parsed data. `auth:prefetch` doesn't
       // surface the raw Content-Type header today; inferring from the
       // body works for the OAuth token endpoints that dominate this
       // flow (Entra ID / Dynamics / Google / etc. all return JSON).

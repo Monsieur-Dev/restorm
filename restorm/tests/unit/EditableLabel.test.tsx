@@ -13,9 +13,9 @@ import { render, screen, fireEvent, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 // Import directly from the EditableLabel source file rather than the
 // electron-core-ui/renderer barrel — the barrel transitively pulls in
-// `jsoncrack-react` via `JsonViewer`, and vite/vitest can't resolve
-// that package's entry in jsdom even though it's React.lazy'd behind
-// a Suspense boundary this test never renders.
+// `@xyflow/react` via `JsonViewer`, and vite/vitest can't resolve
+// that package's entry in jsdom even though it's behind a Suspense
+// boundary this test never renders.
 import { EditableLabel, type EditableLabelAs } from '../../../electron-core-ui/src/renderer/components/EditableLabel'
 import '@testing-library/jest-dom/vitest'
 

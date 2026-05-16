@@ -1,0 +1,29 @@
+/*
+ * Animate node positions during collapse / expand. React Flow writes
+ * `transform: translate(x, y)` inline on each `.react-flow__node` —
+ * CSS transitions ride on top of that, so easing the property in
+ * gives a smooth slide whenever the layout pass moves the node.
+ *
+ * Scoped to the JsonViewer's own wrapper so other React Flow
+ * instances on the page (model graph, etc.) keep their existing
+ * behaviour.
+ */
+.json-viewer-canvas .react-flow__node {
+	transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+	/*
+	 * React Flow writes `visibility: visible` inline on each node
+	 * wrapper (its way of saying "this node has measured
+	 * dimensions"). That inline style beats `visibility: hidden` on
+	 * an ancestor — including the ECUI `Tabs` host, which hides
+	 * inactive tab panels by toggling `visibility`. The leak shows up
+	 * as ghost nodes still painted over the Response / Infos tabs
+	 * after the user has visited the Graph tab once. `inherit` plus
+	 * `!important` forces the node back to the parent's visibility,
+	 * which is what every other tab content already does. Safe here
+	 * because our layout assigns explicit `width` / `height` on
+	 * every node, so React Flow's "no dimensions → hide" branch
+	 * never fires for us.
+	 */
+	visibility: inherit !important;
+}

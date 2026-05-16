@@ -215,7 +215,7 @@
         "response": "Response",
         "prettyfied": "Prettyfied",
         "requestBody": "Request body",
-        "jsoncrack": "JSONCrack"
+        "graph": "Graph"
       },
       "loading": "Sending request...",
       "noResponse": "Click Send to execute the request",
