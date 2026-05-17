@@ -25,7 +25,15 @@ const FOLDER_INDEXABLE_KEYS = new Set([
   // document we serialise: treating it as indexable ensures a
   // FOLDER_UPDATED event fires when its map changes, so tag renderers
   // repaint and the dirty-state tracker can detect the diff.
-  'tagColors'
+  'tagColors',
+  // `apiUpdate` carries the env folder's spec-refresh config:
+  // sourceUrl, payloadChecksum, lastImportedAt, lastCheckedAt, …
+  // Treating it as indexable ensures every Refresh / Apply update
+  // mutation (`folder.apiUpdate = { … }` via the proxy set trap)
+  // fires FOLDER_UPDATED → the save-unit pipeline → disk write.
+  // Without this, the file stays stale and the next Refresh re-fires
+  // the "out of date" branch forever.
+  'apiUpdate'
   // `environments` and `items` are *deliberately* not in this set.
   // Both fire huge event volumes during Swagger import (one FOLDER_UPDATED
   // per env folder / per folder-items rewrite, each paying an

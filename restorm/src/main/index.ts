@@ -44,7 +44,6 @@ import { clearUserSettings, parseCliArgs } from './cli/args'
 import { setupGraphQL } from './GraphQLSetup'
 import { registerRestormIPC } from './IPCHandlers'
 import { registerApiUpdateIPC } from './services/apiUpdate/registerApiUpdateIPC'
-import { apiUpdateScheduler } from './services/apiUpdate/ApiUpdateScheduler'
 import { runApiUpdateApply } from './services/apiUpdate/orchestrateApply'
 import { loadFolderStructure, attachDraftStoreForFolder, attachDraftStoreForFile, getDraftsRootDir } from './FileOperations'
 import { DEFAULT_UI_DELAY_MS } from '../shared/config/constants'
@@ -561,5 +560,3 @@ registerApiUpdateIPC({
   },
   applyUpdate: async (folderId, selection) => runApiUpdateApply(folderId, selection)
 })
-
-apiUpdateScheduler.start()

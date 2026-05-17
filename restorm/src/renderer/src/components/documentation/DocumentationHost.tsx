@@ -43,6 +43,11 @@ export interface DocumentationHostProps {
    * pre-configured request from any route block. When provided,
    * each route's RouteHeader exposes an "Add" button. */
   onAddRequest?: (operation: OperationDocumentation) => void
+  /** Force-hide every per-route "+ Add a request" button regardless
+   * of whether `onAddRequest` is wired. Read-only consumers (e.g.
+   * the Import modal's Documentation preview tab) set this so the
+   * doc surface stays advisory. */
+  hideAddRequest?: boolean
   /** Render the API info block (version / contact / license /
    * terms / external docs / server / source) under the scope
    * header. Set by the env-folder Docs2 wiring; folder / single-
@@ -74,9 +79,16 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
   scopeTitle,
   scopeDescription,
   onAddRequest,
+  hideAddRequest = false,
   showApiInfo = false,
   testId
 }) => {
+  /** Resolve the effective `onAddRequest` once: when `hideAddRequest`
+   * is set, force-drop the callback even if a parent wired one. The
+   * route block + RouteHeader treat "no callback" as "no button", so
+   * a single source of truth here keeps every downstream check
+   * aligned. */
+  const effectiveOnAddRequest = hideAddRequest ? undefined : onAddRequest
   const slice = useMemo(
     () => selectDocSlice(apiDocumentation, filters),
     [apiDocumentation, filters]
@@ -317,7 +329,7 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
                 operation={op}
                 headingLevel={sectionHeadingLevel}
                 showGroupChip={false}
-                {...(onAddRequest ? { onAddRequest } : {})}
+                {...(effectiveOnAddRequest ? { onAddRequest: effectiveOnAddRequest } : {})}
               />
             ))}
           </section>
@@ -328,7 +340,7 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
             operation={op}
             headingLevel={sectionHeadingLevel}
             showGroupChip={!isSingleRoute}
-            {...(onAddRequest && !isSingleRoute ? { onAddRequest } : {})}
+            {...(effectiveOnAddRequest && !isSingleRoute ? { onAddRequest: effectiveOnAddRequest } : {})}
           />
         ))}
 

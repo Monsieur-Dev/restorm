@@ -1,11 +1,10 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { InputBox, Button, ControlGroup, useFileService, ContextMenu, Table, type ContextMenuItem, type TableColumn } from 'electron-core-ui/renderer'
+import { useFileService, ContextMenu, Table, type ContextMenuItem, type TableColumn } from 'electron-core-ui/renderer'
 import { getFavorites, removeFavorite, reorderFavorites } from '../../services/favoritesStore'
 import { PROJECT_UUID_KEY } from '../../../../shared/config/projectUuid'
 import type { EnvironmentFolder, FolderItem } from '../../../../shared/types/collections'
 import type { ApiDocumentation } from '../../../../shared/types/apiDocumentation'
-import type { ApiUpdateConfig } from '../../../../shared/types/baseTypes'
 import { ApiUpdateSettingsSection } from './ApiUpdateSettingsSection'
 import { Badge, type BadgeType } from '../common/Badge'
 import './environmentFolderHome.css'
@@ -111,53 +110,9 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
       window.removeEventListener('storage', handler)
     }
   }, [])
-  // Source URL editing + refresh
-  const [sourceUrl, setSourceUrl] = useState(apiDoc?.sourceUrl ?? '')
-  const [isRefreshing, setIsRefreshing] = useState(false)
-
-  const handleRefresh = useCallback(async () => {
-    if (!sourceUrl.trim() || isRefreshing) return
-    setIsRefreshing(true)
-    try {
-      const importer = (window as unknown as {
-        restorm?: { import?: { import?: (input: string) => Promise<{
-          success: boolean
-          items?: { apiDocumentation?: unknown }[]
-          error?: string
-        }> } }
-      }).restorm?.import?.import
-      if (!importer) return
-      const result = await importer(sourceUrl.trim())
-      if (!result.success) return
-      const freshApiDoc = result.items?.[0]?.apiDocumentation
-      if (!freshApiDoc) return
-      // Update the sourceUrl on the fresh doc to match what the user typed
-      ;(freshApiDoc as { sourceUrl?: string }).sourceUrl = sourceUrl.trim()
-      // Mutate through the reactive proxy
-      ;(folder as unknown as Record<string, unknown>)['apiDocumentation'] = freshApiDoc
-    } finally {
-      setIsRefreshing(false)
-    }
-  }, [sourceUrl, isRefreshing, folder])
 
   const importSource = folder.importSource
   const sourceConfig = importSource ? SOURCE_CONFIG[importSource] : undefined
-
-  const applyApiUpdatePatch = useCallback((patch: Partial<ApiUpdateConfig>): void => {
-    const target = folder as unknown as { apiUpdate?: ApiUpdateConfig }
-    const next: ApiUpdateConfig = {
-      sourceUrl: patch.sourceUrl ?? target.apiUpdate?.sourceUrl ?? apiDoc?.sourceUrl ?? '',
-      autoCheckEnabled: patch.autoCheckEnabled ?? target.apiUpdate?.autoCheckEnabled ?? false,
-      interval: patch.interval ?? target.apiUpdate?.interval ?? 'daily',
-      ...(target.apiUpdate ?? {}),
-      ...patch
-    }
-    target.apiUpdate = next
-    const api = (window as unknown as {
-      restorm?: { apiUpdate?: { setSettings: (id: string, cfg: unknown) => Promise<void> } }
-    }).restorm?.apiUpdate
-    if (api) void api.setSettings(folder.id, next)
-  }, [folder, apiDoc?.sourceUrl])
 
   const favoriteColumns = useMemo<TableColumn<FavoriteRequest>[]>(() => [
     {
@@ -252,33 +207,7 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
       </div>
 
       {/* ── API spec updates ── */}
-      <ApiUpdateSettingsSection
-        folderId={folder.id}
-        config={(folder as unknown as { apiUpdate?: ApiUpdateConfig }).apiUpdate}
-        defaultSourceUrl={apiDoc?.sourceUrl}
-        onSettingsChange={applyApiUpdatePatch}
-      />
-
-      {/* ── Source URL ── */}
-      {apiDoc?.sourceUrl && (
-        <div className="home-source-url">
-          <ControlGroup>
-            <InputBox
-              value={sourceUrl}
-              onChange={setSourceUrl}
-              options={{ type: 'text', ariaLabel: 'Source URL' }}
-            />
-            <Button
-              icon="refresh"
-              options={{ ariaLabel: t('folderView.home.refresh') }}
-              disabled={isRefreshing}
-              onClick={() => { void handleRefresh() }}
-            >
-              {isRefreshing ? t('folderView.home.refreshing') : t('folderView.home.refresh')}
-            </Button>
-          </ControlGroup>
-        </div>
-      )}
+      <ApiUpdateSettingsSection folder={folder} />
 
       {/* ── Favorite requests ── */}
       {favoriteRequests.length > 0 && (

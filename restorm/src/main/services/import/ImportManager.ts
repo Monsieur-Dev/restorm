@@ -8,6 +8,7 @@
  * - Returns parsed results
  */
 
+import { createHash } from 'node:crypto'
 import * as fs from 'fs/promises'
 import { logger } from 'electron-core-ui/main'
 import type { EnvironmentFolder, FolderItem } from '../../../shared/models'
@@ -33,6 +34,11 @@ export interface ImportResult {
    * uses this to decide whether to show the "Add authentication"
    * button. */
   isAuthError?: boolean
+  /** SHA-256 of the raw payload the importer parsed (URL or file).
+   * Stamped onto the env folder's `apiUpdate.payloadChecksum` so a
+   * subsequent Refresh can detect "no change since the import that
+   * produced this folder" without re-running the full importer. */
+  payloadChecksum?: string
 }
 
 export interface ImportOptions {
@@ -199,7 +205,7 @@ function disableEmptyKeyValuesInTree(folder: EnvironmentFolder): void {
 }
 
 /** Import from a given content string with detected or specified format */
-async function importFromContent(
+export async function importFromContent(
   content: string,
   format: string,
   source: string,
@@ -426,7 +432,17 @@ export async function importFrom(
     }
     
     // Import using detected format
-    return await importFromContent(content, detectedFormat, source, isUrl ? input : undefined)
+    const result = await importFromContent(content, detectedFormat, source, isUrl ? input : undefined)
+    if (result.success) {
+      // Stamp the payload checksum on every successful import — the
+      // env folder's `apiUpdate.payloadChecksum` is what the Refresh
+      // button compares against, so it MUST be computed off exactly
+      // the same bytes a future `refresh-fetch` will see. Using the
+      // raw response text here (pre-parse) matches what
+      // `apiUpdate:refresh-fetch` hashes server-side.
+      result.payloadChecksum = `sha256:${createHash('sha256').update(content).digest('hex')}`
+    }
+    return result
   } catch (error) {
     logger.error(`[ImportManager] Unexpected error:`, error)
     return {

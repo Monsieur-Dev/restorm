@@ -2,7 +2,7 @@
  * ImportModal - Modal for importing requests from various sources
  */
 
-import React, { useState, useCallback, useEffect, useLayoutEffect, useRef } from 'react'
+import React, { useState, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import {
   Modal,
   Button,
@@ -16,9 +16,11 @@ import {
 import { useTranslation } from 'react-i18next'
 import type { FolderItem, EnvironmentFolder, Folder } from '../../../../shared/types/collections'
 import { isEnvironmentFolder, isRequest } from '../../../../shared/types/collections'
+import type { ApiDocumentation } from '../../../../shared/types/apiDocumentation'
 import type { AuthenticationRequest } from '../../../../shared/models'
 import { logger } from 'electron-core-ui/renderer'
 import { AuthenticationSetupModal } from './AuthenticationSetupModal'
+import { DocumentationHost } from '../documentation/DocumentationHost'
 import { ImportFormatShowcase } from './ImportFormatShowcase'
 import { ImportSelectionTree } from './ImportSelectionTree'
 import { allLeafKeys } from './importSelectionHelpers'
@@ -33,12 +35,11 @@ import './ImportModal.css'
  *   already-imported env folder. Both fields are display-only —
  *   they're sourced from the env folder's stored apiUpdate config
  *   and aren't editable in this flow.
- * - Calls `apiUpdate.previewTree(targetFolderId)` to get the parsed
- *   preview tree + the set of leaves whose operation already lives
- *   in the target. Locked leaves arrive checked + disabled (the user
- *   can't opt them out without losing a route the folder already
- *   exposes); other leaves arrive unchecked and surface as opt-in
- *   additions.
+ * - Runs the regular `import.preview` against the stored sourceUrl
+ *   with the env folder's headers attached, then renders the tree
+ *   alongside the routes already in the folder. The locked-keys set
+ *   stays empty: a refresh proposes the full spec, the wizard's
+ *   tri-state checkboxes let the user trim it before confirming.
  * - Replaces the "Import" button with "Apply update" and routes the
  *   confirm action to `apiUpdate.apply` instead of the fresh-import
  *   handler. The callback receives the resulting payload so the host
@@ -55,6 +56,15 @@ export interface RefreshContext {
    */
   sourceHeaders?: Record<string, string>
   targetFolderId: string
+  /**
+   * Natural keys of every request already present in the target
+   * env folder. Computed by the host from the existing folder
+   * before opening the modal. The bootstrap intersects this set
+   * with the preview's leaf keys to drive `lockedKeys` — already-
+   * imported routes land pre-checked + locked, new routes arrive
+   * unchecked so the user opts into them explicitly.
+   */
+  existingLeafKeys?: ReadonlySet<string>
   onApplied: (updatedFolder: unknown) => void
 }
 
@@ -119,6 +129,11 @@ export function ImportModal({
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [previewItems, setPreviewItems] = useState<FolderItem[]>([])
+  // SHA-256 of the raw response body the importer parsed, returned by
+  // `import.preview`. Stamped onto the env folder's `apiUpdate` at
+  // commit-import time so a later Refresh can confirm "no change
+  // since this import" by comparing checksums.
+  const [previewChecksum, setPreviewChecksum] = useState<string | undefined>(undefined)
   /**
    * Set of leaf natural keys the user wants to import. Initialised
    * to the full leaf set whenever a fresh preview lands so the
@@ -155,8 +170,9 @@ export function ImportModal({
   /**
    * Set of leaf natural keys whose checkbox is forced-on + disabled
    * because their operation already exists in the target folder.
-   * Populated from `apiUpdate.previewTree`'s `lockedKeys` array on
-   * refresh-from-source, empty in fresh-import mode.
+   * Populated by the refresh-from-source bootstrap from the
+   * intersection of `refreshContext.existingLeafKeys` with the
+   * fetched preview tree's leaves. Fresh imports leave this empty.
    */
   const [lockedKeys, setLockedKeys] = useState<ReadonlySet<string>>(() => new Set())
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -265,14 +281,19 @@ export function ImportModal({
           const result = await window.restorm?.import.preview(value.trim(), previewOptions)
 
           if (result?.success) {
+            const ck = (result as { payloadChecksum?: string }).payloadChecksum
+            logger.info('[import.preview] captured checksum', { hasChecksum: ck !== undefined, checksum: ck })
             setPreviewItems(result.items as FolderItem[])
+            setPreviewChecksum(ck)
             setError(null)
           } else {
             setPreviewItems([])
+            setPreviewChecksum(undefined)
             setError(result?.error ?? t('import.error.unknown'))
           }
         } catch (err) {
           setPreviewItems([])
+          setPreviewChecksum(undefined)
           setError(err instanceof Error ? err.message : String(err))
         } finally {
           setIsLoading(false)
@@ -288,11 +309,10 @@ export function ImportModal({
   // re-fires once the row sits still for 200 ms.
   //
   // Skip this entirely when the modal is in refresh-from-source
-  // mode — that path has its own preview bootstrap
-  // (`apiUpdate.previewTree`) and the URL-input handler would
-  // overwrite the tree the refresh bootstrap produced. The refresh
-  // flow already uses the persisted `sourceHeaders` server-side,
-  // so the in-modal headers don't need a re-preview round-trip.
+  // mode — that path runs its own `import.preview` against the
+  // stored URL on open, with the env folder's persisted headers
+  // already attached. The URL-input handler would otherwise stomp
+  // on the tree that refresh bootstrap produced.
   useEffect(() => {
     if (refreshContext !== undefined) return
     if (input.trim().length === 0) return
@@ -525,13 +545,18 @@ export function ImportModal({
       const stamped = { ...item } as EnvironmentFolder
       if (isUrlImport) {
         const existing = (stamped as unknown as { apiUpdate?: Record<string, unknown> }).apiUpdate ?? {}
-        const apiDoc = (stamped as unknown as { apiDocumentation?: { api?: { version?: string } } }).apiDocumentation
         ;(stamped as unknown as { apiUpdate?: Record<string, unknown> }).apiUpdate = {
           sourceUrl: sourceUrlAtImport,
-          autoCheckEnabled: false,
-          interval: 'daily',
-          ...(apiDoc?.api?.version !== undefined ? { lastImportedSpecVersion: apiDoc.api.version } : {}),
+          lastImportedAt: Date.now(),
           ...existing,
+          // `payloadChecksum` MUST match the value `refresh-fetch`
+          // recomputes on the next user-triggered Refresh — both
+          // hashes are SHA-256 of the raw response body, computed
+          // identically on the main side. Without this stamp, a
+          // freshly imported folder would always report "update
+          // available" on the first Refresh (stored checksum
+          // undefined vs. a non-undefined just-fetched one).
+          ...(previewChecksum !== undefined ? { payloadChecksum: previewChecksum } : {}),
           ...(attachedAuth ? { authenticationRequestId: attachedAuth.id } : {}),
           ...(hasManualHeaders ? { sourceHeaders: manualHeadersAsRecord } : {})
         }
@@ -550,6 +575,12 @@ export function ImportModal({
       return stamped
     })
     finalItems = stampApiUpdate(finalItems)
+    logger.info('[import.commit] stamp', {
+      isUrlImport,
+      sourceUrl: sourceUrlAtImport,
+      hasPreviewChecksum: previewChecksum !== undefined,
+      previewChecksum
+    })
 
     // Imports always land at the project root — the destination
     // picker (and the per-import "new folder" creation that went with
@@ -559,16 +590,14 @@ export function ImportModal({
 
     // Close modal (useEffect will clear state when modal closes)
     onClose()
-  }, [previewItems, selection, input, onImport, onClose, attachedAuth, manualHeaders, refreshContext])
+  }, [previewItems, previewChecksum, selection, input, onImport, onClose, attachedAuth, manualHeaders, refreshContext])
 
   // Refresh-from-source bootstrap. When `refreshContext` is provided
   // we pre-fill the URL display + the auth pill from the env folder's
-  // stored config, then ask main to do the preview. Main runs the
-  // saved auth route through the env's first environment (so any
-  // `{{var}}`-style placeholders get resolved before /login fires)
-  // and returns the parsed-spec tree. Skipping the renderer-side
-  // auth.prefetch path is what makes refresh handle Handlebars-style
-  // variables the same way the apply path does.
+  // stored config, then fire the regular `import.preview` against
+  // the stored URL with the persisted manual headers attached. Auth
+  // attaches re-prefetch on user re-confirmation (via the auth-setup
+  // sub-modal) — the import wizard already has UX for that.
   useEffect(() => {
     if (!isOpen || !refreshContext) return
     setInput(refreshContext.sourceUrl)
@@ -592,26 +621,63 @@ export function ImportModal({
     const token = { cancelled: false }
     void (async () => {
       try {
+        // `apiUpdate:refresh-fetch` runs the same fetch the Home
+        // Refresh button uses — it resolves the env folder's auth
+        // route + `${VAR}` headers on the main side, fetches the
+        // URL, parses the payload, and returns items + checksum.
+        // Doing the auth on main is mandatory: the renderer-side
+        // `auth.prefetch` would forward the request raw, without
+        // handlebars expansion against the env folder's ContextService.
         const api = (window as unknown as {
-          restorm?: { apiUpdate?: { previewTree?: (id: string) => Promise<{ success: boolean; items: unknown[]; lockedKeys?: string[]; error?: string }> } }
+          restorm?: { apiUpdate?: {
+            refreshFetch: (id: string) => Promise<
+              | { ok: true; checksum: string; payload: string; items: FolderItem[]; format: string | null }
+              | { ok: false; error: string }
+            >
+          } }
         }).restorm?.apiUpdate
-        if (!api?.previewTree) throw new Error('apiUpdate.previewTree IPC unavailable')
-        const result = await api.previewTree(refreshContext.targetFolderId)
+        if (!api) {
+          if (!token.cancelled) {
+            setPreviewItems([])
+            setPreviewChecksum(undefined)
+            setError(t('import.error.unknown'))
+            setLockedKeys(new Set())
+          }
+          return
+        }
+        const result = await api.refreshFetch(refreshContext.targetFolderId)
         if (token.cancelled) return
-        if (result.success) {
-          setPreviewItems(result.items as FolderItem[])
-          setLockedKeys(new Set(result.lockedKeys ?? []))
+        if (result.ok) {
+          const items = result.items
+          setPreviewItems(items)
+          setPreviewChecksum(result.checksum)
           setError(null)
+          // Re-derive `lockedKeys` from the intersection of the
+          // existing folder's leaves with the freshly-fetched
+          // preview. A request that disappeared from the source
+          // spec drops out of the locked set so the wizard doesn't
+          // try to force-check a key the tree no longer contains.
+          const existing = refreshContext.existingLeafKeys
+          if (existing && existing.size > 0) {
+            const previewLeaves = allLeafKeys(items)
+            const locked = new Set<string>()
+            for (const key of existing) if (previewLeaves.has(key)) locked.add(key)
+            setLockedKeys(locked)
+          } else {
+            setLockedKeys(new Set())
+          }
         } else {
           setPreviewItems([])
+          setPreviewChecksum(undefined)
+          setError(result.error)
           setLockedKeys(new Set())
-          setError(result.error ?? t('import.error.unknown'))
         }
       } catch (err) {
         if (!token.cancelled) {
           setPreviewItems([])
-          setLockedKeys(new Set())
+          setPreviewChecksum(undefined)
           setError(err instanceof Error ? err.message : String(err))
+          setLockedKeys(new Set())
         }
       } finally {
         if (!token.cancelled) setIsLoading(false)
@@ -652,15 +718,13 @@ export function ImportModal({
   // - Fresh import: every leaf checked, matching the legacy
   //   "import everything" UX.
   // - Refresh from source: only the locked leaves are pre-checked.
-  //   A locked leaf is one whose operation is already present in the
-  //   target folder (per the same `findOperationForRoute` matcher
-  //   that drives Docs-tab visibility). New operations arrive
-  //   unchecked so they show up as opt-in additions; locked leaves
-  //   are read-only (the user can't opt them out). An empty
-  //   `lockedKeys` set in refresh mode would surface every fresh
-  //   route as a brand-new addition — that's the right default since
-  //   it means the existing folder doesn't cover any of the spec's
-  //   current operations.
+  //   A locked leaf is one whose natural key is already present in
+  //   the target folder (intersection of `existingLeafKeys` with the
+  //   preview's leaves, computed by the bootstrap effect). New
+  //   operations arrive unchecked so they show up as opt-in
+  //   additions; locked leaves are read-only — the user can't opt
+  //   them out, which would silently drop a route already exposed
+  //   by the folder.
   useEffect(() => {
     if (refreshContext) {
       setSelection(new Set(lockedKeys))
@@ -916,60 +980,24 @@ export function ImportModal({
           </div>
         )}
 
-        {/* Section 3: Selection tree (preview + tri-state checkboxes).
-            Rendered as a sibling of the drop-zone wrapper rather than
-            a child, so the preview can occupy the same flex slot
-            without inheriting the dashed border / drop-cue treatment
-            — a busy import flow shouldn't compete with the drop-zone
-            decoration. Hidden during an active drag so the drop-zone
-            takes the slot back; `previewItems` stays in state, so the
-            list re-mounts identically on dragleave. */}
+        {/* Section 3: Two-tab preview — the Routes tree (tri-state
+            checkboxes + filter) and a read-only Documentation view of
+            the parsed spec. Rendered as a sibling of the drop-zone
+            wrapper rather than a child, so the preview can occupy
+            the same flex slot without inheriting the dashed border /
+            drop-cue treatment. Hidden during an active drag so the
+            drop-zone takes the slot back; `previewItems` stays in
+            state, so the list re-mounts identically on dragleave. */}
         {displayedSection === 'preview' && !isDraggingOver && (
           <div className={`import-section import-preview-section import-section-fade${transitionPhase !== null ? ` import-section-fade--${transitionPhase}` : ''}`}>
-            <div className="import-preview-header">
-              <label className="import-label">
-                {t('import.preview.label')}
-              </label>
-              <div className="import-preview-actions">
-                <Button
-                  secondary
-                  onClick={() => { setSelection(allLeafKeys(previewItems)) }}
-                  data-testid="import-select-all-button"
-                >
-                  {t('import.selectAll', 'Select all')}
-                </Button>
-                <Button
-                  secondary
-                  onClick={() => {
-                    // Locked leaves stay checked even on "Select none"
-                    // — opting them out would silently drop a route the
-                    // target folder already exposes.
-                    setSelection(new Set(lockedKeys))
-                  }}
-                  data-testid="import-select-none-button"
-                >
-                  {t('import.selectNone', 'Select none')}
-                </Button>
-              </div>
-            </div>
-            <div className="import-preview-search">
-              <InputBox
-                value={searchFilter}
-                onChange={setSearchFilter}
-                options={{ placeholder: t('import.searchPlaceholder', 'Filter routes / folders…') }}
-                data-testid="import-selection-search"
-              />
-            </div>
-            <div className="import-preview">
-              <ImportSelectionTree
-                items={previewItems}
-                selection={selection}
-                onSelectionChange={setSelection}
-                searchFilter={searchFilter}
-                lockedKeys={lockedKeys}
-                data-testid="import-selection-tree"
-              />
-            </div>
+            <ImportPreviewTabs
+              previewItems={previewItems}
+              selection={selection}
+              onSelectionChange={setSelection}
+              searchFilter={searchFilter}
+              onSearchFilterChange={setSearchFilter}
+              lockedKeys={lockedKeys}
+            />
           </div>
         )}
 
@@ -1051,5 +1079,158 @@ export function ImportModal({
         </div>
       </Modal>
     </Modal>
+  )
+}
+
+/**
+ * Two-tab preview area inside the Import modal: the Routes tab
+ * surfaces the selectable tree the wizard always had; the
+ * Documentation tab renders the parsed spec read-only via
+ * `DocumentationHost`. Locked-keys + the search filter live in the
+ * parent so switching tabs doesn't reset state.
+ *
+ * Pulling the parsed `apiDocumentation` off the first env-folder in
+ * the preview items keeps the doc tab in sync with the routes tab —
+ * the import preview always emits an env folder per format, and the
+ * documentation lives on that folder.
+ */
+interface ImportPreviewTabsProps {
+  previewItems: FolderItem[]
+  selection: Set<string>
+  onSelectionChange: (sel: Set<string>) => void
+  searchFilter: string
+  onSearchFilterChange: (filter: string) => void
+  lockedKeys: ReadonlySet<string>
+}
+
+type ImportPreviewTabId = 'routes' | 'documentation'
+
+const ImportPreviewTabs: React.FC<ImportPreviewTabsProps> = ({
+  previewItems,
+  selection,
+  onSelectionChange,
+  searchFilter,
+  onSearchFilterChange,
+  lockedKeys
+}) => {
+  const { t } = useTranslation()
+  const [activeTab, setActiveTab] = useState<ImportPreviewTabId>('routes')
+
+  const apiDocumentation = useMemo<ApiDocumentation | undefined>(() => {
+    for (const item of previewItems) {
+      if (isEnvironmentFolder(item)) {
+        const doc = (item as unknown as { apiDocumentation?: ApiDocumentation }).apiDocumentation
+        if (doc) return doc
+      }
+    }
+    return undefined
+  }, [previewItems])
+
+  // Mounted inline rather than via ECUI `<Tabs>` so the inactive
+  // panel is *fully unmounted* instead of hidden via `visibility:
+  // hidden`. The hidden-pane strategy from Tabs cascaded into the
+  // active panel's bounding box in some refresh-modal renders,
+  // making the routes tree look unrenderable to the e2e visibility
+  // assertion even though the data was there.
+  return (
+    <div
+      className="import-preview-tabs-root"
+      data-testid="import-preview-tabs"
+      data-active-tab-id={activeTab}
+    >
+      <div className="import-preview-tab-bar" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'routes'}
+          className={`import-preview-tab-button${activeTab === 'routes' ? ' is-active' : ''}`}
+          data-testid="import-preview-tabs-tab-routes"
+          onClick={() => { setActiveTab('routes') }}
+        >
+          {t('import.tabs.routes', 'Routes')}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'documentation'}
+          className={`import-preview-tab-button${activeTab === 'documentation' ? ' is-active' : ''}`}
+          data-testid="import-preview-tabs-tab-documentation"
+          onClick={() => { setActiveTab('documentation') }}
+        >
+          {t('import.tabs.documentation', 'Documentation')}
+        </button>
+      </div>
+      <div className="import-preview-tab-panel">
+        {activeTab === 'routes' && (
+          <div
+            className="import-preview-routes-tab"
+            data-testid="import-preview-tabs-tabpanel-routes"
+          >
+            <div className="import-preview-header">
+              <div className="import-preview-actions">
+                <Button
+                  secondary
+                  onClick={() => { onSelectionChange(allLeafKeys(previewItems)) }}
+                  data-testid="import-select-all-button"
+                >
+                  {t('import.selectAll', 'Select all')}
+                </Button>
+                <Button
+                  secondary
+                  onClick={() => {
+                    // Locked leaves stay checked even on "Select none"
+                    // — opting them out would silently drop a route the
+                    // target folder already exposes.
+                    onSelectionChange(new Set(lockedKeys))
+                  }}
+                  data-testid="import-select-none-button"
+                >
+                  {t('import.selectNone', 'Select none')}
+                </Button>
+              </div>
+            </div>
+            <div className="import-preview-search">
+              <InputBox
+                value={searchFilter}
+                onChange={onSearchFilterChange}
+                options={{ placeholder: t('import.searchPlaceholder', 'Filter routes / folders…') }}
+                data-testid="import-selection-search"
+              />
+            </div>
+            <div className="import-preview">
+              <ImportSelectionTree
+                items={previewItems}
+                selection={selection}
+                onSelectionChange={onSelectionChange}
+                searchFilter={searchFilter}
+                lockedKeys={lockedKeys}
+                data-testid="import-selection-tree"
+              />
+            </div>
+          </div>
+        )}
+        {activeTab === 'documentation' && (
+          <div
+            className="import-preview-doc-tab"
+            data-testid="import-preview-tabs-tabpanel-documentation"
+          >
+            {apiDocumentation
+              ? (
+                <DocumentationHost
+                  apiDocumentation={apiDocumentation}
+                  showApiInfo
+                  hideAddRequest
+                  testId="import-preview-documentation"
+                />
+                )
+              : (
+                <div className="import-preview-doc-empty" data-testid="import-preview-documentation-empty">
+                  {t('import.preview.noDocumentation', 'No parsed documentation for this source.')}
+                </div>
+                )}
+          </div>
+        )}
+      </div>
+    </div>
   )
 }

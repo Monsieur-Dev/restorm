@@ -1,35 +1,36 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, InputBox, KeyValueTable, SelectBox, Toggle, type KeyValueTableHandle, type KeyValueTableRow } from 'electron-core-ui/renderer'
-import type { ApiUpdateConfig, ApiUpdateInterval, ApiUpdateState } from '../../../../shared/types/baseTypes'
+import { Button, Modal, logger, eventBus } from 'electron-core-ui/renderer'
+import { DocumentEvents, type DocumentChangedPayload } from '../../services/DocumentEvents'
+import { updateReactiveProperty } from '../RequestTabViews/requestTabViewUtils'
+import type { ApiUpdateConfig } from '../../../../shared/types/baseTypes'
+import type { EnvironmentFolder } from '../../../../shared/types/folderTypes'
 
 /**
- * Settings UX for the periodic API-update flow.
+ * Read-only summary of the env folder's API spec import state plus a
+ * single "Refresh" button.
  *
- * Lives on `EnvironmentFolderHome` and is the only place the user
- * configures auto-check, interval, and source URL. Other surfaces
- * (folder badge, toaster) read the same `ApiUpdateState` snapshot
- * the IPC stream pushes — they don't have their own controls.
+ * The Refresh flow:
+ *   1. Open a local "Refreshing API spec…" modal.
+ *   2. Call `apiUpdate.refreshFetch(folderId)` which hits the source
+ *      URL with the env folder's expanded headers + the resolved auth
+ *      headers, hashes the body and returns the checksum.
+ *   3. Bump `lastCheckedAt` on the folder (reactive mutation +
+ *      `apiUpdate:set-settings` IPC).
+ *   4. If the checksum matches `apiUpdate.payloadChecksum` → show
+ *      "API spec is up to date." with an OK button. Done.
+ *   5. Otherwise (or on fetch error) → close this modal and dispatch
+ *      a `restorm:open-import-refresh` event so App can pop the
+ *      Import modal in "Refresh from source" mode, exactly like the
+ *      sidebar context-menu entry does.
  */
 interface Props {
-  folderId: string
-  config: ApiUpdateConfig | undefined
-  defaultSourceUrl: string | undefined
-  /** Persists a partial config patch onto the folder. The host wires
-   * this to the `apiUpdate.setSettings` IPC + the local reactive
-   * proxy update so the UX stays responsive while the round-trip
-   * completes. */
-  onSettingsChange: (patch: Partial<ApiUpdateConfig>) => void
+  folder: EnvironmentFolder
 }
 
-const INTERVAL_ORDER: ApiUpdateInterval[] = ['hourly', 'every6h', 'daily', 'weekly', 'never']
-
 interface ApiUpdateApi {
-  getState: (folderId: string) => Promise<unknown>
-  checkNow: (folderId: string) => Promise<void>
-  apply: (folderId: string) => Promise<void>
-  dismiss: (folderId: string) => Promise<void>
-  onStateChanged: (callback: (data: { folderId: string; state: unknown }) => void) => (() => void)
+  setSettings: (folderId: string, config: Partial<ApiUpdateConfig>) => Promise<void>
+  refreshFetch: (folderId: string) => Promise<{ ok: true; checksum: string; payload: string } | { ok: false; error: string }>
 }
 
 function getApiUpdateApi(): ApiUpdateApi | null {
@@ -37,79 +38,92 @@ function getApiUpdateApi(): ApiUpdateApi | null {
   return api ?? null
 }
 
-export const ApiUpdateSettingsSection: React.FC<Props> = ({ folderId, config, defaultSourceUrl, onSettingsChange }) => {
+type RefreshPhase = 'idle' | 'fetching' | 'up-to-date'
+
+export const ApiUpdateSettingsSection: React.FC<Props> = ({ folder }) => {
   const { t } = useTranslation()
-  const api = getApiUpdateApi()
-  const [state, setState] = useState<ApiUpdateState>({ kind: 'idle' })
-  const [pendingSourceUrl, setPendingSourceUrl] = useState(config?.sourceUrl ?? defaultSourceUrl ?? '')
-  const headersTableRef = useRef<KeyValueTableHandle | null>(null)
+  const [phase, setPhase] = useState<RefreshPhase>('idle')
+  // Bumped on every FOLDER_UPDATED for this folder so we re-read the
+  // proxy's `apiUpdate` field after `persistPatch` / refresh-from-source
+  // mutations. Without the bump the section keeps showing the stale
+  // `lastCheckedAt` / `payloadChecksum` until the next external rerender.
+  const [, forceRender] = useState(0)
+
+  const folderId = folder.id
 
   useEffect(() => {
-    if (!api) return
-    let alive = true
-    void api.getState(folderId).then((s) => {
-      if (alive) setState(s as ApiUpdateState)
-    })
-    const unsubscribe = api.onStateChanged((evt) => {
-      if (evt.folderId === folderId) setState(evt.state as ApiUpdateState)
-    })
-    return () => {
-      alive = false
-      unsubscribe()
+    const subscription = eventBus.subscribe<DocumentChangedPayload>(
+      DocumentEvents.FOLDER_UPDATED,
+      (payload) => {
+        if (payload.id !== folderId) return
+        forceRender((seq) => seq + 1)
+      }
+    )
+    return () => { subscription.unsubscribe() }
+  }, [folderId])
+
+  const config = (folder as unknown as { apiUpdate?: ApiUpdateConfig }).apiUpdate
+
+  const closeModal = useCallback(() => { setPhase('idle') }, [])
+
+  const persistPatch = useCallback((patch: Partial<ApiUpdateConfig>) => {
+    // Mutate the reactive folder proxy. `apiUpdate` lives in
+    // FOLDER_INDEXABLE_KEYS, so the proxy set trap fires
+    // FOLDER_UPDATED → the save-unit upsert pipeline → disk. Going
+    // through `updateReactiveProperty` (Object.assign) keeps the
+    // eslint-react immutability rule happy while still triggering
+    // the proxy.
+    const nextApiUpdate = { ...(config ?? {}), ...patch }
+    updateReactiveProperty(folder as unknown as Record<string, unknown>, 'apiUpdate', nextApiUpdate)
+  }, [folder, config])
+
+  const handleRefresh = useCallback(async () => {
+    const api = getApiUpdateApi()
+    if (!api || !config?.sourceUrl) return
+    setPhase('fetching')
+    const result = await api.refreshFetch(folderId)
+    const checkedAt = Date.now()
+    // Stamp `lastCheckedAt` regardless of success — a Refresh attempt
+    // is itself a meaningful event ("user pinged the source at this
+    // time"), separate from whether the response was usable.
+    try {
+      await api.setSettings(folderId, { lastCheckedAt: checkedAt })
+    } catch {
+      // Persistence hiccups shouldn't block the user's decision flow;
+      // they'll see the up-to-date / refresh modal either way.
     }
-  }, [api, folderId])
-
-  const intervalOptions = useMemo(
-    () => INTERVAL_ORDER.map((v) => ({ text: v, label: t(`folderView.home.apiUpdate.interval${capitalize(v)}`) })),
-    [t]
-  )
-
-  const intervalSelected = useMemo(() => {
-    const idx = INTERVAL_ORDER.indexOf(config?.interval ?? 'daily')
-    return idx >= 0 ? idx : 2
-  }, [config?.interval])
-
-  const handleAutoCheckToggle = useCallback((checked: boolean) => {
-    const seedSourceUrl = config?.sourceUrl ?? defaultSourceUrl ?? pendingSourceUrl
-    if (!config && seedSourceUrl) {
-      onSettingsChange({
-        sourceUrl: seedSourceUrl,
-        autoCheckEnabled: checked,
-        interval: 'daily'
-      })
+    logger.info('[apiUpdate.refresh] checksum compare', {
+      folderId,
+      ok: result.ok,
+      stored: config.payloadChecksum,
+      fetched: result.ok ? result.checksum : null,
+      match: result.ok && config.payloadChecksum === result.checksum
+    })
+    if (result.ok && config.payloadChecksum && result.checksum === config.payloadChecksum) {
+      persistPatch({ lastCheckedAt: checkedAt })
+      setPhase('up-to-date')
       return
     }
-    onSettingsChange({ autoCheckEnabled: checked })
-  }, [config, defaultSourceUrl, onSettingsChange, pendingSourceUrl])
-
-  const handleIntervalSelect = useCallback((data: { selected: string }) => {
-    onSettingsChange({ interval: data.selected as ApiUpdateInterval })
-  }, [onSettingsChange])
-
-  const handleSourceUrlBlur = useCallback(() => {
-    if (pendingSourceUrl !== (config?.sourceUrl ?? '')) {
-      onSettingsChange({ sourceUrl: pendingSourceUrl })
+    // Self-heal: when the stored payload checksum is missing (legacy
+    // project files predating the stamp, or imports that landed
+    // before the renderer's commit-stamp pipeline) but the fetch was
+    // OK, adopt the just-fetched checksum so the next Refresh has a
+    // baseline. The user can't tell the difference — without a
+    // stored baseline there's no "out of date" to surface anyway.
+    if (result.ok && !config.payloadChecksum) {
+      persistPatch({ lastCheckedAt: checkedAt, payloadChecksum: result.checksum })
+      setPhase('up-to-date')
+      return
     }
-  }, [pendingSourceUrl, config?.sourceUrl, onSettingsChange])
+    persistPatch({ lastCheckedAt: checkedAt })
+    // Mismatch or fetch error — close this modal, defer to the
+    // Import modal in refresh mode (same code path the sidebar
+    // context-menu entry uses).
+    setPhase('idle')
+    window.dispatchEvent(new CustomEvent('restorm:open-import-refresh', { detail: { folderId } }))
+  }, [folderId, config, persistPatch])
 
-  const headerEntries = Object.entries(config?.sourceHeaders ?? {})
-
-  const handleCheckNow = useCallback(async () => {
-    if (!api) return
-    await api.checkNow(folderId)
-  }, [api, folderId])
-
-  const handleApply = useCallback(async () => {
-    if (!api) return
-    await api.apply(folderId)
-  }, [api, folderId])
-
-  const handleDismiss = useCallback(async () => {
-    if (!api) return
-    await api.dismiss(folderId)
-  }, [api, folderId])
-
-  if (!defaultSourceUrl && !config?.sourceUrl) {
+  if (!config?.sourceUrl) {
     return (
       <div className="home-section" data-testid="home-api-update-section">
         <h3 className="home-section-title">
@@ -123,15 +137,16 @@ export const ApiUpdateSettingsSection: React.FC<Props> = ({ folderId, config, de
     )
   }
 
-  const lastCheckedLabel = config?.lastCheckedAt
-    ? t('folderView.home.apiUpdate.lastCheckedAt', { time: new Date(config.lastCheckedAt).toLocaleString() })
+  const lastImportedText = config.lastImportedAt !== undefined
+    ? new Date(config.lastImportedAt).toLocaleString()
+    : t('folderView.home.apiUpdate.neverImported')
+  // Fallback to the import timestamp when the user hasn't pinged the
+  // source yet — importing IS the first successful check, so showing
+  // "Never checked" right after an import is confusing.
+  const effectiveLastChecked = config.lastCheckedAt ?? config.lastImportedAt
+  const lastCheckedText = effectiveLastChecked !== undefined
+    ? new Date(effectiveLastChecked).toLocaleString()
     : t('folderView.home.apiUpdate.neverChecked')
-
-  const stateLabel = state.kind === 'available'
-    ? t('folderView.home.apiUpdate.stateAvailable')
-    : state.kind === 'error'
-      ? t('folderView.home.apiUpdate.stateError')
-      : t('folderView.home.apiUpdate.stateIdle')
 
   return (
     <div className="home-section" data-testid="home-api-update-section">
@@ -140,119 +155,58 @@ export const ApiUpdateSettingsSection: React.FC<Props> = ({ folderId, config, de
         {t('folderView.home.apiUpdate.title')}
       </h3>
       <div className="home-section-content api-update-grid">
-        <label className="api-update-toggle-row">
-          <Toggle
-            checked={config?.autoCheckEnabled === true}
-            onChange={handleAutoCheckToggle}
-            data-testid="home-api-update-auto-toggle"
-          />
-          <span>{t('folderView.home.apiUpdate.autoCheckLabel')}</span>
-        </label>
-
-        <label className="api-update-row">
-          <span className="api-update-label">{t('folderView.home.apiUpdate.intervalLabel')}</span>
-          <SelectBox
-            id={`api-update-interval-${folderId}`}
-            className="api-update-select"
-            options={intervalOptions}
-            selected={intervalSelected}
-            onDidSelect={handleIntervalSelect}
-            data-testid="home-api-update-interval"
-          />
-        </label>
-
-        <label className="api-update-row">
-          <span className="api-update-label">URL</span>
-          <InputBox
-            value={pendingSourceUrl}
-            onChange={setPendingSourceUrl}
-            onBlur={handleSourceUrlBlur}
-            options={{ type: 'text', ariaLabel: 'Source URL' }}
-          />
-        </label>
-
-        <div className="api-update-headers" data-testid="home-api-update-headers">
-          <span className="api-update-label">Headers</span>
-          {/* Same KV table the Import modal's "Add custom headers"
-              uses, for visual + behavioural consistency on the
-              `sourceHeaders` field. Replaces an ad-hoc renderer
-              whose "Add header" button no-op'd on empty key + value
-              because the underlying `handleHeaderChange` skipped
-              empty keys before they could be typed in. */}
-          <KeyValueTable
-            ref={headersTableRef}
-            data-testid="home-api-update-headers-table"
-            showDescription={false}
-            initialRows={headerEntries.map(([key, value]) => ({
-              id: key,
-              key,
-              value,
-              enabled: true
-            }))}
-            onRowsChange={(rows: KeyValueTableRow[]) => {
-              const next: Record<string, string> = {}
-              for (const row of rows) {
-                if (!(row.enabled ?? true)) continue
-                const k = row.key.trim()
-                if (k.length === 0) continue
-                next[k] = row.value
-              }
-              onSettingsChange({ sourceHeaders: next })
-            }}
-          />
-          {/* Add-row button — the KeyValueTable renders nothing when
-              `initialRows` is empty, so we surface an explicit
-              "Add header" trigger that calls into the table's
-              imperative handle to insert a new empty row the user
-              can then fill. */}
-          <Button
-            icon="add"
-            options={{ ariaLabel: 'Add header' }}
-            data-testid="home-api-update-add-header"
-            onClick={() => { headersTableRef.current?.addRow() }}
-          >Add header</Button>
+        <div className="api-update-row">
+          <span className="api-update-label">{t('folderView.home.apiUpdate.urlLabel')}</span>
+          <span data-testid="home-api-update-url">{config.sourceUrl}</span>
         </div>
-
-        <div className="api-update-state-row" data-testid="home-api-update-state">
-          <span className={`api-update-state api-update-state-${state.kind}`}>{stateLabel}</span>
-          <span className="api-update-last-checked">{lastCheckedLabel}</span>
+        <div className="api-update-row">
+          <span className="api-update-label">{t('folderView.home.apiUpdate.lastImportedLabel')}</span>
+          <span data-testid="home-api-update-last-imported">{lastImportedText}</span>
+        </div>
+        <div className="api-update-row">
+          <span className="api-update-label">{t('folderView.home.apiUpdate.lastCheckedLabel')}</span>
+          <span data-testid="home-api-update-last-checked">{lastCheckedText}</span>
+        </div>
+        <div>
           <Button
             icon="refresh"
-            options={{ ariaLabel: t('folderView.home.apiUpdate.checkNow') }}
-            disabled={state.kind === 'checking'}
-            onClick={() => { void handleCheckNow() }}
+            onClick={() => { void handleRefresh() }}
+            disabled={phase !== 'idle'}
+            data-testid="home-api-update-refresh"
           >
-            {state.kind === 'checking'
-              ? t('folderView.home.apiUpdate.checkInProgress')
-              : t('folderView.home.apiUpdate.checkNow')}
+            {t('common.refresh')}
           </Button>
-          {state.kind === 'available' && (
+        </div>
+      </div>
+
+      <Modal
+        isOpen={phase !== 'idle'}
+        onClose={closeModal}
+        title={t('folderView.home.apiUpdate.refreshing')}
+        size="dialog"
+        data-testid="home-api-update-refresh-modal"
+      >
+        <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {phase === 'fetching' && (
+            <div role="status" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <i className="codicon codicon-loading codicon-modifier-spin" aria-hidden="true" />
+              <span>{t('folderView.home.apiUpdate.fetching')}</span>
+            </div>
+          )}
+          {phase === 'up-to-date' && (
             <>
-              <Button
-                icon="cloud-download"
-                onClick={() => { void handleApply() }}
-                data-testid="home-api-update-apply"
-              >
-                {t('folderView.home.apiUpdate.applyUpdate')}
-              </Button>
-              <Button
-                icon="close"
-                onClick={() => { void handleDismiss() }}
-                data-testid="home-api-update-dismiss"
-              >
-                {t('folderView.home.apiUpdate.dismiss')}
-              </Button>
+              <p style={{ margin: 0 }} data-testid="home-api-update-up-to-date">
+                {t('folderView.home.apiUpdate.upToDate')}
+              </p>
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button onClick={closeModal} data-testid="home-api-update-ok">
+                  {t('folderView.home.apiUpdate.ok')}
+                </Button>
+              </div>
             </>
           )}
         </div>
-        {state.error && (
-          <p className="api-update-error" data-testid="home-api-update-error">{state.error}</p>
-        )}
-      </div>
+      </Modal>
     </div>
   )
-}
-
-function capitalize<T extends string>(s: T): Capitalize<T> {
-  return (s.charAt(0).toUpperCase() + s.slice(1)) as Capitalize<T>
 }

@@ -1,6 +1,7 @@
 {
   "common": {
-    "opened": "Ouverts"
+    "opened": "Ouverts",
+    "refresh": "Actualiser"
   },
   "file": {
     "untitled": "Sans titre",

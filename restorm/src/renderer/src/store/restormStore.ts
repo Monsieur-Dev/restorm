@@ -11,7 +11,6 @@ import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 import type { EnvironmentFolder, FolderItem, Environment, Request, Folder } from '../../../shared/types/collections'
 import { isAnyFolder, isEnvironmentFolder, isRequest } from '../../../shared/types/collections'
-import { migrateApiUpdateForCollections } from '../../../shared/utils/migrateApiUpdate'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
 
 // ============================================================================
@@ -249,11 +248,6 @@ export const useRestormStore = create<RestormState>()(
     
     // Set collections
     setCollections: (collections, source = 'user') => {
-      // Backfill apiUpdate from legacy apiDocumentation.sourceUrl on
-      // open. Idempotent — only runs on folders that don't already
-      // have apiUpdate, and matches the same backfill the main
-      // process applies to its CollectionStore.
-      migrateApiUpdateForCollections(collections as unknown as Parameters<typeof migrateApiUpdateForCollections>[0])
       set({ collections, currentEventSource: source })
       // Skip the main-side mirror when MCP drove the change — main IS
       // the source in that case (the MCP write tool already mutated

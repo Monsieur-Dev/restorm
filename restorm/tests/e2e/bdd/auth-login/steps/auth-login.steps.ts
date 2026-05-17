@@ -529,16 +529,17 @@ When(
 
 When('I trigger a refresh from source on the imported folder', async () => {
   const p = requirePage()
-  // Open the env folder's right-click menu and click "Refresh from
-  // source". The folder row title carries the spec's `info.title`
-  // — the auth-service spec is "Auth Test Service — Pet API".
+  // Open the env folder's right-click menu and click "Refresh". The
+  // folder row title carries the spec's `info.title` — the auth-
+  // service spec is "Auth Test Service — Pet API".
   const folderRow = sidebarRowByName(p, 'Auth Test Service — Pet API')
   await expect(folderRow).toBeVisible({ timeout: 5000 })
   await folderRow.click({ button: 'right' })
   // The context menu mounts at the document root; pick the entry by
   // its visible label (locale-stable here since the e2e runs against
-  // the en bundle).
-  const menuItem = p.locator('[role="menuitem"]').filter({ hasText: 'Refresh from source' }).first()
+  // the en bundle). Match "Refresh" exactly to avoid colliding with
+  // any other entry that might contain the word.
+  const menuItem = p.locator('[role="menuitem"]').filter({ hasText: /^Refresh$/ }).first()
   await expect(menuItem).toBeVisible({ timeout: 5000 })
   await menuItem.click()
   // Refresh-from-source reuses the ImportModal; the modal stamps

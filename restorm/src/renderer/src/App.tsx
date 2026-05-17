@@ -102,6 +102,7 @@ import { RestormWorkbenchContainer } from './components/MainView/Workbench/Resto
 import { SaveOptionsModal } from './components/Modals/SaveOptionsModal'
 import { DeleteConfirmationModal } from './components/Modals/DeleteConfirmationModal'
 import { ImportModal, type RefreshContext } from './components/Modals/ImportModal'
+import { allLeafKeys } from './components/Modals/importSelectionHelpers'
 import { AvailableVariablesProvider } from './contexts/AvailableVariablesContext'
 import { VariableTransformProvider } from './contexts/VariableTransformContext'
 import { AuthRequestResolverContext, type AuthRequestResolver } from './contexts/authRequestResolverContext'
@@ -125,10 +126,8 @@ import { RequestCreationProvider } from './contexts/RequestCreationContext'
 import { useNavigation } from './hooks/useNavigation'
 import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
 import { useWorkbenchTabs } from './hooks/useWorkbenchTabs'
-import { useApiUpdateNotifications } from './hooks/useApiUpdateNotifications'
 import { useFirewallPromptToasts } from './hooks/useFirewallPromptToasts'
 import { useFirewallProjectOriginsSync } from './hooks/useFirewallProjectOriginsSync'
-import { useApiUpdateStateMap } from './hooks/useApiUpdateStateMap'
 import { useSidebarState } from './hooks/useSidebarState'
 import {
   isFavorite as favoritesStoreIsFavorite,
@@ -244,11 +243,6 @@ const App: React.FC = () => {
       body: t('app.draftsRestoredBody', { count: payload.count })
     })
   })
-
-  // Toast on every transition into the "update available" state.
-  // The settings section already owns the inline state; this is the
-  // out-of-band notification for users not currently on the folder.
-  useApiUpdateNotifications(t)
 
   // Surface every firewall pending-permission prompt as a toast in
   // the global app toaster. The four action buttons (Allow once /
@@ -1377,9 +1371,6 @@ const App: React.FC = () => {
     return () => { window.removeEventListener('restorm:favorites-changed', handler) }
   }, [])
 
-  const apiUpdateStateMap = useApiUpdateStateMap()
-  const hasApiUpdateAvailable = useCallback((id: string): boolean => apiUpdateStateMap[id]?.kind === 'available', [apiUpdateStateMap])
-
   const [refreshSourceTarget, setRefreshSourceTarget] = useState<{ id: string; name: string } | null>(null)
   const canRefreshFromSource = useCallback((id: string): boolean => {
     const folder = rootItems.find((c) => isEnvironmentFolder(c) && c.id === id)
@@ -1392,6 +1383,21 @@ const App: React.FC = () => {
     if (!folder || !('name' in folder)) return
     setRefreshSourceTarget({ id, name: folder.name })
   }, [rootItems])
+
+  // The env-folder home page surfaces a Refresh button that resolves
+  // a mismatch by opening the Import modal in refresh mode. Same code
+  // path as the sidebar context-menu entry above; bridged via a window
+  // event so the section doesn't need a prop wired through the page.
+  useEffect(() => {
+    const handler = (event: Event): void => {
+      const detail = (event as CustomEvent<{ folderId?: string } | null>).detail
+      const folderId = detail?.folderId
+      if (folderId === undefined || folderId.length === 0) return
+      onRefreshFromSource(folderId)
+    }
+    window.addEventListener('restorm:open-import-refresh', handler)
+    return () => { window.removeEventListener('restorm:open-import-refresh', handler) }
+  }, [onRefreshFromSource])
 
   const { favoriteItems, openDocumentItems } = useFavoritesAndOpenItems({
     rootItems,
@@ -1422,8 +1428,7 @@ const App: React.FC = () => {
     isItemFavorite,
     onToggleFavorite: handleToggleFavorite,
     canRefreshFromSource,
-    onRefreshFromSource,
-    hasApiUpdateAvailable
+    onRefreshFromSource
   })
 
   // Wrapper for confirmDelete that uses deleteConfirmation.itemId
@@ -2278,11 +2283,17 @@ const App: React.FC = () => {
               const authReq = (apiUpdate?.authenticationRequestId
                 ? resolveAuthRequestCb(apiUpdate.authenticationRequestId)
                 : null) as RefreshContext['authenticationRequest'] | null
+              // Pre-compute the natural keys of every request already
+              // in the env folder so the modal can lock the matching
+              // leaves in the fetched preview tree. Walks the folder's
+              // top-level items (children of the env-folder root).
+              const existingLeafKeys = folder ? allLeafKeys(folder.items) : new Set<string>()
               const refreshContext: RefreshContext = {
                 sourceUrl,
                 ...(authReq ? { authenticationRequest: authReq } : {}),
                 ...(apiUpdate?.sourceHeaders ? { sourceHeaders: apiUpdate.sourceHeaders } : {}),
                 targetFolderId: targetId,
+                ...(existingLeafKeys.size > 0 ? { existingLeafKeys } : {}),
                 onApplied: (updatedFolder) => {
                   // Splice the apply payload onto the existing env
                   // folder in rootItems: each added request is
@@ -2308,6 +2319,7 @@ const App: React.FC = () => {
                     setRefreshSourceTarget(null)
                     return
                   }
+                  const updatedFolderRef: { value: EnvironmentFolder | null } = { value: null }
                   setRootItems((current) => current.map((item) => {
                     if (!('id' in item) || item.id !== payload.id) return item
                     if (!('items' in item)) return item
@@ -2351,12 +2363,29 @@ const App: React.FC = () => {
                       ),
                       next.items
                     )
-                    return {
+                    const merged = {
                       ...next,
                       items: updated,
                       ...(payload.apiUpdate ? { apiUpdate: payload.apiUpdate } : {})
                     } as typeof item
+                    updatedFolderRef.value = merged as unknown as EnvironmentFolder
+                    return merged
                   }))
+                  // The `setRootItems` callback above swaps the proxied
+                  // folder for a plain spread literal — the proxy's set
+                  // trap never sees an `apiUpdate =` assignment, so even
+                  // though `apiUpdate` is in FOLDER_INDEXABLE_KEYS the
+                  // event doesn't auto-fire here. Emit explicitly so the
+                  // save-unit upsert picks up the refreshed apiUpdate
+                  // (payloadChecksum / lastImportedAt) and writes it to
+                  // disk on the next flush.
+                  if (updatedFolderRef.value) {
+                    eventBus.emitLocalSync(DocumentEvents.FOLDER_UPDATED, {
+                      type: 'folder',
+                      id: payload.id,
+                      document: updatedFolderRef.value
+                    } as DocumentChangedPayload)
+                  }
                   setRefreshSourceTarget(null)
                 }
               }

@@ -33,10 +33,6 @@ export interface FolderToListViewOptions {
    * `useDeprecatedRequestIds`); editing a URL re-evaluates the row
    * instantly. */
   deprecatedRequestIds?: ReadonlySet<string>
-  /** When `true`, the env folder gets an "update available" badge
-   * appended to its title. Drives the sidebar dot the user sees
-   * before opening the folder home. */
-  hasApiUpdateAvailable?: (folderId: string) => boolean
 }
 
 const DEPRECATED_DIM_STYLE: React.CSSProperties = { opacity: 0.5 }
@@ -245,29 +241,9 @@ function environmentFolderToListViewItem(
   const isExpanded = options.expandedIds.has(folder.id)
 
   const children = folder.items.map((item) => folderItemToListViewItem(item, options))
-  const showBadge = options.hasApiUpdateAvailable?.(folder.id) === true
-  const title = showBadge
-    ? React.createElement(
-      React.Fragment,
-      null,
-      folder.name,
-      React.createElement('span', {
-        'data-testid': `sidebar-api-update-badge-${folder.id}`,
-        title: 'Update available',
-        style: {
-          display: 'inline-block',
-          width: '8px',
-          height: '8px',
-          marginLeft: '8px',
-          borderRadius: '50%',
-          background: 'var(--gitDecoration-modifiedResourceForeground, #e2a03f)'
-        }
-      })
-    )
-    : folder.name
   return {
     id: folder.id,
-    title,
+    title: folder.name,
     isExpandable: children.length > 0,
     isExpanded,
     icon: toListViewIcon(folder.icon, 'folder-library'),

@@ -159,7 +159,7 @@ export const buildContextMenuForItem = (
         { id: 'sep-refresh', isSeparator: true, label: '' },
         {
           id: 'refresh-from-source',
-          label: t('sidebar.contextMenu.refreshFromSource'),
+          label: t('common.refresh'),
           icon: 'cloud-download',
           onClick: () => { onRefreshFromSource(itemId) }
         }

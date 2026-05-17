@@ -1046,29 +1046,11 @@ contextBridge.exposeInMainWorld('restorm', {
     }
   },
   apiUpdate: {
-    /** Read the current ApiUpdateState for a single folder. */
-    getState: async (folderId: string): Promise<unknown> => {
-      const result: unknown = await ipcRenderer.invoke('apiUpdate:get-state', folderId)
-      return result
-    },
-    /** One-shot read of every known folder's state. The renderer
-     * uses this on mount to populate badges before the first
-     * push event arrives. */
-    getSnapshot: async (): Promise<Record<string, unknown>> => {
-      const result: unknown = await ipcRenderer.invoke('apiUpdate:get-snapshot')
-      return result as Record<string, unknown>
-    },
-    /** Persist a new ApiUpdateConfig onto the folder. The main
-     * process writes through CollectionStore + the persistence
-     * layer, then re-registers the scheduler so cadence changes
-     * take effect immediately. */
+    /** Persist a partial `ApiUpdateConfig` patch onto the folder.
+     * The main process writes through CollectionStore + the
+     * persistence layer. */
     setSettings: async (folderId: string, config: unknown): Promise<void> => {
       await ipcRenderer.invoke('apiUpdate:set-settings', folderId, config)
-    },
-    /** Force a check ignoring schedule + autoCheckEnabled. Used by
-     * the explicit "Check now" button. */
-    checkNow: async (folderId: string): Promise<void> => {
-      await ipcRenderer.invoke('apiUpdate:check-now', folderId)
     },
     /** Apply the available update against the folder. Resolves
      * once the pipeline has run; rejects on failure so the
@@ -1080,47 +1062,26 @@ contextBridge.exposeInMainWorld('restorm', {
       const result: unknown = await ipcRenderer.invoke('apiUpdate:apply', folderId, selection)
       return result as { updatedFolder: unknown }
     },
-    /** Compute the diff against the current folder content
-     * without mutating it. Used by the "Refresh from source"
-     * confirmation dialog to surface counters before commit. */
-    preview: async (folderId: string): Promise<unknown> => {
-      const result: unknown = await ipcRenderer.invoke('apiUpdate:preview', folderId)
-      return result
-    },
-    /** Resolve the env folder's auth route + fetch the source URL +
-     * run the format adapter, all main-side, and return the parsed
-     * preview tree (same shape as `import.preview`). The refresh
-     * variant of the import modal calls this instead of running
-     * `auth.prefetch` + `import.preview` itself, so `{{var}}`
-     * placeholders inside the saved auth route can be resolved
-     * against the env folder's first environment. The optional
-     * `lockedKeys` array marks leaves whose operation is already
-     * present in the target folder; the modal pre-ticks them and
-     * disables their checkbox so the user can't opt them out. */
-    previewTree: async (folderId: string): Promise<{ success: boolean; items: unknown[]; lockedKeys?: string[]; error?: string }> => {
-      const result: unknown = await ipcRenderer.invoke('apiUpdate:preview-tree', folderId)
-      return result as { success: boolean; items: unknown[]; lockedKeys?: string[]; error?: string }
-    },
-    /** Acknowledge an "available" notification for the rest of the
-     * session. The badge stays; only the toast suppression flips. */
-    dismiss: async (folderId: string): Promise<void> => {
-      await ipcRenderer.invoke('apiUpdate:dismiss', folderId)
-    },
-    /** Subscribe to state transitions for every folder. */
-    onStateChanged: (callback: (data: { folderId: string; state: unknown }) => void): (() => void) => {
-      const handler = (_event: Electron.IpcRendererEvent, data: { folderId: string; state: unknown }): void => {
-        callback(data)
-      }
-      ipcRenderer.on('apiUpdate:state-changed', handler)
-      return () => {
-        ipcRenderer.removeListener('apiUpdate:state-changed', handler)
-      }
+    /** Fetch the folder's source URL with `${VAR}`-expanded headers
+     * and the resolved auth headers, then return a payload checksum
+     * + the raw payload. The renderer's Refresh button compares the
+     * checksum against the stored `apiUpdate.payloadChecksum`:
+     * equal ⇒ "up to date" modal; different (or fetch errored) ⇒
+     * open the Import modal in refresh mode. */
+    refreshFetch: async (folderId: string): Promise<
+      | { ok: true; checksum: string; payload: string; items: unknown[]; format: string | null }
+      | { ok: false; error: string }
+    > => {
+      const result: unknown = await ipcRenderer.invoke('apiUpdate:refresh-fetch', folderId)
+      return result as
+        | { ok: true; checksum: string; payload: string; items: unknown[]; format: string | null }
+        | { ok: false; error: string }
     },
     /** Mirror the renderer's collection tree onto the main-side
-     * CollectionStore. The main-side apply / preview orchestrators
-     * look up folders by id; without this sync they would always
-     * fail with "folder not found". Fire-and-forget; the handler
-     * doesn't return anything. */
+     * CollectionStore. The main-side apply / refresh-fetch
+     * orchestrators look up folders by id; without this sync they
+     * would always fail with "folder not found". Fire-and-forget;
+     * the handler doesn't return anything. */
     syncCollections: async (collections: unknown[]): Promise<void> => {
       await ipcRenderer.invoke('collections:sync', collections)
     }

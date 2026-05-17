@@ -73,7 +73,6 @@
       "rename": "Rename",
       "addToFavorites": "Add to favorites",
       "removeFromFavorites": "Remove from favorites",
-      "refreshFromSource": "Refresh from source",
       "closeTab": "Close",
       "closeOtherTabs": "Close others",
       "closeTabsToTheRight": "Close to the right",
@@ -100,25 +99,6 @@
       "itemMessage": "Are you sure you want to delete \"{{name}}\"?",
       "confirm": "Delete",
       "cancel": "Cancel"
-    },
-    "apiUpdate": {
-      "modalTitle": "Update API: {{name}}",
-      "checking": "Checking for updates…",
-      "applying": "Applying…",
-      "apply": "Apply update",
-      "cancel": "Cancel",
-      "preserveNote": "Your customizations will be preserved.",
-      "summary": {
-        "added": "{{count}} added",
-        "modified": "{{count}} modified",
-        "deprecated": "{{count}} deprecated",
-        "removed": "{{count}} removed",
-        "skipped": "{{count}} skipped",
-        "unchanged": "{{count}} unchanged",
-        "modelsChanged": "{{count}} model(s) changed"
-      },
-      "successToastTitle": "API updated",
-      "successToastBody": "{{added}} added, {{deprecated}} deprecated, {{removed}} removed."
     }
   },
   "environment": {
@@ -146,27 +126,18 @@
       "viewDocsDesc": "Browse the API documentation, models, and endpoints",
       "favoriteRequests": "Favorite requests",
       "removeFavorite": "Remove from favorites",
-      "refresh": "Refresh",
-      "refreshing": "Refreshing...",
       "apiUpdate": {
         "title": "API spec updates",
-        "autoCheckLabel": "Check for spec updates automatically",
-        "intervalLabel": "Interval",
-        "intervalHourly": "Hourly",
-        "intervalEvery6h": "Every 6 hours",
-        "intervalDaily": "Daily",
-        "intervalWeekly": "Weekly",
-        "intervalNever": "Never",
-        "checkNow": "Check now",
-        "checkInProgress": "Checking…",
-        "lastCheckedAt": "Last checked: {{time}}",
+        "noConfig": "This folder was not created from an importable source.",
+        "urlLabel": "URL",
+        "lastImportedLabel": "Last imported",
+        "lastCheckedLabel": "Last checked",
+        "neverImported": "Never imported",
         "neverChecked": "Never checked",
-        "stateIdle": "Up to date",
-        "stateAvailable": "Update available",
-        "stateError": "Last check failed",
-        "applyUpdate": "Apply update",
-        "dismiss": "Dismiss",
-        "noConfig": "This folder was not created from an importable source."
+        "refreshing": "Refreshing API spec…",
+        "fetching": "Fetching…",
+        "upToDate": "API spec is up to date.",
+        "ok": "OK"
       }
     },
     "docs": {

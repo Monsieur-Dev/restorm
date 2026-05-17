@@ -73,7 +73,6 @@
       "rename": "Renommer",
       "addToFavorites": "Ajouter aux favoris",
       "removeFromFavorites": "Retirer des favoris",
-      "refreshFromSource": "Rafraîchir depuis la source",
       "closeTab": "Fermer",
       "closeOtherTabs": "Fermer les autres",
       "closeTabsToTheRight": "Fermer à droite",
@@ -100,25 +99,6 @@
       "itemMessage": "Êtes-vous sûr de vouloir supprimer \"{{name}}\" ?",
       "confirm": "Supprimer",
       "cancel": "Annuler"
-    },
-    "apiUpdate": {
-      "modalTitle": "Mettre à jour l'API : {{name}}",
-      "checking": "Vérification des mises à jour…",
-      "applying": "Application…",
-      "apply": "Appliquer la mise à jour",
-      "cancel": "Annuler",
-      "preserveNote": "Vos personnalisations seront préservées.",
-      "summary": {
-        "added": "{{count}} ajouté(s)",
-        "modified": "{{count}} modifié(s)",
-        "deprecated": "{{count}} obsolète(s)",
-        "removed": "{{count}} retiré(s)",
-        "skipped": "{{count}} ignoré(s)",
-        "unchanged": "{{count}} inchangé(s)",
-        "modelsChanged": "{{count}} modèle(s) modifié(s)"
-      },
-      "successToastTitle": "API mise à jour",
-      "successToastBody": "{{added}} ajout(s), {{deprecated}} obsolète(s), {{removed}} retiré(s)."
     }
   },
   "environment": {
@@ -146,27 +126,18 @@
       "viewDocsDesc": "Parcourez la documentation de l'API, les modèles et les endpoints",
       "favoriteRequests": "Requêtes favorites",
       "removeFavorite": "Retirer des favoris",
-      "refresh": "Rafraîchir",
-      "refreshing": "Actualisation...",
       "apiUpdate": {
         "title": "Mises à jour de la spec",
-        "autoCheckLabel": "Vérifier automatiquement les mises à jour",
-        "intervalLabel": "Intervalle",
-        "intervalHourly": "Toutes les heures",
-        "intervalEvery6h": "Toutes les 6 heures",
-        "intervalDaily": "Quotidien",
-        "intervalWeekly": "Hebdomadaire",
-        "intervalNever": "Jamais",
-        "checkNow": "Vérifier maintenant",
-        "checkInProgress": "Vérification…",
-        "lastCheckedAt": "Dernière vérification : {{time}}",
+        "noConfig": "Ce dossier n'a pas été créé depuis une source importable.",
+        "urlLabel": "URL",
+        "lastImportedLabel": "Dernier import",
+        "lastCheckedLabel": "Dernière vérification",
+        "neverImported": "Jamais importé",
         "neverChecked": "Jamais vérifié",
-        "stateIdle": "À jour",
-        "stateAvailable": "Mise à jour disponible",
-        "stateError": "Échec de la dernière vérification",
-        "applyUpdate": "Appliquer la mise à jour",
-        "dismiss": "Ignorer",
-        "noConfig": "Ce dossier n'a pas été créé depuis une source importable."
+        "refreshing": "Actualisation de la spec…",
+        "fetching": "Récupération…",
+        "upToDate": "La spec de l'API est à jour.",
+        "ok": "OK"
       }
     },
     "docs": {

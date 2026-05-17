@@ -155,16 +155,40 @@ export function registerImportTools(mcp: McpService): void {
         return jsonReply({ url, format: result.format ?? null, imported: { folders: 0, requests: 0 }, items: [] })
       }
 
+      // Stamp every freshly-imported env folder with the same
+      // `apiUpdate` payload the UI's Import modal writes — sourceUrl
+      // + lastImportedAt + payloadChecksum. Without this the env
+      // folder's Home tab shows an empty "API spec updates" section
+      // and the Refresh button has nothing to compare against, so an
+      // MCP-driven import lands a folder the user can never refresh
+      // through the UI. The checksum already comes from `importFrom`,
+      // so this is a pure copy-onto-folder step.
+      const stampApiUpdate = (envFolder: EnvironmentFolder): void => {
+        const existing = (envFolder as unknown as { apiUpdate?: Record<string, unknown> }).apiUpdate ?? {}
+        ;(envFolder as unknown as { apiUpdate?: Record<string, unknown> }).apiUpdate = {
+          sourceUrl: url,
+          lastImportedAt: Date.now(),
+          ...existing,
+          ...(result.payloadChecksum !== undefined ? { payloadChecksum: result.payloadChecksum } : {})
+        }
+      }
+
       const summaries: { id: string; name: string; kind: 'folder' | 'env-folder' | 'request' }[] = []
       const counts = { folders: 0, requests: 0 }
       for (const item of result.items) {
         if (parent !== null && isAnyFolder(parent)) {
+          // Importing under an existing folder: stamp every imported
+          // env folder so it carries the refresh config. A bare
+          // request / folder nested under an existing parent has no
+          // env folder of its own — the parent already owns one.
+          if (isEnvironmentFolder(item)) stampApiUpdate(item)
           parent.items.push(item)
         } else {
           // Root-level: every imported item must be an env-folder when
           // no parent is given (the renderer's tree expects EnvironmentFolder
           // at the top). Wrap a bare folder / request if necessary.
           if (isEnvironmentFolder(item)) {
+            stampApiUpdate(item)
             const collections = collectionStore.getCollections()
             collections.push(item)
           } else {
@@ -178,6 +202,7 @@ export function registerImportTools(mcp: McpService): void {
               items: [item],
               environments: []
             } as unknown as EnvironmentFolder
+            stampApiUpdate(wrapper)
             collectionStore.getCollections().push(wrapper)
           }
         }

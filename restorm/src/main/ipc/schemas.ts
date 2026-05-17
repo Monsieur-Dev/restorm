@@ -306,32 +306,27 @@ export const findStopArgs = z.tuple([
 ])
 
 // ==========================================================================
-// API Update (per-folder periodic spec re-check)
+// API Update (per-folder on-demand spec re-import)
 // ==========================================================================
 
 // `apiUpdate:set-settings` is a PATCH operation — the IPC handler
 // passes the payload straight to `updateFolderConfig` which spreads
 // it into the existing `apiUpdate` config. Every field is optional
-// so partial patches (e.g. `{ sourceHeaders }` from the
-// refresh-from-source flow, or just `{ autoCheckEnabled: true }`
-// from the settings toggle) are accepted without forcing the
-// caller to read the whole config first.
+// so partial patches (e.g. `{ sourceHeaders }` from the Refresh
+// flow, or `{ lastCheckedAt }` after a checksum check) are accepted
+// without forcing the caller to read the whole config first.
 const apiUpdateConfigSchema = z.object({
   sourceUrl: z.string().optional(),
   sourceHeaders: z.record(z.string(), z.string()).optional(),
-  autoCheckEnabled: z.boolean().optional(),
-  interval: z.enum(['hourly', 'every6h', 'daily', 'weekly', 'never']).optional(),
   lastCheckedAt: z.number().optional(),
-  lastImportedSpecVersion: z.string().optional(),
-  lastImportedSpecHash: z.string().optional()
+  lastImportedAt: z.number().optional(),
+  payloadChecksum: z.string().optional(),
+  authenticationRequestId: z.string().optional()
 })
 
 const folderIdArg = z.string()
 
-export const apiUpdateGetStateArgs = z.tuple([folderIdArg])
-export const apiUpdateGetSnapshotArgs = z.tuple([])
 export const apiUpdateSetSettingsArgs = z.tuple([folderIdArg, apiUpdateConfigSchema])
-export const apiUpdateCheckNowArgs = z.tuple([folderIdArg])
 export const apiUpdateApplyArgs = z.tuple([
   folderIdArg,
   z.object({
@@ -339,9 +334,7 @@ export const apiUpdateApplyArgs = z.tuple([
     skip: z.array(z.string())
   }).optional()
 ])
-export const apiUpdateDismissArgs = z.tuple([folderIdArg])
-export const apiUpdatePreviewArgs = z.tuple([folderIdArg])
-export const apiUpdatePreviewTreeArgs = z.tuple([folderIdArg])
+export const apiUpdateRefreshFetchArgs = z.tuple([folderIdArg])
 
 /** Renderer → main sync of the loaded collections so main-side
  * services (apiUpdate apply / preview) can resolve folder ids

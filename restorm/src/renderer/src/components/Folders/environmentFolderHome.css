@@ -118,21 +118,6 @@
   opacity: 0.5;
 }
 
-/* ── Source URL ── */
-
-.home-source-url {
-  margin-bottom: 32px;
-}
-
-.home-source-url .ecu-control-group {
-  width: 100%;
-}
-
-.home-source-url .ecu-control-group > *:first-child {
-  flex: 1;
-  min-width: 0;
-}
-
 /* ── Section ── */
 
 .home-section {

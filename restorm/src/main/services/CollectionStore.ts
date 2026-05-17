@@ -7,8 +7,6 @@
 
 import { eventBusService, logger, createPubSub, serializeWithDecorators } from 'electron-core-ui/main'
 import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from './DocumentEvents'
-import { migrateApiUpdateForCollections } from '../../shared/utils/migrateApiUpdate'
-import { registerSchedulerFolders } from './apiUpdate/registerFolders'
 import {
   Folder,
   EnvironmentFolder,
@@ -126,24 +124,6 @@ class CollectionStore {
   setCollections(collections: Collection[], source: 'file-load' | 'user' = 'file-load'): void {
     // Convert plain objects to class instances if needed
     this.collections = collections.map(c => this.ensureEnvironmentFolderInstance(c))
-    // Backfill `apiUpdate` from the legacy `apiDocumentation.sourceUrl`
-    // marker for env folders saved before the field existed. Pure +
-    // idempotent, so running it again on a project that's already
-    // migrated is a no-op.
-    migrateApiUpdateForCollections(this.collections)
-    // Refresh the scheduler's view of which folders are due for an
-    // auto-check. The scheduler owns no persistence — its view is
-    // re-derived from the loaded collections every time the user
-    // opens a project.
-    registerSchedulerFolders({
-      collections: this.collections,
-      persistConfig: (folderId, patch) => {
-        const target = this.findById(folderId)
-        if (!target || !('folderType' in target)) return
-        const env = target as unknown as { apiUpdate?: Record<string, unknown> }
-        env.apiUpdate = { ...(env.apiUpdate ?? {}), ...patch }
-      }
-    })
     logger.info('[CollectionStore] Collections set', { count: collections.length, source })
   }
 
