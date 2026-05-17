@@ -66,6 +66,7 @@ import { toasterService } from 'electron-core-ui/renderer'
 // seeing a new `[]` on every render.
 const EMPTY_VARIABLES: VariableDefinition[] = []
 import { buildAuthPrefetchPayload } from '../Modals/authPrefetchPayload'
+import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 
 const METHODS: HTTPMethod[] = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']
 type BodyMode = 'text' | 'form-data' | 'x-www-form-urlencoded' | 'file'
@@ -645,13 +646,15 @@ export const LocalAuthenticationRequestForm: React.FC<LocalAuthenticationRequest
           data-testid="local-auth-form-cancel-button"
         />
       ) : (
-        <Button
-          icon="send"
-          emphasis={1}
-          onClick={() => { void handleSend() }}
-          options={{ title: t('requestTab.send', 'Send'), ariaLabel: t('requestTab.send', 'Send') }}
-          data-testid="local-auth-form-send-button"
-        />
+        <SendButtonEnvSwitcher>
+          <Button
+            icon="send"
+            emphasis={1}
+            onClick={() => { void handleSend() }}
+            options={{ title: t('requestTab.send', 'Send'), ariaLabel: t('requestTab.send', 'Send') }}
+            data-testid="local-auth-form-send-button"
+          />
+        </SendButtonEnvSwitcher>
       )}
     </ControlGroup>
     </div>

@@ -79,6 +79,7 @@ import {
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
+import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 
 const urlRowStyle: CSSProperties = { display: 'flex', gap: 8, alignItems: 'center' }
 const urlInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0 }
@@ -782,18 +783,20 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         />
       </div>
       <div style={sendButtonWrapperStyle}>
-        <Button
-          disabled={isSending}
-          icon="play"
-          onClick={handleSend}
-          options={{
-            ariaLabel: t('odataRequestTab.send', 'Send'),
-            title: t('odataRequestTab.send', 'Send')
-          }}
-          data-testid="odata-request-send"
-        >
-          {t('odataRequestTab.send', 'Send')}
-        </Button>
+        <SendButtonEnvSwitcher>
+          <Button
+            disabled={isSending}
+            icon="play"
+            onClick={handleSend}
+            options={{
+              ariaLabel: t('odataRequestTab.send', 'Send'),
+              title: t('odataRequestTab.send', 'Send')
+            }}
+            data-testid="odata-request-send"
+          >
+            {t('odataRequestTab.send', 'Send')}
+          </Button>
+        </SendButtonEnvSwitcher>
       </div>
     </div>
     </div>

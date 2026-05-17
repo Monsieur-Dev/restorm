@@ -38,6 +38,17 @@ export interface EnvironmentProviderProps {
    * purposes but nothing is persisted.
    */
   persistenceKey?: EnvironmentPersistenceKey | undefined
+  /**
+   * Every request id under the env folder this provider serves —
+   * including the request the provider was instantiated for.
+   * Exposed through the context (`folderRequestIds`) so popover
+   * hosts (statusbar env selector + Send-button right-click) can
+   * run sibling-override cleanup when the user picks an env with
+   * "Apply to all" on. Optional: providers that can't enumerate
+   * sibling ids (folder tabs, in-memory-only mode) simply leave
+   * the cleanup branch disabled.
+   */
+  folderRequestIds?: string[] | undefined
   children: React.ReactNode
 }
 
@@ -87,6 +98,7 @@ export const EnvironmentProvider: React.FC<EnvironmentProviderProps> = ({
   environments,
   tagColors,
   persistenceKey,
+  folderRequestIds,
   children
 }) => {
   // Sync first-paint selection: use whatever the session caches know
@@ -235,10 +247,12 @@ export const EnvironmentProvider: React.FC<EnvironmentProviderProps> = ({
       selectedEnvId,
       tagColors,
       envColor,
+      projectUuid: persistenceKey?.projectUuid,
+      folderRequestIds,
       setFolderEnv,
       setRequestOverride
     }),
-    [environments, selectedEnvId, tagColors, envColor, setFolderEnv, setRequestOverride]
+    [environments, selectedEnvId, tagColors, envColor, persistenceKey?.projectUuid, folderRequestIds, setFolderEnv, setRequestOverride]
   )
 
   return <EnvironmentContext.Provider value={value}>{children}</EnvironmentContext.Provider>

@@ -30,6 +30,7 @@ import { DocumentationHost } from '../documentation/DocumentationHost'
 import { findOperationForRoute } from '../../../../shared/utils/findOperationForRoute'
 import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
 import { CurlPasteCallout } from '../CurlPasteCallout'
+import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { toasterService } from 'electron-core-ui/renderer'
 
 export interface SoapRequestTabViewProps {
@@ -431,16 +432,18 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
             data-testid="soap-url-input"
           />
         </div>
-        <Button
-          icon={isSending ? 'close' : 'send'}
-          onClick={isSending ? handleCancel : handleSend}
-          {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-          options={{
-            title: isSending ? t('cancel') : t('soap.send'),
-            ariaLabel: isSending ? t('cancel') : t('soap.send')
-          }}
-          data-testid="soap-request-action-button"
-        />
+        <SendButtonEnvSwitcher>
+          <Button
+            icon={isSending ? 'close' : 'send'}
+            onClick={isSending ? handleCancel : handleSend}
+            {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+            options={{
+              title: isSending ? t('cancel') : t('soap.send'),
+              ariaLabel: isSending ? t('cancel') : t('soap.send')
+            }}
+            data-testid="soap-request-action-button"
+          />
+        </SendButtonEnvSwitcher>
       </ControlGroup>
       <div style={{ fontSize: 12, color: 'var(--descriptionForeground)' }}>
         {request.service}/{request.operation} • SOAPAction: {request.soapAction}

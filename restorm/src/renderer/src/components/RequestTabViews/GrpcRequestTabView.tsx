@@ -28,6 +28,7 @@ import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabView
 import { useApiDocumentationFromRequest } from '../../hooks/useApiDocumentationFromRequest'
 import { DocumentationHost } from '../documentation/DocumentationHost'
 import { findOperationForRoute } from '../../../../shared/utils/findOperationForRoute'
+import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 
 export interface GrpcRequestTabViewProps {
   request: GrpcRequest
@@ -404,16 +405,18 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
             data-testid="grpc-url-input"
           />
         </div>
-        <Button
-          icon={isSending ? 'close' : 'send'}
-          onClick={isSending ? handleCancel : handleSend}
-          {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-          options={{
-            title: isSending ? t('cancel') : t('grpc.send'),
-            ariaLabel: isSending ? t('cancel') : t('grpc.send')
-          }}
-          data-testid="grpc-send-button"
-        />
+        <SendButtonEnvSwitcher>
+          <Button
+            icon={isSending ? 'close' : 'send'}
+            onClick={isSending ? handleCancel : handleSend}
+            {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+            options={{
+              title: isSending ? t('cancel') : t('grpc.send'),
+              ariaLabel: isSending ? t('cancel') : t('grpc.send')
+            }}
+            data-testid="grpc-send-button"
+          />
+        </SendButtonEnvSwitcher>
       </ControlGroup>
       <div style={{ fontSize: 12, color: 'var(--descriptionForeground)' }}>
         {request.service}/{request.method}

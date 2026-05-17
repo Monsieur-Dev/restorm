@@ -42,6 +42,7 @@ import { DocumentationHost } from '../documentation/DocumentationHost'
 import { findOperationForRoute } from '../../../../shared/utils/findOperationForRoute'
 import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
 import { CurlPasteCallout } from '../CurlPasteCallout'
+import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { toasterService } from 'electron-core-ui/renderer'
 
 const methodSelectWrapperStyle: CSSProperties = { width: 90, flexShrink: 0 }
@@ -990,13 +991,15 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           data-testid="http-request-cancel-button"
         />
       ) : (
-        <Button
-          icon="send"
-          onClick={handleSend}
-          {...(sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-          options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}
-          data-testid="http-request-send-button"
-        />
+        <SendButtonEnvSwitcher>
+          <Button
+            icon="send"
+            onClick={handleSend}
+            {...(sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+            options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}
+            data-testid="http-request-send-button"
+          />
+        </SendButtonEnvSwitcher>
       )}
     </ControlGroup>
     </div>

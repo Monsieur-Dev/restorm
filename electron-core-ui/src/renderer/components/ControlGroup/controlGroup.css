@@ -16,6 +16,45 @@
 
 .ecu-control-group--horizontal {
 	flex-direction: row;
+
+	/*
+	 * Pin the strip to ECUI's standard control height (28px is the
+	 * de-facto value baked into `.text-button`, `.inputbox`,
+	 * `.multi-select-combo`, `.icon-select`, `.date-time-picker`,
+	 * etc.). Without this, the row's height is `max(children
+	 * intrinsic heights)` — and font-metric rounding on the
+	 * codicon-only Button (≈28.2px intrinsic) inflates the row past
+	 * the InputBox (locked to 28px via `box-sizing: border-box`),
+	 * which can't follow back up. The bottom of the button then
+	 * snaps 1 device pixel past the input's bottom, visible as a
+	 * misalignment. Forcing the row itself to 28px makes the height
+	 * source-of-truth the *ControlGroup*, not the tallest child —
+	 * matching the user's mental model. Only horizontal CG carries
+	 * this rule: vertical CG legitimately stacks children of
+	 * different heights.
+	 */
+	height: 28px;
+}
+
+/*
+ * Force every interactive bordered control found inside the strip
+ * to follow the strip's height — even when it's a grandchild of CG
+ * (e.g. SelectBox wraps `.select-box` in an unstyled `<div>`, and
+ * the wrapper sits flush at 28px but the inner `.select-box` has
+ * no `height` set so it falls back to its font-metric intrinsic
+ * (~28.2px) and pokes 0.2px past the strip's bottom edge). Naming
+ * the classes one-by-one is intentional: only widgets that
+ * actually paint a bordered chip need to match the strip's
+ * dimensions — wrappers carrying icons, badges or non-bordered
+ * decorations should be left alone.
+ */
+.ecu-control-group--horizontal .select-container,
+.ecu-control-group--horizontal .select-box,
+.ecu-control-group--horizontal .inputbox,
+.ecu-control-group--horizontal .text-button,
+.ecu-control-group--horizontal .custom-trigger {
+	height: 100%;
+	box-sizing: border-box;
 }
 
 .ecu-control-group--horizontal > * {

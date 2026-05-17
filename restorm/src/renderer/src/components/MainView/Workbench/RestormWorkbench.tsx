@@ -745,13 +745,31 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       return { projectUuid, envFolderId, requestId }
     }
 
+    // Flatten every request id under this env folder. Surfaced through
+    // the context so popover hosts (statusbar env selector +
+    // Send-button right-click) can wipe stale per-request overrides on
+    // siblings when the user picks an env with "Apply to all" on.
+    interface FolderWalkNode { readonly type?: string; readonly id: string; readonly items?: readonly FolderWalkNode[] }
+    const envFolderRequestIds: string[] | undefined = (() => {
+      if (!reactiveEnvFolder) return undefined
+      const ids: string[] = []
+      const walk = (items: readonly FolderWalkNode[]): void => {
+        for (const it of items) {
+          if (it.type === 'request') ids.push(it.id)
+          else if (it.items) walk(it.items)
+        }
+      }
+      walk((reactiveEnvFolder as unknown as { items: readonly FolderWalkNode[] }).items)
+      return ids
+    })()
+
     // HTTP request tab
     if (isHTTPRequestTab(effectiveTab)) {
       // Get reactive request if available, otherwise use tab's copy
       const reactiveRequest = getRequestById?.(effectiveTab.request.id)
       const request = (reactiveRequest?.type === 'http') ? reactiveRequest : effectiveTab.request
       return (
-        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
+        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <DeprecationAwareRequestTab
             request={request}
             breadcrumbs={breadcrumbs}
@@ -782,7 +800,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isGraphQLRequestTab(effectiveTab)) {
       const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
+        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -812,7 +830,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isGrpcRequestTab(effectiveTab)) {
       const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
+        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -842,7 +860,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isSoapRequestTab(effectiveTab)) {
       const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
+        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -872,7 +890,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isWebSocketRequestTab(effectiveTab)) {
       const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
+        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -902,7 +920,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isODataRequestTab(effectiveTab)) {
       const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
+        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -929,7 +947,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isAuthenticationRequestTab(effectiveTab)) {
       const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
+        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}

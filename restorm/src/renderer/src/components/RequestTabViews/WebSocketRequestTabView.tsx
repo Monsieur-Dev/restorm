@@ -30,6 +30,7 @@ import { useApiDocumentationFromRequest } from '../../hooks/useApiDocumentationF
 import { DocumentationHost } from '../documentation/DocumentationHost'
 import { findOperationForRoute } from '../../../../shared/utils/findOperationForRoute'
 import { DEFAULT_WS_TIMEOUT_MS } from '../../../../shared/config/constants'
+import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 
 export interface WebSocketRequestTabViewProps {
   request: WebSocketRequest
@@ -441,16 +442,18 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           data-testid="websocket-url-input"
         />
       </div>
-      <Button
-        icon={isSending ? 'debug-disconnect' : 'plug'}
-        onClick={isSending ? handleDisconnect : handleSend}
-        {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-        options={{
-          title: isSending ? t('websocket.disconnect') : t('websocket.connect'),
-          ariaLabel: isSending ? t('websocket.disconnect') : t('websocket.connect')
-        }}
-        data-testid="websocket-connect-button"
-      />
+      <SendButtonEnvSwitcher>
+        <Button
+          icon={isSending ? 'debug-disconnect' : 'plug'}
+          onClick={isSending ? handleDisconnect : handleSend}
+          {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+          options={{
+            title: isSending ? t('websocket.disconnect') : t('websocket.connect'),
+            ariaLabel: isSending ? t('websocket.disconnect') : t('websocket.connect')
+          }}
+          data-testid="websocket-connect-button"
+        />
+      </SendButtonEnvSwitcher>
     </ControlGroup>
   )
   
