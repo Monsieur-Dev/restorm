@@ -1,0 +1,327 @@
+{
+  "common": {
+    "opened": "Geöffnet",
+    "refresh": "Aktualisieren"
+  },
+  "file": {
+    "untitled": "Unbenannt",
+    "unsavedChanges": {
+      "title": "Nicht gespeicherte Änderungen",
+      "message": "Möchten Sie die Änderungen an „{{fileName}}“ speichern?",
+      "detail": "Ihre Änderungen gehen verloren, wenn Sie sie nicht speichern.",
+      "save": "Speichern",
+      "dontSave": "Nicht speichern",
+      "cancel": "Abbrechen"
+    }
+  },
+  "recentFilesVignette": {
+    "favorites": "Favoriten",
+    "recentFiles": "Zuletzt verwendete Dateien",
+    "addToFavorites": "Zu Favoriten hinzufügen",
+    "removeFromFavorites": "Aus Favoriten entfernen",
+    "confirmRemoveFavorite": "Möchten Sie „{{fileName}}“ wirklich aus den Favoriten entfernen?",
+    "favoritesLandmarkLabel": "Favoritenliste",
+    "recentsLandmarkLabel": "Liste der zuletzt verwendeten Dateien"
+  },
+  "welcomeScreen": {
+    "landmarkLabel": "Willkommen"
+  },
+  "menuBar": {
+    "new": "Neu",
+    "open": "Öffnen",
+    "edit": "Bearbeiten",
+    "view": "Ansicht",
+    "help": "Hilfe",
+    "undo": "Rückgängig",
+    "redo": "Wiederherstellen",
+    "cut": "Ausschneiden",
+    "copy": "Kopieren",
+    "paste": "Einfügen",
+    "find": "Suchen",
+    "replace": "Ersetzen",
+    "toggleSidebar": "Seitenleiste ein-/ausblenden",
+    "toggleResponsePanel": "Antwortbereich ein-/ausblenden",
+    "zoomIn": "Vergrößern",
+    "zoomOut": "Verkleinern",
+    "resetZoom": "Zoom zurücksetzen",
+    "settings": "Einstellungen",
+    "toggleDevTools": "Entwicklertools",
+    "toggleFullscreen": "Vollbild",
+    "about": "Über",
+    "documentation": "Dokumentation",
+    "keyboardShortcuts": "Tastenkürzel",
+    "releaseNotes": "Versionshinweise",
+    "reportIssue": "Problem melden"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "theme": "Design",
+    "language": "Sprache",
+    "searchPlaceholder": "Einstellungen durchsuchen...",
+    "noResults": "Keine Einstellungen gefunden.",
+    "numberOutOfRange": "Der Wert muss zwischen {{min}} und {{max}} liegen.",
+    "resetSetting": "Einstellung zurücksetzen",
+    "copySettingId": "Einstellungs-ID kopieren",
+    "settingOptions": "Optionen der Einstellung",
+    "scopeTabsLabel": "Geltungsbereich der Einstellungen",
+    "userOnlyHidden": "{{count}} nur für den Benutzer geltende Einstellung(en) auf diesem Tab ausgeblendet.",
+    "scope": {
+      "user": "Benutzer",
+      "workspace": "Arbeitsbereich",
+      "workspaceDisabledTooltip": "Öffnen Sie ein Projekt, um die Arbeitsbereich-Einstellungen zu bearbeiten"
+    },
+    "appearance": {
+      "title": "Darstellung",
+      "theme": {
+        "title": "Design",
+        "description": "Wählen Sie das Farbschema der Anwendung"
+      },
+      "language": {
+        "title": "Sprache",
+        "description": "Wählen Sie die Sprache der Anwendung",
+        "en": "English",
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "pt": "Português",
+        "nl": "Nederlands",
+        "sv": "Svenska",
+        "da": "Dansk",
+        "nb": "Norsk bokmål",
+        "fi": "Suomi",
+        "pl": "Polski",
+        "cs": "Čeština",
+        "hu": "Magyar",
+        "ro": "Română",
+        "el": "Ελληνικά",
+        "uk": "Українська",
+        "hr": "Hrvatski",
+        "sr": "Srpski",
+        "sq": "Shqip",
+        "tr": "Türkçe",
+        "id": "Bahasa Indonesia",
+        "vi": "Tiếng Việt",
+        "ja": "日本語",
+        "ko": "한국어",
+        "zh-CN": "简体中文",
+        "zh-TW": "繁體中文"
+      },
+      "advancedVisualEffects": {
+        "title": "Erweiterte visuelle Effekte",
+        "description": "Aktiviert erweiterte visuelle Effekte wie Hintergrundunschärfe bei Overlays und CSS-Animationen. Deaktivieren Sie sie für bessere Leistung auf schwächerer Hardware."
+      },
+      "editor": {
+        "title": "Editor",
+        "fontSize": {
+          "title": "Schriftgröße",
+          "description": "Bestimmt die Schriftgröße des Code-Editors in Pixeln"
+        },
+        "fontFamily": {
+          "title": "Schriftart",
+          "description": "Bestimmt die Schriftart des Code-Editors"
+        },
+        "wordWrap": {
+          "title": "Zeilenumbruch",
+          "description": "Bestimmt, ob Zeilen im Code-Editor umgebrochen werden"
+        },
+        "minimap": {
+          "title": "Minimap",
+          "description": "Bestimmt, ob die Minimap im Code-Editor angezeigt wird"
+        },
+        "lineNumbers": {
+          "title": "Zeilennummern",
+          "description": "Bestimmt, ob Zeilennummern im Code-Editor angezeigt werden"
+        }
+      }
+    },
+    "files": {
+      "title": "Dateien",
+      "autoSave": {
+        "title": "Automatisches Speichern",
+        "description": "Steuert das automatische Speichern geänderter Editoren. Weitere Informationen finden Sie in der Dokumentation.",
+        "off": "Aus",
+        "afterDelay": "Nach Verzögerung",
+        "onWindowChange": "Bei Fensterwechsel"
+      },
+      "autoSaveDelay": {
+        "title": "Verzögerung für automatisches Speichern",
+        "description": "Bestimmt die Verzögerung in Millisekunden, nach der ein geänderter Editor automatisch gespeichert wird. Gilt nur, wenn das automatische Speichern auf „Nach Verzögerung“ eingestellt ist."
+      }
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Zur Definition springen"
+  },
+  "tagsView": {
+    "removeTag": "Tag entfernen",
+    "newTag": "Neues Tag"
+  },
+  "contextMenu": {
+    "cut": "Ausschneiden",
+    "copy": "Kopieren",
+    "paste": "Einfügen"
+  },
+  "search": {
+    "placeholder": "Suchen...",
+    "noResults": "Keine Ergebnisse gefunden",
+    "resultsAriaLabel": "Suchergebnisse",
+    "categories": {
+      "request": "HTTP-Anfragen",
+      "folder": "Ordner",
+      "environment": "Umgebungen",
+      "settings": "Einstellungen",
+      "tag": "Tags"
+    }
+  },
+  "iconSelect": {
+    "searchEmojis": "Emojis suchen...",
+    "noEmojisFound": "Keine Emojis gefunden",
+    "searchCodicons": "Codicons suchen...",
+    "searchIconoir": "Iconoir durchsuchen...",
+    "searchPhosphor": "Phosphor durchsuchen...",
+    "searchMaterial": "Material durchsuchen...",
+    "searchSimpleIcons": "Simple Icons durchsuchen...",
+    "searchFeather": "Feather durchsuchen...",
+    "searchFontAwesome": "Font Awesome durchsuchen...",
+    "moreIcons": "+{{count}} weitere Symbole. Verwenden Sie die Suche, um bestimmte Symbole zu finden.",
+    "more": "+{{count}} weitere. Verwenden Sie die Suche, um bestimmte Symbole zu finden.",
+    "noIconsFound": "Keine Symbole gefunden",
+    "searchResults": "Suchergebnisse",
+    "categories": {
+      "files": "Dateien",
+      "git": "Git",
+      "debug": "Debugging",
+      "symbols": "Symbole",
+      "arrows": "Pfeile",
+      "ui": "Oberfläche",
+      "media": "Medien",
+      "editing": "Bearbeitung",
+      "terminal": "Terminal",
+      "people": "Personen",
+      "notifications": "Benachrichtigungen",
+      "brands": "Marken",
+      "communication": "Kommunikation",
+      "users": "Benutzer",
+      "business": "Wirtschaft",
+      "medical": "Medizin",
+      "transport": "Transport",
+      "weather": "Wetter",
+      "shapes": "Formen",
+      "design": "Design",
+      "devices": "Geräte",
+      "buildings": "Gebäude",
+      "nature": "Natur",
+      "food": "Essen",
+      "sport": "Sport",
+      "sports": "Sportarten",
+      "animals": "Tiere",
+      "tools": "Werkzeuge"
+    },
+    "emojiCategories": {
+      "people": "Smileys & Personen",
+      "nature": "Tiere & Natur",
+      "food": "Essen & Trinken",
+      "activity": "Aktivitäten",
+      "travel": "Reisen & Orte",
+      "objects": "Objekte",
+      "symbols": "Symbole",
+      "flags": "Flaggen"
+    }
+  },
+  "dateTimePicker": {
+    "ariaLabel": "Datum/Uhrzeit-Auswahl",
+    "openCalendar": "Kalender öffnen",
+    "previousYear": "Vorheriges Jahr",
+    "nextYear": "Nächstes Jahr",
+    "previousMonth": "Vorheriger Monat",
+    "nextMonth": "Nächster Monat",
+    "selectMonth": "Monat auswählen",
+    "selectYear": "Jahr auswählen",
+    "includeTime": "Uhrzeit einbeziehen",
+    "hours": "Stunden",
+    "minutes": "Minuten",
+    "output": "Ausgabe",
+    "pattern": "Muster",
+    "outputModes": {
+      "pattern": "Muster",
+      "unix": "Unix (s)",
+      "epoch": "Epoch (ms)",
+      "iso": "ISO 8601"
+    },
+    "preview": "Vorschau",
+    "tokens": {
+      "S": "Millisekunde, ohne Auffüllen",
+      "SSS": "Millisekunde, auf 3 aufgefüllt",
+      "u": "Sekundenbruchteile, funktionsgleich mit SSS",
+      "uu": "Sekundenbruchteile, zwischen 0 und 99, auf 2 aufgefüllt",
+      "uuu": "Sekundenbruchteile, zwischen 0 und 9",
+      "s": "Sekunde, ohne Auffüllen",
+      "ss": "Sekunde, auf 2 aufgefüllt",
+      "m": "Minute, ohne Auffüllen",
+      "mm": "Minute, auf 2 aufgefüllt",
+      "h": "Stunde im 12-Stunden-Format, ohne Auffüllen",
+      "hh": "Stunde im 12-Stunden-Format, auf 2 aufgefüllt",
+      "H": "Stunde im 24-Stunden-Format, ohne Auffüllen",
+      "HH": "Stunde im 24-Stunden-Format, auf 2 aufgefüllt",
+      "Z": "schmaler Offset",
+      "ZZ": "kurzer Offset",
+      "ZZZ": "technischer Offset",
+      "ZZZZ": "abgekürzter benannter Offset",
+      "ZZZZZ": "vollständig benannter Offset",
+      "z": "IANA-Zone",
+      "a": "Tageshälfte (AM/PM)",
+      "d": "Tag des Monats, ohne Auffüllen",
+      "dd": "Tag des Monats, auf 2 aufgefüllt",
+      "c": "Wochentag, als Zahl von 1–7 (Montag ist 1, Sonntag ist 7)",
+      "ccc": "Wochentag, als lokalisierte abgekürzte Zeichenkette",
+      "cccc": "Wochentag, als vollständige lokalisierte Zeichenkette",
+      "ccccc": "Wochentag, als einzelner lokalisierter Buchstabe",
+      "L": "Monat als Zahl ohne Auffüllen",
+      "LL": "Monat als Zahl mit Auffüllen",
+      "LLL": "Monat als lokalisierte abgekürzte Zeichenkette",
+      "LLLL": "Monat als vollständige lokalisierte Zeichenkette",
+      "LLLLL": "Monat als einzelner lokalisierter Buchstabe",
+      "y": "Jahr, ohne Auffüllen",
+      "yy": "zweistelliges Jahr",
+      "yyyy": "vier- bis sechsstelliges Jahr, auf 4 aufgefüllt",
+      "G": "abgekürzte lokalisierte Ära",
+      "GG": "vollständige lokalisierte Ära",
+      "GGGGG": "einbuchstabige lokalisierte Ära",
+      "kk": "ISO-Wochenjahr, ohne Auffüllen",
+      "kkkk": "ISO-Wochenjahr, auf 4 aufgefüllt",
+      "W": "ISO-Wochennummer, ohne Auffüllen",
+      "WW": "ISO-Wochennummer, auf 2 aufgefüllt",
+      "ii": "lokales Wochenjahr, ohne Auffüllen",
+      "iiii": "lokales Wochenjahr, auf 4 aufgefüllt",
+      "n": "lokale Wochennummer, ohne Auffüllen",
+      "nn": "lokale Wochennummer, auf 2 aufgefüllt",
+      "o": "Ordinalzahl (Tag des Jahres), ohne Auffüllen",
+      "ooo": "Ordinalzahl (Tag des Jahres), auf 3 aufgefüllt",
+      "q": "Quartal, ohne Auffüllen",
+      "qq": "Quartal, auf 2 aufgefüllt",
+      "D": "lokalisiertes numerisches Datum",
+      "DD": "lokalisiertes Datum mit abgekürztem Monat",
+      "DDD": "lokalisiertes Datum mit vollständigem Monat",
+      "DDDD": "lokalisiertes Datum mit vollständigem Monat und Wochentag",
+      "t": "lokalisierte Uhrzeit",
+      "tt": "lokalisierte Uhrzeit mit Sekunden",
+      "ttt": "lokalisierte Uhrzeit mit Sekunden und abgekürztem Offset",
+      "tttt": "lokalisierte Uhrzeit mit Sekunden und vollständigem Offset",
+      "T": "lokalisierte 24-Stunden-Zeit",
+      "TT": "lokalisierte 24-Stunden-Zeit mit Sekunden",
+      "TTT": "lokalisierte 24-Stunden-Zeit mit Sekunden und abgekürztem Offset",
+      "TTTT": "lokalisierte 24-Stunden-Zeit mit Sekunden und vollständigem Offset",
+      "f": "kurzes lokalisiertes Datum mit Uhrzeit",
+      "ff": "etwas weniger kurzes lokalisiertes Datum mit Uhrzeit",
+      "fff": "ausführliches lokalisiertes Datum mit Uhrzeit",
+      "ffff": "sehr ausführliches lokalisiertes Datum mit Uhrzeit",
+      "F": "kurzes lokalisiertes Datum mit Uhrzeit und Sekunden",
+      "FF": "etwas weniger kurzes lokalisiertes Datum mit Uhrzeit und Sekunden",
+      "FFF": "ausführliches lokalisiertes Datum mit Uhrzeit und Sekunden",
+      "FFFF": "sehr ausführliches lokalisiertes Datum mit Uhrzeit und Sekunden",
+      "X": "Unix-Zeitstempel in Sekunden",
+      "x": "Unix-Zeitstempel in Millisekunden"
+    }
+  }
+}

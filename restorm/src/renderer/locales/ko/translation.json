@@ -1,0 +1,619 @@
+{
+  "app": {
+    "title": "restorm",
+    "openSettings": "설정 열기",
+    "draftsRestoredTitle": "저장하지 않은 작업이 복원되었습니다",
+    "draftsRestoredBody_other": "이전 세션에서 초안 {{count}}개를 복원했습니다."
+  },
+  "statusbar": {
+    "requestHistory": "요청 기록",
+    "envSelector": {
+      "applyToAll": "모든 요청에 적용"
+    }
+  },
+  "authFailureToast": {
+    "title": "인증에 실패했습니다",
+    "fallbackReason": "인증 요청이 성공하지 못했습니다.",
+    "openAuthRoute": "인증 경로 열기"
+  },
+  "menuBar": {
+    "file": "파일",
+    "new": "새로 만들기",
+    "import": "가져오기",
+    "open": "열기",
+    "openFolder": "폴더 열기",
+    "recentFiles": "최근 파일",
+    "favorites": "즐겨찾기",
+    "close": "닫기",
+    "save": "저장",
+    "saveAll": "모두 저장",
+    "saveAs": "다른 이름으로 저장",
+    "exit": "종료",
+    "selection": "선택",
+    "tools": "도구",
+    "findInCollection": "컬렉션에서 찾기",
+    "addRequest": "요청 추가",
+    "addRequestHttp": "HTTP 요청",
+    "addRequestGraphql": "GraphQL 요청",
+    "addRequestGrpc": "gRPC 요청",
+    "addRequestSoap": "SOAP 요청",
+    "addRequestOdata": "OData 요청",
+    "addRequestWebsocket": "WebSocket 요청",
+    "addFolder": "폴더 추가",
+    "addEnvironmentFolder": "환경 폴더 추가",
+    "addVariable": "변수 추가",
+    "addTag": "태그 추가",
+    "expandAllFolders": "모든 폴더 펼치기",
+    "collapseAllFolders": "모든 폴더 접기",
+    "sendActiveRequest": "요청 보내기",
+    "cancelActiveRequest": "요청 취소",
+    "generateCodeSnippet": "코드 스니펫 생성",
+    "copyAsCurl": "cURL로 복사",
+    "exportOpenApi": "OpenAPI로 내보내기",
+    "clearAuthCache": "인증 캐시 지우기",
+    "openLogsFolder": "로그 폴더 열기"
+  },
+  "sidebar": {
+    "addRequest": "요청 추가",
+    "collapseAll": "모든 요청 접기",
+    "workspace": "워크스페이스",
+    "favorites": "즐겨찾기",
+    "newFolder": "새 폴더",
+    "newEnvironmentFolder": "새 환경 폴더",
+    "contextMenu": {
+      "createFolder": "폴더 만들기",
+      "createEnvironmentFolder": "환경 폴더 만들기",
+      "delete": "삭제",
+      "clone": "복제",
+      "rename": "이름 바꾸기",
+      "addToFavorites": "즐겨찾기에 추가",
+      "removeFromFavorites": "즐겨찾기에서 제거",
+      "closeTab": "닫기",
+      "closeOtherTabs": "다른 탭 닫기",
+      "closeTabsToTheRight": "오른쪽 탭 닫기",
+      "closeAllTabs": "모두 닫기",
+      "add": {
+        "title": "추가",
+        "folder": "폴더",
+        "httpGet": "HTTP – GET 요청",
+        "httpPost": "HTTP – POST 요청",
+        "httpPut": "HTTP – PUT 요청",
+        "httpPatch": "HTTP – PATCH 요청",
+        "httpDelete": "HTTP – DELETE 요청",
+        "graphql": "GraphQL 요청",
+        "grpc": "gRPC 요청",
+        "soap": "SOAP 요청",
+        "websocket": "WebSocket 요청",
+        "odata": "OData 요청",
+        "auth": "HTTP 인증 요청"
+      }
+    },
+    "deleteConfirm": {
+      "title": "삭제 확인",
+      "folderMessage": "폴더 \"{{name}}\" 및 그 안의 모든 내용을 삭제하시겠습니까?",
+      "itemMessage": "\"{{name}}\"을(를) 삭제하시겠습니까?",
+      "confirm": "삭제",
+      "cancel": "취소"
+    }
+  },
+  "environment": {
+    "newName": "새 환경",
+    "add": "환경 추가",
+    "rename": "이름 바꾸기",
+    "addSub": "하위 환경 추가",
+    "delete": "삭제"
+  },
+  "folderView": {
+    "environments": "환경",
+    "environmentsAriaLabel": "폴더 환경",
+    "variables": "변수",
+    "addVariable": "변수 행 추가",
+    "selectEnvironment": "변수를 보려면 환경을 선택하세요",
+    "tabs": {
+      "docs": "문서",
+      "configuration": "구성",
+      "notes": "메모"
+    },
+    "home": {
+      "configureEnvs": "환경 구성",
+      "configureEnvsDesc": "각 환경의 기본 URL, 변수, 인증을 설정합니다",
+      "viewDocs": "문서 보기",
+      "viewDocsDesc": "API 문서, 모델, 엔드포인트를 살펴봅니다",
+      "favoriteRequests": "즐겨찾는 요청",
+      "removeFavorite": "즐겨찾기에서 제거",
+      "apiUpdate": {
+        "title": "API 명세 업데이트",
+        "noConfig": "이 폴더는 가져올 수 있는 소스에서 생성되지 않았습니다.",
+        "urlLabel": "URL",
+        "lastImportedLabel": "마지막으로 가져온 시각",
+        "lastCheckedLabel": "마지막으로 확인한 시각",
+        "neverImported": "가져온 적 없음",
+        "neverChecked": "확인한 적 없음",
+        "refreshing": "API 명세를 새로 고치는 중…",
+        "fetching": "가져오는 중…",
+        "upToDate": "API 명세가 최신 상태입니다.",
+        "ok": "확인"
+      }
+    },
+    "contextVariables": {
+      "title": "사용 가능한 컨텍스트 변수",
+      "description": "요청 URL과 표현식 형식의 변수에서 {{handlebars}} 문법으로 이 변수들을 사용할 수 있습니다.",
+      "name": "변수",
+      "value": "해석된 값",
+      "copied": "복사했습니다!"
+    }
+  },
+  "requestTab": {
+    "deprecated": "이 엔드포인트는 더 이상 사용되지 않으며, 향후 버전에서 제거될 수 있습니다.",
+    "send": "보내기",
+    "cancel": "취소",
+    "urlPlaceholder": "요청 URL",
+    "methodSelect": "HTTP 메서드 선택",
+    "addHeader": "헤더 추가",
+    "addParam": "매개변수 추가",
+    "environmentSelector": {
+      "noEnvironment": "환경 없음"
+    },
+    "body": {
+      "fileLabel": "파일 또는 URL:",
+      "browse": "찾아보기..."
+    },
+    "tabs": {
+      "docs": "문서",
+      "requestLayout": "요청",
+      "headers": "헤더",
+      "body": "본문",
+      "params": "매개변수",
+      "pathParams": "경로 매개변수",
+      "notes": "메모",
+      "codeSnippets": "코드 스니펫",
+      "responsesHistory": "응답 기록"
+    },
+    "responses": {
+      "tabs": {
+        "response": "응답",
+        "requestBody": "요청 본문",
+        "graph": "그래프"
+      },
+      "loading": "요청을 보내는 중...",
+      "noResponse": "요청을 실행하려면 보내기를 클릭하세요",
+      "history": {
+        "list": "응답 기록 목록",
+        "empty": "아직 기록된 응답이 없습니다",
+        "select": "자세히 보려면 응답을 선택하세요",
+        "pin": "응답 고정",
+        "unpin": "응답 고정 해제"
+      }
+    }
+  },
+  "workbench": {
+    "tabContextMenu": {
+      "close": "닫기",
+      "closeOthers": "다른 탭 닫기",
+      "addToFavorites": "즐겨찾기에 추가",
+      "removeFromFavorites": "즐겨찾기에서 제거"
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "정의로 이동"
+  },
+  "keyValueTable": {
+    "types": {
+      "string": "문자열",
+      "secret": "비밀 값",
+      "number": "숫자",
+      "dateTime": "날짜/시간",
+      "color": "색상",
+      "expression": "표현식",
+      "boolean": "부울"
+    },
+    "apiEnums": "API에서 정의한 형식"
+  },
+  "graphql": {
+    "send": "보내기",
+    "urlPlaceholder": "GraphQL 엔드포인트 URL",
+    "tabs": {
+      "query": "쿼리",
+      "variables": "변수",
+      "headers": "헤더"
+    }
+  },
+  "grpc": {
+    "send": "호출",
+    "urlPlaceholder": "gRPC 서버(host:port)",
+    "tabs": {
+      "message": "메시지",
+      "metadata": "메타데이터"
+    }
+  },
+  "soap": {
+    "send": "보내기",
+    "urlPlaceholder": "SOAP 엔드포인트 URL",
+    "tabs": {
+      "body": "본문",
+      "headers": "헤더"
+    }
+  },
+  "websocket": {
+    "connect": "연결",
+    "connected": "연결됨",
+    "disconnected": "연결 끊김",
+    "noMessages": "아직 메시지가 없습니다",
+    "urlPlaceholder": "WebSocket URL",
+    "event": "이벤트",
+    "topic": "주제",
+    "tabs": {
+      "message": "메시지",
+      "headers": "헤더"
+    }
+  },
+  "search": {
+    "placeholder": "검색...",
+    "noResults": "결과를 찾을 수 없습니다",
+    "resultsAriaLabel": "검색 결과",
+    "categories": {
+      "request": "요청",
+      "folder": "폴더",
+      "environment": "환경",
+      "settings": "설정",
+      "tag": "태그"
+    },
+    "tooltip": {
+      "noDetails": "표시할 세부 정보가 없습니다",
+      "noContent": "문서나 메모가 없습니다"
+    }
+  },
+  "httpStatus": {
+    "100": {
+      "name": "Continue",
+      "description": "서버가 요청 헤더를 수신했으며, 클라이언트는 요청 본문 전송을 계속해야 합니다."
+    },
+    "101": {
+      "name": "Switching Protocols",
+      "description": "요청자가 서버에 프로토콜 전환을 요청했고, 서버가 이에 동의했습니다."
+    },
+    "200": {
+      "name": "OK",
+      "description": "HTTP 요청이 성공한 경우의 표준 응답입니다. 실제 응답 내용은 사용된 요청 메서드에 따라 달라집니다."
+    },
+    "201": {
+      "name": "Created",
+      "description": "요청이 처리되어 새 리소스가 생성되었습니다."
+    },
+    "202": {
+      "name": "Accepted",
+      "description": "요청은 처리하기 위해 접수되었지만 처리가 아직 완료되지 않았습니다."
+    },
+    "204": {
+      "name": "No Content",
+      "description": "서버가 요청을 정상적으로 처리했으며 반환할 콘텐츠가 없습니다."
+    },
+    "301": {
+      "name": "Moved Permanently",
+      "description": "이번 요청과 이후의 모든 요청은 지정된 URI로 보내야 합니다."
+    },
+    "302": {
+      "name": "Found",
+      "description": "클라이언트에게 다른 URL을 참조하도록 알립니다. HTTP/1.0 사양에서는 클라이언트가 임시 리다이렉트를 수행하도록 요구했습니다."
+    },
+    "304": {
+      "name": "Not Modified",
+      "description": "요청 헤더에 지정된 버전 이후로 리소스가 변경되지 않았음을 나타냅니다."
+    },
+    "400": {
+      "name": "Bad Request",
+      "description": "명백한 클라이언트 오류(예: 잘못된 요청 구문)로 인해 서버가 요청을 처리할 수 없거나 처리하지 않으려는 경우입니다."
+    },
+    "401": {
+      "name": "Unauthorized",
+      "description": "인증이 필요하지만, 인증이 실패했거나 아직 제공되지 않았습니다."
+    },
+    "403": {
+      "name": "Forbidden",
+      "description": "요청에 유효한 데이터가 포함되어 있고 서버가 이를 이해했지만, 서버가 작업 수행을 거부합니다."
+    },
+    "404": {
+      "name": "Not Found",
+      "description": "요청한 리소스를 찾을 수 없지만, 향후에는 사용 가능할 수 있습니다."
+    },
+    "405": {
+      "name": "Method Not Allowed",
+      "description": "요청한 리소스에서는 해당 요청 메서드가 지원되지 않습니다."
+    },
+    "408": {
+      "name": "Request Timeout",
+      "description": "서버가 요청을 기다리는 중에 시간이 초과되었습니다."
+    },
+    "409": {
+      "name": "Conflict",
+      "description": "리소스의 현재 상태와 충돌하여 요청을 처리할 수 없음을 나타냅니다."
+    },
+    "410": {
+      "name": "Gone",
+      "description": "요청한 리소스가 이전에는 사용 가능했으나 더 이상 사용할 수 없으며, 앞으로도 다시 사용할 수 없음을 나타냅니다."
+    },
+    "415": {
+      "name": "Unsupported Media Type",
+      "description": "요청 엔터티의 미디어 타입을 서버 또는 리소스가 지원하지 않습니다."
+    },
+    "422": {
+      "name": "Unprocessable Entity",
+      "description": "요청 형식은 올바르지만 의미상의 오류로 인해 처리할 수 없었습니다."
+    },
+    "429": {
+      "name": "Too Many Requests",
+      "description": "사용자가 일정 시간 내에 너무 많은 요청을 보냈습니다(속도 제한)."
+    },
+    "500": {
+      "name": "Internal Server Error",
+      "description": "예상치 못한 상황이 발생했고 더 구체적인 메시지가 적절하지 않을 때 반환되는 일반적인 오류 메시지입니다."
+    },
+    "501": {
+      "name": "Not Implemented",
+      "description": "서버가 요청 메서드를 인식하지 못하거나, 요청을 수행할 수 있는 능력이 없습니다."
+    },
+    "502": {
+      "name": "Bad Gateway",
+      "description": "서버가 게이트웨이 또는 프록시 역할을 하던 중 상위 서버로부터 잘못된 응답을 받았습니다."
+    },
+    "503": {
+      "name": "Service Unavailable",
+      "description": "서버가 요청을 처리할 수 없습니다(과부하 상태이거나 유지 보수를 위해 중단된 상태)."
+    },
+    "504": {
+      "name": "Gateway Timeout",
+      "description": "서버가 게이트웨이 또는 프록시 역할을 하던 중 상위 서버로부터 응답을 제때 받지 못했습니다."
+    }
+  },
+  "welcome": {
+    "confirmRemoveFavorite": "\"{{fileName}}\"을(를) 즐겨찾기에서 제거하시겠습니까?",
+    "noFilesHint": "기존 파일을 열거나 새 파일을 만들어 시작하세요",
+    "newAriaLabel": "새 컬렉션 만들기",
+    "openAriaLabel": "디스크에서 컬렉션 열기",
+    "landmarkLabel": "시작 화면"
+  },
+  "save": {
+    "title": "저장 옵션",
+    "mode": {
+      "label": "저장 모드",
+      "file": "단일 파일",
+      "folder": "폴더 구조",
+      "fileDescription": "모든 항목을 하나의 파일에 저장합니다",
+      "folderDescription": "각 항목을 별도의 파일로 분리한 폴더 구조로 저장합니다"
+    },
+    "format": {
+      "label": "형식",
+      "yamlDescription": "사람이 읽기 쉬움",
+      "jsonDescription": "표준 형식",
+      "json5Description": "JSON + 주석"
+    },
+    "preview": {
+      "label": "구조 미리 보기",
+      "noDocumentation": "이 소스에는 분석된 문서가 없습니다."
+    }
+  },
+  "common": {
+    "cancel": "취소",
+    "save": "저장"
+  },
+  "helpers": {
+    "categories": {
+      "comparison": "비교",
+      "string": "문자열",
+      "math": "수학",
+      "array": "배열",
+      "object": "객체",
+      "url": "URL",
+      "date": "날짜",
+      "regex": "정규식",
+      "misc": "기타"
+    },
+    "eq": "엄격한 동등 비교(===)",
+    "ne": "엄격한 비동등 비교(!==)",
+    "neq": "엄격한 비동등 비교(!==)",
+    "lt": "보다 작음(<)",
+    "lte": "이하(<=)",
+    "gt": "보다 큼(>)",
+    "gte": "이상(>=)",
+    "and": "블록 헬퍼: 모든 값이 참일 때 렌더링합니다",
+    "or": "블록 헬퍼: 값 중 하나라도 참이면 렌더링합니다",
+    "not": "반전된 부울 값을 반환합니다",
+    "ifEquals": "블록 헬퍼: 값이 같을 때 렌더링합니다",
+    "is": "블록 헬퍼: 느슨한 동등 비교",
+    "isnt": "블록 헬퍼: 느슨한 비동등 비교",
+    "default": "첫 번째 값이 null/undefined인 경우 기본값을 반환합니다",
+    "compare": "블록 헬퍼: 연산자를 이용해 비교합니다",
+    "lowercase": "문자열을 소문자로 변환합니다",
+    "uppercase": "문자열을 대문자로 변환합니다",
+    "capitalize": "첫 글자를 대문자로 만듭니다",
+    "capitalizeAll": "각 단어의 첫 글자를 대문자로 만듭니다",
+    "titleize": "각 단어의 첫 글자를 대문자로 만듭니다",
+    "camelcase": "camelCase로 변환합니다",
+    "pascalcase": "PascalCase로 변환합니다",
+    "snakecase": "snake_case로 변환합니다",
+    "snakeCase": "snake_case로 변환합니다(별칭)",
+    "dashcase": "dash-case(kebab-case)로 변환합니다",
+    "dotcase": "dot.case로 변환합니다",
+    "pathcase": "path/case로 변환합니다",
+    "sentencecase": "Sentence case로 변환합니다",
+    "slugify": "URL에 적합한 슬러그로 변환합니다",
+    "trim": "양쪽 끝의 공백을 제거합니다",
+    "trimLeft": "앞쪽의 공백을 제거합니다",
+    "trimRight": "뒤쪽의 공백을 제거합니다",
+    "replace": "모든 a를 b로 바꿉니다",
+    "split": "문자열을 배열로 분리합니다",
+    "truncate": "문자열을 지정된 길이로 자릅니다",
+    "ellipsis": "문자열을 자르고 말줄임표를 붙입니다",
+    "append": "문자열 뒤에 접미사를 덧붙입니다",
+    "prepend": "문자열 앞에 접두사를 덧붙입니다",
+    "reverse": "문자열 또는 배열을 뒤집습니다",
+    "startsWith": "블록 헬퍼: 문자열이 접두사로 시작하면 렌더링합니다",
+    "endsWith": "블록 헬퍼: 문자열이 접미사로 끝나면 렌더링합니다",
+    "contains": "블록 헬퍼: 문자열이 부분 문자열을 포함하면 렌더링합니다",
+    "padStart": "지정된 길이가 되도록 문자열 앞쪽을 채웁니다",
+    "padEnd": "지정된 길이가 되도록 문자열 뒤쪽을 채웁니다",
+    "repeat": "문자열을 n번 반복합니다",
+    "substring": "문자열의 일부를 추출합니다",
+    "indexOf": "부분 문자열의 인덱스를 반환합니다(없으면 -1)",
+    "count": "부분 문자열의 출현 횟수를 셉니다",
+    "newLineToBr": "줄바꿈을 <br> 태그로 변환합니다",
+    "stripTags": "문자열에서 HTML 태그를 제거합니다",
+    "add": "두 수를 더합니다",
+    "subtract": "a에서 b를 뺍니다",
+    "multiply": "두 수를 곱합니다",
+    "divide": "a를 b로 나눕니다",
+    "modulo": "a / b의 나머지를 반환합니다",
+    "abs": "절대값을 반환합니다",
+    "ceil": "가장 가까운 정수로 올림합니다",
+    "floor": "가장 가까운 정수로 내림합니다",
+    "round": "가장 가까운 정수로 반올림합니다",
+    "min": "최솟값을 반환합니다",
+    "max": "최댓값을 반환합니다",
+    "pow": "밑을 지수로 거듭제곱한 값을 반환합니다",
+    "sqrt": "제곱근을 반환합니다",
+    "random": "min과 max 사이의 임의 정수를 반환합니다",
+    "sum": "배열 값들의 합을 반환합니다",
+    "avg": "배열 값들의 평균을 반환합니다",
+    "toFixed": "지정된 소수 자릿수로 숫자를 형식화합니다",
+    "toInt": "정수로 변환합니다",
+    "toFloat": "부동 소수점 수로 변환합니다",
+    "first": "배열의 첫 번째 요소를 반환합니다",
+    "last": "배열의 마지막 요소를 반환합니다",
+    "after": "인덱스 n 이후의 요소를 반환합니다",
+    "before": "인덱스 n 이전의 요소를 반환합니다",
+    "slice": "배열의 일부분을 반환합니다",
+    "length": "배열/문자열/객체의 길이를 반환합니다",
+    "join": "구분자로 배열 요소를 연결합니다",
+    "sort": "배열을 정렬합니다",
+    "unique": "중복되지 않은 값을 반환합니다",
+    "concat": "배열을 이어 붙입니다",
+    "flatten": "중첩된 배열을 평탄화합니다",
+    "pluck": "객체 배열에서 특정 속성을 추출합니다",
+    "itemAt": "지정한 인덱스의 항목을 반환합니다",
+    "inArray": "블록 헬퍼: 값이 배열에 포함되어 있으면 렌더링합니다",
+    "isArray": "값이 배열이면 true를 반환합니다",
+    "isEmpty": "블록 헬퍼: 값이 비어 있으면 렌더링합니다",
+    "some": "블록 헬퍼: 일부 항목이 일치하면 렌더링합니다",
+    "every": "블록 헬퍼: 모든 항목이 일치하면 렌더링합니다",
+    "JSONstringify": "객체를 JSON 문자열로 변환합니다",
+    "JSONparse": "JSON 문자열을 객체로 파싱합니다",
+    "get": "경로로 중첩된 속성을 가져옵니다",
+    "keys": "객체의 키를 반환합니다",
+    "values": "객체의 값을 반환합니다",
+    "entries": "[키, 값] 쌍을 반환합니다",
+    "hasOwn": "블록 헬퍼: 객체가 해당 속성을 가지고 있으면 렌더링합니다",
+    "pick": "선택한 키만 포함한 객체를 만듭니다",
+    "omit": "지정한 키를 제외한 객체를 만듭니다",
+    "merge": "여러 객체를 병합합니다",
+    "isObject": "값이 객체이면 true를 반환합니다",
+    "typeOf": "값의 형식을 반환합니다",
+    "encodeURI": "문자열을 URL 인코딩합니다",
+    "decodeURI": "문자열을 URL 디코딩합니다",
+    "urlParse": "URL을 구성 요소로 분해합니다",
+    "stripQuerystring": "URL에서 쿼리 문자열을 제거합니다",
+    "stripProtocol": "URL에서 프로토콜을 제거합니다",
+    "now": "현재 날짜를 ISO 문자열로 반환합니다",
+    "timestamp": "현재 타임스탬프(밀리초)를 반환합니다",
+    "year": "현재 연도를 반환합니다",
+    "formatDate": "패턴에 따라 날짜를 형식화합니다",
+    "match": "정규식 일치 결과를 반환합니다",
+    "test": "블록 헬퍼: 정규식이 일치하면 렌더링합니다",
+    "coalesce": "null/undefined가 아닌 첫 번째 값을 반환합니다",
+    "uuid": "임의의 UUID를 생성합니다",
+    "noop": "블록 헬퍼: 콘텐츠를 그대로 렌더링합니다",
+    "raw": "블록 헬퍼: 원본 콘텐츠를 렌더링합니다",
+    "times": "블록 헬퍼: n번 반복합니다",
+    "range": "숫자 배열을 생성합니다"
+  },
+  "behavior": {
+    "title": "동작",
+    "syncSidebarWithTabs": "사이드바 선택을 활성 탭과 동기화",
+    "syncSidebarWithTabsDescription": "워크스페이스에서 탭을 전환할 때, 대응하는 항목을 사이드바에서 자동으로 선택하고 표시합니다",
+    "dateTimeFormat": "날짜/시간 형식",
+    "dateTimeFormatDescription": "애플리케이션에서 날짜와 시간을 표시할 때 사용하는 형식",
+    "dateTimeFormat.us": "미국식 형식(MM/DD/YYYY, 12시간)",
+    "dateTimeFormat.iso": "ISO 형식(YYYY-MM-DD, 24시간)"
+  },
+  "console": {
+    "title": "콘솔",
+    "requestFormat": "요청 형식",
+    "requestFormatDescription": "콘솔 탭에서 외부로 보내는 요청을 표현할 때 사용하는 기본 셸 스타일입니다. 각 행은 복사하여 붙여넣을 수 있는 명령줄이며, 콘솔 도구 모음의 토글을 사용하면 현재 탭에 한해 이 기본값을 재정의할 수 있습니다.",
+    "requestFormat.curl": "curl(Unix 스타일)",
+    "requestFormat.powershell": "PowerShell(Invoke-RestMethod)"
+  },
+  "import": {
+    "title": "요청 가져오기",
+    "source": {
+      "label": "여기에 붙여넣으세요!",
+      "placeholder": "파일 경로, URL을 입력하거나 curl/PowerShell 명령을 붙여넣으세요..."
+    },
+    "formats": {
+      "swagger": {
+        "description": "SmartBear에서 출발한 OpenAPI 2.0 사양입니다. Swagger JSON 또는 YAML을 붙여넣기만 하면, restorm이 모든 오퍼레이션을 분석하고 보안 스킴을 가져와 문서 전체를 탐색 가능한 요청 트리로 변환합니다.",
+        "trademark": "Swagger는 SmartBear Software의 등록 상표입니다."
+      },
+      "openapi": {
+        "description": "현재의 OpenAPI 표준(3.0과 3.1)입니다. Swagger와 동일하게 붙여넣기만 하면 됩니다. 매개변수, 요청 본문, 보안 스킴, 웹훅이 예제와 함께 즉시 보낼 수 있는 타입화된 요청 트리로 변환됩니다.",
+        "trademark": "OpenAPI는 Linux Foundation 산하 OpenAPI Initiative의 프로젝트입니다."
+      },
+      "curl": {
+        "description": "이미 터미널에서 동작 중인 요청이 있나요? 전체 curl 호출(플래그, 헤더, 본문, 쿼리 문자열)을 그대로 붙여넣으면, restorm이 이를 다시 실행하고 편집하고 고정할 수 있는 실제 요청으로 재구성합니다.",
+        "trademark": "curl은 © Daniel Stenberg의 오픈 소스 소프트웨어로, 해당 약관에 따라 사용됩니다."
+      },
+      "powershell": {
+        "description": "같은 아이디어를 PowerShell 스타일로 적용한 것입니다. Invoke-WebRequest 또는 Invoke-RestMethod 명령을 붙여넣으면, restorm이 URI, 메서드, 헤더, 본문을 읽어 시각적으로 다듬을 수 있는 요청을 생성합니다.",
+        "trademark": "PowerShell은 Microsoft Corporation의 등록 상표입니다."
+      },
+      "postman": {
+        "description": "회사에 저장해 둔 Postman 컬렉션이 있나요? JSON을 가져다 놓으세요. restorm이 모든 요청, 예제 응답, 환경 변수를 읽어, 다른 API와 나란히 실행할 수 있는 restorm 트리로 컬렉션을 재구성합니다.",
+        "trademark": "Postman은 Postman, Inc.의 등록 상표이며, 여기서는 호환성 참조 목적으로만 사용됩니다."
+      },
+      "insomnia": {
+        "description": "Insomnia에서 넘어오셨나요? 내보낸 파일을 가져다 놓으면 됩니다. restorm은 v4 / v5 컬렉션 형식을 이해하며, 모든 요청, 헤더, 본문, 환경을 함께 가져와 restorm 트리로 보여 줍니다.",
+        "trademark": "Insomnia는 Kong Inc.의 등록 상표이며, 여기서는 호환성 참조 목적으로만 사용됩니다."
+      },
+      "bruno": {
+        "description": "Bruno 형식의 .bru 파일이나 폴더 내보내기 — restorm은 스크립트 블록까지 포함하여 .bru 텍스트 형식을 읽고, 각 요청을 바로 전송할 수 있는 restorm의 일급 노드로 재구성합니다.",
+        "trademark": "Bruno는 Anoop M. D.가 만든 오픈 소스 소프트웨어(MIT)로, 해당 약관에 따라 사용됩니다."
+      },
+      "graphql": {
+        "description": "GraphQL SDL(.graphql / .gql 또는 GraphQL 클라이언트에서 복사한 내용)을 붙여넣으면, restorm이 오퍼레이션마다 요청을 하나씩 생성하고, 알맞은 query / mutation / subscription 타입에 연결하여 변수까지 구조화해 둡니다.",
+        "trademark": "GraphQL은 Joint Development Foundation의 프로젝트인 GraphQL Foundation의 상표입니다."
+      },
+      "grpc": {
+        "description": ".proto 파일(또는 해당 디렉터리)을 가져다 놓으면, restorm이 모든 service, 모든 RPC, 모든 message를 순회하며 각 메서드를 codegen 없이 gRPC 실행기로 보낼 수 있는 타입화된 요청으로 변환합니다.",
+        "trademark": "gRPC는 Cloud Native Computing Foundation의 프로젝트입니다."
+      },
+      "soap": {
+        "description": "WSDL이 있나요? 붙여넣기(또는 URL 입력)만으로 restorm이 각 <port>와 <operation>을 분석하여, 올바른 SOAPAction 헤더, 스키마로 타입화된 본문 스켈레톤, WSDL이 선언한 인증 스킴이 적용된 바로 보낼 수 있는 SOAP 엔벨로프를 생성합니다."
+      },
+      "websocket": {
+        "description": "WebSocket 엔드포인트(ws:// 또는 wss://)를 붙여넣으면, restorm이 연결을 열고 서버의 hello 프레임을 캡처한 뒤, 재생 가능한 페이로드 템플릿이 있는 send / subscribe 요청을 생성합니다.",
+        "trademark": "WebSocket은 IETF(RFC 6455)와 W3C가 표준화한 프로토콜입니다."
+      },
+      "kafka": {
+        "description": "Apache Kafka의 bootstrap-server URL(또는 토픽 목록)을 붙여넣으면, restorm이 토픽별로 컨슈머와 프로듀서를 등록하고, 사용 중인 Schema Registry를 통해 Avro / Protobuf 페이로드를 디코딩하며, 각 오프셋을 한 번의 클릭으로 다시 재생할 수 있게 합니다.",
+        "trademark": "Apache Kafka 및 Kafka 로고는 Apache Software Foundation의 상표입니다."
+      },
+      "socketio": {
+        "description": "Socket.IO 서버 URL을 붙여넣으면, restorm이 핸드셰이크를 협상하고 서버가 발행하는 네임스페이스와 이벤트 이름을 나열하며, emit / on 이벤트마다 페이로드 검증이 포함된 요청을 하나씩 제공합니다.",
+        "trademark": "Socket.IO는 MIT 라이선스로 공개된 오픈 소스 라이브러리이며, 이름과 로고는 지시적 용법으로 사용됩니다."
+      },
+      "odata": {
+        "description": "OData 서비스 문서 URL이나 $metadata 파일을 붙여넣으면, restorm이 CSDL을 읽어 엔터티 집합, 함수 임포트, 액션을 재구성하고, 각 오퍼레이션에서 $filter / $select / $top / $skip 쿼리 옵션을 미리 채워 둡니다."
+      },
+      "mqtt": {
+        "description": "MQTT 브로커 URL이나 토픽 카탈로그를 붙여넣으면, restorm이 토픽별로 publish / subscribe 요청을 구성하고, 스트리밍 미리 보기를 위해 연결을 유지하며, 보관된 메시지 스냅샷을 기억하여 나중에 다시 재생할 수 있게 합니다.",
+        "trademark": "MQTT는 OASIS 표준이며, MQTT 이름과 로고는 OASIS Open의 상표입니다."
+      }
+    },
+    "loading": "분석 중...",
+    "noResults": "요청을 찾을 수 없습니다",
+    "error": {
+      "unknown": "알 수 없는 오류가 발생했습니다"
+    },
+    "ok": "가져오기",
+    "cancel": "취소",
+    "dropZone": "드롭 영역"
+  }
+}

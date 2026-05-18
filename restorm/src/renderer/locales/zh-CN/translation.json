@@ -1,0 +1,619 @@
+{
+  "app": {
+    "title": "restorm",
+    "openSettings": "打开设置",
+    "draftsRestoredTitle": "已恢复未保存的工作",
+    "draftsRestoredBody_other": "已从上一次会话恢复 {{count}} 个草稿。"
+  },
+  "statusbar": {
+    "requestHistory": "请求历史",
+    "envSelector": {
+      "applyToAll": "应用到所有请求"
+    }
+  },
+  "authFailureToast": {
+    "title": "身份验证失败",
+    "fallbackReason": "身份验证请求未能成功。",
+    "openAuthRoute": "打开身份验证路由"
+  },
+  "menuBar": {
+    "file": "文件",
+    "new": "新建",
+    "import": "导入",
+    "open": "打开",
+    "openFolder": "打开文件夹",
+    "recentFiles": "最近的文件",
+    "favorites": "收藏",
+    "close": "关闭",
+    "save": "保存",
+    "saveAll": "全部保存",
+    "saveAs": "另存为",
+    "exit": "退出",
+    "selection": "选择",
+    "tools": "工具",
+    "findInCollection": "在集合中查找",
+    "addRequest": "添加请求",
+    "addRequestHttp": "HTTP 请求",
+    "addRequestGraphql": "GraphQL 请求",
+    "addRequestGrpc": "gRPC 请求",
+    "addRequestSoap": "SOAP 请求",
+    "addRequestOdata": "OData 请求",
+    "addRequestWebsocket": "WebSocket 请求",
+    "addFolder": "添加文件夹",
+    "addEnvironmentFolder": "添加环境文件夹",
+    "addVariable": "添加变量",
+    "addTag": "添加标签",
+    "expandAllFolders": "展开所有文件夹",
+    "collapseAllFolders": "折叠所有文件夹",
+    "sendActiveRequest": "发送请求",
+    "cancelActiveRequest": "取消请求",
+    "generateCodeSnippet": "生成代码片段",
+    "copyAsCurl": "复制为 cURL",
+    "exportOpenApi": "导出为 OpenAPI",
+    "clearAuthCache": "清除身份验证缓存",
+    "openLogsFolder": "打开日志文件夹"
+  },
+  "sidebar": {
+    "addRequest": "添加请求",
+    "collapseAll": "折叠所有请求",
+    "workspace": "工作区",
+    "favorites": "收藏",
+    "newFolder": "新建文件夹",
+    "newEnvironmentFolder": "新建环境文件夹",
+    "contextMenu": {
+      "createFolder": "创建文件夹",
+      "createEnvironmentFolder": "创建环境文件夹",
+      "delete": "删除",
+      "clone": "克隆",
+      "rename": "重命名",
+      "addToFavorites": "添加到收藏",
+      "removeFromFavorites": "从收藏中移除",
+      "closeTab": "关闭",
+      "closeOtherTabs": "关闭其他",
+      "closeTabsToTheRight": "关闭右侧",
+      "closeAllTabs": "全部关闭",
+      "add": {
+        "title": "添加",
+        "folder": "文件夹",
+        "httpGet": "HTTP – GET 请求",
+        "httpPost": "HTTP – POST 请求",
+        "httpPut": "HTTP – PUT 请求",
+        "httpPatch": "HTTP – PATCH 请求",
+        "httpDelete": "HTTP – DELETE 请求",
+        "graphql": "GraphQL 请求",
+        "grpc": "gRPC 请求",
+        "soap": "SOAP 请求",
+        "websocket": "WebSocket 请求",
+        "odata": "OData 请求",
+        "auth": "HTTP 身份验证请求"
+      }
+    },
+    "deleteConfirm": {
+      "title": "确认删除",
+      "folderMessage": "确定要删除文件夹 \"{{name}}\" 及其所有内容吗？",
+      "itemMessage": "确定要删除 \"{{name}}\" 吗？",
+      "confirm": "删除",
+      "cancel": "取消"
+    }
+  },
+  "environment": {
+    "newName": "新环境",
+    "add": "添加环境",
+    "rename": "重命名",
+    "addSub": "添加子环境",
+    "delete": "删除"
+  },
+  "folderView": {
+    "environments": "环境",
+    "environmentsAriaLabel": "文件夹环境",
+    "variables": "变量",
+    "addVariable": "添加变量行",
+    "selectEnvironment": "选择一个环境以查看变量",
+    "tabs": {
+      "docs": "文档",
+      "configuration": "配置",
+      "notes": "笔记"
+    },
+    "home": {
+      "configureEnvs": "配置环境",
+      "configureEnvsDesc": "为每个环境设置基础 URL、变量和身份验证",
+      "viewDocs": "查看文档",
+      "viewDocsDesc": "浏览 API 文档、模型和端点",
+      "favoriteRequests": "收藏的请求",
+      "removeFavorite": "从收藏中移除",
+      "apiUpdate": {
+        "title": "API 规范更新",
+        "noConfig": "此文件夹不是从可导入的源创建的。",
+        "urlLabel": "URL",
+        "lastImportedLabel": "上次导入",
+        "lastCheckedLabel": "上次检查",
+        "neverImported": "从未导入",
+        "neverChecked": "从未检查",
+        "refreshing": "正在刷新 API 规范…",
+        "fetching": "正在获取…",
+        "upToDate": "API 规范已是最新。",
+        "ok": "确定"
+      }
+    },
+    "contextVariables": {
+      "title": "可用的上下文变量",
+      "description": "在请求 URL 和表达式类型的变量中使用这些变量，语法为 {{handlebars}}。",
+      "name": "变量",
+      "value": "解析后的值",
+      "copied": "已复制！"
+    }
+  },
+  "requestTab": {
+    "deprecated": "此端点已弃用，可能会在未来版本中移除。",
+    "send": "发送",
+    "cancel": "取消",
+    "urlPlaceholder": "请求 URL",
+    "methodSelect": "选择 HTTP 方法",
+    "addHeader": "添加请求头",
+    "addParam": "添加参数",
+    "environmentSelector": {
+      "noEnvironment": "无环境"
+    },
+    "body": {
+      "fileLabel": "文件或 URL：",
+      "browse": "浏览..."
+    },
+    "tabs": {
+      "docs": "文档",
+      "requestLayout": "请求",
+      "headers": "请求头",
+      "body": "正文",
+      "params": "参数",
+      "pathParams": "路径参数",
+      "notes": "笔记",
+      "codeSnippets": "代码片段",
+      "responsesHistory": "响应历史"
+    },
+    "responses": {
+      "tabs": {
+        "response": "响应",
+        "requestBody": "请求正文",
+        "graph": "图表"
+      },
+      "loading": "正在发送请求...",
+      "noResponse": "点击“发送”以执行请求",
+      "history": {
+        "list": "响应历史列表",
+        "empty": "暂无已记录的响应",
+        "select": "选择一个响应以查看详情",
+        "pin": "固定响应",
+        "unpin": "取消固定响应"
+      }
+    }
+  },
+  "workbench": {
+    "tabContextMenu": {
+      "close": "关闭",
+      "closeOthers": "关闭其他",
+      "addToFavorites": "添加到收藏",
+      "removeFromFavorites": "从收藏中移除"
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "转到定义"
+  },
+  "keyValueTable": {
+    "types": {
+      "string": "字符串",
+      "secret": "密钥",
+      "number": "数字",
+      "dateTime": "日期时间",
+      "color": "颜色",
+      "expression": "表达式",
+      "boolean": "布尔值"
+    },
+    "apiEnums": "API 定义的类型"
+  },
+  "graphql": {
+    "send": "发送",
+    "urlPlaceholder": "GraphQL 端点 URL",
+    "tabs": {
+      "query": "查询",
+      "variables": "变量",
+      "headers": "请求头"
+    }
+  },
+  "grpc": {
+    "send": "调用",
+    "urlPlaceholder": "gRPC 服务器（host:port）",
+    "tabs": {
+      "message": "消息",
+      "metadata": "元数据"
+    }
+  },
+  "soap": {
+    "send": "发送",
+    "urlPlaceholder": "SOAP 端点 URL",
+    "tabs": {
+      "body": "正文",
+      "headers": "请求头"
+    }
+  },
+  "websocket": {
+    "connect": "连接",
+    "connected": "已连接",
+    "disconnected": "已断开连接",
+    "noMessages": "暂无消息",
+    "urlPlaceholder": "WebSocket URL",
+    "event": "事件",
+    "topic": "主题",
+    "tabs": {
+      "message": "消息",
+      "headers": "请求头"
+    }
+  },
+  "search": {
+    "placeholder": "搜索...",
+    "noResults": "未找到结果",
+    "resultsAriaLabel": "搜索结果",
+    "categories": {
+      "request": "请求",
+      "folder": "文件夹",
+      "environment": "环境",
+      "settings": "设置",
+      "tag": "标签"
+    },
+    "tooltip": {
+      "noDetails": "无可用详情",
+      "noContent": "无文档或笔记"
+    }
+  },
+  "httpStatus": {
+    "100": {
+      "name": "Continue",
+      "description": "服务器已收到请求头，客户端应继续发送请求正文。"
+    },
+    "101": {
+      "name": "Switching Protocols",
+      "description": "请求方已要求服务器切换协议，服务器已同意。"
+    },
+    "200": {
+      "name": "OK",
+      "description": "HTTP 请求成功的标准响应。实际响应取决于所使用的请求方法。"
+    },
+    "201": {
+      "name": "Created",
+      "description": "请求已得到满足，并创建了新的资源。"
+    },
+    "202": {
+      "name": "Accepted",
+      "description": "请求已被接受以进行处理，但处理尚未完成。"
+    },
+    "204": {
+      "name": "No Content",
+      "description": "服务器已成功处理请求，但不返回任何内容。"
+    },
+    "301": {
+      "name": "Moved Permanently",
+      "description": "此请求和所有未来请求都应定向到指定的 URI。"
+    },
+    "302": {
+      "name": "Found",
+      "description": "告知客户端查看另一个 URL。HTTP/1.0 规范要求客户端执行临时重定向。"
+    },
+    "304": {
+      "name": "Not Modified",
+      "description": "表示自请求头指定的版本以来，资源未被修改。"
+    },
+    "400": {
+      "name": "Bad Request",
+      "description": "由于明显的客户端错误（例如请求语法格式错误），服务器无法或不会处理该请求。"
+    },
+    "401": {
+      "name": "Unauthorized",
+      "description": "需要身份验证，但身份验证失败或尚未提供。"
+    },
+    "403": {
+      "name": "Forbidden",
+      "description": "请求包含有效数据并被服务器理解，但服务器拒绝执行该操作。"
+    },
+    "404": {
+      "name": "Not Found",
+      "description": "找不到请求的资源，但将来可能可用。"
+    },
+    "405": {
+      "name": "Method Not Allowed",
+      "description": "请求的资源不支持该请求方法。"
+    },
+    "408": {
+      "name": "Request Timeout",
+      "description": "服务器等待请求超时。"
+    },
+    "409": {
+      "name": "Conflict",
+      "description": "表示由于资源当前状态的冲突，请求无法处理。"
+    },
+    "410": {
+      "name": "Gone",
+      "description": "表示请求的资源以前可用，但现已不再可用，并且将不再可用。"
+    },
+    "415": {
+      "name": "Unsupported Media Type",
+      "description": "请求实体的媒体类型不受服务器或资源支持。"
+    },
+    "422": {
+      "name": "Unprocessable Entity",
+      "description": "请求格式正确，但由于语义错误而无法处理。"
+    },
+    "429": {
+      "name": "Too Many Requests",
+      "description": "用户在给定时间内发送了过多请求（速率限制）。"
+    },
+    "500": {
+      "name": "Internal Server Error",
+      "description": "通用错误消息，当遇到意外情况且没有更具体的消息时给出。"
+    },
+    "501": {
+      "name": "Not Implemented",
+      "description": "服务器无法识别请求方法，或缺少满足请求的能力。"
+    },
+    "502": {
+      "name": "Bad Gateway",
+      "description": "服务器作为网关或代理时，从上游服务器收到了无效的响应。"
+    },
+    "503": {
+      "name": "Service Unavailable",
+      "description": "服务器无法处理请求（因为过载或停机维护）。"
+    },
+    "504": {
+      "name": "Gateway Timeout",
+      "description": "服务器作为网关或代理时，未及时从上游服务器收到响应。"
+    }
+  },
+  "welcome": {
+    "confirmRemoveFavorite": "确定要将 \"{{fileName}}\" 从收藏中移除吗？",
+    "noFilesHint": "打开一个文件或新建一个文件以开始",
+    "newAriaLabel": "新建集合",
+    "openAriaLabel": "从磁盘打开集合",
+    "landmarkLabel": "欢迎"
+  },
+  "save": {
+    "title": "保存选项",
+    "mode": {
+      "label": "保存模式",
+      "file": "单一文件",
+      "folder": "文件夹结构",
+      "fileDescription": "将所有内容保存到一个文件中",
+      "folderDescription": "保存为文件夹结构，每项使用单独的文件"
+    },
+    "format": {
+      "label": "格式",
+      "yamlDescription": "人类可读",
+      "jsonDescription": "标准格式",
+      "json5Description": "JSON + 注释"
+    },
+    "preview": {
+      "label": "结构预览",
+      "noDocumentation": "此来源没有可解析的文档。"
+    }
+  },
+  "common": {
+    "cancel": "取消",
+    "save": "保存"
+  },
+  "helpers": {
+    "categories": {
+      "comparison": "比较",
+      "string": "字符串",
+      "math": "数学",
+      "array": "数组",
+      "object": "对象",
+      "url": "URL",
+      "date": "日期",
+      "regex": "正则表达式",
+      "misc": "其他"
+    },
+    "eq": "严格相等 (===)",
+    "ne": "严格不等 (!==)",
+    "neq": "严格不等 (!==)",
+    "lt": "小于 (<)",
+    "lte": "小于或等于 (<=)",
+    "gt": "大于 (>)",
+    "gte": "大于或等于 (>=)",
+    "and": "块助手：当所有值都为真时渲染",
+    "or": "块助手：当任一值为真时渲染",
+    "not": "返回相反的布尔值",
+    "ifEquals": "块助手：当值相等时渲染",
+    "is": "块助手：宽松相等比较",
+    "isnt": "块助手：宽松不等比较",
+    "default": "如果第一个值为 null/undefined，则返回默认值",
+    "compare": "块助手：使用运算符进行比较",
+    "lowercase": "将字符串转换为小写",
+    "uppercase": "将字符串转换为大写",
+    "capitalize": "将首字母大写",
+    "capitalizeAll": "将每个单词的首字母大写",
+    "titleize": "将每个单词的首字母大写",
+    "camelcase": "转换为 camelCase",
+    "pascalcase": "转换为 PascalCase",
+    "snakecase": "转换为 snake_case",
+    "snakeCase": "转换为 snake_case（别名）",
+    "dashcase": "转换为 dash-case（kebab-case）",
+    "dotcase": "转换为 dot.case",
+    "pathcase": "转换为 path/case",
+    "sentencecase": "转换为 Sentence case",
+    "slugify": "转换为 URL 友好的 slug",
+    "trim": "移除两端的空白字符",
+    "trimLeft": "移除开头的空白字符",
+    "trimRight": "移除结尾的空白字符",
+    "replace": "将所有 a 替换为 b",
+    "split": "将字符串拆分为数组",
+    "truncate": "将字符串截断到指定长度",
+    "ellipsis": "将字符串截断并加省略号",
+    "append": "将后缀追加到字符串",
+    "prepend": "将前缀添加到字符串",
+    "reverse": "反转字符串或数组",
+    "startsWith": "块助手：当字符串以前缀开头时渲染",
+    "endsWith": "块助手：当字符串以后缀结尾时渲染",
+    "contains": "块助手：当字符串包含子串时渲染",
+    "padStart": "在开头填充字符串以达到指定长度",
+    "padEnd": "在结尾填充字符串以达到指定长度",
+    "repeat": "重复字符串 n 次",
+    "substring": "提取字符串的一部分",
+    "indexOf": "返回子串的索引（未找到则返回 -1）",
+    "count": "统计子串出现的次数",
+    "newLineToBr": "将换行符转换为 <br> 标签",
+    "stripTags": "从字符串中移除 HTML 标签",
+    "add": "两数相加",
+    "subtract": "从 a 中减去 b",
+    "multiply": "两数相乘",
+    "divide": "a 除以 b",
+    "modulo": "返回 a / b 的余数",
+    "abs": "返回绝对值",
+    "ceil": "向上取整到最接近的整数",
+    "floor": "向下取整到最接近的整数",
+    "round": "四舍五入到最接近的整数",
+    "min": "返回最小值",
+    "max": "返回最大值",
+    "pow": "返回底数的指数幂",
+    "sqrt": "返回平方根",
+    "random": "返回 min 和 max 之间的随机整数",
+    "sum": "返回数组各值之和",
+    "avg": "返回数组各值的平均数",
+    "toFixed": "格式化为固定小数位数",
+    "toInt": "转换为整数",
+    "toFloat": "转换为浮点数",
+    "first": "返回数组的第一个元素",
+    "last": "返回数组的最后一个元素",
+    "after": "返回索引 n 之后的元素",
+    "before": "返回索引 n 之前的元素",
+    "slice": "返回数组的切片",
+    "length": "返回数组/字符串/对象的长度",
+    "join": "用分隔符连接数组元素",
+    "sort": "对数组排序",
+    "unique": "返回唯一值",
+    "concat": "连接数组",
+    "flatten": "扁平化嵌套数组",
+    "pluck": "从对象数组中提取属性",
+    "itemAt": "返回索引处的项",
+    "inArray": "块助手：当值在数组中时渲染",
+    "isArray": "如果值是数组则返回 true",
+    "isEmpty": "块助手：当值为空时渲染",
+    "some": "块助手：当部分项匹配时渲染",
+    "every": "块助手：当所有项都匹配时渲染",
+    "JSONstringify": "将对象转换为 JSON 字符串",
+    "JSONparse": "将 JSON 字符串解析为对象",
+    "get": "按路径获取嵌套属性",
+    "keys": "返回对象的键",
+    "values": "返回对象的值",
+    "entries": "返回 [键, 值] 对",
+    "hasOwn": "块助手：当对象具有该属性时渲染",
+    "pick": "创建包含选定键的对象",
+    "omit": "创建不包含指定键的对象",
+    "merge": "合并多个对象",
+    "isObject": "如果值是对象则返回 true",
+    "typeOf": "返回值的类型",
+    "encodeURI": "对字符串进行 URL 编码",
+    "decodeURI": "对字符串进行 URL 解码",
+    "urlParse": "将 URL 解析为各个组成部分",
+    "stripQuerystring": "从 URL 中移除查询字符串",
+    "stripProtocol": "从 URL 中移除协议",
+    "now": "返回当前日期的 ISO 字符串",
+    "timestamp": "返回当前时间戳（毫秒）",
+    "year": "返回当前年份",
+    "formatDate": "按模式格式化日期",
+    "match": "返回正则匹配项",
+    "test": "块助手：当正则匹配时渲染",
+    "coalesce": "返回第一个非 null/undefined 值",
+    "uuid": "生成随机 UUID",
+    "noop": "块助手：按原样渲染内容",
+    "raw": "块助手：渲染原始内容",
+    "times": "块助手：重复 n 次",
+    "range": "生成数字数组"
+  },
+  "behavior": {
+    "title": "行为",
+    "syncSidebarWithTabs": "侧边栏选中项与当前标签同步",
+    "syncSidebarWithTabsDescription": "在工作区切换标签时，自动选中并在侧边栏中显示对应的项",
+    "dateTimeFormat": "日期/时间格式",
+    "dateTimeFormatDescription": "应用程序中显示日期和时间所使用的格式",
+    "dateTimeFormat.us": "美式格式 (MM/DD/YYYY, 12 小时制)",
+    "dateTimeFormat.iso": "ISO 格式 (YYYY-MM-DD, 24 小时制)"
+  },
+  "console": {
+    "title": "控制台",
+    "requestFormat": "请求格式",
+    "requestFormatDescription": "用于在控制台标签中呈现外发请求的默认 shell 风格。每行都是一条可复制粘贴的命令；控制台工具栏中的开关会为当前标签覆盖此默认值。",
+    "requestFormat.curl": "curl（Unix 风格）",
+    "requestFormat.powershell": "PowerShell（Invoke-RestMethod）"
+  },
+  "import": {
+    "title": "导入请求",
+    "source": {
+      "label": "在此粘贴内容！",
+      "placeholder": "输入文件路径、URL，或粘贴 curl/PowerShell 命令..."
+    },
+    "formats": {
+      "swagger": {
+        "description": "OpenAPI 2.0 规范，源自 SmartBear。粘贴 Swagger JSON 或 YAML——restorm 会解析每个操作，引入安全方案，并将整个文档转化为可导航的请求树。",
+        "trademark": "Swagger 是 SmartBear Software 的注册商标。"
+      },
+      "openapi": {
+        "description": "当前的 OpenAPI 标准（3.0 与 3.1）。与 Swagger 一样粘贴即用：参数、请求体、安全方案和 webhook 都会成为带示例、可直接发送的类型化请求树。",
+        "trademark": "OpenAPI 是 Linux 基金会下 OpenAPI Initiative 的项目。"
+      },
+      "curl": {
+        "description": "已经在终端中跑通的请求？粘贴完整的 curl 调用——参数、请求头、正文、查询字符串——restorm 会将其重建为可重新运行、编辑和固定的真实请求。",
+        "trademark": "curl 是 © Daniel Stenberg 的开源软件，在此按其许可证条款使用。"
+      },
+      "powershell": {
+        "description": "同样的思路，PowerShell 风格。粘贴 Invoke-WebRequest 或 Invoke-RestMethod 命令，restorm 会读取其 URI、方法、请求头和正文，生成一个可在可视化界面上迭代的请求。",
+        "trademark": "PowerShell 是 Microsoft Corporation 的注册商标。"
+      },
+      "postman": {
+        "description": "有保存在公司的 Postman 集合？拖入 JSON——restorm 会读取每个请求、每个示例响应和每个环境变量，并将集合重建为可与其他 API 并行运行的 restorm 树。",
+        "trademark": "Postman 是 Postman, Inc. 的注册商标，此处仅用于兼容性参考。"
+      },
+      "insomnia": {
+        "description": "从 Insomnia 迁移过来？拖入你的导出文件。restorm 能识别其 v4 / v5 集合格式，将每个请求、请求头、正文和环境一并带过来，并以 restorm 树呈现。",
+        "trademark": "Insomnia 是 Kong Inc. 的注册商标，此处仅用于兼容性参考。"
+      },
+      "bruno": {
+        "description": "Bruno 的 .bru 文件或文件夹导出——restorm 会读取 .bru 文本格式（包括其脚本块），并将每个请求重建为一流的、可立即发送的 restorm 节点。",
+        "trademark": "Bruno 是 Anoop M. D. 开发的开源软件（MIT），在此按其许可证条款使用。"
+      },
+      "graphql": {
+        "description": "粘贴 GraphQL SDL（.graphql / .gql 或从你的 GraphQL 客户端复制的内容），restorm 会为每个操作搭建一个请求，准确连接到对应的 query / mutation / subscription 类型，并已结构化变量。",
+        "trademark": "GraphQL 是 Joint Development Foundation 项目 GraphQL Foundation 的商标。"
+      },
+      "grpc": {
+        "description": "拖入 .proto 文件（或其所在目录），restorm 会遍历每个 service、每个 RPC、每个 message——将每个方法转化为一个类型化请求，通过 gRPC 执行器即可发送，无需任何 codegen。",
+        "trademark": "gRPC 是 Cloud Native Computing Foundation 的项目。"
+      },
+      "soap": {
+        "description": "有 WSDL？粘贴它（或其 URL）——restorm 会解析每个 <port> 和 <operation>，生成附带正确 SOAPAction 请求头、Schema 类型化正文骨架和 WSDL 声明的认证方案的、即发即用的 SOAP 信封。"
+      },
+      "websocket": {
+        "description": "粘贴 WebSocket 端点（ws:// 或 wss://）——restorm 会打开连接，捕获服务器的 hello 帧，并搭建带可重放载荷模板的 send / subscribe 请求。",
+        "trademark": "WebSocket 是由 IETF（RFC 6455）和 W3C 标准化的协议。"
+      },
+      "kafka": {
+        "description": "粘贴 Apache Kafka bootstrap-server URL（或主题列表）——restorm 会按主题注册 consumer 与 producer，通过你的 Schema Registry 解码 Avro / Protobuf 载荷，并让你一键回放单个 offset。",
+        "trademark": "Apache Kafka 与 Kafka 标志是 Apache Software Foundation 的商标。"
+      },
+      "socketio": {
+        "description": "粘贴 Socket.IO 服务器 URL——restorm 会协商握手、列出服务器发出的命名空间和事件名，并为每个 emit / on 事件提供一个带载荷校验的请求。",
+        "trademark": "Socket.IO 是基于 MIT 许可证发布的开源库；名称和标志在此为指称性使用。"
+      },
+      "odata": {
+        "description": "粘贴 OData 服务文档 URL 或 $metadata 文件——restorm 会读取 CSDL，重建实体集、函数导入和操作，并在每个操作上预填 $filter / $select / $top / $skip 查询选项。"
+      },
+      "mqtt": {
+        "description": "粘贴 MQTT broker URL 或主题目录——restorm 会按主题搭建 publish / subscribe 请求，保持连接以进行流式预览，并记住保留消息快照供日后回放。",
+        "trademark": "MQTT 是 OASIS 标准；MQTT 名称和标志是 OASIS Open 的商标。"
+      }
+    },
+    "loading": "正在分析...",
+    "noResults": "未找到请求",
+    "error": {
+      "unknown": "发生未知错误"
+    },
+    "ok": "导入",
+    "cancel": "取消",
+    "dropZone": "拖放区"
+  }
+}

@@ -1,0 +1,327 @@
+{
+  "common": {
+    "opened": "Otwarte",
+    "refresh": "Odśwież"
+  },
+  "file": {
+    "untitled": "Bez tytułu",
+    "unsavedChanges": {
+      "title": "Niezapisane zmiany",
+      "message": "Czy chcesz zapisać zmiany w „{{fileName}}”?",
+      "detail": "Twoje zmiany zostaną utracone, jeśli ich nie zapiszesz.",
+      "save": "Zapisz",
+      "dontSave": "Nie zapisuj",
+      "cancel": "Anuluj"
+    }
+  },
+  "recentFilesVignette": {
+    "favorites": "Ulubione",
+    "recentFiles": "Ostatnie pliki",
+    "addToFavorites": "Dodaj do ulubionych",
+    "removeFromFavorites": "Usuń z ulubionych",
+    "confirmRemoveFavorite": "Czy na pewno chcesz usunąć „{{fileName}}” z ulubionych?",
+    "favoritesLandmarkLabel": "Lista ulubionych",
+    "recentsLandmarkLabel": "Lista ostatnich plików"
+  },
+  "welcomeScreen": {
+    "landmarkLabel": "Witamy"
+  },
+  "menuBar": {
+    "new": "Nowy",
+    "open": "Otwórz",
+    "edit": "Edycja",
+    "view": "Widok",
+    "help": "Pomoc",
+    "undo": "Cofnij",
+    "redo": "Ponów",
+    "cut": "Wytnij",
+    "copy": "Kopiuj",
+    "paste": "Wklej",
+    "find": "Znajdź",
+    "replace": "Zamień",
+    "toggleSidebar": "Przełącz panel boczny",
+    "toggleResponsePanel": "Przełącz panel odpowiedzi",
+    "zoomIn": "Powiększ",
+    "zoomOut": "Pomniejsz",
+    "resetZoom": "Resetuj powiększenie",
+    "settings": "Ustawienia",
+    "toggleDevTools": "Przełącz narzędzia deweloperskie",
+    "toggleFullscreen": "Przełącz pełny ekran",
+    "about": "O programie",
+    "documentation": "Dokumentacja",
+    "keyboardShortcuts": "Skróty klawiszowe",
+    "releaseNotes": "Informacje o wersji",
+    "reportIssue": "Zgłoś problem"
+  },
+  "settings": {
+    "title": "Ustawienia",
+    "theme": "Motyw",
+    "language": "Język",
+    "searchPlaceholder": "Szukaj w ustawieniach...",
+    "noResults": "Nie znaleziono ustawień.",
+    "numberOutOfRange": "Wartość musi się mieścić w zakresie od {{min}} do {{max}}.",
+    "resetSetting": "Resetuj ustawienie",
+    "copySettingId": "Kopiuj identyfikator ustawienia",
+    "settingOptions": "Opcje ustawienia",
+    "scopeTabsLabel": "Zakres ustawień",
+    "userOnlyHidden": "Ukryto {{count}} ustawień wyłącznie użytkownika na tej karcie.",
+    "scope": {
+      "user": "Użytkownik",
+      "workspace": "Obszar roboczy",
+      "workspaceDisabledTooltip": "Otwórz projekt, aby edytować ustawienia obszaru roboczego"
+    },
+    "appearance": {
+      "title": "Wygląd",
+      "theme": {
+        "title": "Motyw",
+        "description": "Wybierz kolorystyczny motyw aplikacji"
+      },
+      "language": {
+        "title": "Język",
+        "description": "Wybierz język aplikacji",
+        "en": "English",
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "pt": "Português",
+        "nl": "Nederlands",
+        "sv": "Svenska",
+        "da": "Dansk",
+        "nb": "Norsk bokmål",
+        "fi": "Suomi",
+        "pl": "Polski",
+        "cs": "Čeština",
+        "hu": "Magyar",
+        "ro": "Română",
+        "el": "Ελληνικά",
+        "uk": "Українська",
+        "hr": "Hrvatski",
+        "sr": "Srpski",
+        "sq": "Shqip",
+        "tr": "Türkçe",
+        "id": "Bahasa Indonesia",
+        "vi": "Tiếng Việt",
+        "ja": "日本語",
+        "ko": "한국어",
+        "zh-CN": "简体中文",
+        "zh-TW": "繁體中文"
+      },
+      "advancedVisualEffects": {
+        "title": "Zaawansowane efekty wizualne",
+        "description": "Włącz zaawansowane efekty wizualne, takie jak rozmycie tła nakładek i animacje CSS. Wyłącz, aby uzyskać lepszą wydajność na słabszym sprzęcie."
+      },
+      "editor": {
+        "title": "Edytor",
+        "fontSize": {
+          "title": "Rozmiar czcionki",
+          "description": "Kontroluje rozmiar czcionki w pikselach dla edytora kodu"
+        },
+        "fontFamily": {
+          "title": "Rodzina czcionek",
+          "description": "Kontroluje rodzinę czcionek dla edytora kodu"
+        },
+        "wordWrap": {
+          "title": "Zawijanie wierszy",
+          "description": "Kontroluje, czy wiersze mają być zawijane w edytorze kodu"
+        },
+        "minimap": {
+          "title": "Minimapa",
+          "description": "Kontroluje, czy w edytorze kodu wyświetlana jest minimapa"
+        },
+        "lineNumbers": {
+          "title": "Numery wierszy",
+          "description": "Kontroluje, czy w edytorze kodu wyświetlane są numery wierszy"
+        }
+      }
+    },
+    "files": {
+      "title": "Pliki",
+      "autoSave": {
+        "title": "Automatyczny zapis",
+        "description": "Kontroluje automatyczny zapis zmodyfikowanych edytorów. Więcej o automatycznym zapisie w dokumentacji.",
+        "off": "Wyłączony",
+        "afterDelay": "Po opóźnieniu",
+        "onWindowChange": "Przy zmianie okna"
+      },
+      "autoSaveDelay": {
+        "title": "Opóźnienie automatycznego zapisu",
+        "description": "Kontroluje opóźnienie w milisekundach, po którym zmodyfikowany edytor jest zapisywany automatycznie. Działa wyłącznie, gdy automatyczny zapis jest ustawiony na Po opóźnieniu."
+      }
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Przejdź do definicji"
+  },
+  "tagsView": {
+    "removeTag": "Usuń tag",
+    "newTag": "Nowy tag"
+  },
+  "contextMenu": {
+    "cut": "Wytnij",
+    "copy": "Kopiuj",
+    "paste": "Wklej"
+  },
+  "search": {
+    "placeholder": "Szukaj...",
+    "noResults": "Brak wyników",
+    "resultsAriaLabel": "Wyniki wyszukiwania",
+    "categories": {
+      "request": "Żądania HTTP",
+      "folder": "Foldery",
+      "environment": "Środowiska",
+      "settings": "Ustawienia",
+      "tag": "Tagi"
+    }
+  },
+  "iconSelect": {
+    "searchEmojis": "Szukaj emoji...",
+    "noEmojisFound": "Nie znaleziono emoji",
+    "searchCodicons": "Szukaj codicons...",
+    "searchIconoir": "Szukaj w Iconoir...",
+    "searchPhosphor": "Szukaj w Phosphor...",
+    "searchMaterial": "Szukaj w Material...",
+    "searchSimpleIcons": "Szukaj w Simple Icons...",
+    "searchFeather": "Szukaj w Feather...",
+    "searchFontAwesome": "Szukaj w Font Awesome...",
+    "moreIcons": "+{{count}} więcej ikon. Użyj wyszukiwania, aby znaleźć konkretne ikony.",
+    "more": "+{{count}} więcej. Użyj wyszukiwania, aby znaleźć konkretne ikony.",
+    "noIconsFound": "Nie znaleziono ikon",
+    "searchResults": "Wyniki wyszukiwania",
+    "categories": {
+      "files": "Pliki",
+      "git": "Git",
+      "debug": "Debugowanie",
+      "symbols": "Symbole",
+      "arrows": "Strzałki",
+      "ui": "Interfejs",
+      "media": "Multimedia",
+      "editing": "Edycja",
+      "terminal": "Terminal",
+      "people": "Osoby",
+      "notifications": "Powiadomienia",
+      "brands": "Marki",
+      "communication": "Komunikacja",
+      "users": "Użytkownicy",
+      "business": "Biznes",
+      "medical": "Medycyna",
+      "transport": "Transport",
+      "weather": "Pogoda",
+      "shapes": "Kształty",
+      "design": "Projektowanie",
+      "devices": "Urządzenia",
+      "buildings": "Budynki",
+      "nature": "Przyroda",
+      "food": "Jedzenie",
+      "sport": "Sport",
+      "sports": "Sporty",
+      "animals": "Zwierzęta",
+      "tools": "Narzędzia"
+    },
+    "emojiCategories": {
+      "people": "Buźki i osoby",
+      "nature": "Zwierzęta i przyroda",
+      "food": "Jedzenie i napoje",
+      "activity": "Aktywności",
+      "travel": "Podróże i miejsca",
+      "objects": "Obiekty",
+      "symbols": "Symbole",
+      "flags": "Flagi"
+    }
+  },
+  "dateTimePicker": {
+    "ariaLabel": "Wybór daty/godziny",
+    "openCalendar": "Otwórz kalendarz",
+    "previousYear": "Poprzedni rok",
+    "nextYear": "Następny rok",
+    "previousMonth": "Poprzedni miesiąc",
+    "nextMonth": "Następny miesiąc",
+    "selectMonth": "Wybierz miesiąc",
+    "selectYear": "Wybierz rok",
+    "includeTime": "Uwzględnij godzinę",
+    "hours": "Godziny",
+    "minutes": "Minuty",
+    "output": "Wynik",
+    "pattern": "Wzorzec",
+    "outputModes": {
+      "pattern": "Wzorzec",
+      "unix": "Unix (s)",
+      "epoch": "Epoch (ms)",
+      "iso": "ISO 8601"
+    },
+    "preview": "Podgląd",
+    "tokens": {
+      "S": "milisekunda, bez wypełnienia",
+      "SSS": "milisekunda, wypełniona do 3 cyfr",
+      "u": "ułamki sekund, funkcjonalnie identyczne z SSS",
+      "uu": "ułamki sekund, od 0 do 99, wypełnione do 2 cyfr",
+      "uuu": "ułamki sekund, od 0 do 9",
+      "s": "sekunda, bez wypełnienia",
+      "ss": "sekunda, wypełniona do 2 cyfr",
+      "m": "minuta, bez wypełnienia",
+      "mm": "minuta, wypełniona do 2 cyfr",
+      "h": "godzina w formacie 12-godzinnym, bez wypełnienia",
+      "hh": "godzina w formacie 12-godzinnym, wypełniona do 2 cyfr",
+      "H": "godzina w formacie 24-godzinnym, bez wypełnienia",
+      "HH": "godzina w formacie 24-godzinnym, wypełniona do 2 cyfr",
+      "Z": "wąska strefa",
+      "ZZ": "krótka strefa",
+      "ZZZ": "techniczna strefa",
+      "ZZZZ": "skrócona nazwana strefa",
+      "ZZZZZ": "pełna nazwana strefa",
+      "z": "strefa IANA",
+      "a": "południe/północ",
+      "d": "dzień miesiąca, bez wypełnienia",
+      "dd": "dzień miesiąca, wypełniony do 2 cyfr",
+      "c": "dzień tygodnia jako liczba od 1 do 7 (poniedziałek to 1, niedziela to 7)",
+      "ccc": "dzień tygodnia jako skrócony zlokalizowany ciąg",
+      "cccc": "dzień tygodnia jako pełny zlokalizowany ciąg",
+      "ccccc": "dzień tygodnia jako pojedyncza zlokalizowana litera",
+      "L": "miesiąc jako liczba bez wypełnienia",
+      "LL": "miesiąc jako liczba z wypełnieniem",
+      "LLL": "miesiąc jako skrócony zlokalizowany ciąg",
+      "LLLL": "miesiąc jako pełny zlokalizowany ciąg",
+      "LLLLL": "miesiąc jako pojedyncza zlokalizowana litera",
+      "y": "rok, bez wypełnienia",
+      "yy": "rok dwucyfrowy",
+      "yyyy": "rok od czterech do sześciu cyfr, wypełniony do 4",
+      "G": "skrócona zlokalizowana era",
+      "GG": "pełna zlokalizowana era",
+      "GGGGG": "zlokalizowana era jednoliterowa",
+      "kk": "rok tygodnia ISO, bez wypełnienia",
+      "kkkk": "rok tygodnia ISO, wypełniony do 4",
+      "W": "numer tygodnia ISO, bez wypełnienia",
+      "WW": "numer tygodnia ISO, wypełniony do 2",
+      "ii": "lokalny rok tygodnia, bez wypełnienia",
+      "iiii": "lokalny rok tygodnia, wypełniony do 4",
+      "n": "lokalny numer tygodnia, bez wypełnienia",
+      "nn": "lokalny numer tygodnia, wypełniony do 2",
+      "o": "porządkowy (dzień roku), bez wypełnienia",
+      "ooo": "porządkowy (dzień roku), wypełniony do 3",
+      "q": "kwartał, bez wypełnienia",
+      "qq": "kwartał, wypełniony do 2",
+      "D": "zlokalizowana data numeryczna",
+      "DD": "zlokalizowana data ze skróconą nazwą miesiąca",
+      "DDD": "zlokalizowana data z pełną nazwą miesiąca",
+      "DDDD": "zlokalizowana data z pełną nazwą miesiąca i dniem tygodnia",
+      "t": "zlokalizowana godzina",
+      "tt": "zlokalizowana godzina z sekundami",
+      "ttt": "zlokalizowana godzina z sekundami i skróconą strefą",
+      "tttt": "zlokalizowana godzina z sekundami i pełną strefą",
+      "T": "zlokalizowana godzina 24-godzinna",
+      "TT": "zlokalizowana godzina 24-godzinna z sekundami",
+      "TTT": "zlokalizowana godzina 24-godzinna z sekundami i skróconą strefą",
+      "TTTT": "zlokalizowana godzina 24-godzinna z sekundami i pełną strefą",
+      "f": "krótka zlokalizowana data i godzina",
+      "ff": "mniej krótka zlokalizowana data i godzina",
+      "fff": "rozbudowana zlokalizowana data i godzina",
+      "ffff": "bardzo rozbudowana zlokalizowana data i godzina",
+      "F": "krótka zlokalizowana data i godzina z sekundami",
+      "FF": "mniej krótka zlokalizowana data i godzina z sekundami",
+      "FFF": "rozbudowana zlokalizowana data i godzina z sekundami",
+      "FFFF": "bardzo rozbudowana zlokalizowana data i godzina z sekundami",
+      "X": "znacznik czasu unix w sekundach",
+      "x": "znacznik czasu unix w milisekundach"
+    }
+  }
+}

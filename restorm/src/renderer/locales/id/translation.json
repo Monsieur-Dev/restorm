@@ -1,0 +1,619 @@
+{
+  "app": {
+    "title": "restorm",
+    "openSettings": "Buka pengaturan",
+    "draftsRestoredTitle": "Pekerjaan yang belum disimpan telah dipulihkan",
+    "draftsRestoredBody_other": "{{count}} draf dipulihkan dari sesi sebelumnya."
+  },
+  "statusbar": {
+    "requestHistory": "Riwayat permintaan",
+    "envSelector": {
+      "applyToAll": "Terapkan ke semua permintaan"
+    }
+  },
+  "authFailureToast": {
+    "title": "Autentikasi gagal",
+    "fallbackReason": "Permintaan autentikasi tidak berhasil.",
+    "openAuthRoute": "Buka rute autentikasi"
+  },
+  "menuBar": {
+    "file": "File",
+    "new": "Baru",
+    "import": "Impor",
+    "open": "Buka",
+    "openFolder": "Buka folder",
+    "recentFiles": "File terbaru",
+    "favorites": "Favorit",
+    "close": "Tutup",
+    "save": "Simpan",
+    "saveAll": "Simpan semua",
+    "saveAs": "Simpan sebagai",
+    "exit": "Keluar",
+    "selection": "Pilihan",
+    "tools": "Alat",
+    "findInCollection": "Cari dalam koleksi",
+    "addRequest": "Tambah permintaan",
+    "addRequestHttp": "Permintaan HTTP",
+    "addRequestGraphql": "Permintaan GraphQL",
+    "addRequestGrpc": "Permintaan gRPC",
+    "addRequestSoap": "Permintaan SOAP",
+    "addRequestOdata": "Permintaan OData",
+    "addRequestWebsocket": "Permintaan WebSocket",
+    "addFolder": "Tambah folder",
+    "addEnvironmentFolder": "Tambah folder lingkungan",
+    "addVariable": "Tambah variabel",
+    "addTag": "Tambah tag",
+    "expandAllFolders": "Bentangkan semua folder",
+    "collapseAllFolders": "Ciutkan semua folder",
+    "sendActiveRequest": "Kirim permintaan",
+    "cancelActiveRequest": "Batalkan permintaan",
+    "generateCodeSnippet": "Buat cuplikan kode",
+    "copyAsCurl": "Salin sebagai cURL",
+    "exportOpenApi": "Ekspor ke OpenAPI",
+    "clearAuthCache": "Bersihkan cache autentikasi",
+    "openLogsFolder": "Buka folder log"
+  },
+  "sidebar": {
+    "addRequest": "Tambah permintaan",
+    "collapseAll": "Ciutkan semua permintaan",
+    "workspace": "Ruang kerja",
+    "favorites": "Favorit",
+    "newFolder": "Folder baru",
+    "newEnvironmentFolder": "Folder lingkungan baru",
+    "contextMenu": {
+      "createFolder": "Buat folder",
+      "createEnvironmentFolder": "Buat folder lingkungan",
+      "delete": "Hapus",
+      "clone": "Klon",
+      "rename": "Ubah nama",
+      "addToFavorites": "Tambah ke favorit",
+      "removeFromFavorites": "Hapus dari favorit",
+      "closeTab": "Tutup",
+      "closeOtherTabs": "Tutup yang lain",
+      "closeTabsToTheRight": "Tutup yang di kanan",
+      "closeAllTabs": "Tutup semua",
+      "add": {
+        "title": "Tambah",
+        "folder": "Folder",
+        "httpGet": "Permintaan HTTP – GET",
+        "httpPost": "Permintaan HTTP – POST",
+        "httpPut": "Permintaan HTTP – PUT",
+        "httpPatch": "Permintaan HTTP – PATCH",
+        "httpDelete": "Permintaan HTTP – DELETE",
+        "graphql": "Permintaan GraphQL",
+        "grpc": "Permintaan gRPC",
+        "soap": "Permintaan SOAP",
+        "websocket": "Permintaan WebSocket",
+        "odata": "Permintaan OData",
+        "auth": "Permintaan autentikasi HTTP"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Konfirmasi penghapusan",
+      "folderMessage": "Apakah Anda yakin ingin menghapus folder \"{{name}}\" dan semua isinya?",
+      "itemMessage": "Apakah Anda yakin ingin menghapus \"{{name}}\"?",
+      "confirm": "Hapus",
+      "cancel": "Batal"
+    }
+  },
+  "environment": {
+    "newName": "Lingkungan baru",
+    "add": "Tambah lingkungan",
+    "rename": "Ubah nama",
+    "addSub": "Tambah sub-lingkungan",
+    "delete": "Hapus"
+  },
+  "folderView": {
+    "environments": "Lingkungan",
+    "environmentsAriaLabel": "Lingkungan folder",
+    "variables": "Variabel",
+    "addVariable": "Tambah baris variabel",
+    "selectEnvironment": "Pilih lingkungan untuk melihat variabel",
+    "tabs": {
+      "docs": "Dokumen",
+      "configuration": "Konfigurasi",
+      "notes": "Catatan"
+    },
+    "home": {
+      "configureEnvs": "Konfigurasi lingkungan",
+      "configureEnvsDesc": "Atur URL dasar, variabel, dan autentikasi untuk setiap lingkungan",
+      "viewDocs": "Lihat dokumentasi",
+      "viewDocsDesc": "Telusuri dokumentasi API, model, dan endpoint",
+      "favoriteRequests": "Permintaan favorit",
+      "removeFavorite": "Hapus dari favorit",
+      "apiUpdate": {
+        "title": "Pembaruan spec API",
+        "noConfig": "Folder ini tidak dibuat dari sumber yang dapat diimpor.",
+        "urlLabel": "URL",
+        "lastImportedLabel": "Impor terakhir",
+        "lastCheckedLabel": "Pemeriksaan terakhir",
+        "neverImported": "Belum pernah diimpor",
+        "neverChecked": "Belum pernah diperiksa",
+        "refreshing": "Menyegarkan spec API…",
+        "fetching": "Mengambil…",
+        "upToDate": "Spec API sudah terbaru.",
+        "ok": "OK"
+      }
+    },
+    "contextVariables": {
+      "title": "Variabel konteks yang tersedia",
+      "description": "Gunakan variabel ini di URL permintaan Anda dan variabel bertipe ekspresi dengan sintaks {{handlebars}}.",
+      "name": "Variabel",
+      "value": "Nilai yang diselesaikan",
+      "copied": "Tersalin!"
+    }
+  },
+  "requestTab": {
+    "deprecated": "Endpoint ini tidak digunakan lagi dan mungkin dihapus pada versi mendatang.",
+    "send": "Kirim",
+    "cancel": "Batal",
+    "urlPlaceholder": "URL permintaan",
+    "methodSelect": "Pilih metode HTTP",
+    "addHeader": "Tambah header",
+    "addParam": "Tambah parameter",
+    "environmentSelector": {
+      "noEnvironment": "Tidak ada lingkungan"
+    },
+    "body": {
+      "fileLabel": "File atau URL:",
+      "browse": "Telusuri..."
+    },
+    "tabs": {
+      "docs": "Dokumen",
+      "requestLayout": "Permintaan",
+      "headers": "Header",
+      "body": "Body",
+      "params": "Parameter",
+      "pathParams": "Parameter jalur",
+      "notes": "Catatan",
+      "codeSnippets": "Cuplikan kode",
+      "responsesHistory": "Riwayat respons"
+    },
+    "responses": {
+      "tabs": {
+        "response": "Respons",
+        "requestBody": "Body permintaan",
+        "graph": "Grafik"
+      },
+      "loading": "Mengirim permintaan...",
+      "noResponse": "Klik Kirim untuk menjalankan permintaan",
+      "history": {
+        "list": "Daftar riwayat respons",
+        "empty": "Belum ada respons yang dicatat",
+        "select": "Pilih respons untuk melihat detail",
+        "pin": "Sematkan respons",
+        "unpin": "Lepas sematan respons"
+      }
+    }
+  },
+  "workbench": {
+    "tabContextMenu": {
+      "close": "Tutup",
+      "closeOthers": "Tutup yang lain",
+      "addToFavorites": "Tambah ke favorit",
+      "removeFromFavorites": "Hapus dari favorit"
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Pergi ke definisi"
+  },
+  "keyValueTable": {
+    "types": {
+      "string": "String",
+      "secret": "Rahasia",
+      "number": "Angka",
+      "dateTime": "Tanggal/waktu",
+      "color": "Warna",
+      "expression": "Ekspresi",
+      "boolean": "Boolean"
+    },
+    "apiEnums": "Tipe yang didefinisikan API"
+  },
+  "graphql": {
+    "send": "Kirim",
+    "urlPlaceholder": "URL endpoint GraphQL",
+    "tabs": {
+      "query": "Kueri",
+      "variables": "Variabel",
+      "headers": "Header"
+    }
+  },
+  "grpc": {
+    "send": "Panggil",
+    "urlPlaceholder": "Server gRPC (host:port)",
+    "tabs": {
+      "message": "Pesan",
+      "metadata": "Metadata"
+    }
+  },
+  "soap": {
+    "send": "Kirim",
+    "urlPlaceholder": "URL endpoint SOAP",
+    "tabs": {
+      "body": "Body",
+      "headers": "Header"
+    }
+  },
+  "websocket": {
+    "connect": "Hubungkan",
+    "connected": "Terhubung",
+    "disconnected": "Terputus",
+    "noMessages": "Belum ada pesan",
+    "urlPlaceholder": "URL WebSocket",
+    "event": "Event",
+    "topic": "Topik",
+    "tabs": {
+      "message": "Pesan",
+      "headers": "Header"
+    }
+  },
+  "search": {
+    "placeholder": "Cari...",
+    "noResults": "Tidak ada hasil ditemukan",
+    "resultsAriaLabel": "Hasil pencarian",
+    "categories": {
+      "request": "Permintaan",
+      "folder": "Folder",
+      "environment": "Lingkungan",
+      "settings": "Pengaturan",
+      "tag": "Tag"
+    },
+    "tooltip": {
+      "noDetails": "Tidak ada detail yang tersedia",
+      "noContent": "Tidak ada dokumentasi atau catatan"
+    }
+  },
+  "httpStatus": {
+    "100": {
+      "name": "Continue",
+      "description": "Server telah menerima header permintaan dan klien harus melanjutkan dengan mengirim body permintaan."
+    },
+    "101": {
+      "name": "Switching Protocols",
+      "description": "Pemohon meminta server untuk mengganti protokol dan server telah menyetujuinya."
+    },
+    "200": {
+      "name": "OK",
+      "description": "Respons standar untuk permintaan HTTP yang berhasil. Respons sebenarnya bergantung pada metode permintaan yang digunakan."
+    },
+    "201": {
+      "name": "Created",
+      "description": "Permintaan telah dipenuhi, menghasilkan pembuatan sumber daya baru."
+    },
+    "202": {
+      "name": "Accepted",
+      "description": "Permintaan telah diterima untuk diproses, tetapi pemrosesan belum selesai."
+    },
+    "204": {
+      "name": "No Content",
+      "description": "Server berhasil memproses permintaan dan tidak mengembalikan konten apa pun."
+    },
+    "301": {
+      "name": "Moved Permanently",
+      "description": "Permintaan ini dan semua permintaan mendatang harus diarahkan ke URI yang diberikan."
+    },
+    "302": {
+      "name": "Found",
+      "description": "Memberi tahu klien untuk melihat URL lain. Spesifikasi HTTP/1.0 mengharuskan klien melakukan pengalihan sementara."
+    },
+    "304": {
+      "name": "Not Modified",
+      "description": "Menunjukkan bahwa sumber daya belum dimodifikasi sejak versi yang ditentukan oleh header permintaan."
+    },
+    "400": {
+      "name": "Bad Request",
+      "description": "Server tidak dapat atau tidak akan memproses permintaan karena kesalahan klien yang tampak (misalnya, sintaks permintaan yang salah)."
+    },
+    "401": {
+      "name": "Unauthorized",
+      "description": "Autentikasi diperlukan dan telah gagal atau belum diberikan."
+    },
+    "403": {
+      "name": "Forbidden",
+      "description": "Permintaan berisi data yang valid dan dipahami oleh server, tetapi server menolak tindakan tersebut."
+    },
+    "404": {
+      "name": "Not Found",
+      "description": "Sumber daya yang diminta tidak dapat ditemukan tetapi mungkin tersedia di masa mendatang."
+    },
+    "405": {
+      "name": "Method Not Allowed",
+      "description": "Metode permintaan tidak didukung untuk sumber daya yang diminta."
+    },
+    "408": {
+      "name": "Request Timeout",
+      "description": "Server kehabisan waktu menunggu permintaan."
+    },
+    "409": {
+      "name": "Conflict",
+      "description": "Menunjukkan bahwa permintaan tidak dapat diproses karena konflik dalam status sumber daya saat ini."
+    },
+    "410": {
+      "name": "Gone",
+      "description": "Menunjukkan bahwa sumber daya yang diminta sebelumnya digunakan tetapi tidak lagi tersedia dan tidak akan tersedia lagi."
+    },
+    "415": {
+      "name": "Unsupported Media Type",
+      "description": "Entitas permintaan memiliki tipe media yang tidak didukung oleh server atau sumber daya."
+    },
+    "422": {
+      "name": "Unprocessable Entity",
+      "description": "Permintaan telah dibentuk dengan baik tetapi tidak dapat diikuti karena kesalahan semantik."
+    },
+    "429": {
+      "name": "Too Many Requests",
+      "description": "Pengguna telah mengirim terlalu banyak permintaan dalam jangka waktu tertentu (pembatasan kecepatan)."
+    },
+    "500": {
+      "name": "Internal Server Error",
+      "description": "Pesan kesalahan umum yang diberikan saat kondisi tak terduga ditemui dan tidak ada pesan yang lebih spesifik yang sesuai."
+    },
+    "501": {
+      "name": "Not Implemented",
+      "description": "Server tidak mengenali metode permintaan, atau tidak memiliki kemampuan untuk memenuhi permintaan tersebut."
+    },
+    "502": {
+      "name": "Bad Gateway",
+      "description": "Server bertindak sebagai gateway atau proxy dan menerima respons yang tidak valid dari server upstream."
+    },
+    "503": {
+      "name": "Service Unavailable",
+      "description": "Server tidak dapat menangani permintaan (karena kelebihan beban atau sedang dalam pemeliharaan)."
+    },
+    "504": {
+      "name": "Gateway Timeout",
+      "description": "Server bertindak sebagai gateway atau proxy dan tidak menerima respons tepat waktu dari server upstream."
+    }
+  },
+  "welcome": {
+    "confirmRemoveFavorite": "Apakah Anda yakin ingin menghapus \"{{fileName}}\" dari favorit?",
+    "noFilesHint": "Buka file atau buat yang baru untuk memulai",
+    "newAriaLabel": "Buat koleksi baru",
+    "openAriaLabel": "Buka koleksi dari disk",
+    "landmarkLabel": "Selamat datang"
+  },
+  "save": {
+    "title": "Opsi penyimpanan",
+    "mode": {
+      "label": "Mode penyimpanan",
+      "file": "File tunggal",
+      "folder": "Struktur folder",
+      "fileDescription": "Simpan semuanya dalam satu file",
+      "folderDescription": "Simpan sebagai struktur folder dengan file terpisah"
+    },
+    "format": {
+      "label": "Format",
+      "yamlDescription": "Mudah dibaca manusia",
+      "jsonDescription": "Format standar",
+      "json5Description": "JSON + komentar"
+    },
+    "preview": {
+      "label": "Pratinjau struktur",
+      "noDocumentation": "Tidak ada dokumentasi yang diuraikan untuk sumber ini."
+    }
+  },
+  "common": {
+    "cancel": "Batal",
+    "save": "Simpan"
+  },
+  "helpers": {
+    "categories": {
+      "comparison": "Perbandingan",
+      "string": "String",
+      "math": "Matematika",
+      "array": "Array",
+      "object": "Objek",
+      "url": "URL",
+      "date": "Tanggal",
+      "regex": "Regex",
+      "misc": "Lain-lain"
+    },
+    "eq": "Kesetaraan ketat (===)",
+    "ne": "Ketidaksetaraan ketat (!==)",
+    "neq": "Ketidaksetaraan ketat (!==)",
+    "lt": "Kurang dari (<)",
+    "lte": "Kurang dari atau sama dengan (<=)",
+    "gt": "Lebih besar dari (>)",
+    "gte": "Lebih besar dari atau sama dengan (>=)",
+    "and": "Helper blok: render jika semua nilai bernilai benar",
+    "or": "Helper blok: render jika ada nilai yang bernilai benar",
+    "not": "Mengembalikan nilai boolean kebalikannya",
+    "ifEquals": "Helper blok: render jika nilai sama",
+    "is": "Helper blok: perbandingan kesetaraan longgar",
+    "isnt": "Helper blok: perbandingan ketidaksetaraan longgar",
+    "default": "Mengembalikan nilai default jika yang pertama null/undefined",
+    "compare": "Helper blok: bandingkan dengan operator",
+    "lowercase": "Mengonversi string menjadi huruf kecil",
+    "uppercase": "Mengonversi string menjadi huruf besar",
+    "capitalize": "Menjadikan huruf pertama menjadi huruf besar",
+    "capitalizeAll": "Menjadikan huruf pertama setiap kata menjadi huruf besar",
+    "titleize": "Menjadikan huruf pertama setiap kata menjadi huruf besar",
+    "camelcase": "Mengonversi ke camelCase",
+    "pascalcase": "Mengonversi ke PascalCase",
+    "snakecase": "Mengonversi ke snake_case",
+    "snakeCase": "Mengonversi ke snake_case (alias)",
+    "dashcase": "Mengonversi ke dash-case (kebab-case)",
+    "dotcase": "Mengonversi ke dot.case",
+    "pathcase": "Mengonversi ke path/case",
+    "sentencecase": "Mengonversi ke Sentence case",
+    "slugify": "Mengonversi ke slug ramah URL",
+    "trim": "Menghapus spasi di kedua ujung",
+    "trimLeft": "Menghapus spasi di awal",
+    "trimRight": "Menghapus spasi di akhir",
+    "replace": "Mengganti semua kemunculan a dengan b",
+    "split": "Membagi string menjadi array",
+    "truncate": "Memotong string ke panjang yang ditentukan",
+    "ellipsis": "Memotong string dengan elipsis",
+    "append": "Menambahkan akhiran ke string",
+    "prepend": "Menambahkan awalan ke string",
+    "reverse": "Membalik string atau array",
+    "startsWith": "Helper blok: render jika string diawali dengan awalan",
+    "endsWith": "Helper blok: render jika string diakhiri dengan akhiran",
+    "contains": "Helper blok: render jika string berisi substring",
+    "padStart": "Mengisi awal string untuk mencapai panjang",
+    "padEnd": "Mengisi akhir string untuk mencapai panjang",
+    "repeat": "Mengulang string n kali",
+    "substring": "Mengekstrak bagian dari string",
+    "indexOf": "Mengembalikan indeks substring (-1 jika tidak ditemukan)",
+    "count": "Menghitung kemunculan substring",
+    "newLineToBr": "Mengonversi baris baru menjadi tag <br>",
+    "stripTags": "Menghapus tag HTML dari string",
+    "add": "Menjumlahkan dua angka",
+    "subtract": "Mengurangkan b dari a",
+    "multiply": "Mengalikan dua angka",
+    "divide": "Membagi a dengan b",
+    "modulo": "Mengembalikan sisa a / b",
+    "abs": "Mengembalikan nilai absolut",
+    "ceil": "Membulatkan ke atas ke bilangan bulat terdekat",
+    "floor": "Membulatkan ke bawah ke bilangan bulat terdekat",
+    "round": "Membulatkan ke bilangan bulat terdekat",
+    "min": "Mengembalikan nilai minimum",
+    "max": "Mengembalikan nilai maksimum",
+    "pow": "Mengembalikan basis pangkat eksponen",
+    "sqrt": "Mengembalikan akar kuadrat",
+    "random": "Mengembalikan bilangan bulat acak antara min dan max",
+    "sum": "Mengembalikan jumlah nilai array",
+    "avg": "Mengembalikan rata-rata nilai array",
+    "toFixed": "Memformat angka dengan desimal tetap",
+    "toInt": "Mengonversi ke bilangan bulat",
+    "toFloat": "Mengonversi ke float",
+    "first": "Mengembalikan elemen pertama dari array",
+    "last": "Mengembalikan elemen terakhir dari array",
+    "after": "Mengembalikan elemen setelah indeks n",
+    "before": "Mengembalikan elemen sebelum indeks n",
+    "slice": "Mengembalikan irisan array",
+    "length": "Mengembalikan panjang array/string/objek",
+    "join": "Menggabungkan elemen array dengan pemisah",
+    "sort": "Mengurutkan array",
+    "unique": "Mengembalikan nilai unik",
+    "concat": "Menggabungkan array",
+    "flatten": "Meratakan array bersarang",
+    "pluck": "Mengekstrak properti dari array objek",
+    "itemAt": "Mengembalikan item pada indeks",
+    "inArray": "Helper blok: render jika nilai ada dalam array",
+    "isArray": "Mengembalikan true jika nilai adalah array",
+    "isEmpty": "Helper blok: render jika nilai kosong",
+    "some": "Helper blok: render jika beberapa item cocok",
+    "every": "Helper blok: render jika semua item cocok",
+    "JSONstringify": "Mengonversi objek ke string JSON",
+    "JSONparse": "Mengurai string JSON menjadi objek",
+    "get": "Mendapatkan properti bersarang berdasarkan jalur",
+    "keys": "Mengembalikan kunci objek",
+    "values": "Mengembalikan nilai objek",
+    "entries": "Mengembalikan pasangan [kunci, nilai]",
+    "hasOwn": "Helper blok: render jika objek memiliki properti",
+    "pick": "Membuat objek dengan kunci yang dipilih",
+    "omit": "Membuat objek tanpa kunci yang ditentukan",
+    "merge": "Menggabungkan beberapa objek",
+    "isObject": "Mengembalikan true jika nilai adalah objek",
+    "typeOf": "Mengembalikan tipe nilai",
+    "encodeURI": "Mengenkode string untuk URL",
+    "decodeURI": "Mendekode string URL",
+    "urlParse": "Mengurai URL menjadi komponen",
+    "stripQuerystring": "Menghapus querystring dari URL",
+    "stripProtocol": "Menghapus protokol dari URL",
+    "now": "Mengembalikan tanggal saat ini sebagai string ISO",
+    "timestamp": "Mengembalikan timestamp saat ini dalam milidetik",
+    "year": "Mengembalikan tahun saat ini",
+    "formatDate": "Memformat tanggal dengan pola",
+    "match": "Mengembalikan kecocokan regex",
+    "test": "Helper blok: render jika regex cocok",
+    "coalesce": "Mengembalikan nilai pertama yang bukan null/undefined",
+    "uuid": "Menghasilkan UUID acak",
+    "noop": "Helper blok yang merender konten apa adanya",
+    "raw": "Helper blok yang merender konten mentah",
+    "times": "Helper blok yang mengulang n kali",
+    "range": "Menghasilkan array angka"
+  },
+  "behavior": {
+    "title": "Perilaku",
+    "syncSidebarWithTabs": "Sinkronkan pilihan sidebar dengan tab aktif",
+    "syncSidebarWithTabsDescription": "Saat berpindah tab di ruang kerja, otomatis pilih dan tampilkan item yang sesuai di sidebar",
+    "dateTimeFormat": "Format tanggal/waktu",
+    "dateTimeFormatDescription": "Format yang digunakan untuk menampilkan tanggal dan waktu dalam aplikasi",
+    "dateTimeFormat.us": "Format AS (MM/DD/YYYY, 12 jam)",
+    "dateTimeFormat.iso": "Format ISO (YYYY-MM-DD, 24 jam)"
+  },
+  "console": {
+    "title": "Konsol",
+    "requestFormat": "Format permintaan",
+    "requestFormatDescription": "Jenis shell default yang digunakan untuk menampilkan permintaan keluar di tab Konsol. Setiap baris adalah baris perintah yang dapat disalin-tempel; tombol di toolbar Konsol menggantikan default ini untuk tab saat ini.",
+    "requestFormat.curl": "curl (gaya Unix)",
+    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+  },
+  "import": {
+    "title": "Impor permintaan",
+    "source": {
+      "label": "Tempel sesuatu di sini!",
+      "placeholder": "Masukkan jalur file, URL, atau tempel perintah curl/PowerShell..."
+    },
+    "formats": {
+      "swagger": {
+        "description": "Spesifikasi OpenAPI 2.0 yang lahir di SmartBear. Tempel Swagger JSON atau YAML — Restorm mengurai setiap operasi, menarik skema keamanan, dan mengubah seluruh dokumen menjadi pohon permintaan yang dapat dinavigasi.",
+        "trademark": "Swagger adalah merek dagang terdaftar dari SmartBear Software."
+      },
+      "openapi": {
+        "description": "Standar OpenAPI saat ini (3.0 dan 3.1). Ergonomi tempel-dan-jalan yang sama dengan Swagger: parameter, body permintaan, skema keamanan, dan webhook hadir sebagai pohon permintaan bertipe dengan contoh yang siap dikirim.",
+        "trademark": "OpenAPI adalah proyek dari OpenAPI Initiative di bawah Linux Foundation."
+      },
+      "curl": {
+        "description": "Sudah punya permintaan yang berjalan di terminal Anda? Tempel perintah curl lengkap — flag, header, body, query string — dan Restorm membangunnya kembali sebagai permintaan asli yang dapat Anda jalankan ulang, edit, dan sematkan.",
+        "trademark": "curl adalah perangkat lunak sumber terbuka © Daniel Stenberg, digunakan di sini berdasarkan ketentuannya."
+      },
+      "powershell": {
+        "description": "Ide yang sama, rasa PowerShell. Tempel perintah Invoke-WebRequest atau Invoke-RestMethod dan Restorm membaca URI, metode, header, dan body untuk menyiapkan permintaan yang dapat Anda kembangkan secara visual.",
+        "trademark": "PowerShell adalah merek dagang terdaftar dari Microsoft Corporation."
+      },
+      "postman": {
+        "description": "Punya koleksi Postman yang tersimpan di kantor? Lepaskan JSON-nya — Restorm membaca setiap permintaan, setiap contoh respons, dan setiap variabel lingkungan, lalu membangun ulang koleksi sebagai pohon Restorm yang dapat Anda jalankan berdampingan dengan API lainnya.",
+        "trademark": "Postman adalah merek dagang terdaftar dari Postman, Inc., digunakan di sini hanya untuk referensi kompatibilitas."
+      },
+      "insomnia": {
+        "description": "Datang dari Insomnia? Lepaskan ekspor Anda. Restorm memahami format koleksi v4 / v5-nya, membawa setiap permintaan, header, body, dan lingkungan, dan menyajikan semuanya sebagai pohon Restorm.",
+        "trademark": "Insomnia adalah merek dagang terdaftar dari Kong Inc., digunakan di sini hanya untuk referensi kompatibilitas."
+      },
+      "bruno": {
+        "description": "File .bru rasa Bruno atau ekspor folder — Restorm membaca format teks .bru, termasuk blok skripnya, dan membuat ulang setiap permintaan sebagai simpul Restorm kelas satu yang siap dikirim.",
+        "trademark": "Bruno adalah perangkat lunak sumber terbuka (MIT) oleh Anoop M. D., digunakan di sini berdasarkan ketentuannya."
+      },
+      "graphql": {
+        "description": "Tempel SDL GraphQL (.graphql / .gql / tempelan dari klien GraphQL Anda) dan Restorm membuat kerangka satu permintaan per operasi, terhubung ke tipe query / mutation / subscription yang tepat dengan variabel yang sudah terstruktur.",
+        "trademark": "GraphQL adalah merek dagang dari GraphQL Foundation, sebuah proyek dari Joint Development Foundation."
+      },
+      "grpc": {
+        "description": "Lepaskan file .proto (atau direktori yang berisinya) dan Restorm menelusuri setiap layanan, setiap RPC, setiap pesan — mengubah setiap metode menjadi permintaan bertipe yang dapat Anda kirim melalui eksekutor gRPC tanpa menyentuh codegen.",
+        "trademark": "gRPC adalah proyek dari Cloud Native Computing Foundation."
+      },
+      "soap": {
+        "description": "Punya WSDL? Tempel (atau URL-nya) — Restorm mengurai setiap <port> dan <operation> dan menghasilkan amplop SOAP yang siap dikirim dengan header SOAPAction yang benar, kerangka body bertipe skema, dan skema autentikasi yang dideklarasikan oleh WSDL."
+      },
+      "websocket": {
+        "description": "Tempel endpoint WebSocket (ws:// atau wss://) — Restorm membuka koneksi, menangkap frame sambutan dari server, dan membuat kerangka permintaan send / subscribe dengan template payload yang dapat diputar ulang.",
+        "trademark": "WebSocket adalah protokol yang distandarisasi oleh IETF (RFC 6455) dan W3C."
+      },
+      "kafka": {
+        "description": "Tempel URL bootstrap-server Apache Kafka (atau daftar topik) — Restorm mendaftarkan consumer + producer per topik, mendekode payload Avro / Protobuf melalui Schema Registry Anda, dan memungkinkan Anda memutar ulang offset individu dengan satu klik.",
+        "trademark": "Apache Kafka dan logo Kafka adalah merek dagang dari Apache Software Foundation."
+      },
+      "socketio": {
+        "description": "Tempel URL server Socket.IO — Restorm menegosiasikan handshake, mencantumkan namespace dan nama event yang dipancarkan server, dan memberi Anda satu permintaan per event emit / on dengan validasi payload.",
+        "trademark": "Socket.IO adalah pustaka sumber terbuka yang dirilis di bawah lisensi MIT; nama dan logo digunakan secara nominatif."
+      },
+      "odata": {
+        "description": "Tempel URL dokumen layanan OData atau file $metadata — Restorm membaca CSDL, membangun ulang entity set, function import, dan action, ditambah mengisi opsi kueri $filter / $select / $top / $skip pada setiap operasi."
+      },
+      "mqtt": {
+        "description": "Tempel URL broker MQTT atau katalog topik — Restorm membuat kerangka permintaan publish / subscribe per topik, mempertahankan koneksi tetap hidup untuk pratinjau streaming, dan mengingat snapshot pesan retained sehingga Anda dapat memutarnya ulang nanti.",
+        "trademark": "MQTT adalah standar OASIS; nama dan logo MQTT adalah merek dagang dari OASIS Open."
+      }
+    },
+    "loading": "Menganalisis...",
+    "noResults": "Tidak ada permintaan ditemukan",
+    "error": {
+      "unknown": "Terjadi kesalahan yang tidak diketahui"
+    },
+    "ok": "Impor",
+    "cancel": "Batal",
+    "dropZone": "Zona lepas"
+  }
+}

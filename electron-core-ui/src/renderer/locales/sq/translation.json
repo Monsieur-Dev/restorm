@@ -1,0 +1,327 @@
+{
+  "common": {
+    "opened": "U hap",
+    "refresh": "Rifresko"
+  },
+  "file": {
+    "untitled": "Pa titull",
+    "unsavedChanges": {
+      "title": "Ndryshime të paruajtura",
+      "message": "Doni t'i ruani ndryshimet te \"{{fileName}}\"?",
+      "detail": "Ndryshimet tuaja do të humbasin nëse nuk i ruani.",
+      "save": "Ruaj",
+      "dontSave": "Mos ruaj",
+      "cancel": "Anulo"
+    }
+  },
+  "recentFilesVignette": {
+    "favorites": "Të preferuarat",
+    "recentFiles": "Skedarët e fundit",
+    "addToFavorites": "Shto te të preferuarat",
+    "removeFromFavorites": "Hiq nga të preferuarat",
+    "confirmRemoveFavorite": "Jeni i sigurt se doni të hiqni \"{{fileName}}\" nga të preferuarat?",
+    "favoritesLandmarkLabel": "Lista e të preferuarave",
+    "recentsLandmarkLabel": "Lista e skedarëve të fundit"
+  },
+  "welcomeScreen": {
+    "landmarkLabel": "Mirësevini"
+  },
+  "menuBar": {
+    "new": "I ri",
+    "open": "Hap",
+    "edit": "Modifiko",
+    "view": "Pamja",
+    "help": "Ndihmë",
+    "undo": "Zhbëj",
+    "redo": "Ribëj",
+    "cut": "Pre",
+    "copy": "Kopjo",
+    "paste": "Ngjit",
+    "find": "Gjej",
+    "replace": "Zëvendëso",
+    "toggleSidebar": "Ndërro shiritin anësor",
+    "toggleResponsePanel": "Ndërro panelin e përgjigjes",
+    "zoomIn": "Zmadho",
+    "zoomOut": "Zvogëlo",
+    "resetZoom": "Rikthe zoom-in",
+    "settings": "Parametrat",
+    "toggleDevTools": "Ndërro veglat e zhvilluesit",
+    "toggleFullscreen": "Ndërro pamjen e plotë",
+    "about": "Rreth",
+    "documentation": "Dokumentacioni",
+    "keyboardShortcuts": "Shkurtoret e tastierës",
+    "releaseNotes": "Shënimet e versionit",
+    "reportIssue": "Raporto një problem"
+  },
+  "settings": {
+    "title": "Parametrat",
+    "theme": "Tema",
+    "language": "Gjuha",
+    "searchPlaceholder": "Kërko parametrat...",
+    "noResults": "Nuk u gjet asnjë parametër.",
+    "numberOutOfRange": "Vlera duhet të jetë midis {{min}} dhe {{max}}.",
+    "resetSetting": "Rikthe parametrin",
+    "copySettingId": "Kopjo ID-në e parametrit",
+    "settingOptions": "Opsionet e parametrit",
+    "scopeTabsLabel": "Fusha e parametrave",
+    "userOnlyHidden": "{{count}} parametra vetëm për përdoruesin janë të fshehur në këtë skedë.",
+    "scope": {
+      "user": "Përdoruesi",
+      "workspace": "Hapësira e punës",
+      "workspaceDisabledTooltip": "Hap një projekt për të modifikuar parametrat e hapësirës së punës"
+    },
+    "appearance": {
+      "title": "Pamja",
+      "theme": {
+        "title": "Tema",
+        "description": "Zgjidh temën e ngjyrave të aplikacionit"
+      },
+      "language": {
+        "title": "Gjuha",
+        "description": "Zgjidh gjuhën e aplikacionit",
+        "en": "English",
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "pt": "Português",
+        "nl": "Nederlands",
+        "sv": "Svenska",
+        "da": "Dansk",
+        "nb": "Norsk bokmål",
+        "fi": "Suomi",
+        "pl": "Polski",
+        "cs": "Čeština",
+        "hu": "Magyar",
+        "ro": "Română",
+        "el": "Ελληνικά",
+        "uk": "Українська",
+        "hr": "Hrvatski",
+        "sr": "Srpski",
+        "sq": "Shqip",
+        "tr": "Türkçe",
+        "id": "Bahasa Indonesia",
+        "vi": "Tiếng Việt",
+        "ja": "日本語",
+        "ko": "한국어",
+        "zh-CN": "简体中文",
+        "zh-TW": "繁體中文"
+      },
+      "advancedVisualEffects": {
+        "title": "Efekte vizuale të avancuara",
+        "description": "Aktivizo efekte vizuale të avancuara si zbehja e sfondit në mbivendosje dhe animacionet CSS. Çaktivizo për performancë më të mirë në harduer të nivelit të ulët."
+      },
+      "editor": {
+        "title": "Editori",
+        "fontSize": {
+          "title": "Madhësia e fontit",
+          "description": "Kontrollon madhësinë e fontit në pikselë për editorin e kodit"
+        },
+        "fontFamily": {
+          "title": "Familja e fontit",
+          "description": "Kontrollon familjen e fontit për editorin e kodit"
+        },
+        "wordWrap": {
+          "title": "Mbështjellja e rreshtit",
+          "description": "Kontrollon nëse rreshtat duhet të mbështillen në editorin e kodit"
+        },
+        "minimap": {
+          "title": "Minihartë",
+          "description": "Kontrollon nëse minihatrta shfaqet në editorin e kodit"
+        },
+        "lineNumbers": {
+          "title": "Numrat e rreshtit",
+          "description": "Kontrollon nëse numrat e rreshtave shfaqen në editorin e kodit"
+        }
+      }
+    },
+    "files": {
+      "title": "Skedarët",
+      "autoSave": {
+        "title": "Ruajtje automatike",
+        "description": "Kontrollon ruajtjen automatike të editorëve të modifikuar. Lexo më shumë rreth ruajtjes automatike në dokumentacion.",
+        "off": "I çaktivizuar",
+        "afterDelay": "Pas vonesës",
+        "onWindowChange": "Në ndryshim dritareje"
+      },
+      "autoSaveDelay": {
+        "title": "Vonesa e ruajtjes automatike",
+        "description": "Kontrollon vonesën në milisekonda pas së cilës një editor i modifikuar ruhet automatikisht. Zbatohet vetëm kur Ruajtja automatike është vendosur në Pas vonesës."
+      }
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Shko te përkufizimi"
+  },
+  "tagsView": {
+    "removeTag": "Hiq etiketën",
+    "newTag": "Etiketë e re"
+  },
+  "contextMenu": {
+    "cut": "Pre",
+    "copy": "Kopjo",
+    "paste": "Ngjit"
+  },
+  "search": {
+    "placeholder": "Kërko...",
+    "noResults": "Nuk u gjet asnjë rezultat",
+    "resultsAriaLabel": "Rezultatet e kërkimit",
+    "categories": {
+      "request": "Kërkesa HTTP",
+      "folder": "Dosjet",
+      "environment": "Mjediset",
+      "settings": "Parametrat",
+      "tag": "Etiketat"
+    }
+  },
+  "iconSelect": {
+    "searchEmojis": "Kërko emojit...",
+    "noEmojisFound": "Nuk u gjet asnjë emoji",
+    "searchCodicons": "Kërko Codicons...",
+    "searchIconoir": "Kërko Iconoir...",
+    "searchPhosphor": "Kërko Phosphor...",
+    "searchMaterial": "Kërko Material...",
+    "searchSimpleIcons": "Kërko Simple Icons...",
+    "searchFeather": "Kërko Feather...",
+    "searchFontAwesome": "Kërko Font Awesome...",
+    "moreIcons": "+{{count}} ikona të tjera. Përdor kërkimin për të gjetur ikona specifike.",
+    "more": "+{{count}} më shumë. Përdor kërkimin për të gjetur ikona specifike.",
+    "noIconsFound": "Nuk u gjet asnjë ikonë",
+    "searchResults": "Rezultatet e kërkimit",
+    "categories": {
+      "files": "Skedarët",
+      "git": "Git",
+      "debug": "Debug",
+      "symbols": "Simbolet",
+      "arrows": "Shigjetat",
+      "ui": "UI",
+      "media": "Media",
+      "editing": "Editimi",
+      "terminal": "Terminal",
+      "people": "Njerëzit",
+      "notifications": "Njoftimet",
+      "brands": "Markat",
+      "communication": "Komunikimi",
+      "users": "Përdoruesit",
+      "business": "Biznes",
+      "medical": "Mjekësore",
+      "transport": "Transport",
+      "weather": "Moti",
+      "shapes": "Format",
+      "design": "Dizajn",
+      "devices": "Pajisjet",
+      "buildings": "Ndërtesat",
+      "nature": "Natyra",
+      "food": "Ushqimi",
+      "sport": "Sport",
+      "sports": "Sportet",
+      "animals": "Kafshët",
+      "tools": "Veglat"
+    },
+    "emojiCategories": {
+      "people": "Buzëqeshje dhe njerëz",
+      "nature": "Kafshë dhe natyrë",
+      "food": "Ushqim dhe pije",
+      "activity": "Aktivitete",
+      "travel": "Udhëtim dhe vende",
+      "objects": "Objekte",
+      "symbols": "Simbole",
+      "flags": "Flamuj"
+    }
+  },
+  "dateTimePicker": {
+    "ariaLabel": "Zgjedhës i datës/orës",
+    "openCalendar": "Hap kalendarin",
+    "previousYear": "Viti i mëparshëm",
+    "nextYear": "Viti tjetër",
+    "previousMonth": "Muaji i mëparshëm",
+    "nextMonth": "Muaji tjetër",
+    "selectMonth": "Zgjidh muajin",
+    "selectYear": "Zgjidh vitin",
+    "includeTime": "Përfshi orën",
+    "hours": "Orë",
+    "minutes": "Minuta",
+    "output": "Dalja",
+    "pattern": "Modeli",
+    "outputModes": {
+      "pattern": "Modeli",
+      "unix": "Unix (s)",
+      "epoch": "Epoch (ms)",
+      "iso": "ISO 8601"
+    },
+    "preview": "Pamja paraprake",
+    "tokens": {
+      "S": "milisekondë, pa mbushje",
+      "SSS": "milisekondë, e mbushur në 3",
+      "u": "sekonda fraksionale, funksionalisht identike me SSS",
+      "uu": "sekonda fraksionale, midis 0 dhe 99, e mbushur në 2",
+      "uuu": "sekonda fraksionale, midis 0 dhe 9",
+      "s": "sekondë, pa mbushje",
+      "ss": "sekondë, e mbushur në 2",
+      "m": "minutë, pa mbushje",
+      "mm": "minutë, e mbushur në 2",
+      "h": "orë në kohë 12-orëshe, pa mbushje",
+      "hh": "orë në kohë 12-orëshe, e mbushur në 2",
+      "H": "orë në kohë 24-orëshe, pa mbushje",
+      "HH": "orë në kohë 24-orëshe, e mbushur në 2",
+      "Z": "offset i ngushtë",
+      "ZZ": "offset i shkurtër",
+      "ZZZ": "offset teknik",
+      "ZZZZ": "offset i lokalizuar i shkurtuar",
+      "ZZZZZ": "offset i lokalizuar i pashkurtuar",
+      "z": "Zona IANA",
+      "a": "meridiem",
+      "d": "dita e muajit, pa mbushje",
+      "dd": "dita e muajit, e mbushur në 2",
+      "c": "dita e javës, si numër nga 1-7 (e hëna është 1, e diela është 7)",
+      "ccc": "dita e javës, si varg i lokalizuar i shkurtuar",
+      "cccc": "dita e javës, si varg i lokalizuar i pashkurtuar",
+      "ccccc": "dita e javës, si një shkronjë e vetme e lokalizuar",
+      "L": "muaji si numër i pambushur",
+      "LL": "muaji si numër i mbushur",
+      "LLL": "muaji si varg i lokalizuar i shkurtuar",
+      "LLLL": "muaji si varg i lokalizuar i pashkurtuar",
+      "LLLLL": "muaji si një shkronjë e vetme e lokalizuar",
+      "y": "viti, i pambushur",
+      "yy": "viti me dy shifra",
+      "yyyy": "viti me katër deri në gjashtë shifra, mbushet në 4",
+      "G": "era e lokalizuar e shkurtuar",
+      "GG": "era e lokalizuar e pashkurtuar",
+      "GGGGG": "era e lokalizuar me një shkronjë",
+      "kk": "viti i javës ISO, i pambushur",
+      "kkkk": "viti i javës ISO, i mbushur në 4",
+      "W": "numri i javës ISO, i pambushur",
+      "WW": "numri i javës ISO, i mbushur në 2",
+      "ii": "viti lokal i javës, i pambushur",
+      "iiii": "viti lokal i javës, i mbushur në 4",
+      "n": "numri lokal i javës, i pambushur",
+      "nn": "numri lokal i javës, i mbushur në 2",
+      "o": "ordinale (dita e vitit), e pambushur",
+      "ooo": "ordinale (dita e vitit), e mbushur në 3",
+      "q": "tremujori, pa mbushje",
+      "qq": "tremujori, i mbushur në 2",
+      "D": "data numerike e lokalizuar",
+      "DD": "data e lokalizuar me muaj të shkurtuar",
+      "DDD": "data e lokalizuar me muaj të plotë",
+      "DDDD": "data e lokalizuar me muaj të plotë dhe ditë të javës",
+      "t": "ora e lokalizuar",
+      "tt": "ora e lokalizuar me sekonda",
+      "ttt": "ora e lokalizuar me sekonda dhe offset të shkurtuar",
+      "tttt": "ora e lokalizuar me sekonda dhe offset të plotë",
+      "T": "ora e lokalizuar 24-orëshe",
+      "TT": "ora e lokalizuar 24-orëshe me sekonda",
+      "TTT": "ora e lokalizuar 24-orëshe me sekonda dhe offset të shkurtuar",
+      "TTTT": "ora e lokalizuar 24-orëshe me sekonda dhe offset të plotë",
+      "f": "data dhe ora e lokalizuar e shkurtër",
+      "ff": "data dhe ora e lokalizuar pak më e gjatë",
+      "fff": "data dhe ora e lokalizuar e detajuar",
+      "ffff": "data dhe ora e lokalizuar shumë e detajuar",
+      "F": "data dhe ora e lokalizuar e shkurtër me sekonda",
+      "FF": "data dhe ora e lokalizuar pak më e gjatë me sekonda",
+      "FFF": "data dhe ora e lokalizuar e detajuar me sekonda",
+      "FFFF": "data dhe ora e lokalizuar shumë e detajuar me sekonda",
+      "X": "timestamp unix në sekonda",
+      "x": "timestamp unix në milisekonda"
+    }
+  }
+}

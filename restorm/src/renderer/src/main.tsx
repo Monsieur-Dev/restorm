@@ -33,6 +33,31 @@ const { ElectronCoreUiProvider } = ElectronCoreUi as unknown as { ElectronCoreUi
 // Import translations
 import enTranslation from '../locales/en/translation.json'
 import frTranslation from '../locales/fr/translation.json'
+import esTranslation from '../locales/es/translation.json'
+import deTranslation from '../locales/de/translation.json'
+import itTranslation from '../locales/it/translation.json'
+import ptTranslation from '../locales/pt/translation.json'
+import sqTranslation from '../locales/sq/translation.json'
+import hrTranslation from '../locales/hr/translation.json'
+import fiTranslation from '../locales/fi/translation.json'
+import nlTranslation from '../locales/nl/translation.json'
+import elTranslation from '../locales/el/translation.json'
+import plTranslation from '../locales/pl/translation.json'
+import srTranslation from '../locales/sr/translation.json'
+import svTranslation from '../locales/sv/translation.json'
+import ukTranslation from '../locales/uk/translation.json'
+import zhCnTranslation from '../locales/zh-CN/translation.json'
+import zhTwTranslation from '../locales/zh-TW/translation.json'
+import jaTranslation from '../locales/ja/translation.json'
+import koTranslation from '../locales/ko/translation.json'
+import trTranslation from '../locales/tr/translation.json'
+import idTranslation from '../locales/id/translation.json'
+import viTranslation from '../locales/vi/translation.json'
+import csTranslation from '../locales/cs/translation.json'
+import daTranslation from '../locales/da/translation.json'
+import nbTranslation from '../locales/nb/translation.json'
+import huTranslation from '../locales/hu/translation.json'
+import roTranslation from '../locales/ro/translation.json'
 
 // Filter harmless Monaco cancellations so they don't spam the console
 const isMonacoCancellation = (reason: unknown): boolean => {
@@ -80,7 +105,32 @@ const initI18n = (): Promise<void> => {
   return safeInitializeI18n(
     {
       en: { translation: enTranslation },
-      fr: { translation: frTranslation }
+      fr: { translation: frTranslation },
+      es: { translation: esTranslation },
+      de: { translation: deTranslation },
+      it: { translation: itTranslation },
+      pt: { translation: ptTranslation },
+      sq: { translation: sqTranslation },
+      hr: { translation: hrTranslation },
+      fi: { translation: fiTranslation },
+      nl: { translation: nlTranslation },
+      el: { translation: elTranslation },
+      pl: { translation: plTranslation },
+      sr: { translation: srTranslation },
+      sv: { translation: svTranslation },
+      uk: { translation: ukTranslation },
+      'zh-CN': { translation: zhCnTranslation },
+      'zh-TW': { translation: zhTwTranslation },
+      ja: { translation: jaTranslation },
+      ko: { translation: koTranslation },
+      tr: { translation: trTranslation },
+      id: { translation: idTranslation },
+      vi: { translation: viTranslation },
+      cs: { translation: csTranslation },
+      da: { translation: daTranslation },
+      nb: { translation: nbTranslation },
+      hu: { translation: huTranslation },
+      ro: { translation: roTranslation }
     },
     'en'
   ).then(() => {

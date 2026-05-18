@@ -1,0 +1,619 @@
+{
+  "app": {
+    "title": "restorm",
+    "openSettings": "開啟設定",
+    "draftsRestoredTitle": "已還原未儲存的工作",
+    "draftsRestoredBody_other": "已從上一次工作階段還原 {{count}} 份草稿。"
+  },
+  "statusbar": {
+    "requestHistory": "請求歷史紀錄",
+    "envSelector": {
+      "applyToAll": "套用至所有請求"
+    }
+  },
+  "authFailureToast": {
+    "title": "驗證失敗",
+    "fallbackReason": "驗證請求未能成功。",
+    "openAuthRoute": "開啟驗證路由"
+  },
+  "menuBar": {
+    "file": "檔案",
+    "new": "新增",
+    "import": "匯入",
+    "open": "開啟",
+    "openFolder": "開啟資料夾",
+    "recentFiles": "最近開啟的檔案",
+    "favorites": "我的最愛",
+    "close": "關閉",
+    "save": "儲存",
+    "saveAll": "全部儲存",
+    "saveAs": "另存新檔",
+    "exit": "結束",
+    "selection": "選取",
+    "tools": "工具",
+    "findInCollection": "在集合中尋找",
+    "addRequest": "新增請求",
+    "addRequestHttp": "HTTP 請求",
+    "addRequestGraphql": "GraphQL 請求",
+    "addRequestGrpc": "gRPC 請求",
+    "addRequestSoap": "SOAP 請求",
+    "addRequestOdata": "OData 請求",
+    "addRequestWebsocket": "WebSocket 請求",
+    "addFolder": "新增資料夾",
+    "addEnvironmentFolder": "新增環境資料夾",
+    "addVariable": "新增變數",
+    "addTag": "新增標籤",
+    "expandAllFolders": "展開所有資料夾",
+    "collapseAllFolders": "收合所有資料夾",
+    "sendActiveRequest": "傳送請求",
+    "cancelActiveRequest": "取消請求",
+    "generateCodeSnippet": "產生程式碼片段",
+    "copyAsCurl": "複製為 cURL",
+    "exportOpenApi": "匯出為 OpenAPI",
+    "clearAuthCache": "清除驗證快取",
+    "openLogsFolder": "開啟記錄檔資料夾"
+  },
+  "sidebar": {
+    "addRequest": "新增請求",
+    "collapseAll": "收合所有請求",
+    "workspace": "工作區",
+    "favorites": "我的最愛",
+    "newFolder": "新增資料夾",
+    "newEnvironmentFolder": "新增環境資料夾",
+    "contextMenu": {
+      "createFolder": "建立資料夾",
+      "createEnvironmentFolder": "建立環境資料夾",
+      "delete": "刪除",
+      "clone": "複製",
+      "rename": "重新命名",
+      "addToFavorites": "加入我的最愛",
+      "removeFromFavorites": "從我的最愛移除",
+      "closeTab": "關閉",
+      "closeOtherTabs": "關閉其他",
+      "closeTabsToTheRight": "關閉右側",
+      "closeAllTabs": "全部關閉",
+      "add": {
+        "title": "新增",
+        "folder": "資料夾",
+        "httpGet": "HTTP – GET 請求",
+        "httpPost": "HTTP – POST 請求",
+        "httpPut": "HTTP – PUT 請求",
+        "httpPatch": "HTTP – PATCH 請求",
+        "httpDelete": "HTTP – DELETE 請求",
+        "graphql": "GraphQL 請求",
+        "grpc": "gRPC 請求",
+        "soap": "SOAP 請求",
+        "websocket": "WebSocket 請求",
+        "odata": "OData 請求",
+        "auth": "HTTP 驗證請求"
+      }
+    },
+    "deleteConfirm": {
+      "title": "確認刪除",
+      "folderMessage": "確定要刪除資料夾 \"{{name}}\" 及其所有內容嗎？",
+      "itemMessage": "確定要刪除 \"{{name}}\" 嗎？",
+      "confirm": "刪除",
+      "cancel": "取消"
+    }
+  },
+  "environment": {
+    "newName": "新增環境",
+    "add": "新增環境",
+    "rename": "重新命名",
+    "addSub": "新增子環境",
+    "delete": "刪除"
+  },
+  "folderView": {
+    "environments": "環境",
+    "environmentsAriaLabel": "資料夾環境",
+    "variables": "變數",
+    "addVariable": "新增變數列",
+    "selectEnvironment": "選取一個環境以檢視變數",
+    "tabs": {
+      "docs": "文件",
+      "configuration": "設定",
+      "notes": "備註"
+    },
+    "home": {
+      "configureEnvs": "設定環境",
+      "configureEnvsDesc": "為每個環境設定基底 URL、變數與驗證方式",
+      "viewDocs": "檢視文件",
+      "viewDocsDesc": "瀏覽 API 文件、模型與端點",
+      "favoriteRequests": "我的最愛請求",
+      "removeFavorite": "從我的最愛移除",
+      "apiUpdate": {
+        "title": "API 規格更新",
+        "noConfig": "此資料夾並非由可匯入的來源建立。",
+        "urlLabel": "URL",
+        "lastImportedLabel": "上次匯入",
+        "lastCheckedLabel": "上次檢查",
+        "neverImported": "從未匯入",
+        "neverChecked": "從未檢查",
+        "refreshing": "正在重新整理 API 規格…",
+        "fetching": "擷取中…",
+        "upToDate": "API 規格已是最新版本。",
+        "ok": "確定"
+      }
+    },
+    "contextVariables": {
+      "title": "可用的內容變數",
+      "description": "在請求 URL 和運算式類型變數中以 {{handlebars}} 語法使用這些變數。",
+      "name": "變數",
+      "value": "解析後的值",
+      "copied": "已複製！"
+    }
+  },
+  "requestTab": {
+    "deprecated": "此端點已淘汰，未來版本中可能會移除。",
+    "send": "傳送",
+    "cancel": "取消",
+    "urlPlaceholder": "請求 URL",
+    "methodSelect": "選取 HTTP 方法",
+    "addHeader": "新增標頭",
+    "addParam": "新增參數",
+    "environmentSelector": {
+      "noEnvironment": "無環境"
+    },
+    "body": {
+      "fileLabel": "檔案或 URL：",
+      "browse": "瀏覽..."
+    },
+    "tabs": {
+      "docs": "文件",
+      "requestLayout": "請求",
+      "headers": "標頭",
+      "body": "內文",
+      "params": "參數",
+      "pathParams": "路徑參數",
+      "notes": "備註",
+      "codeSnippets": "程式碼片段",
+      "responsesHistory": "回應歷史紀錄"
+    },
+    "responses": {
+      "tabs": {
+        "response": "回應",
+        "requestBody": "請求內文",
+        "graph": "圖表"
+      },
+      "loading": "正在傳送請求...",
+      "noResponse": "點擊「傳送」以執行請求",
+      "history": {
+        "list": "回應歷史紀錄清單",
+        "empty": "尚未記錄任何回應",
+        "select": "選取一筆回應以檢視詳細資料",
+        "pin": "釘選回應",
+        "unpin": "取消釘選回應"
+      }
+    }
+  },
+  "workbench": {
+    "tabContextMenu": {
+      "close": "關閉",
+      "closeOthers": "關閉其他",
+      "addToFavorites": "加入我的最愛",
+      "removeFromFavorites": "從我的最愛移除"
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "前往定義"
+  },
+  "keyValueTable": {
+    "types": {
+      "string": "字串",
+      "secret": "密鑰",
+      "number": "數字",
+      "dateTime": "日期時間",
+      "color": "顏色",
+      "expression": "運算式",
+      "boolean": "布林值"
+    },
+    "apiEnums": "API 定義的型別"
+  },
+  "graphql": {
+    "send": "傳送",
+    "urlPlaceholder": "GraphQL 端點 URL",
+    "tabs": {
+      "query": "查詢",
+      "variables": "變數",
+      "headers": "標頭"
+    }
+  },
+  "grpc": {
+    "send": "呼叫",
+    "urlPlaceholder": "gRPC 伺服器（host:port）",
+    "tabs": {
+      "message": "訊息",
+      "metadata": "中繼資料"
+    }
+  },
+  "soap": {
+    "send": "傳送",
+    "urlPlaceholder": "SOAP 端點 URL",
+    "tabs": {
+      "body": "內文",
+      "headers": "標頭"
+    }
+  },
+  "websocket": {
+    "connect": "連線",
+    "connected": "已連線",
+    "disconnected": "已中斷連線",
+    "noMessages": "尚無訊息",
+    "urlPlaceholder": "WebSocket URL",
+    "event": "事件",
+    "topic": "主題",
+    "tabs": {
+      "message": "訊息",
+      "headers": "標頭"
+    }
+  },
+  "search": {
+    "placeholder": "搜尋...",
+    "noResults": "找不到結果",
+    "resultsAriaLabel": "搜尋結果",
+    "categories": {
+      "request": "請求",
+      "folder": "資料夾",
+      "environment": "環境",
+      "settings": "設定",
+      "tag": "標籤"
+    },
+    "tooltip": {
+      "noDetails": "沒有可用的詳細資料",
+      "noContent": "沒有文件或備註"
+    }
+  },
+  "httpStatus": {
+    "100": {
+      "name": "Continue",
+      "description": "伺服器已收到請求標頭，用戶端應繼續傳送請求內文。"
+    },
+    "101": {
+      "name": "Switching Protocols",
+      "description": "請求方已要求伺服器切換通訊協定，伺服器同意執行。"
+    },
+    "200": {
+      "name": "OK",
+      "description": "HTTP 請求成功時的標準回應。實際回應取決於所使用的請求方法。"
+    },
+    "201": {
+      "name": "Created",
+      "description": "請求已完成，並建立了新的資源。"
+    },
+    "202": {
+      "name": "Accepted",
+      "description": "請求已被接受處理，但處理尚未完成。"
+    },
+    "204": {
+      "name": "No Content",
+      "description": "伺服器已成功處理請求，但不傳回任何內容。"
+    },
+    "301": {
+      "name": "Moved Permanently",
+      "description": "此請求及未來所有請求都應導向指定的 URI。"
+    },
+    "302": {
+      "name": "Found",
+      "description": "通知用戶端查看另一個 URL。HTTP/1.0 規範要求用戶端執行暫時重新導向。"
+    },
+    "304": {
+      "name": "Not Modified",
+      "description": "表示自請求標頭所指定的版本以來，資源並未修改。"
+    },
+    "400": {
+      "name": "Bad Request",
+      "description": "由於明顯的用戶端錯誤（例如請求語法格式錯誤），伺服器無法或不願處理該請求。"
+    },
+    "401": {
+      "name": "Unauthorized",
+      "description": "需要進行驗證，而驗證失敗或尚未提供。"
+    },
+    "403": {
+      "name": "Forbidden",
+      "description": "請求包含有效資料且伺服器已理解，但伺服器拒絕執行該動作。"
+    },
+    "404": {
+      "name": "Not Found",
+      "description": "找不到請求的資源，但未來可能會提供。"
+    },
+    "405": {
+      "name": "Method Not Allowed",
+      "description": "請求的資源不支援該請求方法。"
+    },
+    "408": {
+      "name": "Request Timeout",
+      "description": "伺服器等候請求逾時。"
+    },
+    "409": {
+      "name": "Conflict",
+      "description": "表示因資源目前狀態的衝突，請求無法被處理。"
+    },
+    "410": {
+      "name": "Gone",
+      "description": "表示請求的資源先前可用，但目前已不再提供，且不會再次提供。"
+    },
+    "415": {
+      "name": "Unsupported Media Type",
+      "description": "請求實體的媒體類型不被伺服器或資源支援。"
+    },
+    "422": {
+      "name": "Unprocessable Entity",
+      "description": "請求格式正確，但因語意錯誤而無法處理。"
+    },
+    "429": {
+      "name": "Too Many Requests",
+      "description": "使用者在指定時間內傳送了過多請求（速率限制）。"
+    },
+    "500": {
+      "name": "Internal Server Error",
+      "description": "通用錯誤訊息，於遇到無法預期的狀況且沒有更具體訊息時提供。"
+    },
+    "501": {
+      "name": "Not Implemented",
+      "description": "伺服器無法辨識請求方法，或無法完成該請求。"
+    },
+    "502": {
+      "name": "Bad Gateway",
+      "description": "伺服器作為閘道或代理時，從上游伺服器收到了無效的回應。"
+    },
+    "503": {
+      "name": "Service Unavailable",
+      "description": "伺服器無法處理請求（因為過載或停機維護）。"
+    },
+    "504": {
+      "name": "Gateway Timeout",
+      "description": "伺服器作為閘道或代理時，未及時從上游伺服器收到回應。"
+    }
+  },
+  "welcome": {
+    "confirmRemoveFavorite": "確定要將 \"{{fileName}}\" 從我的最愛中移除嗎？",
+    "noFilesHint": "開啟現有檔案或新增一個檔案以開始",
+    "newAriaLabel": "建立新集合",
+    "openAriaLabel": "從磁碟開啟集合",
+    "landmarkLabel": "歡迎"
+  },
+  "save": {
+    "title": "儲存選項",
+    "mode": {
+      "label": "儲存模式",
+      "file": "單一檔案",
+      "folder": "資料夾結構",
+      "fileDescription": "將所有內容儲存為單一檔案",
+      "folderDescription": "以資料夾結構儲存，每項使用獨立檔案"
+    },
+    "format": {
+      "label": "格式",
+      "yamlDescription": "易於閱讀",
+      "jsonDescription": "標準格式",
+      "json5Description": "JSON + 註解"
+    },
+    "preview": {
+      "label": "結構預覽",
+      "noDocumentation": "此來源沒有可解析的文件。"
+    }
+  },
+  "common": {
+    "cancel": "取消",
+    "save": "儲存"
+  },
+  "helpers": {
+    "categories": {
+      "comparison": "比較",
+      "string": "字串",
+      "math": "數學",
+      "array": "陣列",
+      "object": "物件",
+      "url": "URL",
+      "date": "日期",
+      "regex": "正規表示式",
+      "misc": "其他"
+    },
+    "eq": "嚴格相等 (===)",
+    "ne": "嚴格不等 (!==)",
+    "neq": "嚴格不等 (!==)",
+    "lt": "小於 (<)",
+    "lte": "小於或等於 (<=)",
+    "gt": "大於 (>)",
+    "gte": "大於或等於 (>=)",
+    "and": "區塊輔助子：所有值皆為真時才渲染",
+    "or": "區塊輔助子：任一值為真時即渲染",
+    "not": "傳回相反的布林值",
+    "ifEquals": "區塊輔助子：值相等時才渲染",
+    "is": "區塊輔助子：寬鬆相等比較",
+    "isnt": "區塊輔助子：寬鬆不等比較",
+    "default": "若第一個值為 null/undefined，則傳回預設值",
+    "compare": "區塊輔助子：以運算子比較",
+    "lowercase": "將字串轉換為小寫",
+    "uppercase": "將字串轉換為大寫",
+    "capitalize": "將首字母轉為大寫",
+    "capitalizeAll": "將每個單字的首字母轉為大寫",
+    "titleize": "將每個單字的首字母轉為大寫",
+    "camelcase": "轉換為 camelCase",
+    "pascalcase": "轉換為 PascalCase",
+    "snakecase": "轉換為 snake_case",
+    "snakeCase": "轉換為 snake_case（別名）",
+    "dashcase": "轉換為 dash-case（kebab-case）",
+    "dotcase": "轉換為 dot.case",
+    "pathcase": "轉換為 path/case",
+    "sentencecase": "轉換為 Sentence case",
+    "slugify": "轉換為 URL 友善的 slug",
+    "trim": "移除兩端的空白字元",
+    "trimLeft": "移除開頭的空白字元",
+    "trimRight": "移除結尾的空白字元",
+    "replace": "將所有 a 取代為 b",
+    "split": "將字串分割為陣列",
+    "truncate": "將字串截斷為指定長度",
+    "ellipsis": "將字串截斷並加上省略號",
+    "append": "在字串結尾附加後綴",
+    "prepend": "在字串開頭附加前綴",
+    "reverse": "反轉字串或陣列",
+    "startsWith": "區塊輔助子：字串以前綴開頭時渲染",
+    "endsWith": "區塊輔助子：字串以後綴結尾時渲染",
+    "contains": "區塊輔助子：字串包含子字串時渲染",
+    "padStart": "在字串開頭填補以達到指定長度",
+    "padEnd": "在字串結尾填補以達到指定長度",
+    "repeat": "重複字串 n 次",
+    "substring": "擷取字串的一部分",
+    "indexOf": "傳回子字串的索引值（找不到時為 -1）",
+    "count": "計算子字串出現的次數",
+    "newLineToBr": "將換行轉換為 <br> 標籤",
+    "stripTags": "從字串中移除 HTML 標籤",
+    "add": "兩數相加",
+    "subtract": "從 a 中減去 b",
+    "multiply": "兩數相乘",
+    "divide": "a 除以 b",
+    "modulo": "傳回 a / b 的餘數",
+    "abs": "傳回絕對值",
+    "ceil": "無條件進位至最接近的整數",
+    "floor": "無條件捨去至最接近的整數",
+    "round": "四捨五入至最接近的整數",
+    "min": "傳回最小值",
+    "max": "傳回最大值",
+    "pow": "傳回底數的指數次方",
+    "sqrt": "傳回平方根",
+    "random": "傳回介於 min 與 max 之間的隨機整數",
+    "sum": "傳回陣列各值的總和",
+    "avg": "傳回陣列各值的平均值",
+    "toFixed": "格式化為固定小數位數",
+    "toInt": "轉換為整數",
+    "toFloat": "轉換為浮點數",
+    "first": "傳回陣列的第一個元素",
+    "last": "傳回陣列的最後一個元素",
+    "after": "傳回索引 n 之後的元素",
+    "before": "傳回索引 n 之前的元素",
+    "slice": "傳回陣列的切片",
+    "length": "傳回陣列／字串／物件的長度",
+    "join": "以分隔符號連接陣列元素",
+    "sort": "對陣列排序",
+    "unique": "傳回不重複的值",
+    "concat": "串接陣列",
+    "flatten": "將巢狀陣列攤平",
+    "pluck": "從物件陣列中擷取屬性",
+    "itemAt": "傳回索引處的項目",
+    "inArray": "區塊輔助子：值位於陣列中時渲染",
+    "isArray": "若值為陣列則傳回 true",
+    "isEmpty": "區塊輔助子：值為空時渲染",
+    "some": "區塊輔助子：部分項目符合時渲染",
+    "every": "區塊輔助子：所有項目皆符合時渲染",
+    "JSONstringify": "將物件轉換為 JSON 字串",
+    "JSONparse": "將 JSON 字串解析為物件",
+    "get": "依路徑取得巢狀屬性",
+    "keys": "傳回物件的鍵",
+    "values": "傳回物件的值",
+    "entries": "傳回 [鍵, 值] 配對",
+    "hasOwn": "區塊輔助子：物件擁有該屬性時渲染",
+    "pick": "建立僅含選定鍵的物件",
+    "omit": "建立不含指定鍵的物件",
+    "merge": "合併多個物件",
+    "isObject": "若值為物件則傳回 true",
+    "typeOf": "傳回值的型別",
+    "encodeURI": "對字串進行 URL 編碼",
+    "decodeURI": "對字串進行 URL 解碼",
+    "urlParse": "將 URL 解析為各組成部分",
+    "stripQuerystring": "從 URL 中移除查詢字串",
+    "stripProtocol": "從 URL 中移除通訊協定",
+    "now": "傳回目前日期的 ISO 字串",
+    "timestamp": "傳回目前時間戳記（毫秒）",
+    "year": "傳回目前年份",
+    "formatDate": "依模式格式化日期",
+    "match": "傳回正規比對結果",
+    "test": "區塊輔助子：正規比對成功時渲染",
+    "coalesce": "傳回第一個非 null／undefined 值",
+    "uuid": "產生隨機 UUID",
+    "noop": "區塊輔助子：原樣渲染內容",
+    "raw": "區塊輔助子：渲染原始內容",
+    "times": "區塊輔助子：重複 n 次",
+    "range": "產生數字陣列"
+  },
+  "behavior": {
+    "title": "行為",
+    "syncSidebarWithTabs": "側邊欄選取項目與作用中的索引標籤同步",
+    "syncSidebarWithTabsDescription": "在工作區切換索引標籤時，自動於側邊欄選取並顯示對應的項目",
+    "dateTimeFormat": "日期／時間格式",
+    "dateTimeFormatDescription": "應用程式顯示日期與時間所使用的格式",
+    "dateTimeFormat.us": "美式格式（MM/DD/YYYY，12 小時制）",
+    "dateTimeFormat.iso": "ISO 格式（YYYY-MM-DD，24 小時制）"
+  },
+  "console": {
+    "title": "主控台",
+    "requestFormat": "請求格式",
+    "requestFormatDescription": "主控台索引標籤中呈現外送請求所使用的預設 shell 風格。每一列都是可複製貼上的命令列；主控台工具列上的切換鈕會為目前索引標籤覆寫此預設值。",
+    "requestFormat.curl": "curl（Unix 風格）",
+    "requestFormat.powershell": "PowerShell（Invoke-RestMethod）"
+  },
+  "import": {
+    "title": "匯入請求",
+    "source": {
+      "label": "把內容貼到這裡！",
+      "placeholder": "輸入檔案路徑、URL，或貼上 curl / PowerShell 命令..."
+    },
+    "formats": {
+      "swagger": {
+        "description": "源自 SmartBear 的 OpenAPI 2.0 規格。貼上 Swagger JSON 或 YAML——restorm 會解析每個操作、納入安全機制，並將整份文件轉化為可瀏覽的請求樹。",
+        "trademark": "Swagger 為 SmartBear Software 的註冊商標。"
+      },
+      "openapi": {
+        "description": "目前的 OpenAPI 標準（3.0 與 3.1）。與 Swagger 一樣貼上即用：參數、請求內文、安全機制與 webhook 都會成為附帶範例、可立即傳送的型別化請求樹。",
+        "trademark": "OpenAPI 是 Linux Foundation 之下 OpenAPI Initiative 的計畫。"
+      },
+      "curl": {
+        "description": "已在終端機跑通的請求？直接貼上完整的 curl 指令——旗標、標頭、內文、查詢字串通通保留——restorm 會將其重建為可重新執行、編輯與釘選的真正請求。",
+        "trademark": "curl 為 © Daniel Stenberg 的開放原始碼軟體，依其授權條款使用。"
+      },
+      "powershell": {
+        "description": "同樣的概念，PowerShell 版本。貼上 Invoke-WebRequest 或 Invoke-RestMethod 命令，restorm 會讀取 URI、方法、標頭與內文，建立一個可在視覺化介面中調整的請求。",
+        "trademark": "PowerShell 為 Microsoft Corporation 的註冊商標。"
+      },
+      "postman": {
+        "description": "有保存在公司的 Postman 集合？拖入 JSON——restorm 會讀取每個請求、每個範例回應與每個環境變數，再將集合重建為與其他 API 並列執行的 restorm 樹。",
+        "trademark": "Postman 為 Postman, Inc. 的註冊商標，此處僅作為相容性參考使用。"
+      },
+      "insomnia": {
+        "description": "從 Insomnia 過來？拖入匯出檔。restorm 可辨識其 v4 / v5 集合格式，將每個請求、標頭、內文與環境一併帶過來，並以 restorm 樹呈現。",
+        "trademark": "Insomnia 為 Kong Inc. 的註冊商標，此處僅作為相容性參考使用。"
+      },
+      "bruno": {
+        "description": "Bruno 風格的 .bru 檔案或資料夾匯出——restorm 會解讀 .bru 文字格式（含其腳本區塊），並將每個請求重建為一級的 restorm 節點，準備好立即傳送。",
+        "trademark": "Bruno 為 Anoop M. D. 開發的開放原始碼軟體（MIT），依其授權條款使用。"
+      },
+      "graphql": {
+        "description": "貼上 GraphQL SDL（.graphql / .gql 或從 GraphQL 用戶端複製的內容），restorm 會為每個操作建立一個請求，準確連接至對應的 query / mutation / subscription 型別，並已結構化變數。",
+        "trademark": "GraphQL 為 Joint Development Foundation 計畫 GraphQL Foundation 的商標。"
+      },
+      "grpc": {
+        "description": "拖入 .proto 檔案（或其所在目錄），restorm 會遍歷每個 service、每個 RPC、每個 message——將每個方法轉為型別化請求，透過 gRPC 執行器即可傳送，完全免動 codegen。",
+        "trademark": "gRPC 為 Cloud Native Computing Foundation 的計畫。"
+      },
+      "soap": {
+        "description": "有 WSDL？貼上它（或其 URL）——restorm 會解析每個 <port> 與 <operation>，並產出附帶正確 SOAPAction 標頭、結構描述型別化內文骨架，以及 WSDL 宣告之驗證方式的、可立即傳送的 SOAP 封包。"
+      },
+      "websocket": {
+        "description": "貼上 WebSocket 端點（ws:// 或 wss://）——restorm 會建立連線、擷取伺服器的 hello 框架，並建立附可重播酬載範本的 send / subscribe 請求。",
+        "trademark": "WebSocket 為由 IETF（RFC 6455）與 W3C 制定的標準通訊協定。"
+      },
+      "kafka": {
+        "description": "貼上 Apache Kafka bootstrap-server URL（或主題清單）——restorm 會為每個主題註冊 consumer 與 producer，透過你的 Schema Registry 解碼 Avro / Protobuf 酬載，並讓你一鍵重播個別 offset。",
+        "trademark": "Apache Kafka 與 Kafka 標誌為 Apache Software Foundation 的商標。"
+      },
+      "socketio": {
+        "description": "貼上 Socket.IO 伺服器 URL——restorm 會協商握手、列出伺服器所發出的命名空間與事件名稱，並為每個 emit / on 事件提供具酬載驗證的請求。",
+        "trademark": "Socket.IO 為以 MIT 授權釋出的開放原始碼程式庫；名稱與標誌在此屬指稱性使用。"
+      },
+      "odata": {
+        "description": "貼上 OData 服務文件 URL 或 $metadata 檔案——restorm 會讀取 CSDL、重建 entity set、function import 與 action，並於每個操作上預填 $filter / $select / $top / $skip 查詢選項。"
+      },
+      "mqtt": {
+        "description": "貼上 MQTT broker URL 或主題目錄——restorm 會為每個主題建立 publish / subscribe 請求，保持連線以提供串流預覽，並記住保留訊息的快照供日後重播。",
+        "trademark": "MQTT 為 OASIS 標準；MQTT 名稱與標誌為 OASIS Open 的商標。"
+      }
+    },
+    "loading": "正在分析...",
+    "noResults": "找不到請求",
+    "error": {
+      "unknown": "發生未知的錯誤"
+    },
+    "ok": "匯入",
+    "cancel": "取消",
+    "dropZone": "拖放區"
+  }
+}

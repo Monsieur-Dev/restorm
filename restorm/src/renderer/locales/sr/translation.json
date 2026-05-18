@@ -1,0 +1,621 @@
+{
+  "app": {
+    "title": "restorm",
+    "openSettings": "Otvori podešavanja",
+    "draftsRestoredTitle": "Nesačuvani rad je vraćen",
+    "draftsRestoredBody_one": "{{count}} nacrt je vraćen iz prethodne sesije.",
+    "draftsRestoredBody_few": "{{count}} nacrta su vraćena iz prethodne sesije.",
+    "draftsRestoredBody_other": "{{count}} nacrta je vraćeno iz prethodne sesije."
+  },
+  "statusbar": {
+    "requestHistory": "Istorija zahteva",
+    "envSelector": {
+      "applyToAll": "Primeni na sve zahteve"
+    }
+  },
+  "authFailureToast": {
+    "title": "Autentifikacija nije uspela",
+    "fallbackReason": "Zahtev za autentifikaciju nije uspeo.",
+    "openAuthRoute": "Otvori rutu za autentifikaciju"
+  },
+  "menuBar": {
+    "file": "Datoteka",
+    "new": "Novo",
+    "import": "Uvezi",
+    "open": "Otvori",
+    "openFolder": "Otvori fasciklu",
+    "recentFiles": "Nedavne datoteke",
+    "favorites": "Omiljeno",
+    "close": "Zatvori",
+    "save": "Sačuvaj",
+    "saveAll": "Sačuvaj sve",
+    "saveAs": "Sačuvaj kao",
+    "exit": "Izlaz",
+    "selection": "Izbor",
+    "tools": "Alati",
+    "findInCollection": "Pronađi u kolekciji",
+    "addRequest": "Dodaj zahtev",
+    "addRequestHttp": "HTTP zahtev",
+    "addRequestGraphql": "GraphQL zahtev",
+    "addRequestGrpc": "gRPC zahtev",
+    "addRequestSoap": "SOAP zahtev",
+    "addRequestOdata": "OData zahtev",
+    "addRequestWebsocket": "WebSocket zahtev",
+    "addFolder": "Dodaj fasciklu",
+    "addEnvironmentFolder": "Dodaj fasciklu okruženja",
+    "addVariable": "Dodaj promenljivu",
+    "addTag": "Dodaj oznaku",
+    "expandAllFolders": "Proširi sve fascikle",
+    "collapseAllFolders": "Skupi sve fascikle",
+    "sendActiveRequest": "Pošalji zahtev",
+    "cancelActiveRequest": "Otkaži zahtev",
+    "generateCodeSnippet": "Generiši isečak koda",
+    "copyAsCurl": "Kopiraj kao cURL",
+    "exportOpenApi": "Izvezi u OpenAPI",
+    "clearAuthCache": "Očisti keš autentifikacije",
+    "openLogsFolder": "Otvori fasciklu zapisa"
+  },
+  "sidebar": {
+    "addRequest": "Dodaj zahtev",
+    "collapseAll": "Skupi sve zahteve",
+    "workspace": "Radni prostor",
+    "favorites": "Omiljeno",
+    "newFolder": "Nova fascikla",
+    "newEnvironmentFolder": "Nova fascikla okruženja",
+    "contextMenu": {
+      "createFolder": "Napravi fasciklu",
+      "createEnvironmentFolder": "Napravi fasciklu okruženja",
+      "delete": "Obriši",
+      "clone": "Kloniraj",
+      "rename": "Preimenuj",
+      "addToFavorites": "Dodaj u omiljeno",
+      "removeFromFavorites": "Ukloni iz omiljenog",
+      "closeTab": "Zatvori",
+      "closeOtherTabs": "Zatvori ostale",
+      "closeTabsToTheRight": "Zatvori desno",
+      "closeAllTabs": "Zatvori sve",
+      "add": {
+        "title": "Dodaj",
+        "folder": "Fascikla",
+        "httpGet": "HTTP – GET zahtev",
+        "httpPost": "HTTP – POST zahtev",
+        "httpPut": "HTTP – PUT zahtev",
+        "httpPatch": "HTTP – PATCH zahtev",
+        "httpDelete": "HTTP – DELETE zahtev",
+        "graphql": "GraphQL zahtev",
+        "grpc": "gRPC zahtev",
+        "soap": "SOAP zahtev",
+        "websocket": "WebSocket zahtev",
+        "odata": "OData zahtev",
+        "auth": "HTTP zahtev za autentifikaciju"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Potvrdi brisanje",
+      "folderMessage": "Da li ste sigurni da želite da obrišete fasciklu \"{{name}}\" i sav njen sadržaj?",
+      "itemMessage": "Da li ste sigurni da želite da obrišete \"{{name}}\"?",
+      "confirm": "Obriši",
+      "cancel": "Otkaži"
+    }
+  },
+  "environment": {
+    "newName": "Novo okruženje",
+    "add": "Dodaj okruženje",
+    "rename": "Preimenuj",
+    "addSub": "Dodaj pod-okruženje",
+    "delete": "Obriši"
+  },
+  "folderView": {
+    "environments": "Okruženja",
+    "environmentsAriaLabel": "Okruženja fascikle",
+    "variables": "Promenljive",
+    "addVariable": "Dodaj red promenljive",
+    "selectEnvironment": "Izaberite okruženje za prikaz promenljivih",
+    "tabs": {
+      "docs": "Dokumentacija",
+      "configuration": "Konfiguracija",
+      "notes": "Beleške"
+    },
+    "home": {
+      "configureEnvs": "Konfiguriši okruženja",
+      "configureEnvsDesc": "Podesi osnovne URL-ove, promenljive i autentifikaciju za svako okruženje",
+      "viewDocs": "Pogledaj dokumentaciju",
+      "viewDocsDesc": "Pretražite dokumentaciju API-ja, modele i krajnje tačke",
+      "favoriteRequests": "Omiljeni zahtevi",
+      "removeFavorite": "Ukloni iz omiljenog",
+      "apiUpdate": {
+        "title": "Ažuriranja API specifikacije",
+        "noConfig": "Ova fascikla nije napravljena iz uvozivog izvora.",
+        "urlLabel": "URL",
+        "lastImportedLabel": "Poslednji uvoz",
+        "lastCheckedLabel": "Poslednja provera",
+        "neverImported": "Nikada nije uvezeno",
+        "neverChecked": "Nikada nije provereno",
+        "refreshing": "Osvežavanje API specifikacije…",
+        "fetching": "Preuzimanje…",
+        "upToDate": "API specifikacija je ažurirana.",
+        "ok": "U redu"
+      }
+    },
+    "contextVariables": {
+      "title": "Dostupne kontekstne promenljive",
+      "description": "Koristite ove promenljive u URL-ovima zahteva i u promenljivama tipa izraz sa sintaksom {{handlebars}}.",
+      "name": "Promenljiva",
+      "value": "Razrešena vrednost",
+      "copied": "Kopirano!"
+    }
+  },
+  "requestTab": {
+    "deprecated": "Ova krajnja tačka je zastarela i mogla bi biti uklonjena u budućoj verziji.",
+    "send": "Pošalji",
+    "cancel": "Otkaži",
+    "urlPlaceholder": "URL zahteva",
+    "methodSelect": "Izaberi HTTP metodu",
+    "addHeader": "Dodaj zaglavlje",
+    "addParam": "Dodaj parametar",
+    "environmentSelector": {
+      "noEnvironment": "Bez okruženja"
+    },
+    "body": {
+      "fileLabel": "Datoteka ili URL:",
+      "browse": "Pregledaj..."
+    },
+    "tabs": {
+      "docs": "Dokumentacija",
+      "requestLayout": "Zahtev",
+      "headers": "Zaglavlja",
+      "body": "Telo",
+      "params": "Parametri",
+      "pathParams": "Parametri putanje",
+      "notes": "Beleške",
+      "codeSnippets": "Isečci koda",
+      "responsesHistory": "Istorija odgovora"
+    },
+    "responses": {
+      "tabs": {
+        "response": "Odgovor",
+        "requestBody": "Telo zahteva",
+        "graph": "Graf"
+      },
+      "loading": "Slanje zahteva...",
+      "noResponse": "Kliknite Pošalji da biste izvršili zahtev",
+      "history": {
+        "list": "Lista istorije odgovora",
+        "empty": "Još nema zabeleženih odgovora",
+        "select": "Izaberite odgovor za prikaz detalja",
+        "pin": "Zakači odgovor",
+        "unpin": "Otkači odgovor"
+      }
+    }
+  },
+  "workbench": {
+    "tabContextMenu": {
+      "close": "Zatvori",
+      "closeOthers": "Zatvori ostale",
+      "addToFavorites": "Dodaj u omiljeno",
+      "removeFromFavorites": "Ukloni iz omiljenog"
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Idi na definiciju"
+  },
+  "keyValueTable": {
+    "types": {
+      "string": "Niz",
+      "secret": "Tajna",
+      "number": "Broj",
+      "dateTime": "Datum i vreme",
+      "color": "Boja",
+      "expression": "Izraz",
+      "boolean": "Bulova vrednost"
+    },
+    "apiEnums": "Tipovi definisani u API-ju"
+  },
+  "graphql": {
+    "send": "Pošalji",
+    "urlPlaceholder": "URL GraphQL krajnje tačke",
+    "tabs": {
+      "query": "Upit",
+      "variables": "Promenljive",
+      "headers": "Zaglavlja"
+    }
+  },
+  "grpc": {
+    "send": "Pozovi",
+    "urlPlaceholder": "gRPC server (host:port)",
+    "tabs": {
+      "message": "Poruka",
+      "metadata": "Metapodaci"
+    }
+  },
+  "soap": {
+    "send": "Pošalji",
+    "urlPlaceholder": "URL SOAP krajnje tačke",
+    "tabs": {
+      "body": "Telo",
+      "headers": "Zaglavlja"
+    }
+  },
+  "websocket": {
+    "connect": "Poveži",
+    "connected": "Povezano",
+    "disconnected": "Prekinuto",
+    "noMessages": "Još nema poruka",
+    "urlPlaceholder": "WebSocket URL",
+    "event": "Događaj",
+    "topic": "Tema",
+    "tabs": {
+      "message": "Poruka",
+      "headers": "Zaglavlja"
+    }
+  },
+  "search": {
+    "placeholder": "Pretraži...",
+    "noResults": "Nema rezultata",
+    "resultsAriaLabel": "Rezultati pretrage",
+    "categories": {
+      "request": "Zahtevi",
+      "folder": "Fascikle",
+      "environment": "Okruženja",
+      "settings": "Podešavanja",
+      "tag": "Oznake"
+    },
+    "tooltip": {
+      "noDetails": "Nema dostupnih detalja",
+      "noContent": "Nema dokumentacije ni beleški"
+    }
+  },
+  "httpStatus": {
+    "100": {
+      "name": "Nastavi",
+      "description": "Server je primio zaglavlja zahteva i klijent treba da nastavi sa slanjem tela zahteva."
+    },
+    "101": {
+      "name": "Promena protokola",
+      "description": "Klijent je zatražio od servera da promeni protokole i server je pristao."
+    },
+    "200": {
+      "name": "OK",
+      "description": "Standardni odgovor za uspešne HTTP zahteve. Stvarni odgovor zavisi od korišćene metode zahteva."
+    },
+    "201": {
+      "name": "Kreirano",
+      "description": "Zahtev je ispunjen, što je rezultiralo kreiranjem novog resursa."
+    },
+    "202": {
+      "name": "Prihvaćeno",
+      "description": "Zahtev je prihvaćen na obradu, ali obrada nije završena."
+    },
+    "204": {
+      "name": "Nema sadržaja",
+      "description": "Server je uspešno obradio zahtev i ne vraća nikakav sadržaj."
+    },
+    "301": {
+      "name": "Trajno premešteno",
+      "description": "Ovaj i svi budući zahtevi treba da se upućuju na dati URI."
+    },
+    "302": {
+      "name": "Pronađeno",
+      "description": "Govori klijentu da pogleda drugi URL. Specifikacija HTTP/1.0 je zahtevala da klijent izvrši privremeno preusmeravanje."
+    },
+    "304": {
+      "name": "Nije izmenjeno",
+      "description": "Označava da resurs nije izmenjen od verzije navedene u zaglavljima zahteva."
+    },
+    "400": {
+      "name": "Neispravan zahtev",
+      "description": "Server ne može ili neće da obradi zahtev zbog očigledne greške klijenta (npr. neispravna sintaksa zahteva)."
+    },
+    "401": {
+      "name": "Neautorizovano",
+      "description": "Autentifikacija je potrebna, a nije uspela ili još nije obezbeđena."
+    },
+    "403": {
+      "name": "Zabranjeno",
+      "description": "Zahtev je sadržao važeće podatke i server ga je razumeo, ali server odbija radnju."
+    },
+    "404": {
+      "name": "Nije pronađeno",
+      "description": "Traženi resurs nije pronađen, ali bi mogao biti dostupan u budućnosti."
+    },
+    "405": {
+      "name": "Metoda nije dozvoljena",
+      "description": "Metoda zahteva nije podržana za traženi resurs."
+    },
+    "408": {
+      "name": "Isteklo vreme zahteva",
+      "description": "Serveru je isteklo vreme čekanja na zahtev."
+    },
+    "409": {
+      "name": "Konflikt",
+      "description": "Označava da zahtev nije mogao biti obrađen zbog konflikta u trenutnom stanju resursa."
+    },
+    "410": {
+      "name": "Nestalo",
+      "description": "Označava da je traženi resurs ranije bio u upotrebi, ali više nije dostupan i neće više biti."
+    },
+    "415": {
+      "name": "Nepodržan tip medija",
+      "description": "Entitet zahteva ima tip medija koji server ili resurs ne podržava."
+    },
+    "422": {
+      "name": "Neobradiv entitet",
+      "description": "Zahtev je bio dobro oblikovan, ali nije mogao da se izvrši zbog semantičkih grešaka."
+    },
+    "429": {
+      "name": "Previše zahteva",
+      "description": "Korisnik je poslao previše zahteva u datom vremenskom periodu (ograničenje brzine)."
+    },
+    "500": {
+      "name": "Interna greška servera",
+      "description": "Generička poruka o grešci, data kada je naišao neočekivani uslov, a nije prikladnija konkretnija poruka."
+    },
+    "501": {
+      "name": "Nije implementirano",
+      "description": "Server ili ne prepoznaje metodu zahteva, ili nema mogućnost da ispuni zahtev."
+    },
+    "502": {
+      "name": "Neispravan mrežni prolaz",
+      "description": "Server je delovao kao mrežni prolaz ili proxy i primio je neispravan odgovor od servera uzvodno."
+    },
+    "503": {
+      "name": "Servis nedostupan",
+      "description": "Server ne može da obradi zahtev (jer je preopterećen ili je u održavanju)."
+    },
+    "504": {
+      "name": "Isteklo vreme mrežnog prolaza",
+      "description": "Server je delovao kao mrežni prolaz ili proxy i nije primio blagovremeni odgovor od servera uzvodno."
+    }
+  },
+  "welcome": {
+    "confirmRemoveFavorite": "Da li ste sigurni da želite da uklonite \"{{fileName}}\" iz omiljenog?",
+    "noFilesHint": "Otvorite datoteku ili napravite novu da biste započeli",
+    "newAriaLabel": "Napravi novu kolekciju",
+    "openAriaLabel": "Otvori kolekciju sa diska",
+    "landmarkLabel": "Dobrodošli"
+  },
+  "save": {
+    "title": "Opcije čuvanja",
+    "mode": {
+      "label": "Režim čuvanja",
+      "file": "Jedna datoteka",
+      "folder": "Struktura fascikli",
+      "fileDescription": "Sačuvaj sve u jednu datoteku",
+      "folderDescription": "Sačuvaj kao strukturu fascikli sa zasebnim datotekama"
+    },
+    "format": {
+      "label": "Format",
+      "yamlDescription": "Čitljivo čoveku",
+      "jsonDescription": "Standardni format",
+      "json5Description": "JSON + komentari"
+    },
+    "preview": {
+      "label": "Pregled strukture",
+      "noDocumentation": "Za ovaj izvor nije analizirana nikakva dokumentacija."
+    }
+  },
+  "common": {
+    "cancel": "Otkaži",
+    "save": "Sačuvaj"
+  },
+  "helpers": {
+    "categories": {
+      "comparison": "Poređenje",
+      "string": "Niz",
+      "math": "Matematika",
+      "array": "Niz (array)",
+      "object": "Objekat",
+      "url": "URL",
+      "date": "Datum",
+      "regex": "Regex",
+      "misc": "Razno"
+    },
+    "eq": "Stroga jednakost (===)",
+    "ne": "Stroga nejednakost (!==)",
+    "neq": "Stroga nejednakost (!==)",
+    "lt": "Manje od (<)",
+    "lte": "Manje ili jednako (<=)",
+    "gt": "Veće od (>)",
+    "gte": "Veće ili jednako (>=)",
+    "and": "Block helper: prikazuje ako su sve vrednosti tačne",
+    "or": "Block helper: prikazuje ako je bilo koja vrednost tačna",
+    "not": "Vraća suprotnu bulovu vrednost",
+    "ifEquals": "Block helper: prikazuje ako su vrednosti jednake",
+    "is": "Block helper: poređenje slabe jednakosti",
+    "isnt": "Block helper: poređenje slabe nejednakosti",
+    "default": "Vraća podrazumevanu vrednost ako je prva null/undefined",
+    "compare": "Block helper: poredi sa operatorom",
+    "lowercase": "Konvertuje niz u mala slova",
+    "uppercase": "Konvertuje niz u velika slova",
+    "capitalize": "Pretvara prvo slovo u veliko",
+    "capitalizeAll": "Pretvara prvo slovo svake reči u veliko",
+    "titleize": "Pretvara prvo slovo svake reči u veliko",
+    "camelcase": "Konvertuje u camelCase",
+    "pascalcase": "Konvertuje u PascalCase",
+    "snakecase": "Konvertuje u snake_case",
+    "snakeCase": "Konvertuje u snake_case (alias)",
+    "dashcase": "Konvertuje u dash-case (kebab-case)",
+    "dotcase": "Konvertuje u dot.case",
+    "pathcase": "Konvertuje u path/case",
+    "sentencecase": "Konvertuje u oblik rečenice",
+    "slugify": "Konvertuje u slug prilagođen URL-u",
+    "trim": "Uklanja razmake sa oba kraja",
+    "trimLeft": "Uklanja razmake sa početka",
+    "trimRight": "Uklanja razmake sa kraja",
+    "replace": "Zamenjuje sve pojave a sa b",
+    "split": "Deli niz u array",
+    "truncate": "Skraćuje niz na navedenu dužinu",
+    "ellipsis": "Skraćuje niz sa tri tačke",
+    "append": "Dodaje sufiks na niz",
+    "prepend": "Dodaje prefiks na niz",
+    "reverse": "Obrće niz ili array",
+    "startsWith": "Block helper: prikazuje ako niz počinje prefiksom",
+    "endsWith": "Block helper: prikazuje ako se niz završava sufiksom",
+    "contains": "Block helper: prikazuje ako niz sadrži podniz",
+    "padStart": "Popunjava niz na početku do određene dužine",
+    "padEnd": "Popunjava niz na kraju do određene dužine",
+    "repeat": "Ponavlja niz n puta",
+    "substring": "Izvlači deo niza",
+    "indexOf": "Vraća indeks podniza (-1 ako nije pronađen)",
+    "count": "Broji pojave podniza",
+    "newLineToBr": "Konvertuje prelome reda u <br> oznake",
+    "stripTags": "Uklanja HTML oznake iz niza",
+    "add": "Sabira dva broja",
+    "subtract": "Oduzima b od a",
+    "multiply": "Množi dva broja",
+    "divide": "Deli a sa b",
+    "modulo": "Vraća ostatak od a / b",
+    "abs": "Vraća apsolutnu vrednost",
+    "ceil": "Zaokružuje na najbliži veći ceo broj",
+    "floor": "Zaokružuje na najbliži manji ceo broj",
+    "round": "Zaokružuje na najbliži ceo broj",
+    "min": "Vraća minimalnu vrednost",
+    "max": "Vraća maksimalnu vrednost",
+    "pow": "Vraća osnovu podignutu na eksponent",
+    "sqrt": "Vraća kvadratni koren",
+    "random": "Vraća nasumičan ceo broj između min i max",
+    "sum": "Vraća zbir vrednosti niza",
+    "avg": "Vraća prosek vrednosti niza",
+    "toFixed": "Formatira broj sa fiksnim decimalama",
+    "toInt": "Konvertuje u ceo broj",
+    "toFloat": "Konvertuje u decimalni broj",
+    "first": "Vraća prvi element/e niza",
+    "last": "Vraća poslednji element/e niza",
+    "after": "Vraća elemente posle indeksa n",
+    "before": "Vraća elemente pre indeksa n",
+    "slice": "Vraća isečak niza",
+    "length": "Vraća dužinu niza/stringa/objekta",
+    "join": "Spaja elemente niza sa separatorom",
+    "sort": "Sortira niz",
+    "unique": "Vraća jedinstvene vrednosti",
+    "concat": "Spaja nizove",
+    "flatten": "Izravnava ugnježdeni niz",
+    "pluck": "Izvlači svojstvo iz niza objekata",
+    "itemAt": "Vraća element na indeksu",
+    "inArray": "Block helper: prikazuje ako se vrednost nalazi u nizu",
+    "isArray": "Vraća true ako je vrednost niz",
+    "isEmpty": "Block helper: prikazuje ako je vrednost prazna",
+    "some": "Block helper: prikazuje ako se neki elementi poklapaju",
+    "every": "Block helper: prikazuje ako se svi elementi poklapaju",
+    "JSONstringify": "Konvertuje objekat u JSON niz",
+    "JSONparse": "Parsira JSON niz u objekat",
+    "get": "Dohvata ugnježdeno svojstvo po putanji",
+    "keys": "Vraća ključeve objekta",
+    "values": "Vraća vrednosti objekta",
+    "entries": "Vraća parove [ključ, vrednost]",
+    "hasOwn": "Block helper: prikazuje ako objekat ima svojstvo",
+    "pick": "Pravi objekat sa izabranim ključevima",
+    "omit": "Pravi objekat bez navedenih ključeva",
+    "merge": "Spaja više objekata",
+    "isObject": "Vraća true ako je vrednost objekat",
+    "typeOf": "Vraća tip vrednosti",
+    "encodeURI": "URL kodira niz",
+    "decodeURI": "URL dekodira niz",
+    "urlParse": "Parsira URL u komponente",
+    "stripQuerystring": "Uklanja querystring iz URL-a",
+    "stripProtocol": "Uklanja protokol iz URL-a",
+    "now": "Vraća trenutni datum kao ISO niz",
+    "timestamp": "Vraća trenutni timestamp u milisekundama",
+    "year": "Vraća trenutnu godinu",
+    "formatDate": "Formatira datum sa šablonom",
+    "match": "Vraća regex poklapanja",
+    "test": "Block helper: prikazuje ako se regex poklapa",
+    "coalesce": "Vraća prvu vrednost koja nije null/undefined",
+    "uuid": "Generiše nasumičan UUID",
+    "noop": "Block helper koji prikazuje sadržaj kao što jeste",
+    "raw": "Block helper koji prikazuje sirov sadržaj",
+    "times": "Block helper koji se ponavlja n puta",
+    "range": "Generiše niz brojeva"
+  },
+  "behavior": {
+    "title": "Ponašanje",
+    "syncSidebarWithTabs": "Sinhronizuj izbor bočne trake sa aktivnom karticom",
+    "syncSidebarWithTabsDescription": "Pri prebacivanju kartica u radnom prostoru, automatski izaberi i prikaži odgovarajuću stavku u bočnoj traci",
+    "dateTimeFormat": "Format datuma/vremena",
+    "dateTimeFormatDescription": "Format koji se koristi za prikaz datuma i vremena u aplikaciji",
+    "dateTimeFormat.us": "Američki format (MM/DD/GGGG, 12 h)",
+    "dateTimeFormat.iso": "ISO format (GGGG-MM-DD, 24 h)"
+  },
+  "console": {
+    "title": "Konzola",
+    "requestFormat": "Format zahteva",
+    "requestFormatDescription": "Podrazumevani tip školjke koji se koristi za prikaz odlaznih zahteva u kartici Konzola. Svaki red je naredba koja se može kopirati i nalepiti; prekidač u alatnoj traci Konzole prevazilazi ovu podrazumevanu vrednost za trenutnu karticu.",
+    "requestFormat.curl": "curl (u Unix stilu)",
+    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+  },
+  "import": {
+    "title": "Uvezi zahteve",
+    "source": {
+      "label": "Nalepite nešto ovde!",
+      "placeholder": "Unesite putanju datoteke, URL ili nalepite curl/PowerShell komandu..."
+    },
+    "formats": {
+      "swagger": {
+        "description": "Specifikacija OpenAPI 2.0, rođena u SmartBeru. Nalepite Swagger JSON ili YAML — Restorm parsira svaku operaciju, povlači sigurnosne šeme i pretvara ceo dokument u stablo zahteva za navigaciju.",
+        "trademark": "Swagger je registrovani zaštitni znak kompanije SmartBear Software."
+      },
+      "openapi": {
+        "description": "Trenutni OpenAPI standard (3.0 i 3.1). Ista paste-and-go ergonomija kao Swagger: parametri, tela zahteva, sigurnosne šeme i webhook-ovi stižu kao stablo tipizovanih zahteva sa primerima spremnim za slanje.",
+        "trademark": "OpenAPI je projekat OpenAPI inicijative pod okriljem Linux fondacije."
+      },
+      "curl": {
+        "description": "Već imate zahtev koji se izvršava u terminalu? Nalepite ceo curl poziv — flagove, zaglavlja, telo, query string — i Restorm ga rekonstruiše kao stvaran zahtev koji možete ponovo pokrenuti, urediti i zakačiti.",
+        "trademark": "curl je softver otvorenog koda © Daniel Stenberg, korišćen ovde pod njegovim uslovima."
+      },
+      "powershell": {
+        "description": "Ista ideja, u stilu PowerShell-a. Nalepite Invoke-WebRequest ili Invoke-RestMethod komandu i Restorm čita URI, metodu, zaglavlja i telo kako bi pripremio zahtev koji možete vizuelno iterirati.",
+        "trademark": "PowerShell je registrovani zaštitni znak kompanije Microsoft Corporation."
+      },
+      "postman": {
+        "description": "Imate Postman kolekciju sačuvanu na poslu? Ubacite JSON — Restorm čita svaki zahtev, svaki primer odgovora i svaku promenljivu okruženja, zatim rekonstruiše kolekciju kao Restorm stablo koje možete pokretati uporedo sa ostatkom vaših API-ja.",
+        "trademark": "Postman je registrovani zaštitni znak kompanije Postman, Inc., korišćen ovde samo kao referenca za kompatibilnost."
+      },
+      "insomnia": {
+        "description": "Dolazite iz Insomnije? Ubacite svoj izvoz. Restorm razume njen v4 / v5 format kolekcije, donosi svaki zahtev, zaglavlje, telo i okruženje, i sve to predstavlja kao Restorm stablo.",
+        "trademark": "Insomnia je registrovani zaštitni znak kompanije Kong Inc., korišćen ovde samo kao referenca za kompatibilnost."
+      },
+      "bruno": {
+        "description": ".bru datoteke u stilu Bruno ili izvoz fascikle — Restorm čita .bru tekstualni format, uključujući njegove blokove skriptovanja, i ponovo kreira svaki zahtev kao prvorazredni Restorm čvor spreman za slanje.",
+        "trademark": "Bruno je softver otvorenog koda (MIT) autora Anoopa M. D., korišćen ovde pod njegovim uslovima."
+      },
+      "graphql": {
+        "description": "Nalepite GraphQL SDL (.graphql / .gql / nalepite iz svog GraphQL klijenta) i Restorm konstruiše jedan zahtev po operaciji, povezan sa pravim tipom query / mutation / subscription sa već strukturiranim promenljivama.",
+        "trademark": "GraphQL je zaštitni znak GraphQL fondacije, projekta Joint Development Foundation."
+      },
+      "grpc": {
+        "description": "Ubacite .proto datoteku (ili direktorijum sa njima) i Restorm prolazi kroz svaki servis, svaki RPC, svaku poruku — pretvarajući svaku metodu u tipizovan zahtev koji možete slati preko gRPC izvršioca bez doticanja codegen-a.",
+        "trademark": "gRPC je projekat Cloud Native Computing fondacije."
+      },
+      "soap": {
+        "description": "Imate WSDL? Nalepite ga (ili njegov URL) — Restorm parsira svaki <port> i <operation> i proizvodi SOAP koverte spremne za slanje sa pravim SOAPAction zaglavljem, skeletima tela tipizovanim po šemi i šemom autentifikacije koju WSDL deklariše."
+      },
+      "websocket": {
+        "description": "Nalepite WebSocket krajnju tačku (ws:// ili wss://) — Restorm otvara vezu, hvata hello okvire servera i konstruiše send / subscribe zahteve sa šablonima payload-a koji se mogu reprodukovati.",
+        "trademark": "WebSocket je protokol standardizovan od strane IETF-a (RFC 6455) i W3C-a."
+      },
+      "kafka": {
+        "description": "Nalepite URL bootstrap-servera Apache Kafke (ili listu tema) — Restorm registruje konzumente i proizvođače po temi, dekodira Avro / Protobuf payload-e preko vašeg Schema Registry-ja i omogućava vam reprodukciju pojedinačnih offset-a jednim klikom.",
+        "trademark": "Apache Kafka i Kafka logo su zaštitni znaci Apache Software fondacije."
+      },
+      "socketio": {
+        "description": "Nalepite URL Socket.IO servera — Restorm pregovara handshake, izlistava namespace-ove i nazive događaja koje server emituje, i daje vam jedan zahtev po emit / on događaju sa validacijom payload-a.",
+        "trademark": "Socket.IO je biblioteka otvorenog koda objavljena pod MIT licencom; naziv i logo se koriste u nominativnom smislu."
+      },
+      "odata": {
+        "description": "Nalepite URL OData service-document-a ili $metadata datoteku — Restorm čita CSDL, rekonstruiše entity setove, function importe i akcije, plus unapred popunjava $filter / $select / $top / $skip opcije upita na svakoj operaciji."
+      },
+      "mqtt": {
+        "description": "Nalepite URL MQTT brokera ili katalog tema — Restorm konstruiše publish / subscribe zahteve po temi, održava vezu uživo za streaming pregled i pamti snapshot-ove zadržanih poruka kako biste ih kasnije mogli reprodukovati.",
+        "trademark": "MQTT je OASIS standard; MQTT naziv i logo su zaštitni znaci OASIS Open-a."
+      }
+    },
+    "loading": "Analiziranje...",
+    "noResults": "Nije pronađen nijedan zahtev",
+    "error": {
+      "unknown": "Došlo je do nepoznate greške"
+    },
+    "ok": "Uvezi",
+    "cancel": "Otkaži",
+    "dropZone": "Zona za ispuštanje"
+  }
+}

@@ -1,0 +1,327 @@
+{
+  "common": {
+    "opened": "Abiertos",
+    "refresh": "Actualizar"
+  },
+  "file": {
+    "untitled": "Sin título",
+    "unsavedChanges": {
+      "title": "Cambios sin guardar",
+      "message": "¿Quieres guardar los cambios en \"{{fileName}}\"?",
+      "detail": "Tus cambios se perderán si no los guardas.",
+      "save": "Guardar",
+      "dontSave": "No guardar",
+      "cancel": "Cancelar"
+    }
+  },
+  "recentFilesVignette": {
+    "favorites": "Favoritos",
+    "recentFiles": "Archivos recientes",
+    "addToFavorites": "Añadir a favoritos",
+    "removeFromFavorites": "Quitar de favoritos",
+    "confirmRemoveFavorite": "¿Seguro que quieres quitar \"{{fileName}}\" de favoritos?",
+    "favoritesLandmarkLabel": "Lista de favoritos",
+    "recentsLandmarkLabel": "Lista de archivos recientes"
+  },
+  "welcomeScreen": {
+    "landmarkLabel": "Bienvenida"
+  },
+  "menuBar": {
+    "new": "Nuevo",
+    "open": "Abrir",
+    "edit": "Edición",
+    "view": "Ver",
+    "help": "Ayuda",
+    "undo": "Deshacer",
+    "redo": "Rehacer",
+    "cut": "Cortar",
+    "copy": "Copiar",
+    "paste": "Pegar",
+    "find": "Buscar",
+    "replace": "Reemplazar",
+    "toggleSidebar": "Mostrar/ocultar barra lateral",
+    "toggleResponsePanel": "Mostrar/ocultar panel de respuesta",
+    "zoomIn": "Acercar",
+    "zoomOut": "Alejar",
+    "resetZoom": "Restablecer zoom",
+    "settings": "Ajustes",
+    "toggleDevTools": "Herramientas de desarrollo",
+    "toggleFullscreen": "Pantalla completa",
+    "about": "Acerca de",
+    "documentation": "Documentación",
+    "keyboardShortcuts": "Atajos de teclado",
+    "releaseNotes": "Notas de la versión",
+    "reportIssue": "Reportar un problema"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "theme": "Tema",
+    "language": "Idioma",
+    "searchPlaceholder": "Buscar en los ajustes...",
+    "noResults": "No se han encontrado ajustes.",
+    "numberOutOfRange": "El valor debe estar entre {{min}} y {{max}}.",
+    "resetSetting": "Restablecer ajuste",
+    "copySettingId": "Copiar identificador del ajuste",
+    "settingOptions": "Opciones del ajuste",
+    "scopeTabsLabel": "Alcance de los ajustes",
+    "userOnlyHidden": "{{count}} ajuste(s) solo de usuario oculto(s) en esta pestaña.",
+    "scope": {
+      "user": "Usuario",
+      "workspace": "Espacio de trabajo",
+      "workspaceDisabledTooltip": "Abre un proyecto para editar los ajustes del espacio de trabajo"
+    },
+    "appearance": {
+      "title": "Apariencia",
+      "theme": {
+        "title": "Tema",
+        "description": "Selecciona el tema de colores de la aplicación"
+      },
+      "language": {
+        "title": "Idioma",
+        "description": "Selecciona el idioma de la aplicación",
+        "en": "English",
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "pt": "Português",
+        "nl": "Nederlands",
+        "sv": "Svenska",
+        "da": "Dansk",
+        "nb": "Norsk bokmål",
+        "fi": "Suomi",
+        "pl": "Polski",
+        "cs": "Čeština",
+        "hu": "Magyar",
+        "ro": "Română",
+        "el": "Ελληνικά",
+        "uk": "Українська",
+        "hr": "Hrvatski",
+        "sr": "Srpski",
+        "sq": "Shqip",
+        "tr": "Türkçe",
+        "id": "Bahasa Indonesia",
+        "vi": "Tiếng Việt",
+        "ja": "日本語",
+        "ko": "한국어",
+        "zh-CN": "简体中文",
+        "zh-TW": "繁體中文"
+      },
+      "advancedVisualEffects": {
+        "title": "Efectos visuales avanzados",
+        "description": "Activa efectos visuales avanzados como el desenfoque de fondo en los overlays y las animaciones CSS. Desactívalo para un mejor rendimiento en hardware modesto."
+      },
+      "editor": {
+        "title": "Editor",
+        "fontSize": {
+          "title": "Tamaño de fuente",
+          "description": "Controla el tamaño de fuente en píxeles del editor de código"
+        },
+        "fontFamily": {
+          "title": "Familia tipográfica",
+          "description": "Controla la familia tipográfica del editor de código"
+        },
+        "wordWrap": {
+          "title": "Ajuste de línea",
+          "description": "Controla si las líneas se ajustan en el editor de código"
+        },
+        "minimap": {
+          "title": "Minimapa",
+          "description": "Controla si se muestra el minimapa en el editor de código"
+        },
+        "lineNumbers": {
+          "title": "Números de línea",
+          "description": "Controla si se muestran los números de línea en el editor de código"
+        }
+      }
+    },
+    "files": {
+      "title": "Archivos",
+      "autoSave": {
+        "title": "Guardado automático",
+        "description": "Controla el guardado automático de los editores modificados. Más información en la documentación.",
+        "off": "Desactivado",
+        "afterDelay": "Tras una espera",
+        "onWindowChange": "Al cambiar de ventana"
+      },
+      "autoSaveDelay": {
+        "title": "Retardo de guardado automático",
+        "description": "Controla el retardo en milisegundos tras el cual un editor modificado se guarda automáticamente. Solo se aplica cuando el guardado automático está configurado en «Tras una espera»."
+      }
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Ir a la definición"
+  },
+  "tagsView": {
+    "removeTag": "Quitar etiqueta",
+    "newTag": "Nueva etiqueta"
+  },
+  "contextMenu": {
+    "cut": "Cortar",
+    "copy": "Copiar",
+    "paste": "Pegar"
+  },
+  "search": {
+    "placeholder": "Buscar...",
+    "noResults": "No se han encontrado resultados",
+    "resultsAriaLabel": "Resultados de búsqueda",
+    "categories": {
+      "request": "Peticiones HTTP",
+      "folder": "Carpetas",
+      "environment": "Entornos",
+      "settings": "Ajustes",
+      "tag": "Etiquetas"
+    }
+  },
+  "iconSelect": {
+    "searchEmojis": "Buscar emojis...",
+    "noEmojisFound": "No se han encontrado emojis",
+    "searchCodicons": "Buscar codicons...",
+    "searchIconoir": "Buscar en Iconoir...",
+    "searchPhosphor": "Buscar en Phosphor...",
+    "searchMaterial": "Buscar en Material...",
+    "searchSimpleIcons": "Buscar en Simple Icons...",
+    "searchFeather": "Buscar en Feather...",
+    "searchFontAwesome": "Buscar en Font Awesome...",
+    "moreIcons": "+{{count}} iconos más. Usa la búsqueda para encontrar iconos específicos.",
+    "more": "+{{count}} más. Usa la búsqueda para encontrar iconos específicos.",
+    "noIconsFound": "No se han encontrado iconos",
+    "searchResults": "Resultados de búsqueda",
+    "categories": {
+      "files": "Archivos",
+      "git": "Git",
+      "debug": "Depuración",
+      "symbols": "Símbolos",
+      "arrows": "Flechas",
+      "ui": "Interfaz",
+      "media": "Multimedia",
+      "editing": "Edición",
+      "terminal": "Terminal",
+      "people": "Personas",
+      "notifications": "Notificaciones",
+      "brands": "Marcas",
+      "communication": "Comunicación",
+      "users": "Usuarios",
+      "business": "Empresa",
+      "medical": "Médico",
+      "transport": "Transporte",
+      "weather": "Clima",
+      "shapes": "Formas",
+      "design": "Diseño",
+      "devices": "Dispositivos",
+      "buildings": "Edificios",
+      "nature": "Naturaleza",
+      "food": "Comida",
+      "sport": "Deporte",
+      "sports": "Deportes",
+      "animals": "Animales",
+      "tools": "Herramientas"
+    },
+    "emojiCategories": {
+      "people": "Caras y personas",
+      "nature": "Animales y naturaleza",
+      "food": "Comida y bebida",
+      "activity": "Actividades",
+      "travel": "Viajes y lugares",
+      "objects": "Objetos",
+      "symbols": "Símbolos",
+      "flags": "Banderas"
+    }
+  },
+  "dateTimePicker": {
+    "ariaLabel": "Selector de fecha/hora",
+    "openCalendar": "Abrir calendario",
+    "previousYear": "Año anterior",
+    "nextYear": "Año siguiente",
+    "previousMonth": "Mes anterior",
+    "nextMonth": "Mes siguiente",
+    "selectMonth": "Seleccionar mes",
+    "selectYear": "Seleccionar año",
+    "includeTime": "Incluir la hora",
+    "hours": "Horas",
+    "minutes": "Minutos",
+    "output": "Salida",
+    "pattern": "Patrón",
+    "outputModes": {
+      "pattern": "Patrón",
+      "unix": "Unix (s)",
+      "epoch": "Epoch (ms)",
+      "iso": "ISO 8601"
+    },
+    "preview": "Vista previa",
+    "tokens": {
+      "S": "milisegundo, sin relleno",
+      "SSS": "milisegundo, rellenado a 3",
+      "u": "segundos fraccionarios, funcionalmente idéntico a SSS",
+      "uu": "segundos fraccionarios, entre 0 y 99, rellenado a 2",
+      "uuu": "segundos fraccionarios, entre 0 y 9",
+      "s": "segundo, sin relleno",
+      "ss": "segundo, rellenado a 2",
+      "m": "minuto, sin relleno",
+      "mm": "minuto, rellenado a 2",
+      "h": "hora en formato de 12 h, sin relleno",
+      "hh": "hora en formato de 12 h, rellenado a 2",
+      "H": "hora en formato de 24 h, sin relleno",
+      "HH": "hora en formato de 24 h, rellenado a 2",
+      "Z": "desfase estrecho",
+      "ZZ": "desfase corto",
+      "ZZZ": "desfase técnico",
+      "ZZZZ": "desfase con nombre abreviado",
+      "ZZZZZ": "desfase con nombre completo",
+      "z": "zona IANA",
+      "a": "meridiano",
+      "d": "día del mes, sin relleno",
+      "dd": "día del mes, rellenado a 2",
+      "c": "día de la semana, como número del 1 al 7 (lunes es 1, domingo es 7)",
+      "ccc": "día de la semana, como cadena localizada abreviada",
+      "cccc": "día de la semana, como cadena localizada completa",
+      "ccccc": "día de la semana, como única letra localizada",
+      "L": "mes como número sin relleno",
+      "LL": "mes como número con relleno",
+      "LLL": "mes como cadena localizada abreviada",
+      "LLLL": "mes como cadena localizada completa",
+      "LLLLL": "mes como única letra localizada",
+      "y": "año, sin relleno",
+      "yy": "año de dos dígitos",
+      "yyyy": "año de cuatro a seis dígitos, rellenado a 4",
+      "G": "era localizada abreviada",
+      "GG": "era localizada completa",
+      "GGGGG": "era localizada de una sola letra",
+      "kk": "año de semana ISO, sin relleno",
+      "kkkk": "año de semana ISO, rellenado a 4",
+      "W": "número de semana ISO, sin relleno",
+      "WW": "número de semana ISO, rellenado a 2",
+      "ii": "año de semana local, sin relleno",
+      "iiii": "año de semana local, rellenado a 4",
+      "n": "número de semana local, sin relleno",
+      "nn": "número de semana local, rellenado a 2",
+      "o": "ordinal (día del año), sin relleno",
+      "ooo": "ordinal (día del año), rellenado a 3",
+      "q": "trimestre, sin relleno",
+      "qq": "trimestre, rellenado a 2",
+      "D": "fecha numérica localizada",
+      "DD": "fecha localizada con mes abreviado",
+      "DDD": "fecha localizada con mes completo",
+      "DDDD": "fecha localizada con mes completo y día de la semana",
+      "t": "hora localizada",
+      "tt": "hora localizada con segundos",
+      "ttt": "hora localizada con segundos y desfase abreviado",
+      "tttt": "hora localizada con segundos y desfase completo",
+      "T": "hora localizada 24 h",
+      "TT": "hora localizada 24 h con segundos",
+      "TTT": "hora localizada 24 h con segundos y desfase abreviado",
+      "TTTT": "hora localizada 24 h con segundos y desfase completo",
+      "f": "fecha y hora localizada corta",
+      "ff": "fecha y hora localizada menos corta",
+      "fff": "fecha y hora localizada extensa",
+      "ffff": "fecha y hora localizada muy extensa",
+      "F": "fecha y hora localizada corta con segundos",
+      "FF": "fecha y hora localizada menos corta con segundos",
+      "FFF": "fecha y hora localizada extensa con segundos",
+      "FFFF": "fecha y hora localizada muy extensa con segundos",
+      "X": "marca de tiempo unix en segundos",
+      "x": "marca de tiempo unix en milisegundos"
+    }
+  }
+}

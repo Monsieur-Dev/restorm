@@ -1,0 +1,327 @@
+{
+  "common": {
+    "opened": "Đã mở",
+    "refresh": "Làm mới"
+  },
+  "file": {
+    "untitled": "Không có tiêu đề",
+    "unsavedChanges": {
+      "title": "Thay đổi chưa lưu",
+      "message": "Bạn có muốn lưu các thay đổi vào \"{{fileName}}\" không?",
+      "detail": "Các thay đổi của bạn sẽ bị mất nếu bạn không lưu.",
+      "save": "Lưu",
+      "dontSave": "Không lưu",
+      "cancel": "Hủy"
+    }
+  },
+  "recentFilesVignette": {
+    "favorites": "Yêu thích",
+    "recentFiles": "Tệp gần đây",
+    "addToFavorites": "Thêm vào mục yêu thích",
+    "removeFromFavorites": "Xóa khỏi mục yêu thích",
+    "confirmRemoveFavorite": "Bạn có chắc chắn muốn xóa \"{{fileName}}\" khỏi mục yêu thích không?",
+    "favoritesLandmarkLabel": "Danh sách yêu thích",
+    "recentsLandmarkLabel": "Danh sách tệp gần đây"
+  },
+  "welcomeScreen": {
+    "landmarkLabel": "Chào mừng"
+  },
+  "menuBar": {
+    "new": "Mới",
+    "open": "Mở",
+    "edit": "Chỉnh sửa",
+    "view": "Xem",
+    "help": "Trợ giúp",
+    "undo": "Hoàn tác",
+    "redo": "Làm lại",
+    "cut": "Cắt",
+    "copy": "Sao chép",
+    "paste": "Dán",
+    "find": "Tìm",
+    "replace": "Thay thế",
+    "toggleSidebar": "Bật/tắt thanh bên",
+    "toggleResponsePanel": "Bật/tắt bảng phản hồi",
+    "zoomIn": "Phóng to",
+    "zoomOut": "Thu nhỏ",
+    "resetZoom": "Đặt lại thu phóng",
+    "settings": "Cài đặt",
+    "toggleDevTools": "Công cụ phát triển",
+    "toggleFullscreen": "Toàn màn hình",
+    "about": "Giới thiệu",
+    "documentation": "Tài liệu",
+    "keyboardShortcuts": "Phím tắt",
+    "releaseNotes": "Ghi chú phát hành",
+    "reportIssue": "Báo cáo sự cố"
+  },
+  "settings": {
+    "title": "Cài đặt",
+    "theme": "Giao diện",
+    "language": "Ngôn ngữ",
+    "searchPlaceholder": "Tìm trong cài đặt...",
+    "noResults": "Không tìm thấy cài đặt nào.",
+    "numberOutOfRange": "Giá trị phải nằm trong khoảng từ {{min}} đến {{max}}.",
+    "resetSetting": "Đặt lại cài đặt",
+    "copySettingId": "Sao chép ID cài đặt",
+    "settingOptions": "Tùy chọn cài đặt",
+    "scopeTabsLabel": "Phạm vi cài đặt",
+    "userOnlyHidden": "Có {{count}} cài đặt chỉ dành cho người dùng được ẩn trên tab này.",
+    "scope": {
+      "user": "Người dùng",
+      "workspace": "Không gian làm việc",
+      "workspaceDisabledTooltip": "Mở một dự án để chỉnh sửa cài đặt không gian làm việc"
+    },
+    "appearance": {
+      "title": "Giao diện",
+      "theme": {
+        "title": "Giao diện",
+        "description": "Chọn giao diện màu của ứng dụng"
+      },
+      "language": {
+        "title": "Ngôn ngữ",
+        "description": "Chọn ngôn ngữ của ứng dụng",
+        "en": "English",
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "pt": "Português",
+        "nl": "Nederlands",
+        "sv": "Svenska",
+        "da": "Dansk",
+        "nb": "Norsk bokmål",
+        "fi": "Suomi",
+        "pl": "Polski",
+        "cs": "Čeština",
+        "hu": "Magyar",
+        "ro": "Română",
+        "el": "Ελληνικά",
+        "uk": "Українська",
+        "hr": "Hrvatski",
+        "sr": "Srpski",
+        "sq": "Shqip",
+        "tr": "Türkçe",
+        "id": "Bahasa Indonesia",
+        "vi": "Tiếng Việt",
+        "ja": "日本語",
+        "ko": "한국어",
+        "zh-CN": "简体中文",
+        "zh-TW": "繁體中文"
+      },
+      "advancedVisualEffects": {
+        "title": "Hiệu ứng hình ảnh nâng cao",
+        "description": "Bật các hiệu ứng hình ảnh nâng cao như làm mờ nền trên các lớp phủ và hoạt ảnh CSS. Tắt để có hiệu suất tốt hơn trên phần cứng yếu."
+      },
+      "editor": {
+        "title": "Trình soạn thảo",
+        "fontSize": {
+          "title": "Cỡ chữ",
+          "description": "Điều khiển cỡ chữ tính bằng pixel cho trình soạn thảo mã"
+        },
+        "fontFamily": {
+          "title": "Phông chữ",
+          "description": "Điều khiển phông chữ cho trình soạn thảo mã"
+        },
+        "wordWrap": {
+          "title": "Xuống dòng tự động",
+          "description": "Điều khiển việc các dòng có được xuống dòng trong trình soạn thảo mã hay không"
+        },
+        "minimap": {
+          "title": "Bản đồ thu nhỏ",
+          "description": "Điều khiển việc hiển thị bản đồ thu nhỏ trong trình soạn thảo mã"
+        },
+        "lineNumbers": {
+          "title": "Số dòng",
+          "description": "Điều khiển việc hiển thị số dòng trong trình soạn thảo mã"
+        }
+      }
+    },
+    "files": {
+      "title": "Tệp",
+      "autoSave": {
+        "title": "Tự động lưu",
+        "description": "Điều khiển tự động lưu các trình soạn thảo đã chỉnh sửa. Đọc thêm về tự động lưu trong tài liệu.",
+        "off": "Tắt",
+        "afterDelay": "Sau độ trễ",
+        "onWindowChange": "Khi đổi cửa sổ"
+      },
+      "autoSaveDelay": {
+        "title": "Độ trễ tự động lưu",
+        "description": "Điều khiển độ trễ tính bằng mili giây trước khi trình soạn thảo đã chỉnh sửa được tự động lưu. Chỉ áp dụng khi Tự động lưu được đặt thành Sau độ trễ."
+      }
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Đi đến định nghĩa"
+  },
+  "tagsView": {
+    "removeTag": "Xóa thẻ",
+    "newTag": "Thẻ mới"
+  },
+  "contextMenu": {
+    "cut": "Cắt",
+    "copy": "Sao chép",
+    "paste": "Dán"
+  },
+  "search": {
+    "placeholder": "Tìm kiếm...",
+    "noResults": "Không tìm thấy kết quả",
+    "resultsAriaLabel": "Kết quả tìm kiếm",
+    "categories": {
+      "request": "Yêu cầu HTTP",
+      "folder": "Thư mục",
+      "environment": "Môi trường",
+      "settings": "Cài đặt",
+      "tag": "Thẻ"
+    }
+  },
+  "iconSelect": {
+    "searchEmojis": "Tìm emoji...",
+    "noEmojisFound": "Không tìm thấy emoji",
+    "searchCodicons": "Tìm codicon...",
+    "searchIconoir": "Tìm trong Iconoir...",
+    "searchPhosphor": "Tìm trong Phosphor...",
+    "searchMaterial": "Tìm trong Material...",
+    "searchSimpleIcons": "Tìm trong Simple Icons...",
+    "searchFeather": "Tìm trong Feather...",
+    "searchFontAwesome": "Tìm trong Font Awesome...",
+    "moreIcons": "+{{count}} biểu tượng khác. Dùng tìm kiếm để tìm biểu tượng cụ thể.",
+    "more": "+{{count}} biểu tượng khác. Dùng tìm kiếm để tìm biểu tượng cụ thể.",
+    "noIconsFound": "Không tìm thấy biểu tượng",
+    "searchResults": "Kết quả tìm kiếm",
+    "categories": {
+      "files": "Tệp",
+      "git": "Git",
+      "debug": "Gỡ lỗi",
+      "symbols": "Ký hiệu",
+      "arrows": "Mũi tên",
+      "ui": "Giao diện",
+      "media": "Đa phương tiện",
+      "editing": "Chỉnh sửa",
+      "terminal": "Terminal",
+      "people": "Con người",
+      "notifications": "Thông báo",
+      "brands": "Thương hiệu",
+      "communication": "Liên lạc",
+      "users": "Người dùng",
+      "business": "Doanh nghiệp",
+      "medical": "Y tế",
+      "transport": "Giao thông",
+      "weather": "Thời tiết",
+      "shapes": "Hình dạng",
+      "design": "Thiết kế",
+      "devices": "Thiết bị",
+      "buildings": "Tòa nhà",
+      "nature": "Thiên nhiên",
+      "food": "Thực phẩm",
+      "sport": "Thể thao",
+      "sports": "Các môn thể thao",
+      "animals": "Động vật",
+      "tools": "Công cụ"
+    },
+    "emojiCategories": {
+      "people": "Khuôn mặt & Con người",
+      "nature": "Động vật & Thiên nhiên",
+      "food": "Thức ăn & Đồ uống",
+      "activity": "Hoạt động",
+      "travel": "Du lịch & Địa điểm",
+      "objects": "Vật thể",
+      "symbols": "Ký hiệu",
+      "flags": "Cờ"
+    }
+  },
+  "dateTimePicker": {
+    "ariaLabel": "Bộ chọn ngày/giờ",
+    "openCalendar": "Mở lịch",
+    "previousYear": "Năm trước",
+    "nextYear": "Năm sau",
+    "previousMonth": "Tháng trước",
+    "nextMonth": "Tháng sau",
+    "selectMonth": "Chọn tháng",
+    "selectYear": "Chọn năm",
+    "includeTime": "Bao gồm thời gian",
+    "hours": "Giờ",
+    "minutes": "Phút",
+    "output": "Đầu ra",
+    "pattern": "Mẫu",
+    "outputModes": {
+      "pattern": "Mẫu",
+      "unix": "Unix (s)",
+      "epoch": "Epoch (ms)",
+      "iso": "ISO 8601"
+    },
+    "preview": "Xem trước",
+    "tokens": {
+      "S": "mili giây, không đệm",
+      "SSS": "mili giây, đệm thành 3 chữ số",
+      "u": "phần giây thập phân, tương đương với SSS",
+      "uu": "phần giây thập phân, từ 0 đến 99, đệm thành 2 chữ số",
+      "uuu": "phần giây thập phân, từ 0 đến 9",
+      "s": "giây, không đệm",
+      "ss": "giây, đệm thành 2 chữ số",
+      "m": "phút, không đệm",
+      "mm": "phút, đệm thành 2 chữ số",
+      "h": "giờ ở định dạng 12 giờ, không đệm",
+      "hh": "giờ ở định dạng 12 giờ, đệm thành 2 chữ số",
+      "H": "giờ ở định dạng 24 giờ, không đệm",
+      "HH": "giờ ở định dạng 24 giờ, đệm thành 2 chữ số",
+      "Z": "độ lệch hẹp",
+      "ZZ": "độ lệch ngắn",
+      "ZZZ": "độ lệch kỹ thuật",
+      "ZZZZ": "độ lệch có tên viết tắt",
+      "ZZZZZ": "độ lệch có tên đầy đủ",
+      "z": "múi giờ IANA",
+      "a": "buổi (sáng/chiều)",
+      "d": "ngày trong tháng, không đệm",
+      "dd": "ngày trong tháng, đệm thành 2 chữ số",
+      "c": "ngày trong tuần, dưới dạng số từ 1-7 (Thứ Hai là 1, Chủ Nhật là 7)",
+      "ccc": "ngày trong tuần, dưới dạng chuỗi viết tắt đã bản địa hóa",
+      "cccc": "ngày trong tuần, dưới dạng chuỗi đầy đủ đã bản địa hóa",
+      "ccccc": "ngày trong tuần, dưới dạng một chữ cái đã bản địa hóa",
+      "L": "tháng dưới dạng số không đệm",
+      "LL": "tháng dưới dạng số có đệm",
+      "LLL": "tháng dưới dạng chuỗi viết tắt đã bản địa hóa",
+      "LLLL": "tháng dưới dạng chuỗi đầy đủ đã bản địa hóa",
+      "LLLLL": "tháng dưới dạng một chữ cái đã bản địa hóa",
+      "y": "năm, không đệm",
+      "yy": "năm hai chữ số",
+      "yyyy": "năm từ bốn đến sáu chữ số, đệm thành 4",
+      "G": "kỷ nguyên viết tắt đã bản địa hóa",
+      "GG": "kỷ nguyên đầy đủ đã bản địa hóa",
+      "GGGGG": "kỷ nguyên một chữ cái đã bản địa hóa",
+      "kk": "năm tuần ISO, không đệm",
+      "kkkk": "năm tuần ISO, đệm thành 4",
+      "W": "số tuần ISO, không đệm",
+      "WW": "số tuần ISO, đệm thành 2",
+      "ii": "năm tuần địa phương, không đệm",
+      "iiii": "năm tuần địa phương, đệm thành 4",
+      "n": "số tuần địa phương, không đệm",
+      "nn": "số tuần địa phương, đệm thành 2",
+      "o": "thứ tự (ngày trong năm), không đệm",
+      "ooo": "thứ tự (ngày trong năm), đệm thành 3",
+      "q": "quý, không đệm",
+      "qq": "quý, đệm thành 2",
+      "D": "ngày dạng số đã bản địa hóa",
+      "DD": "ngày đã bản địa hóa với tháng viết tắt",
+      "DDD": "ngày đã bản địa hóa với tháng đầy đủ",
+      "DDDD": "ngày đã bản địa hóa với tháng đầy đủ và thứ trong tuần",
+      "t": "giờ đã bản địa hóa",
+      "tt": "giờ đã bản địa hóa kèm giây",
+      "ttt": "giờ đã bản địa hóa kèm giây và độ lệch viết tắt",
+      "tttt": "giờ đã bản địa hóa kèm giây và độ lệch đầy đủ",
+      "T": "giờ 24 giờ đã bản địa hóa",
+      "TT": "giờ 24 giờ đã bản địa hóa kèm giây",
+      "TTT": "giờ 24 giờ đã bản địa hóa kèm giây và độ lệch viết tắt",
+      "TTTT": "giờ 24 giờ đã bản địa hóa kèm giây và độ lệch đầy đủ",
+      "f": "ngày và giờ ngắn đã bản địa hóa",
+      "ff": "ngày và giờ ít ngắn hơn đã bản địa hóa",
+      "fff": "ngày và giờ chi tiết đã bản địa hóa",
+      "ffff": "ngày và giờ rất chi tiết đã bản địa hóa",
+      "F": "ngày và giờ ngắn đã bản địa hóa kèm giây",
+      "FF": "ngày và giờ ít ngắn hơn đã bản địa hóa kèm giây",
+      "FFF": "ngày và giờ chi tiết đã bản địa hóa kèm giây",
+      "FFFF": "ngày và giờ rất chi tiết đã bản địa hóa kèm giây",
+      "X": "dấu thời gian unix tính bằng giây",
+      "x": "dấu thời gian unix tính bằng mili giây"
+    }
+  }
+}

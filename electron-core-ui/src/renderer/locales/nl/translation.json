@@ -1,0 +1,327 @@
+{
+  "common": {
+    "opened": "Geopend",
+    "refresh": "Vernieuwen"
+  },
+  "file": {
+    "untitled": "Naamloos",
+    "unsavedChanges": {
+      "title": "Niet-opgeslagen wijzigingen",
+      "message": "Wil je de wijzigingen in \"{{fileName}}\" opslaan?",
+      "detail": "Je wijzigingen gaan verloren als je ze niet opslaat.",
+      "save": "Opslaan",
+      "dontSave": "Niet opslaan",
+      "cancel": "Annuleren"
+    }
+  },
+  "recentFilesVignette": {
+    "favorites": "Favorieten",
+    "recentFiles": "Recente bestanden",
+    "addToFavorites": "Toevoegen aan favorieten",
+    "removeFromFavorites": "Verwijderen uit favorieten",
+    "confirmRemoveFavorite": "Weet je zeker dat je \"{{fileName}}\" uit favorieten wilt verwijderen?",
+    "favoritesLandmarkLabel": "Lijst met favorieten",
+    "recentsLandmarkLabel": "Lijst met recente bestanden"
+  },
+  "welcomeScreen": {
+    "landmarkLabel": "Welkom"
+  },
+  "menuBar": {
+    "new": "Nieuw",
+    "open": "Openen",
+    "edit": "Bewerken",
+    "view": "Beeld",
+    "help": "Help",
+    "undo": "Ongedaan maken",
+    "redo": "Opnieuw uitvoeren",
+    "cut": "Knippen",
+    "copy": "Kopiëren",
+    "paste": "Plakken",
+    "find": "Zoeken",
+    "replace": "Vervangen",
+    "toggleSidebar": "Zijbalk in-/uitschakelen",
+    "toggleResponsePanel": "Antwoordpaneel in-/uitschakelen",
+    "zoomIn": "Inzoomen",
+    "zoomOut": "Uitzoomen",
+    "resetZoom": "Zoom herstellen",
+    "settings": "Instellingen",
+    "toggleDevTools": "Ontwikkelhulpprogramma's",
+    "toggleFullscreen": "Volledig scherm",
+    "about": "Over",
+    "documentation": "Documentatie",
+    "keyboardShortcuts": "Sneltoetsen",
+    "releaseNotes": "Release-opmerkingen",
+    "reportIssue": "Probleem melden"
+  },
+  "settings": {
+    "title": "Instellingen",
+    "theme": "Thema",
+    "language": "Taal",
+    "searchPlaceholder": "Instellingen zoeken...",
+    "noResults": "Geen instellingen gevonden.",
+    "numberOutOfRange": "Waarde moet tussen {{min}} en {{max}} liggen.",
+    "resetSetting": "Instelling herstellen",
+    "copySettingId": "Instellings-ID kopiëren",
+    "settingOptions": "Instellingsopties",
+    "scopeTabsLabel": "Bereik van instellingen",
+    "userOnlyHidden": "{{count}} alleen-gebruiker-instelling(en) zijn verborgen op dit tabblad.",
+    "scope": {
+      "user": "Gebruiker",
+      "workspace": "Werkruimte",
+      "workspaceDisabledTooltip": "Open een project om werkruimte-instellingen te bewerken"
+    },
+    "appearance": {
+      "title": "Weergave",
+      "theme": {
+        "title": "Thema",
+        "description": "Selecteer het kleurenthema van de toepassing"
+      },
+      "language": {
+        "title": "Taal",
+        "description": "Selecteer de taal van de toepassing",
+        "en": "English",
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "pt": "Português",
+        "nl": "Nederlands",
+        "sv": "Svenska",
+        "da": "Dansk",
+        "nb": "Norsk bokmål",
+        "fi": "Suomi",
+        "pl": "Polski",
+        "cs": "Čeština",
+        "hu": "Magyar",
+        "ro": "Română",
+        "el": "Ελληνικά",
+        "uk": "Українська",
+        "hr": "Hrvatski",
+        "sr": "Srpski",
+        "sq": "Shqip",
+        "tr": "Türkçe",
+        "id": "Bahasa Indonesia",
+        "vi": "Tiếng Việt",
+        "ja": "日本語",
+        "ko": "한국어",
+        "zh-CN": "简体中文",
+        "zh-TW": "繁體中文"
+      },
+      "advancedVisualEffects": {
+        "title": "Geavanceerde visuele effecten",
+        "description": "Schakel geavanceerde visuele effecten in, zoals achtergrondvervaging op overlays en CSS-animaties. Schakel uit voor betere prestaties op zwakkere hardware."
+      },
+      "editor": {
+        "title": "Editor",
+        "fontSize": {
+          "title": "Lettergrootte",
+          "description": "Bepaalt de lettergrootte in pixels voor de code-editor"
+        },
+        "fontFamily": {
+          "title": "Lettertype",
+          "description": "Bepaalt het lettertype voor de code-editor"
+        },
+        "wordWrap": {
+          "title": "Regelterugloop",
+          "description": "Bepaalt of regels moeten worden afgebroken in de code-editor"
+        },
+        "minimap": {
+          "title": "Minimap",
+          "description": "Bepaalt of de minimap wordt weergegeven in de code-editor"
+        },
+        "lineNumbers": {
+          "title": "Regelnummers",
+          "description": "Bepaalt of regelnummers worden weergegeven in de code-editor"
+        }
+      }
+    },
+    "files": {
+      "title": "Bestanden",
+      "autoSave": {
+        "title": "Automatisch opslaan",
+        "description": "Bepaalt het automatisch opslaan van gewijzigde editors. Lees meer over automatisch opslaan in de documentatie.",
+        "off": "Uit",
+        "afterDelay": "Na vertraging",
+        "onWindowChange": "Bij venster wisselen"
+      },
+      "autoSaveDelay": {
+        "title": "Vertraging voor automatisch opslaan",
+        "description": "Bepaalt de vertraging in milliseconden waarna een gewijzigde editor automatisch wordt opgeslagen. Geldt alleen wanneer Automatisch opslaan is ingesteld op Na vertraging."
+      }
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Ga naar definitie"
+  },
+  "tagsView": {
+    "removeTag": "Tag verwijderen",
+    "newTag": "Nieuwe tag"
+  },
+  "contextMenu": {
+    "cut": "Knippen",
+    "copy": "Kopiëren",
+    "paste": "Plakken"
+  },
+  "search": {
+    "placeholder": "Zoeken...",
+    "noResults": "Geen resultaten gevonden",
+    "resultsAriaLabel": "Zoekresultaten",
+    "categories": {
+      "request": "HTTP-verzoeken",
+      "folder": "Mappen",
+      "environment": "Omgevingen",
+      "settings": "Instellingen",
+      "tag": "Tags"
+    }
+  },
+  "iconSelect": {
+    "searchEmojis": "Emoji's zoeken...",
+    "noEmojisFound": "Geen emoji's gevonden",
+    "searchCodicons": "Codicons zoeken...",
+    "searchIconoir": "Iconoir doorzoeken...",
+    "searchPhosphor": "Phosphor doorzoeken...",
+    "searchMaterial": "Material doorzoeken...",
+    "searchSimpleIcons": "Simple Icons doorzoeken...",
+    "searchFeather": "Feather doorzoeken...",
+    "searchFontAwesome": "Font Awesome doorzoeken...",
+    "moreIcons": "+{{count}} extra iconen. Gebruik de zoekfunctie om specifieke iconen te vinden.",
+    "more": "+{{count}} meer. Gebruik de zoekfunctie om specifieke iconen te vinden.",
+    "noIconsFound": "Geen iconen gevonden",
+    "searchResults": "Zoekresultaten",
+    "categories": {
+      "files": "Bestanden",
+      "git": "Git",
+      "debug": "Debug",
+      "symbols": "Symbolen",
+      "arrows": "Pijlen",
+      "ui": "Interface",
+      "media": "Media",
+      "editing": "Bewerken",
+      "terminal": "Terminal",
+      "people": "Personen",
+      "notifications": "Meldingen",
+      "brands": "Merken",
+      "communication": "Communicatie",
+      "users": "Gebruikers",
+      "business": "Zaken",
+      "medical": "Medisch",
+      "transport": "Vervoer",
+      "weather": "Weer",
+      "shapes": "Vormen",
+      "design": "Ontwerp",
+      "devices": "Apparaten",
+      "buildings": "Gebouwen",
+      "nature": "Natuur",
+      "food": "Voedsel",
+      "sport": "Sport",
+      "sports": "Sporten",
+      "animals": "Dieren",
+      "tools": "Gereedschap"
+    },
+    "emojiCategories": {
+      "people": "Smileys en personen",
+      "nature": "Dieren en natuur",
+      "food": "Eten en drinken",
+      "activity": "Activiteiten",
+      "travel": "Reizen en plaatsen",
+      "objects": "Voorwerpen",
+      "symbols": "Symbolen",
+      "flags": "Vlaggen"
+    }
+  },
+  "dateTimePicker": {
+    "ariaLabel": "Datum-/tijdkiezer",
+    "openCalendar": "Kalender openen",
+    "previousYear": "Vorig jaar",
+    "nextYear": "Volgend jaar",
+    "previousMonth": "Vorige maand",
+    "nextMonth": "Volgende maand",
+    "selectMonth": "Maand selecteren",
+    "selectYear": "Jaar selecteren",
+    "includeTime": "Tijd opnemen",
+    "hours": "Uren",
+    "minutes": "Minuten",
+    "output": "Uitvoer",
+    "pattern": "Patroon",
+    "outputModes": {
+      "pattern": "Patroon",
+      "unix": "Unix (s)",
+      "epoch": "Epoch (ms)",
+      "iso": "ISO 8601"
+    },
+    "preview": "Voorbeeld",
+    "tokens": {
+      "S": "milliseconde, geen opvulling",
+      "SSS": "milliseconde, opgevuld tot 3",
+      "u": "fractionele seconden, functioneel identiek aan SSS",
+      "uu": "fractionele seconden, tussen 0 en 99, opgevuld tot 2",
+      "uuu": "fractionele seconden, tussen 0 en 9",
+      "s": "seconde, geen opvulling",
+      "ss": "seconde, opgevuld tot 2",
+      "m": "minuut, geen opvulling",
+      "mm": "minuut, opgevuld tot 2",
+      "h": "uur in 12-uursnotatie, geen opvulling",
+      "hh": "uur in 12-uursnotatie, opgevuld tot 2",
+      "H": "uur in 24-uursnotatie, geen opvulling",
+      "HH": "uur in 24-uursnotatie, opgevuld tot 2",
+      "Z": "smalle offset",
+      "ZZ": "korte offset",
+      "ZZZ": "technische offset",
+      "ZZZZ": "afgekorte benoemde offset",
+      "ZZZZZ": "volledige benoemde offset",
+      "z": "IANA-zone",
+      "a": "meridiem",
+      "d": "dag van de maand, geen opvulling",
+      "dd": "dag van de maand, opgevuld tot 2",
+      "c": "dag van de week, als getal van 1-7 (maandag is 1, zondag is 7)",
+      "ccc": "dag van de week, als afgekorte gelokaliseerde tekenreeks",
+      "cccc": "dag van de week, als volledige gelokaliseerde tekenreeks",
+      "ccccc": "dag van de week, als enkele gelokaliseerde letter",
+      "L": "maand als getal zonder opvulling",
+      "LL": "maand als opgevuld getal",
+      "LLL": "maand als afgekorte gelokaliseerde tekenreeks",
+      "LLLL": "maand als volledige gelokaliseerde tekenreeks",
+      "LLLLL": "maand als enkele gelokaliseerde letter",
+      "y": "jaar, geen opvulling",
+      "yy": "tweecijferig jaar",
+      "yyyy": "jaar van vier tot zes cijfers, opgevuld tot 4",
+      "G": "afgekort gelokaliseerd tijdperk",
+      "GG": "volledig gelokaliseerd tijdperk",
+      "GGGGG": "gelokaliseerd tijdperk van één letter",
+      "kk": "ISO-weekjaar, geen opvulling",
+      "kkkk": "ISO-weekjaar, opgevuld tot 4",
+      "W": "ISO-weeknummer, geen opvulling",
+      "WW": "ISO-weeknummer, opgevuld tot 2",
+      "ii": "lokaal weekjaar, geen opvulling",
+      "iiii": "lokaal weekjaar, opgevuld tot 4",
+      "n": "lokaal weeknummer, geen opvulling",
+      "nn": "lokaal weeknummer, opgevuld tot 2",
+      "o": "ordinaal (dag van het jaar), geen opvulling",
+      "ooo": "ordinaal (dag van het jaar), opgevuld tot 3",
+      "q": "kwartaal, geen opvulling",
+      "qq": "kwartaal, opgevuld tot 2",
+      "D": "gelokaliseerde numerieke datum",
+      "DD": "gelokaliseerde datum met afgekorte maand",
+      "DDD": "gelokaliseerde datum met volledige maand",
+      "DDDD": "gelokaliseerde datum met volledige maand en weekdag",
+      "t": "gelokaliseerde tijd",
+      "tt": "gelokaliseerde tijd met seconden",
+      "ttt": "gelokaliseerde tijd met seconden en afgekorte offset",
+      "tttt": "gelokaliseerde tijd met seconden en volledige offset",
+      "T": "gelokaliseerde 24-uurstijd",
+      "TT": "gelokaliseerde 24-uurstijd met seconden",
+      "TTT": "gelokaliseerde 24-uurstijd met seconden en afgekorte offset",
+      "TTTT": "gelokaliseerde 24-uurstijd met seconden en volledige offset",
+      "f": "korte gelokaliseerde datum en tijd",
+      "ff": "minder korte gelokaliseerde datum en tijd",
+      "fff": "uitgebreide gelokaliseerde datum en tijd",
+      "ffff": "zeer uitgebreide gelokaliseerde datum en tijd",
+      "F": "korte gelokaliseerde datum en tijd met seconden",
+      "FF": "minder korte gelokaliseerde datum en tijd met seconden",
+      "FFF": "uitgebreide gelokaliseerde datum en tijd met seconden",
+      "FFFF": "zeer uitgebreide gelokaliseerde datum en tijd met seconden",
+      "X": "unix-tijdstempel in seconden",
+      "x": "unix-tijdstempel in milliseconden"
+    }
+  }
+}

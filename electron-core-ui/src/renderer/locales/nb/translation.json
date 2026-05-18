@@ -1,0 +1,327 @@
+{
+  "common": {
+    "opened": "Åpnet",
+    "refresh": "Oppdater"
+  },
+  "file": {
+    "untitled": "Uten tittel",
+    "unsavedChanges": {
+      "title": "Ulagrede endringer",
+      "message": "Vil du lagre endringene i «{{fileName}}»?",
+      "detail": "Endringene dine går tapt hvis du ikke lagrer dem.",
+      "save": "Lagre",
+      "dontSave": "Ikke lagre",
+      "cancel": "Avbryt"
+    }
+  },
+  "recentFilesVignette": {
+    "favorites": "Favoritter",
+    "recentFiles": "Nylige filer",
+    "addToFavorites": "Legg til i favoritter",
+    "removeFromFavorites": "Fjern fra favoritter",
+    "confirmRemoveFavorite": "Er du sikker på at du vil fjerne «{{fileName}}» fra favoritter?",
+    "favoritesLandmarkLabel": "Favorittliste",
+    "recentsLandmarkLabel": "Liste over nylige filer"
+  },
+  "welcomeScreen": {
+    "landmarkLabel": "Velkommen"
+  },
+  "menuBar": {
+    "new": "Ny",
+    "open": "Åpne",
+    "edit": "Rediger",
+    "view": "Vis",
+    "help": "Hjelp",
+    "undo": "Angre",
+    "redo": "Gjør om",
+    "cut": "Klipp ut",
+    "copy": "Kopier",
+    "paste": "Lim inn",
+    "find": "Finn",
+    "replace": "Erstatt",
+    "toggleSidebar": "Veksle sidefelt",
+    "toggleResponsePanel": "Veksle svarpanel",
+    "zoomIn": "Zoom inn",
+    "zoomOut": "Zoom ut",
+    "resetZoom": "Tilbakestill zoom",
+    "settings": "Innstillinger",
+    "toggleDevTools": "Veksle utviklerverktøy",
+    "toggleFullscreen": "Veksle fullskjerm",
+    "about": "Om",
+    "documentation": "Dokumentasjon",
+    "keyboardShortcuts": "Hurtigtaster",
+    "releaseNotes": "Versjonsmerknader",
+    "reportIssue": "Rapporter problem"
+  },
+  "settings": {
+    "title": "Innstillinger",
+    "theme": "Tema",
+    "language": "Språk",
+    "searchPlaceholder": "Søk i innstillinger...",
+    "noResults": "Ingen innstillinger funnet.",
+    "numberOutOfRange": "Verdien må være mellom {{min}} og {{max}}.",
+    "resetSetting": "Tilbakestill innstilling",
+    "copySettingId": "Kopier innstillings-ID",
+    "settingOptions": "Innstillingsalternativer",
+    "scopeTabsLabel": "Innstillingsomfang",
+    "userOnlyHidden": "{{count}} brukerinnstilling(er) er skjult på denne fanen.",
+    "scope": {
+      "user": "Bruker",
+      "workspace": "Arbeidsområde",
+      "workspaceDisabledTooltip": "Åpne et prosjekt for å redigere innstillinger for arbeidsområdet"
+    },
+    "appearance": {
+      "title": "Utseende",
+      "theme": {
+        "title": "Tema",
+        "description": "Velg applikasjonens fargetema"
+      },
+      "language": {
+        "title": "Språk",
+        "description": "Velg applikasjonens språk",
+        "en": "English",
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "pt": "Português",
+        "nl": "Nederlands",
+        "sv": "Svenska",
+        "da": "Dansk",
+        "nb": "Norsk bokmål",
+        "fi": "Suomi",
+        "pl": "Polski",
+        "cs": "Čeština",
+        "hu": "Magyar",
+        "ro": "Română",
+        "el": "Ελληνικά",
+        "uk": "Українська",
+        "hr": "Hrvatski",
+        "sr": "Srpski",
+        "sq": "Shqip",
+        "tr": "Türkçe",
+        "id": "Bahasa Indonesia",
+        "vi": "Tiếng Việt",
+        "ja": "日本語",
+        "ko": "한국어",
+        "zh-CN": "简体中文",
+        "zh-TW": "繁體中文"
+      },
+      "advancedVisualEffects": {
+        "title": "Avanserte visuelle effekter",
+        "description": "Aktiver avanserte visuelle effekter som bakgrunnsuskarphet på overlegg og CSS-animasjoner. Deaktiver for bedre ytelse på svakere maskinvare."
+      },
+      "editor": {
+        "title": "Editor",
+        "fontSize": {
+          "title": "Skriftstørrelse",
+          "description": "Styrer skriftstørrelsen i piksler for kodeeditoren"
+        },
+        "fontFamily": {
+          "title": "Skriftfamilie",
+          "description": "Styrer skriftfamilien for kodeeditoren"
+        },
+        "wordWrap": {
+          "title": "Tekstbryting",
+          "description": "Styrer om linjer skal brytes i kodeeditoren"
+        },
+        "minimap": {
+          "title": "Minikart",
+          "description": "Styrer om minikartet vises i kodeeditoren"
+        },
+        "lineNumbers": {
+          "title": "Linjenummer",
+          "description": "Styrer om linjenummer vises i kodeeditoren"
+        }
+      }
+    },
+    "files": {
+      "title": "Filer",
+      "autoSave": {
+        "title": "Autolagring",
+        "description": "Styrer autolagring av endrede editorer. Les mer om autolagring i dokumentasjonen.",
+        "off": "Av",
+        "afterDelay": "Etter forsinkelse",
+        "onWindowChange": "Ved vindusbytte"
+      },
+      "autoSaveDelay": {
+        "title": "Autolagringsforsinkelse",
+        "description": "Styrer forsinkelsen i millisekunder før en endret editor lagres automatisk. Gjelder bare når Autolagring er satt til Etter forsinkelse."
+      }
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Gå til definisjon"
+  },
+  "tagsView": {
+    "removeTag": "Fjern tagg",
+    "newTag": "Ny tagg"
+  },
+  "contextMenu": {
+    "cut": "Klipp ut",
+    "copy": "Kopier",
+    "paste": "Lim inn"
+  },
+  "search": {
+    "placeholder": "Søk...",
+    "noResults": "Ingen resultater funnet",
+    "resultsAriaLabel": "Søkeresultater",
+    "categories": {
+      "request": "HTTP-forespørsler",
+      "folder": "Mapper",
+      "environment": "Miljøer",
+      "settings": "Innstillinger",
+      "tag": "Tagger"
+    }
+  },
+  "iconSelect": {
+    "searchEmojis": "Søk i emojier...",
+    "noEmojisFound": "Ingen emojier funnet",
+    "searchCodicons": "Søk i codicons...",
+    "searchIconoir": "Søk i Iconoir...",
+    "searchPhosphor": "Søk i Phosphor...",
+    "searchMaterial": "Søk i Material...",
+    "searchSimpleIcons": "Søk i Simple Icons...",
+    "searchFeather": "Søk i Feather...",
+    "searchFontAwesome": "Søk i Font Awesome...",
+    "moreIcons": "+{{count}} flere ikoner. Bruk søk for å finne spesifikke ikoner.",
+    "more": "+{{count}} flere. Bruk søk for å finne spesifikke ikoner.",
+    "noIconsFound": "Ingen ikoner funnet",
+    "searchResults": "Søkeresultater",
+    "categories": {
+      "files": "Filer",
+      "git": "Git",
+      "debug": "Feilsøking",
+      "symbols": "Symboler",
+      "arrows": "Piler",
+      "ui": "Grensesnitt",
+      "media": "Medier",
+      "editing": "Redigering",
+      "terminal": "Terminal",
+      "people": "Personer",
+      "notifications": "Varsler",
+      "brands": "Merker",
+      "communication": "Kommunikasjon",
+      "users": "Brukere",
+      "business": "Forretning",
+      "medical": "Medisinsk",
+      "transport": "Transport",
+      "weather": "Vær",
+      "shapes": "Former",
+      "design": "Design",
+      "devices": "Enheter",
+      "buildings": "Bygninger",
+      "nature": "Natur",
+      "food": "Mat",
+      "sport": "Sport",
+      "sports": "Idretter",
+      "animals": "Dyr",
+      "tools": "Verktøy"
+    },
+    "emojiCategories": {
+      "people": "Smilefjes og personer",
+      "nature": "Dyr og natur",
+      "food": "Mat og drikke",
+      "activity": "Aktiviteter",
+      "travel": "Reise og steder",
+      "objects": "Objekter",
+      "symbols": "Symboler",
+      "flags": "Flagg"
+    }
+  },
+  "dateTimePicker": {
+    "ariaLabel": "Dato/tid-velger",
+    "openCalendar": "Åpne kalender",
+    "previousYear": "Forrige år",
+    "nextYear": "Neste år",
+    "previousMonth": "Forrige måned",
+    "nextMonth": "Neste måned",
+    "selectMonth": "Velg måned",
+    "selectYear": "Velg år",
+    "includeTime": "Inkluder tid",
+    "hours": "Timer",
+    "minutes": "Minutter",
+    "output": "Utdata",
+    "pattern": "Mønster",
+    "outputModes": {
+      "pattern": "Mønster",
+      "unix": "Unix (s)",
+      "epoch": "Epoch (ms)",
+      "iso": "ISO 8601"
+    },
+    "preview": "Forhåndsvisning",
+    "tokens": {
+      "S": "millisekund, uten utfylling",
+      "SSS": "millisekund, utfylt til 3",
+      "u": "brøkdelssekunder, funksjonelt identisk med SSS",
+      "uu": "brøkdelssekunder, mellom 0 og 99, utfylt til 2",
+      "uuu": "brøkdelssekunder, mellom 0 og 9",
+      "s": "sekund, uten utfylling",
+      "ss": "sekund, utfylt til 2",
+      "m": "minutt, uten utfylling",
+      "mm": "minutt, utfylt til 2",
+      "h": "time i 12-timersformat, uten utfylling",
+      "hh": "time i 12-timersformat, utfylt til 2",
+      "H": "time i 24-timersformat, uten utfylling",
+      "HH": "time i 24-timersformat, utfylt til 2",
+      "Z": "smal forskyvning",
+      "ZZ": "kort forskyvning",
+      "ZZZ": "teknisk forskyvning",
+      "ZZZZ": "forkortet navngitt forskyvning",
+      "ZZZZZ": "uforkortet navngitt forskyvning",
+      "z": "IANA-sone",
+      "a": "meridiem",
+      "d": "dag i måneden, uten utfylling",
+      "dd": "dag i måneden, utfylt til 2",
+      "c": "ukedag, som tall fra 1-7 (mandag er 1, søndag er 7)",
+      "ccc": "ukedag, som forkortet lokalisert streng",
+      "cccc": "ukedag, som uforkortet lokalisert streng",
+      "ccccc": "ukedag, som én lokalisert bokstav",
+      "L": "måned som uutfylt tall",
+      "LL": "måned som utfylt tall",
+      "LLL": "måned som forkortet lokalisert streng",
+      "LLLL": "måned som uforkortet lokalisert streng",
+      "LLLLL": "måned som én lokalisert bokstav",
+      "y": "år, uutfylt",
+      "yy": "tosifret år",
+      "yyyy": "fire- til sekssifret år, utfylt til 4",
+      "G": "forkortet lokalisert tidsalder",
+      "GG": "uforkortet lokalisert tidsalder",
+      "GGGGG": "én-bokstavs lokalisert tidsalder",
+      "kk": "ISO-ukeår, uutfylt",
+      "kkkk": "ISO-ukeår, utfylt til 4",
+      "W": "ISO-ukenummer, uutfylt",
+      "WW": "ISO-ukenummer, utfylt til 2",
+      "ii": "lokalt ukeår, uutfylt",
+      "iiii": "lokalt ukeår, utfylt til 4",
+      "n": "lokalt ukenummer, uutfylt",
+      "nn": "lokalt ukenummer, utfylt til 2",
+      "o": "ordinal (dag i året), uutfylt",
+      "ooo": "ordinal (dag i året), utfylt til 3",
+      "q": "kvartal, uten utfylling",
+      "qq": "kvartal, utfylt til 2",
+      "D": "lokalisert numerisk dato",
+      "DD": "lokalisert dato med forkortet måned",
+      "DDD": "lokalisert dato med full måned",
+      "DDDD": "lokalisert dato med full måned og ukedag",
+      "t": "lokalisert tid",
+      "tt": "lokalisert tid med sekunder",
+      "ttt": "lokalisert tid med sekunder og forkortet forskyvning",
+      "tttt": "lokalisert tid med sekunder og full forskyvning",
+      "T": "lokalisert 24-timers tid",
+      "TT": "lokalisert 24-timers tid med sekunder",
+      "TTT": "lokalisert 24-timers tid med sekunder og forkortet forskyvning",
+      "TTTT": "lokalisert 24-timers tid med sekunder og full forskyvning",
+      "f": "kort lokalisert dato og tid",
+      "ff": "mindre kort lokalisert dato og tid",
+      "fff": "utførlig lokalisert dato og tid",
+      "ffff": "ekstra utførlig lokalisert dato og tid",
+      "F": "kort lokalisert dato og tid med sekunder",
+      "FF": "mindre kort lokalisert dato og tid med sekunder",
+      "FFF": "utførlig lokalisert dato og tid med sekunder",
+      "FFFF": "ekstra utførlig lokalisert dato og tid med sekunder",
+      "X": "unix-tidsstempel i sekunder",
+      "x": "unix-tidsstempel i millisekunder"
+    }
+  }
+}

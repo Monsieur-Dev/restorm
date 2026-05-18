@@ -1,0 +1,327 @@
+{
+  "common": {
+    "opened": "Öppnade",
+    "refresh": "Uppdatera"
+  },
+  "file": {
+    "untitled": "Namnlös",
+    "unsavedChanges": {
+      "title": "Osparade ändringar",
+      "message": "Vill du spara ändringarna i \"{{fileName}}\"?",
+      "detail": "Dina ändringar går förlorade om du inte sparar dem.",
+      "save": "Spara",
+      "dontSave": "Spara inte",
+      "cancel": "Avbryt"
+    }
+  },
+  "recentFilesVignette": {
+    "favorites": "Favoriter",
+    "recentFiles": "Senaste filer",
+    "addToFavorites": "Lägg till i favoriter",
+    "removeFromFavorites": "Ta bort från favoriter",
+    "confirmRemoveFavorite": "Vill du verkligen ta bort \"{{fileName}}\" från favoriter?",
+    "favoritesLandmarkLabel": "Favoritlista",
+    "recentsLandmarkLabel": "Lista över senaste filer"
+  },
+  "welcomeScreen": {
+    "landmarkLabel": "Välkommen"
+  },
+  "menuBar": {
+    "new": "Ny",
+    "open": "Öppna",
+    "edit": "Redigera",
+    "view": "Visa",
+    "help": "Hjälp",
+    "undo": "Ångra",
+    "redo": "Gör om",
+    "cut": "Klipp ut",
+    "copy": "Kopiera",
+    "paste": "Klistra in",
+    "find": "Sök",
+    "replace": "Ersätt",
+    "toggleSidebar": "Växla sidofält",
+    "toggleResponsePanel": "Växla svarspanel",
+    "zoomIn": "Zooma in",
+    "zoomOut": "Zooma ut",
+    "resetZoom": "Återställ zoom",
+    "settings": "Inställningar",
+    "toggleDevTools": "Växla utvecklarverktyg",
+    "toggleFullscreen": "Växla helskärm",
+    "about": "Om",
+    "documentation": "Dokumentation",
+    "keyboardShortcuts": "Kortkommandon",
+    "releaseNotes": "Versionsinformation",
+    "reportIssue": "Rapportera ett problem"
+  },
+  "settings": {
+    "title": "Inställningar",
+    "theme": "Tema",
+    "language": "Språk",
+    "searchPlaceholder": "Sök i inställningar...",
+    "noResults": "Inga inställningar hittades.",
+    "numberOutOfRange": "Värdet måste vara mellan {{min}} och {{max}}.",
+    "resetSetting": "Återställ inställning",
+    "copySettingId": "Kopiera inställnings-ID",
+    "settingOptions": "Inställningsalternativ",
+    "scopeTabsLabel": "Inställningsnivå",
+    "userOnlyHidden": "{{count}} inställning(ar) endast för användare är dold(a) på denna flik.",
+    "scope": {
+      "user": "Användare",
+      "workspace": "Arbetsyta",
+      "workspaceDisabledTooltip": "Öppna ett projekt för att redigera inställningar för arbetsytan"
+    },
+    "appearance": {
+      "title": "Utseende",
+      "theme": {
+        "title": "Tema",
+        "description": "Välj applikationens färgtema"
+      },
+      "language": {
+        "title": "Språk",
+        "description": "Välj applikationens språk",
+        "en": "English",
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "pt": "Português",
+        "nl": "Nederlands",
+        "sv": "Svenska",
+        "da": "Dansk",
+        "nb": "Norsk bokmål",
+        "fi": "Suomi",
+        "pl": "Polski",
+        "cs": "Čeština",
+        "hu": "Magyar",
+        "ro": "Română",
+        "el": "Ελληνικά",
+        "uk": "Українська",
+        "hr": "Hrvatski",
+        "sr": "Srpski",
+        "sq": "Shqip",
+        "tr": "Türkçe",
+        "id": "Bahasa Indonesia",
+        "vi": "Tiếng Việt",
+        "ja": "日本語",
+        "ko": "한국어",
+        "zh-CN": "简体中文",
+        "zh-TW": "繁體中文"
+      },
+      "advancedVisualEffects": {
+        "title": "Avancerade visuella effekter",
+        "description": "Aktivera avancerade visuella effekter såsom bakgrundsoskärpa på överlägg och CSS-animationer. Inaktivera för bättre prestanda på enklare hårdvara."
+      },
+      "editor": {
+        "title": "Editor",
+        "fontSize": {
+          "title": "Teckenstorlek",
+          "description": "Styr teckenstorleken i pixlar för kodredigeraren"
+        },
+        "fontFamily": {
+          "title": "Teckensnitt",
+          "description": "Styr teckensnittet för kodredigeraren"
+        },
+        "wordWrap": {
+          "title": "Radbrytning",
+          "description": "Styr om rader ska brytas i kodredigeraren"
+        },
+        "minimap": {
+          "title": "Minikarta",
+          "description": "Styr om minikartan visas i kodredigeraren"
+        },
+        "lineNumbers": {
+          "title": "Radnummer",
+          "description": "Styr om radnummer visas i kodredigeraren"
+        }
+      }
+    },
+    "files": {
+      "title": "Filer",
+      "autoSave": {
+        "title": "Spara automatiskt",
+        "description": "Styr automatisk sparning av ändrade editorer. Läs mer om automatisk sparning i dokumentationen.",
+        "off": "Av",
+        "afterDelay": "Efter fördröjning",
+        "onWindowChange": "Vid fönsterbyte"
+      },
+      "autoSaveDelay": {
+        "title": "Fördröjning för automatisk sparning",
+        "description": "Styr fördröjningen i millisekunder efter vilken en ändrad editor sparas automatiskt. Gäller endast när automatisk sparning är inställd på Efter fördröjning."
+      }
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Gå till definition"
+  },
+  "tagsView": {
+    "removeTag": "Ta bort tagg",
+    "newTag": "Ny tagg"
+  },
+  "contextMenu": {
+    "cut": "Klipp ut",
+    "copy": "Kopiera",
+    "paste": "Klistra in"
+  },
+  "search": {
+    "placeholder": "Sök...",
+    "noResults": "Inga resultat hittades",
+    "resultsAriaLabel": "Sökresultat",
+    "categories": {
+      "request": "HTTP-förfrågningar",
+      "folder": "Mappar",
+      "environment": "Miljöer",
+      "settings": "Inställningar",
+      "tag": "Taggar"
+    }
+  },
+  "iconSelect": {
+    "searchEmojis": "Sök emojis...",
+    "noEmojisFound": "Inga emojis hittades",
+    "searchCodicons": "Sök codicons...",
+    "searchIconoir": "Sök i Iconoir...",
+    "searchPhosphor": "Sök i Phosphor...",
+    "searchMaterial": "Sök i Material...",
+    "searchSimpleIcons": "Sök i Simple Icons...",
+    "searchFeather": "Sök i Feather...",
+    "searchFontAwesome": "Sök i Font Awesome...",
+    "moreIcons": "+{{count}} fler ikoner. Använd sökningen för att hitta specifika ikoner.",
+    "more": "+{{count}} till. Använd sökningen för att hitta specifika ikoner.",
+    "noIconsFound": "Inga ikoner hittades",
+    "searchResults": "Sökresultat",
+    "categories": {
+      "files": "Filer",
+      "git": "Git",
+      "debug": "Felsökning",
+      "symbols": "Symboler",
+      "arrows": "Pilar",
+      "ui": "Gränssnitt",
+      "media": "Media",
+      "editing": "Redigering",
+      "terminal": "Terminal",
+      "people": "Personer",
+      "notifications": "Aviseringar",
+      "brands": "Varumärken",
+      "communication": "Kommunikation",
+      "users": "Användare",
+      "business": "Företag",
+      "medical": "Medicin",
+      "transport": "Transport",
+      "weather": "Väder",
+      "shapes": "Former",
+      "design": "Design",
+      "devices": "Enheter",
+      "buildings": "Byggnader",
+      "nature": "Natur",
+      "food": "Mat",
+      "sport": "Sport",
+      "sports": "Idrotter",
+      "animals": "Djur",
+      "tools": "Verktyg"
+    },
+    "emojiCategories": {
+      "people": "Smileys och personer",
+      "nature": "Djur och natur",
+      "food": "Mat och dryck",
+      "activity": "Aktiviteter",
+      "travel": "Resor och platser",
+      "objects": "Objekt",
+      "symbols": "Symboler",
+      "flags": "Flaggor"
+    }
+  },
+  "dateTimePicker": {
+    "ariaLabel": "Datum/tid-väljare",
+    "openCalendar": "Öppna kalender",
+    "previousYear": "Föregående år",
+    "nextYear": "Nästa år",
+    "previousMonth": "Föregående månad",
+    "nextMonth": "Nästa månad",
+    "selectMonth": "Välj månad",
+    "selectYear": "Välj år",
+    "includeTime": "Inkludera tid",
+    "hours": "Timmar",
+    "minutes": "Minuter",
+    "output": "Utdata",
+    "pattern": "Mönster",
+    "outputModes": {
+      "pattern": "Mönster",
+      "unix": "Unix (s)",
+      "epoch": "Epoch (ms)",
+      "iso": "ISO 8601"
+    },
+    "preview": "Förhandsgranskning",
+    "tokens": {
+      "S": "millisekund, utan utfyllnad",
+      "SSS": "millisekund, utfylld till 3",
+      "u": "delsekunder, funktionellt identisk med SSS",
+      "uu": "delsekunder, mellan 0 och 99, utfylld till 2",
+      "uuu": "delsekunder, mellan 0 och 9",
+      "s": "sekund, utan utfyllnad",
+      "ss": "sekund, utfylld till 2",
+      "m": "minut, utan utfyllnad",
+      "mm": "minut, utfylld till 2",
+      "h": "timme i 12-timmarsformat, utan utfyllnad",
+      "hh": "timme i 12-timmarsformat, utfylld till 2",
+      "H": "timme i 24-timmarsformat, utan utfyllnad",
+      "HH": "timme i 24-timmarsformat, utfylld till 2",
+      "Z": "smal offset",
+      "ZZ": "kort offset",
+      "ZZZ": "teknisk offset",
+      "ZZZZ": "förkortat namngivet offset",
+      "ZZZZZ": "oförkortat namngivet offset",
+      "z": "IANA-zon",
+      "a": "meridian",
+      "d": "dag i månaden, utan utfyllnad",
+      "dd": "dag i månaden, utfylld till 2",
+      "c": "veckodag, som tal från 1 till 7 (måndag är 1, söndag är 7)",
+      "ccc": "veckodag, som lokaliserad förkortad sträng",
+      "cccc": "veckodag, som lokaliserad oförkortad sträng",
+      "ccccc": "veckodag, som en enstaka lokaliserad bokstav",
+      "L": "månad som ej utfyllt tal",
+      "LL": "månad som utfyllt tal",
+      "LLL": "månad som lokaliserad förkortad sträng",
+      "LLLL": "månad som lokaliserad oförkortad sträng",
+      "LLLLL": "månad som en enstaka lokaliserad bokstav",
+      "y": "år, utan utfyllnad",
+      "yy": "tvåsiffrigt år",
+      "yyyy": "år med fyra till sex siffror, utfyllt till 4",
+      "G": "förkortad lokaliserad era",
+      "GG": "oförkortad lokaliserad era",
+      "GGGGG": "lokaliserad era som en bokstav",
+      "kk": "ISO-veckoår, utan utfyllnad",
+      "kkkk": "ISO-veckoår, utfyllt till 4",
+      "W": "ISO-veckonummer, utan utfyllnad",
+      "WW": "ISO-veckonummer, utfyllt till 2",
+      "ii": "lokalt veckoår, utan utfyllnad",
+      "iiii": "lokalt veckoår, utfyllt till 4",
+      "n": "lokalt veckonummer, utan utfyllnad",
+      "nn": "lokalt veckonummer, utfyllt till 2",
+      "o": "ordningstal (dag på året), utan utfyllnad",
+      "ooo": "ordningstal (dag på året), utfyllt till 3",
+      "q": "kvartal, utan utfyllnad",
+      "qq": "kvartal, utfyllt till 2",
+      "D": "lokaliserat numeriskt datum",
+      "DD": "lokaliserat datum med förkortad månad",
+      "DDD": "lokaliserat datum med fullständig månad",
+      "DDDD": "lokaliserat datum med fullständig månad och veckodag",
+      "t": "lokaliserad tid",
+      "tt": "lokaliserad tid med sekunder",
+      "ttt": "lokaliserad tid med sekunder och förkortat offset",
+      "tttt": "lokaliserad tid med sekunder och fullständigt offset",
+      "T": "lokaliserad 24-timmarstid",
+      "TT": "lokaliserad 24-timmarstid med sekunder",
+      "TTT": "lokaliserad 24-timmarstid med sekunder och förkortat offset",
+      "TTTT": "lokaliserad 24-timmarstid med sekunder och fullständigt offset",
+      "f": "kort lokaliserat datum och tid",
+      "ff": "mindre kort lokaliserat datum och tid",
+      "fff": "utförligt lokaliserat datum och tid",
+      "ffff": "extra utförligt lokaliserat datum och tid",
+      "F": "kort lokaliserat datum och tid med sekunder",
+      "FF": "mindre kort lokaliserat datum och tid med sekunder",
+      "FFF": "utförligt lokaliserat datum och tid med sekunder",
+      "FFFF": "extra utförligt lokaliserat datum och tid med sekunder",
+      "X": "unix-tidsstämpel i sekunder",
+      "x": "unix-tidsstämpel i millisekunder"
+    }
+  }
+}

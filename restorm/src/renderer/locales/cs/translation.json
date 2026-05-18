@@ -1,0 +1,622 @@
+{
+  "app": {
+    "title": "restorm",
+    "openSettings": "Otevřít nastavení",
+    "draftsRestoredTitle": "Neuložená práce obnovena",
+    "draftsRestoredBody_one": "{{count}} koncept byl obnoven z předchozí relace.",
+    "draftsRestoredBody_few": "{{count}} koncepty byly obnoveny z předchozí relace.",
+    "draftsRestoredBody_many": "{{count}} konceptu bylo obnoveno z předchozí relace.",
+    "draftsRestoredBody_other": "{{count}} konceptů bylo obnoveno z předchozí relace."
+  },
+  "statusbar": {
+    "requestHistory": "Historie požadavků",
+    "envSelector": {
+      "applyToAll": "Použít na všechny požadavky"
+    }
+  },
+  "authFailureToast": {
+    "title": "Ověření selhalo",
+    "fallbackReason": "Požadavek na ověření neuspěl.",
+    "openAuthRoute": "Otevřít cestu k ověření"
+  },
+  "menuBar": {
+    "file": "Soubor",
+    "new": "Nový",
+    "import": "Importovat",
+    "open": "Otevřít",
+    "openFolder": "Otevřít složku",
+    "recentFiles": "Naposledy otevřené",
+    "favorites": "Oblíbené",
+    "close": "Zavřít",
+    "save": "Uložit",
+    "saveAll": "Uložit vše",
+    "saveAs": "Uložit jako",
+    "exit": "Ukončit",
+    "selection": "Výběr",
+    "tools": "Nástroje",
+    "findInCollection": "Najít v kolekci",
+    "addRequest": "Přidat požadavek",
+    "addRequestHttp": "Požadavek HTTP",
+    "addRequestGraphql": "Požadavek GraphQL",
+    "addRequestGrpc": "Požadavek gRPC",
+    "addRequestSoap": "Požadavek SOAP",
+    "addRequestOdata": "Požadavek OData",
+    "addRequestWebsocket": "Požadavek WebSocket",
+    "addFolder": "Přidat složku",
+    "addEnvironmentFolder": "Přidat složku prostředí",
+    "addVariable": "Přidat proměnnou",
+    "addTag": "Přidat štítek",
+    "expandAllFolders": "Rozbalit všechny složky",
+    "collapseAllFolders": "Sbalit všechny složky",
+    "sendActiveRequest": "Odeslat požadavek",
+    "cancelActiveRequest": "Zrušit požadavek",
+    "generateCodeSnippet": "Generovat ukázku kódu",
+    "copyAsCurl": "Kopírovat jako cURL",
+    "exportOpenApi": "Exportovat do OpenAPI",
+    "clearAuthCache": "Vymazat mezipaměť ověření",
+    "openLogsFolder": "Otevřít složku s logy"
+  },
+  "sidebar": {
+    "addRequest": "Přidat požadavek",
+    "collapseAll": "Sbalit všechny požadavky",
+    "workspace": "Pracovní prostor",
+    "favorites": "Oblíbené",
+    "newFolder": "Nová složka",
+    "newEnvironmentFolder": "Nová složka prostředí",
+    "contextMenu": {
+      "createFolder": "Vytvořit složku",
+      "createEnvironmentFolder": "Vytvořit složku prostředí",
+      "delete": "Smazat",
+      "clone": "Duplikovat",
+      "rename": "Přejmenovat",
+      "addToFavorites": "Přidat k oblíbeným",
+      "removeFromFavorites": "Odebrat z oblíbených",
+      "closeTab": "Zavřít",
+      "closeOtherTabs": "Zavřít ostatní",
+      "closeTabsToTheRight": "Zavřít vpravo",
+      "closeAllTabs": "Zavřít vše",
+      "add": {
+        "title": "Přidat",
+        "folder": "Složka",
+        "httpGet": "HTTP – požadavek GET",
+        "httpPost": "HTTP – požadavek POST",
+        "httpPut": "HTTP – požadavek PUT",
+        "httpPatch": "HTTP – požadavek PATCH",
+        "httpDelete": "HTTP – požadavek DELETE",
+        "graphql": "Požadavek GraphQL",
+        "grpc": "Požadavek gRPC",
+        "soap": "Požadavek SOAP",
+        "websocket": "Požadavek WebSocket",
+        "odata": "Požadavek OData",
+        "auth": "Ověřovací požadavek HTTP"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Potvrdit smazání",
+      "folderMessage": "Opravdu chcete smazat složku „{{name}}“ a celý její obsah?",
+      "itemMessage": "Opravdu chcete smazat „{{name}}“?",
+      "confirm": "Smazat",
+      "cancel": "Zrušit"
+    }
+  },
+  "environment": {
+    "newName": "Nové prostředí",
+    "add": "Přidat prostředí",
+    "rename": "Přejmenovat",
+    "addSub": "Přidat podprostředí",
+    "delete": "Smazat"
+  },
+  "folderView": {
+    "environments": "Prostředí",
+    "environmentsAriaLabel": "Prostředí složky",
+    "variables": "Proměnné",
+    "addVariable": "Přidat řádek proměnné",
+    "selectEnvironment": "Vyberte prostředí pro zobrazení proměnných",
+    "tabs": {
+      "docs": "Dokumentace",
+      "configuration": "Konfigurace",
+      "notes": "Poznámky"
+    },
+    "home": {
+      "configureEnvs": "Nakonfigurovat prostředí",
+      "configureEnvsDesc": "Nastavte základní URL, proměnné a ověření pro každé prostředí",
+      "viewDocs": "Zobrazit dokumentaci",
+      "viewDocsDesc": "Procházet dokumentaci API, modely a endpointy",
+      "favoriteRequests": "Oblíbené požadavky",
+      "removeFavorite": "Odebrat z oblíbených",
+      "apiUpdate": {
+        "title": "Aktualizace specifikace API",
+        "noConfig": "Tato složka nebyla vytvořena z importovatelného zdroje.",
+        "urlLabel": "URL",
+        "lastImportedLabel": "Poslední import",
+        "lastCheckedLabel": "Poslední kontrola",
+        "neverImported": "Nikdy neimportováno",
+        "neverChecked": "Nikdy nezkontrolováno",
+        "refreshing": "Aktualizace specifikace API…",
+        "fetching": "Načítání…",
+        "upToDate": "Specifikace API je aktuální.",
+        "ok": "OK"
+      }
+    },
+    "contextVariables": {
+      "title": "Dostupné kontextové proměnné",
+      "description": "Použijte tyto proměnné v URL požadavků a v proměnných typu výraz pomocí syntaxe {{handlebars}}.",
+      "name": "Proměnná",
+      "value": "Vyhodnocená hodnota",
+      "copied": "Zkopírováno!"
+    }
+  },
+  "requestTab": {
+    "deprecated": "Tento endpoint je zastaralý a v budoucí verzi může být odstraněn.",
+    "send": "Odeslat",
+    "cancel": "Zrušit",
+    "urlPlaceholder": "URL požadavku",
+    "methodSelect": "Vybrat metodu HTTP",
+    "addHeader": "Přidat hlavičku",
+    "addParam": "Přidat parametr",
+    "environmentSelector": {
+      "noEnvironment": "Bez prostředí"
+    },
+    "body": {
+      "fileLabel": "Soubor nebo URL:",
+      "browse": "Procházet..."
+    },
+    "tabs": {
+      "docs": "Dokumentace",
+      "requestLayout": "Požadavek",
+      "headers": "Hlavičky",
+      "body": "Tělo",
+      "params": "Parametry",
+      "pathParams": "Parametry cesty",
+      "notes": "Poznámky",
+      "codeSnippets": "Ukázky kódu",
+      "responsesHistory": "Historie odpovědí"
+    },
+    "responses": {
+      "tabs": {
+        "response": "Odpověď",
+        "requestBody": "Tělo požadavku",
+        "graph": "Graf"
+      },
+      "loading": "Odesílání požadavku...",
+      "noResponse": "Klikněte na Odeslat pro spuštění požadavku",
+      "history": {
+        "list": "Seznam historie odpovědí",
+        "empty": "Zatím nebyly zaznamenány žádné odpovědi",
+        "select": "Vyberte odpověď pro zobrazení detailů",
+        "pin": "Připnout odpověď",
+        "unpin": "Odepnout odpověď"
+      }
+    }
+  },
+  "workbench": {
+    "tabContextMenu": {
+      "close": "Zavřít",
+      "closeOthers": "Zavřít ostatní",
+      "addToFavorites": "Přidat k oblíbeným",
+      "removeFromFavorites": "Odebrat z oblíbených"
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Přejít na definici"
+  },
+  "keyValueTable": {
+    "types": {
+      "string": "Řetězec",
+      "secret": "Tajný klíč",
+      "number": "Číslo",
+      "dateTime": "Datum a čas",
+      "color": "Barva",
+      "expression": "Výraz",
+      "boolean": "Boolean"
+    },
+    "apiEnums": "Typy definované v API"
+  },
+  "graphql": {
+    "send": "Odeslat",
+    "urlPlaceholder": "URL endpointu GraphQL",
+    "tabs": {
+      "query": "Dotaz",
+      "variables": "Proměnné",
+      "headers": "Hlavičky"
+    }
+  },
+  "grpc": {
+    "send": "Volat",
+    "urlPlaceholder": "Server gRPC (hostitel:port)",
+    "tabs": {
+      "message": "Zpráva",
+      "metadata": "Metadata"
+    }
+  },
+  "soap": {
+    "send": "Odeslat",
+    "urlPlaceholder": "URL endpointu SOAP",
+    "tabs": {
+      "body": "Tělo",
+      "headers": "Hlavičky"
+    }
+  },
+  "websocket": {
+    "connect": "Připojit",
+    "connected": "Připojeno",
+    "disconnected": "Odpojeno",
+    "noMessages": "Zatím žádné zprávy",
+    "urlPlaceholder": "URL WebSocket",
+    "event": "Událost",
+    "topic": "Téma",
+    "tabs": {
+      "message": "Zpráva",
+      "headers": "Hlavičky"
+    }
+  },
+  "search": {
+    "placeholder": "Hledat...",
+    "noResults": "Nenalezeny žádné výsledky",
+    "resultsAriaLabel": "Výsledky hledání",
+    "categories": {
+      "request": "Požadavky",
+      "folder": "Složky",
+      "environment": "Prostředí",
+      "settings": "Nastavení",
+      "tag": "Štítky"
+    },
+    "tooltip": {
+      "noDetails": "Žádné podrobnosti k dispozici",
+      "noContent": "Žádná dokumentace ani poznámky"
+    }
+  },
+  "httpStatus": {
+    "100": {
+      "name": "Continue",
+      "description": "Server přijal hlavičky požadavku a klient by měl pokračovat v odesílání těla požadavku."
+    },
+    "101": {
+      "name": "Switching Protocols",
+      "description": "Žadatel požádal server o přepnutí protokolů a server s tím souhlasil."
+    },
+    "200": {
+      "name": "OK",
+      "description": "Standardní odpověď pro úspěšné HTTP požadavky. Skutečná odpověď závisí na použité metodě požadavku."
+    },
+    "201": {
+      "name": "Created",
+      "description": "Požadavek byl splněn, což vedlo k vytvoření nového zdroje."
+    },
+    "202": {
+      "name": "Accepted",
+      "description": "Požadavek byl přijat ke zpracování, ale zpracování nebylo dokončeno."
+    },
+    "204": {
+      "name": "No Content",
+      "description": "Server úspěšně zpracoval požadavek a nevrací žádný obsah."
+    },
+    "301": {
+      "name": "Moved Permanently",
+      "description": "Tento a všechny budoucí požadavky by měly být směrovány na zadané URI."
+    },
+    "302": {
+      "name": "Found",
+      "description": "Sděluje klientovi, aby se podíval na jinou URL. Specifikace HTTP/1.0 vyžadovala, aby klient provedl dočasné přesměrování."
+    },
+    "304": {
+      "name": "Not Modified",
+      "description": "Indikuje, že zdroj nebyl od verze určené hlavičkami požadavku změněn."
+    },
+    "400": {
+      "name": "Bad Request",
+      "description": "Server nemůže nebo nebude požadavek zpracovat kvůli zjevné chybě klienta (např. chybně formátovaná syntaxe požadavku)."
+    },
+    "401": {
+      "name": "Unauthorized",
+      "description": "Je vyžadováno ověření, které selhalo nebo ještě nebylo poskytnuto."
+    },
+    "403": {
+      "name": "Forbidden",
+      "description": "Požadavek obsahoval platná data a server mu porozuměl, ale server akci odmítá."
+    },
+    "404": {
+      "name": "Not Found",
+      "description": "Požadovaný zdroj nebyl nalezen, ale v budoucnu může být dostupný."
+    },
+    "405": {
+      "name": "Method Not Allowed",
+      "description": "Metoda požadavku není pro požadovaný zdroj podporována."
+    },
+    "408": {
+      "name": "Request Timeout",
+      "description": "Vypršel časový limit serveru při čekání na požadavek."
+    },
+    "409": {
+      "name": "Conflict",
+      "description": "Indikuje, že požadavek nelze zpracovat z důvodu konfliktu se současným stavem zdroje."
+    },
+    "410": {
+      "name": "Gone",
+      "description": "Indikuje, že požadovaný zdroj byl dříve používán, ale již není dostupný a nebude opět dostupný."
+    },
+    "415": {
+      "name": "Unsupported Media Type",
+      "description": "Entita požadavku má typ média, který server nebo zdroj nepodporuje."
+    },
+    "422": {
+      "name": "Unprocessable Entity",
+      "description": "Požadavek byl správně formátován, ale nebylo možné jej splnit kvůli sémantickým chybám."
+    },
+    "429": {
+      "name": "Too Many Requests",
+      "description": "Uživatel odeslal příliš mnoho požadavků v daném časovém období (rate limiting)."
+    },
+    "500": {
+      "name": "Internal Server Error",
+      "description": "Obecná chybová zpráva, vrácená, když nastala neočekávaná situace a žádná konkrétnější zpráva není vhodná."
+    },
+    "501": {
+      "name": "Not Implemented",
+      "description": "Server buď nerozpoznává metodu požadavku, nebo nemá schopnost požadavek splnit."
+    },
+    "502": {
+      "name": "Bad Gateway",
+      "description": "Server fungoval jako brána nebo proxy a obdržel neplatnou odpověď ze serveru proti proudu."
+    },
+    "503": {
+      "name": "Service Unavailable",
+      "description": "Server nemůže zpracovat požadavek (protože je přetížený nebo je vypnut kvůli údržbě)."
+    },
+    "504": {
+      "name": "Gateway Timeout",
+      "description": "Server fungoval jako brána nebo proxy a neobdržel včasnou odpověď ze serveru proti proudu."
+    }
+  },
+  "welcome": {
+    "confirmRemoveFavorite": "Opravdu chcete odebrat „{{fileName}}“ z oblíbených?",
+    "noFilesHint": "Začněte otevřením souboru nebo vytvořením nového",
+    "newAriaLabel": "Vytvořit novou kolekci",
+    "openAriaLabel": "Otevřít kolekci z disku",
+    "landmarkLabel": "Úvodní obrazovka"
+  },
+  "save": {
+    "title": "Možnosti uložení",
+    "mode": {
+      "label": "Režim uložení",
+      "file": "Jediný soubor",
+      "folder": "Struktura složek",
+      "fileDescription": "Uložit vše do jednoho souboru",
+      "folderDescription": "Uložit jako strukturu složek se samostatnými soubory"
+    },
+    "format": {
+      "label": "Formát",
+      "yamlDescription": "Čitelné pro člověka",
+      "jsonDescription": "Standardní formát",
+      "json5Description": "JSON + komentáře"
+    },
+    "preview": {
+      "label": "Náhled struktury",
+      "noDocumentation": "Pro tento zdroj nebyla analyzována žádná dokumentace."
+    }
+  },
+  "common": {
+    "cancel": "Zrušit",
+    "save": "Uložit"
+  },
+  "helpers": {
+    "categories": {
+      "comparison": "Porovnání",
+      "string": "Řetězec",
+      "math": "Matematika",
+      "array": "Pole",
+      "object": "Objekt",
+      "url": "URL",
+      "date": "Datum",
+      "regex": "Regex",
+      "misc": "Různé"
+    },
+    "eq": "Striktní rovnost (===)",
+    "ne": "Striktní nerovnost (!==)",
+    "neq": "Striktní nerovnost (!==)",
+    "lt": "Menší než (<)",
+    "lte": "Menší nebo rovno (<=)",
+    "gt": "Větší než (>)",
+    "gte": "Větší nebo rovno (>=)",
+    "and": "Blokový helper: vykreslí, pokud jsou všechny hodnoty pravdivé",
+    "or": "Blokový helper: vykreslí, pokud je alespoň jedna hodnota pravdivá",
+    "not": "Vrátí opačnou logickou hodnotu",
+    "ifEquals": "Blokový helper: vykreslí, pokud jsou hodnoty rovny",
+    "is": "Blokový helper: porovnání volné rovnosti",
+    "isnt": "Blokový helper: porovnání volné nerovnosti",
+    "default": "Vrátí výchozí hodnotu, pokud je první null/undefined",
+    "compare": "Blokový helper: porovnání s operátorem",
+    "lowercase": "Převede řetězec na malá písmena",
+    "uppercase": "Převede řetězec na velká písmena",
+    "capitalize": "První písmeno velkým",
+    "capitalizeAll": "První písmeno každého slova velkým",
+    "titleize": "První písmeno každého slova velkým",
+    "camelcase": "Převede na camelCase",
+    "pascalcase": "Převede na PascalCase",
+    "snakecase": "Převede na snake_case",
+    "snakeCase": "Převede na snake_case (alias)",
+    "dashcase": "Převede na dash-case (kebab-case)",
+    "dotcase": "Převede na dot.case",
+    "pathcase": "Převede na path/case",
+    "sentencecase": "Převede na větný tvar",
+    "slugify": "Převede na slug vhodný pro URL",
+    "trim": "Odstraní mezery z obou konců",
+    "trimLeft": "Odstraní mezery ze začátku",
+    "trimRight": "Odstraní mezery z konce",
+    "replace": "Nahradí všechny výskyty a za b",
+    "split": "Rozdělí řetězec na pole",
+    "truncate": "Zkrátí řetězec na zadanou délku",
+    "ellipsis": "Zkrátí řetězec s výpustkou",
+    "append": "Přidá příponu k řetězci",
+    "prepend": "Přidá předponu k řetězci",
+    "reverse": "Obrátí řetězec nebo pole",
+    "startsWith": "Blokový helper: vykreslí, pokud řetězec začíná předponou",
+    "endsWith": "Blokový helper: vykreslí, pokud řetězec končí příponou",
+    "contains": "Blokový helper: vykreslí, pokud řetězec obsahuje podřetězec",
+    "padStart": "Doplní řetězec na začátku na požadovanou délku",
+    "padEnd": "Doplní řetězec na konci na požadovanou délku",
+    "repeat": "Zopakuje řetězec n-krát",
+    "substring": "Extrahuje část řetězce",
+    "indexOf": "Vrátí index podřetězce (-1, pokud není nalezen)",
+    "count": "Spočítá výskyty podřetězce",
+    "newLineToBr": "Převede konce řádků na značky <br>",
+    "stripTags": "Odstraní z řetězce HTML značky",
+    "add": "Sečte dvě čísla",
+    "subtract": "Odečte b od a",
+    "multiply": "Vynásobí dvě čísla",
+    "divide": "Vydělí a hodnotou b",
+    "modulo": "Vrátí zbytek po dělení a / b",
+    "abs": "Vrátí absolutní hodnotu",
+    "ceil": "Zaokrouhlí nahoru na celé číslo",
+    "floor": "Zaokrouhlí dolů na celé číslo",
+    "round": "Zaokrouhlí na nejbližší celé číslo",
+    "min": "Vrátí minimální hodnotu",
+    "max": "Vrátí maximální hodnotu",
+    "pow": "Vrátí základ umocněný na exponent",
+    "sqrt": "Vrátí druhou odmocninu",
+    "random": "Vrátí náhodné celé číslo mezi min a max",
+    "sum": "Vrátí součet hodnot v poli",
+    "avg": "Vrátí průměr hodnot v poli",
+    "toFixed": "Naformátuje číslo s pevným počtem desetin",
+    "toInt": "Převede na celé číslo",
+    "toFloat": "Převede na desetinné číslo",
+    "first": "Vrátí první prvek/y pole",
+    "last": "Vrátí poslední prvek/y pole",
+    "after": "Vrátí prvky za indexem n",
+    "before": "Vrátí prvky před indexem n",
+    "slice": "Vrátí řez pole",
+    "length": "Vrátí délku pole/řetězce/objektu",
+    "join": "Spojí prvky pole oddělovačem",
+    "sort": "Seřadí pole",
+    "unique": "Vrátí unikátní hodnoty",
+    "concat": "Spojí pole",
+    "flatten": "Zploští vnořené pole",
+    "pluck": "Vytáhne vlastnost z pole objektů",
+    "itemAt": "Vrátí prvek na indexu",
+    "inArray": "Blokový helper: vykreslí, pokud je hodnota v poli",
+    "isArray": "Vrátí true, pokud je hodnota pole",
+    "isEmpty": "Blokový helper: vykreslí, pokud je hodnota prázdná",
+    "some": "Blokový helper: vykreslí, pokud některé prvky odpovídají",
+    "every": "Blokový helper: vykreslí, pokud všechny prvky odpovídají",
+    "JSONstringify": "Převede objekt na JSON řetězec",
+    "JSONparse": "Naparsuje JSON řetězec na objekt",
+    "get": "Získá vnořenou vlastnost podle cesty",
+    "keys": "Vrátí klíče objektu",
+    "values": "Vrátí hodnoty objektu",
+    "entries": "Vrátí dvojice [klíč, hodnota]",
+    "hasOwn": "Blokový helper: vykreslí, pokud objekt vlastní vlastnost",
+    "pick": "Vytvoří objekt s vybranými klíči",
+    "omit": "Vytvoří objekt bez zadaných klíčů",
+    "merge": "Sloučí více objektů",
+    "isObject": "Vrátí true, pokud je hodnota objekt",
+    "typeOf": "Vrátí typ hodnoty",
+    "encodeURI": "Zakóduje řetězec pro URL",
+    "decodeURI": "Dekóduje řetězec z URL",
+    "urlParse": "Naparsuje URL na komponenty",
+    "stripQuerystring": "Odstraní query string z URL",
+    "stripProtocol": "Odstraní protokol z URL",
+    "now": "Vrátí aktuální datum jako ISO řetězec",
+    "timestamp": "Vrátí aktuální časové razítko v milisekundách",
+    "year": "Vrátí aktuální rok",
+    "formatDate": "Naformátuje datum podle vzoru",
+    "match": "Vrátí shody regulárního výrazu",
+    "test": "Blokový helper: vykreslí, pokud regex odpovídá",
+    "coalesce": "Vrátí první hodnotu, která není null/undefined",
+    "uuid": "Vygeneruje náhodné UUID",
+    "noop": "Blokový helper, který vykreslí obsah tak, jak je",
+    "raw": "Blokový helper, který vykreslí surový obsah",
+    "times": "Blokový helper, který se opakuje n-krát",
+    "range": "Vygeneruje pole čísel"
+  },
+  "behavior": {
+    "title": "Chování",
+    "syncSidebarWithTabs": "Synchronizovat výběr v postranním panelu s aktivní záložkou",
+    "syncSidebarWithTabsDescription": "Při přepínání záložek v pracovním prostoru automaticky vybrat a zvýraznit odpovídající položku v postranním panelu",
+    "dateTimeFormat": "Formát data a času",
+    "dateTimeFormatDescription": "Formát používaný pro zobrazování dat a časů v aplikaci",
+    "dateTimeFormat.us": "Formát US (MM/DD/RRRR, 12h)",
+    "dateTimeFormat.iso": "Formát ISO (RRRR-MM-DD, 24h)"
+  },
+  "console": {
+    "title": "Konzole",
+    "requestFormat": "Formát požadavků",
+    "requestFormatDescription": "Výchozí typ shellu pro vykreslení odchozích požadavků v záložce Konzole. Každý řádek je příkaz k zkopírování; přepínač v nástrojové liště konzole tento výchozí přepíše pro aktuální záložku.",
+    "requestFormat.curl": "curl (styl Unix)",
+    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+  },
+  "import": {
+    "title": "Importovat požadavky",
+    "source": {
+      "label": "Sem něco vložte!",
+      "placeholder": "Zadejte cestu k souboru, URL nebo vložte příkaz curl/PowerShell..."
+    },
+    "formats": {
+      "swagger": {
+        "description": "Specifikace OpenAPI 2.0, která vznikla ve SmartBear. Vložte Swagger ve formátu JSON nebo YAML — Restorm projde každou operaci, načte schémata zabezpečení a celý dokument promění ve strom požadavků připravený k použití.",
+        "trademark": "Swagger je registrovaná ochranná známka SmartBear Software."
+      },
+      "openapi": {
+        "description": "Současný standard OpenAPI (3.0 a 3.1). Stejná ergonomie jako u Swaggeru: parametry, těla požadavků, schémata zabezpečení a webhooky se dostanou do stromu typovaných požadavků s příklady připravenými k odeslání.",
+        "trademark": "OpenAPI je projekt OpenAPI Initiative pod záštitou Linux Foundation."
+      },
+      "curl": {
+        "description": "Už máš požadavek spuštěný v terminálu? Vlož celý příkaz curl — flagy, hlavičky, tělo, query string — a Restorm ho znovu sestaví jako skutečný požadavek, který můžeš znovu spustit, upravit a připnout.",
+        "trademark": "curl je open source software © Daniel Stenberg, použitý zde dle jeho podmínek."
+      },
+      "powershell": {
+        "description": "Stejný princip, ale v PowerShellu. Vlož příkaz Invoke-WebRequest nebo Invoke-RestMethod a Restorm přečte URI, metodu, hlavičky a tělo, aby z nich vytvořil požadavek, který lze vizuálně upravovat.",
+        "trademark": "PowerShell je registrovaná ochranná známka Microsoft Corporation."
+      },
+      "postman": {
+        "description": "Máš v práci uloženou kolekci Postman? Pusť ji jako JSON — Restorm přečte každý požadavek, každý příklad odpovědi a každou proměnnou prostředí, a kolekci přestaví jako strom Restorm, který můžeš spouštět vedle zbytku svých API.",
+        "trademark": "Postman je registrovaná ochranná známka Postman, Inc., použitá zde pouze pro účely kompatibility."
+      },
+      "insomnia": {
+        "description": "Přicházíš z Insomnia? Pusť svůj export. Restorm rozumí formátu kolekcí v4 / v5, přenese každý požadavek, hlavičku, tělo i prostředí, a vše zobrazí jako strom Restorm.",
+        "trademark": "Insomnia je registrovaná ochranná známka Kong Inc., použitá zde pouze pro účely kompatibility."
+      },
+      "bruno": {
+        "description": "Soubory .bru Bruno nebo export složky — Restorm čte textový formát .bru včetně skriptovacích bloků a každý požadavek znovu vytvoří jako prvotřídní uzel Restorm připravený k odeslání.",
+        "trademark": "Bruno je open source software (MIT) Anoopa M. D., použitý zde dle jeho podmínek."
+      },
+      "graphql": {
+        "description": "Vlož GraphQL SDL (.graphql / .gql / vložení z tvého GraphQL klienta) a Restorm připraví jeden požadavek na každou operaci, navázaný na správný typ query / mutation / subscription s předem strukturovanými proměnnými.",
+        "trademark": "GraphQL je ochranná známka GraphQL Foundation, projektu Joint Development Foundation."
+      },
+      "grpc": {
+        "description": "Pusť soubor .proto (nebo celý adresář s nimi) a Restorm projde každou službu, každé RPC, každou zprávu — z každé metody udělá typovaný požadavek, který lze odeslat přes gRPC exekutor bez nutnosti dotýkat se codegenu.",
+        "trademark": "gRPC je projekt Cloud Native Computing Foundation."
+      },
+      "soap": {
+        "description": "Máš WSDL? Vlož ho (nebo jeho URL) — Restorm naparsuje každý <port> a každou <operation> a vytvoří SOAP obálky připravené k odeslání se správnou hlavičkou SOAPAction, skelety těla typované schématem a se schématem ověření, které WSDL deklaruje."
+      },
+      "websocket": {
+        "description": "Vlož WebSocket endpoint (ws:// nebo wss://) — Restorm otevře spojení, zachytí uvítací rámce ze serveru a vytvoří požadavky send / subscribe s opakovatelnými šablonami payloadu.",
+        "trademark": "WebSocket je protokol standardizovaný IETF (RFC 6455) a W3C."
+      },
+      "kafka": {
+        "description": "Vlož URL bootstrap-serveru Apache Kafka (nebo seznam topiků) — Restorm zaregistruje konzumenty a producenty pro každý topic, dekóduje payloady Avro / Protobuf přes tvůj Schema Registry a umožní jedním klikem přehrát konkrétní offset.",
+        "trademark": "Apache Kafka a logo Kafka jsou ochranné známky Apache Software Foundation."
+      },
+      "socketio": {
+        "description": "Vlož URL serveru Socket.IO — Restorm vyjedná handshake, vypíše namespaces a názvy událostí, které server vysílá, a poskytne ti jeden požadavek na každý emit / on s validací payloadu.",
+        "trademark": "Socket.IO je open-source knihovna vydaná pod licencí MIT; název a logo jsou použity nominativně."
+      },
+      "odata": {
+        "description": "Vlož URL OData service-document nebo soubor $metadata — Restorm přečte CSDL, znovu vytvoří entity sets, function imports a actions a předvyplní možnosti $filter / $select / $top / $skip u každé operace."
+      },
+      "mqtt": {
+        "description": "Vlož URL MQTT brokeru nebo katalog topiků — Restorm vytvoří požadavky publish / subscribe pro každý topic, udržuje spojení živé pro náhledy streamování a pamatuje si snapshoty zachovaných zpráv, abys je mohl později přehrát.",
+        "trademark": "MQTT je standard OASIS; název a logo MQTT jsou ochranné známky OASIS Open."
+      }
+    },
+    "loading": "Probíhá analýza...",
+    "noResults": "Nebyly nalezeny žádné požadavky",
+    "error": {
+      "unknown": "Došlo k neznámé chybě"
+    },
+    "ok": "Importovat",
+    "cancel": "Zrušit",
+    "dropZone": "Zóna pro vložení"
+  }
+}

@@ -1,0 +1,620 @@
+{
+  "app": {
+    "title": "restorm",
+    "openSettings": "Abrir definições",
+    "draftsRestoredTitle": "Trabalho não guardado restaurado",
+    "draftsRestoredBody_one": "{{count}} rascunho restaurado da sessão anterior.",
+    "draftsRestoredBody_other": "{{count}} rascunhos restaurados da sessão anterior."
+  },
+  "statusbar": {
+    "requestHistory": "Histórico de pedidos",
+    "envSelector": {
+      "applyToAll": "Aplicar a todos os pedidos"
+    }
+  },
+  "authFailureToast": {
+    "title": "Falha na autenticação",
+    "fallbackReason": "O pedido de autenticação não teve êxito.",
+    "openAuthRoute": "Abrir rota de autenticação"
+  },
+  "menuBar": {
+    "file": "Ficheiro",
+    "new": "Novo",
+    "import": "Importar",
+    "open": "Abrir",
+    "openFolder": "Abrir pasta",
+    "recentFiles": "Ficheiros recentes",
+    "favorites": "Favoritos",
+    "close": "Fechar",
+    "save": "Guardar",
+    "saveAll": "Guardar tudo",
+    "saveAs": "Guardar como",
+    "exit": "Sair",
+    "selection": "Seleção",
+    "tools": "Ferramentas",
+    "findInCollection": "Pesquisar na coleção",
+    "addRequest": "Adicionar pedido",
+    "addRequestHttp": "Pedido HTTP",
+    "addRequestGraphql": "Pedido GraphQL",
+    "addRequestGrpc": "Pedido gRPC",
+    "addRequestSoap": "Pedido SOAP",
+    "addRequestOdata": "Pedido OData",
+    "addRequestWebsocket": "Pedido WebSocket",
+    "addFolder": "Adicionar pasta",
+    "addEnvironmentFolder": "Adicionar pasta de ambiente",
+    "addVariable": "Adicionar variável",
+    "addTag": "Adicionar etiqueta",
+    "expandAllFolders": "Expandir todas as pastas",
+    "collapseAllFolders": "Recolher todas as pastas",
+    "sendActiveRequest": "Enviar pedido",
+    "cancelActiveRequest": "Cancelar pedido",
+    "generateCodeSnippet": "Gerar excerto de código",
+    "copyAsCurl": "Copiar como cURL",
+    "exportOpenApi": "Exportar para OpenAPI",
+    "clearAuthCache": "Limpar cache de autenticação",
+    "openLogsFolder": "Abrir pasta de registos"
+  },
+  "sidebar": {
+    "addRequest": "Adicionar pedido",
+    "collapseAll": "Recolher todos os pedidos",
+    "workspace": "Área de trabalho",
+    "favorites": "Favoritos",
+    "newFolder": "Nova pasta",
+    "newEnvironmentFolder": "Nova pasta de ambiente",
+    "contextMenu": {
+      "createFolder": "Criar pasta",
+      "createEnvironmentFolder": "Criar pasta de ambiente",
+      "delete": "Eliminar",
+      "clone": "Clonar",
+      "rename": "Renomear",
+      "addToFavorites": "Adicionar aos favoritos",
+      "removeFromFavorites": "Remover dos favoritos",
+      "closeTab": "Fechar",
+      "closeOtherTabs": "Fechar os outros",
+      "closeTabsToTheRight": "Fechar à direita",
+      "closeAllTabs": "Fechar todos",
+      "add": {
+        "title": "Adicionar",
+        "folder": "Pasta",
+        "httpGet": "HTTP – pedido GET",
+        "httpPost": "HTTP – pedido POST",
+        "httpPut": "HTTP – pedido PUT",
+        "httpPatch": "HTTP – pedido PATCH",
+        "httpDelete": "HTTP – pedido DELETE",
+        "graphql": "Pedido GraphQL",
+        "grpc": "Pedido gRPC",
+        "soap": "Pedido SOAP",
+        "websocket": "Pedido WebSocket",
+        "odata": "Pedido OData",
+        "auth": "Pedido de autenticação HTTP"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Confirmar eliminação",
+      "folderMessage": "Tem a certeza de que deseja eliminar a pasta \"{{name}}\" e todo o seu conteúdo?",
+      "itemMessage": "Tem a certeza de que deseja eliminar \"{{name}}\"?",
+      "confirm": "Eliminar",
+      "cancel": "Cancelar"
+    }
+  },
+  "environment": {
+    "newName": "Novo ambiente",
+    "add": "Adicionar ambiente",
+    "rename": "Renomear",
+    "addSub": "Adicionar subambiente",
+    "delete": "Eliminar"
+  },
+  "folderView": {
+    "environments": "Ambientes",
+    "environmentsAriaLabel": "Ambientes da pasta",
+    "variables": "Variáveis",
+    "addVariable": "Adicionar linha de variável",
+    "selectEnvironment": "Selecione um ambiente para ver as variáveis",
+    "tabs": {
+      "docs": "Docs",
+      "configuration": "Configuração",
+      "notes": "Notas"
+    },
+    "home": {
+      "configureEnvs": "Configurar ambientes",
+      "configureEnvsDesc": "Configure os URLs base, variáveis e autenticação para cada ambiente",
+      "viewDocs": "Ver documentação",
+      "viewDocsDesc": "Navegue pela documentação da API, modelos e endpoints",
+      "favoriteRequests": "Pedidos favoritos",
+      "removeFavorite": "Remover dos favoritos",
+      "apiUpdate": {
+        "title": "Atualizações da especificação da API",
+        "noConfig": "Esta pasta não foi criada a partir de uma fonte importável.",
+        "urlLabel": "URL",
+        "lastImportedLabel": "Última importação",
+        "lastCheckedLabel": "Última verificação",
+        "neverImported": "Nunca importado",
+        "neverChecked": "Nunca verificado",
+        "refreshing": "A atualizar a especificação da API…",
+        "fetching": "A obter…",
+        "upToDate": "A especificação da API está atualizada.",
+        "ok": "OK"
+      }
+    },
+    "contextVariables": {
+      "title": "Variáveis de contexto disponíveis",
+      "description": "Utilize estas variáveis nos URLs dos pedidos e nas variáveis do tipo expressão com a sintaxe {{handlebars}}.",
+      "name": "Variável",
+      "value": "Valor resolvido",
+      "copied": "Copiado!"
+    }
+  },
+  "requestTab": {
+    "deprecated": "Este endpoint está obsoleto e poderá ser removido numa versão futura.",
+    "send": "Enviar",
+    "cancel": "Cancelar",
+    "urlPlaceholder": "URL do pedido",
+    "methodSelect": "Selecionar método HTTP",
+    "addHeader": "Adicionar cabeçalho",
+    "addParam": "Adicionar parâmetro",
+    "environmentSelector": {
+      "noEnvironment": "Sem ambiente"
+    },
+    "body": {
+      "fileLabel": "Ficheiro ou URL:",
+      "browse": "Procurar..."
+    },
+    "tabs": {
+      "docs": "Docs",
+      "requestLayout": "Pedido",
+      "headers": "Cabeçalhos",
+      "body": "Corpo",
+      "params": "Parâmetros",
+      "pathParams": "Parâmetros de caminho",
+      "notes": "Notas",
+      "codeSnippets": "Excertos de código",
+      "responsesHistory": "Histórico de respostas"
+    },
+    "responses": {
+      "tabs": {
+        "response": "Resposta",
+        "requestBody": "Corpo do pedido",
+        "graph": "Grafo"
+      },
+      "loading": "A enviar pedido...",
+      "noResponse": "Clique em Enviar para executar o pedido",
+      "history": {
+        "list": "Lista do histórico de respostas",
+        "empty": "Ainda não há respostas registadas",
+        "select": "Selecione uma resposta para ver os detalhes",
+        "pin": "Fixar resposta",
+        "unpin": "Desafixar resposta"
+      }
+    }
+  },
+  "workbench": {
+    "tabContextMenu": {
+      "close": "Fechar",
+      "closeOthers": "Fechar os outros",
+      "addToFavorites": "Adicionar aos favoritos",
+      "removeFromFavorites": "Remover dos favoritos"
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Ir para a definição"
+  },
+  "keyValueTable": {
+    "types": {
+      "string": "Cadeia de caracteres",
+      "secret": "Segredo",
+      "number": "Número",
+      "dateTime": "Data/hora",
+      "color": "Cor",
+      "expression": "Expressão",
+      "boolean": "Booleano"
+    },
+    "apiEnums": "Tipos definidos pela API"
+  },
+  "graphql": {
+    "send": "Enviar",
+    "urlPlaceholder": "URL do endpoint GraphQL",
+    "tabs": {
+      "query": "Consulta",
+      "variables": "Variáveis",
+      "headers": "Cabeçalhos"
+    }
+  },
+  "grpc": {
+    "send": "Invocar",
+    "urlPlaceholder": "Servidor gRPC (host:porta)",
+    "tabs": {
+      "message": "Mensagem",
+      "metadata": "Metadados"
+    }
+  },
+  "soap": {
+    "send": "Enviar",
+    "urlPlaceholder": "URL do endpoint SOAP",
+    "tabs": {
+      "body": "Corpo",
+      "headers": "Cabeçalhos"
+    }
+  },
+  "websocket": {
+    "connect": "Ligar",
+    "connected": "Ligado",
+    "disconnected": "Desligado",
+    "noMessages": "Ainda não há mensagens",
+    "urlPlaceholder": "URL do WebSocket",
+    "event": "Evento",
+    "topic": "Tópico",
+    "tabs": {
+      "message": "Mensagem",
+      "headers": "Cabeçalhos"
+    }
+  },
+  "search": {
+    "placeholder": "Pesquisar...",
+    "noResults": "Nenhum resultado encontrado",
+    "resultsAriaLabel": "Resultados da pesquisa",
+    "categories": {
+      "request": "Pedidos",
+      "folder": "Pastas",
+      "environment": "Ambientes",
+      "settings": "Definições",
+      "tag": "Etiquetas"
+    },
+    "tooltip": {
+      "noDetails": "Não há detalhes disponíveis",
+      "noContent": "Sem documentação ou notas"
+    }
+  },
+  "httpStatus": {
+    "100": {
+      "name": "Continuar",
+      "description": "O servidor recebeu os cabeçalhos do pedido e o cliente deve prosseguir com o envio do corpo do pedido."
+    },
+    "101": {
+      "name": "Mudança de protocolo",
+      "description": "O solicitante pediu ao servidor para mudar de protocolo e o servidor concordou."
+    },
+    "200": {
+      "name": "OK",
+      "description": "Resposta padrão para pedidos HTTP bem-sucedidos. A resposta real depende do método de pedido utilizado."
+    },
+    "201": {
+      "name": "Criado",
+      "description": "O pedido foi cumprido, resultando na criação de um novo recurso."
+    },
+    "202": {
+      "name": "Aceite",
+      "description": "O pedido foi aceite para processamento, mas o processamento ainda não foi concluído."
+    },
+    "204": {
+      "name": "Sem conteúdo",
+      "description": "O servidor processou o pedido com êxito e não está a devolver qualquer conteúdo."
+    },
+    "301": {
+      "name": "Movido permanentemente",
+      "description": "Este pedido e todos os futuros devem ser direcionados para o URI indicado."
+    },
+    "302": {
+      "name": "Encontrado",
+      "description": "Indica ao cliente para consultar outro URL. A especificação HTTP/1.0 exigia que o cliente efetuasse um redirecionamento temporário."
+    },
+    "304": {
+      "name": "Não modificado",
+      "description": "Indica que o recurso não foi modificado desde a versão especificada pelos cabeçalhos do pedido."
+    },
+    "400": {
+      "name": "Pedido inválido",
+      "description": "O servidor não pode ou não irá processar o pedido devido a um erro aparente do cliente (por exemplo, sintaxe de pedido malformada)."
+    },
+    "401": {
+      "name": "Não autorizado",
+      "description": "É necessária autenticação que falhou ou ainda não foi fornecida."
+    },
+    "403": {
+      "name": "Proibido",
+      "description": "O pedido continha dados válidos e foi compreendido pelo servidor, mas o servidor recusa-se a agir."
+    },
+    "404": {
+      "name": "Não encontrado",
+      "description": "O recurso solicitado não foi encontrado, mas poderá estar disponível no futuro."
+    },
+    "405": {
+      "name": "Método não permitido",
+      "description": "O método de pedido não é suportado para o recurso solicitado."
+    },
+    "408": {
+      "name": "Tempo limite do pedido",
+      "description": "O servidor excedeu o tempo limite à espera do pedido."
+    },
+    "409": {
+      "name": "Conflito",
+      "description": "Indica que o pedido não pôde ser processado devido a um conflito no estado atual do recurso."
+    },
+    "410": {
+      "name": "Desaparecido",
+      "description": "Indica que o recurso solicitado já não está disponível e não voltará a estar."
+    },
+    "415": {
+      "name": "Tipo de média não suportado",
+      "description": "A entidade do pedido tem um tipo de média que o servidor ou recurso não suporta."
+    },
+    "422": {
+      "name": "Entidade não processável",
+      "description": "O pedido estava bem formado, mas não pôde ser seguido devido a erros semânticos."
+    },
+    "429": {
+      "name": "Demasiados pedidos",
+      "description": "O utilizador enviou demasiados pedidos num determinado período de tempo (limitação de taxa)."
+    },
+    "500": {
+      "name": "Erro interno do servidor",
+      "description": "Mensagem de erro genérica, apresentada quando ocorre uma condição inesperada e nenhuma mensagem mais específica é adequada."
+    },
+    "501": {
+      "name": "Não implementado",
+      "description": "O servidor não reconhece o método de pedido ou não tem capacidade para o cumprir."
+    },
+    "502": {
+      "name": "Gateway inválido",
+      "description": "O servidor estava a atuar como gateway ou proxy e recebeu uma resposta inválida do servidor de origem."
+    },
+    "503": {
+      "name": "Serviço indisponível",
+      "description": "O servidor não consegue processar o pedido (porque está sobrecarregado ou em manutenção)."
+    },
+    "504": {
+      "name": "Tempo limite do gateway",
+      "description": "O servidor estava a atuar como gateway ou proxy e não recebeu uma resposta atempada do servidor de origem."
+    }
+  },
+  "welcome": {
+    "confirmRemoveFavorite": "Tem a certeza de que deseja remover \"{{fileName}}\" dos favoritos?",
+    "noFilesHint": "Abra um ficheiro ou crie um novo para começar",
+    "newAriaLabel": "Criar uma nova coleção",
+    "openAriaLabel": "Abrir uma coleção a partir do disco",
+    "landmarkLabel": "Bem-vindo"
+  },
+  "save": {
+    "title": "Opções de gravação",
+    "mode": {
+      "label": "Modo de gravação",
+      "file": "Ficheiro único",
+      "folder": "Estrutura de pastas",
+      "fileDescription": "Guardar tudo num único ficheiro",
+      "folderDescription": "Guardar como estrutura de pastas com ficheiros separados"
+    },
+    "format": {
+      "label": "Formato",
+      "yamlDescription": "Legível para humanos",
+      "jsonDescription": "Formato padrão",
+      "json5Description": "JSON + comentários"
+    },
+    "preview": {
+      "label": "Pré-visualização da estrutura",
+      "noDocumentation": "Não há documentação analisada para esta fonte."
+    }
+  },
+  "common": {
+    "cancel": "Cancelar",
+    "save": "Guardar"
+  },
+  "helpers": {
+    "categories": {
+      "comparison": "Comparação",
+      "string": "Cadeia",
+      "math": "Matemática",
+      "array": "Vetor",
+      "object": "Objeto",
+      "url": "URL",
+      "date": "Data",
+      "regex": "Regex",
+      "misc": "Diversos"
+    },
+    "eq": "Igualdade estrita (===)",
+    "ne": "Desigualdade estrita (!==)",
+    "neq": "Desigualdade estrita (!==)",
+    "lt": "Menor que (<)",
+    "lte": "Menor ou igual (<=)",
+    "gt": "Maior que (>)",
+    "gte": "Maior ou igual (>=)",
+    "and": "Helper de bloco: renderiza se todos os valores forem verdadeiros",
+    "or": "Helper de bloco: renderiza se algum valor for verdadeiro",
+    "not": "Devolve o valor booleano inverso",
+    "ifEquals": "Helper de bloco: renderiza se os valores forem iguais",
+    "is": "Helper de bloco: comparação de igualdade não estrita",
+    "isnt": "Helper de bloco: comparação de desigualdade não estrita",
+    "default": "Devolve o valor padrão se o primeiro for null/undefined",
+    "compare": "Helper de bloco: compara com um operador",
+    "lowercase": "Converte a cadeia para minúsculas",
+    "uppercase": "Converte a cadeia para maiúsculas",
+    "capitalize": "Coloca em maiúscula a primeira letra",
+    "capitalizeAll": "Coloca em maiúscula a primeira letra de cada palavra",
+    "titleize": "Coloca em maiúscula a primeira letra de cada palavra",
+    "camelcase": "Converte para camelCase",
+    "pascalcase": "Converte para PascalCase",
+    "snakecase": "Converte para snake_case",
+    "snakeCase": "Converte para snake_case (alias)",
+    "dashcase": "Converte para dash-case (kebab-case)",
+    "dotcase": "Converte para dot.case",
+    "pathcase": "Converte para path/case",
+    "sentencecase": "Converte para Caixa de frase",
+    "slugify": "Converte para slug compatível com URL",
+    "trim": "Remove espaços em branco de ambas as extremidades",
+    "trimLeft": "Remove espaços em branco do início",
+    "trimRight": "Remove espaços em branco do fim",
+    "replace": "Substitui todas as ocorrências de a por b",
+    "split": "Divide a cadeia num vetor",
+    "truncate": "Trunca a cadeia ao comprimento especificado",
+    "ellipsis": "Trunca a cadeia com reticências",
+    "append": "Adiciona um sufixo à cadeia",
+    "prepend": "Adiciona um prefixo à cadeia",
+    "reverse": "Inverte uma cadeia ou vetor",
+    "startsWith": "Helper de bloco: renderiza se a cadeia começa pelo prefixo",
+    "endsWith": "Helper de bloco: renderiza se a cadeia termina pelo sufixo",
+    "contains": "Helper de bloco: renderiza se a cadeia contém a subcadeia",
+    "padStart": "Preenche a cadeia no início até atingir o comprimento",
+    "padEnd": "Preenche a cadeia no fim até atingir o comprimento",
+    "repeat": "Repete a cadeia n vezes",
+    "substring": "Extrai parte da cadeia",
+    "indexOf": "Devolve o índice da subcadeia (-1 se não encontrada)",
+    "count": "Conta as ocorrências da subcadeia",
+    "newLineToBr": "Converte quebras de linha em etiquetas <br>",
+    "stripTags": "Remove etiquetas HTML da cadeia",
+    "add": "Soma dois números",
+    "subtract": "Subtrai b de a",
+    "multiply": "Multiplica dois números",
+    "divide": "Divide a por b",
+    "modulo": "Devolve o resto de a / b",
+    "abs": "Devolve o valor absoluto",
+    "ceil": "Arredonda para cima ao inteiro mais próximo",
+    "floor": "Arredonda para baixo ao inteiro mais próximo",
+    "round": "Arredonda ao inteiro mais próximo",
+    "min": "Devolve o valor mínimo",
+    "max": "Devolve o valor máximo",
+    "pow": "Devolve a base elevada ao expoente",
+    "sqrt": "Devolve a raiz quadrada",
+    "random": "Devolve um inteiro aleatório entre min e max",
+    "sum": "Devolve a soma dos valores do vetor",
+    "avg": "Devolve a média dos valores do vetor",
+    "toFixed": "Formata o número com decimais fixas",
+    "toInt": "Converte para inteiro",
+    "toFloat": "Converte para decimal",
+    "first": "Devolve o(s) primeiro(s) elemento(s) do vetor",
+    "last": "Devolve o(s) último(s) elemento(s) do vetor",
+    "after": "Devolve os elementos após o índice n",
+    "before": "Devolve os elementos antes do índice n",
+    "slice": "Devolve uma fatia do vetor",
+    "length": "Devolve o comprimento do vetor/cadeia/objeto",
+    "join": "Junta os elementos do vetor com um separador",
+    "sort": "Ordena o vetor",
+    "unique": "Devolve os valores únicos",
+    "concat": "Concatena vetores",
+    "flatten": "Aplana o vetor aninhado",
+    "pluck": "Extrai uma propriedade de um vetor de objetos",
+    "itemAt": "Devolve o elemento no índice",
+    "inArray": "Helper de bloco: renderiza se o valor está no vetor",
+    "isArray": "Devolve verdadeiro se o valor é um vetor",
+    "isEmpty": "Helper de bloco: renderiza se o valor está vazio",
+    "some": "Helper de bloco: renderiza se alguns elementos correspondem",
+    "every": "Helper de bloco: renderiza se todos os elementos correspondem",
+    "JSONstringify": "Converte o objeto em cadeia JSON",
+    "JSONparse": "Analisa uma cadeia JSON para objeto",
+    "get": "Obtém uma propriedade aninhada por caminho",
+    "keys": "Devolve as chaves do objeto",
+    "values": "Devolve os valores do objeto",
+    "entries": "Devolve pares [chave, valor]",
+    "hasOwn": "Helper de bloco: renderiza se o objeto possui a propriedade",
+    "pick": "Cria um objeto com as chaves selecionadas",
+    "omit": "Cria um objeto sem as chaves especificadas",
+    "merge": "Combina vários objetos",
+    "isObject": "Devolve verdadeiro se o valor é um objeto",
+    "typeOf": "Devolve o tipo do valor",
+    "encodeURI": "Codifica uma cadeia para URL",
+    "decodeURI": "Descodifica uma cadeia de URL",
+    "urlParse": "Analisa um URL em componentes",
+    "stripQuerystring": "Remove a querystring do URL",
+    "stripProtocol": "Remove o protocolo do URL",
+    "now": "Devolve a data atual como cadeia ISO",
+    "timestamp": "Devolve a marca temporal atual em milissegundos",
+    "year": "Devolve o ano atual",
+    "formatDate": "Formata uma data com um padrão",
+    "match": "Devolve as correspondências da regex",
+    "test": "Helper de bloco: renderiza se a regex corresponde",
+    "coalesce": "Devolve o primeiro valor não null/undefined",
+    "uuid": "Gera um UUID aleatório",
+    "noop": "Helper de bloco que renderiza o conteúdo tal como está",
+    "raw": "Helper de bloco que renderiza conteúdo bruto",
+    "times": "Helper de bloco que repete n vezes",
+    "range": "Gera um vetor de números"
+  },
+  "behavior": {
+    "title": "Comportamento",
+    "syncSidebarWithTabs": "Sincronizar a seleção da barra lateral com o separador ativo",
+    "syncSidebarWithTabsDescription": "Ao mudar de separador na área de trabalho, selecionar e revelar automaticamente o item correspondente na barra lateral",
+    "dateTimeFormat": "Formato de data/hora",
+    "dateTimeFormatDescription": "Formato utilizado para apresentar datas e horas na aplicação",
+    "dateTimeFormat.us": "Formato EUA (MM/DD/AAAA, 12h)",
+    "dateTimeFormat.iso": "Formato ISO (AAAA-MM-DD, 24h)"
+  },
+  "console": {
+    "title": "Consola",
+    "requestFormat": "Formato do pedido",
+    "requestFormatDescription": "Tipo de shell utilizado por defeito para apresentar os pedidos enviados no separador Consola. Cada linha é uma linha de comando que pode ser copiada e colada; o interruptor na barra de ferramentas da Consola substitui este valor predefinido para o separador atual.",
+    "requestFormat.curl": "curl (estilo Unix)",
+    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+  },
+  "import": {
+    "title": "Importar pedidos",
+    "source": {
+      "label": "Cole aqui qualquer coisa!",
+      "placeholder": "Introduza o caminho do ficheiro, URL ou cole um comando curl/PowerShell..."
+    },
+    "formats": {
+      "swagger": {
+        "description": "A especificação OpenAPI 2.0, nascida na SmartBear. Cole um Swagger JSON ou YAML — o Restorm analisa cada operação, importa os esquemas de segurança e transforma o documento numa árvore navegável de pedidos.",
+        "trademark": "Swagger é uma marca registada da SmartBear Software."
+      },
+      "openapi": {
+        "description": "O atual padrão OpenAPI (3.0 e 3.1). A mesma ergonomia de colar-e-pronto do Swagger: parâmetros, corpos de pedido, esquemas de segurança e webhooks aparecem como uma árvore de pedidos tipados, com exemplos prontos a enviar.",
+        "trademark": "OpenAPI é um projeto da OpenAPI Initiative sob a Linux Foundation."
+      },
+      "curl": {
+        "description": "Já tem o pedido a correr no terminal? Cole a invocação completa de curl — opções, cabeçalhos, corpo, query string — e o Restorm reconstrói-o como um pedido real que pode reexecutar, editar e fixar.",
+        "trademark": "curl é software de código aberto © Daniel Stenberg, utilizado aqui sob os respetivos termos."
+      },
+      "powershell": {
+        "description": "A mesma ideia, em PowerShell. Cole um comando Invoke-WebRequest ou Invoke-RestMethod e o Restorm lê o URI, o método, os cabeçalhos e o corpo para preparar um pedido que pode iterar visualmente.",
+        "trademark": "PowerShell é uma marca registada da Microsoft Corporation."
+      },
+      "postman": {
+        "description": "Tem uma coleção Postman guardada no escritório? Largue o JSON — o Restorm lê cada pedido, cada resposta de exemplo e cada variável de ambiente, e reconstrói a coleção como uma árvore Restorm que pode executar lado a lado com o resto das suas APIs.",
+        "trademark": "Postman é uma marca registada da Postman, Inc., utilizada aqui apenas para fins de referência de compatibilidade."
+      },
+      "insomnia": {
+        "description": "Vem do Insomnia? Largue o export. O Restorm compreende o formato de coleção v4 / v5, traz consigo cada pedido, cabeçalho, corpo e ambiente, e apresenta tudo como uma árvore Restorm.",
+        "trademark": "Insomnia é uma marca registada da Kong Inc., utilizada aqui apenas para fins de referência de compatibilidade."
+      },
+      "bruno": {
+        "description": "Ficheiros .bru ao estilo Bruno ou um export de pasta — o Restorm lê o formato de texto .bru, incluindo os blocos de script, e recria cada pedido como um nó Restorm de primeira classe pronto a enviar.",
+        "trademark": "Bruno é software de código aberto (MIT) por Anoop M. D., utilizado aqui sob os respetivos termos."
+      },
+      "graphql": {
+        "description": "Cole um SDL GraphQL (.graphql / .gql / um excerto do seu cliente GraphQL) e o Restorm gera automaticamente um pedido por operação, ligado ao tipo correto de query / mutation / subscription com as variáveis já estruturadas.",
+        "trademark": "GraphQL é uma marca da GraphQL Foundation, um projeto da Joint Development Foundation."
+      },
+      "grpc": {
+        "description": "Largue um ficheiro .proto (ou uma pasta com vários) e o Restorm percorre cada serviço, cada RPC, cada mensagem — transformando cada método num pedido tipado que pode enviar pelo executor gRPC sem tocar em codegen.",
+        "trademark": "gRPC é um projeto da Cloud Native Computing Foundation."
+      },
+      "soap": {
+        "description": "Tem um WSDL? Cole-o (ou o respetivo URL) — o Restorm analisa cada <port> e <operation> e produz envelopes SOAP prontos a enviar com o cabeçalho SOAPAction correto, esqueletos de corpo tipados pelo esquema e o esquema de autenticação declarado no WSDL."
+      },
+      "websocket": {
+        "description": "Cole um endpoint WebSocket (ws:// ou wss://) — o Restorm abre a ligação, captura as tramas de hello do servidor e gera pedidos send / subscribe com modelos de payload reproduzíveis.",
+        "trademark": "WebSocket é um protocolo padronizado pela IETF (RFC 6455) e pelo W3C."
+      },
+      "kafka": {
+        "description": "Cole o URL de um bootstrap-server Apache Kafka (ou uma lista de tópicos) — o Restorm regista consumidores e produtores por tópico, descodifica os payloads Avro / Protobuf através do seu Schema Registry e permite reproduzir offsets individuais com um clique.",
+        "trademark": "Apache Kafka e o logótipo Kafka são marcas da Apache Software Foundation."
+      },
+      "socketio": {
+        "description": "Cole o URL de um servidor Socket.IO — o Restorm negoceia o handshake, lista os namespaces e nomes de eventos emitidos pelo servidor e oferece um pedido por emit / on com validação de payload.",
+        "trademark": "Socket.IO é uma biblioteca de código aberto publicada sob a licença MIT; o nome e o logótipo são utilizados de forma nominativa."
+      },
+      "odata": {
+        "description": "Cole o URL de um service-document OData ou um ficheiro $metadata — o Restorm lê o CSDL, reconstrói os entity sets, function imports e ações, e pré-preenche as opções de consulta $filter / $select / $top / $skip em cada operação."
+      },
+      "mqtt": {
+        "description": "Cole o URL de um broker MQTT ou um catálogo de tópicos — o Restorm gera pedidos publish / subscribe por tópico, mantém a ligação ativa para pré-visualizações em streaming e guarda instantâneos das mensagens retidas para que possa reproduzi-las mais tarde.",
+        "trademark": "MQTT é um padrão OASIS; o nome e o logótipo MQTT são marcas da OASIS Open."
+      }
+    },
+    "loading": "A analisar...",
+    "noResults": "Nenhum pedido encontrado",
+    "error": {
+      "unknown": "Ocorreu um erro desconhecido"
+    },
+    "ok": "Importar",
+    "cancel": "Cancelar",
+    "dropZone": "Zona de largar"
+  }
+}

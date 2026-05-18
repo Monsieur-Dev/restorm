@@ -1,0 +1,620 @@
+{
+  "app": {
+    "title": "restorm",
+    "openSettings": "Ayarları aç",
+    "draftsRestoredTitle": "Kaydedilmemiş çalışma geri yüklendi",
+    "draftsRestoredBody_one": "{{count}} taslak önceki oturumunuzdan geri yüklendi.",
+    "draftsRestoredBody_other": "{{count}} taslak önceki oturumunuzdan geri yüklendi."
+  },
+  "statusbar": {
+    "requestHistory": "İstek geçmişi",
+    "envSelector": {
+      "applyToAll": "Tüm isteklere uygula"
+    }
+  },
+  "authFailureToast": {
+    "title": "Kimlik doğrulama başarısız",
+    "fallbackReason": "Kimlik doğrulama isteği başarılı olmadı.",
+    "openAuthRoute": "Kimlik doğrulama rotasını aç"
+  },
+  "menuBar": {
+    "file": "Dosya",
+    "new": "Yeni",
+    "import": "İçe aktar",
+    "open": "Aç",
+    "openFolder": "Klasör aç",
+    "recentFiles": "Son kullanılan dosyalar",
+    "favorites": "Favoriler",
+    "close": "Kapat",
+    "save": "Kaydet",
+    "saveAll": "Tümünü kaydet",
+    "saveAs": "Farklı kaydet",
+    "exit": "Çık",
+    "selection": "Seçim",
+    "tools": "Araçlar",
+    "findInCollection": "Koleksiyonda bul",
+    "addRequest": "İstek ekle",
+    "addRequestHttp": "HTTP isteği",
+    "addRequestGraphql": "GraphQL isteği",
+    "addRequestGrpc": "gRPC isteği",
+    "addRequestSoap": "SOAP isteği",
+    "addRequestOdata": "OData isteği",
+    "addRequestWebsocket": "WebSocket isteği",
+    "addFolder": "Klasör ekle",
+    "addEnvironmentFolder": "Ortam klasörü ekle",
+    "addVariable": "Değişken ekle",
+    "addTag": "Etiket ekle",
+    "expandAllFolders": "Tüm klasörleri genişlet",
+    "collapseAllFolders": "Tüm klasörleri daralt",
+    "sendActiveRequest": "İsteği gönder",
+    "cancelActiveRequest": "İsteği iptal et",
+    "generateCodeSnippet": "Kod parçacığı oluştur",
+    "copyAsCurl": "cURL olarak kopyala",
+    "exportOpenApi": "OpenAPI'a dışa aktar",
+    "clearAuthCache": "Kimlik doğrulama önbelleğini temizle",
+    "openLogsFolder": "Günlük klasörünü aç"
+  },
+  "sidebar": {
+    "addRequest": "İstek ekle",
+    "collapseAll": "Tüm istekleri daralt",
+    "workspace": "Çalışma alanı",
+    "favorites": "Favoriler",
+    "newFolder": "Yeni klasör",
+    "newEnvironmentFolder": "Yeni ortam klasörü",
+    "contextMenu": {
+      "createFolder": "Klasör oluştur",
+      "createEnvironmentFolder": "Ortam klasörü oluştur",
+      "delete": "Sil",
+      "clone": "Çoğalt",
+      "rename": "Yeniden adlandır",
+      "addToFavorites": "Favorilere ekle",
+      "removeFromFavorites": "Favorilerden çıkar",
+      "closeTab": "Kapat",
+      "closeOtherTabs": "Diğerlerini kapat",
+      "closeTabsToTheRight": "Sağdakileri kapat",
+      "closeAllTabs": "Tümünü kapat",
+      "add": {
+        "title": "Ekle",
+        "folder": "Klasör",
+        "httpGet": "HTTP – GET isteği",
+        "httpPost": "HTTP – POST isteği",
+        "httpPut": "HTTP – PUT isteği",
+        "httpPatch": "HTTP – PATCH isteği",
+        "httpDelete": "HTTP – DELETE isteği",
+        "graphql": "GraphQL isteği",
+        "grpc": "gRPC isteği",
+        "soap": "SOAP isteği",
+        "websocket": "WebSocket isteği",
+        "odata": "OData isteği",
+        "auth": "HTTP kimlik doğrulama isteği"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Silmeyi onayla",
+      "folderMessage": "\"{{name}}\" klasörünü ve tüm içeriğini silmek istediğinize emin misiniz?",
+      "itemMessage": "\"{{name}}\" öğesini silmek istediğinize emin misiniz?",
+      "confirm": "Sil",
+      "cancel": "İptal"
+    }
+  },
+  "environment": {
+    "newName": "Yeni ortam",
+    "add": "Ortam ekle",
+    "rename": "Yeniden adlandır",
+    "addSub": "Alt ortam ekle",
+    "delete": "Sil"
+  },
+  "folderView": {
+    "environments": "Ortamlar",
+    "environmentsAriaLabel": "Klasör ortamları",
+    "variables": "Değişkenler",
+    "addVariable": "Değişken satırı ekle",
+    "selectEnvironment": "Değişkenleri görüntülemek için bir ortam seçin",
+    "tabs": {
+      "docs": "Belgeler",
+      "configuration": "Yapılandırma",
+      "notes": "Notlar"
+    },
+    "home": {
+      "configureEnvs": "Ortamları yapılandır",
+      "configureEnvsDesc": "Her ortam için temel URL'leri, değişkenleri ve kimlik doğrulamayı ayarlayın",
+      "viewDocs": "Belgeleri görüntüle",
+      "viewDocsDesc": "API belgelerine, modellere ve uç noktalara göz atın",
+      "favoriteRequests": "Favori istekler",
+      "removeFavorite": "Favorilerden çıkar",
+      "apiUpdate": {
+        "title": "API spec güncellemeleri",
+        "noConfig": "Bu klasör içe aktarılabilir bir kaynaktan oluşturulmadı.",
+        "urlLabel": "URL",
+        "lastImportedLabel": "Son içe aktarma",
+        "lastCheckedLabel": "Son kontrol",
+        "neverImported": "Hiç içe aktarılmadı",
+        "neverChecked": "Hiç kontrol edilmedi",
+        "refreshing": "API spec yenileniyor…",
+        "fetching": "Getiriliyor…",
+        "upToDate": "API spec güncel.",
+        "ok": "TAMAM"
+      }
+    },
+    "contextVariables": {
+      "title": "Kullanılabilir bağlam değişkenleri",
+      "description": "Bu değişkenleri istek URL'lerinizde ve ifade tipindeki değişkenlerinizde {{handlebars}} sözdizimiyle kullanın.",
+      "name": "Değişken",
+      "value": "Çözümlenmiş değer",
+      "copied": "Kopyalandı!"
+    }
+  },
+  "requestTab": {
+    "deprecated": "Bu uç nokta kullanımdan kaldırılmıştır ve gelecekteki bir sürümde kaldırılabilir.",
+    "send": "Gönder",
+    "cancel": "İptal",
+    "urlPlaceholder": "İstek URL'si",
+    "methodSelect": "HTTP yöntemini seçin",
+    "addHeader": "Başlık ekle",
+    "addParam": "Parametre ekle",
+    "environmentSelector": {
+      "noEnvironment": "Ortam yok"
+    },
+    "body": {
+      "fileLabel": "Dosya veya URL:",
+      "browse": "Gözat..."
+    },
+    "tabs": {
+      "docs": "Belgeler",
+      "requestLayout": "İstek",
+      "headers": "Başlıklar",
+      "body": "Gövde",
+      "params": "Parametreler",
+      "pathParams": "Yol parametreleri",
+      "notes": "Notlar",
+      "codeSnippets": "Kod parçacıkları",
+      "responsesHistory": "Yanıt geçmişi"
+    },
+    "responses": {
+      "tabs": {
+        "response": "Yanıt",
+        "requestBody": "İstek gövdesi",
+        "graph": "Grafik"
+      },
+      "loading": "İstek gönderiliyor...",
+      "noResponse": "İsteği yürütmek için Gönder'e tıklayın",
+      "history": {
+        "list": "Yanıt geçmişi listesi",
+        "empty": "Henüz kaydedilmiş yanıt yok",
+        "select": "Ayrıntıları görüntülemek için bir yanıt seçin",
+        "pin": "Yanıtı sabitle",
+        "unpin": "Yanıt sabitlemesini kaldır"
+      }
+    }
+  },
+  "workbench": {
+    "tabContextMenu": {
+      "close": "Kapat",
+      "closeOthers": "Diğerlerini kapat",
+      "addToFavorites": "Favorilere ekle",
+      "removeFromFavorites": "Favorilerden çıkar"
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Tanıma git"
+  },
+  "keyValueTable": {
+    "types": {
+      "string": "Dize",
+      "secret": "Gizli",
+      "number": "Sayı",
+      "dateTime": "Tarih/saat",
+      "color": "Renk",
+      "expression": "İfade",
+      "boolean": "Boolean"
+    },
+    "apiEnums": "API tanımlı türler"
+  },
+  "graphql": {
+    "send": "Gönder",
+    "urlPlaceholder": "GraphQL uç nokta URL'si",
+    "tabs": {
+      "query": "Sorgu",
+      "variables": "Değişkenler",
+      "headers": "Başlıklar"
+    }
+  },
+  "grpc": {
+    "send": "Çağır",
+    "urlPlaceholder": "gRPC sunucusu (host:port)",
+    "tabs": {
+      "message": "Mesaj",
+      "metadata": "Meta veriler"
+    }
+  },
+  "soap": {
+    "send": "Gönder",
+    "urlPlaceholder": "SOAP uç nokta URL'si",
+    "tabs": {
+      "body": "Gövde",
+      "headers": "Başlıklar"
+    }
+  },
+  "websocket": {
+    "connect": "Bağlan",
+    "connected": "Bağlandı",
+    "disconnected": "Bağlantı kesildi",
+    "noMessages": "Henüz mesaj yok",
+    "urlPlaceholder": "WebSocket URL'si",
+    "event": "Olay",
+    "topic": "Konu",
+    "tabs": {
+      "message": "Mesaj",
+      "headers": "Başlıklar"
+    }
+  },
+  "search": {
+    "placeholder": "Ara...",
+    "noResults": "Sonuç bulunamadı",
+    "resultsAriaLabel": "Arama sonuçları",
+    "categories": {
+      "request": "İstekler",
+      "folder": "Klasörler",
+      "environment": "Ortamlar",
+      "settings": "Ayarlar",
+      "tag": "Etiketler"
+    },
+    "tooltip": {
+      "noDetails": "Ayrıntı yok",
+      "noContent": "Belge veya not yok"
+    }
+  },
+  "httpStatus": {
+    "100": {
+      "name": "Continue",
+      "description": "Sunucu istek başlıklarını aldı ve istemci istek gövdesini göndermeye devam etmelidir."
+    },
+    "101": {
+      "name": "Switching Protocols",
+      "description": "İstemci sunucudan protokol değiştirmesini istedi ve sunucu kabul etti."
+    },
+    "200": {
+      "name": "OK",
+      "description": "Başarılı HTTP istekleri için standart yanıt. Asıl yanıt kullanılan istek yöntemine bağlıdır."
+    },
+    "201": {
+      "name": "Created",
+      "description": "İstek karşılandı ve yeni bir kaynağın oluşturulmasıyla sonuçlandı."
+    },
+    "202": {
+      "name": "Accepted",
+      "description": "İstek işlenmek üzere kabul edildi, ancak işlem henüz tamamlanmadı."
+    },
+    "204": {
+      "name": "No Content",
+      "description": "Sunucu isteği başarıyla işledi ve herhangi bir içerik döndürmüyor."
+    },
+    "301": {
+      "name": "Moved Permanently",
+      "description": "Bu ve gelecekteki tüm istekler verilen URI'ye yönlendirilmelidir."
+    },
+    "302": {
+      "name": "Found",
+      "description": "İstemciye başka bir URL'ye bakmasını söyler. HTTP/1.0 spesifikasyonu istemcinin geçici yönlendirme yapmasını gerektiriyordu."
+    },
+    "304": {
+      "name": "Not Modified",
+      "description": "Kaynağın istek başlıklarında belirtilen sürümden bu yana değiştirilmediğini gösterir."
+    },
+    "400": {
+      "name": "Bad Request",
+      "description": "Sunucu bariz bir istemci hatası nedeniyle isteği işleyemez veya işlemeyecektir (ör. hatalı biçimlendirilmiş istek söz dizimi)."
+    },
+    "401": {
+      "name": "Unauthorized",
+      "description": "Kimlik doğrulama gereklidir ve başarısız oldu veya henüz sağlanmadı."
+    },
+    "403": {
+      "name": "Forbidden",
+      "description": "İstek geçerli veriler içeriyordu ve sunucu tarafından anlaşıldı, ancak sunucu eylemi reddediyor."
+    },
+    "404": {
+      "name": "Not Found",
+      "description": "İstenen kaynak bulunamadı ancak gelecekte mevcut olabilir."
+    },
+    "405": {
+      "name": "Method Not Allowed",
+      "description": "Bir istek yöntemi, istenen kaynak için desteklenmiyor."
+    },
+    "408": {
+      "name": "Request Timeout",
+      "description": "Sunucu isteği beklerken zaman aşımına uğradı."
+    },
+    "409": {
+      "name": "Conflict",
+      "description": "Kaynağın mevcut durumundaki bir çakışma nedeniyle isteğin işlenemediğini gösterir."
+    },
+    "410": {
+      "name": "Gone",
+      "description": "İstenen kaynağın daha önce kullanıldığını ancak artık mevcut olmadığını ve bir daha mevcut olmayacağını gösterir."
+    },
+    "415": {
+      "name": "Unsupported Media Type",
+      "description": "İstek varlığının, sunucu veya kaynağın desteklemediği bir medya türü var."
+    },
+    "422": {
+      "name": "Unprocessable Entity",
+      "description": "İstek iyi biçimlendirilmişti ancak anlamsal hatalar nedeniyle yerine getirilemedi."
+    },
+    "429": {
+      "name": "Too Many Requests",
+      "description": "Kullanıcı belirli bir süre içinde çok fazla istek gönderdi (hız sınırlaması)."
+    },
+    "500": {
+      "name": "Internal Server Error",
+      "description": "Beklenmeyen bir durumla karşılaşıldığında verilen ve daha spesifik bir mesajın uygun olmadığı genel bir hata mesajı."
+    },
+    "501": {
+      "name": "Not Implemented",
+      "description": "Sunucu, istek yöntemini tanımıyor veya isteği yerine getirme yeteneğinden yoksun."
+    },
+    "502": {
+      "name": "Bad Gateway",
+      "description": "Sunucu ağ geçidi veya proxy olarak görev yapıyordu ve yukarı akış sunucusundan geçersiz bir yanıt aldı."
+    },
+    "503": {
+      "name": "Service Unavailable",
+      "description": "Sunucu isteği işleyemiyor (aşırı yüklendiği veya bakımda olduğu için)."
+    },
+    "504": {
+      "name": "Gateway Timeout",
+      "description": "Sunucu ağ geçidi veya proxy olarak görev yapıyordu ve yukarı akış sunucusundan zamanında yanıt alamadı."
+    }
+  },
+  "welcome": {
+    "confirmRemoveFavorite": "\"{{fileName}}\" dosyasını favorilerden çıkarmak istediğinize emin misiniz?",
+    "noFilesHint": "Başlamak için bir dosya açın veya yeni bir tane oluşturun",
+    "newAriaLabel": "Yeni bir koleksiyon oluştur",
+    "openAriaLabel": "Diskten bir koleksiyon aç",
+    "landmarkLabel": "Hoş geldiniz"
+  },
+  "save": {
+    "title": "Kaydetme seçenekleri",
+    "mode": {
+      "label": "Kaydetme modu",
+      "file": "Tek dosya",
+      "folder": "Klasör yapısı",
+      "fileDescription": "Her şeyi tek bir dosyada kaydet",
+      "folderDescription": "Ayrı dosyalarla klasör yapısı olarak kaydet"
+    },
+    "format": {
+      "label": "Biçim",
+      "yamlDescription": "İnsan tarafından okunabilir",
+      "jsonDescription": "Standart biçim",
+      "json5Description": "JSON + yorumlar"
+    },
+    "preview": {
+      "label": "Yapı önizlemesi",
+      "noDocumentation": "Bu kaynak için ayrıştırılmış belge yok."
+    }
+  },
+  "common": {
+    "cancel": "İptal",
+    "save": "Kaydet"
+  },
+  "helpers": {
+    "categories": {
+      "comparison": "Karşılaştırma",
+      "string": "Dize",
+      "math": "Matematik",
+      "array": "Dizi",
+      "object": "Nesne",
+      "url": "URL",
+      "date": "Tarih",
+      "regex": "Regex",
+      "misc": "Çeşitli"
+    },
+    "eq": "Katı eşitlik (===)",
+    "ne": "Katı eşitsizlik (!==)",
+    "neq": "Katı eşitsizlik (!==)",
+    "lt": "Küçüktür (<)",
+    "lte": "Küçük veya eşit (<=)",
+    "gt": "Büyüktür (>)",
+    "gte": "Büyük veya eşit (>=)",
+    "and": "Blok yardımcısı: tüm değerler doğruysa render eder",
+    "or": "Blok yardımcısı: herhangi bir değer doğruysa render eder",
+    "not": "Ters boolean değeri döndürür",
+    "ifEquals": "Blok yardımcısı: değerler eşitse render eder",
+    "is": "Blok yardımcısı: gevşek eşitlik karşılaştırması",
+    "isnt": "Blok yardımcısı: gevşek eşitsizlik karşılaştırması",
+    "default": "İlk değer null/undefined ise varsayılan değeri döndürür",
+    "compare": "Blok yardımcısı: operatörle karşılaştırır",
+    "lowercase": "Dizeyi küçük harfe çevirir",
+    "uppercase": "Dizeyi büyük harfe çevirir",
+    "capitalize": "İlk harfi büyük yapar",
+    "capitalizeAll": "Her kelimenin ilk harfini büyük yapar",
+    "titleize": "Her kelimenin ilk harfini büyük yapar",
+    "camelcase": "camelCase'e dönüştürür",
+    "pascalcase": "PascalCase'e dönüştürür",
+    "snakecase": "snake_case'e dönüştürür",
+    "snakeCase": "snake_case'e dönüştürür (takma ad)",
+    "dashcase": "dash-case'e (kebab-case) dönüştürür",
+    "dotcase": "dot.case'e dönüştürür",
+    "pathcase": "path/case'e dönüştürür",
+    "sentencecase": "Sentence case'e dönüştürür",
+    "slugify": "URL dostu slug'a dönüştürür",
+    "trim": "Her iki uçtan boşlukları kaldırır",
+    "trimLeft": "Baştaki boşlukları kaldırır",
+    "trimRight": "Sondaki boşlukları kaldırır",
+    "replace": "Tüm a oluşumlarını b ile değiştirir",
+    "split": "Dizeyi diziye böler",
+    "truncate": "Dizeyi belirtilen uzunlukta kısaltır",
+    "ellipsis": "Dizeyi üç nokta ile kısaltır",
+    "append": "Dizeye sonek ekler",
+    "prepend": "Dizeye önek ekler",
+    "reverse": "Bir dizeyi veya diziyi ters çevirir",
+    "startsWith": "Blok yardımcısı: dize önekle başlıyorsa render eder",
+    "endsWith": "Blok yardımcısı: dize sonekle bitiyorsa render eder",
+    "contains": "Blok yardımcısı: dize alt dize içeriyorsa render eder",
+    "padStart": "Uzunluğa ulaşmak için dizenin başını doldurur",
+    "padEnd": "Uzunluğa ulaşmak için dizenin sonunu doldurur",
+    "repeat": "Dizeyi n kez tekrar eder",
+    "substring": "Dizenin bir kısmını çıkarır",
+    "indexOf": "Alt dizenin indeksini döndürür (bulunmazsa -1)",
+    "count": "Alt dizenin tekrar sayısını sayar",
+    "newLineToBr": "Yeni satırları <br> etiketlerine dönüştürür",
+    "stripTags": "HTML etiketlerini dizeden kaldırır",
+    "add": "İki sayıyı toplar",
+    "subtract": "a'dan b'yi çıkarır",
+    "multiply": "İki sayıyı çarpar",
+    "divide": "a'yı b'ye böler",
+    "modulo": "a / b kalanını döndürür",
+    "abs": "Mutlak değeri döndürür",
+    "ceil": "En yakın üst tamsayıya yuvarlar",
+    "floor": "En yakın alt tamsayıya yuvarlar",
+    "round": "En yakın tamsayıya yuvarlar",
+    "min": "Minimum değeri döndürür",
+    "max": "Maksimum değeri döndürür",
+    "pow": "Üs alınmış tabanı döndürür",
+    "sqrt": "Karekökü döndürür",
+    "random": "min ile max arasında rastgele tamsayı döndürür",
+    "sum": "Dizi değerlerinin toplamını döndürür",
+    "avg": "Dizi değerlerinin ortalamasını döndürür",
+    "toFixed": "Sayıyı sabit ondalık basamaklarla biçimlendirir",
+    "toInt": "Tamsayıya dönüştürür",
+    "toFloat": "Ondalıklı sayıya dönüştürür",
+    "first": "Dizinin ilk eleman(lar)ını döndürür",
+    "last": "Dizinin son eleman(lar)ını döndürür",
+    "after": "n indeksinden sonraki elemanları döndürür",
+    "before": "n indeksinden önceki elemanları döndürür",
+    "slice": "Dizinin bir dilimini döndürür",
+    "length": "Dizi/dize/nesne uzunluğunu döndürür",
+    "join": "Dizi elemanlarını ayırıcıyla birleştirir",
+    "sort": "Diziyi sıralar",
+    "unique": "Benzersiz değerleri döndürür",
+    "concat": "Dizileri birleştirir",
+    "flatten": "İç içe diziyi düzleştirir",
+    "pluck": "Nesneler dizisinden bir özelliği çıkarır",
+    "itemAt": "İndeksteki öğeyi döndürür",
+    "inArray": "Blok yardımcısı: değer dizide ise render eder",
+    "isArray": "Değer dizi ise true döndürür",
+    "isEmpty": "Blok yardımcısı: değer boşsa render eder",
+    "some": "Blok yardımcısı: bazı öğeler eşleşirse render eder",
+    "every": "Blok yardımcısı: tüm öğeler eşleşirse render eder",
+    "JSONstringify": "Nesneyi JSON dizesine dönüştürür",
+    "JSONparse": "JSON dizesini nesneye ayrıştırır",
+    "get": "Yola göre iç içe özelliği alır",
+    "keys": "Nesne anahtarlarını döndürür",
+    "values": "Nesne değerlerini döndürür",
+    "entries": "[anahtar, değer] çiftlerini döndürür",
+    "hasOwn": "Blok yardımcısı: nesnede özellik varsa render eder",
+    "pick": "Seçilen anahtarlarla nesne oluşturur",
+    "omit": "Belirtilen anahtarlar olmadan nesne oluşturur",
+    "merge": "Birden çok nesneyi birleştirir",
+    "isObject": "Değer nesne ise true döndürür",
+    "typeOf": "Değerin türünü döndürür",
+    "encodeURI": "Dizeyi URL için kodlar",
+    "decodeURI": "URL dizesini çözer",
+    "urlParse": "URL'yi bileşenlere ayrıştırır",
+    "stripQuerystring": "URL'den querystring'i kaldırır",
+    "stripProtocol": "URL'den protokolü kaldırır",
+    "now": "Geçerli tarihi ISO dizesi olarak döndürür",
+    "timestamp": "Geçerli zaman damgasını milisaniye cinsinden döndürür",
+    "year": "Geçerli yılı döndürür",
+    "formatDate": "Tarihi desenle biçimlendirir",
+    "match": "Regex eşleşmelerini döndürür",
+    "test": "Blok yardımcısı: regex eşleşirse render eder",
+    "coalesce": "İlk null/undefined olmayan değeri döndürür",
+    "uuid": "Rastgele bir UUID oluşturur",
+    "noop": "İçeriği olduğu gibi render eden blok yardımcısı",
+    "raw": "Ham içeriği render eden blok yardımcısı",
+    "times": "n kez tekrar eden blok yardımcısı",
+    "range": "Sayı dizisi oluşturur"
+  },
+  "behavior": {
+    "title": "Davranış",
+    "syncSidebarWithTabs": "Kenar çubuğu seçimini etkin sekmeyle senkronize et",
+    "syncSidebarWithTabsDescription": "Çalışma alanında sekme değiştirilirken kenar çubuğunda ilgili öğeyi otomatik olarak seç ve göster",
+    "dateTimeFormat": "Tarih/saat biçimi",
+    "dateTimeFormatDescription": "Uygulamada tarihleri ve saatleri görüntülemek için kullanılan biçim",
+    "dateTimeFormat.us": "ABD biçimi (AA/GG/YYYY, 12 saat)",
+    "dateTimeFormat.iso": "ISO biçimi (YYYY-AA-GG, 24 saat)"
+  },
+  "console": {
+    "title": "Konsol",
+    "requestFormat": "İstek biçimi",
+    "requestFormatDescription": "Konsol sekmesinde giden istekleri göstermek için varsayılan kabuk türü. Her satır kopyalanıp yapıştırılabilen bir komut satırıdır; Konsol araç çubuğundaki anahtar, geçerli sekme için bu varsayılanı geçersiz kılar.",
+    "requestFormat.curl": "curl (Unix tarzı)",
+    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+  },
+  "import": {
+    "title": "İstekleri içe aktar",
+    "source": {
+      "label": "Buraya bir şey yapıştırın!",
+      "placeholder": "Dosya yolu, URL girin veya curl/PowerShell komutu yapıştırın..."
+    },
+    "formats": {
+      "swagger": {
+        "description": "SmartBear'da doğan OpenAPI 2.0 spesifikasyonu. Bir Swagger JSON veya YAML yapıştırın — Restorm her işlemi ayrıştırır, güvenlik şemalarını çeker ve tüm belgeyi gezilebilir bir istek ağacına dönüştürür.",
+        "trademark": "Swagger, SmartBear Software'in tescilli markasıdır."
+      },
+      "openapi": {
+        "description": "Güncel OpenAPI standardı (3.0 ve 3.1). Swagger ile aynı yapıştır-ve-başla ergonomisi: parametreler, istek gövdeleri, güvenlik şemaları ve webhook'lar, gönderilmeye hazır örneklerle birlikte tipli istek ağacı olarak yer alır.",
+        "trademark": "OpenAPI, Linux Foundation altındaki OpenAPI Initiative'in bir projesidir."
+      },
+      "curl": {
+        "description": "İsteği zaten terminalde çalıştırıyor musunuz? Tam curl komutunu yapıştırın — bayraklar, başlıklar, gövde, sorgu dizesi — ve Restorm bunu yeniden çalıştırabileceğiniz, düzenleyebileceğiniz ve sabitleyebileceğiniz gerçek bir istek olarak yeniden oluşturur.",
+        "trademark": "curl, açık kaynaklı bir yazılımdır © Daniel Stenberg, burada kendi koşulları altında kullanılmaktadır."
+      },
+      "powershell": {
+        "description": "Aynı fikir, PowerShell tadında. Bir Invoke-WebRequest veya Invoke-RestMethod komutunu yapıştırın; Restorm URI, yöntem, başlıklar ve gövdeyi okuyarak görsel olarak üzerinde çalışabileceğiniz bir istek oluşturur.",
+        "trademark": "PowerShell, Microsoft Corporation'ın tescilli markasıdır."
+      },
+      "postman": {
+        "description": "Ofiste duran bir Postman koleksiyonunuz mu var? JSON'u bırakın — Restorm her isteği, her örnek yanıtı ve her ortam değişkenini okur, ardından koleksiyonu diğer API'lerinizin yanında çalıştırabileceğiniz bir Restorm ağacı olarak yeniden oluşturur.",
+        "trademark": "Postman, Postman, Inc.'in tescilli markasıdır ve burada yalnızca uyumluluk referansı amacıyla kullanılmaktadır."
+      },
+      "insomnia": {
+        "description": "Insomnia'dan mı geliyorsunuz? Dışa aktarmanızı bırakın. Restorm v4 / v5 koleksiyon biçimini anlar, her isteği, başlığı, gövdeyi ve ortamı getirir ve tümünü bir Restorm ağacı olarak ortaya çıkarır.",
+        "trademark": "Insomnia, Kong Inc.'in tescilli markasıdır ve burada yalnızca uyumluluk referansı amacıyla kullanılmaktadır."
+      },
+      "bruno": {
+        "description": "Bruno tadında .bru dosyaları veya bir klasör dışa aktarımı — Restorm betikleme blokları dahil .bru metin biçimini okur ve her isteği gönderilmeye hazır birinci sınıf bir Restorm düğümü olarak yeniden oluşturur.",
+        "trademark": "Bruno, Anoop M. D. tarafından geliştirilen açık kaynaklı bir yazılımdır (MIT) ve burada kendi koşulları altında kullanılmaktadır."
+      },
+      "graphql": {
+        "description": "Bir GraphQL SDL (.graphql / .gql / GraphQL istemcinizden bir yapıştırma) yapıştırın ve Restorm her işlem için bir istek iskeleti oluşturur, doğru query / mutation / subscription tipine bağlanmış ve değişkenleri yapılandırılmış olarak.",
+        "trademark": "GraphQL, Joint Development Foundation projesi olan GraphQL Foundation'ın markasıdır."
+      },
+      "grpc": {
+        "description": "Bir .proto dosyasını (veya bir dizinini) bırakın ve Restorm her servisi, her RPC'yi, her mesajı gezerek her yöntemi kod üretimine dokunmadan gRPC yürütücüsü üzerinden gönderebileceğiniz tipli bir isteğe dönüştürür.",
+        "trademark": "gRPC, Cloud Native Computing Foundation'ın bir projesidir."
+      },
+      "soap": {
+        "description": "Bir WSDL'iniz mi var? Yapıştırın (veya URL'sini) — Restorm her <port> ve <operation>'ı ayrıştırır ve doğru SOAPAction başlığı, şema tipli gövde iskeletleri ve WSDL'in beyan ettiği kimlik doğrulama şeması ile birlikte gönderilmeye hazır SOAP zarfları üretir."
+      },
+      "websocket": {
+        "description": "Bir WebSocket uç noktası yapıştırın (ws:// veya wss://) — Restorm bağlantıyı açar, sunucunun hello çerçevelerini yakalar ve yeniden oynatılabilir yük şablonlarıyla send / subscribe isteklerinin iskeletini oluşturur.",
+        "trademark": "WebSocket, IETF (RFC 6455) ve W3C tarafından standartlaştırılmış bir protokoldür."
+      },
+      "kafka": {
+        "description": "Bir Apache Kafka bootstrap-server URL'si (veya topic listesi) yapıştırın — Restorm topic başına consumer + producer'ları kaydeder, Schema Registry'niz aracılığıyla Avro / Protobuf yüklerini çözer ve tek tıklamayla belirli offset'leri yeniden oynatmanıza olanak tanır.",
+        "trademark": "Apache Kafka ve Kafka logosu, Apache Software Foundation'ın markalarıdır."
+      },
+      "socketio": {
+        "description": "Bir Socket.IO sunucu URL'si yapıştırın — Restorm handshake'i müzakere eder, sunucunun yaydığı namespace'leri ve olay adlarını listeler ve yük doğrulamasıyla emit / on olayı başına bir istek verir.",
+        "trademark": "Socket.IO, MIT lisansı altında yayınlanan açık kaynaklı bir kitaplıktır; ad ve logo nominal olarak kullanılmaktadır."
+      },
+      "odata": {
+        "description": "Bir OData servis belgesi URL'si veya bir $metadata dosyası yapıştırın — Restorm CSDL'i okur, entity set'leri, function import'ları ve action'ları yeniden oluşturur, ayrıca her işlemde $filter / $select / $top / $skip sorgu seçeneklerini önceden doldurur."
+      },
+      "mqtt": {
+        "description": "Bir MQTT broker URL'si veya bir topic kataloğu yapıştırın — Restorm topic başına publish / subscribe istek iskeletleri oluşturur, akış önizlemeleri için bağlantıyı canlı tutar ve daha sonra yeniden oynatabilmeniz için retained-message anlık görüntülerini hatırlar.",
+        "trademark": "MQTT bir OASIS standardıdır; MQTT adı ve logosu OASIS Open'ın ticari markalarıdır."
+      }
+    },
+    "loading": "Analiz ediliyor...",
+    "noResults": "İstek bulunamadı",
+    "error": {
+      "unknown": "Bilinmeyen bir hata oluştu"
+    },
+    "ok": "İçe aktar",
+    "cancel": "İptal",
+    "dropZone": "Bırakma alanı"
+  }
+}

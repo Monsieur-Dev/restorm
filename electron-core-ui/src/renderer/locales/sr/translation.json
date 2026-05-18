@@ -1,0 +1,327 @@
+{
+  "common": {
+    "opened": "Otvoreno",
+    "refresh": "Osveži"
+  },
+  "file": {
+    "untitled": "Bez naslova",
+    "unsavedChanges": {
+      "title": "Nesačuvane izmene",
+      "message": "Da li želite da sačuvate izmene u \"{{fileName}}\"?",
+      "detail": "Vaše izmene će biti izgubljene ako ih ne sačuvate.",
+      "save": "Sačuvaj",
+      "dontSave": "Nemoj sačuvati",
+      "cancel": "Otkaži"
+    }
+  },
+  "recentFilesVignette": {
+    "favorites": "Omiljeno",
+    "recentFiles": "Nedavne datoteke",
+    "addToFavorites": "Dodaj u omiljeno",
+    "removeFromFavorites": "Ukloni iz omiljenog",
+    "confirmRemoveFavorite": "Da li ste sigurni da želite da uklonite \"{{fileName}}\" iz omiljenog?",
+    "favoritesLandmarkLabel": "Lista omiljenog",
+    "recentsLandmarkLabel": "Lista nedavnih datoteka"
+  },
+  "welcomeScreen": {
+    "landmarkLabel": "Dobrodošli"
+  },
+  "menuBar": {
+    "new": "Novo",
+    "open": "Otvori",
+    "edit": "Uredi",
+    "view": "Prikaz",
+    "help": "Pomoć",
+    "undo": "Opozovi",
+    "redo": "Ponovi",
+    "cut": "Iseci",
+    "copy": "Kopiraj",
+    "paste": "Nalepi",
+    "find": "Pronađi",
+    "replace": "Zameni",
+    "toggleSidebar": "Prebaci bočnu traku",
+    "toggleResponsePanel": "Prebaci panel odgovora",
+    "zoomIn": "Uvećaj",
+    "zoomOut": "Umanji",
+    "resetZoom": "Resetuj uvećanje",
+    "settings": "Podešavanja",
+    "toggleDevTools": "Prebaci razvojne alate",
+    "toggleFullscreen": "Prebaci pun ekran",
+    "about": "O aplikaciji",
+    "documentation": "Dokumentacija",
+    "keyboardShortcuts": "Prečice na tastaturi",
+    "releaseNotes": "Napomene o izdanju",
+    "reportIssue": "Prijavi problem"
+  },
+  "settings": {
+    "title": "Podešavanja",
+    "theme": "Tema",
+    "language": "Jezik",
+    "searchPlaceholder": "Pretraži podešavanja...",
+    "noResults": "Nije pronađeno nijedno podešavanje.",
+    "numberOutOfRange": "Vrednost mora biti između {{min}} i {{max}}.",
+    "resetSetting": "Resetuj podešavanje",
+    "copySettingId": "Kopiraj ID podešavanja",
+    "settingOptions": "Opcije podešavanja",
+    "scopeTabsLabel": "Opseg podešavanja",
+    "userOnlyHidden": "{{count}} korisničkih podešavanja je sakriveno na ovoj kartici.",
+    "scope": {
+      "user": "Korisnik",
+      "workspace": "Radni prostor",
+      "workspaceDisabledTooltip": "Otvorite projekat da biste uređivali podešavanja radnog prostora"
+    },
+    "appearance": {
+      "title": "Izgled",
+      "theme": {
+        "title": "Tema",
+        "description": "Izaberi temu boja aplikacije"
+      },
+      "language": {
+        "title": "Jezik",
+        "description": "Izaberi jezik aplikacije",
+        "en": "English",
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "pt": "Português",
+        "nl": "Nederlands",
+        "sv": "Svenska",
+        "da": "Dansk",
+        "nb": "Norsk bokmål",
+        "fi": "Suomi",
+        "pl": "Polski",
+        "cs": "Čeština",
+        "hu": "Magyar",
+        "ro": "Română",
+        "el": "Ελληνικά",
+        "uk": "Українська",
+        "hr": "Hrvatski",
+        "sr": "Srpski",
+        "sq": "Shqip",
+        "tr": "Türkçe",
+        "id": "Bahasa Indonesia",
+        "vi": "Tiếng Việt",
+        "ja": "日本語",
+        "ko": "한국어",
+        "zh-CN": "简体中文",
+        "zh-TW": "繁體中文"
+      },
+      "advancedVisualEffects": {
+        "title": "Napredni vizuelni efekti",
+        "description": "Omogući napredne vizuelne efekte kao što su zamućenje pozadine na slojevima i CSS animacije. Onemogući za bolje performanse na slabijem hardveru."
+      },
+      "editor": {
+        "title": "Editor",
+        "fontSize": {
+          "title": "Veličina fonta",
+          "description": "Kontroliše veličinu fonta u pikselima za editor koda"
+        },
+        "fontFamily": {
+          "title": "Familija fonta",
+          "description": "Kontroliše familiju fonta za editor koda"
+        },
+        "wordWrap": {
+          "title": "Prelom reči",
+          "description": "Kontroliše da li redovi treba da se prelamaju u editoru koda"
+        },
+        "minimap": {
+          "title": "Minimapa",
+          "description": "Kontroliše da li je minimapa prikazana u editoru koda"
+        },
+        "lineNumbers": {
+          "title": "Brojevi redova",
+          "description": "Kontroliše da li su brojevi redova prikazani u editoru koda"
+        }
+      }
+    },
+    "files": {
+      "title": "Datoteke",
+      "autoSave": {
+        "title": "Automatsko čuvanje",
+        "description": "Kontroliše automatsko čuvanje izmenjenih editora. Pročitajte više o automatskom čuvanju u dokumentaciji.",
+        "off": "Isključeno",
+        "afterDelay": "Posle odlaganja",
+        "onWindowChange": "Pri promeni prozora"
+      },
+      "autoSaveDelay": {
+        "title": "Odlaganje automatskog čuvanja",
+        "description": "Kontroliše odlaganje u milisekundama nakon kojeg se izmenjeni editor automatski čuva. Primenjuje se samo kada je Automatsko čuvanje postavljeno na Posle odlaganja."
+      }
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Idi na definiciju"
+  },
+  "tagsView": {
+    "removeTag": "Ukloni oznaku",
+    "newTag": "Nova oznaka"
+  },
+  "contextMenu": {
+    "cut": "Iseci",
+    "copy": "Kopiraj",
+    "paste": "Nalepi"
+  },
+  "search": {
+    "placeholder": "Pretraži...",
+    "noResults": "Nema rezultata",
+    "resultsAriaLabel": "Rezultati pretrage",
+    "categories": {
+      "request": "HTTP zahtevi",
+      "folder": "Fascikle",
+      "environment": "Okruženja",
+      "settings": "Podešavanja",
+      "tag": "Oznake"
+    }
+  },
+  "iconSelect": {
+    "searchEmojis": "Pretraži emoji...",
+    "noEmojisFound": "Nije pronađen nijedan emoji",
+    "searchCodicons": "Pretraži Codicons...",
+    "searchIconoir": "Pretraži Iconoir...",
+    "searchPhosphor": "Pretraži Phosphor...",
+    "searchMaterial": "Pretraži Material...",
+    "searchSimpleIcons": "Pretraži Simple Icons...",
+    "searchFeather": "Pretraži Feather...",
+    "searchFontAwesome": "Pretraži Font Awesome...",
+    "moreIcons": "+{{count}} dodatnih ikona. Koristite pretragu da pronađete specifične ikone.",
+    "more": "+{{count}} više. Koristite pretragu da pronađete specifične ikone.",
+    "noIconsFound": "Nije pronađena nijedna ikona",
+    "searchResults": "Rezultati pretrage",
+    "categories": {
+      "files": "Datoteke",
+      "git": "Git",
+      "debug": "Otklanjanje grešaka",
+      "symbols": "Simboli",
+      "arrows": "Strelice",
+      "ui": "UI",
+      "media": "Mediji",
+      "editing": "Uređivanje",
+      "terminal": "Terminal",
+      "people": "Ljudi",
+      "notifications": "Obaveštenja",
+      "brands": "Brendovi",
+      "communication": "Komunikacija",
+      "users": "Korisnici",
+      "business": "Posao",
+      "medical": "Medicina",
+      "transport": "Prevoz",
+      "weather": "Vreme",
+      "shapes": "Oblici",
+      "design": "Dizajn",
+      "devices": "Uređaji",
+      "buildings": "Zgrade",
+      "nature": "Priroda",
+      "food": "Hrana",
+      "sport": "Sport",
+      "sports": "Sportovi",
+      "animals": "Životinje",
+      "tools": "Alati"
+    },
+    "emojiCategories": {
+      "people": "Smajliji i ljudi",
+      "nature": "Životinje i priroda",
+      "food": "Hrana i piće",
+      "activity": "Aktivnosti",
+      "travel": "Putovanja i mesta",
+      "objects": "Predmeti",
+      "symbols": "Simboli",
+      "flags": "Zastave"
+    }
+  },
+  "dateTimePicker": {
+    "ariaLabel": "Birač datuma/vremena",
+    "openCalendar": "Otvori kalendar",
+    "previousYear": "Prethodna godina",
+    "nextYear": "Sledeća godina",
+    "previousMonth": "Prethodni mesec",
+    "nextMonth": "Sledeći mesec",
+    "selectMonth": "Izaberi mesec",
+    "selectYear": "Izaberi godinu",
+    "includeTime": "Uključi vreme",
+    "hours": "Sati",
+    "minutes": "Minuti",
+    "output": "Izlaz",
+    "pattern": "Obrazac",
+    "outputModes": {
+      "pattern": "Obrazac",
+      "unix": "Unix (s)",
+      "epoch": "Epoch (ms)",
+      "iso": "ISO 8601"
+    },
+    "preview": "Pregled",
+    "tokens": {
+      "S": "milisekunda, bez popune",
+      "SSS": "milisekunda, popunjena na 3",
+      "u": "delimične sekunde, funkcionalno identično SSS",
+      "uu": "delimične sekunde, između 0 i 99, popunjeno na 2",
+      "uuu": "delimične sekunde, između 0 i 9",
+      "s": "sekunda, bez popune",
+      "ss": "sekunda, popunjena na 2",
+      "m": "minut, bez popune",
+      "mm": "minut, popunjen na 2",
+      "h": "sat u 12-časovnom vremenu, bez popune",
+      "hh": "sat u 12-časovnom vremenu, popunjen na 2",
+      "H": "sat u 24-časovnom vremenu, bez popune",
+      "HH": "sat u 24-časovnom vremenu, popunjen na 2",
+      "Z": "uski offset",
+      "ZZ": "kratak offset",
+      "ZZZ": "tehnički offset",
+      "ZZZZ": "skraćeni imenovani offset",
+      "ZZZZZ": "neskraćeni imenovani offset",
+      "z": "IANA zona",
+      "a": "AM/PM",
+      "d": "dan u mesecu, bez popune",
+      "dd": "dan u mesecu, popunjen na 2",
+      "c": "dan u nedelji, kao broj od 1-7 (ponedeljak je 1, nedelja je 7)",
+      "ccc": "dan u nedelji, kao skraćen lokalizovan niz",
+      "cccc": "dan u nedelji, kao neskraćen lokalizovan niz",
+      "ccccc": "dan u nedelji, kao jedno lokalizovano slovo",
+      "L": "mesec kao nepopunjen broj",
+      "LL": "mesec kao popunjen broj",
+      "LLL": "mesec kao skraćen lokalizovan niz",
+      "LLLL": "mesec kao neskraćen lokalizovan niz",
+      "LLLLL": "mesec kao jedno lokalizovano slovo",
+      "y": "godina, nepopunjena",
+      "yy": "dvocifrena godina",
+      "yyyy": "godina od četiri do šest cifara, popunjena na 4",
+      "G": "skraćena lokalizovana era",
+      "GG": "neskraćena lokalizovana era",
+      "GGGGG": "lokalizovana era sa jednim slovom",
+      "kk": "ISO godina nedelje, nepopunjena",
+      "kkkk": "ISO godina nedelje, popunjena na 4",
+      "W": "ISO broj nedelje, nepopunjen",
+      "WW": "ISO broj nedelje, popunjen na 2",
+      "ii": "lokalna godina nedelje, nepopunjena",
+      "iiii": "lokalna godina nedelje, popunjena na 4",
+      "n": "lokalni broj nedelje, nepopunjen",
+      "nn": "lokalni broj nedelje, popunjen na 2",
+      "o": "redni (dan u godini), nepopunjen",
+      "ooo": "redni (dan u godini), popunjen na 3",
+      "q": "kvartal, bez popune",
+      "qq": "kvartal, popunjen na 2",
+      "D": "lokalizovan numerički datum",
+      "DD": "lokalizovan datum sa skraćenim mesecom",
+      "DDD": "lokalizovan datum sa punim mesecom",
+      "DDDD": "lokalizovan datum sa punim mesecom i danom u nedelji",
+      "t": "lokalizovano vreme",
+      "tt": "lokalizovano vreme sa sekundama",
+      "ttt": "lokalizovano vreme sa sekundama i skraćenim offsetom",
+      "tttt": "lokalizovano vreme sa sekundama i punim offsetom",
+      "T": "lokalizovano 24-časovno vreme",
+      "TT": "lokalizovano 24-časovno vreme sa sekundama",
+      "TTT": "lokalizovano 24-časovno vreme sa sekundama i skraćenim offsetom",
+      "TTTT": "lokalizovano 24-časovno vreme sa sekundama i punim offsetom",
+      "f": "kratak lokalizovan datum i vreme",
+      "ff": "manje kratak lokalizovan datum i vreme",
+      "fff": "detaljan lokalizovan datum i vreme",
+      "ffff": "veoma detaljan lokalizovan datum i vreme",
+      "F": "kratak lokalizovan datum i vreme sa sekundama",
+      "FF": "manje kratak lokalizovan datum i vreme sa sekundama",
+      "FFF": "detaljan lokalizovan datum i vreme sa sekundama",
+      "FFFF": "veoma detaljan lokalizovan datum i vreme sa sekundama",
+      "X": "unix timestamp u sekundama",
+      "x": "unix timestamp u milisekundama"
+    }
+  }
+}

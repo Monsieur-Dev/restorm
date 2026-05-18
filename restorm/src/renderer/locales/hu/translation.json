@@ -1,0 +1,620 @@
+{
+  "app": {
+    "title": "restorm",
+    "openSettings": "Beállítások megnyitása",
+    "draftsRestoredTitle": "Mentetlen munka helyreállítva",
+    "draftsRestoredBody_one": "{{count}} piszkozat lett helyreállítva az előző munkamenetből.",
+    "draftsRestoredBody_other": "{{count}} piszkozat lett helyreállítva az előző munkamenetből."
+  },
+  "statusbar": {
+    "requestHistory": "Kérések előzményei",
+    "envSelector": {
+      "applyToAll": "Alkalmazás az összes kérésre"
+    }
+  },
+  "authFailureToast": {
+    "title": "Hitelesítés sikertelen",
+    "fallbackReason": "A hitelesítési kérés nem járt sikerrel.",
+    "openAuthRoute": "Hitelesítési útvonal megnyitása"
+  },
+  "menuBar": {
+    "file": "Fájl",
+    "new": "Új",
+    "import": "Importálás",
+    "open": "Megnyitás",
+    "openFolder": "Mappa megnyitása",
+    "recentFiles": "Legutóbbi fájlok",
+    "favorites": "Kedvencek",
+    "close": "Bezárás",
+    "save": "Mentés",
+    "saveAll": "Összes mentése",
+    "saveAs": "Mentés másként",
+    "exit": "Kilépés",
+    "selection": "Kijelölés",
+    "tools": "Eszközök",
+    "findInCollection": "Keresés a gyűjteményben",
+    "addRequest": "Kérés hozzáadása",
+    "addRequestHttp": "HTTP-kérés",
+    "addRequestGraphql": "GraphQL-kérés",
+    "addRequestGrpc": "gRPC-kérés",
+    "addRequestSoap": "SOAP-kérés",
+    "addRequestOdata": "OData-kérés",
+    "addRequestWebsocket": "WebSocket-kérés",
+    "addFolder": "Mappa hozzáadása",
+    "addEnvironmentFolder": "Környezeti mappa hozzáadása",
+    "addVariable": "Változó hozzáadása",
+    "addTag": "Címke hozzáadása",
+    "expandAllFolders": "Összes mappa kibontása",
+    "collapseAllFolders": "Összes mappa összecsukása",
+    "sendActiveRequest": "Kérés küldése",
+    "cancelActiveRequest": "Kérés megszakítása",
+    "generateCodeSnippet": "Kódrészlet generálása",
+    "copyAsCurl": "Másolás cURL-ként",
+    "exportOpenApi": "Exportálás OpenAPI-ba",
+    "clearAuthCache": "Hitelesítési gyorsítótár ürítése",
+    "openLogsFolder": "Naplók mappa megnyitása"
+  },
+  "sidebar": {
+    "addRequest": "Kérés hozzáadása",
+    "collapseAll": "Összes kérés összecsukása",
+    "workspace": "Munkaterület",
+    "favorites": "Kedvencek",
+    "newFolder": "Új mappa",
+    "newEnvironmentFolder": "Új környezeti mappa",
+    "contextMenu": {
+      "createFolder": "Mappa létrehozása",
+      "createEnvironmentFolder": "Környezeti mappa létrehozása",
+      "delete": "Törlés",
+      "clone": "Klónozás",
+      "rename": "Átnevezés",
+      "addToFavorites": "Hozzáadás a kedvencekhez",
+      "removeFromFavorites": "Eltávolítás a kedvencekből",
+      "closeTab": "Bezárás",
+      "closeOtherTabs": "Többi bezárása",
+      "closeTabsToTheRight": "Bezárás jobbra",
+      "closeAllTabs": "Összes bezárása",
+      "add": {
+        "title": "Hozzáadás",
+        "folder": "Mappa",
+        "httpGet": "HTTP – GET kérés",
+        "httpPost": "HTTP – POST kérés",
+        "httpPut": "HTTP – PUT kérés",
+        "httpPatch": "HTTP – PATCH kérés",
+        "httpDelete": "HTTP – DELETE kérés",
+        "graphql": "GraphQL-kérés",
+        "grpc": "gRPC-kérés",
+        "soap": "SOAP-kérés",
+        "websocket": "WebSocket-kérés",
+        "odata": "OData-kérés",
+        "auth": "HTTP-hitelesítési kérés"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Törlés megerősítése",
+      "folderMessage": "Biztosan törölni szeretné a(z) \"{{name}}\" mappát és annak teljes tartalmát?",
+      "itemMessage": "Biztosan törölni szeretné a(z) \"{{name}}\" elemet?",
+      "confirm": "Törlés",
+      "cancel": "Mégse"
+    }
+  },
+  "environment": {
+    "newName": "Új környezet",
+    "add": "Környezet hozzáadása",
+    "rename": "Átnevezés",
+    "addSub": "Alkörnyezet hozzáadása",
+    "delete": "Törlés"
+  },
+  "folderView": {
+    "environments": "Környezetek",
+    "environmentsAriaLabel": "Mappa környezetei",
+    "variables": "Változók",
+    "addVariable": "Változósor hozzáadása",
+    "selectEnvironment": "Válasszon egy környezetet a változók megtekintéséhez",
+    "tabs": {
+      "docs": "Dokumentáció",
+      "configuration": "Konfiguráció",
+      "notes": "Jegyzetek"
+    },
+    "home": {
+      "configureEnvs": "Környezetek konfigurálása",
+      "configureEnvsDesc": "Állítsa be az alap URL-eket, változókat és a hitelesítést minden környezethez",
+      "viewDocs": "Dokumentáció megtekintése",
+      "viewDocsDesc": "Böngéssze az API dokumentációját, modelljeit és végpontjait",
+      "favoriteRequests": "Kedvenc kérések",
+      "removeFavorite": "Eltávolítás a kedvencekből",
+      "apiUpdate": {
+        "title": "API-specifikáció frissítései",
+        "noConfig": "Ez a mappa nem importálható forrásból jött létre.",
+        "urlLabel": "URL",
+        "lastImportedLabel": "Utolsó importálás",
+        "lastCheckedLabel": "Utolsó ellenőrzés",
+        "neverImported": "Soha nem importálva",
+        "neverChecked": "Soha nem ellenőrizve",
+        "refreshing": "API-specifikáció frissítése…",
+        "fetching": "Letöltés…",
+        "upToDate": "Az API-specifikáció naprakész.",
+        "ok": "OK"
+      }
+    },
+    "contextVariables": {
+      "title": "Elérhető környezeti változók",
+      "description": "Használja ezeket a változókat a kérés URL-jeiben és a kifejezés típusú változókban a {{handlebars}} szintaxissal.",
+      "name": "Változó",
+      "value": "Feloldott érték",
+      "copied": "Másolva!"
+    }
+  },
+  "requestTab": {
+    "deprecated": "Ez a végpont elavult, és egy későbbi verzióban eltávolításra kerülhet.",
+    "send": "Küldés",
+    "cancel": "Megszakítás",
+    "urlPlaceholder": "Kérés URL-je",
+    "methodSelect": "HTTP-metódus kiválasztása",
+    "addHeader": "Fejléc hozzáadása",
+    "addParam": "Paraméter hozzáadása",
+    "environmentSelector": {
+      "noEnvironment": "Nincs környezet"
+    },
+    "body": {
+      "fileLabel": "Fájl vagy URL:",
+      "browse": "Tallózás..."
+    },
+    "tabs": {
+      "docs": "Dokumentáció",
+      "requestLayout": "Kérés",
+      "headers": "Fejlécek",
+      "body": "Törzs",
+      "params": "Paraméterek",
+      "pathParams": "Útvonal-paraméterek",
+      "notes": "Jegyzetek",
+      "codeSnippets": "Kódrészletek",
+      "responsesHistory": "Válaszok előzményei"
+    },
+    "responses": {
+      "tabs": {
+        "response": "Válasz",
+        "requestBody": "Kérés törzse",
+        "graph": "Grafikon"
+      },
+      "loading": "Kérés küldése...",
+      "noResponse": "Kattintson a Küldés gombra a kérés végrehajtásához",
+      "history": {
+        "list": "Válaszok előzménylistája",
+        "empty": "Még nincsenek rögzített válaszok",
+        "select": "Válasszon egy választ a részletek megtekintéséhez",
+        "pin": "Válasz rögzítése",
+        "unpin": "Rögzítés feloldása"
+      }
+    }
+  },
+  "workbench": {
+    "tabContextMenu": {
+      "close": "Bezárás",
+      "closeOthers": "Többi bezárása",
+      "addToFavorites": "Hozzáadás a kedvencekhez",
+      "removeFromFavorites": "Eltávolítás a kedvencekből"
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Ugrás a definícióhoz"
+  },
+  "keyValueTable": {
+    "types": {
+      "string": "Karakterlánc",
+      "secret": "Titok",
+      "number": "Szám",
+      "dateTime": "Dátum és idő",
+      "color": "Szín",
+      "expression": "Kifejezés",
+      "boolean": "Logikai"
+    },
+    "apiEnums": "API által definiált típusok"
+  },
+  "graphql": {
+    "send": "Küldés",
+    "urlPlaceholder": "GraphQL-végpont URL-je",
+    "tabs": {
+      "query": "Lekérdezés",
+      "variables": "Változók",
+      "headers": "Fejlécek"
+    }
+  },
+  "grpc": {
+    "send": "Hívás",
+    "urlPlaceholder": "gRPC-szerver (gazdagép:port)",
+    "tabs": {
+      "message": "Üzenet",
+      "metadata": "Metaadatok"
+    }
+  },
+  "soap": {
+    "send": "Küldés",
+    "urlPlaceholder": "SOAP-végpont URL-je",
+    "tabs": {
+      "body": "Törzs",
+      "headers": "Fejlécek"
+    }
+  },
+  "websocket": {
+    "connect": "Csatlakozás",
+    "connected": "Csatlakoztatva",
+    "disconnected": "Lecsatlakozva",
+    "noMessages": "Még nincsenek üzenetek",
+    "urlPlaceholder": "WebSocket URL",
+    "event": "Esemény",
+    "topic": "Téma",
+    "tabs": {
+      "message": "Üzenet",
+      "headers": "Fejlécek"
+    }
+  },
+  "search": {
+    "placeholder": "Keresés...",
+    "noResults": "Nincs találat",
+    "resultsAriaLabel": "Keresési eredmények",
+    "categories": {
+      "request": "Kérések",
+      "folder": "Mappák",
+      "environment": "Környezetek",
+      "settings": "Beállítások",
+      "tag": "Címkék"
+    },
+    "tooltip": {
+      "noDetails": "Nincs elérhető részlet",
+      "noContent": "Nincs dokumentáció vagy jegyzet"
+    }
+  },
+  "httpStatus": {
+    "100": {
+      "name": "Continue",
+      "description": "A szerver megkapta a kérés fejléceit, és a kliensnek folytatnia kell a kérés törzsének küldését."
+    },
+    "101": {
+      "name": "Switching Protocols",
+      "description": "A kérelmező arra kérte a szervert, hogy váltson protokollt, és a szerver beleegyezett."
+    },
+    "200": {
+      "name": "OK",
+      "description": "Standard válasz a sikeres HTTP-kérésekre. A tényleges válasz a használt kéréstípustól függ."
+    },
+    "201": {
+      "name": "Created",
+      "description": "A kérés teljesült, és új erőforrás jött létre."
+    },
+    "202": {
+      "name": "Accepted",
+      "description": "A kérés feldolgozásra elfogadásra került, de a feldolgozás még nem fejeződött be."
+    },
+    "204": {
+      "name": "No Content",
+      "description": "A szerver sikeresen feldolgozta a kérést, de nem küld vissza tartalmat."
+    },
+    "301": {
+      "name": "Moved Permanently",
+      "description": "Ezt és minden további kérést a megadott URI-re kell irányítani."
+    },
+    "302": {
+      "name": "Found",
+      "description": "Arra utasítja a klienst, hogy nézzen meg egy másik URL-t. A HTTP/1.0 specifikáció ideiglenes átirányítást írt elő a kliens számára."
+    },
+    "304": {
+      "name": "Not Modified",
+      "description": "Jelzi, hogy az erőforrás nem módosult a kérés fejléceiben megadott verzió óta."
+    },
+    "400": {
+      "name": "Bad Request",
+      "description": "A szerver nem tudja vagy nem fogja feldolgozni a kérést egy nyilvánvaló kliensoldali hiba miatt (pl. hibás kérésszintaxis)."
+    },
+    "401": {
+      "name": "Unauthorized",
+      "description": "Hitelesítés szükséges, amely sikertelen vagy még nem történt meg."
+    },
+    "403": {
+      "name": "Forbidden",
+      "description": "A kérés érvényes adatokat tartalmazott, és a szerver megértette, de a szerver megtagadja a műveletet."
+    },
+    "404": {
+      "name": "Not Found",
+      "description": "A kért erőforrás nem található, de a jövőben elérhetővé válhat."
+    },
+    "405": {
+      "name": "Method Not Allowed",
+      "description": "A kéréstípus nem támogatott a kért erőforráshoz."
+    },
+    "408": {
+      "name": "Request Timeout",
+      "description": "A szerver túllépte az időkorlátot a kérésre várva."
+    },
+    "409": {
+      "name": "Conflict",
+      "description": "Jelzi, hogy a kérést nem lehetett feldolgozni az erőforrás aktuális állapotában lévő ütközés miatt."
+    },
+    "410": {
+      "name": "Gone",
+      "description": "Jelzi, hogy a kért erőforrás korábban használatban volt, de már nem érhető el, és nem is lesz újra elérhető."
+    },
+    "415": {
+      "name": "Unsupported Media Type",
+      "description": "A kérés entitásának olyan médiatípusa van, amelyet a szerver vagy az erőforrás nem támogat."
+    },
+    "422": {
+      "name": "Unprocessable Entity",
+      "description": "A kérés jól formált volt, de szemantikai hibák miatt nem volt követhető."
+    },
+    "429": {
+      "name": "Too Many Requests",
+      "description": "A felhasználó túl sok kérést küldött egy adott időtartam alatt (sebességkorlátozás)."
+    },
+    "500": {
+      "name": "Internal Server Error",
+      "description": "Általános hibaüzenet, amelyet akkor adnak, ha váratlan állapot következett be, és nincs ennél specifikusabb üzenet."
+    },
+    "501": {
+      "name": "Not Implemented",
+      "description": "A szerver vagy nem ismeri fel a kéréstípust, vagy nem képes teljesíteni a kérést."
+    },
+    "502": {
+      "name": "Bad Gateway",
+      "description": "A szerver átjáróként vagy proxyként működött, és érvénytelen választ kapott a felsőbb szintű szervertől."
+    },
+    "503": {
+      "name": "Service Unavailable",
+      "description": "A szerver nem tudja kezelni a kérést (mert túlterhelt vagy karbantartás alatt áll)."
+    },
+    "504": {
+      "name": "Gateway Timeout",
+      "description": "A szerver átjáróként vagy proxyként működött, és nem kapott időben választ a felsőbb szintű szervertől."
+    }
+  },
+  "welcome": {
+    "confirmRemoveFavorite": "Biztosan eltávolítja a(z) \"{{fileName}}\" elemet a kedvencek közül?",
+    "noFilesHint": "Nyisson meg egy fájlt vagy hozzon létre egy újat a kezdéshez",
+    "newAriaLabel": "Új gyűjtemény létrehozása",
+    "openAriaLabel": "Gyűjtemény megnyitása lemezről",
+    "landmarkLabel": "Üdvözöljük"
+  },
+  "save": {
+    "title": "Mentési beállítások",
+    "mode": {
+      "label": "Mentési mód",
+      "file": "Egy fájl",
+      "folder": "Mappastruktúra",
+      "fileDescription": "Minden mentése egyetlen fájlba",
+      "folderDescription": "Mentés mappastruktúraként, külön fájlokkal"
+    },
+    "format": {
+      "label": "Formátum",
+      "yamlDescription": "Ember számára olvasható",
+      "jsonDescription": "Szabványos formátum",
+      "json5Description": "JSON + megjegyzések"
+    },
+    "preview": {
+      "label": "Struktúra előnézete",
+      "noDocumentation": "Ehhez a forráshoz nincs elemzett dokumentáció."
+    }
+  },
+  "common": {
+    "cancel": "Mégse",
+    "save": "Mentés"
+  },
+  "helpers": {
+    "categories": {
+      "comparison": "Összehasonlítás",
+      "string": "Karakterlánc",
+      "math": "Matematika",
+      "array": "Tömb",
+      "object": "Objektum",
+      "url": "URL",
+      "date": "Dátum",
+      "regex": "Regex",
+      "misc": "Egyéb"
+    },
+    "eq": "Szigorú egyenlőség (===)",
+    "ne": "Szigorú egyenlőtlenség (!==)",
+    "neq": "Szigorú egyenlőtlenség (!==)",
+    "lt": "Kisebb mint (<)",
+    "lte": "Kisebb vagy egyenlő (<=)",
+    "gt": "Nagyobb mint (>)",
+    "gte": "Nagyobb vagy egyenlő (>=)",
+    "and": "Blokk-segéd: megjelenik, ha minden érték igaz",
+    "or": "Blokk-segéd: megjelenik, ha bármely érték igaz",
+    "not": "Visszaadja a fordított logikai értéket",
+    "ifEquals": "Blokk-segéd: megjelenik, ha az értékek egyenlők",
+    "is": "Blokk-segéd: laza egyenlőség-összehasonlítás",
+    "isnt": "Blokk-segéd: laza egyenlőtlenség-összehasonlítás",
+    "default": "Visszaadja az alapértelmezett értéket, ha az első null/undefined",
+    "compare": "Blokk-segéd: összehasonlítás operátorral",
+    "lowercase": "A karakterláncot kisbetűsre alakítja",
+    "uppercase": "A karakterláncot nagybetűsre alakítja",
+    "capitalize": "Az első betűt nagybetűre váltja",
+    "capitalizeAll": "Minden szó első betűjét nagybetűre váltja",
+    "titleize": "Minden szó első betűjét nagybetűre váltja",
+    "camelcase": "Átalakítás camelCase-be",
+    "pascalcase": "Átalakítás PascalCase-be",
+    "snakecase": "Átalakítás snake_case-be",
+    "snakeCase": "Átalakítás snake_case-be (alias)",
+    "dashcase": "Átalakítás dash-case-be (kebab-case)",
+    "dotcase": "Átalakítás dot.case-be",
+    "pathcase": "Átalakítás path/case-be",
+    "sentencecase": "Átalakítás mondatformátumba",
+    "slugify": "Átalakítás URL-barát sluggá",
+    "trim": "Eltávolítja a szóközöket mindkét végéről",
+    "trimLeft": "Eltávolítja a szóközöket az elejéről",
+    "trimRight": "Eltávolítja a szóközöket a végéről",
+    "replace": "Az a minden előfordulását b-re cseréli",
+    "split": "Karakterláncot tömbre bont",
+    "truncate": "Lerövidíti a karakterláncot megadott hosszúságra",
+    "ellipsis": "Lerövidíti a karakterláncot három ponttal",
+    "append": "Utótagot fűz a karakterlánchoz",
+    "prepend": "Előtagot fűz a karakterlánchoz",
+    "reverse": "Megfordít egy karakterláncot vagy tömböt",
+    "startsWith": "Blokk-segéd: megjelenik, ha a karakterlánc az előtaggal kezdődik",
+    "endsWith": "Blokk-segéd: megjelenik, ha a karakterlánc az utótaggal végződik",
+    "contains": "Blokk-segéd: megjelenik, ha a karakterlánc tartalmazza a részkifejezést",
+    "padStart": "Kiegészíti a karakterláncot az elején a megadott hosszúságig",
+    "padEnd": "Kiegészíti a karakterláncot a végén a megadott hosszúságig",
+    "repeat": "Megismétli a karakterláncot n-szer",
+    "substring": "Kivonja a karakterlánc egy részét",
+    "indexOf": "Visszaadja a részkifejezés indexét (-1, ha nem található)",
+    "count": "Megszámolja a részkifejezés előfordulásait",
+    "newLineToBr": "Új sorokat <br> címkékre alakít",
+    "stripTags": "Eltávolítja a HTML-címkéket a karakterláncból",
+    "add": "Két számot összead",
+    "subtract": "Kivonja b-t a-ból",
+    "multiply": "Két számot összeszoroz",
+    "divide": "Elosztja a-t b-vel",
+    "modulo": "Visszaadja a / b maradékát",
+    "abs": "Visszaadja az abszolút értéket",
+    "ceil": "Felfelé kerekít a legközelebbi egészre",
+    "floor": "Lefelé kerekít a legközelebbi egészre",
+    "round": "Kerekít a legközelebbi egészre",
+    "min": "Visszaadja a minimális értéket",
+    "max": "Visszaadja a maximális értéket",
+    "pow": "Visszaadja az alapot a kitevőre emelve",
+    "sqrt": "Visszaadja a négyzetgyököt",
+    "random": "Visszaad egy véletlen egész számot min és max között",
+    "sum": "Visszaadja a tömb értékeinek összegét",
+    "avg": "Visszaadja a tömb értékeinek átlagát",
+    "toFixed": "Számot formáz fix tizedesjegyekkel",
+    "toInt": "Átalakít egész számra",
+    "toFloat": "Átalakít lebegőpontos számra",
+    "first": "Visszaadja a tömb első elemét (elemeit)",
+    "last": "Visszaadja a tömb utolsó elemét (elemeit)",
+    "after": "Visszaadja az n indexet követő elemeket",
+    "before": "Visszaadja az n index előtti elemeket",
+    "slice": "Visszaad egy szeletet a tömbből",
+    "length": "Visszaadja a tömb/karakterlánc/objektum hosszát",
+    "join": "Tömbelemeket egyesít elválasztóval",
+    "sort": "Rendezi a tömböt",
+    "unique": "Visszaadja az egyedi értékeket",
+    "concat": "Összefűz tömböket",
+    "flatten": "Egymásba ágyazott tömböt laposít",
+    "pluck": "Tulajdonságot von ki objektumok tömbjéből",
+    "itemAt": "Visszaadja az indexen lévő elemet",
+    "inArray": "Blokk-segéd: megjelenik, ha az érték a tömbben van",
+    "isArray": "Igaz, ha az érték tömb",
+    "isEmpty": "Blokk-segéd: megjelenik, ha az érték üres",
+    "some": "Blokk-segéd: megjelenik, ha néhány elem megfelel",
+    "every": "Blokk-segéd: megjelenik, ha minden elem megfelel",
+    "JSONstringify": "Objektumot JSON-karakterlánccá alakít",
+    "JSONparse": "JSON-karakterláncot objektummá alakít",
+    "get": "Beágyazott tulajdonságot kér le útvonal alapján",
+    "keys": "Visszaadja az objektum kulcsait",
+    "values": "Visszaadja az objektum értékeit",
+    "entries": "Visszaadja a [kulcs, érték] párokat",
+    "hasOwn": "Blokk-segéd: megjelenik, ha az objektumnak van ilyen tulajdonsága",
+    "pick": "Objektumot hoz létre a kiválasztott kulcsokkal",
+    "omit": "Objektumot hoz létre a megadott kulcsok nélkül",
+    "merge": "Több objektumot egyesít",
+    "isObject": "Igaz, ha az érték objektum",
+    "typeOf": "Visszaadja az érték típusát",
+    "encodeURI": "URL-kódolja a karakterláncot",
+    "decodeURI": "URL-dekódolja a karakterláncot",
+    "urlParse": "URL-t komponensekre bont",
+    "stripQuerystring": "Eltávolítja a query stringet az URL-ből",
+    "stripProtocol": "Eltávolítja a protokollt az URL-ből",
+    "now": "Visszaadja az aktuális dátumot ISO-karakterláncként",
+    "timestamp": "Visszaadja az aktuális időbélyeget ezredmásodpercben",
+    "year": "Visszaadja az aktuális évet",
+    "formatDate": "Dátumot formáz minta szerint",
+    "match": "Visszaadja a regex-találatokat",
+    "test": "Blokk-segéd: megjelenik, ha a regex egyezik",
+    "coalesce": "Visszaadja az első nem null/undefined értéket",
+    "uuid": "Véletlen UUID-t generál",
+    "noop": "Blokk-segéd, amely a tartalmat változatlanul jeleníti meg",
+    "raw": "Blokk-segéd, amely nyers tartalmat jelenít meg",
+    "times": "Blokk-segéd, amely n-szer ismétel",
+    "range": "Számok tömbjét generálja"
+  },
+  "behavior": {
+    "title": "Viselkedés",
+    "syncSidebarWithTabs": "Oldalsáv kijelölésének szinkronizálása az aktív füllel",
+    "syncSidebarWithTabsDescription": "Amikor a munkaterületen fület vált, automatikusan kijelöli és megjeleníti a megfelelő elemet az oldalsávon",
+    "dateTimeFormat": "Dátum/idő formátum",
+    "dateTimeFormatDescription": "A dátumok és időpontok megjelenítéséhez használt formátum az alkalmazásban",
+    "dateTimeFormat.us": "US-formátum (HH/NN/ÉÉÉÉ, 12 órás)",
+    "dateTimeFormat.iso": "ISO-formátum (ÉÉÉÉ-HH-NN, 24 órás)"
+  },
+  "console": {
+    "title": "Konzol",
+    "requestFormat": "Kérés formátuma",
+    "requestFormatDescription": "A Konzol fülön a kimenő kérések megjelenítéséhez használt alapértelmezett shell-stílus. Minden sor egy másolható-beilleszthető parancssor; a Konzol eszköztárában lévő váltó felülírja ezt az alapértelmezést az aktuális fülön.",
+    "requestFormat.curl": "curl (Unix-stílusú)",
+    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+  },
+  "import": {
+    "title": "Kérések importálása",
+    "source": {
+      "label": "Illesszen be valamit ide!",
+      "placeholder": "Adja meg a fájl elérési útját, URL-t, vagy illesszen be egy curl/PowerShell parancsot..."
+    },
+    "formats": {
+      "swagger": {
+        "description": "Az OpenAPI 2.0 specifikáció, amely a SmartBearnél született. Illesszen be egy Swagger JSON-t vagy YAML-t — a Restorm elemzi az összes műveletet, beolvassa a biztonsági sémákat, és a teljes dokumentumot egy navigálható kérés-fává alakítja.",
+        "trademark": "A Swagger a SmartBear Software bejegyzett védjegye."
+      },
+      "openapi": {
+        "description": "Az aktuális OpenAPI szabvány (3.0 és 3.1). Ugyanaz a beillesztős-ergonomia, mint a Swagger esetén: a paraméterek, kéréstörzsek, biztonsági sémák és webhookok típusos kérések fájában jelennek meg, küldésre kész példákkal.",
+        "trademark": "Az OpenAPI az OpenAPI Initiative projektje a Linux Foundation égisze alatt."
+      },
+      "curl": {
+        "description": "Már fut a kérés a termináljában? Illessze be a teljes curl-hívást — flagek, fejlécek, törzs, query string — és a Restorm valós kéréssé alakítja, amelyet újrafuttathat, szerkeszthet és rögzíthet.",
+        "trademark": "A curl nyílt forráskódú szoftver © Daniel Stenberg, itt a feltételei szerint használva."
+      },
+      "powershell": {
+        "description": "Ugyanaz az ötlet, PowerShell-ben. Illesszen be egy Invoke-WebRequest vagy Invoke-RestMethod parancsot, és a Restorm beolvassa az URI-t, a metódust, a fejléceket és a törzset, hogy létrehozzon egy vizuálisan szerkeszthető kérést.",
+        "trademark": "A PowerShell a Microsoft Corporation bejegyzett védjegye."
+      },
+      "postman": {
+        "description": "Van egy Postman-gyűjteménye a munkahelyén? Dobja be a JSON-t — a Restorm minden kérést, minden példaválaszt és minden környezeti változót beolvas, majd újraépíti a gyűjteményt Restorm-fává, amelyet a többi API mellett futtathat.",
+        "trademark": "A Postman a Postman, Inc. bejegyzett védjegye, itt kizárólag kompatibilitási hivatkozásként használva."
+      },
+      "insomnia": {
+        "description": "Insomniáról érkezik? Dobja be az exportját. A Restorm érti a v4 / v5 gyűjteményformátumát, minden kérést, fejlécet, törzset és környezetet áthoz, és Restorm-fában jeleníti meg.",
+        "trademark": "Az Insomnia a Kong Inc. bejegyzett védjegye, itt kizárólag kompatibilitási hivatkozásként használva."
+      },
+      "bruno": {
+        "description": "Bruno-stílusú .bru fájlok vagy mappa-export — a Restorm beolvassa a .bru szöveges formátumot, beleértve a szkriptblokkokat is, és minden kérést elsőosztályú Restorm-csomóponttá épít újra, küldésre készen.",
+        "trademark": "A Bruno nyílt forráskódú szoftver (MIT), Anoop M. D. által, itt a feltételei szerint használva."
+      },
+      "graphql": {
+        "description": "Illesszen be egy GraphQL SDL-t (.graphql / .gql / egy beillesztést a GraphQL-kliensből), és a Restorm műveletenként egy kérést állít fel, a megfelelő query / mutation / subscription típushoz kötve, már strukturált változókkal.",
+        "trademark": "A GraphQL a GraphQL Foundation védjegye, amely a Joint Development Foundation projektje."
+      },
+      "grpc": {
+        "description": "Dobjon be egy .proto fájlt (vagy egy mappát belőlük), és a Restorm végigjárja minden szolgáltatást, minden RPC-t, minden üzenetet — minden metódusból típusos kérést készít, amelyet a gRPC-végrehajtón keresztül küldhet, codegen érintése nélkül.",
+        "trademark": "A gRPC a Cloud Native Computing Foundation projektje."
+      },
+      "soap": {
+        "description": "Van egy WSDL-je? Illessze be (vagy az URL-jét) — a Restorm elemzi minden <port>-ot és <operation>-t, és küldésre kész SOAP-borítékokat hoz létre a megfelelő SOAPAction fejléccel, séma-típusos törzsvázakkal és a WSDL által deklarált hitelesítési sémával."
+      },
+      "websocket": {
+        "description": "Illesszen be egy WebSocket-végpontot (ws:// vagy wss://) — a Restorm megnyitja a kapcsolatot, elfogja a szerver hello-frame-jeit, és újrajátszható payload-sablonokkal létrehoz send / subscribe kéréseket.",
+        "trademark": "A WebSocket az IETF (RFC 6455) és a W3C által szabványosított protokoll."
+      },
+      "kafka": {
+        "description": "Illessze be egy Apache Kafka bootstrap-server URL-jét (vagy témák listáját) — a Restorm témánként consumereket és producereket regisztrál, Avro / Protobuf payloadokat dekódol a Schema Registryn keresztül, és lehetővé teszi az egyes offsetek egy kattintással történő újrajátszását.",
+        "trademark": "Az Apache Kafka és a Kafka logó az Apache Software Foundation védjegyei."
+      },
+      "socketio": {
+        "description": "Illessze be egy Socket.IO szerver URL-jét — a Restorm lebonyolítja a handshake-et, listázza a szerver által kibocsátott névtereket és eseményneveket, és emit / on eseményenként egy-egy kérést ad, payload-érvényesítéssel.",
+        "trademark": "A Socket.IO MIT-licenc alatt kiadott nyílt forráskódú könyvtár; a név és logó nominatív használatban."
+      },
+      "odata": {
+        "description": "Illessze be egy OData service-document URL-jét vagy egy $metadata fájlt — a Restorm beolvassa a CSDL-t, újraépíti az entity seteket, function importokat és action-öket, és minden műveletnél előre kitölti a $filter / $select / $top / $skip query opciókat."
+      },
+      "mqtt": {
+        "description": "Illessze be egy MQTT-bróker URL-jét vagy egy témakatalógust — a Restorm témánként publish / subscribe kéréseket állít fel, élőben tartja a kapcsolatot a streaming-előnézetekhez, és megjegyzi a megtartott üzenetek pillanatképeit, hogy később újrajátszhatók legyenek.",
+        "trademark": "Az MQTT egy OASIS szabvány; az MQTT név és logó az OASIS Open védjegyei."
+      }
+    },
+    "loading": "Elemzés...",
+    "noResults": "Nem található kérés",
+    "error": {
+      "unknown": "Ismeretlen hiba történt"
+    },
+    "ok": "Importálás",
+    "cancel": "Mégse",
+    "dropZone": "Bedobási terület"
+  }
+}

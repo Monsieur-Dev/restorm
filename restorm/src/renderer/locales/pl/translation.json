@@ -1,0 +1,622 @@
+{
+  "app": {
+    "title": "restorm",
+    "openSettings": "Otwórz ustawienia",
+    "draftsRestoredTitle": "Przywrócono niezapisaną pracę",
+    "draftsRestoredBody_one": "Przywrócono {{count}} brudnopis z poprzedniej sesji.",
+    "draftsRestoredBody_few": "Przywrócono {{count}} brudnopisy z poprzedniej sesji.",
+    "draftsRestoredBody_many": "Przywrócono {{count}} brudnopisów z poprzedniej sesji.",
+    "draftsRestoredBody_other": "Przywrócono {{count}} brudnopisu z poprzedniej sesji."
+  },
+  "statusbar": {
+    "requestHistory": "Historia żądań",
+    "envSelector": {
+      "applyToAll": "Zastosuj do wszystkich żądań"
+    }
+  },
+  "authFailureToast": {
+    "title": "Uwierzytelnianie nie powiodło się",
+    "fallbackReason": "Żądanie uwierzytelniania nie zostało zrealizowane.",
+    "openAuthRoute": "Otwórz trasę uwierzytelniania"
+  },
+  "menuBar": {
+    "file": "Plik",
+    "new": "Nowy",
+    "import": "Importuj",
+    "open": "Otwórz",
+    "openFolder": "Otwórz folder",
+    "recentFiles": "Ostatnie pliki",
+    "favorites": "Ulubione",
+    "close": "Zamknij",
+    "save": "Zapisz",
+    "saveAll": "Zapisz wszystko",
+    "saveAs": "Zapisz jako",
+    "exit": "Zakończ",
+    "selection": "Zaznaczenie",
+    "tools": "Narzędzia",
+    "findInCollection": "Znajdź w kolekcji",
+    "addRequest": "Dodaj żądanie",
+    "addRequestHttp": "Żądanie HTTP",
+    "addRequestGraphql": "Żądanie GraphQL",
+    "addRequestGrpc": "Żądanie gRPC",
+    "addRequestSoap": "Żądanie SOAP",
+    "addRequestOdata": "Żądanie OData",
+    "addRequestWebsocket": "Żądanie WebSocket",
+    "addFolder": "Dodaj folder",
+    "addEnvironmentFolder": "Dodaj folder środowisk",
+    "addVariable": "Dodaj zmienną",
+    "addTag": "Dodaj tag",
+    "expandAllFolders": "Rozwiń wszystkie foldery",
+    "collapseAllFolders": "Zwiń wszystkie foldery",
+    "sendActiveRequest": "Wyślij żądanie",
+    "cancelActiveRequest": "Anuluj żądanie",
+    "generateCodeSnippet": "Generuj fragment kodu",
+    "copyAsCurl": "Kopiuj jako cURL",
+    "exportOpenApi": "Eksportuj do OpenAPI",
+    "clearAuthCache": "Wyczyść pamięć podręczną uwierzytelniania",
+    "openLogsFolder": "Otwórz folder dzienników"
+  },
+  "sidebar": {
+    "addRequest": "Dodaj żądanie",
+    "collapseAll": "Zwiń wszystkie żądania",
+    "workspace": "Obszar roboczy",
+    "favorites": "Ulubione",
+    "newFolder": "Nowy folder",
+    "newEnvironmentFolder": "Nowy folder środowisk",
+    "contextMenu": {
+      "createFolder": "Utwórz folder",
+      "createEnvironmentFolder": "Utwórz folder środowisk",
+      "delete": "Usuń",
+      "clone": "Klonuj",
+      "rename": "Zmień nazwę",
+      "addToFavorites": "Dodaj do ulubionych",
+      "removeFromFavorites": "Usuń z ulubionych",
+      "closeTab": "Zamknij",
+      "closeOtherTabs": "Zamknij inne",
+      "closeTabsToTheRight": "Zamknij po prawej",
+      "closeAllTabs": "Zamknij wszystkie",
+      "add": {
+        "title": "Dodaj",
+        "folder": "Folder",
+        "httpGet": "Żądanie HTTP – GET",
+        "httpPost": "Żądanie HTTP – POST",
+        "httpPut": "Żądanie HTTP – PUT",
+        "httpPatch": "Żądanie HTTP – PATCH",
+        "httpDelete": "Żądanie HTTP – DELETE",
+        "graphql": "Żądanie GraphQL",
+        "grpc": "Żądanie gRPC",
+        "soap": "Żądanie SOAP",
+        "websocket": "Żądanie WebSocket",
+        "odata": "Żądanie OData",
+        "auth": "Żądanie uwierzytelniania HTTP"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Potwierdź usunięcie",
+      "folderMessage": "Czy na pewno chcesz usunąć folder „{{name}}” i całą jego zawartość?",
+      "itemMessage": "Czy na pewno chcesz usunąć „{{name}}”?",
+      "confirm": "Usuń",
+      "cancel": "Anuluj"
+    }
+  },
+  "environment": {
+    "newName": "Nowe środowisko",
+    "add": "Dodaj środowisko",
+    "rename": "Zmień nazwę",
+    "addSub": "Dodaj podśrodowisko",
+    "delete": "Usuń"
+  },
+  "folderView": {
+    "environments": "Środowiska",
+    "environmentsAriaLabel": "Środowiska folderu",
+    "variables": "Zmienne",
+    "addVariable": "Dodaj wiersz zmiennej",
+    "selectEnvironment": "Wybierz środowisko, aby wyświetlić zmienne",
+    "tabs": {
+      "docs": "Dokumentacja",
+      "configuration": "Konfiguracja",
+      "notes": "Notatki"
+    },
+    "home": {
+      "configureEnvs": "Skonfiguruj środowiska",
+      "configureEnvsDesc": "Skonfiguruj bazowe adresy URL, zmienne i uwierzytelnianie dla każdego środowiska",
+      "viewDocs": "Wyświetl dokumentację",
+      "viewDocsDesc": "Przeglądaj dokumentację API, modele i punkty końcowe",
+      "favoriteRequests": "Ulubione żądania",
+      "removeFavorite": "Usuń z ulubionych",
+      "apiUpdate": {
+        "title": "Aktualizacje specyfikacji API",
+        "noConfig": "Ten folder nie został utworzony z importowalnego źródła.",
+        "urlLabel": "URL",
+        "lastImportedLabel": "Ostatnio zaimportowano",
+        "lastCheckedLabel": "Ostatnio sprawdzono",
+        "neverImported": "Nigdy nie importowano",
+        "neverChecked": "Nigdy nie sprawdzano",
+        "refreshing": "Odświeżanie specyfikacji API…",
+        "fetching": "Pobieranie…",
+        "upToDate": "Specyfikacja API jest aktualna.",
+        "ok": "OK"
+      }
+    },
+    "contextVariables": {
+      "title": "Dostępne zmienne kontekstowe",
+      "description": "Użyj tych zmiennych w adresach URL żądań i w zmiennych typu wyrażenie ze składnią {{handlebars}}.",
+      "name": "Zmienna",
+      "value": "Wartość rozwiązana",
+      "copied": "Skopiowano!"
+    }
+  },
+  "requestTab": {
+    "deprecated": "Ten punkt końcowy jest przestarzały i może zostać usunięty w przyszłej wersji.",
+    "send": "Wyślij",
+    "cancel": "Anuluj",
+    "urlPlaceholder": "URL żądania",
+    "methodSelect": "Wybierz metodę HTTP",
+    "addHeader": "Dodaj nagłówek",
+    "addParam": "Dodaj parametr",
+    "environmentSelector": {
+      "noEnvironment": "Brak środowiska"
+    },
+    "body": {
+      "fileLabel": "Plik lub URL:",
+      "browse": "Przeglądaj..."
+    },
+    "tabs": {
+      "docs": "Dokumentacja",
+      "requestLayout": "Żądanie",
+      "headers": "Nagłówki",
+      "body": "Treść",
+      "params": "Parametry",
+      "pathParams": "Parametry ścieżki",
+      "notes": "Notatki",
+      "codeSnippets": "Fragmenty kodu",
+      "responsesHistory": "Historia odpowiedzi"
+    },
+    "responses": {
+      "tabs": {
+        "response": "Odpowiedź",
+        "requestBody": "Treść żądania",
+        "graph": "Wykres"
+      },
+      "loading": "Wysyłanie żądania...",
+      "noResponse": "Kliknij Wyślij, aby wykonać żądanie",
+      "history": {
+        "list": "Lista historii odpowiedzi",
+        "empty": "Nie zarejestrowano jeszcze żadnych odpowiedzi",
+        "select": "Wybierz odpowiedź, aby zobaczyć szczegóły",
+        "pin": "Przypnij odpowiedź",
+        "unpin": "Odepnij odpowiedź"
+      }
+    }
+  },
+  "workbench": {
+    "tabContextMenu": {
+      "close": "Zamknij",
+      "closeOthers": "Zamknij inne",
+      "addToFavorites": "Dodaj do ulubionych",
+      "removeFromFavorites": "Usuń z ulubionych"
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Przejdź do definicji"
+  },
+  "keyValueTable": {
+    "types": {
+      "string": "Łańcuch znaków",
+      "secret": "Sekret",
+      "number": "Liczba",
+      "dateTime": "Data/godzina",
+      "color": "Kolor",
+      "expression": "Wyrażenie",
+      "boolean": "Wartość logiczna"
+    },
+    "apiEnums": "Typy zdefiniowane w API"
+  },
+  "graphql": {
+    "send": "Wyślij",
+    "urlPlaceholder": "URL punktu końcowego GraphQL",
+    "tabs": {
+      "query": "Zapytanie",
+      "variables": "Zmienne",
+      "headers": "Nagłówki"
+    }
+  },
+  "grpc": {
+    "send": "Wywołaj",
+    "urlPlaceholder": "Serwer gRPC (host:port)",
+    "tabs": {
+      "message": "Wiadomość",
+      "metadata": "Metadane"
+    }
+  },
+  "soap": {
+    "send": "Wyślij",
+    "urlPlaceholder": "URL punktu końcowego SOAP",
+    "tabs": {
+      "body": "Treść",
+      "headers": "Nagłówki"
+    }
+  },
+  "websocket": {
+    "connect": "Połącz",
+    "connected": "Połączono",
+    "disconnected": "Rozłączono",
+    "noMessages": "Brak wiadomości",
+    "urlPlaceholder": "URL WebSocket",
+    "event": "Zdarzenie",
+    "topic": "Temat",
+    "tabs": {
+      "message": "Wiadomość",
+      "headers": "Nagłówki"
+    }
+  },
+  "search": {
+    "placeholder": "Szukaj...",
+    "noResults": "Brak wyników",
+    "resultsAriaLabel": "Wyniki wyszukiwania",
+    "categories": {
+      "request": "Żądania",
+      "folder": "Foldery",
+      "environment": "Środowiska",
+      "settings": "Ustawienia",
+      "tag": "Tagi"
+    },
+    "tooltip": {
+      "noDetails": "Brak dostępnych szczegółów",
+      "noContent": "Brak dokumentacji lub notatek"
+    }
+  },
+  "httpStatus": {
+    "100": {
+      "name": "Continue",
+      "description": "Serwer otrzymał nagłówki żądania i klient powinien kontynuować wysyłanie treści żądania."
+    },
+    "101": {
+      "name": "Switching Protocols",
+      "description": "Klient poprosił serwer o zmianę protokołu, a serwer wyraził na to zgodę."
+    },
+    "200": {
+      "name": "OK",
+      "description": "Standardowa odpowiedź dla pomyślnych żądań HTTP. Rzeczywista odpowiedź zależy od użytej metody żądania."
+    },
+    "201": {
+      "name": "Created",
+      "description": "Żądanie zostało zrealizowane, co skutkowało utworzeniem nowego zasobu."
+    },
+    "202": {
+      "name": "Accepted",
+      "description": "Żądanie zostało przyjęte do przetwarzania, ale przetwarzanie nie zostało zakończone."
+    },
+    "204": {
+      "name": "No Content",
+      "description": "Serwer pomyślnie przetworzył żądanie i nie zwraca żadnej treści."
+    },
+    "301": {
+      "name": "Moved Permanently",
+      "description": "To i wszystkie przyszłe żądania powinny być kierowane na podany URI."
+    },
+    "302": {
+      "name": "Found",
+      "description": "Informuje klienta, aby skierował się pod inny adres URL. Specyfikacja HTTP/1.0 wymagała od klienta wykonania tymczasowego przekierowania."
+    },
+    "304": {
+      "name": "Not Modified",
+      "description": "Wskazuje, że zasób nie został zmodyfikowany od wersji określonej w nagłówkach żądania."
+    },
+    "400": {
+      "name": "Bad Request",
+      "description": "Serwer nie może lub nie chce przetworzyć żądania z powodu oczywistego błędu klienta (np. nieprawidłowa składnia)."
+    },
+    "401": {
+      "name": "Unauthorized",
+      "description": "Wymagane jest uwierzytelnienie, które nie powiodło się lub nie zostało jeszcze dostarczone."
+    },
+    "403": {
+      "name": "Forbidden",
+      "description": "Żądanie zawierało poprawne dane i zostało zrozumiane przez serwer, lecz serwer odmawia wykonania akcji."
+    },
+    "404": {
+      "name": "Not Found",
+      "description": "Żądanego zasobu nie znaleziono, ale może być dostępny w przyszłości."
+    },
+    "405": {
+      "name": "Method Not Allowed",
+      "description": "Metoda żądania nie jest obsługiwana dla żądanego zasobu."
+    },
+    "408": {
+      "name": "Request Timeout",
+      "description": "Serwer przekroczył czas oczekiwania na żądanie."
+    },
+    "409": {
+      "name": "Conflict",
+      "description": "Wskazuje, że żądania nie można było przetworzyć z powodu konfliktu w aktualnym stanie zasobu."
+    },
+    "410": {
+      "name": "Gone",
+      "description": "Wskazuje, że żądany zasób był wcześniej używany, ale nie jest już dostępny i nie będzie ponownie dostępny."
+    },
+    "415": {
+      "name": "Unsupported Media Type",
+      "description": "Treść żądania ma typ nośnika, którego serwer ani zasób nie obsługują."
+    },
+    "422": {
+      "name": "Unprocessable Entity",
+      "description": "Żądanie było poprawnie sformułowane, ale nie mogło zostać przetworzone z powodu błędów semantycznych."
+    },
+    "429": {
+      "name": "Too Many Requests",
+      "description": "Użytkownik wysłał zbyt wiele żądań w określonym czasie (ograniczenie częstotliwości)."
+    },
+    "500": {
+      "name": "Internal Server Error",
+      "description": "Ogólny komunikat o błędzie zwracany, gdy wystąpił nieoczekiwany warunek i bardziej szczegółowy komunikat nie jest odpowiedni."
+    },
+    "501": {
+      "name": "Not Implemented",
+      "description": "Serwer nie rozpoznaje metody żądania lub nie jest w stanie spełnić żądania."
+    },
+    "502": {
+      "name": "Bad Gateway",
+      "description": "Serwer działał jako brama lub proxy i otrzymał nieprawidłową odpowiedź od serwera nadrzędnego."
+    },
+    "503": {
+      "name": "Service Unavailable",
+      "description": "Serwer nie może obsłużyć żądania (z powodu przeciążenia lub konserwacji)."
+    },
+    "504": {
+      "name": "Gateway Timeout",
+      "description": "Serwer działał jako brama lub proxy i nie otrzymał na czas odpowiedzi od serwera nadrzędnego."
+    }
+  },
+  "welcome": {
+    "confirmRemoveFavorite": "Czy na pewno chcesz usunąć „{{fileName}}” z ulubionych?",
+    "noFilesHint": "Otwórz plik lub utwórz nowy, aby rozpocząć",
+    "newAriaLabel": "Utwórz nową kolekcję",
+    "openAriaLabel": "Otwórz kolekcję z dysku",
+    "landmarkLabel": "Witamy"
+  },
+  "save": {
+    "title": "Opcje zapisu",
+    "mode": {
+      "label": "Tryb zapisu",
+      "file": "Pojedynczy plik",
+      "folder": "Struktura folderów",
+      "fileDescription": "Zapisz wszystko w jednym pliku",
+      "folderDescription": "Zapisz jako strukturę folderów z oddzielnymi plikami"
+    },
+    "format": {
+      "label": "Format",
+      "yamlDescription": "Czytelny dla człowieka",
+      "jsonDescription": "Format standardowy",
+      "json5Description": "JSON + komentarze"
+    },
+    "preview": {
+      "label": "Podgląd struktury",
+      "noDocumentation": "Brak przeanalizowanej dokumentacji dla tego źródła."
+    }
+  },
+  "common": {
+    "cancel": "Anuluj",
+    "save": "Zapisz"
+  },
+  "helpers": {
+    "categories": {
+      "comparison": "Porównanie",
+      "string": "Łańcuch znaków",
+      "math": "Matematyka",
+      "array": "Tablica",
+      "object": "Obiekt",
+      "url": "URL",
+      "date": "Data",
+      "regex": "Regex",
+      "misc": "Różne"
+    },
+    "eq": "Ścisła równość (===)",
+    "ne": "Ścisła nierówność (!==)",
+    "neq": "Ścisła nierówność (!==)",
+    "lt": "Mniej niż (<)",
+    "lte": "Mniejsze lub równe (<=)",
+    "gt": "Większe niż (>)",
+    "gte": "Większe lub równe (>=)",
+    "and": "Helper blokowy: renderuje, jeśli wszystkie wartości są prawdziwe",
+    "or": "Helper blokowy: renderuje, jeśli jakakolwiek wartość jest prawdziwa",
+    "not": "Zwraca odwrotną wartość logiczną",
+    "ifEquals": "Helper blokowy: renderuje, jeśli wartości są równe",
+    "is": "Helper blokowy: luźna równość",
+    "isnt": "Helper blokowy: luźna nierówność",
+    "default": "Zwraca wartość domyślną, jeśli pierwsza jest null/undefined",
+    "compare": "Helper blokowy: porównuje z operatorem",
+    "lowercase": "Konwertuje łańcuch na małe litery",
+    "uppercase": "Konwertuje łańcuch na wielkie litery",
+    "capitalize": "Zamienia pierwszą literę na wielką",
+    "capitalizeAll": "Zamienia pierwszą literę każdego słowa na wielką",
+    "titleize": "Zamienia pierwszą literę każdego słowa na wielką",
+    "camelcase": "Konwertuje na camelCase",
+    "pascalcase": "Konwertuje na PascalCase",
+    "snakecase": "Konwertuje na snake_case",
+    "snakeCase": "Konwertuje na snake_case (alias)",
+    "dashcase": "Konwertuje na dash-case (kebab-case)",
+    "dotcase": "Konwertuje na dot.case",
+    "pathcase": "Konwertuje na path/case",
+    "sentencecase": "Konwertuje na zapis zdaniowy",
+    "slugify": "Konwertuje na slug przyjazny dla URL",
+    "trim": "Usuwa białe znaki z obu końców",
+    "trimLeft": "Usuwa białe znaki na początku",
+    "trimRight": "Usuwa białe znaki na końcu",
+    "replace": "Zamienia wszystkie wystąpienia a na b",
+    "split": "Dzieli łańcuch na tablicę",
+    "truncate": "Skraca łańcuch do określonej długości",
+    "ellipsis": "Skraca łańcuch z wielokropkiem",
+    "append": "Dodaje sufiks do łańcucha",
+    "prepend": "Dodaje prefiks do łańcucha",
+    "reverse": "Odwraca łańcuch lub tablicę",
+    "startsWith": "Helper blokowy: renderuje, jeśli łańcuch zaczyna się od prefiksu",
+    "endsWith": "Helper blokowy: renderuje, jeśli łańcuch kończy się sufiksem",
+    "contains": "Helper blokowy: renderuje, jeśli łańcuch zawiera podłańcuch",
+    "padStart": "Uzupełnia łańcuch na początku do osiągnięcia długości",
+    "padEnd": "Uzupełnia łańcuch na końcu do osiągnięcia długości",
+    "repeat": "Powtarza łańcuch n razy",
+    "substring": "Wyodrębnia część łańcucha",
+    "indexOf": "Zwraca indeks podłańcucha (-1, jeśli nie znaleziono)",
+    "count": "Liczy wystąpienia podłańcucha",
+    "newLineToBr": "Konwertuje znaki nowej linii na znaczniki <br>",
+    "stripTags": "Usuwa znaczniki HTML z łańcucha",
+    "add": "Dodaje dwie liczby",
+    "subtract": "Odejmuje b od a",
+    "multiply": "Mnoży dwie liczby",
+    "divide": "Dzieli a przez b",
+    "modulo": "Zwraca resztę z dzielenia a / b",
+    "abs": "Zwraca wartość bezwzględną",
+    "ceil": "Zaokrągla w górę do najbliższej liczby całkowitej",
+    "floor": "Zaokrągla w dół do najbliższej liczby całkowitej",
+    "round": "Zaokrągla do najbliższej liczby całkowitej",
+    "min": "Zwraca wartość minimalną",
+    "max": "Zwraca wartość maksymalną",
+    "pow": "Zwraca podstawę podniesioną do wykładnika",
+    "sqrt": "Zwraca pierwiastek kwadratowy",
+    "random": "Zwraca losową liczbę całkowitą między min a max",
+    "sum": "Zwraca sumę wartości tablicy",
+    "avg": "Zwraca średnią wartości tablicy",
+    "toFixed": "Formatuje liczbę ze stałą liczbą miejsc dziesiętnych",
+    "toInt": "Konwertuje na liczbę całkowitą",
+    "toFloat": "Konwertuje na liczbę zmiennoprzecinkową",
+    "first": "Zwraca pierwszy element (elementy) tablicy",
+    "last": "Zwraca ostatni element (elementy) tablicy",
+    "after": "Zwraca elementy po indeksie n",
+    "before": "Zwraca elementy przed indeksem n",
+    "slice": "Zwraca wycinek tablicy",
+    "length": "Zwraca długość tablicy/łańcucha/obiektu",
+    "join": "Łączy elementy tablicy separatorem",
+    "sort": "Sortuje tablicę",
+    "unique": "Zwraca unikalne wartości",
+    "concat": "Łączy tablice",
+    "flatten": "Spłaszcza zagnieżdżoną tablicę",
+    "pluck": "Wyodrębnia właściwość z tablicy obiektów",
+    "itemAt": "Zwraca element o podanym indeksie",
+    "inArray": "Helper blokowy: renderuje, jeśli wartość znajduje się w tablicy",
+    "isArray": "Zwraca true, jeśli wartość jest tablicą",
+    "isEmpty": "Helper blokowy: renderuje, jeśli wartość jest pusta",
+    "some": "Helper blokowy: renderuje, jeśli niektóre elementy pasują",
+    "every": "Helper blokowy: renderuje, jeśli wszystkie elementy pasują",
+    "JSONstringify": "Konwertuje obiekt na łańcuch JSON",
+    "JSONparse": "Parsuje łańcuch JSON na obiekt",
+    "get": "Pobiera zagnieżdżoną właściwość po ścieżce",
+    "keys": "Zwraca klucze obiektu",
+    "values": "Zwraca wartości obiektu",
+    "entries": "Zwraca pary [klucz, wartość]",
+    "hasOwn": "Helper blokowy: renderuje, jeśli obiekt ma właściwość",
+    "pick": "Tworzy obiekt z wybranymi kluczami",
+    "omit": "Tworzy obiekt bez określonych kluczy",
+    "merge": "Scala wiele obiektów",
+    "isObject": "Zwraca true, jeśli wartość jest obiektem",
+    "typeOf": "Zwraca typ wartości",
+    "encodeURI": "Koduje łańcuch dla URL",
+    "decodeURI": "Dekoduje łańcuch URL",
+    "urlParse": "Parsuje URL na komponenty",
+    "stripQuerystring": "Usuwa querystring z URL",
+    "stripProtocol": "Usuwa protokół z URL",
+    "now": "Zwraca aktualną datę jako łańcuch ISO",
+    "timestamp": "Zwraca aktualny znacznik czasu w milisekundach",
+    "year": "Zwraca aktualny rok",
+    "formatDate": "Formatuje datę według wzorca",
+    "match": "Zwraca dopasowania regex",
+    "test": "Helper blokowy: renderuje, jeśli regex pasuje",
+    "coalesce": "Zwraca pierwszą wartość niebędącą null/undefined",
+    "uuid": "Generuje losowy UUID",
+    "noop": "Helper blokowy, który renderuje zawartość bez zmian",
+    "raw": "Helper blokowy, który renderuje surową zawartość",
+    "times": "Helper blokowy, który powtarza n razy",
+    "range": "Generuje tablicę liczb"
+  },
+  "behavior": {
+    "title": "Zachowanie",
+    "syncSidebarWithTabs": "Synchronizuj zaznaczenie panelu bocznego z aktywną kartą",
+    "syncSidebarWithTabsDescription": "Podczas zmiany karty w obszarze roboczym automatycznie zaznaczaj i wyświetlaj odpowiadający element w panelu bocznym",
+    "dateTimeFormat": "Format daty/godziny",
+    "dateTimeFormatDescription": "Format używany do wyświetlania dat i godzin w aplikacji",
+    "dateTimeFormat.us": "Format US (MM/DD/RRRR, 12h)",
+    "dateTimeFormat.iso": "Format ISO (RRRR-MM-DD, 24h)"
+  },
+  "console": {
+    "title": "Konsola",
+    "requestFormat": "Format żądań",
+    "requestFormatDescription": "Domyślny rodzaj powłoki używany do renderowania wychodzących żądań w karcie Konsola. Każdy wiersz to gotowy do skopiowania wiersz polecenia; przełącznik na pasku narzędzi Konsoli nadpisuje ten domyślny wybór dla bieżącej karty.",
+    "requestFormat.curl": "curl (styl Unix)",
+    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+  },
+  "import": {
+    "title": "Importuj żądania",
+    "source": {
+      "label": "Wklej tutaj coś!",
+      "placeholder": "Wprowadź ścieżkę pliku, URL lub wklej polecenie curl/PowerShell..."
+    },
+    "formats": {
+      "swagger": {
+        "description": "Specyfikacja OpenAPI 2.0, narodzona w SmartBear. Wklej Swaggera w formacie JSON lub YAML — Restorm przetwarza każdą operację, pobiera schematy bezpieczeństwa i zamienia cały dokument w nawigowalne drzewo żądań.",
+        "trademark": "Swagger jest zastrzeżonym znakiem towarowym SmartBear Software."
+      },
+      "openapi": {
+        "description": "Aktualny standard OpenAPI (3.0 i 3.1). Ta sama ergonomia wklej-i-działaj co Swagger: parametry, treści żądań, schematy bezpieczeństwa i webhooks lądują jako drzewo typowanych żądań z gotowymi do wysłania przykładami.",
+        "trademark": "OpenAPI to projekt OpenAPI Initiative pod skrzydłami Linux Foundation."
+      },
+      "curl": {
+        "description": "Masz już żądanie działające w terminalu? Wklej pełne wywołanie curl — flagi, nagłówki, treść, query string — a Restorm odtworzy je jako prawdziwe żądanie, które możesz ponownie uruchomić, edytować i przypiąć.",
+        "trademark": "curl to oprogramowanie open source © Daniel Stenberg, używane tutaj na jego warunkach."
+      },
+      "powershell": {
+        "description": "Ten sam pomysł, w wersji PowerShell. Wklej polecenie Invoke-WebRequest lub Invoke-RestMethod, a Restorm odczyta URI, metodę, nagłówki i treść, aby utworzyć żądanie do dalszej iteracji w sposób wizualny.",
+        "trademark": "PowerShell jest zastrzeżonym znakiem towarowym Microsoft Corporation."
+      },
+      "postman": {
+        "description": "Masz w pracy zapisaną kolekcję Postmana? Wrzuć JSON — Restorm czyta każde żądanie, każdą przykładową odpowiedź i każdą zmienną środowiskową, a następnie odtwarza kolekcję jako drzewo Restorm, które możesz uruchamiać obok pozostałych API.",
+        "trademark": "Postman jest zastrzeżonym znakiem towarowym Postman, Inc., używanym tutaj wyłącznie jako odniesienie do kompatybilności."
+      },
+      "insomnia": {
+        "description": "Przychodzisz z Insomnii? Wrzuć eksport. Restorm rozumie jej format kolekcji v4/v5, przenosi każde żądanie, nagłówek, treść i środowisko, a całość prezentuje jako drzewo Restorm.",
+        "trademark": "Insomnia jest zastrzeżonym znakiem towarowym Kong Inc., używanym tutaj wyłącznie jako odniesienie do kompatybilności."
+      },
+      "bruno": {
+        "description": "Pliki .bru w stylu Bruno lub eksport folderu — Restorm czyta tekstowy format .bru, w tym jego bloki skryptowe, i odtwarza każde żądanie jako pełnoprawny węzeł Restorm gotowy do wysłania.",
+        "trademark": "Bruno to oprogramowanie open source (MIT) autorstwa Anoop M. D., używane tutaj na jego warunkach."
+      },
+      "graphql": {
+        "description": "Wklej GraphQL SDL (.graphql / .gql / wycinek z Twojego klienta GraphQL), a Restorm stworzy szkielet jednego żądania na operację, podpięty pod właściwy typ query/mutation/subscription, z już ustrukturyzowanymi zmiennymi.",
+        "trademark": "GraphQL jest znakiem towarowym GraphQL Foundation, projektu Joint Development Foundation."
+      },
+      "grpc": {
+        "description": "Wrzuć plik .proto (lub cały katalog) — Restorm przejdzie przez każdą usługę, każde RPC i każdą wiadomość, zamieniając każdą metodę w typowane żądanie, które możesz wysłać przez wykonawcę gRPC bez tknięcia codegen.",
+        "trademark": "gRPC to projekt Cloud Native Computing Foundation."
+      },
+      "soap": {
+        "description": "Masz WSDL? Wklej go (lub jego URL) — Restorm parsuje każdy <port> i <operation> oraz tworzy gotowe do wysłania koperty SOAP z właściwym nagłówkiem SOAPAction, szkieletami treści typowanymi przez schemat oraz schematem uwierzytelniania zadeklarowanym w WSDL."
+      },
+      "websocket": {
+        "description": "Wklej punkt końcowy WebSocket (ws:// lub wss://) — Restorm otwiera połączenie, przechwytuje ramki powitalne serwera i tworzy szkielety żądań send/subscribe z odtwarzalnymi szablonami payloadu.",
+        "trademark": "WebSocket to protokół ustandaryzowany przez IETF (RFC 6455) i W3C."
+      },
+      "kafka": {
+        "description": "Wklej URL serwera bootstrap Apache Kafka (lub listę tematów) — Restorm rejestruje konsumentów i producentów na temat, dekoduje payloady Avro/Protobuf przez Twoje Schema Registry i pozwala odtworzyć poszczególne offsety jednym kliknięciem.",
+        "trademark": "Apache Kafka oraz logo Kafki są znakami towarowymi Apache Software Foundation."
+      },
+      "socketio": {
+        "description": "Wklej URL serwera Socket.IO — Restorm negocjuje handshake, listuje namespace'y i nazwy zdarzeń emitowanych przez serwer i daje Ci jedno żądanie na emit / on z walidacją payloadu.",
+        "trademark": "Socket.IO to biblioteka open source wydana na licencji MIT; nazwa i logo są używane nominatywnie."
+      },
+      "odata": {
+        "description": "Wklej URL dokumentu usługi OData lub plik $metadata — Restorm odczyta CSDL, odtworzy zestawy encji, importy funkcji i akcje oraz wstępnie wypełni opcje zapytań $filter / $select / $top / $skip dla każdej operacji."
+      },
+      "mqtt": {
+        "description": "Wklej URL brokera MQTT lub katalog tematów — Restorm tworzy żądania publish/subscribe na temat, utrzymuje połączenie dla podglądu strumieniowego i zapamiętuje migawki wiadomości retained, aby można było je później odtworzyć.",
+        "trademark": "MQTT to standard OASIS; nazwa i logo MQTT są znakami towarowymi OASIS Open."
+      }
+    },
+    "loading": "Analizowanie...",
+    "noResults": "Nie znaleziono żądań",
+    "error": {
+      "unknown": "Wystąpił nieznany błąd"
+    },
+    "ok": "Importuj",
+    "cancel": "Anuluj",
+    "dropZone": "Strefa upuszczania"
+  }
+}
