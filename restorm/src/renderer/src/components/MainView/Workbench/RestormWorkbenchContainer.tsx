@@ -18,6 +18,11 @@ export interface RestormWorkbenchContainerProps {
    *  Passed through to env-folder home tabs so the Favorite Requests
    *  rows open the matching request. */
   onRequestClick?: (requestId: string) => void
+  /** Middle-click variant of `onRequestClick` — opens the request tab
+   *  without focusing it. Threaded down so the Favorite Requests rows
+   *  can mirror the sidebar's middle-click "open in background"
+   *  gesture. */
+  onRequestAuxClick?: (requestId: string) => void
   onBreadcrumbClick: (item: BreadcrumbItem, index: number, isLast: boolean) => void
   /** Middle-click on a non-last breadcrumb segment — "open tab in background". */
   onBreadcrumbAuxClick?: (item: BreadcrumbItem, index: number, isLast: boolean) => void
@@ -62,6 +67,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
   onFocusedGroupChange,
   onTabActivate,
   onRequestClick,
+  onRequestAuxClick,
   onBreadcrumbClick,
   onBreadcrumbAuxClick,
   onItemRename,
@@ -103,6 +109,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
           onFocusedGroupChange={onFocusedGroupChange}
           onTabActivate={onTabActivate}
           {...(onRequestClick ? { onRequestClick } : {})}
+          {...(onRequestAuxClick ? { onRequestAuxClick } : {})}
           onBreadcrumbClick={onBreadcrumbClick}
           {...(onBreadcrumbAuxClick ? { onBreadcrumbAuxClick } : {})}
           onItemRename={onItemRename}

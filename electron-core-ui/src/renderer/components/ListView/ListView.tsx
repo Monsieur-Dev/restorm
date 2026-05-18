@@ -171,6 +171,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
   expandOnChevronOnly = false,
   onItemClick,
   onItemDoubleClick,
+  onItemAuxClick,
   onSelectionChange,
   onItemToggle,
   onItemDrop,
@@ -760,6 +761,14 @@ const ListViewInner: React.FC<ListViewProps> = ({
               handleDoubleClick(flat, event)
             }
 
+            const handleRowAuxClick = (event: React.MouseEvent<HTMLDivElement>): void => {
+              if (event.button !== 1) return
+              if (!onItemAuxClick) return
+              event.preventDefault()
+              const payload: ListViewItemEventPayload = { item: item, path: flat.path }
+              onItemAuxClick(payload, event)
+            }
+
             const handleRowMouseEnter = (event: React.MouseEvent<HTMLDivElement>): void => {
               if (!onItemMouseEnter) return
               const payload: ListViewItemEventPayload = { item: item, path: flat.path }
@@ -824,6 +833,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
                 draggable={!isEditing && !disableDrag}
                 onClick={handleRowClick}
                 onDoubleClick={handleRowDoubleClick}
+                onAuxClick={handleRowAuxClick}
                 onMouseEnter={handleRowMouseEnter}
                 onMouseLeave={handleRowMouseLeave}
                 onContextMenu={(event): void => {

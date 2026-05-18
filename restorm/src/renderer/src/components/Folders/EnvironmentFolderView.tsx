@@ -50,6 +50,9 @@ export interface EnvironmentFolderViewProps {
    *  Threaded down to `EnvironmentFolderHome` so the Favorite Requests
    *  list rows behave like sidebar entries. */
   onRequestClick?: (requestId: string) => void
+  /** Middle-click variant of `onRequestClick`. Opens the request tab
+   *  without focusing it — the "open in background" gesture. */
+  onRequestAuxClick?: (requestId: string) => void
 }
 
 /** Convert environments to ListView items */
@@ -777,7 +780,7 @@ const ContextVariablesSection = React.memo<{ envId: string | null }>(({ envId })
 
 ContextVariablesSection.displayName = 'ContextVariablesSection'
 
-const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ folder, onFolderChange, onRequestClick }) => {
+const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ folder, onFolderChange, onRequestClick, onRequestAuxClick }) => {
   const { t } = useTranslation()
   const switchTabFnRef = useRef<((tabId: string) => void) | null>(null)
   const handleSwitchTab = useCallback((tabId: string) => { switchTabFnRef.current?.(tabId) }, [])
@@ -788,7 +791,7 @@ const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ fold
   const homeTab: Tab = {
     id: 'home',
     label: <span className="codicon codicon-home" />,
-    content: <EnvironmentFolderHome folder={folder} onSwitchTab={handleSwitchTab} {...(onRequestClick ? { onRequestClick } : {})} />
+    content: <EnvironmentFolderHome folder={folder} onSwitchTab={handleSwitchTab} {...(onRequestClick ? { onRequestClick } : {})} {...(onRequestAuxClick ? { onRequestAuxClick } : {})} />
   }
 
   // Configuration tab with environment management
@@ -819,6 +822,7 @@ const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ fold
         {...(apiDocumentation.api.description !== undefined && apiDocumentation.api.description.length > 0
           ? { scopeDescription: apiDocumentation.api.description }
           : {})}
+        {...(folder.tagColors ? { tagColors: folder.tagColors } : {})}
         showApiInfo
         {...(requestCreation
           ? {
@@ -830,7 +834,7 @@ const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ fold
         testId="env-folder-documentation-host"
       />
     )
-  }, [apiDocumentation, requestCreation, folder.id])
+  }, [apiDocumentation, requestCreation, folder.id, folder.tagColors])
 
   return (
     <BaseFolderView

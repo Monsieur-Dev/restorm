@@ -21,6 +21,12 @@ export interface RestormSidebarProps {
   expandedIds: string[]
   editingItemId: string | null
   onItemClick: (itemId: string) => void
+  /**
+   * Middle-click on a row. Receives the item id so the consumer can open
+   * the corresponding tab without focusing it (the typical "open in
+   * background" semantics).
+   */
+  onItemAuxClick?: (itemId: string) => void
   onItemToggle: (payload: ListViewItemEventPayload, expanded: boolean) => void
   onItemDrop: (payload: ListViewDropEventPayload) => void
   onItemRename: (payload: ListViewItemEventPayload, newName: string) => void
@@ -66,6 +72,7 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
   expandedIds,
   editingItemId,
   onItemClick,
+  onItemAuxClick,
   onItemToggle,
   onItemDrop,
   onItemRename,
@@ -95,6 +102,14 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
       onItemClick(id)
     }
   }, [onItemClick])
+
+  const handleItemAuxClick = useCallback((payload: ListViewItemEventPayload) => {
+    if (!onItemAuxClick) return
+    const id = payload.item.id
+    if (id) {
+      onItemAuxClick(id)
+    }
+  }, [onItemAuxClick])
 
   // Each optional pane is only rendered when it has content, so the
   // collapsed-array indices coming back from SplitView depend on the
@@ -231,6 +246,7 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
               {...(onFavoritesEditingEnd && { onEditingEnd: onFavoritesEditingEnd })}
               onItemRename={onItemRename}
               onItemClick={handleItemClick}
+              onItemAuxClick={handleItemAuxClick}
               onItemDrop={handleFavoritesDrop}
               data-testid="sidebar-favorites-listview"
             />
@@ -254,6 +270,7 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
               {...(onOpenedEditingEnd && { onEditingEnd: onOpenedEditingEnd })}
               onItemRename={onItemRename}
               onItemClick={handleItemClick}
+              onItemAuxClick={handleItemAuxClick}
               data-testid="sidebar-open-documents-listview"
             />
           </Pane>
@@ -300,6 +317,7 @@ export const RestormSidebar: React.FC<RestormSidebarProps> = ({
               expandOnChevronOnly
               onItemToggle={onItemToggle}
               onItemClick={handleItemClick}
+              onItemAuxClick={handleItemAuxClick}
               onItemDrop={onItemDrop}
               onItemRename={onItemRename}
               editingItemId={editingItemId}

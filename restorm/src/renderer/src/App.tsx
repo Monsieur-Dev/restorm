@@ -1935,6 +1935,7 @@ const App: React.FC = () => {
   // Use navigation hook for handling clicks and breadcrumbs
   const {
     handleItemClick,
+    handleItemAuxClick,
     handleBreadcrumbClick,
     handleBreadcrumbAuxClick,
     handleTabActivate,
@@ -2047,6 +2048,7 @@ const App: React.FC = () => {
                   expandedIds={expandedIds}
                   editingItemId={sidebarEditingItemId}
                   onItemClick={handleItemClick}
+                  onItemAuxClick={handleItemAuxClick}
                   onItemToggle={(payload, expanded) => {
                     const id = payload.item.id
                     if (!id) return
@@ -2096,6 +2098,7 @@ const App: React.FC = () => {
               onFocusedGroupChange={setFocusedGroupId}
               onTabActivate={handleTabActivate}
               onRequestClick={handleItemClick}
+              onRequestAuxClick={handleItemAuxClick}
               onBreadcrumbClick={handleBreadcrumbClick}
               onBreadcrumbAuxClick={handleBreadcrumbAuxClick}
               onItemRename={handleItemRename}

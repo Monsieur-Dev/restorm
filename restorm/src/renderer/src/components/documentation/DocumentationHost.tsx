@@ -53,6 +53,12 @@ export interface DocumentationHostProps {
    * header. Set by the env-folder Docs2 wiring; folder / single-
    * route scopes leave it `false`. */
   showApiInfo?: boolean
+  /** Per-tag color overrides resolved by the host's env folder.
+   *  Threaded into each `RouteHeader` so the group chip rendered
+   *  next to the route name picks the user's color first, falling
+   *  back to a deterministic hash of the tag name (mirrors the
+   *  workbench tab badge / sidebar bookmark logic). */
+  tagColors?: Record<string, string>
   /** Optional test id stamped on the root container. */
   testId?: string
 }
@@ -81,6 +87,7 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
   onAddRequest,
   hideAddRequest = false,
   showApiInfo = false,
+  tagColors,
   testId
 }) => {
   /** Resolve the effective `onAddRequest` once: when `hideAddRequest`
@@ -329,6 +336,7 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
                 operation={op}
                 headingLevel={sectionHeadingLevel}
                 showGroupChip={false}
+                {...(tagColors ? { tagColors } : {})}
                 {...(effectiveOnAddRequest ? { onAddRequest: effectiveOnAddRequest } : {})}
               />
             ))}
@@ -340,6 +348,7 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
             operation={op}
             headingLevel={sectionHeadingLevel}
             showGroupChip={!isSingleRoute}
+            {...(tagColors ? { tagColors } : {})}
             {...(effectiveOnAddRequest && !isSingleRoute ? { onAddRequest: effectiveOnAddRequest } : {})}
           />
         ))}
@@ -442,10 +451,11 @@ interface RouteBlockProps {
   operation: OperationDocumentation
   headingLevel: 1 | 2 | 3
   showGroupChip: boolean
+  tagColors?: Record<string, string>
   onAddRequest?: (operation: OperationDocumentation) => void
 }
 
-const RouteBlock: React.FC<RouteBlockProps> = ({ operation, headingLevel, showGroupChip, onAddRequest }) => {
+const RouteBlock: React.FC<RouteBlockProps> = ({ operation, headingLevel, showGroupChip, tagColors, onAddRequest }) => {
   const SectionHeading = headingLevel === 1 ? 'h1' : headingLevel === 2 ? 'h2' : 'h3'
   const opIdSlug = getOperationSlug(operation)
   return (
@@ -458,6 +468,7 @@ const RouteBlock: React.FC<RouteBlockProps> = ({ operation, headingLevel, showGr
         operation={operation}
         headingLevel={headingLevel}
         showGroupChip={showGroupChip}
+        {...(tagColors ? { tagColors } : {})}
         {...(onAddRequest ? { onAddRequest } : {})}
       />
       {(operation.parameters?.length ?? 0) > 0 && (

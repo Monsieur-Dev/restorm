@@ -20,6 +20,9 @@ interface Props {
   folder: EnvironmentFolder
   onSwitchTab: (tabId: string) => void
   onRequestClick?: (requestId: string) => void
+  /** Middle-click variant — opens the request tab without focusing it
+   *  (the "open in background" gesture). */
+  onRequestAuxClick?: (requestId: string) => void
 }
 
 const SOURCE_CONFIG: Record<string, { logo?: string; icon?: string; label: string; color: string }> = {
@@ -49,7 +52,7 @@ function collectRequests(items: FolderItem[], parentPath: string[] = []): Favori
   return result
 }
 
-const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequestClick }) => {
+const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequestClick, onRequestAuxClick }) => {
   const { t } = useTranslation()
   const { state: fileState } = useFileService()
   const [favVersion, setFavVersion] = useState(0)
@@ -122,6 +125,11 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
         <div
           className="home-favorite-cell"
           onClick={() => { onRequestClick?.(req.id) }}
+          onAuxClick={(e) => {
+            if (e.button !== 1) return
+            e.preventDefault()
+            onRequestAuxClick?.(req.id)
+          }}
           onContextMenu={(e) => { handleFavContextMenu(e, req.id) }}
           data-testid={`home-favorite-${req.id}`}
         >
@@ -145,7 +153,7 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
         </div>
       )
     }
-  ], [onRequestClick, projectUuid])
+  ], [onRequestClick, onRequestAuxClick, projectUuid])
 
   return (
     <div className="home-container">

@@ -184,6 +184,13 @@ export interface ListViewProps {
 
   onItemClick?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
   onItemDoubleClick?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
+  /**
+   * Fires on auxiliary mouse button presses (middle-click / mouse wheel button).
+   * Consumers typically use this to implement "open in background" semantics —
+   * the row selection and onItemClick handler are NOT invoked, so the caller is
+   * free to decide whether to focus the underlying view or leave it unfocused.
+   */
+  onItemAuxClick?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
   onSelectionChange?: (selectedIds: string[], payload: ListViewItemEventPayload) => void
   onItemToggle?: (
     payload: ListViewItemEventPayload,

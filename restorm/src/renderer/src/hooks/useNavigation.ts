@@ -30,6 +30,13 @@ export interface UseNavigationOptions {
 
 export interface UseNavigationReturn {
   handleItemClick: (itemId: string) => void
+  /**
+   * Middle-click ("open in background") variant of `handleItemClick`.
+   * Opens the matching workbench tab without focusing it, without
+   * moving the sidebar selection, and without pushing a
+   * navigation-service event.
+   */
+  handleItemAuxClick: (itemId: string) => void
   handleBreadcrumbClick: (item: BreadcrumbItem, index: number, isLast: boolean) => void
   /**
    * Middle-click handler for a breadcrumb folder / env-folder segment.
@@ -133,6 +140,30 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       }
     }
   }, [rootItems, setSelectedItemId, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
+
+  // Middle-click ("open in background") variant of `handleItemClick`.
+  // Opens the corresponding workbench tab without focusing it, without
+  // moving sidebar selection, and without pushing a navigation-service
+  // event — the user's current focus stays exactly where it was.
+  const handleItemAuxClick = useCallback((itemId: string) => {
+    const { item, breadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
+    if (!item) return
+
+    if (isEnvironmentFolder(item)) {
+      openEnvironmentFolderTab(item, breadcrumbs, { focus: false })
+      return
+    }
+
+    if (isFolder(item)) {
+      openFolderTab(item, breadcrumbs, { focus: false })
+      return
+    }
+
+    if (isRequest(item)) {
+      const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
+      openAnyRequestTab(item, breadcrumbs, environments, { focus: false })
+    }
+  }, [rootItems, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
 
   // Handle breadcrumb item click — open a workbench tab for the
   // clicked segment, not just update history. The old implementation
@@ -307,6 +338,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
 
   return {
     handleItemClick,
+    handleItemAuxClick,
     handleBreadcrumbClick,
     handleBreadcrumbAuxClick,
     handleTabActivate,
