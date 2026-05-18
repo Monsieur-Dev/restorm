@@ -131,14 +131,18 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   const findParentFolder = useRestormStore((state) => state.findParentFolder)
   const handlebarsHelpers = useHandlebarsHelpers()
   const { apiDocumentation, route } = useApiDocumentationFromRequest(request)
+  // Matched OpenAPI operation for the current request — drives both
+  // the Docs tab mount and the per-code tooltip in the Infos tab.
+  const matchedOperation = useMemo(() => {
+    if (!apiDocumentation || !route) return undefined
+    return findOperationForRoute(apiDocumentation, route) ?? undefined
+  }, [apiDocumentation, route])
   // Only mount the Docs tab when the request's URL actually maps to an
   // operation in the spec — otherwise the tab would render an empty
   // shell whenever the user is editing a URL that doesn't match
   // anything (which is exactly when the spec viewer would be useless).
   const docsContent = useMemo(() => {
-    if (!apiDocumentation || !route) return undefined
-    const matched = findOperationForRoute(apiDocumentation, route)
-    if (!matched) return undefined
+    if (!apiDocumentation || !route || !matchedOperation) return undefined
     return (
       <DocumentationHost
         apiDocumentation={apiDocumentation}
@@ -146,7 +150,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         testId="http-request-documentation-host"
       />
     )
-  }, [apiDocumentation, route])
+  }, [apiDocumentation, route, matchedOperation])
   const previousEnvIdRef = useRef<string | null>(null)
   const sendButtonStyle: React.CSSProperties | undefined = envColor
     ? { backgroundColor: envColor, color: getContrastColor(envColor), borderColor: envColor }
@@ -921,8 +925,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   const codeSnippetsContent = backendCodeSnippets || t('requestTab.codeSnippets.loading', 'Loading code snippets...')
 
   const { infosContent, responseContent, jsonData } = useMemo(
-    () => buildHttpResponseViewData(httpResponse),
-    [httpResponse]
+    () => buildHttpResponseViewData(httpResponse, matchedOperation),
+    [httpResponse, matchedOperation]
   )
 
   const buildHistoryView = useCallback((detail: ResponseHistoryDetail) => {
@@ -948,8 +952,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       timings: detail.response.timings,
       ...(detail.response.error ? { error: detail.response.error } : {})
     }
-    return buildHttpResponseViewData(historyResponse)
-  }, [request.id])
+    return buildHttpResponseViewData(historyResponse, matchedOperation)
+  }, [request.id, matchedOperation])
 
   // URL section
   const urlSection = (

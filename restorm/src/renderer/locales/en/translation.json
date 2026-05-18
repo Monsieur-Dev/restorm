@@ -30,8 +30,6 @@
     "saveAll": "Save All",
     "saveAs": "Save As",
     "exit": "Exit",
-    "noRecentFiles": "No recent files",
-    "noFavorites": "No favorites",
     "selection": "Selection",
     "tools": "Tools",
     "findInCollection": "Find in Collection",
@@ -64,10 +62,8 @@
     "newFolder": "New Folder",
     "newEnvironmentFolder": "New Environment Folder",
     "contextMenu": {
-      "createSubfolder": "Create subfolder",
       "createFolder": "Create folder",
       "createEnvironmentFolder": "Create environment folder",
-      "defineVariables": "Define variables",
       "delete": "Delete",
       "clone": "Clone",
       "rename": "Rename",
@@ -140,11 +136,6 @@
         "ok": "OK"
       }
     },
-    "docs": {
-      "source": "Source:",
-      "refresh": "Refresh docs",
-      "refreshing": "Refreshing..."
-    },
     "contextVariables": {
       "title": "Available context variables",
       "description": "Use these variables in your request URLs and expression-type variables with the {{handlebars}} syntax.",
@@ -162,8 +153,6 @@
     "addHeader": "Add header",
     "addParam": "Add param",
     "environmentSelector": {
-      "ariaLabel": "Select environment",
-      "listAriaLabel": "Available environments",
       "noEnvironment": "No environment"
     },
     "body": {
@@ -184,7 +173,6 @@
     "responses": {
       "tabs": {
         "response": "Response",
-        "prettyfied": "Prettyfied",
         "requestBody": "Request body",
         "graph": "Graph"
       },
@@ -200,8 +188,6 @@
     }
   },
   "workbench": {
-    "tagsLabel": "Tags",
-    "removeTag": "Remove tag",
     "tabContextMenu": {
       "close": "Close",
       "closeOthers": "Close others",
@@ -226,41 +212,31 @@
   },
   "graphql": {
     "send": "Send",
-    "response": "Response",
     "urlPlaceholder": "GraphQL endpoint URL",
     "tabs": {
       "query": "Query",
       "variables": "Variables",
-      "headers": "Headers",
-      "docs": "Docs",
-      "notes": "Notes"
+      "headers": "Headers"
     }
   },
   "grpc": {
     "send": "Invoke",
-    "response": "Response",
     "urlPlaceholder": "gRPC server (host:port)",
     "tabs": {
       "message": "Message",
-      "metadata": "Metadata",
-      "docs": "Docs",
-      "notes": "Notes"
+      "metadata": "Metadata"
     }
   },
   "soap": {
     "send": "Send",
-    "response": "Response",
     "urlPlaceholder": "SOAP endpoint URL",
     "tabs": {
       "body": "Body",
-      "headers": "Headers",
-      "docs": "Docs",
-      "notes": "Notes"
+      "headers": "Headers"
     }
   },
   "websocket": {
     "connect": "Connect",
-    "messages": "Messages",
     "connected": "Connected",
     "disconnected": "Disconnected",
     "noMessages": "No messages yet",
@@ -269,9 +245,7 @@
     "topic": "Topic",
     "tabs": {
       "message": "Message",
-      "headers": "Headers",
-      "docs": "Docs",
-      "notes": "Notes"
+      "headers": "Headers"
     }
   },
   "search": {
@@ -390,10 +364,6 @@
     "504": {
       "name": "Gateway Timeout",
       "description": "The server was acting as a gateway or proxy and did not receive a timely response from the upstream server."
-    },
-    "unknown": {
-      "name": "Unknown Status",
-      "description": "This status code is not recognized."
     }
   },
   "welcome": {
@@ -419,14 +389,13 @@
       "json5Description": "JSON + comments"
     },
     "preview": {
-      "label": "Structure Preview"
+      "label": "Structure Preview",
+      "noDocumentation": "No parsed documentation for this source."
     }
   },
   "common": {
     "cancel": "Cancel",
-    "save": "Save",
-    "ok": "OK",
-    "close": "Close"
+    "save": "Save"
   },
   "helpers": {
     "categories": {
@@ -617,8 +586,7 @@
         "trademark": "gRPC is a project of the Cloud Native Computing Foundation."
       },
       "soap": {
-        "description": "Got a WSDL? Paste it (or its URL) — Restorm parses every <port> and <operation> and produces ready-to-send SOAP envelopes with the right SOAPAction header, schema-typed body skeletons, and the auth scheme the WSDL declares.",
-        "trademark": "SOAP and WSDL are open standards published by the World Wide Web Consortium (W3C)."
+        "description": "Got a WSDL? Paste it (or its URL) — Restorm parses every <port> and <operation> and produces ready-to-send SOAP envelopes with the right SOAPAction header, schema-typed body skeletons, and the auth scheme the WSDL declares."
       },
       "websocket": {
         "description": "Paste a WebSocket endpoint (ws:// or wss://) — Restorm opens the connection, captures the server's hello frames, and scaffolds send / subscribe requests with replayable payload templates.",
@@ -633,16 +601,12 @@
         "trademark": "Socket.IO is an open-source library released under the MIT license; the name and logo are used nominatively."
       },
       "odata": {
-        "description": "Paste an OData service-document URL or a $metadata file — Restorm reads the CSDL, rebuilds the entity sets, function imports, and actions, plus pre-fills the $filter / $select / $top / $skip query options on every operation.",
-        "trademark": "OData is an OASIS standard."
+        "description": "Paste an OData service-document URL or a $metadata file — Restorm reads the CSDL, rebuilds the entity sets, function imports, and actions, plus pre-fills the $filter / $select / $top / $skip query options on every operation."
       },
       "mqtt": {
         "description": "Paste an MQTT broker URL or a topic catalog — Restorm scaffolds publish / subscribe requests per topic, keeps the connection live for streaming previews, and remembers retained-message snapshots so you can replay them later.",
         "trademark": "MQTT is an OASIS standard; the MQTT name and logo are trademarks of OASIS Open."
       }
-    },
-    "preview": {
-      "label": "Preview"
     },
     "loading": "Analyzing...",
     "noResults": "No requests found",

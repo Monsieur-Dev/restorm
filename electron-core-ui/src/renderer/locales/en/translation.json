@@ -130,15 +130,12 @@
   },
   "tagsView": {
     "removeTag": "Remove tag",
-    "changeColor": "Change tag color",
-    "removeColor": "Remove tag color",
     "newTag": "New tag"
   },
   "contextMenu": {
     "cut": "Cut",
     "copy": "Copy",
-    "paste": "Paste",
-    "goToDefinition": "Go to Definition"
+    "paste": "Paste"
   },
   "search": {
     "placeholder": "Search...",
@@ -153,10 +150,8 @@
     }
   },
   "iconSelect": {
-    "search": "Search...",
     "searchEmojis": "Search emojis...",
     "noEmojisFound": "No emojis found",
-    "searchIcons": "Search icons...",
     "searchCodicons": "Search codicons...",
     "searchIconoir": "Search Iconoir...",
     "searchPhosphor": "Search Phosphor...",
@@ -230,24 +225,6 @@
       "iso": "ISO 8601"
     },
     "preview": "Preview",
-    "formatHelp": {
-      "title": "Formatting help",
-      "note": "Uses Luxon formatting tokens.",
-      "table": {
-        "token": "Token",
-        "description": "Description",
-        "output": "Output"
-      },
-      "rows": {
-        "year": "Year",
-        "month": "Month (2 digits)",
-        "day": "Day (2 digits)",
-        "hour24": "Hour (00-23)",
-        "minute": "Minute (00-59)",
-        "second": "Second (00-59)"
-      },
-      "more": "Example"
-    },
     "tokens": {
       "S": "millisecond, no padding",
       "SSS": "millisecond, padded to 3",

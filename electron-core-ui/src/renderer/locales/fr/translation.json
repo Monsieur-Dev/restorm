@@ -130,15 +130,12 @@
   },
   "tagsView": {
     "removeTag": "Supprimer le tag",
-    "changeColor": "Changer la couleur du tag",
-    "removeColor": "Supprimer la couleur du tag",
     "newTag": "Nouveau tag"
   },
   "contextMenu": {
     "cut": "Couper",
     "copy": "Copier",
-    "paste": "Coller",
-    "goToDefinition": "Aller à la définition"
+    "paste": "Coller"
   },
   "search": {
     "placeholder": "Rechercher...",
@@ -153,10 +150,8 @@
     }
   },
   "iconSelect": {
-    "search": "Rechercher...",
     "searchEmojis": "Rechercher des emojis...",
     "noEmojisFound": "Aucun emoji trouvé",
-    "searchIcons": "Rechercher des icônes...",
     "searchCodicons": "Rechercher des codicons...",
     "searchIconoir": "Rechercher dans Iconoir...",
     "searchPhosphor": "Rechercher dans Phosphor...",
@@ -230,24 +225,6 @@
       "iso": "ISO 8601"
     },
     "preview": "Aperçu",
-    "formatHelp": {
-      "title": "Aide au formatage",
-      "note": "Utilise les jetons de formatage Luxon.",
-      "table": {
-        "token": "Jeton",
-        "description": "Description",
-        "output": "Sortie"
-      },
-      "rows": {
-        "year": "Année",
-        "month": "Mois (2 chiffres)",
-        "day": "Jour (2 chiffres)",
-        "hour24": "Heure (00-23)",
-        "minute": "Minute (00-59)",
-        "second": "Seconde (00-59)"
-      },
-      "more": "Exemple"
-    },
     "tokens": {
       "S": "milliseconde, sans padding",
       "SSS": "milliseconde, padding à 3",

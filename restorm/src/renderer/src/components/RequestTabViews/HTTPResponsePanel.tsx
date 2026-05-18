@@ -5,6 +5,9 @@ import {
   type ListViewItemData
 } from 'electron-core-ui/renderer'
 import type { HTTPResponse, KeyValue } from '../../../../shared/types/collections'
+import type { OperationDocumentation } from '../../../../shared/types/apiDocumentation'
+import { ResponseInfoStatusCodeTooltip } from '../documentation/StatusCodeTooltip'
+import { statusCodeColor } from '../documentation/statusCodeColor'
 
 const flexRowStyle: CSSProperties = { display: 'flex', gap: 8 }
 const boldLabelStyle: CSSProperties = { fontWeight: 600 }
@@ -54,14 +57,47 @@ export interface HTTPResponseViewResult {
   jsonData: unknown
 }
 
-/** Build the response view data from an HTTPResponse */
-export function buildHttpResponseViewData(response: HTTPResponse | null): HTTPResponseViewResult {
+/** Build the response view data from an HTTPResponse.
+ *
+ *  `operation` is the matched OpenAPI operation for the request that
+ *  produced this response — used to look up a per-code description so
+ *  the Infos tab can decorate the status code with a hover tooltip
+ *  ("the doc message + the generic RFC reason"). When undefined, or
+ *  when the operation has no entry for this code, the status code
+ *  renders plain (no tooltip). */
+export function buildHttpResponseViewData(
+  response: HTTPResponse | null,
+  operation?: OperationDocumentation
+): HTTPResponseViewResult {
   const generalItems: ListViewItemData[] = []
   if (response) {
+    const statusColor = getStatusColor(response.statusCode) === 'green'
+      ? 'var(--testing-iconPassed)'
+      : getStatusColor(response.statusCode) === 'orange'
+        ? 'var(--editorWarning-foreground)'
+        : 'var(--testing-iconFailed)'
+    const codeStr = String(response.statusCode)
+    const docDescription = operation?.responses?.[codeStr]?.description
+    const dotStyle: CSSProperties = {
+      display: 'inline-block',
+      width: 8,
+      height: 8,
+      borderRadius: '50%',
+      backgroundColor: statusCodeColor(codeStr),
+      flexShrink: 0
+    }
+    const statusCodeNode = (
+      <ResponseInfoStatusCodeTooltip code={codeStr} docDescription={docDescription}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: statusColor }}>
+          <span style={dotStyle} aria-hidden="true" />
+          <span>{response.statusCode} {response.statusText}</span>
+        </span>
+      </ResponseInfoStatusCodeTooltip>
+    )
     generalItems.push(
       { id: 'general-request-url', icon: 'blank', title: <span style={flexRowStyle}><span style={boldLabelStyle}>Request URL</span><span>{response.requestUrl}</span></span> },
       { id: 'general-request-method', icon: 'blank', title: <span style={flexRowStyle}><span style={boldLabelStyle}>Request Method</span><span>{response.requestMethod}</span></span> },
-      { id: 'general-status-code', icon: 'blank', title: <span style={flexRowStyle}><span style={boldLabelStyle}>Status Code</span><span style={{ color: getStatusColor(response.statusCode) === 'green' ? 'var(--testing-iconPassed)' : getStatusColor(response.statusCode) === 'orange' ? 'var(--editorWarning-foreground)' : 'var(--testing-iconFailed)' }}>{response.statusCode} {response.statusText}</span></span> },
+      { id: 'general-status-code', icon: 'blank', title: <span style={flexRowStyle}><span style={boldLabelStyle}>Status Code</span>{statusCodeNode}</span> },
       { id: 'general-duration', icon: 'blank', title: <span style={flexRowStyle}><span style={boldLabelStyle}>Duration</span><span>{formatDuration(response.timings.durationMs)}</span></span> }
     )
     if (response.contentType) {

@@ -30,8 +30,6 @@
     "saveAll": "Tout enregistrer",
     "saveAs": "Enregistrer sous",
     "exit": "Quitter",
-    "noRecentFiles": "Aucun fichier récent",
-    "noFavorites": "Aucun favori",
     "selection": "Sélection",
     "tools": "Outils",
     "findInCollection": "Rechercher dans la collection",
@@ -64,10 +62,8 @@
     "newFolder": "Nouveau dossier",
     "newEnvironmentFolder": "Nouveau dossier de variables",
     "contextMenu": {
-      "createSubfolder": "Créer un sous-dossier",
       "createFolder": "Créer un dossier",
       "createEnvironmentFolder": "Créer un dossier de variables",
-      "defineVariables": "Définir les variables",
       "delete": "Supprimer",
       "clone": "Cloner",
       "rename": "Renommer",
@@ -140,11 +136,6 @@
         "ok": "OK"
       }
     },
-    "docs": {
-      "source": "Source :",
-      "refresh": "Actualiser la doc",
-      "refreshing": "Actualisation..."
-    },
     "contextVariables": {
       "title": "Variables de contexte disponibles",
       "description": "Utilisez ces variables dans vos URLs de requêtes et dans vos variables de type expression avec la syntaxe {{handlebars}}.",
@@ -162,8 +153,6 @@
     "addHeader": "Ajouter un header",
     "addParam": "Ajouter un paramètre",
     "environmentSelector": {
-      "ariaLabel": "Sélectionner un environnement",
-      "listAriaLabel": "Liste des environnements",
       "noEnvironment": "Aucun environnement"
     },
     "body": {
@@ -184,7 +173,6 @@
     "responses": {
       "tabs": {
         "response": "Réponse",
-        "prettyfied": "Formattée",
         "requestBody": "Corps de la requête",
         "graph": "Graphe"
       },
@@ -200,8 +188,6 @@
     }
   },
   "workbench": {
-    "tagsLabel": "Tags",
-    "removeTag": "Supprimer le tag",
     "tabContextMenu": {
       "close": "Fermer",
       "closeOthers": "Fermer les autres",
@@ -226,41 +212,31 @@
   },
   "graphql": {
     "send": "Envoyer",
-    "response": "Réponse",
     "urlPlaceholder": "URL du endpoint GraphQL",
     "tabs": {
       "query": "Requête",
       "variables": "Variables",
-      "headers": "En-têtes",
-      "docs": "Docs",
-      "notes": "Notes"
+      "headers": "En-têtes"
     }
   },
   "grpc": {
     "send": "Appeler",
-    "response": "Réponse",
     "urlPlaceholder": "Serveur gRPC (hôte:port)",
     "tabs": {
       "message": "Message",
-      "metadata": "Métadonnées",
-      "docs": "Docs",
-      "notes": "Notes"
+      "metadata": "Métadonnées"
     }
   },
   "soap": {
     "send": "Envoyer",
-    "response": "Réponse",
     "urlPlaceholder": "URL du endpoint SOAP",
     "tabs": {
       "body": "Corps",
-      "headers": "En-têtes",
-      "docs": "Docs",
-      "notes": "Notes"
+      "headers": "En-têtes"
     }
   },
   "websocket": {
     "connect": "Connecter",
-    "messages": "Messages",
     "connected": "Connecté",
     "disconnected": "Déconnecté",
     "noMessages": "Aucun message pour l'instant",
@@ -269,9 +245,7 @@
     "topic": "Topic",
     "tabs": {
       "message": "Message",
-      "headers": "En-têtes",
-      "docs": "Docs",
-      "notes": "Notes"
+      "headers": "En-têtes"
     }
   },
   "search": {
@@ -390,10 +364,6 @@
     "504": {
       "name": "Délai de passerelle dépassé",
       "description": "Le serveur agissait en tant que passerelle ou proxy et n'a pas reçu de réponse en temps voulu du serveur en amont."
-    },
-    "unknown": {
-      "name": "Statut inconnu",
-      "description": "Ce code de statut n'est pas reconnu."
     }
   },
   "welcome": {
@@ -419,14 +389,13 @@
       "json5Description": "JSON + commentaires"
     },
     "preview": {
-      "label": "Aperçu de la structure"
+      "label": "Aperçu de la structure",
+      "noDocumentation": "Aucune documentation analysée pour cette source."
     }
   },
   "common": {
     "cancel": "Annuler",
-    "save": "Enregistrer",
-    "ok": "OK",
-    "close": "Fermer"
+    "save": "Enregistrer"
   },
   "helpers": {
     "categories": {
@@ -617,8 +586,7 @@
         "trademark": "gRPC est un projet de la Cloud Native Computing Foundation."
       },
       "soap": {
-        "description": "Un WSDL ? Colle-le (ou son URL) — Restorm parse chaque <port> et chaque <operation>, génère des enveloppes SOAP prêtes à envoyer avec le bon header SOAPAction, des skeletons de body typés par le schéma, et le mode d'auth déclaré dans le WSDL.",
-        "trademark": "SOAP et WSDL sont des standards ouverts publiés par le World Wide Web Consortium (W3C)."
+        "description": "Un WSDL ? Colle-le (ou son URL) — Restorm parse chaque <port> et chaque <operation>, génère des enveloppes SOAP prêtes à envoyer avec le bon header SOAPAction, des skeletons de body typés par le schéma, et le mode d'auth déclaré dans le WSDL."
       },
       "websocket": {
         "description": "Colle un endpoint WebSocket (ws:// ou wss://) — Restorm ouvre la connexion, capture les frames de hello envoyées par le serveur, et fabrique les requêtes send / subscribe avec des templates de payload rejouables.",
@@ -633,16 +601,12 @@
         "trademark": "Socket.IO est une bibliothèque open-source publiée sous licence MIT ; le nom et le logo sont utilisés à titre nominatif."
       },
       "odata": {
-        "description": "Colle l'URL d'un service-document OData ou un fichier $metadata — Restorm lit le CSDL, reconstruit les entity sets, les function imports et les actions, et pré-remplit les options $filter / $select / $top / $skip sur chaque opération.",
-        "trademark": "OData est un standard OASIS."
+        "description": "Colle l'URL d'un service-document OData ou un fichier $metadata — Restorm lit le CSDL, reconstruit les entity sets, les function imports et les actions, et pré-remplit les options $filter / $select / $top / $skip sur chaque opération."
       },
       "mqtt": {
         "description": "Colle l'URL d'un broker MQTT ou un catalogue de topics — Restorm fabrique les requêtes publish / subscribe par topic, garde la connexion ouverte pour les previews en streaming, et retient les snapshots des messages retained pour pouvoir les rejouer plus tard.",
         "trademark": "MQTT est un standard OASIS ; le nom et le logo MQTT sont des marques d'OASIS Open."
       }
-    },
-    "preview": {
-      "label": "Aperçu"
     },
     "loading": "Analyse en cours...",
     "noResults": "Aucune requête trouvée",
