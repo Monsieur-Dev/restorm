@@ -103,6 +103,7 @@ import { SaveOptionsModal } from './components/Modals/SaveOptionsModal'
 import { DeleteConfirmationModal } from './components/Modals/DeleteConfirmationModal'
 import { ImportModal, type RefreshContext } from './components/Modals/ImportModal'
 import { allLeafKeys } from './components/Modals/importSelectionHelpers'
+import { ApiSpecRefreshFlow } from './components/Folders/ApiSpecRefreshFlow'
 import { AvailableVariablesProvider } from './contexts/AvailableVariablesContext'
 import { VariableTransformProvider } from './contexts/VariableTransformContext'
 import { AuthRequestResolverContext, type AuthRequestResolver } from './contexts/authRequestResolverContext'
@@ -1372,6 +1373,12 @@ const App: React.FC = () => {
   }, [])
 
   const [refreshSourceTarget, setRefreshSourceTarget] = useState<{ id: string; name: string } | null>(null)
+  // The env folder the sidebar context-menu's "Refresh" entry is
+  // currently running the check-then-decide flow against. Picks up
+  // the same `<ApiSpecRefreshFlow>` the Home tab uses so the two
+  // surfaces share UX (the "Refreshing API spec…" modal, then either
+  // "up to date" or the Import modal in refresh mode).
+  const [apiSpecRefreshFolder, setApiSpecRefreshFolder] = useState<EnvironmentFolder | null>(null)
   const canRefreshFromSource = useCallback((id: string): boolean => {
     const folder = rootItems.find((c) => isEnvironmentFolder(c) && c.id === id)
     if (!folder) return false
@@ -1379,25 +1386,30 @@ const App: React.FC = () => {
     return Boolean(apiUpdate?.sourceUrl)
   }, [rootItems])
   const onRefreshFromSource = useCallback((id: string): void => {
+    const folder = rootItems.find((c): c is EnvironmentFolder => isEnvironmentFolder(c) && c.id === id)
+    if (!folder) return
+    setApiSpecRefreshFolder(folder)
+  }, [rootItems])
+  const openRefreshImportModal = useCallback((id: string): void => {
     const folder = rootItems.find((c) => isEnvironmentFolder(c) && c.id === id)
     if (!folder || !('name' in folder)) return
     setRefreshSourceTarget({ id, name: folder.name })
   }, [rootItems])
 
-  // The env-folder home page surfaces a Refresh button that resolves
-  // a mismatch by opening the Import modal in refresh mode. Same code
-  // path as the sidebar context-menu entry above; bridged via a window
-  // event so the section doesn't need a prop wired through the page.
+  // `<ApiSpecRefreshFlow>` dispatches `restorm:open-import-refresh`
+  // when the user-driven Refresh button finds a checksum mismatch.
+  // App owns the Import modal state, so this event triggers it
+  // directly (no second checksum round-trip).
   useEffect(() => {
     const handler = (event: Event): void => {
       const detail = (event as CustomEvent<{ folderId?: string } | null>).detail
       const folderId = detail?.folderId
       if (folderId === undefined || folderId.length === 0) return
-      onRefreshFromSource(folderId)
+      openRefreshImportModal(folderId)
     }
     window.addEventListener('restorm:open-import-refresh', handler)
     return () => { window.removeEventListener('restorm:open-import-refresh', handler) }
-  }, [onRefreshFromSource])
+  }, [openRefreshImportModal])
 
   const { favoriteItems, openDocumentItems } = useFavoritesAndOpenItems({
     rootItems,
@@ -2393,6 +2405,14 @@ const App: React.FC = () => {
               return { refreshContext }
             })() : {})}
           />
+          {apiSpecRefreshFolder && (
+            <ApiSpecRefreshFlow
+              folder={apiSpecRefreshFolder}
+              onDismiss={() => { setApiSpecRefreshFolder(null) }}
+              onOpenRefreshModal={openRefreshImportModal}
+              testIdPrefix="sidebar-refresh-from-source"
+            />
+          )}
         </div>
         </AuthRequestResolverContext.Provider>
       </VariableTransformProvider>
