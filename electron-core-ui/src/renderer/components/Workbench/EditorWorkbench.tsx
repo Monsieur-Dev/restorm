@@ -487,6 +487,20 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 	// object (which would defeat the memo).
 	const renderTabContent = extCallbacks.renderTabContent;
 
+	// When the host swaps its `renderTabContent` callback (e.g. it
+	// captured a new prop closure), invalidate every cached entry so
+	// the next pass produces fresh content. Without this, every tab
+	// keeps its first-render JSX forever — host-level prop changes
+	// that flow through `renderTabContent` (new context, new click
+	// callback, new env values) would never reach already-mounted
+	// tabs until they were closed and reopened.
+	const lastRenderTabContentRef = useRef(renderTabContent);
+	if (lastRenderTabContentRef.current !== renderTabContent) {
+		lastRenderTabContentRef.current = renderTabContent;
+		tabContentCache.clear();
+		tabVersionCache.clear();
+	}
+
 	// This memo mutates `tabContentCache` / `tabVersionCache` /
 	// `hostNodesRef` as a side effect (a render-cache write + a prune of
 	// closed tabs). React StrictMode double-invokes `useMemo`, so EVERY

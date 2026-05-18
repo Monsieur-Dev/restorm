@@ -46,6 +46,10 @@ export interface EnvironmentFolderViewProps {
   folder: EnvironmentFolder
   /** Called when folder data changes (environments, etc.) */
   onFolderChange?: (folder: EnvironmentFolder) => void
+  /** Open a request by id — same handler the sidebar wires for clicks.
+   *  Threaded down to `EnvironmentFolderHome` so the Favorite Requests
+   *  list rows behave like sidebar entries. */
+  onRequestClick?: (requestId: string) => void
 }
 
 /** Convert environments to ListView items */
@@ -773,7 +777,7 @@ const ContextVariablesSection = React.memo<{ envId: string | null }>(({ envId })
 
 ContextVariablesSection.displayName = 'ContextVariablesSection'
 
-const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ folder, onFolderChange }) => {
+const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ folder, onFolderChange, onRequestClick }) => {
   const { t } = useTranslation()
   const switchTabFnRef = useRef<((tabId: string) => void) | null>(null)
   const handleSwitchTab = useCallback((tabId: string) => { switchTabFnRef.current?.(tabId) }, [])
@@ -784,7 +788,7 @@ const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ fold
   const homeTab: Tab = {
     id: 'home',
     label: <span className="codicon codicon-home" />,
-    content: <EnvironmentFolderHome folder={folder} onSwitchTab={handleSwitchTab} />
+    content: <EnvironmentFolderHome folder={folder} onSwitchTab={handleSwitchTab} {...(onRequestClick ? { onRequestClick } : {})} />
   }
 
   // Configuration tab with environment management

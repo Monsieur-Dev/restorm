@@ -66,6 +66,9 @@ export interface RestormWorkbenchProps {
   onFocusedGroupChange?: (groupId: string | null) => void
   /** Callback fired when a tab is activated (clicked or selected) */
   onTabActivate?: (tabId: string) => void
+  /** Open a request by id — passed through to env-folder home tabs so
+   *  the Favorite Requests rows behave like sidebar entries. */
+  onRequestClick?: (requestId: string) => void
   /** Callback fired when a breadcrumb item is clicked (for navigation) */
   onBreadcrumbClick?: (item: BreadcrumbItem, index: number, isLast: boolean) => void
   /** Callback fired on middle-click of a non-last breadcrumb item — the
@@ -143,6 +146,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   focusedGroupId,
   onFocusedGroupChange,
   onTabActivate,
+  onRequestClick,
   onBreadcrumbClick,
   onBreadcrumbAuxClick,
   onItemRename,
@@ -700,6 +704,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
                 onEnvironmentFolderChange(folder.id, updatedFolder)
               }
             }}
+            {...(onRequestClick ? { onRequestClick } : {})}
           />
         </RestormWorkbenchTab>
       )
@@ -1005,7 +1010,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, updateMiniBrowserUrl, updatePanelCollapsed])
+  }, [onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, onRequestClick, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, updateMiniBrowserUrl, updatePanelCollapsed])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(

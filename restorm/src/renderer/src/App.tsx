@@ -2083,6 +2083,7 @@ const App: React.FC = () => {
               focusedGroupId={focusedGroupId}
               onFocusedGroupChange={setFocusedGroupId}
               onTabActivate={handleTabActivate}
+              onRequestClick={handleItemClick}
               onBreadcrumbClick={handleBreadcrumbClick}
               onBreadcrumbAuxClick={handleBreadcrumbAuxClick}
               onItemRename={handleItemRename}
