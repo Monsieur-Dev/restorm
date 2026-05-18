@@ -20,7 +20,6 @@
     "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "baseUrl": ".",
     "paths": {
       "electron-core-ui/main": ["../electron-core-ui/src/main/index.ts"],
       "electron-core-ui/types": ["../electron-core-ui/types/index.ts"]
