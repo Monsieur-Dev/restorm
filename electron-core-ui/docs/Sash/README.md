@@ -122,6 +122,12 @@ const SplitPane: React.FC = () => {
 - Use a `ResizeObserver` (as in the example) to keep heights/widths up to date when the container resizes.
 - Keep drag logic **pure** and bounded (clamp values with `min`/`max`) to avoid invalid layouts or negative sizes when the user drags aggressively or resizes the window quickly.
 
+## Iframe pointer-events during drag
+
+The Sash automatically marks every `<iframe>` with `pointer-events-disabled` on `mousedown` and removes the class on `mouseup`. This stops the iframe document from capturing `mousemove` / `mouseup` mid-drag — without it, the gesture would be lost as soon as the cursor enters an iframe.
+
+This is the only embed-related side-effect the Sash applies on its own. Containers that host heavier embedded content (Electron `<webview>`, Monaco editor instances, etc.) are responsible for hiding those bodies wholesale via the Sash's `onStart` / `onEnd` callbacks — `display: none` on the host container is far cheaper than per-element layout work during a drag.
+
 ## Testing
 
 When `data-testid` is provided, the components expose stable hooks for E2E tests.

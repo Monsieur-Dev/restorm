@@ -40,7 +40,13 @@ const mockState = {
 
 vi.mock('../../services/CollectionStore', () => ({
   collectionStore: {
-    findById: (id: string) => mockState.findById(id)
+    findById: (id: string) => mockState.findById(id),
+    // `flushRequestStateToContext` calls this when registering a
+    // freshly-resolved request inline (cold open_project case). Tests
+    // don't care about env folders → return null and the helper falls
+    // back to a null environmentId, which is the same shape the
+    // renderer uses when no env has been chosen yet.
+    findParentFolder: (_id: string) => null
   }
 }))
 
@@ -104,7 +110,7 @@ afterEach(() => {
 // ---------------------------------------------------------------------------
 
 describe('execute tools — run_request (unary)', () => {
-  for (const protocol of ['http', 'odata', 'graphql', 'soap', 'grpc', 'auth'] as const) {
+  for (const protocol of ['http', 'odata', 'soap', 'auth'] as const) {
     it(`returns the freshly-stored history entry shape for ${protocol}`, async () => {
       vi.useFakeTimers()
       mockState.findById.mockReturnValue({ id: 'r1', name: 'r', type: protocol })
@@ -118,10 +124,17 @@ describe('execute tools — run_request (unary)', () => {
           type: protocol,
           statusCode: 200,
           statusText: 'OK',
-          responseHeaders: { 'content-type': 'application/json' },
-          body: '{"hello":"world"}',
-          durationMs: 12,
-          requestUrl: 'http://api/foo'
+          responseHeaders: [
+            { key: 'content-type', value: 'application/json' }
+          ],
+          responseBody: '{"hello":"world"}',
+          timings: { startedAt: '2026-05-11T00:00:00.000Z', durationMs: 12 },
+          requestUrl: 'http://api/foo',
+          requestMethod: 'GET',
+          requestHeaders: [{ key: 'Authorization', value: 'Bearer x' }],
+          requestParams: [{ key: 'q', value: '1' }],
+          requestPathParams: [],
+          requestBody: { type: 'text', content: '' }
         }
       })
 
@@ -138,12 +151,78 @@ describe('execute tools — run_request (unary)', () => {
         protocol,
         success: true,
         status: 200,
+        statusText: 'OK',
         body: { hello: 'world' },
         bodyContentType: 'application/json',
-        durationMs: 12
+        durationMs: 12,
+        requestUrl: 'http://api/foo',
+        request: {
+          method: 'GET',
+          url: 'http://api/foo',
+          headers: [{ key: 'Authorization', value: 'Bearer x' }],
+          params: [{ key: 'q', value: '1' }]
+        }
       })
     })
   }
+
+  it('returns parsed { data, errors } for graphql', async () => {
+    vi.useFakeTimers()
+    mockState.findById.mockReturnValue({ id: 'r1', name: 'r', type: 'graphql' })
+    mockState.list
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ guid: 'g-new' }])
+    mockState.getDetail.mockResolvedValue({
+      requestId: 'r1',
+      success: true,
+      response: {
+        type: 'graphql',
+        statusCode: 200,
+        responseHeaders: [{ key: 'content-type', value: 'application/json' }],
+        data: { user: { id: 42 } },
+        errors: undefined,
+        timings: { startedAt: '2026-05-11T00:00:00.000Z', durationMs: 7 },
+        requestUrl: 'http://api/graphql'
+      }
+    })
+
+    const mcp = new FakeMcpService()
+    registerExecutionTools(mcp as unknown as McpService)
+    const promise = mcp.invoke('run_request', { id: 'r1' }) as Promise<unknown>
+    await vi.advanceTimersByTimeAsync(700)
+    const { payload } = parseReply(await promise) as { payload: { body?: { data?: unknown } } }
+    expect(payload.body?.data).toEqual({ user: { id: 42 } })
+  })
+
+  it('returns the gRPC responseMessage as body', async () => {
+    vi.useFakeTimers()
+    mockState.findById.mockReturnValue({ id: 'r1', name: 'r', type: 'grpc' })
+    mockState.list
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ guid: 'g-new' }])
+    mockState.getDetail.mockResolvedValue({
+      requestId: 'r1',
+      success: true,
+      response: {
+        type: 'grpc',
+        statusCode: 0,
+        responseHeaders: [],
+        responseMessage: '{"reply":"pong"}',
+        contentType: 'application/json',
+        timings: { startedAt: '2026-05-11T00:00:00.000Z', durationMs: 3 },
+        requestUrl: 'grpc://api/Foo/Ping',
+        requestMethod: 'Ping',
+        requestMetadata: []
+      }
+    })
+
+    const mcp = new FakeMcpService()
+    registerExecutionTools(mcp as unknown as McpService)
+    const promise = mcp.invoke('run_request', { id: 'r1' }) as Promise<unknown>
+    await vi.advanceTimersByTimeAsync(700)
+    const { payload } = parseReply(await promise) as { payload: { body?: unknown } }
+    expect(payload.body).toEqual({ reply: 'pong' })
+  })
 
   it('opens the tab + clicks Send via the renderer broadcasts', async () => {
     vi.useFakeTimers()
@@ -266,10 +345,10 @@ describe('execute tools — cancel_request', () => {
 })
 
 // ---------------------------------------------------------------------------
-// run_batch — order preservation, partial-on-unknown, mixed protocols
+// run_request_batch — order preservation, partial-on-unknown, mixed protocols
 // ---------------------------------------------------------------------------
 
-describe('execute tools — run_batch', () => {
+describe('execute tools — run_request_batch', () => {
   it('runs requests sequentially and preserves input order', async () => {
     vi.useFakeTimers()
     const reqs: Record<string, unknown> = {
@@ -288,7 +367,7 @@ describe('execute tools — run_batch', () => {
 
     const mcp = new FakeMcpService()
     registerExecutionTools(mcp as unknown as McpService)
-    const promise = mcp.invoke('run_batch', { ids: ['a', 'b', 'c'] }) as Promise<unknown>
+    const promise = mcp.invoke('run_request_batch', { ids: ['a', 'b', 'c'] }) as Promise<unknown>
     // 3 requests × (400ms tab + 200ms poll)
     await vi.advanceTimersByTimeAsync(3_000)
     const { payload } = parseReply(await promise) as { payload: { ranCount: number; results: { requestId: string }[] } }
@@ -307,7 +386,7 @@ describe('execute tools — run_batch', () => {
 
     const mcp = new FakeMcpService()
     registerExecutionTools(mcp as unknown as McpService)
-    const promise = mcp.invoke('run_batch', { ids: ['a', 'ghost', 'c'] }) as Promise<unknown>
+    const promise = mcp.invoke('run_request_batch', { ids: ['a', 'ghost', 'c'] }) as Promise<unknown>
     await vi.advanceTimersByTimeAsync(1_000)
     const { payload } = parseReply(await promise) as { payload: { ranCount: number; requestedCount: number; error?: { code: string } } }
     expect(payload.ranCount).toBe(1)
@@ -318,7 +397,7 @@ describe('execute tools — run_batch', () => {
   it('rejects an empty array', async () => {
     const mcp = new FakeMcpService()
     registerExecutionTools(mcp as unknown as McpService)
-    const { isError } = parseReply(await mcp.invoke('run_batch', { ids: [] }))
+    const { isError } = parseReply(await mcp.invoke('run_request_batch', { ids: [] }))
     expect(isError).toBe(true)
   })
 })

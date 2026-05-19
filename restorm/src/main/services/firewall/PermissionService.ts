@@ -81,6 +81,23 @@ interface PendingPrompt {
 	resolve: (verdict: Verdict) => void
 	origin: FirewallOrigin
 	timeoutHandle: NodeJS.Timeout
+	source: string
+	startedAt: string
+	originHint?: string
+}
+
+/**
+ * Read-only snapshot of a pending prompt — what the MCP layer
+ * (and the firewall toast UI) needs to surface "the user has X
+ * decisions waiting." `promptId` is the key callers pass back to
+ * `resolvePrompt` to answer one programmatically.
+ */
+export interface PendingPromptSnapshot {
+	promptId: string
+	origin: FirewallOrigin
+	source: string
+	startedAt: string
+	originHint?: string
 }
 
 /**
@@ -436,11 +453,24 @@ class PermissionService {
 		const promptId = randomUUID()
 		const promise = new Promise<Verdict>((resolve) => {
 			const timeoutHandle = setTimeout(() => {
-				logger.warn('PermissionService: prompt timed out (auto-deny)', { promptId, origin, source, timeoutMs: PROMPT_TIMEOUT_MS })
-				this.resolvePrompt(promptId, 'deny')
+				logger.warn('PermissionService: prompt timed out (auto-deny, not persisted)', { promptId, origin, source, timeoutMs: PROMPT_TIMEOUT_MS })
+				// `persist: false` — the user didn't actually answer, so
+				// treating silence as a permanent "block forever" is
+				// hostile UX. Deny THIS request, leave the rule lists
+				// untouched, and the next outbound call to the same
+				// origin gets a fresh prompt.
+				this.resolvePrompt(promptId, 'deny', false)
 			}, PROMPT_TIMEOUT_MS)
 			timeoutHandle.unref()
-			this.pendingPrompts.set(promptId, { resolve, origin, timeoutHandle })
+			const pending: PendingPrompt = {
+				resolve,
+				origin,
+				timeoutHandle,
+				source,
+				startedAt: new Date().toISOString()
+			}
+			if (originHint !== undefined && originHint !== '') pending.originHint = originHint
+			this.pendingPrompts.set(promptId, pending)
 		})
 		this.promptByOrigin.set(key, promptId)
 		const payload: FirewallPromptPayload = {
@@ -452,15 +482,25 @@ class PermissionService {
 		}
 		const targets = BrowserWindow.getAllWindows().filter((w) => !w.isDestroyed())
 		if (targets.length === 0) {
-			logger.warn('PermissionService: no renderer window for prompt — auto-denying', { promptId, origin, source })
-			queueMicrotask(() => { this.resolvePrompt(promptId, 'deny') })
+			logger.warn('PermissionService: no renderer window for prompt — auto-denying (not persisted)', { promptId, origin, source })
+			// Same rationale as the timeout path: no renderer = no user
+			// signal = don't persist the silence into the blacklist.
+			queueMicrotask(() => { this.resolvePrompt(promptId, 'deny', false) })
 			return promise
 		}
 		for (const win of targets) win.webContents.send(FIREWALL_IPC.PROMPT_SHOW, payload)
 		return promise
 	}
 
-	resolvePrompt(promptId: string, verdict: Verdict): void {
+	/**
+	 * Resolve a pending prompt. `persist` defaults to `true` — meaning
+	 * the verdict gets recorded into the matching list so future calls
+	 * to the same origin short-circuit. Pass `false` for synthetic
+	 * resolutions (timeout, no-renderer, before-quit cleanup) where the
+	 * user didn't actually click — those should resolve the current
+	 * request without writing a forever-rule on their behalf.
+	 */
+	resolvePrompt(promptId: string, verdict: Verdict, persist = true): void {
 		this.loadIfNeeded()
 		const pending = this.pendingPrompts.get(promptId)
 		if (pending === undefined) {
@@ -471,11 +511,13 @@ class PermissionService {
 		const key = this.originKey(pending.origin)
 		this.pendingPrompts.delete(promptId)
 		this.promptByOrigin.delete(key)
-		// Persist the user's decision into the matching list. Allow
-		// → whitelist; deny → blacklist. Both lists' add* methods
-		// dedupe + write through to disk.
-		if (verdict === 'allow') this.addToWhitelist(pending.origin)
-		else this.addToBlacklist(pending.origin)
+		if (persist) {
+			// Persist the user's decision into the matching list. Allow
+			// → whitelist; deny → blacklist. Both lists' add* methods
+			// dedupe + write through to disk.
+			if (verdict === 'allow') this.addToWhitelist(pending.origin)
+			else this.addToBlacklist(pending.origin)
+		}
 		pending.resolve(verdict)
 		const waiters = this.waitersByOrigin.get(key)
 		if (waiters !== undefined) {
@@ -490,9 +532,32 @@ class PermissionService {
 	 * bridge with dangling Promises that the renderer can never
 	 * resolve. Idempotent.
 	 */
+	/**
+	 * Snapshot of every prompt currently awaiting a user decision.
+	 * Returned in insertion order (oldest first) so the caller can
+	 * show "X has been waiting longer than Y." Empty when no
+	 * prompt is in flight.
+	 */
+	listPendingPrompts(): PendingPromptSnapshot[] {
+		const out: PendingPromptSnapshot[] = []
+		for (const [promptId, p] of this.pendingPrompts) {
+			const snap: PendingPromptSnapshot = {
+				promptId,
+				origin: { ...p.origin },
+				source: p.source,
+				startedAt: p.startedAt
+			}
+			if (p.originHint !== undefined) snap.originHint = p.originHint
+			out.push(snap)
+		}
+		return out
+	}
+
 	denyAllPending(): void {
 		const ids = Array.from(this.pendingPrompts.keys())
-		for (const promptId of ids) this.resolvePrompt(promptId, 'deny')
+		// `persist: false` — shutdown isn't a user decision; the next
+		// boot starts with the same rules the user had before quitting.
+		for (const promptId of ids) this.resolvePrompt(promptId, 'deny', false)
 	}
 }
 

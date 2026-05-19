@@ -339,7 +339,6 @@ function itemToHTTPRequest(item: PostmanItem, pathPrefix: string): HTTPRequest {
     type: 'http',
     id: generateId(`postman:request:${pathPrefix}:${item.name}`),
     name: item.name,
-    documentation: '',
     tags: [],
     method: toHTTPMethod(request?.method),
     url: rawUrl,
@@ -391,7 +390,6 @@ function itemToGraphQLRequest(item: PostmanItem, pathPrefix: string): GraphQLReq
     type: 'graphql',
     id: generateId(`postman:graphql:${pathPrefix}:${item.name}`),
     name: item.name,
-    documentation: '',
     tags: [],
     url: rawUrl,
     operationType,
@@ -416,7 +414,6 @@ function convertItem(item: PostmanItem, pathPrefix: string): Folder | Request {
     const folder: Folder = {
       id: generateId(`postman:folder:${folderPath}`),
       name: item.name,
-      documentation: '',
       tags: [],
       configuration: {},
       items: item.item.map(child => convertItem(child, folderPath))
@@ -440,27 +437,33 @@ function extractEnvironment(
 ): Environment {
   const variables: KeyValue[] = []
 
-  // Add collection variables
+  // Add collection variables. `createTypedKeyValue` promotes any value
+  // containing `{{...}}` to an `ExpressionValue` so Postman templates
+  // (`{{protocol}}://{{host}}`, `{{token}}`, …) actually substitute at
+  // runtime instead of being persisted as literal strings.
   for (const v of collection.variable ?? []) {
     if (v.key && v.value !== undefined) {
       // If user provided a baseUrl, skip the collection's baseUrl
       if (v.key === 'baseUrl' && baseUrl) {
         continue
       }
-      variables.push({
+      const description = extractDescription(v.description)
+      variables.push(createTypedKeyValue({
         key: v.key,
-        value: v.value,
-        description: extractDescription(v.description) || undefined
-      })
+        value: typeof v.value === 'string' ? v.value : String(v.value),
+        enabled: true,
+        ...(description ? { description } : {})
+      }))
     }
   }
 
   // If baseUrl provided, add it at the beginning
   if (baseUrl) {
-    variables.unshift({
+    variables.unshift(createTypedKeyValue({
       key: 'baseUrl',
-      value: baseUrl
-    })
+      value: baseUrl,
+      enabled: true
+    }))
   }
 
   // Extract domain name for environment name
@@ -553,7 +556,6 @@ export function importPostman(
     importSource: 'postman',
     id: generateId(`postman:root:${collection.info.name}`),
     name: collection.info.name,
-    documentation: '',
     tags: [],
     configuration: {},
     environments: [environment],

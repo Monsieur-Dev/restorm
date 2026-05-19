@@ -30,8 +30,12 @@ This folder contains:
 - Persistence:
   - `workbenchId?: string`
   - `autosave?: boolean`
-  - `onRebuildTab?: (tabId: string) => EditorTab | null`
+  - `onRebuildTab?: (tabId: string, data?: unknown) => EditorTab | null` — receives the optional per-tab `persistedState` round-tripped through the autosave (see below).
   - `onStateRestored?: (tree: WorkbenchTree | null) => void`
+
+#### Round-tripping per-tab state
+
+Each `EditorTab` may set an opt-in `persistedState?: unknown` field. ECUI captures it on every autosave (parallel array next to `tabIds`) and feeds it back into the second argument of `onRebuildTab(tabId, data)` on restore. Use it for tab-local state that doesn't belong in the tab id — e.g. a Mini browser's current URL, a markdown preview's scroll position, the active sub-tab inside a multi-pane editor. The payload must be JSON-serialisable; ECUI treats it as opaque.
 - Sizing:
   - `onSizesChange?: (nodeId: string, sizes: number[]) => void`
 - Tab callbacks / extensibility:
@@ -41,6 +45,27 @@ This folder contains:
   - `onGetTabContent?: (tabId: string) => string | undefined`
   - `onDetachToNewWindow?: (tabId: string, groupId: string, cursorX?: number, cursorY?: number) => void`
   - `onWorkbenchTabDropped?: (tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }) => boolean | Promise<boolean>`
+
+#### Imperative handle (`EditorWorkbenchHandle`)
+
+`EditorWorkbench` is a `forwardRef` — attach a ref to reach its imperative API:
+
+- `saveState(): Promise<boolean>` — manually flush the workbench tree to storage.
+- `loadState(): Promise<WorkbenchTree | null>` — manually restore from storage.
+- `clearState(): Promise<boolean>` — drop the persisted state.
+- `setFullscreenTabId(tabId: string | null): void` — maximize a tab into the fullscreen modal (`tabId`), or restore whatever is maximized (`null`). Mirrors a double-click on the tab: same `allowFullscreen` gate, same modal. The maximized and normal views share one React instance — relocated by `appendChild`, never remounted — so no editor / response / scroll state is lost in either direction. Use this to drive maximize from outside the workbench (e.g. wired to the MCP `set_tab_maximized` tool).
+
+#### Maximizing a tab (`allowFullscreen`)
+
+A tab opts into maximize by setting `allowFullscreen: true` on its `EditorTab`. Maximizable tabs respond to a double-click on their tab header (and to `setFullscreenTabId`) by opening their content in a fullscreen [`Modal`](../Modal/README.md). At most one tab across all split panes can be maximized at a time. The maximized state is workbench-wide (owned by `EditorWorkbench`), not per-group.
+
+#### Tab content lives above the split-pane tree
+
+Each tab's content (`renderTabContent(tab)`) is rendered **exactly once**, by `EditorWorkbench`, into a stable per-tab detached host `<div>` — *above* the split-pane group tree. Each `EditorGroupView` only renders an empty slot per tab; the host node is relocated into the current slot (or the fullscreen modal body) with `appendChild`.
+
+The consequence consumers can rely on: a tab keeps its **single React instance** — and therefore all of its state (an in-flight HTTP response, unsaved edits, scroll position, sub-tab selection) — when it is **moved between groups**, dragged to a split, or maximized / restored. None of those is a remount.
+
+The host node carries a `data-tab-host-id="{tabId}"` attribute — a stable hook for debugging or for asserting in tests that a tab kept its instance across a relocation.
 
 ## Testing
 

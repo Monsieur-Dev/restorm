@@ -1,5 +1,7 @@
+import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { useRequestReset } from '../../hooks/useRequestReset'
+import { getRequestPanelState, setRequestPanelCollapsed } from '../../services/requestPanelStateStore'
 import { useTranslation } from 'react-i18next'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
@@ -19,7 +21,7 @@ import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { WebSocketRequest, WebSocketResponse, WebSocketMessage, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
-import type { WebSocketExecutionResult, WebSocketMessageItem, KeyValueData } from '../../types/global.d'
+import type { WebSocketExecutionResult, WebSocketMessageItem } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { useRestormStore } from '../../store/restormStore'
@@ -29,6 +31,7 @@ import { useApiDocumentationFromRequest } from '../../hooks/useApiDocumentationF
 import { DocumentationHost } from '../documentation/DocumentationHost'
 import { findOperationForRoute } from '../../../../shared/utils/findOperationForRoute'
 import { DEFAULT_WS_TIMEOUT_MS } from '../../../../shared/config/constants'
+import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 
 export interface WebSocketRequestTabViewProps {
   request: WebSocketRequest
@@ -39,7 +42,10 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
 }) => {
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
-  const { selectedEnvId, environments, envColor } = useEnvironmentContext()
+  // See HTTPRequestTabView — `projectUuid` from the env context is
+  // synchronously available, unlike `useFileService` which races the
+  // `useState` lazy initializer.
+  const { selectedEnvId, environments, envColor, projectUuid } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const { apiDocumentation, route } = useApiDocumentationFromRequest(request)
@@ -54,6 +60,23 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<WebSocketResponse | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+
+  // See HTTPRequestTabView for the contract.
+  const [panelCollapsed, setPanelCollapsed] = useState<{ message: boolean; headers: boolean }>(() => {
+    const seed = (projectUuid ? getRequestPanelState(projectUuid, request.id) : undefined) ?? {}
+    return {
+      message: typeof seed['message'] === 'boolean' ? seed['message'] : false,
+      headers: typeof seed['headers'] === 'boolean' ? seed['headers'] : request.headers.length === 0
+    }
+  })
+  const handlePanelCollapsedChange = useCallback((arr: boolean[]) => {
+    const next = { message: arr[0] ?? false, headers: arr[1] ?? false }
+    setPanelCollapsed(next)
+    if (projectUuid) {
+      setRequestPanelCollapsed(projectUuid, request.id, 'message', next.message)
+      setRequestPanelCollapsed(projectUuid, request.id, 'headers', next.headers)
+    }
+  }, [projectUuid, request.id])
 
   const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
@@ -85,8 +108,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     const currentRequest = requestRef.current
     logger.debug('[WebSocketRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
 
-    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
-      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
+    const toKeyValueData = toKeyValueDataShared
 
     void window.restorm?.context.registerRequest(requestId, currentEnvId, {
       headers: toKeyValueData(currentRequest.headers)
@@ -148,8 +170,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
 
   // Notify ContextService when URL, event or message changes
   useEffect(() => {
-    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
-      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
+    const toKeyValueData = toKeyValueDataShared
 
     void window.restorm?.context.updateFullRequestData(request.id, {
       url,
@@ -241,8 +262,13 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
 
   // Request content (SplitView with Message, Headers)
   const requestContent = (
-    <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }} data-testid="websocket-request-split-view">
-      <Pane title={t('websocket.tabs.message')} initialSize={0.7} minSize={150} data-testid="websocket-message-pane">
+    <SplitView
+      orientation="vertical"
+      style={{ width: '100%', height: '100%' }}
+      data-testid="websocket-request-split-view"
+      onCollapsedChange={handlePanelCollapsedChange}
+    >
+      <Pane title={t('websocket.tabs.message')} initialSize={0.7} minSize={150} collapsed={panelCollapsed.message} data-testid="websocket-message-pane">
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {(request.protocol === 'socketio' || request.protocol === 'mqtt') && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 4px' }}>
@@ -273,7 +299,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         title={t('websocket.tabs.headers')}
         initialSize={0.3}
         minSize={100}
-        collapsed={request.headers.length === 0}
+        collapsed={panelCollapsed.headers}
         data-testid="websocket-headers-pane"
         headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
           <Button
@@ -415,16 +441,18 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           data-testid="websocket-url-input"
         />
       </div>
-      <Button
-        icon={isSending ? 'debug-disconnect' : 'plug'}
-        onClick={isSending ? handleDisconnect : handleSend}
-        {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-        options={{
-          title: isSending ? t('websocket.disconnect') : t('websocket.connect'),
-          ariaLabel: isSending ? t('websocket.disconnect') : t('websocket.connect')
-        }}
-        data-testid="websocket-connect-button"
-      />
+      <SendButtonEnvSwitcher>
+        <Button
+          icon={isSending ? 'debug-disconnect' : 'plug'}
+          onClick={isSending ? handleDisconnect : handleSend}
+          {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+          options={{
+            title: isSending ? t('websocket.disconnect') : t('websocket.connect'),
+            ariaLabel: isSending ? t('websocket.disconnect') : t('websocket.connect')
+          }}
+          data-testid="websocket-connect-button"
+        />
+      </SendButtonEnvSwitcher>
     </ControlGroup>
   )
   

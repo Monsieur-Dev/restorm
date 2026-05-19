@@ -14,14 +14,29 @@ vi.mock('electron-core-ui/main', () => ({
   logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() }
 }))
 
-vi.mock('../../../src/main/services/ContextService', () => ({
-  contextService: {
-    getResolvedUrl: vi.fn(),
-    getRequestContext: vi.fn(),
-    resolveValue: vi.fn((v: string) => v),
-    transformAllValues: vi.fn()
+vi.mock('../../../src/main/services/ContextService', () => {
+  const resolveValueMock = vi.fn((v: string) => v)
+  return {
+    contextService: {
+      getResolvedUrl: vi.fn(),
+      getRequestContext: vi.fn(),
+      resolveValue: resolveValueMock,
+      // Type-aware header path: HTTPExecutionService now calls
+      // `resolveKeyValueForRequest(kv)` instead of
+      // `resolveValue(kv.value)` so it can gate substitution on
+      // `ExpressionValue` vs `StringValue`. The default mock unwraps
+      // the value via `toString()` (covers both class instances and
+      // raw-string test fixtures) and reuses `resolveValueMock` so
+      // existing tests that override `resolveValue.mockImplementation`
+      // keep working without having to also configure this one.
+      resolveKeyValueForRequest: vi.fn((kv: { value: unknown }) => {
+        const raw = typeof kv.value === 'string' ? kv.value : String(kv.value)
+        return resolveValueMock(raw)
+      }),
+      transformAllValues: vi.fn()
+    }
   }
-}))
+})
 
 // For http/https we return an object whose `request` is a vi.fn().
 // We grab the reference *after* the mock is set up via `await import(…)`.

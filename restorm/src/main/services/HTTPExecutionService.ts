@@ -10,6 +10,7 @@ import { BrowserWindow } from 'electron'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
 import { authenticationCacheService, type ResolvedAuthShape } from './AuthenticationCacheService'
+import { withFirewallBypass } from './firewall/firewallBypass'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../shared/config/constants'
 import type { AuthenticationRequest } from '../../shared/models/requests/AuthenticationRequest'
 
@@ -135,9 +136,13 @@ class HTTPExecutionService {
               continue
             }
             if (h.key) {
-              // Resolve header value using environment context
-              const resolvedValue = contextService.resolveValue(h.value, requestId)
-              headers[h.key] = resolvedValue
+              // Type-aware resolution: only `ExpressionValue` rows
+              // get handlebars-substituted; a `StringValue` row
+              // ships verbatim. The old `resolveValue(h.value, …)`
+              // path always ran the resolver regardless of type,
+              // so a user who handcrafted `{{token}}` as a plain
+              // string saw it silently expanded on send.
+              headers[h.key] = contextService.resolveKeyValueForRequest(h, requestId)
             }
           }
         }
@@ -155,21 +160,57 @@ class HTTPExecutionService {
         }
       } else if (requestContext?.fullData?.body) {
         const bodyData = requestContext.fullData.body
-        if (bodyData.type === 'text') {
-          body = contextService.resolveValue(bodyData.content, requestId)
-        } else if (bodyData.type === 'x-www-form-urlencoded') {
-          const params = new URLSearchParams()
-          for (const field of bodyData.fields) {
-            if (field.key) {
-              const resolvedKey = contextService.resolveValue(field.key, requestId)
-              const resolvedValue = contextService.resolveValue(field.value, requestId)
-              params.append(resolvedKey, resolvedValue)
+        switch (bodyData.type) {
+          case 'text':
+            body = contextService.resolveValue(bodyData.content, requestId)
+            break
+          case 'x-www-form-urlencoded': {
+            const params = new URLSearchParams()
+            for (const field of bodyData.fields) {
+              if (field.key) {
+                // `field.value` arrives either as a raw string (renderer
+                // IPC path) or a `ValueType` instance (main-side flush
+                // path). Coerce uniformly — body templates always run
+                // through handlebars regardless of declared type.
+                const rawValue = typeof field.value === 'string' ? field.value : field.value.toString()
+                const resolvedKey = contextService.resolveValue(field.key, requestId)
+                const resolvedValue = contextService.resolveValue(rawValue, requestId)
+                params.append(resolvedKey, resolvedValue)
+              }
+            }
+            body = params.toString()
+            headers['Content-Type'] ??= 'application/x-www-form-urlencoded'
+            break
+          }
+          case 'form-data':
+          case 'file':
+            // `form-data` and `file` reach the wire through a dedicated
+            // upload path elsewhere; leaving `body` undefined here is
+            // intentional. The warning is a tripwire in case that path
+            // ever stops claiming these requests and they accidentally
+            // fall through to the plain executor.
+            logger.warn('[HTTPExecutionService] body type uses a dedicated handler and is not routed through this executor', {
+              requestId,
+              bodyType: bodyData.type
+            })
+            break
+          default: {
+            // Compile-time exhaustiveness: forces the developer to
+            // re-visit this switch whenever a new variant is added to
+            // `HTTPRequestBody`. The runtime branch defends against
+            // bad persisted state / MCP callers that bypass schema
+            // checks — used to drop silently and surface as a generic
+            // upstream 4xx.
+            const _exhaustive: never = bodyData
+            const unknownType = (bodyData as { type?: unknown }).type
+            return {
+              requestId,
+              success: false,
+              error: `Unknown body type: ${JSON.stringify(unknownType)}. Valid values: text, file, form-data, x-www-form-urlencoded.`,
+              timings: { startedAt, durationMs: Date.now() - startTime }
             }
           }
-          body = params.toString()
-          headers['Content-Type'] ??= 'application/x-www-form-urlencoded'
         }
-        // Note: form-data and file modes require special handling
       }
 
       // Inject auth headers (fresh or cached) before dispatching.
@@ -332,7 +373,15 @@ class HTTPExecutionService {
     timeout: number
     signal: AbortSignal
   }): Promise<{ statusCode: number; statusText: string; headers: Record<string, string | string[]>; body: string }> {
-    return new Promise((resolve, reject) => {
+    // The Send-button dispatch is by definition a user-initiated
+    // outbound — same trust tier as a URL pasted into Import or typed
+    // into the mini-browser. Wrap the actual http.request call inside
+    // `withFirewallBypass` so the firewall interceptor short-circuits
+    // to `allow` instead of either popping a duplicate prompt the user
+    // already answered by clicking Send, or (worse) hanging silently
+    // on a non-whitelisted origin like `httpbin.org` because the
+    // main-process intercept path can't surface a toast.
+    return withFirewallBypass(() => new Promise((resolve, reject) => {
       const { url, method, headers, body, timeout, signal } = options
       
       const isHttps = url.protocol === 'https:'
@@ -404,7 +453,7 @@ class HTTPExecutionService {
       }
 
       request.end()
-    })
+    }))
   }
 
   /**
@@ -540,7 +589,20 @@ class HTTPExecutionService {
     for (const h of headerSource) {
       if (h.enabled === false) continue
       if (!h.key) continue
-      headers[h.key] = resolveForAuth(extractString(h.value))
+      // When the auth request IS registered with ContextService, use
+      // the type-aware path (gates substitution on `ExpressionValue`
+      // vs `StringValue`, same invariant as the main request headers).
+      // Otherwise fall back to the unconditional resolve — the auth
+      // never reached `register-request`, so we don't have a `KeyValue`
+      // with a real `ValueType` to gate on anyway (the renderer-import
+      // path lands here for spec-fetch auth).
+      if (contextService.getRequestContext(resolutionRequestId)) {
+        headers[h.key] = contextService.resolveKeyValueForRequest(h, resolutionRequestId)
+      } else if (parentRequestId && contextService.getRequestContext(parentRequestId)) {
+        headers[h.key] = contextService.resolveKeyValueForRequest(h, parentRequestId)
+      } else {
+        headers[h.key] = extractString(h.value)
+      }
     }
 
     // Build body.
@@ -553,8 +615,14 @@ class HTTPExecutionService {
         const params = new URLSearchParams()
         for (const field of bodyData.fields) {
           if (!field.key) continue
+          // `field.value` typed as `ValueType` — `flushRequestStateToContext`
+          // pushes the live class instance through, while the legacy
+          // renderer→IPC path lands a `string`. Coerce uniformly so
+          // `resolveValue` (which expects a string template) sees the
+          // raw template either way.
+          const rawValue = typeof field.value === 'string' ? field.value : field.value.toString()
           const k = contextService.resolveValue(field.key, resolutionRequestId)
-          const v = contextService.resolveValue(field.value, resolutionRequestId)
+          const v = contextService.resolveValue(rawValue, resolutionRequestId)
           params.append(k, v)
         }
         body = params.toString()

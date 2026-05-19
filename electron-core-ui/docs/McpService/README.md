@@ -126,6 +126,14 @@ mcp.registerResource(
 
 The handler can be sync or async; both branches are funneled through the same finalization. `mimeType` resolution order: handler return value → resource config → `application/json` default for text payloads (no default for blob payloads — set `mimeType` explicitly when you mean binary).
 
+### `invokeTool(name, args, extra?)`
+
+Invokes a registered tool by name from inside the host process, returning whatever the tool's handler returns (sync value or `Promise`). Throws if `name` is not registered. Used by the built-in `batch` tool to chain calls without a round-trip through the HTTP transport; consuming apps can also use it to compose tools.
+
+```typescript
+const result = await Promise.resolve(mcp.invokeTool('screenshot', {}))
+```
+
 ## Built-in tools
 
 ### `screenshot`
@@ -351,6 +359,87 @@ Appends a `<style>` tag with arbitrary CSS rules. Useful to debug hover/focus/ac
 ### `wait`
 
 Block for `ms` milliseconds. Use only when nothing else fits — prefer `wait-for` (DOM condition) or `refresh` (waits for `did-finish-load`). Capped at 30000 ms.
+
+### `batch`
+
+Chains multiple MCP tool calls into a single request. Runs each step in order; the next step only fires after the previous one resolves **and** the renderer has had an implicit "1 frame + 1 microtask" settle (override per step with `waitFor`, or skip globally via `skipImplicitSettle`). Aborts on the first step that throws or returns `isError: true` — subsequent steps are skipped.
+
+```jsonc
+{
+  "steps": [
+    { "name": "dispatch-event", "args": { "selector": ".open-btn", "type": "click" },
+      "waitFor": { "selector": ".modal" } },
+    { "name": "screenshot" }
+  ],
+  "windowId": 1,              // optional — window for the implicit settle frame-tick
+  "skipImplicitSettle": false // optional — drop the inter-step settle
+}
+```
+
+Per-step `waitFor` overrides the implicit settle. Pick one shape:
+
+| shape | meaning |
+| --- | --- |
+| `{ ms }` | Fixed delay in ms |
+| `{ selector, timeoutMs?, pollMs? }` | Poll until at least one element matches `selector` |
+| `{ predicate, timeoutMs?, pollMs? }` | Poll until the JS expression evaluates truthy in the renderer |
+
+`timeoutMs` defaults to 5000 (a timed-out / throwing `waitFor` aborts the batch). The response aggregates every step's `content` parts in order — embedded images / resources reach the client inline — followed by a final text part with the structured envelope:
+
+```jsonc
+{
+  "ranCount": 2,
+  "totalCount": 2,
+  "aborted": false,
+  "abortedAt": null,
+  "results": [
+    { "index": 0, "name": "dispatch-event", "ok": true },
+    { "index": 1, "name": "screenshot", "ok": true }
+  ]
+}
+```
+
+When a step is `screencast-stop`, the recorded `.webm` is read from disk and inlined as a `resource` content part (base64 `blob` + `video/webm` `mimeType`), so a `screencast-start → actions → screencast-stop` chain returns the video bytes without a follow-up file read. Not to be confused with consuming-app tools like restorm's `run_request_batch`, which batches HTTP / protocol requests.
+
+### `open_mini_browser`
+
+Broadcasts `MINI_BROWSER_OPEN_CHANNEL` to open / focus the host app's Mini browser panel. Optional `url` navigates the embedded webview immediately (bare hosts like `example.com` are normalised by the renderer). Requires the host to render `MiniBrowserPanel` and wire `useMcpMiniBrowserBridge` — see the [MiniBrowser doc](../MiniBrowser/README.md).
+
+```jsonc
+{ "url": "https://example.com" }   // url optional
+```
+
+### `mini_browser_execute`
+
+Runs a JavaScript expression inside the Mini browser's `<webview>` **guest** context (not the host renderer) and returns the result. Broadcasts `MINI_BROWSER_EXECUTE_CHANNEL` with a request id, waits for the renderer's reply on `MINI_BROWSER_EXECUTE_REPLY_CHANNEL`. Use it to fill a login form in the embedded site, read a token from the page's `localStorage`, click a button, etc.
+
+```jsonc
+{
+  "code": "(() => localStorage.getItem('jwt'))()",
+  "timeoutMs": 5000   // optional, default 5000, max 60000
+}
+```
+
+Returns an error if no Mini browser tab is open or the webview hasn't finished its initial load.
+
+### `open_console`
+
+Broadcasts `CONSOLE_OPEN_CHANNEL` to open / focus the host app's Console panel (the read-only audit feed of intercepted network traffic). Requires the host to render `ConsolePanel` and wire its tab — see the [Console doc](../Console/README.md). No parameters.
+
+### `console_clear`
+
+Broadcasts `CONSOLE_CLEAR_CHANNEL` to wipe the renderer-side Console feed buffer — same effect as the toolbar's Clear button. The host wires it to `clearConsoleFeed()`. Useful to reset the log before a focused experiment. No parameters.
+
+### `set_tab_maximized`
+
+Broadcasts `SET_TAB_MAXIMIZED_CHANNEL` to open a workbench tab fullscreen (in the same modal a double-click on the tab opens) or restore it back to its split-pane slot. The maximized and normal views share one React instance, so no edits / responses / scroll state are lost in either direction. Requires the host to wire `EditorWorkbench`'s `setFullscreenTabId` imperative handle to the channel — see the [Workbench doc](../Workbench/README.md).
+
+```jsonc
+{ "tabId": "request-id:abc", "maximized": true }   // maximize
+{ "maximized": false }                             // restore (tabId ignored)
+```
+
+`tabId` is required when `maximized` is `true`; on restore it is ignored since at most one tab can be maximized at a time. Only tabs the host marked maximizable (`allowFullscreen`) actually maximize.
 
 ### `get-windows`
 

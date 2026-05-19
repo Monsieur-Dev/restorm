@@ -253,6 +253,12 @@ function mapModels(definitions: Record<string, CommonSchema> | undefined): Recor
     const merged = mergeAllOfInto({ ...schema })
     const entry: ModelDocumentation = { name, properties: mapSchemaProperties(schema) }
     if (merged.description !== undefined) entry.description = merged.description
+    // Top-level enum schema: surface values so consumers render the
+    // model as an enum node rather than an empty object. `properties`
+    // will be empty for these schemas.
+    if (Array.isArray(merged.enum) && merged.enum.length > 0) {
+      entry.enumValues = [...merged.enum]
+    }
     const oneOf = extractCompositionRefs(merged.oneOf)
     const anyOf = extractCompositionRefs(merged.anyOf)
     const discriminator = extractDiscriminator(merged)

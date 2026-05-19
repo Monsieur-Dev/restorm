@@ -1,0 +1,725 @@
+{
+  "app": {
+    "title": "restorm",
+    "openSettings": "Öppna inställningar",
+    "draftsRestoredTitle": "Osparat arbete återställt",
+    "draftsRestoredBody_one": "{{count}} utkast återställdes från din föregående session.",
+    "draftsRestoredBody_other": "{{count}} utkast återställdes från din föregående session."
+  },
+  "statusbar": {
+    "requestHistory": "Förfrågningshistorik",
+    "envSelector": {
+      "applyToAll": "Använd på alla förfrågningar"
+    }
+  },
+  "tips": {
+    "cardTitle": "Tips & tricks",
+    "maximizeTab": {
+      "title": "Maximera en flik med ett klick",
+      "body": "Dubbelklicka på valfri workbench-flik för att visa den i helskärm. Tryck Esc för att återgå till den föregående layouten."
+    },
+    "mcpControl": {
+      "title": "Styr restorm med AI",
+      "body": "Restorm levereras med en MCP-server, så AI-assistenter som Claude Code kan lista, öppna, redigera och köra dina förfrågningar, inspektera svar och manipulera arbetsytan programmatiskt – utan att lämna chatten."
+    },
+    "envSwitch": {
+      "title": "Byt miljö enkelt!",
+      "body": "Byt miljö för den aktuella förfrågan eller för alla förfrågningar i ditt API genom att klicka på knappen i statusraden, eller genom att högerklicka på förfrågans skicka-knapp."
+    },
+    "authRequests": {
+      "title": "Behöver du autentisera dig för ditt API?",
+      "body": "Istället för att skicka en förfrågan varje gång för att hämta en token och klistra in den överallt – använd auth-förfrågningar. När ett anrop misslyckas (401, 403, …) eller din tokens livslängd löper ut körs auth-förfrågan automatiskt om för att extrahera och återanvända token. Smidigt!"
+    },
+    "supplyChain": {
+      "title": "Skydda dig själv!",
+      "body": "Som all programvara använder Restorm tredjepartsbibliotek. För att förhindra supply chain-attacker fångas alla utgående anrop på lägsta nivå, och vi varnar dig om ett tredjepartsbibliotek försöker stjäla dina personliga uppgifter!"
+    },
+    "codeSnippets": {
+      "title": "Restorm hjälper dig att koda!",
+      "body": "Hitta kodsnuttar för varje förfrågan för att integrera dem i din mjukvara. Många språk tillgängliga: curl, PowerShell, TypeScript, C# och många fler!"
+    },
+    "workbenchLayout": {
+      "title": "Organisera din arbetsyta",
+      "body": "Stor skärm och många förfrågningar? Placera dem sida vid sida, ovanpå varandra eller precis som du vill — bara dra en flik dit du vill ha den. Allt för din komfort!"
+    },
+    "persistState": {
+      "title": "Hitta det precis som du lämnade det!",
+      "body": "Stänger du Restorm och öppnar det igen så hittar du det i exakt samma tillstånd som när du lämnade det."
+    },
+    "favorites": {
+      "title": "Vissa ligger dig närmare hjärtat…",
+      "body": "Finns det förfrågningar som betyder mer för dig än andra? Spara dem som favoriter!"
+    },
+    "console": {
+      "title": "Se vad som händer",
+      "body": "Konsolen visar anropen till dina API:er medan du skickar förfrågningar. Smidigt att kopiera in dem i terminalen vid behov! Vilken smak föredrar du: curl eller PowerShell?"
+    },
+    "miniBrowser": {
+      "title": "Trött på att byta fönster hela tiden?",
+      "body": "Restorm har en inbyggd minibrowser. Praktiskt när din app visuellt reagerar på dina API-anrop."
+    },
+    "apiDocs": {
+      "title": "Dokumentationen — här inne",
+      "body": "Slipp hoppa mellan Restorm och dokumentationen för ditt API. Om ditt API levererar en spec (Swagger, OpenAPI, …) importeras den i Restorm och du kan läsa den direkt här."
+    },
+    "secrets": {
+      "title": "Skydda dina hemligheter",
+      "body": "Dina lösenord och auth-tokens lagras inte direkt i Restorm-filen. Därför sparar Restorm hemligheter och förfrågningshistorik i separata filer. Det är upp till dig att inte pusha dem till GitHub. Restorm kan också hämta hemligheter från AWS, GitHub och andra källor."
+    },
+    "themes": {
+      "title": "Dina färger, ditt humör",
+      "body": "Restorm levereras med flera färgscheman. Välj det som passar din stämning."
+    },
+    "search": {
+      "title": "Hitta allt, snabbt",
+      "body": "Har du sett toppen av fönstret? Restorm har en inbyggd sökmotor — slut på timmar av letande efter precis den där förfrågan."
+    },
+    "multiEnv": {
+      "title": "Samma förfrågningar, olika miljöer",
+      "body": "Har du dev, staging och prod? Samma förfrågningar, men inte riktigt samma URL:er, inte riktigt samma tokens… Använd miljöer och variabler för att växla med ett klick. Du kan till och med särskilja varje miljö med färg och ikon för att slippa skräcken på fredagskvällen i produktion!"
+    },
+    "protocols": {
+      "title": "Mer än bara REST",
+      "body": "Restorm talar REST… och mycket mer! GraphQL, gRPC, SOAP, OData, WebSocket — alla dessa protokoll inom räckhåll, utan att byta verktyg."
+    },
+    "responseTree": {
+      "title": "Se dina API-svar visuellt",
+      "body": "Visste du att du kan utforska dina API-svar mer grafiskt? Restorm visar dem som ett interaktivt träd som du kan navigera, fälla in och fälla ut."
+    },
+    "responseHistory": {
+      "title": "Historik över förfrågningar",
+      "body": "Du kan bläddra i historiken över alla anrop till dina API:er. Smidigt för att ta reda på exakt vad som hände."
+    },
+    "multiLanguage": {
+      "title": "27 språk!",
+      "body": "Restorm talar 27 språk. Engelska, franska, spanska, tyska, italienska, japanska, kinesiska, koreanska och många fler — välj ditt i inställningarna!"
+    }
+  },
+  "authFailureToast": {
+    "title": "Autentisering misslyckades",
+    "fallbackReason": "Autentiseringsförfrågan lyckades inte.",
+    "openAuthRoute": "Öppna autentiseringsruttn"
+  },
+  "menuBar": {
+    "file": "Arkiv",
+    "new": "Ny",
+    "import": "Importera",
+    "open": "Öppna",
+    "openFolder": "Öppna mapp",
+    "recentFiles": "Senaste filer",
+    "favorites": "Favoriter",
+    "close": "Stäng",
+    "save": "Spara",
+    "saveAll": "Spara alla",
+    "saveAs": "Spara som",
+    "exit": "Avsluta",
+    "selection": "Markering",
+    "tools": "Verktyg",
+    "findInCollection": "Sök i samling",
+    "addRequest": "Lägg till förfrågan",
+    "addRequestHttp": "HTTP-förfrågan",
+    "addRequestGraphql": "GraphQL-förfrågan",
+    "addRequestGrpc": "gRPC-förfrågan",
+    "addRequestSoap": "SOAP-förfrågan",
+    "addRequestOdata": "OData-förfrågan",
+    "addRequestWebsocket": "WebSocket-förfrågan",
+    "addFolder": "Lägg till mapp",
+    "addEnvironmentFolder": "Lägg till miljömapp",
+    "addVariable": "Lägg till variabel",
+    "addTag": "Lägg till tagg",
+    "expandAllFolders": "Expandera alla mappar",
+    "collapseAllFolders": "Fäll ihop alla mappar",
+    "sendActiveRequest": "Skicka förfrågan",
+    "cancelActiveRequest": "Avbryt förfrågan",
+    "generateCodeSnippet": "Generera kodavsnitt",
+    "copyAsCurl": "Kopiera som cURL",
+    "exportOpenApi": "Exportera till OpenAPI",
+    "clearAuthCache": "Rensa autentiseringscache",
+    "openLogsFolder": "Öppna loggmapp"
+  },
+  "sidebar": {
+    "addRequest": "Lägg till förfrågan",
+    "collapseAll": "Fäll ihop alla förfrågningar",
+    "workspace": "Arbetsyta",
+    "favorites": "Favoriter",
+    "newFolder": "Ny mapp",
+    "newEnvironmentFolder": "Ny miljömapp",
+    "contextMenu": {
+      "createFolder": "Skapa mapp",
+      "createEnvironmentFolder": "Skapa miljömapp",
+      "delete": "Ta bort",
+      "clone": "Klona",
+      "rename": "Byt namn",
+      "addToFavorites": "Lägg till i favoriter",
+      "removeFromFavorites": "Ta bort från favoriter",
+      "closeTab": "Stäng",
+      "closeOtherTabs": "Stäng andra",
+      "closeTabsToTheRight": "Stäng till höger",
+      "closeAllTabs": "Stäng alla",
+      "add": {
+        "title": "Lägg till",
+        "folder": "Mapp",
+        "httpGet": "HTTP – GET-förfrågan",
+        "httpPost": "HTTP – POST-förfrågan",
+        "httpPut": "HTTP – PUT-förfrågan",
+        "httpPatch": "HTTP – PATCH-förfrågan",
+        "httpDelete": "HTTP – DELETE-förfrågan",
+        "graphql": "GraphQL-förfrågan",
+        "grpc": "gRPC-förfrågan",
+        "soap": "SOAP-förfrågan",
+        "websocket": "WebSocket-förfrågan",
+        "odata": "OData-förfrågan",
+        "auth": "HTTP-autentiseringsförfrågan"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Bekräfta borttagning",
+      "folderMessage": "Är du säker på att du vill ta bort mappen \"{{name}}\" och allt dess innehåll?",
+      "itemMessage": "Är du säker på att du vill ta bort \"{{name}}\"?",
+      "confirm": "Ta bort",
+      "cancel": "Avbryt"
+    }
+  },
+  "environment": {
+    "newName": "Ny miljö",
+    "add": "Lägg till miljö",
+    "rename": "Byt namn",
+    "addSub": "Lägg till undermiljö",
+    "delete": "Ta bort"
+  },
+  "folderView": {
+    "environments": "Miljöer",
+    "environmentsAriaLabel": "Mappens miljöer",
+    "variables": "Variabler",
+    "addVariable": "Lägg till variabelrad",
+    "selectEnvironment": "Välj en miljö för att visa variabler",
+    "tabs": {
+      "docs": "Dokumentation",
+      "environments": "Miljöer",
+      "notes": "Anteckningar"
+    },
+    "home": {
+      "configureEnvs": "Konfigurera miljöer",
+      "configureEnvsDesc": "Ställ in dina bas-URL:er, variabler och autentisering för varje miljö",
+      "viewDocs": "Visa dokumentation",
+      "viewDocsDesc": "Bläddra i API-dokumentationen, modeller och endpoints",
+      "favoriteRequests": "Favoritförfrågningar",
+      "removeFavorite": "Ta bort från favoriter",
+      "apiUpdate": {
+        "title": "Uppdateringar av API-spec",
+        "noConfig": "Den här mappen skapades inte från en importerbar källa.",
+        "urlLabel": "URL",
+        "lastImportedLabel": "Senast importerad",
+        "lastCheckedLabel": "Senast kontrollerad",
+        "neverImported": "Aldrig importerad",
+        "neverChecked": "Aldrig kontrollerad",
+        "refreshing": "Uppdaterar API-spec…",
+        "fetching": "Hämtar…",
+        "upToDate": "API-spec är uppdaterad.",
+        "ok": "OK"
+      }
+    },
+    "contextVariables": {
+      "title": "Tillgängliga kontextvariabler",
+      "description": "Använd dessa variabler i dina förfrågnings-URL:er och uttrycks-typade variabler med syntaxen {{handlebars}}.",
+      "name": "Variabel",
+      "value": "Upplöst värde",
+      "copied": "Kopierat!"
+    }
+  },
+  "requestTab": {
+    "deprecated": "Denna endpoint är föråldrad och kan tas bort i en framtida version.",
+    "send": "Skicka",
+    "cancel": "Avbryt",
+    "urlPlaceholder": "Förfrågnings-URL",
+    "methodSelect": "Välj HTTP-metod",
+    "addHeader": "Lägg till header",
+    "addParam": "Lägg till parameter",
+    "environmentSelector": {
+      "noEnvironment": "Ingen miljö"
+    },
+    "body": {
+      "fileLabel": "Fil eller URL:",
+      "browse": "Bläddra..."
+    },
+    "tabs": {
+      "docs": "Dokumentation",
+      "requestLayout": "Förfrågan",
+      "headers": "Headers",
+      "body": "Kropp",
+      "params": "Parametrar",
+      "pathParams": "Sökvägsparametrar",
+      "notes": "Anteckningar",
+      "codeSnippets": "Kodavsnitt",
+      "responsesHistory": "Svarshistorik"
+    },
+    "responses": {
+      "tabs": {
+        "response": "Svar",
+        "requestBody": "Förfrågans kropp",
+        "graph": "Graf"
+      },
+      "loading": "Skickar förfrågan...",
+      "noResponse": "Klicka på Skicka för att köra förfrågan",
+      "history": {
+        "list": "Lista över svarshistorik",
+        "empty": "Inga svar har registrerats än",
+        "select": "Välj ett svar för att se detaljer",
+        "pin": "Nåla fast svar",
+        "unpin": "Lossa svar"
+      }
+    }
+  },
+  "workbench": {
+    "tabContextMenu": {
+      "close": "Stäng",
+      "closeOthers": "Stäng andra",
+      "addToFavorites": "Lägg till i favoriter",
+      "removeFromFavorites": "Ta bort från favoriter"
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Gå till definition"
+  },
+  "keyValueTable": {
+    "types": {
+      "string": "Sträng",
+      "secret": "Hemlighet",
+      "number": "Tal",
+      "dateTime": "Datum/tid",
+      "color": "Färg",
+      "expression": "Uttryck",
+      "boolean": "Boolesk"
+    },
+    "apiEnums": "API-definierade typer"
+  },
+  "graphql": {
+    "send": "Skicka",
+    "urlPlaceholder": "URL till GraphQL-endpoint",
+    "tabs": {
+      "query": "Fråga",
+      "variables": "Variabler",
+      "headers": "Headers"
+    }
+  },
+  "grpc": {
+    "send": "Anropa",
+    "urlPlaceholder": "gRPC-server (värd:port)",
+    "tabs": {
+      "message": "Meddelande",
+      "metadata": "Metadata"
+    }
+  },
+  "soap": {
+    "send": "Skicka",
+    "urlPlaceholder": "URL till SOAP-endpoint",
+    "tabs": {
+      "body": "Kropp",
+      "headers": "Headers"
+    }
+  },
+  "websocket": {
+    "connect": "Anslut",
+    "connected": "Ansluten",
+    "disconnected": "Frånkopplad",
+    "noMessages": "Inga meddelanden än",
+    "urlPlaceholder": "WebSocket-URL",
+    "event": "Händelse",
+    "topic": "Topic",
+    "tabs": {
+      "message": "Meddelande",
+      "headers": "Headers"
+    }
+  },
+  "search": {
+    "placeholder": "Sök...",
+    "noResults": "Inga resultat hittades",
+    "resultsAriaLabel": "Sökresultat",
+    "categories": {
+      "request": "Förfrågningar",
+      "folder": "Mappar",
+      "environment": "Miljöer",
+      "settings": "Inställningar",
+      "tag": "Taggar"
+    },
+    "tooltip": {
+      "noDetails": "Inga detaljer tillgängliga",
+      "noContent": "Ingen dokumentation eller anteckningar"
+    }
+  },
+  "httpStatus": {
+    "100": {
+      "name": "Continue",
+      "description": "Servern har tagit emot förfrågans headers och klienten bör fortsätta att skicka förfrågans kropp."
+    },
+    "101": {
+      "name": "Switching Protocols",
+      "description": "Klienten har bett servern att byta protokoll och servern har gått med på det."
+    },
+    "200": {
+      "name": "OK",
+      "description": "Standardsvar för lyckade HTTP-förfrågningar. Det faktiska svaret beror på vilken förfrågansmetod som användes."
+    },
+    "201": {
+      "name": "Created",
+      "description": "Förfrågan har uppfyllts vilket resulterat i att en ny resurs har skapats."
+    },
+    "202": {
+      "name": "Accepted",
+      "description": "Förfrågan har accepterats för bearbetning, men bearbetningen är inte slutförd."
+    },
+    "204": {
+      "name": "No Content",
+      "description": "Servern har behandlat förfrågan framgångsrikt och returnerar inget innehåll."
+    },
+    "301": {
+      "name": "Moved Permanently",
+      "description": "Denna och alla framtida förfrågningar bör riktas till den angivna URI:n."
+    },
+    "302": {
+      "name": "Found",
+      "description": "Talar om för klienten att titta på en annan URL. HTTP/1.0-specifikationen krävde att klienten utförde en tillfällig omdirigering."
+    },
+    "304": {
+      "name": "Not Modified",
+      "description": "Anger att resursen inte har ändrats sedan den version som anges av förfrågans headers."
+    },
+    "400": {
+      "name": "Bad Request",
+      "description": "Servern kan eller vill inte behandla förfrågan på grund av ett uppenbart klientfel (t.ex. felformaterad syntax)."
+    },
+    "401": {
+      "name": "Unauthorized",
+      "description": "Autentisering krävs och har misslyckats eller har ännu inte tillhandahållits."
+    },
+    "403": {
+      "name": "Forbidden",
+      "description": "Förfrågan innehöll giltiga data och förstods av servern, men servern vägrar utföra åtgärden."
+    },
+    "404": {
+      "name": "Not Found",
+      "description": "Den efterfrågade resursen kunde inte hittas men kan vara tillgänglig i framtiden."
+    },
+    "405": {
+      "name": "Method Not Allowed",
+      "description": "En förfrågansmetod stöds inte för den efterfrågade resursen."
+    },
+    "408": {
+      "name": "Request Timeout",
+      "description": "Servern fick timeout under väntan på förfrågan."
+    },
+    "409": {
+      "name": "Conflict",
+      "description": "Anger att förfrågan inte kunde behandlas på grund av en konflikt i resursens aktuella tillstånd."
+    },
+    "410": {
+      "name": "Gone",
+      "description": "Anger att den efterfrågade resursen tidigare var i bruk men inte längre är tillgänglig och inte kommer att vara tillgänglig igen."
+    },
+    "415": {
+      "name": "Unsupported Media Type",
+      "description": "Förfrågans entitet har en mediatyp som servern eller resursen inte stöder."
+    },
+    "422": {
+      "name": "Unprocessable Entity",
+      "description": "Förfrågan var välformad men kunde inte följas på grund av semantiska fel."
+    },
+    "429": {
+      "name": "Too Many Requests",
+      "description": "Användaren har skickat för många förfrågningar under en given tid (hastighetsbegränsning)."
+    },
+    "500": {
+      "name": "Internal Server Error",
+      "description": "Ett generiskt felmeddelande som ges när ett oväntat tillstånd uppstått och inget mer specifikt meddelande är lämpligt."
+    },
+    "501": {
+      "name": "Not Implemented",
+      "description": "Servern känner antingen inte igen förfrågansmetoden eller saknar förmågan att uppfylla förfrågan."
+    },
+    "502": {
+      "name": "Bad Gateway",
+      "description": "Servern agerade som gateway eller proxy och tog emot ett ogiltigt svar från den överordnade servern."
+    },
+    "503": {
+      "name": "Service Unavailable",
+      "description": "Servern kan inte hantera förfrågan (eftersom den är överbelastad eller stängd för underhåll)."
+    },
+    "504": {
+      "name": "Gateway Timeout",
+      "description": "Servern agerade som gateway eller proxy och fick inget snabbt svar från den överordnade servern."
+    }
+  },
+  "welcome": {
+    "confirmRemoveFavorite": "Vill du verkligen ta bort \"{{fileName}}\" från favoriter?",
+    "noFilesHint": "Öppna en fil eller skapa en ny för att komma igång",
+    "newAriaLabel": "Skapa en ny samling",
+    "openAriaLabel": "Öppna en samling från disken",
+    "landmarkLabel": "Välkommen"
+  },
+  "save": {
+    "title": "Sparalternativ",
+    "mode": {
+      "label": "Sparläge",
+      "file": "En enda fil",
+      "folder": "Mappstruktur",
+      "fileDescription": "Spara allt i en enda fil",
+      "folderDescription": "Spara som en mappstruktur med separata filer"
+    },
+    "format": {
+      "label": "Format",
+      "yamlDescription": "Läsbart för människor",
+      "jsonDescription": "Standardformat",
+      "json5Description": "JSON + kommentarer"
+    },
+    "preview": {
+      "label": "Förhandsgranskning av struktur",
+      "noDocumentation": "Ingen analyserad dokumentation för denna källa."
+    }
+  },
+  "common": {
+    "cancel": "Avbryt",
+    "save": "Spara"
+  },
+  "helpers": {
+    "categories": {
+      "comparison": "Jämförelse",
+      "string": "Sträng",
+      "math": "Matematik",
+      "array": "Array",
+      "object": "Objekt",
+      "url": "URL",
+      "date": "Datum",
+      "regex": "Regex",
+      "misc": "Övrigt"
+    },
+    "eq": "Strikt likhet (===)",
+    "ne": "Strikt olikhet (!==)",
+    "neq": "Strikt olikhet (!==)",
+    "lt": "Mindre än (<)",
+    "lte": "Mindre än eller lika med (<=)",
+    "gt": "Större än (>)",
+    "gte": "Större än eller lika med (>=)",
+    "and": "Blockhjälpare: renderar om alla värden är truthy",
+    "or": "Blockhjälpare: renderar om något värde är truthy",
+    "not": "Returnerar omvänt booleskt värde",
+    "ifEquals": "Blockhjälpare: renderar om värdena är lika",
+    "is": "Blockhjälpare: lös likhetsjämförelse",
+    "isnt": "Blockhjälpare: lös olikhetsjämförelse",
+    "default": "Returnerar standardvärdet om det första är null/undefined",
+    "compare": "Blockhjälpare: jämför med operator",
+    "lowercase": "Konverterar sträng till gemener",
+    "uppercase": "Konverterar sträng till versaler",
+    "capitalize": "Gör första bokstaven stor",
+    "capitalizeAll": "Gör första bokstaven i varje ord stor",
+    "titleize": "Gör första bokstaven i varje ord stor",
+    "camelcase": "Konverterar till camelCase",
+    "pascalcase": "Konverterar till PascalCase",
+    "snakecase": "Konverterar till snake_case",
+    "snakeCase": "Konverterar till snake_case (alias)",
+    "dashcase": "Konverterar till dash-case (kebab-case)",
+    "dotcase": "Konverterar till dot.case",
+    "pathcase": "Konverterar till path/case",
+    "sentencecase": "Konverterar till Meningsform",
+    "slugify": "Konverterar till URL-vänlig slug",
+    "trim": "Tar bort blanksteg från båda ändar",
+    "trimLeft": "Tar bort blanksteg från början",
+    "trimRight": "Tar bort blanksteg från slutet",
+    "replace": "Ersätter alla förekomster av a med b",
+    "split": "Delar upp strängen i array",
+    "truncate": "Trunkerar strängen till angiven längd",
+    "ellipsis": "Trunkerar strängen med ellips",
+    "append": "Lägger till suffix till strängen",
+    "prepend": "Lägger till prefix till strängen",
+    "reverse": "Vänder en sträng eller array",
+    "startsWith": "Blockhjälpare: renderar om strängen börjar med prefix",
+    "endsWith": "Blockhjälpare: renderar om strängen slutar med suffix",
+    "contains": "Blockhjälpare: renderar om strängen innehåller delsträng",
+    "padStart": "Fyller ut strängen i början för att nå längden",
+    "padEnd": "Fyller ut strängen i slutet för att nå längden",
+    "repeat": "Upprepar strängen n gånger",
+    "substring": "Extraherar del av strängen",
+    "indexOf": "Returnerar index för delsträng (-1 om ej hittad)",
+    "count": "Räknar förekomster av delsträng",
+    "newLineToBr": "Konverterar radbrytningar till <br>-taggar",
+    "stripTags": "Tar bort HTML-taggar från strängen",
+    "add": "Adderar två tal",
+    "subtract": "Subtraherar b från a",
+    "multiply": "Multiplicerar två tal",
+    "divide": "Dividerar a med b",
+    "modulo": "Returnerar resten av a / b",
+    "abs": "Returnerar absolutvärdet",
+    "ceil": "Avrundar uppåt till närmaste heltal",
+    "floor": "Avrundar nedåt till närmaste heltal",
+    "round": "Avrundar till närmaste heltal",
+    "min": "Returnerar minsta värde",
+    "max": "Returnerar största värde",
+    "pow": "Returnerar bas upphöjt till exponent",
+    "sqrt": "Returnerar kvadratrot",
+    "random": "Returnerar slumpmässigt heltal mellan min och max",
+    "sum": "Returnerar summan av arrayens värden",
+    "avg": "Returnerar medelvärdet av arrayens värden",
+    "toFixed": "Formaterar talet med fasta decimaler",
+    "toInt": "Konverterar till heltal",
+    "toFloat": "Konverterar till flyttal",
+    "first": "Returnerar första elementet/elementen i arrayen",
+    "last": "Returnerar sista elementet/elementen i arrayen",
+    "after": "Returnerar element efter index n",
+    "before": "Returnerar element före index n",
+    "slice": "Returnerar en delmängd av arrayen",
+    "length": "Returnerar längden på array/sträng/objekt",
+    "join": "Sammanfogar arrayens element med separator",
+    "sort": "Sorterar arrayen",
+    "unique": "Returnerar unika värden",
+    "concat": "Sammanfogar arrayer",
+    "flatten": "Plattar ut nästlad array",
+    "pluck": "Extraherar egenskap från array av objekt",
+    "itemAt": "Returnerar elementet på index",
+    "inArray": "Blockhjälpare: renderar om värdet finns i arrayen",
+    "isArray": "Returnerar true om värdet är en array",
+    "isEmpty": "Blockhjälpare: renderar om värdet är tomt",
+    "some": "Blockhjälpare: renderar om några element matchar",
+    "every": "Blockhjälpare: renderar om alla element matchar",
+    "JSONstringify": "Konverterar objekt till JSON-sträng",
+    "JSONparse": "Tolkar JSON-sträng till objekt",
+    "get": "Hämtar nästlad egenskap via sökväg",
+    "keys": "Returnerar objektets nycklar",
+    "values": "Returnerar objektets värden",
+    "entries": "Returnerar [nyckel, värde]-par",
+    "hasOwn": "Blockhjälpare: renderar om objektet har egenskapen",
+    "pick": "Skapar objekt med valda nycklar",
+    "omit": "Skapar objekt utan angivna nycklar",
+    "merge": "Slår ihop flera objekt",
+    "isObject": "Returnerar true om värdet är ett objekt",
+    "typeOf": "Returnerar värdets typ",
+    "encodeURI": "URL-kodar en sträng",
+    "decodeURI": "URL-avkodar en sträng",
+    "urlParse": "Tolkar URL till komponenter",
+    "stripQuerystring": "Tar bort querystring från URL",
+    "stripProtocol": "Tar bort protokoll från URL",
+    "now": "Returnerar aktuell tid som ISO-sträng",
+    "timestamp": "Returnerar aktuell tidsstämpel i millisekunder",
+    "year": "Returnerar aktuellt år",
+    "formatDate": "Formaterar datum med mönster",
+    "match": "Returnerar regex-matchningar",
+    "test": "Blockhjälpare: renderar om regex matchar",
+    "coalesce": "Returnerar första värdet som inte är null/undefined",
+    "uuid": "Genererar ett slumpmässigt UUID",
+    "noop": "Blockhjälpare som renderar innehållet som det är",
+    "raw": "Blockhjälpare som renderar rått innehåll",
+    "times": "Blockhjälpare som upprepar n gånger",
+    "range": "Genererar array av tal"
+  },
+  "behavior": {
+    "title": "Beteende",
+    "syncSidebarWithTabs": "Synka sidofältets val med aktiv flik",
+    "syncSidebarWithTabsDescription": "Vid byte av flik i arbetsytan, välj och visa motsvarande objekt i sidofältet automatiskt",
+    "dateTimeFormat": "Datum/tid-format",
+    "dateTimeFormatDescription": "Format som används för att visa datum och tid i applikationen",
+    "dateTimeFormat.us": "US-format (MM/DD/ÅÅÅÅ, 12h)",
+    "dateTimeFormat.iso": "ISO-format (ÅÅÅÅ-MM-DD, 24h)"
+  },
+  "console": {
+    "title": "Konsol",
+    "requestFormat": "Förfrågansformat",
+    "requestFormatDescription": "Standardvariant av skal som används för att rendera utgående förfrågningar i Konsol-fliken. Varje rad är en kopiebar kommandorad; växeln i Konsol-verktygsfältet åsidosätter detta standardval för den aktuella fliken.",
+    "requestFormat.curl": "curl (Unix-stil)",
+    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+  },
+  "import": {
+    "title": "Importera förfrågningar",
+    "source": {
+      "label": "Klistra in något här!",
+      "placeholder": "Ange filsökväg, URL, eller klistra in ett curl/PowerShell-kommando..."
+    },
+    "formats": {
+      "swagger": {
+        "description": "OpenAPI 2.0-specifikationen, född hos SmartBear. Klistra in en Swagger JSON eller YAML — Restorm tolkar varje operation, hämtar in säkerhetsschemana och förvandlar hela dokumentet till ett navigerbart träd av förfrågningar.",
+        "trademark": "Swagger är ett registrerat varumärke som tillhör SmartBear Software."
+      },
+      "openapi": {
+        "description": "Den aktuella OpenAPI-standarden (3.0 och 3.1). Samma klistra-och-kör-ergonomi som Swagger: parametrar, request bodies, säkerhetsschemana och webhooks landar som ett träd av typade förfrågningar med exempel redo att skickas.",
+        "trademark": "OpenAPI är ett projekt av OpenAPI Initiative under Linux Foundation."
+      },
+      "curl": {
+        "description": "Har du redan förfrågan igång i terminalen? Klistra in hela curl-anropet — flaggor, headers, kropp, query string — och Restorm bygger om den till en riktig förfrågan du kan köra om, redigera och nåla fast.",
+        "trademark": "curl är öppen källkod © Daniel Stenberg, används här på dess villkor."
+      },
+      "powershell": {
+        "description": "Samma idé, PowerShell-variant. Klistra in ett Invoke-WebRequest- eller Invoke-RestMethod-kommando och Restorm läser URI, metod, headers och kropp för att skapa en förfrågan du kan iterera på visuellt.",
+        "trademark": "PowerShell är ett registrerat varumärke som tillhör Microsoft Corporation."
+      },
+      "postman": {
+        "description": "Har du en Postman-samling sparad på jobbet? Släpp JSON-filen — Restorm läser varje förfrågan, varje exempelvar och varje miljövariabel, och bygger sedan om samlingen som ett Restorm-träd du kan köra sida vid sida med resten av dina API:er.",
+        "trademark": "Postman är ett registrerat varumärke som tillhör Postman, Inc., använt här endast som kompatibilitetsreferens."
+      },
+      "insomnia": {
+        "description": "Kommer du från Insomnia? Släpp din export. Restorm förstår dess v4/v5-samlingsformat, tar med varje förfrågan, header, kropp och miljö, och visar allt som ett Restorm-träd.",
+        "trademark": "Insomnia är ett registrerat varumärke som tillhör Kong Inc., använt här endast som kompatibilitetsreferens."
+      },
+      "bruno": {
+        "description": "Bruno-formaterade .bru-filer eller en mappexport — Restorm läser textformatet .bru, inklusive dess skriptblock, och återskapar varje förfrågan som en förstklassig Restorm-nod redo att skickas.",
+        "trademark": "Bruno är öppen källkod (MIT) av Anoop M. D., används här på dess villkor."
+      },
+      "graphql": {
+        "description": "Klistra in en GraphQL SDL (.graphql / .gql / en kopiering från din GraphQL-klient) och Restorm bygger en förfrågan per operation, kopplad till rätt query/mutation/subscription-typ med variablerna redan strukturerade.",
+        "trademark": "GraphQL är ett varumärke som tillhör GraphQL Foundation, ett projekt inom Joint Development Foundation."
+      },
+      "grpc": {
+        "description": "Släpp en .proto-fil (eller en mapp med dem) och Restorm går igenom varje tjänst, varje RPC, varje meddelande — och förvandlar varje metod till en typad förfrågan som du kan skicka via gRPC-exekveraren utan att röra codegen.",
+        "trademark": "gRPC är ett projekt inom Cloud Native Computing Foundation."
+      },
+      "soap": {
+        "description": "Har du en WSDL? Klistra in den (eller dess URL) — Restorm tolkar varje <port> och <operation> och producerar färdiga SOAP-kuvert med rätt SOAPAction-header, schematypade kroppsskeleton och det autentiseringsschema som WSDL deklarerar."
+      },
+      "websocket": {
+        "description": "Klistra in en WebSocket-endpoint (ws:// eller wss://) — Restorm öppnar anslutningen, fångar serverns hello-frames och skapar send/subscribe-förfrågningar med repeterbara payload-mallar.",
+        "trademark": "WebSocket är ett protokoll standardiserat av IETF (RFC 6455) och W3C."
+      },
+      "kafka": {
+        "description": "Klistra in en Apache Kafka bootstrap-server-URL (eller en lista över topics) — Restorm registrerar consumers och producers per topic, avkodar Avro-/Protobuf-payloads via ditt Schema Registry, och låter dig spela upp enskilda offsets med ett klick.",
+        "trademark": "Apache Kafka och Kafka-logotypen är varumärken som tillhör Apache Software Foundation."
+      },
+      "socketio": {
+        "description": "Klistra in en Socket.IO-server-URL — Restorm förhandlar handskakningen, listar namespaces och händelsenamn som servern sänder, och ger dig en förfrågan per emit/on-händelse med payload-validering.",
+        "trademark": "Socket.IO är ett bibliotek med öppen källkod släppt under MIT-licens; namn och logotyp används nominativt."
+      },
+      "odata": {
+        "description": "Klistra in en URL till ett OData-tjänstdokument eller en $metadata-fil — Restorm läser CSDL:n, bygger om entitetsuppsättningar, function imports och åtgärder, och förfyller frågealternativen $filter/$select/$top/$skip på varje operation."
+      },
+      "mqtt": {
+        "description": "Klistra in en MQTT-broker-URL eller en topic-katalog — Restorm bygger publish/subscribe-förfrågningar per topic, håller anslutningen levande för strömmade förhandsvisningar och kommer ihåg retained-message-ögonblicksbilder så att du kan spela upp dem senare.",
+        "trademark": "MQTT är en OASIS-standard; namnet MQTT och logotypen är varumärken som tillhör OASIS Open."
+      }
+    },
+    "loading": "Analyserar...",
+    "noResults": "Inga förfrågningar hittades",
+    "error": {
+      "unknown": "Ett okänt fel inträffade"
+    },
+    "ok": "Importera",
+    "cancel": "Avbryt",
+    "dropZone": "Släppzon"
+  },
+  "emptyBench": {
+    "importCard": {
+      "title": "Importera ditt API",
+      "body": "Ta in en OpenAPI/Swagger-spec, ett GraphQL-schema, en Postman/Bruno/Insomnia-samling, eller klistra in ett curl/PowerShell-kommando. Restorm parsar det, bygger mappstrukturen och levererar varje endpoint färdig."
+    },
+    "recentActivity": {
+      "title": "Senaste aktivitet",
+      "empty": "Skicka din första begäran för att se den här."
+    },
+    "apiCard": {
+      "favorites": "Favoriter",
+      "topUsed": "Topp 10 mest använda",
+      "recent": "Senaste förfrågningar",
+      "description": "Beskrivning",
+      "version": "Version",
+      "quickLinks": {
+        "environments": "Miljöer",
+        "docs": "Dokumentation",
+        "notes": "Anteckningar"
+      }
+    }
+  }
+}

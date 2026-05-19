@@ -1,0 +1,328 @@
+{
+  "common": {
+    "opened": "開いた状態",
+    "refresh": "更新",
+    "import": "インポート"
+  },
+  "file": {
+    "untitled": "無題",
+    "unsavedChanges": {
+      "title": "未保存の変更",
+      "message": "\"{{fileName}}\" の変更を保存しますか？",
+      "detail": "保存しない場合、変更は失われます。",
+      "save": "保存",
+      "dontSave": "保存しない",
+      "cancel": "キャンセル"
+    }
+  },
+  "recentFilesVignette": {
+    "favorites": "お気に入り",
+    "recentFiles": "最近使ったファイル",
+    "addToFavorites": "お気に入りに追加",
+    "removeFromFavorites": "お気に入りから削除",
+    "confirmRemoveFavorite": "\"{{fileName}}\" をお気に入りから削除してもよろしいですか？",
+    "favoritesLandmarkLabel": "お気に入り一覧",
+    "recentsLandmarkLabel": "最近使ったファイル一覧"
+  },
+  "welcomeScreen": {
+    "landmarkLabel": "ようこそ"
+  },
+  "menuBar": {
+    "new": "新規作成",
+    "open": "開く",
+    "edit": "編集",
+    "view": "表示",
+    "help": "ヘルプ",
+    "undo": "元に戻す",
+    "redo": "やり直し",
+    "cut": "切り取り",
+    "copy": "コピー",
+    "paste": "貼り付け",
+    "find": "検索",
+    "replace": "置換",
+    "toggleSidebar": "サイドバーの表示切り替え",
+    "toggleResponsePanel": "レスポンスパネルの表示切り替え",
+    "zoomIn": "拡大",
+    "zoomOut": "縮小",
+    "resetZoom": "ズームをリセット",
+    "settings": "設定",
+    "toggleDevTools": "開発者ツールの表示切り替え",
+    "toggleFullscreen": "全画面表示の切り替え",
+    "about": "バージョン情報",
+    "documentation": "ドキュメント",
+    "keyboardShortcuts": "キーボードショートカット",
+    "releaseNotes": "リリースノート",
+    "reportIssue": "問題を報告"
+  },
+  "settings": {
+    "title": "設定",
+    "theme": "テーマ",
+    "language": "言語",
+    "searchPlaceholder": "設定を検索...",
+    "noResults": "設定が見つかりません。",
+    "numberOutOfRange": "値は {{min}} から {{max}} の範囲で指定してください。",
+    "resetSetting": "設定をリセット",
+    "copySettingId": "設定 ID をコピー",
+    "settingOptions": "設定オプション",
+    "scopeTabsLabel": "設定の適用範囲",
+    "userOnlyHidden": "このタブではユーザー専用の設定 {{count}} 件が非表示になっています。",
+    "scope": {
+      "user": "ユーザー",
+      "workspace": "ワークスペース",
+      "workspaceDisabledTooltip": "ワークスペース設定を編集するにはプロジェクトを開いてください"
+    },
+    "appearance": {
+      "title": "外観",
+      "theme": {
+        "title": "テーマ",
+        "description": "アプリケーションのカラーテーマを選択します"
+      },
+      "language": {
+        "title": "言語",
+        "description": "アプリケーションの言語を選択します",
+        "en": "English",
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "pt": "Português",
+        "nl": "Nederlands",
+        "sv": "Svenska",
+        "da": "Dansk",
+        "nb": "Norsk bokmål",
+        "fi": "Suomi",
+        "pl": "Polski",
+        "cs": "Čeština",
+        "hu": "Magyar",
+        "ro": "Română",
+        "el": "Ελληνικά",
+        "uk": "Українська",
+        "hr": "Hrvatski",
+        "sr": "Srpski",
+        "sq": "Shqip",
+        "tr": "Türkçe",
+        "id": "Bahasa Indonesia",
+        "vi": "Tiếng Việt",
+        "ja": "日本語",
+        "ko": "한국어",
+        "zh-CN": "简体中文",
+        "zh-TW": "繁體中文"
+      },
+      "advancedVisualEffects": {
+        "title": "高度なビジュアルエフェクト",
+        "description": "オーバーレイの背景ぼかしや CSS アニメーションなどの高度なビジュアルエフェクトを有効にします。性能の低いハードウェアではオフにするとパフォーマンスが向上します。"
+      },
+      "editor": {
+        "title": "エディター",
+        "fontSize": {
+          "title": "フォントサイズ",
+          "description": "コードエディターのフォントサイズ（ピクセル）を制御します"
+        },
+        "fontFamily": {
+          "title": "フォントファミリー",
+          "description": "コードエディターで使用するフォントファミリーを制御します"
+        },
+        "wordWrap": {
+          "title": "ワードラップ",
+          "description": "コードエディターで行を折り返すかどうかを制御します"
+        },
+        "minimap": {
+          "title": "ミニマップ",
+          "description": "コードエディターにミニマップを表示するかどうかを制御します"
+        },
+        "lineNumbers": {
+          "title": "行番号",
+          "description": "コードエディターに行番号を表示するかどうかを制御します"
+        }
+      }
+    },
+    "files": {
+      "title": "ファイル",
+      "autoSave": {
+        "title": "自動保存",
+        "description": "未保存のエディターの自動保存を制御します。自動保存の詳細はドキュメントを参照してください。",
+        "off": "オフ",
+        "afterDelay": "一定時間後",
+        "onWindowChange": "ウィンドウ切り替え時"
+      },
+      "autoSaveDelay": {
+        "title": "自動保存の遅延",
+        "description": "未保存のエディターが自動保存されるまでの遅延時間（ミリ秒）を制御します。「自動保存」が「一定時間後」に設定されている場合のみ適用されます。"
+      }
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "定義へ移動"
+  },
+  "tagsView": {
+    "removeTag": "タグを削除",
+    "newTag": "新しいタグ"
+  },
+  "contextMenu": {
+    "cut": "切り取り",
+    "copy": "コピー",
+    "paste": "貼り付け"
+  },
+  "search": {
+    "placeholder": "検索...",
+    "noResults": "結果が見つかりません",
+    "resultsAriaLabel": "検索結果",
+    "categories": {
+      "request": "HTTP リクエスト",
+      "folder": "フォルダ",
+      "environment": "環境",
+      "settings": "設定",
+      "tag": "タグ"
+    }
+  },
+  "iconSelect": {
+    "searchEmojis": "絵文字を検索...",
+    "noEmojisFound": "絵文字が見つかりません",
+    "searchCodicons": "Codicons を検索...",
+    "searchIconoir": "Iconoir を検索...",
+    "searchPhosphor": "Phosphor を検索...",
+    "searchMaterial": "Material を検索...",
+    "searchSimpleIcons": "Simple Icons を検索...",
+    "searchFeather": "Feather を検索...",
+    "searchFontAwesome": "Font Awesome を検索...",
+    "moreIcons": "他 {{count}} 個のアイコンがあります。検索で目的のアイコンを探してください。",
+    "more": "他 {{count}} 個あります。検索で目的のアイコンを探してください。",
+    "noIconsFound": "アイコンが見つかりません",
+    "searchResults": "検索結果",
+    "categories": {
+      "files": "ファイル",
+      "git": "Git",
+      "debug": "デバッグ",
+      "symbols": "シンボル",
+      "arrows": "矢印",
+      "ui": "UI",
+      "media": "メディア",
+      "editing": "編集",
+      "terminal": "ターミナル",
+      "people": "人物",
+      "notifications": "通知",
+      "brands": "ブランド",
+      "communication": "コミュニケーション",
+      "users": "ユーザー",
+      "business": "ビジネス",
+      "medical": "医療",
+      "transport": "交通",
+      "weather": "天気",
+      "shapes": "図形",
+      "design": "デザイン",
+      "devices": "デバイス",
+      "buildings": "建物",
+      "nature": "自然",
+      "food": "食べ物",
+      "sport": "スポーツ",
+      "sports": "スポーツ",
+      "animals": "動物",
+      "tools": "ツール"
+    },
+    "emojiCategories": {
+      "people": "スマイリーと人",
+      "nature": "動物と自然",
+      "food": "食べ物と飲み物",
+      "activity": "アクティビティ",
+      "travel": "旅行と場所",
+      "objects": "オブジェクト",
+      "symbols": "シンボル",
+      "flags": "旗"
+    }
+  },
+  "dateTimePicker": {
+    "ariaLabel": "日付／時刻ピッカー",
+    "openCalendar": "カレンダーを開く",
+    "previousYear": "前の年",
+    "nextYear": "次の年",
+    "previousMonth": "前の月",
+    "nextMonth": "次の月",
+    "selectMonth": "月を選択",
+    "selectYear": "年を選択",
+    "includeTime": "時刻を含める",
+    "hours": "時",
+    "minutes": "分",
+    "output": "出力",
+    "pattern": "パターン",
+    "outputModes": {
+      "pattern": "パターン",
+      "unix": "Unix（秒）",
+      "epoch": "Epoch（ミリ秒）",
+      "iso": "ISO 8601"
+    },
+    "preview": "プレビュー",
+    "tokens": {
+      "S": "ミリ秒、パディングなし",
+      "SSS": "ミリ秒、3 桁にパディング",
+      "u": "小数秒、機能的には SSS と同等",
+      "uu": "小数秒、0〜99 の範囲、2 桁にパディング",
+      "uuu": "小数秒、0〜9 の範囲",
+      "s": "秒、パディングなし",
+      "ss": "秒、2 桁にパディング",
+      "m": "分、パディングなし",
+      "mm": "分、2 桁にパディング",
+      "h": "12 時間制の時、パディングなし",
+      "hh": "12 時間制の時、2 桁にパディング",
+      "H": "24 時間制の時、パディングなし",
+      "HH": "24 時間制の時、2 桁にパディング",
+      "Z": "狭いオフセット",
+      "ZZ": "短いオフセット",
+      "ZZZ": "技術者向けオフセット",
+      "ZZZZ": "名前付きオフセットの短縮形",
+      "ZZZZZ": "名前付きオフセットの完全形",
+      "z": "IANA タイムゾーン",
+      "a": "午前／午後",
+      "d": "月の日、パディングなし",
+      "dd": "月の日、2 桁にパディング",
+      "c": "曜日、1〜7 の数字（月曜は 1、日曜は 7）",
+      "ccc": "曜日、ローカライズされた短縮形",
+      "cccc": "曜日、ローカライズされた完全形",
+      "ccccc": "曜日、ローカライズされた 1 文字",
+      "L": "月、パディングなしの数字",
+      "LL": "月、パディングされた数字",
+      "LLL": "月、ローカライズされた短縮形",
+      "LLLL": "月、ローカライズされた完全形",
+      "LLLLL": "月、ローカライズされた 1 文字",
+      "y": "年、パディングなし",
+      "yy": "2 桁の年",
+      "yyyy": "4〜6 桁の年、4 桁にパディング",
+      "G": "年号、ローカライズされた短縮形",
+      "GG": "年号、ローカライズされた完全形",
+      "GGGGG": "年号、ローカライズされた 1 文字",
+      "kk": "ISO 週の年、パディングなし",
+      "kkkk": "ISO 週の年、4 桁にパディング",
+      "W": "ISO 週番号、パディングなし",
+      "WW": "ISO 週番号、2 桁にパディング",
+      "ii": "ローカル週の年、パディングなし",
+      "iiii": "ローカル週の年、4 桁にパディング",
+      "n": "ローカル週番号、パディングなし",
+      "nn": "ローカル週番号、2 桁にパディング",
+      "o": "序数（年内通算日）、パディングなし",
+      "ooo": "序数（年内通算日）、3 桁にパディング",
+      "q": "四半期、パディングなし",
+      "qq": "四半期、2 桁にパディング",
+      "D": "ローカライズされた数字日付",
+      "DD": "月の短縮形を含むローカライズされた日付",
+      "DDD": "月の完全形を含むローカライズされた日付",
+      "DDDD": "月の完全形と曜日を含むローカライズされた日付",
+      "t": "ローカライズされた時刻",
+      "tt": "秒を含むローカライズされた時刻",
+      "ttt": "秒とオフセット短縮形を含むローカライズされた時刻",
+      "tttt": "秒と完全なオフセットを含むローカライズされた時刻",
+      "T": "ローカライズされた 24 時間制時刻",
+      "TT": "秒を含むローカライズされた 24 時間制時刻",
+      "TTT": "秒とオフセット短縮形を含むローカライズされた 24 時間制時刻",
+      "TTTT": "秒と完全なオフセットを含むローカライズされた 24 時間制時刻",
+      "f": "短いローカライズされた日付と時刻",
+      "ff": "やや短いローカライズされた日付と時刻",
+      "fff": "詳細なローカライズされた日付と時刻",
+      "ffff": "より詳細なローカライズされた日付と時刻",
+      "F": "秒を含む短いローカライズされた日付と時刻",
+      "FF": "秒を含むやや短いローカライズされた日付と時刻",
+      "FFF": "秒を含む詳細なローカライズされた日付と時刻",
+      "FFFF": "秒を含むより詳細なローカライズされた日付と時刻",
+      "X": "Unix タイムスタンプ（秒）",
+      "x": "Unix タイムスタンプ（ミリ秒）"
+    }
+  }
+}

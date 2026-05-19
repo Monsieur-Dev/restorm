@@ -10,6 +10,15 @@ export interface PersistedGroupNode {
   id: string;
   /** For tabs: list of tab IDs */
   tabIds?: string[] | undefined;
+  /**
+   * For tabs: optional parallel array of per-tab persisted state.
+   * Index N matches `tabIds[N]`. Entries are whatever the consumer
+   * stored on `EditorTab.persistedState` at extract time; `null`
+   * means "this tab opted out of state persistence". Older saves
+   * predating this field round-trip cleanly — the rebuild callback
+   * just receives `undefined` for the data argument.
+   */
+  tabData?: unknown[] | undefined;
   /** For tabs: active tab ID */
   activeTabId?: string | undefined;
   /** For container: orientation */
@@ -38,10 +47,17 @@ export interface PersistedWorkbenchState {
 export function extractWorkbenchState(tree: WorkbenchTree): PersistedWorkbenchState {
   const extractNode = (node: GroupNode): PersistedGroupNode => {
     if (isTabGroupNode(node)) {
+      // Capture each tab's opt-in `persistedState`. The parallel
+      // array stays empty when no tab in the group has any state
+      // to persist — keeps the on-disk shape lean for the common
+      // (stateless) case.
+      const tabData = node.tabs.map(t => t.persistedState ?? null);
+      const hasAnyData = tabData.some(d => d !== null);
       return {
         type: 'tabs',
         id: node.id,
         tabIds: node.tabs.map(t => t.id),
+        ...(hasAnyData ? { tabData } : {}),
         activeTabId: node.activeTabId
       };
     } else {
@@ -64,10 +80,14 @@ export function extractWorkbenchState(tree: WorkbenchTree): PersistedWorkbenchSt
 }
 
 /**
- * Callback to rebuild a tab from its ID
- * Returns the EditorTab or null if not found
+ * Callback to rebuild a tab from its persisted id + optional state.
+ * Returns the EditorTab or null if not found.
+ *
+ * `data` is whatever the consumer stored on `EditorTab.persistedState`
+ * before serialisation (or `undefined` for tabs that opted out, or for
+ * saves predating the field). Treat it as opaque and JSON-parsed.
  */
-export type RebuildTabCallback = (tabId: string) => EditorTab | null;
+export type RebuildTabCallback = (tabId: string, data?: unknown) => EditorTab | null;
 
 /**
  * Rebuild workbench tree from persisted state
@@ -87,8 +107,13 @@ export function rebuildWorkbenchTree(
     if (saved.type === 'tabs') {
       // TabGroupNode
       const tabs: EditorTab[] = [];
-      for (const tabId of saved.tabIds ?? []) {
-        const tab = rebuildTab(tabId);
+      const ids = saved.tabIds ?? [];
+      const data = saved.tabData ?? [];
+      for (let i = 0; i < ids.length; i++) {
+        const tabId = ids[i];
+        if (tabId === undefined) continue;
+        const persistedState = data[i] ?? undefined;
+        const tab = rebuildTab(tabId, persistedState);
         if (tab) tabs.push(tab);
       }
       if (tabs.length === 0) return null;

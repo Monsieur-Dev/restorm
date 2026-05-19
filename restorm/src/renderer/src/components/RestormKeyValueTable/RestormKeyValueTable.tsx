@@ -531,6 +531,12 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
         nextValue = new StringValue(raw)
       }
 
+      // Auto-toggle of the enabled flag against value emptiness now
+      // lives inside `KeyValueTable.updateData` (via the
+      // `autoToggleEnabledOnEmpty` prop we set above), so the local
+      // state + the visible checkbox stay in sync. Doing it here
+      // would only update the upstream data layer and leave the
+      // checkbox visually checked.
       if (rowId) {
         valueTypeByRowIdRef.current.set(rowId, nextValue)
       }
@@ -859,6 +865,7 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
         onRowsChange={handleRowsChange}
         renderKeyCell={KeyCellRenderer}
         renderValueCell={ValueCellRenderer}
+        autoToggleEnabledOnEmpty
         {...(persistenceId && { persistenceId })}
         {...(dataTestId && { 'data-testid': dataTestId })}
       />

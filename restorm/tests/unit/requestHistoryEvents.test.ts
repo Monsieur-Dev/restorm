@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
 // Reach into the library source directly. The renderer barrel
-// (`electron-core-ui/renderer`) lazy-loads `jsoncrack-react`, which the
-// vite-driven test bundler can't resolve at unit-test time.
+// (`electron-core-ui/renderer`) pulls in `@xyflow/react` via
+// `JsonViewer`, which the vite-driven test bundler can't resolve at
+// unit-test time without a jsdom-compatible shim.
 import { eventBus } from '../../../electron-core-ui/src/renderer/services/EventBus'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../src/renderer/src/services/DocumentEvents'
 

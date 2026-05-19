@@ -1,0 +1,328 @@
+{
+  "common": {
+    "opened": "已開啟",
+    "refresh": "重新整理",
+    "import": "匯入"
+  },
+  "file": {
+    "untitled": "未命名",
+    "unsavedChanges": {
+      "title": "未儲存的變更",
+      "message": "是否要儲存對 \"{{fileName}}\" 的變更？",
+      "detail": "如果不儲存，您的變更將會遺失。",
+      "save": "儲存",
+      "dontSave": "不儲存",
+      "cancel": "取消"
+    }
+  },
+  "recentFilesVignette": {
+    "favorites": "我的最愛",
+    "recentFiles": "最近開啟的檔案",
+    "addToFavorites": "加入我的最愛",
+    "removeFromFavorites": "從我的最愛移除",
+    "confirmRemoveFavorite": "確定要將 \"{{fileName}}\" 從我的最愛中移除嗎？",
+    "favoritesLandmarkLabel": "我的最愛清單",
+    "recentsLandmarkLabel": "最近檔案清單"
+  },
+  "welcomeScreen": {
+    "landmarkLabel": "歡迎"
+  },
+  "menuBar": {
+    "new": "新增",
+    "open": "開啟",
+    "edit": "編輯",
+    "view": "檢視",
+    "help": "說明",
+    "undo": "復原",
+    "redo": "取消復原",
+    "cut": "剪下",
+    "copy": "複製",
+    "paste": "貼上",
+    "find": "尋找",
+    "replace": "取代",
+    "toggleSidebar": "切換側邊欄",
+    "toggleResponsePanel": "切換回應面板",
+    "zoomIn": "放大",
+    "zoomOut": "縮小",
+    "resetZoom": "重設縮放",
+    "settings": "設定",
+    "toggleDevTools": "切換開發者工具",
+    "toggleFullscreen": "切換全螢幕",
+    "about": "關於",
+    "documentation": "文件",
+    "keyboardShortcuts": "鍵盤快速鍵",
+    "releaseNotes": "發行說明",
+    "reportIssue": "回報問題"
+  },
+  "settings": {
+    "title": "設定",
+    "theme": "佈景主題",
+    "language": "語言",
+    "searchPlaceholder": "搜尋設定...",
+    "noResults": "找不到設定。",
+    "numberOutOfRange": "值必須介於 {{min}} 與 {{max}} 之間。",
+    "resetSetting": "重設此設定",
+    "copySettingId": "複製設定 ID",
+    "settingOptions": "設定選項",
+    "scopeTabsLabel": "設定範圍",
+    "userOnlyHidden": "此索引標籤已隱藏 {{count}} 項僅限使用者的設定。",
+    "scope": {
+      "user": "使用者",
+      "workspace": "工作區",
+      "workspaceDisabledTooltip": "請先開啟專案才能編輯工作區設定"
+    },
+    "appearance": {
+      "title": "外觀",
+      "theme": {
+        "title": "佈景主題",
+        "description": "選取應用程式的色彩佈景主題"
+      },
+      "language": {
+        "title": "語言",
+        "description": "選取應用程式的語言",
+        "en": "English",
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "pt": "Português",
+        "nl": "Nederlands",
+        "sv": "Svenska",
+        "da": "Dansk",
+        "nb": "Norsk bokmål",
+        "fi": "Suomi",
+        "pl": "Polski",
+        "cs": "Čeština",
+        "hu": "Magyar",
+        "ro": "Română",
+        "el": "Ελληνικά",
+        "uk": "Українська",
+        "hr": "Hrvatski",
+        "sr": "Srpski",
+        "sq": "Shqip",
+        "tr": "Türkçe",
+        "id": "Bahasa Indonesia",
+        "vi": "Tiếng Việt",
+        "ja": "日本語",
+        "ko": "한국어",
+        "zh-CN": "简体中文",
+        "zh-TW": "繁體中文"
+      },
+      "advancedVisualEffects": {
+        "title": "進階視覺效果",
+        "description": "啟用進階視覺效果，例如浮層的背景模糊和 CSS 動畫。在效能較低的硬體上可停用以獲得較佳效能。"
+      },
+      "editor": {
+        "title": "編輯器",
+        "fontSize": {
+          "title": "字型大小",
+          "description": "控制程式碼編輯器中的字型大小（像素）"
+        },
+        "fontFamily": {
+          "title": "字型",
+          "description": "控制程式碼編輯器所使用的字型"
+        },
+        "wordWrap": {
+          "title": "自動換行",
+          "description": "控制程式碼編輯器是否對行進行自動換行"
+        },
+        "minimap": {
+          "title": "縮圖",
+          "description": "控制程式碼編輯器中是否顯示縮圖"
+        },
+        "lineNumbers": {
+          "title": "行號",
+          "description": "控制程式碼編輯器中是否顯示行號"
+        }
+      }
+    },
+    "files": {
+      "title": "檔案",
+      "autoSave": {
+        "title": "自動儲存",
+        "description": "控制有未儲存變更的編輯器的自動儲存行為。請參閱文件以瞭解更多關於自動儲存的說明。",
+        "off": "關閉",
+        "afterDelay": "延遲後儲存",
+        "onWindowChange": "切換視窗時儲存"
+      },
+      "autoSaveDelay": {
+        "title": "自動儲存延遲",
+        "description": "控制在「延遲後儲存」模式下，未儲存的編輯器多少毫秒後會自動儲存。僅在「自動儲存」設為「延遲後儲存」時生效。"
+      }
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "前往定義"
+  },
+  "tagsView": {
+    "removeTag": "移除標籤",
+    "newTag": "新標籤"
+  },
+  "contextMenu": {
+    "cut": "剪下",
+    "copy": "複製",
+    "paste": "貼上"
+  },
+  "search": {
+    "placeholder": "搜尋...",
+    "noResults": "找不到結果",
+    "resultsAriaLabel": "搜尋結果",
+    "categories": {
+      "request": "HTTP 請求",
+      "folder": "資料夾",
+      "environment": "環境",
+      "settings": "設定",
+      "tag": "標籤"
+    }
+  },
+  "iconSelect": {
+    "searchEmojis": "搜尋表情符號...",
+    "noEmojisFound": "找不到表情符號",
+    "searchCodicons": "搜尋 Codicons...",
+    "searchIconoir": "搜尋 Iconoir...",
+    "searchPhosphor": "搜尋 Phosphor...",
+    "searchMaterial": "搜尋 Material...",
+    "searchSimpleIcons": "搜尋 Simple Icons...",
+    "searchFeather": "搜尋 Feather...",
+    "searchFontAwesome": "搜尋 Font Awesome...",
+    "moreIcons": "另有 {{count}} 個圖示。使用搜尋可找到特定圖示。",
+    "more": "另有 {{count}} 個。使用搜尋可找到特定圖示。",
+    "noIconsFound": "找不到圖示",
+    "searchResults": "搜尋結果",
+    "categories": {
+      "files": "檔案",
+      "git": "Git",
+      "debug": "除錯",
+      "symbols": "符號",
+      "arrows": "箭頭",
+      "ui": "介面",
+      "media": "媒體",
+      "editing": "編輯",
+      "terminal": "終端機",
+      "people": "人物",
+      "notifications": "通知",
+      "brands": "品牌",
+      "communication": "通訊",
+      "users": "使用者",
+      "business": "商務",
+      "medical": "醫療",
+      "transport": "交通",
+      "weather": "天氣",
+      "shapes": "形狀",
+      "design": "設計",
+      "devices": "裝置",
+      "buildings": "建築物",
+      "nature": "自然",
+      "food": "食物",
+      "sport": "運動",
+      "sports": "運動",
+      "animals": "動物",
+      "tools": "工具"
+    },
+    "emojiCategories": {
+      "people": "笑臉與人物",
+      "nature": "動物與自然",
+      "food": "食物與飲料",
+      "activity": "活動",
+      "travel": "旅遊與地點",
+      "objects": "物品",
+      "symbols": "符號",
+      "flags": "旗幟"
+    }
+  },
+  "dateTimePicker": {
+    "ariaLabel": "日期／時間選擇器",
+    "openCalendar": "開啟行事曆",
+    "previousYear": "上一年",
+    "nextYear": "下一年",
+    "previousMonth": "上一月",
+    "nextMonth": "下一月",
+    "selectMonth": "選擇月份",
+    "selectYear": "選擇年份",
+    "includeTime": "包含時間",
+    "hours": "小時",
+    "minutes": "分鐘",
+    "output": "輸出",
+    "pattern": "格式樣式",
+    "outputModes": {
+      "pattern": "格式樣式",
+      "unix": "Unix（秒）",
+      "epoch": "Epoch（毫秒）",
+      "iso": "ISO 8601"
+    },
+    "preview": "預覽",
+    "tokens": {
+      "S": "毫秒，不補零",
+      "SSS": "毫秒，補齊至 3 位",
+      "u": "小數秒，功能上等同於 SSS",
+      "uu": "小數秒，介於 0 至 99 之間，補齊至 2 位",
+      "uuu": "小數秒，介於 0 至 9 之間",
+      "s": "秒，不補零",
+      "ss": "秒，補齊至 2 位",
+      "m": "分鐘，不補零",
+      "mm": "分鐘，補齊至 2 位",
+      "h": "12 小時制小時，不補零",
+      "hh": "12 小時制小時，補齊至 2 位",
+      "H": "24 小時制小時，不補零",
+      "HH": "24 小時制小時，補齊至 2 位",
+      "Z": "窄式偏移",
+      "ZZ": "短式偏移",
+      "ZZZ": "工程師風格偏移",
+      "ZZZZ": "命名偏移縮寫",
+      "ZZZZZ": "命名偏移全名",
+      "z": "IANA 時區",
+      "a": "上午／下午",
+      "d": "當月第幾日，不補零",
+      "dd": "當月第幾日，補齊至 2 位",
+      "c": "星期幾，數字 1-7（週一為 1，週日為 7）",
+      "ccc": "星期幾，在地化縮寫",
+      "cccc": "星期幾，在地化全名",
+      "ccccc": "星期幾，在地化單字母",
+      "L": "月份，不補零的數字",
+      "LL": "月份，補零的數字",
+      "LLL": "月份，在地化縮寫",
+      "LLLL": "月份，在地化全名",
+      "LLLLL": "月份，在地化單字母",
+      "y": "年份，不補零",
+      "yy": "兩位數年份",
+      "yyyy": "四到六位數年份，補齊至 4 位",
+      "G": "紀元，在地化縮寫",
+      "GG": "紀元，在地化全名",
+      "GGGGG": "紀元，在地化單字母",
+      "kk": "ISO 週年，不補零",
+      "kkkk": "ISO 週年，補齊至 4 位",
+      "W": "ISO 週數，不補零",
+      "WW": "ISO 週數，補齊至 2 位",
+      "ii": "本地週年，不補零",
+      "iiii": "本地週年，補齊至 4 位",
+      "n": "本地週數，不補零",
+      "nn": "本地週數，補齊至 2 位",
+      "o": "序數（當年第幾日），不補零",
+      "ooo": "序數（當年第幾日），補齊至 3 位",
+      "q": "季度，不補零",
+      "qq": "季度，補齊至 2 位",
+      "D": "在地化數字日期",
+      "DD": "附月份縮寫的在地化日期",
+      "DDD": "附月份全名的在地化日期",
+      "DDDD": "附月份全名與星期的在地化日期",
+      "t": "在地化時間",
+      "tt": "附秒數的在地化時間",
+      "ttt": "附秒數與偏移縮寫的在地化時間",
+      "tttt": "附秒數與完整偏移的在地化時間",
+      "T": "24 小時制在地化時間",
+      "TT": "附秒數的 24 小時制在地化時間",
+      "TTT": "附秒數與偏移縮寫的 24 小時制在地化時間",
+      "TTTT": "附秒數與完整偏移的 24 小時制在地化時間",
+      "f": "短式在地化日期與時間",
+      "ff": "較短式在地化日期與時間",
+      "fff": "詳細的在地化日期與時間",
+      "ffff": "更詳細的在地化日期與時間",
+      "F": "附秒數的短式在地化日期與時間",
+      "FF": "附秒數的較短式在地化日期與時間",
+      "FFF": "附秒數的詳細在地化日期與時間",
+      "FFFF": "附秒數的更詳細在地化日期與時間",
+      "X": "Unix 時間戳記（秒）",
+      "x": "Unix 時間戳記（毫秒）"
+    }
+  }
+}

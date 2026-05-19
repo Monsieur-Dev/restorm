@@ -7,6 +7,7 @@
 
 import { eventBus, logger } from 'electron-core-ui/renderer'
 import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
+import { cloneForEventBus } from '../utils/cloneForEventBus'
 import type { Folder, HTTPRequest, FolderItem, Request, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, AuthenticationRequest, Environment } from '../../../shared/types/collections'
 import { isAnyFolder, isHTTPRequest, isRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isEnvironmentFolder } from '../../../shared/types/collections'
 
@@ -18,14 +19,21 @@ import { isAnyFolder, isHTTPRequest, isRequest, isGraphQLRequest, isGrpcRequest,
 const FOLDER_INDEXABLE_KEYS = new Set([
   'name',
   'icon',
-  'documentation',
   'notes',
   'tags',
   // `tagColors` isn't a searchable field, but it *is* part of the folder
   // document we serialise: treating it as indexable ensures a
   // FOLDER_UPDATED event fires when its map changes, so tag renderers
   // repaint and the dirty-state tracker can detect the diff.
-  'tagColors'
+  'tagColors',
+  // `apiUpdate` carries the env folder's spec-refresh config:
+  // sourceUrl, payloadChecksum, lastImportedAt, lastCheckedAt, …
+  // Treating it as indexable ensures every Refresh / Apply update
+  // mutation (`folder.apiUpdate = { … }` via the proxy set trap)
+  // fires FOLDER_UPDATED → the save-unit pipeline → disk write.
+  // Without this, the file stays stale and the next Refresh re-fires
+  // the "out of date" branch forever.
+  'apiUpdate'
   // `environments` and `items` are *deliberately* not in this set.
   // Both fire huge event volumes during Swagger import (one FOLDER_UPDATED
   // per env folder / per folder-items rewrite, each paying an
@@ -40,7 +48,6 @@ const FOLDER_INDEXABLE_KEYS = new Set([
 /** Properties that trigger re-indexing when modified (HTTP requests) */
 const HTTP_REQUEST_INDEXABLE_KEYS = new Set([
   'name',
-  'documentation',
   'notes',
   'tags',
   'authenticationRequestId',
@@ -55,7 +62,6 @@ const HTTP_REQUEST_INDEXABLE_KEYS = new Set([
 /** Properties that trigger re-indexing when modified (GraphQL requests) */
 const GRAPHQL_REQUEST_INDEXABLE_KEYS = new Set([
   'name',
-  'documentation',
   'notes',
   'tags',
   'authenticationRequestId',
@@ -69,7 +75,6 @@ const GRAPHQL_REQUEST_INDEXABLE_KEYS = new Set([
 /** Properties that trigger re-indexing when modified (gRPC requests) */
 const GRPC_REQUEST_INDEXABLE_KEYS = new Set([
   'name',
-  'documentation',
   'notes',
   'tags',
   'authenticationRequestId',
@@ -84,7 +89,6 @@ const GRPC_REQUEST_INDEXABLE_KEYS = new Set([
 /** Properties that trigger re-indexing when modified (SOAP requests) */
 const SOAP_REQUEST_INDEXABLE_KEYS = new Set([
   'name',
-  'documentation',
   'notes',
   'tags',
   'authenticationRequestId',
@@ -99,7 +103,6 @@ const SOAP_REQUEST_INDEXABLE_KEYS = new Set([
 /** Properties that trigger re-indexing when modified (WebSocket requests) */
 const WEBSOCKET_REQUEST_INDEXABLE_KEYS = new Set([
   'name',
-  'documentation',
   'notes',
   'tags',
   'authenticationRequestId',
@@ -113,7 +116,6 @@ const WEBSOCKET_REQUEST_INDEXABLE_KEYS = new Set([
 /** Properties that trigger re-indexing when modified (OData requests) */
 const ODATA_REQUEST_INDEXABLE_KEYS = new Set([
   'name',
-  'documentation',
   'notes',
   'tags',
   'authenticationRequestId',
@@ -135,7 +137,6 @@ const ODATA_REQUEST_INDEXABLE_KEYS = new Set([
  * Auth requests mirror HTTP requests and add auth-specific fields. */
 const AUTH_REQUEST_INDEXABLE_KEYS = new Set([
   'name',
-  'documentation',
   'notes',
   'tags',
   'authenticationRequestId',
@@ -251,7 +252,16 @@ function emitUpdate(
     const payload: DocumentChangedPayload = {
       id: docId,
       type: docType,
-      document: JSON.parse(JSON.stringify(document)) // Deep clone to remove Proxy
+      // `cloneForEventBus` over `JSON.parse(JSON.stringify(…))`: the
+      // latter calls `PasswordValue.toJSON()` which strips the
+      // plaintext, so any main-side subscriber (e.g. ContextService
+      // re-registering env vars on ENVIRONMENT_UPDATED) sees every
+      // secret as an empty string — handlebars then substitutes
+      // `{{JWTBearer_token}}` with `''`. The custom walker copies
+      // own enumerable props (so the `value` field survives), never
+      // touches `toJSON`, and tolerates the reactive Proxy graph
+      // (the way `structuredClone` doesn't in jsdom).
+      document: cloneForEventBus(document)
     }
 
     if (parentFolderId !== undefined) {
@@ -380,7 +390,17 @@ function createDocumentProxyHandler(
  *      `MarkdownEditor` → `onChange('')` right after mount doesn't
  *      spuriously flip an otherwise-clean document dirty when its
  *      `notes`/`documentation` were previously `undefined`.
- *   3. Structural deep-equal for objects/arrays via JSON.
+ *   3. Structural deep-equal for objects/arrays — must run through
+ *      `cloneForEventBus` first, then `JSON.stringify`. A raw
+ *      `JSON.stringify` invokes `PasswordValue.toJSON()` which
+ *      strips the plaintext, so two `PasswordValue` instances with
+ *      different secrets stringify to the SAME `{"type":"password"}`
+ *      shape — the proxy reports "no change" and `emitUpdate` is
+ *      skipped, meaning a user typing into a password field never
+ *      reaches `ContextService` / `CollectionStore` (and the save
+ *      flow writes an empty `.env`). `cloneForEventBus` copies the
+ *      `value` field as a normal property so the serialised diff
+ *      actually sees the password change.
  */
 function sameProxyValue(a: unknown, b: unknown): boolean {
   if (a === b) return true
@@ -391,7 +411,7 @@ function sameProxyValue(a: unknown, b: unknown): boolean {
   if (typeof a !== typeof b) return false
   if (typeof a !== 'object') return false
   try {
-    return JSON.stringify(a) === JSON.stringify(b)
+    return JSON.stringify(cloneForEventBus(a)) === JSON.stringify(cloneForEventBus(b))
   } catch {
     return false
   }
@@ -669,7 +689,11 @@ export function emitEnvironmentCreated(
   eventBus.emitSync(DocumentEvents.ENVIRONMENT_CREATED, {
     id: env.id,
     type: 'environment',
-    document: JSON.parse(JSON.stringify(env)) as Environment,
+    // `cloneForEventBus` instead of JSON.stringify so
+    // `PasswordValue.toJSON()` doesn't strip the plaintext —
+    // ContextService needs the secret to substitute templated
+    // headers / URLs against the env context.
+    document: cloneForEventBus(env),
     parentFolderId,
     parentEnvironmentId
   })
@@ -686,7 +710,7 @@ export function emitEnvironmentUpdated(
   eventBus.emitSync(DocumentEvents.ENVIRONMENT_UPDATED, {
     id: env.id,
     type: 'environment',
-    document: JSON.parse(JSON.stringify(env)) as Environment,
+    document: cloneForEventBus(env),
     parentFolderId,
     parentEnvironmentId
   })

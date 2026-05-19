@@ -20,6 +20,7 @@ import {
 } from '../../../shared/models/requests'
 import type { HTTPMethod } from '../../../shared/models/types'
 import { findItemById, findItemWithBreadcrumbs, getFolderIcon, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
+import { cloneForEventBus } from '../utils/cloneForEventBus'
 import { generateUniqueId, cloneItemInTree, removeItemFromTree, insertItemIntoTree } from '../utils/treeManipulation'
 import type { WorkbenchTree } from 'electron-core-ui/renderer'
 import type { BreadcrumbItem, FolderTab, EnvironmentFolderTab, HTTPRequestTab } from '../../../shared/types/editor'
@@ -433,7 +434,6 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       const folder: Folder = {
         id,
         name,
-        documentation: '',
         tags: [],
         configuration: {},
         items: []
@@ -443,12 +443,15 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       pushedItem = reactive
       // Strip the proxy before sending over IPC — `eventBus.emitSync`
       // goes through `structuredClone` which can't ferry Proxy
-      // wrappers, and `useImport` follows the same JSON-round-trip
-      // pattern to stay safe here.
+      // wrappers. `cloneForEventBus` rather than the JSON round-trip
+      // so `PasswordValue.toJSON()` doesn't strip the plaintext on
+      // its way to main (matters when the folder being created
+      // carries an environment with secrets — main needs them for
+      // handlebars resolution and for the next `.restorm.env` write).
       const folderPayload: DocumentChangedPayload = {
         id: reactive.id,
         type: 'folder',
-        document: JSON.parse(JSON.stringify(reactive)) as Folder
+        document: cloneForEventBus(reactive)
       }
       eventBus.emitSync(DocumentEvents.FOLDER_CREATED, folderPayload)
     } else {
@@ -493,7 +496,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       const createdPayload: DocumentChangedPayload = {
         id: reactive.id,
         type: 'request',
-        document: JSON.parse(JSON.stringify(reactive)) as Request,
+        document: cloneForEventBus(reactive),
         ...(resolvedParentId !== undefined ? { parentFolderId: resolvedParentId } : {})
       }
       eventBus.emitSync(DocumentEvents.REQUEST_CREATED, createdPayload)
@@ -526,7 +529,6 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     const newFolder: Folder = {
       id: generateUniqueId(),
       name: t('sidebar.newFolder'),
-      documentation: '',
       tags: [],
       configuration: {},
       items: []
@@ -546,7 +548,6 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       name: t('sidebar.newEnvironmentFolder'),
       folderType: 'environment',
       fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
-      documentation: '',
       tags: [],
       configuration: {},
       environments: [],

@@ -171,6 +171,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
   expandOnChevronOnly = false,
   onItemClick,
   onItemDoubleClick,
+  onItemAuxClick,
   onSelectionChange,
   onItemToggle,
   onItemDrop,
@@ -178,7 +179,8 @@ const ListViewInner: React.FC<ListViewProps> = ({
   onItemRename,
   onItemMouseEnter,
   onItemMouseLeave,
-  onDeleteRequest
+  onDeleteRequest,
+  disableDrag = false
 }) => {
   const rootTestId = dataTestId ?? 'list-view'
   const scrollableTestId = scrollableTestIdProp ?? `${rootTestId}-scrollable`
@@ -759,6 +761,14 @@ const ListViewInner: React.FC<ListViewProps> = ({
               handleDoubleClick(flat, event)
             }
 
+            const handleRowAuxClick = (event: React.MouseEvent<HTMLDivElement>): void => {
+              if (event.button !== 1) return
+              if (!onItemAuxClick) return
+              event.preventDefault()
+              const payload: ListViewItemEventPayload = { item: item, path: flat.path }
+              onItemAuxClick(payload, event)
+            }
+
             const handleRowMouseEnter = (event: React.MouseEvent<HTMLDivElement>): void => {
               if (!onItemMouseEnter) return
               const payload: ListViewItemEventPayload = { item: item, path: flat.path }
@@ -820,24 +830,27 @@ const ListViewInner: React.FC<ListViewProps> = ({
                 aria-level={depth + 1}
                 aria-expanded={!isLeaf ? isExpanded : undefined}
                 aria-selected={isSelected}
-                draggable={!isEditing}
+                draggable={!isEditing && !disableDrag}
                 onClick={handleRowClick}
                 onDoubleClick={handleRowDoubleClick}
+                onAuxClick={handleRowAuxClick}
                 onMouseEnter={handleRowMouseEnter}
                 onMouseLeave={handleRowMouseLeave}
                 onContextMenu={(event): void => {
                   handleContextMenu(flat, event)
                 }}
-                onDragStart={(event): void => {
-                  handleDragStart(flat, event)
-                }}
-                onDragOver={(event): void => {
-                  handleDragOver(flat, event)
-                }}
-                onDragLeave={handleDragLeave}
-                onDrop={(event): void => {
-                  handleDrop(flat, event)
-                }}
+                {...(disableDrag ? {} : {
+                  onDragStart: (event: React.DragEvent<HTMLDivElement>): void => {
+                    handleDragStart(flat, event)
+                  },
+                  onDragOver: (event: React.DragEvent<HTMLDivElement>): void => {
+                    handleDragOver(flat, event)
+                  },
+                  onDragLeave: handleDragLeave,
+                  onDrop: (event: React.DragEvent<HTMLDivElement>): void => {
+                    handleDrop(flat, event)
+                  }
+                })}
               >
                 {/* Indents positioned absolutely to span full row height */}
                 <div className="list-view-indents" aria-hidden="true">

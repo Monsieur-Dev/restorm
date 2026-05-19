@@ -1,0 +1,328 @@
+{
+  "common": {
+    "opened": "Aperti",
+    "refresh": "Aggiorna",
+    "import": "Importa"
+  },
+  "file": {
+    "untitled": "Senza titolo",
+    "unsavedChanges": {
+      "title": "Modifiche non salvate",
+      "message": "Vuoi salvare le modifiche a \"{{fileName}}\"?",
+      "detail": "Le modifiche andranno perse se non le salvi.",
+      "save": "Salva",
+      "dontSave": "Non salvare",
+      "cancel": "Annulla"
+    }
+  },
+  "recentFilesVignette": {
+    "favorites": "Preferiti",
+    "recentFiles": "File recenti",
+    "addToFavorites": "Aggiungi ai preferiti",
+    "removeFromFavorites": "Rimuovi dai preferiti",
+    "confirmRemoveFavorite": "Vuoi davvero rimuovere \"{{fileName}}\" dai preferiti?",
+    "favoritesLandmarkLabel": "Elenco dei preferiti",
+    "recentsLandmarkLabel": "Elenco dei file recenti"
+  },
+  "welcomeScreen": {
+    "landmarkLabel": "Benvenuto"
+  },
+  "menuBar": {
+    "new": "Nuovo",
+    "open": "Apri",
+    "edit": "Modifica",
+    "view": "Visualizza",
+    "help": "Aiuto",
+    "undo": "Annulla",
+    "redo": "Ripeti",
+    "cut": "Taglia",
+    "copy": "Copia",
+    "paste": "Incolla",
+    "find": "Trova",
+    "replace": "Sostituisci",
+    "toggleSidebar": "Mostra/nascondi la barra laterale",
+    "toggleResponsePanel": "Mostra/nascondi il pannello risposta",
+    "zoomIn": "Aumenta zoom",
+    "zoomOut": "Diminuisci zoom",
+    "resetZoom": "Reimposta zoom",
+    "settings": "Impostazioni",
+    "toggleDevTools": "Strumenti per sviluppatori",
+    "toggleFullscreen": "Schermo intero",
+    "about": "Informazioni",
+    "documentation": "Documentazione",
+    "keyboardShortcuts": "Scorciatoie da tastiera",
+    "releaseNotes": "Note di rilascio",
+    "reportIssue": "Segnala un problema"
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "theme": "Tema",
+    "language": "Lingua",
+    "searchPlaceholder": "Cerca nelle impostazioni...",
+    "noResults": "Nessuna impostazione trovata.",
+    "numberOutOfRange": "Il valore deve essere compreso tra {{min}} e {{max}}.",
+    "resetSetting": "Reimposta",
+    "copySettingId": "Copia l'ID dell'impostazione",
+    "settingOptions": "Opzioni dell'impostazione",
+    "scopeTabsLabel": "Ambito delle impostazioni",
+    "userOnlyHidden": "{{count}} impostazione/i solo utente nascosta/e in questa scheda.",
+    "scope": {
+      "user": "Utente",
+      "workspace": "Area di lavoro",
+      "workspaceDisabledTooltip": "Apri un progetto per modificare le impostazioni dell'area di lavoro"
+    },
+    "appearance": {
+      "title": "Aspetto",
+      "theme": {
+        "title": "Tema",
+        "description": "Seleziona il tema cromatico dell'applicazione"
+      },
+      "language": {
+        "title": "Lingua",
+        "description": "Seleziona la lingua dell'applicazione",
+        "en": "English",
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "pt": "Português",
+        "nl": "Nederlands",
+        "sv": "Svenska",
+        "da": "Dansk",
+        "nb": "Norsk bokmål",
+        "fi": "Suomi",
+        "pl": "Polski",
+        "cs": "Čeština",
+        "hu": "Magyar",
+        "ro": "Română",
+        "el": "Ελληνικά",
+        "uk": "Українська",
+        "hr": "Hrvatski",
+        "sr": "Srpski",
+        "sq": "Shqip",
+        "tr": "Türkçe",
+        "id": "Bahasa Indonesia",
+        "vi": "Tiếng Việt",
+        "ja": "日本語",
+        "ko": "한국어",
+        "zh-CN": "简体中文",
+        "zh-TW": "繁體中文"
+      },
+      "advancedVisualEffects": {
+        "title": "Effetti visivi avanzati",
+        "description": "Attiva effetti visivi avanzati come la sfocatura di sfondo sugli overlay e le animazioni CSS. Disattivalo per ottenere prestazioni migliori su hardware modesto."
+      },
+      "editor": {
+        "title": "Editor",
+        "fontSize": {
+          "title": "Dimensione del carattere",
+          "description": "Controlla la dimensione del carattere in pixel per l'editor di codice"
+        },
+        "fontFamily": {
+          "title": "Famiglia di caratteri",
+          "description": "Controlla la famiglia di caratteri per l'editor di codice"
+        },
+        "wordWrap": {
+          "title": "A capo automatico",
+          "description": "Controlla se le righe devono andare a capo nell'editor di codice"
+        },
+        "minimap": {
+          "title": "Minimappa",
+          "description": "Controlla se la minimappa è visibile nell'editor di codice"
+        },
+        "lineNumbers": {
+          "title": "Numeri di riga",
+          "description": "Controlla se i numeri di riga sono visibili nell'editor di codice"
+        }
+      }
+    },
+    "files": {
+      "title": "File",
+      "autoSave": {
+        "title": "Salvataggio automatico",
+        "description": "Controlla il salvataggio automatico degli editor modificati. Maggiori informazioni nella documentazione.",
+        "off": "Disattivato",
+        "afterDelay": "Dopo un ritardo",
+        "onWindowChange": "Al cambio di finestra"
+      },
+      "autoSaveDelay": {
+        "title": "Ritardo del salvataggio automatico",
+        "description": "Controlla il ritardo in millisecondi dopo il quale un editor modificato viene salvato automaticamente. Si applica solo quando il salvataggio automatico è impostato su «Dopo un ritardo»."
+      }
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Vai alla definizione"
+  },
+  "tagsView": {
+    "removeTag": "Rimuovi tag",
+    "newTag": "Nuovo tag"
+  },
+  "contextMenu": {
+    "cut": "Taglia",
+    "copy": "Copia",
+    "paste": "Incolla"
+  },
+  "search": {
+    "placeholder": "Cerca...",
+    "noResults": "Nessun risultato trovato",
+    "resultsAriaLabel": "Risultati della ricerca",
+    "categories": {
+      "request": "Richieste HTTP",
+      "folder": "Cartelle",
+      "environment": "Ambienti",
+      "settings": "Impostazioni",
+      "tag": "Tag"
+    }
+  },
+  "iconSelect": {
+    "searchEmojis": "Cerca emoji...",
+    "noEmojisFound": "Nessuna emoji trovata",
+    "searchCodicons": "Cerca codicon...",
+    "searchIconoir": "Cerca in Iconoir...",
+    "searchPhosphor": "Cerca in Phosphor...",
+    "searchMaterial": "Cerca in Material...",
+    "searchSimpleIcons": "Cerca in Simple Icons...",
+    "searchFeather": "Cerca in Feather...",
+    "searchFontAwesome": "Cerca in Font Awesome...",
+    "moreIcons": "+{{count}} altre icone. Usa la ricerca per trovare icone specifiche.",
+    "more": "+{{count}} altre. Usa la ricerca per trovare icone specifiche.",
+    "noIconsFound": "Nessuna icona trovata",
+    "searchResults": "Risultati della ricerca",
+    "categories": {
+      "files": "File",
+      "git": "Git",
+      "debug": "Debug",
+      "symbols": "Simboli",
+      "arrows": "Frecce",
+      "ui": "Interfaccia",
+      "media": "Media",
+      "editing": "Modifica",
+      "terminal": "Terminale",
+      "people": "Persone",
+      "notifications": "Notifiche",
+      "brands": "Marchi",
+      "communication": "Comunicazione",
+      "users": "Utenti",
+      "business": "Lavoro",
+      "medical": "Medicina",
+      "transport": "Trasporti",
+      "weather": "Meteo",
+      "shapes": "Forme",
+      "design": "Design",
+      "devices": "Dispositivi",
+      "buildings": "Edifici",
+      "nature": "Natura",
+      "food": "Cibo",
+      "sport": "Sport",
+      "sports": "Sport",
+      "animals": "Animali",
+      "tools": "Strumenti"
+    },
+    "emojiCategories": {
+      "people": "Faccine e persone",
+      "nature": "Animali e natura",
+      "food": "Cibo e bevande",
+      "activity": "Attività",
+      "travel": "Viaggi e luoghi",
+      "objects": "Oggetti",
+      "symbols": "Simboli",
+      "flags": "Bandiere"
+    }
+  },
+  "dateTimePicker": {
+    "ariaLabel": "Selettore data/ora",
+    "openCalendar": "Apri calendario",
+    "previousYear": "Anno precedente",
+    "nextYear": "Anno successivo",
+    "previousMonth": "Mese precedente",
+    "nextMonth": "Mese successivo",
+    "selectMonth": "Seleziona mese",
+    "selectYear": "Seleziona anno",
+    "includeTime": "Includi l'ora",
+    "hours": "Ore",
+    "minutes": "Minuti",
+    "output": "Output",
+    "pattern": "Formato",
+    "outputModes": {
+      "pattern": "Formato",
+      "unix": "Unix (s)",
+      "epoch": "Epoch (ms)",
+      "iso": "ISO 8601"
+    },
+    "preview": "Anteprima",
+    "tokens": {
+      "S": "millisecondo, senza padding",
+      "SSS": "millisecondo, padding a 3",
+      "u": "secondi frazionari, funzionalmente identico a SSS",
+      "uu": "secondi frazionari, tra 0 e 99, padding a 2",
+      "uuu": "secondi frazionari, tra 0 e 9",
+      "s": "secondo, senza padding",
+      "ss": "secondo, padding a 2",
+      "m": "minuto, senza padding",
+      "mm": "minuto, padding a 2",
+      "h": "ora in formato 12 h, senza padding",
+      "hh": "ora in formato 12 h, padding a 2",
+      "H": "ora in formato 24 h, senza padding",
+      "HH": "ora in formato 24 h, padding a 2",
+      "Z": "offset stretto",
+      "ZZ": "offset corto",
+      "ZZZ": "offset tecnico",
+      "ZZZZ": "offset nominato abbreviato",
+      "ZZZZZ": "offset nominato esteso",
+      "z": "zona IANA",
+      "a": "meridiano",
+      "d": "giorno del mese, senza padding",
+      "dd": "giorno del mese, padding a 2",
+      "c": "giorno della settimana, come numero da 1 a 7 (lunedì è 1, domenica è 7)",
+      "ccc": "giorno della settimana, come stringa localizzata abbreviata",
+      "cccc": "giorno della settimana, come stringa localizzata estesa",
+      "ccccc": "giorno della settimana, come singola lettera localizzata",
+      "L": "mese come numero senza padding",
+      "LL": "mese come numero con padding",
+      "LLL": "mese come stringa localizzata abbreviata",
+      "LLLL": "mese come stringa localizzata estesa",
+      "LLLLL": "mese come singola lettera localizzata",
+      "y": "anno, senza padding",
+      "yy": "anno a due cifre",
+      "yyyy": "anno da quattro a sei cifre, padding a 4",
+      "G": "era localizzata abbreviata",
+      "GG": "era localizzata estesa",
+      "GGGGG": "era localizzata di una sola lettera",
+      "kk": "anno della settimana ISO, senza padding",
+      "kkkk": "anno della settimana ISO, padding a 4",
+      "W": "numero di settimana ISO, senza padding",
+      "WW": "numero di settimana ISO, padding a 2",
+      "ii": "anno della settimana locale, senza padding",
+      "iiii": "anno della settimana locale, padding a 4",
+      "n": "numero di settimana locale, senza padding",
+      "nn": "numero di settimana locale, padding a 2",
+      "o": "ordinale (giorno dell'anno), senza padding",
+      "ooo": "ordinale (giorno dell'anno), padding a 3",
+      "q": "trimestre, senza padding",
+      "qq": "trimestre, padding a 2",
+      "D": "data numerica localizzata",
+      "DD": "data localizzata con mese abbreviato",
+      "DDD": "data localizzata con mese esteso",
+      "DDDD": "data localizzata con mese esteso e giorno della settimana",
+      "t": "ora localizzata",
+      "tt": "ora localizzata con secondi",
+      "ttt": "ora localizzata con secondi e offset abbreviato",
+      "tttt": "ora localizzata con secondi e offset esteso",
+      "T": "ora localizzata in formato 24 h",
+      "TT": "ora localizzata in formato 24 h con secondi",
+      "TTT": "ora localizzata in formato 24 h con secondi e offset abbreviato",
+      "TTTT": "ora localizzata in formato 24 h con secondi e offset esteso",
+      "f": "data e ora localizzata breve",
+      "ff": "data e ora localizzata meno breve",
+      "fff": "data e ora localizzata estesa",
+      "ffff": "data e ora localizzata molto estesa",
+      "F": "data e ora localizzata breve con secondi",
+      "FF": "data e ora localizzata meno breve con secondi",
+      "FFF": "data e ora localizzata estesa con secondi",
+      "FFFF": "data e ora localizzata molto estesa con secondi",
+      "X": "timestamp unix in secondi",
+      "x": "timestamp unix in millisecondi"
+    }
+  }
+}

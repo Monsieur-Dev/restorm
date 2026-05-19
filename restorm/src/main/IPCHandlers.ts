@@ -4,7 +4,8 @@ import { isTabDetachEnabled } from './featureFlags'
 import { join, relative, dirname } from 'path'
 import { promises as fs, existsSync, statSync, rmSync } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
-import { contextService, responseHistoryService } from './services'
+import { contextService, responseHistoryService, requestUsageService } from './services'
+import { miniBrowserService } from './services/MiniBrowserService'
 import { assertPathWithinParent } from './utils/pathSecurity'
 import { saveFolderStructure, loadFolderStructure, attachDraftStoreForFolder, attachDraftStoreForFile } from './FileOperations'
 import type { PersistenceFormat } from 'electron-core-ui'
@@ -12,6 +13,8 @@ import { resolveRequestURL, type URLResolutionInput } from './services/request/H
 import { httpExecutionService, type HTTPExecutionInput } from './services/HTTPExecutionService'
 import { authPrefetchOneShot, resolveProducedHeaders } from './services/AuthenticationPrefetch'
 import { AuthenticationRequest } from '../shared/models/requests/AuthenticationRequest'
+import { StringValue, ExpressionValue } from '../shared/types/valueTypes'
+import type { KeyValue } from '../shared/types/baseTypes'
 import { authenticationCacheService } from './services/AuthenticationCacheService'
 import { graphqlExecutionService, type GraphQLExecutionInput } from './services/GraphQLExecutionService'
 import { soapExecutionService, type SOAPExecutionInput } from './services/SOAPExecutionService'
@@ -39,8 +42,13 @@ import {
   websocketConnectArgs, websocketDisconnectArgs, websocketSendArgs, websocketIsActiveArgs,
   responsesHistoryListArgs, responsesHistoryGetArgs,
   responsesHistoryTogglePinArgs,
+  requestUsageGetArgs,
   importPreviewArgs, importImportArgs,
-  findInPageArgs, findStopArgs
+  findInPageArgs, findStopArgs,
+  miniBrowserCreateArgs, miniBrowserDestroyArgs, miniBrowserSetBoundsArgs,
+  miniBrowserNavigateArgs, miniBrowserReloadArgs,
+  miniBrowserGoBackArgs, miniBrowserGoForwardArgs, miniBrowserGetStateArgs,
+  miniBrowserCaptureArgs
 } from './ipc/schemas'
 
 /**
@@ -59,6 +67,68 @@ function isPlainAuthPayload(value: unknown): value is Parameters<typeof Authenti
 
 function getE2EMockedFolderPath(): string | null {
   return process.env['E2E_MOCK_SAVE_FOLDER'] ?? null
+}
+
+interface KeyValueRowFromIpc {
+  id?: string | undefined
+  key: string
+  value: string
+  enabled?: boolean | undefined
+  isExpression?: boolean | undefined
+}
+
+/**
+ * Rehydrate an IPC-serialised KeyValue row back to the canonical
+ * `KeyValue` shape with a real `ValueType` subclass. The renderer
+ * flattens `KeyValue.value` to a string on the way to main, but
+ * carries the `isExpression` bit so we know whether to materialise
+ * an `ExpressionValue` (which the resolver will run through
+ * handlebars) or a plain `StringValue` (which the resolver will
+ * pass through verbatim).
+ */
+function rehydrateKeyValueRow(row: KeyValueRowFromIpc): KeyValue {
+  const value = row.isExpression === true ? new ExpressionValue(row.value) : new StringValue(row.value)
+  return {
+    ...(row.id !== undefined ? { id: row.id } : {}),
+    key: row.key,
+    value,
+    ...(row.enabled !== undefined ? { enabled: row.enabled } : {})
+  }
+}
+
+/**
+ * Walk an IPC `FullRequestData` payload and rehydrate every
+ * KeyValue group + body form-fields back to real `KeyValue`s with
+ * `ValueType` instances. The `context:update-full-request-data`
+ * handler used to forward the renderer payload verbatim, so any
+ * header / param / form-data field with `isExpression: true`
+ * landed in `ContextService.keyValueGroups` as a bare string —
+ * the runtime `resolveKeyValueForRequest` then read `kv.value`
+ * (a string) and `isExpressionValue` returned false, so handlebars
+ * never fired and the wire shipped `Bearer {{token}}` literally.
+ *
+ * `register-request` and `update-request-keyvalues` already
+ * rehydrate; this mirrors the same pass for the third entry point.
+ */
+function rehydrateFullRequestData(data: unknown): unknown {
+  if (typeof data !== 'object' || data === null) return data
+  const record = data as Record<string, unknown>
+  const out: Record<string, unknown> = { ...record }
+  for (const group of ['headers', 'params', 'pathParams', 'metadata'] as const) {
+    const rows = record[group]
+    if (Array.isArray(rows)) {
+      out[group] = rows.map((row) => rehydrateKeyValueRow(row as KeyValueRowFromIpc))
+    }
+  }
+  // Body fields (`form-data` / `x-www-form-urlencoded`) keep their
+  // wire shape — `{ key: string, value: string }`. The downstream
+  // `HTTPExecutionService` runs them through `resolveValue(field.value)`
+  // which expects a raw string, and the in-form template usage is
+  // identical regardless of declared `ValueType`. Rehydrating them
+  // here would force every executor to unwrap via `toString()` and
+  // crashes the resolver's `rawValue.includes('{{')` branch on the
+  // first send.
+  return out
 }
 
 /**
@@ -544,11 +614,20 @@ export function registerRestormIPC(deps: {
   })
 
   validatedHandle('context:register-request', contextRegisterRequestArgs, (_event, [requestId, environmentId, requestData]) => {
+    // The IPC payload carries `value: string` plus an optional
+    // `isExpression` flag — rehydrate each row to a real KeyValue
+    // with the matching ValueType subclass so downstream
+    // `resolveKeyValue` reads the right type. Without this, every
+    // value would arrive as a bare string and the resolver
+    // couldn't distinguish a templated `ExpressionValue` from a
+    // verbatim `StringValue` (a `StringValue("{{token}}")` would
+    // get handlebars-substituted at send time even though the
+    // product rule is "templating is opt-in via expression").
     contextService.registerRequest(requestId, environmentId, {
       id: requestId,
-      headers: requestData.headers,
-      params: requestData.params,
-      pathParams: requestData.pathParams
+      headers: requestData.headers?.map(rehydrateKeyValueRow),
+      params: requestData.params?.map(rehydrateKeyValueRow),
+      pathParams: requestData.pathParams?.map(rehydrateKeyValueRow)
     })
   })
 
@@ -565,11 +644,12 @@ export function registerRestormIPC(deps: {
   })
 
   validatedHandle('context:update-request-keyvalues', contextUpdateRequestKeyValuesArgs, (_event, [requestId, groupName, keyValues, sourceId]) => {
-    contextService.updateRequestKeyValues(requestId, groupName, keyValues, sourceId)
+    contextService.updateRequestKeyValues(requestId, groupName, keyValues.map(rehydrateKeyValueRow), sourceId)
   })
 
   validatedHandle('context:update-full-request-data', contextUpdateFullRequestDataArgs, (_event, [requestId, data, sourceId]) => {
-    contextService.updateFullRequestData(requestId, data as Parameters<typeof contextService.updateFullRequestData>[1], sourceId)
+    const rehydrated = rehydrateFullRequestData(data)
+    contextService.updateFullRequestData(requestId, rehydrated as Parameters<typeof contextService.updateFullRequestData>[1], sourceId)
   })
 
   validatedHandle('context:get-resolved-url', contextGetResolvedUrlArgs, (_event, [requestId]) => {
@@ -617,6 +697,7 @@ export function registerRestormIPC(deps: {
     const result = await httpExecutionService.execute(executionInput)
     setImmediate(() => {
       void responseHistoryService.storeExecutionResult(input.requestId, 'http', result)
+      requestUsageService.recordSend(input.requestId)
     })
     return result
   })
@@ -668,6 +749,7 @@ export function registerRestormIPC(deps: {
     })
     setImmediate(() => {
       void responseHistoryService.storeExecutionResult(input.requestId, 'odata', result)
+      requestUsageService.recordSend(input.requestId)
     })
     return result
   })
@@ -800,6 +882,7 @@ export function registerRestormIPC(deps: {
     const result = await graphqlExecutionService.execute(input as GraphQLExecutionInput)
     setImmediate(() => {
       void responseHistoryService.storeExecutionResult(input.requestId, 'graphql', result)
+      requestUsageService.recordSend(input.requestId)
     })
     return result
   })
@@ -820,6 +903,7 @@ export function registerRestormIPC(deps: {
     const result = await soapExecutionService.execute(input as SOAPExecutionInput)
     setImmediate(() => {
       void responseHistoryService.storeExecutionResult(input.requestId, 'soap', result)
+      requestUsageService.recordSend(input.requestId)
     })
     return result
   })
@@ -840,6 +924,7 @@ export function registerRestormIPC(deps: {
     const result = grpcExecutionService.execute(input as GRPCExecutionInput)
     setImmediate(() => {
       void responseHistoryService.storeExecutionResult(input.requestId, 'grpc', result)
+      requestUsageService.recordSend(input.requestId)
     })
     return result
   })
@@ -860,6 +945,7 @@ export function registerRestormIPC(deps: {
     const result = await websocketExecutionService.execute(input as WebSocketExecutionInput)
     setImmediate(() => {
       void responseHistoryService.storeExecutionResult(input.requestId, 'websocket', result)
+      requestUsageService.recordSend(input.requestId)
     })
     return result
   })
@@ -890,6 +976,19 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('responses:history:toggle-pin', responsesHistoryTogglePinArgs, async (_event, [guid, pinned]) => {
     return responseHistoryService.togglePin(guid, pinned)
+  })
+
+  // ==========================================================================
+  // Request Usage IPC Handlers
+  // --------------------------------------------------------------------------
+  // The renderer reads the full usage map on EmptyBench mount; updates
+  // arrive via the `request-usage:changed` push event broadcast from
+  // `RequestUsageService.recordSend` next to each protocol's history
+  // write.
+  // ==========================================================================
+
+  validatedHandle('request-usage:get', requestUsageGetArgs, () => {
+    return requestUsageService.getAll()
   })
 
   // ==========================================================================
@@ -940,6 +1039,63 @@ export function registerRestormIPC(deps: {
     const win = BrowserWindow.fromWebContents(event.sender)
     win?.webContents.stopFindInPage(action)
     return { ok: true }
+  })
+
+  // ==========================================================================
+  // MiniBrowser — main-process `WebContentsView` lifecycle. Each Mini-
+  // Browser tab in the renderer is backed by one WebContentsView here;
+  // the renderer doesn't host the embedded page in its own DOM at all,
+  // so cross-group tab moves are just `setBounds` updates instead of
+  // re-parenting a `<webview>` (which Chromium would tear down on every
+  // move). See `services/MiniBrowserService.ts` for the full rationale.
+  // ==========================================================================
+
+  validatedHandle('miniBrowser:create', miniBrowserCreateArgs, (event, [tabId, initialUrl]) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (!win) {
+      logger.warn('[IPC] miniBrowser:create: no owner BrowserWindow', { tabId })
+      return { ok: false }
+    }
+    miniBrowserService.create(tabId, win, initialUrl)
+    return { ok: true }
+  })
+
+  validatedHandle('miniBrowser:destroy', miniBrowserDestroyArgs, (_event, [tabId]) => {
+    miniBrowserService.destroy(tabId)
+    return { ok: true }
+  })
+
+  validatedHandle('miniBrowser:set-bounds', miniBrowserSetBoundsArgs, (_event, [tabId, bounds]) => {
+    miniBrowserService.setBounds(tabId, bounds)
+    return { ok: true }
+  })
+
+  validatedHandle('miniBrowser:navigate', miniBrowserNavigateArgs, (_event, [tabId, url]) => {
+    miniBrowserService.navigate(tabId, url)
+    return { ok: true }
+  })
+
+  validatedHandle('miniBrowser:reload', miniBrowserReloadArgs, (_event, [tabId]) => {
+    miniBrowserService.reload(tabId)
+    return { ok: true }
+  })
+
+  validatedHandle('miniBrowser:go-back', miniBrowserGoBackArgs, (_event, [tabId]) => {
+    miniBrowserService.goBack(tabId)
+    return { ok: true }
+  })
+
+  validatedHandle('miniBrowser:go-forward', miniBrowserGoForwardArgs, (_event, [tabId]) => {
+    miniBrowserService.goForward(tabId)
+    return { ok: true }
+  })
+
+  validatedHandle('miniBrowser:get-state', miniBrowserGetStateArgs, (_event, [tabId]) => {
+    return miniBrowserService.getState(tabId)
+  })
+
+  validatedHandle('miniBrowser:capture', miniBrowserCaptureArgs, async (_event, [tabId]) => {
+    return await miniBrowserService.capturePage(tabId)
   })
 
   validatedHandle('import:import', importImportArgs, async (_event, [input]) => {

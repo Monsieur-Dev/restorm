@@ -203,7 +203,7 @@ describe('PermissionService.check', () => {
 		expect(verdict).toBe('deny')
 	})
 
-	it('auto-denies when no BrowserWindow can show the prompt', async () => {
+	it('auto-denies when no BrowserWindow can show the prompt, without persisting to blacklist', async () => {
 		const verdict = await permissionService.check({
 			scheme: 'https',
 			host: 'no-window.example',
@@ -211,9 +211,12 @@ describe('PermissionService.check', () => {
 			source: 'main-https'
 		})
 		expect(verdict).toBe('deny')
-		// The auto-deny path also persists the origin to the blacklist.
+		// The auto-deny path is a synthetic resolution (no user click =
+		// no user signal), so it must NOT persist the origin to the
+		// blacklist — otherwise the very first prompt of a session
+		// silently builds a forever-rule when no window is mounted yet.
 		expect(
 			permissionService.listBlacklist().some((o) => o.host === 'no-window.example')
-		).toBe(true)
+		).toBe(false)
 	})
 })

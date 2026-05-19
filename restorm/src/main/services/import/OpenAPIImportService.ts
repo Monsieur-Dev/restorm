@@ -34,7 +34,7 @@ import {
   type EnumMatchingRule
 } from '../../../shared/types/collections'
 import { toHTTPMethod } from './httpMethodValidator'
-import { openapi3ToApiDocumentation, type OAS3Spec, type OAS3Server, expandServerVariables, pickPrimaryContentType } from './transformers/openapi3ToApiDocumentation'
+import { openapi3ToApiDocumentation, type OAS3Spec, type OAS3Server, type OAS3SecurityScheme, expandServerVariables, pickPrimaryContentType } from './transformers/openapi3ToApiDocumentation'
 import { openapi31ToApiDocumentation, type OAS31Spec } from './transformers/openapi31ToApiDocumentation'
 import { rewriteUrlTemplate, resolveJsonPointer, type CommonSchema } from './transformers/_shared'
 import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
@@ -151,6 +151,61 @@ function buildTypedValue(type: string | string[] | undefined, format: string | u
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// Schema wrapper resolution — `allOf` / `$ref` / `oneOf` / `anyOf`
+// ────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Flatten a parameter / form-field schema that hides its actual shape behind
+ * `$ref`, `allOf`, `oneOf` or `anyOf`. FastAPI-style specs are the common
+ * culprit — an enum parameter looks like
+ *
+ *   schema: { allOf: [{ $ref: '#/components/schemas/AchievementType' }] }
+ *
+ * with no `enum` / `type` at the top. Walking only the top-level schema
+ * loses both the enum values (so the dropdown disappears) and the underlying
+ * type (so it falls back to `StringValue`).
+ */
+function resolveSchemaShape(
+  schema: CommonSchema | OAS3Reference | undefined,
+  spec: OAS3Spec,
+  seenRefs = new Set<string>()
+): CommonSchema | undefined {
+  if (!schema) return undefined
+  if (isReference(schema)) {
+    if (seenRefs.has(schema.$ref)) return undefined
+    seenRefs.add(schema.$ref)
+    const resolved = resolveJsonPointer(spec, schema.$ref) as CommonSchema | undefined
+    return resolveSchemaShape(resolved, spec, seenRefs)
+  }
+  const enumValues = Array.isArray(schema.enum) ? schema.enum : undefined
+  const directType = Array.isArray(schema.type) ? schema.type.find((t) => t !== 'null') ?? schema.type[0] : schema.type
+  if (enumValues || directType !== undefined) return schema
+  // `allOf` is the FastAPI/Pydantic pattern for wrapping a single ref while
+  // still attaching `title` / `description` at the parameter level. Pick the
+  // first sub-schema that resolves to something concrete.
+  for (const key of ['allOf', 'oneOf', 'anyOf'] as const) {
+    const branches = schema[key]
+    if (!Array.isArray(branches)) continue
+    for (const sub of branches) {
+      const subResolved = resolveSchemaShape(sub, spec, new Set(seenRefs))
+      if (subResolved) {
+        // Carry forward outer defaults / examples / format so the param
+        // input keeps its annotations even when the type came from the
+        // referenced model.
+        return {
+          ...subResolved,
+          ...(schema.default !== undefined && subResolved.default === undefined ? { default: schema.default } : {}),
+          ...(schema.example !== undefined && subResolved.example === undefined ? { example: schema.example } : {}),
+          ...(schema.format !== undefined && subResolved.format === undefined ? { format: schema.format } : {}),
+          ...(schema.description !== undefined && subResolved.description === undefined ? { description: schema.description } : {})
+        }
+      }
+    }
+  }
+  return schema
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // Enum extraction — `components.schemas` (3.x) instead of `definitions` (2.0)
 // ────────────────────────────────────────────────────────────────────────────
 
@@ -193,8 +248,9 @@ function extractEnumDefinitions(spec: OAS3Spec): { definitions: EnumDefinition[]
       for (const rawParam of rawParams) {
         const param = deref(spec, rawParam)
         if (!param) continue
-        const schema = param.schema && !isReference(param.schema) ? param.schema : undefined
-        const enumValues: unknown[] | undefined = schema?.enum ?? schema?.items?.enum
+        const schema = resolveSchemaShape(param.schema, spec)
+        const itemsSchema = resolveSchemaShape(schema?.items, spec)
+        const enumValues: unknown[] | undefined = schema?.enum ?? itemsSchema?.enum
         if (!enumValues || enumValues.length === 0) continue
 
         const sig = enumValues.map(String).slice().sort().join('|')
@@ -259,7 +315,21 @@ function schemaToSample(
   } else {
     inferredType = workingSchema.type
   }
-  inferredType ??= workingSchema.properties ? 'object' : workingSchema.items ? 'array' : 'string'
+  // Default-type fallback ladder. A schema that carries no `type` but
+  // *does* carry a `format` / `enum` is almost certainly a string
+  // (think `{format: 'date-time'}` or `{enum: ['a','b']}`). A schema
+  // that is genuinely empty (`{}`) is OpenAPI's "any" — for JSON
+  // request bodies the FastAPI-style action endpoint expects `{}`,
+  // not `""`, so default to `'object'` rather than `'string'`. The
+  // old default of `'string'` made imported action bodies render as
+  // `'""'` and the server then rejected the request with 422 "Field
+  // required".
+  inferredType ??=
+    workingSchema.properties ? 'object'
+      : workingSchema.items ? 'array'
+      : workingSchema.format ? 'string'
+      : Array.isArray(workingSchema.enum) && workingSchema.enum.length > 0 ? 'string'
+      : 'object'
 
   switch (inferredType) {
     case 'object': {
@@ -298,25 +368,39 @@ function schemaToSample(
 
 function keyValueFromOpenApi3Param(
   param: OAS3Parameter,
+  spec: OAS3Spec,
   enumLookup?: Map<string, string>,
   method?: string,
   path?: string
 ): KeyValue {
-  const schema = param.schema && !isReference(param.schema) ? param.schema : undefined
-  const itemsSchema = schema?.items
+  // Resolve through `$ref` / `allOf` / `oneOf` / `anyOf` so FastAPI-style
+  // parameter wrappers (where the schema is just a `$ref` carrier) still
+  // surface their enum + type.
+  const schema = resolveSchemaShape(param.schema, spec)
+  const itemsSchema = resolveSchemaShape(schema?.items, spec)
   const defaultVal = param.example ?? schema?.example ?? schema?.default ?? itemsSchema?.default
 
   if (enumLookup && method && path) {
     const lookupKey = `${method}:${path}:${param.name}`
     const defId = enumLookup.get(lookupKey)
     if (defId) {
+      // The enum values resolved by `resolveSchemaShape` — the SelectBox
+      // renderer falls back to index 0 when no value matches, so an
+      // empty `preSelected` displays the first option visually while
+      // the underlying KeyValue still carries `''`. That mismatch sends
+      // `?param=` on the first execution; pin the initial value to the
+      // first enum entry so the displayed value is what we actually send.
+      const enumValues: unknown[] = Array.isArray(schema?.enum)
+        ? schema.enum
+        : Array.isArray(itemsSchema?.enum) ? itemsSchema.enum : []
+      const firstEnumValue = enumValues.find((v): v is string => typeof v === 'string') ?? ''
       if (schema?.type === 'array') {
         const preSelected = Array.isArray(defaultVal)
           ? defaultVal.filter((v): v is string => typeof v === 'string')
           : typeof defaultVal === 'string' ? [defaultVal] : []
         return kvOfType(param.name, new EnumListValue(preSelected, defId), param.description)
       }
-      const preSelected = typeof defaultVal === 'string' ? defaultVal : ''
+      const preSelected = typeof defaultVal === 'string' ? defaultVal : firstEnumValue
       return kvOfType(param.name, new EnumValue(preSelected, defId), param.description)
     }
   }
@@ -416,15 +500,14 @@ function operationToRequest(
   const filtered = (loc: string): OAS3Parameter[] => parameters.filter((p) => p.in === loc)
   const ctx = enumLookup ? { lookup: enumLookup, method, path } : undefined
 
-  const headers = filtered('header').map((p) => keyValueFromOpenApi3Param(p, ctx?.lookup, ctx?.method, ctx?.path))
-  const params = dedupeByName(filtered('query')).map((p) => keyValueFromOpenApi3Param(p, ctx?.lookup, ctx?.method, ctx?.path))
-  const pathParams = dedupeByName(filtered('path')).map((p) => keyValueFromOpenApi3Param(p, ctx?.lookup, ctx?.method, ctx?.path))
+  const headers = filtered('header').map((p) => keyValueFromOpenApi3Param(p, spec, ctx?.lookup, ctx?.method, ctx?.path))
+  const params = dedupeByName(filtered('query')).map((p) => keyValueFromOpenApi3Param(p, spec, ctx?.lookup, ctx?.method, ctx?.path))
+  const pathParams = dedupeByName(filtered('path')).map((p) => keyValueFromOpenApi3Param(p, spec, ctx?.lookup, ctx?.method, ctx?.path))
 
   const request: HTTPRequest = {
     type: 'http',
     id: generateId(`request:${method}:${path}`),
     name: operation.summary ?? operation.operationId ?? `${method.toUpperCase()} ${path}`,
-    documentation: '',
     tags: operation.tags ?? [],
     method: toHTTPMethod(method),
     url: buildUrl(path, parameters),
@@ -469,22 +552,50 @@ function applyOpenApi3SecurityToRequest(
   for (const schemeName of Object.keys(requirement)) {
     const scheme = defs[schemeName]
     if (!scheme) continue
+    // All security-derived header / query values carry `{{handlebars}}`
+    // placeholders that resolve against the env folder's variables —
+    // they MUST be `ExpressionValue`s so `ContextService.resolveKeyValue`
+    // actually substitutes them at request time. A `StringValue` of
+    // the same text gets sent verbatim (the product rule is "templating
+    // is opt-in via expression"), so the user would see `Bearer
+    // {{schemeName_token}}` on the wire instead of the resolved token.
     if (scheme.type === 'apiKey' && scheme.name !== undefined && scheme.in !== undefined) {
       const placeholder = `{{${schemeName}}}`
       const target = scheme.in === 'header' ? request.headers : scheme.in === 'query' ? request.params : null
       if (target && !target.some((kv) => kv.key === scheme.name)) {
-        target.push({ key: scheme.name, value: new StringValue(placeholder) })
+        target.push({ key: scheme.name, value: new ExpressionValue(placeholder) })
       }
     } else if (scheme.type === 'http' && scheme.scheme === 'basic') {
       if (!request.headers.some((kv) => kv.key.toLowerCase() === 'authorization')) {
-        request.headers.push({ key: 'Authorization', value: new StringValue(`Basic {{${schemeName}_credentials}}`) })
+        request.headers.push({ key: 'Authorization', value: new ExpressionValue(`Basic {{${schemeName}_credentials}}`) })
       }
     } else if ((scheme.type === 'http' && scheme.scheme === 'bearer') || scheme.type === 'oauth2' || scheme.type === 'openIdConnect') {
       if (!request.headers.some((kv) => kv.key.toLowerCase() === 'authorization')) {
-        request.headers.push({ key: 'Authorization', value: new StringValue(`Bearer {{${schemeName}_token}}`) })
+        request.headers.push({ key: 'Authorization', value: new ExpressionValue(`Bearer {{${schemeName}_token}}`) })
       }
     }
   }
+}
+
+/**
+ * Variable names the security schemes implicitly reference in the
+ * placeholders above. We surface them on the env folder so the user
+ * sees an explicit row to fill in instead of having to discover the
+ * convention from a Bearer template.
+ */
+function collectSecuritySchemeVariableNames(defs: Record<string, OAS3SecurityScheme> | undefined): string[] {
+  if (!defs) return []
+  const out: string[] = []
+  for (const [schemeName, scheme] of Object.entries(defs)) {
+    if (scheme.type === 'apiKey') {
+      out.push(schemeName)
+    } else if (scheme.type === 'http' && scheme.scheme === 'basic') {
+      out.push(`${schemeName}_credentials`)
+    } else if ((scheme.type === 'http' && scheme.scheme === 'bearer') || scheme.type === 'oauth2' || scheme.type === 'openIdConnect') {
+      out.push(`${schemeName}_token`)
+    }
+  }
+  return out
 }
 
 function dedupeByName(params: OAS3Parameter[]): OAS3Parameter[] {
@@ -505,7 +616,6 @@ function buildFolderItems(spec: OAS3Spec, enumLookup?: Map<string, string>): Fol
     tagFolders.set(tag.name, {
       id: generateId(`folder:tag:${tag.name}`),
       name: tag.name,
-      documentation: '',
       tags: [tag.name],
       configuration: {},
       items: []
@@ -515,7 +625,6 @@ function buildFolderItems(spec: OAS3Spec, enumLookup?: Map<string, string>): Fol
   const untaggedFolder: Folder = {
     id: generateId('folder:untagged:Other'),
     name: 'Other',
-    documentation: '',
     tags: [],
     configuration: {},
     items: []
@@ -538,7 +647,6 @@ function buildFolderItems(spec: OAS3Spec, enumLookup?: Map<string, string>): Fol
           folder = {
             id: generateId(`folder:tag:${tagName}`),
             name: tagName,
-            documentation: '',
             tags: [tagName],
             configuration: {},
             items: []
@@ -558,7 +666,6 @@ function buildFolderItems(spec: OAS3Spec, enumLookup?: Map<string, string>): Fol
     webhooksFolder = {
       id: generateId('folder:webhooks'),
       name: 'Webhooks',
-      documentation: 'Documentation-only — webhooks are incoming events.',
       tags: ['webhook'],
       configuration: {},
       items: []
@@ -641,11 +748,30 @@ function createOpenApi3Environment(spec: OAS3Spec, overrideBaseUrl?: string, sou
   // and the resolved `baseUrl` template that requests will reference.
   const resolvedPrimary = primary ? resolveServerUrl(primary.url, sourceUrl) : ''
   const primaryUrl = primary ? expandServerVariables({ ...primary, url: resolvedPrimary }) : ''
+  // Fallback when the spec omits `servers` entirely (the OpenAPI 3.x
+  // spec says implementations should default to `/`, which is
+  // useless to a user importing from a remote URL). If we know the
+  // URL the spec was fetched from, derive the origin from it — for
+  // `https://api.example.com/openapi.json` the user almost
+  // certainly wants `baseUrl = https://api.example.com`. Falls
+  // through to empty string for file imports where we have no
+  // origin at all.
+  let derivedFromSourceUrl = ''
+  if (!primary && sourceUrl !== undefined && sourceUrl !== '') {
+    try {
+      const u = new URL(sourceUrl)
+      derivedFromSourceUrl = `${u.protocol}//${u.host}`
+    } catch {
+      // Malformed source URL — leave blank.
+    }
+  }
   let domainName: string
   if (overrideBaseUrl !== undefined) {
     domainName = extractDomainName(overrideBaseUrl)
   } else if (primaryUrl !== '') {
     domainName = extractDomainName(primaryUrl)
+  } else if (derivedFromSourceUrl !== '') {
+    domainName = extractDomainName(derivedFromSourceUrl)
   } else {
     domainName = 'Default'
   }
@@ -670,8 +796,27 @@ function createOpenApi3Environment(spec: OAS3Spec, overrideBaseUrl?: string, sou
     }
   }
 
-  const baseUrlTemplate = primary ? rewriteUrlTemplate(resolvedPrimary) : ''
+  const baseUrlTemplate = primary
+    ? rewriteUrlTemplate(resolvedPrimary)
+    : derivedFromSourceUrl
   rootVariables.push(kvOfType('baseUrl', new ExpressionValue(baseUrlTemplate)))
+
+  // Auto-create placeholder variables for every security scheme the
+  // spec declares. The user otherwise had to discover the convention
+  // (`schemeName_token` for bearer / oauth2, `schemeName_credentials`
+  // for basic, `schemeName` for apiKey) by reading the imported
+  // request's `Authorization` header. Empty default — the user fills
+  // it in once after import.
+  //
+  // Seeded as `PasswordValue` so the plaintext lands in the sibling
+  // `.restorm.env` on save (and is masked in the UI), matching the
+  // rest of restorm's secret-handling story. A `StringValue` would
+  // round-trip through the main `.restorm` document and leave the
+  // token sitting in plaintext on disk.
+  for (const varName of collectSecuritySchemeVariableNames(spec.components?.securitySchemes)) {
+    if (rootVariables.some((kv) => kv.key === varName)) continue
+    rootVariables.push(kvOfType(varName, new PasswordValue('')))
+  }
 
   const subEnvironments: Environment['subEnvironments'] = servers.slice(1).map((server, idx) => {
     const resolvedSubUrl = resolveServerUrl(server.url, sourceUrl)
@@ -765,7 +910,6 @@ export function importOpenAPI(
     fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     id: generateId(`folder:root:${spec.info.title}`),
     name: spec.info.title,
-    documentation: '',
     tags: [],
     configuration: {},
     environments: [newEnvironment],

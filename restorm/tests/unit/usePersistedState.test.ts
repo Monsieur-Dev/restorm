@@ -9,9 +9,10 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { act, renderHook } from '@testing-library/react'
 // Reach into the library source directly. The renderer barrel
-// (`electron-core-ui/renderer`) lazy-loads `jsoncrack-react`, which the
-// vite-driven test bundler can't resolve at unit-test time; importing the
-// hook module avoids pulling in that unrelated component graph.
+// (`electron-core-ui/renderer`) pulls in `@xyflow/react` via
+// `JsonViewer`, which the vite-driven test bundler can't resolve at
+// unit-test time; importing the hook module avoids dragging in that
+// unrelated component graph.
 import { usePersistedState } from '../../../electron-core-ui/src/renderer/hooks/usePersistedState'
 
 type FakeStore = Map<string, unknown>

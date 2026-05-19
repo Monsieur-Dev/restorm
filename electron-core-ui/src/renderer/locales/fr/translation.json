@@ -1,6 +1,8 @@
 {
   "common": {
-    "opened": "Ouverts"
+    "opened": "Ouverts",
+    "refresh": "Actualiser",
+    "import": "Importer"
   },
   "file": {
     "untitled": "Sans titre",
@@ -79,7 +81,32 @@
         "title": "Langue",
         "description": "Sélectionner la langue de l'application",
         "en": "English",
-        "fr": "Français"
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "pt": "Português",
+        "nl": "Nederlands",
+        "sv": "Svenska",
+        "da": "Dansk",
+        "nb": "Norsk bokmål",
+        "fi": "Suomi",
+        "pl": "Polski",
+        "cs": "Čeština",
+        "hu": "Magyar",
+        "ro": "Română",
+        "el": "Ελληνικά",
+        "uk": "Українська",
+        "hr": "Hrvatski",
+        "sr": "Srpski",
+        "sq": "Shqip",
+        "tr": "Türkçe",
+        "id": "Bahasa Indonesia",
+        "vi": "Tiếng Việt",
+        "ja": "日本語",
+        "ko": "한국어",
+        "zh-CN": "简体中文",
+        "zh-TW": "繁體中文"
       },
       "advancedVisualEffects": {
         "title": "Effets visuels avancés",
@@ -129,15 +156,12 @@
   },
   "tagsView": {
     "removeTag": "Supprimer le tag",
-    "changeColor": "Changer la couleur du tag",
-    "removeColor": "Supprimer la couleur du tag",
     "newTag": "Nouveau tag"
   },
   "contextMenu": {
     "cut": "Couper",
     "copy": "Copier",
-    "paste": "Coller",
-    "goToDefinition": "Aller à la définition"
+    "paste": "Coller"
   },
   "search": {
     "placeholder": "Rechercher...",
@@ -152,10 +176,8 @@
     }
   },
   "iconSelect": {
-    "search": "Rechercher...",
     "searchEmojis": "Rechercher des emojis...",
     "noEmojisFound": "Aucun emoji trouvé",
-    "searchIcons": "Rechercher des icônes...",
     "searchCodicons": "Rechercher des codicons...",
     "searchIconoir": "Rechercher dans Iconoir...",
     "searchPhosphor": "Rechercher dans Phosphor...",
@@ -229,24 +251,6 @@
       "iso": "ISO 8601"
     },
     "preview": "Aperçu",
-    "formatHelp": {
-      "title": "Aide au formatage",
-      "note": "Utilise les jetons de formatage Luxon.",
-      "table": {
-        "token": "Jeton",
-        "description": "Description",
-        "output": "Sortie"
-      },
-      "rows": {
-        "year": "Année",
-        "month": "Mois (2 chiffres)",
-        "day": "Jour (2 chiffres)",
-        "hour24": "Heure (00-23)",
-        "minute": "Minute (00-59)",
-        "second": "Seconde (00-59)"
-      },
-      "more": "Exemple"
-    },
     "tokens": {
       "S": "milliseconde, sans padding",
       "SSS": "milliseconde, padding à 3",

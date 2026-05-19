@@ -7,6 +7,14 @@ import { createCoreUIAPI } from '../../../../electron-core-ui/src/preload/api'
 import { createElectronAPI } from '../../../../electron-core-ui/src/preload/electronAPI'
 import type { PersistenceFormat } from '../../../../electron-core-ui/src/main/services/PersistenceService'
 import {
+  MINI_BROWSER_OPEN_CHANNEL,
+  MINI_BROWSER_EXECUTE_CHANNEL,
+  MINI_BROWSER_EXECUTE_REPLY_CHANNEL,
+  CONSOLE_OPEN_CHANNEL,
+  CONSOLE_CLEAR_CHANNEL,
+  SET_TAB_MAXIMIZED_CHANNEL
+} from '../../../../electron-core-ui/src/types/ipcChannels'
+import {
   FIREWALL_IPC,
   FIREWALL_REQUEST_RECORD_CHANNEL,
   type FirewallOrigin,
@@ -273,9 +281,9 @@ contextBridge.exposeInMainWorld('restorm', {
       requestId: string,
       environmentId: string | null,
       requestData: {
-        headers?: { id?: string; key: string; value: string }[]
-        params?: { id?: string; key: string; value: string }[]
-        pathParams?: { id?: string; key: string; value: string }[]
+        headers?: { id?: string; key: string; value: string; enabled?: boolean; isExpression?: boolean }[]
+        params?: { id?: string; key: string; value: string; enabled?: boolean; isExpression?: boolean }[]
+        pathParams?: { id?: string; key: string; value: string; enabled?: boolean; isExpression?: boolean }[]
       }
     ): Promise<void> => {
       await ipcRenderer.invoke('context:register-request', requestId, environmentId, requestData)
@@ -349,6 +357,79 @@ contextBridge.exposeInMainWorld('restorm', {
     /** Clear all context data (when file is closed) */
     clearAll: async (): Promise<void> => {
       await ipcRenderer.invoke('context:clear-all')
+    }
+  },
+  miniBrowser: {
+    /** Create a `WebContentsView` for a Mini-Browser tab, attached to
+     * the calling window's `contentView`. Idempotent — a duplicate call
+     * for the same `tabId` is a no-op. */
+    create: async (tabId: string, initialUrl?: string): Promise<{ ok: boolean }> => {
+      return await ipcRenderer.invoke('miniBrowser:create', tabId, initialUrl) as { ok: boolean }
+    },
+    /** Tear down the view (close its contents, free the slot). Called
+     * on the Mini-Browser tab's final unmount — NOT on cross-group
+     * moves (those are pure `setBounds` updates). */
+    destroy: async (tabId: string): Promise<{ ok: boolean }> => {
+      return await ipcRenderer.invoke('miniBrowser:destroy', tabId) as { ok: boolean }
+    },
+    /** Position the view in window-coordinate space (DIP). The panel's
+     * `ResizeObserver` on its placeholder slot drives this every time
+     * the slot's rect changes. A zero-size rect hides the view. */
+    setBounds: async (tabId: string, bounds: { x: number; y: number; width: number; height: number }): Promise<{ ok: boolean }> => {
+      return await ipcRenderer.invoke('miniBrowser:set-bounds', tabId, bounds) as { ok: boolean }
+    },
+    navigate: async (tabId: string, url: string): Promise<{ ok: boolean }> => {
+      return await ipcRenderer.invoke('miniBrowser:navigate', tabId, url) as { ok: boolean }
+    },
+    reload: async (tabId: string): Promise<{ ok: boolean }> => {
+      return await ipcRenderer.invoke('miniBrowser:reload', tabId) as { ok: boolean }
+    },
+    goBack: async (tabId: string): Promise<{ ok: boolean }> => {
+      return await ipcRenderer.invoke('miniBrowser:go-back', tabId) as { ok: boolean }
+    },
+    goForward: async (tabId: string): Promise<{ ok: boolean }> => {
+      return await ipcRenderer.invoke('miniBrowser:go-forward', tabId) as { ok: boolean }
+    },
+    /** Synchronous URL + back/forward snapshot. Used to seed the
+     * toolbar before the first `did-navigate` event lands. */
+    getState: async (tabId: string): Promise<{ url: string; canGoBack: boolean; canGoForward: boolean } | null> => {
+      return await ipcRenderer.invoke('miniBrowser:get-state', tabId) as { url: string; canGoBack: boolean; canGoForward: boolean } | null
+    },
+    /** PNG data URL of the current page. Used by the panel to paint a
+     * still image of the page in place of the live view during HTML5
+     * drag gestures (the OS-compositor-level view paints above HTML
+     * pixels, so a real drag overlay would otherwise be occluded). */
+    capture: async (tabId: string): Promise<string | null> => {
+      return await ipcRenderer.invoke('miniBrowser:capture', tabId) as string | null
+    },
+    onDidNavigate: (callback: (result: { tabId: string; url: string }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, result: { tabId: string; url: string }): void => {
+        callback(result)
+      }
+      ipcRenderer.on('miniBrowser:did-navigate', handler)
+      ipcRenderer.on('miniBrowser:did-navigate-in-page', handler)
+      return () => {
+        ipcRenderer.removeListener('miniBrowser:did-navigate', handler)
+        ipcRenderer.removeListener('miniBrowser:did-navigate-in-page', handler)
+      }
+    },
+    onDidStopLoading: (callback: (result: { tabId: string; canGoBack: boolean; canGoForward: boolean }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, result: { tabId: string; canGoBack: boolean; canGoForward: boolean }): void => {
+        callback(result)
+      }
+      ipcRenderer.on('miniBrowser:did-stop-loading', handler)
+      return () => {
+        ipcRenderer.removeListener('miniBrowser:did-stop-loading', handler)
+      }
+    },
+    onUserInteraction: (callback: (result: { tabId: string }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, result: { tabId: string }): void => {
+        callback(result)
+      }
+      ipcRenderer.on('miniBrowser:user-interaction', handler)
+      return () => {
+        ipcRenderer.removeListener('miniBrowser:user-interaction', handler)
+      }
     }
   },
   http: {
@@ -717,6 +798,32 @@ contextBridge.exposeInMainWorld('restorm', {
       return result as boolean
     }
   },
+  requestUsage: {
+    /** Fetch the full per-request usage map: count + lastSentAt + last
+     * 10 send timestamps, keyed by request id. The EmptyBench ApiCard
+     * + RecentActivityCard filter this against the open project's
+     * tree to render per-API "Top played" / "Recent" lists. */
+    get: async (): Promise<Record<string, { count: number; lastSentAt: string; history: string[] }>> => {
+      const result: unknown = await ipcRenderer.invoke('request-usage:get')
+      return result as Record<string, { count: number; lastSentAt: string; history: string[] }>
+    },
+    /** Subscribe to push events fired every time the map mutates
+     * (new send recorded, or a request deleted invalidated its
+     * entry). The callback receives the fresh full snapshot — no
+     * diffing required on the renderer side. */
+    onChanged: (
+      callback: (map: Record<string, { count: number; lastSentAt: string; history: string[] }>) => void
+    ): (() => void) => {
+      const handler = (
+        _event: Electron.IpcRendererEvent,
+        map: Record<string, { count: number; lastSentAt: string; history: string[] }>
+      ): void => {
+        callback(map)
+      }
+      ipcRenderer.on('request-usage:changed', handler)
+      return () => { ipcRenderer.removeListener('request-usage:changed', handler) }
+    }
+  },
   runtime: {
     /** Per-boot runtime config (MCP + GraphQL endpoint). Both ports
      * are picked at startup — the renderer reads them once and caches
@@ -825,6 +932,57 @@ contextBridge.exposeInMainWorld('restorm', {
       const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; favorite: boolean | null }) }
       ipcRenderer.on('mcp:set-favorite', handler)
       return () => { ipcRenderer.off('mcp:set-favorite', handler) }
+    },
+    /** Subscribe to MCP `open_mini_browser`. Payload optionally carries
+     * `{ url }` to navigate the Mini browser webview to once the
+     * singleton tab is mounted. */
+    onMcpOpenMiniBrowser: (callback: (payload: { url?: string }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback((payload ?? {}) as { url?: string }) }
+      ipcRenderer.on(MINI_BROWSER_OPEN_CHANNEL, handler)
+      return () => { ipcRenderer.off(MINI_BROWSER_OPEN_CHANNEL, handler) }
+    },
+    /** Subscribe to MCP `mini_browser_execute`. Payload
+     * `{ requestId, code }`. The renderer is expected to run the
+     * script inside the Mini browser webview's guest context (via
+     * `webview.executeJavaScript`) and reply via
+     * `restorm.runtime.replyMiniBrowserExecute({ requestId, result, error })`. */
+    onMcpMiniBrowserExecute: (callback: (payload: { requestId: string; code: string }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { requestId: string; code: string }) }
+      ipcRenderer.on(MINI_BROWSER_EXECUTE_CHANNEL, handler)
+      return () => { ipcRenderer.off(MINI_BROWSER_EXECUTE_CHANNEL, handler) }
+    },
+    /** Send the result of a `mini_browser_execute` script back to main.
+     * `error` is set when the script threw or the webview wasn't ready. */
+    replyMiniBrowserExecute: (payload: { requestId: string; result?: unknown; error?: string }): void => {
+      ipcRenderer.send(MINI_BROWSER_EXECUTE_REPLY_CHANNEL, payload)
+    },
+    /** Subscribe to MCP `open_console` — open / focus the singleton Console tab. */
+    onMcpOpenConsole: (callback: () => void): (() => void) => {
+      const handler = (): void => { callback() }
+      ipcRenderer.on(CONSOLE_OPEN_CHANNEL, handler)
+      return () => { ipcRenderer.off(CONSOLE_OPEN_CHANNEL, handler) }
+    },
+    /** Subscribe to MCP `console_clear` — wipe the renderer-side feed. */
+    onMcpConsoleClear: (callback: () => void): (() => void) => {
+      const handler = (): void => { callback() }
+      ipcRenderer.on(CONSOLE_CLEAR_CHANNEL, handler)
+      return () => { ipcRenderer.off(CONSOLE_CLEAR_CHANNEL, handler) }
+    },
+    /** Subscribe to MCP `open_firewall` — open / focus the singleton Firewall tab. */
+    onMcpOpenFirewall: (callback: () => void): (() => void) => {
+      const handler = (): void => { callback() }
+      ipcRenderer.on('mcp:open-firewall', handler)
+      return () => { ipcRenderer.off('mcp:open-firewall', handler) }
+    },
+    /** Subscribe to MCP `set_tab_maximized` — maximize a workbench tab
+     * by id, or restore the maximized tab when `maximized` is false
+     * (`tabId` is then `null`). */
+    onMcpSetTabMaximized: (callback: (payload: { tabId: string | null; maximized: boolean }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => {
+        callback((payload ?? { tabId: null, maximized: false }) as { tabId: string | null; maximized: boolean })
+      }
+      ipcRenderer.on(SET_TAB_MAXIMIZED_CHANNEL, handler)
+      return () => { ipcRenderer.off(SET_TAB_MAXIMIZED_CHANNEL, handler) }
     }
   },
   import: {
@@ -914,29 +1072,11 @@ contextBridge.exposeInMainWorld('restorm', {
     }
   },
   apiUpdate: {
-    /** Read the current ApiUpdateState for a single folder. */
-    getState: async (folderId: string): Promise<unknown> => {
-      const result: unknown = await ipcRenderer.invoke('apiUpdate:get-state', folderId)
-      return result
-    },
-    /** One-shot read of every known folder's state. The renderer
-     * uses this on mount to populate badges before the first
-     * push event arrives. */
-    getSnapshot: async (): Promise<Record<string, unknown>> => {
-      const result: unknown = await ipcRenderer.invoke('apiUpdate:get-snapshot')
-      return result as Record<string, unknown>
-    },
-    /** Persist a new ApiUpdateConfig onto the folder. The main
-     * process writes through CollectionStore + the persistence
-     * layer, then re-registers the scheduler so cadence changes
-     * take effect immediately. */
+    /** Persist a partial `ApiUpdateConfig` patch onto the folder.
+     * The main process writes through CollectionStore + the
+     * persistence layer. */
     setSettings: async (folderId: string, config: unknown): Promise<void> => {
       await ipcRenderer.invoke('apiUpdate:set-settings', folderId, config)
-    },
-    /** Force a check ignoring schedule + autoCheckEnabled. Used by
-     * the explicit "Check now" button. */
-    checkNow: async (folderId: string): Promise<void> => {
-      await ipcRenderer.invoke('apiUpdate:check-now', folderId)
     },
     /** Apply the available update against the folder. Resolves
      * once the pipeline has run; rejects on failure so the
@@ -948,47 +1088,26 @@ contextBridge.exposeInMainWorld('restorm', {
       const result: unknown = await ipcRenderer.invoke('apiUpdate:apply', folderId, selection)
       return result as { updatedFolder: unknown }
     },
-    /** Compute the diff against the current folder content
-     * without mutating it. Used by the "Refresh from source"
-     * confirmation dialog to surface counters before commit. */
-    preview: async (folderId: string): Promise<unknown> => {
-      const result: unknown = await ipcRenderer.invoke('apiUpdate:preview', folderId)
-      return result
-    },
-    /** Resolve the env folder's auth route + fetch the source URL +
-     * run the format adapter, all main-side, and return the parsed
-     * preview tree (same shape as `import.preview`). The refresh
-     * variant of the import modal calls this instead of running
-     * `auth.prefetch` + `import.preview` itself, so `{{var}}`
-     * placeholders inside the saved auth route can be resolved
-     * against the env folder's first environment. The optional
-     * `lockedKeys` array marks leaves whose operation is already
-     * present in the target folder; the modal pre-ticks them and
-     * disables their checkbox so the user can't opt them out. */
-    previewTree: async (folderId: string): Promise<{ success: boolean; items: unknown[]; lockedKeys?: string[]; error?: string }> => {
-      const result: unknown = await ipcRenderer.invoke('apiUpdate:preview-tree', folderId)
-      return result as { success: boolean; items: unknown[]; lockedKeys?: string[]; error?: string }
-    },
-    /** Acknowledge an "available" notification for the rest of the
-     * session. The badge stays; only the toast suppression flips. */
-    dismiss: async (folderId: string): Promise<void> => {
-      await ipcRenderer.invoke('apiUpdate:dismiss', folderId)
-    },
-    /** Subscribe to state transitions for every folder. */
-    onStateChanged: (callback: (data: { folderId: string; state: unknown }) => void): (() => void) => {
-      const handler = (_event: Electron.IpcRendererEvent, data: { folderId: string; state: unknown }): void => {
-        callback(data)
-      }
-      ipcRenderer.on('apiUpdate:state-changed', handler)
-      return () => {
-        ipcRenderer.removeListener('apiUpdate:state-changed', handler)
-      }
+    /** Fetch the folder's source URL with `${VAR}`-expanded headers
+     * and the resolved auth headers, then return a payload checksum
+     * + the raw payload. The renderer's Refresh button compares the
+     * checksum against the stored `apiUpdate.payloadChecksum`:
+     * equal ⇒ "up to date" modal; different (or fetch errored) ⇒
+     * open the Import modal in refresh mode. */
+    refreshFetch: async (folderId: string): Promise<
+      | { ok: true; checksum: string; payload: string; items: unknown[]; format: string | null }
+      | { ok: false; error: string }
+    > => {
+      const result: unknown = await ipcRenderer.invoke('apiUpdate:refresh-fetch', folderId)
+      return result as
+        | { ok: true; checksum: string; payload: string; items: unknown[]; format: string | null }
+        | { ok: false; error: string }
     },
     /** Mirror the renderer's collection tree onto the main-side
-     * CollectionStore. The main-side apply / preview orchestrators
-     * look up folders by id; without this sync they would always
-     * fail with "folder not found". Fire-and-forget; the handler
-     * doesn't return anything. */
+     * CollectionStore. The main-side apply / refresh-fetch
+     * orchestrators look up folders by id; without this sync they
+     * would always fail with "folder not found". Fire-and-forget;
+     * the handler doesn't return anything. */
     syncCollections: async (collections: unknown[]): Promise<void> => {
       await ipcRenderer.invoke('collections:sync', collections)
     }

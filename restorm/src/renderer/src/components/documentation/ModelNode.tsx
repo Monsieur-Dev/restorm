@@ -2,6 +2,7 @@ import React from 'react'
 import { Handle, Position, type NodeProps } from '@xyflow/react'
 import type { ModelDocumentation, PropertyDocumentation, SchemaConstraints } from '../../../../shared/types/apiDocumentation'
 import {
+  MODEL_NODE_ENUM_VISIBLE_MAX,
   MODEL_NODE_WIDTH,
   modelHeaderHeight,
   sourceHandleIdForProperty,
@@ -152,13 +153,76 @@ const ModelNodeHeader: React.FC<ModelNodeHeaderProps> = ({ model }) => {
   )
 }
 
+function formatEnumValue(v: unknown): string {
+  if (typeof v === 'string') return v
+  if (typeof v === 'number' || typeof v === 'boolean') return String(v)
+  if (v === null) return 'null'
+  try {
+    const json = JSON.stringify(v)
+    return typeof json === 'string' ? json : '?'
+  } catch {
+    return '?'
+  }
+}
+
+interface EnumValuesProps {
+  values: readonly unknown[]
+}
+
+const EnumValues: React.FC<EnumValuesProps> = ({ values }) => {
+  const overflows = values.length > MODEL_NODE_ENUM_VISIBLE_MAX
+  const visible = overflows ? values.slice(0, MODEL_NODE_ENUM_VISIBLE_MAX) : values
+  const list = (
+    <ul className="documentation-host-model-node__enum-list">
+      {visible.map((v, i) => (
+        <li key={i} className="documentation-host-model-node__enum-item">
+          {formatEnumValue(v)}
+        </li>
+      ))}
+      {overflows && (
+        <li className="documentation-host-model-node__enum-item documentation-host-model-node__enum-item--more">
+          …
+        </li>
+      )}
+    </ul>
+  )
+  if (!overflows) return list
+  // Tooltip surfaces the full set on hover so the user can see
+  // every value when the node has been truncated.
+  const fullList = (
+    <ul className="documentation-host-model-node__tooltip-enum-list">
+      {values.map((v, i) => (
+        <li key={i}>{formatEnumValue(v)}</li>
+      ))}
+    </ul>
+  )
+  return (
+    <DelayedTooltip
+      content={
+        <div className="documentation-host-model-node__tooltip">
+          {fullList}
+        </div>
+      }
+      as="div"
+      className="documentation-host-model-node__enum-wrap"
+    >
+      {list}
+    </DelayedTooltip>
+  )
+}
+
 export const ModelNode: React.FC<NodeProps> = ({ data }) => {
   const { model, incomingEdgeIds = [], nodeHeight } = data as ModelNodeData
   const totalIncoming = incomingEdgeIds.length
+  const isEnum = Array.isArray(model.enumValues) && model.enumValues.length > 0
   return (
     <div
-      className="documentation-host-model-node"
+      className={
+        'documentation-host-model-node' +
+        (isEnum ? ' documentation-host-model-node--enum' : '')
+      }
       data-testid={`documentation-host-model-node-${model.name}`}
+      data-enum={isEnum ? 'true' : 'false'}
       style={{ width: MODEL_NODE_WIDTH }}
     >
       {/* One target handle per incoming edge, distributed along the
@@ -241,6 +305,7 @@ export const ModelNode: React.FC<NodeProps> = ({ data }) => {
           )
         })}
       </ul>
+      {isEnum && <EnumValues values={model.enumValues ?? []} />}
     </div>
   )
 }

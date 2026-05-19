@@ -87,13 +87,28 @@ function collectEnvironmentContexts(items: (EnvironmentFolder | Folder | Request
 	const out: EnvContext[] = []
 	const visit = (item: EnvironmentFolder | Folder | Request): void => {
 		if (isEnvironmentFolder(item)) {
-			const folder = item as EnvironmentFolder & { environments?: { variables?: { key: string; value: string }[] }[] }
+			const folder = item
 			const envs = Array.isArray(folder.environments) ? folder.environments : []
 			for (const env of envs) {
 				const ctx: EnvContext = {}
 				const vars = Array.isArray(env.variables) ? env.variables : []
 				for (const v of vars) {
-					if (typeof v.key === 'string' && typeof v.value === 'string') ctx[v.key] = v.value
+					if (typeof v.key !== 'string') continue
+					// `v.value` can arrive in three shapes depending on where
+					// in the load pipeline we run:
+					//   - `ValueType` class instance (StringValue, ExpressionValue,
+					//     NumericValue, …) once the renderer's `makeReactive*`
+					//     pass has reified the tree
+					//   - plain POJO `{ type, value }` straight off the wire
+					//     (file-open IPC, MCP `update_folder`, etc.) before
+					//     reification fires
+					//   - the raw string when an importer cut a corner
+					// Extracting requires probing all three: the instance has
+					// a meaningful `toString()`, the POJO needs `.value`
+					// pulled out explicitly (its `.toString()` returns
+					// `"[object Object]"`), and a raw string is itself.
+					const str = extractValueString(v.value)
+					if (str !== '') ctx[v.key] = str
 				}
 				out.push(ctx)
 			}
@@ -106,6 +121,32 @@ function collectEnvironmentContexts(items: (EnvironmentFolder | Folder | Request
 	}
 	for (const item of items) visit(item)
 	return out
+}
+
+/**
+ * Coerce a `KeyValue.value` of unknown shape (live `ValueType` instance,
+ * POJO `{ type, value }`, raw string, …) into the plain string the
+ * firewall origin sync needs. Skipping any of these shapes makes the
+ * env context drop the variable — and a missing `baseUrl` mapping
+ * tanks every project-origin resolution that needs handlebars
+ * substitution (which is most of them).
+ */
+function extractValueString(value: unknown): string {
+	if (typeof value === 'string') return value
+	if (value === null || value === undefined) return ''
+	if (typeof value === 'object') {
+		// POJO shape from the wire — `{ type: 'string', value: '...' }`.
+		const inner = (value as { value?: unknown }).value
+		if (typeof inner === 'string') return inner
+		// Live `ValueType` instance — `.toString()` returns the stored
+		// string. Skip if it falls through to `Object.prototype.toString`
+		// (which yields the useless `"[object Object]"`).
+		const toStr = (value as { toString?: () => string }).toString
+		if (typeof toStr === 'function' && toStr !== Object.prototype.toString) {
+			return toStr.call(value)
+		}
+	}
+	return ''
 }
 
 function extractRawUrl(request: Request): string | null {

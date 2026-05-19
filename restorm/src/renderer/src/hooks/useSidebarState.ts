@@ -27,12 +27,9 @@ export interface UseSidebarStateOptions {
   isItemFavorite?: (itemId: string) => boolean
   onToggleFavorite?: (itemId: string) => void
   /** `true` for an env folder that has an apiUpdate.sourceUrl
-   * configured. Drives the "Refresh from source" right-click entry. */
+   * configured. Drives the "Refresh" right-click entry. */
   canRefreshFromSource?: (itemId: string) => boolean
   onRefreshFromSource?: (itemId: string) => void
-  /** `true` for an env folder whose ApiUpdateState is currently
-   * `'available'`. Drives the "update available" badge in the tree. */
-  hasApiUpdateAvailable?: (folderId: string) => boolean
 }
 
 export interface UseSidebarStateReturn {
@@ -40,7 +37,7 @@ export interface UseSidebarStateReturn {
 }
 
 export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStateReturn {
-  const { rootItems, expandedIds, updateCount, onCloneItem, onAddChildItem, onDeleteItem, onRenameItem, isItemFavorite, onToggleFavorite, canRefreshFromSource, onRefreshFromSource, hasApiUpdateAvailable } = options
+  const { rootItems, expandedIds, updateCount, onCloneItem, onAddChildItem, onDeleteItem, onRenameItem, isItemFavorite, onToggleFavorite, canRefreshFromSource, onRefreshFromSource } = options
   const { t } = useTranslation()
 
   // Set of request ids whose URL currently resolves to a deprecated
@@ -65,8 +62,7 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
       // than the title alone, and the decision rides on the live
       // matcher (so editing the URL re-evaluates instantly).
       renderRemovedTitle: (name: string) => React.createElement('span', { style: { textDecoration: 'line-through', opacity: 0.6 }, title: 'Removed from source spec' }, name),
-      deprecatedRequestIds,
-      ...(hasApiUpdateAvailable !== undefined && { hasApiUpdateAvailable })
+      deprecatedRequestIds
     }
     // Each root item becomes a top-level row in the sidebar. Folders
     // go through `folderAsRootListViewItem` (which renders them as a
@@ -79,7 +75,7 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
         ? folderAsRootListViewItem(item, renderOptions)
         : folderItemToListViewItem(item, renderOptions)
     )
-  }, [expandedIds, rootItems, updateCount, hasApiUpdateAvailable, deprecatedRequestIds])
+  }, [expandedIds, rootItems, updateCount, deprecatedRequestIds])
 
   // Attach context menus to sidebar items.
   // `isItemFavorite` / `onToggleFavorite` are optional: only spread

@@ -33,8 +33,30 @@ export interface TabsProps {
    * This preserves component state when switching tabs (useful for editors like Milkdown).
    * Requires the parent container to have a defined height.
    * Defaults to false.
+   *
+   * Superseded by `mountStrategy`. If `mountStrategy` is set, this prop is ignored;
+   * otherwise `keepMounted: true` maps to `'eager'` and `keepMounted: false` (the
+   * default) maps to `'active-only'`.
    */
   keepMounted?: boolean
+  /**
+   * Controls when each tab's content is mounted into the React tree:
+   *  - `'active-only'` (default when `keepMounted` is false / unset): only the
+   *    active tab is mounted; switching unmounts the previous tab and remounts
+   *    the new one. Cheapest first render, but tab state is lost on every switch.
+   *  - `'eager'` (default when `keepMounted` is true): every tab is mounted up
+   *    front and inactive ones are hidden via `visibility:hidden`. State is
+   *    preserved across switches at the cost of a heavier cold start — every
+   *    tab pays its mount cost before the user has even visited it.
+   *  - `'lazy-once'`: a tab is mounted the first time it becomes active and
+   *    stays mounted thereafter (hidden via `visibility:hidden` when not the
+   *    active tab). The active tab is mounted on first render; never-visited
+   *    tabs cost nothing. Best of both worlds for views where most users only
+   *    ever interact with one or two of the tabs.
+   *
+   * `mountStrategy` wins over `keepMounted` when both are passed.
+   */
+  mountStrategy?: 'eager' | 'lazy-once' | 'active-only'
   /**
    * Legacy callback for tab double-click events.
    * Consider using allowFullscreen property on individual tabs instead for fullscreen behavior.
@@ -52,12 +74,42 @@ const TabsInner: React.FC<TabsProps> = ({
   onTabChange,
   onTabClose,
   keepMounted = false,
+  mountStrategy,
   onTabDoubleClick: legacyDoubleClickCallback,
   'data-testid': dataTestId
 }) => {
   const [internalActiveTab, setInternalActiveTab] = useState(tabs[0]?.id ?? '')
   const [fullscreenTabId, setFullscreenTabId] = useState<string | null>(null)
   const currentActiveTab = activeTabId ?? internalActiveTab
+
+  // Resolve the effective strategy. `mountStrategy` wins; otherwise we map the
+  // legacy boolean `keepMounted` to its equivalent (`true` → `'eager'`,
+  // `false`/unset → `'active-only'`) so existing callers keep their behaviour.
+  const effectiveStrategy: 'eager' | 'lazy-once' | 'active-only' =
+    mountStrategy ?? (keepMounted ? 'eager' : 'active-only')
+
+  // For `'lazy-once'`: track which tabs have ever been the active tab. They
+  // stay mounted thereafter (visibility-hidden when not active). The initial
+  // active tab is mounted from the first render — never-visited tabs cost
+  // nothing. The set is intentionally append-only; we never evict, so a
+  // visited tab keeps its state for the lifetime of this `Tabs` instance.
+  //
+  // We extend the set DURING RENDER (gated by a membership check) rather
+  // than in a `useEffect`, so the same render that flips a tab's
+  // `visibility` to `visible` also commits the new tab to the tree —
+  // otherwise the user would see one frame of empty content before the
+  // effect fired.
+  const [mountedTabs, setMountedTabs] = useState<Set<string>>(
+    () => new Set(currentActiveTab ? [currentActiveTab] : [])
+  )
+  if (effectiveStrategy === 'lazy-once' && currentActiveTab && !mountedTabs.has(currentActiveTab)) {
+    setMountedTabs((prev) => {
+      if (prev.has(currentActiveTab)) return prev
+      const next = new Set(prev)
+      next.add(currentActiveTab)
+      return next
+    })
+  }
 
   const handleTabClick = useCallback((tabId: string): void => {
     setInternalActiveTab(tabId)
@@ -90,7 +142,16 @@ const TabsInner: React.FC<TabsProps> = ({
         display: 'flex',
         flexDirection: 'column',
         width: '100%',
-        height: '100%'
+        height: '100%',
+        // `min-height: 0` is required when this wrapper is a flex item
+        // in its own parent (which it almost always is — the workbench
+        // tab content area, every embedded folder/env-folder view).
+        // Without it, the flex-item default `min-height: auto` forces
+        // the wrapper to grow to its natural min-content height when
+        // ANY descendant of an inner scrollable produces a min-content
+        // larger than the parent's available space. The visible effect
+        // is a pane that's a few pixels taller than its siblings.
+        minHeight: 0
       }}
       {...(dataTestId && {
         'data-testid': dataTestId,
@@ -254,10 +315,15 @@ const TabsInner: React.FC<TabsProps> = ({
       </ScrollableElement>
 
       {/* Tab content */}
-      <div role="tabpanel" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, ...(keepMounted ? { position: 'relative' } : {}) }}>
-        {keepMounted ? (
-          // Keep all tabs mounted, hide inactive ones with CSS (preserves component state)
+      <div role="tabpanel" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, ...(effectiveStrategy !== 'active-only' ? { position: 'relative' } : {}) }}>
+        {effectiveStrategy !== 'active-only' ? (
+          // Eager: every tab is mounted up front.
+          // Lazy-once: a tab is rendered only once it has ever been active
+          // (tracked in `mountedTabs`) and stays mounted thereafter.
+          // Both strategies hide inactive tabs via `visibility:hidden` so
+          // their component state is preserved across switches.
           tabs.map(tab => {
+            if (effectiveStrategy === 'lazy-once' && !mountedTabs.has(tab.id)) return null
             const isActive = tab.id === currentActiveTab
             const useScrollable = tab.useScrollableElement ?? true
             return useScrollable ? (
@@ -300,7 +366,7 @@ const TabsInner: React.FC<TabsProps> = ({
             )
           })
         ) : (
-          // Default: only render active tab (unmount inactive ones)
+          // active-only: only render the active tab (unmount inactive ones).
           (() => {
             const activeTab = tabs.find(tab => tab.id === currentActiveTab)
             if (!activeTab) return null

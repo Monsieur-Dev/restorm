@@ -184,6 +184,13 @@ export interface ListViewProps {
 
   onItemClick?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
   onItemDoubleClick?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
+  /**
+   * Fires on auxiliary mouse button presses (middle-click / mouse wheel button).
+   * Consumers typically use this to implement "open in background" semantics —
+   * the row selection and onItemClick handler are NOT invoked, so the caller is
+   * free to decide whether to focus the underlying view or leave it unfocused.
+   */
+  onItemAuxClick?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
   onSelectionChange?: (selectedIds: string[], payload: ListViewItemEventPayload) => void
   onItemToggle?: (
     payload: ListViewItemEventPayload,
@@ -211,6 +218,15 @@ export interface ListViewProps {
    * Called when the Delete key is pressed on the active item.
    */
   onDeleteRequest?: (payload: ListViewItemEventPayload) => void
+
+  /**
+   * When `true`, rows are no longer draggable and the drop handlers
+   * are no-ops. Use for read-only / selection-only views (e.g. an
+   * import preview tree) where accidental drags would interfere
+   * with a surrounding drop target. Default `false` — rows keep the
+   * standard drag-to-reorder UX.
+   */
+  disableDrag?: boolean
 }
 
 export interface ListViewItemProps {

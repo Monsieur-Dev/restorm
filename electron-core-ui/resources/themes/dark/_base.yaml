@@ -29,6 +29,10 @@ colors:
     value: "#454545"
     description: Hover widget border color
 
+  - id: editorSuggestWidget.background
+    value: "#252526"
+    description: Editor suggest widget background (autocomplete dropdown)
+
   # Generic foreground (used by many controls / labels)
   - id: foreground
     value: "#d4d4d4"
@@ -75,6 +79,10 @@ colors:
   - id: inputOption.activeBorder
     value: "#2488DB"
     description: Active option border
+
+  - id: inputOption.activeForeground
+    value: "#ffffff"
+    description: Active option foreground
 
   # Generic description text (used by labels, tooltips, etc.)
   - id: descriptionForeground
@@ -144,6 +152,10 @@ colors:
   - id: list.foreground
     value: "#cccccc"
     description: List foreground
+
+  - id: list.focusAndSelectionOutline
+    value: "#4D80B8"
+    description: List focus and selection outline (dimmer-blue on dark backgrounds)
 
   - id: list.dropBackground
     value: "#383B3D"
@@ -333,6 +345,10 @@ colors:
     value: "#16825D"
     description: Status bar remote item background
 
+  - id: statusBarItem.errorBackground
+    value: "#5A1D1D"
+    description: Status bar error item background
+
   # Ports
   - id: ports.iconRunningProcessForeground
     value: "#369432"
@@ -357,6 +373,33 @@ colors:
   - id: actionBar.toggledBackground
     value: "#383a49"
     description: Action bar toggled background
+
+  # Diff editor
+  - id: diffEditor.unchangedRegionBackground
+    value: "#1e1e1e"
+    description: Diff editor unchanged region background
+
+  # Notebook
+  - id: notebook.cellBorderColor
+    value: "#37373D"
+    description: Notebook cell border color
+
+  - id: notebook.selectedCellBackground
+    value: "#37373D80"
+    description: Notebook selected cell background
+
+  # Search & settings text inputs
+  - id: searchEditor.textInputBorder
+    value: "#3C3C3C"
+    description: Search editor text input border
+
+  - id: settings.numberInputBorder
+    value: "#3C3C3C"
+    description: Settings number input border
+
+  - id: settings.textInputBorder
+    value: "#3C3C3C"
+    description: Settings text input border
 
   # Window
   - id: window.border

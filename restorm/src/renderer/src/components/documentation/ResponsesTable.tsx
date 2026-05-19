@@ -6,6 +6,7 @@ import type {
 import { statusCodeColor } from './statusCodeColor'
 import { extractModelRef, useDocumentedModels } from './documentationModels'
 import { ModelRefLink } from './ModelRefLink'
+import { DocViewerStatusCodeTooltip } from './StatusCodeTooltip'
 
 export interface ResponsesTableProps {
   /** Operations to surface responses for. Each operation's
@@ -139,7 +140,9 @@ export const ResponsesTable: React.FC<ResponsesTableProps> = ({ operations, test
                     className="documentation-host-responses-table__dot"
                     style={{ backgroundColor: statusCodeColor(row.statusCode) }}
                   />
-                  <span className="documentation-host-responses-table__code">{row.statusCode}</span>
+                  <DocViewerStatusCodeTooltip code={row.statusCode}>
+                    <span className="documentation-host-responses-table__code">{row.statusCode}</span>
+                  </DocViewerStatusCodeTooltip>
                 </td>
                 {showOperationColumn && (
                   <td className="documentation-host-responses-table__td documentation-host-responses-table__td--op">

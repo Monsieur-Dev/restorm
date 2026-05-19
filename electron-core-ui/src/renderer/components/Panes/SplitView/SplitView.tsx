@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { Sash } from '../../Sash';
 import type { SashEvent, IHorizontalSashLayoutProvider } from '../../Sash';
 import { Pane } from './Pane';
+import { computeCollapsedArray, isFullyControlled } from './collapsedLogic';
 import type { InternalPaneConfig, SplitViewProps } from './types';
 import './splitview.css';
 
@@ -359,21 +360,21 @@ export const SplitView: React.FC<SplitViewProps> = ({
 	const collapseAnimationTimeoutRef = useRef<number | null>(null);
 	const [isAnimatingCollapse, setIsAnimatingCollapse] = useState(false);
 
-	// Derive collapsed array from state or compute from pane defaults
-	const collapsed = useMemo(() => {
-		if (collapsedState.forCount === panes.length && collapsedState.values.length === panes.length) {
-			return collapsedState.values;
-		}
-		return panes.map((pane, index) => {
-			if (typeof collapsedState.values[index] === 'boolean' && collapsedState.forCount >= index + 1) {
-				return collapsedState.values[index];
-			}
-			if (typeof pane.collapsed === 'boolean') {
-				return pane.collapsed;
-			}
-			return Boolean(pane.defaultCollapsed);
-		});
-	}, [panes, collapsedState]);
+	// Fully-controlled mode: every pane provides an explicit `collapsed`
+	// prop. In that case the parent owns the truth on every render —
+	// the prop wins over the internal state, and toggles only fire
+	// `onCollapsedChange`. This is what restorm needs so that a remount
+	// of the workbench tab (e.g. response panel appears → BaseRequestTabView
+	// swaps `<div>` for `<VerticalSashContainer>`, unmounting the
+	// SplitView) doesn't drop the user's collapsed selections — the
+	// parent re-hydrates them from its own state on the new mount.
+	// Detection + derivation live in `collapsedLogic.ts` for unit tests.
+	const isControlled = isFullyControlled(panes);
+
+	const collapsed = useMemo(
+		() => computeCollapsedArray(panes, collapsedState),
+		[panes, collapsedState]
+	);
 
 	// Wrapper to update collapsed state
 	const setCollapsed = useCallback((updater: boolean[] | ((prev: boolean[]) => boolean[])) => {
@@ -431,35 +432,38 @@ export const SplitView: React.FC<SplitViewProps> = ({
 				return;
 			}
 
-			setCollapsed(() => {
-				const currentCollapsed = collapsed;
-				const nextCollapsed = [...currentCollapsed];
-				nextCollapsed[index] = !currentCollapsed[index];
+			const nextCollapsed = [...collapsed];
+			nextCollapsed[index] = !collapsed[index];
 
-				// Enable animated class briefly for collapse/expand transitions
-				if (collapseAnimationTimeoutRef.current !== null) {
-					window.clearTimeout(collapseAnimationTimeoutRef.current);
-					collapseAnimationTimeoutRef.current = null;
-				}
-				setIsAnimatingCollapse(true);
-				collapseAnimationTimeoutRef.current = window.setTimeout(() => {
-					setIsAnimatingCollapse(false);
-					collapseAnimationTimeoutRef.current = null;
-				}, 200);
+			// Enable animated class briefly for collapse/expand transitions
+			if (collapseAnimationTimeoutRef.current !== null) {
+				window.clearTimeout(collapseAnimationTimeoutRef.current);
+				collapseAnimationTimeoutRef.current = null;
+			}
+			setIsAnimatingCollapse(true);
+			collapseAnimationTimeoutRef.current = window.setTimeout(() => {
+				setIsAnimatingCollapse(false);
+				collapseAnimationTimeoutRef.current = null;
+			}, 200);
 
-				// Recompute ratios based on collapsed mask:
-				// - collapsed panes get a ratio that matches their header height
-				// - remaining space is distributed proportionally to initialSize
-				updateRatios(() => {
-					const container = containerRef.current;
-					const containerHeight = container?.getBoundingClientRect().height;
-					return computeRatiosForState(nextCollapsed, containerHeight);
-				});
-
-				return nextCollapsed;
+			// Recompute ratios based on collapsed mask:
+			// - collapsed panes get a ratio that matches their header height
+			// - remaining space is distributed proportionally to initialSize
+			updateRatios(() => {
+				const container = containerRef.current;
+				const containerHeight = container?.getBoundingClientRect().height;
+				return computeRatiosForState(nextCollapsed, containerHeight);
 			});
+
+			if (isControlled) {
+				// Parent owns the truth — notify and let the new prop flow
+				// back as the source of `collapsed` on the next render.
+				onCollapsedChange?.(nextCollapsed);
+			} else {
+				setCollapsed(nextCollapsed);
+			}
 		},
-		[panes.length, updateRatios, computeRatiosForState, setCollapsed, collapsed]
+		[panes.length, updateRatios, computeRatiosForState, setCollapsed, collapsed, isControlled, onCollapsedChange]
 	);
 
 	// Notify external listener when ratios change
@@ -472,11 +476,15 @@ export const SplitView: React.FC<SplitViewProps> = ({
 	// Notify external listener when the collapsed mask changes (header
 	// click). Only fires after the first user-driven toggle — initial
 	// values come from the parent via `defaultCollapsed` / `collapsed`.
+	// Controlled mode notifies directly from `handleToggleCollapsed`
+	// instead (so the parent's setter and the SplitView's internal
+	// state stay in lockstep without echo via this effect).
 	useEffect(() => {
+		if (isControlled) return;
 		if (!onCollapsedChange) return
 		if (collapsedState.forCount !== panes.length) return
 		onCollapsedChange(collapsed)
-	}, [collapsed, collapsedState.forCount, panes.length, onCollapsedChange]);
+	}, [collapsed, collapsedState.forCount, panes.length, onCollapsedChange, isControlled]);
 
 	// Ensure initial ratios respect the current collapsed mask so that
 	// expanded panes consume all remaining height and collapsed panes only

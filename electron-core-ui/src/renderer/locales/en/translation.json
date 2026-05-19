@@ -1,6 +1,8 @@
 {
   "common": {
-    "opened": "Opened"
+    "opened": "Opened",
+    "refresh": "Refresh",
+    "import": "Import"
   },
   "file": {
     "untitled": "Untitled",
@@ -79,7 +81,32 @@
         "title": "Language",
         "description": "Select the application language",
         "en": "English",
-        "fr": "Français"
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "pt": "Português",
+        "nl": "Nederlands",
+        "sv": "Svenska",
+        "da": "Dansk",
+        "nb": "Norsk bokmål",
+        "fi": "Suomi",
+        "pl": "Polski",
+        "cs": "Čeština",
+        "hu": "Magyar",
+        "ro": "Română",
+        "el": "Ελληνικά",
+        "uk": "Українська",
+        "hr": "Hrvatski",
+        "sr": "Srpski",
+        "sq": "Shqip",
+        "tr": "Türkçe",
+        "id": "Bahasa Indonesia",
+        "vi": "Tiếng Việt",
+        "ja": "日本語",
+        "ko": "한국어",
+        "zh-CN": "简体中文",
+        "zh-TW": "繁體中文"
       },
       "advancedVisualEffects": {
         "title": "Advanced visual effects",
@@ -129,15 +156,12 @@
   },
   "tagsView": {
     "removeTag": "Remove tag",
-    "changeColor": "Change tag color",
-    "removeColor": "Remove tag color",
     "newTag": "New tag"
   },
   "contextMenu": {
     "cut": "Cut",
     "copy": "Copy",
-    "paste": "Paste",
-    "goToDefinition": "Go to Definition"
+    "paste": "Paste"
   },
   "search": {
     "placeholder": "Search...",
@@ -152,10 +176,8 @@
     }
   },
   "iconSelect": {
-    "search": "Search...",
     "searchEmojis": "Search emojis...",
     "noEmojisFound": "No emojis found",
-    "searchIcons": "Search icons...",
     "searchCodicons": "Search codicons...",
     "searchIconoir": "Search Iconoir...",
     "searchPhosphor": "Search Phosphor...",
@@ -229,24 +251,6 @@
       "iso": "ISO 8601"
     },
     "preview": "Preview",
-    "formatHelp": {
-      "title": "Formatting help",
-      "note": "Uses Luxon formatting tokens.",
-      "table": {
-        "token": "Token",
-        "description": "Description",
-        "output": "Output"
-      },
-      "rows": {
-        "year": "Year",
-        "month": "Month (2 digits)",
-        "day": "Day (2 digits)",
-        "hour24": "Hour (00-23)",
-        "minute": "Minute (00-59)",
-        "second": "Second (00-59)"
-      },
-      "more": "Example"
-    },
     "tokens": {
       "S": "millisecond, no padding",
       "SSS": "millisecond, padded to 3",

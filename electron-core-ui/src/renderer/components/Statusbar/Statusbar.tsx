@@ -17,10 +17,10 @@ const Statusbar: React.FC<StatusbarProps> = ({
 
   // Expose the statusbar height on document.body so other components
   // (e.g. Toaster) can anchor themselves above the bar without
-  // hard-coding the value. Matches the 22px height in statusbar.css.
+  // hard-coding the value. Matches the 26px height in statusbar.css.
   useEffect(() => {
     if (typeof document === 'undefined') return
-    document.body.style.setProperty('--statusbar-height', '22px')
+    document.body.style.setProperty('--statusbar-height', '26px')
     return () => {
       document.body.style.removeProperty('--statusbar-height')
     }

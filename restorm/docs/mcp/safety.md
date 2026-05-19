@@ -20,7 +20,7 @@ When the user authorises a `tools/call`, the AI gets to:
 
 1. **Read project state** (`list_*`, `get_*`, `search`, `restorm://*` resources). Returns serialised data with `PasswordValue` masked.
 2. **Mutate the project** (`create_*`, `update_*`, `rename_*`, `delete_*`, `set_favorite`, `import_from_url`). Goes through `CollectionStore` exactly the same way the GUI does — drafts, dirty state, autosave, GraphQL subscriptions all work identically.
-3. **Execute requests** (`run_request`, `run_batch`, `read_stream`). Performs **real** HTTP / GraphQL / SOAP / gRPC / WebSocket calls to whatever target the request points at.
+3. **Execute requests** (`run_request`, `run_request_batch`, `read_stream`). Performs **real** HTTP / GraphQL / SOAP / gRPC / WebSocket calls to whatever target the request points at.
 4. **Drive the UI** (`open_tab`, `reveal_in_tree`, `close_tab`, plus the ECUI built-ins like `screenshot` / `dispatch-event` / `evaluate`). Useful for E2E harnesses; the user sees every change live.
 
 ## What the AI cannot do

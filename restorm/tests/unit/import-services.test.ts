@@ -701,7 +701,10 @@ describe('PostmanImportService', () => {
 
       const env = result.environments[0]
       const baseUrlVar = env?.variables.find((v) => v.key === 'baseUrl')
-      expect(baseUrlVar?.value).toBe('http://custom.url')
+      // Collection variables are now wrapped via `createTypedKeyValue`
+      // (StringValue / ExpressionValue depending on `{{…}}` presence),
+      // so unwrap via `toString()` rather than comparing the raw shape.
+      expect(baseUrlVar?.value.toString()).toBe('http://custom.url')
     })
 
     it('should generate unique IDs for all items', () => {

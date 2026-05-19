@@ -105,8 +105,10 @@ class GraphQLExecutionService {
               continue
             }
             if (h.key) {
-              const resolvedValue = contextService.resolveValue(h.value, requestId)
-              headers[h.key] = resolvedValue
+              // Type-aware: only `ExpressionValue` rows get handlebars-
+              // substituted; a `StringValue` row ships verbatim. Matches
+              // the HTTP path's invariant — see `HTTPExecutionService`.
+              headers[h.key] = contextService.resolveKeyValueForRequest(h, requestId)
             }
           }
         }

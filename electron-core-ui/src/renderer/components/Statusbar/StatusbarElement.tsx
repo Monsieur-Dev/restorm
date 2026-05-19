@@ -1,9 +1,10 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { StatusbarElementProps } from './types'
 import { Tooltip } from '../Tooltip'
 import { IconView } from '../IconView'
 import { getContrastColor } from '../../utils/colorContrast'
+import { StatusbarTooltipContext } from './StatusbarTooltipContext'
 
 interface PulseEntry {
   id: number
@@ -180,6 +181,13 @@ const StatusbarElement: React.FC<StatusbarElementProps> = ({
     onClick?.(event)
   }
 
+  // Imperative close handler exposed to click-mode popover content via
+  // `StatusbarTooltipContext`. Lets the inner content dismiss the
+  // popover itself after a user action — e.g. an env picker closes on
+  // env-select but stays open while the user toggles "Apply to all".
+  const closeTooltip = useCallback((): void => { setShowTooltip(false) }, [])
+  const tooltipContextValue = useMemo(() => ({ closeTooltip }), [closeTooltip])
+
   const hasIcon = icon !== undefined && icon !== null && icon.type !== 'none'
   const hasTitle = title !== undefined && title !== null && title !== ''
 
@@ -239,7 +247,9 @@ const StatusbarElement: React.FC<StatusbarElementProps> = ({
           placement={tooltipPlacement}
           content={(
             <div ref={tooltipContentRef}>
-              {children}
+              <StatusbarTooltipContext.Provider value={tooltipContextValue}>
+                {children}
+              </StatusbarTooltipContext.Provider>
             </div>
           )}
           show={showTooltip}

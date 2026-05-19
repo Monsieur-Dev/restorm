@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { createPortal } from 'react-dom'
+import { useOverlayPresence } from '../../hooks/useOverlayPresence'
 import './tooltip.css'
 
 export interface TooltipProps {
@@ -52,6 +53,12 @@ const Tooltip: React.FC<TooltipProps> = ({
   repositionKey
 }) => {
   const tooltipRef = useRef<HTMLDivElement>(null)
+  // Tell the MiniBrowser (or any listener) that an overlay with this
+  // tooltip's footprint is currently mounted while `show` is true.
+  // The hook reads the rect lazily from `tooltipRef`, so a tooltip
+  // that re-positions itself after first paint is automatically up
+  // to date.
+  useOverlayPresence(tooltipRef, show)
   const [position, setPosition] = useState<{ top: number; left: number; beakLeftPercent: number; beakTopPercent: number | undefined }>({ top: -9999, left: -9999, beakLeftPercent: 50, beakTopPercent: undefined })
   const [isPositioned, setIsPositioned] = useState(false)
   const [resolvedPlacement, setResolvedPlacement] = useState<'above' | 'below'>('above')

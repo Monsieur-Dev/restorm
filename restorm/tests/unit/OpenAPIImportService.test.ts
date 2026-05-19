@@ -130,12 +130,11 @@ describe('OpenAPIImportService — 3.1 dispatching', () => {
     expect(folder.apiDocumentation?.api.title).toBe('Petstore 3.1')
   })
 
-  it('exposes webhooks as a separate "Webhooks" folder marked documentation-only', () => {
+  it('exposes webhooks as a separate "Webhooks" folder tagged for visual filtering', () => {
     const folder = importOpenAPI(loadFixture('petstore-3.1.json') as OAS31Spec)
     const webhooksFolder = folder.items.find((it) => 'items' in it && (it as Folder).name === 'Webhooks') as Folder | undefined
     expect(webhooksFolder).toBeDefined()
     expect(webhooksFolder?.tags).toContain('webhook')
-    expect(webhooksFolder?.documentation).toContain('Documentation-only')
   })
 })
 
@@ -221,5 +220,61 @@ describe('OpenAPIImportService — re-import idempotency', () => {
       return out
     }
     expect(collectIds(a.items)).toEqual(collectIds(b.items))
+  })
+})
+
+describe('OpenAPIImportService — empty/typeless body schema fallback ladder', () => {
+  // schemaToSample falls back through a ladder when `schema.type` is
+  // absent. Three branches matter for body sampling: a completely empty
+  // schema is the FastAPI-style "any object" (default `{}`), a schema
+  // with only a `format` is almost always a string (default `""`), and
+  // a schema with a non-empty `enum` defaults to the first member.
+
+  const makeSpecWithBody = (bodySchema: Record<string, unknown>): OAS3Spec => ({
+    openapi: '3.0.0',
+    info: { title: 'Body schema fallback', version: '1.0' },
+    servers: [{ url: 'https://example.com' }],
+    paths: {
+      '/action': {
+        post: {
+          operationId: 'doAction',
+          requestBody: {
+            content: { 'application/json': { schema: bodySchema as never } }
+          },
+          responses: { '200': { description: 'ok' } }
+        }
+      }
+    }
+  } as OAS3Spec)
+
+  const findActionBody = (spec: OAS3Spec): HTTPRequest['body'] => {
+    const folder = importOpenAPI(spec)
+    const all: HTTPRequest[] = []
+    const walk = (items: Folder['items']): void => {
+      for (const it of items) {
+        if ('items' in it) walk((it as Folder).items)
+        else all.push(it as HTTPRequest)
+      }
+    }
+    walk(folder.items)
+    return all[0]?.body
+  }
+
+  it('imports a body whose schema is `{}` as a JSON-object text body, not an empty string', () => {
+    const body = findActionBody(makeSpecWithBody({}))
+    expect(body?.type).toBe('text')
+    if (body?.type === 'text') expect(body.content).toBe('{}')
+  })
+
+  it('keeps a typeless schema with a `format` defaulting to a string body', () => {
+    const body = findActionBody(makeSpecWithBody({ format: 'date-time' }))
+    expect(body?.type).toBe('text')
+    if (body?.type === 'text') expect(body.content).toBe('""')
+  })
+
+  it('keeps a typeless schema with a non-empty `enum` defaulting to its first member', () => {
+    const body = findActionBody(makeSpecWithBody({ enum: ['alpha', 'beta'] }))
+    expect(body?.type).toBe('text')
+    if (body?.type === 'text') expect(body.content).toBe('"alpha"')
   })
 })

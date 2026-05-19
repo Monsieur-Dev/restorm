@@ -47,6 +47,15 @@ export const ModelGraphLegend: React.FC = () => {
         </span>
       </li>
       <li className="documentation-host-model-graph-legend__item">
+        <span
+          className="documentation-host-model-graph-legend__enum-swatch"
+          aria-hidden="true"
+        />
+        <span className="documentation-host-model-graph-legend__label">
+          enum model (light-blue border)
+        </span>
+      </li>
+      <li className="documentation-host-model-graph-legend__item">
         <span className="documentation-host-model-graph-legend__edge documentation-host-model-graph-legend__edge--single-required" aria-hidden="true" />
         <span className="documentation-host-model-graph-legend__label">required single ref</span>
       </li>

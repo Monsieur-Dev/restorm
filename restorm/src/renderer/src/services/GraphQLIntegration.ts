@@ -75,7 +75,11 @@ function setupSubscriptions(): void {
 
   // Subscribe to folder updates
   const folderUpdatedCleanup = graphQLClient.subscribe(
-    `subscription { folderUpdated { id name documentation notes tags } }`,
+    // `documentation` is intentionally absent — the field was retired from
+    // the `Folder` schema, so querying it here triggered a runtime
+    // `GRAPHQL_VALIDATION_FAILED`. Folder docs live elsewhere now (route
+    // tag-folders are derived from the parent EnvironmentFolder).
+    `subscription { folderUpdated { id name notes tags } }`,
     undefined,
     (data) => {
       const payload = (data as { folderUpdated?: Partial<Folder> | null }).folderUpdated

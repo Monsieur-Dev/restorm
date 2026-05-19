@@ -63,6 +63,7 @@ import { DocumentEvents, type DocumentChangedPayload } from '../services/Documen
 import { searchIndexService } from '../services/SearchIndexService'
 import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
 import { prepareForSerialization, processAfterDeserialization } from '../utils/serialization'
+import { cloneForEventBus } from '../utils/cloneForEventBus'
 import { normalizeFileFormatVersion } from '../../../shared/config/fileFormatVersion'
 import type { Folder, EnvironmentFolder, Request, FolderItem, Environment } from '../../../shared/types/collections'
 import { isEnvironmentFolder, isAnyFolder } from '../../../shared/types/collections'
@@ -153,6 +154,21 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
    * on both sides, gives the clean revert signal we need.
    */
   const savedBaselineRef = useRef<string | null>(null)
+
+  /**
+   * Separate baseline for the password-sidecar content (`.restorm.env`
+   * for single-file mode, `restorm.env` for folder mode). Password
+   * values are intentionally stripped by `PasswordValue.toJSON()`
+   * before persistence — which means they also disappear from the
+   * `JSON.stringify`-based whole-doc checksum used by
+   * `hasContentChanged`. Typing a JWT into an env-folder password
+   * field therefore looks like a no-op to the main-doc checksum, and
+   * the autosave path skips the sidecar write — the secret never
+   * lands on disk. Tracking the sidecar content separately lets the
+   * save flow notice "the main doc didn't change but a password did"
+   * and still flush `.env`.
+   */
+  const savedEnvBaselineRef = useRef<string | null>(null)
 
   /**
    * Compose the on-disk folder name for a root collection the exact
@@ -327,18 +343,34 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       return true
     }
 
+    // Collect from the live in-memory tree (not `plainData`).
+    // `JSON.parse(JSON.stringify(rootItems))` runs every
+    // `PasswordValue.toJSON()`, which strips the plaintext —
+    // collecting from `plainData` would always see an empty
+    // string for every secret, even when the user just typed
+    // a real value. The live tree still holds the plaintext on
+    // the `PasswordValue` instances; `isPasswordValueType` /
+    // `getPasswordString` accept both class instances and the
+    // POJO shape so the walker works on either.
+    const secrets = collectPasswordSecretsFromCollections({ collections: rootItems })
+    const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
+    const hasEnvChanged = envContent !== (savedEnvBaselineRef.current ?? '')
+
     if (hasRealChanges) {
-      const secrets = collectPasswordSecretsFromCollections(plainData)
-      const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
       const saved = await saveFile(dataForChecksum)
       if (!saved) return false
-      if (filePath) {
-        await window.restorm?.secrets.write(`${filePath}.env`, envContent)
-      }
-    } else {
-      // Same rationale as the folder branch above — bulk-clear
-      // orphan drafts even when there's no whole-file delta.
+    } else if (!hasEnvChanged) {
+      // Neither the main doc nor any password changed — bulk-clear
+      // orphan drafts and skip both file writes.
       await window.restorm?.file.clearDrafts()
+    }
+    // Always write `.env` when its content drifted from the last
+    // saved baseline, even if `hasContentChanged` reports no main-doc
+    // delta. The main-doc checksum can't see password edits (toJSON
+    // strips them), so password-only changes go through this branch.
+    if (filePath && (hasRealChanges || hasEnvChanged)) {
+      await window.restorm?.secrets.write(`${filePath}.env`, envContent)
+      savedEnvBaselineRef.current = envContent
     }
     void setContentChecksum(currentChecksum)
     savedBaselineRef.current = currentChecksum
@@ -548,10 +580,19 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       // their expectation is "this tab is now saved".
       const saved = hasRealChanges ? await saveFile(dataForChecksum) : true
       if (!saved) return false
-      if (hasRealChanges && filePath) {
-        const secrets = collectPasswordSecretsFromCollections(plainData)
+      if (filePath) {
+        // Password values are stripped from the main-doc checksum by
+        // `PasswordValue.toJSON()`, so `hasRealChanges` can't see
+        // password-only edits. Compare the sidecar content against
+        // its own baseline and write `.env` whenever the secrets
+        // changed, regardless of the main-doc verdict.
+        const secrets = collectPasswordSecretsFromCollections({ collections: rootItems })
         const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
-        await window.restorm?.secrets.write(`${filePath}.env`, envContent)
+        const hasEnvChanged = envContent !== (savedEnvBaselineRef.current ?? '')
+        if (hasRealChanges || hasEnvChanged) {
+          await window.restorm?.secrets.write(`${filePath}.env`, envContent)
+          savedEnvBaselineRef.current = envContent
+        }
       }
       // Re-baseline `hasContentChanged` to the renderer's shape so
       // post-save comparisons match (see `handleMenuSave` for the
@@ -657,9 +698,10 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
             logger.info('[useFileManagement] File saved successfully', { path: result.path })
             setIsOpenedAsFolder(false)
             if (result.path) {
-              const secrets = collectPasswordSecretsFromCollections(plainData)
+              const secrets = collectPasswordSecretsFromCollections({ collections: rootItems })
               const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
               await window.restorm?.secrets.write(`${result.path}.env`, envContent)
+              savedEnvBaselineRef.current = envContent
             }
             if (isNew && result.path) {
               await closeFile()
@@ -699,7 +741,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       const dataForSave = prepareForSerialization(plainData)
       const saved = await saveFile(dataForSave)
       if (saved && filePath) {
-        const secrets = collectPasswordSecretsFromCollections(plainData)
+        const secrets = collectPasswordSecretsFromCollections({ collections: rootItems })
         const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
         await window.restorm?.secrets.write(`${filePath}.env`, envContent)
       }
@@ -786,9 +828,11 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
         }
 
         const content = state.currentFile.content as Record<string, unknown> | null
+        let openedEnvContent = ''
         if (content && !openedAsFolder && path) {
           const envText = await window.restorm?.secrets.read(`${path}.env`)
           if (envText) {
+            openedEnvContent = envText
             const parsed = parseEnvFileDetailed(envText)
             if (parsed.duplicates.length > 0) {
               logger.warn('[useFileManagement] Duplicate keys found in .restorm.env (last wins)', {
@@ -798,6 +842,12 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
             applyPasswordSecretsToCollections(content, parsed.vars)
           }
         }
+        // Capture the loaded env content as the sidecar baseline so
+        // the save flow's "did the secrets change since load?" check
+        // has a reference point. Without this, the first save after
+        // a fresh load would always re-write `.env` (harmless but
+        // wasteful), and a later edit-then-revert wouldn't quiet.
+        savedEnvBaselineRef.current = openedEnvContent
 
         const collectionsRaw = (content as { collections?: unknown } | null)?.collections
         const collections = Array.isArray(collectionsRaw) ? (collectionsRaw as EnvironmentFolder[]) : []
@@ -872,7 +922,13 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
           const payload: DocumentChangedPayload = {
             id: env.id,
             type: 'environment',
-            document: JSON.parse(JSON.stringify(env)),
+            // `cloneForEventBus` instead of `JSON.parse(JSON.stringify(...))`:
+            // `PasswordValue.toJSON()` strips the plaintext, so without
+            // this every secret loaded from the sidecar `.restorm.env`
+            // would reach main-side ContextService as `""` — handlebars
+            // would then resolve `{{token}}` to an empty string at
+            // execution time even though the on-disk state is correct.
+            document: cloneForEventBus(env),
             parentFolderId,
             parentEnvironmentId
           }
@@ -974,7 +1030,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       const saved = await saveFile(dataForSave)
       if (saved) {
         if (filePath) {
-          const secrets = collectPasswordSecretsFromCollections(plainData)
+          const secrets = collectPasswordSecretsFromCollections({ collections: rootItems })
           const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
           await window.restorm?.secrets.write(`${filePath}.env`, envContent)
         }

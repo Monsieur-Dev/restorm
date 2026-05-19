@@ -1,5 +1,5 @@
 import React from 'react'
-import { MarkdownViewer } from 'electron-core-ui/renderer'
+import { MarkdownViewer, getColorFromString, getContrastColor } from 'electron-core-ui/renderer'
 import type { OperationDocumentation, SecurityScheme } from '../../../../shared/types/apiDocumentation'
 import { Badge } from '../common/Badge'
 import { mapToBadgeType } from '../../utils/badgeUtils'
@@ -14,10 +14,15 @@ export interface RouteHeaderProps {
    * tab) so the outer hierarchy stays well-formed. */
   headingLevel?: 1 | 2 | 3
   /** Show the operation's `group` (tag) as a chip next to the
-   * method/URL line. Useful in multi-route docs where several
+   * summary heading. Useful in multi-route docs where several
    * tags are interleaved; redundant in single-route since the
    * folder hierarchy already conveys the tag. */
   showGroupChip?: boolean
+  /** Per-tag color overrides resolved from the env folder. Same
+   * priority as the workbench tab badge: explicit override wins,
+   * fallback to a deterministic hash of the tag name (matching
+   * `BookmarkRibbon`'s default). */
+  tagColors?: Record<string, string>
   /** Optional callback wiring an "Add" button below the title. Only
    * rendered when defined — single-route docs typically don't need
    * it because the user is already viewing a request, while multi-
@@ -179,7 +184,7 @@ function renderSchemeDetail(scheme: SecurityScheme, requestedScopes: string[]): 
   return lines.length > 0 ? <>{lines}</> : null
 }
 
-export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLevel = 1, showGroupChip = false, onAddRequest }) => {
+export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLevel = 1, showGroupChip = false, tagColors, onAddRequest }) => {
   const requestBodyType = formatBodyParameter(operation)
   const responseSchema = formatResponseSchema(operation)
   const requestPayload = formatRequestPayload(operation)
@@ -189,6 +194,10 @@ export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLeve
   const verb = operation.match.method ?? operation.match.operationType
   const altDiscriminators = describeNonHttpDiscriminators(operation)
   const securitySchemes = useDocumentedSecuritySchemes()
+  const group = operation.group
+  const showGroupTag = showGroupChip && group !== undefined && group.length > 0
+  const groupBg = showGroupTag ? (tagColors?.[group] ?? getColorFromString(group)) : undefined
+  const groupFg = groupBg !== undefined ? getContrastColor(groupBg) : undefined
 
   return (
     <div
@@ -197,10 +206,19 @@ export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLeve
     >
       {operation.summary !== undefined && operation.summary.length > 0 && (
         <SummaryHeading className="documentation-host-route-header__summary">
-          {operation.summary}
+          <span className="documentation-host-route-header__summary-text">{operation.summary}</span>
           {operation.deprecated === true && (
             <span className="documentation-host-route-header__badge documentation-host-route-header__badge--deprecated">
               deprecated
+            </span>
+          )}
+          {showGroupTag && (
+            <span
+              className="documentation-host-route-header__group-chip"
+              data-testid="documentation-host-route-header-group-chip"
+              style={{ backgroundColor: groupBg, color: groupFg }}
+            >
+              {group}
             </span>
           )}
         </SummaryHeading>
@@ -211,14 +229,6 @@ export const RouteHeader: React.FC<RouteHeaderProps> = ({ operation, headingLeve
           <Badge type={mapToBadgeType(verb)} />
         )}
         <code className="documentation-host-route-header__url">{operation.match.urlPattern}</code>
-        {showGroupChip && operation.group !== undefined && operation.group.length > 0 && (
-          <span
-            className="documentation-host-route-header__group-chip"
-            data-testid="documentation-host-route-header-group-chip"
-          >
-            {operation.group}
-          </span>
-        )}
         {altDiscriminators.length > 0 && (
           <span className="documentation-host-route-header__alt-discriminators">
             {altDiscriminators.map(({ label, value }) => (

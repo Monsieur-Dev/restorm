@@ -15,9 +15,26 @@ import { grpcImportAdapter } from '../import/idempotent/GrpcAdapter'
 import { soapImportAdapter } from '../import/idempotent/SoapAdapter'
 import { odataImportAdapter } from '../import/idempotent/ODataAdapter'
 import { computeSpecHash } from './specHash'
-import { expandHeaderTemplate, expandVariables } from './scheduling'
 import { resolveAuthHeadersForFolder } from './resolveAuthHeaders'
 import { specKeyToImportSelectionKey } from './specKeyTranslator'
+
+/** Expand `${VAR}` placeholders against the env-var map. Mirrors the
+ * resolution shape `registerApiUpdateIPC.refresh-fetch` uses so the
+ * apply path consumes the exact same URL / header template the
+ * refresh check just hit. */
+function expandVariables(template: string, vars: Record<string, string>): string {
+  return template.replace(/\$\{([^}]+)\}/g, (match, name: string) => vars[name] ?? match)
+}
+
+function expandHeaderTemplate(
+  headers: Record<string, string> | undefined,
+  vars: Record<string, string>
+): Record<string, string> {
+  if (!headers) return {}
+  const out: Record<string, string> = {}
+  for (const [k, v] of Object.entries(headers)) out[k] = expandVariables(v, vars)
+  return out
+}
 
 /**
  * Wire the IPC `apply` handler to the live runtime — fetch a fresh
@@ -149,8 +166,11 @@ export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateA
   // The freshly-built tree carries materialised requests we'll lift
   // into the existing folder. Capture the parsed normalised spec
   // ahead of time so the hash stored on disk matches what the
-  // pipeline applied.
-  const fullSpec = adapter.extractNormalizedSpec(JSON.parse(await fetchText(url, headers)), {})
+  // pipeline applied. The raw text is kept alongside so the
+  // post-apply `payloadChecksum` can hash the exact body the
+  // refresh-fetch handler would see on the next round-trip.
+  const rawSpecText = await fetchText(url, headers)
+  const fullSpec = adapter.extractNormalizedSpec(JSON.parse(rawSpecText), {})
 
   // The renderer's `include` set carries ImportSelectionTree keys
   // (`request:http:METHOD {{baseUrl}}/path/{{id}}`); the pipeline
@@ -176,22 +196,28 @@ export async function runApiUpdateApply(folderId: string, selection?: ApiUpdateA
     : fullSpec
 
   const fetchedHash = computeSpecHash(fullSpec)
-  const fetchedVersion = fullSpec.version ?? extractVersionFromImported(freshFolder)
 
   const applyResult = applyApiUpdate({
     target: env,
     freshFolder,
     spec,
     importSource,
-    fetchedHash,
-    ...(fetchedVersion !== undefined ? { fetchedVersion } : {})
+    fetchedHash
   })
 
+  // Hash the exact body the importer parsed so the next refresh
+  // round-trip compares like-for-like — without this the Refresh
+  // button would always pop the Import modal (refresh-fetch hashes
+  // the raw text, and any structural-only hash would diverge).
+  const { createHash } = await import('node:crypto')
+  const payloadChecksum = `sha256:${createHash('sha256').update(rawSpecText).digest('hex')}`
+
+  const now = Date.now()
   env.apiUpdate = {
     ...config,
-    lastImportedSpecHash: fetchedHash,
-    ...(fetchedVersion !== undefined ? { lastImportedSpecVersion: fetchedVersion } : {}),
-    lastCheckedAt: Date.now()
+    lastCheckedAt: now,
+    lastImportedAt: now,
+    payloadChecksum
   }
 
   pubsub.publish(PUBSUB_TOPICS.FOLDER_UPDATED, env)
@@ -224,9 +250,4 @@ async function fetchText(url: string, headers: Record<string, string>): Promise<
   const response = await fetch(url, Object.keys(headers).length === 0 ? {} : { headers })
   if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`)
   return response.text()
-}
-
-function extractVersionFromImported(folder: EnvironmentFolder): string | undefined {
-  const apiDoc = (folder as unknown as { apiDocumentation?: { api?: { version?: string } } }).apiDocumentation
-  return apiDoc?.api?.version
 }

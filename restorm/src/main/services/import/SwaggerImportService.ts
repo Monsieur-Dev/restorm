@@ -314,6 +314,13 @@ function keyValueFromSwaggerParam(
     const lookupKey = `${method}:${path}:${param.name}`
     const defId = enumLookup.get(lookupKey)
     if (defId) {
+      // SelectBox visually defaults to index 0 when no value matches —
+      // mirror that in the underlying KeyValue so the first execution
+      // sends what the user sees instead of an empty `?param=`.
+      const enumValues: unknown[] = Array.isArray(param.enum)
+        ? param.enum
+        : Array.isArray(param.items?.enum) ? param.items.enum : []
+      const firstEnumValue = enumValues.find((v): v is string => typeof v === 'string') ?? ''
       if (param.type === 'array') {
         // Pre-fill with default value(s)
         const preSelected = Array.isArray(defaultVal)
@@ -321,7 +328,7 @@ function keyValueFromSwaggerParam(
           : typeof defaultVal === 'string' ? [defaultVal] : []
         return kvOfType(param.name, new EnumListValue(preSelected, defId), param.description)
       }
-      const preSelected = typeof defaultVal === 'string' ? defaultVal : ''
+      const preSelected = typeof defaultVal === 'string' ? defaultVal : firstEnumValue
       return kvOfType(param.name, new EnumValue(preSelected, defId), param.description)
     }
   }
@@ -561,7 +568,6 @@ function operationToRequest(
     type: 'http',
     id: generateId(`request:${method}:${path}`),
     name: operation.summary ?? operation.operationId ?? `${method.toUpperCase()} ${path}`,
-    documentation: '',
     tags: operation.tags ?? [],
     method: toHTTPMethod(method),
     url: buildUrl(path, parameters),
@@ -618,22 +624,48 @@ function applySwagger20SecurityToRequest(
   for (const schemeName of Object.keys(requirement)) {
     const scheme = defs[schemeName]
     if (!scheme) continue
+    // See the matching comment in `OpenAPIImportService` —
+    // security-derived templates must be `ExpressionValue` for the
+    // `{{handlebars}}` substitution to fire on send. A `StringValue`
+    // would send the literal template text.
     if (scheme.type === 'apiKey' && scheme.name !== undefined && scheme.in !== undefined) {
       const placeholder = `{{${schemeName}}}`
       const target = scheme.in === 'header' ? request.headers : request.params
       if (!target.some((kv) => kv.key === scheme.name)) {
-        target.push({ key: scheme.name, value: new StringValue(placeholder) })
+        target.push({ key: scheme.name, value: new ExpressionValue(placeholder) })
       }
     } else if (scheme.type === 'basic') {
       if (!request.headers.some((kv) => kv.key.toLowerCase() === 'authorization')) {
-        request.headers.push({ key: 'Authorization', value: new StringValue(`Basic {{${schemeName}_credentials}}`) })
+        request.headers.push({ key: 'Authorization', value: new ExpressionValue(`Basic {{${schemeName}_credentials}}`) })
       }
     } else if (scheme.type === 'oauth2') {
       if (!request.headers.some((kv) => kv.key.toLowerCase() === 'authorization')) {
-        request.headers.push({ key: 'Authorization', value: new StringValue(`Bearer {{${schemeName}_token}}`) })
+        request.headers.push({ key: 'Authorization', value: new ExpressionValue(`Bearer {{${schemeName}_token}}`) })
       }
     }
   }
+}
+
+/**
+ * Variable names the security schemes implicitly reference in the
+ * placeholders above. Mirror of the OpenAPI 3.x helper — Swagger 2.0
+ * only knows `apiKey` / `basic` / `oauth2`, no `bearer` / `openIdConnect`.
+ */
+function collectSwaggerSecuritySchemeVariableNames(defs: Record<string, { type: 'apiKey' | 'basic' | 'oauth2'; name?: string; in?: 'header' | 'query'; flow?: string }> | undefined): string[] {
+  if (!defs) return []
+  const out: string[] = []
+  for (const [schemeName, scheme] of Object.entries(defs)) {
+    if (scheme.type === 'apiKey') {
+      out.push(schemeName)
+    } else if (scheme.type === 'basic') {
+      out.push(`${schemeName}_credentials`)
+    } else {
+      // Swagger 2.0 limits security types to `apiKey | basic | oauth2`,
+      // so the only remaining branch here is `oauth2`.
+      out.push(`${schemeName}_token`)
+    }
+  }
+  return out
 }
 
 // ============================================================================
@@ -752,6 +784,18 @@ function createSwaggerEnvironment(spec: SwaggerSpec, overrideBaseUrl: string | u
   const baseUrlTemplate = `{{scheme}}://{{host}}${port !== '' ? ':{{port}}' : ''}${basePath !== '' ? '{{baseRoute}}' : ''}`
   rootVariables.push(kvOfType('baseUrl', new ExpressionValue(baseUrlTemplate)))
 
+  // Auto-create placeholder variables for every security definition
+  // the spec declares — `<schemeName>_token` (bearer/oauth2),
+  // `<schemeName>_credentials` (basic), or `<schemeName>` (apiKey).
+  // See `applySwaggerSecurityToRequest` for the matching header
+  // template that consumes these.
+  // Seeded as `PasswordValue` (same rationale as the OpenAPI 3.x
+  // importer): plaintext lands in `.restorm.env`, masked in the UI.
+  for (const varName of collectSwaggerSecuritySchemeVariableNames(spec.securityDefinitions)) {
+    if (rootVariables.some((kv) => kv.key === varName)) continue
+    rootVariables.push(kvOfType(varName, new PasswordValue('')))
+  }
+
   // Sub-environments only override `scheme`. Skip sub-envs whose variables
   // are identical to the root (e.g. the default scheme matches root — no
   // point creating a redundant sub-env).
@@ -780,13 +824,13 @@ function buildSwaggerFolderItems(spec: SwaggerSpec, enumLookup?: Map<string, str
   // Create tag folders map
   const tagFolders = new Map<string, Folder>()
 
-  // Create folders for each tag — documentation is left empty; it's compiled on demand
-  // from the root folder's apiDocumentation when a tag folder maps to a group.
+  // Create folders for each tag — structured documentation is compiled on
+  // demand from the root folder's apiDocumentation when a tag folder maps to
+  // a group.
   for (const tag of spec.tags ?? []) {
     tagFolders.set(tag.name, {
       id: generateId(`folder:tag:${tag.name}`),
       name: tag.name,
-      documentation: '',
       tags: [tag.name],
       configuration: {},
       items: []
@@ -797,7 +841,6 @@ function buildSwaggerFolderItems(spec: SwaggerSpec, enumLookup?: Map<string, str
   const untaggedFolder: Folder = {
     id: generateId('folder:untagged:Other'),
     name: 'Other',
-    documentation: '',
     tags: [],
     configuration: {},
     items: []
@@ -829,7 +872,6 @@ function buildSwaggerFolderItems(spec: SwaggerSpec, enumLookup?: Map<string, str
           folder = {
             id: generateId(`folder:tag:${tagName}`),
             name: tagName,
-            documentation: '',
             tags: [tagName],
             configuration: {},
             items: []
@@ -936,7 +978,6 @@ export function importSwagger(spec: SwaggerSpec, options: SwaggerImportOptions =
     fileFormatVersion: CURRENT_FILE_FORMAT_VERSION,
     id: generateId(`folder:root:${spec.info.title}`),
     name: spec.info.title,
-    documentation: '',
     tags: [],
     configuration: {},
     environments: [newEnvironment],

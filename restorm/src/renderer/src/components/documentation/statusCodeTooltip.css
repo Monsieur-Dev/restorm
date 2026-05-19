@@ -1,0 +1,32 @@
+/* Tooltip bodies for status-code hovers — doc-viewer "RFC reason"
+ * variant + response-panel stacked "doc message above RFC reason"
+ * variant. Both live inside the ECUI Tooltip portal, so the styles
+ * here just shape the inner content. */
+
+.status-code-tooltip__stack {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	max-width: 360px;
+}
+
+.status-code-tooltip__doc {
+	font-weight: 500;
+	line-height: 1.35;
+}
+
+.status-code-tooltip__rfc {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	max-width: 360px;
+}
+
+.status-code-tooltip__rfc-name {
+	font-weight: 600;
+}
+
+.status-code-tooltip__rfc-description {
+	line-height: 1.35;
+	opacity: 0.85;
+}

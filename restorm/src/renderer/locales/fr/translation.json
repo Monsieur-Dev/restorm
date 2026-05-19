@@ -12,6 +12,89 @@
       "applyToAll": "Appliquer à toutes les requêtes"
     }
   },
+  "tips": {
+    "cardTitle": "Astuces et conseils",
+    "maximizeTab": {
+      "title": "Agrandir un onglet en un clic",
+      "body": "Double-cliquez sur n'importe quel onglet du workbench pour l'afficher en plein écran. Appuyez sur Échap pour revenir à la disposition initiale."
+    },
+    "mcpControl": {
+      "title": "Pilotez restorm avec une IA",
+      "body": "Restorm embarque un serveur MCP, ce qui permet aux assistants IA comme Claude Code de lister, ouvrir, éditer et exécuter vos requêtes, d'inspecter les réponses et de manipuler l'espace de travail par programmation — sans quitter leur conversation."
+    },
+    "envSwitch": {
+      "title": "Changez d'environnement facilement !",
+      "body": "Vous pouvez changer d'environnement sur la requête en cours ou sur toutes les requêtes de votre API en cliquant sur le bouton de la barre de status, ou en faisant un clic droit sur le bouton d'envoi de la requête !"
+    },
+    "authRequests": {
+      "title": "Vous avez besoin de vous authentifier pour utiliser votre API ?",
+      "body": "Plutôt que de lancer une requête à chaque fois pour récupérer un token et copier/coller celui-ci un peu partout, utilisez les requêtes d'authentification ! En cas d'erreur sur un appel (401, 403, ...), ou passé la durée de vie de votre token, la requête d'authentification sera automatiquement rejouée pour en extraire le token et l'utiliser. Pratique !"
+    },
+    "supplyChain": {
+      "title": "Protégez-vous !",
+      "body": "Comme tout logiciel, Restorm utilise des librairies tierces. Pour éviter les attaques de supply chain, tous les appels sortants sont rattrapés au plus bas niveau, et on vous alerte si une librairie tierce tente de voler vos informations personnelles !"
+    },
+    "codeSnippets": {
+      "title": "Restorm vous aide à coder !",
+      "body": "Retrouvez des snippets de code sur chaque requête pour vous aider à les intégrer dans votre logiciel. Beaucoup de langages sont disponibles : curl, PowerShell, TypeScript, C#, et bien plus encore !"
+    },
+    "workbenchLayout": {
+      "title": "Organisez votre plan de travail",
+      "body": "Vous avez un grand écran et beaucoup de requêtes ? Vous pouvez les mettre côte à côte, l'une en dessous de l'autre et faire un peu ce que vous voulez ! Déplacez simplement un onglet là où vous le souhaitez. Tout pour votre confort !"
+    },
+    "persistState": {
+      "title": "Retrouvez-le comme vous l'avez laissé !",
+      "body": "Si vous fermez Restorm et que vous le rouvrez, vous le retrouverez dans le même état que lorsque vous l'aviez laissé."
+    },
+    "favorites": {
+      "title": "Il y en a que l'on préfère plus que d'autres…",
+      "body": "Certaines requêtes sont plus chères à votre cœur ? Mettez-les en favoris !"
+    },
+    "console": {
+      "title": "Pour mieux voir ce qui se passe",
+      "body": "La console vous permet de voir les appels à vos APIs au fur et à mesure que vous lancez des requêtes. Pratique pour les copier/coller dans votre terminal si vous en avez besoin ! Choisissez votre parfum : curl, ou PowerShell ?"
+    },
+    "miniBrowser": {
+      "title": "Marre de changer de fenêtre tout le temps ?",
+      "body": "Restorm intègre un mini navigateur web. Pratique quand votre application réagit visuellement à vos appels d'APIs."
+    },
+    "apiDocs": {
+      "title": "La documentation, sur place",
+      "body": "Pas besoin de naviguer entre Restorm et la documentation de votre API. Si votre API fournit une documentation (Swagger, OpenAPI, ...), elle est importée dans Restorm et vous pouvez directement la consulter ici."
+    },
+    "secrets": {
+      "title": "Protégez vos secrets",
+      "body": "Vos mots de passe et vos jetons d'autorisation ne sont pas stockés directement dans le fichier restorm. C'est pour cela que Restorm stocke vos secrets et l'historique de vos requêtes dans des fichiers séparés. À vous de ne pas les mettre directement sur GitHub. Restorm sait aussi récupérer vos secrets depuis AWS, GitHub ou autres."
+    },
+    "themes": {
+      "title": "Vos couleurs, vos envies",
+      "body": "Restorm est fourni avec différents styles de couleurs. Choisissez selon votre humeur."
+    },
+    "search": {
+      "title": "Retrouvez tout, rapidement",
+      "body": "Vous avez vu en haut de cette fenêtre ? Restorm embarque un moteur de recherche… Comme ça, plus besoin de passer des heures à rechercher LA requête."
+    },
+    "multiEnv": {
+      "title": "Mêmes requêtes, environnements différents",
+      "body": "Vous avez un environnement de dev, un de prod, un de staging ? Ce sont les mêmes requêtes, mais pas tout à fait les mêmes URLs, pas tout à fait les mêmes tokens… Utilisez les environnements et les variables pour passer de l'un à l'autre ! Vous pouvez même distinguer vos environnements avec des couleurs et des icônes pour vous éviter les frayeurs du vendredi soir, veille de week-end, en production !"
+    },
+    "protocols": {
+      "title": "+ que du REST",
+      "body": "Restorm sait faire du REST… et bien plus ! GraphQL, gRPC, SOAP, OData, WebSocket — autant de protocoles à portée de main, sans changer d'outil."
+    },
+    "responseTree": {
+      "title": "Visualisez vos réponses d'API",
+      "body": "Saviez-vous que vous pouvez consulter le résultat de vos réponses d'API sous une forme plus graphique ? Restorm les affiche comme un arbre interactif que vous pouvez parcourir, replier et déplier."
+    },
+    "responseHistory": {
+      "title": "Historique des requêtes",
+      "body": "Vous pouvez consulter l'historique de vos appels à vos APIs. Pratique pour retrouver ce qui a bien pu se passer."
+    },
+    "multiLanguage": {
+      "title": "27 langues !",
+      "body": "Restorm parle 27 langues. Anglais, français, espagnol, allemand, italien, japonais, chinois, coréen et bien d'autres — choisissez la vôtre dans les paramètres !"
+    }
+  },
   "authFailureToast": {
     "title": "Échec de l'authentification",
     "fallbackReason": "La requête d'authentification n'a pas abouti.",
@@ -30,8 +113,6 @@
     "saveAll": "Tout enregistrer",
     "saveAs": "Enregistrer sous",
     "exit": "Quitter",
-    "noRecentFiles": "Aucun fichier récent",
-    "noFavorites": "Aucun favori",
     "selection": "Sélection",
     "tools": "Outils",
     "findInCollection": "Rechercher dans la collection",
@@ -64,16 +145,13 @@
     "newFolder": "Nouveau dossier",
     "newEnvironmentFolder": "Nouveau dossier de variables",
     "contextMenu": {
-      "createSubfolder": "Créer un sous-dossier",
       "createFolder": "Créer un dossier",
       "createEnvironmentFolder": "Créer un dossier de variables",
-      "defineVariables": "Définir les variables",
       "delete": "Supprimer",
       "clone": "Cloner",
       "rename": "Renommer",
       "addToFavorites": "Ajouter aux favoris",
       "removeFromFavorites": "Retirer des favoris",
-      "refreshFromSource": "Rafraîchir depuis la source",
       "closeTab": "Fermer",
       "closeOtherTabs": "Fermer les autres",
       "closeTabsToTheRight": "Fermer à droite",
@@ -100,25 +178,6 @@
       "itemMessage": "Êtes-vous sûr de vouloir supprimer \"{{name}}\" ?",
       "confirm": "Supprimer",
       "cancel": "Annuler"
-    },
-    "apiUpdate": {
-      "modalTitle": "Mettre à jour l'API : {{name}}",
-      "checking": "Vérification des mises à jour…",
-      "applying": "Application…",
-      "apply": "Appliquer la mise à jour",
-      "cancel": "Annuler",
-      "preserveNote": "Vos personnalisations seront préservées.",
-      "summary": {
-        "added": "{{count}} ajouté(s)",
-        "modified": "{{count}} modifié(s)",
-        "deprecated": "{{count}} obsolète(s)",
-        "removed": "{{count}} retiré(s)",
-        "skipped": "{{count}} ignoré(s)",
-        "unchanged": "{{count}} inchangé(s)",
-        "modelsChanged": "{{count}} modèle(s) modifié(s)"
-      },
-      "successToastTitle": "API mise à jour",
-      "successToastBody": "{{added}} ajout(s), {{deprecated}} obsolète(s), {{removed}} retiré(s)."
     }
   },
   "environment": {
@@ -136,7 +195,7 @@
     "selectEnvironment": "Sélectionnez un environnement pour voir les variables",
     "tabs": {
       "docs": "Docs",
-      "configuration": "Configuration",
+      "environments": "Environnements",
       "notes": "Notes"
     },
     "home": {
@@ -146,33 +205,19 @@
       "viewDocsDesc": "Parcourez la documentation de l'API, les modèles et les endpoints",
       "favoriteRequests": "Requêtes favorites",
       "removeFavorite": "Retirer des favoris",
-      "refresh": "Rafraîchir",
-      "refreshing": "Actualisation...",
       "apiUpdate": {
         "title": "Mises à jour de la spec",
-        "autoCheckLabel": "Vérifier automatiquement les mises à jour",
-        "intervalLabel": "Intervalle",
-        "intervalHourly": "Toutes les heures",
-        "intervalEvery6h": "Toutes les 6 heures",
-        "intervalDaily": "Quotidien",
-        "intervalWeekly": "Hebdomadaire",
-        "intervalNever": "Jamais",
-        "checkNow": "Vérifier maintenant",
-        "checkInProgress": "Vérification…",
-        "lastCheckedAt": "Dernière vérification : {{time}}",
+        "noConfig": "Ce dossier n'a pas été créé depuis une source importable.",
+        "urlLabel": "URL",
+        "lastImportedLabel": "Dernier import",
+        "lastCheckedLabel": "Dernière vérification",
+        "neverImported": "Jamais importé",
         "neverChecked": "Jamais vérifié",
-        "stateIdle": "À jour",
-        "stateAvailable": "Mise à jour disponible",
-        "stateError": "Échec de la dernière vérification",
-        "applyUpdate": "Appliquer la mise à jour",
-        "dismiss": "Ignorer",
-        "noConfig": "Ce dossier n'a pas été créé depuis une source importable."
+        "refreshing": "Actualisation de la spec…",
+        "fetching": "Récupération…",
+        "upToDate": "La spec de l'API est à jour.",
+        "ok": "OK"
       }
-    },
-    "docs": {
-      "source": "Source :",
-      "refresh": "Actualiser la doc",
-      "refreshing": "Actualisation..."
     },
     "contextVariables": {
       "title": "Variables de contexte disponibles",
@@ -191,8 +236,6 @@
     "addHeader": "Ajouter un header",
     "addParam": "Ajouter un paramètre",
     "environmentSelector": {
-      "ariaLabel": "Sélectionner un environnement",
-      "listAriaLabel": "Liste des environnements",
       "noEnvironment": "Aucun environnement"
     },
     "body": {
@@ -213,9 +256,8 @@
     "responses": {
       "tabs": {
         "response": "Réponse",
-        "prettyfied": "Formattée",
         "requestBody": "Corps de la requête",
-        "jsoncrack": "JSONCrack"
+        "graph": "Graphe"
       },
       "loading": "Envoi de la requête...",
       "noResponse": "Cliquez sur Envoyer pour exécuter la requête",
@@ -229,8 +271,6 @@
     }
   },
   "workbench": {
-    "tagsLabel": "Tags",
-    "removeTag": "Supprimer le tag",
     "tabContextMenu": {
       "close": "Fermer",
       "closeOthers": "Fermer les autres",
@@ -255,41 +295,31 @@
   },
   "graphql": {
     "send": "Envoyer",
-    "response": "Réponse",
     "urlPlaceholder": "URL du endpoint GraphQL",
     "tabs": {
       "query": "Requête",
       "variables": "Variables",
-      "headers": "En-têtes",
-      "docs": "Docs",
-      "notes": "Notes"
+      "headers": "En-têtes"
     }
   },
   "grpc": {
     "send": "Appeler",
-    "response": "Réponse",
     "urlPlaceholder": "Serveur gRPC (hôte:port)",
     "tabs": {
       "message": "Message",
-      "metadata": "Métadonnées",
-      "docs": "Docs",
-      "notes": "Notes"
+      "metadata": "Métadonnées"
     }
   },
   "soap": {
     "send": "Envoyer",
-    "response": "Réponse",
     "urlPlaceholder": "URL du endpoint SOAP",
     "tabs": {
       "body": "Corps",
-      "headers": "En-têtes",
-      "docs": "Docs",
-      "notes": "Notes"
+      "headers": "En-têtes"
     }
   },
   "websocket": {
     "connect": "Connecter",
-    "messages": "Messages",
     "connected": "Connecté",
     "disconnected": "Déconnecté",
     "noMessages": "Aucun message pour l'instant",
@@ -298,9 +328,7 @@
     "topic": "Topic",
     "tabs": {
       "message": "Message",
-      "headers": "En-têtes",
-      "docs": "Docs",
-      "notes": "Notes"
+      "headers": "En-têtes"
     }
   },
   "search": {
@@ -419,10 +447,6 @@
     "504": {
       "name": "Délai de passerelle dépassé",
       "description": "Le serveur agissait en tant que passerelle ou proxy et n'a pas reçu de réponse en temps voulu du serveur en amont."
-    },
-    "unknown": {
-      "name": "Statut inconnu",
-      "description": "Ce code de statut n'est pas reconnu."
     }
   },
   "welcome": {
@@ -448,14 +472,13 @@
       "json5Description": "JSON + commentaires"
     },
     "preview": {
-      "label": "Aperçu de la structure"
+      "label": "Aperçu de la structure",
+      "noDocumentation": "Aucune documentation analysée pour cette source."
     }
   },
   "common": {
     "cancel": "Annuler",
-    "save": "Enregistrer",
-    "ok": "OK",
-    "close": "Fermer"
+    "save": "Enregistrer"
   },
   "helpers": {
     "categories": {
@@ -646,8 +669,7 @@
         "trademark": "gRPC est un projet de la Cloud Native Computing Foundation."
       },
       "soap": {
-        "description": "Un WSDL ? Colle-le (ou son URL) — Restorm parse chaque <port> et chaque <operation>, génère des enveloppes SOAP prêtes à envoyer avec le bon header SOAPAction, des skeletons de body typés par le schéma, et le mode d'auth déclaré dans le WSDL.",
-        "trademark": "SOAP et WSDL sont des standards ouverts publiés par le World Wide Web Consortium (W3C)."
+        "description": "Un WSDL ? Colle-le (ou son URL) — Restorm parse chaque <port> et chaque <operation>, génère des enveloppes SOAP prêtes à envoyer avec le bon header SOAPAction, des skeletons de body typés par le schéma, et le mode d'auth déclaré dans le WSDL."
       },
       "websocket": {
         "description": "Colle un endpoint WebSocket (ws:// ou wss://) — Restorm ouvre la connexion, capture les frames de hello envoyées par le serveur, et fabrique les requêtes send / subscribe avec des templates de payload rejouables.",
@@ -662,16 +684,12 @@
         "trademark": "Socket.IO est une bibliothèque open-source publiée sous licence MIT ; le nom et le logo sont utilisés à titre nominatif."
       },
       "odata": {
-        "description": "Colle l'URL d'un service-document OData ou un fichier $metadata — Restorm lit le CSDL, reconstruit les entity sets, les function imports et les actions, et pré-remplit les options $filter / $select / $top / $skip sur chaque opération.",
-        "trademark": "OData est un standard OASIS."
+        "description": "Colle l'URL d'un service-document OData ou un fichier $metadata — Restorm lit le CSDL, reconstruit les entity sets, les function imports et les actions, et pré-remplit les options $filter / $select / $top / $skip sur chaque opération."
       },
       "mqtt": {
         "description": "Colle l'URL d'un broker MQTT ou un catalogue de topics — Restorm fabrique les requêtes publish / subscribe par topic, garde la connexion ouverte pour les previews en streaming, et retient les snapshots des messages retained pour pouvoir les rejouer plus tard.",
         "trademark": "MQTT est un standard OASIS ; le nom et le logo MQTT sont des marques d'OASIS Open."
       }
-    },
-    "preview": {
-      "label": "Aperçu"
     },
     "loading": "Analyse en cours...",
     "noResults": "Aucune requête trouvée",
@@ -681,5 +699,27 @@
     "ok": "Importer",
     "cancel": "Annuler",
     "dropZone": "Drop zone"
+  },
+  "emptyBench": {
+    "importCard": {
+      "title": "Importez votre API",
+      "body": "Apportez une spec OpenAPI / Swagger, un schéma GraphQL, une collection Postman / Bruno / Insomnia, ou collez une commande curl / PowerShell. Restorm la parse, construit l'arborescence et atterrit avec toutes les requêtes pré-remplies."
+    },
+    "recentActivity": {
+      "title": "Activité récente",
+      "empty": "Envoyez votre première requête pour la voir ici."
+    },
+    "apiCard": {
+      "favorites": "Favoris",
+      "topUsed": "10 plus utilisées",
+      "recent": "Dernières requêtes",
+      "description": "Description",
+      "version": "Version",
+      "quickLinks": {
+        "environments": "Environnements",
+        "docs": "Documentation",
+        "notes": "Notes"
+      }
+    }
   }
 }

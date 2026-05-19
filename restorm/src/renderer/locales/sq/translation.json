@@ -1,0 +1,725 @@
+{
+  "app": {
+    "title": "restorm",
+    "openSettings": "Hap parametrat",
+    "draftsRestoredTitle": "Puna e paruajtur u rikthye",
+    "draftsRestoredBody_one": "{{count}} skicë u rikthye nga sesioni juaj i mëparshëm.",
+    "draftsRestoredBody_other": "{{count}} skica u rikthyen nga sesioni juaj i mëparshëm."
+  },
+  "statusbar": {
+    "requestHistory": "Historiku i kërkesave",
+    "envSelector": {
+      "applyToAll": "Zbato te të gjitha kërkesat"
+    }
+  },
+  "tips": {
+    "cardTitle": "Këshilla dhe truke",
+    "maximizeTab": {
+      "title": "Maksimizo një skedë me një klikim",
+      "body": "Klikoni dy herë në cilëndo skedë të workbench-it për ta shfaqur në ekran të plotë. Shtypni Esc për t'u kthyer në paraqitjen e mëparshme."
+    },
+    "mcpControl": {
+      "title": "Drejtoni restorm-in me IA",
+      "body": "Restorm vjen me një server MCP, kështu që asistentët e IA si Claude Code mund të listojnë, hapin, redaktojnë dhe ekzekutojnë kërkesat tuaja, të inspektojnë përgjigjet dhe të manipulojnë hapësirën e punës programatikisht — pa lënë bisedën."
+    },
+    "envSwitch": {
+      "title": "Ndërroni mjedise me lehtësi!",
+      "body": "Ndryshoni mjedisin për kërkesën aktuale ose për të gjitha kërkesat e API-së suaj duke klikuar butonin në shiritin e statusit, ose duke klikuar me të djathtën butonin e dërgimit të kërkesës."
+    },
+    "authRequests": {
+      "title": "Duhet të autentikoheni për të përdorur API-në tuaj?",
+      "body": "Në vend që të dërgoni një kërkesë çdo herë për të marrë një token dhe ta kopjoni e ngjisni kudo, përdorni kërkesat e autentikimit. Kur një thirrje dështon (401, 403, …) ose mbaron jeta e tokenit, kërkesa e autentikimit ekzekutohet automatikisht përsëri për të nxjerrë dhe ripërdorur tokenin. Praktike!"
+    },
+    "supplyChain": {
+      "title": "Mbroni veten!",
+      "body": "Si çdo softuer, Restorm përdor biblioteka të palëve të treta. Për të parandaluar sulmet ndaj zinxhirit të furnizimit, të gjitha thirrjet dalëse kapen në nivelin më të ulët dhe ne ju njoftojmë nëse një bibliotekë e palës së tretë përpiqet të vjedhë informacionet tuaja personale!"
+    },
+    "codeSnippets": {
+      "title": "Restorm ju ndihmon të kodoni!",
+      "body": "Gjeni copëza kodi për çdo kërkesë për t'ju ndihmuar t'i integroni në programin tuaj. Janë në dispozicion shumë gjuhë: curl, PowerShell, TypeScript, C# dhe shumë të tjera!"
+    },
+    "workbenchLayout": {
+      "title": "Organizoni hapësirën tuaj të punës",
+      "body": "Keni një ekran të madh dhe shumë kërkesa? Vendosini krah për krah, njëra mbi tjetrën ose pak a shumë si të doni — thjesht zvarritni një skedë aty ku dëshironi. Gjithçka për rehatinë tuaj!"
+    },
+    "persistState": {
+      "title": "Gjejeni siç e latë!",
+      "body": "Nëse mbyllni Restorm dhe e rihapni, do ta gjeni në të njëjtën gjendje në të cilën e latë."
+    },
+    "favorites": {
+      "title": "Disa janë më të dashur për ju se të tjerët…",
+      "body": "Keni kërkesa që ju janë më të rëndësishme? Shtoni ato te të preferuarat!"
+    },
+    "console": {
+      "title": "Shihni më mirë çfarë po ndodh",
+      "body": "Konsola ju tregon thirrjet drejt API-ve tuaja ndërsa lëshoni kërkesa. E përshtatshme për t'i kopjuar në terminalin tuaj kur duhet! Cili është shija juaj: curl ose PowerShell?"
+    },
+    "miniBrowser": {
+      "title": "Të lodhur duke ndërruar dritaret çdo herë?",
+      "body": "Restorm përfshin një mini shfletues web. I përshtatshëm kur aplikacioni juaj reagon vizualisht ndaj thirrjeve API."
+    },
+    "apiDocs": {
+      "title": "Dokumentacioni — pikërisht këtu",
+      "body": "Nuk ka më kalim midis Restorm dhe dokumentacionit të API-së suaj. Nëse API-ja juaj ofron një specifikim (Swagger, OpenAPI, …), ai importohet në Restorm dhe mund ta konsultoni drejtpërdrejt këtu."
+    },
+    "secrets": {
+      "title": "Mbroni sekretet tuaja",
+      "body": "Fjalëkalimet dhe tokenat e autorizimit nuk ruhen drejtpërdrejt brenda skedarit Restorm. Prandaj Restorm i ruan sekretet dhe historinë e kërkesave në skedarë të veçantë. Është detyrë juaja të mos i ngarkoni në GitHub. Restorm mund t'i marrë sekretet edhe nga AWS, GitHub apo burime të tjera."
+    },
+    "themes": {
+      "title": "Ngjyrat tuaja, humori juaj",
+      "body": "Restorm vjen me disa skema ngjyrash. Zgjidhni atë që përshtatet me humorin tuaj."
+    },
+    "search": {
+      "title": "Gjeni gjithçka, shpejt",
+      "body": "E patë pjesën e sipërme të kësaj dritareje? Restorm sjell një motor kërkimi — mjaft me orë të tëra duke kërkuar ATË kërkesë."
+    },
+    "multiEnv": {
+      "title": "Të njëjtat kërkesa, mjedise të ndryshme",
+      "body": "Keni një mjedis dev, një prod dhe një staging? Janë të njëjtat kërkesa, por jo plotësisht të njëjtat URL dhe jo plotësisht të njëjtët token… Përdorni mjediset dhe variablat për të kaluar nga njëri tek tjetri me një klikim. Mund t'i dalloni edhe me ngjyra dhe ikona, për të shmangur frikërat e të premteve mbrëma para fundjavës në prodhim!"
+    },
+    "protocols": {
+      "title": "Më shumë se vetëm REST",
+      "body": "Restorm flet REST… dhe shumë më tepër! GraphQL, gRPC, SOAP, OData, WebSocket — të gjitha këto protokole në majë të gishtave, pa ndërruar mjet."
+    },
+    "responseTree": {
+      "title": "Shihni përgjigjet e API-së në mënyrë vizuale",
+      "body": "E dinit se mund t'i shfletoni përgjigjet e API-së në mënyrë më grafike? Restorm i shfaq si një pemë interaktive që mund ta lëvizni, ta palosni dhe ta shpalosni."
+    },
+    "responseHistory": {
+      "title": "Historiku i kërkesave",
+      "body": "Mund të shfletoni historikun e të gjitha thirrjeve drejt API-ve tuaja. I përshtatshëm për të kuptuar se çfarë ndodhi vërtet."
+    },
+    "multiLanguage": {
+      "title": "27 gjuhë!",
+      "body": "Restorm flet 27 gjuhë. Anglisht, frëngjisht, spanjisht, gjermanisht, italisht, japonisht, kinezisht, koreanisht dhe shumë të tjera — zgjidhni tuajën nga cilësimet!"
+    }
+  },
+  "authFailureToast": {
+    "title": "Vërtetimi dështoi",
+    "fallbackReason": "Kërkesa e vërtetimit nuk pati sukses.",
+    "openAuthRoute": "Hap rrugën e vërtetimit"
+  },
+  "menuBar": {
+    "file": "Skedar",
+    "new": "I ri",
+    "import": "Importo",
+    "open": "Hap",
+    "openFolder": "Hap dosjen",
+    "recentFiles": "Skedarët e fundit",
+    "favorites": "Të preferuarat",
+    "close": "Mbyll",
+    "save": "Ruaj",
+    "saveAll": "Ruaj të gjitha",
+    "saveAs": "Ruaj si",
+    "exit": "Dil",
+    "selection": "Zgjedhja",
+    "tools": "Veglat",
+    "findInCollection": "Gjej në koleksion",
+    "addRequest": "Shto kërkesë",
+    "addRequestHttp": "Kërkesë HTTP",
+    "addRequestGraphql": "Kërkesë GraphQL",
+    "addRequestGrpc": "Kërkesë gRPC",
+    "addRequestSoap": "Kërkesë SOAP",
+    "addRequestOdata": "Kërkesë OData",
+    "addRequestWebsocket": "Kërkesë WebSocket",
+    "addFolder": "Shto dosje",
+    "addEnvironmentFolder": "Shto dosje mjedisi",
+    "addVariable": "Shto variabël",
+    "addTag": "Shto etiketë",
+    "expandAllFolders": "Zgjero të gjitha dosjet",
+    "collapseAllFolders": "Mbyll të gjitha dosjet",
+    "sendActiveRequest": "Dërgo kërkesën",
+    "cancelActiveRequest": "Anulo kërkesën",
+    "generateCodeSnippet": "Gjenero copëz kodi",
+    "copyAsCurl": "Kopjo si cURL",
+    "exportOpenApi": "Eksporto në OpenAPI",
+    "clearAuthCache": "Pastro memorien e vërtetimit",
+    "openLogsFolder": "Hap dosjen e regjistrave"
+  },
+  "sidebar": {
+    "addRequest": "Shto kërkesë",
+    "collapseAll": "Mbyll të gjitha kërkesat",
+    "workspace": "Hapësira e punës",
+    "favorites": "Të preferuarat",
+    "newFolder": "Dosje e re",
+    "newEnvironmentFolder": "Dosje e re mjedisi",
+    "contextMenu": {
+      "createFolder": "Krijo dosje",
+      "createEnvironmentFolder": "Krijo dosje mjedisi",
+      "delete": "Fshi",
+      "clone": "Klono",
+      "rename": "Riemërto",
+      "addToFavorites": "Shto te të preferuarat",
+      "removeFromFavorites": "Hiq nga të preferuarat",
+      "closeTab": "Mbyll",
+      "closeOtherTabs": "Mbyll të tjerat",
+      "closeTabsToTheRight": "Mbyll në të djathtë",
+      "closeAllTabs": "Mbyll të gjitha",
+      "add": {
+        "title": "Shto",
+        "folder": "Dosje",
+        "httpGet": "HTTP – kërkesë GET",
+        "httpPost": "HTTP – kërkesë POST",
+        "httpPut": "HTTP – kërkesë PUT",
+        "httpPatch": "HTTP – kërkesë PATCH",
+        "httpDelete": "HTTP – kërkesë DELETE",
+        "graphql": "Kërkesë GraphQL",
+        "grpc": "Kërkesë gRPC",
+        "soap": "Kërkesë SOAP",
+        "websocket": "Kërkesë WebSocket",
+        "odata": "Kërkesë OData",
+        "auth": "Kërkesë HTTP për vërtetim"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Konfirmo fshirjen",
+      "folderMessage": "Jeni i sigurt se doni të fshini dosjen \"{{name}}\" dhe të gjithë përmbajtjen e saj?",
+      "itemMessage": "Jeni i sigurt se doni të fshini \"{{name}}\"?",
+      "confirm": "Fshi",
+      "cancel": "Anulo"
+    }
+  },
+  "environment": {
+    "newName": "Mjedis i ri",
+    "add": "Shto mjedis",
+    "rename": "Riemërto",
+    "addSub": "Shto nën-mjedis",
+    "delete": "Fshi"
+  },
+  "folderView": {
+    "environments": "Mjediset",
+    "environmentsAriaLabel": "Mjediset e dosjes",
+    "variables": "Variablat",
+    "addVariable": "Shto rresht variabli",
+    "selectEnvironment": "Zgjidh një mjedis për të parë variablat",
+    "tabs": {
+      "docs": "Dokumentacioni",
+      "environments": "Mjedise",
+      "notes": "Shënimet"
+    },
+    "home": {
+      "configureEnvs": "Konfiguro mjediset",
+      "configureEnvsDesc": "Vendos URL-të bazë, variablat dhe vërtetimin për çdo mjedis",
+      "viewDocs": "Shiko dokumentacionin",
+      "viewDocsDesc": "Shfleto dokumentacionin e API-së, modelet dhe pikat fundore",
+      "favoriteRequests": "Kërkesat e preferuara",
+      "removeFavorite": "Hiq nga të preferuarat",
+      "apiUpdate": {
+        "title": "Përditësime të specifikës së API-së",
+        "noConfig": "Kjo dosje nuk u krijua nga një burim që mund të importohet.",
+        "urlLabel": "URL",
+        "lastImportedLabel": "Importi i fundit",
+        "lastCheckedLabel": "Kontrolli i fundit",
+        "neverImported": "Asnjëherë e importuar",
+        "neverChecked": "Asnjëherë e kontrolluar",
+        "refreshing": "Po rifreskohet specifika e API-së…",
+        "fetching": "Po merret…",
+        "upToDate": "Specifika e API-së është e përditësuar.",
+        "ok": "Në rregull"
+      }
+    },
+    "contextVariables": {
+      "title": "Variablat e kontekstit në dispozicion",
+      "description": "Përdor këto variabla në URL-të e kërkesave dhe te variablat e tipit shprehje me sintaksën {{handlebars}}.",
+      "name": "Variabël",
+      "value": "Vlera e zgjidhur",
+      "copied": "U kopjua!"
+    }
+  },
+  "requestTab": {
+    "deprecated": "Kjo pikë fundore është e vjetëruar dhe mund të hiqet në një version të ardhshëm.",
+    "send": "Dërgo",
+    "cancel": "Anulo",
+    "urlPlaceholder": "URL e kërkesës",
+    "methodSelect": "Zgjidh metodën HTTP",
+    "addHeader": "Shto kokë",
+    "addParam": "Shto parametër",
+    "environmentSelector": {
+      "noEnvironment": "Pa mjedis"
+    },
+    "body": {
+      "fileLabel": "Skedar ose URL:",
+      "browse": "Shfleto..."
+    },
+    "tabs": {
+      "docs": "Dokumentacioni",
+      "requestLayout": "Kërkesa",
+      "headers": "Kokat",
+      "body": "Trupi",
+      "params": "Parametrat",
+      "pathParams": "Parametrat e shtegut",
+      "notes": "Shënimet",
+      "codeSnippets": "Copëza kodi",
+      "responsesHistory": "Historiku i përgjigjeve"
+    },
+    "responses": {
+      "tabs": {
+        "response": "Përgjigjja",
+        "requestBody": "Trupi i kërkesës",
+        "graph": "Grafiku"
+      },
+      "loading": "Po dërgohet kërkesa...",
+      "noResponse": "Klikoni Dërgo për të ekzekutuar kërkesën",
+      "history": {
+        "list": "Lista e historikut të përgjigjeve",
+        "empty": "Ende nuk është regjistruar asnjë përgjigje",
+        "select": "Zgjidh një përgjigje për të parë detajet",
+        "pin": "Fikso përgjigjen",
+        "unpin": "Hiq fiksimin e përgjigjes"
+      }
+    }
+  },
+  "workbench": {
+    "tabContextMenu": {
+      "close": "Mbyll",
+      "closeOthers": "Mbyll të tjerat",
+      "addToFavorites": "Shto te të preferuarat",
+      "removeFromFavorites": "Hiq nga të preferuarat"
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Shko te përkufizimi"
+  },
+  "keyValueTable": {
+    "types": {
+      "string": "Varg",
+      "secret": "Sekret",
+      "number": "Numër",
+      "dateTime": "Data/ora",
+      "color": "Ngjyrë",
+      "expression": "Shprehje",
+      "boolean": "Booleane"
+    },
+    "apiEnums": "Tipet e përcaktuara në API"
+  },
+  "graphql": {
+    "send": "Dërgo",
+    "urlPlaceholder": "URL e pikës fundore GraphQL",
+    "tabs": {
+      "query": "Pyetja",
+      "variables": "Variablat",
+      "headers": "Kokat"
+    }
+  },
+  "grpc": {
+    "send": "Thirr",
+    "urlPlaceholder": "Server gRPC (host:port)",
+    "tabs": {
+      "message": "Mesazhi",
+      "metadata": "Metadata"
+    }
+  },
+  "soap": {
+    "send": "Dërgo",
+    "urlPlaceholder": "URL e pikës fundore SOAP",
+    "tabs": {
+      "body": "Trupi",
+      "headers": "Kokat"
+    }
+  },
+  "websocket": {
+    "connect": "Lidh",
+    "connected": "I lidhur",
+    "disconnected": "I shkëputur",
+    "noMessages": "Ende asnjë mesazh",
+    "urlPlaceholder": "URL WebSocket",
+    "event": "Ngjarje",
+    "topic": "Tema",
+    "tabs": {
+      "message": "Mesazhi",
+      "headers": "Kokat"
+    }
+  },
+  "search": {
+    "placeholder": "Kërko...",
+    "noResults": "Nuk u gjet asnjë rezultat",
+    "resultsAriaLabel": "Rezultatet e kërkimit",
+    "categories": {
+      "request": "Kërkesat",
+      "folder": "Dosjet",
+      "environment": "Mjediset",
+      "settings": "Parametrat",
+      "tag": "Etiketat"
+    },
+    "tooltip": {
+      "noDetails": "Asnjë detaj në dispozicion",
+      "noContent": "Asnjë dokumentacion ose shënim"
+    }
+  },
+  "httpStatus": {
+    "100": {
+      "name": "Vazhdo",
+      "description": "Serveri ka marrë kokat e kërkesës dhe klienti duhet të vazhdojë me dërgimin e trupit të kërkesës."
+    },
+    "101": {
+      "name": "Ndërrimi i protokolleve",
+      "description": "Kërkuesi i ka kërkuar serverit të ndërrojë protokollet dhe serveri ka rënë dakord."
+    },
+    "200": {
+      "name": "OK",
+      "description": "Përgjigjja standarde për kërkesat HTTP të suksesshme. Përgjigjja e vërtetë varet nga metoda e kërkesës e përdorur."
+    },
+    "201": {
+      "name": "I krijuar",
+      "description": "Kërkesa është përmbushur, duke rezultuar në krijimin e një burimi të ri."
+    },
+    "202": {
+      "name": "Pranuar",
+      "description": "Kërkesa është pranuar për përpunim, por përpunimi nuk është përfunduar."
+    },
+    "204": {
+      "name": "Pa përmbajtje",
+      "description": "Serveri e përpunoi me sukses kërkesën dhe nuk po kthen asnjë përmbajtje."
+    },
+    "301": {
+      "name": "Lëvizur përgjithmonë",
+      "description": "Kjo kërkesë dhe të gjitha kërkesat e ardhshme duhet të drejtohen te URI-ja e dhënë."
+    },
+    "302": {
+      "name": "U gjet",
+      "description": "I thotë klientit të shikojë një URL tjetër. Specifika HTTP/1.0 kërkonte që klienti të kryente një ridrejtim të përkohshëm."
+    },
+    "304": {
+      "name": "I pamodifikuar",
+      "description": "Tregon se burimi nuk është modifikuar që nga versioni i specifikuar nga kokat e kërkesës."
+    },
+    "400": {
+      "name": "Kërkesë e gabuar",
+      "description": "Serveri nuk mund ose nuk do ta përpunojë kërkesën për shkak të një gabimi të dukshëm të klientit (p.sh. sintaksë e gabuar e kërkesës)."
+    },
+    "401": {
+      "name": "I paautorizuar",
+      "description": "Kërkohet vërtetim dhe ai ka dështuar ose nuk është dhënë ende."
+    },
+    "403": {
+      "name": "I ndaluar",
+      "description": "Kërkesa përmbante të dhëna të vlefshme dhe u kuptua nga serveri, por serveri po e refuzon veprimin."
+    },
+    "404": {
+      "name": "I pagjetur",
+      "description": "Burimi i kërkuar nuk mund të gjendej por mund të jetë në dispozicion në të ardhmen."
+    },
+    "405": {
+      "name": "Metodë e palejuar",
+      "description": "Një metodë kërkese nuk mbështetet për burimin e kërkuar."
+    },
+    "408": {
+      "name": "Skadimi i kërkesës",
+      "description": "Serverit i skadoi koha duke pritur kërkesën."
+    },
+    "409": {
+      "name": "Konflikt",
+      "description": "Tregon se kërkesa nuk mund të përpunohej për shkak të konfliktit në gjendjen aktuale të burimit."
+    },
+    "410": {
+      "name": "I larguar",
+      "description": "Tregon se burimi i kërkuar ishte më parë në përdorim, por nuk është më në dispozicion dhe nuk do të jetë sërish."
+    },
+    "415": {
+      "name": "Lloj media i pambështetur",
+      "description": "Entiteti i kërkesës ka një lloj media që serveri ose burimi nuk e mbështet."
+    },
+    "422": {
+      "name": "Entitet i papërpunueshëm",
+      "description": "Kërkesa ishte e formuar mirë por nuk mund të ndiqej për shkak të gabimeve semantike."
+    },
+    "429": {
+      "name": "Tepër kërkesa",
+      "description": "Përdoruesi ka dërguar tepër kërkesa në një periudhë të caktuar kohe (kufizim i ritmit)."
+    },
+    "500": {
+      "name": "Gabim i brendshëm i serverit",
+      "description": "Një mesazh i përgjithshëm gabimi, i dhënë kur është hasur një gjendje e papritur dhe nuk është më e përshtatshme asnjë mesazh më specifik."
+    },
+    "501": {
+      "name": "I paimplementuar",
+      "description": "Serveri ose nuk e njeh metodën e kërkesës, ose nuk ka aftësinë për të përmbushur kërkesën."
+    },
+    "502": {
+      "name": "Portë e gabuar",
+      "description": "Serveri po vepronte si portë ose proxy dhe mori një përgjigje të pavlefshme nga serveri më lart."
+    },
+    "503": {
+      "name": "Shërbim i padisponueshëm",
+      "description": "Serveri nuk mund ta përballojë kërkesën (sepse është i mbingarkuar ose është në mirëmbajtje)."
+    },
+    "504": {
+      "name": "Skadim porte",
+      "description": "Serveri po vepronte si portë ose proxy dhe nuk mori një përgjigje në kohë nga serveri më lart."
+    }
+  },
+  "welcome": {
+    "confirmRemoveFavorite": "Jeni i sigurt se doni të hiqni \"{{fileName}}\" nga të preferuarat?",
+    "noFilesHint": "Hap një skedar ose krijo një të ri për të filluar",
+    "newAriaLabel": "Krijo një koleksion të ri",
+    "openAriaLabel": "Hap një koleksion nga disku",
+    "landmarkLabel": "Mirësevini"
+  },
+  "save": {
+    "title": "Opsionet e ruajtjes",
+    "mode": {
+      "label": "Mënyra e ruajtjes",
+      "file": "Skedar i vetëm",
+      "folder": "Strukturë dosjesh",
+      "fileDescription": "Ruaj gjithçka në një skedar të vetëm",
+      "folderDescription": "Ruaj si strukturë dosjesh me skedarë të ndarë"
+    },
+    "format": {
+      "label": "Formati",
+      "yamlDescription": "I lexueshëm nga njerëzit",
+      "jsonDescription": "Format standard",
+      "json5Description": "JSON + komente"
+    },
+    "preview": {
+      "label": "Pamja paraprake e strukturës",
+      "noDocumentation": "Asnjë dokumentacion i analizuar për këtë burim."
+    }
+  },
+  "common": {
+    "cancel": "Anulo",
+    "save": "Ruaj"
+  },
+  "helpers": {
+    "categories": {
+      "comparison": "Krahasimi",
+      "string": "Varg",
+      "math": "Matematika",
+      "array": "Varg (array)",
+      "object": "Objekt",
+      "url": "URL",
+      "date": "Data",
+      "regex": "Regex",
+      "misc": "Të ndryshme"
+    },
+    "eq": "Barazi e rreptë (===)",
+    "ne": "Pabarazi e rreptë (!==)",
+    "neq": "Pabarazi e rreptë (!==)",
+    "lt": "Më pak se (<)",
+    "lte": "Më pak se ose e barabartë me (<=)",
+    "gt": "Më shumë se (>)",
+    "gte": "Më shumë se ose e barabartë me (>=)",
+    "and": "Block helper: shfaqet nëse të gjitha vlerat janë të vërteta",
+    "or": "Block helper: shfaqet nëse ndonjë vlerë është e vërtetë",
+    "not": "Kthen vlerën booleane të kundërt",
+    "ifEquals": "Block helper: shfaqet nëse vlerat janë të barabarta",
+    "is": "Block helper: krahasim i barazisë jo të rreptë",
+    "isnt": "Block helper: krahasim i pabarazisë jo të rreptë",
+    "default": "Kthen vlerën e parazgjedhur nëse e para është null/undefined",
+    "compare": "Block helper: krahaso me operator",
+    "lowercase": "Konverton vargun në shkronja të vogla",
+    "uppercase": "Konverton vargun në shkronja të mëdha",
+    "capitalize": "Bën shkronjën e parë të madhe",
+    "capitalizeAll": "Bën shkronjën e parë të çdo fjale të madhe",
+    "titleize": "Bën shkronjën e parë të çdo fjale të madhe",
+    "camelcase": "Konverton në camelCase",
+    "pascalcase": "Konverton në PascalCase",
+    "snakecase": "Konverton në snake_case",
+    "snakeCase": "Konverton në snake_case (alias)",
+    "dashcase": "Konverton në dash-case (kebab-case)",
+    "dotcase": "Konverton në dot.case",
+    "pathcase": "Konverton në path/case",
+    "sentencecase": "Konverton në formë fjalie",
+    "slugify": "Konverton në slug të përshtatshëm për URL",
+    "trim": "Heq hapësirat boshe nga të dyja anët",
+    "trimLeft": "Heq hapësirat boshe nga fillimi",
+    "trimRight": "Heq hapësirat boshe nga fundi",
+    "replace": "Zëvendëson të gjitha rastet e a me b",
+    "split": "Ndan vargun në një array",
+    "truncate": "Shkurton vargun në gjatësinë e specifikuar",
+    "ellipsis": "Shkurton vargun me tre pika",
+    "append": "Shton një prapashtesë në varg",
+    "prepend": "Shton një parashtesë në varg",
+    "reverse": "Përmbys një varg ose array",
+    "startsWith": "Block helper: shfaqet nëse vargu fillon me parashtesën",
+    "endsWith": "Block helper: shfaqet nëse vargu mbaron me prapashtesën",
+    "contains": "Block helper: shfaqet nëse vargu përmban nënvargun",
+    "padStart": "Mbush vargun në fillim për të arritur gjatësinë",
+    "padEnd": "Mbush vargun në fund për të arritur gjatësinë",
+    "repeat": "Përsërit vargun n herë",
+    "substring": "Nxjerr një pjesë të vargut",
+    "indexOf": "Kthen indeksin e nënvargut (-1 nëse nuk gjendet)",
+    "count": "Numëron rastet e nënvargut",
+    "newLineToBr": "Konverton ndërrimet e rreshtit në tags <br>",
+    "stripTags": "Heq tagsat HTML nga vargu",
+    "add": "Mbledh dy numra",
+    "subtract": "Zbret b nga a",
+    "multiply": "Shumëzon dy numra",
+    "divide": "Pjesëton a me b",
+    "modulo": "Kthen mbetjen e a / b",
+    "abs": "Kthen vlerën absolute",
+    "ceil": "Rrumbullakon lart te numri i plotë më i afërt",
+    "floor": "Rrumbullakon poshtë te numri i plotë më i afërt",
+    "round": "Rrumbullakon te numri i plotë më i afërt",
+    "min": "Kthen vlerën minimale",
+    "max": "Kthen vlerën maksimale",
+    "pow": "Kthen bazën të ngritur në eksponent",
+    "sqrt": "Kthen rrënjën katrore",
+    "random": "Kthen një numër të plotë të rastësishëm midis min dhe max",
+    "sum": "Kthen shumën e vlerave të array",
+    "avg": "Kthen mesataren e vlerave të array",
+    "toFixed": "Formaton numrin me dhjetore fikse",
+    "toInt": "Konverton në numër të plotë",
+    "toFloat": "Konverton në numër me presje",
+    "first": "Kthen elementin/elementet e parë të array",
+    "last": "Kthen elementin/elementet e fundit të array",
+    "after": "Kthen elementet pas indeksit n",
+    "before": "Kthen elementet para indeksit n",
+    "slice": "Kthen një copë të array",
+    "length": "Kthen gjatësinë e array/varg/objekti",
+    "join": "Bashkon elementet e array me një ndarës",
+    "sort": "Rendit array",
+    "unique": "Kthen vlerat unike",
+    "concat": "Lidh array-të",
+    "flatten": "Sheshon array-në e ndërthurur",
+    "pluck": "Nxjerr një veti nga një array objektesh",
+    "itemAt": "Kthen elementin në indeksin e dhënë",
+    "inArray": "Block helper: shfaqet nëse vlera është në array",
+    "isArray": "Kthen true nëse vlera është array",
+    "isEmpty": "Block helper: shfaqet nëse vlera është e zbrazët",
+    "some": "Block helper: shfaqet nëse disa elemente përputhen",
+    "every": "Block helper: shfaqet nëse të gjitha elementet përputhen",
+    "JSONstringify": "Konverton objektin në varg JSON",
+    "JSONparse": "Parsezon vargun JSON në objekt",
+    "get": "Merr vetinë e ndërthurur sipas shtegut",
+    "keys": "Kthen çelësat e objektit",
+    "values": "Kthen vlerat e objektit",
+    "entries": "Kthen çiftet [çelës, vlerë]",
+    "hasOwn": "Block helper: shfaqet nëse objekti ka vetinë",
+    "pick": "Krijon një objekt me çelësat e zgjedhur",
+    "omit": "Krijon një objekt pa çelësat e specifikuar",
+    "merge": "Bashkon shumë objekte",
+    "isObject": "Kthen true nëse vlera është objekt",
+    "typeOf": "Kthen llojin e vlerës",
+    "encodeURI": "Kodon një varg për URL",
+    "decodeURI": "Dekodon një varg URL",
+    "urlParse": "Parsezon URL-në në komponentë",
+    "stripQuerystring": "Heq querystring nga URL",
+    "stripProtocol": "Heq protokollin nga URL",
+    "now": "Kthen datën aktuale si varg ISO",
+    "timestamp": "Kthen timestamp aktual në milisekonda",
+    "year": "Kthen vitin aktual",
+    "formatDate": "Formaton datën me një model",
+    "match": "Kthen përputhjet regex",
+    "test": "Block helper: shfaqet nëse regex përputhet",
+    "coalesce": "Kthen vlerën e parë jo null/undefined",
+    "uuid": "Gjeneron një UUID të rastësishëm",
+    "noop": "Block helper që shfaq përmbajtjen siç është",
+    "raw": "Block helper që shfaq përmbajtjen e papërpunuar",
+    "times": "Block helper që përsëritet n herë",
+    "range": "Gjeneron një array numrash"
+  },
+  "behavior": {
+    "title": "Sjellja",
+    "syncSidebarWithTabs": "Sinkronizo zgjedhjen e shiritit anësor me skedën aktive",
+    "syncSidebarWithTabsDescription": "Kur ndërroni skedat në hapësirën e punës, zgjidh dhe shfaq automatikisht elementin përkatës në shiritin anësor",
+    "dateTimeFormat": "Formati data/ora",
+    "dateTimeFormatDescription": "Formati i përdorur për shfaqjen e datave dhe orëve në aplikacion",
+    "dateTimeFormat.us": "Format US (MM/DD/VVVV, 12 orë)",
+    "dateTimeFormat.iso": "Format ISO (VVVV-MM-DD, 24 orë)"
+  },
+  "console": {
+    "title": "Konsola",
+    "requestFormat": "Formati i kërkesës",
+    "requestFormatDescription": "Lloji i parazgjedhur i shell-it i përdorur për të paraqitur kërkesat dalëse në skedën Konsola. Çdo rresht është një linjë komande që mund të kopjohet; ndërruesi në shiritin e veglave të Konsolës e mbivendos këtë parazgjedhje për skedën aktuale.",
+    "requestFormat.curl": "curl (në stil Unix)",
+    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+  },
+  "import": {
+    "title": "Importo kërkesa",
+    "source": {
+      "label": "Ngjit diçka këtu!",
+      "placeholder": "Fut shtegun e skedarit, URL-në ose ngjit një komandë curl/PowerShell..."
+    },
+    "formats": {
+      "swagger": {
+        "description": "Specifika OpenAPI 2.0, e lindur te SmartBear. Ngjit një Swagger JSON ose YAML — Restorm parsezon çdo operacion, tërheq skemat e sigurisë dhe e kthen të gjithë dokumentin në një pemë kërkesash të lundrueshme.",
+        "trademark": "Swagger është një markë tregtare e regjistruar e SmartBear Software."
+      },
+      "openapi": {
+        "description": "Standardi aktual OpenAPI (3.0 dhe 3.1). E njëjta ergonomi si Swagger: parametrat, trupat e kërkesës, skemat e sigurisë dhe webhook-ët arrijnë si një pemë kërkesash të tipizuara me shembuj gati për t'u dërguar.",
+        "trademark": "OpenAPI është një projekt i OpenAPI Initiative nën Linux Foundation."
+      },
+      "curl": {
+        "description": "E keni tashmë kërkesën duke punuar në terminal? Ngjit thirrjen e plotë curl — flamurët, kokat, trupin, query string — dhe Restorm e rindërton si një kërkesë reale që mund ta rinisni, redaktoni dhe fiksoni.",
+        "trademark": "curl është software me kod të hapur © Daniel Stenberg, i përdorur këtu sipas kushteve të tij."
+      },
+      "powershell": {
+        "description": "E njëjta ide, në stil PowerShell. Ngjit një komandë Invoke-WebRequest ose Invoke-RestMethod dhe Restorm lexon URI-në, metodën, kokat dhe trupin për të farësuar një kërkesë mbi të cilën mund të iteroni vizualisht.",
+        "trademark": "PowerShell është një markë tregtare e regjistruar e Microsoft Corporation."
+      },
+      "postman": {
+        "description": "Keni një koleksion Postman të ruajtur në zyrë? Hidhni JSON-in — Restorm lexon çdo kërkesë, çdo shembull përgjigjeje dhe çdo variabël mjedisi, pastaj rindërton koleksionin si një pemë Restorm që mund ta drejtoni krah për krah me pjesën tjetër të API-ve tuaja.",
+        "trademark": "Postman është një markë tregtare e regjistruar e Postman, Inc., e përdorur këtu vetëm si referencë për përputhshmëri."
+      },
+      "insomnia": {
+        "description": "Vini nga Insomnia? Hidhni eksportin tuaj. Restorm e kupton formatin e tij të koleksionit v4 / v5, sjell çdo kërkesë, kokë, trup dhe mjedis, dhe i paraqet të gjitha si një pemë Restorm.",
+        "trademark": "Insomnia është një markë tregtare e regjistruar e Kong Inc., e përdorur këtu vetëm si referencë për përputhshmëri."
+      },
+      "bruno": {
+        "description": "Skedarë .bru në stilin Bruno ose eksport i një dosjeje — Restorm lexon formatin tekstual .bru, përfshirë blloqet e skriptimit, dhe rikrijon çdo kërkesë si një nyje Restorm të nivelit të parë gati për t'u dërguar.",
+        "trademark": "Bruno është software me kod të hapur (MIT) nga Anoop M. D., i përdorur këtu sipas kushteve të tij."
+      },
+      "graphql": {
+        "description": "Ngjit një SDL GraphQL (.graphql / .gql / një ngjitje nga klienti juaj GraphQL) dhe Restorm ndërton një kërkesë për operacion, e lidhur me llojin e duhur query / mutation / subscription me variablat tashmë të strukturuara.",
+        "trademark": "GraphQL është një markë tregtare e GraphQL Foundation, projekt i Joint Development Foundation."
+      },
+      "grpc": {
+        "description": "Hidhni një skedar .proto (ose një direktori të tyre) dhe Restorm përshkon çdo shërbim, çdo RPC, çdo mesazh — duke e kthyer çdo metodë në një kërkesë të tipizuar që mund ta dërgoni përmes ekzekutorit gRPC pa prekur codegen.",
+        "trademark": "gRPC është një projekt i Cloud Native Computing Foundation."
+      },
+      "soap": {
+        "description": "Keni një WSDL? Ngjiteni (ose URL-në e tij) — Restorm parsezon çdo <port> dhe <operation> dhe prodhon zarfe SOAP gati për t'u dërguar me kokën e duhur SOAPAction, skelete trupi të tipizuara sipas skemës dhe skemën e vërtetimit që deklaron WSDL-ja."
+      },
+      "websocket": {
+        "description": "Ngjit një pikë fundore WebSocket (ws:// ose wss://) — Restorm hap lidhjen, kap kornizat hello të serverit dhe ndërton kërkesa send / subscribe me modele payload që mund të riluhen.",
+        "trademark": "WebSocket është një protokoll i standardizuar nga IETF (RFC 6455) dhe W3C."
+      },
+      "kafka": {
+        "description": "Ngjit një URL të një bootstrap-server Apache Kafka (ose një listë temash) — Restorm regjistron konsumatorët dhe prodhuesit për temë, dekodon payload-et Avro / Protobuf përmes Schema Registry-së suaj dhe ju lejon të riluani offsetet individuale me një klikim.",
+        "trademark": "Apache Kafka dhe logoja Kafka janë marka tregtare të Apache Software Foundation."
+      },
+      "socketio": {
+        "description": "Ngjit një URL serveri Socket.IO — Restorm negocion handshake-un, liston namespace-t dhe emrat e ngjarjeve që emiton serveri dhe ju jep një kërkesë për ngjarje emit / on me validim payload-i.",
+        "trademark": "Socket.IO është një bibliotekë me kod të hapur e publikuar nën licencën MIT; emri dhe logoja përdoren në mënyrë emërtore."
+      },
+      "odata": {
+        "description": "Ngjit një URL të një service-document OData ose një skedar $metadata — Restorm lexon CSDL-në, rindërton entity sets, function imports dhe actions, plus parambush opsionet e query $filter / $select / $top / $skip për çdo operacion."
+      },
+      "mqtt": {
+        "description": "Ngjit një URL të një broker-i MQTT ose një katalog temash — Restorm ndërton kërkesa publish / subscribe për temë, e mban lidhjen të gjallë për pamje paraprake në streaming dhe mban mend snapshot-et e mesazheve të mbajtura për t'i riluajtur më vonë.",
+        "trademark": "MQTT është një standard OASIS; emri dhe logoja MQTT janë marka tregtare të OASIS Open."
+      }
+    },
+    "loading": "Po analizohet...",
+    "noResults": "Nuk u gjet asnjë kërkesë",
+    "error": {
+      "unknown": "Ndodhi një gabim i panjohur"
+    },
+    "ok": "Importo",
+    "cancel": "Anulo",
+    "dropZone": "Zona e lëshimit"
+  },
+  "emptyBench": {
+    "importCard": {
+      "title": "Importo API-në tënde",
+      "body": "Sill një specifikim OpenAPI / Swagger, një skemë GraphQL, një koleksion Postman / Bruno / Insomnia, ose ngjit një komandë curl / PowerShell. Restorm e analizon, ndërton strukturën e dosjeve dhe ulet me çdo endpoint të gatshëm."
+    },
+    "recentActivity": {
+      "title": "Aktivitet i fundit",
+      "empty": "Dërgoni kërkesën tuaj të parë për ta parë këtu."
+    },
+    "apiCard": {
+      "favorites": "Të preferuara",
+      "topUsed": "Top 10 më të përdorurat",
+      "recent": "Kërkesat e fundit",
+      "description": "Përshkrim",
+      "version": "Versioni",
+      "quickLinks": {
+        "environments": "Mjedise",
+        "docs": "Dokumentim",
+        "notes": "Shënime"
+      }
+    }
+  }
+}

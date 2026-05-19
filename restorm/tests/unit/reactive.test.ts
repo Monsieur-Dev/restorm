@@ -105,7 +105,6 @@ describe('Reactive Document System', () => {
   const createTestFolder = (): Folder => ({
     id: 'folder-1',
     name: 'Test Folder',
-    documentation: 'Test documentation',
     tags: ['test'],
     configuration: { environments: [] },
     items: []
@@ -115,7 +114,6 @@ describe('Reactive Document System', () => {
     type: 'http',
     id: 'request-1',
     name: 'Test Request',
-    documentation: 'Test request documentation',
     tags: ['api'],
     method: 'GET',
     url: 'https://api.example.com/test',
@@ -147,23 +145,6 @@ describe('Reactive Document System', () => {
       const reactiveFolder = makeReactiveFolder(folder)
 
       reactiveFolder.notes = 'coucou'
-
-      vi.advanceTimersByTime(100)
-
-      expect(mockedEventBus.emitSync).toHaveBeenCalledWith(
-        mockedDocumentEvents.FOLDER_UPDATED,
-        expect.objectContaining({
-          id: 'folder-1',
-          type: 'folder'
-        })
-      )
-    })
-
-    it('should emit FOLDER_UPDATED when documentation is changed', () => {
-      const folder = createTestFolder()
-      const reactiveFolder = makeReactiveFolder(folder)
-
-      reactiveFolder.documentation = 'New documentation'
 
       vi.advanceTimersByTime(100)
 
@@ -332,7 +313,6 @@ describe('Reactive Document System', () => {
       folderType: 'environment',
       fileFormatVersion: 1,
       name: 'Envs',
-      documentation: '',
       tags: [],
       configuration: { environments: [] },
       items: [],

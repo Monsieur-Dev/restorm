@@ -76,6 +76,26 @@ class FirewallService {
 				callback({ cancel: false })
 				return
 			}
+			// Skip requests originating from the Mini browser's
+			// `<iframe>` — the firewall is meant to gate restorm's
+			// own outbound calls (HTTP / GraphQL / WebSocket
+			// executions, auth prefetch, import fetches), not
+			// arbitrary third-party browsing inside the embedded
+			// iframe. Without this bypass the user would have to
+			// click "Allow" for every CSS / font / XHR an embedded
+			// page makes — dozens of prompts per page load.
+			//
+			// Heuristic: the request's owning frame is a non-main
+			// frame whose document URL is an external `http(s)://`
+			// origin (i.e. not the renderer's own Vite / app
+			// origin). Internal iframes used by Monaco / devtools
+			// load via `vscode-resource:` / `devtools://` and don't
+			// match. The top-level renderer document is always the
+			// main frame, so it short-circuits cleanly here too.
+			if (isMiniBrowserIframeRequest(details)) {
+				callback({ cancel: false })
+				return
+			}
 			let record: RequestRecord | null = null
 			try {
 				record = this.recordFromWebRequest(details)
@@ -250,6 +270,76 @@ const VITE_DEV_ORIGIN = (() => {
 function isViteDevOrigin(rawUrl: string): boolean {
 	if (VITE_DEV_ORIGIN === null) return false
 	try { return new URL(rawUrl).origin === VITE_DEV_ORIGIN } catch { return false }
+}
+
+/**
+ * Detect requests that originated from the Mini browser surface
+ * (rendering arbitrary third-party content like the artifactsmmo
+ * game UI). The firewall stays out of those — the user opened the
+ * Mini browser explicitly, prompting for every CSS/font/XHR the
+ * embedded page makes would be unworkable.
+ *
+ * The Mini browser uses Electron's `<webview>` tag. The tag is its
+ * own top-level browsing context (so `frame.top === frame` for any
+ * request originating from inside it), but the request still flows
+ * through the host BrowserWindow's webRequest listener with the
+ * webview's URL set on `frame.url`.
+ *
+ * Single reliable signal across both legacy iframe + current webview
+ * shapes: the originating `frame.url` is an external `http(s)://`
+ * origin. Restorm's own main frame lives at the Vite / app origin
+ * which `isExternalHttpUrl` filters out, so any frame URL that gets
+ * past that test is a Mini browser surface. Internal Chromium frames
+ * (Monaco / devtools at `vscode-resource:` / `devtools://`) don't
+ * match the http(s) test either.
+ */
+function isMiniBrowserIframeRequest(details: OnBeforeRequestListenerDetails): boolean {
+	// (1) Navigation request itself — the very first fetch that loads
+	//     the Mini browser surface's main HTML document. With an
+	//     `<iframe>` `resourceType === 'subFrame'`; with an Electron
+	//     `<webview>` it's `mainFrame` (the webview is its own
+	//     top-level browsing context, not a subframe of restorm's
+	//     renderer). In both shapes, `details.frame.url` is still
+	//     `about:blank` at this point so the frame-based check below
+	//     would miss it. Use the resource-type + destination-URL
+	//     signal instead: only the Mini browser surface ever points
+	//     a top-level / sub-frame navigation at an external http(s)
+	//     origin (restorm's own renderer never navigates away from
+	//     the Vite / app origin).
+	if ((details.resourceType === 'subFrame' || details.resourceType === 'mainFrame') && isExternalHttpUrl(details.url)) {
+		return true
+	}
+	// (2) Sub-resource of an already-loaded Mini browser surface (CSS,
+	//     JS, font, XHR, fetch, WS, …). When the Mini browser uses an
+	//     `<iframe>`, `details.frame` is the iframe's frame (not the
+	//     parent). When it uses an Electron `<webview>`, the tag is
+	//     its own *top-level* browsing context so `frame.top === frame`
+	//     — there's no parent to compare to. Both paths share one
+	//     reliable signal: `frame.url` is an external http(s) origin.
+	//     Restorm's own main frame lives at the Vite / app origin which
+	//     `isExternalHttpUrl` filters out, so any frame URL that gets
+	//     past that test is a Mini browser surface (no other restorm
+	//     surface points a frame at a remote http URL).
+	const frame = details.frame
+	if (!frame) return false
+	const frameUrl = frame.url
+	if (typeof frameUrl !== 'string' || frameUrl === '') return false
+	return isExternalHttpUrl(frameUrl)
+}
+
+/**
+ * `true` iff the URL parses as http(s) AND its origin is NOT the
+ * Vite dev origin. Used to distinguish a third-party page (which the
+ * Mini browser is meant to load) from restorm's own renderer / dev
+ * assets / internal `vscode-resource:` / `devtools://` URLs.
+ */
+function isExternalHttpUrl(rawUrl: string): boolean {
+	let parsed: URL
+	try { parsed = new URL(rawUrl) } catch { return false }
+	const scheme = parsed.protocol.replace(/:$/, '').toLowerCase()
+	if (scheme !== 'http' && scheme !== 'https') return false
+	if (VITE_DEV_ORIGIN !== null && parsed.origin === VITE_DEV_ORIGIN) return false
+	return true
 }
 
 function inferProtocol(parsed: URL | null): RequestRecordProtocol {

@@ -60,6 +60,52 @@ export function cloneTree(tree: WorkbenchTree): WorkbenchTree {
 	return clone;
 }
 
+/**
+ * Every tab across the whole tree, in depth-first group order.
+ *
+ * `EditorWorkbench` renders the tab *content* once per entry here
+ * (above the split-pane tree), so a tab keeps its single React instance
+ * no matter which group currently holds it — moving a tab between
+ * groups becomes a pure DOM relocation instead of an unmount/remount.
+ */
+export function flattenTabs(tree: WorkbenchTree): EditorTab[] {
+	const out: EditorTab[] = [];
+	const walk = (nodes: GroupNode[]): void => {
+		for (const node of nodes) {
+			if (isTabGroupNode(node)) {
+				out.push(...node.tabs);
+			} else {
+				walk(node.groups);
+			}
+		}
+	};
+	walk(tree.groups);
+	return out;
+}
+
+/**
+ * Every group's `activeTabId` flattened. Drives the workbench's
+ * lazy-mount policy: a tab's React subtree is materialised the first
+ * time it appears here (= becomes the visible tab of its group) and
+ * stays mounted thereafter. Tabs that have never been visible — e.g.
+ * extras opened in the background by a tree-replace — pay no React
+ * cost until the user activates them.
+ */
+export function collectActiveTabIds(tree: WorkbenchTree): string[] {
+	const out: string[] = [];
+	const walk = (nodes: GroupNode[]): void => {
+		for (const node of nodes) {
+			if (isTabGroupNode(node)) {
+				if (node.activeTabId) out.push(node.activeTabId);
+			} else {
+				walk(node.groups);
+			}
+		}
+	};
+	walk(tree.groups);
+	return out;
+}
+
 export function findGroup(tree: WorkbenchTree, groupId: string): FindResult {
 	const rec = (parent: ContainerGroupNode | null, groups: GroupNode[], path: number[]): FindResult => {
 		for (let i = 0; i < groups.length; i++) {

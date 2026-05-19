@@ -123,7 +123,7 @@ export type OAS3PathItem = Partial<Record<HttpMethod, OAS3Operation>> & {
  * normaliser maps those onto Swagger 2.0's flow keys
  * (`application` / `accessCode`) so the doc viewer's rendering
  * doesn't have to special-case the version. */
-interface OAS3SecurityScheme {
+export interface OAS3SecurityScheme {
   type: 'apiKey' | 'http' | 'oauth2' | 'openIdConnect'
   description?: string
   // apiKey
@@ -348,6 +348,11 @@ function mapModels(components: OAS3Components | undefined): Record<string, Model
     const merged = mergeAllOfInto({ ...schema })
     const entry: ModelDocumentation = { name, properties: mapSchemaProperties(schema) }
     if (merged.description !== undefined) entry.description = merged.description
+    // Top-level enum schema: surface values so consumers render the
+    // model as an enum node rather than an empty object.
+    if (Array.isArray(merged.enum) && merged.enum.length > 0) {
+      entry.enumValues = [...merged.enum]
+    }
     const oneOf = extractCompositionRefs(merged.oneOf)
     const anyOf = extractCompositionRefs(merged.anyOf)
     const discriminator = extractDiscriminator(merged)

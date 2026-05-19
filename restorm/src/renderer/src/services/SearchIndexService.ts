@@ -72,7 +72,6 @@ function folderToSearchDocument(folder: Folder, parentPath: string[] = [], paren
   return {
     id: folder.id,
     title: folder.name,
-    ...(folder.documentation ? { description: folder.documentation } : {}),
     category: 'folder',
     icon: 'folder',
     keywords: folder.tags.join(' '),
@@ -165,7 +164,6 @@ function httpRequestToSearchDocument(
   return {
     id: request.id,
     title: request.name,
-    ...(request.documentation ? { description: request.documentation } : {}),
     category: 'request',
     icon: request.method.toLowerCase(),
     keywords,
@@ -242,7 +240,6 @@ function authenticationRequestToSearchDocument(
   return {
     id: request.id,
     title: request.name,
-    ...(request.documentation ? { description: request.documentation } : {}),
     category: 'request',
     // `icon: 'auth'` → `mapToBadgeType('AUTH')` → 'AUTH' badge
     // (matches the sidebar's auth badge styling). The search
@@ -305,7 +302,6 @@ function graphqlRequestToSearchDocument(
   return {
     id: request.id,
     title: request.name,
-    ...(request.documentation ? { description: request.documentation } : {}),
     category: 'request',
     icon: request.operationType,
     keywords,
@@ -359,7 +355,6 @@ function grpcRequestToSearchDocument(
   return {
     id: request.id,
     title: request.name,
-    ...(request.documentation ? { description: request.documentation } : {}),
     category: 'request',
     icon: request.callType,
     keywords,
@@ -414,7 +409,6 @@ function soapRequestToSearchDocument(
   return {
     id: request.id,
     title: request.name,
-    ...(request.documentation ? { description: request.documentation } : {}),
     category: 'request',
     icon: 'soap',
     keywords,
@@ -468,7 +462,6 @@ function websocketRequestToSearchDocument(
   return {
     id: request.id,
     title: request.name,
-    ...(request.documentation ? { description: request.documentation } : {}),
     category: 'request',
     icon: request.protocol,
     keywords,
@@ -524,7 +517,6 @@ function odataRequestToSearchDocument(
   return {
     id: request.id,
     title: request.name,
-    ...(request.documentation ? { description: request.documentation } : {}),
     category: 'request',
     icon: 'odata',
     keywords,

@@ -73,6 +73,11 @@ export interface ListViewProps {
   ariaLabel?: string
   onItemClick?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
   onItemDoubleClick?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
+  /** Middle-click on a row (mouse button 1). Receives the same payload as
+   *  onItemClick. Useful for "open in background" gestures: the row is
+   *  not selected, onItemClick is not invoked, and the consumer decides
+   *  what to do (typically opening a tab without focusing it). */
+  onItemAuxClick?: (payload: ListViewItemEventPayload, event: React.MouseEvent<HTMLDivElement>) => void
   onSelectionChange?: (selectedIds: string[], payload: ListViewItemEventPayload) => void
   onItemToggle?: (
     payload: ListViewItemEventPayload,

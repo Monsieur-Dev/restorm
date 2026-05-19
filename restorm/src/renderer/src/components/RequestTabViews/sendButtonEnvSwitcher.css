@@ -1,0 +1,31 @@
+/* ==========================================================================
+   SendButtonEnvSwitcher — preserve ControlGroup's stretch-to-tallest
+   behaviour when the wrapped Send button is a *grandchild* of the
+   ControlGroup (the wrapper inserts a layer in between).
+
+   The ControlGroup rules in `controlGroup.css` use `> .button-container`
+   + `> .button-container > .text-button` direct-child selectors to
+   force the button to fill the strip's height. Once we wrap the
+   button in `<span class="restorm-send-button-env-switcher">`, those
+   rules no longer match and the button shrinks to its intrinsic
+   height — visually shorter than the URL InputBox next to it.
+
+   Re-applying the same stretch chain through the wrapper restores
+   the alignment. Scoped tightly to this component so no other
+   `.button-container` consumer of a parent flex is affected.
+   ========================================================================== */
+
+.restorm-send-button-env-switcher {
+	display: inline-flex;
+	align-self: stretch;
+	align-items: stretch;
+}
+
+.restorm-send-button-env-switcher > .button-container {
+	display: flex;
+}
+
+.restorm-send-button-env-switcher > .button-container > .text-button {
+	height: 100%;
+	max-width: none;
+}

@@ -139,6 +139,22 @@ describe('swaggerToApiDocumentation', () => {
     expect(doc.server).toEqual({ host: 'petstore.swagger.io', basePath: '/v2', schemes: ['https'] })
   })
 
+  it('surfaces top-level enum definitions as `enumValues` on the model', () => {
+    const spec: SwaggerSpec = {
+      ...baseSpec,
+      definitions: {
+        ...(baseSpec.definitions ?? {}),
+        Status: {
+          type: 'string',
+          enum: ['available', 'pending', 'sold']
+        }
+      }
+    }
+    const doc = swaggerToApiDocumentation(spec)
+    expect(doc.models.Status?.enumValues).toEqual(['available', 'pending', 'sold'])
+    expect(doc.models.Status?.properties).toEqual([])
+  })
+
   it('maps definitions into models with required flags and $ref type labels', () => {
     const doc = swaggerToApiDocumentation(baseSpec)
     const pet = doc.models.Pet

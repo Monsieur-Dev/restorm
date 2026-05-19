@@ -130,6 +130,16 @@ export interface KeyValueTableProps {
    * omitted, widths live in memory for the component lifetime only.
    */
   persistenceId?: string | undefined
+  /**
+   * When `true`, the enabled-toggle is auto-managed against the value
+   * column: typing into an empty value re-enables the row, clearing a
+   * non-empty value disables it. Off by default — consumers that
+   * legitimately want a checked-but-empty row (e.g. `?filter=` to
+   * reset a server-side default) should leave this off. Restorm
+   * passes it on for HTTP-style tables so users don't accidentally
+   * send `?name=&drop=` to APIs that 422 on empty parameters.
+   */
+  autoToggleEnabledOnEmpty?: boolean | undefined
 }
 
 export interface KeyValueTableHandle {
@@ -148,6 +158,7 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
     showResolvedValue = false,
     renderResolvedValueCell: ResolvedValueCellRenderer = DefaultCellRenderer,
     persistenceId,
+    autoToggleEnabledOnEmpty = false,
     'data-testid': dataTestId
   },
   ref
@@ -173,14 +184,30 @@ export const KeyValueTable = React.memo(React.forwardRef<KeyValueTableHandle, Ke
       setRows((oldRows) =>
         oldRows.map((row, index) => {
           if (index !== rowIndex) return row
-          return {
+          const nextRow: ParamRow = {
             ...row,
             [columnId]: value as string | boolean
           }
+          // Auto-track the enabled toggle against value emptiness when
+          // the consumer opts in. The flip happens INSIDE this state
+          // update so the visible checkbox stays in sync — doing the
+          // toggle higher up (in the parent's `onRowsChange` handler)
+          // mutates the upstream data layer but leaves this local
+          // `rows` state stale, so the checkbox would visually stay on.
+          if (autoToggleEnabledOnEmpty && columnId === 'value') {
+            const prevText = typeof row.value === 'string' ? row.value : ''
+            const nextText = typeof value === 'string' ? value : ''
+            const prevEmpty = prevText.trim() === ''
+            const nextEmpty = nextText.trim() === ''
+            if (prevEmpty !== nextEmpty) {
+              nextRow.enabled = !nextEmpty
+            }
+          }
+          return nextRow
         })
       )
     },
-    []
+    [autoToggleEnabledOnEmpty]
   )
 
   const keyValues: KeyValueTableRow[] = useMemo(

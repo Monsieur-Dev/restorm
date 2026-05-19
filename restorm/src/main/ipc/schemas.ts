@@ -10,7 +10,17 @@ const persistenceFormatArg = z.enum(['json', 'json5', 'yaml'])
 const keyValueSchema = z.object({
   id: z.string().optional(),
   key: z.string(),
-  value: z.string()
+  value: z.string(),
+  /**
+   * Whether the value is an `ExpressionValue` and should be run
+   * through the handlebars resolver at request time. Defaults to
+   * `false` — a plain `StringValue` is sent verbatim. The renderer
+   * derives this from the persisted `ValueType` subclass; main
+   * reconstructs the right `ValueType` instance on receipt so the
+   * resolver behaves consistently across the IPC boundary.
+   */
+  isExpression: z.boolean().optional(),
+  enabled: z.boolean().optional()
 })
 
 // ==========================================================================
@@ -265,6 +275,12 @@ export const responsesHistoryGetArgs = z.tuple([z.string()])
 export const responsesHistoryTogglePinArgs = z.tuple([z.string(), z.boolean()])
 
 // ==========================================================================
+// Request Usage
+// ==========================================================================
+
+export const requestUsageGetArgs = z.tuple([])
+
+// ==========================================================================
 // Import
 // ==========================================================================
 
@@ -296,32 +312,27 @@ export const findStopArgs = z.tuple([
 ])
 
 // ==========================================================================
-// API Update (per-folder periodic spec re-check)
+// API Update (per-folder on-demand spec re-import)
 // ==========================================================================
 
 // `apiUpdate:set-settings` is a PATCH operation — the IPC handler
 // passes the payload straight to `updateFolderConfig` which spreads
 // it into the existing `apiUpdate` config. Every field is optional
-// so partial patches (e.g. `{ sourceHeaders }` from the
-// refresh-from-source flow, or just `{ autoCheckEnabled: true }`
-// from the settings toggle) are accepted without forcing the
-// caller to read the whole config first.
+// so partial patches (e.g. `{ sourceHeaders }` from the Refresh
+// flow, or `{ lastCheckedAt }` after a checksum check) are accepted
+// without forcing the caller to read the whole config first.
 const apiUpdateConfigSchema = z.object({
   sourceUrl: z.string().optional(),
   sourceHeaders: z.record(z.string(), z.string()).optional(),
-  autoCheckEnabled: z.boolean().optional(),
-  interval: z.enum(['hourly', 'every6h', 'daily', 'weekly', 'never']).optional(),
   lastCheckedAt: z.number().optional(),
-  lastImportedSpecVersion: z.string().optional(),
-  lastImportedSpecHash: z.string().optional()
+  lastImportedAt: z.number().optional(),
+  payloadChecksum: z.string().optional(),
+  authenticationRequestId: z.string().optional()
 })
 
 const folderIdArg = z.string()
 
-export const apiUpdateGetStateArgs = z.tuple([folderIdArg])
-export const apiUpdateGetSnapshotArgs = z.tuple([])
 export const apiUpdateSetSettingsArgs = z.tuple([folderIdArg, apiUpdateConfigSchema])
-export const apiUpdateCheckNowArgs = z.tuple([folderIdArg])
 export const apiUpdateApplyArgs = z.tuple([
   folderIdArg,
   z.object({
@@ -329,9 +340,7 @@ export const apiUpdateApplyArgs = z.tuple([
     skip: z.array(z.string())
   }).optional()
 ])
-export const apiUpdateDismissArgs = z.tuple([folderIdArg])
-export const apiUpdatePreviewArgs = z.tuple([folderIdArg])
-export const apiUpdatePreviewTreeArgs = z.tuple([folderIdArg])
+export const apiUpdateRefreshFetchArgs = z.tuple([folderIdArg])
 
 /** Renderer → main sync of the loaded collections so main-side
  * services (apiUpdate apply / preview) can resolve folder ids
@@ -339,3 +348,25 @@ export const apiUpdatePreviewTreeArgs = z.tuple([folderIdArg])
  * truth for the project tree; this handler just mirrors it into the
  * main-side CollectionStore. */
 export const collectionsSyncArgs = z.tuple([z.array(z.unknown())])
+
+// ==========================================================================
+// MiniBrowser — main-process `WebContentsView` lifecycle
+// ==========================================================================
+
+const tabIdArg = z.string()
+const miniBrowserBoundsSchema = z.object({
+  x: z.number(),
+  y: z.number(),
+  width: z.number(),
+  height: z.number()
+})
+
+export const miniBrowserCreateArgs = z.tuple([tabIdArg, z.string().optional()])
+export const miniBrowserDestroyArgs = z.tuple([tabIdArg])
+export const miniBrowserSetBoundsArgs = z.tuple([tabIdArg, miniBrowserBoundsSchema])
+export const miniBrowserNavigateArgs = z.tuple([tabIdArg, z.string()])
+export const miniBrowserReloadArgs = z.tuple([tabIdArg])
+export const miniBrowserGoBackArgs = z.tuple([tabIdArg])
+export const miniBrowserGoForwardArgs = z.tuple([tabIdArg])
+export const miniBrowserGetStateArgs = z.tuple([tabIdArg])
+export const miniBrowserCaptureArgs = z.tuple([tabIdArg])

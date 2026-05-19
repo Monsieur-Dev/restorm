@@ -17,7 +17,7 @@ import { z } from 'zod'
 import { BrowserWindow } from 'electron'
 import { McpService } from 'electron-core-ui'
 import { collectionStore } from '../../services/CollectionStore'
-import { isAnyFolder, isEnvironmentFolder, isRequest, KeyValue } from '../../../shared/models'
+import { isAnyFolder, isEnvironmentFolder, isRequest, KeyValue, Environment } from '../../../shared/models'
 import { broadcastTreeReplace } from './import'
 
 /**
@@ -40,6 +40,29 @@ function reifyKeyValueArrays(patch: Record<string, unknown>): Record<string, unk
         return entry
       })
     }
+  }
+  return out
+}
+
+/**
+ * Walk an `update_folder` patch's `environments` array and turn every
+ * plain-object entry into a real `Environment` class instance (which
+ * itself reifies each `variable` into a `KeyValue` with the matching
+ * `ValueType` subclass). Without this, the next `toPlainObject()` call
+ * downstream — emitted by `CollectionStore.emitFolderUpdated` — crashes
+ * with `e.toPlainObject is not a function` on the plain-object env.
+ */
+function reifyEnvironmentsArray(patch: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = { ...patch }
+  const envs = out['environments']
+  if (Array.isArray(envs)) {
+    out['environments'] = envs.map((entry: unknown): unknown => {
+      if (entry instanceof Environment) return entry
+      if (entry !== null && typeof entry === 'object') {
+        return Environment.fromPlain(entry as Parameters<typeof Environment.fromPlain>[0])
+      }
+      return entry
+    })
   }
   return out
 }
@@ -188,7 +211,9 @@ export function registerWriteTools(mcp: McpService): void {
           'Partial request shape. Whitelisted top-level keys: url, method, headers, params, ' +
           'pathParams, body, name, description, query, variables, service, callType, ' +
           'requestMessage, metadata, soapAction, operation, soapBody, protocol, event, message. ' +
-          '`id` and `type` are dropped silently — protected.'
+          '`id` and `type` are dropped silently — protected. `body.type` must be one of ' +
+          '`text` / `file` / `form-data` / `x-www-form-urlencoded` (the canonical HTTPRequestBody ' +
+          'discriminator values); to send a JSON payload use `{type: "text", content: "{…json…}"}`.'
         )
       } as Record<string, unknown>
     },
@@ -209,6 +234,28 @@ export function registerWriteTools(mcp: McpService): void {
       // by the old one, and `type` change would mismatch the class
       // instance with the actual request kind.
       const { id: _id, type: _type, ...rawSafePatch } = patchRaw as Record<string, unknown>
+      // Reject `body.type` values the executor / UI can't render. The
+      // 4 canonical types form the entire `HTTPRequestBody` union; a
+      // caller stuffing anything else (e.g. `'json'`) used to land in
+      // an empty body editor and reach the wire as a payload-less
+      // POST, surfacing as a generic 4xx from the upstream server.
+      const VALID_BODY_TYPES = ['text', 'file', 'form-data', 'x-www-form-urlencoded'] as const
+      const patchedBody = (rawSafePatch as { body?: unknown }).body
+      if (patchedBody !== undefined && patchedBody !== null) {
+        if (typeof patchedBody !== 'object' || Array.isArray(patchedBody)) {
+          return errorReply('body must be an object')
+        }
+        const bodyType = (patchedBody as { type?: unknown }).type
+        if (
+          bodyType !== undefined &&
+          (typeof bodyType !== 'string' ||
+            !(VALID_BODY_TYPES as readonly string[]).includes(bodyType))
+        ) {
+          return errorReply(
+            `body.type must be one of: ${VALID_BODY_TYPES.join(', ')} (got: ${JSON.stringify(bodyType)})`
+          )
+        }
+      }
       const safePatch = reifyKeyValueArrays(rawSafePatch)
       const updated = collectionStore.updateRequest(id, safePatch as Partial<Request>)
       if (!updated) return errorReply(`updateRequest failed for ${id}`)
@@ -237,7 +284,7 @@ export function registerWriteTools(mcp: McpService): void {
       title: 'Update arbitrary fields on a folder or env-folder',
       description:
         'Apply a partial-patch to an existing folder. Whitelisted fields cover both Folder and ' +
-        'EnvironmentFolder shapes: `name`, `documentation`, `notes`, `tags`, `tagColors`, ' +
+        'EnvironmentFolder shapes: `name`, `notes`, `tags`, `tagColors`, ' +
         '`configuration`, `environments` (env-folders only), `enumDefinitions`, `apiUpdate`. ' +
         '`id`, `items` and `folderType` are protected (use create / move / delete for those). ' +
         'Triggers an MCP-driven refresh so an open folder tab repaints.',
@@ -262,7 +309,12 @@ export function registerWriteTools(mcp: McpService): void {
       }
       // Same protections as update_request: id / items / folderType
       // would corrupt the in-memory tree if changed.
-      const { id: _id, items: _items, folderType: _folderType, ...safePatch } = patchRaw as Record<string, unknown>
+      const { id: _id, items: _items, folderType: _folderType, ...rawPatch } = patchRaw as Record<string, unknown>
+      // Reify `environments` so a JSON-only MCP caller can hand us
+      // `{ variables: [{key, value: {type:'password', value:'…'}}, …] }`
+      // and the downstream `emitFolderUpdated` → `toPlainObject` chain
+      // still works (it would otherwise crash on plain-object envs).
+      const safePatch = reifyEnvironmentsArray(rawPatch)
       const updated = collectionStore.updateFolder(id, safePatch as Partial<typeof target>)
       if (!updated) return errorReply(`updateFolder failed for ${id}`)
       // Mirror the request-update IPC chain so an open folder tab
@@ -344,6 +396,202 @@ export function registerWriteTools(mcp: McpService): void {
         return jsonReply({ id, kind: isEnvironmentFolder(target) ? 'env-folder' : 'folder', deleted: true })
       }
       return errorReply(`Item ${id} is not a folder, env-folder or request`)
+    }
+  )
+
+  // ────────────────────────────────────────────────────────────────────
+  // Env-variable CRUD — list / set / delete variables on an
+  // `Environment` inside an env-folder without round-tripping through
+  // `update_folder` (which requires the caller to send the whole
+  // environments array). The previous workflow had MCP clients editing
+  // the YAML on disk to seed `JWTBearer_token`; these tools collapse
+  // that into a single explicit call per variable.
+  // ────────────────────────────────────────────────────────────────────
+
+  /**
+   * Locate an `Environment` inside any env-folder of the open project
+   * by its id. Searches recursively through `subEnvironments` so nested
+   * envs (e.g. `prod → eu-west`) are reachable. Returns `null` when no
+   * environment with the given id exists in the project.
+   */
+  const findEnvById = (envId: string): Environment | null => {
+    const root = collectionStore
+    const walkEnv = (env: Environment): Environment | null => {
+      if (env.id === envId) return env
+      for (const sub of env.subEnvironments ?? []) {
+        const hit = walkEnv(sub)
+        if (hit) return hit
+      }
+      return null
+    }
+    for (const folder of root.getCollections()) {
+      if (!isEnvironmentFolder(folder)) continue
+      for (const env of folder.environments) {
+        const hit = walkEnv(env)
+        if (hit) return hit
+      }
+    }
+    return null
+  }
+
+  mcp.registerTool(
+    'list_env_variables',
+    {
+      title: 'List variables of an environment',
+      description:
+        'Return every key + serialised value for the given `Environment`. Use this to discover ' +
+        'what variables an env folder ships with (e.g. after `import_from_url` auto-creates ' +
+        '`baseUrl` / `JWTBearer_token` for an OpenAPI spec with bearer security). ' +
+        'Returned `value` is the persisted ValueType POJO — for `password`-typed entries the ' +
+        '`value.value` field is the plaintext currently held in memory (which is what the ' +
+        'request resolver uses); the on-disk shape strips it via `.env`.',
+      inputSchema: {
+        envId: z.string().min(1).describe('Environment id (NOT the env-folder id). Find it via `list_folders` then read the folder\'s `environments[i].id`.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const argRecord = args
+      const envId = typeof argRecord['envId'] === 'string' ? argRecord['envId'] : ''
+      if (!envId) return errorReply('envId is required')
+      const env = findEnvById(envId)
+      if (!env) return errorReply(`No environment with id ${envId}`)
+      const variables = env.variables.map((kv) => ({
+        id: kv.id,
+        key: kv.key,
+        enabled: kv.enabled,
+        description: kv.description,
+        value: kv.value
+      }))
+      return jsonReply({ envId, name: env.name, variables })
+    }
+  )
+
+  mcp.registerTool(
+    'set_env_variable',
+    {
+      title: 'Create or update one environment variable',
+      description:
+        'Upsert a single variable on the given `Environment`. If a variable with the same key ' +
+        'already exists it is replaced (keeping its id), otherwise a new one is appended. The ' +
+        '`value` field accepts the persisted `ValueType` POJO shape: ' +
+        '`{ type: "string" | "expression" | "password" | "numeric" | "boolean" | "color" | "datetime", value: ... }`. ' +
+        'For `password` variables, the plaintext travels through memory + lands in the sibling ' +
+        '`.restorm.env` file on save; the main `.restorm` document only carries `{ type: "password" }`. ' +
+        'Use `expression` (not `string`) when the value contains `{{handlebars}}` placeholders that ' +
+        'should resolve against this environment\'s context — `StringValue` ships verbatim. ' +
+        'Triggers an autosave so the change persists immediately.',
+      inputSchema: {
+        envId: z.string().min(1).describe('Environment id.'),
+        key: z.string().min(1).describe('Variable key (e.g. "JWTBearer_token").'),
+        value: z
+          .record(z.string(), z.unknown())
+          .describe('Persisted `ValueType` POJO, e.g. `{ "type": "password", "value": "<the-secret>" }` or `{ "type": "expression", "value": "Bearer {{token}}" }`. A bare string is rejected — wrap plain text in `{ "type": "string", "value": "…" }`.'),
+        enabled: z.boolean().optional().describe('Default true.'),
+        description: z.string().optional().describe('Free-text description shown next to the variable.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const argRecord = args
+      const envId = typeof argRecord['envId'] === 'string' ? argRecord['envId'] : ''
+      const key = typeof argRecord['key'] === 'string' ? argRecord['key'] : ''
+      if (!envId) return errorReply('envId is required')
+      if (!key) return errorReply('key is required')
+      const env = findEnvById(envId)
+      if (!env) return errorReply(`No environment with id ${envId}`)
+      const enabled = typeof argRecord['enabled'] === 'boolean' ? argRecord['enabled'] : true
+      const description = typeof argRecord['description'] === 'string' ? argRecord['description'] : undefined
+      const valueRaw = argRecord['value']
+      // KeyValue.fromPlain handles every ValueType shape + falls back to
+      // a sensible empty StringValue when the caller omits `value`.
+      const kv = KeyValue.fromPlain({
+        key,
+        value: valueRaw,
+        ...(description !== undefined ? { description } : {}),
+        enabled
+      })
+      const existingIdx = env.variables.findIndex((v) => v.key === key)
+      if (existingIdx >= 0) {
+        // Preserve the prior id so per-variable subscribers (transform
+        // result store, search index) don't see a "deleted then
+        // created" diff for an update.
+        const existing = env.variables[existingIdx]
+        if (existing?.id !== undefined) kv.id = existing.id
+        env.variables[existingIdx] = kv
+      } else {
+        env.variables.push(kv)
+      }
+      // Find the owning env-folder so we can re-broadcast it to the
+      // renderer; the env document itself isn't a top-level save unit,
+      // it travels inside the env folder.
+      const ownerFolderId = ((): string | undefined => {
+        const isOwnedBy = (root: Environment): boolean => {
+          if (root === env) return true
+          for (const sub of root.subEnvironments ?? []) {
+            if (isOwnedBy(sub)) return true
+          }
+          return false
+        }
+        for (const folder of collectionStore.getCollections()) {
+          if (!isEnvironmentFolder(folder)) continue
+          for (const e of folder.environments) {
+            if (isOwnedBy(e)) return folder.id
+          }
+        }
+        return undefined
+      })()
+      // Notify ContextService that this env's variables changed so the
+      // handlebars context is rebuilt. `updateFolder({})` with an empty
+      // patch wouldn't pass the `patchTouchesEnvironments` gate inside
+      // CollectionStore, so the per-env `ENVIRONMENT_UPDATED` event
+      // would never fire and the resolved URLs / available variables
+      // would keep using the previous env snapshot.
+      collectionStore.updateEnvironment(envId, {})
+      if (ownerFolderId !== undefined) {
+        collectionStore.updateFolder(ownerFolderId, {} as never)
+        for (const win of BrowserWindow.getAllWindows()) {
+          if (!win.isDestroyed()) {
+            win.webContents.send('mcp:folder-updated', { itemId: ownerFolderId, patch: {} })
+          }
+        }
+      }
+      broadcastTreeReplace()
+      triggerSave()
+      const declaredType = (valueRaw && typeof valueRaw === 'object' ? (valueRaw as { type?: unknown }).type : undefined)
+      return jsonReply({ envId, key, replaced: existingIdx >= 0, type: typeof declaredType === 'string' ? declaredType : 'string' })
+    }
+  )
+
+  mcp.registerTool(
+    'delete_env_variable',
+    {
+      title: 'Delete one environment variable',
+      description:
+        'Remove a variable by key from the given `Environment`. No-op when the key isn\'t present ' +
+        '(returns `removed: false` so the caller can branch). Triggers an autosave on success.',
+      inputSchema: {
+        envId: z.string().min(1).describe('Environment id.'),
+        key: z.string().min(1).describe('Variable key to remove.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const argRecord = args
+      const envId = typeof argRecord['envId'] === 'string' ? argRecord['envId'] : ''
+      const key = typeof argRecord['key'] === 'string' ? argRecord['key'] : ''
+      if (!envId) return errorReply('envId is required')
+      if (!key) return errorReply('key is required')
+      const env = findEnvById(envId)
+      if (!env) return errorReply(`No environment with id ${envId}`)
+      const before = env.variables.length
+      env.variables = env.variables.filter((v) => v.key !== key)
+      const removed = env.variables.length < before
+      if (removed) {
+        // Same reason as set_env_variable: signal ContextService that
+        // env.variables changed so the handlebars context is rebuilt.
+        collectionStore.updateEnvironment(envId, {})
+        broadcastTreeReplace()
+        triggerSave()
+      }
+      return jsonReply({ envId, key, removed })
     }
   )
 }

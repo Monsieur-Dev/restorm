@@ -110,6 +110,7 @@ export function SaveOptionsModal({
       isOpen={isOpen}
       onClose={onClose}
       title={title ?? t('save.title', 'Save Options')}
+      size="dialog"
       data-testid="save-modal"
     >
       <div className="save-options-modal" data-testid="save-options-modal">

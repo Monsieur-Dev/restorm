@@ -1,0 +1,724 @@
+{
+  "app": {
+    "title": "restorm",
+    "openSettings": "設定を開く",
+    "draftsRestoredTitle": "未保存の作業を復元しました",
+    "draftsRestoredBody_other": "前回のセッションから {{count}} 件の下書きを復元しました。"
+  },
+  "statusbar": {
+    "requestHistory": "リクエスト履歴",
+    "envSelector": {
+      "applyToAll": "すべてのリクエストに適用"
+    }
+  },
+  "tips": {
+    "cardTitle": "ヒントとコツ",
+    "maximizeTab": {
+      "title": "ワンクリックでタブを最大化",
+      "body": "ワークベンチの任意のタブをダブルクリックするとフルスクリーンで表示できます。Esc キーを押すと元のレイアウトに戻ります。"
+    },
+    "mcpControl": {
+      "title": "AI で restorm を操作",
+      "body": "restorm には MCP サーバーが組み込まれており、Claude Code のような AI アシスタントが、チャットを離れることなくリクエストの一覧表示・オープン・編集・実行、レスポンスの確認、ワークスペースのプログラム的な操作を行えます。"
+    },
+    "envSwitch": {
+      "title": "環境を簡単に切り替え!",
+      "body": "現在のリクエストや API のすべてのリクエストの環境を変更するには、ステータスバーのボタンをクリックするか、リクエストの送信ボタンを右クリックします。"
+    },
+    "authRequests": {
+      "title": "API を使うのに認証が必要?",
+      "body": "毎回トークンを取得するためにリクエストを送って貼り付け回る代わりに、認証リクエストを使いましょう。呼び出しが失敗した場合 (401、403 など)、またはトークンの有効期限が切れた場合、認証リクエストが自動的に再実行され、トークンが抽出・再利用されます。便利!"
+    },
+    "supplyChain": {
+      "title": "自分を守ろう!",
+      "body": "他のソフトウェアと同様、Restorm はサードパーティのライブラリを使用しています。サプライチェーン攻撃を防ぐため、すべての送信呼び出しを最下層で捕捉し、サードパーティのライブラリが個人情報を盗もうとした場合に警告します!"
+    },
+    "codeSnippets": {
+      "title": "Restorm がコーディングを支援!",
+      "body": "各リクエストでコードスニペットを確認でき、ソフトウェアへの統合に役立ちます。多くの言語に対応: curl、PowerShell、TypeScript、C# など!"
+    },
+    "workbenchLayout": {
+      "title": "ワークベンチを整理しよう",
+      "body": "大きな画面とたくさんのリクエスト? 並べて表示したり、上下に並べたり、自由に配置できます。タブをドラッグして好きな場所に置くだけ。あなたの快適さのために!"
+    },
+    "persistState": {
+      "title": "離れたときと同じ状態で再開!",
+      "body": "Restorm を閉じて再度開くと、前回離れたときとまったく同じ状態で再開できます。"
+    },
+    "favorites": {
+      "title": "お気に入りはありますか?",
+      "body": "ほかより気になるリクエストはありませんか? お気に入りに追加しましょう!"
+    },
+    "console": {
+      "title": "何が起きているかを把握",
+      "body": "コンソールでは、リクエストを送るたびに API への呼び出しを確認できます。必要に応じてターミナルにそのままコピー＆ペーストできて便利! お好みはどちら: curl と PowerShell?"
+    },
+    "miniBrowser": {
+      "title": "いちいちウィンドウを切り替えるのに疲れた?",
+      "body": "Restorm にはミニ Web ブラウザが組み込まれています。アプリが API 呼び出しに対して視覚的に反応する場面で便利!"
+    },
+    "apiDocs": {
+      "title": "ドキュメントもこの場で",
+      "body": "Restorm と API ドキュメントを行き来する必要はありません。API がスペック (Swagger、OpenAPI など) を提供していれば、Restorm に取り込まれ、ここで直接閲覧できます。"
+    },
+    "secrets": {
+      "title": "シークレットを守ろう",
+      "body": "パスワードや認可トークンは Restorm ファイル本体には保存されません。シークレットとリクエスト履歴は別ファイルに保管されます。GitHub に上げないようご注意ください。Restorm は AWS や GitHub などからシークレットを取得することもできます。"
+    },
+    "themes": {
+      "title": "あなたの色、あなたの気分",
+      "body": "Restorm には複数のカラースキームが用意されています。気分にぴったり合うものを選びましょう。"
+    },
+    "search": {
+      "title": "必要なものを瞬時に",
+      "body": "ウィンドウの上を見ましたか? Restorm には検索エンジンが組み込まれているので、目当てのリクエストを何時間も探す必要はありません。"
+    },
+    "multiEnv": {
+      "title": "同じリクエスト、異なる環境",
+      "body": "dev、prod、staging はありますか? リクエストは同じでも、URL もトークンも微妙に違う…そんなときは環境と変数を使ってワンクリックで切り替えましょう。色とアイコンで環境を区別すれば、金曜の夜に本番でヒヤッとすることもありません!"
+    },
+    "protocols": {
+      "title": "REST だけじゃない",
+      "body": "Restorm は REST を扱えるだけでなく、それ以上! GraphQL、gRPC、SOAP、OData、WebSocket — これらのプロトコルがすべて手元に揃い、ツールを切り替える必要がありません。"
+    },
+    "responseTree": {
+      "title": "API レスポンスをビジュアルで",
+      "body": "API のレスポンスをよりグラフィカルに確認できることをご存じでしたか? Restorm は対話的なツリーとして表示し、ノードの折りたたみや展開もできます。"
+    },
+    "responseHistory": {
+      "title": "リクエストの履歴",
+      "body": "API への呼び出し履歴をすべて確認できます。実際に何が起きたのかを後から追うのに便利です。"
+    },
+    "multiLanguage": {
+      "title": "27 言語!",
+      "body": "Restorm は 27 言語に対応しています。英語、フランス語、スペイン語、ドイツ語、イタリア語、日本語、中国語、韓国語…ほか多数。設定で好きな言語を選んでください。"
+    }
+  },
+  "authFailureToast": {
+    "title": "認証に失敗しました",
+    "fallbackReason": "認証リクエストが成功しませんでした。",
+    "openAuthRoute": "認証ルートを開く"
+  },
+  "menuBar": {
+    "file": "ファイル",
+    "new": "新規作成",
+    "import": "インポート",
+    "open": "開く",
+    "openFolder": "フォルダを開く",
+    "recentFiles": "最近使ったファイル",
+    "favorites": "お気に入り",
+    "close": "閉じる",
+    "save": "保存",
+    "saveAll": "すべて保存",
+    "saveAs": "名前を付けて保存",
+    "exit": "終了",
+    "selection": "選択",
+    "tools": "ツール",
+    "findInCollection": "コレクション内を検索",
+    "addRequest": "リクエストを追加",
+    "addRequestHttp": "HTTP リクエスト",
+    "addRequestGraphql": "GraphQL リクエスト",
+    "addRequestGrpc": "gRPC リクエスト",
+    "addRequestSoap": "SOAP リクエスト",
+    "addRequestOdata": "OData リクエスト",
+    "addRequestWebsocket": "WebSocket リクエスト",
+    "addFolder": "フォルダを追加",
+    "addEnvironmentFolder": "環境フォルダを追加",
+    "addVariable": "変数を追加",
+    "addTag": "タグを追加",
+    "expandAllFolders": "すべてのフォルダを展開",
+    "collapseAllFolders": "すべてのフォルダを折りたたむ",
+    "sendActiveRequest": "リクエストを送信",
+    "cancelActiveRequest": "リクエストをキャンセル",
+    "generateCodeSnippet": "コードスニペットを生成",
+    "copyAsCurl": "cURL としてコピー",
+    "exportOpenApi": "OpenAPI にエクスポート",
+    "clearAuthCache": "認証キャッシュをクリア",
+    "openLogsFolder": "ログフォルダを開く"
+  },
+  "sidebar": {
+    "addRequest": "リクエストを追加",
+    "collapseAll": "すべてのリクエストを折りたたむ",
+    "workspace": "ワークスペース",
+    "favorites": "お気に入り",
+    "newFolder": "新規フォルダ",
+    "newEnvironmentFolder": "新規環境フォルダ",
+    "contextMenu": {
+      "createFolder": "フォルダを作成",
+      "createEnvironmentFolder": "環境フォルダを作成",
+      "delete": "削除",
+      "clone": "複製",
+      "rename": "名前を変更",
+      "addToFavorites": "お気に入りに追加",
+      "removeFromFavorites": "お気に入りから削除",
+      "closeTab": "閉じる",
+      "closeOtherTabs": "他を閉じる",
+      "closeTabsToTheRight": "右側を閉じる",
+      "closeAllTabs": "すべて閉じる",
+      "add": {
+        "title": "追加",
+        "folder": "フォルダ",
+        "httpGet": "HTTP – GET リクエスト",
+        "httpPost": "HTTP – POST リクエスト",
+        "httpPut": "HTTP – PUT リクエスト",
+        "httpPatch": "HTTP – PATCH リクエスト",
+        "httpDelete": "HTTP – DELETE リクエスト",
+        "graphql": "GraphQL リクエスト",
+        "grpc": "gRPC リクエスト",
+        "soap": "SOAP リクエスト",
+        "websocket": "WebSocket リクエスト",
+        "odata": "OData リクエスト",
+        "auth": "HTTP 認証リクエスト"
+      }
+    },
+    "deleteConfirm": {
+      "title": "削除の確認",
+      "folderMessage": "フォルダ \"{{name}}\" とその中身をすべて削除してもよろしいですか？",
+      "itemMessage": "\"{{name}}\" を削除してもよろしいですか？",
+      "confirm": "削除",
+      "cancel": "キャンセル"
+    }
+  },
+  "environment": {
+    "newName": "新しい環境",
+    "add": "環境を追加",
+    "rename": "名前を変更",
+    "addSub": "サブ環境を追加",
+    "delete": "削除"
+  },
+  "folderView": {
+    "environments": "環境",
+    "environmentsAriaLabel": "フォルダの環境",
+    "variables": "変数",
+    "addVariable": "変数行を追加",
+    "selectEnvironment": "変数を表示するには環境を選択してください",
+    "tabs": {
+      "docs": "ドキュメント",
+      "environments": "環境",
+      "notes": "メモ"
+    },
+    "home": {
+      "configureEnvs": "環境を設定",
+      "configureEnvsDesc": "各環境のベース URL、変数、認証を設定します",
+      "viewDocs": "ドキュメントを表示",
+      "viewDocsDesc": "API のドキュメント、モデル、エンドポイントを参照します",
+      "favoriteRequests": "お気に入りのリクエスト",
+      "removeFavorite": "お気に入りから削除",
+      "apiUpdate": {
+        "title": "API スペックの更新",
+        "noConfig": "このフォルダはインポート可能なソースから作成されていません。",
+        "urlLabel": "URL",
+        "lastImportedLabel": "最終インポート",
+        "lastCheckedLabel": "最終確認",
+        "neverImported": "インポート履歴なし",
+        "neverChecked": "確認履歴なし",
+        "refreshing": "API スペックを更新しています…",
+        "fetching": "取得中…",
+        "upToDate": "API スペックは最新です。",
+        "ok": "OK"
+      }
+    },
+    "contextVariables": {
+      "title": "利用可能なコンテキスト変数",
+      "description": "これらの変数は、リクエスト URL や式タイプの変数の中で {{handlebars}} 構文を用いて利用できます。",
+      "name": "変数",
+      "value": "解決後の値",
+      "copied": "コピーしました！"
+    }
+  },
+  "requestTab": {
+    "deprecated": "このエンドポイントは非推奨です。今後のバージョンで削除される可能性があります。",
+    "send": "送信",
+    "cancel": "キャンセル",
+    "urlPlaceholder": "リクエスト URL",
+    "methodSelect": "HTTP メソッドを選択",
+    "addHeader": "ヘッダーを追加",
+    "addParam": "パラメータを追加",
+    "environmentSelector": {
+      "noEnvironment": "環境なし"
+    },
+    "body": {
+      "fileLabel": "ファイルまたは URL：",
+      "browse": "参照..."
+    },
+    "tabs": {
+      "docs": "ドキュメント",
+      "requestLayout": "リクエスト",
+      "headers": "ヘッダー",
+      "body": "ボディ",
+      "params": "パラメータ",
+      "pathParams": "パスパラメータ",
+      "notes": "メモ",
+      "codeSnippets": "コードスニペット",
+      "responsesHistory": "レスポンス履歴"
+    },
+    "responses": {
+      "tabs": {
+        "response": "レスポンス",
+        "requestBody": "リクエストボディ",
+        "graph": "グラフ"
+      },
+      "loading": "リクエストを送信しています...",
+      "noResponse": "「送信」をクリックしてリクエストを実行してください",
+      "history": {
+        "list": "レスポンス履歴の一覧",
+        "empty": "記録されたレスポンスはまだありません",
+        "select": "詳細を表示するレスポンスを選択してください",
+        "pin": "レスポンスをピン留め",
+        "unpin": "ピン留めを解除"
+      }
+    }
+  },
+  "workbench": {
+    "tabContextMenu": {
+      "close": "閉じる",
+      "closeOthers": "他を閉じる",
+      "addToFavorites": "お気に入りに追加",
+      "removeFromFavorites": "お気に入りから削除"
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "定義へ移動"
+  },
+  "keyValueTable": {
+    "types": {
+      "string": "文字列",
+      "secret": "シークレット",
+      "number": "数値",
+      "dateTime": "日時",
+      "color": "色",
+      "expression": "式",
+      "boolean": "ブール値"
+    },
+    "apiEnums": "API で定義された型"
+  },
+  "graphql": {
+    "send": "送信",
+    "urlPlaceholder": "GraphQL エンドポイント URL",
+    "tabs": {
+      "query": "クエリ",
+      "variables": "変数",
+      "headers": "ヘッダー"
+    }
+  },
+  "grpc": {
+    "send": "呼び出し",
+    "urlPlaceholder": "gRPC サーバー（host:port）",
+    "tabs": {
+      "message": "メッセージ",
+      "metadata": "メタデータ"
+    }
+  },
+  "soap": {
+    "send": "送信",
+    "urlPlaceholder": "SOAP エンドポイント URL",
+    "tabs": {
+      "body": "ボディ",
+      "headers": "ヘッダー"
+    }
+  },
+  "websocket": {
+    "connect": "接続",
+    "connected": "接続済み",
+    "disconnected": "切断されました",
+    "noMessages": "メッセージはまだありません",
+    "urlPlaceholder": "WebSocket URL",
+    "event": "イベント",
+    "topic": "トピック",
+    "tabs": {
+      "message": "メッセージ",
+      "headers": "ヘッダー"
+    }
+  },
+  "search": {
+    "placeholder": "検索...",
+    "noResults": "結果が見つかりません",
+    "resultsAriaLabel": "検索結果",
+    "categories": {
+      "request": "リクエスト",
+      "folder": "フォルダ",
+      "environment": "環境",
+      "settings": "設定",
+      "tag": "タグ"
+    },
+    "tooltip": {
+      "noDetails": "詳細はありません",
+      "noContent": "ドキュメントやメモはありません"
+    }
+  },
+  "httpStatus": {
+    "100": {
+      "name": "Continue",
+      "description": "サーバーはリクエストヘッダーを受信しました。クライアントはリクエストボディの送信を続行してください。"
+    },
+    "101": {
+      "name": "Switching Protocols",
+      "description": "リクエスト側がサーバーにプロトコルの切り替えを要求し、サーバーがそれに同意しました。"
+    },
+    "200": {
+      "name": "OK",
+      "description": "HTTP リクエストが成功した場合の標準的なレスポンスです。実際の応答内容は使用されたリクエストメソッドによって異なります。"
+    },
+    "201": {
+      "name": "Created",
+      "description": "リクエストが正常に処理され、新しいリソースが作成されました。"
+    },
+    "202": {
+      "name": "Accepted",
+      "description": "リクエストは処理のために受理されましたが、処理はまだ完了していません。"
+    },
+    "204": {
+      "name": "No Content",
+      "description": "サーバーはリクエストを正常に処理しましたが、返却するコンテンツはありません。"
+    },
+    "301": {
+      "name": "Moved Permanently",
+      "description": "今回および今後のすべてのリクエストは、指定された URI に振り向けるべきです。"
+    },
+    "302": {
+      "name": "Found",
+      "description": "クライアントに別の URL を参照するよう指示します。HTTP/1.0 仕様ではクライアントに一時的なリダイレクトを実行するよう求めていました。"
+    },
+    "304": {
+      "name": "Not Modified",
+      "description": "リクエストヘッダーで指定されたバージョン以降、リソースが変更されていないことを示します。"
+    },
+    "400": {
+      "name": "Bad Request",
+      "description": "明らかなクライアントエラー（リクエスト構文の不正など）により、サーバーがリクエストを処理できないか処理しないことを示します。"
+    },
+    "401": {
+      "name": "Unauthorized",
+      "description": "認証が必要ですが、認証に失敗したか、まだ提供されていません。"
+    },
+    "403": {
+      "name": "Forbidden",
+      "description": "リクエストには有効なデータが含まれ、サーバーはそれを理解していますが、操作の実行を拒否しています。"
+    },
+    "404": {
+      "name": "Not Found",
+      "description": "リクエストされたリソースは見つかりませんでしたが、将来利用可能になる可能性があります。"
+    },
+    "405": {
+      "name": "Method Not Allowed",
+      "description": "リクエストされたリソースでは、そのリクエストメソッドはサポートされていません。"
+    },
+    "408": {
+      "name": "Request Timeout",
+      "description": "リクエストの待機中にサーバーがタイムアウトしました。"
+    },
+    "409": {
+      "name": "Conflict",
+      "description": "リソースの現在の状態との競合により、リクエストを処理できないことを示します。"
+    },
+    "410": {
+      "name": "Gone",
+      "description": "リクエストされたリソースは以前は利用可能でしたが、現在は利用できず、今後も利用できないことを示します。"
+    },
+    "415": {
+      "name": "Unsupported Media Type",
+      "description": "リクエストエンティティのメディアタイプが、サーバーまたはリソースでサポートされていません。"
+    },
+    "422": {
+      "name": "Unprocessable Entity",
+      "description": "リクエストの形式は正しいものの、意味的な誤りにより処理できませんでした。"
+    },
+    "429": {
+      "name": "Too Many Requests",
+      "description": "一定時間内にユーザーが送信したリクエストが多すぎます（レート制限）。"
+    },
+    "500": {
+      "name": "Internal Server Error",
+      "description": "予期しない状況が発生し、より具体的なメッセージが適切でない場合に返される一般的なエラーメッセージです。"
+    },
+    "501": {
+      "name": "Not Implemented",
+      "description": "サーバーはリクエストメソッドを認識できないか、そのリクエストを処理する能力を持っていません。"
+    },
+    "502": {
+      "name": "Bad Gateway",
+      "description": "サーバーがゲートウェイまたはプロキシとして動作していた際、上流サーバーから無効な応答を受け取りました。"
+    },
+    "503": {
+      "name": "Service Unavailable",
+      "description": "サーバーがリクエストを処理できません（過負荷状態、または保守のためダウンしているため）。"
+    },
+    "504": {
+      "name": "Gateway Timeout",
+      "description": "サーバーがゲートウェイまたはプロキシとして動作していた際、上流サーバーからの応答を時間内に受け取れませんでした。"
+    }
+  },
+  "welcome": {
+    "confirmRemoveFavorite": "\"{{fileName}}\" をお気に入りから削除してもよろしいですか？",
+    "noFilesHint": "既存のファイルを開くか、新規ファイルを作成して開始してください",
+    "newAriaLabel": "新しいコレクションを作成",
+    "openAriaLabel": "ディスクからコレクションを開く",
+    "landmarkLabel": "ようこそ"
+  },
+  "save": {
+    "title": "保存オプション",
+    "mode": {
+      "label": "保存モード",
+      "file": "単一ファイル",
+      "folder": "フォルダ構成",
+      "fileDescription": "すべてを単一のファイルに保存します",
+      "folderDescription": "ファイルを分けたフォルダ構成として保存します"
+    },
+    "format": {
+      "label": "形式",
+      "yamlDescription": "人にとって読みやすい形式",
+      "jsonDescription": "標準形式",
+      "json5Description": "JSON + コメント"
+    },
+    "preview": {
+      "label": "構成プレビュー",
+      "noDocumentation": "このソースには解析済みのドキュメントがありません。"
+    }
+  },
+  "common": {
+    "cancel": "キャンセル",
+    "save": "保存"
+  },
+  "helpers": {
+    "categories": {
+      "comparison": "比較",
+      "string": "文字列",
+      "math": "数値演算",
+      "array": "配列",
+      "object": "オブジェクト",
+      "url": "URL",
+      "date": "日付",
+      "regex": "正規表現",
+      "misc": "その他"
+    },
+    "eq": "厳密な等価比較 (===)",
+    "ne": "厳密な非等価比較 (!==)",
+    "neq": "厳密な非等価比較 (!==)",
+    "lt": "より小さい (<)",
+    "lte": "以下 (<=)",
+    "gt": "より大きい (>)",
+    "gte": "以上 (>=)",
+    "and": "ブロックヘルパー：すべての値が真の場合に描画",
+    "or": "ブロックヘルパー：いずれかの値が真の場合に描画",
+    "not": "真偽値を反転して返します",
+    "ifEquals": "ブロックヘルパー：値が等しい場合に描画",
+    "is": "ブロックヘルパー：緩い等価比較",
+    "isnt": "ブロックヘルパー：緩い非等価比較",
+    "default": "最初の値が null/undefined の場合にデフォルト値を返します",
+    "compare": "ブロックヘルパー：演算子を指定して比較",
+    "lowercase": "文字列を小文字に変換します",
+    "uppercase": "文字列を大文字に変換します",
+    "capitalize": "先頭の文字を大文字にします",
+    "capitalizeAll": "各単語の先頭文字を大文字にします",
+    "titleize": "各単語の先頭文字を大文字にします",
+    "camelcase": "camelCase に変換します",
+    "pascalcase": "PascalCase に変換します",
+    "snakecase": "snake_case に変換します",
+    "snakeCase": "snake_case に変換します（エイリアス）",
+    "dashcase": "dash-case（kebab-case）に変換します",
+    "dotcase": "dot.case に変換します",
+    "pathcase": "path/case に変換します",
+    "sentencecase": "Sentence case に変換します",
+    "slugify": "URL に適したスラッグに変換します",
+    "trim": "両端の空白を取り除きます",
+    "trimLeft": "先頭の空白を取り除きます",
+    "trimRight": "末尾の空白を取り除きます",
+    "replace": "すべての a を b に置換します",
+    "split": "文字列を配列に分割します",
+    "truncate": "文字列を指定の長さに切り詰めます",
+    "ellipsis": "文字列を切り詰めて省略記号を付与します",
+    "append": "文字列にサフィックスを追加します",
+    "prepend": "文字列にプレフィックスを追加します",
+    "reverse": "文字列または配列を反転します",
+    "startsWith": "ブロックヘルパー：文字列がプレフィックスで始まる場合に描画",
+    "endsWith": "ブロックヘルパー：文字列がサフィックスで終わる場合に描画",
+    "contains": "ブロックヘルパー：文字列が部分文字列を含む場合に描画",
+    "padStart": "指定の長さになるよう文字列の先頭をパディングします",
+    "padEnd": "指定の長さになるよう文字列の末尾をパディングします",
+    "repeat": "文字列を n 回繰り返します",
+    "substring": "文字列の一部を抽出します",
+    "indexOf": "部分文字列のインデックスを返します（見つからない場合は -1）",
+    "count": "部分文字列の出現回数を数えます",
+    "newLineToBr": "改行を <br> タグに変換します",
+    "stripTags": "文字列から HTML タグを取り除きます",
+    "add": "2 つの数値を加算します",
+    "subtract": "a から b を減算します",
+    "multiply": "2 つの数値を乗算します",
+    "divide": "a を b で除算します",
+    "modulo": "a / b の剰余を返します",
+    "abs": "絶対値を返します",
+    "ceil": "最も近い整数に切り上げます",
+    "floor": "最も近い整数に切り下げます",
+    "round": "最も近い整数に丸めます",
+    "min": "最小値を返します",
+    "max": "最大値を返します",
+    "pow": "底を指数で累乗した値を返します",
+    "sqrt": "平方根を返します",
+    "random": "min と max の間のランダムな整数を返します",
+    "sum": "配列の各値の合計を返します",
+    "avg": "配列の各値の平均を返します",
+    "toFixed": "指定の小数桁数で数値を整形します",
+    "toInt": "整数に変換します",
+    "toFloat": "浮動小数点数に変換します",
+    "first": "配列の先頭要素を返します",
+    "last": "配列の末尾要素を返します",
+    "after": "インデックス n より後の要素を返します",
+    "before": "インデックス n より前の要素を返します",
+    "slice": "配列のスライスを返します",
+    "length": "配列／文字列／オブジェクトの長さを返します",
+    "join": "区切り文字で配列要素を連結します",
+    "sort": "配列をソートします",
+    "unique": "重複のない値を返します",
+    "concat": "配列を連結します",
+    "flatten": "ネストした配列を平坦化します",
+    "pluck": "オブジェクト配列から特定のプロパティを抽出します",
+    "itemAt": "指定インデックスの要素を返します",
+    "inArray": "ブロックヘルパー：値が配列に含まれる場合に描画",
+    "isArray": "値が配列であれば true を返します",
+    "isEmpty": "ブロックヘルパー：値が空の場合に描画",
+    "some": "ブロックヘルパー：一部の項目が一致する場合に描画",
+    "every": "ブロックヘルパー：すべての項目が一致する場合に描画",
+    "JSONstringify": "オブジェクトを JSON 文字列に変換します",
+    "JSONparse": "JSON 文字列をオブジェクトに解析します",
+    "get": "パス指定でネストしたプロパティを取得します",
+    "keys": "オブジェクトのキーを返します",
+    "values": "オブジェクトの値を返します",
+    "entries": "[キー, 値] の組を返します",
+    "hasOwn": "ブロックヘルパー：オブジェクトがそのプロパティを持つ場合に描画",
+    "pick": "選択したキーのみを含むオブジェクトを作成します",
+    "omit": "指定キーを除いたオブジェクトを作成します",
+    "merge": "複数のオブジェクトをマージします",
+    "isObject": "値がオブジェクトであれば true を返します",
+    "typeOf": "値の型を返します",
+    "encodeURI": "文字列を URL エンコードします",
+    "decodeURI": "文字列を URL デコードします",
+    "urlParse": "URL を構成要素に分解します",
+    "stripQuerystring": "URL からクエリ文字列を取り除きます",
+    "stripProtocol": "URL からプロトコルを取り除きます",
+    "now": "現在の日付を ISO 文字列で返します",
+    "timestamp": "現在のタイムスタンプ（ミリ秒）を返します",
+    "year": "現在の年を返します",
+    "formatDate": "パターンに従って日付を整形します",
+    "match": "正規表現のマッチを返します",
+    "test": "ブロックヘルパー：正規表現が一致する場合に描画",
+    "coalesce": "最初の null／undefined ではない値を返します",
+    "uuid": "ランダムな UUID を生成します",
+    "noop": "ブロックヘルパー：内容をそのまま描画します",
+    "raw": "ブロックヘルパー：生のまま内容を描画します",
+    "times": "ブロックヘルパー：n 回繰り返します",
+    "range": "数値の配列を生成します"
+  },
+  "behavior": {
+    "title": "動作",
+    "syncSidebarWithTabs": "サイドバーの選択をアクティブなタブと同期する",
+    "syncSidebarWithTabsDescription": "ワークスペースでタブを切り替えた際に、対応する項目を自動でサイドバーで選択・表示します",
+    "dateTimeFormat": "日付／時刻の形式",
+    "dateTimeFormatDescription": "アプリケーション内で日付と時刻を表示する際に使用する形式",
+    "dateTimeFormat.us": "米国形式（MM/DD/YYYY、12 時間制）",
+    "dateTimeFormat.iso": "ISO 形式（YYYY-MM-DD、24 時間制）"
+  },
+  "console": {
+    "title": "コンソール",
+    "requestFormat": "リクエスト形式",
+    "requestFormatDescription": "コンソールタブで外向きリクエストを表示する際の既定のシェル風スタイルです。各行はコピーして実行できるコマンドラインで、コンソールのツールバーのトグルが現在のタブの既定値を上書きします。",
+    "requestFormat.curl": "curl（Unix スタイル）",
+    "requestFormat.powershell": "PowerShell（Invoke-RestMethod）"
+  },
+  "import": {
+    "title": "リクエストをインポート",
+    "source": {
+      "label": "ここに貼り付けてください！",
+      "placeholder": "ファイルパス、URL を入力するか、curl／PowerShell コマンドを貼り付けてください..."
+    },
+    "formats": {
+      "swagger": {
+        "description": "SmartBear で生まれた OpenAPI 2.0 仕様。Swagger の JSON または YAML を貼り付けるだけで、restorm はすべてのオペレーションを解析し、セキュリティスキームを取り込み、ドキュメント全体をナビゲートできるリクエストのツリーに変換します。",
+        "trademark": "Swagger は SmartBear Software の登録商標です。"
+      },
+      "openapi": {
+        "description": "現行の OpenAPI 標準（3.0 と 3.1）。Swagger と同じく貼り付けるだけで利用可能：パラメータ、リクエストボディ、セキュリティスキーム、Webhook は、サンプル付きで送信可能な型付きリクエストのツリーになります。",
+        "trademark": "OpenAPI は Linux Foundation 配下の OpenAPI Initiative のプロジェクトです。"
+      },
+      "curl": {
+        "description": "ターミナルで動いているリクエストがある？完全な curl コマンド（フラグ、ヘッダー、ボディ、クエリ文字列）を貼り付けるだけで、restorm は再実行・編集・ピン留めできる実際のリクエストとして組み立て直します。",
+        "trademark": "curl は © Daniel Stenberg のオープンソースソフトウェアで、その条項に基づき使用しています。"
+      },
+      "powershell": {
+        "description": "同じ発想を PowerShell 風にしたものです。Invoke-WebRequest や Invoke-RestMethod のコマンドを貼り付ければ、restorm が URI、メソッド、ヘッダー、ボディを読み取り、ビジュアルに編集できるリクエストの土台を作ります。",
+        "trademark": "PowerShell は Microsoft Corporation の登録商標です。"
+      },
+      "postman": {
+        "description": "会社に Postman コレクションを保存していますか？JSON を投入してください——restorm はすべてのリクエスト、例のレスポンス、環境変数を読み取り、他の API と並べて実行できる restorm のツリーとして再構築します。",
+        "trademark": "Postman は Postman, Inc. の登録商標で、ここでは互換性のための参照として使用しています。"
+      },
+      "insomnia": {
+        "description": "Insomnia から移ってきましたか？エクスポートを投入してください。restorm は v4 / v5 のコレクション形式を理解し、すべてのリクエスト、ヘッダー、ボディ、環境を引き継ぎ、restorm のツリーとして表示します。",
+        "trademark": "Insomnia は Kong Inc. の登録商標で、ここでは互換性のための参照として使用しています。"
+      },
+      "bruno": {
+        "description": "Bruno 形式の .bru ファイルやフォルダエクスポート——restorm は .bru テキスト形式（スクリプトブロックを含む）を読み取り、それぞれのリクエストを送信準備が整った restorm の一級ノードとして再現します。",
+        "trademark": "Bruno は Anoop M. D. によるオープンソースソフトウェア（MIT）で、その条項に基づき使用しています。"
+      },
+      "graphql": {
+        "description": "GraphQL SDL（.graphql / .gql、または GraphQL クライアントからの貼り付け）を貼り付けると、restorm はオペレーションごとに 1 つのリクエストを作成し、適切な query / mutation / subscription 型に接続して、変数まで構造化します。",
+        "trademark": "GraphQL は Joint Development Foundation のプロジェクト GraphQL Foundation の商標です。"
+      },
+      "grpc": {
+        "description": ".proto ファイル（またはそのディレクトリ）を投入してください。restorm はすべての service、すべての RPC、すべての message を辿り、各メソッドを gRPC エグゼキューターから送信できる型付きリクエストに変換します。codegen は不要です。",
+        "trademark": "gRPC は Cloud Native Computing Foundation のプロジェクトです。"
+      },
+      "soap": {
+        "description": "WSDL がありますか？貼り付け（または URL の指定）だけで、restorm は各 <port> と <operation> を解析し、適切な SOAPAction ヘッダー、スキーマで型付けされたボディの雛形、WSDL が宣言する認証スキームを備えた、即送信可能な SOAP エンベロープを生成します。"
+      },
+      "websocket": {
+        "description": "WebSocket エンドポイント（ws:// または wss://）を貼り付けると、restorm は接続を開き、サーバーの hello フレームを取り込み、再生可能なペイロードテンプレート付きの send／subscribe リクエストを組み立てます。",
+        "trademark": "WebSocket は IETF（RFC 6455）と W3C により標準化されたプロトコルです。"
+      },
+      "kafka": {
+        "description": "Apache Kafka の bootstrap-server URL（またはトピック一覧）を貼り付けると、restorm はトピックごとに consumer と producer を登録し、Schema Registry を通じて Avro／Protobuf のペイロードをデコードし、個々のオフセットをワンクリックで再生できるようにします。",
+        "trademark": "Apache Kafka および Kafka のロゴは Apache Software Foundation の商標です。"
+      },
+      "socketio": {
+        "description": "Socket.IO サーバーの URL を貼り付けると、restorm はハンドシェイクをネゴシエートし、サーバーが発行するネームスペースやイベント名を一覧表示し、emit／on イベントごとにペイロードのバリデーション付きリクエストを 1 つずつ提供します。",
+        "trademark": "Socket.IO は MIT ライセンスで公開されているオープンソースのライブラリです。名称とロゴは指示的に使用しています。"
+      },
+      "odata": {
+        "description": "OData のサービスドキュメント URL や $metadata ファイルを貼り付けると、restorm は CSDL を読み取り、エンティティセット、ファンクションインポート、アクションを再構築し、各オペレーションに $filter／$select／$top／$skip クエリオプションをあらかじめ入力します。"
+      },
+      "mqtt": {
+        "description": "MQTT ブローカーの URL やトピックカタログを貼り付けると、restorm はトピックごとに publish／subscribe リクエストを生成し、ストリーミングプレビューのために接続を保持し、保持メッセージのスナップショットを記憶して後で再生できるようにします。",
+        "trademark": "MQTT は OASIS 標準です。MQTT の名称とロゴは OASIS Open の商標です。"
+      }
+    },
+    "loading": "解析中...",
+    "noResults": "リクエストが見つかりません",
+    "error": {
+      "unknown": "不明なエラーが発生しました"
+    },
+    "ok": "インポート",
+    "cancel": "キャンセル",
+    "dropZone": "ドロップ領域"
+  },
+  "emptyBench": {
+    "importCard": {
+      "title": "API をインポート",
+      "body": "OpenAPI / Swagger 仕様、GraphQL スキーマ、Postman / Bruno / Insomnia コレクションを持ち込むか、curl / PowerShell コマンドを貼り付けてください。Restorm が解析し、フォルダ構造を作成し、各エンドポイントを事前入力で用意します。"
+    },
+    "recentActivity": {
+      "title": "最近のアクティビティ",
+      "empty": "最初のリクエストを送信すると、ここに表示されます。"
+    },
+    "apiCard": {
+      "favorites": "お気に入り",
+      "topUsed": "最もよく使われる 10 件",
+      "recent": "最近のリクエスト",
+      "description": "説明",
+      "version": "バージョン",
+      "quickLinks": {
+        "environments": "環境",
+        "docs": "ドキュメント",
+        "notes": "メモ"
+      }
+    }
+  }
+}

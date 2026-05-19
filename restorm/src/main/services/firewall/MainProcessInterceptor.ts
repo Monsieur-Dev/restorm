@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto'
 import { logger, graphQLService } from 'electron-core-ui'
 import { firewallService } from './FirewallService'
 import { permissionService } from './PermissionService'
+import { isFirewallBypassed } from './firewallBypass'
 import { DeniedClientRequest } from './DeniedClientRequest'
 import { BufferingClientRequest } from './BufferingClientRequest'
 import { captureOriginHint } from './stackOrigin'
@@ -91,7 +92,15 @@ function patchHttpModule(mod: HttpLikeModule, source: RequestRecordSource): void
 		if (cls === 'allow') {
 			record.verdict = 'allow'
 			firewallService.emit(record)
-			return realFn(args)
+			const realRequest = realFn(args)
+			// `http.request` doesn't carry the body in its arguments — the
+			// caller calls `req.write(chunk)` / `req.end(chunk)` afterwards.
+			// The first record we emitted has an empty body. Intercept the
+			// writes, accumulate them, and re-emit the record with the
+			// assembled body once `end()` fires. The renderer dedupes by
+			// `id` so the update replaces the placeholder in place.
+			attachBodyCapture(realRequest, record)
+			return realRequest
 		}
 		// `prompt` — buffer the request and start the async resolution.
 		record.verdict = 'pending'
@@ -133,6 +142,71 @@ function patchHttpModule(mod: HttpLikeModule, source: RequestRecordSource): void
 
 function makeDenied(record: RequestRecord): DeniedClientRequest {
 	return new DeniedClientRequest(`Firewall blocked outbound request to ${record.host}:${String(record.port)}`)
+}
+
+const BODY_CAPTURE_LIMIT_BYTES = 64 * 1024
+
+/**
+ * Patch the real `ClientRequest`'s `write` / `end` so we observe the
+ * caller's body chunks, accumulate up to `BODY_CAPTURE_LIMIT_BYTES`,
+ * then re-emit the firewall record (same `id`) once the request is
+ * sealed. Without this, every Layer B POST surfaces in the console
+ * panel as a curl missing its `--data-raw` flag — un-copy-pasteable.
+ *
+ * We never mutate or block what reaches the wire — the original
+ * `write` / `end` are called through with identical args. Failure
+ * inside our observer is swallowed so a buggy capture path can't
+ * break the user's HTTP request.
+ */
+function attachBodyCapture(req: ClientRequest, record: RequestRecord): void {
+	const chunks: string[] = []
+	let totalBytes = 0
+	let exhausted = false
+
+	const observe = (chunk: unknown, encoding?: BufferEncoding): void => {
+		if (exhausted || chunk === undefined || chunk === null) return
+		try {
+			let text: string | null = null
+			if (typeof chunk === 'string') text = chunk
+			else if (chunk instanceof Uint8Array) text = Buffer.from(chunk).toString(encoding ?? 'utf8')
+			if (text === null) return
+			const byteLen = Buffer.byteLength(text, 'utf8')
+			if (totalBytes + byteLen > BODY_CAPTURE_LIMIT_BYTES) {
+				exhausted = true
+				return
+			}
+			chunks.push(text)
+			totalBytes += byteLen
+		} catch {
+			// Observer must never break the live request — drop on error.
+		}
+	}
+
+	const originalWrite = req.write.bind(req)
+	req.write = ((...wargs: Parameters<ClientRequest['write']>): boolean => {
+		observe(wargs[0], typeof wargs[1] === 'string' ? wargs[1] : undefined)
+		return originalWrite(...wargs)
+	}) as ClientRequest['write']
+
+	const originalEnd = req.end.bind(req)
+	req.end = ((...eargs: Parameters<ClientRequest['end']>): ClientRequest => {
+		if (eargs[0] !== undefined && typeof eargs[0] !== 'function') {
+			observe(eargs[0], typeof eargs[1] === 'string' ? eargs[1] : undefined)
+		}
+		try {
+			const body = exhausted
+				? `<body too large: ${String(totalBytes)}+ bytes>`
+				: chunks.length === 0
+					? undefined
+					: chunks.join('')
+			if (body !== undefined) {
+				firewallService.emit({ ...record, body })
+			}
+		} catch {
+			// Same safety net — observation must never crash the request.
+		}
+		return originalEnd(...eargs)
+	}) as ClientRequest['end']
 }
 
 /**
@@ -202,12 +276,11 @@ function recordFromHttpArgs(args: unknown[], source: RequestRecordSource): Reque
 		port: Number.isFinite(port) ? port : 0,
 		headers,
 		// `http.request`'s body is written via `req.write()` AFTER the
-		// call returns — Layer B records always show empty bodies for
-		// streaming POSTs. The `BufferingClientRequest` *does* see
-		// every write but doesn't re-emit a completion record (the
-		// console renders the URL + method, not the body, for main-
-		// side captures). Layer A captures bodies for renderer-side
-		// fetch.
+		// call returns, so the record we build here starts body-less.
+		// `attachBodyCapture` patches the returned `ClientRequest` to
+		// observe the writes and re-emits the record (same `id`) once
+		// `end()` fires; the renderer's console store dedupes by `id`
+		// and replaces the placeholder in place.
 		verdict: 'allow'
 	}
 }
@@ -257,6 +330,17 @@ function patchFetch(): void {
 
 		const originHint = captureOriginHint(2)
 		if (originHint !== null) record.originHint = originHint
+		// User-initiated outbound traffic (Import dialog, request runner,
+		// mini-browser navigation) is treated as pre-authorised — the
+		// firewall exists to gate background traffic, not the very fetch
+		// the user just typed a URL for. Still emit the record for audit
+		// visibility, then forward to the real fetch without a verdict
+		// roundtrip. See `firewallBypass.ts` for the call-site contract.
+		if (isFirewallBypassed()) {
+			record.verdict = 'allow'
+			firewallService.emit(record)
+			return originalFetch(input, init)
+		}
 		const cls = permissionService.classify({
 			scheme: record.protocol,
 			host: record.host,
@@ -341,6 +425,17 @@ function recordFromFetchArgs(input: RequestInfo | URL, init: RequestInit | undef
 
 	let parsed: URL | null = null
 	try { parsed = new URL(raw) } catch { return null }
+	// Inline resources (`data:application/wasm;base64,...`,
+	// `data:image/png;base64,...`) and other non-network schemes
+	// (`blob:`, `file:`, `chrome-extension:`, `vscode-resource:`)
+	// aren't real outbound traffic — they live inside the page. The
+	// Chromium webRequest listener gates on `isNetworkScheme` for the
+	// same reason; the fetch + http monkey-patches were missing the
+	// symmetric gate, so a renderer fetching a data: URL surfaced as a
+	// garbage `curl -X GET 'data:...'` record in the Console panel
+	// (with the full base64 payload echoed back). Drop it cleanly.
+	const lowerProtocol = parsed.protocol.toLowerCase()
+	if (lowerProtocol !== 'http:' && lowerProtocol !== 'https:') return null
 	if (isInternalGraphqlEndpoint(raw)) return null
 	const host = parsed.hostname.toLowerCase()
 	const protocol: RequestRecordProtocol = parsed.protocol === 'https:' ? 'https' : 'http'

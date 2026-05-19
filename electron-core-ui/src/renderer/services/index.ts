@@ -23,6 +23,9 @@ export type {
   Subscription
 } from './EventBus'
 
+export { overlayPresenceService } from './overlayPresenceService'
+export type { OverlayPresence } from './overlayPresenceService'
+
 export { keyboardShortcutService } from './KeyboardShortcutService'
 export type {
   ParsedShortcut,

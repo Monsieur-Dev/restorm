@@ -1,0 +1,328 @@
+{
+  "common": {
+    "opened": "Avatut",
+    "refresh": "Päivitä",
+    "import": "Tuo"
+  },
+  "file": {
+    "untitled": "Nimetön",
+    "unsavedChanges": {
+      "title": "Tallentamattomat muutokset",
+      "message": "Haluatko tallentaa muutokset tiedostoon \"{{fileName}}\"?",
+      "detail": "Muutoksesi menetetään, jos et tallenna niitä.",
+      "save": "Tallenna",
+      "dontSave": "Älä tallenna",
+      "cancel": "Peruuta"
+    }
+  },
+  "recentFilesVignette": {
+    "favorites": "Suosikit",
+    "recentFiles": "Viimeisimmät tiedostot",
+    "addToFavorites": "Lisää suosikkeihin",
+    "removeFromFavorites": "Poista suosikeista",
+    "confirmRemoveFavorite": "Haluatko varmasti poistaa kohteen \"{{fileName}}\" suosikeista?",
+    "favoritesLandmarkLabel": "Suosikkilista",
+    "recentsLandmarkLabel": "Viimeisimpien tiedostojen lista"
+  },
+  "welcomeScreen": {
+    "landmarkLabel": "Tervetuloa"
+  },
+  "menuBar": {
+    "new": "Uusi",
+    "open": "Avaa",
+    "edit": "Muokkaa",
+    "view": "Näytä",
+    "help": "Ohje",
+    "undo": "Kumoa",
+    "redo": "Tee uudelleen",
+    "cut": "Leikkaa",
+    "copy": "Kopioi",
+    "paste": "Liitä",
+    "find": "Etsi",
+    "replace": "Korvaa",
+    "toggleSidebar": "Näytä/piilota sivupalkki",
+    "toggleResponsePanel": "Näytä/piilota vastauspaneeli",
+    "zoomIn": "Lähennä",
+    "zoomOut": "Loitonna",
+    "resetZoom": "Palauta zoomaus",
+    "settings": "Asetukset",
+    "toggleDevTools": "Kehittäjätyökalut",
+    "toggleFullscreen": "Koko näyttö",
+    "about": "Tietoja",
+    "documentation": "Dokumentaatio",
+    "keyboardShortcuts": "Pikanäppäimet",
+    "releaseNotes": "Julkaisutiedot",
+    "reportIssue": "Ilmoita ongelmasta"
+  },
+  "settings": {
+    "title": "Asetukset",
+    "theme": "Teema",
+    "language": "Kieli",
+    "searchPlaceholder": "Etsi asetuksia...",
+    "noResults": "Asetuksia ei löytynyt.",
+    "numberOutOfRange": "Arvon on oltava välillä {{min}} ja {{max}}.",
+    "resetSetting": "Palauta asetus",
+    "copySettingId": "Kopioi asetuksen tunnus",
+    "settingOptions": "Asetusvaihtoehdot",
+    "scopeTabsLabel": "Asetusten laajuus",
+    "userOnlyHidden": "{{count}} vain käyttäjälle tarkoitettu asetus on piilotettu tällä välilehdellä.",
+    "scope": {
+      "user": "Käyttäjä",
+      "workspace": "Työtila",
+      "workspaceDisabledTooltip": "Avaa projekti muokataksesi työtilan asetuksia"
+    },
+    "appearance": {
+      "title": "Ulkoasu",
+      "theme": {
+        "title": "Teema",
+        "description": "Valitse sovelluksen väriteema"
+      },
+      "language": {
+        "title": "Kieli",
+        "description": "Valitse sovelluksen kieli",
+        "en": "English",
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "pt": "Português",
+        "nl": "Nederlands",
+        "sv": "Svenska",
+        "da": "Dansk",
+        "nb": "Norsk bokmål",
+        "fi": "Suomi",
+        "pl": "Polski",
+        "cs": "Čeština",
+        "hu": "Magyar",
+        "ro": "Română",
+        "el": "Ελληνικά",
+        "uk": "Українська",
+        "hr": "Hrvatski",
+        "sr": "Srpski",
+        "sq": "Shqip",
+        "tr": "Türkçe",
+        "id": "Bahasa Indonesia",
+        "vi": "Tiếng Việt",
+        "ja": "日本語",
+        "ko": "한국어",
+        "zh-CN": "简体中文",
+        "zh-TW": "繁體中文"
+      },
+      "advancedVisualEffects": {
+        "title": "Edistyneet visuaaliset tehosteet",
+        "description": "Ota käyttöön edistyneet visuaaliset tehosteet, kuten taustan sumennus peittokuvissa ja CSS-animaatiot. Poista käytöstä parantaaksesi suorituskykyä heikommalla laitteistolla."
+      },
+      "editor": {
+        "title": "Editori",
+        "fontSize": {
+          "title": "Fonttikoko",
+          "description": "Ohjaa koodieditorin fonttikokoa pikseleinä"
+        },
+        "fontFamily": {
+          "title": "Fonttiperhe",
+          "description": "Ohjaa koodieditorin fonttiperhettä"
+        },
+        "wordWrap": {
+          "title": "Rivitys",
+          "description": "Ohjaa, rivitetäänkö rivit koodieditorissa"
+        },
+        "minimap": {
+          "title": "Minikartta",
+          "description": "Ohjaa, näytetäänkö minikartta koodieditorissa"
+        },
+        "lineNumbers": {
+          "title": "Rivinumerot",
+          "description": "Ohjaa, näytetäänkö rivinumerot koodieditorissa"
+        }
+      }
+    },
+    "files": {
+      "title": "Tiedostot",
+      "autoSave": {
+        "title": "Automaattinen tallennus",
+        "description": "Ohjaa muokattujen editoreiden automaattista tallennusta. Lue lisää automaattisesta tallennuksesta dokumentaatiosta.",
+        "off": "Pois käytöstä",
+        "afterDelay": "Viiveen jälkeen",
+        "onWindowChange": "Ikkunaa vaihdettaessa"
+      },
+      "autoSaveDelay": {
+        "title": "Automaattisen tallennuksen viive",
+        "description": "Ohjaa viivettä millisekunteina, jonka jälkeen muokattu editori tallennetaan automaattisesti. Käytössä vain, kun automaattinen tallennus on asetettu tilaan Viiveen jälkeen."
+      }
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Siirry määritelmään"
+  },
+  "tagsView": {
+    "removeTag": "Poista tagi",
+    "newTag": "Uusi tagi"
+  },
+  "contextMenu": {
+    "cut": "Leikkaa",
+    "copy": "Kopioi",
+    "paste": "Liitä"
+  },
+  "search": {
+    "placeholder": "Etsi...",
+    "noResults": "Tuloksia ei löytynyt",
+    "resultsAriaLabel": "Hakutulokset",
+    "categories": {
+      "request": "HTTP-pyynnöt",
+      "folder": "Kansiot",
+      "environment": "Ympäristöt",
+      "settings": "Asetukset",
+      "tag": "Tagit"
+    }
+  },
+  "iconSelect": {
+    "searchEmojis": "Etsi emojeja...",
+    "noEmojisFound": "Emojeja ei löytynyt",
+    "searchCodicons": "Etsi codiconeja...",
+    "searchIconoir": "Etsi Iconoirista...",
+    "searchPhosphor": "Etsi Phosphorista...",
+    "searchMaterial": "Etsi Materialista...",
+    "searchSimpleIcons": "Etsi Simple Iconsista...",
+    "searchFeather": "Etsi Featheristä...",
+    "searchFontAwesome": "Etsi Font Awesomesta...",
+    "moreIcons": "+{{count}} lisää kuvaketta. Käytä hakua löytääksesi tietyt kuvakkeet.",
+    "more": "+{{count}} lisää. Käytä hakua löytääksesi tietyt kuvakkeet.",
+    "noIconsFound": "Kuvakkeita ei löytynyt",
+    "searchResults": "Hakutulokset",
+    "categories": {
+      "files": "Tiedostot",
+      "git": "Git",
+      "debug": "Vianetsintä",
+      "symbols": "Symbolit",
+      "arrows": "Nuolet",
+      "ui": "Käyttöliittymä",
+      "media": "Media",
+      "editing": "Muokkaus",
+      "terminal": "Pääte",
+      "people": "Ihmiset",
+      "notifications": "Ilmoitukset",
+      "brands": "Brändit",
+      "communication": "Viestintä",
+      "users": "Käyttäjät",
+      "business": "Liiketoiminta",
+      "medical": "Lääketiede",
+      "transport": "Kuljetus",
+      "weather": "Sää",
+      "shapes": "Muodot",
+      "design": "Suunnittelu",
+      "devices": "Laitteet",
+      "buildings": "Rakennukset",
+      "nature": "Luonto",
+      "food": "Ruoka",
+      "sport": "Urheilu",
+      "sports": "Urheilulajit",
+      "animals": "Eläimet",
+      "tools": "Työkalut"
+    },
+    "emojiCategories": {
+      "people": "Hymiöt ja ihmiset",
+      "nature": "Eläimet ja luonto",
+      "food": "Ruoka ja juoma",
+      "activity": "Aktiviteetit",
+      "travel": "Matkailu ja paikat",
+      "objects": "Esineet",
+      "symbols": "Symbolit",
+      "flags": "Liput"
+    }
+  },
+  "dateTimePicker": {
+    "ariaLabel": "Päivämäärän/ajan valitsin",
+    "openCalendar": "Avaa kalenteri",
+    "previousYear": "Edellinen vuosi",
+    "nextYear": "Seuraava vuosi",
+    "previousMonth": "Edellinen kuukausi",
+    "nextMonth": "Seuraava kuukausi",
+    "selectMonth": "Valitse kuukausi",
+    "selectYear": "Valitse vuosi",
+    "includeTime": "Sisällytä kellonaika",
+    "hours": "Tunnit",
+    "minutes": "Minuutit",
+    "output": "Tuloste",
+    "pattern": "Muoto",
+    "outputModes": {
+      "pattern": "Muoto",
+      "unix": "Unix (s)",
+      "epoch": "Epoch (ms)",
+      "iso": "ISO 8601"
+    },
+    "preview": "Esikatselu",
+    "tokens": {
+      "S": "millisekunti, ei täyttöä",
+      "SSS": "millisekunti, täytetty pituuteen 3",
+      "u": "sekunnin osat, toiminnallisesti sama kuin SSS",
+      "uu": "sekunnin osat, välillä 0–99, täytetty pituuteen 2",
+      "uuu": "sekunnin osat, välillä 0–9",
+      "s": "sekunti, ei täyttöä",
+      "ss": "sekunti, täytetty pituuteen 2",
+      "m": "minuutti, ei täyttöä",
+      "mm": "minuutti, täytetty pituuteen 2",
+      "h": "tunti 12 tunnin muodossa, ei täyttöä",
+      "hh": "tunti 12 tunnin muodossa, täytetty pituuteen 2",
+      "H": "tunti 24 tunnin muodossa, ei täyttöä",
+      "HH": "tunti 24 tunnin muodossa, täytetty pituuteen 2",
+      "Z": "kapea siirtymä",
+      "ZZ": "lyhyt siirtymä",
+      "ZZZ": "tekninen siirtymä",
+      "ZZZZ": "lyhennetty nimetty siirtymä",
+      "ZZZZZ": "lyhentämätön nimetty siirtymä",
+      "z": "IANA-vyöhyke",
+      "a": "vuorokaudenaika",
+      "d": "kuukauden päivä, ei täyttöä",
+      "dd": "kuukauden päivä, täytetty pituuteen 2",
+      "c": "viikonpäivä numerona 1–7 (maanantai on 1, sunnuntai on 7)",
+      "ccc": "viikonpäivä lyhennettynä lokalisoituna merkkijonona",
+      "cccc": "viikonpäivä lyhentämättömänä lokalisoituna merkkijonona",
+      "ccccc": "viikonpäivä yhtenä lokalisoituna kirjaimena",
+      "L": "kuukausi täyttämättömänä numerona",
+      "LL": "kuukausi täytettynä numerona",
+      "LLL": "kuukausi lyhennettynä lokalisoituna merkkijonona",
+      "LLLL": "kuukausi lyhentämättömänä lokalisoituna merkkijonona",
+      "LLLLL": "kuukausi yhtenä lokalisoituna kirjaimena",
+      "y": "vuosi, ei täyttöä",
+      "yy": "kaksinumeroinen vuosi",
+      "yyyy": "neljä- tai kuusinumeroinen vuosi, täytetty pituuteen 4",
+      "G": "lyhennetty lokalisoitu aikakausi",
+      "GG": "lyhentämätön lokalisoitu aikakausi",
+      "GGGGG": "yksikirjaiminen lokalisoitu aikakausi",
+      "kk": "ISO-viikkovuosi, ei täyttöä",
+      "kkkk": "ISO-viikkovuosi, täytetty pituuteen 4",
+      "W": "ISO-viikkonumero, ei täyttöä",
+      "WW": "ISO-viikkonumero, täytetty pituuteen 2",
+      "ii": "paikallinen viikkovuosi, ei täyttöä",
+      "iiii": "paikallinen viikkovuosi, täytetty pituuteen 4",
+      "n": "paikallinen viikkonumero, ei täyttöä",
+      "nn": "paikallinen viikkonumero, täytetty pituuteen 2",
+      "o": "järjestysluku (vuoden päivä), ei täyttöä",
+      "ooo": "järjestysluku (vuoden päivä), täytetty pituuteen 3",
+      "q": "vuosineljännes, ei täyttöä",
+      "qq": "vuosineljännes, täytetty pituuteen 2",
+      "D": "lokalisoitu numeerinen päivämäärä",
+      "DD": "lokalisoitu päivämäärä lyhennetyllä kuukaudella",
+      "DDD": "lokalisoitu päivämäärä koko kuukauden nimellä",
+      "DDDD": "lokalisoitu päivämäärä koko kuukauden nimellä ja viikonpäivällä",
+      "t": "lokalisoitu kellonaika",
+      "tt": "lokalisoitu kellonaika sekunteineen",
+      "ttt": "lokalisoitu kellonaika sekunteineen ja lyhennetyllä siirtymällä",
+      "tttt": "lokalisoitu kellonaika sekunteineen ja täydellä siirtymällä",
+      "T": "lokalisoitu 24-tuntinen kellonaika",
+      "TT": "lokalisoitu 24-tuntinen kellonaika sekunteineen",
+      "TTT": "lokalisoitu 24-tuntinen kellonaika sekunteineen ja lyhennetyllä siirtymällä",
+      "TTTT": "lokalisoitu 24-tuntinen kellonaika sekunteineen ja täydellä siirtymällä",
+      "f": "lyhyt lokalisoitu päivämäärä ja aika",
+      "ff": "lyhyehkö lokalisoitu päivämäärä ja aika",
+      "fff": "yksityiskohtainen lokalisoitu päivämäärä ja aika",
+      "ffff": "erittäin yksityiskohtainen lokalisoitu päivämäärä ja aika",
+      "F": "lyhyt lokalisoitu päivämäärä ja aika sekunteineen",
+      "FF": "lyhyehkö lokalisoitu päivämäärä ja aika sekunteineen",
+      "FFF": "yksityiskohtainen lokalisoitu päivämäärä ja aika sekunteineen",
+      "FFFF": "erittäin yksityiskohtainen lokalisoitu päivämäärä ja aika sekunteineen",
+      "X": "unix-aikaleima sekunteina",
+      "x": "unix-aikaleima millisekunteina"
+    }
+  }
+}

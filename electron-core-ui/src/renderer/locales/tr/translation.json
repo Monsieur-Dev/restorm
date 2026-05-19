@@ -1,0 +1,328 @@
+{
+  "common": {
+    "opened": "Açıldı",
+    "refresh": "Yenile",
+    "import": "İçe aktar"
+  },
+  "file": {
+    "untitled": "Adsız",
+    "unsavedChanges": {
+      "title": "Kaydedilmemiş Değişiklikler",
+      "message": "\"{{fileName}}\" dosyasındaki değişiklikleri kaydetmek istiyor musunuz?",
+      "detail": "Kaydetmezseniz değişiklikleriniz kaybolacak.",
+      "save": "Kaydet",
+      "dontSave": "Kaydetme",
+      "cancel": "İptal"
+    }
+  },
+  "recentFilesVignette": {
+    "favorites": "Favoriler",
+    "recentFiles": "Son Kullanılan Dosyalar",
+    "addToFavorites": "Favorilere ekle",
+    "removeFromFavorites": "Favorilerden çıkar",
+    "confirmRemoveFavorite": "\"{{fileName}}\" dosyasını favorilerden çıkarmak istediğinize emin misiniz?",
+    "favoritesLandmarkLabel": "Favoriler listesi",
+    "recentsLandmarkLabel": "Son kullanılan dosyalar listesi"
+  },
+  "welcomeScreen": {
+    "landmarkLabel": "Hoş geldiniz"
+  },
+  "menuBar": {
+    "new": "Yeni",
+    "open": "Aç",
+    "edit": "Düzen",
+    "view": "Görünüm",
+    "help": "Yardım",
+    "undo": "Geri al",
+    "redo": "Yinele",
+    "cut": "Kes",
+    "copy": "Kopyala",
+    "paste": "Yapıştır",
+    "find": "Bul",
+    "replace": "Değiştir",
+    "toggleSidebar": "Kenar çubuğunu aç/kapat",
+    "toggleResponsePanel": "Yanıt panelini aç/kapat",
+    "zoomIn": "Yakınlaştır",
+    "zoomOut": "Uzaklaştır",
+    "resetZoom": "Yakınlaştırmayı sıfırla",
+    "settings": "Ayarlar",
+    "toggleDevTools": "Geliştirici Araçları",
+    "toggleFullscreen": "Tam ekran",
+    "about": "Hakkında",
+    "documentation": "Belgeler",
+    "keyboardShortcuts": "Klavye Kısayolları",
+    "releaseNotes": "Sürüm Notları",
+    "reportIssue": "Sorun Bildir"
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "theme": "Tema",
+    "language": "Dil",
+    "searchPlaceholder": "Ayarlarda ara...",
+    "noResults": "Ayar bulunamadı.",
+    "numberOutOfRange": "Değer {{min}} ile {{max}} arasında olmalıdır.",
+    "resetSetting": "Ayarı sıfırla",
+    "copySettingId": "Ayar kimliğini kopyala",
+    "settingOptions": "Ayar seçenekleri",
+    "scopeTabsLabel": "Ayar kapsamı",
+    "userOnlyHidden": "Bu sekmede {{count}} yalnızca kullanıcıya özel ayar gizlenmiştir.",
+    "scope": {
+      "user": "Kullanıcı",
+      "workspace": "Çalışma alanı",
+      "workspaceDisabledTooltip": "Çalışma alanı ayarlarını düzenlemek için bir proje açın"
+    },
+    "appearance": {
+      "title": "Görünüm",
+      "theme": {
+        "title": "Tema",
+        "description": "Uygulamanın renk temasını seçin"
+      },
+      "language": {
+        "title": "Dil",
+        "description": "Uygulamanın dilini seçin",
+        "en": "English",
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "pt": "Português",
+        "nl": "Nederlands",
+        "sv": "Svenska",
+        "da": "Dansk",
+        "nb": "Norsk bokmål",
+        "fi": "Suomi",
+        "pl": "Polski",
+        "cs": "Čeština",
+        "hu": "Magyar",
+        "ro": "Română",
+        "el": "Ελληνικά",
+        "uk": "Українська",
+        "hr": "Hrvatski",
+        "sr": "Srpski",
+        "sq": "Shqip",
+        "tr": "Türkçe",
+        "id": "Bahasa Indonesia",
+        "vi": "Tiếng Việt",
+        "ja": "日本語",
+        "ko": "한국어",
+        "zh-CN": "简体中文",
+        "zh-TW": "繁體中文"
+      },
+      "advancedVisualEffects": {
+        "title": "Gelişmiş görsel efektler",
+        "description": "Yer paylaşımlarda arka plan bulanıklığı ve CSS animasyonları gibi gelişmiş görsel efektleri etkinleştirir. Düşük donanımda daha iyi performans için devre dışı bırakın."
+      },
+      "editor": {
+        "title": "Düzenleyici",
+        "fontSize": {
+          "title": "Yazı tipi boyutu",
+          "description": "Kod düzenleyicideki yazı tipi boyutunu piksel cinsinden denetler"
+        },
+        "fontFamily": {
+          "title": "Yazı tipi ailesi",
+          "description": "Kod düzenleyici için yazı tipi ailesini denetler"
+        },
+        "wordWrap": {
+          "title": "Satır kaydırma",
+          "description": "Kod düzenleyicide satırların kaydırılıp kaydırılmayacağını denetler"
+        },
+        "minimap": {
+          "title": "Mini harita",
+          "description": "Kod düzenleyicide mini haritanın gösterilip gösterilmeyeceğini denetler"
+        },
+        "lineNumbers": {
+          "title": "Satır numaraları",
+          "description": "Kod düzenleyicide satır numaralarının gösterilip gösterilmeyeceğini denetler"
+        }
+      }
+    },
+    "files": {
+      "title": "Dosyalar",
+      "autoSave": {
+        "title": "Otomatik kaydet",
+        "description": "Değiştirilmiş düzenleyicilerin otomatik olarak kaydedilmesini denetler. Otomatik kaydetme hakkında daha fazla bilgi için belgelere göz atın.",
+        "off": "Kapalı",
+        "afterDelay": "Belirli bir gecikmeden sonra",
+        "onWindowChange": "Pencere değişiminde"
+      },
+      "autoSaveDelay": {
+        "title": "Otomatik kaydetme gecikmesi",
+        "description": "Değiştirilmiş bir düzenleyicinin otomatik olarak kaydedilmesinden önceki gecikmeyi milisaniye cinsinden denetler. Yalnızca otomatik kaydetme « Belirli bir gecikmeden sonra » olarak ayarlandığında geçerlidir."
+      }
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Tanıma git"
+  },
+  "tagsView": {
+    "removeTag": "Etiketi kaldır",
+    "newTag": "Yeni etiket"
+  },
+  "contextMenu": {
+    "cut": "Kes",
+    "copy": "Kopyala",
+    "paste": "Yapıştır"
+  },
+  "search": {
+    "placeholder": "Ara...",
+    "noResults": "Sonuç bulunamadı",
+    "resultsAriaLabel": "Arama sonuçları",
+    "categories": {
+      "request": "HTTP istekleri",
+      "folder": "Klasörler",
+      "environment": "Ortamlar",
+      "settings": "Ayarlar",
+      "tag": "Etiketler"
+    }
+  },
+  "iconSelect": {
+    "searchEmojis": "Emoji ara...",
+    "noEmojisFound": "Emoji bulunamadı",
+    "searchCodicons": "Codicon ara...",
+    "searchIconoir": "Iconoir'da ara...",
+    "searchPhosphor": "Phosphor'da ara...",
+    "searchMaterial": "Material'da ara...",
+    "searchSimpleIcons": "Simple Icons'ta ara...",
+    "searchFeather": "Feather'da ara...",
+    "searchFontAwesome": "Font Awesome'da ara...",
+    "moreIcons": "+{{count}} simge daha. Belirli simgeleri bulmak için aramayı kullanın.",
+    "more": "+{{count}} daha. Belirli simgeleri bulmak için aramayı kullanın.",
+    "noIconsFound": "Simge bulunamadı",
+    "searchResults": "Arama sonuçları",
+    "categories": {
+      "files": "Dosyalar",
+      "git": "Git",
+      "debug": "Hata ayıklama",
+      "symbols": "Semboller",
+      "arrows": "Oklar",
+      "ui": "Arayüz",
+      "media": "Medya",
+      "editing": "Düzenleme",
+      "terminal": "Terminal",
+      "people": "İnsanlar",
+      "notifications": "Bildirimler",
+      "brands": "Markalar",
+      "communication": "İletişim",
+      "users": "Kullanıcılar",
+      "business": "İş",
+      "medical": "Tıbbi",
+      "transport": "Ulaşım",
+      "weather": "Hava durumu",
+      "shapes": "Şekiller",
+      "design": "Tasarım",
+      "devices": "Cihazlar",
+      "buildings": "Binalar",
+      "nature": "Doğa",
+      "food": "Yiyecek",
+      "sport": "Spor",
+      "sports": "Sporlar",
+      "animals": "Hayvanlar",
+      "tools": "Araçlar"
+    },
+    "emojiCategories": {
+      "people": "Yüzler ve insanlar",
+      "nature": "Hayvanlar ve doğa",
+      "food": "Yiyecek ve içecek",
+      "activity": "Etkinlikler",
+      "travel": "Seyahat ve yerler",
+      "objects": "Nesneler",
+      "symbols": "Semboller",
+      "flags": "Bayraklar"
+    }
+  },
+  "dateTimePicker": {
+    "ariaLabel": "Tarih/saat seçici",
+    "openCalendar": "Takvimi aç",
+    "previousYear": "Önceki yıl",
+    "nextYear": "Sonraki yıl",
+    "previousMonth": "Önceki ay",
+    "nextMonth": "Sonraki ay",
+    "selectMonth": "Ay seç",
+    "selectYear": "Yıl seç",
+    "includeTime": "Saati dahil et",
+    "hours": "Saat",
+    "minutes": "Dakika",
+    "output": "Çıktı",
+    "pattern": "Biçim",
+    "outputModes": {
+      "pattern": "Biçim",
+      "unix": "Unix (s)",
+      "epoch": "Epoch (ms)",
+      "iso": "ISO 8601"
+    },
+    "preview": "Önizleme",
+    "tokens": {
+      "S": "milisaniye, dolgu yok",
+      "SSS": "milisaniye, 3 haneye dolgulu",
+      "u": "kesirli saniye, işlevsel olarak SSS ile aynı",
+      "uu": "kesirli saniye, 0 ile 99 arası, 2 haneye dolgulu",
+      "uuu": "kesirli saniye, 0 ile 9 arası",
+      "s": "saniye, dolgu yok",
+      "ss": "saniye, 2 haneye dolgulu",
+      "m": "dakika, dolgu yok",
+      "mm": "dakika, 2 haneye dolgulu",
+      "h": "12 saatlik biçimde saat, dolgu yok",
+      "hh": "12 saatlik biçimde saat, 2 haneye dolgulu",
+      "H": "24 saatlik biçimde saat, dolgu yok",
+      "HH": "24 saatlik biçimde saat, 2 haneye dolgulu",
+      "Z": "dar kayma",
+      "ZZ": "kısa kayma",
+      "ZZZ": "teknik kayma",
+      "ZZZZ": "kısaltılmış adlandırılmış kayma",
+      "ZZZZZ": "kısaltılmamış adlandırılmış kayma",
+      "z": "IANA bölgesi",
+      "a": "öğleden önce/sonra",
+      "d": "ayın günü, dolgu yok",
+      "dd": "ayın günü, 2 haneye dolgulu",
+      "c": "haftanın günü, 1-7 arasında sayı olarak (Pazartesi 1, Pazar 7)",
+      "ccc": "haftanın günü, kısaltılmış yerelleştirilmiş dize olarak",
+      "cccc": "haftanın günü, kısaltılmamış yerelleştirilmiş dize olarak",
+      "ccccc": "haftanın günü, tek yerelleştirilmiş harf olarak",
+      "L": "ay, dolgusuz sayı olarak",
+      "LL": "ay, dolgulu sayı olarak",
+      "LLL": "ay, kısaltılmış yerelleştirilmiş dize olarak",
+      "LLLL": "ay, kısaltılmamış yerelleştirilmiş dize olarak",
+      "LLLLL": "ay, tek yerelleştirilmiş harf olarak",
+      "y": "yıl, dolgusuz",
+      "yy": "iki haneli yıl",
+      "yyyy": "dört ila altı haneli yıl, 4 haneye dolgulu",
+      "G": "kısaltılmış yerelleştirilmiş çağ",
+      "GG": "kısaltılmamış yerelleştirilmiş çağ",
+      "GGGGG": "tek harfli yerelleştirilmiş çağ",
+      "kk": "ISO hafta yılı, dolgusuz",
+      "kkkk": "ISO hafta yılı, 4 haneye dolgulu",
+      "W": "ISO hafta numarası, dolgusuz",
+      "WW": "ISO hafta numarası, 2 haneye dolgulu",
+      "ii": "yerel hafta yılı, dolgusuz",
+      "iiii": "yerel hafta yılı, 4 haneye dolgulu",
+      "n": "yerel hafta numarası, dolgusuz",
+      "nn": "yerel hafta numarası, 2 haneye dolgulu",
+      "o": "sıra numarası (yılın günü), dolgusuz",
+      "ooo": "sıra numarası (yılın günü), 3 haneye dolgulu",
+      "q": "çeyrek, dolgu yok",
+      "qq": "çeyrek, 2 haneye dolgulu",
+      "D": "yerelleştirilmiş sayısal tarih",
+      "DD": "kısaltılmış aylı yerelleştirilmiş tarih",
+      "DDD": "tam aylı yerelleştirilmiş tarih",
+      "DDDD": "tam ay ve hafta günüyle yerelleştirilmiş tarih",
+      "t": "yerelleştirilmiş saat",
+      "tt": "saniyeli yerelleştirilmiş saat",
+      "ttt": "saniyeli ve kısaltılmış kaymalı yerelleştirilmiş saat",
+      "tttt": "saniyeli ve tam kaymalı yerelleştirilmiş saat",
+      "T": "yerelleştirilmiş 24 saatlik saat",
+      "TT": "saniyeli yerelleştirilmiş 24 saatlik saat",
+      "TTT": "saniyeli ve kısaltılmış kaymalı yerelleştirilmiş 24 saatlik saat",
+      "TTTT": "saniyeli ve tam kaymalı yerelleştirilmiş 24 saatlik saat",
+      "f": "kısa yerelleştirilmiş tarih ve saat",
+      "ff": "daha az kısa yerelleştirilmiş tarih ve saat",
+      "fff": "ayrıntılı yerelleştirilmiş tarih ve saat",
+      "ffff": "çok ayrıntılı yerelleştirilmiş tarih ve saat",
+      "F": "saniyeli kısa yerelleştirilmiş tarih ve saat",
+      "FF": "saniyeli daha az kısa yerelleştirilmiş tarih ve saat",
+      "FFF": "saniyeli ayrıntılı yerelleştirilmiş tarih ve saat",
+      "FFFF": "saniyeli çok ayrıntılı yerelleştirilmiş tarih ve saat",
+      "X": "saniye cinsinden unix zaman damgası",
+      "x": "milisaniye cinsinden unix zaman damgası"
+    }
+  }
+}

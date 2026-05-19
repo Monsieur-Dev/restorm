@@ -1,0 +1,328 @@
+{
+  "common": {
+    "opened": "Otevřeno",
+    "refresh": "Obnovit",
+    "import": "Importovat"
+  },
+  "file": {
+    "untitled": "Bez názvu",
+    "unsavedChanges": {
+      "title": "Neuložené změny",
+      "message": "Chcete uložit změny v souboru „{{fileName}}“?",
+      "detail": "Vaše změny budou ztraceny, pokud je neuložíte.",
+      "save": "Uložit",
+      "dontSave": "Neukládat",
+      "cancel": "Zrušit"
+    }
+  },
+  "recentFilesVignette": {
+    "favorites": "Oblíbené",
+    "recentFiles": "Naposledy otevřené",
+    "addToFavorites": "Přidat k oblíbeným",
+    "removeFromFavorites": "Odebrat z oblíbených",
+    "confirmRemoveFavorite": "Opravdu chcete odebrat „{{fileName}}“ z oblíbených?",
+    "favoritesLandmarkLabel": "Seznam oblíbených",
+    "recentsLandmarkLabel": "Seznam naposledy otevřených souborů"
+  },
+  "welcomeScreen": {
+    "landmarkLabel": "Úvodní obrazovka"
+  },
+  "menuBar": {
+    "new": "Nový",
+    "open": "Otevřít",
+    "edit": "Úpravy",
+    "view": "Zobrazení",
+    "help": "Nápověda",
+    "undo": "Zpět",
+    "redo": "Vpřed",
+    "cut": "Vyjmout",
+    "copy": "Kopírovat",
+    "paste": "Vložit",
+    "find": "Najít",
+    "replace": "Nahradit",
+    "toggleSidebar": "Přepnout postranní panel",
+    "toggleResponsePanel": "Přepnout panel odpovědí",
+    "zoomIn": "Přiblížit",
+    "zoomOut": "Oddálit",
+    "resetZoom": "Resetovat přiblížení",
+    "settings": "Nastavení",
+    "toggleDevTools": "Přepnout vývojářské nástroje",
+    "toggleFullscreen": "Přepnout celou obrazovku",
+    "about": "O aplikaci",
+    "documentation": "Dokumentace",
+    "keyboardShortcuts": "Klávesové zkratky",
+    "releaseNotes": "Poznámky k vydání",
+    "reportIssue": "Nahlásit problém"
+  },
+  "settings": {
+    "title": "Nastavení",
+    "theme": "Motiv",
+    "language": "Jazyk",
+    "searchPlaceholder": "Hledat v nastavení...",
+    "noResults": "Nenalezena žádná nastavení.",
+    "numberOutOfRange": "Hodnota musí být mezi {{min}} a {{max}}.",
+    "resetSetting": "Resetovat nastavení",
+    "copySettingId": "Kopírovat ID nastavení",
+    "settingOptions": "Možnosti nastavení",
+    "scopeTabsLabel": "Rozsah nastavení",
+    "userOnlyHidden": "{{count}} nastavení pouze pro uživatele je v této záložce skryto.",
+    "scope": {
+      "user": "Uživatel",
+      "workspace": "Pracovní prostor",
+      "workspaceDisabledTooltip": "Otevřete projekt pro úpravu nastavení pracovního prostoru"
+    },
+    "appearance": {
+      "title": "Vzhled",
+      "theme": {
+        "title": "Motiv",
+        "description": "Vyberte barevný motiv aplikace"
+      },
+      "language": {
+        "title": "Jazyk",
+        "description": "Vyberte jazyk aplikace",
+        "en": "English",
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "pt": "Português",
+        "nl": "Nederlands",
+        "sv": "Svenska",
+        "da": "Dansk",
+        "nb": "Norsk bokmål",
+        "fi": "Suomi",
+        "pl": "Polski",
+        "cs": "Čeština",
+        "hu": "Magyar",
+        "ro": "Română",
+        "el": "Ελληνικά",
+        "uk": "Українська",
+        "hr": "Hrvatski",
+        "sr": "Srpski",
+        "sq": "Shqip",
+        "tr": "Türkçe",
+        "id": "Bahasa Indonesia",
+        "vi": "Tiếng Việt",
+        "ja": "日本語",
+        "ko": "한국어",
+        "zh-CN": "简体中文",
+        "zh-TW": "繁體中文"
+      },
+      "advancedVisualEffects": {
+        "title": "Pokročilé vizuální efekty",
+        "description": "Povolit pokročilé vizuální efekty, jako je rozostření pozadí na překryvech a CSS animace. Pro lepší výkon na slabším hardwaru deaktivujte."
+      },
+      "editor": {
+        "title": "Editor",
+        "fontSize": {
+          "title": "Velikost písma",
+          "description": "Určuje velikost písma v pixelech pro editor kódu"
+        },
+        "fontFamily": {
+          "title": "Rodina písma",
+          "description": "Určuje rodinu písma pro editor kódu"
+        },
+        "wordWrap": {
+          "title": "Zalamování řádků",
+          "description": "Určuje, zda se mají řádky v editoru kódu zalamovat"
+        },
+        "minimap": {
+          "title": "Minimapa",
+          "description": "Určuje, zda se v editoru kódu zobrazuje minimapa"
+        },
+        "lineNumbers": {
+          "title": "Čísla řádků",
+          "description": "Určuje, zda se v editoru kódu zobrazují čísla řádků"
+        }
+      }
+    },
+    "files": {
+      "title": "Soubory",
+      "autoSave": {
+        "title": "Automatické ukládání",
+        "description": "Řídí automatické ukládání změněných editorů. Více o automatickém ukládání najdete v dokumentaci.",
+        "off": "Vypnuto",
+        "afterDelay": "Po prodlevě",
+        "onWindowChange": "Při změně okna"
+      },
+      "autoSaveDelay": {
+        "title": "Prodleva automatického ukládání",
+        "description": "Určuje prodlevu v milisekundách, po které se změněný editor automaticky uloží. Platí jen tehdy, pokud je automatické ukládání nastaveno na „Po prodlevě“."
+      }
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Přejít na definici"
+  },
+  "tagsView": {
+    "removeTag": "Odebrat štítek",
+    "newTag": "Nový štítek"
+  },
+  "contextMenu": {
+    "cut": "Vyjmout",
+    "copy": "Kopírovat",
+    "paste": "Vložit"
+  },
+  "search": {
+    "placeholder": "Hledat...",
+    "noResults": "Nenalezeny žádné výsledky",
+    "resultsAriaLabel": "Výsledky hledání",
+    "categories": {
+      "request": "Požadavky HTTP",
+      "folder": "Složky",
+      "environment": "Prostředí",
+      "settings": "Nastavení",
+      "tag": "Štítky"
+    }
+  },
+  "iconSelect": {
+    "searchEmojis": "Hledat emoji...",
+    "noEmojisFound": "Žádné emoji nenalezeno",
+    "searchCodicons": "Hledat codicons...",
+    "searchIconoir": "Hledat v Iconoir...",
+    "searchPhosphor": "Hledat v Phosphor...",
+    "searchMaterial": "Hledat v Material...",
+    "searchSimpleIcons": "Hledat v Simple Icons...",
+    "searchFeather": "Hledat ve Feather...",
+    "searchFontAwesome": "Hledat ve Font Awesome...",
+    "moreIcons": "+{{count}} dalších ikon. Pro nalezení konkrétních ikon použijte vyhledávání.",
+    "more": "+{{count}} dalších. Pro nalezení konkrétních ikon použijte vyhledávání.",
+    "noIconsFound": "Žádné ikony nenalezeny",
+    "searchResults": "Výsledky hledání",
+    "categories": {
+      "files": "Soubory",
+      "git": "Git",
+      "debug": "Ladění",
+      "symbols": "Symboly",
+      "arrows": "Šipky",
+      "ui": "Rozhraní",
+      "media": "Média",
+      "editing": "Úpravy",
+      "terminal": "Terminál",
+      "people": "Lidé",
+      "notifications": "Oznámení",
+      "brands": "Značky",
+      "communication": "Komunikace",
+      "users": "Uživatelé",
+      "business": "Firma",
+      "medical": "Lékařství",
+      "transport": "Doprava",
+      "weather": "Počasí",
+      "shapes": "Tvary",
+      "design": "Design",
+      "devices": "Zařízení",
+      "buildings": "Budovy",
+      "nature": "Příroda",
+      "food": "Jídlo",
+      "sport": "Sport",
+      "sports": "Sporty",
+      "animals": "Zvířata",
+      "tools": "Nástroje"
+    },
+    "emojiCategories": {
+      "people": "Tváře a lidé",
+      "nature": "Zvířata a příroda",
+      "food": "Jídlo a pití",
+      "activity": "Aktivity",
+      "travel": "Cestování a místa",
+      "objects": "Objekty",
+      "symbols": "Symboly",
+      "flags": "Vlajky"
+    }
+  },
+  "dateTimePicker": {
+    "ariaLabel": "Výběr data a času",
+    "openCalendar": "Otevřít kalendář",
+    "previousYear": "Předchozí rok",
+    "nextYear": "Následující rok",
+    "previousMonth": "Předchozí měsíc",
+    "nextMonth": "Následující měsíc",
+    "selectMonth": "Vyberte měsíc",
+    "selectYear": "Vyberte rok",
+    "includeTime": "Zahrnout čas",
+    "hours": "Hodiny",
+    "minutes": "Minuty",
+    "output": "Výstup",
+    "pattern": "Formát",
+    "outputModes": {
+      "pattern": "Formát",
+      "unix": "Unix (s)",
+      "epoch": "Epoch (ms)",
+      "iso": "ISO 8601"
+    },
+    "preview": "Náhled",
+    "tokens": {
+      "S": "milisekunda, bez zarovnání",
+      "SSS": "milisekunda, zarovnaná na 3",
+      "u": "zlomky sekund, funkčně totožné s SSS",
+      "uu": "zlomky sekund, mezi 0 a 99, zarovnané na 2",
+      "uuu": "zlomky sekund, mezi 0 a 9",
+      "s": "sekunda, bez zarovnání",
+      "ss": "sekunda, zarovnaná na 2",
+      "m": "minuta, bez zarovnání",
+      "mm": "minuta, zarovnaná na 2",
+      "h": "hodina v 12hodinovém formátu, bez zarovnání",
+      "hh": "hodina v 12hodinovém formátu, zarovnaná na 2",
+      "H": "hodina v 24hodinovém formátu, bez zarovnání",
+      "HH": "hodina v 24hodinovém formátu, zarovnaná na 2",
+      "Z": "úzké odsazení",
+      "ZZ": "krátké odsazení",
+      "ZZZ": "technické odsazení",
+      "ZZZZ": "zkrácené pojmenované odsazení",
+      "ZZZZZ": "nezkrácené pojmenované odsazení",
+      "z": "zóna IANA",
+      "a": "AM/PM",
+      "d": "den v měsíci, bez zarovnání",
+      "dd": "den v měsíci, zarovnaný na 2",
+      "c": "den v týdnu jako číslo od 1 do 7 (pondělí je 1, neděle je 7)",
+      "ccc": "den v týdnu, jako zkrácený lokalizovaný řetězec",
+      "cccc": "den v týdnu, jako nezkrácený lokalizovaný řetězec",
+      "ccccc": "den v týdnu, jako jediné lokalizované písmeno",
+      "L": "měsíc jako číslo bez zarovnání",
+      "LL": "měsíc jako zarovnané číslo",
+      "LLL": "měsíc jako zkrácený lokalizovaný řetězec",
+      "LLLL": "měsíc jako nezkrácený lokalizovaný řetězec",
+      "LLLLL": "měsíc jako jediné lokalizované písmeno",
+      "y": "rok, bez zarovnání",
+      "yy": "dvouciferný rok",
+      "yyyy": "čtyř- až šesticiferný rok, zarovnaný na 4",
+      "G": "zkrácená lokalizovaná éra",
+      "GG": "nezkrácená lokalizovaná éra",
+      "GGGGG": "lokalizovaná éra na jedno písmeno",
+      "kk": "rok ISO týdne, bez zarovnání",
+      "kkkk": "rok ISO týdne, zarovnaný na 4",
+      "W": "číslo ISO týdne, bez zarovnání",
+      "WW": "číslo ISO týdne, zarovnané na 2",
+      "ii": "rok lokálního týdne, bez zarovnání",
+      "iiii": "rok lokálního týdne, zarovnaný na 4",
+      "n": "číslo lokálního týdne, bez zarovnání",
+      "nn": "číslo lokálního týdne, zarovnané na 2",
+      "o": "ordinál (den v roce), bez zarovnání",
+      "ooo": "ordinál (den v roce), zarovnaný na 3",
+      "q": "čtvrtletí, bez zarovnání",
+      "qq": "čtvrtletí, zarovnané na 2",
+      "D": "lokalizované číselné datum",
+      "DD": "lokalizované datum se zkráceným měsícem",
+      "DDD": "lokalizované datum s plným měsícem",
+      "DDDD": "lokalizované datum s plným měsícem a dnem v týdnu",
+      "t": "lokalizovaný čas",
+      "tt": "lokalizovaný čas se sekundami",
+      "ttt": "lokalizovaný čas se sekundami a zkráceným odsazením",
+      "tttt": "lokalizovaný čas se sekundami a plným odsazením",
+      "T": "lokalizovaný 24hodinový čas",
+      "TT": "lokalizovaný 24hodinový čas se sekundami",
+      "TTT": "lokalizovaný 24hodinový čas se sekundami a zkráceným odsazením",
+      "TTTT": "lokalizovaný 24hodinový čas se sekundami a plným odsazením",
+      "f": "krátké lokalizované datum a čas",
+      "ff": "méně krátké lokalizované datum a čas",
+      "fff": "podrobné lokalizované datum a čas",
+      "ffff": "velmi podrobné lokalizované datum a čas",
+      "F": "krátké lokalizované datum a čas se sekundami",
+      "FF": "méně krátké lokalizované datum a čas se sekundami",
+      "FFF": "podrobné lokalizované datum a čas se sekundami",
+      "FFFF": "velmi podrobné lokalizované datum a čas se sekundami",
+      "X": "unix časové razítko v sekundách",
+      "x": "unix časové razítko v milisekundách"
+    }
+  }
+}

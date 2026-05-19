@@ -1,5 +1,7 @@
+import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useRequestReset } from '../../hooks/useRequestReset'
+import { getRequestPanelState, setRequestPanelCollapsed } from '../../services/requestPanelStateStore'
 import { useTranslation } from 'react-i18next'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
@@ -18,7 +20,7 @@ import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { SoapRequest, SoapResponse, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
-import type { SOAPExecutionResult, KeyValueData } from '../../types/global.d'
+import type { SOAPExecutionResult } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { useRestormStore } from '../../store/restormStore'
@@ -29,6 +31,7 @@ import { DocumentationHost } from '../documentation/DocumentationHost'
 import { findOperationForRoute } from '../../../../shared/utils/findOperationForRoute'
 import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
 import { CurlPasteCallout } from '../CurlPasteCallout'
+import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { toasterService } from 'electron-core-ui/renderer'
 
 export interface SoapRequestTabViewProps {
@@ -40,7 +43,10 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
 }) => {
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
-  const { selectedEnvId, environments, envColor } = useEnvironmentContext()
+  // See HTTPRequestTabView — `projectUuid` from the env context is
+  // synchronously available, unlike `useFileService` which races the
+  // `useState` lazy initializer.
+  const { selectedEnvId, environments, envColor, projectUuid } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const { apiDocumentation, route } = useApiDocumentationFromRequest(request)
@@ -54,6 +60,23 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<SoapResponse | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+
+  // See HTTPRequestTabView for the contract.
+  const [panelCollapsed, setPanelCollapsed] = useState<{ body: boolean; headers: boolean }>(() => {
+    const seed = (projectUuid ? getRequestPanelState(projectUuid, request.id) : undefined) ?? {}
+    return {
+      body: typeof seed['body'] === 'boolean' ? seed['body'] : false,
+      headers: typeof seed['headers'] === 'boolean' ? seed['headers'] : request.headers.length === 0
+    }
+  })
+  const handlePanelCollapsedChange = useCallback((arr: boolean[]) => {
+    const next = { body: arr[0] ?? false, headers: arr[1] ?? false }
+    setPanelCollapsed(next)
+    if (projectUuid) {
+      setRequestPanelCollapsed(projectUuid, request.id, 'body', next.body)
+      setRequestPanelCollapsed(projectUuid, request.id, 'headers', next.headers)
+    }
+  }, [projectUuid, request.id])
 
   const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
@@ -86,8 +109,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
     const currentRequest = requestRef.current
     logger.debug('[SoapRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
 
-    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
-      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
+    const toKeyValueData = toKeyValueDataShared
 
     void window.restorm?.context.registerRequest(requestId, currentEnvId, {
       headers: toKeyValueData(currentRequest.headers)
@@ -149,8 +171,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
 
   // Notify ContextService when URL or body changes
   useEffect(() => {
-    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
-      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
+    const toKeyValueData = toKeyValueDataShared
 
     void window.restorm?.context.updateFullRequestData(request.id, {
       url,
@@ -229,8 +250,13 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
   
   // Request content (SplitView with Body, Headers)
   const requestContent = (
-    <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }} data-testid="soap-request-split-view">
-      <Pane title={t('soap.tabs.body')} initialSize={0.7} minSize={150} data-testid="soap-request-body-pane">
+    <SplitView
+      orientation="vertical"
+      style={{ width: '100%', height: '100%' }}
+      data-testid="soap-request-split-view"
+      onCollapsedChange={handlePanelCollapsedChange}
+    >
+      <Pane title={t('soap.tabs.body')} initialSize={0.7} minSize={150} collapsed={panelCollapsed.body} data-testid="soap-request-body-pane">
         <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
           <CodeEditor
             height="100%"
@@ -246,7 +272,7 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
         title={t('soap.tabs.headers')}
         initialSize={0.3}
         minSize={100}
-        collapsed={request.headers.length === 0}
+        collapsed={panelCollapsed.headers}
         data-testid="soap-request-headers-pane"
         headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
           <Button
@@ -405,16 +431,18 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
             data-testid="soap-url-input"
           />
         </div>
-        <Button
-          icon={isSending ? 'close' : 'send'}
-          onClick={isSending ? handleCancel : handleSend}
-          {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-          options={{
-            title: isSending ? t('cancel') : t('soap.send'),
-            ariaLabel: isSending ? t('cancel') : t('soap.send')
-          }}
-          data-testid="soap-request-action-button"
-        />
+        <SendButtonEnvSwitcher>
+          <Button
+            icon={isSending ? 'close' : 'send'}
+            onClick={isSending ? handleCancel : handleSend}
+            {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+            options={{
+              title: isSending ? t('cancel') : t('soap.send'),
+              ariaLabel: isSending ? t('cancel') : t('soap.send')
+            }}
+            data-testid="soap-request-action-button"
+          />
+        </SendButtonEnvSwitcher>
       </ControlGroup>
       <div style={{ fontSize: 12, color: 'var(--descriptionForeground)' }}>
         {request.service}/{request.operation} • SOAPAction: {request.soapAction}

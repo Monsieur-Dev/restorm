@@ -1,0 +1,724 @@
+{
+  "app": {
+    "title": "restorm",
+    "openSettings": "Mở cài đặt",
+    "draftsRestoredTitle": "Đã khôi phục công việc chưa lưu",
+    "draftsRestoredBody_other": "{{count}} bản nháp đã được khôi phục từ phiên trước của bạn."
+  },
+  "statusbar": {
+    "requestHistory": "Lịch sử yêu cầu",
+    "envSelector": {
+      "applyToAll": "Áp dụng cho tất cả yêu cầu"
+    }
+  },
+  "tips": {
+    "cardTitle": "Mẹo & thủ thuật",
+    "maximizeTab": {
+      "title": "Phóng to một tab chỉ với một cú nhấp",
+      "body": "Nhấp đúp vào bất kỳ tab nào trong workbench để mở rộng toàn màn hình. Nhấn Esc để khôi phục bố cục trước đó."
+    },
+    "mcpControl": {
+      "title": "Điều khiển restorm bằng AI",
+      "body": "Restorm tích hợp sẵn máy chủ MCP, vì vậy các trợ lý AI như Claude Code có thể liệt kê, mở, chỉnh sửa và chạy các yêu cầu của bạn, kiểm tra phản hồi và thao tác không gian làm việc theo cách lập trình — mà không cần rời khỏi cuộc trò chuyện."
+    },
+    "envSwitch": {
+      "title": "Chuyển môi trường dễ dàng!",
+      "body": "Thay đổi môi trường của yêu cầu hiện tại hoặc của tất cả các yêu cầu trong API của bạn bằng cách nhấp vào nút trên thanh trạng thái, hoặc nhấp chuột phải vào nút gửi của yêu cầu."
+    },
+    "authRequests": {
+      "title": "Cần xác thực để sử dụng API của bạn?",
+      "body": "Thay vì gửi một yêu cầu mỗi lần để lấy token rồi sao chép-dán khắp nơi, hãy sử dụng các yêu cầu xác thực. Khi một lệnh gọi thất bại (401, 403, …) hoặc thời hạn của token hết, yêu cầu xác thực sẽ tự động được chạy lại để trích xuất và tái sử dụng token. Tiện lợi!"
+    },
+    "supplyChain": {
+      "title": "Bảo vệ chính mình!",
+      "body": "Như mọi phần mềm, Restorm sử dụng các thư viện của bên thứ ba. Để ngăn chặn các cuộc tấn công chuỗi cung ứng, mọi lệnh gọi ra ngoài đều được chặn ở mức thấp nhất, và chúng tôi sẽ cảnh báo bạn nếu một thư viện bên thứ ba cố gắng đánh cắp thông tin cá nhân của bạn!"
+    },
+    "codeSnippets": {
+      "title": "Restorm giúp bạn viết mã!",
+      "body": "Tìm các đoạn mã trên mọi yêu cầu để giúp bạn tích hợp chúng vào phần mềm của mình. Có nhiều ngôn ngữ: curl, PowerShell, TypeScript, C# và nhiều hơn nữa!"
+    },
+    "workbenchLayout": {
+      "title": "Sắp xếp bàn làm việc của bạn",
+      "body": "Bạn có màn hình lớn và nhiều yêu cầu? Đặt chúng cạnh nhau, chồng lên nhau hoặc theo cách bạn muốn — chỉ cần kéo một tab tới nơi bạn cần. Tất cả vì sự thoải mái của bạn!"
+    },
+    "persistState": {
+      "title": "Tìm lại y nguyên như khi rời đi!",
+      "body": "Nếu bạn đóng Restorm rồi mở lại, bạn sẽ thấy nó ở đúng trạng thái như khi bạn rời đi."
+    },
+    "favorites": {
+      "title": "Có những cái thân thuộc hơn…",
+      "body": "Có những yêu cầu quan trọng với bạn hơn? Thêm chúng vào mục yêu thích!"
+    },
+    "console": {
+      "title": "Xem rõ hơn chuyện đang xảy ra",
+      "body": "Bảng điều khiển hiển thị các lệnh gọi tới API của bạn ngay khi gửi yêu cầu. Tiện để sao chép vào terminal khi cần! Chọn hương vị của bạn: curl hay PowerShell?"
+    },
+    "miniBrowser": {
+      "title": "Mệt vì cứ phải đổi cửa sổ?",
+      "body": "Restorm tích hợp sẵn một trình duyệt web mini. Tiện lợi khi ứng dụng của bạn phản ứng trực quan với các lệnh gọi API."
+    },
+    "apiDocs": {
+      "title": "Tài liệu — ngay tại đây",
+      "body": "Không cần qua lại giữa Restorm và tài liệu API của bạn. Nếu API cung cấp đặc tả (Swagger, OpenAPI, …), nó sẽ được nhập vào Restorm và bạn có thể xem trực tiếp tại đây."
+    },
+    "secrets": {
+      "title": "Bảo vệ các bí mật của bạn",
+      "body": "Mật khẩu và token ủy quyền không được lưu trực tiếp trong file Restorm. Vì vậy Restorm lưu các bí mật và lịch sử yêu cầu trong các file riêng biệt. Bạn cần lưu ý đừng đẩy chúng lên GitHub. Restorm cũng có thể lấy bí mật từ AWS, GitHub và các nguồn khác."
+    },
+    "themes": {
+      "title": "Màu của bạn, tâm trạng của bạn",
+      "body": "Restorm đi kèm nhiều bộ màu. Hãy chọn bộ màu hợp với tâm trạng của bạn."
+    },
+    "search": {
+      "title": "Tìm thấy mọi thứ, nhanh chóng",
+      "body": "Bạn có thấy phần đầu của cửa sổ này không? Restorm tích hợp công cụ tìm kiếm — không cần tìm hàng giờ chỉ để có yêu cầu BẠN cần."
+    },
+    "multiEnv": {
+      "title": "Cùng yêu cầu, môi trường khác nhau",
+      "body": "Bạn có môi trường dev, prod và staging? Vẫn là những yêu cầu đó, chỉ là URL và token hơi khác… Hãy dùng môi trường và biến để chuyển đổi chỉ với một cú nhấp. Bạn còn có thể tô màu và gắn biểu tượng riêng cho từng môi trường — để tránh những phen thót tim tối thứ Sáu trên production!"
+    },
+    "protocols": {
+      "title": "Không chỉ là REST",
+      "body": "Restorm nói REST… và còn nhiều hơn thế! GraphQL, gRPC, SOAP, OData, WebSocket — tất cả các giao thức này đều nằm trong tầm tay, không cần đổi công cụ."
+    },
+    "responseTree": {
+      "title": "Hiển thị phản hồi API trực quan",
+      "body": "Bạn có biết bạn có thể xem phản hồi API của mình dưới dạng đồ thị? Restorm hiển thị chúng như một cây tương tác mà bạn có thể duyệt, thu gọn và mở rộng."
+    },
+    "responseHistory": {
+      "title": "Lịch sử yêu cầu",
+      "body": "Bạn có thể xem lại lịch sử tất cả các lệnh gọi tới API của bạn. Tiện lợi để tìm ra điều gì thực sự đã xảy ra."
+    },
+    "multiLanguage": {
+      "title": "27 ngôn ngữ!",
+      "body": "Restorm nói 27 ngôn ngữ. Tiếng Anh, Pháp, Tây Ban Nha, Đức, Ý, Nhật, Trung, Hàn và nhiều ngôn ngữ khác — chọn ngôn ngữ của bạn trong phần cài đặt!"
+    }
+  },
+  "authFailureToast": {
+    "title": "Xác thực thất bại",
+    "fallbackReason": "Yêu cầu xác thực không thành công.",
+    "openAuthRoute": "Mở tuyến xác thực"
+  },
+  "menuBar": {
+    "file": "Tệp",
+    "new": "Mới",
+    "import": "Nhập",
+    "open": "Mở",
+    "openFolder": "Mở thư mục",
+    "recentFiles": "Tệp gần đây",
+    "favorites": "Yêu thích",
+    "close": "Đóng",
+    "save": "Lưu",
+    "saveAll": "Lưu tất cả",
+    "saveAs": "Lưu dưới dạng",
+    "exit": "Thoát",
+    "selection": "Lựa chọn",
+    "tools": "Công cụ",
+    "findInCollection": "Tìm trong bộ sưu tập",
+    "addRequest": "Thêm yêu cầu",
+    "addRequestHttp": "Yêu cầu HTTP",
+    "addRequestGraphql": "Yêu cầu GraphQL",
+    "addRequestGrpc": "Yêu cầu gRPC",
+    "addRequestSoap": "Yêu cầu SOAP",
+    "addRequestOdata": "Yêu cầu OData",
+    "addRequestWebsocket": "Yêu cầu WebSocket",
+    "addFolder": "Thêm thư mục",
+    "addEnvironmentFolder": "Thêm thư mục môi trường",
+    "addVariable": "Thêm biến",
+    "addTag": "Thêm thẻ",
+    "expandAllFolders": "Mở rộng tất cả thư mục",
+    "collapseAllFolders": "Thu gọn tất cả thư mục",
+    "sendActiveRequest": "Gửi yêu cầu",
+    "cancelActiveRequest": "Hủy yêu cầu",
+    "generateCodeSnippet": "Tạo đoạn mã",
+    "copyAsCurl": "Sao chép dưới dạng cURL",
+    "exportOpenApi": "Xuất sang OpenAPI",
+    "clearAuthCache": "Xóa bộ nhớ đệm xác thực",
+    "openLogsFolder": "Mở thư mục nhật ký"
+  },
+  "sidebar": {
+    "addRequest": "Thêm yêu cầu",
+    "collapseAll": "Thu gọn tất cả yêu cầu",
+    "workspace": "Không gian làm việc",
+    "favorites": "Yêu thích",
+    "newFolder": "Thư mục mới",
+    "newEnvironmentFolder": "Thư mục môi trường mới",
+    "contextMenu": {
+      "createFolder": "Tạo thư mục",
+      "createEnvironmentFolder": "Tạo thư mục môi trường",
+      "delete": "Xóa",
+      "clone": "Nhân bản",
+      "rename": "Đổi tên",
+      "addToFavorites": "Thêm vào mục yêu thích",
+      "removeFromFavorites": "Xóa khỏi mục yêu thích",
+      "closeTab": "Đóng",
+      "closeOtherTabs": "Đóng các tab khác",
+      "closeTabsToTheRight": "Đóng các tab bên phải",
+      "closeAllTabs": "Đóng tất cả",
+      "add": {
+        "title": "Thêm",
+        "folder": "Thư mục",
+        "httpGet": "Yêu cầu HTTP – GET",
+        "httpPost": "Yêu cầu HTTP – POST",
+        "httpPut": "Yêu cầu HTTP – PUT",
+        "httpPatch": "Yêu cầu HTTP – PATCH",
+        "httpDelete": "Yêu cầu HTTP – DELETE",
+        "graphql": "Yêu cầu GraphQL",
+        "grpc": "Yêu cầu gRPC",
+        "soap": "Yêu cầu SOAP",
+        "websocket": "Yêu cầu WebSocket",
+        "odata": "Yêu cầu OData",
+        "auth": "Yêu cầu xác thực HTTP"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Xác nhận xóa",
+      "folderMessage": "Bạn có chắc chắn muốn xóa thư mục \"{{name}}\" và toàn bộ nội dung của nó không?",
+      "itemMessage": "Bạn có chắc chắn muốn xóa \"{{name}}\" không?",
+      "confirm": "Xóa",
+      "cancel": "Hủy"
+    }
+  },
+  "environment": {
+    "newName": "Môi trường mới",
+    "add": "Thêm môi trường",
+    "rename": "Đổi tên",
+    "addSub": "Thêm môi trường con",
+    "delete": "Xóa"
+  },
+  "folderView": {
+    "environments": "Môi trường",
+    "environmentsAriaLabel": "Môi trường của thư mục",
+    "variables": "Biến",
+    "addVariable": "Thêm hàng biến",
+    "selectEnvironment": "Chọn một môi trường để xem các biến",
+    "tabs": {
+      "docs": "Tài liệu",
+      "environments": "Môi trường",
+      "notes": "Ghi chú"
+    },
+    "home": {
+      "configureEnvs": "Cấu hình môi trường",
+      "configureEnvsDesc": "Thiết lập URL cơ sở, biến và xác thực cho mỗi môi trường",
+      "viewDocs": "Xem tài liệu",
+      "viewDocsDesc": "Duyệt tài liệu API, mô hình và endpoint",
+      "favoriteRequests": "Yêu cầu yêu thích",
+      "removeFavorite": "Xóa khỏi mục yêu thích",
+      "apiUpdate": {
+        "title": "Cập nhật spec API",
+        "noConfig": "Thư mục này không được tạo từ nguồn có thể nhập.",
+        "urlLabel": "URL",
+        "lastImportedLabel": "Nhập lần cuối",
+        "lastCheckedLabel": "Kiểm tra lần cuối",
+        "neverImported": "Chưa bao giờ nhập",
+        "neverChecked": "Chưa bao giờ kiểm tra",
+        "refreshing": "Đang làm mới spec API…",
+        "fetching": "Đang lấy…",
+        "upToDate": "Spec API đã được cập nhật.",
+        "ok": "OK"
+      }
+    },
+    "contextVariables": {
+      "title": "Các biến ngữ cảnh khả dụng",
+      "description": "Sử dụng các biến này trong URL yêu cầu và các biến kiểu biểu thức của bạn với cú pháp {{handlebars}}.",
+      "name": "Biến",
+      "value": "Giá trị đã giải quyết",
+      "copied": "Đã sao chép!"
+    }
+  },
+  "requestTab": {
+    "deprecated": "Endpoint này đã không còn được dùng và có thể bị xóa trong phiên bản tương lai.",
+    "send": "Gửi",
+    "cancel": "Hủy",
+    "urlPlaceholder": "URL yêu cầu",
+    "methodSelect": "Chọn phương thức HTTP",
+    "addHeader": "Thêm header",
+    "addParam": "Thêm tham số",
+    "environmentSelector": {
+      "noEnvironment": "Không có môi trường"
+    },
+    "body": {
+      "fileLabel": "Tệp hoặc URL:",
+      "browse": "Duyệt..."
+    },
+    "tabs": {
+      "docs": "Tài liệu",
+      "requestLayout": "Yêu cầu",
+      "headers": "Header",
+      "body": "Body",
+      "params": "Tham số",
+      "pathParams": "Tham số đường dẫn",
+      "notes": "Ghi chú",
+      "codeSnippets": "Đoạn mã",
+      "responsesHistory": "Lịch sử phản hồi"
+    },
+    "responses": {
+      "tabs": {
+        "response": "Phản hồi",
+        "requestBody": "Body yêu cầu",
+        "graph": "Đồ thị"
+      },
+      "loading": "Đang gửi yêu cầu...",
+      "noResponse": "Nhấp Gửi để thực thi yêu cầu",
+      "history": {
+        "list": "Danh sách lịch sử phản hồi",
+        "empty": "Chưa có phản hồi nào được ghi lại",
+        "select": "Chọn một phản hồi để xem chi tiết",
+        "pin": "Ghim phản hồi",
+        "unpin": "Bỏ ghim phản hồi"
+      }
+    }
+  },
+  "workbench": {
+    "tabContextMenu": {
+      "close": "Đóng",
+      "closeOthers": "Đóng các tab khác",
+      "addToFavorites": "Thêm vào mục yêu thích",
+      "removeFromFavorites": "Xóa khỏi mục yêu thích"
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Đi đến định nghĩa"
+  },
+  "keyValueTable": {
+    "types": {
+      "string": "Chuỗi",
+      "secret": "Bí mật",
+      "number": "Số",
+      "dateTime": "Ngày/giờ",
+      "color": "Màu",
+      "expression": "Biểu thức",
+      "boolean": "Boolean"
+    },
+    "apiEnums": "Kiểu được định nghĩa bởi API"
+  },
+  "graphql": {
+    "send": "Gửi",
+    "urlPlaceholder": "URL endpoint GraphQL",
+    "tabs": {
+      "query": "Truy vấn",
+      "variables": "Biến",
+      "headers": "Header"
+    }
+  },
+  "grpc": {
+    "send": "Gọi",
+    "urlPlaceholder": "Máy chủ gRPC (host:port)",
+    "tabs": {
+      "message": "Thông điệp",
+      "metadata": "Siêu dữ liệu"
+    }
+  },
+  "soap": {
+    "send": "Gửi",
+    "urlPlaceholder": "URL endpoint SOAP",
+    "tabs": {
+      "body": "Body",
+      "headers": "Header"
+    }
+  },
+  "websocket": {
+    "connect": "Kết nối",
+    "connected": "Đã kết nối",
+    "disconnected": "Đã ngắt kết nối",
+    "noMessages": "Chưa có thông điệp",
+    "urlPlaceholder": "URL WebSocket",
+    "event": "Sự kiện",
+    "topic": "Chủ đề",
+    "tabs": {
+      "message": "Thông điệp",
+      "headers": "Header"
+    }
+  },
+  "search": {
+    "placeholder": "Tìm kiếm...",
+    "noResults": "Không tìm thấy kết quả",
+    "resultsAriaLabel": "Kết quả tìm kiếm",
+    "categories": {
+      "request": "Yêu cầu",
+      "folder": "Thư mục",
+      "environment": "Môi trường",
+      "settings": "Cài đặt",
+      "tag": "Thẻ"
+    },
+    "tooltip": {
+      "noDetails": "Không có chi tiết",
+      "noContent": "Không có tài liệu hoặc ghi chú"
+    }
+  },
+  "httpStatus": {
+    "100": {
+      "name": "Continue",
+      "description": "Máy chủ đã nhận được header yêu cầu và máy khách nên tiếp tục gửi body yêu cầu."
+    },
+    "101": {
+      "name": "Switching Protocols",
+      "description": "Bên yêu cầu đã đề nghị máy chủ chuyển đổi giao thức và máy chủ đã đồng ý."
+    },
+    "200": {
+      "name": "OK",
+      "description": "Phản hồi tiêu chuẩn cho các yêu cầu HTTP thành công. Phản hồi thực tế phụ thuộc vào phương thức yêu cầu được sử dụng."
+    },
+    "201": {
+      "name": "Created",
+      "description": "Yêu cầu đã được thực hiện, dẫn đến việc tạo ra một tài nguyên mới."
+    },
+    "202": {
+      "name": "Accepted",
+      "description": "Yêu cầu đã được chấp nhận để xử lý, nhưng quá trình xử lý chưa hoàn tất."
+    },
+    "204": {
+      "name": "No Content",
+      "description": "Máy chủ đã xử lý yêu cầu thành công và không trả về nội dung nào."
+    },
+    "301": {
+      "name": "Moved Permanently",
+      "description": "Yêu cầu này và tất cả các yêu cầu trong tương lai nên được chuyển hướng đến URI đã cho."
+    },
+    "302": {
+      "name": "Found",
+      "description": "Yêu cầu máy khách xem một URL khác. Đặc tả HTTP/1.0 yêu cầu máy khách thực hiện chuyển hướng tạm thời."
+    },
+    "304": {
+      "name": "Not Modified",
+      "description": "Cho biết tài nguyên chưa được sửa đổi kể từ phiên bản được chỉ định bởi header yêu cầu."
+    },
+    "400": {
+      "name": "Bad Request",
+      "description": "Máy chủ không thể hoặc sẽ không xử lý yêu cầu do lỗi rõ ràng từ máy khách (ví dụ: cú pháp yêu cầu không hợp lệ)."
+    },
+    "401": {
+      "name": "Unauthorized",
+      "description": "Yêu cầu xác thực và đã thất bại hoặc chưa được cung cấp."
+    },
+    "403": {
+      "name": "Forbidden",
+      "description": "Yêu cầu chứa dữ liệu hợp lệ và đã được máy chủ hiểu, nhưng máy chủ từ chối hành động."
+    },
+    "404": {
+      "name": "Not Found",
+      "description": "Không thể tìm thấy tài nguyên được yêu cầu nhưng có thể có sẵn trong tương lai."
+    },
+    "405": {
+      "name": "Method Not Allowed",
+      "description": "Một phương thức yêu cầu không được hỗ trợ cho tài nguyên được yêu cầu."
+    },
+    "408": {
+      "name": "Request Timeout",
+      "description": "Máy chủ đã hết thời gian chờ yêu cầu."
+    },
+    "409": {
+      "name": "Conflict",
+      "description": "Cho biết rằng yêu cầu không thể được xử lý do xung đột trong trạng thái hiện tại của tài nguyên."
+    },
+    "410": {
+      "name": "Gone",
+      "description": "Cho biết rằng tài nguyên được yêu cầu trước đây đã được sử dụng nhưng không còn khả dụng và sẽ không khả dụng trở lại."
+    },
+    "415": {
+      "name": "Unsupported Media Type",
+      "description": "Thực thể yêu cầu có kiểu media mà máy chủ hoặc tài nguyên không hỗ trợ."
+    },
+    "422": {
+      "name": "Unprocessable Entity",
+      "description": "Yêu cầu được định dạng tốt nhưng không thể được thực hiện do lỗi ngữ nghĩa."
+    },
+    "429": {
+      "name": "Too Many Requests",
+      "description": "Người dùng đã gửi quá nhiều yêu cầu trong một khoảng thời gian nhất định (giới hạn tốc độ)."
+    },
+    "500": {
+      "name": "Internal Server Error",
+      "description": "Thông báo lỗi chung, được đưa ra khi gặp điều kiện không mong muốn và không có thông báo cụ thể nào phù hợp hơn."
+    },
+    "501": {
+      "name": "Not Implemented",
+      "description": "Máy chủ không nhận ra phương thức yêu cầu, hoặc không có khả năng đáp ứng yêu cầu."
+    },
+    "502": {
+      "name": "Bad Gateway",
+      "description": "Máy chủ đang hoạt động như một gateway hoặc proxy và đã nhận được phản hồi không hợp lệ từ máy chủ thượng nguồn."
+    },
+    "503": {
+      "name": "Service Unavailable",
+      "description": "Máy chủ không thể xử lý yêu cầu (vì quá tải hoặc đang bảo trì)."
+    },
+    "504": {
+      "name": "Gateway Timeout",
+      "description": "Máy chủ đang hoạt động như một gateway hoặc proxy và không nhận được phản hồi kịp thời từ máy chủ thượng nguồn."
+    }
+  },
+  "welcome": {
+    "confirmRemoveFavorite": "Bạn có chắc chắn muốn xóa \"{{fileName}}\" khỏi mục yêu thích không?",
+    "noFilesHint": "Mở một tệp hoặc tạo tệp mới để bắt đầu",
+    "newAriaLabel": "Tạo bộ sưu tập mới",
+    "openAriaLabel": "Mở bộ sưu tập từ đĩa",
+    "landmarkLabel": "Chào mừng"
+  },
+  "save": {
+    "title": "Tùy chọn lưu",
+    "mode": {
+      "label": "Chế độ lưu",
+      "file": "Tệp đơn",
+      "folder": "Cấu trúc thư mục",
+      "fileDescription": "Lưu mọi thứ trong một tệp duy nhất",
+      "folderDescription": "Lưu dưới dạng cấu trúc thư mục với các tệp riêng biệt"
+    },
+    "format": {
+      "label": "Định dạng",
+      "yamlDescription": "Con người đọc được",
+      "jsonDescription": "Định dạng tiêu chuẩn",
+      "json5Description": "JSON + chú thích"
+    },
+    "preview": {
+      "label": "Xem trước cấu trúc",
+      "noDocumentation": "Không có tài liệu được phân tích cho nguồn này."
+    }
+  },
+  "common": {
+    "cancel": "Hủy",
+    "save": "Lưu"
+  },
+  "helpers": {
+    "categories": {
+      "comparison": "So sánh",
+      "string": "Chuỗi",
+      "math": "Toán học",
+      "array": "Mảng",
+      "object": "Đối tượng",
+      "url": "URL",
+      "date": "Ngày",
+      "regex": "Regex",
+      "misc": "Khác"
+    },
+    "eq": "Bằng nghiêm ngặt (===)",
+    "ne": "Không bằng nghiêm ngặt (!==)",
+    "neq": "Không bằng nghiêm ngặt (!==)",
+    "lt": "Nhỏ hơn (<)",
+    "lte": "Nhỏ hơn hoặc bằng (<=)",
+    "gt": "Lớn hơn (>)",
+    "gte": "Lớn hơn hoặc bằng (>=)",
+    "and": "Helper khối: render nếu tất cả giá trị đều đúng",
+    "or": "Helper khối: render nếu có giá trị nào đúng",
+    "not": "Trả về giá trị boolean ngược lại",
+    "ifEquals": "Helper khối: render nếu các giá trị bằng nhau",
+    "is": "Helper khối: so sánh bằng lỏng lẻo",
+    "isnt": "Helper khối: so sánh không bằng lỏng lẻo",
+    "default": "Trả về giá trị mặc định nếu giá trị đầu tiên là null/undefined",
+    "compare": "Helper khối: so sánh với toán tử",
+    "lowercase": "Chuyển chuỗi thành chữ thường",
+    "uppercase": "Chuyển chuỗi thành chữ hoa",
+    "capitalize": "Viết hoa chữ cái đầu tiên",
+    "capitalizeAll": "Viết hoa chữ cái đầu tiên của mỗi từ",
+    "titleize": "Viết hoa chữ cái đầu tiên của mỗi từ",
+    "camelcase": "Chuyển thành camelCase",
+    "pascalcase": "Chuyển thành PascalCase",
+    "snakecase": "Chuyển thành snake_case",
+    "snakeCase": "Chuyển thành snake_case (bí danh)",
+    "dashcase": "Chuyển thành dash-case (kebab-case)",
+    "dotcase": "Chuyển thành dot.case",
+    "pathcase": "Chuyển thành path/case",
+    "sentencecase": "Chuyển thành Sentence case",
+    "slugify": "Chuyển thành slug thân thiện với URL",
+    "trim": "Xóa khoảng trắng ở hai đầu",
+    "trimLeft": "Xóa khoảng trắng ở đầu",
+    "trimRight": "Xóa khoảng trắng ở cuối",
+    "replace": "Thay thế tất cả lần xuất hiện của a bằng b",
+    "split": "Chia chuỗi thành mảng",
+    "truncate": "Cắt chuỗi đến độ dài chỉ định",
+    "ellipsis": "Cắt chuỗi với dấu ba chấm",
+    "append": "Thêm hậu tố vào chuỗi",
+    "prepend": "Thêm tiền tố vào chuỗi",
+    "reverse": "Đảo ngược chuỗi hoặc mảng",
+    "startsWith": "Helper khối: render nếu chuỗi bắt đầu bằng tiền tố",
+    "endsWith": "Helper khối: render nếu chuỗi kết thúc bằng hậu tố",
+    "contains": "Helper khối: render nếu chuỗi chứa chuỗi con",
+    "padStart": "Đệm chuỗi ở đầu để đạt độ dài",
+    "padEnd": "Đệm chuỗi ở cuối để đạt độ dài",
+    "repeat": "Lặp lại chuỗi n lần",
+    "substring": "Trích xuất một phần của chuỗi",
+    "indexOf": "Trả về chỉ số của chuỗi con (-1 nếu không tìm thấy)",
+    "count": "Đếm số lần xuất hiện của chuỗi con",
+    "newLineToBr": "Chuyển dòng mới thành thẻ <br>",
+    "stripTags": "Xóa thẻ HTML khỏi chuỗi",
+    "add": "Cộng hai số",
+    "subtract": "Trừ b từ a",
+    "multiply": "Nhân hai số",
+    "divide": "Chia a cho b",
+    "modulo": "Trả về số dư của a / b",
+    "abs": "Trả về giá trị tuyệt đối",
+    "ceil": "Làm tròn lên đến số nguyên gần nhất",
+    "floor": "Làm tròn xuống đến số nguyên gần nhất",
+    "round": "Làm tròn đến số nguyên gần nhất",
+    "min": "Trả về giá trị nhỏ nhất",
+    "max": "Trả về giá trị lớn nhất",
+    "pow": "Trả về cơ số lũy thừa số mũ",
+    "sqrt": "Trả về căn bậc hai",
+    "random": "Trả về số nguyên ngẫu nhiên giữa min và max",
+    "sum": "Trả về tổng các giá trị trong mảng",
+    "avg": "Trả về trung bình các giá trị trong mảng",
+    "toFixed": "Định dạng số với số thập phân cố định",
+    "toInt": "Chuyển đổi thành số nguyên",
+    "toFloat": "Chuyển đổi thành số thực",
+    "first": "Trả về phần tử đầu tiên của mảng",
+    "last": "Trả về phần tử cuối cùng của mảng",
+    "after": "Trả về các phần tử sau chỉ số n",
+    "before": "Trả về các phần tử trước chỉ số n",
+    "slice": "Trả về lát của mảng",
+    "length": "Trả về độ dài của mảng/chuỗi/đối tượng",
+    "join": "Nối các phần tử mảng với dấu phân cách",
+    "sort": "Sắp xếp mảng",
+    "unique": "Trả về các giá trị duy nhất",
+    "concat": "Nối các mảng",
+    "flatten": "Làm phẳng mảng lồng nhau",
+    "pluck": "Trích xuất thuộc tính từ mảng đối tượng",
+    "itemAt": "Trả về phần tử tại chỉ số",
+    "inArray": "Helper khối: render nếu giá trị có trong mảng",
+    "isArray": "Trả về true nếu giá trị là mảng",
+    "isEmpty": "Helper khối: render nếu giá trị rỗng",
+    "some": "Helper khối: render nếu một số phần tử khớp",
+    "every": "Helper khối: render nếu tất cả các phần tử khớp",
+    "JSONstringify": "Chuyển đổi đối tượng thành chuỗi JSON",
+    "JSONparse": "Phân tích chuỗi JSON thành đối tượng",
+    "get": "Lấy thuộc tính lồng nhau theo đường dẫn",
+    "keys": "Trả về các khóa của đối tượng",
+    "values": "Trả về các giá trị của đối tượng",
+    "entries": "Trả về các cặp [khóa, giá trị]",
+    "hasOwn": "Helper khối: render nếu đối tượng có thuộc tính",
+    "pick": "Tạo đối tượng với các khóa được chọn",
+    "omit": "Tạo đối tượng không có các khóa được chỉ định",
+    "merge": "Hợp nhất nhiều đối tượng",
+    "isObject": "Trả về true nếu giá trị là đối tượng",
+    "typeOf": "Trả về kiểu của giá trị",
+    "encodeURI": "Mã hóa chuỗi cho URL",
+    "decodeURI": "Giải mã chuỗi URL",
+    "urlParse": "Phân tích URL thành các thành phần",
+    "stripQuerystring": "Xóa querystring khỏi URL",
+    "stripProtocol": "Xóa giao thức khỏi URL",
+    "now": "Trả về ngày hiện tại dưới dạng chuỗi ISO",
+    "timestamp": "Trả về dấu thời gian hiện tại tính bằng mili giây",
+    "year": "Trả về năm hiện tại",
+    "formatDate": "Định dạng ngày với mẫu",
+    "match": "Trả về các kết quả khớp regex",
+    "test": "Helper khối: render nếu regex khớp",
+    "coalesce": "Trả về giá trị đầu tiên không phải null/undefined",
+    "uuid": "Tạo UUID ngẫu nhiên",
+    "noop": "Helper khối render nội dung như cũ",
+    "raw": "Helper khối render nội dung thô",
+    "times": "Helper khối lặp lại n lần",
+    "range": "Tạo mảng các số"
+  },
+  "behavior": {
+    "title": "Hành vi",
+    "syncSidebarWithTabs": "Đồng bộ lựa chọn thanh bên với tab đang hoạt động",
+    "syncSidebarWithTabsDescription": "Khi chuyển tab trong không gian làm việc, tự động chọn và hiển thị mục tương ứng trong thanh bên",
+    "dateTimeFormat": "Định dạng ngày/giờ",
+    "dateTimeFormatDescription": "Định dạng được sử dụng để hiển thị ngày và giờ trong ứng dụng",
+    "dateTimeFormat.us": "Định dạng Mỹ (MM/DD/YYYY, 12h)",
+    "dateTimeFormat.iso": "Định dạng ISO (YYYY-MM-DD, 24h)"
+  },
+  "console": {
+    "title": "Bảng điều khiển",
+    "requestFormat": "Định dạng yêu cầu",
+    "requestFormatDescription": "Kiểu shell mặc định được sử dụng để hiển thị các yêu cầu đi trong tab Bảng điều khiển. Mỗi dòng là một dòng lệnh có thể sao chép-dán; nút chuyển trong thanh công cụ Bảng điều khiển ghi đè mặc định này cho tab hiện tại.",
+    "requestFormat.curl": "curl (kiểu Unix)",
+    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+  },
+  "import": {
+    "title": "Nhập yêu cầu",
+    "source": {
+      "label": "Dán gì đó vào đây!",
+      "placeholder": "Nhập đường dẫn tệp, URL, hoặc dán lệnh curl/PowerShell..."
+    },
+    "formats": {
+      "swagger": {
+        "description": "Spec OpenAPI 2.0 ra đời tại SmartBear. Dán Swagger JSON hoặc YAML — Restorm phân tích mọi thao tác, kéo các sơ đồ bảo mật, và biến toàn bộ tài liệu thành cây yêu cầu có thể duyệt được.",
+        "trademark": "Swagger là nhãn hiệu đã đăng ký của SmartBear Software."
+      },
+      "openapi": {
+        "description": "Tiêu chuẩn OpenAPI hiện tại (3.0 và 3.1). Cùng cách thức dán-và-chạy như Swagger: tham số, body yêu cầu, sơ đồ bảo mật và webhook đến dưới dạng cây yêu cầu kiểu với ví dụ sẵn sàng gửi.",
+        "trademark": "OpenAPI là dự án của OpenAPI Initiative thuộc Linux Foundation."
+      },
+      "curl": {
+        "description": "Đã có yêu cầu chạy trong terminal? Dán toàn bộ lệnh curl — cờ, header, body, query string — và Restorm xây dựng lại thành yêu cầu thực sự mà bạn có thể chạy lại, chỉnh sửa và ghim.",
+        "trademark": "curl là phần mềm mã nguồn mở © Daniel Stenberg, được sử dụng ở đây theo các điều khoản của nó."
+      },
+      "powershell": {
+        "description": "Ý tưởng tương tự, kiểu PowerShell. Dán lệnh Invoke-WebRequest hoặc Invoke-RestMethod và Restorm đọc URI, phương thức, header và body để tạo một yêu cầu mà bạn có thể phát triển trực quan.",
+        "trademark": "PowerShell là nhãn hiệu đã đăng ký của Microsoft Corporation."
+      },
+      "postman": {
+        "description": "Có bộ sưu tập Postman được lưu ở văn phòng? Thả JSON vào — Restorm đọc mọi yêu cầu, mọi phản hồi mẫu và mọi biến môi trường, sau đó xây dựng lại bộ sưu tập thành cây Restorm mà bạn có thể chạy song song với các API còn lại.",
+        "trademark": "Postman là nhãn hiệu đã đăng ký của Postman, Inc., được sử dụng ở đây chỉ để tham chiếu tương thích."
+      },
+      "insomnia": {
+        "description": "Đến từ Insomnia? Thả tệp xuất của bạn. Restorm hiểu định dạng bộ sưu tập v4 / v5 của nó, mang theo mọi yêu cầu, header, body và môi trường, và hiển thị tất cả dưới dạng cây Restorm.",
+        "trademark": "Insomnia là nhãn hiệu đã đăng ký của Kong Inc., được sử dụng ở đây chỉ để tham chiếu tương thích."
+      },
+      "bruno": {
+        "description": "Tệp .bru kiểu Bruno hoặc xuất thư mục — Restorm đọc định dạng văn bản .bru, bao gồm các khối scripting, và tái tạo mỗi yêu cầu thành nút Restorm hạng nhất sẵn sàng gửi.",
+        "trademark": "Bruno là phần mềm mã nguồn mở (MIT) của Anoop M. D., được sử dụng ở đây theo các điều khoản của nó."
+      },
+      "graphql": {
+        "description": "Dán SDL GraphQL (.graphql / .gql / một bản dán từ client GraphQL của bạn) và Restorm tạo khung một yêu cầu cho mỗi thao tác, được kết nối đúng với kiểu query / mutation / subscription với các biến đã được cấu trúc sẵn.",
+        "trademark": "GraphQL là nhãn hiệu của GraphQL Foundation, một dự án của Joint Development Foundation."
+      },
+      "grpc": {
+        "description": "Thả tệp .proto (hoặc một thư mục chứa chúng) và Restorm đi qua mọi dịch vụ, mọi RPC, mọi thông điệp — biến mỗi phương thức thành yêu cầu kiểu mà bạn có thể gửi qua trình thực thi gRPC mà không cần chạm vào codegen.",
+        "trademark": "gRPC là dự án của Cloud Native Computing Foundation."
+      },
+      "soap": {
+        "description": "Có WSDL? Dán nó (hoặc URL của nó) — Restorm phân tích mỗi <port> và <operation> và tạo các phong bì SOAP sẵn sàng gửi với header SOAPAction phù hợp, khung body kiểu sơ đồ và sơ đồ xác thực mà WSDL khai báo."
+      },
+      "websocket": {
+        "description": "Dán endpoint WebSocket (ws:// hoặc wss://) — Restorm mở kết nối, ghi lại các khung chào từ máy chủ, và tạo khung các yêu cầu send / subscribe với các mẫu payload có thể phát lại.",
+        "trademark": "WebSocket là một giao thức được chuẩn hóa bởi IETF (RFC 6455) và W3C."
+      },
+      "kafka": {
+        "description": "Dán URL bootstrap-server của Apache Kafka (hoặc một danh sách topic) — Restorm đăng ký consumer + producer cho mỗi topic, giải mã payload Avro / Protobuf qua Schema Registry của bạn, và cho phép bạn phát lại các offset riêng lẻ chỉ với một cú nhấp chuột.",
+        "trademark": "Apache Kafka và logo Kafka là nhãn hiệu của Apache Software Foundation."
+      },
+      "socketio": {
+        "description": "Dán URL máy chủ Socket.IO — Restorm đàm phán handshake, liệt kê các namespace và tên sự kiện mà máy chủ phát ra, và cung cấp cho bạn một yêu cầu cho mỗi sự kiện emit / on với xác thực payload.",
+        "trademark": "Socket.IO là thư viện mã nguồn mở được phát hành theo giấy phép MIT; tên và logo được sử dụng có tính chất chỉ định."
+      },
+      "odata": {
+        "description": "Dán URL tài liệu dịch vụ OData hoặc tệp $metadata — Restorm đọc CSDL, xây dựng lại các entity set, function import và action, đồng thời điền sẵn các tùy chọn truy vấn $filter / $select / $top / $skip trên mỗi thao tác."
+      },
+      "mqtt": {
+        "description": "Dán URL broker MQTT hoặc danh mục topic — Restorm tạo khung yêu cầu publish / subscribe cho mỗi topic, giữ kết nối hoạt động để xem trước trực tiếp, và ghi nhớ snapshot tin nhắn retained để bạn có thể phát lại sau.",
+        "trademark": "MQTT là một tiêu chuẩn OASIS; tên và logo MQTT là nhãn hiệu của OASIS Open."
+      }
+    },
+    "loading": "Đang phân tích...",
+    "noResults": "Không tìm thấy yêu cầu",
+    "error": {
+      "unknown": "Đã xảy ra lỗi không xác định"
+    },
+    "ok": "Nhập",
+    "cancel": "Hủy",
+    "dropZone": "Vùng thả"
+  },
+  "emptyBench": {
+    "importCard": {
+      "title": "Nhập API của bạn",
+      "body": "Mang vào một spec OpenAPI / Swagger, một schema GraphQL, một bộ sưu tập Postman / Bruno / Insomnia, hoặc dán một lệnh curl / PowerShell. Restorm sẽ phân tích, dựng cây thư mục và mỗi endpoint sẵn sàng."
+    },
+    "recentActivity": {
+      "title": "Hoạt động gần đây",
+      "empty": "Gửi yêu cầu đầu tiên của bạn để xem nó ở đây."
+    },
+    "apiCard": {
+      "favorites": "Yêu thích",
+      "topUsed": "Top 10 dùng nhiều nhất",
+      "recent": "Yêu cầu gần đây",
+      "description": "Mô tả",
+      "version": "Phiên bản",
+      "quickLinks": {
+        "environments": "Môi trường",
+        "docs": "Tài liệu",
+        "notes": "Ghi chú"
+      }
+    }
+  }
+}

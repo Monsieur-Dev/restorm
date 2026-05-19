@@ -1,0 +1,726 @@
+{
+  "app": {
+    "title": "restorm",
+    "openSettings": "Deschide setările",
+    "draftsRestoredTitle": "Lucrul nesalvat a fost restaurat",
+    "draftsRestoredBody_one": "{{count}} ciornă a fost restaurată din sesiunea anterioară.",
+    "draftsRestoredBody_few": "{{count}} ciorne au fost restaurate din sesiunea anterioară.",
+    "draftsRestoredBody_other": "{{count}} de ciorne au fost restaurate din sesiunea anterioară."
+  },
+  "statusbar": {
+    "requestHistory": "Istoricul cererilor",
+    "envSelector": {
+      "applyToAll": "Aplică la toate cererile"
+    }
+  },
+  "tips": {
+    "cardTitle": "Sfaturi și trucuri",
+    "maximizeTab": {
+      "title": "Maximizează o filă cu un clic",
+      "body": "Dublu-clic pe orice filă din workbench pentru a o afișa pe ecran complet. Apasă Esc pentru a reveni la aspectul anterior."
+    },
+    "mcpControl": {
+      "title": "Controlează restorm cu AI",
+      "body": "Restorm include un server MCP, astfel încât asistenții AI precum Claude Code pot lista, deschide, edita și executa cererile tale, pot inspecta răspunsurile și pot manipula spațiul de lucru programatic – fără să părăsească conversația."
+    },
+    "envSwitch": {
+      "title": "Schimbă mediile cu ușurință!",
+      "body": "Schimbă mediul cererii curente sau al tuturor cererilor din API-ul tău dând clic pe butonul din bara de stare, ori clic dreapta pe butonul de trimitere al cererii."
+    },
+    "authRequests": {
+      "title": "Trebuie să te autentifici pentru a-ți folosi API-ul?",
+      "body": "În loc să lansezi o cerere de fiecare dată pentru a obține un token și a-l copia peste tot, folosește cererile de autentificare. Când un apel eșuează (401, 403, …) sau expiră durata de viață a tokenului, cererea de autentificare este rulată automat din nou pentru a extrage tokenul și a-l reutiliza. Practic!"
+    },
+    "supplyChain": {
+      "title": "Protejează-te!",
+      "body": "Ca orice software, Restorm folosește biblioteci terțe. Pentru a preveni atacurile asupra lanțului de aprovizionare, toate apelurile ieșite sunt interceptate la nivelul cel mai jos, iar te avertizăm dacă o bibliotecă terță încearcă să-ți fure datele personale!"
+    },
+    "codeSnippets": {
+      "title": "Restorm te ajută să programezi!",
+      "body": "Găsește fragmente de cod la fiecare cerere pentru a te ajuta să le integrezi în software-ul tău. Multe limbaje sunt disponibile: curl, PowerShell, TypeScript, C# și multe altele!"
+    },
+    "workbenchLayout": {
+      "title": "Organizează-ți spațiul de lucru",
+      "body": "Ai un ecran mare și multe cereri? Pune-le una lângă alta, una sub alta sau aproape oricum vrei — pur și simplu trage o filă acolo unde dorești. Totul pentru confortul tău!"
+    },
+    "persistState": {
+      "title": "Regăsește-l așa cum l-ai lăsat!",
+      "body": "Dacă închizi Restorm și îl deschizi din nou, îl vei regăsi exact în aceeași stare în care l-ai lăsat."
+    },
+    "favorites": {
+      "title": "Unele îți sunt mai dragi decât altele…",
+      "body": "Ai cereri care îți sunt mai apropiate de suflet? Marchează-le ca favorite!"
+    },
+    "console": {
+      "title": "Vezi ce se întâmplă",
+      "body": "Consola îți arată apelurile către API-uri pe măsură ce lansezi cereri. Practic pentru a le copia în terminal când ai nevoie! Ce preferi: curl sau PowerShell?"
+    },
+    "miniBrowser": {
+      "title": "Sătul să tot schimbi fereastra?",
+      "body": "Restorm include un mini browser web. Practic atunci când aplicația ta reacționează vizual la apelurile API."
+    },
+    "apiDocs": {
+      "title": "Documentația — chiar aici",
+      "body": "Nu mai trebuie să schimbi între Restorm și documentația API-ului tău. Dacă API-ul oferă o specificație (Swagger, OpenAPI, …), aceasta este importată în Restorm și o poți consulta direct aici."
+    },
+    "secrets": {
+      "title": "Protejează-ți secretele",
+      "body": "Parolele și tokenurile tale de autorizare nu sunt salvate direct în fișierul Restorm. De aceea, Restorm stochează secretele și istoricul cererilor în fișiere separate. Depinde de tine să nu le urci pe GitHub. Restorm poate prelua secretele și din AWS, GitHub sau alte surse."
+    },
+    "themes": {
+      "title": "Culorile tale, starea ta",
+      "body": "Restorm vine cu mai multe scheme de culori. Alege-o pe cea care se potrivește stării tale."
+    },
+    "search": {
+      "title": "Găsește orice, repede",
+      "body": "Ai văzut partea de sus a acestei ferestre? Restorm include un motor de căutare — gata cu orele de căutat ACEA cerere."
+    },
+    "multiEnv": {
+      "title": "Aceleași cereri, medii diferite",
+      "body": "Ai un mediu de dev, unul de prod și unul de staging? Aceleași cereri, dar nu chiar aceleași URL-uri și nu chiar aceleași tokenuri… Folosește mediile și variabilele ca să comuți între ele cu un singur clic. Le poți chiar diferenția cu culori și iconițe, ca să eviți spaimele de vineri seara dinaintea weekendului în producție!"
+    },
+    "protocols": {
+      "title": "Mult mai mult decât REST",
+      "body": "Restorm vorbește REST… și mult mai mult! GraphQL, gRPC, SOAP, OData, WebSocket — toate aceste protocoale la îndemână, fără să schimbi unealta."
+    },
+    "responseTree": {
+      "title": "Vizualizează răspunsurile API",
+      "body": "Știai că poți consulta răspunsurile API mai grafic? Restorm le afișează sub forma unui arbore interactiv pe care îl poți parcurge, plia și desfășura."
+    },
+    "responseHistory": {
+      "title": "Istoricul cererilor",
+      "body": "Poți consulta istoricul tuturor apelurilor către API-urile tale. Practic pentru a afla ce s-a întâmplat de fapt."
+    },
+    "multiLanguage": {
+      "title": "27 de limbi!",
+      "body": "Restorm vorbește 27 de limbi. Engleză, franceză, spaniolă, germană, italiană, japoneză, chineză, coreeană și multe altele — alege-o pe a ta din setări!"
+    }
+  },
+  "authFailureToast": {
+    "title": "Autentificare eșuată",
+    "fallbackReason": "Cererea de autentificare nu a reușit.",
+    "openAuthRoute": "Deschide ruta de autentificare"
+  },
+  "menuBar": {
+    "file": "Fișier",
+    "new": "Nou",
+    "import": "Importă",
+    "open": "Deschide",
+    "openFolder": "Deschide folderul",
+    "recentFiles": "Fișiere recente",
+    "favorites": "Favorite",
+    "close": "Închide",
+    "save": "Salvează",
+    "saveAll": "Salvează tot",
+    "saveAs": "Salvează ca",
+    "exit": "Ieșire",
+    "selection": "Selecție",
+    "tools": "Unelte",
+    "findInCollection": "Caută în colecție",
+    "addRequest": "Adaugă cerere",
+    "addRequestHttp": "Cerere HTTP",
+    "addRequestGraphql": "Cerere GraphQL",
+    "addRequestGrpc": "Cerere gRPC",
+    "addRequestSoap": "Cerere SOAP",
+    "addRequestOdata": "Cerere OData",
+    "addRequestWebsocket": "Cerere WebSocket",
+    "addFolder": "Adaugă folder",
+    "addEnvironmentFolder": "Adaugă folder de mediu",
+    "addVariable": "Adaugă variabilă",
+    "addTag": "Adaugă etichetă",
+    "expandAllFolders": "Extinde toate folderele",
+    "collapseAllFolders": "Restrânge toate folderele",
+    "sendActiveRequest": "Trimite cererea",
+    "cancelActiveRequest": "Anulează cererea",
+    "generateCodeSnippet": "Generează fragment de cod",
+    "copyAsCurl": "Copiază drept cURL",
+    "exportOpenApi": "Exportă în OpenAPI",
+    "clearAuthCache": "Golește memoria cache de autentificare",
+    "openLogsFolder": "Deschide folderul de jurnale"
+  },
+  "sidebar": {
+    "addRequest": "Adaugă cerere",
+    "collapseAll": "Restrânge toate cererile",
+    "workspace": "Spațiu de lucru",
+    "favorites": "Favorite",
+    "newFolder": "Folder nou",
+    "newEnvironmentFolder": "Folder nou de mediu",
+    "contextMenu": {
+      "createFolder": "Creează folder",
+      "createEnvironmentFolder": "Creează folder de mediu",
+      "delete": "Șterge",
+      "clone": "Clonează",
+      "rename": "Redenumește",
+      "addToFavorites": "Adaugă la favorite",
+      "removeFromFavorites": "Elimină din favorite",
+      "closeTab": "Închide",
+      "closeOtherTabs": "Închide celelalte",
+      "closeTabsToTheRight": "Închide cele din dreapta",
+      "closeAllTabs": "Închide toate",
+      "add": {
+        "title": "Adaugă",
+        "folder": "Folder",
+        "httpGet": "Cerere HTTP – GET",
+        "httpPost": "Cerere HTTP – POST",
+        "httpPut": "Cerere HTTP – PUT",
+        "httpPatch": "Cerere HTTP – PATCH",
+        "httpDelete": "Cerere HTTP – DELETE",
+        "graphql": "Cerere GraphQL",
+        "grpc": "Cerere gRPC",
+        "soap": "Cerere SOAP",
+        "websocket": "Cerere WebSocket",
+        "odata": "Cerere OData",
+        "auth": "Cerere HTTP de autentificare"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Confirmă ștergerea",
+      "folderMessage": "Sigur doriți să ștergeți folderul \"{{name}}\" și tot conținutul său?",
+      "itemMessage": "Sigur doriți să ștergeți \"{{name}}\"?",
+      "confirm": "Șterge",
+      "cancel": "Anulează"
+    }
+  },
+  "environment": {
+    "newName": "Mediu nou",
+    "add": "Adaugă mediu",
+    "rename": "Redenumește",
+    "addSub": "Adaugă submediu",
+    "delete": "Șterge"
+  },
+  "folderView": {
+    "environments": "Medii",
+    "environmentsAriaLabel": "Mediile folderului",
+    "variables": "Variabile",
+    "addVariable": "Adaugă rând de variabilă",
+    "selectEnvironment": "Selectați un mediu pentru a vedea variabilele",
+    "tabs": {
+      "docs": "Documentație",
+      "environments": "Medii",
+      "notes": "Notițe"
+    },
+    "home": {
+      "configureEnvs": "Configurează mediile",
+      "configureEnvsDesc": "Configurați URL-urile de bază, variabilele și autentificarea pentru fiecare mediu",
+      "viewDocs": "Vezi documentația",
+      "viewDocsDesc": "Răsfoiți documentația API-ului, modelele și punctele finale",
+      "favoriteRequests": "Cereri favorite",
+      "removeFavorite": "Elimină din favorite",
+      "apiUpdate": {
+        "title": "Actualizări ale specificației API",
+        "noConfig": "Acest folder nu a fost creat dintr-o sursă importabilă.",
+        "urlLabel": "URL",
+        "lastImportedLabel": "Ultimul import",
+        "lastCheckedLabel": "Ultima verificare",
+        "neverImported": "Niciodată importat",
+        "neverChecked": "Niciodată verificat",
+        "refreshing": "Se reîmprospătează specificația API…",
+        "fetching": "Se descarcă…",
+        "upToDate": "Specificația API este la zi.",
+        "ok": "OK"
+      }
+    },
+    "contextVariables": {
+      "title": "Variabile de context disponibile",
+      "description": "Utilizați aceste variabile în URL-urile cererilor și în variabilele de tip expresie cu sintaxa {{handlebars}}.",
+      "name": "Variabilă",
+      "value": "Valoare rezolvată",
+      "copied": "Copiat!"
+    }
+  },
+  "requestTab": {
+    "deprecated": "Acest endpoint este depreciat și ar putea fi eliminat într-o versiune viitoare.",
+    "send": "Trimite",
+    "cancel": "Anulează",
+    "urlPlaceholder": "URL-ul cererii",
+    "methodSelect": "Selectați metoda HTTP",
+    "addHeader": "Adaugă antet",
+    "addParam": "Adaugă parametru",
+    "environmentSelector": {
+      "noEnvironment": "Niciun mediu"
+    },
+    "body": {
+      "fileLabel": "Fișier sau URL:",
+      "browse": "Răsfoiește..."
+    },
+    "tabs": {
+      "docs": "Documentație",
+      "requestLayout": "Cerere",
+      "headers": "Antete",
+      "body": "Corp",
+      "params": "Parametri",
+      "pathParams": "Parametri de cale",
+      "notes": "Notițe",
+      "codeSnippets": "Fragmente de cod",
+      "responsesHistory": "Istoricul răspunsurilor"
+    },
+    "responses": {
+      "tabs": {
+        "response": "Răspuns",
+        "requestBody": "Corpul cererii",
+        "graph": "Grafic"
+      },
+      "loading": "Se trimite cererea...",
+      "noResponse": "Apăsați Trimite pentru a executa cererea",
+      "history": {
+        "list": "Listă a istoricului răspunsurilor",
+        "empty": "Niciun răspuns înregistrat încă",
+        "select": "Selectați un răspuns pentru a vedea detaliile",
+        "pin": "Fixează răspunsul",
+        "unpin": "Defixează răspunsul"
+      }
+    }
+  },
+  "workbench": {
+    "tabContextMenu": {
+      "close": "Închide",
+      "closeOthers": "Închide celelalte",
+      "addToFavorites": "Adaugă la favorite",
+      "removeFromFavorites": "Elimină din favorite"
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Mergi la definiție"
+  },
+  "keyValueTable": {
+    "types": {
+      "string": "Șir",
+      "secret": "Secret",
+      "number": "Număr",
+      "dateTime": "Dată și oră",
+      "color": "Culoare",
+      "expression": "Expresie",
+      "boolean": "Boolean"
+    },
+    "apiEnums": "Tipuri definite de API"
+  },
+  "graphql": {
+    "send": "Trimite",
+    "urlPlaceholder": "URL-ul endpoint-ului GraphQL",
+    "tabs": {
+      "query": "Interogare",
+      "variables": "Variabile",
+      "headers": "Antete"
+    }
+  },
+  "grpc": {
+    "send": "Invocă",
+    "urlPlaceholder": "Server gRPC (gazdă:port)",
+    "tabs": {
+      "message": "Mesaj",
+      "metadata": "Metadate"
+    }
+  },
+  "soap": {
+    "send": "Trimite",
+    "urlPlaceholder": "URL-ul endpoint-ului SOAP",
+    "tabs": {
+      "body": "Corp",
+      "headers": "Antete"
+    }
+  },
+  "websocket": {
+    "connect": "Conectează",
+    "connected": "Conectat",
+    "disconnected": "Deconectat",
+    "noMessages": "Niciun mesaj încă",
+    "urlPlaceholder": "URL WebSocket",
+    "event": "Eveniment",
+    "topic": "Subiect",
+    "tabs": {
+      "message": "Mesaj",
+      "headers": "Antete"
+    }
+  },
+  "search": {
+    "placeholder": "Caută...",
+    "noResults": "Niciun rezultat găsit",
+    "resultsAriaLabel": "Rezultatele căutării",
+    "categories": {
+      "request": "Cereri",
+      "folder": "Foldere",
+      "environment": "Medii",
+      "settings": "Setări",
+      "tag": "Etichete"
+    },
+    "tooltip": {
+      "noDetails": "Niciun detaliu disponibil",
+      "noContent": "Nicio documentație sau notiță"
+    }
+  },
+  "httpStatus": {
+    "100": {
+      "name": "Continue",
+      "description": "Serverul a primit antetele cererii și clientul ar trebui să continue trimiterea corpului cererii."
+    },
+    "101": {
+      "name": "Switching Protocols",
+      "description": "Solicitantul a cerut serverului să schimbe protocoalele și serverul a acceptat."
+    },
+    "200": {
+      "name": "OK",
+      "description": "Răspuns standard pentru cererile HTTP reușite. Răspunsul efectiv depinde de metoda cererii utilizate."
+    },
+    "201": {
+      "name": "Created",
+      "description": "Cererea a fost îndeplinită, având ca rezultat crearea unei resurse noi."
+    },
+    "202": {
+      "name": "Accepted",
+      "description": "Cererea a fost acceptată pentru procesare, dar procesarea nu a fost finalizată."
+    },
+    "204": {
+      "name": "No Content",
+      "description": "Serverul a procesat cu succes cererea și nu returnează niciun conținut."
+    },
+    "301": {
+      "name": "Moved Permanently",
+      "description": "Această cerere și toate cele viitoare ar trebui direcționate către URI-ul indicat."
+    },
+    "302": {
+      "name": "Found",
+      "description": "Îi spune clientului să se uite la un alt URL. Specificația HTTP/1.0 cerea clientului să efectueze o redirecționare temporară."
+    },
+    "304": {
+      "name": "Not Modified",
+      "description": "Indică faptul că resursa nu a fost modificată de la versiunea specificată de antetele cererii."
+    },
+    "400": {
+      "name": "Bad Request",
+      "description": "Serverul nu poate sau nu va procesa cererea din cauza unei erori aparente a clientului (de ex. sintaxă malformată a cererii)."
+    },
+    "401": {
+      "name": "Unauthorized",
+      "description": "Este necesară autentificarea, iar aceasta a eșuat sau nu a fost încă furnizată."
+    },
+    "403": {
+      "name": "Forbidden",
+      "description": "Cererea conținea date valide și a fost înțeleasă de server, dar serverul refuză acțiunea."
+    },
+    "404": {
+      "name": "Not Found",
+      "description": "Resursa solicitată nu a putut fi găsită, dar ar putea fi disponibilă în viitor."
+    },
+    "405": {
+      "name": "Method Not Allowed",
+      "description": "O metodă de cerere nu este acceptată pentru resursa solicitată."
+    },
+    "408": {
+      "name": "Request Timeout",
+      "description": "Serverul a expirat în așteptarea cererii."
+    },
+    "409": {
+      "name": "Conflict",
+      "description": "Indică faptul că cererea nu a putut fi procesată din cauza unui conflict în starea curentă a resursei."
+    },
+    "410": {
+      "name": "Gone",
+      "description": "Indică faptul că resursa solicitată a fost utilizată anterior, dar nu mai este disponibilă și nu va mai fi disponibilă."
+    },
+    "415": {
+      "name": "Unsupported Media Type",
+      "description": "Entitatea cererii are un tip media pe care serverul sau resursa nu îl acceptă."
+    },
+    "422": {
+      "name": "Unprocessable Entity",
+      "description": "Cererea era bine formată, dar nu a putut fi urmată din cauza unor erori semantice."
+    },
+    "429": {
+      "name": "Too Many Requests",
+      "description": "Utilizatorul a trimis prea multe cereri într-o anumită perioadă de timp (limitare a ratei)."
+    },
+    "500": {
+      "name": "Internal Server Error",
+      "description": "Mesaj de eroare generic, oferit atunci când a fost întâlnită o condiție neașteptată și niciun mesaj mai specific nu este potrivit."
+    },
+    "501": {
+      "name": "Not Implemented",
+      "description": "Serverul fie nu recunoaște metoda cererii, fie nu are capacitatea de a îndeplini cererea."
+    },
+    "502": {
+      "name": "Bad Gateway",
+      "description": "Serverul acționa ca un gateway sau proxy și a primit un răspuns invalid de la serverul din amonte."
+    },
+    "503": {
+      "name": "Service Unavailable",
+      "description": "Serverul nu poate gestiona cererea (deoarece este suprasolicitat sau în întreținere)."
+    },
+    "504": {
+      "name": "Gateway Timeout",
+      "description": "Serverul acționa ca un gateway sau proxy și nu a primit un răspuns la timp de la serverul din amonte."
+    }
+  },
+  "welcome": {
+    "confirmRemoveFavorite": "Sigur doriți să eliminați \"{{fileName}}\" din favorite?",
+    "noFilesHint": "Deschideți un fișier sau creați unul nou pentru a începe",
+    "newAriaLabel": "Creează o colecție nouă",
+    "openAriaLabel": "Deschide o colecție de pe disc",
+    "landmarkLabel": "Bine ați venit"
+  },
+  "save": {
+    "title": "Opțiuni de salvare",
+    "mode": {
+      "label": "Mod de salvare",
+      "file": "Fișier unic",
+      "folder": "Structură de foldere",
+      "fileDescription": "Salvează totul într-un singur fișier",
+      "folderDescription": "Salvează ca structură de foldere cu fișiere separate"
+    },
+    "format": {
+      "label": "Format",
+      "yamlDescription": "Lizibil pentru oameni",
+      "jsonDescription": "Format standard",
+      "json5Description": "JSON + comentarii"
+    },
+    "preview": {
+      "label": "Previzualizare structură",
+      "noDocumentation": "Nu există documentație analizată pentru această sursă."
+    }
+  },
+  "common": {
+    "cancel": "Anulează",
+    "save": "Salvează"
+  },
+  "helpers": {
+    "categories": {
+      "comparison": "Comparație",
+      "string": "Șir",
+      "math": "Matematică",
+      "array": "Tablou",
+      "object": "Obiect",
+      "url": "URL",
+      "date": "Dată",
+      "regex": "Regex",
+      "misc": "Diverse"
+    },
+    "eq": "Egalitate strictă (===)",
+    "ne": "Inegalitate strictă (!==)",
+    "neq": "Inegalitate strictă (!==)",
+    "lt": "Mai mic decât (<)",
+    "lte": "Mai mic sau egal (<=)",
+    "gt": "Mai mare decât (>)",
+    "gte": "Mai mare sau egal (>=)",
+    "and": "Helper de bloc: afișează dacă toate valorile sunt adevărate",
+    "or": "Helper de bloc: afișează dacă cel puțin o valoare este adevărată",
+    "not": "Returnează valoarea booleană inversă",
+    "ifEquals": "Helper de bloc: afișează dacă valorile sunt egale",
+    "is": "Helper de bloc: comparație non-strictă",
+    "isnt": "Helper de bloc: comparație non-strictă inegală",
+    "default": "Returnează valoarea implicită dacă prima este null/undefined",
+    "compare": "Helper de bloc: compară cu operator",
+    "lowercase": "Convertește șirul în minuscule",
+    "uppercase": "Convertește șirul în majuscule",
+    "capitalize": "Transformă prima literă în majusculă",
+    "capitalizeAll": "Transformă prima literă a fiecărui cuvânt în majusculă",
+    "titleize": "Transformă prima literă a fiecărui cuvânt în majusculă",
+    "camelcase": "Convertește în camelCase",
+    "pascalcase": "Convertește în PascalCase",
+    "snakecase": "Convertește în snake_case",
+    "snakeCase": "Convertește în snake_case (alias)",
+    "dashcase": "Convertește în dash-case (kebab-case)",
+    "dotcase": "Convertește în dot.case",
+    "pathcase": "Convertește în path/case",
+    "sentencecase": "Convertește în formă de propoziție",
+    "slugify": "Convertește într-un slug prietenos cu URL-urile",
+    "trim": "Elimină spațiile albe de la ambele capete",
+    "trimLeft": "Elimină spațiile albe de la început",
+    "trimRight": "Elimină spațiile albe de la sfârșit",
+    "replace": "Înlocuiește toate aparițiile lui a cu b",
+    "split": "Împarte șirul într-un tablou",
+    "truncate": "Trunchiază șirul la lungimea specificată",
+    "ellipsis": "Trunchiază șirul cu puncte de suspensie",
+    "append": "Adaugă un sufix la șir",
+    "prepend": "Adaugă un prefix la șir",
+    "reverse": "Inversează un șir sau un tablou",
+    "startsWith": "Helper de bloc: afișează dacă șirul începe cu prefixul",
+    "endsWith": "Helper de bloc: afișează dacă șirul se termină cu sufixul",
+    "contains": "Helper de bloc: afișează dacă șirul conține subșirul",
+    "padStart": "Completează șirul la început pentru a atinge lungimea",
+    "padEnd": "Completează șirul la sfârșit pentru a atinge lungimea",
+    "repeat": "Repetă șirul de n ori",
+    "substring": "Extrage o parte din șir",
+    "indexOf": "Returnează indexul subșirului (-1 dacă nu este găsit)",
+    "count": "Numără aparițiile subșirului",
+    "newLineToBr": "Convertește liniile noi în etichete <br>",
+    "stripTags": "Elimină etichetele HTML din șir",
+    "add": "Adună două numere",
+    "subtract": "Scade b din a",
+    "multiply": "Înmulțește două numere",
+    "divide": "Împarte a la b",
+    "modulo": "Returnează restul lui a / b",
+    "abs": "Returnează valoarea absolută",
+    "ceil": "Rotunjește în sus la cel mai apropiat întreg",
+    "floor": "Rotunjește în jos la cel mai apropiat întreg",
+    "round": "Rotunjește la cel mai apropiat întreg",
+    "min": "Returnează valoarea minimă",
+    "max": "Returnează valoarea maximă",
+    "pow": "Returnează baza ridicată la exponent",
+    "sqrt": "Returnează rădăcina pătrată",
+    "random": "Returnează un întreg aleator între min și max",
+    "sum": "Returnează suma valorilor din tablou",
+    "avg": "Returnează media valorilor din tablou",
+    "toFixed": "Formatează numărul cu zecimale fixe",
+    "toInt": "Convertește în întreg",
+    "toFloat": "Convertește în număr cu virgulă mobilă",
+    "first": "Returnează primul/primele element(e) al(e) tabloului",
+    "last": "Returnează ultimul/ultimele element(e) al(e) tabloului",
+    "after": "Returnează elementele după indexul n",
+    "before": "Returnează elementele înainte de indexul n",
+    "slice": "Returnează o secțiune a tabloului",
+    "length": "Returnează lungimea tabloului/șirului/obiectului",
+    "join": "Unește elementele tabloului cu un separator",
+    "sort": "Sortează tabloul",
+    "unique": "Returnează valorile unice",
+    "concat": "Concatenează tablouri",
+    "flatten": "Aplatizează un tablou imbricat",
+    "pluck": "Extrage o proprietate dintr-un tablou de obiecte",
+    "itemAt": "Returnează elementul de la index",
+    "inArray": "Helper de bloc: afișează dacă valoarea este în tablou",
+    "isArray": "Returnează true dacă valoarea este tablou",
+    "isEmpty": "Helper de bloc: afișează dacă valoarea este goală",
+    "some": "Helper de bloc: afișează dacă unele elemente se potrivesc",
+    "every": "Helper de bloc: afișează dacă toate elementele se potrivesc",
+    "JSONstringify": "Convertește obiectul într-un șir JSON",
+    "JSONparse": "Parsează șirul JSON într-un obiect",
+    "get": "Obține o proprietate imbricată după cale",
+    "keys": "Returnează cheile obiectului",
+    "values": "Returnează valorile obiectului",
+    "entries": "Returnează perechile [cheie, valoare]",
+    "hasOwn": "Helper de bloc: afișează dacă obiectul are proprietatea",
+    "pick": "Creează un obiect cu cheile selectate",
+    "omit": "Creează un obiect fără cheile specificate",
+    "merge": "Combină mai multe obiecte",
+    "isObject": "Returnează true dacă valoarea este obiect",
+    "typeOf": "Returnează tipul valorii",
+    "encodeURI": "Codifică un șir pentru URL",
+    "decodeURI": "Decodifică un șir URL",
+    "urlParse": "Parsează URL-ul în componente",
+    "stripQuerystring": "Elimină query string-ul din URL",
+    "stripProtocol": "Elimină protocolul din URL",
+    "now": "Returnează data curentă ca șir ISO",
+    "timestamp": "Returnează marca temporală curentă în milisecunde",
+    "year": "Returnează anul curent",
+    "formatDate": "Formatează data cu un șablon",
+    "match": "Returnează potrivirile regex",
+    "test": "Helper de bloc: afișează dacă regex-ul se potrivește",
+    "coalesce": "Returnează prima valoare nenulă/non-undefined",
+    "uuid": "Generează un UUID aleator",
+    "noop": "Helper de bloc care redă conținutul ca atare",
+    "raw": "Helper de bloc care redă conținut brut",
+    "times": "Helper de bloc care repetă de n ori",
+    "range": "Generează un tablou de numere"
+  },
+  "behavior": {
+    "title": "Comportament",
+    "syncSidebarWithTabs": "Sincronizează selecția barei laterale cu fila activă",
+    "syncSidebarWithTabsDescription": "La schimbarea filei în spațiul de lucru, selectează și afișează automat elementul corespunzător în bara laterală",
+    "dateTimeFormat": "Format dată/oră",
+    "dateTimeFormatDescription": "Format folosit pentru a afișa datele și orele în aplicație",
+    "dateTimeFormat.us": "Format SUA (LL/ZZ/AAAA, 12h)",
+    "dateTimeFormat.iso": "Format ISO (AAAA-LL-ZZ, 24h)"
+  },
+  "console": {
+    "title": "Consolă",
+    "requestFormat": "Format al cererilor",
+    "requestFormatDescription": "Stilul de shell folosit implicit pentru afișarea cererilor de ieșire în fila Consolă. Fiecare rând este o linie de comandă ce poate fi copiată; comutatorul din bara de unelte a Consolei suprascrie acest implicit pentru fila curentă.",
+    "requestFormat.curl": "curl (stil Unix)",
+    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+  },
+  "import": {
+    "title": "Importă cereri",
+    "source": {
+      "label": "Lipiți ceva aici!",
+      "placeholder": "Introduceți calea fișierului, URL-ul sau lipiți o comandă curl/PowerShell..."
+    },
+    "formats": {
+      "swagger": {
+        "description": "Specificația OpenAPI 2.0, născută la SmartBear. Lipiți un Swagger JSON sau YAML — Restorm parsează fiecare operațiune, preia schemele de securitate și transformă întregul document într-un arbore navigabil de cereri.",
+        "trademark": "Swagger este o marcă înregistrată a SmartBear Software."
+      },
+      "openapi": {
+        "description": "Standardul OpenAPI actual (3.0 și 3.1). Aceeași ergonomie de tip lipit-și-gata ca la Swagger: parametri, corpuri de cereri, scheme de securitate și webhook-uri ajung sub forma unui arbore de cereri tipizate, cu exemple gata de trimis.",
+        "trademark": "OpenAPI este un proiect al OpenAPI Initiative sub umbrela Linux Foundation."
+      },
+      "curl": {
+        "description": "Aveți deja cererea rulând în terminalul dvs.? Lipiți întreaga invocare curl — flag-uri, antete, corp, query string — și Restorm o reconstruiește ca o cerere reală pe care o puteți rerula, edita și fixa.",
+        "trademark": "curl este software open source © Daniel Stenberg, folosit aici conform termenilor săi."
+      },
+      "powershell": {
+        "description": "Aceeași idee, varianta PowerShell. Lipiți o comandă Invoke-WebRequest sau Invoke-RestMethod și Restorm citește URI-ul, metoda, antetele și corpul pentru a porni o cerere pe care o puteți itera vizual.",
+        "trademark": "PowerShell este o marcă înregistrată a Microsoft Corporation."
+      },
+      "postman": {
+        "description": "Aveți o colecție Postman salvată la birou? Aruncați JSON-ul — Restorm citește fiecare cerere, fiecare răspuns de exemplu și fiecare variabilă de mediu, apoi reconstruiește colecția ca un arbore Restorm pe care îl puteți rula alături de restul API-urilor dvs.",
+        "trademark": "Postman este o marcă înregistrată a Postman, Inc., folosită aici doar ca referință de compatibilitate."
+      },
+      "insomnia": {
+        "description": "Veniți de la Insomnia? Aruncați exportul dvs. Restorm înțelege formatul său de colecție v4 / v5, aduce fiecare cerere, antet, corp și mediu și prezintă totul ca un arbore Restorm.",
+        "trademark": "Insomnia este o marcă înregistrată a Kong Inc., folosită aici doar ca referință de compatibilitate."
+      },
+      "bruno": {
+        "description": "Fișiere .bru în stil Bruno sau un export de folder — Restorm citește formatul text .bru, inclusiv blocurile de scripting, și recreează fiecare cerere ca un nod Restorm de primă clasă, gata de trimis.",
+        "trademark": "Bruno este software open source (MIT) de Anoop M. D., folosit aici conform termenilor săi."
+      },
+      "graphql": {
+        "description": "Lipiți un SDL GraphQL (.graphql / .gql / un text lipit din clientul dvs. GraphQL) și Restorm generează câte o cerere per operațiune, conectată la tipul potrivit query / mutation / subscription, cu variabile deja structurate.",
+        "trademark": "GraphQL este o marcă a GraphQL Foundation, un proiect al Joint Development Foundation."
+      },
+      "grpc": {
+        "description": "Aruncați un fișier .proto (sau un director cu astfel de fișiere) și Restorm parcurge fiecare serviciu, fiecare RPC, fiecare mesaj — transformând fiecare metodă într-o cerere tipizată pe care o puteți trimite prin executorul gRPC fără a atinge codegen-ul.",
+        "trademark": "gRPC este un proiect al Cloud Native Computing Foundation."
+      },
+      "soap": {
+        "description": "Aveți un WSDL? Lipiți-l (sau URL-ul său) — Restorm parsează fiecare <port> și <operation> și produce plicuri SOAP gata de trimis, cu antetul SOAPAction corect, schelete de corp tipizate prin schemă și schema de autentificare declarată de WSDL."
+      },
+      "websocket": {
+        "description": "Lipiți un endpoint WebSocket (ws:// sau wss://) — Restorm deschide conexiunea, captează frame-urile de salut ale serverului și generează cereri send / subscribe cu șabloane de payload care pot fi rejucate.",
+        "trademark": "WebSocket este un protocol standardizat de IETF (RFC 6455) și W3C."
+      },
+      "kafka": {
+        "description": "Lipiți URL-ul unui bootstrap-server Apache Kafka (sau o listă de topice) — Restorm înregistrează consumatori și producători per topic, decodează payload-uri Avro / Protobuf prin Schema Registry-ul dvs. și vă permite să rejucați offset-uri individuale cu un singur clic.",
+        "trademark": "Apache Kafka și logo-ul Kafka sunt mărci ale Apache Software Foundation."
+      },
+      "socketio": {
+        "description": "Lipiți URL-ul unui server Socket.IO — Restorm negociază handshake-ul, listează namespace-urile și numele evenimentelor emise de server și vă oferă câte o cerere per eveniment emit / on, cu validare de payload.",
+        "trademark": "Socket.IO este o bibliotecă open source publicată sub licența MIT; numele și logo-ul sunt folosite nominativ."
+      },
+      "odata": {
+        "description": "Lipiți URL-ul unui document de serviciu OData sau un fișier $metadata — Restorm citește CSDL-ul, reconstruiește entity set-urile, function import-urile și acțiunile, plus precompletează opțiunile de interogare $filter / $select / $top / $skip pentru fiecare operațiune."
+      },
+      "mqtt": {
+        "description": "Lipiți URL-ul unui broker MQTT sau un catalog de topice — Restorm generează cereri publish / subscribe per topic, menține conexiunea activă pentru previzualizări în flux și reține instantanee ale mesajelor retained pentru a le putea rejuca mai târziu.",
+        "trademark": "MQTT este un standard OASIS; numele și logo-ul MQTT sunt mărci ale OASIS Open."
+      }
+    },
+    "loading": "Se analizează...",
+    "noResults": "Nicio cerere găsită",
+    "error": {
+      "unknown": "A apărut o eroare necunoscută"
+    },
+    "ok": "Importă",
+    "cancel": "Anulează",
+    "dropZone": "Zonă de plasare"
+  },
+  "emptyBench": {
+    "importCard": {
+      "title": "Importă API-ul tău",
+      "body": "Adu o spec OpenAPI / Swagger, o schemă GraphQL, o colecție Postman / Bruno / Insomnia, sau lipește o comandă curl / PowerShell. Restorm o parsează, construiește structura de foldere și aterizează cu fiecare endpoint precompletat."
+    },
+    "recentActivity": {
+      "title": "Activitate recentă",
+      "empty": "Trimite prima ta cerere pentru a o vedea aici."
+    },
+    "apiCard": {
+      "favorites": "Favorite",
+      "topUsed": "Top 10 cele mai folosite",
+      "recent": "Ultimele cereri",
+      "description": "Descriere",
+      "version": "Versiune",
+      "quickLinks": {
+        "environments": "Medii",
+        "docs": "Documentație",
+        "notes": "Note"
+      }
+    }
+  }
+}

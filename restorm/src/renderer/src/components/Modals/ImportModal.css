@@ -76,6 +76,52 @@
      becomes the flex-1 scroll area. */
 }
 
+.import-preview-tabs-root {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.import-preview-tab-bar {
+  display: flex;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--tab-border);
+  margin-bottom: 8px;
+}
+
+.import-preview-tab-button {
+  background: transparent;
+  border: none;
+  padding: 6px 12px;
+  font: inherit;
+  color: var(--tab-inactiveForeground);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.import-preview-tab-button.is-active {
+  color: var(--tab-activeForeground);
+  border-bottom-color: var(--focusBorder);
+}
+
+.import-preview-tab-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.import-preview-routes-tab,
+.import-preview-doc-tab {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 8px;
+}
+
 .import-preview-header {
   display: flex;
   align-items: center;

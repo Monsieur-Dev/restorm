@@ -1,25 +1,10 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EditorTabs } from './EditorTabs';
-import { Modal } from '../Modal';
 import { useSetting } from '../../hooks/useSettings';
 import type { EditorGroup, EditorWorkbenchCallbacks, SplitDirection } from './types';
 import { getEditorDragData, isEditorDragEvent } from './dnd';
-import { getTabTitleString } from './utils';
-
-/**
- * Hard-memoised slot for cached tab content. `tabContentCache` already
- * returns a stable React element ref per tab, and `<div key={tab.id}>`
- * wrappers stay in a stable DOM order, but wrapping the cached element
- * in a memoised passthrough pins the reconciler bailout: when
- * `content` is referentially identical, React does not re-enter the
- * inner subtree, and the embedded editors keep their fibers — and the
- * underlying Monaco / Milkdown instances — mounted.
- */
-const CachedTabContentSlot = React.memo<{ content: React.ReactNode }>(
-	({ content }) => <>{content}</>,
-	(prev, next) => prev.content === next.content
-);
-CachedTabContentSlot.displayName = 'CachedTabContentSlot';
+import { useIsWorkbenchResizing } from './WorkbenchResizeContext';
+import { TabSlot } from './TabContentHost';
 
 export interface EditorGroupViewProps extends EditorWorkbenchCallbacks {
 	group: EditorGroup;
@@ -32,64 +17,63 @@ export interface EditorGroupViewProps extends EditorWorkbenchCallbacks {
 	 */
 	onFocusRequested?: (groupId: string) => void;
 	/**
+	 * Flip the workbench-wide maximized tab id. Pass `null` to restore.
+	 * Called on tab double-click; the fullscreen modal itself lives in
+	 * `EditorWorkbench`.
+	 */
+	onChangeFullscreenTabId?: (tabId: string | null) => void;
+	/**
+	 * Workbench-wide id of the maximized tab (the modal-owner state).
+	 * A `TabSlot` whose tab matches relocates its host node into the
+	 * modal body and renders `display:none` so it doesn't occupy layout
+	 * space behind the modal.
+	 */
+	maximizedTabId?: string | null;
+	/**
+	 * The fullscreen modal's body DOM node (owned by `EditorWorkbench`).
+	 * `TabSlot` relocates the maximized tab's host node into it.
+	 */
+	modalBody?: HTMLElement | null;
+	/**
+	 * Returns the stable, workbench-owned host `<div>` for a tab id.
+	 * `TabSlot` relocates it into this group's slot on mount, so a tab's
+	 * React subtree survives being moved between groups.
+	 */
+	getTabHost: (tabId: string) => HTMLDivElement;
+	/**
 	 * Optional test id base for stable E2E selectors.
 	 */
 	'data-testid'?: string;
 }
 
 export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
-	const { group, renderTabContent, onSplitTab, onActivateTab, hasFocus = false, onFocusRequested, 'data-testid': dataTestId } = props;
+	const {
+		group, onSplitTab, onActivateTab, hasFocus = false, onFocusRequested,
+		onChangeFullscreenTabId, maximizedTabId = null, modalBody = null,
+		getTabHost,
+		'data-testid': dataTestId
+	} = props;
 	const [splitTarget, setSplitTarget] = useState<SplitDirection | 'center' | undefined>(undefined);
 	const [isEditorDrag, setIsEditorDrag] = useState<boolean>(false);
-	const [fullscreenTabId, setFullscreenTabId] = useState<string | null>(null);
 	const contentRef = useRef<HTMLDivElement | null>(null);
 	const [advancedEffects] = useSetting('appearance:advancedVisualEffects');
+	// Hide every tab body — including the active one — while a sash is
+	// being dragged. Heavy embeds (Monaco, Electron `<webview>`,
+	// ResizeObserver-driven charts) otherwise relayout on every
+	// mousemove and visibly lag the drag. Module-level signal (not
+	// React Context) — see WorkbenchResizeContext.tsx for why.
+	const isResizing = useIsWorkbenchResizing();
 
-	// Cache rendered tab contents — render each tab only once, then reuse.
-	// This prevents React from unmounting/remounting heavy components (Monaco editors, etc.)
-	// when switching tabs — only the CSS display property toggles visibility.
-	// Using useState initializer as a persistent cache that survives re-renders.
-	const [tabContentCache] = useState(() => new Map<string, React.ReactNode>());
-	const [tabVersionCache] = useState(() => new Map<string, number>());
-
-	const tabContents = useMemo(() => {
-		// Prune entries for closed tabs
-		const tabIds = new Set(group.tabs.map(t => t.id));
-		for (const k of tabContentCache.keys()) {
-			if (!tabIds.has(k)) {
-				tabContentCache.delete(k);
-				tabVersionCache.delete(k);
-			}
-		}
-		// Render new tabs or tabs whose contentVersion changed, reuse cached content for others
-		const result = new Map<string, React.ReactNode>();
-		for (const tab of group.tabs) {
-			const cachedVersion = tabVersionCache.get(tab.id);
-			const currentVersion = tab.contentVersion ?? 0;
-			let content = tabContentCache.get(tab.id);
-			if (!content || cachedVersion !== currentVersion) {
-				content = renderTabContent?.(tab) ?? tab.content ?? <span>{tab.title}</span>;
-				tabContentCache.set(tab.id, content);
-				tabVersionCache.set(tab.id, currentVersion);
-			}
-			result.set(tab.id, content);
-		}
-		return result;
-	}, [group.tabs, renderTabContent, tabContentCache, tabVersionCache]);
-
-	// Handle tab double-click for fullscreen modal
+	// Open the fullscreen modal on tab double-click. Only flips the
+	// workbench-wide id — the modal and the tab content both live in
+	// `EditorWorkbench` now; the `allowFullscreen` gate keeps a
+	// non-maximizable tab from opening one.
 	const handleTabDoubleClick = useCallback((tabId: string) => {
 		const tab = group.tabs.find((t) => t.id === tabId);
 		if (tab?.allowFullscreen) {
-			setFullscreenTabId(tabId);
+			onChangeFullscreenTabId?.(tabId);
 		}
-	}, [group.tabs]);
-
-	// Get the fullscreen tab
-	const fullscreenTab = useMemo(() => {
-		if (!fullscreenTabId) return null;
-		return group.tabs.find((t) => t.id === fullscreenTabId) ?? null;
-	}, [fullscreenTabId, group.tabs]);
+	}, [group.tabs, onChangeFullscreenTabId]);
 
 	// Wrapper around onActivateTab that also requests focus for this group
 	const handleActivateTab = useCallback((tabId: string, groupId: string) => {
@@ -102,8 +86,17 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 		onActivateTab?.(tabId, groupId);
 	}, [onActivateTab, onFocusRequested]);
 
-	const computeDirection = useCallback((e: React.DragEvent<HTMLDivElement>): SplitDirection | 'center' => {
-		const rect = e.currentTarget.getBoundingClientRect();
+	// Direction is measured against the group's content placeholder
+	// (`contentRef`), NOT `e.currentTarget`: the drag handlers are now
+	// attached as native DOM listeners on that placeholder (see the
+	// effect below), so a `dragover` bubbling up from the portalled tab
+	// content reports `currentTarget` as the placeholder anyway — but
+	// reading the ref directly keeps it correct regardless of which
+	// descendant the event actually fired on.
+	const computeDirection = useCallback((e: DragEvent): SplitDirection | 'center' => {
+		const host = contentRef.current;
+		if (!host) return 'center';
+		const rect = host.getBoundingClientRect();
 		const relX = (e.clientX - rect.left) / rect.width;
 		const relY = (e.clientY - rect.top) / rect.height;
 		const margin = 0.10; // 10% border zones
@@ -142,7 +135,7 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 		return { ...base, clipPath: 'inset(50% 0 0 0)' };
 	}, [splitTarget, isEditorDrag, advancedEffects]);
 
-	const isBlockedDrop = useCallback((e: React.DragEvent<HTMLDivElement>): boolean => {
+	const isBlockedDrop = useCallback((e: DragEvent): boolean => {
 		const data = getEditorDragData(e);
 		// Only consider drops coming from editor tab drag-and-drop
 		if (!data) return false;
@@ -153,7 +146,7 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 	}, [group.id, group.tabs]);
 
 	const onDragOverGroup = useCallback(
-		(e: React.DragEvent<HTMLDivElement>) => {
+		(e: DragEvent) => {
 			// Detect if current drag is coming from editor tabs (using MIME type or fallback flag)
 			const isEditor = isEditorDragEvent(e);
 			setIsEditorDrag(isEditor);
@@ -163,18 +156,18 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 			}
 			e.preventDefault();
 			if (isBlockedDrop(e)) {
-				try { e.dataTransfer.dropEffect = 'none'; } catch { /* noop */ }
+				if (e.dataTransfer) e.dataTransfer.dropEffect = 'none';
 				setSplitTarget(undefined);
 				return;
 			}
-			try { e.dataTransfer.dropEffect = 'move'; } catch { /* noop */ }
+			if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
 			setSplitTarget(computeDirection(e));
 		},
 		[computeDirection, isBlockedDrop]
 	);
 
 	const onDragEnterGroup = useCallback(
-		(e: React.DragEvent<HTMLDivElement>) => {
+		(e: DragEvent) => {
 			const isEditor = isEditorDragEvent(e);
 			setIsEditorDrag(isEditor);
 			if (!isEditor) {
@@ -183,23 +176,31 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 			}
 			e.preventDefault();
 			if (isBlockedDrop(e)) {
-				try { e.dataTransfer.dropEffect = 'none'; } catch { /* noop */ }
+				if (e.dataTransfer) e.dataTransfer.dropEffect = 'none';
 				setSplitTarget(undefined);
 				return;
 			}
-			try { e.dataTransfer.dropEffect = 'move'; } catch { /* noop */ }
+			if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
 			setSplitTarget(computeDirection(e));
 		},
 		[computeDirection, isBlockedDrop]
 	);
 
-	const onDragLeaveGroup = useCallback(() => {
+	const onDragLeaveGroup = useCallback((e: DragEvent) => {
+		// `dragleave` also fires when the pointer crosses between this
+		// group's own descendants — most notably the split overlay's
+		// `clip-path` boundary, since a clipped element does not
+		// hit-test its clipped-away region. Only tear the overlay down
+		// when the pointer has actually moved to something OUTSIDE the
+		// group container; an intra-group move keeps it up.
+		const next = e.relatedTarget;
+		if (next instanceof Node && contentRef.current?.contains(next)) return;
 		setSplitTarget(undefined);
 		setIsEditorDrag(false);
 	}, []);
 
 	const onDropGroup = useCallback(
-		(e: React.DragEvent<HTMLDivElement>) => {
+		(e: DragEvent) => {
 			const data = getEditorDragData(e);
 			// Ignore drops that are not coming from editor tabs (e.g. Milkdown drag & drop)
 			if (!data) {
@@ -222,6 +223,54 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 		[computeDirection, onSplitTab, group.id, group.tabs]
 	);
 
+	// Attach the split-drop drag handlers as NATIVE DOM listeners on the
+	// content placeholder rather than React `onDrag*` props. The tab
+	// content is `createPortal`'d with `EditorWorkbench` as its React
+	// parent, so React's synthetic drag events on the content propagate
+	// to `EditorWorkbench` and never reach this group's handlers. DOM
+	// bubbling, by contrast, follows the real DOM tree — and the host
+	// node IS a DOM descendant of this placeholder — so a `dragover`
+	// fired anywhere over the group reaches these listeners.
+	useEffect(() => {
+		const el = contentRef.current;
+		if (!el) return undefined;
+		el.addEventListener('dragenter', onDragEnterGroup);
+		el.addEventListener('dragover', onDragOverGroup);
+		el.addEventListener('dragleave', onDragLeaveGroup);
+		el.addEventListener('drop', onDropGroup);
+		return () => {
+			el.removeEventListener('dragenter', onDragEnterGroup);
+			el.removeEventListener('dragover', onDragOverGroup);
+			el.removeEventListener('dragleave', onDragLeaveGroup);
+			el.removeEventListener('drop', onDropGroup);
+		};
+	}, [onDragEnterGroup, onDragOverGroup, onDragLeaveGroup, onDropGroup]);
+
+	// Same portal-side-effect as above: clicking *anywhere* in a tab's
+	// content should make this group the active one (the tab header
+	// lights up). React's synthetic mousedown / focus events on the
+	// portalled content bubble through the React tree to
+	// `EditorWorkbench`, so a React `onMouseDown` / `onFocusCapture` on
+	// this placeholder never sees clicks inside Monaco / the body / the
+	// Send button / etc. Native DOM bubbling DOES reach the placeholder
+	// (the host node is a real DOM descendant), so we use
+	// `addEventListener('mousedown' | 'focusin', …)` instead.
+	//
+	// `focusin` (bubbling counterpart of `focus`) covers programmatic
+	// focus moves — e.g. Tab-key navigation into Monaco, or `.focus()`
+	// from a component — that don't go through `mousedown`.
+	useEffect(() => {
+		const el = contentRef.current;
+		if (!el || !onFocusRequested) return undefined;
+		const handleActivate = (): void => { onFocusRequested(group.id); };
+		el.addEventListener('mousedown', handleActivate);
+		el.addEventListener('focusin', handleActivate);
+		return () => {
+			el.removeEventListener('mousedown', handleActivate);
+			el.removeEventListener('focusin', handleActivate);
+		};
+	}, [onFocusRequested, group.id]);
+
 	return (
 		<div
 			className="editor-group-container"
@@ -232,7 +281,7 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 				'data-active-tab-id': group.activeTabId ?? '',
 				'data-tab-count': String(group.tabs.length)
 			})}
-			style={{ display: 'flex', flexDirection: 'column', minWidth: 0, position: 'relative', height: '100%' }}
+			style={{ display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0, position: 'relative', height: '100%' }}
 		>
 			<div className="title" style={{ display: 'flex' }}>
 				<EditorTabs
@@ -253,33 +302,15 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 					'data-is-editor-drag': isEditorDrag ? 'true' : 'false'
 				})}
 				tabIndex={-1}
-				onDragEnter={onDragEnterGroup}
-				onDragOver={onDragOverGroup}
-				onDragLeave={onDragLeaveGroup}
-				onDrop={onDropGroup}
-				onFocusCapture={() => {
-					// When any element inside this container receives focus (including Monaco),
-					// request focus for this group so tabs are not dimmed
-					// But don't interfere with the actual focus - let Monaco keep its focus
-					if (onFocusRequested) {
-						onFocusRequested(group.id);
-					}
-					// Don't prevent default or stop propagation - let Monaco handle its own focus
-				}}
-				onMouseDown={(e) => {
-					// Only request focus if clicking directly on the container itself (background),
-					// not on interactive elements inside (like Monaco editor, inputs, textareas, etc.)
-					// When clicking on interactive elements, onFocusCapture will handle it
-					const target = e.target as HTMLElement;
-					const isContainerClick = target === contentRef.current;
-					
-					// If clicking on the container itself (background), request focus
-					// Monaco clicks will be handled by onFocusCapture when Monaco receives focus
-					if (isContainerClick && onFocusRequested) {
-						onFocusRequested(group.id);
-					}
-					// Don't prevent default or stop propagation - let Monaco and other editors handle their own clicks
-				}}
+				/*
+				 * Split-drop drag handlers AND the activate-group click /
+				 * focus listeners are attached as native DOM listeners on
+				 * this node (see the two `useEffect`s above) — NOT as
+				 * React props — because the tab content is `createPortal`'d
+				 * with `EditorWorkbench` as its React parent, so synthetic
+				 * events bubble up the React tree to the workbench rather
+				 * than to this group.
+				 */
 				style={{
 					position: 'relative',
 					outline: 'none',
@@ -292,78 +323,50 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 			>
 				<div className="editor-group-content-panel">
 				{/*
-				 * Render the content panes in a STABLE order keyed by
-				 * `tab.id`, independent of the visual tab strip order
-				 * managed by EditorTabs. When the user drags a tab, the
-				 * tab strip reorders (via React's keyed reconciliation
-				 * inside EditorTabs) but here, in the content panel, the
-				 * `<div key={tab.id}>` host order does not change — only
-				 * the `display` style flips between flex and none.
+				 * One empty `TabSlot` per tab, rendered in a STABLE order
+				 * keyed by `tab.id` — independent of the visual tab-strip
+				 * order managed by EditorTabs. The tab *content* is not
+				 * rendered here: each `TabSlot` only registers its `<div>`
+				 * with `EditorWorkbench`, which relocates the tab's
+				 * workbench-owned host node into it. Moving a tab between
+				 * groups (or in/out of the fullscreen modal) is then a
+				 * pure `appendChild` of that host node — React never
+				 * unmounts the tab's subtree, so its state survives.
 				 *
-				 * Why this matters: when keyed children swap positions,
-				 * React's reconciler marks the moved fiber for the
-				 * `Placement` effect, which the commit phase translates
-				 * into `parent.insertBefore(node, sibling)`. The DOM
-				 * spec requires that step to *remove* the node from its
-				 * current parent first and then re-insert at the new
-				 * position. That brief detach is enough to break Monaco
-				 * editors embedded inside (`InstantiationService has
-				 * been disposed`, `domNode` access on a torn-down view).
-				 * Sorting locally by tab id pins each pane's DOM
-				 * position so a same-group reorder never moves any
-				 * content-panel child.
+				 * The stable id-sorted order matters because swapping
+				 * keyed children marks the moved fiber for a `Placement`
+				 * effect, whose `insertBefore` briefly detaches the node —
+				 * enough to break embedded Monaco editors. Pinning each
+				 * slot's DOM position by tab id means a same-group reorder
+				 * never moves any slot.
 				 */}
 				{[...group.tabs]
 					.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
-					.map((tab) => {
-						const isActive = tab.id === group.activeTabId;
-						const content = tabContents.get(tab.id);
-						return (
-							<div
-								key={tab.id}
-								style={{
-									display: isActive ? 'flex' : 'none',
-									flex: 1,
-									minHeight: 0
-								}}
-							>
-								<CachedTabContentSlot content={content} />
-							</div>
-						);
-					})}
+					.map((tab) => (
+						<TabSlot
+							key={tab.id}
+							tabId={tab.id}
+							isActive={tab.id === group.activeTabId}
+							isResizing={isResizing}
+							isMaximized={maximizedTabId === tab.id}
+							modalBody={modalBody}
+							getTabHost={getTabHost}
+						/>
+					))}
 				</div>
+				{/*
+				 * Visual-only split indicator. Drag handling lives on
+				 * the content placeholder's native DOM listeners — this
+				 * overlay carries no `onDrag*` props: its `clip-path`
+				 * would otherwise drop hit-testing for the clipped-away
+				 * half, firing a spurious `dragleave` the instant the
+				 * pointer crossed the boundary.
+				 */}
 				<div
 					style={overlayStyle}
 					{...(dataTestId && { 'data-testid': `${dataTestId}-group-${group.id}-overlay` })}
-					onDragEnter={(e) => {
-						onDragEnterGroup(e);
-						e.stopPropagation();
-					}}
-					onDragOver={(e) => {
-						onDragOverGroup(e);
-						e.stopPropagation();
-					}}
-					onDragLeave={(e) => {
-						onDragLeaveGroup();
-						e.stopPropagation();
-					}}
-					onDrop={(e) => {
-						onDropGroup(e);
-						e.stopPropagation();
-					}}
 				/>
 			</div>
-			<Modal
-				isOpen={fullscreenTabId !== null}
-				onClose={() => {
-					setFullscreenTabId(null);
-				}}
-				title={fullscreenTab?.fullscreenModalTitle ?? (fullscreenTab ? getTabTitleString(fullscreenTab, '') : '')}
-			>
-				{fullscreenTab ? (
-					renderTabContent?.(fullscreenTab) ?? fullscreenTab.content ?? <span>{fullscreenTab.title}</span>
-				) : null}
-			</Modal>
 		</div>
 	);
 };

@@ -37,18 +37,28 @@ export interface DocumentationHostProps {
    * the route summary is the H1. */
   scopeTitle?: string
   /** Optional markdown rendered immediately under the scope title.
-   * Pulled from `apiDocumentation.api.description` for env folders
-   * and from the user-authored `folder.documentation` for folders. */
+   * Pulled from `apiDocumentation.api.description` for env folders. */
   scopeDescription?: string
   /** Wired by multi-route hosts (folder doc) to spawn a fresh
    * pre-configured request from any route block. When provided,
    * each route's RouteHeader exposes an "Add" button. */
   onAddRequest?: (operation: OperationDocumentation) => void
+  /** Force-hide every per-route "+ Add a request" button regardless
+   * of whether `onAddRequest` is wired. Read-only consumers (e.g.
+   * the Import modal's Documentation preview tab) set this so the
+   * doc surface stays advisory. */
+  hideAddRequest?: boolean
   /** Render the API info block (version / contact / license /
    * terms / external docs / server / source) under the scope
    * header. Set by the env-folder Docs2 wiring; folder / single-
    * route scopes leave it `false`. */
   showApiInfo?: boolean
+  /** Per-tag color overrides resolved by the host's env folder.
+   *  Threaded into each `RouteHeader` so the group chip rendered
+   *  next to the route name picks the user's color first, falling
+   *  back to a deterministic hash of the tag name (mirrors the
+   *  workbench tab badge / sidebar bookmark logic). */
+  tagColors?: Record<string, string>
   /** Optional test id stamped on the root container. */
   testId?: string
 }
@@ -75,9 +85,17 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
   scopeTitle,
   scopeDescription,
   onAddRequest,
+  hideAddRequest = false,
   showApiInfo = false,
+  tagColors,
   testId
 }) => {
+  /** Resolve the effective `onAddRequest` once: when `hideAddRequest`
+   * is set, force-drop the callback even if a parent wired one. The
+   * route block + RouteHeader treat "no callback" as "no button", so
+   * a single source of truth here keeps every downstream check
+   * aligned. */
+  const effectiveOnAddRequest = hideAddRequest ? undefined : onAddRequest
   const slice = useMemo(
     () => selectDocSlice(apiDocumentation, filters),
     [apiDocumentation, filters]
@@ -318,7 +336,8 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
                 operation={op}
                 headingLevel={sectionHeadingLevel}
                 showGroupChip={false}
-                {...(onAddRequest ? { onAddRequest } : {})}
+                {...(tagColors ? { tagColors } : {})}
+                {...(effectiveOnAddRequest ? { onAddRequest: effectiveOnAddRequest } : {})}
               />
             ))}
           </section>
@@ -329,7 +348,8 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
             operation={op}
             headingLevel={sectionHeadingLevel}
             showGroupChip={!isSingleRoute}
-            {...(onAddRequest && !isSingleRoute ? { onAddRequest } : {})}
+            {...(tagColors ? { tagColors } : {})}
+            {...(effectiveOnAddRequest && !isSingleRoute ? { onAddRequest: effectiveOnAddRequest } : {})}
           />
         ))}
 
@@ -431,10 +451,11 @@ interface RouteBlockProps {
   operation: OperationDocumentation
   headingLevel: 1 | 2 | 3
   showGroupChip: boolean
+  tagColors?: Record<string, string>
   onAddRequest?: (operation: OperationDocumentation) => void
 }
 
-const RouteBlock: React.FC<RouteBlockProps> = ({ operation, headingLevel, showGroupChip, onAddRequest }) => {
+const RouteBlock: React.FC<RouteBlockProps> = ({ operation, headingLevel, showGroupChip, tagColors, onAddRequest }) => {
   const SectionHeading = headingLevel === 1 ? 'h1' : headingLevel === 2 ? 'h2' : 'h3'
   const opIdSlug = getOperationSlug(operation)
   return (
@@ -447,6 +468,7 @@ const RouteBlock: React.FC<RouteBlockProps> = ({ operation, headingLevel, showGr
         operation={operation}
         headingLevel={headingLevel}
         showGroupChip={showGroupChip}
+        {...(tagColors ? { tagColors } : {})}
         {...(onAddRequest ? { onAddRequest } : {})}
       />
       {(operation.parameters?.length ?? 0) > 0 && (

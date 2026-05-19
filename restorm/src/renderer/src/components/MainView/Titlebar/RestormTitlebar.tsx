@@ -41,6 +41,10 @@ export interface RestormTitlebarProps {
    * as Console, but no specific placement constraint — the host
    * just appends to the focused group. */
   onOpenFirewall: () => void
+  /** Open / focus the Mini browser singleton tab. Wired to
+   * `View → Mini browser`. Same singleton-or-focus pattern as
+   * Firewall. */
+  onOpenMiniBrowser: () => void
 }
 
 /**
@@ -63,7 +67,8 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   onOpenRecentFile,
   onSearchResultClick,
   onOpenConsole,
-  onOpenFirewall
+  onOpenFirewall,
+  onOpenMiniBrowser
 }) => {
   const { t } = useTranslation()
   const { showSettingsModal } = useSettingsModal()
@@ -114,6 +119,12 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
       onSearchResultClick={onSearchResultClick}
       renderSearchTooltipContent={renderSearchTooltipContent}
       renderSearchBadge={(method) => <Badge type={mapToBadgeType(method)} />}
+      // The search popover hosts a draggable model graph; a fast pan
+      // can push the cursor past the popover bounds for a frame
+      // before pointer-lock pulls it back, which would dismiss it
+      // with the default 300ms grace. 1s is comfortably above that
+      // transient window without feeling sticky on normal exits.
+      searchTooltipHideDelayMs={1000}
       leftContent={
         <MenuBar data-testid="titlebar-menubar">
           <MenuBarItem title={t('menuBar.file')} data-testid="titlebar-menubar-item-file">
@@ -206,12 +217,20 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
             <MenuItem
               data-testid="titlebar-menu-item-console"
               title={t('menuBar.console', 'Console')}
+              icon={<span className="codicon codicon-terminal" aria-hidden="true" />}
               onClick={onOpenConsole}
             />
             <MenuItem
               data-testid="titlebar-menu-item-firewall"
               title={t('menuBar.firewall', 'Firewall')}
+              icon={<span className="codicon codicon-shield" aria-hidden="true" />}
               onClick={onOpenFirewall}
+            />
+            <MenuItem
+              data-testid="titlebar-menu-item-mini-browser"
+              title={t('menuBar.miniBrowser', 'Mini browser')}
+              icon={<span className="codicon codicon-browser" aria-hidden="true" />}
+              onClick={onOpenMiniBrowser}
             />
             <MenuItemSeparator data-testid="titlebar-menu-separator-view-1" />
             <MenuItem data-testid="titlebar-menu-item-zoom-in" title={t('menuBar.zoomIn')} shortcut="Ctrl++" disabled />

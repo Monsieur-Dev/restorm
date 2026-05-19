@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import Workbench from '../Workbench/Workbench'
 import { Button } from '../Button'
+import { useOverlayPresence } from '../../hooks/useOverlayPresence'
 import './modal.css'
 
 export type ModalSize = 'full' | 'dialog'
@@ -13,6 +14,17 @@ export interface ModalProps {
   children: React.ReactNode
   /** Modal size: 'full' for fullscreen-like, 'dialog' for compact dialog box */
   size?: ModalSize
+  /**
+   * Fired once the close animation has finished and the modal has
+   * fully unmounted its content — i.e. the "really closed" signal, as
+   * opposed to `onClose` which fires the instant the user requests a
+   * close (start of the fade-out). Use this when something outside the
+   * modal must only react after the fade completes. Driven by the
+   * overlay's `transitionend`, so it is robust against React
+   * StrictMode's mount/unmount probing (which never synthesises
+   * transition events).
+   */
+  onClosed?: () => void
   /** Optional test id applied to the modal container. Defaults to `modal`. */
   'data-testid'?: string
 }
@@ -23,12 +35,20 @@ const ModalInner: React.FC<ModalProps> = ({
   onClose,
   children,
   size = 'full',
+  onClosed,
   'data-testid': dataTestId
 }) => {
   const [isRendered, setIsRendered] = useState(isOpen)
   const [overlayState, setOverlayState] = useState<'open' | 'closing' | 'closed'>('closed')
   const wasOpenRef = useRef(isOpen)
   const rafIdsRef = useRef<number[]>([])
+  // Announce the modal's overlay footprint to listeners
+  // (`MiniBrowserPanel` collapses its content view while a modal sits
+  // over it). Active while the modal is rendered — including the
+  // fade-out closing phase — so the view stays collapsed until the
+  // overlay fully detaches.
+  const overlayRef = useRef<HTMLDivElement>(null)
+  useOverlayPresence(overlayRef, isRendered)
 
   const rootTestId = dataTestId ?? 'modal'
   const overlayTestId = `${rootTestId}-overlay`
@@ -121,15 +141,23 @@ const ModalInner: React.FC<ModalProps> = ({
 
   const content = (
     <div
+      ref={overlayRef}
       className={overlayClassName}
       data-state={overlayState}
       data-testid={overlayTestId}
       onTransitionEnd={(event) => {
         if (event.target !== event.currentTarget) return
         if (event.propertyName !== 'opacity') return
-        if (overlayState === 'closing') {
+        // `!isOpen` guards a close that was superseded by a re-open
+        // mid-fade: the cancelled fade-out still fires `transitionend`,
+        // but if `isOpen` flipped back true the open-branch effect is
+        // already driving `overlayState` back to `open` — tearing the
+        // modal down (or firing `onClosed`) here would wipe the
+        // re-opened state.
+        if (overlayState === 'closing' && !isOpen) {
           setIsRendered(false)
           setOverlayState('closed')
+          onClosed?.()
         }
       }}
     >

@@ -280,7 +280,6 @@ function requestToHTTPRequest(request: InsomniaRequest): HTTPRequest {
     type: 'http',
     id: generateId(`insomnia:request:${request._id}`),
     name: request.name,
-    documentation: '',
     tags: [],
     method: toHTTPMethod(request.method),
     url: request.url,
@@ -332,7 +331,6 @@ function requestToGraphQLRequest(request: InsomniaRequest): GraphQLRequest {
     type: 'graphql',
     id: generateId(`insomnia:graphql:${request._id}`),
     name: request.name,
-    documentation: '',
     tags: [],
     url: request.url,
     operationType,
@@ -366,7 +364,6 @@ function buildFolderTree(
     const folder: Folder = {
       id: generateId(`insomnia:folder:${group._id}`),
       name: group.name,
-      documentation: '',
       tags: [],
       configuration: {},
       items: buildFolderTree(resources, group._id)
@@ -411,22 +408,27 @@ function extractEnvironments(
   for (const env of envResources) {
     const variables: KeyValue[] = []
 
-    // Convert environment data to KeyValue pairs
+    // Convert environment data to KeyValue pairs. `createTypedKeyValue`
+    // promotes any value containing `{{...}}` to an `ExpressionValue` so
+    // Insomnia templates (`{{ _.host }}`, `{{ _.token }}`, …) actually
+    // substitute at runtime instead of being persisted as literal strings.
     for (const [key, value] of Object.entries(env.data)) {
       // Skip baseUrl if user provided one
       if (key === 'baseUrl' && baseUrl) {
         continue
       }
       if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-        variables.push({
+        variables.push(createTypedKeyValue({
           key,
-          value: String(value)
-        })
+          value: String(value),
+          enabled: true
+        }))
       } else if (value !== null && typeof value === 'object') {
-        variables.push({
+        variables.push(createTypedKeyValue({
           key,
-          value: JSON.stringify(value)
-        })
+          value: JSON.stringify(value),
+          enabled: true
+        }))
       }
     }
 
@@ -540,7 +542,6 @@ export function importInsomnia(
     importSource: 'insomnia',
     id: generateId(`insomnia:root:${workspaceName}`),
     name: workspaceName,
-    documentation: '',
     tags: [],
     configuration: {},
     environments,

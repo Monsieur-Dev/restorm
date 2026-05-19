@@ -29,6 +29,10 @@ let lastReply: McpToolReply | null = null
 let lastReplyPayload: unknown = null
 let importedFolderId: string | null = null
 let firstRequestId: string | null = null
+let currentTabId: string | null = null
+// Set as a side effect of the "I set the MCP env variable …" When, then
+// consumed by the list / delete env-variable steps that follow it.
+let selectedEnvId: string | null = null
 
 function parsedReply(reply: McpToolReply): unknown {
   const text = reply.content?.[0]?.text ?? ''
@@ -290,6 +294,370 @@ Then(
     const reply = await callMcpTool(discovery, 'get_response_history', { requestId: firstRequestId })
     const payload = parsedReply(reply) as { count?: number; entries?: { guid: string }[] }
     expect((payload.entries ?? []).length).toBeGreaterThanOrEqual(n)
+  }
+)
+
+When(
+  'I open the first imported request as a workbench tab via MCP',
+  async ({ callMcpTool }) => {
+    if (!discovery || !firstRequestId) throw new Error('list_requests must run first')
+    const opened = await callMcpTool(discovery, 'open_tab', { itemId: firstRequestId })
+    expect(opened.isError ?? false).toBe(false)
+    // `get_current_tab` reads the renderer-pushed active-tab snapshot,
+    // which lags the `open_tab` IPC. Poll until it reflects the request
+    // we just opened (matched by `itemId`) rather than trusting the
+    // first read — otherwise a stale snapshot from an earlier step
+    // (e.g. the Console / Mini browser tab) leaks into `currentTabId`.
+    const deadline = Date.now() + 10_000
+    let payload: { tabId?: string | null; itemId?: string | null } = {}
+    while (Date.now() < deadline) {
+      const cur = await callMcpTool(discovery, 'get_current_tab', {})
+      payload = parsedReply(cur) as { tabId?: string | null; itemId?: string | null }
+      if (payload.itemId === firstRequestId && typeof payload.tabId === 'string' && payload.tabId.length > 0) {
+        currentTabId = payload.tabId
+        return
+      }
+      await page?.waitForTimeout(150)
+    }
+    throw new Error(`get_current_tab never reflected the opened request ${firstRequestId}: ${JSON.stringify(payload)}`)
+  }
+)
+
+When(
+  'I maximize the current workbench tab via MCP',
+  async ({ callMcpTool }) => {
+    if (!discovery || !currentTabId) throw new Error('open the request tab first')
+    lastReply = await callMcpTool(discovery, 'set_tab_maximized', { tabId: currentTabId, maximized: true })
+    lastReplyPayload = parsedReply(lastReply)
+    expect(lastReply.isError ?? false).toBe(false)
+    expect(lastReplyPayload).toMatchObject({ tabId: currentTabId, maximized: true })
+  }
+)
+
+When(
+  'I restore the maximized workbench tab via MCP',
+  async ({ callMcpTool }) => {
+    if (!discovery) throw new Error('launch first')
+    lastReply = await callMcpTool(discovery, 'set_tab_maximized', { maximized: false })
+    lastReplyPayload = parsedReply(lastReply)
+    expect(lastReply.isError ?? false).toBe(false)
+    expect(lastReplyPayload).toMatchObject({ tabId: null, maximized: false })
+  }
+)
+
+Then(
+  'the fullscreen workbench modal should be visible',
+  async () => {
+    if (!page) throw new Error('launch first')
+    // The workbench fullscreen modal is the ECUI `Modal` with the
+    // default `data-testid`, so its overlay is `modal-overlay`.
+    await expect(page.locator('[data-testid="modal-overlay"]').first()).toBeVisible({ timeout: 10_000 })
+  }
+)
+
+Then(
+  'the fullscreen workbench modal should be hidden',
+  async () => {
+    if (!page) throw new Error('launch first')
+    // `Modal` unmounts its content once the close animation finishes,
+    // so the overlay leaves the DOM entirely — `toHaveCount(0)` with a
+    // generous window absorbs the fade-out transition.
+    await expect(page.locator('[data-testid="modal-overlay"]')).toHaveCount(0, { timeout: 10_000 })
+  }
+)
+
+// The request tab's whole host node — `BaseRequestTabView`, response
+// panel included — is *relocated* between the normal slot and the
+// fullscreen modal (never duplicated, never remounted). The response
+// `Tabs` container exposes its current selection via `data-active-tab-id`;
+// asserting that attribute (and the run_request status row it gates)
+// across a maximize/restore is a faithful probe for "the maximized and
+// normal views share one React instance with its state intact".
+Then(
+  'the active response sub-tab should be {string}',
+  async ({}, tabId: string) => {
+    if (!page) throw new Error('launch first')
+    await expect(page.locator('[data-testid="base-request-tabs-response"]').first())
+      .toHaveAttribute('data-active-tab-id', tabId, { timeout: 10_000 })
+  }
+)
+
+Then(
+  'the response Infos panel should show status {string}',
+  async ({}, status: string) => {
+    if (!page) throw new Error('launch first')
+    // The Infos sub-tab renders the parsed status / headers as a plain
+    // DOM ListView — the status row carries the parsed status code.
+    const statusRow = page
+      .locator('[data-testid="http-response-headers-list"] [data-item-id="general-status-code"]')
+      .first()
+    await expect(statusRow).toBeVisible({ timeout: 10_000 })
+    expect(await statusRow.innerText()).toContain(status)
+  }
+)
+
+When(
+  'I select the {string} response sub-tab',
+  async ({}, tabId: string) => {
+    if (!page) throw new Error('launch first')
+    await page
+      .locator(`[data-testid="base-request-tabs-response"] [data-tab-id="${tabId}"]`)
+      .first()
+      .click()
+    await expect(page.locator('[data-testid="base-request-tabs-response"]').first())
+      .toHaveAttribute('data-active-tab-id', tabId, { timeout: 10_000 })
+  }
+)
+
+When(
+  'I mark the request tab\'s host node',
+  async () => {
+    if (!page || !currentTabId) throw new Error('open the request tab first')
+    // Probe on the workbench-owned host `<div>` (`data-tab-host-id`).
+    // The host node is what the refactor pins: a cross-group move
+    // relocates this exact node by `appendChild` instead of rebuilding
+    // it, so the probe attribute set here survives the move iff the
+    // refactor's invariant holds. (DOM nodes *inside* the host can
+    // legitimately rearrange when restorm flips between split and
+    // compact layout in a narrow destination group — proving "the
+    // tab's React subtree didn't remount" lives in the unit test for
+    // `EditorWorkbench` under StrictMode, not in this e2e step.)
+    const marked = await page.evaluate((tabId) => {
+      const host = document.querySelector(`[data-tab-host-id="${tabId}"]`)
+      if (!host) return false
+      host.setAttribute('data-e2e-host-probe', 'cross-group-probe')
+      return true
+    }, currentTabId)
+    expect(marked, `host node for tab "${currentTabId}" not found`).toBe(true)
+  }
+)
+
+When(
+  'I send the active workbench tab to the next group',
+  async () => {
+    if (!page) throw new Error('launch first')
+    // Ctrl+Alt+Right sends the active tab to the adjacent group,
+    // creating one on demand. The tab's host node must be relocated
+    // (appendChild), not remounted — that is what this move exercises.
+    await page.keyboard.press('Control+Alt+ArrowRight')
+    // Let React flush the controlled focus / tree change.
+    await page.waitForTimeout(500)
+  }
+)
+
+Then(
+  'the request tab\'s host node is the same relocated instance',
+  async () => {
+    if (!page || !currentTabId) throw new Error('open the request tab first')
+    const result = await page.evaluate((tabId) => {
+      const host = document.querySelector(`[data-tab-host-id="${tabId}"]`)
+      return {
+        found: host !== null,
+        probed: host?.getAttribute('data-e2e-host-probe') === 'cross-group-probe',
+        connected: host?.isConnected === true
+      }
+    }, currentTabId)
+    // Same node (probe survived) + still attached to the document =
+    // the host was relocated, not rebuilt.
+    expect(result).toEqual({ found: true, probed: true, connected: true })
+  }
+)
+
+Then(
+  'the request tab content is still rendered',
+  async () => {
+    if (!page) throw new Error('launch first')
+    // `base-request-tabs-request` is rendered in every layout (split,
+    // compact, no-response), so visibility is layout-independent.
+    await expect(page.locator('[data-testid="base-request-tabs-request"]').first())
+      .toBeVisible({ timeout: 10_000 })
+  }
+)
+
+// ───────────────────────────────────────────────────────────────────
+// MCP tool surface added on this branch
+// ───────────────────────────────────────────────────────────────────
+
+When(
+  'I call MCP open_console',
+  async ({ callMcpTool }) => {
+    if (!discovery) throw new Error('launch first')
+    const reply = await callMcpTool(discovery, 'open_console', {})
+    expect(parsedReply(reply)).toMatchObject({ opened: true })
+  }
+)
+
+Then(
+  'the Console panel should be visible',
+  async () => {
+    if (!page) throw new Error('launch first')
+    await expect(page.locator('[data-testid="console-panel"]').first()).toBeVisible({ timeout: 10_000 })
+  }
+)
+
+When(
+  'I call MCP open_firewall',
+  async ({ callMcpTool }) => {
+    if (!discovery) throw new Error('launch first')
+    const reply = await callMcpTool(discovery, 'open_firewall', {})
+    expect(parsedReply(reply)).toMatchObject({ opened: true })
+  }
+)
+
+Then(
+  'the Firewall panel should be visible',
+  async () => {
+    if (!page) throw new Error('launch first')
+    await expect(page.locator('[data-testid="firewall-panel"]').first()).toBeVisible({ timeout: 10_000 })
+  }
+)
+
+When(
+  'I allow the origin {string} via MCP',
+  async ({ callMcpTool }, origin: string) => {
+    if (!discovery) throw new Error('launch first')
+    const reply = await callMcpTool(discovery, 'firewall_allow', { origin })
+    expect(reply.isError ?? false).toBe(false)
+    expect(parsedReply(reply)).toMatchObject({ list: 'whitelist' })
+  }
+)
+
+When(
+  'I deny the origin {string} via MCP',
+  async ({ callMcpTool }, origin: string) => {
+    if (!discovery) throw new Error('launch first')
+    const reply = await callMcpTool(discovery, 'firewall_deny', { origin })
+    expect(reply.isError ?? false).toBe(false)
+    expect(parsedReply(reply)).toMatchObject({ list: 'blacklist' })
+  }
+)
+
+Then(
+  'MCP firewall_list_rules should whitelist {string}',
+  async ({ callMcpTool }, host: string) => {
+    if (!discovery) throw new Error('launch first')
+    const reply = await callMcpTool(discovery, 'firewall_list_rules', {})
+    const payload = parsedReply(reply) as { whitelist?: { host: string }[] }
+    // Assert the shape first, so a payload-shape regression fails as
+    // "shape changed" rather than the misleading "host not found".
+    expect(Array.isArray(payload.whitelist)).toBe(true)
+    expect((payload.whitelist ?? []).some((o) => o.host === host)).toBe(true)
+  }
+)
+
+Then(
+  'MCP firewall_list_rules should blacklist {string}',
+  async ({ callMcpTool }, host: string) => {
+    if (!discovery) throw new Error('launch first')
+    const reply = await callMcpTool(discovery, 'firewall_list_rules', {})
+    const payload = parsedReply(reply) as { blacklist?: { host: string }[] }
+    expect(Array.isArray(payload.blacklist)).toBe(true)
+    expect((payload.blacklist ?? []).some((o) => o.host === host)).toBe(true)
+  }
+)
+
+When(
+  'I call MCP open_mini_browser',
+  async ({ callMcpTool }) => {
+    if (!discovery) throw new Error('launch first')
+    const reply = await callMcpTool(discovery, 'open_mini_browser', {})
+    expect(reply.isError ?? false).toBe(false)
+  }
+)
+
+Then(
+  'the Mini browser tab should be open',
+  async () => {
+    if (!page) throw new Error('launch first')
+    // Workbench tabs render as `[testid]-...-tabs-tab-[tabId]`; match the
+    // singleton id, excluding the per-tab label / close sub-elements.
+    await expect(
+      page.locator('[data-testid*="tabs-tab-mini-browser:singleton"]:not([data-testid*="-label"]):not([data-testid*="-close"])')
+    ).toHaveCount(1, { timeout: 10_000 })
+  }
+)
+
+When(
+  'I set the MCP env variable {string} to {string} on the imported env folder',
+  async ({ callMcpTool }, key: string, value: string) => {
+    if (!discovery || !importedFolderId) throw new Error('list_requests must run first')
+    // `set_env_variable` keys off the Environment id, not the env-folder
+    // id — `get_active_env` resolves the folder's selected (or first) env.
+    const envReply = await callMcpTool(discovery, 'get_active_env', { envFolderId: importedFolderId })
+    const envPayload = parsedReply(envReply) as { selectedEnvId?: string | null }
+    if (typeof envPayload.selectedEnvId !== 'string' || envPayload.selectedEnvId.length === 0) {
+      throw new Error(`get_active_env returned no selectedEnvId: ${JSON.stringify(envPayload)}`)
+    }
+    selectedEnvId = envPayload.selectedEnvId
+    const setReply = await callMcpTool(discovery, 'set_env_variable', {
+      envId: selectedEnvId,
+      key,
+      value: { type: 'string', value }
+    })
+    expect(setReply.isError ?? false).toBe(false)
+    expect(parsedReply(setReply)).toMatchObject({ key })
+  }
+)
+
+Then(
+  'MCP list_env_variables should report {string} is {string}',
+  async ({ callMcpTool }, key: string, value: string) => {
+    if (!discovery || !selectedEnvId) throw new Error('set the env variable first')
+    const reply = await callMcpTool(discovery, 'list_env_variables', { envId: selectedEnvId })
+    const payload = parsedReply(reply) as { variables?: { key: string; value: unknown }[] }
+    const found = (payload.variables ?? []).find((v) => v.key === key)
+    expect(found, `expected env variable "${key}" to be present`).toBeTruthy()
+    // The stored value is a ValueType POJO; assert the plaintext is in it
+    // without pinning the exact serialised shape.
+    expect(JSON.stringify(found?.value ?? null)).toContain(value)
+  }
+)
+
+When(
+  'I delete the MCP env variable {string}',
+  async ({ callMcpTool }, key: string) => {
+    if (!discovery || !selectedEnvId) throw new Error('set the env variable first')
+    const reply = await callMcpTool(discovery, 'delete_env_variable', { envId: selectedEnvId, key })
+    expect(parsedReply(reply)).toMatchObject({ key, removed: true })
+  }
+)
+
+Then(
+  'MCP list_env_variables should not report {string}',
+  async ({ callMcpTool }, key: string) => {
+    if (!discovery || !selectedEnvId) throw new Error('set the env variable first')
+    const reply = await callMcpTool(discovery, 'list_env_variables', { envId: selectedEnvId })
+    const payload = parsedReply(reply) as { variables?: { key: string }[] }
+    expect((payload.variables ?? []).some((v) => v.key === key)).toBe(false)
+  }
+)
+
+When(
+  'I run an MCP batch of open_console then get_current_tab',
+  async ({ callMcpTool }) => {
+    if (!discovery) throw new Error('launch first')
+    lastReply = await callMcpTool(discovery, 'batch', {
+      steps: [{ name: 'open_console' }, { name: 'get_current_tab' }]
+    })
+    expect(lastReply.isError ?? false).toBe(false)
+  }
+)
+
+Then(
+  'the MCP batch reply should report {int} of {int} steps ran',
+  async ({}, ran: number, total: number) => {
+    if (!lastReply) throw new Error('run the batch first')
+    // `batch` aggregates each step's `content` parts then appends the
+    // structured envelope as the FINAL text part — so parse the last
+    // text content, not the first.
+    const texts = (lastReply.content ?? []).filter(
+      (c): c is { type: string; text: string } => c.type === 'text' && typeof c.text === 'string'
+    )
+    const last = texts[texts.length - 1]
+    const envelope = JSON.parse(last?.text ?? '{}') as { ranCount?: number; totalCount?: number; aborted?: boolean }
+    expect(envelope.ranCount).toBe(ran)
+    expect(envelope.totalCount).toBe(total)
+    expect(envelope.aborted).toBe(false)
   }
 )
 

@@ -176,7 +176,6 @@ function channelToRequests(
       type: 'websocket',
       id: generateId(`${collectionName}:ws:publish:${channelPath}`),
       name: op.operationId ?? `Publish to ${channelPath}`,
-      documentation: '',
       tags: ['publish', protocol],
       url: baseUrl,
       protocol,
@@ -195,7 +194,6 @@ function channelToRequests(
       type: 'websocket',
       id: generateId(`${collectionName}:ws:subscribe:${channelPath}`),
       name: op.operationId ?? `Subscribe to ${channelPath}`,
-      documentation: '',
       tags: ['subscribe', protocol],
       url: baseUrl,
       protocol,
@@ -211,7 +209,6 @@ function channelToRequests(
       type: 'websocket',
       id: generateId(`${collectionName}:ws:channel:${channelPath}`),
       name: channelPath,
-      documentation: '',
       tags: [protocol],
       url: baseUrl,
       protocol,
@@ -277,7 +274,6 @@ export function importAsyncAPI(specContent: string, options: AsyncAPIImportOptio
     items.push({
       id: generateId(`${name}:folder:asyncapi:mqtt`),
       name: 'MQTT',
-      documentation: '',
       tags: ['mqtt'],
       configuration: {},
       items: mqttRequests
@@ -288,7 +284,6 @@ export function importAsyncAPI(specContent: string, options: AsyncAPIImportOptio
     items.push({
       id: generateId(`${name}:folder:asyncapi:socketio`),
       name: 'Socket.IO',
-      documentation: '',
       tags: ['socketio'],
       configuration: {},
       items: socketioRequests
@@ -299,7 +294,6 @@ export function importAsyncAPI(specContent: string, options: AsyncAPIImportOptio
     items.push({
       id: generateId(`${name}:folder:asyncapi:websocket`),
       name: 'WebSocket',
-      documentation: '',
       tags: ['websocket'],
       configuration: {},
       items: websocketRequests
@@ -347,7 +341,6 @@ export function importAsyncAPI(specContent: string, options: AsyncAPIImportOptio
     importSource: 'asyncapi',
     id: generateId(`${name}:folder:asyncapi:root`),
     name,
-    documentation: '',
     tags: [],
     configuration: {},
     environments: [environment],

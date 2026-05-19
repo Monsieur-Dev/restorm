@@ -1,0 +1,47 @@
+<svg viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg" class="empty-bench-tip-illustration" role="img" aria-hidden="true">
+  <style>
+    .auth-disc { fill: #ea580c; }
+    .auth-logo { fill: #ffffff; }
+
+    .auth-ripple {
+      fill: none;
+      stroke: #fb923c;
+      stroke-width: 4;
+      vector-effect: non-scaling-stroke;
+      transform-box: fill-box;
+      transform-origin: center;
+      opacity: 0;
+      animation-name: auth-ripple-pulse;
+      animation-duration: 2.4s;
+      animation-timing-function: ease-out;
+      animation-iteration-count: infinite;
+      animation-play-state: paused;
+    }
+    .auth-ripple--2 { animation-delay: 0.8s; }
+    .auth-ripple--3 { animation-delay: 1.6s; }
+
+    @keyframes auth-ripple-pulse {
+      0%   { transform: scale(0); opacity: 1; }
+      100% { transform: scale(1.35); opacity: 0; }
+    }
+  </style>
+
+  <!-- Layer 1: orange disc (right + bottom clipped by the viewBox). -->
+  <circle class="auth-disc" cx="180" cy="95" r="85" />
+
+  <!-- Layer 2: wave ripples, drawn over the disc but under the key. -->
+  <circle class="auth-ripple auth-ripple--1" cx="180" cy="95" r="85" />
+  <circle class="auth-ripple auth-ripple--2" cx="180" cy="95" r="85" />
+  <circle class="auth-ripple auth-ripple--3" cx="180" cy="95" r="85" />
+
+  <!-- Layer 3: key codicon glyph, scaled 5×, rotated -90° around the
+       disc centre. -->
+  <g transform="rotate(-90 180 95)">
+    <g transform="translate(140 55) scale(5)">
+      <path
+        class="auth-logo"
+        d="M12 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm3 .5c0 2.481-2.019 4.5-4.5 4.5H9.186l-.797.775a.507.507 0 0 1-.138.095l-.179.083a.51.51 0 0 1-.211.046H7v1.293c0 .133-.053.26-.146.354l-.207.207a.5.5 0 0 1-.354.146H5v1.293a.503.503 0 0 1-.146.353l-.206.207a.502.502 0 0 1-.354.147H2c-.552-.002-1-.451-1-1.001v-1.593c0-.263.106-.521.293-.707L6.19 6.801A4.505 4.505 0 0 1 10.5 1C12.981 1 15 3.019 15 5.5Zm-1 0C14 3.57 12.43 2 10.5 2a3.504 3.504 0 0 0-3.269 4.755.503.503 0 0 1-.113.533L2 12.406v1.593h2V12.5a.5.5 0 0 1 .5-.5H6v-1.5a.5.5 0 0 1 .5-.5h1.252l.882-.858A.502.502 0 0 1 8.983 9h1.518c1.93 0 3.5-1.57 3.5-3.5H14Z"
+      />
+    </g>
+  </g>
+</svg>

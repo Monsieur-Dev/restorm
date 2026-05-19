@@ -1,0 +1,725 @@
+{
+  "app": {
+    "title": "restorm",
+    "openSettings": "Instellingen openen",
+    "draftsRestoredTitle": "Niet-opgeslagen werk hersteld",
+    "draftsRestoredBody_one": "{{count}} concept is hersteld uit de vorige sessie.",
+    "draftsRestoredBody_other": "{{count}} concepten zijn hersteld uit de vorige sessie."
+  },
+  "statusbar": {
+    "requestHistory": "Geschiedenis van verzoeken",
+    "envSelector": {
+      "applyToAll": "Toepassen op alle verzoeken"
+    }
+  },
+  "tips": {
+    "cardTitle": "Tips & tricks",
+    "maximizeTab": {
+      "title": "Maximaliseer een tabblad met één klik",
+      "body": "Dubbelklik op een willekeurig workbench-tabblad om het op volledig scherm te tonen. Druk op Esc om terug te keren naar de oorspronkelijke indeling."
+    },
+    "mcpControl": {
+      "title": "Bestuur restorm met AI",
+      "body": "Restorm bevat een MCP-server, zodat AI-assistenten zoals Claude Code je requests kunnen tonen, openen, bewerken en uitvoeren, responses kunnen inspecteren en je werkruimte programmatisch kunnen aansturen — zonder hun chat te verlaten."
+    },
+    "envSwitch": {
+      "title": "Wissel eenvoudig van omgeving!",
+      "body": "Wissel de omgeving van de huidige request of van alle requests in je API door op de knop in de statusbalk te klikken, of door met de rechtermuisknop op de verzendknop van de request te klikken."
+    },
+    "authRequests": {
+      "title": "Moet je je authenticeren voor je API?",
+      "body": "In plaats van iedere keer een request te versturen om een token op te halen en die overal te plakken: gebruik auth-requests. Faalt een call (401, 403, …) of is de levensduur van je token voorbij, dan wordt de auth-request automatisch opnieuw uitgevoerd om het token op te halen en te gebruiken. Handig!"
+    },
+    "supplyChain": {
+      "title": "Bescherm jezelf!",
+      "body": "Zoals elke software gebruikt Restorm bibliotheken van derden. Om supply-chain-aanvallen te voorkomen worden alle uitgaande aanroepen op het laagste niveau onderschept, en we waarschuwen je als een bibliotheek van derden je persoonlijke informatie probeert te stelen!"
+    },
+    "codeSnippets": {
+      "title": "Restorm helpt je met coderen!",
+      "body": "Vind code-snippets bij elke request om ze in je software te integreren. Veel talen beschikbaar: curl, PowerShell, TypeScript, C# en nog veel meer!"
+    },
+    "workbenchLayout": {
+      "title": "Organiseer je werkbank",
+      "body": "Heb je een groot scherm en veel requests? Zet ze naast elkaar, onder elkaar of zo'n beetje hoe je maar wilt — sleep gewoon een tabblad waar je het wilt. Alles voor je gemak!"
+    },
+    "persistState": {
+      "title": "Vind het terug zoals je het achterliet!",
+      "body": "Sluit je Restorm en open je het opnieuw, dan vind je het in exact dezelfde staat terug als waarin je het achterliet."
+    },
+    "favorites": {
+      "title": "Sommige liggen je nauwer aan het hart…",
+      "body": "Heb je requests die je belangrijker vindt dan andere? Markeer ze als favoriet!"
+    },
+    "console": {
+      "title": "Bekijk wat er gebeurt",
+      "body": "De console laat je zien hoe je APIs worden aangeroepen terwijl je requests verstuurt. Handig om ze in je terminal te plakken als dat nodig is! Wat is je smaak: curl of PowerShell?"
+    },
+    "miniBrowser": {
+      "title": "Moe van het constante vensterwisselen?",
+      "body": "Restorm heeft een ingebouwde mini-webbrowser. Handig wanneer je app visueel reageert op je API-aanroepen."
+    },
+    "apiDocs": {
+      "title": "De documentatie, gewoon hier",
+      "body": "Geen geschakel meer tussen Restorm en de documentatie van je API. Levert je API een spec (Swagger, OpenAPI, …), dan wordt die in Restorm geïmporteerd en kun je hem direct hier raadplegen."
+    },
+    "secrets": {
+      "title": "Bescherm je geheimen",
+      "body": "Je wachtwoorden en auth-tokens worden niet rechtstreeks in het Restorm-bestand opgeslagen. Daarom bewaart Restorm geheimen en je request-historie in aparte bestanden. Het is aan jou ze niet naar GitHub te pushen. Restorm kan geheimen ook ophalen uit AWS, GitHub en andere bronnen."
+    },
+    "themes": {
+      "title": "Jouw kleuren, jouw stemming",
+      "body": "Restorm wordt geleverd met verschillende kleurschema's. Kies degene die past bij hoe je je voelt."
+    },
+    "search": {
+      "title": "Vind alles, snel",
+      "body": "Heb je de bovenkant van dit venster gezien? Restorm heeft een ingebouwde zoekfunctie — nooit meer uren zoeken naar DE juiste request."
+    },
+    "multiEnv": {
+      "title": "Dezelfde requests, andere omgevingen",
+      "body": "Heb je een dev-, een prod- en een staging-omgeving? Dezelfde requests, alleen niet helemaal dezelfde URLs, niet helemaal dezelfde tokens… Gebruik omgevingen en variabelen om met één klik om te schakelen. Je kunt elke omgeving zelfs een eigen kleur en pictogram geven, om die schrikmomenten op vrijdagavond in productie te vermijden!"
+    },
+    "protocols": {
+      "title": "Meer dan alleen REST",
+      "body": "Restorm spreekt REST… en nog veel meer! GraphQL, gRPC, SOAP, OData, WebSocket — al die protocollen binnen handbereik, zonder van tool te wisselen."
+    },
+    "responseTree": {
+      "title": "Bekijk je API-responses visueel",
+      "body": "Wist je dat je je API-responses ook grafischer kunt verkennen? Restorm toont ze als een interactieve boom die je kunt navigeren, inklappen en uitklappen."
+    },
+    "responseHistory": {
+      "title": "Geschiedenis van requests",
+      "body": "Je kunt de geschiedenis van al je API-aanroepen bekijken. Handig om te achterhalen wat er precies is gebeurd."
+    },
+    "multiLanguage": {
+      "title": "27 talen!",
+      "body": "Restorm spreekt 27 talen. Engels, Frans, Spaans, Duits, Italiaans, Japans, Chinees, Koreaans en nog veel meer — kies de jouwe in de instellingen!"
+    }
+  },
+  "authFailureToast": {
+    "title": "Authenticatie mislukt",
+    "fallbackReason": "Het authenticatieverzoek is niet geslaagd.",
+    "openAuthRoute": "Authenticatieroute openen"
+  },
+  "menuBar": {
+    "file": "Bestand",
+    "new": "Nieuw",
+    "import": "Importeren",
+    "open": "Openen",
+    "openFolder": "Map openen",
+    "recentFiles": "Recente bestanden",
+    "favorites": "Favorieten",
+    "close": "Sluiten",
+    "save": "Opslaan",
+    "saveAll": "Alles opslaan",
+    "saveAs": "Opslaan als",
+    "exit": "Afsluiten",
+    "selection": "Selectie",
+    "tools": "Hulpprogramma's",
+    "findInCollection": "Zoeken in collectie",
+    "addRequest": "Verzoek toevoegen",
+    "addRequestHttp": "HTTP-verzoek",
+    "addRequestGraphql": "GraphQL-verzoek",
+    "addRequestGrpc": "gRPC-verzoek",
+    "addRequestSoap": "SOAP-verzoek",
+    "addRequestOdata": "OData-verzoek",
+    "addRequestWebsocket": "WebSocket-verzoek",
+    "addFolder": "Map toevoegen",
+    "addEnvironmentFolder": "Omgevingsmap toevoegen",
+    "addVariable": "Variabele toevoegen",
+    "addTag": "Tag toevoegen",
+    "expandAllFolders": "Alle mappen uitvouwen",
+    "collapseAllFolders": "Alle mappen samenvouwen",
+    "sendActiveRequest": "Verzoek verzenden",
+    "cancelActiveRequest": "Verzoek annuleren",
+    "generateCodeSnippet": "Codefragment genereren",
+    "copyAsCurl": "Kopiëren als cURL",
+    "exportOpenApi": "Exporteren naar OpenAPI",
+    "clearAuthCache": "Authenticatiecache wissen",
+    "openLogsFolder": "Logbestandenmap openen"
+  },
+  "sidebar": {
+    "addRequest": "Verzoek toevoegen",
+    "collapseAll": "Alle verzoeken samenvouwen",
+    "workspace": "Werkruimte",
+    "favorites": "Favorieten",
+    "newFolder": "Nieuwe map",
+    "newEnvironmentFolder": "Nieuwe omgevingsmap",
+    "contextMenu": {
+      "createFolder": "Map maken",
+      "createEnvironmentFolder": "Omgevingsmap maken",
+      "delete": "Verwijderen",
+      "clone": "Klonen",
+      "rename": "Naam wijzigen",
+      "addToFavorites": "Toevoegen aan favorieten",
+      "removeFromFavorites": "Verwijderen uit favorieten",
+      "closeTab": "Sluiten",
+      "closeOtherTabs": "Andere sluiten",
+      "closeTabsToTheRight": "Rechts sluiten",
+      "closeAllTabs": "Alles sluiten",
+      "add": {
+        "title": "Toevoegen",
+        "folder": "Map",
+        "httpGet": "HTTP – GET-verzoek",
+        "httpPost": "HTTP – POST-verzoek",
+        "httpPut": "HTTP – PUT-verzoek",
+        "httpPatch": "HTTP – PATCH-verzoek",
+        "httpDelete": "HTTP – DELETE-verzoek",
+        "graphql": "GraphQL-verzoek",
+        "grpc": "gRPC-verzoek",
+        "soap": "SOAP-verzoek",
+        "websocket": "WebSocket-verzoek",
+        "odata": "OData-verzoek",
+        "auth": "HTTP-authenticatieverzoek"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Verwijderen bevestigen",
+      "folderMessage": "Weet je zeker dat je de map \"{{name}}\" en alle inhoud wilt verwijderen?",
+      "itemMessage": "Weet je zeker dat je \"{{name}}\" wilt verwijderen?",
+      "confirm": "Verwijderen",
+      "cancel": "Annuleren"
+    }
+  },
+  "environment": {
+    "newName": "Nieuwe omgeving",
+    "add": "Omgeving toevoegen",
+    "rename": "Naam wijzigen",
+    "addSub": "Sub-omgeving toevoegen",
+    "delete": "Verwijderen"
+  },
+  "folderView": {
+    "environments": "Omgevingen",
+    "environmentsAriaLabel": "Mapomgevingen",
+    "variables": "Variabelen",
+    "addVariable": "Variabelerij toevoegen",
+    "selectEnvironment": "Selecteer een omgeving om variabelen te zien",
+    "tabs": {
+      "docs": "Docs",
+      "environments": "Omgevingen",
+      "notes": "Notities"
+    },
+    "home": {
+      "configureEnvs": "Omgevingen configureren",
+      "configureEnvsDesc": "Stel je basis-URL's, variabelen en authenticatie in voor elke omgeving",
+      "viewDocs": "Documentatie bekijken",
+      "viewDocsDesc": "Blader door de API-documentatie, modellen en endpoints",
+      "favoriteRequests": "Favoriete verzoeken",
+      "removeFavorite": "Verwijderen uit favorieten",
+      "apiUpdate": {
+        "title": "Updates van API-specificatie",
+        "noConfig": "Deze map is niet aangemaakt vanuit een importeerbare bron.",
+        "urlLabel": "URL",
+        "lastImportedLabel": "Laatst geïmporteerd",
+        "lastCheckedLabel": "Laatst gecontroleerd",
+        "neverImported": "Nooit geïmporteerd",
+        "neverChecked": "Nooit gecontroleerd",
+        "refreshing": "API-specificatie wordt vernieuwd…",
+        "fetching": "Ophalen…",
+        "upToDate": "API-specificatie is up-to-date.",
+        "ok": "OK"
+      }
+    },
+    "contextVariables": {
+      "title": "Beschikbare contextvariabelen",
+      "description": "Gebruik deze variabelen in je verzoek-URL's en in variabelen van het type expressie met de {{handlebars}}-syntaxis.",
+      "name": "Variabele",
+      "value": "Opgeloste waarde",
+      "copied": "Gekopieerd!"
+    }
+  },
+  "requestTab": {
+    "deprecated": "Dit endpoint is verouderd en kan in een toekomstige versie worden verwijderd.",
+    "send": "Verzenden",
+    "cancel": "Annuleren",
+    "urlPlaceholder": "URL van het verzoek",
+    "methodSelect": "HTTP-methode selecteren",
+    "addHeader": "Header toevoegen",
+    "addParam": "Parameter toevoegen",
+    "environmentSelector": {
+      "noEnvironment": "Geen omgeving"
+    },
+    "body": {
+      "fileLabel": "Bestand of URL:",
+      "browse": "Bladeren..."
+    },
+    "tabs": {
+      "docs": "Docs",
+      "requestLayout": "Verzoek",
+      "headers": "Headers",
+      "body": "Body",
+      "params": "Parameters",
+      "pathParams": "Padparameters",
+      "notes": "Notities",
+      "codeSnippets": "Codefragmenten",
+      "responsesHistory": "Geschiedenis van antwoorden"
+    },
+    "responses": {
+      "tabs": {
+        "response": "Antwoord",
+        "requestBody": "Verzoekbody",
+        "graph": "Grafiek"
+      },
+      "loading": "Verzoek wordt verzonden...",
+      "noResponse": "Klik op Verzenden om het verzoek uit te voeren",
+      "history": {
+        "list": "Lijst met antwoordgeschiedenis",
+        "empty": "Nog geen antwoorden geregistreerd",
+        "select": "Selecteer een antwoord om details te bekijken",
+        "pin": "Antwoord vastmaken",
+        "unpin": "Antwoord losmaken"
+      }
+    }
+  },
+  "workbench": {
+    "tabContextMenu": {
+      "close": "Sluiten",
+      "closeOthers": "Andere sluiten",
+      "addToFavorites": "Toevoegen aan favorieten",
+      "removeFromFavorites": "Verwijderen uit favorieten"
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Ga naar definitie"
+  },
+  "keyValueTable": {
+    "types": {
+      "string": "Tekenreeks",
+      "secret": "Geheim",
+      "number": "Getal",
+      "dateTime": "Datum/tijd",
+      "color": "Kleur",
+      "expression": "Expressie",
+      "boolean": "Boolean"
+    },
+    "apiEnums": "Door de API gedefinieerde typen"
+  },
+  "graphql": {
+    "send": "Verzenden",
+    "urlPlaceholder": "URL van het GraphQL-endpoint",
+    "tabs": {
+      "query": "Query",
+      "variables": "Variabelen",
+      "headers": "Headers"
+    }
+  },
+  "grpc": {
+    "send": "Aanroepen",
+    "urlPlaceholder": "gRPC-server (host:poort)",
+    "tabs": {
+      "message": "Bericht",
+      "metadata": "Metagegevens"
+    }
+  },
+  "soap": {
+    "send": "Verzenden",
+    "urlPlaceholder": "URL van het SOAP-endpoint",
+    "tabs": {
+      "body": "Body",
+      "headers": "Headers"
+    }
+  },
+  "websocket": {
+    "connect": "Verbinden",
+    "connected": "Verbonden",
+    "disconnected": "Verbinding verbroken",
+    "noMessages": "Nog geen berichten",
+    "urlPlaceholder": "WebSocket-URL",
+    "event": "Gebeurtenis",
+    "topic": "Onderwerp",
+    "tabs": {
+      "message": "Bericht",
+      "headers": "Headers"
+    }
+  },
+  "search": {
+    "placeholder": "Zoeken...",
+    "noResults": "Geen resultaten gevonden",
+    "resultsAriaLabel": "Zoekresultaten",
+    "categories": {
+      "request": "Verzoeken",
+      "folder": "Mappen",
+      "environment": "Omgevingen",
+      "settings": "Instellingen",
+      "tag": "Tags"
+    },
+    "tooltip": {
+      "noDetails": "Geen details beschikbaar",
+      "noContent": "Geen documentatie of notities"
+    }
+  },
+  "httpStatus": {
+    "100": {
+      "name": "Continue",
+      "description": "De server heeft de verzoekheaders ontvangen en de client moet doorgaan met het verzenden van de verzoekbody."
+    },
+    "101": {
+      "name": "Switching Protocols",
+      "description": "De aanvrager heeft de server gevraagd om van protocol te wisselen en de server heeft daarmee ingestemd."
+    },
+    "200": {
+      "name": "OK",
+      "description": "Standaardantwoord voor succesvolle HTTP-verzoeken. Het werkelijke antwoord hangt af van de gebruikte verzoekmethode."
+    },
+    "201": {
+      "name": "Created",
+      "description": "Het verzoek is uitgevoerd en heeft geresulteerd in het aanmaken van een nieuwe resource."
+    },
+    "202": {
+      "name": "Accepted",
+      "description": "Het verzoek is geaccepteerd voor verwerking, maar de verwerking is nog niet voltooid."
+    },
+    "204": {
+      "name": "No Content",
+      "description": "De server heeft het verzoek met succes verwerkt en geeft geen inhoud terug."
+    },
+    "301": {
+      "name": "Moved Permanently",
+      "description": "Dit verzoek en alle toekomstige verzoeken moeten worden gericht aan de opgegeven URI."
+    },
+    "302": {
+      "name": "Found",
+      "description": "Vertelt de client een andere URL te raadplegen. De HTTP/1.0-specificatie vereiste een tijdelijke omleiding door de client."
+    },
+    "304": {
+      "name": "Not Modified",
+      "description": "Geeft aan dat de resource niet is gewijzigd sinds de versie die door de verzoekheaders is opgegeven."
+    },
+    "400": {
+      "name": "Bad Request",
+      "description": "De server kan of wil het verzoek niet verwerken vanwege een duidelijke clientfout (bijvoorbeeld onjuiste syntaxis)."
+    },
+    "401": {
+      "name": "Unauthorized",
+      "description": "Authenticatie is vereist en is mislukt of nog niet verstrekt."
+    },
+    "403": {
+      "name": "Forbidden",
+      "description": "Het verzoek bevatte geldige gegevens en werd door de server begrepen, maar de server weigert de actie uit te voeren."
+    },
+    "404": {
+      "name": "Not Found",
+      "description": "De gevraagde resource kon niet worden gevonden, maar is mogelijk in de toekomst beschikbaar."
+    },
+    "405": {
+      "name": "Method Not Allowed",
+      "description": "Een verzoekmethode wordt niet ondersteund voor de gevraagde resource."
+    },
+    "408": {
+      "name": "Request Timeout",
+      "description": "De server kreeg een time-out tijdens het wachten op het verzoek."
+    },
+    "409": {
+      "name": "Conflict",
+      "description": "Geeft aan dat het verzoek niet kon worden verwerkt vanwege een conflict in de huidige staat van de resource."
+    },
+    "410": {
+      "name": "Gone",
+      "description": "Geeft aan dat de gevraagde resource eerder beschikbaar was, maar niet meer beschikbaar is en niet meer beschikbaar zal komen."
+    },
+    "415": {
+      "name": "Unsupported Media Type",
+      "description": "De verzoekentiteit heeft een mediatype dat de server of resource niet ondersteunt."
+    },
+    "422": {
+      "name": "Unprocessable Entity",
+      "description": "Het verzoek was goed gevormd, maar kon niet worden gevolgd vanwege semantische fouten."
+    },
+    "429": {
+      "name": "Too Many Requests",
+      "description": "De gebruiker heeft te veel verzoeken verzonden binnen een bepaalde tijd (snelheidsbeperking)."
+    },
+    "500": {
+      "name": "Internal Server Error",
+      "description": "Een algemene foutmelding, gegeven wanneer een onverwachte situatie is opgetreden en geen specifiekere melding geschikt is."
+    },
+    "501": {
+      "name": "Not Implemented",
+      "description": "De server herkent de verzoekmethode niet of is niet in staat het verzoek te vervullen."
+    },
+    "502": {
+      "name": "Bad Gateway",
+      "description": "De server fungeerde als gateway of proxy en ontving een ongeldig antwoord van de upstream-server."
+    },
+    "503": {
+      "name": "Service Unavailable",
+      "description": "De server kan het verzoek niet verwerken (omdat hij overbelast is of in onderhoud)."
+    },
+    "504": {
+      "name": "Gateway Timeout",
+      "description": "De server fungeerde als gateway of proxy en ontving niet tijdig een antwoord van de upstream-server."
+    }
+  },
+  "welcome": {
+    "confirmRemoveFavorite": "Weet je zeker dat je \"{{fileName}}\" uit favorieten wilt verwijderen?",
+    "noFilesHint": "Open een bestand of maak een nieuwe aan om te beginnen",
+    "newAriaLabel": "Een nieuwe collectie maken",
+    "openAriaLabel": "Een collectie van schijf openen",
+    "landmarkLabel": "Welkom"
+  },
+  "save": {
+    "title": "Opslagopties",
+    "mode": {
+      "label": "Opslagmodus",
+      "file": "Enkel bestand",
+      "folder": "Mapstructuur",
+      "fileDescription": "Alles opslaan in één bestand",
+      "folderDescription": "Opslaan als mapstructuur met afzonderlijke bestanden"
+    },
+    "format": {
+      "label": "Indeling",
+      "yamlDescription": "Leesbaar voor mensen",
+      "jsonDescription": "Standaardindeling",
+      "json5Description": "JSON + commentaar"
+    },
+    "preview": {
+      "label": "Voorbeeld van structuur",
+      "noDocumentation": "Geen geparseerde documentatie voor deze bron."
+    }
+  },
+  "common": {
+    "cancel": "Annuleren",
+    "save": "Opslaan"
+  },
+  "helpers": {
+    "categories": {
+      "comparison": "Vergelijking",
+      "string": "Tekenreeks",
+      "math": "Wiskunde",
+      "array": "Array",
+      "object": "Object",
+      "url": "URL",
+      "date": "Datum",
+      "regex": "Regex",
+      "misc": "Diversen"
+    },
+    "eq": "Strikte gelijkheid (===)",
+    "ne": "Strikte ongelijkheid (!==)",
+    "neq": "Strikte ongelijkheid (!==)",
+    "lt": "Kleiner dan (<)",
+    "lte": "Kleiner dan of gelijk aan (<=)",
+    "gt": "Groter dan (>)",
+    "gte": "Groter dan of gelijk aan (>=)",
+    "and": "Block-helper: rendert als alle waarden waar zijn",
+    "or": "Block-helper: rendert als een waarde waar is",
+    "not": "Geeft de omgekeerde booleaanse waarde terug",
+    "ifEquals": "Block-helper: rendert als waarden gelijk zijn",
+    "is": "Block-helper: losse gelijkheidsvergelijking",
+    "isnt": "Block-helper: losse ongelijkheidsvergelijking",
+    "default": "Geeft de standaardwaarde als de eerste null/undefined is",
+    "compare": "Block-helper: vergelijken met operator",
+    "lowercase": "Zet tekenreeks om naar kleine letters",
+    "uppercase": "Zet tekenreeks om naar hoofdletters",
+    "capitalize": "Maakt de eerste letter een hoofdletter",
+    "capitalizeAll": "Maakt de eerste letter van elk woord een hoofdletter",
+    "titleize": "Maakt de eerste letter van elk woord een hoofdletter",
+    "camelcase": "Converteert naar camelCase",
+    "pascalcase": "Converteert naar PascalCase",
+    "snakecase": "Converteert naar snake_case",
+    "snakeCase": "Converteert naar snake_case (alias)",
+    "dashcase": "Converteert naar dash-case (kebab-case)",
+    "dotcase": "Converteert naar dot.case",
+    "pathcase": "Converteert naar path/case",
+    "sentencecase": "Converteert naar zinshoofdletters",
+    "slugify": "Converteert naar URL-vriendelijke slug",
+    "trim": "Verwijdert witruimte aan beide uiteinden",
+    "trimLeft": "Verwijdert witruimte aan het begin",
+    "trimRight": "Verwijdert witruimte aan het einde",
+    "replace": "Vervangt alle voorkomens van a door b",
+    "split": "Splitst tekenreeks in een array",
+    "truncate": "Kort tekenreeks in tot opgegeven lengte",
+    "ellipsis": "Kort tekenreeks in met weglatingsteken",
+    "append": "Voegt suffix toe aan tekenreeks",
+    "prepend": "Voegt prefix toe aan tekenreeks",
+    "reverse": "Keert een tekenreeks of array om",
+    "startsWith": "Block-helper: rendert als tekenreeks begint met prefix",
+    "endsWith": "Block-helper: rendert als tekenreeks eindigt op suffix",
+    "contains": "Block-helper: rendert als tekenreeks de subtekst bevat",
+    "padStart": "Vult tekenreeks aan het begin aan tot lengte",
+    "padEnd": "Vult tekenreeks aan het einde aan tot lengte",
+    "repeat": "Herhaalt tekenreeks n keer",
+    "substring": "Haalt deel van tekenreeks op",
+    "indexOf": "Geeft index van subtekst terug (-1 als niet gevonden)",
+    "count": "Telt voorkomens van subtekst",
+    "newLineToBr": "Converteert regeleinden naar <br>-tags",
+    "stripTags": "Verwijdert HTML-tags uit tekenreeks",
+    "add": "Telt twee getallen op",
+    "subtract": "Trekt b af van a",
+    "multiply": "Vermenigvuldigt twee getallen",
+    "divide": "Deelt a door b",
+    "modulo": "Geeft de rest van a / b terug",
+    "abs": "Geeft de absolute waarde terug",
+    "ceil": "Rondt af naar boven naar dichtstbijzijnde geheel getal",
+    "floor": "Rondt af naar beneden naar dichtstbijzijnde geheel getal",
+    "round": "Rondt af naar dichtstbijzijnde geheel getal",
+    "min": "Geeft de minimumwaarde terug",
+    "max": "Geeft de maximumwaarde terug",
+    "pow": "Geeft het grondtal verheven tot de exponent terug",
+    "sqrt": "Geeft de vierkantswortel terug",
+    "random": "Geeft een willekeurig geheel getal tussen min en max terug",
+    "sum": "Geeft de som van array-waarden terug",
+    "avg": "Geeft het gemiddelde van array-waarden terug",
+    "toFixed": "Formatteert getal met vast aantal decimalen",
+    "toInt": "Converteert naar geheel getal",
+    "toFloat": "Converteert naar drijvende komma",
+    "first": "Geeft het eerste element/de eerste elementen van de array terug",
+    "last": "Geeft het laatste element/de laatste elementen van de array terug",
+    "after": "Geeft elementen na index n terug",
+    "before": "Geeft elementen vóór index n terug",
+    "slice": "Geeft een stukje van de array terug",
+    "length": "Geeft de lengte van array/tekenreeks/object terug",
+    "join": "Voegt array-elementen samen met scheidingsteken",
+    "sort": "Sorteert array",
+    "unique": "Geeft unieke waarden terug",
+    "concat": "Voegt arrays samen",
+    "flatten": "Maakt geneste array plat",
+    "pluck": "Haalt eigenschap uit een array van objecten",
+    "itemAt": "Geeft element op index terug",
+    "inArray": "Block-helper: rendert als waarde in array zit",
+    "isArray": "Geeft waar terug als waarde een array is",
+    "isEmpty": "Block-helper: rendert als waarde leeg is",
+    "some": "Block-helper: rendert als sommige items overeenkomen",
+    "every": "Block-helper: rendert als alle items overeenkomen",
+    "JSONstringify": "Converteert object naar JSON-tekenreeks",
+    "JSONparse": "Ontleedt JSON-tekenreeks naar object",
+    "get": "Haalt geneste eigenschap op via pad",
+    "keys": "Geeft sleutels van object terug",
+    "values": "Geeft waarden van object terug",
+    "entries": "Geeft [sleutel, waarde]-paren terug",
+    "hasOwn": "Block-helper: rendert als object eigenschap heeft",
+    "pick": "Maakt object met geselecteerde sleutels",
+    "omit": "Maakt object zonder opgegeven sleutels",
+    "merge": "Voegt meerdere objecten samen",
+    "isObject": "Geeft waar terug als waarde een object is",
+    "typeOf": "Geeft het type van de waarde terug",
+    "encodeURI": "Codeert een tekenreeks voor URL",
+    "decodeURI": "Decodeert een URL-tekenreeks",
+    "urlParse": "Ontleedt URL in componenten",
+    "stripQuerystring": "Verwijdert querystring uit URL",
+    "stripProtocol": "Verwijdert protocol uit URL",
+    "now": "Geeft huidige datum als ISO-tekenreeks terug",
+    "timestamp": "Geeft huidige tijdstempel in milliseconden terug",
+    "year": "Geeft het huidige jaar terug",
+    "formatDate": "Formatteert datum met patroon",
+    "match": "Geeft regex-overeenkomsten terug",
+    "test": "Block-helper: rendert als regex overeenkomt",
+    "coalesce": "Geeft eerste niet-null/undefined waarde terug",
+    "uuid": "Genereert een willekeurige UUID",
+    "noop": "Block-helper die inhoud weergeeft zoals deze is",
+    "raw": "Block-helper die ruwe inhoud weergeeft",
+    "times": "Block-helper die n keer herhaalt",
+    "range": "Genereert array met getallen"
+  },
+  "behavior": {
+    "title": "Gedrag",
+    "syncSidebarWithTabs": "Selectie in zijbalk synchroniseren met actief tabblad",
+    "syncSidebarWithTabsDescription": "Bij het wisselen van tabbladen in de werkruimte automatisch het overeenkomstige item in de zijbalk selecteren en tonen",
+    "dateTimeFormat": "Datum-/tijdnotatie",
+    "dateTimeFormatDescription": "Notatie die wordt gebruikt om datums en tijden in de toepassing weer te geven",
+    "dateTimeFormat.us": "Amerikaanse notatie (MM/DD/JJJJ, 12h)",
+    "dateTimeFormat.iso": "ISO-notatie (JJJJ-MM-DD, 24h)"
+  },
+  "console": {
+    "title": "Console",
+    "requestFormat": "Verzoekformaat",
+    "requestFormatDescription": "Standaard shell-variant voor het weergeven van uitgaande verzoeken op het Console-tabblad. Elke rij is een commandoregel die je kunt kopiëren en plakken; de schakelaar in de Console-werkbalk overschrijft deze standaard voor het huidige tabblad.",
+    "requestFormat.curl": "curl (Unix-stijl)",
+    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+  },
+  "import": {
+    "title": "Verzoeken importeren",
+    "source": {
+      "label": "Plak hier iets!",
+      "placeholder": "Voer bestandspad of URL in, of plak een curl/PowerShell-commando..."
+    },
+    "formats": {
+      "swagger": {
+        "description": "De OpenAPI 2.0-specificatie, ontstaan bij SmartBear. Plak een Swagger JSON of YAML — Restorm parseert elke operatie, neemt security schemes mee en zet het hele document om in een navigeerbare boomstructuur van verzoeken.",
+        "trademark": "Swagger is een gedeponeerd handelsmerk van SmartBear Software."
+      },
+      "openapi": {
+        "description": "De huidige OpenAPI-standaard (3.0 en 3.1). Dezelfde plak-en-klaar-ergonomie als Swagger: parameters, request bodies, security schemes en webhooks komen binnen als een boom van getypeerde verzoeken met klaarstaande voorbeelden.",
+        "trademark": "OpenAPI is een project van het OpenAPI Initiative onder de Linux Foundation."
+      },
+      "curl": {
+        "description": "Heb je het verzoek al draaien in je terminal? Plak de volledige curl-aanroep — vlaggen, headers, body, querystring — en Restorm bouwt het opnieuw als een echt verzoek dat je opnieuw kunt uitvoeren, bewerken en vastmaken.",
+        "trademark": "curl is opensourcesoftware © Daniel Stenberg, hier gebruikt onder de bijbehorende voorwaarden."
+      },
+      "powershell": {
+        "description": "Hetzelfde idee, PowerShell-versie. Plak een Invoke-WebRequest- of Invoke-RestMethod-commando en Restorm leest de URI, methode, headers en body om een verzoek te starten dat je visueel kunt itereren.",
+        "trademark": "PowerShell is een gedeponeerd handelsmerk van Microsoft Corporation."
+      },
+      "postman": {
+        "description": "Een Postman-collectie die op kantoor rondslingert? Sleep de JSON erin — Restorm leest elk verzoek, elk voorbeeldantwoord en elke omgevingsvariabele, en bouwt de collectie opnieuw op als een Restorm-boom die je naast je andere API's kunt gebruiken.",
+        "trademark": "Postman is een gedeponeerd handelsmerk van Postman, Inc., hier alleen ter referentie voor compatibiliteit gebruikt."
+      },
+      "insomnia": {
+        "description": "Kom je van Insomnia? Sleep je export erin. Restorm begrijpt het v4-/v5-collectieformaat, neemt elk verzoek, elke header, body en omgeving mee en presenteert het geheel als een Restorm-boom.",
+        "trademark": "Insomnia is een gedeponeerd handelsmerk van Kong Inc., hier alleen ter referentie voor compatibiliteit gebruikt."
+      },
+      "bruno": {
+        "description": "Bruno-achtige .bru-bestanden of een mapexport — Restorm leest het .bru-tekstformaat, inclusief de scriptblokken, en bouwt elk verzoek opnieuw op als een eersteklas Restorm-knooppunt dat klaar is om te verzenden.",
+        "trademark": "Bruno is opensourcesoftware (MIT) van Anoop M. D., hier gebruikt onder de bijbehorende voorwaarden."
+      },
+      "graphql": {
+        "description": "Plak een GraphQL SDL (.graphql / .gql / een plakwerk uit je GraphQL-client) en Restorm steigert één verzoek per operatie, gekoppeld aan het juiste query/mutation/subscription-type met al gestructureerde variabelen.",
+        "trademark": "GraphQL is een handelsmerk van de GraphQL Foundation, een project van de Joint Development Foundation."
+      },
+      "grpc": {
+        "description": "Sleep een .proto-bestand (of een map vol .proto-bestanden) en Restorm doorloopt elke service, elke RPC en elk bericht — en zet elke methode om in een getypeerd verzoek dat je via de gRPC-executor kunt verzenden zonder aan codegen te raken.",
+        "trademark": "gRPC is een project van de Cloud Native Computing Foundation."
+      },
+      "soap": {
+        "description": "Een WSDL? Plak hem (of zijn URL) — Restorm parseert elke <port> en elke <operation> en produceert kant-en-klare SOAP-enveloppen met de juiste SOAPAction-header, schema-getypeerde body-skeletten en het door de WSDL gedeclareerde authenticatieschema."
+      },
+      "websocket": {
+        "description": "Plak een WebSocket-endpoint (ws:// of wss://) — Restorm opent de verbinding, vangt de hello-frames van de server op en steigert send-/subscribe-verzoeken met herafspeelbare payload-templates.",
+        "trademark": "WebSocket is een protocol dat is gestandaardiseerd door de IETF (RFC 6455) en het W3C."
+      },
+      "kafka": {
+        "description": "Plak de URL van een Apache Kafka bootstrap-server (of een lijst met topics) — Restorm registreert consumers en producers per topic, decodeert Avro-/Protobuf-payloads via je Schema Registry en laat je met één klik individuele offsets opnieuw afspelen.",
+        "trademark": "Apache Kafka en het Kafka-logo zijn handelsmerken van de Apache Software Foundation."
+      },
+      "socketio": {
+        "description": "Plak de URL van een Socket.IO-server — Restorm onderhandelt de handshake, somt de namespaces en gebeurtenisnamen op die de server uitzendt, en geeft je één verzoek per emit/on-gebeurtenis met payload-validatie.",
+        "trademark": "Socket.IO is een opensourcebibliotheek uitgebracht onder de MIT-licentie; de naam en het logo worden hier ter aanduiding gebruikt."
+      },
+      "odata": {
+        "description": "Plak de URL van een OData service-document of een $metadata-bestand — Restorm leest de CSDL, bouwt de entity sets, function imports en actions opnieuw op en vult de query-opties $filter/$select/$top/$skip vooraf in op elke operatie."
+      },
+      "mqtt": {
+        "description": "Plak de URL van een MQTT-broker of een topiccatalogus — Restorm steigert publish-/subscribe-verzoeken per topic, houdt de verbinding open voor streaming-previews en onthoudt snapshots van retained messages zodat je ze later kunt afspelen.",
+        "trademark": "MQTT is een OASIS-standaard; de naam en het logo van MQTT zijn handelsmerken van OASIS Open."
+      }
+    },
+    "loading": "Analyseren...",
+    "noResults": "Geen verzoeken gevonden",
+    "error": {
+      "unknown": "Er is een onbekende fout opgetreden"
+    },
+    "ok": "Importeren",
+    "cancel": "Annuleren",
+    "dropZone": "Sleepzone"
+  },
+  "emptyBench": {
+    "importCard": {
+      "title": "Importeer je API",
+      "body": "Breng een OpenAPI/Swagger-spec, een GraphQL-schema, een Postman/Bruno/Insomnia-collectie mee, of plak een curl/PowerShell-commando. Restorm verwerkt het, bouwt de mappenstructuur op en levert elk endpoint kant-en-klaar."
+    },
+    "recentActivity": {
+      "title": "Recente activiteit",
+      "empty": "Verstuur je eerste verzoek om het hier te zien."
+    },
+    "apiCard": {
+      "favorites": "Favorieten",
+      "topUsed": "Top 10 meest gebruikt",
+      "recent": "Laatste requests",
+      "description": "Omschrijving",
+      "version": "Versie",
+      "quickLinks": {
+        "environments": "Omgevingen",
+        "docs": "Documentatie",
+        "notes": "Notities"
+      }
+    }
+  }
+}

@@ -1,0 +1,328 @@
+{
+  "common": {
+    "opened": "已打开",
+    "refresh": "刷新",
+    "import": "导入"
+  },
+  "file": {
+    "untitled": "未命名",
+    "unsavedChanges": {
+      "title": "未保存的更改",
+      "message": "是否要保存对 \"{{fileName}}\" 的更改？",
+      "detail": "如果不保存，您的更改将会丢失。",
+      "save": "保存",
+      "dontSave": "不保存",
+      "cancel": "取消"
+    }
+  },
+  "recentFilesVignette": {
+    "favorites": "收藏",
+    "recentFiles": "最近的文件",
+    "addToFavorites": "添加到收藏",
+    "removeFromFavorites": "从收藏中移除",
+    "confirmRemoveFavorite": "确定要将 \"{{fileName}}\" 从收藏中移除吗？",
+    "favoritesLandmarkLabel": "收藏列表",
+    "recentsLandmarkLabel": "最近文件列表"
+  },
+  "welcomeScreen": {
+    "landmarkLabel": "欢迎"
+  },
+  "menuBar": {
+    "new": "新建",
+    "open": "打开",
+    "edit": "编辑",
+    "view": "视图",
+    "help": "帮助",
+    "undo": "撤销",
+    "redo": "恢复",
+    "cut": "剪切",
+    "copy": "复制",
+    "paste": "粘贴",
+    "find": "查找",
+    "replace": "替换",
+    "toggleSidebar": "切换侧边栏",
+    "toggleResponsePanel": "切换响应面板",
+    "zoomIn": "放大",
+    "zoomOut": "缩小",
+    "resetZoom": "重置缩放",
+    "settings": "设置",
+    "toggleDevTools": "切换开发者工具",
+    "toggleFullscreen": "切换全屏",
+    "about": "关于",
+    "documentation": "文档",
+    "keyboardShortcuts": "键盘快捷键",
+    "releaseNotes": "发行说明",
+    "reportIssue": "报告问题"
+  },
+  "settings": {
+    "title": "设置",
+    "theme": "主题",
+    "language": "语言",
+    "searchPlaceholder": "搜索设置...",
+    "noResults": "未找到任何设置。",
+    "numberOutOfRange": "值必须在 {{min}} 到 {{max}} 之间。",
+    "resetSetting": "重置设置",
+    "copySettingId": "复制设置 ID",
+    "settingOptions": "设置选项",
+    "scopeTabsLabel": "设置作用范围",
+    "userOnlyHidden": "{{count}} 项仅用户级设置在此选项卡中已隐藏。",
+    "scope": {
+      "user": "用户",
+      "workspace": "工作区",
+      "workspaceDisabledTooltip": "打开一个项目以编辑工作区设置"
+    },
+    "appearance": {
+      "title": "外观",
+      "theme": {
+        "title": "主题",
+        "description": "选择应用程序的配色主题"
+      },
+      "language": {
+        "title": "语言",
+        "description": "选择应用程序的语言",
+        "en": "English",
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "pt": "Português",
+        "nl": "Nederlands",
+        "sv": "Svenska",
+        "da": "Dansk",
+        "nb": "Norsk bokmål",
+        "fi": "Suomi",
+        "pl": "Polski",
+        "cs": "Čeština",
+        "hu": "Magyar",
+        "ro": "Română",
+        "el": "Ελληνικά",
+        "uk": "Українська",
+        "hr": "Hrvatski",
+        "sr": "Srpski",
+        "sq": "Shqip",
+        "tr": "Türkçe",
+        "id": "Bahasa Indonesia",
+        "vi": "Tiếng Việt",
+        "ja": "日本語",
+        "ko": "한국어",
+        "zh-CN": "简体中文",
+        "zh-TW": "繁體中文"
+      },
+      "advancedVisualEffects": {
+        "title": "高级视觉效果",
+        "description": "启用高级视觉效果，例如浮层背景模糊和 CSS 动画。在性能较弱的硬件上可禁用以获得更佳性能。"
+      },
+      "editor": {
+        "title": "编辑器",
+        "fontSize": {
+          "title": "字号",
+          "description": "控制代码编辑器中的字号（像素）"
+        },
+        "fontFamily": {
+          "title": "字体",
+          "description": "控制代码编辑器中所使用的字体"
+        },
+        "wordWrap": {
+          "title": "自动换行",
+          "description": "控制代码编辑器是否对行进行自动换行"
+        },
+        "minimap": {
+          "title": "缩略图",
+          "description": "控制代码编辑器中是否显示缩略图"
+        },
+        "lineNumbers": {
+          "title": "行号",
+          "description": "控制代码编辑器中是否显示行号"
+        }
+      }
+    },
+    "files": {
+      "title": "文件",
+      "autoSave": {
+        "title": "自动保存",
+        "description": "控制编辑器在有未保存改动时的自动保存行为。请参阅文档以了解更多关于自动保存的说明。",
+        "off": "关闭",
+        "afterDelay": "延迟后保存",
+        "onWindowChange": "切换窗口时保存"
+      },
+      "autoSaveDelay": {
+        "title": "自动保存延迟",
+        "description": "控制在“延迟后保存”模式下，未保存的编辑器在多少毫秒后自动保存。仅在“自动保存”设为“延迟后保存”时生效。"
+      }
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "转到定义"
+  },
+  "tagsView": {
+    "removeTag": "移除标签",
+    "newTag": "新标签"
+  },
+  "contextMenu": {
+    "cut": "剪切",
+    "copy": "复制",
+    "paste": "粘贴"
+  },
+  "search": {
+    "placeholder": "搜索...",
+    "noResults": "未找到结果",
+    "resultsAriaLabel": "搜索结果",
+    "categories": {
+      "request": "HTTP 请求",
+      "folder": "文件夹",
+      "environment": "环境",
+      "settings": "设置",
+      "tag": "标签"
+    }
+  },
+  "iconSelect": {
+    "searchEmojis": "搜索表情符号...",
+    "noEmojisFound": "未找到表情符号",
+    "searchCodicons": "搜索 Codicons...",
+    "searchIconoir": "搜索 Iconoir...",
+    "searchPhosphor": "搜索 Phosphor...",
+    "searchMaterial": "搜索 Material...",
+    "searchSimpleIcons": "搜索 Simple Icons...",
+    "searchFeather": "搜索 Feather...",
+    "searchFontAwesome": "搜索 Font Awesome...",
+    "moreIcons": "另有 {{count}} 个图标。使用搜索可找到特定图标。",
+    "more": "另有 {{count}} 个。使用搜索可找到特定图标。",
+    "noIconsFound": "未找到图标",
+    "searchResults": "搜索结果",
+    "categories": {
+      "files": "文件",
+      "git": "Git",
+      "debug": "调试",
+      "symbols": "符号",
+      "arrows": "箭头",
+      "ui": "界面",
+      "media": "媒体",
+      "editing": "编辑",
+      "terminal": "终端",
+      "people": "人物",
+      "notifications": "通知",
+      "brands": "品牌",
+      "communication": "通讯",
+      "users": "用户",
+      "business": "商务",
+      "medical": "医疗",
+      "transport": "交通",
+      "weather": "天气",
+      "shapes": "形状",
+      "design": "设计",
+      "devices": "设备",
+      "buildings": "建筑",
+      "nature": "自然",
+      "food": "食物",
+      "sport": "运动",
+      "sports": "运动",
+      "animals": "动物",
+      "tools": "工具"
+    },
+    "emojiCategories": {
+      "people": "笑脸与人物",
+      "nature": "动物与自然",
+      "food": "食物与饮料",
+      "activity": "活动",
+      "travel": "旅行与地点",
+      "objects": "物品",
+      "symbols": "符号",
+      "flags": "旗帜"
+    }
+  },
+  "dateTimePicker": {
+    "ariaLabel": "日期/时间选择器",
+    "openCalendar": "打开日历",
+    "previousYear": "上一年",
+    "nextYear": "下一年",
+    "previousMonth": "上一月",
+    "nextMonth": "下一月",
+    "selectMonth": "选择月份",
+    "selectYear": "选择年份",
+    "includeTime": "包含时间",
+    "hours": "小时",
+    "minutes": "分钟",
+    "output": "输出",
+    "pattern": "模式",
+    "outputModes": {
+      "pattern": "模式",
+      "unix": "Unix（秒）",
+      "epoch": "Epoch（毫秒）",
+      "iso": "ISO 8601"
+    },
+    "preview": "预览",
+    "tokens": {
+      "S": "毫秒，不补零",
+      "SSS": "毫秒，补齐至 3 位",
+      "u": "小数秒，功能上与 SSS 相同",
+      "uu": "小数秒，介于 0 至 99 之间，补齐至 2 位",
+      "uuu": "小数秒，介于 0 至 9 之间",
+      "s": "秒，不补零",
+      "ss": "秒，补齐至 2 位",
+      "m": "分钟，不补零",
+      "mm": "分钟，补齐至 2 位",
+      "h": "12 小时制小时，不补零",
+      "hh": "12 小时制小时，补齐至 2 位",
+      "H": "24 小时制小时，不补零",
+      "HH": "24 小时制小时，补齐至 2 位",
+      "Z": "窄偏移",
+      "ZZ": "短偏移",
+      "ZZZ": "工程师风格偏移",
+      "ZZZZ": "命名偏移缩写",
+      "ZZZZZ": "命名偏移全称",
+      "z": "IANA 时区",
+      "a": "上午/下午",
+      "d": "月中日期，不补零",
+      "dd": "月中日期，补齐至 2 位",
+      "c": "星期几，数字 1-7（周一为 1，周日为 7）",
+      "ccc": "星期几，本地化缩写",
+      "cccc": "星期几，本地化全称",
+      "ccccc": "星期几，本地化单字母",
+      "L": "月份，不补零的数字",
+      "LL": "月份，补零的数字",
+      "LLL": "月份，本地化缩写",
+      "LLLL": "月份，本地化全称",
+      "LLLLL": "月份，本地化单字母",
+      "y": "年份，不补零",
+      "yy": "两位年份",
+      "yyyy": "四至六位年份，补齐至 4 位",
+      "G": "纪元，本地化缩写",
+      "GG": "纪元，本地化全称",
+      "GGGGG": "纪元，本地化单字母",
+      "kk": "ISO 周纪年，不补零",
+      "kkkk": "ISO 周纪年，补齐至 4 位",
+      "W": "ISO 周编号，不补零",
+      "WW": "ISO 周编号，补齐至 2 位",
+      "ii": "本地周纪年，不补零",
+      "iiii": "本地周纪年，补齐至 4 位",
+      "n": "本地周编号，不补零",
+      "nn": "本地周编号，补齐至 2 位",
+      "o": "序数（年中第几日），不补零",
+      "ooo": "序数（年中第几日），补齐至 3 位",
+      "q": "季度，不补零",
+      "qq": "季度，补齐至 2 位",
+      "D": "本地化数字日期",
+      "DD": "带月份缩写的本地化日期",
+      "DDD": "带月份全称的本地化日期",
+      "DDDD": "带月份全称与星期的本地化日期",
+      "t": "本地化时间",
+      "tt": "带秒的本地化时间",
+      "ttt": "带秒和偏移缩写的本地化时间",
+      "tttt": "带秒和完整偏移的本地化时间",
+      "T": "24 小时制本地化时间",
+      "TT": "带秒的 24 小时制本地化时间",
+      "TTT": "带秒和偏移缩写的 24 小时制本地化时间",
+      "TTTT": "带秒和完整偏移的 24 小时制本地化时间",
+      "f": "短格式本地化日期与时间",
+      "ff": "较短格式本地化日期与时间",
+      "fff": "详细本地化日期与时间",
+      "ffff": "更详细的本地化日期与时间",
+      "F": "带秒的短格式本地化日期与时间",
+      "FF": "带秒的较短格式本地化日期与时间",
+      "FFF": "带秒的详细本地化日期与时间",
+      "FFFF": "带秒的更详细本地化日期与时间",
+      "X": "Unix 时间戳（秒）",
+      "x": "Unix 时间戳（毫秒）"
+    }
+  }
+}

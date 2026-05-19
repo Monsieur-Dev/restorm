@@ -6,6 +6,7 @@ import { isEnvironmentFolder, isAnyFolder } from '../../../shared/types/collecti
 import { DocumentEvents } from '../services/DocumentEvents'
 import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
 import { buildRequestFromOperation } from '../services/buildRequestFromOperation'
+import { cloneForEventBus } from '../utils/cloneForEventBus'
 import type { CreateFromOperationOptions, RequestCreationApi } from '../contexts/requestCreationContextValue'
 import type { BreadcrumbItem } from '../../../shared/types/editor'
 
@@ -93,7 +94,6 @@ export function useRequestCreationApi(opts: UseRequestCreationApiOptions): Reque
           const newTagFolder: Folder = {
             id: generateId(`folder:tag:${operation.group}`),
             name: operation.group,
-            documentation: '',
             tags: [operation.group],
             configuration: {},
             items: []
@@ -103,7 +103,10 @@ export function useRequestCreationApi(opts: UseRequestCreationApiOptions): Reque
           eventBus.emitSync(DocumentEvents.FOLDER_CREATED, {
             id: reactiveTagFolder.id,
             type: 'folder',
-            document: JSON.parse(JSON.stringify(reactiveTagFolder)) as Folder,
+            // `cloneForEventBus` preserves `PasswordValue` plaintext on
+            // the way to main (matters when an ancestor env carries
+            // secrets the new folder inherits in handlebars scope).
+            document: cloneForEventBus(reactiveTagFolder),
             parentFolderId: envFolder.id
           })
           targetFolder = reactiveTagFolder
@@ -118,7 +121,7 @@ export function useRequestCreationApi(opts: UseRequestCreationApiOptions): Reque
       eventBus.emitSync(DocumentEvents.REQUEST_CREATED, {
         id: reactiveRequest.id,
         type: 'request',
-        document: JSON.parse(JSON.stringify(reactiveRequest)) as Request,
+        document: cloneForEventBus(reactiveRequest),
         parentFolderId: targetFolder.id
       })
 

@@ -1,0 +1,154 @@
+<svg viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg" class="empty-bench-tip-illustration" role="img" aria-hidden="true">
+  <style>
+    .ad-frame {
+      fill: #f5f5f5;
+      stroke: currentColor;
+      stroke-width: 1.4;
+      stroke-linejoin: round;
+    }
+
+    /* Page typography */
+    .ad-h1      { fill: #1e3a8a; }
+    .ad-h2      { fill: #2563eb; }
+    .ad-text    { fill: #9ca3af; }
+    .ad-caption { fill: #6b7280; }
+
+    /* Code block */
+    .ad-code-bg  { fill: #1f2937; }
+    .ad-code-tok { stroke: none; }
+    .ad-code--kw   { fill: #93c5fd; }
+    .ad-code--str  { fill: #fcd34d; }
+    .ad-code--fn   { fill: #fde68a; }
+    .ad-code--ident { fill: #e5e7eb; }
+
+    /* Diagram (entity-graph-like) */
+    .ad-node {
+      fill: #ffffff;
+      stroke: #2563eb;
+      stroke-width: 1.2;
+    }
+    .ad-edge {
+      stroke: #6b7280;
+      stroke-width: 1.2;
+      stroke-linecap: round;
+      fill: none;
+    }
+
+    /* Bar chart */
+    .ad-bar { fill: #60a5fa; }
+    .ad-bar--alt { fill: #93c5fd; }
+
+    .ad-scroll {
+      animation-name: ad-page-scroll;
+      animation-duration: 16s;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+      animation-fill-mode: both;
+      animation-play-state: paused;
+    }
+    /* One "set" of content is 220 px tall. Two copies are stacked
+       so the translate animation wraps seamlessly. */
+    @keyframes ad-page-scroll {
+      0%   { transform: translateY(0); }
+      100% { transform: translateY(-220px); }
+    }
+  </style>
+
+  <defs>
+    <clipPath id="ad-viewport">
+      <rect x="10" y="10" width="200" height="130" rx="8" />
+    </clipPath>
+  </defs>
+
+  <!-- Document frame (light paper) -->
+  <rect class="ad-frame" x="10" y="10" width="200" height="130" rx="8" />
+
+  <!-- Scrolling document content -->
+  <g clip-path="url(#ad-viewport)">
+    <g class="ad-scroll">
+      <!-- ============ Set 1 (starts at y=20, ends ≈ y=220) ============ -->
+      <rect class="ad-h1"      x="18" y="20" width="96" height="9" rx="2" />
+      <rect class="ad-caption" x="18" y="36" width="64" height="4" rx="1" />
+
+      <rect class="ad-text" x="18" y="46" width="184" height="3" rx="1" />
+      <rect class="ad-text" x="18" y="52" width="178" height="3" rx="1" />
+      <rect class="ad-text" x="18" y="58" width="160" height="3" rx="1" />
+
+      <rect class="ad-h2"   x="18" y="70" width="58" height="6" rx="1.5" />
+
+      <!-- Code block -->
+      <rect class="ad-code-bg" x="18" y="82" width="184" height="34" rx="3" />
+      <rect class="ad-code-tok ad-code--kw"    x="24" y="88"  width="20" height="3" rx="1" />
+      <rect class="ad-code-tok ad-code--ident" x="48" y="88"  width="38" height="3" rx="1" />
+      <rect class="ad-code-tok ad-code--str"   x="90" y="88"  width="60" height="3" rx="1" />
+      <rect class="ad-code-tok ad-code--kw"    x="24" y="94"  width="14" height="3" rx="1" />
+      <rect class="ad-code-tok ad-code--fn"    x="42" y="94"  width="38" height="3" rx="1" />
+      <rect class="ad-code-tok ad-code--ident" x="84" y="94"  width="60" height="3" rx="1" />
+      <rect class="ad-code-tok ad-code--ident" x="30" y="100" width="48" height="3" rx="1" />
+      <rect class="ad-code-tok ad-code--str"   x="82" y="100" width="80" height="3" rx="1" />
+      <rect class="ad-code-tok ad-code--kw"    x="24" y="106" width="16" height="3" rx="1" />
+      <rect class="ad-code-tok ad-code--ident" x="44" y="106" width="32" height="3" rx="1" />
+
+      <!-- Diagram (3 model nodes connected) -->
+      <rect class="ad-h2"   x="18" y="124" width="68" height="6" rx="1.5" />
+
+      <line class="ad-edge" x1="60"  y1="148" x2="118" y2="148" />
+      <line class="ad-edge" x1="118" y1="148" x2="178" y2="164" />
+      <rect class="ad-node" x="36"  y="140" width="48" height="20" rx="3" />
+      <rect class="ad-node" x="100" y="140" width="48" height="20" rx="3" />
+      <rect class="ad-node" x="154" y="156" width="48" height="20" rx="3" />
+
+      <!-- Paragraph -->
+      <rect class="ad-text" x="18" y="188" width="180" height="3" rx="1" />
+      <rect class="ad-text" x="18" y="194" width="150" height="3" rx="1" />
+
+      <!-- Bar chart (4 bars + baseline) -->
+      <line class="ad-edge" x1="18" y1="234" x2="202" y2="234" />
+      <rect class="ad-bar"     x="36"  y="216" width="20" height="18" rx="1" />
+      <rect class="ad-bar--alt" x="68"  y="208" width="20" height="26" rx="1" />
+      <rect class="ad-bar"     x="100" y="220" width="20" height="14" rx="1" />
+      <rect class="ad-bar--alt" x="132" y="200" width="20" height="34" rx="1" />
+      <rect class="ad-bar"     x="164" y="212" width="20" height="22" rx="1" />
+
+      <!-- ============ Set 2 (identical, offset +220) ============ -->
+      <rect class="ad-h1"      x="18" y="240" width="96" height="9" rx="2" />
+      <rect class="ad-caption" x="18" y="256" width="64" height="4" rx="1" />
+
+      <rect class="ad-text" x="18" y="266" width="184" height="3" rx="1" />
+      <rect class="ad-text" x="18" y="272" width="178" height="3" rx="1" />
+      <rect class="ad-text" x="18" y="278" width="160" height="3" rx="1" />
+
+      <rect class="ad-h2"   x="18" y="290" width="58" height="6" rx="1.5" />
+
+      <rect class="ad-code-bg" x="18" y="302" width="184" height="34" rx="3" />
+      <rect class="ad-code-tok ad-code--kw"    x="24" y="308" width="20" height="3" rx="1" />
+      <rect class="ad-code-tok ad-code--ident" x="48" y="308" width="38" height="3" rx="1" />
+      <rect class="ad-code-tok ad-code--str"   x="90" y="308" width="60" height="3" rx="1" />
+      <rect class="ad-code-tok ad-code--kw"    x="24" y="314" width="14" height="3" rx="1" />
+      <rect class="ad-code-tok ad-code--fn"    x="42" y="314" width="38" height="3" rx="1" />
+      <rect class="ad-code-tok ad-code--ident" x="84" y="314" width="60" height="3" rx="1" />
+      <rect class="ad-code-tok ad-code--ident" x="30" y="320" width="48" height="3" rx="1" />
+      <rect class="ad-code-tok ad-code--str"   x="82" y="320" width="80" height="3" rx="1" />
+      <rect class="ad-code-tok ad-code--kw"    x="24" y="326" width="16" height="3" rx="1" />
+      <rect class="ad-code-tok ad-code--ident" x="44" y="326" width="32" height="3" rx="1" />
+
+      <rect class="ad-h2"   x="18" y="344" width="68" height="6" rx="1.5" />
+
+      <line class="ad-edge" x1="60"  y1="368" x2="118" y2="368" />
+      <line class="ad-edge" x1="118" y1="368" x2="178" y2="384" />
+      <rect class="ad-node" x="36"  y="360" width="48" height="20" rx="3" />
+      <rect class="ad-node" x="100" y="360" width="48" height="20" rx="3" />
+      <rect class="ad-node" x="154" y="376" width="48" height="20" rx="3" />
+
+      <rect class="ad-text" x="18" y="408" width="180" height="3" rx="1" />
+      <rect class="ad-text" x="18" y="414" width="150" height="3" rx="1" />
+
+      <line class="ad-edge" x1="18" y1="454" x2="202" y2="454" />
+      <rect class="ad-bar"     x="36"  y="436" width="20" height="18" rx="1" />
+      <rect class="ad-bar--alt" x="68"  y="428" width="20" height="26" rx="1" />
+      <rect class="ad-bar"     x="100" y="440" width="20" height="14" rx="1" />
+      <rect class="ad-bar--alt" x="132" y="420" width="20" height="34" rx="1" />
+      <rect class="ad-bar"     x="164" y="432" width="20" height="22" rx="1" />
+    </g>
+  </g>
+</svg>

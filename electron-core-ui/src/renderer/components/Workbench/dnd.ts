@@ -22,9 +22,9 @@ export function setEditorDragData(e: React.DragEvent, data: DragEditorPayload): 
 	currentDragData = data;
 }
 
-export function getEditorDragData(e: React.DragEvent): DragEditorPayload | undefined {
+export function getEditorDragData(e: React.DragEvent | DragEvent): DragEditorPayload | undefined {
 	try {
-		const raw = e.dataTransfer.getData(DND_MIME.editor);
+		const raw = e.dataTransfer?.getData(DND_MIME.editor);
 		if (!raw) return undefined;
 		return JSON.parse(raw) as DragEditorPayload;
 	} catch {

@@ -33,7 +33,6 @@ const RESTORM_SEARCH_CATEGORIES: Record<string, CategoryMeta> = {
 interface FolderData {
   id: string
   name: string
-  documentation?: string
   tags: string[]
   notes?: string
   items: (FolderData | RequestData)[]
@@ -45,7 +44,6 @@ interface RequestData {
   id: string
   name: string
   type: 'http' | 'graphql' | 'grpc' | 'soap' | 'websocket'
-  documentation?: string
   tags: string[]
   notes?: string
   url?: string
@@ -94,7 +92,6 @@ function folderToSearchDocument(folder: FolderData, parentPath: string[] = []): 
   return {
     id: folder.id,
     title: folder.name,
-    ...(folder.documentation ? { description: folder.documentation } : {}),
     category: 'folder',
     icon: 'folder',
     keywords: folder.tags.join(' '),
@@ -180,7 +177,6 @@ function requestToSearchDocument(
   return {
     id: request.id,
     title: request.name,
-    ...(request.documentation ? { description: request.documentation } : {}),
     category: 'request',
     icon,
     keywords: keywordParts.filter(Boolean).join(' '),

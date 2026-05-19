@@ -1,5 +1,6 @@
 import React, { type CSSProperties, useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { useRequestReset } from '../../hooks/useRequestReset'
+import { getRequestPanelState, setRequestPanelCollapsed } from '../../services/requestPanelStateStore'
 import { useTranslation } from 'react-i18next'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
@@ -32,7 +33,7 @@ import { mapToBadgeType } from '../../utils/badgeUtils'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
-import { normalizeValueType } from '../../utils/normalizeValueType'
+import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import { buildHttpResponseViewData } from './HTTPResponsePanel'
 import { HTTPRequestBodySection } from './HTTPRequestBodySection'
 import type { HTTPRequestBody } from '../../../../shared/types/requestPrimitives'
@@ -42,6 +43,7 @@ import { DocumentationHost } from '../documentation/DocumentationHost'
 import { findOperationForRoute } from '../../../../shared/utils/findOperationForRoute'
 import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
 import { CurlPasteCallout } from '../CurlPasteCallout'
+import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { toasterService } from 'electron-core-ui/renderer'
 
 const methodSelectWrapperStyle: CSSProperties = { width: 90, flexShrink: 0 }
@@ -106,20 +108,32 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
 }) => {
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
-  const { selectedEnvId, environments, envColor } = useEnvironmentContext()
+  // `projectUuid` lives on the EnvironmentContext (mirrored from the
+  // workbench's `persistenceKey`). Sourcing it from here — rather than
+  // `useFileService` — guarantees it's already non-null at the first
+  // render: `useFileService` in a child component spins up its own
+  // store and seeds asynchronously, which would race the
+  // `requestPanelStateStore` lookup in `useState`'s lazy initializer
+  // below and silently fall through to the empty-section heuristic
+  // on a tab reopen.
+  const { selectedEnvId, environments, envColor, projectUuid } = useEnvironmentContext()
   const resolveAuthRequest = useAuthRequestResolver()
   const collections = useRestormStore((state) => state.collections)
   const findParentFolder = useRestormStore((state) => state.findParentFolder)
   const handlebarsHelpers = useHandlebarsHelpers()
   const { apiDocumentation, route } = useApiDocumentationFromRequest(request)
+  // Matched OpenAPI operation for the current request — drives both
+  // the Docs tab mount and the per-code tooltip in the Infos tab.
+  const matchedOperation = useMemo(() => {
+    if (!apiDocumentation || !route) return undefined
+    return findOperationForRoute(apiDocumentation, route) ?? undefined
+  }, [apiDocumentation, route])
   // Only mount the Docs tab when the request's URL actually maps to an
   // operation in the spec — otherwise the tab would render an empty
   // shell whenever the user is editing a URL that doesn't match
   // anything (which is exactly when the spec viewer would be useless).
   const docsContent = useMemo(() => {
-    if (!apiDocumentation || !route) return undefined
-    const matched = findOperationForRoute(apiDocumentation, route)
-    if (!matched) return undefined
+    if (!apiDocumentation || !route || !matchedOperation) return undefined
     return (
       <DocumentationHost
         apiDocumentation={apiDocumentation}
@@ -127,7 +141,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         testId="http-request-documentation-host"
       />
     )
-  }, [apiDocumentation, route])
+  }, [apiDocumentation, route, matchedOperation])
   const previousEnvIdRef = useRef<string | null>(null)
   const sendButtonStyle: React.CSSProperties | undefined = envColor
     ? { backgroundColor: envColor, color: getContrastColor(envColor), borderColor: envColor }
@@ -153,6 +167,51 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   const [isSending, setIsSending] = useState<boolean>(false)
   const [httpResponse, setHttpResponse] = useState<HTTPResponse | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+
+  // Lift the SplitView's per-pane collapsed state up into
+  // HTTPRequestTabView so it survives the SplitView's remount when
+  // `BaseRequestTabView` swaps `<div>` for `<VerticalSashContainer>`
+  // on first-response (and vice-versa). Each Pane is rendered with
+  // `collapsed={panelCollapsed[paneId]}`, which puts the SplitView
+  // in fully-controlled mode (see ECUI `collapsedLogic.ts`) — every
+  // toggle round-trips through this state, every remount re-hydrates
+  // from it.
+  //
+  // Initial values: per-request user-level store (survives tab
+  // close + file close), falling back to the empty-section heuristic
+  // when no entry exists yet. Snapshot via lazy useState initializer
+  // so the heuristic only runs once per mount.
+  const [panelCollapsed, setPanelCollapsed] = useState<{
+    headers: boolean
+    pathParams: boolean
+    params: boolean
+    body: boolean
+  }>(() => {
+    const seed = (projectUuid ? getRequestPanelState(projectUuid, request.id) : undefined) ?? {}
+    return {
+      headers: typeof seed['headers'] === 'boolean' ? seed['headers'] : request.headers.length === 0,
+      pathParams: typeof seed['pathParams'] === 'boolean' ? seed['pathParams'] : (request.pathParams?.length ?? 0) === 0,
+      params: typeof seed['params'] === 'boolean' ? seed['params'] : request.params.length === 0,
+      body: typeof seed['body'] === 'boolean' ? seed['body'] : false
+    }
+  })
+  const handlePanelCollapsedChange = useCallback((arr: boolean[]) => {
+    // SplitView fires this with the array in pane render order:
+    // headers, pathParams, params, body.
+    const next = {
+      headers: arr[0] ?? false,
+      pathParams: arr[1] ?? false,
+      params: arr[2] ?? false,
+      body: arr[3] ?? false
+    }
+    setPanelCollapsed(next)
+    if (projectUuid) {
+      setRequestPanelCollapsed(projectUuid, request.id, 'headers', next.headers)
+      setRequestPanelCollapsed(projectUuid, request.id, 'pathParams', next.pathParams)
+      setRequestPanelCollapsed(projectUuid, request.id, 'params', next.params)
+      setRequestPanelCollapsed(projectUuid, request.id, 'body', next.body)
+    }
+  }, [projectUuid, request.id])
 
   const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
@@ -223,14 +282,11 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   // Keep requestIdRef in sync for guard checks in other effects
   useEffect(() => { requestIdRef.current = request.id }, [request.id])
 
-  // Convert KeyValue arrays to plain objects for IPC
+  // Convert KeyValue arrays to plain objects for IPC. Shared with
+  // the other request tabs so `isExpression` propagation stays
+  // consistent.
   const toKeyValueData = useCallback((kvs: KeyValue[]): KeyValueData[] =>
-    kvs.map(kv => {
-      const result: KeyValueData = { key: kv.key, value: normalizeValueType(kv.value as unknown).toString() }
-      if (kv.id !== undefined) result.id = kv.id
-      if (kv.enabled !== undefined) result.enabled = kv.enabled
-      return result
-    }), [])
+    toKeyValueDataShared(kvs), [])
 
   // Own-echo handling: during an active typing burst we buffer the latest resolved URL /
   // code snippets in refs (no setState → no re-render). After a short idle delay we apply the
@@ -718,13 +774,22 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       })
   }, [request.id])
 
-  // Request content (SplitView with Panes)
+  // Request content (SplitView with Panes). Every Pane provides an
+  // explicit `collapsed` from `panelCollapsed` → SplitView runs in
+  // controlled mode (see ECUI `collapsedLogic.ts`). `onCollapsedChange`
+  // updates HTTPRequestTabView's state, which survives the SplitView
+  // remount that happens when the response panel toggles.
   const requestContent = (
-    <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }} data-testid="http-request-split-view">
+    <SplitView
+      orientation="vertical"
+      style={{ width: '100%', height: '100%' }}
+      data-testid="http-request-split-view"
+      onCollapsedChange={handlePanelCollapsedChange}
+    >
       <Pane
         title={t('requestTab.tabs.headers')}
         initialSize={0.2}
-        collapsed={request.headers.length === 0}
+        collapsed={panelCollapsed.headers}
         minSize={150}
         data-testid="http-request-headers-pane"
         headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
@@ -755,7 +820,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       <Pane
         title={t('requestTab.tabs.pathParams')}
         initialSize={0.2}
-        collapsed={(request.pathParams?.length ?? 0) === 0}
+        collapsed={panelCollapsed.pathParams}
         minSize={150}
         data-testid="http-request-path-params-pane"
         headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
@@ -789,7 +854,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       <Pane
         title={t('requestTab.tabs.params')}
         initialSize={0.2}
-        collapsed={request.params.length === 0}
+        collapsed={panelCollapsed.params}
         minSize={150}
         data-testid="http-request-params-pane"
         headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
@@ -820,7 +885,12 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           data-testid="http-request-query-params-table"
         />
       </Pane>
-      <Pane title={t('requestTab.tabs.body')} initialSize={0.4} data-testid="http-request-body-pane">
+      <Pane
+        title={t('requestTab.tabs.body')}
+        initialSize={0.4}
+        collapsed={panelCollapsed.body}
+        data-testid="http-request-body-pane"
+      >
         <HTTPRequestBodySection
           bodyMode={bodyMode}
           onBodyModeChange={setBodyMode}
@@ -841,8 +911,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   const codeSnippetsContent = backendCodeSnippets || t('requestTab.codeSnippets.loading', 'Loading code snippets...')
 
   const { infosContent, responseContent, jsonData } = useMemo(
-    () => buildHttpResponseViewData(httpResponse),
-    [httpResponse]
+    () => buildHttpResponseViewData(httpResponse, matchedOperation),
+    [httpResponse, matchedOperation]
   )
 
   const buildHistoryView = useCallback((detail: ResponseHistoryDetail) => {
@@ -868,8 +938,8 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
       timings: detail.response.timings,
       ...(detail.response.error ? { error: detail.response.error } : {})
     }
-    return buildHttpResponseViewData(historyResponse)
-  }, [request.id])
+    return buildHttpResponseViewData(historyResponse, matchedOperation)
+  }, [request.id, matchedOperation])
 
   // URL section
   const urlSection = (
@@ -911,13 +981,15 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           data-testid="http-request-cancel-button"
         />
       ) : (
-        <Button
-          icon="send"
-          onClick={handleSend}
-          {...(sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-          options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}
-          data-testid="http-request-send-button"
-        />
+        <SendButtonEnvSwitcher>
+          <Button
+            icon="send"
+            onClick={handleSend}
+            {...(sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+            options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}
+            data-testid="http-request-send-button"
+          />
+        </SendButtonEnvSwitcher>
       )}
     </ControlGroup>
     </div>

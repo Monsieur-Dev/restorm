@@ -159,6 +159,12 @@ export interface ModelDocumentation {
   /** XML serialisation hints (Swagger 2.0 + OpenAPI 3.x `xml`).
    * Defines the root element's name + optional namespace. */
   xml?: XmlHints
+  /** Enum values declared at the model schema's top level (e.g.
+   * `{ type: "string", enum: ["A","B"] }` referenced as `$ref:
+   * "#/components/schemas/Foo"`). Present when the schema is an
+   * enum rather than an object — `properties` is empty in that
+   * case and consumers should render the values directly. */
+  enumValues?: unknown[]
 }
 
 /** A group of operations (Swagger tag, WSDL service, gRPC package, GraphQL root type...). */

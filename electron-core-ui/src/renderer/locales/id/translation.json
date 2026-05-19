@@ -1,0 +1,328 @@
+{
+  "common": {
+    "opened": "Dibuka",
+    "refresh": "Segarkan",
+    "import": "Impor"
+  },
+  "file": {
+    "untitled": "Tanpa judul",
+    "unsavedChanges": {
+      "title": "Perubahan belum disimpan",
+      "message": "Apakah Anda ingin menyimpan perubahan pada \"{{fileName}}\"?",
+      "detail": "Perubahan Anda akan hilang jika tidak disimpan.",
+      "save": "Simpan",
+      "dontSave": "Jangan simpan",
+      "cancel": "Batal"
+    }
+  },
+  "recentFilesVignette": {
+    "favorites": "Favorit",
+    "recentFiles": "File terbaru",
+    "addToFavorites": "Tambahkan ke favorit",
+    "removeFromFavorites": "Hapus dari favorit",
+    "confirmRemoveFavorite": "Apakah Anda yakin ingin menghapus \"{{fileName}}\" dari favorit?",
+    "favoritesLandmarkLabel": "Daftar favorit",
+    "recentsLandmarkLabel": "Daftar file terbaru"
+  },
+  "welcomeScreen": {
+    "landmarkLabel": "Selamat datang"
+  },
+  "menuBar": {
+    "new": "Baru",
+    "open": "Buka",
+    "edit": "Edit",
+    "view": "Tampilan",
+    "help": "Bantuan",
+    "undo": "Urungkan",
+    "redo": "Ulangi",
+    "cut": "Potong",
+    "copy": "Salin",
+    "paste": "Tempel",
+    "find": "Cari",
+    "replace": "Ganti",
+    "toggleSidebar": "Alihkan sidebar",
+    "toggleResponsePanel": "Alihkan panel respons",
+    "zoomIn": "Perbesar",
+    "zoomOut": "Perkecil",
+    "resetZoom": "Atur ulang zoom",
+    "settings": "Pengaturan",
+    "toggleDevTools": "Alat pengembang",
+    "toggleFullscreen": "Layar penuh",
+    "about": "Tentang",
+    "documentation": "Dokumentasi",
+    "keyboardShortcuts": "Pintasan keyboard",
+    "releaseNotes": "Catatan rilis",
+    "reportIssue": "Laporkan masalah"
+  },
+  "settings": {
+    "title": "Pengaturan",
+    "theme": "Tema",
+    "language": "Bahasa",
+    "searchPlaceholder": "Cari pengaturan...",
+    "noResults": "Tidak ada pengaturan ditemukan.",
+    "numberOutOfRange": "Nilai harus antara {{min}} dan {{max}}.",
+    "resetSetting": "Atur ulang pengaturan",
+    "copySettingId": "Salin ID pengaturan",
+    "settingOptions": "Opsi pengaturan",
+    "scopeTabsLabel": "Cakupan pengaturan",
+    "userOnlyHidden": "{{count}} pengaturan khusus pengguna disembunyikan pada tab ini.",
+    "scope": {
+      "user": "Pengguna",
+      "workspace": "Ruang kerja",
+      "workspaceDisabledTooltip": "Buka proyek untuk mengedit pengaturan ruang kerja"
+    },
+    "appearance": {
+      "title": "Tampilan",
+      "theme": {
+        "title": "Tema",
+        "description": "Pilih tema warna aplikasi"
+      },
+      "language": {
+        "title": "Bahasa",
+        "description": "Pilih bahasa aplikasi",
+        "en": "English",
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "pt": "Português",
+        "nl": "Nederlands",
+        "sv": "Svenska",
+        "da": "Dansk",
+        "nb": "Norsk bokmål",
+        "fi": "Suomi",
+        "pl": "Polski",
+        "cs": "Čeština",
+        "hu": "Magyar",
+        "ro": "Română",
+        "el": "Ελληνικά",
+        "uk": "Українська",
+        "hr": "Hrvatski",
+        "sr": "Srpski",
+        "sq": "Shqip",
+        "tr": "Türkçe",
+        "id": "Bahasa Indonesia",
+        "vi": "Tiếng Việt",
+        "ja": "日本語",
+        "ko": "한국어",
+        "zh-CN": "简体中文",
+        "zh-TW": "繁體中文"
+      },
+      "advancedVisualEffects": {
+        "title": "Efek visual lanjutan",
+        "description": "Aktifkan efek visual lanjutan seperti backdrop blur pada overlay dan animasi CSS. Nonaktifkan untuk performa lebih baik pada perangkat keras kelas bawah."
+      },
+      "editor": {
+        "title": "Editor",
+        "fontSize": {
+          "title": "Ukuran font",
+          "description": "Mengontrol ukuran font dalam piksel untuk editor kode"
+        },
+        "fontFamily": {
+          "title": "Keluarga font",
+          "description": "Mengontrol keluarga font untuk editor kode"
+        },
+        "wordWrap": {
+          "title": "Bungkus baris",
+          "description": "Mengontrol apakah baris harus dibungkus di editor kode"
+        },
+        "minimap": {
+          "title": "Minimap",
+          "description": "Mengontrol apakah minimap ditampilkan di editor kode"
+        },
+        "lineNumbers": {
+          "title": "Nomor baris",
+          "description": "Mengontrol apakah nomor baris ditampilkan di editor kode"
+        }
+      }
+    },
+    "files": {
+      "title": "File",
+      "autoSave": {
+        "title": "Simpan otomatis",
+        "description": "Mengontrol penyimpanan otomatis editor yang dimodifikasi. Baca lebih lanjut tentang penyimpanan otomatis di dokumentasi.",
+        "off": "Mati",
+        "afterDelay": "Setelah jeda",
+        "onWindowChange": "Saat berpindah jendela"
+      },
+      "autoSaveDelay": {
+        "title": "Jeda simpan otomatis",
+        "description": "Mengontrol jeda dalam milidetik sebelum editor yang dimodifikasi disimpan otomatis. Hanya berlaku saat Simpan Otomatis diatur ke Setelah Jeda."
+      }
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Pergi ke definisi"
+  },
+  "tagsView": {
+    "removeTag": "Hapus tag",
+    "newTag": "Tag baru"
+  },
+  "contextMenu": {
+    "cut": "Potong",
+    "copy": "Salin",
+    "paste": "Tempel"
+  },
+  "search": {
+    "placeholder": "Cari...",
+    "noResults": "Tidak ada hasil ditemukan",
+    "resultsAriaLabel": "Hasil pencarian",
+    "categories": {
+      "request": "Permintaan HTTP",
+      "folder": "Folder",
+      "environment": "Lingkungan",
+      "settings": "Pengaturan",
+      "tag": "Tag"
+    }
+  },
+  "iconSelect": {
+    "searchEmojis": "Cari emoji...",
+    "noEmojisFound": "Tidak ada emoji ditemukan",
+    "searchCodicons": "Cari codicon...",
+    "searchIconoir": "Cari Iconoir...",
+    "searchPhosphor": "Cari Phosphor...",
+    "searchMaterial": "Cari Material...",
+    "searchSimpleIcons": "Cari Simple Icons...",
+    "searchFeather": "Cari Feather...",
+    "searchFontAwesome": "Cari Font Awesome...",
+    "moreIcons": "+{{count}} ikon lainnya. Gunakan pencarian untuk menemukan ikon tertentu.",
+    "more": "+{{count}} lainnya. Gunakan pencarian untuk menemukan ikon tertentu.",
+    "noIconsFound": "Tidak ada ikon ditemukan",
+    "searchResults": "Hasil pencarian",
+    "categories": {
+      "files": "File",
+      "git": "Git",
+      "debug": "Debug",
+      "symbols": "Simbol",
+      "arrows": "Panah",
+      "ui": "Antarmuka",
+      "media": "Media",
+      "editing": "Pengeditan",
+      "terminal": "Terminal",
+      "people": "Orang",
+      "notifications": "Notifikasi",
+      "brands": "Merek",
+      "communication": "Komunikasi",
+      "users": "Pengguna",
+      "business": "Bisnis",
+      "medical": "Medis",
+      "transport": "Transportasi",
+      "weather": "Cuaca",
+      "shapes": "Bentuk",
+      "design": "Desain",
+      "devices": "Perangkat",
+      "buildings": "Bangunan",
+      "nature": "Alam",
+      "food": "Makanan",
+      "sport": "Olahraga",
+      "sports": "Olahraga",
+      "animals": "Hewan",
+      "tools": "Alat"
+    },
+    "emojiCategories": {
+      "people": "Wajah & Orang",
+      "nature": "Hewan & Alam",
+      "food": "Makanan & Minuman",
+      "activity": "Aktivitas",
+      "travel": "Perjalanan & Tempat",
+      "objects": "Objek",
+      "symbols": "Simbol",
+      "flags": "Bendera"
+    }
+  },
+  "dateTimePicker": {
+    "ariaLabel": "Pemilih tanggal/waktu",
+    "openCalendar": "Buka kalender",
+    "previousYear": "Tahun sebelumnya",
+    "nextYear": "Tahun berikutnya",
+    "previousMonth": "Bulan sebelumnya",
+    "nextMonth": "Bulan berikutnya",
+    "selectMonth": "Pilih bulan",
+    "selectYear": "Pilih tahun",
+    "includeTime": "Sertakan waktu",
+    "hours": "Jam",
+    "minutes": "Menit",
+    "output": "Keluaran",
+    "pattern": "Pola",
+    "outputModes": {
+      "pattern": "Pola",
+      "unix": "Unix (s)",
+      "epoch": "Epoch (ms)",
+      "iso": "ISO 8601"
+    },
+    "preview": "Pratinjau",
+    "tokens": {
+      "S": "milidetik, tanpa padding",
+      "SSS": "milidetik, padding ke 3",
+      "u": "detik pecahan, secara fungsional identik dengan SSS",
+      "uu": "detik pecahan, antara 0 dan 99, padding ke 2",
+      "uuu": "detik pecahan, antara 0 dan 9",
+      "s": "detik, tanpa padding",
+      "ss": "detik, padding ke 2",
+      "m": "menit, tanpa padding",
+      "mm": "menit, padding ke 2",
+      "h": "jam dalam format 12 jam, tanpa padding",
+      "hh": "jam dalam format 12 jam, padding ke 2",
+      "H": "jam dalam format 24 jam, tanpa padding",
+      "HH": "jam dalam format 24 jam, padding ke 2",
+      "Z": "offset sempit",
+      "ZZ": "offset pendek",
+      "ZZZ": "offset teknis",
+      "ZZZZ": "offset bernama yang disingkat",
+      "ZZZZZ": "offset bernama tanpa singkatan",
+      "z": "zona IANA",
+      "a": "meridiem",
+      "d": "hari dalam bulan, tanpa padding",
+      "dd": "hari dalam bulan, padding ke 2",
+      "c": "hari dalam minggu, sebagai angka 1-7 (Senin adalah 1, Minggu adalah 7)",
+      "ccc": "hari dalam minggu, sebagai string terlokalisasi yang disingkat",
+      "cccc": "hari dalam minggu, sebagai string terlokalisasi tanpa singkatan",
+      "ccccc": "hari dalam minggu, sebagai satu huruf terlokalisasi",
+      "L": "bulan sebagai angka tanpa padding",
+      "LL": "bulan sebagai angka dengan padding",
+      "LLL": "bulan sebagai string terlokalisasi yang disingkat",
+      "LLLL": "bulan sebagai string terlokalisasi tanpa singkatan",
+      "LLLLL": "bulan sebagai satu huruf terlokalisasi",
+      "y": "tahun, tanpa padding",
+      "yy": "tahun dua digit",
+      "yyyy": "tahun empat sampai enam digit, padding ke 4",
+      "G": "era terlokalisasi yang disingkat",
+      "GG": "era terlokalisasi tanpa singkatan",
+      "GGGGG": "era terlokalisasi satu huruf",
+      "kk": "tahun minggu ISO, tanpa padding",
+      "kkkk": "tahun minggu ISO, padding ke 4",
+      "W": "nomor minggu ISO, tanpa padding",
+      "WW": "nomor minggu ISO, padding ke 2",
+      "ii": "tahun minggu lokal, tanpa padding",
+      "iiii": "tahun minggu lokal, padding ke 4",
+      "n": "nomor minggu lokal, tanpa padding",
+      "nn": "nomor minggu lokal, padding ke 2",
+      "o": "ordinal (hari dalam tahun), tanpa padding",
+      "ooo": "ordinal (hari dalam tahun), padding ke 3",
+      "q": "kuartal, tanpa padding",
+      "qq": "kuartal, padding ke 2",
+      "D": "tanggal numerik terlokalisasi",
+      "DD": "tanggal terlokalisasi dengan bulan yang disingkat",
+      "DDD": "tanggal terlokalisasi dengan bulan penuh",
+      "DDDD": "tanggal terlokalisasi dengan bulan penuh dan hari dalam minggu",
+      "t": "waktu terlokalisasi",
+      "tt": "waktu terlokalisasi dengan detik",
+      "ttt": "waktu terlokalisasi dengan detik dan offset yang disingkat",
+      "tttt": "waktu terlokalisasi dengan detik dan offset penuh",
+      "T": "waktu 24 jam terlokalisasi",
+      "TT": "waktu 24 jam terlokalisasi dengan detik",
+      "TTT": "waktu 24 jam terlokalisasi dengan detik dan offset yang disingkat",
+      "TTTT": "waktu 24 jam terlokalisasi dengan detik dan offset penuh",
+      "f": "tanggal dan waktu terlokalisasi pendek",
+      "ff": "tanggal dan waktu terlokalisasi sedikit kurang pendek",
+      "fff": "tanggal dan waktu terlokalisasi rinci",
+      "ffff": "tanggal dan waktu terlokalisasi sangat rinci",
+      "F": "tanggal dan waktu terlokalisasi pendek dengan detik",
+      "FF": "tanggal dan waktu terlokalisasi sedikit kurang pendek dengan detik",
+      "FFF": "tanggal dan waktu terlokalisasi rinci dengan detik",
+      "FFFF": "tanggal dan waktu terlokalisasi sangat rinci dengan detik",
+      "X": "timestamp unix dalam detik",
+      "x": "timestamp unix dalam milidetik"
+    }
+  }
+}

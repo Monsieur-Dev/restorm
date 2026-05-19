@@ -22,9 +22,15 @@ import {
   useDraftsRestored,
   useDirtyUnitsSet,
   cleanseForPersistence,
-  toasterService
+  toasterService,
+  useMcpMiniBrowserBridge,
+  clearConsoleFeed,
+  registerConsoleFeedSource,
+  type MiniBrowserBridgeApi,
+  type ConsoleFeedSource
 } from 'electron-core-ui/renderer'
 import { PROJECT_UUID_KEY } from '../../shared/config/projectUuid'
+import { preloadRequestPanelStates, removeRequestPanelState } from './services/requestPanelStateStore'
 import { HTTPRequest } from '../../shared/models/requests/HTTPRequest'
 import { SoapRequest } from '../../shared/models/requests/SoapRequest'
 import { GrpcRequest } from '../../shared/models/requests/GrpcRequest'
@@ -65,7 +71,7 @@ import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayloa
 import { getResponseHistoryList } from './services/GraphQLIntegration'
 import type { EditorTab, WorkbenchTree, GroupNode, TabGroupNode, ContainerGroupNode } from 'electron-core-ui/renderer'
 import { isContainerNode, isTabGroupNode } from 'electron-core-ui/renderer'
-import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, type ConsoleTab, type FirewallTab } from '../../shared/types/editor'
+import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, type ConsoleTab, type FirewallTab, type MiniBrowserTab } from '../../shared/types/editor'
 import { findGroupIdForTab, hasGroupWithId, updateGroupById } from './utils/workbenchHelpers'
 
 /**
@@ -90,12 +96,15 @@ import { useMcpNavigation } from './hooks/useMcpNavigation'
 import { useMcpTreeReplace } from './hooks/useMcpTreeReplace'
 import { useMcpRunRequest } from './hooks/useMcpRunRequest'
 import { useMcpRequestPatch } from './hooks/useMcpRequestPatch'
+import { useMcpWorkbenchTabsBridge } from './hooks/useMcpWorkbenchTabsBridge'
 import { useMcpFolderPatch } from './hooks/useMcpFolderPatch'
 import { RestormSidebar } from './components/MainView/Sidebar/RestormSidebar'
 import { RestormWorkbenchContainer } from './components/MainView/Workbench/RestormWorkbenchContainer'
 import { SaveOptionsModal } from './components/Modals/SaveOptionsModal'
 import { DeleteConfirmationModal } from './components/Modals/DeleteConfirmationModal'
 import { ImportModal, type RefreshContext } from './components/Modals/ImportModal'
+import { allLeafKeys } from './components/Modals/importSelectionHelpers'
+import { ApiSpecRefreshFlow } from './components/Folders/ApiSpecRefreshFlow'
 import { AvailableVariablesProvider } from './contexts/AvailableVariablesContext'
 import { VariableTransformProvider } from './contexts/VariableTransformContext'
 import { AuthRequestResolverContext, type AuthRequestResolver } from './contexts/authRequestResolverContext'
@@ -119,10 +128,8 @@ import { RequestCreationProvider } from './contexts/RequestCreationContext'
 import { useNavigation } from './hooks/useNavigation'
 import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
 import { useWorkbenchTabs } from './hooks/useWorkbenchTabs'
-import { useApiUpdateNotifications } from './hooks/useApiUpdateNotifications'
 import { useFirewallPromptToasts } from './hooks/useFirewallPromptToasts'
 import { useFirewallProjectOriginsSync } from './hooks/useFirewallProjectOriginsSync'
-import { useApiUpdateStateMap } from './hooks/useApiUpdateStateMap'
 import { useSidebarState } from './hooks/useSidebarState'
 import {
   isFavorite as favoritesStoreIsFavorite,
@@ -151,6 +158,14 @@ import {
   isAuthenticationRequest
 } from '../../shared/types/collections'
 import { buildRequestPath } from './utils/requestPath'
+
+// Wire the ECUI Console feed to restorm's firewall IPC channel. The
+// store subscribes lazily on the first `useConsoleFeed` consumer, so
+// registering at module-eval time (preload has already run) is safe.
+// `window.api.firewall` is exposed by the preload but not declared on
+// `window.api`'s type — cast through the known shape.
+const firewallFeed = (window as unknown as { api?: { firewall?: ConsoleFeedSource } }).api?.firewall
+if (firewallFeed) registerConsoleFeedSource(firewallFeed)
 
 const MIN_LEFT_WIDTH = 180
 
@@ -230,11 +245,6 @@ const App: React.FC = () => {
       body: t('app.draftsRestoredBody', { count: payload.count })
     })
   })
-
-  // Toast on every transition into the "update available" state.
-  // The settings section already owns the inline state; this is the
-  // out-of-band notification for users not currently on the folder.
-  useApiUpdateNotifications(t)
 
   // Surface every firewall pending-permission prompt as a toast in
   // the global app toaster. The four action buttons (Allow once /
@@ -329,6 +339,17 @@ const App: React.FC = () => {
     }
   )
 
+  // Prime the per-request panel-collapsed cache as soon as we know
+  // the project UUID — the *RequestTabView seeds its useState lazy
+  // initializer synchronously from `getRequestPanelState`, so the
+  // disk read has to land before the first tab mounts. Cache lookup
+  // is keyed by UUID so re-opens of the same project (or hot
+  // reloads) see the same persisted set.
+  useEffect(() => {
+    if (!projectUuid) return
+    void preloadRequestPanelStates(projectUuid)
+  }, [projectUuid])
+
   // Persisted collapsed state for the Favorites + Opened sidebar panes,
   // keyed by project UUID like the workbench layout. Workspace stays
   // expanded — collapsible:false on its Pane.
@@ -398,7 +419,8 @@ const App: React.FC = () => {
         id: CONSOLE_TAB_ID,
         tabType: 'console',
         title: 'Console',
-        titleString: 'Console'
+        titleString: 'Console',
+        allowFullscreen: true
       }
       const newGroup: TabGroupNode = {
         id: `console-group-${String(Date.now())}-${crypto.randomUUID().slice(0, 8)}`,
@@ -433,6 +455,54 @@ const App: React.FC = () => {
    * just append to the focused group (or the first available
    * `TabGroupNode` if no focus). Activate-existing-or-create.
    */
+  const handleOpenMiniBrowser = useCallback(() => {
+    setWorkbenchTree(prev => {
+      const existingGroupId = findGroupIdForTab(prev.groups, MINI_BROWSER_TAB_ID)
+      if (existingGroupId !== null) {
+        return {
+          ...prev,
+          groups: updateGroupById(prev.groups, existingGroupId, group => ({ ...group, activeTabId: MINI_BROWSER_TAB_ID }))
+        }
+      }
+      const miniBrowserTab: MiniBrowserTab = {
+        id: MINI_BROWSER_TAB_ID,
+        tabType: 'mini-browser',
+        title: 'Mini browser',
+        titleString: 'Mini browser',
+        allowFullscreen: true
+      }
+      const findFirstTabGroup = (nodes: GroupNode[]): TabGroupNode | null => {
+        for (const node of nodes) {
+          if (isTabGroupNode(node)) return node
+          if (isContainerNode(node)) {
+            const inner = findFirstTabGroup(node.groups)
+            if (inner !== null) return inner
+          }
+        }
+        return null
+      }
+      const targetId = focusedGroupId !== null && hasGroupWithId(prev.groups, focusedGroupId)
+        ? focusedGroupId
+        : (findFirstTabGroup(prev.groups)?.id ?? null)
+      if (targetId !== null) {
+        return {
+          ...prev,
+          groups: updateGroupById(prev.groups, targetId, group => ({
+            ...group,
+            tabs: [...group.tabs, miniBrowserTab],
+            activeTabId: MINI_BROWSER_TAB_ID
+          }))
+        }
+      }
+      const newGroup: TabGroupNode = {
+        id: `mini-browser-group-${String(Date.now())}-${crypto.randomUUID().slice(0, 8)}`,
+        tabs: [miniBrowserTab],
+        activeTabId: MINI_BROWSER_TAB_ID
+      }
+      return { ...prev, groups: [newGroup] }
+    })
+  }, [setWorkbenchTree, focusedGroupId])
+
   const handleOpenFirewall = useCallback(() => {
     setWorkbenchTree(prev => {
       const existingGroupId = findGroupIdForTab(prev.groups, FIREWALL_TAB_ID)
@@ -446,7 +516,8 @@ const App: React.FC = () => {
         id: FIREWALL_TAB_ID,
         tabType: 'firewall',
         title: 'Firewall',
-        titleString: 'Firewall'
+        titleString: 'Firewall',
+        allowFullscreen: true
       }
       // Find the focused group (or the first TabGroupNode anywhere
       // in the tree) and append. Walks containers recursively for
@@ -1034,9 +1105,15 @@ const App: React.FC = () => {
   // Both no-op when MCP is disabled. `envByFolder` stays empty for now —
   // populating it requires per-folder env-selector state we don't track
   // centrally yet; `get_active_env` falls back to the folder's first env.
+  // `resolveActiveTabId` walks the workbench tree (handling split groups
+  // and the focused-vs-first-active fallback) so MCP callers get the real
+  // tab id they'd need to pass to `close_tab`. The old `tabId: null`
+  // left the snapshot half-populated (`itemId` set, `tabId` null), which
+  // looked like a stale-cache bug from the agent's side.
+  const mcpActiveTabId = resolveActiveTabId(workbenchTree.groups, focusedGroupId) ?? null
   useMcpActiveStateBridge({
     enabled: mcpEnabled,
-    tabId: null,
+    tabId: mcpActiveTabId,
     itemId: activeRequest?.id ?? null,
     kind: activeRequest ? 'request' : null,
     envByFolder: {}
@@ -1052,6 +1129,7 @@ const App: React.FC = () => {
     enabled: mcpEnabled,
     rootItems,
     setExpandedIds,
+    setSelectedItemId,
     openFolderTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
@@ -1064,7 +1142,9 @@ const App: React.FC = () => {
   // mutations — roundtripping would clobber its class instances).
   // The hook flips the ref true; the effect reads + resets it.
   const mcpDrivenRef = useRef(false)
-  useMcpTreeReplace({ enabled: mcpEnabled, setRootItems, mcpDrivenRef })
+  const bumpAllTabContentVersionsRef = useRef<() => void>(() => { /* not yet wired */ })
+  const bumpAllTabContentVersionsStable = useCallback((): void => { bumpAllTabContentVersionsRef.current() }, [])
+  useMcpTreeReplace({ enabled: mcpEnabled, setRootItems, mcpDrivenRef, bumpAllTabContentVersions: bumpAllTabContentVersionsStable })
   useMcpRunRequest({ enabled: mcpEnabled })
   // Forward-ref dance: `bumpTabContentVersionFor` is declared further
   // down (depends on `setWorkbenchTree`). Hand the patch hook a stable
@@ -1074,6 +1154,50 @@ const App: React.FC = () => {
   const bumpTabContentVersionRef = useRef<(itemId: string) => void>(() => { /* not yet wired */ })
   const bumpTabContentVersionStable = useCallback((itemId: string) => { bumpTabContentVersionRef.current(itemId) }, [])
   useMcpRequestPatch({ enabled: mcpEnabled, rootItems, bumpTabContentVersionFor: bumpTabContentVersionStable })
+  // MCP `mini_browser_*` bridge — main fires `mcp:mini-browser-open`
+  // / `mcp:mini-browser-execute`; this hook responds by opening the
+  // singleton tab + mutating its `url` (which also seeds the webview's
+  // initial `src`), or by running JS inside the webview guest and
+  // replying with the result.
+  const setMiniBrowserUrlForMcp = useCallback((url: string): void => {
+    setWorkbenchTree(prev => {
+      const visit = (nodes: GroupNode[]): GroupNode[] => nodes.map((node) => {
+        if (isTabGroupNode(node)) {
+          const idx = node.tabs.findIndex((t) => t.id === MINI_BROWSER_TAB_ID)
+          if (idx < 0) return node
+          const target = node.tabs[idx] as MiniBrowserTab
+          if (target.url === url) return node
+          const nextTab: MiniBrowserTab = { ...target, url, persistedState: { url } }
+          return { ...node, tabs: [...node.tabs.slice(0, idx), nextTab, ...node.tabs.slice(idx + 1)] }
+        }
+        if (isContainerNode(node)) return { ...node, groups: visit(node.groups) }
+        return node
+      })
+      return { ...prev, groups: visit(prev.groups) }
+    })
+  }, [])
+  useMcpMiniBrowserBridge({
+    enabled: mcpEnabled,
+    // `window.restorm.runtime` carries the Mini browser IPC bridge
+    // methods; the runtime block isn't fully typed in window.d.ts, so
+    // narrow it to the bridge shape the hook needs.
+    bridge: (window as { restorm?: { runtime?: MiniBrowserBridgeApi } }).restorm?.runtime,
+    openMiniBrowser: handleOpenMiniBrowser,
+    setMiniBrowserUrl: setMiniBrowserUrlForMcp
+  })
+  // MCP `set_tab_maximized` — drive the workbench-wide fullscreen tab
+  // through `EditorWorkbench`'s imperative handle. `maximized: false`
+  // arrives with `tabId: null`, which restores whatever is maximized.
+  const handleSetTabMaximized = useCallback((payload: { tabId: string | null; maximized: boolean }) => {
+    workbenchRef.current?.setFullscreenTabId(payload.maximized ? payload.tabId : null)
+  }, [workbenchRef])
+  useMcpWorkbenchTabsBridge({
+    enabled: mcpEnabled,
+    openConsole: handleOpenConsole,
+    clearConsoleFeed,
+    openFirewall: handleOpenFirewall,
+    setTabMaximized: handleSetTabMaximized
+  })
   useMcpFolderPatch({ enabled: mcpEnabled, rootItems, bumpTabContentVersionFor: bumpTabContentVersionStable })
   // MCP `set_favorite` listener — call the same toggle/remove path the
   // sidebar buttons use, then bump the tab content version so the H1
@@ -1116,7 +1240,7 @@ const App: React.FC = () => {
   }, [projectUuid, favoritesVersion])
 
   // Bump `contentVersion` on every workbench tab whose underlying
-  // request matches `itemId`. EditorGroupView caches each tab's
+  // request matches `itemId`. EditorWorkbench caches each tab's
   // rendered React tree until contentVersion flips — without this, a
   // favorite toggle wouldn't propagate to the H1 star toggle (the
   // cached node still holds the old `isFavorite` prop).
@@ -1135,8 +1259,35 @@ const App: React.FC = () => {
       return { ...prev, groups: walk(prev.groups) }
     })
   }, [])
-  // Patch the forward-ref consumed by `useMcpRequestPatch` (above).
+  /**
+   * Bump every workbench tab's `contentVersion`. Used after a full
+   * tree replacement (`mcp:tree-replace`): the renderer just swapped
+   * `rootItems` for a fresh reactive tree, so every cached tab
+   * content (held by `EditorWorkbench`'s tabContentCache) is now
+   * holding a stale folder/request reference. Without invalidating
+   * those caches, `RestormWorkbench`'s `reactiveFolder ?? effectiveTab.folder`
+   * conditional would still surface the OLD reference (the cached
+   * React element was rendered with the pre-replace closure), and
+   * the user would see the live tree's stale snapshot — for env
+   * folders that means password edits stuck in the orphaned tree
+   * never reach `rootItems` and the save flow writes an empty `.env`.
+   */
+  const bumpAllTabContentVersions = useCallback((): void => {
+    setWorkbenchTree((prev) => {
+      const walk = (nodes: GroupNode[]): GroupNode[] => nodes.map((n) => {
+        if (isContainerNode(n)) return { ...n, groups: walk(n.groups) }
+        if (!isTabGroupNode(n)) return n
+        const tabs = n.tabs.map((tab) => ({ ...tab, contentVersion: (tab.contentVersion ?? 0) + 1 }))
+        return { ...n, tabs }
+      })
+      return { ...prev, groups: walk(prev.groups) }
+    })
+  }, [])
+
+  // Patch the forward-refs consumed by `useMcpRequestPatch` /
+  // `useMcpTreeReplace` (above).
   useEffect(() => { bumpTabContentVersionRef.current = bumpTabContentVersionFor }, [bumpTabContentVersionFor])
+  useEffect(() => { bumpAllTabContentVersionsRef.current = bumpAllTabContentVersions }, [bumpAllTabContentVersions])
 
   const handleToggleFavorite = useCallback((itemId: string): void => {
     if (!projectUuid) return
@@ -1233,10 +1384,13 @@ const App: React.FC = () => {
     return () => { window.removeEventListener('restorm:favorites-changed', handler) }
   }, [])
 
-  const apiUpdateStateMap = useApiUpdateStateMap()
-  const hasApiUpdateAvailable = useCallback((id: string): boolean => apiUpdateStateMap[id]?.kind === 'available', [apiUpdateStateMap])
-
   const [refreshSourceTarget, setRefreshSourceTarget] = useState<{ id: string; name: string } | null>(null)
+  // The env folder the sidebar context-menu's "Refresh" entry is
+  // currently running the check-then-decide flow against. Picks up
+  // the same `<ApiSpecRefreshFlow>` the Home tab uses so the two
+  // surfaces share UX (the "Refreshing API spec…" modal, then either
+  // "up to date" or the Import modal in refresh mode).
+  const [apiSpecRefreshFolder, setApiSpecRefreshFolder] = useState<EnvironmentFolder | null>(null)
   const canRefreshFromSource = useCallback((id: string): boolean => {
     const folder = rootItems.find((c) => isEnvironmentFolder(c) && c.id === id)
     if (!folder) return false
@@ -1244,10 +1398,30 @@ const App: React.FC = () => {
     return Boolean(apiUpdate?.sourceUrl)
   }, [rootItems])
   const onRefreshFromSource = useCallback((id: string): void => {
+    const folder = rootItems.find((c): c is EnvironmentFolder => isEnvironmentFolder(c) && c.id === id)
+    if (!folder) return
+    setApiSpecRefreshFolder(folder)
+  }, [rootItems])
+  const openRefreshImportModal = useCallback((id: string): void => {
     const folder = rootItems.find((c) => isEnvironmentFolder(c) && c.id === id)
     if (!folder || !('name' in folder)) return
     setRefreshSourceTarget({ id, name: folder.name })
   }, [rootItems])
+
+  // `<ApiSpecRefreshFlow>` dispatches `restorm:open-import-refresh`
+  // when the user-driven Refresh button finds a checksum mismatch.
+  // App owns the Import modal state, so this event triggers it
+  // directly (no second checksum round-trip).
+  useEffect(() => {
+    const handler = (event: Event): void => {
+      const detail = (event as CustomEvent<{ folderId?: string } | null>).detail
+      const folderId = detail?.folderId
+      if (folderId === undefined || folderId.length === 0) return
+      openRefreshImportModal(folderId)
+    }
+    window.addEventListener('restorm:open-import-refresh', handler)
+    return () => { window.removeEventListener('restorm:open-import-refresh', handler) }
+  }, [openRefreshImportModal])
 
   const { favoriteItems, openDocumentItems } = useFavoritesAndOpenItems({
     rootItems,
@@ -1278,8 +1452,7 @@ const App: React.FC = () => {
     isItemFavorite,
     onToggleFavorite: handleToggleFavorite,
     canRefreshFromSource,
-    onRefreshFromSource,
-    hasApiUpdateAvailable
+    onRefreshFromSource
   })
 
   // Wrapper for confirmDelete that uses deleteConfirmation.itemId
@@ -1714,6 +1887,27 @@ const App: React.FC = () => {
       void markSaveUnitDeleted(payload.id).catch((err: unknown) => {
         logger.warn('[App] markSaveUnitDeleted failed', { id: payload.id, error: String(err) })
       })
+      // Drop the per-request panel-state entry so the user-level
+      // store doesn't accumulate orphaned ids. Folder + env deletes
+      // skip this path — only request ids key into the store.
+      if (payload.type === 'request' && projectUuid) {
+        removeRequestPanelState(projectUuid, payload.id)
+      }
+    }
+
+    // Workbench-tab cache invalidation on env changes. Every request
+    // tab's `EnvironmentProvider` reads `liveEnvironments` off the
+    // reactive env-folder at render time, but the cached React element
+    // captures that array reference. Without invalidation, a newly-
+    // created env (Forgeaude in the original repro) never reaches the
+    // request tab's `setAvailableEnvironments` IPC even though the env
+    // exists in ContextService, and `{{name}}` resolves to empty on
+    // dispatch. Bumping every tab's contentVersion forces the cached
+    // tab content to regenerate with the live env list — React still
+    // reconciles same-type components in place so component-local
+    // useState survives.
+    const handleEnvStructureChanged = (): void => {
+      bumpAllTabContentVersionsRef.current()
     }
 
     const subscriptions = [
@@ -1728,7 +1922,12 @@ const App: React.FC = () => {
       eventBus.subscribe(DocumentEvents.ENVIRONMENT_CREATED, handleUpsertImmediate),
       eventBus.subscribe(DocumentEvents.FOLDER_DELETED, handleDelete),
       eventBus.subscribe(DocumentEvents.REQUEST_DELETED, handleDelete),
-      eventBus.subscribe(DocumentEvents.ENVIRONMENT_DELETED, handleDelete)
+      eventBus.subscribe(DocumentEvents.ENVIRONMENT_DELETED, handleDelete),
+      // Bump tab contentVersion so request tabs re-derive their live
+      // env list when the env tree mutates — see comment above.
+      eventBus.subscribe(DocumentEvents.ENVIRONMENT_CREATED, handleEnvStructureChanged),
+      eventBus.subscribe(DocumentEvents.ENVIRONMENT_UPDATED, handleEnvStructureChanged),
+      eventBus.subscribe(DocumentEvents.ENVIRONMENT_DELETED, handleEnvStructureChanged)
     ]
 
     const timersMap = dirtyChecksumTimersRef.current
@@ -1746,7 +1945,7 @@ const App: React.FC = () => {
       }
       upsertTimers.clear()
     }
-  }, [updateTabDirtyChecksum, rootItems, environmentFolderCollections, filePath])
+  }, [updateTabDirtyChecksum, rootItems, environmentFolderCollections, filePath, projectUuid])
 
   // Dirty state is now handled by FileService in the main process
   // It subscribes to DocumentEvents and compares checksums automatically
@@ -1754,6 +1953,7 @@ const App: React.FC = () => {
   // Use navigation hook for handling clicks and breadcrumbs
   const {
     handleItemClick,
+    handleItemAuxClick,
     handleBreadcrumbClick,
     handleBreadcrumbAuxClick,
     handleTabActivate,
@@ -1827,6 +2027,7 @@ const App: React.FC = () => {
         onSearchResultClick={handleSearchResultClick}
         onOpenConsole={handleOpenConsole}
         onOpenFirewall={handleOpenFirewall}
+        onOpenMiniBrowser={handleOpenMiniBrowser}
       />
 
       {fileName ? (
@@ -1865,6 +2066,7 @@ const App: React.FC = () => {
                   expandedIds={expandedIds}
                   editingItemId={sidebarEditingItemId}
                   onItemClick={handleItemClick}
+                  onItemAuxClick={handleItemAuxClick}
                   onItemToggle={(payload, expanded) => {
                     const id = payload.item.id
                     if (!id) return
@@ -1913,6 +2115,8 @@ const App: React.FC = () => {
               focusedGroupId={focusedGroupId}
               onFocusedGroupChange={setFocusedGroupId}
               onTabActivate={handleTabActivate}
+              onRequestClick={handleItemClick}
+              onRequestAuxClick={handleItemAuxClick}
               onBreadcrumbClick={handleBreadcrumbClick}
               onBreadcrumbAuxClick={handleBreadcrumbAuxClick}
               onItemRename={handleItemRename}
@@ -1922,7 +2126,7 @@ const App: React.FC = () => {
               onFolderChange={handleFolderChange}
               onEnvironmentFolderChange={handleEnvironmentFolderChange}
               onSizesChange={handleSizesChange}
-              emptyFallback={<EmptyBench />}
+              emptyFallback={<EmptyBench rootItems={rootItems} projectUuid={projectUuid} onImport={() => { setShowImportModal(true) }} onOpenRequest={handleItemClick} />}
               workbenchId={workbenchId}
               onRebuildTab={rootItems.length > 0 ? handleRebuildTab : undefined}
               onStateRestored={handleStateRestored}
@@ -2113,11 +2317,17 @@ const App: React.FC = () => {
               const authReq = (apiUpdate?.authenticationRequestId
                 ? resolveAuthRequestCb(apiUpdate.authenticationRequestId)
                 : null) as RefreshContext['authenticationRequest'] | null
+              // Pre-compute the natural keys of every request already
+              // in the env folder so the modal can lock the matching
+              // leaves in the fetched preview tree. Walks the folder's
+              // top-level items (children of the env-folder root).
+              const existingLeafKeys = folder ? allLeafKeys(folder.items) : new Set<string>()
               const refreshContext: RefreshContext = {
                 sourceUrl,
                 ...(authReq ? { authenticationRequest: authReq } : {}),
                 ...(apiUpdate?.sourceHeaders ? { sourceHeaders: apiUpdate.sourceHeaders } : {}),
                 targetFolderId: targetId,
+                ...(existingLeafKeys.size > 0 ? { existingLeafKeys } : {}),
                 onApplied: (updatedFolder) => {
                   // Splice the apply payload onto the existing env
                   // folder in rootItems: each added request is
@@ -2143,6 +2353,7 @@ const App: React.FC = () => {
                     setRefreshSourceTarget(null)
                     return
                   }
+                  const updatedFolderRef: { value: EnvironmentFolder | null } = { value: null }
                   setRootItems((current) => current.map((item) => {
                     if (!('id' in item) || item.id !== payload.id) return item
                     if (!('items' in item)) return item
@@ -2186,18 +2397,43 @@ const App: React.FC = () => {
                       ),
                       next.items
                     )
-                    return {
+                    const merged = {
                       ...next,
                       items: updated,
                       ...(payload.apiUpdate ? { apiUpdate: payload.apiUpdate } : {})
                     } as typeof item
+                    updatedFolderRef.value = merged as unknown as EnvironmentFolder
+                    return merged
                   }))
+                  // The `setRootItems` callback above swaps the proxied
+                  // folder for a plain spread literal — the proxy's set
+                  // trap never sees an `apiUpdate =` assignment, so even
+                  // though `apiUpdate` is in FOLDER_INDEXABLE_KEYS the
+                  // event doesn't auto-fire here. Emit explicitly so the
+                  // save-unit upsert picks up the refreshed apiUpdate
+                  // (payloadChecksum / lastImportedAt) and writes it to
+                  // disk on the next flush.
+                  if (updatedFolderRef.value) {
+                    eventBus.emitLocalSync(DocumentEvents.FOLDER_UPDATED, {
+                      type: 'folder',
+                      id: payload.id,
+                      document: updatedFolderRef.value
+                    } as DocumentChangedPayload)
+                  }
                   setRefreshSourceTarget(null)
                 }
               }
               return { refreshContext }
             })() : {})}
           />
+          {apiSpecRefreshFolder && (
+            <ApiSpecRefreshFlow
+              folder={apiSpecRefreshFolder}
+              onDismiss={() => { setApiSpecRefreshFolder(null) }}
+              onOpenRefreshModal={openRefreshImportModal}
+              testIdPrefix="sidebar-refresh-from-source"
+            />
+          )}
         </div>
         </AuthRequestResolverContext.Provider>
       </VariableTransformProvider>

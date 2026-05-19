@@ -7,8 +7,6 @@
 
 import { eventBusService, logger, createPubSub, serializeWithDecorators } from 'electron-core-ui/main'
 import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from './DocumentEvents'
-import { migrateApiUpdateForCollections } from '../../shared/utils/migrateApiUpdate'
-import { registerSchedulerFolders } from './apiUpdate/registerFolders'
 import {
   Folder,
   EnvironmentFolder,
@@ -126,24 +124,6 @@ class CollectionStore {
   setCollections(collections: Collection[], source: 'file-load' | 'user' = 'file-load'): void {
     // Convert plain objects to class instances if needed
     this.collections = collections.map(c => this.ensureEnvironmentFolderInstance(c))
-    // Backfill `apiUpdate` from the legacy `apiDocumentation.sourceUrl`
-    // marker for env folders saved before the field existed. Pure +
-    // idempotent, so running it again on a project that's already
-    // migrated is a no-op.
-    migrateApiUpdateForCollections(this.collections)
-    // Refresh the scheduler's view of which folders are due for an
-    // auto-check. The scheduler owns no persistence — its view is
-    // re-derived from the loaded collections every time the user
-    // opens a project.
-    registerSchedulerFolders({
-      collections: this.collections,
-      persistConfig: (folderId, patch) => {
-        const target = this.findById(folderId)
-        if (!target || !('folderType' in target)) return
-        const env = target as unknown as { apiUpdate?: Record<string, unknown> }
-        env.apiUpdate = { ...(env.apiUpdate ?? {}), ...patch }
-      }
-    })
     logger.info('[CollectionStore] Collections set', { count: collections.length, source })
   }
 
@@ -175,7 +155,6 @@ class CollectionStore {
       const envFolder = new EnvironmentFolder({
         id: newFolder.id,
         name: newFolder.name,
-        documentation: newFolder.documentation,
         notes: newFolder.notes,
         tags: newFolder.tags,
         items: [],
@@ -204,11 +183,34 @@ class CollectionStore {
     const folder = this.findById(id)
     if (!folder || !isAnyFolder(folder)) return null
 
+    // Detect whether the patch touches `environments` on an env-folder
+    // BEFORE we apply it — we need the post-apply env list to fire
+    // per-env `ENVIRONMENT_UPDATED` events so `ContextService`
+    // recalculates its handlebars context (env-folder save units don't
+    // travel through the env event bus on their own).
+    const patchTouchesEnvironments = isEnvironmentFolder(folder)
+      && Object.prototype.hasOwnProperty.call(updates as Record<string, unknown>, 'environments')
+
     // Apply updates
     Object.assign(folder, updates)
 
     // Emit event
     this.emitFolderUpdated(folder)
+
+    // When `environments` was in the patch, the renderer's env-context
+    // store needs a per-env `ENVIRONMENT_UPDATED` so it re-resolves
+    // variables (e.g. a new `JWTBearer_token` secret has to land in
+    // the handlebars context, otherwise templated headers like
+    // `Bearer {{JWTBearer_token}}` keep resolving to an empty string
+    // and downstream requests 403). Walks `subEnvironments` so a
+    // nested env update also propagates.
+    if (patchTouchesEnvironments && isEnvironmentFolder(folder)) {
+      const emitTree = (env: Environment): void => {
+        this.emitEnvironmentUpdated(env)
+        for (const sub of env.subEnvironments ?? []) emitTree(sub)
+      }
+      for (const env of folder.environments) emitTree(env)
+    }
     return folder
   }
 
@@ -686,7 +688,14 @@ class CollectionStore {
     const payload: DocumentChangedPayload = {
       id: env.id,
       type: 'environment',
-      document: env.toPlainObject(),
+      // Pass the live `Environment` (with real `KeyValue` instances)
+      // instead of `toPlainObject()` — the latter calls
+      // `serializeValueForPersistence` which strips `PasswordValue`
+      // plaintext. This emit is main-process-internal (handlers run
+      // in-process, no IPC structured clone), so the consumers
+      // (ContextService) see the secret-bearing instance and can
+      // resolve `{{token}}` correctly.
+      document: env,
       parentFolderId: parentId,
       parentEnvironmentId
     }
@@ -699,7 +708,9 @@ class CollectionStore {
     const payload: DocumentChangedPayload = {
       id: env.id,
       type: 'environment',
-      document: env.toPlainObject()
+      // See `emitEnvironmentCreated` — pass the live instance so
+      // `PasswordValue` plaintext survives the eventBus hop.
+      document: env
     }
     void eventBusService.emit(DocumentEvents.ENVIRONMENT_UPDATED, payload)
     pubsub.publish(PUBSUB_TOPICS.ENVIRONMENT_UPDATED, env)

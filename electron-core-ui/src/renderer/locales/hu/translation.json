@@ -1,0 +1,328 @@
+{
+  "common": {
+    "opened": "Megnyitva",
+    "refresh": "Frissítés",
+    "import": "Importálás"
+  },
+  "file": {
+    "untitled": "Névtelen",
+    "unsavedChanges": {
+      "title": "Mentetlen módosítások",
+      "message": "Menteni szeretné a(z) \"{{fileName}}\" módosításait?",
+      "detail": "A módosítások elvesznek, ha nem menti őket.",
+      "save": "Mentés",
+      "dontSave": "Ne mentse",
+      "cancel": "Mégse"
+    }
+  },
+  "recentFilesVignette": {
+    "favorites": "Kedvencek",
+    "recentFiles": "Legutóbbi fájlok",
+    "addToFavorites": "Hozzáadás a kedvencekhez",
+    "removeFromFavorites": "Eltávolítás a kedvencekből",
+    "confirmRemoveFavorite": "Biztosan eltávolítja a(z) \"{{fileName}}\" elemet a kedvencek közül?",
+    "favoritesLandmarkLabel": "Kedvencek listája",
+    "recentsLandmarkLabel": "Legutóbbi fájlok listája"
+  },
+  "welcomeScreen": {
+    "landmarkLabel": "Üdvözöljük"
+  },
+  "menuBar": {
+    "new": "Új",
+    "open": "Megnyitás",
+    "edit": "Szerkesztés",
+    "view": "Nézet",
+    "help": "Súgó",
+    "undo": "Visszavonás",
+    "redo": "Újra",
+    "cut": "Kivágás",
+    "copy": "Másolás",
+    "paste": "Beillesztés",
+    "find": "Keresés",
+    "replace": "Csere",
+    "toggleSidebar": "Oldalsáv ki/be",
+    "toggleResponsePanel": "Válaszpanel ki/be",
+    "zoomIn": "Nagyítás",
+    "zoomOut": "Kicsinyítés",
+    "resetZoom": "Nagyítás visszaállítása",
+    "settings": "Beállítások",
+    "toggleDevTools": "Fejlesztői eszközök",
+    "toggleFullscreen": "Teljes képernyő",
+    "about": "Névjegy",
+    "documentation": "Dokumentáció",
+    "keyboardShortcuts": "Billentyűparancsok",
+    "releaseNotes": "Kiadási megjegyzések",
+    "reportIssue": "Hiba bejelentése"
+  },
+  "settings": {
+    "title": "Beállítások",
+    "theme": "Téma",
+    "language": "Nyelv",
+    "searchPlaceholder": "Keresés a beállításokban...",
+    "noResults": "Nem található beállítás.",
+    "numberOutOfRange": "Az értéknek {{min}} és {{max}} között kell lennie.",
+    "resetSetting": "Beállítás visszaállítása",
+    "copySettingId": "Beállítás azonosítójának másolása",
+    "settingOptions": "Beállítás lehetőségei",
+    "scopeTabsLabel": "Beállítások hatóköre",
+    "userOnlyHidden": "{{count}} csak-felhasználói beállítás rejtett ezen a fülön.",
+    "scope": {
+      "user": "Felhasználó",
+      "workspace": "Munkaterület",
+      "workspaceDisabledTooltip": "Nyisson meg egy projektet a munkaterület-beállítások szerkesztéséhez"
+    },
+    "appearance": {
+      "title": "Megjelenés",
+      "theme": {
+        "title": "Téma",
+        "description": "Válassza ki az alkalmazás színtémáját"
+      },
+      "language": {
+        "title": "Nyelv",
+        "description": "Válassza ki az alkalmazás nyelvét",
+        "en": "English",
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "pt": "Português",
+        "nl": "Nederlands",
+        "sv": "Svenska",
+        "da": "Dansk",
+        "nb": "Norsk bokmål",
+        "fi": "Suomi",
+        "pl": "Polski",
+        "cs": "Čeština",
+        "hu": "Magyar",
+        "ro": "Română",
+        "el": "Ελληνικά",
+        "uk": "Українська",
+        "hr": "Hrvatski",
+        "sr": "Srpski",
+        "sq": "Shqip",
+        "tr": "Türkçe",
+        "id": "Bahasa Indonesia",
+        "vi": "Tiếng Việt",
+        "ja": "日本語",
+        "ko": "한국어",
+        "zh-CN": "简体中文",
+        "zh-TW": "繁體中文"
+      },
+      "advancedVisualEffects": {
+        "title": "Speciális vizuális effektek",
+        "description": "Engedélyezi a speciális vizuális effekteket, például az overlay-eken alkalmazott háttér-elmosást és a CSS-animációkat. Letiltása jobb teljesítményt biztosít gyengébb hardveren."
+      },
+      "editor": {
+        "title": "Szerkesztő",
+        "fontSize": {
+          "title": "Betűméret",
+          "description": "Szabályozza a kódszerkesztő betűméretét képpontban"
+        },
+        "fontFamily": {
+          "title": "Betűcsalád",
+          "description": "Szabályozza a kódszerkesztő betűcsaládját"
+        },
+        "wordWrap": {
+          "title": "Sortörés",
+          "description": "Szabályozza, hogy a sorok megtörjenek-e a kódszerkesztőben"
+        },
+        "minimap": {
+          "title": "Minitérkép",
+          "description": "Szabályozza, hogy a minitérkép megjelenjen-e a kódszerkesztőben"
+        },
+        "lineNumbers": {
+          "title": "Sorszámok",
+          "description": "Szabályozza, hogy a sorszámok megjelenjenek-e a kódszerkesztőben"
+        }
+      }
+    },
+    "files": {
+      "title": "Fájlok",
+      "autoSave": {
+        "title": "Automatikus mentés",
+        "description": "Szabályozza a módosított szerkesztők automatikus mentését. További információ az automatikus mentésről a dokumentációban.",
+        "off": "Kikapcsolva",
+        "afterDelay": "Késleltetés után",
+        "onWindowChange": "Ablakváltáskor"
+      },
+      "autoSaveDelay": {
+        "title": "Automatikus mentés késleltetése",
+        "description": "Szabályozza azt a késleltetést ezredmásodpercben, amely után egy módosított szerkesztő automatikusan mentésre kerül. Csak akkor érvényes, ha az automatikus mentés Késleltetés után értékre van állítva."
+      }
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Ugrás a definícióhoz"
+  },
+  "tagsView": {
+    "removeTag": "Címke eltávolítása",
+    "newTag": "Új címke"
+  },
+  "contextMenu": {
+    "cut": "Kivágás",
+    "copy": "Másolás",
+    "paste": "Beillesztés"
+  },
+  "search": {
+    "placeholder": "Keresés...",
+    "noResults": "Nincs találat",
+    "resultsAriaLabel": "Keresési eredmények",
+    "categories": {
+      "request": "HTTP-kérések",
+      "folder": "Mappák",
+      "environment": "Környezetek",
+      "settings": "Beállítások",
+      "tag": "Címkék"
+    }
+  },
+  "iconSelect": {
+    "searchEmojis": "Emojik keresése...",
+    "noEmojisFound": "Nem található emoji",
+    "searchCodicons": "Codicons keresése...",
+    "searchIconoir": "Iconoir keresése...",
+    "searchPhosphor": "Phosphor keresése...",
+    "searchMaterial": "Material keresése...",
+    "searchSimpleIcons": "Simple Icons keresése...",
+    "searchFeather": "Feather keresése...",
+    "searchFontAwesome": "Font Awesome keresése...",
+    "moreIcons": "+{{count}} további ikon. Használja a keresést konkrét ikonok megtalálásához.",
+    "more": "+{{count}} további. Használja a keresést konkrét ikonok megtalálásához.",
+    "noIconsFound": "Nem található ikon",
+    "searchResults": "Keresési eredmények",
+    "categories": {
+      "files": "Fájlok",
+      "git": "Git",
+      "debug": "Hibakeresés",
+      "symbols": "Szimbólumok",
+      "arrows": "Nyilak",
+      "ui": "UI",
+      "media": "Média",
+      "editing": "Szerkesztés",
+      "terminal": "Terminál",
+      "people": "Emberek",
+      "notifications": "Értesítések",
+      "brands": "Márkák",
+      "communication": "Kommunikáció",
+      "users": "Felhasználók",
+      "business": "Üzleti",
+      "medical": "Orvosi",
+      "transport": "Közlekedés",
+      "weather": "Időjárás",
+      "shapes": "Alakzatok",
+      "design": "Tervezés",
+      "devices": "Eszközök",
+      "buildings": "Épületek",
+      "nature": "Természet",
+      "food": "Étel",
+      "sport": "Sport",
+      "sports": "Sportok",
+      "animals": "Állatok",
+      "tools": "Eszközök"
+    },
+    "emojiCategories": {
+      "people": "Arcok és emberek",
+      "nature": "Állatok és természet",
+      "food": "Étel és ital",
+      "activity": "Tevékenységek",
+      "travel": "Utazás és helyek",
+      "objects": "Tárgyak",
+      "symbols": "Szimbólumok",
+      "flags": "Zászlók"
+    }
+  },
+  "dateTimePicker": {
+    "ariaLabel": "Dátum-/időválasztó",
+    "openCalendar": "Naptár megnyitása",
+    "previousYear": "Előző év",
+    "nextYear": "Következő év",
+    "previousMonth": "Előző hónap",
+    "nextMonth": "Következő hónap",
+    "selectMonth": "Hónap kiválasztása",
+    "selectYear": "Év kiválasztása",
+    "includeTime": "Idő hozzáadása",
+    "hours": "Óra",
+    "minutes": "Perc",
+    "output": "Kimenet",
+    "pattern": "Minta",
+    "outputModes": {
+      "pattern": "Minta",
+      "unix": "Unix (s)",
+      "epoch": "Epoch (ms)",
+      "iso": "ISO 8601"
+    },
+    "preview": "Előnézet",
+    "tokens": {
+      "S": "ezredmásodperc, kitöltés nélkül",
+      "SSS": "ezredmásodperc, 3-ra kitöltve",
+      "u": "törtmásodperc, funkcionálisan azonos az SSS-szel",
+      "uu": "törtmásodperc, 0 és 99 között, 2-re kitöltve",
+      "uuu": "törtmásodperc, 0 és 9 között",
+      "s": "másodperc, kitöltés nélkül",
+      "ss": "másodperc, 2-re kitöltve",
+      "m": "perc, kitöltés nélkül",
+      "mm": "perc, 2-re kitöltve",
+      "h": "óra 12 órás formátumban, kitöltés nélkül",
+      "hh": "óra 12 órás formátumban, 2-re kitöltve",
+      "H": "óra 24 órás formátumban, kitöltés nélkül",
+      "HH": "óra 24 órás formátumban, 2-re kitöltve",
+      "Z": "szűk offset",
+      "ZZ": "rövid offset",
+      "ZZZ": "technikai offset",
+      "ZZZZ": "rövidített nevesített offset",
+      "ZZZZZ": "rövidítetlen nevesített offset",
+      "z": "IANA zóna",
+      "a": "délelőtt/délután",
+      "d": "a hónap napja, kitöltés nélkül",
+      "dd": "a hónap napja, 2-re kitöltve",
+      "c": "a hét napja, 1–7 közötti számként (hétfő = 1, vasárnap = 7)",
+      "ccc": "a hét napja, lokalizált rövidített karakterláncként",
+      "cccc": "a hét napja, lokalizált rövidítetlen karakterláncként",
+      "ccccc": "a hét napja, egyetlen lokalizált betűként",
+      "L": "hónap kitöltetlen számként",
+      "LL": "hónap kitöltött számként",
+      "LLL": "hónap lokalizált rövidített karakterláncként",
+      "LLLL": "hónap lokalizált rövidítetlen karakterláncként",
+      "LLLLL": "hónap egyetlen lokalizált betűként",
+      "y": "év, kitöltés nélkül",
+      "yy": "kétjegyű év",
+      "yyyy": "négy- vagy hatjegyű év, 4-re kitöltve",
+      "G": "lokalizált rövidített kor",
+      "GG": "lokalizált rövidítetlen kor",
+      "GGGGG": "egybetűs lokalizált kor",
+      "kk": "ISO hét éve, kitöltés nélkül",
+      "kkkk": "ISO hét éve, 4-re kitöltve",
+      "W": "ISO hétszám, kitöltés nélkül",
+      "WW": "ISO hétszám, 2-re kitöltve",
+      "ii": "helyi hét éve, kitöltés nélkül",
+      "iiii": "helyi hét éve, 4-re kitöltve",
+      "n": "helyi hétszám, kitöltés nélkül",
+      "nn": "helyi hétszám, 2-re kitöltve",
+      "o": "sorszám (az év napja), kitöltés nélkül",
+      "ooo": "sorszám (az év napja), 3-ra kitöltve",
+      "q": "negyedév, kitöltés nélkül",
+      "qq": "negyedév, 2-re kitöltve",
+      "D": "lokalizált numerikus dátum",
+      "DD": "lokalizált dátum rövidített hónappal",
+      "DDD": "lokalizált dátum teljes hónappal",
+      "DDDD": "lokalizált dátum teljes hónappal és a hét napjával",
+      "t": "lokalizált idő",
+      "tt": "lokalizált idő másodpercekkel",
+      "ttt": "lokalizált idő másodpercekkel és rövidített offsettel",
+      "tttt": "lokalizált idő másodpercekkel és teljes offsettel",
+      "T": "lokalizált 24 órás idő",
+      "TT": "lokalizált 24 órás idő másodpercekkel",
+      "TTT": "lokalizált 24 órás idő másodpercekkel és rövidített offsettel",
+      "TTTT": "lokalizált 24 órás idő másodpercekkel és teljes offsettel",
+      "f": "rövid lokalizált dátum és idő",
+      "ff": "kevésbé rövid lokalizált dátum és idő",
+      "fff": "részletes lokalizált dátum és idő",
+      "ffff": "különösen részletes lokalizált dátum és idő",
+      "F": "rövid lokalizált dátum és idő másodpercekkel",
+      "FF": "kevésbé rövid lokalizált dátum és idő másodpercekkel",
+      "FFF": "részletes lokalizált dátum és idő másodpercekkel",
+      "FFFF": "különösen részletes lokalizált dátum és idő másodpercekkel",
+      "X": "unix időbélyeg másodpercben",
+      "x": "unix időbélyeg ezredmásodpercben"
+    }
+  }
+}

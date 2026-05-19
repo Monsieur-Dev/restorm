@@ -25,6 +25,7 @@ export interface TitlebarProps {
   renderSearchBadge?: (method: string) => React.ReactNode
   searchFn?: (query: string) => Promise<GroupedResults[]>
   searchBarTestId?: string
+  searchTooltipHideDelayMs?: number
   customWcoTestId?: string
   customWcoPlatform?: string
 }
@@ -44,6 +45,7 @@ export interface TitlebarProps {
 - **showSearchBar** (`boolean`) : When enabled, renders an internal `SearchBar` in the center.
 - **searchFn** (`(query: string) => Promise<GroupedResults[]>`) : Optional override to make E2E search deterministic.
 - **searchBarTestId** (`string`) : Optional override test id for the internal `SearchBar`.
+- **searchTooltipHideDelayMs** (`number`) : Forwarded to the internal `SearchBar` as `tooltipHideDelayMs` — the delay (default `300`) before the result tooltip hides once the pointer leaves it.
 - **customWcoTestId** (`string`) : Optional override test id for the internal `CustomWCO`.
 - **customWcoPlatform** (`string`) : Optional platform override passed to the internal `CustomWCO` (useful for deterministic web E2E harnesses).
 

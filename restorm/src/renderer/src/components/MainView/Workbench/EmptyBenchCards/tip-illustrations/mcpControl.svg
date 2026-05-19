@@ -1,0 +1,51 @@
+<svg viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg" class="empty-bench-tip-illustration" role="img" aria-hidden="true">
+  <style>
+    .mcp-disc { fill: #2563eb; }
+    .mcp-logo { fill: #ffffff; }
+
+    .mcp-ripple {
+      fill: none;
+      stroke: #60a5fa;
+      stroke-width: 4;
+      vector-effect: non-scaling-stroke;
+      transform-box: fill-box;
+      transform-origin: center;
+      opacity: 0;
+      animation-name: mcp-ripple-pulse;
+      animation-duration: 2.4s;
+      animation-timing-function: ease-out;
+      animation-iteration-count: infinite;
+      animation-play-state: paused;
+    }
+    .mcp-ripple--2 { animation-delay: 0.8s; }
+    .mcp-ripple--3 { animation-delay: 1.6s; }
+
+    @keyframes mcp-ripple-pulse {
+      0%   { transform: scale(0); opacity: 1; }
+      100% { transform: scale(1.35); opacity: 0; }
+    }
+  </style>
+
+  <!-- Layer 1: background disc (clipped by the viewBox on the right
+       + bottom so only the upper-left 3/4 shows). -->
+  <circle class="mcp-disc" cx="180" cy="95" r="85" />
+
+  <!-- Layer 2: wave ripples, drawn over the disc but under the logo
+       so the icon stays readable. -->
+  <circle class="mcp-ripple mcp-ripple--1" cx="180" cy="95" r="85" />
+  <circle class="mcp-ripple mcp-ripple--2" cx="180" cy="95" r="85" />
+  <circle class="mcp-ripple mcp-ripple--3" cx="180" cy="95" r="85" />
+
+  <!-- Layer 3: MCP glyph (same path as the codicon `mcp`), scaled
+       5×, rotated -90° around the disc centre. -->
+  <g transform="rotate(-90 180 95)">
+    <g transform="translate(140 55) scale(5)">
+      <path
+        class="mcp-logo"
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M14.556 7.875a2.75 2.75 0 0 1-.053.054L8.697 13.62a.183.183 0 0 0-.003.259l.003.003 1.192 1.17a.55.55 0 0 1 .011.776l-.01.01a.575.575 0 0 1-.803 0L7.896 14.67a1.28 1.28 0 0 1 0-1.836L13.7 7.142a1.647 1.647 0 0 0 .032-2.328l-.031-.032-.034-.032a1.725 1.725 0 0 0-2.405-.002l-4.781 4.69h-.002l-.065.065a.575.575 0 0 1-.803 0 .55.55 0 0 1-.01-.776l.01-.01L10.46 3.96c.65-.636.663-1.678.027-2.329l-.029-.03a1.725 1.725 0 0 0-2.407 0L1.635 7.896a.575.575 0 0 1-.802 0 .55.55 0 0 1-.011-.776l.011-.01L7.25.814a2.875 2.875 0 0 1 4.01 0c.63.613.929 1.49.803 2.36.88-.125 1.77.166 2.406.787l.034.033a2.743 2.743 0 0 1 .053 3.88Zm-1.69-1.553a.549.549 0 0 0 .01-.776l-.01-.01a.575.575 0 0 0-.803 0L7.317 10.19a1.725 1.725 0 0 1-2.407 0A1.647 1.647 0 0 1 4.88 7.86l.031-.031 4.747-4.655a.55.55 0 0 0 .011-.776l-.011-.01a.575.575 0 0 0-.803 0L4.108 7.042a2.743 2.743 0 0 0 0 3.933 2.876 2.876 0 0 0 4.011 0l4.747-4.655v.001Z"
+      />
+    </g>
+  </g>
+</svg>

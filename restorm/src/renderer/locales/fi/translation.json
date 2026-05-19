@@ -1,0 +1,725 @@
+{
+  "app": {
+    "title": "restorm",
+    "openSettings": "Avaa asetukset",
+    "draftsRestoredTitle": "Tallentamaton työ palautettu",
+    "draftsRestoredBody_one": "{{count}} luonnos palautettiin edellisestä istunnosta.",
+    "draftsRestoredBody_other": "{{count}} luonnosta palautettiin edellisestä istunnosta."
+  },
+  "statusbar": {
+    "requestHistory": "Pyyntöhistoria",
+    "envSelector": {
+      "applyToAll": "Käytä kaikkiin pyyntöihin"
+    }
+  },
+  "tips": {
+    "cardTitle": "Vinkkejä ja kikkoja",
+    "maximizeTab": {
+      "title": "Suurenna välilehti yhdellä klikkauksella",
+      "body": "Kaksoisnapsauta mitä tahansa workbench-välilehteä näyttääksesi sen koko näytön kokoisena. Palaa edelliseen asetteluun painamalla Esc."
+    },
+    "mcpControl": {
+      "title": "Ohjaa restormia tekoälyllä",
+      "body": "Restormissa on mukana MCP-palvelin, joten Claude Coden kaltaiset tekoälyavustajat voivat listata, avata, muokata ja ajaa pyyntöjäsi, tarkastella vastauksia ja muokata työtilaa ohjelmallisesti – poistumatta keskustelusta."
+    },
+    "envSwitch": {
+      "title": "Vaihda ympäristöä helposti!",
+      "body": "Vaihda nykyisen pyynnön tai koko API:n pyyntöjen ympäristöä napsauttamalla tilarivin painiketta tai napsauttamalla pyynnön lähetyspainiketta hiiren oikealla."
+    },
+    "authRequests": {
+      "title": "Tarvitsetko tunnistautumisen API:n käyttöön?",
+      "body": "Sen sijaan että lähetät pyynnön joka kerta tokenin saamiseksi ja liität sen joka paikkaan, käytä autentikointipyyntöjä. Kun kutsu epäonnistuu (401, 403, …) tai tokenin elinaika päättyy, autentikointipyyntö ajetaan automaattisesti uudelleen tokenin hakemiseksi ja uudelleenkäyttämiseksi. Kätevää!"
+    },
+    "supplyChain": {
+      "title": "Suojaa itseäsi!",
+      "body": "Kuten kaikki ohjelmistot, Restorm käyttää kolmannen osapuolen kirjastoja. Toimitusketjuhyökkäysten estämiseksi kaikki lähtevät kutsut otetaan kiinni alimmalla tasolla, ja varoitamme sinua, jos kolmannen osapuolen kirjasto yrittää varastaa henkilökohtaisia tietojasi!"
+    },
+    "codeSnippets": {
+      "title": "Restorm auttaa sinua koodaamaan!",
+      "body": "Löydä koodisnipettejä jokaiselle pyynnölle integroidaksesi ne ohjelmistoosi. Useita kieliä saatavilla: curl, PowerShell, TypeScript, C# ja paljon muuta!"
+    },
+    "workbenchLayout": {
+      "title": "Järjestä työpöytäsi",
+      "body": "Onko sinulla iso näyttö ja paljon pyyntöjä? Asettele ne rinnakkain, päällekkäin tai miten haluat — vain raahaa välilehti haluamaasi paikkaan. Mukavuutesi takia!"
+    },
+    "persistState": {
+      "title": "Löydä se samanlaisena kuin jätit sen!",
+      "body": "Jos suljet Restormin ja avaat sen uudelleen, löydät sen täsmälleen samassa tilassa kuin jätit sen."
+    },
+    "favorites": {
+      "title": "Jotkut ovat sydäntäsi lähempänä kuin toiset…",
+      "body": "Onko pyyntöjä, jotka ovat sinulle muita tärkeämpiä? Lisää ne suosikkeihin!"
+    },
+    "console": {
+      "title": "Näe paremmin mitä tapahtuu",
+      "body": "Konsoli näyttää API-kutsut sitä mukaa kun lähetät pyyntöjä. Kätevä kopioida ja liittää terminaaliin tarvittaessa! Mikä on makusi: curl vai PowerShell?"
+    },
+    "miniBrowser": {
+      "title": "Kyllästyitkö jatkuvaan ikkunoiden vaihteluun?",
+      "body": "Restormissa on sisäänrakennettu mini-selain. Kätevä, kun sovelluksesi reagoi visuaalisesti API-kutsuihisi."
+    },
+    "apiDocs": {
+      "title": "Dokumentaatio — täällä samassa paikassa",
+      "body": "Ei tarvitse enää siirtyä Restormin ja API:n dokumentaation välillä. Jos API tarjoaa määrittelyn (Swagger, OpenAPI, …), se tuodaan Restormiin ja voit lukea sitä suoraan täällä."
+    },
+    "secrets": {
+      "title": "Suojaa salaisuutesi",
+      "body": "Salasanasi ja auth-tokenisi eivät tallennu suoraan Restorm-tiedostoon. Restorm tallentaa salaisuudet ja pyyntöhistorian erillisiin tiedostoihin. Sinun on huolehdittava, ettet pushaa niitä GitHubiin. Restorm voi myös hakea salaisuudet AWS:stä, GitHubista ja muista lähteistä."
+    },
+    "themes": {
+      "title": "Sinun värisi, sinun tunnelmasi",
+      "body": "Restormin mukana tulee useita värimalleja. Valitse se, joka sopii fiilikseesi."
+    },
+    "search": {
+      "title": "Löydä kaikki nopeasti",
+      "body": "Huomasitko tämän ikkunan yläosan? Restormissa on hakukone, joten et joudu enää etsimään tunteja sitä yhtä oikeaa pyyntöä."
+    },
+    "multiEnv": {
+      "title": "Samat pyynnöt, eri ympäristöt",
+      "body": "Onko sinulla kehitys-, prod- ja staging-ympäristö? Samat pyynnöt, mutta hieman erilaiset URL:t ja tokenit… Käytä ympäristöjä ja muuttujia vaihtaaksesi ne yhdellä klikkauksella. Voit jopa erottaa ne väreillä ja kuvakkeilla, jotta vältyt perjantai-iltapelolta tuotannossa!"
+    },
+    "protocols": {
+      "title": "Enemmän kuin pelkkä REST",
+      "body": "Restorm puhuu REST:iä… ja paljon enemmän! GraphQL, gRPC, SOAP, OData, WebSocket — kaikki nämä protokollat käden ulottuvilla, ilman työkalujen vaihtoa."
+    },
+    "responseTree": {
+      "title": "Näe API-vastaukset visuaalisesti",
+      "body": "Tiesitkö, että voit selata API-vastauksiasi graafisemmin? Restorm näyttää ne interaktiivisena puuna, jota voit selata, taittaa ja avata."
+    },
+    "responseHistory": {
+      "title": "Pyyntöjen historia",
+      "body": "Voit selata kaikkien API-kutsujesi historiaa. Kätevä tapa selvittää, mitä oikeasti tapahtui."
+    },
+    "multiLanguage": {
+      "title": "27 kieltä!",
+      "body": "Restorm puhuu 27 kieltä. Englanti, ranska, espanja, saksa, italia, japani, kiina, korea ja monia muita — valitse omasi asetuksista!"
+    }
+  },
+  "authFailureToast": {
+    "title": "Todennus epäonnistui",
+    "fallbackReason": "Todennuspyyntö ei onnistunut.",
+    "openAuthRoute": "Avaa todennusreitti"
+  },
+  "menuBar": {
+    "file": "Tiedosto",
+    "new": "Uusi",
+    "import": "Tuo",
+    "open": "Avaa",
+    "openFolder": "Avaa kansio",
+    "recentFiles": "Viimeisimmät tiedostot",
+    "favorites": "Suosikit",
+    "close": "Sulje",
+    "save": "Tallenna",
+    "saveAll": "Tallenna kaikki",
+    "saveAs": "Tallenna nimellä",
+    "exit": "Lopeta",
+    "selection": "Valinta",
+    "tools": "Työkalut",
+    "findInCollection": "Etsi kokoelmasta",
+    "addRequest": "Lisää pyyntö",
+    "addRequestHttp": "HTTP-pyyntö",
+    "addRequestGraphql": "GraphQL-pyyntö",
+    "addRequestGrpc": "gRPC-pyyntö",
+    "addRequestSoap": "SOAP-pyyntö",
+    "addRequestOdata": "OData-pyyntö",
+    "addRequestWebsocket": "WebSocket-pyyntö",
+    "addFolder": "Lisää kansio",
+    "addEnvironmentFolder": "Lisää ympäristökansio",
+    "addVariable": "Lisää muuttuja",
+    "addTag": "Lisää tagi",
+    "expandAllFolders": "Laajenna kaikki kansiot",
+    "collapseAllFolders": "Tiivistä kaikki kansiot",
+    "sendActiveRequest": "Lähetä pyyntö",
+    "cancelActiveRequest": "Peruuta pyyntö",
+    "generateCodeSnippet": "Luo koodikatkelma",
+    "copyAsCurl": "Kopioi cURL-muodossa",
+    "exportOpenApi": "Vie OpenAPI-muotoon",
+    "clearAuthCache": "Tyhjennä todennusvälimuisti",
+    "openLogsFolder": "Avaa lokikansio"
+  },
+  "sidebar": {
+    "addRequest": "Lisää pyyntö",
+    "collapseAll": "Tiivistä kaikki pyynnöt",
+    "workspace": "Työtila",
+    "favorites": "Suosikit",
+    "newFolder": "Uusi kansio",
+    "newEnvironmentFolder": "Uusi ympäristökansio",
+    "contextMenu": {
+      "createFolder": "Luo kansio",
+      "createEnvironmentFolder": "Luo ympäristökansio",
+      "delete": "Poista",
+      "clone": "Kloonaa",
+      "rename": "Nimeä uudelleen",
+      "addToFavorites": "Lisää suosikkeihin",
+      "removeFromFavorites": "Poista suosikeista",
+      "closeTab": "Sulje",
+      "closeOtherTabs": "Sulje muut",
+      "closeTabsToTheRight": "Sulje oikealla olevat",
+      "closeAllTabs": "Sulje kaikki",
+      "add": {
+        "title": "Lisää",
+        "folder": "Kansio",
+        "httpGet": "HTTP – GET-pyyntö",
+        "httpPost": "HTTP – POST-pyyntö",
+        "httpPut": "HTTP – PUT-pyyntö",
+        "httpPatch": "HTTP – PATCH-pyyntö",
+        "httpDelete": "HTTP – DELETE-pyyntö",
+        "graphql": "GraphQL-pyyntö",
+        "grpc": "gRPC-pyyntö",
+        "soap": "SOAP-pyyntö",
+        "websocket": "WebSocket-pyyntö",
+        "odata": "OData-pyyntö",
+        "auth": "HTTP-todennuspyyntö"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Vahvista poisto",
+      "folderMessage": "Haluatko varmasti poistaa kansion \"{{name}}\" ja kaiken sen sisällön?",
+      "itemMessage": "Haluatko varmasti poistaa kohteen \"{{name}}\"?",
+      "confirm": "Poista",
+      "cancel": "Peruuta"
+    }
+  },
+  "environment": {
+    "newName": "Uusi ympäristö",
+    "add": "Lisää ympäristö",
+    "rename": "Nimeä uudelleen",
+    "addSub": "Lisää aliympäristö",
+    "delete": "Poista"
+  },
+  "folderView": {
+    "environments": "Ympäristöt",
+    "environmentsAriaLabel": "Kansion ympäristöt",
+    "variables": "Muuttujat",
+    "addVariable": "Lisää muuttujarivi",
+    "selectEnvironment": "Valitse ympäristö nähdäksesi muuttujat",
+    "tabs": {
+      "docs": "Dokumentit",
+      "environments": "Ympäristöt",
+      "notes": "Muistiinpanot"
+    },
+    "home": {
+      "configureEnvs": "Määritä ympäristöt",
+      "configureEnvsDesc": "Aseta perus-URL-osoitteet, muuttujat ja todennus jokaiselle ympäristölle",
+      "viewDocs": "Näytä dokumentaatio",
+      "viewDocsDesc": "Selaa API-dokumentaatiota, malleja ja päätepisteitä",
+      "favoriteRequests": "Suosikkipyynnöt",
+      "removeFavorite": "Poista suosikeista",
+      "apiUpdate": {
+        "title": "API-määrittelyn päivitykset",
+        "noConfig": "Tätä kansiota ei luotu tuotavasta lähteestä.",
+        "urlLabel": "URL",
+        "lastImportedLabel": "Viimeksi tuotu",
+        "lastCheckedLabel": "Viimeksi tarkistettu",
+        "neverImported": "Ei koskaan tuotu",
+        "neverChecked": "Ei koskaan tarkistettu",
+        "refreshing": "Päivitetään API-määrittelyä…",
+        "fetching": "Haetaan…",
+        "upToDate": "API-määrittely on ajan tasalla.",
+        "ok": "OK"
+      }
+    },
+    "contextVariables": {
+      "title": "Käytettävissä olevat kontekstimuuttujat",
+      "description": "Käytä näitä muuttujia pyyntöjen URL-osoitteissa ja lauseketyyppisissä muuttujissa {{handlebars}}-syntaksilla.",
+      "name": "Muuttuja",
+      "value": "Selvitetty arvo",
+      "copied": "Kopioitu!"
+    }
+  },
+  "requestTab": {
+    "deprecated": "Tämä päätepiste on vanhentunut ja se voidaan poistaa tulevassa versiossa.",
+    "send": "Lähetä",
+    "cancel": "Peruuta",
+    "urlPlaceholder": "Pyynnön URL",
+    "methodSelect": "Valitse HTTP-menetelmä",
+    "addHeader": "Lisää otsake",
+    "addParam": "Lisää parametri",
+    "environmentSelector": {
+      "noEnvironment": "Ei ympäristöä"
+    },
+    "body": {
+      "fileLabel": "Tiedosto tai URL:",
+      "browse": "Selaa..."
+    },
+    "tabs": {
+      "docs": "Dokumentit",
+      "requestLayout": "Pyyntö",
+      "headers": "Otsakkeet",
+      "body": "Sisältö",
+      "params": "Parametrit",
+      "pathParams": "Polkuparametrit",
+      "notes": "Muistiinpanot",
+      "codeSnippets": "Koodikatkelmat",
+      "responsesHistory": "Vastaushistoria"
+    },
+    "responses": {
+      "tabs": {
+        "response": "Vastaus",
+        "requestBody": "Pyynnön sisältö",
+        "graph": "Kaavio"
+      },
+      "loading": "Lähetetään pyyntöä...",
+      "noResponse": "Suorita pyyntö napsauttamalla Lähetä",
+      "history": {
+        "list": "Vastaushistorian luettelo",
+        "empty": "Vastauksia ei vielä tallennettu",
+        "select": "Valitse vastaus nähdäksesi yksityiskohdat",
+        "pin": "Kiinnitä vastaus",
+        "unpin": "Poista kiinnitys"
+      }
+    }
+  },
+  "workbench": {
+    "tabContextMenu": {
+      "close": "Sulje",
+      "closeOthers": "Sulje muut",
+      "addToFavorites": "Lisää suosikkeihin",
+      "removeFromFavorites": "Poista suosikeista"
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Siirry määritelmään"
+  },
+  "keyValueTable": {
+    "types": {
+      "string": "Merkkijono",
+      "secret": "Salaisuus",
+      "number": "Numero",
+      "dateTime": "Päivämäärä/aika",
+      "color": "Väri",
+      "expression": "Lauseke",
+      "boolean": "Totuusarvo"
+    },
+    "apiEnums": "API:n määrittämät tyypit"
+  },
+  "graphql": {
+    "send": "Lähetä",
+    "urlPlaceholder": "GraphQL-päätepisteen URL",
+    "tabs": {
+      "query": "Kysely",
+      "variables": "Muuttujat",
+      "headers": "Otsakkeet"
+    }
+  },
+  "grpc": {
+    "send": "Kutsu",
+    "urlPlaceholder": "gRPC-palvelin (host:portti)",
+    "tabs": {
+      "message": "Viesti",
+      "metadata": "Metatiedot"
+    }
+  },
+  "soap": {
+    "send": "Lähetä",
+    "urlPlaceholder": "SOAP-päätepisteen URL",
+    "tabs": {
+      "body": "Sisältö",
+      "headers": "Otsakkeet"
+    }
+  },
+  "websocket": {
+    "connect": "Yhdistä",
+    "connected": "Yhdistetty",
+    "disconnected": "Yhteys katkaistu",
+    "noMessages": "Ei vielä viestejä",
+    "urlPlaceholder": "WebSocket-URL",
+    "event": "Tapahtuma",
+    "topic": "Aihe",
+    "tabs": {
+      "message": "Viesti",
+      "headers": "Otsakkeet"
+    }
+  },
+  "search": {
+    "placeholder": "Etsi...",
+    "noResults": "Tuloksia ei löytynyt",
+    "resultsAriaLabel": "Hakutulokset",
+    "categories": {
+      "request": "Pyynnöt",
+      "folder": "Kansiot",
+      "environment": "Ympäristöt",
+      "settings": "Asetukset",
+      "tag": "Tagit"
+    },
+    "tooltip": {
+      "noDetails": "Ei tietoja saatavilla",
+      "noContent": "Ei dokumentaatiota tai muistiinpanoja"
+    }
+  },
+  "httpStatus": {
+    "100": {
+      "name": "Continue",
+      "description": "Palvelin on vastaanottanut pyynnön otsakkeet, ja asiakkaan tulee jatkaa lähettämällä pyynnön sisältö."
+    },
+    "101": {
+      "name": "Switching Protocols",
+      "description": "Pyytäjä on pyytänyt palvelinta vaihtamaan protokollaa ja palvelin on suostunut siihen."
+    },
+    "200": {
+      "name": "OK",
+      "description": "Vakiovastaus onnistuneille HTTP-pyynnöille. Todellinen vastaus riippuu käytetystä pyyntömenetelmästä."
+    },
+    "201": {
+      "name": "Created",
+      "description": "Pyyntö on toteutettu ja se on johtanut uuden resurssin luomiseen."
+    },
+    "202": {
+      "name": "Accepted",
+      "description": "Pyyntö on hyväksytty käsittelyä varten, mutta käsittelyä ei ole vielä saatettu päätökseen."
+    },
+    "204": {
+      "name": "No Content",
+      "description": "Palvelin käsitteli pyynnön onnistuneesti eikä palauta mitään sisältöä."
+    },
+    "301": {
+      "name": "Moved Permanently",
+      "description": "Tämä ja kaikki tulevat pyynnöt on ohjattava annettuun URI-osoitteeseen."
+    },
+    "302": {
+      "name": "Found",
+      "description": "Kehottaa asiakasta tarkistamaan toisen URL-osoitteen. HTTP/1.0-määritys edellytti, että asiakas suorittaa väliaikaisen uudelleenohjauksen."
+    },
+    "304": {
+      "name": "Not Modified",
+      "description": "Ilmaisee, että resurssia ei ole muokattu pyynnön otsakkeiden määrittämän version jälkeen."
+    },
+    "400": {
+      "name": "Bad Request",
+      "description": "Palvelin ei voi tai ei halua käsitellä pyyntöä ilmeisen asiakasvirheen vuoksi (esim. virheellinen pyyntösyntaksi)."
+    },
+    "401": {
+      "name": "Unauthorized",
+      "description": "Todennus on pakollinen ja se on epäonnistunut tai sitä ei ole vielä annettu."
+    },
+    "403": {
+      "name": "Forbidden",
+      "description": "Pyyntö sisälsi kelvolliset tiedot ja palvelin ymmärsi sen, mutta palvelin kieltäytyy toiminnasta."
+    },
+    "404": {
+      "name": "Not Found",
+      "description": "Pyydettyä resurssia ei löytynyt, mutta se voi olla saatavilla tulevaisuudessa."
+    },
+    "405": {
+      "name": "Method Not Allowed",
+      "description": "Pyyntömenetelmää ei tueta pyydetylle resurssille."
+    },
+    "408": {
+      "name": "Request Timeout",
+      "description": "Palvelimen pyynnön odotusaika ylittyi."
+    },
+    "409": {
+      "name": "Conflict",
+      "description": "Ilmaisee, että pyyntöä ei voitu käsitellä ristiriidan vuoksi resurssin nykyisessä tilassa."
+    },
+    "410": {
+      "name": "Gone",
+      "description": "Ilmaisee, että pyydetty resurssi oli aiemmin käytössä, mutta ei ole enää saatavilla eikä tule olemaan."
+    },
+    "415": {
+      "name": "Unsupported Media Type",
+      "description": "Pyynnön entiteetillä on mediatyyppi, jota palvelin tai resurssi ei tue."
+    },
+    "422": {
+      "name": "Unprocessable Entity",
+      "description": "Pyyntö oli hyvin muotoiltu, mutta sitä ei voitu noudattaa semanttisten virheiden vuoksi."
+    },
+    "429": {
+      "name": "Too Many Requests",
+      "description": "Käyttäjä on lähettänyt liian monta pyyntöä tietyssä ajassa (nopeusrajoitus)."
+    },
+    "500": {
+      "name": "Internal Server Error",
+      "description": "Yleinen virheilmoitus, joka annetaan, kun odottamaton tilanne on havaittu eikä mikään tarkempi viesti sovi."
+    },
+    "501": {
+      "name": "Not Implemented",
+      "description": "Palvelin ei tunnista pyyntömenetelmää tai sillä ei ole kykyä toteuttaa pyyntöä."
+    },
+    "502": {
+      "name": "Bad Gateway",
+      "description": "Palvelin toimi yhdyskäytävänä tai välityspalvelimena ja vastaanotti virheellisen vastauksen ylävirran palvelimelta."
+    },
+    "503": {
+      "name": "Service Unavailable",
+      "description": "Palvelin ei pysty käsittelemään pyyntöä (koska se on ylikuormitettu tai huollossa)."
+    },
+    "504": {
+      "name": "Gateway Timeout",
+      "description": "Palvelin toimi yhdyskäytävänä tai välityspalvelimena eikä saanut ajoissa vastausta ylävirran palvelimelta."
+    }
+  },
+  "welcome": {
+    "confirmRemoveFavorite": "Haluatko varmasti poistaa kohteen \"{{fileName}}\" suosikeista?",
+    "noFilesHint": "Avaa tiedosto tai luo uusi aloittaaksesi",
+    "newAriaLabel": "Luo uusi kokoelma",
+    "openAriaLabel": "Avaa kokoelma levyltä",
+    "landmarkLabel": "Tervetuloa"
+  },
+  "save": {
+    "title": "Tallennusasetukset",
+    "mode": {
+      "label": "Tallennustila",
+      "file": "Yksittäinen tiedosto",
+      "folder": "Kansiorakenne",
+      "fileDescription": "Tallenna kaikki yhteen tiedostoon",
+      "folderDescription": "Tallenna kansiorakenteena erillisillä tiedostoilla"
+    },
+    "format": {
+      "label": "Muoto",
+      "yamlDescription": "Ihmisen luettavissa",
+      "jsonDescription": "Vakiomuoto",
+      "json5Description": "JSON + kommentit"
+    },
+    "preview": {
+      "label": "Rakenteen esikatselu",
+      "noDocumentation": "Tälle lähteelle ei ole jäsennettyä dokumentaatiota."
+    }
+  },
+  "common": {
+    "cancel": "Peruuta",
+    "save": "Tallenna"
+  },
+  "helpers": {
+    "categories": {
+      "comparison": "Vertailu",
+      "string": "Merkkijono",
+      "math": "Matematiikka",
+      "array": "Taulukko",
+      "object": "Objekti",
+      "url": "URL",
+      "date": "Päivämäärä",
+      "regex": "Regex",
+      "misc": "Sekalaiset"
+    },
+    "eq": "Tiukka yhtäsuuruus (===)",
+    "ne": "Tiukka erisuuruus (!==)",
+    "neq": "Tiukka erisuuruus (!==)",
+    "lt": "Pienempi kuin (<)",
+    "lte": "Pienempi tai yhtä suuri (<=)",
+    "gt": "Suurempi kuin (>)",
+    "gte": "Suurempi tai yhtä suuri (>=)",
+    "and": "Lohkoauttaja: renderöi, jos kaikki arvot ovat totta",
+    "or": "Lohkoauttaja: renderöi, jos jokin arvo on totta",
+    "not": "Palauttaa käänteisen totuusarvon",
+    "ifEquals": "Lohkoauttaja: renderöi, jos arvot ovat yhtä suuret",
+    "is": "Lohkoauttaja: löyhä yhtäsuuruusvertailu",
+    "isnt": "Lohkoauttaja: löyhä erisuuruusvertailu",
+    "default": "Palauttaa oletusarvon, jos ensimmäinen on null/undefined",
+    "compare": "Lohkoauttaja: vertaa operaattorilla",
+    "lowercase": "Muuntaa merkkijonon pieniksi kirjaimiksi",
+    "uppercase": "Muuntaa merkkijonon isoiksi kirjaimiksi",
+    "capitalize": "Muuttaa ensimmäisen kirjaimen isoksi",
+    "capitalizeAll": "Muuttaa jokaisen sanan ensimmäisen kirjaimen isoksi",
+    "titleize": "Muuttaa jokaisen sanan ensimmäisen kirjaimen isoksi",
+    "camelcase": "Muuntaa muotoon camelCase",
+    "pascalcase": "Muuntaa muotoon PascalCase",
+    "snakecase": "Muuntaa muotoon snake_case",
+    "snakeCase": "Muuntaa muotoon snake_case (alias)",
+    "dashcase": "Muuntaa muotoon dash-case (kebab-case)",
+    "dotcase": "Muuntaa muotoon dot.case",
+    "pathcase": "Muuntaa muotoon path/case",
+    "sentencecase": "Muuntaa lausemuotoon",
+    "slugify": "Muuntaa URL-ystävälliseksi tunnisteeksi",
+    "trim": "Poistaa välilyönnit molemmista päistä",
+    "trimLeft": "Poistaa välilyönnit alusta",
+    "trimRight": "Poistaa välilyönnit lopusta",
+    "replace": "Korvaa kaikki a:n esiintymät b:llä",
+    "split": "Jakaa merkkijonon taulukoksi",
+    "truncate": "Lyhentää merkkijonon määritettyyn pituuteen",
+    "ellipsis": "Lyhentää merkkijonon kolmella pisteellä",
+    "append": "Lisää jälkiliitteen merkkijonoon",
+    "prepend": "Lisää etuliitteen merkkijonoon",
+    "reverse": "Kääntää merkkijonon tai taulukon",
+    "startsWith": "Lohkoauttaja: renderöi, jos merkkijono alkaa etuliitteellä",
+    "endsWith": "Lohkoauttaja: renderöi, jos merkkijono päättyy jälkiliitteeseen",
+    "contains": "Lohkoauttaja: renderöi, jos merkkijono sisältää alimerkkijonon",
+    "padStart": "Täyttää merkkijonon alusta määriteltyyn pituuteen",
+    "padEnd": "Täyttää merkkijonon lopusta määriteltyyn pituuteen",
+    "repeat": "Toistaa merkkijonon n kertaa",
+    "substring": "Poimii osan merkkijonosta",
+    "indexOf": "Palauttaa alimerkkijonon indeksin (-1, jos ei löydy)",
+    "count": "Laskee alimerkkijonon esiintymät",
+    "newLineToBr": "Muuntaa rivinvaihdot <br>-tunnisteiksi",
+    "stripTags": "Poistaa HTML-tunnisteet merkkijonosta",
+    "add": "Lisää kaksi lukua",
+    "subtract": "Vähentää b:n a:sta",
+    "multiply": "Kertoo kaksi lukua",
+    "divide": "Jakaa a:n b:llä",
+    "modulo": "Palauttaa a / b -jakojäännöksen",
+    "abs": "Palauttaa itseisarvon",
+    "ceil": "Pyöristää ylöspäin lähimpään kokonaislukuun",
+    "floor": "Pyöristää alaspäin lähimpään kokonaislukuun",
+    "round": "Pyöristää lähimpään kokonaislukuun",
+    "min": "Palauttaa pienimmän arvon",
+    "max": "Palauttaa suurimman arvon",
+    "pow": "Palauttaa kantaluvun korotettuna eksponenttiin",
+    "sqrt": "Palauttaa neliöjuuren",
+    "random": "Palauttaa satunnaisen kokonaisluvun välillä min ja max",
+    "sum": "Palauttaa taulukon arvojen summan",
+    "avg": "Palauttaa taulukon arvojen keskiarvon",
+    "toFixed": "Muotoilee luvun kiinteällä desimaalimäärällä",
+    "toInt": "Muuntaa kokonaisluvuksi",
+    "toFloat": "Muuntaa liukuluvuksi",
+    "first": "Palauttaa taulukon ensimmäisen alkion/alkiot",
+    "last": "Palauttaa taulukon viimeisen alkion/alkiot",
+    "after": "Palauttaa alkiot indeksin n jälkeen",
+    "before": "Palauttaa alkiot ennen indeksiä n",
+    "slice": "Palauttaa taulukon osan",
+    "length": "Palauttaa taulukon/merkkijonon/objektin pituuden",
+    "join": "Yhdistää taulukon alkiot erottimella",
+    "sort": "Lajittelee taulukon",
+    "unique": "Palauttaa yksilölliset arvot",
+    "concat": "Yhdistää taulukot",
+    "flatten": "Litistää sisäkkäiset taulukot",
+    "pluck": "Poimii ominaisuuden objektien taulukosta",
+    "itemAt": "Palauttaa alkion indeksissä",
+    "inArray": "Lohkoauttaja: renderöi, jos arvo on taulukossa",
+    "isArray": "Palauttaa tosi, jos arvo on taulukko",
+    "isEmpty": "Lohkoauttaja: renderöi, jos arvo on tyhjä",
+    "some": "Lohkoauttaja: renderöi, jos jotkin alkiot vastaavat",
+    "every": "Lohkoauttaja: renderöi, jos kaikki alkiot vastaavat",
+    "JSONstringify": "Muuntaa objektin JSON-merkkijonoksi",
+    "JSONparse": "Jäsentää JSON-merkkijonon objektiksi",
+    "get": "Hakee sisäkkäisen ominaisuuden polulla",
+    "keys": "Palauttaa objektin avaimet",
+    "values": "Palauttaa objektin arvot",
+    "entries": "Palauttaa [avain, arvo] -parit",
+    "hasOwn": "Lohkoauttaja: renderöi, jos objektilla on ominaisuus",
+    "pick": "Luo objektin valituilla avaimilla",
+    "omit": "Luo objektin ilman määriteltyjä avaimia",
+    "merge": "Yhdistää useita objekteja",
+    "isObject": "Palauttaa tosi, jos arvo on objekti",
+    "typeOf": "Palauttaa arvon tyypin",
+    "encodeURI": "Koodaa merkkijonon URL-muotoon",
+    "decodeURI": "Dekoodaa URL-merkkijonon",
+    "urlParse": "Jäsentää URL-osoitteen osiin",
+    "stripQuerystring": "Poistaa kyselymerkkijonon URL-osoitteesta",
+    "stripProtocol": "Poistaa protokollan URL-osoitteesta",
+    "now": "Palauttaa nykyisen päivämäärän ISO-merkkijonona",
+    "timestamp": "Palauttaa nykyisen aikaleiman millisekunteina",
+    "year": "Palauttaa nykyisen vuoden",
+    "formatDate": "Muotoilee päivämäärän mallin mukaan",
+    "match": "Palauttaa regex-osumat",
+    "test": "Lohkoauttaja: renderöi, jos regex vastaa",
+    "coalesce": "Palauttaa ensimmäisen ei-null/undefined-arvon",
+    "uuid": "Luo satunnaisen UUID:n",
+    "noop": "Lohkoauttaja, joka renderöi sisällön sellaisenaan",
+    "raw": "Lohkoauttaja, joka renderöi raakasisällön",
+    "times": "Lohkoauttaja, joka toistaa n kertaa",
+    "range": "Luo lukujen taulukon"
+  },
+  "behavior": {
+    "title": "Toiminta",
+    "syncSidebarWithTabs": "Synkronoi sivupalkin valinta aktiivisen välilehden kanssa",
+    "syncSidebarWithTabsDescription": "Kun vaihdat välilehteä työtilassa, valitse ja näytä automaattisesti vastaava kohde sivupalkissa",
+    "dateTimeFormat": "Päivämäärän/ajan muoto",
+    "dateTimeFormatDescription": "Sovelluksessa käytetty muoto päivämäärien ja aikojen näyttämiseen",
+    "dateTimeFormat.us": "Yhdysvaltain muoto (KK/PP/VVVV, 12h)",
+    "dateTimeFormat.iso": "ISO-muoto (VVVV-KK-PP, 24h)"
+  },
+  "console": {
+    "title": "Konsoli",
+    "requestFormat": "Pyyntömuoto",
+    "requestFormatDescription": "Oletuskuoritapa, jota käytetään lähtevien pyyntöjen näyttämiseen Konsoli-välilehdellä. Jokainen rivi on kopioitavissa oleva komentorivi; Konsolin työkalupalkin valitsin ohittaa tämän oletuksen nykyiselle välilehdelle.",
+    "requestFormat.curl": "curl (Unix-tyyli)",
+    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+  },
+  "import": {
+    "title": "Tuo pyyntöjä",
+    "source": {
+      "label": "Liitä jotain tähän!",
+      "placeholder": "Anna tiedostopolku, URL tai liitä curl/PowerShell-komento..."
+    },
+    "formats": {
+      "swagger": {
+        "description": "OpenAPI 2.0 -määrittely, syntynyt SmartBearilla. Liitä Swagger JSON tai YAML — Restorm jäsentää jokaisen operaation, hakee suojausmäärittelyt ja muuttaa koko asiakirjan navigoitavaksi pyyntöpuuksi.",
+        "trademark": "Swagger on SmartBear Softwaren rekisteröity tavaramerkki."
+      },
+      "openapi": {
+        "description": "Nykyinen OpenAPI-standardi (3.0 ja 3.1). Sama liitä-ja-valmis-ergonomia kuin Swaggerissa: parametrit, pyyntösisällöt, suojausmäärittelyt ja webhookit ilmestyvät tyypitettynä pyyntöpuuna lähetysvalmiine esimerkkeineen.",
+        "trademark": "OpenAPI on OpenAPI Initiative -hankkeen projekti Linux Foundationin alaisuudessa."
+      },
+      "curl": {
+        "description": "Onko pyyntö jo käynnissä päätteessäsi? Liitä koko curl-kutsu — liput, otsakkeet, sisältö, kyselymerkkijono — ja Restorm rakentaa sen uudelleen oikeaksi pyynnöksi, jonka voit suorittaa uudelleen, muokata ja kiinnittää.",
+        "trademark": "curl on avoimen lähdekoodin ohjelmisto © Daniel Stenberg, käytetään tässä sen ehtojen mukaisesti."
+      },
+      "powershell": {
+        "description": "Sama idea, PowerShell-muodossa. Liitä Invoke-WebRequest- tai Invoke-RestMethod-komento, ja Restorm lukee URI:n, menetelmän, otsakkeet ja sisällön luodakseen pyynnön, jota voit kehittää visuaalisesti.",
+        "trademark": "PowerShell on Microsoft Corporationin rekisteröity tavaramerkki."
+      },
+      "postman": {
+        "description": "Onko toimistolla tallessa Postman-kokoelma? Pudota JSON-tiedosto — Restorm lukee jokaisen pyynnön, jokaisen esimerkkivastauksen ja jokaisen ympäristömuuttujan ja rakentaa kokoelman Restorm-puuksi, jota voit ajaa muiden API:idesi rinnalla.",
+        "trademark": "Postman on Postman, Inc:n rekisteröity tavaramerkki, käytetään tässä vain yhteensopivuusviittauksena."
+      },
+      "insomnia": {
+        "description": "Tuletko Insomniasta? Pudota vientitiedostosi. Restorm ymmärtää sen v4-/v5-kokoelmamuotoa, tuo mukanaan jokaisen pyynnön, otsakkeen, sisällön ja ympäristön ja näyttää kaiken Restorm-puuna.",
+        "trademark": "Insomnia on Kong Inc:n rekisteröity tavaramerkki, käytetään tässä vain yhteensopivuusviittauksena."
+      },
+      "bruno": {
+        "description": "Bruno-tyyppisiä .bru-tiedostoja tai kansion vienti — Restorm lukee .bru-tekstimuodon skriptilohkoineen ja luo jokaisen pyynnön ensiluokkaisena Restorm-solmuna, joka on valmis lähetettäväksi.",
+        "trademark": "Bruno on avoimen lähdekoodin ohjelmisto (MIT) tekijänä Anoop M. D., käytetään tässä sen ehtojen mukaisesti."
+      },
+      "graphql": {
+        "description": "Liitä GraphQL SDL (.graphql / .gql / liitos GraphQL-asiakkaastasi), niin Restorm rakentaa yhden pyynnön per operaatio, kytkettynä oikeaan query-/mutation-/subscription-tyyppiin valmiiksi rakennetuilla muuttujilla.",
+        "trademark": "GraphQL on GraphQL Foundationin tavaramerkki, joka on Joint Development Foundationin projekti."
+      },
+      "grpc": {
+        "description": "Pudota .proto-tiedosto (tai kokonainen kansio sellaisia), niin Restorm käy läpi jokaisen palvelun, jokaisen RPC:n ja jokaisen viestin — jokaisesta menetelmästä tulee tyypitetty pyyntö, jonka voit lähettää gRPC-suorittimen kautta ilman codegeniä.",
+        "trademark": "gRPC on Cloud Native Computing Foundationin projekti."
+      },
+      "soap": {
+        "description": "Onko WSDL? Liitä se (tai sen URL) — Restorm jäsentää jokaisen <port>- ja <operation>-elementin ja tuottaa lähetysvalmiit SOAP-kuoret oikealla SOAPAction-otsakkeella, skeeman mukaan tyypitetyillä sisältöluonnoksilla ja WSDL:n ilmoittamalla todennusmenetelmällä."
+      },
+      "websocket": {
+        "description": "Liitä WebSocket-päätepiste (ws:// tai wss://) — Restorm avaa yhteyden, kaappaa palvelimen hello-kehykset ja rakentaa send-/subscribe-pyynnöt toistettavilla hyötykuormamalleilla.",
+        "trademark": "WebSocket on IETF:n (RFC 6455) ja W3C:n standardoima protokolla."
+      },
+      "kafka": {
+        "description": "Liitä Apache Kafka bootstrap-server-URL (tai luettelo aiheista) — Restorm rekisteröi kuluttajat ja tuottajat aiheittain, dekoodaa Avro-/Protobuf-hyötykuormat Schema Registryn kautta ja antaa sinun toistaa yksittäisiä offsetteja yhdellä napsautuksella.",
+        "trademark": "Apache Kafka ja Kafka-logo ovat Apache Software Foundationin tavaramerkkejä."
+      },
+      "socketio": {
+        "description": "Liitä Socket.IO-palvelimen URL — Restorm neuvottelee kättelyn, listaa palvelimen lähettämät nimitilat ja tapahtumanimet ja antaa sinulle yhden pyynnön per emit-/on-tapahtuma hyötykuorman validoinnilla.",
+        "trademark": "Socket.IO on avoimen lähdekoodin kirjasto, joka on julkaistu MIT-lisenssillä; nimeä ja logoa käytetään tässä nimellisesti."
+      },
+      "odata": {
+        "description": "Liitä OData-service-document-URL tai $metadata-tiedosto — Restorm lukee CSDL:n, rakentaa entity setit, function importit ja toiminnot uudelleen ja esitäyttää $filter-/$select-/$top-/$skip-kyselyvaihtoehdot jokaiselle operaatiolle."
+      },
+      "mqtt": {
+        "description": "Liitä MQTT-välittäjän URL tai aiheluettelo — Restorm rakentaa publish-/subscribe-pyynnöt aiheittain, pitää yhteyden auki suoratoistoesikatseluja varten ja muistaa säilytettyjen viestien tilannekuvat, jotta voit toistaa ne myöhemmin.",
+        "trademark": "MQTT on OASIS-standardi; MQTT-nimi ja -logo ovat OASIS Openin tavaramerkkejä."
+      }
+    },
+    "loading": "Analysoidaan...",
+    "noResults": "Pyyntöjä ei löytynyt",
+    "error": {
+      "unknown": "Tapahtui tuntematon virhe"
+    },
+    "ok": "Tuo",
+    "cancel": "Peruuta",
+    "dropZone": "Pudotusalue"
+  },
+  "emptyBench": {
+    "importCard": {
+      "title": "Tuo API:si",
+      "body": "Tuo OpenAPI/Swagger-määrittely, GraphQL-skeema, Postman/Bruno/Insomnia-kokoelma tai liitä curl/PowerShell-komento. Restorm jäsentää sen, rakentaa kansiorakenteen ja saa jokaisen päätepisteen valmiiksi."
+    },
+    "recentActivity": {
+      "title": "Viimeisin toiminta",
+      "empty": "Lähetä ensimmäinen pyyntö nähdäksesi sen täällä."
+    },
+    "apiCard": {
+      "favorites": "Suosikit",
+      "topUsed": "Top 10 käytetyimmät",
+      "recent": "Viimeisimmät pyynnöt",
+      "description": "Kuvaus",
+      "version": "Versio",
+      "quickLinks": {
+        "environments": "Ympäristöt",
+        "docs": "Dokumentaatio",
+        "notes": "Muistiinpanot"
+      }
+    }
+  }
+}

@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect, useLayoutEffect } from 'react'
 import { MenuItemProps } from './types'
 import { ScrollableElement } from '../ScrollableElement'
+import { useOverlayPresence } from '../../hooks/useOverlayPresence'
 
 const SUBMENU_WIDTH = 300
 const VIEWPORT_PADDING = 8
@@ -26,6 +27,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
   const [showSubmenu, setShowSubmenu] = useState(false)
   const itemRef = useRef<HTMLAnchorElement>(null)
   const submenuRef = useRef<HTMLDivElement>(null)
+  useOverlayPresence(submenuRef, showSubmenu)
   const submenuTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   // Store the calculated height only when submenu is shown (null means use 'auto')
   const [activeHeight, setActiveHeight] = useState<string | null>(null)

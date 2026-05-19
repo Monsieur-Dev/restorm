@@ -1,26 +1,27 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { InputBox, Button, ControlGroup, useFileService, ContextMenu, Table, type ContextMenuItem, type TableColumn } from 'electron-core-ui/renderer'
-import { getFavorites, removeFavorite, reorderFavorites } from '../../services/favoritesStore'
+import { useFileService, ContextMenu, Table, type ContextMenuItem, type TableColumn } from 'electron-core-ui/renderer'
+import { addFavorite, getFavorites, isFavorite as isFavoriteCheck, removeFavorite, reorderFavorites } from '../../services/favoritesStore'
 import { PROJECT_UUID_KEY } from '../../../../shared/config/projectUuid'
 import type { EnvironmentFolder, FolderItem } from '../../../../shared/types/collections'
 import type { ApiDocumentation } from '../../../../shared/types/apiDocumentation'
-import type { ApiUpdateConfig } from '../../../../shared/types/baseTypes'
 import { ApiUpdateSettingsSection } from './ApiUpdateSettingsSection'
-import { Badge, type BadgeType } from '../common/Badge'
+import { RequestListRow } from '../MainView/Workbench/EmptyBenchCards/RequestListRow'
 import './environmentFolderHome.css'
 
 interface FavoriteRequest {
   id: string
   name: string
   method: string
-  path: string
 }
 
 interface Props {
   folder: EnvironmentFolder
   onSwitchTab: (tabId: string) => void
   onRequestClick?: (requestId: string) => void
+  /** Middle-click variant — opens the request tab without focusing it
+   *  (the "open in background" gesture). */
+  onRequestAuxClick?: (requestId: string) => void
 }
 
 const SOURCE_CONFIG: Record<string, { logo?: string; icon?: string; label: string; color: string }> = {
@@ -37,20 +38,20 @@ const SOURCE_CONFIG: Record<string, { logo?: string; icon?: string; label: strin
   url: { icon: 'link', label: 'URL Import', color: '#888' }
 }
 
-function collectRequests(items: FolderItem[], parentPath: string[] = []): FavoriteRequest[] {
+function collectRequests(items: FolderItem[]): FavoriteRequest[] {
   const result: FavoriteRequest[] = []
   for (const item of items) {
     if ('items' in item) {
-      result.push(...collectRequests(item.items, [...parentPath, item.name]))
+      result.push(...collectRequests(item.items))
     } else if ('method' in item) {
       const req = item as { id: string; name: string; method: string }
-      result.push({ id: req.id, name: req.name, method: req.method, path: parentPath.join(' / ') })
+      result.push({ id: req.id, name: req.name, method: req.method })
     }
   }
   return result
 }
 
-const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequestClick }) => {
+const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequestClick, onRequestAuxClick }) => {
   const { t } = useTranslation()
   const { state: fileState } = useFileService()
   const [favVersion, setFavVersion] = useState(0)
@@ -111,86 +112,45 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
       window.removeEventListener('storage', handler)
     }
   }, [])
-  // Source URL editing + refresh
-  const [sourceUrl, setSourceUrl] = useState(apiDoc?.sourceUrl ?? '')
-  const [isRefreshing, setIsRefreshing] = useState(false)
-
-  const handleRefresh = useCallback(async () => {
-    if (!sourceUrl.trim() || isRefreshing) return
-    setIsRefreshing(true)
-    try {
-      const importer = (window as unknown as {
-        restorm?: { import?: { import?: (input: string) => Promise<{
-          success: boolean
-          items?: { apiDocumentation?: unknown }[]
-          error?: string
-        }> } }
-      }).restorm?.import?.import
-      if (!importer) return
-      const result = await importer(sourceUrl.trim())
-      if (!result.success) return
-      const freshApiDoc = result.items?.[0]?.apiDocumentation
-      if (!freshApiDoc) return
-      // Update the sourceUrl on the fresh doc to match what the user typed
-      ;(freshApiDoc as { sourceUrl?: string }).sourceUrl = sourceUrl.trim()
-      // Mutate through the reactive proxy
-      ;(folder as unknown as Record<string, unknown>)['apiDocumentation'] = freshApiDoc
-    } finally {
-      setIsRefreshing(false)
-    }
-  }, [sourceUrl, isRefreshing, folder])
 
   const importSource = folder.importSource
   const sourceConfig = importSource ? SOURCE_CONFIG[importSource] : undefined
 
-  const applyApiUpdatePatch = useCallback((patch: Partial<ApiUpdateConfig>): void => {
-    const target = folder as unknown as { apiUpdate?: ApiUpdateConfig }
-    const next: ApiUpdateConfig = {
-      sourceUrl: patch.sourceUrl ?? target.apiUpdate?.sourceUrl ?? apiDoc?.sourceUrl ?? '',
-      autoCheckEnabled: patch.autoCheckEnabled ?? target.apiUpdate?.autoCheckEnabled ?? false,
-      interval: patch.interval ?? target.apiUpdate?.interval ?? 'daily',
-      ...(target.apiUpdate ?? {}),
-      ...patch
-    }
-    target.apiUpdate = next
-    const api = (window as unknown as {
-      restorm?: { apiUpdate?: { setSettings: (id: string, cfg: unknown) => Promise<void> } }
-    }).restorm?.apiUpdate
-    if (api) void api.setSettings(folder.id, next)
-  }, [folder, apiDoc?.sourceUrl])
+  const handleToggleFavorite = useCallback((requestId: string, next: boolean): void => {
+    if (!projectUuid) return
+    if (next) addFavorite(projectUuid, requestId)
+    else removeFavorite(projectUuid, requestId)
+    setFavVersion((v) => v + 1)
+  }, [projectUuid])
 
-  const favoriteColumns = useMemo<TableColumn<FavoriteRequest>[]>(() => [
+  const favoriteColumns = useMemo<TableColumn<FavoriteRequest>[]>(() => {
+    void favVersion // reactivity dep — favorites store reads in renderCell
+    return [
     {
       id: 'favorite',
       header: '',
       renderCell: (req) => (
         <div
-          className="home-favorite-cell"
-          onClick={() => { onRequestClick?.(req.id) }}
           onContextMenu={(e) => { handleFavContextMenu(e, req.id) }}
-          data-testid={`home-favorite-${req.id}`}
+          onAuxClick={(e) => {
+            if (e.button !== 1) return
+            e.preventDefault()
+            onRequestAuxClick?.(req.id)
+          }}
         >
-          <Badge type={req.method.toUpperCase() as BadgeType} />
-          <span className="home-favorite-name">{req.name}</span>
-          <span className="home-favorite-path">{req.path}</span>
-          <button
-            type="button"
-            className="home-favorite-delete"
-            onClick={(e) => {
-              e.stopPropagation()
-              if (projectUuid) {
-                removeFavorite(projectUuid, req.id)
-                setFavVersion((v) => v + 1)
-              }
-            }}
-            data-testid={`home-favorite-${req.id}-delete`}
-          >
-            <span className="codicon codicon-trash" />
-          </button>
+          <RequestListRow
+            id={req.id}
+            name={req.name}
+            method={req.method}
+            isFavorite={projectUuid ? isFavoriteCheck(projectUuid, req.id) : false}
+            onOpen={() => { onRequestClick?.(req.id) }}
+            onToggleFavorite={(next) => { handleToggleFavorite(req.id, next) }}
+            data-testid={`home-favorite-${req.id}`}
+          />
         </div>
       )
     }
-  ], [onRequestClick, projectUuid])
+  ]}, [onRequestClick, onRequestAuxClick, projectUuid, favVersion, handleToggleFavorite])
 
   return (
     <div className="home-container">
@@ -241,7 +201,7 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
           icon="settings-gear"
           label={t('folderView.home.configureEnvs')}
           description={t('folderView.home.configureEnvsDesc')}
-          onClick={() => { onSwitchTab('configuration') }}
+          onClick={() => { onSwitchTab('environments') }}
         />
         <ActionButton
           icon="book"
@@ -252,33 +212,7 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
       </div>
 
       {/* ── API spec updates ── */}
-      <ApiUpdateSettingsSection
-        folderId={folder.id}
-        config={(folder as unknown as { apiUpdate?: ApiUpdateConfig }).apiUpdate}
-        defaultSourceUrl={apiDoc?.sourceUrl}
-        onSettingsChange={applyApiUpdatePatch}
-      />
-
-      {/* ── Source URL ── */}
-      {apiDoc?.sourceUrl && (
-        <div className="home-source-url">
-          <ControlGroup>
-            <InputBox
-              value={sourceUrl}
-              onChange={setSourceUrl}
-              options={{ type: 'text', ariaLabel: 'Source URL' }}
-            />
-            <Button
-              icon="refresh"
-              options={{ ariaLabel: t('folderView.home.refresh') }}
-              disabled={isRefreshing}
-              onClick={() => { void handleRefresh() }}
-            >
-              {isRefreshing ? t('folderView.home.refreshing') : t('folderView.home.refresh')}
-            </Button>
-          </ControlGroup>
-        </div>
-      )}
+      <ApiUpdateSettingsSection folder={folder} />
 
       {/* ── Favorite requests ── */}
       {favoriteRequests.length > 0 && (
@@ -287,7 +221,7 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
             columns={favoriteColumns}
             rows={favoriteRequests}
             getRowId={(r) => r.id}
-            reorderable
+            reorderable={favoriteRequests.length > 1}
             onRowsReorder={handleRowsReorder}
             data-testid="home-favorites-table"
           />

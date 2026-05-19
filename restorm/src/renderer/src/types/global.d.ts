@@ -94,6 +94,20 @@ declare global {
         onAvailableVariables: (callback: (result: AvailableVariablesResult) => void) => (() => void)
         clearAll: () => Promise<void>
       }
+      miniBrowser: {
+        create: (tabId: string, initialUrl?: string) => Promise<{ ok: boolean }>
+        destroy: (tabId: string) => Promise<{ ok: boolean }>
+        setBounds: (tabId: string, bounds: { x: number; y: number; width: number; height: number }) => Promise<{ ok: boolean }>
+        navigate: (tabId: string, url: string) => Promise<{ ok: boolean }>
+        reload: (tabId: string) => Promise<{ ok: boolean }>
+        goBack: (tabId: string) => Promise<{ ok: boolean }>
+        goForward: (tabId: string) => Promise<{ ok: boolean }>
+        getState: (tabId: string) => Promise<{ url: string; canGoBack: boolean; canGoForward: boolean } | null>
+        capture: (tabId: string) => Promise<string | null>
+        onDidNavigate: (callback: (result: { tabId: string; url: string }) => void) => (() => void)
+        onDidStopLoading: (callback: (result: { tabId: string; canGoBack: boolean; canGoForward: boolean }) => void) => (() => void)
+        onUserInteraction: (callback: (result: { tabId: string }) => void) => (() => void)
+      }
       http: {
         execute: (input: HTTPExecutionInput) => Promise<HTTPExecutionResult>
         cancel: (requestId: string) => Promise<boolean>
@@ -188,6 +202,12 @@ declare global {
           }) => void
         ) => () => void
       }
+      requestUsage: {
+        get: () => Promise<Record<string, { count: number; lastSentAt: string; history: string[] }>>
+        onChanged: (
+          callback: (map: Record<string, { count: number; lastSentAt: string; history: string[] }>) => void
+        ) => () => void
+      }
     }
   }
 }
@@ -206,6 +226,15 @@ export interface KeyValueData {
   value: string
   /** Whether this key-value is enabled (default: true) */
   enabled?: boolean | undefined
+  /**
+   * Whether the value is an `ExpressionValue` and should be run
+   * through handlebars at request time. Defaults to `false` —
+   * `StringValue` is sent verbatim. Source-of-truth lives in the
+   * renderer's persisted `KeyValue.value` (`isExpressionValue`
+   * predicate); main reconstructs the matching `ValueType` instance
+   * on receipt.
+   */
+  isExpression?: boolean | undefined
 }
 
 /** Variable transformation result from context service */

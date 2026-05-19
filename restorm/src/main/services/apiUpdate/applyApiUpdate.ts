@@ -47,10 +47,14 @@ export interface ApplyApiUpdateInput {
   freshFolder: EnvironmentFolder
   spec: NormalizedSpec
   importSource: ImportSourceType
-  /** The raw spec content as fetched, kept around so we can store
-   * the right `lastImportedSpecHash` even when the spec has no
-   * `info.version` to anchor against. */
+  /** Structural hash of the fetched spec. The orchestrator passes
+   * one in so the same value can be stored back on the env folder
+   * after the merge; tests can omit it and let the function recompute
+   * via `computeSpecHash`. */
   fetchedHash?: string
+  /** Optional `info.version` carried over from the fetched spec.
+   * Pure metadata — surfaced on the result for callers that need
+   * to display it; not used as a merge key. */
   fetchedVersion?: string
 }
 

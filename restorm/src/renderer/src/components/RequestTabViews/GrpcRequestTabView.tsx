@@ -1,5 +1,7 @@
+import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { useRequestReset } from '../../hooks/useRequestReset'
+import { getRequestPanelState, setRequestPanelCollapsed } from '../../services/requestPanelStateStore'
 import { useTranslation } from 'react-i18next'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
@@ -18,7 +20,7 @@ import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { GrpcRequest, GrpcResponse, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
-import type { GRPCExecutionResult, KeyValueData } from '../../types/global.d'
+import type { GRPCExecutionResult } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { useRestormStore } from '../../store/restormStore'
@@ -27,6 +29,7 @@ import { updateReactiveProperty, toKeyValuesFromHistory } from './requestTabView
 import { useApiDocumentationFromRequest } from '../../hooks/useApiDocumentationFromRequest'
 import { DocumentationHost } from '../documentation/DocumentationHost'
 import { findOperationForRoute } from '../../../../shared/utils/findOperationForRoute'
+import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 
 export interface GrpcRequestTabViewProps {
   request: GrpcRequest
@@ -37,7 +40,10 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
 }) => {
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
-  const { selectedEnvId, environments, envColor } = useEnvironmentContext()
+  // See HTTPRequestTabView — `projectUuid` from the env context is
+  // synchronously available, unlike `useFileService` which races the
+  // `useState` lazy initializer.
+  const { selectedEnvId, environments, envColor, projectUuid } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const { apiDocumentation, route } = useApiDocumentationFromRequest(request)
@@ -51,6 +57,23 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<GrpcResponse | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+
+  // See HTTPRequestTabView for the contract.
+  const [panelCollapsed, setPanelCollapsed] = useState<{ message: boolean; metadata: boolean }>(() => {
+    const seed = (projectUuid ? getRequestPanelState(projectUuid, request.id) : undefined) ?? {}
+    return {
+      message: typeof seed['message'] === 'boolean' ? seed['message'] : false,
+      metadata: typeof seed['metadata'] === 'boolean' ? seed['metadata'] : request.metadata.length === 0
+    }
+  })
+  const handlePanelCollapsedChange = useCallback((arr: boolean[]) => {
+    const next = { message: arr[0] ?? false, metadata: arr[1] ?? false }
+    setPanelCollapsed(next)
+    if (projectUuid) {
+      setRequestPanelCollapsed(projectUuid, request.id, 'message', next.message)
+      setRequestPanelCollapsed(projectUuid, request.id, 'metadata', next.metadata)
+    }
+  }, [projectUuid, request.id])
 
   const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
@@ -81,8 +104,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
     const currentRequest = requestRef.current
     logger.debug('[GrpcRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
 
-    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
-      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
+    const toKeyValueData = toKeyValueDataShared
 
     void window.restorm?.context.registerRequest(requestId, currentEnvId, {
       headers: toKeyValueData(currentRequest.metadata)
@@ -144,8 +166,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
 
   // Notify ContextService when URL or request message changes
   useEffect(() => {
-    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
-      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
+    const toKeyValueData = toKeyValueDataShared
 
     void window.restorm?.context.updateFullRequestData(request.id, {
       url,
@@ -225,8 +246,13 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
 
   // Request content (SplitView with Message, Metadata)
   const requestContent = (
-    <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }} data-testid="grpc-request-content-splitview">
-      <Pane title={t('grpc.tabs.message')} initialSize={0.7} minSize={150} data-testid="grpc-message-pane">
+    <SplitView
+      orientation="vertical"
+      style={{ width: '100%', height: '100%' }}
+      data-testid="grpc-request-content-splitview"
+      onCollapsedChange={handlePanelCollapsedChange}
+    >
+      <Pane title={t('grpc.tabs.message')} initialSize={0.7} minSize={150} collapsed={panelCollapsed.message} data-testid="grpc-message-pane">
         <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
           <CodeEditor
             height="100%"
@@ -242,7 +268,7 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
         title={t('grpc.tabs.metadata')}
         initialSize={0.3}
         minSize={100}
-        collapsed={request.metadata.length === 0}
+        collapsed={panelCollapsed.metadata}
         data-testid="grpc-metadata-pane"
         headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
           <Button
@@ -378,16 +404,18 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
             data-testid="grpc-url-input"
           />
         </div>
-        <Button
-          icon={isSending ? 'close' : 'send'}
-          onClick={isSending ? handleCancel : handleSend}
-          {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-          options={{
-            title: isSending ? t('cancel') : t('grpc.send'),
-            ariaLabel: isSending ? t('cancel') : t('grpc.send')
-          }}
-          data-testid="grpc-send-button"
-        />
+        <SendButtonEnvSwitcher>
+          <Button
+            icon={isSending ? 'close' : 'send'}
+            onClick={isSending ? handleCancel : handleSend}
+            {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+            options={{
+              title: isSending ? t('cancel') : t('grpc.send'),
+              ariaLabel: isSending ? t('cancel') : t('grpc.send')
+            }}
+            data-testid="grpc-send-button"
+          />
+        </SendButtonEnvSwitcher>
       </ControlGroup>
       <div style={{ fontSize: 12, color: 'var(--descriptionForeground)' }}>
         {request.service}/{request.method}

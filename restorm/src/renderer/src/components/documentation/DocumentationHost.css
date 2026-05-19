@@ -273,6 +273,76 @@
   overflow: hidden;
 }
 
+/* Enum nodes get a light-blue ring so users can tell at a glance
+ * that the card is a value enumeration, not a regular object
+ * model. Implemented via box-shadow (not `border`) for the same
+ * reason as the default ring: a real border would shift `offsetTop`
+ * and break ELK port alignment. The legend documents this contract. */
+.documentation-host-model-node--enum {
+  box-shadow:
+    0 0 0 2px var(--documentation-host-enum-border, #4ea3f5),
+    0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+/* Flash animation fired after `focusModel(name)` — twin pulses of
+ * a red outline so the user can spot the destination node even
+ * when it was already on screen (no pan animation to follow with
+ * the eye). The outline sits outside the box-shadow so the
+ * underlying default / enum ring is preserved during the flash.
+ * Width animates from 0 → 3px → 0 → 3px → 0 to produce two
+ * crisp pulses rather than a single linear fade. */
+@keyframes documentation-host-model-node-flash {
+  0%, 50%, 100% {
+    outline-width: 0;
+    outline-color: transparent;
+  }
+  25%, 75% {
+    outline-width: 3px;
+    outline-color: #e34c4c;
+  }
+}
+
+.documentation-host-model-node--flash {
+  outline: 0 solid transparent;
+  outline-offset: 2px;
+  animation: documentation-host-model-node-flash 1.2s ease-in-out;
+}
+
+.documentation-host-model-node__enum-wrap {
+  display: block;
+}
+
+.documentation-host-model-node__enum-list {
+  list-style: disc inside;
+  margin: 0;
+  padding: 4px 12px 8px;
+  font-size: 12px;
+  color: var(--editor-foreground);
+}
+
+.documentation-host-model-node__enum-item {
+  line-height: 22px;
+  padding: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.documentation-host-model-node__enum-item--more {
+  color: var(--descriptionForeground, rgba(127, 127, 127, 0.7));
+  font-weight: bold;
+  list-style: none;
+  padding-left: 14px;
+}
+
+.documentation-host-model-node__tooltip-enum-list {
+  list-style: disc inside;
+  margin: 0;
+  padding: 0 4px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
 .documentation-host-model-node__handle {
   width: 6px;
   height: 6px;
@@ -1205,6 +1275,15 @@
 .documentation-host-model-graph-legend__edge--array-optional {
   border-color: var(--documentation-edge-array, #f0a868);
   border-top-style: dashed;
+}
+
+.documentation-host-model-graph-legend__enum-swatch {
+  display: inline-block;
+  width: 18px;
+  height: 12px;
+  border: 2px solid var(--documentation-host-enum-border, #4ea3f5);
+  border-radius: 3px;
+  align-self: center;
 }
 
 /* ──────────────────────────────────────────────────────────────────

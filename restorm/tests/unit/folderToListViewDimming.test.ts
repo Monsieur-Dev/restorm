@@ -15,8 +15,8 @@
 import React from 'react'
 import { describe, it, expect, vi } from 'vitest'
 
-// Stub out the renderer barrel so the test loader doesn't try to
-// resolve `jsoncrack-react` (lazy-loaded at runtime by the real
+// Stub out the renderer barrel so the test loader doesn't have to
+// resolve `@xyflow/react` (pulled in by `JsonViewer` inside the real
 // barrel; the bundler can't follow it under jsdom). We only need
 // the type + a placeholder for `IconView`.
 vi.mock('electron-core-ui/renderer', () => ({

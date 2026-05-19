@@ -1,5 +1,7 @@
+import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useRequestReset } from '../../hooks/useRequestReset'
+import { getRequestPanelState, setRequestPanelCollapsed } from '../../services/requestPanelStateStore'
 import { useTranslation } from 'react-i18next'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
@@ -18,7 +20,7 @@ import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { GraphQLRequest, GraphQLResponse, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
-import type { GraphQLExecutionResult, KeyValueData } from '../../types/global.d'
+import type { GraphQLExecutionResult } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { useRestormStore } from '../../store/restormStore'
@@ -29,6 +31,7 @@ import { DocumentationHost } from '../documentation/DocumentationHost'
 import { findOperationForRoute } from '../../../../shared/utils/findOperationForRoute'
 import { useCurlPaste, type ParsedCurl } from '../../hooks/useCurlPaste'
 import { CurlPasteCallout } from '../CurlPasteCallout'
+import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 import { toasterService } from 'electron-core-ui/renderer'
 
 export interface GraphQLRequestTabViewProps {
@@ -40,7 +43,12 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
 }) => {
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
-  const { selectedEnvId, environments, envColor } = useEnvironmentContext()
+  // `projectUuid` comes from the EnvironmentContext (mirrored from the
+  // workbench's `persistenceKey`) — not `useFileService`. See
+  // HTTPRequestTabView for the rationale: useState's lazy initializer
+  // below needs a synchronous, already-hydrated value to read the
+  // per-request panel-state store from.
+  const { selectedEnvId, environments, envColor, projectUuid } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const { apiDocumentation, route } = useApiDocumentationFromRequest(request)
@@ -55,6 +63,36 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<GraphQLResponse | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+
+  // See HTTPRequestTabView for the pattern. GraphQL has only a
+  // collapsible headers pane today (query + variables don't collapse),
+  // but we still round-trip the full map so future Pane additions
+  // need no extra plumbing.
+  const [panelCollapsed, setPanelCollapsed] = useState<{
+    query: boolean
+    variables: boolean
+    headers: boolean
+  }>(() => {
+    const seed = (projectUuid ? getRequestPanelState(projectUuid, request.id) : undefined) ?? {}
+    return {
+      query: typeof seed['query'] === 'boolean' ? seed['query'] : false,
+      variables: typeof seed['variables'] === 'boolean' ? seed['variables'] : false,
+      headers: typeof seed['headers'] === 'boolean' ? seed['headers'] : request.headers.length === 0
+    }
+  })
+  const handlePanelCollapsedChange = useCallback((arr: boolean[]) => {
+    const next = {
+      query: arr[0] ?? false,
+      variables: arr[1] ?? false,
+      headers: arr[2] ?? false
+    }
+    setPanelCollapsed(next)
+    if (projectUuid) {
+      setRequestPanelCollapsed(projectUuid, request.id, 'query', next.query)
+      setRequestPanelCollapsed(projectUuid, request.id, 'variables', next.variables)
+      setRequestPanelCollapsed(projectUuid, request.id, 'headers', next.headers)
+    }
+  }, [projectUuid, request.id])
 
   const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
@@ -96,8 +134,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
     
     logger.debug('[GraphQLRequestTabView] Registering request with ContextService', { requestId, selectedEnvId: currentEnvId })
 
-    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
-      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
+    const toKeyValueData = toKeyValueDataShared
 
     void restormContext.registerRequest(requestId, currentEnvId, {
       headers: toKeyValueData(currentRequest.headers)
@@ -159,8 +196,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
 
   // Notify ContextService when URL, query or variables change
   useEffect(() => {
-    const toKeyValueData = (kvs: KeyValue[]): KeyValueData[] =>
-      kvs.map(kv => ({ id: kv.id, key: kv.key, value: kv.value.toString(), enabled: kv.enabled }))
+    const toKeyValueData = toKeyValueDataShared
 
     void window.restorm?.context.updateFullRequestData(request.id, {
       url,
@@ -243,8 +279,13 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
   
   // Request content (SplitView with Query, Variables, Headers)
   const requestContent = (
-    <SplitView orientation="vertical" style={{ width: '100%', height: '100%' }} data-testid="graphql-request-splitview">
-      <Pane title={t('graphql.tabs.query')} initialSize={0.5} minSize={150} data-testid="graphql-query-pane">
+    <SplitView
+      orientation="vertical"
+      style={{ width: '100%', height: '100%' }}
+      data-testid="graphql-request-splitview"
+      onCollapsedChange={handlePanelCollapsedChange}
+    >
+      <Pane title={t('graphql.tabs.query')} initialSize={0.5} minSize={150} collapsed={panelCollapsed.query} data-testid="graphql-query-pane">
         <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
           <CodeEditor
             height="100%"
@@ -256,7 +297,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
           />
         </div>
       </Pane>
-      <Pane title={t('graphql.tabs.variables')} initialSize={0.25} minSize={100} data-testid="graphql-variables-pane">
+      <Pane title={t('graphql.tabs.variables')} initialSize={0.25} minSize={100} collapsed={panelCollapsed.variables} data-testid="graphql-variables-pane">
         <div style={{ height: '100%', border: '1px solid var(--panel-border)', borderRadius: 3 }}>
           <CodeEditor
             height="100%"
@@ -272,7 +313,7 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
         title={t('graphql.tabs.headers')}
         initialSize={0.25}
         minSize={100}
-        collapsed={request.headers.length === 0}
+        collapsed={panelCollapsed.headers}
         data-testid="graphql-headers-pane"
         headerActions={({ collapsed, toggle }: { collapsed: boolean; toggle: () => void }) => (
           <Button
@@ -418,16 +459,18 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
           data-testid="graphql-url-input"
         />
       </div>
-      <Button
-        icon={isSending ? 'close' : 'send'}
-        onClick={isSending ? handleCancel : handleSend}
-        {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-        options={{
-          title: isSending ? t('cancel') : t('graphql.send'),
-          ariaLabel: isSending ? t('cancel') : t('graphql.send')
-        }}
-        data-testid="graphql-action-button"
-      />
+      <SendButtonEnvSwitcher>
+        <Button
+          icon={isSending ? 'close' : 'send'}
+          onClick={isSending ? handleCancel : handleSend}
+          {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+          options={{
+            title: isSending ? t('cancel') : t('graphql.send'),
+            ariaLabel: isSending ? t('cancel') : t('graphql.send')
+          }}
+          data-testid="graphql-action-button"
+        />
+      </SendButtonEnvSwitcher>
     </ControlGroup>
     </div>
   )

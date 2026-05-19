@@ -1,0 +1,162 @@
+<svg viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg" class="empty-bench-tip-illustration" role="img" aria-hidden="true">
+  <style>
+    .es-bar-bg {
+      fill: var(--editor-background, #1e1e1e);
+      stroke: currentColor;
+      stroke-width: 1.4;
+      stroke-linejoin: round;
+    }
+    .es-method { fill: #2563eb; }
+    .es-send   { fill: #16a34a; }
+    .es-arrow  { fill: #ffffff; }
+    .es-url-text {
+      stroke: currentColor;
+      stroke-width: 3;
+      stroke-linecap: round;
+      opacity: 0.35;
+    }
+
+    .es-pointer {
+      fill: currentColor;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linejoin: round;
+    }
+    .es-sparkle {
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      fill: none;
+      opacity: 0;
+    }
+
+    .es-tooltip {
+      fill: var(--editor-background, #1e1e1e);
+      stroke: currentColor;
+      stroke-width: 1.4;
+      stroke-linejoin: round;
+    }
+    .es-tooltip-line {
+      stroke: currentColor;
+      stroke-width: 3;
+      stroke-linecap: round;
+      opacity: 0.4;
+    }
+    .es-color-swatch {
+      stroke: currentColor;
+      stroke-width: 1;
+    }
+    .es-color-swatch--red   { fill: #fca5a5; }
+    .es-color-swatch--green { fill: #86efac; }
+    .es-color-swatch--blue  { fill: #93c5fd; }
+
+    .es-tooltip-group {
+      transform-box: fill-box;
+      transform-origin: 50% 0%;
+    }
+
+    .es-pointer-group,
+    .es-tooltip-group,
+    .es-sparkle {
+      animation-duration: 6s;
+      animation-iteration-count: infinite;
+      animation-fill-mode: both;
+      animation-play-state: paused;
+    }
+    .es-pointer-group { animation-name: es-pointer-move; animation-timing-function: ease-in-out; }
+    .es-tooltip-group { animation-name: es-tooltip-show; animation-timing-function: ease-out; }
+    .es-sparkle       { animation-name: es-burst; animation-timing-function: linear; }
+
+    @keyframes es-pointer-move {
+      0%   { transform: translate(60px, 120px); opacity: 0; }
+      4%   { opacity: 1; }
+      14%  { transform: translate(181px, 51px); opacity: 1; }
+      78%  { transform: translate(181px, 51px); opacity: 1; }
+      92%  { transform: translate(181px, 51px); opacity: 0; }
+      100% { transform: translate(60px, 120px); opacity: 0; }
+    }
+    @keyframes es-tooltip-show {
+      0%, 28% {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.85);
+      }
+      42% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      78% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      92% {
+        opacity: 0;
+        transform: translateY(0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.85);
+      }
+    }
+    @keyframes es-burst {
+      0%, 15% {
+        opacity: 0;
+        transform: translate(var(--es-nx), var(--es-ny));
+      }
+      19% {
+        opacity: 1;
+        transform: translate(0, 0);
+      }
+      25% {
+        opacity: 0;
+        transform: translate(calc(var(--es-nx) * -0.6), calc(var(--es-ny) * -0.6));
+      }
+      26%, 100% {
+        opacity: 0;
+      }
+    }
+  </style>
+
+  <!-- Layer 1: URL bar (back). Outer shell + colored end caps + URL
+       pseudo-text in the centre + send arrow inside the green
+       button. -->
+  <rect class="es-bar-bg" x="20" y="35" width="180" height="32" rx="10" />
+  <path
+    class="es-method"
+    d="M 30 35 L 58 35 L 58 67 L 30 67 A 10 10 0 0 1 20 57 L 20 45 A 10 10 0 0 1 30 35 Z"
+  />
+  <line class="es-url-text" x1="68" y1="51" x2="130" y2="51" />
+  <path
+    class="es-send"
+    d="M 162 35 L 190 35 A 10 10 0 0 1 200 45 L 200 57 A 10 10 0 0 1 190 67 L 162 67 Z"
+  />
+  <path
+    class="es-arrow"
+    d="M 170 49 L 183 49 L 183 45 L 190 51 L 183 57 L 183 53 L 170 53 Z"
+  />
+
+  <!-- Layer 2: context-menu tooltip with 3 colored rows. Anchored
+       to the send button via a small upward chevron. -->
+  <g class="es-tooltip-group">
+    <path
+      class="es-tooltip"
+      d="M 136 90 L 175 90 L 181 84 L 187 90 L 204 90 A 6 6 0 0 1 210 96 L 210 139 A 6 6 0 0 1 204 145 L 136 145 A 6 6 0 0 1 130 139 L 130 96 A 6 6 0 0 1 136 90 Z"
+    />
+    <rect class="es-color-swatch es-color-swatch--red"   x="140" y="100" width="10" height="10" rx="2" />
+    <line class="es-tooltip-line" x1="156" y1="105" x2="200" y2="105" />
+    <rect class="es-color-swatch es-color-swatch--green" x="140" y="115" width="10" height="10" rx="2" />
+    <line class="es-tooltip-line" x1="156" y1="120" x2="196" y2="120" />
+    <rect class="es-color-swatch es-color-swatch--blue"  x="140" y="130" width="10" height="10" rx="2" />
+    <line class="es-tooltip-line" x1="156" y1="135" x2="202" y2="135" />
+  </g>
+
+  <!-- Layer 3: pointer + right-click ripple (always on top). The
+       sparkle lines fan only to the RIGHT of the cursor to signify
+       a right-click. -->
+  <g class="es-pointer-group">
+    <line class="es-sparkle" x1="12" y1="-3" x2="18" y2="-7" style="--es-nx: -3px; --es-ny: 2px" />
+    <line class="es-sparkle" x1="13" y1="0"  x2="20" y2="0"  style="--es-nx: -4px; --es-ny: 0px" />
+    <line class="es-sparkle" x1="12" y1="3"  x2="18" y2="6"  style="--es-nx: -3px; --es-ny: -2px" />
+    <line class="es-sparkle" x1="15" y1="-1" x2="22" y2="-2" style="--es-nx: -4px; --es-ny: 1px" />
+    <path class="es-pointer" d="M 0 0 L 0 17 L 4.5 12.5 L 7.5 19 L 10 18 L 7.2 11.5 L 13 11.5 Z" />
+  </g>
+</svg>

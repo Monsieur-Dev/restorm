@@ -4,3 +4,6 @@ vscode/
 # e2e temp workspace — created on every test run, wiped before each scenario
 restorm/tests/e2e/.tmp/
 .superpowers/
+# Claude Code's scheduler lock — touched on every /loop wake-up, so it
+# would otherwise show up as dirty in every working tree.
+.claude/scheduled_tasks.lock

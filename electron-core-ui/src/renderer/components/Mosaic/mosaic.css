@@ -1,0 +1,79 @@
+/* MosaicLayout — Pinterest-style masonry via native CSS multi-
+ * column. The host (`MosaicLayout.tsx`) sets `column-width`,
+ * `column-gap`, and `max-width` inline from props; we cover the
+ * tile-level guarantees here so `<MosaicCard>` (and any sibling
+ * card-shaped element) flows correctly.
+ *
+ * The `--mosaic-column-gap` variable is also set inline by the
+ * host so tile bottom-margins match the configured horizontal
+ * gutter — keeps vertical and horizontal rhythm symmetrical
+ * regardless of the host's `columnGap` prop. */
+
+.mosaic-layout {
+	width: 100%;
+	margin: 0 auto;
+	box-sizing: border-box;
+}
+
+/* Default tile guarantees — any direct child of a `MosaicLayout`
+ * that opts into the masonry should ship `break-inside: avoid`.
+ * `MosaicCard` carries it on its own root selector below; this
+ * fallback covers callers who slot a custom element instead. */
+.mosaic-layout > * {
+	break-inside: avoid;
+	-webkit-column-break-inside: avoid;
+	margin-bottom: var(--mosaic-column-gap, 20px);
+}
+
+.mosaic-card {
+	break-inside: avoid;
+	-webkit-column-break-inside: avoid;
+	display: flex;
+	flex-direction: column;
+	margin-bottom: var(--mosaic-column-gap, 20px);
+	border-radius: 10px;
+	background-color: var(--editorWidget-background, var(--editor-inactiveSelectionBackground));
+	border: 1px solid var(--panel-border, rgb(127, 127, 127, 0.2));
+	box-sizing: border-box;
+	overflow: hidden; /* clip the banner to the card's rounded corners */
+}
+
+/* Banner wrapper holds the drop shadow. `filter: drop-shadow`
+ * traces the rasterised silhouette, so the shadow follows the
+ * chevron clip-path on the inner banner. The wrapper itself
+ * carries no background — the colour lives on the inner
+ * `.mosaic-card__banner` so the shadow doesn't bleed beyond
+ * the chevron tip. */
+.mosaic-card__banner-wrap {
+	filter: drop-shadow(0 4px 6px rgb(0, 0, 0, 0.35));
+}
+
+/* Downward chevron with a sharp centred apex. Chevron depth is
+ * 24 px (apex at 100%, slopes start at calc(100% - 24px));
+ * padding-bottom adds the apex clearance so text never intrudes
+ * into the chevron area. Adjust the depth value if a deeper or
+ * shallower chevron is required. */
+.mosaic-card__banner {
+	background-color: var(--button-background);
+	color: var(--button-foreground);
+	padding: 20px 22px 40px;
+	clip-path: polygon(0% 0%, 100% 0%, 100% calc(100% - 24px), 50% 100%, 0% calc(100% - 24px));
+}
+
+.mosaic-card__title {
+	margin: 0;
+	font-size: 22px;
+	font-weight: 700;
+	letter-spacing: 0.03em;
+	line-height: 1.2;
+	color: inherit;
+	text-align: center;
+}
+
+.mosaic-card__body {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	min-width: 0;
+	padding: 18px 20px 20px;
+}

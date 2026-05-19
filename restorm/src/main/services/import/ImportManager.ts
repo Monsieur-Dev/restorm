@@ -8,9 +8,13 @@
  * - Returns parsed results
  */
 
+import { createHash } from 'node:crypto'
 import * as fs from 'fs/promises'
 import { logger } from 'electron-core-ui/main'
 import type { EnvironmentFolder, FolderItem } from '../../../shared/models'
+import { isRequest, isAnyFolder, isHTTPRequest, isAuthenticationRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest } from '../../../shared/types/collections'
+import { disableEmptyKeyValues } from '../../../shared/utils/emptyKeyValueHelper'
+import { withFirewallBypass } from '../firewall/firewallBypass'
 
 // ============================================================================
 // Types
@@ -30,6 +34,11 @@ export interface ImportResult {
    * uses this to decide whether to show the "Add authentication"
    * button. */
   isAuthError?: boolean
+  /** SHA-256 of the raw payload the importer parsed (URL or file).
+   * Stamped onto the env folder's `apiUpdate.payloadChecksum` so a
+   * subsequent Refresh can detect "no change since the import that
+   * produced this folder" without re-running the full importer. */
+  payloadChecksum?: string
 }
 
 export interface ImportOptions {
@@ -160,8 +169,43 @@ export function detectFormat(content: string, filePath?: string): string | null 
 // Import Functions
 // ============================================================================
 
+/**
+ * Walk a freshly-imported folder tree and flip `enabled: false` on
+ * every KV row whose value resolves to empty (headers, params,
+ * path params, gRPC metadata, SOAP headers). Body fields are left
+ * alone — POSTing `{"bio": ""}` is a legitimate "clear this field"
+ * payload that the user should manage explicitly.
+ */
+function disableEmptyKeyValuesInTree(folder: EnvironmentFolder): void {
+  const visit = (item: FolderItem): void => {
+    if (isRequest(item)) {
+      if (isHTTPRequest(item) || isAuthenticationRequest(item)) {
+        disableEmptyKeyValues(item.headers)
+        disableEmptyKeyValues(item.params)
+        disableEmptyKeyValues(item.pathParams)
+      } else if (isGraphQLRequest(item)) {
+        disableEmptyKeyValues(item.headers)
+      } else if (isGrpcRequest(item)) {
+        disableEmptyKeyValues(item.metadata)
+      } else if (isSoapRequest(item)) {
+        disableEmptyKeyValues(item.headers)
+      } else if (isWebSocketRequest(item)) {
+        disableEmptyKeyValues(item.headers)
+      } else if (isODataRequest(item)) {
+        disableEmptyKeyValues(item.headers)
+        disableEmptyKeyValues(item.params)
+      }
+      return
+    }
+    if (isAnyFolder(item)) {
+      for (const child of item.items) visit(child)
+    }
+  }
+  for (const child of folder.items) visit(child)
+}
+
 /** Import from a given content string with detected or specified format */
-async function importFromContent(
+export async function importFromContent(
   content: string,
   format: string,
   source: string,
@@ -258,6 +302,15 @@ async function importFromContent(
         }
     }
     
+    // Auto-disable empty rows across the freshly-imported tree. Most
+    // specs (OpenAPI parameters with no `example` / no `default`,
+    // generated headers like `Authorization: ""` waiting for the user
+    // to fill them in) produce KV entries whose value resolves to "".
+    // Sent over the wire as `?name=&header=` they trigger regex-based
+    // 422s on strict APIs. Default is now "create empty rows as
+    // disabled" — the user opts in by re-checking the row.
+    disableEmptyKeyValuesInTree(folder)
+
     // Return the folder itself as a single item, not its children
     return {
       success: true,
@@ -313,7 +366,12 @@ export async function importFrom(
           headers: redactedHeaders,
           headerCount: Object.keys(options.extraHeaders ?? {}).length
         })
-        const response = await fetch(input, fetchInit)
+        // Import is user-initiated (URL paste / drag-drop on the
+        // Import modal) — bypass the firewall so we don't ask the
+        // user to authorise the very fetch they just typed a URL
+        // for, and so a fresh project with empty `projectOrigins`
+        // doesn't dead-end on auto-deny.
+        const response = await withFirewallBypass(() => fetch(input, fetchInit))
         logger.info('[ImportManager] fetch response', {
           url: input,
           status: response.status,
@@ -374,7 +432,17 @@ export async function importFrom(
     }
     
     // Import using detected format
-    return await importFromContent(content, detectedFormat, source, isUrl ? input : undefined)
+    const result = await importFromContent(content, detectedFormat, source, isUrl ? input : undefined)
+    if (result.success) {
+      // Stamp the payload checksum on every successful import — the
+      // env folder's `apiUpdate.payloadChecksum` is what the Refresh
+      // button compares against, so it MUST be computed off exactly
+      // the same bytes a future `refresh-fetch` will see. Using the
+      // raw response text here (pre-parse) matches what
+      // `apiUpdate:refresh-fetch` hashes server-side.
+      result.payloadChecksum = `sha256:${createHash('sha256').update(content).digest('hex')}`
+    }
+    return result
   } catch (error) {
     logger.error(`[ImportManager] Unexpected error:`, error)
     return {
@@ -401,7 +469,10 @@ export async function tryAllImports(
   try {
     if (isUrl) {
       source = input
-      const response = await fetch(input)
+      // Same firewall bypass rationale as `importFromUrl` above —
+      // user typed / dropped the URL, that's the authorisation
+      // signal.
+      const response = await withFirewallBypass(() => fetch(input))
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`)
       }

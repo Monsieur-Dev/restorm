@@ -1,0 +1,725 @@
+{
+  "app": {
+    "title": "restorm",
+    "openSettings": "Åpne innstillinger",
+    "draftsRestoredTitle": "Ulagret arbeid gjenopprettet",
+    "draftsRestoredBody_one": "{{count}} utkast ble gjenopprettet fra forrige økt.",
+    "draftsRestoredBody_other": "{{count}} utkast ble gjenopprettet fra forrige økt."
+  },
+  "statusbar": {
+    "requestHistory": "Forespørselshistorikk",
+    "envSelector": {
+      "applyToAll": "Bruk på alle forespørsler"
+    }
+  },
+  "tips": {
+    "cardTitle": "Tips og triks",
+    "maximizeTab": {
+      "title": "Maksimer en fane med ett klikk",
+      "body": "Dobbeltklikk på en hvilken som helst workbench-fane for å vise den i fullskjerm. Trykk Esc for å gå tilbake til det forrige oppsettet."
+    },
+    "mcpControl": {
+      "title": "Styr restorm med AI",
+      "body": "Restorm leveres med en MCP-server, slik at AI-assistenter som Claude Code kan vise, åpne, redigere og kjøre forespørslene dine, inspisere svar og styre arbeidsområdet programmatisk – uten å forlate chatten."
+    },
+    "envSwitch": {
+      "title": "Bytt miljø enkelt!",
+      "body": "Bytt miljø for den aktive forespørselen eller for alle forespørslene i API-et ditt ved å klikke på knappen i statuslinjen, eller ved å høyreklikke på send-knappen til forespørselen."
+    },
+    "authRequests": {
+      "title": "Trenger du å autentisere deg mot API-et?",
+      "body": "I stedet for å sende en forespørsel hver gang for å hente et token og lime det inn overalt, bruk auth-forespørsler. Når et kall feiler (401, 403, …) eller tokenet utløper, kjøres auth-forespørselen automatisk på nytt for å hente og gjenbruke tokenet. Praktisk!"
+    },
+    "supplyChain": {
+      "title": "Beskytt deg selv!",
+      "body": "Som all programvare bruker Restorm tredjepartsbiblioteker. For å unngå supply chain-angrep fanges alle utgående kall på laveste nivå, og vi varsler deg dersom et tredjepartsbibliotek prøver å stjele personopplysningene dine!"
+    },
+    "codeSnippets": {
+      "title": "Restorm hjelper deg å kode!",
+      "body": "Finn kodesnutter på hver forespørsel for å hjelpe deg å integrere dem i programvaren din. Mange språk er tilgjengelige: curl, PowerShell, TypeScript, C# og mange flere!"
+    },
+    "workbenchLayout": {
+      "title": "Organiser arbeidsbenken din",
+      "body": "Stor skjerm og mange forespørsler? Plasser dem ved siden av hverandre, oppå hverandre eller omtrent som du vil — bare dra en fane dit du ønsker. Alt for komforten din!"
+    },
+    "persistState": {
+      "title": "Finn det igjen slik du forlot det!",
+      "body": "Lukker du Restorm og åpner det igjen, finner du det i nøyaktig samme tilstand som du forlot det."
+    },
+    "favorites": {
+      "title": "Noen står deg nærmere hjertet…",
+      "body": "Har du forespørsler som betyr mer for deg enn andre? Marker dem som favoritter!"
+    },
+    "console": {
+      "title": "Se hva som skjer",
+      "body": "Konsollen viser kallene til API-ene dine etter hvert som du sender forespørsler. Praktisk hvis du trenger å lime dem inn i terminalen! Hva er smaken din: curl eller PowerShell?"
+    },
+    "miniBrowser": {
+      "title": "Lei av å bytte vindu hele tiden?",
+      "body": "Restorm har en innebygd minibrowser. Praktisk når appen din reagerer visuelt på API-kallene dine."
+    },
+    "apiDocs": {
+      "title": "Dokumentasjonen — rett her",
+      "body": "Slipp å hoppe mellom Restorm og dokumentasjonen for API-et ditt. Hvis API-et ditt leverer en spec (Swagger, OpenAPI, …), importeres den i Restorm, og du kan lese den direkte her."
+    },
+    "secrets": {
+      "title": "Beskytt hemmelighetene dine",
+      "body": "Passordene og auth-tokenene dine lagres ikke direkte i Restorm-filen. Derfor lagrer Restorm hemmeligheter og forespørselshistorikken i separate filer. Det er opp til deg å ikke pushe dem til GitHub. Restorm kan også hente hemmeligheter fra AWS, GitHub og andre kilder."
+    },
+    "themes": {
+      "title": "Dine farger, ditt humør",
+      "body": "Restorm kommer med flere fargesystemer. Velg det som matcher humøret ditt."
+    },
+    "search": {
+      "title": "Finn alt, raskt",
+      "body": "Har du sett øverst i dette vinduet? Restorm har en innebygd søkemotor — slutt på timesvis med leting etter akkurat den forespørselen."
+    },
+    "multiEnv": {
+      "title": "Samme forespørsler, ulike miljøer",
+      "body": "Har du dev, staging og prod? Samme forespørsler, bare ikke helt de samme URL-ene, ikke helt de samme tokenene… Bruk miljøer og variabler til å bytte med ett klikk. Du kan til og med kjennetegne hvert miljø med farge og ikon, slik at du slipper fredag-kveld-skrekken i produksjon!"
+    },
+    "protocols": {
+      "title": "Mer enn bare REST",
+      "body": "Restorm snakker REST… og mye mer! GraphQL, gRPC, SOAP, OData, WebSocket — alle disse protokollene rett innen rekkevidde, uten å bytte verktøy."
+    },
+    "responseTree": {
+      "title": "Se API-svarene dine visuelt",
+      "body": "Visste du at du kan utforske API-svarene dine på en mer grafisk måte? Restorm viser dem som et interaktivt tre du kan navigere, lukke og åpne."
+    },
+    "responseHistory": {
+      "title": "Historikk over forespørsler",
+      "body": "Du kan bla i historikken over alle kallene dine til API-ene. Praktisk når du skal finne ut hva som faktisk skjedde."
+    },
+    "multiLanguage": {
+      "title": "27 språk!",
+      "body": "Restorm snakker 27 språk. Engelsk, fransk, spansk, tysk, italiensk, japansk, kinesisk, koreansk og mange flere — velg ditt i innstillingene!"
+    }
+  },
+  "authFailureToast": {
+    "title": "Autentisering mislyktes",
+    "fallbackReason": "Autentiseringsforespørselen lyktes ikke.",
+    "openAuthRoute": "Åpne autentiseringsrute"
+  },
+  "menuBar": {
+    "file": "Fil",
+    "new": "Ny",
+    "import": "Importer",
+    "open": "Åpne",
+    "openFolder": "Åpne mappe",
+    "recentFiles": "Nylige filer",
+    "favorites": "Favoritter",
+    "close": "Lukk",
+    "save": "Lagre",
+    "saveAll": "Lagre alle",
+    "saveAs": "Lagre som",
+    "exit": "Avslutt",
+    "selection": "Utvalg",
+    "tools": "Verktøy",
+    "findInCollection": "Finn i samling",
+    "addRequest": "Legg til forespørsel",
+    "addRequestHttp": "HTTP-forespørsel",
+    "addRequestGraphql": "GraphQL-forespørsel",
+    "addRequestGrpc": "gRPC-forespørsel",
+    "addRequestSoap": "SOAP-forespørsel",
+    "addRequestOdata": "OData-forespørsel",
+    "addRequestWebsocket": "WebSocket-forespørsel",
+    "addFolder": "Legg til mappe",
+    "addEnvironmentFolder": "Legg til miljømappe",
+    "addVariable": "Legg til variabel",
+    "addTag": "Legg til tagg",
+    "expandAllFolders": "Utvid alle mapper",
+    "collapseAllFolders": "Skjul alle mapper",
+    "sendActiveRequest": "Send forespørsel",
+    "cancelActiveRequest": "Avbryt forespørsel",
+    "generateCodeSnippet": "Generer kodebit",
+    "copyAsCurl": "Kopier som cURL",
+    "exportOpenApi": "Eksporter til OpenAPI",
+    "clearAuthCache": "Tøm autentiseringsbuffer",
+    "openLogsFolder": "Åpne loggmappe"
+  },
+  "sidebar": {
+    "addRequest": "Legg til forespørsel",
+    "collapseAll": "Skjul alle forespørsler",
+    "workspace": "Arbeidsområde",
+    "favorites": "Favoritter",
+    "newFolder": "Ny mappe",
+    "newEnvironmentFolder": "Ny miljømappe",
+    "contextMenu": {
+      "createFolder": "Opprett mappe",
+      "createEnvironmentFolder": "Opprett miljømappe",
+      "delete": "Slett",
+      "clone": "Klon",
+      "rename": "Gi nytt navn",
+      "addToFavorites": "Legg til i favoritter",
+      "removeFromFavorites": "Fjern fra favoritter",
+      "closeTab": "Lukk",
+      "closeOtherTabs": "Lukk andre",
+      "closeTabsToTheRight": "Lukk til høyre",
+      "closeAllTabs": "Lukk alle",
+      "add": {
+        "title": "Legg til",
+        "folder": "Mappe",
+        "httpGet": "HTTP – GET-forespørsel",
+        "httpPost": "HTTP – POST-forespørsel",
+        "httpPut": "HTTP – PUT-forespørsel",
+        "httpPatch": "HTTP – PATCH-forespørsel",
+        "httpDelete": "HTTP – DELETE-forespørsel",
+        "graphql": "GraphQL-forespørsel",
+        "grpc": "gRPC-forespørsel",
+        "soap": "SOAP-forespørsel",
+        "websocket": "WebSocket-forespørsel",
+        "odata": "OData-forespørsel",
+        "auth": "HTTP-autentiseringsforespørsel"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Bekreft sletting",
+      "folderMessage": "Er du sikker på at du vil slette mappen «{{name}}» og alt innholdet?",
+      "itemMessage": "Er du sikker på at du vil slette «{{name}}»?",
+      "confirm": "Slett",
+      "cancel": "Avbryt"
+    }
+  },
+  "environment": {
+    "newName": "Nytt miljø",
+    "add": "Legg til miljø",
+    "rename": "Gi nytt navn",
+    "addSub": "Legg til undermiljø",
+    "delete": "Slett"
+  },
+  "folderView": {
+    "environments": "Miljøer",
+    "environmentsAriaLabel": "Mappens miljøer",
+    "variables": "Variabler",
+    "addVariable": "Legg til variabelrad",
+    "selectEnvironment": "Velg et miljø for å se variabler",
+    "tabs": {
+      "docs": "Dokumentasjon",
+      "environments": "Miljøer",
+      "notes": "Notater"
+    },
+    "home": {
+      "configureEnvs": "Konfigurer miljøer",
+      "configureEnvsDesc": "Sett opp basis-URL-er, variabler og autentisering for hvert miljø",
+      "viewDocs": "Vis dokumentasjon",
+      "viewDocsDesc": "Bla gjennom API-dokumentasjon, modeller og endepunkter",
+      "favoriteRequests": "Favorittforespørsler",
+      "removeFavorite": "Fjern fra favoritter",
+      "apiUpdate": {
+        "title": "Oppdateringer av API-spec",
+        "noConfig": "Denne mappen ble ikke opprettet fra en importerbar kilde.",
+        "urlLabel": "URL",
+        "lastImportedLabel": "Sist importert",
+        "lastCheckedLabel": "Sist sjekket",
+        "neverImported": "Aldri importert",
+        "neverChecked": "Aldri sjekket",
+        "refreshing": "Oppdaterer API-spec…",
+        "fetching": "Henter…",
+        "upToDate": "API-spec er oppdatert.",
+        "ok": "OK"
+      }
+    },
+    "contextVariables": {
+      "title": "Tilgjengelige kontekstvariabler",
+      "description": "Bruk disse variablene i forespørsels-URL-er og uttrykksvariabler med {{handlebars}}-syntaks.",
+      "name": "Variabel",
+      "value": "Resolvert verdi",
+      "copied": "Kopiert!"
+    }
+  },
+  "requestTab": {
+    "deprecated": "Dette endepunktet er utdatert og kan bli fjernet i en fremtidig versjon.",
+    "send": "Send",
+    "cancel": "Avbryt",
+    "urlPlaceholder": "Forespørsels-URL",
+    "methodSelect": "Velg HTTP-metode",
+    "addHeader": "Legg til header",
+    "addParam": "Legg til parameter",
+    "environmentSelector": {
+      "noEnvironment": "Ingen miljø"
+    },
+    "body": {
+      "fileLabel": "Fil eller URL:",
+      "browse": "Bla gjennom..."
+    },
+    "tabs": {
+      "docs": "Dokumentasjon",
+      "requestLayout": "Forespørsel",
+      "headers": "Headere",
+      "body": "Body",
+      "params": "Parametre",
+      "pathParams": "Stiparametre",
+      "notes": "Notater",
+      "codeSnippets": "Kodeeksempler",
+      "responsesHistory": "Svarhistorikk"
+    },
+    "responses": {
+      "tabs": {
+        "response": "Svar",
+        "requestBody": "Forespørsels-body",
+        "graph": "Graf"
+      },
+      "loading": "Sender forespørsel...",
+      "noResponse": "Klikk Send for å utføre forespørselen",
+      "history": {
+        "list": "Liste over svarhistorikk",
+        "empty": "Ingen svar registrert ennå",
+        "select": "Velg et svar for å se detaljer",
+        "pin": "Fest svar",
+        "unpin": "Løsne svar"
+      }
+    }
+  },
+  "workbench": {
+    "tabContextMenu": {
+      "close": "Lukk",
+      "closeOthers": "Lukk andre",
+      "addToFavorites": "Legg til i favoritter",
+      "removeFromFavorites": "Fjern fra favoritter"
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Gå til definisjon"
+  },
+  "keyValueTable": {
+    "types": {
+      "string": "Streng",
+      "secret": "Hemmelighet",
+      "number": "Tall",
+      "dateTime": "Dato/tid",
+      "color": "Farge",
+      "expression": "Uttrykk",
+      "boolean": "Boolean"
+    },
+    "apiEnums": "API-definerte typer"
+  },
+  "graphql": {
+    "send": "Send",
+    "urlPlaceholder": "GraphQL-endepunkt-URL",
+    "tabs": {
+      "query": "Spørring",
+      "variables": "Variabler",
+      "headers": "Headere"
+    }
+  },
+  "grpc": {
+    "send": "Kall",
+    "urlPlaceholder": "gRPC-server (vert:port)",
+    "tabs": {
+      "message": "Melding",
+      "metadata": "Metadata"
+    }
+  },
+  "soap": {
+    "send": "Send",
+    "urlPlaceholder": "SOAP-endepunkt-URL",
+    "tabs": {
+      "body": "Body",
+      "headers": "Headere"
+    }
+  },
+  "websocket": {
+    "connect": "Koble til",
+    "connected": "Tilkoblet",
+    "disconnected": "Frakoblet",
+    "noMessages": "Ingen meldinger ennå",
+    "urlPlaceholder": "WebSocket-URL",
+    "event": "Hendelse",
+    "topic": "Emne",
+    "tabs": {
+      "message": "Melding",
+      "headers": "Headere"
+    }
+  },
+  "search": {
+    "placeholder": "Søk...",
+    "noResults": "Ingen resultater funnet",
+    "resultsAriaLabel": "Søkeresultater",
+    "categories": {
+      "request": "Forespørsler",
+      "folder": "Mapper",
+      "environment": "Miljøer",
+      "settings": "Innstillinger",
+      "tag": "Tagger"
+    },
+    "tooltip": {
+      "noDetails": "Ingen detaljer tilgjengelig",
+      "noContent": "Ingen dokumentasjon eller notater"
+    }
+  },
+  "httpStatus": {
+    "100": {
+      "name": "Continue",
+      "description": "Serveren har mottatt forespørselshoderne, og klienten skal fortsette med å sende forespørselens body."
+    },
+    "101": {
+      "name": "Switching Protocols",
+      "description": "Forespørreren har bedt serveren om å bytte protokoll, og serveren har samtykket."
+    },
+    "200": {
+      "name": "OK",
+      "description": "Standardsvar for vellykkede HTTP-forespørsler. Det faktiske svaret avhenger av forespørselsmetoden som ble brukt."
+    },
+    "201": {
+      "name": "Created",
+      "description": "Forespørselen er oppfylt og har resultert i opprettelsen av en ny ressurs."
+    },
+    "202": {
+      "name": "Accepted",
+      "description": "Forespørselen er akseptert for behandling, men behandlingen er ikke fullført."
+    },
+    "204": {
+      "name": "No Content",
+      "description": "Serveren behandlet forespørselen og returnerer ikke noe innhold."
+    },
+    "301": {
+      "name": "Moved Permanently",
+      "description": "Denne og alle fremtidige forespørsler skal sendes til den angitte URI-en."
+    },
+    "302": {
+      "name": "Found",
+      "description": "Ber klienten se på en annen URL. HTTP/1.0-spesifikasjonen krevde at klienten utførte en midlertidig omdirigering."
+    },
+    "304": {
+      "name": "Not Modified",
+      "description": "Indikerer at ressursen ikke er endret siden versjonen spesifisert av forespørselshoderne."
+    },
+    "400": {
+      "name": "Bad Request",
+      "description": "Serveren kan ikke eller vil ikke behandle forespørselen på grunn av en tilsynelatende klientfeil (f.eks. dårlig formatert forespørselssyntaks)."
+    },
+    "401": {
+      "name": "Unauthorized",
+      "description": "Autentisering kreves og har mislyktes eller er ikke gitt ennå."
+    },
+    "403": {
+      "name": "Forbidden",
+      "description": "Forespørselen inneholdt gyldige data og ble forstått av serveren, men serveren nekter å utføre handlingen."
+    },
+    "404": {
+      "name": "Not Found",
+      "description": "Den forespurte ressursen kunne ikke finnes, men kan være tilgjengelig i fremtiden."
+    },
+    "405": {
+      "name": "Method Not Allowed",
+      "description": "En forespørselsmetode støttes ikke for den forespurte ressursen."
+    },
+    "408": {
+      "name": "Request Timeout",
+      "description": "Serveren fikk tidsavbrudd mens den ventet på forespørselen."
+    },
+    "409": {
+      "name": "Conflict",
+      "description": "Indikerer at forespørselen ikke kunne behandles på grunn av en konflikt i ressursens nåværende tilstand."
+    },
+    "410": {
+      "name": "Gone",
+      "description": "Indikerer at den forespurte ressursen tidligere var i bruk, men ikke lenger er tilgjengelig og ikke vil bli tilgjengelig igjen."
+    },
+    "415": {
+      "name": "Unsupported Media Type",
+      "description": "Forespørselsentiteten har en medietype som serveren eller ressursen ikke støtter."
+    },
+    "422": {
+      "name": "Unprocessable Entity",
+      "description": "Forespørselen var velformet, men kunne ikke etterfølges på grunn av semantiske feil."
+    },
+    "429": {
+      "name": "Too Many Requests",
+      "description": "Brukeren har sendt for mange forespørsler i løpet av en gitt periode (rate-limiting)."
+    },
+    "500": {
+      "name": "Internal Server Error",
+      "description": "En generisk feilmelding, gitt når en uventet tilstand oppstod og ingen mer spesifikk melding er passende."
+    },
+    "501": {
+      "name": "Not Implemented",
+      "description": "Serveren gjenkjenner enten ikke forespørselsmetoden, eller den mangler evnen til å oppfylle forespørselen."
+    },
+    "502": {
+      "name": "Bad Gateway",
+      "description": "Serveren fungerte som gateway eller proxy og mottok et ugyldig svar fra oppstrømsserveren."
+    },
+    "503": {
+      "name": "Service Unavailable",
+      "description": "Serveren kan ikke håndtere forespørselen (fordi den er overbelastet eller nede for vedlikehold)."
+    },
+    "504": {
+      "name": "Gateway Timeout",
+      "description": "Serveren fungerte som gateway eller proxy og fikk ikke et raskt nok svar fra oppstrømsserveren."
+    }
+  },
+  "welcome": {
+    "confirmRemoveFavorite": "Er du sikker på at du vil fjerne «{{fileName}}» fra favoritter?",
+    "noFilesHint": "Åpne en fil eller opprett en ny for å komme i gang",
+    "newAriaLabel": "Opprett en ny samling",
+    "openAriaLabel": "Åpne en samling fra disk",
+    "landmarkLabel": "Velkommen"
+  },
+  "save": {
+    "title": "Lagringsalternativer",
+    "mode": {
+      "label": "Lagringsmodus",
+      "file": "Én fil",
+      "folder": "Mappestruktur",
+      "fileDescription": "Lagre alt i én fil",
+      "folderDescription": "Lagre som mappestruktur med separate filer"
+    },
+    "format": {
+      "label": "Format",
+      "yamlDescription": "Lesbart for mennesker",
+      "jsonDescription": "Standardformat",
+      "json5Description": "JSON + kommentarer"
+    },
+    "preview": {
+      "label": "Forhåndsvisning av struktur",
+      "noDocumentation": "Ingen parset dokumentasjon for denne kilden."
+    }
+  },
+  "common": {
+    "cancel": "Avbryt",
+    "save": "Lagre"
+  },
+  "helpers": {
+    "categories": {
+      "comparison": "Sammenligning",
+      "string": "Streng",
+      "math": "Matematikk",
+      "array": "Array",
+      "object": "Objekt",
+      "url": "URL",
+      "date": "Dato",
+      "regex": "Regex",
+      "misc": "Diverse"
+    },
+    "eq": "Streng likhet (===)",
+    "ne": "Streng ulikhet (!==)",
+    "neq": "Streng ulikhet (!==)",
+    "lt": "Mindre enn (<)",
+    "lte": "Mindre enn eller lik (<=)",
+    "gt": "Større enn (>)",
+    "gte": "Større enn eller lik (>=)",
+    "and": "Blokkhelper: vises hvis alle verdier er sanne",
+    "or": "Blokkhelper: vises hvis minst én verdi er sann",
+    "not": "Returnerer den motsatte boolske verdien",
+    "ifEquals": "Blokkhelper: vises hvis verdiene er like",
+    "is": "Blokkhelper: løs likhetsammenligning",
+    "isnt": "Blokkhelper: løs ulikhetsammenligning",
+    "default": "Returnerer standardverdi hvis den første er null/undefined",
+    "compare": "Blokkhelper: sammenligning med operator",
+    "lowercase": "Konverterer streng til små bokstaver",
+    "uppercase": "Konverterer streng til store bokstaver",
+    "capitalize": "Gjør første bokstav stor",
+    "capitalizeAll": "Gjør første bokstav i hvert ord stor",
+    "titleize": "Gjør første bokstav i hvert ord stor",
+    "camelcase": "Konverterer til camelCase",
+    "pascalcase": "Konverterer til PascalCase",
+    "snakecase": "Konverterer til snake_case",
+    "snakeCase": "Konverterer til snake_case (alias)",
+    "dashcase": "Konverterer til dash-case (kebab-case)",
+    "dotcase": "Konverterer til dot.case",
+    "pathcase": "Konverterer til path/case",
+    "sentencecase": "Konverterer til setningsform",
+    "slugify": "Konverterer til URL-vennlig slug",
+    "trim": "Fjerner mellomrom i begge ender",
+    "trimLeft": "Fjerner mellomrom fra starten",
+    "trimRight": "Fjerner mellomrom fra slutten",
+    "replace": "Erstatter alle forekomster av a med b",
+    "split": "Splitter streng til array",
+    "truncate": "Forkorter strengen til angitt lengde",
+    "ellipsis": "Forkorter strengen med ellipse",
+    "append": "Legger til suffiks på strengen",
+    "prepend": "Legger til prefiks på strengen",
+    "reverse": "Reverserer en streng eller et array",
+    "startsWith": "Blokkhelper: vises hvis strengen starter med prefiks",
+    "endsWith": "Blokkhelper: vises hvis strengen slutter med suffiks",
+    "contains": "Blokkhelper: vises hvis strengen inneholder delstreng",
+    "padStart": "Fyller strengen i starten for å nå lengden",
+    "padEnd": "Fyller strengen i slutten for å nå lengden",
+    "repeat": "Gjentar strengen n ganger",
+    "substring": "Ekstraherer del av streng",
+    "indexOf": "Returnerer indeks for delstreng (-1 hvis ikke funnet)",
+    "count": "Teller forekomster av delstreng",
+    "newLineToBr": "Konverterer linjeskift til <br>-tagger",
+    "stripTags": "Fjerner HTML-tagger fra streng",
+    "add": "Legger sammen to tall",
+    "subtract": "Trekker b fra a",
+    "multiply": "Multipliserer to tall",
+    "divide": "Deler a på b",
+    "modulo": "Returnerer rest av a / b",
+    "abs": "Returnerer absoluttverdi",
+    "ceil": "Runder opp til nærmeste heltall",
+    "floor": "Runder ned til nærmeste heltall",
+    "round": "Runder til nærmeste heltall",
+    "min": "Returnerer minimumsverdi",
+    "max": "Returnerer maksimumsverdi",
+    "pow": "Returnerer base opphøyd i eksponent",
+    "sqrt": "Returnerer kvadratrot",
+    "random": "Returnerer tilfeldig heltall mellom min og maks",
+    "sum": "Returnerer summen av array-verdier",
+    "avg": "Returnerer gjennomsnittet av array-verdier",
+    "toFixed": "Formaterer tall med faste desimaler",
+    "toInt": "Konverterer til heltall",
+    "toFloat": "Konverterer til desimaltall",
+    "first": "Returnerer første element(er) i array",
+    "last": "Returnerer siste element(er) i array",
+    "after": "Returnerer elementer etter indeks n",
+    "before": "Returnerer elementer før indeks n",
+    "slice": "Returnerer utsnitt av array",
+    "length": "Returnerer lengden på array/streng/objekt",
+    "join": "Slår sammen array-elementer med separator",
+    "sort": "Sorterer array",
+    "unique": "Returnerer unike verdier",
+    "concat": "Setter sammen arrays",
+    "flatten": "Flater ut nestet array",
+    "pluck": "Ekstraherer egenskap fra array av objekter",
+    "itemAt": "Returnerer element på indeks",
+    "inArray": "Blokkhelper: vises hvis verdien finnes i array",
+    "isArray": "Returnerer true hvis verdien er et array",
+    "isEmpty": "Blokkhelper: vises hvis verdien er tom",
+    "some": "Blokkhelper: vises hvis noen elementer matcher",
+    "every": "Blokkhelper: vises hvis alle elementer matcher",
+    "JSONstringify": "Konverterer objekt til JSON-streng",
+    "JSONparse": "Parser JSON-streng til objekt",
+    "get": "Henter nestet egenskap via sti",
+    "keys": "Returnerer objektets nøkler",
+    "values": "Returnerer objektets verdier",
+    "entries": "Returnerer [nøkkel, verdi]-par",
+    "hasOwn": "Blokkhelper: vises hvis objektet har egenskapen",
+    "pick": "Oppretter objekt med valgte nøkler",
+    "omit": "Oppretter objekt uten de angitte nøklene",
+    "merge": "Slår sammen flere objekter",
+    "isObject": "Returnerer true hvis verdien er et objekt",
+    "typeOf": "Returnerer typen av verdien",
+    "encodeURI": "URL-encoder en streng",
+    "decodeURI": "URL-decoder en streng",
+    "urlParse": "Parser URL i komponenter",
+    "stripQuerystring": "Fjerner querystring fra URL",
+    "stripProtocol": "Fjerner protokoll fra URL",
+    "now": "Returnerer gjeldende dato som ISO-streng",
+    "timestamp": "Returnerer gjeldende tidsstempel i millisekunder",
+    "year": "Returnerer gjeldende år",
+    "formatDate": "Formaterer dato med mønster",
+    "match": "Returnerer regex-treff",
+    "test": "Blokkhelper: vises hvis regex matcher",
+    "coalesce": "Returnerer første verdi som ikke er null/undefined",
+    "uuid": "Genererer en tilfeldig UUID",
+    "noop": "Blokkhelper som viser innholdet som det er",
+    "raw": "Blokkhelper som viser rå innhold",
+    "times": "Blokkhelper som gjentar n ganger",
+    "range": "Genererer array av tall"
+  },
+  "behavior": {
+    "title": "Atferd",
+    "syncSidebarWithTabs": "Synkroniser sidefeltvalg med aktiv fane",
+    "syncSidebarWithTabsDescription": "Når du bytter fane i arbeidsområdet, velges og vises tilsvarende element automatisk i sidefeltet",
+    "dateTimeFormat": "Dato/tid-format",
+    "dateTimeFormatDescription": "Format som brukes for å vise datoer og tider i applikasjonen",
+    "dateTimeFormat.us": "US-format (MM/DD/ÅÅÅÅ, 12t)",
+    "dateTimeFormat.iso": "ISO-format (ÅÅÅÅ-MM-DD, 24t)"
+  },
+  "console": {
+    "title": "Konsoll",
+    "requestFormat": "Forespørselsformat",
+    "requestFormatDescription": "Standard shell-stil for å vise utgående forespørsler i Konsoll-fanen. Hver rad er en kommandolinje du kan kopiere; vippeknappen i Konsoll-verktøylinjen overstyrer denne standarden for gjeldende fane.",
+    "requestFormat.curl": "curl (Unix-stil)",
+    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+  },
+  "import": {
+    "title": "Importer forespørsler",
+    "source": {
+      "label": "Lim inn noe her!",
+      "placeholder": "Skriv inn filsti, URL, eller lim inn curl/PowerShell-kommando..."
+    },
+    "formats": {
+      "swagger": {
+        "description": "OpenAPI 2.0-spesifikasjonen, født hos SmartBear. Lim inn en Swagger JSON eller YAML — Restorm parser hver operasjon, henter sikkerhetsskjemaene og gjør hele dokumentet om til et navigerbart tre av forespørsler.",
+        "trademark": "Swagger er et registrert varemerke for SmartBear Software."
+      },
+      "openapi": {
+        "description": "Den nåværende OpenAPI-standarden (3.0 og 3.1). Samme lim-og-kjør-ergonomi som Swagger: parametre, forespørselsbodyer, sikkerhetsskjemaer og webhooks lander som et tre av typede forespørsler med eksempler klare til å sendes.",
+        "trademark": "OpenAPI er et prosjekt i OpenAPI Initiative under Linux Foundation."
+      },
+      "curl": {
+        "description": "Har du allerede forespørselen kjørende i terminalen? Lim inn hele curl-kommandoen — flagg, headere, body, query string — og Restorm bygger den opp som en ekte forespørsel du kan kjøre på nytt, redigere og feste.",
+        "trademark": "curl er åpen kildekode-programvare © Daniel Stenberg, brukt her under dets vilkår."
+      },
+      "powershell": {
+        "description": "Samme idé, PowerShell-versjon. Lim inn en Invoke-WebRequest- eller Invoke-RestMethod-kommando, og Restorm leser URI, metode, headere og body for å lage en forespørsel du kan iterere på visuelt.",
+        "trademark": "PowerShell er et registrert varemerke for Microsoft Corporation."
+      },
+      "postman": {
+        "description": "Har du en Postman-samling lagret på jobben? Slipp JSON-en — Restorm leser hver forespørsel, hvert eksempelsvar og hver miljøvariabel, og bygger samlingen opp som et Restorm-tre du kan kjøre side om side med resten av API-ene dine.",
+        "trademark": "Postman er et registrert varemerke for Postman, Inc., brukt her kun som kompatibilitetsreferanse."
+      },
+      "insomnia": {
+        "description": "Kommer du fra Insomnia? Slipp eksporten din. Restorm forstår v4/v5-samlingsformatet, tar med hver forespørsel, header, body og miljø, og viser hele greia som et Restorm-tre.",
+        "trademark": "Insomnia er et registrert varemerke for Kong Inc., brukt her kun som kompatibilitetsreferanse."
+      },
+      "bruno": {
+        "description": "Bruno-baserte .bru-filer eller en mappeeksport — Restorm leser .bru-tekstformatet, inkludert dets skriptingblokker, og gjenoppretter hver forespørsel som en førsteklasses Restorm-node klar til å sendes.",
+        "trademark": "Bruno er åpen kildekode-programvare (MIT) av Anoop M. D., brukt her under dets vilkår."
+      },
+      "graphql": {
+        "description": "Lim inn en GraphQL-SDL (.graphql/.gql/lim-inn fra GraphQL-klienten din), og Restorm lager én forespørsel per operasjon, koblet til riktig query-/mutation-/subscription-type med variabler allerede strukturert.",
+        "trademark": "GraphQL er et varemerke for GraphQL Foundation, et prosjekt i Joint Development Foundation."
+      },
+      "grpc": {
+        "description": "Slipp en .proto-fil (eller en mappe med dem), og Restorm går gjennom hver tjeneste, hver RPC, hver melding — hver metode blir en typet forespørsel du kan sende via gRPC-utføreren uten å røre codegen.",
+        "trademark": "gRPC er et prosjekt i Cloud Native Computing Foundation."
+      },
+      "soap": {
+        "description": "Har du en WSDL? Lim den inn (eller URL-en) — Restorm parser hver <port> og <operation> og produserer SOAP-konvolutter klare til å sendes med riktig SOAPAction-header, skjematypede body-skjeletter og auth-ordningen WSDL-en deklarerer."
+      },
+      "websocket": {
+        "description": "Lim inn et WebSocket-endepunkt (ws:// eller wss://) — Restorm åpner forbindelsen, fanger serverens hello-frames og lager send-/subscribe-forespørsler med spillbare payload-maler.",
+        "trademark": "WebSocket er en protokoll standardisert av IETF (RFC 6455) og W3C."
+      },
+      "kafka": {
+        "description": "Lim inn en Apache Kafka-bootstrap-server-URL (eller en liste over emner) — Restorm registrerer consumers og producers per emne, dekoder Avro-/Protobuf-payloader via Schema Registry og lar deg spille av individuelle offsets med ett klikk.",
+        "trademark": "Apache Kafka og Kafka-logoen er varemerker for Apache Software Foundation."
+      },
+      "socketio": {
+        "description": "Lim inn en Socket.IO-server-URL — Restorm forhandler handshaket, lister namespaces og hendelsesnavnene serveren sender, og gir deg én forespørsel per emit-/on-hendelse med payload-validering.",
+        "trademark": "Socket.IO er et åpen kildekode-bibliotek utgitt under MIT-lisensen; navn og logo brukes nominativt."
+      },
+      "odata": {
+        "description": "Lim inn en OData-service-document-URL eller en $metadata-fil — Restorm leser CSDL-en, bygger opp entitetssettene, function imports og actions, samt forhåndsfyller $filter-/$select-/$top-/$skip-spørringsalternativene på hver operasjon."
+      },
+      "mqtt": {
+        "description": "Lim inn en MQTT-broker-URL eller en emnekatalog — Restorm lager publish-/subscribe-forespørsler per emne, holder forbindelsen i live for strømmingsforhåndsvisninger og husker øyeblikksbilder av retained messages slik at du kan spille dem av senere.",
+        "trademark": "MQTT er en OASIS-standard; MQTT-navnet og -logoen er varemerker for OASIS Open."
+      }
+    },
+    "loading": "Analyserer...",
+    "noResults": "Ingen forespørsler funnet",
+    "error": {
+      "unknown": "En ukjent feil oppstod"
+    },
+    "ok": "Importer",
+    "cancel": "Avbryt",
+    "dropZone": "Slippsone"
+  },
+  "emptyBench": {
+    "importCard": {
+      "title": "Importer API-en din",
+      "body": "Ta med en OpenAPI/Swagger-spec, et GraphQL-skjema, en Postman/Bruno/Insomnia-samling, eller lim inn en curl/PowerShell-kommando. Restorm tolker den, bygger opp mappestrukturen og lander med hvert endepunkt klart."
+    },
+    "recentActivity": {
+      "title": "Nylig aktivitet",
+      "empty": "Send din første forespørsel for å se den her."
+    },
+    "apiCard": {
+      "favorites": "Favoritter",
+      "topUsed": "Topp 10 mest brukte",
+      "recent": "Siste forespørsler",
+      "description": "Beskrivelse",
+      "version": "Versjon",
+      "quickLinks": {
+        "environments": "Miljøer",
+        "docs": "Dokumentasjon",
+        "notes": "Notater"
+      }
+    }
+  }
+}

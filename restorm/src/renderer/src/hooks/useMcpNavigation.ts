@@ -2,21 +2,21 @@
  * Bridge MCP navigation IPC events into the workbench. The main
  * process broadcasts `mcp:open-tab` / `mcp:reveal-in-tree` whenever an
  * MCP client invokes the matching tool; this hook listens for those,
- * resolves the item against the live `rootItems`, and routes to the
- * existing tab-opening / sidebar-expansion paths.
+ * resolves the item against the live `rootItems`, and routes through
+ * the *same* navigation side-effects a sidebar click would trigger —
+ * sidebar selection, ancestor expansion, MRU/alt-tab history, plus
+ * the tab open. Anything less and the workbench tab opens but the
+ * user can't tell where the AI is in the project.
  *
  * Disabled outside MCP mode — when `mcpEnabled` is false the listeners
  * are never registered, so the renderer pays no cost in the common
  * non-MCP case.
- *
- * `reveal_in_tree` only expands the ancestors today (selecting +
- * scrolling to the node would require a sidebar-side ref / scroll API
- * that doesn't exist yet — tracked as a known limitation in the MCP
- * doc; expansion alone already covers "make this node visible").
  */
 
 import { useEffect } from 'react'
+import { navigationService } from 'electron-core-ui/renderer'
 import type { FolderItem, Folder, EnvironmentFolder, Request, Environment } from '../../../shared/types/collections'
+import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest } from '../../../shared/types/collections'
 import { findFolderById, findEnvironmentFolderById, findRequestById, findItemWithBreadcrumbs, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
 import type { BreadcrumbItem } from '../../../shared/types/editor'
 import type { OpenTabOptions } from './useWorkbenchTabs'
@@ -33,20 +33,60 @@ export interface UseMcpNavigationInput {
   enabled: boolean
   rootItems: FolderItem[]
   setExpandedIds: (updater: (prev: string[]) => string[]) => void
+  setSelectedItemId: (next: string | null) => void
   openFolderTab: (folder: Folder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
   openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
   openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[], options?: OpenTabOptions) => void
   closeTabByItemId: (itemId: string) => void
 }
 
+/**
+ * Map a typed `Request` instance to the `navigationService` type tag
+ * used by every other navigation source (sidebar / breadcrumb). Keeps
+ * the alt-tab / MRU list shape consistent regardless of who opened
+ * the tab.
+ */
+function navTypeForRequest(req: Request): string {
+  if (isHTTPRequest(req)) return 'http-request'
+  if (isGraphQLRequest(req)) return 'graphql-request'
+  if (isGrpcRequest(req)) return 'grpc-request'
+  if (isSoapRequest(req)) return 'soap-request'
+  if (isWebSocketRequest(req)) return 'websocket-request'
+  if (isODataRequest(req)) return 'odata-request'
+  return 'http-request'
+}
+
 export function useMcpNavigation(input: UseMcpNavigationInput): void {
-  const { enabled, rootItems, setExpandedIds, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, closeTabByItemId } = input
+  const {
+    enabled,
+    rootItems,
+    setExpandedIds,
+    setSelectedItemId,
+    openFolderTab,
+    openEnvironmentFolderTab,
+    openAnyRequestTab,
+    closeTabByItemId
+  } = input
 
   useEffect(() => {
     if (!enabled) return
     const root = window as { restorm?: { runtime?: RestormNavBridge } }
     const api = root.restorm?.runtime
     if (!api) return
+
+    /**
+     * Expand the breadcrumb ancestors of `itemId` so the node is
+     * visible after we select it. Same logic the `mcp:reveal-in-tree`
+     * listener uses, lifted to a helper so the open-tab path can fire
+     * it too — a select without expansion is invisible if the parent
+     * folder happens to be collapsed.
+     */
+    const expandAncestors = (itemId: string): void => {
+      const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
+      const ancestorIds = breadcrumbs.map((b) => b.id).filter((id) => id !== itemId)
+      if (ancestorIds.length === 0) return
+      setExpandedIds((prev) => Array.from(new Set([...prev, ...ancestorIds])))
+    }
 
     const offOpen = api.onMcpOpenTab(({ itemId, kind }) => {
       const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
@@ -55,23 +95,29 @@ export function useMcpNavigation(input: UseMcpNavigationInput): void {
         if (!req) return
         const envs = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
         openAnyRequestTab(req, breadcrumbs, envs)
+        setSelectedItemId(itemId)
+        expandAncestors(itemId)
+        navigationService.navigateTo(itemId, 'mcp', { type: navTypeForRequest(req) })
       } else if (kind === 'env-folder') {
         const f = findEnvironmentFolderById(rootItems, itemId)
         if (!f) return
         openEnvironmentFolderTab(f, breadcrumbs)
+        setSelectedItemId(itemId)
+        expandAncestors(itemId)
+        navigationService.navigateTo(itemId, 'mcp', { type: 'environment-folder' })
       } else {
         // kind === 'folder' (only remaining union arm — ActiveKind is exhaustive).
         const f = findFolderById(rootItems, itemId)
         if (!f) return
         openFolderTab(f, breadcrumbs)
+        setSelectedItemId(itemId)
+        expandAncestors(itemId)
+        navigationService.navigateTo(itemId, 'mcp', { type: 'folder' })
       }
     })
 
     const offReveal = api.onMcpRevealInTree(({ itemId }) => {
-      const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
-      const ancestorIds = breadcrumbs.map((b) => b.id).filter((id) => id !== itemId)
-      if (ancestorIds.length === 0) return
-      setExpandedIds((prev) => Array.from(new Set([...prev, ...ancestorIds])))
+      expandAncestors(itemId)
     })
 
     const offClose = api.onMcpCloseTab(({ itemId }) => {
@@ -83,5 +129,5 @@ export function useMcpNavigation(input: UseMcpNavigationInput): void {
       offReveal()
       offClose()
     }
-  }, [enabled, rootItems, setExpandedIds, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, closeTabByItemId])
+  }, [enabled, rootItems, setExpandedIds, setSelectedItemId, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, closeTabByItemId])
 }

@@ -133,7 +133,9 @@ export function registerReadTools(mcp: McpService): void {
         'Run a typed search across folders / requests / environments using restorm\'s in-memory ' +
         'search index. Optional `kinds` filter narrows the result categories; `maxResults` caps ' +
         'the response length (default 50, max 200). Each match carries `{ id, title, category, ' +
-        'description?, score }`.',
+        'description?, score }`; request-kind matches additionally carry `method` and `url` so ' +
+        'callers can disambiguate hits (e.g. two requests named "List Users" on different paths) ' +
+        'without a follow-up `get_request`.',
       inputSchema: {
         query: z.string().min(1).describe('Free-text query, e.g. "users" or "POST /pets".'),
         kinds: z.array(z.enum(['request', 'folder', 'environment', 'tag', 'settings'])).optional().describe(
@@ -154,16 +156,39 @@ export function registerReadTools(mcp: McpService): void {
       const rawMax = typeof argRecord['maxResults'] === 'number' ? argRecord['maxResults'] : MAX_SEARCH_RESULTS
       const max = Math.max(1, Math.min(ABS_MAX_SEARCH_RESULTS, Math.floor(rawMax)))
       const grouped = searchService.search(query)
-      const matches: { id: string; title: string; category: string; description?: string; score: number }[] = []
+      const matches: {
+        id: string
+        title: string
+        category: string
+        description?: string
+        method?: string
+        url?: string
+        score: number
+      }[] = []
       for (const group of grouped) {
         if (kinds !== null && !kinds.has(group.category)) continue
         for (const r of group.items) {
           if (matches.length >= max) break
+          // For request-kind matches, fold in the on-disk method + URL
+          // so the agent can preview the hit without an extra
+          // `get_request`. Cheap O(1) lookup via the collection store.
+          let methodVal: string | undefined
+          let urlVal: string | undefined
+          if (r.category === 'request') {
+            const target = collectionStore.findById(r.id)
+            if (target && isRequest(target)) {
+              const req = target as { url?: string; method?: string; type?: string }
+              urlVal = typeof req.url === 'string' ? req.url : undefined
+              methodVal = typeof req.method === 'string' ? req.method : req.type
+            }
+          }
           matches.push({
             id: r.id,
             title: r.title,
             category: r.category,
             ...(r.description !== undefined ? { description: r.description } : {}),
+            ...(methodVal !== undefined ? { method: methodVal } : {}),
+            ...(urlVal !== undefined ? { url: urlVal } : {}),
             score: r.score
           })
         }
@@ -206,9 +231,12 @@ export function registerReadTools(mcp: McpService): void {
       // renderer-IPC plumbing.
       const selectedId = pickSelectedEnvId(envFolderId, envs.map((e) => e.id)) ?? firstEnv.id
       const selected = envs.find((e) => e.id === selectedId) ?? firstEnv
+      // `getContext` returns `Record<string, string>` (the resolved
+      // variable map) directly — not a wrapper with a `.variables`
+      // property. Iterate over its entries.
       const ctx = contextService.getContext(selected.id)
       const variables = ctx
-        ? Object.entries(ctx.variables).map(([key, value]) => ({
+        ? Object.entries(ctx).map(([key, value]) => ({
           key,
           value: typeof value === 'string' ? value : String(value),
           resolved: typeof value === 'string' ? value : String(value)

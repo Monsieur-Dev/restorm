@@ -1,0 +1,725 @@
+{
+  "app": {
+    "title": "restorm",
+    "openSettings": "Einstellungen öffnen",
+    "draftsRestoredTitle": "Nicht gespeicherte Arbeit wiederhergestellt",
+    "draftsRestoredBody_one": "{{count}} Entwurf wurde aus Ihrer vorherigen Sitzung wiederhergestellt.",
+    "draftsRestoredBody_other": "{{count}} Entwürfe wurden aus Ihrer vorherigen Sitzung wiederhergestellt."
+  },
+  "statusbar": {
+    "requestHistory": "Anfrageverlauf",
+    "envSelector": {
+      "applyToAll": "Auf alle Anfragen anwenden"
+    }
+  },
+  "tips": {
+    "cardTitle": "Tipps & Tricks",
+    "maximizeTab": {
+      "title": "Tab mit einem Klick maximieren",
+      "body": "Doppelklicke einen Tab im Workbench, um ihn im Vollbild zu öffnen. Drücke Esc, um zur ursprünglichen Anordnung zurückzukehren."
+    },
+    "mcpControl": {
+      "title": "Restorm per KI steuern",
+      "body": "Restorm liefert einen MCP-Server mit, sodass KI-Assistenten wie Claude Code deine Anfragen auflisten, öffnen, bearbeiten und ausführen, Antworten inspizieren und den Arbeitsbereich programmatisch verändern können – ohne den Chat zu verlassen."
+    },
+    "envSwitch": {
+      "title": "Umgebungen einfach wechseln!",
+      "body": "Wechsle die Umgebung der aktuellen Anfrage oder aller Anfragen deiner API mit einem Klick auf die Schaltfläche in der Statusleiste oder per Rechtsklick auf den Senden-Button der Anfrage."
+    },
+    "authRequests": {
+      "title": "Musst du dich für deine API authentifizieren?",
+      "body": "Statt jedes Mal eine Anfrage zu starten, um ein Token zu holen und überall einzufügen, nutze Auth-Requests. Schlägt ein Aufruf fehl (401, 403, …) oder ist dein Token abgelaufen, wird die Auth-Anfrage automatisch erneut ausgeführt, das Token extrahiert und weiterverwendet. Praktisch!"
+    },
+    "supplyChain": {
+      "title": "Schütze dich!",
+      "body": "Wie jede Software nutzt Restorm Drittanbieter-Bibliotheken. Um Supply-Chain-Angriffe zu verhindern, werden alle ausgehenden Aufrufe auf niedrigster Ebene abgefangen, und wir warnen dich, wenn eine Drittanbieter-Bibliothek versucht, deine persönlichen Daten zu stehlen!"
+    },
+    "codeSnippets": {
+      "title": "Restorm hilft beim Programmieren!",
+      "body": "Finde Code-Snippets zu jeder Anfrage, um sie in deiner Software einzubinden. Viele Sprachen verfügbar: curl, PowerShell, TypeScript, C# und vieles mehr!"
+    },
+    "workbenchLayout": {
+      "title": "Organisiere deinen Arbeitsbereich",
+      "body": "Großer Bildschirm und viele Anfragen? Lege sie nebeneinander, untereinander oder ganz nach Belieben – zieh eine Registerkarte einfach dorthin, wo du sie haben willst. Alles für deinen Komfort!"
+    },
+    "persistState": {
+      "title": "Finde es genau so vor, wie du es verlassen hast!",
+      "body": "Wenn du Restorm schließt und wieder öffnest, findest du es genau in dem Zustand vor, in dem du es verlassen hast."
+    },
+    "favorites": {
+      "title": "Manche liegen dir mehr am Herzen…",
+      "body": "Sind dir manche Anfragen wichtiger als andere? Markiere sie als Favoriten!"
+    },
+    "console": {
+      "title": "So siehst du, was passiert",
+      "body": "Die Konsole zeigt dir die Aufrufe deiner APIs in Echtzeit, wenn du Anfragen abschickst. Praktisch zum Kopieren und Einfügen ins Terminal, wenn nötig! Welche Variante magst du: curl oder PowerShell?"
+    },
+    "miniBrowser": {
+      "title": "Genug vom ständigen Fensterwechsel?",
+      "body": "Restorm bringt einen integrierten Mini-Browser mit. Praktisch, wenn deine Anwendung visuell auf deine API-Aufrufe reagiert."
+    },
+    "apiDocs": {
+      "title": "Die Doku — direkt hier",
+      "body": "Kein Wechsel mehr zwischen Restorm und der Dokumentation deiner API nötig. Liefert deine API eine Spezifikation (Swagger, OpenAPI, …), wird sie in Restorm importiert und ist direkt hier einsehbar."
+    },
+    "secrets": {
+      "title": "Schütze deine Geheimnisse",
+      "body": "Deine Passwörter und Auth-Tokens werden nicht direkt in der Restorm-Datei gespeichert. Deshalb legt Restorm Secrets und Anfrage-Historie in separaten Dateien ab. An dir liegt es, sie nicht auf GitHub zu pushen. Restorm kann Secrets auch aus AWS, GitHub oder anderen Quellen abrufen."
+    },
+    "themes": {
+      "title": "Deine Farben, deine Stimmung",
+      "body": "Restorm bringt mehrere Farbschemata mit. Wähle dasjenige, das zu deiner Stimmung passt."
+    },
+    "search": {
+      "title": "Finde alles, schnell",
+      "body": "Hast du den oberen Bereich des Fensters gesehen? Restorm bringt eine Suche mit — schluss damit, stundenlang DIE Anfrage zu suchen."
+    },
+    "multiEnv": {
+      "title": "Gleiche Anfragen, andere Umgebungen",
+      "body": "Hast du Dev, Staging und Prod? Es sind die gleichen Anfragen, nur nicht ganz dieselben URLs, nicht ganz dieselben Tokens… Nutze Umgebungen und Variablen, um per Klick umzuschalten. Du kannst sogar jede Umgebung mit Farbe und Icon kennzeichnen, damit dir die Schrecksekunden vor dem Wochenende in Produktion erspart bleiben!"
+    },
+    "protocols": {
+      "title": "Mehr als nur REST",
+      "body": "Restorm spricht REST … und noch viel mehr! GraphQL, gRPC, SOAP, OData, WebSocket — all diese Protokolle stehen dir direkt zur Verfügung, ohne das Tool zu wechseln."
+    },
+    "responseTree": {
+      "title": "Sieh deine API-Antworten — visuell",
+      "body": "Wusstest du, dass du deine API-Antworten viel grafischer durchstöbern kannst? Restorm zeigt sie als interaktiven Baum, durch den du navigieren, einklappen und ausklappen kannst."
+    },
+    "responseHistory": {
+      "title": "Verlauf der Anfragen",
+      "body": "Du kannst den Verlauf aller Aufrufe deiner APIs einsehen. Praktisch, um nachzuvollziehen, was wirklich passiert ist."
+    },
+    "multiLanguage": {
+      "title": "27 Sprachen!",
+      "body": "Restorm spricht 27 Sprachen. Englisch, Französisch, Spanisch, Deutsch, Italienisch, Japanisch, Chinesisch, Koreanisch und viele mehr — wähle deine in den Einstellungen!"
+    }
+  },
+  "authFailureToast": {
+    "title": "Authentifizierung fehlgeschlagen",
+    "fallbackReason": "Die Authentifizierungsanfrage war nicht erfolgreich.",
+    "openAuthRoute": "Authentifizierungsroute öffnen"
+  },
+  "menuBar": {
+    "file": "Datei",
+    "new": "Neu",
+    "import": "Importieren",
+    "open": "Öffnen",
+    "openFolder": "Ordner öffnen",
+    "recentFiles": "Zuletzt verwendete Dateien",
+    "favorites": "Favoriten",
+    "close": "Schließen",
+    "save": "Speichern",
+    "saveAll": "Alles speichern",
+    "saveAs": "Speichern unter",
+    "exit": "Beenden",
+    "selection": "Auswahl",
+    "tools": "Werkzeuge",
+    "findInCollection": "In Sammlung suchen",
+    "addRequest": "Anfrage hinzufügen",
+    "addRequestHttp": "HTTP-Anfrage",
+    "addRequestGraphql": "GraphQL-Anfrage",
+    "addRequestGrpc": "gRPC-Anfrage",
+    "addRequestSoap": "SOAP-Anfrage",
+    "addRequestOdata": "OData-Anfrage",
+    "addRequestWebsocket": "WebSocket-Anfrage",
+    "addFolder": "Ordner hinzufügen",
+    "addEnvironmentFolder": "Umgebungsordner hinzufügen",
+    "addVariable": "Variable hinzufügen",
+    "addTag": "Tag hinzufügen",
+    "expandAllFolders": "Alle Ordner ausklappen",
+    "collapseAllFolders": "Alle Ordner einklappen",
+    "sendActiveRequest": "Anfrage senden",
+    "cancelActiveRequest": "Anfrage abbrechen",
+    "generateCodeSnippet": "Code-Snippet generieren",
+    "copyAsCurl": "Als cURL kopieren",
+    "exportOpenApi": "Als OpenAPI exportieren",
+    "clearAuthCache": "Authentifizierungs-Cache leeren",
+    "openLogsFolder": "Log-Ordner öffnen"
+  },
+  "sidebar": {
+    "addRequest": "Anfrage hinzufügen",
+    "collapseAll": "Alle Anfragen einklappen",
+    "workspace": "Arbeitsbereich",
+    "favorites": "Favoriten",
+    "newFolder": "Neuer Ordner",
+    "newEnvironmentFolder": "Neuer Umgebungsordner",
+    "contextMenu": {
+      "createFolder": "Ordner erstellen",
+      "createEnvironmentFolder": "Umgebungsordner erstellen",
+      "delete": "Löschen",
+      "clone": "Klonen",
+      "rename": "Umbenennen",
+      "addToFavorites": "Zu Favoriten hinzufügen",
+      "removeFromFavorites": "Aus Favoriten entfernen",
+      "closeTab": "Schließen",
+      "closeOtherTabs": "Andere schließen",
+      "closeTabsToTheRight": "Rechts schließen",
+      "closeAllTabs": "Alle schließen",
+      "add": {
+        "title": "Hinzufügen",
+        "folder": "Ordner",
+        "httpGet": "HTTP-Anfrage – GET",
+        "httpPost": "HTTP-Anfrage – POST",
+        "httpPut": "HTTP-Anfrage – PUT",
+        "httpPatch": "HTTP-Anfrage – PATCH",
+        "httpDelete": "HTTP-Anfrage – DELETE",
+        "graphql": "GraphQL-Anfrage",
+        "grpc": "gRPC-Anfrage",
+        "soap": "SOAP-Anfrage",
+        "websocket": "WebSocket-Anfrage",
+        "odata": "OData-Anfrage",
+        "auth": "HTTP-Authentifizierungsanfrage"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Löschen bestätigen",
+      "folderMessage": "Möchten Sie den Ordner „{{name}}“ und seinen gesamten Inhalt wirklich löschen?",
+      "itemMessage": "Möchten Sie „{{name}}“ wirklich löschen?",
+      "confirm": "Löschen",
+      "cancel": "Abbrechen"
+    }
+  },
+  "environment": {
+    "newName": "Neue Umgebung",
+    "add": "Umgebung hinzufügen",
+    "rename": "Umbenennen",
+    "addSub": "Unterumgebung hinzufügen",
+    "delete": "Löschen"
+  },
+  "folderView": {
+    "environments": "Umgebungen",
+    "environmentsAriaLabel": "Ordnerumgebungen",
+    "variables": "Variablen",
+    "addVariable": "Variable hinzufügen",
+    "selectEnvironment": "Wählen Sie eine Umgebung, um die Variablen zu sehen",
+    "tabs": {
+      "docs": "Doku",
+      "environments": "Umgebungen",
+      "notes": "Notizen"
+    },
+    "home": {
+      "configureEnvs": "Umgebungen konfigurieren",
+      "configureEnvsDesc": "Legen Sie Ihre Basis-URLs, Variablen und Authentifizierung für jede Umgebung fest",
+      "viewDocs": "Dokumentation anzeigen",
+      "viewDocsDesc": "Durchsuchen Sie die API-Dokumentation, Modelle und Endpunkte",
+      "favoriteRequests": "Favorisierte Anfragen",
+      "removeFavorite": "Aus Favoriten entfernen",
+      "apiUpdate": {
+        "title": "Aktualisierungen der API-Spezifikation",
+        "noConfig": "Dieser Ordner wurde nicht aus einer importierbaren Quelle erstellt.",
+        "urlLabel": "URL",
+        "lastImportedLabel": "Letzter Import",
+        "lastCheckedLabel": "Letzte Prüfung",
+        "neverImported": "Nie importiert",
+        "neverChecked": "Nie geprüft",
+        "refreshing": "API-Spezifikation wird aktualisiert…",
+        "fetching": "Wird abgerufen…",
+        "upToDate": "Die API-Spezifikation ist aktuell.",
+        "ok": "OK"
+      }
+    },
+    "contextVariables": {
+      "title": "Verfügbare Kontextvariablen",
+      "description": "Verwenden Sie diese Variablen in Ihren Anfrage-URLs und in Variablen vom Typ Ausdruck mit der {{handlebars}}-Syntax.",
+      "name": "Variable",
+      "value": "Aufgelöster Wert",
+      "copied": "Kopiert!"
+    }
+  },
+  "requestTab": {
+    "deprecated": "Dieser Endpunkt ist veraltet und könnte in einer zukünftigen Version entfernt werden.",
+    "send": "Senden",
+    "cancel": "Abbrechen",
+    "urlPlaceholder": "Anfrage-URL",
+    "methodSelect": "HTTP-Methode auswählen",
+    "addHeader": "Header hinzufügen",
+    "addParam": "Parameter hinzufügen",
+    "environmentSelector": {
+      "noEnvironment": "Keine Umgebung"
+    },
+    "body": {
+      "fileLabel": "Datei oder URL:",
+      "browse": "Durchsuchen..."
+    },
+    "tabs": {
+      "docs": "Doku",
+      "requestLayout": "Anfrage",
+      "headers": "Header",
+      "body": "Body",
+      "params": "Parameter",
+      "pathParams": "Pfadparameter",
+      "notes": "Notizen",
+      "codeSnippets": "Code-Snippets",
+      "responsesHistory": "Antwortverlauf"
+    },
+    "responses": {
+      "tabs": {
+        "response": "Antwort",
+        "requestBody": "Anfrage-Body",
+        "graph": "Graph"
+      },
+      "loading": "Anfrage wird gesendet...",
+      "noResponse": "Klicken Sie auf Senden, um die Anfrage auszuführen",
+      "history": {
+        "list": "Liste des Antwortverlaufs",
+        "empty": "Noch keine Antworten aufgezeichnet",
+        "select": "Wählen Sie eine Antwort, um die Details anzuzeigen",
+        "pin": "Antwort anheften",
+        "unpin": "Antwort lösen"
+      }
+    }
+  },
+  "workbench": {
+    "tabContextMenu": {
+      "close": "Schließen",
+      "closeOthers": "Andere schließen",
+      "addToFavorites": "Zu Favoriten hinzufügen",
+      "removeFromFavorites": "Aus Favoriten entfernen"
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Zur Definition springen"
+  },
+  "keyValueTable": {
+    "types": {
+      "string": "Zeichenkette",
+      "secret": "Geheimnis",
+      "number": "Zahl",
+      "dateTime": "Datum/Uhrzeit",
+      "color": "Farbe",
+      "expression": "Ausdruck",
+      "boolean": "Boolesch"
+    },
+    "apiEnums": "In der API definierte Typen"
+  },
+  "graphql": {
+    "send": "Senden",
+    "urlPlaceholder": "GraphQL-Endpunkt-URL",
+    "tabs": {
+      "query": "Query",
+      "variables": "Variablen",
+      "headers": "Header"
+    }
+  },
+  "grpc": {
+    "send": "Aufrufen",
+    "urlPlaceholder": "gRPC-Server (host:port)",
+    "tabs": {
+      "message": "Nachricht",
+      "metadata": "Metadaten"
+    }
+  },
+  "soap": {
+    "send": "Senden",
+    "urlPlaceholder": "SOAP-Endpunkt-URL",
+    "tabs": {
+      "body": "Body",
+      "headers": "Header"
+    }
+  },
+  "websocket": {
+    "connect": "Verbinden",
+    "connected": "Verbunden",
+    "disconnected": "Getrennt",
+    "noMessages": "Noch keine Nachrichten",
+    "urlPlaceholder": "WebSocket-URL",
+    "event": "Ereignis",
+    "topic": "Topic",
+    "tabs": {
+      "message": "Nachricht",
+      "headers": "Header"
+    }
+  },
+  "search": {
+    "placeholder": "Suchen...",
+    "noResults": "Keine Ergebnisse gefunden",
+    "resultsAriaLabel": "Suchergebnisse",
+    "categories": {
+      "request": "Anfragen",
+      "folder": "Ordner",
+      "environment": "Umgebungen",
+      "settings": "Einstellungen",
+      "tag": "Tags"
+    },
+    "tooltip": {
+      "noDetails": "Keine Details verfügbar",
+      "noContent": "Keine Dokumentation oder Notizen"
+    }
+  },
+  "httpStatus": {
+    "100": {
+      "name": "Weiter",
+      "description": "Der Server hat die Anfrage-Header empfangen und der Client sollte mit dem Senden des Anfrage-Bodys fortfahren."
+    },
+    "101": {
+      "name": "Protokollwechsel",
+      "description": "Der Anforderer hat den Server gebeten, das Protokoll zu wechseln, und der Server hat zugestimmt."
+    },
+    "200": {
+      "name": "OK",
+      "description": "Standardantwort für erfolgreiche HTTP-Anfragen. Die tatsächliche Antwort hängt von der verwendeten Anfragemethode ab."
+    },
+    "201": {
+      "name": "Erstellt",
+      "description": "Die Anfrage wurde erfüllt und hat zur Erstellung einer neuen Ressource geführt."
+    },
+    "202": {
+      "name": "Akzeptiert",
+      "description": "Die Anfrage wurde zur Verarbeitung akzeptiert, die Verarbeitung ist jedoch noch nicht abgeschlossen."
+    },
+    "204": {
+      "name": "Kein Inhalt",
+      "description": "Der Server hat die Anfrage erfolgreich verarbeitet und gibt keinen Inhalt zurück."
+    },
+    "301": {
+      "name": "Dauerhaft verschoben",
+      "description": "Diese und alle künftigen Anfragen sollten an den angegebenen URI gerichtet werden."
+    },
+    "302": {
+      "name": "Gefunden",
+      "description": "Weist den Client an, eine andere URL aufzurufen. Die HTTP/1.0-Spezifikation verlangte vom Client eine temporäre Weiterleitung."
+    },
+    "304": {
+      "name": "Nicht modifiziert",
+      "description": "Gibt an, dass die Ressource seit der durch die Anfrage-Header angegebenen Version nicht geändert wurde."
+    },
+    "400": {
+      "name": "Ungültige Anfrage",
+      "description": "Der Server kann oder will die Anfrage aufgrund eines offensichtlichen Client-Fehlers (z. B. fehlerhafte Syntax) nicht verarbeiten."
+    },
+    "401": {
+      "name": "Nicht autorisiert",
+      "description": "Eine Authentifizierung ist erforderlich und ist fehlgeschlagen oder wurde noch nicht bereitgestellt."
+    },
+    "403": {
+      "name": "Verboten",
+      "description": "Die Anfrage enthielt gültige Daten und wurde vom Server verstanden, aber der Server verweigert die Ausführung."
+    },
+    "404": {
+      "name": "Nicht gefunden",
+      "description": "Die angeforderte Ressource wurde nicht gefunden, könnte aber in Zukunft verfügbar sein."
+    },
+    "405": {
+      "name": "Methode nicht erlaubt",
+      "description": "Eine Anfragemethode wird für die angeforderte Ressource nicht unterstützt."
+    },
+    "408": {
+      "name": "Zeitüberschreitung der Anfrage",
+      "description": "Beim Warten auf die Anfrage hat der Server eine Zeitüberschreitung gemeldet."
+    },
+    "409": {
+      "name": "Konflikt",
+      "description": "Gibt an, dass die Anfrage aufgrund eines Konflikts mit dem aktuellen Zustand der Ressource nicht verarbeitet werden konnte."
+    },
+    "410": {
+      "name": "Verschwunden",
+      "description": "Gibt an, dass die angeforderte Ressource zuvor verfügbar war, jetzt aber nicht mehr verfügbar ist und auch nicht mehr verfügbar sein wird."
+    },
+    "415": {
+      "name": "Nicht unterstützter Medientyp",
+      "description": "Die Entität der Anfrage hat einen Medientyp, den der Server oder die Ressource nicht unterstützt."
+    },
+    "422": {
+      "name": "Nicht verarbeitbare Entität",
+      "description": "Die Anfrage war wohlgeformt, konnte aber aufgrund semantischer Fehler nicht weiterverarbeitet werden."
+    },
+    "429": {
+      "name": "Zu viele Anfragen",
+      "description": "Der Nutzer hat in einer bestimmten Zeitspanne zu viele Anfragen gesendet (Rate Limiting)."
+    },
+    "500": {
+      "name": "Interner Serverfehler",
+      "description": "Eine generische Fehlermeldung, die ausgegeben wird, wenn ein unerwarteter Zustand aufgetreten ist und keine spezifischere Meldung passt."
+    },
+    "501": {
+      "name": "Nicht implementiert",
+      "description": "Der Server erkennt entweder die Anfragemethode nicht oder ist nicht in der Lage, die Anfrage zu erfüllen."
+    },
+    "502": {
+      "name": "Ungültiges Gateway",
+      "description": "Der Server fungierte als Gateway oder Proxy und erhielt eine ungültige Antwort vom Upstream-Server."
+    },
+    "503": {
+      "name": "Dienst nicht verfügbar",
+      "description": "Der Server kann die Anfrage nicht verarbeiten (weil er überlastet ist oder gewartet wird)."
+    },
+    "504": {
+      "name": "Gateway-Zeitüberschreitung",
+      "description": "Der Server fungierte als Gateway oder Proxy und erhielt keine rechtzeitige Antwort vom Upstream-Server."
+    }
+  },
+  "welcome": {
+    "confirmRemoveFavorite": "Möchten Sie „{{fileName}}“ wirklich aus den Favoriten entfernen?",
+    "noFilesHint": "Öffnen Sie eine Datei oder erstellen Sie eine neue, um loszulegen",
+    "newAriaLabel": "Eine neue Sammlung erstellen",
+    "openAriaLabel": "Eine Sammlung von der Festplatte öffnen",
+    "landmarkLabel": "Willkommen"
+  },
+  "save": {
+    "title": "Speicheroptionen",
+    "mode": {
+      "label": "Speichermodus",
+      "file": "Einzelne Datei",
+      "folder": "Ordnerstruktur",
+      "fileDescription": "Alles in einer einzigen Datei speichern",
+      "folderDescription": "Als Ordnerstruktur mit separaten Dateien speichern"
+    },
+    "format": {
+      "label": "Format",
+      "yamlDescription": "Menschenlesbar",
+      "jsonDescription": "Standardformat",
+      "json5Description": "JSON + Kommentare"
+    },
+    "preview": {
+      "label": "Strukturvorschau",
+      "noDocumentation": "Für diese Quelle wurde keine Dokumentation analysiert."
+    }
+  },
+  "common": {
+    "cancel": "Abbrechen",
+    "save": "Speichern"
+  },
+  "helpers": {
+    "categories": {
+      "comparison": "Vergleich",
+      "string": "Zeichenkette",
+      "math": "Mathematik",
+      "array": "Array",
+      "object": "Objekt",
+      "url": "URL",
+      "date": "Datum",
+      "regex": "Regex",
+      "misc": "Verschiedenes"
+    },
+    "eq": "Strikte Gleichheit (===)",
+    "ne": "Strikte Ungleichheit (!==)",
+    "neq": "Strikte Ungleichheit (!==)",
+    "lt": "Kleiner als (<)",
+    "lte": "Kleiner oder gleich (<=)",
+    "gt": "Größer als (>)",
+    "gte": "Größer oder gleich (>=)",
+    "and": "Block-Helper: rendert, wenn alle Werte wahr sind",
+    "or": "Block-Helper: rendert, wenn mindestens ein Wert wahr ist",
+    "not": "Gibt den invertierten booleschen Wert zurück",
+    "ifEquals": "Block-Helper: rendert, wenn die Werte gleich sind",
+    "is": "Block-Helper: lose Gleichheitsprüfung",
+    "isnt": "Block-Helper: lose Ungleichheitsprüfung",
+    "default": "Gibt den Standardwert zurück, wenn der erste null/undefined ist",
+    "compare": "Block-Helper: vergleicht mit einem Operator",
+    "lowercase": "Wandelt die Zeichenkette in Kleinbuchstaben um",
+    "uppercase": "Wandelt die Zeichenkette in Großbuchstaben um",
+    "capitalize": "Wandelt den ersten Buchstaben in einen Großbuchstaben um",
+    "capitalizeAll": "Wandelt den ersten Buchstaben jedes Wortes in einen Großbuchstaben um",
+    "titleize": "Wandelt den ersten Buchstaben jedes Wortes in einen Großbuchstaben um",
+    "camelcase": "Wandelt in camelCase um",
+    "pascalcase": "Wandelt in PascalCase um",
+    "snakecase": "Wandelt in snake_case um",
+    "snakeCase": "Wandelt in snake_case um (Alias)",
+    "dashcase": "Wandelt in dash-case (kebab-case) um",
+    "dotcase": "Wandelt in dot.case um",
+    "pathcase": "Wandelt in path/case um",
+    "sentencecase": "Wandelt in Satzschreibweise um",
+    "slugify": "Wandelt in einen URL-tauglichen Slug um",
+    "trim": "Entfernt Leerzeichen an beiden Enden",
+    "trimLeft": "Entfernt Leerzeichen am Anfang",
+    "trimRight": "Entfernt Leerzeichen am Ende",
+    "replace": "Ersetzt alle Vorkommen von a durch b",
+    "split": "Teilt die Zeichenkette in ein Array auf",
+    "truncate": "Kürzt die Zeichenkette auf die angegebene Länge",
+    "ellipsis": "Kürzt die Zeichenkette mit Auslassungspunkten",
+    "append": "Hängt ein Suffix an die Zeichenkette an",
+    "prepend": "Stellt ein Präfix der Zeichenkette voran",
+    "reverse": "Kehrt eine Zeichenkette oder ein Array um",
+    "startsWith": "Block-Helper: rendert, wenn die Zeichenkette mit dem Präfix beginnt",
+    "endsWith": "Block-Helper: rendert, wenn die Zeichenkette mit dem Suffix endet",
+    "contains": "Block-Helper: rendert, wenn die Zeichenkette die Teilzeichenkette enthält",
+    "padStart": "Füllt die Zeichenkette am Anfang auf, um die Länge zu erreichen",
+    "padEnd": "Füllt die Zeichenkette am Ende auf, um die Länge zu erreichen",
+    "repeat": "Wiederholt die Zeichenkette n-mal",
+    "substring": "Extrahiert einen Teil der Zeichenkette",
+    "indexOf": "Gibt den Index der Teilzeichenkette zurück (-1 wenn nicht gefunden)",
+    "count": "Zählt die Vorkommen der Teilzeichenkette",
+    "newLineToBr": "Wandelt Zeilenumbrüche in <br>-Tags um",
+    "stripTags": "Entfernt HTML-Tags aus der Zeichenkette",
+    "add": "Addiert zwei Zahlen",
+    "subtract": "Subtrahiert b von a",
+    "multiply": "Multipliziert zwei Zahlen",
+    "divide": "Dividiert a durch b",
+    "modulo": "Gibt den Rest von a / b zurück",
+    "abs": "Gibt den absoluten Wert zurück",
+    "ceil": "Rundet auf die nächste ganze Zahl auf",
+    "floor": "Rundet auf die nächste ganze Zahl ab",
+    "round": "Rundet auf die nächste ganze Zahl",
+    "min": "Gibt den minimalen Wert zurück",
+    "max": "Gibt den maximalen Wert zurück",
+    "pow": "Gibt die Basis hoch dem Exponenten zurück",
+    "sqrt": "Gibt die Quadratwurzel zurück",
+    "random": "Gibt eine zufällige ganze Zahl zwischen min und max zurück",
+    "sum": "Gibt die Summe der Array-Werte zurück",
+    "avg": "Gibt den Durchschnitt der Array-Werte zurück",
+    "toFixed": "Formatiert die Zahl mit fester Nachkommastellenzahl",
+    "toInt": "Wandelt in eine ganze Zahl um",
+    "toFloat": "Wandelt in eine Gleitkommazahl um",
+    "first": "Gibt das/die erste(n) Element(e) des Arrays zurück",
+    "last": "Gibt das/die letzte(n) Element(e) des Arrays zurück",
+    "after": "Gibt die Elemente nach Index n zurück",
+    "before": "Gibt die Elemente vor Index n zurück",
+    "slice": "Gibt einen Ausschnitt des Arrays zurück",
+    "length": "Gibt die Länge des Arrays/der Zeichenkette/des Objekts zurück",
+    "join": "Verbindet die Array-Elemente mit einem Trennzeichen",
+    "sort": "Sortiert das Array",
+    "unique": "Gibt die eindeutigen Werte zurück",
+    "concat": "Verkettet Arrays",
+    "flatten": "Flacht ein verschachteltes Array ab",
+    "pluck": "Extrahiert eine Eigenschaft aus einem Array von Objekten",
+    "itemAt": "Gibt das Element am Index zurück",
+    "inArray": "Block-Helper: rendert, wenn der Wert im Array enthalten ist",
+    "isArray": "Gibt true zurück, wenn der Wert ein Array ist",
+    "isEmpty": "Block-Helper: rendert, wenn der Wert leer ist",
+    "some": "Block-Helper: rendert, wenn einige Elemente übereinstimmen",
+    "every": "Block-Helper: rendert, wenn alle Elemente übereinstimmen",
+    "JSONstringify": "Wandelt das Objekt in eine JSON-Zeichenkette um",
+    "JSONparse": "Parst die JSON-Zeichenkette zu einem Objekt",
+    "get": "Holt eine verschachtelte Eigenschaft über einen Pfad",
+    "keys": "Gibt die Schlüssel des Objekts zurück",
+    "values": "Gibt die Werte des Objekts zurück",
+    "entries": "Gibt [Schlüssel, Wert]-Paare zurück",
+    "hasOwn": "Block-Helper: rendert, wenn das Objekt die Eigenschaft besitzt",
+    "pick": "Erstellt ein Objekt mit den ausgewählten Schlüsseln",
+    "omit": "Erstellt ein Objekt ohne die angegebenen Schlüssel",
+    "merge": "Führt mehrere Objekte zusammen",
+    "isObject": "Gibt true zurück, wenn der Wert ein Objekt ist",
+    "typeOf": "Gibt den Typ des Werts zurück",
+    "encodeURI": "Kodiert eine Zeichenkette für eine URL",
+    "decodeURI": "Dekodiert eine URL-Zeichenkette",
+    "urlParse": "Zerlegt die URL in Komponenten",
+    "stripQuerystring": "Entfernt den Querystring aus der URL",
+    "stripProtocol": "Entfernt das Protokoll aus der URL",
+    "now": "Gibt das aktuelle Datum als ISO-Zeichenkette zurück",
+    "timestamp": "Gibt den aktuellen Zeitstempel in Millisekunden zurück",
+    "year": "Gibt das aktuelle Jahr zurück",
+    "formatDate": "Formatiert das Datum mit einem Muster",
+    "match": "Gibt die Regex-Treffer zurück",
+    "test": "Block-Helper: rendert, wenn die Regex passt",
+    "coalesce": "Gibt den ersten nicht null/undefined-Wert zurück",
+    "uuid": "Generiert eine zufällige UUID",
+    "noop": "Block-Helper, der den Inhalt unverändert rendert",
+    "raw": "Block-Helper, der den Rohinhalt rendert",
+    "times": "Block-Helper, der n-mal wiederholt",
+    "range": "Generiert ein Array von Zahlen"
+  },
+  "behavior": {
+    "title": "Verhalten",
+    "syncSidebarWithTabs": "Auswahl der Seitenleiste mit dem aktiven Tab synchronisieren",
+    "syncSidebarWithTabsDescription": "Beim Wechsel der Tabs im Arbeitsbereich automatisch das entsprechende Element in der Seitenleiste auswählen und anzeigen",
+    "dateTimeFormat": "Datum/Uhrzeit-Format",
+    "dateTimeFormatDescription": "Format zur Anzeige von Datum und Uhrzeit in der Anwendung",
+    "dateTimeFormat.us": "US-Format (MM/TT/JJJJ, 12 h)",
+    "dateTimeFormat.iso": "ISO-Format (JJJJ-MM-TT, 24 h)"
+  },
+  "console": {
+    "title": "Konsole",
+    "requestFormat": "Anfrageformat",
+    "requestFormatDescription": "Standardmäßiger Shell-Stil zur Darstellung ausgehender Anfragen im Konsolen-Tab. Jede Zeile ist eine kopierbare Kommandozeile; der Umschalter in der Konsolen-Toolbar überschreibt diesen Standard für den aktuellen Tab.",
+    "requestFormat.curl": "curl (Unix-Stil)",
+    "requestFormat.powershell": "PowerShell (Invoke-RestMethod)"
+  },
+  "import": {
+    "title": "Anfragen importieren",
+    "source": {
+      "label": "Fügen Sie hier etwas ein!",
+      "placeholder": "Dateipfad, URL oder curl/PowerShell-Befehl eingeben..."
+    },
+    "formats": {
+      "swagger": {
+        "description": "Die OpenAPI-2.0-Spezifikation, geboren bei SmartBear. Fügen Sie ein Swagger-JSON oder -YAML ein — Restorm liest jede Operation, übernimmt die Sicherheitsschemata und verwandelt das gesamte Dokument in einen navigierbaren Baum von Anfragen.",
+        "trademark": "Swagger ist eine eingetragene Marke von SmartBear Software."
+      },
+      "openapi": {
+        "description": "Der aktuelle OpenAPI-Standard (3.0 und 3.1). Dieselbe Paste-and-go-Ergonomie wie bei Swagger: Parameter, Request-Bodies, Sicherheitsschemata und Webhooks landen als Baum typisierter Anfragen mit sendebereiten Beispielen.",
+        "trademark": "OpenAPI ist ein Projekt der OpenAPI Initiative unter dem Dach der Linux Foundation."
+      },
+      "curl": {
+        "description": "Die Anfrage läuft schon in Ihrem Terminal? Fügen Sie den vollständigen curl-Aufruf ein — Flags, Header, Body, Querystring — und Restorm baut daraus eine echte Anfrage, die Sie erneut ausführen, bearbeiten und anheften können.",
+        "trademark": "curl ist Open-Source-Software © Daniel Stenberg, hier unter deren Bedingungen verwendet."
+      },
+      "powershell": {
+        "description": "Dieselbe Idee, im PowerShell-Stil. Fügen Sie einen Invoke-WebRequest- oder Invoke-RestMethod-Befehl ein, und Restorm liest URI, Methode, Header und Body und erstellt eine Anfrage, die Sie visuell weiterentwickeln können.",
+        "trademark": "PowerShell ist eine eingetragene Marke der Microsoft Corporation."
+      },
+      "postman": {
+        "description": "Sie haben eine Postman-Sammlung im Büro liegen? Werfen Sie das JSON hinein — Restorm liest jede Anfrage, jede Beispielantwort und jede Umgebungsvariable und baut die Sammlung als Restorm-Baum nach, den Sie neben Ihren anderen APIs verwenden können.",
+        "trademark": "Postman ist eine eingetragene Marke von Postman, Inc., hier nur als Kompatibilitätsreferenz verwendet."
+      },
+      "insomnia": {
+        "description": "Kommen Sie von Insomnia? Werfen Sie Ihren Export hinein. Restorm versteht das v4-/v5-Sammlungsformat, übernimmt jede Anfrage, jeden Header, jeden Body und jede Umgebung und stellt alles als Restorm-Baum dar.",
+        "trademark": "Insomnia ist eine eingetragene Marke von Kong Inc., hier nur als Kompatibilitätsreferenz verwendet."
+      },
+      "bruno": {
+        "description": "Bruno-typische .bru-Dateien oder ein Ordner-Export — Restorm liest das .bru-Textformat samt Skriptblöcken und stellt jede Anfrage als vollwertigen Restorm-Knoten bereit, der sendebereit ist.",
+        "trademark": "Bruno ist Open-Source-Software (MIT) von Anoop M. D., hier unter deren Bedingungen verwendet."
+      },
+      "graphql": {
+        "description": "Fügen Sie ein GraphQL-SDL (.graphql / .gql / einen Paste aus Ihrem GraphQL-Client) ein, und Restorm legt eine Anfrage pro Operation an, mit korrektem Query-/Mutation-/Subscription-Typ und bereits strukturierten Variablen.",
+        "trademark": "GraphQL ist eine Marke der GraphQL Foundation, einem Projekt der Joint Development Foundation."
+      },
+      "grpc": {
+        "description": "Werfen Sie eine .proto-Datei (oder ein Verzeichnis davon) hinein, und Restorm geht jeden Service, jede RPC, jede Message durch — und macht aus jeder Methode eine typisierte Anfrage, die Sie über den gRPC-Executor senden können, ohne Codegen anzufassen.",
+        "trademark": "gRPC ist ein Projekt der Cloud Native Computing Foundation."
+      },
+      "soap": {
+        "description": "Sie haben ein WSDL? Fügen Sie es (oder seine URL) ein — Restorm parst jeden <port> und jede <operation> und erzeugt sendebereite SOAP-Envelopes mit dem korrekten SOAPAction-Header, schemabasierten Body-Gerüsten und dem im WSDL deklarierten Auth-Schema."
+      },
+      "websocket": {
+        "description": "Fügen Sie einen WebSocket-Endpunkt (ws:// oder wss://) ein — Restorm öffnet die Verbindung, fängt die Hello-Frames des Servers ein und erstellt send-/subscribe-Anfragen mit wiederabspielbaren Payload-Vorlagen.",
+        "trademark": "WebSocket ist ein von der IETF (RFC 6455) und dem W3C standardisiertes Protokoll."
+      },
+      "kafka": {
+        "description": "Fügen Sie eine Apache-Kafka-Bootstrap-Server-URL (oder eine Liste von Topics) ein — Restorm registriert Consumer + Producer pro Topic, dekodiert Avro-/Protobuf-Payloads über Ihre Schema Registry und lässt Sie einzelne Offsets mit einem Klick erneut abspielen.",
+        "trademark": "Apache Kafka und das Kafka-Logo sind Marken der Apache Software Foundation."
+      },
+      "socketio": {
+        "description": "Fügen Sie eine Socket.IO-Server-URL ein — Restorm verhandelt den Handshake, listet die Namespaces und Event-Namen auf, die der Server emittiert, und gibt Ihnen eine Anfrage pro emit-/on-Event mit Payload-Validierung.",
+        "trademark": "Socket.IO ist eine Open-Source-Bibliothek unter der MIT-Lizenz; Name und Logo werden hier nominativ verwendet."
+      },
+      "odata": {
+        "description": "Fügen Sie eine OData-Service-Document-URL oder eine $metadata-Datei ein — Restorm liest das CSDL, baut Entity Sets, Function Imports und Actions nach und füllt die Query-Optionen $filter / $select / $top / $skip in jeder Operation vor."
+      },
+      "mqtt": {
+        "description": "Fügen Sie eine MQTT-Broker-URL oder einen Topic-Katalog ein — Restorm erzeugt publish-/subscribe-Anfragen pro Topic, hält die Verbindung für Streaming-Vorschauen offen und merkt sich Snapshots von Retained Messages, damit Sie sie später erneut abspielen können.",
+        "trademark": "MQTT ist ein OASIS-Standard; der Name und das Logo MQTT sind Marken von OASIS Open."
+      }
+    },
+    "loading": "Analyse läuft...",
+    "noResults": "Keine Anfragen gefunden",
+    "error": {
+      "unknown": "Ein unbekannter Fehler ist aufgetreten"
+    },
+    "ok": "Importieren",
+    "cancel": "Abbrechen",
+    "dropZone": "Ablagezone"
+  },
+  "emptyBench": {
+    "importCard": {
+      "title": "Importiere deine API",
+      "body": "Bring eine OpenAPI/Swagger-Spec, ein GraphQL-Schema, eine Postman/Bruno/Insomnia-Sammlung mit oder füge einen curl/PowerShell-Befehl ein. Restorm parst sie, baut die Ordnerstruktur auf und liefert jeden Endpunkt vorgefüllt."
+    },
+    "recentActivity": {
+      "title": "Letzte Aktivität",
+      "empty": "Senden Sie Ihre erste Anfrage, um sie hier zu sehen."
+    },
+    "apiCard": {
+      "favorites": "Favoriten",
+      "topUsed": "Top 10 meistgenutzt",
+      "recent": "Letzte Anfragen",
+      "description": "Beschreibung",
+      "version": "Version",
+      "quickLinks": {
+        "environments": "Umgebungen",
+        "docs": "Dokumentation",
+        "notes": "Notizen"
+      }
+    }
+  }
+}

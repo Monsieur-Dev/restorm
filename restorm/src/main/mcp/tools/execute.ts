@@ -23,15 +23,22 @@
  */
 
 import { z } from 'zod'
+import * as fs from 'node:fs'
+import * as os from 'node:os'
+import * as path from 'node:path'
 import { BrowserWindow } from 'electron'
 import { McpService } from 'electron-core-ui'
 import { collectionStore } from '../../services/CollectionStore'
+import { contextService } from '../../services/ContextService'
+import type { FullRequestData } from '../../services/ContextServiceTypes'
 import { responseHistoryService } from '../../services'
 import { httpExecutionService } from '../../services/HTTPExecutionService'
 import { graphqlExecutionService } from '../../services/GraphQLExecutionService'
 import { soapExecutionService } from '../../services/SOAPExecutionService'
 import { grpcExecutionService } from '../../services/GRPCExecutionService'
 import { websocketExecutionService } from '../../services/WebSocketExecutionService'
+import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isODataRequest, isAuthenticationRequest, isWebSocketRequest, isEnvironmentFolder } from '../../../shared/types/collections'
+import type { HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, AuthenticationRequest, KeyValue, EnvironmentFolder } from '../../../shared/types/collections'
 import { isRequest, type FolderItem, type Request } from '../../../shared/models'
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
@@ -43,34 +50,185 @@ function errorReply(message: string): { content: { type: 'text'; text: string }[
 }
 
 /**
+ * Bodies larger than this threshold get spilled to a temp file and the
+ * inline `body` field shrinks to a preview + path hint. The MCP harness
+ * caps tool-result token counts; a single ~200 KiB response (e.g.
+ * `/my/logs`) used to trip a generic spillover that drops the whole
+ * structured result behind an opaque file read. Truncating *just the
+ * body* preserves the typed fields (status, headers, durationMs, …) so
+ * the caller can still branch on them without paying the round-trip.
+ */
+const BODY_TRUNCATION_THRESHOLD_BYTES = 50 * 1024
+const BODY_INLINE_PREVIEW_BYTES = 4 * 1024
+
+async function maybeTruncateBody(shaped: unknown): Promise<unknown> {
+  if (!shaped || typeof shaped !== 'object') return shaped
+  const obj = shaped as Record<string, unknown> & { body?: unknown }
+  if (obj.body === undefined || obj.body === null) return shaped
+  const serialised = typeof obj.body === 'string'
+    ? obj.body
+    : JSON.stringify(obj.body)
+  if (serialised.length <= BODY_TRUNCATION_THRESHOLD_BYTES) {
+    // Make the negative answer explicit at the result root so callers
+    // can branch on `result.bodyTruncated === false` without falling
+    // back to `'bodyTruncated' in result` semantics.
+    return { ...obj, bodyTruncated: false }
+  }
+
+  const requestId = typeof obj.requestId === 'string' ? obj.requestId : 'request'
+  const safeId = requestId.replace(/[^A-Za-z0-9._-]/g, '_').slice(0, 64)
+  // Add a random suffix on top of `Date.now()` so two truncations of
+  // the same requestId in the same millisecond (run_request_batch, racing
+  // retries) don't clobber each other's spill files.
+  const suffix = Math.random().toString(36).slice(2, 10)
+  const fileName = `restorm-mcp-body-${safeId}-${Date.now()}-${suffix}.json`
+  const filePath = path.join(os.tmpdir(), fileName)
+  // Persist the body in its prettiest form: pretty-print JSON when we
+  // had structured data, otherwise the raw string. The caller can
+  // Read the file directly without re-parsing.
+  const persisted = typeof obj.body === 'string'
+    ? obj.body
+    : JSON.stringify(obj.body, null, 2)
+  try {
+    await fs.promises.writeFile(filePath, persisted, 'utf-8')
+  } catch (err) {
+    // Persistence failed — keep the original body. The harness's own
+    // spillover still has us covered; we just lose the structured
+    // typed-fields-preserved nicety.
+    return {
+      ...obj,
+      bodyTruncated: false,
+      bodySpillError: err instanceof Error ? err.message : String(err)
+    }
+  }
+
+  const previewSlice = serialised.slice(0, BODY_INLINE_PREVIEW_BYTES)
+  const inlineBody = typeof obj.body === 'string'
+    ? `${previewSlice}\n…<body truncated at ${BODY_INLINE_PREVIEW_BYTES} bytes; full ${serialised.length} bytes at ${filePath}>…`
+    : {
+        _truncated: true,
+        _previewBytes: BODY_INLINE_PREVIEW_BYTES,
+        _totalBytes: serialised.length,
+        _filePath: filePath,
+        _preview: previewSlice
+      }
+
+  return {
+    ...obj,
+    body: inlineBody,
+    bodyTruncated: true,
+    bodyTotalBytes: serialised.length,
+    bodySpilledPath: filePath,
+    bodySpilledHint: `Full response body written to ${filePath} (${serialised.length} bytes). Read it directly when the inline preview is insufficient.`
+  }
+}
+
+/**
  * Project a raw history-detail entry into the run_request wire shape.
  * The history detail already contains everything the AI needs (status,
  * headers, body, timings, URL) — we just rename a few fields and parse
  * JSON bodies in-place so the caller doesn't get a string-of-JSON.
+ *
+ * Field mapping: history details follow the per-protocol shapes in
+ * `responseHistory.ts` — bodies live under `responseBody` (HTTP/OData/SOAP)
+ * or `data`/`errors` (GraphQL) or `responseMessage` (gRPC) or `messages`
+ * (WebSocket); `responseHeaders` is an *array* of `{ key, value }` pairs,
+ * not a flat object; `durationMs` is nested under `timings`.
  */
+function pickHeaderValue(headers: unknown, name: string): string {
+  if (!Array.isArray(headers)) return ''
+  const lower = name.toLowerCase()
+  for (const entry of headers as { key?: string; value?: string }[]) {
+    if (typeof entry.key === 'string' && entry.key.toLowerCase() === lower) {
+      return typeof entry.value === 'string' ? entry.value : ''
+    }
+  }
+  return ''
+}
+
+function pickBody(response: Record<string, unknown>): { raw: unknown; isString: boolean } {
+  // GraphQL: structured already
+  if ('data' in response || 'errors' in response) {
+    return { raw: { data: response['data'], errors: response['errors'] }, isString: false }
+  }
+  // gRPC
+  if (typeof response['responseMessage'] === 'string') {
+    return { raw: response['responseMessage'], isString: true }
+  }
+  // WebSocket
+  if (Array.isArray(response['messages'])) {
+    return { raw: response['messages'], isString: false }
+  }
+  // HTTP / OData / SOAP
+  if (typeof response['responseBody'] === 'string') {
+    return { raw: response['responseBody'], isString: true }
+  }
+  return { raw: undefined, isString: false }
+}
+
 function shapeHistoryDetail(detail: unknown): unknown {
   if (!detail || typeof detail !== 'object') return detail
   const d = detail as Record<string, unknown>
   const response = (d['response'] ?? {}) as Record<string, unknown>
-  let parsedBody: unknown = response['body']
-  const headers = response['responseHeaders'] ?? {}
-  const headersObj = headers as Record<string, string | string[]>
-  const ct = headersObj['content-type'] ?? headersObj['Content-Type'] ?? ''
-  const contentType = Array.isArray(ct) ? ct[0] ?? '' : ct
-  if (typeof response['body'] === 'string' && /application\/(json|.*\+json)/i.test(contentType)) {
-    try { parsedBody = JSON.parse(response['body']) } catch { /* keep as string */ }
+
+  const responseHeaders = response['responseHeaders']
+  const contentType = typeof response['contentType'] === 'string'
+    ? response['contentType']
+    : pickHeaderValue(responseHeaders, 'content-type')
+
+  const { raw, isString } = pickBody(response)
+  let parsedBody: unknown = raw
+  if (isString && typeof raw === 'string' && /application\/(json|.*\+json)/i.test(contentType)) {
+    try { parsedBody = JSON.parse(raw) } catch { /* keep as string */ }
   }
+
+  const timings = (response['timings'] ?? {}) as Record<string, unknown>
+  const durationMs = typeof timings['durationMs'] === 'number'
+    ? timings['durationMs']
+    : typeof response['durationMs'] === 'number' ? response['durationMs'] : undefined
+
+  // Echo the request data the renderer actually sent — so the caller
+  // sees exactly what hit the wire, including handlebars-resolved URL,
+  // path/query params, headers, and body. Field availability is
+  // protocol-specific (e.g. GraphQL has no `requestParams`); the
+  // consumer can ignore missing keys.
+  //
+  // gRPC overloads `requestMethod` on the history shape to mean "the
+  // gRPC method name" — for every other protocol it's the HTTP verb.
+  // We gate the grpc-specific extras on `protocol === 'grpc'` so an
+  // HTTP response doesn't end up with a misleading `grpcMethod: "GET"`.
+  const requestMeta = (d['requestMeta'] ?? {}) as Record<string, unknown>
+  const protocol = response['type'] ?? 'http'
+  const isGrpc = protocol === 'grpc'
+  const sentRequest = {
+    method: response['requestMethod'] ?? requestMeta['method'],
+    url: response['requestUrl'],
+    headers: response['requestHeaders'],
+    params: response['requestParams'],
+    pathParams: response['requestPathParams'],
+    body: response['requestBody'],
+    // protocol-specific extras
+    ...(typeof response['requestSoapAction'] === 'string' ? { soapAction: response['requestSoapAction'] } : {}),
+    ...(isGrpc ? {
+      grpcMethod: response['requestMethod'],
+      grpcMessage: response['requestMessage'],
+      grpcMetadata: response['requestMetadata']
+    } : {})
+  }
+
   return {
     requestId: d['requestId'],
-    protocol: response['type'] ?? 'http',
+    protocol,
     success: d['success'] === true,
     status: response['statusCode'] ?? null,
     statusText: response['statusText'],
-    headers: response['responseHeaders'],
+    headers: responseHeaders,
     body: parsedBody,
     bodyContentType: contentType || undefined,
-    durationMs: response['durationMs'],
-    requestUrl: response['requestUrl']
+    durationMs,
+    requestUrl: response['requestUrl'],
+    request: sentRequest,
+    error: response['error']
   }
 }
 
@@ -126,6 +284,141 @@ function decodeStreamToken(token: string): { requestId: string; cursor: number }
 }
 
 /**
+ * Build a `FullRequestData` payload from the live `Request` class
+ * instance held in `CollectionStore` and push it into `ContextService`
+ * so the next `HTTPExecutionService` read reflects the latest fields.
+ *
+ * Why this exists: the renderer's `HTTPRequestTabView` is supposed to
+ * call `updateFullRequestData` on every field change, but the chain
+ * relies on the tab being mounted AND its body / headers / URL state
+ * effects firing in the right order. When MCP calls
+ * `update_request(... body ...)` and then `run_request` back-to-back,
+ * the renderer's mount-time `useState` may have already captured the
+ * pre-patch body, and the post-patch `transport-replaced` event
+ * doesn't always re-flush before the Send click fires. The result is
+ * `HTTPExecutionService` reading a stale `fullData.body` (the symptom:
+ * subsequent `Action Move` requests send the previous coordinates and
+ * the API answers "already at destination"). Pushing from main here
+ * sidesteps the renderer entirely and keeps the executor authoritative.
+ */
+function flushRequestStateToContext(req: Request): void {
+  // Headers / params / pathParams / metadata are common across most
+  // protocols — pull them off whichever shape the request takes.
+  const headers = (req as { headers?: unknown }).headers
+  const params = (req as { params?: unknown }).params
+  const pathParams = (req as { pathParams?: unknown }).pathParams
+  const metadata = (req as { metadata?: unknown }).metadata
+
+  const data: Partial<FullRequestData> & { id: string } = {
+    id: req.id,
+    url: (req as { url?: string }).url ?? '',
+    headers: Array.isArray(headers) ? (headers as FullRequestData['headers']) : []
+  }
+  if (isHTTPRequest(req) || isAuthenticationRequest(req)) {
+    const http = req as HTTPRequest | AuthenticationRequest
+    data.requestType = req.type === 'auth' ? 'auth' : 'http'
+    data.method = http.method
+    if (Array.isArray(params)) data.params = params as FullRequestData['params']
+    if (Array.isArray(pathParams)) data.pathParams = pathParams as FullRequestData['pathParams']
+    if (http.body !== undefined) data.body = http.body as FullRequestData['body']
+  } else if (isGraphQLRequest(req)) {
+    const gql = req as GraphQLRequest
+    data.requestType = 'graphql'
+    data.operationType = gql.operationType
+    data.query = gql.query
+    data.variables = gql.variables
+  } else if (isGrpcRequest(req)) {
+    const grpc = req as GrpcRequest
+    data.requestType = 'grpc'
+    data.service = grpc.service
+    data.grpcMethod = grpc.method
+    data.callType = grpc.callType
+    data.requestMessage = grpc.requestMessage
+    if (Array.isArray(metadata)) data.metadata = metadata as FullRequestData['metadata']
+  } else if (isSoapRequest(req)) {
+    const soap = req as SoapRequest
+    data.requestType = 'soap'
+    data.soapAction = soap.soapAction
+    data.soapService = soap.service
+    data.operation = soap.operation
+    data.soapBody = (soap as { body?: unknown }).body as string | undefined
+  } else if (isODataRequest(req)) {
+    data.requestType = 'odata'
+    if (Array.isArray(params)) data.params = params as FullRequestData['params']
+    if (Array.isArray(pathParams)) data.pathParams = pathParams as FullRequestData['pathParams']
+  } else if (isWebSocketRequest(req)) {
+    const ws = req as WebSocketRequest
+    data.requestType = 'websocket'
+    if ('event' in ws) (data as { event?: unknown }).event = (ws as { event?: unknown }).event
+    if ('message' in ws) (data as { message?: unknown }).message = (ws as { message?: unknown }).message
+  }
+  // If the request isn't registered with ContextService yet, register
+  // it inline. Until recently we bailed out here on the assumption
+  // that `mcp:open-tab` would race the renderer's `registerRequest`
+  // call ahead of our dispatch — that's true only when restorm has
+  // already been running and the tree is reactive. On a *cold*
+  // open_project → run_request sequence the renderer is still
+  // hydrating, the request tab hasn't mounted, and
+  // `getResolvedUrl` returns undefined → the executor short-circuits
+  // with "No resolved URL found for this request" before the user
+  // even sees what happened.
+  //
+  // Find the request's env-folder ancestor, pick its first
+  // environment as a sane default (the renderer applies a richer
+  // "selected env" cache when it mounts; the first env is the same
+  // fallback the renderer uses if no selection has been recorded
+  // yet), and register inline.
+  if (contextService.getRequestContext(req.id) === undefined) {
+    try {
+      const envFolder = findEnvFolderAncestor(req.id)
+      const envId = envFolder?.environments[0]?.id ?? null
+      const headersArr = Array.isArray(headers) ? (headers as KeyValue[]) : []
+      const paramsArr = Array.isArray(params) ? (params as KeyValue[]) : []
+      const pathParamsArr = Array.isArray(pathParams) ? (pathParams as KeyValue[]) : []
+      contextService.registerRequest(req.id, envId, {
+        id: req.id,
+        headers: headersArr,
+        params: paramsArr,
+        pathParams: pathParamsArr
+      })
+    } catch {
+      // Vitest's main-side stubs don't expose `app.isPackaged`, so
+      // the logger initialisation inside `registerRequest` throws —
+      // and the `logger.debug` we'd use to surface this also throws
+      // for the same reason. In production this never fires (Electron
+      // populates `app.isPackaged`); silently skip so the rest of the
+      // dispatch can proceed against whatever state the renderer has.
+    }
+  }
+  try {
+    contextService.updateFullRequestData(req.id, data as FullRequestData)
+  } catch {
+    // Vitest's main-side stubs don't expose `app.isPackaged`, so the
+    // logger initialisation inside `updateFullRequestData`'s warn
+    // path throws — and any `logger.debug` we'd use to report it
+    // also throws for the same reason. In production this never
+    // fires (Electron populates `app.isPackaged`); silently skip.
+  }
+}
+
+/**
+ * Walk parent folders until an `EnvironmentFolder` is found. Bounded
+ * iteration so a malformed tree (cycle, missing parent) can't loop
+ * forever — restorm trees are at most a handful of levels deep in
+ * practice.
+ */
+function findEnvFolderAncestor(itemId: string): EnvironmentFolder | null {
+  let cursor = itemId
+  for (let i = 0; i < 32; i++) {
+    const parent = collectionStore.findParentFolder(cursor)
+    if (!parent) return null
+    if (isEnvironmentFolder(parent)) return parent
+    cursor = parent.id
+  }
+  return null
+}
+
+/**
  * Run a unary (single-response) request by delegating to the renderer's
  * Send button + waiting for the new history entry to land. Used by HTTP /
  * OData / GraphQL / SOAP / gRPC + the auth request type.
@@ -135,6 +428,11 @@ async function runUnaryRequest(req: Request, timeoutMs: number): Promise<unknown
   // Tab activation needs a render tick before the Send button is
   // mounted — give React time to flush the activation render.
   await delay(400)
+  // Make sure ContextService sees the latest body / headers / URL
+  // before the renderer-side Send click — see helper for the full
+  // reason. Without this, an `update_request` immediately followed by
+  // `run_request` can ship the pre-patch body.
+  flushRequestStateToContext(req)
   const before = await responseHistoryService.list(req.id)
   const baselineGuid = before[0]?.guid ?? null
   dispatchSendInRenderer(req.id)
@@ -146,7 +444,7 @@ async function runUnaryRequest(req: Request, timeoutMs: number): Promise<unknown
   if (detail === null) {
     return { error: { code: 'HISTORY_GONE', message: `history entry ${fresh.guid} disappeared between detection and read` } }
   }
-  return shapeHistoryDetail(detail)
+  return await maybeTruncateBody(shapeHistoryDetail(detail))
 }
 
 /**
@@ -187,11 +485,14 @@ export function registerExecutionTools(mcp: McpService): void {
       description:
         'Execute the request with the given id and return its structured response. ' +
         'Unary protocols (HTTP / OData / GraphQL / SOAP / gRPC) return ' +
-        '`{ status, statusText, headers, body, durationMs, protocol, error? }`; JSON bodies ' +
-        'are parsed in-place. Streaming protocols (WebSocket) return the first frames + a ' +
-        '`continuationToken` — pass it to `read_stream` to pull more, or `cancel_request(id)` ' +
-        'to disconnect. The response is also persisted to the request\'s history (visible in ' +
-        'the UI) and replayed live in the response panel.',
+        '`{ status, statusText, headers, body, bodyContentType, durationMs, protocol, ' +
+        'requestUrl, request: { method, url, headers, params, pathParams, body, ... }, error? }`; ' +
+        'JSON bodies are parsed in-place. The `request` echo reflects exactly what hit the ' +
+        'wire (handlebars-resolved URL, sent headers/params/body) so callers can audit the ' +
+        'call without a second `get_response` round-trip. Streaming protocols (WebSocket) ' +
+        'return the first frames + a `continuationToken` — pass it to `read_stream` to pull ' +
+        'more, or `cancel_request(id)` to disconnect. The response is also persisted to the ' +
+        'request\'s history (visible in the UI) and replayed live in the response panel.',
       inputSchema: {
         id: z.string().min(1).describe('Request id (from list_requests / search).'),
         timeoutMs: z.coerce.number().int().min(500).max(120_000).optional().describe(
@@ -281,7 +582,7 @@ export function registerExecutionTools(mcp: McpService): void {
   )
 
   mcp.registerTool(
-    'run_batch',
+    'run_request_batch',
     {
       title: 'Run a list of requests sequentially',
       description:
@@ -289,7 +590,8 @@ export function registerExecutionTools(mcp: McpService): void {
         'a time, in input order, and returns the array of results in the same order. Stops ' +
         'early on an unknown id (returns the partial array + an `error` field). Distinct from ' +
         'OData `$batch` (which has its own semantics and is invoked via a single `odata-batch` ' +
-        'request).',
+        'request). Not to be confused with the generic `batch` tool which chains arbitrary MCP ' +
+        'tool calls.',
       inputSchema: {
         ids: z.array(z.string().min(1)).min(1).describe('Ordered list of request ids to run.'),
         timeoutMs: z.coerce.number().int().min(500).max(120_000).optional().describe(
@@ -331,7 +633,7 @@ export function registerExecutionTools(mcp: McpService): void {
             result = await runStreamingWebsocketRequest(req, 2_000)
             break
           default:
-            result = { error: { code: 'UNKNOWN_PROTOCOL', message: `protocol "${(req as { type?: string }).type ?? '?'}" not supported by run_batch` } }
+            result = { error: { code: 'UNKNOWN_PROTOCOL', message: `protocol "${(req as { type?: string }).type ?? '?'}" not supported by run_request_batch` } }
         }
         results.push(result)
       }

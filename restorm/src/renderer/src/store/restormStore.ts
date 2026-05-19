@@ -11,7 +11,7 @@ import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 import type { EnvironmentFolder, FolderItem, Environment, Request, Folder } from '../../../shared/types/collections'
 import { isAnyFolder, isEnvironmentFolder, isRequest } from '../../../shared/types/collections'
-import { migrateApiUpdateForCollections } from '../../../shared/utils/migrateApiUpdate'
+import { cloneForEventBus } from '../utils/cloneForEventBus'
 
 // ============================================================================
 // Types
@@ -248,11 +248,6 @@ export const useRestormStore = create<RestormState>()(
     
     // Set collections
     setCollections: (collections, source = 'user') => {
-      // Backfill apiUpdate from legacy apiDocumentation.sourceUrl on
-      // open. Idempotent — only runs on folders that don't already
-      // have apiUpdate, and matches the same backfill the main
-      // process applies to its CollectionStore.
-      migrateApiUpdateForCollections(collections as unknown as Parameters<typeof migrateApiUpdateForCollections>[0])
       set({ collections, currentEventSource: source })
       // Skip the main-side mirror when MCP drove the change — main IS
       // the source in that case (the MCP write tool already mutated
@@ -271,7 +266,11 @@ export const useRestormStore = create<RestormState>()(
       if (api?.syncCollections) {
         // Strip reactive proxies before sending over IPC — they
         // serialize fine but the receiving side wants plain objects.
-        void api.syncCollections(JSON.parse(JSON.stringify(collections)) as unknown[])
+        // `cloneForEventBus` instead of `JSON.parse(JSON.stringify(...))`
+        // so `PasswordValue.toJSON()` doesn't get called along the way
+        // — main needs the plaintext to resolve handlebars + to write
+        // the `.restorm.env` sidecar correctly on the next save.
+        void api.syncCollections(cloneForEventBus(collections) as unknown[])
       }
     },
     

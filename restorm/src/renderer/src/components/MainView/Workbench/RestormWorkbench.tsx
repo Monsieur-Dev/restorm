@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
-import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, IconView, TabSwitcherOverlay, navigationService, useFeature, type ContextMenuItem } from 'electron-core-ui/renderer'
+import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, IconView, TabSwitcherOverlay, navigationService, useFeature, MiniBrowserPanel, ConsolePanel, type ContextMenuItem } from 'electron-core-ui/renderer'
+import { miniBrowserDriver } from '../../../services/miniBrowserDriver'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback, TabSwitcherItem } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
 import type { RestormEditorTab, BreadcrumbItem } from '../../../../../shared/types/editor'
@@ -14,9 +15,9 @@ import {
   isODataRequestTab,
   isAuthenticationRequestTab,
   isConsoleTab,
-  isFirewallTab
+  isFirewallTab,
+  isMiniBrowserTab
 } from '../../../../../shared/types/editor'
-import { ConsolePanel } from '../../Console'
 import { FirewallPanel } from '../../Firewall'
 import {
   HTTPRequestTabView,
@@ -65,6 +66,13 @@ export interface RestormWorkbenchProps {
   onFocusedGroupChange?: (groupId: string | null) => void
   /** Callback fired when a tab is activated (clicked or selected) */
   onTabActivate?: (tabId: string) => void
+  /** Open a request by id — passed through to env-folder home tabs so
+   *  the Favorite Requests rows behave like sidebar entries. */
+  onRequestClick?: (requestId: string) => void
+  /** Middle-click variant of `onRequestClick`. Threaded down to the
+   *  env-folder home favorites so a middle-click opens the request tab
+   *  without focusing it (the "open in background" gesture). */
+  onRequestAuxClick?: (requestId: string) => void
   /** Callback fired when a breadcrumb item is clicked (for navigation) */
   onBreadcrumbClick?: (item: BreadcrumbItem, index: number, isLast: boolean) => void
   /** Callback fired on middle-click of a non-last breadcrumb item — the
@@ -125,6 +133,9 @@ export interface RestormWorkbenchHandle {
   saveState: () => Promise<boolean>
   loadState: () => Promise<WorkbenchTree | null>
   clearState: () => Promise<boolean>
+  /** Maximize a workbench tab into the fullscreen modal, or restore
+   * the maximized tab with `null`. Forwards to `EditorWorkbench`. */
+  setFullscreenTabId: (tabId: string | null) => void
 }
 
 const EditorWorkbenchAny = EditorWorkbench as unknown as React.ForwardRefExoticComponent<Record<string, unknown> & React.RefAttributes<EditorWorkbenchHandle>>
@@ -139,6 +150,8 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   focusedGroupId,
   onFocusedGroupChange,
   onTabActivate,
+  onRequestClick,
+  onRequestAuxClick,
   onBreadcrumbClick,
   onBreadcrumbAuxClick,
   onItemRename,
@@ -167,6 +180,15 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   const isControlled = onTreeChange !== undefined
   const [localTree, setLocalTree] = useState<WorkbenchTree>(initialTree)
   const tree = isControlled ? initialTree : localTree
+  // Always-current view of the tree, for callbacks baked into tab
+  // content. `EditorWorkbench` caches each tab's rendered content
+  // workbench-wide and that cache survives the tab being moved between
+  // groups — so a callback that *closed over* `tree` would keep
+  // computing against the tab's pre-move position and snap it back.
+  // `treeRef` is read instead, so those callbacks always see where the
+  // tab actually is now.
+  const treeRef = useRef<WorkbenchTree>(tree)
+  useEffect(() => { treeRef.current = tree }, [tree])
   const lastTabCountRef = useRef<number>(0)
   // Per-group active-tab tracker so we can detect activations in any
   // split pane (not just `groups[0]`) when the tree mutates
@@ -180,7 +202,8 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   useImperativeHandle(ref, () => ({
     saveState: async () => editorWorkbenchRef.current?.saveState() ?? false,
     loadState: async () => editorWorkbenchRef.current?.loadState() ?? null,
-    clearState: async () => editorWorkbenchRef.current?.clearState() ?? false
+    clearState: async () => editorWorkbenchRef.current?.clearState() ?? false,
+    setFullscreenTabId: (tabId: string | null) => { editorWorkbenchRef.current?.setFullscreenTabId(tabId) }
   }), [])
 
   useEffect(() => {
@@ -372,6 +395,18 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       )
     }
 
+    // Mini browser tab — codicon `browser` + "Mini browser" label.
+    // Singleton, no dirty indicator (the navigated URL is persisted
+    // directly on the tab object via the workbench tree).
+    if (isMiniBrowserTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <IconView icon={{ type: 'codicon', value: 'browser' }} size={14} />
+          <span>Mini browser</span>
+        </span>
+      )
+    }
+
     return null
   }, [renderDirtyIndicator])
 
@@ -504,6 +539,45 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     return undefined
   }, [getEnvironmentFolderById])
 
+  /** Persist the Mini browser's current URL on its tab record so
+   * reopening the workbench restores the navigation state. Walks the
+   * tree (including nested split containers) to locate the tab by id,
+   * then replaces it with an updated copy. No-op when the URL hasn't
+   * actually changed so we don't churn the workbench-tree subscribers. */
+  const updateMiniBrowserUrl = useCallback((tabId: string, url: string): void => {
+    const currentTree = treeRef.current
+    const updateGroups = (nodes: typeof currentTree.groups): typeof currentTree.groups =>
+      nodes.map((node) => {
+        if (isTabGroupNode(node)) {
+          const target = node.tabs.find((t) => t.id === tabId)
+          if (!target) return node
+          const current = (target as RestormEditorTab & { url?: string }).url
+          if (current === url) return node
+          return {
+            ...node,
+            // Mirror the URL into `persistedState` as well, so ECUI's
+            // workbench autosave captures it under `tabData[N]` and the
+            // matching `handleRebuildTab(MINI_BROWSER_TAB_ID, data)`
+            // call restores the navigation state on file reopen.
+            tabs: node.tabs.map((t) => (
+              t.id === tabId
+                ? ({ ...t, url, persistedState: { url } } as EditorTab)
+                : t
+            ))
+          }
+        }
+        if (isContainerNode(node)) {
+          return { ...node, groups: updateGroups(node.groups) }
+        }
+        return node
+      })
+    const nextGroups = updateGroups(currentTree.groups)
+    if (nextGroups === currentTree.groups) return
+    const nextTree = { ...currentTree, groups: nextGroups }
+    if (onTreeChange) onTreeChange(nextTree)
+    else setLocalTree(nextTree)
+  }, [onTreeChange])
+
   // Render tab content based on tab type
   const renderTabContent = useCallback((tab: RestormEditorTab): React.ReactNode => {
     // Check if this is a dropped tab with cached data
@@ -579,6 +653,8 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
                 onEnvironmentFolderChange(folder.id, updatedFolder)
               }
             }}
+            {...(onRequestClick ? { onRequestClick } : {})}
+            {...(onRequestAuxClick ? { onRequestAuxClick } : {})}
           />
         </RestormWorkbenchTab>
       )
@@ -599,6 +675,21 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       ? (tag: string, color: string | null): void => { onTagColorChange(envFolderId, tag, color) }
       : undefined
 
+    // Read the env list live off the reactive env-folder rather than
+    // off `effectiveTab.environments` (which was a one-shot snapshot
+    // captured at tab-open time). `EnvironmentFolderView.updateEnvironments`
+    // assigns `folder.environments = nextArray` on every add/remove,
+    // so the snapshot would otherwise miss any env created after the
+    // tab was first opened — surfacing as `{{name}}` resolving empty
+    // when the user picks the new env in the status bar selector,
+    // because the request tab's `setAvailableEnvironments` IPC never
+    // included it. Reading live closes that gap; cached tab content
+    // re-renders when `contentVersion` is bumped on env events (see
+    // useWorkbenchUpdates).
+    const reactiveEnvFolder = envFolderId ? getEnvironmentFolderById?.(envFolderId) : undefined
+    const fallbackEnvironments = (effectiveTab as { environments?: typeof reactiveEnvFolder extends EnvironmentFolder ? typeof reactiveEnvFolder['environments'] : never }).environments
+    const liveEnvironments = reactiveEnvFolder?.environments ?? fallbackEnvironments
+
     // Build the persistence key for the environment provider scoped
     // to this tab. Requires both the project UUID (workspace identity)
     // and the request's ancestor env folder id (primary storage grain).
@@ -609,13 +700,31 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       return { projectUuid, envFolderId, requestId }
     }
 
+    // Flatten every request id under this env folder. Surfaced through
+    // the context so popover hosts (statusbar env selector +
+    // Send-button right-click) can wipe stale per-request overrides on
+    // siblings when the user picks an env with "Apply to all" on.
+    interface FolderWalkNode { readonly type?: string; readonly id: string; readonly items?: readonly FolderWalkNode[] }
+    const envFolderRequestIds: string[] | undefined = (() => {
+      if (!reactiveEnvFolder) return undefined
+      const ids: string[] = []
+      const walk = (items: readonly FolderWalkNode[]): void => {
+        for (const it of items) {
+          if (it.type === 'request') ids.push(it.id)
+          else if (it.items) walk(it.items)
+        }
+      }
+      walk((reactiveEnvFolder as unknown as { items: readonly FolderWalkNode[] }).items)
+      return ids
+    })()
+
     // HTTP request tab
     if (isHTTPRequestTab(effectiveTab)) {
       // Get reactive request if available, otherwise use tab's copy
       const reactiveRequest = getRequestById?.(effectiveTab.request.id)
       const request = (reactiveRequest?.type === 'http') ? reactiveRequest : effectiveTab.request
       return (
-        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
+        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <DeprecationAwareRequestTab
             request={request}
             breadcrumbs={breadcrumbs}
@@ -631,7 +740,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             {...favoritePropsFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              <HTTPRequestTabView request={request} />
+              <HTTPRequestTabView
+                request={request}
+              />
             </div>
           </DeprecationAwareRequestTab>
         </EnvironmentProvider>
@@ -642,7 +753,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isGraphQLRequestTab(effectiveTab)) {
       const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
+        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -657,7 +768,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             {...favoritePropsFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              <GraphQLRequestTabView request={request} />
+              <GraphQLRequestTabView
+                request={request}
+              />
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>
@@ -668,7 +781,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isGrpcRequestTab(effectiveTab)) {
       const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
+        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -683,7 +796,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             {...favoritePropsFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              <GrpcRequestTabView request={request} />
+              <GrpcRequestTabView
+                request={request}
+              />
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>
@@ -694,7 +809,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isSoapRequestTab(effectiveTab)) {
       const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
+        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -709,7 +824,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             {...favoritePropsFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              <SoapRequestTabView request={request} />
+              <SoapRequestTabView
+                request={request}
+              />
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>
@@ -720,7 +837,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isWebSocketRequestTab(effectiveTab)) {
       const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
+        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -735,7 +852,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             {...favoritePropsFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              <WebSocketRequestTabView request={request} />
+              <WebSocketRequestTabView
+                request={request}
+              />
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>
@@ -746,7 +865,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isODataRequestTab(effectiveTab)) {
       const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
+        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -773,7 +892,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isAuthenticationRequestTab(effectiveTab)) {
       const request = effectiveTab.request
       return (
-        <EnvironmentProvider environments={effectiveTab.environments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)}>
+        <EnvironmentProvider environments={liveEnvironments} tagColors={requestTagColors} persistenceKey={envPersistenceKey(effectiveTab.request.id)} folderRequestIds={envFolderRequestIds}>
           <RestormWorkbenchTab
             breadcrumbs={breadcrumbs}
             onBreadcrumbClick={onBreadcrumbClick}
@@ -788,7 +907,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             {...favoritePropsFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
-              <HTTPRequestTabView request={request} />
+              <HTTPRequestTabView
+                request={request}
+              />
             </div>
           </RestormWorkbenchTab>
         </EnvironmentProvider>
@@ -811,9 +932,23 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       return <FirewallPanel />
     }
 
+    // Mini browser tab — singleton, identified by `tabType: 'mini-browser'`.
+    // The currently-navigated URL is stored on the tab itself; we update
+    // it through the workbench tree so reopening restores the same page.
+    if (isMiniBrowserTab(effectiveTab)) {
+      return (
+        <MiniBrowserPanel
+          tabId={effectiveTab.id}
+          {...(effectiveTab.url !== undefined ? { initialUrl: effectiveTab.url } : {})}
+          onUrlChange={(url) => { updateMiniBrowserUrl(effectiveTab.id, url) }}
+          driver={miniBrowserDriver}
+        />
+      )
+    }
+
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite])
+  }, [onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, updateMiniBrowserUrl])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(

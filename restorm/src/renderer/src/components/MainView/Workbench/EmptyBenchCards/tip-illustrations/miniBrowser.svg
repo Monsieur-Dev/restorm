@@ -1,0 +1,128 @@
+<svg viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg" class="empty-bench-tip-illustration" role="img" aria-hidden="true">
+  <style>
+    .mb-pane {
+      fill: var(--editor-background, #1e1e1e);
+      stroke: currentColor;
+      stroke-width: 1.4;
+      stroke-linejoin: round;
+    }
+
+    /* Mini-browser chrome */
+    .mb-url-bar {
+      fill: #2d2d30;
+      stroke: currentColor;
+      stroke-width: 0.8;
+      stroke-linejoin: round;
+    }
+    .mb-url-dot {
+      fill: #6a6a6a;
+    }
+
+    /* Page content shapes — drawn against a white page background
+       inside the viewport. */
+    .mb-page-bg { fill: #f5f5f5; }
+    .mb-heading { fill: #3b82f6; }
+    .mb-subhead { fill: #1f2937; }
+    .mb-text    { fill: #9ca3af; }
+    .mb-image   { fill: #c4cdd5; }
+    .mb-btn--p  { fill: #3b82f6; }
+    .mb-btn--s  { fill: #d1d5db; }
+
+    .mb-scroll {
+      animation-name: mb-page-scroll;
+      animation-duration: 14s;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+      animation-fill-mode: both;
+      animation-play-state: paused;
+    }
+    /* One "page set" is 198 px tall. Two copies are stacked so the
+       translate animation can wrap seamlessly. */
+    @keyframes mb-page-scroll {
+      0%   { transform: translateY(0); }
+      100% { transform: translateY(-198px); }
+    }
+  </style>
+
+  <defs>
+    <clipPath id="mb-viewport">
+      <rect x="138" y="50" width="64" height="86" rx="2" />
+    </clipPath>
+  </defs>
+
+  <!-- Top-left pane -->
+  <path
+    class="mb-pane"
+    d="M 22 14 L 48 14 A 10 10 0 0 1 58 24 L 58 32 L 120 32 A 8 8 0 0 1 128 40 L 128 72 A 8 8 0 0 1 120 80 L 20 80 A 8 8 0 0 1 12 72 L 12 24 A 10 10 0 0 1 22 14 Z"
+  />
+  <!-- Bottom-left pane -->
+  <path
+    class="mb-pane"
+    d="M 22 84 L 48 84 A 10 10 0 0 1 58 94 L 58 102 L 120 102 A 8 8 0 0 1 128 110 L 128 130 A 8 8 0 0 1 120 138 L 20 138 A 8 8 0 0 1 12 130 L 12 94 A 10 10 0 0 1 22 84 Z"
+  />
+  <!-- Right pane (full height) — hosts the mini-browser -->
+  <path
+    class="mb-pane"
+    d="M 142 14 L 168 14 A 10 10 0 0 1 178 24 L 178 32 L 200 32 A 8 8 0 0 1 208 40 L 208 130 A 8 8 0 0 1 200 138 L 140 138 A 8 8 0 0 1 132 130 L 132 24 A 10 10 0 0 1 142 14 Z"
+  />
+
+  <!-- URL bar at the top of the right pane -->
+  <circle class="mb-url-dot" cx="142" cy="42" r="1.6" />
+  <circle class="mb-url-dot" cx="148" cy="42" r="1.6" />
+  <rect class="mb-url-bar" x="154" y="38" width="48" height="8" rx="4" />
+
+  <!-- Page viewport (white background + scrolling content) -->
+  <rect class="mb-page-bg" x="138" y="50" width="64" height="86" rx="2" />
+
+  <g clip-path="url(#mb-viewport)">
+    <g class="mb-scroll">
+      <!-- ============ Set 1 (top set) — 198 px tall ============ -->
+      <!-- Heading -->
+      <rect class="mb-heading" x="142" y="54" width="44" height="6" rx="1.5" />
+      <!-- Subheading -->
+      <rect class="mb-subhead" x="142" y="64" width="32" height="4" rx="1" />
+      <!-- Text paragraph (3 lines) -->
+      <rect class="mb-text"    x="142" y="72" width="56" height="3" rx="1" />
+      <rect class="mb-text"    x="142" y="78" width="52" height="3" rx="1" />
+      <rect class="mb-text"    x="142" y="84" width="48" height="3" rx="1" />
+      <!-- Image placeholder -->
+      <rect class="mb-image"   x="142" y="92" width="56" height="26" rx="2" />
+      <!-- Section heading -->
+      <rect class="mb-subhead" x="142" y="124" width="40" height="4" rx="1" />
+      <!-- Two text lines -->
+      <rect class="mb-text"    x="142" y="132" width="56" height="3" rx="1" />
+      <rect class="mb-text"    x="142" y="138" width="44" height="3" rx="1" />
+      <!-- Image (smaller) -->
+      <rect class="mb-image"   x="142" y="146" width="56" height="18" rx="2" />
+      <!-- Text + actions -->
+      <rect class="mb-text"    x="142" y="170" width="52" height="3" rx="1" />
+      <rect class="mb-text"    x="142" y="176" width="50" height="3" rx="1" />
+      <rect class="mb-btn--p"  x="142" y="184" width="22" height="8" rx="2" />
+      <rect class="mb-btn--s"  x="168" y="184" width="22" height="8" rx="2" />
+      <!-- Footer-ish text -->
+      <rect class="mb-text"    x="142" y="198" width="40" height="3" rx="1" />
+      <rect class="mb-text"    x="142" y="204" width="56" height="3" rx="1" />
+      <rect class="mb-text"    x="142" y="210" width="32" height="3" rx="1" />
+      <!-- Spacer to reach 198 px from y=54 (first row top) → bottom of set 1 = 54 + 198 = 252 -->
+
+      <!-- ============ Set 2 (mirror of set 1, offset +198) ============ -->
+      <rect class="mb-heading" x="142" y="252" width="44" height="6" rx="1.5" />
+      <rect class="mb-subhead" x="142" y="262" width="32" height="4" rx="1" />
+      <rect class="mb-text"    x="142" y="270" width="56" height="3" rx="1" />
+      <rect class="mb-text"    x="142" y="276" width="52" height="3" rx="1" />
+      <rect class="mb-text"    x="142" y="282" width="48" height="3" rx="1" />
+      <rect class="mb-image"   x="142" y="290" width="56" height="26" rx="2" />
+      <rect class="mb-subhead" x="142" y="322" width="40" height="4" rx="1" />
+      <rect class="mb-text"    x="142" y="330" width="56" height="3" rx="1" />
+      <rect class="mb-text"    x="142" y="336" width="44" height="3" rx="1" />
+      <rect class="mb-image"   x="142" y="344" width="56" height="18" rx="2" />
+      <rect class="mb-text"    x="142" y="368" width="52" height="3" rx="1" />
+      <rect class="mb-text"    x="142" y="374" width="50" height="3" rx="1" />
+      <rect class="mb-btn--p"  x="142" y="382" width="22" height="8" rx="2" />
+      <rect class="mb-btn--s"  x="168" y="382" width="22" height="8" rx="2" />
+      <rect class="mb-text"    x="142" y="396" width="40" height="3" rx="1" />
+      <rect class="mb-text"    x="142" y="402" width="56" height="3" rx="1" />
+      <rect class="mb-text"    x="142" y="408" width="32" height="3" rx="1" />
+    </g>
+  </g>
+</svg>

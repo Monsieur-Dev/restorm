@@ -17,7 +17,7 @@
  * Response chrome surfaces `@odata.count` / `@odata.nextLink` in the
  * Infos tab (alongside status, duration, headers, and operation
  * kind), renders the JSON body in a full-height Monaco editor on the
- * Response tab, and feeds the parsed value into the JsonCrack tab.
+ * Response tab, and feeds the parsed value into the Graph tab.
  *
  * History is recorded via `ResponseHistoryService` as a dedicated
  * `'odata'` entry; the same builder drives live rendering and
@@ -57,6 +57,7 @@ import {
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import { useAuthRequestResolver } from '../../contexts/authRequestResolverContext'
 import type { KeyValueData } from '../../types/global.d'
+import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
@@ -78,6 +79,7 @@ import {
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../../../shared/config/constants'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
+import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
 
 const urlRowStyle: CSSProperties = { display: 'flex', gap: 8, alignItems: 'center' }
 const urlInputWrapperStyle: CSSProperties = { flex: 1, minWidth: 0 }
@@ -150,12 +152,7 @@ const ODATA_VERSION_BY_INDEX: ODataVersion[] = ['v4', 'v3', 'v2']
 const ODATA_OPERATION_KIND_BY_INDEX: ODataOperationKind[] = ['entity-set', 'function', 'action', 'batch']
 
 function toKeyValueData(kvs: readonly KeyValue[]): KeyValueData[] {
-  return kvs.map((kv) => ({
-    id: kv.id,
-    key: kv.key,
-    value: kv.value.toString(),
-    enabled: kv.enabled
-  }))
+  return toKeyValueDataShared(kvs)
 }
 
 function tryParseJson(raw: string): unknown {
@@ -786,18 +783,20 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
         />
       </div>
       <div style={sendButtonWrapperStyle}>
-        <Button
-          disabled={isSending}
-          icon="play"
-          onClick={handleSend}
-          options={{
-            ariaLabel: t('odataRequestTab.send', 'Send'),
-            title: t('odataRequestTab.send', 'Send')
-          }}
-          data-testid="odata-request-send"
-        >
-          {t('odataRequestTab.send', 'Send')}
-        </Button>
+        <SendButtonEnvSwitcher>
+          <Button
+            disabled={isSending}
+            icon="play"
+            onClick={handleSend}
+            options={{
+              ariaLabel: t('odataRequestTab.send', 'Send'),
+              title: t('odataRequestTab.send', 'Send')
+            }}
+            data-testid="odata-request-send"
+          >
+            {t('odataRequestTab.send', 'Send')}
+          </Button>
+        </SendButtonEnvSwitcher>
       </div>
     </div>
     </div>

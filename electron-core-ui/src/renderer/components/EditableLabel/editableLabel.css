@@ -6,14 +6,17 @@
 }
 
 /* Interactive trigger: a bare <button> that inherits the typographic
- * context (font / colour / size) from its ancestor Tag. `position:
- * relative` anchors the absolutely-positioned pencil hint. */
+ * context (font / colour / size) from its ancestor Tag. The right
+ * padding reserves a slot for the pencil hint so it sits *inside*
+ * the button's hit area — clicking the pencil therefore activates
+ * the trigger (instead of the click landing on whatever happens to
+ * be to the right of the title). */
 .ecui-editable-label-trigger {
   position: relative;
   display: inline-flex;
   align-items: center;
   border: none;
-  padding: 0;
+  padding: 0 24px 0 0;
   margin: 0;
   background: none;
   color: inherit;
@@ -26,19 +29,20 @@
  * `:focus-visible` renders a ring even though the user didn't tab
  * here — it reads as a glitch lingering after the edit. Likewise the
  * mouse-click path leaves focus on the trigger; surfacing a ring
- * would highlight something the user just clicked past. Covering
- * both pseudos keeps the post-interaction state visually clean. */
+ * would highlight something the user just clicked past. The
+ * `!important` overrides the workbench-wide `button:focus` outline
+ * declared by the global VSCode-style stylesheet. */
 .ecui-editable-label-trigger:focus,
 .ecui-editable-label-trigger:focus-visible {
-  outline: none;
+  outline: none !important;
 }
 
-/* Pencil hint: absolutely-positioned so it doesn't nudge layout in/out
- * on hover. Fades in on hover of the trigger, or when the trigger has
- * keyboard focus. */
+/* Pencil hint: absolutely-positioned inside the trigger's right
+ * padding so it doesn't nudge layout in/out on hover. Fades in on
+ * hover of the trigger, or when the trigger has keyboard focus. */
 .ecui-editable-label-pencil {
   position: absolute;
-  right: -20px;
+  right: 4px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 10px;
@@ -72,7 +76,13 @@
 }
 
 .ecui-editable-label-input:focus {
-  outline: 1px solid var(--focusBorder);
+  /* No outline — the border already shifts colour to telegraph
+   * focus, and the global workbench `input:focus` outline added a
+   * second contour that clashed with the border. `!important`
+   * cancels that outer outline; the colour change on `border-color`
+   * keeps the focus state legible. */
+  outline: none !important;
+  border-color: var(--focusBorder);
 }
 
 .ecui-editable-label-input[aria-invalid='true'] {

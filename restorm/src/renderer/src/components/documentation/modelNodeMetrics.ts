@@ -72,10 +72,30 @@ export function targetHandleCenterY(
   return top + ((incomingIndex + 1) / (totalIncoming + 1)) * usable
 }
 
+/** How many enum entries the node renders inline before collapsing
+ * the rest under a "…" affordance + hover tooltip. */
+export const MODEL_NODE_ENUM_VISIBLE_MAX = 10
+/** Each enum bullet row takes the same vertical space as a property
+ * row so the property + enum branches share metrics. */
+export const MODEL_NODE_ENUM_ROW_HEIGHT = MODEL_NODE_PROPERTY_HEIGHT
+
+/** Number of enum rows the node will physically render (values
+ * capped at MODEL_NODE_ENUM_VISIBLE_MAX, plus an extra "…" row when
+ * the source list is longer than the cap). */
+export function visibleEnumRowCount(model: ModelDocumentation): number {
+  if (!model.enumValues) return 0
+  const len = model.enumValues.length
+  if (len === 0) return 0
+  const capped = Math.min(len, MODEL_NODE_ENUM_VISIBLE_MAX)
+  return capped + (len > MODEL_NODE_ENUM_VISIBLE_MAX ? 1 : 0)
+}
+
 export function estimateModelNodeHeight(model: ModelDocumentation): number {
+  const enumRows = visibleEnumRowCount(model)
   return (
     modelHeaderHeight(model) +
     MODEL_NODE_PROPERTY_LIST_PADDING_Y * 2 +
-    model.properties.length * MODEL_NODE_PROPERTY_HEIGHT
+    model.properties.length * MODEL_NODE_PROPERTY_HEIGHT +
+    enumRows * MODEL_NODE_ENUM_ROW_HEIGHT
   )
 }

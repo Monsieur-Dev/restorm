@@ -62,11 +62,19 @@ export type { VariableInputBoxProps, VariableDefinition } from './VariableInputB
 export { CodeEditor, bootstrapMonaco } from './CodeEditor'
 export type { CodeEditorProps, CodeEditorRef } from './CodeEditor'
 
+// MiniBrowser exports
+export { MiniBrowserPanel } from './MiniBrowser'
+export type { MiniBrowserPanelProps, MiniBrowserDriver } from './MiniBrowser'
+
+// Console exports
+export { ConsolePanel, Console, ConsoleToolbar, useConsoleFeed, registerConsoleFeedSource, clearConsoleFeed, ConsoleFeedStore, renderRecord } from './Console'
+export type { ConsolePanelProps, ConsoleProps, ConsoleToolbarProps, ConsoleFeedSource, ConsoleRecord, ConsoleShell, RecordRenderer } from './Console'
+
 // Settings exports
 export { SettingsPage, SettingsModalProvider, useSettingsModal } from './Settings'
 
 // Toggle exports
-export { Toggle, defaultToggleStyles } from './Toggle/index'
+export { Toggle, defaultToggleStyles, starLottieAnimationData } from './Toggle/index'
 export type { IToggleStyles, ICheckboxStyles, ToggleProps, ToggleState, ToggleValue } from './Toggle/index'
 
 // Radio exports
@@ -98,6 +106,10 @@ export type {
   VerticalSashContainerProps,
   HorizontalSashContainerProps
 } from './Sash'
+
+// Mosaic exports
+export { MosaicLayout, MosaicCard } from './Mosaic'
+export type { MosaicLayoutProps, MosaicCardProps } from './Mosaic'
 
 // ListView exports
 export { ListView, ListViewItem } from './ListView'
@@ -177,8 +189,8 @@ export { SearchBar } from './SearchBar/index'
 export type { SearchBarProps } from './SearchBar/index'
 
 // Statusbar exports
-export { Statusbar, StatusbarElement } from './Statusbar/index'
-export type { StatusbarProps, StatusbarElementProps } from './Statusbar/index'
+export { Statusbar, StatusbarElement, useStatusbarTooltip } from './Statusbar/index'
+export type { StatusbarProps, StatusbarElementProps, StatusbarTooltipContextValue } from './Statusbar/index'
 
 // Tooltip exports
 export { Tooltip } from './Tooltip/index'

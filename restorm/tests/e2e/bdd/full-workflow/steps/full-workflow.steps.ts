@@ -2623,3 +2623,108 @@ Then('exactly one console tab should be open', async () => {
   if (!page) throw new Error('app must be launched')
   await expect(page.locator('[data-testid*="tabs-tab-console:singleton"]:not([data-testid*="-label"]):not([data-testid*="-close"])')).toHaveCount(1)
 })
+
+When('I double-click the console workbench tab', async () => {
+  if (!page) throw new Error('app must be launched')
+  const tab = page
+    .locator('[data-testid*="tabs-tab-console:singleton"]:not([data-testid*="-label"]):not([data-testid*="-close"])')
+    .first()
+  await tab.waitFor({ state: 'visible', timeout: 5_000 })
+  await tab.dblclick()
+})
+
+Then('the fullscreen workbench modal should be visible', async () => {
+  if (!page) throw new Error('app must be launched')
+  // The workbench fullscreen modal is the ECUI `Modal` with the
+  // default `data-testid`, so its overlay is `modal-overlay`.
+  await expect(page.locator('[data-testid="modal-overlay"]').first()).toBeVisible({ timeout: 10_000 })
+})
+
+When('I close the fullscreen workbench modal', async () => {
+  if (!page) throw new Error('app must be launched')
+  await page.locator('[data-testid="modal-close"]').first().click()
+})
+
+Then('the fullscreen workbench modal should be hidden', async () => {
+  if (!page) throw new Error('app must be launched')
+  // `Modal` unmounts its content once the close animation finishes,
+  // so the overlay leaves the DOM entirely.
+  await expect(page.locator('[data-testid="modal-overlay"]')).toHaveCount(0, { timeout: 10_000 })
+})
+
+// ─── EmptyBench recent-activity + per-request panel-state persistence
+// ────────────────────────────────────────────────────────────────────
+
+When('I click the send button in the active request tab', async () => {
+  if (!page) throw new Error('app must be launched')
+  const button = page.locator('[data-testid="http-request-send-button"]').first()
+  await expect(button).toBeVisible({ timeout: 5000 })
+  await button.click()
+  // Wait for the response panel to land before we treat the send as
+  // "complete" — `RequestUsageService.recordSend` fires inside
+  // `setImmediate` next to `responseHistoryService.storeExecutionResult`,
+  // so the user-level store update happens shortly after the IPC
+  // returns. Tab title flipping back from "Sending…" is the clean
+  // visual signal that the call has settled.
+  await page.waitForTimeout(2000)
+})
+
+When('I collapse every visible pane in the active request tab', async () => {
+  if (!page) throw new Error('app must be launched')
+  // Pane headers live under the BaseRequestTabView SplitView and
+  // carry `data-is-collapsed` ('true' | 'false'). Toggling the header
+  // collapses the body. Iterate until no expanded headers remain
+  // (handles the case where collapsing one pane re-flows others,
+  // sometimes detaching their headers from the DOM briefly).
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const expanded = page.locator(
+      '[data-testid="http-request-split-view"] [data-testid$="-header"][data-is-collapsed="false"]'
+    )
+    const count = await expanded.count()
+    if (count === 0) return
+    await expanded.first().click()
+    await page.waitForTimeout(150)
+  }
+  throw new Error('Failed to collapse every visible pane after 10 attempts')
+})
+
+Then('every pane in the active request tab should be collapsed', async () => {
+  if (!page) throw new Error('app must be launched')
+  const expanded = page.locator(
+    '[data-testid="http-request-split-view"] [data-testid$="-header"][data-is-collapsed="false"]'
+  )
+  await expect(expanded).toHaveCount(0, { timeout: 5000 })
+})
+
+When('I click the recent-activity row at index {int}', async ({}, index: number) => {
+  if (!page) throw new Error('app must be launched')
+  // The Table renders rows under <tbody>; index 0 = newest entry.
+  // Each row hosts a RequestListRow with role="button" — click that
+  // so the row's onOpen handler (and not the surrounding chrome) gets
+  // the gesture.
+  const rows = page.locator('[data-testid="empty-bench-card-recent-table"] tbody tr')
+  await expect(rows.nth(index)).toBeVisible({ timeout: 5000 })
+  await rows.nth(index).locator('[role="button"]').first().click()
+})
+
+Then(
+  'the recent-activity row at index {int} should be the request {string}',
+  async ({}, index: number, name: string) => {
+    if (!page) throw new Error('app must be launched')
+    const row = page
+      .locator('[data-testid="empty-bench-card-recent-table"] tbody tr')
+      .nth(index)
+    await expect(row).toContainText(name, { timeout: 5000 })
+  }
+)
+
+Then(
+  'the recent-activity card should not contain the request {string}',
+  async ({}, name: string) => {
+    if (!page) throw new Error('app must be launched')
+    const matching = page
+      .locator('[data-testid="empty-bench-card-recent-table"] tbody tr')
+      .filter({ hasText: name })
+    await expect(matching).toHaveCount(0, { timeout: 5000 })
+  }
+)

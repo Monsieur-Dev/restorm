@@ -1,0 +1,328 @@
+{
+  "common": {
+    "opened": "Deschise",
+    "refresh": "Reîmprospătează",
+    "import": "Importă"
+  },
+  "file": {
+    "untitled": "Fără titlu",
+    "unsavedChanges": {
+      "title": "Modificări nesalvate",
+      "message": "Doriți să salvați modificările făcute la \"{{fileName}}\"?",
+      "detail": "Modificările dvs. vor fi pierdute dacă nu le salvați.",
+      "save": "Salvează",
+      "dontSave": "Nu salva",
+      "cancel": "Anulează"
+    }
+  },
+  "recentFilesVignette": {
+    "favorites": "Favorite",
+    "recentFiles": "Fișiere recente",
+    "addToFavorites": "Adaugă la favorite",
+    "removeFromFavorites": "Elimină din favorite",
+    "confirmRemoveFavorite": "Sigur doriți să eliminați \"{{fileName}}\" din favorite?",
+    "favoritesLandmarkLabel": "Listă de favorite",
+    "recentsLandmarkLabel": "Listă de fișiere recente"
+  },
+  "welcomeScreen": {
+    "landmarkLabel": "Bine ați venit"
+  },
+  "menuBar": {
+    "new": "Nou",
+    "open": "Deschide",
+    "edit": "Editare",
+    "view": "Vizualizare",
+    "help": "Ajutor",
+    "undo": "Anulează",
+    "redo": "Refă",
+    "cut": "Decupează",
+    "copy": "Copiază",
+    "paste": "Lipește",
+    "find": "Caută",
+    "replace": "Înlocuiește",
+    "toggleSidebar": "Comută bara laterală",
+    "toggleResponsePanel": "Comută panoul de răspuns",
+    "zoomIn": "Mărește",
+    "zoomOut": "Micșorează",
+    "resetZoom": "Resetează zoom-ul",
+    "settings": "Setări",
+    "toggleDevTools": "Comută instrumentele pentru dezvoltatori",
+    "toggleFullscreen": "Comută ecranul complet",
+    "about": "Despre",
+    "documentation": "Documentație",
+    "keyboardShortcuts": "Scurtături de tastatură",
+    "releaseNotes": "Note de lansare",
+    "reportIssue": "Raportează o problemă"
+  },
+  "settings": {
+    "title": "Setări",
+    "theme": "Temă",
+    "language": "Limbă",
+    "searchPlaceholder": "Caută în setări...",
+    "noResults": "Nu s-au găsit setări.",
+    "numberOutOfRange": "Valoarea trebuie să fie între {{min}} și {{max}}.",
+    "resetSetting": "Resetează setarea",
+    "copySettingId": "Copiază ID-ul setării",
+    "settingOptions": "Opțiuni de setare",
+    "scopeTabsLabel": "Domeniul setărilor",
+    "userOnlyHidden": "{{count}} setare/setări doar pentru utilizator sunt ascunse în acest tab.",
+    "scope": {
+      "user": "Utilizator",
+      "workspace": "Spațiu de lucru",
+      "workspaceDisabledTooltip": "Deschideți un proiect pentru a edita setările spațiului de lucru"
+    },
+    "appearance": {
+      "title": "Aspect",
+      "theme": {
+        "title": "Temă",
+        "description": "Selectați tema de culoare a aplicației"
+      },
+      "language": {
+        "title": "Limbă",
+        "description": "Selectați limba aplicației",
+        "en": "English",
+        "fr": "Français",
+        "es": "Español",
+        "de": "Deutsch",
+        "it": "Italiano",
+        "pt": "Português",
+        "nl": "Nederlands",
+        "sv": "Svenska",
+        "da": "Dansk",
+        "nb": "Norsk bokmål",
+        "fi": "Suomi",
+        "pl": "Polski",
+        "cs": "Čeština",
+        "hu": "Magyar",
+        "ro": "Română",
+        "el": "Ελληνικά",
+        "uk": "Українська",
+        "hr": "Hrvatski",
+        "sr": "Srpski",
+        "sq": "Shqip",
+        "tr": "Türkçe",
+        "id": "Bahasa Indonesia",
+        "vi": "Tiếng Việt",
+        "ja": "日本語",
+        "ko": "한국어",
+        "zh-CN": "简体中文",
+        "zh-TW": "繁體中文"
+      },
+      "advancedVisualEffects": {
+        "title": "Efecte vizuale avansate",
+        "description": "Activează efecte vizuale avansate precum estomparea fundalului peste suprapuneri și animațiile CSS. Dezactivați pentru performanță mai bună pe hardware modest."
+      },
+      "editor": {
+        "title": "Editor",
+        "fontSize": {
+          "title": "Dimensiunea fontului",
+          "description": "Controlează dimensiunea fontului în pixeli pentru editorul de cod"
+        },
+        "fontFamily": {
+          "title": "Familia fontului",
+          "description": "Controlează familia fontului pentru editorul de cod"
+        },
+        "wordWrap": {
+          "title": "Încadrare text",
+          "description": "Controlează dacă liniile se încadrează în editorul de cod"
+        },
+        "minimap": {
+          "title": "Minihartă",
+          "description": "Controlează dacă miniharta este afișată în editorul de cod"
+        },
+        "lineNumbers": {
+          "title": "Numere de linie",
+          "description": "Controlează dacă numerele de linie sunt afișate în editorul de cod"
+        }
+      }
+    },
+    "files": {
+      "title": "Fișiere",
+      "autoSave": {
+        "title": "Salvare automată",
+        "description": "Controlează salvarea automată a editoarelor modificate. Citiți mai multe despre salvarea automată în documentație.",
+        "off": "Dezactivată",
+        "afterDelay": "După întârziere",
+        "onWindowChange": "La schimbarea ferestrei"
+      },
+      "autoSaveDelay": {
+        "title": "Întârziere salvare automată",
+        "description": "Controlează întârzierea în milisecunde după care un editor modificat este salvat automat. Se aplică numai când Salvarea automată este setată pe După întârziere."
+      }
+    }
+  },
+  "codeEditor": {
+    "goToDefinition": "Mergi la definiție"
+  },
+  "tagsView": {
+    "removeTag": "Elimină eticheta",
+    "newTag": "Etichetă nouă"
+  },
+  "contextMenu": {
+    "cut": "Decupează",
+    "copy": "Copiază",
+    "paste": "Lipește"
+  },
+  "search": {
+    "placeholder": "Caută...",
+    "noResults": "Niciun rezultat găsit",
+    "resultsAriaLabel": "Rezultatele căutării",
+    "categories": {
+      "request": "Cereri HTTP",
+      "folder": "Foldere",
+      "environment": "Medii",
+      "settings": "Setări",
+      "tag": "Etichete"
+    }
+  },
+  "iconSelect": {
+    "searchEmojis": "Caută emoji-uri...",
+    "noEmojisFound": "Niciun emoji găsit",
+    "searchCodicons": "Caută codicons...",
+    "searchIconoir": "Caută în Iconoir...",
+    "searchPhosphor": "Caută în Phosphor...",
+    "searchMaterial": "Caută în Material...",
+    "searchSimpleIcons": "Caută în Simple Icons...",
+    "searchFeather": "Caută în Feather...",
+    "searchFontAwesome": "Caută în Font Awesome...",
+    "moreIcons": "+{{count}} pictograme suplimentare. Folosiți căutarea pentru a găsi pictograme specifice.",
+    "more": "+{{count}} în plus. Folosiți căutarea pentru a găsi pictograme specifice.",
+    "noIconsFound": "Nicio pictogramă găsită",
+    "searchResults": "Rezultatele căutării",
+    "categories": {
+      "files": "Fișiere",
+      "git": "Git",
+      "debug": "Depanare",
+      "symbols": "Simboluri",
+      "arrows": "Săgeți",
+      "ui": "Interfață",
+      "media": "Media",
+      "editing": "Editare",
+      "terminal": "Terminal",
+      "people": "Persoane",
+      "notifications": "Notificări",
+      "brands": "Branduri",
+      "communication": "Comunicare",
+      "users": "Utilizatori",
+      "business": "Afaceri",
+      "medical": "Medical",
+      "transport": "Transport",
+      "weather": "Vreme",
+      "shapes": "Forme",
+      "design": "Design",
+      "devices": "Dispozitive",
+      "buildings": "Clădiri",
+      "nature": "Natură",
+      "food": "Mâncare",
+      "sport": "Sport",
+      "sports": "Sporturi",
+      "animals": "Animale",
+      "tools": "Unelte"
+    },
+    "emojiCategories": {
+      "people": "Fețe și persoane",
+      "nature": "Animale și natură",
+      "food": "Mâncare și băutură",
+      "activity": "Activități",
+      "travel": "Călătorii și locuri",
+      "objects": "Obiecte",
+      "symbols": "Simboluri",
+      "flags": "Steaguri"
+    }
+  },
+  "dateTimePicker": {
+    "ariaLabel": "Selector dată/oră",
+    "openCalendar": "Deschide calendarul",
+    "previousYear": "Anul precedent",
+    "nextYear": "Anul următor",
+    "previousMonth": "Luna precedentă",
+    "nextMonth": "Luna următoare",
+    "selectMonth": "Selectează luna",
+    "selectYear": "Selectează anul",
+    "includeTime": "Include ora",
+    "hours": "Ore",
+    "minutes": "Minute",
+    "output": "Ieșire",
+    "pattern": "Șablon",
+    "outputModes": {
+      "pattern": "Șablon",
+      "unix": "Unix (s)",
+      "epoch": "Epoch (ms)",
+      "iso": "ISO 8601"
+    },
+    "preview": "Previzualizare",
+    "tokens": {
+      "S": "milisecundă, fără completare",
+      "SSS": "milisecundă, completată la 3",
+      "u": "secunde fracționare, funcțional identic cu SSS",
+      "uu": "secunde fracționare, între 0 și 99, completate la 2",
+      "uuu": "secunde fracționare, între 0 și 9",
+      "s": "secundă, fără completare",
+      "ss": "secundă, completată la 2",
+      "m": "minut, fără completare",
+      "mm": "minut, completat la 2",
+      "h": "oră în format 12h, fără completare",
+      "hh": "oră în format 12h, completată la 2",
+      "H": "oră în format 24h, fără completare",
+      "HH": "oră în format 24h, completată la 2",
+      "Z": "offset îngust",
+      "ZZ": "offset scurt",
+      "ZZZ": "offset tehnic",
+      "ZZZZ": "offset numit abreviat",
+      "ZZZZZ": "offset numit neabreviat",
+      "z": "zonă IANA",
+      "a": "meridian",
+      "d": "ziua lunii, fără completare",
+      "dd": "ziua lunii, completată la 2",
+      "c": "ziua săptămânii, ca număr de la 1 la 7 (luni = 1, duminică = 7)",
+      "ccc": "ziua săptămânii, ca șir localizat abreviat",
+      "cccc": "ziua săptămânii, ca șir localizat neabreviat",
+      "ccccc": "ziua săptămânii, ca o singură literă localizată",
+      "L": "lună ca număr necompletat",
+      "LL": "lună ca număr completat",
+      "LLL": "lună ca șir localizat abreviat",
+      "LLLL": "lună ca șir localizat neabreviat",
+      "LLLLL": "lună ca o singură literă localizată",
+      "y": "an, fără completare",
+      "yy": "an cu două cifre",
+      "yyyy": "an de la patru la șase cifre, completat la 4",
+      "G": "eră localizată abreviată",
+      "GG": "eră localizată neabreviată",
+      "GGGGG": "eră localizată cu o literă",
+      "kk": "an de săptămână ISO, fără completare",
+      "kkkk": "an de săptămână ISO, completat la 4",
+      "W": "număr de săptămână ISO, fără completare",
+      "WW": "număr de săptămână ISO, completat la 2",
+      "ii": "an de săptămână locală, fără completare",
+      "iiii": "an de săptămână locală, completat la 4",
+      "n": "număr de săptămână locală, fără completare",
+      "nn": "număr de săptămână locală, completat la 2",
+      "o": "ordinal (ziua anului), fără completare",
+      "ooo": "ordinal (ziua anului), completat la 3",
+      "q": "trimestru, fără completare",
+      "qq": "trimestru, completat la 2",
+      "D": "dată numerică localizată",
+      "DD": "dată localizată cu lună abreviată",
+      "DDD": "dată localizată cu lună completă",
+      "DDDD": "dată localizată cu lună completă și zi a săptămânii",
+      "t": "oră localizată",
+      "tt": "oră localizată cu secunde",
+      "ttt": "oră localizată cu secunde și offset abreviat",
+      "tttt": "oră localizată cu secunde și offset complet",
+      "T": "oră localizată 24h",
+      "TT": "oră localizată 24h cu secunde",
+      "TTT": "oră localizată 24h cu secunde și offset abreviat",
+      "TTTT": "oră localizată 24h cu secunde și offset complet",
+      "f": "dată și oră localizată scurtă",
+      "ff": "dată și oră localizată mai puțin scurtă",
+      "fff": "dată și oră localizată detaliată",
+      "ffff": "dată și oră localizată foarte detaliată",
+      "F": "dată și oră localizată scurtă cu secunde",
+      "FF": "dată și oră localizată mai puțin scurtă cu secunde",
+      "FFF": "dată și oră localizată detaliată cu secunde",
+      "FFFF": "dată și oră localizată foarte detaliată cu secunde",
+      "X": "marcaj temporal unix în secunde",
+      "x": "marcaj temporal unix în milisecunde"
+    }
+  }
+}

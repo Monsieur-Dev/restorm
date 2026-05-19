@@ -31,7 +31,7 @@ const mockState = {
   findById: vi.fn<(id: string) => unknown>(),
   getCollections: vi.fn<() => unknown[]>(),
   serializeRequest: vi.fn<(r: unknown) => Record<string, unknown>>(),
-  getContext: vi.fn<(envId: string) => { variables: Record<string, string> } | undefined>(),
+  getContext: vi.fn<(envId: string) => Record<string, string> | undefined>(),
   search: vi.fn<(q: string) => { category: string; items: { id: string; title: string; category: string; description?: string; score: number }[] }[]>()
 }
 
@@ -223,6 +223,30 @@ describe('read tools — search', () => {
     const { isError } = parseReply(mcp.invoke('search', { query: '' }))
     expect(isError).toBe(true)
   })
+
+  it('enriches request-kind matches with method + url', () => {
+    mockState.findById.mockImplementation((id: string) => {
+      if (id === 'r1') return { id: 'r1', name: 'List users', type: 'http', method: 'GET', url: '{{baseUrl}}/users', headers: [], params: [], pathParams: [] }
+      if (id === 'r2') return { id: 'r2', name: 'Create user', type: 'http', method: 'POST', url: '{{baseUrl}}/users', headers: [], params: [], pathParams: [] }
+      return null
+    })
+    const mcp = new FakeMcpService()
+    registerReadTools(mcp as unknown as McpService)
+    const { payload } = parseReply(mcp.invoke('search', { query: 'u', kinds: ['request'] })) as { payload: { matches: { id: string; method?: string; url?: string }[] } }
+    expect(payload.matches).toEqual([
+      expect.objectContaining({ id: 'r1', method: 'GET', url: '{{baseUrl}}/users' }),
+      expect.objectContaining({ id: 'r2', method: 'POST', url: '{{baseUrl}}/users' })
+    ])
+  })
+
+  it('does not enrich non-request matches with method/url', () => {
+    const mcp = new FakeMcpService()
+    registerReadTools(mcp as unknown as McpService)
+    const { payload } = parseReply(mcp.invoke('search', { query: 'u', kinds: ['folder'] })) as { payload: { matches: { id: string; method?: string; url?: string }[] } }
+    expect(payload.matches).toHaveLength(1)
+    expect(payload.matches[0]).not.toHaveProperty('method')
+    expect(payload.matches[0]).not.toHaveProperty('url')
+  })
 })
 
 describe('read tools — get_active_env', () => {
@@ -246,7 +270,9 @@ describe('read tools — get_active_env', () => {
         { id: 'env-B', name: 'prod', variables: [] }
       ]
     })
-    mockState.getContext.mockReturnValue({ variables: { host: 'http://stg' } })
+    // ContextService.getContext returns the resolved variable map
+    // (Record<string, string>) directly — no `variables` wrapper.
+    mockState.getContext.mockReturnValue({ host: 'http://stg' })
     const mcp = new FakeMcpService()
     registerReadTools(mcp as unknown as McpService)
     const { payload } = parseReply(mcp.invoke('get_active_env', { envFolderId: 'ef' })) as { payload: { selectedEnvId: string; selectedEnvName: string; variables: { key: string; resolved: string }[] } }
