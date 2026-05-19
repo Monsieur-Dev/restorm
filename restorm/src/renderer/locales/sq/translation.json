@@ -195,7 +195,7 @@
     "selectEnvironment": "Zgjidh një mjedis për të parë variablat",
     "tabs": {
       "docs": "Dokumentacioni",
-      "configuration": "Konfigurimi",
+      "environments": "Mjedise",
       "notes": "Shënimet"
     },
     "home": {
@@ -714,7 +714,12 @@
       "topUsed": "Top 10 më të përdorurat",
       "recent": "Kërkesat e fundit",
       "description": "Përshkrim",
-      "version": "Versioni"
+      "version": "Versioni",
+      "quickLinks": {
+        "environments": "Mjedise",
+        "docs": "Dokumentim",
+        "notes": "Shënime"
+      }
     }
   }
 }

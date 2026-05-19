@@ -195,7 +195,7 @@
     "selectEnvironment": "Vælg et miljø for at se variabler",
     "tabs": {
       "docs": "Dokumentation",
-      "configuration": "Konfiguration",
+      "environments": "Miljøer",
       "notes": "Noter"
     },
     "home": {
@@ -714,7 +714,12 @@
       "topUsed": "Top 10 mest brugte",
       "recent": "Seneste forespørgsler",
       "description": "Beskrivelse",
-      "version": "Version"
+      "version": "Version",
+      "quickLinks": {
+        "environments": "Miljøer",
+        "docs": "Dokumentation",
+        "notes": "Noter"
+      }
     }
   }
 }

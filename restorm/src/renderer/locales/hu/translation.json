@@ -195,7 +195,7 @@
     "selectEnvironment": "Válasszon egy környezetet a változók megtekintéséhez",
     "tabs": {
       "docs": "Dokumentáció",
-      "configuration": "Konfiguráció",
+      "environments": "Környezetek",
       "notes": "Jegyzetek"
     },
     "home": {
@@ -714,7 +714,12 @@
       "topUsed": "10 leghasználtabb",
       "recent": "Legutóbbi kérések",
       "description": "Leírás",
-      "version": "Verzió"
+      "version": "Verzió",
+      "quickLinks": {
+        "environments": "Környezetek",
+        "docs": "Dokumentáció",
+        "notes": "Jegyzetek"
+      }
     }
   }
 }

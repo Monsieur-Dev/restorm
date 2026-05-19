@@ -196,7 +196,7 @@
     "selectEnvironment": "Izaberite okruženje za prikaz promenljivih",
     "tabs": {
       "docs": "Dokumentacija",
-      "configuration": "Konfiguracija",
+      "environments": "Окружења",
       "notes": "Beleške"
     },
     "home": {
@@ -715,7 +715,12 @@
       "topUsed": "Топ 10 најкоришћенијих",
       "recent": "Последњи захтеви",
       "description": "Опис",
-      "version": "Верзија"
+      "version": "Верзија",
+      "quickLinks": {
+        "environments": "Окружења",
+        "docs": "Документација",
+        "notes": "Белешке"
+      }
     }
   }
 }

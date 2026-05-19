@@ -194,7 +194,7 @@
     "selectEnvironment": "変数を表示するには環境を選択してください",
     "tabs": {
       "docs": "ドキュメント",
-      "configuration": "設定",
+      "environments": "環境",
       "notes": "メモ"
     },
     "home": {
@@ -713,7 +713,12 @@
       "topUsed": "最もよく使われる 10 件",
       "recent": "最近のリクエスト",
       "description": "説明",
-      "version": "バージョン"
+      "version": "バージョン",
+      "quickLinks": {
+        "environments": "環境",
+        "docs": "ドキュメント",
+        "notes": "メモ"
+      }
     }
   }
 }

@@ -194,7 +194,7 @@
     "selectEnvironment": "选择一个环境以查看变量",
     "tabs": {
       "docs": "文档",
-      "configuration": "配置",
+      "environments": "环境",
       "notes": "笔记"
     },
     "home": {
@@ -713,7 +713,12 @@
       "topUsed": "最常用前 10",
       "recent": "最近的请求",
       "description": "描述",
-      "version": "版本"
+      "version": "版本",
+      "quickLinks": {
+        "environments": "环境",
+        "docs": "文档",
+        "notes": "笔记"
+      }
     }
   }
 }

@@ -287,12 +287,12 @@ When('I import the previewed routes', async () => {
 async function openEnvFolderInWorkbench(p: Page): Promise<void> {
   // Click the imported env-folder row in the sidebar to mount the
   // EnvironmentFolderView in the workbench tab area. The view opens
-  // on the "Home" tab by default — switch to "Configuration" so the
+  // on the "Home" tab by default — switch to "Environments" so the
   // env list + variables table become reachable.
   const folderRow = sidebarRowByName(p, 'Auth Test Service — Pet API')
   await expect(folderRow).toBeVisible({ timeout: 5000 })
   await folderRow.click()
-  await p.getByRole('tab', { name: 'Configuration' }).click()
+  await p.getByRole('tab', { name: 'Environments' }).click()
   await expect(p.locator('[data-testid="environment-folder-sash-container"]')).toBeVisible({ timeout: 10000 })
 }
 
@@ -371,9 +371,20 @@ When(
     // ContextMenu items use the `role="menuitem"` aria role; the EN
     // label for `environment.addSub` is "Add sub-environment".
     await p.getByRole('menuitem', { name: 'Add sub-environment' }).click()
-    // The new sub-env auto-names "New environment". Select + rename.
-    await selectEnvByName(p, 'New environment')
-    await renameSelectedEnv(p, subName)
+    // The new sub-env lands selected AND in inline-rename mode (see
+    // `handleAddSubEnvironment` in EnvironmentFolderView). Wait for
+    // the rename input to appear inside the list; focus may be
+    // transient between menu close + ListView's auto-focus useEffect,
+    // so we click the input ourselves to guarantee it has focus
+    // before typing.
+    const editing = list.locator('input').last()
+    await expect(editing).toBeVisible({ timeout: 5000 })
+    await editing.click()
+    await p.keyboard.press('Control+A')
+    await p.keyboard.press('Delete')
+    await p.keyboard.type(subName, { delay: 5 })
+    await p.keyboard.press('Enter')
+    await p.waitForTimeout(200)
     // Variables table now reflects the freshly-selected sub-env. Add
     // a single client_id row.
     // The pane header sits over the add-variable button when the layout

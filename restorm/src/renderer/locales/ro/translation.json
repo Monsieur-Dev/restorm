@@ -196,7 +196,7 @@
     "selectEnvironment": "Selectați un mediu pentru a vedea variabilele",
     "tabs": {
       "docs": "Documentație",
-      "configuration": "Configurare",
+      "environments": "Medii",
       "notes": "Notițe"
     },
     "home": {
@@ -715,7 +715,12 @@
       "topUsed": "Top 10 cele mai folosite",
       "recent": "Ultimele cereri",
       "description": "Descriere",
-      "version": "Versiune"
+      "version": "Versiune",
+      "quickLinks": {
+        "environments": "Medii",
+        "docs": "Documentație",
+        "notes": "Note"
+      }
     }
   }
 }

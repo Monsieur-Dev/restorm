@@ -194,7 +194,7 @@
     "selectEnvironment": "選取一個環境以檢視變數",
     "tabs": {
       "docs": "文件",
-      "configuration": "設定",
+      "environments": "環境",
       "notes": "備註"
     },
     "home": {
@@ -713,7 +713,12 @@
       "topUsed": "最常用 10 個",
       "recent": "最近的請求",
       "description": "描述",
-      "version": "版本"
+      "version": "版本",
+      "quickLinks": {
+        "environments": "環境",
+        "docs": "文件",
+        "notes": "筆記"
+      }
     }
   }
 }

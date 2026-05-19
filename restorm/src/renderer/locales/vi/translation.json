@@ -194,7 +194,7 @@
     "selectEnvironment": "Chọn một môi trường để xem các biến",
     "tabs": {
       "docs": "Tài liệu",
-      "configuration": "Cấu hình",
+      "environments": "Môi trường",
       "notes": "Ghi chú"
     },
     "home": {
@@ -713,7 +713,12 @@
       "topUsed": "Top 10 dùng nhiều nhất",
       "recent": "Yêu cầu gần đây",
       "description": "Mô tả",
-      "version": "Phiên bản"
+      "version": "Phiên bản",
+      "quickLinks": {
+        "environments": "Môi trường",
+        "docs": "Tài liệu",
+        "notes": "Ghi chú"
+      }
     }
   }
 }

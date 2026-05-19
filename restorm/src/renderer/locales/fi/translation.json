@@ -195,7 +195,7 @@
     "selectEnvironment": "Valitse ympäristö nähdäksesi muuttujat",
     "tabs": {
       "docs": "Dokumentit",
-      "configuration": "Asetukset",
+      "environments": "Ympäristöt",
       "notes": "Muistiinpanot"
     },
     "home": {
@@ -714,7 +714,12 @@
       "topUsed": "Top 10 käytetyimmät",
       "recent": "Viimeisimmät pyynnöt",
       "description": "Kuvaus",
-      "version": "Versio"
+      "version": "Versio",
+      "quickLinks": {
+        "environments": "Ympäristöt",
+        "docs": "Dokumentaatio",
+        "notes": "Muistiinpanot"
+      }
     }
   }
 }

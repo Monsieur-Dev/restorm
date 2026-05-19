@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MosaicCard, Table, getColorFromString, type TableColumn } from 'electron-core-ui/renderer'
+import { Button, eventBus, MosaicCard, Table, getColorFromString, type TableColumn } from 'electron-core-ui/renderer'
 import type { EnvironmentFolder, FolderItem } from '../../../../../../shared/types/folderTypes'
 import type { Request as RestormRequest } from '../../../../../../shared/types/requests'
 import {
@@ -10,6 +10,8 @@ import {
   removeFavorite,
   reorderFavorites
 } from '../../../../services/favoritesStore'
+import { DocumentEvents, type DocumentChangedPayload } from '../../../../services/DocumentEvents'
+import { setPendingEnvFolderSubTab } from '../../../../services/envFolderTabIntent'
 import { useRequestUsage, type RequestUsageMap } from '../../../../hooks/useRequestUsage'
 import { RequestListRow } from './RequestListRow'
 
@@ -84,9 +86,35 @@ export const ApiCard: React.FC<ApiCardProps> = ({ folder, projectUuid, onOpenReq
   const [favVersion, setFavVersion] = useState(0)
   const usage = useRequestUsage()
 
+  // Bumped on every FOLDER_UPDATED event that names this env-folder
+  // — `folder` itself is a reactive proxy that mutates in place, so
+  // React's prop comparison sees the same reference even when the
+  // sidebar rename writes a new `folder.name`. The version is a
+  // dummy state whose only job is to re-pull `folder.name` for the
+  // banner title.
+  const [folderVersion, setFolderVersion] = useState(0)
+  useEffect(() => {
+    const sub = eventBus.subscribe<DocumentChangedPayload>(
+      DocumentEvents.FOLDER_UPDATED,
+      (payload) => {
+        if (payload.id === folder.id) setFolderVersion((v) => v + 1)
+      }
+    )
+    return () => { sub.unsubscribe() }
+  }, [folder.id])
+
   const apiInfo = folder.apiDocumentation?.api
-  const displayName = apiInfo?.title ?? folder.name
-  const bannerBg = getColorFromString(displayName)
+  // Title follows the env-folder rename: the spec title (when present)
+  // is only the import-time hint, the folder name is the user's
+  // identifier and what the sidebar surfaces.
+  void folderVersion
+  const displayName = (folder.name && folder.name.length > 0)
+    ? folder.name
+    : apiInfo?.title ?? ''
+  // Banner colour is keyed off the folder id (stable across renames)
+  // rather than the displayed name so rebranding doesn't reshuffle
+  // the card's accent.
+  const bannerBg = getColorFromString(folder.id)
 
   useEffect(() => {
     const handler = (): void => { setFavVersion((v) => v + 1) }
@@ -169,6 +197,48 @@ export const ApiCard: React.FC<ApiCardProps> = ({ folder, projectUuid, onOpenReq
           <span className="empty-bench-meta-value">{apiInfo.version}</span>
         </p>
       ) : null}
+
+      {/*
+        * Quick links to the three env-folder sub-tabs. Each click
+        * stages the desired sub-tab id via `envFolderTabIntent`,
+        * then hands off to the generic `onOpenRequest` (which
+        * `useNavigation.handleItemClick` routes by id type — folder
+        * id → env-folder tab). The view drains the staged intent on
+        * mount (cold-open) AND via a live subscription (hot-open
+        * when the env-folder tab is already on screen).
+        */}
+      <div className="empty-bench-quick-links" data-testid={`empty-bench-card-api-${folder.id}-quick-links`}>
+        <Button
+          secondary
+          onClick={() => {
+            setPendingEnvFolderSubTab(folder.id, 'environments')
+            onOpenRequest(folder.id)
+          }}
+          data-testid={`empty-bench-card-api-${folder.id}-quick-environments`}
+        >
+          {t('emptyBench.apiCard.quickLinks.environments', 'Environments')}
+        </Button>
+        <Button
+          secondary
+          onClick={() => {
+            setPendingEnvFolderSubTab(folder.id, 'docs')
+            onOpenRequest(folder.id)
+          }}
+          data-testid={`empty-bench-card-api-${folder.id}-quick-docs`}
+        >
+          {t('emptyBench.apiCard.quickLinks.docs', 'Documentation')}
+        </Button>
+        <Button
+          secondary
+          onClick={() => {
+            setPendingEnvFolderSubTab(folder.id, 'notes')
+            onOpenRequest(folder.id)
+          }}
+          data-testid={`empty-bench-card-api-${folder.id}-quick-notes`}
+        >
+          {t('emptyBench.apiCard.quickLinks.notes', 'Notes')}
+        </Button>
+      </div>
 
       {favorites.length > 0 && (
         <section>

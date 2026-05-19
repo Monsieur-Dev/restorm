@@ -194,7 +194,7 @@
     "selectEnvironment": "Pilih lingkungan untuk melihat variabel",
     "tabs": {
       "docs": "Dokumen",
-      "configuration": "Konfigurasi",
+      "environments": "Lingkungan",
       "notes": "Catatan"
     },
     "home": {
@@ -713,7 +713,12 @@
       "topUsed": "Top 10 paling sering",
       "recent": "Permintaan terakhir",
       "description": "Deskripsi",
-      "version": "Versi"
+      "version": "Versi",
+      "quickLinks": {
+        "environments": "Lingkungan",
+        "docs": "Dokumentasi",
+        "notes": "Catatan"
+      }
     }
   }
 }

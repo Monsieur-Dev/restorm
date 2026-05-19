@@ -138,7 +138,7 @@ Feature: Full workflow end-to-end scenario
     Then the folder tab breadcrumb icon should be "heart"
     When I save the file with Ctrl+S
 
-    When I switch to the "Configuration" inner tab
+    When I switch to the "Environments" inner tab
     When I add a variable "themeColor" of type color to the env folder
     Then the environment-folder variables table color picker should be visible
     When I add a variable "launchDate" of type dateTime to the env folder
@@ -166,7 +166,7 @@ Feature: Full workflow end-to-end scenario
     And the sidebar folder "pet" should be expanded
     And the sidebar folder "user" should be collapsed
     When I click the sidebar env folder "Swagger Petstore"
-    When I switch to the "Configuration" inner tab
+    When I switch to the "Environments" inner tab
     # Variable types must be preserved across env switches: `themeColor`
     # lives on the `localhost` env. Switch to the `https` sub-env and
     # back — the color picker cell should re-appear on the parent env

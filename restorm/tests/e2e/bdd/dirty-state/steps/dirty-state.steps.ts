@@ -295,7 +295,7 @@ When('I press backspace in the body', async () => {
  * Configuration sub-tab.
  */
 async function focusFirstEnvVarValueAtEnd(p: Page): Promise<void> {
-  const configSubTab = p.locator('[role="tab"][data-tab-id="configuration"]:visible').first()
+  const configSubTab = p.locator('[role="tab"][data-tab-id="environments"]:visible').first()
   if ((await configSubTab.count()) > 0) {
     const active = await configSubTab.getAttribute('aria-selected')
     if (active !== 'true') {
@@ -445,7 +445,7 @@ When(
     // if we just typed there. The variables table lives on the
     // "Configuration" sub-tab — switch there before reaching for row
     // inputs.
-    const configSubTab = p.locator('[role="tab"][data-tab-id="configuration"]:visible').first()
+    const configSubTab = p.locator('[role="tab"][data-tab-id="environments"]:visible').first()
     if ((await configSubTab.count()) > 0) {
       const alreadyActive = await configSubTab.getAttribute('aria-selected')
       if (alreadyActive !== 'true') {
@@ -497,11 +497,11 @@ When(
 
 /**
  * Env folder view defaults to the "Home" landing sub-tab, not the
- * "Configuration" sub-tab where the envs list + add button live. Switch
+ * "Environments" sub-tab where the envs list + add button live. Switch
  * before reaching for the inner controls.
  */
 async function activateEnvFolderConfigSubTab(p: Page): Promise<void> {
-  const configSubTab = p.locator('[role="tab"][data-tab-id="configuration"]:visible').first()
+  const configSubTab = p.locator('[role="tab"][data-tab-id="environments"]:visible').first()
   if ((await configSubTab.count()) === 0) return
   const alreadyActive = await configSubTab.getAttribute('aria-selected')
   if (alreadyActive === 'true') return

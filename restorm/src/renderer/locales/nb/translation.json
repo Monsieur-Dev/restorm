@@ -195,7 +195,7 @@
     "selectEnvironment": "Velg et miljø for å se variabler",
     "tabs": {
       "docs": "Dokumentasjon",
-      "configuration": "Konfigurasjon",
+      "environments": "Miljøer",
       "notes": "Notater"
     },
     "home": {
@@ -714,7 +714,12 @@
       "topUsed": "Topp 10 mest brukte",
       "recent": "Siste forespørsler",
       "description": "Beskrivelse",
-      "version": "Versjon"
+      "version": "Versjon",
+      "quickLinks": {
+        "environments": "Miljøer",
+        "docs": "Dokumentasjon",
+        "notes": "Notater"
+      }
     }
   }
 }

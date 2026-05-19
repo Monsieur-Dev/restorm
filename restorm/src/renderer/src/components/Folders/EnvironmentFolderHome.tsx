@@ -201,7 +201,7 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
           icon="settings-gear"
           label={t('folderView.home.configureEnvs')}
           description={t('folderView.home.configureEnvsDesc')}
-          onClick={() => { onSwitchTab('configuration') }}
+          onClick={() => { onSwitchTab('environments') }}
         />
         <ActionButton
           icon="book"

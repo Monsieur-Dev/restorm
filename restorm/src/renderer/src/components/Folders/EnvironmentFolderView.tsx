@@ -32,6 +32,7 @@ import type { ApiDocumentation, OperationDocumentation } from '../../../../share
 import { DocumentationHost } from '../documentation/DocumentationHost'
 import { mergeEnumDefinitionsIntoModels } from '../documentation/mergeEnumDefinitions'
 import { useRequestCreation } from '../../contexts/useRequestCreation'
+import { consumePendingEnvFolderSubTab, subscribeEnvFolderSubTabIntent } from '../../services/envFolderTabIntent'
 
 /** Generate a unique ID for a new environment */
 function generateEnvironmentId(): string {
@@ -243,9 +244,13 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
     }
   }, [colorPickerEnvId])
 
-  // Track item being renamed (used by context menu to trigger rename mode)
-  const [_renamingEnvId, setRenamingEnvId] = useState<string | null>(null)
-  void _renamingEnvId // Will be used when ListView supports external rename trigger
+  // Env id currently in inline-rename mode. Driven by the context
+  // menu's "Rename" action AND by the new-environment / new-sub-env
+  // handlers below, which drop the freshly-created env straight into
+  // rename mode so the user can type the real name without a second
+  // click. `null` when nothing is being renamed; the ListView clears
+  // it via `onEditingEnd`.
+  const [editingEnvId, setEditingEnvId] = useState<string | null>(null)
 
   // Get the selected environment from local state (for display)
   const selectedEnvironment = useMemo(
@@ -284,8 +289,11 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
     const newEnvironments = addEnvironmentToList(localEnvironments, newEnv)
     updateEnvironments(newEnvironments)
     emitEnvironmentCreated(newEnv, folder.id)
-    // Select the new environment
+    // Select the new environment AND drop it into inline-rename mode so
+    // the user can type the real name without an extra right-click /
+    // F2 — matches the sidebar tree's "new folder" UX.
     setSelectedEnvId(newEnv.id)
+    setEditingEnvId(newEnv.id)
   }, [t, folder.id, localEnvironments, updateEnvironments])
 
   // Handler for adding a sub-environment. See `handleAddEnvironment`
@@ -304,9 +312,11 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
     const newEnvironments = addSubEnvironment(localEnvironments, parentId, newEnv)
     updateEnvironments(newEnvironments)
     emitEnvironmentCreated(newEnv, folder.id, parentId)
-    // Ensure parent is expanded and select the new environment
+    // Ensure parent is expanded, select the new environment, and drop
+    // it into inline-rename mode (same UX as the top-level add).
     setExpandedIds(prev => Array.from(new Set([...prev, parentId])))
     setSelectedEnvId(newEnv.id)
+    setEditingEnvId(newEnv.id)
   }, [t, folder.id, localEnvironments, updateEnvironments])
 
   // Handler for deleting an environment. Emits ENVIRONMENT_DELETED so
@@ -442,7 +452,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
       shortcut: 'F2',
       onClick: () => {
         if (selectedEnvId) {
-          setRenamingEnvId(selectedEnvId)
+          setEditingEnvId(selectedEnvId)
         }
       }
     },
@@ -474,7 +484,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
     [localEnvironments, expandedIds, envContextMenuItems, renderEnvLeftActions]
   )
 
-  const [leftWidth] = useState<number>(220)
+  const [leftWidth] = useState<number>(320)
   const variablesParamsRef = useRef<KeyValueTableHandle | null>(null)
 
   // Context variables state is managed inside ContextVariablesSection
@@ -547,6 +557,9 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
                 rootRole="tree"
                 ariaLabel={t('folderView.environmentsAriaLabel')}
                 selectedIds={selectedEnvId ? [selectedEnvId] : []}
+                editingItemId={editingEnvId}
+                onEditingStart={(id) => { setEditingEnvId(id) }}
+                onEditingEnd={() => { setEditingEnvId(null) }}
                 isRenameable
                 expandOnChevronOnly
                 data-testid="environment-folder-environment-list"
@@ -784,7 +797,21 @@ const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ fold
   const { t } = useTranslation()
   const switchTabFnRef = useRef<((tabId: string) => void) | null>(null)
   const handleSwitchTab = useCallback((tabId: string) => { switchTabFnRef.current?.(tabId) }, [])
-  const handleSwitchTabReady = useCallback((fn: (tabId: string) => void) => { switchTabFnRef.current = fn }, [])
+  // Drain any pending sub-tab intent staged by `ApiCard`'s quick
+  // links on the EmptyBench when the env-folder view first mounts;
+  // also subscribe so the same gesture works when the view is
+  // already on screen.
+  const handleSwitchTabReady = useCallback((fn: (tabId: string) => void) => {
+    switchTabFnRef.current = fn
+    const pending = consumePendingEnvFolderSubTab(folder.id)
+    if (pending !== undefined) fn(pending)
+  }, [folder.id])
+  useEffect(() => {
+    const unsubscribe = subscribeEnvFolderSubTabIntent((folderId, tabId) => {
+      if (folderId === folder.id) switchTabFnRef.current?.(tabId)
+    })
+    return unsubscribe
+  }, [folder.id])
   const requestCreation = useRequestCreation()
 
   // Home tab — overview page for the environment folder
@@ -794,10 +821,11 @@ const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ fold
     content: <EnvironmentFolderHome folder={folder} onSwitchTab={handleSwitchTab} {...(onRequestClick ? { onRequestClick } : {})} {...(onRequestAuxClick ? { onRequestAuxClick } : {})} />
   }
 
-  // Configuration tab with environment management
-  const configurationTab: Tab = {
-    id: 'configuration',
-    label: t('folderView.tabs.configuration'),
+  // Environments tab — hosts the env-list editor + per-env variables.
+  // Kept singular to match the sidebar's "Environments" terminology.
+  const environmentsTab: Tab = {
+    id: 'environments',
+    label: t('folderView.tabs.environments'),
     useScrollableElement: false,
     content: <EnvironmentConfigPanel folder={folder} onFolderChange={onFolderChange} />
   }
@@ -839,7 +867,7 @@ const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ fold
   return (
     <BaseFolderView
       folder={folder}
-      additionalTabs={[homeTab, configurationTab]}
+      additionalTabs={[homeTab, environmentsTab]}
       {...(docsContent !== undefined ? { docsContent } : {})}
       defaultActiveTabId="home"
       onSwitchTabReady={handleSwitchTabReady}

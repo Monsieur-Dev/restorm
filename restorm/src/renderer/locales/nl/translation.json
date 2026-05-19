@@ -195,7 +195,7 @@
     "selectEnvironment": "Selecteer een omgeving om variabelen te zien",
     "tabs": {
       "docs": "Docs",
-      "configuration": "Configuratie",
+      "environments": "Omgevingen",
       "notes": "Notities"
     },
     "home": {
@@ -714,7 +714,12 @@
       "topUsed": "Top 10 meest gebruikt",
       "recent": "Laatste requests",
       "description": "Omschrijving",
-      "version": "Versie"
+      "version": "Versie",
+      "quickLinks": {
+        "environments": "Omgevingen",
+        "docs": "Documentatie",
+        "notes": "Notities"
+      }
     }
   }
 }

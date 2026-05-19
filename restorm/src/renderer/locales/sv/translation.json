@@ -195,7 +195,7 @@
     "selectEnvironment": "Välj en miljö för att visa variabler",
     "tabs": {
       "docs": "Dokumentation",
-      "configuration": "Konfiguration",
+      "environments": "Miljöer",
       "notes": "Anteckningar"
     },
     "home": {
@@ -714,7 +714,12 @@
       "topUsed": "Topp 10 mest använda",
       "recent": "Senaste förfrågningar",
       "description": "Beskrivning",
-      "version": "Version"
+      "version": "Version",
+      "quickLinks": {
+        "environments": "Miljöer",
+        "docs": "Dokumentation",
+        "notes": "Anteckningar"
+      }
     }
   }
 }

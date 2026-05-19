@@ -194,7 +194,7 @@
     "selectEnvironment": "변수를 보려면 환경을 선택하세요",
     "tabs": {
       "docs": "문서",
-      "configuration": "구성",
+      "environments": "환경",
       "notes": "메모"
     },
     "home": {
@@ -713,7 +713,12 @@
       "topUsed": "가장 많이 사용된 10 개",
       "recent": "최근 요청",
       "description": "설명",
-      "version": "버전"
+      "version": "버전",
+      "quickLinks": {
+        "environments": "환경",
+        "docs": "문서",
+        "notes": "노트"
+      }
     }
   }
 }

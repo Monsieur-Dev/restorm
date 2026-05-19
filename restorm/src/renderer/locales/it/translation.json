@@ -195,7 +195,7 @@
     "selectEnvironment": "Seleziona un ambiente per vedere le variabili",
     "tabs": {
       "docs": "Docs",
-      "configuration": "Configurazione",
+      "environments": "Ambienti",
       "notes": "Note"
     },
     "home": {
@@ -714,7 +714,12 @@
       "topUsed": "Top 10 più usate",
       "recent": "Ultime richieste",
       "description": "Descrizione",
-      "version": "Versione"
+      "version": "Versione",
+      "quickLinks": {
+        "environments": "Ambienti",
+        "docs": "Documentazione",
+        "notes": "Note"
+      }
     }
   }
 }

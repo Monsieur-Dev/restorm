@@ -131,6 +131,16 @@
 	font-variant-numeric: tabular-nums;
 }
 
+/* ApiCard quick-link row — three buttons (Environments / Docs /
+ * Notes) that open the env-folder workbench tab with the matching
+ * sub-tab pre-activated. Stacked or wrapped depending on width. */
+.empty-bench-quick-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 12px 0 4px;
+}
+
 .empty-bench-tips {
 	list-style: none;
 	margin: 0;

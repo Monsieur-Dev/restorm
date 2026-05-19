@@ -195,7 +195,7 @@
     "selectEnvironment": "Değişkenleri görüntülemek için bir ortam seçin",
     "tabs": {
       "docs": "Belgeler",
-      "configuration": "Yapılandırma",
+      "environments": "Ortamlar",
       "notes": "Notlar"
     },
     "home": {
@@ -714,7 +714,12 @@
       "topUsed": "En çok kullanılan 10",
       "recent": "Son istekler",
       "description": "Açıklama",
-      "version": "Sürüm"
+      "version": "Sürüm",
+      "quickLinks": {
+        "environments": "Ortamlar",
+        "docs": "Belgeler",
+        "notes": "Notlar"
+      }
     }
   }
 }
