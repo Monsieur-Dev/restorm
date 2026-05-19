@@ -46,8 +46,14 @@
 
 /* Code blocks container with copy button */
 .markdown-code-block {
-  position: relative;
   margin: 0.8em 0;
+}
+
+/* Inner wrapper is the copy button's positioning context — it hugs
+ * the <pre> so the button sits inside the frame regardless of any
+ * padding the outer block inherits (e.g. inside a <details>). */
+.markdown-code-block-inner {
+  position: relative;
 }
 
 .markdown-code-block pre {

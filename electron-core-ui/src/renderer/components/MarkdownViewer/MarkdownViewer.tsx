@@ -42,19 +42,27 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ children, copyText, dataTestId })
 
   return (
     <div className="markdown-code-block" {...(dataTestId && { 'data-testid': dataTestId })}>
-      <button
-        type="button"
-        className={`markdown-code-copy-btn ${copied ? 'copied' : ''}`}
-        onClick={handleCopy}
-        title={copied ? 'Copied!' : 'Copy code'}
-        {...(dataTestId && {
-          'data-testid': `${dataTestId}-copy`,
-          'data-is-copied': copied ? 'true' : 'false'
-        })}
-      >
-        <i className={`codicon codicon-${copied ? 'check' : 'copy'}`} />
-      </button>
-      <pre>{children}</pre>
+      {/* Inner wrapper hugs the <pre> exactly so the absolutely-
+        * positioned copy button anchors to the code frame's own
+        * edges — not the outer block's padding box. The outer block
+        * can pick up horizontal padding from contexts like a
+        * <details> disclosure (`details > :not(summary)`), which
+        * would otherwise leave the button hanging past the frame. */}
+      <div className="markdown-code-block-inner">
+        <button
+          type="button"
+          className={`markdown-code-copy-btn ${copied ? 'copied' : ''}`}
+          onClick={handleCopy}
+          title={copied ? 'Copied!' : 'Copy code'}
+          {...(dataTestId && {
+            'data-testid': `${dataTestId}-copy`,
+            'data-is-copied': copied ? 'true' : 'false'
+          })}
+        >
+          <i className={`codicon codicon-${copied ? 'check' : 'copy'}`} />
+        </button>
+        <pre>{children}</pre>
+      </div>
     </div>
   )
 }
