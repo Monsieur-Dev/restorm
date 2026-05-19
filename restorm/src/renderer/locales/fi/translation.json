@@ -12,6 +12,89 @@
       "applyToAll": "Käytä kaikkiin pyyntöihin"
     }
   },
+  "tips": {
+    "cardTitle": "Vinkkejä ja kikkoja",
+    "maximizeTab": {
+      "title": "Suurenna välilehti yhdellä klikkauksella",
+      "body": "Kaksoisnapsauta mitä tahansa workbench-välilehteä näyttääksesi sen koko näytön kokoisena. Palaa edelliseen asetteluun painamalla Esc."
+    },
+    "mcpControl": {
+      "title": "Ohjaa restormia tekoälyllä",
+      "body": "Restormissa on mukana MCP-palvelin, joten Claude Coden kaltaiset tekoälyavustajat voivat listata, avata, muokata ja ajaa pyyntöjäsi, tarkastella vastauksia ja muokata työtilaa ohjelmallisesti – poistumatta keskustelusta."
+    },
+    "envSwitch": {
+      "title": "Vaihda ympäristöä helposti!",
+      "body": "Vaihda nykyisen pyynnön tai koko API:n pyyntöjen ympäristöä napsauttamalla tilarivin painiketta tai napsauttamalla pyynnön lähetyspainiketta hiiren oikealla."
+    },
+    "authRequests": {
+      "title": "Tarvitsetko tunnistautumisen API:n käyttöön?",
+      "body": "Sen sijaan että lähetät pyynnön joka kerta tokenin saamiseksi ja liität sen joka paikkaan, käytä autentikointipyyntöjä. Kun kutsu epäonnistuu (401, 403, …) tai tokenin elinaika päättyy, autentikointipyyntö ajetaan automaattisesti uudelleen tokenin hakemiseksi ja uudelleenkäyttämiseksi. Kätevää!"
+    },
+    "supplyChain": {
+      "title": "Suojaa itseäsi!",
+      "body": "Kuten kaikki ohjelmistot, Restorm käyttää kolmannen osapuolen kirjastoja. Toimitusketjuhyökkäysten estämiseksi kaikki lähtevät kutsut otetaan kiinni alimmalla tasolla, ja varoitamme sinua, jos kolmannen osapuolen kirjasto yrittää varastaa henkilökohtaisia tietojasi!"
+    },
+    "codeSnippets": {
+      "title": "Restorm auttaa sinua koodaamaan!",
+      "body": "Löydä koodisnipettejä jokaiselle pyynnölle integroidaksesi ne ohjelmistoosi. Useita kieliä saatavilla: curl, PowerShell, TypeScript, C# ja paljon muuta!"
+    },
+    "workbenchLayout": {
+      "title": "Järjestä työpöytäsi",
+      "body": "Onko sinulla iso näyttö ja paljon pyyntöjä? Asettele ne rinnakkain, päällekkäin tai miten haluat — vain raahaa välilehti haluamaasi paikkaan. Mukavuutesi takia!"
+    },
+    "persistState": {
+      "title": "Löydä se samanlaisena kuin jätit sen!",
+      "body": "Jos suljet Restormin ja avaat sen uudelleen, löydät sen täsmälleen samassa tilassa kuin jätit sen."
+    },
+    "favorites": {
+      "title": "Jotkut ovat sydäntäsi lähempänä kuin toiset…",
+      "body": "Onko pyyntöjä, jotka ovat sinulle muita tärkeämpiä? Lisää ne suosikkeihin!"
+    },
+    "console": {
+      "title": "Näe paremmin mitä tapahtuu",
+      "body": "Konsoli näyttää API-kutsut sitä mukaa kun lähetät pyyntöjä. Kätevä kopioida ja liittää terminaaliin tarvittaessa! Mikä on makusi: curl vai PowerShell?"
+    },
+    "miniBrowser": {
+      "title": "Kyllästyitkö jatkuvaan ikkunoiden vaihteluun?",
+      "body": "Restormissa on sisäänrakennettu mini-selain. Kätevä, kun sovelluksesi reagoi visuaalisesti API-kutsuihisi."
+    },
+    "apiDocs": {
+      "title": "Dokumentaatio — täällä samassa paikassa",
+      "body": "Ei tarvitse enää siirtyä Restormin ja API:n dokumentaation välillä. Jos API tarjoaa määrittelyn (Swagger, OpenAPI, …), se tuodaan Restormiin ja voit lukea sitä suoraan täällä."
+    },
+    "secrets": {
+      "title": "Suojaa salaisuutesi",
+      "body": "Salasanasi ja auth-tokenisi eivät tallennu suoraan Restorm-tiedostoon. Restorm tallentaa salaisuudet ja pyyntöhistorian erillisiin tiedostoihin. Sinun on huolehdittava, ettet pushaa niitä GitHubiin. Restorm voi myös hakea salaisuudet AWS:stä, GitHubista ja muista lähteistä."
+    },
+    "themes": {
+      "title": "Sinun värisi, sinun tunnelmasi",
+      "body": "Restormin mukana tulee useita värimalleja. Valitse se, joka sopii fiilikseesi."
+    },
+    "search": {
+      "title": "Löydä kaikki nopeasti",
+      "body": "Huomasitko tämän ikkunan yläosan? Restormissa on hakukone, joten et joudu enää etsimään tunteja sitä yhtä oikeaa pyyntöä."
+    },
+    "multiEnv": {
+      "title": "Samat pyynnöt, eri ympäristöt",
+      "body": "Onko sinulla kehitys-, prod- ja staging-ympäristö? Samat pyynnöt, mutta hieman erilaiset URL:t ja tokenit… Käytä ympäristöjä ja muuttujia vaihtaaksesi ne yhdellä klikkauksella. Voit jopa erottaa ne väreillä ja kuvakkeilla, jotta vältyt perjantai-iltapelolta tuotannossa!"
+    },
+    "protocols": {
+      "title": "Enemmän kuin pelkkä REST",
+      "body": "Restorm puhuu REST:iä… ja paljon enemmän! GraphQL, gRPC, SOAP, OData, WebSocket — kaikki nämä protokollat käden ulottuvilla, ilman työkalujen vaihtoa."
+    },
+    "responseTree": {
+      "title": "Näe API-vastaukset visuaalisesti",
+      "body": "Tiesitkö, että voit selata API-vastauksiasi graafisemmin? Restorm näyttää ne interaktiivisena puuna, jota voit selata, taittaa ja avata."
+    },
+    "responseHistory": {
+      "title": "Pyyntöjen historia",
+      "body": "Voit selata kaikkien API-kutsujesi historiaa. Kätevä tapa selvittää, mitä oikeasti tapahtui."
+    },
+    "multiLanguage": {
+      "title": "27 kieltä!",
+      "body": "Restorm puhuu 27 kieltä. Englanti, ranska, espanja, saksa, italia, japani, kiina, korea ja monia muita — valitse omasi asetuksista!"
+    }
+  },
   "authFailureToast": {
     "title": "Todennus epäonnistui",
     "fallbackReason": "Todennuspyyntö ei onnistunut.",
@@ -616,5 +699,22 @@
     "ok": "Tuo",
     "cancel": "Peruuta",
     "dropZone": "Pudotusalue"
+  },
+  "emptyBench": {
+    "importCard": {
+      "title": "Tuo API:si",
+      "body": "Tuo OpenAPI/Swagger-määrittely, GraphQL-skeema, Postman/Bruno/Insomnia-kokoelma tai liitä curl/PowerShell-komento. Restorm jäsentää sen, rakentaa kansiorakenteen ja saa jokaisen päätepisteen valmiiksi."
+    },
+    "recentActivity": {
+      "title": "Viimeisin toiminta",
+      "empty": "Lähetä ensimmäinen pyyntö nähdäksesi sen täällä."
+    },
+    "apiCard": {
+      "favorites": "Suosikit",
+      "topUsed": "Top 10 käytetyimmät",
+      "recent": "Viimeisimmät pyynnöt",
+      "description": "Kuvaus",
+      "version": "Versio"
+    }
   }
 }

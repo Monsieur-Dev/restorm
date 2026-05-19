@@ -1,7 +1,8 @@
 {
   "common": {
     "opened": "Opened",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "import": "Import"
   },
   "file": {
     "untitled": "Untitled",

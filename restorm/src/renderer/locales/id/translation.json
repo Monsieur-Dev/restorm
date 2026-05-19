@@ -11,6 +11,89 @@
       "applyToAll": "Terapkan ke semua permintaan"
     }
   },
+  "tips": {
+    "cardTitle": "Tips & trik",
+    "maximizeTab": {
+      "title": "Maksimalkan tab dengan satu klik",
+      "body": "Klik dua kali tab workbench mana pun untuk menampilkannya layar penuh. Tekan Esc untuk kembali ke tata letak sebelumnya."
+    },
+    "mcpControl": {
+      "title": "Kendalikan restorm dengan AI",
+      "body": "Restorm menyertakan server MCP, sehingga asisten AI seperti Claude Code dapat mencantumkan, membuka, mengedit, dan menjalankan permintaan Anda, memeriksa respons, dan memanipulasi ruang kerja secara programatik — tanpa keluar dari obrolan."
+    },
+    "envSwitch": {
+      "title": "Ganti environment dengan mudah!",
+      "body": "Ubah environment pada permintaan saat ini atau pada semua permintaan di API Anda dengan mengklik tombol di bilah status, atau klik kanan pada tombol kirim permintaan."
+    },
+    "authRequests": {
+      "title": "Perlu autentikasi untuk menggunakan API Anda?",
+      "body": "Daripada mengirim permintaan setiap kali untuk mendapatkan token dan menempelkannya di mana-mana, gunakan permintaan autentikasi. Saat panggilan gagal (401, 403, …) atau masa berlaku token habis, permintaan autentikasi otomatis dijalankan kembali untuk mengambil token dan menggunakannya. Praktis!"
+    },
+    "supplyChain": {
+      "title": "Lindungi dirimu!",
+      "body": "Seperti software lainnya, Restorm menggunakan library pihak ketiga. Untuk mencegah serangan supply chain, semua panggilan keluar ditangkap di level terendah, dan kami akan memperingatkanmu jika sebuah library pihak ketiga mencoba mencuri informasi pribadimu!"
+    },
+    "codeSnippets": {
+      "title": "Restorm membantu Anda menulis kode!",
+      "body": "Temukan snippet kode pada setiap permintaan untuk membantu mengintegrasikannya ke perangkat lunak Anda. Banyak bahasa tersedia: curl, PowerShell, TypeScript, C#, dan banyak lainnya!"
+    },
+    "workbenchLayout": {
+      "title": "Atur ruang kerjamu",
+      "body": "Punya layar besar dan banyak permintaan? Tata mereka berdampingan, bertumpuk, atau sesukamu — cukup seret tab ke posisi yang kamu mau. Semua demi kenyamananmu!"
+    },
+    "persistState": {
+      "title": "Temukan sama persis seperti saat ditinggalkan!",
+      "body": "Jika kamu menutup Restorm lalu membukanya kembali, kamu akan menemukannya dalam keadaan yang sama persis seperti saat kamu meninggalkannya."
+    },
+    "favorites": {
+      "title": "Beberapa lebih dekat di hatimu…",
+      "body": "Punya permintaan yang lebih berarti untukmu? Tandai sebagai favorit!"
+    },
+    "console": {
+      "title": "Lihat apa yang sedang terjadi",
+      "body": "Konsol menampilkan panggilan ke API-mu saat kamu mengirim permintaan. Praktis untuk salin-tempel ke terminal kalau perlu! Pilih rasa favoritmu: curl atau PowerShell?"
+    },
+    "miniBrowser": {
+      "title": "Bosan terus berpindah jendela?",
+      "body": "Restorm dilengkapi mini web browser bawaan. Praktis saat aplikasimu bereaksi secara visual terhadap panggilan API."
+    },
+    "apiDocs": {
+      "title": "Dokumentasi — di sini juga",
+      "body": "Tidak perlu lagi pindah-pindah antara Restorm dan dokumentasi API-mu. Jika API-mu menyediakan spec (Swagger, OpenAPI, …), itu akan diimpor ke Restorm dan bisa kamu baca langsung di sini."
+    },
+    "secrets": {
+      "title": "Lindungi rahasia kamu",
+      "body": "Password dan token autentikasi tidak disimpan langsung di dalam file Restorm. Karena itu Restorm menyimpan rahasia dan riwayat permintaan di file terpisah. Terserah kamu untuk tidak mengunggahnya ke GitHub. Restorm juga bisa mengambil rahasia dari AWS, GitHub, dan sumber lainnya."
+    },
+    "themes": {
+      "title": "Warnamu, suasanamu",
+      "body": "Restorm hadir dengan beberapa skema warna. Pilih yang paling sesuai dengan suasana hatimu."
+    },
+    "search": {
+      "title": "Temukan semuanya, cepat",
+      "body": "Lihat bagian atas jendela ini? Restorm punya pencarian bawaan — tidak perlu lagi berjam-jam mencari permintaan ITU."
+    },
+    "multiEnv": {
+      "title": "Request yang sama, environment berbeda",
+      "body": "Punya environment dev, prod, dan staging? Request-nya sama, hanya URL dan token-nya yang berbeda sedikit… Pakai environments dan variables untuk berpindah dalam satu klik. Kamu bahkan bisa membedakan setiap environment dengan warna dan ikon untuk menghindari panik di production pada Jumat malam!"
+    },
+    "protocols": {
+      "title": "Lebih dari sekadar REST",
+      "body": "Restorm berbicara REST… dan jauh lebih banyak lagi! GraphQL, gRPC, SOAP, OData, WebSocket — semua protokol ini ada di ujung jarimu, tanpa harus pindah tool."
+    },
+    "responseTree": {
+      "title": "Lihat respons API kamu, secara visual",
+      "body": "Tahukah kamu bisa menelusuri respons API-mu dalam bentuk yang lebih grafis? Restorm menampilkannya sebagai pohon interaktif yang bisa dijelajahi, dilipat, dan dibuka kembali."
+    },
+    "responseHistory": {
+      "title": "Riwayat permintaan",
+      "body": "Kamu bisa menelusuri riwayat semua panggilan ke API-mu. Praktis untuk mencari tahu apa yang sebenarnya terjadi."
+    },
+    "multiLanguage": {
+      "title": "27 bahasa!",
+      "body": "Restorm berbicara 27 bahasa. Inggris, Prancis, Spanyol, Jerman, Italia, Jepang, Mandarin, Korea, dan banyak lainnya — pilih bahasamu di pengaturan!"
+    }
+  },
   "authFailureToast": {
     "title": "Autentikasi gagal",
     "fallbackReason": "Permintaan autentikasi tidak berhasil.",
@@ -615,5 +698,22 @@
     "ok": "Impor",
     "cancel": "Batal",
     "dropZone": "Zona lepas"
+  },
+  "emptyBench": {
+    "importCard": {
+      "title": "Impor API kamu",
+      "body": "Bawa spec OpenAPI / Swagger, schema GraphQL, koleksi Postman / Bruno / Insomnia, atau tempel perintah curl / PowerShell. Restorm akan mem-parse-nya, membangun struktur folder, dan setiap endpoint langsung siap."
+    },
+    "recentActivity": {
+      "title": "Aktivitas terbaru",
+      "empty": "Kirim permintaan pertama Anda untuk melihatnya di sini."
+    },
+    "apiCard": {
+      "favorites": "Favorit",
+      "topUsed": "Top 10 paling sering",
+      "recent": "Permintaan terakhir",
+      "description": "Deskripsi",
+      "version": "Versi"
+    }
   }
 }

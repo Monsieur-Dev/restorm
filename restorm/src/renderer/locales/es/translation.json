@@ -12,6 +12,89 @@
       "applyToAll": "Aplicar a todas las peticiones"
     }
   },
+  "tips": {
+    "cardTitle": "Consejos y trucos",
+    "maximizeTab": {
+      "title": "Amplía una pestaña con un clic",
+      "body": "Haz doble clic en cualquier pestaña del banco de trabajo para mostrarla en pantalla completa. Pulsa Esc para volver a la disposición anterior."
+    },
+    "mcpControl": {
+      "title": "Controla restorm con IA",
+      "body": "Restorm incluye un servidor MCP, así que asistentes de IA como Claude Code pueden listar, abrir, editar y ejecutar tus peticiones, inspeccionar respuestas y manipular el espacio de trabajo de forma programática, sin salir de su conversación."
+    },
+    "envSwitch": {
+      "title": "¡Cambia de entorno fácilmente!",
+      "body": "Cambia el entorno de la petición actual o de todas las peticiones de tu API haciendo clic en el botón de la barra de estado, o haciendo clic derecho sobre el botón de envío de la petición."
+    },
+    "authRequests": {
+      "title": "¿Necesitas autenticarte para usar tu API?",
+      "body": "En lugar de lanzar una petición cada vez para obtener un token y copiarlo y pegarlo por todas partes, usa peticiones de autenticación. Cuando una llamada falla (401, 403, …) o caduca tu token, la petición de autenticación se vuelve a ejecutar automáticamente para extraer el token y reutilizarlo. ¡Práctico!"
+    },
+    "supplyChain": {
+      "title": "¡Protégete!",
+      "body": "Como cualquier software, Restorm depende de librerías de terceros. Para evitar ataques de supply chain, todas las llamadas salientes se interceptan al nivel más bajo, y te avisamos si una librería de terceros intenta robar tu información personal."
+    },
+    "codeSnippets": {
+      "title": "¡Restorm te ayuda a programar!",
+      "body": "Encuentra fragmentos de código en cada petición para integrarla en tu software. Hay muchos lenguajes disponibles: curl, PowerShell, TypeScript, C# y mucho más."
+    },
+    "workbenchLayout": {
+      "title": "Organiza tu mesa de trabajo",
+      "body": "¿Tienes una pantalla grande y muchas peticiones? Colócalas en paralelo, apiladas o como prefieras: solo arrastra una pestaña donde la quieras. ¡Todo por tu comodidad!"
+    },
+    "persistState": {
+      "title": "¡Encuéntralo tal como lo dejaste!",
+      "body": "Si cierras Restorm y lo vuelves a abrir, lo encontrarás exactamente en el mismo estado en que lo dejaste."
+    },
+    "favorites": {
+      "title": "Hay algunas que aprecias más que otras…",
+      "body": "¿Algunas peticiones son más importantes para ti? ¡Márcalas como favoritas!"
+    },
+    "console": {
+      "title": "Mira mejor lo que pasa",
+      "body": "La consola te muestra las llamadas a tus APIs a medida que lanzas peticiones. ¡Práctico para copiar y pegar en tu terminal cuando lo necesites! ¿Cuál es tu sabor: curl o PowerShell?"
+    },
+    "miniBrowser": {
+      "title": "¿Cansado de cambiar de ventana todo el tiempo?",
+      "body": "Restorm incluye un mini navegador web. Práctico cuando tu aplicación reacciona visualmente a tus llamadas de API."
+    },
+    "apiDocs": {
+      "title": "La documentación, aquí mismo",
+      "body": "No tienes que ir y venir entre Restorm y la documentación de tu API. Si tu API ofrece una documentación (Swagger, OpenAPI, …), se importa a Restorm y puedes consultarla directamente aquí."
+    },
+    "secrets": {
+      "title": "Protege tus secretos",
+      "body": "Tus contraseñas y tokens de autorización no se guardan directamente dentro del archivo Restorm. Por eso Restorm guarda los secretos y el historial de peticiones en archivos separados. Depende de ti no subirlos a GitHub. Restorm también puede recuperar tus secretos desde AWS, GitHub y otros."
+    },
+    "themes": {
+      "title": "Tus colores, tu estado de ánimo",
+      "body": "Restorm incluye varios esquemas de colores. Elige el que mejor se adapte a tu humor."
+    },
+    "search": {
+      "title": "Encuentra todo, rápido",
+      "body": "¿Has visto la parte de arriba de esta ventana? Restorm incorpora un buscador… Así, no tienes que pasar horas buscando LA petición."
+    },
+    "multiEnv": {
+      "title": "Mismas peticiones, entornos distintos",
+      "body": "¿Tienes un entorno de dev, otro de prod y otro de staging? Son las mismas peticiones, pero no exactamente las mismas URLs ni los mismos tokens… Usa los entornos y las variables para pasar de uno a otro con un clic. ¡Incluso puedes distinguirlos con colores e iconos para ahorrarte los sustos de un viernes por la tarde en producción!"
+    },
+    "protocols": {
+      "title": "Mucho más que REST",
+      "body": "Restorm habla REST… ¡y mucho más! GraphQL, gRPC, SOAP, OData, WebSocket — todos esos protocolos al alcance de tu mano, sin cambiar de herramienta."
+    },
+    "responseTree": {
+      "title": "Visualiza tus respuestas de API",
+      "body": "¿Sabías que puedes ver tus respuestas de API de forma más visual? Restorm las representa como un árbol interactivo que puedes navegar, plegar y desplegar."
+    },
+    "responseHistory": {
+      "title": "Historial de peticiones",
+      "body": "Puedes consultar el historial de todas las llamadas a tus APIs. Útil para descubrir qué pasó exactamente."
+    },
+    "multiLanguage": {
+      "title": "¡27 idiomas!",
+      "body": "Restorm habla 27 idiomas. Inglés, francés, español, alemán, italiano, japonés, chino, coreano y muchos más — elige el tuyo en los ajustes."
+    }
+  },
   "authFailureToast": {
     "title": "Error de autenticación",
     "fallbackReason": "La petición de autenticación no se ha completado.",
@@ -616,5 +699,22 @@
     "ok": "Importar",
     "cancel": "Cancelar",
     "dropZone": "Zona de arrastre"
+  },
+  "emptyBench": {
+    "importCard": {
+      "title": "Importa tu API",
+      "body": "Trae una especificación OpenAPI / Swagger, un esquema GraphQL, una colección Postman / Bruno / Insomnia, o pega un comando curl / PowerShell. Restorm la analiza, construye la estructura de carpetas y aterriza con cada endpoint listo."
+    },
+    "recentActivity": {
+      "title": "Actividad reciente",
+      "empty": "Envíe su primera solicitud para verla aquí."
+    },
+    "apiCard": {
+      "favorites": "Favoritos",
+      "topUsed": "10 más usadas",
+      "recent": "Últimas peticiones",
+      "description": "Descripción",
+      "version": "Versión"
+    }
   }
 }

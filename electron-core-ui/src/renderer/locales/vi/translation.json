@@ -1,7 +1,8 @@
 {
   "common": {
     "opened": "Đã mở",
-    "refresh": "Làm mới"
+    "refresh": "Làm mới",
+    "import": "Nhập"
   },
   "file": {
     "untitled": "Không có tiêu đề",

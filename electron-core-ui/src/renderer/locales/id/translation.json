@@ -1,7 +1,8 @@
 {
   "common": {
     "opened": "Dibuka",
-    "refresh": "Segarkan"
+    "refresh": "Segarkan",
+    "import": "Impor"
   },
   "file": {
     "untitled": "Tanpa judul",

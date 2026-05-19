@@ -98,6 +98,12 @@ declare global {
         get: (guid: string) => Promise<ResponseHistoryDetail | null>
         togglePin: (guid: string, pinned: boolean) => Promise<boolean>
       }
+      requestUsage: {
+        get: () => Promise<Record<string, { count: number; lastSentAt: string; history: string[] }>>
+        onChanged: (
+          callback: (map: Record<string, { count: number; lastSentAt: string; history: string[] }>) => void
+        ) => () => void
+      }
       runtime: {
         getConfig: () => Promise<{
           mcp: { enabled: boolean; port: number | null }

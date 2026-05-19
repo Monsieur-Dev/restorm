@@ -13,6 +13,89 @@
       "applyToAll": "Primijeni na sve zahtjeve"
     }
   },
+  "tips": {
+    "cardTitle": "Savjeti i trikovi",
+    "maximizeTab": {
+      "title": "Maksimizirajte karticu jednim klikom",
+      "body": "Dvostruko kliknite bilo koju karticu workbencha kako biste je prikazali preko cijelog zaslona. Pritisnite Esc za povratak na prethodni raspored."
+    },
+    "mcpControl": {
+      "title": "Upravljajte restorm-om uz AI",
+      "body": "Restorm dolazi s MCP poslužiteljem, pa AI asistenti poput Claude Codea mogu prikazivati, otvarati, uređivati i izvršavati vaše zahtjeve, pregledavati odgovore i programski upravljati radnim prostorom – bez napuštanja razgovora."
+    },
+    "envSwitch": {
+      "title": "Mijenjajte okruženja jednostavno!",
+      "body": "Promijenite okruženje trenutnog zahtjeva ili svih zahtjeva u vašem API-ju klikom na gumb u traci stanja, ili desnim klikom na gumb za slanje zahtjeva."
+    },
+    "authRequests": {
+      "title": "Trebate li se autenticirati za korištenje API-ja?",
+      "body": "Umjesto da svaki put pokrećete zahtjev za dohvaćanje tokena i kopirate ga posvuda, koristite zahtjeve za autentifikaciju. Kada poziv ne uspije (401, 403, …) ili istekne vijek tokena, zahtjev za autentifikaciju se automatski ponovo pokreće kako bi se token izvukao i ponovno koristio. Praktično!"
+    },
+    "supplyChain": {
+      "title": "Zaštitite se!",
+      "body": "Kao i svaki softver, Restorm koristi biblioteke trećih strana. Kako bi se spriječili napadi na opskrbni lanac, svi odlazni pozivi presreću se na najnižoj razini, a obavještavamo vas ako biblioteka treće strane pokuša ukrasti vaše osobne podatke!"
+    },
+    "codeSnippets": {
+      "title": "Restorm vam pomaže pisati kod!",
+      "body": "Pronađite isječke koda na svakom zahtjevu kako bismo vam pomogli integrirati ih u vaš softver. Dostupno je mnogo jezika: curl, PowerShell, TypeScript, C# i još mnogo više!"
+    },
+    "workbenchLayout": {
+      "title": "Organizirajte svoj radni prostor",
+      "body": "Imate veliki zaslon i puno zahtjeva? Stavite ih jedan pored drugog, jedan ispod drugog ili otprilike kako želite — samo povucite karticu tamo gdje želite. Sve za vašu udobnost!"
+    },
+    "persistState": {
+      "title": "Pronađite ga onakvog kakvog ste ostavili!",
+      "body": "Ako zatvorite Restorm i ponovo ga otvorite, pronaći ćete ga u potpuno istom stanju u kojem ste ga ostavili."
+    },
+    "favorites": {
+      "title": "Neki su vam bliži srcu od drugih…",
+      "body": "Imate zahtjeve do kojih vam je više stalo? Dodajte ih u favorite!"
+    },
+    "console": {
+      "title": "Vidite što se događa",
+      "body": "Konzola vam pokazuje pozive prema vašim API-ima dok šaljete zahtjeve. Praktično za kopiranje u terminal kada vam zatreba! Što preferirate: curl ili PowerShell?"
+    },
+    "miniBrowser": {
+      "title": "Umorni od stalnog prebacivanja prozora?",
+      "body": "Restorm dolazi s ugrađenim mini web preglednikom. Praktično kada vaša aplikacija vizualno reagira na API pozive."
+    },
+    "apiDocs": {
+      "title": "Dokumentacija — odmah ovdje",
+      "body": "Više nema potrebe za prebacivanjem između Restorma i dokumentacije vašeg API-ja. Ako vaš API daje specifikaciju (Swagger, OpenAPI, …), uvozi se u Restorm i možete je čitati izravno ovdje."
+    },
+    "secrets": {
+      "title": "Zaštitite svoje tajne",
+      "body": "Vaše lozinke i autorizacijski tokeni ne pohranjuju se izravno u Restorm datoteku. Zato Restorm drži tajne i povijest zahtjeva u zasebnim datotekama. Na vama je da ih ne pushate na GitHub. Restorm može dohvatiti tajne i s AWS-a, GitHub-a i drugih izvora."
+    },
+    "themes": {
+      "title": "Vaše boje, vaše raspoloženje",
+      "body": "Restorm dolazi s nekoliko shema boja. Odaberite onu koja odgovara vašem raspoloženju."
+    },
+    "search": {
+      "title": "Pronađite sve, brzo",
+      "body": "Vidjeli ste vrh ovog prozora? Restorm dolazi s tražilicom — nema više satima traženja TOG zahtjeva."
+    },
+    "multiEnv": {
+      "title": "Isti zahtjevi, različita okruženja",
+      "body": "Imate dev, prod i staging okruženja? Isti zahtjevi, samo ne baš isti URL-ovi i ne baš isti tokeni… Koristite okruženja i varijable za prebacivanje jednim klikom. Svako okruženje možete označiti vlastitom bojom i ikonom — kraj petkovih navečer panika u produkciji!"
+    },
+    "protocols": {
+      "title": "Više od običnog REST-a",
+      "body": "Restorm govori REST… i mnogo više! GraphQL, gRPC, SOAP, OData, WebSocket — svi ti protokoli na dohvat ruke, bez mijenjanja alata."
+    },
+    "responseTree": {
+      "title": "Vizualizirajte API odgovore",
+      "body": "Jeste li znali da možete pregledavati odgovore svog API-ja u grafičkijem obliku? Restorm ih prikazuje kao interaktivno stablo koje možete pretraživati, sklapati i rasklapati."
+    },
+    "responseHistory": {
+      "title": "Povijest zahtjeva",
+      "body": "Možete pregledavati povijest svih poziva prema vašim API-ima. Praktično za otkrivanje što se zapravo dogodilo."
+    },
+    "multiLanguage": {
+      "title": "27 jezika!",
+      "body": "Restorm govori 27 jezika. Engleski, francuski, španjolski, njemački, talijanski, japanski, kineski, korejski i mnogi drugi — odaberi svoj u postavkama!"
+    }
+  },
   "authFailureToast": {
     "title": "Autentifikacija nije uspjela",
     "fallbackReason": "Zahtjev za autentifikaciju nije uspio.",
@@ -617,5 +700,22 @@
     "ok": "Uvezi",
     "cancel": "Odustani",
     "dropZone": "Područje za ispuštanje"
+  },
+  "emptyBench": {
+    "importCard": {
+      "title": "Uvezi svoj API",
+      "body": "Donesi OpenAPI / Swagger specifikaciju, GraphQL shemu, Postman / Bruno / Insomnia kolekciju, ili zalijepi curl / PowerShell naredbu. Restorm to parsira, gradi strukturu mapa i sletjet ćeš sa svakim endpointom spremnim."
+    },
+    "recentActivity": {
+      "title": "Nedavna aktivnost",
+      "empty": "Pošaljite svoj prvi zahtjev da biste ga vidjeli ovdje."
+    },
+    "apiCard": {
+      "favorites": "Favoriti",
+      "topUsed": "Top 10 najkorištenijih",
+      "recent": "Posljednji zahtjevi",
+      "description": "Opis",
+      "version": "Verzija"
+    }
   }
 }

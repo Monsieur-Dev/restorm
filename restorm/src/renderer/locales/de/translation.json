@@ -12,6 +12,89 @@
       "applyToAll": "Auf alle Anfragen anwenden"
     }
   },
+  "tips": {
+    "cardTitle": "Tipps & Tricks",
+    "maximizeTab": {
+      "title": "Tab mit einem Klick maximieren",
+      "body": "Doppelklicke einen Tab im Workbench, um ihn im Vollbild zu öffnen. Drücke Esc, um zur ursprünglichen Anordnung zurückzukehren."
+    },
+    "mcpControl": {
+      "title": "Restorm per KI steuern",
+      "body": "Restorm liefert einen MCP-Server mit, sodass KI-Assistenten wie Claude Code deine Anfragen auflisten, öffnen, bearbeiten und ausführen, Antworten inspizieren und den Arbeitsbereich programmatisch verändern können – ohne den Chat zu verlassen."
+    },
+    "envSwitch": {
+      "title": "Umgebungen einfach wechseln!",
+      "body": "Wechsle die Umgebung der aktuellen Anfrage oder aller Anfragen deiner API mit einem Klick auf die Schaltfläche in der Statusleiste oder per Rechtsklick auf den Senden-Button der Anfrage."
+    },
+    "authRequests": {
+      "title": "Musst du dich für deine API authentifizieren?",
+      "body": "Statt jedes Mal eine Anfrage zu starten, um ein Token zu holen und überall einzufügen, nutze Auth-Requests. Schlägt ein Aufruf fehl (401, 403, …) oder ist dein Token abgelaufen, wird die Auth-Anfrage automatisch erneut ausgeführt, das Token extrahiert und weiterverwendet. Praktisch!"
+    },
+    "supplyChain": {
+      "title": "Schütze dich!",
+      "body": "Wie jede Software nutzt Restorm Drittanbieter-Bibliotheken. Um Supply-Chain-Angriffe zu verhindern, werden alle ausgehenden Aufrufe auf niedrigster Ebene abgefangen, und wir warnen dich, wenn eine Drittanbieter-Bibliothek versucht, deine persönlichen Daten zu stehlen!"
+    },
+    "codeSnippets": {
+      "title": "Restorm hilft beim Programmieren!",
+      "body": "Finde Code-Snippets zu jeder Anfrage, um sie in deiner Software einzubinden. Viele Sprachen verfügbar: curl, PowerShell, TypeScript, C# und vieles mehr!"
+    },
+    "workbenchLayout": {
+      "title": "Organisiere deinen Arbeitsbereich",
+      "body": "Großer Bildschirm und viele Anfragen? Lege sie nebeneinander, untereinander oder ganz nach Belieben – zieh eine Registerkarte einfach dorthin, wo du sie haben willst. Alles für deinen Komfort!"
+    },
+    "persistState": {
+      "title": "Finde es genau so vor, wie du es verlassen hast!",
+      "body": "Wenn du Restorm schließt und wieder öffnest, findest du es genau in dem Zustand vor, in dem du es verlassen hast."
+    },
+    "favorites": {
+      "title": "Manche liegen dir mehr am Herzen…",
+      "body": "Sind dir manche Anfragen wichtiger als andere? Markiere sie als Favoriten!"
+    },
+    "console": {
+      "title": "So siehst du, was passiert",
+      "body": "Die Konsole zeigt dir die Aufrufe deiner APIs in Echtzeit, wenn du Anfragen abschickst. Praktisch zum Kopieren und Einfügen ins Terminal, wenn nötig! Welche Variante magst du: curl oder PowerShell?"
+    },
+    "miniBrowser": {
+      "title": "Genug vom ständigen Fensterwechsel?",
+      "body": "Restorm bringt einen integrierten Mini-Browser mit. Praktisch, wenn deine Anwendung visuell auf deine API-Aufrufe reagiert."
+    },
+    "apiDocs": {
+      "title": "Die Doku — direkt hier",
+      "body": "Kein Wechsel mehr zwischen Restorm und der Dokumentation deiner API nötig. Liefert deine API eine Spezifikation (Swagger, OpenAPI, …), wird sie in Restorm importiert und ist direkt hier einsehbar."
+    },
+    "secrets": {
+      "title": "Schütze deine Geheimnisse",
+      "body": "Deine Passwörter und Auth-Tokens werden nicht direkt in der Restorm-Datei gespeichert. Deshalb legt Restorm Secrets und Anfrage-Historie in separaten Dateien ab. An dir liegt es, sie nicht auf GitHub zu pushen. Restorm kann Secrets auch aus AWS, GitHub oder anderen Quellen abrufen."
+    },
+    "themes": {
+      "title": "Deine Farben, deine Stimmung",
+      "body": "Restorm bringt mehrere Farbschemata mit. Wähle dasjenige, das zu deiner Stimmung passt."
+    },
+    "search": {
+      "title": "Finde alles, schnell",
+      "body": "Hast du den oberen Bereich des Fensters gesehen? Restorm bringt eine Suche mit — schluss damit, stundenlang DIE Anfrage zu suchen."
+    },
+    "multiEnv": {
+      "title": "Gleiche Anfragen, andere Umgebungen",
+      "body": "Hast du Dev, Staging und Prod? Es sind die gleichen Anfragen, nur nicht ganz dieselben URLs, nicht ganz dieselben Tokens… Nutze Umgebungen und Variablen, um per Klick umzuschalten. Du kannst sogar jede Umgebung mit Farbe und Icon kennzeichnen, damit dir die Schrecksekunden vor dem Wochenende in Produktion erspart bleiben!"
+    },
+    "protocols": {
+      "title": "Mehr als nur REST",
+      "body": "Restorm spricht REST … und noch viel mehr! GraphQL, gRPC, SOAP, OData, WebSocket — all diese Protokolle stehen dir direkt zur Verfügung, ohne das Tool zu wechseln."
+    },
+    "responseTree": {
+      "title": "Sieh deine API-Antworten — visuell",
+      "body": "Wusstest du, dass du deine API-Antworten viel grafischer durchstöbern kannst? Restorm zeigt sie als interaktiven Baum, durch den du navigieren, einklappen und ausklappen kannst."
+    },
+    "responseHistory": {
+      "title": "Verlauf der Anfragen",
+      "body": "Du kannst den Verlauf aller Aufrufe deiner APIs einsehen. Praktisch, um nachzuvollziehen, was wirklich passiert ist."
+    },
+    "multiLanguage": {
+      "title": "27 Sprachen!",
+      "body": "Restorm spricht 27 Sprachen. Englisch, Französisch, Spanisch, Deutsch, Italienisch, Japanisch, Chinesisch, Koreanisch und viele mehr — wähle deine in den Einstellungen!"
+    }
+  },
   "authFailureToast": {
     "title": "Authentifizierung fehlgeschlagen",
     "fallbackReason": "Die Authentifizierungsanfrage war nicht erfolgreich.",
@@ -616,5 +699,22 @@
     "ok": "Importieren",
     "cancel": "Abbrechen",
     "dropZone": "Ablagezone"
+  },
+  "emptyBench": {
+    "importCard": {
+      "title": "Importiere deine API",
+      "body": "Bring eine OpenAPI/Swagger-Spec, ein GraphQL-Schema, eine Postman/Bruno/Insomnia-Sammlung mit oder füge einen curl/PowerShell-Befehl ein. Restorm parst sie, baut die Ordnerstruktur auf und liefert jeden Endpunkt vorgefüllt."
+    },
+    "recentActivity": {
+      "title": "Letzte Aktivität",
+      "empty": "Senden Sie Ihre erste Anfrage, um sie hier zu sehen."
+    },
+    "apiCard": {
+      "favorites": "Favoriten",
+      "topUsed": "Top 10 meistgenutzt",
+      "recent": "Letzte Anfragen",
+      "description": "Beschreibung",
+      "version": "Version"
+    }
   }
 }

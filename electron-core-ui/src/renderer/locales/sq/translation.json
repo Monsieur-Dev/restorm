@@ -1,7 +1,8 @@
 {
   "common": {
     "opened": "U hap",
-    "refresh": "Rifresko"
+    "refresh": "Rifresko",
+    "import": "Importo"
   },
   "file": {
     "untitled": "Pa titull",

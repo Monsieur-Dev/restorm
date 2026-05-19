@@ -1,0 +1,133 @@
+<svg viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg" class="empty-bench-tip-illustration" role="img" aria-hidden="true">
+  <style>
+    .rt-node {
+      fill: var(--editor-background, #1e1e1e);
+      stroke: currentColor;
+      stroke-width: 1.2;
+      stroke-linejoin: round;
+    }
+    .rt-link {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.2;
+      stroke-linecap: round;
+      opacity: 0.55;
+    }
+
+    .rt-type-object { fill: #569cd6; }
+    .rt-type-array  { fill: #ea580c; }
+    .rt-type-string { fill: #22c55e; }
+    .rt-key-bar {
+      fill: currentColor;
+      opacity: 0.55;
+    }
+
+    .rt-pointer {
+      fill: currentColor;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linejoin: round;
+    }
+    .rt-sparkle {
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      fill: none;
+      opacity: 0;
+    }
+
+    .rt-children, .rt-grandchildren, .rt-pointer-group, .rt-sparkle {
+      animation-duration: 12s;
+      animation-iteration-count: infinite;
+      animation-fill-mode: both;
+      animation-play-state: paused;
+    }
+    .rt-children       { opacity: 0; animation-name: rt-children-show; }
+    .rt-grandchildren  { opacity: 0; animation-name: rt-grand-show; }
+    .rt-pointer-group  { animation-name: rt-pointer-move; animation-timing-function: ease-in-out; opacity: 0; }
+    .rt-sparkle        { animation-name: rt-burst; animation-timing-function: linear; }
+
+    @keyframes rt-children-show {
+      0%, 22% { opacity: 0; }
+      25%, 100% { opacity: 1; }
+    }
+    @keyframes rt-grand-show {
+      0%, 48% { opacity: 0; }
+      51%, 100% { opacity: 1; }
+    }
+    @keyframes rt-pointer-move {
+      0%, 9%  { opacity: 0; transform: translate(110px, 130px); }
+      12%     { opacity: 1; transform: translate(110px, 130px); }
+      19%     { opacity: 1; transform: translate(33px, 75px); }
+      24%     { opacity: 0; transform: translate(33px, 75px); }
+      40%     { opacity: 0; transform: translate(103px, 75px); }
+      43%     { opacity: 1; transform: translate(103px, 75px); }
+      50%     { opacity: 0; transform: translate(103px, 75px); }
+      100%    { opacity: 0; transform: translate(103px, 75px); }
+    }
+    /* Two click bursts: one on the root (~22 %), one on the
+       middle child (~48 %). */
+    @keyframes rt-burst {
+      0%, 20%   { opacity: 0; transform: translate(var(--rt-nx), var(--rt-ny)); }
+      22%       { opacity: 1; transform: translate(0, 0); }
+      24%       { opacity: 0; transform: translate(calc(var(--rt-nx) * -0.6), calc(var(--rt-ny) * -0.6)); }
+      25%, 46%  { opacity: 0; transform: translate(var(--rt-nx), var(--rt-ny)); }
+      48%       { opacity: 1; transform: translate(0, 0); }
+      50%       { opacity: 0; transform: translate(calc(var(--rt-nx) * -0.6), calc(var(--rt-ny) * -0.6)); }
+      51%, 100% { opacity: 0; }
+    }
+  </style>
+
+  <!-- =========== Root node (always visible) =========== -->
+  <rect class="rt-node" x="10" y="64" width="46" height="22" rx="4" />
+  <rect class="rt-type-object" x="14" y="71" width="6" height="8" rx="1" />
+  <rect class="rt-key-bar"     x="24" y="71" width="26" height="8" rx="1" />
+
+  <!-- =========== Children + their links to root =========== -->
+  <g class="rt-children">
+    <!-- Links from root to each child -->
+    <path class="rt-link" d="M 56 75 C 68 75 68 39 80 39" />
+    <path class="rt-link" d="M 56 75 L 80 75" />
+    <path class="rt-link" d="M 56 75 C 68 75 68 111 80 111" />
+
+    <!-- Child 1 — another object -->
+    <rect class="rt-node" x="80" y="28" width="46" height="22" rx="4" />
+    <rect class="rt-type-object" x="84" y="35" width="6" height="8" rx="1" />
+    <rect class="rt-key-bar"     x="94" y="35" width="26" height="8" rx="1" />
+
+    <!-- Child 2 — array -->
+    <rect class="rt-node" x="80" y="64" width="46" height="22" rx="4" />
+    <rect class="rt-type-array" x="84" y="71" width="6" height="8" rx="1" />
+    <rect class="rt-key-bar"    x="94" y="71" width="22" height="8" rx="1" />
+
+    <!-- Child 3 — string -->
+    <rect class="rt-node" x="80" y="100" width="46" height="22" rx="4" />
+    <rect class="rt-type-string" x="84" y="107" width="6" height="8" rx="1" />
+    <rect class="rt-key-bar"     x="94" y="107" width="20" height="8" rx="1" />
+  </g>
+
+  <!-- =========== Grandchildren of Child 2 + their links =========== -->
+  <g class="rt-grandchildren">
+    <path class="rt-link" d="M 126 75 C 138 75 138 63 150 63" />
+    <path class="rt-link" d="M 126 75 C 138 75 138 99 150 99" />
+
+    <rect class="rt-node" x="150" y="52" width="46" height="22" rx="4" />
+    <rect class="rt-type-string" x="154" y="59" width="6" height="8" rx="1" />
+    <rect class="rt-key-bar"     x="164" y="59" width="26" height="8" rx="1" />
+
+    <rect class="rt-node" x="150" y="88" width="46" height="22" rx="4" />
+    <rect class="rt-type-string" x="154" y="95" width="6" height="8" rx="1" />
+    <rect class="rt-key-bar"     x="164" y="95" width="22" height="8" rx="1" />
+  </g>
+
+  <!-- =========== Cursor + click sparkles =========== -->
+  <g class="rt-pointer-group">
+    <line class="rt-sparkle" x1="-2" y1="-3" x2="-8"  y2="-10" style="--rt-nx: 4px;  --rt-ny: 5px" />
+    <line class="rt-sparkle" x1="-4" y1="-1" x2="-12" y2="-2"  style="--rt-nx: 6px;  --rt-ny: 1px" />
+    <line class="rt-sparkle" x1="-1" y1="-4" x2="-2"  y2="-12" style="--rt-nx: 1px;  --rt-ny: 6px" />
+    <line class="rt-sparkle" x1="2"  y1="-4" x2="4"   y2="-11" style="--rt-nx: -2px; --rt-ny: 6px" />
+    <line class="rt-sparkle" x1="-3" y1="2"  x2="-10" y2="6"   style="--rt-nx: 5px;  --rt-ny: -3px" />
+    <line class="rt-sparkle" x1="5"  y1="-2" x2="11"  y2="-6"  style="--rt-nx: -4px; --rt-ny: 3px" />
+    <path class="rt-pointer" d="M 0 0 L 0 17 L 4.5 12.5 L 7.5 19 L 10 18 L 7.2 11.5 L 13 11.5 Z" />
+  </g>
+</svg>

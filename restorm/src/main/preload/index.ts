@@ -798,6 +798,32 @@ contextBridge.exposeInMainWorld('restorm', {
       return result as boolean
     }
   },
+  requestUsage: {
+    /** Fetch the full per-request usage map: count + lastSentAt + last
+     * 10 send timestamps, keyed by request id. The EmptyBench ApiCard
+     * + RecentActivityCard filter this against the open project's
+     * tree to render per-API "Top played" / "Recent" lists. */
+    get: async (): Promise<Record<string, { count: number; lastSentAt: string; history: string[] }>> => {
+      const result: unknown = await ipcRenderer.invoke('request-usage:get')
+      return result as Record<string, { count: number; lastSentAt: string; history: string[] }>
+    },
+    /** Subscribe to push events fired every time the map mutates
+     * (new send recorded, or a request deleted invalidated its
+     * entry). The callback receives the fresh full snapshot — no
+     * diffing required on the renderer side. */
+    onChanged: (
+      callback: (map: Record<string, { count: number; lastSentAt: string; history: string[] }>) => void
+    ): (() => void) => {
+      const handler = (
+        _event: Electron.IpcRendererEvent,
+        map: Record<string, { count: number; lastSentAt: string; history: string[] }>
+      ): void => {
+        callback(map)
+      }
+      ipcRenderer.on('request-usage:changed', handler)
+      return () => { ipcRenderer.removeListener('request-usage:changed', handler) }
+    }
+  },
   runtime: {
     /** Per-boot runtime config (MCP + GraphQL endpoint). Both ports
      * are picked at startup — the renderer reads them once and caches

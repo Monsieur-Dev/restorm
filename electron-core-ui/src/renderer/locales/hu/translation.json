@@ -1,7 +1,8 @@
 {
   "common": {
     "opened": "Megnyitva",
-    "refresh": "Frissítés"
+    "refresh": "Frissítés",
+    "import": "Importálás"
   },
   "file": {
     "untitled": "Névtelen",

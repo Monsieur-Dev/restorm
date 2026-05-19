@@ -1,0 +1,169 @@
+<svg viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg" class="empty-bench-tip-illustration" role="img" aria-hidden="true">
+  <style>
+    .sr-window {
+      fill: var(--editor-background, #1e1e1e);
+      stroke: currentColor;
+      stroke-width: 1.4;
+      stroke-linejoin: round;
+    }
+    .sr-titlebar { fill: #2d2d30; }
+    .sr-search-box {
+      fill: #ffffff;
+      stroke: currentColor;
+      stroke-width: 1;
+      stroke-linejoin: round;
+    }
+    .sr-search-icon {
+      stroke: #6b7280;
+      stroke-width: 1.4;
+      fill: none;
+    }
+    .sr-typed { fill: #1f2937; }
+
+    .sr-dropdown {
+      fill: #1f2937;
+      stroke: currentColor;
+      stroke-width: 1;
+      stroke-linejoin: round;
+    }
+    .sr-row-hover { fill: #374151; }
+    .sr-row-badge--get  { fill: #16a34a; }
+    .sr-row-badge--post { fill: #2563eb; }
+    .sr-row-badge--put  { fill: #f59e0b; }
+    .sr-row-text { fill: #d4d4d4; opacity: 0.55; }
+
+    .sr-tooltip {
+      fill: var(--editor-background, #1e1e1e);
+      stroke: currentColor;
+      stroke-width: 1.2;
+      stroke-linejoin: round;
+    }
+    .sr-tooltip-h1   { fill: #ffffff; opacity: 0.85; }
+    .sr-tooltip-text { fill: currentColor; opacity: 0.4; }
+
+    .sr-pointer {
+      fill: currentColor;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linejoin: round;
+    }
+    .sr-sparkle {
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      fill: none;
+      opacity: 0;
+    }
+
+    .sr-anim {
+      animation-duration: 12s;
+      animation-iteration-count: infinite;
+      animation-fill-mode: both;
+      animation-play-state: paused;
+      animation-timing-function: ease-out;
+    }
+    .sr-anim--typed    { animation-name: sr-typed-grow;    transform-box: fill-box; transform-origin: 0% 50%; transform: scaleX(0); }
+    .sr-anim--dropdown { animation-name: sr-dropdown-show; opacity: 0; transform: translateY(-4px); }
+    .sr-anim--hover    { animation-name: sr-hover-show;    opacity: 0; }
+    .sr-anim--tooltip  { animation-name: sr-tooltip-show;  opacity: 0; transform: translateX(-6px); transform-box: fill-box; }
+    .sr-pointer-group  { animation-name: sr-pointer-move;  animation-timing-function: ease-in-out; opacity: 0; }
+    .sr-sparkle        { animation-name: sr-burst;         animation-timing-function: linear; }
+
+    @keyframes sr-pointer-move {
+      0%, 8%   { opacity: 0; transform: translate(110px, 130px); }
+      11%      { opacity: 1; transform: translate(110px, 130px); }
+      19%      { opacity: 1; transform: translate(110px, 17px); }
+      40%      { opacity: 1; transform: translate(110px, 17px); }
+      47%      { opacity: 1; transform: translate(110px, 65px); }
+      96%      { opacity: 1; transform: translate(110px, 65px); }
+      100%     { opacity: 0; transform: translate(110px, 65px); }
+    }
+    @keyframes sr-burst {
+      0%, 19% { opacity: 0; transform: translate(var(--sr-nx), var(--sr-ny)); }
+      22%     { opacity: 1; transform: translate(0, 0); }
+      25%     { opacity: 0; transform: translate(calc(var(--sr-nx) * -0.6), calc(var(--sr-ny) * -0.6)); }
+      26%, 100% { opacity: 0; }
+    }
+    @keyframes sr-typed-grow {
+      0%, 22%  { transform: scaleX(0); }
+      32%, 100% { transform: scaleX(1); }
+    }
+    @keyframes sr-dropdown-show {
+      0%, 30%  { opacity: 0; transform: translateY(-4px); }
+      40%, 95% { opacity: 1; transform: translateY(0); }
+      100%     { opacity: 0; transform: translateY(-4px); }
+    }
+    @keyframes sr-hover-show {
+      0%, 46%  { opacity: 0; }
+      50%, 95% { opacity: 1; }
+      100%     { opacity: 0; }
+    }
+    @keyframes sr-tooltip-show {
+      0%, 54%  { opacity: 0; transform: translateX(-6px); }
+      62%, 95% { opacity: 1; transform: translateX(0); }
+      100%     { opacity: 0; transform: translateX(-6px); }
+    }
+  </style>
+
+  <!-- Window outline + title bar -->
+  <rect class="sr-window" x="10" y="8" width="200" height="134" rx="8" />
+  <path d="M 10 16 A 8 8 0 0 1 18 8 L 202 8 A 8 8 0 0 1 210 16 L 210 26 L 10 26 Z" class="sr-titlebar" />
+
+  <!-- Search box centred in the title strip -->
+  <rect class="sr-search-box" x="50" y="11" width="120" height="12" rx="4" />
+  <!-- Magnifying glass icon inside the search box -->
+  <circle class="sr-search-icon" cx="56" cy="17" r="2.4" />
+  <line class="sr-search-icon" x1="58" y1="19" x2="60" y2="21" />
+  <!-- Typed text indicator — animates width from 0 -->
+  <rect class="sr-typed sr-anim sr-anim--typed" x="63" y="14" width="60" height="6" rx="1.5" />
+
+  <!-- Results dropdown -->
+  <g class="sr-anim sr-anim--dropdown">
+    <rect class="sr-dropdown" x="50" y="30" width="120" height="60" rx="4" />
+
+    <!-- Row hover highlight on row 3 (active result) -->
+    <rect class="sr-row-hover sr-anim sr-anim--hover" x="52" y="58" width="116" height="14" rx="2" />
+
+    <!-- Row 1 -->
+    <rect class="sr-row-badge--get" x="56" y="35" width="14" height="5" rx="1" />
+    <rect class="sr-row-text"       x="74" y="35" width="78" height="5" rx="1" />
+
+    <!-- Row 2 (the hovered one) -->
+    <rect class="sr-row-badge--post" x="56" y="49" width="14" height="5" rx="1" />
+    <rect class="sr-row-text"        x="74" y="49" width="86" height="5" rx="1" />
+
+    <!-- Row 3 -->
+    <rect class="sr-row-badge--put" x="56" y="63" width="14" height="5" rx="1" />
+    <rect class="sr-row-text"       x="74" y="63" width="72" height="5" rx="1" />
+
+    <!-- Row 4 -->
+    <rect class="sr-row-badge--get" x="56" y="77" width="14" height="5" rx="1" />
+    <rect class="sr-row-text"       x="74" y="77" width="64" height="5" rx="1" />
+  </g>
+
+  <!-- Hover tooltip with docs (chevron on the LEFT, pointing back at
+       the hovered result row — row 3, centred at y=65). -->
+  <g class="sr-anim sr-anim--tooltip">
+    <path
+      class="sr-tooltip"
+      d="M 180 50 L 216 50 A 4 4 0 0 1 220 54 L 220 88 A 4 4 0 0 1 216 92 L 180 92 L 180 69 L 174 65 L 180 61 L 180 50 Z"
+    />
+    <!-- Docs content -->
+    <rect class="sr-tooltip-h1"   x="184" y="56" width="26" height="5" rx="1" />
+    <rect class="sr-tooltip-text" x="184" y="66" width="32" height="3" rx="1" />
+    <rect class="sr-tooltip-text" x="184" y="72" width="28" height="3" rx="1" />
+    <rect class="sr-tooltip-text" x="184" y="78" width="32" height="3" rx="1" />
+    <rect class="sr-tooltip-text" x="184" y="84" width="22" height="3" rx="1" />
+  </g>
+
+  <!-- Pointer + click sparkles -->
+  <g class="sr-anim sr-pointer-group">
+    <line class="sr-sparkle" x1="-2" y1="-3" x2="-8"  y2="-10" style="--sr-nx: 4px;  --sr-ny: 5px" />
+    <line class="sr-sparkle" x1="-4" y1="-1" x2="-12" y2="-2"  style="--sr-nx: 6px;  --sr-ny: 1px" />
+    <line class="sr-sparkle" x1="-1" y1="-4" x2="-2"  y2="-12" style="--sr-nx: 1px;  --sr-ny: 6px" />
+    <line class="sr-sparkle" x1="2"  y1="-4" x2="4"   y2="-11" style="--sr-nx: -2px; --sr-ny: 6px" />
+    <line class="sr-sparkle" x1="-3" y1="2"  x2="-10" y2="6"   style="--sr-nx: 5px;  --sr-ny: -3px" />
+    <line class="sr-sparkle" x1="5"  y1="-2" x2="11"  y2="-6"  style="--sr-nx: -4px; --sr-ny: 3px" />
+    <path class="sr-pointer" d="M 0 0 L 0 17 L 4.5 12.5 L 7.5 19 L 10 18 L 7.2 11.5 L 13 11.5 Z" />
+  </g>
+</svg>

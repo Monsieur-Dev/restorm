@@ -1,0 +1,145 @@
+<svg viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg" class="empty-bench-tip-illustration" role="img" aria-hidden="true">
+  <style>
+    .cn-window {
+      fill: #1e1e1e;
+      stroke: currentColor;
+      stroke-width: 1.4;
+      stroke-linejoin: round;
+    }
+    .cn-titlebar { fill: #2d2d30; }
+    .cn-light--r { fill: #ff5f56; }
+    .cn-light--y { fill: #ffbd2e; }
+    .cn-light--g { fill: #27c93f; }
+
+    .cn-tok { stroke: none; }
+    .cn-prompt   { fill: #27c93f; }
+    .cn-keyword  { fill: #569cd6; }
+    .cn-method   { fill: #dcdcaa; }
+    .cn-string   { fill: #ce9178; }
+    .cn-ident    { fill: #d4d4d4; }
+    .cn-success  { fill: #4ec9b0; }
+    .cn-error    { fill: #f48771; }
+    .cn-comment  { fill: #6a9955; }
+    .cn-function { fill: #dcdcaa; }
+
+    .cn-lines {
+      animation-name: cn-scroll;
+      animation-duration: 12s;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+      animation-fill-mode: both;
+      animation-play-state: paused;
+    }
+    /* One "set" of 8 lines is 112 px tall (14 px per line). The two
+       sets are stacked vertically; we translate the container by
+       exactly one set's height so the second set seamlessly takes
+       the first set's place at the loop seam. */
+    @keyframes cn-scroll {
+      0%   { transform: translateY(0); }
+      100% { transform: translateY(-112px); }
+    }
+  </style>
+
+  <defs>
+    <clipPath id="cn-viewport">
+      <rect x="14" y="28" width="192" height="106" rx="2" />
+    </clipPath>
+  </defs>
+
+  <!-- Window shell + title strip -->
+  <rect class="cn-window" x="10" y="12" width="200" height="128" rx="8" />
+  <path d="M 10 20 A 8 8 0 0 1 18 12 L 202 12 A 8 8 0 0 1 210 20 L 210 28 L 10 28 Z" class="cn-titlebar" />
+  <circle class="cn-light--r" cx="20" cy="20" r="3" />
+  <circle class="cn-light--y" cx="30" cy="20" r="3" />
+  <circle class="cn-light--g" cx="40" cy="20" r="3" />
+
+  <!-- Scrolling content -->
+  <g clip-path="url(#cn-viewport)">
+    <g class="cn-lines">
+      <!-- Set 1 -->
+      <!-- Line 1: $ curl -X GET <url> -->
+      <rect class="cn-tok cn-prompt"  x="20" y="34" width="6"  height="6" rx="1" />
+      <rect class="cn-tok cn-keyword" x="30" y="34" width="20" height="6" rx="1" />
+      <rect class="cn-tok cn-ident"   x="54" y="34" width="10" height="6" rx="1" />
+      <rect class="cn-tok cn-method"  x="68" y="34" width="20" height="6" rx="1" />
+      <rect class="cn-tok cn-string"  x="92" y="34" width="98" height="6" rx="1" />
+
+      <!-- Line 2: > 200 OK -->
+      <rect class="cn-tok cn-prompt"  x="20" y="48" width="6"  height="6" rx="1" />
+      <rect class="cn-tok cn-success" x="30" y="48" width="18" height="6" rx="1" />
+      <rect class="cn-tok cn-ident"   x="52" y="48" width="14" height="6" rx="1" />
+
+      <!-- Line 3: $ curl -X POST <url> -d '{...}' -->
+      <rect class="cn-tok cn-prompt"  x="20" y="62" width="6"  height="6" rx="1" />
+      <rect class="cn-tok cn-keyword" x="30" y="62" width="20" height="6" rx="1" />
+      <rect class="cn-tok cn-ident"   x="54" y="62" width="10" height="6" rx="1" />
+      <rect class="cn-tok cn-method"  x="68" y="62" width="24" height="6" rx="1" />
+      <rect class="cn-tok cn-string"  x="96" y="62" width="68" height="6" rx="1" />
+      <rect class="cn-tok cn-ident"   x="168" y="62" width="10" height="6" rx="1" />
+
+      <!-- Line 4: > 401 Unauthorized -->
+      <rect class="cn-tok cn-prompt"  x="20" y="76" width="6"  height="6" rx="1" />
+      <rect class="cn-tok cn-error"   x="30" y="76" width="18" height="6" rx="1" />
+      <rect class="cn-tok cn-ident"   x="52" y="76" width="62" height="6" rx="1" />
+
+      <!-- Line 5: comment // retry with auth header -->
+      <rect class="cn-tok cn-comment" x="20" y="90" width="118" height="6" rx="1" />
+
+      <!-- Line 6: $ Invoke-RestMethod -Uri "..." -Method POST -->
+      <rect class="cn-tok cn-prompt"   x="20" y="104" width="6"  height="6" rx="1" />
+      <rect class="cn-tok cn-function" x="30" y="104" width="76" height="6" rx="1" />
+      <rect class="cn-tok cn-ident"    x="110" y="104" width="22" height="6" rx="1" />
+      <rect class="cn-tok cn-string"   x="136" y="104" width="48" height="6" rx="1" />
+
+      <!-- Line 7: -Headers @{ Authorization = "Bearer ..." } -->
+      <rect class="cn-tok cn-ident"   x="30" y="118" width="32" height="6" rx="1" />
+      <rect class="cn-tok cn-keyword" x="66" y="118" width="14" height="6" rx="1" />
+      <rect class="cn-tok cn-ident"   x="84" y="118" width="46" height="6" rx="1" />
+      <rect class="cn-tok cn-string"  x="134" y="118" width="56" height="6" rx="1" />
+
+      <!-- Line 8: > StatusCode : 200 -->
+      <rect class="cn-tok cn-prompt"  x="20" y="132" width="6"  height="6" rx="1" />
+      <rect class="cn-tok cn-ident"   x="30" y="132" width="50" height="6" rx="1" />
+      <rect class="cn-tok cn-success" x="84" y="132" width="18" height="6" rx="1" />
+
+      <!-- Set 2 (identical to Set 1, offset by +112 in y, so the
+           translate animation can wrap seamlessly). -->
+      <rect class="cn-tok cn-prompt"  x="20" y="146" width="6"  height="6" rx="1" />
+      <rect class="cn-tok cn-keyword" x="30" y="146" width="20" height="6" rx="1" />
+      <rect class="cn-tok cn-ident"   x="54" y="146" width="10" height="6" rx="1" />
+      <rect class="cn-tok cn-method"  x="68" y="146" width="20" height="6" rx="1" />
+      <rect class="cn-tok cn-string"  x="92" y="146" width="98" height="6" rx="1" />
+
+      <rect class="cn-tok cn-prompt"  x="20" y="160" width="6"  height="6" rx="1" />
+      <rect class="cn-tok cn-success" x="30" y="160" width="18" height="6" rx="1" />
+      <rect class="cn-tok cn-ident"   x="52" y="160" width="14" height="6" rx="1" />
+
+      <rect class="cn-tok cn-prompt"  x="20" y="174" width="6"  height="6" rx="1" />
+      <rect class="cn-tok cn-keyword" x="30" y="174" width="20" height="6" rx="1" />
+      <rect class="cn-tok cn-ident"   x="54" y="174" width="10" height="6" rx="1" />
+      <rect class="cn-tok cn-method"  x="68" y="174" width="24" height="6" rx="1" />
+      <rect class="cn-tok cn-string"  x="96" y="174" width="68" height="6" rx="1" />
+      <rect class="cn-tok cn-ident"   x="168" y="174" width="10" height="6" rx="1" />
+
+      <rect class="cn-tok cn-prompt"  x="20" y="188" width="6"  height="6" rx="1" />
+      <rect class="cn-tok cn-error"   x="30" y="188" width="18" height="6" rx="1" />
+      <rect class="cn-tok cn-ident"   x="52" y="188" width="62" height="6" rx="1" />
+
+      <rect class="cn-tok cn-comment" x="20" y="202" width="118" height="6" rx="1" />
+
+      <rect class="cn-tok cn-prompt"   x="20" y="216" width="6"  height="6" rx="1" />
+      <rect class="cn-tok cn-function" x="30" y="216" width="76" height="6" rx="1" />
+      <rect class="cn-tok cn-ident"    x="110" y="216" width="22" height="6" rx="1" />
+      <rect class="cn-tok cn-string"   x="136" y="216" width="48" height="6" rx="1" />
+
+      <rect class="cn-tok cn-ident"   x="30" y="230" width="32" height="6" rx="1" />
+      <rect class="cn-tok cn-keyword" x="66" y="230" width="14" height="6" rx="1" />
+      <rect class="cn-tok cn-ident"   x="84" y="230" width="46" height="6" rx="1" />
+      <rect class="cn-tok cn-string"  x="134" y="230" width="56" height="6" rx="1" />
+
+      <rect class="cn-tok cn-prompt"  x="20" y="244" width="6"  height="6" rx="1" />
+      <rect class="cn-tok cn-ident"   x="30" y="244" width="50" height="6" rx="1" />
+      <rect class="cn-tok cn-success" x="84" y="244" width="18" height="6" rx="1" />
+    </g>
+  </g>
+</svg>

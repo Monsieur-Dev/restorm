@@ -1,7 +1,8 @@
 {
   "common": {
     "opened": "開いた状態",
-    "refresh": "更新"
+    "refresh": "更新",
+    "import": "インポート"
   },
   "file": {
     "untitled": "無題",

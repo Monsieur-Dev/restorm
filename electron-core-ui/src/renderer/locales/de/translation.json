@@ -1,7 +1,8 @@
 {
   "common": {
     "opened": "Geöffnet",
-    "refresh": "Aktualisieren"
+    "refresh": "Aktualisieren",
+    "import": "Importieren"
   },
   "file": {
     "untitled": "Unbenannt",

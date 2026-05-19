@@ -1,7 +1,8 @@
 {
   "common": {
     "opened": "열림",
-    "refresh": "새로 고침"
+    "refresh": "새로 고침",
+    "import": "가져오기"
   },
   "file": {
     "untitled": "제목 없음",

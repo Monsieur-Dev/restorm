@@ -13,6 +13,89 @@
       "applyToAll": "Aplică la toate cererile"
     }
   },
+  "tips": {
+    "cardTitle": "Sfaturi și trucuri",
+    "maximizeTab": {
+      "title": "Maximizează o filă cu un clic",
+      "body": "Dublu-clic pe orice filă din workbench pentru a o afișa pe ecran complet. Apasă Esc pentru a reveni la aspectul anterior."
+    },
+    "mcpControl": {
+      "title": "Controlează restorm cu AI",
+      "body": "Restorm include un server MCP, astfel încât asistenții AI precum Claude Code pot lista, deschide, edita și executa cererile tale, pot inspecta răspunsurile și pot manipula spațiul de lucru programatic – fără să părăsească conversația."
+    },
+    "envSwitch": {
+      "title": "Schimbă mediile cu ușurință!",
+      "body": "Schimbă mediul cererii curente sau al tuturor cererilor din API-ul tău dând clic pe butonul din bara de stare, ori clic dreapta pe butonul de trimitere al cererii."
+    },
+    "authRequests": {
+      "title": "Trebuie să te autentifici pentru a-ți folosi API-ul?",
+      "body": "În loc să lansezi o cerere de fiecare dată pentru a obține un token și a-l copia peste tot, folosește cererile de autentificare. Când un apel eșuează (401, 403, …) sau expiră durata de viață a tokenului, cererea de autentificare este rulată automat din nou pentru a extrage tokenul și a-l reutiliza. Practic!"
+    },
+    "supplyChain": {
+      "title": "Protejează-te!",
+      "body": "Ca orice software, Restorm folosește biblioteci terțe. Pentru a preveni atacurile asupra lanțului de aprovizionare, toate apelurile ieșite sunt interceptate la nivelul cel mai jos, iar te avertizăm dacă o bibliotecă terță încearcă să-ți fure datele personale!"
+    },
+    "codeSnippets": {
+      "title": "Restorm te ajută să programezi!",
+      "body": "Găsește fragmente de cod la fiecare cerere pentru a te ajuta să le integrezi în software-ul tău. Multe limbaje sunt disponibile: curl, PowerShell, TypeScript, C# și multe altele!"
+    },
+    "workbenchLayout": {
+      "title": "Organizează-ți spațiul de lucru",
+      "body": "Ai un ecran mare și multe cereri? Pune-le una lângă alta, una sub alta sau aproape oricum vrei — pur și simplu trage o filă acolo unde dorești. Totul pentru confortul tău!"
+    },
+    "persistState": {
+      "title": "Regăsește-l așa cum l-ai lăsat!",
+      "body": "Dacă închizi Restorm și îl deschizi din nou, îl vei regăsi exact în aceeași stare în care l-ai lăsat."
+    },
+    "favorites": {
+      "title": "Unele îți sunt mai dragi decât altele…",
+      "body": "Ai cereri care îți sunt mai apropiate de suflet? Marchează-le ca favorite!"
+    },
+    "console": {
+      "title": "Vezi ce se întâmplă",
+      "body": "Consola îți arată apelurile către API-uri pe măsură ce lansezi cereri. Practic pentru a le copia în terminal când ai nevoie! Ce preferi: curl sau PowerShell?"
+    },
+    "miniBrowser": {
+      "title": "Sătul să tot schimbi fereastra?",
+      "body": "Restorm include un mini browser web. Practic atunci când aplicația ta reacționează vizual la apelurile API."
+    },
+    "apiDocs": {
+      "title": "Documentația — chiar aici",
+      "body": "Nu mai trebuie să schimbi între Restorm și documentația API-ului tău. Dacă API-ul oferă o specificație (Swagger, OpenAPI, …), aceasta este importată în Restorm și o poți consulta direct aici."
+    },
+    "secrets": {
+      "title": "Protejează-ți secretele",
+      "body": "Parolele și tokenurile tale de autorizare nu sunt salvate direct în fișierul Restorm. De aceea, Restorm stochează secretele și istoricul cererilor în fișiere separate. Depinde de tine să nu le urci pe GitHub. Restorm poate prelua secretele și din AWS, GitHub sau alte surse."
+    },
+    "themes": {
+      "title": "Culorile tale, starea ta",
+      "body": "Restorm vine cu mai multe scheme de culori. Alege-o pe cea care se potrivește stării tale."
+    },
+    "search": {
+      "title": "Găsește orice, repede",
+      "body": "Ai văzut partea de sus a acestei ferestre? Restorm include un motor de căutare — gata cu orele de căutat ACEA cerere."
+    },
+    "multiEnv": {
+      "title": "Aceleași cereri, medii diferite",
+      "body": "Ai un mediu de dev, unul de prod și unul de staging? Aceleași cereri, dar nu chiar aceleași URL-uri și nu chiar aceleași tokenuri… Folosește mediile și variabilele ca să comuți între ele cu un singur clic. Le poți chiar diferenția cu culori și iconițe, ca să eviți spaimele de vineri seara dinaintea weekendului în producție!"
+    },
+    "protocols": {
+      "title": "Mult mai mult decât REST",
+      "body": "Restorm vorbește REST… și mult mai mult! GraphQL, gRPC, SOAP, OData, WebSocket — toate aceste protocoale la îndemână, fără să schimbi unealta."
+    },
+    "responseTree": {
+      "title": "Vizualizează răspunsurile API",
+      "body": "Știai că poți consulta răspunsurile API mai grafic? Restorm le afișează sub forma unui arbore interactiv pe care îl poți parcurge, plia și desfășura."
+    },
+    "responseHistory": {
+      "title": "Istoricul cererilor",
+      "body": "Poți consulta istoricul tuturor apelurilor către API-urile tale. Practic pentru a afla ce s-a întâmplat de fapt."
+    },
+    "multiLanguage": {
+      "title": "27 de limbi!",
+      "body": "Restorm vorbește 27 de limbi. Engleză, franceză, spaniolă, germană, italiană, japoneză, chineză, coreeană și multe altele — alege-o pe a ta din setări!"
+    }
+  },
   "authFailureToast": {
     "title": "Autentificare eșuată",
     "fallbackReason": "Cererea de autentificare nu a reușit.",
@@ -617,5 +700,22 @@
     "ok": "Importă",
     "cancel": "Anulează",
     "dropZone": "Zonă de plasare"
+  },
+  "emptyBench": {
+    "importCard": {
+      "title": "Importă API-ul tău",
+      "body": "Adu o spec OpenAPI / Swagger, o schemă GraphQL, o colecție Postman / Bruno / Insomnia, sau lipește o comandă curl / PowerShell. Restorm o parsează, construiește structura de foldere și aterizează cu fiecare endpoint precompletat."
+    },
+    "recentActivity": {
+      "title": "Activitate recentă",
+      "empty": "Trimite prima ta cerere pentru a o vedea aici."
+    },
+    "apiCard": {
+      "favorites": "Favorite",
+      "topUsed": "Top 10 cele mai folosite",
+      "recent": "Ultimele cereri",
+      "description": "Descriere",
+      "version": "Versiune"
+    }
   }
 }

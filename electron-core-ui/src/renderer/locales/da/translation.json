@@ -1,7 +1,8 @@
 {
   "common": {
     "opened": "Åbnet",
-    "refresh": "Opdatér"
+    "refresh": "Opdatér",
+    "import": "Importér"
   },
   "file": {
     "untitled": "Uden titel",

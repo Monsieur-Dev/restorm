@@ -74,7 +74,7 @@ export type { ConsolePanelProps, ConsoleProps, ConsoleToolbarProps, ConsoleFeedS
 export { SettingsPage, SettingsModalProvider, useSettingsModal } from './Settings'
 
 // Toggle exports
-export { Toggle, defaultToggleStyles } from './Toggle/index'
+export { Toggle, defaultToggleStyles, starLottieAnimationData } from './Toggle/index'
 export type { IToggleStyles, ICheckboxStyles, ToggleProps, ToggleState, ToggleValue } from './Toggle/index'
 
 // Radio exports
@@ -106,6 +106,10 @@ export type {
   VerticalSashContainerProps,
   HorizontalSashContainerProps
 } from './Sash'
+
+// Mosaic exports
+export { MosaicLayout, MosaicCard } from './Mosaic'
+export type { MosaicLayoutProps, MosaicCardProps } from './Mosaic'
 
 // ListView exports
 export { ListView, ListViewItem } from './ListView'

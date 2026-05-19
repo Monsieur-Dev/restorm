@@ -57,6 +57,7 @@
     "@zip.js/zip.js": "^2.8.26",
     "axios": "^1.16.1",
     "electron-core-ui": "workspace:*",
+    "lottie-react": "^2.4.1",
     "elkjs": "^0.11.1",
     "handlebars": "^4.7.9",
     "i18next": "^26.2.0",

@@ -1,7 +1,8 @@
 {
   "common": {
     "opened": "Άνοιξε",
-    "refresh": "Ανανέωση"
+    "refresh": "Ανανέωση",
+    "import": "Εισαγωγή"
   },
   "file": {
     "untitled": "Χωρίς τίτλο",

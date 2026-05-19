@@ -1,7 +1,8 @@
 {
   "common": {
     "opened": "Açıldı",
-    "refresh": "Yenile"
+    "refresh": "Yenile",
+    "import": "İçe aktar"
   },
   "file": {
     "untitled": "Adsız",

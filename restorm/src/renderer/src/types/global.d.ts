@@ -202,6 +202,12 @@ declare global {
           }) => void
         ) => () => void
       }
+      requestUsage: {
+        get: () => Promise<Record<string, { count: number; lastSentAt: string; history: string[] }>>
+        onChanged: (
+          callback: (map: Record<string, { count: number; lastSentAt: string; history: string[] }>) => void
+        ) => () => void
+      }
     }
   }
 }

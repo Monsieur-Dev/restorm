@@ -12,6 +12,89 @@
       "applyToAll": "Tüm isteklere uygula"
     }
   },
+  "tips": {
+    "cardTitle": "İpuçları ve hileler",
+    "maximizeTab": {
+      "title": "Bir sekmeyi tek tıkla büyütün",
+      "body": "Workbench'teki herhangi bir sekmeye çift tıklayarak tam ekranda görüntüleyebilirsiniz. Önceki düzene dönmek için Esc tuşuna basın."
+    },
+    "mcpControl": {
+      "title": "Restorm'u yapay zeka ile kontrol edin",
+      "body": "Restorm bir MCP sunucusu içerir, böylece Claude Code gibi yapay zeka asistanları isteklerinizi listeleyebilir, açabilir, düzenleyebilir ve çalıştırabilir, yanıtları inceleyebilir ve çalışma alanını programatik olarak yönetebilir — sohbeti terk etmeden."
+    },
+    "envSwitch": {
+      "title": "Ortamlar arasında kolayca geçin!",
+      "body": "Geçerli isteğin ya da API'nizdeki tüm isteklerin ortamını durum çubuğundaki düğmeye tıklayarak veya isteğin gönder düğmesine sağ tıklayarak değiştirin."
+    },
+    "authRequests": {
+      "title": "API'nizi kullanmak için kimlik doğrulaması gerekiyor mu?",
+      "body": "Bir token almak için her seferinde istek atıp her yere yapıştırmak yerine kimlik doğrulama isteklerini kullanın. Bir çağrı başarısız olduğunda (401, 403, …) veya tokenınızın ömrü dolduğunda kimlik doğrulama isteği otomatik olarak yeniden çalıştırılır, tokenı çıkarır ve yeniden kullanır. Pratik!"
+    },
+    "supplyChain": {
+      "title": "Kendinizi koruyun!",
+      "body": "Her yazılım gibi Restorm da üçüncü taraf kütüphaneler kullanır. Tedarik zinciri saldırılarını önlemek için tüm giden çağrılar en düşük seviyede yakalanır ve üçüncü taraf bir kütüphane kişisel bilgilerinizi çalmaya çalışırsa sizi uyarırız!"
+    },
+    "codeSnippets": {
+      "title": "Restorm kod yazmanıza yardımcı olur!",
+      "body": "Her isteğe ait kod parçacıklarını bularak yazılımınıza entegre edebilirsiniz. Birçok dil mevcut: curl, PowerShell, TypeScript, C# ve çok daha fazlası!"
+    },
+    "workbenchLayout": {
+      "title": "Çalışma alanınızı düzenleyin",
+      "body": "Büyük bir ekranınız ve çok sayıda isteğiniz mi var? Onları yan yana, alt alta veya istediğiniz gibi yerleştirin — bir sekmeyi istediğiniz yere sürükleyin yeter. Tamamı rahatınız için!"
+    },
+    "persistState": {
+      "title": "Onu bıraktığınız gibi bulun!",
+      "body": "Restorm'u kapatıp tekrar açarsanız, onu tam olarak bıraktığınız haliyle bulursunuz."
+    },
+    "favorites": {
+      "title": "Bazıları kalbinize daha yakındır…",
+      "body": "Bazı istekler diğerlerinden daha mı önemli? Onları favorilere ekleyin!"
+    },
+    "console": {
+      "title": "Olanları daha iyi görün",
+      "body": "Konsol, istek gönderirken API'lerinize yapılan çağrıları gerçek zamanlı gösterir. Gerektiğinde terminale yapıştırmak için pratik! Hangisini tercih edersin: curl mi yoksa PowerShell mi?"
+    },
+    "miniBrowser": {
+      "title": "Sürekli pencere değiştirmekten yoruldunuz mu?",
+      "body": "Restorm yerleşik bir mini web tarayıcısıyla gelir. Uygulamanız API çağrılarına görsel olarak tepki verdiğinde çok kullanışlıdır."
+    },
+    "apiDocs": {
+      "title": "Dokümantasyon — tam burada",
+      "body": "Restorm ile API'nizin dokümantasyonu arasında geçiş yapmaya gerek yok. API'niz bir spec sağlıyorsa (Swagger, OpenAPI, …), Restorm'a aktarılır ve doğrudan burada okuyabilirsiniz."
+    },
+    "secrets": {
+      "title": "Sırlarınızı koruyun",
+      "body": "Şifreleriniz ve yetkilendirme tokenlarınız doğrudan Restorm dosyasının içinde tutulmaz. Restorm bu yüzden sırları ve istek geçmişini ayrı dosyalarda saklar. GitHub'a yüklememek size kalmış. Restorm sırları AWS, GitHub veya diğer kaynaklardan da alabilir."
+    },
+    "themes": {
+      "title": "Renkleriniz, ruh haliniz",
+      "body": "Restorm birden çok renk şemasıyla gelir. Ruh halinize uyanı seçin."
+    },
+    "search": {
+      "title": "Her şeyi hızla bulun",
+      "body": "Pencerenin üst kısmını gördünüz mü? Restorm bir arama motoru ile gelir — saatlerce O isteği aramaktan kurtulun."
+    },
+    "multiEnv": {
+      "title": "Aynı istekler, farklı ortamlar",
+      "body": "Dev, prod ve staging ortamlarınız mı var? İstekler aynı, ama URL'ler ve tokenlar tam aynı değil… Ortamları ve değişkenleri kullanarak tek tıkla geçiş yapın. Hatta her ortamı rengi ve ikonuyla ayırt edebilirsiniz — cuma akşamı production'da kalp atışı tutmayalım!"
+    },
+    "protocols": {
+      "title": "Sadece REST'ten fazlası",
+      "body": "Restorm REST konuşur… ve çok daha fazlasını! GraphQL, gRPC, SOAP, OData, WebSocket — bütün bu protokoller elinizin altında, araç değiştirmenize gerek kalmadan."
+    },
+    "responseTree": {
+      "title": "API yanıtlarınızı görsel olarak inceleyin",
+      "body": "API yanıtlarınızı daha görsel bir biçimde inceleyebileceğinizi biliyor muydunuz? Restorm bunları gezilebilir, açıp kapatabileceğiniz etkileşimli bir ağaç olarak gösterir."
+    },
+    "responseHistory": {
+      "title": "İstek geçmişi",
+      "body": "API'lerinize yapılan tüm çağrıların geçmişini inceleyebilirsiniz. Gerçekte ne olduğunu öğrenmek için çok kullanışlı."
+    },
+    "multiLanguage": {
+      "title": "27 dil!",
+      "body": "Restorm 27 dilde konuşur. İngilizce, Fransızca, İspanyolca, Almanca, İtalyanca, Japonca, Çince, Korece ve daha pek çoğu — ayarlardan kendi dilinizi seçin!"
+    }
+  },
   "authFailureToast": {
     "title": "Kimlik doğrulama başarısız",
     "fallbackReason": "Kimlik doğrulama isteği başarılı olmadı.",
@@ -616,5 +699,22 @@
     "ok": "İçe aktar",
     "cancel": "İptal",
     "dropZone": "Bırakma alanı"
+  },
+  "emptyBench": {
+    "importCard": {
+      "title": "API'nizi içe aktarın",
+      "body": "Bir OpenAPI / Swagger şartnamesi, bir GraphQL şeması, bir Postman / Bruno / Insomnia koleksiyonu getirin veya bir curl / PowerShell komutu yapıştırın. Restorm onu ayrıştırır, klasör yapısını kurar ve her endpoint hazır gelir."
+    },
+    "recentActivity": {
+      "title": "Son etkinlik",
+      "empty": "Burada görmek için ilk isteğinizi gönderin."
+    },
+    "apiCard": {
+      "favorites": "Favoriler",
+      "topUsed": "En çok kullanılan 10",
+      "recent": "Son istekler",
+      "description": "Açıklama",
+      "version": "Sürüm"
+    }
   }
 }

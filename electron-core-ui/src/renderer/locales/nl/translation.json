@@ -1,7 +1,8 @@
 {
   "common": {
     "opened": "Geopend",
-    "refresh": "Vernieuwen"
+    "refresh": "Vernieuwen",
+    "import": "Importeren"
   },
   "file": {
     "untitled": "Naamloos",

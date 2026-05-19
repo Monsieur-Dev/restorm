@@ -1,0 +1,160 @@
+<svg viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg" class="empty-bench-tip-illustration" role="img" aria-hidden="true">
+  <style>
+    /* Three theme palettes cycled through via circular reveals
+       that grow from the lower-right anchor (75%, 75%). The four
+       layers are stacked so later reveals always paint over the
+       earlier ones; the last reveal returns to theme A so the
+       loop seam is invisible.
+
+       Each layer inlines its own copy of the 7-line editor
+       content so CSS class rules (.th-a .th-kw target) match
+       the tokens directly — a shared symbol referenced via use
+       would put them behind a shadow boundary the class
+       selectors cannot cross. */
+
+    .th-reveal {
+      transform-origin: 75% 75%;
+      transform: scale(0);
+      animation-duration: 18s;
+      animation-iteration-count: infinite;
+      animation-fill-mode: both;
+      animation-play-state: paused;
+      animation-timing-function: ease-out;
+    }
+    .th-reveal--b      { animation-name: th-reveal-b; }
+    .th-reveal--c      { animation-name: th-reveal-c; }
+    .th-reveal--a-loop { animation-name: th-reveal-a; }
+
+    /* Each theme stays settled for ~4 s and the reveal expansion
+       itself is sharp (~0.55 s). */
+    @keyframes th-reveal-b { 0%, 25% { transform: scale(0); } 28%, 100% { transform: scale(1); } }
+    @keyframes th-reveal-c { 0%, 50% { transform: scale(0); } 53%, 100% { transform: scale(1); } }
+    @keyframes th-reveal-a { 0%, 75% { transform: scale(0); } 78%, 100% { transform: scale(1); } }
+
+    /* Theme A — VS Code Dark+ */
+    .th-a .th-bg      { fill: #1e1e1e; }
+    .th-a .th-kw      { fill: #569cd6; }
+    .th-a .th-str     { fill: #ce9178; }
+    .th-a .th-fn      { fill: #dcdcaa; }
+    .th-a .th-ident   { fill: #d4d4d4; }
+    .th-a .th-comment { fill: #6a9955; }
+
+    /* Theme B — Light+ */
+    .th-b .th-bg      { fill: #ffffff; }
+    .th-b .th-kw      { fill: #0000ff; }
+    .th-b .th-str     { fill: #a31515; }
+    .th-b .th-fn      { fill: #795e26; }
+    .th-b .th-ident   { fill: #1f1f1f; }
+    .th-b .th-comment { fill: #008000; }
+
+    /* Theme C — Monokai */
+    .th-c .th-bg      { fill: #272822; }
+    .th-c .th-kw      { fill: #f92672; }
+    .th-c .th-str     { fill: #e6db74; }
+    .th-c .th-fn      { fill: #a6e22e; }
+    .th-c .th-ident   { fill: #f8f8f2; }
+    .th-c .th-comment { fill: #75715e; }
+  </style>
+
+  <defs>
+    <clipPath id="th-clip-b"><circle class="th-reveal th-reveal--b"      cx="165" cy="112.5" r="210" /></clipPath>
+    <clipPath id="th-clip-c"><circle class="th-reveal th-reveal--c"      cx="165" cy="112.5" r="210" /></clipPath>
+    <clipPath id="th-clip-a"><circle class="th-reveal th-reveal--a-loop" cx="165" cy="112.5" r="210" /></clipPath>
+  </defs>
+
+  <!-- ============ Layer 1 — Theme A (base, always visible) ============ -->
+  <g class="th-a">
+    <rect class="th-bg" x="0" y="0" width="220" height="150" />
+    <rect class="th-kw"      x="18"  y="22"  width="26"  height="6" rx="1.5" />
+    <rect class="th-ident"   x="48"  y="22"  width="40"  height="6" rx="1.5" />
+    <rect class="th-str"     x="92"  y="22"  width="92"  height="6" rx="1.5" />
+    <rect class="th-kw"      x="18"  y="40"  width="20"  height="6" rx="1.5" />
+    <rect class="th-fn"      x="42"  y="40"  width="48"  height="6" rx="1.5" />
+    <rect class="th-ident"   x="94"  y="40"  width="36"  height="6" rx="1.5" />
+    <rect class="th-str"     x="134" y="40"  width="56"  height="6" rx="1.5" />
+    <rect class="th-comment" x="18"  y="58"  width="140" height="6" rx="1.5" />
+    <rect class="th-kw"      x="18"  y="76"  width="22"  height="6" rx="1.5" />
+    <rect class="th-ident"   x="44"  y="76"  width="34"  height="6" rx="1.5" />
+    <rect class="th-fn"      x="82"  y="76"  width="50"  height="6" rx="1.5" />
+    <rect class="th-str"     x="136" y="76"  width="48"  height="6" rx="1.5" />
+    <rect class="th-kw"      x="18"  y="94"  width="26"  height="6" rx="1.5" />
+    <rect class="th-str"     x="48"  y="94"  width="120" height="6" rx="1.5" />
+    <rect class="th-ident"   x="30"  y="112" width="20"  height="6" rx="1.5" />
+    <rect class="th-fn"      x="54"  y="112" width="46"  height="6" rx="1.5" />
+    <rect class="th-str"     x="104" y="112" width="80"  height="6" rx="1.5" />
+    <rect class="th-comment" x="18"  y="130" width="78"  height="6" rx="1.5" />
+    <rect class="th-ident"   x="102" y="130" width="6"   height="6" rx="1.5" />
+  </g>
+
+  <!-- ============ Layer 2 — Theme B (revealed by circle B) ============ -->
+  <g class="th-b" clip-path="url(#th-clip-b)">
+    <rect class="th-bg" x="0" y="0" width="220" height="150" />
+    <rect class="th-kw"      x="18"  y="22"  width="26"  height="6" rx="1.5" />
+    <rect class="th-ident"   x="48"  y="22"  width="40"  height="6" rx="1.5" />
+    <rect class="th-str"     x="92"  y="22"  width="92"  height="6" rx="1.5" />
+    <rect class="th-kw"      x="18"  y="40"  width="20"  height="6" rx="1.5" />
+    <rect class="th-fn"      x="42"  y="40"  width="48"  height="6" rx="1.5" />
+    <rect class="th-ident"   x="94"  y="40"  width="36"  height="6" rx="1.5" />
+    <rect class="th-str"     x="134" y="40"  width="56"  height="6" rx="1.5" />
+    <rect class="th-comment" x="18"  y="58"  width="140" height="6" rx="1.5" />
+    <rect class="th-kw"      x="18"  y="76"  width="22"  height="6" rx="1.5" />
+    <rect class="th-ident"   x="44"  y="76"  width="34"  height="6" rx="1.5" />
+    <rect class="th-fn"      x="82"  y="76"  width="50"  height="6" rx="1.5" />
+    <rect class="th-str"     x="136" y="76"  width="48"  height="6" rx="1.5" />
+    <rect class="th-kw"      x="18"  y="94"  width="26"  height="6" rx="1.5" />
+    <rect class="th-str"     x="48"  y="94"  width="120" height="6" rx="1.5" />
+    <rect class="th-ident"   x="30"  y="112" width="20"  height="6" rx="1.5" />
+    <rect class="th-fn"      x="54"  y="112" width="46"  height="6" rx="1.5" />
+    <rect class="th-str"     x="104" y="112" width="80"  height="6" rx="1.5" />
+    <rect class="th-comment" x="18"  y="130" width="78"  height="6" rx="1.5" />
+    <rect class="th-ident"   x="102" y="130" width="6"   height="6" rx="1.5" />
+  </g>
+
+  <!-- ============ Layer 3 — Theme C (revealed by circle C) ============ -->
+  <g class="th-c" clip-path="url(#th-clip-c)">
+    <rect class="th-bg" x="0" y="0" width="220" height="150" />
+    <rect class="th-kw"      x="18"  y="22"  width="26"  height="6" rx="1.5" />
+    <rect class="th-ident"   x="48"  y="22"  width="40"  height="6" rx="1.5" />
+    <rect class="th-str"     x="92"  y="22"  width="92"  height="6" rx="1.5" />
+    <rect class="th-kw"      x="18"  y="40"  width="20"  height="6" rx="1.5" />
+    <rect class="th-fn"      x="42"  y="40"  width="48"  height="6" rx="1.5" />
+    <rect class="th-ident"   x="94"  y="40"  width="36"  height="6" rx="1.5" />
+    <rect class="th-str"     x="134" y="40"  width="56"  height="6" rx="1.5" />
+    <rect class="th-comment" x="18"  y="58"  width="140" height="6" rx="1.5" />
+    <rect class="th-kw"      x="18"  y="76"  width="22"  height="6" rx="1.5" />
+    <rect class="th-ident"   x="44"  y="76"  width="34"  height="6" rx="1.5" />
+    <rect class="th-fn"      x="82"  y="76"  width="50"  height="6" rx="1.5" />
+    <rect class="th-str"     x="136" y="76"  width="48"  height="6" rx="1.5" />
+    <rect class="th-kw"      x="18"  y="94"  width="26"  height="6" rx="1.5" />
+    <rect class="th-str"     x="48"  y="94"  width="120" height="6" rx="1.5" />
+    <rect class="th-ident"   x="30"  y="112" width="20"  height="6" rx="1.5" />
+    <rect class="th-fn"      x="54"  y="112" width="46"  height="6" rx="1.5" />
+    <rect class="th-str"     x="104" y="112" width="80"  height="6" rx="1.5" />
+    <rect class="th-comment" x="18"  y="130" width="78"  height="6" rx="1.5" />
+    <rect class="th-ident"   x="102" y="130" width="6"   height="6" rx="1.5" />
+  </g>
+
+  <!-- ============ Layer 4 — Theme A loop back (revealed by circle A) ============ -->
+  <g class="th-a" clip-path="url(#th-clip-a)">
+    <rect class="th-bg" x="0" y="0" width="220" height="150" />
+    <rect class="th-kw"      x="18"  y="22"  width="26"  height="6" rx="1.5" />
+    <rect class="th-ident"   x="48"  y="22"  width="40"  height="6" rx="1.5" />
+    <rect class="th-str"     x="92"  y="22"  width="92"  height="6" rx="1.5" />
+    <rect class="th-kw"      x="18"  y="40"  width="20"  height="6" rx="1.5" />
+    <rect class="th-fn"      x="42"  y="40"  width="48"  height="6" rx="1.5" />
+    <rect class="th-ident"   x="94"  y="40"  width="36"  height="6" rx="1.5" />
+    <rect class="th-str"     x="134" y="40"  width="56"  height="6" rx="1.5" />
+    <rect class="th-comment" x="18"  y="58"  width="140" height="6" rx="1.5" />
+    <rect class="th-kw"      x="18"  y="76"  width="22"  height="6" rx="1.5" />
+    <rect class="th-ident"   x="44"  y="76"  width="34"  height="6" rx="1.5" />
+    <rect class="th-fn"      x="82"  y="76"  width="50"  height="6" rx="1.5" />
+    <rect class="th-str"     x="136" y="76"  width="48"  height="6" rx="1.5" />
+    <rect class="th-kw"      x="18"  y="94"  width="26"  height="6" rx="1.5" />
+    <rect class="th-str"     x="48"  y="94"  width="120" height="6" rx="1.5" />
+    <rect class="th-ident"   x="30"  y="112" width="20"  height="6" rx="1.5" />
+    <rect class="th-fn"      x="54"  y="112" width="46"  height="6" rx="1.5" />
+    <rect class="th-str"     x="104" y="112" width="80"  height="6" rx="1.5" />
+    <rect class="th-comment" x="18"  y="130" width="78"  height="6" rx="1.5" />
+    <rect class="th-ident"   x="102" y="130" width="6"   height="6" rx="1.5" />
+  </g>
+</svg>

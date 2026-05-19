@@ -1,7 +1,8 @@
 {
   "common": {
     "opened": "Aperti",
-    "refresh": "Aggiorna"
+    "refresh": "Aggiorna",
+    "import": "Importa"
   },
   "file": {
     "untitled": "Senza titolo",

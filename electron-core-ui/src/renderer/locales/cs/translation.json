@@ -1,7 +1,8 @@
 {
   "common": {
     "opened": "Otevřeno",
-    "refresh": "Obnovit"
+    "refresh": "Obnovit",
+    "import": "Importovat"
   },
   "file": {
     "untitled": "Bez názvu",

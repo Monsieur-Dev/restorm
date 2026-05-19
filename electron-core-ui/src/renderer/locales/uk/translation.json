@@ -1,7 +1,8 @@
 {
   "common": {
     "opened": "Відкриті",
-    "refresh": "Оновити"
+    "refresh": "Оновити",
+    "import": "Імпорт"
   },
   "file": {
     "untitled": "Без назви",

@@ -1,7 +1,8 @@
 {
   "common": {
     "opened": "Otvoreno",
-    "refresh": "Osvježi"
+    "refresh": "Osvježi",
+    "import": "Uvezi"
   },
   "file": {
     "untitled": "Bez naslova",

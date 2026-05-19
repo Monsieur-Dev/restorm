@@ -1,0 +1,187 @@
+<svg viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg" class="empty-bench-tip-illustration" role="img" aria-hidden="true">
+  <style>
+    /* Active tab + pane body merged into one rounded silhouette,
+       matching the maximizeTab tip's style. */
+    .wl-pane {
+      fill: var(--editor-background, #1e1e1e);
+      stroke: currentColor;
+      stroke-width: 1.4;
+      stroke-linejoin: round;
+    }
+    /* Inactive tab — top corners rounded, bottom flush against the
+       pane body. */
+    .wl-tab {
+      fill: #c5c5c5;
+      stroke: currentColor;
+      stroke-width: 1.2;
+      stroke-linejoin: round;
+    }
+    .wl-dropzone {
+      fill: #60a5fa;
+      opacity: 0;
+    }
+
+    .wl-pointer {
+      fill: currentColor;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linejoin: round;
+    }
+
+    /* The "ghost" tab that travels under the cursor between the
+       pickup and drop locations. Lives inside the pointer group so
+       it inherits the same translate() — the visibility on/off is
+       driven by its own opacity keyframes. */
+    .wl-grab-rect {
+      fill: #c5c5c5;
+      stroke: currentColor;
+      stroke-width: 1;
+      opacity: 0;
+    }
+
+    .wl-layout,
+    .wl-dropzone,
+    .wl-pointer-group,
+    .wl-grab-rect {
+      animation-duration: 15s;
+      animation-iteration-count: infinite;
+      animation-fill-mode: both;
+      animation-play-state: paused;
+    }
+    .wl-layout--a    { animation-name: wl-layout-a;    opacity: 1; }
+    .wl-layout--b    { animation-name: wl-layout-b;    opacity: 0; }
+    .wl-layout--c    { animation-name: wl-layout-c;    opacity: 0; }
+    .wl-dropzone--right  { animation-name: wl-drop-right; }
+    .wl-dropzone--bottom { animation-name: wl-drop-bottom; }
+    .wl-pointer-group { animation-name: wl-pointer-move; opacity: 0; }
+    .wl-grab-rect     { animation-name: wl-grab-visibility; }
+
+    @keyframes wl-layout-a {
+      0%, 25%  { opacity: 1; }
+      30%, 95% { opacity: 0; }
+      100%     { opacity: 1; }
+    }
+    @keyframes wl-layout-b {
+      0%, 28%  { opacity: 0; }
+      32%, 60% { opacity: 1; }
+      65%, 100% { opacity: 0; }
+    }
+    @keyframes wl-layout-c {
+      0%, 63%  { opacity: 0; }
+      67%, 94% { opacity: 1; }
+      97%, 100% { opacity: 0; }
+    }
+    @keyframes wl-drop-right {
+      0%, 21% { opacity: 0; }
+      25%, 28% { opacity: 0.35; }
+      30%, 100% { opacity: 0; }
+    }
+    @keyframes wl-drop-bottom {
+      0%, 51% { opacity: 0; }
+      55%, 58% { opacity: 0.35; }
+      60%, 100% { opacity: 0; }
+    }
+
+    /* Pointer life-cycle. Single continuous arc — the cursor enters
+       from the bottom-right corner, makes two pickup+drag+drop
+       moves, then exits back to the corner before the loop wraps.
+       Between the two moves opacity stays at 1 so the user can
+       follow the trip with their eye. */
+    @keyframes wl-pointer-move {
+      0%       { opacity: 0; transform: translate(220px, 150px); }
+      3%       { opacity: 1; transform: translate(220px, 150px); }
+      14%      { opacity: 1; transform: translate(88px, 22px); }
+      16%      { opacity: 1; transform: translate(88px, 22px); }
+      24%      { opacity: 1; transform: translate(170px, 80px); }
+      28%      { opacity: 1; transform: translate(170px, 80px); }
+      42%      { opacity: 1; transform: translate(88px, 22px); }
+      46%      { opacity: 1; transform: translate(88px, 22px); }
+      56%      { opacity: 1; transform: translate(70px, 108px); }
+      60%      { opacity: 1; transform: translate(70px, 108px); }
+      92%      { opacity: 1; transform: translate(70px, 108px); }
+      98%      { opacity: 1; transform: translate(220px, 150px); }
+      100%     { opacity: 0; transform: translate(220px, 150px); }
+    }
+
+    /* Ghost-tab visibility. Two short windows aligned with the two
+       pickup → drop drags: 16–25% (move 1) and 46–57% (move 2).
+       The grab fades in at the pickup moment and fades out at the
+       drop moment so the cursor visibly "holds" the tile across
+       the path. */
+    @keyframes wl-grab-visibility {
+      0%, 15%   { opacity: 0; }
+      17%, 25%  { opacity: 0.7; }
+      27%, 45%  { opacity: 0; }
+      47%, 57%  { opacity: 0.7; }
+      59%, 100% { opacity: 0; }
+    }
+  </style>
+
+  <!-- ============================ Layout A — single pane, 3 tabs -->
+  <g class="wl-layout wl-layout--a">
+    <!-- Inactive tabs B + C (drawn behind so their bottoms get covered by the pane body) -->
+    <path class="wl-tab" d="M 74 14 L 102 14 A 10 10 0 0 1 112 24 L 112 36 L 64 36 L 64 24 A 10 10 0 0 1 74 14 Z" />
+    <path class="wl-tab" d="M 126 14 L 154 14 A 10 10 0 0 1 164 24 L 164 36 L 116 36 L 116 24 A 10 10 0 0 1 126 14 Z" />
+
+    <!-- Active tab A + pane body (single merged silhouette) -->
+    <path
+      class="wl-pane"
+      d="M 22 14 L 50 14 A 10 10 0 0 1 60 24 L 60 32 L 200 32 A 8 8 0 0 1 208 40 L 208 130 A 8 8 0 0 1 200 138 L 20 138 A 8 8 0 0 1 12 130 L 12 24 A 10 10 0 0 1 22 14 Z"
+    />
+
+    <!-- Right-side drop zone highlight -->
+    <rect class="wl-dropzone wl-dropzone--right" x="116" y="38" width="88" height="96" rx="6" />
+  </g>
+
+  <!-- ============================ Layout B — left (B+C) | right (A) -->
+  <g class="wl-layout wl-layout--b">
+    <!-- Inactive tab C in left pane -->
+    <path class="wl-tab" d="M 70 14 L 96 14 A 10 10 0 0 1 106 24 L 106 36 L 60 36 L 60 24 A 10 10 0 0 1 70 14 Z" />
+
+    <!-- Left pane: active tab B + body -->
+    <path
+      class="wl-pane"
+      d="M 22 14 L 48 14 A 10 10 0 0 1 58 24 L 58 32 L 120 32 A 8 8 0 0 1 128 40 L 128 130 A 8 8 0 0 1 120 138 L 20 138 A 8 8 0 0 1 12 130 L 12 24 A 10 10 0 0 1 22 14 Z"
+    />
+
+    <!-- Right pane: active tab A + body -->
+    <path
+      class="wl-pane"
+      d="M 142 14 L 168 14 A 10 10 0 0 1 178 24 L 178 32 L 200 32 A 8 8 0 0 1 208 40 L 208 130 A 8 8 0 0 1 200 138 L 140 138 A 8 8 0 0 1 132 130 L 132 24 A 10 10 0 0 1 142 14 Z"
+    />
+
+    <!-- Bottom-of-left-pane drop zone -->
+    <rect class="wl-dropzone wl-dropzone--bottom" x="16" y="86" width="108" height="48" rx="6" />
+  </g>
+
+  <!-- ============================ Layout C — C top-left, B bottom-left, A right full-height -->
+  <g class="wl-layout wl-layout--c">
+    <!-- Top-left pane: active tab C + body -->
+    <path
+      class="wl-pane"
+      d="M 22 14 L 48 14 A 10 10 0 0 1 58 24 L 58 32 L 120 32 A 8 8 0 0 1 128 40 L 128 72 A 8 8 0 0 1 120 80 L 20 80 A 8 8 0 0 1 12 72 L 12 24 A 10 10 0 0 1 22 14 Z"
+    />
+
+    <!-- Bottom-left pane: active tab B + body -->
+    <path
+      class="wl-pane"
+      d="M 22 84 L 48 84 A 10 10 0 0 1 58 94 L 58 102 L 120 102 A 8 8 0 0 1 128 110 L 128 130 A 8 8 0 0 1 120 138 L 20 138 A 8 8 0 0 1 12 130 L 12 94 A 10 10 0 0 1 22 84 Z"
+    />
+
+    <!-- Right pane: active tab A + body (full height) -->
+    <path
+      class="wl-pane"
+      d="M 142 14 L 168 14 A 10 10 0 0 1 178 24 L 178 32 L 200 32 A 8 8 0 0 1 208 40 L 208 130 A 8 8 0 0 1 200 138 L 140 138 A 8 8 0 0 1 132 130 L 132 24 A 10 10 0 0 1 142 14 Z"
+    />
+
+  </g>
+
+  <!-- Pointer (always on top). The grab rect lives inside the
+       same group so it inherits the cursor's translate() — it
+       visibly travels with the pointer between the pickup and
+       drop sites. -->
+  <g class="wl-pointer-group">
+    <rect class="wl-grab-rect" x="-21" y="-11" width="42" height="22" rx="6" />
+    <path class="wl-pointer" d="M 0 0 L 0 17 L 4.5 12.5 L 7.5 19 L 10 18 L 7.2 11.5 L 13 11.5 Z" />
+  </g>
+</svg>

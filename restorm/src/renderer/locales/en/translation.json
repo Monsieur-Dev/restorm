@@ -12,6 +12,89 @@
       "applyToAll": "Apply to all requests"
     }
   },
+  "tips": {
+    "cardTitle": "Tips & tricks",
+    "maximizeTab": {
+      "title": "Maximise a tab in one click",
+      "body": "Double-click any workbench tab to expand it fullscreen. Press Esc to restore the surrounding layout."
+    },
+    "mcpControl": {
+      "title": "Drive restorm with AI",
+      "body": "Restorm ships an MCP server, so AI assistants like Claude Code can list, open, edit, and run your requests, inspect responses, and manipulate the workspace programmatically — without leaving their chat."
+    },
+    "envSwitch": {
+      "title": "Switch environments easily!",
+      "body": "Change the environment on the current request or on every request in your API by clicking the status-bar button, or by right-clicking the request's send button!"
+    },
+    "authRequests": {
+      "title": "Need to authenticate to use your API?",
+      "body": "Instead of firing a request every time to fetch a token and copy/paste it everywhere, use auth requests! When a call fails (401, 403, …) or your token's lifetime is up, the auth request is automatically replayed to extract the token and reuse it. Handy!"
+    },
+    "supplyChain": {
+      "title": "Protect yourself!",
+      "body": "Like any software, Restorm relies on third-party libraries. To prevent supply-chain attacks, every outbound call is caught at the lowest level, and we alert you if a third-party library tries to steal your personal information!"
+    },
+    "codeSnippets": {
+      "title": "Restorm helps you write code!",
+      "body": "Find code snippets on every request to help you integrate them into your software. Many languages available: curl, PowerShell, TypeScript, C#, and many more!"
+    },
+    "workbenchLayout": {
+      "title": "Organise your workbench",
+      "body": "Got a big screen and lots of requests? Put them side by side, stacked, or pretty much however you want! Just drag a tab where you need it. All for your comfort!"
+    },
+    "persistState": {
+      "title": "Find it just as you left it!",
+      "body": "If you close Restorm and reopen it, you'll find it in the exact same state as you left it."
+    },
+    "favorites": {
+      "title": "Some are dearer to your heart…",
+      "body": "Got requests that matter more to you than others? Pin them as favourites!"
+    },
+    "console": {
+      "title": "See what is going on",
+      "body": "The console lets you watch calls to your APIs as you fire requests. Handy for copy-pasting them into your terminal when needed! Pick your flavour: curl or PowerShell?"
+    },
+    "miniBrowser": {
+      "title": "Tired of switching windows all the time?",
+      "body": "Restorm ships a built-in mini web browser. Handy when your app reacts visually to your API calls."
+    },
+    "apiDocs": {
+      "title": "Documentation, right here",
+      "body": "No need to switch between Restorm and your API's documentation. If your API ships a spec (Swagger, OpenAPI, …), it's imported into Restorm and you can read it directly here."
+    },
+    "secrets": {
+      "title": "Protect your secrets",
+      "body": "Your passwords and auth tokens aren't stored inside the Restorm file itself. Restorm keeps secrets and request history in separate files — make sure not to commit them to GitHub. Restorm can also pull secrets from AWS, GitHub, and other vaults."
+    },
+    "themes": {
+      "title": "Your colours, your mood",
+      "body": "Restorm comes with several colour schemes. Pick the one that matches how you feel."
+    },
+    "search": {
+      "title": "Find everything, fast",
+      "body": "See the top of this window? Restorm ships a search engine — no more hunting for hours to find THE one request."
+    },
+    "multiEnv": {
+      "title": "Same requests, different environments",
+      "body": "Got a dev, a prod, and a staging environment? Same requests, just not quite the same URLs, not quite the same tokens… Use environments and variables to switch between them in one click. You can even mark each environment with its own colour and icon to dodge those Friday-evening-before-the-weekend production scares!"
+    },
+    "protocols": {
+      "title": "More than just REST",
+      "body": "Restorm speaks REST… and a lot more! GraphQL, gRPC, SOAP, OData, WebSocket — many protocols at your fingertips, without switching tools."
+    },
+    "responseTree": {
+      "title": "See your API responses, visually",
+      "body": "Did you know you can browse your API responses in a more visual way? Restorm renders them as an interactive tree you can navigate, fold, and unfold."
+    },
+    "responseHistory": {
+      "title": "Request history",
+      "body": "You can browse the history of every call to your APIs. Handy for figuring out what actually happened."
+    },
+    "multiLanguage": {
+      "title": "27 languages!",
+      "body": "Restorm speaks 27 languages. English, French, Spanish, German, Italian, Japanese, Chinese, Korean, and many more — pick yours in the settings!"
+    }
+  },
   "authFailureToast": {
     "title": "Authentication failed",
     "fallbackReason": "The authentication request did not succeed.",
@@ -616,5 +699,22 @@
     "ok": "Import",
     "cancel": "Cancel",
     "dropZone": "Drop zone"
+  },
+  "emptyBench": {
+    "importCard": {
+      "title": "Import your API",
+      "body": "Bring in an OpenAPI / Swagger spec, a GraphQL schema, a Postman / Bruno / Insomnia collection, or paste a curl / PowerShell command. Restorm parses it, builds the folder layout, and lands every endpoint pre-filled."
+    },
+    "recentActivity": {
+      "title": "Recent activity",
+      "empty": "Send your first request to see it here."
+    },
+    "apiCard": {
+      "favorites": "Favorites",
+      "topUsed": "Top 10 most used",
+      "recent": "Last requests",
+      "description": "Description",
+      "version": "Version"
+    }
   }
 }

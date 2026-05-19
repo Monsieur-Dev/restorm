@@ -14,6 +14,89 @@
       "applyToAll": "Použít na všechny požadavky"
     }
   },
+  "tips": {
+    "cardTitle": "Tipy a triky",
+    "maximizeTab": {
+      "title": "Maximalizujte záložku jedním kliknutím",
+      "body": "Dvojklikem na libovolnou záložku workbenche ji zobrazíte na celou obrazovku. Stiskem Esc obnovíte předchozí rozložení."
+    },
+    "mcpControl": {
+      "title": "Ovládejte restorm pomocí AI",
+      "body": "Restorm obsahuje MCP server, takže asistenti AI jako Claude Code mohou vypisovat, otevírat, upravovat a spouštět vaše požadavky, prohlížet odpovědi a programově manipulovat s pracovní plochou – aniž by opustili konverzaci."
+    },
+    "envSwitch": {
+      "title": "Snadno přepínejte prostředí!",
+      "body": "Změňte prostředí aktuálního požadavku nebo všech požadavků vašeho API kliknutím na tlačítko ve stavovém řádku, nebo kliknutím pravým tlačítkem na tlačítko odeslání požadavku."
+    },
+    "authRequests": {
+      "title": "Potřebujete se k svému API ověřit?",
+      "body": "Místo aby se pokaždé spouštěl požadavek na získání tokenu a vy jej museli kopírovat všude, použijte autentizační požadavky. Když volání selže (401, 403, …) nebo platnost tokenu vyprší, autentizační požadavek se automaticky přehraje, vytáhne token a znovu jej použije. Praktické!"
+    },
+    "supplyChain": {
+      "title": "Chraňte se!",
+      "body": "Jako každý software, Restorm využívá knihovny třetích stran. Aby se zabránilo útokům na dodavatelský řetězec, jsou všechna odchozí volání zachycena na nejnižší úrovni, a my vás upozorníme, pokud se nějaká knihovna třetí strany pokusí ukrást vaše osobní údaje!"
+    },
+    "codeSnippets": {
+      "title": "Restorm vám pomáhá programovat!",
+      "body": "Najděte úryvky kódu u každého požadavku, které vám pomohou je integrovat do vašeho softwaru. K dispozici je mnoho jazyků: curl, PowerShell, TypeScript, C# a mnoho dalších!"
+    },
+    "workbenchLayout": {
+      "title": "Uspořádejte si svůj pracovní prostor",
+      "body": "Máte velký monitor a hodně požadavků? Rozmístěte je vedle sebe, pod sebe nebo úplně podle libosti — stačí přetáhnout záložku tam, kam chcete. Vše pro váš komfort!"
+    },
+    "persistState": {
+      "title": "Najděte ho přesně tak, jak jste ho opustili!",
+      "body": "Pokud Restorm zavřete a znovu otevřete, najdete ho přesně ve stejném stavu, v jakém jste ho opustili."
+    },
+    "favorites": {
+      "title": "Některé jsou vám bližší než ostatní…",
+      "body": "Máte požadavky, na kterých vám záleží víc? Přidejte si je do oblíbených!"
+    },
+    "console": {
+      "title": "Vidět, co se děje",
+      "body": "Konzole zobrazuje volání vašich API v reálném čase, jakmile odesíláte požadavky. Praktické pro kopírování do terminálu, když to potřebujete! Jaký máte rád: curl, nebo PowerShell?"
+    },
+    "miniBrowser": {
+      "title": "Unavuje vás přepínání oken?",
+      "body": "Restorm má vestavěný mini-prohlížeč. Šikovné, když vaše aplikace vizuálně reaguje na API volání."
+    },
+    "apiDocs": {
+      "title": "Dokumentace — přímo tady",
+      "body": "Žádné přepínání mezi Restormem a dokumentací vašeho API. Pokud vaše API poskytuje specifikaci (Swagger, OpenAPI, …), naimportuje se do Restormu a můžete si ji rovnou prohlédnout zde."
+    },
+    "secrets": {
+      "title": "Chraňte svá tajemství",
+      "body": "Vaše hesla a autorizační tokeny se neukládají přímo do souboru Restorm. Proto Restorm ukládá tajemství a historii požadavků do oddělených souborů. Je na vás, abyste je nedávali přímo na GitHub. Restorm umí také získávat tajemství z AWS, GitHubu a dalších zdrojů."
+    },
+    "themes": {
+      "title": "Tvé barvy, tvá nálada",
+      "body": "Restorm přichází s několika barevnými schématy. Vyber to, které sedne tvé náladě."
+    },
+    "search": {
+      "title": "Najdi cokoli, rychle",
+      "body": "Viděl jsi horní část tohoto okna? Restorm má vestavěný vyhledávač — žádné dlouhé hledání TÉ správné požadavky."
+    },
+    "multiEnv": {
+      "title": "Stejné požadavky, jiná prostředí",
+      "body": "Máš dev, prod a staging? Stejné požadavky, jenom ne úplně stejné URL a ne úplně stejné tokeny… Použij prostředí a proměnné, abys přepínal jedním kliknutím. Každé prostředí můžeš dokonce rozlišit barvou a ikonou — pro klid v pátek večer před víkendem v produkci!"
+    },
+    "protocols": {
+      "title": "Víc než jen REST",
+      "body": "Restorm mluví REST… a mnohem víc! GraphQL, gRPC, SOAP, OData, WebSocket — všechny tyto protokoly máte po ruce, aniž byste museli měnit nástroj."
+    },
+    "responseTree": {
+      "title": "Vizualizujte odpovědi svého API",
+      "body": "Věděli jste, že odpovědi vašeho API si můžete prohlížet i graficky? Restorm je zobrazuje jako interaktivní strom, který lze procházet, sbalit i rozbalit."
+    },
+    "responseHistory": {
+      "title": "Historie požadavků",
+      "body": "Můžete procházet historii všech volání svých API. Praktické, když potřebujete zjistit, co se vlastně stalo."
+    },
+    "multiLanguage": {
+      "title": "27 jazyků!",
+      "body": "Restorm mluví 27 jazyky. Angličtina, francouzština, španělština, němčina, italština, japonština, čínština, korejština a mnohé další — vyber si svůj v nastavení!"
+    }
+  },
   "authFailureToast": {
     "title": "Ověření selhalo",
     "fallbackReason": "Požadavek na ověření neuspěl.",
@@ -618,5 +701,22 @@
     "ok": "Importovat",
     "cancel": "Zrušit",
     "dropZone": "Zóna pro vložení"
+  },
+  "emptyBench": {
+    "importCard": {
+      "title": "Importujte své API",
+      "body": "Přineste specifikaci OpenAPI / Swagger, schéma GraphQL, kolekci Postman / Bruno / Insomnia, nebo vložte příkaz curl / PowerShell. Restorm ji rozparsuje, vytvoří strukturu složek a každý endpoint vám podá hotový."
+    },
+    "recentActivity": {
+      "title": "Nedávná aktivita",
+      "empty": "Odešlete svůj první požadavek, abyste jej zde viděli."
+    },
+    "apiCard": {
+      "favorites": "Oblíbené",
+      "topUsed": "Top 10 nejpoužívanějších",
+      "recent": "Poslední požadavky",
+      "description": "Popis",
+      "version": "Verze"
+    }
   }
 }

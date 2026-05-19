@@ -12,6 +12,89 @@
       "applyToAll": "Appliquer à toutes les requêtes"
     }
   },
+  "tips": {
+    "cardTitle": "Astuces et conseils",
+    "maximizeTab": {
+      "title": "Agrandir un onglet en un clic",
+      "body": "Double-cliquez sur n'importe quel onglet du workbench pour l'afficher en plein écran. Appuyez sur Échap pour revenir à la disposition initiale."
+    },
+    "mcpControl": {
+      "title": "Pilotez restorm avec une IA",
+      "body": "Restorm embarque un serveur MCP, ce qui permet aux assistants IA comme Claude Code de lister, ouvrir, éditer et exécuter vos requêtes, d'inspecter les réponses et de manipuler l'espace de travail par programmation — sans quitter leur conversation."
+    },
+    "envSwitch": {
+      "title": "Changez d'environnement facilement !",
+      "body": "Vous pouvez changer d'environnement sur la requête en cours ou sur toutes les requêtes de votre API en cliquant sur le bouton de la barre de status, ou en faisant un clic droit sur le bouton d'envoi de la requête !"
+    },
+    "authRequests": {
+      "title": "Vous avez besoin de vous authentifier pour utiliser votre API ?",
+      "body": "Plutôt que de lancer une requête à chaque fois pour récupérer un token et copier/coller celui-ci un peu partout, utilisez les requêtes d'authentification ! En cas d'erreur sur un appel (401, 403, ...), ou passé la durée de vie de votre token, la requête d'authentification sera automatiquement rejouée pour en extraire le token et l'utiliser. Pratique !"
+    },
+    "supplyChain": {
+      "title": "Protégez-vous !",
+      "body": "Comme tout logiciel, Restorm utilise des librairies tierces. Pour éviter les attaques de supply chain, tous les appels sortants sont rattrapés au plus bas niveau, et on vous alerte si une librairie tierce tente de voler vos informations personnelles !"
+    },
+    "codeSnippets": {
+      "title": "Restorm vous aide à coder !",
+      "body": "Retrouvez des snippets de code sur chaque requête pour vous aider à les intégrer dans votre logiciel. Beaucoup de langages sont disponibles : curl, PowerShell, TypeScript, C#, et bien plus encore !"
+    },
+    "workbenchLayout": {
+      "title": "Organisez votre plan de travail",
+      "body": "Vous avez un grand écran et beaucoup de requêtes ? Vous pouvez les mettre côte à côte, l'une en dessous de l'autre et faire un peu ce que vous voulez ! Déplacez simplement un onglet là où vous le souhaitez. Tout pour votre confort !"
+    },
+    "persistState": {
+      "title": "Retrouvez-le comme vous l'avez laissé !",
+      "body": "Si vous fermez Restorm et que vous le rouvrez, vous le retrouverez dans le même état que lorsque vous l'aviez laissé."
+    },
+    "favorites": {
+      "title": "Il y en a que l'on préfère plus que d'autres…",
+      "body": "Certaines requêtes sont plus chères à votre cœur ? Mettez-les en favoris !"
+    },
+    "console": {
+      "title": "Pour mieux voir ce qui se passe",
+      "body": "La console vous permet de voir les appels à vos APIs au fur et à mesure que vous lancez des requêtes. Pratique pour les copier/coller dans votre terminal si vous en avez besoin ! Choisissez votre parfum : curl, ou PowerShell ?"
+    },
+    "miniBrowser": {
+      "title": "Marre de changer de fenêtre tout le temps ?",
+      "body": "Restorm intègre un mini navigateur web. Pratique quand votre application réagit visuellement à vos appels d'APIs."
+    },
+    "apiDocs": {
+      "title": "La documentation, sur place",
+      "body": "Pas besoin de naviguer entre Restorm et la documentation de votre API. Si votre API fournit une documentation (Swagger, OpenAPI, ...), elle est importée dans Restorm et vous pouvez directement la consulter ici."
+    },
+    "secrets": {
+      "title": "Protégez vos secrets",
+      "body": "Vos mots de passe et vos jetons d'autorisation ne sont pas stockés directement dans le fichier restorm. C'est pour cela que Restorm stocke vos secrets et l'historique de vos requêtes dans des fichiers séparés. À vous de ne pas les mettre directement sur GitHub. Restorm sait aussi récupérer vos secrets depuis AWS, GitHub ou autres."
+    },
+    "themes": {
+      "title": "Vos couleurs, vos envies",
+      "body": "Restorm est fourni avec différents styles de couleurs. Choisissez selon votre humeur."
+    },
+    "search": {
+      "title": "Retrouvez tout, rapidement",
+      "body": "Vous avez vu en haut de cette fenêtre ? Restorm embarque un moteur de recherche… Comme ça, plus besoin de passer des heures à rechercher LA requête."
+    },
+    "multiEnv": {
+      "title": "Mêmes requêtes, environnements différents",
+      "body": "Vous avez un environnement de dev, un de prod, un de staging ? Ce sont les mêmes requêtes, mais pas tout à fait les mêmes URLs, pas tout à fait les mêmes tokens… Utilisez les environnements et les variables pour passer de l'un à l'autre ! Vous pouvez même distinguer vos environnements avec des couleurs et des icônes pour vous éviter les frayeurs du vendredi soir, veille de week-end, en production !"
+    },
+    "protocols": {
+      "title": "+ que du REST",
+      "body": "Restorm sait faire du REST… et bien plus ! GraphQL, gRPC, SOAP, OData, WebSocket — autant de protocoles à portée de main, sans changer d'outil."
+    },
+    "responseTree": {
+      "title": "Visualisez vos réponses d'API",
+      "body": "Saviez-vous que vous pouvez consulter le résultat de vos réponses d'API sous une forme plus graphique ? Restorm les affiche comme un arbre interactif que vous pouvez parcourir, replier et déplier."
+    },
+    "responseHistory": {
+      "title": "Historique des requêtes",
+      "body": "Vous pouvez consulter l'historique de vos appels à vos APIs. Pratique pour retrouver ce qui a bien pu se passer."
+    },
+    "multiLanguage": {
+      "title": "27 langues !",
+      "body": "Restorm parle 27 langues. Anglais, français, espagnol, allemand, italien, japonais, chinois, coréen et bien d'autres — choisissez la vôtre dans les paramètres !"
+    }
+  },
   "authFailureToast": {
     "title": "Échec de l'authentification",
     "fallbackReason": "La requête d'authentification n'a pas abouti.",
@@ -616,5 +699,22 @@
     "ok": "Importer",
     "cancel": "Annuler",
     "dropZone": "Drop zone"
+  },
+  "emptyBench": {
+    "importCard": {
+      "title": "Importez votre API",
+      "body": "Apportez une spec OpenAPI / Swagger, un schéma GraphQL, une collection Postman / Bruno / Insomnia, ou collez une commande curl / PowerShell. Restorm la parse, construit l'arborescence et atterrit avec toutes les requêtes pré-remplies."
+    },
+    "recentActivity": {
+      "title": "Activité récente",
+      "empty": "Envoyez votre première requête pour la voir ici."
+    },
+    "apiCard": {
+      "favorites": "Favoris",
+      "topUsed": "10 plus utilisées",
+      "recent": "Dernières requêtes",
+      "description": "Description",
+      "version": "Version"
+    }
   }
 }

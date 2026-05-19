@@ -1,19 +1,18 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useFileService, ContextMenu, Table, type ContextMenuItem, type TableColumn } from 'electron-core-ui/renderer'
-import { getFavorites, removeFavorite, reorderFavorites } from '../../services/favoritesStore'
+import { addFavorite, getFavorites, isFavorite as isFavoriteCheck, removeFavorite, reorderFavorites } from '../../services/favoritesStore'
 import { PROJECT_UUID_KEY } from '../../../../shared/config/projectUuid'
 import type { EnvironmentFolder, FolderItem } from '../../../../shared/types/collections'
 import type { ApiDocumentation } from '../../../../shared/types/apiDocumentation'
 import { ApiUpdateSettingsSection } from './ApiUpdateSettingsSection'
-import { Badge, type BadgeType } from '../common/Badge'
+import { RequestListRow } from '../MainView/Workbench/EmptyBenchCards/RequestListRow'
 import './environmentFolderHome.css'
 
 interface FavoriteRequest {
   id: string
   name: string
   method: string
-  path: string
 }
 
 interface Props {
@@ -39,14 +38,14 @@ const SOURCE_CONFIG: Record<string, { logo?: string; icon?: string; label: strin
   url: { icon: 'link', label: 'URL Import', color: '#888' }
 }
 
-function collectRequests(items: FolderItem[], parentPath: string[] = []): FavoriteRequest[] {
+function collectRequests(items: FolderItem[]): FavoriteRequest[] {
   const result: FavoriteRequest[] = []
   for (const item of items) {
     if ('items' in item) {
-      result.push(...collectRequests(item.items, [...parentPath, item.name]))
+      result.push(...collectRequests(item.items))
     } else if ('method' in item) {
       const req = item as { id: string; name: string; method: string }
-      result.push({ id: req.id, name: req.name, method: req.method, path: parentPath.join(' / ') })
+      result.push({ id: req.id, name: req.name, method: req.method })
     }
   }
   return result
@@ -117,43 +116,41 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
   const importSource = folder.importSource
   const sourceConfig = importSource ? SOURCE_CONFIG[importSource] : undefined
 
-  const favoriteColumns = useMemo<TableColumn<FavoriteRequest>[]>(() => [
+  const handleToggleFavorite = useCallback((requestId: string, next: boolean): void => {
+    if (!projectUuid) return
+    if (next) addFavorite(projectUuid, requestId)
+    else removeFavorite(projectUuid, requestId)
+    setFavVersion((v) => v + 1)
+  }, [projectUuid])
+
+  const favoriteColumns = useMemo<TableColumn<FavoriteRequest>[]>(() => {
+    void favVersion // reactivity dep — favorites store reads in renderCell
+    return [
     {
       id: 'favorite',
       header: '',
       renderCell: (req) => (
         <div
-          className="home-favorite-cell"
-          onClick={() => { onRequestClick?.(req.id) }}
+          onContextMenu={(e) => { handleFavContextMenu(e, req.id) }}
           onAuxClick={(e) => {
             if (e.button !== 1) return
             e.preventDefault()
             onRequestAuxClick?.(req.id)
           }}
-          onContextMenu={(e) => { handleFavContextMenu(e, req.id) }}
-          data-testid={`home-favorite-${req.id}`}
         >
-          <Badge type={req.method.toUpperCase() as BadgeType} />
-          <span className="home-favorite-name">{req.name}</span>
-          <span className="home-favorite-path">{req.path}</span>
-          <button
-            type="button"
-            className="home-favorite-delete"
-            onClick={(e) => {
-              e.stopPropagation()
-              if (projectUuid) {
-                removeFavorite(projectUuid, req.id)
-                setFavVersion((v) => v + 1)
-              }
-            }}
-            data-testid={`home-favorite-${req.id}-delete`}
-          >
-            <span className="codicon codicon-trash" />
-          </button>
+          <RequestListRow
+            id={req.id}
+            name={req.name}
+            method={req.method}
+            isFavorite={projectUuid ? isFavoriteCheck(projectUuid, req.id) : false}
+            onOpen={() => { onRequestClick?.(req.id) }}
+            onToggleFavorite={(next) => { handleToggleFavorite(req.id, next) }}
+            data-testid={`home-favorite-${req.id}`}
+          />
         </div>
       )
     }
-  ], [onRequestClick, onRequestAuxClick, projectUuid])
+  ]}, [onRequestClick, onRequestAuxClick, projectUuid, favVersion, handleToggleFavorite])
 
   return (
     <div className="home-container">
@@ -224,7 +221,7 @@ const EnvironmentFolderHome: React.FC<Props> = ({ folder, onSwitchTab, onRequest
             columns={favoriteColumns}
             rows={favoriteRequests}
             getRowId={(r) => r.id}
-            reorderable
+            reorderable={favoriteRequests.length > 1}
             onRowsReorder={handleRowsReorder}
             data-testid="home-favorites-table"
           />

@@ -4,7 +4,7 @@ import { isTabDetachEnabled } from './featureFlags'
 import { join, relative, dirname } from 'path'
 import { promises as fs, existsSync, statSync, rmSync } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
-import { contextService, responseHistoryService } from './services'
+import { contextService, responseHistoryService, requestUsageService } from './services'
 import { miniBrowserService } from './services/MiniBrowserService'
 import { assertPathWithinParent } from './utils/pathSecurity'
 import { saveFolderStructure, loadFolderStructure, attachDraftStoreForFolder, attachDraftStoreForFile } from './FileOperations'
@@ -42,6 +42,7 @@ import {
   websocketConnectArgs, websocketDisconnectArgs, websocketSendArgs, websocketIsActiveArgs,
   responsesHistoryListArgs, responsesHistoryGetArgs,
   responsesHistoryTogglePinArgs,
+  requestUsageGetArgs,
   importPreviewArgs, importImportArgs,
   findInPageArgs, findStopArgs,
   miniBrowserCreateArgs, miniBrowserDestroyArgs, miniBrowserSetBoundsArgs,
@@ -696,6 +697,7 @@ export function registerRestormIPC(deps: {
     const result = await httpExecutionService.execute(executionInput)
     setImmediate(() => {
       void responseHistoryService.storeExecutionResult(input.requestId, 'http', result)
+      requestUsageService.recordSend(input.requestId)
     })
     return result
   })
@@ -747,6 +749,7 @@ export function registerRestormIPC(deps: {
     })
     setImmediate(() => {
       void responseHistoryService.storeExecutionResult(input.requestId, 'odata', result)
+      requestUsageService.recordSend(input.requestId)
     })
     return result
   })
@@ -879,6 +882,7 @@ export function registerRestormIPC(deps: {
     const result = await graphqlExecutionService.execute(input as GraphQLExecutionInput)
     setImmediate(() => {
       void responseHistoryService.storeExecutionResult(input.requestId, 'graphql', result)
+      requestUsageService.recordSend(input.requestId)
     })
     return result
   })
@@ -899,6 +903,7 @@ export function registerRestormIPC(deps: {
     const result = await soapExecutionService.execute(input as SOAPExecutionInput)
     setImmediate(() => {
       void responseHistoryService.storeExecutionResult(input.requestId, 'soap', result)
+      requestUsageService.recordSend(input.requestId)
     })
     return result
   })
@@ -919,6 +924,7 @@ export function registerRestormIPC(deps: {
     const result = grpcExecutionService.execute(input as GRPCExecutionInput)
     setImmediate(() => {
       void responseHistoryService.storeExecutionResult(input.requestId, 'grpc', result)
+      requestUsageService.recordSend(input.requestId)
     })
     return result
   })
@@ -939,6 +945,7 @@ export function registerRestormIPC(deps: {
     const result = await websocketExecutionService.execute(input as WebSocketExecutionInput)
     setImmediate(() => {
       void responseHistoryService.storeExecutionResult(input.requestId, 'websocket', result)
+      requestUsageService.recordSend(input.requestId)
     })
     return result
   })
@@ -969,6 +976,19 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('responses:history:toggle-pin', responsesHistoryTogglePinArgs, async (_event, [guid, pinned]) => {
     return responseHistoryService.togglePin(guid, pinned)
+  })
+
+  // ==========================================================================
+  // Request Usage IPC Handlers
+  // --------------------------------------------------------------------------
+  // The renderer reads the full usage map on EmptyBench mount; updates
+  // arrive via the `request-usage:changed` push event broadcast from
+  // `RequestUsageService.recordSend` next to each protocol's history
+  // write.
+  // ==========================================================================
+
+  validatedHandle('request-usage:get', requestUsageGetArgs, () => {
+    return requestUsageService.getAll()
   })
 
   // ==========================================================================

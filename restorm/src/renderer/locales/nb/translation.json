@@ -12,6 +12,89 @@
       "applyToAll": "Bruk på alle forespørsler"
     }
   },
+  "tips": {
+    "cardTitle": "Tips og triks",
+    "maximizeTab": {
+      "title": "Maksimer en fane med ett klikk",
+      "body": "Dobbeltklikk på en hvilken som helst workbench-fane for å vise den i fullskjerm. Trykk Esc for å gå tilbake til det forrige oppsettet."
+    },
+    "mcpControl": {
+      "title": "Styr restorm med AI",
+      "body": "Restorm leveres med en MCP-server, slik at AI-assistenter som Claude Code kan vise, åpne, redigere og kjøre forespørslene dine, inspisere svar og styre arbeidsområdet programmatisk – uten å forlate chatten."
+    },
+    "envSwitch": {
+      "title": "Bytt miljø enkelt!",
+      "body": "Bytt miljø for den aktive forespørselen eller for alle forespørslene i API-et ditt ved å klikke på knappen i statuslinjen, eller ved å høyreklikke på send-knappen til forespørselen."
+    },
+    "authRequests": {
+      "title": "Trenger du å autentisere deg mot API-et?",
+      "body": "I stedet for å sende en forespørsel hver gang for å hente et token og lime det inn overalt, bruk auth-forespørsler. Når et kall feiler (401, 403, …) eller tokenet utløper, kjøres auth-forespørselen automatisk på nytt for å hente og gjenbruke tokenet. Praktisk!"
+    },
+    "supplyChain": {
+      "title": "Beskytt deg selv!",
+      "body": "Som all programvare bruker Restorm tredjepartsbiblioteker. For å unngå supply chain-angrep fanges alle utgående kall på laveste nivå, og vi varsler deg dersom et tredjepartsbibliotek prøver å stjele personopplysningene dine!"
+    },
+    "codeSnippets": {
+      "title": "Restorm hjelper deg å kode!",
+      "body": "Finn kodesnutter på hver forespørsel for å hjelpe deg å integrere dem i programvaren din. Mange språk er tilgjengelige: curl, PowerShell, TypeScript, C# og mange flere!"
+    },
+    "workbenchLayout": {
+      "title": "Organiser arbeidsbenken din",
+      "body": "Stor skjerm og mange forespørsler? Plasser dem ved siden av hverandre, oppå hverandre eller omtrent som du vil — bare dra en fane dit du ønsker. Alt for komforten din!"
+    },
+    "persistState": {
+      "title": "Finn det igjen slik du forlot det!",
+      "body": "Lukker du Restorm og åpner det igjen, finner du det i nøyaktig samme tilstand som du forlot det."
+    },
+    "favorites": {
+      "title": "Noen står deg nærmere hjertet…",
+      "body": "Har du forespørsler som betyr mer for deg enn andre? Marker dem som favoritter!"
+    },
+    "console": {
+      "title": "Se hva som skjer",
+      "body": "Konsollen viser kallene til API-ene dine etter hvert som du sender forespørsler. Praktisk hvis du trenger å lime dem inn i terminalen! Hva er smaken din: curl eller PowerShell?"
+    },
+    "miniBrowser": {
+      "title": "Lei av å bytte vindu hele tiden?",
+      "body": "Restorm har en innebygd minibrowser. Praktisk når appen din reagerer visuelt på API-kallene dine."
+    },
+    "apiDocs": {
+      "title": "Dokumentasjonen — rett her",
+      "body": "Slipp å hoppe mellom Restorm og dokumentasjonen for API-et ditt. Hvis API-et ditt leverer en spec (Swagger, OpenAPI, …), importeres den i Restorm, og du kan lese den direkte her."
+    },
+    "secrets": {
+      "title": "Beskytt hemmelighetene dine",
+      "body": "Passordene og auth-tokenene dine lagres ikke direkte i Restorm-filen. Derfor lagrer Restorm hemmeligheter og forespørselshistorikken i separate filer. Det er opp til deg å ikke pushe dem til GitHub. Restorm kan også hente hemmeligheter fra AWS, GitHub og andre kilder."
+    },
+    "themes": {
+      "title": "Dine farger, ditt humør",
+      "body": "Restorm kommer med flere fargesystemer. Velg det som matcher humøret ditt."
+    },
+    "search": {
+      "title": "Finn alt, raskt",
+      "body": "Har du sett øverst i dette vinduet? Restorm har en innebygd søkemotor — slutt på timesvis med leting etter akkurat den forespørselen."
+    },
+    "multiEnv": {
+      "title": "Samme forespørsler, ulike miljøer",
+      "body": "Har du dev, staging og prod? Samme forespørsler, bare ikke helt de samme URL-ene, ikke helt de samme tokenene… Bruk miljøer og variabler til å bytte med ett klikk. Du kan til og med kjennetegne hvert miljø med farge og ikon, slik at du slipper fredag-kveld-skrekken i produksjon!"
+    },
+    "protocols": {
+      "title": "Mer enn bare REST",
+      "body": "Restorm snakker REST… og mye mer! GraphQL, gRPC, SOAP, OData, WebSocket — alle disse protokollene rett innen rekkevidde, uten å bytte verktøy."
+    },
+    "responseTree": {
+      "title": "Se API-svarene dine visuelt",
+      "body": "Visste du at du kan utforske API-svarene dine på en mer grafisk måte? Restorm viser dem som et interaktivt tre du kan navigere, lukke og åpne."
+    },
+    "responseHistory": {
+      "title": "Historikk over forespørsler",
+      "body": "Du kan bla i historikken over alle kallene dine til API-ene. Praktisk når du skal finne ut hva som faktisk skjedde."
+    },
+    "multiLanguage": {
+      "title": "27 språk!",
+      "body": "Restorm snakker 27 språk. Engelsk, fransk, spansk, tysk, italiensk, japansk, kinesisk, koreansk og mange flere — velg ditt i innstillingene!"
+    }
+  },
   "authFailureToast": {
     "title": "Autentisering mislyktes",
     "fallbackReason": "Autentiseringsforespørselen lyktes ikke.",
@@ -616,5 +699,22 @@
     "ok": "Importer",
     "cancel": "Avbryt",
     "dropZone": "Slippsone"
+  },
+  "emptyBench": {
+    "importCard": {
+      "title": "Importer API-en din",
+      "body": "Ta med en OpenAPI/Swagger-spec, et GraphQL-skjema, en Postman/Bruno/Insomnia-samling, eller lim inn en curl/PowerShell-kommando. Restorm tolker den, bygger opp mappestrukturen og lander med hvert endepunkt klart."
+    },
+    "recentActivity": {
+      "title": "Nylig aktivitet",
+      "empty": "Send din første forespørsel for å se den her."
+    },
+    "apiCard": {
+      "favorites": "Favoritter",
+      "topUsed": "Topp 10 mest brukte",
+      "recent": "Siste forespørsler",
+      "description": "Beskrivelse",
+      "version": "Versjon"
+    }
   }
 }

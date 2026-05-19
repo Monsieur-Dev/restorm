@@ -1,7 +1,8 @@
 {
   "common": {
     "opened": "Deschise",
-    "refresh": "Reîmprospătează"
+    "refresh": "Reîmprospătează",
+    "import": "Importă"
   },
   "file": {
     "untitled": "Fără titlu",

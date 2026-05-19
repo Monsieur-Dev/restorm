@@ -1,0 +1,59 @@
+<svg viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg" class="empty-bench-tip-illustration" role="img" aria-hidden="true">
+  <style>
+    .ml-word {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, system-ui, sans-serif;
+      fill: currentColor;
+      dominant-baseline: middle;
+      animation-iteration-count: infinite;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-play-state: paused;
+    }
+    .ml-word--left  { animation-name: ml-marquee-left; }
+    .ml-word--right { animation-name: ml-marquee-right; }
+
+    @keyframes ml-marquee-left {
+      0%   { transform: translateX(240px); }
+      100% { transform: translateX(-220px); }
+    }
+    @keyframes ml-marquee-right {
+      0%   { transform: translateX(-220px); }
+      100% { transform: translateX(240px); }
+    }
+  </style>
+
+  <defs>
+    <clipPath id="ml-viewport">
+      <rect x="0" y="0" width="220" height="150" />
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#ml-viewport)">
+    <text class="ml-word ml-word--left"  x="0" y="18"  font-size="24" font-weight="700" fill-opacity="0.85" style="animation-duration: 28s; animation-delay:  0s">Hello</text>
+    <text class="ml-word ml-word--right" x="0" y="42"  font-size="14" font-weight="500" fill-opacity="0.4"  style="animation-duration: 32s; animation-delay: -5s">Bonjour</text>
+    <text class="ml-word ml-word--left"  x="0" y="68"  font-size="20" font-weight="600" fill-opacity="0.6"  style="animation-duration: 30s; animation-delay: -10s">Hola</text>
+    <text class="ml-word ml-word--right" x="0" y="14"  font-size="12" font-weight="500" fill-opacity="0.35" style="animation-duration: 26s; animation-delay: -7s">Hallo</text>
+    <text class="ml-word ml-word--left"  x="0" y="98"  font-size="18" font-weight="600" fill-opacity="0.55" style="animation-duration: 24s; animation-delay: -3s">Ciao</text>
+    <text class="ml-word ml-word--right" x="0" y="124" font-size="22" font-weight="700" fill-opacity="0.7"  style="animation-duration: 31s; animation-delay: -12s">Olá</text>
+    <text class="ml-word ml-word--right" x="0" y="36"  font-size="16" font-weight="500" fill-opacity="0.5"  style="animation-duration: 35s; animation-delay: -2s">こんにちは</text>
+    <text class="ml-word ml-word--left"  x="0" y="82"  font-size="26" font-weight="700" fill-opacity="0.8"  style="animation-duration: 29s; animation-delay: -15s">你好</text>
+    <text class="ml-word ml-word--right" x="0" y="110" font-size="14" font-weight="500" fill-opacity="0.4"  style="animation-duration: 33s; animation-delay: -8s">안녕하세요</text>
+    <text class="ml-word ml-word--left"  x="0" y="24"  font-size="13" font-weight="500" fill-opacity="0.35" style="animation-duration: 27s; animation-delay: -14s">Привет</text>
+    <text class="ml-word ml-word--left"  x="0" y="58"  font-size="20" font-weight="600" fill-opacity="0.6"  style="animation-duration: 30s; animation-delay: -18s">Merhaba</text>
+    <text class="ml-word ml-word--right" x="0" y="132" font-size="10" font-weight="500" fill-opacity="0.3"  style="animation-duration: 22s; animation-delay: -6s">Hej</text>
+    <text class="ml-word ml-word--right" x="0" y="88"  font-size="17" font-weight="600" fill-opacity="0.5"  style="animation-duration: 34s; animation-delay: -11s">Cześć</text>
+    <text class="ml-word ml-word--left"  x="0" y="46"  font-size="15" font-weight="500" fill-opacity="0.45" style="animation-duration: 26s; animation-delay: -1s">Γεια</text>
+    <text class="ml-word ml-word--left"  x="0" y="104" font-size="12" font-weight="500" fill-opacity="0.35" style="animation-duration: 32s; animation-delay: -9s">שלום</text>
+    <text class="ml-word ml-word--right" x="0" y="72"  font-size="14" font-weight="500" fill-opacity="0.4"  style="animation-duration: 28s; animation-delay: -4s">مرحبا</text>
+    <text class="ml-word ml-word--left"  x="0" y="120" font-size="18" font-weight="600" fill-opacity="0.55" style="animation-duration: 31s; animation-delay: -13s">Xin chào</text>
+    <text class="ml-word ml-word--right" x="0" y="64"  font-size="11" font-weight="500" fill-opacity="0.3"  style="animation-duration: 25s; animation-delay: -16s">Halo</text>
+    <text class="ml-word ml-word--right" x="0" y="30"  font-size="17" font-weight="600" fill-opacity="0.5"  style="animation-duration: 28s; animation-delay: -19s">नमस्ते</text>
+    <text class="ml-word ml-word--left"  x="0" y="92"  font-size="15" font-weight="500" fill-opacity="0.45" style="animation-duration: 33s; animation-delay: -2s">สวัสดี</text>
+    <text class="ml-word ml-word--right" x="0" y="140" font-size="12" font-weight="500" fill-opacity="0.3"  style="animation-duration: 23s; animation-delay: -8s">Ahoj</text>
+    <text class="ml-word ml-word--left"  x="0" y="10"  font-size="14" font-weight="500" fill-opacity="0.4"  style="animation-duration: 27s; animation-delay: -11s">Szia</text>
+    <text class="ml-word ml-word--left"  x="0" y="52"  font-size="19" font-weight="600" fill-opacity="0.6"  style="animation-duration: 30s; animation-delay: -14s">Salut</text>
+    <text class="ml-word ml-word--right" x="0" y="78"  font-size="11" font-weight="500" fill-opacity="0.3"  style="animation-duration: 26s; animation-delay: -5s">Bok</text>
+    <text class="ml-word ml-word--left"  x="0" y="116" font-size="13" font-weight="500" fill-opacity="0.35" style="animation-duration: 29s; animation-delay: -17s">Tungjatjeta</text>
+    <text class="ml-word ml-word--right" x="0" y="100" font-size="16" font-weight="500" fill-opacity="0.5"  style="animation-duration: 34s; animation-delay: -20s">Здраво</text>
+  </g>
+</svg>

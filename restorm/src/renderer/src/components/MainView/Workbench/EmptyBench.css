@@ -1,13 +1,256 @@
+/* EmptyBench — page chrome around the ECUI Mosaic. The card-level
+ * styling (border, background, padding, title) lives in ECUI's
+ * `MosaicCard`; only the surrounding wrapper + the per-card body
+ * content classes stay here. */
+
 .empty-bench-container {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--editor-background);
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0;
+	align-items: center;
+	gap: 24px;
+	padding: 32px 24px;
+	overflow-y: auto;
+	background-color: var(--editor-background);
 }
 
 .empty-bench-logo {
-  width: 120px;
-  height: auto;
-  opacity: 0.5;
+	width: 120px;
+	height: auto;
+	opacity: 0.55;
+	flex-shrink: 0;
+}
+
+/* --- Card body styles ------------------------------------------------ */
+
+.empty-bench-lead {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.5;
+	color: var(--foreground);
+}
+
+.empty-bench-hint {
+	margin: 0;
+	font-size: 11.5px;
+	color: var(--descriptionForeground);
+}
+
+.empty-bench-description {
+	margin: 0;
+	font-size: 12.5px;
+	line-height: 1.45;
+	color: var(--descriptionForeground);
+}
+
+.empty-bench-subtitle {
+	margin: 4px 0 6px;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--descriptionForeground);
+}
+
+.empty-bench-import-cta {
+	display: flex;
+	justify-content: center;
+	margin: 12px 0 6px;
+}
+
+/* RequestListRow — shared cell renderer for the EmptyBench card
+ * lists (favourites, top-played, last-played, recent activity) and
+ * the env-folder home favourites table. The whole row is
+ * clickable; the star Toggle is inside but stops propagation so
+ * clicking it doesn't also open the tab. */
+.request-list-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+	width: 100%;
+	padding: 2px 4px;
+	border-radius: 3px;
+	cursor: pointer;
+	font-size: 12.5px;
+	color: var(--foreground);
+}
+
+.request-list-row:hover {
+	background-color: var(--listHoverBackground);
+}
+
+.request-list-row:focus-visible {
+	outline: 1px solid var(--focusBorder);
+	outline-offset: -1px;
+}
+
+.request-list-row__name {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.request-list-row__trailing {
+	font-size: 11px;
+	color: var(--descriptionForeground);
+	font-style: italic;
+	flex-shrink: 0;
+}
+
+.request-list-row__star {
+	display: inline-flex;
+	align-items: center;
+	flex-shrink: 0;
+}
+
+.empty-bench-list__count {
+	font-variant-numeric: tabular-nums;
+	font-size: 11.5px;
+	color: var(--descriptionForeground);
+	flex-shrink: 0;
+}
+
+.empty-bench-meta-row {
+	margin: 0;
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+	font-size: 11px;
+	color: var(--descriptionForeground);
+}
+.empty-bench-meta-label {
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	font-weight: 600;
+}
+.empty-bench-meta-value {
+	font-variant-numeric: tabular-nums;
+}
+
+.empty-bench-tips {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.empty-bench-tip {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.empty-bench-tip__title {
+	font-size: 12.5px;
+	font-weight: 600;
+	color: var(--foreground);
+}
+
+.empty-bench-tip__body {
+	font-size: 12px;
+	line-height: 1.4;
+	color: var(--descriptionForeground);
+}
+
+/* Tip rotator — three-phase sequential animation driven by the
+ * `data-phase` attribute on the wrapper:
+ *
+ *   fade-out → resize → fade-in
+ *
+ * The height itself is pinned to explicit pixel values from JS
+ * (TipsCard measures the natural height of the swapped content
+ * and applies it as an inline style). The CSS just gates which
+ * property transitions per phase so the three beats stay
+ * sequential rather than overlapping. */
+.empty-bench-tip-rotator {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	opacity: 1;
+	overflow: hidden;
+}
+
+.empty-bench-tip-rotator[data-phase="fade-out"] {
+	opacity: 0;
+	transition: opacity 1000ms ease;
+}
+
+.empty-bench-tip-rotator[data-phase="resize"] {
+	opacity: 0;
+	transition: height 1400ms ease;
+}
+
+.empty-bench-tip-rotator[data-phase="fade-in"] {
+	opacity: 1;
+	transition: opacity 1000ms ease;
+}
+
+.empty-bench-tip-illustration {
+	display: block;
+	width: 100%;
+	height: auto;
+	max-height: 180px;
+	margin-top: 10px;
+	color: var(--foreground);
+}
+
+/* favorites tip: Lottie animation placed on top of a clipped amber
+ * disc. The wrapper holds the 220×150 aspect ratio so the disc
+ * and the Lottie share the same coordinate space as the SVG-only
+ * tips. */
+.fv-wrap {
+	position: relative;
+	width: 100%;
+	aspect-ratio: 220 / 150;
+	margin-top: 10px;
+	overflow: hidden;
+}
+.fv-disc-svg {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	display: block;
+}
+.fv-lottie-slot {
+	position: absolute;
+	/* Center the Lottie square exactly on the disc centre (180, 95)
+	 * in the 220×150 viewBox = (81.8%, 63.3%). Width sized so the
+	 * Lottie reads bigger than before — the natural disc radius is
+	 * 85 ≈ 57% of the viewBox width, so we go with 72% width and
+	 * use translate(-50%, -50%) to anchor it at its centre. The
+	 * wrap's `overflow: hidden` handles any pixels that fall past
+	 * the right/bottom edges of the viewBox (matches the clipped
+	 * disc). */
+	left: 81.8%;
+	top: 63.3%;
+	width: 110%;
+	height: 162%;
+	transform: translate(-50%, -50%) rotate(-25deg);
+}
+.fv-lottie-slot svg {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+/* Hold the illustration's CSS animations paused until the tip
+ * has fully arrived on screen, then unblock at the start of the
+ * `visible` phase (i.e. the very moment fade-in completes). A
+ * single selector here — `data-phase="visible"` — avoids the
+ * Chromium quirk we hit earlier where TWO selectors both
+ * declaring `animation-play-state: running` (one per phase) made
+ * the animation restart from frame 0 when the cascade switched
+ * between them. The SVG-internal default is `paused`; this rule's
+ * (0, 3, 0) specificity beats the SVG's (0, 1, 0) `.foo { paused }`
+ * declarations so the running state lands cleanly on the
+ * descendants. */
+.empty-bench-tip-rotator[data-phase="visible"] .empty-bench-tip-illustration * {
+	animation-play-state: running;
 }

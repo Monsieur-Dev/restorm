@@ -15,6 +15,14 @@
 - **NEVER** use `git push --no-verify` or `git commit --no-verify`
 - **NEVER** reference a ticket ID (`OYO-X`, `JIRA-X`, `#123`, etc.) in a source comment, `describe`/`it` title, TODO marker, or committed Markdown doc. Ticket IDs belong in the commit message, in the PR description, and in `git log` — they rot in tracked files. If a comment or doc needs to explain *why* something looks this way, describe the constraint or invariant in the present tense, without referring to the ticket that introduced it. If you need to point readers at related work, link a **file path** or a **stable doc anchor**, not a ticket URL.
 
+## Translations span every locale
+
+Whenever you touch a translation file (`*/locales/*/translation.json`) — adding a new key, fixing wording, renaming a key — apply the same change to **every** locale shipped by the app, not just `en` and `fr`. The full set lives next to those two under `electron-core-ui/src/renderer/locales/` and `restorm/src/renderer/locales/`. Missing entries silently fall back to `en` at runtime, so the bug is invisible during local dev and only shows up to a user who happens to run the app in `de` / `ja` / `cs` / etc.
+
+A locale is in scope if a `translation.json` file exists for it under either app's `locales/` directory. When a key is restorm-specific (e.g. tips on the EmptyBench), put it only in `restorm/`; when it's shared chrome (menu bar, settings, …) keep both ECUI and restorm in sync. Either way, every locale file under the matching `locales/` directory must move together.
+
+If you genuinely cannot translate a phrase yet, still add the **key** to every locale with a placeholder English value so the JSON structure stays parallel — leaving the key out causes the fallback chain to land on the wrong language.
+
 ## Visual claims must be verified against the screenshot
 
 When reporting that a UI change is done — "labels removed", "edge no longer crosses the box", "spacing increased", "badge moved to the right of the name", or any other visible-state assertion — **you must look at the actual screenshot before stating it**. Don't assume the change took effect because the source diff says so: HMR may not have applied yet, the path you edited may not be the one that renders this view, or the framework may carry a hidden default that contradicts your diff.

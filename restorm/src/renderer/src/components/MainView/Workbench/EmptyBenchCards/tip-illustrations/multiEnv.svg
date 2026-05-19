@@ -1,0 +1,181 @@
+<svg viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg" class="empty-bench-tip-illustration" role="img" aria-hidden="true">
+  <style>
+    /* Shared chrome — URL bar fill (24 px tall, rounded-left,
+       square-right), template text, and the white play-button
+       arrow that always sits on top of every send button. */
+    .env-bar-fill { fill: var(--editor-background, #1e1e1e); }
+
+    .env-tpl-text {
+      font-family: 'SFMono-Regular', Menlo, Consolas, monospace;
+      font-size: 6.5px;
+      dominant-baseline: middle;
+    }
+    .env-tpl-var  { fill: #569cd6; }
+    .env-tpl-sep  { fill: currentColor; opacity: 0.55; }
+    .env-tpl-path { fill: #ce9178; }
+
+    .env-arrow {
+      fill: #ffffff;
+    }
+
+    /* Per-env overlay parts */
+    .env-bar-stroke {
+      fill: none;
+      stroke-width: 1.6;
+      stroke-linejoin: round;
+    }
+    .env-send { /* env-specific fill (the button bg is the colour cue) */ }
+
+    .env-tooltip { stroke-width: 1; stroke-linejoin: round; }
+    .env-res-text {
+      font-family: 'SFMono-Regular', Menlo, Consolas, monospace;
+      font-size: 6.5px;
+      dominant-baseline: middle;
+    }
+    .env-res-sep  { opacity: 0.55; }
+    .env-res-path { opacity: 0.55; }
+
+    /* localhost — green / safe */
+    .env-localhost .env-bar-stroke { stroke: #16a34a; }
+    .env-localhost .env-send       { fill: #16a34a; }
+    .env-localhost .env-tooltip    { fill: #052e16; stroke: #16a34a; }
+    .env-localhost .env-res-scheme { fill: #4ade80; }
+    .env-localhost .env-res-host   { fill: #86efac; }
+    .env-localhost .env-res-port   { fill: #4ade80; }
+    .env-localhost .env-res-sep    { fill: #86efac; }
+    .env-localhost .env-res-path   { fill: #d1fae5; }
+
+    /* dev — blue / non-prod */
+    .env-dev .env-bar-stroke { stroke: #2563eb; }
+    .env-dev .env-send       { fill: #2563eb; }
+    .env-dev .env-tooltip    { fill: #0a1f4d; stroke: #2563eb; }
+    .env-dev .env-res-scheme { fill: #60a5fa; }
+    .env-dev .env-res-host   { fill: #93c5fd; }
+    .env-dev .env-res-port   { fill: #60a5fa; }
+    .env-dev .env-res-sep    { fill: #93c5fd; }
+    .env-dev .env-res-path   { fill: #dbeafe; }
+
+    /* stage — amber / careful */
+    .env-stage .env-bar-stroke { stroke: #f59e0b; }
+    .env-stage .env-send       { fill: #f59e0b; }
+    .env-stage .env-tooltip    { fill: #3a2607; stroke: #f59e0b; }
+    .env-stage .env-res-scheme { fill: #fbbf24; }
+    .env-stage .env-res-host   { fill: #fde68a; }
+    .env-stage .env-res-port   { fill: #fbbf24; }
+    .env-stage .env-res-sep    { fill: #fde68a; }
+    .env-stage .env-res-path   { fill: #fef3c7; }
+
+    /* prod — red / danger zone */
+    .env-prod .env-bar-stroke { stroke: #dc2626; }
+    .env-prod .env-send       { fill: #dc2626; }
+    .env-prod .env-tooltip    { fill: #4a0e0e; stroke: #dc2626; }
+    .env-prod .env-res-scheme { fill: #f87171; }
+    .env-prod .env-res-host   { fill: #fca5a5; }
+    .env-prod .env-res-port   { fill: #f87171; }
+    .env-prod .env-res-sep    { fill: #fca5a5; }
+    .env-prod .env-res-path   { fill: #fee2e2; }
+
+    .env-reveal {
+      transform-origin: 75% 75%;
+      transform: scale(0);
+      animation-duration: 18s;
+      animation-iteration-count: infinite;
+      animation-fill-mode: both;
+      animation-play-state: paused;
+      animation-timing-function: ease-out;
+    }
+    .env-reveal--dev   { animation-name: env-reveal-dev; }
+    .env-reveal--stage { animation-name: env-reveal-stage; }
+    .env-reveal--prod  { animation-name: env-reveal-prod; }
+    .env-reveal--loop  { animation-name: env-reveal-loop; }
+
+    @keyframes env-reveal-dev   { 0%, 20% { transform: scale(0); } 23%, 100% { transform: scale(1); } }
+    @keyframes env-reveal-stage { 0%, 40% { transform: scale(0); } 43%, 100% { transform: scale(1); } }
+    @keyframes env-reveal-prod  { 0%, 60% { transform: scale(0); } 63%, 100% { transform: scale(1); } }
+    @keyframes env-reveal-loop  { 0%, 80% { transform: scale(0); } 83%, 100% { transform: scale(1); } }
+  </style>
+
+  <defs>
+    <clipPath id="env-clip-dev"><circle class="env-reveal env-reveal--dev"   cx="165" cy="112.5" r="210" /></clipPath>
+    <clipPath id="env-clip-stage"><circle class="env-reveal env-reveal--stage" cx="165" cy="112.5" r="210" /></clipPath>
+    <clipPath id="env-clip-prod"><circle class="env-reveal env-reveal--prod"  cx="165" cy="112.5" r="210" /></clipPath>
+    <clipPath id="env-clip-loop"><circle class="env-reveal env-reveal--loop"  cx="165" cy="112.5" r="210" /></clipPath>
+  </defs>
+
+  <!-- ============ Shared base — URL bar fill + template text ============ -->
+  <path
+    class="env-bar-fill"
+    d="M 14 84 L 180 84 L 180 108 L 14 108 A 4 4 0 0 1 10 104 L 10 88 A 4 4 0 0 1 14 84 Z"
+  />
+  <text class="env-tpl-text" x="14" y="96">
+    <tspan class="env-tpl-var">{{scheme}}</tspan><tspan class="env-tpl-sep">://</tspan><tspan class="env-tpl-var">{{host}}</tspan><tspan class="env-tpl-sep">:</tspan><tspan class="env-tpl-var">{{port}}</tspan><tspan class="env-tpl-path">/myAwesomeApi/...</tspan>
+  </text>
+
+  <!-- ============ Layer 1 — localhost (base) ============ -->
+  <g class="env-localhost">
+    <path class="env-bar-stroke" d="M 14 84 L 180 84 L 180 108 L 14 108 A 4 4 0 0 1 10 104 L 10 88 A 4 4 0 0 1 14 84 Z" />
+    <path class="env-send"       d="M 180 83 L 206 83 A 4 4 0 0 1 210 87 L 210 105 A 4 4 0 0 1 206 109 L 180 109 Z" />
+    <g>
+      <path class="env-tooltip" d="M 10 46 L 210 46 A 6 6 0 0 1 216 52 L 216 70 A 6 6 0 0 1 210 76 L 102 76 L 95 82 L 88 76 L 10 76 A 6 6 0 0 1 4 70 L 4 52 A 6 6 0 0 1 10 46 Z" />
+      <text class="env-res-text" x="10" y="62">
+        <tspan class="env-res-scheme">http</tspan><tspan class="env-res-sep">://</tspan><tspan class="env-res-host">localhost</tspan><tspan class="env-res-sep">:</tspan><tspan class="env-res-port">3000</tspan><tspan class="env-res-path">/myAwesomeApi/...</tspan>
+      </text>
+    </g>
+  </g>
+
+  <!-- ============ Layer 2 — dev ============ -->
+  <g class="env-dev" clip-path="url(#env-clip-dev)">
+    <path class="env-bar-stroke" d="M 14 84 L 180 84 L 180 108 L 14 108 A 4 4 0 0 1 10 104 L 10 88 A 4 4 0 0 1 14 84 Z" />
+    <path class="env-send"       d="M 180 83 L 206 83 A 4 4 0 0 1 210 87 L 210 105 A 4 4 0 0 1 206 109 L 180 109 Z" />
+    <g>
+      <path class="env-tooltip" d="M 10 46 L 210 46 A 6 6 0 0 1 216 52 L 216 70 A 6 6 0 0 1 210 76 L 102 76 L 95 82 L 88 76 L 10 76 A 6 6 0 0 1 4 70 L 4 52 A 6 6 0 0 1 10 46 Z" />
+      <text class="env-res-text" x="10" y="62">
+        <tspan class="env-res-scheme">http</tspan><tspan class="env-res-sep">://</tspan><tspan class="env-res-host">dev.example.com</tspan><tspan class="env-res-sep">:</tspan><tspan class="env-res-port">80</tspan><tspan class="env-res-path">/myAwesomeApi/...</tspan>
+      </text>
+    </g>
+  </g>
+
+  <!-- ============ Layer 3 — stage ============ -->
+  <g class="env-stage" clip-path="url(#env-clip-stage)">
+    <path class="env-bar-stroke" d="M 14 84 L 180 84 L 180 108 L 14 108 A 4 4 0 0 1 10 104 L 10 88 A 4 4 0 0 1 14 84 Z" />
+    <path class="env-send"       d="M 180 83 L 206 83 A 4 4 0 0 1 210 87 L 210 105 A 4 4 0 0 1 206 109 L 180 109 Z" />
+    <g>
+      <path class="env-tooltip" d="M 10 46 L 210 46 A 6 6 0 0 1 216 52 L 216 70 A 6 6 0 0 1 210 76 L 102 76 L 95 82 L 88 76 L 10 76 A 6 6 0 0 1 4 70 L 4 52 A 6 6 0 0 1 10 46 Z" />
+      <text class="env-res-text" x="10" y="62">
+        <tspan class="env-res-scheme">https</tspan><tspan class="env-res-sep">://</tspan><tspan class="env-res-host">stage.example.com</tspan><tspan class="env-res-sep">:</tspan><tspan class="env-res-port">443</tspan><tspan class="env-res-path">/myAwesomeApi/...</tspan>
+      </text>
+    </g>
+  </g>
+
+  <!-- ============ Layer 4 — prod ============ -->
+  <g class="env-prod" clip-path="url(#env-clip-prod)">
+    <path class="env-bar-stroke" d="M 14 84 L 180 84 L 180 108 L 14 108 A 4 4 0 0 1 10 104 L 10 88 A 4 4 0 0 1 14 84 Z" />
+    <path class="env-send"       d="M 180 83 L 206 83 A 4 4 0 0 1 210 87 L 210 105 A 4 4 0 0 1 206 109 L 180 109 Z" />
+    <g>
+      <path class="env-tooltip" d="M 10 46 L 210 46 A 6 6 0 0 1 216 52 L 216 70 A 6 6 0 0 1 210 76 L 102 76 L 95 82 L 88 76 L 10 76 A 6 6 0 0 1 4 70 L 4 52 A 6 6 0 0 1 10 46 Z" />
+      <text class="env-res-text" x="10" y="62">
+        <tspan class="env-res-scheme">https</tspan><tspan class="env-res-sep">://</tspan><tspan class="env-res-host">api.example.com</tspan><tspan class="env-res-sep">:</tspan><tspan class="env-res-port">443</tspan><tspan class="env-res-path">/myAwesomeApi/...</tspan>
+      </text>
+    </g>
+  </g>
+
+  <!-- ============ Layer 5 — localhost loop ============ -->
+  <g class="env-localhost" clip-path="url(#env-clip-loop)">
+    <path class="env-bar-stroke" d="M 14 84 L 180 84 L 180 108 L 14 108 A 4 4 0 0 1 10 104 L 10 88 A 4 4 0 0 1 14 84 Z" />
+    <path class="env-send"       d="M 180 83 L 206 83 A 4 4 0 0 1 210 87 L 210 105 A 4 4 0 0 1 206 109 L 180 109 Z" />
+    <g>
+      <path class="env-tooltip" d="M 10 46 L 210 46 A 6 6 0 0 1 216 52 L 216 70 A 6 6 0 0 1 210 76 L 102 76 L 95 82 L 88 76 L 10 76 A 6 6 0 0 1 4 70 L 4 52 A 6 6 0 0 1 10 46 Z" />
+      <text class="env-res-text" x="10" y="62">
+        <tspan class="env-res-scheme">http</tspan><tspan class="env-res-sep">://</tspan><tspan class="env-res-host">localhost</tspan><tspan class="env-res-sep">:</tspan><tspan class="env-res-port">3000</tspan><tspan class="env-res-path">/myAwesomeApi/...</tspan>
+      </text>
+    </g>
+  </g>
+
+  <!-- ============ Shared top — white "send" codicon icon ============ -->
+  <g transform="translate(189 90) scale(0.75)">
+    <path
+      class="env-arrow"
+      d="M1.177 1.119a.5.5 0 0 1 .547-.066l13 6.5a.5.5 0 0 1 0 .895l-13 6.5a.5.5 0 0 1-.702-.595L2.977 8 1.022 1.648a.5.5 0 0 1 .155-.529ZM3.869 8.5l-1.547 5.03L13.382 8 2.322 2.47 3.869 7.5H9.5a.5.5 0 0 1 0 1H3.87Z"
+    />
+  </g>
+</svg>

@@ -1,7 +1,8 @@
 {
   "common": {
     "opened": "已開啟",
-    "refresh": "重新整理"
+    "refresh": "重新整理",
+    "import": "匯入"
   },
   "file": {
     "untitled": "未命名",

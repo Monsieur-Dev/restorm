@@ -1,7 +1,8 @@
 {
   "common": {
     "opened": "Avatut",
-    "refresh": "Päivitä"
+    "refresh": "Päivitä",
+    "import": "Tuo"
   },
   "file": {
     "untitled": "Nimetön",

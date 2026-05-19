@@ -11,6 +11,89 @@
       "applyToAll": "套用至所有請求"
     }
   },
+  "tips": {
+    "cardTitle": "小撇步與技巧",
+    "maximizeTab": {
+      "title": "一鍵最大化分頁",
+      "body": "在工作區的任一分頁上點兩下可將其全螢幕顯示。按 Esc 可恢復先前的版面配置。"
+    },
+    "mcpControl": {
+      "title": "以 AI 操控 restorm",
+      "body": "restorm 內建 MCP 伺服器，讓 Claude Code 等 AI 助手不必離開聊天視窗，就能列出、開啟、編輯與執行你的請求，檢視回應，並以程式方式操作工作區。"
+    },
+    "envSwitch": {
+      "title": "輕鬆切換環境!",
+      "body": "點擊狀態列按鈕可切換目前請求的環境，於請求送出按鈕上按右鍵則可切換 API 內所有請求的環境。"
+    },
+    "authRequests": {
+      "title": "使用你的 API 需要驗證?",
+      "body": "與其每次都送出請求取得權杖再到處複製貼上，不如使用驗證請求。當呼叫失敗 (401、403 等) 或權杖逾期時，驗證請求會自動重新執行以擷取並重用權杖。十分方便!"
+    },
+    "supplyChain": {
+      "title": "保護你自己!",
+      "body": "和其他軟體一樣，Restorm 使用了第三方函式庫。為了防範供應鏈攻擊，所有對外的呼叫都會在最底層被攔截，一旦某個第三方函式庫試圖竊取你的個人資訊，我們會立刻提醒你!"
+    },
+    "codeSnippets": {
+      "title": "Restorm 助你撰寫程式碼!",
+      "body": "在每個請求上找到程式碼片段，幫助你整合至自己的軟體。支援多種語言: curl、PowerShell、TypeScript、C# 等等!"
+    },
+    "workbenchLayout": {
+      "title": "整理你的工作區",
+      "body": "螢幕夠大、請求又多? 並排擺放、上下堆疊、隨心安排 — 只要拖曳分頁到你想要的位置即可。一切都是為了你的舒適!"
+    },
+    "persistState": {
+      "title": "回到你離開時的樣子!",
+      "body": "關閉 Restorm 後再次打開，你會看到它停留在你上次離開時的相同狀態。"
+    },
+    "favorites": {
+      "title": "總有幾個讓你格外偏愛…",
+      "body": "有些請求比其他的更重要? 把它們加入收藏吧!"
+    },
+    "console": {
+      "title": "更清楚地看到正在發生的事",
+      "body": "主控台會在你發送請求時即時顯示對 API 的呼叫。需要時可直接複製貼上到你的終端機，相當方便! 你比較喜歡哪種風味: curl 還是 PowerShell?"
+    },
+    "miniBrowser": {
+      "title": "厭倦了不停切換視窗?",
+      "body": "Restorm 內建了一個迷你網頁瀏覽器。當你的應用對 API 呼叫產生視覺反饋時非常實用!"
+    },
+    "apiDocs": {
+      "title": "文件就在這裡看",
+      "body": "不必再在 Restorm 與 API 文件之間切換。如果你的 API 提供了規範 (Swagger、OpenAPI…)，會被匯入到 Restorm，你可以直接在這裡閱讀。"
+    },
+    "secrets": {
+      "title": "保護你的密鑰",
+      "body": "你的密碼和授權權杖不會直接保存在 Restorm 檔案內。所以 Restorm 把密鑰與請求紀錄存放在獨立的檔案。請注意別把它們提交到 GitHub。Restorm 也能從 AWS、GitHub 等地方擷取你的密鑰。"
+    },
+    "themes": {
+      "title": "你的色彩，你的心情",
+      "body": "Restorm 提供多種配色方案。挑一個最符合你當下心情的吧。"
+    },
+    "search": {
+      "title": "想找什麼，一秒搞定",
+      "body": "看到視窗頂端了嗎? Restorm 內建了搜尋引擎，不必再花幾個小時翻找那一條請求了。"
+    },
+    "multiEnv": {
+      "title": "一樣的請求，不同的環境",
+      "body": "你有 dev、prod、staging 三個環境? 一樣的請求，但 URL 與 token 略有差異… 使用環境和變數即可一鍵切換。還可以為每個環境分配顏色與圖示，避免週五傍晚在正式環境上心驚膽跳!"
+    },
+    "protocols": {
+      "title": "不只是 REST",
+      "body": "Restorm 不僅會 REST… 還會更多! GraphQL、gRPC、SOAP、OData、WebSocket — 這些協定都觸手可及，無需切換工具。"
+    },
+    "responseTree": {
+      "title": "視覺化查看 API 回應",
+      "body": "你知道嗎? Restorm 可以把 API 回應渲染成可互動的樹狀檢視，讓你隨意展開、折疊地瀏覽。"
+    },
+    "responseHistory": {
+      "title": "請求歷史",
+      "body": "你可以查看所有 API 呼叫的歷史紀錄。方便回頭梳理到底發生了什麼。"
+    },
+    "multiLanguage": {
+      "title": "27 種語言!",
+      "body": "Restorm 支援 27 種語言。英文、法文、西班牙文、德文、義大利文、日文、中文、韓文等等 — 在設定中挑選你的語言吧!"
+    }
+  },
   "authFailureToast": {
     "title": "驗證失敗",
     "fallbackReason": "驗證請求未能成功。",
@@ -615,5 +698,22 @@
     "ok": "匯入",
     "cancel": "取消",
     "dropZone": "拖放區"
+  },
+  "emptyBench": {
+    "importCard": {
+      "title": "匯入你的 API",
+      "body": "帶上 OpenAPI / Swagger 規格、GraphQL schema、Postman / Bruno / Insomnia 集合，或貼上一條 curl / PowerShell 命令。Restorm 會解析、搭建資料夾結構，並為每個端點預先填好欄位。"
+    },
+    "recentActivity": {
+      "title": "最近活動",
+      "empty": "傳送您的第一個請求以在此處查看。"
+    },
+    "apiCard": {
+      "favorites": "我的最愛",
+      "topUsed": "最常用 10 個",
+      "recent": "最近的請求",
+      "description": "描述",
+      "version": "版本"
+    }
   }
 }

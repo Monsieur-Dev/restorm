@@ -275,6 +275,12 @@ export const responsesHistoryGetArgs = z.tuple([z.string()])
 export const responsesHistoryTogglePinArgs = z.tuple([z.string(), z.boolean()])
 
 // ==========================================================================
+// Request Usage
+// ==========================================================================
+
+export const requestUsageGetArgs = z.tuple([])
+
+// ==========================================================================
 // Import
 // ==========================================================================
 

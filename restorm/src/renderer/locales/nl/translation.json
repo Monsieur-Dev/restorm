@@ -12,6 +12,89 @@
       "applyToAll": "Toepassen op alle verzoeken"
     }
   },
+  "tips": {
+    "cardTitle": "Tips & tricks",
+    "maximizeTab": {
+      "title": "Maximaliseer een tabblad met één klik",
+      "body": "Dubbelklik op een willekeurig workbench-tabblad om het op volledig scherm te tonen. Druk op Esc om terug te keren naar de oorspronkelijke indeling."
+    },
+    "mcpControl": {
+      "title": "Bestuur restorm met AI",
+      "body": "Restorm bevat een MCP-server, zodat AI-assistenten zoals Claude Code je requests kunnen tonen, openen, bewerken en uitvoeren, responses kunnen inspecteren en je werkruimte programmatisch kunnen aansturen — zonder hun chat te verlaten."
+    },
+    "envSwitch": {
+      "title": "Wissel eenvoudig van omgeving!",
+      "body": "Wissel de omgeving van de huidige request of van alle requests in je API door op de knop in de statusbalk te klikken, of door met de rechtermuisknop op de verzendknop van de request te klikken."
+    },
+    "authRequests": {
+      "title": "Moet je je authenticeren voor je API?",
+      "body": "In plaats van iedere keer een request te versturen om een token op te halen en die overal te plakken: gebruik auth-requests. Faalt een call (401, 403, …) of is de levensduur van je token voorbij, dan wordt de auth-request automatisch opnieuw uitgevoerd om het token op te halen en te gebruiken. Handig!"
+    },
+    "supplyChain": {
+      "title": "Bescherm jezelf!",
+      "body": "Zoals elke software gebruikt Restorm bibliotheken van derden. Om supply-chain-aanvallen te voorkomen worden alle uitgaande aanroepen op het laagste niveau onderschept, en we waarschuwen je als een bibliotheek van derden je persoonlijke informatie probeert te stelen!"
+    },
+    "codeSnippets": {
+      "title": "Restorm helpt je met coderen!",
+      "body": "Vind code-snippets bij elke request om ze in je software te integreren. Veel talen beschikbaar: curl, PowerShell, TypeScript, C# en nog veel meer!"
+    },
+    "workbenchLayout": {
+      "title": "Organiseer je werkbank",
+      "body": "Heb je een groot scherm en veel requests? Zet ze naast elkaar, onder elkaar of zo'n beetje hoe je maar wilt — sleep gewoon een tabblad waar je het wilt. Alles voor je gemak!"
+    },
+    "persistState": {
+      "title": "Vind het terug zoals je het achterliet!",
+      "body": "Sluit je Restorm en open je het opnieuw, dan vind je het in exact dezelfde staat terug als waarin je het achterliet."
+    },
+    "favorites": {
+      "title": "Sommige liggen je nauwer aan het hart…",
+      "body": "Heb je requests die je belangrijker vindt dan andere? Markeer ze als favoriet!"
+    },
+    "console": {
+      "title": "Bekijk wat er gebeurt",
+      "body": "De console laat je zien hoe je APIs worden aangeroepen terwijl je requests verstuurt. Handig om ze in je terminal te plakken als dat nodig is! Wat is je smaak: curl of PowerShell?"
+    },
+    "miniBrowser": {
+      "title": "Moe van het constante vensterwisselen?",
+      "body": "Restorm heeft een ingebouwde mini-webbrowser. Handig wanneer je app visueel reageert op je API-aanroepen."
+    },
+    "apiDocs": {
+      "title": "De documentatie, gewoon hier",
+      "body": "Geen geschakel meer tussen Restorm en de documentatie van je API. Levert je API een spec (Swagger, OpenAPI, …), dan wordt die in Restorm geïmporteerd en kun je hem direct hier raadplegen."
+    },
+    "secrets": {
+      "title": "Bescherm je geheimen",
+      "body": "Je wachtwoorden en auth-tokens worden niet rechtstreeks in het Restorm-bestand opgeslagen. Daarom bewaart Restorm geheimen en je request-historie in aparte bestanden. Het is aan jou ze niet naar GitHub te pushen. Restorm kan geheimen ook ophalen uit AWS, GitHub en andere bronnen."
+    },
+    "themes": {
+      "title": "Jouw kleuren, jouw stemming",
+      "body": "Restorm wordt geleverd met verschillende kleurschema's. Kies degene die past bij hoe je je voelt."
+    },
+    "search": {
+      "title": "Vind alles, snel",
+      "body": "Heb je de bovenkant van dit venster gezien? Restorm heeft een ingebouwde zoekfunctie — nooit meer uren zoeken naar DE juiste request."
+    },
+    "multiEnv": {
+      "title": "Dezelfde requests, andere omgevingen",
+      "body": "Heb je een dev-, een prod- en een staging-omgeving? Dezelfde requests, alleen niet helemaal dezelfde URLs, niet helemaal dezelfde tokens… Gebruik omgevingen en variabelen om met één klik om te schakelen. Je kunt elke omgeving zelfs een eigen kleur en pictogram geven, om die schrikmomenten op vrijdagavond in productie te vermijden!"
+    },
+    "protocols": {
+      "title": "Meer dan alleen REST",
+      "body": "Restorm spreekt REST… en nog veel meer! GraphQL, gRPC, SOAP, OData, WebSocket — al die protocollen binnen handbereik, zonder van tool te wisselen."
+    },
+    "responseTree": {
+      "title": "Bekijk je API-responses visueel",
+      "body": "Wist je dat je je API-responses ook grafischer kunt verkennen? Restorm toont ze als een interactieve boom die je kunt navigeren, inklappen en uitklappen."
+    },
+    "responseHistory": {
+      "title": "Geschiedenis van requests",
+      "body": "Je kunt de geschiedenis van al je API-aanroepen bekijken. Handig om te achterhalen wat er precies is gebeurd."
+    },
+    "multiLanguage": {
+      "title": "27 talen!",
+      "body": "Restorm spreekt 27 talen. Engels, Frans, Spaans, Duits, Italiaans, Japans, Chinees, Koreaans en nog veel meer — kies de jouwe in de instellingen!"
+    }
+  },
   "authFailureToast": {
     "title": "Authenticatie mislukt",
     "fallbackReason": "Het authenticatieverzoek is niet geslaagd.",
@@ -616,5 +699,22 @@
     "ok": "Importeren",
     "cancel": "Annuleren",
     "dropZone": "Sleepzone"
+  },
+  "emptyBench": {
+    "importCard": {
+      "title": "Importeer je API",
+      "body": "Breng een OpenAPI/Swagger-spec, een GraphQL-schema, een Postman/Bruno/Insomnia-collectie mee, of plak een curl/PowerShell-commando. Restorm verwerkt het, bouwt de mappenstructuur op en levert elk endpoint kant-en-klaar."
+    },
+    "recentActivity": {
+      "title": "Recente activiteit",
+      "empty": "Verstuur je eerste verzoek om het hier te zien."
+    },
+    "apiCard": {
+      "favorites": "Favorieten",
+      "topUsed": "Top 10 meest gebruikt",
+      "recent": "Laatste requests",
+      "description": "Omschrijving",
+      "version": "Versie"
+    }
   }
 }

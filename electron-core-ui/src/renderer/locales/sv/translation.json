@@ -1,7 +1,8 @@
 {
   "common": {
     "opened": "Öppnade",
-    "refresh": "Uppdatera"
+    "refresh": "Uppdatera",
+    "import": "Importera"
   },
   "file": {
     "untitled": "Namnlös",

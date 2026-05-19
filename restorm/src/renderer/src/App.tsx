@@ -2108,7 +2108,7 @@ const App: React.FC = () => {
               onFolderChange={handleFolderChange}
               onEnvironmentFolderChange={handleEnvironmentFolderChange}
               onSizesChange={handleSizesChange}
-              emptyFallback={<EmptyBench />}
+              emptyFallback={<EmptyBench rootItems={rootItems} projectUuid={projectUuid} onImport={() => { setShowImportModal(true) }} onOpenRequest={handleItemClick} />}
               workbenchId={workbenchId}
               onRebuildTab={rootItems.length > 0 ? handleRebuildTab : undefined}
               onStateRestored={handleStateRestored}

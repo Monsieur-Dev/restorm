@@ -12,6 +12,89 @@
       "applyToAll": "Zbato te të gjitha kërkesat"
     }
   },
+  "tips": {
+    "cardTitle": "Këshilla dhe truke",
+    "maximizeTab": {
+      "title": "Maksimizo një skedë me një klikim",
+      "body": "Klikoni dy herë në cilëndo skedë të workbench-it për ta shfaqur në ekran të plotë. Shtypni Esc për t'u kthyer në paraqitjen e mëparshme."
+    },
+    "mcpControl": {
+      "title": "Drejtoni restorm-in me IA",
+      "body": "Restorm vjen me një server MCP, kështu që asistentët e IA si Claude Code mund të listojnë, hapin, redaktojnë dhe ekzekutojnë kërkesat tuaja, të inspektojnë përgjigjet dhe të manipulojnë hapësirën e punës programatikisht — pa lënë bisedën."
+    },
+    "envSwitch": {
+      "title": "Ndërroni mjedise me lehtësi!",
+      "body": "Ndryshoni mjedisin për kërkesën aktuale ose për të gjitha kërkesat e API-së suaj duke klikuar butonin në shiritin e statusit, ose duke klikuar me të djathtën butonin e dërgimit të kërkesës."
+    },
+    "authRequests": {
+      "title": "Duhet të autentikoheni për të përdorur API-në tuaj?",
+      "body": "Në vend që të dërgoni një kërkesë çdo herë për të marrë një token dhe ta kopjoni e ngjisni kudo, përdorni kërkesat e autentikimit. Kur një thirrje dështon (401, 403, …) ose mbaron jeta e tokenit, kërkesa e autentikimit ekzekutohet automatikisht përsëri për të nxjerrë dhe ripërdorur tokenin. Praktike!"
+    },
+    "supplyChain": {
+      "title": "Mbroni veten!",
+      "body": "Si çdo softuer, Restorm përdor biblioteka të palëve të treta. Për të parandaluar sulmet ndaj zinxhirit të furnizimit, të gjitha thirrjet dalëse kapen në nivelin më të ulët dhe ne ju njoftojmë nëse një bibliotekë e palës së tretë përpiqet të vjedhë informacionet tuaja personale!"
+    },
+    "codeSnippets": {
+      "title": "Restorm ju ndihmon të kodoni!",
+      "body": "Gjeni copëza kodi për çdo kërkesë për t'ju ndihmuar t'i integroni në programin tuaj. Janë në dispozicion shumë gjuhë: curl, PowerShell, TypeScript, C# dhe shumë të tjera!"
+    },
+    "workbenchLayout": {
+      "title": "Organizoni hapësirën tuaj të punës",
+      "body": "Keni një ekran të madh dhe shumë kërkesa? Vendosini krah për krah, njëra mbi tjetrën ose pak a shumë si të doni — thjesht zvarritni një skedë aty ku dëshironi. Gjithçka për rehatinë tuaj!"
+    },
+    "persistState": {
+      "title": "Gjejeni siç e latë!",
+      "body": "Nëse mbyllni Restorm dhe e rihapni, do ta gjeni në të njëjtën gjendje në të cilën e latë."
+    },
+    "favorites": {
+      "title": "Disa janë më të dashur për ju se të tjerët…",
+      "body": "Keni kërkesa që ju janë më të rëndësishme? Shtoni ato te të preferuarat!"
+    },
+    "console": {
+      "title": "Shihni më mirë çfarë po ndodh",
+      "body": "Konsola ju tregon thirrjet drejt API-ve tuaja ndërsa lëshoni kërkesa. E përshtatshme për t'i kopjuar në terminalin tuaj kur duhet! Cili është shija juaj: curl ose PowerShell?"
+    },
+    "miniBrowser": {
+      "title": "Të lodhur duke ndërruar dritaret çdo herë?",
+      "body": "Restorm përfshin një mini shfletues web. I përshtatshëm kur aplikacioni juaj reagon vizualisht ndaj thirrjeve API."
+    },
+    "apiDocs": {
+      "title": "Dokumentacioni — pikërisht këtu",
+      "body": "Nuk ka më kalim midis Restorm dhe dokumentacionit të API-së suaj. Nëse API-ja juaj ofron një specifikim (Swagger, OpenAPI, …), ai importohet në Restorm dhe mund ta konsultoni drejtpërdrejt këtu."
+    },
+    "secrets": {
+      "title": "Mbroni sekretet tuaja",
+      "body": "Fjalëkalimet dhe tokenat e autorizimit nuk ruhen drejtpërdrejt brenda skedarit Restorm. Prandaj Restorm i ruan sekretet dhe historinë e kërkesave në skedarë të veçantë. Është detyrë juaja të mos i ngarkoni në GitHub. Restorm mund t'i marrë sekretet edhe nga AWS, GitHub apo burime të tjera."
+    },
+    "themes": {
+      "title": "Ngjyrat tuaja, humori juaj",
+      "body": "Restorm vjen me disa skema ngjyrash. Zgjidhni atë që përshtatet me humorin tuaj."
+    },
+    "search": {
+      "title": "Gjeni gjithçka, shpejt",
+      "body": "E patë pjesën e sipërme të kësaj dritareje? Restorm sjell një motor kërkimi — mjaft me orë të tëra duke kërkuar ATË kërkesë."
+    },
+    "multiEnv": {
+      "title": "Të njëjtat kërkesa, mjedise të ndryshme",
+      "body": "Keni një mjedis dev, një prod dhe një staging? Janë të njëjtat kërkesa, por jo plotësisht të njëjtat URL dhe jo plotësisht të njëjtët token… Përdorni mjediset dhe variablat për të kaluar nga njëri tek tjetri me një klikim. Mund t'i dalloni edhe me ngjyra dhe ikona, për të shmangur frikërat e të premteve mbrëma para fundjavës në prodhim!"
+    },
+    "protocols": {
+      "title": "Më shumë se vetëm REST",
+      "body": "Restorm flet REST… dhe shumë më tepër! GraphQL, gRPC, SOAP, OData, WebSocket — të gjitha këto protokole në majë të gishtave, pa ndërruar mjet."
+    },
+    "responseTree": {
+      "title": "Shihni përgjigjet e API-së në mënyrë vizuale",
+      "body": "E dinit se mund t'i shfletoni përgjigjet e API-së në mënyrë më grafike? Restorm i shfaq si një pemë interaktive që mund ta lëvizni, ta palosni dhe ta shpalosni."
+    },
+    "responseHistory": {
+      "title": "Historiku i kërkesave",
+      "body": "Mund të shfletoni historikun e të gjitha thirrjeve drejt API-ve tuaja. I përshtatshëm për të kuptuar se çfarë ndodhi vërtet."
+    },
+    "multiLanguage": {
+      "title": "27 gjuhë!",
+      "body": "Restorm flet 27 gjuhë. Anglisht, frëngjisht, spanjisht, gjermanisht, italisht, japonisht, kinezisht, koreanisht dhe shumë të tjera — zgjidhni tuajën nga cilësimet!"
+    }
+  },
   "authFailureToast": {
     "title": "Vërtetimi dështoi",
     "fallbackReason": "Kërkesa e vërtetimit nuk pati sukses.",
@@ -616,5 +699,22 @@
     "ok": "Importo",
     "cancel": "Anulo",
     "dropZone": "Zona e lëshimit"
+  },
+  "emptyBench": {
+    "importCard": {
+      "title": "Importo API-në tënde",
+      "body": "Sill një specifikim OpenAPI / Swagger, një skemë GraphQL, një koleksion Postman / Bruno / Insomnia, ose ngjit një komandë curl / PowerShell. Restorm e analizon, ndërton strukturën e dosjeve dhe ulet me çdo endpoint të gatshëm."
+    },
+    "recentActivity": {
+      "title": "Aktivitet i fundit",
+      "empty": "Dërgoni kërkesën tuaj të parë për ta parë këtu."
+    },
+    "apiCard": {
+      "favorites": "Të preferuara",
+      "topUsed": "Top 10 më të përdorurat",
+      "recent": "Kërkesat e fundit",
+      "description": "Përshkrim",
+      "version": "Versioni"
+    }
   }
 }

@@ -1,0 +1,152 @@
+<svg viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg" class="empty-bench-tip-illustration" role="img" aria-hidden="true">
+  <style>
+    .ps-window-frame {
+      fill: var(--editor-background, #1e1e1e);
+      stroke: currentColor;
+      stroke-width: 1.4;
+      stroke-linejoin: round;
+    }
+    .ps-pane {
+      fill: var(--editor-background, #1e1e1e);
+      stroke: currentColor;
+      stroke-width: 1.2;
+      stroke-linejoin: round;
+    }
+    .ps-close {
+      stroke: currentColor;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      fill: none;
+    }
+
+    .ps-icon {
+      fill: #2563eb;
+      stroke: currentColor;
+      stroke-width: 1.2;
+      stroke-linejoin: round;
+    }
+    .ps-icon-letter {
+      font-family: 'SFMono-Regular', Menlo, Consolas, monospace;
+      font-size: 22px;
+      font-weight: 700;
+      fill: #ffffff;
+      text-anchor: middle;
+    }
+    .ps-icon-label {
+      font-family: 'SFMono-Regular', Menlo, Consolas, monospace;
+      font-size: 11px;
+      font-weight: 600;
+      fill: currentColor;
+      text-anchor: middle;
+    }
+
+    .ps-pointer {
+      fill: currentColor;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linejoin: round;
+    }
+    .ps-sparkle {
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      fill: none;
+      opacity: 0;
+    }
+
+    .ps-window-group,
+    .ps-app-group,
+    .ps-pointer-group,
+    .ps-sparkle {
+      animation-duration: 15s;
+      animation-iteration-count: infinite;
+      animation-fill-mode: both;
+      animation-play-state: paused;
+    }
+    .ps-window-group  { animation-name: ps-window-show; }
+    .ps-app-group     { animation-name: ps-app-show;    opacity: 0; }
+    .ps-pointer-group { animation-name: ps-pointer-move; opacity: 0; }
+    .ps-sparkle       { animation-name: ps-sparkle-burst; }
+
+    @keyframes ps-window-show {
+      0%, 27%  { opacity: 1; }
+      37%, 67% { opacity: 0; }
+      75%, 100% { opacity: 1; }
+    }
+    @keyframes ps-app-show {
+      0%, 37%  { opacity: 0; }
+      47%, 62% { opacity: 1; }
+      72%, 100% { opacity: 0; }
+    }
+    @keyframes ps-pointer-move {
+      0%, 22% { opacity: 0; transform: translate(200px, 14px); }
+      24%     { opacity: 1; transform: translate(200px, 14px); }
+      31%     { opacity: 1; transform: translate(200px, 14px); }
+      33%     { opacity: 0; transform: translate(200px, 14px); }
+      54%     { opacity: 0; transform: translate(110px, 54px); }
+      56%     { opacity: 1; transform: translate(110px, 54px); }
+      66%     { opacity: 1; transform: translate(110px, 54px); }
+      68%, 100% { opacity: 0; transform: translate(110px, 54px); }
+    }
+    /* Three sparkle bursts per cycle:
+         single click on the close button at ~29%,
+         double-click on the app icon at ~58% then ~62%. */
+    @keyframes ps-sparkle-burst {
+      0%, 26%  { opacity: 0; transform: translate(var(--ps-nx), var(--ps-ny)); }
+      28%      { opacity: 1; transform: translate(0, 0); }
+      31%      { opacity: 0; transform: translate(calc(var(--ps-nx) * -0.6), calc(var(--ps-ny) * -0.6)); }
+      32%, 56% { opacity: 0; transform: translate(var(--ps-nx), var(--ps-ny)); }
+      58%      { opacity: 1; transform: translate(0, 0); }
+      60%      { opacity: 0; transform: translate(calc(var(--ps-nx) * -0.6), calc(var(--ps-ny) * -0.6)); }
+      61%      { opacity: 0; transform: translate(var(--ps-nx), var(--ps-ny)); }
+      62%      { opacity: 1; transform: translate(0, 0); }
+      64%      { opacity: 0; transform: translate(calc(var(--ps-nx) * -0.6), calc(var(--ps-ny) * -0.6)); }
+      65%, 100% { opacity: 0; }
+    }
+  </style>
+
+  <!-- ================================ Window (with 3-pane workbench inside) -->
+  <g class="ps-window-group">
+    <!-- Outer window frame -->
+    <rect class="ps-window-frame" x="10" y="8" width="200" height="134" rx="8" />
+
+    <!-- Close button (X glyph) at top-right of the title strip -->
+    <line class="ps-close" x1="196" y1="11" x2="204" y2="19" />
+    <line class="ps-close" x1="196" y1="19" x2="204" y2="11" />
+
+    <!-- 3-pane workbench (same arrangement as workbenchLayout's Layout C) -->
+    <!-- Top-left pane (active tab + body merged) -->
+    <path
+      class="ps-pane"
+      d="M 24 26 L 50 26 A 10 10 0 0 1 60 36 L 60 44 L 122 44 A 8 8 0 0 1 130 52 L 130 76 A 8 8 0 0 1 122 84 L 22 84 A 8 8 0 0 1 14 76 L 14 36 A 10 10 0 0 1 24 26 Z"
+    />
+    <!-- Bottom-left pane -->
+    <path
+      class="ps-pane"
+      d="M 24 88 L 50 88 A 10 10 0 0 1 60 98 L 60 106 L 122 106 A 8 8 0 0 1 130 114 L 130 130 A 8 8 0 0 1 122 138 L 22 138 A 8 8 0 0 1 14 130 L 14 98 A 10 10 0 0 1 24 88 Z"
+    />
+    <!-- Right pane (full inside-height) -->
+    <path
+      class="ps-pane"
+      d="M 144 26 L 168 26 A 10 10 0 0 1 178 36 L 178 44 L 198 44 A 8 8 0 0 1 206 52 L 206 130 A 8 8 0 0 1 198 138 L 142 138 A 8 8 0 0 1 134 130 L 134 36 A 10 10 0 0 1 144 26 Z"
+    />
+  </g>
+
+  <!-- ================================ Closed-app state: Restorm icon + label -->
+  <g class="ps-app-group">
+    <rect class="ps-icon" x="92" y="44" width="36" height="36" rx="8" />
+    <text class="ps-icon-letter" x="110" y="71">R</text>
+    <text class="ps-icon-label"  x="110" y="98">Restorm</text>
+  </g>
+
+  <!-- ================================ Pointer + click sparkles (always on top) -->
+  <g class="ps-pointer-group">
+    <line class="ps-sparkle" x1="-2" y1="-3" x2="-8"  y2="-10" style="--ps-nx: 4px;  --ps-ny: 5px" />
+    <line class="ps-sparkle" x1="-4" y1="-1" x2="-12" y2="-2"  style="--ps-nx: 6px;  --ps-ny: 1px" />
+    <line class="ps-sparkle" x1="-1" y1="-4" x2="-2"  y2="-12" style="--ps-nx: 1px;  --ps-ny: 6px" />
+    <line class="ps-sparkle" x1="2"  y1="-4" x2="4"   y2="-11" style="--ps-nx: -2px; --ps-ny: 6px" />
+    <line class="ps-sparkle" x1="-3" y1="2"  x2="-10" y2="6"   style="--ps-nx: 5px;  --ps-ny: -3px" />
+    <line class="ps-sparkle" x1="5"  y1="-2" x2="11"  y2="-6"  style="--ps-nx: -4px; --ps-ny: 3px" />
+    <path class="ps-pointer" d="M 0 0 L 0 17 L 4.5 12.5 L 7.5 19 L 10 18 L 7.2 11.5 L 13 11.5 Z" />
+  </g>
+</svg>

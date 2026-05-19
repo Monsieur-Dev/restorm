@@ -1,7 +1,8 @@
 {
   "common": {
     "opened": "已打开",
-    "refresh": "刷新"
+    "refresh": "刷新",
+    "import": "导入"
   },
   "file": {
     "untitled": "未命名",
