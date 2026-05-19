@@ -30,6 +30,7 @@ import {
   type ConsoleFeedSource
 } from 'electron-core-ui/renderer'
 import { PROJECT_UUID_KEY } from '../../shared/config/projectUuid'
+import { preloadRequestPanelStates, removeRequestPanelState } from './services/requestPanelStateStore'
 import { HTTPRequest } from '../../shared/models/requests/HTTPRequest'
 import { SoapRequest } from '../../shared/models/requests/SoapRequest'
 import { GrpcRequest } from '../../shared/models/requests/GrpcRequest'
@@ -337,6 +338,17 @@ const App: React.FC = () => {
       onMissing: () => allFolderIdsRef.current.slice()
     }
   )
+
+  // Prime the per-request panel-collapsed cache as soon as we know
+  // the project UUID — the *RequestTabView seeds its useState lazy
+  // initializer synchronously from `getRequestPanelState`, so the
+  // disk read has to land before the first tab mounts. Cache lookup
+  // is keyed by UUID so re-opens of the same project (or hot
+  // reloads) see the same persisted set.
+  useEffect(() => {
+    if (!projectUuid) return
+    void preloadRequestPanelStates(projectUuid)
+  }, [projectUuid])
 
   // Persisted collapsed state for the Favorites + Opened sidebar panes,
   // keyed by project UUID like the workbench layout. Workspace stays
@@ -1875,6 +1887,12 @@ const App: React.FC = () => {
       void markSaveUnitDeleted(payload.id).catch((err: unknown) => {
         logger.warn('[App] markSaveUnitDeleted failed', { id: payload.id, error: String(err) })
       })
+      // Drop the per-request panel-state entry so the user-level
+      // store doesn't accumulate orphaned ids. Folder + env deletes
+      // skip this path — only request ids key into the store.
+      if (payload.type === 'request' && projectUuid) {
+        removeRequestPanelState(projectUuid, payload.id)
+      }
     }
 
     // Workbench-tab cache invalidation on env changes. Every request
@@ -1886,8 +1904,8 @@ const App: React.FC = () => {
     // exists in ContextService, and `{{name}}` resolves to empty on
     // dispatch. Bumping every tab's contentVersion forces the cached
     // tab content to regenerate with the live env list — React still
-    // reconciles same-type components in place so useState (incl. the
-    // panelCollapsed map landed in eb56963a) survives.
+    // reconciles same-type components in place so component-local
+    // useState survives.
     const handleEnvStructureChanged = (): void => {
       bumpAllTabContentVersionsRef.current()
     }
@@ -1927,7 +1945,7 @@ const App: React.FC = () => {
       }
       upsertTimers.clear()
     }
-  }, [updateTabDirtyChecksum, rootItems, environmentFolderCollections, filePath])
+  }, [updateTabDirtyChecksum, rootItems, environmentFolderCollections, filePath, projectUuid])
 
   // Dirty state is now handled by FileService in the main process
   // It subscribes to DocumentEvents and compares checksums automatically

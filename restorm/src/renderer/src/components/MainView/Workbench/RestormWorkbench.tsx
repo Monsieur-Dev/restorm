@@ -539,62 +539,6 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     return undefined
   }, [getEnvironmentFolderById])
 
-  /**
-   * Persist the per-pane collapsed map for a request tab. Same walking
-   * pattern as `updateMiniBrowserUrl`: locate the tab by id (including
-   * nested split containers), mirror the map onto both the typed
-   * `panelCollapsed` field and ECUI's opaque `persistedState`. ECUI's
-   * workbench autosave round-trips the latter — the matching
-   * `handleRebuildTab` then re-hydrates it on file reopen.
-   *
-   * Shallow-equality bail-out prevents tree churn when the user
-   * toggles back to a previously-recorded state.
-   */
-  const updatePanelCollapsed = useCallback((tabId: string, map: Record<string, boolean>): void => {
-    const shallowMapEqual = (a: Record<string, boolean> | undefined, b: Record<string, boolean>): boolean => {
-      if (!a) return false
-      const aKeys = Object.keys(a)
-      const bKeys = Object.keys(b)
-      if (aKeys.length !== bKeys.length) return false
-      for (const k of aKeys) if (a[k] !== b[k]) return false
-      return true
-    }
-    const currentTree = treeRef.current
-    const updateGroups = (nodes: typeof currentTree.groups): typeof currentTree.groups =>
-      nodes.map((node) => {
-        if (isTabGroupNode(node)) {
-          const target = node.tabs.find((t) => t.id === tabId)
-          if (!target) return node
-          const current = (target as RestormEditorTab).panelCollapsed
-          if (shallowMapEqual(current, map)) return node
-          return {
-            ...node,
-            tabs: node.tabs.map((t) =>
-              t.id === tabId
-                ? ({
-                    ...t,
-                    panelCollapsed: map,
-                    persistedState: {
-                      ...((typeof t.persistedState === 'object' && t.persistedState !== null) ? t.persistedState : {}),
-                      panelCollapsed: map
-                    }
-                  } as EditorTab)
-                : t
-            )
-          }
-        }
-        if (isContainerNode(node)) {
-          return { ...node, groups: updateGroups(node.groups) }
-        }
-        return node
-      })
-    const nextGroups = updateGroups(currentTree.groups)
-    if (nextGroups === currentTree.groups) return
-    const nextTree = { ...currentTree, groups: nextGroups }
-    if (onTreeChange) onTreeChange(nextTree)
-    else setLocalTree(nextTree)
-  }, [onTreeChange])
-
   /** Persist the Mini browser's current URL on its tab record so
    * reopening the workbench restores the navigation state. Walks the
    * tree (including nested split containers) to locate the tab by id,
@@ -798,8 +742,6 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <HTTPRequestTabView
                 request={request}
-                {...(effectiveTab.panelCollapsed ? { initialPanelCollapsed: effectiveTab.panelCollapsed } : {})}
-                onPanelCollapsedChange={(map) => { updatePanelCollapsed(effectiveTab.id, map) }}
               />
             </div>
           </DeprecationAwareRequestTab>
@@ -828,8 +770,6 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <GraphQLRequestTabView
                 request={request}
-                {...(effectiveTab.panelCollapsed ? { initialPanelCollapsed: effectiveTab.panelCollapsed } : {})}
-                onPanelCollapsedChange={(map) => { updatePanelCollapsed(effectiveTab.id, map) }}
               />
             </div>
           </RestormWorkbenchTab>
@@ -858,8 +798,6 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <GrpcRequestTabView
                 request={request}
-                {...(effectiveTab.panelCollapsed ? { initialPanelCollapsed: effectiveTab.panelCollapsed } : {})}
-                onPanelCollapsedChange={(map) => { updatePanelCollapsed(effectiveTab.id, map) }}
               />
             </div>
           </RestormWorkbenchTab>
@@ -888,8 +826,6 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <SoapRequestTabView
                 request={request}
-                {...(effectiveTab.panelCollapsed ? { initialPanelCollapsed: effectiveTab.panelCollapsed } : {})}
-                onPanelCollapsedChange={(map) => { updatePanelCollapsed(effectiveTab.id, map) }}
               />
             </div>
           </RestormWorkbenchTab>
@@ -918,8 +854,6 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <WebSocketRequestTabView
                 request={request}
-                {...(effectiveTab.panelCollapsed ? { initialPanelCollapsed: effectiveTab.panelCollapsed } : {})}
-                onPanelCollapsedChange={(map) => { updatePanelCollapsed(effectiveTab.id, map) }}
               />
             </div>
           </RestormWorkbenchTab>
@@ -975,8 +909,6 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <HTTPRequestTabView
                 request={request}
-                {...(effectiveTab.panelCollapsed ? { initialPanelCollapsed: effectiveTab.panelCollapsed } : {})}
-                onPanelCollapsedChange={(map) => { updatePanelCollapsed(effectiveTab.id, map) }}
               />
             </div>
           </RestormWorkbenchTab>
@@ -1016,7 +948,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, updateMiniBrowserUrl, updatePanelCollapsed])
+  }, [onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, updateMiniBrowserUrl])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(

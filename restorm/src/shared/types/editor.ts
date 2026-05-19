@@ -26,17 +26,6 @@ interface BaseRestormTab extends EditorTab {
   titleString?: string
   /** Breadcrumb path for navigation */
   breadcrumbs?: BreadcrumbItem[]
-  /**
-   * Per-pane collapsed state for request tab views (HTTP / GraphQL /
-   * gRPC / SOAP / WebSocket / OData). Keys are pane ids the matching
-   * RequestTabView declares ('headers', 'pathParams', 'query',
-   * 'message', …) — each value is the latest user toggle for that
-   * pane. Round-tripped through `EditorTab.persistedState` so the
-   * state survives both the SplitView's remount on response-panel
-   * toggle AND a full file close+reopen. Undefined means "no user
-   * choice yet — fall back to the per-section heuristic on mount".
-   */
-  panelCollapsed?: Record<string, boolean>
 }
 
 /** Tab displaying a folder's configuration */

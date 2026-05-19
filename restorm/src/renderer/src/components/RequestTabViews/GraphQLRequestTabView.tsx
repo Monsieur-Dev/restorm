@@ -1,6 +1,7 @@
 import { toKeyValueData as toKeyValueDataShared } from '../../utils/toKeyValueData'
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useRequestReset } from '../../hooks/useRequestReset'
+import { getRequestPanelState, setRequestPanelCollapsed } from '../../services/requestPanelStateStore'
 import { useTranslation } from 'react-i18next'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
@@ -35,21 +36,19 @@ import { toasterService } from 'electron-core-ui/renderer'
 
 export interface GraphQLRequestTabViewProps {
   request: GraphQLRequest
-  /** See HTTPRequestTabView for the contract — opaque map of paneId
-   * (here: 'query' | 'variables' | 'headers') to its persisted
-   * collapsed state. */
-  initialPanelCollapsed?: Record<string, boolean>
-  onPanelCollapsedChange?: (map: Record<string, boolean>) => void
 }
 
 export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
-  request,
-  initialPanelCollapsed,
-  onPanelCollapsedChange
+  request
 }) => {
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
   const { t } = useTranslation()
-  const { selectedEnvId, environments, envColor } = useEnvironmentContext()
+  // `projectUuid` comes from the EnvironmentContext (mirrored from the
+  // workbench's `persistenceKey`) — not `useFileService`. See
+  // HTTPRequestTabView for the rationale: useState's lazy initializer
+  // below needs a synchronous, already-hydrated value to read the
+  // per-request panel-state store from.
+  const { selectedEnvId, environments, envColor, projectUuid } = useEnvironmentContext()
   const collections = useRestormStore((state) => state.collections)
   const handlebarsHelpers = useHandlebarsHelpers()
   const { apiDocumentation, route } = useApiDocumentationFromRequest(request)
@@ -74,15 +73,13 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
     variables: boolean
     headers: boolean
   }>(() => {
-    const seed = initialPanelCollapsed ?? {}
+    const seed = (projectUuid ? getRequestPanelState(projectUuid, request.id) : undefined) ?? {}
     return {
       query: typeof seed['query'] === 'boolean' ? seed['query'] : false,
       variables: typeof seed['variables'] === 'boolean' ? seed['variables'] : false,
       headers: typeof seed['headers'] === 'boolean' ? seed['headers'] : request.headers.length === 0
     }
   })
-  const onPanelCollapsedChangeRef = useRef(onPanelCollapsedChange)
-  useEffect(() => { onPanelCollapsedChangeRef.current = onPanelCollapsedChange }, [onPanelCollapsedChange])
   const handlePanelCollapsedChange = useCallback((arr: boolean[]) => {
     const next = {
       query: arr[0] ?? false,
@@ -90,8 +87,12 @@ export const GraphQLRequestTabView: React.FC<GraphQLRequestTabViewProps> = ({
       headers: arr[2] ?? false
     }
     setPanelCollapsed(next)
-    onPanelCollapsedChangeRef.current?.(next)
-  }, [])
+    if (projectUuid) {
+      setRequestPanelCollapsed(projectUuid, request.id, 'query', next.query)
+      setRequestPanelCollapsed(projectUuid, request.id, 'variables', next.variables)
+      setRequestPanelCollapsed(projectUuid, request.id, 'headers', next.headers)
+    }
+  }, [projectUuid, request.id])
 
   const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
   
