@@ -54,6 +54,9 @@ export function mapToBadgeType(value: string): BadgeType {
   // Authentication
   if (normalized === 'auth') return 'AUTH'
 
+  // Scenario (dataflow graph)
+  if (normalized === 'scenario') return 'SCENARIO'
+
   // Fallback: try to use value as-is if it's a valid BadgeType
   return value.toUpperCase() as BadgeType
 }

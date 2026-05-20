@@ -171,7 +171,8 @@
         "soap": "Požadavek SOAP",
         "websocket": "Požadavek WebSocket",
         "odata": "Požadavek OData",
-        "auth": "Ověřovací požadavek HTTP"
+        "auth": "Ověřovací požadavek HTTP",
+        "scenario": "Scénář"
       }
     },
     "deleteConfirm": {

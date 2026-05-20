@@ -169,7 +169,8 @@
         "soap": "SOAP-verzoek",
         "websocket": "WebSocket-verzoek",
         "odata": "OData-verzoek",
-        "auth": "HTTP-authenticatieverzoek"
+        "auth": "HTTP-authenticatieverzoek",
+        "scenario": "Scenario"
       }
     },
     "deleteConfirm": {

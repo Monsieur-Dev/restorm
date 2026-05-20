@@ -169,7 +169,8 @@
         "soap": "Αίτημα SOAP",
         "websocket": "Αίτημα WebSocket",
         "odata": "Αίτημα OData",
-        "auth": "Αίτημα HTTP ταυτοποίησης"
+        "auth": "Αίτημα HTTP ταυτοποίησης",
+        "scenario": "Σενάριο"
       }
     },
     "deleteConfirm": {

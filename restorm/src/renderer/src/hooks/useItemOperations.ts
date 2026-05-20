@@ -8,7 +8,7 @@ import type { ListViewDropEventPayload, ListViewItemEventPayload } from 'electro
 import { isTabGroupNode } from 'electron-core-ui/renderer'
 import type { Environment, Folder, EnvironmentFolder, Request, FolderItem } from '../../../shared/types/collections'
 import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
-import { isAnyFolder } from '../../../shared/types/collections'
+import { isAnyFolder, isScenario } from '../../../shared/types/collections'
 import {
   HTTPRequest,
   GraphQLRequest,
@@ -389,6 +389,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       case 'websocket': return 'New WebSocket request'
       case 'odata': return 'New OData request'
       case 'auth': return 'New auth request'
+      case 'scenario': return 'New scenario'
     }
   }, [t])
 
@@ -418,7 +419,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     // identity, we still need to nudge React with `setRootItems((prev)
     // => [...prev])` so the sidebar's `.map(rootItems)` re-runs and
     // picks the new descendant up.
-    const mountChild = (reactive: Folder | Request): void => {
+    const mountChild = (reactive: FolderItem): void => {
       if (isRoot) {
         setRootItems((prev) => [...prev, reactive])
       } else if (parent && isAnyFolder(parent)) {
@@ -429,8 +430,24 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     // Build a plain item then wrap it reactive; mirrors the shapes
     // `useImport` produces on import so the save-unit registry /
     // serializer / executors all pick them up without special casing.
-    let pushedItem: Folder | Request
-    if (kind === 'folder') {
+    let pushedItem: FolderItem
+    if (kind === 'scenario') {
+      // A scenario is a plain tree item (no execution wiring yet in
+      // Phase 1). It syncs to main via `collections:sync` and reifies
+      // into a `Scenario` model there; no per-item document event is
+      // needed (there's no ContextService/search registration to do).
+      const scenario = {
+        type: 'scenario' as const,
+        id,
+        name,
+        tags: [] as string[],
+        params: [],
+        nodes: [],
+        edges: []
+      }
+      mountChild(scenario as unknown as FolderItem)
+      pushedItem = scenario as unknown as FolderItem
+    } else if (kind === 'folder') {
       const folder: Folder = {
         id,
         name,
@@ -520,7 +537,9 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     const envs = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
     if (kind === 'folder' && isAnyFolder(pushedItem)) {
       openFolderTab(pushedItem, breadcrumbs)
-    } else if (!isAnyFolder(pushedItem)) {
+    } else if (!isAnyFolder(pushedItem) && !isScenario(pushedItem)) {
+      // Scenarios don't open a tab yet — the graph editor lands in a
+      // later slice. The new scenario is created + selected in the tree.
       openAnyRequestTab(pushedItem, breadcrumbs, envs)
     }
   }, [rootItems, setRootItems, setExpandedIds, setSelectedItemId, openFolderTab, openAnyRequestTab, defaultNameFor])

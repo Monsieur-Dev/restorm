@@ -169,7 +169,8 @@
         "soap": "SOAP isteği",
         "websocket": "WebSocket isteği",
         "odata": "OData isteği",
-        "auth": "HTTP kimlik doğrulama isteği"
+        "auth": "HTTP kimlik doğrulama isteği",
+        "scenario": "Senaryo"
       }
     },
     "deleteConfirm": {

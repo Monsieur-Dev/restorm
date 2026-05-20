@@ -168,7 +168,8 @@
         "soap": "SOAP 請求",
         "websocket": "WebSocket 請求",
         "odata": "OData 請求",
-        "auth": "HTTP 驗證請求"
+        "auth": "HTTP 驗證請求",
+        "scenario": "場景"
       }
     },
     "deleteConfirm": {

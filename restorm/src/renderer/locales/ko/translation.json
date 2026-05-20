@@ -168,7 +168,8 @@
         "soap": "SOAP 요청",
         "websocket": "WebSocket 요청",
         "odata": "OData 요청",
-        "auth": "HTTP 인증 요청"
+        "auth": "HTTP 인증 요청",
+        "scenario": "시나리오"
       }
     },
     "deleteConfirm": {

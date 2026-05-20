@@ -168,7 +168,8 @@
         "soap": "Yêu cầu SOAP",
         "websocket": "Yêu cầu WebSocket",
         "odata": "Yêu cầu OData",
-        "auth": "Yêu cầu xác thực HTTP"
+        "auth": "Yêu cầu xác thực HTTP",
+        "scenario": "Kịch bản"
       }
     },
     "deleteConfirm": {

@@ -169,7 +169,8 @@
         "soap": "Kërkesë SOAP",
         "websocket": "Kërkesë WebSocket",
         "odata": "Kërkesë OData",
-        "auth": "Kërkesë HTTP për vërtetim"
+        "auth": "Kërkesë HTTP për vërtetim",
+        "scenario": "Skenari"
       }
     },
     "deleteConfirm": {

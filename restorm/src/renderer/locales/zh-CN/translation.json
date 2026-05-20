@@ -168,7 +168,8 @@
         "soap": "SOAP 请求",
         "websocket": "WebSocket 请求",
         "odata": "OData 请求",
-        "auth": "HTTP 身份验证请求"
+        "auth": "HTTP 身份验证请求",
+        "scenario": "场景"
       }
     },
     "deleteConfirm": {

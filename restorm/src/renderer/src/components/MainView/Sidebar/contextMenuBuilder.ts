@@ -39,6 +39,7 @@ export type AddChildKind =
   | 'websocket'
   | 'odata'
   | 'auth'
+  | 'scenario'
 
 export type AddChildHandler = (parentId: string, kind: AddChildKind) => void
 
@@ -142,6 +143,13 @@ export const buildAddSubmenu = (
     label: t('sidebar.contextMenu.add.auth'),
     icon: React.createElement(Badge, { type: 'AUTH' }),
     onClick: () => { onAddChildItem(parentId, 'auth') }
+  },
+  { id: `sep-add-scenario-${parentId}`, isSeparator: true, label: '' },
+  {
+    id: `add-scenario-${parentId}`,
+    label: t('sidebar.contextMenu.add.scenario'),
+    icon: React.createElement(Badge, { type: 'SCENARIO' }),
+    onClick: () => { onAddChildItem(parentId, 'scenario') }
   }
 ]
 

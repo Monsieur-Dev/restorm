@@ -169,7 +169,8 @@
         "soap": "SOAP-kérés",
         "websocket": "WebSocket-kérés",
         "odata": "OData-kérés",
-        "auth": "HTTP-hitelesítési kérés"
+        "auth": "HTTP-hitelesítési kérés",
+        "scenario": "Forgatókönyv"
       }
     },
     "deleteConfirm": {

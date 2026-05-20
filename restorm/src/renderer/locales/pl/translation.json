@@ -171,7 +171,8 @@
         "soap": "Żądanie SOAP",
         "websocket": "Żądanie WebSocket",
         "odata": "Żądanie OData",
-        "auth": "Żądanie uwierzytelniania HTTP"
+        "auth": "Żądanie uwierzytelniania HTTP",
+        "scenario": "Scenariusz"
       }
     },
     "deleteConfirm": {

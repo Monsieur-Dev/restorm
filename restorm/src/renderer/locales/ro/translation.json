@@ -170,7 +170,8 @@
         "soap": "Cerere SOAP",
         "websocket": "Cerere WebSocket",
         "odata": "Cerere OData",
-        "auth": "Cerere HTTP de autentificare"
+        "auth": "Cerere HTTP de autentificare",
+        "scenario": "Scenariu"
       }
     },
     "deleteConfirm": {

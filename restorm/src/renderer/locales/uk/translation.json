@@ -171,7 +171,8 @@
         "soap": "Запит SOAP",
         "websocket": "Запит WebSocket",
         "odata": "Запит OData",
-        "auth": "Запит автентифікації HTTP"
+        "auth": "Запит автентифікації HTTP",
+        "scenario": "Сценарій"
       }
     },
     "deleteConfirm": {

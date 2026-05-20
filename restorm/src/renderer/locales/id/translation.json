@@ -168,7 +168,8 @@
         "soap": "Permintaan SOAP",
         "websocket": "Permintaan WebSocket",
         "odata": "Permintaan OData",
-        "auth": "Permintaan autentikasi HTTP"
+        "auth": "Permintaan autentikasi HTTP",
+        "scenario": "Skenario"
       }
     },
     "deleteConfirm": {

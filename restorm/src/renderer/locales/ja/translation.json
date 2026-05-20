@@ -168,7 +168,8 @@
         "soap": "SOAP リクエスト",
         "websocket": "WebSocket リクエスト",
         "odata": "OData リクエスト",
-        "auth": "HTTP 認証リクエスト"
+        "auth": "HTTP 認証リクエスト",
+        "scenario": "シナリオ"
       }
     },
     "deleteConfirm": {

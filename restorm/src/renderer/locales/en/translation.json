@@ -169,7 +169,8 @@
         "soap": "SOAP request",
         "websocket": "WebSocket request",
         "odata": "OData request",
-        "auth": "HTTP authentication request"
+        "auth": "HTTP authentication request",
+        "scenario": "Scenario"
       }
     },
     "deleteConfirm": {

@@ -162,6 +162,18 @@
   font-size: 14px !important;
 }
 
+/* Scenario badge — a violet pill with a circuit-board glyph, distinct
+ * from the protocol/method palette so dataflow graphs read at a glance. */
+.badge-scenario {
+  background-color: #8b5cf6;
+  color: #ffffff;
+  padding: 2px 4px;
+}
+
+.badge-scenario .codicon-circuit-board {
+  font-size: 14px !important;
+}
+
 /* ============================================================================
  * Marketing tier
  * ========================================================================= */

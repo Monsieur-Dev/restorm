@@ -170,7 +170,8 @@
         "soap": "SOAP zahtjev",
         "websocket": "WebSocket zahtjev",
         "odata": "OData zahtjev",
-        "auth": "HTTP zahtjev za autentifikaciju"
+        "auth": "HTTP zahtjev za autentifikaciju",
+        "scenario": "Scenarij"
       }
     },
     "deleteConfirm": {

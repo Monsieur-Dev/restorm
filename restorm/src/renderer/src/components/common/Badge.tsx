@@ -19,6 +19,8 @@ export type BadgeType =
   | 'ODATA'
   // Authentication
   | 'AUTH'
+  // Scenario (dataflow graph) — renders a circuit-board codicon
+  | 'SCENARIO'
   // Marketing tier — shown next to import-format names that require a
   // paid plan. Distinct gold gradient so it doesn't read as a
   // protocol badge.
@@ -45,6 +47,15 @@ export const Badge: React.FC<BadgeProps> = ({ type, label, className }) => {
     return (
       <span className={`badge ${typeClass} ${className ?? ''}`} aria-label={label ?? 'Authentication request'}>
         <i className="codicon codicon-key" aria-hidden="true" />
+      </span>
+    )
+  }
+
+  // Scenarios show a circuit-board glyph (a dataflow graph), not text.
+  if (type === 'SCENARIO') {
+    return (
+      <span className={`badge ${typeClass} ${className ?? ''}`} aria-label={label ?? 'Scenario'}>
+        <i className="codicon codicon-circuit-board" aria-hidden="true" />
       </span>
     )
   }

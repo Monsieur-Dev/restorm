@@ -5,8 +5,8 @@
 import type { ListViewItemData } from 'electron-core-ui/renderer'
 import { IconView } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
-import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, AuthenticationRequest } from '../../../shared/types/collections'
-import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest } from '../../../shared/types/collections'
+import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, AuthenticationRequest, Scenario } from '../../../shared/types/collections'
+import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isScenario } from '../../../shared/types/collections'
 import React, { type ReactNode } from 'react'
 
 /** Convert an Icon to a ListView-compatible icon (string for codicons, ReactNode for others) */
@@ -185,6 +185,22 @@ function authenticationRequestToListViewItem(
 }
 
 /**
+ * Convert a Scenario to a ListViewItemData. Renders the circuit-board
+ * scenario badge so dataflow graphs are visually distinct from requests.
+ */
+function scenarioToListViewItem(
+  scenario: Scenario,
+  options: FolderToListViewOptions
+): ListViewItemData {
+  const badge = options.renderProtocolBadge?.('scenario', 'SCENARIO')
+  return {
+    id: scenario.id,
+    title: scenario.name,
+    icon: badge
+  }
+}
+
+/**
  * Convert a FolderItem (Folder, EnvironmentFolder, or Request) to ListViewItemData
  */
 export function folderItemToListViewItem(
@@ -213,6 +229,10 @@ export function folderItemToListViewItem(
     if (isAuthenticationRequest(item)) {
       return authenticationRequestToListViewItem(item, options)
     }
+  }
+
+  if (isScenario(item)) {
+    return scenarioToListViewItem(item, options)
   }
 
   if (isEnvironmentFolder(item)) {
