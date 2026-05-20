@@ -747,7 +747,7 @@
   },
   "scenario": {
     "editor": {
-      "empty": "Empty scenario — the node palette lands in a later slice"
+      "empty": "Empty scenario — right-click the canvas to add a node"
     }
   }
 }

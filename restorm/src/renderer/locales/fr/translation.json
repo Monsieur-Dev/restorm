@@ -748,7 +748,7 @@
   },
   "scenario": {
     "editor": {
-      "empty": "Scénario vide — la palette de nœuds arrive dans un prochain lot"
+      "empty": "Scénario vide — clic droit sur le canevas pour ajouter un nœud"
     }
   }
 }

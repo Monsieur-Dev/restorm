@@ -32,7 +32,7 @@ import { EnvironmentProvider } from '../../../contexts/EnvironmentContext'
 import { ScenarioEditorView } from '../../Scenario/ScenarioEditorView'
 import { FolderView } from '../../Folders/FolderView'
 import { EnvironmentFolderView } from '../../Folders/EnvironmentFolderView'
-import type { EnvironmentFolder, Folder, Request } from '../../../../../shared/types/collections'
+import type { EnvironmentFolder, Folder, Request, ScenarioNode, ScenarioEdge } from '../../../../../shared/types/collections'
 import { getFolderIcon } from '../../../utils/treeSearch'
 import { Badge } from '../../common/Badge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
@@ -91,6 +91,8 @@ export interface RestormWorkbenchProps {
   onTagColorChange?: ((envFolderId: string, tag: string, color: string | null) => void) | undefined
   /** Callback fired when a folder's data changes (environments, etc.) */
   onFolderChange?: (folderId: string, folder: Folder) => void
+  /** Callback fired when a scenario's graph (nodes/edges) changes. */
+  onScenarioChange?: (scenarioId: string, patch: { nodes: ScenarioNode[]; edges: ScenarioEdge[] }) => void
   /** Fallback component displayed when no tabs are open */
   emptyFallback?: React.ReactNode
   /** Callback fired when group sizes change (sash dragging) */
@@ -161,6 +163,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   onTagsChange,
   onTagColorChange,
   onFolderChange,
+  onScenarioChange,
   onEnvironmentFolderChange,
   emptyFallback,
   onSizesChange,
@@ -592,7 +595,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Scenario editor tab
     if (isScenarioEditorTab(effectiveTab)) {
-      return <ScenarioEditorView scenario={effectiveTab.scenario} />
+      return <ScenarioEditorView scenario={effectiveTab.scenario} {...(onScenarioChange ? { onScenarioChange } : {})} />
     }
 
     // Folder tab
@@ -955,7 +958,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, updateMiniBrowserUrl])
+  }, [onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onScenarioChange, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, updateMiniBrowserUrl])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(

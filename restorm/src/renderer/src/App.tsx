@@ -149,7 +149,9 @@ import type {
   Folder,
   FolderItem,
   EnvironmentFolder,
-  Request
+  Request,
+  ScenarioNode,
+  ScenarioEdge
 } from '../../shared/types/collections'
 import {
   isRequest,
@@ -1025,6 +1027,19 @@ const App: React.FC = () => {
     rootItems,
     setWorkbenchTree
   })
+
+  // Persist scenario graph edits (add node, move node, …) made in the
+  // editor back onto the scenario in `rootItems`, then nudge React so the
+  // whole-file save picks the change up (verified: scenarios round-trip
+  // through the standard save path).
+  const handleScenarioChange = useCallback((scenarioId: string, patch: { nodes: ScenarioNode[]; edges: ScenarioEdge[] }) => {
+    const item = findItemById(rootItems, scenarioId)
+    if (item && isScenario(item)) {
+      item.nodes = patch.nodes
+      item.edges = patch.edges
+      setRootItems((prev) => [...prev])
+    }
+  }, [rootItems, setRootItems])
 
   // Environments of the active request's nearest ancestor env-folder,
   // used to feed the status-bar env selector. Empty when the active
@@ -2128,6 +2143,7 @@ const App: React.FC = () => {
               onTagsChange={handleTagsChange}
               onTagColorChange={handleTagColorChange}
               onFolderChange={handleFolderChange}
+              onScenarioChange={handleScenarioChange}
               onEnvironmentFolderChange={handleEnvironmentFolderChange}
               onSizesChange={handleSizesChange}
               emptyFallback={<EmptyBench rootItems={rootItems} projectUuid={projectUuid} onImport={() => { setShowImportModal(true) }} onOpenRequest={handleItemClick} />}
@@ -2161,6 +2177,7 @@ const App: React.FC = () => {
             onItemIconChange={handleItemIconChange}
             onTagsChange={handleTagsChange}
             onFolderChange={handleFolderChange}
+            onScenarioChange={handleScenarioChange}
             onEnvironmentFolderChange={handleEnvironmentFolderChange}
             onSizesChange={handleSizesChange}
             emptyFallback={
