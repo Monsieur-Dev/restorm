@@ -31,7 +31,7 @@ import { useRestormStore } from '../../../store/restormStore'
 import { findOperationForRoute, type RouteLike } from '../../../../../shared/utils/findOperationForRoute'
 import { routeFromRequest } from '../../../hooks/routeFromRequest'
 import { resolveUrlAgainstEnv, flattenEnvVars } from '../../../../../shared/utils/resolveUrlAgainstEnv'
-import { isEnvironmentFolder, isRequest } from '../../../../../shared/types/folderTypes'
+import { isEnvironmentFolder, isRequest, isAnyFolder } from '../../../../../shared/types/folderTypes'
 import type { EnvironmentFolder, Folder } from '../../../../../shared/types/collections'
 import type { Request } from '../../../../../shared/types/collections'
 import './SearchTooltipContent.css'
@@ -65,7 +65,7 @@ function findRequestWithParent(
 function walkFolder(folder: Folder | EnvironmentFolder, requestId: string): Request | null {
   for (const item of folder.items) {
     if (isRequest(item) && item.id === requestId) return item
-    if (!isRequest(item)) {
+    if (isAnyFolder(item)) {
       const inner = walkFolder(item, requestId)
       if (inner) return inner
     }
@@ -87,7 +87,7 @@ function findFolderInTree(
 
 function walkForFolder(folder: Folder | EnvironmentFolder, folderId: string): Folder | EnvironmentFolder | null {
   for (const item of folder.items) {
-    if (isRequest(item)) continue
+    if (!isAnyFolder(item)) continue
     if (item.id === folderId) return item
     const inner = walkForFolder(item, folderId)
     if (inner) return inner

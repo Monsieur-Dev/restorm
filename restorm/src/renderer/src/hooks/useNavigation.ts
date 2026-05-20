@@ -5,7 +5,7 @@
 import { useEffect, useCallback } from 'react'
 import { navigationService } from 'electron-core-ui/renderer'
 import type { NavigationEvent, SearchResult } from 'electron-core-ui/renderer'
-import type { Folder, EnvironmentFolder, Request, Environment } from '../../../shared/types/collections'
+import type { Folder, EnvironmentFolder, Request, Environment, FolderItem } from '../../../shared/types/collections'
 import { isFolder, isRequest, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest } from '../../../shared/types/collections'
 import { findFolderById, findItemWithBreadcrumbs } from '../utils/treeSearch'
 import type { BreadcrumbItem } from '../../../shared/types/editor'
@@ -18,14 +18,14 @@ export interface OpenNavTabOptions {
 }
 
 export interface UseNavigationOptions {
-  rootItems: (EnvironmentFolder | Folder | Request)[]
+  rootItems: FolderItem[]
   openFolderTab: (folder: Folder, breadcrumbs: BreadcrumbItem[], options?: OpenNavTabOptions) => void
   openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[], options?: OpenNavTabOptions) => void
   openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[], options?: OpenNavTabOptions) => void
   setSelectedItemId: React.Dispatch<React.SetStateAction<string | null>>
   setExpandedIds: React.Dispatch<React.SetStateAction<string[]>>
   setFocusedGroupId: React.Dispatch<React.SetStateAction<string | null>>
-  getNearestEnvironmentsForBreadcrumbs: (rootItems: (EnvironmentFolder | Folder | Request)[], breadcrumbs: BreadcrumbItem[]) => Environment[]
+  getNearestEnvironmentsForBreadcrumbs: (rootItems: FolderItem[], breadcrumbs: BreadcrumbItem[]) => Environment[]
 }
 
 export interface UseNavigationReturn {
@@ -249,7 +249,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
   // Resolve an index path (e.g. "0.0.1") to an actual item ID by walking rootItems
   const resolveIndexPath = useCallback((indexPath: string): string | null => {
     const indices = indexPath.split('.').map(Number)
-    let current: (EnvironmentFolder | Folder | Request)[] = rootItems
+    let current: FolderItem[] = rootItems
     for (let i = 0; i < indices.length; i++) {
       const idx = indices[i]
       if (idx === undefined || idx >= current.length) return null
@@ -258,7 +258,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       if (i === indices.length - 1) return item.id
       // Navigate into children
       if ('items' in item && Array.isArray(item.items)) {
-        current = item.items as (EnvironmentFolder | Folder | Request)[]
+        current = item.items
       } else {
         return null
       }

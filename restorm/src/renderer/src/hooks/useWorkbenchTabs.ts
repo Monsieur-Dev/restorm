@@ -59,7 +59,7 @@ import type {
 import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, type MiniBrowserTab } from '../../../shared/types/editor'
 
 export interface UseWorkbenchTabsOptions {
-  rootItems: (EnvironmentFolder | Folder | Request)[]
+  rootItems: FolderItem[]
   focusedGroupId: string | null
   setWorkbenchTree: React.Dispatch<React.SetStateAction<WorkbenchTree>>
   registerTabDirtyState: (id: string, checksum: string) => void
@@ -468,7 +468,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
 
     if (parsed.type === 'env-folder') {
       if (parsed.indexPath) {
-        const item = findItemByIndexPath(rootItems as FolderItem[], parsed.indexPath)
+        const item = findItemByIndexPath(rootItems, parsed.indexPath)
         if (item && isEnvironmentFolder(item)) {
           const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, item.id)
           return {
@@ -501,7 +501,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
 
     if (parsed.type === 'folder') {
       if (parsed.indexPath) {
-        const item = findItemByIndexPath(rootItems as FolderItem[], parsed.indexPath)
+        const item = findItemByIndexPath(rootItems, parsed.indexPath)
         if (item && isAnyFolder(item) && !isEnvironmentFolder(item)) {
           const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, item.id)
           return {
@@ -534,7 +534,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
 
     let requestItem: FolderItem | null = null
     if (parsed.indexPath) {
-      requestItem = findItemByIndexPath(rootItems as FolderItem[], parsed.indexPath)
+      requestItem = findItemByIndexPath(rootItems, parsed.indexPath)
     } else if (parsed.legacyId) {
       requestItem = findRequestById(rootItems, parsed.legacyId) ?? null
     }

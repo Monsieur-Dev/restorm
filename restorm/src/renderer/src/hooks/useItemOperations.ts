@@ -6,7 +6,7 @@ import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ListViewDropEventPayload, ListViewItemEventPayload } from 'electron-core-ui/renderer'
 import { isTabGroupNode } from 'electron-core-ui/renderer'
-import type { Environment, Folder, EnvironmentFolder, Request } from '../../../shared/types/collections'
+import type { Environment, Folder, EnvironmentFolder, Request, FolderItem } from '../../../shared/types/collections'
 import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 import { isAnyFolder } from '../../../shared/types/collections'
 import {
@@ -31,8 +31,8 @@ import type { AddChildKind } from '../components/MainView/Sidebar/contextMenuBui
 import { removeFavorite as favoritesStoreRemove } from '../services/favoritesStore'
 
 export interface UseItemOperationsOptions {
-  rootItems: (EnvironmentFolder | Folder | Request)[]
-  setRootItems: React.Dispatch<React.SetStateAction<(EnvironmentFolder | Folder | Request)[]>>
+  rootItems: FolderItem[]
+  setRootItems: React.Dispatch<React.SetStateAction<FolderItem[]>>
   setExpandedIds: React.Dispatch<React.SetStateAction<string[]>>
   setSelectedItemId: React.Dispatch<React.SetStateAction<string | null>>
   setSidebarEditingItemId: React.Dispatch<React.SetStateAction<string | null>>

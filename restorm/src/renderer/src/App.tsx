@@ -153,6 +153,7 @@ import type {
 } from '../../shared/types/collections'
 import {
   isRequest,
+  isScenario,
   isEnvironmentFolder,
   isAnyFolder,
   isAuthenticationRequest
@@ -278,7 +279,7 @@ const App: React.FC = () => {
 
   // Root items data (mutable for renaming)
   // Can contain EnvironmentFolders, Folders, or standalone Requests
-  const [rootItems, setRootItems] = useState<(EnvironmentFolder | Folder | Request)[]>(initialRootItems)
+  const [rootItems, setRootItems] = useState<FolderItem[]>(initialRootItems)
 
   // Push the project's auto-derived origins (every request URL,
   // resolved against available env vars) to the main-process
@@ -588,7 +589,7 @@ const App: React.FC = () => {
     // have unsaved work on this folder document", not "something
     // somewhere below me is dirty".
     const cascadeParentById = new Map<string, string>()
-    const visit = (item: EnvironmentFolder | Folder | Request): void => {
+    const visit = (item: FolderItem): void => {
       if (!('items' in item)) return
       for (const child of item.items) visit(child)
       const itemIsEnvFolder = 'environments' in item && Array.isArray(item.environments)
@@ -1656,12 +1657,12 @@ const App: React.FC = () => {
         // Use ref to ensure we call the latest version
         handleFileOpenedRef.current(fileState)
       },
-      setRootItems: (items: (EnvironmentFolder | Folder | Request)[]) => {
+      setRootItems: (items: FolderItem[]) => {
         // Folders/env-folders go through `makeReactiveFolder`; root-level
         // requests go through `makeReactiveRequest` (no parent id) so
         // edits emit `REQUEST_UPDATED` like nested requests.
         const reactiveItems = items.map((item) =>
-          'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
+          'items' in item ? makeReactiveFolder(item) : isScenario(item) ? item : makeReactiveRequest(item)
         )
         setRootItems(reactiveItems)
         // Also trigger indexing
@@ -1671,7 +1672,7 @@ const App: React.FC = () => {
           for (const rootItem of reactiveItems) {
             if ('items' in rootItem) {
               await searchIndexService.indexFolderTree(rootItem)
-            } else {
+            } else if (!isScenario(rootItem)) {
               await searchIndexService.indexRootRequest(rootItem)
             }
           }

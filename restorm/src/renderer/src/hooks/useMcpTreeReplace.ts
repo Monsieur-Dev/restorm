@@ -17,7 +17,7 @@
 import type React from 'react'
 import { useEffect } from 'react'
 import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
-import type { Folder, EnvironmentFolder, Request, FolderItem } from '../../../shared/types/collections'
+import type { Folder, Request, FolderItem } from '../../../shared/types/collections'
 
 interface RestormTreeBridge {
   onMcpTreeReplace: (cb: (payload: unknown) => void) => () => void
@@ -25,7 +25,7 @@ interface RestormTreeBridge {
 
 export interface UseMcpTreeReplaceInput {
   enabled: boolean
-  setRootItems: React.Dispatch<React.SetStateAction<(EnvironmentFolder | Folder | Request)[]>>
+  setRootItems: React.Dispatch<React.SetStateAction<FolderItem[]>>
   /**
    * Mutable ref the renderer flips to `true` immediately before applying
    * an MCP-driven tree replacement, and reads inside the downstream
@@ -70,7 +70,7 @@ export function useMcpTreeReplace(input: UseMcpTreeReplaceInput): void {
     if (!api) return
     const off = api.onMcpTreeReplace((payload) => {
       if (!Array.isArray(payload)) return
-      const next: (EnvironmentFolder | Folder | Request)[] = []
+      const next: FolderItem[] = []
       for (const raw of payload) {
         const r = reifyItem(raw)
         if (r !== null) next.push(r)

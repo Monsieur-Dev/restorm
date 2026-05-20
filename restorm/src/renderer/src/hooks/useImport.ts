@@ -8,11 +8,12 @@ import { DocumentEvents } from '../services/DocumentEvents'
 import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
 import { processAfterDeserialization } from '../utils/serialization'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
-import type { Folder, EnvironmentFolder, Environment, Request, FolderItem } from '../../../shared/types/collections'
+import type { Folder, EnvironmentFolder, Environment, FolderItem } from '../../../shared/types/collections'
+import { isScenario } from '../../../shared/types/collections'
 
 export interface UseImportOptions {
-  rootItems: (EnvironmentFolder | Folder | Request)[]
-  setRootItems: React.Dispatch<React.SetStateAction<(EnvironmentFolder | Folder | Request)[]>>
+  rootItems: FolderItem[]
+  setRootItems: React.Dispatch<React.SetStateAction<FolderItem[]>>
   setExpandedIds: React.Dispatch<React.SetStateAction<string[]>>
   /**
    * Fired once after every successful import, after the new tree has
@@ -111,7 +112,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         if (current !== undefined) {
           const remapped = idMap.get(current)
           if (remapped !== undefined && remapped !== current) {
-            return { ...item, authenticationRequestId: remapped }
+            return { ...item, authenticationRequestId: remapped } as FolderItem
           }
         }
         return item
@@ -238,7 +239,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
       // and flow into the dirty tracker / search index like any
       // nested request.
       const reactiveImported = itemsWithNewIds.map((item) =>
-        'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
+        'items' in item ? makeReactiveFolder(item) : isScenario(item) ? item : makeReactiveRequest(item)
       )
       setRootItems((prev) => [...prev, ...reactiveImported])
       expandAfterImport()

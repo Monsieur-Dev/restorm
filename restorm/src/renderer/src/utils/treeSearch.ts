@@ -37,7 +37,7 @@ function findFolderByIdInTree(folder: Folder | EnvironmentFolder, id: string): F
 }
 
 /** Find a folder by ID across multiple root items */
-export function findFolderById(rootItems: (EnvironmentFolder | Folder | Request)[], id: string): Folder | EnvironmentFolder | undefined {
+export function findFolderById(rootItems: FolderItem[], id: string): Folder | EnvironmentFolder | undefined {
   for (const root of rootItems) {
     // Skip if root is a Request (has no folder tree)
     if (!('items' in root)) continue
@@ -64,7 +64,7 @@ function findEnvironmentFolderByIdInTree(folder: Folder | EnvironmentFolder, id:
 }
 
 /** Find an environment folder by ID across multiple root folders */
-export function findEnvironmentFolderById(rootItems: (EnvironmentFolder | Folder | Request)[], id: string): EnvironmentFolder | undefined {
+export function findEnvironmentFolderById(rootItems: FolderItem[], id: string): EnvironmentFolder | undefined {
   for (const root of rootItems) {
     // Skip if root is a Request (has no folder tree)
     if (!('items' in root)) continue
@@ -87,10 +87,11 @@ function findRequestByIdInTree(folder: Folder | EnvironmentFolder, id: string): 
 }
 
 /** Find any request by ID across multiple root folders */
-export function findRequestById(rootItems: (EnvironmentFolder | Folder | Request)[], id: string): Request | undefined {
+export function findRequestById(rootItems: FolderItem[], id: string): Request | undefined {
   for (const root of rootItems) {
-    // Check if root itself is the Request we're looking for
-    if (!('items' in root) && root.id === id) {
+    // Check if root itself is the Request we're looking for (a Scenario
+    // is also a childless root item, so guard on isRequest).
+    if (isRequest(root) && root.id === id) {
       return root
     }
     // Otherwise search in folder tree
@@ -116,7 +117,7 @@ function findItemByIdInTree(folder: Folder | EnvironmentFolder, id: string): Fol
 }
 
 /** Find any item (folder or request) by ID across multiple root folders */
-export function findItemById(rootItems: (EnvironmentFolder | Folder | Request)[], id: string): FolderItem | null {
+export function findItemById(rootItems: FolderItem[], id: string): FolderItem | null {
   for (const root of rootItems) {
     // Check if root itself is the item we're looking for
     if (root.id === id) {
@@ -165,7 +166,7 @@ function findItemWithBreadcrumbsInTree(
 
 /** Find an item (folder or request) by ID and build breadcrumbs including the item itself - across multiple root folders */
 export function findItemWithBreadcrumbs(
-  rootItems: (EnvironmentFolder | Folder | Request)[],
+  rootItems: FolderItem[],
   id: string
 ): { item: FolderItem | null; breadcrumbs: BreadcrumbItem[] } {
   for (const root of rootItems) {
@@ -194,7 +195,7 @@ export function findItemWithBreadcrumbs(
 
 /** Get environments from the nearest ancestor EnvironmentFolder */
 export function getNearestEnvironmentsForBreadcrumbs(
-  rootItems: (EnvironmentFolder | Folder | Request)[],
+  rootItems: FolderItem[],
   breadcrumbs: BreadcrumbItem[]
 ): Environment[] {
   if (breadcrumbs.length === 0) {
@@ -248,7 +249,7 @@ function findItemWithParentInTree(
 
 /** Find an item and its parent folder across multiple root folders */
 export function findItemWithParent(
-  rootItems: (EnvironmentFolder | Folder | Request)[],
+  rootItems: FolderItem[],
   targetId: string
 ): { item: FolderItem | null; parent: Folder | EnvironmentFolder | null; index: number; rootFolder: EnvironmentFolder | Folder | null } {
   // Check if any root item is directly the target (for root-level Requests)

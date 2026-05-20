@@ -5,7 +5,7 @@
 import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ListViewItemData } from 'electron-core-ui/renderer'
-import type { Folder, EnvironmentFolder, Request } from '../../../shared/types/collections'
+import type { FolderItem } from '../../../shared/types/collections'
 import { folderAsRootListViewItem, folderItemToListViewItem } from '../services/FolderToListView'
 import { attachContextMenus } from '../components/MainView/Sidebar/contextMenuBuilder'
 import type { AddChildKind } from '../components/MainView/Sidebar/contextMenuBuilder'
@@ -14,7 +14,7 @@ import { mapToBadgeType } from '../utils/badgeUtils'
 import { useDeprecatedRequestIds } from './useDeprecatedRequestIds'
 
 export interface UseSidebarStateOptions {
-  rootItems: (EnvironmentFolder | Folder | Request)[]
+  rootItems: FolderItem[]
   expandedIds: string[]
   /** Counter incremented on in-place mutations to trigger re-computation */
   updateCount?: number

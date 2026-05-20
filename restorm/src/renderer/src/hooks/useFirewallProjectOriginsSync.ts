@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
-import type { EnvironmentFolder, Folder, Request } from '../../../shared/types/collections'
-import { isEnvironmentFolder, isAnyFolder, isHTTPRequest, isGraphQLRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isGrpcRequest } from '../../../shared/types/collections'
+import type { FolderItem, Request } from '../../../shared/types/collections'
+import { isEnvironmentFolder, isAnyFolder, isScenario, isHTTPRequest, isGraphQLRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isGrpcRequest } from '../../../shared/types/collections'
 import type { FirewallOrigin } from '../../../shared/types/firewall'
 
 interface FirewallProjectApi {
@@ -30,7 +30,7 @@ function getFirewallApi(): FirewallProjectApi | null {
  * the URL still has unresolved variables after substitution, we
  * skip it (can't infer an origin from a parametric host).
  */
-export function useFirewallProjectOriginsSync(rootItems: (EnvironmentFolder | Folder | Request)[]): void {
+export function useFirewallProjectOriginsSync(rootItems: FolderItem[]): void {
 	const origins = useMemo<FirewallOrigin[]>(() => collectProjectOrigins(rootItems), [rootItems])
 	useEffect(() => {
 		const api = getFirewallApi()
@@ -39,7 +39,7 @@ export function useFirewallProjectOriginsSync(rootItems: (EnvironmentFolder | Fo
 	}, [origins])
 }
 
-function collectProjectOrigins(rootItems: (EnvironmentFolder | Folder | Request)[]): FirewallOrigin[] {
+function collectProjectOrigins(rootItems: FolderItem[]): FirewallOrigin[] {
 	const requests = collectRequests(rootItems)
 	const envContexts = collectEnvironmentContexts(rootItems)
 	const seen = new Map<string, FirewallOrigin>()
@@ -65,13 +65,14 @@ function collectProjectOrigins(rootItems: (EnvironmentFolder | Folder | Request)
 	return Array.from(seen.values())
 }
 
-function collectRequests(items: (EnvironmentFolder | Folder | Request)[]): Request[] {
+function collectRequests(items: FolderItem[]): Request[] {
 	const out: Request[] = []
-	const visit = (item: EnvironmentFolder | Folder | Request): void => {
+	const visit = (item: FolderItem): void => {
 		if (isAnyFolder(item) || isEnvironmentFolder(item)) {
 			for (const child of item.items) visit(child)
 			return
 		}
+		if (isScenario(item)) return
 		// All concrete request kinds carry a resolvable URL of some shape.
 		if (isHTTPRequest(item) || isGraphQLRequest(item) || isSoapRequest(item) || isWebSocketRequest(item) || isODataRequest(item) || isAuthenticationRequest(item) || isGrpcRequest(item)) {
 			out.push(item as Request)
@@ -83,9 +84,9 @@ function collectRequests(items: (EnvironmentFolder | Folder | Request)[]): Reque
 
 type EnvContext = Record<string, string>
 
-function collectEnvironmentContexts(items: (EnvironmentFolder | Folder | Request)[]): EnvContext[] {
+function collectEnvironmentContexts(items: FolderItem[]): EnvContext[] {
 	const out: EnvContext[] = []
-	const visit = (item: EnvironmentFolder | Folder | Request): void => {
+	const visit = (item: FolderItem): void => {
 		if (isEnvironmentFolder(item)) {
 			const folder = item
 			const envs = Array.isArray(folder.environments) ? folder.environments : []

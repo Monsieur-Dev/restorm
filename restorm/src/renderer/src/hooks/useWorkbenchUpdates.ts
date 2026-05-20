@@ -29,14 +29,14 @@ function mapAllTabs(
   })
 }
 import type { Icon } from 'electron-core-ui/types'
-import type { Folder, EnvironmentFolder, Request } from '../../../shared/types/collections'
+import type { Folder, EnvironmentFolder, FolderItem } from '../../../shared/types/collections'
 import { isEnvironmentFolder } from '../../../shared/types/collections'
 import { findItemById, findEnvironmentFolderById, getNearestEnvironmentsForBreadcrumbs, getFolderIcon } from '../utils/treeSearch'
-import { isAnyFolder } from '../../../shared/types/collections'
+import { isAnyFolder, isScenario } from '../../../shared/types/collections'
 import type { FolderTab, EnvironmentFolderTab, HTTPRequestTab, BreadcrumbItem } from '../../../shared/types/editor'
 
 export interface UseWorkbenchUpdatesOptions {
-  rootItems: (EnvironmentFolder | Folder | Request)[]
+  rootItems: FolderItem[]
   setWorkbenchTree: React.Dispatch<React.SetStateAction<WorkbenchTree>>
 }
 
@@ -343,7 +343,7 @@ export function useWorkbenchUpdates(options: UseWorkbenchUpdatesOptions): UseWor
       if (!effectiveIcon && foundItem && isAnyFolder(foundItem)) {
         delete foundItem.icon
         effectiveIcon = getFolderIcon(foundItem)
-      } else if (foundItem) {
+      } else if (foundItem && !isScenario(foundItem)) {
         if (effectiveIcon) {
           foundItem.icon = effectiveIcon
         } else {

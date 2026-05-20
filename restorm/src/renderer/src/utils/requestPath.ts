@@ -1,4 +1,4 @@
-import type { EnvironmentFolder, Folder, FolderItem, Request } from '../../../shared/types/collections'
+import type { FolderItem, Request } from '../../../shared/types/collections'
 import { isAnyFolder, isRequest } from '../../../shared/types/collections'
 
 function getPaddingWidth(count: number): number {
@@ -44,7 +44,7 @@ function findRequestPathInItems(items: FolderItem[], prefix: string, requestId: 
 }
 
 export function buildRequestPath(
-  collections: (EnvironmentFolder | Folder | Request)[],
+  collections: FolderItem[],
   requestId: string
 ): string | null {
   for (let i = 0; i < collections.length; i++) {
@@ -58,6 +58,9 @@ export function buildRequestPath(
       }
       continue
     }
+    // Scenarios are childless leaves like requests, but aren't request
+    // matches — skip them so `.items` only runs on real folders.
+    if (!isAnyFolder(item)) continue
     const base = folderSegment(item.name, i, collections.length)
     const path = findRequestPathInItems(item.items, base, requestId)
     if (path) return path

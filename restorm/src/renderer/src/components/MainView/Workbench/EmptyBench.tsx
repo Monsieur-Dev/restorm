@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react'
 import { MosaicLayout } from 'electron-core-ui/renderer'
 import { ImportCard, RecentActivityCard, ApiCard, TipsCard } from './EmptyBenchCards'
-import { isEnvironmentFolder, type EnvironmentFolder, type Folder } from '../../../../../shared/types/folderTypes'
-import type { Request as RestormRequest } from '../../../../../shared/types/requests'
+import { isEnvironmentFolder, type EnvironmentFolder, type FolderItem } from '../../../../../shared/types/folderTypes'
 import './EmptyBench.css'
 
 /**
@@ -19,7 +18,7 @@ import './EmptyBench.css'
 interface EmptyBenchProps {
   /** The open project's full tree (env-folders, folders, and root
    *  requests). EmptyBench filters env-folders for its ApiCards. */
-  readonly rootItems: readonly (EnvironmentFolder | Folder | RestormRequest)[]
+  readonly rootItems: readonly FolderItem[]
   /** Project UUID stamped on the collection file. Scopes the favourites
    *  lookup in `ApiCard`. `null` until the file is hydrated. */
   readonly projectUuid: string | null

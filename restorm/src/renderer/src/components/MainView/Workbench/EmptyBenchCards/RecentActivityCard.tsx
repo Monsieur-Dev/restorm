@@ -3,8 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { MosaicCard, Table, type TableColumn } from 'electron-core-ui/renderer'
 import {
   isEnvironmentFolder,
-  type EnvironmentFolder,
-  type Folder,
+  isScenario,
   type FolderItem
 } from '../../../../../../shared/types/folderTypes'
 import type { Request as RestormRequest } from '../../../../../../shared/types/requests'
@@ -53,7 +52,7 @@ function indexRequests(
   for (const item of items) {
     if ('items' in item) {
       indexRequests(item.items, apiName, out)
-    } else {
+    } else if (!isScenario(item)) {
       const req: RestormRequest = item
       const method = 'method' in req && typeof req.method === 'string'
         ? req.method
@@ -66,7 +65,7 @@ function indexRequests(
 }
 
 interface RecentActivityCardProps {
-  readonly rootItems: readonly (EnvironmentFolder | Folder | RestormRequest)[]
+  readonly rootItems: readonly FolderItem[]
   /** Open a request in the workbench when its row is clicked. */
   readonly onOpenRequest: (requestId: string) => void
   /** Project UUID — scopes the star toggle's favourite store

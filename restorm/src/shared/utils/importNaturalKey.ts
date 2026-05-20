@@ -8,7 +8,7 @@ import {
   isAuthenticationRequest,
   type Request
 } from '../types/requests'
-import { isAnyFolder, type Folder, type EnvironmentFolder, type FolderItem } from '../types/folderTypes'
+import { isAnyFolder, isScenario, type Folder, type EnvironmentFolder, type FolderItem } from '../types/folderTypes'
 
 /**
  * Stable identifier for a single item in a parsed-spec import preview
@@ -126,7 +126,7 @@ export function filterImportTreeBySelection(
       if (filteredChildren.length > 0) {
         out.push({ ...folder, items: filteredChildren })
       }
-    } else {
+    } else if (!isScenario(item)) {
       const key = importNaturalKeyForRequest(item)
       if (selection.has(key)) out.push(item)
     }
@@ -145,7 +145,7 @@ export function walkImportTreeWithKeys(
       const path = [...parentPath, folder.name]
       out.push({ key: importNaturalKeyForFolder(path), item, path })
       out.push(...walkImportTreeWithKeys(folder.items, path))
-    } else {
+    } else if (!isScenario(item)) {
       // Leaf request — its path is the parent's path; the key carries
       // the request kind + identity, not the path, since two routes
       // with the same method+url can't coexist anywhere in the tree.

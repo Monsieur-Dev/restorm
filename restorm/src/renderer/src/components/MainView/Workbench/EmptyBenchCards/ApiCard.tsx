@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, eventBus, MosaicCard, Table, getColorFromString, type TableColumn } from 'electron-core-ui/renderer'
 import type { EnvironmentFolder, FolderItem } from '../../../../../../shared/types/folderTypes'
+import { isScenario } from '../../../../../../shared/types/folderTypes'
 import type { Request as RestormRequest } from '../../../../../../shared/types/requests'
 import {
   addFavorite,
@@ -52,7 +53,7 @@ function collectRequests(items: FolderItem[]): RequestRow[] {
   for (const item of items) {
     if ('items' in item) {
       result.push(...collectRequests(item.items))
-    } else {
+    } else if (!isScenario(item)) {
       const req: RestormRequest = item
       const method = 'method' in req && typeof req.method === 'string'
         ? req.method

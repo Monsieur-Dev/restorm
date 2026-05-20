@@ -9,7 +9,7 @@ import {
   type GroupNode,
   type WorkbenchTree
 } from 'electron-core-ui/renderer'
-import type { Folder, EnvironmentFolder, Request } from '../../../shared/types/collections'
+import type { FolderItem } from '../../../shared/types/collections'
 import { folderItemToListViewItem } from '../services/FolderToListView'
 import { Badge } from '../components/common/Badge'
 import { mapToBadgeType } from '../utils/badgeUtils'
@@ -21,7 +21,7 @@ import {
 } from '../components/MainView/Sidebar/contextMenuBuilder'
 
 export interface UseFavoritesAndOpenItemsOptions {
-  rootItems: (EnvironmentFolder | Folder | Request)[]
+  rootItems: FolderItem[]
   workbenchTree: WorkbenchTree
   projectUuid: string | null
   /** Counter incremented when items are mutated in-place (rename, etc.) */
