@@ -7,14 +7,19 @@ import {
   useNodesState,
   useEdgesState,
   useReactFlow,
+  addEdge,
   type Node,
-  type NodeChange
+  type Edge,
+  type Connection,
+  type NodeChange,
+  type EdgeChange
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { useTranslation } from 'react-i18next'
 import { Button } from 'electron-core-ui/renderer'
-import type { Scenario, ScenarioNode, ScenarioNodeKind } from '../../../../shared/types/collections'
+import type { Scenario, ScenarioNode, ScenarioEdge, ScenarioNodeKind } from '../../../../shared/types/collections'
 import { SCENARIO_NODE_CATALOGUE, scenarioNodeMeta } from './scenarioNodeCatalogue'
+import { scenarioEdgeToFlowEdge, flowEdgeToScenarioEdge } from './scenarioGraphMapping'
 
 export interface ScenarioEditorViewProps {
   /** The scenario being edited. */
@@ -49,6 +54,10 @@ function toFlowNode(n: ScenarioNode): Node<NodeData> {
   }
 }
 
+function toFlowEdge(e: ScenarioEdge): Edge {
+  return scenarioEdgeToFlowEdge(e) as Edge
+}
+
 const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onScenarioChange }) => {
   const { t } = useTranslation()
   const { screenToFlowPosition } = useReactFlow()
@@ -58,18 +67,23 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
   // keyed by id. React Flow only round-trips id + position; we merge it
   // back from here when persisting so nothing is lost on a move.
   const nodeStore = useRef<Map<string, ScenarioNode>>(new Map())
+  // Per-edge scenario data (selector/color) keyed by edge id, merged back
+  // on persist (React Flow only round-trips source/target/handles).
+  const edgeStore = useRef<Map<string, ScenarioEdge>>(new Map())
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<NodeData>>([])
-  const [edges, , onEdgesChange] = useEdgesState([])
+  const [edges, setEdges, onEdgesChange] = useEdgesState([] as Edge[])
   const [palette, setPalette] = useState<{ x: number; y: number; flow: { x: number; y: number } } | null>(null)
 
   // Seed from the scenario whenever the open scenario changes (tab switch).
   useEffect(() => {
     nodeStore.current = new Map(scenario.nodes.map((n) => [n.id, n]))
+    edgeStore.current = new Map(scenario.edges.map((e) => [e.id, e]))
     setNodes(scenario.nodes.map(toFlowNode))
-  }, [scenario.id, scenario.nodes, setNodes])
+    setEdges(scenario.edges.map(toFlowEdge))
+  }, [scenario.id, scenario.nodes, scenario.edges, setNodes, setEdges])
 
-  const persist = useCallback((flowNodes: Node<NodeData>[]) => {
+  const persist = useCallback((flowNodes: Node<NodeData>[], flowEdges: Edge[]) => {
     const nextNodes: ScenarioNode[] = flowNodes.map((fn) => {
       const prior = nodeStore.current.get(fn.id)
       return {
@@ -84,17 +98,40 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
         ...(prior?.collapsed !== undefined ? { collapsed: prior.collapsed } : {})
       }
     })
+    const nextEdges: ScenarioEdge[] = flowEdges.map((fe) =>
+      flowEdgeToScenarioEdge(
+        { id: fe.id, source: fe.source, target: fe.target, sourceHandle: fe.sourceHandle, targetHandle: fe.targetHandle },
+        edgeStore.current.get(fe.id)
+      )
+    )
     nodeStore.current = new Map(nextNodes.map((n) => [n.id, n]))
-    onScenarioChange?.(scenario.id, { nodes: nextNodes, edges: scenario.edges })
-  }, [onScenarioChange, scenario.id, scenario.edges])
+    edgeStore.current = new Map(nextEdges.map((e) => [e.id, e]))
+    onScenarioChange?.(scenario.id, { nodes: nextNodes, edges: nextEdges })
+  }, [onScenarioChange, scenario.id])
 
   const handleNodesChange = useCallback((changes: NodeChange<Node<NodeData>>[]) => {
     onNodesChange(changes)
     // Persist after position/drag changes settle.
     if (changes.some((c) => c.type === 'position' && c.dragging === false)) {
-      setNodes((curr) => { persist(curr); return curr })
+      setNodes((curr) => { setEdges((e) => { persist(curr, e); return e }); return curr })
     }
-  }, [onNodesChange, setNodes, persist])
+  }, [onNodesChange, setNodes, setEdges, persist])
+
+  const handleEdgesChange = useCallback((changes: EdgeChange<Edge>[]) => {
+    onEdgesChange(changes)
+    if (changes.some((c) => c.type === 'remove')) {
+      setNodes((n) => { setEdges((e) => { persist(n, e); return e }); return n })
+    }
+  }, [onEdgesChange, setNodes, setEdges, persist])
+
+  const onConnect = useCallback((connection: Connection) => {
+    const id = `e-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    setEdges((curr) => {
+      const next = addEdge({ ...connection, id }, curr)
+      setNodes((n) => { persist(n, next); return n })
+      return next
+    })
+  }, [setEdges, setNodes, persist])
 
   const addNode = useCallback((kind: ScenarioNodeKind, flow: { x: number; y: number }) => {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
@@ -102,11 +139,11 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     nodeStore.current.set(id, node)
     setNodes((curr) => {
       const next = [...curr, toFlowNode(node)]
-      persist(next)
+      setEdges((e) => { persist(next, e); return e })
       return next
     })
     setPalette(null)
-  }, [setNodes, persist])
+  }, [setNodes, setEdges, persist])
 
   const onPaneContextMenu = useCallback((event: React.MouseEvent | MouseEvent) => {
     event.preventDefault()
@@ -131,11 +168,11 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
         nodes={nodes}
         edges={edges}
         onNodesChange={handleNodesChange}
-        onEdgesChange={onEdgesChange}
+        onEdgesChange={handleEdgesChange}
+        onConnect={onConnect}
         onPaneContextMenu={onPaneContextMenu}
         onPaneClick={() => { setPalette(null) }}
         fitView
-        nodesConnectable={false}
         proOptions={{ hideAttribution: true }}
       >
         <Background />
