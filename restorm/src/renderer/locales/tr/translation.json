@@ -721,5 +721,13 @@
         "notes": "Notlar"
       }
     }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Belgede bul",
+      "previousMatch": "Önceki eşleşme",
+      "nextMatch": "Sonraki eşleşme",
+      "close": "Kapat"
+    }
   }
 }

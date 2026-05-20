@@ -721,5 +721,13 @@
         "notes": "Muistiinpanot"
       }
     }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Etsi asiakirjasta",
+      "previousMatch": "Edellinen osuma",
+      "nextMatch": "Seuraava osuma",
+      "close": "Sulje"
+    }
   }
 }

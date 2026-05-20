@@ -722,5 +722,13 @@
         "notes": "Bilješke"
       }
     }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Pronađi u dokumentu",
+      "previousMatch": "Prethodno podudaranje",
+      "nextMatch": "Sljedeće podudaranje",
+      "close": "Zatvori"
+    }
   }
 }

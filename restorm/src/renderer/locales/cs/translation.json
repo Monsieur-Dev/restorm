@@ -723,5 +723,13 @@
         "notes": "Poznámky"
       }
     }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Najít v dokumentu",
+      "previousMatch": "Předchozí shoda",
+      "nextMatch": "Další shoda",
+      "close": "Zavřít"
+    }
   }
 }

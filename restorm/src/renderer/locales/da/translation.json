@@ -721,5 +721,13 @@
         "notes": "Noter"
       }
     }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Find i dokumentet",
+      "previousMatch": "Forrige match",
+      "nextMatch": "Næste match",
+      "close": "Luk"
+    }
   }
 }

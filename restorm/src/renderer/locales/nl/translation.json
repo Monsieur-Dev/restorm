@@ -721,5 +721,13 @@
         "notes": "Notities"
       }
     }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Zoeken in document",
+      "previousMatch": "Vorige overeenkomst",
+      "nextMatch": "Volgende overeenkomst",
+      "close": "Sluiten"
+    }
   }
 }

@@ -723,5 +723,13 @@
         "notes": "Notatki"
       }
     }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Znajdź w dokumencie",
+      "previousMatch": "Poprzednie dopasowanie",
+      "nextMatch": "Następne dopasowanie",
+      "close": "Zamknij"
+    }
   }
 }

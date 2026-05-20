@@ -1,20 +1,16 @@
 Feature: Documentation viewer interactions
   The documentation host gives the reader a sidebar outline,
-  clickable cross-references, an in-page search bar (native Ctrl+F
-  + custom Ctrl+Shift+F), and an "Add a request" button on every
-  route block. Each scenario imports the Petstore spec into a
-  fresh single-file collection, opens the env folder Docs tab, and
-  exercises one of these surfaces.
+  clickable cross-references, an in-doc search bar (Ctrl+F, a
+  CSS-Highlight search scoped to the documentation), and an "Add a
+  request" button on every route block. Each scenario imports the
+  Petstore spec into a fresh single-file collection, opens the env
+  folder Docs tab, and exercises one of these surfaces.
 
   Background:
     Given the docs viewer scenario is bootstrapped with the Petstore spec
 
-  Scenario: Ctrl+F opens the Chromium-native find bar
+  Scenario: Ctrl+F opens the in-doc search bar
     When I press Ctrl+F on the docs panel
-    Then the native find bar should be visible
-
-  Scenario: Ctrl+Shift+F opens the custom CSS-Highlight find bar
-    When I press Ctrl+Shift+F on the docs panel
     Then the custom search bar should be visible
 
   Scenario: Sidebar Operation entry scrolls to the matching route block

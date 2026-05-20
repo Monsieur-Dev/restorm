@@ -721,5 +721,13 @@
         "notes": "Shënime"
       }
     }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Gjej në dokument",
+      "previousMatch": "Përputhja e mëparshme",
+      "nextMatch": "Përputhja tjetër",
+      "close": "Mbyll"
+    }
   }
 }

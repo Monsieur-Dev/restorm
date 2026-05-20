@@ -720,5 +720,13 @@
         "notes": "노트"
       }
     }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "문서에서 찾기",
+      "previousMatch": "이전 일치",
+      "nextMatch": "다음 일치",
+      "close": "닫기"
+    }
   }
 }

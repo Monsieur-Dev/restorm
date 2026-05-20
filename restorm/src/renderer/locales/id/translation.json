@@ -720,5 +720,13 @@
         "notes": "Catatan"
       }
     }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Cari di dokumen",
+      "previousMatch": "Kecocokan sebelumnya",
+      "nextMatch": "Kecocokan berikutnya",
+      "close": "Tutup"
+    }
   }
 }

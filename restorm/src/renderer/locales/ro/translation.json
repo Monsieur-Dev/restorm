@@ -722,5 +722,13 @@
         "notes": "Note"
       }
     }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Găsește în document",
+      "previousMatch": "Potrivirea anterioară",
+      "nextMatch": "Potrivirea următoare",
+      "close": "Închide"
+    }
   }
 }

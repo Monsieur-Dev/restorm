@@ -720,5 +720,13 @@
         "notes": "Ghi chú"
       }
     }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Tìm trong tài liệu",
+      "previousMatch": "Kết quả trước",
+      "nextMatch": "Kết quả tiếp theo",
+      "close": "Đóng"
+    }
   }
 }

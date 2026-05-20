@@ -723,5 +723,13 @@
         "notes": "Нотатки"
       }
     }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Знайти в документі",
+      "previousMatch": "Попередній збіг",
+      "nextMatch": "Наступний збіг",
+      "close": "Закрити"
+    }
   }
 }

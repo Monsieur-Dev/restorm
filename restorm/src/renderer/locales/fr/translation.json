@@ -721,5 +721,13 @@
         "notes": "Notes"
       }
     }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Rechercher dans la documentation",
+      "previousMatch": "Correspondance précédente",
+      "nextMatch": "Correspondance suivante",
+      "close": "Fermer"
+    }
   }
 }

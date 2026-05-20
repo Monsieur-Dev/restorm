@@ -721,5 +721,13 @@
         "notes": "Jegyzetek"
       }
     }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Keresés a dokumentumban",
+      "previousMatch": "Előző találat",
+      "nextMatch": "Következő találat",
+      "close": "Bezárás"
+    }
   }
 }

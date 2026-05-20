@@ -720,5 +720,13 @@
         "notes": "笔记"
       }
     }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "在文档中查找",
+      "previousMatch": "上一个匹配",
+      "nextMatch": "下一个匹配",
+      "close": "关闭"
+    }
   }
 }

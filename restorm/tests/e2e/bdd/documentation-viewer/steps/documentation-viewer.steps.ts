@@ -115,18 +115,6 @@ When('I press Ctrl+F on the docs panel', async () => {
   await p.waitForTimeout(200)
 })
 
-When('I press Ctrl+Shift+F on the docs panel', async () => {
-  const p = requirePage()
-  await p.keyboard.press('Control+Shift+F')
-  await p.waitForTimeout(200)
-})
-
-Then('the native find bar should be visible', async () => {
-  const p = requirePage()
-  const bar = p.locator('[data-testid="documentation-host-native-find-bar"]')
-  await expect(bar).toBeVisible({ timeout: 5000 })
-})
-
 Then('the custom search bar should be visible', async () => {
   const p = requirePage()
   const bar = p.locator('[data-testid="documentation-host-search-bar"]')

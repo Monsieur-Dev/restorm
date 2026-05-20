@@ -185,23 +185,6 @@ declare global {
           error?: string
         }>
       }
-      find: {
-        inPage: (
-          text: string,
-          options?: { forward?: boolean; findNext?: boolean; matchCase?: boolean }
-        ) => Promise<{ requestId: number }>
-        stop: (
-          action: 'clearSelection' | 'keepSelection' | 'activateSelection'
-        ) => Promise<{ ok: boolean }>
-        onResult: (
-          callback: (result: {
-            requestId: number
-            activeMatchOrdinal: number
-            matches: number
-            finalUpdate: boolean
-          }) => void
-        ) => () => void
-      }
       requestUsage: {
         get: () => Promise<Record<string, { count: number; lastSentAt: string; history: string[] }>>
         onChanged: (

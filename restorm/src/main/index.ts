@@ -108,18 +108,6 @@ function createWindow(): void {
         return { action: 'deny' }
       })
 
-      // Forward Chromium's native find-in-page results to the
-      // renderer so the documentation viewer can render the n-of-m
-      // counter + step navigation against `webContents.findInPage`.
-      mainWindow.webContents.on('found-in-page', (_event, result) => {
-        mainWindow?.webContents.send('find:result', {
-          requestId: result.requestId,
-          activeMatchOrdinal: result.activeMatchOrdinal,
-          matches: result.matches,
-          finalUpdate: result.finalUpdate
-        })
-      })
-
       // Handle main window close event - check for unsaved changes
       mainWindow.on('close', (event) => {
         // Check if file is dirty and ask for confirmation

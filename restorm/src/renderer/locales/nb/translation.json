@@ -721,5 +721,13 @@
         "notes": "Notater"
       }
     }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Finn i dokumentet",
+      "previousMatch": "Forrige treff",
+      "nextMatch": "Neste treff",
+      "close": "Lukk"
+    }
   }
 }

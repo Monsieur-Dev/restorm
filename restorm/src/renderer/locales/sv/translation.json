@@ -721,5 +721,13 @@
         "notes": "Anteckningar"
       }
     }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Sök i dokumentet",
+      "previousMatch": "Föregående träff",
+      "nextMatch": "Nästa träff",
+      "close": "Stäng"
+    }
   }
 }
