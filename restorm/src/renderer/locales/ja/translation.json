@@ -744,5 +744,10 @@
       "nextMatch": "次の一致",
       "close": "閉じる"
     }
+  },
+  "scenario": {
+    "editor": {
+      "empty": "Empty scenario — the node palette lands in a later slice"
+    }
   }
 }

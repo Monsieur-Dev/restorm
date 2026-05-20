@@ -745,5 +745,10 @@
       "nextMatch": "Következő találat",
       "close": "Bezárás"
     }
+  },
+  "scenario": {
+    "editor": {
+      "empty": "Empty scenario — the node palette lands in a later slice"
+    }
   }
 }

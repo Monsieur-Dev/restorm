@@ -44,6 +44,7 @@ export interface UseItemOperationsOptions {
     isFolder: boolean
   }>>
   openFolderTab: (folder: Folder, breadcrumbs: import('../../../shared/types/editor').BreadcrumbItem[]) => void
+  openScenarioEditorTab: (scenario: import('../../../shared/types/collections').Scenario, breadcrumbs: BreadcrumbItem[]) => void
   openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: import('../../../shared/types/editor').BreadcrumbItem[]) => void
   openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[]) => void
   /** Project UUID. When the deleted subtree contains favorited items,
@@ -79,7 +80,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     setDeleteConfirmation,
     projectUuid
   } = options
-  const { openFolderTab, openEnvironmentFolderTab, openAnyRequestTab } = options
+  const { openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab } = options
   const { t } = useTranslation()
 
   // Handle drag & drop in the sidebar to reorder items
@@ -537,12 +538,12 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     const envs = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
     if (kind === 'folder' && isAnyFolder(pushedItem)) {
       openFolderTab(pushedItem, breadcrumbs)
-    } else if (!isAnyFolder(pushedItem) && !isScenario(pushedItem)) {
-      // Scenarios don't open a tab yet — the graph editor lands in a
-      // later slice. The new scenario is created + selected in the tree.
+    } else if (isScenario(pushedItem)) {
+      openScenarioEditorTab(pushedItem, breadcrumbs)
+    } else if (!isAnyFolder(pushedItem)) {
       openAnyRequestTab(pushedItem, breadcrumbs, envs)
     }
-  }, [rootItems, setRootItems, setExpandedIds, setSelectedItemId, openFolderTab, openAnyRequestTab, defaultNameFor])
+  }, [rootItems, setRootItems, setExpandedIds, setSelectedItemId, openFolderTab, openScenarioEditorTab, openAnyRequestTab, defaultNameFor])
 
   const handleCreateRootFolder = useCallback(() => {
     const newFolder: Folder = {

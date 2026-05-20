@@ -744,5 +744,10 @@
       "nextMatch": "다음 일치",
       "close": "닫기"
     }
+  },
+  "scenario": {
+    "editor": {
+      "empty": "Empty scenario — the node palette lands in a later slice"
+    }
   }
 }

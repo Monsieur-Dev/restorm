@@ -745,5 +745,10 @@
       "nextMatch": "Next match",
       "close": "Close"
     }
+  },
+  "scenario": {
+    "editor": {
+      "empty": "Empty scenario — the node palette lands in a later slice"
+    }
   }
 }

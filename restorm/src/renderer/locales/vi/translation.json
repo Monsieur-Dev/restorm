@@ -744,5 +744,10 @@
       "nextMatch": "Kết quả tiếp theo",
       "close": "Đóng"
     }
+  },
+  "scenario": {
+    "editor": {
+      "empty": "Empty scenario — the node palette lands in a later slice"
+    }
   }
 }

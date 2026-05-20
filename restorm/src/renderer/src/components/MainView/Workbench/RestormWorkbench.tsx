@@ -14,6 +14,7 @@ import {
   isWebSocketRequestTab,
   isODataRequestTab,
   isAuthenticationRequestTab,
+  isScenarioEditorTab,
   isConsoleTab,
   isFirewallTab,
   isMiniBrowserTab
@@ -28,6 +29,7 @@ import {
   ODataRequestTabView
 } from '../../RequestTabViews'
 import { EnvironmentProvider } from '../../../contexts/EnvironmentContext'
+import { ScenarioEditorView } from '../../Scenario/ScenarioEditorView'
 import { FolderView } from '../../Folders/FolderView'
 import { EnvironmentFolderView } from '../../Folders/EnvironmentFolderView'
 import type { EnvironmentFolder, Folder, Request } from '../../../../../shared/types/collections'
@@ -587,6 +589,11 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     const breadcrumbs = effectiveTab.breadcrumbs ?? [
       { id: 'root', label: 'Root' }
     ]
+
+    // Scenario editor tab
+    if (isScenarioEditorTab(effectiveTab)) {
+      return <ScenarioEditorView scenario={effectiveTab.scenario} />
+    }
 
     // Folder tab
     if (isFolderTab(effectiveTab)) {

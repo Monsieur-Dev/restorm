@@ -745,5 +745,10 @@
       "nextMatch": "Correspondance suivante",
       "close": "Fermer"
     }
+  },
+  "scenario": {
+    "editor": {
+      "empty": "Scénario vide — la palette de nœuds arrive dans un prochain lot"
+    }
   }
 }

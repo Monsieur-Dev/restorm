@@ -20,6 +20,7 @@ import {
   findFolderById,
   findEnvironmentFolderById,
   findRequestById,
+  findItemById,
   findItemWithBreadcrumbs,
   getNearestEnvironmentsForBreadcrumbs
 } from '../utils/treeSearch'
@@ -28,7 +29,8 @@ import type {
   FolderItem,
   EnvironmentFolder,
   Environment,
-  Request
+  Request,
+  Scenario
 } from '../../../shared/types/collections'
 import {
   isRequest,
@@ -40,7 +42,8 @@ import {
   isODataRequest,
   isAuthenticationRequest,
   isEnvironmentFolder,
-  isAnyFolder
+  isAnyFolder,
+  isScenario
 } from '../../../shared/types/collections'
 import type {
   FolderTab,
@@ -52,6 +55,7 @@ import type {
   WebSocketRequestTab,
   ODataRequestTab,
   AuthenticationRequestTab,
+  ScenarioEditorTab,
   ConsoleTab,
   FirewallTab,
   BreadcrumbItem
@@ -76,8 +80,9 @@ export interface UseWorkbenchTabsReturn {
   workbenchRef: React.RefObject<RestormWorkbenchHandle | null>
   hasRestoredWorkbenchRef: React.RefObject<boolean>
   findIndexPathById: (items: FolderItem[], targetId: string) => number[] | null
-  buildTabId: (prefix: 'folder' | 'env-folder' | 'request', id: string) => string
+  buildTabId: (prefix: 'folder' | 'env-folder' | 'request' | 'scenario', id: string) => string
   openFolderTab: (folder: Folder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
+  openScenarioEditorTab: (scenario: Scenario, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
   openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
   openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[], options?: OpenTabOptions) => void
   handleRebuildTab: (tabId: string) => EditorTab | null
@@ -155,7 +160,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
    * compat with already-persisted workbench state; new tabs are
    * always emitted as `request-id:<uuid>`.
    */
-  const buildTabId = useCallback((prefix: 'folder' | 'env-folder' | 'request', id: string): string => {
+  const buildTabId = useCallback((prefix: 'folder' | 'env-folder' | 'request' | 'scenario', id: string): string => {
     return `${prefix}-id:${id}`
   }, [])
 
@@ -295,6 +300,29 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     })
   }, [buildTabId, registerTabDirtyState, setWorkbenchTree, addTabToTree])
 
+  // Open the scenario (dataflow graph) editor in the workbench
+  const openScenarioEditorTab = useCallback((scenario: Scenario, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => {
+    const tabId = buildTabId('scenario', scenario.id)
+
+    setTimeout(() => {
+      const scenarioChecksum = computeChecksum(JSON.parse(JSON.stringify(scenario)))
+      registerTabDirtyState(scenario.id, scenarioChecksum)
+    }, 500)
+
+    setWorkbenchTree((prev) => {
+      const newTab: ScenarioEditorTab = {
+        id: tabId,
+        tabType: 'scenario-editor',
+        title: scenario.name,
+        titleString: scenario.name,
+        scenario,
+        breadcrumbs,
+        allowFullscreen: true
+      }
+      return addTabToTree(prev, tabId, newTab, options, scenario.id)
+    })
+  }, [buildTabId, registerTabDirtyState, setWorkbenchTree, addTabToTree])
+
   // Open an environment folder tab in the workbench
   const openEnvironmentFolderTab = useCallback((folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => {
     const tabId = buildTabId('env-folder', folder.id)
@@ -378,25 +406,25 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     [buildTabId, registerTabDirtyState, setWorkbenchTree, addTabToTree]
   )
 
-  const parseTabId = useCallback((tabId: string): { type: 'folder' | 'env-folder' | 'request'; indexPath?: number[]; legacyId?: string } | null => {
-    const indexMatch = /^(folder|env-folder|request)-idx:([0-9]+(?:\.[0-9]+)*)$/.exec(tabId)
+  const parseTabId = useCallback((tabId: string): { type: 'folder' | 'env-folder' | 'request' | 'scenario'; indexPath?: number[]; legacyId?: string } | null => {
+    const indexMatch = /^(folder|env-folder|request|scenario)-idx:([0-9]+(?:\.[0-9]+)*)$/.exec(tabId)
     if (indexMatch?.[1] && indexMatch[2]) {
       return {
-        type: indexMatch[1] as 'folder' | 'env-folder' | 'request',
+        type: indexMatch[1] as 'folder' | 'env-folder' | 'request' | 'scenario',
         indexPath: indexMatch[2].split('.').map((part) => Number(part))
       }
     }
-    const legacyMatch = /^(folder|env-folder|request)-id:(.+)$/.exec(tabId)
+    const legacyMatch = /^(folder|env-folder|request|scenario)-id:(.+)$/.exec(tabId)
     if (legacyMatch?.[1] && legacyMatch[2]) {
       return {
-        type: legacyMatch[1] as 'folder' | 'env-folder' | 'request',
+        type: legacyMatch[1] as 'folder' | 'env-folder' | 'request' | 'scenario',
         legacyId: legacyMatch[2]
       }
     }
-    const oldMatch = /^(folder|env-folder|request)-(.+)$/.exec(tabId)
+    const oldMatch = /^(folder|env-folder|request|scenario)-(.+)$/.exec(tabId)
     if (oldMatch?.[1] && oldMatch[2]) {
       return {
-        type: oldMatch[1] as 'folder' | 'env-folder' | 'request',
+        type: oldMatch[1] as 'folder' | 'env-folder' | 'request' | 'scenario',
         legacyId: oldMatch[2]
       }
     }
@@ -528,6 +556,25 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
             allowFullscreen: true
           } as FolderTab
         }
+      }
+      return null
+    }
+
+    if (parsed.type === 'scenario') {
+      const item = parsed.indexPath
+        ? findItemByIndexPath(rootItems, parsed.indexPath)
+        : (parsed.legacyId ? findItemById(rootItems, parsed.legacyId) : null)
+      if (item && isScenario(item)) {
+        const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, item.id)
+        return {
+          id: tabId,
+          tabType: 'scenario-editor',
+          title: item.name,
+          titleString: item.name,
+          scenario: item,
+          breadcrumbs,
+          allowFullscreen: true
+        } as ScenarioEditorTab
       }
       return null
     }
@@ -694,6 +741,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     findIndexPathById,
     buildTabId,
     openFolderTab,
+    openScenarioEditorTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
     handleRebuildTab,

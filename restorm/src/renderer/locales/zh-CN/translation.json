@@ -744,5 +744,10 @@
       "nextMatch": "下一个匹配",
       "close": "关闭"
     }
+  },
+  "scenario": {
+    "editor": {
+      "empty": "Empty scenario — the node palette lands in a later slice"
+    }
   }
 }

@@ -659,6 +659,7 @@ const App: React.FC = () => {
     workbenchRef,
     hasRestoredWorkbenchRef,
     openFolderTab,
+    openScenarioEditorTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
     handleRebuildTab,
@@ -998,6 +999,7 @@ const App: React.FC = () => {
     setWorkbenchTree,
     setDeleteConfirmation,
     openFolderTab,
+    openScenarioEditorTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
     projectUuid
@@ -1962,6 +1964,7 @@ const App: React.FC = () => {
   } = useNavigation({
     rootItems,
     openFolderTab,
+    openScenarioEditorTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
     setSelectedItemId,
