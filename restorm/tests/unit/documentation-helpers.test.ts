@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { extractModelRef } from '../../src/renderer/src/components/documentation/documentationModels'
+import { collectEnumGroups, isEnumModel } from '../../src/renderer/src/components/documentation/enumGroups'
+import type { ModelDocumentation } from '../../src/shared/types/apiDocumentation'
 import { statusCodeColor } from '../../src/renderer/src/components/documentation/statusCodeColor'
 import { routeFromRequest } from '../../src/renderer/src/hooks/routeFromRequest'
 import { buildRequestFromOperation } from '../../src/renderer/src/services/buildRequestFromOperation'
@@ -173,6 +175,48 @@ describe('statusCodeColor', () => {
   it('`default` and unrecognised codes fall back to the neutral colour', () => {
     expect(statusCodeColor('default')).toContain('description-foreground')
     expect(statusCodeColor('???')).toContain('description-foreground')
+  })
+})
+
+describe('enumGroups', () => {
+  const objectModel: ModelDocumentation = {
+    name: 'Pet',
+    properties: [
+      { name: 'name', type: 'string', required: true },
+      { name: 'status', type: 'string', required: false, enumValues: ['available', 'sold'] }
+    ]
+  }
+  const enumModel: ModelDocumentation = {
+    name: 'Skill',
+    properties: [],
+    enumValues: ['mining', 'fishing']
+  }
+
+  it('isEnumModel: propertyless schema with enumValues is an enum model', () => {
+    expect(isEnumModel(enumModel)).toBe(true)
+    expect(isEnumModel(objectModel)).toBe(false)
+    // An object model that also carries top-level enumValues stays structural.
+    expect(isEnumModel({ ...objectModel, enumValues: ['x'] })).toBe(false)
+  })
+
+  it('collectEnumGroups: top-level enum becomes a model-level group', () => {
+    const groups = collectEnumGroups([enumModel])
+    expect(groups).toHaveLength(1)
+    expect(groups[0]?.modelName).toBe('Skill')
+    expect(groups[0]?.entries).toEqual([])
+    expect(groups[0]?.modelLevelValues).toEqual(['mining', 'fishing'])
+  })
+
+  it('collectEnumGroups: object model contributes per-property enum entries', () => {
+    const groups = collectEnumGroups([objectModel])
+    expect(groups).toHaveLength(1)
+    expect(groups[0]?.modelLevelValues).toBeUndefined()
+    expect(groups[0]?.entries).toEqual([{ propertyName: 'status', values: ['available', 'sold'] }])
+  })
+
+  it('collectEnumGroups: models with no enums produce no group', () => {
+    const plain: ModelDocumentation = { name: 'Empty', properties: [{ name: 'id', type: 'string', required: true }] }
+    expect(collectEnumGroups([plain])).toEqual([])
   })
 })
 

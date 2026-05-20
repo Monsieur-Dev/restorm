@@ -12,6 +12,7 @@ import { DocumentationHostNativeFind, type DocumentationHostNativeFindHandle } f
 import { DocumentationHostSearch, type DocumentationHostSearchHandle } from './DocumentationHostSearch'
 import { DocumentationSidebar } from './DocumentationSidebar'
 import { DocumentationModelsContext, DocumentationSecuritySchemesContext } from './documentationModels'
+import { collectEnumGroups, isEnumModel } from './enumGroups'
 import { DocumentationNavigationContext, type DocumentationNavigationApi } from './documentationNavigation'
 import { EnumsSection } from './EnumsSection'
 import { ModelGraph, type ModelGraphHandle } from './ModelGraph'
@@ -144,9 +145,15 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
   // focused on the operation card itself.
   const showSidebar = operations.length > 1 || (scopeTitle !== undefined && scopeTitle.length > 0)
 
+  // Enum schemas (`{ type: "string", enum: [...] }`) are surfaced in
+  // the Enums section + sidebar Enums outline, never as model-graph
+  // nodes. Split them out so the graph / Models outline / cross-ref
+  // link set only ever see object models.
+  const structuralModels = useMemo(() => models.filter((m) => !isEnumModel(m)), [models])
+  const enumGroups = useMemo(() => collectEnumGroups(models), [models])
   const modelNames = useMemo<Set<string>>(
-    () => new Set(models.map((m) => m.name)),
-    [models]
+    () => new Set(structuralModels.map((m) => m.name)),
+    [structuralModels]
   )
   /** Bucket the in-scope operations by their `group` (tag) in the
    * order the spec declares the groups. `(ungrouped)` collects
@@ -353,7 +360,7 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
           />
         ))}
 
-      {models.length > 0 ? (
+      {structuralModels.length > 0 ? (
         <section
           ref={modelsSectionRef}
           className="documentation-host__section documentation-host__models"
@@ -362,13 +369,13 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
           {topLevelSectionLevel === 1
             ? <h1 className="documentation-host__section-title">Models</h1>
             : <h2 className="documentation-host__section-title">Models</h2>}
-          <ModelGraph ref={modelGraphRef} models={models} />
+          <ModelGraph ref={modelGraphRef} models={structuralModels} />
           <ModelGraphLegend />
         </section>
       ) : null}
 
-      <CompositionSection models={models} headingLevel={topLevelSectionLevel} />
-      <EnumsSection ref={enumsSectionRef} models={models} headingLevel={topLevelSectionLevel} />
+      <CompositionSection models={structuralModels} headingLevel={topLevelSectionLevel} />
+      <EnumsSection ref={enumsSectionRef} enumGroups={enumGroups} headingLevel={topLevelSectionLevel} />
     </div>
     </ScrollableElement>
   )
@@ -415,7 +422,8 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
             panel={(
               <DocumentationSidebar
                 operations={operations}
-                models={models}
+                models={structuralModels}
+                enumGroups={enumGroups}
                 operationSlug={getOperationSlug}
                 {...(scopeTitle !== undefined && scopeTitle.length > 0 ? { scopeTitle } : {})}
               />

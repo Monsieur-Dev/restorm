@@ -4,14 +4,18 @@ import type {
   ModelDocumentation,
   OperationDocumentation
 } from '../../../../shared/types/apiDocumentation'
-import { collectEnumGroups } from './enumGroups'
+import type { EnumGroup } from './enumGroups'
 import { useDocumentationNavigation } from './documentationNavigation'
 
 export interface DocumentationSidebarProps {
   /** Operations rendered in the host, in display order. */
   operations: OperationDocumentation[]
-  /** Models rendered in the host (deduplicated transitive closure). */
+  /** Object models rendered in the host (deduplicated transitive
+   * closure, enum schemas excluded — those live in `enumGroups`). */
   models: ModelDocumentation[]
+  /** Enum groups (property-level + top-level enum schemas), collected
+   * once by the host so the sidebar + Enums section stay in sync. */
+  enumGroups: EnumGroup[]
   /** Stable slug fn for operation links, supplied by the host so
    * sidebar + route-block ids match exactly. */
   operationSlug: (op: OperationDocumentation) => string
@@ -53,11 +57,11 @@ function groupOperations(operations: OperationDocumentation[]): OperationGroup[]
 export const DocumentationSidebar: React.FC<DocumentationSidebarProps> = ({
   operations,
   models,
+  enumGroups,
   operationSlug,
   scopeTitle
 }) => {
   const groups = useMemo(() => groupOperations(operations), [operations])
-  const enumGroups = useMemo(() => collectEnumGroups(models), [models])
   const nav = useDocumentationNavigation()
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
 
