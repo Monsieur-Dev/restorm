@@ -10,6 +10,7 @@ import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayloa
 import {
   Folder,
   EnvironmentFolder,
+  Scenario,
   Environment,
   KeyValue,
   HTTPRequest,
@@ -564,7 +565,15 @@ class CollectionStore {
       item.items = item.items.map((c: FolderItem) => this.reifyItem(c))
       return item
     }
+    if (item instanceof Scenario) return item
     const rec = item as unknown as Record<string, unknown>
+    // Scenario leaf (plain object). Checked before the generic
+    // `type`-bearing request branch — a scenario also carries a `type`,
+    // and the request factory would otherwise mis-build it as an
+    // HTTPRequest, dropping its nodes/edges.
+    if (rec['type'] === 'scenario') {
+      return Scenario.fromPlain(rec as Parameters<typeof Scenario.fromPlain>[0])
+    }
     if (Array.isArray(rec['items'])) {
       // Nested folder (plain object). EnvironmentFolders only ever sit
       // at the root, so a nested `items` carrier is a plain Folder.

@@ -13,17 +13,19 @@ export * from './KeyValue'
 export * from './Environment'
 export * from './Folder'
 export * from './EnvironmentFolder'
+export * from './Scenario'
 export * from './requests'
 export * from './types'
 
 // Re-export union types for convenience
 import { Folder } from './Folder'
 import { EnvironmentFolder } from './EnvironmentFolder'
+import { Scenario } from './Scenario'
 import type { Request } from './requests'
 import type { BaseFolderItem } from './types'
 
 /** Union type for folder items */
-export type FolderItem = Folder | EnvironmentFolder | Request
+export type FolderItem = Folder | EnvironmentFolder | Request | Scenario
 
 /** Type guard: check if item is an EnvironmentFolder */
 export function isEnvironmentFolder(item: BaseFolderItem | FolderItem): item is EnvironmentFolder {
@@ -42,7 +44,15 @@ export function isAnyFolder(item: BaseFolderItem | FolderItem): item is Folder |
   return isFolder(item) || isEnvironmentFolder(item)
 }
 
+/** Type guard: check if item is a Scenario */
+export function isScenario(item: BaseFolderItem | FolderItem): item is Scenario {
+  return item instanceof Scenario || (
+    'type' in item && (item as { type: unknown }).type === 'scenario'
+  )
+}
+
 /** Type guard: check if item is a Request */
 export function isRequest(item: BaseFolderItem | FolderItem): item is Request {
-  return 'type' in item && !('items' in item)
+  // A Scenario also carries `type` + no `items`; exclude it.
+  return 'type' in item && !('items' in item) && !isScenario(item)
 }
