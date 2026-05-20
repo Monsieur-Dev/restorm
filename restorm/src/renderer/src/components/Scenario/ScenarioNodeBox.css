@@ -1,0 +1,93 @@
+.scn-node {
+  min-width: 160px;
+  border: 1px solid var(--ecu-node-border, #454545);
+  border-radius: 6px;
+  background: var(--ecu-node-background, #2d2d30);
+  color: var(--ecu-foreground, #cccccc);
+  font-size: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.scn-node-selected {
+  border-color: var(--ecu-focusBorder, #007fd4);
+  box-shadow: 0 0 0 1px var(--ecu-focusBorder, #007fd4);
+}
+
+.scn-node-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px;
+  font-weight: 600;
+  color: var(--ecu-foreground, #cccccc);
+  background: var(--ecu-node-header-background, #3a3a3d);
+  border-bottom: 1px solid var(--ecu-node-border, #454545);
+}
+
+/* The global `.codicon` rule forces icon colour with `!important` (~#3b3b3b),
+ * which is invisible on the dark header — override it so the kind icon +
+ * collapse chevron follow the header's foreground (auto-contrasted when the
+ * box is coloured). `!important` is required to beat the global rule. */
+.scn-node-header .scn-node-icon,
+.scn-node-collapse .codicon {
+  color: inherit !important;
+}
+
+.scn-node-collapsed .scn-node-header {
+  border-bottom: none;
+}
+
+.scn-node-icon {
+  font-size: 14px !important;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.scn-node-title {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.scn-node-status {
+  font-size: 13px !important;
+  flex-shrink: 0;
+}
+.scn-node-status-running { color: #eab308 !important; animation: scn-spin 1.2s linear infinite; }
+.scn-node-status-ok { color: #22c55e !important; }
+.scn-node-status-error { color: #ef4444 !important; }
+
+@keyframes scn-spin { to { transform: rotate(360deg); } }
+
+.scn-node-collapse {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  opacity: 0.7;
+}
+.scn-node-collapse:hover { opacity: 1; }
+
+/* The body region (between header and the bottom edge) gives expanded
+ * nodes their height so input/output handles distribute down the sides. */
+.scn-node:not(.scn-node-collapsed) .scn-node-header {
+  margin-bottom: 28px;
+}
+
+.scn-handle.react-flow__handle {
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--ecu-node-background, #2d2d30);
+}
+
+.scn-handle-error {
+  left: auto;
+  right: 12px;
+}

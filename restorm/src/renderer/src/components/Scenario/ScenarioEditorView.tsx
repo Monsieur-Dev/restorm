@@ -18,8 +18,9 @@ import '@xyflow/react/dist/style.css'
 import { useTranslation } from 'react-i18next'
 import { Button } from 'electron-core-ui/renderer'
 import type { Scenario, ScenarioNode, ScenarioEdge, ScenarioNodeKind } from '../../../../shared/types/collections'
-import { SCENARIO_NODE_CATALOGUE, scenarioNodeMeta } from './scenarioNodeCatalogue'
+import { SCENARIO_NODE_CATALOGUE } from './scenarioNodeCatalogue'
 import { scenarioEdgeToFlowEdge, flowEdgeToScenarioEdge } from './scenarioGraphMapping'
+import { ScenarioNodeBox, type ScenarioNodeBoxData } from './ScenarioNodeBox'
 
 export interface ScenarioEditorViewProps {
   /** The scenario being edited. */
@@ -28,10 +29,9 @@ export interface ScenarioEditorViewProps {
   onScenarioChange?: (scenarioId: string, patch: { nodes: ScenarioNode[]; edges: Scenario['edges'] }) => void
 }
 
-interface NodeData extends Record<string, unknown> {
-  kind: ScenarioNodeKind
-  label: string
-}
+type NodeData = ScenarioNodeBoxData
+
+const nodeTypes = { scenarioNode: ScenarioNodeBox }
 
 const containerStyle: CSSProperties = { width: '100%', height: '100%', position: 'relative' }
 const emptyStyle: CSSProperties = {
@@ -44,13 +44,20 @@ const paletteStyle: CSSProperties = {
   borderRadius: 4, padding: 4, boxShadow: '0 2px 8px rgba(0,0,0,0.4)', display: 'flex', flexDirection: 'column', gap: 1
 }
 
-function toFlowNode(n: ScenarioNode): Node<NodeData> {
-  const meta = scenarioNodeMeta(n.kind)
+function toFlowNode(n: ScenarioNode, onToggleCollapse: (id: string) => void): Node<NodeData> {
   return {
     id: n.id,
+    type: 'scenarioNode',
     position: n.position,
-    data: { kind: n.kind, label: n.note ? `${meta.defaultLabel} — ${n.note}` : meta.defaultLabel },
-    ...(n.color ? { style: { background: n.color } } : {})
+    data: {
+      kind: n.kind,
+      inputs: n.inputs,
+      outputs: n.outputs,
+      onToggleCollapse,
+      ...(n.note !== undefined ? { note: n.note } : {}),
+      ...(n.color !== undefined ? { color: n.color } : {}),
+      ...(n.collapsed !== undefined ? { collapsed: n.collapsed } : {})
+    }
   }
 }
 
@@ -74,14 +81,6 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<NodeData>>([])
   const [edges, setEdges, onEdgesChange] = useEdgesState([] as Edge[])
   const [palette, setPalette] = useState<{ x: number; y: number; flow: { x: number; y: number } } | null>(null)
-
-  // Seed from the scenario whenever the open scenario changes (tab switch).
-  useEffect(() => {
-    nodeStore.current = new Map(scenario.nodes.map((n) => [n.id, n]))
-    edgeStore.current = new Map(scenario.edges.map((e) => [e.id, e]))
-    setNodes(scenario.nodes.map(toFlowNode))
-    setEdges(scenario.edges.map(toFlowEdge))
-  }, [scenario.id, scenario.nodes, scenario.edges, setNodes, setEdges])
 
   const persist = useCallback((flowNodes: Node<NodeData>[], flowEdges: Edge[]) => {
     const nextNodes: ScenarioNode[] = flowNodes.map((fn) => {
@@ -108,6 +107,27 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     edgeStore.current = new Map(nextEdges.map((e) => [e.id, e]))
     onScenarioChange?.(scenario.id, { nodes: nextNodes, edges: nextEdges })
   }, [onScenarioChange, scenario.id])
+
+  // Toggle a node's collapsed flag; update the live node + persist.
+  const onToggleCollapse = useCallback((nodeId: string) => {
+    setNodes((curr) => {
+      const next = curr.map((fn) =>
+        fn.id === nodeId ? { ...fn, data: { ...fn.data, collapsed: !fn.data.collapsed } } : fn
+      )
+      const prior = nodeStore.current.get(nodeId)
+      if (prior) nodeStore.current.set(nodeId, { ...prior, collapsed: !prior.collapsed })
+      setEdges((e) => { persist(next, e); return e })
+      return next
+    })
+  }, [setNodes, setEdges, persist])
+
+  // Seed from the scenario whenever the open scenario changes (tab switch).
+  useEffect(() => {
+    nodeStore.current = new Map(scenario.nodes.map((n) => [n.id, n]))
+    edgeStore.current = new Map(scenario.edges.map((e) => [e.id, e]))
+    setNodes(scenario.nodes.map((n) => toFlowNode(n, onToggleCollapse)))
+    setEdges(scenario.edges.map(toFlowEdge))
+  }, [scenario.id, scenario.nodes, scenario.edges, setNodes, setEdges, onToggleCollapse])
 
   const handleNodesChange = useCallback((changes: NodeChange<Node<NodeData>>[]) => {
     onNodesChange(changes)
@@ -138,12 +158,12 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     const node: ScenarioNode = { id, kind, config: {}, inputs: [], outputs: [], position: flow }
     nodeStore.current.set(id, node)
     setNodes((curr) => {
-      const next = [...curr, toFlowNode(node)]
+      const next = [...curr, toFlowNode(node, onToggleCollapse)]
       setEdges((e) => { persist(next, e); return e })
       return next
     })
     setPalette(null)
-  }, [setNodes, setEdges, persist])
+  }, [setNodes, setEdges, persist, onToggleCollapse])
 
   const onPaneContextMenu = useCallback((event: React.MouseEvent | MouseEvent) => {
     event.preventDefault()
@@ -167,6 +187,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
       <ReactFlow
         nodes={nodes}
         edges={edges}
+        nodeTypes={nodeTypes}
         onNodesChange={handleNodesChange}
         onEdgesChange={handleEdgesChange}
         onConnect={onConnect}

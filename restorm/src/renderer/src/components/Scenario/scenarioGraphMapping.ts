@@ -1,4 +1,4 @@
-import type { ScenarioEdge } from '../../../../shared/types/collections'
+import type { ScenarioEdge, ScenarioPort } from '../../../../shared/types/collections'
 
 /**
  * Pure mapping between the scenario data model and React Flow's
@@ -41,4 +41,32 @@ export function flowEdgeToScenarioEdge(fe: FlowEdgeShape, prior?: ScenarioEdge):
     ...(prior?.selector !== undefined ? { selector: prior.selector } : {}),
     ...(prior?.color !== undefined ? { color: prior.color } : {})
   }
+}
+
+/** Default handle/edge colour per semantic port role (epic §5b). */
+export const ROLE_COLOR: Record<string, string> = {
+  then: '#22c55e',
+  case: '#22c55e',
+  response: '#22c55e',
+  status: '#3b82f6',
+  else: '#3b82f6',
+  default: '#3b82f6',
+  error: '#ef4444'
+}
+
+const NEUTRAL_PORT_COLOR = '#9ca3af'
+
+/** The colour for a port handle: explicit override → role colour → neutral. */
+export function portColor(p: ScenarioPort): string {
+  return p.defaultEdgeColor ?? (p.role ? ROLE_COLOR[p.role] ?? NEUTRAL_PORT_COLOR : NEUTRAL_PORT_COLOR)
+}
+
+/**
+ * Even vertical distribution of N handles along a node's side, as a CSS
+ * `top` percentage. Collapsed nodes pin every handle to the header centre.
+ */
+export function handleTop(index: number, count: number, collapsed: boolean): string {
+  if (collapsed) return '50%'
+  const slice = 100 / (count + 1)
+  return `${slice * (index + 1)}%`
 }
