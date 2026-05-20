@@ -820,71 +820,12 @@ When('I press Ctrl+F', async () => {
   await p.waitForTimeout(200)
 })
 
-When('I press Ctrl+Shift+F', async () => {
-  const p = requirePage()
-  await p.keyboard.press('Control+Shift+F')
-  await p.waitForTimeout(200)
-})
-
-When('I type {string} in the find input', async ({}, query: string) => {
-  const p = requirePage()
-  const input = p.locator('[data-testid="documentation-host-native-find-bar"] .documentation-host-search-bar__input')
-  await expect(input).toBeVisible({ timeout: 5000 })
-  // Click the input first to ensure focus, then type via the keyboard
-  // so the React onChange + the underlying `findInPage` call fire as
-  // they would for a real user. `fill()` shortcuts the input via JS
-  // but in past runs this raced the focus rAF inside the bar.
-  await input.click()
-  await p.keyboard.type(query, { delay: 30 })
-  // Native findInPage round-trips through main → 'found-in-page' →
-  // 'find:result'. The next assertion polls the counter so we don't
-  // need a fixed wait here.
-})
-
 When('I type {string} in the search input', async ({}, query: string) => {
   const p = requirePage()
   const input = p.locator('[data-testid="documentation-host-search-bar"] .documentation-host-search-bar__input')
   await expect(input).toBeVisible({ timeout: 5000 })
   await input.fill(query)
   await p.waitForTimeout(400)
-})
-
-Then('the native find bar should be visible', async () => {
-  const p = requirePage()
-  const bar = p.locator('[data-testid="documentation-host-native-find-bar"]')
-  await expect(bar).toBeVisible({ timeout: 5000 })
-})
-
-When('I press F3', async () => {
-  const p = requirePage()
-  await p.keyboard.press('F3')
-  await p.waitForTimeout(400)
-})
-
-Then('the native find bar active match should have advanced', async () => {
-  const p = requirePage()
-  const counter = p.locator('[data-testid="documentation-host-native-find-bar"] .documentation-host-search-bar__counter')
-  // Poll: native findInPage's 'found-in-page' event can land late on
-  // a freshly-reloaded page. The counter eventually settles at
-  // active >= 2 once F3 has advanced past the first match.
-  await expect.poll(async () => {
-    const text = (await counter.textContent()) ?? '0 / 0'
-    const m = /(\d+)\s*\/\s*(\d+)/.exec(text)
-    return m ? Number(m[1]) : 0
-  }, { timeout: 8000, message: 'native find bar should advance the active match past 1' })
-    .toBeGreaterThan(1)
-})
-
-When('I press Escape', async () => {
-  const p = requirePage()
-  await p.keyboard.press('Escape')
-  await p.waitForTimeout(200)
-})
-
-Then('the native find bar should be gone', async () => {
-  const p = requirePage()
-  const bar = p.locator('[data-testid="documentation-host-native-find-bar"]')
-  await expect(bar).toHaveCount(0, { timeout: 5000 })
 })
 
 Then('the custom search bar counter should report a match count above zero', async () => {

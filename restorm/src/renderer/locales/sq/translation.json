@@ -196,7 +196,8 @@
     "tabs": {
       "docs": "Dokumentacioni",
       "environments": "Mjedise",
-      "notes": "Shënimet"
+      "notes": "Shënimet",
+      "customValues": "Custom variables"
     },
     "home": {
       "configureEnvs": "Konfiguro mjediset",
@@ -225,6 +226,18 @@
       "name": "Variabël",
       "value": "Vlera e zgjidhur",
       "copied": "U kopjua!"
+    },
+    "customValues": {
+      "lists": "Lists",
+      "values": "Values",
+      "addList": "Add a list",
+      "newListName": "New list",
+      "addEntry": "Add a value",
+      "label": "Label",
+      "value": "Value",
+      "noEntries": "No values yet",
+      "selectList": "Select a list",
+      "enabled": "Aktivizuar"
     }
   },
   "requestTab": {
@@ -291,7 +304,9 @@
       "expression": "Shprehje",
       "boolean": "Booleane"
     },
-    "apiEnums": "Tipet e përcaktuara në API"
+    "apiEnums": "Tipet e përcaktuara në API",
+    "customLists": "Tipe të personalizuara",
+    "listSuffix": "listë"
   },
   "graphql": {
     "send": "Dërgo",
@@ -720,6 +735,14 @@
         "docs": "Dokumentim",
         "notes": "Shënime"
       }
+    }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Gjej në dokument",
+      "previousMatch": "Përputhja e mëparshme",
+      "nextMatch": "Përputhja tjetër",
+      "close": "Mbyll"
     }
   }
 }

@@ -195,7 +195,8 @@
     "tabs": {
       "docs": "ドキュメント",
       "environments": "環境",
-      "notes": "メモ"
+      "notes": "メモ",
+      "customValues": "Custom variables"
     },
     "home": {
       "configureEnvs": "環境を設定",
@@ -224,6 +225,18 @@
       "name": "変数",
       "value": "解決後の値",
       "copied": "コピーしました！"
+    },
+    "customValues": {
+      "lists": "Lists",
+      "values": "Values",
+      "addList": "Add a list",
+      "newListName": "New list",
+      "addEntry": "Add a value",
+      "label": "Label",
+      "value": "Value",
+      "noEntries": "No values yet",
+      "selectList": "Select a list",
+      "enabled": "有効"
     }
   },
   "requestTab": {
@@ -290,7 +303,9 @@
       "expression": "式",
       "boolean": "ブール値"
     },
-    "apiEnums": "API で定義された型"
+    "apiEnums": "API で定義された型",
+    "customLists": "カスタム型",
+    "listSuffix": "リスト"
   },
   "graphql": {
     "send": "送信",
@@ -719,6 +734,14 @@
         "docs": "ドキュメント",
         "notes": "メモ"
       }
+    }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "ドキュメント内を検索",
+      "previousMatch": "前の一致",
+      "nextMatch": "次の一致",
+      "close": "閉じる"
     }
   }
 }

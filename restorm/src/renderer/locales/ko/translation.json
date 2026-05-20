@@ -195,7 +195,8 @@
     "tabs": {
       "docs": "문서",
       "environments": "환경",
-      "notes": "메모"
+      "notes": "메모",
+      "customValues": "Custom variables"
     },
     "home": {
       "configureEnvs": "환경 구성",
@@ -224,6 +225,18 @@
       "name": "변수",
       "value": "해석된 값",
       "copied": "복사했습니다!"
+    },
+    "customValues": {
+      "lists": "Lists",
+      "values": "Values",
+      "addList": "Add a list",
+      "newListName": "New list",
+      "addEntry": "Add a value",
+      "label": "Label",
+      "value": "Value",
+      "noEntries": "No values yet",
+      "selectList": "Select a list",
+      "enabled": "사용"
     }
   },
   "requestTab": {
@@ -290,7 +303,9 @@
       "expression": "표현식",
       "boolean": "부울"
     },
-    "apiEnums": "API에서 정의한 형식"
+    "apiEnums": "API에서 정의한 형식",
+    "customLists": "사용자 지정 유형",
+    "listSuffix": "목록"
   },
   "graphql": {
     "send": "보내기",
@@ -719,6 +734,14 @@
         "docs": "문서",
         "notes": "노트"
       }
+    }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "문서에서 찾기",
+      "previousMatch": "이전 일치",
+      "nextMatch": "다음 일치",
+      "close": "닫기"
     }
   }
 }

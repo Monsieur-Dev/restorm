@@ -26,9 +26,12 @@ import {
   type DocumentDeletedPayload
 } from './DocumentEvents'
 import { registerHandlebarsHelpers } from '../utils/handlebarsHelpers'
-import { pubsub, PUBSUB_TOPICS } from './CollectionStore'
+import { pubsub, PUBSUB_TOPICS, collectionStore } from './CollectionStore'
 import { KeyValue as KeyValueModel } from '../../shared/models'
-import { isExpressionValue } from '../../shared/utils/valueHelpers'
+import { StringValue, EnumListValue, CustomListValue, CustomListMultiValue } from '../../shared/types/collections'
+import type { CustomValueList } from '../../shared/types/collections'
+import { isEnvironmentFolder } from '../../shared/types/folderTypes'
+import { isExpressionValue, isCustomListValue, isCustomListMultiValue } from '../../shared/utils/valueHelpers'
 import { resolveUrl } from './URLResolver'
 import { compileSnippetTemplates, generateCodeSnippets, type CompiledSnippetTemplates } from './CodeSnippetGenerator'
 import type {
@@ -279,6 +282,11 @@ class ContextService {
     // Now apply this environment's variables with Handlebars transformation
     const finalContext = { ...accumulatedContext }
 
+    // Custom value lists live on the owning env-folder; an env variable
+    // typed as a CustomListValue resolves its label → entry value here.
+    const ownerFolder = collectionStore.findEnvironmentFolderByEnvironmentId(envId)
+    const customValueLists = ownerFolder?.customValueLists
+
     for (const kv of meta.rawVariables) {
       // Broadcast available variables for autocompletion (for ALL fields, including disabled)
       // Each field sees: parent env variables + previous ENABLED variables in this env
@@ -297,7 +305,7 @@ class ContextService {
       if (kv.key) {
         // Copy context before transformation for this variable
         const contextUsed = { ...finalContext }
-        const transformedValue = this.resolveKeyValue(kv, finalContext)
+        const transformedValue = this.resolveEnvKeyValue(kv, finalContext, customValueLists)
         finalContext[kv.key] = transformedValue
 
         // Store and broadcast transformation result if variable has an id
@@ -695,6 +703,12 @@ class ContextService {
         ...(pathParamsFromGroup !== undefined ? { pathParams: pathParamsFromGroup } : ctx.fullData.pathParams !== undefined ? { pathParams: ctx.fullData.pathParams } : {})
       }
 
+      // Materialise any CustomListValue params/pathParams into plain
+      // resolved StringValues so URLResolver (which only special-cases
+      // enums) builds the query/path with the substituted value.
+      if (updatedData.params) updatedData.params = this.materializeCustomListKVs(updatedData.params, requestId)
+      if (updatedData.pathParams) updatedData.pathParams = this.materializeCustomListKVs(updatedData.pathParams, requestId)
+
       // Delegate URL resolution to URLResolver
       const urlResult = resolveUrl(updatedData, baseContext, this.transformValue.bind(this))
       const previousUrlResult = this.resolvedUrls.get(requestId)
@@ -923,6 +937,18 @@ class ContextService {
    * instead of the always-resolves shortcut.
    */
   resolveKeyValueForRequest(kv: KeyValue, requestId: string): string {
+    // A CustomListValue carries a label; substitute the owning list's
+    // current entry value (read live from the folder so edits to the
+    // list are reflected on the next dispatch).
+    if (isCustomListValue(kv.value)) {
+      return this.resolveCustomListValue(kv.value, requestId)
+    }
+    // Multi-select: resolve each label and join (header / body context
+    // can't repeat a key, so we comma-join — query params get the
+    // repeated-key treatment in URLResolver via materialization).
+    if (isCustomListMultiValue(kv.value)) {
+      return this.resolveCustomListMultiValue(kv.value, requestId).join(',')
+    }
     const ctx = this.requestContexts.get(requestId)
     if (!ctx?.environmentId) {
       return kv.value.toString()
@@ -932,6 +958,161 @@ class ContextService {
       return kv.value.toString()
     }
     return this.resolveKeyValue(kv, envContext)
+  }
+
+  /**
+   * Resolve an environment variable's value to its context string.
+   * Custom-list types substitute the selected label(s) for the current
+   * entry value(s) from the owning folder's lists (read here, not via a
+   * requestId walk, because env variables aren't request-scoped). Every
+   * other type defers to `resolveKeyValue` (expression-aware gate).
+   */
+  private resolveEnvKeyValue(
+    kv: KeyValue,
+    context: TransformedContext,
+    lists: CustomValueList[] | undefined
+  ): string {
+    if (isCustomListValue(kv.value)) {
+      const value = kv.value
+      const entry = lists
+        ?.find((l) => l.id === value.listId)
+        ?.entries.find((e) => e.label === value.label && e.enabled !== false)
+      // No label fallback: an unresolvable custom value resolves to the
+      // empty string so a missing / disabled entry can't masquerade as a
+      // valid value (which it silently did when label === value).
+      return entry?.value ?? ''
+    }
+    if (isCustomListMultiValue(kv.value)) {
+      const value = kv.value
+      const list = lists?.find((l) => l.id === value.listId)
+      if (!list) return ''
+      return value.labels
+        .map((label) => list.entries.find((e) => e.label === label && e.enabled !== false)?.value)
+        .filter((v): v is string => v !== undefined)
+        .join(',')
+    }
+    return this.resolveKeyValue(kv, context)
+  }
+
+  private resolveCustomListValue(value: CustomListValue, requestId: string): string {
+    const list = this.findCustomValueList(value.listId, requestId)
+    // A disabled (unchecked) entry is treated as unavailable. No label
+    // fallback: an unresolvable custom value resolves to the empty
+    // string rather than leaking the label onto the wire (a label that
+    // happened to equal its value silently masked broken resolution).
+    const entry = list?.entries.find((e) => e.label === value.label && e.enabled !== false)
+    return entry?.value ?? ''
+  }
+
+  /**
+   * Resolve a multi-select CustomListMultiValue to the list of current
+   * entry values for the selected labels. Labels whose entry is missing
+   * or disabled are dropped (an unchecked value stops being sent). A
+   * missing list resolves to no values — no label fallback.
+   */
+  private resolveCustomListMultiValue(value: CustomListMultiValue, requestId: string): string[] {
+    const list = this.findCustomValueList(value.listId, requestId)
+    if (!list) return []
+    const resolved: string[] = []
+    for (const label of value.labels) {
+      const entry = list.entries.find((e) => e.label === label && e.enabled !== false)
+      if (entry) resolved.push(entry.value)
+    }
+    return resolved
+  }
+
+  /**
+   * Re-resolve everything affected by a custom-value-list edit on an
+   * env-folder: the folder's environment contexts (env vars typed as a
+   * custom list) and every registered request under the folder (params
+   * / headers typed as a custom list). Reads the lists live from
+   * `collectionStore`.
+   *
+   * Deliberately event-free — it must NOT route through
+   * `collectionStore.updateFolder`, whose `FOLDER_UPDATED` /
+   * `ENVIRONMENT_UPDATED` GraphQL publishes would spam the subscription
+   * layer on every keystroke commit. Disk persistence + the renderer's
+   * own reactivity are handled renderer-side; main only needs the fresh
+   * lists for dispatch resolution.
+   */
+  recalculateForCustomListChange(folderId: string): void {
+    const folder = collectionStore.findById(folderId)
+    if (folder && isEnvironmentFolder(folder)) {
+      const recalcEnvTree = (envs: Environment[]): void => {
+        for (const env of envs) {
+          if (this.environmentMeta.has(env.id)) this.recalculateContext(env.id)
+          if (env.subEnvironments) recalcEnvTree(env.subEnvironments)
+        }
+      }
+      recalcEnvTree(folder.environments)
+    }
+    for (const requestId of this.requestContexts.keys()) {
+      if (this.isRequestUnderFolder(requestId, folderId)) {
+        this.recalculateRequestContext(requestId)
+      }
+    }
+  }
+
+  /** True when `requestId`'s ancestor chain includes `folderId`. */
+  private isRequestUnderFolder(requestId: string, folderId: string): boolean {
+    let cursor: string | null = requestId
+    for (let i = 0; i < 32 && cursor; i++) {
+      const parent = collectionStore.findParentFolder(cursor)
+      if (!parent) return false
+      if (parent.id === folderId) return true
+      cursor = parent.id
+    }
+    return false
+  }
+
+  /**
+   * Walk up the request's ancestor chain to the nearest environment
+   * folder and return the custom value list matching `listId` (read
+   * live so edits reflect on the next dispatch).
+   */
+  private findCustomValueList(listId: string, requestId: string): CustomValueList | null {
+    let cursor: string | null = requestId
+    for (let i = 0; i < 32 && cursor; i++) {
+      const parent = collectionStore.findParentFolder(cursor)
+      if (!parent) break
+      if (isEnvironmentFolder(parent)) {
+        return parent.customValueLists?.find((l) => l.id === listId) ?? null
+      }
+      cursor = parent.id
+    }
+    return null
+  }
+
+  /**
+   * Return a copy of `kvs` with every custom-list value materialised so
+   * downstream resolvers (which only special-case enums) handle them:
+   * - CustomListValue → resolved StringValue.
+   * - CustomListMultiValue → EnumListValue of resolved values, which
+   *   URLResolver repeats per value (collectionFormat: multi).
+   */
+  private materializeCustomListKVs(kvs: KeyValue[], requestId: string): KeyValue[] {
+    if (!kvs.some((kv) => isCustomListValue(kv.value) || isCustomListMultiValue(kv.value))) return kvs
+    return kvs.map((kv) => {
+      if (isCustomListValue(kv.value)) {
+        return new KeyValueModel({
+          ...(kv.id !== undefined && { id: kv.id }),
+          key: kv.key,
+          value: new StringValue(this.resolveCustomListValue(kv.value, requestId)),
+          ...(kv.description !== undefined && { description: kv.description }),
+          enabled: kv.enabled ?? true
+        })
+      }
+      if (isCustomListMultiValue(kv.value)) {
+        return new KeyValueModel({
+          ...(kv.id !== undefined && { id: kv.id }),
+          key: kv.key,
+          value: new EnumListValue(this.resolveCustomListMultiValue(kv.value, requestId), ''),
+          ...(kv.description !== undefined && { description: kv.description }),
+          enabled: kv.enabled ?? true
+        })
+      }
+      return kv
+    })
   }
 
   /**

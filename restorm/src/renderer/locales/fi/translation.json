@@ -196,7 +196,8 @@
     "tabs": {
       "docs": "Dokumentit",
       "environments": "Ympäristöt",
-      "notes": "Muistiinpanot"
+      "notes": "Muistiinpanot",
+      "customValues": "Custom variables"
     },
     "home": {
       "configureEnvs": "Määritä ympäristöt",
@@ -225,6 +226,18 @@
       "name": "Muuttuja",
       "value": "Selvitetty arvo",
       "copied": "Kopioitu!"
+    },
+    "customValues": {
+      "lists": "Lists",
+      "values": "Values",
+      "addList": "Add a list",
+      "newListName": "New list",
+      "addEntry": "Add a value",
+      "label": "Label",
+      "value": "Value",
+      "noEntries": "No values yet",
+      "selectList": "Select a list",
+      "enabled": "Käytössä"
     }
   },
   "requestTab": {
@@ -291,7 +304,9 @@
       "expression": "Lauseke",
       "boolean": "Totuusarvo"
     },
-    "apiEnums": "API:n määrittämät tyypit"
+    "apiEnums": "API:n määrittämät tyypit",
+    "customLists": "Mukautetut tyypit",
+    "listSuffix": "luettelo"
   },
   "graphql": {
     "send": "Lähetä",
@@ -720,6 +735,14 @@
         "docs": "Dokumentaatio",
         "notes": "Muistiinpanot"
       }
+    }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Etsi asiakirjasta",
+      "previousMatch": "Edellinen osuma",
+      "nextMatch": "Seuraava osuma",
+      "close": "Sulje"
     }
   }
 }

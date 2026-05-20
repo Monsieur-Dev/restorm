@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const HIGHLIGHT_NAME = 'documentation-host-search'
 const ACTIVE_HIGHLIGHT_NAME = 'documentation-host-search-active'
@@ -96,6 +97,7 @@ function buildMatchRanges(root: HTMLElement, query: string): Range[] {
  */
 export const DocumentationHostSearch = React.forwardRef<DocumentationHostSearchHandle, DocumentationHostSearchProps>(
   ({ rootRef }, forwardedRef) => {
+    const { t } = useTranslation()
     const [open, setOpen] = useState(false)
     const [query, setQuery] = useState('')
     const [activeIndex, setActiveIndex] = useState(0)
@@ -212,7 +214,7 @@ export const DocumentationHostSearch = React.forwardRef<DocumentationHostSearchH
           ref={inputRef}
           className="documentation-host-search-bar__input"
           type="text"
-          placeholder="Find in doc"
+          placeholder={t('documentation.find.placeholder')}
           value={query}
           onChange={(e): void => { setQuery(e.target.value) }}
           onKeyDown={(e): void => {
@@ -230,21 +232,21 @@ export const DocumentationHostSearch = React.forwardRef<DocumentationHostSearchH
         <button
           type="button"
           className="documentation-host-search-bar__button"
-          aria-label="Previous match"
+          aria-label={t('documentation.find.previousMatch')}
           onClick={stepPrev}
           disabled={matchCount === 0}
         >▲</button>
         <button
           type="button"
           className="documentation-host-search-bar__button"
-          aria-label="Next match"
+          aria-label={t('documentation.find.nextMatch')}
           onClick={stepNext}
           disabled={matchCount === 0}
         >▼</button>
         <button
           type="button"
           className="documentation-host-search-bar__button documentation-host-search-bar__button--close"
-          aria-label="Close search"
+          aria-label={t('documentation.find.close')}
           onClick={handleClose}
         >×</button>
       </div>

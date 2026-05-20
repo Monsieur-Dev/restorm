@@ -50,6 +50,58 @@ describe('OpenAPIImportService — petstore-3.0', () => {
     expect(statusEnum).toBeDefined()
     expect(statusEnum?.matchingRules.some((r) => r.pathPattern === '/pet/findByStatus' && r.method === 'get' && r.paramName === 'status')).toBe(true)
   })
+})
+
+describe('OpenAPIImportService — top-level enum schemas', () => {
+  // A standalone enum component (`{ type: string, enum: [...] }` with
+  // no properties) must become an EnumDefinition (so it is usable in
+  // the KV-table type picker) AND a top-level enum model on the docs
+  // layer (so the docs render it in the Enums section instead of as a
+  // model-graph node).
+  const specWithComponentEnum: OAS3Spec = {
+    openapi: '3.0.0',
+    info: { title: 'Game API', version: '1' },
+    servers: [{ url: 'https://api.example.com' }],
+    components: {
+      schemas: {
+        Skill: { type: 'string', enum: ['mining', 'fishing', 'woodcutting'] },
+        Character: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            mainSkill: { $ref: '#/components/schemas/Skill' }
+          }
+        }
+      }
+    },
+    paths: {
+      '/characters': {
+        get: { summary: 'List characters', responses: { 200: { description: 'ok' } } }
+      }
+    }
+  } as unknown as OAS3Spec
+
+  it('promotes a propertyless top-level enum schema to an EnumDefinition', () => {
+    const folder = importOpenAPI(specWithComponentEnum)
+    const skillEnum = folder.enumDefinitions?.find((d) => d.name === 'Skill')
+    expect(skillEnum).toBeDefined()
+    expect(skillEnum?.values.slice().sort()).toEqual(['fishing', 'mining', 'woodcutting'])
+  })
+
+  it('surfaces the enum schema as an enum-typed model (values, no properties)', () => {
+    const folder = importOpenAPI(specWithComponentEnum)
+    const skillModel = folder.apiDocumentation?.models.Skill
+    expect(skillModel).toBeDefined()
+    expect(skillModel?.properties).toEqual([])
+    expect(skillModel?.enumValues).toEqual(['mining', 'fishing', 'woodcutting'])
+  })
+
+  it('keeps object models with properties out of the enum treatment', () => {
+    const folder = importOpenAPI(specWithComponentEnum)
+    const character = folder.apiDocumentation?.models.Character
+    expect(character?.properties.length).toBeGreaterThan(0)
+    expect(character?.enumValues).toBeUndefined()
+  })
 
   it('produces an env with a baseUrl ExpressionValue derived from servers[0]', () => {
     const folder = importOpenAPI(loadFixture('petstore-3.0.json') as OAS3Spec)

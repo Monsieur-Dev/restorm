@@ -197,7 +197,8 @@
     "tabs": {
       "docs": "Documentație",
       "environments": "Medii",
-      "notes": "Notițe"
+      "notes": "Notițe",
+      "customValues": "Custom variables"
     },
     "home": {
       "configureEnvs": "Configurează mediile",
@@ -226,6 +227,18 @@
       "name": "Variabilă",
       "value": "Valoare rezolvată",
       "copied": "Copiat!"
+    },
+    "customValues": {
+      "lists": "Lists",
+      "values": "Values",
+      "addList": "Add a list",
+      "newListName": "New list",
+      "addEntry": "Add a value",
+      "label": "Label",
+      "value": "Value",
+      "noEntries": "No values yet",
+      "selectList": "Select a list",
+      "enabled": "Activat"
     }
   },
   "requestTab": {
@@ -292,7 +305,9 @@
       "expression": "Expresie",
       "boolean": "Boolean"
     },
-    "apiEnums": "Tipuri definite de API"
+    "apiEnums": "Tipuri definite de API",
+    "customLists": "Tipuri personalizate",
+    "listSuffix": "listă"
   },
   "graphql": {
     "send": "Trimite",
@@ -721,6 +736,14 @@
         "docs": "Documentație",
         "notes": "Note"
       }
+    }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Găsește în document",
+      "previousMatch": "Potrivirea anterioară",
+      "nextMatch": "Potrivirea următoare",
+      "close": "Închide"
     }
   }
 }

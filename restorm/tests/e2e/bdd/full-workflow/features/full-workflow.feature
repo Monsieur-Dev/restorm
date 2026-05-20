@@ -725,3 +725,53 @@ Feature: Full workflow end-to-end scenario
     When I close the current file and discard changes
     And I close the app
     Then no errors should have been logged
+
+  # Custom value lists: a user-defined label→value map on an env folder.
+  # A request param bound to a list substitutes the selected label's
+  # current value at dispatch (resolved in the main process). Editing,
+  # renaming, disabling and deleting the list flow through live; an
+  # unresolvable selection sends empty (no label fallback).
+  Scenario: Custom value lists substitute at dispatch and react to edits
+    Given a fresh app seeded with the main window at x=10 y=10
+    And I open the custom-value-lists sample collection
+    When I open the custom-list "Paint" request
+    And I select the "live" environment on the active request tab
+    # Use → the entry value is substituted for the label.
+    Then the active request URL tooltip should be "https://api.example.com/paint?color=FF0000"
+
+    # Edit the value → the new value is dispatched live.
+    When I open the custom variables tab on the "Paint API" env folder
+    And I select the "Couleur" custom value list
+    And I set the "Rouge" custom-list entry value to "0000FF"
+    When I focus the custom-list "Paint" request tab
+    Then the active request URL tooltip should be "https://api.example.com/paint?color=0000FF"
+
+    # Rename the list → the binding holds (resolved by id, not name).
+    When I open the custom variables tab on the "Paint API" env folder
+    And I rename the "Couleur" custom value list to "Teinte"
+    When I focus the custom-list "Paint" request tab
+    Then the active request URL tooltip should be "https://api.example.com/paint?color=0000FF"
+
+    # Disable the entry → unresolvable, sends empty (no label fallback).
+    When I open the custom variables tab on the "Paint API" env folder
+    And I select the "Teinte" custom value list
+    And I uncheck the "Rouge" custom-list entry
+    When I focus the custom-list "Paint" request tab
+    Then the active request URL tooltip should be "https://api.example.com/paint?color="
+
+    # Re-enable → resolution returns.
+    When I open the custom variables tab on the "Paint API" env folder
+    And I select the "Teinte" custom value list
+    And I check the "Rouge" custom-list entry
+    When I focus the custom-list "Paint" request tab
+    Then the active request URL tooltip should be "https://api.example.com/paint?color=0000FF"
+
+    # Delete the whole list → unresolvable, sends empty.
+    When I open the custom variables tab on the "Paint API" env folder
+    And I delete the "Teinte" custom value list
+    When I focus the custom-list "Paint" request tab
+    Then the active request URL tooltip should be "https://api.example.com/paint?color="
+
+    When I close the current file and discard changes
+    And I close the app
+    Then no errors should have been logged

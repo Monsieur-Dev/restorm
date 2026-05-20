@@ -197,7 +197,8 @@
     "tabs": {
       "docs": "Dokumentacija",
       "environments": "Okruženja",
-      "notes": "Bilješke"
+      "notes": "Bilješke",
+      "customValues": "Custom variables"
     },
     "home": {
       "configureEnvs": "Konfiguriraj okruženja",
@@ -226,6 +227,18 @@
       "name": "Varijabla",
       "value": "Razriješena vrijednost",
       "copied": "Kopirano!"
+    },
+    "customValues": {
+      "lists": "Lists",
+      "values": "Values",
+      "addList": "Add a list",
+      "newListName": "New list",
+      "addEntry": "Add a value",
+      "label": "Label",
+      "value": "Value",
+      "noEntries": "No values yet",
+      "selectList": "Select a list",
+      "enabled": "Omogućeno"
     }
   },
   "requestTab": {
@@ -292,7 +305,9 @@
       "expression": "Izraz",
       "boolean": "Booleova vrijednost"
     },
-    "apiEnums": "Tipovi definirani u API-ju"
+    "apiEnums": "Tipovi definirani u API-ju",
+    "customLists": "Prilagođeni tipovi",
+    "listSuffix": "popis"
   },
   "graphql": {
     "send": "Pošalji",
@@ -721,6 +736,14 @@
         "docs": "Dokumentacija",
         "notes": "Bilješke"
       }
+    }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Pronađi u dokumentu",
+      "previousMatch": "Prethodno podudaranje",
+      "nextMatch": "Sljedeće podudaranje",
+      "close": "Zatvori"
     }
   }
 }

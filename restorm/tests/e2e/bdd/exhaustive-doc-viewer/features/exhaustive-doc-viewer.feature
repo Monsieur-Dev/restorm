@@ -73,15 +73,8 @@ Feature: Exhaustive documentation viewer behaviour
     And the Composition section should describe the patched discriminator on the first model
     And the Enums section should include "Pet" with a status enum row
 
-  Scenario: Search — Ctrl+F native bar + Ctrl+Shift+F custom bar
+  Scenario: Search — Ctrl+F opens the in-doc CSS-Highlight search
     When I press Ctrl+F
-    Then the native find bar should be visible
-    When I type "pet" in the find input
-    And I press F3
-    Then the native find bar active match should have advanced
-    When I press Escape
-    Then the native find bar should be gone
-    When I press Ctrl+Shift+F
     And I type "pet" in the search input
     Then the custom search bar counter should report a match count above zero
     When I press F3 enough times to wrap around the match list

@@ -195,7 +195,8 @@
     "tabs": {
       "docs": "Tài liệu",
       "environments": "Môi trường",
-      "notes": "Ghi chú"
+      "notes": "Ghi chú",
+      "customValues": "Custom variables"
     },
     "home": {
       "configureEnvs": "Cấu hình môi trường",
@@ -224,6 +225,18 @@
       "name": "Biến",
       "value": "Giá trị đã giải quyết",
       "copied": "Đã sao chép!"
+    },
+    "customValues": {
+      "lists": "Lists",
+      "values": "Values",
+      "addList": "Add a list",
+      "newListName": "New list",
+      "addEntry": "Add a value",
+      "label": "Label",
+      "value": "Value",
+      "noEntries": "No values yet",
+      "selectList": "Select a list",
+      "enabled": "Bật"
     }
   },
   "requestTab": {
@@ -290,7 +303,9 @@
       "expression": "Biểu thức",
       "boolean": "Boolean"
     },
-    "apiEnums": "Kiểu được định nghĩa bởi API"
+    "apiEnums": "Kiểu được định nghĩa bởi API",
+    "customLists": "Loại tùy chỉnh",
+    "listSuffix": "danh sách"
   },
   "graphql": {
     "send": "Gửi",
@@ -719,6 +734,14 @@
         "docs": "Tài liệu",
         "notes": "Ghi chú"
       }
+    }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Tìm trong tài liệu",
+      "previousMatch": "Kết quả trước",
+      "nextMatch": "Kết quả tiếp theo",
+      "close": "Đóng"
     }
   }
 }

@@ -201,6 +201,16 @@ export function useWorkbenchUpdates(options: UseWorkbenchUpdatesOptions): UseWor
       }
       reactiveFolder.tags = updatedFolder.tags
       reactiveFolder.name = updatedFolder.name
+      // Carry the user-managed value-type collections too — without
+      // these the panel's edits (custom value lists, enum definitions)
+      // never reach the reactive tree, so the main-side mirror keeps
+      // resolving against the stale snapshot.
+      if (updatedFolder.customValueLists !== undefined) {
+        reactiveFolder.customValueLists = updatedFolder.customValueLists
+      }
+      if (updatedFolder.enumDefinitions !== undefined) {
+        reactiveFolder.enumDefinitions = updatedFolder.enumDefinitions
+      }
     }
     
     // Force React re-render without breaking reactive proxies

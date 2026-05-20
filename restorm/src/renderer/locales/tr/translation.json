@@ -196,7 +196,8 @@
     "tabs": {
       "docs": "Belgeler",
       "environments": "Ortamlar",
-      "notes": "Notlar"
+      "notes": "Notlar",
+      "customValues": "Custom variables"
     },
     "home": {
       "configureEnvs": "Ortamları yapılandır",
@@ -225,6 +226,18 @@
       "name": "Değişken",
       "value": "Çözümlenmiş değer",
       "copied": "Kopyalandı!"
+    },
+    "customValues": {
+      "lists": "Lists",
+      "values": "Values",
+      "addList": "Add a list",
+      "newListName": "New list",
+      "addEntry": "Add a value",
+      "label": "Label",
+      "value": "Value",
+      "noEntries": "No values yet",
+      "selectList": "Select a list",
+      "enabled": "Etkin"
     }
   },
   "requestTab": {
@@ -291,7 +304,9 @@
       "expression": "İfade",
       "boolean": "Boolean"
     },
-    "apiEnums": "API tanımlı türler"
+    "apiEnums": "API tanımlı türler",
+    "customLists": "Özel türler",
+    "listSuffix": "liste"
   },
   "graphql": {
     "send": "Gönder",
@@ -720,6 +735,14 @@
         "docs": "Belgeler",
         "notes": "Notlar"
       }
+    }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Belgede bul",
+      "previousMatch": "Önceki eşleşme",
+      "nextMatch": "Sonraki eşleşme",
+      "close": "Kapat"
     }
   }
 }

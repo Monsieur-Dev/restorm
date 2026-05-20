@@ -195,7 +195,8 @@
     "tabs": {
       "docs": "文件",
       "environments": "環境",
-      "notes": "備註"
+      "notes": "備註",
+      "customValues": "Custom variables"
     },
     "home": {
       "configureEnvs": "設定環境",
@@ -224,6 +225,18 @@
       "name": "變數",
       "value": "解析後的值",
       "copied": "已複製！"
+    },
+    "customValues": {
+      "lists": "Lists",
+      "values": "Values",
+      "addList": "Add a list",
+      "newListName": "New list",
+      "addEntry": "Add a value",
+      "label": "Label",
+      "value": "Value",
+      "noEntries": "No values yet",
+      "selectList": "Select a list",
+      "enabled": "已啟用"
     }
   },
   "requestTab": {
@@ -290,7 +303,9 @@
       "expression": "運算式",
       "boolean": "布林值"
     },
-    "apiEnums": "API 定義的型別"
+    "apiEnums": "API 定義的型別",
+    "customLists": "自訂類型",
+    "listSuffix": "清單"
   },
   "graphql": {
     "send": "傳送",
@@ -719,6 +734,14 @@
         "docs": "文件",
         "notes": "筆記"
       }
+    }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "在文件中尋找",
+      "previousMatch": "上一個相符項",
+      "nextMatch": "下一個相符項",
+      "close": "關閉"
     }
   }
 }

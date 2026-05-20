@@ -1,4 +1,4 @@
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, type ValueType } from '../../../shared/types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, type ValueType } from '../../../shared/types/collections'
 
 export function normalizeValueType(input: unknown): ValueType {
   if (
@@ -10,7 +10,9 @@ export function normalizeValueType(input: unknown): ValueType {
     input instanceof ExpressionValue ||
     input instanceof BooleanValue ||
     input instanceof EnumValue ||
-    input instanceof EnumListValue
+    input instanceof EnumListValue ||
+    input instanceof CustomListValue ||
+    input instanceof CustomListMultiValue
   ) {
     return input
   }
@@ -61,6 +63,20 @@ export function normalizeValueType(input: unknown): ValueType {
         return new EnumListValue(
           Array.isArray(raw) ? raw.filter((v): v is string => typeof v === 'string') : [],
           typeof defId === 'string' ? defId : ''
+        )
+      }
+      case 'customList': {
+        const p = plain as { listId?: unknown; label?: unknown }
+        return new CustomListValue(
+          typeof p.listId === 'string' ? p.listId : '',
+          typeof p.label === 'string' ? p.label : ''
+        )
+      }
+      case 'customListMulti': {
+        const p = plain as { listId?: unknown; labels?: unknown }
+        return new CustomListMultiValue(
+          typeof p.listId === 'string' ? p.listId : '',
+          Array.isArray(p.labels) ? p.labels.filter((v): v is string => typeof v === 'string') : []
         )
       }
       default:

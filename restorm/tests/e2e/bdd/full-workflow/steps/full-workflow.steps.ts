@@ -1,8 +1,8 @@
 import { createBdd } from 'playwright-bdd'
-import { existsSync, readFileSync, readdirSync } from 'fs'
+import { existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync } from 'fs'
 import { dirname, join, resolve } from 'path'
 import type { ElectronApplication, Page, Locator } from '@playwright/test'
-import { configureNextConfirmationDialogForE2E, configureNextOpenDialogForE2E, configureNextSaveFileDialogForE2E } from 'electron-core-ui/testing'
+import { configureNextConfirmationDialogForE2E, configureNextOpenDialogForE2E, configureNextSaveFileDialogForE2E, listViewRowSelectorByTitle } from 'electron-core-ui/testing'
 import { test, expect, readSavedMainBounds, FULL_WORKFLOW_TEMP_DIR, currentElectronApp } from '../../fixtures/full-workflow.fixture'
 
 /** Absolute path to the repo's shared e2e sample directory (tests/unit). */
@@ -2728,3 +2728,168 @@ Then(
     await expect(matching).toHaveCount(0, { timeout: 5000 })
   }
 )
+
+// ---------------------------------------------------------------------------
+// Custom value lists — label→value substitution at dispatch + live reactivity
+// ---------------------------------------------------------------------------
+
+// Stable entry ids so the entry-row testids are predictable.
+const CVL_ENTRY_ID: Record<string, string> = { Rouge: 'entry-rouge', Vert: 'entry-vert' }
+
+// Single-file collection seeded on disk: one env folder with a custom
+// value list and a request whose query param is bound to that list.
+const CVL_SAMPLE_RESTORM = `collections:
+  - folderType: environment
+    fileFormatVersion: 1
+    name: Paint API
+    documentation: ''
+    tags: []
+    id: cv000000-0000-0000-0000-0000000000cv
+    customValueLists:
+      - id: list-couleur
+        name: Couleur
+        entries:
+          - id: entry-rouge
+            label: Rouge
+            value: 'FF0000'
+            enabled: true
+          - id: entry-vert
+            label: Vert
+            value: '00FF00'
+            enabled: true
+    environments:
+      - name: live
+        variables:
+          - key: baseUrl
+            value:
+              type: string
+              value: https://api.example.com
+            enabled: true
+    items:
+      - type: http
+        name: Paint
+        documentation: ''
+        tags: []
+        id: cv100000-0000-0000-0000-0000000000cv
+        url: '{{baseUrl}}/paint'
+        method: GET
+        headers: []
+        params:
+          - key: color
+            value:
+              type: customList
+              listId: list-couleur
+              label: Rouge
+            enabled: true
+        pathParams: []
+`
+
+function cvlSidebarRow(p: Page, name: string): Locator {
+  // Exact-title match disambiguates the request "Paint" from its parent
+  // folder "Paint API" (a `:has-text` substring match would hit both).
+  return p
+    .locator('[data-testid="sidebar-listview"] .list-view-row')
+    .filter({ has: p.getByText(name, { exact: true }) })
+    .first()
+}
+
+Given('I open the custom-value-lists sample collection', async () => {
+  if (!page) throw new Error('app must be launched')
+  const electronApp = currentElectronApp()
+  if (!electronApp) throw new Error('app must be launched')
+  mkdirSync(FULL_WORKFLOW_TEMP_DIR, { recursive: true })
+  const workingCopy = join(FULL_WORKFLOW_TEMP_DIR, 'custom-value-lists.restorm')
+  writeFileSync(workingCopy, CVL_SAMPLE_RESTORM, 'utf-8')
+  await configureNextOpenDialogForE2E(electronApp, { kind: 'openFile', path: workingCopy })
+  await page.locator('[data-testid="titlebar-menubar-item-file"]').click()
+  await page.locator('[data-testid="titlebar-menu-item-open"]').first().click()
+  await expect(cvlSidebarRow(page, 'Paint API')).toBeVisible({ timeout: 10000 })
+})
+
+When('I open the custom-list {string} request', async ({}, name: string) => {
+  if (!page) throw new Error('app must be launched')
+  const folderRow = cvlSidebarRow(page, 'Paint API')
+  await expect(folderRow).toBeVisible({ timeout: 10000 })
+  if ((await folderRow.getAttribute('aria-expanded')) !== 'true') {
+    await folderRow.locator('button.list-view-expander').first().click()
+  }
+  await page.waitForTimeout(500)
+  const row = cvlSidebarRow(page, name)
+  await expect(row).toBeVisible({ timeout: 5000 })
+  await row.click()
+  await expect(page.locator('[data-testid="http-request-query-params-table"]')).toBeVisible({ timeout: 10000 })
+})
+
+When('I focus the custom-list {string} request tab', async ({}, title: string) => {
+  if (!page) throw new Error('app must be launched')
+  const tab = page.locator('[role="tab"]').filter({ has: page.getByText(title, { exact: true }) }).first()
+  await expect(tab).toBeVisible({ timeout: 5000 })
+  await tab.click()
+  await expect(page.locator('[data-testid="http-request-query-params-table"]')).toBeVisible({ timeout: 10000 })
+})
+
+When('I open the custom variables tab on the {string} env folder', async ({}, folderName: string) => {
+  if (!page) throw new Error('app must be launched')
+  const row = cvlSidebarRow(page, folderName)
+  await expect(row).toBeVisible({ timeout: 5000 })
+  await row.click()
+  await page.getByRole('tab', { name: 'Custom variables' }).click()
+  await expect(page.locator('[data-testid="custom-values-sash-container"]')).toBeVisible({ timeout: 10000 })
+})
+
+When('I select the {string} custom value list', async ({}, listName: string) => {
+  if (!page) throw new Error('app must be launched')
+  const row = page.locator(listViewRowSelectorByTitle('custom-values-list', listName)).first()
+  await expect(row).toBeVisible({ timeout: 5000 })
+  await row.click()
+  await expect(page.locator('[data-testid="custom-values-add-entry-button"]')).toBeVisible({ timeout: 5000 })
+})
+
+When('I set the {string} custom-list entry value to {string}', async ({}, label: string, value: string) => {
+  if (!page) throw new Error('app must be launched')
+  const input = page.locator(`[data-testid="custom-values-entry-value-${CVL_ENTRY_ID[label]}-input"]`)
+  await expect(input).toBeVisible({ timeout: 5000 })
+  await input.fill(value)
+  await page.waitForTimeout(600) // debounced folder write (~350ms) + propagation
+})
+
+When('I uncheck the {string} custom-list entry', async ({}, label: string) => {
+  if (!page) throw new Error('app must be launched')
+  const checkbox = page.locator(`[data-testid="custom-values-entry-enabled-${CVL_ENTRY_ID[label]}"]`)
+  await expect(checkbox).toBeVisible({ timeout: 5000 })
+  await checkbox.uncheck()
+  await page.waitForTimeout(300)
+})
+
+When('I check the {string} custom-list entry', async ({}, label: string) => {
+  if (!page) throw new Error('app must be launched')
+  const checkbox = page.locator(`[data-testid="custom-values-entry-enabled-${CVL_ENTRY_ID[label]}"]`)
+  await expect(checkbox).toBeVisible({ timeout: 5000 })
+  await checkbox.check()
+  await page.waitForTimeout(300)
+})
+
+When('I rename the {string} custom value list to {string}', async ({}, listName: string, newName: string) => {
+  if (!page) throw new Error('app must be launched')
+  const row = page.locator(listViewRowSelectorByTitle('custom-values-list', listName)).first()
+  await expect(row).toBeVisible({ timeout: 5000 })
+  await row.click({ button: 'right' })
+  await page.getByRole('menuitem', { name: 'Rename' }).click()
+  const input = page.locator('[data-testid="custom-values-list"] input').first()
+  await expect(input).toBeVisible({ timeout: 5000 })
+  await input.click()
+  await page.keyboard.press('Control+A')
+  await page.keyboard.press('Delete')
+  await page.keyboard.type(newName, { delay: 5 })
+  await page.keyboard.press('Enter')
+  await page.waitForTimeout(300)
+})
+
+When('I delete the {string} custom value list', async ({}, listName: string) => {
+  if (!page) throw new Error('app must be launched')
+  const row = page.locator(listViewRowSelectorByTitle('custom-values-list', listName)).first()
+  await expect(row).toBeVisible({ timeout: 5000 })
+  await row.click({ button: 'right' })
+  await page.getByRole('menuitem', { name: 'Delete' }).click()
+  await page.waitForTimeout(300)
+})

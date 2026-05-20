@@ -196,7 +196,8 @@
     "tabs": {
       "docs": "Dokumentation",
       "environments": "Miljøer",
-      "notes": "Noter"
+      "notes": "Noter",
+      "customValues": "Custom variables"
     },
     "home": {
       "configureEnvs": "Konfigurér miljøer",
@@ -225,6 +226,18 @@
       "name": "Variabel",
       "value": "Beregnet værdi",
       "copied": "Kopieret!"
+    },
+    "customValues": {
+      "lists": "Lists",
+      "values": "Values",
+      "addList": "Add a list",
+      "newListName": "New list",
+      "addEntry": "Add a value",
+      "label": "Label",
+      "value": "Value",
+      "noEntries": "No values yet",
+      "selectList": "Select a list",
+      "enabled": "Aktiveret"
     }
   },
   "requestTab": {
@@ -291,7 +304,9 @@
       "expression": "Udtryk",
       "boolean": "Boolean"
     },
-    "apiEnums": "API-definerede typer"
+    "apiEnums": "API-definerede typer",
+    "customLists": "Brugerdefinerede typer",
+    "listSuffix": "liste"
   },
   "graphql": {
     "send": "Send",
@@ -720,6 +735,14 @@
         "docs": "Dokumentation",
         "notes": "Noter"
       }
+    }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Find i dokumentet",
+      "previousMatch": "Forrige match",
+      "nextMatch": "Næste match",
+      "close": "Luk"
     }
   }
 }

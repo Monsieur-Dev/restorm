@@ -8,10 +8,10 @@ import type { RouteLike } from '../../../../shared/utils/findOperationForRoute'
 import { selectDocSlice } from '../../../../shared/utils/selectDocSlice'
 import { ApiInfoSection } from './ApiInfoSection'
 import { CompositionSection } from './CompositionSection'
-import { DocumentationHostNativeFind, type DocumentationHostNativeFindHandle } from './DocumentationHostNativeFind'
 import { DocumentationHostSearch, type DocumentationHostSearchHandle } from './DocumentationHostSearch'
 import { DocumentationSidebar } from './DocumentationSidebar'
 import { DocumentationModelsContext, DocumentationSecuritySchemesContext } from './documentationModels'
+import { collectEnumGroups, isEnumModel } from './enumGroups'
 import { DocumentationNavigationContext, type DocumentationNavigationApi } from './documentationNavigation'
 import { EnumsSection } from './EnumsSection'
 import { ModelGraph, type ModelGraphHandle } from './ModelGraph'
@@ -132,7 +132,6 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
 
   const rootRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<DocumentationHostSearchHandle>(null)
-  const nativeFindRef = useRef<DocumentationHostNativeFindHandle>(null)
   const modelsSectionRef = useRef<HTMLElement>(null)
   const modelGraphRef = useRef<ModelGraphHandle>(null)
   const enumsSectionRef = useRef<HTMLElement>(null)
@@ -144,9 +143,15 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
   // focused on the operation card itself.
   const showSidebar = operations.length > 1 || (scopeTitle !== undefined && scopeTitle.length > 0)
 
+  // Enum schemas (`{ type: "string", enum: [...] }`) are surfaced in
+  // the Enums section + sidebar Enums outline, never as model-graph
+  // nodes. Split them out so the graph / Models outline / cross-ref
+  // link set only ever see object models.
+  const structuralModels = useMemo(() => models.filter((m) => !isEnumModel(m)), [models])
+  const enumGroups = useMemo(() => collectEnumGroups(models), [models])
   const modelNames = useMemo<Set<string>>(
-    () => new Set(models.map((m) => m.name)),
-    [models]
+    () => new Set(structuralModels.map((m) => m.name)),
+    [structuralModels]
   )
   /** Bucket the in-scope operations by their `group` (tag) in the
    * order the spec declares the groups. `(ungrouped)` collects
@@ -223,50 +228,35 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
     }
   }), [])
 
-  // Ctrl+F (or Cmd+F) opens Chromium's native `findInPage` bar;
-  // Ctrl+Shift+F opens the JS-side custom search bar (CSS Custom
-  // Highlight API, scoped to the host root). F3 / Shift+F3 step
-  // through whichever bar is currently open. We listen at the
-  // window level so the shortcut works without the host being
-  // focused, but gate on host visibility (`offsetParent`) so the
-  // inactive tab panels (Tabs uses `visibility: hidden`) don't all
-  // hijack the keystroke at once. Monaco binds Ctrl+F at the
-  // editor level and stops propagation, so editors keep their
-  // native find-bar.
+  // Ctrl+F (or Cmd+F) opens the in-doc search bar — the JS-side CSS
+  // Custom Highlight search scoped to the host root, so matches light
+  // up only inside the documentation (Chromium's native `findInPage`
+  // can't be limited to a DOM subtree). F3 / Shift+F3 step through
+  // matches. We listen at the window level so the shortcut works
+  // without the host being focused, but gate on host visibility
+  // (`offsetParent`) so the inactive tab panels (Tabs uses
+  // `visibility: hidden`) don't all hijack the keystroke at once.
+  // Monaco binds Ctrl+F at the editor level and stops propagation, so
+  // editors keep their native find-bar.
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
       const root = rootRef.current
       if (!root?.offsetParent) return
       const isF = (e.key === 'f' || e.key === 'F') && (e.ctrlKey || e.metaKey)
-      if (isF && e.shiftKey) {
+      if (isF) {
         e.preventDefault()
         searchRef.current?.open()
         return
       }
-      if (isF) {
-        e.preventDefault()
-        nativeFindRef.current?.open()
-        return
-      }
       if (e.key === 'F3') {
         e.preventDefault()
-        const handle = nativeFindRef.current?.isOpen() === true
-          ? nativeFindRef.current
-          : searchRef.current?.isOpen() === true
-            ? searchRef.current
-            : nativeFindRef.current  // default to native when neither is open
-        if (e.shiftKey) handle?.previous()
-        else handle?.next()
+        if (e.shiftKey) searchRef.current?.previous()
+        else searchRef.current?.next()
         return
       }
-      if (e.key === 'Escape') {
-        if (searchRef.current?.isOpen() === true) {
-          e.preventDefault()
-          searchRef.current.close()
-        } else if (nativeFindRef.current?.isOpen() === true) {
-          e.preventDefault()
-          nativeFindRef.current.close()
-        }
+      if (e.key === 'Escape' && searchRef.current?.isOpen() === true) {
+        e.preventDefault()
+        searchRef.current.close()
       }
     }
     window.addEventListener('keydown', onKey)
@@ -353,7 +343,7 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
           />
         ))}
 
-      {models.length > 0 ? (
+      {structuralModels.length > 0 ? (
         <section
           ref={modelsSectionRef}
           className="documentation-host__section documentation-host__models"
@@ -362,13 +352,13 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
           {topLevelSectionLevel === 1
             ? <h1 className="documentation-host__section-title">Models</h1>
             : <h2 className="documentation-host__section-title">Models</h2>}
-          <ModelGraph ref={modelGraphRef} models={models} />
+          <ModelGraph ref={modelGraphRef} models={structuralModels} />
           <ModelGraphLegend />
         </section>
       ) : null}
 
-      <CompositionSection models={models} headingLevel={topLevelSectionLevel} />
-      <EnumsSection ref={enumsSectionRef} models={models} headingLevel={topLevelSectionLevel} />
+      <CompositionSection models={structuralModels} headingLevel={topLevelSectionLevel} />
+      <EnumsSection ref={enumsSectionRef} enumGroups={enumGroups} headingLevel={topLevelSectionLevel} />
     </div>
     </ScrollableElement>
   )
@@ -385,7 +375,6 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
         data-model-count={String(models.length)}
         onClick={handleClick}
       >
-        <DocumentationHostNativeFind ref={nativeFindRef} />
         <DocumentationHostSearch ref={searchRef} rootRef={rootRef} />
         {showSidebar ? (
           <Dock
@@ -415,7 +404,8 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
             panel={(
               <DocumentationSidebar
                 operations={operations}
-                models={models}
+                models={structuralModels}
+                enumGroups={enumGroups}
                 operationSlug={getOperationSlug}
                 {...(scopeTitle !== undefined && scopeTitle.length > 0 ? { scopeTitle } : {})}
               />

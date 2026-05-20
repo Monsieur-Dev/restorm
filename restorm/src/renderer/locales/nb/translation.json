@@ -196,7 +196,8 @@
     "tabs": {
       "docs": "Dokumentasjon",
       "environments": "Miljøer",
-      "notes": "Notater"
+      "notes": "Notater",
+      "customValues": "Custom variables"
     },
     "home": {
       "configureEnvs": "Konfigurer miljøer",
@@ -225,6 +226,18 @@
       "name": "Variabel",
       "value": "Resolvert verdi",
       "copied": "Kopiert!"
+    },
+    "customValues": {
+      "lists": "Lists",
+      "values": "Values",
+      "addList": "Add a list",
+      "newListName": "New list",
+      "addEntry": "Add a value",
+      "label": "Label",
+      "value": "Value",
+      "noEntries": "No values yet",
+      "selectList": "Select a list",
+      "enabled": "Aktivert"
     }
   },
   "requestTab": {
@@ -291,7 +304,9 @@
       "expression": "Uttrykk",
       "boolean": "Boolean"
     },
-    "apiEnums": "API-definerte typer"
+    "apiEnums": "API-definerte typer",
+    "customLists": "Egendefinerte typer",
+    "listSuffix": "liste"
   },
   "graphql": {
     "send": "Send",
@@ -720,6 +735,14 @@
         "docs": "Dokumentasjon",
         "notes": "Notater"
       }
+    }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Finn i dokumentet",
+      "previousMatch": "Forrige treff",
+      "nextMatch": "Neste treff",
+      "close": "Lukk"
     }
   }
 }

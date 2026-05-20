@@ -185,23 +185,6 @@ declare global {
           error?: string
         }>
       }
-      find: {
-        inPage: (
-          text: string,
-          options?: { forward?: boolean; findNext?: boolean; matchCase?: boolean }
-        ) => Promise<{ requestId: number }>
-        stop: (
-          action: 'clearSelection' | 'keepSelection' | 'activateSelection'
-        ) => Promise<{ ok: boolean }>
-        onResult: (
-          callback: (result: {
-            requestId: number
-            activeMatchOrdinal: number
-            matches: number
-            finalUpdate: boolean
-          }) => void
-        ) => () => void
-      }
       requestUsage: {
         get: () => Promise<Record<string, { count: number; lastSentAt: string; history: string[] }>>
         onChanged: (
@@ -235,6 +218,14 @@ export interface KeyValueData {
    * on receipt.
    */
   isExpression?: boolean | undefined
+  /**
+   * Set when the value is a `CustomListValue`. `value` carries only the
+   * label (its `toString()`); main needs the list id + label to look up
+   * the entry's current value and substitute it at dispatch.
+   */
+  customList?: { listId: string; label: string } | undefined
+  /** Multi-select counterpart — a `CustomListMultiValue`. */
+  customListMulti?: { listId: string; labels: string[] } | undefined
 }
 
 /** Variable transformation result from context service */

@@ -198,7 +198,8 @@
     "tabs": {
       "docs": "Dokumentace",
       "environments": "Prostředí",
-      "notes": "Poznámky"
+      "notes": "Poznámky",
+      "customValues": "Custom variables"
     },
     "home": {
       "configureEnvs": "Nakonfigurovat prostředí",
@@ -227,6 +228,18 @@
       "name": "Proměnná",
       "value": "Vyhodnocená hodnota",
       "copied": "Zkopírováno!"
+    },
+    "customValues": {
+      "lists": "Lists",
+      "values": "Values",
+      "addList": "Add a list",
+      "newListName": "New list",
+      "addEntry": "Add a value",
+      "label": "Label",
+      "value": "Value",
+      "noEntries": "No values yet",
+      "selectList": "Select a list",
+      "enabled": "Povoleno"
     }
   },
   "requestTab": {
@@ -293,7 +306,9 @@
       "expression": "Výraz",
       "boolean": "Boolean"
     },
-    "apiEnums": "Typy definované v API"
+    "apiEnums": "Typy definované v API",
+    "customLists": "Vlastní typy",
+    "listSuffix": "seznam"
   },
   "graphql": {
     "send": "Odeslat",
@@ -722,6 +737,14 @@
         "docs": "Dokumentace",
         "notes": "Poznámky"
       }
+    }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Najít v dokumentu",
+      "previousMatch": "Předchozí shoda",
+      "nextMatch": "Další shoda",
+      "close": "Zavřít"
     }
   }
 }

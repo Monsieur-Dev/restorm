@@ -196,7 +196,8 @@
     "tabs": {
       "docs": "Docs",
       "environments": "Ambientes",
-      "notes": "Notas"
+      "notes": "Notas",
+      "customValues": "Custom variables"
     },
     "home": {
       "configureEnvs": "Configurar ambientes",
@@ -225,6 +226,18 @@
       "name": "Variável",
       "value": "Valor resolvido",
       "copied": "Copiado!"
+    },
+    "customValues": {
+      "lists": "Lists",
+      "values": "Values",
+      "addList": "Add a list",
+      "newListName": "New list",
+      "addEntry": "Add a value",
+      "label": "Label",
+      "value": "Value",
+      "noEntries": "No values yet",
+      "selectList": "Select a list",
+      "enabled": "Ativado"
     }
   },
   "requestTab": {
@@ -291,7 +304,9 @@
       "expression": "Expressão",
       "boolean": "Booleano"
     },
-    "apiEnums": "Tipos definidos pela API"
+    "apiEnums": "Tipos definidos pela API",
+    "customLists": "Tipos personalizados",
+    "listSuffix": "lista"
   },
   "graphql": {
     "send": "Enviar",
@@ -720,6 +735,14 @@
         "docs": "Documentação",
         "notes": "Notas"
       }
+    }
+  },
+  "documentation": {
+    "find": {
+      "placeholder": "Localizar no documento",
+      "previousMatch": "Correspondência anterior",
+      "nextMatch": "Próxima correspondência",
+      "close": "Fechar"
     }
   }
 }

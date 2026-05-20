@@ -1028,49 +1028,6 @@ contextBridge.exposeInMainWorld('restorm', {
       }
     }
   },
-  find: {
-    /**
-     * Trigger Chromium's native in-page find. The Chromium engine
-     * paints the yellow highlight directly on the rendered DOM,
-     * including any `visibility: hidden` panels — the renderer is
-     * responsible for only invoking this while the docs panel is
-     * actually visible.
-     */
-    inPage: async (
-      text: string,
-      options?: { forward?: boolean; findNext?: boolean; matchCase?: boolean }
-    ): Promise<{ requestId: number }> => {
-      const result: unknown = await ipcRenderer.invoke('find:in-page', text, options)
-      return result as { requestId: number }
-    },
-    /** Stop the active find session. `clearSelection` removes both
-     * the search highlight and the selection; `keepSelection` keeps
-     * the active match selected; `activateSelection` clicks through
-     * (rarely useful in our use case). */
-    stop: async (
-      action: 'clearSelection' | 'keepSelection' | 'activateSelection'
-    ): Promise<{ ok: boolean }> => {
-      const result: unknown = await ipcRenderer.invoke('find:stop', action)
-      return result as { ok: boolean }
-    },
-    /** Subscribe to `'found-in-page'` updates forwarded from main.
-     * Returns an unsubscribe handle. */
-    onResult: (
-      callback: (result: {
-        requestId: number
-        activeMatchOrdinal: number
-        matches: number
-        finalUpdate: boolean
-      }) => void
-    ): (() => void) => {
-      const listener = (
-        _event: unknown,
-        result: { requestId: number; activeMatchOrdinal: number; matches: number; finalUpdate: boolean }
-      ): void => { callback(result) }
-      ipcRenderer.on('find:result', listener)
-      return (): void => { ipcRenderer.removeListener('find:result', listener) }
-    }
-  },
   apiUpdate: {
     /** Persist a partial `ApiUpdateConfig` patch onto the folder.
      * The main process writes through CollectionStore + the
@@ -1110,6 +1067,16 @@ contextBridge.exposeInMainWorld('restorm', {
      * the handler doesn't return anything. */
     syncCollections: async (collections: unknown[]): Promise<void> => {
       await ipcRenderer.invoke('collections:sync', collections)
+    },
+    /** Persist an env-folder's custom value lists onto the main-side
+     * CollectionStore. Unlike `syncCollections` (full-tree replace),
+     * this targets one folder and routes through `updateFolder`, which
+     * re-fires `ENVIRONMENT_UPDATED` so the dispatch resolver re-runs
+     * for the folder's open requests — the panel's reactive edits
+     * otherwise never reach main (in-place mutation skips the sync
+     * memo). */
+    updateFolderCustomValueLists: async (folderId: string, lists: unknown[]): Promise<void> => {
+      await ipcRenderer.invoke('collections:update-folder-custom-value-lists', folderId, lists)
     }
   }
 })

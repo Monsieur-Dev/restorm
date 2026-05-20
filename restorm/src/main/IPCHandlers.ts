@@ -13,7 +13,7 @@ import { resolveRequestURL, type URLResolutionInput } from './services/request/H
 import { httpExecutionService, type HTTPExecutionInput } from './services/HTTPExecutionService'
 import { authPrefetchOneShot, resolveProducedHeaders } from './services/AuthenticationPrefetch'
 import { AuthenticationRequest } from '../shared/models/requests/AuthenticationRequest'
-import { StringValue, ExpressionValue } from '../shared/types/valueTypes'
+import { StringValue, ExpressionValue, CustomListValue, CustomListMultiValue } from '../shared/types/valueTypes'
 import type { KeyValue } from '../shared/types/baseTypes'
 import { authenticationCacheService } from './services/AuthenticationCacheService'
 import { graphqlExecutionService, type GraphQLExecutionInput } from './services/GraphQLExecutionService'
@@ -44,7 +44,6 @@ import {
   responsesHistoryTogglePinArgs,
   requestUsageGetArgs,
   importPreviewArgs, importImportArgs,
-  findInPageArgs, findStopArgs,
   miniBrowserCreateArgs, miniBrowserDestroyArgs, miniBrowserSetBoundsArgs,
   miniBrowserNavigateArgs, miniBrowserReloadArgs,
   miniBrowserGoBackArgs, miniBrowserGoForwardArgs, miniBrowserGetStateArgs,
@@ -75,6 +74,8 @@ interface KeyValueRowFromIpc {
   value: string
   enabled?: boolean | undefined
   isExpression?: boolean | undefined
+  customList?: { listId: string; label: string } | undefined
+  customListMulti?: { listId: string; labels: string[] } | undefined
 }
 
 /**
@@ -87,7 +88,16 @@ interface KeyValueRowFromIpc {
  * pass through verbatim).
  */
 function rehydrateKeyValueRow(row: KeyValueRowFromIpc): KeyValue {
-  const value = row.isExpression === true ? new ExpressionValue(row.value) : new StringValue(row.value)
+  // Custom-list rows carry the structured shape so the dispatch
+  // resolver can substitute the entry value; the flat `value` (the
+  // label) is only a display fallback.
+  const value = row.customList
+    ? new CustomListValue(row.customList.listId, row.customList.label)
+    : row.customListMulti
+      ? new CustomListMultiValue(row.customListMulti.listId, row.customListMulti.labels)
+      : row.isExpression === true
+        ? new ExpressionValue(row.value)
+        : new StringValue(row.value)
   return {
     ...(row.id !== undefined ? { id: row.id } : {}),
     key: row.key,
@@ -1013,32 +1023,6 @@ export function registerRestormIPC(deps: {
         error: error instanceof Error ? error.message : String(error)
       }
     }
-  })
-
-  // ==========================================================================
-  // In-page find (Chromium native via webContents.findInPage)
-  //
-  // The renderer's documentation viewer drives the find through the
-  // `restorm.find` preload bridge. We dispatch to the calling
-  // window's webContents so multiple BrowserWindows can run their
-  // own concurrent find without colliding.
-  // ==========================================================================
-
-  validatedHandle('find:in-page', findInPageArgs, (event, [text, options]) => {
-    const win = BrowserWindow.fromWebContents(event.sender)
-    if (!win) return { requestId: -1 }
-    if (text.length === 0) {
-      win.webContents.stopFindInPage('clearSelection')
-      return { requestId: -1 }
-    }
-    const requestId = win.webContents.findInPage(text, options ?? {})
-    return { requestId }
-  })
-
-  validatedHandle('find:stop', findStopArgs, (event, [action]) => {
-    const win = BrowserWindow.fromWebContents(event.sender)
-    win?.webContents.stopFindInPage(action)
-    return { ok: true }
   })
 
   // ==========================================================================

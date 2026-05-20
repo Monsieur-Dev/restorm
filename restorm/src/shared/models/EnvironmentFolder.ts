@@ -13,7 +13,7 @@ import {
 import { Environment } from './Environment'
 import type { RuntimeId, Icon, FolderConfiguration, FolderType, BaseFolderItem } from './types'
 import type { ApiDocumentation } from '../types/apiDocumentation'
-import type { ApiUpdateConfig, ImportSourceType } from '../types/baseTypes'
+import type { ApiUpdateConfig, ImportSourceType, CustomValueList } from '../types/baseTypes'
 import { CURRENT_FILE_FORMAT_VERSION } from '../config/fileFormatVersion'
 
 /**
@@ -94,6 +94,12 @@ export class EnvironmentFolder {
    * `apiDocumentation.sourceUrl` when absent. */
   apiUpdate?: ApiUpdateConfig
 
+  /** User-defined custom value lists (named label → value maps). Fully
+   * user-managed; never touched by re-import. Preserved through the
+   * renderer→main `collections:sync` mirror so the dispatch resolver in
+   * the main process can read it to substitute label → value. */
+  customValueLists?: CustomValueList[]
+
   constructor(init?: Partial<EnvironmentFolder>) {
     if (init) {
       Object.assign(this, init)
@@ -124,6 +130,7 @@ export class EnvironmentFolder {
     apiDocumentation?: ApiDocumentation
     importSource?: ImportSourceType
     apiUpdate?: ApiUpdateConfig
+    customValueLists?: CustomValueList[]
   }): EnvironmentFolder {
     const folder = new EnvironmentFolder({
       ...(obj.id !== undefined && { id: obj.id }),
@@ -156,6 +163,7 @@ export class EnvironmentFolder {
     }
     if (obj.importSource) folder.importSource = obj.importSource
     if (obj.apiUpdate) folder.apiUpdate = obj.apiUpdate
+    if (Array.isArray(obj.customValueLists)) folder.customValueLists = obj.customValueLists
     return folder
   }
 
@@ -183,6 +191,7 @@ export class EnvironmentFolder {
     if (this.apiDocumentation) plain['apiDocumentation'] = this.apiDocumentation
     if (this.importSource) plain['importSource'] = this.importSource
     if (this.apiUpdate) plain['apiUpdate'] = this.apiUpdate
+    if (this.customValueLists) plain['customValueLists'] = this.customValueLists
     return plain
   }
 }
