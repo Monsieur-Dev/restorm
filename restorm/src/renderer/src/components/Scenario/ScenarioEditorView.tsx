@@ -21,6 +21,7 @@ import type { Scenario, ScenarioNode, ScenarioEdge, ScenarioNodeKind } from '../
 import { SCENARIO_NODE_CATALOGUE } from './scenarioNodeCatalogue'
 import { scenarioEdgeToFlowEdge, flowEdgeToScenarioEdge } from './scenarioGraphMapping'
 import { ScenarioNodeBox, type ScenarioNodeBoxData } from './ScenarioNodeBox'
+import { defaultPortsForKind } from './scenarioNodePorts'
 
 export interface ScenarioEditorViewProps {
   /** The scenario being edited. */
@@ -155,7 +156,8 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
 
   const addNode = useCallback((kind: ScenarioNodeKind, flow: { x: number; y: number }) => {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-    const node: ScenarioNode = { id, kind, config: {}, inputs: [], outputs: [], position: flow }
+    const { inputs, outputs } = defaultPortsForKind(kind)
+    const node: ScenarioNode = { id, kind, config: {}, inputs, outputs, position: flow }
     nodeStore.current.set(id, node)
     setNodes((curr) => {
       const next = [...curr, toFlowNode(node, onToggleCollapse)]

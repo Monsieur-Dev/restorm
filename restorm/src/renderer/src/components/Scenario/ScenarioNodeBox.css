@@ -75,16 +75,60 @@
 }
 .scn-node-collapse:hover { opacity: 1; }
 
-/* The body region (between header and the bottom edge) gives expanded
- * nodes their height so input/output handles distribute down the sides. */
-.scn-node:not(.scn-node-collapsed) .scn-node-header {
-  margin-bottom: 28px;
+/* Body: input column (left) + output column (right), each row a labelled
+ * port whose handle sits inline at the node edge. */
+.scn-node-body {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 7px 0;
+}
+
+.scn-node-col {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.scn-node-col-out {
+  align-items: flex-end;
+}
+
+.scn-port {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.scn-port-out {
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.scn-port-label {
+  font-size: 11px;
+  opacity: 0.85;
+  white-space: nowrap;
+  line-height: 1;
 }
 
 .scn-handle.react-flow__handle {
   width: 9px;
   height: 9px;
   border: 1px solid var(--ecu-node-background, #2d2d30);
+}
+
+/* Inline handles flow with their row instead of being absolutely pinned to
+ * the node side; React Flow still derives connection geometry from the DOM
+ * rect, so wiring works. Pull them onto the node's outer edge. */
+.scn-handle-inline.react-flow__handle {
+  position: relative;
+  top: auto;
+  transform: none;
+}
+.scn-node-col-in .scn-handle-inline {
+  left: -10px;
+}
+.scn-node-col-out .scn-handle-inline {
+  right: -10px;
 }
 
 .scn-handle-error {

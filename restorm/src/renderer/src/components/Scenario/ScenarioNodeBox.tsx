@@ -63,31 +63,40 @@ export const ScenarioNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, 
         </button>
       </div>
 
-      {/* Input handles (left edge) */}
-      {inputs.map((p, i) => (
-        <Handle
-          key={`in-${p.id}`}
-          id={p.id}
-          type="target"
-          position={Position.Left}
-          className="scn-handle"
-          style={{ top: handleTop(i, inputs.length, collapsed), background: portColor(p) }}
-          title={p.name || p.id}
-        />
-      ))}
+      {/* Expanded: labelled port rows; the handle lives inline in each row. */}
+      {!collapsed && (
+        <div className="scn-node-body">
+          <div className="scn-node-col scn-node-col-in">
+            {inputs.map((p) => (
+              <div className="scn-port scn-port-in" key={`in-${p.id}`}>
+                <Handle id={p.id} type="target" position={Position.Left} className="scn-handle scn-handle-inline" style={{ background: portColor(p) }} title={p.name || p.id} />
+                {p.name && <span className="scn-port-label">{p.name}</span>}
+              </div>
+            ))}
+          </div>
+          <div className="scn-node-col scn-node-col-out">
+            {outputs.map((p) => (
+              <div className="scn-port scn-port-out" key={`out-${p.id}`}>
+                {p.name && <span className="scn-port-label">{p.name}</span>}
+                <Handle id={p.id} type="source" position={Position.Right} className="scn-handle scn-handle-inline" style={{ background: portColor(p) }} title={p.name || p.id} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
-      {/* Output handles (right edge) */}
-      {outputs.map((p, i) => (
-        <Handle
-          key={`out-${p.id}`}
-          id={p.id}
-          type="source"
-          position={Position.Right}
-          className="scn-handle"
-          style={{ top: handleTop(i, outputs.length, collapsed), background: portColor(p) }}
-          title={p.name || p.id}
-        />
-      ))}
+      {/* Collapsed: keep the handles (so edges stay attached) pinned to the
+          header edges, distributed and unlabelled. */}
+      {collapsed && (
+        <>
+          {inputs.map((p, i) => (
+            <Handle key={`in-${p.id}`} id={p.id} type="target" position={Position.Left} className="scn-handle" style={{ top: handleTop(i, inputs.length, true), background: portColor(p) }} title={p.name || p.id} />
+          ))}
+          {outputs.map((p, i) => (
+            <Handle key={`out-${p.id}`} id={p.id} type="source" position={Position.Right} className="scn-handle" style={{ top: handleTop(i, outputs.length, true), background: portColor(p) }} title={p.name || p.id} />
+          ))}
+        </>
+      )}
 
       {/* Dedicated error port (bottom). Wireable rescue branch (epic §4). */}
       <Handle
