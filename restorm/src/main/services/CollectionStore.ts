@@ -104,6 +104,21 @@ class CollectionStore {
   }
 
   /**
+   * Find the EnvironmentFolder owning a given environment (or
+   * sub-environment) id. Custom value lists live on that folder, so
+   * env-variable resolution needs it to look up a `CustomListValue`
+   * label → entry value.
+   */
+  findEnvironmentFolderByEnvironmentId(envId: string): EnvironmentFolder | null {
+    for (const collection of this.collections) {
+      if (this.findEnvironmentInFolder(collection, envId)) {
+        return collection
+      }
+    }
+    return null
+  }
+
+  /**
    * Find parent folder of an item
    */
   findParentFolder(itemId: string): Folder | EnvironmentFolder | null {

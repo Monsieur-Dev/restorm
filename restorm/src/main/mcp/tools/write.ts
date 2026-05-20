@@ -18,6 +18,7 @@ import { BrowserWindow } from 'electron'
 import { McpService } from 'electron-core-ui'
 import { collectionStore } from '../../services/CollectionStore'
 import { isAnyFolder, isEnvironmentFolder, isRequest, KeyValue, Environment } from '../../../shared/models'
+import type { EnvironmentFolder, CustomValueList, CustomValueEntry } from '../../../shared/types/collections'
 import { broadcastTreeReplace } from './import'
 
 /**
@@ -592,6 +593,157 @@ export function registerWriteTools(mcp: McpService): void {
         triggerSave()
       }
       return jsonReply({ envId, key, removed })
+    }
+  )
+
+  // ────────────────────────────────────────────────────────────────────
+  // Custom value lists — user-defined label → value maps on an env
+  // folder ("Variables personnalisées"). Selectable as a value type in
+  // any key-value table; at dispatch the resolver substitutes the
+  // matching entry's value for the selected label.
+  // ────────────────────────────────────────────────────────────────────
+
+  const findEnvFolderById = (folderId: string): EnvironmentFolder | null => {
+    const item = collectionStore.findById(folderId)
+    return item && isEnvironmentFolder(item) ? (item as unknown as EnvironmentFolder) : null
+  }
+
+  const persistCustomValueLists = (folder: EnvironmentFolder, next: CustomValueList[]): void => {
+    folder.customValueLists = next
+    collectionStore.updateFolder(folder.id, { customValueLists: next } as never)
+    for (const win of BrowserWindow.getAllWindows()) {
+      if (!win.isDestroyed()) {
+        win.webContents.send('mcp:folder-updated', { itemId: folder.id, patch: { customValueLists: next } })
+      }
+    }
+    broadcastTreeReplace()
+    triggerSave()
+  }
+
+  const coerceEntries = (raw: unknown): CustomValueEntry[] => {
+    if (!Array.isArray(raw)) return []
+    return raw
+      .filter((e): e is Record<string, unknown> => typeof e === 'object' && e !== null)
+      .map((e) => ({
+        id: typeof e['id'] === 'string' && e['id'] ? (e['id']) : crypto.randomUUID(),
+        label: typeof e['label'] === 'string' ? (e['label']) : '',
+        value: typeof e['value'] === 'string' ? (e['value']) : '',
+        ...(e['enabled'] === false ? { enabled: false } : {})
+      }))
+  }
+
+  const entriesSchema = z
+    .array(z.object({ id: z.string().optional(), label: z.string(), value: z.string(), enabled: z.boolean().optional() }))
+    .describe('Entries: `[{ "label": "Rouge", "value": "FF0000" }, …]`. `id` optional (auto-generated). `enabled: false` hides the entry from the dropdown + makes it unresolvable.')
+
+  mcp.registerTool(
+    'list_custom_value_lists',
+    {
+      title: 'List the custom value lists of an env folder',
+      description:
+        'Return every user-defined custom value list (label → value maps) on the given environment ' +
+        'folder. These are selectable as a "custom type" in any key-value table; at dispatch the ' +
+        'selected label is replaced by the matching entry value.',
+      inputSchema: {
+        folderId: z.string().min(1).describe('Environment-folder id (from `list_folders`, kind "env-folder").')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const folderId = typeof args['folderId'] === 'string' ? args['folderId'] : ''
+      if (!folderId) return errorReply('folderId is required')
+      const folder = findEnvFolderById(folderId)
+      if (!folder) return errorReply(`No environment folder with id ${folderId}`)
+      return jsonReply({ folderId, lists: folder.customValueLists ?? [] })
+    }
+  )
+
+  mcp.registerTool(
+    'create_custom_value_list',
+    {
+      title: 'Create a custom value list',
+      description:
+        'Append a new named custom value list to the env folder. Example: name "Couleur" with ' +
+        'entries `[{ "label": "Rouge", "value": "FF0000" }, { "label": "Vert", "value": "00FF00" }]`. ' +
+        'Returns the created list (with generated ids). Triggers an autosave.',
+      inputSchema: {
+        folderId: z.string().min(1).describe('Environment-folder id.'),
+        name: z.string().min(1).describe('Display name (e.g. "Couleur").'),
+        entries: entriesSchema.optional()
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const folderId = typeof args['folderId'] === 'string' ? args['folderId'] : ''
+      const name = typeof args['name'] === 'string' ? args['name'] : ''
+      if (!folderId) return errorReply('folderId is required')
+      if (!name) return errorReply('name is required')
+      const folder = findEnvFolderById(folderId)
+      if (!folder) return errorReply(`No environment folder with id ${folderId}`)
+      const list: CustomValueList = { id: crypto.randomUUID(), name, entries: coerceEntries(args['entries']) }
+      persistCustomValueLists(folder, [...(folder.customValueLists ?? []), list])
+      return jsonReply({ folderId, list })
+    }
+  )
+
+  mcp.registerTool(
+    'update_custom_value_list',
+    {
+      title: 'Update a custom value list',
+      description:
+        'Rename a custom value list and/or replace its entries. Omit `name` to keep the current ' +
+        'name; omit `entries` to keep the current entries (pass `[]` to clear them). The full ' +
+        'entries array replaces the existing one. Triggers an autosave.',
+      inputSchema: {
+        folderId: z.string().min(1).describe('Environment-folder id.'),
+        listId: z.string().min(1).describe('Custom value list id.'),
+        name: z.string().optional().describe('New display name (optional).'),
+        entries: entriesSchema.optional().describe('Replacement entries (optional; pass `[]` to clear).')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const folderId = typeof args['folderId'] === 'string' ? args['folderId'] : ''
+      const listId = typeof args['listId'] === 'string' ? args['listId'] : ''
+      if (!folderId) return errorReply('folderId is required')
+      if (!listId) return errorReply('listId is required')
+      const folder = findEnvFolderById(folderId)
+      if (!folder) return errorReply(`No environment folder with id ${folderId}`)
+      const lists = folder.customValueLists ?? []
+      const current = lists.find((l) => l.id === listId)
+      if (!current) return errorReply(`No custom value list with id ${listId}`)
+      const updated: CustomValueList = {
+        ...current,
+        ...(typeof args['name'] === 'string' && args['name'] ? { name: args['name'] } : {}),
+        ...(args['entries'] !== undefined ? { entries: coerceEntries(args['entries']) } : {})
+      }
+      const next = lists.map((l) => (l.id === listId ? updated : l))
+      persistCustomValueLists(folder, next)
+      return jsonReply({ folderId, list: updated })
+    }
+  )
+
+  mcp.registerTool(
+    'delete_custom_value_list',
+    {
+      title: 'Delete a custom value list',
+      description:
+        'Remove a custom value list from the env folder by id. Returns `removed: false` when the ' +
+        'id is not present. Triggers an autosave on success.',
+      inputSchema: {
+        folderId: z.string().min(1).describe('Environment-folder id.'),
+        listId: z.string().min(1).describe('Custom value list id to remove.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const folderId = typeof args['folderId'] === 'string' ? args['folderId'] : ''
+      const listId = typeof args['listId'] === 'string' ? args['listId'] : ''
+      if (!folderId) return errorReply('folderId is required')
+      if (!listId) return errorReply('listId is required')
+      const folder = findEnvFolderById(folderId)
+      if (!folder) return errorReply(`No environment folder with id ${folderId}`)
+      const lists = folder.customValueLists ?? []
+      const next = lists.filter((l) => l.id !== listId)
+      const removed = next.length < lists.length
+      if (removed) persistCustomValueLists(folder, next)
+      return jsonReply({ folderId, listId, removed })
     }
   )
 }

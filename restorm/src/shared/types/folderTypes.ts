@@ -1,4 +1,4 @@
-import type { RuntimeId, Icon, Environment, FolderConfiguration, EnumDefinition, ImportSourceType, ApiUpdateConfig } from './baseTypes'
+import type { RuntimeId, Icon, Environment, FolderConfiguration, EnumDefinition, CustomValueList, ImportSourceType, ApiUpdateConfig } from './baseTypes'
 import type { Request } from './requests/index'
 import type { ApiDocumentation } from './apiDocumentation'
 
@@ -23,6 +23,11 @@ export interface EnvironmentFolder extends Folder {
   environments: Environment[]
   tagColors?: Record<string, string>
   enumDefinitions?: EnumDefinition[]
+  /** User-defined custom value lists (named label → value maps).
+   * Fully user-managed via the "Variables personnalisées" tab —
+   * never touched by spec re-import and not shown in the docs.
+   * Absent until the user creates one. */
+  customValueLists?: CustomValueList[]
   /** Structured API documentation populated by spec importers
    * (OpenAPI / AsyncAPI / GraphQL / gRPC reflection / SOAP /
    * OData). Drives the Docs tab on every request, env-folder, and

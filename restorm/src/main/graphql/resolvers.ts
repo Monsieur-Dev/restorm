@@ -224,53 +224,61 @@ export const resolvers = {
     }
   },
 
+  // Each `subscribe` yields the published payload directly (the folder /
+  // environment / request entity, or a deleted id). `resolve` must
+  // therefore return that payload as the field value. Wrapping it
+  // (`{ folderUpdated: payload }`) made the field resolve to an object
+  // with no `id`, tripping `Cannot return null for non-nullable field
+  // Folder.id` on every folder / environment update and leaving the
+  // subscriptions dead — the renderer's handlers are echo-guarded
+  // (`shouldIgnoreEvent(id, 'graphql')`), so they were meant to run.
   Subscription: {
     folderCreated: {
       subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_TOPICS.FOLDER_CREATED),
-      resolve: (payload: unknown): unknown => ({ folderCreated: payload })
+      resolve: (payload: unknown): unknown => payload
     },
     folderUpdated: {
       subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_TOPICS.FOLDER_UPDATED),
-      resolve: (payload: unknown): unknown => ({ folderUpdated: payload })
+      resolve: (payload: unknown): unknown => payload
     },
     folderDeleted: {
       subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_TOPICS.FOLDER_DELETED),
-      resolve: (payload: unknown): unknown => ({ folderDeleted: payload })
+      resolve: (payload: unknown): unknown => payload
     },
     requestCreated: {
       subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_TOPICS.REQUEST_CREATED),
-      resolve: (payload: unknown): unknown => ({ requestCreated: payload })
+      resolve: (payload: unknown): unknown => payload
     },
     requestUpdated: {
       subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_TOPICS.REQUEST_UPDATED),
-      resolve: (payload: unknown): unknown => ({ requestUpdated: payload })
+      resolve: (payload: unknown): unknown => payload
     },
     requestDeleted: {
       subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_TOPICS.REQUEST_DELETED),
-      resolve: (payload: unknown): unknown => ({ requestDeleted: payload })
+      resolve: (payload: unknown): unknown => payload
     },
     environmentCreated: {
       subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_TOPICS.ENVIRONMENT_CREATED),
-      resolve: (payload: unknown): unknown => ({ environmentCreated: payload })
+      resolve: (payload: unknown): unknown => payload
     },
     environmentUpdated: {
       subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_TOPICS.ENVIRONMENT_UPDATED),
-      resolve: (payload: unknown): unknown => ({ environmentUpdated: payload })
+      resolve: (payload: unknown): unknown => payload
     },
     environmentDeleted: {
       subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_TOPICS.ENVIRONMENT_DELETED),
-      resolve: (payload: unknown): unknown => ({ environmentDeleted: payload })
+      resolve: (payload: unknown): unknown => payload
     },
     contextChanged: {
       subscribe: (_: unknown, { environmentId }: { environmentId: string }): AsyncIterable<unknown> => {
         logger.debug('[GraphQL] contextChanged subscription', { environmentId })
         return pubsub.subscribe(PUBSUB_TOPICS.CONTEXT_CHANGED)
       },
-      resolve: (payload: unknown): unknown => ({ contextChanged: payload })
+      resolve: (payload: unknown): unknown => payload
     },
     searchIndexUpdated: {
       subscribe: (): AsyncIterable<unknown> => pubsub.subscribe(PUBSUB_TOPICS.SEARCH_INDEX_UPDATED),
-      resolve: (payload: unknown): unknown => ({ searchIndexUpdated: payload })
+      resolve: (payload: unknown): unknown => payload
     }
   }
 }

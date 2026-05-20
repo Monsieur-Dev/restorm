@@ -196,7 +196,8 @@
     "tabs": {
       "docs": "Dokumentáció",
       "environments": "Környezetek",
-      "notes": "Jegyzetek"
+      "notes": "Jegyzetek",
+      "customValues": "Custom variables"
     },
     "home": {
       "configureEnvs": "Környezetek konfigurálása",
@@ -225,6 +226,18 @@
       "name": "Változó",
       "value": "Feloldott érték",
       "copied": "Másolva!"
+    },
+    "customValues": {
+      "lists": "Lists",
+      "values": "Values",
+      "addList": "Add a list",
+      "newListName": "New list",
+      "addEntry": "Add a value",
+      "label": "Label",
+      "value": "Value",
+      "noEntries": "No values yet",
+      "selectList": "Select a list",
+      "enabled": "Engedélyezve"
     }
   },
   "requestTab": {
@@ -291,7 +304,9 @@
       "expression": "Kifejezés",
       "boolean": "Logikai"
     },
-    "apiEnums": "API által definiált típusok"
+    "apiEnums": "API által definiált típusok",
+    "customLists": "Egyéni típusok",
+    "listSuffix": "lista"
   },
   "graphql": {
     "send": "Küldés",

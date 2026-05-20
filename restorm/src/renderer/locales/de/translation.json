@@ -196,7 +196,8 @@
     "tabs": {
       "docs": "Doku",
       "environments": "Umgebungen",
-      "notes": "Notizen"
+      "notes": "Notizen",
+      "customValues": "Custom variables"
     },
     "home": {
       "configureEnvs": "Umgebungen konfigurieren",
@@ -225,6 +226,18 @@
       "name": "Variable",
       "value": "Aufgelöster Wert",
       "copied": "Kopiert!"
+    },
+    "customValues": {
+      "lists": "Lists",
+      "values": "Values",
+      "addList": "Add a list",
+      "newListName": "New list",
+      "addEntry": "Add a value",
+      "label": "Label",
+      "value": "Value",
+      "noEntries": "No values yet",
+      "selectList": "Select a list",
+      "enabled": "Aktiviert"
     }
   },
   "requestTab": {
@@ -291,7 +304,9 @@
       "expression": "Ausdruck",
       "boolean": "Boolesch"
     },
-    "apiEnums": "In der API definierte Typen"
+    "apiEnums": "In der API definierte Typen",
+    "customLists": "Benutzerdefinierte Typen",
+    "listSuffix": "Liste"
   },
   "graphql": {
     "send": "Senden",

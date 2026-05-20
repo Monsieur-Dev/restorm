@@ -1,5 +1,6 @@
 import React, { type CSSProperties, useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { useRequestReset } from '../../hooks/useRequestReset'
+import { useEnvFolderValueTypes } from '../../hooks/useEnvFolderValueTypes'
 import { getRequestPanelState, setRequestPanelCollapsed } from '../../services/requestPanelStateStore'
 import { useTranslation } from 'react-i18next'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
@@ -19,7 +20,7 @@ import {
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
-import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue, ResponseHistoryDetail, EnvironmentFolder, AuthenticationRequest } from '../../../../shared/types/collections'
+import type { HTTPRequest, HTTPResponse, HTTPMethod, KeyValue, ResponseHistoryDetail, AuthenticationRequest } from '../../../../shared/types/collections'
 import { isAuthenticationRequest } from '../../../../shared/types/collections'
 import { StringValue } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
@@ -119,7 +120,6 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   const { selectedEnvId, environments, envColor, projectUuid } = useEnvironmentContext()
   const resolveAuthRequest = useAuthRequestResolver()
   const collections = useRestormStore((state) => state.collections)
-  const findParentFolder = useRestormStore((state) => state.findParentFolder)
   const handlebarsHelpers = useHandlebarsHelpers()
   const { apiDocumentation, route } = useApiDocumentationFromRequest(request)
   // Matched OpenAPI operation for the current request — drives both
@@ -147,17 +147,9 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     ? { backgroundColor: envColor, color: getContrastColor(envColor), borderColor: envColor }
     : undefined
 
-  // Resolve enum definitions from the nearest ancestor EnvironmentFolder
-  const enumDefinitions = useMemo(() => {
-    let current: ReturnType<typeof findParentFolder> = findParentFolder(request.id)
-    while (current) {
-      if ('folderType' in current && (current as { folderType?: string }).folderType === 'environment') {
-        return (current as unknown as EnvironmentFolder).enumDefinitions
-      }
-      current = findParentFolder(current.id)
-    }
-    return undefined
-  }, [request.id, findParentFolder])
+  // Enum definitions + custom value lists from the nearest ancestor
+  // env-folder, so the KeyValue tables can offer the type submenus.
+  const { enumDefinitions, customValueLists } = useEnvFolderValueTypes(request.id)
 
   const [method, setMethod] = useState<string>(request.method)
   const [url, setUrl] = useState<string>(request.url)
@@ -845,6 +837,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           initialRows={request.pathParams ?? []}
           onRowsChange={handlePathParamsChange}
           enumDefinitions={enumDefinitions}
+          customValueLists={customValueLists}
           requestUrl={request.url}
           requestMethod={request.method}
           persistenceId={`http-path-params:${request.id}`}
@@ -879,6 +872,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           initialRows={request.params}
           onRowsChange={handleParamsChange}
           enumDefinitions={enumDefinitions}
+          customValueLists={customValueLists}
           requestUrl={request.url}
           requestMethod={request.method}
           persistenceId={`http-query-params:${request.id}`}

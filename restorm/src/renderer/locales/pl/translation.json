@@ -198,7 +198,8 @@
     "tabs": {
       "docs": "Dokumentacja",
       "environments": "Środowiska",
-      "notes": "Notatki"
+      "notes": "Notatki",
+      "customValues": "Custom variables"
     },
     "home": {
       "configureEnvs": "Skonfiguruj środowiska",
@@ -227,6 +228,18 @@
       "name": "Zmienna",
       "value": "Wartość rozwiązana",
       "copied": "Skopiowano!"
+    },
+    "customValues": {
+      "lists": "Lists",
+      "values": "Values",
+      "addList": "Add a list",
+      "newListName": "New list",
+      "addEntry": "Add a value",
+      "label": "Label",
+      "value": "Value",
+      "noEntries": "No values yet",
+      "selectList": "Select a list",
+      "enabled": "Włączone"
     }
   },
   "requestTab": {
@@ -293,7 +306,9 @@
       "expression": "Wyrażenie",
       "boolean": "Wartość logiczna"
     },
-    "apiEnums": "Typy zdefiniowane w API"
+    "apiEnums": "Typy zdefiniowane w API",
+    "customLists": "Typy niestandardowe",
+    "listSuffix": "lista"
   },
   "graphql": {
     "send": "Wyślij",

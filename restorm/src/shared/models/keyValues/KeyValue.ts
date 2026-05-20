@@ -5,7 +5,7 @@
 import { trackable } from 'electron-core-ui/decorators'
 import type { RuntimeId } from '../types'
 import type { ValueType } from '../../types/collections'
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue } from '../../types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue } from '../../types/collections'
 import { BaseKeyValue } from './BaseKeyValue'
 import { serializeValueForPersistence } from '../../utils/valuePersistence'
 
@@ -32,7 +32,9 @@ export class KeyValue extends BaseKeyValue {
       obj.value instanceof ExpressionValue ||
       obj.value instanceof BooleanValue ||
       obj.value instanceof EnumValue ||
-      obj.value instanceof EnumListValue
+      obj.value instanceof EnumListValue ||
+      obj.value instanceof CustomListValue ||
+      obj.value instanceof CustomListMultiValue
     ) {
       value = obj.value
     } else if (obj.value && typeof obj.value === 'object') {
@@ -85,6 +87,22 @@ export class KeyValue extends BaseKeyValue {
           value = new EnumListValue(
             Array.isArray(raw) ? raw.filter((v): v is string => typeof v === 'string') : [],
             typeof defId === 'string' ? defId : ''
+          )
+          break
+        }
+        case 'customList': {
+          const p = plain as { listId?: unknown; label?: unknown }
+          value = new CustomListValue(
+            typeof p.listId === 'string' ? p.listId : '',
+            typeof p.label === 'string' ? p.label : ''
+          )
+          break
+        }
+        case 'customListMulti': {
+          const p = plain as { listId?: unknown; labels?: unknown }
+          value = new CustomListMultiValue(
+            typeof p.listId === 'string' ? p.listId : '',
+            Array.isArray(p.labels) ? p.labels.filter((v): v is string => typeof v === 'string') : []
           )
           break
         }

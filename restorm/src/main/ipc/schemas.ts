@@ -20,6 +20,15 @@ const keyValueSchema = z.object({
    * resolver behaves consistently across the IPC boundary.
    */
   isExpression: z.boolean().optional(),
+  /**
+   * Set when the value is a custom-list selection. The flat `value`
+   * string only carries the label; main rehydrates a `CustomListValue`
+   * / `CustomListMultiValue` from these so the dispatch resolver can
+   * substitute the entry value. Must live in the schema — zod strips
+   * unknown keys, which would silently drop the type on the way in.
+   */
+  customList: z.object({ listId: z.string(), label: z.string() }).optional(),
+  customListMulti: z.object({ listId: z.string(), labels: z.array(z.string()) }).optional(),
   enabled: z.boolean().optional()
 })
 
@@ -331,6 +340,11 @@ export const apiUpdateRefreshFetchArgs = z.tuple([folderIdArg])
  * truth for the project tree; this handler just mirrors it into the
  * main-side CollectionStore. */
 export const collectionsSyncArgs = z.tuple([z.array(z.unknown())])
+
+/** `[folderId, customValueLists]` — targeted update of one env-folder's
+ * custom value lists. Lists pass through as `unknown` (no strip) so the
+ * entries survive intact for the dispatch resolver. */
+export const collectionsUpdateFolderCustomValueListsArgs = z.tuple([z.string(), z.array(z.unknown())])
 
 // ==========================================================================
 // MiniBrowser — main-process `WebContentsView` lifecycle

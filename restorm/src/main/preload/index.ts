@@ -1067,6 +1067,16 @@ contextBridge.exposeInMainWorld('restorm', {
      * the handler doesn't return anything. */
     syncCollections: async (collections: unknown[]): Promise<void> => {
       await ipcRenderer.invoke('collections:sync', collections)
+    },
+    /** Persist an env-folder's custom value lists onto the main-side
+     * CollectionStore. Unlike `syncCollections` (full-tree replace),
+     * this targets one folder and routes through `updateFolder`, which
+     * re-fires `ENVIRONMENT_UPDATED` so the dispatch resolver re-runs
+     * for the folder's open requests — the panel's reactive edits
+     * otherwise never reach main (in-place mutation skips the sync
+     * memo). */
+    updateFolderCustomValueLists: async (folderId: string, lists: unknown[]): Promise<void> => {
+      await ipcRenderer.invoke('collections:update-folder-custom-value-lists', folderId, lists)
     }
   }
 })

@@ -19,15 +19,15 @@ import {
 } from 'electron-core-ui/renderer'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import type { TranslatedHelperDefinition } from '../../utils/handlebarsHelpersDefinitions'
-import type { KeyValue, ValueType, EnumDefinition } from '../../../../shared/types/collections'
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue } from '../../../../shared/types/collections'
-import { isPasswordValue, isNumericValue, isDateTimeValue, isColorValue, isExpressionValue, isBooleanValue, isEnumValue, isEnumListValue } from '../../../../shared/utils/valueHelpers'
+import type { KeyValue, ValueType, EnumDefinition, CustomValueList } from '../../../../shared/types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue } from '../../../../shared/types/collections'
+import { isPasswordValue, isNumericValue, isDateTimeValue, isColorValue, isExpressionValue, isBooleanValue, isEnumValue, isEnumListValue, isCustomListValue, isCustomListMultiValue } from '../../../../shared/utils/valueHelpers'
 import { inferValueFromString, isHexColorString, tryParseDateString, tryParseNumberString } from '../../../../shared/utils/valueCasting'
 import { normalizeValueType } from '../../utils/normalizeValueType'
 
 export type VariableContext = Record<string, string>
 
-type ValueTypeKind = 'string' | 'secret' | 'number' | 'dateTime' | 'color' | 'expression' | 'boolean' | 'enum' | 'enumList'
+type ValueTypeKind = 'string' | 'secret' | 'number' | 'dateTime' | 'color' | 'expression' | 'boolean' | 'enum' | 'enumList' | 'customList' | 'customListMulti'
 
 function resolveValueTypeKind(value: ValueType | undefined): ValueTypeKind {
   if (!value) return 'string'
@@ -39,6 +39,8 @@ function resolveValueTypeKind(value: ValueType | undefined): ValueTypeKind {
   if (isBooleanValue(value)) return 'boolean'
   if (isEnumValue(value)) return 'enum'
   if (isEnumListValue(value)) return 'enumList'
+  if (isCustomListMultiValue(value)) return 'customListMulti'
+  if (isCustomListValue(value)) return 'customList'
   return 'string'
 }
 
@@ -193,6 +195,8 @@ export interface RestormKeyValueTableProps {
   onRowsChange?: (rows: KeyValue[]) => void
   /** Enum definitions from the parent EnvironmentFolder (for enum type transforms). */
   enumDefinitions?: EnumDefinition[] | undefined
+  /** User-defined custom value lists from the parent EnvironmentFolder. */
+  customValueLists?: CustomValueList[] | undefined
   /** URL pattern of the current request (for matching route-specific enums). */
   requestUrl?: string | undefined
   /** HTTP method of the current request (for matching route-specific enums). */
@@ -214,6 +218,7 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
     initialRows,
     onRowsChange,
     enumDefinitions,
+    customValueLists,
     requestUrl,
     requestMethod,
     persistenceId,
@@ -306,6 +311,31 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
     let nextDisplayValue = raw
 
     switch (target) {
+      case 'customList': {
+        const listId = enumDefId ?? ''
+        const list = customValueLists?.find((l) => l.id === listId)
+        const enabledEntries = (list?.entries ?? []).filter((e) => e.enabled !== false)
+        // Keep the current label if it's still an enabled entry,
+        // otherwise default to the first enabled entry so the dropdown
+        // shows a valid selection.
+        const label = enabledEntries.some((e) => e.label === raw)
+          ? raw
+          : enabledEntries[0]?.label ?? ''
+        nextValue = new CustomListValue(listId, label)
+        nextDisplayValue = label
+        break
+      }
+      case 'customListMulti': {
+        const listId = enumDefId ?? ''
+        const list = customValueLists?.find((l) => l.id === listId)
+        const enabledLabels = (list?.entries ?? []).filter((e) => e.enabled !== false).map((e) => e.label)
+        // Keep any currently-selected labels that are still enabled.
+        const current = raw ? raw.split(',').map((s) => s.trim()).filter(Boolean) : []
+        const labels = current.filter((l) => enabledLabels.includes(l))
+        nextValue = new CustomListMultiValue(listId, labels)
+        nextDisplayValue = labels.join(',')
+        break
+      }
       case 'string': {
         nextValue = new StringValue(raw)
         nextDisplayValue = raw
@@ -368,7 +398,7 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
       onRowsChange(nextRows)
     }
     closeContextMenu()
-  }, [contextMenu, closeContextMenu, initialRows, onRowsChange])
+  }, [contextMenu, closeContextMenu, initialRows, onRowsChange, customValueLists])
 
   // Compute route-matched and all enum definitions for the context menu
   const { routeEnums, allEnums } = useMemo(() => {
@@ -388,8 +418,16 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
     return { routeEnums: matched, allEnums: sorted }
   }, [enumDefinitions, requestUrl, requestMethod])
 
+  // Custom value lists, sorted by name, for the "Types personnalisés" submenu.
+  const customLists = useMemo(
+    () => (customValueLists ? [...customValueLists].sort((a, b) => a.name.localeCompare(b.name)) : []),
+    [customValueLists]
+  )
+
   const contextMenuNode = useMemo(() => {
     if (!contextMenu?.visible) return null
+
+    const listWord = t('keyValueTable.listSuffix')
 
     const enumMenuItems = (defs: EnumDefinition[]): React.ReactNode => defs.map((def) => (
       <React.Fragment key={def.id}>
@@ -400,7 +438,7 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
           {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-enum-${def.id}` })}
         />
         <MenuItem
-          title={`${def.name} (list)`}
+          title={`${def.name} (${listWord})`}
           checked={contextMenu.activeType === 'enumList' && contextMenu.activeEnumDefId === def.id}
           onClick={() => { castToType('enumList', def.id) }}
           {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-enumlist-${def.id}` })}
@@ -463,6 +501,29 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
                 {enumMenuItems(allEnums)}
               </MenuItem>
             )}
+            {customLists.length > 0 && (
+              <MenuItem
+                title={t('keyValueTable.customLists')}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-custom-lists` })}
+              >
+                {customLists.map((list) => (
+                  <React.Fragment key={list.id}>
+                    <MenuItem
+                      title={list.name}
+                      checked={contextMenu.activeType === 'customList' && contextMenu.activeEnumDefId === list.id}
+                      onClick={() => { castToType('customList', list.id) }}
+                      {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-customlist-${list.id}` })}
+                    />
+                    <MenuItem
+                      title={`${list.name} (${listWord})`}
+                      checked={contextMenu.activeType === 'customListMulti' && contextMenu.activeEnumDefId === list.id}
+                      onClick={() => { castToType('customListMulti', list.id) }}
+                      {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-customlistmulti-${list.id}` })}
+                    />
+                  </React.Fragment>
+                ))}
+              </MenuItem>
+            )}
             <MenuItemSeparator
               {...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-separator` })}
             />
@@ -482,7 +543,7 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
         </div>
       </div>
     )
-  }, [contextMenu, t, castToType, dataTestId, routeEnums, allEnums])
+  }, [contextMenu, t, castToType, dataTestId, routeEnums, allEnums, customLists])
 
   const tableInitialRows = React.useMemo<KeyValueTableRow[] | undefined>(() => {
     if (!initialRows) return undefined
@@ -527,6 +588,10 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
         nextValue = new EnumValue(raw, currentType.enumDefinitionId)
       } else if (currentType instanceof EnumListValue) {
         nextValue = new EnumListValue(raw ? raw.split(',').map((s) => s.trim()) : [], currentType.enumDefinitionId)
+      } else if (currentType instanceof CustomListValue) {
+        nextValue = new CustomListValue(currentType.listId, raw)
+      } else if (currentType instanceof CustomListMultiValue) {
+        nextValue = new CustomListMultiValue(currentType.listId, raw ? raw.split(',').map((s) => s.trim()) : [])
       } else {
         nextValue = new StringValue(raw)
       }
@@ -617,7 +682,9 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
           currentValue: value,
           onChange,
           activeType,
-          activeEnumDefId: (resolved as { enumDefinitionId?: string }).enumDefinitionId
+          activeEnumDefId:
+            (resolved as { enumDefinitionId?: string }).enumDefinitionId ??
+            (resolved as { listId?: string }).listId
         })
       }
 
@@ -800,6 +867,71 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
         )
       }
 
+      // CustomListMultiValue → MultiSelectCombo of the list's labels;
+      // the dispatch resolver repeats the param per resolved value.
+      if (resolved instanceof CustomListMultiValue) {
+        const list = customValueLists?.find((l) => l.id === resolved.listId)
+        const enabled = (list?.entries ?? []).filter((e) => e.enabled !== false)
+        const options = enabled.map((e) => ({ value: e.label, label: e.label }))
+        // Drop any selected labels whose entry is no longer enabled.
+        const selected = resolved.labels.filter((l) => options.some((o) => o.value === l))
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', height: '100%', minWidth: 0 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <MultiSelectCombo
+                options={options}
+                selected={selected}
+                onChange={(next) => {
+                  if (id) valueTypeByRowIdRef.current.set(id, new CustomListMultiValue(resolved.listId, next))
+                  onChange(next.join(','))
+                }}
+                placeholder={list?.name ?? 'Select...'}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-customlistmulti` })}
+              />
+            </div>
+            <TypeIndicator
+              icon="list-unordered"
+              ariaLabel="Custom list multi value"
+              onMenuOpen={handleContextMenu}
+              {...(dataTestId && { dataTestId: `${dataTestId}-value-type-customlistmulti` })}
+            />
+          </div>
+        )
+      }
+
+      // CustomListValue → SelectBox of the list's labels (the dispatch
+      // resolver substitutes the matching entry value at send time).
+      if (resolved instanceof CustomListValue) {
+        const list = customValueLists?.find((l) => l.id === resolved.listId)
+        // Only enabled entries are selectable; an unchecked entry drops
+        // out of the dropdown.
+        const options = (list?.entries ?? []).filter((e) => e.enabled !== false).map((e) => ({ text: e.label }))
+        const selectedIndex = options.findIndex((o) => o.text === resolved.label)
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', height: '100%', minWidth: 0 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <SelectBox
+                options={options}
+                selected={selectedIndex >= 0 ? selectedIndex : 0}
+                onDidSelect={(data) => {
+                  if (id) valueTypeByRowIdRef.current.set(id, new CustomListValue(resolved.listId, data.selected))
+                  onChange(data.selected)
+                }}
+                className=""
+                id={id ?? 'customlist-select'}
+                {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-customlist` })}
+              />
+            </div>
+            <TypeIndicator
+              icon="symbol-enum"
+              ariaLabel="Custom list value"
+              onMenuOpen={handleContextMenu}
+              {...(dataTestId && { dataTestId: `${dataTestId}-value-type-customlist` })}
+            />
+          </div>
+        )
+      }
+
       // EnumValue → SelectBox
       if (resolved instanceof EnumValue) {
         const enumDef = enumDefinitions?.find((d) => d.id === resolved.enumDefinitionId)
@@ -854,7 +986,7 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
         </div>
       )
     },
-    [dataTestId, enumDefinitions]
+    [dataTestId, enumDefinitions, customValueLists]
   )
 
   return (

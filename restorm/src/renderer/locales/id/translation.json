@@ -195,7 +195,8 @@
     "tabs": {
       "docs": "Dokumen",
       "environments": "Lingkungan",
-      "notes": "Catatan"
+      "notes": "Catatan",
+      "customValues": "Custom variables"
     },
     "home": {
       "configureEnvs": "Konfigurasi lingkungan",
@@ -224,6 +225,18 @@
       "name": "Variabel",
       "value": "Nilai yang diselesaikan",
       "copied": "Tersalin!"
+    },
+    "customValues": {
+      "lists": "Lists",
+      "values": "Values",
+      "addList": "Add a list",
+      "newListName": "New list",
+      "addEntry": "Add a value",
+      "label": "Label",
+      "value": "Value",
+      "noEntries": "No values yet",
+      "selectList": "Select a list",
+      "enabled": "Aktif"
     }
   },
   "requestTab": {
@@ -290,7 +303,9 @@
       "expression": "Ekspresi",
       "boolean": "Boolean"
     },
-    "apiEnums": "Tipe yang didefinisikan API"
+    "apiEnums": "Tipe yang didefinisikan API",
+    "customLists": "Tipe khusus",
+    "listSuffix": "daftar"
   },
   "graphql": {
     "send": "Kirim",

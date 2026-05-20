@@ -196,7 +196,8 @@
     "tabs": {
       "docs": "Docs",
       "environments": "Environments",
-      "notes": "Notes"
+      "notes": "Notes",
+      "customValues": "Custom variables"
     },
     "home": {
       "configureEnvs": "Configure environments",
@@ -225,6 +226,18 @@
       "name": "Variable",
       "value": "Resolved value",
       "copied": "Copied!"
+    },
+    "customValues": {
+      "lists": "Lists",
+      "values": "Values",
+      "addList": "Add a list",
+      "newListName": "New list",
+      "addEntry": "Add a value",
+      "label": "Label",
+      "value": "Value",
+      "noEntries": "No values yet",
+      "selectList": "Select a list",
+      "enabled": "Enabled"
     }
   },
   "requestTab": {
@@ -291,7 +304,9 @@
       "expression": "Expression",
       "boolean": "Boolean"
     },
-    "apiEnums": "API defined types"
+    "apiEnums": "API defined types",
+    "customLists": "Custom types",
+    "listSuffix": "list"
   },
   "graphql": {
     "send": "Send",

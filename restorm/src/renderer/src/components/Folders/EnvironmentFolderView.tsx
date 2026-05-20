@@ -17,6 +17,7 @@ import {
   type KeyValueTableHandle
 } from 'electron-core-ui/renderer'
 import { RestormKeyValueTable } from '../RestormKeyValueTable'
+import { CustomValueListsPanel } from './CustomValueListsPanel'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import type { EnvironmentFolder, Environment, KeyValue, Icon } from '../../../../shared/types/collections'
 import { makeReactiveEnvironment, emitEnvironmentCreated, emitEnvironmentDeleted, emitEnvironmentUpdated } from '../../types/reactive'
@@ -449,7 +450,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
     {
       id: 'rename',
       label: t('environment.rename'),
-      shortcut: 'F2',
+      icon: 'edit',
       onClick: () => {
         if (selectedEnvId) {
           setEditingEnvId(selectedEnvId)
@@ -459,7 +460,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
     {
       id: 'addSubEnvironment',
       label: t('environment.addSub'),
-      shortcut: 'Ctrl++',
+      icon: 'add',
       onClick: () => {
         if (selectedEnvId) {
           handleAddSubEnvironment(selectedEnvId)
@@ -469,7 +470,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
     {
       id: 'delete',
       label: t('environment.delete'),
-      shortcut: 'Delete',
+      icon: 'trash',
       onClick: () => {
         if (selectedEnvId) {
           handleDeleteEnvironment(selectedEnvId)
@@ -664,6 +665,9 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
                     {...(folder.enumDefinitions && folder.enumDefinitions.length > 0
                       ? { enumDefinitions: folder.enumDefinitions }
                       : {})}
+                    {...(folder.customValueLists && folder.customValueLists.length > 0
+                      ? { customValueLists: folder.customValueLists }
+                      : {})}
                     persistenceId={`env-folder-vars:${folder.id}`}
                     data-testid="environment-folder-variables-table"
                   />
@@ -830,6 +834,14 @@ const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ fold
     content: <EnvironmentConfigPanel folder={folder} onFolderChange={onFolderChange} />
   }
 
+  // Custom value lists tab — user-defined label → value maps.
+  const customValuesTab: Tab = {
+    id: 'custom-values',
+    label: t('folderView.tabs.customValues'),
+    useScrollableElement: false,
+    content: <CustomValueListsPanel folder={folder} onFolderChange={onFolderChange} />
+  }
+
   const rawApiDocumentation = (folder as unknown as { apiDocumentation?: unknown }).apiDocumentation as ApiDocumentation | undefined
   const apiDocumentation = useMemo(() => (
     rawApiDocumentation !== undefined
@@ -867,7 +879,7 @@ const EnvironmentFolderViewInner: React.FC<EnvironmentFolderViewProps> = ({ fold
   return (
     <BaseFolderView
       folder={folder}
-      additionalTabs={[homeTab, environmentsTab]}
+      additionalTabs={[homeTab, environmentsTab, customValuesTab]}
       {...(docsContent !== undefined ? { docsContent } : {})}
       defaultActiveTabId="home"
       onSwitchTabReady={handleSwitchTabReady}

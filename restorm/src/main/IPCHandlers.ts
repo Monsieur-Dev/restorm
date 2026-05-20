@@ -13,7 +13,7 @@ import { resolveRequestURL, type URLResolutionInput } from './services/request/H
 import { httpExecutionService, type HTTPExecutionInput } from './services/HTTPExecutionService'
 import { authPrefetchOneShot, resolveProducedHeaders } from './services/AuthenticationPrefetch'
 import { AuthenticationRequest } from '../shared/models/requests/AuthenticationRequest'
-import { StringValue, ExpressionValue } from '../shared/types/valueTypes'
+import { StringValue, ExpressionValue, CustomListValue, CustomListMultiValue } from '../shared/types/valueTypes'
 import type { KeyValue } from '../shared/types/baseTypes'
 import { authenticationCacheService } from './services/AuthenticationCacheService'
 import { graphqlExecutionService, type GraphQLExecutionInput } from './services/GraphQLExecutionService'
@@ -74,6 +74,8 @@ interface KeyValueRowFromIpc {
   value: string
   enabled?: boolean | undefined
   isExpression?: boolean | undefined
+  customList?: { listId: string; label: string } | undefined
+  customListMulti?: { listId: string; labels: string[] } | undefined
 }
 
 /**
@@ -86,7 +88,16 @@ interface KeyValueRowFromIpc {
  * pass through verbatim).
  */
 function rehydrateKeyValueRow(row: KeyValueRowFromIpc): KeyValue {
-  const value = row.isExpression === true ? new ExpressionValue(row.value) : new StringValue(row.value)
+  // Custom-list rows carry the structured shape so the dispatch
+  // resolver can substitute the entry value; the flat `value` (the
+  // label) is only a display fallback.
+  const value = row.customList
+    ? new CustomListValue(row.customList.listId, row.customList.label)
+    : row.customListMulti
+      ? new CustomListMultiValue(row.customListMulti.listId, row.customListMulti.labels)
+      : row.isExpression === true
+        ? new ExpressionValue(row.value)
+        : new StringValue(row.value)
   return {
     ...(row.id !== undefined ? { id: row.id } : {}),
     key: row.key,

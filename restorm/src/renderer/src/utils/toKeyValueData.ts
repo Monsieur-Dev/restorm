@@ -1,4 +1,4 @@
-import { isExpressionValue } from '../../../shared/utils/valueHelpers'
+import { isExpressionValue, isCustomListValue, isCustomListMultiValue } from '../../../shared/utils/valueHelpers'
 import { normalizeValueType } from './normalizeValueType'
 import type { KeyValue } from '../../../shared/types/baseTypes'
 import type { KeyValueData } from '../types/global'
@@ -34,6 +34,13 @@ export function toKeyValueData(kvs: readonly KeyValue[]): KeyValueData[] {
 		if (kv.id !== undefined) out.id = kv.id
 		if (kv.enabled !== undefined) out.enabled = kv.enabled
 		if (isExpressionValue(normalized)) out.isExpression = true
+		// Custom-list values carry only a label in `value` (their
+		// `toString()`); main needs the list id + label(s) to substitute
+		// the entry value at dispatch, so ship the structured shape too.
+		// Without it the label would be sent verbatim (and silently look
+		// correct whenever label === value).
+		else if (isCustomListValue(normalized)) out.customList = { listId: normalized.listId, label: normalized.label }
+		else if (isCustomListMultiValue(normalized)) out.customListMulti = { listId: normalized.listId, labels: normalized.labels }
 		return out
 	})
 }

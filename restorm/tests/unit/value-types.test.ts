@@ -9,7 +9,9 @@ import {
   ExpressionValue,
   BooleanValue,
   EnumValue,
-  EnumListValue
+  EnumListValue,
+  CustomListValue,
+  CustomListMultiValue
 } from '../../src/shared/types/collections'
 import {
   isColorValue,
@@ -19,12 +21,14 @@ import {
   isExpressionValue,
   isBooleanValue,
   isEnumValue,
-  isEnumListValue
+  isEnumListValue,
+  isCustomListValue,
+  isCustomListMultiValue
 } from '../../src/shared/utils/valueHelpers'
 import { serializeValueForPersistence } from '../../src/shared/utils/valuePersistence'
 
 describe('ValueType serialization round-trips', () => {
-  const cases: { name: string; value: InstanceType<typeof StringValue | typeof ColorValue | typeof DateTimeValue | typeof NumericValue | typeof PasswordValue | typeof ExpressionValue | typeof BooleanValue | typeof EnumValue | typeof EnumListValue>; expectedType: string }[] = [
+  const cases: { name: string; value: InstanceType<typeof StringValue | typeof ColorValue | typeof DateTimeValue | typeof NumericValue | typeof PasswordValue | typeof ExpressionValue | typeof BooleanValue | typeof EnumValue | typeof EnumListValue | typeof CustomListValue | typeof CustomListMultiValue>; expectedType: string }[] = [
     { name: 'StringValue', value: new StringValue('hello'), expectedType: 'string' },
     { name: 'ColorValue', value: new ColorValue('#ff0000'), expectedType: 'color' },
     { name: 'NumericValue', value: new NumericValue(42, 'decimal'), expectedType: 'numeric' },
@@ -32,7 +36,9 @@ describe('ValueType serialization round-trips', () => {
     { name: 'ExpressionValue', value: new ExpressionValue('{{scheme}}://{{host}}'), expectedType: 'expression' },
     { name: 'BooleanValue', value: new BooleanValue(true), expectedType: 'boolean' },
     { name: 'EnumValue', value: new EnumValue('available', 'status-enum-id'), expectedType: 'enum' },
-    { name: 'EnumListValue', value: new EnumListValue(['a', 'b'], 'multi-enum-id'), expectedType: 'enumList' }
+    { name: 'EnumListValue', value: new EnumListValue(['a', 'b'], 'multi-enum-id'), expectedType: 'enumList' },
+    { name: 'CustomListValue', value: new CustomListValue('couleur-list-id', 'Rouge'), expectedType: 'customList' },
+    { name: 'CustomListMultiValue', value: new CustomListMultiValue('couleur-list-id', ['Rouge', 'Vert']), expectedType: 'customListMulti' }
   ]
 
   for (const { name, value, expectedType } of cases) {
@@ -58,6 +64,29 @@ describe('ValueType serialization round-trips', () => {
     const kv = KeyValue.fromPlain({ key: 'test', value: serialized })
     expect(kv.value.type).toBe('datetime')
     expect(kv.value instanceof DateTimeValue).toBe(true)
+  })
+
+  it('CustomListValue preserves listId + label through persistence', () => {
+    const value = new CustomListValue('couleur-list-id', 'Rouge')
+    const serialized = serializeValueForPersistence(value)
+    expect(serialized).toEqual({ type: 'customList', listId: 'couleur-list-id', label: 'Rouge' })
+
+    const kv = KeyValue.fromPlain({ key: 'test', value: serialized })
+    expect(kv.value instanceof CustomListValue).toBe(true)
+    expect((kv.value as CustomListValue).listId).toBe('couleur-list-id')
+    expect((kv.value as CustomListValue).label).toBe('Rouge')
+  })
+
+  it('CustomListMultiValue preserves listId + labels through persistence', () => {
+    const value = new CustomListMultiValue('couleur-list-id', ['Rouge', 'Vert'])
+    const serialized = serializeValueForPersistence(value)
+    expect(serialized).toEqual({ type: 'customListMulti', listId: 'couleur-list-id', labels: ['Rouge', 'Vert'] })
+
+    const kv = KeyValue.fromPlain({ key: 'test', value: serialized })
+    expect(kv.value instanceof CustomListMultiValue).toBe(true)
+    expect((kv.value as CustomListMultiValue).listId).toBe('couleur-list-id')
+    expect((kv.value as CustomListMultiValue).labels).toEqual(['Rouge', 'Vert'])
+    expect(isCustomListMultiValue(kv.value)).toBe(true)
   })
 })
 
@@ -85,6 +114,22 @@ describe('valueHelpers type guards', () => {
   it('isEnumListValue detects EnumListValue instances', () => {
     expect(isEnumListValue(new EnumListValue(['a'], 'id'))).toBe(true)
     expect(isEnumListValue(new EnumValue('a', 'id'))).toBe(false)
+  })
+
+  it('isCustomListValue detects CustomListValue instances + proxy fallback', () => {
+    expect(isCustomListValue(new CustomListValue('list', 'Rouge'))).toBe(true)
+    expect(isCustomListValue(new EnumValue('a', 'id'))).toBe(false)
+    const proxy = { type: 'customList', listId: 'list', label: 'Rouge', toString: () => 'Rouge' }
+    expect(isCustomListValue(proxy as unknown as CustomListValue)).toBe(true)
+    // The multi variant must not be misdetected as the single variant.
+    expect(isCustomListValue(new CustomListMultiValue('list', ['Rouge']))).toBe(false)
+  })
+
+  it('isCustomListMultiValue detects CustomListMultiValue instances + proxy fallback', () => {
+    expect(isCustomListMultiValue(new CustomListMultiValue('list', ['Rouge', 'Vert']))).toBe(true)
+    expect(isCustomListMultiValue(new CustomListValue('list', 'Rouge'))).toBe(false)
+    const proxy = { type: 'customListMulti', listId: 'list', labels: ['Rouge'], toString: () => 'Rouge' }
+    expect(isCustomListMultiValue(proxy as unknown as CustomListMultiValue)).toBe(true)
   })
 
   it('all type guards return false for wrong types', () => {

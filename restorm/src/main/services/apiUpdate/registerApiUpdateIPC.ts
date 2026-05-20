@@ -4,12 +4,15 @@ import {
   apiUpdateSetSettingsArgs,
   apiUpdateApplyArgs,
   apiUpdateRefreshFetchArgs,
-  collectionsSyncArgs
+  collectionsSyncArgs,
+  collectionsUpdateFolderCustomValueListsArgs
 } from '../../ipc/schemas'
 import { collectionStore } from '../CollectionStore'
+import { contextService } from '../ContextService'
 import { resolveAuthHeadersForFolder } from './resolveAuthHeaders'
 import { detectFormat, importFromContent } from '../import/ImportManager'
 import type { FolderItem } from '../../../shared/types/folderTypes'
+import { isEnvironmentFolder } from '../../../shared/types/folderTypes'
 import type { EnvironmentFolder } from '../../../shared/types/folderTypes'
 import type { ApiUpdateConfig } from '../../../shared/types/baseTypes'
 
@@ -160,5 +163,20 @@ export function registerApiUpdateIPC(deps: ApiUpdateIPCDeps): void {
       'user'
     )
     logger.info('[apiUpdate.collections:sync] mirrored collections from renderer', { count: collections.length })
+  })
+
+  // Targeted folder update for custom value lists. Sets the lists on the
+  // folder directly (NOT via `updateFolder`, whose `FOLDER_UPDATED` /
+  // `ENVIRONMENT_UPDATED` GraphQL publishes would spam the subscription
+  // layer on every keystroke), then asks ContextService to re-resolve
+  // the folder's open requests + env contexts against the fresh lists.
+  // Disk persistence stays renderer-driven.
+  validatedHandle('collections:update-folder-custom-value-lists', collectionsUpdateFolderCustomValueListsArgs, (_event, [folderId, lists]) => {
+    const folder = collectionStore.findById(folderId)
+    if (folder && isEnvironmentFolder(folder)) {
+      folder.customValueLists = lists as EnvironmentFolder['customValueLists']
+      contextService.recalculateForCustomListChange(folderId)
+      logger.info('[apiUpdate.update-folder-custom-value-lists] updated folder lists', { folderId, count: lists.length })
+    }
   })
 }

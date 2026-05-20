@@ -198,7 +198,8 @@
     "tabs": {
       "docs": "Документація",
       "environments": "Середовища",
-      "notes": "Нотатки"
+      "notes": "Нотатки",
+      "customValues": "Custom variables"
     },
     "home": {
       "configureEnvs": "Налаштувати середовища",
@@ -227,6 +228,18 @@
       "name": "Змінна",
       "value": "Розв’язане значення",
       "copied": "Скопійовано!"
+    },
+    "customValues": {
+      "lists": "Lists",
+      "values": "Values",
+      "addList": "Add a list",
+      "newListName": "New list",
+      "addEntry": "Add a value",
+      "label": "Label",
+      "value": "Value",
+      "noEntries": "No values yet",
+      "selectList": "Select a list",
+      "enabled": "Увімкнено"
     }
   },
   "requestTab": {
@@ -293,7 +306,9 @@
       "expression": "Вираз",
       "boolean": "Булеве"
     },
-    "apiEnums": "Типи, визначені в API"
+    "apiEnums": "Типи, визначені в API",
+    "customLists": "Власні типи",
+    "listSuffix": "список"
   },
   "graphql": {
     "send": "Надіслати",

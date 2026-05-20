@@ -2,7 +2,7 @@
  * Helper functions for working with Value types
  */
 
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, type ValueType } from '../types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, type ValueType } from '../types/collections'
 
 /**
  * Convert a ValueType to a string using its toString() method
@@ -86,4 +86,20 @@ export function isEnumValue(value: ValueType): value is EnumValue {
  */
 export function isEnumListValue(value: ValueType): value is EnumListValue {
   return value instanceof EnumListValue || (value as { type?: string }).type === 'enumList'
+}
+
+/**
+ * Check if a value is a CustomListValue (a label picked from a
+ * user-defined custom value list on the env folder).
+ */
+export function isCustomListValue(value: ValueType): value is CustomListValue {
+  return value instanceof CustomListValue || (value as { type?: string }).type === 'customList'
+}
+
+/**
+ * Check if a value is a CustomListMultiValue (multi-select of labels
+ * from a user-defined custom value list on the env folder).
+ */
+export function isCustomListMultiValue(value: ValueType): value is CustomListMultiValue {
+  return value instanceof CustomListMultiValue || (value as { type?: string }).type === 'customListMulti'
 }

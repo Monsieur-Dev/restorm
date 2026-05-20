@@ -196,7 +196,8 @@
     "tabs": {
       "docs": "Dokumentation",
       "environments": "Miljöer",
-      "notes": "Anteckningar"
+      "notes": "Anteckningar",
+      "customValues": "Custom variables"
     },
     "home": {
       "configureEnvs": "Konfigurera miljöer",
@@ -225,6 +226,18 @@
       "name": "Variabel",
       "value": "Upplöst värde",
       "copied": "Kopierat!"
+    },
+    "customValues": {
+      "lists": "Lists",
+      "values": "Values",
+      "addList": "Add a list",
+      "newListName": "New list",
+      "addEntry": "Add a value",
+      "label": "Label",
+      "value": "Value",
+      "noEntries": "No values yet",
+      "selectList": "Select a list",
+      "enabled": "Aktiverad"
     }
   },
   "requestTab": {
@@ -291,7 +304,9 @@
       "expression": "Uttryck",
       "boolean": "Boolesk"
     },
-    "apiEnums": "API-definierade typer"
+    "apiEnums": "API-definierade typer",
+    "customLists": "Anpassade typer",
+    "listSuffix": "lista"
   },
   "graphql": {
     "send": "Skicka",

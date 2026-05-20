@@ -131,3 +131,34 @@ export interface EnumDefinition {
   /** Enum no longer appears in the most recently fetched spec. */
   removed?: boolean
 }
+
+/**
+ * One entry of a user-defined custom value list: a display `label`
+ * paired with the `value` that gets substituted onto the wire when
+ * the label is selected (e.g. `Rouge` → `FF0000`).
+ */
+export interface CustomValueEntry {
+  id: RuntimeId
+  /** Shown in the type picker / value dropdown. */
+  label: string
+  /** Substituted at dispatch in place of the label. */
+  value: string
+  /** When `false`, the entry is hidden from the value dropdown and is
+   * no longer resolvable (a request that still references it falls
+   * back to the raw label). Defaults to enabled when absent. */
+  enabled?: boolean
+}
+
+/**
+ * A named, fully user-defined label → value map living on an
+ * EnvironmentFolder (separate from imported `EnumDefinition`s — never
+ * touched by re-import, not shown in the docs). Selected as a value
+ * type in a key-value table: the user picks a label, the dispatch
+ * resolver substitutes the matching entry's value.
+ */
+export interface CustomValueList {
+  id: RuntimeId
+  /** Display name (e.g. "Couleur"). */
+  name: string
+  entries: CustomValueEntry[]
+}
