@@ -190,6 +190,43 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     setEdges(scenario.edges.map(toFlowEdge))
   }, [scenario.id, scenario.nodes, scenario.edges, setNodes, setEdges])
 
+  // Re-seed when this scenario is mutated externally by the MCP tools
+  // (create/move/update/delete node, connect/disconnect). Deliberately
+  // bypasses the seededId guard — these aren't our own edits, so the open
+  // editor must repaint from the incoming graph.
+  useEffect(() => {
+    const api = (window as { restorm?: { runtime?: { onMcpScenarioUpdated?: (cb: (p: { scenarioId: string; nodes: unknown[]; edges: unknown[] }) => void) => () => void } } }).restorm?.runtime
+    if (!api?.onMcpScenarioUpdated) return
+    return api.onMcpScenarioUpdated(({ scenarioId, nodes, edges }) => {
+      if (scenarioId !== scenario.id) return
+      const ns = nodes as ScenarioNode[]
+      const es = edges as Scenario['edges']
+      nodeStore.current = new Map(ns.map((n) => [n.id, n]))
+      edgeStore.current = new Map(es.map((e) => [e.id, e]))
+      setNodes(ns.map((n) => toFlowNode(n, handlers.current)))
+      setEdges(es.map(toFlowEdge))
+    })
+  }, [scenario.id, setNodes, setEdges])
+
+  // Report React-Flow-measured node rects (position + size) to main, debounced.
+  // Size isn't in the model, so this lets the scenario MCP read tools expose
+  // box sizes — an agent can then place boxes without overlap, no screenshots.
+  useEffect(() => {
+    const api = (window as { restorm?: { runtime?: { pushScenarioLayout?: (p: { scenarioId: string; rects: Record<string, { x: number; y: number; width: number; height: number }> }) => void } } }).restorm?.runtime
+    const push = api?.pushScenarioLayout
+    if (!push) return
+    const t = setTimeout(() => {
+      const rects: Record<string, { x: number; y: number; width: number; height: number }> = {}
+      for (const n of nodes) {
+        const w = n.measured?.width ?? n.width
+        const h = n.measured?.height ?? n.height
+        if (w != null && h != null) rects[n.id] = { x: n.position.x, y: n.position.y, width: w, height: h }
+      }
+      if (Object.keys(rects).length > 0) push({ scenarioId: scenario.id, rects })
+    }, 250)
+    return () => { clearTimeout(t) }
+  }, [nodes, scenario.id])
+
   const handleNodesChange = useCallback((changes: NodeChange<Node<NodeData>>[]) => {
     onNodesChange(changes)
     // Node removals (Delete/Backspace on a selection) — drop them from the
