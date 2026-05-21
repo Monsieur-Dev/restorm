@@ -104,6 +104,8 @@
 .scn-node-play-ready { background: #22c55e; }
 .scn-node-play-ready:hover { background: #16a34a; }
 .scn-node-play-idle { background: #6b7280; cursor: default; }
+.scn-node-play-running { background: #ef4444; }
+.scn-node-play-running:hover { background: #dc2626; }
 
 .scn-node-status {
   font-size: 13px !important;

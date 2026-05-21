@@ -15,6 +15,7 @@
  * in-flight runs so status + cancel work).
  */
 
+import { ipcMain } from 'electron'
 import { McpService } from 'electron-core-ui'
 import { z } from 'zod'
 import { collectionStore } from '../../services/CollectionStore'
@@ -197,6 +198,13 @@ export async function getScenarioNodeResult(scenarioId: string, nodeId: string):
 }
 
 export function registerScenarioRunTools(mcp: McpService): void {
+  // Renderer play→stop button plumbing. Guard against a re-register during dev
+  // HMR / restart (re-adding a handler on a live channel throws).
+  ipcMain.removeHandler('scenario:run-node')
+  ipcMain.handle('scenario:run-node', (_e, scenarioId, nodeId) => runScenarioNode(String(scenarioId), String(nodeId)))
+  ipcMain.removeHandler('scenario:cancel-node')
+  ipcMain.handle('scenario:cancel-node', (_e, scenarioId, nodeId) => cancelScenarioNode(String(scenarioId), String(nodeId)))
+
   const ids = {
     scenarioId: z.string().min(1).describe('Scenario id.'),
     nodeId: z.string().min(1).describe('Node (box) id.')

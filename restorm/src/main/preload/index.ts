@@ -866,6 +866,15 @@ contextBridge.exposeInMainWorld('restorm', {
     pushScenarioLayout: (payload: { scenarioId: string; rects: Record<string, { x: number; y: number; width: number; height: number }> }): void => {
       ipcRenderer.send('scenario:layout', payload)
     },
+    /** Run a scenario box (request / wait) through the main-process engine —
+     * the same path the MCP `run_scenario_node` tool uses. Resolves with the
+     * run summary; rejects (the thrown engine error) on failure / cancel. */
+    runScenarioNode: (scenarioId: string, nodeId: string): Promise<unknown> =>
+      ipcRenderer.invoke('scenario:run-node', scenarioId, nodeId),
+    /** Cancel a box's in-flight run. The awaiting `runScenarioNode` promise
+     * then rejects (`wait`) or settles (`request` abort), clearing the run. */
+    cancelScenarioNode: (scenarioId: string, nodeId: string): Promise<{ cancelled: boolean; reason?: string }> =>
+      ipcRenderer.invoke('scenario:cancel-node', scenarioId, nodeId) as Promise<{ cancelled: boolean; reason?: string }>,
     /** Full-snapshot push fired on renderer (re)load — useful after an
      * HMR cycle so main's cache is always consistent with the renderer. */
     pushMcpActiveStateBootstrap: (payload: {

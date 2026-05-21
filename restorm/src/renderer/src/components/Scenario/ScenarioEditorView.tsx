@@ -58,6 +58,7 @@ const PALETTE_ENTRIES: (ScenarioNodeKindMeta | { separator: true })[] = SCENARIO
 )
 
 interface NodeHandlers {
+  scenarioId: string
   onToggleCollapse: (id: string) => void
   onHeaderContextMenu: (id: string, x: number, y: number) => void
 }
@@ -69,6 +70,7 @@ function toFlowNode(n: ScenarioNode, handlers: NodeHandlers): Node<NodeData> {
     position: n.position,
     data: {
       kind: n.kind,
+      scenarioId: handlers.scenarioId,
       inputs: n.inputs,
       outputs: n.outputs,
       config: n.config,
@@ -177,8 +179,8 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     setNodeMenu({ nodeId, x, y })
   }, [setNodes])
 
-  const handlers = useRef<NodeHandlers>({ onToggleCollapse, onHeaderContextMenu })
-  useEffect(() => { handlers.current = { onToggleCollapse, onHeaderContextMenu } }, [onToggleCollapse, onHeaderContextMenu])
+  const handlers = useRef<NodeHandlers>({ scenarioId: scenario.id, onToggleCollapse, onHeaderContextMenu })
+  useEffect(() => { handlers.current = { scenarioId: scenario.id, onToggleCollapse, onHeaderContextMenu } }, [scenario.id, onToggleCollapse, onHeaderContextMenu])
 
   // Seed from the scenario only when the open scenario changes (tab switch).
   // The guard makes our own persist writes (which replace `scenario.nodes`)

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, type CSSProperties, type ReactNode } from 'react'
+import React, { useCallback, useMemo, useState, type CSSProperties, type ReactNode } from 'react'
 import { Handle, Position, useNodeConnections, type Node } from '@xyflow/react'
 import { getContrastColor, MarkdownViewer } from 'electron-core-ui/renderer'
 import type { ScenarioNodeKind, ScenarioPort, ScenarioPortRole } from '../../../../../shared/types/collections'
@@ -11,6 +11,9 @@ import '../ScenarioNodeBox.css'
 /** React Flow node data shared by every scenario node box. */
 export interface ScenarioNodeBoxData extends Record<string, unknown> {
   kind: ScenarioNodeKind
+  /** Owning scenario id — lets the play button call the run/cancel engine.
+   * Undefined for nodes seeded before this was threaded through (no-op click). */
+  scenarioId?: string
   note?: string
   color?: string
   collapsed?: boolean
@@ -131,6 +134,32 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
     data.onHeaderContextMenu?.(id, e.clientX, e.clientY)
   }, [data, id])
 
+  // Run / cancel the box through the main-process engine. While a run is in
+  // flight the button flips to a stop glyph; clicking it then cancels (the
+  // in-flight promise's `.finally` clears `running` when it settles).
+  const [running, setRunning] = useState(false)
+  const scenarioId = data.scenarioId
+  const onPlay = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!scenarioId) return
+    const rt = (window as {
+      restorm?: {
+        runtime?: {
+          runScenarioNode?: (scenarioId: string, nodeId: string) => Promise<unknown>
+          cancelScenarioNode?: (scenarioId: string, nodeId: string) => Promise<{ cancelled: boolean; reason?: string }>
+        }
+      }
+    }).restorm?.runtime
+    if (running) {
+      void rt?.cancelScenarioNode?.(scenarioId, id)
+      return
+    }
+    setRunning(true)
+    const run = rt?.runScenarioNode?.(scenarioId, id)
+    if (run) void run.finally(() => { setRunning(false) })
+    else setRunning(false)
+  }, [scenarioId, id, running])
+
   return (
     <div className={`scn-node ${selected ? 'scn-node-selected' : ''} ${collapsed ? 'scn-node-collapsed' : ''}`} data-testid={`scn-node-${data.kind}`}>
       <div className={`scn-node-header ${launchInput ? 'scn-node-header-has-launch' : ''}`} style={headerStyle} onContextMenu={onHeaderContextMenu}>
@@ -154,12 +183,13 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
         )}
         <button
           type="button"
-          className={`scn-node-play nodrag ${canPlay ? 'scn-node-play-ready' : 'scn-node-play-idle'}`}
-          onClick={(e) => { e.stopPropagation() }}
-          aria-label="Run node"
-          title="Run node"
+          className={`scn-node-play nodrag ${running ? 'scn-node-play-running' : canPlay ? 'scn-node-play-ready' : 'scn-node-play-idle'}`}
+          onMouseDown={(e) => { e.stopPropagation() }}
+          onClick={onPlay}
+          aria-label={running ? 'Stop node' : 'Run node'}
+          title={running ? 'Stop node' : 'Run node'}
         >
-          <i className="codicon codicon-play-circle" aria-hidden="true" />
+          <i className={`codicon codicon-${running ? 'debug-stop' : 'play-circle'}`} aria-hidden="true" />
         </button>
       </div>
 
