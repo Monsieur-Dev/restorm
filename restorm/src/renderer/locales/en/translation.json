@@ -749,6 +749,20 @@
   "scenario": {
     "editor": {
       "empty": "Empty scenario — right-click the canvas to add a node"
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del"
+      }
     }
   }
 }

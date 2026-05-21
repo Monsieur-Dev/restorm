@@ -281,20 +281,16 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
 
   // Parse a tab ID to extract the item ID and type
   const parseTabId = useCallback((tabId: string): { itemId: string | null; itemType: string | null } => {
-    const indexMatch = /^(env-folder|folder|request)-idx:(.+)$/.exec(tabId)
-    const idMatch = /^(env-folder|folder|request)-id:(.+)$/.exec(tabId)
+    const indexMatch = /^(env-folder|folder|request|scenario)-idx:(.+)$/.exec(tabId)
+    const idMatch = /^(env-folder|folder|request|scenario)-id:(.+)$/.exec(tabId)
+    const mapType = (prefix: string): string =>
+      prefix === 'request' ? 'http-request' : prefix === 'scenario' ? 'scenario-editor' : prefix
 
     if (indexMatch?.[1] && indexMatch[2]) {
-      return {
-        itemType: indexMatch[1] === 'request' ? 'http-request' : indexMatch[1],
-        itemId: resolveIndexPath(indexMatch[2])
-      }
+      return { itemType: mapType(indexMatch[1]), itemId: resolveIndexPath(indexMatch[2]) }
     }
     if (idMatch?.[1] && idMatch[2]) {
-      return {
-        itemType: idMatch[1] === 'request' ? 'http-request' : idMatch[1],
-        itemId: idMatch[2]
-      }
+      return { itemType: mapType(idMatch[1]), itemId: idMatch[2] }
     }
     return { itemId: null, itemType: null }
   }, [resolveIndexPath])

@@ -52,6 +52,15 @@
   outline: none;
 }
 
+/* Milkdown Crepe ships a very wide editor padding (60px 120px). Tighten it —
+ * but the block drag/add handles anchor ~84px to the left of the text, so the
+ * left gutter must stay wide enough for them to be reachable (a too-small left
+ * padding clips them). Top/right/bottom can shrink freely. Applies to every
+ * MarkdownEditor. */
+.milkdown .ProseMirror.editor {
+  padding: 16px 32px 24px 84px;
+}
+
 .milkdown-editor-root {
   height: 100%;
   width: 100%;

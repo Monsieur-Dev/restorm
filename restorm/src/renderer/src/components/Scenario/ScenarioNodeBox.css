@@ -1,17 +1,19 @@
 .scn-node {
   min-width: 160px;
-  border: 1px solid var(--ecu-node-border, #454545);
+  border: 1px solid var(--widget-border, #454545);
   border-radius: 6px;
-  background: var(--ecu-node-background, #2d2d30);
-  color: var(--ecu-foreground, #cccccc);
+  background: var(--scenarioNode-background, #2d2d30);
+  color: var(--foreground, #cccccc);
   font-size: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
+  /* visible so the edge anchors render as full circles (not clipped halves).
+   * The header rounds its own corners to keep the box outline clean. */
+  overflow: visible;
 }
 
 .scn-node-selected {
-  border-color: var(--ecu-focusBorder, #007fd4);
-  box-shadow: 0 0 0 1px var(--ecu-focusBorder, #007fd4);
+  border-color: var(--focusBorder, #007fd4);
+  box-shadow: 0 0 0 1px var(--focusBorder, #007fd4);
 }
 
 .scn-node-header {
@@ -20,9 +22,29 @@
   gap: 6px;
   padding: 5px 6px;
   font-weight: 600;
-  color: var(--ecu-foreground, #cccccc);
-  background: var(--ecu-node-header-background, #3a3a3d);
-  border-bottom: 1px solid var(--ecu-node-border, #454545);
+  color: var(--foreground, #cccccc);
+  background: var(--scenarioNode-headerBackground, #3a3a3d);
+  border-bottom: 1px solid var(--widget-border, #454545);
+  border-radius: 6px 6px 0 0;
+  position: relative;
+  /* Reserve room on the right for the round play button (which overflows the
+   * frame). The left is widened separately when there's a launch anchor. */
+  padding-right: 46px;
+}
+
+/* Make room for the launch anchor so it doesn't sit under the icon/title. */
+.scn-node-header-has-launch {
+  padding-left: 16px;
+}
+
+/* Generic "launch" input anchor: centred on the header's left border. Raised
+ * above the header content so it stays a clear connection drop target. */
+.scn-handle-launch.react-flow__handle {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
 }
 
 /* The global `.codicon` rule forces icon colour with `!important` (~#3b3b3b),
@@ -36,6 +58,7 @@
 
 .scn-node-collapsed .scn-node-header {
   border-bottom: none;
+  border-radius: 6px;
 }
 
 .scn-node-icon {
@@ -45,12 +68,42 @@
 }
 
 .scn-node-title {
-  flex: 1;
+  /* Don't grow: keep the collapse chevron glued right after the title
+   * (dropdown-trigger style) instead of pushed to the far edge. */
+  flex: 0 1 auto;
   min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Round run button: bigger than the header so it overflows the frame, pinned
+ * to the right. Green when the node is runnable now, grey otherwise. */
+.scn-node-play {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid var(--scenarioNode-background, #2d2d30);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  z-index: 6;
+}
+.scn-node-play .codicon {
+  color: #fff !important;
+  font-size: 40px !important;
+}
+.scn-node-play-ready { background: #22c55e; }
+.scn-node-play-ready:hover { background: #16a34a; }
+.scn-node-play-idle { background: #6b7280; cursor: default; }
 
 .scn-node-status {
   font-size: 13px !important;
@@ -75,6 +128,33 @@
 }
 .scn-node-collapse:hover { opacity: 1; }
 
+/* Notes section: free annotation between header and ports, its own band.
+ * The MarkdownViewer sits flush to the box edges (no band padding); a
+ * separator sits below it. The viewer is made transparent so it picks up
+ * the box body background instead of its own editor background. Keep the
+ * markdown compact so a note doesn't blow up the node. */
+.scn-node-notes {
+  border-bottom: 1px solid var(--editorHoverWidget-border, #454545);
+  max-width: 280px;
+}
+.scn-node-notes .markdown-viewer {
+  background-color: transparent;
+  font-size: 11px;
+}
+.scn-node-notes :is(p, ul, ol, pre, h1, h2, h3, h4, h5, h6) {
+  margin: 0 0 4px;
+}
+.scn-node-notes :is(p, ul, ol, pre, h1, h2, h3, h4, h5, h6):last-child {
+  margin-bottom: 0;
+}
+.scn-node-notes ul,
+.scn-node-notes ol {
+  padding-left: 16px;
+}
+.scn-node-notes :is(h1, h2, h3, h4, h5, h6) {
+  font-size: 12px;
+}
+
 /* Body: input column (left) + output column (right), each row a labelled
  * port whose handle sits inline at the node edge. */
 .scn-node-body {
@@ -93,13 +173,15 @@
   align-items: flex-end;
 }
 
-.scn-port {
+/* A body row: an anchor + a cell. Min-height keeps rows aligned even when
+ * one column has fewer rows than the other. */
+.scn-row {
   display: flex;
   align-items: center;
   gap: 6px;
+  min-height: 22px;
 }
-.scn-port-out {
-  flex-direction: row;
+.scn-row-right {
   justify-content: flex-end;
 }
 
@@ -110,10 +192,12 @@
   line-height: 1;
 }
 
+/* Anchors: clearly visible coloured dots with a contrasting ring. */
 .scn-handle.react-flow__handle {
-  width: 9px;
-  height: 9px;
-  border: 1px solid var(--ecu-node-background, #2d2d30);
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--scenarioNode-background, #2d2d30);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
 }
 
 /* Inline handles flow with their row instead of being absolutely pinned to
@@ -122,16 +206,139 @@
 .scn-handle-inline.react-flow__handle {
   position: relative;
   top: auto;
-  transform: none;
+  flex-shrink: 0;
 }
+/* Centre the anchor on the node's outer edge (its centre on the border). */
 .scn-node-col-in .scn-handle-inline {
-  left: -10px;
+  left: 0;
+  transform: translateX(-50%);
 }
 .scn-node-col-out .scn-handle-inline {
-  right: -10px;
+  right: 0;
+  transform: translateX(50%);
 }
 
 .scn-handle-error {
   left: auto;
   right: 12px;
+}
+
+/* Collapsible left-column section (headers / params / body …). */
+.scn-section {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.scn-section-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.8;
+  min-height: 18px;
+  user-select: none;
+  position: relative;
+  /* Indent the title to line up with the row labels below (anchor + gap).
+   * The collapsed anchors overlay this leading region (absolute), so the
+   * title sits at the same x whether the section is open or collapsed. */
+  padding-left: 18px;
+}
+.scn-section-header:hover { opacity: 1; }
+.scn-section-chevron {
+  font-size: 12px !important;
+  color: inherit !important;
+  flex-shrink: 0;
+}
+.scn-section-title {
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.85;
+}
+.scn-section-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+/* When collapsed, the section's anchors gather on the title row. They keep
+ * the per-row edge alignment (first anchor centred on the node border), then
+ * flow rightward in front of the title. */
+/* Collapsed anchors overlay the header's leading region (out of flow, so the
+ * title doesn't shift) and stay edge-pinned on the node border like the row
+ * anchors. */
+.scn-section-balls {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* KV row: param name + value opposite each other. */
+.scn-kv {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+  justify-content: space-between;
+  flex: 1;
+}
+.scn-kv-value {
+  font-size: 11px;
+  opacity: 0.55;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+  font-family: var(--editor-font-family, monospace);
+}
+
+/* Environment-selector button cell (request node, nameless top section).
+ * Indented so its left edge lines up with the row text below (which is
+ * offset by the anchor + gap), since this row has no left anchor. */
+.scn-env-button {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  margin-left: 18px;
+}
+.scn-env-button .button {
+  width: 100%;
+  max-width: 220px;
+}
+
+/* If operator toggle — compact segmented control. */
+.scn-operator-toggle {
+  display: inline-flex;
+  border: 1px solid var(--editorHoverWidget-border, #454545);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.scn-operator-option {
+  min-width: 20px;
+  padding: 1px 4px;
+  font-size: 11px;
+  line-height: 1.4;
+  background: transparent;
+  color: inherit;
+  border: none;
+  border-right: 1px solid var(--editorHoverWidget-border, #454545);
+  cursor: pointer;
+  opacity: 0.7;
+}
+.scn-operator-option:last-child {
+  border-right: none;
+}
+.scn-operator-option:hover {
+  opacity: 1;
+  background: var(--list-hoverBackground, rgba(255, 255, 255, 0.06));
+}
+.scn-operator-option-active {
+  opacity: 1;
+  background: var(--focusBorder, #007fd4);
+  color: #fff;
 }

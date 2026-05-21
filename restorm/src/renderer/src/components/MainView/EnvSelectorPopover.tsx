@@ -48,6 +48,9 @@ export interface EnvPopoverListProps {
 	 * statusbar host's selectors; the Send-button host overrides it
 	 * to disambiguate. */
 	testIdPrefix?: string
+	/** Hide the "Apply to all requests" footer — used by hosts where the
+	 * selection is scoped to a single target (e.g. a scenario request node). */
+	hideApplyToAll?: boolean
 }
 
 /**
@@ -62,7 +65,7 @@ export interface EnvPopoverListProps {
  * the foreground text — selection state therefore reinforces the
  * env's identifier instead of fighting it.
  */
-export const EnvPopoverList: React.FC<EnvPopoverListProps> = ({ rows, selectedEnvId, applyToAll, onApplyToAllChange, onSelect, onCloseRequested, testIdPrefix = 'statusbar-env-selector' }) => {
+export const EnvPopoverList: React.FC<EnvPopoverListProps> = ({ rows, selectedEnvId, applyToAll, onApplyToAllChange, onSelect, onCloseRequested, testIdPrefix = 'statusbar-env-selector', hideApplyToAll = false }) => {
 	const { t } = useTranslation()
 	const handleEnvClick = useCallback((envId: string): void => {
 		onSelect(envId)
@@ -188,6 +191,7 @@ export const EnvPopoverList: React.FC<EnvPopoverListProps> = ({ rows, selectedEn
 					</Fragment>
 				)
 			})}
+			{!hideApplyToAll && (
 			<label
 				data-testid={`${testIdPrefix}-apply-to-all`}
 				style={{
@@ -210,6 +214,7 @@ export const EnvPopoverList: React.FC<EnvPopoverListProps> = ({ rows, selectedEn
 				/>
 				<span>{t('statusbar.envSelector.applyToAll', 'Apply to all requests')}</span>
 			</label>
+			)}
 		</div>
 	)
 }

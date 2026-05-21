@@ -747,8 +747,22 @@
     }
   },
   "scenario": {
+    "tab": {
+      "graph": "Scénario",
+      "notes": "Notes"
+    },
     "editor": {
       "empty": "Scénario vide — clic droit sur le canevas pour ajouter un nœud"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Changer la couleur",
+        "resetColor": "Réinitialiser la couleur",
+        "addNote": "Ajouter/modifier une note",
+        "duplicate": "Dupliquer",
+        "delete": "Supprimer",
+        "deleteShortcut": "Suppr"
+      }
     }
   }
 }

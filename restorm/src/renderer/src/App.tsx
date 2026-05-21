@@ -119,6 +119,8 @@ import {
 import { DesktopIndicator } from './components/MainView/DesktopIndicator'
 import { findItemById } from './utils/treeSearch'
 import { EnvironmentProvider } from './contexts/EnvironmentContext'
+import { getSessionRequestOverride, getSessionFolderEnv, findEnvironmentById } from './services/environmentSelectionStore'
+import type { RequestEnvInfo } from './components/Scenario/scenarioBoundResolver'
 import { StatusbarEnvironmentSelector } from './components/MainView/StatusbarEnvironmentSelector'
 import { StatusbarAuthSelector } from './components/MainView/StatusbarAuthSelector'
 import { shouldShowAuthSelector } from './components/MainView/statusbarAuthHelpers'
@@ -1032,14 +1034,48 @@ const App: React.FC = () => {
   // editor back onto the scenario in `rootItems`, then nudge React so the
   // whole-file save picks the change up (verified: scenarios round-trip
   // through the standard save path).
-  const handleScenarioChange = useCallback((scenarioId: string, patch: { nodes: ScenarioNode[]; edges: ScenarioEdge[] }) => {
+  const handleScenarioChange = useCallback((scenarioId: string, patch: { nodes?: ScenarioNode[]; edges?: ScenarioEdge[]; notes?: string }) => {
     const item = findItemById(rootItems, scenarioId)
     if (item && isScenario(item)) {
-      item.nodes = patch.nodes
-      item.edges = patch.edges
+      if (patch.nodes !== undefined) item.nodes = patch.nodes
+      if (patch.edges !== undefined) item.edges = patch.edges
+      if (patch.notes !== undefined) item.notes = patch.notes
       setRootItems((prev) => [...prev])
     }
   }, [rootItems, setRootItems])
+
+  // Resolve a tree item by id to its live object — used by the scenario editor
+  // both to decide what a sidebar drop creates (request/scenario/ignored) and
+  // to keep a request/sub-scenario node's badge + title in sync with renames.
+  // Depends on `rootItems` so the bound boxes re-resolve when the tree changes.
+  const resolveBoundItem = useCallback((itemId: string): FolderItem | null => {
+    return findItemById(rootItems, itemId) ?? null
+  }, [rootItems])
+
+  // A request's environment picture for its scenario node: the envs of its
+  // nearest ancestor env-folder + the env currently selected for the request
+  // (session override → folder default → first env). Null when the request
+  // has no ancestor env-folder, so the node hides its env-selector section.
+  const resolveRequestEnv = useCallback((requestId: string): RequestEnvInfo | null => {
+    const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, requestId)
+    const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
+    if (environments.length === 0) return null
+    let envFolderId: string | undefined
+    for (let i = breadcrumbs.length - 2; i >= 0; i -= 1) {
+      const id = breadcrumbs[i]?.id
+      if (!id) continue
+      const folder = findFolderById(rootItems, id)
+      if (folder && isEnvironmentFolder(folder as FolderItem)) { envFolderId = folder.id; break }
+    }
+    let selectedEnvId = environments[0]?.id ?? null
+    if (projectUuid && envFolderId) {
+      const reqOverride = getSessionRequestOverride(projectUuid, requestId)
+      const folderEnv = getSessionFolderEnv(projectUuid, envFolderId)
+      if (reqOverride && findEnvironmentById(environments, reqOverride)) selectedEnvId = reqOverride
+      else if (folderEnv && findEnvironmentById(environments, folderEnv)) selectedEnvId = folderEnv
+    }
+    return { environments, selectedEnvId }
+  }, [rootItems, projectUuid])
 
   // Environments of the active request's nearest ancestor env-folder,
   // used to feed the status-bar env selector. Empty when the active
@@ -2144,6 +2180,8 @@ const App: React.FC = () => {
               onTagColorChange={handleTagColorChange}
               onFolderChange={handleFolderChange}
               onScenarioChange={handleScenarioChange}
+              resolveBoundItem={resolveBoundItem}
+              resolveRequestEnv={resolveRequestEnv}
               onEnvironmentFolderChange={handleEnvironmentFolderChange}
               onSizesChange={handleSizesChange}
               emptyFallback={<EmptyBench rootItems={rootItems} projectUuid={projectUuid} onImport={() => { setShowImportModal(true) }} onOpenRequest={handleItemClick} />}
@@ -2178,6 +2216,8 @@ const App: React.FC = () => {
             onTagsChange={handleTagsChange}
             onFolderChange={handleFolderChange}
             onScenarioChange={handleScenarioChange}
+            resolveBoundItem={resolveBoundItem}
+            resolveRequestEnv={resolveRequestEnv}
             onEnvironmentFolderChange={handleEnvironmentFolderChange}
             onSizesChange={handleSizesChange}
             emptyFallback={

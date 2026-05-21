@@ -42,7 +42,7 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // Sources & control
   start: { inputs: [], outputs: [OUT] },
   input: { inputs: [], outputs: [{ id: 'value', name: 'value' }] },
-  if: { inputs: [IN], outputs: [{ id: 'then', name: 'then', role: 'then' }, { id: 'else', name: 'else', role: 'else' }] },
+  if: { inputs: [{ id: 'left', name: 'left' }, { id: 'right', name: 'right' }], outputs: [{ id: 'then', name: 'then', role: 'then' }, { id: 'else', name: 'else', role: 'else' }] },
   switch: { inputs: [IN], outputs: [{ id: 'case1', name: 'case 1', role: 'case' }, { id: 'default', name: 'default', role: 'default' }] },
   // Requests & composition
   request: { inputs: [IN], outputs: [{ id: 'response', name: 'response', dataType: 'response', role: 'response' }] },

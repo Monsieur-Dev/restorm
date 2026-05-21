@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest'
 import { defaultPortsForKind } from '../../src/renderer/src/components/Scenario/scenarioNodePorts'
 
 describe('defaultPortsForKind', () => {
-  it('gives If a then/else branch (no input role, coloured outputs)', () => {
+  it('gives If left/right operands and a then/else branch', () => {
     const { inputs, outputs } = defaultPortsForKind('if')
-    expect(inputs.map((p) => p.id)).toEqual(['in'])
+    expect(inputs.map((p) => p.id)).toEqual(['left', 'right'])
     expect(outputs.map((p) => p.id)).toEqual(['then', 'else'])
     expect(outputs.map((p) => p.role)).toEqual(['then', 'else'])
   })

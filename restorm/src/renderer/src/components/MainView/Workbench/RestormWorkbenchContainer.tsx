@@ -5,6 +5,7 @@ import { EnvironmentValuesProvider } from '../../../contexts/EnvironmentValuesCo
 import type { Icon } from 'electron-core-ui/types'
 import type { BreadcrumbItem } from '../../../../../shared/types/editor'
 import type { Request, Folder, EnvironmentFolder, ScenarioNode, ScenarioEdge } from '../../../../../shared/types/collections'
+import type { ResolveBoundItem, ResolveRequestEnv } from '../../Scenario/scenarioBoundResolver'
 
 export interface RestormWorkbenchContainerProps {
   workbenchRef?: React.Ref<RestormWorkbenchHandle>
@@ -31,7 +32,9 @@ export interface RestormWorkbenchContainerProps {
   onTagsChange: (targetId: string, tags: string[]) => void
   onTagColorChange?: (envFolderId: string, tag: string, color: string | null) => void
   onFolderChange: (folderId: string, folder: Folder) => void
-  onScenarioChange?: (scenarioId: string, patch: { nodes: ScenarioNode[]; edges: ScenarioEdge[] }) => void
+  onScenarioChange?: (scenarioId: string, patch: { nodes?: ScenarioNode[]; edges?: ScenarioEdge[]; notes?: string }) => void
+  resolveBoundItem?: ResolveBoundItem
+  resolveRequestEnv?: ResolveRequestEnv
   onEnvironmentFolderChange: (folderId: string, folder: EnvironmentFolder) => void
   onSizesChange: (nodeId: string, sizes: number[]) => void
   emptyFallback: React.ReactNode
@@ -77,6 +80,8 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
   onTagColorChange,
   onFolderChange,
   onScenarioChange,
+  resolveBoundItem,
+  resolveRequestEnv,
   onEnvironmentFolderChange,
   onSizesChange,
   emptyFallback,
@@ -120,6 +125,8 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
           onTagColorChange={onTagColorChange}
           onFolderChange={onFolderChange}
           {...(onScenarioChange ? { onScenarioChange } : {})}
+          {...(resolveBoundItem ? { resolveBoundItem } : {})}
+          {...(resolveRequestEnv ? { resolveRequestEnv } : {})}
           onEnvironmentFolderChange={onEnvironmentFolderChange}
           onSizesChange={onSizesChange}
           emptyFallback={emptyFallback}

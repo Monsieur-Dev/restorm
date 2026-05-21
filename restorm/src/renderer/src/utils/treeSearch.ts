@@ -9,7 +9,7 @@ import type {
   EnvironmentFolder,
   Request
 } from '../../../shared/types/collections'
-import { isEnvironmentFolder, isAnyFolder, isRequest } from '../../../shared/types/collections'
+import { isEnvironmentFolder, isAnyFolder, isRequest, isScenario } from '../../../shared/types/collections'
 import type { Icon } from 'electron-core-ui/types'
 import type { BreadcrumbItem } from '../../../shared/types/editor'
 
@@ -153,9 +153,9 @@ function findItemWithBreadcrumbsInTree(
       }
       const found = findItemWithBreadcrumbsInTree(item, id, currentPath)
       if (found.item) return found
-    } else if (isRequest(item)) {
+    } else if (isRequest(item) || isScenario(item)) {
       if (item.id === id) {
-        // Include the request itself as the last breadcrumb (no icon, no IconSelect)
+        // Leaf item (request or scenario) — last breadcrumb, no icon.
         return { item, breadcrumbs: [...currentPath, { id: item.id, label: item.name, icon: null }] }
       }
     }

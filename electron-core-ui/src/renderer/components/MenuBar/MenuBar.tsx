@@ -297,9 +297,13 @@ const MenuBar: React.FC<MenuBarProps> = ({
     })
   }, [])
 
-  // Close menu when clicking outside
+  // Close menu when clicking outside. Listen in the *capture* phase on
+  // `pointerdown`: surfaces like a React Flow / graph canvas call
+  // `stopPropagation()` (and preventDefault) on pointer events, so a
+  // bubble-phase `mousedown` listener never reaches `document` and the
+  // open menu would stay stuck. Capture runs before the canvas handler.
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent): void => {
+    const handleClickOutside = (event: PointerEvent): void => {
       if (menubarRef.current && !menubarRef.current.contains(event.target as Node)) {
         setState({
           focusedMenuIndex: null,
@@ -310,8 +314,8 @@ const MenuBar: React.FC<MenuBarProps> = ({
     }
 
     if (state.isOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-      return () => { document.removeEventListener('mousedown', handleClickOutside) }
+      document.addEventListener('pointerdown', handleClickOutside, true)
+      return () => { document.removeEventListener('pointerdown', handleClickOutside, true) }
     }
     return undefined
   }, [state.isOpen])

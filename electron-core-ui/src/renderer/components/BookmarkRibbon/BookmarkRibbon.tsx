@@ -258,6 +258,7 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
             {onRemove ? (
               <Button
                 secondary
+                fullWidth
                 icon="trash"
                 onClick={handleRemove}
                 options={{ ariaLabel: 'Remove bookmark', title: 'Remove bookmark' }}

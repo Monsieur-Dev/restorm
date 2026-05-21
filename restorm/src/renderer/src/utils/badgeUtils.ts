@@ -1,4 +1,23 @@
 import type { BadgeType } from '../components/common/Badge'
+import type { Request } from '../../../shared/types/requests'
+
+/**
+ * Badge for a saved request, by protocol — mirrors the per-protocol choice
+ * the workbench tab title makes (method for HTTP/auth, call type for gRPC,
+ * sub-protocol for WebSocket, fixed badge for GraphQL/SOAP/OData).
+ */
+export function requestBadgeType(request: Request): BadgeType {
+  switch (request.type) {
+    case 'http': return mapToBadgeType(request.method)
+    case 'auth': return 'AUTH'
+    case 'graphql': return 'GQL'
+    case 'grpc': return mapToBadgeType(request.callType)
+    case 'soap': return 'SOAP'
+    case 'websocket': return mapToBadgeType(request.protocol)
+    case 'odata': return 'ODATA'
+    default: return 'GET'
+  }
+}
 
 /**
  * Map raw protocol/type values to BadgeType
