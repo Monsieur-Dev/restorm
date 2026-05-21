@@ -53,7 +53,7 @@ function boundRequestId(node: ScenarioNode): string {
 
 // --- In-flight run registry (drives status + cancel) -----------------------
 
-interface RunningRun { startedAt: string; requestId?: string }
+interface RunningRun { startedAt: string; cancel: () => void }
 const running = new Map<string, RunningRun>()
 const runKey = (scenarioId: string, nodeId: string): string => `${scenarioId}::${nodeId}`
 
@@ -67,7 +67,7 @@ export interface ScenarioNodeRunSummary {
 }
 
 /** Execute a `request` box exactly like the classic Send (main exec + history). */
-async function executeRequest(node: ScenarioNode): Promise<ScenarioNodeRunSummary> {
+async function executeRequest(node: ScenarioNode, key: string): Promise<ScenarioNodeRunSummary> {
   const requestId = boundRequestId(node)
   if (!requestId) throw new Error(`request node ${node.id} has no bound request (config.requestId)`)
   const req = collectionStore.findById(requestId)
@@ -85,6 +85,7 @@ async function executeRequest(node: ScenarioNode): Promise<ScenarioNodeRunSummar
     method: req.method,
     ...(auth && isAuthenticationRequest(auth) ? { authRequest: auth } : {})
   }
+  running.set(key, { startedAt: new Date().toISOString(), cancel: () => { httpExecutionService.cancel(req.id) } })
   const result = await httpExecutionService.execute(input)
   await responseHistoryService.storeExecutionResult(req.id, 'http', result)
   requestUsageService.recordSend(req.id)
@@ -98,18 +99,42 @@ async function executeRequest(node: ScenarioNode): Promise<ScenarioNodeRunSummar
   }
 }
 
-/** Run a scenario box by id. Generic by kind; only `request` runs for now.
- * Tracks the run so `get_scenario_node_status` / `cancel_scenario_node` work. */
+/** Duration (ms) for a `wait` box — from config if present, else a default
+ * long enough to make cancel easy to demo. (Config isn't persisted yet.) */
+function waitMs(node: ScenarioNode): number {
+  const cfg = node.config as Record<string, unknown> | undefined
+  const d = cfg?.['durationMs'] ?? cfg?.['duration']
+  return typeof d === 'number' && d > 0 ? d : 5000
+}
+
+/** Delay for the box's duration; cancelable (the cancel rejects the run). */
+async function executeWait(node: ScenarioNode, key: string): Promise<ScenarioNodeRunSummary> {
+  const ms = waitMs(node)
+  await new Promise<void>((resolve, reject) => {
+    const timer = setTimeout(() => { running.delete(key); resolve() }, ms)
+    running.set(key, {
+      startedAt: new Date().toISOString(),
+      cancel: () => { clearTimeout(timer); running.delete(key); reject(new Error('cancelled')) }
+    })
+  })
+  return { nodeId: node.id, kind: node.kind, requestId: '', success: true, status: 0, durationMs: ms }
+}
+
+/** Run a scenario box by id. Generic by kind (`request`, `wait` so far). Tracks
+ * the run so `get_scenario_node_status` / `cancel_scenario_node` work. */
 export async function runScenarioNode(scenarioId: string, nodeId: string): Promise<ScenarioNodeRunSummary> {
   const { node } = locateNode(scenarioId, nodeId)
-  if (node.kind !== 'request') {
-    throw new Error(`Running a '${node.kind}' box isn't implemented yet (only 'request' so far)`)
-  }
   const key = runKey(scenarioId, nodeId)
   if (running.has(key)) throw new Error(`node ${nodeId} is already running`)
-  running.set(key, { startedAt: new Date().toISOString(), requestId: boundRequestId(node) })
   try {
-    return await executeRequest(node)
+    switch (node.kind) {
+      case 'request':
+        return await executeRequest(node, key)
+      case 'wait':
+        return await executeWait(node, key)
+      default:
+        throw new Error(`Running a '${node.kind}' box isn't implemented yet (request, wait so far)`)
+    }
   } finally {
     running.delete(key)
   }
@@ -121,12 +146,12 @@ export function getScenarioNodeStatus(scenarioId: string, nodeId: string): { nod
   return entry ? { nodeId, status: 'running', startedAt: entry.startedAt } : { nodeId, status: 'idle' }
 }
 
-/** Cancel a box's in-flight run. For a `request` box this aborts the live
- * HTTP dispatch (the awaiting run then settles + clears the registry). */
+/** Cancel a box's in-flight run: a `request` aborts the live HTTP dispatch, a
+ * `wait` clears its timer (the awaiting run then settles + clears the registry). */
 export function cancelScenarioNode(scenarioId: string, nodeId: string): { cancelled: boolean; reason?: string } {
   const entry = running.get(runKey(scenarioId, nodeId))
   if (!entry) return { cancelled: false, reason: 'not running' }
-  if (entry.requestId) httpExecutionService.cancel(entry.requestId)
+  entry.cancel()
   return { cancelled: true }
 }
 
