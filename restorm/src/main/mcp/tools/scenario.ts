@@ -16,7 +16,7 @@ import { McpService } from 'electron-core-ui'
 import { collectionStore } from '../../services/CollectionStore'
 import type { Scenario } from '../../../shared/models/Scenario'
 import type { ScenarioNode, ScenarioEdge, ScenarioNodeKind } from '../../../shared/types/scenario'
-import { defaultPortsForKind } from '../../../shared/scenarioNodePorts'
+import { defaultPortsForKind, isValidScenarioConnection, outputPortFlow, inputPortFlow } from '../../../shared/scenarioNodePorts'
 import { broadcastTreeReplace } from './import'
 
 const SCENARIO_KINDS = [
@@ -298,6 +298,11 @@ export function registerScenarioTools(mcp: McpService): void {
       }
       if (!toNode.inputs.some((p) => p.id === toPortId)) {
         return errorReply(`${toPortId} is not an input of ${toNodeId} (inputs: ${toNode.inputs.map((p) => p.id).join(', ') || 'none'})`)
+      }
+      if (!isValidScenarioConnection({ sourceKind: fromNode.kind, sourceOutputs: fromNode.outputs, sourceHandle: fromPortId, targetKind: toNode.kind, targetInputs: toNode.inputs, targetHandle: toPortId })) {
+        const outF = outputPortFlow(fromNode.outputs, fromPortId, fromNode.kind)
+        const inF = inputPortFlow(toNode.inputs, toPortId, toNode.kind)
+        return errorReply(`incompatible link: ${fromPortId} is a "${outF}" output and ${toPortId} accepts "${inF}" only (a value output can't drive a header trigger; a signal output can't feed a data input).`)
       }
       const edge: ScenarioEdge = {
         id: randomUUID(),

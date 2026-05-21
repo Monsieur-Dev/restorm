@@ -55,5 +55,5 @@ export type {
 } from './responseHistory'
 
 export type { Folder, EnvironmentFolder, FolderItem } from './folderTypes'
-export type { Scenario, ScenarioNode, ScenarioPort, ScenarioEdge, ScenarioParam, ScenarioNodeKind, ScenarioDataType, ScenarioPortRole } from './scenario'
+export type { Scenario, ScenarioNode, ScenarioPort, ScenarioEdge, ScenarioParam, ScenarioNodeKind, ScenarioDataType, ScenarioPortRole, PortFlow } from './scenario'
 export { isEnvironmentFolder, isFolder, isAnyFolder, isRequest, isScenario } from './folderTypes'

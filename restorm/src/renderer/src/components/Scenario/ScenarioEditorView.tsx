@@ -23,7 +23,7 @@ import { ScenarioBoundResolverContext, ScenarioRequestEnvContext, type ResolveBo
 import { SCENARIO_NODE_CATALOGUE, type ScenarioNodeKindMeta } from './scenarioNodeCatalogue'
 import { scenarioEdgeToFlowEdge, flowEdgeToScenarioEdge } from './scenarioGraphMapping'
 import { ScenarioNodeView, type ScenarioNodeBoxData } from './nodes'
-import { defaultPortsForKind } from './scenarioNodePorts'
+import { defaultPortsForKind, isValidScenarioConnection } from './scenarioNodePorts'
 
 export interface ScenarioEditorViewProps {
   /** The scenario being edited. */
@@ -253,14 +253,33 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     }
   }, [onEdgesChange, setNodes, setEdges, persist])
 
+  // Block links that don't make sense by port flow class (value / signal /
+  // both): a value output can't feed the header trigger, a signal output
+  // can't feed a data input, etc. Drives React Flow's drag-time validity.
+  const validateConnection = useCallback((c: Connection | Edge): boolean => {
+    if (!c.source || !c.target || !c.sourceHandle || !c.targetHandle) return false
+    const src = nodes.find((n) => n.id === c.source)
+    const tgt = nodes.find((n) => n.id === c.target)
+    if (!src || !tgt) return false
+    return isValidScenarioConnection({
+      sourceKind: src.data.kind,
+      sourceOutputs: src.data.outputs,
+      sourceHandle: c.sourceHandle,
+      targetKind: tgt.data.kind,
+      targetInputs: tgt.data.inputs,
+      targetHandle: c.targetHandle
+    })
+  }, [nodes])
+
   const onConnect = useCallback((connection: Connection) => {
+    if (!validateConnection(connection)) return
     const id = `e-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
     setEdges((curr) => {
       const next = addEdge({ ...connection, id }, curr)
       setNodes((n) => { persist(n, next); return n })
       return next
     })
-  }, [setEdges, setNodes, persist])
+  }, [setEdges, setNodes, persist, validateConnection])
 
   const addNode = useCallback((kind: ScenarioNodeKind, flow: { x: number; y: number }, config: Record<string, unknown> = {}) => {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
@@ -424,6 +443,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
         onNodesChange={handleNodesChange}
         onEdgesChange={handleEdgesChange}
         onConnect={onConnect}
+        isValidConnection={validateConnection}
         deleteKeyCode={['Delete', 'Backspace']}
         multiSelectionKeyCode={['Control', 'Meta']}
         onPaneContextMenu={onPaneContextMenu}

@@ -41,6 +41,16 @@ export type ScenarioPortRole =
   | 'error'
   | (string & {})
 
+/**
+ * Connection compatibility class for a port.
+ * - On an **output**: `value` (A) pushes a value; `signal` (B) only signals
+ *   "action done" (no value); `both` (AB) does both (e.g. `response`, `error`).
+ * - On an **input**: `value` accepts A/AB (data/body inputs); `signal` accepts
+ *   B/AB (the header launch trigger).
+ * A link is valid when `output === 'both'` or `output === inputAccepts`.
+ */
+export type PortFlow = 'value' | 'signal' | 'both'
+
 export interface ScenarioPort {
   id: RuntimeId
   name: string
@@ -51,6 +61,8 @@ export interface ScenarioPort {
   defaultEdgeColor?: string
   /** Mandatory input: flagged red in the editor until a link points to it. */
   required?: boolean
+  /** Connection class (value / signal / both) — see {@link PortFlow}. */
+  flow?: PortFlow
 }
 
 /**

@@ -58,6 +58,13 @@ const PROTOCOL_VERSION = '2025-03-26'
 // match `MCP_DISCOVERY_DIR` in `restorm/src/main/services/mcpDiscovery.ts`.
 const DISCOVERY_DIR = join(tmpdir(), 'restorm-mcp')
 
+// Last `tools/list` restorm actually returned, persisted here so the next
+// session can answer `tools/list` (while restorm is still down) with the
+// real, current tool set instead of the hand-written `BUILTIN_TOOLS` — which
+// inevitably drifts as tools are added. Self-syncing: refreshed every time we
+// forward a live `tools/list`. See `fallbackTools()` / `cacheTools()`.
+const TOOLS_CACHE_FILE = join(DISCOVERY_DIR, 'tools-cache.json')
+
 // Resolved at runtime — restorm picks a free OS port at boot and
 // announces it via the lockfile. `null` means we haven't discovered
 // (or spawned) a live instance yet.
@@ -749,6 +756,29 @@ function makeErrorReply(id, code, message) {
 }
 
 /**
+ * Tools to advertise while restorm is down: the last live `tools/list` we
+ * cached (always the real, current set), falling back to the hand-written
+ * `BUILTIN_TOOLS` only on a cold first run before any cache exists.
+ */
+function fallbackTools() {
+  try {
+    const cached = JSON.parse(readFileSync(TOOLS_CACHE_FILE, 'utf8'))
+    if (Array.isArray(cached) && cached.length > 0) return cached
+  } catch { /* no/invalid cache — fall back below */ }
+  return BUILTIN_TOOLS
+}
+
+/** Persist a live `tools/list` result so the next session is in sync. */
+async function cacheTools(tools) {
+  try {
+    await fs.mkdir(DISCOVERY_DIR, { recursive: true })
+    await fs.writeFile(TOOLS_CACHE_FILE, JSON.stringify(tools))
+  } catch (err) {
+    log('failed to cache tools/list', { error: String(err) })
+  }
+}
+
+/**
  * Decide how to handle a request without spawning restorm. Returns a
  * synthetic reply for the cheap protocol calls (`initialize`,
  * `tools/list`, the `notifications/initialized` no-op), and `null`
@@ -771,7 +801,7 @@ function trySyntheticReply(parsed) {
     return {
       jsonrpc: '2.0',
       id: parsed.id ?? null,
-      result: { tools: BUILTIN_TOOLS }
+      result: { tools: fallbackTools() }
     }
   }
   // `notifications/initialized` and any other notification with no
@@ -811,6 +841,10 @@ async function handleLine(text) {
   try {
     const reply = await forward(text)
     if (reply !== null) writeReply(reply)
+    // Keep the on-disk fallback in sync with restorm's real tool set.
+    if (parsed.method === 'tools/list' && Array.isArray(reply?.result?.tools)) {
+      void cacheTools(reply.result.tools)
+    }
   } catch (err) {
     log('forward failed', { error: String(err) })
     writeReply(makeErrorReply(parsed.id ?? null, -32000, String(err)))
