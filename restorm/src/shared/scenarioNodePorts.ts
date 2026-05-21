@@ -66,7 +66,7 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   waitUntil: { inputs: [{ id: 'until', name: 'until', required: true }], outputs: [{ id: 'out', name: 'then', role: 'then', flow: 'signal' }] },
   now: { inputs: [IN], outputs: [{ id: 'value', name: 'now', dataType: 'string', flow: 'value' }] },
   // Data & compute
-  arithmetic: { inputs: [{ id: 'a', name: 'a', dataType: 'number', required: true }, { id: 'b', name: 'b', dataType: 'number', required: true }], outputs: [{ id: 'result', name: 'result', dataType: 'number', flow: 'value' }] },
+  arithmetic: { inputs: [{ id: 'a', name: 'a', dataType: 'number', required: true }, { id: 'b', name: 'b', dataType: 'number' }], outputs: [{ id: 'result', name: 'result', dataType: 'number', flow: 'value' }] },
   comparator: { inputs: [{ id: 'a', name: 'a', required: true }, { id: 'b', name: 'b', required: true }], outputs: [{ id: 'result', name: 'result', dataType: 'boolean', flow: 'value' }] },
   boolean: { inputs: [{ id: 'a', name: 'a', dataType: 'boolean', required: true }, { id: 'b', name: 'b', dataType: 'boolean', required: true }], outputs: [{ id: 'result', name: 'result', dataType: 'boolean', flow: 'value' }] },
   template: { inputs: [{ id: 'vars', name: 'vars', dataType: 'json' }], outputs: [{ id: 'text', name: 'text', dataType: 'string', flow: 'value' }] },

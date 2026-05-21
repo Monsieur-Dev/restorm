@@ -1,23 +1,47 @@
-import React from 'react'
-import type { NodeProps } from '@xyflow/react'
+import React, { useState } from 'react'
+import { useNodeConnections, type NodeProps } from '@xyflow/react'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { SegmentedToggle } from './SegmentedToggle'
 
 /**
- * Two mandatory operands `a` / `b` with an operator toggle between them and a
- * single `result` output. Shared shape for comparator / arithmetic / boolean
- * (they differ only by the operator set). Both inputs are required, so the run
- * button stays grey until they're wired.
+ * Inline numeric field for an unwired operand — mirrors the wait node's inline
+ * duration (visual-only local state until the node config schema lands).
  */
-function makeBinaryOpBox(options: readonly string[], defaultValue: string, displayName: string): React.FC<NodeProps<ScenarioNodeBoxType>> {
+const InlineNumber: React.FC = () => {
+  const [value, setValue] = useState<string>('0')
+  return (
+    <input
+      type="number"
+      className="scn-wait-input nodrag"
+      value={value}
+      onMouseDown={(e) => { e.stopPropagation() }}
+      onChange={(e) => { setValue(e.target.value) }}
+    />
+  )
+}
+
+/**
+ * Two operands `a` / `b` with an operator toggle between them and a single
+ * `result` output. Shared shape for comparator / arithmetic / boolean (they
+ * differ only by the operator set). `a` is always required. When
+ * `bNumericWhenUnwired` is set (arithmetic), `b` is optional: wire a value into
+ * it, or set a literal inline with a numeric field. Otherwise `b` is required.
+ */
+function makeBinaryOpBox(options: readonly string[], defaultValue: string, displayName: string, bNumericWhenUnwired = false): React.FC<NodeProps<ScenarioNodeBoxType>> {
   const Comp: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
+    const bConnections = useNodeConnections({ handleType: 'target', handleId: 'b' })
+    const bWired = bConnections.length > 0
+    const bRow: ScenarioNodeCell =
+      bNumericWhenUnwired && !bWired
+        ? { id: 'b', content: <InlineNumber />, port: { id: 'b', type: 'target' } }
+        : { id: 'b', label: 'b', port: { id: 'b', type: 'target', ...(bNumericWhenUnwired ? {} : { required: true }) } }
     const left: ScenarioNodeSection[] = [
       {
         id: 'main',
         rows: [
           { id: 'a', label: 'a', port: { id: 'a', type: 'target', required: true } },
           { id: 'op', content: <SegmentedToggle options={options} defaultValue={defaultValue} ariaLabel="operator" /> },
-          { id: 'b', label: 'b', port: { id: 'b', type: 'target', required: true } }
+          bRow
         ]
       }
     ]
@@ -31,5 +55,5 @@ function makeBinaryOpBox(options: readonly string[], defaultValue: string, displ
 }
 
 export const ComparatorNodeBox = makeBinaryOpBox(['<', '≤', '=', '≥', '>'], '=', 'ComparatorNodeBox')
-export const ArithmeticNodeBox = makeBinaryOpBox(['+', '−', '×', '÷'], '+', 'ArithmeticNodeBox')
+export const ArithmeticNodeBox = makeBinaryOpBox(['+', '−', '×', '÷'], '+', 'ArithmeticNodeBox', true)
 export const BooleanNodeBox = makeBinaryOpBox(['AND', 'OR', 'XOR'], 'AND', 'BooleanNodeBox')
