@@ -45,7 +45,6 @@ const OUT = { id: 'out' }
 
 const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // Sources & control
-  start: { inputs: [], outputs: [OUT] },
   input: { inputs: [], outputs: [{ id: 'value', name: 'value' }] },
   if: { inputs: [{ id: 'left', name: 'left', required: true }, { id: 'right', name: 'right', required: true }], outputs: [{ id: 'then', name: 'then', role: 'then' }, { id: 'else', name: 'else', role: 'else' }] },
   switch: { inputs: [{ id: 'in', name: 'on', required: true }], outputs: [{ id: 'case1', name: 'case 1', role: 'case' }, { id: 'default', name: 'default', role: 'default' }] },
@@ -60,7 +59,7 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // Time
   wait: { inputs: [IN, { id: 'duration', name: 'duration', dataType: 'duration' }], outputs: [{ id: 'out', name: 'then', role: 'then' }] },
   waitUntil: { inputs: [{ id: 'until', name: 'until', required: true }], outputs: [{ id: 'out', name: 'then', role: 'then' }] },
-  now: { inputs: [], outputs: [{ id: 'value', name: 'now', dataType: 'string' }] },
+  now: { inputs: [IN], outputs: [{ id: 'value', name: 'now', dataType: 'string' }] },
   // Data & compute
   arithmetic: { inputs: [{ id: 'a', name: 'a', dataType: 'number', required: true }, { id: 'b', name: 'b', dataType: 'number', required: true }], outputs: [{ id: 'result', name: 'result', dataType: 'number' }] },
   comparator: { inputs: [{ id: 'a', name: 'a', required: true }, { id: 'b', name: 'b', required: true }], outputs: [{ id: 'result', name: 'result', dataType: 'boolean' }] },

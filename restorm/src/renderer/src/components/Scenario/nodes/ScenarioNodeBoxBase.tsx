@@ -79,6 +79,12 @@ export interface ScenarioNodeBoxBaseProps {
    * that needs its inputs produced first). Defaults to false.
    */
   canPlay?: boolean
+  /**
+   * Whether the node exposes the dedicated error output port (bottom). Most
+   * nodes can fail, so it defaults to true; set false for kinds that can't
+   * error (e.g. `now`), where an error anchor would be meaningless.
+   */
+  hasError?: boolean
 }
 
 const STATUS_GLYPH: Record<NonNullable<ScenarioNodeBoxData['status']>, string> = {
@@ -95,7 +101,7 @@ const STATUS_GLYPH: Record<NonNullable<ScenarioNodeBoxData['status']>, string> =
  * box colour with auto-contrast, and the dedicated error port. Per-kind
  * components (IfNodeBox, …) compose this and only declare their columns.
  */
-export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, data, selected, left, right, headerIcon, title, launchInput, canPlay }) => {
+export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, data, selected, left, right, headerIcon, title, launchInput, canPlay, hasError }) => {
   const meta = scenarioNodeMeta(data.kind)
   const collapsed = data.collapsed === true
   const note = data.note
@@ -195,14 +201,16 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
         />
       ))}
 
-      <Handle
-        id="error"
-        type="source"
-        position={Position.Bottom}
-        className="scn-handle scn-handle-error"
-        style={{ background: ROLE_COLOR['error'] }}
-        title="error"
-      />
+      {hasError !== false && (
+        <Handle
+          id="error"
+          type="source"
+          position={Position.Bottom}
+          className="scn-handle scn-handle-error"
+          style={{ background: ROLE_COLOR['error'] }}
+          title="error"
+        />
+      )}
     </div>
   )
 }

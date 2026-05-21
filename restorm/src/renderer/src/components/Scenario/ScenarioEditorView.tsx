@@ -16,11 +16,11 @@ import {
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { useTranslation } from 'react-i18next'
-import { Button, ContextMenu, Tooltip, ColorPicker, Modal, MarkdownEditor } from 'electron-core-ui/renderer'
+import { Button, ContextMenu, Tooltip, ColorPicker, Modal, MarkdownEditor, type ContextMenuItem } from 'electron-core-ui/renderer'
 import type { Scenario, ScenarioNode, ScenarioEdge, ScenarioNodeKind } from '../../../../shared/types/collections'
 import { isRequest, isScenario } from '../../../../shared/types/collections'
 import { ScenarioBoundResolverContext, ScenarioRequestEnvContext, type ResolveBoundItem, type ResolveRequestEnv } from './scenarioBoundResolver'
-import { SCENARIO_NODE_CATALOGUE } from './scenarioNodeCatalogue'
+import { SCENARIO_NODE_CATALOGUE, type ScenarioNodeKindMeta } from './scenarioNodeCatalogue'
 import { scenarioEdgeToFlowEdge, flowEdgeToScenarioEdge } from './scenarioGraphMapping'
 import { ScenarioNodeView, type ScenarioNodeBoxData } from './nodes'
 import { defaultPortsForKind } from './scenarioNodePorts'
@@ -49,11 +49,13 @@ const emptyStyle: CSSProperties = {
   position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
   pointerEvents: 'none', opacity: 0.6, fontSize: 13, zIndex: 1
 }
-const paletteStyle: CSSProperties = {
-  position: 'absolute', zIndex: 10, maxHeight: 360, overflowY: 'auto', minWidth: 200,
-  background: 'var(--ecu-menu-background, #252526)', border: '1px solid var(--ecu-menu-border, #454545)',
-  borderRadius: 4, padding: 4, boxShadow: '0 2px 8px rgba(0,0,0,0.4)', display: 'flex', flexDirection: 'column', gap: 1
-}
+
+/** The catalogue flattened with a separator marker between categories — the
+ * add-node menu maps this to ContextMenu items. Computed once (no refs / no
+ * render-phase work). */
+const PALETTE_ENTRIES: (ScenarioNodeKindMeta | { separator: true })[] = SCENARIO_NODE_CATALOGUE.flatMap(
+  (meta, i, arr) => (i > 0 && arr[i - 1]?.category !== meta.category ? [{ separator: true as const }, meta] : [meta])
+)
 
 interface NodeHandlers {
   onToggleCollapse: (id: string) => void
@@ -400,14 +402,10 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
 
   const onPaneContextMenu = useCallback((event: React.MouseEvent | MouseEvent) => {
     event.preventDefault()
-    const rect = wrapperRef.current?.getBoundingClientRect()
     const clientX = 'clientX' in event ? event.clientX : 0
     const clientY = 'clientY' in event ? event.clientY : 0
-    setPalette({
-      x: clientX - (rect?.left ?? 0),
-      y: clientY - (rect?.top ?? 0),
-      flow: screenToFlowPosition({ x: clientX, y: clientY })
-    })
+    // Screen coords for the ContextMenu (same convention as the node menu).
+    setPalette({ x: clientX, y: clientY, flow: screenToFlowPosition({ x: clientX, y: clientY }) })
   }, [screenToFlowPosition])
 
   return (
@@ -440,21 +438,18 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
         <Controls showInteractive={false} />
       </ReactFlow>
       {palette && (
-        <div data-testid="scenario-node-palette" style={{ ...paletteStyle, left: palette.x, top: palette.y }}>
-          {SCENARIO_NODE_CATALOGUE.map((meta) => (
-            <Button
-              key={meta.kind}
-              small
-              fullWidth
-              align="left"
-              icon={meta.icon}
-              data-testid={`scenario-palette-${meta.kind}`}
-              onClick={() => { addNode(meta.kind, palette.flow) }}
-            >
-              {t(meta.labelKey, meta.defaultLabel)}
-            </Button>
+        <ContextMenu
+          visible
+          x={palette.x}
+          y={palette.y}
+          onRequestClose={() => { setPalette(null) }}
+          data-testid="scenario-node-palette"
+          items={PALETTE_ENTRIES.map((e, i): ContextMenuItem => (
+            'separator' in e
+              ? { id: `sep-${i}`, label: '', isSeparator: true }
+              : { id: e.kind, label: t(e.labelKey, e.defaultLabel), icon: e.icon, onClick: () => { addNode(e.kind, palette.flow) } }
           ))}
-        </div>
+        />
       )}
       {nodeMenu && (
         <ContextMenu

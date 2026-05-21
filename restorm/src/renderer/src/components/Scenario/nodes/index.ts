@@ -2,7 +2,6 @@ import { createElement, type FC } from 'react'
 import type { NodeProps } from '@xyflow/react'
 import type { ScenarioNodeKind } from '../../../../../shared/types/collections'
 import { type ScenarioNodeBoxType } from './ScenarioNodeBoxBase'
-import { DefaultNodeBox } from './DefaultNodeBox'
 import { IfNodeBox } from './IfNodeBox'
 import { RequestNodeBox } from './RequestNodeBox'
 import { RunScenarioNodeBox } from './RunScenarioNodeBox'
@@ -12,6 +11,8 @@ import { WaitUntilNodeBox } from './WaitUntilNodeBox'
 import { ComparatorNodeBox, ArithmeticNodeBox, BooleanNodeBox } from './BinaryOpNodeBox'
 import { InputNodeBox, GetVariableNodeBox, SetVariableNodeBox } from './VariableNodeBox'
 import { TransformNodeBox, TemplateNodeBox } from './TransformNodeBox'
+import { ForEachNodeBox, AggregateNodeBox, MapNodeBox, FilterNodeBox } from './CollectionNodeBoxes'
+import { LogNodeBox, AssertNodeBox, NowNodeBox } from './UtilityNodeBoxes'
 
 export type { ScenarioNodeBoxData, ScenarioNodeBoxType, ScenarioNodeCell } from './ScenarioNodeBoxBase'
 export { ScenarioNodeBoxBase } from './ScenarioNodeBoxBase'
@@ -19,30 +20,38 @@ export { ScenarioNodeBoxBase } from './ScenarioNodeBoxBase'
 type NodeBoxComponent = FC<NodeProps<ScenarioNodeBoxType>>
 
 /**
- * Per-kind node box components. Each kind that needs a bespoke body
- * registers its component here; everything else falls back to
- * `DefaultNodeBox`. Add a new file under `nodes/` + one line here.
+ * Per-kind node box components — one bespoke component for every kind, no
+ * generic fallback. The full `Record` makes TypeScript reject adding a new
+ * `ScenarioNodeKind` without registering a component for it. Add a new file
+ * under `nodes/` + one line here.
  */
-const SCENARIO_NODE_COMPONENTS: Partial<Record<ScenarioNodeKind, NodeBoxComponent>> = {
+const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
+  input: InputNodeBox,
   if: IfNodeBox,
   switch: SwitchNodeBox,
   request: RequestNodeBox,
   runScenario: RunScenarioNodeBox,
+  forEach: ForEachNodeBox,
+  aggregate: AggregateNodeBox,
+  map: MapNodeBox,
+  filter: FilterNodeBox,
   wait: WaitNodeBox,
   waitUntil: WaitUntilNodeBox,
-  comparator: ComparatorNodeBox,
+  now: NowNodeBox,
   arithmetic: ArithmeticNodeBox,
+  comparator: ComparatorNodeBox,
   boolean: BooleanNodeBox,
-  input: InputNodeBox,
-  getVariable: GetVariableNodeBox,
+  template: TemplateNodeBox,
   setVariable: SetVariableNodeBox,
+  getVariable: GetVariableNodeBox,
   transform: TransformNodeBox,
-  template: TemplateNodeBox
+  log: LogNodeBox,
+  assert: AssertNodeBox
 }
 
-/** The component that renders a given node kind (bespoke or default). */
+/** The bespoke component that renders a given node kind. */
 export function nodeBoxForKind(kind: ScenarioNodeKind): NodeBoxComponent {
-  return SCENARIO_NODE_COMPONENTS[kind] ?? DefaultNodeBox
+  return SCENARIO_NODE_COMPONENTS[kind]
 }
 
 /**

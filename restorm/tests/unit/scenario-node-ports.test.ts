@@ -9,8 +9,8 @@ describe('defaultPortsForKind', () => {
     expect(outputs.map((p) => p.role)).toEqual(['then', 'else'])
   })
 
-  it('gives Start an output but no input', () => {
-    const { inputs, outputs } = defaultPortsForKind('start')
+  it('gives Input an output but no input (a source kind)', () => {
+    const { inputs, outputs } = defaultPortsForKind('input')
     expect(inputs).toHaveLength(0)
     expect(outputs).toHaveLength(1)
   })
