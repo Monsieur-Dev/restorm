@@ -13,9 +13,9 @@ export const IfNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, 
     {
       id: 'main',
       rows: [
-        { id: 'left', label: 'left', port: { id: 'left', type: 'target' } },
+        { id: 'left', label: 'left', port: { id: 'left', type: 'target', required: true } },
         { id: 'operator', content: <OperatorToggle /> },
-        { id: 'right', label: 'right', port: { id: 'right', type: 'target' } }
+        { id: 'right', label: 'right', port: { id: 'right', type: 'target', required: true } }
       ]
     }
   ]

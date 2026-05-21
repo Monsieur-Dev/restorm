@@ -311,6 +311,90 @@
   max-width: 220px;
 }
 
+/* Wait node — inline numeric duration field + unit toggle. */
+.scn-wait-duration {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+.scn-wait-input {
+  width: 50px;
+  background: var(--input-background, #3c3c3c);
+  color: var(--input-foreground, #cccccc);
+  border: 1px solid var(--input-border, #555555);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-size: 11px;
+  font-family: var(--editor-font-family, monospace);
+}
+.scn-unit-toggle {
+  display: inline-flex;
+  border: 1px solid var(--editorHoverWidget-border, #454545);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.scn-unit-option {
+  min-width: 18px;
+  padding: 1px 4px;
+  font-size: 10px;
+  line-height: 1.4;
+  background: transparent;
+  color: inherit;
+  border: none;
+  border-right: 1px solid var(--editorHoverWidget-border, #454545);
+  cursor: pointer;
+  opacity: 0.7;
+}
+.scn-unit-option:last-child { border-right: none; }
+.scn-unit-option:hover {
+  opacity: 1;
+  background: var(--list-hoverBackground, rgba(255, 255, 255, 0.06));
+}
+.scn-unit-option-active {
+  opacity: 1;
+  background: var(--focusBorder, #007fd4);
+  color: #fff;
+}
+
+/* Node-local name field (input / get-/set-variable). */
+.scn-name-input {
+  width: 90px;
+  background: var(--input-background, #3c3c3c);
+  color: var(--input-foreground, #cccccc);
+  border: 1px solid var(--input-border, #555555);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-size: 11px;
+  font-family: var(--editor-font-family, monospace);
+}
+
+/* Node-local expression / template field (transform / template). */
+.scn-code-input {
+  width: 150px;
+  resize: vertical;
+  background: var(--input-background, #3c3c3c);
+  color: var(--input-foreground, #cccccc);
+  border: 1px solid var(--input-border, #555555);
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-size: 11px;
+  font-family: var(--editor-font-family, monospace);
+}
+
+/* Switch node — per-case match value field (output rows). */
+.scn-case-input {
+  width: 80px;
+  background: var(--input-background, #3c3c3c);
+  color: var(--input-foreground, #cccccc);
+  border: 1px solid var(--input-border, #555555);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-size: 11px;
+  font-family: var(--editor-font-family, monospace);
+}
+
 /* If operator toggle — compact segmented control. */
 .scn-operator-toggle {
   display: inline-flex;

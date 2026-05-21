@@ -6,6 +6,12 @@ import { DefaultNodeBox } from './DefaultNodeBox'
 import { IfNodeBox } from './IfNodeBox'
 import { RequestNodeBox } from './RequestNodeBox'
 import { RunScenarioNodeBox } from './RunScenarioNodeBox'
+import { SwitchNodeBox } from './SwitchNodeBox'
+import { WaitNodeBox } from './WaitNodeBox'
+import { WaitUntilNodeBox } from './WaitUntilNodeBox'
+import { ComparatorNodeBox, ArithmeticNodeBox, BooleanNodeBox } from './BinaryOpNodeBox'
+import { InputNodeBox, GetVariableNodeBox, SetVariableNodeBox } from './VariableNodeBox'
+import { TransformNodeBox, TemplateNodeBox } from './TransformNodeBox'
 
 export type { ScenarioNodeBoxData, ScenarioNodeBoxType, ScenarioNodeCell } from './ScenarioNodeBoxBase'
 export { ScenarioNodeBoxBase } from './ScenarioNodeBoxBase'
@@ -19,8 +25,19 @@ type NodeBoxComponent = FC<NodeProps<ScenarioNodeBoxType>>
  */
 const SCENARIO_NODE_COMPONENTS: Partial<Record<ScenarioNodeKind, NodeBoxComponent>> = {
   if: IfNodeBox,
+  switch: SwitchNodeBox,
   request: RequestNodeBox,
-  runScenario: RunScenarioNodeBox
+  runScenario: RunScenarioNodeBox,
+  wait: WaitNodeBox,
+  waitUntil: WaitUntilNodeBox,
+  comparator: ComparatorNodeBox,
+  arithmetic: ArithmeticNodeBox,
+  boolean: BooleanNodeBox,
+  input: InputNodeBox,
+  getVariable: GetVariableNodeBox,
+  setVariable: SetVariableNodeBox,
+  transform: TransformNodeBox,
+  template: TemplateNodeBox
 }
 
 /** The component that renders a given node kind (bespoke or default). */

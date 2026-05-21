@@ -1,11 +1,11 @@
-import React, { useCallback, type CSSProperties, type ReactNode } from 'react'
-import { Handle, Position, type Node } from '@xyflow/react'
+import React, { useCallback, useMemo, type CSSProperties, type ReactNode } from 'react'
+import { Handle, Position, useNodeConnections, type Node } from '@xyflow/react'
 import { getContrastColor, MarkdownViewer } from 'electron-core-ui/renderer'
 import type { ScenarioNodeKind, ScenarioPort, ScenarioPortRole } from '../../../../../shared/types/collections'
 import { scenarioNodeMeta } from '../scenarioNodeCatalogue'
 import { ROLE_COLOR, handleTop } from '../scenarioGraphMapping'
 import { ScenarioNodeSection } from './ScenarioNodeSection'
-import { anchorColor, cellBody } from './scenarioCellRender'
+import { anchorColor, cellBody, portAnchorColor } from './scenarioCellRender'
 import '../ScenarioNodeBox.css'
 
 /** React Flow node data shared by every scenario node box. */
@@ -39,7 +39,7 @@ export interface ScenarioNodeCell {
   content?: ReactNode
   /** Optional hover tooltip on the cell label (e.g. a param description). */
   tooltip?: string
-  port?: { id: string; role?: ScenarioPortRole; type: 'target' | 'source' }
+  port?: { id: string; role?: ScenarioPortRole; type: 'target' | 'source'; required?: boolean }
 }
 
 /**
@@ -102,6 +102,14 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
   const leftRows = left.flatMap((s) => s.rows)
   const allPorts = [...leftRows, ...right].flatMap((c) => (c.port ? [c.port] : []))
 
+  // Which input (target) handles currently have an incoming link — drives the
+  // red "missing required link" flag on mandatory inputs.
+  const targetConnections = useNodeConnections({ id, handleType: 'target' })
+  const connectedInputs = useMemo(
+    () => new Set(targetConnections.map((c) => c.targetHandle).filter((h): h is string => h != null)),
+    [targetConnections]
+  )
+
   const headerStyle: CSSProperties = data.color
     ? { background: data.color, color: getContrastColor(data.color) }
     : {}
@@ -159,7 +167,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
         <div className="scn-node-body">
           <div className="scn-node-col scn-node-col-in">
             {left.map((section) => (
-              <ScenarioNodeSection key={section.id} section={section} />
+              <ScenarioNodeSection key={section.id} section={section} connectedInputs={connectedInputs} />
             ))}
           </div>
           <div className="scn-node-col scn-node-col-out">
@@ -182,7 +190,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
           type={p.type}
           position={p.type === 'target' ? Position.Left : Position.Right}
           className="scn-handle"
-          style={{ top: handleTop(i, allPorts.length, true), background: anchorColor(p.role) }}
+          style={{ top: handleTop(i, allPorts.length, true), background: portAnchorColor(p, connectedInputs) }}
           title={p.id}
         />
       ))}

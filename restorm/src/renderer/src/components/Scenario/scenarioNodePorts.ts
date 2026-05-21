@@ -19,6 +19,7 @@ interface PortSpec {
   name?: string
   dataType?: ScenarioDataType
   role?: ScenarioPortRole
+  required?: boolean
 }
 
 function p(spec: PortSpec): ScenarioPort {
@@ -26,7 +27,8 @@ function p(spec: PortSpec): ScenarioPort {
     id: spec.id,
     name: spec.name ?? '',
     dataType: spec.dataType ?? 'any',
-    ...(spec.role ? { role: spec.role } : {})
+    ...(spec.role ? { role: spec.role } : {}),
+    ...(spec.required ? { required: true } : {})
   }
 }
 
@@ -42,31 +44,31 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // Sources & control
   start: { inputs: [], outputs: [OUT] },
   input: { inputs: [], outputs: [{ id: 'value', name: 'value' }] },
-  if: { inputs: [{ id: 'left', name: 'left' }, { id: 'right', name: 'right' }], outputs: [{ id: 'then', name: 'then', role: 'then' }, { id: 'else', name: 'else', role: 'else' }] },
-  switch: { inputs: [IN], outputs: [{ id: 'case1', name: 'case 1', role: 'case' }, { id: 'default', name: 'default', role: 'default' }] },
+  if: { inputs: [{ id: 'left', name: 'left', required: true }, { id: 'right', name: 'right', required: true }], outputs: [{ id: 'then', name: 'then', role: 'then' }, { id: 'else', name: 'else', role: 'else' }] },
+  switch: { inputs: [{ id: 'in', name: 'on', required: true }], outputs: [{ id: 'case1', name: 'case 1', role: 'case' }, { id: 'default', name: 'default', role: 'default' }] },
   // Requests & composition
   request: { inputs: [IN], outputs: [{ id: 'response', name: 'response', dataType: 'response', role: 'response' }] },
   runScenario: { inputs: [IN], outputs: [{ id: 'result', name: 'result', role: 'response' }] },
   // Iteration & collections
-  forEach: { inputs: [{ id: 'items', name: 'items', dataType: 'json' }], outputs: [{ id: 'each', name: 'each', role: 'then' }, { id: 'done', name: 'done', role: 'else' }] },
-  aggregate: { inputs: [{ id: 'items', name: 'items', dataType: 'json' }], outputs: [{ id: 'result', name: 'result' }] },
-  map: { inputs: [{ id: 'items', name: 'items', dataType: 'json' }], outputs: [{ id: 'mapped', name: 'mapped', dataType: 'json' }] },
-  filter: { inputs: [{ id: 'items', name: 'items', dataType: 'json' }], outputs: [{ id: 'kept', name: 'kept', dataType: 'json' }] },
+  forEach: { inputs: [{ id: 'items', name: 'items', dataType: 'json', required: true }], outputs: [{ id: 'each', name: 'each', role: 'then' }, { id: 'done', name: 'done', role: 'else' }] },
+  aggregate: { inputs: [{ id: 'items', name: 'items', dataType: 'json', required: true }], outputs: [{ id: 'result', name: 'result' }] },
+  map: { inputs: [{ id: 'items', name: 'items', dataType: 'json', required: true }], outputs: [{ id: 'mapped', name: 'mapped', dataType: 'json' }] },
+  filter: { inputs: [{ id: 'items', name: 'items', dataType: 'json', required: true }], outputs: [{ id: 'kept', name: 'kept', dataType: 'json' }] },
   // Time
-  wait: { inputs: [IN], outputs: [OUT] },
-  waitUntil: { inputs: [{ id: 'in', name: '', dataType: 'duration' }], outputs: [OUT] },
+  wait: { inputs: [IN, { id: 'duration', name: 'duration', dataType: 'duration' }], outputs: [{ id: 'out', name: 'then', role: 'then' }] },
+  waitUntil: { inputs: [{ id: 'until', name: 'until', required: true }], outputs: [{ id: 'out', name: 'then', role: 'then' }] },
   now: { inputs: [], outputs: [{ id: 'value', name: 'now', dataType: 'string' }] },
   // Data & compute
-  arithmetic: { inputs: [{ id: 'a', name: 'a', dataType: 'number' }, { id: 'b', name: 'b', dataType: 'number' }], outputs: [{ id: 'result', name: 'result', dataType: 'number' }] },
-  comparator: { inputs: [{ id: 'a', name: 'a' }, { id: 'b', name: 'b' }], outputs: [{ id: 'result', name: 'result', dataType: 'boolean' }] },
-  boolean: { inputs: [{ id: 'a', name: 'a', dataType: 'boolean' }, { id: 'b', name: 'b', dataType: 'boolean' }], outputs: [{ id: 'result', name: 'result', dataType: 'boolean' }] },
+  arithmetic: { inputs: [{ id: 'a', name: 'a', dataType: 'number', required: true }, { id: 'b', name: 'b', dataType: 'number', required: true }], outputs: [{ id: 'result', name: 'result', dataType: 'number' }] },
+  comparator: { inputs: [{ id: 'a', name: 'a', required: true }, { id: 'b', name: 'b', required: true }], outputs: [{ id: 'result', name: 'result', dataType: 'boolean' }] },
+  boolean: { inputs: [{ id: 'a', name: 'a', dataType: 'boolean', required: true }, { id: 'b', name: 'b', dataType: 'boolean', required: true }], outputs: [{ id: 'result', name: 'result', dataType: 'boolean' }] },
   template: { inputs: [{ id: 'vars', name: 'vars', dataType: 'json' }], outputs: [{ id: 'text', name: 'text', dataType: 'string' }] },
-  setVariable: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'value', name: 'value' }] },
+  setVariable: { inputs: [{ id: 'value', name: 'value', required: true }], outputs: [{ id: 'value', name: 'value' }] },
   getVariable: { inputs: [], outputs: [{ id: 'value', name: 'value' }] },
-  transform: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'value', name: 'value' }] },
+  transform: { inputs: [{ id: 'value', name: 'value', required: true }], outputs: [{ id: 'value', name: 'value' }] },
   // Utilities
-  log: { inputs: [{ id: 'value', name: 'value' }], outputs: [OUT] },
-  assert: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'then', name: 'pass', role: 'then' }, { id: 'else', name: 'fail', role: 'else' }] }
+  log: { inputs: [{ id: 'value', name: 'value', required: true }], outputs: [OUT] },
+  assert: { inputs: [{ id: 'value', name: 'value', required: true }], outputs: [{ id: 'then', name: 'pass', role: 'then' }, { id: 'else', name: 'fail', role: 'else' }] }
 }
 
 /** A generic single-in/single-out node for any kind without a spec. */

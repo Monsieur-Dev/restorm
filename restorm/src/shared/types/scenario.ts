@@ -49,6 +49,8 @@ export interface ScenarioPort {
   role?: ScenarioPortRole
   /** Explicit default colour for edges leaving this port (overrides the role default). */
   defaultEdgeColor?: string
+  /** Mandatory input: flagged red in the editor until a link points to it. */
+  required?: boolean
 }
 
 /**
