@@ -58,12 +58,16 @@ const PROTOCOL_VERSION = '2025-03-26'
 // match `MCP_DISCOVERY_DIR` in `restorm/src/main/services/mcpDiscovery.ts`.
 const DISCOVERY_DIR = join(tmpdir(), 'restorm-mcp')
 
-// Last `tools/list` restorm actually returned, persisted here so the next
-// session can answer `tools/list` (while restorm is still down) with the
-// real, current tool set instead of the hand-written `BUILTIN_TOOLS` — which
-// inevitably drifts as tools are added. Self-syncing: refreshed every time we
-// forward a live `tools/list`. See `fallbackTools()` / `cacheTools()`.
-const TOOLS_CACHE_FILE = join(DISCOVERY_DIR, 'tools-cache.json')
+// Last `tools/list` restorm actually returned, persisted so the next session
+// can answer `tools/list` (while restorm is still down) with the real, current
+// tool set instead of the hand-written `BUILTIN_TOOLS` — which inevitably
+// drifts as tools are added. Self-syncing: refreshed every time we forward a
+// live `tools/list`. See `fallbackTools()` / `cacheTools()`.
+//
+// Deliberately a SIBLING of DISCOVERY_DIR, not a file inside it: that dir holds
+// per-pid `*.json` lockfiles and the launcher GCs any `.json` there without a
+// live pid — a cache file living inside would be swept on the next relaunch.
+const TOOLS_CACHE_FILE = join(tmpdir(), 'restorm-mcp-tools-cache.json')
 
 // Resolved at runtime — restorm picks a free OS port at boot and
 // announces it via the lockfile. `null` means we haven't discovered
@@ -771,7 +775,6 @@ function fallbackTools() {
 /** Persist a live `tools/list` result so the next session is in sync. */
 async function cacheTools(tools) {
   try {
-    await fs.mkdir(DISCOVERY_DIR, { recursive: true })
     await fs.writeFile(TOOLS_CACHE_FILE, JSON.stringify(tools))
   } catch (err) {
     log('failed to cache tools/list', { error: String(err) })
