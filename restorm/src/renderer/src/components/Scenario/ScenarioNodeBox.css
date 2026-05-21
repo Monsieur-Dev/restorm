@@ -428,3 +428,73 @@
   background: var(--focusBorder, #007fd4);
   color: #fff;
 }
+
+/* JSON-path selector — shown on a data link's receiving input. A label over a
+ * [textbox + target button] control group editing the edge's selector. */
+.scn-path-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+  max-width: 220px;
+}
+.scn-path-label {
+  opacity: 0.85;
+}
+.scn-path-controls {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+.scn-path-controls .input-box {
+  flex: 1;
+  min-width: 0;
+}
+.scn-path-controls .monaco-inputbox {
+  font-size: 11px;
+}
+.scn-path-target {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+/* The picker popover: a scrollable tree of the upstream box's run result. */
+.scn-path-popover {
+  display: flex;
+  flex-direction: column;
+  min-width: 240px;
+  max-width: 360px;
+  max-height: 320px;
+  background: var(--editorHoverWidget-background, #252526);
+  border: 1px solid var(--editorHoverWidget-border, #454545);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+.scn-path-popover-head {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--editorHoverWidget-border, #454545);
+  font-size: 11px;
+  opacity: 0.85;
+}
+.scn-path-popover-source {
+  font-weight: 600;
+}
+.scn-path-popover .ecu-list-view,
+.scn-path-popover [data-testid='scn-path-tree'] {
+  overflow: auto;
+  max-height: 270px;
+}
+.scn-path-popover-msg {
+  padding: 12px;
+  font-size: 12px;
+  opacity: 0.75;
+}
+.scn-path-popover-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  font-size: 12px;
+}

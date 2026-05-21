@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
 import { Handle, Position } from '@xyflow/react'
+import type { ScenarioNodeKind, ScenarioPort } from '../../../../../shared/types/collections'
 import type { ScenarioNodeCell, ScenarioNodeSection as Section } from './ScenarioNodeBoxBase'
-import { cellBody, portAnchorColor } from './scenarioCellRender'
+import { portAnchorColor } from './scenarioCellRender'
+import { ScenarioInputCell } from './ScenarioInputCell'
 
 function inlineHandle(cell: ScenarioNodeCell, connectedInputs: Set<string>): React.ReactNode {
   if (!cell.port) return null
@@ -24,8 +26,18 @@ function inlineHandle(cell: ScenarioNodeCell, connectedInputs: Set<string>): Rea
  * row carries its own anchor; when collapsed the rows hide and their anchors
  * gather on the section title row (the handles stay mounted so edges hold).
  */
-export const ScenarioNodeSection: React.FC<{ section: Section; connectedInputs: Set<string> }> = ({ section, connectedInputs }) => {
+export const ScenarioNodeSection: React.FC<{
+  section: Section
+  connectedInputs: Set<string>
+  nodeKind: ScenarioNodeKind
+  nodeInputs: ScenarioPort[]
+  scenarioId?: string
+}> = ({ section, connectedInputs, nodeKind, nodeInputs, scenarioId }) => {
   const [collapsed, setCollapsed] = useState(false)
+
+  const renderCell = (cell: ScenarioNodeCell): React.ReactNode => (
+    <ScenarioInputCell cell={cell} nodeKind={nodeKind} nodeInputs={nodeInputs} {...(scenarioId !== undefined ? { scenarioId } : {})} />
+  )
 
   if (!section.name) {
     return (
@@ -33,7 +45,7 @@ export const ScenarioNodeSection: React.FC<{ section: Section; connectedInputs: 
         {section.rows.map((cell) => (
           <div className="scn-row scn-row-left" key={cell.id}>
             {inlineHandle(cell, connectedInputs)}
-            {cellBody(cell)}
+            {renderCell(cell)}
           </div>
         ))}
       </>
@@ -56,7 +68,7 @@ export const ScenarioNodeSection: React.FC<{ section: Section; connectedInputs: 
           {section.rows.map((cell) => (
             <div className="scn-row scn-row-left" key={cell.id}>
               {inlineHandle(cell, connectedInputs)}
-              {cellBody(cell)}
+              {renderCell(cell)}
             </div>
           ))}
         </div>

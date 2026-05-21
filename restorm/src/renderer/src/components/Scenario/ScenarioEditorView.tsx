@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -20,6 +20,7 @@ import { Button, ContextMenu, Tooltip, ColorPicker, Modal, MarkdownEditor, type 
 import type { Scenario, ScenarioNode, ScenarioEdge, ScenarioNodeKind } from '../../../../shared/types/collections'
 import { isRequest, isScenario } from '../../../../shared/types/collections'
 import { ScenarioBoundResolverContext, ScenarioRequestEnvContext, type ResolveBoundItem, type ResolveRequestEnv } from './scenarioBoundResolver'
+import { ScenarioEdgeSelectorContext, type ScenarioEdgeSelectorApi } from './scenarioEdgeSelector'
 import { SCENARIO_NODE_CATALOGUE, type ScenarioNodeKindMeta } from './scenarioNodeCatalogue'
 import { scenarioEdgeToFlowEdge, flowEdgeToScenarioEdge } from './scenarioGraphMapping'
 import { ScenarioNodeView, type ScenarioNodeBoxData } from './nodes'
@@ -158,6 +159,22 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     edgeStore.current = new Map(nextEdges.map((e) => [e.id, e]))
     onScenarioChange?.(scenario.id, { nodes: nextNodes, edges: nextEdges })
   }, [onScenarioChange, scenario.id])
+
+  // The JSON-path selector on a data link reads + writes that edge's `selector`
+  // through this api; the write mutates the authoritative edge store and
+  // re-persists (the seed guard keeps it from re-seeding the canvas).
+  const getEdgeSelector = useCallback((edgeId: string) => edgeStore.current.get(edgeId)?.selector, [])
+  const setEdgeSelector = useCallback((edgeId: string, selector: string) => {
+    const prior = edgeStore.current.get(edgeId)
+    if (!prior) return
+    const trimmed = selector.trim()
+    const updated: ScenarioEdge = { ...prior }
+    if (trimmed === '') delete updated.selector
+    else updated.selector = trimmed
+    edgeStore.current.set(edgeId, updated)
+    setNodes((n) => { setEdges((e) => { persist(n, e); return e }); return n })
+  }, [setNodes, setEdges, persist])
+  const edgeSelectorApi = useMemo<ScenarioEdgeSelectorApi>(() => ({ getSelector: getEdgeSelector, setSelector: setEdgeSelector }), [getEdgeSelector, setEdgeSelector])
 
   // Toggle a node's collapsed flag; update the live node + persist.
   const onToggleCollapse = useCallback((nodeId: string) => {
@@ -432,6 +449,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
   return (
     <ScenarioBoundResolverContext.Provider value={resolveBoundItem ?? null}>
     <ScenarioRequestEnvContext.Provider value={resolveRequestEnv ?? null}>
+    <ScenarioEdgeSelectorContext.Provider value={edgeSelectorApi}>
     <div ref={wrapperRef} data-testid="scenario-editor" style={containerStyle} onDragOver={onDragOver} onDrop={onDrop}>
       {nodes.length === 0 && (
         <div data-testid="scenario-editor-empty" style={emptyStyle}>
@@ -534,6 +552,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
         </div>
       </Modal>
     </div>
+    </ScenarioEdgeSelectorContext.Provider>
     </ScenarioRequestEnvContext.Provider>
     </ScenarioBoundResolverContext.Provider>
   )

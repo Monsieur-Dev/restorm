@@ -115,6 +115,7 @@ declare global {
         pushScenarioLayout: (payload: { scenarioId: string; rects: Record<string, { x: number; y: number; width: number; height: number }> }) => void
         runScenarioNode: (scenarioId: string, nodeId: string) => Promise<unknown>
         cancelScenarioNode: (scenarioId: string, nodeId: string) => Promise<{ cancelled: boolean; reason?: string }>
+        getScenarioNodeResult: (scenarioId: string, nodeId: string) => Promise<Record<string, unknown> | null>
         pushMcpActiveStateBootstrap: (payload: {
           tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | null }
           envByFolder: Record<string, string | null>

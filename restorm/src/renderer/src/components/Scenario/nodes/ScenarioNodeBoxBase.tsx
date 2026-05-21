@@ -203,7 +203,14 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
         <div className="scn-node-body">
           <div className="scn-node-col scn-node-col-in">
             {left.map((section) => (
-              <ScenarioNodeSection key={section.id} section={section} connectedInputs={connectedInputs} />
+              <ScenarioNodeSection
+                key={section.id}
+                section={section}
+                connectedInputs={connectedInputs}
+                nodeKind={data.kind}
+                nodeInputs={data.inputs}
+                {...(data.scenarioId !== undefined ? { scenarioId: data.scenarioId } : {})}
+              />
             ))}
           </div>
           <div className="scn-node-col scn-node-col-out">

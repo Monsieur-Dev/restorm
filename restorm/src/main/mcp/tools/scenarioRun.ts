@@ -204,6 +204,10 @@ export function registerScenarioRunTools(mcp: McpService): void {
   ipcMain.handle('scenario:run-node', (_e, scenarioId, nodeId) => runScenarioNode(String(scenarioId), String(nodeId)))
   ipcMain.removeHandler('scenario:cancel-node')
   ipcMain.handle('scenario:cancel-node', (_e, scenarioId, nodeId) => cancelScenarioNode(String(scenarioId), String(nodeId)))
+  // Read a box's last run result as its output context — the JSON-path selector
+  // popover reads the upstream box's result to let the user pick a property.
+  ipcMain.removeHandler('scenario:node-result')
+  ipcMain.handle('scenario:node-result', (_e, scenarioId, nodeId) => getScenarioNodeResult(String(scenarioId), String(nodeId)))
 
   const ids = {
     scenarioId: z.string().min(1).describe('Scenario id.'),

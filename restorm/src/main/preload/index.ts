@@ -875,6 +875,11 @@ contextBridge.exposeInMainWorld('restorm', {
      * then rejects (`wait`) or settles (`request` abort), clearing the run. */
     cancelScenarioNode: (scenarioId: string, nodeId: string): Promise<{ cancelled: boolean; reason?: string }> =>
       ipcRenderer.invoke('scenario:cancel-node', scenarioId, nodeId) as Promise<{ cancelled: boolean; reason?: string }>,
+    /** A box's last run result as its output context (resolved request, raw
+     * request, response). Null if it hasn't run yet. Feeds the JSON-path
+     * selector popover on a data link's receiving input. */
+    getScenarioNodeResult: (scenarioId: string, nodeId: string): Promise<Record<string, unknown> | null> =>
+      ipcRenderer.invoke('scenario:node-result', scenarioId, nodeId) as Promise<Record<string, unknown> | null>,
     /** Full-snapshot push fired on renderer (re)load — useful after an
      * HMR cycle so main's cache is always consistent with the renderer. */
     pushMcpActiveStateBootstrap: (payload: {

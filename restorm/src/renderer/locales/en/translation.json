@@ -763,6 +763,15 @@
         "delete": "Delete",
         "deleteShortcut": "Del"
       }
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source box to pick a property from its result.",
+      "runSource": "Run source",
+      "running": "Running…"
     }
   }
 }
