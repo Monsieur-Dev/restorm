@@ -779,6 +779,7 @@
         "resetColor": "Réinitialiser la couleur",
         "delete": "Supprimer"
       }
-    }
+    },
+    "invalid": "{{count}} entrée(s) requise(s) non câblée(s) — scénario non exécutable"
   }
 }

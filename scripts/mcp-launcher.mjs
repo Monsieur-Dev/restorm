@@ -377,6 +377,34 @@ const BUILTIN_TOOLS = [
       },
       required: ['sourceSelector', 'targetSelector']
     }
+  },
+  {
+    name: 'mouse-input',
+    title: 'Trusted mouse input',
+    description:
+      'Inject OS-level, trusted (isTrusted=true) mouse input via webContents.sendInputEvent — the mouse ' +
+      'counterpart of `keyboard-shortcut`. Use for interactions that ignore synthetic DOM events: pointer-capture ' +
+      'drags (React Flow connections), hover-opened submenus (ECUI ContextMenu / native-style menus), Monaco wheel ' +
+      'scrolling. Point comes from a `selector` (rect centre) or explicit x/y (CSS px). Gestures: move (hover), ' +
+      'click, drag (down→move→up; target via toSelector or toX/toY), wheel (scroll by deltaY).',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        gesture: { type: 'string', enum: ['move', 'click', 'drag', 'wheel'] },
+        selector: { type: 'string' },
+        x: { type: 'number' },
+        y: { type: 'number' },
+        toSelector: { type: 'string' },
+        toX: { type: 'number' },
+        toY: { type: 'number' },
+        steps: { type: 'integer', minimum: 1, maximum: 60 },
+        button: { type: 'string', enum: ['left', 'middle', 'right'] },
+        deltaX: { type: 'number' },
+        deltaY: { type: 'number' },
+        windowId: { type: 'integer', description: 'Target a specific BrowserWindow by `webContents.id` (see `get-windows`). Omit for focused / first-visible.' }
+      },
+      required: ['gesture']
+    }
   }
 ]
 

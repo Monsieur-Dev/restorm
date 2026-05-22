@@ -12,7 +12,9 @@ import {
   type Edge,
   type Connection,
   type NodeChange,
-  type EdgeChange
+  type EdgeChange,
+  type OnConnectStart,
+  type OnConnectEnd
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { useTranslation } from 'react-i18next'
@@ -25,6 +27,7 @@ import { SCENARIO_NODE_CATALOGUE, type ScenarioNodeKindMeta } from './scenarioNo
 import { scenarioEdgeToFlowEdge, flowEdgeToScenarioEdge, portColor } from './scenarioGraphMapping'
 import { ScenarioNodeView, type ScenarioNodeBoxData } from './nodes'
 import { defaultPortsForKind, isValidScenarioConnection } from './scenarioNodePorts'
+import { linkPaletteEntries } from './scenarioLinkPalette'
 
 export interface ScenarioEditorViewProps {
   /** The scenario being edited. */
@@ -50,6 +53,14 @@ const emptyStyle: CSSProperties = {
   position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
   pointerEvents: 'none', opacity: 0.6, fontSize: 13, zIndex: 1
 }
+const invalidBannerStyle: CSSProperties = {
+  position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', zIndex: 5,
+  display: 'flex', alignItems: 'center', gap: 6, pointerEvents: 'none',
+  padding: '4px 10px', borderRadius: 4, fontSize: 12,
+  background: 'var(--inputValidation-errorBackground, #5a1d1d)',
+  color: 'var(--inputValidation-errorForeground, #fff)',
+  border: '1px solid var(--inputValidation-errorBorder, #be1100)'
+}
 
 /** The catalogue flattened with a separator marker between categories — the
  * add-node menu maps this to ContextMenu items. Computed once (no refs / no
@@ -57,6 +68,9 @@ const emptyStyle: CSSProperties = {
 const PALETTE_ENTRIES: (ScenarioNodeKindMeta | { separator: true })[] = SCENARIO_NODE_CATALOGUE.flatMap(
   (meta, i, arr) => (i > 0 && arr[i - 1]?.category !== meta.category ? [{ separator: true as const }, meta] : [meta])
 )
+
+/** Catalogue meta by kind — label/icon lookup for the filtered link palette. */
+const META_BY_KIND = new Map<ScenarioNodeKind, ScenarioNodeKindMeta>(SCENARIO_NODE_CATALOGUE.map((m) => [m.kind, m]))
 
 interface NodeHandlers {
   scenarioId: string
@@ -82,6 +96,23 @@ function toFlowNode(n: ScenarioNode, handlers: NodeHandlers): Node<NodeData> {
       ...(n.collapsed !== undefined ? { collapsed: n.collapsed } : {})
     }
   }
+}
+
+/**
+ * Count required inputs left unsatisfied across the graph — a required port
+ * (from the kind's canonical ports, which is what the boxes render) with no
+ * incoming edge. A non-zero count makes the scenario invalid / non-runnable.
+ * (Literal-value satisfaction lands with the per-slot config model.)
+ */
+function countUnsatisfiedRequired(flowNodes: Node<NodeData>[], flowEdges: Edge[]): number {
+  let n = 0
+  for (const node of flowNodes) {
+    for (const inp of defaultPortsForKind(node.data.kind).inputs) {
+      if (!inp.required) continue
+      if (!flowEdges.some((e) => e.target === node.id && e.targetHandle === inp.id)) n++
+    }
+  }
+  return n
 }
 
 /**
@@ -329,6 +360,81 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     setPalette(null)
   }, [setNodes, setEdges, persist])
 
+  // --- Add-node gesture #1: drag a link off a port, release on empty canvas →
+  // a palette filtered to kinds with a flow-compatible port, then a pre-wired
+  // node. The dragged port's direction decides the wiring (output→new input,
+  // or input←new output). ---
+  const connectStart = useRef<{ nodeId: string | null; handleId: string | null; handleType: 'source' | 'target' | null } | null>(null)
+  // Releasing a connection drag on empty canvas fires `onConnectEnd` (which
+  // opens the link palette) immediately followed by `onPaneClick` (~20ms) —
+  // the same release counts as a pane click and would close the palette we
+  // just opened. Record when we open it so `onPaneClick` can ignore that one.
+  const linkPaletteOpenedAt = useRef(0)
+  const [linkPalette, setLinkPalette] = useState<{
+    x: number; y: number; flow: { x: number; y: number }
+    fromNodeId: string; fromHandle: string; fromIsSource: boolean
+    entries: { kind: ScenarioNodeKind; label: string; icon: string; wirePort: string }[]
+  } | null>(null)
+
+  const onConnectStart = useCallback<OnConnectStart>((_e, params) => {
+    connectStart.current = { nodeId: params.nodeId ?? null, handleId: params.handleId ?? null, handleType: params.handleType ?? null }
+  }, [])
+
+  const onConnectEnd = useCallback<OnConnectEnd>((event, state) => {
+    const start = connectStart.current
+    connectStart.current = null
+    // Only when released on empty canvas (a real drop on a handle sets toNode
+    // and fires onConnect instead).
+    if (state.toNode || !start?.nodeId || !start.handleId) return
+    const srcNode = nodes.find((n) => n.id === start.nodeId)
+    if (!srcNode) return
+    const fromHandle = start.handleId
+    const fromIsSource = start.handleType !== 'target'
+    // Filtered, header-prioritising palette (see linkPaletteEntries); decorate
+    // each with its catalogue label/icon.
+    const entries = linkPaletteEntries(
+      { kind: srcNode.data.kind, inputs: srcNode.data.inputs, outputs: srcNode.data.outputs },
+      fromHandle,
+      fromIsSource
+    ).map((e) => {
+      const m = META_BY_KIND.get(e.kind)
+      return { kind: e.kind, label: m ? t(m.labelKey, m.defaultLabel) : e.kind, icon: m?.icon ?? 'circle-outline', wirePort: e.wirePort }
+    })
+    if (entries.length === 0) return
+    const pt = 'changedTouches' in event ? event.changedTouches[0] : event
+    const x = pt?.clientX ?? 0
+    const y = pt?.clientY ?? 0
+    linkPaletteOpenedAt.current = Date.now()
+    setLinkPalette({ x, y, flow: screenToFlowPosition({ x, y }), fromNodeId: start.nodeId, fromHandle, fromIsSource, entries })
+  }, [nodes, t, screenToFlowPosition])
+
+  // Create the picked kind at the drop point and wire it to the dragged port.
+  // The id + node + edge are built ONCE, outside any state updater — React
+  // StrictMode double-invokes updater functions in dev, so doing this inside
+  // `setLinkPalette(updater)` minted two different ids and added the node twice.
+  const addLinkedNode = useCallback((kind: ScenarioNodeKind, wirePort: string) => {
+    const lp = linkPalette
+    if (!lp) return
+    const newId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    const { inputs, outputs } = defaultPortsForKind(kind)
+    const node: ScenarioNode = { id: newId, kind, config: {}, inputs, outputs, position: lp.flow }
+    nodeStore.current.set(newId, node)
+    const edgeId = `e-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    const edge: Edge = lp.fromIsSource
+      ? { id: edgeId, source: lp.fromNodeId, sourceHandle: lp.fromHandle, target: newId, targetHandle: wirePort }
+      : { id: edgeId, source: newId, sourceHandle: wirePort, target: lp.fromNodeId, targetHandle: lp.fromHandle }
+    const srcN = nodeStore.current.get(edge.source)
+    const srcPort = srcN?.outputs.find((o) => o.id === edge.sourceHandle)
+    const stroke = srcPort ? portColor(srcPort) : undefined
+    if (stroke) edge.style = { stroke }
+    setNodes((curr) => {
+      const next = [...curr, toFlowNode(node, handlers.current)]
+      setEdges((e) => { const ne = [...e, edge]; persist(next, ne); return ne })
+      return next
+    })
+    setLinkPalette(null)
+  }, [linkPalette, setNodes, setEdges, persist])
+
   const onDragOver = useCallback((event: React.DragEvent) => {
     // Allow the drop only when the host can resolve dragged items.
     if (!resolveBoundItem) return
@@ -516,6 +622,9 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     })
   }, [setNodes, setEdges, persist])
 
+  // A required input left unwired makes the scenario non-runnable.
+  const invalidCount = useMemo(() => countUnsatisfiedRequired(nodes, edges), [nodes, edges])
+
   return (
     <ScenarioBoundResolverContext.Provider value={resolveBoundItem ?? null}>
     <ScenarioRequestEnvContext.Provider value={resolveRequestEnv ?? null}>
@@ -526,6 +635,12 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
           {t('scenario.editor.empty', 'Empty scenario — right-click the canvas to add a node')}
         </div>
       )}
+      {invalidCount > 0 && (
+        <div data-testid="scenario-invalid-banner" style={invalidBannerStyle}>
+          <i className="codicon codicon-warning" aria-hidden="true" />
+          {t('scenario.invalid', { count: invalidCount, defaultValue: '{{count}} required input(s) not wired — scenario is not runnable' })}
+        </div>
+      )}
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -533,16 +648,18 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
         onNodesChange={handleNodesChange}
         onEdgesChange={handleEdgesChange}
         onConnect={onConnect}
+        onConnectStart={onConnectStart}
+        onConnectEnd={onConnectEnd}
         isValidConnection={validateConnection}
         deleteKeyCode={['Delete', 'Backspace']}
         multiSelectionKeyCode={['Control', 'Meta']}
         onPaneContextMenu={onPaneContextMenu}
         onEdgeContextMenu={onEdgeContextMenu}
-        onPaneClick={() => { setPalette(null); setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null) }}
-        onNodeClick={() => { setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null) }}
-        onEdgeClick={() => { setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null) }}
-        onMoveStart={() => { setNodeMenu(null); setPalette(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null) }}
-        onNodeDragStart={() => { setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null) }}
+        onPaneClick={() => { setPalette(null); setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); if (Date.now() - linkPaletteOpenedAt.current > 250) setLinkPalette(null) }}
+        onNodeClick={() => { setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null) }}
+        onEdgeClick={() => { setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null) }}
+        onMoveStart={() => { setNodeMenu(null); setPalette(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null) }}
+        onNodeDragStart={() => { setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null) }}
         fitView
         proOptions={{ hideAttribution: true }}
       >
@@ -564,6 +681,18 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
             'separator' in e
               ? { id: `sep-${i}`, label: '', isSeparator: true }
               : { id: e.kind, label: t(e.labelKey, e.defaultLabel), icon: e.icon, onClick: () => { addNode(e.kind, palette.flow) } }
+          ))}
+        />
+      )}
+      {linkPalette && (
+        <ContextMenu
+          visible
+          x={linkPalette.x}
+          y={linkPalette.y}
+          onRequestClose={() => { setLinkPalette(null) }}
+          data-testid="scenario-link-palette"
+          items={linkPalette.entries.map((e): ContextMenuItem => (
+            { id: e.kind, label: e.label, icon: e.icon, onClick: () => { addLinkedNode(e.kind, e.wirePort) } }
           ))}
         />
       )}

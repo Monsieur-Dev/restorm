@@ -1521,6 +1521,107 @@ export class McpService {
     )
 
     this.registerTool(
+      'mouse-input',
+      {
+        title: 'Trusted mouse input',
+        description:
+          'Inject OS-level, *trusted* (`isTrusted=true`) mouse input via `webContents.sendInputEvent` — the ' +
+          'mouse counterpart of `keyboard-shortcut`. Use it for interactions that ignore synthetic DOM events: ' +
+          'pointer-capture drags (React Flow link/connection drags), hover-opened submenus (ECUI ContextMenu, ' +
+          'native-style menus), and Monaco wheel scrolling. The point comes from a `selector` (its rect centre) ' +
+          'or explicit `x`/`y` (CSS px, viewport-relative). Gestures: `move` (hover), `click` (down+up), ' +
+          '`drag` (down at start → moved across `steps` to the target → up), `wheel` (scroll by `deltaY`). ' +
+          'For `drag`, give the target with `toSelector` or `toX`/`toY`. Prefer this over `dispatch-event` / ' +
+          '`drag-drop` whenever the target ignores synthetic events.',
+        inputSchema: {
+          gesture: z.enum(['move', 'click', 'drag', 'wheel']).describe('move = hover; click = down+up; drag = down→move→up; wheel = scroll.'),
+          selector: z.string().optional().describe('CSS selector; its rect centre is the (start) point. Provide this or x/y.'),
+          x: z.coerce.number().optional().describe('Explicit (start) X in CSS px, viewport-relative. Used instead of selector.'),
+          y: z.coerce.number().optional().describe('Explicit (start) Y in CSS px, viewport-relative. Used instead of selector.'),
+          toSelector: z.string().optional().describe('drag only: target CSS selector (rect centre).'),
+          toX: z.coerce.number().optional().describe('drag only: target X (CSS px).'),
+          toY: z.coerce.number().optional().describe('drag only: target Y (CSS px).'),
+          steps: z.coerce.number().int().min(1).max(60).optional().describe('drag only: intermediate moves along the path (default 16).'),
+          button: z.enum(['left', 'middle', 'right']).optional().describe('Mouse button (default left).'),
+          deltaX: z.coerce.number().optional().describe('wheel only: horizontal scroll delta.'),
+          deltaY: z.coerce.number().optional().describe('wheel only: vertical scroll delta (negative = scroll up).'),
+          windowId: windowIdSchema
+        } as Record<string, unknown>
+      },
+      async (args) => {
+        const a = args
+        const gesture = typeof a['gesture'] === 'string' ? a['gesture'] : ''
+        const button = (typeof a['button'] === 'string' ? a['button'] : 'left') as 'left' | 'middle' | 'right'
+        const windowId = typeof a['windowId'] === 'number' ? a['windowId'] : undefined
+        const win = pickWindow(windowId)
+        if (!win) return noWindowError(windowId)
+
+        // Resolve a point from explicit coords, else a selector's rect centre.
+        const resolvePoint = async (sel: unknown, ex: unknown, ey: unknown): Promise<{ x: number; y: number } | { error: string }> => {
+          if (typeof ex === 'number' && typeof ey === 'number') return { x: ex, y: ey }
+          if (typeof sel === 'string' && sel) {
+            const code = `(() => { const el = document.querySelector(${JSON.stringify(sel)}); if (!el) return { error: 'no element matches: ' + ${JSON.stringify(sel)} }; const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; })()`
+            return (await win.webContents.executeJavaScript(code, true)) as { x: number; y: number } | { error: string }
+          }
+          return { error: 'provide a selector or explicit x/y' }
+        }
+
+        type InputEvt = Parameters<typeof win.webContents.sendInputEvent>[0]
+        const send = (e: Record<string, unknown>): void => { win.webContents.sendInputEvent(e as unknown as InputEvt) }
+        const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
+
+        const start = await resolvePoint(a['selector'], a['x'], a['y'])
+        if ('error' in start) return { content: [{ type: 'text', text: `mouse-input failed: ${start.error}` }], isError: true }
+        const sx = Math.round(start.x)
+        const sy = Math.round(start.y)
+
+        if (gesture === 'wheel') {
+          const deltaX = typeof a['deltaX'] === 'number' ? a['deltaX'] : 0
+          const deltaY = typeof a['deltaY'] === 'number' ? a['deltaY'] : 0
+          send({ type: 'mouseMove', x: sx, y: sy })
+          send({ type: 'mouseWheel', x: sx, y: sy, deltaX, deltaY, canScroll: true })
+          return { content: [{ type: 'text', text: JSON.stringify({ gesture, x: sx, y: sy, deltaX, deltaY }, null, 2) }] }
+        }
+
+        if (gesture === 'move') {
+          send({ type: 'mouseMove', x: sx, y: sy })
+          return { content: [{ type: 'text', text: JSON.stringify({ gesture, x: sx, y: sy }, null, 2) }] }
+        }
+
+        if (gesture === 'click') {
+          send({ type: 'mouseMove', x: sx, y: sy })
+          send({ type: 'mouseDown', x: sx, y: sy, button, clickCount: 1 })
+          send({ type: 'mouseUp', x: sx, y: sy, button, clickCount: 1 })
+          return { content: [{ type: 'text', text: JSON.stringify({ gesture, x: sx, y: sy, button }, null, 2) }] }
+        }
+
+        // drag: down at start → frame-paced moves → up at the target. The
+        // delays let pointer-capture consumers (React Flow) process each move.
+        const end = await resolvePoint(a['toSelector'], a['toX'], a['toY'])
+        if ('error' in end) return { content: [{ type: 'text', text: `mouse-input drag target failed: ${end.error}` }], isError: true }
+        const ex = Math.round(end.x)
+        const ey = Math.round(end.y)
+        const steps = Math.max(1, Math.min(60, Math.floor(typeof a['steps'] === 'number' ? a['steps'] : 16)))
+        // The held button must be signalled on each move via the
+        // `<button>ButtonDown` modifier — otherwise Chromium reports
+        // `buttons: 0` on the pointermoves and a pointer-capture consumer
+        // (React Flow's connection drag) sees the button as released and never
+        // starts the drag.
+        const heldModifier = `${button}ButtonDown`
+        send({ type: 'mouseMove', x: sx, y: sy })
+        send({ type: 'mouseDown', x: sx, y: sy, button, clickCount: 1 })
+        await sleep(16)
+        for (let i = 1; i <= steps; i++) {
+          const t = i / steps
+          send({ type: 'mouseMove', x: Math.round(sx + (ex - sx) * t), y: Math.round(sy + (ey - sy) * t), modifiers: [heldModifier] })
+          await sleep(12)
+        }
+        send({ type: 'mouseUp', x: ex, y: ey, button, clickCount: 1 })
+        return { content: [{ type: 'text', text: JSON.stringify({ gesture, from: { x: sx, y: sy }, to: { x: ex, y: ey }, steps, button }, null, 2) }] }
+      }
+    )
+
+    this.registerTool(
       'batch',
       {
         title: 'Chain MCP tool calls in one request',
