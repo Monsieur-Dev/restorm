@@ -474,7 +474,11 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
         fitView
         proOptions={{ hideAttribution: true }}
       >
-        <Background />
+        {/* Unique pattern id per scenario: React Flow's Background derives its
+            SVG <pattern> id from this, and with several scenario tabs mounted
+            at once a shared id makes `url(#pattern-…)` resolve to the first
+            (often a hidden 0×0 tab), leaving the visible grid blank. */}
+        <Background id={scenario.id} />
         <Controls showInteractive={false} />
       </ReactFlow>
       {palette && (

@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useNodesData } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import { Button, ControlGroup, InputBox, ListView, Tooltip } from 'electron-core-ui/renderer'
 import { buildScenarioPathTree } from '../scenarioPathTree'
@@ -38,12 +37,6 @@ function scenarioRuntime(): ScenarioRuntime | undefined {
 export const ScenarioPathSelector: React.FC<ScenarioPathSelectorProps> = ({ edgeId, sourceNodeId, scenarioId, label }) => {
   const { t } = useTranslation()
   const api = useScenarioEdgeSelector()
-  const sourceData = useNodesData(sourceNodeId)
-  const sourceTitle = (() => {
-    const cfg = (sourceData?.data as { config?: Record<string, unknown> } | undefined)?.config
-    const cfgLabel = typeof cfg?.['label'] === 'string' ? cfg['label'] : undefined
-    return cfgLabel ?? (sourceData?.data as { kind?: string } | undefined)?.kind ?? sourceNodeId
-  })()
 
   const [value, setValue] = useState<string>(() => api?.getSelector(edgeId) ?? '')
   const [open, setOpen] = useState(false)
@@ -117,9 +110,6 @@ export const ScenarioPathSelector: React.FC<ScenarioPathSelectorProps> = ({ edge
 
   const popover = (
     <div ref={popoverRef} className="scn-path-popover nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
-      <div className="scn-path-popover-head">
-        <span className="scn-path-popover-source">{sourceTitle}</span>
-      </div>
       {loading ? (
         <div className="scn-path-popover-msg">{t('scenario.pathSelector.loading', 'Loading…')}</div>
       ) : result ? (
@@ -128,6 +118,7 @@ export const ScenarioPathSelector: React.FC<ScenarioPathSelectorProps> = ({ edge
           selectionMode="single"
           selectedIds={value ? [value] : []}
           onItemClick={({ item }) => { commit(item.id); setOpen(false) }}
+          style={{ width: 300, height: 280 }}
           data-testid="scn-path-tree"
         />
       ) : (
@@ -173,6 +164,7 @@ export const ScenarioPathSelector: React.FC<ScenarioPathSelectorProps> = ({ edge
         show={open}
         placement="below"
         side="auto"
+        className="scn-path-tooltip"
         repositionKey={open ? `${edgeId}:${result === undefined ? 'loading' : result === null ? 'empty' : 'tree'}` : null}
         content={popover}
         data-testid="scn-path-popover-tooltip"

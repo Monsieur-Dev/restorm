@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { EditorTabs } from './EditorTabs';
 import { useSetting } from '../../hooks/useSettings';
 import type { EditorGroup, EditorWorkbenchCallbacks, SplitDirection } from './types';
-import { getEditorDragData, isEditorDragEvent } from './dnd';
+import { clearEditorDragData, getEditorDragData, isEditorDragEvent } from './dnd';
 import { useIsWorkbenchResizing } from './WorkbenchResizeContext';
 import { TabSlot } from './TabContentHost';
 
@@ -212,6 +212,7 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 			// Ignore drop when dragging the only tab of this group into its own content
 			if (data.sourceGroupId === group.id && group.tabs.length === 1 && group.tabs[0]?.id === data.editorId) {
 				setSplitTarget(undefined);
+				clearEditorDragData();
 				return;
 			}
 			const dir = computeDirection(e);
@@ -219,6 +220,12 @@ export const EditorGroupView: React.FC<EditorGroupViewProps> = (props) => {
 			const direction = dir === 'center' ? 'full' : dir;
 			onSplitTab?.(data.editorId, data.sourceGroupId, group.id, direction);
 			setIsEditorDrag(false);
+			// Splitting moves the dragged tab to this group, so the source tab
+			// unmounts during the drop's re-render and its `dragend` never fires.
+			// Clear the in-memory payload here, otherwise `isEditorDragEvent`'s
+			// fallback keeps reporting true for the next (foreign) drag — making
+			// the split overlay swallow drops meant for the editor content.
+			clearEditorDragData();
 		},
 		[computeDirection, onSplitTab, group.id, group.tabs]
 	);
