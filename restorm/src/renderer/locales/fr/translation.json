@@ -772,6 +772,13 @@
       "noResult": "Lancez la boîte source pour choisir une propriété de son résultat.",
       "runSource": "Lancer la source",
       "running": "En cours…"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Changer la couleur",
+        "resetColor": "Réinitialiser la couleur",
+        "delete": "Supprimer"
+      }
     }
   }
 }

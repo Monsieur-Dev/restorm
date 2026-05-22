@@ -22,7 +22,7 @@ import { isRequest, isScenario } from '../../../../shared/types/collections'
 import { ScenarioBoundResolverContext, ScenarioRequestEnvContext, type ResolveBoundItem, type ResolveRequestEnv } from './scenarioBoundResolver'
 import { ScenarioEdgeSelectorContext, type ScenarioEdgeSelectorApi } from './scenarioEdgeSelector'
 import { SCENARIO_NODE_CATALOGUE, type ScenarioNodeKindMeta } from './scenarioNodeCatalogue'
-import { scenarioEdgeToFlowEdge, flowEdgeToScenarioEdge } from './scenarioGraphMapping'
+import { scenarioEdgeToFlowEdge, flowEdgeToScenarioEdge, portColor } from './scenarioGraphMapping'
 import { ScenarioNodeView, type ScenarioNodeBoxData } from './nodes'
 import { defaultPortsForKind, isValidScenarioConnection } from './scenarioNodePorts'
 
@@ -82,10 +82,6 @@ function toFlowNode(n: ScenarioNode, handlers: NodeHandlers): Node<NodeData> {
       ...(n.collapsed !== undefined ? { collapsed: n.collapsed } : {})
     }
   }
-}
-
-function toFlowEdge(e: ScenarioEdge): Edge {
-  return scenarioEdgeToFlowEdge(e) as Edge
 }
 
 /**
@@ -176,6 +172,23 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
   }, [setNodes, setEdges, persist])
   const edgeSelectorApi = useMemo<ScenarioEdgeSelectorApi>(() => ({ getSelector: getEdgeSelector, setSelector: setEdgeSelector }), [getEdgeSelector, setEdgeSelector])
 
+  // A scenario edge → React Flow edge, with its stroke resolved: an explicit
+  // `Edge.color` override wins, otherwise the source port's role colour
+  // (then=green / else=blue / response=green / error=red / …), else neutral.
+  const buildFlowEdge = useCallback((e: ScenarioEdge): Edge => {
+    const fe = scenarioEdgeToFlowEdge(e) as Edge
+    const src = nodeStore.current.get(e.from.nodeId)
+    const port = src?.outputs.find((o) => o.id === e.from.portId)
+    const stroke = e.color ?? (port ? portColor(port) : undefined)
+    return stroke ? { ...fe, style: { ...(fe.style ?? {}), stroke } } : fe
+  }, [])
+
+  const [edgeMenu, setEdgeMenu] = useState<{ edgeId: string; x: number; y: number } | null>(null)
+  const [edgeColorPicker, setEdgeColorPicker] = useState<{ edgeId: string; x: number; y: number } | null>(null)
+  // Cursor-anchored invisible target for the edge colour-picker tooltip (edges
+  // have no stable DOM element to pin a beak to, unlike a node header).
+  const edgeColorAnchorRef = useRef<HTMLDivElement>(null)
+
   // Toggle a node's collapsed flag; update the live node + persist.
   const onToggleCollapse = useCallback((nodeId: string) => {
     setNodes((curr) => {
@@ -208,8 +221,8 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     nodeStore.current = new Map(scenario.nodes.map((n) => [n.id, n]))
     edgeStore.current = new Map(scenario.edges.map((e) => [e.id, e]))
     setNodes(scenario.nodes.map((n) => toFlowNode(n, handlers.current)))
-    setEdges(scenario.edges.map(toFlowEdge))
-  }, [scenario.id, scenario.nodes, scenario.edges, setNodes, setEdges])
+    setEdges(scenario.edges.map(buildFlowEdge))
+  }, [scenario.id, scenario.nodes, scenario.edges, setNodes, setEdges, buildFlowEdge])
 
   // Re-seed when this scenario is mutated externally by the MCP tools
   // (create/move/update/delete node, connect/disconnect). Deliberately
@@ -225,9 +238,9 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
       nodeStore.current = new Map(ns.map((n) => [n.id, n]))
       edgeStore.current = new Map(es.map((e) => [e.id, e]))
       setNodes(ns.map((n) => toFlowNode(n, handlers.current)))
-      setEdges(es.map(toFlowEdge))
+      setEdges(es.map(buildFlowEdge))
     })
-  }, [scenario.id, setNodes, setEdges])
+  }, [scenario.id, setNodes, setEdges, buildFlowEdge])
 
   // Report React-Flow-measured node rects (position + size) to main, debounced.
   // Size isn't in the model, so this lets the scenario MCP read tools expose
@@ -293,12 +306,15 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
   const onConnect = useCallback((connection: Connection) => {
     if (!validateConnection(connection)) return
     const id = `e-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    const src = nodes.find((n) => n.id === connection.source)
+    const port = src?.data.outputs.find((o) => o.id === connection.sourceHandle)
+    const stroke = port ? portColor(port) : undefined
     setEdges((curr) => {
-      const next = addEdge({ ...connection, id }, curr)
+      const next = addEdge({ ...connection, id, ...(stroke ? { style: { stroke } } : {}) }, curr)
       setNodes((n) => { persist(n, next); return n })
       return next
     })
-  }, [setEdges, setNodes, persist, validateConnection])
+  }, [setEdges, setNodes, persist, validateConnection, nodes])
 
   const addNode = useCallback((kind: ScenarioNodeKind, flow: { x: number; y: number }, config: Record<string, unknown> = {}) => {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
@@ -446,6 +462,60 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     setPalette({ x: clientX, y: clientY, flow: screenToFlowPosition({ x: clientX, y: clientY }) })
   }, [screenToFlowPosition])
 
+  // Right-click on an edge: select it (deselect the rest) + open the edge menu.
+  const onEdgeContextMenu = useCallback((event: React.MouseEvent, edge: Edge) => {
+    event.preventDefault()
+    event.stopPropagation()
+    setEdges((curr) => curr.map((e) => (e.selected === (e.id === edge.id) ? e : { ...e, selected: e.id === edge.id })))
+    setEdgeMenu({ edgeId: edge.id, x: event.clientX, y: event.clientY })
+  }, [setEdges])
+
+  // Delete an edge (context-menu action; the Delete key is handled by React Flow).
+  const deleteEdge = useCallback((edgeId: string) => {
+    setEdgeMenu(null)
+    setNodes((n) => {
+      setEdges((e) => {
+        const ne = e.filter((ed) => ed.id !== edgeId)
+        edgeStore.current.delete(edgeId)
+        persist(n, ne)
+        return ne
+      })
+      return n
+    })
+  }, [setNodes, setEdges, persist])
+
+  const openEdgeColorPicker = useCallback((edgeId: string, x: number, y: number) => {
+    setEdgeMenu(null)
+    setEdgeColorPicker({ edgeId, x, y })
+  }, [])
+
+  // Set (or, with `undefined`, reset to the role default) an edge's colour:
+  // mutate the authoritative edge + repaint its stroke + persist.
+  const setEdgeColor = useCallback((edgeId: string, color: string | undefined) => {
+    const prior = edgeStore.current.get(edgeId)
+    if (prior) {
+      const updated: ScenarioEdge = { ...prior }
+      if (color === undefined) delete updated.color
+      else updated.color = color
+      edgeStore.current.set(edgeId, updated)
+    }
+    setNodes((n) => {
+      setEdges((curr) => {
+        const next = curr.map((e) => {
+          if (e.id !== edgeId) return e
+          const sc = edgeStore.current.get(edgeId)
+          const src = sc ? nodeStore.current.get(sc.from.nodeId) : undefined
+          const port = sc ? src?.outputs.find((o) => o.id === sc.from.portId) : undefined
+          const stroke = color ?? (port ? portColor(port) : undefined)
+          return { ...e, style: { ...(e.style ?? {}), ...(stroke ? { stroke } : {}) } }
+        })
+        persist(n, next)
+        return next
+      })
+      return n
+    })
+  }, [setNodes, setEdges, persist])
+
   return (
     <ScenarioBoundResolverContext.Provider value={resolveBoundItem ?? null}>
     <ScenarioRequestEnvContext.Provider value={resolveRequestEnv ?? null}>
@@ -467,10 +537,12 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
         deleteKeyCode={['Delete', 'Backspace']}
         multiSelectionKeyCode={['Control', 'Meta']}
         onPaneContextMenu={onPaneContextMenu}
-        onPaneClick={() => { setPalette(null); setNodeMenu(null); setColorPickerNodeId(null) }}
-        onNodeClick={() => { setNodeMenu(null); setColorPickerNodeId(null) }}
-        onMoveStart={() => { setNodeMenu(null); setPalette(null); setColorPickerNodeId(null) }}
-        onNodeDragStart={() => { setNodeMenu(null); setColorPickerNodeId(null) }}
+        onEdgeContextMenu={onEdgeContextMenu}
+        onPaneClick={() => { setPalette(null); setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null) }}
+        onNodeClick={() => { setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null) }}
+        onEdgeClick={() => { setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null) }}
+        onMoveStart={() => { setNodeMenu(null); setPalette(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null) }}
+        onNodeDragStart={() => { setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null) }}
         fitView
         proOptions={{ hideAttribution: true }}
       >
@@ -534,6 +606,49 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
               onClick={() => { if (colorPickerNodeId) { setNodeColor(colorPickerNodeId, undefined); setColorPickerNodeId(null) } }}
               options={{ ariaLabel: t('scenario.node.menu.resetColor', 'Reset colour'), title: t('scenario.node.menu.resetColor', 'Reset colour') }}
               data-testid="scenario-node-color-reset"
+            />
+          </div>
+        }
+      />
+      {edgeMenu && (
+        <ContextMenu
+          visible
+          x={edgeMenu.x}
+          y={edgeMenu.y}
+          onRequestClose={() => { setEdgeMenu(null) }}
+          data-testid="scenario-edge-menu"
+          items={[
+            { id: 'edge-color', label: t('scenario.edge.menu.changeColor', 'Change colour'), icon: 'symbol-color', opensDialog: true, onClick: () => { openEdgeColorPicker(edgeMenu.edgeId, edgeMenu.x, edgeMenu.y) } },
+            { id: 'edge-sep', label: '', isSeparator: true },
+            { id: 'edge-delete', label: t('scenario.edge.menu.delete', 'Delete'), icon: 'trash', shortcut: t('scenario.node.menu.deleteShortcut', 'Del'), onClick: () => { deleteEdge(edgeMenu.edgeId) } }
+          ]}
+        />
+      )}
+      {edgeColorPicker && (
+        <div ref={edgeColorAnchorRef} style={{ position: 'fixed', left: edgeColorPicker.x, top: edgeColorPicker.y, width: 0, height: 0, pointerEvents: 'none' }} />
+      )}
+      <Tooltip
+        targetRef={edgeColorAnchorRef}
+        show={edgeColorPicker !== null}
+        repositionKey={edgeColorPicker?.edgeId ?? null}
+        data-testid="scenario-edge-color-picker-tooltip"
+        placement="below"
+        side="auto"
+        content={
+          <div onMouseDown={(e) => { e.stopPropagation() }} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <ColorPicker
+              value={(() => { const s = edgeColorPicker ? edges.find((e) => e.id === edgeColorPicker.edgeId)?.style?.stroke : undefined; return typeof s === 'string' ? s : '#3b82f6' })()}
+              onChange={(color) => { if (edgeColorPicker) setEdgeColor(edgeColorPicker.edgeId, color) }}
+              disableAlpha
+              data-testid="scenario-edge-color-picker"
+            />
+            <Button
+              secondary
+              fullWidth
+              icon="trash"
+              onClick={() => { if (edgeColorPicker) { setEdgeColor(edgeColorPicker.edgeId, undefined); setEdgeColorPicker(null) } }}
+              options={{ ariaLabel: t('scenario.edge.menu.resetColor', 'Reset colour'), title: t('scenario.edge.menu.resetColor', 'Reset colour') }}
+              data-testid="scenario-edge-color-reset"
             />
           </div>
         }

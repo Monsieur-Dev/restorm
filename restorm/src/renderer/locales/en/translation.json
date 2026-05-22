@@ -772,6 +772,13 @@
       "noResult": "Run the source box to pick a property from its result.",
       "runSource": "Run source",
       "running": "Running…"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
     }
   }
 }
