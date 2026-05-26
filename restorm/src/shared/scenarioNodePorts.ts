@@ -51,8 +51,8 @@ const OUT: PortSpec = { id: 'out', flow: 'signal' }
 const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // Sources & control
   input: { inputs: [IN], outputs: [{ id: 'value', name: 'value', flow: 'value' }] },
-  if: { inputs: [{ id: 'left', name: 'left' }, { id: 'right', name: 'right' }], outputs: [{ id: 'then', name: 'then', role: 'then', flow: 'signal' }, { id: 'else', name: 'else', role: 'else', flow: 'signal' }] },
-  switch: { inputs: [{ id: 'in', name: 'on', required: true }], outputs: [{ id: 'case1', name: 'case 1', role: 'case', flow: 'signal' }, { id: 'default', name: 'default', role: 'default', flow: 'signal' }] },
+  if: { inputs: [IN, { id: 'left', name: 'left' }, { id: 'right', name: 'right' }], outputs: [{ id: 'then', name: 'then', role: 'then', flow: 'signal' }, { id: 'else', name: 'else', role: 'else', flow: 'signal' }] },
+  switch: { inputs: [IN, { id: 'on', name: 'on' }], outputs: [{ id: 'default', name: 'default', role: 'default', flow: 'signal' }] },
   // Requests & composition
   httpRequest: { inputs: [IN, { id: 'env', name: 'env', flow: 'value' }], outputs: [{ id: 'response', name: 'response', dataType: 'response', role: 'response', flow: 'both' }] },
   runScenario: { inputs: [IN], outputs: [{ id: 'result', name: 'result', role: 'response', flow: 'both' }] },
@@ -70,7 +70,7 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   comparator: { inputs: [{ id: 'a', name: 'a', required: true }, { id: 'b', name: 'b', required: true }], outputs: [{ id: 'result', name: 'result', dataType: 'boolean', flow: 'value' }] },
   boolean: { inputs: [{ id: 'a', name: 'a', dataType: 'boolean', required: true }, { id: 'b', name: 'b', dataType: 'boolean', required: true }], outputs: [{ id: 'result', name: 'result', dataType: 'boolean', flow: 'value' }] },
   template: { inputs: [{ id: 'vars', name: 'vars', dataType: 'json' }], outputs: [{ id: 'text', name: 'text', dataType: 'string', flow: 'value' }] },
-  setVariable: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'out', name: 'value', flow: 'value' }] },
+  setVariable: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'event', name: 'event', flow: 'signal' }] },
   getVariable: { inputs: [], outputs: [{ id: 'value', name: 'value', flow: 'value' }] },
   transform: { inputs: [{ id: 'value', name: 'value', required: true }], outputs: [{ id: 'out', name: 'value', flow: 'value' }] },
   // Utilities

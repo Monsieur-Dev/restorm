@@ -303,7 +303,8 @@
       "dateTime": "Datum/tijd",
       "color": "Kleur",
       "expression": "Expressie",
-      "boolean": "Boolean"
+      "boolean": "Boolean",
+      "variables": "Variabelen"
     },
     "apiEnums": "Door de API gedefinieerde typen",
     "customLists": "Aangepaste typen",
@@ -494,7 +495,8 @@
   },
   "common": {
     "cancel": "Annuleren",
-    "save": "Opslaan"
+    "save": "Opslaan",
+    "remove": "Verwijderen"
   },
   "helpers": {
     "categories": {
@@ -780,6 +782,10 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable"
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Case toevoegen",
+      "removeCase": "Case verwijderen"
+    }
   }
 }

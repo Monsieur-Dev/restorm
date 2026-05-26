@@ -61,7 +61,7 @@ describe('scenario MCP tools', () => {
     const res = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'if', x: 10, y: 20 }))
     expect(res['kind']).toBe('if')
     expect(res['position']).toEqual({ x: 10, y: 20 })
-    expect((res['inputs'] as unknown[]).length).toBe(2) // if → left + right
+    expect((res['inputs'] as unknown[]).length).toBe(3) // if → in (trigger) + left + right
     expect(scenario.nodes).toHaveLength(1)
     expect(scenario.nodes[0]?.id).toBe(res['nodeId'])
   })

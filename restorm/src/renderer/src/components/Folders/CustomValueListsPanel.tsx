@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   ListView,
@@ -10,8 +10,7 @@ import {
   Pane,
   Button,
   InputBox,
-  eventBus,
-  useDebouncedCallback
+  eventBus
 } from 'electron-core-ui/renderer'
 import type { EnvironmentFolder, CustomValueList, CustomValueEntry } from '../../../../shared/types/collections'
 import { DocumentEvents, type DocumentChangedPayload } from '../../services/DocumentEvents'
@@ -46,9 +45,22 @@ export const CustomValueListsPanel: React.FC<CustomValueListsPanelProps> = ({ fo
   const [selectedId, setSelectedId] = useState<string | null>(() => folder.customValueLists?.[0]?.id ?? null)
   const [editingId, setEditingId] = useState<string | null>(null)
 
+  // Latest committed lists, updated synchronously on every write. Text edits
+  // now arrive debounced from inside InputBox, so a debounced `onChange` fires
+  // its captured closure *after* the user may have made an intervening
+  // immediate edit (e.g. toggled a sibling entry's checkbox). Computing the
+  // next array from this ref — rather than the `lists`/`selected` snapshot the
+  // closure captured — merges each field patch into the current entries, so a
+  // late label/value commit can't revert that checkbox toggle.
+  const listsRef = useRef(lists)
+
   // Re-sync from the folder prop on the next frame (mirrors the env panel).
   useEffect(() => {
-    const raf = requestAnimationFrame(() => { setLists(folder.customValueLists ?? []) })
+    const raf = requestAnimationFrame(() => {
+      const fresh = folder.customValueLists ?? []
+      listsRef.current = fresh
+      setLists(fresh)
+    })
     return (): void => { cancelAnimationFrame(raf) }
   }, [folder.customValueLists])
 
@@ -74,78 +86,73 @@ export const CustomValueListsPanel: React.FC<CustomValueListsPanelProps> = ({ fo
     void api?.updateFolderCustomValueLists?.(folder.id, next as unknown as unknown[])
   }, [folder, onFolderChange])
 
-  // Debounced commit for per-keystroke text edits (label / value), so a
-  // burst of typing doesn't fire a folder write + re-resolve every open
-  // request on every character.
-  const commitDebounced = useDebouncedCallback(commit, 350)
-
-  // Flush any pending text edit when the panel unmounts so the last few
-  // characters aren't dropped on tab close / navigation.
-  useEffect(() => () => { commitDebounced.flush() }, [commitDebounced])
-
-  // Immediate persist: local state + folder write now. Cancels any
-  // pending debounced text commit so it can't clobber with stale data.
+  // Persist: update local state + write the folder. Per-keystroke text edits
+  // arrive already debounced from InputBox (its onChange is debounced), so the
+  // folder write + re-resolve no longer needs its own debounce here.
+  // `listsRef` is updated synchronously so a same-tick follow-up read sees it.
   const persist = useCallback((next: CustomValueList[]) => {
+    listsRef.current = next
     setLists(next)
-    commitDebounced.cancel()
     commit(next)
-  }, [commit, commitDebounced])
-
-  // Local state now, folder write debounced (text fields).
-  const persistDebounced = useCallback((next: CustomValueList[]) => {
-    setLists(next)
-    commitDebounced(next)
-  }, [commitDebounced])
+  }, [commit])
 
   const selected = useMemo(() => lists.find((l) => l.id === selectedId) ?? null, [lists, selectedId])
 
   const handleAdd = useCallback(() => {
     const id = genId('cvl')
     const newList: CustomValueList = { id, name: t('folderView.customValues.newListName'), entries: [] }
-    persist([...lists, newList])
+    persist([...listsRef.current, newList])
     setSelectedId(id)
     setEditingId(id)
-  }, [lists, persist, t])
+  }, [persist, t])
 
   const handleRename = useCallback((id: string, name: string) => {
     const trimmed = name.trim()
     if (!trimmed) return
-    persist(lists.map((l) => (l.id === id ? { ...l, name: trimmed } : l)))
-  }, [lists, persist])
+    persist(listsRef.current.map((l) => (l.id === id ? { ...l, name: trimmed } : l)))
+  }, [persist])
 
   const handleDelete = useCallback((id: string) => {
-    const next = lists.filter((l) => l.id !== id)
+    const next = listsRef.current.filter((l) => l.id !== id)
     persist(next)
     if (selectedId === id) setSelectedId(next[0]?.id ?? null)
-  }, [lists, persist, selectedId])
+  }, [persist, selectedId])
 
-  const setEntries = useCallback((listId: string, entries: CustomValueEntry[], debounced = false) => {
-    const next = lists.map((l) => (l.id === listId ? { ...l, entries } : l))
-    if (debounced) persistDebounced(next)
-    else persist(next)
-  }, [lists, persist, persistDebounced])
+  const setEntries = useCallback((listId: string, entries: CustomValueEntry[]) => {
+    const next = listsRef.current.map((l) => (l.id === listId ? { ...l, entries } : l))
+    persist(next)
+  }, [persist])
+
+  // Apply a per-entry change against the LATEST entries of the selected list
+  // (read from `listsRef`, not a closure snapshot) so a late debounced text
+  // commit merges its patch instead of clobbering an intervening edit.
+  const mutateSelectedEntries = useCallback(
+    (mutate: (entries: CustomValueEntry[]) => CustomValueEntry[]) => {
+      if (!selectedId) return
+      const list = listsRef.current.find((l) => l.id === selectedId)
+      if (!list) return
+      setEntries(selectedId, mutate(list.entries))
+    },
+    [selectedId, setEntries]
+  )
 
   const handleAddEntry = useCallback(() => {
-    if (!selected) return
-    setEntries(selected.id, [...selected.entries, { id: genId('cve'), label: '', value: '' }])
-  }, [selected, setEntries])
+    mutateSelectedEntries((entries) => [...entries, { id: genId('cve'), label: '', value: '' }])
+  }, [mutateSelectedEntries])
 
-  // Text edits (label / value) debounce the folder write; the checkbox
-  // (enabled) commits immediately.
+  // Text edits (label / value) arrive debounced from InputBox; the checkbox
+  // (enabled) fires immediately. Both merge into the current entries.
   const handleEntryText = useCallback((entryId: string, patch: Partial<CustomValueEntry>) => {
-    if (!selected) return
-    setEntries(selected.id, selected.entries.map((e) => (e.id === entryId ? { ...e, ...patch } : e)), true)
-  }, [selected, setEntries])
+    mutateSelectedEntries((entries) => entries.map((e) => (e.id === entryId ? { ...e, ...patch } : e)))
+  }, [mutateSelectedEntries])
 
   const handleEntryEnabled = useCallback((entryId: string, enabled: boolean) => {
-    if (!selected) return
-    setEntries(selected.id, selected.entries.map((e) => (e.id === entryId ? { ...e, enabled } : e)))
-  }, [selected, setEntries])
+    mutateSelectedEntries((entries) => entries.map((e) => (e.id === entryId ? { ...e, enabled } : e)))
+  }, [mutateSelectedEntries])
 
   const handleEntryDelete = useCallback((entryId: string) => {
-    if (!selected) return
-    setEntries(selected.id, selected.entries.filter((e) => e.id !== entryId))
-  }, [selected, setEntries])
+    mutateSelectedEntries((entries) => entries.filter((e) => e.id !== entryId))
+  }, [mutateSelectedEntries])
 
   // `ContextMenuItem.onClick` receives no payload — it acts on the
   // row the user right-clicked, which `onItemContextMenu` has already

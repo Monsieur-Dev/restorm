@@ -18,8 +18,9 @@ import {
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import type { TranslatedHelperDefinition } from '../../utils/handlebarsHelpersDefinitions'
 import type { ValueType, EnumDefinition, CustomValueList } from '../../../../shared/types/collections'
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue } from '../../../../shared/types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue } from '../../../../shared/types/collections'
 import type { EnvValueTypeGroup } from '../../hooks/collectEnvValueTypeGroups'
+import { useScenarioVariables } from '../../contexts/ScenarioVariablesContext'
 import { castValueToKind, resolveValueTypeKind, type ValueTypeKind } from './castValue'
 import './typedValueField.css'
 
@@ -173,6 +174,19 @@ export interface TypedValueFieldProps {
   valueTypeGroups?: EnvValueTypeGroup[] | undefined
   /** Type kinds to omit from the type-pick menu (e.g. `['expression']`). */
   excludeTypes?: ValueTypeKind[] | undefined
+  /**
+   * A scenario variable name to omit from the "Variables" menu — e.g. a
+   * `setVariable` node excludes the variable it itself declares, so it can
+   * reference any variable but its own.
+   */
+  excludeVariableName?: string | undefined
+  /**
+   * When set, the type-pick menu gains a trailing separator + a "remove" entry
+   * (e.g. a switch case removing itself). The label defaults to "Supprimer".
+   */
+  onRemove?: (() => void) | undefined
+  /** Label for the {@link onRemove} entry. Defaults to a translated "Supprimer". */
+  removeLabel?: string | undefined
   /** Variables visible to the expression editor. */
   variables?: VariableDefinition[] | undefined
   /** Handlebars helpers for the expression editor's autocompletion. */
@@ -198,12 +212,23 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
   onChange,
   valueTypeGroups,
   excludeTypes,
+  excludeVariableName,
+  onRemove,
+  removeLabel,
   variables = [],
   helpers = [],
   expressionVariableId,
   dataTestId
 }) => {
   const { t } = useTranslation()
+
+  // Scenario variables in scope (empty outside a scenario), minus this field's
+  // own variable, so a setVariable can reference any variable but itself.
+  const scenarioVariables = useScenarioVariables()
+  const variableNames = useMemo(
+    () => scenarioVariables.filter((name) => name !== excludeVariableName),
+    [scenarioVariables, excludeVariableName]
+  )
 
   const [menu, setMenu] = useState<{ visible: boolean; x: number; y: number } | null>(null)
 
@@ -384,6 +409,22 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
       })
     }
 
+    if (variableNames.length > 0 && !isExcluded('variable')) {
+      const activeVar = activeType === 'variable' ? value.toString() : undefined
+      items.push({
+        id: 'variables',
+        label: t('keyValueTable.types.variables', 'Variables'),
+        items: variableNames.map((name) => ({
+          id: `variable-${name}`,
+          label: name,
+          checked: activeVar === name,
+          onClick: () => { cast('variable', name) },
+          ...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-variable-${name}` })
+        })),
+        ...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-variables` })
+      })
+    }
+
     items.push({ id: 'sep-secret', label: '', isSeparator: true })
 
     if (!isExcluded('secret')) {
@@ -405,8 +446,19 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
       })
     }
 
+    if (onRemove) {
+      items.push({ id: 'sep-remove', label: '', isSeparator: true })
+      items.push({
+        id: 'remove',
+        label: removeLabel ?? t('common.remove', 'Supprimer'),
+        icon: 'trash',
+        onClick: onRemove,
+        ...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-remove` })
+      })
+    }
+
     return items
-  }, [t, cast, dataTestId, groups, activeType, activeDefId, isExcluded])
+  }, [t, cast, dataTestId, groups, activeType, activeDefId, isExcluded, variableNames, value, onRemove, removeLabel])
 
   const widget = ((): React.ReactNode => {
     if (value instanceof PasswordValue) {
@@ -493,6 +545,20 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
           {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-expression` })}
         />,
         { icon: 'code', ariaLabel: 'Expression (Handlebars template)', typeTestid: 'expression' }
+      )
+    }
+
+    // VariableValue → read-only display of the referenced variable name (the
+    // reference is changed via the type menu's "Variables" submenu, not typed).
+    if (value instanceof VariableValue) {
+      return withTypeControl(
+        <InputBox
+          value={value.toString()}
+          options={{ type: 'text' }}
+          disabled
+          {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-variable` })}
+        />,
+        { icon: 'symbol-variable', ariaLabel: 'Variable reference', typeTestid: 'variable' }
       )
     }
 

@@ -303,7 +303,8 @@
       "dateTime": "Datum/tid",
       "color": "Färg",
       "expression": "Uttryck",
-      "boolean": "Boolesk"
+      "boolean": "Boolesk",
+      "variables": "Variabler"
     },
     "apiEnums": "API-definierade typer",
     "customLists": "Anpassade typer",
@@ -494,7 +495,8 @@
   },
   "common": {
     "cancel": "Avbryt",
-    "save": "Spara"
+    "save": "Spara",
+    "remove": "Ta bort"
   },
   "helpers": {
     "categories": {
@@ -780,6 +782,10 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable"
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Lägg till fall",
+      "removeCase": "Ta bort fall"
+    }
   }
 }

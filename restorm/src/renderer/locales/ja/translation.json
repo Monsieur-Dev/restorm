@@ -302,7 +302,8 @@
       "dateTime": "日時",
       "color": "色",
       "expression": "式",
-      "boolean": "ブール値"
+      "boolean": "ブール値",
+      "variables": "変数"
     },
     "apiEnums": "API で定義された型",
     "customLists": "カスタム型",
@@ -493,7 +494,8 @@
   },
   "common": {
     "cancel": "キャンセル",
-    "save": "保存"
+    "save": "保存",
+    "remove": "削除"
   },
   "helpers": {
     "categories": {
@@ -779,6 +781,10 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable"
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "ケースを追加",
+      "removeCase": "ケースを削除"
+    }
   }
 }

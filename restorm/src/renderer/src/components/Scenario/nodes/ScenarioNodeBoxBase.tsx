@@ -74,10 +74,17 @@ export interface ScenarioNodeBoxBaseProps {
   /**
    * Whether the node accepts a generic "launch" input — a target anchor on
    * the left of the header (id `in`). Lets nodes be chained without a
-   * dedicated condition (e.g. one request's `response` → the next's launch).
-   * Off for nodes that trigger on a specific input instead (the `if`).
+   * dedicated condition (e.g. one request's `response` → the next's launch,
+   * or a `setVariable`'s `event` → an `if`'s launch).
    */
   launchInput?: boolean
+  /**
+   * Whether the node emits a generic "event" output — a source anchor on the
+   * right of the header (id `event`, signal flow). Lets a node signal
+   * completion to chain the next node's launch input without producing a data
+   * value (e.g. `setVariable`, which stores its input and fires this event).
+   */
+  headerEventOutput?: boolean
   /**
    * Whether the node can be run on its own right now. Drives the header
    * play button's colour: green when runnable, grey otherwise (e.g. an `if`
@@ -106,7 +113,7 @@ const STATUS_GLYPH: Record<NonNullable<ScenarioNodeBoxData['status']>, string> =
  * box colour with auto-contrast, and the dedicated error port. Per-kind
  * components (IfNodeBox, …) compose this and only declare their columns.
  */
-export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, data, selected, left, right, headerIcon, title, launchInput, canPlay, hasError }) => {
+export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, data, selected, left, right, headerIcon, title, launchInput, headerEventOutput, canPlay, hasError }) => {
   const meta = scenarioNodeMeta(data.kind)
   const collapsed = data.collapsed === true
   const note = data.note
@@ -164,7 +171,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
 
   return (
     <div className={`scn-node ${selected ? 'scn-node-selected' : ''} ${collapsed ? 'scn-node-collapsed' : ''}`} data-testid={`scn-node-${data.kind}`}>
-      <div className={`scn-node-header ${launchInput ? 'scn-node-header-has-launch' : ''}`} style={headerStyle} onContextMenu={onHeaderContextMenu}>
+      <div className={`scn-node-header ${launchInput ? 'scn-node-header-has-launch' : ''} ${headerEventOutput ? 'scn-node-header-has-event' : ''}`} style={headerStyle} onContextMenu={onHeaderContextMenu}>
         {launchInput && (
           <Handle
             id="in"
@@ -173,6 +180,16 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
             className={`scn-handle scn-handle-launch ${inputFlowRingClass('in', data.inputs, data.kind)}`}
             style={{ background: anchorColor() }}
             title="in"
+          />
+        )}
+        {headerEventOutput && (
+          <Handle
+            id="event"
+            type="source"
+            position={Position.Right}
+            className={`scn-handle scn-handle-event ${outputFlowRingClass('event', data.outputs, data.kind)}`}
+            style={{ background: anchorColor() }}
+            title="event"
           />
         )}
         {headerIcon ?? <i className={`codicon codicon-${meta.icon} scn-node-icon`} aria-hidden="true" />}

@@ -302,7 +302,8 @@
       "dateTime": "日期時間",
       "color": "顏色",
       "expression": "運算式",
-      "boolean": "布林值"
+      "boolean": "布林值",
+      "variables": "變數"
     },
     "apiEnums": "API 定義的型別",
     "customLists": "自訂類型",
@@ -493,7 +494,8 @@
   },
   "common": {
     "cancel": "取消",
-    "save": "儲存"
+    "save": "儲存",
+    "remove": "移除"
   },
   "helpers": {
     "categories": {
@@ -779,6 +781,10 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable"
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "新增分支",
+      "removeCase": "移除分支"
+    }
   }
 }

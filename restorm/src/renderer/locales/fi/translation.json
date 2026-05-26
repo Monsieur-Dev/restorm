@@ -303,7 +303,8 @@
       "dateTime": "Päivämäärä/aika",
       "color": "Väri",
       "expression": "Lauseke",
-      "boolean": "Totuusarvo"
+      "boolean": "Totuusarvo",
+      "variables": "Muuttujat"
     },
     "apiEnums": "API:n määrittämät tyypit",
     "customLists": "Mukautetut tyypit",
@@ -494,7 +495,8 @@
   },
   "common": {
     "cancel": "Peruuta",
-    "save": "Tallenna"
+    "save": "Tallenna",
+    "remove": "Poista"
   },
   "helpers": {
     "categories": {
@@ -780,6 +782,10 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable"
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Lisää tapaus",
+      "removeCase": "Poista tapaus"
+    }
   }
 }

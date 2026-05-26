@@ -304,7 +304,8 @@
       "dateTime": "Datum i vreme",
       "color": "Boja",
       "expression": "Izraz",
-      "boolean": "Bulova vrednost"
+      "boolean": "Bulova vrednost",
+      "variables": "Променљиве"
     },
     "apiEnums": "Tipovi definisani u API-ju",
     "customLists": "Прилагођени типови",
@@ -495,7 +496,8 @@
   },
   "common": {
     "cancel": "Otkaži",
-    "save": "Sačuvaj"
+    "save": "Sačuvaj",
+    "remove": "Уклони"
   },
   "helpers": {
     "categories": {
@@ -781,6 +783,10 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable"
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Додај случај",
+      "removeCase": "Уклони случај"
+    }
   }
 }

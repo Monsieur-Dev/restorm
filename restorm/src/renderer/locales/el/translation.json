@@ -303,7 +303,8 @@
       "dateTime": "Ημερομηνία/ώρα",
       "color": "Χρώμα",
       "expression": "Έκφραση",
-      "boolean": "Λογική τιμή"
+      "boolean": "Λογική τιμή",
+      "variables": "Μεταβλητές"
     },
     "apiEnums": "Τύποι ορισμένοι στο API",
     "customLists": "Προσαρμοσμένοι τύποι",
@@ -494,7 +495,8 @@
   },
   "common": {
     "cancel": "Ακύρωση",
-    "save": "Αποθήκευση"
+    "save": "Αποθήκευση",
+    "remove": "Αφαίρεση"
   },
   "helpers": {
     "categories": {
@@ -780,6 +782,10 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable"
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Προσθήκη περίπτωσης",
+      "removeCase": "Αφαίρεση περίπτωσης"
+    }
   }
 }

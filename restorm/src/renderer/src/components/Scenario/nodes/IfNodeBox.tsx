@@ -62,7 +62,7 @@ export const IfNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, 
     { id: 'then', label: 'then', port: { id: 'then', role: 'then', type: 'source' } },
     { id: 'else', label: 'else', port: { id: 'else', role: 'else', type: 'source' } }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} launchInput />
 }
 
 export default IfNodeBox

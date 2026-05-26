@@ -302,7 +302,8 @@
       "dateTime": "날짜/시간",
       "color": "색상",
       "expression": "표현식",
-      "boolean": "부울"
+      "boolean": "부울",
+      "variables": "변수"
     },
     "apiEnums": "API에서 정의한 형식",
     "customLists": "사용자 지정 유형",
@@ -493,7 +494,8 @@
   },
   "common": {
     "cancel": "취소",
-    "save": "저장"
+    "save": "저장",
+    "remove": "제거"
   },
   "helpers": {
     "categories": {
@@ -779,6 +781,10 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable"
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "케이스 추가",
+      "removeCase": "케이스 제거"
+    }
   }
 }

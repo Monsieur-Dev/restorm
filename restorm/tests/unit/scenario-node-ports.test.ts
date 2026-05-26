@@ -3,9 +3,10 @@ import { defaultPortsForKind, isValidScenarioConnection } from '../../src/render
 import type { ScenarioNodeKind } from '../../src/shared/types/scenario'
 
 describe('defaultPortsForKind', () => {
-  it('gives If left/right operands and a then/else branch', () => {
+  it('gives If a header launch trigger, left/right operands and a then/else branch', () => {
     const { inputs, outputs } = defaultPortsForKind('if')
-    expect(inputs.map((p) => p.id)).toEqual(['left', 'right'])
+    expect(inputs.map((p) => p.id)).toEqual(['in', 'left', 'right'])
+    expect(inputs[0]).toMatchObject({ id: 'in', flow: 'signal' })
     expect(outputs.map((p) => p.id)).toEqual(['then', 'else'])
     expect(outputs.map((p) => p.role)).toEqual(['then', 'else'])
   })
@@ -58,7 +59,10 @@ describe('isValidScenarioConnection (link flow rules)', () => {
     expect(link('now', 'value', 'httpRequest', 'in')).toBe(false)
   })
   it('rejects a signal output into a data input (if.then → switch.on)', () => {
-    expect(link('if', 'then', 'switch', 'in')).toBe(false)
+    expect(link('if', 'then', 'switch', 'on')).toBe(false)
+  })
+  it('allows a signal output into the switch header trigger (if.then → switch.in)', () => {
+    expect(link('if', 'then', 'switch', 'in')).toBe(true)
   })
   it('rejects a signal branch into a value input (if.then → arithmetic.a)', () => {
     expect(link('if', 'then', 'arithmetic', 'a')).toBe(false)

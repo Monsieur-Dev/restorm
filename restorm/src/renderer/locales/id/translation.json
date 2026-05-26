@@ -302,7 +302,8 @@
       "dateTime": "Tanggal/waktu",
       "color": "Warna",
       "expression": "Ekspresi",
-      "boolean": "Boolean"
+      "boolean": "Boolean",
+      "variables": "Variabel"
     },
     "apiEnums": "Tipe yang didefinisikan API",
     "customLists": "Tipe khusus",
@@ -493,7 +494,8 @@
   },
   "common": {
     "cancel": "Batal",
-    "save": "Simpan"
+    "save": "Simpan",
+    "remove": "Hapus"
   },
   "helpers": {
     "categories": {
@@ -779,6 +781,10 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable"
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Tambah kasus",
+      "removeCase": "Hapus kasus"
+    }
   }
 }

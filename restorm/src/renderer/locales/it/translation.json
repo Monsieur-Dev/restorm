@@ -303,7 +303,8 @@
       "dateTime": "Data/ora",
       "color": "Colore",
       "expression": "Espressione",
-      "boolean": "Booleano"
+      "boolean": "Booleano",
+      "variables": "Variabili"
     },
     "apiEnums": "Tipi definiti nell'API",
     "customLists": "Tipi personalizzati",
@@ -494,7 +495,8 @@
   },
   "common": {
     "cancel": "Annulla",
-    "save": "Salva"
+    "save": "Salva",
+    "remove": "Rimuovi"
   },
   "helpers": {
     "categories": {
@@ -780,6 +782,10 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable"
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Aggiungi caso",
+      "removeCase": "Rimuovi caso"
+    }
   }
 }

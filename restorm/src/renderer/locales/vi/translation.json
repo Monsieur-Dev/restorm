@@ -302,7 +302,8 @@
       "dateTime": "Ngày/giờ",
       "color": "Màu",
       "expression": "Biểu thức",
-      "boolean": "Boolean"
+      "boolean": "Boolean",
+      "variables": "Biến"
     },
     "apiEnums": "Kiểu được định nghĩa bởi API",
     "customLists": "Loại tùy chỉnh",
@@ -493,7 +494,8 @@
   },
   "common": {
     "cancel": "Hủy",
-    "save": "Lưu"
+    "save": "Lưu",
+    "remove": "Xóa"
   },
   "helpers": {
     "categories": {
@@ -779,6 +781,10 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable"
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Thêm trường hợp",
+      "removeCase": "Xóa trường hợp"
+    }
   }
 }

@@ -45,6 +45,22 @@
   padding-left: 16px;
 }
 
+/* "event" output anchor: centred on the header's right border. The play
+ * button is shifted inward so the anchor keeps the very edge clear of it. */
+.scn-handle-event.react-flow__handle {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translate(50%, -50%);
+  z-index: 7;
+}
+.scn-node-header-has-event {
+  padding-right: 70px;
+}
+.scn-node-header-has-event .scn-node-play {
+  right: 24px;
+}
+
 /* Generic "launch" input anchor: centred on the header's left border. Raised
  * above the header content so it stays a clear connection drop target. */
 .scn-handle-launch.react-flow__handle {
@@ -397,14 +413,13 @@
   color: #fff;
 }
 
-/* Node-local name field (input / get-/set-variable). */
+/* Node name field (input / get-/set-variable) — a thin InputBox wrapper. The
+   field chrome (border / background) comes from InputBox's themed styles, so
+   this only sizes the wrapper and keeps the compact node font. */
 .scn-name-input {
-  width: 90px;
-  background: var(--input-background, #3c3c3c);
-  color: var(--input-foreground, #cccccc);
-  border: 1px solid var(--input-border, #555555);
-  border-radius: 3px;
-  padding: 1px 4px;
+  width: 100%;
+}
+.scn-name-input .input {
   font-size: 11px;
   font-family: var(--editor-font-family, monospace);
 }
@@ -418,18 +433,6 @@
   border: 1px solid var(--input-border, #555555);
   border-radius: 3px;
   padding: 2px 4px;
-  font-size: 11px;
-  font-family: var(--editor-font-family, monospace);
-}
-
-/* Switch node — per-case match value field (output rows). */
-.scn-case-input {
-  width: 80px;
-  background: var(--input-background, #3c3c3c);
-  color: var(--input-foreground, #cccccc);
-  border: 1px solid var(--input-border, #555555);
-  border-radius: 3px;
-  padding: 1px 4px;
   font-size: 11px;
   font-family: var(--editor-font-family, monospace);
 }

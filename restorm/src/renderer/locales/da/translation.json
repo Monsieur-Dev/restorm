@@ -303,7 +303,8 @@
       "dateTime": "Dato/tid",
       "color": "Farve",
       "expression": "Udtryk",
-      "boolean": "Boolean"
+      "boolean": "Boolean",
+      "variables": "Variabler"
     },
     "apiEnums": "API-definerede typer",
     "customLists": "Brugerdefinerede typer",
@@ -494,7 +495,8 @@
   },
   "common": {
     "cancel": "Annullér",
-    "save": "Gem"
+    "save": "Gem",
+    "remove": "Fjern"
   },
   "helpers": {
     "categories": {
@@ -780,6 +782,10 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable"
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Tilføj tilfælde",
+      "removeCase": "Fjern tilfælde"
+    }
   }
 }

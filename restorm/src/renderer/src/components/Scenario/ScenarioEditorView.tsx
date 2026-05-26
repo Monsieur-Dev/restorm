@@ -23,6 +23,7 @@ import type { Scenario, ScenarioNode, ScenarioEdge, ScenarioNodeKind } from '../
 import { isRequest, isScenario } from '../../../../shared/types/collections'
 import { ScenarioBoundResolverContext, ScenarioRequestEnvContext, type ResolveBoundItem, type ResolveRequestEnv } from './scenarioBoundResolver'
 import { ScenarioEdgeSelectorContext, type ScenarioEdgeSelectorApi } from './scenarioEdgeSelector'
+import { ScenarioVariablesContext } from '../../contexts/ScenarioVariablesContext'
 import { SCENARIO_NODE_CATALOGUE, type ScenarioNodeKindMeta } from './scenarioNodeCatalogue'
 import { scenarioEdgeToFlowEdge, flowEdgeToScenarioEdge, portColor } from './scenarioGraphMapping'
 import { ScenarioNodeView, type ScenarioNodeBoxData } from './nodes'
@@ -166,12 +167,18 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
   const persist = useCallback((flowNodes: Node<NodeData>[], flowEdges: Edge[]) => {
     const nextNodes: ScenarioNode[] = flowNodes.map((fn) => {
       const prior = nodeStore.current.get(fn.id)
+      // Serialize the LIVE React Flow node data, not the authoritative store:
+      // `setNodeConfig` always updates `fn.data.config`, but the matching
+      // `nodeStore` write can lag for out-of-band (MCP-created) nodes, leaving
+      // `prior.config` stale — which is why successive config edits persisted
+      // only the first. The store stays the fallback for `config` (the only
+      // optional field on the node data); `inputs`/`outputs` are always carried.
       return {
         id: fn.id,
         kind: fn.data.kind,
-        config: prior?.config ?? {},
-        inputs: prior?.inputs ?? [],
-        outputs: prior?.outputs ?? [],
+        config: fn.data.config ?? prior?.config ?? {},
+        inputs: fn.data.inputs,
+        outputs: fn.data.outputs,
         position: fn.position,
         ...(prior?.note !== undefined ? { note: prior.note } : {}),
         ...(prior?.color !== undefined ? { color: prior.color } : {}),
@@ -186,7 +193,13 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     )
     nodeStore.current = new Map(nextNodes.map((n) => [n.id, n]))
     edgeStore.current = new Map(nextEdges.map((e) => [e.id, e]))
-    onScenarioChange?.(scenario.id, { nodes: nextNodes, edges: nextEdges })
+    // Defer the parent update. `persist` is sometimes called inside a
+    // `setNodes`/`setEdges` updater (notably from `setNodeConfig`), and calling
+    // `onScenarioChange` (→ `setState` on App) synchronously from there trips
+    // React's "cannot update a component while rendering a different one" and
+    // the update is dropped — which is why scenario config edits never reached
+    // the parent (and thus never autosaved). A microtask runs it after commit.
+    queueMicrotask(() => { onScenarioChange?.(scenario.id, { nodes: nextNodes, edges: nextEdges }) })
   }, [onScenarioChange, scenario.id])
 
   // The JSON-path selector on a data link reads + writes that edge's `selector`
@@ -254,6 +267,20 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
       const prior = nodeStore.current.get(nodeId)
       if (prior) {
         nodeStore.current.set(nodeId, { ...prior, config: { ...prior.config, ...config } })
+      } else {
+        // Seed the authoritative store from the live node when it's missing
+        // (out-of-band / MCP-created), so this + later persists keep its config.
+        const fn = next.find((n) => n.id === nodeId)
+        if (fn) {
+          nodeStore.current.set(nodeId, {
+            id: nodeId,
+            kind: fn.data.kind,
+            config: { ...(fn.data.config ?? {}) },
+            inputs: fn.data.inputs,
+            outputs: fn.data.outputs,
+            position: fn.position
+          })
+        }
       }
       setEdges((e) => { persist(next, e); return e })
       return next
@@ -645,9 +672,23 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
   // A required input left unwired makes the scenario non-runnable.
   const invalidCount = useMemo(() => countUnsatisfiedRequired(nodes, edges), [nodes, edges])
 
+  // Variable names in scope — declared by `setVariable` nodes and named
+  // `input`/param nodes. Drives the value selector's "Variables" menu.
+  const scenarioVariables = useMemo(() => {
+    const names = new Set<string>()
+    for (const node of nodes) {
+      if (node.data.kind === 'setVariable' || node.data.kind === 'input') {
+        const name = (node.data.config as { name?: unknown } | undefined)?.name
+        if (typeof name === 'string' && name.trim() !== '') names.add(name)
+      }
+    }
+    return [...names]
+  }, [nodes])
+
   return (
     <ScenarioBoundResolverContext.Provider value={resolveBoundItem ?? null}>
     <ScenarioRequestEnvContext.Provider value={resolveRequestEnv ?? null}>
+    <ScenarioVariablesContext.Provider value={scenarioVariables}>
     <ScenarioEdgeSelectorContext.Provider value={edgeSelectorApi}>
     <div ref={wrapperRef} data-testid="scenario-editor" style={containerStyle} onDragOver={onDragOver} onDrop={onDrop}>
       {nodes.length === 0 && (
@@ -821,6 +862,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
       </Modal>
     </div>
     </ScenarioEdgeSelectorContext.Provider>
+    </ScenarioVariablesContext.Provider>
     </ScenarioRequestEnvContext.Provider>
     </ScenarioBoundResolverContext.Provider>
   )

@@ -61,7 +61,14 @@ export interface InputBoxProps {
   'data-testid'?: string
   value?: string
   onChange?: (value: string) => void
-  /** Debounce delay (ms) before emitting onChange to parent. Default: 200ms. */
+  /**
+   * Debounce delay (ms) before emitting `onChange` to the parent. Defaults to
+   * `300` — the field keeps its own draft so typing stays instant, and only
+   * the `onChange` callback (the parent's persistence / side effect) is
+   * debounced. A pending change is flushed immediately on blur. Pass `0` to
+   * opt out and emit on every keystroke (e.g. an address bar that commits on
+   * Enter, or a filter that must react live).
+   */
   changeDebounceMs?: number
   onBlur?: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void
   onFocus?: () => void

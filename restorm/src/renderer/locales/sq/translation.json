@@ -303,7 +303,8 @@
       "dateTime": "Data/ora",
       "color": "Ngjyrë",
       "expression": "Shprehje",
-      "boolean": "Booleane"
+      "boolean": "Booleane",
+      "variables": "Variablat"
     },
     "apiEnums": "Tipet e përcaktuara në API",
     "customLists": "Tipe të personalizuara",
@@ -494,7 +495,8 @@
   },
   "common": {
     "cancel": "Anulo",
-    "save": "Ruaj"
+    "save": "Ruaj",
+    "remove": "Hiq"
   },
   "helpers": {
     "categories": {
@@ -780,6 +782,10 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable"
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Shto rast",
+      "removeCase": "Hiq rastin"
+    }
   }
 }

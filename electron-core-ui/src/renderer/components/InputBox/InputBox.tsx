@@ -8,7 +8,7 @@ const InputBoxInner: React.FC<InputBoxProps> = ({
   'data-testid': dataTestId,
   value = '',
   onChange,
-  changeDebounceMs = 0,
+  changeDebounceMs = 300,
   onBlur,
   onFocus,
   onKeyDown,
@@ -21,7 +21,19 @@ const InputBoxInner: React.FC<InputBoxProps> = ({
 }) => {
   const [message, setMessage] = useState<IMessage | null>(null)
   const [state, setState] = useState<'idle' | 'focused'>('idle')
-  
+
+  // Local draft so typing stays instant even though `onChange` is debounced:
+  // a fully-controlled value would snap the field back to the stale prop on
+  // any intervening re-render and drop characters mid-word.
+  const [draft, setDraft] = useState(value)
+  const [syncedValue, setSyncedValue] = useState(value)
+  // Adopt an external value change (parent update, programmatic reset, …)
+  // during render — React's prop-derived-state pattern, not an effect.
+  if (value !== syncedValue) {
+    setSyncedValue(value)
+    setDraft(value)
+  }
+
   // Compute placeholder based on state and options (no useEffect needed)
   const currentPlaceholder = useMemo(() => {
     if (options.showPlaceholderOnFocus && state === 'idle') {
@@ -36,14 +48,34 @@ const InputBoxInner: React.FC<InputBoxProps> = ({
   const mirrorRef = useRef<HTMLDivElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastEmittedValueRef = useRef<string>(value)
+  // Latest onChange, so the unmount flush below fires the current closure
+  // rather than the one captured by the mount-only effect.
+  const onChangeRef = useRef(onChange)
+  useEffect(() => { onChangeRef.current = onChange }, [onChange])
+
+  // An external `value` change supersedes any in-flight debounced edit: the
+  // render-phase branch above already adopted it into `draft`, so cancel the
+  // pending timer (its captured value is now stale) and re-baseline the emit
+  // ref — otherwise a later blur / unmount flush would re-emit the discarded
+  // draft and clobber the value the parent just pushed.
+  useEffect(() => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+      debounceRef.current = null
+    }
+    lastEmittedValueRef.current = value
+  }, [value])
 
   const styles = options.inputBoxStyles ?? defaultInputBoxStyles
 
-  // Clear pending debounce on unmount
+  // Flush a pending debounced change on unmount so the last keystrokes aren't
+  // dropped on tab close / navigation (the field may unmount before a blur).
   useEffect(() => {
     return () => {
       if (debounceRef.current) {
         clearTimeout(debounceRef.current)
+        debounceRef.current = null
+        onChangeRef.current?.(lastEmittedValueRef.current)
       }
     }
   }, [])
@@ -112,7 +144,8 @@ const InputBoxInner: React.FC<InputBoxProps> = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     const newValue = e.target.value
-    
+    setDraft(newValue)
+
     // Validate
     const validationMessage = validate(newValue)
     if (validationMessage) {
@@ -134,13 +167,14 @@ const InputBoxInner: React.FC<InputBoxProps> = ({
   const isNumberInput = options.type === 'number'
   const stepValue = options.step ?? 1
   const incrementNumber = useCallback((delta: number): void => {
-    const current = parseFloat(value) || 0
+    const current = parseFloat(draft) || 0
     let next = current + delta
     if (options.min !== undefined) next = Math.max(next, options.min)
     if (options.max !== undefined) next = Math.min(next, options.max)
     const str = String(next)
+    setDraft(str)
     emitChange(str)
-  }, [value, options.min, options.max, emitChange])
+  }, [draft, options.min, options.max, emitChange])
 
   // Use native event listeners for wheel events
   useEffect(() => {
@@ -189,6 +223,13 @@ const InputBoxInner: React.FC<InputBoxProps> = ({
     setState('idle')
     if (containerRef.current) {
       containerRef.current.classList.remove('synthetic-focus')
+    }
+    // Flush a pending debounced change so the value commits before any
+    // blur-triggered action (save button, tab switch, …) reads stale state.
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+      debounceRef.current = null
+      onChange?.(lastEmittedValueRef.current)
     }
     onBlur?.(e)
   }
@@ -253,7 +294,7 @@ const InputBoxInner: React.FC<InputBoxProps> = ({
     }
   }
 
-  const inputClasses = ['input', value ? '' : 'empty'].filter(Boolean).join(' ')
+  const inputClasses = ['input', draft ? '' : 'empty'].filter(Boolean).join(' ')
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     if (isNumberInput) {
@@ -288,7 +329,7 @@ const InputBoxInner: React.FC<InputBoxProps> = ({
 
   const baseProps = {
     className: inputClasses,
-    value: value,
+    value: draft,
     onChange: handleChange,
     onFocus: handleFocus,
     onBlur: handleBlur,
@@ -337,7 +378,7 @@ const InputBoxInner: React.FC<InputBoxProps> = ({
                   aria-hidden="true"
                   {...(dataTestId && { 'data-testid': `${dataTestId}-mirror` })}
                 >
-                  {value || '\u00a0'}
+                  {draft || '\u00a0'}
                 </div>
               }
             </>

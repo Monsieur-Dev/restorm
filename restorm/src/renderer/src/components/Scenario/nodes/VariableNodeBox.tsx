@@ -118,6 +118,7 @@ export const SetVariableNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
                 onChange={(next) => { data.onSetConfig?.(id, { value: serializeValueForPersistence(next) }) }}
                 valueTypeGroups={valueTypeGroups}
                 excludeTypes={['expression']}
+                excludeVariableName={name}
                 dataTestId="scn-setvar-value"
               />
             </div>
@@ -126,6 +127,8 @@ export const SetVariableNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
       ]
     }
   ]
-  const right: ScenarioNodeCell[] = [{ id: 'out', label: 'value', port: { id: 'out', type: 'source' } }]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
+  // No data `value` output: a setVariable stores its input into the named
+  // variable (referenced elsewhere via the value selector's "Variables" menu)
+  // and only emits a header `event` signal on completion to chain the next node.
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerEventOutput />
 }

@@ -303,7 +303,8 @@
       "dateTime": "Tarih/saat",
       "color": "Renk",
       "expression": "İfade",
-      "boolean": "Boolean"
+      "boolean": "Boolean",
+      "variables": "Değişkenler"
     },
     "apiEnums": "API tanımlı türler",
     "customLists": "Özel türler",
@@ -494,7 +495,8 @@
   },
   "common": {
     "cancel": "İptal",
-    "save": "Kaydet"
+    "save": "Kaydet",
+    "remove": "Kaldır"
   },
   "helpers": {
     "categories": {
@@ -780,6 +782,10 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable"
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Durum ekle",
+      "removeCase": "Durumu kaldır"
+    }
   }
 }

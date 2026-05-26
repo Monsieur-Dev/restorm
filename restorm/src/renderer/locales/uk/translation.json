@@ -305,7 +305,8 @@
       "dateTime": "Дата/час",
       "color": "Колір",
       "expression": "Вираз",
-      "boolean": "Булеве"
+      "boolean": "Булеве",
+      "variables": "Змінні"
     },
     "apiEnums": "Типи, визначені в API",
     "customLists": "Власні типи",
@@ -496,7 +497,8 @@
   },
   "common": {
     "cancel": "Скасувати",
-    "save": "Зберегти"
+    "save": "Зберегти",
+    "remove": "Вилучити"
   },
   "helpers": {
     "categories": {
@@ -782,6 +784,10 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable"
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Додати випадок",
+      "removeCase": "Вилучити випадок"
+    }
   }
 }

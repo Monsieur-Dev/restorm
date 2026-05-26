@@ -305,7 +305,8 @@
       "dateTime": "Datum a čas",
       "color": "Barva",
       "expression": "Výraz",
-      "boolean": "Boolean"
+      "boolean": "Boolean",
+      "variables": "Proměnné"
     },
     "apiEnums": "Typy definované v API",
     "customLists": "Vlastní typy",
@@ -496,7 +497,8 @@
   },
   "common": {
     "cancel": "Zrušit",
-    "save": "Uložit"
+    "save": "Uložit",
+    "remove": "Odebrat"
   },
   "helpers": {
     "categories": {
@@ -782,6 +784,10 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable"
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Přidat případ",
+      "removeCase": "Odebrat případ"
+    }
   }
 }

@@ -304,7 +304,8 @@
       "dateTime": "Dată și oră",
       "color": "Culoare",
       "expression": "Expresie",
-      "boolean": "Boolean"
+      "boolean": "Boolean",
+      "variables": "Variabile"
     },
     "apiEnums": "Tipuri definite de API",
     "customLists": "Tipuri personalizate",
@@ -495,7 +496,8 @@
   },
   "common": {
     "cancel": "Anulează",
-    "save": "Salvează"
+    "save": "Salvează",
+    "remove": "Elimină"
   },
   "helpers": {
     "categories": {
@@ -781,6 +783,10 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable"
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Adaugă caz",
+      "removeCase": "Elimină caz"
+    }
   }
 }

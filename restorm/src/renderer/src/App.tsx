@@ -47,6 +47,13 @@ import { Environment as EnvironmentClass } from '../../shared/models/Environment
  * produces on save — that's the invariant `commitIfDraftMatches`
  * relies on.
  */
+// Debounce handle + latest save-all callback for the scenario-edit autosave
+// (see handleScenarioChange). Module-scoped (single App instance) so the
+// debounced timer always invokes the current `handleMenuSaveAll` — capturing it
+// in the timer closure would save a stale `rootItems` snapshot.
+let scenarioSaveTimer: ReturnType<typeof setTimeout> | null = null
+let latestSaveAll: (() => Promise<boolean>) | null = null
+
 const classForDocument = (type: 'folder' | 'request' | 'environment', doc: Record<string, unknown>): object => {
   if (type === 'request') {
     const t = doc['type']
@@ -931,14 +938,32 @@ const App: React.FC = () => {
   // Bridge the AutoSaveController's `'file:autosave-trigger'` IPC to
   // the existing save-all flow. The controller (in main) owns the
   // when; the renderer owns the how.
+  //
+  // The trigger must NOT call `handleMenuSaveAll()` synchronously from
+  // the IPC callback. The MCP write tools (e.g. a scenario node edit in
+  // `mcp/tools/scenario.ts`) fire, in one main-process tick,
+  // `mcp:tree-replace` (→ `setRootItems`, async) immediately followed by
+  // `file:autosave-trigger`. A synchronous save here would close over the
+  // *pre-replace* `rootItems` and write the stale tree — the MCP edit
+  // would never reach disk. So we bump a counter and let a post-commit
+  // effect run the save once React has applied the new `rootItems` (same
+  // discipline as the post-import save below).
+  const [pendingAutoSave, setPendingAutoSave] = useState(0)
   useEffect(() => {
     const unsub = window.api.file.onAutoSaveTrigger(() => {
-      void handleMenuSaveAll().catch((err: unknown) => {
-        logger.error('[App] Autosave failed', { error: String(err) })
-      })
+      setPendingAutoSave((c) => c + 1)
     })
     return () => { unsub() }
-  }, [handleMenuSaveAll])
+  }, [])
+  const lastAutoSaveRef = useRef(0)
+  useEffect(() => {
+    if (pendingAutoSave === 0) return
+    if (lastAutoSaveRef.current === pendingAutoSave) return
+    lastAutoSaveRef.current = pendingAutoSave
+    void handleMenuSaveAll().catch((err: unknown) => {
+      logger.error('[App] Autosave failed', { error: String(err) })
+    })
+  }, [pendingAutoSave, handleMenuSaveAll])
 
   // After an import, persist the fresh tree to disk so the registry's
   // initial hydration reference matches what's on disk. Without this,
@@ -1034,6 +1059,11 @@ const App: React.FC = () => {
   // editor back onto the scenario in `rootItems`, then nudge React so the
   // whole-file save picks the change up (verified: scenarios round-trip
   // through the standard save path).
+  // Keep the module-scoped handle pointing at the current whole-file save so
+  // the scenario autosave timer always flushes the latest `rootItems`. Done in
+  // an effect (post-commit) rather than during render — reassigning a global
+  // mid-render is an impure side effect.
+  useEffect(() => { latestSaveAll = handleMenuSaveAll }, [handleMenuSaveAll])
   const handleScenarioChange = useCallback((scenarioId: string, patch: { nodes?: ScenarioNode[]; edges?: ScenarioEdge[]; notes?: string }) => {
     const item = findItemById(rootItems, scenarioId)
     if (item && isScenario(item)) {
@@ -1041,6 +1071,20 @@ const App: React.FC = () => {
       if (patch.edges !== undefined) item.edges = patch.edges
       if (patch.notes !== undefined) item.notes = patch.notes
       setRootItems((prev) => [...prev])
+      // Scenario node/edge/note edits mutate the tree in place, which doesn't
+      // trip the trackable dirty trap (those keys aren't indexable) — so unlike
+      // request/folder edits they never schedule an autosave, and the on-disk
+      // copy keeps its create-time state. The whole-file save serializes the
+      // live tree correctly, so debounce one here (via the always-current
+      // `latestSaveAll`) to push scenario edits — incl. those on MCP-created
+      // nodes — to disk.
+      if (scenarioSaveTimer) clearTimeout(scenarioSaveTimer)
+      scenarioSaveTimer = setTimeout(() => {
+        scenarioSaveTimer = null
+        void latestSaveAll?.().catch((err: unknown) => {
+          logger.error('[App] scenario autosave failed', { error: String(err) })
+        })
+      }, 600)
     }
   }, [rootItems, setRootItems])
 

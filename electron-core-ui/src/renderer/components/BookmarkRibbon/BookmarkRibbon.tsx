@@ -233,6 +233,11 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
             <InputBox
               options={{ placeholder: 'Bookmark name' }}
               value={draftLabel}
+              // Commit reads `draftLabel` synchronously on Enter / blur, so the
+              // draft must track every keystroke — a debounced onChange would
+              // leave it stale at commit time. Discrete edit, no per-keystroke
+              // persistence, so immediate emit costs nothing here.
+              changeDebounceMs={0}
               onChange={(next) => { setDraftLabel(next) }}
               onBlur={handleCommitRename}
               onKeyDown={(event) => {
