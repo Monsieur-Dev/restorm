@@ -1,6 +1,6 @@
 import type { ValueType, CustomValueList } from '../../../../shared/types/collections'
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue } from '../../../../shared/types/collections'
-import { isPasswordValue, isNumericValue, isDateTimeValue, isColorValue, isExpressionValue, isBooleanValue, isEnumValue, isEnumListValue, isCustomListValue, isCustomListMultiValue, isVariableValue } from '../../../../shared/utils/valueHelpers'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue } from '../../../../shared/types/collections'
+import { isPasswordValue, isNumericValue, isDateTimeValue, isColorValue, isExpressionValue, isBooleanValue, isEnumValue, isEnumListValue, isCustomListValue, isCustomListMultiValue, isVariableValue, isEnvironmentValue } from '../../../../shared/utils/valueHelpers'
 import { isHexColorString, tryParseDateString, tryParseNumberString } from '../../../../shared/utils/valueCasting'
 
 export type ValueTypeKind =
@@ -16,11 +16,13 @@ export type ValueTypeKind =
   | 'customList'
   | 'customListMulti'
   | 'variable'
+  | 'environment'
 
 /** Map a concrete ValueType instance to its UI kind discriminator. */
 export function resolveValueTypeKind(value: ValueType | undefined): ValueTypeKind {
   if (!value) return 'string'
   if (isVariableValue(value)) return 'variable'
+  if (isEnvironmentValue(value)) return 'environment'
   if (isPasswordValue(value)) return 'secret'
   if (isNumericValue(value)) return 'number'
   if (isDateTimeValue(value)) return 'dateTime'
@@ -91,6 +93,9 @@ export function castValueToKind(
     case 'variable':
       // `defId` carries the chosen variable name (from the "Variables" menu).
       return new VariableValue(defId ?? raw)
+    case 'environment':
+      // `defId` carries the chosen environment id (from the env picker button).
+      return new EnvironmentValue(defId ?? raw)
     case 'boolean': {
       const asBool = raw.trim().toLowerCase() === 'true' || raw.trim() === '1'
       return new BooleanValue(asBool)

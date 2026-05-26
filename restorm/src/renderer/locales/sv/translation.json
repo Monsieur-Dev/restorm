@@ -304,7 +304,8 @@
       "color": "Färg",
       "expression": "Uttryck",
       "boolean": "Boolesk",
-      "variables": "Variabler"
+      "variables": "Variabler",
+      "environment": "Miljö"
     },
     "apiEnums": "API-definierade typer",
     "customLists": "Anpassade typer",
@@ -786,6 +787,70 @@
     "switch": {
       "addCase": "Lägg till fall",
       "removeCase": "Ta bort fall"
+    },
+    "forEach": {
+      "items": "objekt",
+      "each": "varje",
+      "done": "klar",
+      "parallelism": "parallellism"
+    },
+    "aggregate": {
+      "items": "objekt",
+      "result": "resultat",
+      "field": "fält",
+      "separator": "avgränsare",
+      "op": {
+        "count": "Antal",
+        "sum": "Summa",
+        "min": "Min",
+        "max": "Max",
+        "average": "Medelvärde",
+        "join": "Sammanfoga"
+      }
+    },
+    "filter": {
+      "items": "objekt",
+      "kept": "behållna",
+      "keepWhere": "behåll om"
+    },
+    "wait": {
+      "then": "sedan",
+      "duration": "varaktighet"
+    },
+    "waitUntil": {
+      "until": "tills",
+      "then": "sedan"
+    },
+    "arithmetic": {
+      "result": "resultat"
+    },
+    "nodes": {
+      "arithmetic": "Aritmetik",
+      "httpRequest": "HTTP-begäran",
+      "runScenario": "Kör scenario",
+      "wait": "Vänta",
+      "waitUntil": "Vänta tills",
+      "now": "Nu",
+      "comparator": "Jämförare",
+      "setVariable": "Ange variabel",
+      "getVariable": "Hämta variabel"
+    },
+    "comparator": {
+      "result": "resultat"
+    },
+    "boolean": {
+      "result": "resultat"
+    },
+    "map": {
+      "items": "objekt",
+      "mapped": "transformerade"
+    },
+    "log": {
+      "message": "meddelande",
+      "data": "data"
+    },
+    "assert": {
+      "message": "meddelande"
     }
   }
 }

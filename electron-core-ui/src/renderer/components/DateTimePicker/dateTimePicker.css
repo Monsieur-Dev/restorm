@@ -1,7 +1,13 @@
 .ecu-date-time-picker {
   display: flex;
   align-items: center;
-  gap: 6px;
+}
+
+/* Joins the text field + calendar button into one continuous control (no gap,
+ * shared border) — fills the picker's width so the input still expands. */
+.ecu-date-time-picker-group {
+  flex: 1;
+  min-width: 0;
 }
 
 .ecu-date-time-picker-input {

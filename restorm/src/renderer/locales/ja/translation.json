@@ -303,7 +303,8 @@
       "color": "色",
       "expression": "式",
       "boolean": "ブール値",
-      "variables": "変数"
+      "variables": "変数",
+      "environment": "環境"
     },
     "apiEnums": "API で定義された型",
     "customLists": "カスタム型",
@@ -785,6 +786,70 @@
     "switch": {
       "addCase": "ケースを追加",
       "removeCase": "ケースを削除"
+    },
+    "forEach": {
+      "items": "項目",
+      "each": "各要素",
+      "done": "完了",
+      "parallelism": "並列処理"
+    },
+    "aggregate": {
+      "items": "項目",
+      "result": "結果",
+      "field": "フィールド",
+      "separator": "区切り文字",
+      "op": {
+        "count": "件数",
+        "sum": "合計",
+        "min": "最小",
+        "max": "最大",
+        "average": "平均",
+        "join": "連結"
+      }
+    },
+    "filter": {
+      "items": "項目",
+      "kept": "保持",
+      "keepWhere": "条件で保持"
+    },
+    "wait": {
+      "then": "次へ",
+      "duration": "期間"
+    },
+    "waitUntil": {
+      "until": "まで",
+      "then": "次へ"
+    },
+    "arithmetic": {
+      "result": "結果"
+    },
+    "nodes": {
+      "arithmetic": "算術",
+      "httpRequest": "HTTPリクエスト",
+      "runScenario": "シナリオ実行",
+      "wait": "待機",
+      "waitUntil": "指定時刻まで待機",
+      "now": "現在",
+      "comparator": "比較",
+      "setVariable": "変数を設定",
+      "getVariable": "変数を取得"
+    },
+    "comparator": {
+      "result": "結果"
+    },
+    "boolean": {
+      "result": "結果"
+    },
+    "map": {
+      "items": "項目",
+      "mapped": "変換後"
+    },
+    "log": {
+      "message": "メッセージ",
+      "data": "データ"
+    },
+    "assert": {
+      "message": "メッセージ"
     }
   }
 }

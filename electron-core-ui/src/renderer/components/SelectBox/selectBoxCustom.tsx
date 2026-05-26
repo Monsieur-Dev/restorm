@@ -291,11 +291,15 @@ const SelectBoxList: React.FC<SelectBoxListProps> = ({
     }
 
     if (isVisible) {
-      document.addEventListener('mousedown', handleClickOutside)
+      // Capture phase: a host that consumes the event before it bubbles to
+      // `document` (e.g. a React Flow canvas calling `stopPropagation` on its
+      // pane mousedown during a pan) would otherwise swallow it and leave the
+      // dropdown stuck open. Capturing at the document fires first, regardless.
+      document.addEventListener('mousedown', handleClickOutside, true)
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('mousedown', handleClickOutside, true)
     }
   }, [isVisible, hideDropdown])
 

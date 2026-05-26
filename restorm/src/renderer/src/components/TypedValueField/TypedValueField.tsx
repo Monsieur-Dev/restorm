@@ -18,7 +18,8 @@ import {
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import type { TranslatedHelperDefinition } from '../../utils/handlebarsHelpersDefinitions'
 import type { ValueType, EnumDefinition, CustomValueList } from '../../../../shared/types/collections'
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue } from '../../../../shared/types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue } from '../../../../shared/types/collections'
+import { EnvironmentValueCell } from './EnvironmentValueCell'
 import type { EnvValueTypeGroup } from '../../hooks/collectEnvValueTypeGroups'
 import { useScenarioVariables } from '../../contexts/ScenarioVariablesContext'
 import { castValueToKind, resolveValueTypeKind, type ValueTypeKind } from './castValue'
@@ -94,9 +95,12 @@ const ColorValueCell: React.FC<ColorValueCellProps> = ({ hex, onChangeHex, dataT
       setIsOpen(false)
     }
 
-    document.addEventListener('mousedown', handleMouseDown)
+    // Capture phase so an outside click on a host that stops propagation
+    // before it bubbles to `document` (e.g. the React Flow canvas pane / nodes)
+    // still dismisses the popover instead of leaving it stuck open.
+    document.addEventListener('mousedown', handleMouseDown, true)
     return () => {
-      document.removeEventListener('mousedown', handleMouseDown)
+      document.removeEventListener('mousedown', handleMouseDown, true)
     }
   }, [isOpen])
 
@@ -181,6 +185,20 @@ export interface TypedValueFieldProps {
    */
   excludeVariableName?: string | undefined
   /**
+   * Show every variable in the "Variables" menu regardless of its declared
+   * type, instead of filtering by `excludeTypes`. Used by `getVariable`, whose
+   * slot accepts a variable of any type (it reads, it doesn't type-constrain).
+   */
+  allowAllVariables?: boolean | undefined
+  /**
+   * Offer the `environment` type in the type-pick menu (an entry before
+   * "secret") and render its env-picker button when selected. Off by default,
+   * since most slots can't take an environment; the nodes that accept one
+   * (input / if / switch / assert / comparator / set+getVariable, and the http
+   * request node's `env` field) opt in.
+   */
+  allowEnvironment?: boolean | undefined
+  /**
    * When set, the type-pick menu gains a trailing separator + a "remove" entry
    * (e.g. a switch case removing itself). The label defaults to "Supprimer".
    */
@@ -213,6 +231,8 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
   valueTypeGroups,
   excludeTypes,
   excludeVariableName,
+  allowAllVariables,
+  allowEnvironment,
   onRemove,
   removeLabel,
   variables = [],
@@ -226,7 +246,7 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
   // own variable, so a setVariable can reference any variable but itself.
   const scenarioVariables = useScenarioVariables()
   const variableNames = useMemo(
-    () => scenarioVariables.filter((name) => name !== excludeVariableName),
+    () => scenarioVariables.filter((v) => v.name !== excludeVariableName),
     [scenarioVariables, excludeVariableName]
   )
 
@@ -409,12 +429,16 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
       })
     }
 
-    if (variableNames.length > 0 && !isExcluded('variable')) {
+    // Only offer variables whose declared type this slot accepts: a slot that
+    // excludes a kind (e.g. arithmetic excludes `string`) must also hide
+    // variables declared with that kind.
+    const selectableVariables = allowAllVariables ? variableNames : variableNames.filter((v) => !isExcluded(v.type))
+    if (selectableVariables.length > 0 && !isExcluded('variable')) {
       const activeVar = activeType === 'variable' ? value.toString() : undefined
       items.push({
         id: 'variables',
         label: t('keyValueTable.types.variables', 'Variables'),
-        items: variableNames.map((name) => ({
+        items: selectableVariables.map(({ name }) => ({
           id: `variable-${name}`,
           label: name,
           checked: activeVar === name,
@@ -425,10 +449,25 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
       })
     }
 
-    items.push({ id: 'sep-secret', label: '', isSeparator: true })
-
+    // `secret` + `expression` sit below a separator — but only emit that
+    // separator when this trailing group actually has entries AND something
+    // precedes it, otherwise an all-excluded tail (e.g. the list-only forEach
+    // `items` selector) leaves an orphan divider with nothing to separate.
+    const tail: ContextMenuItem[] = []
+    // `environment` sits just before `secret`, only where the slot opted in.
+    // Picking it casts to an empty EnvironmentValue; the env-picker button then
+    // resolves the actual environment (there's no submenu).
+    if (allowEnvironment && !isExcluded('environment')) {
+      tail.push({
+        id: 'environment',
+        label: t('keyValueTable.types.environment', 'Environment'),
+        checked: activeType === 'environment',
+        onClick: () => { cast('environment') },
+        ...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-environment` })
+      })
+    }
     if (!isExcluded('secret')) {
-      items.push({
+      tail.push({
         id: 'secret',
         label: t('keyValueTable.types.secret'),
         checked: activeType === 'secret',
@@ -437,13 +476,17 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
       })
     }
     if (!isExcluded('expression')) {
-      items.push({
+      tail.push({
         id: 'expression',
         label: t('keyValueTable.types.expression'),
         checked: activeType === 'expression',
         onClick: () => { cast('expression') },
         ...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-expression` })
       })
+    }
+    if (tail.length > 0) {
+      if (items.length > 0) items.push({ id: 'sep-secret', label: '', isSeparator: true })
+      items.push(...tail)
     }
 
     if (onRemove) {
@@ -458,7 +501,7 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
     }
 
     return items
-  }, [t, cast, dataTestId, groups, activeType, activeDefId, isExcluded, variableNames, value, onRemove, removeLabel])
+  }, [t, cast, dataTestId, groups, activeType, activeDefId, isExcluded, variableNames, allowAllVariables, allowEnvironment, value, onRemove, removeLabel])
 
   const widget = ((): React.ReactNode => {
     if (value instanceof PasswordValue) {
@@ -559,6 +602,19 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
           {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-variable` })}
         />,
         { icon: 'symbol-variable', ariaLabel: 'Variable reference', typeTestid: 'variable' }
+      )
+    }
+
+    // EnvironmentValue → an env-picker button (left of the type control) listing
+    // every environment across all environment folders.
+    if (value instanceof EnvironmentValue) {
+      return withTypeControl(
+        <EnvironmentValueCell
+          value={value}
+          onChange={(next) => { onChange(next) }}
+          {...(dataTestId && { dataTestId })}
+        />,
+        { icon: 'globe', ariaLabel: 'Environment reference', typeTestid: 'environment' }
       )
     }
 

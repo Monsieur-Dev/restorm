@@ -303,7 +303,8 @@
       "color": "颜色",
       "expression": "表达式",
       "boolean": "布尔值",
-      "variables": "变量"
+      "variables": "变量",
+      "environment": "环境"
     },
     "apiEnums": "API 定义的类型",
     "customLists": "自定义类型",
@@ -785,6 +786,70 @@
     "switch": {
       "addCase": "添加分支",
       "removeCase": "移除分支"
+    },
+    "forEach": {
+      "items": "项",
+      "each": "每项",
+      "done": "完成",
+      "parallelism": "并行度"
+    },
+    "aggregate": {
+      "items": "项",
+      "result": "结果",
+      "field": "字段",
+      "separator": "分隔符",
+      "op": {
+        "count": "计数",
+        "sum": "求和",
+        "min": "最小值",
+        "max": "最大值",
+        "average": "平均值",
+        "join": "连接"
+      }
+    },
+    "filter": {
+      "items": "项",
+      "kept": "保留",
+      "keepWhere": "保留条件"
+    },
+    "wait": {
+      "then": "然后",
+      "duration": "时长"
+    },
+    "waitUntil": {
+      "until": "直到",
+      "then": "然后"
+    },
+    "arithmetic": {
+      "result": "结果"
+    },
+    "nodes": {
+      "arithmetic": "算术",
+      "httpRequest": "HTTP 请求",
+      "runScenario": "运行场景",
+      "wait": "等待",
+      "waitUntil": "等待至",
+      "now": "现在",
+      "comparator": "比较器",
+      "setVariable": "设置变量",
+      "getVariable": "获取变量"
+    },
+    "comparator": {
+      "result": "结果"
+    },
+    "boolean": {
+      "result": "结果"
+    },
+    "map": {
+      "items": "项",
+      "mapped": "已映射"
+    },
+    "log": {
+      "message": "消息",
+      "data": "数据"
+    },
+    "assert": {
+      "message": "消息"
     }
   }
 }

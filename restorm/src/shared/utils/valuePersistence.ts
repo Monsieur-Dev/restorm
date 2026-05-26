@@ -1,6 +1,6 @@
 import type { ValueTypeName } from '../types/valueTypes/BaseValueType'
 import type { ValueType } from '../types/collections'
-import { DateTimeValue, NumericValue, PasswordValue, StringValue, ColorValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue } from '../types/collections'
+import { DateTimeValue, NumericValue, PasswordValue, StringValue, ColorValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue } from '../types/collections'
 
 export type PersistedValue =
   | { type: 'string'; value: string }
@@ -15,13 +15,14 @@ export type PersistedValue =
   | { type: 'customList'; listId: string; label: string }
   | { type: 'customListMulti'; listId: string; labels: string[] }
   | { type: 'variable'; value: string }
+  | { type: 'environment'; value: string }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
 
 function isValueTypeName(value: unknown): value is ValueTypeName {
-  return value === 'string' || value === 'color' || value === 'numeric' || value === 'datetime' || value === 'password' || value === 'expression' || value === 'boolean' || value === 'enum' || value === 'enumList' || value === 'customList' || value === 'customListMulti' || value === 'variable'
+  return value === 'string' || value === 'color' || value === 'numeric' || value === 'datetime' || value === 'password' || value === 'expression' || value === 'boolean' || value === 'enum' || value === 'enumList' || value === 'customList' || value === 'customListMulti' || value === 'variable' || value === 'environment'
 }
 
 /**
@@ -47,6 +48,9 @@ export function serializeValueForPersistence(value: unknown): PersistedValue {
   }
   if (value instanceof VariableValue) {
     return { type: 'variable', value: value.value }
+  }
+  if (value instanceof EnvironmentValue) {
+    return { type: 'environment', value: value.value }
   }
   if (value instanceof BooleanValue) {
     return { type: 'boolean', value: value.value }
@@ -98,6 +102,10 @@ export function serializeValueForPersistence(value: unknown): PersistedValue {
     if (type === 'variable') {
       const raw = (value as { value?: unknown }).value
       return { type: 'variable', value: typeof raw === 'string' ? raw : '' }
+    }
+    if (type === 'environment') {
+      const raw = (value as { value?: unknown }).value
+      return { type: 'environment', value: typeof raw === 'string' ? raw : '' }
     }
     if (type === 'boolean') {
       const raw = (value as { value?: unknown }).value

@@ -306,7 +306,8 @@
       "color": "Barva",
       "expression": "Výraz",
       "boolean": "Boolean",
-      "variables": "Proměnné"
+      "variables": "Proměnné",
+      "environment": "Prostředí"
     },
     "apiEnums": "Typy definované v API",
     "customLists": "Vlastní typy",
@@ -788,6 +789,70 @@
     "switch": {
       "addCase": "Přidat případ",
       "removeCase": "Odebrat případ"
+    },
+    "forEach": {
+      "items": "položky",
+      "each": "každý",
+      "done": "hotovo",
+      "parallelism": "paralelismus"
+    },
+    "aggregate": {
+      "items": "položky",
+      "result": "výsledek",
+      "field": "pole",
+      "separator": "oddělovač",
+      "op": {
+        "count": "Počet",
+        "sum": "Součet",
+        "min": "Min",
+        "max": "Max",
+        "average": "Průměr",
+        "join": "Spojit"
+      }
+    },
+    "filter": {
+      "items": "položky",
+      "kept": "zachované",
+      "keepWhere": "zachovat když"
+    },
+    "wait": {
+      "then": "poté",
+      "duration": "doba trvání"
+    },
+    "waitUntil": {
+      "until": "do",
+      "then": "poté"
+    },
+    "arithmetic": {
+      "result": "výsledek"
+    },
+    "nodes": {
+      "arithmetic": "Aritmetika",
+      "httpRequest": "Požadavek HTTP",
+      "runScenario": "Spustit scénář",
+      "wait": "Čekat",
+      "waitUntil": "Čekat do",
+      "now": "Nyní",
+      "comparator": "Komparátor",
+      "setVariable": "Nastavit proměnnou",
+      "getVariable": "Získat proměnnou"
+    },
+    "comparator": {
+      "result": "výsledek"
+    },
+    "boolean": {
+      "result": "výsledek"
+    },
+    "map": {
+      "items": "položky",
+      "mapped": "transformované"
+    },
+    "log": {
+      "message": "zpráva",
+      "data": "data"
+    },
+    "assert": {
+      "message": "zpráva"
     }
   }
 }

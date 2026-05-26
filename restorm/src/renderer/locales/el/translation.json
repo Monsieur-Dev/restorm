@@ -304,7 +304,8 @@
       "color": "Χρώμα",
       "expression": "Έκφραση",
       "boolean": "Λογική τιμή",
-      "variables": "Μεταβλητές"
+      "variables": "Μεταβλητές",
+      "environment": "Περιβάλλον"
     },
     "apiEnums": "Τύποι ορισμένοι στο API",
     "customLists": "Προσαρμοσμένοι τύποι",
@@ -786,6 +787,70 @@
     "switch": {
       "addCase": "Προσθήκη περίπτωσης",
       "removeCase": "Αφαίρεση περίπτωσης"
+    },
+    "forEach": {
+      "items": "στοιχεία",
+      "each": "καθένα",
+      "done": "έτοιμο",
+      "parallelism": "παραλληλισμός"
+    },
+    "aggregate": {
+      "items": "στοιχεία",
+      "result": "αποτέλεσμα",
+      "field": "πεδίο",
+      "separator": "διαχωριστικό",
+      "op": {
+        "count": "Πλήθος",
+        "sum": "Άθροισμα",
+        "min": "Ελάχιστο",
+        "max": "Μέγιστο",
+        "average": "Μέσος όρος",
+        "join": "Ένωση"
+      }
+    },
+    "filter": {
+      "items": "στοιχεία",
+      "kept": "διατηρημένα",
+      "keepWhere": "διατήρηση αν"
+    },
+    "wait": {
+      "then": "έπειτα",
+      "duration": "διάρκεια"
+    },
+    "waitUntil": {
+      "until": "έως",
+      "then": "έπειτα"
+    },
+    "arithmetic": {
+      "result": "αποτέλεσμα"
+    },
+    "nodes": {
+      "arithmetic": "Αριθμητική",
+      "httpRequest": "Αίτημα HTTP",
+      "runScenario": "Εκτέλεση σεναρίου",
+      "wait": "Αναμονή",
+      "waitUntil": "Αναμονή έως",
+      "now": "Τώρα",
+      "comparator": "Συγκριτής",
+      "setVariable": "Ορισμός μεταβλητής",
+      "getVariable": "Λήψη μεταβλητής"
+    },
+    "comparator": {
+      "result": "αποτέλεσμα"
+    },
+    "boolean": {
+      "result": "αποτέλεσμα"
+    },
+    "map": {
+      "items": "στοιχεία",
+      "mapped": "μετασχηματισμένα"
+    },
+    "log": {
+      "message": "μήνυμα",
+      "data": "δεδομένα"
+    },
+    "assert": {
+      "message": "μήνυμα"
     }
   }
 }

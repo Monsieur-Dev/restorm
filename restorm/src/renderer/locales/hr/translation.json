@@ -305,7 +305,8 @@
       "color": "Boja",
       "expression": "Izraz",
       "boolean": "Booleova vrijednost",
-      "variables": "Varijable"
+      "variables": "Varijable",
+      "environment": "Okruženje"
     },
     "apiEnums": "Tipovi definirani u API-ju",
     "customLists": "Prilagođeni tipovi",
@@ -787,6 +788,70 @@
     "switch": {
       "addCase": "Dodaj slučaj",
       "removeCase": "Ukloni slučaj"
+    },
+    "forEach": {
+      "items": "stavke",
+      "each": "svaki",
+      "done": "gotovo",
+      "parallelism": "paralelizam"
+    },
+    "aggregate": {
+      "items": "stavke",
+      "result": "rezultat",
+      "field": "polje",
+      "separator": "razdjelnik",
+      "op": {
+        "count": "Broj",
+        "sum": "Zbroj",
+        "min": "Min",
+        "max": "Maks",
+        "average": "Prosjek",
+        "join": "Spoji"
+      }
+    },
+    "filter": {
+      "items": "stavke",
+      "kept": "zadržani",
+      "keepWhere": "zadrži ako"
+    },
+    "wait": {
+      "then": "zatim",
+      "duration": "trajanje"
+    },
+    "waitUntil": {
+      "until": "do",
+      "then": "zatim"
+    },
+    "arithmetic": {
+      "result": "rezultat"
+    },
+    "nodes": {
+      "arithmetic": "Aritmetika",
+      "httpRequest": "HTTP zahtjev",
+      "runScenario": "Pokreni scenarij",
+      "wait": "Čekaj",
+      "waitUntil": "Čekaj do",
+      "now": "Sada",
+      "comparator": "Usporednik",
+      "setVariable": "Postavi varijablu",
+      "getVariable": "Dohvati varijablu"
+    },
+    "comparator": {
+      "result": "rezultat"
+    },
+    "boolean": {
+      "result": "rezultat"
+    },
+    "map": {
+      "items": "stavke",
+      "mapped": "transformirano"
+    },
+    "log": {
+      "message": "poruka",
+      "data": "podaci"
+    },
+    "assert": {
+      "message": "poruka"
     }
   }
 }

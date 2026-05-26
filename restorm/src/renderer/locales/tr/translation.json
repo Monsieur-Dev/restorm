@@ -304,7 +304,8 @@
       "color": "Renk",
       "expression": "İfade",
       "boolean": "Boolean",
-      "variables": "Değişkenler"
+      "variables": "Değişkenler",
+      "environment": "Ortam"
     },
     "apiEnums": "API tanımlı türler",
     "customLists": "Özel türler",
@@ -786,6 +787,70 @@
     "switch": {
       "addCase": "Durum ekle",
       "removeCase": "Durumu kaldır"
+    },
+    "forEach": {
+      "items": "öğeler",
+      "each": "her",
+      "done": "bitti",
+      "parallelism": "paralellik"
+    },
+    "aggregate": {
+      "items": "öğeler",
+      "result": "sonuç",
+      "field": "alan",
+      "separator": "ayırıcı",
+      "op": {
+        "count": "Sayı",
+        "sum": "Toplam",
+        "min": "En küçük",
+        "max": "En büyük",
+        "average": "Ortalama",
+        "join": "Birleştir"
+      }
+    },
+    "filter": {
+      "items": "öğeler",
+      "kept": "tutulanlar",
+      "keepWhere": "şu durumda tut"
+    },
+    "wait": {
+      "then": "sonra",
+      "duration": "süre"
+    },
+    "waitUntil": {
+      "until": "kadar",
+      "then": "sonra"
+    },
+    "arithmetic": {
+      "result": "sonuç"
+    },
+    "nodes": {
+      "arithmetic": "Aritmetik",
+      "httpRequest": "HTTP isteği",
+      "runScenario": "Senaryoyu çalıştır",
+      "wait": "Bekle",
+      "waitUntil": "Şu ana kadar bekle",
+      "now": "Şimdi",
+      "comparator": "Karşılaştırıcı",
+      "setVariable": "Değişken ata",
+      "getVariable": "Değişkeni al"
+    },
+    "comparator": {
+      "result": "sonuç"
+    },
+    "boolean": {
+      "result": "sonuç"
+    },
+    "map": {
+      "items": "öğeler",
+      "mapped": "dönüştürülmüş"
+    },
+    "log": {
+      "message": "mesaj",
+      "data": "veri"
+    },
+    "assert": {
+      "message": "mesaj"
     }
   }
 }

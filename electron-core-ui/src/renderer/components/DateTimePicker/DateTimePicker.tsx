@@ -4,6 +4,7 @@ import { DateTime } from 'luxon'
 import { Button } from '../Button'
 import { Tooltip } from '../Tooltip'
 import { InputBox } from '../InputBox'
+import { ControlGroup } from '../ControlGroup'
 import { CalendarGrid } from './CalendarGrid'
 import { TimePicker } from './TimePicker'
 import { OutputSettings } from './OutputSettings'
@@ -100,9 +101,14 @@ const DateTimePickerInner: React.FC<DateTimePickerProps> = ({
       setIsOpen(false)
     }
 
-    document.addEventListener('mousedown', handleMouseDown)
+    // Capture phase: some hosts (e.g. a canvas/graph surface that owns pointer
+    // gestures) stop propagation on mousedown, so a bubble-phase listener never
+    // sees the click and the popover would stay open. Listening in capture runs
+    // before those handlers; the containment checks above still keep it open for
+    // clicks inside the trigger or the calendar.
+    document.addEventListener('mousedown', handleMouseDown, true)
     return () => {
-      document.removeEventListener('mousedown', handleMouseDown)
+      document.removeEventListener('mousedown', handleMouseDown, true)
     }
   }, [isOpen])
 
@@ -323,6 +329,7 @@ const DateTimePickerInner: React.FC<DateTimePickerProps> = ({
       data-output-mode={effectiveOutputMode}
       data-include-time={effectiveIncludeTime ? 'true' : 'false'}
     >
+      <ControlGroup className="ecu-date-time-picker-group">
       <div className="ecu-date-time-picker-input">
         <InputBox
           data-testid={`${testId}-input`}
@@ -369,6 +376,7 @@ const DateTimePickerInner: React.FC<DateTimePickerProps> = ({
           />
         </div>
       </div>
+      </ControlGroup>
 
       <Tooltip
         targetRef={targetRef as unknown as React.RefObject<HTMLElement | null>}

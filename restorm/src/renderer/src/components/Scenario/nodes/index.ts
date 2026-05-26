@@ -8,10 +8,15 @@ import { RunScenarioNodeBox } from './RunScenarioNodeBox'
 import { SwitchNodeBox } from './SwitchNodeBox'
 import { WaitNodeBox } from './WaitNodeBox'
 import { WaitUntilNodeBox } from './WaitUntilNodeBox'
-import { ComparatorNodeBox, ArithmeticNodeBox, BooleanNodeBox } from './BinaryOpNodeBox'
+import { ComparatorNodeBox } from './ComparatorNodeBox'
+import { BooleanNodeBox } from './BooleanNodeBox'
+import { ArithmeticNodeBox } from './ArithmeticNodeBox'
 import { InputNodeBox, GetVariableNodeBox, SetVariableNodeBox } from './VariableNodeBox'
-import { TransformNodeBox, TemplateNodeBox } from './TransformNodeBox'
-import { ForEachNodeBox, AggregateNodeBox, MapNodeBox, FilterNodeBox } from './CollectionNodeBoxes'
+import { TransformNodeBox } from './TransformNodeBox'
+import { ForEachNodeBox } from './ForEachNodeBox'
+import { AggregateNodeBox } from './AggregateNodeBox'
+import { FilterNodeBox } from './FilterNodeBox'
+import { MapNodeBox } from './MapNodeBox'
 import { LogNodeBox, AssertNodeBox, NowNodeBox } from './UtilityNodeBoxes'
 
 export type { ScenarioNodeBoxData, ScenarioNodeBoxType, ScenarioNodeCell } from './ScenarioNodeBoxBase'
@@ -41,7 +46,6 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   arithmetic: ArithmeticNodeBox,
   comparator: ComparatorNodeBox,
   boolean: BooleanNodeBox,
-  template: TemplateNodeBox,
   setVariable: SetVariableNodeBox,
   getVariable: GetVariableNodeBox,
   transform: TransformNodeBox,

@@ -211,6 +211,18 @@
   justify-content: flex-end;
 }
 
+/* Rows without a port anchor (operator toggles, level radios, name/expression
+ * fields, …) get the anchor's footprint as a margin so their content lines up
+ * with the labels/fields of rows that do carry an anchor (the 12px dot, its
+ * flow ring, and the 6px row gap). Left column insets from the left, right
+ * column from the right, matching the side the missing bubble would sit on. */
+.scn-node-col-in .scn-row-left:not(:has(.scn-handle-inline)) {
+  margin-left: 22px;
+}
+.scn-node-col-out .scn-row-right:not(:has(.scn-handle-inline)) {
+  margin-right: 22px;
+}
+
 .scn-port-label {
   font-size: 11px;
   opacity: 0.85;
@@ -316,6 +328,20 @@
   letter-spacing: 0.02em;
   opacity: 0.6;
   margin-bottom: 3px;
+}
+/* forEach parallelism config row (right column, no port): caption + enable
+ * toggle + a narrow bounded count field, laid out inline. */
+.scn-foreach-parallelism {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.scn-foreach-parallelism .scn-field-caption {
+  margin-bottom: 0;
+}
+.scn-foreach-parallelism .inputbox {
+  width: 56px;
 }
 /* When collapsed, the section's anchors gather on the title row. They keep
  * the per-row edge alignment (first anchor centred on the node border), then
@@ -424,17 +450,10 @@
   font-family: var(--editor-font-family, monospace);
 }
 
-/* Node-local expression / template field (transform / template). */
-.scn-code-input {
-  width: 150px;
-  resize: vertical;
-  background: var(--input-background, #3c3c3c);
-  color: var(--input-foreground, #cccccc);
-  border: 1px solid var(--input-border, #555555);
-  border-radius: 3px;
-  padding: 2px 4px;
-  font-size: 11px;
-  font-family: var(--editor-font-family, monospace);
+/* Template's expression field gets a wider minimum so the Handlebars editor
+ * has room to read — the generic node selector min is narrower. */
+.scn-template-field .tvf-control-group {
+  min-width: 200px;
 }
 
 /* If operator toggle — compact segmented control. */

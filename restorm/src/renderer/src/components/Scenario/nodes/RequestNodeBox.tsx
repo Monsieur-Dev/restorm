@@ -5,8 +5,21 @@ import type { KeyValue } from '../../../../../shared/types/baseTypes'
 import { Badge } from '../../common/Badge'
 import { requestBadgeType } from '../../../utils/badgeUtils'
 import { useScenarioBoundResolver, useScenarioRequestEnv } from '../scenarioBoundResolver'
-import { EnvButtonCell } from './EnvButtonCell'
+import { TypedValueField } from '../../TypedValueField'
+import type { ValueTypeKind } from '../../TypedValueField/castValue'
+import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroups'
+import { normalizeValueType } from '../../../utils/normalizeValueType'
+import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
+import { EnvironmentValue } from '../../../../../shared/types/collections'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
+
+/** The request node's `env` field is pinned to the `environment` type: every
+ * other concrete type is excluded, leaving the env picker plus — via the
+ * Variables submenu — variables *declared* of type environment (a variable's
+ * own type must survive the filter, and only `environment` does here). */
+const ENV_PINNED_EXCLUDE: ValueTypeKind[] = [
+  'string', 'secret', 'number', 'dateTime', 'color', 'expression', 'boolean', 'enum', 'enumList', 'customList', 'customListMulti'
+]
 
 /** Best-effort one-line display of a KeyValue's (typed) value. */
 function displayValue(v: unknown): string {
@@ -48,6 +61,7 @@ function kvSection(id: string, name: string, kvs: KeyValue[] | undefined): Scena
 export const RequestNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
   const resolve = useScenarioBoundResolver()
   const resolveEnv = useScenarioRequestEnv()
+  const valueTypeGroups = useAllEnvValueTypeGroups()
   const requestId = typeof data.config?.['requestId'] === 'string' ? data.config['requestId'] : undefined
   const item = requestId && resolve ? resolve(requestId) : null
   const request = item && isRequest(item) ? item : null
@@ -63,11 +77,31 @@ export const RequestNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, d
   const bodySection: ScenarioNodeSection | null = r.body
     ? { id: 'body', name: 'Body', rows: [{ id: 'body', label: 'body', port: { id: 'body', type: 'target' } }] }
     : null
-  // Nameless section with the env-selector button — only when the request
-  // sits under an environment folder. Carries an optional `env` data input so
-  // the environment can be driven by an upstream link instead of the picker.
+  // Nameless section with the env field — only when the request sits under an
+  // environment folder. A value selector pinned to the `environment` type: the
+  // picker lists every env across all folders, defaulting to the request's base
+  // pinned env, and the Variables submenu surfaces environment-typed variables.
+  // Carries an optional `env` data input so an upstream link can drive it too.
   const envSection: ScenarioNodeSection | null = envInfo
-    ? { id: 'env', rows: [{ id: 'env', content: <EnvButtonCell environments={envInfo.environments} defaultEnvId={envInfo.selectedEnvId} />, port: { id: 'env', type: 'target' } }] }
+    ? {
+      id: 'env',
+      rows: [{
+        id: 'env',
+        port: { id: 'env', type: 'target' },
+        content: (
+          <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
+            <TypedValueField
+              value={data.config?.['env'] !== undefined ? normalizeValueType(data.config['env']) : new EnvironmentValue(envInfo.selectedEnvId ?? '')}
+              onChange={(next) => { data.onSetConfig?.(id, { env: serializeValueForPersistence(next) }) }}
+              valueTypeGroups={valueTypeGroups}
+              excludeTypes={ENV_PINNED_EXCLUDE}
+              allowEnvironment
+              dataTestId="scn-request-env"
+            />
+          </div>
+        )
+      }]
+    }
     : null
   const left: ScenarioNodeSection[] = [
     envSection,

@@ -306,7 +306,8 @@
       "color": "Kolor",
       "expression": "Wyrażenie",
       "boolean": "Wartość logiczna",
-      "variables": "Zmienne"
+      "variables": "Zmienne",
+      "environment": "Środowisko"
     },
     "apiEnums": "Typy zdefiniowane w API",
     "customLists": "Typy niestandardowe",
@@ -788,6 +789,70 @@
     "switch": {
       "addCase": "Dodaj przypadek",
       "removeCase": "Usuń przypadek"
+    },
+    "forEach": {
+      "items": "elementy",
+      "each": "każdy",
+      "done": "gotowe",
+      "parallelism": "równoległość"
+    },
+    "aggregate": {
+      "items": "elementy",
+      "result": "wynik",
+      "field": "pole",
+      "separator": "separator",
+      "op": {
+        "count": "Liczba",
+        "sum": "Suma",
+        "min": "Min",
+        "max": "Maks",
+        "average": "Średnia",
+        "join": "Połącz"
+      }
+    },
+    "filter": {
+      "items": "elementy",
+      "kept": "zachowane",
+      "keepWhere": "zachowaj gdy"
+    },
+    "wait": {
+      "then": "potem",
+      "duration": "czas trwania"
+    },
+    "waitUntil": {
+      "until": "do",
+      "then": "potem"
+    },
+    "arithmetic": {
+      "result": "wynik"
+    },
+    "nodes": {
+      "arithmetic": "Arytmetyka",
+      "httpRequest": "Żądanie HTTP",
+      "runScenario": "Uruchom scenariusz",
+      "wait": "Czekaj",
+      "waitUntil": "Czekaj do",
+      "now": "Teraz",
+      "comparator": "Komparator",
+      "setVariable": "Ustaw zmienną",
+      "getVariable": "Pobierz zmienną"
+    },
+    "comparator": {
+      "result": "wynik"
+    },
+    "boolean": {
+      "result": "wynik"
+    },
+    "map": {
+      "items": "elementy",
+      "mapped": "przekształcone"
+    },
+    "log": {
+      "message": "komunikat",
+      "data": "dane"
+    },
+    "assert": {
+      "message": "komunikat"
     }
   }
 }

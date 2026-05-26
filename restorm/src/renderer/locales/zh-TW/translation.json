@@ -303,7 +303,8 @@
       "color": "顏色",
       "expression": "運算式",
       "boolean": "布林值",
-      "variables": "變數"
+      "variables": "變數",
+      "environment": "環境"
     },
     "apiEnums": "API 定義的型別",
     "customLists": "自訂類型",
@@ -785,6 +786,70 @@
     "switch": {
       "addCase": "新增分支",
       "removeCase": "移除分支"
+    },
+    "forEach": {
+      "items": "項目",
+      "each": "每項",
+      "done": "完成",
+      "parallelism": "並行度"
+    },
+    "aggregate": {
+      "items": "項目",
+      "result": "結果",
+      "field": "欄位",
+      "separator": "分隔符",
+      "op": {
+        "count": "計數",
+        "sum": "總和",
+        "min": "最小值",
+        "max": "最大值",
+        "average": "平均值",
+        "join": "連接"
+      }
+    },
+    "filter": {
+      "items": "項目",
+      "kept": "保留",
+      "keepWhere": "保留條件"
+    },
+    "wait": {
+      "then": "然後",
+      "duration": "時長"
+    },
+    "waitUntil": {
+      "until": "直到",
+      "then": "然後"
+    },
+    "arithmetic": {
+      "result": "結果"
+    },
+    "nodes": {
+      "arithmetic": "算術",
+      "httpRequest": "HTTP 請求",
+      "runScenario": "執行場景",
+      "wait": "等待",
+      "waitUntil": "等待至",
+      "now": "現在",
+      "comparator": "比較器",
+      "setVariable": "設定變數",
+      "getVariable": "取得變數"
+    },
+    "comparator": {
+      "result": "結果"
+    },
+    "boolean": {
+      "result": "結果"
+    },
+    "map": {
+      "items": "項目",
+      "mapped": "已映射"
+    },
+    "log": {
+      "message": "訊息",
+      "data": "資料"
+    },
+    "assert": {
+      "message": "訊息"
     }
   }
 }

@@ -37,9 +37,9 @@ describe('linkPaletteEntries — drag from an output', () => {
     expect(kinds).not.toContain('arithmetic')
   })
 
-  it('omits kinds that have no input at all', () => {
-    const kinds = linkPaletteEntries(srcOf('httpRequest'), 'response', true).map((e) => e.kind)
-    expect(kinds).not.toContain('getVariable')
+  it('lists getVariable (it now owns a header launch trigger), wired to it', () => {
+    const entries = linkPaletteEntries(srcOf('httpRequest'), 'response', true)
+    expect(entries.find((e) => e.kind === 'getVariable')?.wirePort).toBe('in')
   })
 
   it('lists input (it owns a header launch trigger), wired to it', () => {

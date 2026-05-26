@@ -75,7 +75,7 @@ describe('scenario MCP tools', () => {
     const a = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'now' }))
     const b = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'log' }))
     const res = parse(mcp.invoke('connect_scenario_nodes', {
-      scenarioId: 's1', fromNodeId: a['nodeId'], fromPortId: 'value', toNodeId: b['nodeId'], toPortId: 'value'
+      scenarioId: 's1', fromNodeId: a['nodeId'], fromPortId: 'value', toNodeId: b['nodeId'], toPortId: 'data'
     }))
     expect(res['edgeId']).toBeTruthy()
     expect(scenario.edges).toHaveLength(1)
@@ -93,7 +93,7 @@ describe('scenario MCP tools', () => {
   it('delete_scenario_node removes the node + its edges', () => {
     const a = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'now' }))
     const b = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'log' }))
-    mcp.invoke('connect_scenario_nodes', { scenarioId: 's1', fromNodeId: a['nodeId'], fromPortId: 'value', toNodeId: b['nodeId'], toPortId: 'value' })
+    mcp.invoke('connect_scenario_nodes', { scenarioId: 's1', fromNodeId: a['nodeId'], fromPortId: 'value', toNodeId: b['nodeId'], toPortId: 'data' })
     const res = parse(mcp.invoke('delete_scenario_node', { scenarioId: 's1', nodeId: a['nodeId'] }))
     expect(res['deletedNodeId']).toBe(a['nodeId'])
     expect((res['deletedEdgeIds'] as unknown[]).length).toBe(1)
@@ -114,7 +114,7 @@ describe('scenario MCP tools', () => {
   it('disconnect_scenario_nodes removes an edge by id', () => {
     const a = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'now' }))
     const b = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'log' }))
-    const edge = parse(mcp.invoke('connect_scenario_nodes', { scenarioId: 's1', fromNodeId: a['nodeId'], fromPortId: 'value', toNodeId: b['nodeId'], toPortId: 'value' }))
+    const edge = parse(mcp.invoke('connect_scenario_nodes', { scenarioId: 's1', fromNodeId: a['nodeId'], fromPortId: 'value', toNodeId: b['nodeId'], toPortId: 'data' }))
     mcp.invoke('disconnect_scenario_nodes', { scenarioId: 's1', edgeId: edge['edgeId'] })
     expect(scenario.edges).toHaveLength(0)
   })

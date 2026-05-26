@@ -306,7 +306,8 @@
       "color": "Колір",
       "expression": "Вираз",
       "boolean": "Булеве",
-      "variables": "Змінні"
+      "variables": "Змінні",
+      "environment": "Середовище"
     },
     "apiEnums": "Типи, визначені в API",
     "customLists": "Власні типи",
@@ -788,6 +789,70 @@
     "switch": {
       "addCase": "Додати випадок",
       "removeCase": "Вилучити випадок"
+    },
+    "forEach": {
+      "items": "елементи",
+      "each": "кожен",
+      "done": "готово",
+      "parallelism": "паралелізм"
+    },
+    "aggregate": {
+      "items": "елементи",
+      "result": "результат",
+      "field": "поле",
+      "separator": "роздільник",
+      "op": {
+        "count": "Кількість",
+        "sum": "Сума",
+        "min": "Мінімум",
+        "max": "Максимум",
+        "average": "Середнє",
+        "join": "Обʼєднати"
+      }
+    },
+    "filter": {
+      "items": "елементи",
+      "kept": "залишені",
+      "keepWhere": "залишити якщо"
+    },
+    "wait": {
+      "then": "потім",
+      "duration": "тривалість"
+    },
+    "waitUntil": {
+      "until": "до",
+      "then": "потім"
+    },
+    "arithmetic": {
+      "result": "результат"
+    },
+    "nodes": {
+      "arithmetic": "Арифметика",
+      "httpRequest": "HTTP-запит",
+      "runScenario": "Запустити сценарій",
+      "wait": "Очікувати",
+      "waitUntil": "Очікувати до",
+      "now": "Зараз",
+      "comparator": "Компаратор",
+      "setVariable": "Задати змінну",
+      "getVariable": "Отримати змінну"
+    },
+    "comparator": {
+      "result": "результат"
+    },
+    "boolean": {
+      "result": "результат"
+    },
+    "map": {
+      "items": "елементи",
+      "mapped": "перетворені"
+    },
+    "log": {
+      "message": "повідомлення",
+      "data": "дані"
+    },
+    "assert": {
+      "message": "повідомлення"
     }
   }
 }

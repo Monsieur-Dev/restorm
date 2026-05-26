@@ -304,7 +304,8 @@
       "color": "Szín",
       "expression": "Kifejezés",
       "boolean": "Logikai",
-      "variables": "Változók"
+      "variables": "Változók",
+      "environment": "Környezet"
     },
     "apiEnums": "API által definiált típusok",
     "customLists": "Egyéni típusok",
@@ -786,6 +787,70 @@
     "switch": {
       "addCase": "Eset hozzáadása",
       "removeCase": "Eset eltávolítása"
+    },
+    "forEach": {
+      "items": "elemek",
+      "each": "minden",
+      "done": "kész",
+      "parallelism": "párhuzamosság"
+    },
+    "aggregate": {
+      "items": "elemek",
+      "result": "eredmény",
+      "field": "mező",
+      "separator": "elválasztó",
+      "op": {
+        "count": "Darabszám",
+        "sum": "Összeg",
+        "min": "Min",
+        "max": "Max",
+        "average": "Átlag",
+        "join": "Összefűzés"
+      }
+    },
+    "filter": {
+      "items": "elemek",
+      "kept": "megtartott",
+      "keepWhere": "megtart ha"
+    },
+    "wait": {
+      "then": "azután",
+      "duration": "időtartam"
+    },
+    "waitUntil": {
+      "until": "eddig",
+      "then": "azután"
+    },
+    "arithmetic": {
+      "result": "eredmény"
+    },
+    "nodes": {
+      "arithmetic": "Aritmetika",
+      "httpRequest": "HTTP-kérés",
+      "runScenario": "Forgatókönyv futtatása",
+      "wait": "Várakozás",
+      "waitUntil": "Várakozás eddig",
+      "now": "Most",
+      "comparator": "Összehasonlító",
+      "setVariable": "Változó beállítása",
+      "getVariable": "Változó lekérése"
+    },
+    "comparator": {
+      "result": "eredmény"
+    },
+    "boolean": {
+      "result": "eredmény"
+    },
+    "map": {
+      "items": "elemek",
+      "mapped": "leképezett"
+    },
+    "log": {
+      "message": "üzenet",
+      "data": "adat"
+    },
+    "assert": {
+      "message": "üzenet"
     }
   }
 }

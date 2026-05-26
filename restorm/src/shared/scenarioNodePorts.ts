@@ -56,26 +56,55 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // Requests & composition
   httpRequest: { inputs: [IN, { id: 'env', name: 'env', flow: 'value' }], outputs: [{ id: 'response', name: 'response', dataType: 'response', role: 'response', flow: 'both' }] },
   runScenario: { inputs: [IN], outputs: [{ id: 'result', name: 'result', role: 'response', flow: 'both' }] },
-  // Iteration & collections
-  forEach: { inputs: [{ id: 'items', name: 'items', dataType: 'json', required: true }], outputs: [{ id: 'each', name: 'each', role: 'then', flow: 'both' }, { id: 'done', name: 'done', role: 'else', flow: 'signal' }] },
-  aggregate: { inputs: [{ id: 'items', name: 'items', dataType: 'json', required: true }], outputs: [{ id: 'result', name: 'result', flow: 'value' }] },
-  map: { inputs: [{ id: 'items', name: 'items', dataType: 'json', required: true }], outputs: [{ id: 'mapped', name: 'mapped', dataType: 'json', flow: 'value' }] },
-  filter: { inputs: [{ id: 'items', name: 'items', dataType: 'json', required: true }], outputs: [{ id: 'kept', name: 'kept', dataType: 'json', flow: 'value' }] },
+  // Iteration & collections. `items` carries a value-selector fallback in the
+  // editor (list-typed sources), so it isn't a hard-required port — like the
+  // `if` operands; the editor flags it red only when no list type is available.
+  // No header trigger — collection nodes are data-driven (run once `items`
+  // resolves).
+  forEach: { inputs: [{ id: 'items', name: 'items', dataType: 'json' }], outputs: [{ id: 'each', name: 'each', role: 'then', flow: 'both' }, { id: 'done', name: 'done', role: 'else', flow: 'signal' }] },
+  // `items` has a value-selector fallback in the editor (like forEach), so it
+  // isn't a hard-required port; the editor flags it red only when no list type
+  // is available to pick. No header trigger — a reduce is data-driven (it runs
+  // once its inputs resolve and exposes `result`).
+  aggregate: { inputs: [{ id: 'items', name: 'items', dataType: 'json' }], outputs: [{ id: 'result', name: 'result', flow: 'value' }] },
+  // `items` has a value-selector fallback (like forEach); the per-item
+  // transform lives in config. No header trigger — data-driven.
+  map: { inputs: [{ id: 'items', name: 'items', dataType: 'json' }], outputs: [{ id: 'mapped', name: 'mapped', dataType: 'json', flow: 'value' }] },
+  // `items` has a value-selector fallback in the editor (like forEach), so it
+  // isn't a hard-required port; the predicate (field/operator/value) lives in
+  // config. No header trigger — data-driven (runs once `items` resolves).
+  filter: { inputs: [{ id: 'items', name: 'items', dataType: 'json' }], outputs: [{ id: 'kept', name: 'kept', dataType: 'json', flow: 'value' }] },
   // Time
   wait: { inputs: [IN, { id: 'duration', name: 'duration', dataType: 'duration' }], outputs: [{ id: 'out', name: 'then', role: 'then', flow: 'signal' }] },
-  waitUntil: { inputs: [{ id: 'until', name: 'until', required: true }], outputs: [{ id: 'out', name: 'then', role: 'then', flow: 'signal' }] },
+  // Aligned on `wait`: a header trigger + an inline value fallback (a date-time
+  // picker) on `until`, so it isn't a hard-required port and the node is
+  // runnable on its own.
+  waitUntil: { inputs: [IN, { id: 'until', name: 'until' }], outputs: [{ id: 'out', name: 'then', role: 'then', flow: 'signal' }] },
   now: { inputs: [IN], outputs: [{ id: 'value', name: 'now', dataType: 'string', flow: 'value' }] },
-  // Data & compute
-  arithmetic: { inputs: [{ id: 'a', name: 'a', dataType: 'number', required: true }, { id: 'b', name: 'b', dataType: 'number' }], outputs: [{ id: 'result', name: 'result', dataType: 'number', flow: 'value' }] },
-  comparator: { inputs: [{ id: 'a', name: 'a', required: true }, { id: 'b', name: 'b', required: true }], outputs: [{ id: 'result', name: 'result', dataType: 'boolean', flow: 'value' }] },
-  boolean: { inputs: [{ id: 'a', name: 'a', dataType: 'boolean', required: true }, { id: 'b', name: 'b', dataType: 'boolean', required: true }], outputs: [{ id: 'result', name: 'result', dataType: 'boolean', flow: 'value' }] },
-  template: { inputs: [{ id: 'vars', name: 'vars', dataType: 'json' }], outputs: [{ id: 'text', name: 'text', dataType: 'string', flow: 'value' }] },
+  // Data & compute. Operands carry typed value-selector fallbacks (like `if`),
+  // so they aren't hard-required ports. No header trigger — these are pure
+  // value nodes (data-driven: they run once their inputs resolve and expose
+  // `result`), so they don't need a launch signal to sequence them.
+  arithmetic: { inputs: [{ id: 'a', name: 'a', dataType: 'number' }, { id: 'b', name: 'b', dataType: 'number' }], outputs: [{ id: 'result', name: 'result', dataType: 'number', flow: 'value' }] },
+  comparator: { inputs: [{ id: 'a', name: 'a' }, { id: 'b', name: 'b' }], outputs: [{ id: 'result', name: 'result', dataType: 'boolean', flow: 'value' }] },
+  boolean: { inputs: [{ id: 'a', name: 'a', dataType: 'boolean' }, { id: 'b', name: 'b', dataType: 'boolean' }], outputs: [{ id: 'result', name: 'result', dataType: 'boolean', flow: 'value' }] },
   setVariable: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'event', name: 'event', flow: 'signal' }] },
-  getVariable: { inputs: [], outputs: [{ id: 'value', name: 'value', flow: 'value' }] },
-  transform: { inputs: [{ id: 'value', name: 'value', required: true }], outputs: [{ id: 'out', name: 'value', flow: 'value' }] },
+  getVariable: { inputs: [IN], outputs: [{ id: 'value', name: 'value', flow: 'value' }] },
+  // `transform` (a.k.a. "Transform template") applies an expression/Handlebars
+  // template to its optional `value` input and emits the result. The input is
+  // optional so the node runs on its own (a pure template); the expression
+  // determines the output type.
+  transform: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'out', name: 'value', flow: 'value' }] },
   // Utilities
-  log: { inputs: [{ id: 'value', name: 'value', required: true }], outputs: [OUT] },
-  assert: { inputs: [{ id: 'value', name: 'value', required: true }], outputs: [{ id: 'then', name: 'pass', role: 'then', flow: 'signal' }, { id: 'else', name: 'fail', role: 'else', flow: 'signal' }] }
+  // A terminal sink: both inputs optional (wire either, or set inline), no
+  // output. `message` is a string, `data` any value.
+  log: { inputs: [{ id: 'message', name: 'message', dataType: 'string' }, { id: 'data', name: 'data' }], outputs: [] },
+  // An assertion compares two operands (`actual` / `expected`) with the same
+  // operator toggle as `if`/`comparator`; both operands carry inline
+  // value-selector fallbacks, so they aren't hard-required ports. A header
+  // trigger sequences it like an `if`. Branches `pass` / `fail`; the failure
+  // label lives in config (`message`).
+  assert: { inputs: [IN, { id: 'a', name: 'actual' }, { id: 'b', name: 'expected' }], outputs: [{ id: 'then', name: 'pass', role: 'then', flow: 'signal' }, { id: 'else', name: 'fail', role: 'else', flow: 'signal' }] }
 }
 
 /** A generic single-in/single-out node for any kind without a spec. */

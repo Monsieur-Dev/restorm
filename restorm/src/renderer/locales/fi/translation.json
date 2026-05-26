@@ -304,7 +304,8 @@
       "color": "Väri",
       "expression": "Lauseke",
       "boolean": "Totuusarvo",
-      "variables": "Muuttujat"
+      "variables": "Muuttujat",
+      "environment": "Ympäristö"
     },
     "apiEnums": "API:n määrittämät tyypit",
     "customLists": "Mukautetut tyypit",
@@ -786,6 +787,70 @@
     "switch": {
       "addCase": "Lisää tapaus",
       "removeCase": "Poista tapaus"
+    },
+    "forEach": {
+      "items": "kohteet",
+      "each": "kukin",
+      "done": "valmis",
+      "parallelism": "rinnakkaisuus"
+    },
+    "aggregate": {
+      "items": "kohteet",
+      "result": "tulos",
+      "field": "kenttä",
+      "separator": "erotin",
+      "op": {
+        "count": "Lukumäärä",
+        "sum": "Summa",
+        "min": "Min",
+        "max": "Maks",
+        "average": "Keskiarvo",
+        "join": "Yhdistä"
+      }
+    },
+    "filter": {
+      "items": "kohteet",
+      "kept": "säilytetyt",
+      "keepWhere": "säilytä jos"
+    },
+    "wait": {
+      "then": "sitten",
+      "duration": "kesto"
+    },
+    "waitUntil": {
+      "until": "kunnes",
+      "then": "sitten"
+    },
+    "arithmetic": {
+      "result": "tulos"
+    },
+    "nodes": {
+      "arithmetic": "Aritmetiikka",
+      "httpRequest": "HTTP-pyyntö",
+      "runScenario": "Suorita skenaario",
+      "wait": "Odota",
+      "waitUntil": "Odota kunnes",
+      "now": "Nyt",
+      "comparator": "Vertailija",
+      "setVariable": "Aseta muuttuja",
+      "getVariable": "Hae muuttuja"
+    },
+    "comparator": {
+      "result": "tulos"
+    },
+    "boolean": {
+      "result": "tulos"
+    },
+    "map": {
+      "items": "kohteet",
+      "mapped": "muunnetut"
+    },
+    "log": {
+      "message": "viesti",
+      "data": "tiedot"
+    },
+    "assert": {
+      "message": "viesti"
     }
   }
 }

@@ -304,7 +304,8 @@
       "color": "Kleur",
       "expression": "Expressie",
       "boolean": "Boolean",
-      "variables": "Variabelen"
+      "variables": "Variabelen",
+      "environment": "Omgeving"
     },
     "apiEnums": "Door de API gedefinieerde typen",
     "customLists": "Aangepaste typen",
@@ -786,6 +787,70 @@
     "switch": {
       "addCase": "Case toevoegen",
       "removeCase": "Case verwijderen"
+    },
+    "forEach": {
+      "items": "items",
+      "each": "elk",
+      "done": "klaar",
+      "parallelism": "parallellisme"
+    },
+    "aggregate": {
+      "items": "items",
+      "result": "resultaat",
+      "field": "veld",
+      "separator": "scheidingsteken",
+      "op": {
+        "count": "Aantal",
+        "sum": "Som",
+        "min": "Min",
+        "max": "Max",
+        "average": "Gemiddelde",
+        "join": "Samenvoegen"
+      }
+    },
+    "filter": {
+      "items": "items",
+      "kept": "behouden",
+      "keepWhere": "behoud als"
+    },
+    "wait": {
+      "then": "dan",
+      "duration": "duur"
+    },
+    "waitUntil": {
+      "until": "tot",
+      "then": "dan"
+    },
+    "arithmetic": {
+      "result": "resultaat"
+    },
+    "nodes": {
+      "arithmetic": "Rekenkunde",
+      "httpRequest": "HTTP-verzoek",
+      "runScenario": "Scenario uitvoeren",
+      "wait": "Wachten",
+      "waitUntil": "Wachten tot",
+      "now": "Nu",
+      "comparator": "Vergelijker",
+      "setVariable": "Variabele instellen",
+      "getVariable": "Variabele ophalen"
+    },
+    "comparator": {
+      "result": "resultaat"
+    },
+    "boolean": {
+      "result": "resultaat"
+    },
+    "map": {
+      "items": "items",
+      "mapped": "getransformeerd"
+    },
+    "log": {
+      "message": "bericht",
+      "data": "gegevens"
+    },
+    "assert": {
+      "message": "bericht"
     }
   }
 }

@@ -304,7 +304,8 @@
       "color": "Ngjyrë",
       "expression": "Shprehje",
       "boolean": "Booleane",
-      "variables": "Variablat"
+      "variables": "Variablat",
+      "environment": "Mjedisi"
     },
     "apiEnums": "Tipet e përcaktuara në API",
     "customLists": "Tipe të personalizuara",
@@ -786,6 +787,70 @@
     "switch": {
       "addCase": "Shto rast",
       "removeCase": "Hiq rastin"
+    },
+    "forEach": {
+      "items": "artikuj",
+      "each": "secili",
+      "done": "u krye",
+      "parallelism": "paralelizëm"
+    },
+    "aggregate": {
+      "items": "artikuj",
+      "result": "rezultati",
+      "field": "fusha",
+      "separator": "ndarës",
+      "op": {
+        "count": "Numërimi",
+        "sum": "Shuma",
+        "min": "Min",
+        "max": "Maks",
+        "average": "Mesatarja",
+        "join": "Bashko"
+      }
+    },
+    "filter": {
+      "items": "artikuj",
+      "kept": "të mbajtura",
+      "keepWhere": "mbaj nëse"
+    },
+    "wait": {
+      "then": "pastaj",
+      "duration": "kohëzgjatja"
+    },
+    "waitUntil": {
+      "until": "deri",
+      "then": "pastaj"
+    },
+    "arithmetic": {
+      "result": "rezultati"
+    },
+    "nodes": {
+      "arithmetic": "Aritmetika",
+      "httpRequest": "Kërkesë HTTP",
+      "runScenario": "Ekzekuto skenarin",
+      "wait": "Prit",
+      "waitUntil": "Prit deri",
+      "now": "Tani",
+      "comparator": "Krahasues",
+      "setVariable": "Cakto variablën",
+      "getVariable": "Merr variablën"
+    },
+    "comparator": {
+      "result": "rezultati"
+    },
+    "boolean": {
+      "result": "rezultati"
+    },
+    "map": {
+      "items": "artikuj",
+      "mapped": "të transformuara"
+    },
+    "log": {
+      "message": "mesazh",
+      "data": "të dhëna"
+    },
+    "assert": {
+      "message": "mesazh"
     }
   }
 }

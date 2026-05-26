@@ -1,25 +1,20 @@
-import React, { useState } from 'react'
+import React from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { ScenarioNameInput } from './ScenarioNameInput'
 import { TypedValueField } from '../../TypedValueField'
+import type { ValueTypeKind } from '../../TypedValueField/castValue'
 import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroups'
 import { normalizeValueType } from '../../../utils/normalizeValueType'
 import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
+import { VariableValue } from '../../../../../shared/types/collections'
 
-/** Small single-line text field for a node-local name (visual until config schema). */
-const NameField: React.FC<{ placeholder: string }> = ({ placeholder }) => {
-  const [value, setValue] = useState('')
-  return (
-    <input
-      className="scn-name-input nodrag"
-      value={value}
-      placeholder={placeholder}
-      onMouseDown={(e) => { e.stopPropagation() }}
-      onChange={(e) => { setValue(e.target.value) }}
-    />
-  )
-}
+/** `getVariable` reads an existing variable: its selector is locked to the
+ * `variable` kind (every other type excluded) and shows every variable
+ * regardless of declared type. */
+const VARIABLE_ONLY_EXCLUDE: ValueTypeKind[] = [
+  'string', 'secret', 'number', 'dateTime', 'color', 'expression', 'boolean', 'enum', 'enumList', 'customList', 'customListMulti'
+]
 
 const VALUE_OUT: ScenarioNodeCell = { id: 'value', label: 'value', port: { id: 'value', type: 'source' } }
 
@@ -63,6 +58,7 @@ export const InputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
                 onChange={(next) => { data.onSetConfig?.(id, { valueType: serializeValueForPersistence(next) }) }}
                 valueTypeGroups={valueTypeGroups}
                 excludeTypes={['expression']}
+                allowEnvironment
                 dataTestId="scn-input"
               />
             </div>
@@ -75,9 +71,39 @@ export const InputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
 }
 
 /** `getVariable` — reads a named variable; produces `value`. Runnable (no input). */
+/**
+ * `getVariable` — reads a named variable; produces `value`. The variable is
+ * chosen via a value selector locked to the `variable` kind (so the only choice
+ * is picking an existing variable, of any type). A header trigger lets the read
+ * be sequenced; it's also runnable on its own. The reference persists in config.
+ */
 export const GetVariableNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
-  const left: ScenarioNodeSection[] = [{ id: 'main', rows: [{ id: 'name', content: <NameField placeholder="variable" /> }] }]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[VALUE_OUT]} canPlay />
+  const valueTypeGroups = useAllEnvValueTypeGroups()
+  const config = data.config ?? {}
+  const left: ScenarioNodeSection[] = [
+    {
+      id: 'main',
+      rows: [
+        {
+          id: 'name',
+          content: (
+            <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
+              <TypedValueField
+                value={config['value'] !== undefined ? normalizeValueType(config['value']) : new VariableValue('')}
+                onChange={(next) => { data.onSetConfig?.(id, { value: serializeValueForPersistence(next) }) }}
+                valueTypeGroups={valueTypeGroups}
+                excludeTypes={VARIABLE_ONLY_EXCLUDE}
+                allowAllVariables
+                allowEnvironment
+                dataTestId="scn-getvar"
+              />
+            </div>
+          )
+        }
+      ]
+    }
+  ]
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[VALUE_OUT]} launchInput canPlay />
 }
 
 /**
@@ -119,6 +145,7 @@ export const SetVariableNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
                 valueTypeGroups={valueTypeGroups}
                 excludeTypes={['expression']}
                 excludeVariableName={name}
+                allowEnvironment
                 dataTestId="scn-setvar-value"
               />
             </div>

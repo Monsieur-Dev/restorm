@@ -303,7 +303,8 @@
       "color": "Màu",
       "expression": "Biểu thức",
       "boolean": "Boolean",
-      "variables": "Biến"
+      "variables": "Biến",
+      "environment": "Môi trường"
     },
     "apiEnums": "Kiểu được định nghĩa bởi API",
     "customLists": "Loại tùy chỉnh",
@@ -785,6 +786,70 @@
     "switch": {
       "addCase": "Thêm trường hợp",
       "removeCase": "Xóa trường hợp"
+    },
+    "forEach": {
+      "items": "mục",
+      "each": "mỗi",
+      "done": "xong",
+      "parallelism": "song song"
+    },
+    "aggregate": {
+      "items": "mục",
+      "result": "kết quả",
+      "field": "trường",
+      "separator": "dấu phân cách",
+      "op": {
+        "count": "Đếm",
+        "sum": "Tổng",
+        "min": "Nhỏ nhất",
+        "max": "Lớn nhất",
+        "average": "Trung bình",
+        "join": "Nối"
+      }
+    },
+    "filter": {
+      "items": "mục",
+      "kept": "đã giữ",
+      "keepWhere": "giữ nếu"
+    },
+    "wait": {
+      "then": "rồi",
+      "duration": "thời lượng"
+    },
+    "waitUntil": {
+      "until": "đến",
+      "then": "rồi"
+    },
+    "arithmetic": {
+      "result": "kết quả"
+    },
+    "nodes": {
+      "arithmetic": "Số học",
+      "httpRequest": "Yêu cầu HTTP",
+      "runScenario": "Chạy kịch bản",
+      "wait": "Chờ",
+      "waitUntil": "Chờ đến",
+      "now": "Bây giờ",
+      "comparator": "Bộ so sánh",
+      "setVariable": "Đặt biến",
+      "getVariable": "Lấy biến"
+    },
+    "comparator": {
+      "result": "kết quả"
+    },
+    "boolean": {
+      "result": "kết quả"
+    },
+    "map": {
+      "items": "mục",
+      "mapped": "đã ánh xạ"
+    },
+    "log": {
+      "message": "thông báo",
+      "data": "dữ liệu"
+    },
+    "assert": {
+      "message": "thông báo"
     }
   }
 }

@@ -57,6 +57,7 @@ export const SwitchNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
                 onChange={(next) => { data.onSetConfig?.(id, { on: serializeValueForPersistence(next) }) }}
                 valueTypeGroups={valueTypeGroups}
                 excludeTypes={['expression']}
+                allowEnvironment
                 dataTestId="scn-switch-on"
               />
             </div>
@@ -76,6 +77,7 @@ export const SwitchNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
             onChange={(next) => { setCases(cases.map((x) => (x.id === c.id ? { ...x, value: serializeValueForPersistence(next) } : x))) }}
             valueTypeGroups={valueTypeGroups}
             excludeTypes={['expression']}
+            allowEnvironment
             onRemove={() => { setCases(cases.filter((x) => x.id !== c.id)) }}
             removeLabel={t('scenario.switch.removeCase', 'Supprimer')}
             dataTestId={`scn-switch-${c.id}`}

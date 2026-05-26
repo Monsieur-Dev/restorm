@@ -23,7 +23,9 @@ import type { Scenario, ScenarioNode, ScenarioEdge, ScenarioNodeKind } from '../
 import { isRequest, isScenario } from '../../../../shared/types/collections'
 import { ScenarioBoundResolverContext, ScenarioRequestEnvContext, type ResolveBoundItem, type ResolveRequestEnv } from './scenarioBoundResolver'
 import { ScenarioEdgeSelectorContext, type ScenarioEdgeSelectorApi } from './scenarioEdgeSelector'
-import { ScenarioVariablesContext } from '../../contexts/ScenarioVariablesContext'
+import { ScenarioVariablesContext, type ScenarioVariable } from '../../contexts/ScenarioVariablesContext'
+import { resolveValueTypeKind } from '../TypedValueField/castValue'
+import { normalizeValueType } from '../../utils/normalizeValueType'
 import { SCENARIO_NODE_CATALOGUE, type ScenarioNodeKindMeta } from './scenarioNodeCatalogue'
 import { scenarioEdgeToFlowEdge, flowEdgeToScenarioEdge, portColor } from './scenarioGraphMapping'
 import { ScenarioNodeView, type ScenarioNodeBoxData } from './nodes'
@@ -672,17 +674,24 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
   // A required input left unwired makes the scenario non-runnable.
   const invalidCount = useMemo(() => countUnsatisfiedRequired(nodes, edges), [nodes, edges])
 
-  // Variable names in scope — declared by `setVariable` nodes and named
-  // `input`/param nodes. Drives the value selector's "Variables" menu.
-  const scenarioVariables = useMemo(() => {
-    const names = new Set<string>()
+  // Variables in scope — declared by `setVariable` nodes and named `input`/param
+  // nodes, each carrying the type it was declared with. Drives the value
+  // selector's "Variables" menu (and lets a slot hide incompatible-typed ones).
+  const scenarioVariables = useMemo<ScenarioVariable[]>(() => {
+    const byName = new Map<string, ScenarioVariable>()
     for (const node of nodes) {
-      if (node.data.kind === 'setVariable' || node.data.kind === 'input') {
-        const name = (node.data.config as { name?: unknown } | undefined)?.name
-        if (typeof name === 'string' && name.trim() !== '') names.add(name)
-      }
+      const kind = node.data.kind
+      if (kind !== 'setVariable' && kind !== 'input') continue
+      const config = node.data.config as { name?: unknown; value?: unknown; valueType?: unknown } | undefined
+      const name = config?.name
+      if (typeof name !== 'string' || name.trim() === '') continue
+      // setVariable stores the value under `value`; the input/param node under
+      // `valueType`. The declared type is that value's kind.
+      const rawValue = kind === 'setVariable' ? config?.value : config?.valueType
+      const type = resolveValueTypeKind(normalizeValueType(rawValue))
+      byName.set(name, { name, type })
     }
-    return [...names]
+    return [...byName.values()]
   }, [nodes])
 
   return (

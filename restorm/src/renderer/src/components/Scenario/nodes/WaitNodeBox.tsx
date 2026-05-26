@@ -1,5 +1,6 @@
 import React from 'react'
 import { useNodeConnections, type NodeProps } from '@xyflow/react'
+import { useTranslation } from 'react-i18next'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { WaitDurationControl } from './WaitDurationControl'
 
@@ -10,6 +11,7 @@ import { WaitDurationControl } from './WaitDurationControl'
  * Runnable on its own (no required input).
  */
 export const WaitNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
+  const { t } = useTranslation()
   const durationConnections = useNodeConnections({ handleType: 'target', handleId: 'duration' })
   const durationWired = durationConnections.length > 0
 
@@ -18,13 +20,13 @@ export const WaitNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data
       id: 'main',
       rows: [
         durationWired
-          ? { id: 'duration', label: 'duration', port: { id: 'duration', type: 'target' } }
+          ? { id: 'duration', label: t('scenario.wait.duration', 'duration'), port: { id: 'duration', type: 'target' } }
           : { id: 'duration', content: <WaitDurationControl />, port: { id: 'duration', type: 'target' } }
       ]
     }
   ]
   const right: ScenarioNodeCell[] = [
-    { id: 'out', label: 'then', port: { id: 'out', role: 'then', type: 'source' } }
+    { id: 'out', label: t('scenario.wait.then', 'then'), port: { id: 'out', role: 'then', type: 'source' } }
   ]
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} launchInput canPlay />
 }

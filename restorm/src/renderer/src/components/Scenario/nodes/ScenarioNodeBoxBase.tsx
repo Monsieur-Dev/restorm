@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState, type CSSProperties, type ReactNode } from 'react'
 import { Handle, Position, useNodeConnections, type Node } from '@xyflow/react'
+import { useTranslation } from 'react-i18next'
 import { getContrastColor, MarkdownViewer } from 'electron-core-ui/renderer'
 import type { ScenarioNodeKind, ScenarioPort, ScenarioPortRole } from '../../../../../shared/types/collections'
 import { scenarioNodeMeta } from '../scenarioNodeCatalogue'
@@ -114,6 +115,7 @@ const STATUS_GLYPH: Record<NonNullable<ScenarioNodeBoxData['status']>, string> =
  * components (IfNodeBox, …) compose this and only declare their columns.
  */
 export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, data, selected, left, right, headerIcon, title, launchInput, headerEventOutput, canPlay, hasError }) => {
+  const { t } = useTranslation()
   const meta = scenarioNodeMeta(data.kind)
   const collapsed = data.collapsed === true
   const note = data.note
@@ -193,7 +195,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
           />
         )}
         {headerIcon ?? <i className={`codicon codicon-${meta.icon} scn-node-icon`} aria-hidden="true" />}
-        <span className="scn-node-title">{title ?? meta.defaultLabel}</span>
+        <span className="scn-node-title">{title ?? t(meta.labelKey, meta.defaultLabel)}</span>
         <button type="button" className="scn-node-collapse nodrag" onClick={onToggle} aria-label={collapsed ? 'Expand' : 'Collapse'}>
           <i className={`codicon codicon-chevron-${collapsed ? 'right' : 'down'}`} aria-hidden="true" />
         </button>

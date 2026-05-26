@@ -198,10 +198,14 @@ const InputBoxInner: React.FC<InputBoxProps> = ({
       return () => { el.removeEventListener('wheel', handleWheel) }
     }
 
-    // Number input: wheel to increment/decrement
+    // Number input: wheel to increment/decrement. Stop propagation so the
+    // wheel is fully consumed here — otherwise an ancestor that also reacts to
+    // wheel (a scroll container, or a React Flow canvas that zooms on scroll)
+    // fires at the same time as the increment.
     if (isNumberInput) {
       const handleWheel = (e: WheelEvent): void => {
         e.preventDefault()
+        e.stopPropagation()
         incrementNumber(e.deltaY < 0 ? stepValue : -stepValue)
       }
       el.addEventListener('wheel', handleWheel, { passive: false })

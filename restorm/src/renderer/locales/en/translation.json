@@ -304,7 +304,8 @@
       "color": "Color",
       "expression": "Expression",
       "boolean": "Boolean",
-      "variables": "Variables"
+      "variables": "Variables",
+      "environment": "Environment"
     },
     "apiEnums": "API defined types",
     "customLists": "Custom types",
@@ -786,6 +787,70 @@
     "switch": {
       "addCase": "Add case",
       "removeCase": "Remove case"
+    },
+    "forEach": {
+      "items": "items",
+      "each": "each",
+      "done": "done",
+      "parallelism": "parallelism"
+    },
+    "aggregate": {
+      "items": "items",
+      "result": "result",
+      "field": "field",
+      "separator": "separator",
+      "op": {
+        "count": "Count",
+        "sum": "Sum",
+        "min": "Min",
+        "max": "Max",
+        "average": "Average",
+        "join": "Join"
+      }
+    },
+    "filter": {
+      "items": "items",
+      "kept": "kept",
+      "keepWhere": "keep where"
+    },
+    "wait": {
+      "then": "then",
+      "duration": "duration"
+    },
+    "waitUntil": {
+      "until": "until",
+      "then": "then"
+    },
+    "arithmetic": {
+      "result": "result"
+    },
+    "nodes": {
+      "arithmetic": "Arithmetic",
+      "httpRequest": "HTTP Request",
+      "runScenario": "Run scenario",
+      "wait": "Wait",
+      "waitUntil": "Wait until",
+      "now": "Now",
+      "comparator": "Comparator",
+      "setVariable": "Set variable",
+      "getVariable": "Get variable"
+    },
+    "comparator": {
+      "result": "result"
+    },
+    "boolean": {
+      "result": "result"
+    },
+    "map": {
+      "items": "items",
+      "mapped": "mapped"
+    },
+    "log": {
+      "message": "message",
+      "data": "data"
+    },
+    "assert": {
+      "message": "message"
     }
   }
 }

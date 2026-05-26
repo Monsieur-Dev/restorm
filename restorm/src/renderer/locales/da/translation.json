@@ -304,7 +304,8 @@
       "color": "Farve",
       "expression": "Udtryk",
       "boolean": "Boolean",
-      "variables": "Variabler"
+      "variables": "Variabler",
+      "environment": "Miljø"
     },
     "apiEnums": "API-definerede typer",
     "customLists": "Brugerdefinerede typer",
@@ -786,6 +787,70 @@
     "switch": {
       "addCase": "Tilføj tilfælde",
       "removeCase": "Fjern tilfælde"
+    },
+    "forEach": {
+      "items": "elementer",
+      "each": "hver",
+      "done": "færdig",
+      "parallelism": "parallelisme"
+    },
+    "aggregate": {
+      "items": "elementer",
+      "result": "resultat",
+      "field": "felt",
+      "separator": "separator",
+      "op": {
+        "count": "Antal",
+        "sum": "Sum",
+        "min": "Min",
+        "max": "Maks",
+        "average": "Gennemsnit",
+        "join": "Sammenføj"
+      }
+    },
+    "filter": {
+      "items": "elementer",
+      "kept": "beholdt",
+      "keepWhere": "behold hvis"
+    },
+    "wait": {
+      "then": "derefter",
+      "duration": "varighed"
+    },
+    "waitUntil": {
+      "until": "indtil",
+      "then": "derefter"
+    },
+    "arithmetic": {
+      "result": "resultat"
+    },
+    "nodes": {
+      "arithmetic": "Aritmetik",
+      "httpRequest": "HTTP-anmodning",
+      "runScenario": "Kør scenarie",
+      "wait": "Vent",
+      "waitUntil": "Vent til",
+      "now": "Nu",
+      "comparator": "Sammenligner",
+      "setVariable": "Sæt variabel",
+      "getVariable": "Hent variabel"
+    },
+    "comparator": {
+      "result": "resultat"
+    },
+    "boolean": {
+      "result": "resultat"
+    },
+    "map": {
+      "items": "elementer",
+      "mapped": "transformeret"
+    },
+    "log": {
+      "message": "besked",
+      "data": "data"
+    },
+    "assert": {
+      "message": "besked"
     }
   }
 }

@@ -305,7 +305,8 @@
       "color": "Boja",
       "expression": "Izraz",
       "boolean": "Bulova vrednost",
-      "variables": "Променљиве"
+      "variables": "Променљиве",
+      "environment": "Окружење"
     },
     "apiEnums": "Tipovi definisani u API-ju",
     "customLists": "Прилагођени типови",
@@ -787,6 +788,70 @@
     "switch": {
       "addCase": "Додај случај",
       "removeCase": "Уклони случај"
+    },
+    "forEach": {
+      "items": "ставке",
+      "each": "сваки",
+      "done": "готово",
+      "parallelism": "паралелизам"
+    },
+    "aggregate": {
+      "items": "ставке",
+      "result": "резултат",
+      "field": "поље",
+      "separator": "раздвајач",
+      "op": {
+        "count": "Број",
+        "sum": "Збир",
+        "min": "Мин",
+        "max": "Макс",
+        "average": "Просек",
+        "join": "Спајање"
+      }
+    },
+    "filter": {
+      "items": "ставке",
+      "kept": "задржани",
+      "keepWhere": "задржи ако"
+    },
+    "wait": {
+      "then": "затим",
+      "duration": "трајање"
+    },
+    "waitUntil": {
+      "until": "до",
+      "then": "затим"
+    },
+    "arithmetic": {
+      "result": "резултат"
+    },
+    "nodes": {
+      "arithmetic": "Аритметика",
+      "httpRequest": "HTTP захтев",
+      "runScenario": "Покрени сценарио",
+      "wait": "Чекај",
+      "waitUntil": "Чекај до",
+      "now": "Сада",
+      "comparator": "Упоређивач",
+      "setVariable": "Постави променљиву",
+      "getVariable": "Узми променљиву"
+    },
+    "comparator": {
+      "result": "резултат"
+    },
+    "boolean": {
+      "result": "резултат"
+    },
+    "map": {
+      "items": "ставке",
+      "mapped": "трансформисано"
+    },
+    "log": {
+      "message": "порука",
+      "data": "подаци"
+    },
+    "assert": {
+      "message": "порука"
     }
   }
 }

@@ -90,7 +90,6 @@ export type ScenarioNodeKind =
   | 'arithmetic'
   | 'comparator'
   | 'boolean'
-  | 'template'
   | 'setVariable'
   | 'getVariable'
   | 'transform'

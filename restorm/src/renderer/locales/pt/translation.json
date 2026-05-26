@@ -304,7 +304,8 @@
       "color": "Cor",
       "expression": "Expressão",
       "boolean": "Booleano",
-      "variables": "Variáveis"
+      "variables": "Variáveis",
+      "environment": "Ambiente"
     },
     "apiEnums": "Tipos definidos pela API",
     "customLists": "Tipos personalizados",
@@ -786,6 +787,70 @@
     "switch": {
       "addCase": "Adicionar caso",
       "removeCase": "Remover caso"
+    },
+    "forEach": {
+      "items": "itens",
+      "each": "cada",
+      "done": "concluído",
+      "parallelism": "paralelismo"
+    },
+    "aggregate": {
+      "items": "itens",
+      "result": "resultado",
+      "field": "campo",
+      "separator": "separador",
+      "op": {
+        "count": "Contagem",
+        "sum": "Soma",
+        "min": "Mín",
+        "max": "Máx",
+        "average": "Média",
+        "join": "Juntar"
+      }
+    },
+    "filter": {
+      "items": "itens",
+      "kept": "mantidos",
+      "keepWhere": "manter se"
+    },
+    "wait": {
+      "then": "depois",
+      "duration": "duração"
+    },
+    "waitUntil": {
+      "until": "até",
+      "then": "depois"
+    },
+    "arithmetic": {
+      "result": "resultado"
+    },
+    "nodes": {
+      "arithmetic": "Aritmética",
+      "httpRequest": "Requisição HTTP",
+      "runScenario": "Executar cenário",
+      "wait": "Aguardar",
+      "waitUntil": "Aguardar até",
+      "now": "Agora",
+      "comparator": "Comparador",
+      "setVariable": "Definir variável",
+      "getVariable": "Obter variável"
+    },
+    "comparator": {
+      "result": "resultado"
+    },
+    "boolean": {
+      "result": "resultado"
+    },
+    "map": {
+      "items": "itens",
+      "mapped": "transformados"
+    },
+    "log": {
+      "message": "mensagem",
+      "data": "dados"
+    },
+    "assert": {
+      "message": "mensagem"
     }
   }
 }

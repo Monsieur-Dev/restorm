@@ -305,7 +305,8 @@
       "color": "Culoare",
       "expression": "Expresie",
       "boolean": "Boolean",
-      "variables": "Variabile"
+      "variables": "Variabile",
+      "environment": "Mediu"
     },
     "apiEnums": "Tipuri definite de API",
     "customLists": "Tipuri personalizate",
@@ -787,6 +788,70 @@
     "switch": {
       "addCase": "Adaugă caz",
       "removeCase": "Elimină caz"
+    },
+    "forEach": {
+      "items": "elemente",
+      "each": "fiecare",
+      "done": "gata",
+      "parallelism": "paralelism"
+    },
+    "aggregate": {
+      "items": "elemente",
+      "result": "rezultat",
+      "field": "câmp",
+      "separator": "separator",
+      "op": {
+        "count": "Număr",
+        "sum": "Sumă",
+        "min": "Min",
+        "max": "Max",
+        "average": "Medie",
+        "join": "Unește"
+      }
+    },
+    "filter": {
+      "items": "elemente",
+      "kept": "păstrate",
+      "keepWhere": "păstrează dacă"
+    },
+    "wait": {
+      "then": "apoi",
+      "duration": "durată"
+    },
+    "waitUntil": {
+      "until": "până la",
+      "then": "apoi"
+    },
+    "arithmetic": {
+      "result": "rezultat"
+    },
+    "nodes": {
+      "arithmetic": "Aritmetică",
+      "httpRequest": "Cerere HTTP",
+      "runScenario": "Rulează scenariul",
+      "wait": "Așteaptă",
+      "waitUntil": "Așteaptă până la",
+      "now": "Acum",
+      "comparator": "Comparator",
+      "setVariable": "Setează variabila",
+      "getVariable": "Obține variabila"
+    },
+    "comparator": {
+      "result": "rezultat"
+    },
+    "boolean": {
+      "result": "rezultat"
+    },
+    "map": {
+      "items": "elemente",
+      "mapped": "transformate"
+    },
+    "log": {
+      "message": "mesaj",
+      "data": "date"
+    },
+    "assert": {
+      "message": "mesaj"
     }
   }
 }

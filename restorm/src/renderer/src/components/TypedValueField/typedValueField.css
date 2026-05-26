@@ -1,2 +1,11 @@
-.tvf-control-group { width: 100%; }
+.tvf-control-group { width: 100%; min-width: 100px; }
 .tvf-control-group > :first-child { flex: 1 1 auto; min-width: 0; }
+/* The environment picker button fills the field side of the control group. */
+.tvf-env-button { flex: 1 1 auto; min-width: 0; }
+/* Give the env label breathing room: 20px of inner side padding. (The button's
+ * natural height already matches the type-indicator on the control group's
+ * right, so no height override is needed.) */
+.tvf-env-button .button {
+  padding-left: 20px;
+  padding-right: 20px;
+}

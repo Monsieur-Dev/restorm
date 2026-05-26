@@ -303,7 +303,8 @@
       "color": "Warna",
       "expression": "Ekspresi",
       "boolean": "Boolean",
-      "variables": "Variabel"
+      "variables": "Variabel",
+      "environment": "Lingkungan"
     },
     "apiEnums": "Tipe yang didefinisikan API",
     "customLists": "Tipe khusus",
@@ -785,6 +786,70 @@
     "switch": {
       "addCase": "Tambah kasus",
       "removeCase": "Hapus kasus"
+    },
+    "forEach": {
+      "items": "item",
+      "each": "tiap",
+      "done": "selesai",
+      "parallelism": "paralelisme"
+    },
+    "aggregate": {
+      "items": "item",
+      "result": "hasil",
+      "field": "bidang",
+      "separator": "pemisah",
+      "op": {
+        "count": "Jumlah",
+        "sum": "Total",
+        "min": "Min",
+        "max": "Maks",
+        "average": "Rata-rata",
+        "join": "Gabung"
+      }
+    },
+    "filter": {
+      "items": "item",
+      "kept": "disimpan",
+      "keepWhere": "simpan jika"
+    },
+    "wait": {
+      "then": "lalu",
+      "duration": "durasi"
+    },
+    "waitUntil": {
+      "until": "hingga",
+      "then": "lalu"
+    },
+    "arithmetic": {
+      "result": "hasil"
+    },
+    "nodes": {
+      "arithmetic": "Aritmatika",
+      "httpRequest": "Permintaan HTTP",
+      "runScenario": "Jalankan skenario",
+      "wait": "Tunggu",
+      "waitUntil": "Tunggu hingga",
+      "now": "Sekarang",
+      "comparator": "Pembanding",
+      "setVariable": "Atur variabel",
+      "getVariable": "Ambil variabel"
+    },
+    "comparator": {
+      "result": "hasil"
+    },
+    "boolean": {
+      "result": "hasil"
+    },
+    "map": {
+      "items": "item",
+      "mapped": "hasil map"
+    },
+    "log": {
+      "message": "pesan",
+      "data": "data"
+    },
+    "assert": {
+      "message": "pesan"
     }
   }
 }

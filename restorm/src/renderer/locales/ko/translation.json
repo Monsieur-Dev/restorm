@@ -303,7 +303,8 @@
       "color": "색상",
       "expression": "표현식",
       "boolean": "부울",
-      "variables": "변수"
+      "variables": "변수",
+      "environment": "환경"
     },
     "apiEnums": "API에서 정의한 형식",
     "customLists": "사용자 지정 유형",
@@ -785,6 +786,70 @@
     "switch": {
       "addCase": "케이스 추가",
       "removeCase": "케이스 제거"
+    },
+    "forEach": {
+      "items": "항목",
+      "each": "각 항목",
+      "done": "완료",
+      "parallelism": "병렬 처리"
+    },
+    "aggregate": {
+      "items": "항목",
+      "result": "결과",
+      "field": "필드",
+      "separator": "구분 기호",
+      "op": {
+        "count": "개수",
+        "sum": "합계",
+        "min": "최소",
+        "max": "최대",
+        "average": "평균",
+        "join": "연결"
+      }
+    },
+    "filter": {
+      "items": "항목",
+      "kept": "유지됨",
+      "keepWhere": "조건 유지"
+    },
+    "wait": {
+      "then": "다음",
+      "duration": "기간"
+    },
+    "waitUntil": {
+      "until": "까지",
+      "then": "다음"
+    },
+    "arithmetic": {
+      "result": "결과"
+    },
+    "nodes": {
+      "arithmetic": "산술",
+      "httpRequest": "HTTP 요청",
+      "runScenario": "시나리오 실행",
+      "wait": "대기",
+      "waitUntil": "까지 대기",
+      "now": "현재",
+      "comparator": "비교기",
+      "setVariable": "변수 설정",
+      "getVariable": "변수 가져오기"
+    },
+    "comparator": {
+      "result": "결과"
+    },
+    "boolean": {
+      "result": "결과"
+    },
+    "map": {
+      "items": "항목",
+      "mapped": "변환됨"
+    },
+    "log": {
+      "message": "메시지",
+      "data": "데이터"
+    },
+    "assert": {
+      "message": "메시지"
     }
   }
 }

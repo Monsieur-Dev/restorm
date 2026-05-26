@@ -30,6 +30,7 @@ export const IfNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, 
           onChange={(next) => { data.onSetConfig?.(id, { [key]: serializeValueForPersistence(next) }) }}
           valueTypeGroups={valueTypeGroups}
           excludeTypes={['expression']}
+          allowEnvironment
           dataTestId={`scn-if-${key}`}
         />
       </div>
