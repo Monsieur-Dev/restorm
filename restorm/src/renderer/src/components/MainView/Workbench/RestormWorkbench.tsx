@@ -94,6 +94,8 @@ export interface RestormWorkbenchProps {
   onFolderChange?: (folderId: string, folder: Folder) => void
   /** Callback fired when a scenario's graph (nodes/edges) changes. */
   onScenarioChange?: (scenarioId: string, patch: { nodes?: ScenarioNode[]; edges?: ScenarioEdge[]; notes?: string }) => void
+  /** Create a new HTTP request as a child of the scenario (id), return its id. */
+  onCreateScenarioRequest?: (scenarioId: string) => string | null
   /** Resolve a tree item by id → live object, for drop + bound node sync. */
   resolveBoundItem?: ResolveBoundItem
   /** Resolve a request's environments + default selection (scenario env section). */
@@ -169,6 +171,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   onTagColorChange,
   onFolderChange,
   onScenarioChange,
+  onCreateScenarioRequest,
   resolveBoundItem,
   resolveRequestEnv,
   onEnvironmentFolderChange,
@@ -640,6 +643,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
                 {...(resolveBoundItem ? { resolveBoundItem } : {})}
                 {...(resolveRequestEnv ? { resolveRequestEnv } : {})}
                 {...(onRequestClick ? { onOpenItem: onRequestClick } : {})}
+                {...(onCreateScenarioRequest ? { onCreateRequest: onCreateScenarioRequest } : {})}
               />
             </div>
           )
@@ -1037,7 +1041,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [t, onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onScenarioChange, resolveBoundItem, resolveRequestEnv, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, updateMiniBrowserUrl])
+  }, [t, onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onScenarioChange, onCreateScenarioRequest, resolveBoundItem, resolveRequestEnv, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, updateMiniBrowserUrl])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(

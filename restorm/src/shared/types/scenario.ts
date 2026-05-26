@@ -1,4 +1,5 @@
 import type { RuntimeId } from './baseTypes'
+import type { FolderItem } from './folderTypes'
 
 /**
  * Scenarios — dataflow graphs of orchestrated requests (restorm's answer
@@ -157,4 +158,12 @@ export interface Scenario {
   params: ScenarioParam[]
   nodes: ScenarioNode[]
   edges: ScenarioEdge[]
+  /**
+   * Child items — a scenario doubles as a folder-like container: requests
+   * authored inside the scenario (and sub-folders) live here, show as its
+   * children in the sidebar, and otherwise behave like any tree item (open as
+   * tabs, indexed, response history). Optional for back-compat with scenarios
+   * persisted before this existed; treat a missing value as `[]`.
+   */
+  items?: FolderItem[]
 }

@@ -62,7 +62,7 @@ export interface UseItemOperationsReturn {
    * folder), wraps it reactive, pushes it into the parent's `items[]`,
    * fires the matching `*_CREATED` event so the save-unit registry
    * picks it up, and opens the new item in a workbench tab. */
-  handleAddChildItem: (parentId: string, kind: AddChildKind) => void
+  handleAddChildItem: (parentId: string, kind: AddChildKind, options?: { silent?: boolean }) => string | null
   handleDeleteItem: (itemId: string) => void
   confirmDelete: (itemId: string) => void
   cancelDelete: () => void
@@ -394,7 +394,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     }
   }, [t])
 
-  const handleAddChildItem = useCallback((parentId: string, kind: AddChildKind) => {
+  const handleAddChildItem = useCallback((parentId: string, kind: AddChildKind, options?: { silent?: boolean }): string | null => {
     // `parentId === ''` is the ROOT sentinel — used by the empty-area
     // sidebar context menu so users can add a top-level folder /
     // request without first creating a parent. For non-root cases we
@@ -406,7 +406,10 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       ? null
       : findItemWithBreadcrumbs(rootItems, parentId)
     const parent = parentLookup?.item ?? null
-    if (!isRoot && (!parent || !isAnyFolder(parent))) return
+    // A parent can be a folder/env-folder OR a scenario (scenarios double as
+    // containers for requests authored inside them).
+    const parentIsContainer = !!parent && (isAnyFolder(parent) || isScenario(parent))
+    if (!isRoot && !parentIsContainer) return null
     const parentBreadcrumbs = parentLookup?.breadcrumbs ?? []
     const name = defaultNameFor(kind)
     const id = generateUniqueId()
@@ -425,6 +428,11 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         setRootItems((prev) => [...prev, reactive])
       } else if (parent && isAnyFolder(parent)) {
         parent.items.push(reactive)
+      } else if (parent && isScenario(parent)) {
+        // Scenario container: its `items` is optional — seed it then append.
+        const scn = parent as { items?: FolderItem[] }
+        scn.items ??= []
+        scn.items.push(reactive)
       }
     }
 
@@ -444,7 +452,10 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         tags: [] as string[],
         params: [],
         nodes: [],
-        edges: []
+        edges: [],
+        // A scenario doubles as a folder-like container for requests authored
+        // inside it; starts empty.
+        items: [] as FolderItem[]
       }
       mountChild(scenario as unknown as FolderItem)
       pushedItem = scenario as unknown as FolderItem
@@ -505,7 +516,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       const request = built as Request
       const resolvedParentId = isRoot
         ? undefined
-        : (parent && isAnyFolder(parent) ? parent.id : undefined)
+        : (parent && (isAnyFolder(parent) || isScenario(parent)) ? parent.id : undefined)
       const reactive = resolvedParentId !== undefined
         ? makeReactiveRequest(request, resolvedParentId)
         : makeReactiveRequest(request)
@@ -520,29 +531,35 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       eventBus.emitSync(DocumentEvents.REQUEST_CREATED, createdPayload)
     }
 
-    // Expand the parent (no-op for root), then nudge React with a
-    // `[...prevItems]` snapshot — see the `mountChild` comment above
-    // for why this is needed for the folder path.
+    // `silent` (a request created inline in a scenario graph) skips ALL
+    // navigation — no parent expand, no sidebar selection, no tab — so the user
+    // stays on the graph and the sidebar doesn't jump. The tree still re-renders
+    // (the `[...prevItems]` nudge) so the new child shows once its parent is
+    // expanded; see the `mountChild` comment for why the nudge is needed.
+    const silent = options?.silent === true
     if (!isRoot) {
-      setExpandedIds((prev) => Array.from(new Set([...prev, parentId])))
+      if (!silent) setExpandedIds((prev) => Array.from(new Set([...prev, parentId])))
       setRootItems((prevItems) => [...prevItems])
     }
-    setSelectedItemId(id)
+    if (!silent) setSelectedItemId(id)
 
-    const newBreadcrumb: BreadcrumbItem = {
-      id,
-      label: name,
-      icon: isAnyFolder(pushedItem) ? getFolderIcon(pushedItem) : null
+    if (!silent) {
+      const newBreadcrumb: BreadcrumbItem = {
+        id,
+        label: name,
+        icon: isAnyFolder(pushedItem) ? getFolderIcon(pushedItem) : null
+      }
+      const breadcrumbs = [...parentBreadcrumbs, newBreadcrumb]
+      const envs = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
+      if (kind === 'folder' && isAnyFolder(pushedItem)) {
+        openFolderTab(pushedItem, breadcrumbs)
+      } else if (isScenario(pushedItem)) {
+        openScenarioEditorTab(pushedItem, breadcrumbs)
+      } else if (!isAnyFolder(pushedItem)) {
+        openAnyRequestTab(pushedItem, breadcrumbs, envs)
+      }
     }
-    const breadcrumbs = [...parentBreadcrumbs, newBreadcrumb]
-    const envs = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
-    if (kind === 'folder' && isAnyFolder(pushedItem)) {
-      openFolderTab(pushedItem, breadcrumbs)
-    } else if (isScenario(pushedItem)) {
-      openScenarioEditorTab(pushedItem, breadcrumbs)
-    } else if (!isAnyFolder(pushedItem)) {
-      openAnyRequestTab(pushedItem, breadcrumbs, envs)
-    }
+    return id
   }, [rootItems, setRootItems, setExpandedIds, setSelectedItemId, openFolderTab, openScenarioEditorTab, openAnyRequestTab, defaultNameFor])
 
   const handleCreateRootFolder = useCallback(() => {

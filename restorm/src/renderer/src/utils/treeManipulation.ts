@@ -11,6 +11,14 @@ export function generateUniqueId(): string {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
 }
 
+/** A container's children array, created in place if missing. Scenarios carry
+ * an optional `items` (they double as containers); this gives a mutable handle
+ * for splice/push regardless of folder vs scenario. */
+function childrenArray(container: { items?: FolderItem[] }): FolderItem[] {
+  container.items ??= []
+  return container.items
+}
+
 /** Deep clone an item with new IDs */
 export function deepCloneItem(item: FolderItem): FolderItem {
   const newId = generateUniqueId()
@@ -42,7 +50,7 @@ export function removeItemFromTree(
   if (!item || !parent || index < 0) return null
 
   // Remove from parent
-  parent.items.splice(index, 1)
+  childrenArray(parent).splice(index, 1)
   return item
 }
 
@@ -64,7 +72,7 @@ export function insertItemIntoTree(
     }
     // If target is not a folder, insert after it instead
     if (parent) {
-      parent.items.splice(index + 1, 0, item)
+      childrenArray(parent).splice(index + 1, 0, item)
       return true
     }
     return false
@@ -74,7 +82,7 @@ export function insertItemIntoTree(
   if (!parent) return false
 
   const insertIndex = position === 'before' ? index : index + 1
-  parent.items.splice(insertIndex, 0, item)
+  childrenArray(parent).splice(insertIndex, 0, item)
   return true
 }
 
@@ -90,7 +98,7 @@ export function cloneItemInTree(
   const clonedItem = deepCloneItem(item)
 
   // Insert after the original
-  parent.items.splice(index + 1, 0, clonedItem)
+  childrenArray(parent).splice(index + 1, 0, clonedItem)
 
   return clonedItem
 }

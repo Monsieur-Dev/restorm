@@ -333,7 +333,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const ids: string[] = []
     for (const item of rootItems) {
-      if ('items' in item) {
+      if ('items' in item && !isScenario(item)) {
         ids.push(...collectAllFolderIds(item))
       }
     }
@@ -1088,6 +1088,27 @@ const App: React.FC = () => {
     }
   }, [rootItems, setRootItems])
 
+  // Create a new HTTP request as a child of a scenario (a scenario doubles as a
+  // folder-like container) and return its id — called when a "Requête HTTP"
+  // node is added to the graph. `openTab: false` keeps the user on the graph.
+  // The request is appended to the scenario's `items` in place, so (like other
+  // scenario edits) nudge a whole-file save to round-trip the new child.
+  const handleCreateScenarioRequest = useCallback((scenarioId: string): string | null => {
+    // `silent`: no sidebar selection/expand, no tab — stay on the graph so the
+    // user can keep editing the scenario without being whisked to the request.
+    const newId = handleAddChildItem(scenarioId, 'http-get', { silent: true })
+    if (newId) {
+      if (scenarioSaveTimer) clearTimeout(scenarioSaveTimer)
+      scenarioSaveTimer = setTimeout(() => {
+        scenarioSaveTimer = null
+        void latestSaveAll?.().catch((err: unknown) => {
+          logger.error('[App] scenario child-request autosave failed', { error: String(err) })
+        })
+      }, 600)
+    }
+    return newId
+  }, [handleAddChildItem])
+
   // Resolve a tree item by id to its live object — used by the scenario editor
   // both to decide what a sidebar drop creates (request/scenario/ignored) and
   // to keep a request/sub-scenario node's badge + title in sync with renames.
@@ -1759,7 +1780,7 @@ const App: React.FC = () => {
         // requests go through `makeReactiveRequest` (no parent id) so
         // edits emit `REQUEST_UPDATED` like nested requests.
         const reactiveItems = items.map((item) =>
-          'items' in item ? makeReactiveFolder(item) : isScenario(item) ? item : makeReactiveRequest(item)
+          isScenario(item) ? item : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
         )
         setRootItems(reactiveItems)
         // Also trigger indexing
@@ -1767,9 +1788,10 @@ const App: React.FC = () => {
           await searchIndexService.clearIndex()
           await searchIndexService.initialize()
           for (const rootItem of reactiveItems) {
+            if (isScenario(rootItem)) continue
             if ('items' in rootItem) {
               await searchIndexService.indexFolderTree(rootItem)
-            } else if (!isScenario(rootItem)) {
+            } else {
               await searchIndexService.indexRootRequest(rootItem)
             }
           }
@@ -2224,6 +2246,7 @@ const App: React.FC = () => {
               onTagColorChange={handleTagColorChange}
               onFolderChange={handleFolderChange}
               onScenarioChange={handleScenarioChange}
+              onCreateScenarioRequest={handleCreateScenarioRequest}
               resolveBoundItem={resolveBoundItem}
               resolveRequestEnv={resolveRequestEnv}
               onEnvironmentFolderChange={handleEnvironmentFolderChange}
@@ -2260,6 +2283,7 @@ const App: React.FC = () => {
             onTagsChange={handleTagsChange}
             onFolderChange={handleFolderChange}
             onScenarioChange={handleScenarioChange}
+            onCreateScenarioRequest={handleCreateScenarioRequest}
             resolveBoundItem={resolveBoundItem}
             resolveRequestEnv={resolveRequestEnv}
             onEnvironmentFolderChange={handleEnvironmentFolderChange}

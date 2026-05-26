@@ -33,6 +33,9 @@ export interface RestormWorkbenchContainerProps {
   onTagColorChange?: (envFolderId: string, tag: string, color: string | null) => void
   onFolderChange: (folderId: string, folder: Folder) => void
   onScenarioChange?: (scenarioId: string, patch: { nodes?: ScenarioNode[]; edges?: ScenarioEdge[]; notes?: string }) => void
+  /** Create a new HTTP request as a child of the scenario (id) and return its
+   * id — used when a "Requête HTTP" node is added to the graph. */
+  onCreateScenarioRequest?: (scenarioId: string) => string | null
   resolveBoundItem?: ResolveBoundItem
   resolveRequestEnv?: ResolveRequestEnv
   onEnvironmentFolderChange: (folderId: string, folder: EnvironmentFolder) => void
@@ -80,6 +83,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
   onTagColorChange,
   onFolderChange,
   onScenarioChange,
+  onCreateScenarioRequest,
   resolveBoundItem,
   resolveRequestEnv,
   onEnvironmentFolderChange,
@@ -125,6 +129,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
           onTagColorChange={onTagColorChange}
           onFolderChange={onFolderChange}
           {...(onScenarioChange ? { onScenarioChange } : {})}
+          {...(onCreateScenarioRequest ? { onCreateScenarioRequest } : {})}
           {...(resolveBoundItem ? { resolveBoundItem } : {})}
           {...(resolveRequestEnv ? { resolveRequestEnv } : {})}
           onEnvironmentFolderChange={onEnvironmentFolderChange}

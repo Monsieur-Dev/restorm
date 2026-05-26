@@ -6,6 +6,7 @@ import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ListViewItemData } from 'electron-core-ui/renderer'
 import type { FolderItem } from '../../../shared/types/collections'
+import { isScenario } from '../../../shared/types/collections'
 import { folderAsRootListViewItem, folderItemToListViewItem } from '../services/FolderToListView'
 import { attachContextMenus } from '../components/MainView/Sidebar/contextMenuBuilder'
 import type { AddChildKind } from '../components/MainView/Sidebar/contextMenuBuilder'
@@ -71,7 +72,11 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
     // `folderItemToListViewItem`, which already dispatches to the
     // right request-type adapter.
     return rootItems.map((item) =>
-      'items' in item
+      // A container (has `items`) renders as a root folder — except a scenario,
+      // which goes through `folderItemToListViewItem` to get its expandable
+      // scenario row. Keep the original `'items' in item` test (not `isAnyFolder`)
+      // so a folder missing a `configuration` field still renders with children.
+      'items' in item && !isScenario(item)
         ? folderAsRootListViewItem(item, renderOptions)
         : folderItemToListViewItem(item, renderOptions)
     )

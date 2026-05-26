@@ -48,6 +48,10 @@ export interface ScenarioEditorViewProps {
   /** Open a tree item (bound request / sub-scenario) in a workbench tab by id —
    * drives the "Edit request / scenario" link on those nodes. */
   onOpenItem?: (itemId: string) => void
+  /** Create a new HTTP request as a child of this scenario and return its id —
+   * called when a "Requête HTTP" node is added to the graph so it binds to a
+   * freshly-created request (placed under the scenario in the sidebar). */
+  onCreateRequest?: (scenarioId: string) => string | null
 }
 
 type NodeData = ScenarioNodeBoxData
@@ -140,7 +144,7 @@ function chooseColorTooltipPlacement(rect: DOMRect): { placement: 'above' | 'bel
   return { placement: 'below', side: 'auto' }
 }
 
-const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onScenarioChange, resolveBoundItem, resolveRequestEnv, onOpenItem }) => {
+const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onScenarioChange, resolveBoundItem, resolveRequestEnv, onOpenItem, onCreateRequest }) => {
   const { t } = useTranslation()
   const { screenToFlowPosition } = useReactFlow()
   const wrapperRef = useRef<HTMLDivElement>(null)
@@ -402,9 +406,17 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
   }, [setEdges, setNodes, persist, validateConnection, nodes])
 
   const addNode = useCallback((kind: ScenarioNodeKind, flow: { x: number; y: number }, config: Record<string, unknown> = {}) => {
+    // A "Requête HTTP" node added from the palette (no bound request yet)
+    // creates a fresh request as a child of this scenario and binds to it; a
+    // drag from the tree already arrives with `requestId` set (bind existing).
+    let nodeConfig = config
+    if (kind === 'httpRequest' && config['requestId'] === undefined && onCreateRequest) {
+      const newRequestId = onCreateRequest(scenario.id)
+      if (newRequestId) nodeConfig = { ...config, requestId: newRequestId }
+    }
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
     const { inputs, outputs } = defaultPortsForKind(kind)
-    const node: ScenarioNode = { id, kind, config, inputs, outputs, position: flow }
+    const node: ScenarioNode = { id, kind, config: nodeConfig, inputs, outputs, position: flow }
     nodeStore.current.set(id, node)
     setNodes((curr) => {
       const next = [...curr, toFlowNode(node, handlers.current)]
@@ -412,7 +424,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
       return next
     })
     setPalette(null)
-  }, [setNodes, setEdges, persist])
+  }, [setNodes, setEdges, persist, onCreateRequest, scenario.id])
 
   // --- Add-node gesture #1: drag a link off a port, release on empty canvas →
   // a palette filtered to kinds with a flow-compatible port, then a pre-wired

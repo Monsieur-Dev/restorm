@@ -187,16 +187,23 @@ function authenticationRequestToListViewItem(
 /**
  * Convert a Scenario to a ListViewItemData. Renders the circuit-board
  * scenario badge so dataflow graphs are visually distinct from requests.
+ * A scenario doubles as a folder-like container: its `items` (requests +
+ * sub-folders authored inside it) render as expandable children.
  */
 function scenarioToListViewItem(
   scenario: Scenario,
   options: FolderToListViewOptions
 ): ListViewItemData {
   const badge = options.renderProtocolBadge?.('scenario', 'SCENARIO')
+  const isExpanded = options.expandedIds.has(scenario.id)
+  const children = (scenario.items ?? []).map((item) => folderItemToListViewItem(item, options))
   return {
     id: scenario.id,
     title: scenario.name,
-    icon: badge
+    isExpandable: children.length > 0,
+    isExpanded,
+    icon: badge,
+    children
   }
 }
 

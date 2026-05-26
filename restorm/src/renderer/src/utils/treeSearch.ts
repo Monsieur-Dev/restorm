@@ -7,7 +7,8 @@ import type {
   FolderItem,
   Environment,
   EnvironmentFolder,
-  Request
+  Request,
+  Scenario
 } from '../../../shared/types/collections'
 import { isEnvironmentFolder, isAnyFolder, isRequest, isScenario } from '../../../shared/types/collections'
 import type { Icon } from 'electron-core-ui/types'
@@ -17,6 +18,31 @@ import type { BreadcrumbItem } from '../../../shared/types/editor'
 const FOLDER_ICON: Icon = { type: 'codicon', value: 'folder' }
 /** Environment folder icon for breadcrumbs */
 const ENV_FOLDER_ICON: Icon = { type: 'codicon', value: 'folder-library' }
+/** Scenario icon for breadcrumbs (scenarios double as containers). */
+const SCENARIO_ICON: Icon = { type: 'codicon', value: 'circuit-board' }
+
+/**
+ * A descendable tree node: anything that carries child `items`. Scenarios now
+ * double as folder-like containers, so the tree walkers recurse through them
+ * (a request/sub-folder authored inside a scenario must be findable +
+ * navigable) — even though a scenario is never itself returned as a folder.
+ */
+type TreeContainer = Folder | EnvironmentFolder | Scenario
+
+/** Children of any container (a scenario's `items` is optional → treat as []). */
+function childItemsOf(container: TreeContainer): FolderItem[] {
+  return (container as { items?: FolderItem[] }).items ?? []
+}
+
+/** Whether a tree item can be descended into (folder, env-folder, or scenario). */
+function isContainer(item: FolderItem): item is TreeContainer {
+  return isAnyFolder(item) || isScenario(item)
+}
+
+/** Breadcrumb icon for a container node. */
+function getContainerIcon(item: TreeContainer): Icon {
+  return isScenario(item) ? SCENARIO_ICON : getFolderIcon(item)
+}
 
 /** Get the appropriate icon for a folder (custom icon if set, otherwise default) */
 export function getFolderIcon(item: Folder | EnvironmentFolder): Icon {
@@ -24,11 +50,15 @@ export function getFolderIcon(item: Folder | EnvironmentFolder): Icon {
   return isEnvironmentFolder(item as FolderItem) ? ENV_FOLDER_ICON : FOLDER_ICON
 }
 
-/** Find a folder by ID in a single folder tree (returns Folder or EnvironmentFolder) */
-function findFolderByIdInTree(folder: Folder | EnvironmentFolder, id: string): Folder | EnvironmentFolder | undefined {
-  if (folder.id === id) return folder
-  for (const item of folder.items) {
-    if (isAnyFolder(item)) {
+/** Find a folder by ID in a single tree (returns Folder or EnvironmentFolder;
+ * descends scenarios but never returns one as a folder). */
+function findFolderByIdInTree(container: TreeContainer, id: string): Folder | EnvironmentFolder | undefined {
+  // Return any folder/env-folder match (a scenario is a container we descend
+  // but never a folder); `!isScenario` rather than `isAnyFolder` so a folder
+  // missing its `configuration` field is still returned, matching prior behavior.
+  if (!isScenario(container) && container.id === id) return container
+  for (const item of childItemsOf(container)) {
+    if (isContainer(item)) {
       const found = findFolderByIdInTree(item, id)
       if (found) return found
     }
@@ -47,15 +77,15 @@ export function findFolderById(rootItems: FolderItem[], id: string): Folder | En
   return undefined
 }
 
-/** Find an environment folder by ID in a single folder tree */
-function findEnvironmentFolderByIdInTree(folder: Folder | EnvironmentFolder, id: string): EnvironmentFolder | undefined {
-  if (isEnvironmentFolder(folder as FolderItem) && folder.id === id) return folder as EnvironmentFolder
-  for (const item of folder.items) {
+/** Find an environment folder by ID in a single tree (descends scenarios). */
+function findEnvironmentFolderByIdInTree(container: TreeContainer, id: string): EnvironmentFolder | undefined {
+  if (isEnvironmentFolder(container as FolderItem) && container.id === id) return container as EnvironmentFolder
+  for (const item of childItemsOf(container)) {
     if (isEnvironmentFolder(item)) {
       if (item.id === id) return item
       const found = findEnvironmentFolderByIdInTree(item, id)
       if (found) return found
-    } else if (isAnyFolder(item)) {
+    } else if (isContainer(item)) {
       const found = findEnvironmentFolderByIdInTree(item, id)
       if (found) return found
     }
@@ -74,11 +104,11 @@ export function findEnvironmentFolderById(rootItems: FolderItem[], id: string): 
   return undefined
 }
 
-/** Find any request by ID in a single folder tree */
-function findRequestByIdInTree(folder: Folder | EnvironmentFolder, id: string): Request | undefined {
-  for (const item of folder.items) {
+/** Find any request by ID in a single tree (descends scenarios). */
+function findRequestByIdInTree(container: TreeContainer, id: string): Request | undefined {
+  for (const item of childItemsOf(container)) {
     if (isRequest(item) && item.id === id) return item
-    if (isAnyFolder(item)) {
+    if (isContainer(item)) {
       const found = findRequestByIdInTree(item, id)
       if (found) return found
     }
@@ -103,12 +133,12 @@ export function findRequestById(rootItems: FolderItem[], id: string): Request | 
   return undefined
 }
 
-/** Find any item (folder or request) by ID in a single folder tree */
-function findItemByIdInTree(folder: Folder | EnvironmentFolder, id: string): FolderItem | null {
-  if (folder.id === id) return folder
-  for (const item of folder.items) {
+/** Find any item (folder, request, or scenario) by ID in a single tree. */
+function findItemByIdInTree(container: TreeContainer, id: string): FolderItem | null {
+  if (container.id === id) return container
+  for (const item of childItemsOf(container)) {
     if (item.id === id) return item
-    if (isAnyFolder(item)) {
+    if (isContainer(item)) {
       const found = findItemByIdInTree(item, id)
       if (found) return found
     }
@@ -134,28 +164,29 @@ export function findItemById(rootItems: FolderItem[], id: string): FolderItem | 
 
 /** Find an item (folder or request) by ID and build breadcrumbs including the item itself - in a single tree */
 function findItemWithBreadcrumbsInTree(
-  folder: Folder | EnvironmentFolder,
+  container: TreeContainer,
   id: string,
   path: BreadcrumbItem[] = []
 ): { item: FolderItem | null; breadcrumbs: BreadcrumbItem[] } {
-  // Check if the root folder itself matches the ID
-  if (folder.id === id) {
-    return { item: folder, breadcrumbs: [...path, { id: folder.id, label: folder.name, icon: getFolderIcon(folder) }] }
+  // Check if the container itself matches the ID
+  if (container.id === id) {
+    return { item: container, breadcrumbs: [...path, { id: container.id, label: container.name, icon: getContainerIcon(container) }] }
   }
 
-  const currentPath = [...path, { id: folder.id, label: folder.name, icon: getFolderIcon(folder) }]
+  const currentPath = [...path, { id: container.id, label: container.name, icon: getContainerIcon(container) }]
 
-  for (const item of folder.items) {
-    if (isAnyFolder(item)) {
+  for (const item of childItemsOf(container)) {
+    if (isContainer(item)) {
+      // A container (folder / env-folder / scenario) — it can be the target and
+      // also be descended into (a scenario holds children).
       if (item.id === id) {
-        // Include the folder itself as the last breadcrumb (with appropriate icon)
-        return { item, breadcrumbs: [...currentPath, { id: item.id, label: item.name, icon: getFolderIcon(item) }] }
+        return { item, breadcrumbs: [...currentPath, { id: item.id, label: item.name, icon: getContainerIcon(item) }] }
       }
       const found = findItemWithBreadcrumbsInTree(item, id, currentPath)
       if (found.item) return found
-    } else if (isRequest(item) || isScenario(item)) {
+    } else if (isRequest(item)) {
       if (item.id === id) {
-        // Leaf item (request or scenario) — last breadcrumb, no icon.
+        // Leaf request — last breadcrumb, no icon.
         return { item, breadcrumbs: [...currentPath, { id: item.id, label: item.name, icon: null }] }
       }
     }
@@ -223,22 +254,23 @@ export function getNearestEnvironmentsForBreadcrumbs(
 
 /** Find an item and its parent folder in a single tree */
 function findItemWithParentInTree(
-  folder: Folder | EnvironmentFolder,
+  container: TreeContainer,
   targetId: string,
-  parent: Folder | EnvironmentFolder | null = null
-): { item: FolderItem | null; parent: Folder | EnvironmentFolder | null; index: number } {
-  // Check if the folder itself is the target (but it can't be moved if it's the root)
-  if (folder.id === targetId) {
-    return { item: folder, parent, index: -1 }
+  parent: TreeContainer | null = null
+): { item: FolderItem | null; parent: TreeContainer | null; index: number } {
+  // Check if the container itself is the target (but it can't be moved if it's the root)
+  if (container.id === targetId) {
+    return { item: container, parent, index: -1 }
   }
 
-  for (let i = 0; i < folder.items.length; i++) {
-    const item = folder.items[i]
+  const items = childItemsOf(container)
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i]
     if (item === undefined) continue
     if (item.id === targetId) {
-      return { item, parent: folder, index: i }
+      return { item, parent: container, index: i }
     }
-    if (isAnyFolder(item)) {
+    if (isContainer(item)) {
       const found = findItemWithParentInTree(item, targetId, item)
       if (found.item) return found
     }
@@ -251,7 +283,7 @@ function findItemWithParentInTree(
 export function findItemWithParent(
   rootItems: FolderItem[],
   targetId: string
-): { item: FolderItem | null; parent: Folder | EnvironmentFolder | null; index: number; rootFolder: EnvironmentFolder | Folder | null } {
+): { item: FolderItem | null; parent: TreeContainer | null; index: number; rootFolder: TreeContainer | null } {
   // Check if any root item is directly the target (for root-level Requests)
   const rootIndex = rootItems.findIndex(root => root.id === targetId)
   if (rootIndex !== -1) {
@@ -260,8 +292,10 @@ export function findItemWithParent(
       return { item, parent: null, index: rootIndex, rootFolder: null }
     }
   }
-  
-  // Otherwise search in folder trees
+
+  // Otherwise search in trees (the inner walk descends scenarios as containers
+  // too). Keep the loose `'items' in root` gate (not `isContainer`) so a root
+  // folder missing a `configuration` field is still descended.
   for (const root of rootItems) {
     if (!('items' in root)) continue
     const found = findItemWithParentInTree(root, targetId)
