@@ -24,8 +24,9 @@ export function useAllEnvironments(): FlatEnvRow[] {
     return () => { sub.unsubscribe() }
   }, [])
 
-  // Re-read the live folder proxies on every render (folders mutate in place);
-  // `version` is bumped by FOLDER_UPDATED to force it after an edit.
+  // Computed inline (not memoised) so it re-reads the live folder proxies on
+  // every render — folders mutate in place, so a `FOLDER_UPDATED` event bumps
+  // `version` to force the re-read. Mirrors `useAllEnvValueTypes`.
   void version
   return collectAllEnvironments(collections)
 }

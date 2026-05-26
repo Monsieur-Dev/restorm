@@ -14,8 +14,8 @@ import {
   type CategoryMeta,
   logger
 } from 'electron-core-ui/renderer'
-import type { Folder, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, AuthenticationRequest, Request } from '../../../shared/types/collections'
-import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isRequest } from '../../../shared/types/collections'
+import type { Folder, Scenario, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, AuthenticationRequest, Request } from '../../../shared/types/collections'
+import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isRequest, isScenario } from '../../../shared/types/collections'
 
 /** Search categories configuration for Restorm */
 const RESTORM_SEARCH_CATEGORIES: Record<string, CategoryMeta> = {
@@ -627,11 +627,39 @@ function collectFolderDocuments(
   for (const item of folder.items) {
     if (isFolder(item)) {
       documents.push(...collectFolderDocuments(item, currentPath, currentNames))
+    } else if (isScenario(item)) {
+      documents.push(...collectScenarioDocuments(item, currentPath, currentNames))
     } else if (isRequest(item)) {
       documents.push(requestToSearchDocument(item, folder.id, currentPath, currentNames))
     }
   }
 
+  return documents
+}
+
+/**
+ * A scenario doubles as a folder-like container: it isn't a searchable document
+ * itself, but the requests (and sub-folders) authored inside it are indexed with
+ * the scenario in their path — so scenario-child requests stay searchable after
+ * the project is reopened (the load-time walk runs through here).
+ */
+function collectScenarioDocuments(
+  scenario: Scenario,
+  parentPath: string[] = [],
+  parentNames: string[] = []
+): ReturnType<typeof collectFolderDocuments> {
+  const currentPath = [...parentPath, scenario.id]
+  const currentNames = [...parentNames, scenario.name]
+  const documents: ReturnType<typeof collectFolderDocuments> = []
+  for (const item of scenario.items ?? []) {
+    if (isFolder(item)) {
+      documents.push(...collectFolderDocuments(item, currentPath, currentNames))
+    } else if (isScenario(item)) {
+      documents.push(...collectScenarioDocuments(item, currentPath, currentNames))
+    } else if (isRequest(item)) {
+      documents.push(requestToSearchDocument(item, scenario.id, currentPath, currentNames))
+    }
+  }
   return documents
 }
 
@@ -669,6 +697,21 @@ class SearchIndexService {
       logger.debug('[SearchIndexService] Indexed folder tree', { documentCount: documents.length })
     } catch (error) {
       logger.error('[SearchIndexService] Error indexing folder tree', { error: String(error), folderId: folder.id })
+    }
+  }
+
+  /**
+   * Index a scenario that lives at the root of the collection — indexes the
+   * requests/sub-folders authored inside it (a scenario doubles as a container).
+   * Nested scenarios go through {@link collectFolderDocuments} via their folder.
+   */
+  async indexScenarioTree(scenario: Scenario): Promise<void> {
+    try {
+      const documents = collectScenarioDocuments(scenario)
+      const plainDocuments = JSON.parse(JSON.stringify(documents)) as typeof documents
+      await searchService.indexDocuments(plainDocuments)
+    } catch (error) {
+      logger.error('[SearchIndexService] Error indexing scenario tree', { error: String(error), scenarioId: scenario.id })
     }
   }
 

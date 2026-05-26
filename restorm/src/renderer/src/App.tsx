@@ -1788,8 +1788,9 @@ const App: React.FC = () => {
           await searchIndexService.clearIndex()
           await searchIndexService.initialize()
           for (const rootItem of reactiveItems) {
-            if (isScenario(rootItem)) continue
-            if ('items' in rootItem) {
+            if (isScenario(rootItem)) {
+              await searchIndexService.indexScenarioTree(rootItem)
+            } else if ('items' in rootItem) {
               await searchIndexService.indexFolderTree(rootItem)
             } else {
               await searchIndexService.indexRootRequest(rootItem)
