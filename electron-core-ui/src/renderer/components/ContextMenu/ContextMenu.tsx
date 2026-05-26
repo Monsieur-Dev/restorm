@@ -28,6 +28,12 @@ export interface ContextMenuItem {
   onClick?: () => void
   /** Optional submenu items */
   items?: ContextMenuItem[]
+  /**
+   * Optional test id applied to this item's row (and, via `MenuItem` /
+   * `MenuItemSeparator`, to its derived sub-elements — `${testId}-label`,
+   * `${testId}-submenu`, `${testId}-separator`, …).
+   */
+  'data-testid'?: string
 }
 
 export interface ContextMenuProps {
@@ -67,7 +73,13 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   const renderItems = (menuItems: ContextMenuItem[]): React.ReactNode =>
     menuItems.map((item) => {
       if (item.isSeparator) {
-        return <MenuItemSeparator key={item.id} id={item.id} />
+        return (
+          <MenuItemSeparator
+            key={item.id}
+            id={item.id}
+            {...(item['data-testid'] !== undefined && { 'data-testid': item['data-testid'] })}
+          />
+        )
       }
 
       const hasSubmenu = Array.isArray(item.items) && item.items.length > 0
@@ -77,6 +89,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           key={item.id}
           id={item.id}
           title={item.label}
+          {...(item['data-testid'] !== undefined && { 'data-testid': item['data-testid'] })}
           {...(item.shortcut ? { shortcut: item.shortcut } : {})}
           disabled={!!item.disabled}
           checked={!!item.checked}

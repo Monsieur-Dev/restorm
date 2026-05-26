@@ -76,6 +76,7 @@ interface NodeHandlers {
   scenarioId: string
   onToggleCollapse: (id: string) => void
   onHeaderContextMenu: (id: string, x: number, y: number) => void
+  onSetConfig: (id: string, config: Record<string, unknown>) => void
 }
 
 function toFlowNode(n: ScenarioNode, handlers: NodeHandlers): Node<NodeData> {
@@ -91,6 +92,7 @@ function toFlowNode(n: ScenarioNode, handlers: NodeHandlers): Node<NodeData> {
       config: n.config,
       onToggleCollapse: handlers.onToggleCollapse,
       onHeaderContextMenu: handlers.onHeaderContextMenu,
+      onSetConfig: handlers.onSetConfig,
       ...(n.note !== undefined ? { note: n.note } : {}),
       ...(n.color !== undefined ? { color: n.color } : {}),
       ...(n.collapsed !== undefined ? { collapsed: n.collapsed } : {})
@@ -240,8 +242,26 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     setNodeMenu({ nodeId, x, y })
   }, [setNodes])
 
-  const handlers = useRef<NodeHandlers>({ scenarioId: scenario.id, onToggleCollapse, onHeaderContextMenu })
-  useEffect(() => { handlers.current = { scenarioId: scenario.id, onToggleCollapse, onHeaderContextMenu } }, [scenario.id, onToggleCollapse, onHeaderContextMenu])
+  // Merge a patch into a node's per-kind config bag; update the live node +
+  // the authoritative store + persist. Modeled on `setNodeColor`.
+  const setNodeConfig = useCallback((nodeId: string, config: Record<string, unknown>) => {
+    setNodes((curr) => {
+      const next = curr.map((fn) => {
+        if (fn.id !== nodeId) return fn
+        const merged = { ...(fn.data.config ?? {}), ...config }
+        return { ...fn, data: { ...fn.data, config: merged } }
+      })
+      const prior = nodeStore.current.get(nodeId)
+      if (prior) {
+        nodeStore.current.set(nodeId, { ...prior, config: { ...prior.config, ...config } })
+      }
+      setEdges((e) => { persist(next, e); return e })
+      return next
+    })
+  }, [setNodes, setEdges, persist])
+
+  const handlers = useRef<NodeHandlers>({ scenarioId: scenario.id, onToggleCollapse, onHeaderContextMenu, onSetConfig: setNodeConfig })
+  useEffect(() => { handlers.current = { scenarioId: scenario.id, onToggleCollapse, onHeaderContextMenu, onSetConfig: setNodeConfig } }, [scenario.id, onToggleCollapse, onHeaderContextMenu, setNodeConfig])
 
   // Seed from the scenario only when the open scenario changes (tab switch).
   // The guard makes our own persist writes (which replace `scenario.nodes`)
@@ -455,7 +475,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     // (anything else) are ignored. The bound id + a fallback label go in config.
     let kind: ScenarioNodeKind
     let config: Record<string, unknown>
-    if (isRequest(item)) { kind = 'request'; config = { requestId: item.id, label: item.name } }
+    if (isRequest(item)) { kind = 'httpRequest'; config = { requestId: item.id, label: item.name } }
     else if (isScenario(item)) { kind = 'runScenario'; config = { scenarioId: item.id, label: item.name } }
     else return
     event.preventDefault()

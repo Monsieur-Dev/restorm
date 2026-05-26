@@ -29,7 +29,7 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   input: InputNodeBox,
   if: IfNodeBox,
   switch: SwitchNodeBox,
-  request: RequestNodeBox,
+  httpRequest: RequestNodeBox,
   runScenario: RunScenarioNodeBox,
   forEach: ForEachNodeBox,
   aggregate: AggregateNodeBox,
@@ -59,7 +59,23 @@ export function nodeBoxForKind(kind: ScenarioNodeKind): NodeBoxComponent {
  * box component by `data.kind`. Registered as `nodeTypes.scenarioNode`.
  * (Named `…View` to avoid clashing with the `ScenarioNode` data-model type.)
  */
+/**
+ * Inert placeholder for a persisted node whose kind this build no longer knows
+ * — a renamed or removed kind, or a scenario authored by a newer version. The
+ * `Record` above is exhaustive for current kinds, but on-disk data can outlive
+ * a rename, so render a harmless box instead of crashing the whole editor.
+ */
+const UnknownNodeBox: NodeBoxComponent = (props) =>
+  createElement(
+    'div',
+    { className: 'scn-node scn-node-unknown', 'data-testid': 'scn-node-unknown' },
+    createElement('div', { className: 'scn-node-header' }, `Unknown node: ${props.data.kind}`)
+  )
+
 export const ScenarioNodeView: NodeBoxComponent = (props) => {
-  const Component = nodeBoxForKind(props.data.kind)
-  return createElement(Component, props)
+  // The map is exhaustive over known kinds at the type level, but on-disk data
+  // can carry a kind this build no longer knows — so treat the lookup as
+  // possibly-undefined and fall back to the inert placeholder.
+  const Component = SCENARIO_NODE_COMPONENTS[props.data.kind] as NodeBoxComponent | undefined
+  return createElement(Component ?? UnknownNodeBox, props)
 }

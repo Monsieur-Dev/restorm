@@ -10,14 +10,15 @@ describe('defaultPortsForKind', () => {
     expect(outputs.map((p) => p.role)).toEqual(['then', 'else'])
   })
 
-  it('gives Input an output but no input (a source kind)', () => {
+  it('gives Input a value output and an optional signal launch trigger', () => {
     const { inputs, outputs } = defaultPortsForKind('input')
-    expect(inputs).toHaveLength(0)
     expect(outputs).toHaveLength(1)
+    expect(outputs[0]).toMatchObject({ id: 'value', flow: 'value' })
+    expect(inputs).toContainEqual(expect.objectContaining({ id: 'in', flow: 'signal' }))
   })
 
   it('gives Request a typed response output', () => {
-    const { outputs } = defaultPortsForKind('request')
+    const { outputs } = defaultPortsForKind('httpRequest')
     expect(outputs[0]).toMatchObject({ id: 'response', role: 'response', dataType: 'response' })
   })
 
@@ -53,8 +54,8 @@ describe('isValidScenarioConnection (link flow rules)', () => {
       targetHandle: tgtHandle
     })
 
-  it('rejects a value output into a header trigger (now.value → request header)', () => {
-    expect(link('now', 'value', 'request', 'in')).toBe(false)
+  it('rejects a value output into a header trigger (now.value → httpRequest header)', () => {
+    expect(link('now', 'value', 'httpRequest', 'in')).toBe(false)
   })
   it('rejects a signal output into a data input (if.then → switch.on)', () => {
     expect(link('if', 'then', 'switch', 'in')).toBe(false)
@@ -62,11 +63,11 @@ describe('isValidScenarioConnection (link flow rules)', () => {
   it('rejects a signal branch into a value input (if.then → arithmetic.a)', () => {
     expect(link('if', 'then', 'arithmetic', 'a')).toBe(false)
   })
-  it('allows an AB output into a header trigger (request.response → request, chaining)', () => {
-    expect(link('request', 'response', 'request', 'in')).toBe(true)
+  it('allows an AB output into a header trigger (httpRequest.response → httpRequest, chaining)', () => {
+    expect(link('httpRequest', 'response', 'httpRequest', 'in')).toBe(true)
   })
   it('allows the error port into a header trigger', () => {
-    expect(link('request', 'error', 'request', 'in')).toBe(true)
+    expect(link('httpRequest', 'error', 'httpRequest', 'in')).toBe(true)
   })
   it('derives signal from role for a flow-less (legacy) branch output', () => {
     expect(isValidScenarioConnection({
@@ -88,7 +89,7 @@ describe('isValidScenarioConnection (link flow rules)', () => {
       sourceKind: 'now',
       sourceOutputs: [{ id: 'value', name: 'now', dataType: 'string' }],
       sourceHandle: 'value',
-      targetKind: 'request',
+      targetKind: 'httpRequest',
       targetInputs: [{ id: 'in', name: '', dataType: 'any' }],
       targetHandle: 'in'
     })).toBe(false)
@@ -98,7 +99,7 @@ describe('isValidScenarioConnection (link flow rules)', () => {
       sourceKind: 'if',
       sourceOutputs: [{ id: 'then', name: 'then', dataType: 'any', role: 'then' }],
       sourceHandle: 'then',
-      targetKind: 'request',
+      targetKind: 'httpRequest',
       targetInputs: [{ id: 'in', name: '', dataType: 'any' }],
       targetHandle: 'in'
     })).toBe(true)

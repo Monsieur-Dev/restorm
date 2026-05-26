@@ -1,3 +1,11 @@
+:root {
+  /* Scenario port/edge flow colours — yellow = trigger (signal), purple = data
+   * (value). Centralised so the port rings, and the flow-coloured edges /
+   * legend that reuse them, all read the same source and can be retuned here. */
+  --scn-flow-signal: #facc15;
+  --scn-flow-value: #a855f7;
+}
+
 .scn-node {
   min-width: 160px;
   border: 1px solid var(--widget-border, #454545);
@@ -202,6 +210,26 @@
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
 }
 
+/* Flow ring: a coloured halo behind the dot encoding the port's flow class —
+ * yellow = trigger (signal), purple = data (value), half-yellow/half-purple for
+ * `both` (carries data AND triggers). The dot's centre fill (role / required)
+ * is unchanged; this ring is the flow. */
+.scn-handle.react-flow__handle::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  /* Hollow ring: mask out the centre so the dot's role/required fill shows
+   * through, leaving only the flow-coloured halo around it. */
+  -webkit-mask: radial-gradient(circle, transparent 0 60%, #000 62%);
+  mask: radial-gradient(circle, transparent 0 60%, #000 62%);
+}
+.scn-handle--flow-signal.react-flow__handle::after { background: var(--scn-flow-signal); }
+.scn-handle--flow-value.react-flow__handle::after { background: var(--scn-flow-value); }
+.scn-handle--flow-both.react-flow__handle::after {
+  background: conic-gradient(var(--scn-flow-signal) 0 50%, var(--scn-flow-value) 50% 100%);
+}
+
 /* Inline handles flow with their row instead of being absolutely pinned to
  * the node side; React Flow still derives connection geometry from the DOM
  * rect, so wiring works. Pull them onto the node's outer edge. */
@@ -263,6 +291,15 @@
   display: flex;
   flex-direction: column;
   gap: 7px;
+}
+/* Caption above an inline control (e.g. the input node's default-value
+ * ControlGroup). Mirrors the section-title's muted weight without the
+ * uppercasing, since it carries mixed-case text. */
+.scn-field-caption {
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  opacity: 0.6;
+  margin-bottom: 3px;
 }
 /* When collapsed, the section's anchors gather on the title row. They keep
  * the per-row edge alignment (first anchor centred on the node border), then

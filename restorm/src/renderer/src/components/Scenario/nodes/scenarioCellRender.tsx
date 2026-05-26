@@ -1,8 +1,22 @@
 import { type ReactNode } from 'react'
-import type { ScenarioPortRole } from '../../../../../shared/types/collections'
+import type { ScenarioNodeKind, ScenarioPort, ScenarioPortRole } from '../../../../../shared/types/collections'
 import { ROLE_COLOR } from '../scenarioGraphMapping'
+import { inputPortFlow, outputPortFlow } from '../scenarioNodePorts'
 import type { ScenarioNodeCell } from './ScenarioNodeBoxBase'
 import { ScenarioCellLabel } from './ScenarioCellLabel'
+
+/**
+ * Ring class for a port handle, by its flow class: a yellow ring for a
+ * trigger (signal) port, purple for a data (value) port, and a half-yellow /
+ * half-purple ring for a `both` port (carries data AND triggers). The handle's
+ * centre fill (role colour / required-red) is unchanged — the ring is the flow.
+ */
+export function inputFlowRingClass(handleId: string, inputs: ScenarioPort[], kind: ScenarioNodeKind): string {
+  return `scn-handle--flow-${inputPortFlow(inputs, handleId, kind)}`
+}
+export function outputFlowRingClass(handleId: string, outputs: ScenarioPort[], kind: ScenarioNodeKind): string {
+  return `scn-handle--flow-${outputPortFlow(outputs, handleId, kind)}`
+}
 
 const NEUTRAL_ANCHOR = '#9ca3af'
 /** Red flag for a required input still missing its (mandatory) incoming link. */

@@ -357,7 +357,7 @@ if (typeof window !== 'undefined') {
           // Index folders for search (will be done again by App, but do it here too for safety)
           for (const folder of reactiveFolders) {
             if (typeof folder === 'object' && folder !== null && 'items' in folder) {
-              await searchModule.searchIndexService.indexFolderTree(folder as import('../../shared/types/collections').Folder)
+              await searchModule.searchIndexService.indexFolderTree(folder as unknown as FolderLike)
             }
           }
           

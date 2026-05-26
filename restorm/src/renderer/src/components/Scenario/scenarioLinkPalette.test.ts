@@ -13,13 +13,13 @@ describe('linkPaletteEntries — drag from an output', () => {
   // Example 1: a request's `response` (a `both` output) → wait, which has a
   // header input → wire to the header.
   it('a response (both) output wires to the header input when the kind has one (wait → in)', () => {
-    const entries = linkPaletteEntries(srcOf('request'), 'response', true)
+    const entries = linkPaletteEntries(srcOf('httpRequest'), 'response', true)
     expect(entries.find((e) => e.kind === 'wait')?.wirePort).toBe('in')
   })
 
   // Example 2: same response → `if`, which has no header → first body input.
   it('a response (both) output wires to the first body input when the kind has no header (if → left)', () => {
-    const entries = linkPaletteEntries(srcOf('request'), 'response', true)
+    const entries = linkPaletteEntries(srcOf('httpRequest'), 'response', true)
     expect(entries.find((e) => e.kind === 'if')?.wirePort).toBe('left')
   })
 
@@ -31,14 +31,18 @@ describe('linkPaletteEntries — drag from an output', () => {
     expect(entries.every((e) => e.wirePort === 'in')).toBe(true)
     const kinds = entries.map((e) => e.kind)
     expect(kinds).toContain('wait')
-    expect(kinds).toContain('request')
+    expect(kinds).toContain('httpRequest')
     expect(kinds).not.toContain('if') // body-only inputs, no header
     expect(kinds).not.toContain('arithmetic')
   })
 
   it('omits kinds that have no input at all', () => {
-    const kinds = linkPaletteEntries(srcOf('request'), 'response', true).map((e) => e.kind)
-    expect(kinds).not.toContain('input')
+    const kinds = linkPaletteEntries(srcOf('httpRequest'), 'response', true).map((e) => e.kind)
     expect(kinds).not.toContain('getVariable')
+  })
+
+  it('lists input (it owns a header launch trigger), wired to it', () => {
+    const entries = linkPaletteEntries(srcOf('httpRequest'), 'response', true)
+    expect(entries.find((e) => e.kind === 'input')?.wirePort).toBe('in')
   })
 })

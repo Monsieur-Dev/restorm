@@ -64,9 +64,10 @@ export const RequestNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, d
     ? { id: 'body', name: 'Body', rows: [{ id: 'body', label: 'body', port: { id: 'body', type: 'target' } }] }
     : null
   // Nameless section with the env-selector button — only when the request
-  // sits under an environment folder (no left anchor, like the If operator).
+  // sits under an environment folder. Carries an optional `env` data input so
+  // the environment can be driven by an upstream link instead of the picker.
   const envSection: ScenarioNodeSection | null = envInfo
-    ? { id: 'env', rows: [{ id: 'env', content: <EnvButtonCell environments={envInfo.environments} defaultEnvId={envInfo.selectedEnvId} /> }] }
+    ? { id: 'env', rows: [{ id: 'env', content: <EnvButtonCell environments={envInfo.environments} defaultEnvId={envInfo.selectedEnvId} />, port: { id: 'env', type: 'target' } }] }
     : null
   const left: ScenarioNodeSection[] = [
     envSection,

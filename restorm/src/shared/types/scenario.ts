@@ -75,7 +75,7 @@ export type ScenarioNodeKind =
   | 'if'
   | 'switch'
   // Requests & composition
-  | 'request'
+  | 'httpRequest'
   | 'runScenario'
   // Iteration & collections
   | 'forEach'

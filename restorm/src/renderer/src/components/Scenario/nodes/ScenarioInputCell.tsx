@@ -30,7 +30,7 @@ export const ScenarioInputCell: React.FC<ScenarioInputCellProps> = ({ cell, node
   if (portId && incoming && sourceData) {
     const data = sourceData.data as { kind?: ScenarioNodeKind; outputs?: ScenarioPort[] }
     const inFlow = inputPortFlow(nodeInputs, portId, nodeKind)
-    const outFlow = outputPortFlow(data.outputs ?? [], incoming.sourceHandle ?? 'out', data.kind ?? 'request')
+    const outFlow = outputPortFlow(data.outputs ?? [], incoming.sourceHandle ?? 'out', data.kind ?? 'httpRequest')
     if (isDataLink(inFlow, outFlow)) {
       return (
         <ScenarioPathSelector

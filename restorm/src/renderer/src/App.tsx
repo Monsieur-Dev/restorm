@@ -2377,7 +2377,7 @@ const App: React.FC = () => {
               // return primitive values), so cast through `unknown`.
               const authReq = (apiUpdate?.authenticationRequestId
                 ? resolveAuthRequestCb(apiUpdate.authenticationRequestId)
-                : null) as RefreshContext['authenticationRequest'] | null
+                : null)
               // Pre-compute the natural keys of every request already
               // in the env folder so the modal can lock the matching
               // leaves in the fetched preview tree. Walks the folder's
@@ -2385,7 +2385,7 @@ const App: React.FC = () => {
               const existingLeafKeys = folder ? allLeafKeys(folder.items) : new Set<string>()
               const refreshContext: RefreshContext = {
                 sourceUrl,
-                ...(authReq ? { authenticationRequest: authReq } : {}),
+                ...(authReq ? { authenticationRequest: authReq as unknown as NonNullable<RefreshContext['authenticationRequest']> } : {}),
                 ...(apiUpdate?.sourceHeaders ? { sourceHeaders: apiUpdate.sourceHeaders } : {}),
                 targetFolderId: targetId,
                 ...(existingLeafKeys.size > 0 ? { existingLeafKeys } : {}),

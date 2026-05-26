@@ -20,7 +20,7 @@ import { defaultPortsForKind, isValidScenarioConnection, outputPortFlow, inputPo
 import { broadcastTreeReplace } from './import'
 
 const SCENARIO_KINDS = [
-  'input', 'if', 'switch', 'request', 'runScenario', 'forEach', 'aggregate', 'map',
+  'input', 'if', 'switch', 'httpRequest', 'runScenario', 'forEach', 'aggregate', 'map',
   'filter', 'wait', 'waitUntil', 'now', 'arithmetic', 'comparator', 'boolean',
   'template', 'setVariable', 'getVariable', 'transform', 'log', 'assert'
 ] as const
@@ -144,7 +144,7 @@ export function registerScenarioTools(mcp: McpService): void {
       description:
         'Create a node (box) in a scenario. `kind` is one of: ' + SCENARIO_KINDS.join(', ') + '. ' +
         'Default input/output ports for the kind are stamped automatically. `config` is the per-kind ' +
-        'bag — e.g. a `request` node binds via `{ requestId, label }`, `runScenario` via `{ scenarioId, label }`. ' +
+        'bag — e.g. an `httpRequest` node binds via `{ requestId, label }`, `runScenario` via `{ scenarioId, label }`. ' +
         'Returns `{ nodeId, kind, position, inputs, outputs }`.',
       inputSchema: {
         scenarioId: z.string().min(1).describe('Scenario to add the node to.'),

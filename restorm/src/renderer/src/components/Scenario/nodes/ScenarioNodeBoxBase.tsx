@@ -5,7 +5,7 @@ import type { ScenarioNodeKind, ScenarioPort, ScenarioPortRole } from '../../../
 import { scenarioNodeMeta } from '../scenarioNodeCatalogue'
 import { ROLE_COLOR, handleTop } from '../scenarioGraphMapping'
 import { ScenarioNodeSection } from './ScenarioNodeSection'
-import { anchorColor, cellBody, portAnchorColor } from './scenarioCellRender'
+import { anchorColor, cellBody, portAnchorColor, inputFlowRingClass, outputFlowRingClass } from './scenarioCellRender'
 import '../ScenarioNodeBox.css'
 
 /** React Flow node data shared by every scenario node box. */
@@ -26,6 +26,8 @@ export interface ScenarioNodeBoxData extends Record<string, unknown> {
   onToggleCollapse?: (id: string) => void
   /** Right-click on the header opens the node context menu at the cursor. */
   onHeaderContextMenu?: (id: string, x: number, y: number) => void
+  /** Persist a patch into the node's per-kind config bag (merged + saved). */
+  onSetConfig?: (id: string, config: Record<string, unknown>) => void
 }
 
 export type ScenarioNodeBoxType = Node<ScenarioNodeBoxData, 'scenarioNode'>
@@ -168,7 +170,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
             id="in"
             type="target"
             position={Position.Left}
-            className="scn-handle scn-handle-launch"
+            className={`scn-handle scn-handle-launch ${inputFlowRingClass('in', data.inputs, data.kind)}`}
             style={{ background: anchorColor() }}
             title="in"
           />
@@ -218,7 +220,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
               <div className="scn-row scn-row-right" key={cell.id}>
                 {cellBody(cell)}
                 {cell.port && (
-                  <Handle id={cell.port.id} type={cell.port.type} position={Position.Right} className="scn-handle scn-handle-inline" style={{ background: anchorColor(cell.port.role) }} title={cell.label ?? cell.port.id} />
+                  <Handle id={cell.port.id} type={cell.port.type} position={Position.Right} className={`scn-handle scn-handle-inline ${outputFlowRingClass(cell.port.id, data.outputs, data.kind)}`} style={{ background: anchorColor(cell.port.role) }} title={cell.label ?? cell.port.id} />
                 )}
               </div>
             ))}
@@ -232,7 +234,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
           id={p.id}
           type={p.type}
           position={p.type === 'target' ? Position.Left : Position.Right}
-          className="scn-handle"
+          className={`scn-handle ${p.type === 'target' ? inputFlowRingClass(p.id, data.inputs, data.kind) : outputFlowRingClass(p.id, data.outputs, data.kind)}`}
           style={{ top: handleTop(i, allPorts.length, true), background: portAnchorColor(p, connectedInputs) }}
           title={p.id}
         />
@@ -243,7 +245,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
           id="error"
           type="source"
           position={Position.Bottom}
-          className="scn-handle scn-handle-error"
+          className={`scn-handle scn-handle-error ${outputFlowRingClass('error', data.outputs, data.kind)}`}
           style={{ background: ROLE_COLOR['error'] }}
           title="error"
         />

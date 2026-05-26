@@ -26,7 +26,7 @@ export const SCENARIO_NODE_CATALOGUE: ScenarioNodeKindMeta[] = [
   { kind: 'if', labelKey: 'scenario.nodes.if', defaultLabel: 'If', icon: 'git-compare', category: 'control' },
   { kind: 'switch', labelKey: 'scenario.nodes.switch', defaultLabel: 'Switch', icon: 'list-tree', category: 'control' },
   // Requests & composition
-  { kind: 'request', labelKey: 'scenario.nodes.request', defaultLabel: 'Request', icon: 'globe', category: 'composition' },
+  { kind: 'httpRequest', labelKey: 'scenario.nodes.httpRequest', defaultLabel: 'HTTP Request', icon: 'globe', category: 'composition' },
   { kind: 'runScenario', labelKey: 'scenario.nodes.runScenario', defaultLabel: 'Run scenario', icon: 'circuit-board', category: 'composition' },
   // Iteration & collections
   { kind: 'forEach', labelKey: 'scenario.nodes.forEach', defaultLabel: 'ForEach', icon: 'symbol-array', category: 'collections' },
