@@ -1,5 +1,6 @@
 import React from 'react'
 import type { NodeProps } from '@xyflow/react'
+import { useTranslation } from 'react-i18next'
 import { isScenario } from '../../../../../shared/types/collections'
 import { Badge } from '../../common/Badge'
 import { useScenarioBoundResolver } from '../scenarioBoundResolver'
@@ -12,6 +13,7 @@ import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, t
  * `config.label` is a fallback for when the scenario has been deleted.
  */
 export const RunScenarioNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
+  const { t } = useTranslation()
   const resolve = useScenarioBoundResolver()
   const scenarioId = typeof data.config?.['scenarioId'] === 'string' ? data.config['scenarioId'] : undefined
   const item = scenarioId && resolve ? resolve(scenarioId) : null
@@ -21,8 +23,25 @@ export const RunScenarioNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
   const title = scenario?.name ?? fallbackLabel
   const headerIcon = scenario ? <Badge type="SCENARIO" /> : undefined
 
-  // The launch trigger is the generic header input; the body just exposes the result.
-  const left: ScenarioNodeSection[] = []
+  // First body line: a link to open the bound sub-scenario in a workbench tab.
+  const left: ScenarioNodeSection[] = (scenario && scenarioId && data.onOpenItem)
+    ? [{
+      id: 'edit',
+      rows: [{
+        id: 'edit',
+        content: (
+          <button
+            type="button"
+            className="scn-edit-link nodrag"
+            data-testid="scn-runscenario-edit-link"
+            onClick={(e) => { e.stopPropagation(); data.onOpenItem?.(scenarioId) }}
+          >
+            {t('scenario.editScenario', 'Edit scenario')}
+          </button>
+        )
+      }]
+    }]
+    : []
   const right: ScenarioNodeCell[] = [
     { id: 'result', label: 'result', port: { id: 'result', role: 'response', type: 'source' } }
   ]

@@ -850,6 +850,8 @@
     },
     "assert": {
       "message": "訊息"
-    }
+    },
+    "editRequest": "編輯請求",
+    "editScenario": "編輯場景"
   }
 }

@@ -456,6 +456,24 @@
   min-width: 200px;
 }
 
+/* First body line on bound request / sub-scenario nodes: a link that opens the
+ * referenced item in a workbench tab. Styled as an inline link, not a button. */
+.scn-edit-link {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-size: 11px;
+  color: var(--textLink-foreground, #4daafc);
+  cursor: pointer;
+  text-align: left;
+}
+.scn-edit-link:hover {
+  text-decoration: underline;
+  color: var(--textLink-activeForeground, var(--textLink-foreground, #4daafc));
+}
+
 /* If operator toggle — compact segmented control. */
 .scn-operator-toggle {
   display: inline-flex;

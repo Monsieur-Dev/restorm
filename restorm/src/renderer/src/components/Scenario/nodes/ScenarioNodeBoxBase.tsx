@@ -29,6 +29,9 @@ export interface ScenarioNodeBoxData extends Record<string, unknown> {
   onHeaderContextMenu?: (id: string, x: number, y: number) => void
   /** Persist a patch into the node's per-kind config bag (merged + saved). */
   onSetConfig?: (id: string, config: Record<string, unknown>) => void
+  /** Open a tree item (the bound request / sub-scenario) in a workbench tab,
+   * by id — drives the "Edit request / scenario" link. */
+  onOpenItem?: (itemId: string) => void
 }
 
 export type ScenarioNodeBoxType = Node<ScenarioNodeBoxData, 'scenarioNode'>

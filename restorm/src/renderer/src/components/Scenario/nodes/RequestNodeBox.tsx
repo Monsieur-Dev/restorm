@@ -1,5 +1,6 @@
 import React from 'react'
 import type { NodeProps } from '@xyflow/react'
+import { useTranslation } from 'react-i18next'
 import { isRequest } from '../../../../../shared/types/collections'
 import type { KeyValue } from '../../../../../shared/types/baseTypes'
 import { Badge } from '../../common/Badge'
@@ -59,6 +60,7 @@ function kvSection(id: string, name: string, kvs: KeyValue[] | undefined): Scena
  * description as a hover tooltip on the name). All resolved live from the tree.
  */
 export const RequestNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
+  const { t } = useTranslation()
   const resolve = useScenarioBoundResolver()
   const resolveEnv = useScenarioRequestEnv()
   const valueTypeGroups = useAllEnvValueTypeGroups()
@@ -103,7 +105,27 @@ export const RequestNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, d
       }]
     }
     : null
+  // First body line: a link to open the bound request in a workbench tab.
+  const editSection: ScenarioNodeSection | null = (request && requestId && data.onOpenItem)
+    ? {
+      id: 'edit',
+      rows: [{
+        id: 'edit',
+        content: (
+          <button
+            type="button"
+            className="scn-edit-link nodrag"
+            data-testid="scn-request-edit-link"
+            onClick={(e) => { e.stopPropagation(); data.onOpenItem?.(requestId) }}
+          >
+            {t('scenario.editRequest', 'Edit request')}
+          </button>
+        )
+      }]
+    }
+    : null
   const left: ScenarioNodeSection[] = [
+    editSection,
     envSection,
     kvSection('headers', 'Headers', r.headers),
     kvSection('pathParams', 'Path Params', r.pathParams),

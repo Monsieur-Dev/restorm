@@ -850,6 +850,8 @@
     },
     "assert": {
       "message": "메시지"
-    }
+    },
+    "editRequest": "요청 편집",
+    "editScenario": "시나리오 편집"
   }
 }

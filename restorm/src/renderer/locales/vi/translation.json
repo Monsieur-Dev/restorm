@@ -850,6 +850,8 @@
     },
     "assert": {
       "message": "thông báo"
-    }
+    },
+    "editRequest": "Sửa yêu cầu",
+    "editScenario": "Sửa kịch bản"
   }
 }

@@ -851,6 +851,8 @@
     },
     "assert": {
       "message": "üzenet"
-    }
+    },
+    "editRequest": "Kérés szerkesztése",
+    "editScenario": "Forgatókönyv szerkesztése"
   }
 }

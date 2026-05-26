@@ -853,6 +853,8 @@
     },
     "assert": {
       "message": "zpráva"
-    }
+    },
+    "editRequest": "Upravit požadavek",
+    "editScenario": "Upravit scénář"
   }
 }

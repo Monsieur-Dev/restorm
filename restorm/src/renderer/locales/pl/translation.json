@@ -853,6 +853,8 @@
     },
     "assert": {
       "message": "komunikat"
-    }
+    },
+    "editRequest": "Edytuj żądanie",
+    "editScenario": "Edytuj scenariusz"
   }
 }

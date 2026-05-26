@@ -851,6 +851,8 @@
     },
     "assert": {
       "message": "message"
-    }
+    },
+    "editRequest": "Éditer la requête",
+    "editScenario": "Éditer le scénario"
   }
 }

@@ -852,6 +852,8 @@
     },
     "assert": {
       "message": "порука"
-    }
+    },
+    "editRequest": "Уреди захтев",
+    "editScenario": "Уреди сценарио"
   }
 }

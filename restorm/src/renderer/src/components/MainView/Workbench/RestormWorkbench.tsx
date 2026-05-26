@@ -639,6 +639,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
                 {...(onScenarioChange ? { onScenarioChange } : {})}
                 {...(resolveBoundItem ? { resolveBoundItem } : {})}
                 {...(resolveRequestEnv ? { resolveRequestEnv } : {})}
+                {...(onRequestClick ? { onOpenItem: onRequestClick } : {})}
               />
             </div>
           )

@@ -850,6 +850,8 @@
     },
     "assert": {
       "message": "pesan"
-    }
+    },
+    "editRequest": "Edit permintaan",
+    "editScenario": "Edit skenario"
   }
 }

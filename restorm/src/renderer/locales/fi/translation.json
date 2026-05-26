@@ -851,6 +851,8 @@
     },
     "assert": {
       "message": "viesti"
-    }
+    },
+    "editRequest": "Muokkaa pyyntöä",
+    "editScenario": "Muokkaa skenaariota"
   }
 }

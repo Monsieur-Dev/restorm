@@ -851,6 +851,8 @@
     },
     "assert": {
       "message": "mesaj"
-    }
+    },
+    "editRequest": "İsteği düzenle",
+    "editScenario": "Senaryoyu düzenle"
   }
 }

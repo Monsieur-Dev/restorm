@@ -852,6 +852,8 @@
     },
     "assert": {
       "message": "poruka"
-    }
+    },
+    "editRequest": "Uredi zahtjev",
+    "editScenario": "Uredi scenarij"
   }
 }

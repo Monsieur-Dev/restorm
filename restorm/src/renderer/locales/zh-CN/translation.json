@@ -850,6 +850,8 @@
     },
     "assert": {
       "message": "消息"
-    }
+    },
+    "editRequest": "编辑请求",
+    "editScenario": "编辑场景"
   }
 }

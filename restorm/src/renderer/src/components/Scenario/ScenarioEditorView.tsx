@@ -45,6 +45,9 @@ export interface ScenarioEditorViewProps {
   resolveBoundItem?: ResolveBoundItem
   /** Resolve a request's environments + default selection (env-selector section). */
   resolveRequestEnv?: ResolveRequestEnv
+  /** Open a tree item (bound request / sub-scenario) in a workbench tab by id —
+   * drives the "Edit request / scenario" link on those nodes. */
+  onOpenItem?: (itemId: string) => void
 }
 
 type NodeData = ScenarioNodeBoxData
@@ -80,6 +83,7 @@ interface NodeHandlers {
   onToggleCollapse: (id: string) => void
   onHeaderContextMenu: (id: string, x: number, y: number) => void
   onSetConfig: (id: string, config: Record<string, unknown>) => void
+  onOpenItem?: (itemId: string) => void
 }
 
 function toFlowNode(n: ScenarioNode, handlers: NodeHandlers): Node<NodeData> {
@@ -96,6 +100,7 @@ function toFlowNode(n: ScenarioNode, handlers: NodeHandlers): Node<NodeData> {
       onToggleCollapse: handlers.onToggleCollapse,
       onHeaderContextMenu: handlers.onHeaderContextMenu,
       onSetConfig: handlers.onSetConfig,
+      ...(handlers.onOpenItem ? { onOpenItem: handlers.onOpenItem } : {}),
       ...(n.note !== undefined ? { note: n.note } : {}),
       ...(n.color !== undefined ? { color: n.color } : {}),
       ...(n.collapsed !== undefined ? { collapsed: n.collapsed } : {})
@@ -135,7 +140,7 @@ function chooseColorTooltipPlacement(rect: DOMRect): { placement: 'above' | 'bel
   return { placement: 'below', side: 'auto' }
 }
 
-const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onScenarioChange, resolveBoundItem, resolveRequestEnv }) => {
+const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onScenarioChange, resolveBoundItem, resolveRequestEnv, onOpenItem }) => {
   const { t } = useTranslation()
   const { screenToFlowPosition } = useReactFlow()
   const wrapperRef = useRef<HTMLDivElement>(null)
@@ -289,8 +294,8 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     })
   }, [setNodes, setEdges, persist])
 
-  const handlers = useRef<NodeHandlers>({ scenarioId: scenario.id, onToggleCollapse, onHeaderContextMenu, onSetConfig: setNodeConfig })
-  useEffect(() => { handlers.current = { scenarioId: scenario.id, onToggleCollapse, onHeaderContextMenu, onSetConfig: setNodeConfig } }, [scenario.id, onToggleCollapse, onHeaderContextMenu, setNodeConfig])
+  const handlers = useRef<NodeHandlers>({ scenarioId: scenario.id, onToggleCollapse, onHeaderContextMenu, onSetConfig: setNodeConfig, ...(onOpenItem ? { onOpenItem } : {}) })
+  useEffect(() => { handlers.current = { scenarioId: scenario.id, onToggleCollapse, onHeaderContextMenu, onSetConfig: setNodeConfig, ...(onOpenItem ? { onOpenItem } : {}) } }, [scenario.id, onToggleCollapse, onHeaderContextMenu, setNodeConfig, onOpenItem])
 
   // Seed from the scenario only when the open scenario changes (tab switch).
   // The guard makes our own persist writes (which replace `scenario.nodes`)

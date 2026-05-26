@@ -852,6 +852,8 @@
     },
     "assert": {
       "message": "mesaj"
-    }
+    },
+    "editRequest": "Editează cererea",
+    "editScenario": "Editează scenariul"
   }
 }

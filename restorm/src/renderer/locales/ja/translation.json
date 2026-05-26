@@ -850,6 +850,8 @@
     },
     "assert": {
       "message": "メッセージ"
-    }
+    },
+    "editRequest": "リクエストを編集",
+    "editScenario": "シナリオを編集"
   }
 }
