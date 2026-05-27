@@ -118,7 +118,7 @@ import { AvailableVariablesProvider } from './contexts/AvailableVariablesContext
 import { VariableTransformProvider } from './contexts/VariableTransformContext'
 import { AuthRequestResolverContext, type AuthRequestResolver } from './contexts/authRequestResolverContext'
 import { collectExpandableIds } from './services/FolderToListView'
-import { findScenariosUsingRequest, isRequestInScenarioSubtree } from './services/scenarioRequestUsage'
+import { findScenariosUsingRequest, collectRequestScenarioRelations } from './services/scenarioRequestUsage'
 import { requestScenarioNodeFocus } from './services/scenarioFocusBus'
 import {
   findFolderById,
@@ -1106,10 +1106,12 @@ const App: React.FC = () => {
   const handleDeleteItemChecked = useCallback((itemId: string) => {
     const item = findItemById(rootItems, itemId)
     if (item && isRequest(item)) {
-      const usages: RequestScenarioDeleteUsage[] = findScenariosUsingRequest(rootItems, itemId).map((u) => ({
+      // Affected scenarios = bound-by-a-box OR holding the request in their
+      // subtree (a child request with no box still belongs to the scenario).
+      const usages: RequestScenarioDeleteUsage[] = collectRequestScenarioRelations(rootItems, itemId).map((u) => ({
         scenarioId: u.scenario.id,
         scenarioName: u.scenario.name,
-        inSubtree: isRequestInScenarioSubtree(u.scenario, itemId)
+        inSubtree: u.inSubtree
       }))
       if (usages.length > 0) {
         setScenarioDelete({ isOpen: true, requestId: itemId, requestName: item.name, usages })
@@ -1151,11 +1153,6 @@ const App: React.FC = () => {
     confirmDeleteWithId(requestId)
   }, [scenarioDelete.requestId, rootItems, handleScenarioChange, confirmDeleteWithId])
 
-  // Create a new HTTP request as a child of a scenario (a scenario doubles as a
-  // folder-like container) and return its id — called when a "Requête HTTP"
-  // node is added to the graph. `openTab: false` keeps the user on the graph.
-  // The request is appended to the scenario's `items` in place, so (like other
-  // scenario edits) nudge a whole-file save to round-trip the new child.
   // Create a child item (request of any protocol, or a sub-scenario) under a
   // scenario from the graph editor's add palette. `silent`: no sidebar
   // selection/expand, no tab — stay on the graph so the user can keep editing

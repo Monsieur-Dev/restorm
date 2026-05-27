@@ -64,3 +64,29 @@ export function isRequestInScenarioSubtree(scenario: Scenario, requestId: string
   }
   return walk(scenario.items)
 }
+
+/** A scenario's relationship to a request being deleted: it binds the request
+ * through `httpRequest` nodes (`nodeIds`), holds it in its subtree
+ * (`inSubtree`), or both. Drives the deletion dialog. */
+export interface ScenarioRequestRelation {
+  scenario: Scenario
+  nodeIds: string[]
+  inSubtree: boolean
+}
+
+/** Every scenario affected by deleting `requestId` — either because a box binds
+ * it, or because it lives in the scenario's subtree (a child request with no
+ * box still belongs to the scenario, so deleting it affects it). Used by the
+ * request-deletion flow; the reverse-nav button uses the narrower
+ * {@link findScenariosUsingRequest} (boxes only). */
+export function collectRequestScenarioRelations(rootItems: FolderItem[], requestId: string): ScenarioRequestRelation[] {
+  const out: ScenarioRequestRelation[] = []
+  walkScenarios(rootItems, (scenario) => {
+    const nodeIds = scenario.nodes
+      .filter((n) => n.kind === 'httpRequest' && n.config['requestId'] === requestId)
+      .map((n) => n.id)
+    const inSubtree = isRequestInScenarioSubtree(scenario, requestId)
+    if (nodeIds.length > 0 || inSubtree) out.push({ scenario, nodeIds, inSubtree })
+  })
+  return out
+}
