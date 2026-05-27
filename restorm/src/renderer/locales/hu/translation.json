@@ -179,6 +179,14 @@
       "itemMessage": "Biztosan törölni szeretné a(z) \"{{name}}\" elemet?",
       "confirm": "Törlés",
       "cancel": "Mégse"
+    },
+    "scenarioDelete": {
+      "title": "Forgatókönyvek által használt kérés törlése",
+      "message": "A(z) „{{name}}” a következő forgatókönyvekben szerepel. Mit szeretne tenni?",
+      "belongsTag": "ehhez a forgatókönyvhöz tartozik",
+      "moveInto": "Áthelyezés ebbe a forgatókönyvbe",
+      "affectsNote": "A kérés törlése eltávolítja azt ezekből a forgatókönyvekből is.",
+      "deleteAnyway": "Törlés mindenképp"
     }
   },
   "environment": {
@@ -865,6 +873,56 @@
       "orphanInput": "Nincs megfelelő „{{name}}\" paraméter az alforgatókönyvben",
       "orphanOutput": "Nincs megfelelő „{{name}}\" kimenet az alforgatókönyvben",
       "then": "azután"
+    },
+    "validation": {
+      "missingName": "Ennek a dobozának nevet kell adni.",
+      "duplicateName": "A(z) „{{name}}” nevet már egy másik doboz használja.",
+      "panelTitle": "{{count}} dobozhiba",
+      "focusBox": "Ugrás erre a dobozra",
+      "showErrors": "Hibák megjelenítése",
+      "input": {
+        "missingName": "Ennek a bemeneti paraméternek nevet kell adni."
+      },
+      "dataLink": {
+        "emptyPath": "A bejövő adatkapcsolathoz JSON-útvonal szükséges.",
+        "badPath": "Az adatkapcsolat „{{path}}” JSON-útvonala érvénytelen."
+      },
+      "output": {
+        "missingName": "Ennek a kimenetnek nevet kell adni.",
+        "duplicateName": "A(z) „{{name}}” nevet már egy másik kimenet használja.",
+        "valueRequired": "A „value” bemenetet forráshoz kell kötni."
+      },
+      "getVariable": {
+        "noSelection": "Ki kell választani egy változót.",
+        "unknown": "A(z) „{{name}}” változó nem létezik a forgatókönyvben."
+      },
+      "setVariable": {
+        "missingName": "A beállítandó változónak nevet kell adni."
+      },
+      "object": {
+        "propMissingName": "Minden tulajdonságnak nevet kell adni.",
+        "propDuplicate": "A(z) „{{name}}” tulajdonságnév duplikált."
+      },
+      "arithmetic": {
+        "divisionByZero": "A nullával való osztás nem lehetséges."
+      },
+      "switch": {
+        "caseDuplicate": "A(z) „{{value}}” esetérték duplikált."
+      },
+      "transform": {
+        "emptyTemplate": "A sablon nem lehet üres."
+      },
+      "request": {
+        "missing": "A hozzárendelt kérés már nem létezik."
+      },
+      "runScenario": {
+        "missing": "A hozzárendelt forgatókönyv már nem létezik.",
+        "requiredInput": "A(z) „{{name}}” kötelező bemenetet egy forráshoz kell kötni."
+      }
+    },
+    "usage": {
+      "button": "Ezt a kérést használó forgatókönyvek",
+      "title": "Ezt a kérést a következő forgatókönyvek használják:"
     }
   }
 }

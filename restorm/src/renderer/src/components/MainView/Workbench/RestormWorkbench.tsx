@@ -41,6 +41,8 @@ import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { useTranslation } from 'react-i18next'
 import { RestormWorkbenchTab } from './RestormWorkbenchTab'
 import { DeprecationAwareRequestTab } from './DeprecationAwareRequestTab'
+import { RequestScenarioUsageButton } from './RequestScenarioUsageButton'
+import type { ScenarioRequestUsage } from '../../../services/scenarioRequestUsage'
 import { useTabSwitcher } from '../../../hooks/useTabSwitcher'
 
 /** Extract title string from EditorTab */
@@ -121,6 +123,11 @@ export interface RestormWorkbenchProps {
   onStateRestored?: (tree: WorkbenchTree | null) => void
   /** Get a reactive Request by ID (for reactivity support) */
   getRequestById?: (id: string) => Request | undefined
+  /** Scenarios that reference a request — drives the "used in scenarios"
+   * reverse-navigation button in the request editor's toolbar. */
+  getScenariosUsingRequest?: ((requestId: string) => ScenarioRequestUsage[]) | undefined
+  /** Open a scenario tab from a request; `focusNodeId` centres a box. */
+  onOpenScenarioFromRequest?: ((scenarioId: string, focusNodeId?: string) => void) | undefined
   /** Get a reactive Folder by ID (for reactivity support) */
   getFolderById?: (id: string) => Folder | undefined
   /** Check if a request is a favorite */
@@ -193,7 +200,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   tabSwitcherAnchorSelector,
   projectUuid,
   isItemFavorite,
-  onToggleFavorite
+  onToggleFavorite,
+  getScenariosUsingRequest,
+  onOpenScenarioFromRequest
 }, ref) => {
   const { t } = useTranslation()
   const editorWorkbenchRef = useRef<EditorWorkbenchHandle>(null)
@@ -767,6 +776,13 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         ? { isFavorite: isItemFavorite?.(id) ?? false, onToggleFavorite: () => { onToggleFavorite(id) } }
         : {}
 
+    // "Used in scenarios" reverse-nav button for the request toolbar. Renders
+    // null when the request is used by no scenario (the button hides itself).
+    const scenarioUsageActionFor = (id: string): React.ReactNode =>
+      getScenariosUsingRequest && onOpenScenarioFromRequest
+        ? <RequestScenarioUsageButton usages={getScenariosUsingRequest(id)} onOpenScenario={onOpenScenarioFromRequest} />
+        : null
+
     // Shared tag color props for request tabs
     const requestTagColors = getTagColorsFromBreadcrumbs(breadcrumbs)
     const envFolderId = getEnvFolderIdFromBreadcrumbs(breadcrumbs)
@@ -837,6 +853,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            topRightAction={scenarioUsageActionFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <HTTPRequestTabView
@@ -865,6 +882,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            topRightAction={scenarioUsageActionFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <GraphQLRequestTabView
@@ -893,6 +911,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            topRightAction={scenarioUsageActionFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <GrpcRequestTabView
@@ -921,6 +940,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            topRightAction={scenarioUsageActionFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <SoapRequestTabView
@@ -949,6 +969,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            topRightAction={scenarioUsageActionFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <WebSocketRequestTabView
@@ -977,6 +998,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            topRightAction={scenarioUsageActionFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <ODataRequestTabView request={request} />
@@ -1004,6 +1026,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            topRightAction={scenarioUsageActionFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <HTTPRequestTabView
@@ -1047,7 +1070,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [t, onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onScenarioChange, onCreateScenarioRequest, onCreateScenarioChild, resolveBoundItem, resolveRequestEnv, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, updateMiniBrowserUrl])
+  }, [t, onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onScenarioChange, onCreateScenarioRequest, onCreateScenarioChild, resolveBoundItem, resolveRequestEnv, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, getScenariosUsingRequest, onOpenScenarioFromRequest, updateMiniBrowserUrl])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(

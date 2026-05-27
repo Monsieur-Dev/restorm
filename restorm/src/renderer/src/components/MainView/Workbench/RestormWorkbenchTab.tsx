@@ -45,6 +45,10 @@ export interface RestormWorkbenchTabProps {
   /** Called when a tag color changes. Pass null to remove the color. */
   onTagColorChange?: ((tag: string, color: string | null) => void) | undefined
   headerRight?: React.ReactNode
+  /** Optional action anchored in the tab's top-right toolbar, between the
+   * bookmark ribbon and the favourite star (e.g. the "used in scenarios"
+   * button). Brings its own absolute positioning. */
+  topRightAction?: React.ReactNode
   /** Optional callout to display at the top of the tab */
   callout?: RestormWorkbenchTabCallout | undefined
   /** Optional tab ID for stable test IDs */
@@ -68,6 +72,7 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
   tagColors,
   onTagColorChange,
   headerRight,
+  topRightAction,
   callout,
   tabId,
   isFavorite,
@@ -132,6 +137,9 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
         onAdd={handleRibbonAdd}
         data-testid={`${testIdPrefix}-bookmarks`}
       />
+      {/* Top-right action (e.g. "used in scenarios"), sitting between the
+       * bookmark ribbon and the favourite star. Self-positioned. */}
+      {topRightAction}
       {/* Row 1: ancestor breadcrumb — navigation only. The last segment
        * moved into the title row below, so edit / icon affordances are
        * disabled here (they live on the H1 + IconSelect). */}

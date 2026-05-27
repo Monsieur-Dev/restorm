@@ -26,13 +26,17 @@ import { ScenarioEdgeSelectorContext, type ScenarioEdgeSelectorApi } from './sce
 import { ScenarioVariablesContext, type ScenarioVariable } from '../../contexts/ScenarioVariablesContext'
 import { resolveValueTypeKind } from '../TypedValueField/castValue'
 import { normalizeValueType } from '../../utils/normalizeValueType'
-import { SCENARIO_NODE_CATALOGUE, type ScenarioNodeKindMeta } from './scenarioNodeCatalogue'
+import { SCENARIO_NODE_CATALOGUE, scenarioNodeMeta, type ScenarioNodeKindMeta } from './scenarioNodeCatalogue'
 import { scenarioEdgeToFlowEdge, flowEdgeToScenarioEdge, portColor } from './scenarioGraphMapping'
 import { ScenarioNodeView, type ScenarioNodeBoxData } from './nodes'
-import { defaultPortsForKind, isValidScenarioConnection, deriveRunScenarioPorts } from './scenarioNodePorts'
+import { defaultPortsForKind, isValidScenarioConnection, deriveRunScenarioPorts, inputPortFlow, outputPortFlow } from './scenarioNodePorts'
+import { isDataLink } from './scenarioPathTree'
 import { linkPaletteEntries } from './scenarioLinkPalette'
 import { SCENARIO_ADD_REQUEST_GROUPS, SCENARIO_ADD_SCENARIO_ENTRY, scenarioAddIcon } from './scenarioChildPalette'
 import type { AddChildKind } from '../MainView/Sidebar/contextMenuBuilder'
+import { validateScenarioGraph, targetKey, type ScenarioNodeError, type ScenarioDataLink } from './scenarioValidation'
+import { ScenarioErrorsContext } from './scenarioErrorsContext'
+import { consumePendingScenarioNodeFocus, onScenarioNodeFocus, clearPendingScenarioNodeFocus } from '../../services/scenarioFocusBus'
 
 export interface ScenarioEditorViewProps {
   /** The scenario being edited. */
@@ -73,6 +77,13 @@ const invalidBannerStyle: CSSProperties = {
   position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', zIndex: 5,
   display: 'flex', alignItems: 'center', gap: 6, pointerEvents: 'none',
   padding: '4px 10px', borderRadius: 4, fontSize: 12,
+  background: 'var(--inputValidation-errorBackground, #5a1d1d)',
+  color: 'var(--inputValidation-errorForeground, #fff)',
+  border: '1px solid var(--inputValidation-errorBorder, #be1100)'
+}
+const errorPanelStyle: CSSProperties = {
+  position: 'absolute', top: 8, right: 8, zIndex: 5, maxWidth: 360, maxHeight: '40%', overflowY: 'auto',
+  display: 'flex', flexDirection: 'column', gap: 2, padding: '6px 8px', borderRadius: 4, fontSize: 12,
   background: 'var(--inputValidation-errorBackground, #5a1d1d)',
   color: 'var(--inputValidation-errorForeground, #fff)',
   border: '1px solid var(--inputValidation-errorBorder, #be1100)'
@@ -162,7 +173,7 @@ function chooseColorTooltipPlacement(rect: DOMRect): { placement: 'above' | 'bel
 
 const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onScenarioChange, resolveBoundItem, resolveRequestEnv, onOpenItem, onCreateRequest, onCreateChild }) => {
   const { t } = useTranslation()
-  const { screenToFlowPosition } = useReactFlow()
+  const { screenToFlowPosition, fitView } = useReactFlow()
   const wrapperRef = useRef<HTMLDivElement>(null)
 
   // The authoritative per-node scenario data (config/ports/note/color),
@@ -230,7 +241,8 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
   }, [onScenarioChange, scenario.id])
 
   // The JSON-path selector on a data link reads + writes that edge's `selector`
-  // through this api; the write mutates the authoritative edge store and
+  // through this api; the write mutates the authoritative edge store, mirrors it
+  // onto the flow edge's `data` (so validation reads it from render state), and
   // re-persists (the seed guard keeps it from re-seeding the canvas).
   const getEdgeSelector = useCallback((edgeId: string) => edgeStore.current.get(edgeId)?.selector, [])
   const setEdgeSelector = useCallback((edgeId: string, selector: string) => {
@@ -241,7 +253,14 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     if (trimmed === '') delete updated.selector
     else updated.selector = trimmed
     edgeStore.current.set(edgeId, updated)
-    setNodes((n) => { setEdges((e) => { persist(n, e); return e }); return n })
+    setNodes((n) => {
+      setEdges((curr) => {
+        const next = curr.map((fe) => (fe.id === edgeId ? { ...fe, data: { ...(fe.data ?? {}), selector: trimmed || undefined } } : fe))
+        persist(n, next)
+        return next
+      })
+      return n
+    })
   }, [setNodes, setEdges, persist])
   const edgeSelectorApi = useMemo<ScenarioEdgeSelectorApi>(() => ({ getSelector: getEdgeSelector, setSelector: setEdgeSelector }), [getEdgeSelector, setEdgeSelector])
 
@@ -281,8 +300,11 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
   // both, drawn red + dashed so the stale wiring is obvious.
   const buildFlowEdge = useCallback((e: ScenarioEdge): Edge => {
     const fe = scenarioEdgeToFlowEdge(e) as Edge
+    // Carry the JSON-path selector in edge data so validation can read it from
+    // render state (not the edgeStore ref).
+    const withSel = (edge: Edge): Edge => (e.selector ? { ...edge, data: { ...(edge.data ?? {}), selector: e.selector } } : edge)
     if (isOrphanEdge(e)) {
-      return { ...fe, className: 'scn-edge-orphan', data: { ...(fe.data ?? {}), orphan: true }, style: { ...(fe.style ?? {}), stroke: 'var(--scn-edge-orphan, #e5484d)', strokeDasharray: '5 4' } }
+      return withSel({ ...fe, className: 'scn-edge-orphan', data: { ...(fe.data ?? {}), orphan: true }, style: { ...(fe.style ?? {}), stroke: 'var(--scn-edge-orphan, #e5484d)', strokeDasharray: '5 4' } })
     }
     const src = nodeStore.current.get(e.from.nodeId)
     // A runScenario's outputs are derived, so fall back to the derived set to
@@ -290,7 +312,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     const port = src?.outputs.find((o) => o.id === e.from.portId)
       ?? derivedPortsOf(src)?.outputs.find((o) => o.id === e.from.portId)
     const stroke = e.color ?? (port ? portColor(port) : undefined)
-    return stroke ? { ...fe, style: { ...(fe.style ?? {}), stroke } } : fe
+    return withSel(stroke ? { ...fe, style: { ...(fe.style ?? {}), stroke } } : fe)
   }, [isOrphanEdge, derivedPortsOf])
 
   const [edgeMenu, setEdgeMenu] = useState<{ edgeId: string; x: number; y: number } | null>(null)
@@ -383,6 +405,26 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
       setEdges(es.map(buildFlowEdge))
     })
   }, [scenario.id, setNodes, setEdges, buildFlowEdge])
+
+  // Centre on a box when navigated here from a request's "used in scenarios"
+  // link. A pending request set just before the tab opened is read on mount; a
+  // live request (tab already open) arrives through the focus bus. Either way
+  // we wait until the target node is seeded before fitting the view.
+  const focusTargetRef = useRef<string | null>(null)
+  const tryFocusNode = useCallback(() => {
+    const id = focusTargetRef.current
+    if (!id || !nodes.some((n) => n.id === id)) return
+    focusTargetRef.current = null
+    void fitView({ nodes: [{ id }], duration: 400, maxZoom: 1.2 })
+  }, [nodes, fitView])
+  useEffect(() => { focusTargetRef.current = consumePendingScenarioNodeFocus(scenario.id) ?? null }, [scenario.id])
+  useEffect(() => { tryFocusNode() }, [tryFocusNode])
+  useEffect(() => onScenarioNodeFocus((scenarioId, nodeId) => {
+    if (scenarioId !== scenario.id) return
+    clearPendingScenarioNodeFocus(scenario.id)
+    focusTargetRef.current = nodeId
+    tryFocusNode()
+  }), [scenario.id, tryFocusNode])
 
   // Report React-Flow-measured node rects (position + size) to main, debounced.
   // Size isn't in the model, so this lets the scenario MCP read tools expose
@@ -787,6 +829,88 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
   // A required input left unwired makes the scenario non-runnable.
   const invalidCount = useMemo(() => countUnsatisfiedRequired(nodes, edges, resolveScenario), [nodes, edges, resolveScenario])
 
+  // Incoming data links (value/both output → data input) with their JSON-path
+  // selector — feeds the empty/malformed-path validation rule. A runScenario's
+  // outputs are derived, so merge them when classifying the source flow.
+  const dataLinks = useMemo<ScenarioDataLink[]>(() => {
+    const out: ScenarioDataLink[] = []
+    for (const e of edges) {
+      if (!e.source || !e.target || !e.sourceHandle || !e.targetHandle) continue
+      const src = nodes.find((n) => n.id === e.source)
+      const tgt = nodes.find((n) => n.id === e.target)
+      if (!src || !tgt) continue
+      // Object property inputs keep their own value field (no JSON-path
+      // selector), so the empty/malformed-path rule doesn't apply to them.
+      if (tgt.data.kind === 'object') continue
+      const srcDerived = derivedPortsOf(src.data)?.outputs ?? []
+      const outFlow = outputPortFlow([...src.data.outputs, ...srcDerived], e.sourceHandle, src.data.kind)
+      const inFlow = inputPortFlow(tgt.data.inputs, e.targetHandle, tgt.data.kind)
+      if (!isDataLink(inFlow, outFlow)) continue
+      const selector = typeof e.data?.['selector'] === 'string' ? e.data['selector'] : undefined
+      out.push({ targetNodeId: e.target, targetPort: e.targetHandle, selector })
+    }
+    return out
+  }, [edges, nodes, derivedPortsOf])
+
+  // Wired input ports (any incoming edge), keyed for the "input must be
+  // connected" checks (e.g. an Output's `value`).
+  const connectedTargets = useMemo(() => {
+    const set = new Set<string>()
+    for (const e of edges) if (e.target && e.targetHandle) set.add(targetKey(e.target, e.targetHandle))
+    return set
+  }, [edges])
+
+  // Per-box validation errors (missing name, bad data-link path, …) keyed by
+  // node id — drives the red border + disabled play (via ScenarioErrorsContext)
+  // and the workflow error panel below. The pure validator covers config-only
+  // rules; a second pass adds the resolver-dependent ones (a bound request /
+  // scenario that's unset or deleted, and a runScenario's required sub-scenario
+  // inputs left unwired) which need the tree, not just the node config.
+  const nodeErrors = useMemo(() => {
+    const byNode = validateScenarioGraph(nodes.map((n) => ({ id: n.id, kind: n.data.kind, config: n.data.config ?? {} })), dataLinks, connectedTargets, t)
+    const add = (id: string, error: ScenarioNodeError): void => {
+      const list = byNode.get(id)
+      if (list) list.push(error)
+      else byNode.set(id, [error])
+    }
+    for (const n of nodes) {
+      // A request / runScenario box is always created bound (palette or drag),
+      // so an *unbound* box can't occur — only a *deleted* binding can, which
+      // we flag as a safety net (incoherent state from an external delete).
+      if (n.data.kind === 'httpRequest') {
+        const requestId = typeof n.data.config?.['requestId'] === 'string' ? n.data.config['requestId'] : ''
+        if (requestId) {
+          const item = resolveBoundItem?.(requestId) ?? null
+          if (!item || !isRequest(item)) add(n.id, { code: 'request-missing', message: t('scenario.validation.request.missing', 'The bound request no longer exists.') })
+        }
+      } else if (n.data.kind === 'runScenario') {
+        const scenarioId = typeof n.data.config?.['scenarioId'] === 'string' ? n.data.config['scenarioId'] : ''
+        if (scenarioId) {
+          const sub = resolveScenario(scenarioId)
+          if (!sub) {
+            add(n.id, { code: 'scenario-missing', message: t('scenario.validation.runScenario.missing', 'The bound scenario no longer exists.') })
+          } else {
+            for (const port of deriveRunScenarioPorts(sub).inputs) {
+              if (port.required && !connectedTargets.has(targetKey(n.id, port.id))) {
+                add(n.id, { code: 'required-input', field: port.id, message: t('scenario.validation.runScenario.requiredInput', 'The required input "{{name}}" must be wired to a source.', { name: port.name }) })
+              }
+            }
+          }
+        }
+      }
+    }
+    return byNode
+  }, [nodes, dataLinks, connectedTargets, resolveBoundItem, resolveScenario, t])
+  // Flat list of every box error, with the box's display title, for the panel.
+  const workflowErrors = useMemo<{ nodeId: string; title: string; error: ScenarioNodeError }[]>(() => {
+    const meta = new Map(nodes.map((n) => [n.id, t(scenarioNodeMeta(n.data.kind).labelKey, scenarioNodeMeta(n.data.kind).defaultLabel)]))
+    const out: { nodeId: string; title: string; error: ScenarioNodeError }[] = []
+    for (const [nodeId, errs] of nodeErrors) {
+      for (const error of errs) out.push({ nodeId, title: meta.get(nodeId) ?? nodeId, error })
+    }
+    return out
+  }, [nodeErrors, nodes, t])
+
   // Wire-ports for the link-drag "Add" submenu — the port the link filter
   // computed for the (folded) request / sub-scenario kinds, when each is
   // flow-compatible with the dragged port. `const` so the `!== undefined`
@@ -819,6 +943,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     <ScenarioRequestEnvContext.Provider value={resolveRequestEnv ?? null}>
     <ScenarioVariablesContext.Provider value={scenarioVariables}>
     <ScenarioEdgeSelectorContext.Provider value={edgeSelectorApi}>
+    <ScenarioErrorsContext.Provider value={nodeErrors}>
     <div ref={wrapperRef} data-testid="scenario-editor" style={containerStyle} onDragOver={onDragOver} onDrop={onDrop}>
       {nodes.length === 0 && (
         <div data-testid="scenario-editor-empty" style={emptyStyle}>
@@ -829,6 +954,25 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
         <div data-testid="scenario-invalid-banner" style={invalidBannerStyle}>
           <i className="codicon codicon-warning" aria-hidden="true" />
           {t('scenario.invalid', { count: invalidCount, defaultValue: '{{count}} required input(s) not wired — scenario is not runnable' })}
+        </div>
+      )}
+      {workflowErrors.length > 0 && (
+        <div data-testid="scenario-error-panel" style={errorPanelStyle} className="nodrag nopan">
+          <div style={{ fontWeight: 600, marginBottom: 2 }}>
+            <i className="codicon codicon-error" aria-hidden="true" style={{ marginRight: 4 }} />
+            {t('scenario.validation.panelTitle', { count: nodeErrors.size, defaultValue: '{{count}} box error(s)' })}
+          </div>
+          {workflowErrors.map(({ nodeId, title, error }) => (
+            <button
+              key={`${nodeId}-${error.code}`}
+              type="button"
+              className="scn-error-row"
+              onClick={() => { void fitView({ nodes: [{ id: nodeId }], duration: 300, maxZoom: 1.2 }) }}
+              title={t('scenario.validation.focusBox', 'Focus this box')}
+            >
+              <span style={{ opacity: 0.8 }}>{title}</span> — {error.message}
+            </button>
+          ))}
         </div>
       )}
       <ReactFlow
@@ -1041,6 +1185,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
         </div>
       </Modal>
     </div>
+    </ScenarioErrorsContext.Provider>
     </ScenarioEdgeSelectorContext.Provider>
     </ScenarioVariablesContext.Provider>
     </ScenarioRequestEnvContext.Provider>

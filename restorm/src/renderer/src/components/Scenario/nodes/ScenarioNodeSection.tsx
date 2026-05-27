@@ -28,15 +28,16 @@ function inlineHandle(cell: ScenarioNodeCell, connectedInputs: Set<string>, node
  */
 export const ScenarioNodeSection: React.FC<{
   section: Section
+  nodeId: string
   connectedInputs: Set<string>
   nodeKind: ScenarioNodeKind
   nodeInputs: ScenarioPort[]
   scenarioId?: string
-}> = ({ section, connectedInputs, nodeKind, nodeInputs, scenarioId }) => {
+}> = ({ section, nodeId, connectedInputs, nodeKind, nodeInputs, scenarioId }) => {
   const [collapsed, setCollapsed] = useState(false)
 
   const renderCell = (cell: ScenarioNodeCell): React.ReactNode => (
-    <ScenarioInputCell cell={cell} nodeKind={nodeKind} nodeInputs={nodeInputs} {...(scenarioId !== undefined ? { scenarioId } : {})} />
+    <ScenarioInputCell cell={cell} nodeId={nodeId} nodeKind={nodeKind} nodeInputs={nodeInputs} {...(scenarioId !== undefined ? { scenarioId } : {})} />
   )
 
   if (!section.name) {

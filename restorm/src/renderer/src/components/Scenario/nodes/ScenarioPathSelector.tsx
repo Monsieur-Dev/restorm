@@ -13,6 +13,8 @@ export interface ScenarioPathSelectorProps {
   scenarioId?: string
   /** The input's label, shown above the control. */
   label?: string
+  /** Outline the control group red (e.g. the path is empty / malformed). */
+  invalid?: boolean
 }
 
 type OutputContext = Record<string, unknown> | null
@@ -34,7 +36,7 @@ function scenarioRuntime(): ScenarioRuntime | undefined {
  * writes its dot-path into the selector. When the source hasn't run yet, the
  * popover offers to run it first.
  */
-export const ScenarioPathSelector: React.FC<ScenarioPathSelectorProps> = ({ edgeId, sourceNodeId, scenarioId, label }) => {
+export const ScenarioPathSelector: React.FC<ScenarioPathSelectorProps> = ({ edgeId, sourceNodeId, scenarioId, label, invalid }) => {
   const { t } = useTranslation()
   const api = useScenarioEdgeSelector()
 
@@ -141,7 +143,7 @@ export const ScenarioPathSelector: React.FC<ScenarioPathSelectorProps> = ({ edge
   return (
     <div ref={rootRef} className="scn-path-selector nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
       {label !== undefined && <span className="scn-port-label scn-path-label">{label}</span>}
-      <ControlGroup className="scn-path-controls">
+      <ControlGroup className={`scn-path-controls${invalid ? ' scn-field-invalid' : ''}`}>
         <InputBox
           options={{ placeholder: t('scenario.pathSelector.placeholder', 'JSON path'), ariaLabel: t('scenario.pathSelector.ariaLabel', 'JSON path selector') }}
           value={value}

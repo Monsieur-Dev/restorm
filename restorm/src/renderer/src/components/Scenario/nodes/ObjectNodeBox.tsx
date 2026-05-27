@@ -4,6 +4,7 @@ import { Button } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { ScenarioNameInput } from './ScenarioNameInput'
+import { useScenarioNodeErrors } from '../scenarioErrorsContext'
 import { TypedValueField } from '../../TypedValueField'
 import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroups'
 import { normalizeValueType } from '../../../utils/normalizeValueType'
@@ -39,6 +40,9 @@ export const ObjectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
   const valueTypeGroups = useAllEnvValueTypeGroups()
   const config = data.config ?? {}
   const properties = readProperties(config)
+  // Property ids flagged by a validation error (missing / duplicate name) →
+  // outline that property's name input red.
+  const invalidProps = new Set(useScenarioNodeErrors(id).map((e) => e.field).filter((f): f is string => f != null))
 
   const setProperties = (next: ObjectProperty[]): void => { data.onSetConfig?.(id, { properties: next }) }
   const stop = (e: React.MouseEvent): void => { e.stopPropagation() }
@@ -51,6 +55,7 @@ export const ObjectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
         <ScenarioNameInput
           value={p.name}
           placeholder="property"
+          invalid={invalidProps.has(p.id)}
           onCommit={(name) => { setProperties(properties.map((x) => (x.id === p.id ? { ...x, name } : x))) }}
         />
         <TypedValueField

@@ -109,6 +109,8 @@ import { RestormSidebar } from './components/MainView/Sidebar/RestormSidebar'
 import { RestormWorkbenchContainer } from './components/MainView/Workbench/RestormWorkbenchContainer'
 import { SaveOptionsModal } from './components/Modals/SaveOptionsModal'
 import { DeleteConfirmationModal } from './components/Modals/DeleteConfirmationModal'
+import { RequestScenarioDeleteModal, type RequestScenarioDeleteUsage } from './components/Modals/RequestScenarioDeleteModal'
+import { removeItemFromTree } from './utils/treeManipulation'
 import { ImportModal, type RefreshContext } from './components/Modals/ImportModal'
 import { allLeafKeys } from './components/Modals/importSelectionHelpers'
 import { ApiSpecRefreshFlow } from './components/Folders/ApiSpecRefreshFlow'
@@ -116,6 +118,8 @@ import { AvailableVariablesProvider } from './contexts/AvailableVariablesContext
 import { VariableTransformProvider } from './contexts/VariableTransformContext'
 import { AuthRequestResolverContext, type AuthRequestResolver } from './contexts/authRequestResolverContext'
 import { collectExpandableIds } from './services/FolderToListView'
+import { findScenariosUsingRequest, isRequestInScenarioSubtree } from './services/scenarioRequestUsage'
+import { requestScenarioNodeFocus } from './services/scenarioFocusBus'
 import {
   findFolderById,
   findEnvironmentFolderById,
@@ -1007,6 +1011,15 @@ const App: React.FC = () => {
     isFolder: boolean
   }>({ isOpen: false, itemId: '', itemName: '', isFolder: false })
 
+  // Enhanced deletion dialog for a request referenced by scenarios (move it in,
+  // or delete + strip its boxes). Empty `usages` means the plain modal is used.
+  const [scenarioDelete, setScenarioDelete] = useState<{
+    isOpen: boolean
+    requestId: string
+    requestName: string
+    usages: RequestScenarioDeleteUsage[]
+  }>({ isOpen: false, requestId: '', requestName: '', usages: [] })
+
   // Use custom hooks for various concerns
   const {
     handleItemDrop,
@@ -1086,6 +1099,57 @@ const App: React.FC = () => {
       }, 600)
     }
   }, [rootItems, setRootItems])
+
+  // Deletion of a request referenced by scenarios. When a request is used, the
+  // plain confirm modal is replaced by one that offers to move the request into
+  // a scenario (for external references) or delete + strip the boxes.
+  const handleDeleteItemChecked = useCallback((itemId: string) => {
+    const item = findItemById(rootItems, itemId)
+    if (item && isRequest(item)) {
+      const usages: RequestScenarioDeleteUsage[] = findScenariosUsingRequest(rootItems, itemId).map((u) => ({
+        scenarioId: u.scenario.id,
+        scenarioName: u.scenario.name,
+        inSubtree: isRequestInScenarioSubtree(u.scenario, itemId)
+      }))
+      if (usages.length > 0) {
+        setScenarioDelete({ isOpen: true, requestId: itemId, requestName: item.name, usages })
+        return
+      }
+    }
+    handleDeleteItem(itemId)
+  }, [rootItems, handleDeleteItem])
+
+  // Move the request into a scenario's subtree instead of deleting it. The
+  // in-place `items` mutation isn't tracked by the dirty trap, so nudge a save.
+  const handleMoveRequestIntoScenario = useCallback((requestId: string, scenarioId: string) => {
+    const scenario = findItemById(rootItems, scenarioId)
+    if (!scenario || !isScenario(scenario)) return
+    const removed = removeItemFromTree(rootItems, requestId)
+    if (!removed) return
+    scenario.items = [...(scenario.items ?? []), removed]
+    setRootItems((prev) => [...prev])
+    if (scenarioSaveTimer) clearTimeout(scenarioSaveTimer)
+    scenarioSaveTimer = setTimeout(() => {
+      scenarioSaveTimer = null
+      void latestSaveAll?.().catch((err: unknown) => { logger.error('[App] move-into-scenario autosave failed', { error: String(err) }) })
+    }, 600)
+    setScenarioDelete((p) => ({ ...p, isOpen: false }))
+  }, [rootItems, setRootItems])
+
+  // Delete the request and strip every box that referenced it (plus the touched
+  // edges) from each using scenario, even if that leaves a scenario incomplete.
+  const handleDeleteRequestAnyway = useCallback(() => {
+    const requestId = scenarioDelete.requestId
+    if (!requestId) return
+    for (const u of findScenariosUsingRequest(rootItems, requestId)) {
+      const dropped = new Set(u.nodeIds)
+      const nodes = u.scenario.nodes.filter((n) => !dropped.has(n.id))
+      const edges = u.scenario.edges.filter((e) => !dropped.has(e.from.nodeId) && !dropped.has(e.to.nodeId))
+      handleScenarioChange(u.scenario.id, { nodes, edges })
+    }
+    setScenarioDelete((p) => ({ ...p, isOpen: false }))
+    confirmDeleteWithId(requestId)
+  }, [scenarioDelete.requestId, rootItems, handleScenarioChange, confirmDeleteWithId])
 
   // Create a new HTTP request as a child of a scenario (a scenario doubles as a
   // folder-like container) and return its id — called when a "Requête HTTP"
@@ -1558,7 +1622,7 @@ const App: React.FC = () => {
     onRenameFavoriteItem: handleStartRenameInFavorites,
     onRenameOpenedItem: handleStartRenameInOpened,
     onCloneItem: handleCloneItem,
-    onDeleteItem: handleDeleteItem,
+    onDeleteItem: handleDeleteItemChecked,
     onToggleFavorite: handleToggleFavorite,
     onUnfavorite: handleUnfavorite,
     onCloseTab: handleCloseTabById,
@@ -1573,7 +1637,7 @@ const App: React.FC = () => {
     updateCount,
     onCloneItem: handleCloneItem,
     onAddChildItem: handleAddChildItem,
-    onDeleteItem: handleDeleteItem,
+    onDeleteItem: handleDeleteItemChecked,
     onRenameItem: handleSidebarRenameItem,
     isItemFavorite,
     onToggleFavorite: handleToggleFavorite,
@@ -2098,6 +2162,18 @@ const App: React.FC = () => {
     getNearestEnvironmentsForBreadcrumbs
   })
 
+  // Reverse navigation request → scenarios: list the scenarios using a request,
+  // and open one (optionally centring the bound box). Computed live from the
+  // tree, so deletes update it with no stored back-reference.
+  const getScenariosUsingRequestCb = useCallback(
+    (requestId: string) => findScenariosUsingRequest(rootItems, requestId),
+    [rootItems]
+  )
+  const openScenarioFromRequest = useCallback((scenarioId: string, focusNodeId?: string) => {
+    handleItemClick(scenarioId)
+    if (focusNodeId) requestScenarioNodeFocus(scenarioId, focusNodeId)
+  }, [handleItemClick])
+
   // Initialize navigation history with restored active tab only
   const hasInitializedNavRef = useRef(false)
   useEffect(() => {
@@ -2207,7 +2283,7 @@ const App: React.FC = () => {
                   }}
                   onItemDrop={handleItemDrop}
                   onItemRename={handleSidebarItemRename}
-                  onDeleteRequest={(payload) => { handleDeleteItem(payload.item.id) }}
+                  onDeleteRequest={(payload) => { handleDeleteItemChecked(payload.item.id) }}
                   onEditingStart={(itemId) => { setSidebarEditingItemId(itemId) }}
                   onEditingEnd={() => { setSidebarEditingItemId(null) }}
                   onAddRequest={() => { setShowImportModal(true) }}
@@ -2265,6 +2341,8 @@ const App: React.FC = () => {
               onRebuildTab={rootItems.length > 0 ? handleRebuildTab : undefined}
               onStateRestored={handleStateRestored}
               getRequestById={getRequestByIdCb}
+              getScenariosUsingRequest={getScenariosUsingRequestCb}
+              onOpenScenarioFromRequest={openScenarioFromRequest}
               getFolderById={getFolderByIdCb}
               getEnvironmentFolderById={getEnvironmentFolderByIdCb}
               navigationEnabled={navigationEnabled}
@@ -2330,6 +2408,8 @@ const App: React.FC = () => {
             onRebuildTab={handleRebuildTab}
             onStateRestored={handleStateRestored}
             getRequestById={(id) => findRequestById(rootItems, id)}
+            getScenariosUsingRequest={getScenariosUsingRequestCb}
+            onOpenScenarioFromRequest={openScenarioFromRequest}
             getFolderById={(id) => findFolderById(rootItems, id)}
             getEnvironmentFolderById={(id) => findEnvironmentFolderById(rootItems, id)}
             navigationEnabled={navigationEnabled}
@@ -2417,6 +2497,16 @@ const App: React.FC = () => {
         isFolder={deleteConfirmation.isFolder}
         onConfirm={confirmDelete}
         onCancel={cancelDelete}
+      />
+
+      {/* Deletion of a request used by scenarios: move it in, or delete + strip boxes. */}
+      <RequestScenarioDeleteModal
+        isOpen={scenarioDelete.isOpen}
+        requestName={scenarioDelete.requestName}
+        usages={scenarioDelete.usages}
+        onMoveIntoScenario={(scenarioId) => { handleMoveRequestIntoScenario(scenarioDelete.requestId, scenarioId) }}
+        onDeleteAnyway={handleDeleteRequestAnyway}
+        onCancel={() => { setScenarioDelete((p) => ({ ...p, isOpen: false })) }}
       />
 
           {/* Save Options Modal */}

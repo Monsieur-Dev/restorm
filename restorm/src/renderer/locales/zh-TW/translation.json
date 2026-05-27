@@ -178,6 +178,14 @@
       "itemMessage": "確定要刪除 \"{{name}}\" 嗎？",
       "confirm": "刪除",
       "cancel": "取消"
+    },
+    "scenarioDelete": {
+      "title": "刪除被場景使用的請求",
+      "message": "「{{name}}」被用於以下場景。您想怎麼做?",
+      "belongsTag": "屬於此場景",
+      "moveInto": "移動到此場景",
+      "affectsNote": "刪除此請求也會將其從這些場景中移除。",
+      "deleteAnyway": "仍然刪除"
     }
   },
   "environment": {
@@ -864,6 +872,56 @@
       "orphanInput": "子場景中沒有相符的參數「{{name}}」",
       "orphanOutput": "子場景中沒有相符的輸出「{{name}}」",
       "then": "然後"
+    },
+    "validation": {
+      "missingName": "此方塊必須有名稱。",
+      "duplicateName": "名稱「{{name}}」已被另一個方塊使用。",
+      "panelTitle": "{{count}} 個方塊錯誤",
+      "focusBox": "定位到此方塊",
+      "showErrors": "顯示錯誤",
+      "input": {
+        "missingName": "此輸入參數必須有名稱。"
+      },
+      "dataLink": {
+        "emptyPath": "傳入的資料連結需要一個 JSON 路徑。",
+        "badPath": "資料連結的 JSON 路徑「{{path}}」格式無效。"
+      },
+      "output": {
+        "missingName": "此輸出必須有名稱。",
+        "duplicateName": "名稱「{{name}}」已被另一個輸出使用。",
+        "valueRequired": "「value」輸入必須連接到一個來源。"
+      },
+      "getVariable": {
+        "noSelection": "必須選擇一個變數。",
+        "unknown": "變數「{{name}}」在場景中不存在。"
+      },
+      "setVariable": {
+        "missingName": "要設定的變數必須有名稱。"
+      },
+      "object": {
+        "propMissingName": "每個屬性都必須有名稱。",
+        "propDuplicate": "屬性名「{{name}}」重複了。"
+      },
+      "arithmetic": {
+        "divisionByZero": "無法除以零。"
+      },
+      "switch": {
+        "caseDuplicate": "分支值「{{value}}」重複。"
+      },
+      "transform": {
+        "emptyTemplate": "範本不能為空。"
+      },
+      "request": {
+        "missing": "關聯的請求已不存在。"
+      },
+      "runScenario": {
+        "missing": "關聯的場景已不存在。",
+        "requiredInput": "必填輸入「{{name}}」必須連接到資料來源。"
+      }
+    },
+    "usage": {
+      "button": "使用此請求的場景",
+      "title": "此請求被用於以下場景:"
     }
   }
 }

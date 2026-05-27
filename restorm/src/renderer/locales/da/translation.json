@@ -179,6 +179,14 @@
       "itemMessage": "Er du sikker på, at du vil slette \"{{name}}\"?",
       "confirm": "Slet",
       "cancel": "Annullér"
+    },
+    "scenarioDelete": {
+      "title": "Slet en anmodning brugt af scenarier",
+      "message": "\"{{name}}\" bruges i følgende scenarier. Hvad vil du gøre?",
+      "belongsTag": "tilhører dette scenarie",
+      "moveInto": "Flyt ind i dette scenarie",
+      "affectsNote": "Sletning af denne anmodning fjerner den også fra disse scenarier.",
+      "deleteAnyway": "Slet alligevel"
     }
   },
   "environment": {
@@ -865,6 +873,56 @@
       "orphanInput": "Ingen matchende parameter \"{{name}}\" i underscenariet",
       "orphanOutput": "Intet matchende output \"{{name}}\" i underscenariet",
       "then": "derefter"
+    },
+    "validation": {
+      "missingName": "Denne boks skal have et navn.",
+      "duplicateName": "Navnet \"{{name}}\" bruges allerede af en anden boks.",
+      "panelTitle": "{{count}} boksfejl",
+      "focusBox": "Gå til denne boks",
+      "showErrors": "Vis fejl",
+      "input": {
+        "missingName": "Denne inputparameter skal have et navn."
+      },
+      "dataLink": {
+        "emptyPath": "Det indgående datalink kræver en JSON-sti.",
+        "badPath": "Datalinkets JSON-sti \"{{path}}\" er ugyldig."
+      },
+      "output": {
+        "missingName": "Dette output skal have et navn.",
+        "duplicateName": "Navnet \"{{name}}\" bruges allerede af et andet output.",
+        "valueRequired": "Inputtet \"value\" skal være forbundet til en kilde."
+      },
+      "getVariable": {
+        "noSelection": "Der skal vælges en variabel.",
+        "unknown": "Variablen \"{{name}}\" findes ikke i scenariet."
+      },
+      "setVariable": {
+        "missingName": "Variablen, der skal angives, skal have et navn."
+      },
+      "object": {
+        "propMissingName": "Hver egenskab skal have et navn.",
+        "propDuplicate": "Egenskabsnavnet \"{{name}}\" er duplikeret."
+      },
+      "arithmetic": {
+        "divisionByZero": "Division med nul er umulig."
+      },
+      "switch": {
+        "caseDuplicate": "Case-værdien \"{{value}}\" er dubleret."
+      },
+      "transform": {
+        "emptyTemplate": "Skabelonen må ikke være tom."
+      },
+      "request": {
+        "missing": "Den tilknyttede anmodning findes ikke længere."
+      },
+      "runScenario": {
+        "missing": "Det tilknyttede scenarie findes ikke længere.",
+        "requiredInput": "Det påkrævede input \"{{name}}\" skal være forbundet til en kilde."
+      }
+    },
+    "usage": {
+      "button": "Scenarier, der bruger denne anmodning",
+      "title": "Denne anmodning bruges i scenarierne:"
     }
   }
 }

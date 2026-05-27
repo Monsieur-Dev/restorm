@@ -178,6 +178,14 @@
       "itemMessage": "\"{{name}}\" を削除してもよろしいですか？",
       "confirm": "削除",
       "cancel": "キャンセル"
+    },
+    "scenarioDelete": {
+      "title": "シナリオで使用中のリクエストを削除",
+      "message": "「{{name}}」は次のシナリオで使用されています。どうしますか?",
+      "belongsTag": "このシナリオに属しています",
+      "moveInto": "このシナリオに移動",
+      "affectsNote": "このリクエストを削除すると、これらのシナリオからも削除されます。",
+      "deleteAnyway": "それでも削除"
     }
   },
   "environment": {
@@ -864,6 +872,56 @@
       "orphanInput": "サブシナリオに一致するパラメーター「{{name}}」がありません",
       "orphanOutput": "サブシナリオに一致する出力「{{name}}」がありません",
       "then": "次へ"
+    },
+    "validation": {
+      "missingName": "このボックスには名前が必要です。",
+      "duplicateName": "名前「{{name}}」は別のボックスで既に使われています。",
+      "panelTitle": "ボックスのエラー {{count}} 件",
+      "focusBox": "このボックスへ移動",
+      "showErrors": "エラーを表示",
+      "input": {
+        "missingName": "この入力パラメーターには名前が必要です。"
+      },
+      "dataLink": {
+        "emptyPath": "入力データリンクには JSON パスが必要です。",
+        "badPath": "データリンクの JSON パス「{{path}}」が不正です。"
+      },
+      "output": {
+        "missingName": "この出力には名前が必要です。",
+        "duplicateName": "名前「{{name}}」は別の出力で既に使われています。",
+        "valueRequired": "「value」入力はソースに接続する必要があります。"
+      },
+      "getVariable": {
+        "noSelection": "変数を選択する必要があります。",
+        "unknown": "変数「{{name}}」はシナリオに存在しません。"
+      },
+      "setVariable": {
+        "missingName": "設定する変数には名前が必要です。"
+      },
+      "object": {
+        "propMissingName": "各プロパティには名前が必要です。",
+        "propDuplicate": "プロパティ名「{{name}}」が重複しています。"
+      },
+      "arithmetic": {
+        "divisionByZero": "ゼロによる除算はできません。"
+      },
+      "switch": {
+        "caseDuplicate": "ケース値「{{value}}」が重複しています。"
+      },
+      "transform": {
+        "emptyTemplate": "テンプレートを空にすることはできません。"
+      },
+      "request": {
+        "missing": "リンクされたリクエストは存在しません。"
+      },
+      "runScenario": {
+        "missing": "リンクされたシナリオは存在しません。",
+        "requiredInput": "必須入力「{{name}}」はソースに接続する必要があります。"
+      }
+    },
+    "usage": {
+      "button": "このリクエストを使用するシナリオ",
+      "title": "このリクエストは次のシナリオで使用されています:"
     }
   }
 }

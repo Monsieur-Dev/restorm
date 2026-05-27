@@ -3,6 +3,7 @@ import type { NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { ScenarioNameInput } from './ScenarioNameInput'
+import { useScenarioFieldInvalid } from '../scenarioErrorsContext'
 import { TypedValueField } from '../../TypedValueField'
 import type { ValueTypeKind } from '../../TypedValueField/castValue'
 import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroups'
@@ -29,6 +30,7 @@ export const InputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
   const valueTypeGroups = useAllEnvValueTypeGroups()
   const config = data.config ?? {}
   const name = typeof config['name'] === 'string' ? config['name'] : ''
+  const nameInvalid = useScenarioFieldInvalid(id, 'name')
   const required = config['required'] === true
   // `normalizeValueType` already returns a StringValue('') for an absent
   // config, so this both rehydrates a saved typed value and seeds the default.
@@ -44,6 +46,7 @@ export const InputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
             <ScenarioNameInput
               value={name}
               placeholder="name"
+              invalid={nameInvalid}
               onCommit={(next) => { data.onSetConfig?.(id, { name: next }) }}
             />
           )
@@ -96,6 +99,7 @@ export const InputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
 export const OutputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
   const config = data.config ?? {}
   const name = typeof config['name'] === 'string' ? config['name'] : ''
+  const nameInvalid = useScenarioFieldInvalid(id, 'name')
   const left: ScenarioNodeSection[] = [
     {
       id: 'main',
@@ -106,6 +110,7 @@ export const OutputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
             <ScenarioNameInput
               value={name}
               placeholder="output"
+              invalid={nameInvalid}
               onCommit={(next) => { data.onSetConfig?.(id, { name: next }) }}
             />
           )
@@ -127,6 +132,7 @@ export const OutputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
 export const GetVariableNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
   const valueTypeGroups = useAllEnvValueTypeGroups()
   const config = data.config ?? {}
+  const selectorInvalid = useScenarioFieldInvalid(id, 'value')
   const left: ScenarioNodeSection[] = [
     {
       id: 'main',
@@ -134,7 +140,7 @@ export const GetVariableNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
         {
           id: 'name',
           content: (
-            <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
+            <div className={`nodrag${selectorInvalid ? ' scn-field-invalid' : ''}`} onMouseDown={(e) => { e.stopPropagation() }}>
               <TypedValueField
                 value={config['value'] !== undefined ? normalizeValueType(config['value']) : new VariableValue('')}
                 onChange={(next) => { data.onSetConfig?.(id, { value: serializeValueForPersistence(next) }) }}
@@ -165,6 +171,7 @@ export const SetVariableNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
   const valueTypeGroups = useAllEnvValueTypeGroups()
   const config = data.config ?? {}
   const name = typeof config['name'] === 'string' ? config['name'] : ''
+  const nameInvalid = useScenarioFieldInvalid(id, 'name')
 
   const left: ScenarioNodeSection[] = [
     {
@@ -176,6 +183,7 @@ export const SetVariableNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
             <ScenarioNameInput
               value={name}
               placeholder="variable"
+              invalid={nameInvalid}
               onCommit={(next) => { data.onSetConfig?.(id, { name: next }) }}
             />
           )

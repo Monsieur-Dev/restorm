@@ -179,6 +179,14 @@
       "itemMessage": "Vuoi davvero eliminare \"{{name}}\"?",
       "confirm": "Elimina",
       "cancel": "Annulla"
+    },
+    "scenarioDelete": {
+      "title": "Eliminare una richiesta usata dagli scenari",
+      "message": "«{{name}}» è usata nei seguenti scenari. Cosa vuoi fare?",
+      "belongsTag": "appartiene a questo scenario",
+      "moveInto": "Sposta in questo scenario",
+      "affectsNote": "Eliminando questa richiesta verrà rimossa anche da questi scenari.",
+      "deleteAnyway": "Elimina comunque"
     }
   },
   "environment": {
@@ -865,6 +873,56 @@
       "orphanInput": "Nessun parametro \"{{name}}\" corrispondente nel sotto-scenario",
       "orphanOutput": "Nessun output \"{{name}}\" corrispondente nel sotto-scenario",
       "then": "poi"
+    },
+    "validation": {
+      "missingName": "Questa casella deve avere un nome.",
+      "duplicateName": "Il nome «{{name}}» è già usato da un'altra casella.",
+      "panelTitle": "{{count}} casella/e in errore",
+      "focusBox": "Vai a questa casella",
+      "showErrors": "Mostra errori",
+      "input": {
+        "missingName": "Questo parametro di input deve avere un nome."
+      },
+      "dataLink": {
+        "emptyPath": "Il collegamento dati in entrata richiede un percorso (JSON path).",
+        "badPath": "Il percorso JSON «{{path}}» del collegamento dati non è valido."
+      },
+      "output": {
+        "missingName": "Questa uscita deve avere un nome.",
+        "duplicateName": "Il nome «{{name}}» è già usato da un'altra uscita.",
+        "valueRequired": "L'ingresso «value» deve essere collegato a una sorgente."
+      },
+      "getVariable": {
+        "noSelection": "Occorre selezionare una variabile.",
+        "unknown": "La variabile «{{name}}» non esiste nello scenario."
+      },
+      "setVariable": {
+        "missingName": "La variabile da impostare deve avere un nome."
+      },
+      "object": {
+        "propMissingName": "Ogni proprietà deve avere un nome.",
+        "propDuplicate": "Il nome di proprietà «{{name}}» è duplicato."
+      },
+      "arithmetic": {
+        "divisionByZero": "La divisione per zero è impossibile."
+      },
+      "switch": {
+        "caseDuplicate": "Il valore del caso «{{value}}» è duplicato."
+      },
+      "transform": {
+        "emptyTemplate": "Il modello non deve essere vuoto."
+      },
+      "request": {
+        "missing": "La richiesta collegata non esiste più."
+      },
+      "runScenario": {
+        "missing": "Lo scenario collegato non esiste più.",
+        "requiredInput": "L'input obbligatorio «{{name}}» deve essere collegato a una sorgente."
+      }
+    },
+    "usage": {
+      "button": "Scenari che usano questa richiesta",
+      "title": "Questa richiesta è usata negli scenari:"
     }
   }
 }

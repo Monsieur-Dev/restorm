@@ -178,6 +178,14 @@
       "itemMessage": "确定要删除 \"{{name}}\" 吗？",
       "confirm": "删除",
       "cancel": "取消"
+    },
+    "scenarioDelete": {
+      "title": "删除被场景使用的请求",
+      "message": "「{{name}}」被用于以下场景。您想怎么做?",
+      "belongsTag": "属于此场景",
+      "moveInto": "移动到此场景",
+      "affectsNote": "删除此请求也会将其从这些场景中移除。",
+      "deleteAnyway": "仍然删除"
     }
   },
   "environment": {
@@ -864,6 +872,56 @@
       "orphanInput": "子场景中没有匹配的参数“{{name}}”",
       "orphanOutput": "子场景中没有匹配的输出“{{name}}”",
       "then": "然后"
+    },
+    "validation": {
+      "missingName": "该框必须有名称。",
+      "duplicateName": "名称“{{name}}”已被另一个框使用。",
+      "panelTitle": "{{count}} 个框错误",
+      "focusBox": "定位到此框",
+      "showErrors": "显示错误",
+      "input": {
+        "missingName": "此输入参数必须有名称。"
+      },
+      "dataLink": {
+        "emptyPath": "传入的数据连接需要一个 JSON 路径。",
+        "badPath": "数据连接的 JSON 路径“{{path}}”格式无效。"
+      },
+      "output": {
+        "missingName": "此输出必须有名称。",
+        "duplicateName": "名称“{{name}}”已被另一个输出使用。",
+        "valueRequired": "“value”输入必须连接到一个来源。"
+      },
+      "getVariable": {
+        "noSelection": "必须选择一个变量。",
+        "unknown": "变量“{{name}}”在场景中不存在。"
+      },
+      "setVariable": {
+        "missingName": "要设置的变量必须有名称。"
+      },
+      "object": {
+        "propMissingName": "每个属性都必须有名称。",
+        "propDuplicate": "属性名“{{name}}”重复了。"
+      },
+      "arithmetic": {
+        "divisionByZero": "不能除以零。"
+      },
+      "switch": {
+        "caseDuplicate": "分支值「{{value}}」重复。"
+      },
+      "transform": {
+        "emptyTemplate": "模板不能为空。"
+      },
+      "request": {
+        "missing": "关联的请求已不存在。"
+      },
+      "runScenario": {
+        "missing": "关联的场景已不存在。",
+        "requiredInput": "必填输入「{{name}}」必须连接到数据源。"
+      }
+    },
+    "usage": {
+      "button": "使用此请求的场景",
+      "title": "此请求被用于以下场景:"
     }
   }
 }

@@ -180,6 +180,14 @@
       "itemMessage": "Sigur doriți să ștergeți \"{{name}}\"?",
       "confirm": "Șterge",
       "cancel": "Anulează"
+    },
+    "scenarioDelete": {
+      "title": "Șterge o cerere folosită de scenarii",
+      "message": "„{{name}}” este folosită în următoarele scenarii. Ce doriți să faceți?",
+      "belongsTag": "aparține acestui scenariu",
+      "moveInto": "Mută în acest scenariu",
+      "affectsNote": "Ștergerea acestei cereri o va elimina și din aceste scenarii.",
+      "deleteAnyway": "Șterge oricum"
     }
   },
   "environment": {
@@ -866,6 +874,56 @@
       "orphanInput": "Niciun parametru \"{{name}}\" corespunzător în subscenariu",
       "orphanOutput": "Nicio ieșire \"{{name}}\" corespunzătoare în subscenariu",
       "then": "apoi"
+    },
+    "validation": {
+      "missingName": "Această casetă trebuie să aibă un nume.",
+      "duplicateName": "Numele „{{name}}” este deja folosit de altă casetă.",
+      "panelTitle": "{{count}} casetă(e) cu erori",
+      "focusBox": "Mergi la această casetă",
+      "showErrors": "Afișează erorile",
+      "input": {
+        "missingName": "Acest parametru de intrare trebuie să aibă un nume."
+      },
+      "dataLink": {
+        "emptyPath": "Legătura de date primită necesită o cale (JSON path).",
+        "badPath": "Calea JSON „{{path}}” a legăturii de date este invalidă."
+      },
+      "output": {
+        "missingName": "Această ieșire trebuie să aibă un nume.",
+        "duplicateName": "Numele „{{name}}” este deja folosit de altă ieșire.",
+        "valueRequired": "Intrarea „value” trebuie conectată la o sursă."
+      },
+      "getVariable": {
+        "noSelection": "Trebuie selectată o variabilă.",
+        "unknown": "Variabila „{{name}}” nu există în scenariu."
+      },
+      "setVariable": {
+        "missingName": "Variabila de setat trebuie să aibă un nume."
+      },
+      "object": {
+        "propMissingName": "Fiecare proprietate trebuie să aibă un nume.",
+        "propDuplicate": "Numele de proprietate „{{name}}” este duplicat."
+      },
+      "arithmetic": {
+        "divisionByZero": "Împărțirea la zero este imposibilă."
+      },
+      "switch": {
+        "caseDuplicate": "Valoarea cazului „{{value}}” este duplicată."
+      },
+      "transform": {
+        "emptyTemplate": "Șablonul nu trebuie să fie gol."
+      },
+      "request": {
+        "missing": "Cererea asociată nu mai există."
+      },
+      "runScenario": {
+        "missing": "Scenariul asociat nu mai există.",
+        "requiredInput": "Intrarea obligatorie „{{name}}” trebuie conectată la o sursă."
+      }
+    },
+    "usage": {
+      "button": "Scenarii care folosesc această cerere",
+      "title": "Această cerere este folosită în scenariile:"
     }
   }
 }

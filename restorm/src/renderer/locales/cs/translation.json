@@ -181,6 +181,14 @@
       "itemMessage": "Opravdu chcete smazat „{{name}}“?",
       "confirm": "Smazat",
       "cancel": "Zrušit"
+    },
+    "scenarioDelete": {
+      "title": "Smazat požadavek používaný scénáři",
+      "message": "„{{name}}“ se používá v následujících scénářích. Co chcete udělat?",
+      "belongsTag": "patří k tomuto scénáři",
+      "moveInto": "Přesunout do tohoto scénáře",
+      "affectsNote": "Smazáním tohoto požadavku jej také odeberete z těchto scénářů.",
+      "deleteAnyway": "Přesto smazat"
     }
   },
   "environment": {
@@ -867,6 +875,56 @@
       "orphanInput": "V dílčím scénáři chybí odpovídající parametr „{{name}}“",
       "orphanOutput": "V dílčím scénáři chybí odpovídající výstup „{{name}}“",
       "then": "poté"
+    },
+    "validation": {
+      "missingName": "Tento blok musí mít název.",
+      "duplicateName": "Název „{{name}}“ už používá jiný blok.",
+      "panelTitle": "Chyby bloků: {{count}}",
+      "focusBox": "Přejít na tento blok",
+      "showErrors": "Zobrazit chyby",
+      "input": {
+        "missingName": "Tento vstupní parametr musí mít název."
+      },
+      "dataLink": {
+        "emptyPath": "Příchozí datový odkaz vyžaduje cestu (JSON path).",
+        "badPath": "Cesta JSON „{{path}}“ datového odkazu je neplatná."
+      },
+      "output": {
+        "missingName": "Tento výstup musí mít název.",
+        "duplicateName": "Název „{{name}}“ už používá jiný výstup.",
+        "valueRequired": "Vstup „value“ musí být připojen ke zdroji."
+      },
+      "getVariable": {
+        "noSelection": "Je nutné vybrat proměnnou.",
+        "unknown": "Proměnná „{{name}}“ ve scénáři neexistuje."
+      },
+      "setVariable": {
+        "missingName": "Nastavovaná proměnná musí mít název."
+      },
+      "object": {
+        "propMissingName": "Každá vlastnost musí mít název.",
+        "propDuplicate": "Název vlastnosti „{{name}}“ je duplicitní."
+      },
+      "arithmetic": {
+        "divisionByZero": "Dělení nulou není možné."
+      },
+      "switch": {
+        "caseDuplicate": "Hodnota případu „{{value}}“ je duplicitní."
+      },
+      "transform": {
+        "emptyTemplate": "Šablona nesmí být prázdná."
+      },
+      "request": {
+        "missing": "Propojený požadavek již neexistuje."
+      },
+      "runScenario": {
+        "missing": "Propojený scénář již neexistuje.",
+        "requiredInput": "Povinný vstup „{{name}}“ musí být připojen ke zdroji."
+      }
+    },
+    "usage": {
+      "button": "Scénáře používající tento požadavek",
+      "title": "Tento požadavek se používá ve scénářích:"
     }
   }
 }

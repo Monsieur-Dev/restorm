@@ -178,6 +178,14 @@
       "itemMessage": "Bạn có chắc chắn muốn xóa \"{{name}}\" không?",
       "confirm": "Xóa",
       "cancel": "Hủy"
+    },
+    "scenarioDelete": {
+      "title": "Xóa một yêu cầu được kịch bản sử dụng",
+      "message": "\"{{name}}\" được dùng trong các kịch bản sau. Bạn muốn làm gì?",
+      "belongsTag": "thuộc về kịch bản này",
+      "moveInto": "Chuyển vào kịch bản này",
+      "affectsNote": "Xóa yêu cầu này cũng sẽ gỡ nó khỏi các kịch bản này.",
+      "deleteAnyway": "Vẫn xóa"
     }
   },
   "environment": {
@@ -864,6 +872,56 @@
       "orphanInput": "Không có tham số \"{{name}}\" khớp trong kịch bản con",
       "orphanOutput": "Không có đầu ra \"{{name}}\" khớp trong kịch bản con",
       "then": "rồi"
+    },
+    "validation": {
+      "missingName": "Hộp này phải có tên.",
+      "duplicateName": "Tên \"{{name}}\" đã được hộp khác sử dụng.",
+      "panelTitle": "{{count}} lỗi hộp",
+      "focusBox": "Đến hộp này",
+      "showErrors": "Hiện lỗi",
+      "input": {
+        "missingName": "Tham số đầu vào này phải có tên."
+      },
+      "dataLink": {
+        "emptyPath": "Liên kết dữ liệu đến cần một đường dẫn (JSON path).",
+        "badPath": "Đường dẫn JSON \"{{path}}\" của liên kết dữ liệu không hợp lệ."
+      },
+      "output": {
+        "missingName": "Đầu ra này phải có tên.",
+        "duplicateName": "Tên \"{{name}}\" đã được đầu ra khác sử dụng.",
+        "valueRequired": "Đầu vào \"value\" phải được nối với một nguồn."
+      },
+      "getVariable": {
+        "noSelection": "Phải chọn một biến.",
+        "unknown": "Biến \"{{name}}\" không tồn tại trong kịch bản."
+      },
+      "setVariable": {
+        "missingName": "Biến cần đặt phải có tên."
+      },
+      "object": {
+        "propMissingName": "Mỗi thuộc tính phải có tên.",
+        "propDuplicate": "Tên thuộc tính \"{{name}}\" bị trùng."
+      },
+      "arithmetic": {
+        "divisionByZero": "Không thể chia cho số không."
+      },
+      "switch": {
+        "caseDuplicate": "Giá trị case \"{{value}}\" bị trùng lặp."
+      },
+      "transform": {
+        "emptyTemplate": "Mẫu không được để trống."
+      },
+      "request": {
+        "missing": "Yêu cầu được liên kết không còn tồn tại."
+      },
+      "runScenario": {
+        "missing": "Kịch bản được liên kết không còn tồn tại.",
+        "requiredInput": "Đầu vào bắt buộc \"{{name}}\" phải được nối với một nguồn."
+      }
+    },
+    "usage": {
+      "button": "Các kịch bản sử dụng yêu cầu này",
+      "title": "Yêu cầu này được dùng trong các kịch bản:"
     }
   }
 }

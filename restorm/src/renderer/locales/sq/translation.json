@@ -179,6 +179,14 @@
       "itemMessage": "Jeni i sigurt se doni të fshini \"{{name}}\"?",
       "confirm": "Fshi",
       "cancel": "Anulo"
+    },
+    "scenarioDelete": {
+      "title": "Fshi një kërkesë të përdorur nga skenarët",
+      "message": "«{{name}}» përdoret në skenarët e mëposhtëm. Çfarë doni të bëni?",
+      "belongsTag": "i përket këtij skenari",
+      "moveInto": "Zhvendos në këtë skenar",
+      "affectsNote": "Fshirja e kësaj kërkese do ta heqë atë edhe nga këta skenarë.",
+      "deleteAnyway": "Fshi gjithsesi"
     }
   },
   "environment": {
@@ -865,6 +873,56 @@
       "orphanInput": "Asnjë parametër \"{{name}}\" përkatës në nën-skenar",
       "orphanOutput": "Asnjë dalje \"{{name}}\" përkatëse në nën-skenar",
       "then": "pastaj"
+    },
+    "validation": {
+      "missingName": "Kjo kuti duhet të ketë një emër.",
+      "duplicateName": "Emri «{{name}}» përdoret tashmë nga një kuti tjetër.",
+      "panelTitle": "{{count}} gabim(e) kutie",
+      "focusBox": "Shko te kjo kuti",
+      "showErrors": "Shfaq gabimet",
+      "input": {
+        "missingName": "Ky parametër hyrës duhet të ketë një emër."
+      },
+      "dataLink": {
+        "emptyPath": "Lidhja hyrëse e të dhënave kërkon një rrugë (JSON path).",
+        "badPath": "Rruga JSON «{{path}}» e lidhjes së të dhënave është e pavlefshme."
+      },
+      "output": {
+        "missingName": "Kjo dalje duhet të ketë një emër.",
+        "duplicateName": "Emri «{{name}}» përdoret tashmë nga një dalje tjetër.",
+        "valueRequired": "Hyrja «value» duhet të lidhet me një burim."
+      },
+      "getVariable": {
+        "noSelection": "Duhet zgjedhur një variabël.",
+        "unknown": "Variabla «{{name}}» nuk ekziston në skenar."
+      },
+      "setVariable": {
+        "missingName": "Variabla që do të caktohet duhet të ketë një emër."
+      },
+      "object": {
+        "propMissingName": "Çdo veti duhet të ketë një emër.",
+        "propDuplicate": "Emri i vetisë «{{name}}» është i dyfishtë."
+      },
+      "arithmetic": {
+        "divisionByZero": "Pjesëtimi me zero është i pamundur."
+      },
+      "switch": {
+        "caseDuplicate": "Vlera e rastit «{{value}}» është e dyfishuar."
+      },
+      "transform": {
+        "emptyTemplate": "Shablloni nuk duhet të jetë bosh."
+      },
+      "request": {
+        "missing": "Kërkesa e lidhur nuk ekziston më."
+      },
+      "runScenario": {
+        "missing": "Skenari i lidhur nuk ekziston më.",
+        "requiredInput": "Hyrja e detyrueshme «{{name}}» duhet të lidhet me një burim."
+      }
+    },
+    "usage": {
+      "button": "Skenarët që përdorin këtë kërkesë",
+      "title": "Kjo kërkesë përdoret në skenarët:"
     }
   }
 }

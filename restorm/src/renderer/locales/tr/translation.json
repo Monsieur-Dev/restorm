@@ -179,6 +179,14 @@
       "itemMessage": "\"{{name}}\" öğesini silmek istediğinize emin misiniz?",
       "confirm": "Sil",
       "cancel": "İptal"
+    },
+    "scenarioDelete": {
+      "title": "Senaryolarda kullanılan bir isteği sil",
+      "message": "\"{{name}}\" şu senaryolarda kullanılıyor. Ne yapmak istersiniz?",
+      "belongsTag": "bu senaryoya ait",
+      "moveInto": "Bu senaryoya taşı",
+      "affectsNote": "Bu isteği silmek onu bu senaryolardan da kaldırır.",
+      "deleteAnyway": "Yine de sil"
     }
   },
   "environment": {
@@ -865,6 +873,56 @@
       "orphanInput": "Alt senaryoda eşleşen \"{{name}}\" parametresi yok",
       "orphanOutput": "Alt senaryoda eşleşen \"{{name}}\" çıktısı yok",
       "then": "sonra"
+    },
+    "validation": {
+      "missingName": "Bu kutunun bir adı olmalı.",
+      "duplicateName": "\"{{name}}\" adı zaten başka bir kutu tarafından kullanılıyor.",
+      "panelTitle": "{{count}} kutu hatası",
+      "focusBox": "Bu kutuya git",
+      "showErrors": "Hataları göster",
+      "input": {
+        "missingName": "Bu giriş parametresinin bir adı olmalı."
+      },
+      "dataLink": {
+        "emptyPath": "Gelen veri bağlantısı bir JSON yolu gerektirir.",
+        "badPath": "Veri bağlantısının \"{{path}}\" JSON yolu geçersiz."
+      },
+      "output": {
+        "missingName": "Bu çıktının bir adı olmalı.",
+        "duplicateName": "\"{{name}}\" adı zaten başka bir çıktı tarafından kullanılıyor.",
+        "valueRequired": "\"value\" girişi bir kaynağa bağlanmalı."
+      },
+      "getVariable": {
+        "noSelection": "Bir değişken seçilmeli.",
+        "unknown": "\"{{name}}\" değişkeni senaryoda yok."
+      },
+      "setVariable": {
+        "missingName": "Ayarlanacak değişkenin bir adı olmalı."
+      },
+      "object": {
+        "propMissingName": "Her özelliğin bir adı olmalı.",
+        "propDuplicate": "\"{{name}}\" özellik adı yinelenmiş."
+      },
+      "arithmetic": {
+        "divisionByZero": "Sıfıra bölme mümkün değil."
+      },
+      "switch": {
+        "caseDuplicate": "\"{{value}}\" durum değeri yinelenmiş."
+      },
+      "transform": {
+        "emptyTemplate": "Şablon boş olmamalıdır."
+      },
+      "request": {
+        "missing": "Bağlı istek artık mevcut değil."
+      },
+      "runScenario": {
+        "missing": "Bağlı senaryo artık mevcut değil.",
+        "requiredInput": "Zorunlu giriş \"{{name}}\" bir kaynağa bağlanmalıdır."
+      }
+    },
+    "usage": {
+      "button": "Bu isteği kullanan senaryolar",
+      "title": "Bu istek şu senaryolarda kullanılıyor:"
     }
   }
 }

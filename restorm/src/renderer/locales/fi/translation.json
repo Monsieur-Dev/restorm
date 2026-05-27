@@ -179,6 +179,14 @@
       "itemMessage": "Haluatko varmasti poistaa kohteen \"{{name}}\"?",
       "confirm": "Poista",
       "cancel": "Peruuta"
+    },
+    "scenarioDelete": {
+      "title": "Poista skenaarioiden käyttämä pyyntö",
+      "message": "”{{name}}” on käytössä seuraavissa skenaarioissa. Mitä haluat tehdä?",
+      "belongsTag": "kuuluu tähän skenaarioon",
+      "moveInto": "Siirrä tähän skenaarioon",
+      "affectsNote": "Tämän pyynnön poistaminen poistaa sen myös näistä skenaarioista.",
+      "deleteAnyway": "Poista silti"
     }
   },
   "environment": {
@@ -865,6 +873,56 @@
       "orphanInput": "Aliskenaariossa ei ole vastaavaa parametria \"{{name}}\"",
       "orphanOutput": "Aliskenaariossa ei ole vastaavaa tulostetta \"{{name}}\"",
       "then": "sitten"
+    },
+    "validation": {
+      "missingName": "Tällä laatikolla on oltava nimi.",
+      "duplicateName": "Nimi ”{{name}}” on jo toisen laatikon käytössä.",
+      "panelTitle": "{{count}} laatikkovirhe(ttä)",
+      "focusBox": "Siirry tähän laatikkoon",
+      "showErrors": "Näytä virheet",
+      "input": {
+        "missingName": "Tällä syöteparametrilla on oltava nimi."
+      },
+      "dataLink": {
+        "emptyPath": "Saapuva datalinkki tarvitsee JSON-polun.",
+        "badPath": "Datalinkin JSON-polku ”{{path}}” on virheellinen."
+      },
+      "output": {
+        "missingName": "Tällä tulosteella on oltava nimi.",
+        "duplicateName": "Nimi ”{{name}}” on jo toisen tulosteen käytössä.",
+        "valueRequired": "Syöte ”value” on liitettävä lähteeseen."
+      },
+      "getVariable": {
+        "noSelection": "Muuttuja on valittava.",
+        "unknown": "Muuttujaa ”{{name}}” ei ole skenaariossa."
+      },
+      "setVariable": {
+        "missingName": "Asetettavalla muuttujalla on oltava nimi."
+      },
+      "object": {
+        "propMissingName": "Jokaisella ominaisuudella on oltava nimi.",
+        "propDuplicate": "Ominaisuuden nimi ”{{name}}” on kahdesti."
+      },
+      "arithmetic": {
+        "divisionByZero": "Nollalla jakaminen ei ole mahdollista."
+      },
+      "switch": {
+        "caseDuplicate": "Tapauksen arvo ”{{value}}” on kahdennettu."
+      },
+      "transform": {
+        "emptyTemplate": "Mallipohja ei saa olla tyhjä."
+      },
+      "request": {
+        "missing": "Liitettyä pyyntöä ei enää ole."
+      },
+      "runScenario": {
+        "missing": "Liitettyä skenaariota ei enää ole.",
+        "requiredInput": "Pakollinen syöte ”{{name}}” on liitettävä lähteeseen."
+      }
+    },
+    "usage": {
+      "button": "Skenaariot, jotka käyttävät tätä pyyntöä",
+      "title": "Tätä pyyntöä käytetään skenaarioissa:"
     }
   }
 }

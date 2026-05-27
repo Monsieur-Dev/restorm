@@ -179,6 +179,14 @@
       "itemMessage": "Weet je zeker dat je \"{{name}}\" wilt verwijderen?",
       "confirm": "Verwijderen",
       "cancel": "Annuleren"
+    },
+    "scenarioDelete": {
+      "title": "Een door scenario's gebruikte aanvraag verwijderen",
+      "message": "\"{{name}}\" wordt gebruikt in de volgende scenario's. Wat wilt u doen?",
+      "belongsTag": "hoort bij dit scenario",
+      "moveInto": "Naar dit scenario verplaatsen",
+      "affectsNote": "Deze aanvraag verwijderen haalt deze ook uit deze scenario's.",
+      "deleteAnyway": "Toch verwijderen"
     }
   },
   "environment": {
@@ -865,6 +873,56 @@
       "orphanInput": "Geen overeenkomende parameter \"{{name}}\" in het subscenario",
       "orphanOutput": "Geen overeenkomende uitvoer \"{{name}}\" in het subscenario",
       "then": "dan"
+    },
+    "validation": {
+      "missingName": "Dit blok moet een naam hebben.",
+      "duplicateName": "De naam ‘{{name}}’ wordt al door een ander blok gebruikt.",
+      "panelTitle": "{{count}} blokfout(en)",
+      "focusBox": "Naar dit blok gaan",
+      "showErrors": "Fouten tonen",
+      "input": {
+        "missingName": "Deze invoerparameter moet een naam hebben."
+      },
+      "dataLink": {
+        "emptyPath": "De inkomende datakoppeling heeft een JSON-pad nodig.",
+        "badPath": "Het JSON-pad ‘{{path}}’ van de datakoppeling is ongeldig."
+      },
+      "output": {
+        "missingName": "Deze uitvoer moet een naam hebben.",
+        "duplicateName": "De naam ‘{{name}}’ wordt al door een andere uitvoer gebruikt.",
+        "valueRequired": "De invoer ‘value’ moet aan een bron gekoppeld zijn."
+      },
+      "getVariable": {
+        "noSelection": "Er moet een variabele worden geselecteerd.",
+        "unknown": "De variabele ‘{{name}}’ bestaat niet in het scenario."
+      },
+      "setVariable": {
+        "missingName": "De in te stellen variabele moet een naam hebben."
+      },
+      "object": {
+        "propMissingName": "Elke eigenschap moet een naam hebben.",
+        "propDuplicate": "De eigenschapsnaam ‘{{name}}’ is dubbel."
+      },
+      "arithmetic": {
+        "divisionByZero": "Delen door nul is onmogelijk."
+      },
+      "switch": {
+        "caseDuplicate": "De case-waarde \"{{value}}\" is dubbel."
+      },
+      "transform": {
+        "emptyTemplate": "De sjabloon mag niet leeg zijn."
+      },
+      "request": {
+        "missing": "De gekoppelde aanvraag bestaat niet meer."
+      },
+      "runScenario": {
+        "missing": "Het gekoppelde scenario bestaat niet meer.",
+        "requiredInput": "De vereiste invoer \"{{name}}\" moet aan een bron worden gekoppeld."
+      }
+    },
+    "usage": {
+      "button": "Scenario's die deze aanvraag gebruiken",
+      "title": "Deze aanvraag wordt gebruikt in de scenario's:"
     }
   }
 }

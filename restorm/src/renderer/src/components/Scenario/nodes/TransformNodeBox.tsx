@@ -2,6 +2,7 @@ import React from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
+import { useScenarioFieldInvalid } from '../scenarioErrorsContext'
 import { TypedValueField } from '../../TypedValueField'
 import type { ValueTypeKind } from '../../TypedValueField/castValue'
 import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroups'
@@ -28,6 +29,7 @@ export const TransformNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id,
   const { t } = useTranslation()
   const valueTypeGroups = useAllEnvValueTypeGroups()
   const config = data.config ?? {}
+  const exprInvalid = useScenarioFieldInvalid(id, 'expression')
   const left: ScenarioNodeSection[] = [
     {
       id: 'main',
@@ -36,7 +38,7 @@ export const TransformNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id,
         {
           id: 'expr',
           content: (
-            <div className="nodrag scn-template-field" onMouseDown={(e) => { e.stopPropagation() }}>
+            <div className={`nodrag scn-template-field${exprInvalid ? ' scn-field-invalid' : ''}`} onMouseDown={(e) => { e.stopPropagation() }}>
               <div className="scn-field-caption">{t('keyValueTable.types.expression', 'Expression')}</div>
               <TypedValueField
                 value={config['expression'] !== undefined ? normalizeValueType(config['expression']) : new ExpressionValue('')}

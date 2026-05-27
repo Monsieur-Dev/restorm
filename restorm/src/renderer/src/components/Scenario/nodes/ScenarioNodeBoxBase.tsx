@@ -1,9 +1,10 @@
-import React, { useCallback, useMemo, useState, type CSSProperties, type ReactNode } from 'react'
+import React, { useCallback, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { Handle, Position, useNodeConnections, type Node } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
-import { getContrastColor, MarkdownViewer } from 'electron-core-ui/renderer'
+import { getContrastColor, MarkdownViewer, Tooltip } from 'electron-core-ui/renderer'
 import type { ScenarioNodeKind, ScenarioPort, ScenarioPortRole, PortFlow } from '../../../../../shared/types/collections'
 import { scenarioNodeMeta } from '../scenarioNodeCatalogue'
+import { useScenarioNodeErrors } from '../scenarioErrorsContext'
 import { ROLE_COLOR, handleTop } from '../scenarioGraphMapping'
 import { ScenarioNodeSection } from './ScenarioNodeSection'
 import { anchorColor, cellBody, portAnchorColor, inputFlowRingClass, outputFlowRingClass, cellInputRingClass, cellOutputRingClass } from './scenarioCellRender'
@@ -120,6 +121,12 @@ const STATUS_GLYPH: Record<NonNullable<ScenarioNodeBoxData['status']>, string> =
 export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, data, selected, left, right, headerIcon, title, launchInput, headerEventOutput, canPlay, hasError }) => {
   const { t } = useTranslation()
   const meta = scenarioNodeMeta(data.kind)
+  // A box in a non-executable state (missing name, unsatisfied input, …) is
+  // flagged red and its play button disabled; the errors are aggregated into
+  // the workflow error panel.
+  const errors = useScenarioNodeErrors(id)
+  const boxInError = errors.length > 0
+  const errorTitle = boxInError ? errors.map((e) => e.message).join('\n') : undefined
   const collapsed = data.collapsed === true
   const note = data.note
   const leftRows = left.flatMap((s) => s.rows)
@@ -152,10 +159,13 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
   // flight the button flips to a stop glyph; clicking it then cancels (the
   // in-flight promise's `.finally` clears `running` when it settles).
   const [running, setRunning] = useState(false)
+  // The header "!" badge reveals a tooltip listing this box's errors on hover.
+  const [showErrors, setShowErrors] = useState(false)
+  const errBadgeRef = useRef<HTMLSpanElement>(null)
   const scenarioId = data.scenarioId
   const onPlay = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
-    if (!scenarioId) return
+    if (!scenarioId || boxInError) return
     const rt = (window as {
       restorm?: {
         runtime?: {
@@ -172,10 +182,10 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
     const run = rt?.runScenarioNode?.(scenarioId, id)
     if (run) void run.finally(() => { setRunning(false) })
     else setRunning(false)
-  }, [scenarioId, id, running])
+  }, [scenarioId, id, running, boxInError])
 
   return (
-    <div className={`scn-node ${selected ? 'scn-node-selected' : ''} ${collapsed ? 'scn-node-collapsed' : ''}`} data-testid={`scn-node-${data.kind}`}>
+    <div className={`scn-node ${selected ? 'scn-node-selected' : ''} ${collapsed ? 'scn-node-collapsed' : ''} ${boxInError ? 'scn-node-error' : ''}`} data-testid={`scn-node-${data.kind}`} {...(errorTitle ? { title: errorTitle } : {})}>
       <div className={`scn-node-header ${launchInput ? 'scn-node-header-has-launch' : ''} ${headerEventOutput ? 'scn-node-header-has-event' : ''}`} style={headerStyle} onContextMenu={onHeaderContextMenu}>
         {launchInput && (
           <Handle
@@ -205,17 +215,46 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
         {data.status && data.status !== 'idle' && (
           <i className={`codicon codicon-${STATUS_GLYPH[data.status]} scn-node-status scn-node-status-${data.status}`} aria-hidden="true" />
         )}
+        {boxInError && (
+          <span
+            ref={errBadgeRef}
+            className="scn-node-errbadge nodrag"
+            data-testid="scn-node-error-badge"
+            aria-label={t('scenario.validation.showErrors', 'Show errors')}
+            onMouseEnter={() => { setShowErrors(true) }}
+            onMouseLeave={() => { setShowErrors(false) }}
+          >
+            <i className="codicon codicon-error" aria-hidden="true" />
+          </span>
+        )}
         <button
           type="button"
-          className={`scn-node-play nodrag ${running ? 'scn-node-play-running' : canPlay ? 'scn-node-play-ready' : 'scn-node-play-idle'}`}
+          className={`scn-node-play nodrag ${running ? 'scn-node-play-running' : boxInError ? 'scn-node-play-disabled' : canPlay ? 'scn-node-play-ready' : 'scn-node-play-idle'}`}
           onMouseDown={(e) => { e.stopPropagation() }}
           onClick={onPlay}
+          disabled={boxInError}
           aria-label={running ? 'Stop node' : 'Run node'}
-          title={running ? 'Stop node' : 'Run node'}
+          title={boxInError ? errorTitle : running ? 'Stop node' : 'Run node'}
         >
           <i className={`codicon codicon-${running ? 'debug-stop' : 'play-circle'}`} aria-hidden="true" />
         </button>
       </div>
+
+      {boxInError && (
+        <Tooltip
+          targetRef={errBadgeRef}
+          show={showErrors}
+          placement="below"
+          data-testid="scn-node-error-popover"
+          onMouseEnter={() => { setShowErrors(true) }}
+          onMouseLeave={() => { setShowErrors(false) }}
+          content={
+            <div className="scn-node-errpopover-body">
+              {errors.map((e) => (<div key={e.code} className="scn-node-errpopover-row">{e.message}</div>))}
+            </div>
+          }
+        />
+      )}
 
       {!collapsed && note && (
         <div className="scn-node-notes nodrag">
@@ -230,6 +269,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
               <ScenarioNodeSection
                 key={section.id}
                 section={section}
+                nodeId={id}
                 connectedInputs={connectedInputs}
                 nodeKind={data.kind}
                 nodeInputs={data.inputs}

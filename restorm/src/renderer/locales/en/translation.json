@@ -179,6 +179,14 @@
       "itemMessage": "Are you sure you want to delete \"{{name}}\"?",
       "confirm": "Delete",
       "cancel": "Cancel"
+    },
+    "scenarioDelete": {
+      "title": "Delete a request used by scenarios",
+      "message": "\"{{name}}\" is used in the following scenarios. What do you want to do?",
+      "belongsTag": "belongs to this scenario",
+      "moveInto": "Move into this scenario",
+      "affectsNote": "Deleting this request will also remove it from these scenarios.",
+      "deleteAnyway": "Delete anyway"
     }
   },
   "environment": {
@@ -865,6 +873,56 @@
       "orphanInput": "No matching parameter \"{{name}}\" in the sub-scenario",
       "orphanOutput": "No matching output \"{{name}}\" in the sub-scenario",
       "then": "then"
+    },
+    "validation": {
+      "missingName": "This box must have a name.",
+      "duplicateName": "The name \"{{name}}\" is already used by another box.",
+      "panelTitle": "{{count}} box error(s)",
+      "focusBox": "Focus this box",
+      "showErrors": "Show errors",
+      "input": {
+        "missingName": "This input parameter must have a name."
+      },
+      "dataLink": {
+        "emptyPath": "The incoming data link needs a JSON path.",
+        "badPath": "The data link JSON path \"{{path}}\" is malformed."
+      },
+      "output": {
+        "missingName": "This output must have a name.",
+        "duplicateName": "The name \"{{name}}\" is already used by another output.",
+        "valueRequired": "The \"value\" input must be wired to a source."
+      },
+      "getVariable": {
+        "noSelection": "A variable must be selected.",
+        "unknown": "The variable \"{{name}}\" does not exist in the scenario."
+      },
+      "setVariable": {
+        "missingName": "The variable to set must have a name."
+      },
+      "object": {
+        "propMissingName": "Each property must have a name.",
+        "propDuplicate": "The property name \"{{name}}\" is duplicated."
+      },
+      "arithmetic": {
+        "divisionByZero": "Division by zero is impossible."
+      },
+      "switch": {
+        "caseDuplicate": "The case value \"{{value}}\" is duplicated."
+      },
+      "transform": {
+        "emptyTemplate": "The template must not be empty."
+      },
+      "request": {
+        "missing": "The bound request no longer exists."
+      },
+      "runScenario": {
+        "missing": "The bound scenario no longer exists.",
+        "requiredInput": "The required input \"{{name}}\" must be wired to a source."
+      }
+    },
+    "usage": {
+      "button": "Scenarios using this request",
+      "title": "This request is used in the scenarios:"
     }
   }
 }

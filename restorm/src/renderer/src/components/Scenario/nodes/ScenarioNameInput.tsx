@@ -5,6 +5,8 @@ interface ScenarioNameInputProps {
   value: string
   placeholder: string
   onCommit: (next: string) => void
+  /** Outline the field red when it's the target of a validation error. */
+  invalid?: boolean
   'data-testid'?: string
 }
 
@@ -19,10 +21,11 @@ export const ScenarioNameInput: React.FC<ScenarioNameInputProps> = ({
   value,
   placeholder,
   onCommit,
+  invalid,
   'data-testid': dataTestId
 }) => (
   <InputBox
-    className="scn-name-input nodrag"
+    className={`scn-name-input nodrag${invalid ? ' scn-field-invalid' : ''}`}
     options={{ placeholder, ariaLabel: placeholder }}
     value={value}
     onChange={onCommit}

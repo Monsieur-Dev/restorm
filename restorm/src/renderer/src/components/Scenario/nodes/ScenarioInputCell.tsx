@@ -6,9 +6,11 @@ import { isDataLink } from '../scenarioPathTree'
 import { cellBody } from './scenarioCellRender'
 import type { ScenarioNodeCell } from './ScenarioNodeBoxBase'
 import { ScenarioPathSelector } from './ScenarioPathSelector'
+import { useScenarioFieldInvalid } from '../scenarioErrorsContext'
 
 export interface ScenarioInputCellProps {
   cell: ScenarioNodeCell
+  nodeId: string
   nodeKind: ScenarioNodeKind
   nodeInputs: ScenarioPort[]
   scenarioId?: string
@@ -20,12 +22,15 @@ export interface ScenarioInputCellProps {
  * the JSON-path selector on that edge instead of a plain label. Otherwise it
  * renders the normal cell body.
  */
-export const ScenarioInputCell: React.FC<ScenarioInputCellProps> = ({ cell, nodeKind, nodeInputs, scenarioId }) => {
+export const ScenarioInputCell: React.FC<ScenarioInputCellProps> = ({ cell, nodeId, nodeKind, nodeInputs, scenarioId }) => {
   const portId = cell.port?.type === 'target' ? cell.port.id : undefined
   // Hooks run unconditionally; a missing port resolves to no connection.
   const connections = useNodeConnections({ handleType: 'target', handleId: portId ?? '' })
   const incoming = connections[0]
   const sourceData = useNodesData(incoming?.source ?? '')
+  // This cell's field is the target of a validation error (e.g. an empty
+  // JSON-path on the data link) → outline its control group in red.
+  const invalid = useScenarioFieldInvalid(nodeId, cell.id)
 
   // An orphan stub (a stale port kept only to anchor a broken edge) keeps its
   // red warning label rather than a JSON-path selector.
@@ -41,6 +46,7 @@ export const ScenarioInputCell: React.FC<ScenarioInputCellProps> = ({ cell, node
         <ScenarioPathSelector
           edgeId={incoming.edgeId}
           sourceNodeId={incoming.source}
+          invalid={invalid}
           {...(scenarioId !== undefined ? { scenarioId } : {})}
           {...(cell.label !== undefined ? { label: cell.label } : {})}
         />

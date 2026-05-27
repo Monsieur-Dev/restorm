@@ -179,6 +179,14 @@
       "itemMessage": "Är du säker på att du vill ta bort \"{{name}}\"?",
       "confirm": "Ta bort",
       "cancel": "Avbryt"
+    },
+    "scenarioDelete": {
+      "title": "Ta bort en begäran som används av scenarier",
+      "message": "”{{name}}” används i följande scenarier. Vad vill du göra?",
+      "belongsTag": "tillhör detta scenario",
+      "moveInto": "Flytta in i detta scenario",
+      "affectsNote": "Att ta bort denna begäran tar även bort den från dessa scenarier.",
+      "deleteAnyway": "Ta bort ändå"
     }
   },
   "environment": {
@@ -865,6 +873,56 @@
       "orphanInput": "Ingen matchande parameter \"{{name}}\" i underscenariot",
       "orphanOutput": "Ingen matchande utdata \"{{name}}\" i underscenariot",
       "then": "sedan"
+    },
+    "validation": {
+      "missingName": "Den här rutan måste ha ett namn.",
+      "duplicateName": "Namnet ”{{name}}” används redan av en annan ruta.",
+      "panelTitle": "{{count}} rutfel",
+      "focusBox": "Gå till denna ruta",
+      "showErrors": "Visa fel",
+      "input": {
+        "missingName": "Den här indataparametern måste ha ett namn."
+      },
+      "dataLink": {
+        "emptyPath": "Den inkommande datalänken behöver en JSON-sökväg.",
+        "badPath": "Datalänkens JSON-sökväg ”{{path}}” är ogiltig."
+      },
+      "output": {
+        "missingName": "Den här utdatan måste ha ett namn.",
+        "duplicateName": "Namnet ”{{name}}” används redan av en annan utdata.",
+        "valueRequired": "Indata ”value” måste vara kopplad till en källa."
+      },
+      "getVariable": {
+        "noSelection": "En variabel måste väljas.",
+        "unknown": "Variabeln ”{{name}}” finns inte i scenariot."
+      },
+      "setVariable": {
+        "missingName": "Variabeln som ska anges måste ha ett namn."
+      },
+      "object": {
+        "propMissingName": "Varje egenskap måste ha ett namn.",
+        "propDuplicate": "Egenskapsnamnet ”{{name}}” är duplicerat."
+      },
+      "arithmetic": {
+        "divisionByZero": "Division med noll är omöjlig."
+      },
+      "switch": {
+        "caseDuplicate": "Case-värdet ”{{value}}” är duplicerat."
+      },
+      "transform": {
+        "emptyTemplate": "Mallen får inte vara tom."
+      },
+      "request": {
+        "missing": "Den länkade begäran finns inte längre."
+      },
+      "runScenario": {
+        "missing": "Det länkade scenariot finns inte längre.",
+        "requiredInput": "Den obligatoriska indata ”{{name}}” måste anslutas till en källa."
+      }
+    },
+    "usage": {
+      "button": "Scenarier som använder denna begäran",
+      "title": "Denna begäran används i scenarierna:"
     }
   }
 }

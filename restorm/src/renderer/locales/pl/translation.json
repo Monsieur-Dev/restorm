@@ -181,6 +181,14 @@
       "itemMessage": "Czy na pewno chcesz usunąć „{{name}}”?",
       "confirm": "Usuń",
       "cancel": "Anuluj"
+    },
+    "scenarioDelete": {
+      "title": "Usuń żądanie używane przez scenariusze",
+      "message": "„{{name}}” jest używane w następujących scenariuszach. Co chcesz zrobić?",
+      "belongsTag": "należy do tego scenariusza",
+      "moveInto": "Przenieś do tego scenariusza",
+      "affectsNote": "Usunięcie tego żądania usunie je również z tych scenariuszy.",
+      "deleteAnyway": "Usuń mimo to"
     }
   },
   "environment": {
@@ -867,6 +875,56 @@
       "orphanInput": "Brak pasującego parametru „{{name}}\" w podscenariuszu",
       "orphanOutput": "Brak pasującego wyjścia „{{name}}\" w podscenariuszu",
       "then": "potem"
+    },
+    "validation": {
+      "missingName": "To pole musi mieć nazwę.",
+      "duplicateName": "Nazwa „{{name}}” jest już używana przez inne pole.",
+      "panelTitle": "Błędy pól: {{count}}",
+      "focusBox": "Przejdź do tego pola",
+      "showErrors": "Pokaż błędy",
+      "input": {
+        "missingName": "Ten parametr wejściowy musi mieć nazwę."
+      },
+      "dataLink": {
+        "emptyPath": "Przychodzące połączenie danych wymaga ścieżki (JSON path).",
+        "badPath": "Ścieżka JSON „{{path}}” połączenia danych jest nieprawidłowa."
+      },
+      "output": {
+        "missingName": "To wyjście musi mieć nazwę.",
+        "duplicateName": "Nazwa „{{name}}” jest już używana przez inne wyjście.",
+        "valueRequired": "Wejście „value” musi być połączone ze źródłem."
+      },
+      "getVariable": {
+        "noSelection": "Należy wybrać zmienną.",
+        "unknown": "Zmienna „{{name}}” nie istnieje w scenariuszu."
+      },
+      "setVariable": {
+        "missingName": "Ustawiana zmienna musi mieć nazwę."
+      },
+      "object": {
+        "propMissingName": "Każda właściwość musi mieć nazwę.",
+        "propDuplicate": "Nazwa właściwości „{{name}}” się powtarza."
+      },
+      "arithmetic": {
+        "divisionByZero": "Dzielenie przez zero jest niemożliwe."
+      },
+      "switch": {
+        "caseDuplicate": "Wartość przypadku „{{value}}” jest zduplikowana."
+      },
+      "transform": {
+        "emptyTemplate": "Szablon nie może być pusty."
+      },
+      "request": {
+        "missing": "Powiązane żądanie już nie istnieje."
+      },
+      "runScenario": {
+        "missing": "Powiązany scenariusz już nie istnieje.",
+        "requiredInput": "Wymagane wejście „{{name}}” musi być podłączone do źródła."
+      }
+    },
+    "usage": {
+      "button": "Scenariusze używające tego żądania",
+      "title": "To żądanie jest używane w scenariuszach:"
     }
   }
 }

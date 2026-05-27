@@ -178,6 +178,14 @@
       "itemMessage": "Apakah Anda yakin ingin menghapus \"{{name}}\"?",
       "confirm": "Hapus",
       "cancel": "Batal"
+    },
+    "scenarioDelete": {
+      "title": "Hapus permintaan yang dipakai skenario",
+      "message": "\"{{name}}\" digunakan dalam skenario berikut. Apa yang ingin Anda lakukan?",
+      "belongsTag": "milik skenario ini",
+      "moveInto": "Pindahkan ke skenario ini",
+      "affectsNote": "Menghapus permintaan ini juga akan menghapusnya dari skenario-skenario ini.",
+      "deleteAnyway": "Tetap hapus"
     }
   },
   "environment": {
@@ -864,6 +872,56 @@
       "orphanInput": "Tidak ada parameter \"{{name}}\" yang cocok di sub-skenario",
       "orphanOutput": "Tidak ada output \"{{name}}\" yang cocok di sub-skenario",
       "then": "lalu"
+    },
+    "validation": {
+      "missingName": "Kotak ini harus memiliki nama.",
+      "duplicateName": "Nama \"{{name}}\" sudah dipakai oleh kotak lain.",
+      "panelTitle": "{{count}} kesalahan kotak",
+      "focusBox": "Fokus ke kotak ini",
+      "showErrors": "Tampilkan kesalahan",
+      "input": {
+        "missingName": "Parameter masukan ini harus memiliki nama."
+      },
+      "dataLink": {
+        "emptyPath": "Tautan data masuk memerlukan jalur (JSON path).",
+        "badPath": "Jalur JSON \"{{path}}\" tautan data tidak valid."
+      },
+      "output": {
+        "missingName": "Keluaran ini harus memiliki nama.",
+        "duplicateName": "Nama \"{{name}}\" sudah dipakai oleh keluaran lain.",
+        "valueRequired": "Masukan \"value\" harus terhubung ke sumber."
+      },
+      "getVariable": {
+        "noSelection": "Variabel harus dipilih.",
+        "unknown": "Variabel \"{{name}}\" tidak ada dalam skenario."
+      },
+      "setVariable": {
+        "missingName": "Variabel yang akan diatur harus memiliki nama."
+      },
+      "object": {
+        "propMissingName": "Setiap properti harus memiliki nama.",
+        "propDuplicate": "Nama properti \"{{name}}\" terduplikasi."
+      },
+      "arithmetic": {
+        "divisionByZero": "Pembagian dengan nol tidak mungkin."
+      },
+      "switch": {
+        "caseDuplicate": "Nilai kasus \"{{value}}\" terduplikasi."
+      },
+      "transform": {
+        "emptyTemplate": "Templat tidak boleh kosong."
+      },
+      "request": {
+        "missing": "Permintaan yang ditautkan tidak ada lagi."
+      },
+      "runScenario": {
+        "missing": "Skenario yang ditautkan tidak ada lagi.",
+        "requiredInput": "Input wajib \"{{name}}\" harus terhubung ke sumber."
+      }
+    },
+    "usage": {
+      "button": "Skenario yang menggunakan permintaan ini",
+      "title": "Permintaan ini digunakan dalam skenario:"
     }
   }
 }

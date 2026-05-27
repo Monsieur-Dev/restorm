@@ -2,6 +2,7 @@ import React from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
+import { useScenarioFieldInvalid } from '../scenarioErrorsContext'
 import { SegmentedToggle } from './SegmentedToggle'
 import { TypedValueField } from '../../TypedValueField'
 import type { ValueTypeKind } from '../../TypedValueField/castValue'
@@ -35,13 +36,15 @@ export const ArithmeticNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id
   const config = data.config ?? {}
   const rawOp = config['operator']
   const operator = typeof rawOp === 'string' && (ARITH_OPS as readonly string[]).includes(rawOp) ? rawOp : '+'
+  // `b` is outlined red when it's a literal zero under a ÷ / % operator.
+  const bInvalid = useScenarioFieldInvalid(id, 'b')
 
   const operand = (key: 'a' | 'b'): ScenarioNodeCell => ({
     id: key,
     label: key,
     port: { id: key, type: 'target' },
     content: (
-      <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
+      <div className={`nodrag${key === 'b' && bInvalid ? ' scn-field-invalid' : ''}`} onMouseDown={(e) => { e.stopPropagation() }}>
         <TypedValueField
           // Default to a number — arithmetic operates on numbers, not the
           // generic string default `normalizeValueType` would otherwise yield.

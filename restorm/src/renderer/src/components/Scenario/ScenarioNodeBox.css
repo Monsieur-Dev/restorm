@@ -19,6 +19,26 @@
   overflow: visible;
 }
 
+/* A box in a non-executable (error) state — red border (overrides selected). */
+.scn-node-error,
+.scn-node-error.scn-node-selected {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 1px #ef4444;
+}
+/* Workflow error panel rows (click to focus the box). */
+.scn-error-row {
+  background: none;
+  border: none;
+  padding: 1px 0;
+  margin: 0;
+  font: inherit;
+  font-size: 12px;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.scn-error-row:hover { text-decoration: underline; }
+
 .scn-node-selected {
   border-color: var(--focusBorder, #007fd4);
   box-shadow: 0 0 0 1px var(--focusBorder, #007fd4);
@@ -130,6 +150,26 @@
 .scn-node-play-idle { background: #6b7280; cursor: default; }
 .scn-node-play-running { background: #ef4444; }
 .scn-node-play-running:hover { background: #dc2626; }
+/* A box in a non-executable (error) state: play disabled. */
+.scn-node-play-disabled { background: #6b7280; opacity: 0.45; cursor: not-allowed; }
+
+/* Header "!" error badge — red, right before the play button. Click opens the
+ * ECUI Tooltip listing the box's errors (neutral tooltip background). */
+.scn-node-errbadge {
+  background: none; border: none; padding: 0;
+  /* Push to the right edge of the header content (the play button is absolute
+   * in the reserved padding-right), so the badge sits just before it. */
+  margin-left: auto; margin-right: 2px;
+  color: #ef4444; cursor: pointer; display: inline-flex; align-items: center;
+}
+.scn-node-errbadge .codicon { font-size: 15px !important; color: #ef4444 !important; }
+.scn-node-errbadge:hover .codicon { color: #f87171 !important; }
+.scn-node-errpopover-body { font-size: 12px; white-space: normal; max-width: 280px; }
+.scn-node-errpopover-row { padding: 1px 0; }
+.scn-node-errpopover-row + .scn-node-errpopover-row { margin-top: 2px; }
+
+/* A box field that is the target of a validation error — red outline. */
+.scn-field-invalid { border-radius: 4px; box-shadow: 0 0 0 1px #ef4444; }
 
 .scn-node-status {
   font-size: 13px !important;

@@ -179,6 +179,14 @@
       "itemMessage": "Êtes-vous sûr de vouloir supprimer \"{{name}}\" ?",
       "confirm": "Supprimer",
       "cancel": "Annuler"
+    },
+    "scenarioDelete": {
+      "title": "Supprimer une requête utilisée par des scénarios",
+      "message": "« {{name}} » est utilisée dans les scénarios suivants. Que souhaitez-vous faire ?",
+      "belongsTag": "appartient à ce scénario",
+      "moveInto": "Déplacer dans ce scénario",
+      "affectsNote": "Supprimer cette requête la retirera aussi de ces scénarios.",
+      "deleteAnyway": "Supprimer quand même"
     }
   },
   "environment": {
@@ -865,6 +873,56 @@
       "orphanInput": "Aucun paramètre « {{name}} » correspondant dans le sous-scénario",
       "orphanOutput": "Aucune sortie « {{name}} » correspondante dans le sous-scénario",
       "then": "ensuite"
+    },
+    "validation": {
+      "missingName": "Cette boîte doit avoir un nom.",
+      "duplicateName": "Le nom « {{name}} » est déjà utilisé par une autre boîte.",
+      "panelTitle": "{{count}} boîte(s) en erreur",
+      "focusBox": "Aller à cette boîte",
+      "showErrors": "Voir les erreurs",
+      "input": {
+        "missingName": "Ce paramètre d'entrée doit avoir un nom."
+      },
+      "dataLink": {
+        "emptyPath": "Le lien de données entrant nécessite un chemin (JSON path).",
+        "badPath": "Le chemin (JSON path) « {{path}} » du lien de données est invalide."
+      },
+      "output": {
+        "missingName": "Cette sortie doit avoir un nom.",
+        "duplicateName": "Le nom « {{name}} » est déjà utilisé par une autre sortie.",
+        "valueRequired": "L'entrée « value » doit être reliée à une source."
+      },
+      "getVariable": {
+        "noSelection": "Une variable doit être sélectionnée.",
+        "unknown": "La variable « {{name}} » n'existe pas dans le scénario."
+      },
+      "setVariable": {
+        "missingName": "La variable à définir doit avoir un nom."
+      },
+      "object": {
+        "propMissingName": "Chaque propriété doit avoir un nom.",
+        "propDuplicate": "Le nom de propriété « {{name}} » est en double."
+      },
+      "arithmetic": {
+        "divisionByZero": "La division par zéro est impossible."
+      },
+      "switch": {
+        "caseDuplicate": "La valeur de cas « {{value}} » est en double."
+      },
+      "transform": {
+        "emptyTemplate": "Le modèle ne doit pas être vide."
+      },
+      "request": {
+        "missing": "La requête liée n'existe plus."
+      },
+      "runScenario": {
+        "missing": "Le scénario lié n'existe plus.",
+        "requiredInput": "L'entrée requise « {{name}} » doit être branchée à une source."
+      }
+    },
+    "usage": {
+      "button": "Scénarios utilisant cette requête",
+      "title": "Cette requête est utilisée dans les scénarios :"
     }
   }
 }

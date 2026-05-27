@@ -178,6 +178,14 @@
       "itemMessage": "\"{{name}}\"을(를) 삭제하시겠습니까?",
       "confirm": "삭제",
       "cancel": "취소"
+    },
+    "scenarioDelete": {
+      "title": "시나리오에서 사용 중인 요청 삭제",
+      "message": "\"{{name}}\"은(는) 다음 시나리오에서 사용됩니다. 어떻게 하시겠습니까?",
+      "belongsTag": "이 시나리오에 속함",
+      "moveInto": "이 시나리오로 이동",
+      "affectsNote": "이 요청을 삭제하면 이 시나리오들에서도 제거됩니다.",
+      "deleteAnyway": "그래도 삭제"
     }
   },
   "environment": {
@@ -864,6 +872,56 @@
       "orphanInput": "하위 시나리오에 일치하는 매개변수 \"{{name}}\"가 없습니다",
       "orphanOutput": "하위 시나리오에 일치하는 출력 \"{{name}}\"가 없습니다",
       "then": "다음"
+    },
+    "validation": {
+      "missingName": "이 박스에는 이름이 필요합니다.",
+      "duplicateName": "이름 \"{{name}}\"은(는) 다른 박스에서 이미 사용 중입니다.",
+      "panelTitle": "박스 오류 {{count}}건",
+      "focusBox": "이 박스로 이동",
+      "showErrors": "오류 표시",
+      "input": {
+        "missingName": "이 입력 매개변수에는 이름이 필요합니다."
+      },
+      "dataLink": {
+        "emptyPath": "들어오는 데이터 링크에는 JSON 경로가 필요합니다.",
+        "badPath": "데이터 링크의 JSON 경로 \"{{path}}\"가 잘못되었습니다."
+      },
+      "output": {
+        "missingName": "이 출력에는 이름이 필요합니다.",
+        "duplicateName": "이름 \"{{name}}\"은(는) 다른 출력에서 이미 사용 중입니다.",
+        "valueRequired": "\"value\" 입력은 소스에 연결되어야 합니다."
+      },
+      "getVariable": {
+        "noSelection": "변수를 선택해야 합니다.",
+        "unknown": "변수 \"{{name}}\"은(는) 시나리오에 존재하지 않습니다."
+      },
+      "setVariable": {
+        "missingName": "설정할 변수에는 이름이 필요합니다."
+      },
+      "object": {
+        "propMissingName": "각 속성에는 이름이 필요합니다.",
+        "propDuplicate": "속성 이름 \"{{name}}\"이(가) 중복되었습니다."
+      },
+      "arithmetic": {
+        "divisionByZero": "0으로 나눌 수 없습니다."
+      },
+      "switch": {
+        "caseDuplicate": "케이스 값 \"{{value}}\"이(가) 중복되었습니다."
+      },
+      "transform": {
+        "emptyTemplate": "템플릿은 비워 둘 수 없습니다."
+      },
+      "request": {
+        "missing": "연결된 요청이 더 이상 존재하지 않습니다."
+      },
+      "runScenario": {
+        "missing": "연결된 시나리오가 더 이상 존재하지 않습니다.",
+        "requiredInput": "필수 입력 \"{{name}}\"은(는) 소스에 연결되어야 합니다."
+      }
+    },
+    "usage": {
+      "button": "이 요청을 사용하는 시나리오",
+      "title": "이 요청은 다음 시나리오에서 사용됩니다:"
     }
   }
 }

@@ -6,6 +6,7 @@ import { EnvironmentValuesProvider } from '../../../contexts/EnvironmentValuesCo
 import type { Icon } from 'electron-core-ui/types'
 import type { BreadcrumbItem } from '../../../../../shared/types/editor'
 import type { Request, Folder, EnvironmentFolder, ScenarioNode, ScenarioEdge } from '../../../../../shared/types/collections'
+import type { ScenarioRequestUsage } from '../../../services/scenarioRequestUsage'
 import type { ResolveBoundItem, ResolveRequestEnv } from '../../Scenario/scenarioBoundResolver'
 
 export interface RestormWorkbenchContainerProps {
@@ -57,6 +58,8 @@ export interface RestormWorkbenchContainerProps {
   onRebuildTab: RebuildTabCallback | undefined
   onStateRestored: (tree: WorkbenchTree | null) => void
   getRequestById: (id: string) => Request | undefined
+  getScenariosUsingRequest?: (requestId: string) => ScenarioRequestUsage[]
+  onOpenScenarioFromRequest?: (scenarioId: string, focusNodeId?: string) => void
   getFolderById: (id: string) => Folder | undefined
   getEnvironmentFolderById: (id: string) => EnvironmentFolder | undefined
   navigationEnabled?: boolean | undefined
@@ -98,6 +101,8 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
   onRebuildTab,
   onStateRestored,
   getRequestById,
+  getScenariosUsingRequest,
+  onOpenScenarioFromRequest,
   getFolderById,
   getEnvironmentFolderById,
   navigationEnabled,
@@ -147,6 +152,8 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
           onRebuildTab={onRebuildTab}
           onStateRestored={onStateRestored}
           getRequestById={getRequestById}
+          getScenariosUsingRequest={getScenariosUsingRequest}
+          onOpenScenarioFromRequest={onOpenScenarioFromRequest}
           getFolderById={getFolderById}
           getEnvironmentFolderById={getEnvironmentFolderById}
           navigationEnabled={navigationEnabled}

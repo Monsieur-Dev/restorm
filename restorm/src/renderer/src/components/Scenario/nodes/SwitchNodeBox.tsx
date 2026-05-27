@@ -3,6 +3,7 @@ import type { NodeProps } from '@xyflow/react'
 import { Button } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
+import { useScenarioNodeErrors } from '../scenarioErrorsContext'
 import { TypedValueField } from '../../TypedValueField'
 import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroups'
 import { normalizeValueType } from '../../../utils/normalizeValueType'
@@ -37,6 +38,8 @@ export const SwitchNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
   const valueTypeGroups = useAllEnvValueTypeGroups()
   const config = data.config ?? {}
   const cases = readCases(config)
+  // Case ids flagged by a duplicate-value error → outline that case's value selector.
+  const invalidCases = new Set(useScenarioNodeErrors(id).map((e) => e.field).filter((f): f is string => f != null))
 
   const setCases = (next: SwitchCase[]): void => { data.onSetConfig?.(id, { cases: next }) }
 
@@ -71,7 +74,7 @@ export const SwitchNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
     ...cases.map((c): ScenarioNodeCell => ({
       id: c.id,
       content: (
-        <div className="nodrag" onMouseDown={stop}>
+        <div className={`nodrag${invalidCases.has(c.id) ? ' scn-field-invalid' : ''}`} onMouseDown={stop}>
           <TypedValueField
             value={normalizeValueType(c.value)}
             onChange={(next) => { setCases(cases.map((x) => (x.id === c.id ? { ...x, value: serializeValueForPersistence(next) } : x))) }}

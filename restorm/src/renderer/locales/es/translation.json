@@ -179,6 +179,14 @@
       "itemMessage": "¿Seguro que quieres eliminar \"{{name}}\"?",
       "confirm": "Eliminar",
       "cancel": "Cancelar"
+    },
+    "scenarioDelete": {
+      "title": "Eliminar una petición usada por escenarios",
+      "message": "«{{name}}» se usa en los siguientes escenarios. ¿Qué desea hacer?",
+      "belongsTag": "pertenece a este escenario",
+      "moveInto": "Mover a este escenario",
+      "affectsNote": "Eliminar esta petición también la quitará de estos escenarios.",
+      "deleteAnyway": "Eliminar de todos modos"
     }
   },
   "environment": {
@@ -865,6 +873,56 @@
       "orphanInput": "No hay ningún parámetro \"{{name}}\" en el subescenario",
       "orphanOutput": "No hay ninguna salida \"{{name}}\" en el subescenario",
       "then": "luego"
+    },
+    "validation": {
+      "missingName": "Esta caja debe tener un nombre.",
+      "duplicateName": "El nombre «{{name}}» ya lo usa otra caja.",
+      "panelTitle": "{{count}} caja(s) con error",
+      "focusBox": "Ir a esta caja",
+      "showErrors": "Ver errores",
+      "input": {
+        "missingName": "Este parámetro de entrada debe tener un nombre."
+      },
+      "dataLink": {
+        "emptyPath": "El enlace de datos entrante necesita una ruta (JSON path).",
+        "badPath": "La ruta JSON «{{path}}» del enlace de datos es inválida."
+      },
+      "output": {
+        "missingName": "Esta salida debe tener un nombre.",
+        "duplicateName": "El nombre «{{name}}» ya lo usa otra salida.",
+        "valueRequired": "La entrada «value» debe estar conectada a una fuente."
+      },
+      "getVariable": {
+        "noSelection": "Debe seleccionarse una variable.",
+        "unknown": "La variable «{{name}}» no existe en el escenario."
+      },
+      "setVariable": {
+        "missingName": "La variable a definir debe tener un nombre."
+      },
+      "object": {
+        "propMissingName": "Cada propiedad debe tener un nombre.",
+        "propDuplicate": "El nombre de propiedad «{{name}}» está duplicado."
+      },
+      "arithmetic": {
+        "divisionByZero": "La división por cero es imposible."
+      },
+      "switch": {
+        "caseDuplicate": "El valor del caso «{{value}}» está duplicado."
+      },
+      "transform": {
+        "emptyTemplate": "La plantilla no debe estar vacía."
+      },
+      "request": {
+        "missing": "La petición vinculada ya no existe."
+      },
+      "runScenario": {
+        "missing": "El escenario vinculado ya no existe.",
+        "requiredInput": "La entrada obligatoria «{{name}}» debe conectarse a una fuente."
+      }
+    },
+    "usage": {
+      "button": "Escenarios que usan esta petición",
+      "title": "Esta petición se usa en los escenarios:"
     }
   }
 }

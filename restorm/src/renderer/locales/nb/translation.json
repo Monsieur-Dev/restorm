@@ -179,6 +179,14 @@
       "itemMessage": "Er du sikker på at du vil slette «{{name}}»?",
       "confirm": "Slett",
       "cancel": "Avbryt"
+    },
+    "scenarioDelete": {
+      "title": "Slett en forespørsel brukt av scenarier",
+      "message": "\"{{name}}\" brukes i følgende scenarier. Hva vil du gjøre?",
+      "belongsTag": "tilhører dette scenarioet",
+      "moveInto": "Flytt inn i dette scenarioet",
+      "affectsNote": "Å slette denne forespørselen fjerner den også fra disse scenariene.",
+      "deleteAnyway": "Slett likevel"
     }
   },
   "environment": {
@@ -865,6 +873,56 @@
       "orphanInput": "Ingen samsvarende parameter «{{name}}» i underscenarioet",
       "orphanOutput": "Ingen samsvarende utdata «{{name}}» i underscenarioet",
       "then": "deretter"
+    },
+    "validation": {
+      "missingName": "Denne boksen må ha et navn.",
+      "duplicateName": "Navnet «{{name}}» brukes allerede av en annen boks.",
+      "panelTitle": "{{count}} boksfeil",
+      "focusBox": "Gå til denne boksen",
+      "showErrors": "Vis feil",
+      "input": {
+        "missingName": "Denne inndataparameteren må ha et navn."
+      },
+      "dataLink": {
+        "emptyPath": "Den innkommende datakoblingen trenger en JSON-sti.",
+        "badPath": "JSON-stien «{{path}}» til datakoblingen er ugyldig."
+      },
+      "output": {
+        "missingName": "Denne utdataen må ha et navn.",
+        "duplicateName": "Navnet «{{name}}» brukes allerede av en annen utdata.",
+        "valueRequired": "Inngangen «value» må være koblet til en kilde."
+      },
+      "getVariable": {
+        "noSelection": "En variabel må velges.",
+        "unknown": "Variabelen «{{name}}» finnes ikke i scenarioet."
+      },
+      "setVariable": {
+        "missingName": "Variabelen som skal settes må ha et navn."
+      },
+      "object": {
+        "propMissingName": "Hver egenskap må ha et navn.",
+        "propDuplicate": "Egenskapsnavnet «{{name}}» er duplisert."
+      },
+      "arithmetic": {
+        "divisionByZero": "Divisjon med null er umulig."
+      },
+      "switch": {
+        "caseDuplicate": "Case-verdien «{{value}}» er duplisert."
+      },
+      "transform": {
+        "emptyTemplate": "Malen kan ikke være tom."
+      },
+      "request": {
+        "missing": "Den tilknyttede forespørselen finnes ikke lenger."
+      },
+      "runScenario": {
+        "missing": "Det tilknyttede scenarioet finnes ikke lenger.",
+        "requiredInput": "Den obligatoriske inngangen «{{name}}» må kobles til en kilde."
+      }
+    },
+    "usage": {
+      "button": "Scenarier som bruker denne forespørselen",
+      "title": "Denne forespørselen brukes i scenariene:"
     }
   }
 }

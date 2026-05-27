@@ -180,6 +180,14 @@
       "itemMessage": "Jeste li sigurni da želite izbrisati \"{{name}}\"?",
       "confirm": "Izbriši",
       "cancel": "Odustani"
+    },
+    "scenarioDelete": {
+      "title": "Izbriši zahtjev koji koriste scenariji",
+      "message": "„{{name}}“ se koristi u sljedećim scenarijima. Što želite učiniti?",
+      "belongsTag": "pripada ovom scenariju",
+      "moveInto": "Premjesti u ovaj scenarij",
+      "affectsNote": "Brisanjem ovog zahtjeva ukloniti će se i iz ovih scenarija.",
+      "deleteAnyway": "Svejedno izbriši"
     }
   },
   "environment": {
@@ -866,6 +874,56 @@
       "orphanInput": "Nema odgovarajućeg parametra \"{{name}}\" u podscenariju",
       "orphanOutput": "Nema odgovarajućeg izlaza \"{{name}}\" u podscenariju",
       "then": "zatim"
+    },
+    "validation": {
+      "missingName": "Ovaj okvir mora imati naziv.",
+      "duplicateName": "Naziv „{{name}}“ već koristi drugi okvir.",
+      "panelTitle": "{{count}} pogreška/e okvira",
+      "focusBox": "Idi na ovaj okvir",
+      "showErrors": "Prikaži pogreške",
+      "input": {
+        "missingName": "Ovaj ulazni parametar mora imati naziv."
+      },
+      "dataLink": {
+        "emptyPath": "Dolazna podatkovna veza treba putanju (JSON path).",
+        "badPath": "JSON putanja „{{path}}“ podatkovne veze nije valjana."
+      },
+      "output": {
+        "missingName": "Ovaj izlaz mora imati naziv.",
+        "duplicateName": "Naziv „{{name}}“ već koristi drugi izlaz.",
+        "valueRequired": "Ulaz „value“ mora biti povezan s izvorom."
+      },
+      "getVariable": {
+        "noSelection": "Mora se odabrati varijabla.",
+        "unknown": "Varijabla „{{name}}“ ne postoji u scenariju."
+      },
+      "setVariable": {
+        "missingName": "Varijabla koja se postavlja mora imati naziv."
+      },
+      "object": {
+        "propMissingName": "Svako svojstvo mora imati naziv.",
+        "propDuplicate": "Naziv svojstva „{{name}}“ je dupliciran."
+      },
+      "arithmetic": {
+        "divisionByZero": "Dijeljenje s nulom nije moguće."
+      },
+      "switch": {
+        "caseDuplicate": "Vrijednost slučaja „{{value}}“ je duplicirana."
+      },
+      "transform": {
+        "emptyTemplate": "Predložak ne smije biti prazan."
+      },
+      "request": {
+        "missing": "Povezani zahtjev više ne postoji."
+      },
+      "runScenario": {
+        "missing": "Povezani scenarij više ne postoji.",
+        "requiredInput": "Obavezni ulaz „{{name}}“ mora biti povezan s izvorom."
+      }
+    },
+    "usage": {
+      "button": "Scenariji koji koriste ovaj zahtjev",
+      "title": "Ovaj zahtjev koristi se u scenarijima:"
     }
   }
 }

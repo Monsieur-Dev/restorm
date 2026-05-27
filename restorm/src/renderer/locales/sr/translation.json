@@ -180,6 +180,14 @@
       "itemMessage": "Da li ste sigurni da želite da obrišete \"{{name}}\"?",
       "confirm": "Obriši",
       "cancel": "Otkaži"
+    },
+    "scenarioDelete": {
+      "title": "Избриши захтев који користе сценарији",
+      "message": "„{{name}}“ се користи у следећим сценаријима. Шта желите да урадите?",
+      "belongsTag": "припада овом сценарију",
+      "moveInto": "Премести у овај сценарио",
+      "affectsNote": "Брисање овог захтева уклониће га и из ових сценарија.",
+      "deleteAnyway": "Свеједно избриши"
     }
   },
   "environment": {
@@ -866,6 +874,56 @@
       "orphanInput": "Нема одговарајућег параметра „{{name}}“ у подсценарију",
       "orphanOutput": "Нема одговарајућег излаза „{{name}}“ у подсценарију",
       "then": "затим"
+    },
+    "validation": {
+      "missingName": "Ово поље мора имати назив.",
+      "duplicateName": "Назив „{{name}}“ већ користи друго поље.",
+      "panelTitle": "Грешке поља: {{count}}",
+      "focusBox": "Иди на ово поље",
+      "showErrors": "Прикажи грешке",
+      "input": {
+        "missingName": "Овај улазни параметар мора имати назив."
+      },
+      "dataLink": {
+        "emptyPath": "Долазна веза података захтева путању (JSON path).",
+        "badPath": "JSON путања „{{path}}“ везе података је неважећа."
+      },
+      "output": {
+        "missingName": "Овај излаз мора имати назив.",
+        "duplicateName": "Назив „{{name}}“ већ користи други излаз.",
+        "valueRequired": "Улаз „value“ мора бити повезан са извором."
+      },
+      "getVariable": {
+        "noSelection": "Мора се изабрати променљива.",
+        "unknown": "Променљива „{{name}}“ не постоји у сценарију."
+      },
+      "setVariable": {
+        "missingName": "Променљива која се поставља мора имати назив."
+      },
+      "object": {
+        "propMissingName": "Свако својство мора имати назив.",
+        "propDuplicate": "Назив својства „{{name}}“ је дуплиран."
+      },
+      "arithmetic": {
+        "divisionByZero": "Дељење нулом није могуће."
+      },
+      "switch": {
+        "caseDuplicate": "Вредност случаја „{{value}}“ је дуплирана."
+      },
+      "transform": {
+        "emptyTemplate": "Шаблон не сме бити празан."
+      },
+      "request": {
+        "missing": "Повезани захтев више не постоји."
+      },
+      "runScenario": {
+        "missing": "Повезани сценарио више не постоји.",
+        "requiredInput": "Обавезни улаз „{{name}}“ мора бити повезан са извором."
+      }
+    },
+    "usage": {
+      "button": "Сценарији који користе овај захтев",
+      "title": "Овај захтев се користи у сценаријима:"
     }
   }
 }
