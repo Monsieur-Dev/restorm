@@ -852,6 +852,10 @@
       "message": "메시지"
     },
     "editRequest": "요청 편집",
-    "editScenario": "시나리오 편집"
+    "editScenario": "시나리오 편집",
+    "object": {
+      "addProperty": "속성 추가",
+      "removeProperty": "속성 제거"
+    }
   }
 }

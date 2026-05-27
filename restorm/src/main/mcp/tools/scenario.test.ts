@@ -81,6 +81,17 @@ describe('scenario MCP tools', () => {
     expect(scenario.edges).toHaveLength(1)
   })
 
+  it('connect rejects a second incoming link on a non-header input', () => {
+    const a = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'now' }))
+    const a2 = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'now' }))
+    const b = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'log' }))
+    const first = mcp.invoke('connect_scenario_nodes', { scenarioId: 's1', fromNodeId: a['nodeId'], fromPortId: 'value', toNodeId: b['nodeId'], toPortId: 'data' })
+    expect(first.isError).toBeUndefined()
+    const second = mcp.invoke('connect_scenario_nodes', { scenarioId: 's1', fromNodeId: a2['nodeId'], fromPortId: 'value', toNodeId: b['nodeId'], toPortId: 'data' })
+    expect(second.isError).toBe(true)
+    expect(scenario.edges).toHaveLength(1)
+  })
+
   it('connect rejects a port that is not on the node', () => {
     const a = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'now' }))
     const b = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'log' }))

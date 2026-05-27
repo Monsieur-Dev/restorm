@@ -852,6 +852,10 @@
       "message": "メッセージ"
     },
     "editRequest": "リクエストを編集",
-    "editScenario": "シナリオを編集"
+    "editScenario": "シナリオを編集",
+    "object": {
+      "addProperty": "プロパティを追加",
+      "removeProperty": "プロパティを削除"
+    }
   }
 }

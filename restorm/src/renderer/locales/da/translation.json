@@ -853,6 +853,10 @@
       "message": "besked"
     },
     "editRequest": "Rediger anmodning",
-    "editScenario": "Rediger scenarie"
+    "editScenario": "Rediger scenarie",
+    "object": {
+      "addProperty": "Tilføj egenskab",
+      "removeProperty": "Fjern egenskab"
+    }
   }
 }

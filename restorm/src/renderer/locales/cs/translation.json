@@ -855,6 +855,10 @@
       "message": "zpráva"
     },
     "editRequest": "Upravit požadavek",
-    "editScenario": "Upravit scénář"
+    "editScenario": "Upravit scénář",
+    "object": {
+      "addProperty": "Přidat vlastnost",
+      "removeProperty": "Odebrat vlastnost"
+    }
   }
 }

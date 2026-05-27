@@ -855,6 +855,10 @@
       "message": "повідомлення"
     },
     "editRequest": "Редагувати запит",
-    "editScenario": "Редагувати сценарій"
+    "editScenario": "Редагувати сценарій",
+    "object": {
+      "addProperty": "Додати властивість",
+      "removeProperty": "Видалити властивість"
+    }
   }
 }

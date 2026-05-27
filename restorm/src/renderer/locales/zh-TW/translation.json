@@ -852,6 +852,10 @@
       "message": "訊息"
     },
     "editRequest": "編輯請求",
-    "editScenario": "編輯場景"
+    "editScenario": "編輯場景",
+    "object": {
+      "addProperty": "新增屬性",
+      "removeProperty": "移除屬性"
+    }
   }
 }

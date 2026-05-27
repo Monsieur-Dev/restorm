@@ -382,6 +382,12 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     const src = nodes.find((n) => n.id === c.source)
     const tgt = nodes.find((n) => n.id === c.target)
     if (!src || !tgt) return false
+    // A non-header input accepts a single incoming link: reject a new link onto
+    // an already-wired data input (the existing one stays). The header launch
+    // trigger (`in`) keeps MERGE — multiple incoming links allowed there.
+    if (c.targetHandle !== 'in' && edges.some((e) => e.target === c.target && e.targetHandle === c.targetHandle)) {
+      return false
+    }
     return isValidScenarioConnection({
       sourceKind: src.data.kind,
       sourceOutputs: src.data.outputs,
@@ -390,7 +396,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
       targetInputs: tgt.data.inputs,
       targetHandle: c.targetHandle
     })
-  }, [nodes])
+  }, [nodes, edges])
 
   const onConnect = useCallback((connection: Connection) => {
     if (!validateConnection(connection)) return

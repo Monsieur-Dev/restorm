@@ -852,6 +852,10 @@
       "message": "pesan"
     },
     "editRequest": "Edit permintaan",
-    "editScenario": "Edit skenario"
+    "editScenario": "Edit skenario",
+    "object": {
+      "addProperty": "Tambah properti",
+      "removeProperty": "Hapus properti"
+    }
   }
 }

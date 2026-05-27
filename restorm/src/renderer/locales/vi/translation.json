@@ -852,6 +852,10 @@
       "message": "thông báo"
     },
     "editRequest": "Sửa yêu cầu",
-    "editScenario": "Sửa kịch bản"
+    "editScenario": "Sửa kịch bản",
+    "object": {
+      "addProperty": "Thêm thuộc tính",
+      "removeProperty": "Xóa thuộc tính"
+    }
   }
 }

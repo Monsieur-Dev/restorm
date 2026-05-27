@@ -853,6 +853,10 @@
       "message": "μήνυμα"
     },
     "editRequest": "Επεξεργασία αιτήματος",
-    "editScenario": "Επεξεργασία σεναρίου"
+    "editScenario": "Επεξεργασία σεναρίου",
+    "object": {
+      "addProperty": "Προσθήκη ιδιότητας",
+      "removeProperty": "Αφαίρεση ιδιότητας"
+    }
   }
 }

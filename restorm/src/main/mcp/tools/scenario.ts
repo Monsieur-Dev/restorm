@@ -21,7 +21,7 @@ import { broadcastTreeReplace } from './import'
 
 const SCENARIO_KINDS = [
   'input', 'output', 'if', 'switch', 'httpRequest', 'runScenario', 'forEach', 'aggregate', 'map',
-  'filter', 'wait', 'waitUntil', 'now', 'arithmetic', 'comparator', 'boolean',
+  'filter', 'wait', 'waitUntil', 'now', 'arithmetic', 'comparator', 'boolean', 'object',
   'setVariable', 'getVariable', 'transform', 'log', 'assert'
 ] as const
 
@@ -303,6 +303,11 @@ export function registerScenarioTools(mcp: McpService): void {
         const outF = outputPortFlow(fromNode.outputs, fromPortId, fromNode.kind)
         const inF = inputPortFlow(toNode.inputs, toPortId, toNode.kind)
         return errorReply(`incompatible link: ${fromPortId} is a "${outF}" output and ${toPortId} accepts "${inF}" only (a value output can't drive a header trigger; a signal output can't feed a data input).`)
+      }
+      // A non-header input accepts a single incoming link (the header launch
+      // trigger `in` keeps MERGE — multiple allowed). Mirrors the editor rule.
+      if (toPortId !== 'in' && scenario.edges.some((e) => e.to.nodeId === toNodeId && e.to.portId === toPortId)) {
+        return errorReply(`${toPortId} of ${toNodeId} already has an incoming link — a non-header input accepts a single link; disconnect the existing one first.`)
       }
       const edge: ScenarioEdge = {
         id: randomUUID(),

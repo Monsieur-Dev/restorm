@@ -853,6 +853,10 @@
       "message": "mesazh"
     },
     "editRequest": "Modifiko kërkesën",
-    "editScenario": "Modifiko skenarin"
+    "editScenario": "Modifiko skenarin",
+    "object": {
+      "addProperty": "Shto veti",
+      "removeProperty": "Hiq vetinë"
+    }
   }
 }

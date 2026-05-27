@@ -42,6 +42,7 @@ export const SCENARIO_NODE_CATALOGUE: ScenarioNodeKindMeta[] = [
   { kind: 'arithmetic', labelKey: 'scenario.nodes.arithmetic', defaultLabel: 'Arithmetic', icon: 'symbol-operator', category: 'compute' },
   { kind: 'comparator', labelKey: 'scenario.nodes.comparator', defaultLabel: 'Comparator', icon: 'equals', category: 'compute' },
   { kind: 'boolean', labelKey: 'scenario.nodes.boolean', defaultLabel: 'Boolean', icon: 'symbol-boolean', category: 'compute' },
+  { kind: 'object', labelKey: 'scenario.nodes.object', defaultLabel: 'Object', icon: 'symbol-namespace', category: 'compute' },
   { kind: 'setVariable', labelKey: 'scenario.nodes.setVariable', defaultLabel: 'Set variable', icon: 'symbol-variable', category: 'compute' },
   { kind: 'getVariable', labelKey: 'scenario.nodes.getVariable', defaultLabel: 'Get variable', icon: 'symbol-variable', category: 'compute' },
   { kind: 'transform', labelKey: 'scenario.nodes.transform', defaultLabel: 'Transform template', icon: 'symbol-string', category: 'compute' },

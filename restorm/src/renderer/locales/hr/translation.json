@@ -854,6 +854,10 @@
       "message": "poruka"
     },
     "editRequest": "Uredi zahtjev",
-    "editScenario": "Uredi scenarij"
+    "editScenario": "Uredi scenarij",
+    "object": {
+      "addProperty": "Dodaj svojstvo",
+      "removeProperty": "Ukloni svojstvo"
+    }
   }
 }

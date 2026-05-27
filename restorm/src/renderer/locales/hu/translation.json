@@ -853,6 +853,10 @@
       "message": "üzenet"
     },
     "editRequest": "Kérés szerkesztése",
-    "editScenario": "Forgatókönyv szerkesztése"
+    "editScenario": "Forgatókönyv szerkesztése",
+    "object": {
+      "addProperty": "Tulajdonság hozzáadása",
+      "removeProperty": "Tulajdonság eltávolítása"
+    }
   }
 }

@@ -854,6 +854,10 @@
       "message": "mesaj"
     },
     "editRequest": "Editează cererea",
-    "editScenario": "Editează scenariul"
+    "editScenario": "Editează scenariul",
+    "object": {
+      "addProperty": "Adaugă proprietate",
+      "removeProperty": "Elimină proprietatea"
+    }
   }
 }

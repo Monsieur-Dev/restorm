@@ -853,6 +853,10 @@
       "message": "viesti"
     },
     "editRequest": "Muokkaa pyyntöä",
-    "editScenario": "Muokkaa skenaariota"
+    "editScenario": "Muokkaa skenaariota",
+    "object": {
+      "addProperty": "Lisää ominaisuus",
+      "removeProperty": "Poista ominaisuus"
+    }
   }
 }

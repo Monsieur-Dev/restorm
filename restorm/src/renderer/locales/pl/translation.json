@@ -855,6 +855,10 @@
       "message": "komunikat"
     },
     "editRequest": "Edytuj żądanie",
-    "editScenario": "Edytuj scenariusz"
+    "editScenario": "Edytuj scenariusz",
+    "object": {
+      "addProperty": "Dodaj właściwość",
+      "removeProperty": "Usuń właściwość"
+    }
   }
 }

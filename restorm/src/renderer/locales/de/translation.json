@@ -853,6 +853,10 @@
       "message": "Meldung"
     },
     "editRequest": "Anfrage bearbeiten",
-    "editScenario": "Szenario bearbeiten"
+    "editScenario": "Szenario bearbeiten",
+    "object": {
+      "addProperty": "Eigenschaft hinzufügen",
+      "removeProperty": "Eigenschaft entfernen"
+    }
   }
 }

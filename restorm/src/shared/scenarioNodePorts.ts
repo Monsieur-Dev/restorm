@@ -92,6 +92,11 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // `result`), so they don't need a launch signal to sequence them.
   arithmetic: { inputs: [{ id: 'a', name: 'a', dataType: 'number' }, { id: 'b', name: 'b', dataType: 'number' }], outputs: [{ id: 'result', name: 'result', dataType: 'number', flow: 'value' }] },
   comparator: { inputs: [{ id: 'a', name: 'a' }, { id: 'b', name: 'b' }], outputs: [{ id: 'result', name: 'result', dataType: 'boolean', flow: 'value' }] },
+  // `object` builds a structured object from N named properties. The property
+  // inputs are user-configured (rendered from config like the switch cases), so
+  // none are stamped here; the single output is the assembled JSON object. No
+  // header trigger — data-driven (runs once its property inputs resolve).
+  object: { inputs: [], outputs: [{ id: 'object', name: 'object', dataType: 'json', flow: 'value' }] },
   boolean: { inputs: [{ id: 'a', name: 'a', dataType: 'boolean' }, { id: 'b', name: 'b', dataType: 'boolean' }], outputs: [{ id: 'result', name: 'result', dataType: 'boolean', flow: 'value' }] },
   setVariable: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'event', name: 'event', flow: 'signal' }] },
   getVariable: { inputs: [IN], outputs: [{ id: 'value', name: 'value', flow: 'value' }] },

@@ -474,6 +474,15 @@
   color: var(--textLink-activeForeground, var(--textLink-foreground, #4daafc));
 }
 
+/* Object-builder property row: name field stacked above its value selector. */
+.scn-object-property {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
 /* If operator toggle — compact segmented control. */
 .scn-operator-toggle {
   display: inline-flex;

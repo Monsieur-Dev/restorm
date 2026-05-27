@@ -853,6 +853,10 @@
       "message": "messaggio"
     },
     "editRequest": "Modifica richiesta",
-    "editScenario": "Modifica scenario"
+    "editScenario": "Modifica scenario",
+    "object": {
+      "addProperty": "Aggiungi proprietà",
+      "removeProperty": "Rimuovi proprietà"
+    }
   }
 }

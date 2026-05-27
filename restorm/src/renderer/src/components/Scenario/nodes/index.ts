@@ -10,6 +10,7 @@ import { WaitNodeBox } from './WaitNodeBox'
 import { WaitUntilNodeBox } from './WaitUntilNodeBox'
 import { ComparatorNodeBox } from './ComparatorNodeBox'
 import { BooleanNodeBox } from './BooleanNodeBox'
+import { ObjectNodeBox } from './ObjectNodeBox'
 import { ArithmeticNodeBox } from './ArithmeticNodeBox'
 import { InputNodeBox, OutputNodeBox, GetVariableNodeBox, SetVariableNodeBox } from './VariableNodeBox'
 import { TransformNodeBox } from './TransformNodeBox'
@@ -47,6 +48,7 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   arithmetic: ArithmeticNodeBox,
   comparator: ComparatorNodeBox,
   boolean: BooleanNodeBox,
+  object: ObjectNodeBox,
   setVariable: SetVariableNodeBox,
   getVariable: GetVariableNodeBox,
   transform: TransformNodeBox,

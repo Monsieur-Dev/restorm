@@ -853,6 +853,10 @@
       "message": "bericht"
     },
     "editRequest": "Verzoek bewerken",
-    "editScenario": "Scenario bewerken"
+    "editScenario": "Scenario bewerken",
+    "object": {
+      "addProperty": "Eigenschap toevoegen",
+      "removeProperty": "Eigenschap verwijderen"
+    }
   }
 }

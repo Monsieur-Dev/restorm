@@ -27,7 +27,10 @@ export const ScenarioInputCell: React.FC<ScenarioInputCellProps> = ({ cell, node
   const incoming = connections[0]
   const sourceData = useNodesData(incoming?.source ?? '')
 
-  if (portId && incoming && sourceData) {
+  // The `object` builder keeps its own cell rendering even when a property is
+  // wired — the cell carries an editable property-name field that the JSON-path
+  // selector swap would otherwise replace.
+  if (portId && incoming && sourceData && nodeKind !== 'object') {
     const data = sourceData.data as { kind?: ScenarioNodeKind; outputs?: ScenarioPort[] }
     const inFlow = inputPortFlow(nodeInputs, portId, nodeKind)
     const outFlow = outputPortFlow(data.outputs ?? [], incoming.sourceHandle ?? 'out', data.kind ?? 'httpRequest')

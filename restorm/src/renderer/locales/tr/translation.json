@@ -853,6 +853,10 @@
       "message": "mesaj"
     },
     "editRequest": "İsteği düzenle",
-    "editScenario": "Senaryoyu düzenle"
+    "editScenario": "Senaryoyu düzenle",
+    "object": {
+      "addProperty": "Özellik ekle",
+      "removeProperty": "Özelliği kaldır"
+    }
   }
 }
