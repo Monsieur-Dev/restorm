@@ -31,6 +31,8 @@ import { scenarioEdgeToFlowEdge, flowEdgeToScenarioEdge, portColor } from './sce
 import { ScenarioNodeView, type ScenarioNodeBoxData } from './nodes'
 import { defaultPortsForKind, isValidScenarioConnection, deriveRunScenarioPorts } from './scenarioNodePorts'
 import { linkPaletteEntries } from './scenarioLinkPalette'
+import { SCENARIO_ADD_REQUEST_GROUPS, SCENARIO_ADD_SCENARIO_ENTRY, scenarioAddIcon } from './scenarioChildPalette'
+import type { AddChildKind } from '../MainView/Sidebar/contextMenuBuilder'
 
 export interface ScenarioEditorViewProps {
   /** The scenario being edited. */
@@ -52,6 +54,10 @@ export interface ScenarioEditorViewProps {
    * called when a "Requête HTTP" node is added to the graph so it binds to a
    * freshly-created request (placed under the scenario in the sidebar). */
   onCreateRequest?: (scenarioId: string) => string | null
+  /** Create a child item of the given kind (request protocol or sub-scenario)
+   * under this scenario, returning its id — drives the add-palette "Add"
+   * submenu: the item lands in the sidebar AND the editor binds its node. */
+  onCreateChild?: (scenarioId: string, kind: AddChildKind) => string | null
 }
 
 type NodeData = ScenarioNodeBoxData
@@ -154,7 +160,7 @@ function chooseColorTooltipPlacement(rect: DOMRect): { placement: 'above' | 'bel
   return { placement: 'below', side: 'auto' }
 }
 
-const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onScenarioChange, resolveBoundItem, resolveRequestEnv, onOpenItem, onCreateRequest }) => {
+const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onScenarioChange, resolveBoundItem, resolveRequestEnv, onOpenItem, onCreateRequest, onCreateChild }) => {
   const { t } = useTranslation()
   const { screenToFlowPosition } = useReactFlow()
   const wrapperRef = useRef<HTMLDivElement>(null)
@@ -484,6 +490,17 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     setPalette(null)
   }, [setNodes, setEdges, persist, onCreateRequest, scenario.id])
 
+  // Add-palette "Add" submenu: create a child item (request protocol /
+  // sub-scenario) under this scenario AND drop its bound node. A request kind →
+  // an `httpRequest` node bound by `requestId`; `scenario` → a `runScenario`
+  // node bound by `scenarioId`. The child lands in the sidebar (silent).
+  const addChildNode = useCallback((kind: AddChildKind, flow: { x: number; y: number }) => {
+    const newId = onCreateChild?.(scenario.id, kind) ?? null
+    if (!newId) { setPalette(null); return }
+    if (kind === 'scenario') addNode('runScenario', flow, { scenarioId: newId })
+    else addNode('httpRequest', flow, { requestId: newId })
+  }, [onCreateChild, scenario.id, addNode])
+
   // --- Add-node gesture #1: drag a link off a port, release on empty canvas →
   // a palette filtered to kinds with a flow-compatible port, then a pre-wired
   // node. The dragged port's direction decides the wiring (output→new input,
@@ -543,12 +560,12 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
   // The id + node + edge are built ONCE, outside any state updater — React
   // StrictMode double-invokes updater functions in dev, so doing this inside
   // `setLinkPalette(updater)` minted two different ids and added the node twice.
-  const addLinkedNode = useCallback((kind: ScenarioNodeKind, wirePort: string) => {
+  const addLinkedNode = useCallback((kind: ScenarioNodeKind, wirePort: string, config: Record<string, unknown> = {}) => {
     const lp = linkPalette
     if (!lp) return
     const newId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
     const { inputs, outputs } = defaultPortsForKind(kind)
-    const node: ScenarioNode = { id: newId, kind, config: {}, inputs, outputs, position: lp.flow }
+    const node: ScenarioNode = { id: newId, kind, config, inputs, outputs, position: lp.flow }
     nodeStore.current.set(newId, node)
     const edgeId = `e-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
     const edge: Edge = lp.fromIsSource
@@ -566,6 +583,17 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     })
     setLinkPalette(null)
   }, [linkPalette, setNodes, setEdges, persist, derivedPortsOf])
+
+  // Link-drag variant of {@link addChildNode}: create the child + drop its
+  // bound node pre-wired to the dragged port. A freshly-created sub-scenario is
+  // empty, so its only output is the `done` trigger — remap a `result` wire
+  // target onto it.
+  const addChildLinkedNode = useCallback((kind: AddChildKind, wirePort: string) => {
+    const newId = onCreateChild?.(scenario.id, kind) ?? null
+    if (!newId) { setLinkPalette(null); return }
+    if (kind === 'scenario') addLinkedNode('runScenario', wirePort === 'result' ? 'done' : wirePort, { scenarioId: newId })
+    else addLinkedNode('httpRequest', wirePort, { requestId: newId })
+  }, [onCreateChild, scenario.id, addLinkedNode])
 
   const onDragOver = useCallback((event: React.DragEvent) => {
     // Allow the drop only when the host can resolve dragged items.
@@ -759,6 +787,13 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
   // A required input left unwired makes the scenario non-runnable.
   const invalidCount = useMemo(() => countUnsatisfiedRequired(nodes, edges, resolveScenario), [nodes, edges, resolveScenario])
 
+  // Wire-ports for the link-drag "Add" submenu — the port the link filter
+  // computed for the (folded) request / sub-scenario kinds, when each is
+  // flow-compatible with the dragged port. `const` so the `!== undefined`
+  // narrowing flows into the menu `onClick` closures below.
+  const linkReqWire = linkPalette?.entries.find((e) => e.kind === 'httpRequest')?.wirePort
+  const linkScnWire = linkPalette?.entries.find((e) => e.kind === 'runScenario')?.wirePort
+
   // Variables in scope — declared by `setVariable` nodes and named `input`/param
   // nodes, each carrying the type it was declared with. Drives the value
   // selector's "Variables" menu (and lets a slot hide incompatible-typed ones).
@@ -832,11 +867,31 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
           y={palette.y}
           onRequestClose={() => { setPalette(null) }}
           data-testid="scenario-node-palette"
-          items={PALETTE_ENTRIES.map((e, i): ContextMenuItem => (
+          items={PALETTE_ENTRIES.flatMap((e, i): ContextMenuItem[] =>
+            // Fold the request + run-scenario entries into a single "Add"
+            // submenu (child request of any protocol / sub-scenario, created in
+            // the sidebar + dropped on the graph). Without `onCreateChild`, keep
+            // the two bare entries.
             'separator' in e
-              ? { id: `sep-${i}`, label: '', isSeparator: true }
-              : { id: e.kind, label: t(e.labelKey, e.defaultLabel), icon: e.icon, onClick: () => { addNode(e.kind, palette.flow) } }
-          ))}
+              ? [{ id: `sep-${i}`, label: '', isSeparator: true }]
+              : onCreateChild && e.kind === 'runScenario'
+                ? []
+                : onCreateChild && e.kind === 'httpRequest'
+                  ? [{
+                      id: 'scenario-add',
+                      label: t('sidebar.contextMenu.add.title', 'Add'),
+                      icon: 'add',
+                      items: [
+                        ...SCENARIO_ADD_REQUEST_GROUPS.flatMap((group, gi): ContextMenuItem[] => [
+                          ...(gi > 0 ? [{ id: `add-rsep-${gi}`, label: '', isSeparator: true } as ContextMenuItem] : []),
+                          ...group.map((c): ContextMenuItem => ({ id: `add-${c.kind}`, label: t(c.labelKey, c.defaultLabel), icon: scenarioAddIcon(c.badge), onClick: () => { addChildNode(c.kind, palette.flow) } }))
+                        ]),
+                        { id: 'add-scn-sep', label: '', isSeparator: true },
+                        { id: `add-${SCENARIO_ADD_SCENARIO_ENTRY.kind}`, label: t(SCENARIO_ADD_SCENARIO_ENTRY.labelKey, SCENARIO_ADD_SCENARIO_ENTRY.defaultLabel), icon: scenarioAddIcon(SCENARIO_ADD_SCENARIO_ENTRY.badge), onClick: () => { addChildNode('scenario', palette.flow) } }
+                      ]
+                    }]
+                  : [{ id: e.kind, label: t(e.labelKey, e.defaultLabel), icon: e.icon, onClick: () => { addNode(e.kind, palette.flow) } }]
+          )}
         />
       )}
       {linkPalette && (
@@ -846,9 +901,40 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
           y={linkPalette.y}
           onRequestClose={() => { setLinkPalette(null) }}
           data-testid="scenario-link-palette"
-          items={linkPalette.entries.map((e): ContextMenuItem => (
-            { id: e.kind, label: e.label, icon: e.icon, onClick: () => { addLinkedNode(e.kind, e.wirePort) } }
-          ))}
+          items={
+            // Fold the flow-compatible request / run-scenario entries into one
+            // "Add" submenu, wired through the port the filter computed (a fresh
+            // sub-scenario only has its `done` trigger, so the helper remaps
+            // `result`). Without `onCreateChild`, entries stay flat.
+            !onCreateChild
+              ? linkPalette.entries.map((e): ContextMenuItem => ({ id: e.kind, label: e.label, icon: e.icon, onClick: () => { addLinkedNode(e.kind, e.wirePort) } }))
+              : [
+                  ...(linkReqWire !== undefined || linkScnWire !== undefined
+                    ? [{
+                        id: 'scenario-add',
+                        label: t('sidebar.contextMenu.add.title', 'Add'),
+                        icon: 'add',
+                        items: [
+                          ...(linkReqWire !== undefined
+                            ? SCENARIO_ADD_REQUEST_GROUPS.flatMap((group, gi): ContextMenuItem[] => [
+                                ...(gi > 0 ? [{ id: `add-rsep-${gi}`, label: '', isSeparator: true } as ContextMenuItem] : []),
+                                ...group.map((c): ContextMenuItem => ({ id: `add-${c.kind}`, label: t(c.labelKey, c.defaultLabel), icon: scenarioAddIcon(c.badge), onClick: () => { addChildLinkedNode(c.kind, linkReqWire) } }))
+                              ])
+                            : []),
+                          ...(linkScnWire !== undefined
+                            ? [
+                                ...(linkReqWire !== undefined ? [{ id: 'add-scn-sep', label: '', isSeparator: true } as ContextMenuItem] : []),
+                                { id: `add-${SCENARIO_ADD_SCENARIO_ENTRY.kind}`, label: t(SCENARIO_ADD_SCENARIO_ENTRY.labelKey, SCENARIO_ADD_SCENARIO_ENTRY.defaultLabel), icon: scenarioAddIcon(SCENARIO_ADD_SCENARIO_ENTRY.badge), onClick: () => { addChildLinkedNode('scenario', linkScnWire) } } as ContextMenuItem
+                              ]
+                            : [])
+                        ]
+                      } as ContextMenuItem]
+                    : []),
+                  ...linkPalette.entries
+                    .filter((e) => e.kind !== 'httpRequest' && e.kind !== 'runScenario')
+                    .map((e): ContextMenuItem => ({ id: e.kind, label: e.label, icon: e.icon, onClick: () => { addLinkedNode(e.kind, e.wirePort) } }))
+                ]
+          }
         />
       )}
       {nodeMenu && (

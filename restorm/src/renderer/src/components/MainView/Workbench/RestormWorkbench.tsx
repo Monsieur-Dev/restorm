@@ -31,6 +31,7 @@ import {
 import { EnvironmentProvider } from '../../../contexts/EnvironmentContext'
 import { ScenarioEditorView } from '../../Scenario/ScenarioEditorView'
 import type { ResolveBoundItem, ResolveRequestEnv } from '../../Scenario/scenarioBoundResolver'
+import type { AddChildKind } from '../Sidebar/contextMenuBuilder'
 import { FolderView } from '../../Folders/FolderView'
 import { EnvironmentFolderView } from '../../Folders/EnvironmentFolderView'
 import type { EnvironmentFolder, Folder, Request, ScenarioNode, ScenarioEdge } from '../../../../../shared/types/collections'
@@ -96,6 +97,9 @@ export interface RestormWorkbenchProps {
   onScenarioChange?: (scenarioId: string, patch: { nodes?: ScenarioNode[]; edges?: ScenarioEdge[]; notes?: string }) => void
   /** Create a new HTTP request as a child of the scenario (id), return its id. */
   onCreateScenarioRequest?: (scenarioId: string) => string | null
+  /** Create a child item of the given kind (request protocol or sub-scenario)
+   * under the scenario from the graph add-palette, returning its id. */
+  onCreateScenarioChild?: (scenarioId: string, kind: AddChildKind) => string | null
   /** Resolve a tree item by id → live object, for drop + bound node sync. */
   resolveBoundItem?: ResolveBoundItem
   /** Resolve a request's environments + default selection (scenario env section). */
@@ -172,6 +176,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   onFolderChange,
   onScenarioChange,
   onCreateScenarioRequest,
+  onCreateScenarioChild,
   resolveBoundItem,
   resolveRequestEnv,
   onEnvironmentFolderChange,
@@ -644,6 +649,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
                 {...(resolveRequestEnv ? { resolveRequestEnv } : {})}
                 {...(onRequestClick ? { onOpenItem: onRequestClick } : {})}
                 {...(onCreateScenarioRequest ? { onCreateRequest: onCreateScenarioRequest } : {})}
+                {...(onCreateScenarioChild ? { onCreateChild: onCreateScenarioChild } : {})}
               />
             </div>
           )
@@ -1041,7 +1047,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [t, onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onScenarioChange, onCreateScenarioRequest, resolveBoundItem, resolveRequestEnv, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, updateMiniBrowserUrl])
+  }, [t, onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onScenarioChange, onCreateScenarioRequest, onCreateScenarioChild, resolveBoundItem, resolveRequestEnv, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, updateMiniBrowserUrl])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(

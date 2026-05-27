@@ -1,6 +1,7 @@
 import React from 'react'
 import type { WorkbenchTree, RebuildTabCallback } from 'electron-core-ui/renderer'
 import { RestormWorkbench, type RestormWorkbenchHandle } from './RestormWorkbench'
+import type { AddChildKind } from '../Sidebar/contextMenuBuilder'
 import { EnvironmentValuesProvider } from '../../../contexts/EnvironmentValuesContext'
 import type { Icon } from 'electron-core-ui/types'
 import type { BreadcrumbItem } from '../../../../../shared/types/editor'
@@ -36,6 +37,9 @@ export interface RestormWorkbenchContainerProps {
   /** Create a new HTTP request as a child of the scenario (id) and return its
    * id — used when a "Requête HTTP" node is added to the graph. */
   onCreateScenarioRequest?: (scenarioId: string) => string | null
+  /** Create a child item of the given kind (request protocol or sub-scenario)
+   * under the scenario from the graph add-palette, returning its id. */
+  onCreateScenarioChild?: (scenarioId: string, kind: AddChildKind) => string | null
   resolveBoundItem?: ResolveBoundItem
   resolveRequestEnv?: ResolveRequestEnv
   onEnvironmentFolderChange: (folderId: string, folder: EnvironmentFolder) => void
@@ -84,6 +88,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
   onFolderChange,
   onScenarioChange,
   onCreateScenarioRequest,
+  onCreateScenarioChild,
   resolveBoundItem,
   resolveRequestEnv,
   onEnvironmentFolderChange,
@@ -130,6 +135,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
           onFolderChange={onFolderChange}
           {...(onScenarioChange ? { onScenarioChange } : {})}
           {...(onCreateScenarioRequest ? { onCreateScenarioRequest } : {})}
+          {...(onCreateScenarioChild ? { onCreateScenarioChild } : {})}
           {...(resolveBoundItem ? { resolveBoundItem } : {})}
           {...(resolveRequestEnv ? { resolveRequestEnv } : {})}
           onEnvironmentFolderChange={onEnvironmentFolderChange}

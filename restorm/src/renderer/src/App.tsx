@@ -115,7 +115,7 @@ import { ApiSpecRefreshFlow } from './components/Folders/ApiSpecRefreshFlow'
 import { AvailableVariablesProvider } from './contexts/AvailableVariablesContext'
 import { VariableTransformProvider } from './contexts/VariableTransformContext'
 import { AuthRequestResolverContext, type AuthRequestResolver } from './contexts/authRequestResolverContext'
-import { collectAllFolderIds } from './services/FolderToListView'
+import { collectExpandableIds } from './services/FolderToListView'
 import {
   findFolderById,
   findEnvironmentFolderById,
@@ -132,6 +132,7 @@ import { StatusbarEnvironmentSelector } from './components/MainView/StatusbarEnv
 import { StatusbarAuthSelector } from './components/MainView/StatusbarAuthSelector'
 import { shouldShowAuthSelector } from './components/MainView/statusbarAuthHelpers'
 import { useItemOperations } from './hooks/useItemOperations'
+import type { AddChildKind } from './components/MainView/Sidebar/contextMenuBuilder'
 import { useRequestCreationApi } from './hooks/useRequestCreationApi'
 import { RequestCreationProvider } from './contexts/RequestCreationContext'
 import { useNavigation } from './hooks/useNavigation'
@@ -187,7 +188,7 @@ const WORKBENCH_ID = 'restorm-main-workbench'
 // Initial root items - empty at startup, populated when opening a file
 const initialRootItems: EnvironmentFolder[] = []
 
-const allFolderIds = initialRootItems.flatMap((folder) => collectAllFolderIds(folder))
+const allFolderIds = initialRootItems.flatMap((item) => collectExpandableIds(item))
 
 /**
  * Resolve the workbench's currently-active tab id. Walks the tree
@@ -333,9 +334,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const ids: string[] = []
     for (const item of rootItems) {
-      if ('items' in item && !isScenario(item)) {
-        ids.push(...collectAllFolderIds(item))
-      }
+      ids.push(...collectExpandableIds(item))
     }
     allFolderIdsRef.current = ids
   }, [rootItems])
@@ -1093,21 +1092,29 @@ const App: React.FC = () => {
   // node is added to the graph. `openTab: false` keeps the user on the graph.
   // The request is appended to the scenario's `items` in place, so (like other
   // scenario edits) nudge a whole-file save to round-trip the new child.
-  const handleCreateScenarioRequest = useCallback((scenarioId: string): string | null => {
-    // `silent`: no sidebar selection/expand, no tab — stay on the graph so the
-    // user can keep editing the scenario without being whisked to the request.
-    const newId = handleAddChildItem(scenarioId, 'http-get', { silent: true })
+  // Create a child item (request of any protocol, or a sub-scenario) under a
+  // scenario from the graph editor's add palette. `silent`: no sidebar
+  // selection/expand, no tab — stay on the graph so the user can keep editing
+  // without being whisked to the new item; the matching node is dropped by the
+  // editor. Returns the new item id (the editor binds its node to it).
+  const handleCreateScenarioChild = useCallback((scenarioId: string, kind: AddChildKind): string | null => {
+    const newId = handleAddChildItem(scenarioId, kind, { silent: true })
     if (newId) {
       if (scenarioSaveTimer) clearTimeout(scenarioSaveTimer)
       scenarioSaveTimer = setTimeout(() => {
         scenarioSaveTimer = null
         void latestSaveAll?.().catch((err: unknown) => {
-          logger.error('[App] scenario child-request autosave failed', { error: String(err) })
+          logger.error('[App] scenario child-item autosave failed', { error: String(err) })
         })
       }, 600)
     }
     return newId
   }, [handleAddChildItem])
+  // Back-compat shim for the bare httpRequest node (link-drag auto-create path).
+  const handleCreateScenarioRequest = useCallback(
+    (scenarioId: string): string | null => handleCreateScenarioChild(scenarioId, 'http-get'),
+    [handleCreateScenarioChild]
+  )
 
   // Resolve a tree item by id to its live object — used by the scenario editor
   // both to decide what a sidebar drop creates (request/scenario/ignored) and
@@ -2248,6 +2255,7 @@ const App: React.FC = () => {
               onFolderChange={handleFolderChange}
               onScenarioChange={handleScenarioChange}
               onCreateScenarioRequest={handleCreateScenarioRequest}
+              onCreateScenarioChild={handleCreateScenarioChild}
               resolveBoundItem={resolveBoundItem}
               resolveRequestEnv={resolveRequestEnv}
               onEnvironmentFolderChange={handleEnvironmentFolderChange}
@@ -2285,6 +2293,7 @@ const App: React.FC = () => {
             onFolderChange={handleFolderChange}
             onScenarioChange={handleScenarioChange}
             onCreateScenarioRequest={handleCreateScenarioRequest}
+            onCreateScenarioChild={handleCreateScenarioChild}
             resolveBoundItem={resolveBoundItem}
             resolveRequestEnv={resolveRequestEnv}
             onEnvironmentFolderChange={handleEnvironmentFolderChange}

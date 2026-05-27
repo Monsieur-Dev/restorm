@@ -2038,7 +2038,11 @@ When('I open the {string} file via Ctrl+O', async ({}, fileName: string) => {
 const BENIGN_LOG_PATTERNS: RegExp[] = [
   /mime_util_xdg\.cc.*Invalid mime\.cache file/,
   /service_worker_storage\.cc.*Failed to delete the database/,
-  /Waiting for the debugger to disconnect/
+  /Waiting for the debugger to disconnect/,
+  // Chromium's X11 atom cache logging the desktop-portal clipboard atoms on
+  // hosts with an active xdg-desktop-portal — emitted on clipboard/drag use,
+  // unrelated to restorm.
+  /atom_cache\.cc.*kAtomsToCache/
 ]
 
 function isErrorLine(line: string): boolean {

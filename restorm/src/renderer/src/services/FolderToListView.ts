@@ -336,3 +336,25 @@ export function collectAllFolderIds(folder: Folder | EnvironmentFolder): string[
 
   return ids
 }
+
+/**
+ * Collect every expandable container id in a tree — folders, env-folders, and
+ * scenarios (which behave like folders, holding child items). Seeds the
+ * sidebar's persisted expand/collapse set, so a scenario's open/closed state
+ * survives a reload exactly like a folder's (a scenario excluded from the
+ * known set would have its persisted id filtered out on restore).
+ */
+export function collectExpandableIds(item: FolderItem): string[] {
+  // A scenario is a container too, but it carries `type:'scenario'` and an
+  // optional `items` — branch it first (an empty scenario isn't expandable).
+  if (isScenario(item)) {
+    return item.items && item.items.length > 0 ? [item.id, ...item.items.flatMap(collectExpandableIds)] : []
+  }
+  // Folders AND env-folders. Test `'items' in item` rather than `isAnyFolder`:
+  // the latter requires `configuration`, which env-folders lack, so it would
+  // drop a root env-folder and leave it collapsed on load.
+  if ('items' in item) {
+    return [item.id, ...item.items.flatMap(collectExpandableIds)]
+  }
+  return []
+}
