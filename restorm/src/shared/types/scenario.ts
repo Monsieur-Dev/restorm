@@ -73,6 +73,7 @@ export interface ScenarioPort {
 export type ScenarioNodeKind =
   // Sources & control
   | 'input'
+  | 'output'
   | 'if'
   | 'switch'
   // Requests & composition

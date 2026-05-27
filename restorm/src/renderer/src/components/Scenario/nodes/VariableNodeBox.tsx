@@ -70,6 +70,36 @@ export const InputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[VALUE_OUT]} launchInput canPlay />
 }
 
+/**
+ * `output` — declares a named scenario output (the symmetric counterpart of
+ * `input`): a name + a `value` input port. The value wired in is exposed as one
+ * of the scenario's outputs, which a parent `runScenario` derives into an output
+ * port. Terminal sink — no output, no error port. The name persists in config.
+ */
+export const OutputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
+  const config = data.config ?? {}
+  const name = typeof config['name'] === 'string' ? config['name'] : ''
+  const left: ScenarioNodeSection[] = [
+    {
+      id: 'main',
+      rows: [
+        {
+          id: 'name',
+          content: (
+            <ScenarioNameInput
+              value={name}
+              placeholder="output"
+              onCommit={(next) => { data.onSetConfig?.(id, { name: next }) }}
+            />
+          )
+        },
+        { id: 'value', label: 'value', port: { id: 'value', type: 'target' } }
+      ]
+    }
+  ]
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} hasError={false} />
+}
+
 /** `getVariable` — reads a named variable; produces `value`. Runnable (no input). */
 /**
  * `getVariable` — reads a named variable; produces `value`. The variable is

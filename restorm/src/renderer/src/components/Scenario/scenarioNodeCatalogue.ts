@@ -23,6 +23,7 @@ export interface ScenarioNodeKindMeta {
 export const SCENARIO_NODE_CATALOGUE: ScenarioNodeKindMeta[] = [
   // Sources & control
   { kind: 'input', labelKey: 'scenario.nodes.input', defaultLabel: 'Input / Param', icon: 'symbol-parameter', category: 'control' },
+  { kind: 'output', labelKey: 'scenario.nodes.output', defaultLabel: 'Output / Return', icon: 'export', category: 'control' },
   { kind: 'if', labelKey: 'scenario.nodes.if', defaultLabel: 'If', icon: 'git-compare', category: 'control' },
   { kind: 'switch', labelKey: 'scenario.nodes.switch', defaultLabel: 'Switch', icon: 'list-tree', category: 'control' },
   // Requests & composition

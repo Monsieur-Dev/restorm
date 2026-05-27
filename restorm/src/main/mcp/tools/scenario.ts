@@ -20,7 +20,7 @@ import { defaultPortsForKind, isValidScenarioConnection, outputPortFlow, inputPo
 import { broadcastTreeReplace } from './import'
 
 const SCENARIO_KINDS = [
-  'input', 'if', 'switch', 'httpRequest', 'runScenario', 'forEach', 'aggregate', 'map',
+  'input', 'output', 'if', 'switch', 'httpRequest', 'runScenario', 'forEach', 'aggregate', 'map',
   'filter', 'wait', 'waitUntil', 'now', 'arithmetic', 'comparator', 'boolean',
   'setVariable', 'getVariable', 'transform', 'log', 'assert'
 ] as const

@@ -11,7 +11,7 @@ import { WaitUntilNodeBox } from './WaitUntilNodeBox'
 import { ComparatorNodeBox } from './ComparatorNodeBox'
 import { BooleanNodeBox } from './BooleanNodeBox'
 import { ArithmeticNodeBox } from './ArithmeticNodeBox'
-import { InputNodeBox, GetVariableNodeBox, SetVariableNodeBox } from './VariableNodeBox'
+import { InputNodeBox, OutputNodeBox, GetVariableNodeBox, SetVariableNodeBox } from './VariableNodeBox'
 import { TransformNodeBox } from './TransformNodeBox'
 import { ForEachNodeBox } from './ForEachNodeBox'
 import { AggregateNodeBox } from './AggregateNodeBox'
@@ -32,6 +32,7 @@ type NodeBoxComponent = FC<NodeProps<ScenarioNodeBoxType>>
  */
 const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   input: InputNodeBox,
+  output: OutputNodeBox,
   if: IfNodeBox,
   switch: SwitchNodeBox,
   httpRequest: RequestNodeBox,

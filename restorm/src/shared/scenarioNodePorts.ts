@@ -51,6 +51,11 @@ const OUT: PortSpec = { id: 'out', flow: 'signal' }
 const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // Sources & control
   input: { inputs: [IN], outputs: [{ id: 'value', name: 'value', flow: 'value' }] },
+  // `output` — declares a named scenario output (the symmetric counterpart of
+  // `input`): it consumes a `value` and exposes it as one of the scenario's
+  // outputs, which a parent `runScenario` derives into an output port. A
+  // terminal sink — no output of its own.
+  output: { inputs: [{ id: 'value', name: 'value' }], outputs: [] },
   if: { inputs: [IN, { id: 'left', name: 'left' }, { id: 'right', name: 'right' }], outputs: [{ id: 'then', name: 'then', role: 'then', flow: 'signal' }, { id: 'else', name: 'else', role: 'else', flow: 'signal' }] },
   switch: { inputs: [IN, { id: 'on', name: 'on' }], outputs: [{ id: 'default', name: 'default', role: 'default', flow: 'signal' }] },
   // Requests & composition
