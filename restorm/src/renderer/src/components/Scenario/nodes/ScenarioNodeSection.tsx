@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Handle, Position } from '@xyflow/react'
 import type { ScenarioNodeKind, ScenarioPort } from '../../../../../shared/types/collections'
 import type { ScenarioNodeCell, ScenarioNodeSection as Section } from './ScenarioNodeBoxBase'
-import { portAnchorColor, inputFlowRingClass } from './scenarioCellRender'
+import { portAnchorColor, cellInputRingClass } from './scenarioCellRender'
 import { ScenarioInputCell } from './ScenarioInputCell'
 
 function inlineHandle(cell: ScenarioNodeCell, connectedInputs: Set<string>, nodeInputs: ScenarioPort[], nodeKind: ScenarioNodeKind): React.ReactNode {
@@ -13,7 +13,7 @@ function inlineHandle(cell: ScenarioNodeCell, connectedInputs: Set<string>, node
       id={cell.port.id}
       type={cell.port.type}
       position={Position.Left}
-      className={`scn-handle scn-handle-inline ${inputFlowRingClass(cell.port.id, nodeInputs, nodeKind)}`}
+      className={`scn-handle scn-handle-inline ${cellInputRingClass(cell.port, nodeInputs, nodeKind)}`}
       style={{ background: portAnchorColor(cell.port, connectedInputs) }}
       title={cell.label ?? cell.port.id}
     />

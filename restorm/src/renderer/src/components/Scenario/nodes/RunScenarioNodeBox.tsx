@@ -79,7 +79,7 @@ export const RunScenarioNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
   // One input port per named `input` node of the sub-scenario (a required param
   // shows the red unmet-required anchor until wired).
   for (const port of derived.inputs) {
-    rows.push({ id: port.id, label: port.name, port: { id: port.id, type: 'target', ...(port.required ? { required: true } : {}) } })
+    rows.push({ id: port.id, label: port.name, port: { id: port.id, type: 'target', ...(port.required ? { required: true } : {}), ...(port.flow ? { flow: port.flow } : {}) } })
   }
   // Stale incoming param ports (red), so the orphaned edge keeps an anchor.
   for (const handleId of orphanInIds) {
@@ -97,7 +97,7 @@ export const RunScenarioNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
   const right: ScenarioNodeCell[] = derived.outputs.map((port) => ({
     id: port.id,
     label: port.id === 'done' ? t('scenario.runScenario.then', 'Then') : port.name,
-    port: { id: port.id, ...(port.role ? { role: port.role } : {}), type: 'source' }
+    port: { id: port.id, ...(port.role ? { role: port.role } : {}), type: 'source', ...(port.flow ? { flow: port.flow } : {}) }
   }))
   // Stale outgoing output ports (red), keeping their orphaned edge anchored.
   for (const handleId of orphanOutIds) {

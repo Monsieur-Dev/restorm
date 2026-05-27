@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react'
-import type { ScenarioNodeKind, ScenarioPort, ScenarioPortRole } from '../../../../../shared/types/collections'
+import type { ScenarioNodeKind, ScenarioPort, ScenarioPortRole, PortFlow } from '../../../../../shared/types/collections'
 import { ROLE_COLOR } from '../scenarioGraphMapping'
 import { inputPortFlow, outputPortFlow } from '../scenarioNodePorts'
 import type { ScenarioNodeCell } from './ScenarioNodeBoxBase'
@@ -16,6 +16,17 @@ export function inputFlowRingClass(handleId: string, inputs: ScenarioPort[], kin
 }
 export function outputFlowRingClass(handleId: string, outputs: ScenarioPort[], kind: ScenarioNodeKind): string {
   return `scn-handle--flow-${outputPortFlow(outputs, handleId, kind)}`
+}
+
+/** A cell port's flow-ring class, honouring an explicit `flow` first: a
+ * runScenario's derived ports (param/output/`done`) carry their own flow but
+ * aren't in the node's static port list, so the by-id lookup would mis-default
+ * them to `value`. */
+export function cellInputRingClass(port: { id: string; flow?: PortFlow }, inputs: ScenarioPort[], kind: ScenarioNodeKind): string {
+  return port.flow ? `scn-handle--flow-${port.flow}` : inputFlowRingClass(port.id, inputs, kind)
+}
+export function cellOutputRingClass(port: { id: string; flow?: PortFlow }, outputs: ScenarioPort[], kind: ScenarioNodeKind): string {
+  return port.flow ? `scn-handle--flow-${port.flow}` : outputFlowRingClass(port.id, outputs, kind)
 }
 
 const NEUTRAL_ANCHOR = '#9ca3af'
