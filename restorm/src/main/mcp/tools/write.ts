@@ -17,7 +17,7 @@ import { z } from 'zod'
 import { BrowserWindow } from 'electron'
 import { McpService } from 'electron-core-ui'
 import { collectionStore } from '../../services/CollectionStore'
-import { isAnyFolder, isEnvironmentFolder, isRequest, KeyValue, Environment } from '../../../shared/models'
+import { isAnyFolder, isEnvironmentFolder, isRequest, isScenario, KeyValue, Environment } from '../../../shared/models'
 import type { EnvironmentFolder, CustomValueList, CustomValueEntry } from '../../../shared/types/collections'
 import { broadcastTreeReplace } from './import'
 
@@ -389,6 +389,13 @@ export function registerWriteTools(mcp: McpService): void {
         triggerSave()
         return jsonReply({ id, kind: 'request', deleted: true })
       }
+      if (isScenario(target)) {
+        const ok = collectionStore.deleteScenario(id)
+        if (!ok) return errorReply(`deleteScenario failed for ${id}`)
+        broadcastTreeReplace()
+        triggerSave()
+        return jsonReply({ id, kind: 'scenario', deleted: true })
+      }
       if (isAnyFolder(target)) {
         const ok = collectionStore.deleteFolder(id)
         if (!ok) return errorReply(`deleteFolder failed for ${id}`)
@@ -396,7 +403,7 @@ export function registerWriteTools(mcp: McpService): void {
         triggerSave()
         return jsonReply({ id, kind: isEnvironmentFolder(target) ? 'env-folder' : 'folder', deleted: true })
       }
-      return errorReply(`Item ${id} is not a folder, env-folder or request`)
+      return errorReply(`Item ${id} is not a folder, env-folder, scenario or request`)
     }
   )
 

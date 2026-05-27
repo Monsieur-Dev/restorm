@@ -14,6 +14,7 @@ import {
 } from 'electron-core-ui/decorators'
 import type { RuntimeId } from './types'
 import type { ScenarioNode, ScenarioEdge, ScenarioParam } from '../types/scenario'
+import type { FolderItem } from '../types/folderTypes'
 
 @trackable()
 @searchable()
@@ -47,6 +48,14 @@ export class Scenario {
   /** Directed port→port links carrying data between nodes. */
   edges: ScenarioEdge[] = []
 
+  /**
+   * Child items authored under the scenario — it behaves like a folder
+   * container (requests of any protocol, sub-folders, sub-scenarios). Absent
+   * (rather than `[]`) when the scenario holds none, so a plain leaf scenario
+   * serializes without an empty array.
+   */
+  items?: FolderItem[]
+
   constructor(init?: Partial<Scenario>) {
     if (init) {
       Object.assign(this, init)
@@ -61,6 +70,7 @@ export class Scenario {
     params?: ScenarioParam[]
     nodes?: ScenarioNode[]
     edges?: ScenarioEdge[]
+    items?: FolderItem[]
   }): Scenario {
     return new Scenario({
       ...(obj.id !== undefined && { id: obj.id }),
@@ -69,7 +79,8 @@ export class Scenario {
       tags: obj.tags ?? [],
       params: obj.params ?? [],
       nodes: obj.nodes ?? [],
-      edges: obj.edges ?? []
+      edges: obj.edges ?? [],
+      ...(obj.items !== undefined && { items: obj.items })
     })
   }
 
@@ -82,7 +93,8 @@ export class Scenario {
       tags: this.tags,
       params: this.params,
       nodes: this.nodes,
-      edges: this.edges
+      edges: this.edges,
+      ...(this.items !== undefined && { items: this.items })
     }
   }
 }
