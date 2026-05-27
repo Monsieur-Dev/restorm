@@ -857,6 +857,14 @@
     "object": {
       "addProperty": "Shto veti",
       "removeProperty": "Hiq vetinë"
+    },
+    "input": {
+      "required": "E detyrueshme"
+    },
+    "runScenario": {
+      "orphanInput": "Asnjë parametër \"{{name}}\" përkatës në nën-skenar",
+      "orphanOutput": "Asnjë dalje \"{{name}}\" përkatëse në nën-skenar",
+      "then": "pastaj"
     }
   }
 }

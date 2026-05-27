@@ -856,6 +856,14 @@
     "object": {
       "addProperty": "添加属性",
       "removeProperty": "删除属性"
+    },
+    "input": {
+      "required": "必填"
+    },
+    "runScenario": {
+      "orphanInput": "子场景中没有匹配的参数“{{name}}”",
+      "orphanOutput": "子场景中没有匹配的输出“{{name}}”",
+      "then": "然后"
     }
   }
 }

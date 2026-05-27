@@ -857,6 +857,14 @@
     "object": {
       "addProperty": "Lisää ominaisuus",
       "removeProperty": "Poista ominaisuus"
+    },
+    "input": {
+      "required": "Pakollinen"
+    },
+    "runScenario": {
+      "orphanInput": "Aliskenaariossa ei ole vastaavaa parametria \"{{name}}\"",
+      "orphanOutput": "Aliskenaariossa ei ole vastaavaa tulostetta \"{{name}}\"",
+      "then": "sitten"
     }
   }
 }

@@ -857,6 +857,14 @@
     "object": {
       "addProperty": "Legg til egenskap",
       "removeProperty": "Fjern egenskap"
+    },
+    "input": {
+      "required": "Påkrevd"
+    },
+    "runScenario": {
+      "orphanInput": "Ingen samsvarende parameter «{{name}}» i underscenarioet",
+      "orphanOutput": "Ingen samsvarende utdata «{{name}}» i underscenarioet",
+      "then": "deretter"
     }
   }
 }

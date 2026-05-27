@@ -857,6 +857,14 @@
     "object": {
       "addProperty": "Add property",
       "removeProperty": "Remove property"
+    },
+    "input": {
+      "required": "Required"
+    },
+    "runScenario": {
+      "orphanInput": "No matching parameter \"{{name}}\" in the sub-scenario",
+      "orphanOutput": "No matching output \"{{name}}\" in the sub-scenario",
+      "then": "then"
     }
   }
 }

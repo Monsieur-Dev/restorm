@@ -32,9 +32,12 @@ export function anchorColor(role?: ScenarioPortRole): string {
  * flagged red until a valid link points to it; otherwise the role colour.
  */
 export function portAnchorColor(
-  port: { id: string; role?: ScenarioPortRole; type: 'target' | 'source'; required?: boolean },
+  port: { id: string; role?: ScenarioPortRole; type: 'target' | 'source'; required?: boolean; orphan?: boolean },
   connectedInputs: Set<string>
 ): string {
+  // A stale port — kept only to anchor an edge whose real port vanished — is
+  // flagged red regardless of connection state.
+  if (port.orphan) return REQUIRED_UNMET
   if (port.required && port.type === 'target' && !connectedInputs.has(port.id)) return REQUIRED_UNMET
   return anchorColor(port.role)
 }

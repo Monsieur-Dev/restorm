@@ -474,6 +474,33 @@
   color: var(--textLink-activeForeground, var(--textLink-foreground, #4daafc));
 }
 
+/* Stale port label on a runScenario whose sub-scenario param/output vanished. */
+.scn-orphan-port {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #ef4444;
+  font-size: 11px;
+}
+.scn-orphan-port .codicon {
+  font-size: 12px;
+}
+
+/* `input` node "required" toggle: a compact checkbox + label row. */
+.scn-required-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--descriptionForeground, #999);
+  cursor: pointer;
+  user-select: none;
+}
+.scn-required-toggle input {
+  margin: 0;
+  cursor: pointer;
+}
+
 /* Object-builder property row: name field stacked above its value selector. */
 .scn-object-property {
   display: flex;

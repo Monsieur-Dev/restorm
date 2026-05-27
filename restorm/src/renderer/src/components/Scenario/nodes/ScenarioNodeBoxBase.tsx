@@ -48,7 +48,7 @@ export interface ScenarioNodeCell {
   content?: ReactNode
   /** Optional hover tooltip on the cell label (e.g. a param description). */
   tooltip?: string
-  port?: { id: string; role?: ScenarioPortRole; type: 'target' | 'source'; required?: boolean }
+  port?: { id: string; role?: ScenarioPortRole; type: 'target' | 'source'; required?: boolean; orphan?: boolean }
 }
 
 /**
@@ -242,7 +242,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
               <div className="scn-row scn-row-right" key={cell.id}>
                 {cellBody(cell)}
                 {cell.port && (
-                  <Handle id={cell.port.id} type={cell.port.type} position={Position.Right} className={`scn-handle scn-handle-inline ${outputFlowRingClass(cell.port.id, data.outputs, data.kind)}`} style={{ background: anchorColor(cell.port.role) }} title={cell.label ?? cell.port.id} />
+                  <Handle id={cell.port.id} type={cell.port.type} position={Position.Right} className={`scn-handle scn-handle-inline ${outputFlowRingClass(cell.port.id, data.outputs, data.kind)}`} style={{ background: portAnchorColor(cell.port, connectedInputs) }} title={cell.label ?? cell.port.id} />
                 )}
               </div>
             ))}

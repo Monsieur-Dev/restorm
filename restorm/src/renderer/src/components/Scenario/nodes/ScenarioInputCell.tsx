@@ -27,10 +27,12 @@ export const ScenarioInputCell: React.FC<ScenarioInputCellProps> = ({ cell, node
   const incoming = connections[0]
   const sourceData = useNodesData(incoming?.source ?? '')
 
-  // The `object` builder keeps its own cell rendering even when a property is
-  // wired — the cell carries an editable property-name field that the JSON-path
-  // selector swap would otherwise replace.
-  if (portId && incoming && sourceData && nodeKind !== 'object') {
+  // An orphan stub (a stale port kept only to anchor a broken edge) keeps its
+  // red warning label rather than a JSON-path selector.
+  // The `object` builder also keeps its own cell rendering even when a property
+  // is wired — the cell carries an editable property-name field that the
+  // JSON-path selector swap would otherwise replace.
+  if (portId && incoming && sourceData && nodeKind !== 'object' && cell.port?.orphan !== true) {
     const data = sourceData.data as { kind?: ScenarioNodeKind; outputs?: ScenarioPort[] }
     const inFlow = inputPortFlow(nodeInputs, portId, nodeKind)
     const outFlow = outputPortFlow(data.outputs ?? [], incoming.sourceHandle ?? 'out', data.kind ?? 'httpRequest')

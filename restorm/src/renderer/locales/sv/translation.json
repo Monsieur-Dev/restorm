@@ -857,6 +857,14 @@
     "object": {
       "addProperty": "Lägg till egenskap",
       "removeProperty": "Ta bort egenskap"
+    },
+    "input": {
+      "required": "Obligatoriskt"
+    },
+    "runScenario": {
+      "orphanInput": "Ingen matchande parameter \"{{name}}\" i underscenariot",
+      "orphanOutput": "Ingen matchande utdata \"{{name}}\" i underscenariot",
+      "then": "sedan"
     }
   }
 }

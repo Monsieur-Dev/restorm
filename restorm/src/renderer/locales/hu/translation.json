@@ -857,6 +857,14 @@
     "object": {
       "addProperty": "Tulajdonság hozzáadása",
       "removeProperty": "Tulajdonság eltávolítása"
+    },
+    "input": {
+      "required": "Kötelező"
+    },
+    "runScenario": {
+      "orphanInput": "Nincs megfelelő „{{name}}\" paraméter az alforgatókönyvben",
+      "orphanOutput": "Nincs megfelelő „{{name}}\" kimenet az alforgatókönyvben",
+      "then": "azután"
     }
   }
 }

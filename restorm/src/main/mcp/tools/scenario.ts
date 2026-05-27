@@ -15,8 +15,8 @@ import { randomUUID } from 'node:crypto'
 import { McpService } from 'electron-core-ui'
 import { collectionStore } from '../../services/CollectionStore'
 import type { Scenario } from '../../../shared/models/Scenario'
-import type { ScenarioNode, ScenarioEdge, ScenarioNodeKind } from '../../../shared/types/scenario'
-import { defaultPortsForKind, isValidScenarioConnection, outputPortFlow, inputPortFlow } from '../../../shared/scenarioNodePorts'
+import type { ScenarioNode, ScenarioEdge, ScenarioNodeKind, ScenarioPort } from '../../../shared/types/scenario'
+import { defaultPortsForKind, isValidScenarioConnection, outputPortFlow, inputPortFlow, deriveRunScenarioPorts } from '../../../shared/scenarioNodePorts'
 import { broadcastTreeReplace } from './import'
 
 const SCENARIO_KINDS = [
@@ -45,6 +45,20 @@ function findScenario(id: string): Scenario | null {
   const item = collectionStore.findById(id)
   if (!item || (item as { type?: string }).type !== 'scenario') return null
   return item as unknown as Scenario
+}
+
+/** A node's effective ports = its static ports plus, for a `runScenario`, the
+ * ports derived from the bound sub-scenario's input/output nodes (re-derived
+ * live, never persisted) — so authoring can wire those derived param/output
+ * ports, matching the editor. */
+function effectivePorts(node: ScenarioNode): { inputs: ScenarioPort[]; outputs: ScenarioPort[] } {
+  if (node.kind === 'runScenario') {
+    const subId = typeof node.config['scenarioId'] === 'string' ? node.config['scenarioId'] : undefined
+    const sub = subId ? findScenario(subId) : null
+    const derived = deriveRunScenarioPorts(sub as unknown as Parameters<typeof deriveRunScenarioPorts>[0])
+    return { inputs: [...node.inputs, ...derived.inputs], outputs: [...node.outputs, ...derived.outputs] }
+  }
+  return { inputs: node.inputs, outputs: node.outputs }
 }
 
 /** Push the mutated scenario to any open editor + sidebar, then autosave. */
@@ -293,15 +307,18 @@ export function registerScenarioTools(mcp: McpService): void {
       const toNode = scenario.nodes.find((n) => n.id === toNodeId)
       if (!fromNode) return errorReply(`No source node ${fromNodeId}`)
       if (!toNode) return errorReply(`No target node ${toNodeId}`)
-      if (fromPortId !== 'error' && !fromNode.outputs.some((p) => p.id === fromPortId)) {
-        return errorReply(`${fromPortId} is not an output of ${fromNodeId} (outputs: ${fromNode.outputs.map((p) => p.id).join(', ') || 'none'})`)
+      // Effective ports include a runScenario's ports derived from its sub-scenario.
+      const fromPorts = effectivePorts(fromNode)
+      const toPorts = effectivePorts(toNode)
+      if (fromPortId !== 'error' && !fromPorts.outputs.some((p) => p.id === fromPortId)) {
+        return errorReply(`${fromPortId} is not an output of ${fromNodeId} (outputs: ${fromPorts.outputs.map((p) => p.id).join(', ') || 'none'})`)
       }
-      if (!toNode.inputs.some((p) => p.id === toPortId)) {
-        return errorReply(`${toPortId} is not an input of ${toNodeId} (inputs: ${toNode.inputs.map((p) => p.id).join(', ') || 'none'})`)
+      if (!toPorts.inputs.some((p) => p.id === toPortId)) {
+        return errorReply(`${toPortId} is not an input of ${toNodeId} (inputs: ${toPorts.inputs.map((p) => p.id).join(', ') || 'none'})`)
       }
-      if (!isValidScenarioConnection({ sourceKind: fromNode.kind, sourceOutputs: fromNode.outputs, sourceHandle: fromPortId, targetKind: toNode.kind, targetInputs: toNode.inputs, targetHandle: toPortId })) {
-        const outF = outputPortFlow(fromNode.outputs, fromPortId, fromNode.kind)
-        const inF = inputPortFlow(toNode.inputs, toPortId, toNode.kind)
+      if (!isValidScenarioConnection({ sourceKind: fromNode.kind, sourceOutputs: fromPorts.outputs, sourceHandle: fromPortId, targetKind: toNode.kind, targetInputs: toPorts.inputs, targetHandle: toPortId })) {
+        const outF = outputPortFlow(fromPorts.outputs, fromPortId, fromNode.kind)
+        const inF = inputPortFlow(toPorts.inputs, toPortId, toNode.kind)
         return errorReply(`incompatible link: ${fromPortId} is a "${outF}" output and ${toPortId} accepts "${inF}" only (a value output can't drive a header trigger; a signal output can't feed a data input).`)
       }
       // A non-header input accepts a single incoming link (the header launch

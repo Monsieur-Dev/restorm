@@ -92,6 +92,41 @@ describe('scenario MCP tools', () => {
     expect(scenario.edges).toHaveLength(1)
   })
 
+  it('connects to a runScenario input port derived from its sub-scenario', () => {
+    // A sub-scenario with one named input → runScenario exposes `param:token`.
+    const sub = {
+      type: 'scenario', id: 'sub1', name: 'Sub', tags: [], params: [],
+      nodes: [{ id: 'i1', kind: 'input', config: { name: 'token' }, inputs: [], outputs: [], position: { x: 0, y: 0 } }],
+      edges: []
+    }
+    mockState.findById.mockImplementation((id) => (id === 's1' ? scenario : id === 'sub1' ? sub : null))
+    const now = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'now' }))
+    const rs = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'runScenario', config: { scenarioId: 'sub1' } }))
+    const res = mcp.invoke('connect_scenario_nodes', {
+      scenarioId: 's1', fromNodeId: now['nodeId'], fromPortId: 'value', toNodeId: rs['nodeId'], toPortId: 'param:token'
+    })
+    expect(res.isError).toBeUndefined()
+    expect(scenario.edges).toHaveLength(1)
+  })
+
+  it('connects a runScenario `done` signal (sub-scenario returns no data) into a launch input', () => {
+    // A sub-scenario with only an input node → its runScenario exposes a `done`
+    // completion trigger, which can sequence the next node's launch input.
+    const sub = {
+      type: 'scenario', id: 'sub1', name: 'Sub', tags: [], params: [],
+      nodes: [{ id: 'i1', kind: 'input', config: { name: 'token' }, inputs: [], outputs: [], position: { x: 0, y: 0 } }],
+      edges: []
+    }
+    mockState.findById.mockImplementation((id) => (id === 's1' ? scenario : id === 'sub1' ? sub : null))
+    const rs = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'runScenario', config: { scenarioId: 'sub1' } }))
+    const target = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'if' }))
+    const res = mcp.invoke('connect_scenario_nodes', {
+      scenarioId: 's1', fromNodeId: rs['nodeId'], fromPortId: 'done', toNodeId: target['nodeId'], toPortId: 'in'
+    })
+    expect(res.isError).toBeUndefined()
+    expect(scenario.edges).toHaveLength(1)
+  })
+
   it('connect rejects a port that is not on the node', () => {
     const a = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'now' }))
     const b = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'log' }))

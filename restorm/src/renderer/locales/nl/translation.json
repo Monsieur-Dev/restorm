@@ -857,6 +857,14 @@
     "object": {
       "addProperty": "Eigenschap toevoegen",
       "removeProperty": "Eigenschap verwijderen"
+    },
+    "input": {
+      "required": "Vereist"
+    },
+    "runScenario": {
+      "orphanInput": "Geen overeenkomende parameter \"{{name}}\" in het subscenario",
+      "orphanOutput": "Geen overeenkomende uitvoer \"{{name}}\" in het subscenario",
+      "then": "dan"
     }
   }
 }

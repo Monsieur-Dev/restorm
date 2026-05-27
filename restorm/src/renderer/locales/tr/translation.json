@@ -857,6 +857,14 @@
     "object": {
       "addProperty": "Özellik ekle",
       "removeProperty": "Özelliği kaldır"
+    },
+    "input": {
+      "required": "Zorunlu"
+    },
+    "runScenario": {
+      "orphanInput": "Alt senaryoda eşleşen \"{{name}}\" parametresi yok",
+      "orphanOutput": "Alt senaryoda eşleşen \"{{name}}\" çıktısı yok",
+      "then": "sonra"
     }
   }
 }

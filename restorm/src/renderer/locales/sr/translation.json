@@ -858,6 +858,14 @@
     "object": {
       "addProperty": "Додај својство",
       "removeProperty": "Уклони својство"
+    },
+    "input": {
+      "required": "Обавезно"
+    },
+    "runScenario": {
+      "orphanInput": "Нема одговарајућег параметра „{{name}}“ у подсценарију",
+      "orphanOutput": "Нема одговарајућег излаза „{{name}}“ у подсценарију",
+      "then": "затим"
     }
   }
 }

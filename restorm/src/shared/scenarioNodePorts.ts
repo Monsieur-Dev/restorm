@@ -1,4 +1,4 @@
-import type { ScenarioNodeKind, ScenarioPort, ScenarioDataType, ScenarioPortRole, PortFlow } from './types/collections'
+import type { ScenarioNodeKind, ScenarioPort, ScenarioDataType, ScenarioPortRole, PortFlow, Scenario } from './types/collections'
 
 /**
  * Default input/output ports per node kind (epic §5b "per-kind
@@ -124,6 +124,52 @@ const FALLBACK: KindPorts = { inputs: [IN], outputs: [OUT] }
 export function defaultPortsForKind(kind: ScenarioNodeKind): { inputs: ScenarioPort[]; outputs: ScenarioPort[] } {
   const spec = PORTS[kind] ?? FALLBACK
   return { inputs: spec.inputs.map(p), outputs: spec.outputs.map(p) }
+}
+
+/** Map a persisted value-type kind (an `input` node's `valueType`) to a port
+ * `dataType` for palette filtering. Laxiste — unknowns fall back to `any`. */
+function dataTypeForValueType(value: unknown): ScenarioDataType {
+  const t = (value as { type?: unknown } | null | undefined)?.type
+  if (t === 'number' || t === 'numeric') return 'number'
+  if (t === 'string') return 'string'
+  if (t === 'boolean') return 'boolean'
+  return 'any'
+}
+
+/**
+ * Ports a `runScenario` node exposes for a given sub-scenario, **derived from
+ * the reference** (epic §5b): one input port per named `input` node (id
+ * `param:<name>`, dataType from its `valueType`) and one output port per named
+ * `output` node (id `output:<name>`). Re-derived on demand (never persisted),
+ * so the call signature always tracks the live sub-scenario — a renamed/removed
+ * param simply drops its port (orphaning any edge to it). Unnamed nodes can't be
+ * exposed; duplicate names collapse to the first. Shared so the editor render
+ * and the MCP authoring path agree on the exact port ids.
+ */
+export function deriveRunScenarioPorts(subScenario: Scenario | null | undefined): { inputs: ScenarioPort[]; outputs: ScenarioPort[] } {
+  const inputs: ScenarioPort[] = []
+  const outputs: ScenarioPort[] = []
+  if (!subScenario) return { inputs, outputs }
+  const seenIn = new Set<string>()
+  const seenOut = new Set<string>()
+  for (const node of subScenario.nodes) {
+    const name = typeof node.config['name'] === 'string' ? node.config['name'].trim() : ''
+    if (!name) continue
+    if (node.kind === 'input' && !seenIn.has(name)) {
+      seenIn.add(name)
+      inputs.push(p({ id: `param:${name}`, name, dataType: dataTypeForValueType(node.config['valueType']), flow: 'value', ...(node.config['required'] === true ? { required: true } : {}) }))
+    } else if (node.kind === 'output' && !seenOut.has(name)) {
+      seenOut.add(name)
+      outputs.push(p({ id: `output:${name}`, name, role: 'response', flow: 'both' }))
+    }
+  }
+  // A sub-scenario that returns no data still needs to signal completion so a
+  // parent can sequence the next node: with no `output` node, expose a single
+  // `done` trigger ("Ensuite") instead of an empty output column.
+  if (outputs.length === 0) {
+    outputs.push(p({ id: 'done', name: 'then', role: 'then', flow: 'signal' }))
+  }
+  return { inputs, outputs }
 }
 
 // --- Link validation by port flow class -----------------------------------

@@ -1,5 +1,6 @@
 import React from 'react'
 import type { NodeProps } from '@xyflow/react'
+import { useTranslation } from 'react-i18next'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { ScenarioNameInput } from './ScenarioNameInput'
 import { TypedValueField } from '../../TypedValueField'
@@ -24,9 +25,11 @@ const VALUE_OUT: ScenarioNodeCell = { id: 'value', label: 'value', port: { id: '
  * trigger. The name + the default value persist into the node's config bag.
  */
 export const InputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
+  const { t } = useTranslation()
   const valueTypeGroups = useAllEnvValueTypeGroups()
   const config = data.config ?? {}
   const name = typeof config['name'] === 'string' ? config['name'] : ''
+  const required = config['required'] === true
   // `normalizeValueType` already returns a StringValue('') for an absent
   // config, so this both rehydrates a saved typed value and seeds the default.
   const value = normalizeValueType(config['valueType'])
@@ -62,6 +65,20 @@ export const InputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
                 dataTestId="scn-input"
               />
             </div>
+          )
+        },
+        {
+          id: 'required',
+          content: (
+            <label className="scn-required-toggle nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
+              <input
+                type="checkbox"
+                checked={required}
+                onChange={(e) => { data.onSetConfig?.(id, { required: e.target.checked }) }}
+                data-testid="scn-input-required"
+              />
+              <span>{t('scenario.input.required', 'Required')}</span>
+            </label>
           )
         }
       ]

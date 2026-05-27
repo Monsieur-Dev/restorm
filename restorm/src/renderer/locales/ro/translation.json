@@ -858,6 +858,14 @@
     "object": {
       "addProperty": "Adaugă proprietate",
       "removeProperty": "Elimină proprietatea"
+    },
+    "input": {
+      "required": "Obligatoriu"
+    },
+    "runScenario": {
+      "orphanInput": "Niciun parametru \"{{name}}\" corespunzător în subscenariu",
+      "orphanOutput": "Nicio ieșire \"{{name}}\" corespunzătoare în subscenariu",
+      "then": "apoi"
     }
   }
 }

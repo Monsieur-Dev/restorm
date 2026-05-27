@@ -856,6 +856,14 @@
     "object": {
       "addProperty": "Thêm thuộc tính",
       "removeProperty": "Xóa thuộc tính"
+    },
+    "input": {
+      "required": "Bắt buộc"
+    },
+    "runScenario": {
+      "orphanInput": "Không có tham số \"{{name}}\" khớp trong kịch bản con",
+      "orphanOutput": "Không có đầu ra \"{{name}}\" khớp trong kịch bản con",
+      "then": "rồi"
     }
   }
 }

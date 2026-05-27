@@ -856,6 +856,14 @@
     "object": {
       "addProperty": "Tambah properti",
       "removeProperty": "Hapus properti"
+    },
+    "input": {
+      "required": "Wajib"
+    },
+    "runScenario": {
+      "orphanInput": "Tidak ada parameter \"{{name}}\" yang cocok di sub-skenario",
+      "orphanOutput": "Tidak ada output \"{{name}}\" yang cocok di sub-skenario",
+      "then": "lalu"
     }
   }
 }

@@ -29,7 +29,7 @@ import { normalizeValueType } from '../../utils/normalizeValueType'
 import { SCENARIO_NODE_CATALOGUE, type ScenarioNodeKindMeta } from './scenarioNodeCatalogue'
 import { scenarioEdgeToFlowEdge, flowEdgeToScenarioEdge, portColor } from './scenarioGraphMapping'
 import { ScenarioNodeView, type ScenarioNodeBoxData } from './nodes'
-import { defaultPortsForKind, isValidScenarioConnection } from './scenarioNodePorts'
+import { defaultPortsForKind, isValidScenarioConnection, deriveRunScenarioPorts } from './scenarioNodePorts'
 import { linkPaletteEntries } from './scenarioLinkPalette'
 
 export interface ScenarioEditorViewProps {
@@ -118,11 +118,21 @@ function toFlowNode(n: ScenarioNode, handlers: NodeHandlers): Node<NodeData> {
  * incoming edge. A non-zero count makes the scenario invalid / non-runnable.
  * (Literal-value satisfaction lands with the per-slot config model.)
  */
-function countUnsatisfiedRequired(flowNodes: Node<NodeData>[], flowEdges: Edge[]): number {
+function countUnsatisfiedRequired(
+  flowNodes: Node<NodeData>[],
+  flowEdges: Edge[],
+  resolveScenario: (id: string) => Scenario | null
+): number {
   let n = 0
   for (const node of flowNodes) {
-    for (const inp of defaultPortsForKind(node.data.kind).inputs) {
-      if (!inp.required) continue
+    const required = defaultPortsForKind(node.data.kind).inputs.filter((i) => i.required)
+    // A runScenario's required inputs are its sub-scenario's required params (derived).
+    if (node.data.kind === 'runScenario') {
+      const subId = typeof node.data.config?.['scenarioId'] === 'string' ? node.data.config['scenarioId'] : undefined
+      const sub = subId ? resolveScenario(subId) : null
+      required.push(...deriveRunScenarioPorts(sub).inputs.filter((i) => i.required))
+    }
+    for (const inp of required) {
       if (!flowEdges.some((e) => e.target === node.id && e.targetHandle === inp.id)) n++
     }
   }
@@ -229,16 +239,53 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
   }, [setNodes, setEdges, persist])
   const edgeSelectorApi = useMemo<ScenarioEdgeSelectorApi>(() => ({ getSelector: getEdgeSelector, setSelector: setEdgeSelector }), [getEdgeSelector, setEdgeSelector])
 
+  // Resolve a scenario reference (a runScenario's sub-scenario) to derive its
+  // ports — for orphan-edge detection and the required-input validity count.
+  const resolveScenario = useCallback((sid: string): Scenario | null => {
+    const it = resolveBoundItem?.(sid) ?? null
+    return it && isScenario(it) ? it : null
+  }, [resolveBoundItem])
+
+  // Ports a runScenario node derives from its bound sub-scenario (one per named
+  // input/output node, plus a `done` trigger when it returns nothing) — null for
+  // any other kind. Accepts both the stored `ScenarioNode` and the flow node's
+  // `data`, since both carry `{ kind, config }`.
+  const derivedPortsOf = useCallback((node: { kind: ScenarioNodeKind; config?: Record<string, unknown> } | undefined) => {
+    if (node?.kind !== 'runScenario') return null
+    const sid = typeof node.config?.['scenarioId'] === 'string' ? node.config['scenarioId'] : undefined
+    return deriveRunScenarioPorts(sid ? resolveScenario(sid) : null)
+  }, [resolveScenario])
+
+  // Whether an edge endpoint still resolves to a live port on a runScenario
+  // node. A runScenario's ports are derived from its sub-scenario's input /
+  // output nodes, so renaming or deleting a param there strands edges that
+  // referenced the old port id — those become orphans we flag in red.
+  const isOrphanEdge = useCallback((e: ScenarioEdge): boolean => {
+    const tgtDerived = derivedPortsOf(nodeStore.current.get(e.to.nodeId))
+    if (tgtDerived && !tgtDerived.inputs.some((p) => p.id === e.to.portId)) return true
+    const srcDerived = derivedPortsOf(nodeStore.current.get(e.from.nodeId))
+    if (srcDerived && !srcDerived.outputs.some((p) => p.id === e.from.portId)) return true
+    return false
+  }, [derivedPortsOf])
+
   // A scenario edge → React Flow edge, with its stroke resolved: an explicit
   // `Edge.color` override wins, otherwise the source port's role colour
   // (then=green / else=blue / response=green / error=red / …), else neutral.
+  // An orphaned edge (endpoint port gone after a sub-scenario rename) overrides
+  // both, drawn red + dashed so the stale wiring is obvious.
   const buildFlowEdge = useCallback((e: ScenarioEdge): Edge => {
     const fe = scenarioEdgeToFlowEdge(e) as Edge
+    if (isOrphanEdge(e)) {
+      return { ...fe, className: 'scn-edge-orphan', data: { ...(fe.data ?? {}), orphan: true }, style: { ...(fe.style ?? {}), stroke: 'var(--scn-edge-orphan, #e5484d)', strokeDasharray: '5 4' } }
+    }
     const src = nodeStore.current.get(e.from.nodeId)
+    // A runScenario's outputs are derived, so fall back to the derived set to
+    // colour edges off its `response` / `done` ports.
     const port = src?.outputs.find((o) => o.id === e.from.portId)
+      ?? derivedPortsOf(src)?.outputs.find((o) => o.id === e.from.portId)
     const stroke = e.color ?? (port ? portColor(port) : undefined)
     return stroke ? { ...fe, style: { ...(fe.style ?? {}), stroke } } : fe
-  }, [])
+  }, [isOrphanEdge, derivedPortsOf])
 
   const [edgeMenu, setEdgeMenu] = useState<{ edgeId: string; x: number; y: number } | null>(null)
   const [edgeColorPicker, setEdgeColorPicker] = useState<{ edgeId: string; x: number; y: number } | null>(null)
@@ -388,28 +435,33 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     if (c.targetHandle !== 'in' && edges.some((e) => e.target === c.target && e.targetHandle === c.targetHandle)) {
       return false
     }
+    // A runScenario exposes derived param/output ports (incl. the `done`
+    // trigger), so merge them in for both endpoints before checking flow.
+    const srcDerived = derivedPortsOf(src.data)
+    const tgtDerived = derivedPortsOf(tgt.data)
     return isValidScenarioConnection({
       sourceKind: src.data.kind,
-      sourceOutputs: src.data.outputs,
+      sourceOutputs: srcDerived ? [...src.data.outputs, ...srcDerived.outputs] : src.data.outputs,
       sourceHandle: c.sourceHandle,
       targetKind: tgt.data.kind,
-      targetInputs: tgt.data.inputs,
+      targetInputs: tgtDerived ? [...tgt.data.inputs, ...tgtDerived.inputs] : tgt.data.inputs,
       targetHandle: c.targetHandle
     })
-  }, [nodes, edges])
+  }, [nodes, edges, derivedPortsOf])
 
   const onConnect = useCallback((connection: Connection) => {
     if (!validateConnection(connection)) return
     const id = `e-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
     const src = nodes.find((n) => n.id === connection.source)
     const port = src?.data.outputs.find((o) => o.id === connection.sourceHandle)
+      ?? (src ? derivedPortsOf(src.data)?.outputs.find((o) => o.id === connection.sourceHandle) : undefined)
     const stroke = port ? portColor(port) : undefined
     setEdges((curr) => {
       const next = addEdge({ ...connection, id, ...(stroke ? { style: { stroke } } : {}) }, curr)
       setNodes((n) => { persist(n, next); return n })
       return next
     })
-  }, [setEdges, setNodes, persist, validateConnection, nodes])
+  }, [setEdges, setNodes, persist, validateConnection, nodes, derivedPortsOf])
 
   const addNode = useCallback((kind: ScenarioNodeKind, flow: { x: number; y: number }, config: Record<string, unknown> = {}) => {
     // A "Requête HTTP" node added from the palette (no bound request yet)
@@ -463,9 +515,16 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     const fromHandle = start.handleId
     const fromIsSource = start.handleType !== 'target'
     // Filtered, header-prioritising palette (see linkPaletteEntries); decorate
-    // each with its catalogue label/icon.
+    // each with its catalogue label/icon. A runScenario's derived ports (incl.
+    // the `done` trigger) join the static set so the dragged port's flow is
+    // classified correctly.
+    const srcDerived = derivedPortsOf(srcNode.data)
     const entries = linkPaletteEntries(
-      { kind: srcNode.data.kind, inputs: srcNode.data.inputs, outputs: srcNode.data.outputs },
+      {
+        kind: srcNode.data.kind,
+        inputs: srcDerived ? [...srcNode.data.inputs, ...srcDerived.inputs] : srcNode.data.inputs,
+        outputs: srcDerived ? [...srcNode.data.outputs, ...srcDerived.outputs] : srcNode.data.outputs
+      },
       fromHandle,
       fromIsSource
     ).map((e) => {
@@ -478,7 +537,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     const y = pt?.clientY ?? 0
     linkPaletteOpenedAt.current = Date.now()
     setLinkPalette({ x, y, flow: screenToFlowPosition({ x, y }), fromNodeId: start.nodeId, fromHandle, fromIsSource, entries })
-  }, [nodes, t, screenToFlowPosition])
+  }, [nodes, t, screenToFlowPosition, derivedPortsOf])
 
   // Create the picked kind at the drop point and wire it to the dragged port.
   // The id + node + edge are built ONCE, outside any state updater — React
@@ -497,6 +556,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
       : { id: edgeId, source: newId, sourceHandle: wirePort, target: lp.fromNodeId, targetHandle: lp.fromHandle }
     const srcN = nodeStore.current.get(edge.source)
     const srcPort = srcN?.outputs.find((o) => o.id === edge.sourceHandle)
+      ?? derivedPortsOf(srcN)?.outputs.find((o) => o.id === edge.sourceHandle)
     const stroke = srcPort ? portColor(srcPort) : undefined
     if (stroke) edge.style = { stroke }
     setNodes((curr) => {
@@ -505,7 +565,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
       return next
     })
     setLinkPalette(null)
-  }, [linkPalette, setNodes, setEdges, persist])
+  }, [linkPalette, setNodes, setEdges, persist, derivedPortsOf])
 
   const onDragOver = useCallback((event: React.DragEvent) => {
     // Allow the drop only when the host can resolve dragged items.
@@ -683,7 +743,9 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
           if (e.id !== edgeId) return e
           const sc = edgeStore.current.get(edgeId)
           const src = sc ? nodeStore.current.get(sc.from.nodeId) : undefined
-          const port = sc ? src?.outputs.find((o) => o.id === sc.from.portId) : undefined
+          const port = sc
+            ? (src?.outputs.find((o) => o.id === sc.from.portId) ?? derivedPortsOf(src)?.outputs.find((o) => o.id === sc.from.portId))
+            : undefined
           const stroke = color ?? (port ? portColor(port) : undefined)
           return { ...e, style: { ...(e.style ?? {}), ...(stroke ? { stroke } : {}) } }
         })
@@ -692,10 +754,10 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
       })
       return n
     })
-  }, [setNodes, setEdges, persist])
+  }, [setNodes, setEdges, persist, derivedPortsOf])
 
   // A required input left unwired makes the scenario non-runnable.
-  const invalidCount = useMemo(() => countUnsatisfiedRequired(nodes, edges), [nodes, edges])
+  const invalidCount = useMemo(() => countUnsatisfiedRequired(nodes, edges, resolveScenario), [nodes, edges, resolveScenario])
 
   // Variables in scope — declared by `setVariable` nodes and named `input`/param
   // nodes, each carrying the type it was declared with. Drives the value

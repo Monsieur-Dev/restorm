@@ -859,6 +859,14 @@
     "object": {
       "addProperty": "Přidat vlastnost",
       "removeProperty": "Odebrat vlastnost"
+    },
+    "input": {
+      "required": "Povinné"
+    },
+    "runScenario": {
+      "orphanInput": "V dílčím scénáři chybí odpovídající parametr „{{name}}“",
+      "orphanOutput": "V dílčím scénáři chybí odpovídající výstup „{{name}}“",
+      "then": "poté"
     }
   }
 }

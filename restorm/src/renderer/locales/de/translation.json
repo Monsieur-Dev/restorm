@@ -857,6 +857,14 @@
     "object": {
       "addProperty": "Eigenschaft hinzufügen",
       "removeProperty": "Eigenschaft entfernen"
+    },
+    "input": {
+      "required": "Erforderlich"
+    },
+    "runScenario": {
+      "orphanInput": "Kein passender Parameter \"{{name}}\" im Unterszenario",
+      "orphanOutput": "Keine passende Ausgabe \"{{name}}\" im Unterszenario",
+      "then": "dann"
     }
   }
 }

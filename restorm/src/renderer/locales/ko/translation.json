@@ -856,6 +856,14 @@
     "object": {
       "addProperty": "속성 추가",
       "removeProperty": "속성 제거"
+    },
+    "input": {
+      "required": "필수"
+    },
+    "runScenario": {
+      "orphanInput": "하위 시나리오에 일치하는 매개변수 \"{{name}}\"가 없습니다",
+      "orphanOutput": "하위 시나리오에 일치하는 출력 \"{{name}}\"가 없습니다",
+      "then": "다음"
     }
   }
 }

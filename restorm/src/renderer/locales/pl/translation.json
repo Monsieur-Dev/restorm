@@ -859,6 +859,14 @@
     "object": {
       "addProperty": "Dodaj właściwość",
       "removeProperty": "Usuń właściwość"
+    },
+    "input": {
+      "required": "Wymagane"
+    },
+    "runScenario": {
+      "orphanInput": "Brak pasującego parametru „{{name}}\" w podscenariuszu",
+      "orphanOutput": "Brak pasującego wyjścia „{{name}}\" w podscenariuszu",
+      "then": "potem"
     }
   }
 }
