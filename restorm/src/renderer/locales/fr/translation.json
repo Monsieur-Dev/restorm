@@ -782,9 +782,7 @@
       "ariaLabel": "Sélecteur de chemin JSON",
       "pick": "Choisir depuis le résultat",
       "loading": "Chargement…",
-      "noResult": "Lancez l'action source pour choisir une propriété de son résultat.",
-      "runSource": "Lancer la source",
-      "running": "En cours…"
+      "noResult": "Lancez l'action source pour choisir une propriété de son résultat."
     },
     "edge": {
       "menu": {
@@ -882,7 +880,6 @@
       "then": "ensuite"
     },
     "validation": {
-      "missingName": "Cette action doit avoir un nom.",
       "duplicateName": "Le nom « {{name}} » est déjà utilisé par une autre action.",
       "panelTitle": "{{count}} action(s) en erreur",
       "focusBox": "Aller à cette action",
@@ -936,10 +933,11 @@
       "run": "Exécuter",
       "debug": "Déboguer",
       "step": "Pas à pas",
-      "noOutputs": "Cette action n'a pas de sortie.",
-      "notRun": "Exécutez l'action pour voir sa sortie.",
       "previewInfo": "Données d'exemple, basées sur les précédents résultats des requêtes.",
-      "pause": "Pause"
+      "pause": "Pause",
+      "noRunsHint": "Pas d'exécution récente pour cette requête — exécutez-la d'ici pour alimenter l'aperçu du scénario.",
+      "syntheticInfo": "Données d'exemple générées à partir de la documentation de cette requête.",
+      "syntheticRunHint": "Données d'exemple — exécutez la requête pour les remplacer par un vrai résultat."
     },
     "now": {
       "timezone": "Fuseau horaire",

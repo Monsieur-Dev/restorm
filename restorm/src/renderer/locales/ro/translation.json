@@ -767,9 +767,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source action to pick a property from its result.",
-      "runSource": "Run source",
-      "running": "Running…"
+      "noResult": "Run the source action to pick a property from its result."
     },
     "tab": {
       "graph": "Scenario",
@@ -883,7 +881,6 @@
       "then": "apoi"
     },
     "validation": {
-      "missingName": "Această acțiune trebuie să aibă un nume.",
       "duplicateName": "Numele „{{name}}” este deja folosit de altă acțiune.",
       "panelTitle": "{{count}} acțiune/i cu erori",
       "focusBox": "Mergi la această acțiune",
@@ -937,10 +934,11 @@
       "run": "Rulează",
       "debug": "Depanare",
       "step": "Pas cu pas",
-      "noOutputs": "Această acțiune nu are ieșire.",
-      "notRun": "Rulează acțiunea pentru a-i vedea ieșirea.",
       "previewInfo": "Example data, based on previous request results.",
-      "pause": "Pauză"
+      "pause": "Pauză",
+      "noRunsHint": "Nicio rulare recentă pentru această cerere — rulează-o de aici ca să populezi previzualizarea scenariului.",
+      "syntheticInfo": "Date de exemplu generate din documentația acestei cereri.",
+      "syntheticRunHint": "Date de exemplu — rulați cererea pentru a le înlocui cu un rezultat real."
     },
     "now": {
       "timezone": "Timezone",

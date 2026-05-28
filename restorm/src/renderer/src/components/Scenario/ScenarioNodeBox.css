@@ -83,7 +83,7 @@
  * authoritative output. */
 .scn-inspector-info {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 6px;
   font-size: 11px;
   opacity: 0.7;
@@ -91,10 +91,56 @@
   margin-bottom: 4px;
   flex: 0 0 auto;
 }
-.scn-inspector-info .codicon-info {
+.scn-inspector-info .codicon {
   font-size: 14px;
   flex-shrink: 0;
   line-height: 1.2;
+}
+.scn-inspector-info > span {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+/* Navigation link at the top of the preview section — opens the box's
+ * bound item (request / sub-scenario) in a workbench tab. Sized like a
+ * normal-weight link, not a button, so it doesn't compete with the
+ * toolbar's actual buttons. */
+.scn-inspector-open {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin-bottom: 6px;
+  color: var(--vscode-textLink-foreground, #3794ff);
+  cursor: pointer;
+  text-decoration: none;
+}
+.scn-inspector-open:hover {
+  text-decoration: underline;
+}
+.scn-inspector-open .codicon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+/* Replaces `.scn-inspector-info` when the previewed box is runnable AND
+ * has no recent result: a small play button + the same italic hint, so
+ * the user gets one clear next-step instead of an info row paired with
+ * an empty-state line. */
+.scn-inspector-run-prompt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  opacity: 0.85;
+  font-style: italic;
+  margin-bottom: 4px;
+  flex: 0 0 auto;
+}
+.scn-inspector-run-prompt > span {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 .scn-inspector-output {
   display: flex;

@@ -24,6 +24,7 @@ import { isRequest, isScenario } from '../../../../shared/types/collections'
 import { Badge } from '../common/Badge'
 import { requestBadgeType } from '../../utils/badgeUtils'
 import { ScenarioBoundResolverContext, ScenarioRequestEnvContext, type ResolveBoundItem, type ResolveRequestEnv } from './scenarioBoundResolver'
+import type { SyntheticRequestPreview } from '../../../../shared/utils/syntheticRequestPreview'
 import { ScenarioEdgeSelectorContext, type ScenarioEdgeSelectorApi } from './scenarioEdgeSelector'
 import { ScenarioStaticPreviewContext, type ScenarioStaticPreviewApi, type ObjectWiredProperty } from './scenarioStaticPreviewContext'
 import { ScenarioVariablesContext, type ScenarioVariable } from '../../contexts/ScenarioVariablesContext'
@@ -58,6 +59,11 @@ export interface ScenarioEditorViewProps {
   resolveBoundItem?: ResolveBoundItem
   /** Resolve a request's environments + default selection (env-selector section). */
   resolveRequestEnv?: ResolveRequestEnv
+  /** Build a synthetic preview from a request's imported documentation.
+   * The inspector uses it when a request box has no recent run result
+   * but its env folder carries a spec — same `{request, response}`
+   * shape as a real run, with sample values keyed by the spec. */
+  resolveSyntheticPreview?: (requestId: string) => SyntheticRequestPreview | null
   /** Open a tree item (bound request / sub-scenario) in a workbench tab by id —
    * drives the "Edit request / scenario" link on those nodes. */
   onOpenItem?: (itemId: string) => void
@@ -212,7 +218,7 @@ function chooseColorTooltipPlacement(rect: DOMRect): { placement: 'above' | 'bel
   return { placement: 'below', side: 'auto' }
 }
 
-const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onScenarioChange, resolveBoundItem, resolveRequestEnv, onOpenItem, onCreateRequest, onCreateChild }) => {
+const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onScenarioChange, resolveBoundItem, resolveRequestEnv, resolveSyntheticPreview, onOpenItem, onCreateRequest, onCreateChild }) => {
   const { t } = useTranslation()
   const { screenToFlowPosition, fitView } = useReactFlow()
   const wrapperRef = useRef<HTMLDivElement>(null)
@@ -1341,6 +1347,31 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
         }
       }
     }
+    // Boxes the main-process engine can actually run on demand (cf.
+    // `runScenarioNode` switch). The inspector uses this to swap its
+    // "example data based on previous runs" info row for an inline
+    // play-from-here button when the box has no result yet.
+    const runnable = n.data.kind === 'httpRequest'
+    // Bound-item navigation: a request / runScenario box can open its
+    // backing item in a workbench tab from the inspector's top row.
+    let openItemId: string | undefined
+    let openItemKind: 'request' | 'scenario' | undefined
+    if (n.data.kind === 'httpRequest') {
+      const reqId = typeof cfg['requestId'] === 'string' ? cfg['requestId'] : undefined
+      if (reqId) { openItemId = reqId; openItemKind = 'request' }
+    } else if (n.data.kind === 'runScenario') {
+      const scnId = typeof cfg['scenarioId'] === 'string' ? cfg['scenarioId'] : undefined
+      if (scnId) { openItemId = scnId; openItemKind = 'scenario' }
+    }
+    // Synthetic preview from the request's imported documentation, used
+    // when the box has no recent real run. Computed eagerly here because
+    // the resolver is pure (no IO) — its identity changes only when the
+    // tree mutates, so it's safe inside this memo.
+    let syntheticPreview: SyntheticRequestPreview | null = null
+    if (n.data.kind === 'httpRequest' && resolveSyntheticPreview) {
+      const boundId = typeof cfg['requestId'] === 'string' ? cfg['requestId'] : null
+      if (boundId) syntheticPreview = resolveSyntheticPreview(boundId)
+    }
     return {
       id: n.id,
       title,
@@ -1350,9 +1381,12 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
       staticData,
       ...(wiredFetches.length > 0 ? { wiredFetches } : {}),
       ...(listOp ? { listOp } : {}),
-      ...(n.data['fakeRunActive'] === true ? { fakeRunActive: true } : {})
+      ...(n.data['fakeRunActive'] === true ? { fakeRunActive: true } : {}),
+      ...(runnable ? { runnable: true } : {}),
+      ...(syntheticPreview ? { syntheticPreview } : {}),
+      ...(openItemId && openItemKind ? { openItemId, openItemKind } : {})
     }
-  }, [nodes, edges, t, derivedPortsOf, staticPreviewApi, resolveBoundItem])
+  }, [nodes, edges, t, derivedPortsOf, staticPreviewApi, resolveBoundItem, resolveSyntheticPreview])
 
   // Edges propagated to React Flow with a transient `data.debugToken`
   // mirroring the source node's `fakeDebugToken`. The token's identity
@@ -1428,6 +1462,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
         previewNode={previewNode}
         onTriggerFakeRun={onTriggerFakeRun}
         onTriggerFakeDebug={onTriggerFakeDebug}
+        {...(onOpenItem ? { onOpenItem } : {})}
       />
       <ReactFlow
         nodes={nodes}

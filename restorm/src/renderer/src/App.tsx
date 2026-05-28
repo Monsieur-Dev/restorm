@@ -175,6 +175,10 @@ import {
   isAuthenticationRequest
 } from '../../shared/types/collections'
 import { buildRequestPath } from './utils/requestPath'
+import { findOperationForRoute } from '../../shared/utils/findOperationForRoute'
+import { routeFromRequest } from './hooks/routeFromRequest'
+import { synthesizeRequestPreview, type SyntheticRequestPreview } from '../../shared/utils/syntheticRequestPreview'
+import type { ApiDocumentation } from '../../shared/types/apiDocumentation'
 
 // Wire the ECUI Console feed to restorm's firewall IPC channel. The
 // store subscribes lazily on the first `useConsoleFeed` consumer, so
@@ -1209,6 +1213,37 @@ const App: React.FC = () => {
     }
     return { environments, selectedEnvId }
   }, [rootItems, projectUuid])
+
+  // Build a synthetic (documentation-derived) preview for a request that
+  // hasn't been run yet — the scenario inspector renders this in place of
+  // the "no recent run" prompt when the request's owning env-folder
+  // carries an imported spec. Pure lookup: walk the tree to find the
+  // request + its env-folder's `apiDocumentation`, match the operation,
+  // then call the shared synthesiser. Returns `null` when any link in
+  // the chain is missing (no request, no env-folder, no spec, no
+  // matching operation).
+  const resolveSyntheticPreview = useCallback((requestId: string): SyntheticRequestPreview | null => {
+    const request = findRequestById(rootItems, requestId)
+    if (!request) return null
+    const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, requestId)
+    let envFolder: EnvironmentFolder | undefined
+    for (let i = breadcrumbs.length - 2; i >= 0; i -= 1) {
+      const id = breadcrumbs[i]?.id
+      if (!id) continue
+      const f = findFolderById(rootItems, id)
+      if (f && isEnvironmentFolder(f as FolderItem)) { envFolder = f as EnvironmentFolder; break }
+    }
+    if (!envFolder) return null
+    const apiDoc = (envFolder as { apiDocumentation?: ApiDocumentation }).apiDocumentation
+    if (!apiDoc) return null
+    const route = routeFromRequest(request)
+    const operation = findOperationForRoute(apiDoc, route)
+    if (!operation) return null
+    return synthesizeRequestPreview(apiDoc, operation, {
+      ...(route.url !== undefined ? { url: route.url } : {}),
+      ...(route.method !== undefined ? { method: route.method } : {})
+    })
+  }, [rootItems])
 
   // Environments of the active request's nearest ancestor env-folder,
   // used to feed the status-bar env selector. Empty when the active
@@ -2337,6 +2372,7 @@ const App: React.FC = () => {
               onCreateScenarioChild={handleCreateScenarioChild}
               resolveBoundItem={resolveBoundItem}
               resolveRequestEnv={resolveRequestEnv}
+              resolveSyntheticPreview={resolveSyntheticPreview}
               onEnvironmentFolderChange={handleEnvironmentFolderChange}
               onSizesChange={handleSizesChange}
               emptyFallback={<EmptyBench rootItems={rootItems} projectUuid={projectUuid} onImport={() => { setShowImportModal(true) }} onOpenRequest={handleItemClick} />}
@@ -2378,6 +2414,7 @@ const App: React.FC = () => {
             onCreateScenarioChild={handleCreateScenarioChild}
             resolveBoundItem={resolveBoundItem}
             resolveRequestEnv={resolveRequestEnv}
+            resolveSyntheticPreview={resolveSyntheticPreview}
             onEnvironmentFolderChange={handleEnvironmentFolderChange}
             onSizesChange={handleSizesChange}
             emptyFallback={

@@ -766,9 +766,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source action to pick a property from its result.",
-      "runSource": "Run source",
-      "running": "Running…"
+      "noResult": "Run the source action to pick a property from its result."
     },
     "tab": {
       "graph": "Scenario",
@@ -882,7 +880,6 @@
       "then": "sonra"
     },
     "validation": {
-      "missingName": "Bu eylemin bir adı olmalı.",
       "duplicateName": "\"{{name}}\" adı zaten başka bir eylem tarafından kullanılıyor.",
       "panelTitle": "{{count}} eylem hatası",
       "focusBox": "Bu eyleme git",
@@ -936,10 +933,11 @@
       "run": "Çalıştır",
       "debug": "Hata Ayıkla",
       "step": "Adım adım",
-      "noOutputs": "Bu eylemin çıktısı yok.",
-      "notRun": "Çıktısını görmek için eylemi çalıştırın.",
       "previewInfo": "Example data, based on previous request results.",
-      "pause": "Duraklat"
+      "pause": "Duraklat",
+      "noRunsHint": "Bu istek için son çalışma yok — senaryo önizlemesini doldurmak için buradan çalıştır.",
+      "syntheticInfo": "Bu isteğin belgelerinden oluşturulan örnek veriler.",
+      "syntheticRunHint": "Örnek veriler — gerçek bir sonuçla değiştirmek için isteği çalıştırın."
     },
     "now": {
       "timezone": "Timezone",

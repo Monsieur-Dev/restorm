@@ -782,9 +782,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source action to pick a property from its result.",
-      "runSource": "Run source",
-      "running": "Running…"
+      "noResult": "Run the source action to pick a property from its result."
     },
     "edge": {
       "menu": {
@@ -882,7 +880,6 @@
       "then": "then"
     },
     "validation": {
-      "missingName": "This action must have a name.",
       "duplicateName": "The name \"{{name}}\" is already used by another action.",
       "panelTitle": "{{count}} action error(s)",
       "focusBox": "Focus this action",
@@ -936,10 +933,11 @@
       "run": "Run",
       "debug": "Debug",
       "step": "Step",
-      "noOutputs": "This action has no output.",
-      "notRun": "Run the action to see its output.",
       "previewInfo": "Example data, based on previous request results.",
-      "pause": "Pause"
+      "pause": "Pause",
+      "noRunsHint": "No recent run for this request — run it from here to populate the scenario preview.",
+      "syntheticInfo": "Example data generated from this request's documentation.",
+      "syntheticRunHint": "Sample data — run the request to replace it with a real result."
     },
     "now": {
       "timezone": "Timezone",

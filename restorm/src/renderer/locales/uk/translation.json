@@ -768,9 +768,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source action to pick a property from its result.",
-      "runSource": "Run source",
-      "running": "Running…"
+      "noResult": "Run the source action to pick a property from its result."
     },
     "tab": {
       "graph": "Scenario",
@@ -884,7 +882,6 @@
       "then": "потім"
     },
     "validation": {
-      "missingName": "Ця дія повинна мати назву.",
       "duplicateName": "Назва «{{name}}» вже використовується іншою дією.",
       "panelTitle": "{{count}} помилок дій",
       "focusBox": "Перейти до цієї дії",
@@ -938,10 +935,11 @@
       "run": "Запустити",
       "debug": "Налагодження",
       "step": "Крок за кроком",
-      "noOutputs": "Ця дія не має виходу.",
-      "notRun": "Запустіть дію, щоб побачити її вихід.",
       "previewInfo": "Example data, based on previous request results.",
-      "pause": "Пауза"
+      "pause": "Пауза",
+      "noRunsHint": "Немає недавнього виконання для цього запиту — запусти його звідси, щоб заповнити прев'ю сценарію.",
+      "syntheticInfo": "Приклад даних, згенерований з документації цього запиту.",
+      "syntheticRunHint": "Приклад даних — виконайте запит, щоб замінити їх реальним результатом."
     },
     "now": {
       "timezone": "Timezone",

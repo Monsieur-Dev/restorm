@@ -765,9 +765,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source action to pick a property from its result.",
-      "runSource": "Run source",
-      "running": "Running…"
+      "noResult": "Run the source action to pick a property from its result."
     },
     "tab": {
       "graph": "Scenario",
@@ -881,7 +879,6 @@
       "then": "lalu"
     },
     "validation": {
-      "missingName": "Aksi ini harus memiliki nama.",
       "duplicateName": "Nama \"{{name}}\" sudah dipakai oleh aksi lain.",
       "panelTitle": "{{count}} kesalahan aksi",
       "focusBox": "Fokus ke aksi ini",
@@ -935,10 +932,11 @@
       "run": "Jalankan",
       "debug": "Debug",
       "step": "Langkah demi langkah",
-      "noOutputs": "Aksi ini tidak memiliki keluaran.",
-      "notRun": "Jalankan aksi untuk melihat keluarannya.",
       "previewInfo": "Example data, based on previous request results.",
-      "pause": "Jeda"
+      "pause": "Jeda",
+      "noRunsHint": "Belum ada eksekusi terbaru untuk permintaan ini — jalankan dari sini untuk mengisi pratinjau skenario.",
+      "syntheticInfo": "Contoh data yang dihasilkan dari dokumentasi permintaan ini.",
+      "syntheticRunHint": "Contoh data — jalankan permintaan untuk menggantinya dengan hasil nyata."
     },
     "now": {
       "timezone": "Timezone",

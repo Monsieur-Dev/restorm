@@ -765,9 +765,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source action to pick a property from its result.",
-      "runSource": "Run source",
-      "running": "Running…"
+      "noResult": "Run the source action to pick a property from its result."
     },
     "tab": {
       "graph": "Scenario",
@@ -881,7 +879,6 @@
       "then": "然後"
     },
     "validation": {
-      "missingName": "此動作必須有名稱。",
       "duplicateName": "名稱「{{name}}」已被另一個動作使用。",
       "panelTitle": "{{count}} 個動作錯誤",
       "focusBox": "定位到此動作",
@@ -935,10 +932,11 @@
       "run": "執行",
       "debug": "偵錯",
       "step": "單步",
-      "noOutputs": "此動作沒有輸出。",
-      "notRun": "執行該動作以查看其輸出。",
       "previewInfo": "Example data, based on previous request results.",
-      "pause": "暫停"
+      "pause": "暫停",
+      "noRunsHint": "此請求尚無最近一次執行結果 — 從此處執行以填入情境預覽。",
+      "syntheticInfo": "從此請求的文件產生的範例資料。",
+      "syntheticRunHint": "範例資料 — 執行請求以替換為真實結果。"
     },
     "now": {
       "timezone": "Timezone",

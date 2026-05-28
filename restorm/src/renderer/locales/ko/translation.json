@@ -765,9 +765,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source action to pick a property from its result.",
-      "runSource": "Run source",
-      "running": "Running…"
+      "noResult": "Run the source action to pick a property from its result."
     },
     "tab": {
       "graph": "Scenario",
@@ -881,7 +879,6 @@
       "then": "다음"
     },
     "validation": {
-      "missingName": "이 액션에는 이름이 필요합니다.",
       "duplicateName": "이름 \"{{name}}\"은(는) 다른 액션에서 이미 사용 중입니다.",
       "panelTitle": "액션 오류 {{count}}건",
       "focusBox": "이 액션으로 이동",
@@ -935,10 +932,11 @@
       "run": "실행",
       "debug": "디버그",
       "step": "단계 실행",
-      "noOutputs": "이 액션에는 출력이 없습니다.",
-      "notRun": "액션을 실행하여 출력을 확인하세요.",
       "previewInfo": "Example data, based on previous request results.",
-      "pause": "일시 중지"
+      "pause": "일시 중지",
+      "noRunsHint": "이 요청의 최근 실행 결과가 없습니다 — 여기서 실행해 시나리오 미리보기를 채우세요.",
+      "syntheticInfo": "이 요청의 문서에서 생성된 예시 데이터입니다.",
+      "syntheticRunHint": "예시 데이터 — 실제 결과로 바꾸려면 요청을 실행하세요."
     },
     "now": {
       "timezone": "Timezone",

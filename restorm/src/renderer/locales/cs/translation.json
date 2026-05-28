@@ -768,9 +768,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source action to pick a property from its result.",
-      "runSource": "Run source",
-      "running": "Running…"
+      "noResult": "Run the source action to pick a property from its result."
     },
     "tab": {
       "graph": "Scenario",
@@ -884,7 +882,6 @@
       "then": "poté"
     },
     "validation": {
-      "missingName": "Tato akce musí mít název.",
       "duplicateName": "Název „{{name}}“ už používá jiná akce.",
       "panelTitle": "Chyby akcí: {{count}}",
       "focusBox": "Přejít na tuto akci",
@@ -938,10 +935,11 @@
       "run": "Spustit",
       "debug": "Ladit",
       "step": "Krok za krokem",
-      "noOutputs": "Tato akce nemá výstup.",
-      "notRun": "Spusťte akci, abyste viděli její výstup.",
       "previewInfo": "Example data, based on previous request results.",
-      "pause": "Pozastavit"
+      "pause": "Pozastavit",
+      "noRunsHint": "Žádné nedávné spuštění tohoto požadavku — spusťte jej zde a naplňte náhled scénáře.",
+      "syntheticInfo": "Příklad dat vygenerovaný z dokumentace tohoto požadavku.",
+      "syntheticRunHint": "Příklad dat — spusťte požadavek, abyste je nahradili skutečným výsledkem."
     },
     "now": {
       "timezone": "Timezone",

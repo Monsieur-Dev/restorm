@@ -8,6 +8,7 @@ import type { BreadcrumbItem } from '../../../../../shared/types/editor'
 import type { Request, Folder, EnvironmentFolder, ScenarioNode, ScenarioEdge } from '../../../../../shared/types/collections'
 import type { ScenarioRequestUsage, ScenarioScenarioUsage } from '../../../services/scenarioRequestUsage'
 import type { ResolveBoundItem, ResolveRequestEnv } from '../../Scenario/scenarioBoundResolver'
+import type { SyntheticRequestPreview } from '../../../../../shared/utils/syntheticRequestPreview'
 
 export interface RestormWorkbenchContainerProps {
   workbenchRef?: React.Ref<RestormWorkbenchHandle>
@@ -43,6 +44,7 @@ export interface RestormWorkbenchContainerProps {
   onCreateScenarioChild?: (scenarioId: string, kind: AddChildKind) => string | null
   resolveBoundItem?: ResolveBoundItem
   resolveRequestEnv?: ResolveRequestEnv
+  resolveSyntheticPreview?: (requestId: string) => SyntheticRequestPreview | null
   onEnvironmentFolderChange: (folderId: string, folder: EnvironmentFolder) => void
   onSizesChange: (nodeId: string, sizes: number[]) => void
   emptyFallback: React.ReactNode
@@ -95,6 +97,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
   onCreateScenarioChild,
   resolveBoundItem,
   resolveRequestEnv,
+  resolveSyntheticPreview,
   onEnvironmentFolderChange,
   onSizesChange,
   emptyFallback,
@@ -145,6 +148,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
           {...(onCreateScenarioChild ? { onCreateScenarioChild } : {})}
           {...(resolveBoundItem ? { resolveBoundItem } : {})}
           {...(resolveRequestEnv ? { resolveRequestEnv } : {})}
+          {...(resolveSyntheticPreview ? { resolveSyntheticPreview } : {})}
           onEnvironmentFolderChange={onEnvironmentFolderChange}
           onSizesChange={onSizesChange}
           emptyFallback={emptyFallback}

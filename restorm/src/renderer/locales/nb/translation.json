@@ -766,9 +766,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source action to pick a property from its result.",
-      "runSource": "Run source",
-      "running": "Running…"
+      "noResult": "Run the source action to pick a property from its result."
     },
     "tab": {
       "graph": "Scenario",
@@ -882,7 +880,6 @@
       "then": "deretter"
     },
     "validation": {
-      "missingName": "Denne handlingen må ha et navn.",
       "duplicateName": "Navnet «{{name}}» brukes allerede av en annen handling.",
       "panelTitle": "{{count}} handlingsfeil",
       "focusBox": "Gå til denne handlingen",
@@ -936,10 +933,11 @@
       "run": "Kjør",
       "debug": "Feilsøk",
       "step": "Steg for steg",
-      "noOutputs": "Denne handlingen har ingen utdata.",
-      "notRun": "Kjør handlingen for å se utdataene.",
       "previewInfo": "Example data, based on previous request results.",
-      "pause": "Pause"
+      "pause": "Pause",
+      "noRunsHint": "Ingen nylig kjøring for denne forespørselen — kjør den herfra for å fylle scenario-forhåndsvisningen.",
+      "syntheticInfo": "Eksempeldata generert fra dokumentasjonen for denne forespørselen.",
+      "syntheticRunHint": "Eksempeldata — kjør forespørselen for å erstatte dem med et reelt resultat."
     },
     "now": {
       "timezone": "Timezone",

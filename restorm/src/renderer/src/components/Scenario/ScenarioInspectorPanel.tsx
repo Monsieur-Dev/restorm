@@ -5,6 +5,7 @@ import type { ScenarioPort } from '../../../../shared/types/collections'
 import type { ScenarioNodeError } from './scenarioValidation'
 import { buildScenarioPathTree } from './scenarioPathTree'
 import { resolveSelectorPath } from '../../../../shared/utils/scenarioStaticPreview'
+import type { SyntheticRequestPreview } from '../../../../shared/utils/syntheticRequestPreview'
 
 /** A wired property of an object-builder node whose value lives in an
  * upstream source's run result (not statically computable). */
@@ -46,6 +47,24 @@ export interface InspectorPreviewNode {
   /** Whether the (visual) "running" animation is currently active on this
    * node — drives the toolbar Run button's Play↔Pause toggle. */
   fakeRunActive?: boolean
+  /** Whether the box is something the renderer can ask the engine to
+   * actually run (request / wait). Drives the "no recent run results"
+   * fallback — when the inspector has no data to show on a runnable
+   * node, it offers a play button to populate it instead of just the
+   * static info-row. */
+  runnable?: boolean
+  /** Spec-derived synthetic preview to show when the box has no run
+   * result of its own — request/response envelope built from the
+   * matched operation in the env folder's `apiDocumentation`. The
+   * inspector renders it like a real result, with a different info row
+   * so the user knows the values are sampled from the spec. */
+  syntheticPreview?: SyntheticRequestPreview
+  /** When the box is bound to a navigable item (request or sub-scenario),
+   * the panel renders a navigation row at the top — "Open <Name> →".
+   * `openItemId` carries the id to navigate to; `openItemKind` chooses
+   * the label and the badge. */
+  openItemId?: string
+  openItemKind?: 'request' | 'scenario'
 }
 export interface ScenarioInspectorPanelProps {
   scenarioId: string
@@ -65,10 +84,14 @@ export interface ScenarioInspectorPanelProps {
    * but on the OUTGOING edges of the previewed box (a moving beam runs
    * along each bezier from the box's handles to the downstream nodes). */
   onTriggerFakeDebug?: (nodeId: string) => void
+  /** Open the previewed node's bound item (request / sub-scenario) in a
+   * workbench tab — drives the navigation row at the top of the panel. */
+  onOpenItem?: (itemId: string) => void
 }
 
 interface ScenarioRuntime {
   getScenarioNodeResult?: (scenarioId: string, nodeId: string) => Promise<Record<string, unknown> | null>
+  runScenarioNode?: (scenarioId: string, nodeId: string) => Promise<unknown>
 }
 function scenarioRuntime(): ScenarioRuntime | undefined {
   return (window as { restorm?: { runtime?: ScenarioRuntime } }).restorm?.runtime
@@ -84,7 +107,7 @@ function scenarioRuntime(): ScenarioRuntime | undefined {
  * data + tree as the JSON-path selector's picker popover). Shown only when
  * exactly one box is selected.
  */
-export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ scenarioId, errors, errorBoxCount, onFocusNode, previewNode, onTriggerFakeRun, onTriggerFakeDebug }) => {
+export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ scenarioId, errors, errorBoxCount, onFocusNode, previewNode, onTriggerFakeRun, onTriggerFakeDebug, onOpenItem }) => {
   const { t } = useTranslation()
   const [result, setResult] = useState<Record<string, unknown> | null>(null)
   const fetchToken = useRef(0)
@@ -133,6 +156,9 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
   //  - list-op kind (map/filter/aggregate) whose items come from a non-
   //    static source → fetch the source, resolve `items` via the selector,
   //    then run the kind-specific computation (`apply`).
+  // Bumped after the inline "Run from here" button fires the engine, so the
+  // useEffect below re-runs and refetches the freshly-populated result.
+  const [runVersion, setRunVersion] = useState(0)
   useEffect(() => {
     const token = ++fetchToken.current
     void (async () => {
@@ -164,12 +190,22 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
       }
       if (fetchToken.current === token) setResult(res)
     })()
-  }, [scenarioId, previewId, hasStatic, staticData, wiredFetches, listOp])
+  }, [scenarioId, previewId, hasStatic, staticData, wiredFetches, listOp, runVersion])
+
+  // Tracks the in-flight "Run from here" call so the inline button can
+  // disable + swap to a busy icon while the engine is busy.
+  const [running, setRunning] = useState(false)
 
   // `result` carries either a runtime fetch (non-static kinds) or the merged
   // static + wired-source overrides (object kind), so it wins when present.
   // `staticData` is the fallback when no async work is needed at all.
-  const data = result ?? staticData
+  // `syntheticPreview` is the spec-derived envelope shown when neither
+  // is available on a runnable box.
+  const realData = result ?? staticData
+  const syntheticPreview = previewNode?.syntheticPreview
+  const data = realData
+    ?? (syntheticPreview ? (syntheticPreview as unknown as Record<string, unknown>) : null)
+  const isSynthetic = realData === null && syntheticPreview != null
   const hasErrors = errors.length > 0
   const noop = (): void => { /* Step is visual-only for now — Run + Debug wire their fake-run animations below. */ }
   const onRun = (): void => {
@@ -231,19 +267,75 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
               {previewNode.titleBadge}
               <span>{previewNode.title}</span>
             </div>
+            {/* First row when the box wraps a navigable item — a small
+              * link to its tab so the inspector doubles as the box's
+              * "open" affordance. Same handler the node-box's
+              * "Edit request / scenario" row uses. */}
+            {previewNode.openItemId && previewNode.openItemKind && onOpenItem && (
+              <button
+                type="button"
+                className="scn-inspector-open"
+                onClick={() => {
+                  const id = previewNode.openItemId
+                  if (id) onOpenItem(id)
+                }}
+                data-testid="scenario-inspector-open"
+              >
+                {previewNode.openItemKind === 'request'
+                  ? t('scenario.editRequest', 'Edit request')
+                  : t('scenario.editScenario', 'Edit scenario')}
+              </button>
+            )}
             {previewNode.note && <div className="scn-inspector-note">{previewNode.note}</div>}
-            <div className="scn-inspector-info" role="note">
-              <i className="codicon codicon-info" aria-hidden="true" />
-              <span>{t('scenario.inspector.previewInfo', 'Example data, based on previous request results.')}</span>
-            </div>
-            {data === null ? (
-              <div className="scn-inspector-empty">{t('scenario.inspector.notRun', 'Run the action to see its output.')}</div>
-            ) : (
-              <div className="scn-inspector-output">
-                <div className="scn-inspector-tree">
-                  <ListView items={buildScenarioPathTree(data)} selectionMode="single" selectedIds={[]} data-testid="scenario-inspector-result" />
-                </div>
+            {/* Inline play button — visible whenever the box is runnable AND
+              * carries no real run result yet, both for the "no data at all"
+              * case (fall back to the hint label) AND alongside a synthetic
+              * preview (so the user can populate it with a real run from the
+              * panel without losing the placeholder tree). Once a real result
+              * lands, the toolbar's Run button is the only run trigger. */}
+            {realData === null && previewNode.runnable === true && (
+              <div className="scn-inspector-run-prompt" role="note">
+                <Button
+                  small
+                  secondary
+                  icon={running ? 'loading' : 'play'}
+                  disabled={running}
+                  onClick={() => {
+                    if (!previewId) return
+                    const rt = scenarioRuntime()
+                    const runFn = rt?.runScenarioNode
+                    if (!runFn) return
+                    setRunning(true)
+                    void (async () => {
+                      try { await runFn(scenarioId, previewId) } catch { /* swallow — error already surfaces in workflow validation */ }
+                      finally { setRunning(false); setRunVersion((v) => v + 1) }
+                    })()
+                  }}
+                  options={{
+                    ariaLabel: t('scenario.inspector.run', 'Run'),
+                    title: t('scenario.inspector.run', 'Run')
+                  }}
+                  data-testid="scenario-inspector-inline-run"
+                />
+                <span>{isSynthetic
+                  ? t('scenario.inspector.syntheticRunHint', 'Sample data — run the request to replace it with a real result.')
+                  : t('scenario.inspector.noRunsHint', 'No recent run for this request — run it from here to populate the scenario preview.')}</span>
               </div>
+            )}
+            {data !== null && (
+              <>
+                <div className="scn-inspector-info" role="note">
+                  <i className={`codicon codicon-${isSynthetic ? 'beaker' : 'info'}`} aria-hidden="true" />
+                  <span>{isSynthetic
+                    ? t('scenario.inspector.syntheticInfo', 'Example data generated from this request\'s documentation.')
+                    : t('scenario.inspector.previewInfo', 'Example data, based on previous request results.')}</span>
+                </div>
+                <div className="scn-inspector-output">
+                  <div className="scn-inspector-tree">
+                    <ListView items={buildScenarioPathTree(data)} selectionMode="single" selectedIds={[]} data-testid="scenario-inspector-result" />
+                  </div>
+                </div>
+              </>
             )}
           </div>
         </>

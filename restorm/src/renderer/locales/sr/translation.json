@@ -767,9 +767,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source action to pick a property from its result.",
-      "runSource": "Run source",
-      "running": "Running…"
+      "noResult": "Run the source action to pick a property from its result."
     },
     "tab": {
       "graph": "Scenario",
@@ -883,7 +881,6 @@
       "then": "затим"
     },
     "validation": {
-      "missingName": "Ова акција мора имати назив.",
       "duplicateName": "Назив „{{name}}“ већ користи друга акција.",
       "panelTitle": "Грешке акција: {{count}}",
       "focusBox": "Иди на ову акцију",
@@ -937,10 +934,11 @@
       "run": "Покрени",
       "debug": "Отклањање грешака",
       "step": "Корак по корак",
-      "noOutputs": "Ова акција нема излаз.",
-      "notRun": "Покрените акцију да бисте видели њен излаз.",
       "previewInfo": "Example data, based on previous request results.",
-      "pause": "Пауза"
+      "pause": "Пауза",
+      "noRunsHint": "Nema skorašnjeg izvršavanja ovog zahteva — pokreni ga odavde da popuniš pregled scenarija.",
+      "syntheticInfo": "Primer podataka generisan iz dokumentacije ovog zahteva.",
+      "syntheticRunHint": "Primer podataka — pokrenite zahtev da ih zamenite stvarnim rezultatom."
     },
     "now": {
       "timezone": "Timezone",

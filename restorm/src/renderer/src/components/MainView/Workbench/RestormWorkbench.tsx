@@ -31,6 +31,7 @@ import {
 import { EnvironmentProvider } from '../../../contexts/EnvironmentContext'
 import { ScenarioEditorView } from '../../Scenario/ScenarioEditorView'
 import type { ResolveBoundItem, ResolveRequestEnv } from '../../Scenario/scenarioBoundResolver'
+import type { SyntheticRequestPreview } from '../../../../../shared/utils/syntheticRequestPreview'
 import type { AddChildKind } from '../Sidebar/contextMenuBuilder'
 import { FolderView } from '../../Folders/FolderView'
 import { EnvironmentFolderView } from '../../Folders/EnvironmentFolderView'
@@ -107,6 +108,10 @@ export interface RestormWorkbenchProps {
   resolveBoundItem?: ResolveBoundItem
   /** Resolve a request's environments + default selection (scenario env section). */
   resolveRequestEnv?: ResolveRequestEnv
+  /** Synthesise a documentation-derived preview for a request — used by
+   * the scenario inspector to show example data when the request has
+   * never been run but its env folder carries an imported spec. */
+  resolveSyntheticPreview?: (requestId: string) => SyntheticRequestPreview | null
   /** Fallback component displayed when no tabs are open */
   emptyFallback?: React.ReactNode
   /** Callback fired when group sizes change (sash dragging) */
@@ -190,6 +195,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   onCreateScenarioChild,
   resolveBoundItem,
   resolveRequestEnv,
+  resolveSyntheticPreview,
   onEnvironmentFolderChange,
   emptyFallback,
   onSizesChange,
@@ -661,6 +667,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
                 {...(onScenarioChange ? { onScenarioChange } : {})}
                 {...(resolveBoundItem ? { resolveBoundItem } : {})}
                 {...(resolveRequestEnv ? { resolveRequestEnv } : {})}
+                {...(resolveSyntheticPreview ? { resolveSyntheticPreview } : {})}
                 {...(onRequestClick ? { onOpenItem: onRequestClick } : {})}
                 {...(onCreateScenarioRequest ? { onCreateRequest: onCreateScenarioRequest } : {})}
                 {...(onCreateScenarioChild ? { onCreateChild: onCreateScenarioChild } : {})}
@@ -1080,7 +1087,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [t, onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onScenarioChange, onCreateScenarioRequest, onCreateScenarioChild, resolveBoundItem, resolveRequestEnv, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, getScenariosUsingRequest, onOpenScenarioFromRequest, getScenariosUsingScenario, updateMiniBrowserUrl])
+  }, [t, onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onScenarioChange, onCreateScenarioRequest, onCreateScenarioChild, resolveBoundItem, resolveRequestEnv, resolveSyntheticPreview, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, getScenariosUsingRequest, onOpenScenarioFromRequest, getScenariosUsingScenario, updateMiniBrowserUrl])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(
