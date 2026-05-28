@@ -766,7 +766,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source box to pick a property from its result.",
+      "noResult": "Run the source action to pick a property from its result.",
       "runSource": "Run source",
       "running": "Running…"
     },
@@ -864,10 +864,14 @@
     "editScenario": "Editar cenário",
     "object": {
       "addProperty": "Adicionar propriedade",
-      "removeProperty": "Remover propriedade"
+      "removeProperty": "Remover propriedade",
+      "propertyName": "Property name",
+      "propertyValue": "value"
     },
     "input": {
-      "required": "Obrigatório"
+      "required": "Obrigatório",
+      "name": "Name",
+      "defaultType": "Default / type"
     },
     "runScenario": {
       "orphanInput": "Nenhum parâmetro \"{{name}}\" correspondente no subcenário",
@@ -875,10 +879,10 @@
       "then": "depois"
     },
     "validation": {
-      "missingName": "Esta caixa precisa de um nome.",
-      "duplicateName": "O nome «{{name}}» já é usado por outra caixa.",
-      "panelTitle": "{{count}} caixa(s) com erro",
-      "focusBox": "Ir para esta caixa",
+      "missingName": "Esta ação precisa de um nome.",
+      "duplicateName": "O nome «{{name}}» já é usado por outra ação.",
+      "panelTitle": "{{count}} ação/ões com erro",
+      "focusBox": "Ir para esta ação",
       "showErrors": "Ver erros",
       "input": {
         "missingName": "Este parâmetro de entrada precisa de um nome."
@@ -910,7 +914,8 @@
         "caseDuplicate": "O valor do caso \"{{value}}\" está duplicado."
       },
       "transform": {
-        "emptyTemplate": "O modelo não pode estar vazio."
+        "emptyTemplate": "O modelo não pode estar vazio.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
       },
       "request": {
         "missing": "A requisição vinculada não existe mais."
@@ -928,8 +933,22 @@
       "run": "Executar",
       "debug": "Depurar",
       "step": "Passo a passo",
-      "noOutputs": "Esta caixa não tem saída.",
-      "notRun": "Execute a caixa para ver sua saída."
+      "noOutputs": "Esta ação não tem saída.",
+      "notRun": "Execute a ação para ver sua saída.",
+      "previewInfo": "Example data, based on previous request results."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

@@ -765,7 +765,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source box to pick a property from its result.",
+      "noResult": "Run the source action to pick a property from its result.",
       "runSource": "Run source",
       "running": "Running…"
     },
@@ -863,10 +863,14 @@
     "editScenario": "Edit skenario",
     "object": {
       "addProperty": "Tambah properti",
-      "removeProperty": "Hapus properti"
+      "removeProperty": "Hapus properti",
+      "propertyName": "Property name",
+      "propertyValue": "value"
     },
     "input": {
-      "required": "Wajib"
+      "required": "Wajib",
+      "name": "Name",
+      "defaultType": "Default / type"
     },
     "runScenario": {
       "orphanInput": "Tidak ada parameter \"{{name}}\" yang cocok di sub-skenario",
@@ -874,10 +878,10 @@
       "then": "lalu"
     },
     "validation": {
-      "missingName": "Kotak ini harus memiliki nama.",
-      "duplicateName": "Nama \"{{name}}\" sudah dipakai oleh kotak lain.",
-      "panelTitle": "{{count}} kesalahan kotak",
-      "focusBox": "Fokus ke kotak ini",
+      "missingName": "Aksi ini harus memiliki nama.",
+      "duplicateName": "Nama \"{{name}}\" sudah dipakai oleh aksi lain.",
+      "panelTitle": "{{count}} kesalahan aksi",
+      "focusBox": "Fokus ke aksi ini",
       "showErrors": "Tampilkan kesalahan",
       "input": {
         "missingName": "Parameter masukan ini harus memiliki nama."
@@ -909,7 +913,8 @@
         "caseDuplicate": "Nilai kasus \"{{value}}\" terduplikasi."
       },
       "transform": {
-        "emptyTemplate": "Templat tidak boleh kosong."
+        "emptyTemplate": "Templat tidak boleh kosong.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
       },
       "request": {
         "missing": "Permintaan yang ditautkan tidak ada lagi."
@@ -927,8 +932,22 @@
       "run": "Jalankan",
       "debug": "Debug",
       "step": "Langkah demi langkah",
-      "noOutputs": "Kotak ini tidak memiliki keluaran.",
-      "notRun": "Jalankan kotak untuk melihat keluarannya."
+      "noOutputs": "Aksi ini tidak memiliki keluaran.",
+      "notRun": "Jalankan aksi untuk melihat keluarannya.",
+      "previewInfo": "Example data, based on previous request results."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

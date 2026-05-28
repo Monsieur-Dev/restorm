@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Button, ControlGroup, InputBox, ListView, Tooltip } from 'electron-core-ui/renderer'
 import { buildScenarioPathTree } from '../scenarioPathTree'
 import { useScenarioEdgeSelector } from '../scenarioEdgeSelector'
+import { useScenarioStaticPreview } from '../scenarioStaticPreviewContext'
 
 export interface ScenarioPathSelectorProps {
   /** Edge whose `selector` this control edits. */
@@ -22,7 +23,6 @@ type OutputContext = Record<string, unknown> | null
 /** The scenario run/result bridge. Accessed via cast (the global `window.restorm`
  * typing doesn't surface `runtime`), mirroring the node header's play button. */
 interface ScenarioRuntime {
-  runScenarioNode?: (scenarioId: string, nodeId: string) => Promise<unknown>
   getScenarioNodeResult?: (scenarioId: string, nodeId: string) => Promise<Record<string, unknown> | null>
 }
 function scenarioRuntime(): ScenarioRuntime | undefined {
@@ -39,13 +39,13 @@ function scenarioRuntime(): ScenarioRuntime | undefined {
 export const ScenarioPathSelector: React.FC<ScenarioPathSelectorProps> = ({ edgeId, sourceNodeId, scenarioId, label, invalid }) => {
   const { t } = useTranslation()
   const api = useScenarioEdgeSelector()
+  const staticApi = useScenarioStaticPreview()
 
   const [value, setValue] = useState<string>(() => api?.getSelector(edgeId) ?? '')
   const [open, setOpen] = useState(false)
   // undefined = not fetched yet, null = no result (box not run), object = result.
   const [result, setResult] = useState<OutputContext | undefined>(undefined)
   const [loading, setLoading] = useState(false)
-  const [running, setRunning] = useState(false)
 
   const rootRef = useRef<HTMLDivElement>(null)
   const targetRef = useRef<HTMLSpanElement>(null)
@@ -63,6 +63,14 @@ export const ScenarioPathSelector: React.FC<ScenarioPathSelectorProps> = ({ edge
   }, [api, edgeId])
 
   const fetchResult = useCallback(async () => {
+    // A static-preview source (input, getVariable, now, transform, …) feeds
+    // its config-derived preview straight in — no run needed. Only fall back
+    // to the runtime fetch when the source kind isn't statically previewable.
+    const staticPreview = staticApi?.getPreview(sourceNodeId) ?? null
+    if (staticPreview !== null) {
+      setResult(staticPreview)
+      return
+    }
     if (!scenarioId) return
     setLoading(true)
     try {
@@ -73,7 +81,7 @@ export const ScenarioPathSelector: React.FC<ScenarioPathSelectorProps> = ({ edge
     } finally {
       setLoading(false)
     }
-  }, [scenarioId, sourceNodeId])
+  }, [scenarioId, sourceNodeId, staticApi])
 
   const toggleOpen = useCallback(() => {
     setOpen((wasOpen) => {
@@ -81,19 +89,6 @@ export const ScenarioPathSelector: React.FC<ScenarioPathSelectorProps> = ({ edge
       return !wasOpen
     })
   }, [fetchResult])
-
-  const runSource = useCallback(async () => {
-    if (!scenarioId) return
-    setRunning(true)
-    try {
-      await scenarioRuntime()?.runScenarioNode?.(scenarioId, sourceNodeId)
-      await fetchResult()
-    } catch {
-      // Run failed / cancelled — keep the popover open showing the empty state.
-    } finally {
-      setRunning(false)
-    }
-  }, [scenarioId, sourceNodeId, fetchResult])
 
   // Close the popover on a click outside both the control and the (portalled)
   // popover. The popover lives in a portal, so it must be excluded explicitly.
@@ -125,23 +120,27 @@ export const ScenarioPathSelector: React.FC<ScenarioPathSelectorProps> = ({ edge
         />
       ) : (
         <div className="scn-path-popover-empty">
-          <span>{t('scenario.pathSelector.noResult', 'Run the source box to pick a property from its result.')}</span>
-          <Button
-            small
-            icon={running ? 'sync' : 'play'}
-            onClick={() => { void runSource() }}
-            disabled={running}
-            data-testid="scn-path-run-source"
-          >
-            {running ? t('scenario.pathSelector.running', 'Running…') : t('scenario.pathSelector.runSource', 'Run source')}
-          </Button>
+          <span>{t('scenario.pathSelector.noResult', 'Run the source action to pick a property from its result.')}</span>
         </div>
       )}
     </div>
   )
 
   return (
-    <div ref={rootRef} className="scn-path-selector nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
+    <div
+      ref={rootRef}
+      className="scn-path-selector nodrag"
+      onMouseDown={(e) => { e.stopPropagation() }}
+      onDragOver={(e) => {
+        // Accept a property dragged from the inspector preview (its tree row id
+        // is the JSON path) — drop sets this link's selector to that path.
+        if (e.dataTransfer.types.includes('text/plain')) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy' }
+      }}
+      onDrop={(e) => {
+        const path = e.dataTransfer.getData('text/plain')
+        if (path) { e.preventDefault(); commit(path) }
+      }}
+    >
       {label !== undefined && <span className="scn-port-label scn-path-label">{label}</span>}
       <ControlGroup className={`scn-path-controls${invalid ? ' scn-field-invalid' : ''}`}>
         <InputBox

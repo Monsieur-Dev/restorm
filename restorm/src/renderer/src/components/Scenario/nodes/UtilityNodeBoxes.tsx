@@ -1,6 +1,7 @@
 import React from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
+import { SelectBox, RadioGroup, type ISelectOptionItem } from 'electron-core-ui/renderer'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { SegmentedToggle } from './SegmentedToggle'
 import { OperatorToggle, OPERATOR_OPTIONS, type OperatorOption } from './OperatorToggle'
@@ -64,12 +65,13 @@ export const LogNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data,
           label: t('scenario.log.data', 'data'),
           port: { id: 'data', type: 'target' },
           content: (
-            <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
-              <div className="scn-field-caption">{t('scenario.log.data', 'data')}</div>
+            <div className="nodrag scn-stacked-field scn-log-data-field" onMouseDown={(e) => { e.stopPropagation() }}>
+              <span className="scn-port-label">{t('scenario.log.data', 'data')}</span>
               <TypedValueField
                 value={normalizeValueType(config['data'])}
                 onChange={(next) => { data.onSetConfig?.(id, { data: serializeValueForPersistence(next) }) }}
                 valueTypeGroups={valueTypeGroups}
+                excludeTypes={['expression']}
                 allowAllVariables
                 dataTestId="scn-log-data"
               />
@@ -161,11 +163,111 @@ export const AssertNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} launchInput />
 }
 
+/** Output formats the `now` box can emit. The runtime + static preview both
+ * branch on this — `datetime` returns a real Date so Handlebars date helpers
+ * (`formatDate`, `year`, …) can operate on it, `epoch` is a number suitable
+ * for arithmetic, `string` is the ISO/timezone-formatted text. */
+export const NOW_FORMATS = ['datetime', 'epoch', 'string'] as const
+export type NowFormat = (typeof NOW_FORMATS)[number]
+
+/** The system's IANA timezone — the sensible default when the box's config
+ * doesn't pin one. */
+function localTimezone(): string {
+  try {
+    return new Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+  } catch {
+    return 'UTC'
+  }
+}
+
+/** Every IANA timezone the host runtime knows about (Node + modern Chromium
+ * both expose `Intl.supportedValuesOf('timeZone')`). Computed once. */
+const ALL_TIMEZONES: readonly string[] = (() => {
+  try {
+    const sv = (Intl as unknown as { supportedValuesOf?: (k: string) => string[] }).supportedValuesOf
+    if (typeof sv === 'function') return sv('timeZone')
+  } catch {
+    /* fall through */
+  }
+  return ['UTC', 'Europe/Paris', 'Europe/London', 'America/New_York', 'America/Los_Angeles', 'Asia/Tokyo']
+})()
+
+/** The current UTC offset for an IANA timezone, formatted as `UTC+02:00` —
+ * shown next to each option so the user knows the wall-clock shift at a
+ * glance. DST-aware (uses today's date). */
+function timezoneOffsetLabel(tz: string): string {
+  try {
+    const parts = new Intl.DateTimeFormat('en', { timeZone: tz, timeZoneName: 'shortOffset' }).formatToParts(new Date())
+    const tzName = parts.find((p) => p.type === 'timeZoneName')?.value ?? ''
+    return tzName.replace(/^GMT/, 'UTC') || 'UTC+00:00'
+  } catch {
+    return ''
+  }
+}
+
+/** SelectBox options for every IANA zone, labelled with their current UTC
+ * offset. Memoised to a module-level array so a re-render doesn't recompute
+ * 400+ Intl.DateTimeFormat instances. */
+const TZ_SELECT_OPTIONS: ISelectOptionItem[] = ALL_TIMEZONES.map((tz) => {
+  const offset = timezoneOffsetLabel(tz)
+  return { text: tz, label: offset ? `${tz} (${offset})` : tz }
+})
+
 /** `now` — emit the current time. An *optional* launch trigger (header input)
  * lets it recompute when fired (e.g. after a request returns a timestamp)
- * instead of only once at start; runnable on its own otherwise. It can't fail,
- * so no error port. */
+ * instead of only once at start; runnable on its own otherwise. Two config
+ * fields shape the output: a `timezone` (IANA, e.g. `Europe/Paris`, or
+ * `UTC` / `local`) and a `format` radio (Date object / epoch ms / string).
+ * It can't fail, so no error port. */
 export const NowNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
+  const { t } = useTranslation()
+  const config = data.config ?? {}
+  const timezone = typeof config['timezone'] === 'string' && config['timezone'] !== '' ? config['timezone'] : localTimezone()
+  const tzIndex = Math.max(0, ALL_TIMEZONES.indexOf(timezone))
+  const rawFormat = config['format']
+  const format: NowFormat = typeof rawFormat === 'string' && (NOW_FORMATS as readonly string[]).includes(rawFormat) ? rawFormat as NowFormat : 'datetime'
+  const formatLabels: Record<NowFormat, string> = {
+    datetime: t('scenario.now.format.datetime', 'DateTime'),
+    epoch: t('scenario.now.format.epoch', 'Epoch'),
+    string: t('scenario.now.format.string', 'String')
+  }
+  const radioItems = { items: NOW_FORMATS.map((f) => ({ text: formatLabels[f], isActive: format === f })) }
+  const left: ScenarioNodeSection[] = [
+    {
+      id: 'main',
+      rows: [
+        {
+          id: 'timezone',
+          label: t('scenario.now.timezone', 'timezone'),
+          content: (
+            <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
+              <SelectBox
+                id={`scn-now-tz-${id}`}
+                className="scn-now-timezone"
+                options={TZ_SELECT_OPTIONS}
+                selected={tzIndex}
+                onDidSelect={({ selected }) => { data.onSetConfig?.(id, { timezone: selected }) }}
+                data-testid="scn-now-timezone"
+              />
+            </div>
+          )
+        },
+        {
+          id: 'format',
+          label: t('scenario.now.formatLabel', 'format'),
+          content: (
+            <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
+              <RadioGroup
+                options={radioItems}
+                onSelect={(idx) => { const next = NOW_FORMATS[idx]; if (next) data.onSetConfig?.(id, { format: next }) }}
+                data-testid="scn-now-format"
+              />
+            </div>
+          )
+        }
+      ]
+    }
+  ]
   const right: ScenarioNodeCell[] = [{ id: 'value', label: 'now', port: { id: 'value', type: 'source' } }]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={[]} right={right} launchInput canPlay hasError={false} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} launchInput canPlay hasError={false} />
 }

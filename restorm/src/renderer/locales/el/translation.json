@@ -766,7 +766,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source box to pick a property from its result.",
+      "noResult": "Run the source action to pick a property from its result.",
       "runSource": "Run source",
       "running": "Running…"
     },
@@ -864,10 +864,14 @@
     "editScenario": "Επεξεργασία σεναρίου",
     "object": {
       "addProperty": "Προσθήκη ιδιότητας",
-      "removeProperty": "Αφαίρεση ιδιότητας"
+      "removeProperty": "Αφαίρεση ιδιότητας",
+      "propertyName": "Property name",
+      "propertyValue": "value"
     },
     "input": {
-      "required": "Απαιτείται"
+      "required": "Απαιτείται",
+      "name": "Name",
+      "defaultType": "Default / type"
     },
     "runScenario": {
       "orphanInput": "Δεν υπάρχει αντίστοιχη παράμετρος «{{name}}» στο υποσενάριο",
@@ -875,10 +879,10 @@
       "then": "έπειτα"
     },
     "validation": {
-      "missingName": "Αυτό το πλαίσιο πρέπει να έχει όνομα.",
-      "duplicateName": "Το όνομα «{{name}}» χρησιμοποιείται ήδη από άλλο πλαίσιο.",
-      "panelTitle": "{{count}} σφάλμα(τα) πλαισίων",
-      "focusBox": "Μετάβαση σε αυτό το πλαίσιο",
+      "missingName": "Αυτή η ενέργεια πρέπει να έχει όνομα.",
+      "duplicateName": "Το όνομα «{{name}}» χρησιμοποιείται ήδη από άλλη ενέργεια.",
+      "panelTitle": "{{count}} σφάλμα(τα) ενεργειών",
+      "focusBox": "Μετάβαση σε αυτή την ενέργεια",
       "showErrors": "Εμφάνιση σφαλμάτων",
       "input": {
         "missingName": "Αυτή η παράμετρος εισόδου πρέπει να έχει όνομα."
@@ -910,7 +914,8 @@
         "caseDuplicate": "Η τιμή περίπτωσης «{{value}}» είναι διπλότυπη."
       },
       "transform": {
-        "emptyTemplate": "Το πρότυπο δεν πρέπει να είναι κενό."
+        "emptyTemplate": "Το πρότυπο δεν πρέπει να είναι κενό.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
       },
       "request": {
         "missing": "Το συνδεδεμένο αίτημα δεν υπάρχει πλέον."
@@ -928,8 +933,22 @@
       "run": "Εκτέλεση",
       "debug": "Αποσφαλμάτωση",
       "step": "Βήμα προς βήμα",
-      "noOutputs": "Αυτό το πλαίσιο δεν έχει έξοδο.",
-      "notRun": "Εκτελέστε το πλαίσιο για να δείτε την έξοδό του."
+      "noOutputs": "Αυτή η ενέργεια δεν έχει έξοδο.",
+      "notRun": "Εκτελέστε την ενέργεια για να δείτε την έξοδό της.",
+      "previewInfo": "Example data, based on previous request results."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

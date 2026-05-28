@@ -765,7 +765,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source box to pick a property from its result.",
+      "noResult": "Run the source action to pick a property from its result.",
       "runSource": "Run source",
       "running": "Running…"
     },
@@ -863,10 +863,14 @@
     "editScenario": "编辑场景",
     "object": {
       "addProperty": "添加属性",
-      "removeProperty": "删除属性"
+      "removeProperty": "删除属性",
+      "propertyName": "Property name",
+      "propertyValue": "value"
     },
     "input": {
-      "required": "必填"
+      "required": "必填",
+      "name": "Name",
+      "defaultType": "Default / type"
     },
     "runScenario": {
       "orphanInput": "子场景中没有匹配的参数“{{name}}”",
@@ -874,10 +878,10 @@
       "then": "然后"
     },
     "validation": {
-      "missingName": "该框必须有名称。",
-      "duplicateName": "名称“{{name}}”已被另一个框使用。",
-      "panelTitle": "{{count}} 个框错误",
-      "focusBox": "定位到此框",
+      "missingName": "该操作必须有名称。",
+      "duplicateName": "名称“{{name}}”已被另一个操作使用。",
+      "panelTitle": "{{count}} 个操作错误",
+      "focusBox": "定位到此操作",
       "showErrors": "显示错误",
       "input": {
         "missingName": "此输入参数必须有名称。"
@@ -909,7 +913,8 @@
         "caseDuplicate": "分支值「{{value}}」重复。"
       },
       "transform": {
-        "emptyTemplate": "模板不能为空。"
+        "emptyTemplate": "模板不能为空。",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
       },
       "request": {
         "missing": "关联的请求已不存在。"
@@ -927,8 +932,22 @@
       "run": "运行",
       "debug": "调试",
       "step": "单步",
-      "noOutputs": "此盒子没有输出。",
-      "notRun": "运行该盒子以查看其输出。"
+      "noOutputs": "此操作没有输出。",
+      "notRun": "运行该操作以查看其输出。",
+      "previewInfo": "Example data, based on previous request results."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

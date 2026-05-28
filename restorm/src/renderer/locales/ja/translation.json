@@ -765,7 +765,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source box to pick a property from its result.",
+      "noResult": "Run the source action to pick a property from its result.",
       "runSource": "Run source",
       "running": "Running…"
     },
@@ -863,10 +863,14 @@
     "editScenario": "シナリオを編集",
     "object": {
       "addProperty": "プロパティを追加",
-      "removeProperty": "プロパティを削除"
+      "removeProperty": "プロパティを削除",
+      "propertyName": "Property name",
+      "propertyValue": "value"
     },
     "input": {
-      "required": "必須"
+      "required": "必須",
+      "name": "Name",
+      "defaultType": "Default / type"
     },
     "runScenario": {
       "orphanInput": "サブシナリオに一致するパラメーター「{{name}}」がありません",
@@ -874,10 +878,10 @@
       "then": "次へ"
     },
     "validation": {
-      "missingName": "このボックスには名前が必要です。",
-      "duplicateName": "名前「{{name}}」は別のボックスで既に使われています。",
-      "panelTitle": "ボックスのエラー {{count}} 件",
-      "focusBox": "このボックスへ移動",
+      "missingName": "このアクションには名前が必要です。",
+      "duplicateName": "名前「{{name}}」は別のアクションで既に使われています。",
+      "panelTitle": "アクションのエラー {{count}} 件",
+      "focusBox": "このアクションへ移動",
       "showErrors": "エラーを表示",
       "input": {
         "missingName": "この入力パラメーターには名前が必要です。"
@@ -909,7 +913,8 @@
         "caseDuplicate": "ケース値「{{value}}」が重複しています。"
       },
       "transform": {
-        "emptyTemplate": "テンプレートを空にすることはできません。"
+        "emptyTemplate": "テンプレートを空にすることはできません。",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
       },
       "request": {
         "missing": "リンクされたリクエストは存在しません。"
@@ -927,8 +932,22 @@
       "run": "実行",
       "debug": "デバッグ",
       "step": "ステップ実行",
-      "noOutputs": "このボックスには出力がありません。",
-      "notRun": "ボックスを実行して出力を確認してください。"
+      "noOutputs": "このアクションには出力がありません。",
+      "notRun": "アクションを実行して出力を確認してください。",
+      "previewInfo": "Example data, based on previous request results."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

@@ -1,32 +1,42 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
+import type { VariableDefinition } from 'electron-core-ui/renderer'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
+import { ScenarioExpressionField } from './ScenarioExpressionField'
 import { buildListItemsCell } from './collectionItemsCell'
-import { TypedValueField } from '../../TypedValueField'
-import type { ValueTypeKind } from '../../TypedValueField/castValue'
+import { useScenarioStaticPreview } from '../scenarioStaticPreviewContext'
 import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroups'
-import { normalizeValueType } from '../../../utils/normalizeValueType'
-import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
-import { ExpressionValue } from '../../../../../shared/types/collections'
 
-/** The per-item transform is always an expression: the value selector is locked
- * to the `expression` kind, rendering the embedded Handlebars/Monaco editor. */
-const EXPRESSION_ONLY_EXCLUDE: ValueTypeKind[] = [
-  'string', 'secret', 'number', 'dateTime', 'color', 'boolean', 'enum', 'enumList', 'customList', 'customListMulti', 'variable'
-]
+/** Short preview of an item-key value used as a variable name in the
+ * autocomplete row (primitives stringified, objects/arrays compacted so the
+ * popup stays one line). */
+function shortPreview(v: unknown): string {
+  if (v === null || v === undefined) return ''
+  if (typeof v === 'string') return v.length > 32 ? `"${v.slice(0, 32)}…"` : `"${v}"`
+  if (typeof v === 'number' || typeof v === 'boolean' || typeof v === 'bigint') return String(v)
+  if (Array.isArray(v)) return `[${v.length}]`
+  return '{…}'
+}
 
 /**
  * `map` — transforms each item of a collection into a new collection `mapped`.
  * `items` is the shared list-typed collection selector; the transform is a
- * per-item expression (a value field locked to `expression`, so it renders the
- * embedded Monaco/Handlebars editor). No header trigger — data-driven. The
- * collection source + expression persist in config.
+ * per-item expression (Handlebars editor). Ctrl+Space surfaces the per-item
+ * keys (from the first resolved item) + the full Handlebars helpers — same
+ * shape as `transform`. No header trigger — data-driven. The collection
+ * source + expression persist in config.
  */
 export const MapNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
   const { t } = useTranslation()
   const valueTypeGroups = useAllEnvValueTypeGroups()
+  const staticPreview = useScenarioStaticPreview()
   const config = data.config ?? {}
+  const variables = useMemo<VariableDefinition[]>(() => {
+    const sample = staticPreview?.getListItemShape(id) ?? null
+    if (!sample) return []
+    return Object.entries(sample).map(([name, val]) => ({ name, value: shortPreview(val) }))
+  }, [id, staticPreview])
 
   const left: ScenarioNodeSection[] = [
     {
@@ -36,15 +46,14 @@ export const MapNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data,
         {
           id: 'expr',
           content: (
-            <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
-              <TypedValueField
-                value={config['expression'] !== undefined ? normalizeValueType(config['expression']) : new ExpressionValue('')}
-                onChange={(next) => { data.onSetConfig?.(id, { expression: serializeValueForPersistence(next) }) }}
-                valueTypeGroups={valueTypeGroups}
-                excludeTypes={EXPRESSION_ONLY_EXCLUDE}
-                dataTestId="scn-map-expr"
-              />
-            </div>
+            <ScenarioExpressionField
+              value={config['expression']}
+              onChange={(next) => { data.onSetConfig?.(id, { expression: next }) }}
+              valueTypeGroups={valueTypeGroups}
+              variables={variables}
+              expressionVariableId={`scn-map-${id}`}
+              dataTestId="scn-map-expr"
+            />
           )
         }
       ]

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { useScenarioNodeErrors } from '../scenarioErrorsContext'
 import { TypedValueField } from '../../TypedValueField'
-import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroups'
+import { useAllEnvValueTypeGroups, type EnvValueTypeGroup } from '../../../hooks/useAllEnvValueTypeGroups'
 import { normalizeValueType } from '../../../utils/normalizeValueType'
 import { serializeValueForPersistence, type PersistedValue } from '../../../../../shared/utils/valuePersistence'
 
@@ -16,6 +16,63 @@ interface SwitchCase {
 
 function caseId(): string {
   return `case-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+}
+
+/** A persisted value of the same type as `prev`, advanced to the "next" value
+ * where that's meaningful — for enum / customList the next allowed
+ * label/value (or the first one if the prev was unset), for numeric the prev
+ * incremented by 1. Used by "+" so a switch on a 5-value enum can be filled
+ * by repeatedly clicking add. Returns a blank otherwise. */
+function nextOfSameType(prev: PersistedValue, groups: EnvValueTypeGroup[]): PersistedValue {
+  if (prev.type === 'enum') {
+    for (const g of groups) {
+      const def = g.enumDefinitions.find((d) => d.id === prev.enumDefinitionId)
+      if (!def) continue
+      const i = def.values.indexOf(prev.value)
+      const next = i >= 0 && i < def.values.length - 1 ? def.values[i + 1] : (def.values[0] ?? '')
+      return { type: 'enum', value: next ?? '', enumDefinitionId: prev.enumDefinitionId }
+    }
+    return blankOfSameType(prev)
+  }
+  if (prev.type === 'customList') {
+    for (const g of groups) {
+      const list = g.customValueLists.find((l) => l.id === prev.listId)
+      if (!list) continue
+      const enabled = list.entries.filter((e) => e.enabled !== false)
+      const i = enabled.findIndex((e) => e.label === prev.label)
+      const next = i >= 0 && i < enabled.length - 1 ? enabled[i + 1] : enabled[0]
+      return { type: 'customList', listId: prev.listId, label: next?.label ?? '' }
+    }
+    return blankOfSameType(prev)
+  }
+  if (prev.type === 'numeric') {
+    return { type: 'numeric', value: prev.value + 1, format: prev.format }
+  }
+  return blankOfSameType(prev)
+}
+
+/** A "blank" persisted value of the same type as `prev` — keeps the type's
+ * structural metadata (`format`, `listId`, `enumDefinitionId`, …) so the new
+ * case appears with the right control, but resets the user-entered content.
+ * Called when "+" adds a case under an existing one, so the user doesn't have
+ * to re-pick the type. */
+function blankOfSameType(prev: PersistedValue): PersistedValue {
+  switch (prev.type) {
+    case 'numeric': return { type: 'numeric', value: 0, format: prev.format }
+    case 'boolean': return { type: 'boolean', value: false }
+    case 'datetime': return { type: 'datetime', value: new Date().toISOString(), format: prev.format }
+    case 'color': return { type: 'color', value: '#000000' }
+    case 'enum': return { type: 'enum', value: '', enumDefinitionId: prev.enumDefinitionId }
+    case 'enumList': return { type: 'enumList', value: [], enumDefinitionId: prev.enumDefinitionId }
+    case 'customList': return { type: 'customList', listId: prev.listId, label: '' }
+    case 'customListMulti': return { type: 'customListMulti', listId: prev.listId, labels: [] }
+    case 'password': return { type: 'password' }
+    case 'expression': return { type: 'expression', value: '' }
+    case 'variable': return { type: 'variable', value: '' }
+    case 'environment': return { type: 'environment', value: '' }
+    case 'string':
+    default: return { type: 'string', value: '' }
+  }
 }
 
 function readCases(config: Record<string, unknown>): SwitchCase[] {
@@ -96,7 +153,16 @@ export const SwitchNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
           small
           secondary
           icon="add"
-          onClick={() => { setCases([...cases, { id: caseId(), value: { type: 'string', value: '' } }]) }}
+          onClick={() => {
+            // Inherit the previous case's type — and advance to the next enum
+            // value / customList label / numeric+1 where that's meaningful —
+            // so a switch on a 5-value enum can be filled by clicking `+` four
+            // times. First case still defaults to `string` as the most
+            // generic starting point.
+            const last = cases[cases.length - 1]
+            const seed = last ? nextOfSameType(last.value, valueTypeGroups) : { type: 'string' as const, value: '' }
+            setCases([...cases, { id: caseId(), value: seed }])
+          }}
           options={{ ariaLabel: t('scenario.switch.addCase', 'Add case'), title: t('scenario.switch.addCase', 'Add case') }}
           data-testid="scenario-switch-add-case"
         />

@@ -780,7 +780,7 @@
       "ariaLabel": "Sélecteur de chemin JSON",
       "pick": "Choisir depuis le résultat",
       "loading": "Chargement…",
-      "noResult": "Lancez la boîte source pour choisir une propriété de son résultat.",
+      "noResult": "Lancez l'action source pour choisir une propriété de son résultat.",
       "runSource": "Lancer la source",
       "running": "En cours…"
     },
@@ -864,10 +864,14 @@
     "editScenario": "Éditer le scénario",
     "object": {
       "addProperty": "Ajouter une propriété",
-      "removeProperty": "Supprimer la propriété"
+      "removeProperty": "Supprimer la propriété",
+      "propertyName": "Nom de la propriété",
+      "propertyValue": "valeur"
     },
     "input": {
-      "required": "Requis"
+      "required": "Requis",
+      "name": "Nom",
+      "defaultType": "Défaut / type"
     },
     "runScenario": {
       "orphanInput": "Aucun paramètre « {{name}} » correspondant dans le sous-scénario",
@@ -875,10 +879,10 @@
       "then": "ensuite"
     },
     "validation": {
-      "missingName": "Cette boîte doit avoir un nom.",
-      "duplicateName": "Le nom « {{name}} » est déjà utilisé par une autre boîte.",
-      "panelTitle": "{{count}} boîte(s) en erreur",
-      "focusBox": "Aller à cette boîte",
+      "missingName": "Cette action doit avoir un nom.",
+      "duplicateName": "Le nom « {{name}} » est déjà utilisé par une autre action.",
+      "panelTitle": "{{count}} action(s) en erreur",
+      "focusBox": "Aller à cette action",
       "showErrors": "Voir les erreurs",
       "input": {
         "missingName": "Ce paramètre d'entrée doit avoir un nom."
@@ -910,7 +914,8 @@
         "caseDuplicate": "La valeur de cas « {{value}} » est en double."
       },
       "transform": {
-        "emptyTemplate": "Le modèle ne doit pas être vide."
+        "emptyTemplate": "Le modèle ne doit pas être vide.",
+        "valueRequired": "Le champ \"value\" doit être connecté quand le template référence {{…}}."
       },
       "request": {
         "missing": "La requête liée n'existe plus."
@@ -928,8 +933,22 @@
       "run": "Exécuter",
       "debug": "Déboguer",
       "step": "Pas à pas",
-      "noOutputs": "Cette boîte n'a pas de sortie.",
-      "notRun": "Exécutez la boîte pour voir sa sortie."
+      "noOutputs": "Cette action n'a pas de sortie.",
+      "notRun": "Exécutez l'action pour voir sa sortie.",
+      "previewInfo": "Données d'exemple, basées sur les précédents résultats des requêtes."
+    },
+    "now": {
+      "timezone": "Fuseau horaire",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "Chaîne"
+      }
+    },
+    "callers": {
+      "button": "Scénarios qui appellent ce scénario",
+      "title": "Ce scénario est appelé par :"
     }
   }
 }

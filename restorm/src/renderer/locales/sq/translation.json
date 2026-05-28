@@ -766,7 +766,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source box to pick a property from its result.",
+      "noResult": "Run the source action to pick a property from its result.",
       "runSource": "Run source",
       "running": "Running…"
     },
@@ -864,10 +864,14 @@
     "editScenario": "Modifiko skenarin",
     "object": {
       "addProperty": "Shto veti",
-      "removeProperty": "Hiq vetinë"
+      "removeProperty": "Hiq vetinë",
+      "propertyName": "Property name",
+      "propertyValue": "value"
     },
     "input": {
-      "required": "E detyrueshme"
+      "required": "E detyrueshme",
+      "name": "Name",
+      "defaultType": "Default / type"
     },
     "runScenario": {
       "orphanInput": "Asnjë parametër \"{{name}}\" përkatës në nën-skenar",
@@ -875,10 +879,10 @@
       "then": "pastaj"
     },
     "validation": {
-      "missingName": "Kjo kuti duhet të ketë një emër.",
-      "duplicateName": "Emri «{{name}}» përdoret tashmë nga një kuti tjetër.",
-      "panelTitle": "{{count}} gabim(e) kutie",
-      "focusBox": "Shko te kjo kuti",
+      "missingName": "Ky veprim duhet të ketë një emër.",
+      "duplicateName": "Emri «{{name}}» përdoret tashmë nga një veprim tjetër.",
+      "panelTitle": "{{count}} gabim(e) veprimi",
+      "focusBox": "Shko te ky veprim",
       "showErrors": "Shfaq gabimet",
       "input": {
         "missingName": "Ky parametër hyrës duhet të ketë një emër."
@@ -910,7 +914,8 @@
         "caseDuplicate": "Vlera e rastit «{{value}}» është e dyfishuar."
       },
       "transform": {
-        "emptyTemplate": "Shablloni nuk duhet të jetë bosh."
+        "emptyTemplate": "Shablloni nuk duhet të jetë bosh.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
       },
       "request": {
         "missing": "Kërkesa e lidhur nuk ekziston më."
@@ -928,8 +933,22 @@
       "run": "Ekzekuto",
       "debug": "Korrigjo",
       "step": "Hap pas hapi",
-      "noOutputs": "Kjo kuti nuk ka dalje.",
-      "notRun": "Ekzekutoni kutinë për të parë daljen e saj."
+      "noOutputs": "Ky veprim nuk ka dalje.",
+      "notRun": "Ekzekutoni veprimin për të parë daljen e tij.",
+      "previewInfo": "Example data, based on previous request results."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

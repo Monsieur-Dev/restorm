@@ -766,7 +766,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source box to pick a property from its result.",
+      "noResult": "Run the source action to pick a property from its result.",
       "runSource": "Run source",
       "running": "Running…"
     },
@@ -864,10 +864,14 @@
     "editScenario": "Rediger scenarie",
     "object": {
       "addProperty": "Tilføj egenskab",
-      "removeProperty": "Fjern egenskab"
+      "removeProperty": "Fjern egenskab",
+      "propertyName": "Property name",
+      "propertyValue": "value"
     },
     "input": {
-      "required": "Påkrævet"
+      "required": "Påkrævet",
+      "name": "Name",
+      "defaultType": "Default / type"
     },
     "runScenario": {
       "orphanInput": "Ingen matchende parameter \"{{name}}\" i underscenariet",
@@ -875,10 +879,10 @@
       "then": "derefter"
     },
     "validation": {
-      "missingName": "Denne boks skal have et navn.",
-      "duplicateName": "Navnet \"{{name}}\" bruges allerede af en anden boks.",
-      "panelTitle": "{{count}} boksfejl",
-      "focusBox": "Gå til denne boks",
+      "missingName": "Denne handling skal have et navn.",
+      "duplicateName": "Navnet \"{{name}}\" bruges allerede af en anden handling.",
+      "panelTitle": "{{count}} handlingsfejl",
+      "focusBox": "Gå til denne handling",
       "showErrors": "Vis fejl",
       "input": {
         "missingName": "Denne inputparameter skal have et navn."
@@ -910,7 +914,8 @@
         "caseDuplicate": "Case-værdien \"{{value}}\" er dubleret."
       },
       "transform": {
-        "emptyTemplate": "Skabelonen må ikke være tom."
+        "emptyTemplate": "Skabelonen må ikke være tom.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
       },
       "request": {
         "missing": "Den tilknyttede anmodning findes ikke længere."
@@ -928,8 +933,22 @@
       "run": "Kør",
       "debug": "Fejlsøg",
       "step": "Trin for trin",
-      "noOutputs": "Denne boks har intet output.",
-      "notRun": "Kør boksen for at se dens output."
+      "noOutputs": "Denne handling har intet output.",
+      "notRun": "Kør handlingen for at se dens output.",
+      "previewInfo": "Example data, based on previous request results."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

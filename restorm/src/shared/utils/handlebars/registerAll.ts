@@ -6,14 +6,14 @@
  */
 
 import Handlebars from 'handlebars'
-import { registerComparisonHelpers } from './helpers/comparison'
-import { registerStringHelpers } from './helpers/string'
-import { registerMathHelpers } from './helpers/math'
-import { registerArrayHelpers } from './helpers/array'
-import { registerObjectHelpers } from './helpers/object'
-import { registerURLHelpers } from './helpers/url'
-import { registerDateHelpers } from './helpers/date'
-import { registerMiscHelpers } from './helpers/misc'
+import { registerComparisonHelpers } from './comparison'
+import { registerStringHelpers } from './string'
+import { registerMathHelpers } from './math'
+import { registerArrayHelpers } from './array'
+import { registerObjectHelpers } from './object'
+import { registerURLHelpers } from './url'
+import { registerDateHelpers } from './date'
+import { registerMiscHelpers } from './misc'
 
 // Flag to prevent registering helpers multiple times
 let helpersRegistered = false

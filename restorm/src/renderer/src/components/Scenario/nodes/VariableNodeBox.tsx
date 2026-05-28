@@ -43,22 +43,25 @@ export const InputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
         {
           id: 'name',
           content: (
-            <ScenarioNameInput
-              value={name}
-              placeholder="name"
-              invalid={nameInvalid}
-              onCommit={(next) => { data.onSetConfig?.(id, { name: next }) }}
-            />
+            <div className="nodrag scn-stacked-field" onMouseDown={(e) => { e.stopPropagation() }}>
+              <span className="scn-port-label">{t('scenario.input.name', 'Name')}</span>
+              <ScenarioNameInput
+                value={name}
+                placeholder="name"
+                invalid={nameInvalid}
+                onCommit={(next) => { data.onSetConfig?.(id, { name: next }) }}
+              />
+            </div>
           )
         },
         {
           id: 'default',
           content: (
             <div
-              className="nodrag"
+              className="nodrag scn-stacked-field"
               onMouseDown={(e) => { e.stopPropagation() }}
             >
-              <div className="scn-field-caption">Default / type</div>
+              <span className="scn-port-label">{t('scenario.input.defaultType', 'Default / type')}</span>
               <TypedValueField
                 value={value}
                 onChange={(next) => { data.onSetConfig?.(id, { valueType: serializeValueForPersistence(next) }) }}

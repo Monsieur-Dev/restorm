@@ -766,7 +766,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source box to pick a property from its result.",
+      "noResult": "Run the source action to pick a property from its result.",
       "runSource": "Run source",
       "running": "Running…"
     },
@@ -864,10 +864,14 @@
     "editScenario": "Szenario bearbeiten",
     "object": {
       "addProperty": "Eigenschaft hinzufügen",
-      "removeProperty": "Eigenschaft entfernen"
+      "removeProperty": "Eigenschaft entfernen",
+      "propertyName": "Property name",
+      "propertyValue": "value"
     },
     "input": {
-      "required": "Erforderlich"
+      "required": "Erforderlich",
+      "name": "Name",
+      "defaultType": "Default / type"
     },
     "runScenario": {
       "orphanInput": "Kein passender Parameter \"{{name}}\" im Unterszenario",
@@ -875,10 +879,10 @@
       "then": "dann"
     },
     "validation": {
-      "missingName": "Dieser Block muss einen Namen haben.",
-      "duplicateName": "Der Name „{{name}}“ wird bereits von einem anderen Block verwendet.",
-      "panelTitle": "{{count}} Block-Fehler",
-      "focusBox": "Zu diesem Block springen",
+      "missingName": "Diese Aktion muss einen Namen haben.",
+      "duplicateName": "Der Name „{{name}}“ wird bereits von einer anderen Aktion verwendet.",
+      "panelTitle": "{{count}} Aktionsfehler",
+      "focusBox": "Zu dieser Aktion springen",
       "showErrors": "Fehler anzeigen",
       "input": {
         "missingName": "Dieser Eingabeparameter muss einen Namen haben."
@@ -910,7 +914,8 @@
         "caseDuplicate": "Der Fallwert „{{value}}“ ist doppelt vorhanden."
       },
       "transform": {
-        "emptyTemplate": "Die Vorlage darf nicht leer sein."
+        "emptyTemplate": "Die Vorlage darf nicht leer sein.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
       },
       "request": {
         "missing": "Die verknüpfte Anfrage existiert nicht mehr."
@@ -928,8 +933,22 @@
       "run": "Ausführen",
       "debug": "Debuggen",
       "step": "Schrittweise",
-      "noOutputs": "Dieses Feld hat keine Ausgabe.",
-      "notRun": "Führen Sie das Feld aus, um seine Ausgabe zu sehen."
+      "noOutputs": "Diese Aktion hat keine Ausgabe.",
+      "notRun": "Führen Sie die Aktion aus, um deren Ausgabe zu sehen.",
+      "previewInfo": "Example data, based on previous request results."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

@@ -766,7 +766,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source box to pick a property from its result.",
+      "noResult": "Run the source action to pick a property from its result.",
       "runSource": "Run source",
       "running": "Running…"
     },
@@ -864,10 +864,14 @@
     "editScenario": "Senaryoyu düzenle",
     "object": {
       "addProperty": "Özellik ekle",
-      "removeProperty": "Özelliği kaldır"
+      "removeProperty": "Özelliği kaldır",
+      "propertyName": "Property name",
+      "propertyValue": "value"
     },
     "input": {
-      "required": "Zorunlu"
+      "required": "Zorunlu",
+      "name": "Name",
+      "defaultType": "Default / type"
     },
     "runScenario": {
       "orphanInput": "Alt senaryoda eşleşen \"{{name}}\" parametresi yok",
@@ -875,10 +879,10 @@
       "then": "sonra"
     },
     "validation": {
-      "missingName": "Bu kutunun bir adı olmalı.",
-      "duplicateName": "\"{{name}}\" adı zaten başka bir kutu tarafından kullanılıyor.",
-      "panelTitle": "{{count}} kutu hatası",
-      "focusBox": "Bu kutuya git",
+      "missingName": "Bu eylemin bir adı olmalı.",
+      "duplicateName": "\"{{name}}\" adı zaten başka bir eylem tarafından kullanılıyor.",
+      "panelTitle": "{{count}} eylem hatası",
+      "focusBox": "Bu eyleme git",
       "showErrors": "Hataları göster",
       "input": {
         "missingName": "Bu giriş parametresinin bir adı olmalı."
@@ -910,7 +914,8 @@
         "caseDuplicate": "\"{{value}}\" durum değeri yinelenmiş."
       },
       "transform": {
-        "emptyTemplate": "Şablon boş olmamalıdır."
+        "emptyTemplate": "Şablon boş olmamalıdır.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
       },
       "request": {
         "missing": "Bağlı istek artık mevcut değil."
@@ -928,8 +933,22 @@
       "run": "Çalıştır",
       "debug": "Hata Ayıkla",
       "step": "Adım adım",
-      "noOutputs": "Bu kutunun çıktısı yok.",
-      "notRun": "Çıktısını görmek için kutuyu çalıştırın."
+      "noOutputs": "Bu eylemin çıktısı yok.",
+      "notRun": "Çıktısını görmek için eylemi çalıştırın.",
+      "previewInfo": "Example data, based on previous request results."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

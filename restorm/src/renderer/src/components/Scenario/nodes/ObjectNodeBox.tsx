@@ -1,12 +1,14 @@
 import React from 'react'
-import type { NodeProps } from '@xyflow/react'
+import { type NodeProps, useNodeConnections } from '@xyflow/react'
 import { Button } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { ScenarioNameInput } from './ScenarioNameInput'
-import { useScenarioNodeErrors } from '../scenarioErrorsContext'
+import { ScenarioPathSelector } from './ScenarioPathSelector'
+import { useScenarioNodeErrors, useScenarioFieldInvalid } from '../scenarioErrorsContext'
 import { TypedValueField } from '../../TypedValueField'
-import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroups'
+import { useAllEnvValueTypeGroups, type EnvValueTypeGroup } from '../../../hooks/useAllEnvValueTypeGroups'
 import { normalizeValueType } from '../../../utils/normalizeValueType'
 import { serializeValueForPersistence, type PersistedValue } from '../../../../../shared/utils/valuePersistence'
 
@@ -24,6 +26,73 @@ function readProperties(config: Record<string, unknown>): ObjectProperty[] {
   const raw = config['properties']
   if (!Array.isArray(raw)) return []
   return raw.filter((p): p is ObjectProperty => typeof p === 'object' && p !== null && typeof (p as { id?: unknown }).id === 'string')
+}
+
+/** A single property row inside the object builder — needs its own component
+ * so `useNodeConnections` (a React hook) can run per port: when an upstream
+ * edge feeds this property, the value cell swaps from the literal selector to
+ * the JSON-path selector (same affordance as the rest of the data inputs). */
+interface ObjectPropertyRowProps {
+  nodeId: string
+  property: ObjectProperty
+  nameInvalid: boolean
+  scenarioId?: string | undefined
+  valueTypeGroups: EnvValueTypeGroup[]
+  t: TFunction
+  onNameCommit: (name: string) => void
+  onValueChange: (value: PersistedValue) => void
+  onRemove: () => void
+  removeLabel: string
+  dataTestId: string
+}
+
+const ObjectPropertyRow: React.FC<ObjectPropertyRowProps> = ({
+  nodeId,
+  property,
+  nameInvalid,
+  scenarioId,
+  valueTypeGroups,
+  t,
+  onNameCommit,
+  onValueChange,
+  onRemove,
+  removeLabel,
+  dataTestId
+}) => {
+  const connections = useNodeConnections({ handleType: 'target', handleId: property.id })
+  const incoming = connections[0]
+  const valueInvalid = useScenarioFieldInvalid(nodeId, property.id)
+  const stop = (e: React.MouseEvent): void => { e.stopPropagation() }
+  return (
+    <div className="nodrag scn-object-property" onMouseDown={stop}>
+      <span className="scn-port-label scn-object-property-label">{t('scenario.object.propertyName', 'Property name')}</span>
+      <ScenarioNameInput
+        value={property.name}
+        placeholder="property"
+        invalid={nameInvalid}
+        onCommit={onNameCommit}
+      />
+      <span className="scn-port-label scn-object-property-label">{t('scenario.object.propertyValue', 'value')}</span>
+      {incoming ? (
+        <ScenarioPathSelector
+          edgeId={incoming.edgeId}
+          sourceNodeId={incoming.source}
+          invalid={valueInvalid}
+          {...(scenarioId !== undefined ? { scenarioId } : {})}
+        />
+      ) : (
+        <TypedValueField
+          value={normalizeValueType(property.value)}
+          onChange={(next) => { onValueChange(serializeValueForPersistence(next)) }}
+          valueTypeGroups={valueTypeGroups}
+          allowAllVariables
+          onRemove={onRemove}
+          removeLabel={removeLabel}
+          dataTestId={dataTestId}
+        />
+      )}
+    </div>
+  )
 }
 
 /**
@@ -45,29 +114,24 @@ export const ObjectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
   const invalidProps = new Set(useScenarioNodeErrors(id).map((e) => e.field).filter((f): f is string => f != null))
 
   const setProperties = (next: ObjectProperty[]): void => { data.onSetConfig?.(id, { properties: next }) }
-  const stop = (e: React.MouseEvent): void => { e.stopPropagation() }
 
   const rows: ScenarioNodeCell[] = properties.map((p): ScenarioNodeCell => ({
     id: p.id,
     port: { id: p.id, type: 'target' },
     content: (
-      <div className="nodrag scn-object-property" onMouseDown={stop}>
-        <ScenarioNameInput
-          value={p.name}
-          placeholder="property"
-          invalid={invalidProps.has(p.id)}
-          onCommit={(name) => { setProperties(properties.map((x) => (x.id === p.id ? { ...x, name } : x))) }}
-        />
-        <TypedValueField
-          value={normalizeValueType(p.value)}
-          onChange={(next) => { setProperties(properties.map((x) => (x.id === p.id ? { ...x, value: serializeValueForPersistence(next) } : x))) }}
-          valueTypeGroups={valueTypeGroups}
-          allowAllVariables
-          onRemove={() => { setProperties(properties.filter((x) => x.id !== p.id)) }}
-          removeLabel={t('scenario.object.removeProperty', 'Supprimer')}
-          dataTestId={`scn-object-${p.id}`}
-        />
-      </div>
+      <ObjectPropertyRow
+        nodeId={id}
+        property={p}
+        nameInvalid={invalidProps.has(p.id)}
+        {...(data.scenarioId !== undefined ? { scenarioId: data.scenarioId } : {})}
+        valueTypeGroups={valueTypeGroups}
+        t={t}
+        onNameCommit={(name) => { setProperties(properties.map((x) => (x.id === p.id ? { ...x, name } : x))) }}
+        onValueChange={(value) => { setProperties(properties.map((x) => (x.id === p.id ? { ...x, value } : x))) }}
+        onRemove={() => { setProperties(properties.filter((x) => x.id !== p.id)) }}
+        removeLabel={t('scenario.object.removeProperty', 'Supprimer')}
+        dataTestId={`scn-object-${p.id}`}
+      />
     )
   }))
   rows.push({

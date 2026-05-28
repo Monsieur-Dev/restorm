@@ -765,7 +765,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source box to pick a property from its result.",
+      "noResult": "Run the source action to pick a property from its result.",
       "runSource": "Run source",
       "running": "Running…"
     },
@@ -863,10 +863,14 @@
     "editScenario": "Sửa kịch bản",
     "object": {
       "addProperty": "Thêm thuộc tính",
-      "removeProperty": "Xóa thuộc tính"
+      "removeProperty": "Xóa thuộc tính",
+      "propertyName": "Property name",
+      "propertyValue": "value"
     },
     "input": {
-      "required": "Bắt buộc"
+      "required": "Bắt buộc",
+      "name": "Name",
+      "defaultType": "Default / type"
     },
     "runScenario": {
       "orphanInput": "Không có tham số \"{{name}}\" khớp trong kịch bản con",
@@ -874,10 +878,10 @@
       "then": "rồi"
     },
     "validation": {
-      "missingName": "Hộp này phải có tên.",
-      "duplicateName": "Tên \"{{name}}\" đã được hộp khác sử dụng.",
-      "panelTitle": "{{count}} lỗi hộp",
-      "focusBox": "Đến hộp này",
+      "missingName": "Hành động này phải có tên.",
+      "duplicateName": "Tên \"{{name}}\" đã được hành động khác sử dụng.",
+      "panelTitle": "{{count}} lỗi hành động",
+      "focusBox": "Đến hành động này",
       "showErrors": "Hiện lỗi",
       "input": {
         "missingName": "Tham số đầu vào này phải có tên."
@@ -909,7 +913,8 @@
         "caseDuplicate": "Giá trị case \"{{value}}\" bị trùng lặp."
       },
       "transform": {
-        "emptyTemplate": "Mẫu không được để trống."
+        "emptyTemplate": "Mẫu không được để trống.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
       },
       "request": {
         "missing": "Yêu cầu được liên kết không còn tồn tại."
@@ -927,8 +932,22 @@
       "run": "Chạy",
       "debug": "Gỡ lỗi",
       "step": "Từng bước",
-      "noOutputs": "Hộp này không có đầu ra.",
-      "notRun": "Chạy hộp để xem đầu ra của nó."
+      "noOutputs": "Hành động này không có đầu ra.",
+      "notRun": "Chạy hành động để xem đầu ra của nó.",
+      "previewInfo": "Example data, based on previous request results."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

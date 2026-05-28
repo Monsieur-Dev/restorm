@@ -17,6 +17,7 @@ import { collectionStore } from '../../services/CollectionStore'
 import type { Scenario } from '../../../shared/models/Scenario'
 import type { ScenarioNode, ScenarioEdge, ScenarioNodeKind, ScenarioPort } from '../../../shared/types/scenario'
 import { defaultPortsForKind, isValidScenarioConnection, outputPortFlow, inputPortFlow, deriveRunScenarioPorts } from '../../../shared/scenarioNodePorts'
+import { STATIC_PREVIEW_KINDS, staticScenarioPreview, singleDeepPath, expectsObjectInput, type StaticPreviewEdge } from '../../../shared/utils/scenarioStaticPreview'
 import { broadcastTreeReplace } from './import'
 
 const SCENARIO_KINDS = [
@@ -326,16 +327,41 @@ export function registerScenarioTools(mcp: McpService): void {
       if (toPortId !== 'in' && scenario.edges.some((e) => e.to.nodeId === toNodeId && e.to.portId === toPortId)) {
         return errorReply(`${toPortId} of ${toNodeId} already has an incoming link — a non-header input accepts a single link; disconnect the existing one first.`)
       }
+      // Mirror the editor's onConnect: when the caller hasn't pinned a
+      // selector and the link is a data link from a box whose output is fully
+      // determined by its config (`STATIC_PREVIEW_KINDS`), auto-fill the
+      // selector when the source's preview narrows to a single primitive path
+      // (e.g. `getVariable` → `{ timer: 100 }` → `"timer"`).
+      let autoSelector: string | undefined
+      const explicitSelector = typeof args['selector'] === 'string' ? args['selector'] : undefined
+      if (explicitSelector === undefined) {
+        const outFlow = outputPortFlow(fromPorts.outputs, fromPortId, fromNode.kind)
+        const inFlow = inputPortFlow(toPorts.inputs, toPortId, toNode.kind)
+        if (inFlow === 'value' && outFlow !== 'signal' && expectsObjectInput(toNode.kind, toPortId)) {
+          // Object-context input — default to the identity selector `.`.
+          autoSelector = '.'
+        } else if (inFlow === 'value' && outFlow !== 'signal' && STATIC_PREVIEW_KINDS.has(fromNode.kind)) {
+          const previewNodes = scenario.nodes.map((n) => ({ id: n.id, kind: n.kind, config: n.config }))
+          const previewEdges: StaticPreviewEdge[] = scenario.edges.map((e) => ({
+            from: e.from,
+            to: e.to,
+            ...(e.selector !== undefined ? { selector: e.selector } : {})
+          }))
+          const preview = staticScenarioPreview({ id: fromNode.id, kind: fromNode.kind, config: fromNode.config }, previewNodes, previewEdges)
+          const path = preview ? singleDeepPath(preview) : null
+          if (path) autoSelector = path
+        }
+      }
       const edge: ScenarioEdge = {
         id: randomUUID(),
         from: { nodeId: fromNodeId, portId: fromPortId },
         to: { nodeId: toNodeId, portId: toPortId },
-        ...(typeof args['selector'] === 'string' ? { selector: args['selector'] } : {}),
+        ...(explicitSelector !== undefined ? { selector: explicitSelector } : autoSelector !== undefined ? { selector: autoSelector } : {}),
         ...(typeof args['color'] === 'string' ? { color: args['color'] } : {})
       }
       scenario.edges.push(edge)
       broadcastScenario(scenario)
-      return jsonReply({ edgeId: edge.id, from: edge.from, to: edge.to })
+      return jsonReply({ edgeId: edge.id, from: edge.from, to: edge.to, ...(edge.selector !== undefined ? { selector: edge.selector } : {}) })
     }
   )
 

@@ -765,7 +765,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source box to pick a property from its result.",
+      "noResult": "Run the source action to pick a property from its result.",
       "runSource": "Run source",
       "running": "Running…"
     },
@@ -863,10 +863,14 @@
     "editScenario": "시나리오 편집",
     "object": {
       "addProperty": "속성 추가",
-      "removeProperty": "속성 제거"
+      "removeProperty": "속성 제거",
+      "propertyName": "Property name",
+      "propertyValue": "value"
     },
     "input": {
-      "required": "필수"
+      "required": "필수",
+      "name": "Name",
+      "defaultType": "Default / type"
     },
     "runScenario": {
       "orphanInput": "하위 시나리오에 일치하는 매개변수 \"{{name}}\"가 없습니다",
@@ -874,10 +878,10 @@
       "then": "다음"
     },
     "validation": {
-      "missingName": "이 박스에는 이름이 필요합니다.",
-      "duplicateName": "이름 \"{{name}}\"은(는) 다른 박스에서 이미 사용 중입니다.",
-      "panelTitle": "박스 오류 {{count}}건",
-      "focusBox": "이 박스로 이동",
+      "missingName": "이 액션에는 이름이 필요합니다.",
+      "duplicateName": "이름 \"{{name}}\"은(는) 다른 액션에서 이미 사용 중입니다.",
+      "panelTitle": "액션 오류 {{count}}건",
+      "focusBox": "이 액션으로 이동",
       "showErrors": "오류 표시",
       "input": {
         "missingName": "이 입력 매개변수에는 이름이 필요합니다."
@@ -909,7 +913,8 @@
         "caseDuplicate": "케이스 값 \"{{value}}\"이(가) 중복되었습니다."
       },
       "transform": {
-        "emptyTemplate": "템플릿은 비워 둘 수 없습니다."
+        "emptyTemplate": "템플릿은 비워 둘 수 없습니다.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
       },
       "request": {
         "missing": "연결된 요청이 더 이상 존재하지 않습니다."
@@ -927,8 +932,22 @@
       "run": "실행",
       "debug": "디버그",
       "step": "단계 실행",
-      "noOutputs": "이 박스에는 출력이 없습니다.",
-      "notRun": "박스를 실행하여 출력을 확인하세요."
+      "noOutputs": "이 액션에는 출력이 없습니다.",
+      "notRun": "액션을 실행하여 출력을 확인하세요.",
+      "previewInfo": "Example data, based on previous request results."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

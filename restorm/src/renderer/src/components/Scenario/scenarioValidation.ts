@@ -65,7 +65,7 @@ function validateInput(node: ValidationNode, ctx: ScenarioValidationContext): Sc
     errors.push({
       code: 'duplicate-name',
       field: 'name',
-      message: ctx.t('scenario.validation.duplicateName', 'The name "{{name}}" is already used by another box.', { name })
+      message: ctx.t('scenario.validation.duplicateName', 'The name "{{name}}" is already used by another action.', { name })
     })
   }
   return errors
@@ -218,6 +218,11 @@ function validateTransform(node: ValidationNode, ctx: ScenarioValidationContext)
   if (!body) {
     return [{ code: 'empty-template', field: 'expression', message: ctx.t('scenario.validation.transform.emptyTemplate', 'The template must not be empty.') }]
   }
+  // A template that interpolates anything (`{{…}}`) needs the `value` input
+  // to feed the Handlebars context — the input has no inline fallback.
+  if (body.includes('{{') && !ctx.connectedTargets.has(targetKey(node.id, 'value'))) {
+    return [{ code: 'value-input-required', field: 'value', message: ctx.t('scenario.validation.transform.valueRequired', 'The "value" input must be connected when the template references {{…}}.') }]
+  }
   return []
 }
 
@@ -255,11 +260,14 @@ export interface ScenarioDataLink {
 
 /** A JSON-path selector: a root identifier then dot-fields / [index] /
  * ['key'] segments (e.g. `response.body.items[0].name`). Used to reject a
- * malformed selector on a data link. */
+ * malformed selector on a data link. A lone `.` is the identity selector —
+ * the source's whole value flows through (used by object-context inputs like
+ * `transform.value`). */
 const SELECTOR_RE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\[\d+\]|\['[^']*'\]|\["[^"]*"\])*$/
 
 export function isValidSelectorPath(selector: string): boolean {
-  return SELECTOR_RE.test(selector.trim())
+  const trimmed = selector.trim()
+  return trimmed === '.' || SELECTOR_RE.test(trimmed)
 }
 
 /** A data link with an empty or malformed selector is an error on the box that

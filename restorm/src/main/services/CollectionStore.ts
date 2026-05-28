@@ -341,6 +341,29 @@ class CollectionStore {
   }
 
   /**
+   * Create a new scenario as a child of `parentId` (a folder-like container).
+   * Returns the inserted Scenario.
+   */
+  createScenario(parentId: string, scenarioData: Partial<Scenario> & { name: string }): Scenario {
+    const newScenario = new Scenario({
+      ...scenarioData,
+      id: scenarioData.id ?? this.generateId(),
+      name: scenarioData.name,
+      tags: scenarioData.tags ?? [],
+      params: scenarioData.params ?? [],
+      nodes: scenarioData.nodes ?? [],
+      edges: scenarioData.edges ?? [],
+      items: scenarioData.items ?? []
+    })
+    const parent = this.findById(parentId)
+    if (parent && this.isContainer(parent)) {
+      this.childItemsForWrite(parent).push(newScenario)
+    }
+    logger.debug('[CollectionStore] Scenario created', { id: newScenario.id, name: newScenario.name, parentId })
+    return newScenario
+  }
+
+  /**
    * Update a request
    */
   updateRequest(id: string, updates: Partial<Request>): Request | null {

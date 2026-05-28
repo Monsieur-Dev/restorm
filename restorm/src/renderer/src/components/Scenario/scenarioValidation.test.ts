@@ -96,8 +96,12 @@ describe('scenarioValidation — transform template', () => {
     expect(codes(run([node('tr', 'transform')]), 'tr')).toContain('empty-template')
   })
 
-  it('accepts a non-empty template', () => {
-    expect(run([node('tr', 'transform', { expression: { type: 'expression', value: '{{value}}' } })]).has('tr')).toBe(false)
+  it('accepts a literal (no interpolation) template with no value input', () => {
+    expect(run([node('tr', 'transform', { expression: { type: 'expression', value: 'Hello world' } })]).has('tr')).toBe(false)
+  })
+
+  it('flags a template that interpolates {{…}} when the value input is unwired', () => {
+    expect(codes(run([node('tr', 'transform', { expression: { type: 'expression', value: '{{name}}' } })]), 'tr')).toContain('value-input-required')
   })
 })
 
@@ -134,5 +138,9 @@ describe('scenarioValidation — data-link selector', () => {
     expect(isValidSelectorPath("a['k'].b")).toBe(true)
     expect(isValidSelectorPath('1bad')).toBe(false)
     expect(isValidSelectorPath('a..b')).toBe(false)
+  })
+
+  it('isValidSelectorPath accepts `.` (identity selector)', () => {
+    expect(isValidSelectorPath('.')).toBe(true)
   })
 })

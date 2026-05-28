@@ -23,7 +23,7 @@ import { findItemById, findItemWithBreadcrumbs, getFolderIcon, getNearestEnviron
 import { cloneForEventBus } from '../utils/cloneForEventBus'
 import { generateUniqueId, cloneItemInTree, removeItemFromTree, insertItemIntoTree } from '../utils/treeManipulation'
 import type { WorkbenchTree } from 'electron-core-ui/renderer'
-import type { BreadcrumbItem, FolderTab, EnvironmentFolderTab, HTTPRequestTab } from '../../../shared/types/editor'
+import type { BreadcrumbItem, FolderTab, EnvironmentFolderTab, HTTPRequestTab, ScenarioEditorTab } from '../../../shared/types/editor'
 import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
 import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
 import { eventBus } from 'electron-core-ui/renderer'
@@ -142,14 +142,20 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         if (tabType === 'console' || tabType === 'firewall') {
           return tab
         }
-        const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
+        const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab | ScenarioEditorTab
 
-        // Get the item ID from the tab
+        // Get the item ID from the tab. Scenario-editor tabs carry their
+        // payload under `scenario` (not `request` / `folder`); without this
+        // branch the breadcrumb refresh after a sidebar drag-and-drop would
+        // hit the `else` and dereference `.request.id` on the wrong shape,
+        // crashing with "Cannot read properties of undefined (reading 'id')".
         let itemId: string
         if (restormTab.tabType === 'folder') {
           itemId = restormTab.folder.id
         } else if (restormTab.tabType === 'environment-folder') {
           itemId = restormTab.folder.id
+        } else if (restormTab.tabType === 'scenario-editor') {
+          itemId = restormTab.scenario.id
         } else {
           itemId = restormTab.request.id
         }

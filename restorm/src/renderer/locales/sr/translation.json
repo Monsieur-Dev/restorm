@@ -767,7 +767,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source box to pick a property from its result.",
+      "noResult": "Run the source action to pick a property from its result.",
       "runSource": "Run source",
       "running": "Running…"
     },
@@ -865,10 +865,14 @@
     "editScenario": "Уреди сценарио",
     "object": {
       "addProperty": "Додај својство",
-      "removeProperty": "Уклони својство"
+      "removeProperty": "Уклони својство",
+      "propertyName": "Property name",
+      "propertyValue": "value"
     },
     "input": {
-      "required": "Обавезно"
+      "required": "Обавезно",
+      "name": "Name",
+      "defaultType": "Default / type"
     },
     "runScenario": {
       "orphanInput": "Нема одговарајућег параметра „{{name}}“ у подсценарију",
@@ -876,10 +880,10 @@
       "then": "затим"
     },
     "validation": {
-      "missingName": "Ово поље мора имати назив.",
-      "duplicateName": "Назив „{{name}}“ већ користи друго поље.",
-      "panelTitle": "Грешке поља: {{count}}",
-      "focusBox": "Иди на ово поље",
+      "missingName": "Ова акција мора имати назив.",
+      "duplicateName": "Назив „{{name}}“ већ користи друга акција.",
+      "panelTitle": "Грешке акција: {{count}}",
+      "focusBox": "Иди на ову акцију",
       "showErrors": "Прикажи грешке",
       "input": {
         "missingName": "Овај улазни параметар мора имати назив."
@@ -911,7 +915,8 @@
         "caseDuplicate": "Вредност случаја „{{value}}“ је дуплирана."
       },
       "transform": {
-        "emptyTemplate": "Шаблон не сме бити празан."
+        "emptyTemplate": "Шаблон не сме бити празан.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
       },
       "request": {
         "missing": "Повезани захтев више не постоји."
@@ -929,8 +934,22 @@
       "run": "Покрени",
       "debug": "Отклањање грешака",
       "step": "Корак по корак",
-      "noOutputs": "Овај оквир нема излаз.",
-      "notRun": "Покрените оквир да бисте видели његов излаз."
+      "noOutputs": "Ова акција нема излаз.",
+      "notRun": "Покрените акцију да бисте видели њен излаз.",
+      "previewInfo": "Example data, based on previous request results."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

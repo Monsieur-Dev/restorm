@@ -6,7 +6,7 @@ import { EnvironmentValuesProvider } from '../../../contexts/EnvironmentValuesCo
 import type { Icon } from 'electron-core-ui/types'
 import type { BreadcrumbItem } from '../../../../../shared/types/editor'
 import type { Request, Folder, EnvironmentFolder, ScenarioNode, ScenarioEdge } from '../../../../../shared/types/collections'
-import type { ScenarioRequestUsage } from '../../../services/scenarioRequestUsage'
+import type { ScenarioRequestUsage, ScenarioScenarioUsage } from '../../../services/scenarioRequestUsage'
 import type { ResolveBoundItem, ResolveRequestEnv } from '../../Scenario/scenarioBoundResolver'
 
 export interface RestormWorkbenchContainerProps {
@@ -60,6 +60,7 @@ export interface RestormWorkbenchContainerProps {
   getRequestById: (id: string) => Request | undefined
   getScenariosUsingRequest?: (requestId: string) => ScenarioRequestUsage[]
   onOpenScenarioFromRequest?: (scenarioId: string, focusNodeId?: string) => void
+  getScenariosUsingScenario?: (scenarioId: string) => ScenarioScenarioUsage[]
   getFolderById: (id: string) => Folder | undefined
   getEnvironmentFolderById: (id: string) => EnvironmentFolder | undefined
   navigationEnabled?: boolean | undefined
@@ -102,6 +103,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
   onStateRestored,
   getRequestById,
   getScenariosUsingRequest,
+  getScenariosUsingScenario,
   onOpenScenarioFromRequest,
   getFolderById,
   getEnvironmentFolderById,
@@ -153,6 +155,7 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
           onStateRestored={onStateRestored}
           getRequestById={getRequestById}
           getScenariosUsingRequest={getScenariosUsingRequest}
+          getScenariosUsingScenario={getScenariosUsingScenario}
           onOpenScenarioFromRequest={onOpenScenarioFromRequest}
           getFolderById={getFolderById}
           getEnvironmentFolderById={getEnvironmentFolderById}

@@ -766,7 +766,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source box to pick a property from its result.",
+      "noResult": "Run the source action to pick a property from its result.",
       "runSource": "Run source",
       "running": "Running…"
     },
@@ -864,10 +864,14 @@
     "editScenario": "Forgatókönyv szerkesztése",
     "object": {
       "addProperty": "Tulajdonság hozzáadása",
-      "removeProperty": "Tulajdonság eltávolítása"
+      "removeProperty": "Tulajdonság eltávolítása",
+      "propertyName": "Property name",
+      "propertyValue": "value"
     },
     "input": {
-      "required": "Kötelező"
+      "required": "Kötelező",
+      "name": "Name",
+      "defaultType": "Default / type"
     },
     "runScenario": {
       "orphanInput": "Nincs megfelelő „{{name}}\" paraméter az alforgatókönyvben",
@@ -875,10 +879,10 @@
       "then": "azután"
     },
     "validation": {
-      "missingName": "Ennek a dobozának nevet kell adni.",
-      "duplicateName": "A(z) „{{name}}” nevet már egy másik doboz használja.",
-      "panelTitle": "{{count}} dobozhiba",
-      "focusBox": "Ugrás erre a dobozra",
+      "missingName": "Ennek a műveletnek nevet kell adni.",
+      "duplicateName": "A(z) „{{name}}” nevet már egy másik művelet használja.",
+      "panelTitle": "{{count}} műveleti hiba",
+      "focusBox": "Ugrás erre a műveletre",
       "showErrors": "Hibák megjelenítése",
       "input": {
         "missingName": "Ennek a bemeneti paraméternek nevet kell adni."
@@ -910,7 +914,8 @@
         "caseDuplicate": "A(z) „{{value}}” esetérték duplikált."
       },
       "transform": {
-        "emptyTemplate": "A sablon nem lehet üres."
+        "emptyTemplate": "A sablon nem lehet üres.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
       },
       "request": {
         "missing": "A hozzárendelt kérés már nem létezik."
@@ -928,8 +933,22 @@
       "run": "Futtatás",
       "debug": "Hibakeresés",
       "step": "Lépésenként",
-      "noOutputs": "Ennek a doboznak nincs kimenete.",
-      "notRun": "Futtassa a dobozt a kimenet megtekintéséhez."
+      "noOutputs": "Ennek a műveletnek nincs kimenete.",
+      "notRun": "Futtassa a műveletet a kimenet megtekintéséhez.",
+      "previewInfo": "Example data, based on previous request results."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

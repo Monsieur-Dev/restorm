@@ -118,7 +118,7 @@ import { AvailableVariablesProvider } from './contexts/AvailableVariablesContext
 import { VariableTransformProvider } from './contexts/VariableTransformContext'
 import { AuthRequestResolverContext, type AuthRequestResolver } from './contexts/authRequestResolverContext'
 import { collectExpandableIds } from './services/FolderToListView'
-import { findScenariosUsingRequest, collectRequestScenarioRelations } from './services/scenarioRequestUsage'
+import { findScenariosUsingRequest, findScenariosUsingScenario, collectRequestScenarioRelations } from './services/scenarioRequestUsage'
 import { requestScenarioNodeFocus } from './services/scenarioFocusBus'
 import {
   findFolderById,
@@ -2166,6 +2166,12 @@ const App: React.FC = () => {
     (requestId: string) => findScenariosUsingRequest(rootItems, requestId),
     [rootItems]
   )
+  // Reverse navigation scenario → callers: same shape, but for sub-scenarios
+  // referenced by a `runScenario` node from another scenario.
+  const getScenariosUsingScenarioCb = useCallback(
+    (scenarioId: string) => findScenariosUsingScenario(rootItems, scenarioId),
+    [rootItems]
+  )
   const openScenarioFromRequest = useCallback((scenarioId: string, focusNodeId?: string) => {
     handleItemClick(scenarioId)
     if (focusNodeId) requestScenarioNodeFocus(scenarioId, focusNodeId)
@@ -2339,6 +2345,7 @@ const App: React.FC = () => {
               onStateRestored={handleStateRestored}
               getRequestById={getRequestByIdCb}
               getScenariosUsingRequest={getScenariosUsingRequestCb}
+              getScenariosUsingScenario={getScenariosUsingScenarioCb}
               onOpenScenarioFromRequest={openScenarioFromRequest}
               getFolderById={getFolderByIdCb}
               getEnvironmentFolderById={getEnvironmentFolderByIdCb}
@@ -2406,6 +2413,7 @@ const App: React.FC = () => {
             onStateRestored={handleStateRestored}
             getRequestById={(id) => findRequestById(rootItems, id)}
             getScenariosUsingRequest={getScenariosUsingRequestCb}
+            getScenariosUsingScenario={getScenariosUsingScenarioCb}
             onOpenScenarioFromRequest={openScenarioFromRequest}
             getFolderById={(id) => findFolderById(rootItems, id)}
             getEnvironmentFolderById={(id) => findEnvironmentFolderById(rootItems, id)}

@@ -12,10 +12,13 @@
   position: absolute;
   top: 8px;
   right: 8px;
-  bottom: 8px;
   z-index: 5;
   width: 320px;
-  overflow-y: auto;
+  /* Height is set in JS to min(content, available) — a definite pixel height,
+   * which is what lets the response tree's ListView scroll (max-height alone
+   * leaves the computed height `auto`, so height:100% never resolves). The
+   * max-height is a pre-measure fallback. */
+  max-height: calc(100% - 16px);
   display: flex;
   flex-direction: column;
   font-size: 12px;
@@ -29,15 +32,26 @@
   display: flex;
   gap: 6px;
   padding: 6px 8px;
+  flex: 0 0 auto;
 }
 .scn-inspector-sep {
   border-top: 1px solid var(--widget-border, #454545);
+  flex: 0 0 auto;
 }
 .scn-inspector-section {
   display: flex;
   flex-direction: column;
   gap: 3px;
   padding: 8px;
+}
+/* Errors stay at natural height; the preview takes the remaining space so its
+ * tree can fill / scroll. */
+.scn-inspector-errors {
+  flex: 0 0 auto;
+}
+.scn-inspector-preview {
+  flex: 1 1 auto;
+  min-height: 0;
 }
 .scn-inspector-section-title {
   font-weight: 600;
@@ -48,27 +62,61 @@
   gap: 4px;
   color: var(--inputValidation-errorForeground, #f48771);
 }
+.scn-inspector-preview-header,
+.scn-inspector-note,
+.scn-inspector-output-label {
+  flex: 0 0 auto;
+}
 .scn-inspector-preview-header {
   font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .scn-inspector-note {
   opacity: 0.8;
   white-space: pre-wrap;
+}
+
+/* Small italic info banner above the preview tree — reminds the user that
+ * the rendered values are samples drawn from the last run results, not
+ * authoritative output. */
+.scn-inspector-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 11px;
+  opacity: 0.7;
+  font-style: italic;
+  margin-bottom: 4px;
+  flex: 0 0 auto;
+}
+.scn-inspector-info .codicon-info {
+  font-size: 14px;
+  flex-shrink: 0;
+  line-height: 1.2;
 }
 .scn-inspector-output {
   display: flex;
   flex-direction: column;
   gap: 2px;
   margin-top: 4px;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 .scn-inspector-output-label {
   opacity: 0.85;
   font-family: var(--monospace-font, monospace);
 }
+/* The tree fills the remaining height (a definite height once the panel is
+ * capped, thanks to flex + min-height:0), so ListView's own ScrollableElement
+ * scrolls — same recipe the sidebar relies on. */
 .scn-inspector-tree {
   border: 1px solid var(--widget-border, #454545);
   border-radius: 4px;
   overflow: hidden;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 .scn-inspector-empty {
   opacity: 0.6;
@@ -576,6 +624,29 @@
   min-width: 200px;
 }
 
+/* The log box's `data` payload is meant to capture whole JSON values, so its
+ * control group stretches to the cell's full width (the type-pick icon stays
+ * pinned right, the value editor fills the remaining space). */
+.scn-log-data-field {
+  width: 100%;
+}
+.scn-log-data-field .tvf-control-group {
+  width: 100%;
+  min-width: 220px;
+}
+
+/* The `now` box's timezone SelectBox lists IANA labels with their UTC offset
+ * (e.g. `America/Argentina/Buenos_Aires (UTC-03:00)`) — give the trigger and
+ * its dropdown enough room to show those entries without truncation. */
+.scn-now-timezone {
+  min-width: 280px;
+}
+
+[data-testid="scn-now-timezone-dropdown"] {
+  min-width: 320px !important;
+  width: 320px !important;
+}
+
 /* First body line on bound request / sub-scenario nodes: a link that opens the
  * referenced item in a workbench tab. Styled as an inline link, not a button. */
 .scn-edit-link {
@@ -628,6 +699,16 @@
   gap: 3px;
   flex: 1;
   min-width: 0;
+}
+
+/* Generic "stacked field" wrapper: caption above its control with the same
+ * tight spacing the path-selector / data-link labels use elsewhere — used by
+ * the `input` box's Name / Default+type rows so they don't sit visually
+ * higher than the equivalent labels on a path-selector row. */
+.scn-stacked-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
 /* If operator toggle — compact segmented control. */

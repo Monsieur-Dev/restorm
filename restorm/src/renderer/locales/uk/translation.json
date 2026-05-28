@@ -768,7 +768,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source box to pick a property from its result.",
+      "noResult": "Run the source action to pick a property from its result.",
       "runSource": "Run source",
       "running": "Running…"
     },
@@ -866,10 +866,14 @@
     "editScenario": "Редагувати сценарій",
     "object": {
       "addProperty": "Додати властивість",
-      "removeProperty": "Видалити властивість"
+      "removeProperty": "Видалити властивість",
+      "propertyName": "Property name",
+      "propertyValue": "value"
     },
     "input": {
-      "required": "Обовʼязково"
+      "required": "Обовʼязково",
+      "name": "Name",
+      "defaultType": "Default / type"
     },
     "runScenario": {
       "orphanInput": "Немає відповідного параметра «{{name}}» у підсценарії",
@@ -877,10 +881,10 @@
       "then": "потім"
     },
     "validation": {
-      "missingName": "Цей блок повинен мати назву.",
-      "duplicateName": "Назва «{{name}}» вже використовується іншим блоком.",
-      "panelTitle": "{{count}} помилок блоків",
-      "focusBox": "Перейти до цього блоку",
+      "missingName": "Ця дія повинна мати назву.",
+      "duplicateName": "Назва «{{name}}» вже використовується іншою дією.",
+      "panelTitle": "{{count}} помилок дій",
+      "focusBox": "Перейти до цієї дії",
       "showErrors": "Показати помилки",
       "input": {
         "missingName": "Цей вхідний параметр повинен мати назву."
@@ -912,7 +916,8 @@
         "caseDuplicate": "Значення випадку «{{value}}» дублюється."
       },
       "transform": {
-        "emptyTemplate": "Шаблон не може бути порожнім."
+        "emptyTemplate": "Шаблон не може бути порожнім.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
       },
       "request": {
         "missing": "Пов'язаний запит більше не існує."
@@ -930,8 +935,22 @@
       "run": "Запустити",
       "debug": "Налагодження",
       "step": "Крок за кроком",
-      "noOutputs": "Цей блок не має виходу.",
-      "notRun": "Запустіть блок, щоб побачити його вихід."
+      "noOutputs": "Ця дія не має виходу.",
+      "notRun": "Запустіть дію, щоб побачити її вихід.",
+      "previewInfo": "Example data, based on previous request results."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

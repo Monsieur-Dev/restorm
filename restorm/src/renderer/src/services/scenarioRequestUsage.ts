@@ -65,6 +65,34 @@ export function isRequestInScenarioSubtree(scenario: Scenario, requestId: string
   return walk(scenario.items)
 }
 
+/**
+ * Where a scenario is referenced by another scenario: the caller plus the ids
+ * of its `runScenario` nodes whose `config.scenarioId` matches. Used by the
+ * scenario editor's "callers" reverse-nav button (mirror of the request one).
+ */
+export interface ScenarioScenarioUsage {
+  scenario: Scenario
+  /** `runScenario` node ids in this caller whose `config.scenarioId` matches. */
+  nodeIds: string[]
+}
+
+/**
+ * Every scenario that references `subScenarioId` through a `runScenario` node.
+ * Excludes the scenario itself (a self-call shouldn't surface in the list of
+ * "scenarios calling this one"; the user is already on it).
+ */
+export function findScenariosUsingScenario(rootItems: FolderItem[], subScenarioId: string): ScenarioScenarioUsage[] {
+  const out: ScenarioScenarioUsage[] = []
+  walkScenarios(rootItems, (scenario) => {
+    if (scenario.id === subScenarioId) return
+    const nodeIds = scenario.nodes
+      .filter((n) => n.kind === 'runScenario' && n.config['scenarioId'] === subScenarioId)
+      .map((n) => n.id)
+    if (nodeIds.length > 0) out.push({ scenario, nodeIds })
+  })
+  return out
+}
+
 /** A scenario's relationship to a request being deleted: it binds the request
  * through `httpRequest` nodes (`nodeIds`), holds it in its subtree
  * (`inSubtree`), or both. Drives the deletion dialog. */

@@ -21,8 +21,11 @@ import { useTranslation } from 'react-i18next'
 import { Button, ContextMenu, Tooltip, ColorPicker, Modal, MarkdownEditor, type ContextMenuItem } from 'electron-core-ui/renderer'
 import type { Scenario, ScenarioNode, ScenarioEdge, ScenarioNodeKind } from '../../../../shared/types/collections'
 import { isRequest, isScenario } from '../../../../shared/types/collections'
+import { Badge } from '../common/Badge'
+import { requestBadgeType } from '../../utils/badgeUtils'
 import { ScenarioBoundResolverContext, ScenarioRequestEnvContext, type ResolveBoundItem, type ResolveRequestEnv } from './scenarioBoundResolver'
 import { ScenarioEdgeSelectorContext, type ScenarioEdgeSelectorApi } from './scenarioEdgeSelector'
+import { ScenarioStaticPreviewContext, type ScenarioStaticPreviewApi, type ObjectWiredProperty } from './scenarioStaticPreviewContext'
 import { ScenarioVariablesContext, type ScenarioVariable } from '../../contexts/ScenarioVariablesContext'
 import { resolveValueTypeKind } from '../TypedValueField/castValue'
 import { normalizeValueType } from '../../utils/normalizeValueType'
@@ -37,6 +40,7 @@ import type { AddChildKind } from '../MainView/Sidebar/contextMenuBuilder'
 import { validateScenarioGraph, targetKey, type ScenarioNodeError, type ScenarioDataLink } from './scenarioValidation'
 import { ScenarioErrorsContext } from './scenarioErrorsContext'
 import { ScenarioInspectorPanel, type InspectorPreviewNode } from './ScenarioInspectorPanel'
+import { staticScenarioPreview, singleDeepPath, expectsObjectInput, singleTopLevelKey, STATIC_PREVIEW_KINDS, resolveItems, applyListOp, resolveSelectorPath, type StaticPreviewNode, type StaticPreviewEdge } from '../../../../shared/utils/scenarioStaticPreview'
 import { consumePendingScenarioNodeFocus, onScenarioNodeFocus, clearPendingScenarioNodeFocus } from '../../services/scenarioFocusBus'
 
 export interface ScenarioEditorViewProps {
@@ -100,6 +104,46 @@ interface NodeHandlers {
   onOpenItem?: (itemId: string) => void
 }
 
+/** Collect the dynamic handle ids declared by a node's per-kind config
+ * (object property ids + switch case ids). Other kinds have no dynamic handles
+ * — only static `inputs` / `outputs` + the always-on header anchors. */
+function dynamicHandleIds(kind: ScenarioNodeKind, config: Record<string, unknown> | undefined): { ids: Set<string>; prefix: 'prop-' | 'case-' } | null {
+  if (kind === 'object') {
+    const raw = config ? config['properties'] : undefined
+    if (!Array.isArray(raw)) return { ids: new Set(), prefix: 'prop-' }
+    const ids = new Set<string>()
+    for (const p of raw) {
+      const id = (p as { id?: unknown }).id
+      if (typeof id === 'string') ids.add(id)
+    }
+    return { ids, prefix: 'prop-' }
+  }
+  if (kind === 'switch') {
+    const raw = config ? config['cases'] : undefined
+    if (!Array.isArray(raw)) return { ids: new Set(), prefix: 'case-' }
+    const ids = new Set<string>()
+    for (const c of raw) {
+      const id = (c as { id?: unknown }).id
+      if (typeof id === 'string') ids.add(id)
+    }
+    return { ids, prefix: 'case-' }
+  }
+  return null
+}
+
+/** Drop edges whose dynamic handle (prop- / case-) on `nodeId` is no longer
+ * declared by the node's config. Static handles (input/output/header anchors)
+ * are stable per kind, so they're not filtered here. */
+function pruneOrphanDynamicEdges<E extends { source?: string | null; target?: string | null; sourceHandle?: string | null; targetHandle?: string | null }>(
+  edges: E[], nodeId: string, valid: Set<string>, prefix: 'prop-' | 'case-'
+): E[] {
+  return edges.filter((e) => {
+    if (e.target === nodeId && typeof e.targetHandle === 'string' && e.targetHandle.startsWith(prefix) && !valid.has(e.targetHandle)) return false
+    if (e.source === nodeId && typeof e.sourceHandle === 'string' && e.sourceHandle.startsWith(prefix) && !valid.has(e.sourceHandle)) return false
+    return true
+  })
+}
+
 function toFlowNode(n: ScenarioNode, handlers: NodeHandlers): Node<NodeData> {
   return {
     id: n.id,
@@ -154,6 +198,44 @@ function countUnsatisfiedRequired(
  * user's priority: above → right → left → below (below = under the
  * header, over the body). Falls through to below when nothing fits.
  */
+/** React Flow's pane / node / edge handlers intercept the underlying
+ * `mousedown` for pan + drag, so global `mousedown` listeners attached to
+ * `document` by tooltips / popovers / suggest widgets elsewhere in the app
+ * never fire when the user interacts with the scenario canvas. Calling this
+ * after each click on a React Flow surface dismisses every off-canvas
+ * "close-on-outside-click" popover at once:
+ *   1. dispatch a synthetic `mousedown` on `document.body` so every
+ *      "outside click" listener (capture or bubble) sees a target outside
+ *      its popover and closes.
+ *   2. blur the active element ONLY when it lives outside the canvas — an
+ *      input inside a scenario node must keep focus when its host node is
+ *      clicked, otherwise the user can never type into it. The titlebar
+ *      search, command palette, etc. live outside `.react-flow`, so they
+ *      still blur and dismiss. */
+function dismissOffCanvasPopovers(): void {
+  document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }))
+  const active = document.activeElement
+  if (active instanceof HTMLElement && active !== document.body && !active.closest('.react-flow')) {
+    active.blur()
+  }
+}
+
+/** The "leaf" identifier of a JSON-path selector — the last name-like segment
+ * (e.g. `response.body.items[0].name` → `"name"`, `now` → `"now"`). Returns
+ * null for paths ending on a numeric index or anything malformed, so callers
+ * never propose a nonsense name. */
+function leafSegment(path: string): string | null {
+  const segments = path
+    .replace(/\[(\d+)\]/g, '.$1')
+    .replace(/\['([^']*)'\]/g, '.$1')
+    .replace(/\["([^"]*)"\]/g, '.$1')
+    .split('.')
+    .filter(Boolean)
+  const last = segments[segments.length - 1]
+  if (!last || !/^[A-Za-z_$][\w$]*$/.test(last)) return null
+  return last
+}
+
 function chooseColorTooltipPlacement(rect: DOMRect): { placement: 'above' | 'below'; side: 'auto' | 'left' | 'right' } {
   const W = 232
   const H = 300
@@ -246,16 +328,144 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     if (trimmed === '') delete updated.selector
     else updated.selector = trimmed
     edgeStore.current.set(edgeId, updated)
+    // The leaf of the picked path is a candidate name for an unnamed object
+    // property: typing / dragging / clicking a path in the picker mirrors that
+    // leaf into the destination property's name (only when empty, so we never
+    // clobber a deliberate rename).
+    const leaf = trimmed ? leafSegment(trimmed) : null
     setNodes((n) => {
+      let nextNodes = n
+      if (leaf) {
+        const target = n.find((x) => x.id === prior.to.nodeId)
+        if (target?.data.kind === 'object') {
+          const propsRaw = target.data.config?.['properties']
+          const props = Array.isArray(propsRaw) ? (propsRaw as { id?: unknown; name?: unknown }[]) : []
+          const prop = props.find((p) => p.id === prior.to.portId)
+          if (prop && (typeof prop.name !== 'string' || prop.name.trim() === '')) {
+            nextNodes = n.map((nd) => nd.id !== target.id ? nd : {
+              ...nd,
+              data: {
+                ...nd.data,
+                config: {
+                  ...(nd.data.config ?? {}),
+                  properties: props.map((p) => p.id === prior.to.portId ? { ...(p as Record<string, unknown>), name: leaf } : p)
+                }
+              }
+            })
+          }
+        }
+      }
       setEdges((curr) => {
         const next = curr.map((fe) => (fe.id === edgeId ? { ...fe, data: { ...(fe.data ?? {}), selector: trimmed || undefined } } : fe))
-        persist(n, next)
+        persist(nextNodes, next)
         return next
       })
-      return n
+      return nextNodes
     })
   }, [setNodes, setEdges, persist])
   const edgeSelectorApi = useMemo<ScenarioEdgeSelectorApi>(() => ({ getSelector: getEdgeSelector, setSelector: setEdgeSelector }), [getEdgeSelector, setEdgeSelector])
+
+  // Lookup the static-config-derived preview for any source box. Used by the
+  // JSON-path picker so a `STATIC_PREVIEW_KINDS` source (`now`, `input`,
+  // `transform`, …) shows its tree immediately — no "run the source" detour.
+  const staticPreviewApi = useMemo<ScenarioStaticPreviewApi>(() => ({
+    getPreview: (sourceNodeId: string) => {
+      const src = nodes.find((n) => n.id === sourceNodeId)
+      if (!src) return null
+      const staticEdges = edges.flatMap((e) => {
+        if (!e.source || !e.target || !e.sourceHandle || !e.targetHandle) return []
+        const sel = typeof e.data?.['selector'] === 'string' ? e.data['selector'] : undefined
+        return [{ from: { nodeId: e.source, portId: e.sourceHandle }, to: { nodeId: e.target, portId: e.targetHandle }, ...(sel !== undefined ? { selector: sel } : {}) }]
+      })
+      return staticScenarioPreview(
+        { id: src.id, kind: src.data.kind, config: src.data.config ?? {} },
+        nodes.map((x) => ({ id: x.id, kind: x.data.kind, config: x.data.config ?? {} })),
+        staticEdges
+      )
+    },
+    getObjectWiredProperties: (nodeId: string) => {
+      // Return every (preview-key, sourceId, selector) tuple the inspector
+      // needs to fetch + inject into the assembled preview, so the user sees
+      // the real value instead of a `null` placeholder. Covers:
+      //   • `object` — one entry per property whose source isn't static.
+      //   • `wait` / `waitUntil` — single entry on the data input.
+      const target = nodes.find((n) => n.id === nodeId)
+      if (!target) return []
+      const out: ObjectWiredProperty[] = []
+      const collect = (previewKey: string, portId: string): void => {
+        const edge = edges.find((e) => e.target === nodeId && e.targetHandle === portId)
+        if (!edge) return
+        const source = nodes.find((n) => n.id === edge.source)
+        if (!source || STATIC_PREVIEW_KINDS.has(source.data.kind)) return
+        const sel = typeof edge.data?.['selector'] === 'string' ? edge.data['selector'] : undefined
+        out.push({ name: previewKey, sourceNodeId: source.id, ...(sel !== undefined ? { selector: sel } : {}) })
+      }
+      if (target.data.kind === 'object') {
+        const propsRaw = target.data.config?.['properties']
+        const props = Array.isArray(propsRaw) ? (propsRaw as { id?: unknown; name?: unknown }[]) : []
+        for (const p of props) {
+          if (typeof p.id !== 'string' || typeof p.name !== 'string' || p.name === '') continue
+          collect(p.name, p.id)
+        }
+      } else if (target.data.kind === 'wait') {
+        collect('duration', 'duration')
+      } else if (target.data.kind === 'waitUntil') {
+        collect('until', 'until')
+      } else if (target.data.kind === 'log') {
+        collect('message', 'message')
+        collect('data', 'data')
+      }
+      return out
+    },
+    getListItemShape: (listNodeId: string) => {
+      const target = nodes.find((n) => n.id === listNodeId)
+      if (!target) return null
+      const cfg = target.data.config ?? {}
+      const mappedNodes = nodes.map((x) => ({ id: x.id, kind: x.data.kind, config: x.data.config ?? {} }))
+      const mappedEdges = edges.flatMap((e) => {
+        if (!e.source || !e.target || !e.sourceHandle || !e.targetHandle) return []
+        const sel = typeof e.data?.['selector'] === 'string' ? e.data['selector'] : undefined
+        return [{ from: { nodeId: e.source, portId: e.sourceHandle }, to: { nodeId: e.target, portId: e.targetHandle }, ...(sel !== undefined ? { selector: sel } : {}) }]
+      })
+      const items = resolveItems(listNodeId, cfg, mappedNodes, mappedEdges)
+      if (!items || items.length === 0) return null
+      const first = items[0]
+      if (!first || typeof first !== 'object' || Array.isArray(first)) return null
+      return first as Record<string, unknown>
+    },
+    getRunScenarioOutputs: (runScenarioNodeId: string) => {
+      // Resolve the bound sub-scenario, then for each Output node compute
+      // its value via the static-preview machinery applied to the
+      // sub-scenario's own nodes + edges. Sources without a static preview
+      // (httpRequest, …) leave the slot at `null`; the user runs the box to
+      // see actuals.
+      const runNode = nodes.find((n) => n.id === runScenarioNodeId)
+      if (runNode?.data.kind !== 'runScenario') return null
+      const runCfg = runNode.data.config ?? {}
+      const subId = typeof runCfg['scenarioId'] === 'string' ? runCfg['scenarioId'] : null
+      if (!subId) return null
+      const subItem = resolveBoundItem?.(subId) ?? null
+      const sub = subItem && isScenario(subItem) ? subItem : null
+      if (!sub) return null
+      const subNodes: StaticPreviewNode[] = sub.nodes.map((n) => ({ id: n.id, kind: n.kind, config: n.config }))
+      const subEdges: StaticPreviewEdge[] = sub.edges.map((e) => ({ from: e.from, to: e.to, ...(e.selector !== undefined ? { selector: e.selector } : {}) }))
+      const out: Record<string, unknown> = {}
+      for (const node of sub.nodes) {
+        if (node.kind !== 'output') continue
+        const name = typeof node.config['name'] === 'string' ? node.config['name'] : ''
+        if (!name) continue
+        const incoming = subEdges.find((e) => e.to.nodeId === node.id && e.to.portId === 'value')
+        if (!incoming) { out[name] = null; continue }
+        const source = subNodes.find((n) => n.id === incoming.from.nodeId)
+        if (!source || !STATIC_PREVIEW_KINDS.has(source.kind)) { out[name] = null; continue }
+        const sp = staticScenarioPreview(source, subNodes, subEdges)
+        if (sp === null) { out[name] = null; continue }
+        const v = incoming.selector ? resolveSelectorPath(sp, incoming.selector) : sp
+        out[name] = v === undefined ? null : v
+      }
+      return out
+    }
+  }), [nodes, edges, resolveBoundItem])
 
   // Resolve a scenario reference (a runScenario's sub-scenario) to derive its
   // ports — for orphan-edge detection and the required-input validity count.
@@ -361,7 +571,24 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
           })
         }
       }
-      setEdges((e) => { persist(next, e); return e })
+      // Object property / switch case removal drops a dynamic handle but
+      // doesn't itself touch edges — the edge entry survives as an orphan
+      // pointing at a handle that no longer exists, which spams React Flow's
+      // "couldn't create edge for target handle id" warning every render.
+      // Catch it at the config-write boundary: filter edges whose dynamic
+      // handle just vanished, then re-persist.
+      const target = next.find((n) => n.id === nodeId)
+      const dyn = target ? dynamicHandleIds(target.data.kind, target.data.config) : null
+      setEdges((e) => {
+        const pruned = dyn ? pruneOrphanDynamicEdges(e, nodeId, dyn.ids, dyn.prefix) : e
+        if (pruned !== e) {
+          for (const dropped of e) {
+            if (!pruned.includes(dropped)) edgeStore.current.delete(dropped.id)
+          }
+        }
+        persist(next, pruned)
+        return pruned
+      })
       return next
     })
   }, [setNodes, setEdges, persist])
@@ -375,11 +602,56 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
   useEffect(() => {
     if (seededId.current === scenario.id) return
     seededId.current = scenario.id
+    // Pre-existing scenarios may carry edges left orphaned by an earlier property
+    // / case removal (the bug class fixed in `setNodeConfig`). Drop them once at
+    // load so the persisted file converges with what the editor can actually
+    // render — and the console isn't flooded with React Flow handle warnings.
+    const cleanEdges = scenario.edges.filter((e) => {
+      const targetNode = scenario.nodes.find((n) => n.id === e.to.nodeId)
+      if (!targetNode) return true
+      const dyn = dynamicHandleIds(targetNode.kind, targetNode.config)
+      if (!dyn) return true
+      if (e.to.portId.startsWith(dyn.prefix) && !dyn.ids.has(e.to.portId)) return false
+      return true
+    })
     nodeStore.current = new Map(scenario.nodes.map((n) => [n.id, n]))
-    edgeStore.current = new Map(scenario.edges.map((e) => [e.id, e]))
+    edgeStore.current = new Map(cleanEdges.map((e) => [e.id, e]))
     setNodes(scenario.nodes.map((n) => toFlowNode(n, handlers.current)))
-    setEdges(scenario.edges.map(buildFlowEdge))
-  }, [scenario.id, scenario.nodes, scenario.edges, setNodes, setEdges, buildFlowEdge])
+    setEdges(cleanEdges.map(buildFlowEdge))
+    if (cleanEdges.length !== scenario.edges.length) {
+      // Schedule a persist so the cleanup makes it back to disk on the next
+      // autosave. Defer to a microtask: the parent owns scenario state, and a
+      // synchronous patch dispatch from inside this effect would race the
+      // initial render that just seeded the editor.
+      queueMicrotask(() => { onScenarioChange?.(scenario.id, { edges: cleanEdges }) })
+    }
+  }, [scenario.id, scenario.nodes, scenario.edges, setNodes, setEdges, buildFlowEdge, onScenarioChange])
+
+  // Sweep dynamic-handle orphan edges whenever the node set / its configs
+  // change. Three motivations:
+  //  - persisted scenarios saved before the sanitizer existed (the load effect
+  //    catches these once, but only when its `seededId` guard fires — HMR
+  //    preserves the ref and short-circuits),
+  //  - belt-and-braces for the `setNodeConfig` cleanup,
+  //  - any future code path that drops a port without touching edges.
+  // The filter is idempotent: when there are no orphans, the result === current
+  // edges and React Flow doesn't re-render.
+  useEffect(() => {
+    setEdges((curr) => {
+      const next = curr.filter((edge) => {
+        const tgt = nodes.find((n) => n.id === edge.target)
+        if (!tgt) return true
+        const dyn = dynamicHandleIds(tgt.data.kind, tgt.data.config)
+        if (!dyn) return true
+        if (typeof edge.targetHandle === 'string' && edge.targetHandle.startsWith(dyn.prefix) && !dyn.ids.has(edge.targetHandle)) return false
+        return true
+      })
+      if (next.length === curr.length) return curr
+      for (const e of curr) if (!next.includes(e)) edgeStore.current.delete(e.id)
+      queueMicrotask(() => { persist(nodes, next) })
+      return next
+    })
+  }, [nodes, setEdges, persist])
 
   // Re-seed when this scenario is mutated externally by the MCP tools
   // (create/move/update/delete node, connect/disconnect). Deliberately
@@ -494,15 +766,102 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     if (!validateConnection(connection)) return
     const id = `e-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
     const src = nodes.find((n) => n.id === connection.source)
+    const tgt = nodes.find((n) => n.id === connection.target)
     const port = src?.data.outputs.find((o) => o.id === connection.sourceHandle)
       ?? (src ? derivedPortsOf(src.data)?.outputs.find((o) => o.id === connection.sourceHandle) : undefined)
     const stroke = port ? portColor(port) : undefined
+    // Auto-fill the JSON path when a data link's source has an unambiguous
+    // (single-deep) preview — e.g. a getVariable `{ timer }` link deduces
+    // `timer` outright, so the user needn't open the picker.
+    let selector: string | undefined
+    if (src && tgt && connection.sourceHandle && connection.targetHandle) {
+      const srcDerived = derivedPortsOf(src.data)?.outputs ?? []
+      const outFlow = outputPortFlow([...src.data.outputs, ...srcDerived], connection.sourceHandle, src.data.kind)
+      const inFlow = inputPortFlow(tgt.data.inputs, connection.targetHandle, tgt.data.kind)
+      if (isDataLink(inFlow, outFlow) && expectsObjectInput(tgt.data.kind, connection.targetHandle)) {
+        // Object-context input: if the source's preview narrows to a single
+        // top-level key, mirror it (the most natural shortcut); otherwise
+        // default to the identity selector `.` (whole object flows through).
+        const preview = STATIC_PREVIEW_KINDS.has(src.data.kind)
+          ? staticScenarioPreview(
+              { id: src.id, kind: src.data.kind, config: src.data.config ?? {} },
+              nodes.map((x) => ({ id: x.id, kind: x.data.kind, config: x.data.config ?? {} })),
+              edges.flatMap((e) => (e.source && e.target && e.sourceHandle && e.targetHandle)
+                ? [{ from: { nodeId: e.source, portId: e.sourceHandle }, to: { nodeId: e.target, portId: e.targetHandle }, ...(typeof e.data?.['selector'] === 'string' ? { selector: e.data['selector'] } : {}) }]
+                : [])
+            )
+          : null
+        const top = preview ? singleTopLevelKey(preview) : null
+        selector = top ?? '.'
+        edgeStore.current.set(id, {
+          id,
+          from: { nodeId: src.id, portId: connection.sourceHandle },
+          to: { nodeId: tgt.id, portId: connection.targetHandle },
+          selector
+        })
+      } else if (isDataLink(inFlow, outFlow)) {
+        const preview = staticScenarioPreview(
+          { id: src.id, kind: src.data.kind, config: src.data.config ?? {} },
+          nodes.map((x) => ({ id: x.id, kind: x.data.kind, config: x.data.config ?? {} })),
+          edges.flatMap((e) => (e.source && e.target && e.sourceHandle && e.targetHandle)
+            ? [{ from: { nodeId: e.source, portId: e.sourceHandle }, to: { nodeId: e.target, portId: e.targetHandle }, ...(typeof e.data?.['selector'] === 'string' ? { selector: e.data['selector'] } : {}) }]
+            : [])
+        )
+        const path = preview ? singleDeepPath(preview) : null
+        if (path) {
+          selector = path
+          // The selector lives authoritatively in `edgeStore` (persist rebuilds
+          // each ScenarioEdge from it, not from the flow edge's `data`), so seed
+          // it there too — otherwise the deduction is dropped on the next save.
+          edgeStore.current.set(id, {
+            id,
+            from: { nodeId: src.id, portId: connection.sourceHandle },
+            to: { nodeId: tgt.id, portId: connection.targetHandle },
+            selector: path
+          })
+        }
+      }
+    }
+    // When the link feeds an object-builder property whose name is still
+    // empty, mirror the source's deduced single top-level key onto that
+    // property's name — the user almost always wants the destination key to
+    // mirror the source key (e.g. `now → object.prop` ⇒ `prop.name = "now"`).
+    // Only fires for a bare identifier path (no dots / brackets); deeper
+    // paths leave the name alone so the user picks deliberately.
+    let propertyRename: { propertyId: string } | undefined
+    if (tgt?.data.kind === 'object' && connection.targetHandle && selector && /^[A-Za-z_$][\w$]*$/.test(selector)) {
+      const propsRaw = tgt.data.config?.['properties']
+      const props = Array.isArray(propsRaw) ? (propsRaw as { id?: unknown; name?: unknown }[]) : []
+      const prop = props.find((p) => p.id === connection.targetHandle)
+      if (prop && (typeof prop.name !== 'string' || prop.name.trim() === '')) {
+        propertyRename = { propertyId: connection.targetHandle }
+      }
+    }
     setEdges((curr) => {
-      const next = addEdge({ ...connection, id, ...(stroke ? { style: { stroke } } : {}) }, curr)
-      setNodes((n) => { persist(n, next); return n })
+      const next = addEdge({ ...connection, id, ...(stroke ? { style: { stroke } } : {}), ...(selector ? { data: { selector } } : {}) }, curr)
+      setNodes((n) => {
+        // Apply the property-name mirror first, so persist captures it.
+        const rename = propertyRename
+        const updated = rename && tgt && selector
+          ? n.map((nd) => nd.id !== tgt.id ? nd : {
+              ...nd,
+              data: {
+                ...nd.data,
+                config: {
+                  ...(nd.data.config ?? {}),
+                  properties: Array.isArray(nd.data.config?.['properties'])
+                    ? (nd.data.config['properties'] as { id?: unknown }[]).map((p) => p.id === rename.propertyId ? { ...(p as Record<string, unknown>), name: selector } : p)
+                    : nd.data.config?.['properties']
+                }
+              }
+            })
+          : n
+        persist(updated, next)
+        return updated
+      })
       return next
     })
-  }, [setEdges, setNodes, persist, validateConnection, nodes, derivedPortsOf])
+  }, [setEdges, setNodes, persist, validateConnection, nodes, edges, derivedPortsOf])
 
   const addNode = useCallback((kind: ScenarioNodeKind, flow: { x: number; y: number }, config: Record<string, unknown> = {}) => {
     // A "Requête HTTP" node added from the palette (no bound request yet)
@@ -912,12 +1271,80 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     const n = selected[0]
     if (!n) return null
     const cfg = n.data.config ?? {}
-    const label = typeof cfg['label'] === 'string' ? cfg['label'] : typeof cfg['name'] === 'string' ? cfg['name'] : ''
     const meta = scenarioNodeMeta(n.data.kind)
-    const title = label || t(meta.labelKey, meta.defaultLabel)
+    // Default: mirror the box header — kind icon (codicon) + kind label. For
+    // runScenario / httpRequest, swap in the bound item's real name and its
+    // semantic badge (SCENARIO icon / HTTP method) so the inspector shows the
+    // exact same identity the user sees on the box header.
+    let title = t(meta.labelKey, meta.defaultLabel)
+    let titleBadge: React.ReactNode = <i className={`codicon codicon-${meta.icon}`} aria-hidden="true" />
+    if (n.data.kind === 'runScenario') {
+      const boundId = typeof cfg['scenarioId'] === 'string' ? cfg['scenarioId'] : null
+      const boundItem = boundId ? (resolveBoundItem?.(boundId) ?? null) : null
+      if (boundItem && isScenario(boundItem)) {
+        title = boundItem.name
+        titleBadge = <Badge type="SCENARIO" />
+      }
+    } else if (n.data.kind === 'httpRequest') {
+      const boundId = typeof cfg['requestId'] === 'string' ? cfg['requestId'] : null
+      const boundItem = boundId ? (resolveBoundItem?.(boundId) ?? null) : null
+      if (boundItem && isRequest(boundItem)) {
+        title = boundItem.name
+        titleBadge = <Badge type={requestBadgeType(boundItem)} />
+      }
+    }
     const outputs = [...n.data.outputs, ...(derivedPortsOf(n.data)?.outputs ?? [])]
-    return { id: n.id, title, ...(n.data.note ? { note: n.data.note } : {}), outputs }
-  }, [nodes, t, derivedPortsOf])
+    // Config-derived preview for static kinds (input, object, …) — shown
+    // without a run. Computed from the live node configs + links across the
+    // graph (an object property wired to a non-static source is omitted).
+    const staticEdges = edges.flatMap((e) => {
+      if (!e.source || !e.target || !e.sourceHandle || !e.targetHandle) return []
+      const sel = typeof e.data?.['selector'] === 'string' ? e.data['selector'] : undefined
+      return [{ from: { nodeId: e.source, portId: e.sourceHandle }, to: { nodeId: e.target, portId: e.targetHandle }, ...(sel !== undefined ? { selector: sel } : {}) }]
+    })
+    // `runScenario` lives across scenarios — its outputs are the sub-scenario's
+    // named Output nodes resolved statically. The shared static-preview can't
+    // see across scenarios, so the editor branches it through a dedicated
+    // context API method.
+    const staticData = n.data.kind === 'runScenario'
+      ? staticPreviewApi.getRunScenarioOutputs(n.id)
+      : staticScenarioPreview(
+          { id: n.id, kind: n.data.kind, config: cfg },
+          nodes.map((x) => ({ id: x.id, kind: x.data.kind, config: x.data.config ?? {} })),
+          staticEdges
+        )
+    // For an object / wait / waitUntil, also surface the wired non-static
+    // properties so the inspector can fetch + inject (cf. wiredFetches).
+    const wiredFetches = staticPreviewApi.getObjectWiredProperties(n.id)
+    // For a list-op box (map / filter / aggregate) whose `items` come from a
+    // non-static source, hand the inspector a recipe: where to fetch the
+    // items + how to apply the box's operation once they're resolved.
+    let listOp: InspectorPreviewNode['listOp']
+    if (n.data.kind === 'map' || n.data.kind === 'filter' || n.data.kind === 'aggregate' || n.data.kind === 'forEach') {
+      const itemsEdge = edges.find((e) => e.target === n.id && e.targetHandle === 'items')
+      if (itemsEdge?.source) {
+        const sourceNode = nodes.find((x) => x.id === itemsEdge.source)
+        if (sourceNode && !STATIC_PREVIEW_KINDS.has(sourceNode.data.kind)) {
+          const sel = typeof itemsEdge.data?.['selector'] === 'string' ? itemsEdge.data['selector'] : undefined
+          const nodeKind = n.data.kind
+          listOp = {
+            fetch: { sourceNodeId: sourceNode.id, ...(sel !== undefined ? { selector: sel } : {}) },
+            apply: (items) => applyListOp({ id: n.id, kind: nodeKind, config: cfg }, items)
+          }
+        }
+      }
+    }
+    return {
+      id: n.id,
+      title,
+      titleBadge,
+      ...(n.data.note ? { note: n.data.note } : {}),
+      outputs,
+      staticData,
+      ...(wiredFetches.length > 0 ? { wiredFetches } : {}),
+      ...(listOp ? { listOp } : {})
+    }
+  }, [nodes, edges, t, derivedPortsOf, staticPreviewApi, resolveBoundItem])
 
   // Wire-ports for the link-drag "Add" submenu — the port the link filter
   // computed for the (folded) request / sub-scenario kinds, when each is
@@ -951,6 +1378,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     <ScenarioRequestEnvContext.Provider value={resolveRequestEnv ?? null}>
     <ScenarioVariablesContext.Provider value={scenarioVariables}>
     <ScenarioEdgeSelectorContext.Provider value={edgeSelectorApi}>
+    <ScenarioStaticPreviewContext.Provider value={staticPreviewApi}>
     <ScenarioErrorsContext.Provider value={nodeErrors}>
     <div ref={wrapperRef} data-testid="scenario-editor" style={containerStyle} onDragOver={onDragOver} onDrop={onDrop}>
       {nodes.length === 0 && (
@@ -985,9 +1413,13 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
         multiSelectionKeyCode={['Control', 'Meta']}
         onPaneContextMenu={onPaneContextMenu}
         onEdgeContextMenu={onEdgeContextMenu}
-        onPaneClick={() => { setPalette(null); setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); if (Date.now() - linkPaletteOpenedAt.current > 250) setLinkPalette(null) }}
-        onNodeClick={() => { setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null) }}
-        onEdgeClick={() => { setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null) }}
+        onPaneClick={() => {
+          setPalette(null); setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null)
+          if (Date.now() - linkPaletteOpenedAt.current > 250) setLinkPalette(null)
+          dismissOffCanvasPopovers()
+        }}
+        onNodeClick={() => { setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null); dismissOffCanvasPopovers() }}
+        onEdgeClick={() => { setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null); dismissOffCanvasPopovers() }}
         onMoveStart={() => { setNodeMenu(null); setPalette(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null) }}
         onNodeDragStart={() => { setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null) }}
         fitView
@@ -1182,6 +1614,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
       </Modal>
     </div>
     </ScenarioErrorsContext.Provider>
+    </ScenarioStaticPreviewContext.Provider>
     </ScenarioEdgeSelectorContext.Provider>
     </ScenarioVariablesContext.Provider>
     </ScenarioRequestEnvContext.Provider>

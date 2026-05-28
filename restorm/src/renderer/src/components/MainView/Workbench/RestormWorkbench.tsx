@@ -42,7 +42,8 @@ import { useTranslation } from 'react-i18next'
 import { RestormWorkbenchTab } from './RestormWorkbenchTab'
 import { DeprecationAwareRequestTab } from './DeprecationAwareRequestTab'
 import { RequestScenarioUsageButton } from './RequestScenarioUsageButton'
-import type { ScenarioRequestUsage } from '../../../services/scenarioRequestUsage'
+import { ScenarioCallersButton } from './ScenarioCallersButton'
+import type { ScenarioRequestUsage, ScenarioScenarioUsage } from '../../../services/scenarioRequestUsage'
 import { useTabSwitcher } from '../../../hooks/useTabSwitcher'
 
 /** Extract title string from EditorTab */
@@ -128,6 +129,9 @@ export interface RestormWorkbenchProps {
   getScenariosUsingRequest?: ((requestId: string) => ScenarioRequestUsage[]) | undefined
   /** Open a scenario tab from a request; `focusNodeId` centres a box. */
   onOpenScenarioFromRequest?: ((scenarioId: string, focusNodeId?: string) => void) | undefined
+  /** Scenarios that reference a sub-scenario via a `runScenario` node — drives
+   * the reverse-nav button on a sub-scenario's editor toolbar. */
+  getScenariosUsingScenario?: ((scenarioId: string) => ScenarioScenarioUsage[]) | undefined
   /** Get a reactive Folder by ID (for reactivity support) */
   getFolderById?: (id: string) => Folder | undefined
   /** Check if a request is a favorite */
@@ -202,7 +206,8 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   isItemFavorite,
   onToggleFavorite,
   getScenariosUsingRequest,
-  onOpenScenarioFromRequest
+  onOpenScenarioFromRequest,
+  getScenariosUsingScenario
 }, ref) => {
   const { t } = useTranslation()
   const editorWorkbenchRef = useRef<EditorWorkbenchHandle>(null)
@@ -677,6 +682,10 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           )
         }
       ]
+      const scenarioCallers = getScenariosUsingScenario?.(scenario.id) ?? []
+      const scenarioCallersAction = scenarioCallers.length > 0 && onOpenScenarioFromRequest
+        ? <ScenarioCallersButton usages={scenarioCallers} onOpenScenario={onOpenScenarioFromRequest} />
+        : null
       return (
         <RestormWorkbenchTab
           breadcrumbs={breadcrumbs}
@@ -689,6 +698,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           tagColors={scnTagColors}
           {...(handleScnTagColorChange ? { onTagColorChange: handleScnTagColorChange } : {})}
           tabId={effectiveTab.id}
+          {...(scenarioCallersAction ? { topRightAction: scenarioCallersAction } : {})}
           {...scnFav}
         >
           <Tabs tabs={scnTabs} data-testid={`scenario-subtabs-${effectiveTab.id}`} />
@@ -1070,7 +1080,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [t, onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onScenarioChange, onCreateScenarioRequest, onCreateScenarioChild, resolveBoundItem, resolveRequestEnv, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, getScenariosUsingRequest, onOpenScenarioFromRequest, updateMiniBrowserUrl])
+  }, [t, onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onScenarioChange, onCreateScenarioRequest, onCreateScenarioChild, resolveBoundItem, resolveRequestEnv, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, getScenariosUsingRequest, onOpenScenarioFromRequest, getScenariosUsingScenario, updateMiniBrowserUrl])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(

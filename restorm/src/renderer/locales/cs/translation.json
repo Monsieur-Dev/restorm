@@ -768,7 +768,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source box to pick a property from its result.",
+      "noResult": "Run the source action to pick a property from its result.",
       "runSource": "Run source",
       "running": "Running…"
     },
@@ -866,10 +866,14 @@
     "editScenario": "Upravit scénář",
     "object": {
       "addProperty": "Přidat vlastnost",
-      "removeProperty": "Odebrat vlastnost"
+      "removeProperty": "Odebrat vlastnost",
+      "propertyName": "Property name",
+      "propertyValue": "value"
     },
     "input": {
-      "required": "Povinné"
+      "required": "Povinné",
+      "name": "Name",
+      "defaultType": "Default / type"
     },
     "runScenario": {
       "orphanInput": "V dílčím scénáři chybí odpovídající parametr „{{name}}“",
@@ -877,10 +881,10 @@
       "then": "poté"
     },
     "validation": {
-      "missingName": "Tento blok musí mít název.",
-      "duplicateName": "Název „{{name}}“ už používá jiný blok.",
-      "panelTitle": "Chyby bloků: {{count}}",
-      "focusBox": "Přejít na tento blok",
+      "missingName": "Tato akce musí mít název.",
+      "duplicateName": "Název „{{name}}“ už používá jiná akce.",
+      "panelTitle": "Chyby akcí: {{count}}",
+      "focusBox": "Přejít na tuto akci",
       "showErrors": "Zobrazit chyby",
       "input": {
         "missingName": "Tento vstupní parametr musí mít název."
@@ -912,7 +916,8 @@
         "caseDuplicate": "Hodnota případu „{{value}}“ je duplicitní."
       },
       "transform": {
-        "emptyTemplate": "Šablona nesmí být prázdná."
+        "emptyTemplate": "Šablona nesmí být prázdná.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
       },
       "request": {
         "missing": "Propojený požadavek již neexistuje."
@@ -930,8 +935,22 @@
       "run": "Spustit",
       "debug": "Ladit",
       "step": "Krok za krokem",
-      "noOutputs": "Tento blok nemá výstup.",
-      "notRun": "Spusťte blok, abyste viděli jeho výstup."
+      "noOutputs": "Tato akce nemá výstup.",
+      "notRun": "Spusťte akci, abyste viděli její výstup.",
+      "previewInfo": "Example data, based on previous request results."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

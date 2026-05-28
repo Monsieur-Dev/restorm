@@ -767,7 +767,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source box to pick a property from its result.",
+      "noResult": "Run the source action to pick a property from its result.",
       "runSource": "Run source",
       "running": "Running…"
     },
@@ -865,10 +865,14 @@
     "editScenario": "Uredi scenarij",
     "object": {
       "addProperty": "Dodaj svojstvo",
-      "removeProperty": "Ukloni svojstvo"
+      "removeProperty": "Ukloni svojstvo",
+      "propertyName": "Property name",
+      "propertyValue": "value"
     },
     "input": {
-      "required": "Obavezno"
+      "required": "Obavezno",
+      "name": "Name",
+      "defaultType": "Default / type"
     },
     "runScenario": {
       "orphanInput": "Nema odgovarajućeg parametra \"{{name}}\" u podscenariju",
@@ -876,10 +880,10 @@
       "then": "zatim"
     },
     "validation": {
-      "missingName": "Ovaj okvir mora imati naziv.",
-      "duplicateName": "Naziv „{{name}}“ već koristi drugi okvir.",
-      "panelTitle": "{{count}} pogreška/e okvira",
-      "focusBox": "Idi na ovaj okvir",
+      "missingName": "Ova akcija mora imati naziv.",
+      "duplicateName": "Naziv „{{name}}“ već koristi druga akcija.",
+      "panelTitle": "{{count}} pogreška/e akcija",
+      "focusBox": "Idi na ovu akciju",
       "showErrors": "Prikaži pogreške",
       "input": {
         "missingName": "Ovaj ulazni parametar mora imati naziv."
@@ -911,7 +915,8 @@
         "caseDuplicate": "Vrijednost slučaja „{{value}}“ je duplicirana."
       },
       "transform": {
-        "emptyTemplate": "Predložak ne smije biti prazan."
+        "emptyTemplate": "Predložak ne smije biti prazan.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
       },
       "request": {
         "missing": "Povezani zahtjev više ne postoji."
@@ -929,8 +934,22 @@
       "run": "Pokreni",
       "debug": "Otklanjanje pogrešaka",
       "step": "Korak po korak",
-      "noOutputs": "Ovaj okvir nema izlaz.",
-      "notRun": "Pokrenite okvir da vidite njegov izlaz."
+      "noOutputs": "Ova akcija nema izlaz.",
+      "notRun": "Pokrenite akciju da vidite njezin izlaz.",
+      "previewInfo": "Example data, based on previous request results."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

@@ -766,7 +766,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source box to pick a property from its result.",
+      "noResult": "Run the source action to pick a property from its result.",
       "runSource": "Run source",
       "running": "Running…"
     },
@@ -864,10 +864,14 @@
     "editScenario": "Scenario bewerken",
     "object": {
       "addProperty": "Eigenschap toevoegen",
-      "removeProperty": "Eigenschap verwijderen"
+      "removeProperty": "Eigenschap verwijderen",
+      "propertyName": "Property name",
+      "propertyValue": "value"
     },
     "input": {
-      "required": "Vereist"
+      "required": "Vereist",
+      "name": "Name",
+      "defaultType": "Default / type"
     },
     "runScenario": {
       "orphanInput": "Geen overeenkomende parameter \"{{name}}\" in het subscenario",
@@ -875,10 +879,10 @@
       "then": "dan"
     },
     "validation": {
-      "missingName": "Dit blok moet een naam hebben.",
-      "duplicateName": "De naam ‘{{name}}’ wordt al door een ander blok gebruikt.",
-      "panelTitle": "{{count}} blokfout(en)",
-      "focusBox": "Naar dit blok gaan",
+      "missingName": "Deze actie moet een naam hebben.",
+      "duplicateName": "De naam ‘{{name}}’ wordt al door een andere actie gebruikt.",
+      "panelTitle": "{{count}} actiefout(en)",
+      "focusBox": "Naar deze actie gaan",
       "showErrors": "Fouten tonen",
       "input": {
         "missingName": "Deze invoerparameter moet een naam hebben."
@@ -910,7 +914,8 @@
         "caseDuplicate": "De case-waarde \"{{value}}\" is dubbel."
       },
       "transform": {
-        "emptyTemplate": "De sjabloon mag niet leeg zijn."
+        "emptyTemplate": "De sjabloon mag niet leeg zijn.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
       },
       "request": {
         "missing": "De gekoppelde aanvraag bestaat niet meer."
@@ -928,8 +933,22 @@
       "run": "Uitvoeren",
       "debug": "Debuggen",
       "step": "Stap voor stap",
-      "noOutputs": "Dit blok heeft geen uitvoer.",
-      "notRun": "Voer het blok uit om de uitvoer te zien."
+      "noOutputs": "Deze actie heeft geen uitvoer.",
+      "notRun": "Voer de actie uit om de uitvoer te zien.",
+      "previewInfo": "Example data, based on previous request results."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

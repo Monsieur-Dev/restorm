@@ -3,3 +3,34 @@
 .variable-inputbox-editor .editor .editor .margin {
 	background-color: transparent !important;
 }
+
+/* Monaco re-parents overflowing content widgets (suggest/hover popups) onto
+ * `body` when `overflowWidgetsDomNode` is set — needed so a transformed
+ * ancestor (React Flow viewport, …) doesn't anchor the popup off-screen.
+ * Lift its stacking context above app surfaces that paint over the editor
+ * (the canvas pane has effectively a higher paint order otherwise). */
+body > .overflowingContentWidgets {
+	z-index: 1000;
+	position: absolute;
+}
+
+/* Monaco's theme rules are scoped to `.monaco-editor`, so once we reparent
+ * the suggest widget onto `body`, it loses its background / border / row
+ * styling and reads as transparent over the canvas. Re-paint the essentials
+ * with VS Code's default Monaco palette (works for both light + dark since the
+ * suggest widget's text colour is set inline by Monaco). */
+body > .overflowingContentWidgets .suggest-widget {
+	background-color: var(--vscode-editorSuggestWidget-background, #f3f3f3);
+	border: 1px solid var(--vscode-editorSuggestWidget-border, #c8c8c8);
+	color: var(--vscode-editorSuggestWidget-foreground, #000);
+	box-shadow: 0 2px 8px rgb(0, 0, 0, 0.16);
+}
+
+body > .overflowingContentWidgets .suggest-widget .monaco-list-row.focused {
+	background-color: var(--vscode-editorSuggestWidget-selectedBackground, #0060c0);
+	color: var(--vscode-editorSuggestWidget-selectedForeground, #fff);
+}
+
+body > .overflowingContentWidgets .suggest-widget .monaco-list-row .label-name .label-description {
+	color: var(--vscode-editorSuggestWidget-foreground, #6c6c6c);
+}

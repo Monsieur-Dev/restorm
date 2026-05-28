@@ -766,7 +766,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source box to pick a property from its result.",
+      "noResult": "Run the source action to pick a property from its result.",
       "runSource": "Run source",
       "running": "Running…"
     },
@@ -864,10 +864,14 @@
     "editScenario": "Modifica scenario",
     "object": {
       "addProperty": "Aggiungi proprietà",
-      "removeProperty": "Rimuovi proprietà"
+      "removeProperty": "Rimuovi proprietà",
+      "propertyName": "Property name",
+      "propertyValue": "value"
     },
     "input": {
-      "required": "Obbligatorio"
+      "required": "Obbligatorio",
+      "name": "Name",
+      "defaultType": "Default / type"
     },
     "runScenario": {
       "orphanInput": "Nessun parametro \"{{name}}\" corrispondente nel sotto-scenario",
@@ -875,10 +879,10 @@
       "then": "poi"
     },
     "validation": {
-      "missingName": "Questa casella deve avere un nome.",
-      "duplicateName": "Il nome «{{name}}» è già usato da un'altra casella.",
-      "panelTitle": "{{count}} casella/e in errore",
-      "focusBox": "Vai a questa casella",
+      "missingName": "Questa azione deve avere un nome.",
+      "duplicateName": "Il nome «{{name}}» è già usato da un'altra azione.",
+      "panelTitle": "{{count}} azione/i in errore",
+      "focusBox": "Vai a questa azione",
       "showErrors": "Mostra errori",
       "input": {
         "missingName": "Questo parametro di input deve avere un nome."
@@ -910,7 +914,8 @@
         "caseDuplicate": "Il valore del caso «{{value}}» è duplicato."
       },
       "transform": {
-        "emptyTemplate": "Il modello non deve essere vuoto."
+        "emptyTemplate": "Il modello non deve essere vuoto.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
       },
       "request": {
         "missing": "La richiesta collegata non esiste più."
@@ -928,8 +933,22 @@
       "run": "Esegui",
       "debug": "Debug",
       "step": "Passo passo",
-      "noOutputs": "Questo riquadro non ha output.",
-      "notRun": "Esegui il riquadro per vederne l'output."
+      "noOutputs": "Questa azione non ha output.",
+      "notRun": "Esegui l'azione per vederne l'output.",
+      "previewInfo": "Example data, based on previous request results."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

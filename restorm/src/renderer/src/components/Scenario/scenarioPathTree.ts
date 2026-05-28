@@ -66,13 +66,21 @@ function buildNode(key: string, rawValue: unknown, path: string, expand: boolean
   // A JSON-string body is shown drilled-into, not as one opaque string.
   const value = typeof rawValue === 'string' ? maybeParseJson(rawValue) ?? rawValue : rawValue
 
+  // A `Date` (e.g. the `now` box's `datetime` output) is a leaf — show its
+  // ISO form instead of recursing into the class instance (no enumerable
+  // properties → would render as an empty object).
+  if (value instanceof Date) {
+    return { id: path, title: `${key}: ${value.toISOString()}`, icon: 'calendar', data: { path } }
+  }
   if (Array.isArray(value)) {
     return {
       id: path,
       title: `${key} [${value.length}]`,
       icon: 'symbol-array',
       isExpandable: true,
-      isExpanded: expand,
+      // `headers` is long + rarely picked, so keep it folded even inside an
+      // expanded parent; every other array follows the inherited expansion.
+      isExpanded: key === 'headers' ? false : expand,
       data: { path },
       children: value.map((item, i) => buildNode(String(i), item, `${path}.${i}`, false))
     }

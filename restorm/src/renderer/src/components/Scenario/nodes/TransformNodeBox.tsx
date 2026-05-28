@@ -1,21 +1,23 @@
-import React from 'react'
-import type { NodeProps } from '@xyflow/react'
+import React, { useMemo } from 'react'
+import { type NodeProps, useNodeConnections } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
+import type { VariableDefinition } from 'electron-core-ui/renderer'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
+import { ScenarioExpressionField } from './ScenarioExpressionField'
 import { useScenarioFieldInvalid } from '../scenarioErrorsContext'
-import { TypedValueField } from '../../TypedValueField'
-import type { ValueTypeKind } from '../../TypedValueField/castValue'
+import { useScenarioStaticPreview } from '../scenarioStaticPreviewContext'
 import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroups'
-import { normalizeValueType } from '../../../utils/normalizeValueType'
-import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
-import { ExpressionValue } from '../../../../../shared/types/collections'
 
-/** The transform body is always an expression: the value selector is locked to
- * the `expression` kind (every other type excluded), which renders the embedded
- * Handlebars/Monaco editor — same control as the KV tables' expression cells. */
-const EXPRESSION_ONLY_EXCLUDE: ValueTypeKind[] = [
-  'string', 'secret', 'number', 'dateTime', 'color', 'boolean', 'enum', 'enumList', 'customList', 'customListMulti', 'variable'
-]
+/** Short hover preview of a value used as a variable in the expression
+ * autocomplete — primitives stringified, objects/arrays compacted so the
+ * popup row stays one-line readable. */
+function shortPreview(v: unknown): string {
+  if (v === null || v === undefined) return ''
+  if (typeof v === 'string') return v.length > 32 ? `"${v.slice(0, 32)}…"` : `"${v}"`
+  if (typeof v === 'number' || typeof v === 'boolean' || typeof v === 'bigint') return String(v)
+  if (Array.isArray(v)) return `[${v.length}]`
+  return '{…}'
+}
 
 /**
  * `transform` ("Transform template") — applies an expression / Handlebars
@@ -23,13 +25,23 @@ const EXPRESSION_ONLY_EXCLUDE: ValueTypeKind[] = [
  * body is a typed-value field locked to the `expression` kind (the embedded
  * Monaco editor), persisted in config. The input is optional so the node runs
  * on its own as a pure template; wire `value` to transform an incoming value.
- * (Merges the former separate transform + template nodes.)
- */
+ * Ctrl+Space surfaces the source's top-level keys + the full Handlebars
+ * helpers suite — same editor shape as `map`. */
 export const TransformNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
   const { t } = useTranslation()
   const valueTypeGroups = useAllEnvValueTypeGroups()
+  const staticPreview = useScenarioStaticPreview()
   const config = data.config ?? {}
   const exprInvalid = useScenarioFieldInvalid(id, 'expression')
+  const valueConnections = useNodeConnections({ handleType: 'target', handleId: 'value' })
+  const sourceId = valueConnections[0]?.source
+  const variables = useMemo<VariableDefinition[]>(() => {
+    if (!sourceId) return []
+    const preview = staticPreview?.getPreview(sourceId) ?? null
+    if (!preview) return []
+    return Object.entries(preview).map(([name, val]) => ({ name, value: shortPreview(val) }))
+  }, [sourceId, staticPreview])
+
   const left: ScenarioNodeSection[] = [
     {
       id: 'main',
@@ -38,16 +50,18 @@ export const TransformNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id,
         {
           id: 'expr',
           content: (
-            <div className={`nodrag scn-template-field${exprInvalid ? ' scn-field-invalid' : ''}`} onMouseDown={(e) => { e.stopPropagation() }}>
+            <>
               <div className="scn-field-caption">{t('keyValueTable.types.expression', 'Expression')}</div>
-              <TypedValueField
-                value={config['expression'] !== undefined ? normalizeValueType(config['expression']) : new ExpressionValue('')}
-                onChange={(next) => { data.onSetConfig?.(id, { expression: serializeValueForPersistence(next) }) }}
+              <ScenarioExpressionField
+                value={config['expression']}
+                onChange={(next) => { data.onSetConfig?.(id, { expression: next }) }}
                 valueTypeGroups={valueTypeGroups}
-                excludeTypes={EXPRESSION_ONLY_EXCLUDE}
+                variables={variables}
+                expressionVariableId={`scn-transform-${id}`}
+                invalid={exprInvalid}
                 dataTestId="scn-transform-expr"
               />
-            </div>
+            </>
           )
         }
       ]

@@ -780,7 +780,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source box to pick a property from its result.",
+      "noResult": "Run the source action to pick a property from its result.",
       "runSource": "Run source",
       "running": "Running…"
     },
@@ -864,10 +864,14 @@
     "editScenario": "Edit scenario",
     "object": {
       "addProperty": "Add property",
-      "removeProperty": "Remove property"
+      "removeProperty": "Remove property",
+      "propertyName": "Property name",
+      "propertyValue": "value"
     },
     "input": {
-      "required": "Required"
+      "required": "Required",
+      "name": "Name",
+      "defaultType": "Default / type"
     },
     "runScenario": {
       "orphanInput": "No matching parameter \"{{name}}\" in the sub-scenario",
@@ -875,10 +879,10 @@
       "then": "then"
     },
     "validation": {
-      "missingName": "This box must have a name.",
-      "duplicateName": "The name \"{{name}}\" is already used by another box.",
-      "panelTitle": "{{count}} box error(s)",
-      "focusBox": "Focus this box",
+      "missingName": "This action must have a name.",
+      "duplicateName": "The name \"{{name}}\" is already used by another action.",
+      "panelTitle": "{{count}} action error(s)",
+      "focusBox": "Focus this action",
       "showErrors": "Show errors",
       "input": {
         "missingName": "This input parameter must have a name."
@@ -910,7 +914,8 @@
         "caseDuplicate": "The case value \"{{value}}\" is duplicated."
       },
       "transform": {
-        "emptyTemplate": "The template must not be empty."
+        "emptyTemplate": "The template must not be empty.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
       },
       "request": {
         "missing": "The bound request no longer exists."
@@ -928,8 +933,22 @@
       "run": "Run",
       "debug": "Debug",
       "step": "Step",
-      "noOutputs": "This box has no output.",
-      "notRun": "Run the box to see its output."
+      "noOutputs": "This action has no output.",
+      "notRun": "Run the action to see its output.",
+      "previewInfo": "Example data, based on previous request results."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

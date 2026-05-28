@@ -166,7 +166,13 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
       automaticLayout: true,
       // Render suggestion / hover widgets in a fixed overlay attached to body,
       // so they are not clipped by ancestor overflow: hidden (ScrollableElement, tables, etc.).
+      // The companion `overflowWidgetsDomNode: document.body` reparents the
+      // overflowing widget onto the body — without it, a transformed ancestor
+      // (e.g. a React Flow viewport using `transform: translate()/scale()`)
+      // becomes the containing block for `position: fixed`, anchoring the
+      // suggest popup hundreds of pixels off the cursor.
       fixedOverflowWidgets: true as const,
+      ...(typeof document !== 'undefined' ? { overflowWidgetsDomNode: document.body } : {}),
       scrollbar: {
         vertical: 'hidden' as const,
         horizontal: 'hidden' as const,
@@ -208,6 +214,26 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
     editorRef.current = editor
 
     const state = getProviderState()
+
+    // Monaco's theme rules (`.monaco-editor .suggest-widget …`) are scoped to
+    // the editor root. When `overflowWidgetsDomNode` reparents the popups onto
+    // `body`, those selectors no longer match — the widget renders unstyled.
+    // Copying the editor's own theme classes (`monaco-editor`, `vs` /
+    // `vs-dark`, …) onto **every** body-attached `overflowingContentWidgets`
+    // container makes every scoped rule resolve again. Stamping all of them
+    // (not just the first) matters because Monaco creates one container per
+    // editor instance, so a later editor's onMount must also stamp the
+    // earlier instance's container (and vice-versa) — otherwise the second
+    // editor's suggest popup renders unstyled.
+    if (typeof document !== 'undefined') {
+      const editorEl = editor.getDomNode()
+      if (editorEl) {
+        const containers = document.body.querySelectorAll(':scope > .overflowingContentWidgets')
+        for (const container of containers) {
+          for (const cls of Array.from(editorEl.classList)) container.classList.add(cls)
+        }
+      }
+    }
 
     if (!disableDefaultProviders && effectiveLanguageId === LANGUAGE_ID) {
       // Configure language, completion and hover for Handlebars-style variables

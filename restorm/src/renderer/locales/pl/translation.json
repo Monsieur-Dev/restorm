@@ -768,7 +768,7 @@
       "ariaLabel": "JSON path selector",
       "pick": "Pick from result",
       "loading": "Loading…",
-      "noResult": "Run the source box to pick a property from its result.",
+      "noResult": "Run the source action to pick a property from its result.",
       "runSource": "Run source",
       "running": "Running…"
     },
@@ -866,10 +866,14 @@
     "editScenario": "Edytuj scenariusz",
     "object": {
       "addProperty": "Dodaj właściwość",
-      "removeProperty": "Usuń właściwość"
+      "removeProperty": "Usuń właściwość",
+      "propertyName": "Property name",
+      "propertyValue": "value"
     },
     "input": {
-      "required": "Wymagane"
+      "required": "Wymagane",
+      "name": "Name",
+      "defaultType": "Default / type"
     },
     "runScenario": {
       "orphanInput": "Brak pasującego parametru „{{name}}\" w podscenariuszu",
@@ -877,10 +881,10 @@
       "then": "potem"
     },
     "validation": {
-      "missingName": "To pole musi mieć nazwę.",
-      "duplicateName": "Nazwa „{{name}}” jest już używana przez inne pole.",
-      "panelTitle": "Błędy pól: {{count}}",
-      "focusBox": "Przejdź do tego pola",
+      "missingName": "Ta akcja musi mieć nazwę.",
+      "duplicateName": "Nazwa „{{name}}” jest już używana przez inną akcję.",
+      "panelTitle": "{{count}} błąd(y) akcji",
+      "focusBox": "Przejdź do tej akcji",
       "showErrors": "Pokaż błędy",
       "input": {
         "missingName": "Ten parametr wejściowy musi mieć nazwę."
@@ -912,7 +916,8 @@
         "caseDuplicate": "Wartość przypadku „{{value}}” jest zduplikowana."
       },
       "transform": {
-        "emptyTemplate": "Szablon nie może być pusty."
+        "emptyTemplate": "Szablon nie może być pusty.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
       },
       "request": {
         "missing": "Powiązane żądanie już nie istnieje."
@@ -930,8 +935,22 @@
       "run": "Uruchom",
       "debug": "Debuguj",
       "step": "Krok po kroku",
-      "noOutputs": "To pole nie ma wyjścia.",
-      "notRun": "Uruchom pole, aby zobaczyć jego wynik."
+      "noOutputs": "Ta akcja nie ma wyjścia.",
+      "notRun": "Uruchom akcję, aby zobaczyć jej wynik.",
+      "previewInfo": "Example data, based on previous request results."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }
