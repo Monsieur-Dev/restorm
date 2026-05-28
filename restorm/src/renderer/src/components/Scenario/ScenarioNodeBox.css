@@ -20,10 +20,14 @@
 }
 
 /* A box in a non-executable (error) state — red border (overrides selected). */
-.scn-node-error,
-.scn-node-error.scn-node-selected {
+.scn-node-error {
   border-color: #ef4444;
   box-shadow: 0 0 0 1px #ef4444;
+}
+/* When also selected, keep the red ring but add the selection drop shadow. */
+.scn-node-error.scn-node-selected {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 1px #ef4444, 0 4px 14px rgba(0, 0, 0, 0.4);
 }
 /* Workflow error panel rows (click to focus the box). */
 .scn-error-row {
@@ -39,9 +43,16 @@
 }
 .scn-error-row:hover { text-decoration: underline; }
 
+/* Selected: the focus ring + a drop shadow so the box lifts off the canvas. */
 .scn-node-selected {
   border-color: var(--focusBorder, #007fd4);
-  box-shadow: 0 0 0 1px var(--focusBorder, #007fd4);
+  box-shadow: 0 0 0 1px var(--focusBorder, #007fd4), 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+/* A selected box also tints its header (themed token), so selection stays
+ * legible even when an error keeps the border red. */
+.scn-node-selected .scn-node-header {
+  background: var(--scenarioNode-headerBackgroundSelected, #2d5070);
 }
 
 .scn-node-header {
@@ -600,12 +611,17 @@
   align-items: stretch;
   width: 100%;
 }
-.scn-path-controls .input-box {
-  flex: 1;
+/* The InputBox wrapper (ECUI renders it with no stable class) must grow to fill
+ * the control group, so the red error ring hugs the field instead of leaving a
+ * gap on the right when the group is wider than the input (e.g. capped at
+ * max-width on a wide request node). */
+.scn-path-controls > :first-child {
+  flex: 1 1 auto;
   min-width: 0;
 }
 .scn-path-controls .monaco-inputbox {
   font-size: 11px;
+  width: 100%;
 }
 .scn-path-target {
   display: inline-flex;

@@ -3,6 +3,9 @@ name: Red
 type: dark
 
 colors:
+  scenarioNode.background: "#400a0a"
+  scenarioNode.headerBackground: "#5a1414"
+  scenarioNode.headerBackgroundSelected: "#8a1e1e"
   activityBar.background: "#580000"
   tab.inactiveBackground: "#300a0a"
   tab.activeBackground: "#490000"

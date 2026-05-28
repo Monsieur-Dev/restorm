@@ -126,7 +126,6 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
   // the workflow error panel.
   const errors = useScenarioNodeErrors(id)
   const boxInError = errors.length > 0
-  const errorTitle = boxInError ? errors.map((e) => e.message).join('\n') : undefined
   const collapsed = data.collapsed === true
   const note = data.note
   const leftRows = left.flatMap((s) => s.rows)
@@ -185,7 +184,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
   }, [scenarioId, id, running, boxInError])
 
   return (
-    <div className={`scn-node ${selected ? 'scn-node-selected' : ''} ${collapsed ? 'scn-node-collapsed' : ''} ${boxInError ? 'scn-node-error' : ''}`} data-testid={`scn-node-${data.kind}`} {...(errorTitle ? { title: errorTitle } : {})}>
+    <div className={`scn-node ${selected ? 'scn-node-selected' : ''} ${collapsed ? 'scn-node-collapsed' : ''} ${boxInError ? 'scn-node-error' : ''}`} data-testid={`scn-node-${data.kind}`}>
       <div className={`scn-node-header ${launchInput ? 'scn-node-header-has-launch' : ''} ${headerEventOutput ? 'scn-node-header-has-event' : ''}`} style={headerStyle} onContextMenu={onHeaderContextMenu}>
         {launchInput && (
           <Handle
@@ -234,7 +233,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
           onClick={onPlay}
           disabled={boxInError}
           aria-label={running ? 'Stop node' : 'Run node'}
-          title={boxInError ? errorTitle : running ? 'Stop node' : 'Run node'}
+          {...(boxInError ? {} : { title: running ? 'Stop node' : 'Run node' })}
         >
           <i className={`codicon codicon-${running ? 'debug-stop' : 'play-circle'}`} aria-hidden="true" />
         </button>
