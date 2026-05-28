@@ -319,8 +319,36 @@
   display: flex;
   align-items: center;
   opacity: 0.7;
+  outline: none;
 }
 .scn-node-collapse:hover { opacity: 1; }
+.scn-node-collapse:focus,
+.scn-node-collapse:focus-visible { outline: none; box-shadow: none; }
+
+/* Collapsing body wrapper: animates the height (via `grid-template-rows`
+ * 1fr→0fr) and the opacity in sync. The wrapper stays mounted through the
+ * closing transition; the JSX flips `bodyMounted` to false only after the
+ * animation has finished, at which point the header-position handles take
+ * over. Inverse on expand: the wrapper mounts first (closed), the JSX flips
+ * `.scn-body-open` on the next frame so the browser runs the 0→1 transition.
+ *
+ * `min-height: 0` on the inner grid item is the standard escape hatch that
+ * lets the row shrink below the auto-computed height of its content. */
+.scn-node-collapsible {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  overflow: hidden;
+  transition: grid-template-rows 200ms ease, opacity 200ms ease;
+}
+.scn-node-collapsible.scn-body-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.scn-node-collapsible-inner {
+  min-height: 0;
+  overflow: hidden;
+}
 
 /* Notes section: free annotation between header and ports, its own band.
  * The MarkdownViewer sits flush to the box edges (no band padding); a

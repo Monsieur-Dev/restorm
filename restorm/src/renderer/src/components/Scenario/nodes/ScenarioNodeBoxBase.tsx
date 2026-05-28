@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { Handle, Position, useNodeConnections, type Node } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import { getContrastColor, MarkdownViewer, Tooltip } from 'electron-core-ui/renderer'
@@ -131,6 +131,38 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
   const leftRows = left.flatMap((s) => s.rows)
   const allPorts = [...leftRows, ...right].flatMap((c) => (c.port ? [c.port] : []))
 
+  // Animate the fold/unfold of the body+notes block. Two-phase render keeps
+  // both ends smooth without ever duplicating React Flow handles:
+  //
+  //  - bodyMounted drives whether the body (and its inline `<Handle>`s) is in
+  //    the DOM. It stays true through the closing transition, then flips false
+  //    once the CSS animation has finished — so the header-position handles
+  //    only appear after the inline ones are gone.
+  //  - bodyOpen drives the `.scn-body-open` class that runs the
+  //    `grid-template-rows`/`opacity` transition.
+  //
+  // On expand we mount the body first and flip the class on the next animation
+  // frame, so the browser sees a 0 → 1 transition (not an instant 1). On
+  // collapse we drop the class immediately and unmount the body after the
+  // transition duration.
+  const ANIM_MS = 200
+  const [bodyMounted, setBodyMounted] = useState(!collapsed)
+  const [bodyOpen, setBodyOpen] = useState(!collapsed)
+  const rafHandle = useRef<number | null>(null)
+  useEffect(() => {
+    if (!collapsed) {
+      const raf1 = requestAnimationFrame(() => {
+        setBodyMounted(true)
+        rafHandle.current = requestAnimationFrame(() => { setBodyOpen(true) })
+      })
+      rafHandle.current = raf1
+      return () => { if (rafHandle.current != null) cancelAnimationFrame(rafHandle.current) }
+    }
+    const raf = requestAnimationFrame(() => { setBodyOpen(false) })
+    const timer = setTimeout(() => { setBodyMounted(false) }, ANIM_MS)
+    return () => { cancelAnimationFrame(raf); clearTimeout(timer) }
+  }, [collapsed])
+
   // Which input (target) handles currently have an incoming link — drives the
   // red "missing required link" flag on mandatory inputs.
   const targetConnections = useNodeConnections({ id, handleType: 'target' })
@@ -255,41 +287,44 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
         />
       )}
 
-      {!collapsed && note && (
-        <div className="scn-node-notes nodrag">
-          <MarkdownViewer value={note} allowMermaid={false} />
-        </div>
-      )}
-
-      {!collapsed && (
-        <div className="scn-node-body">
-          <div className="scn-node-col scn-node-col-in">
-            {left.map((section) => (
-              <ScenarioNodeSection
-                key={section.id}
-                section={section}
-                nodeId={id}
-                connectedInputs={connectedInputs}
-                nodeKind={data.kind}
-                nodeInputs={data.inputs}
-                {...(data.scenarioId !== undefined ? { scenarioId: data.scenarioId } : {})}
-              />
-            ))}
-          </div>
-          <div className="scn-node-col scn-node-col-out">
-            {right.map((cell) => (
-              <div className="scn-row scn-row-right" key={cell.id}>
-                {cellBody(cell)}
-                {cell.port && (
-                  <Handle id={cell.port.id} type={cell.port.type} position={Position.Right} className={`scn-handle scn-handle-inline ${cellOutputRingClass(cell.port, data.outputs, data.kind)}`} style={{ background: portAnchorColor(cell.port, connectedInputs) }} title={cell.label ?? cell.port.id} />
-                )}
+      {bodyMounted && (
+        <div className={`scn-node-collapsible ${bodyOpen ? 'scn-body-open' : ''}`}>
+          <div className="scn-node-collapsible-inner">
+            {note && (
+              <div className="scn-node-notes nodrag">
+                <MarkdownViewer value={note} allowMermaid={false} />
               </div>
-            ))}
+            )}
+            <div className="scn-node-body">
+              <div className="scn-node-col scn-node-col-in">
+                {left.map((section) => (
+                  <ScenarioNodeSection
+                    key={section.id}
+                    section={section}
+                    nodeId={id}
+                    connectedInputs={connectedInputs}
+                    nodeKind={data.kind}
+                    nodeInputs={data.inputs}
+                    {...(data.scenarioId !== undefined ? { scenarioId: data.scenarioId } : {})}
+                  />
+                ))}
+              </div>
+              <div className="scn-node-col scn-node-col-out">
+                {right.map((cell) => (
+                  <div className="scn-row scn-row-right" key={cell.id}>
+                    {cellBody(cell)}
+                    {cell.port && (
+                      <Handle id={cell.port.id} type={cell.port.type} position={Position.Right} className={`scn-handle scn-handle-inline ${cellOutputRingClass(cell.port, data.outputs, data.kind)}`} style={{ background: portAnchorColor(cell.port, connectedInputs) }} title={cell.label ?? cell.port.id} />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       )}
 
-      {collapsed && allPorts.map((p, i) => (
+      {!bodyMounted && allPorts.map((p, i) => (
         <Handle
           key={p.id}
           id={p.id}
