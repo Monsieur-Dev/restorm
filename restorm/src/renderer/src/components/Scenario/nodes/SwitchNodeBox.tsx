@@ -1,5 +1,6 @@
 import React from 'react'
 import type { NodeProps } from '@xyflow/react'
+import type { TFunction } from 'i18next'
 import { Button } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
@@ -75,6 +76,22 @@ function blankOfSameType(prev: PersistedValue): PersistedValue {
   }
 }
 
+/** Best-effort user-readable label for a case's typed value — feeds the
+ * collapsed-handle tooltip. customList entries surface their picked label
+ * ("Glaude"); strings/numbers/enums their printed value; the rest fall back
+ * to a generic "case" so the tooltip never shows the raw case-id. */
+function caseLabel(value: PersistedValue, t: TFunction): string {
+  if (value.type === 'customList') return value.label || t('scenario.switch.case', 'case')
+  if (value.type === 'customListMulti') return value.labels.join(', ') || t('scenario.switch.case', 'case')
+  if (value.type === 'enum') return value.value || t('scenario.switch.case', 'case')
+  if (value.type === 'enumList') return value.value.join(', ') || t('scenario.switch.case', 'case')
+  if (value.type === 'string') return value.value || t('scenario.switch.case', 'case')
+  if (value.type === 'numeric') return String(value.value)
+  if (value.type === 'boolean') return String(value.value)
+  if (value.type === 'datetime') return value.value || t('scenario.switch.case', 'case')
+  return t('scenario.switch.case', 'case')
+}
+
 function readCases(config: Record<string, unknown>): SwitchCase[] {
   const raw = config['cases']
   if (!Array.isArray(raw)) return []
@@ -130,6 +147,11 @@ export const SwitchNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
   const right: ScenarioNodeCell[] = [
     ...cases.map((c): ScenarioNodeCell => ({
       id: c.id,
+      // Carries the case's user-readable label onto the port — eg. the
+      // customList entry name ("Glaude"), the literal string value, or the
+      // formatted numeric — so the collapsed handle tooltip shows that
+      // instead of the generated `case-…` id.
+      label: caseLabel(c.value, t),
       content: (
         <div className={`nodrag${invalidCases.has(c.id) ? ' scn-field-invalid' : ''}`} onMouseDown={stop}>
           <TypedValueField

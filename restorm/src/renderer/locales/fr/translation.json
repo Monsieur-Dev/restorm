@@ -796,7 +796,8 @@
     "invalid": "{{count}} entrée(s) requise(s) non câblée(s) — scénario non exécutable",
     "switch": {
       "addCase": "Ajouter un cas",
-      "removeCase": "Supprimer le cas"
+      "removeCase": "Supprimer le cas",
+      "case": "cas"
     },
     "forEach": {
       "items": "éléments",

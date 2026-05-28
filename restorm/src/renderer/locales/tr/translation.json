@@ -796,7 +796,8 @@
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "switch": {
       "addCase": "Durum ekle",
-      "removeCase": "Durumu kaldır"
+      "removeCase": "Durumu kaldır",
+      "case": "durum"
     },
     "forEach": {
       "items": "öğeler",

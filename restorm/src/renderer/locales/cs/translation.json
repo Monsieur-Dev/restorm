@@ -798,7 +798,8 @@
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "switch": {
       "addCase": "Přidat případ",
-      "removeCase": "Odebrat případ"
+      "removeCase": "Odebrat případ",
+      "case": "případ"
     },
     "forEach": {
       "items": "položky",

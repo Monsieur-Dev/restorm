@@ -795,7 +795,8 @@
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "switch": {
       "addCase": "Thêm trường hợp",
-      "removeCase": "Xóa trường hợp"
+      "removeCase": "Xóa trường hợp",
+      "case": "trường hợp"
     },
     "forEach": {
       "items": "mục",

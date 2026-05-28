@@ -796,7 +796,8 @@
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "switch": {
       "addCase": "Añadir caso",
-      "removeCase": "Eliminar caso"
+      "removeCase": "Eliminar caso",
+      "case": "caso"
     },
     "forEach": {
       "items": "elementos",

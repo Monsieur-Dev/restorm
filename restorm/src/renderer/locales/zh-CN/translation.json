@@ -795,7 +795,8 @@
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "switch": {
       "addCase": "添加分支",
-      "removeCase": "移除分支"
+      "removeCase": "移除分支",
+      "case": "案例"
     },
     "forEach": {
       "items": "项",

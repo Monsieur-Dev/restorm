@@ -129,7 +129,14 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
   const collapsed = data.collapsed === true
   const note = data.note
   const leftRows = left.flatMap((s) => s.rows)
-  const allPorts = [...leftRows, ...right].flatMap((c) => (c.port ? [c.port] : []))
+  // Carry the cell's `label` alongside each port so the collapsed-mode handle
+  // tooltip surfaces the user-readable name (eg. "started_at", "Glaude"),
+  // not the generated id (eg. `prop-1779949045488-…`, `case-1779946367569-…`).
+  // Per-kind components that mint dynamic ports — `object` properties,
+  // `switch` cases — set `cell.label` to the user-given name so this lookup
+  // resolves; static ports already carry their own `cell.label`.
+  const allPorts: (NonNullable<ScenarioNodeCell['port']> & { _label?: string })[] =
+    [...leftRows, ...right].flatMap((c) => (c.port ? [{ ...c.port, ...(c.label ? { _label: c.label } : {}) }] : []))
 
   // Animate the fold/unfold of the body+notes block. Two-phase render keeps
   // both ends smooth without ever duplicating React Flow handles:
@@ -473,7 +480,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
             position={p.type === 'target' ? Position.Left : Position.Right}
             className={`scn-handle scn-handle-positioned ${p.type === 'target' ? cellInputRingClass(p, data.inputs, data.kind) : cellOutputRingClass(p, data.outputs, data.kind)}`}
             style={{ top: `${top}px`, background: portAnchorColor(p, connectedInputs) }}
-            title={p.id}
+            title={p._label ?? p.id}
           />
         )
       })}

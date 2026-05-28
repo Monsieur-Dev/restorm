@@ -796,7 +796,8 @@
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "switch": {
       "addCase": "Shto rast",
-      "removeCase": "Hiq rastin"
+      "removeCase": "Hiq rastin",
+      "case": "rast"
     },
     "forEach": {
       "items": "artikuj",

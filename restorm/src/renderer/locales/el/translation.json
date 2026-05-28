@@ -796,7 +796,8 @@
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "switch": {
       "addCase": "Προσθήκη περίπτωσης",
-      "removeCase": "Αφαίρεση περίπτωσης"
+      "removeCase": "Αφαίρεση περίπτωσης",
+      "case": "περίπτωση"
     },
     "forEach": {
       "items": "στοιχεία",

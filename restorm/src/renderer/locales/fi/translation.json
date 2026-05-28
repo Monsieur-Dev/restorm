@@ -796,7 +796,8 @@
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "switch": {
       "addCase": "Lisää tapaus",
-      "removeCase": "Poista tapaus"
+      "removeCase": "Poista tapaus",
+      "case": "tapaus"
     },
     "forEach": {
       "items": "kohteet",

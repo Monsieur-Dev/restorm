@@ -795,7 +795,8 @@
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "switch": {
       "addCase": "케이스 추가",
-      "removeCase": "케이스 제거"
+      "removeCase": "케이스 제거",
+      "case": "케이스"
     },
     "forEach": {
       "items": "항목",

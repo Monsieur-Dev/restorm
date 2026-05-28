@@ -796,7 +796,8 @@
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "switch": {
       "addCase": "Eset hozzáadása",
-      "removeCase": "Eset eltávolítása"
+      "removeCase": "Eset eltávolítása",
+      "case": "eset"
     },
     "forEach": {
       "items": "elemek",

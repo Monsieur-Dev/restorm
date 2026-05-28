@@ -117,6 +117,10 @@ export const ObjectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
 
   const rows: ScenarioNodeCell[] = properties.map((p): ScenarioNodeCell => ({
     id: p.id,
+    // Carries the user-given property name onto the port so the collapsed
+    // box tooltip shows "started_at" / "total_seconds" instead of the
+    // generated `prop-…` handle id.
+    label: p.name || t('scenario.object.propertyName', 'Property name'),
     port: { id: p.id, type: 'target' },
     content: (
       <ObjectPropertyRow

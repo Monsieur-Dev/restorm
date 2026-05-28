@@ -797,7 +797,8 @@
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "switch": {
       "addCase": "Додај случај",
-      "removeCase": "Уклони случај"
+      "removeCase": "Уклони случај",
+      "case": "случај"
     },
     "forEach": {
       "items": "ставке",
