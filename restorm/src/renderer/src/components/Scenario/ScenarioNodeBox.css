@@ -334,9 +334,9 @@
  * `min-height: 0` on the inner grid item is the standard escape hatch that
  * lets the row shrink below the auto-computed height of its content. */
 /* Two-phase collapse/expand:
- *   close →  phase 1 (0…2000ms): inner content opacity 1 → 0;
+ *   close →  phase 1 (0…200ms): inner content opacity 1 → 0;
  *            phase 2 (2000…4000ms): grid row 1fr → 0fr (height + handles).
- *   open  →  phase 1 (0…2000ms): grid row 0fr → 1fr (height + handles);
+ *   open  →  phase 1 (0…200ms): grid row 0fr → 1fr (height + handles);
  *            phase 2 (2000…4000ms): inner content opacity 0 → 1.
  * The `transition-delay` on each property orders the phases without any JS
  * timer chaining — the runtime just toggles the `.scn-body-open` class.
@@ -361,10 +361,10 @@
   grid-template-rows: 1fr;
 }
 .scn-node[data-animating="true"] .scn-node-collapsible {
-  transition: grid-template-rows 2000ms ease 2000ms;
+  transition: grid-template-rows 200ms ease 200ms;
 }
 .scn-node[data-animating="true"] .scn-node-collapsible.scn-body-open {
-  transition: grid-template-rows 2000ms ease 0ms;
+  transition: grid-template-rows 200ms ease 0ms;
 }
 .scn-node-collapsible-inner {
   min-height: 0;
@@ -377,10 +377,10 @@
   opacity: 1;
 }
 .scn-node[data-animating="true"] .scn-node-collapsible-inner {
-  transition: opacity 2000ms ease 0ms;
+  transition: opacity 200ms ease 0ms;
 }
 .scn-node[data-animating="true"] .scn-node-collapsible.scn-body-open > .scn-node-collapsible-inner {
-  transition: opacity 2000ms ease 2000ms;
+  transition: opacity 200ms ease 200ms;
 }
 
 /* Notes section: free annotation between header and ports, its own band.
@@ -496,7 +496,7 @@
  *
  * The transition direction is driven by `.scn-node-collapsed`: closing waits
  * for the body's opacity to fade out (2s) before sliding `top`; opening
- * slides `top` first, then fades the content in. Both phases run 2000ms. */
+ * slides `top` first, then fades the content in. Both phases run 200ms. */
 .scn-handle-positioned.react-flow__handle {
   position: absolute;
   /* No transition by default — handles snap to whatever position the layout
@@ -506,10 +506,10 @@
   transition: none;
 }
 .scn-node[data-animating="true"] .scn-handle-positioned.react-flow__handle {
-  transition: top 2000ms ease 2000ms;
+  transition: top 200ms ease 200ms;
 }
 .scn-node[data-animating="true"]:not(.scn-node-collapsed) .scn-handle-positioned.react-flow__handle {
-  transition: top 2000ms ease 0ms;
+  transition: top 200ms ease 0ms;
 }
 .scn-handle-positioned[data-handlepos="left"].react-flow__handle {
   left: 0;

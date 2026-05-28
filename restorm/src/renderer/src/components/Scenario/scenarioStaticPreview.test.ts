@@ -68,6 +68,22 @@ describe('staticScenarioPreview', () => {
     expect(staticScenarioPreview(get, [input, get], [])).toEqual({ timer: 42 })
   })
 
+  it('setVariable with a name + literal value → { <name>: value }', () => {
+    const n = node('s', 'setVariable', { name: 'flag', value: { type: 'boolean', value: true } })
+    expect(staticScenarioPreview(n, [n], [])).toEqual({ flag: true })
+  })
+
+  it('setVariable without a name returns null (no anchor → nothing to preview)', () => {
+    const n = node('s', 'setVariable', { value: { type: 'string', value: 'x' } })
+    expect(staticScenarioPreview(n, [n], [])).toBeNull()
+  })
+
+  it('getVariable picks the value emitted by an upstream setVariable', () => {
+    const set = node('s', 'setVariable', { name: 'count', value: { type: 'numeric', value: 7, format: 'decimal' } })
+    const get = node('g', 'getVariable', { value: { type: 'variable', value: 'count' } })
+    expect(staticScenarioPreview(get, [set, get], [])).toEqual({ count: 7 })
+  })
+
   it('arithmetic computes { result } from literal operands', () => {
     const n = node('a', 'arithmetic', {
       operator: '+',

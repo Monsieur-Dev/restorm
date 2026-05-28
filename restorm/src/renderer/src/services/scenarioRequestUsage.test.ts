@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import type { FolderItem } from '../../../shared/types/collections'
 import {
   findScenariosUsingRequest,
+  findScenariosUsingScenario,
   isRequestInScenarioSubtree,
   collectRequestScenarioRelations
 } from './scenarioRequestUsage'
@@ -63,6 +64,51 @@ describe('isRequestInScenarioSubtree', () => {
 
   it('is false for a request referenced from outside the subtree', () => {
     expect(isRequestInScenarioSubtree(scn, 'req-bound')).toBe(false)
+  })
+})
+
+describe('findScenariosUsingScenario', () => {
+  // A separate tree where two scenarios reference a third one via runScenario
+  // boxes, plus a self-reference that must be excluded.
+  function runNode(id: string, scenarioId: string): { id: string; kind: string; config: { scenarioId: string }; inputs: never[]; outputs: never[]; position: { x: number; y: number } } {
+    return { id, kind: 'runScenario', config: { scenarioId }, inputs: [], outputs: [], position: { x: 0, y: 0 } }
+  }
+  const target = { type: 'scenario', id: 'target', name: 'Target', tags: [], params: [], nodes: [], edges: [] }
+  // Caller A runs the target twice — both node ids must surface in `nodeIds`.
+  const callerA = { type: 'scenario', id: 'a', name: 'Caller A', tags: [], params: [], nodes: [runNode('a1', 'target'), runNode('a2', 'target')], edges: [] }
+  const callerB = { type: 'scenario', id: 'b', name: 'Caller B', tags: [], params: [], nodes: [runNode('b1', 'target')], edges: [] }
+  // A scenario that runs ITSELF — the self-call must be excluded so the user
+  // doesn't see "this scenario calls itself" when they open the callers menu.
+  const selfCaller = { type: 'scenario', id: 'target', name: 'Self-caller', tags: [], params: [], nodes: [runNode('self1', 'target')], edges: [] }
+  // A scenario that doesn't reference the target at all.
+  const unrelated = { type: 'scenario', id: 'unrelated', name: 'Unrelated', tags: [], params: [], nodes: [runNode('u1', 'other')], edges: [] }
+
+  it('lists every scenario whose runScenario boxes reference the target id', () => {
+    const env = { folderType: 'environment', id: 'env', name: 'Env', configuration: {}, environments: [], items: [target, callerA, callerB, unrelated] }
+    const usages = findScenariosUsingScenario([env] as unknown as FolderItem[], 'target')
+    expect(usages).toHaveLength(2)
+    expect(usages.map((u) => u.scenario.id).sort()).toEqual(['a', 'b'])
+  })
+
+  it('aggregates every matching node id when one caller runs the target several times', () => {
+    const env = { folderType: 'environment', id: 'env', name: 'Env', configuration: {}, environments: [], items: [callerA] }
+    const usages = findScenariosUsingScenario([env] as unknown as FolderItem[], 'target')
+    expect(usages).toHaveLength(1)
+    expect(usages[0]?.nodeIds).toEqual(['a1', 'a2'])
+  })
+
+  it('excludes self-calls so the target scenario is never listed as its own caller', () => {
+    // `selfCaller` shares its id with `target` — `findScenariosUsingScenario`
+    // must skip it, otherwise the callers menu would show "this scenario
+    // calls itself" the moment the user adds a `runScenario` pointing at the
+    // current scenario.
+    const env = { folderType: 'environment', id: 'env', name: 'Env', configuration: {}, environments: [], items: [selfCaller] }
+    expect(findScenariosUsingScenario([env] as unknown as FolderItem[], 'target')).toHaveLength(0)
+  })
+
+  it('returns nothing when no scenario references the target', () => {
+    const env = { folderType: 'environment', id: 'env', name: 'Env', configuration: {}, environments: [], items: [unrelated] }
+    expect(findScenariosUsingScenario([env] as unknown as FolderItem[], 'target')).toHaveLength(0)
   })
 })
 

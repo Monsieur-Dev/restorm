@@ -157,7 +157,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
   // half. The CSS-side `transition-delay` on the inner wrapper sequences the
   // two: closing first fades content (0→half) then shrinks height + handle
   // positions (half→full); opening reverses that order.
-  const ANIM_MS = 4000
+  const ANIM_MS = 400
   const [bodyMounted, setBodyMounted] = useState(!collapsed)
   const [bodyOpen, setBodyOpen] = useState(!collapsed)
   const rafHandle = useRef<number | null>(null)
