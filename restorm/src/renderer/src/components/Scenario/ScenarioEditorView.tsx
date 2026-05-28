@@ -42,6 +42,7 @@ import { ScenarioErrorsContext } from './scenarioErrorsContext'
 import { ScenarioInspectorPanel, type InspectorPreviewNode } from './ScenarioInspectorPanel'
 import { staticScenarioPreview, singleDeepPath, expectsObjectInput, singleTopLevelKey, STATIC_PREVIEW_KINDS, resolveItems, applyListOp, resolveSelectorPath, type StaticPreviewNode, type StaticPreviewEdge } from '../../../../shared/utils/scenarioStaticPreview'
 import { consumePendingScenarioNodeFocus, onScenarioNodeFocus, clearPendingScenarioNodeFocus } from '../../services/scenarioFocusBus'
+import { dynamicHandleIds, pruneOrphanDynamicEdges, isOrphanDynamicEdge } from './orphanEdgeSanitizer'
 
 export interface ScenarioEditorViewProps {
   /** The scenario being edited. */
@@ -102,46 +103,6 @@ interface NodeHandlers {
   onHeaderContextMenu: (id: string, x: number, y: number) => void
   onSetConfig: (id: string, config: Record<string, unknown>) => void
   onOpenItem?: (itemId: string) => void
-}
-
-/** Collect the dynamic handle ids declared by a node's per-kind config
- * (object property ids + switch case ids). Other kinds have no dynamic handles
- * — only static `inputs` / `outputs` + the always-on header anchors. */
-function dynamicHandleIds(kind: ScenarioNodeKind, config: Record<string, unknown> | undefined): { ids: Set<string>; prefix: 'prop-' | 'case-' } | null {
-  if (kind === 'object') {
-    const raw = config ? config['properties'] : undefined
-    if (!Array.isArray(raw)) return { ids: new Set(), prefix: 'prop-' }
-    const ids = new Set<string>()
-    for (const p of raw) {
-      const id = (p as { id?: unknown }).id
-      if (typeof id === 'string') ids.add(id)
-    }
-    return { ids, prefix: 'prop-' }
-  }
-  if (kind === 'switch') {
-    const raw = config ? config['cases'] : undefined
-    if (!Array.isArray(raw)) return { ids: new Set(), prefix: 'case-' }
-    const ids = new Set<string>()
-    for (const c of raw) {
-      const id = (c as { id?: unknown }).id
-      if (typeof id === 'string') ids.add(id)
-    }
-    return { ids, prefix: 'case-' }
-  }
-  return null
-}
-
-/** Drop edges whose dynamic handle (prop- / case-) on `nodeId` is no longer
- * declared by the node's config. Static handles (input/output/header anchors)
- * are stable per kind, so they're not filtered here. */
-function pruneOrphanDynamicEdges<E extends { source?: string | null; target?: string | null; sourceHandle?: string | null; targetHandle?: string | null }>(
-  edges: E[], nodeId: string, valid: Set<string>, prefix: 'prop-' | 'case-'
-): E[] {
-  return edges.filter((e) => {
-    if (e.target === nodeId && typeof e.targetHandle === 'string' && e.targetHandle.startsWith(prefix) && !valid.has(e.targetHandle)) return false
-    if (e.source === nodeId && typeof e.sourceHandle === 'string' && e.sourceHandle.startsWith(prefix) && !valid.has(e.sourceHandle)) return false
-    return true
-  })
 }
 
 function toFlowNode(n: ScenarioNode, handlers: NodeHandlers): Node<NodeData> {
@@ -606,14 +567,11 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     // / case removal (the bug class fixed in `setNodeConfig`). Drop them once at
     // load so the persisted file converges with what the editor can actually
     // render — and the console isn't flooded with React Flow handle warnings.
-    const cleanEdges = scenario.edges.filter((e) => {
-      const targetNode = scenario.nodes.find((n) => n.id === e.to.nodeId)
-      if (!targetNode) return true
-      const dyn = dynamicHandleIds(targetNode.kind, targetNode.config)
-      if (!dyn) return true
-      if (e.to.portId.startsWith(dyn.prefix) && !dyn.ids.has(e.to.portId)) return false
-      return true
-    })
+    const nodeBy = new Map(scenario.nodes.map((n) => [n.id, n]))
+    const cleanEdges = scenario.edges.filter((e) => !isOrphanDynamicEdge(
+      { source: e.from.nodeId, target: e.to.nodeId, sourceHandle: e.from.portId, targetHandle: e.to.portId },
+      (id) => nodeBy.get(id)
+    ))
     nodeStore.current = new Map(scenario.nodes.map((n) => [n.id, n]))
     edgeStore.current = new Map(cleanEdges.map((e) => [e.id, e]))
     setNodes(scenario.nodes.map((n) => toFlowNode(n, handlers.current)))
@@ -638,14 +596,12 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
   // edges and React Flow doesn't re-render.
   useEffect(() => {
     setEdges((curr) => {
-      const next = curr.filter((edge) => {
-        const tgt = nodes.find((n) => n.id === edge.target)
-        if (!tgt) return true
-        const dyn = dynamicHandleIds(tgt.data.kind, tgt.data.config)
-        if (!dyn) return true
-        if (typeof edge.targetHandle === 'string' && edge.targetHandle.startsWith(dyn.prefix) && !dyn.ids.has(edge.targetHandle)) return false
-        return true
-      })
+      const nodeBy = (id: string): { kind: ScenarioNodeKind; config?: Record<string, unknown> } | undefined => {
+        const n = nodes.find((x) => x.id === id)
+        if (!n) return undefined
+        return n.data.config !== undefined ? { kind: n.data.kind, config: n.data.config } : { kind: n.data.kind }
+      }
+      const next = curr.filter((edge) => !isOrphanDynamicEdge(edge, nodeBy))
       if (next.length === curr.length) return curr
       for (const e of curr) if (!next.includes(e)) edgeStore.current.delete(e.id)
       queueMicrotask(() => { persist(nodes, next) })
