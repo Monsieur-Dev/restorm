@@ -937,7 +937,8 @@
       "step": "단계 실행",
       "noOutputs": "이 액션에는 출력이 없습니다.",
       "notRun": "액션을 실행하여 출력을 확인하세요.",
-      "previewInfo": "Example data, based on previous request results."
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "일시 중지"
     },
     "now": {
       "timezone": "Timezone",

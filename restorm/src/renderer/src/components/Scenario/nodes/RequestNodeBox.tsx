@@ -144,7 +144,6 @@ export const RequestNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, d
       left={left}
       right={right}
       launchInput
-      canPlay
       {...(headerIcon ? { headerIcon } : {})}
       {...(title ? { title } : {})}
     />

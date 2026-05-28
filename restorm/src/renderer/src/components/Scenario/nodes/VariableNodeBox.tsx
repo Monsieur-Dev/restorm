@@ -90,7 +90,7 @@ export const InputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
       ]
     }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[VALUE_OUT]} launchInput canPlay />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[VALUE_OUT]} launchInput />
 }
 
 /**
@@ -159,7 +159,7 @@ export const GetVariableNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
       ]
     }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[VALUE_OUT]} launchInput canPlay />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[VALUE_OUT]} launchInput />
 }
 
 /**

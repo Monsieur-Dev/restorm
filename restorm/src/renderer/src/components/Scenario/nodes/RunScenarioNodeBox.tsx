@@ -116,7 +116,6 @@ export const RunScenarioNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
       left={left}
       right={right}
       launchInput
-      canPlay
       {...(headerIcon ? { headerIcon } : {})}
       {...(title ? { title } : {})}
     />

@@ -938,7 +938,8 @@
       "step": "Pas à pas",
       "noOutputs": "Cette action n'a pas de sortie.",
       "notRun": "Exécutez l'action pour voir sa sortie.",
-      "previewInfo": "Données d'exemple, basées sur les précédents résultats des requêtes."
+      "previewInfo": "Données d'exemple, basées sur les précédents résultats des requêtes.",
+      "pause": "Pause"
     },
     "now": {
       "timezone": "Fuseau horaire",

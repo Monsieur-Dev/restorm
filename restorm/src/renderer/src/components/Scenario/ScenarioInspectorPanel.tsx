@@ -43,8 +43,10 @@ export interface InspectorPreviewNode {
   /** For a list-operating box whose `items` come from a non-static source,
    * the recipe the inspector uses to fetch + transform → preview. */
   listOp?: InspectorListOp
+  /** Whether the (visual) "running" animation is currently active on this
+   * node — drives the toolbar Run button's Play↔Pause toggle. */
+  fakeRunActive?: boolean
 }
-
 export interface ScenarioInspectorPanelProps {
   scenarioId: string
   /** Flat list of every box error (with the box title), for the errors section. */
@@ -55,6 +57,14 @@ export interface ScenarioInspectorPanelProps {
   onFocusNode: (nodeId: string) => void
   /** The node to preview, or null when zero / many boxes are selected. */
   previewNode: InspectorPreviewNode | null
+  /** Run the (fake / simulated) execution animation on the previewed box.
+   * Side-effect-bearing real execution lands in a later phase; for now
+   * this paints a "currently running" `BorderBeam` around the node. */
+  onTriggerFakeRun?: (nodeId: string) => void
+  /** Sibling of `onTriggerFakeRun` — flips the same placeholder animation
+   * but on the OUTGOING edges of the previewed box (a moving beam runs
+   * along each bezier from the box's handles to the downstream nodes). */
+  onTriggerFakeDebug?: (nodeId: string) => void
 }
 
 interface ScenarioRuntime {
@@ -74,7 +84,7 @@ function scenarioRuntime(): ScenarioRuntime | undefined {
  * data + tree as the JSON-path selector's picker popover). Shown only when
  * exactly one box is selected.
  */
-export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ scenarioId, errors, errorBoxCount, onFocusNode, previewNode }) => {
+export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ scenarioId, errors, errorBoxCount, onFocusNode, previewNode, onTriggerFakeRun, onTriggerFakeDebug }) => {
   const { t } = useTranslation()
   const [result, setResult] = useState<Record<string, unknown> | null>(null)
   const fetchToken = useRef(0)
@@ -161,14 +171,32 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
   // `staticData` is the fallback when no async work is needed at all.
   const data = result ?? staticData
   const hasErrors = errors.length > 0
-  const noop = (): void => { /* toolbar is visual-only — not wired yet */ }
+  const noop = (): void => { /* Step is visual-only for now — Run + Debug wire their fake-run animations below. */ }
+  const onRun = (): void => {
+    if (previewNode && onTriggerFakeRun) onTriggerFakeRun(previewNode.id)
+  }
+  const onDebug = (): void => {
+    if (previewNode && onTriggerFakeDebug) onTriggerFakeDebug(previewNode.id)
+  }
+  const runDisabled = !previewNode || !onTriggerFakeRun
+  const debugDisabled = !previewNode || !onTriggerFakeDebug
+  const runIsPause = previewNode?.fakeRunActive === true
+  const runIcon = runIsPause ? 'debug-pause' : 'play'
+  const runLabel = runIsPause
+    ? t('scenario.inspector.pause', 'Pause')
+    : t('scenario.inspector.run', 'Run')
+  const debugLabel = t('scenario.inspector.debug', 'Debug')
 
   return (
     <div ref={panelRef} className="scn-inspector nodrag nopan" data-testid="scenario-inspector-panel">
-      {/* Run toolbar — visual only for now. */}
+      {/* Run toolbar — Run flips the BorderBeam orbit on the selected node
+       * (toggle: clicking again becomes Pause). Debug is a one-shot trigger
+       * that fires a single travelling beam along every outgoing edge of
+       * the previewed box — represents one data/event crossing the link.
+       * Step stays visual-only until the real engine wires in. */}
       <div className="scn-inspector-toolbar" data-testid="scenario-inspector-toolbar">
-        <Button small secondary icon="play" onClick={noop} options={{ ariaLabel: t('scenario.inspector.run', 'Run'), title: t('scenario.inspector.run', 'Run') }} data-testid="scenario-inspector-run" />
-        <Button small secondary icon="debug-alt" onClick={noop} options={{ ariaLabel: t('scenario.inspector.debug', 'Debug'), title: t('scenario.inspector.debug', 'Debug') }} data-testid="scenario-inspector-debug" />
+        <Button small secondary icon={runIcon} onClick={onRun} disabled={runDisabled} options={{ ariaLabel: runLabel, title: runLabel }} data-testid="scenario-inspector-run" />
+        <Button small secondary icon="debug-alt" onClick={onDebug} disabled={debugDisabled} options={{ ariaLabel: debugLabel, title: debugLabel }} data-testid="scenario-inspector-debug" />
         <Button small secondary icon="debug-step-over" onClick={noop} options={{ ariaLabel: t('scenario.inspector.step', 'Step'), title: t('scenario.inspector.step', 'Step') }} data-testid="scenario-inspector-step" />
       </div>
 

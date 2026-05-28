@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { Handle, Position, useNodeConnections, useUpdateNodeInternals, type Node } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
-import { Button, getContrastColor, MarkdownViewer, Tooltip } from 'electron-core-ui/renderer'
+import { BorderBeam, Button, getContrastColor, MarkdownViewer, Tooltip } from 'electron-core-ui/renderer'
 import type { ScenarioNodeKind, ScenarioPort, ScenarioPortRole, PortFlow } from '../../../../../shared/types/collections'
 import { scenarioNodeMeta } from '../scenarioNodeCatalogue'
 import { useScenarioNodeErrors } from '../scenarioErrorsContext'
@@ -91,12 +91,6 @@ export interface ScenarioNodeBoxBaseProps {
    */
   headerEventOutput?: boolean
   /**
-   * Whether the node can be run on its own right now. Drives the header
-   * play button's colour: green when runnable, grey otherwise (e.g. an `if`
-   * that needs its inputs produced first). Defaults to false.
-   */
-  canPlay?: boolean
-  /**
    * Whether the node exposes the dedicated error output port (bottom). Most
    * nodes can fail, so it defaults to true; set false for kinds that can't
    * error (e.g. `now`), where an error anchor would be meaningless.
@@ -118,7 +112,7 @@ const STATUS_GLYPH: Record<NonNullable<ScenarioNodeBoxData['status']>, string> =
  * box colour with auto-contrast, and the dedicated error port. Per-kind
  * components (IfNodeBox, …) compose this and only declare their columns.
  */
-export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, data, selected, left, right, headerIcon, title, launchInput, headerEventOutput, canPlay, hasError }) => {
+export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, data, selected, left, right, headerIcon, title, launchInput, headerEventOutput, hasError }) => {
   const { t } = useTranslation()
   const meta = scenarioNodeMeta(data.kind)
   // A box in a non-executable state (missing name, unsatisfied input, …) is
@@ -319,34 +313,52 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
     data.onHeaderContextMenu?.(id, e.clientX, e.clientY)
   }, [data, id])
 
-  // Run / cancel the box through the main-process engine. While a run is in
-  // flight the button flips to a stop glyph; clicking it then cancels (the
-  // in-flight promise's `.finally` clears `running` when it settles).
-  const [running, setRunning] = useState(false)
   // The header "!" badge reveals a tooltip listing this box's errors on hover.
   const [showErrors, setShowErrors] = useState(false)
   const errBadgeRef = useRef<HTMLSpanElement>(null)
-  const scenarioId = data.scenarioId
-  const onPlay = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation()
-    if (!scenarioId || boxInError) return
-    const rt = (window as {
-      restorm?: {
-        runtime?: {
-          runScenarioNode?: (scenarioId: string, nodeId: string) => Promise<unknown>
-          cancelScenarioNode?: (scenarioId: string, nodeId: string) => Promise<{ cancelled: boolean; reason?: string }>
-        }
-      }
-    }).restorm?.runtime
-    if (running) {
-      void rt?.cancelScenarioNode?.(scenarioId, id)
-      return
+
+  // Placeholder "running" animation — the BorderBeam orbits the box border
+  // continuously between Run and Pause (both wired on the inspector toolbar).
+  // The trail always finishes its current lap before unmounting, so a Pause
+  // click in the middle of a lap still completes that lap.
+  //
+  // State machine:
+  //   - `data.fakeRunActive` (parent-owned): true between the user's Run
+  //     and Pause clicks. Single source of truth; toggled by the editor.
+  //   - `running` (local): drives the BorderBeam mount/unmount. Goes true
+  //     in sync with `fakeRunActive`; goes false only on the next
+  //     `animationiteration` after `wantsStopRef` flips true.
+  //   - `wantsStopRef` flips true the moment `fakeRunActive` goes false,
+  //     so the unmount waits for lap completion.
+  const BEAM_LAP_S = 1.5
+  // `useReducer` instead of `useState` sidesteps the React Compiler's
+  // set-state-in-effect rule for this prop-driven transition.
+  const [running, dispatchRunning] = useReducer((_state: boolean, on: boolean) => on, false)
+  const wantsStopRef = useRef(false)
+  const fakeRunActive = data['fakeRunActive'] === true
+  useEffect(() => {
+    if (fakeRunActive) {
+      // Start (or stay) running. rAF ensures the mount lands before the
+      // browser paints the trail, so we don't miss the first iteration.
+      const raf = requestAnimationFrame(() => { dispatchRunning(true) })
+      wantsStopRef.current = false
+      return () => { cancelAnimationFrame(raf) }
     }
-    setRunning(true)
-    const run = rt?.runScenarioNode?.(scenarioId, id)
-    if (run) void run.finally(() => { setRunning(false) })
-    else setRunning(false)
-  }, [scenarioId, id, running, boxInError])
+    // Pause requested — mark wantsStop so the next animationiteration
+    // unmounts. Don't touch `running` synchronously; the trail finishes
+    // its lap first.
+    wantsStopRef.current = true
+    return undefined
+  }, [fakeRunActive])
+  const onAnimationIteration = useCallback((e: React.AnimationEvent<HTMLDivElement>) => {
+    // Only react to the BorderBeam's own keyframe, not other animations the
+    // box might host (the collapse/expand transitions, the spinning status
+    // glyph). The CSS keyframe name is stable on the trail element.
+    if (e.animationName === 'ecu-border-beam-travel' && wantsStopRef.current) {
+      dispatchRunning(false)
+      wantsStopRef.current = false
+    }
+  }, [])
 
   return (
     <div
@@ -354,7 +366,9 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
       className={`scn-node ${selected ? 'scn-node-selected' : ''} ${collapsed ? 'scn-node-collapsed' : ''} ${boxInError ? 'scn-node-error' : ''}`}
       data-testid={`scn-node-${data.kind}`}
       data-animating={animating ? 'true' : 'false'}
+      data-running={running ? 'true' : 'false'}
       style={collapsed && expandedWidth !== null ? { width: `${expandedWidth}px` } : {}}
+      onAnimationIteration={onAnimationIteration}
     >
       <div ref={headerRef} className={`scn-node-header ${headerEventOutput ? 'scn-node-header-has-event' : ''}`} style={headerStyle} onContextMenu={onHeaderContextMenu}>
         {launchInput && (
@@ -402,17 +416,6 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
             <i className="codicon codicon-error" aria-hidden="true" />
           </span>
         )}
-        <button
-          type="button"
-          className={`scn-node-play nodrag ${running ? 'scn-node-play-running' : boxInError ? 'scn-node-play-disabled' : canPlay ? 'scn-node-play-ready' : 'scn-node-play-idle'}`}
-          onMouseDown={(e) => { e.stopPropagation() }}
-          onClick={onPlay}
-          disabled={boxInError}
-          aria-label={running ? 'Stop node' : 'Run node'}
-          {...(boxInError ? {} : { title: running ? 'Stop node' : 'Run node' })}
-        >
-          <i className={`codicon codicon-${running ? 'debug-stop' : 'play-circle'}`} aria-hidden="true" />
-        </button>
       </div>
 
       {boxInError && (
@@ -493,6 +496,18 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
           className={`scn-handle scn-handle-error ${outputFlowRingClass('error', data.outputs, data.kind)}`}
           style={{ background: ROLE_COLOR['error'] }}
           title="error"
+        />
+      )}
+      {/* The BorderBeam orbits the full box outline. Rendered LAST so it
+       * paints on top of the header background — otherwise the trail's lap
+       * along the top edge disappears behind the header's solid fill. */}
+      {running && (
+        <BorderBeam
+          duration={BEAM_LAP_S}
+          size={80}
+          borderWidth={2}
+          colorFrom="#facc15"
+          colorTo="#22c55e"
         />
       )}
     </div>

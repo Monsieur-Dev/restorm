@@ -269,5 +269,5 @@ export const NowNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data,
     }
   ]
   const right: ScenarioNodeCell[] = [{ id: 'value', label: 'now', port: { id: 'value', type: 'source' } }]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} launchInput canPlay hasError={false} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} launchInput hasError={false} />
 }

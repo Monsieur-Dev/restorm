@@ -68,5 +68,5 @@ export const TransformNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id,
     }
   ]
   const right: ScenarioNodeCell[] = [{ id: 'out', label: 'value', port: { id: 'out', type: 'source' } }]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} canPlay />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
 }

@@ -937,7 +937,8 @@
       "step": "Từng bước",
       "noOutputs": "Hành động này không có đầu ra.",
       "notRun": "Chạy hành động để xem đầu ra của nó.",
-      "previewInfo": "Example data, based on previous request results."
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "Tạm dừng"
     },
     "now": {
       "timezone": "Timezone",

@@ -188,16 +188,15 @@
   border-bottom: 1px solid var(--widget-border, #454545);
   border-radius: 6px 6px 0 0;
   position: relative;
-  /* Reserve room on the left for a potential launch anchor + on the right for
-   * the round play button (which overflows the frame). Keep both fixed
-   * regardless of whether the anchor is rendered, so the title/icon land at
-   * the same x across every kind. */
+  /* Reserve room on the left for a potential launch anchor (keep fixed
+   * whether or not it's rendered, so the title/icon land at the same x
+   * across every kind), and a small right gutter so the error badge — and
+   * any later header affordance — doesn't sit flush against the corner. */
   padding-left: 16px;
-  padding-right: 96px;
+  padding-right: 16px;
 }
 
-/* "event" output anchor: centred on the header's right border. The play
- * button is shifted inward so the anchor keeps the very edge clear of it. */
+/* "event" output anchor: centred on the header's right border. */
 .scn-handle-event.react-flow__handle {
   position: absolute;
   right: 0;
@@ -206,10 +205,7 @@
   z-index: 7;
 }
 .scn-node-header-has-event {
-  padding-right: 120px;
-}
-.scn-node-header-has-event .scn-node-play {
-  right: 74px;
+  padding-right: 28px;
 }
 
 /* Generic "launch" input anchor: centred on the header's left border. Raised
@@ -252,45 +248,12 @@
   text-overflow: ellipsis;
 }
 
-/* Round run button: pinned to the right of the header with a 50px gap to the
- * box edge (the gap reserves room for the inspector preview anchor / future
- * gutter actions). Green when the node is runnable now, grey otherwise. */
-.scn-node-play {
-  position: absolute;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 38px;
-  height: 38px;
-  flex-shrink: 0;
-  padding: 0;
-  border-radius: 50%;
-  border: 2px solid var(--scenarioNode-background, #2d2d30);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
-  z-index: 6;
-}
-.scn-node-play .codicon {
-  color: #fff !important;
-  font-size: 40px !important;
-}
-.scn-node-play-ready { background: #22c55e; }
-.scn-node-play-ready:hover { background: #16a34a; }
-.scn-node-play-idle { background: #6b7280; cursor: default; }
-.scn-node-play-running { background: #ef4444; }
-.scn-node-play-running:hover { background: #dc2626; }
-/* A box in a non-executable (error) state: play disabled. */
-.scn-node-play-disabled { background: #6b7280; opacity: 0.45; cursor: not-allowed; }
-
-/* Header "!" error badge — red, right before the play button. Click opens the
- * ECUI Tooltip listing the box's errors (neutral tooltip background). */
+/* Header "!" error badge — red, on the right side of the header. Click opens
+ * the ECUI Tooltip listing the box's errors (neutral tooltip background). */
 .scn-node-errbadge {
   background: none; border: none; padding: 0;
-  /* Push to the right edge of the header content (the play button is absolute
-   * in the reserved padding-right), so the badge sits just before it. */
+  /* Push to the right edge of the header content so the badge sits at the
+   * far end, just inside the header's right gutter. */
   margin-left: auto; margin-right: 2px;
   color: #ef4444; cursor: pointer; display: inline-flex; align-items: center;
 }

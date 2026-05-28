@@ -1,0 +1,42 @@
+/*
+ * Travelling beam on a scenario edge — single-shot CSS counterpart of the
+ * `BorderBeam` orbit on a node. The trail is a short bright slice of the
+ * SAME bezier path (drawn as a sibling stroke), so it traces the curve
+ * exactly — no tangent-aligned rectangle drifting off the bend.
+ *
+ * `pathLength={100}` on the JSX normalises the path so the dash + offset
+ * keyframes work in percent regardless of the actual bezier length.
+ */
+.scn-edge-beam-stroke {
+  stroke: #facc15;
+  stroke-width: 3px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+  filter: drop-shadow(0 0 4px #22c55e);
+  animation-name: scn-edge-beam-dash;
+  animation-iteration-count: 1;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes scn-edge-beam-dash {
+  /* JS sets `--scn-edge-beam-dash-start` to `dashLen` (slice fully before
+   * the path start) and `--scn-edge-beam-dash-end` to `-(totalLength + 2)`
+   * (slice fully past the end). Wrapping in `calc(x * 1px)` makes the
+   * unitless custom-property values into a stroke-dashoffset length. */
+  from {
+    stroke-dashoffset: calc(var(--scn-edge-beam-dash-start) * 1px);
+  }
+
+  to {
+    stroke-dashoffset: calc(var(--scn-edge-beam-dash-end) * 1px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scn-edge-beam-stroke {
+    animation: none;
+    opacity: 0;
+  }
+}

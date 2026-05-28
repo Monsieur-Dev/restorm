@@ -938,7 +938,8 @@
       "step": "Βήμα προς βήμα",
       "noOutputs": "Αυτή η ενέργεια δεν έχει έξοδο.",
       "notRun": "Εκτελέστε την ενέργεια για να δείτε την έξοδό της.",
-      "previewInfo": "Example data, based on previous request results."
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "Παύση"
     },
     "now": {
       "timezone": "Timezone",
