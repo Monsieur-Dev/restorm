@@ -10,6 +10,7 @@ import {
   trackable,
   searchable,
   fileNaming,
+  separateFolders,
   TreatEmptyAsUndefined
 } from 'electron-core-ui/decorators'
 import type { RuntimeId } from './types'
@@ -53,7 +54,12 @@ export class Scenario {
    * container (requests of any protocol, sub-folders, sub-scenarios). Absent
    * (rather than `[]`) when the scenario holds none, so a plain leaf scenario
    * serializes without an empty array.
-   */
+   *
+   * `@separateFolders()` mirrors `Folder.items` so folder-mode persistence
+   * walks scenario children the same way it walks folder children — each
+   * child item becomes its own folder under the scenario's directory, with
+   * the scenario's own state living in the parent `index.<ext>`. */
+  @separateFolders()
   items?: FolderItem[]
 
   constructor(init?: Partial<Scenario>) {
