@@ -1,11 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
-import { Handle, Position, useNodeConnections, type Node } from '@xyflow/react'
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { Handle, Position, useNodeConnections, useUpdateNodeInternals, type Node } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
-import { getContrastColor, MarkdownViewer, Tooltip } from 'electron-core-ui/renderer'
+import { Button, getContrastColor, MarkdownViewer, Tooltip } from 'electron-core-ui/renderer'
 import type { ScenarioNodeKind, ScenarioPort, ScenarioPortRole, PortFlow } from '../../../../../shared/types/collections'
 import { scenarioNodeMeta } from '../scenarioNodeCatalogue'
 import { useScenarioNodeErrors } from '../scenarioErrorsContext'
-import { ROLE_COLOR, handleTop } from '../scenarioGraphMapping'
+import { ROLE_COLOR } from '../scenarioGraphMapping'
 import { ScenarioNodeSection } from './ScenarioNodeSection'
 import { anchorColor, cellBody, portAnchorColor, inputFlowRingClass, outputFlowRingClass, cellInputRingClass, cellOutputRingClass } from './scenarioCellRender'
 import '../ScenarioNodeBox.css'
@@ -145,12 +145,41 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
   // frame, so the browser sees a 0 → 1 transition (not an instant 1). On
   // collapse we drop the class immediately and unmount the body after the
   // transition duration.
-  const ANIM_MS = 200
+  // Animation: opacity fade (phase 1) and height/handles morph (phase 2) play
+  // back-to-back, not concurrently. Total runtime is ANIM_MS; each phase gets
+  // half. The CSS-side `transition-delay` on the inner wrapper sequences the
+  // two: closing first fades content (0→half) then shrinks height + handle
+  // positions (half→full); opening reverses that order.
+  const ANIM_MS = 4000
   const [bodyMounted, setBodyMounted] = useState(!collapsed)
   const [bodyOpen, setBodyOpen] = useState(!collapsed)
   const rafHandle = useRef<number | null>(null)
+  // `animating` is armed synchronously by `onToggle` BEFORE the parent flips
+  // `collapsed`. Any flip that arrives without going through `onToggle` (eg.
+  // parent state hydration replaying the persisted state, MCP graph patch)
+  // keeps `animating` at false, so CSS transitions stay off and the body
+  // state snaps in the effect below.
+  const [animating, dispatchAnim] = useReducer((_state: boolean, on: boolean) => on, false)
   useEffect(() => {
+    if (!animating) return undefined
+    const t = setTimeout(() => { dispatchAnim(false) }, ANIM_MS)
+    return () => { clearTimeout(t) }
+  }, [animating, collapsed])
+  useEffect(() => {
+    if (!animating) {
+      // Non-user change (parent hydration, MCP patch, …): snap the body
+      // state to match `collapsed` without running the animation timer.
+      // CSS transitions are also gated on `data-animating="true"`, so the
+      // visual is instant.
+      queueMicrotask(() => {
+        setBodyMounted(!collapsed)
+        setBodyOpen(!collapsed)
+      })
+      return undefined
+    }
     if (!collapsed) {
+      // Expand: mount the body first, flip the class on the next frame so the
+      // browser sees a 0 → 1 transition rather than starting at 1.
       const raf1 = requestAnimationFrame(() => {
         setBodyMounted(true)
         rafHandle.current = requestAnimationFrame(() => { setBodyOpen(true) })
@@ -158,10 +187,103 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
       rafHandle.current = raf1
       return () => { if (rafHandle.current != null) cancelAnimationFrame(rafHandle.current) }
     }
-    const raf = requestAnimationFrame(() => { setBodyOpen(false) })
+    // Collapse: flip the class via a microtask — runs before the next browser
+    // paint, so there's no perceptible delay between the click and the start
+    // of the opacity fade. The full unmount waits the entire animation.
+    queueMicrotask(() => { setBodyOpen(false) })
     const timer = setTimeout(() => { setBodyMounted(false) }, ANIM_MS)
-    return () => { cancelAnimationFrame(raf); clearTimeout(timer) }
-  }, [collapsed])
+    return () => { clearTimeout(timer) }
+  }, [collapsed, animating])
+
+  // Single source of port handles: rendered as siblings of the body, absolute-
+  // positioned on the box. Their `top` value comes from a layout-time
+  // measurement of each row's vertical centre (the `[data-port-id]` marker on
+  // the row), and snaps to the header centre when the node is collapsed. A
+  // CSS transition on `top` (delayed by the opacity phase) slides each handle
+  // smoothly between its expanded and collapsed position, instead of the
+  // previous swap that snapped the moment the body unmounted.
+  const boxRef = useRef<HTMLDivElement>(null)
+  const headerRef = useRef<HTMLDivElement>(null)
+  const [rowTops, setRowTops] = useState<Map<string, number>>(new Map())
+  useLayoutEffect(() => {
+    const box = boxRef.current
+    if (!box) return
+    // Walk each marker's `offsetParent` chain up to the box, summing
+    // `offsetTop`. `getBoundingClientRect` would include the React Flow
+    // viewport's `scale(zoom)` transform, but CSS `top` values stay in
+    // pre-transform px — so we'd render misaligned at any non-1 zoom.
+    // `.scn-node` is `position: relative`, so it sits in the offsetParent
+    // chain and the walk terminates there for both rows and section
+    // markers.
+    const next = new Map<string, number>()
+    box.querySelectorAll<HTMLElement>('[data-port-id]').forEach((el) => {
+      const portId = el.dataset['portId']
+      if (!portId) return
+      let top = 0
+      let cur: HTMLElement | null = el
+      while (cur && cur !== box) {
+        top += cur.offsetTop
+        cur = cur.offsetParent as HTMLElement | null
+      }
+      next.set(portId, top + el.offsetHeight / 2)
+    })
+    // Defer the setState to a microtask: the rule forbids a synchronous setState
+    // in an effect (it would cascade-render in the same commit), but a deferred
+    // one is the standard "publish layout measurements" pattern.
+    queueMicrotask(() => {
+      setRowTops((prev) => {
+        if (prev.size !== next.size) return next
+        for (const [k, v] of next) if (prev.get(k) !== v) return next
+        return prev
+      })
+    })
+  }, [bodyMounted, bodyOpen, left, right, errors.length, collapsed])
+  // Collapsed-mode handle position = vertical centre of the header. Measured
+  // once per header layout so a coloured/notes-bearing header still places
+  // the gathered handles correctly.
+  const [headerCenterY, setHeaderCenterY] = useState(22)
+  useLayoutEffect(() => {
+    const h = headerRef.current
+    if (!h) return
+    const measured = h.offsetHeight / 2
+    queueMicrotask(() => { setHeaderCenterY(measured) })
+  }, [boxInError, data.color, data.collapsed])
+
+  // Keep the box at its expanded width once collapsed — without this the
+  // header alone would shrink to its content width and the box "pops"
+  // narrower, which looks bad next to the surrounding edges that still
+  // anchor at the old width.
+  const [expandedWidth, setExpandedWidth] = useState<number | null>(null)
+  useLayoutEffect(() => {
+    if (collapsed) return
+    const box = boxRef.current
+    if (!box) return
+    const w = box.offsetWidth
+    queueMicrotask(() => {
+      setExpandedWidth((prev) => (prev === w ? prev : w))
+    })
+  }, [collapsed, bodyMounted, bodyOpen, left, right])
+
+  // Whether a collapse/expand transition is in progress. Only true between
+  // the user's click on the chevron and ANIM_MS later — never during initial
+  // mount, scenario load, or any non-toggle re-measurement. The CSS gates
+  // the `top` transition on this so handles snap into place outside the
+  // animation window instead of sliding every time a row re-lays out.
+  //
+  // The flag has to flip on synchronously with the `collapsed` prop change,
+  // not via a useEffect microtask: a deferred `dispatchAnim(true)` lands
+  // AFTER React has already committed the new `top` value, so the CSS sees
+  // `data-animating="false"` at the moment `top` changes → no transition. We
+  // detect the prop change during render with a ref + set state inline; the
+  // setState is gated by the inequality so it doesn't loop. A useEffect
+  // schedules the turn-off timer.
+
+  // React Flow caches each handle's position internally for edge routing.
+  // When we move the handle DOM (different `top` after a measurement or a
+  // collapse), we have to tell the store explicitly — otherwise edges keep
+  // pointing at the old positions.
+  const updateInternals = useUpdateNodeInternals()
+  useEffect(() => { updateInternals(id) }, [id, updateInternals, rowTops, headerCenterY, collapsed])
 
   // Which input (target) handles currently have an incoming link — drives the
   // red "missing required link" flag on mandatory inputs.
@@ -175,8 +297,12 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
     ? { background: data.color, color: getContrastColor(data.color) }
     : {}
 
-  const onToggle = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation()
+  const onToggle = useCallback((e?: React.MouseEvent) => {
+    e?.stopPropagation()
+    // Arm the animation gate synchronously, BEFORE the parent flips
+    // `collapsed`. Any other source of a flip (parent hydration, MCP patch,
+    // …) arrives without this priming step, so it snaps without animating.
+    dispatchAnim(true)
     data.onToggleCollapse?.(id)
   }, [data, id])
 
@@ -216,8 +342,14 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
   }, [scenarioId, id, running, boxInError])
 
   return (
-    <div className={`scn-node ${selected ? 'scn-node-selected' : ''} ${collapsed ? 'scn-node-collapsed' : ''} ${boxInError ? 'scn-node-error' : ''}`} data-testid={`scn-node-${data.kind}`}>
-      <div className={`scn-node-header ${launchInput ? 'scn-node-header-has-launch' : ''} ${headerEventOutput ? 'scn-node-header-has-event' : ''}`} style={headerStyle} onContextMenu={onHeaderContextMenu}>
+    <div
+      ref={boxRef}
+      className={`scn-node ${selected ? 'scn-node-selected' : ''} ${collapsed ? 'scn-node-collapsed' : ''} ${boxInError ? 'scn-node-error' : ''}`}
+      data-testid={`scn-node-${data.kind}`}
+      data-animating={animating ? 'true' : 'false'}
+      style={collapsed && expandedWidth !== null ? { width: `${expandedWidth}px` } : {}}
+    >
+      <div ref={headerRef} className={`scn-node-header ${headerEventOutput ? 'scn-node-header-has-event' : ''}`} style={headerStyle} onContextMenu={onHeaderContextMenu}>
         {launchInput && (
           <Handle
             id="in"
@@ -240,9 +372,14 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
         )}
         {headerIcon ?? <i className={`codicon codicon-${meta.icon} scn-node-icon`} aria-hidden="true" />}
         <span className="scn-node-title">{title ?? t(meta.labelKey, meta.defaultLabel)}</span>
-        <button type="button" className="scn-node-collapse nodrag" onClick={onToggle} aria-label={collapsed ? 'Expand' : 'Collapse'}>
-          <i className={`codicon codicon-chevron-${collapsed ? 'right' : 'down'}`} aria-hidden="true" />
-        </button>
+        <Button
+          small
+          secondary
+          className="scn-node-collapse nodrag"
+          icon={`chevron-${collapsed ? 'right' : 'down'}`}
+          onClick={onToggle}
+          options={{ ariaLabel: collapsed ? t('scenario.node.expand', 'Expand') : t('scenario.node.collapse', 'Collapse') }}
+        />
         {data.status && data.status !== 'idle' && (
           <i className={`codicon codicon-${STATUS_GLYPH[data.status]} scn-node-status scn-node-status-${data.status}`} aria-hidden="true" />
         )}
@@ -311,11 +448,8 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
               </div>
               <div className="scn-node-col scn-node-col-out">
                 {right.map((cell) => (
-                  <div className="scn-row scn-row-right" key={cell.id}>
+                  <div className="scn-row scn-row-right" key={cell.id} {...(cell.port ? { 'data-port-id': cell.port.id } : {})}>
                     {cellBody(cell)}
-                    {cell.port && (
-                      <Handle id={cell.port.id} type={cell.port.type} position={Position.Right} className={`scn-handle scn-handle-inline ${cellOutputRingClass(cell.port, data.outputs, data.kind)}`} style={{ background: portAnchorColor(cell.port, connectedInputs) }} title={cell.label ?? cell.port.id} />
-                    )}
                   </div>
                 ))}
               </div>
@@ -324,17 +458,25 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
         </div>
       )}
 
-      {!bodyMounted && allPorts.map((p, i) => (
-        <Handle
-          key={p.id}
-          id={p.id}
-          type={p.type}
-          position={p.type === 'target' ? Position.Left : Position.Right}
-          className={`scn-handle ${p.type === 'target' ? cellInputRingClass(p, data.inputs, data.kind) : cellOutputRingClass(p, data.outputs, data.kind)}`}
-          style={{ top: handleTop(i, allPorts.length, true), background: portAnchorColor(p, connectedInputs) }}
-          title={p.id}
-        />
-      ))}
+      {/* Single set of port handles — always rendered, absolutely positioned
+       * on the box. Their `top` slides between the row centre (expanded) and
+       * the header centre (collapsed) via CSS, sequenced after the opacity
+       * phase (collapse) or before it (expand). */}
+      {allPorts.map((p) => {
+        const measured = rowTops.get(p.id)
+        const top = collapsed || measured === undefined ? headerCenterY : measured
+        return (
+          <Handle
+            key={p.id}
+            id={p.id}
+            type={p.type}
+            position={p.type === 'target' ? Position.Left : Position.Right}
+            className={`scn-handle scn-handle-positioned ${p.type === 'target' ? cellInputRingClass(p, data.inputs, data.kind) : cellOutputRingClass(p, data.outputs, data.kind)}`}
+            style={{ top: `${top}px`, background: portAnchorColor(p, connectedInputs) }}
+            title={p.id}
+          />
+        )
+      })}
 
       {hasError !== false && (
         <Handle

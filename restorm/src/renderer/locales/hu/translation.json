@@ -782,7 +782,9 @@
         "duplicate": "Duplicate",
         "delete": "Delete",
         "deleteShortcut": "Del"
-      }
+      },
+      "expand": "Kibont",
+      "collapse": "Összecsuk"
     },
     "edge": {
       "menu": {

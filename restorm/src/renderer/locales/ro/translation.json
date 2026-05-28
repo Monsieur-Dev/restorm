@@ -783,7 +783,9 @@
         "duplicate": "Duplicate",
         "delete": "Delete",
         "deleteShortcut": "Del"
-      }
+      },
+      "expand": "Extinde",
+      "collapse": "Restrânge"
     },
     "edge": {
       "menu": {

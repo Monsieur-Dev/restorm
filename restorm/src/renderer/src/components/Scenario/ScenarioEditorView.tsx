@@ -485,14 +485,24 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
   // have no stable DOM element to pin a beak to, unlike a node header).
   const edgeColorAnchorRef = useRef<HTMLDivElement>(null)
 
-  // Toggle a node's collapsed flag; update the live node + persist.
+  // Toggle a node's collapsed flag; update the live node + persist. The
+  // `nodeStore` write has to derive its target value from `fn.data.collapsed`
+  // (the snapshot React passes into the updater), NOT from `prior.collapsed`
+  // — under React StrictMode the updater is invoked twice, so a side-effect
+  // that toggles based on the (mutating) `nodeStore` value flips twice and
+  // cancels itself out, leaving the store in its pre-click state while the
+  // live React Flow state correctly ends at the new value. That divergence
+  // is what stops the persisted file from picking up the collapse.
   const onToggleCollapse = useCallback((nodeId: string) => {
     setNodes((curr) => {
+      const target = curr.find((x) => x.id === nodeId)
+      if (!target) return curr
+      const newCollapsed = !target.data.collapsed
       const next = curr.map((fn) =>
-        fn.id === nodeId ? { ...fn, data: { ...fn.data, collapsed: !fn.data.collapsed } } : fn
+        fn.id === nodeId ? { ...fn, data: { ...fn.data, collapsed: newCollapsed } } : fn
       )
       const prior = nodeStore.current.get(nodeId)
-      if (prior) nodeStore.current.set(nodeId, { ...prior, collapsed: !prior.collapsed })
+      if (prior) nodeStore.current.set(nodeId, { ...prior, collapsed: newCollapsed })
       setEdges((e) => { persist(next, e); return e })
       return next
     })

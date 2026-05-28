@@ -781,7 +781,9 @@
         "duplicate": "Duplicate",
         "delete": "Delete",
         "deleteShortcut": "Del"
-      }
+      },
+      "expand": "Mở rộng",
+      "collapse": "Thu gọn"
     },
     "edge": {
       "menu": {

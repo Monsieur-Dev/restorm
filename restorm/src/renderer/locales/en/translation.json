@@ -773,7 +773,9 @@
         "duplicate": "Duplicate",
         "delete": "Delete",
         "deleteShortcut": "Del"
-      }
+      },
+      "expand": "Expand",
+      "collapse": "Collapse"
     },
     "pathSelector": {
       "placeholder": "JSON path",

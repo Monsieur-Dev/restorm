@@ -134,6 +134,11 @@
   /* visible so the edge anchors render as full circles (not clipped halves).
    * The header rounds its own corners to keep the box outline clean. */
   overflow: visible;
+  /* Anchor for the absolute-positioned port handles: their `top` is measured
+   * in box-local px so they line up with the rows regardless of React Flow
+   * viewport zoom (`scale(N)` would otherwise inflate `getBoundingClientRect`
+   * values while CSS `top` stays pre-transform). */
+  position: relative;
 }
 
 /* A box in a non-executable (error) state — red border (overrides selected). */
@@ -183,14 +188,12 @@
   border-bottom: 1px solid var(--widget-border, #454545);
   border-radius: 6px 6px 0 0;
   position: relative;
-  /* Reserve room on the right for the round play button (which overflows the
-   * frame). The left is widened separately when there's a launch anchor. */
-  padding-right: 46px;
-}
-
-/* Make room for the launch anchor so it doesn't sit under the icon/title. */
-.scn-node-header-has-launch {
+  /* Reserve room on the left for a potential launch anchor + on the right for
+   * the round play button (which overflows the frame). Keep both fixed
+   * regardless of whether the anchor is rendered, so the title/icon land at
+   * the same x across every kind. */
   padding-left: 16px;
+  padding-right: 96px;
 }
 
 /* "event" output anchor: centred on the header's right border. The play
@@ -203,10 +206,10 @@
   z-index: 7;
 }
 .scn-node-header-has-event {
-  padding-right: 70px;
+  padding-right: 120px;
 }
 .scn-node-header-has-event .scn-node-play {
-  right: 24px;
+  right: 74px;
 }
 
 /* Generic "launch" input anchor: centred on the header's left border. Raised
@@ -249,11 +252,12 @@
   text-overflow: ellipsis;
 }
 
-/* Round run button: bigger than the header so it overflows the frame, pinned
- * to the right. Green when the node is runnable now, grey otherwise. */
+/* Round run button: pinned to the right of the header with a 50px gap to the
+ * box edge (the gap reserves room for the inspector preview anchor / future
+ * gutter actions). Green when the node is runnable now, grey otherwise. */
 .scn-node-play {
   position: absolute;
-  right: 4px;
+  right: 20px;
   top: 50%;
   transform: translateY(-50%);
   width: 38px;
@@ -309,21 +313,16 @@
 
 @keyframes scn-spin { to { transform: rotate(360deg); } }
 
+/* Chevron toggle uses ECUI Button (handles focus + variants) — we only need
+ * to nudge its background/opacity so it doesn't sit too loud inside the
+ * header. */
 .scn-node-collapse {
   flex-shrink: 0;
-  background: none;
-  border: none;
-  color: inherit;
-  cursor: pointer;
-  padding: 0;
-  display: flex;
-  align-items: center;
+  background: transparent !important;
+  border-color: transparent !important;
   opacity: 0.7;
-  outline: none;
 }
 .scn-node-collapse:hover { opacity: 1; }
-.scn-node-collapse:focus,
-.scn-node-collapse:focus-visible { outline: none; box-shadow: none; }
 
 /* Collapsing body wrapper: animates the height (via `grid-template-rows`
  * 1fr→0fr) and the opacity in sync. The wrapper stays mounted through the
@@ -334,20 +333,54 @@
  *
  * `min-height: 0` on the inner grid item is the standard escape hatch that
  * lets the row shrink below the auto-computed height of its content. */
+/* Two-phase collapse/expand:
+ *   close →  phase 1 (0…2000ms): inner content opacity 1 → 0;
+ *            phase 2 (2000…4000ms): grid row 1fr → 0fr (height + handles).
+ *   open  →  phase 1 (0…2000ms): grid row 0fr → 1fr (height + handles);
+ *            phase 2 (2000…4000ms): inner content opacity 0 → 1.
+ * The `transition-delay` on each property orders the phases without any JS
+ * timer chaining — the runtime just toggles the `.scn-body-open` class.
+ *
+ * Clip only vertically so the body's height transitions cleanly to 0 while
+ * the inline handles (translated half-outside the box edge to sit on the
+ * border as connection points) stay visible. `overflow-y: clip` +
+ * `overflow-x: visible` is the modern combo that doesn't trigger an
+ * h-scrollbar. */
 .scn-node-collapsible {
   display: grid;
   grid-template-rows: 0fr;
-  opacity: 0;
-  overflow: hidden;
-  transition: grid-template-rows 200ms ease, opacity 200ms ease;
+  overflow-x: visible;
+  overflow-y: clip;
+  /* No transition by default — only an explicit user click on the chevron
+   * unlocks the timed sequence (CSS gate via `data-animating="true"`). Any
+   * other source of a `collapsed` flip (parent hydration replaying the
+   * persisted state, MCP graph patch, …) snaps to the new layout. */
+  transition: none;
 }
 .scn-node-collapsible.scn-body-open {
   grid-template-rows: 1fr;
-  opacity: 1;
+}
+.scn-node[data-animating="true"] .scn-node-collapsible {
+  transition: grid-template-rows 2000ms ease 2000ms;
+}
+.scn-node[data-animating="true"] .scn-node-collapsible.scn-body-open {
+  transition: grid-template-rows 2000ms ease 0ms;
 }
 .scn-node-collapsible-inner {
   min-height: 0;
-  overflow: hidden;
+  overflow-x: visible;
+  overflow-y: clip;
+  opacity: 0;
+  transition: none;
+}
+.scn-node-collapsible.scn-body-open > .scn-node-collapsible-inner {
+  opacity: 1;
+}
+.scn-node[data-animating="true"] .scn-node-collapsible-inner {
+  transition: opacity 2000ms ease 0ms;
+}
+.scn-node[data-animating="true"] .scn-node-collapsible.scn-body-open > .scn-node-collapsible-inner {
+  transition: opacity 2000ms ease 2000ms;
 }
 
 /* Notes section: free annotation between header and ports, its own band.
@@ -457,19 +490,42 @@
 /* Inline handles flow with their row instead of being absolutely pinned to
  * the node side; React Flow still derives connection geometry from the DOM
  * rect, so wiring works. Pull them onto the node's outer edge. */
-.scn-handle-inline.react-flow__handle {
-  position: relative;
-  top: auto;
-  flex-shrink: 0;
+/* Single set of port handles, positioned absolutely on the box. `top` is set
+ * inline (in px, measured at layout time from each row's `data-port-id`
+ * marker), so it transitions cleanly between expanded and collapsed states.
+ *
+ * The transition direction is driven by `.scn-node-collapsed`: closing waits
+ * for the body's opacity to fade out (2s) before sliding `top`; opening
+ * slides `top` first, then fades the content in. Both phases run 2000ms. */
+.scn-handle-positioned.react-flow__handle {
+  position: absolute;
+  /* No transition by default — handles snap to whatever position the layout
+   * pass reports. The transition is only enabled while the user-triggered
+   * collapse/expand animation is in progress (`data-animating="true"`), so
+   * initial mount / scenario load / row re-measure never slide them. */
+  transition: none;
 }
-/* Centre the anchor on the node's outer edge (its centre on the border). */
-.scn-node-col-in .scn-handle-inline {
+.scn-node[data-animating="true"] .scn-handle-positioned.react-flow__handle {
+  transition: top 2000ms ease 2000ms;
+}
+.scn-node[data-animating="true"]:not(.scn-node-collapsed) .scn-handle-positioned.react-flow__handle {
+  transition: top 2000ms ease 0ms;
+}
+.scn-handle-positioned[data-handlepos="left"].react-flow__handle {
   left: 0;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
 }
-.scn-node-col-out .scn-handle-inline {
+.scn-handle-positioned[data-handlepos="right"].react-flow__handle {
   right: 0;
-  transform: translateX(50%);
+  transform: translate(50%, -50%);
+}
+
+/* Section-collapsed handle marker: a zero-width placeholder in the title row
+ * that the box-level layout measures to position handles at the title centre. */
+.scn-section-ball {
+  display: inline-block;
+  width: 0;
+  height: 0;
 }
 
 .scn-handle-error {

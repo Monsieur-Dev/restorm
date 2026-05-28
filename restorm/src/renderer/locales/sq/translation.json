@@ -782,7 +782,9 @@
         "duplicate": "Duplicate",
         "delete": "Delete",
         "deleteShortcut": "Del"
-      }
+      },
+      "expand": "Zgjero",
+      "collapse": "Mblidh"
     },
     "edge": {
       "menu": {

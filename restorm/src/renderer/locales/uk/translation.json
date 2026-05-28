@@ -784,7 +784,9 @@
         "duplicate": "Duplicate",
         "delete": "Delete",
         "deleteShortcut": "Del"
-      }
+      },
+      "expand": "Розгорнути",
+      "collapse": "Згорнути"
     },
     "edge": {
       "menu": {

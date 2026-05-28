@@ -783,7 +783,9 @@
         "duplicate": "Duplicate",
         "delete": "Delete",
         "deleteShortcut": "Del"
-      }
+      },
+      "expand": "Proširi",
+      "collapse": "Sažmi"
     },
     "edge": {
       "menu": {

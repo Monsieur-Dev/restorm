@@ -773,7 +773,9 @@
         "duplicate": "Dupliquer",
         "delete": "Supprimer",
         "deleteShortcut": "Suppr"
-      }
+      },
+      "expand": "Développer",
+      "collapse": "Réduire"
     },
     "pathSelector": {
       "placeholder": "Chemin JSON",
