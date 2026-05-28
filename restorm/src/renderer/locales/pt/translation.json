@@ -923,6 +923,13 @@
     "usage": {
       "button": "Cenários que usam esta requisição",
       "title": "Esta requisição é usada nos cenários:"
+    },
+    "inspector": {
+      "run": "Executar",
+      "debug": "Depurar",
+      "step": "Passo a passo",
+      "noOutputs": "Esta caixa não tem saída.",
+      "notRun": "Execute a caixa para ver sua saída."
     }
   }
 }

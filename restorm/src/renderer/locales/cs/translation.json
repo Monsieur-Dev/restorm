@@ -925,6 +925,13 @@
     "usage": {
       "button": "Scénáře používající tento požadavek",
       "title": "Tento požadavek se používá ve scénářích:"
+    },
+    "inspector": {
+      "run": "Spustit",
+      "debug": "Ladit",
+      "step": "Krok za krokem",
+      "noOutputs": "Tento blok nemá výstup.",
+      "notRun": "Spusťte blok, abyste viděli jeho výstup."
     }
   }
 }

@@ -923,6 +923,13 @@
     "usage": {
       "button": "Escenarios que usan esta petición",
       "title": "Esta petición se usa en los escenarios:"
+    },
+    "inspector": {
+      "run": "Ejecutar",
+      "debug": "Depurar",
+      "step": "Paso a paso",
+      "noOutputs": "Esta caja no tiene salida.",
+      "notRun": "Ejecuta la caja para ver su salida."
     }
   }
 }

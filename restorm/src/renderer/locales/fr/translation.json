@@ -923,6 +923,13 @@
     "usage": {
       "button": "Scénarios utilisant cette requête",
       "title": "Cette requête est utilisée dans les scénarios :"
+    },
+    "inspector": {
+      "run": "Exécuter",
+      "debug": "Déboguer",
+      "step": "Pas à pas",
+      "noOutputs": "Cette boîte n'a pas de sortie.",
+      "notRun": "Exécutez la boîte pour voir sa sortie."
     }
   }
 }

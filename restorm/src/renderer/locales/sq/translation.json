@@ -923,6 +923,13 @@
     "usage": {
       "button": "Skenarët që përdorin këtë kërkesë",
       "title": "Kjo kërkesë përdoret në skenarët:"
+    },
+    "inspector": {
+      "run": "Ekzekuto",
+      "debug": "Korrigjo",
+      "step": "Hap pas hapi",
+      "noOutputs": "Kjo kuti nuk ka dalje.",
+      "notRun": "Ekzekutoni kutinë për të parë daljen e saj."
     }
   }
 }

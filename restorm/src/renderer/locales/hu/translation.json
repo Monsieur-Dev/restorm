@@ -923,6 +923,13 @@
     "usage": {
       "button": "Ezt a kérést használó forgatókönyvek",
       "title": "Ezt a kérést a következő forgatókönyvek használják:"
+    },
+    "inspector": {
+      "run": "Futtatás",
+      "debug": "Hibakeresés",
+      "step": "Lépésenként",
+      "noOutputs": "Ennek a doboznak nincs kimenete.",
+      "notRun": "Futtassa a dobozt a kimenet megtekintéséhez."
     }
   }
 }

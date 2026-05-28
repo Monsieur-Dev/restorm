@@ -923,6 +923,13 @@
     "usage": {
       "button": "Scenarier som använder denna begäran",
       "title": "Denna begäran används i scenarierna:"
+    },
+    "inspector": {
+      "run": "Kör",
+      "debug": "Felsök",
+      "step": "Steg för steg",
+      "noOutputs": "Den här rutan har ingen utdata.",
+      "notRun": "Kör rutan för att se dess utdata."
     }
   }
 }

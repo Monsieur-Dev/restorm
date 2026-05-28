@@ -922,6 +922,13 @@
     "usage": {
       "button": "Các kịch bản sử dụng yêu cầu này",
       "title": "Yêu cầu này được dùng trong các kịch bản:"
+    },
+    "inspector": {
+      "run": "Chạy",
+      "debug": "Gỡ lỗi",
+      "step": "Từng bước",
+      "noOutputs": "Hộp này không có đầu ra.",
+      "notRun": "Chạy hộp để xem đầu ra của nó."
     }
   }
 }

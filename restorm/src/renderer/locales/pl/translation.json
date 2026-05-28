@@ -925,6 +925,13 @@
     "usage": {
       "button": "Scenariusze używające tego żądania",
       "title": "To żądanie jest używane w scenariuszach:"
+    },
+    "inspector": {
+      "run": "Uruchom",
+      "debug": "Debuguj",
+      "step": "Krok po kroku",
+      "noOutputs": "To pole nie ma wyjścia.",
+      "notRun": "Uruchom pole, aby zobaczyć jego wynik."
     }
   }
 }

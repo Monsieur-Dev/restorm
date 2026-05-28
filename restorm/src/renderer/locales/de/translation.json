@@ -923,6 +923,13 @@
     "usage": {
       "button": "Szenarien, die diese Anfrage verwenden",
       "title": "Diese Anfrage wird in den folgenden Szenarien verwendet:"
+    },
+    "inspector": {
+      "run": "Ausführen",
+      "debug": "Debuggen",
+      "step": "Schrittweise",
+      "noOutputs": "Dieses Feld hat keine Ausgabe.",
+      "notRun": "Führen Sie das Feld aus, um seine Ausgabe zu sehen."
     }
   }
 }

@@ -6,6 +6,75 @@
   --scn-flow-value: #a855f7;
 }
 
+/* Editor side panel: a run toolbar, the workflow errors, and the selected-box
+ * preview — stacked sections split by separators, anchored top-right. */
+.scn-inspector {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  bottom: 8px;
+  z-index: 5;
+  width: 320px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  border-radius: 6px;
+  background: var(--editorWidget-background, #252526);
+  color: var(--foreground, #cccccc);
+  border: 1px solid var(--widget-border, #454545);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+.scn-inspector-toolbar {
+  display: flex;
+  gap: 6px;
+  padding: 6px 8px;
+}
+.scn-inspector-sep {
+  border-top: 1px solid var(--widget-border, #454545);
+}
+.scn-inspector-section {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px;
+}
+.scn-inspector-section-title {
+  font-weight: 600;
+}
+.scn-inspector-errors-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--inputValidation-errorForeground, #f48771);
+}
+.scn-inspector-preview-header {
+  font-size: 13px;
+}
+.scn-inspector-note {
+  opacity: 0.8;
+  white-space: pre-wrap;
+}
+.scn-inspector-output {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+}
+.scn-inspector-output-label {
+  opacity: 0.85;
+  font-family: var(--monospace-font, monospace);
+}
+.scn-inspector-tree {
+  border: 1px solid var(--widget-border, #454545);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.scn-inspector-empty {
+  opacity: 0.6;
+  font-style: italic;
+}
+
 .scn-node {
   min-width: 160px;
   border: 1px solid var(--widget-border, #454545);

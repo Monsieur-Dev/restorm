@@ -923,6 +923,13 @@
     "usage": {
       "button": "Scenarier, der bruger denne anmodning",
       "title": "Denne anmodning bruges i scenarierne:"
+    },
+    "inspector": {
+      "run": "Kør",
+      "debug": "Fejlsøg",
+      "step": "Trin for trin",
+      "noOutputs": "Denne boks har intet output.",
+      "notRun": "Kør boksen for at se dens output."
     }
   }
 }

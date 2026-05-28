@@ -923,6 +923,13 @@
     "usage": {
       "button": "Scenario's die deze aanvraag gebruiken",
       "title": "Deze aanvraag wordt gebruikt in de scenario's:"
+    },
+    "inspector": {
+      "run": "Uitvoeren",
+      "debug": "Debuggen",
+      "step": "Stap voor stap",
+      "noOutputs": "Dit blok heeft geen uitvoer.",
+      "notRun": "Voer het blok uit om de uitvoer te zien."
     }
   }
 }

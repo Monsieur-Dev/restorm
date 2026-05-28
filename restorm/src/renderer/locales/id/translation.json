@@ -922,6 +922,13 @@
     "usage": {
       "button": "Skenario yang menggunakan permintaan ini",
       "title": "Permintaan ini digunakan dalam skenario:"
+    },
+    "inspector": {
+      "run": "Jalankan",
+      "debug": "Debug",
+      "step": "Langkah demi langkah",
+      "noOutputs": "Kotak ini tidak memiliki keluaran.",
+      "notRun": "Jalankan kotak untuk melihat keluarannya."
     }
   }
 }

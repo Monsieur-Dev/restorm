@@ -923,6 +923,13 @@
     "usage": {
       "button": "Skenaariot, jotka käyttävät tätä pyyntöä",
       "title": "Tätä pyyntöä käytetään skenaarioissa:"
+    },
+    "inspector": {
+      "run": "Suorita",
+      "debug": "Vianjäljitys",
+      "step": "Askel kerrallaan",
+      "noOutputs": "Tällä laatikolla ei ole tulostetta.",
+      "notRun": "Suorita laatikko nähdäksesi sen tulosteen."
     }
   }
 }

@@ -36,6 +36,7 @@ import { SCENARIO_ADD_REQUEST_GROUPS, SCENARIO_ADD_SCENARIO_ENTRY, scenarioAddIc
 import type { AddChildKind } from '../MainView/Sidebar/contextMenuBuilder'
 import { validateScenarioGraph, targetKey, type ScenarioNodeError, type ScenarioDataLink } from './scenarioValidation'
 import { ScenarioErrorsContext } from './scenarioErrorsContext'
+import { ScenarioInspectorPanel, type InspectorPreviewNode } from './ScenarioInspectorPanel'
 import { consumePendingScenarioNodeFocus, onScenarioNodeFocus, clearPendingScenarioNodeFocus } from '../../services/scenarioFocusBus'
 
 export interface ScenarioEditorViewProps {
@@ -81,14 +82,6 @@ const invalidBannerStyle: CSSProperties = {
   color: 'var(--inputValidation-errorForeground, #fff)',
   border: '1px solid var(--inputValidation-errorBorder, #be1100)'
 }
-const errorPanelStyle: CSSProperties = {
-  position: 'absolute', top: 8, right: 8, zIndex: 5, maxWidth: 360, maxHeight: '40%', overflowY: 'auto',
-  display: 'flex', flexDirection: 'column', gap: 2, padding: '6px 8px', borderRadius: 4, fontSize: 12,
-  background: 'var(--inputValidation-errorBackground, #5a1d1d)',
-  color: 'var(--inputValidation-errorForeground, #fff)',
-  border: '1px solid var(--inputValidation-errorBorder, #be1100)'
-}
-
 /** The catalogue flattened with a separator marker between categories — the
  * add-node menu maps this to ContextMenu items. Computed once (no refs / no
  * render-phase work). */
@@ -911,6 +904,21 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     return out
   }, [nodeErrors, nodes, t])
 
+  // The single selected box, previewed in the inspector panel (name, note, and
+  // each output's value). Null when zero or several boxes are selected.
+  const previewNode = useMemo<InspectorPreviewNode | null>(() => {
+    const selected = nodes.filter((n) => n.selected)
+    if (selected.length !== 1) return null
+    const n = selected[0]
+    if (!n) return null
+    const cfg = n.data.config ?? {}
+    const label = typeof cfg['label'] === 'string' ? cfg['label'] : typeof cfg['name'] === 'string' ? cfg['name'] : ''
+    const meta = scenarioNodeMeta(n.data.kind)
+    const title = label || t(meta.labelKey, meta.defaultLabel)
+    const outputs = [...n.data.outputs, ...(derivedPortsOf(n.data)?.outputs ?? [])]
+    return { id: n.id, title, ...(n.data.note ? { note: n.data.note } : {}), outputs }
+  }, [nodes, t, derivedPortsOf])
+
   // Wire-ports for the link-drag "Add" submenu — the port the link filter
   // computed for the (folded) request / sub-scenario kinds, when each is
   // flow-compatible with the dragged port. `const` so the `!== undefined`
@@ -956,25 +964,13 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
           {t('scenario.invalid', { count: invalidCount, defaultValue: '{{count}} required input(s) not wired — scenario is not runnable' })}
         </div>
       )}
-      {workflowErrors.length > 0 && (
-        <div data-testid="scenario-error-panel" style={errorPanelStyle} className="nodrag nopan">
-          <div style={{ fontWeight: 600, marginBottom: 2 }}>
-            <i className="codicon codicon-error" aria-hidden="true" style={{ marginRight: 4 }} />
-            {t('scenario.validation.panelTitle', { count: nodeErrors.size, defaultValue: '{{count}} box error(s)' })}
-          </div>
-          {workflowErrors.map(({ nodeId, title, error }) => (
-            <button
-              key={`${nodeId}-${error.code}`}
-              type="button"
-              className="scn-error-row"
-              onClick={() => { void fitView({ nodes: [{ id: nodeId }], duration: 300, maxZoom: 1.2 }) }}
-              title={t('scenario.validation.focusBox', 'Focus this box')}
-            >
-              <span style={{ opacity: 0.8 }}>{title}</span> — {error.message}
-            </button>
-          ))}
-        </div>
-      )}
+      <ScenarioInspectorPanel
+        scenarioId={scenario.id}
+        errors={workflowErrors}
+        errorBoxCount={nodeErrors.size}
+        onFocusNode={(nodeId) => { void fitView({ nodes: [{ id: nodeId }], duration: 300, maxZoom: 1.2 }) }}
+        previewNode={previewNode}
+      />
       <ReactFlow
         nodes={nodes}
         edges={edges}

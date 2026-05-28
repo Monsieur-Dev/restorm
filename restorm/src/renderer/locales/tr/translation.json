@@ -923,6 +923,13 @@
     "usage": {
       "button": "Bu isteği kullanan senaryolar",
       "title": "Bu istek şu senaryolarda kullanılıyor:"
+    },
+    "inspector": {
+      "run": "Çalıştır",
+      "debug": "Hata Ayıkla",
+      "step": "Adım adım",
+      "noOutputs": "Bu kutunun çıktısı yok.",
+      "notRun": "Çıktısını görmek için kutuyu çalıştırın."
     }
   }
 }

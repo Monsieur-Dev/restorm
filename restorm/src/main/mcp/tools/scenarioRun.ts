@@ -156,12 +156,15 @@ export function cancelScenarioNode(scenarioId: string, nodeId: string): { cancel
   return { cancelled: true }
 }
 
-/** A box's last run result as its output context. For a `request` box that's
- * the request's history: { resolved request, raw restorm request, response }.
- * Null if it hasn't run (no history) yet. */
-export async function getScenarioNodeResult(scenarioId: string, nodeId: string): Promise<Record<string, unknown> | null> {
-  const { node } = locateNode(scenarioId, nodeId)
-  if (node.kind !== 'request') return null
+/** Per-kind preview-data resolver: each node kind defines how its inspector
+ * preview value is fetched. Option A — a strategy registry keyed by kind, so
+ * each box has one implementation, without forcing a class hierarchy onto the
+ * serialized node model. A kind with no resolver has no preview yet. */
+type PreviewResolver = (scenarioId: string, node: ScenarioNode) => Promise<Record<string, unknown> | null>
+
+/** `httpRequest` (and legacy `request`): the bound request's last send result —
+ * resolved request, raw restorm model, and response — read from its history. */
+const resolveRequestPreview: PreviewResolver = async (_scenarioId, node) => {
   const requestId = boundRequestId(node)
   if (!requestId) return null
   const entries = await responseHistoryService.list(requestId)
@@ -171,7 +174,7 @@ export async function getScenarioNodeResult(scenarioId: string, nodeId: string):
   const r = detail.response
   const raw = collectionStore.findById(requestId)
   return {
-    nodeId,
+    nodeId: node.id,
     requestId,
     historyGuid: detail.guid,
     timestamp: detail.timestamp,
@@ -195,6 +198,21 @@ export async function getScenarioNodeResult(scenarioId: string, nodeId: string):
       ...(r.error ? { error: r.error } : {})
     }
   }
+}
+
+/** Inspector-preview resolvers by node kind. Add a kind's resolver here to give
+ * its preview real data as the runner gains the ability to execute that kind. */
+const previewResolvers: Partial<Record<ScenarioNode['kind'], PreviewResolver>> = {
+  httpRequest: resolveRequestPreview,
+  request: resolveRequestPreview
+}
+
+/** A box's last run result as its output context, resolved per kind. Null when
+ * the kind has no preview resolver, or it hasn't produced a result yet. */
+export async function getScenarioNodeResult(scenarioId: string, nodeId: string): Promise<Record<string, unknown> | null> {
+  const { node } = locateNode(scenarioId, nodeId)
+  const resolver = previewResolvers[node.kind]
+  return resolver ? resolver(scenarioId, node) : null
 }
 
 export function registerScenarioRunTools(mcp: McpService): void {

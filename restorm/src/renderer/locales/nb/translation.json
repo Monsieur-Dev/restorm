@@ -923,6 +923,13 @@
     "usage": {
       "button": "Scenarier som bruker denne forespørselen",
       "title": "Denne forespørselen brukes i scenariene:"
+    },
+    "inspector": {
+      "run": "Kjør",
+      "debug": "Feilsøk",
+      "step": "Steg for steg",
+      "noOutputs": "Denne boksen har ingen utdata.",
+      "notRun": "Kjør boksen for å se utdataene."
     }
   }
 }

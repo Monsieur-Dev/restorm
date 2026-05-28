@@ -923,6 +923,13 @@
     "usage": {
       "button": "Scenari che usano questa richiesta",
       "title": "Questa richiesta è usata negli scenari:"
+    },
+    "inspector": {
+      "run": "Esegui",
+      "debug": "Debug",
+      "step": "Passo passo",
+      "noOutputs": "Questo riquadro non ha output.",
+      "notRun": "Esegui il riquadro per vederne l'output."
     }
   }
 }

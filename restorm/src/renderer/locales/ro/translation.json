@@ -924,6 +924,13 @@
     "usage": {
       "button": "Scenarii care folosesc această cerere",
       "title": "Această cerere este folosită în scenariile:"
+    },
+    "inspector": {
+      "run": "Rulează",
+      "debug": "Depanare",
+      "step": "Pas cu pas",
+      "noOutputs": "Această casetă nu are ieșire.",
+      "notRun": "Rulează caseta pentru a-i vedea ieșirea."
     }
   }
 }

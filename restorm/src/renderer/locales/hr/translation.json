@@ -924,6 +924,13 @@
     "usage": {
       "button": "Scenariji koji koriste ovaj zahtjev",
       "title": "Ovaj zahtjev koristi se u scenarijima:"
+    },
+    "inspector": {
+      "run": "Pokreni",
+      "debug": "Otklanjanje pogrešaka",
+      "step": "Korak po korak",
+      "noOutputs": "Ovaj okvir nema izlaz.",
+      "notRun": "Pokrenite okvir da vidite njegov izlaz."
     }
   }
 }

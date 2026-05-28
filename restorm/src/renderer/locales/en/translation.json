@@ -923,6 +923,13 @@
     "usage": {
       "button": "Scenarios using this request",
       "title": "This request is used in the scenarios:"
+    },
+    "inspector": {
+      "run": "Run",
+      "debug": "Debug",
+      "step": "Step",
+      "noOutputs": "This box has no output.",
+      "notRun": "Run the box to see its output."
     }
   }
 }
