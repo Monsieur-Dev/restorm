@@ -312,16 +312,6 @@
 /* A box field that is the target of a validation error — red outline. */
 .scn-field-invalid { border-radius: 4px; box-shadow: 0 0 0 1px #ef4444; }
 
-.scn-node-status {
-  font-size: 13px !important;
-  flex-shrink: 0;
-}
-.scn-node-status-running { color: #eab308 !important; animation: scn-spin 1.2s linear infinite; }
-.scn-node-status-ok { color: #22c55e !important; }
-.scn-node-status-error { color: #ef4444 !important; }
-
-@keyframes scn-spin { to { transform: rotate(360deg); } }
-
 /* Chevron toggle uses ECUI Button (handles focus + variants) — we only need
  * to nudge its background/opacity so it doesn't sit too loud inside the
  * header. */

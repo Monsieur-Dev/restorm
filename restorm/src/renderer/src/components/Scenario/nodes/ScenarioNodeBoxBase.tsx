@@ -23,7 +23,9 @@ export interface ScenarioNodeBoxData extends Record<string, unknown> {
   config?: Record<string, unknown>
   inputs: ScenarioPort[]
   outputs: ScenarioPort[]
-  /** Run status for the live-execution overlay (Phase 2); drives the badge. */
+  /** Run status for the live-execution overlay; populated when Phase 2
+   * lands the real runner. Currently only declared so call sites + the
+   * persistence layer can carry it without a follow-up refactor. */
   status?: 'idle' | 'running' | 'ok' | 'error'
   onToggleCollapse?: (id: string) => void
   /** Right-click on the header opens the node context menu at the cursor. */
@@ -96,13 +98,6 @@ export interface ScenarioNodeBoxBaseProps {
    * error (e.g. `now`), where an error anchor would be meaningless.
    */
   hasError?: boolean
-}
-
-const STATUS_GLYPH: Record<NonNullable<ScenarioNodeBoxData['status']>, string> = {
-  idle: '',
-  running: 'sync',
-  ok: 'pass-filled',
-  error: 'error'
 }
 
 /**
@@ -401,9 +396,6 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
           onClick={onToggle}
           options={{ ariaLabel: collapsed ? t('scenario.node.expand', 'Expand') : t('scenario.node.collapse', 'Collapse') }}
         />
-        {data.status && data.status !== 'idle' && (
-          <i className={`codicon codicon-${STATUS_GLYPH[data.status]} scn-node-status scn-node-status-${data.status}`} aria-hidden="true" />
-        )}
         {boxInError && (
           <span
             ref={errBadgeRef}

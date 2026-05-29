@@ -129,12 +129,16 @@ export async function runScenarioNode(scenarioId: string, nodeId: string): Promi
   if (running.has(key)) throw new Error(`node ${nodeId} is already running`)
   try {
     switch (node.kind) {
+      // Renderer persists request boxes as `httpRequest`; the older
+      // `request` kind is still accepted so any in-flight scenario file
+      // pre-rename keeps working.
+      case 'httpRequest':
       case 'request':
         return await executeRequest(node, key)
       case 'wait':
         return await executeWait(node, key)
       default:
-        throw new Error(`Running a '${node.kind}' box isn't implemented yet (request, wait so far)`)
+        throw new Error(`Running a '${node.kind}' box isn't implemented yet (httpRequest, wait so far)`)
     }
   } finally {
     running.delete(key)
