@@ -508,7 +508,8 @@
   "common": {
     "cancel": "Annuleren",
     "save": "Opslaan",
-    "remove": "Verwijderen"
+    "remove": "Verwijderen",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -941,7 +942,11 @@
       "noRunsHint": "Geen recente uitvoering voor dit verzoek — voer het hier uit om de scenario-preview te vullen.",
       "syntheticInfo": "Voorbeeldgegevens gegenereerd uit de documentatie van deze aanvraag.",
       "syntheticRunHint": "Voorbeeldgegevens — voer het verzoek uit om ze te vervangen door een echt resultaat.",
-      "stop": "Stop"
+      "stop": "Stop",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "logsShowAll": "Show all logs",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -955,6 +960,11 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Uitvoeringsparameters",
+      "run": "Uitvoeren",
+      "midRunTitle": "Invoer gevraagd"
     }
   }
 }

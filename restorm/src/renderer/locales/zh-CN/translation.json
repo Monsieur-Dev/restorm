@@ -507,7 +507,8 @@
   "common": {
     "cancel": "取消",
     "save": "保存",
-    "remove": "移除"
+    "remove": "移除",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -940,7 +941,11 @@
       "noRunsHint": "此请求暂无最近一次运行结果 — 从此处运行以填充场景预览。",
       "syntheticInfo": "从此请求的文档生成的示例数据。",
       "syntheticRunHint": "示例数据 — 执行请求以替换为真实结果。",
-      "stop": "停止"
+      "stop": "停止",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "logsShowAll": "Show all logs",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -954,6 +959,11 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "需要输入"
     }
   }
 }

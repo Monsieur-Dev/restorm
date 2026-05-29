@@ -508,7 +508,8 @@
   "common": {
     "cancel": "Annulla",
     "save": "Salva",
-    "remove": "Rimuovi"
+    "remove": "Rimuovi",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -941,7 +942,11 @@
       "noRunsHint": "Nessuna esecuzione recente per questa richiesta — eseguila da qui per popolare l'anteprima dello scenario.",
       "syntheticInfo": "Dati di esempio generati dalla documentazione di questa richiesta.",
       "syntheticRunHint": "Dati di esempio — esegui la richiesta per sostituirli con un risultato reale.",
-      "stop": "Ferma"
+      "stop": "Ferma",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "logsShowAll": "Show all logs",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -955,6 +960,11 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Parametri di esecuzione",
+      "run": "Esegui",
+      "midRunTitle": "Input richiesto"
     }
   }
 }

@@ -41,7 +41,7 @@ function str(v: unknown): string {
  * to a string. Self-contained so the module is usable from both renderer and
  * main (which loads scenarios from disk as plain JSON, never as instantiated
  * `ValueType` instances). */
-function concreteValue(persisted: unknown): unknown {
+export function concreteValue(persisted: unknown): unknown {
   if (persisted === null || persisted === undefined) return null
   if (typeof persisted !== 'object') return persisted
   const p = persisted as { type?: unknown; value?: unknown; label?: unknown; labels?: unknown }
@@ -191,6 +191,16 @@ export function resolveItems(
     const v = edge.selector ? resolveSelectorPath(sp, edge.selector) : sp
     return Array.isArray(v) ? v : null
   }
+  return literalConfigItems(cfg)
+}
+
+/** Resolve a list box's `items` from its CONFIG literal alone (no wired
+ * edge): a `customListMulti` yields its picked labels, an `enumList` its
+ * values. Returns `null` when the config carries no literal list. Shared
+ * by the static preview AND the runtime executors (`forEach` / `map` /
+ * `filter` / `aggregate`) so an unwired list box iterates over its
+ * configured items instead of nothing. */
+export function literalConfigItems(cfg: Record<string, unknown>): unknown[] | null {
   const lit = cfg['items']
   if (lit && typeof lit === 'object') {
     const p = lit as { type?: unknown; labels?: unknown; value?: unknown }

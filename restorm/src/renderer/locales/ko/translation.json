@@ -507,7 +507,8 @@
   "common": {
     "cancel": "취소",
     "save": "저장",
-    "remove": "제거"
+    "remove": "제거",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -940,7 +941,11 @@
       "noRunsHint": "이 요청의 최근 실행 결과가 없습니다 — 여기서 실행해 시나리오 미리보기를 채우세요.",
       "syntheticInfo": "이 요청의 문서에서 생성된 예시 데이터입니다.",
       "syntheticRunHint": "예시 데이터 — 실제 결과로 바꾸려면 요청을 실행하세요.",
-      "stop": "중지"
+      "stop": "중지",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "logsShowAll": "Show all logs",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -954,6 +959,11 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "입력 필요"
     }
   }
 }

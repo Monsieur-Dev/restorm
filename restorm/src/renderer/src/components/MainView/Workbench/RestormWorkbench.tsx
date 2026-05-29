@@ -655,6 +655,14 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       const scnFav = onToggleFavorite
         ? { isFavorite: isItemFavorite?.(scenario.id) ?? false, onToggleFavorite: () => { onToggleFavorite(scenario.id) } }
         : {}
+      // Drop the breadcrumb icon on the scenario itself (the last
+      // crumb) — the `circuit-board` glyph next to the H1 title reads
+      // as noise here; the SCENARIO badge already conveys the kind
+      // wherever it matters (sidebar, search). Ancestor crumbs keep
+      // their folder icons.
+      const scnBreadcrumbs = breadcrumbs.map((crumb, i) =>
+        i === breadcrumbs.length - 1 ? { ...crumb, icon: null } : crumb
+      )
       const scnTabs: Tab[] = [
         {
           id: 'graph',
@@ -664,6 +672,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             <div style={{ height: '100%', minHeight: 0 }}>
               <ScenarioEditorView
                 scenario={scenario}
+                {...(projectUuid ? { projectUuid } : {})}
                 {...(onScenarioChange ? { onScenarioChange } : {})}
                 {...(resolveBoundItem ? { resolveBoundItem } : {})}
                 {...(resolveRequestEnv ? { resolveRequestEnv } : {})}
@@ -695,7 +704,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         : null
       return (
         <RestormWorkbenchTab
-          breadcrumbs={breadcrumbs}
+          breadcrumbs={scnBreadcrumbs}
           onBreadcrumbClick={onBreadcrumbClick}
           onBreadcrumbAuxClick={onBreadcrumbAuxClick}
           onBreadcrumbRename={onItemRename}

@@ -507,7 +507,8 @@
   "common": {
     "cancel": "Hủy",
     "save": "Lưu",
-    "remove": "Xóa"
+    "remove": "Xóa",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -940,7 +941,11 @@
       "noRunsHint": "Chưa có lần chạy gần đây cho yêu cầu này — chạy nó từ đây để điền bản xem trước kịch bản.",
       "syntheticInfo": "Dữ liệu mẫu được tạo từ tài liệu của yêu cầu này.",
       "syntheticRunHint": "Dữ liệu mẫu — chạy yêu cầu để thay thế bằng kết quả thực.",
-      "stop": "Dừng"
+      "stop": "Dừng",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "logsShowAll": "Show all logs",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -954,6 +959,11 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Yêu cầu nhập liệu"
     }
   }
 }

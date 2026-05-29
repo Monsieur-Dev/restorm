@@ -508,7 +508,8 @@
   "common": {
     "cancel": "Ακύρωση",
     "save": "Αποθήκευση",
-    "remove": "Αφαίρεση"
+    "remove": "Αφαίρεση",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -941,7 +942,11 @@
       "noRunsHint": "Δεν υπάρχει πρόσφατη εκτέλεση για αυτό το αίτημα — εκτέλεσέ το από εδώ για να γεμίσεις την προεπισκόπηση του σεναρίου.",
       "syntheticInfo": "Δείγμα δεδομένων που δημιουργήθηκε από την τεκμηρίωση αυτού του αιτήματος.",
       "syntheticRunHint": "Δείγμα δεδομένων — εκτελέστε το αίτημα για να τα αντικαταστήσετε με πραγματικό αποτέλεσμα.",
-      "stop": "Διακοπή"
+      "stop": "Διακοπή",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "logsShowAll": "Show all logs",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -955,6 +960,11 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Απαιτείται είσοδος"
     }
   }
 }

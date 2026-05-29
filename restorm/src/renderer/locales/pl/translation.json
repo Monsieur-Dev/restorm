@@ -510,7 +510,8 @@
   "common": {
     "cancel": "Anuluj",
     "save": "Zapisz",
-    "remove": "Usuń"
+    "remove": "Usuń",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -943,7 +944,11 @@
       "noRunsHint": "Brak ostatniego wykonania dla tego żądania — uruchom je stąd, aby wypełnić podgląd scenariusza.",
       "syntheticInfo": "Przykładowe dane wygenerowane z dokumentacji tego żądania.",
       "syntheticRunHint": "Przykładowe dane — uruchom żądanie, aby zastąpić je rzeczywistym wynikiem.",
-      "stop": "Zatrzymaj"
+      "stop": "Zatrzymaj",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "logsShowAll": "Show all logs",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -957,6 +962,11 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Wymagane dane"
     }
   }
 }

@@ -1,0 +1,76 @@
+/*
+ * Inline backdrop + form panel for the run-parameters prompt. Scoped
+ * to the scenario tab via `position: absolute` against the editor's
+ * relative wrapper — the rest of the workbench (sidebar, other
+ * tabs) stays interactive.
+ */
+.scn-input-prompt-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: rgb(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+
+.scn-input-prompt {
+  background: var(--editorWidget-background, #252526);
+  border: 1px solid var(--editorWidget-border, #454545);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgb(0, 0, 0, 0.35);
+  width: min(480px, 100%);
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.scn-input-prompt-header {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--editorWidget-border, #454545);
+}
+
+.scn-input-prompt-body {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.scn-input-prompt-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scn-input-prompt-label {
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+.scn-input-prompt-input {
+  background: var(--input-background, #1e1e1e);
+  color: var(--input-foreground, #ccc);
+  border: 1px solid var(--input-border, #3c3c3c);
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-family: inherit;
+}
+
+.scn-input-prompt-input:focus {
+  outline: none;
+  border-color: var(--focusBorder, #0078d4);
+}
+
+.scn-input-prompt-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--editorWidget-border, #454545);
+}

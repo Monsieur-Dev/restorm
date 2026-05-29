@@ -6,6 +6,7 @@
 
 import Handlebars from 'handlebars'
 import type { NodeExecutor } from '../types'
+import { literalConfigItems, concreteValue } from '../../../shared/utils/scenarioStaticPreview'
 
 /** Arithmetic node: `op(a, b)` with op from config. */
 export const arithmeticExecutor: NodeExecutor = (act, ctx) => {
@@ -28,23 +29,27 @@ export const arithmeticExecutor: NodeExecutor = (act, ctx) => {
   return { outputs: [{ port: 'result', value }] }
 }
 
-/** Comparator: compares `left` and `right` via `op`, emits boolean. */
+/** Comparator: compares operands `a` and `b` via `op`, emits boolean
+ * on `result`. (Canonical port ids are `a` / `b` / `result`.) */
 export const comparatorExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { op?: string }
-  const l = act.inputs['left']
-  const r = act.inputs['right']
-  let value: boolean
-  switch (cfg.op) {
-    case 'lt': value = (l as number) < (r as number); break
-    case 'lte': value = (l as number) <= (r as number); break
-    case 'eq': value = l === r; break
-    case 'gte': value = (l as number) >= (r as number); break
-    case 'gt': value = (l as number) > (r as number); break
-    case 'ne': value = l !== r; break
-    case 'contains': value = String(l).includes(String(r)); break
-    default: value = l === r; break
+  const l = act.inputs['a']
+  const r = act.inputs['b']
+  return { outputs: [{ port: 'result', value: compare(cfg.op, l, r) }] }
+}
+
+/** Shared comparison used by comparator / if / assert. */
+function compare(op: string | undefined, l: unknown, r: unknown): boolean {
+  switch (op) {
+    case 'lt': return (l as number) < (r as number)
+    case 'lte': return (l as number) <= (r as number)
+    case 'eq': return l === r
+    case 'gte': return (l as number) >= (r as number)
+    case 'gt': return (l as number) > (r as number)
+    case 'ne': return l !== r
+    case 'contains': return stringifySafely(l).includes(stringifySafely(r))
+    default: return l === r
   }
-  return { outputs: [{ port: 'result', value }] }
 }
 
 /** Boolean node: `op(a, b)` → boolean. */
@@ -63,11 +68,18 @@ export const booleanExecutor: NodeExecutor = (act, ctx) => {
   return { outputs: [{ port: 'result', value }] }
 }
 
-/** If node: route to `then` or `else` based on the condition. The
- * passthrough port `value` carries the input value forward. */
-export const ifExecutor: NodeExecutor = (act) => {
-  const cond = Boolean(act.inputs['condition'])
-  const value = act.inputs['value']
+/** If node: compares operands `left` / `right` with the config
+ * operator, routing the trigger value to `then` / `else`. (Canonical
+ * inputs are `in` / `left` / `right`; outputs `then` / `else`.) When
+ * no operator/operands are wired, falls back to the truthiness of the
+ * `in` signal so a bare `if` still routes. */
+export const ifExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { op?: string }
+  const hasOperands = act.inputs['left'] !== undefined || act.inputs['right'] !== undefined
+  const cond = hasOperands
+    ? compare(cfg.op, act.inputs['left'], act.inputs['right'])
+    : Boolean(act.inputs['in'])
+  const value = act.inputs['in'] ?? act.inputs['left']
   return { outputs: [{ port: cond ? 'then' : 'else', value }] }
 }
 
@@ -99,13 +111,14 @@ export const nowExecutor: NodeExecutor = (_act, ctx) => {
   return { outputs: [{ port: 'value', value }] }
 }
 
-/** Set / Get variable: writes / reads the run's variable store. */
+/** Set / Get variable: writes / reads the run's variable store.
+ * `setVariable` emits a signal on `event` (canonical port id). */
 export const setVariableExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { name?: string }
   const name = cfg.name ?? ''
   const value = act.inputs['value']
   if (name) ctx.variables.set(name, value)
-  return { outputs: [{ port: 'value', value }] }
+  return { outputs: [{ port: 'event', value }] }
 }
 
 export const getVariableExecutor: NodeExecutor = (_act, ctx) => {
@@ -116,36 +129,41 @@ export const getVariableExecutor: NodeExecutor = (_act, ctx) => {
 }
 
 /** Object builder: assembles inputs (port id == property name) into
- * an object on the `value` port. */
+ * an object on the `object` port (canonical id). */
 export const objectExecutor: NodeExecutor = (act) => {
   const value: Record<string, unknown> = { ...act.inputs }
-  return { outputs: [{ port: 'value', value }] }
+  return { outputs: [{ port: 'object', value }] }
 }
 
 /** Log node: pushes one user-facing log entry; passes the value
  * through so the chain can continue. */
 export const logExecutor: NodeExecutor = (act, ctx) => {
-  const cfg = ctx.node.config as { level?: 'debug' | 'info' | 'warn' | 'error'; message?: string }
-  const data = act.inputs['data']
+  const cfg = ctx.node.config as { level?: 'debug' | 'info' | 'warn' | 'error'; message?: unknown; data?: unknown }
+  // `message` is persisted as a typed ValueType (`{ type, value }`), not a
+  // bare string — resolve it to its concrete string. Wired `data` wins;
+  // otherwise resolve the node's configured data value.
+  const resolvedMessage = concreteValue(cfg.message)
+  const message = typeof resolvedMessage === 'string' ? resolvedMessage : (resolvedMessage == null ? '' : stringifySafely(resolvedMessage))
+  const data = act.inputs['data'] !== undefined ? act.inputs['data'] : (cfg.data !== undefined ? concreteValue(cfg.data) : undefined)
   ctx.log({
     level: cfg.level ?? 'info',
     source: 'user',
     nodeId: ctx.node.id,
     scope: act.scope,
-    message: cfg.message ?? '',
+    message,
     data
   })
   return { outputs: [{ port: 'value', value: data }] }
 }
 
-/** Assert node: throws when the predicate is false, otherwise
- * forwards the value. The error port routes the failure when wired. */
+/** Assert node: compares operands `a` (actual) / `b` (expected) with
+ * the config operator, routing the trigger to `then` (pass) or `else`
+ * (fail). Canonical inputs `in` / `a` / `b`; outputs `then` / `else`. */
 export const assertExecutor: NodeExecutor = (act, ctx) => {
-  const cfg = ctx.node.config as { message?: string }
-  const ok = Boolean(act.inputs['condition'])
-  const value = act.inputs['value']
-  if (!ok) throw new Error(cfg.message ?? 'assertion failed')
-  return { outputs: [{ port: 'value', value }] }
+  const cfg = ctx.node.config as { op?: string }
+  const ok = compare(cfg.op ?? 'eq', act.inputs['a'], act.inputs['b'])
+  const value = act.inputs['in'] ?? act.inputs['a']
+  return { outputs: [{ port: ok ? 'then' : 'else', value }] }
 }
 
 /** Map node: applies a (statically-validated) transform to each item.
@@ -153,7 +171,7 @@ export const assertExecutor: NodeExecutor = (act, ctx) => {
  * config; future iterations will allow a template / sub-expression. */
 export const mapExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { property?: string }
-  const items = Array.isArray(act.inputs['items']) ? act.inputs['items'] : []
+  const items = Array.isArray(act.inputs['items']) ? act.inputs['items'] : (literalConfigItems(ctx.node.config) ?? [])
   const prop = cfg.property
   const value = prop
     ? items.map((it) => (it as Record<string, unknown> | null)?.[prop])
@@ -164,7 +182,7 @@ export const mapExecutor: NodeExecutor = (act, ctx) => {
 /** Filter node: keeps items satisfying a comparator predicate. */
 export const filterExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { property?: string; op?: string; value?: unknown }
-  const items = Array.isArray(act.inputs['items']) ? act.inputs['items'] : []
+  const items = Array.isArray(act.inputs['items']) ? act.inputs['items'] : (literalConfigItems(ctx.node.config) ?? [])
   const op = cfg.op ?? 'eq'
   const cmp = cfg.value
   const prop = cfg.property
@@ -189,9 +207,10 @@ export const filterExecutor: NodeExecutor = (act, ctx) => {
 export const transformExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { expression?: string }
   const tpl = cfg.expression ?? ''
-  if (tpl === '') return { outputs: [{ port: 'value', value: act.inputs['value'] }] }
+  // Canonical output port id is `out` (name "value").
+  if (tpl === '') return { outputs: [{ port: 'out', value: act.inputs['value'] }] }
   const value = renderHandlebars(tpl, { ...act.inputs, ...Object.fromEntries(ctx.variables) })
-  return { outputs: [{ port: 'value', value }] }
+  return { outputs: [{ port: 'out', value }] }
 }
 
 function renderHandlebars(template: string, ctx: Record<string, unknown>): string {

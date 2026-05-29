@@ -106,9 +106,10 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // determines the output type.
   transform: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'out', name: 'value', flow: 'value' }] },
   // Utilities
-  // A terminal sink: both inputs optional (wire either, or set inline), no
-  // output. `message` is a string, `data` any value.
-  log: { inputs: [{ id: 'message', name: 'message', dataType: 'string' }, { id: 'data', name: 'data' }], outputs: [] },
+  // A terminal sink: a header launch trigger (`in`) so it can be sequenced in
+  // a flow, plus two optional inputs (wire either, or set inline). `message` is
+  // a string, `data` any value. No output (terminal).
+  log: { inputs: [IN, { id: 'message', name: 'message', dataType: 'string' }, { id: 'data', name: 'data' }], outputs: [] },
   // An assertion compares two operands (`actual` / `expected`) with the same
   // operator toggle as `if`/`comparator`; both operands carry inline
   // value-selector fallbacks, so they aren't hard-required ports. A header

@@ -508,7 +508,8 @@
   "common": {
     "cancel": "Avbryt",
     "save": "Lagre",
-    "remove": "Fjern"
+    "remove": "Fjern",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -941,7 +942,11 @@
       "noRunsHint": "Ingen nylig kjøring for denne forespørselen — kjør den herfra for å fylle scenario-forhåndsvisningen.",
       "syntheticInfo": "Eksempeldata generert fra dokumentasjonen for denne forespørselen.",
       "syntheticRunHint": "Eksempeldata — kjør forespørselen for å erstatte dem med et reelt resultat.",
-      "stop": "Stopp"
+      "stop": "Stopp",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "logsShowAll": "Show all logs",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -955,6 +960,11 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Inndata kreves"
     }
   }
 }

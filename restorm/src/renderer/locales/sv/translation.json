@@ -508,7 +508,8 @@
   "common": {
     "cancel": "Avbryt",
     "save": "Spara",
-    "remove": "Ta bort"
+    "remove": "Ta bort",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -941,7 +942,11 @@
       "noRunsHint": "Ingen nyligen utförd körning för denna förfrågan — kör den härifrån för att fylla scenariot.",
       "syntheticInfo": "Exempeldata genererad från denna förfrågans dokumentation.",
       "syntheticRunHint": "Exempeldata — kör förfrågan för att ersätta dem med ett verkligt resultat.",
-      "stop": "Stopp"
+      "stop": "Stopp",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "logsShowAll": "Show all logs",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -955,6 +960,11 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Inmatning krävs"
     }
   }
 }

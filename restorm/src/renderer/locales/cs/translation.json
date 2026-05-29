@@ -510,7 +510,8 @@
   "common": {
     "cancel": "Zrušit",
     "save": "Uložit",
-    "remove": "Odebrat"
+    "remove": "Odebrat",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -943,7 +944,11 @@
       "noRunsHint": "Žádné nedávné spuštění tohoto požadavku — spusťte jej zde a naplňte náhled scénáře.",
       "syntheticInfo": "Příklad dat vygenerovaný z dokumentace tohoto požadavku.",
       "syntheticRunHint": "Příklad dat — spusťte požadavek, abyste je nahradili skutečným výsledkem.",
-      "stop": "Zastavit"
+      "stop": "Zastavit",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "logsShowAll": "Show all logs",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -957,6 +962,11 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Vyžadována vstupní data"
     }
   }
 }

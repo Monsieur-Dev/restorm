@@ -508,7 +508,8 @@
   "common": {
     "cancel": "Annullér",
     "save": "Gem",
-    "remove": "Fjern"
+    "remove": "Fjern",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -941,7 +942,11 @@
       "noRunsHint": "Ingen nylig kørsel af denne anmodning — kør den herfra for at udfylde scenarie-forhåndsvisningen.",
       "syntheticInfo": "Eksempeldata genereret ud fra dokumentationen for denne anmodning.",
       "syntheticRunHint": "Eksempeldata — kør anmodningen for at erstatte den med et rigtigt resultat.",
-      "stop": "Stop"
+      "stop": "Stop",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "logsShowAll": "Show all logs",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -955,6 +960,11 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Input påkrævet"
     }
   }
 }

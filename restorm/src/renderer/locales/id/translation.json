@@ -507,7 +507,8 @@
   "common": {
     "cancel": "Batal",
     "save": "Simpan",
-    "remove": "Hapus"
+    "remove": "Hapus",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -940,7 +941,11 @@
       "noRunsHint": "Belum ada eksekusi terbaru untuk permintaan ini — jalankan dari sini untuk mengisi pratinjau skenario.",
       "syntheticInfo": "Contoh data yang dihasilkan dari dokumentasi permintaan ini.",
       "syntheticRunHint": "Contoh data — jalankan permintaan untuk menggantinya dengan hasil nyata.",
-      "stop": "Hentikan"
+      "stop": "Hentikan",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "logsShowAll": "Show all logs",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -954,6 +959,11 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Input diminta"
     }
   }
 }

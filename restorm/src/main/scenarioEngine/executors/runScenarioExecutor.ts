@@ -14,15 +14,32 @@ import type { NodeExecutor } from '../types'
 export const runScenarioExecutor: NodeExecutor = async (act, ctx) => {
   const cfg = ctx.node.config as { scenarioId?: string }
   if (typeof cfg.scenarioId !== 'string') throw new Error(`runScenario node ${ctx.node.id} has no bound scenarioId`)
+  // Derived input ports are named `param:<name>` (see
+  // `deriveRunScenarioPorts`). Strip that prefix so the sub-scenario's
+  // `input` node — keyed by the bare param name — actually receives the
+  // wired value (e.g. a `forEach` `each` → `param:name` feeds the
+  // sub-scenario's `name`). Bare keys (legacy) pass through unchanged.
   const params: Record<string, unknown> = {}
   for (const [k, v] of Object.entries(act.inputs)) {
     if (v === undefined) continue
-    params[k] = v
+    const key = k.startsWith('param:') ? k.slice('param:'.length) : k
+    params[key] = v
   }
-  const outputs = await ctx.runSubScenario(cfg.scenarioId, params)
-  // Emit each output port from the sub-scenario as its own emission.
-  // The renderer derives the run-scenario node's outputs from the
-  // sub-scenario's output nodes, so the names should line up.
-  const emissions = Object.entries(outputs).map(([port, value]) => ({ port, value }))
+  // Pass our own abort signal so cancelling THIS run cascades into the
+  // sub-scenario (its in-flight HTTP / wait timers abort too) — without
+  // it, a Stop on the parent leaves the sub-run executing.
+  const outputs = await ctx.runSubScenario(cfg.scenarioId, params, ctx.signal)
+  // The runScenario node derives one output port per sub-scenario
+  // `output` node, with id `output:<name>` (see `deriveRunScenarioPorts`).
+  // Emit on those derived ids; also emit the whole map on the default
+  // `result` port so a node wired to `result` still receives the bundle.
+  // ALWAYS emit a `done` completion signal too: when the sub-scenario has
+  // no `output` node, the box exposes a single `done` ("Ensuite") trigger
+  // — without this emission, wiring it would never fire the next node.
+  const emissions = [
+    { port: 'result', value: outputs },
+    { port: 'done', value: outputs },
+    ...Object.entries(outputs).map(([name, value]) => ({ port: `output:${name}`, value }))
+  ]
   return { outputs: emissions }
 }

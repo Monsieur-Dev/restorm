@@ -509,7 +509,8 @@
   "common": {
     "cancel": "Anulează",
     "save": "Salvează",
-    "remove": "Elimină"
+    "remove": "Elimină",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -942,7 +943,11 @@
       "noRunsHint": "Nicio rulare recentă pentru această cerere — rulează-o de aici ca să populezi previzualizarea scenariului.",
       "syntheticInfo": "Date de exemplu generate din documentația acestei cereri.",
       "syntheticRunHint": "Date de exemplu — rulați cererea pentru a le înlocui cu un rezultat real.",
-      "stop": "Oprește"
+      "stop": "Oprește",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "logsShowAll": "Show all logs",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -956,6 +961,11 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Date solicitate"
     }
   }
 }

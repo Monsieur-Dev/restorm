@@ -510,7 +510,8 @@
   "common": {
     "cancel": "Скасувати",
     "save": "Зберегти",
-    "remove": "Вилучити"
+    "remove": "Вилучити",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -943,7 +944,11 @@
       "noRunsHint": "Немає недавнього виконання для цього запиту — запусти його звідси, щоб заповнити прев'ю сценарію.",
       "syntheticInfo": "Приклад даних, згенерований з документації цього запиту.",
       "syntheticRunHint": "Приклад даних — виконайте запит, щоб замінити їх реальним результатом.",
-      "stop": "Зупинити"
+      "stop": "Зупинити",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "logsShowAll": "Show all logs",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -957,6 +962,11 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Потрібен ввід"
     }
   }
 }

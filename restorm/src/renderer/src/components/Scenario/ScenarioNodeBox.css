@@ -49,7 +49,8 @@
 .scn-inspector-errors {
   flex: 0 0 auto;
 }
-.scn-inspector-preview {
+.scn-inspector-preview,
+.scn-inspector-logs {
   flex: 1 1 auto;
   min-height: 0;
 }
@@ -73,6 +74,52 @@
   align-items: center;
   gap: 6px;
 }
+
+/* Run-logs panel (shown when no box is selected). */
+.scn-inspector-logs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.scn-inspector-logs-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  opacity: 0.9;
+  margin: 4px 0;
+  cursor: pointer;
+}
+.scn-log-line {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+.scn-log-ts {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.55;
+  font-size: 11px;
+  flex: 0 0 auto;
+}
+.scn-log-msg {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Colored level dot rendered as the row's icon. */
+.scn-log-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--scn-log-dot-color, #888);
+}
+.scn-log-dot-debug { --scn-log-dot-color: #8a8a8a; }
+.scn-log-dot-info  { --scn-log-dot-color: #3794ff; }
+.scn-log-dot-warn  { --scn-log-dot-color: #e0a030; }
+.scn-log-dot-error { --scn-log-dot-color: #f14c4c; }
 .scn-inspector-note {
   opacity: 0.8;
   white-space: pre-wrap;

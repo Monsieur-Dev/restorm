@@ -21,6 +21,7 @@ import { httpExecutionService, type HTTPExecutionInput } from '../../services/HT
 import { responseHistoryService } from '../../services/ResponseHistoryService'
 import { flushRequestStateToContext } from '../../mcp/tools/execute'
 import { isHTTPRequest, isAuthenticationRequest } from '../../../shared/types/collections'
+import type { Request } from '../../../shared/types/collections'
 import type { NodeExecutor } from '../types'
 
 export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
@@ -30,20 +31,22 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
   if (!req) throw new Error(`bound request ${cfg.requestId} not found`)
   if (!isHTTPRequest(req)) throw new Error(`bound request ${cfg.requestId} is not HTTP (${(req as { type?: string }).type})`)
 
-  flushRequestStateToContext(req)
-
-  // Slot short-circuit: each input port name maps to a request slot.
-  // Map them onto an override structure the execution service knows
-  // how to merge.
-  const overrides = readSlotOverrides(act.inputs)
+  // Slot short-circuit: a wired input port whose id is `pathParams:<key>`
+  // / `headers:<key>` / `params:<key>` / `body` overrides that slot's
+  // value. We apply the overrides onto a shallow CLONE of the request,
+  // then flush THAT clone into the ContextService so the executor's
+  // env + Handlebars resolution (incl. `{{name}}` path-param lookup)
+  // sees the wired value — exactly the "résolution classique
+  // court-circuitée slot par slot" the spec asks for.
+  const effectiveReq = applySlotOverrides(req, act.inputs)
+  flushRequestStateToContext(effectiveReq)
 
   const authId = req.authenticationRequestId
   const auth = authId ? collectionStore.findById(authId) : null
   const input: HTTPExecutionInput = {
     requestId: req.id,
     method: req.method,
-    ...(auth && isAuthenticationRequest(auth) ? { authRequest: auth } : {}),
-    ...(overrides ? { runtimeOverrides: overrides } : {})
+    ...(auth && isAuthenticationRequest(auth) ? { authRequest: auth } : {})
   }
 
   // Cancellation: HTTPExecutionService.cancel(req.id) is the existing
@@ -56,56 +59,79 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
   ctx.signal.removeEventListener('abort', onAbort)
   await responseHistoryService.storeExecutionResult(req.id, 'http', result)
 
+  // The `response` port carries the SAME `{ request, response }` shape the
+  // JSON-path picker shows (see `getScenarioNodeResult` in
+  // `mcp/tools/scenarioRun.ts`). Keeping the runtime token and the picker
+  // context identical is what makes a picker-built selector like
+  // `response.body.data.cooldown.total_seconds` resolve at run time.
+  //
+  // `result.body` is the raw response string; `resolveSelectorPath` parses
+  // it lazily when a selector drills past `response.body`.
   return {
     outputs: [
       {
         port: 'response',
         value: {
-          status: result.statusCode ?? 0,
-          statusText: result.statusText ?? '',
-          headers: (result.responseHeaders ?? {}) as Record<string, string>,
-          body: result.responseBody as unknown,
-          durationMs: result.timings.durationMs,
-          success: result.success
+          request: {
+            url: result.requestUrl,
+            method: req.method,
+            headers: result.requestHeaders ?? {}
+          },
+          response: {
+            status: result.statusCode ?? 0,
+            statusText: result.statusText ?? '',
+            headers: result.headers ?? {},
+            body: result.body,
+            durationMs: result.timings.durationMs,
+            success: result.success,
+            ...(result.error !== undefined ? { error: result.error } : {})
+          }
         }
       }
     ]
   }
 }
 
+interface KV { key: string; value?: unknown; enabled?: boolean }
+
 /**
- * Per-slot overrides extracted from the activation inputs. The
- * runtime override map is read by HTTPExecutionService — slots not
- * present here fall back to the request's persisted (env-resolved)
- * value.
+ * Return the request to flush + execute, with any wired slot inputs
+ * applied. Input port ids mirror the editor + MCP slot ports:
+ * `pathParams:<key>`, `headers:<key>`, `params:<key>`, `body`. When
+ * nothing is wired, the original request is returned unchanged. The
+ * clone is shallow per-array so the persisted request is never
+ * mutated.
  */
-function readSlotOverrides(inputs: Record<string, unknown>): {
-  url?: string
-  body?: unknown
-  headers?: Record<string, string>
-  params?: Record<string, string>
-  pathParams?: Record<string, string>
-} | undefined {
-  const out: Record<string, unknown> = {}
-  for (const [k, v] of Object.entries(inputs)) {
-    if (v === undefined) continue
-    if (k === 'url' && typeof v === 'string') out['url'] = v
-    else if (k === 'body') out['body'] = v
-    else if (k.startsWith('header.')) {
-      const h = (out['headers'] as Record<string, string> | undefined) ?? {}
-      h[k.slice('header.'.length)] = stringifyToWire(v)
-      out['headers'] = h
-    } else if (k.startsWith('param.')) {
-      const p = (out['params'] as Record<string, string> | undefined) ?? {}
-      p[k.slice('param.'.length)] = stringifyToWire(v)
-      out['params'] = p
-    } else if (k.startsWith('path.')) {
-      const p = (out['pathParams'] as Record<string, string> | undefined) ?? {}
-      p[k.slice('path.'.length)] = stringifyToWire(v)
-      out['pathParams'] = p
-    }
+function applySlotOverrides(req: Request, inputs: Record<string, unknown>): Request {
+  const slotKeys = Object.keys(inputs).filter((k) => isSlotPort(k) && inputs[k] !== undefined)
+  if (slotKeys.length === 0) return req
+  const http = req as unknown as { pathParams?: KV[]; headers?: KV[]; params?: KV[]; body?: unknown }
+  const clone = Object.assign(Object.create(Object.getPrototypeOf(req) as object), req, {
+    pathParams: cloneKVs(http.pathParams),
+    headers: cloneKVs(http.headers),
+    params: cloneKVs(http.params)
+  }) as unknown as { pathParams: KV[]; headers: KV[]; params: KV[]; body?: unknown }
+  for (const portId of slotKeys) {
+    const value = inputs[portId]
+    if (portId === 'body') { clone.body = value; continue }
+    const sep = portId.indexOf(':')
+    const group = portId.slice(0, sep)
+    const key = portId.slice(sep + 1)
+    const arr = group === 'pathParams' ? clone.pathParams : group === 'headers' ? clone.headers : group === 'params' ? clone.params : null
+    if (!arr) continue
+    const existing = arr.find((kv) => kv.key === key)
+    if (existing) existing.value = stringifyToWire(value)
+    else arr.push({ key, value: stringifyToWire(value), enabled: true })
   }
-  return Object.keys(out).length > 0 ? out as ReturnType<typeof readSlotOverrides> : undefined
+  return clone as unknown as Request
+}
+
+function isSlotPort(portId: string): boolean {
+  return portId === 'body' || portId.startsWith('pathParams:') || portId.startsWith('headers:') || portId.startsWith('params:')
+}
+
+function cloneKVs(kvs: KV[] | undefined): KV[] {
+  return (kvs ?? []).map((kv) => ({ ...kv }))
 }
 
 function stringifyToWire(v: unknown): string {

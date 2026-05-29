@@ -31,11 +31,37 @@ import {
 import { httpRequestExecutor } from './httpRequestExecutor'
 import { runScenarioExecutor } from './runScenarioExecutor'
 
-/** Pure passthrough — an `input` node just forwards its (resolved
- * default OR provided param) value to the `value` port. The seed
- * activation set up by the scheduler already places the value in
- * `inputs.value`. */
-const inputPassthroughExecutor: NodeExecutor = (act) => ({ outputs: [{ port: 'value', value: act.inputs['value'] }] })
+/** An `input` node either: (a) seeded at run start with the user's
+ * up-front value (the editor's pre-run modal) — pure passthrough; or
+ * (b) activated mid-run because an upstream node fed a value into it
+ * — in that case we surface a single-field prompt so the user can
+ * confirm / edit before the value flows downstream. The `seeded`
+ * flag on the activation distinguishes the two paths. */
+const inputExecutor: NodeExecutor = async (act, ctx) => {
+  // The seed activation already carries the `{ [name]: value }` shape
+  // (see `Scheduler.seedRoots`); pass it through verbatim.
+  if (act.seeded === true) return { outputs: [{ port: 'value', value: act.inputs['value'] }] }
+  const cfg = ctx.node.config as { name?: string; valueType?: { type?: string } }
+  const name = typeof cfg.name === 'string' && cfg.name !== '' ? cfg.name : 'value'
+  const value = await ctx.requestUserInput({
+    name: cfg.name ?? ctx.node.id,
+    defaultValue: act.inputs['value'],
+    hint: inferHint(cfg.valueType?.type)
+  })
+  // Wrap to match the static preview shape so a wired selector
+  // (auto-deduced to the param name) resolves the same as the seeded path.
+  return { outputs: [{ port: 'value', value: { [name]: value } }] }
+}
+
+function inferHint(t: string | undefined): 'string' | 'number' | 'boolean' | 'object' {
+  switch (t) {
+    case 'number': return 'number'
+    case 'boolean': return 'boolean'
+    case 'object': return 'object'
+    case 'string':
+    default: return 'string'
+  }
+}
 
 /** `output` node: forwards its incoming value to the run's result
  * map. Wired by the engine container — here we just emit on the
@@ -73,7 +99,7 @@ function pickExecutor(kind: string): NodeExecutor {
     case 'httpRequest':
     case 'request': return httpRequestExecutor
     case 'runScenario': return runScenarioExecutor
-    case 'input': return inputPassthroughExecutor
+    case 'input': return inputExecutor
     case 'output': return outputPassthroughExecutor
     default: throw new Error(`no executor for kind '${kind}'`)
   }

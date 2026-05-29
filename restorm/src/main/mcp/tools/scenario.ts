@@ -59,8 +59,41 @@ function effectivePorts(node: ScenarioNode): { inputs: ScenarioPort[]; outputs: 
     const derived = deriveRunScenarioPorts(sub as unknown as Parameters<typeof deriveRunScenarioPorts>[0])
     return { inputs: [...node.inputs, ...derived.inputs], outputs: [...node.outputs, ...derived.outputs] }
   }
+  if (node.kind === 'httpRequest' || node.kind === 'request') {
+    // Each writable slot of the bound request (path param / header /
+    // query param / body) is exposed as a derived input port so a link
+    // can short-circuit its resolution. Port ids mirror the renderer's
+    // RequestNodeBox: `pathParams:<key>`, `headers:<key>`,
+    // `params:<key>`, `body`. The engine's httpRequest executor reads
+    // these same ids.
+    return { inputs: [...node.inputs, ...deriveRequestSlotPorts(node)], outputs: node.outputs }
+  }
   return { inputs: node.inputs, outputs: node.outputs }
 }
+
+/** Derived input ports for an httpRequest node's writable slots. */
+function deriveRequestSlotPorts(node: ScenarioNode): ScenarioPort[] {
+  const requestId = typeof node.config['requestId'] === 'string' ? node.config['requestId'] : undefined
+  if (!requestId) return []
+  const req = collectionStore.findById(requestId) as { headers?: KV[]; params?: KV[]; pathParams?: KV[]; body?: unknown } | null
+  if (!req) return []
+  const ports: ScenarioPort[] = []
+  const add = (prefix: 'pathParams' | 'headers' | 'params', kvs: KV[] | undefined): void => {
+    for (const kv of kvs ?? []) {
+      if (kv.enabled === false || !kv.key) continue
+      ports.push({ id: `${prefix}:${kv.key}`, name: kv.key, dataType: 'any', flow: 'value' })
+    }
+  }
+  add('pathParams', req.pathParams)
+  add('headers', req.headers)
+  add('params', req.params)
+  if (req.body !== undefined && req.body !== null) {
+    ports.push({ id: 'body', name: 'body', dataType: 'any', flow: 'value' })
+  }
+  return ports
+}
+
+interface KV { key: string; value?: unknown; enabled?: boolean }
 
 /** Push the mutated scenario to any open editor + sidebar, then autosave. */
 function broadcastScenario(scenario: Scenario): void {
@@ -337,19 +370,27 @@ export function registerScenarioTools(mcp: McpService): void {
       if (explicitSelector === undefined) {
         const outFlow = outputPortFlow(fromPorts.outputs, fromPortId, fromNode.kind)
         const inFlow = inputPortFlow(toPorts.inputs, toPortId, toNode.kind)
-        if (inFlow === 'value' && outFlow !== 'signal' && expectsObjectInput(toNode.kind, toPortId)) {
-          // Object-context input — default to the identity selector `.`.
-          autoSelector = '.'
-        } else if (inFlow === 'value' && outFlow !== 'signal' && STATIC_PREVIEW_KINDS.has(fromNode.kind)) {
-          const previewNodes = scenario.nodes.map((n) => ({ id: n.id, kind: n.kind, config: n.config }))
-          const previewEdges: StaticPreviewEdge[] = scenario.edges.map((e) => ({
-            from: e.from,
-            to: e.to,
-            ...(e.selector !== undefined ? { selector: e.selector } : {})
-          }))
-          const preview = staticScenarioPreview({ id: fromNode.id, kind: fromNode.kind, config: fromNode.config }, previewNodes, previewEdges)
-          const path = preview ? singleDeepPath(preview) : null
-          if (path) autoSelector = path
+        if (inFlow === 'value' && outFlow !== 'signal') {
+          if (expectsObjectInput(toNode.kind, toPortId)) {
+            // Object-context input — default to the identity selector `.`.
+            autoSelector = '.'
+          } else if (STATIC_PREVIEW_KINDS.has(fromNode.kind)) {
+            const previewNodes = scenario.nodes.map((n) => ({ id: n.id, kind: n.kind, config: n.config }))
+            const previewEdges: StaticPreviewEdge[] = scenario.edges.map((e) => ({
+              from: e.from,
+              to: e.to,
+              ...(e.selector !== undefined ? { selector: e.selector } : {})
+            }))
+            const preview = staticScenarioPreview({ id: fromNode.id, kind: fromNode.kind, config: fromNode.config }, previewNodes, previewEdges)
+            const path = preview ? singleDeepPath(preview) : null
+            // Default to identity `.` when no single-deep path is deducible.
+            autoSelector = path ?? '.'
+          } else {
+            // Runtime-only source (httpRequest response, forEach `each`, …):
+            // default to identity `.` so the data link isn't left without a
+            // selector (which trips the "needs a JSON path" validation).
+            autoSelector = '.'
+          }
         }
       }
       const edge: ScenarioEdge = {

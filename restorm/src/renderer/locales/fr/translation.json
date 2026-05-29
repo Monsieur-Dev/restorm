@@ -508,7 +508,8 @@
   "common": {
     "cancel": "Annuler",
     "save": "Enregistrer",
-    "remove": "Supprimer"
+    "remove": "Supprimer",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -941,7 +942,11 @@
       "noRunsHint": "Pas d'exécution récente pour cette requête — exécutez-la d'ici pour alimenter l'aperçu du scénario.",
       "syntheticInfo": "Données d'exemple générées à partir de la documentation de cette requête.",
       "syntheticRunHint": "Données d'exemple — exécutez la requête pour les remplacer par un vrai résultat.",
-      "stop": "Arrêter"
+      "stop": "Arrêter",
+      "logsTitle": "Logs d'exécution",
+      "copyLogs": "Copier les logs",
+      "logsShowAll": "Afficher tous les logs",
+      "noUserLogs": "Aucun log utilisateur (entrées de l'action Log) dans ce run."
     },
     "now": {
       "timezone": "Fuseau horaire",
@@ -955,6 +960,11 @@
     "callers": {
       "button": "Scénarios qui appellent ce scénario",
       "title": "Ce scénario est appelé par :"
+    },
+    "runPrompt": {
+      "title": "Paramètres d'exécution",
+      "run": "Exécuter",
+      "midRunTitle": "Saisie demandée"
     }
   }
 }

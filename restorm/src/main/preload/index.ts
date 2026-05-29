@@ -894,6 +894,12 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.invoke('scenario:engine:abort', runId, reason) as Promise<{ ok: boolean }>,
     scenarioEngineReadLog: (runId: string): Promise<unknown[]> =>
       ipcRenderer.invoke('scenario:engine:read-log', runId) as Promise<unknown[]>,
+    /** The run + every sub-run it launched, each with metadata + log —
+     * powers the inspector's run-logs panel (incl. sub-scenario logs). */
+    scenarioEngineRunTree: (runId: string): Promise<unknown[]> =>
+      ipcRenderer.invoke('scenario:engine:run-tree', runId) as Promise<unknown[]>,
+    scenarioEngineResolveUserInput: (runId: string, requestId: string, value: unknown): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke('scenario:engine:resolve-user-input', runId, requestId, value) as Promise<{ ok: boolean }>,
     /** Subscribe to engine events (node-started/-completed/data-flow/run-…).
      * Returns an unsubscribe function. The renderer animates the graph
      * + edge beams off these events. */

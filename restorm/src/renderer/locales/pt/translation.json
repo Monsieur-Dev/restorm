@@ -508,7 +508,8 @@
   "common": {
     "cancel": "Cancelar",
     "save": "Guardar",
-    "remove": "Remover"
+    "remove": "Remover",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -941,7 +942,11 @@
       "noRunsHint": "Sem execução recente para esta requisição — execute-a daqui para preencher a pré-visualização do cenário.",
       "syntheticInfo": "Dados de exemplo gerados a partir da documentação desta requisição.",
       "syntheticRunHint": "Dados de exemplo — execute a requisição para substituí-los por um resultado real.",
-      "stop": "Parar"
+      "stop": "Parar",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "logsShowAll": "Show all logs",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -955,6 +960,11 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Parâmetros de execução",
+      "run": "Executar",
+      "midRunTitle": "Entrada solicitada"
     }
   }
 }

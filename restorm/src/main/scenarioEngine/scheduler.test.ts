@@ -91,7 +91,36 @@ describe('Scheduler foundations', () => {
     expect(order[2]).toBe('sink:{"x":"A","y":"B"}')
   })
 
-  it('fires a downstream node only when ALL required inputs are present', async () => {
+  it('fires a downstream node only when ALL WIRED inputs are present', async () => {
+    // Both x and y are wired, but only `a` emits — `b` is wired yet
+    // never fires, so sink must wait forever (edge-driven
+    // requiredness: a port is required iff it has an incoming edge).
+    const scenario = buildScenario(
+      [
+        { id: 'a', kind: 'now', outputs: ['value'] },
+        { id: 'b', kind: 'now', outputs: ['value'] },
+        { id: 'sink', kind: 'object', inputs: ['x', 'y'], outputs: ['value'] }
+      ],
+      [
+        { from: ['a', 'value'], to: ['sink', 'x'] },
+        { from: ['b', 'value'], to: ['sink', 'y'] }
+      ]
+    )
+    const sinkRan = vi.fn()
+    const executors = new Map<string, NodeExecutor>([
+      ['a', () => ({ outputs: [{ port: 'value', value: 1 }] })],
+      // `b` is a root that fires but emits NOTHING on its `value`
+      // port — so the wired `sink.y` edge never carries a token and
+      // sink must keep waiting.
+      ['b', () => ({ outputs: [] })],
+      ['sink', (act) => { sinkRan(act); return { outputs: [] } }]
+    ])
+    const s = new Scheduler({ scenario, executors })
+    await s.run()
+    expect(sinkRan).not.toHaveBeenCalled()
+  })
+
+  it('an unwired input port is not awaited — a node fires on its wired inputs alone', async () => {
     const scenario = buildScenario(
       [
         { id: 'a', kind: 'now', outputs: ['value'] },
@@ -106,7 +135,9 @@ describe('Scheduler foundations', () => {
     ])
     const s = new Scheduler({ scenario, executors })
     await s.run()
-    expect(sinkRan).not.toHaveBeenCalled()
+    // `y` was never wired → not awaited → sink fires with just x.
+    expect(sinkRan).toHaveBeenCalledTimes(1)
+    expect((sinkRan.mock.calls[0]?.[0] as { inputs: Record<string, unknown> }).inputs).toEqual({ x: 1 })
   })
 
   it('aborts cooperatively: in-flight executors observe AbortSignal and the run lands cancelled', async () => {
@@ -399,5 +430,44 @@ describe('AC2 — loop termination via if + return edge', () => {
     // net, (c) inc fires at least 3 times.
     expect(s.status().state).toBe('completed')
     expect(counter).toBeGreaterThanOrEqual(3)
+  })
+})
+
+// ------------------------------------------------------------------
+// AND-join barrier — several "ensuite" edges into one `in`
+// ------------------------------------------------------------------
+
+describe('AND-join barrier on `in`', () => {
+  it('two forward branches into one `in` wait for both, fire the target once', async () => {
+    // `fork` fans out to two branches; both branches' `then` edges
+    // converge on `target.in`. This is a synchronisation barrier:
+    // target must wait for BOTH branches and run a SINGLE time — not
+    // once per arriving branch. (If the user wanted two runs they'd
+    // use two target boxes.)
+    const scenario = buildScenario(
+      [
+        { id: 'fork', kind: 'now', outputs: ['value'] },
+        { id: 'branchA', kind: 'now', inputs: ['in'], outputs: ['out'] },
+        { id: 'branchB', kind: 'now', inputs: ['in'], outputs: ['out'] },
+        { id: 'target', kind: 'now', inputs: ['in'], outputs: ['value'] }
+      ],
+      [
+        { from: ['fork', 'value'], to: ['branchA', 'in'] },
+        { from: ['fork', 'value'], to: ['branchB', 'in'] },
+        { from: ['branchA', 'out'], to: ['target', 'in'] },
+        { from: ['branchB', 'out'], to: ['target', 'in'] }
+      ]
+    )
+    let targetRuns = 0
+    const executors = new Map<string, NodeExecutor>([
+      ['fork', () => ({ outputs: [{ port: 'value', value: 1 }] })],
+      ['branchA', (act) => ({ outputs: [{ port: 'out', value: act.inputs['in'] }] })],
+      ['branchB', (act) => ({ outputs: [{ port: 'out', value: act.inputs['in'] }] })],
+      ['target', () => { targetRuns += 1; return { outputs: [] } }]
+    ])
+    const s = new Scheduler({ scenario, executors })
+    await s.run()
+    expect(s.status().state).toBe('completed')
+    expect(targetRuns).toBe(1)
   })
 })

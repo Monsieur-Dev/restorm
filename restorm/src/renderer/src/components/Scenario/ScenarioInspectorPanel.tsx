@@ -1,6 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, ListView } from 'electron-core-ui/renderer'
+import { Button, ListView, Toggle, type ListViewItemData } from 'electron-core-ui/renderer'
+import type { ScenarioLogEntry } from '../../hooks/useScenarioEngine'
 import type { ScenarioPort } from '../../../../shared/types/collections'
 import type { ScenarioNodeError } from './scenarioValidation'
 import { buildScenarioPathTree } from './scenarioPathTree'
@@ -97,6 +98,9 @@ export interface ScenarioInspectorPanelProps {
   onEngineResume?: () => void
   onEngineStep?: () => void
   onEngineStop?: () => void
+  /** Chronological run log (current or last run, whole tree merged).
+   * Shown in the panel body when NO box is selected. */
+  runLog?: readonly ScenarioLogEntry[]
 }
 
 interface ScenarioRuntime {
@@ -117,9 +121,13 @@ function scenarioRuntime(): ScenarioRuntime | undefined {
  * data + tree as the JSON-path selector's picker popover). Shown only when
  * exactly one box is selected.
  */
-export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ scenarioId, errors, errorBoxCount, onFocusNode, previewNode, onTriggerFakeRun, onTriggerFakeDebug, onOpenItem, engineState, onEngineRun, onEnginePause, onEngineResume, onEngineStep, onEngineStop }) => {
+export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ scenarioId, errors, errorBoxCount, onFocusNode, previewNode, onTriggerFakeRun, onTriggerFakeDebug, onOpenItem, engineState, onEngineRun, onEnginePause, onEngineResume, onEngineStep, onEngineStop, runLog }) => {
   const { t } = useTranslation()
   const [result, setResult] = useState<Record<string, unknown> | null>(null)
+  // Run-logs panel (shown when no box is selected): all entries vs only
+  // the user-pushed ones (the `log` action, source === 'user').
+  const [showAllLogs, setShowAllLogs] = useState(true)
+  const [copied, setCopied] = useState(false)
   const fetchToken = useRef(0)
   const panelRef = useRef<HTMLDivElement>(null)
 
@@ -258,6 +266,53 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
   const debugLabel = t('scenario.inspector.debug', 'Debug')
   const stopLabel = t('scenario.inspector.stop', 'Stop')
 
+  // Run-logs view (only when no box is selected). `all` shows engine +
+  // user entries; otherwise only the user-pushed ones (the `log` action).
+  const allLogs = runLog ?? []
+  const visibleLogs = showAllLogs ? allLogs : allLogs.filter((e) => e.source === 'user')
+  const logTs = (ts: string): string => (ts.length >= 23 ? ts.slice(11, 23) : ts)
+  // Defensive: a log `message` may arrive as a non-string (e.g. a typed
+  // ValueType `{ type, value }`); never hand a raw object to React.
+  const asText = (v: unknown): string => {
+    if (typeof v === 'string') return v
+    if (v === null || v === undefined) return ''
+    if (typeof v === 'number' || typeof v === 'boolean' || typeof v === 'bigint') return String(v)
+    try { return JSON.stringify(v) } catch { return '[unserializable]' }
+  }
+  // Prefix tree ids per row so the same data shape across rows can't
+  // collide on React keys.
+  const prefixIds = (items: ListViewItemData[], prefix: string): ListViewItemData[] =>
+    items.map((it) => ({ ...it, id: `${prefix}/${it.id}`, ...(it.children ? { children: prefixIds(it.children, prefix) } : {}) }))
+  const logItems: ListViewItemData[] = visibleLogs.map((e, i) => {
+    const level = e.level ?? 'info'
+    const item: ListViewItemData = {
+      id: `log-${i}`,
+      icon: <span className={`scn-log-dot scn-log-dot-${level}`} aria-hidden="true" />,
+      title: (
+        <span className="scn-log-line">
+          <span className="scn-log-ts">{logTs(e.ts)}</span>
+          <span className="scn-log-msg">{asText(e.message)}</span>
+        </span>
+      )
+    }
+    if (e.data !== undefined) {
+      const tree = buildScenarioPathTree(typeof e.data === 'object' && e.data !== null ? (e.data as Record<string, unknown>) : { value: e.data })
+      item.children = prefixIds(tree, `log-${i}`)
+    }
+    return item
+  })
+  const copyLogs = (): void => {
+    const text = visibleLogs.map((e) => {
+      let dataStr = ''
+      if (e.data !== undefined) { try { dataStr = ` ${JSON.stringify(e.data)}` } catch { dataStr = '' } }
+      return `${logTs(e.ts)} [${(e.level ?? 'info').toUpperCase()}] ${asText(e.message)}${dataStr}`
+    }).join('\n')
+    void navigator.clipboard.writeText(text).then(() => {
+      setCopied(true)
+      setTimeout(() => { setCopied(false) }, 1500)
+    }).catch(() => { /* clipboard denied — no-op */ })
+  }
+
   return (
     <div ref={panelRef} className="scn-inspector nodrag nopan" data-testid="scenario-inspector-panel">
       {/* Run toolbar — Run flips the BorderBeam orbit on the selected node
@@ -375,6 +430,51 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
                 </div>
               </>
             )}
+          </div>
+        </>
+      )}
+
+      {/* No box selected → run logs of the current / last run. Nothing
+        * is shown until there's at least one run to display. */}
+      {!previewNode && allLogs.length > 0 && (
+        <>
+          <div className="scn-inspector-sep" />
+          <div className="scn-inspector-section scn-inspector-logs">
+            <div className="scn-inspector-section-title scn-inspector-logs-header">
+              <span>{t('scenario.inspector.logsTitle', 'Run logs')}</span>
+              <Button
+                small
+                secondary
+                icon={copied ? 'check' : 'copy'}
+                onClick={copyLogs}
+                disabled={visibleLogs.length === 0}
+                options={{ ariaLabel: t('scenario.inspector.copyLogs', 'Copy logs'), title: t('scenario.inspector.copyLogs', 'Copy logs') }}
+                data-testid="scenario-inspector-copy-logs"
+              />
+            </div>
+            <label className="scn-inspector-logs-toggle nodrag">
+              <Toggle
+                checked={showAllLogs}
+                onChange={(checked) => { setShowAllLogs(checked) }}
+                aria-label={t('scenario.inspector.logsShowAll', 'Show all logs')}
+                data-testid="scenario-inspector-logs-all"
+              />
+              <span>{t('scenario.inspector.logsShowAll', 'Show all logs')}</span>
+            </label>
+            {logItems.length === 0
+              ? (
+                <div className="scn-inspector-info" role="note">
+                  <i className="codicon codicon-info" aria-hidden="true" />
+                  <span>{t('scenario.inspector.noUserLogs', 'No user logs (entries from the Log action) in this run.')}</span>
+                </div>
+                )
+              : (
+                <div className="scn-inspector-output">
+                  <div className="scn-inspector-tree">
+                    <ListView items={logItems} selectionMode="single" selectedIds={[]} data-testid="scenario-inspector-logs" />
+                  </div>
+                </div>
+                )}
           </div>
         </>
       )}

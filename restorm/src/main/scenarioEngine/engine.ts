@@ -13,6 +13,7 @@ import { isScenario } from '../../shared/types/collections'
 import type { Scenario } from '../../shared/types/scenario'
 import { Scheduler, type RunOptions } from './scheduler'
 import { buildExecutorRegistry } from './executors/registry'
+import { RunArchive, type ArchivedRun } from './runArchive'
 import type { EngineEvent, RunLogEntry, RunStatus, RuntimeId } from './types'
 
 export interface RunHandle {
@@ -26,6 +27,12 @@ export interface RunCallContext {
   /** Scenario ids already on the call stack (used to detect
    * recursion). Top-level calls pass an empty set. */
   stack: ReadonlySet<RuntimeId>
+  /** The top-level scenario that started this run. Inherited unchanged
+   * by every sub-scenario so all events trace back to the launcher. */
+  launcherScenarioId: RuntimeId
+  /** The run that launched this one (a `runScenario` node). Absent for
+   * a top-level run. Links sub-runs to their parent in the archive. */
+  parentRunId?: RuntimeId
 }
 
 export class ScenarioEngine {
@@ -33,10 +40,13 @@ export class ScenarioEngine {
   /** Listeners interested in every event across every run — used by
    * the IPC bridge to forward to the renderer. */
   private readonly fanoutListeners: ((e: EngineEvent) => void)[] = []
+  /** Retains run logs (incl. sub-runs) during AND after execution so
+   * any client can harvest them by `runId`. Bounded — see defaults. */
+  private readonly archive = new RunArchive({ maxRuns: 50, maxEntriesPerRun: 2000, ttlMs: 30 * 60 * 1000 })
 
   /** Top-level run entry point. */
   start(scenarioId: RuntimeId, options: RunOptions = {}): RunHandle {
-    return this.startWithStack(scenarioId, options, { stack: new Set() })
+    return this.startWithStack(scenarioId, options, { stack: new Set(), launcherScenarioId: scenarioId })
   }
 
   /** Fanout subscription — every event from every active scheduler
@@ -55,18 +65,40 @@ export class ScenarioEngine {
     return [...this.activeRuns.values()].map((s) => s.status())
   }
 
-  /** Read the in-memory log for a run. Returns `[]` for unknown ids. */
+  /** Read the in-memory log for a run. Serves the LIVE scheduler log
+   * while the run is active, then the archived snapshot once it ends.
+   * Returns `[]` for unknown ids. */
   readLog(runId: RuntimeId): readonly RunLogEntry[] {
     const scheduler = this.activeRuns.get(runId)
-    return scheduler ? scheduler.readLog() : []
+    if (scheduler) return scheduler.readLog()
+    return this.archive.get(runId)?.log ?? []
+  }
+
+  /** A run + every sub-run it launched (transitively), each with its
+   * metadata + current log (live or archived). The entry point for a
+   * client to harvest a whole run tree from a single top-level runId. */
+  runTree(runId: RuntimeId): (ArchivedRun & { log: readonly RunLogEntry[] })[] {
+    return this.archive.tree(runId).map((r) => ({ ...r, log: this.readLog(r.runId) }))
+  }
+
+  /** Metadata for every retained run (most recent first) — lets a
+   * client discover the runId of a run it didn't start (e.g. one
+   * launched from the UI Play button). Live status reflects the
+   * scheduler when still active. */
+  listRuns(): (ArchivedRun & { live: boolean })[] {
+    return this.archive.list().map((r) => {
+      const scheduler = this.activeRuns.get(r.runId)
+      return { ...r, ...(scheduler ? { status: scheduler.status().state } : {}), live: scheduler !== undefined }
+    })
   }
 
   pause(runId: RuntimeId): void { this.activeRuns.get(runId)?.pause() }
   resume(runId: RuntimeId): void { this.activeRuns.get(runId)?.resume() }
   step(runId: RuntimeId): void { this.activeRuns.get(runId)?.step() }
   abort(runId: RuntimeId, reason?: string): void { this.activeRuns.get(runId)?.abort(reason) }
+  resolveUserInput(runId: RuntimeId, requestId: string, value: unknown): void { this.activeRuns.get(runId)?.resolveUserInput(requestId, value) }
 
-  private startWithStack(scenarioId: RuntimeId, options: RunOptions, callCtx: RunCallContext): RunHandle {
+  private startWithStack(scenarioId: RuntimeId, options: RunOptions, callCtx: RunCallContext, parentSignal?: AbortSignal): RunHandle {
     const scenario = this.loadScenario(scenarioId)
     if (callCtx.stack.has(scenarioId)) {
       throw new Error(`recursion detected: scenario ${scenarioId} is already running on the call stack`)
@@ -75,18 +107,34 @@ export class ScenarioEngine {
     const scheduler = new Scheduler({
       scenario,
       executors,
-      runSubScenario: async (subId, params) => {
+      ...(parentSignal ? { parentSignal } : {}),
+      runSubScenario: async (subId, params, subParentSignal) => {
         const subStack = new Set(callCtx.stack)
         subStack.add(scenarioId)
-        const handle = this.startWithStack(subId, { params }, { stack: subStack })
+        // Forward the calling node's abort signal so a Stop cascades all
+        // the way down the sub-scenario tree, and link the sub-run to
+        // this run in the archive via `parentRunId`.
+        const handle = this.startWithStack(subId, { params }, { stack: subStack, launcherScenarioId: callCtx.launcherScenarioId, parentRunId: scheduler.runId }, subParentSignal)
         return handle.done
       }
     })
     this.activeRuns.set(scheduler.runId, scheduler)
-    // Forward this scheduler's events to the global fanout.
+    this.archive.start({
+      runId: scheduler.runId,
+      scenarioId,
+      launcherScenarioId: callCtx.launcherScenarioId,
+      ...(callCtx.parentRunId !== undefined ? { parentRunId: callCtx.parentRunId } : {}),
+      startedAtMs: Date.now()
+    })
+    // Forward this scheduler's events to the global fanout, stamping the
+    // launcher (top-level) scenario id so the renderer only animates the
+    // tab that started the run — sub-scenario events carry the launcher's
+    // id, never the sub's.
+    const { launcherScenarioId } = callCtx
     scheduler.on((e) => {
+      const stamped: EngineEvent = { ...e, launcherScenarioId }
       for (const l of this.fanoutListeners) {
-        try { l(e) } catch { /* swallow */ }
+        try { l(stamped) } catch { /* swallow */ }
       }
     })
     const outputBucket: Record<string, unknown> = {}
@@ -100,6 +148,9 @@ export class ScenarioEngine {
       if (out) outputBucket[name] = out.value
     })
     const done = scheduler.run(options).then(() => outputBucket).finally(() => {
+      // Snapshot the final log into the archive BEFORE dropping the live
+      // scheduler, so the run's logs survive for later harvesting.
+      this.archive.complete(scheduler.runId, scheduler.status().state, Date.now(), scheduler.readLog())
       this.activeRuns.delete(scheduler.runId)
     })
     return { scheduler, done }

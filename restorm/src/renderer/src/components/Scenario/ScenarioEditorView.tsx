@@ -28,6 +28,7 @@ import type { SyntheticRequestPreview } from '../../../../shared/utils/synthetic
 import { ScenarioEdgeSelectorContext, type ScenarioEdgeSelectorApi } from './scenarioEdgeSelector'
 import { ScenarioStaticPreviewContext, type ScenarioStaticPreviewApi, type ObjectWiredProperty } from './scenarioStaticPreviewContext'
 import { ScenarioVariablesContext, type ScenarioVariable } from '../../contexts/ScenarioVariablesContext'
+import { getScenarioViewport, setScenarioViewport } from '../../services/scenarioViewportStore'
 import { resolveValueTypeKind } from '../TypedValueField/castValue'
 import { normalizeValueType } from '../../utils/normalizeValueType'
 import { SCENARIO_NODE_CATALOGUE, scenarioNodeMeta, type ScenarioNodeKindMeta } from './scenarioNodeCatalogue'
@@ -42,6 +43,7 @@ import { validateScenarioGraph, targetKey, type ScenarioNodeError, type Scenario
 import { ScenarioErrorsContext } from './scenarioErrorsContext'
 import { ScenarioInspectorPanel, type InspectorPreviewNode } from './ScenarioInspectorPanel'
 import { useScenarioEngine } from '../../hooks/useScenarioEngine'
+import { ScenarioInputPrompt, ScenarioMidRunInputPrompt } from './ScenarioInputPrompt'
 import { ScenarioDebugBezierEdge } from './ScenarioDebugBezierEdge'
 import { staticScenarioPreview, singleDeepPath, expectsObjectInput, singleTopLevelKey, STATIC_PREVIEW_KINDS, resolveItems, applyListOp, resolveSelectorPath, type StaticPreviewNode, type StaticPreviewEdge } from '../../../../shared/utils/scenarioStaticPreview'
 import { consumePendingScenarioNodeFocus, onScenarioNodeFocus, clearPendingScenarioNodeFocus } from '../../services/scenarioFocusBus'
@@ -50,6 +52,10 @@ import { dynamicHandleIds, pruneOrphanDynamicEdges, isOrphanDynamicEdge } from '
 export interface ScenarioEditorViewProps {
   /** The scenario being edited. */
   scenario: Scenario
+  /** Workspace identity (user-scope key) for persisting graph pan+zoom.
+   * Passed from the workbench — the editor renders outside the
+   * EnvironmentProvider, so it can't read the env context. */
+  projectUuid?: string | null | undefined
   /** Persist node/edge edits back to the tree (debounced by the host). */
   onScenarioChange?: (scenarioId: string, patch: { nodes?: ScenarioNode[]; edges?: Scenario['edges']; notes?: string }) => void
   /**
@@ -219,14 +225,22 @@ function chooseColorTooltipPlacement(rect: DOMRect): { placement: 'above' | 'bel
   return { placement: 'below', side: 'auto' }
 }
 
-const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onScenarioChange, resolveBoundItem, resolveRequestEnv, resolveSyntheticPreview, onOpenItem, onCreateRequest, onCreateChild }) => {
+const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, projectUuid, onScenarioChange, resolveBoundItem, resolveRequestEnv, resolveSyntheticPreview, onOpenItem, onCreateRequest, onCreateChild }) => {
   const { t } = useTranslation()
   const { screenToFlowPosition, fitView } = useReactFlow()
   const wrapperRef = useRef<HTMLDivElement>(null)
   // Phase 2 — real engine controller for this scenario tab. Drives the
   // inspector's Run / Pause / Step / Stop buttons + animates nodes /
   // edges off engine events.
-  const engine = useScenarioEngine()
+  const engine = useScenarioEngine(scenario.id)
+  // Restore the graph's saved pan+zoom (user scope, per scenario). Read
+  // synchronously from the primed cache so React Flow can seed its
+  // `defaultViewport` on first render; fall back to `fitView` when none
+  // is stored. Saved on pan/zoom via `onMove` (the store debounces).
+  // `projectUuid` is passed from the workbench (this editor renders
+  // OUTSIDE the EnvironmentProvider, so the env context isn't available).
+  const savedViewport = projectUuid ? getScenarioViewport(projectUuid, scenario.id) : undefined
+  const [inputPromptOpen, setInputPromptOpen] = useState(false)
 
   // The authoritative per-node scenario data (config/ports/note/color),
   // keyed by id. React Flow only round-trips id + position; we merge it
@@ -826,18 +840,21 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
             : [])
         )
         const path = preview ? singleDeepPath(preview) : null
-        if (path) {
-          selector = path
-          // The selector lives authoritatively in `edgeStore` (persist rebuilds
-          // each ScenarioEdge from it, not from the flow edge's `data`), so seed
-          // it there too — otherwise the deduction is dropped on the next save.
-          edgeStore.current.set(id, {
-            id,
-            from: { nodeId: src.id, portId: connection.sourceHandle },
-            to: { nodeId: tgt.id, portId: connection.targetHandle },
-            selector: path
-          })
-        }
+        // Default to the identity selector `.` when no single-deep path is
+        // deducible — e.g. an array output, or a runtime-only source like an
+        // httpRequest `response` or a forEach `each`. The whole value flows
+        // through (the user drills further via the picker if needed), and the
+        // link no longer trips the "needs a JSON path" validation by being
+        // left selector-less. The selector lives authoritatively in
+        // `edgeStore` (persist rebuilds each ScenarioEdge from it), so seed it
+        // there too — otherwise it's dropped on the next save.
+        selector = path ?? '.'
+        edgeStore.current.set(id, {
+          id,
+          from: { nodeId: src.id, portId: connection.sourceHandle },
+          to: { nodeId: tgt.id, portId: connection.targetHandle },
+          selector
+        })
       }
     }
     // When the link feeds an object-builder property whose name is still
@@ -1414,6 +1431,22 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
     })
   }, [nodes, edges, engine.edgeTokens])
 
+  // Set of `input` node ids that have an incoming edge — they're
+  // skipped by the up-front prompt because they depend on upstream
+  // values. The engine will pause those nodes mid-run + raise a
+  // single-field prompt once it gets there (future task).
+  const inputsWithPredecessors = useMemo(() => {
+    const incomingByTarget = new Set<string>()
+    for (const e of scenario.edges) {
+      if (e.to.nodeId) incomingByTarget.add(e.to.nodeId)
+    }
+    const blocked = new Set<string>()
+    for (const n of scenario.nodes) {
+      if (n.kind === 'input' && incomingByTarget.has(n.id)) blocked.add(n.id)
+    }
+    return blocked
+  }, [scenario])
+
   // Inject `data.fakeRunActive` for every node the engine reports as
   // currently running. The BorderBeam already reacts to that flag —
   // re-using it keeps the visual identical between fake-run + real
@@ -1483,7 +1516,17 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
         onTriggerFakeDebug={onTriggerFakeDebug}
         {...(onOpenItem ? { onOpenItem } : {})}
         engineState={engine.state}
-        onEngineRun={() => { void engine.start(scenario.id) }}
+        runLog={engine.runLog}
+        onEngineRun={() => {
+          // Only open the params prompt when there's actually an input
+          // to collect (an `input` node with no required predecessor).
+          // Otherwise start directly — opening a fields-less prompt made
+          // it call `onSubmit` during render, which React could invoke
+          // several times → several concurrent runs from ONE Play click.
+          const hasInputsToCollect = scenario.nodes.some((n) => n.kind === 'input' && !inputsWithPredecessors.has(n.id))
+          if (hasInputsToCollect) setInputPromptOpen(true)
+          else void engine.start(scenario.id, {})
+        }}
         onEnginePause={() => { void engine.pause() }}
         onEngineResume={() => { void engine.resume() }}
         onEngineStep={() => { void engine.step() }}
@@ -1512,8 +1555,9 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
         onNodeClick={() => { setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null); dismissOffCanvasPopovers() }}
         onEdgeClick={() => { setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null); dismissOffCanvasPopovers() }}
         onMoveStart={() => { setNodeMenu(null); setPalette(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null) }}
+        onMove={(_, viewport) => { if (projectUuid) setScenarioViewport(projectUuid, scenario.id, viewport) }}
         onNodeDragStart={() => { setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null) }}
-        fitView
+        {...(savedViewport ? { defaultViewport: savedViewport } : { fitView: true })}
         proOptions={{ hideAttribution: true }}
       >
         {/* Unique pattern id per scenario: React Flow's Background derives its
@@ -1523,6 +1567,33 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
         <Background id={scenario.id} />
         <Controls showInteractive={false} />
       </ReactFlow>
+      <ScenarioInputPrompt
+        inputNodes={scenario.nodes}
+        predecessorBlocked={inputsWithPredecessors}
+        open={inputPromptOpen}
+        onCancel={() => { setInputPromptOpen(false) }}
+        onSubmit={(values) => {
+          setInputPromptOpen(false)
+          void engine.start(scenario.id, values)
+        }}
+      />
+      {/* Mid-run prompt — the engine raises one when an input node
+        * with predecessors activates. Only the HEAD of the queue is
+        * shown; the resolution dequeues + reveals the next (if any),
+        * so the user answers them sequentially. */}
+      {engine.pendingInputs.length > 0 && (() => {
+        const head = engine.pendingInputs[0]
+        if (!head) return null
+        return (
+          <ScenarioMidRunInputPrompt
+            open
+            name={head.name}
+            defaultValue={head.defaultValue}
+            hint={head.hint}
+            onSubmit={(value) => { void engine.resolveUserInput(head.requestId, value) }}
+          />
+        )
+      })()}
       {palette && (
         <ContextMenu
           visible

@@ -62,6 +62,18 @@ export function installScenarioEngineIPC(): void {
     return scenarioEngine.readLog(runId)
   })
 
+  // The whole run tree (the run + every sub-scenario run it launched),
+  // each with its metadata + current log — so the inspector can show a
+  // run's logs incl. its sub-scenarios' actions.
+  ipcMain.handle('scenario:engine:run-tree', (_e, runId: string) => {
+    return scenarioEngine.runTree(runId)
+  })
+
+  ipcMain.handle('scenario:engine:resolve-user-input', (_e, runId: string, requestId: string, value: unknown) => {
+    scenarioEngine.resolveUserInput(runId, requestId, value)
+    return { ok: true }
+  })
+
   ipcMain.handle('scenario:engine:active-statuses', () => {
     return scenarioEngine.activeStatuses()
   })

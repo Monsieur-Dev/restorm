@@ -509,7 +509,8 @@
   "common": {
     "cancel": "Odustani",
     "save": "Spremi",
-    "remove": "Ukloni"
+    "remove": "Ukloni",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -942,7 +943,11 @@
       "noRunsHint": "Nema nedavnog izvođenja ovog zahtjeva — pokreni ga odavde da popuniš pretpregled scenarija.",
       "syntheticInfo": "Primjer podataka generiran iz dokumentacije ovog zahtjeva.",
       "syntheticRunHint": "Primjer podataka — pokrenite zahtjev kako biste ih zamijenili stvarnim rezultatom.",
-      "stop": "Zaustavi"
+      "stop": "Zaustavi",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "logsShowAll": "Show all logs",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -956,6 +961,11 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Potreban unos"
     }
   }
 }

@@ -508,7 +508,8 @@
   "common": {
     "cancel": "İptal",
     "save": "Kaydet",
-    "remove": "Kaldır"
+    "remove": "Kaldır",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -941,7 +942,11 @@
       "noRunsHint": "Bu istek için son çalışma yok — senaryo önizlemesini doldurmak için buradan çalıştır.",
       "syntheticInfo": "Bu isteğin belgelerinden oluşturulan örnek veriler.",
       "syntheticRunHint": "Örnek veriler — gerçek bir sonuçla değiştirmek için isteği çalıştırın.",
-      "stop": "Durdur"
+      "stop": "Durdur",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "logsShowAll": "Show all logs",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -955,6 +960,11 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Giriş gerekli"
     }
   }
 }

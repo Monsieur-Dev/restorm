@@ -62,6 +62,11 @@ export interface Activation {
   /** Values keyed by input port id, deep-cloned so executors can't
    * mutate sibling scopes' state. */
   inputs: Record<RuntimeId, unknown>
+  /** Set by the scheduler when this activation came from the root-
+   * seed pass (not from a token match). The `input` executor uses
+   * this to skip the mid-run prompt — the up-front form already
+   * collected the value. */
+  seeded?: boolean
 }
 
 /** One output emission from an executor: the port + the value to put
@@ -82,7 +87,7 @@ export interface ExecResult {
    * and emits the `each` port inside each; `aggregate` collects on
    * a scope-closed signal. */
   scopeAction?:
-    | { type: 'openForEach'; items: unknown[]; parallel: boolean }
+    | { type: 'openForEach'; items: unknown[]; parallel: boolean; batchSize: number }
     | { type: 'closeScope' }
 }
 
@@ -90,7 +95,7 @@ export interface ExecResult {
  * Events surfaced to the renderer (and to anyone subscribing to the
  * engine) — drives node animations + edge beams + the run log.
  */
-export type EngineEvent =
+export type EngineEvent = (
   | { type: 'run-started'; runId: RuntimeId; scenarioId: RuntimeId; at: string }
   | { type: 'run-completed'; runId: RuntimeId; at: string }
   | { type: 'run-cancelled'; runId: RuntimeId; at: string; reason?: string }
@@ -101,6 +106,16 @@ export type EngineEvent =
   | { type: 'node-completed'; runId: RuntimeId; nodeId: RuntimeId; scope: ScopeStack; at: string; outputs: Emission[] }
   | { type: 'node-failed'; runId: RuntimeId; nodeId: RuntimeId; scope: ScopeStack; at: string; error: string }
   | { type: 'data-flow-emitted'; runId: RuntimeId; edgeId: RuntimeId; tokenId: number; at: string }
+  | { type: 'user-input-requested'; runId: RuntimeId; nodeId: RuntimeId; requestId: RuntimeId; name: string; defaultValue: unknown; hint: 'string' | 'number' | 'boolean' | 'object'; at: string }
+) & {
+  /** The TOP-LEVEL ("launcher") scenario whose run produced this event.
+   * Sub-scenario events inherit the launcher's id (NOT the sub's), so the
+   * renderer animates only the tab that started the run — never a
+   * sub-scenario's own tab, where several concurrent instances would
+   * otherwise paint conflicting beams. Stamped by the engine container at
+   * fanout time. */
+  launcherScenarioId?: RuntimeId
+}
 
 /** One entry in the run log (engine-internal). Persistence is OYO-286. */
 export interface RunLogEntry {
@@ -137,7 +152,13 @@ export interface ExecContext {
   variables: Map<string, unknown>
   /** Run a sub-scenario by id, with the given param map. Recursion is
    * detected by the engine. */
-  runSubScenario: (scenarioId: RuntimeId, params: Record<string, unknown>) => Promise<Record<string, unknown>>
+  runSubScenario: (scenarioId: RuntimeId, params: Record<string, unknown>, parentSignal?: AbortSignal) => Promise<Record<string, unknown>>
+  /** Pause the activation and surface a single-field prompt to the
+   * renderer. The promise resolves with the user-confirmed value
+   * (which may be the default or an edited one). Used by the `input`
+   * executor when an upstream node has already supplied a value the
+   * user can still override. */
+  requestUserInput: (req: { name: string; defaultValue: unknown; hint: 'string' | 'number' | 'boolean' | 'object' }) => Promise<unknown>
   /** The node being executed — handy when the executor needs to read
    * its `config` (request id, comparator op, switch cases, …) without
    * the engine having to pre-extract everything. */

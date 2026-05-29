@@ -31,6 +31,7 @@ import {
 } from 'electron-core-ui/renderer'
 import { PROJECT_UUID_KEY } from '../../shared/config/projectUuid'
 import { preloadRequestPanelStates, removeRequestPanelState } from './services/requestPanelStateStore'
+import { preloadScenarioViewports } from './services/scenarioViewportStore'
 import { HTTPRequest } from '../../shared/models/requests/HTTPRequest'
 import { SoapRequest } from '../../shared/models/requests/SoapRequest'
 import { GrpcRequest } from '../../shared/models/requests/GrpcRequest'
@@ -367,6 +368,7 @@ const App: React.FC = () => {
   useEffect(() => {
     if (!projectUuid) return
     void preloadRequestPanelStates(projectUuid)
+    void preloadScenarioViewports(projectUuid)
   }, [projectUuid])
 
   // Persisted collapsed state for the Favorites + Opened sidebar panes,

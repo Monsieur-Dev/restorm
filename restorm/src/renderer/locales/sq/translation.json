@@ -508,7 +508,8 @@
   "common": {
     "cancel": "Anulo",
     "save": "Ruaj",
-    "remove": "Hiq"
+    "remove": "Hiq",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -941,7 +942,11 @@
       "noRunsHint": "Nuk ka ekzekutim të fundit për këtë kërkesë — ekzekutoje nga këtu për të mbushur paraqitjen e skenarit.",
       "syntheticInfo": "Të dhëna shembull të gjeneruara nga dokumentacioni i kësaj kërkese.",
       "syntheticRunHint": "Të dhëna shembull — ekzekutoni kërkesën për t'i zëvendësuar me një rezultat të vërtetë.",
-      "stop": "Ndalo"
+      "stop": "Ndalo",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "logsShowAll": "Show all logs",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -955,6 +960,11 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Kërkohet hyrje"
     }
   }
 }
