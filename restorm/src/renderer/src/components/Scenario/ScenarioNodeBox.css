@@ -802,6 +802,11 @@
   display: flex;
   flex-direction: column;
   gap: 3px;
+  /* Fills the row's spare width so a typed-value editor (dropdown,
+   * env button, input) stretches to the row's right edge instead of
+   * sizing to its label / content. */
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 /* If operator toggle — compact segmented control. */
@@ -844,7 +849,10 @@
   gap: 3px;
   flex: 1;
   min-width: 0;
-  max-width: 220px;
+  /* Lets the selector fill the cell row — the input + target button
+   * grow with the box width so a long JSON path stays readable on a
+   * wide node. */
+  width: 100%;
 }
 .scn-path-label {
   opacity: 0.85;
