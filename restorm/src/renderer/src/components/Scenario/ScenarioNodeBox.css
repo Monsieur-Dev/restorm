@@ -399,7 +399,10 @@
  * markdown compact so a note doesn't blow up the node. */
 .scn-node-notes {
   border-bottom: 1px solid var(--editorHoverWidget-border, #454545);
-  max-width: 280px;
+  /* Span the full box width so the separator line reaches the right
+   * edge of the box, matching the header separator above it. */
+  width: 100%;
+  box-sizing: border-box;
 }
 .scn-node-notes .markdown-viewer {
   background-color: transparent;
