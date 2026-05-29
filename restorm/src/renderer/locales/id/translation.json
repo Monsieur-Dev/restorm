@@ -365,7 +365,8 @@
       "folder": "Folder",
       "environment": "Lingkungan",
       "settings": "Pengaturan",
-      "tag": "Tag"
+      "tag": "Tag",
+      "scenario": "Skenario"
     },
     "tooltip": {
       "noDetails": "Tidak ada detail yang tersedia",

@@ -365,7 +365,8 @@
       "folder": "文件夹",
       "environment": "环境",
       "settings": "设置",
-      "tag": "标签"
+      "tag": "标签",
+      "scenario": "场景"
     },
     "tooltip": {
       "noDetails": "无可用详情",

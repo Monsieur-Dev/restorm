@@ -365,7 +365,8 @@
       "folder": "폴더",
       "environment": "환경",
       "settings": "설정",
-      "tag": "태그"
+      "tag": "태그",
+      "scenario": "시나리오"
     },
     "tooltip": {
       "noDetails": "표시할 세부 정보가 없습니다",

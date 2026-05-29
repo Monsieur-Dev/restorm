@@ -367,7 +367,8 @@
       "folder": "Fascikle",
       "environment": "Okruženja",
       "settings": "Podešavanja",
-      "tag": "Oznake"
+      "tag": "Oznake",
+      "scenario": "Scenariji"
     },
     "tooltip": {
       "noDetails": "Nema dostupnih detalja",

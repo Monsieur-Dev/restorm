@@ -366,7 +366,8 @@
       "folder": "Dosjet",
       "environment": "Mjediset",
       "settings": "Parametrat",
-      "tag": "Etiketat"
+      "tag": "Etiketat",
+      "scenario": "Skenarë"
     },
     "tooltip": {
       "noDetails": "Asnjë detaj në dispozicion",

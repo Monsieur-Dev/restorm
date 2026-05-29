@@ -366,7 +366,8 @@
       "folder": "Folders",
       "environment": "Environments",
       "settings": "Settings",
-      "tag": "Tags"
+      "tag": "Tags",
+      "scenario": "Scenarios"
     },
     "tooltip": {
       "noDetails": "No details available",

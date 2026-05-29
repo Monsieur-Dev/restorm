@@ -44,4 +44,26 @@ describe('SearchIndexService (renderer) — scenario container indexing on load'
 
     expect(indexedIds()).toContain('root-scn-req')
   })
+
+  it('indexes the scenario itself as a navigable search document', async () => {
+    const scenario = { type: 'scenario', id: 'root-scn', name: 'Root scenario', tags: ['flow'], notes: 'do the dance', params: [], nodes: [], edges: [], items: [] }
+
+    await searchIndexService.indexScenarioTree(scenario as unknown as Parameters<typeof searchIndexService.indexScenarioTree>[0])
+
+    const docs = indexDocuments.mock.calls.flatMap((c) => c[0]) as { id: string; title: string; category: string; navigation: Record<string, unknown> }[]
+    const scn = docs.find((d) => d.id === 'root-scn')
+    expect(scn).toBeDefined()
+    expect(scn?.category).toBe('scenario')
+    expect(scn?.navigation['type']).toBe('scenario')
+    expect(scn?.navigation['scenarioId']).toBe('root-scn')
+  })
+
+  it('indexes a sub-scenario when traversed through its parent folder', async () => {
+    const subScenario = { type: 'scenario', id: 'sub-scn', name: 'Sub scenario', tags: [], params: [], nodes: [], edges: [], items: [] }
+    const folder = { id: 'env', name: 'Env', tags: [], configuration: {}, items: [subScenario] }
+
+    await searchIndexService.indexFolderTree(folder as unknown as FolderArg)
+
+    expect(indexedIds()).toContain('sub-scn')
+  })
 })

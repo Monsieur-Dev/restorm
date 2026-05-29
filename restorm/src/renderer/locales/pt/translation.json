@@ -366,7 +366,8 @@
       "folder": "Pastas",
       "environment": "Ambientes",
       "settings": "Definições",
-      "tag": "Etiquetas"
+      "tag": "Etiquetas",
+      "scenario": "Cenários"
     },
     "tooltip": {
       "noDetails": "Não há detalhes disponíveis",

@@ -366,7 +366,8 @@
       "folder": "Mappar",
       "environment": "Miljöer",
       "settings": "Inställningar",
-      "tag": "Taggar"
+      "tag": "Taggar",
+      "scenario": "Scenarier"
     },
     "tooltip": {
       "noDetails": "Inga detaljer tillgängliga",

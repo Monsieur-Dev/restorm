@@ -366,7 +366,8 @@
       "folder": "Mappen",
       "environment": "Omgevingen",
       "settings": "Instellingen",
-      "tag": "Tags"
+      "tag": "Tags",
+      "scenario": "Scenario's"
     },
     "tooltip": {
       "noDetails": "Geen details beschikbaar",

@@ -368,7 +368,8 @@
       "folder": "Složky",
       "environment": "Prostředí",
       "settings": "Nastavení",
-      "tag": "Štítky"
+      "tag": "Štítky",
+      "scenario": "Scénáře"
     },
     "tooltip": {
       "noDetails": "Žádné podrobnosti k dispozici",

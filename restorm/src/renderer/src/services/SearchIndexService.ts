@@ -21,9 +21,10 @@ import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSoc
 const RESTORM_SEARCH_CATEGORIES: Record<string, CategoryMeta> = {
   request: { label: 'search.categories.request', icon: 'cloud', order: 1 },
   folder: { label: 'search.categories.folder', icon: 'folder', order: 2 },
-  environment: { label: 'search.categories.environment', icon: 'folder-library', order: 3 },
-  settings: { label: 'search.categories.settings', icon: 'settings-gear', order: 4 },
-  tag: { label: 'search.categories.tag', icon: 'tag', order: 5 }
+  scenario: { label: 'search.categories.scenario', icon: 'list-flat', order: 3 },
+  environment: { label: 'search.categories.environment', icon: 'folder-library', order: 4 },
+  settings: { label: 'search.categories.settings', icon: 'settings-gear', order: 5 },
+  tag: { label: 'search.categories.tag', icon: 'tag', order: 6 }
 }
 
 /** Metadata structure for search documents in restorm */
@@ -83,6 +84,42 @@ function folderToSearchDocument(folder: Folder, parentPath: string[] = [], paren
     metadata: {
       tags: folder.tags,
       ...(folder.notes ? { notes: folder.notes } : {}),
+      ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
+    }
+  }
+}
+
+/**
+ * Convert a Scenario to a SearchDocument. Mirrors the folder doc shape so
+ * the search list treats scenarios as first-class navigable entries: the
+ * same path / breadcrumb metadata, `type: 'scenario'` in the navigation so
+ * the click handler can route through the same `handleItemClick` pipeline
+ * as folders.
+ */
+function scenarioToSearchDocument(scenario: Scenario, parentPath: string[] = [], parentNames: string[] = []): {
+  id: string
+  title: string
+  description?: string
+  category: string
+  icon: string
+  keywords: string
+  navigation: Record<string, unknown>
+  metadata: Record<string, unknown>
+} {
+  return {
+    id: scenario.id,
+    title: scenario.name,
+    category: 'scenario',
+    icon: 'list-flat',
+    keywords: scenario.tags.join(' '),
+    navigation: {
+      type: 'scenario',
+      scenarioId: scenario.id,
+      path: [...parentPath, scenario.id]
+    },
+    metadata: {
+      tags: scenario.tags,
+      ...(scenario.notes ? { notes: scenario.notes } : {}),
       ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
     }
   }
@@ -638,10 +675,11 @@ function collectFolderDocuments(
 }
 
 /**
- * A scenario doubles as a folder-like container: it isn't a searchable document
- * itself, but the requests (and sub-folders) authored inside it are indexed with
- * the scenario in their path — so scenario-child requests stay searchable after
- * the project is reopened (the load-time walk runs through here).
+ * A scenario is both a searchable document AND a folder-like container.
+ * Returns the scenario's own doc first (so the search list surfaces it
+ * directly by name), then the docs for the requests / sub-folders /
+ * sub-scenarios authored inside it — with the scenario in their path so
+ * a child request's breadcrumb shows the owning scenario.
  */
 function collectScenarioDocuments(
   scenario: Scenario,
@@ -650,7 +688,9 @@ function collectScenarioDocuments(
 ): ReturnType<typeof collectFolderDocuments> {
   const currentPath = [...parentPath, scenario.id]
   const currentNames = [...parentNames, scenario.name]
-  const documents: ReturnType<typeof collectFolderDocuments> = []
+  const documents: ReturnType<typeof collectFolderDocuments> = [
+    scenarioToSearchDocument(scenario, parentPath, parentNames)
+  ]
   for (const item of scenario.items ?? []) {
     if (isFolder(item)) {
       documents.push(...collectFolderDocuments(item, currentPath, currentNames))

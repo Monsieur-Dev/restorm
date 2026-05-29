@@ -366,7 +366,8 @@
       "folder": "Mappák",
       "environment": "Környezetek",
       "settings": "Beállítások",
-      "tag": "Címkék"
+      "tag": "Címkék",
+      "scenario": "Forgatókönyvek"
     },
     "tooltip": {
       "noDetails": "Nincs elérhető részlet",

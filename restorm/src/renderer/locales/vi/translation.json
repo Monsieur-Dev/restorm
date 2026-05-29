@@ -365,7 +365,8 @@
       "folder": "Thư mục",
       "environment": "Môi trường",
       "settings": "Cài đặt",
-      "tag": "Thẻ"
+      "tag": "Thẻ",
+      "scenario": "Kịch bản"
     },
     "tooltip": {
       "noDetails": "Không có chi tiết",

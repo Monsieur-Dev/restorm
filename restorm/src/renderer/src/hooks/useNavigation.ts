@@ -342,6 +342,8 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       handleItemClick(result.navigation['requestId'] as string)
     } else if (result.navigation?.['type'] === 'folder' && result.navigation['folderId']) {
       handleItemClick(result.navigation['folderId'] as string)
+    } else if (result.navigation?.['type'] === 'scenario' && result.navigation['scenarioId']) {
+      handleItemClick(result.navigation['scenarioId'] as string)
     }
   }, [handleItemClick])
 

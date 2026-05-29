@@ -368,7 +368,8 @@
       "folder": "Foldery",
       "environment": "Środowiska",
       "settings": "Ustawienia",
-      "tag": "Tagi"
+      "tag": "Tagi",
+      "scenario": "Scenariusze"
     },
     "tooltip": {
       "noDetails": "Brak dostępnych szczegółów",

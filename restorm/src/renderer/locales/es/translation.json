@@ -366,7 +366,8 @@
       "folder": "Carpetas",
       "environment": "Entornos",
       "settings": "Ajustes",
-      "tag": "Etiquetas"
+      "tag": "Etiquetas",
+      "scenario": "Escenarios"
     },
     "tooltip": {
       "noDetails": "Sin detalles disponibles",

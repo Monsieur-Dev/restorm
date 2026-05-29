@@ -366,7 +366,8 @@
       "folder": "Kansiot",
       "environment": "Ympäristöt",
       "settings": "Asetukset",
-      "tag": "Tagit"
+      "tag": "Tagit",
+      "scenario": "Skenaariot"
     },
     "tooltip": {
       "noDetails": "Ei tietoja saatavilla",

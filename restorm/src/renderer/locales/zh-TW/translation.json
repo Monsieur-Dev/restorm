@@ -365,7 +365,8 @@
       "folder": "資料夾",
       "environment": "環境",
       "settings": "設定",
-      "tag": "標籤"
+      "tag": "標籤",
+      "scenario": "情境"
     },
     "tooltip": {
       "noDetails": "沒有可用的詳細資料",

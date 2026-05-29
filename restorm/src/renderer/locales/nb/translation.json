@@ -366,7 +366,8 @@
       "folder": "Mapper",
       "environment": "Miljøer",
       "settings": "Innstillinger",
-      "tag": "Tagger"
+      "tag": "Tagger",
+      "scenario": "Scenarier"
     },
     "tooltip": {
       "noDetails": "Ingen detaljer tilgjengelig",

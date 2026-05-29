@@ -366,7 +366,8 @@
       "folder": "Cartelle",
       "environment": "Ambienti",
       "settings": "Impostazioni",
-      "tag": "Tag"
+      "tag": "Tag",
+      "scenario": "Scenari"
     },
     "tooltip": {
       "noDetails": "Nessun dettaglio disponibile",

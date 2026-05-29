@@ -367,7 +367,8 @@
       "folder": "Mape",
       "environment": "Okruženja",
       "settings": "Postavke",
-      "tag": "Oznake"
+      "tag": "Oznake",
+      "scenario": "Scenariji"
     },
     "tooltip": {
       "noDetails": "Nema dostupnih pojedinosti",

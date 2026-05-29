@@ -368,7 +368,8 @@
       "folder": "Теки",
       "environment": "Середовища",
       "settings": "Параметри",
-      "tag": "Теги"
+      "tag": "Теги",
+      "scenario": "Сценарії"
     },
     "tooltip": {
       "noDetails": "Деталі недоступні",

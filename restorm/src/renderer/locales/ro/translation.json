@@ -367,7 +367,8 @@
       "folder": "Foldere",
       "environment": "Medii",
       "settings": "Setări",
-      "tag": "Etichete"
+      "tag": "Etichete",
+      "scenario": "Scenarii"
     },
     "tooltip": {
       "noDetails": "Niciun detaliu disponibil",

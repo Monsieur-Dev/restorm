@@ -366,7 +366,8 @@
       "folder": "Klasörler",
       "environment": "Ortamlar",
       "settings": "Ayarlar",
-      "tag": "Etiketler"
+      "tag": "Etiketler",
+      "scenario": "Senaryolar"
     },
     "tooltip": {
       "noDetails": "Ayrıntı yok",

@@ -366,7 +366,8 @@
       "folder": "Dossiers",
       "environment": "Environnements",
       "settings": "Paramètres",
-      "tag": "Tags"
+      "tag": "Tags",
+      "scenario": "Scénarios"
     },
     "tooltip": {
       "noDetails": "Aucun détail disponible",
