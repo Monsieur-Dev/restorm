@@ -940,7 +940,8 @@
       "pause": "Pausa",
       "noRunsHint": "Nessuna esecuzione recente per questa richiesta — eseguila da qui per popolare l'anteprima dello scenario.",
       "syntheticInfo": "Dati di esempio generati dalla documentazione di questa richiesta.",
-      "syntheticRunHint": "Dati di esempio — esegui la richiesta per sostituirli con un risultato reale."
+      "syntheticRunHint": "Dati di esempio — esegui la richiesta per sostituirli con un risultato reale.",
+      "stop": "Ferma"
     },
     "now": {
       "timezone": "Timezone",

@@ -939,7 +939,8 @@
       "pause": "일시 중지",
       "noRunsHint": "이 요청의 최근 실행 결과가 없습니다 — 여기서 실행해 시나리오 미리보기를 채우세요.",
       "syntheticInfo": "이 요청의 문서에서 생성된 예시 데이터입니다.",
-      "syntheticRunHint": "예시 데이터 — 실제 결과로 바꾸려면 요청을 실행하세요."
+      "syntheticRunHint": "예시 데이터 — 실제 결과로 바꾸려면 요청을 실행하세요.",
+      "stop": "중지"
     },
     "now": {
       "timezone": "Timezone",

@@ -940,7 +940,8 @@
       "pause": "Pauzë",
       "noRunsHint": "Nuk ka ekzekutim të fundit për këtë kërkesë — ekzekutoje nga këtu për të mbushur paraqitjen e skenarit.",
       "syntheticInfo": "Të dhëna shembull të gjeneruara nga dokumentacioni i kësaj kërkese.",
-      "syntheticRunHint": "Të dhëna shembull — ekzekutoni kërkesën për t'i zëvendësuar me një rezultat të vërtetë."
+      "syntheticRunHint": "Të dhëna shembull — ekzekutoni kërkesën për t'i zëvendësuar me një rezultat të vërtetë.",
+      "stop": "Ndalo"
     },
     "now": {
       "timezone": "Timezone",

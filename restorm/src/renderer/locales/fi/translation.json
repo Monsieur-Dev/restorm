@@ -940,7 +940,8 @@
       "pause": "Tauko",
       "noRunsHint": "Tälle pyynnölle ei ole tuoretta suoritusta — suorita se täältä täyttääksesi skenaarion esikatselun.",
       "syntheticInfo": "Esimerkkidata, joka on luotu tämän pyynnön dokumentaatiosta.",
-      "syntheticRunHint": "Esimerkkidata — suorita pyyntö korvataksesi sen oikealla tuloksella."
+      "syntheticRunHint": "Esimerkkidata — suorita pyyntö korvataksesi sen oikealla tuloksella.",
+      "stop": "Pysäytä"
     },
     "now": {
       "timezone": "Timezone",

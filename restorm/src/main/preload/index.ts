@@ -880,6 +880,28 @@ contextBridge.exposeInMainWorld('restorm', {
      * selector popover on a data link's receiving input. */
     getScenarioNodeResult: (scenarioId: string, nodeId: string): Promise<Record<string, unknown> | null> =>
       ipcRenderer.invoke('scenario:node-result', scenarioId, nodeId) as Promise<Record<string, unknown> | null>,
+    /** Full-scenario engine (Phase 2): start a run end-to-end. Returns
+     * a runId the caller uses for subsequent pause / step / abort. */
+    scenarioEngineStart: (scenarioId: string, params?: Record<string, unknown>): Promise<{ runId: string }> =>
+      ipcRenderer.invoke('scenario:engine:start', scenarioId, params) as Promise<{ runId: string }>,
+    scenarioEnginePause: (runId: string): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke('scenario:engine:pause', runId) as Promise<{ ok: boolean }>,
+    scenarioEngineResume: (runId: string): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke('scenario:engine:resume', runId) as Promise<{ ok: boolean }>,
+    scenarioEngineStep: (runId: string): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke('scenario:engine:step', runId) as Promise<{ ok: boolean }>,
+    scenarioEngineAbort: (runId: string, reason?: string): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke('scenario:engine:abort', runId, reason) as Promise<{ ok: boolean }>,
+    scenarioEngineReadLog: (runId: string): Promise<unknown[]> =>
+      ipcRenderer.invoke('scenario:engine:read-log', runId) as Promise<unknown[]>,
+    /** Subscribe to engine events (node-started/-completed/data-flow/run-…).
+     * Returns an unsubscribe function. The renderer animates the graph
+     * + edge beams off these events. */
+    onScenarioEngineEvent: (cb: (event: unknown) => void): (() => void) => {
+      const handler = (_e: unknown, ev: unknown): void => { cb(ev) }
+      ipcRenderer.on('scenario:engine:event', handler)
+      return () => { ipcRenderer.off('scenario:engine:event', handler) }
+    },
     /** Full-snapshot push fired on renderer (re)load — useful after an
      * HMR cycle so main's cache is always consistent with the renderer. */
     pushMcpActiveStateBootstrap: (payload: {

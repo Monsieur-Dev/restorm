@@ -941,7 +941,8 @@
       "pause": "Пауза",
       "noRunsHint": "Nema skorašnjeg izvršavanja ovog zahteva — pokreni ga odavde da popuniš pregled scenarija.",
       "syntheticInfo": "Primer podataka generisan iz dokumentacije ovog zahteva.",
-      "syntheticRunHint": "Primer podataka — pokrenite zahtev da ih zamenite stvarnim rezultatom."
+      "syntheticRunHint": "Primer podataka — pokrenite zahtev da ih zamenite stvarnim rezultatom.",
+      "stop": "Zaustavi"
     },
     "now": {
       "timezone": "Timezone",

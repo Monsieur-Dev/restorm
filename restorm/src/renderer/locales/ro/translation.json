@@ -941,7 +941,8 @@
       "pause": "Pauză",
       "noRunsHint": "Nicio rulare recentă pentru această cerere — rulează-o de aici ca să populezi previzualizarea scenariului.",
       "syntheticInfo": "Date de exemplu generate din documentația acestei cereri.",
-      "syntheticRunHint": "Date de exemplu — rulați cererea pentru a le înlocui cu un rezultat real."
+      "syntheticRunHint": "Date de exemplu — rulați cererea pentru a le înlocui cu un rezultat real.",
+      "stop": "Oprește"
     },
     "now": {
       "timezone": "Timezone",

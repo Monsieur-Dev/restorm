@@ -940,7 +940,8 @@
       "pause": "Duraklat",
       "noRunsHint": "Bu istek için son çalışma yok — senaryo önizlemesini doldurmak için buradan çalıştır.",
       "syntheticInfo": "Bu isteğin belgelerinden oluşturulan örnek veriler.",
-      "syntheticRunHint": "Örnek veriler — gerçek bir sonuçla değiştirmek için isteği çalıştırın."
+      "syntheticRunHint": "Örnek veriler — gerçek bir sonuçla değiştirmek için isteği çalıştırın.",
+      "stop": "Durdur"
     },
     "now": {
       "timezone": "Timezone",

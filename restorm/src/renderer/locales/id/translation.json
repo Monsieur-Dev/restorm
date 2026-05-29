@@ -939,7 +939,8 @@
       "pause": "Jeda",
       "noRunsHint": "Belum ada eksekusi terbaru untuk permintaan ini — jalankan dari sini untuk mengisi pratinjau skenario.",
       "syntheticInfo": "Contoh data yang dihasilkan dari dokumentasi permintaan ini.",
-      "syntheticRunHint": "Contoh data — jalankan permintaan untuk menggantinya dengan hasil nyata."
+      "syntheticRunHint": "Contoh data — jalankan permintaan untuk menggantinya dengan hasil nyata.",
+      "stop": "Hentikan"
     },
     "now": {
       "timezone": "Timezone",

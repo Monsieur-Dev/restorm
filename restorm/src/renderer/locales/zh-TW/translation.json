@@ -939,7 +939,8 @@
       "pause": "暫停",
       "noRunsHint": "此請求尚無最近一次執行結果 — 從此處執行以填入情境預覽。",
       "syntheticInfo": "從此請求的文件產生的範例資料。",
-      "syntheticRunHint": "範例資料 — 執行請求以替換為真實結果。"
+      "syntheticRunHint": "範例資料 — 執行請求以替換為真實結果。",
+      "stop": "停止"
     },
     "now": {
       "timezone": "Timezone",

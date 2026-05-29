@@ -940,7 +940,8 @@
       "pause": "Szünet",
       "noRunsHint": "Nincs friss futtatás ehhez a kéréshez — futtasd innen, hogy feltöltsd a forgatókönyv előnézetét.",
       "syntheticInfo": "Példa adatok generálva ennek a kérésnek a dokumentációjából.",
-      "syntheticRunHint": "Példa adatok — futtassa a kérést, hogy valódi eredménnyel cserélje ki."
+      "syntheticRunHint": "Példa adatok — futtassa a kérést, hogy valódi eredménnyel cserélje ki.",
+      "stop": "Leállítás"
     },
     "now": {
       "timezone": "Timezone",

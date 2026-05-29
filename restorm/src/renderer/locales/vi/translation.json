@@ -939,7 +939,8 @@
       "pause": "Tạm dừng",
       "noRunsHint": "Chưa có lần chạy gần đây cho yêu cầu này — chạy nó từ đây để điền bản xem trước kịch bản.",
       "syntheticInfo": "Dữ liệu mẫu được tạo từ tài liệu của yêu cầu này.",
-      "syntheticRunHint": "Dữ liệu mẫu — chạy yêu cầu để thay thế bằng kết quả thực."
+      "syntheticRunHint": "Dữ liệu mẫu — chạy yêu cầu để thay thế bằng kết quả thực.",
+      "stop": "Dừng"
     },
     "now": {
       "timezone": "Timezone",

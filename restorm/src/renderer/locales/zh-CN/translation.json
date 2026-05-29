@@ -939,7 +939,8 @@
       "pause": "暂停",
       "noRunsHint": "此请求暂无最近一次运行结果 — 从此处运行以填充场景预览。",
       "syntheticInfo": "从此请求的文档生成的示例数据。",
-      "syntheticRunHint": "示例数据 — 执行请求以替换为真实结果。"
+      "syntheticRunHint": "示例数据 — 执行请求以替换为真实结果。",
+      "stop": "停止"
     },
     "now": {
       "timezone": "Timezone",

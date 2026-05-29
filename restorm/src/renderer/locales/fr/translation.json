@@ -940,7 +940,8 @@
       "pause": "Pause",
       "noRunsHint": "Pas d'exécution récente pour cette requête — exécutez-la d'ici pour alimenter l'aperçu du scénario.",
       "syntheticInfo": "Données d'exemple générées à partir de la documentation de cette requête.",
-      "syntheticRunHint": "Données d'exemple — exécutez la requête pour les remplacer par un vrai résultat."
+      "syntheticRunHint": "Données d'exemple — exécutez la requête pour les remplacer par un vrai résultat.",
+      "stop": "Arrêter"
     },
     "now": {
       "timezone": "Fuseau horaire",

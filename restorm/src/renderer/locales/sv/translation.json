@@ -940,7 +940,8 @@
       "pause": "Pausa",
       "noRunsHint": "Ingen nyligen utförd körning för denna förfrågan — kör den härifrån för att fylla scenariot.",
       "syntheticInfo": "Exempeldata genererad från denna förfrågans dokumentation.",
-      "syntheticRunHint": "Exempeldata — kör förfrågan för att ersätta dem med ett verkligt resultat."
+      "syntheticRunHint": "Exempeldata — kör förfrågan för att ersätta dem med ett verkligt resultat.",
+      "stop": "Stopp"
     },
     "now": {
       "timezone": "Timezone",

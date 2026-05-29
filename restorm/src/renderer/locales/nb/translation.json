@@ -940,7 +940,8 @@
       "pause": "Pause",
       "noRunsHint": "Ingen nylig kjøring for denne forespørselen — kjør den herfra for å fylle scenario-forhåndsvisningen.",
       "syntheticInfo": "Eksempeldata generert fra dokumentasjonen for denne forespørselen.",
-      "syntheticRunHint": "Eksempeldata — kjør forespørselen for å erstatte dem med et reelt resultat."
+      "syntheticRunHint": "Eksempeldata — kjør forespørselen for å erstatte dem med et reelt resultat.",
+      "stop": "Stopp"
     },
     "now": {
       "timezone": "Timezone",

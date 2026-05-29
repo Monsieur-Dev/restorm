@@ -941,7 +941,8 @@
       "pause": "Pauza",
       "noRunsHint": "Nema nedavnog izvođenja ovog zahtjeva — pokreni ga odavde da popuniš pretpregled scenarija.",
       "syntheticInfo": "Primjer podataka generiran iz dokumentacije ovog zahtjeva.",
-      "syntheticRunHint": "Primjer podataka — pokrenite zahtjev kako biste ih zamijenili stvarnim rezultatom."
+      "syntheticRunHint": "Primjer podataka — pokrenite zahtjev kako biste ih zamijenili stvarnim rezultatom.",
+      "stop": "Zaustavi"
     },
     "now": {
       "timezone": "Timezone",

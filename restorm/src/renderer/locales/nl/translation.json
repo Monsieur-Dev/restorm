@@ -940,7 +940,8 @@
       "pause": "Pauze",
       "noRunsHint": "Geen recente uitvoering voor dit verzoek — voer het hier uit om de scenario-preview te vullen.",
       "syntheticInfo": "Voorbeeldgegevens gegenereerd uit de documentatie van deze aanvraag.",
-      "syntheticRunHint": "Voorbeeldgegevens — voer het verzoek uit om ze te vervangen door een echt resultaat."
+      "syntheticRunHint": "Voorbeeldgegevens — voer het verzoek uit om ze te vervangen door een echt resultaat.",
+      "stop": "Stop"
     },
     "now": {
       "timezone": "Timezone",

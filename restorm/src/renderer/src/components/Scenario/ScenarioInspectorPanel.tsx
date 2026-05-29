@@ -87,6 +87,16 @@ export interface ScenarioInspectorPanelProps {
   /** Open the previewed node's bound item (request / sub-scenario) in a
    * workbench tab — drives the navigation row at the top of the panel. */
   onOpenItem?: (itemId: string) => void
+  /** Phase 2 engine controls — when supplied, the toolbar Run / Pause /
+   * Step / Stop buttons drive a real run instead of the fake-run
+   * animation. The engine's current state (running/paused/idle) drives
+   * the icon swap on the Run button. */
+  engineState?: 'idle' | 'running' | 'paused' | 'completed' | 'cancelled' | 'failed'
+  onEngineRun?: () => void
+  onEnginePause?: () => void
+  onEngineResume?: () => void
+  onEngineStep?: () => void
+  onEngineStop?: () => void
 }
 
 interface ScenarioRuntime {
@@ -107,7 +117,7 @@ function scenarioRuntime(): ScenarioRuntime | undefined {
  * data + tree as the JSON-path selector's picker popover). Shown only when
  * exactly one box is selected.
  */
-export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ scenarioId, errors, errorBoxCount, onFocusNode, previewNode, onTriggerFakeRun, onTriggerFakeDebug, onOpenItem }) => {
+export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ scenarioId, errors, errorBoxCount, onFocusNode, previewNode, onTriggerFakeRun, onTriggerFakeDebug, onOpenItem, engineState, onEngineRun, onEnginePause, onEngineResume, onEngineStep, onEngineStop }) => {
   const { t } = useTranslation()
   const [result, setResult] = useState<Record<string, unknown> | null>(null)
   const fetchToken = useRef(0)
@@ -207,21 +217,46 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
     ?? (syntheticPreview ? (syntheticPreview as unknown as Record<string, unknown>) : null)
   const isSynthetic = realData === null && syntheticPreview != null
   const hasErrors = errors.length > 0
-  const noop = (): void => { /* Step is visual-only for now — Run + Debug wire their fake-run animations below. */ }
+  // When the host wires `onEngineRun` (Phase 2), the toolbar drives the
+  // real engine: Run kicks off the scenario; Pause/Resume + Step + Stop
+  // are live controls; the Run button swaps to a Pause icon while
+  // running and back to Play while paused/idle. When the engine
+  // controls are absent (Phase 1 host that hasn't been migrated yet),
+  // the buttons fall back to the fake-run animation handlers.
+  const engineWired = onEngineRun !== undefined
   const onRun = (): void => {
+    if (onEngineRun !== undefined) {
+      if (engineState === 'running') onEnginePause?.()
+      else if (engineState === 'paused') onEngineResume?.()
+      else onEngineRun()
+      return
+    }
     if (previewNode && onTriggerFakeRun) onTriggerFakeRun(previewNode.id)
   }
   const onDebug = (): void => {
     if (previewNode && onTriggerFakeDebug) onTriggerFakeDebug(previewNode.id)
   }
-  const runDisabled = !previewNode || !onTriggerFakeRun
+  const onStep = (): void => {
+    if (engineWired && (engineState === 'paused' || engineState === 'running')) {
+      onEngineStep?.()
+    }
+  }
+  const onStop = (): void => {
+    if (engineWired) onEngineStop?.()
+  }
+  const runDisabled = engineWired ? false : !previewNode || !onTriggerFakeRun
   const debugDisabled = !previewNode || !onTriggerFakeDebug
-  const runIsPause = previewNode?.fakeRunActive === true
+  const stepDisabled = !engineWired || (engineState !== 'paused' && engineState !== 'running')
+  const stopDisabled = !engineWired || (engineState !== 'running' && engineState !== 'paused')
+  const runIsPause = engineWired
+    ? engineState === 'running'
+    : previewNode?.fakeRunActive === true
   const runIcon = runIsPause ? 'debug-pause' : 'play'
   const runLabel = runIsPause
     ? t('scenario.inspector.pause', 'Pause')
     : t('scenario.inspector.run', 'Run')
   const debugLabel = t('scenario.inspector.debug', 'Debug')
+  const stopLabel = t('scenario.inspector.stop', 'Stop')
 
   return (
     <div ref={panelRef} className="scn-inspector nodrag nopan" data-testid="scenario-inspector-panel">
@@ -233,7 +268,10 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
       <div className="scn-inspector-toolbar" data-testid="scenario-inspector-toolbar">
         <Button small secondary icon={runIcon} onClick={onRun} disabled={runDisabled} options={{ ariaLabel: runLabel, title: runLabel }} data-testid="scenario-inspector-run" />
         <Button small secondary icon="debug-alt" onClick={onDebug} disabled={debugDisabled} options={{ ariaLabel: debugLabel, title: debugLabel }} data-testid="scenario-inspector-debug" />
-        <Button small secondary icon="debug-step-over" onClick={noop} options={{ ariaLabel: t('scenario.inspector.step', 'Step'), title: t('scenario.inspector.step', 'Step') }} data-testid="scenario-inspector-step" />
+        <Button small secondary icon="debug-step-over" onClick={onStep} disabled={stepDisabled} options={{ ariaLabel: t('scenario.inspector.step', 'Step'), title: t('scenario.inspector.step', 'Step') }} data-testid="scenario-inspector-step" />
+        {engineWired && (
+          <Button small secondary icon="debug-stop" onClick={onStop} disabled={stopDisabled} options={{ ariaLabel: stopLabel, title: stopLabel }} data-testid="scenario-inspector-stop" />
+        )}
       </div>
 
       {hasErrors && (

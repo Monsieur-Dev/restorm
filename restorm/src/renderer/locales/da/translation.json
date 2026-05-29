@@ -940,7 +940,8 @@
       "pause": "Pause",
       "noRunsHint": "Ingen nylig kørsel af denne anmodning — kør den herfra for at udfylde scenarie-forhåndsvisningen.",
       "syntheticInfo": "Eksempeldata genereret ud fra dokumentationen for denne anmodning.",
-      "syntheticRunHint": "Eksempeldata — kør anmodningen for at erstatte den med et rigtigt resultat."
+      "syntheticRunHint": "Eksempeldata — kør anmodningen for at erstatte den med et rigtigt resultat.",
+      "stop": "Stop"
     },
     "now": {
       "timezone": "Timezone",

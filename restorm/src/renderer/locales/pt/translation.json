@@ -940,7 +940,8 @@
       "pause": "Pausa",
       "noRunsHint": "Sem execução recente para esta requisição — execute-a daqui para preencher a pré-visualização do cenário.",
       "syntheticInfo": "Dados de exemplo gerados a partir da documentação desta requisição.",
-      "syntheticRunHint": "Dados de exemplo — execute a requisição para substituí-los por um resultado real."
+      "syntheticRunHint": "Dados de exemplo — execute a requisição para substituí-los por um resultado real.",
+      "stop": "Parar"
     },
     "now": {
       "timezone": "Timezone",

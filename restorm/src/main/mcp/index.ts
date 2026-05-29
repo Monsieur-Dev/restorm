@@ -19,6 +19,7 @@ import { registerExecutionTools } from './tools/execute'
 import { registerWorkbenchTabTools } from './tools/workbenchTabs'
 import { registerScenarioTools } from './tools/scenario'
 import { registerScenarioRunTools } from './tools/scenarioRun'
+import { installScenarioEngineIPC } from '../scenarioEngine/ipcBridge'
 import { registerResources } from './resources'
 
 export function registerRestormMcp(mcp: McpService): void {
@@ -32,5 +33,6 @@ export function registerRestormMcp(mcp: McpService): void {
   registerWorkbenchTabTools(mcp)
   registerScenarioTools(mcp)
   registerScenarioRunTools(mcp)
+  installScenarioEngineIPC()
   registerResources(mcp)
 }

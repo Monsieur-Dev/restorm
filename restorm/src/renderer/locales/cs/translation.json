@@ -942,7 +942,8 @@
       "pause": "Pozastavit",
       "noRunsHint": "Žádné nedávné spuštění tohoto požadavku — spusťte jej zde a naplňte náhled scénáře.",
       "syntheticInfo": "Příklad dat vygenerovaný z dokumentace tohoto požadavku.",
-      "syntheticRunHint": "Příklad dat — spusťte požadavek, abyste je nahradili skutečným výsledkem."
+      "syntheticRunHint": "Příklad dat — spusťte požadavek, abyste je nahradili skutečným výsledkem.",
+      "stop": "Zastavit"
     },
     "now": {
       "timezone": "Timezone",

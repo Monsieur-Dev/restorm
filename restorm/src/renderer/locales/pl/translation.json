@@ -942,7 +942,8 @@
       "pause": "Wstrzymaj",
       "noRunsHint": "Brak ostatniego wykonania dla tego żądania — uruchom je stąd, aby wypełnić podgląd scenariusza.",
       "syntheticInfo": "Przykładowe dane wygenerowane z dokumentacji tego żądania.",
-      "syntheticRunHint": "Przykładowe dane — uruchom żądanie, aby zastąpić je rzeczywistym wynikiem."
+      "syntheticRunHint": "Przykładowe dane — uruchom żądanie, aby zastąpić je rzeczywistym wynikiem.",
+      "stop": "Zatrzymaj"
     },
     "now": {
       "timezone": "Timezone",

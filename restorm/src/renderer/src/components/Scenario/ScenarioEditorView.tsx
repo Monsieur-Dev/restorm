@@ -41,6 +41,7 @@ import type { AddChildKind } from '../MainView/Sidebar/contextMenuBuilder'
 import { validateScenarioGraph, targetKey, type ScenarioNodeError, type ScenarioDataLink } from './scenarioValidation'
 import { ScenarioErrorsContext } from './scenarioErrorsContext'
 import { ScenarioInspectorPanel, type InspectorPreviewNode } from './ScenarioInspectorPanel'
+import { useScenarioEngine } from '../../hooks/useScenarioEngine'
 import { ScenarioDebugBezierEdge } from './ScenarioDebugBezierEdge'
 import { staticScenarioPreview, singleDeepPath, expectsObjectInput, singleTopLevelKey, STATIC_PREVIEW_KINDS, resolveItems, applyListOp, resolveSelectorPath, type StaticPreviewNode, type StaticPreviewEdge } from '../../../../shared/utils/scenarioStaticPreview'
 import { consumePendingScenarioNodeFocus, onScenarioNodeFocus, clearPendingScenarioNodeFocus } from '../../services/scenarioFocusBus'
@@ -222,6 +223,10 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
   const { t } = useTranslation()
   const { screenToFlowPosition, fitView } = useReactFlow()
   const wrapperRef = useRef<HTMLDivElement>(null)
+  // Phase 2 — real engine controller for this scenario tab. Drives the
+  // inspector's Run / Pause / Step / Stop buttons + animates nodes /
+  // edges off engine events.
+  const engine = useScenarioEngine()
 
   // The authoritative per-node scenario data (config/ports/note/color),
   // keyed by id. React Flow only round-trips id + position; we merge it
@@ -1389,24 +1394,38 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
   }, [nodes, edges, t, derivedPortsOf, staticPreviewApi, resolveBoundItem, resolveSyntheticPreview])
 
   // Edges propagated to React Flow with a transient `data.debugToken`
-  // mirroring the source node's `fakeDebugToken`. The token's identity
-  // (number value) drives the custom edge component's single-shot
-  // travelling beam — each new value fires one lap. The underlying
-  // scenario edge model is untouched (no persistence).
+  // mirroring the source node's `fakeDebugToken` AND any edge that
+  // received a token bump from the engine (`engine.edgeTokens`). The
+  // token's identity (number value) drives the custom edge
+  // component's single-shot travelling beam.
   const presentationalEdges = useMemo(() => {
     const debugTokenBySource = new Map<string, number>()
     for (const n of nodes) {
       const tok = n.data['fakeDebugToken']
       if (typeof tok === 'number' && tok > 0) debugTokenBySource.set(n.id, tok)
     }
-    if (debugTokenBySource.size === 0) return edges
+    const engineEdgeTokens = engine.edgeTokens
+    if (debugTokenBySource.size === 0 && engineEdgeTokens.size === 0) return edges
     return edges.map((e) => {
       const tok = e.source ? debugTokenBySource.get(e.source) : undefined
-      return tok !== undefined
-        ? { ...e, data: { ...(e.data ?? {}), debugToken: tok } }
-        : e
+      const engineTok = engineEdgeTokens.get(e.id)
+      if (tok === undefined && engineTok === undefined) return e
+      return { ...e, data: { ...(e.data ?? {}), debugToken: tok ?? engineTok } }
     })
-  }, [nodes, edges])
+  }, [nodes, edges, engine.edgeTokens])
+
+  // Inject `data.fakeRunActive` for every node the engine reports as
+  // currently running. The BorderBeam already reacts to that flag —
+  // re-using it keeps the visual identical between fake-run + real
+  // engine without per-source styling.
+  const presentationalNodes = useMemo(() => {
+    if (engine.runningNodeIds.size === 0) return nodes
+    return nodes.map((n) =>
+      engine.runningNodeIds.has(n.id) && n.data['fakeRunActive'] !== true
+        ? { ...n, data: { ...n.data, fakeRunActive: true } }
+        : n
+    )
+  }, [nodes, engine.runningNodeIds])
 
   // Wire-ports for the link-drag "Add" submenu — the port the link filter
   // computed for the (folded) request / sub-scenario kinds, when each is
@@ -1463,9 +1482,15 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, onS
         onTriggerFakeRun={onTriggerFakeRun}
         onTriggerFakeDebug={onTriggerFakeDebug}
         {...(onOpenItem ? { onOpenItem } : {})}
+        engineState={engine.state}
+        onEngineRun={() => { void engine.start(scenario.id) }}
+        onEnginePause={() => { void engine.pause() }}
+        onEngineResume={() => { void engine.resume() }}
+        onEngineStep={() => { void engine.step() }}
+        onEngineStop={() => { void engine.stop() }}
       />
       <ReactFlow
-        nodes={nodes}
+        nodes={presentationalNodes}
         edges={presentationalEdges}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}

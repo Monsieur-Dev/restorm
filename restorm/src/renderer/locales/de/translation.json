@@ -940,7 +940,8 @@
       "pause": "Pause",
       "noRunsHint": "Keine aktuelle Ausführung für diese Anfrage — führe sie hier aus, um die Szenario-Vorschau zu füllen.",
       "syntheticInfo": "Beispieldaten generiert aus der Dokumentation dieser Anfrage.",
-      "syntheticRunHint": "Beispieldaten — führen Sie die Anfrage aus, um sie durch ein echtes Ergebnis zu ersetzen."
+      "syntheticRunHint": "Beispieldaten — führen Sie die Anfrage aus, um sie durch ein echtes Ergebnis zu ersetzen.",
+      "stop": "Stopp"
     },
     "now": {
       "timezone": "Timezone",
