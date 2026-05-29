@@ -371,7 +371,8 @@
     },
     "tooltip": {
       "noDetails": "Ingen detaljer tilgængelige",
-      "noContent": "Ingen dokumentation eller noter"
+      "noContent": "Ingen dokumentation eller noter",
+      "noScenario": "Scenarie utilgængeligt"
     }
   },
   "httpStatus": {

@@ -373,7 +373,8 @@
     },
     "tooltip": {
       "noDetails": "Brak dostępnych szczegółów",
-      "noContent": "Brak dokumentacji lub notatek"
+      "noContent": "Brak dokumentacji lub notatek",
+      "noScenario": "Scenariusz niedostępny"
     }
   },
   "httpStatus": {

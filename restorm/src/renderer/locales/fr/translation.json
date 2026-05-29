@@ -371,7 +371,8 @@
     },
     "tooltip": {
       "noDetails": "Aucun détail disponible",
-      "noContent": "Aucune documentation ni notes"
+      "noContent": "Aucune documentation ni notes",
+      "noScenario": "Scénario indisponible"
     }
   },
   "httpStatus": {

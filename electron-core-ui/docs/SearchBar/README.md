@@ -38,6 +38,11 @@ export interface SearchBarProps {
   /** Custom renderer for method/type badge. If not provided, uses default request-type-badge styling. */
   renderBadge?: (method: string) => React.ReactNode
 
+  /** Categories whose result items render with the inline badge layout
+   *  ([Badge] Title — breadcrumb on a single row) instead of the default
+   *  [Icon] Title \n breadcrumb stacked layout. Defaults to `['request']`. */
+  badgedCategories?: string[]
+
   /**
    * Delay in milliseconds before the result tooltip hides after the
    * pointer leaves it. Defaults to `300`. Increase it when the

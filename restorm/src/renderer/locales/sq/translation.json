@@ -371,7 +371,8 @@
     },
     "tooltip": {
       "noDetails": "Asnjë detaj në dispozicion",
-      "noContent": "Asnjë dokumentacion ose shënim"
+      "noContent": "Asnjë dokumentacion ose shënim",
+      "noScenario": "Skenari i padisponueshëm"
     }
   },
   "httpStatus": {

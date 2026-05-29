@@ -370,7 +370,8 @@
     },
     "tooltip": {
       "noDetails": "詳細はありません",
-      "noContent": "ドキュメントやメモはありません"
+      "noContent": "ドキュメントやメモはありません",
+      "noScenario": "シナリオを利用できません"
     }
   },
   "httpStatus": {

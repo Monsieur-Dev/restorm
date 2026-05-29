@@ -28,6 +28,13 @@ export interface SearchBarProps {
   renderTooltipContent?: (result: SearchResult) => React.ReactNode
   /** Custom renderer for method/type badge. If not provided, uses default request-type-badge styling. */
   renderBadge?: (method: string) => React.ReactNode
+  /** Categories whose result items render with the inline badge layout
+   * (`[Badge] Title — breadcrumb` on a single row) instead of the
+   * default `[Icon] Title \n breadcrumb` stacked layout. Defaults to
+   * `['request']` so existing consumers keep the single-line method
+   * badge. Hosts pass extra categories — e.g. `['request', 'scenario']`
+   * — when they want a non-request kind to share the same chrome. */
+  badgedCategories?: string[]
   /** Delay in milliseconds before the result tooltip hides after
    * the pointer leaves it. Defaults to 300 ms — bump it when the
    * tooltip hosts an interactive surface the user may drag (e.g.
@@ -47,6 +54,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   searchFn,
   renderTooltipContent,
   renderBadge,
+  badgedCategories = ['request'],
   tooltipHideDelayMs = 300
 }) => {
   const { t } = useTranslation()
@@ -345,7 +353,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     // Default rendering: show title and description
     const { category, icon, title: resultTitle, description } = hoveredResult
 
-    if (category === 'request' && icon) {
+    if (badgedCategories.includes(category) && icon) {
       const method = icon.toUpperCase()
       return (
         <div style={{ maxHeight: 'calc(100vh - 90px)', display: 'flex', flexDirection: 'column' }}>
@@ -381,7 +389,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         )}
       </div>
     )
-  }, [hoveredResult, renderTooltipContent, renderBadge, tooltipMarkdownTestId])
+  }, [hoveredResult, renderTooltipContent, renderBadge, tooltipMarkdownTestId, badgedCategories])
 
   return (
     <div
@@ -513,7 +521,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                               const breadcrumb = result.metadata?.['breadcrumb']
                               const breadcrumbArray = Array.isArray(breadcrumb) ? (breadcrumb as string[]) : null
                               
-                              if (category === 'request' && icon) {
+                              if (badgedCategories.includes(category) && icon) {
                                 return (
                                   <div className="result-content">
                                     <div className="result-title result-badge-title">

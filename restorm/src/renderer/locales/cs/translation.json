@@ -373,7 +373,8 @@
     },
     "tooltip": {
       "noDetails": "Žádné podrobnosti k dispozici",
-      "noContent": "Žádná dokumentace ani poznámky"
+      "noContent": "Žádná dokumentace ani poznámky",
+      "noScenario": "Scénář není k dispozici"
     }
   },
   "httpStatus": {

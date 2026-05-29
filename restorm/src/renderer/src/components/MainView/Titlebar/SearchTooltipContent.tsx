@@ -32,8 +32,10 @@ import { findOperationForRoute, type RouteLike } from '../../../../../shared/uti
 import { routeFromRequest } from '../../../hooks/routeFromRequest'
 import { resolveUrlAgainstEnv, flattenEnvVars } from '../../../../../shared/utils/resolveUrlAgainstEnv'
 import { isEnvironmentFolder, isRequest, isAnyFolder } from '../../../../../shared/types/folderTypes'
-import type { EnvironmentFolder, Folder } from '../../../../../shared/types/collections'
+import { isScenario } from '../../../../../shared/types/collections'
+import type { EnvironmentFolder, Folder, Scenario } from '../../../../../shared/types/collections'
 import type { Request } from '../../../../../shared/types/collections'
+import { ScenarioGraphPreview } from './ScenarioGraphPreview'
 import './SearchTooltipContent.css'
 
 const compiledTemplate = Handlebars.compile(requestDetailsTemplate)
@@ -91,6 +93,35 @@ function walkForFolder(folder: Folder | EnvironmentFolder, folderId: string): Fo
     if (item.id === folderId) return item
     const inner = walkForFolder(item, folderId)
     if (inner) return inner
+  }
+  return null
+}
+
+/** Walk the tree to find the scenario the result references.
+ * Scenarios can live at the root, inside an env-folder / folder,
+ * or nested inside another scenario (folder-like container). */
+function findScenarioInTree(
+  collections: EnvironmentFolder[],
+  scenarioId: string
+): Scenario | null {
+  for (const envFolder of collections) {
+    const found = walkForScenario(envFolder, scenarioId)
+    if (found) return found
+  }
+  return null
+}
+
+function walkForScenario(folder: Folder | EnvironmentFolder | Scenario, scenarioId: string): Scenario | null {
+  const items = 'items' in folder ? folder.items ?? [] : []
+  for (const item of items) {
+    if (isScenario(item) && item.id === scenarioId) return item
+    if (isScenario(item)) {
+      const inner = walkForScenario(item, scenarioId)
+      if (inner) return inner
+    } else if (isAnyFolder(item)) {
+      const inner = walkForScenario(item, scenarioId)
+      if (inner) return inner
+    }
   }
   return null
 }
@@ -229,6 +260,43 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
         <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
           {docContent}
         </div>
+      </div>
+    )
+  }
+
+  if (category === 'scenario') {
+    // Scenario preview: same chrome as the request branch (bookmark
+    // ribbon + breadcrumb + Badge + title), then a read-only React
+    // Flow embed of the scenario's graph. Falls back to a notes-only
+    // panel when the scenario id doesn't resolve to a live scenario
+    // (stale index that hasn't been refreshed yet).
+    const scenario = findScenarioInTree(collections, resultId)
+    return (
+      <div
+        style={{
+          position: 'relative',
+          height: 'min(640px, calc(100vh - 90px))',
+          maxHeight: 'calc(100vh - 90px)',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden'
+        }}
+        onWheelCapture={(e) => { e.stopPropagation() }}
+        data-testid="search-tooltip-scenario"
+      >
+        {Header}
+        <div style={{ marginBottom: 8, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Badge type="SCENARIO" />
+          <strong style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{resultTitle}</strong>
+        </div>
+        {notes && (
+          <div style={{ marginBottom: 8, flexShrink: 0 }}>
+            <MarkdownViewer value={notes} style={{ maxHeight: '40vh' }} data-testid="markdown-viewer-scenario-notes" />
+          </div>
+        )}
+        {scenario
+          ? <div style={{ flex: 1, minHeight: 0 }}><ScenarioGraphPreview scenario={scenario} /></div>
+          : <div style={{ flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.6 }}>{t('search.tooltip.noScenario', 'Scenario unavailable')}</div>}
       </div>
     )
   }

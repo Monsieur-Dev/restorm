@@ -88,12 +88,21 @@ const Tooltip: React.FC<TooltipProps> = ({
     if (side === 'right') {
       // Position tooltip to the right of the target
       left = targetRect.right + gap + beakWidth
+      const targetCenterY = targetRect.top + targetRect.height / 2
 
-      // Use fixedTop if provided, otherwise align with target center
+      // `fixedTop` is the caller's preferred top — useful when several
+      // adjacent hover targets share a panel and a stable tooltip top
+      // avoids jumpy chrome. But the beak has to land on the hovered
+      // row, so we treat `fixedTop` as a soft hint and pull the
+      // tooltip just far enough off it to keep the target's centre
+      // inside the [10%, 90%] beak zone. Without this slide, a target
+      // far below `fixedTop` clamps the beak to 90% — visually it
+      // floats next to the tooltip instead of next to the row.
       if (fixedTop !== undefined) {
-        top = fixedTop
+        const minTopForBeak = targetCenterY - tooltipHeight * 0.9
+        const maxTopForBeak = targetCenterY - tooltipHeight * 0.1
+        top = Math.max(minTopForBeak, Math.min(maxTopForBeak, fixedTop))
       } else {
-        const targetCenterY = targetRect.top + targetRect.height / 2
         top = targetCenterY - tooltipHeight / 2
       }
 
@@ -108,11 +117,10 @@ const Tooltip: React.FC<TooltipProps> = ({
         top = viewportHeight - tooltipHeight - gap
       }
 
-      // Calculate beak vertical position as percentage
-      // The beak should point to the vertical center of the target
-      const targetCenterY = targetRect.top + targetRect.height / 2
+      // Calculate beak vertical position as percentage. Already inside
+      // [10%, 90%] thanks to the slide above, except when viewport
+      // clamping forced the tooltip back — re-clamp for safety.
       beakTopPercent = ((targetCenterY - top) / tooltipHeight) * 100
-      // Clamp beak position between 10% and 90%
       beakTopPercent = Math.max(10, Math.min(90, beakTopPercent))
 
       setPosition({ top, left, beakLeftPercent: 0, beakTopPercent })
@@ -125,12 +133,14 @@ const Tooltip: React.FC<TooltipProps> = ({
     if (side === 'left') {
       // Position tooltip to the left of the target
       left = targetRect.left - gap - beakWidth - tooltipWidth
+      const targetCenterY = targetRect.top + targetRect.height / 2
 
-      // Use fixedTop if provided, otherwise align with target center
+      // Same slide-to-keep-beak-aligned semantics as `side === 'right'`.
       if (fixedTop !== undefined) {
-        top = fixedTop
+        const minTopForBeak = targetCenterY - tooltipHeight * 0.9
+        const maxTopForBeak = targetCenterY - tooltipHeight * 0.1
+        top = Math.max(minTopForBeak, Math.min(maxTopForBeak, fixedTop))
       } else {
-        const targetCenterY = targetRect.top + targetRect.height / 2
         top = targetCenterY - tooltipHeight / 2
       }
 
@@ -145,8 +155,6 @@ const Tooltip: React.FC<TooltipProps> = ({
         top = viewportHeight - tooltipHeight - gap
       }
 
-      // Calculate beak vertical position as percentage
-      const targetCenterY = targetRect.top + targetRect.height / 2
       beakTopPercent = ((targetCenterY - top) / tooltipHeight) * 100
       beakTopPercent = Math.max(10, Math.min(90, beakTopPercent))
 

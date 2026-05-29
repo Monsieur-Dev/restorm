@@ -370,7 +370,8 @@
     },
     "tooltip": {
       "noDetails": "Không có chi tiết",
-      "noContent": "Không có tài liệu hoặc ghi chú"
+      "noContent": "Không có tài liệu hoặc ghi chú",
+      "noScenario": "Kịch bản không khả dụng"
     }
   },
   "httpStatus": {

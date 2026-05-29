@@ -371,7 +371,8 @@
     },
     "tooltip": {
       "noDetails": "Inga detaljer tillgängliga",
-      "noContent": "Ingen dokumentation eller anteckningar"
+      "noContent": "Ingen dokumentation eller anteckningar",
+      "noScenario": "Scenariot är inte tillgängligt"
     }
   },
   "httpStatus": {

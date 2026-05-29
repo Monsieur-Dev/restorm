@@ -370,7 +370,8 @@
     },
     "tooltip": {
       "noDetails": "无可用详情",
-      "noContent": "无文档或笔记"
+      "noContent": "无文档或笔记",
+      "noScenario": "场景不可用"
     }
   },
   "httpStatus": {

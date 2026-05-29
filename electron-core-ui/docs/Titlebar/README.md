@@ -23,6 +23,7 @@ export interface TitlebarProps {
   onSearchResultClick?: (result: SearchResult) => void
   renderSearchTooltipContent?: (result: SearchResult) => React.ReactNode
   renderSearchBadge?: (method: string) => React.ReactNode
+  searchBadgedCategories?: string[]
   searchFn?: (query: string) => Promise<GroupedResults[]>
   searchBarTestId?: string
   searchTooltipHideDelayMs?: number

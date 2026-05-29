@@ -371,7 +371,8 @@
     },
     "tooltip": {
       "noDetails": "Ei tietoja saatavilla",
-      "noContent": "Ei dokumentaatiota tai muistiinpanoja"
+      "noContent": "Ei dokumentaatiota tai muistiinpanoja",
+      "noScenario": "Skenaario ei käytettävissä"
     }
   },
   "httpStatus": {

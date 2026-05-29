@@ -21,7 +21,7 @@ import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSoc
 const RESTORM_SEARCH_CATEGORIES: Record<string, CategoryMeta> = {
   request: { label: 'search.categories.request', icon: 'cloud', order: 1 },
   folder: { label: 'search.categories.folder', icon: 'folder', order: 2 },
-  scenario: { label: 'search.categories.scenario', icon: 'list-flat', order: 3 },
+  scenario: { label: 'search.categories.scenario', icon: 'circuit-board', order: 3 },
   environment: { label: 'search.categories.environment', icon: 'folder-library', order: 4 },
   settings: { label: 'search.categories.settings', icon: 'settings-gear', order: 5 },
   tag: { label: 'search.categories.tag', icon: 'tag', order: 6 }
@@ -110,7 +110,10 @@ function scenarioToSearchDocument(scenario: Scenario, parentPath: string[] = [],
     id: scenario.id,
     title: scenario.name,
     category: 'scenario',
-    icon: 'list-flat',
+    // Per-item icon doubles as the badge label in the search list when
+    // 'scenario' is in `badgedCategories` on the SearchBar — `mapToBadgeType`
+    // turns `'scenario'` into the purple SCENARIO badge.
+    icon: 'scenario',
     keywords: scenario.tags.join(' '),
     navigation: {
       type: 'scenario',

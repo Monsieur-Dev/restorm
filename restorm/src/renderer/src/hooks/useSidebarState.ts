@@ -2,7 +2,8 @@
  * Hook for managing sidebar state and list view items
  */
 
-import React, { useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
+import { findItemById } from '../utils/treeSearch'
 import { useTranslation } from 'react-i18next'
 import type { ListViewItemData } from 'electron-core-ui/renderer'
 import type { FolderItem } from '../../../shared/types/collections'
@@ -86,6 +87,14 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
   // `isItemFavorite` / `onToggleFavorite` are optional: only spread
   // when defined so `exactOptionalPropertyTypes` doesn't reject an
   // explicit `undefined`.
+  // Walk the tree to flag scenarios — the context-menu builder routes
+  // them through a dedicated branch (toggle-favourite + Add child) so
+  // a scenario gets the bookmark affordance every request has.
+  const isItemScenario = useCallback((itemId: string): boolean => {
+    const item = findItemById(rootItems, itemId)
+    return item !== null && isScenario(item)
+  }, [rootItems])
+
   const sidebarItemsWithContextMenu: ListViewItemData[] = useMemo(
     () => attachContextMenus({
       items: sidebarItems,
@@ -97,9 +106,10 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
       ...(isItemFavorite !== undefined && { isItemFavorite }),
       ...(onToggleFavorite !== undefined && { onToggleFavorite }),
       ...(canRefreshFromSource !== undefined && { canRefreshFromSource }),
-      ...(onRefreshFromSource !== undefined && { onRefreshFromSource })
+      ...(onRefreshFromSource !== undefined && { onRefreshFromSource }),
+      isItemScenario
     }),
-    [sidebarItems, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, canRefreshFromSource, onRefreshFromSource]
+    [sidebarItems, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, canRefreshFromSource, onRefreshFromSource, isItemScenario]
   )
 
   return {

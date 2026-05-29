@@ -370,7 +370,8 @@
     },
     "tooltip": {
       "noDetails": "Tidak ada detail yang tersedia",
-      "noContent": "Tidak ada dokumentasi atau catatan"
+      "noContent": "Tidak ada dokumentasi atau catatan",
+      "noScenario": "Skenario tidak tersedia"
     }
   },
   "httpStatus": {

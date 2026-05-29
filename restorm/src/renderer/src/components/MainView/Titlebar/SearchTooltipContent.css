@@ -32,3 +32,35 @@
   font-weight: 600;
   opacity: 1;
 }
+
+/* Embedded scenario graph preview — read-only thumbnail showing the
+ * scenario's nodes and edges inside the search tooltip. */
+.scn-preview-canvas {
+  background: var(--editor-background, #1e1e1e);
+  border: 1px solid var(--editorHoverWidget-border, #454545);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.scn-preview-node {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: var(--editorWidget-background, #252526);
+  border: 1px solid var(--editorWidget-border, #454545);
+  border-radius: 4px;
+  font-size: 11px;
+  min-width: 80px;
+  max-width: 200px;
+}
+.scn-preview-node .codicon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.scn-preview-node-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

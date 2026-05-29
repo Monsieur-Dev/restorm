@@ -370,7 +370,8 @@
     },
     "tooltip": {
       "noDetails": "沒有可用的詳細資料",
-      "noContent": "沒有文件或備註"
+      "noContent": "沒有文件或備註",
+      "noScenario": "情境無法使用"
     }
   },
   "httpStatus": {
