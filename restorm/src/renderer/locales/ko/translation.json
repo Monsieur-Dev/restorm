@@ -371,7 +371,8 @@
     "tooltip": {
       "noDetails": "표시할 세부 정보가 없습니다",
       "noContent": "문서나 메모가 없습니다",
-      "noScenario": "시나리오를 사용할 수 없습니다"
+      "noScenario": "시나리오를 사용할 수 없습니다",
+      "scenarioKind": "시나리오"
     }
   },
   "httpStatus": {

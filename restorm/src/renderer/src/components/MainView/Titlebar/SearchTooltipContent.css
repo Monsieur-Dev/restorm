@@ -64,3 +64,26 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Scenario preview header — H1 + kind row, matching the
+ * `DocumentationHost` request preview's chrome (big title, then a
+ * single line that names the kind under it). */
+.search-tooltip-scenario-title {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0 0 4px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.search-tooltip-scenario-kind {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--descriptionForeground);
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}

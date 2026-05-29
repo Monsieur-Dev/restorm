@@ -374,7 +374,8 @@
     "tooltip": {
       "noDetails": "Žádné podrobnosti k dispozici",
       "noContent": "Žádná dokumentace ani poznámky",
-      "noScenario": "Scénář není k dispozici"
+      "noScenario": "Scénář není k dispozici",
+      "scenarioKind": "scénář"
     }
   },
   "httpStatus": {

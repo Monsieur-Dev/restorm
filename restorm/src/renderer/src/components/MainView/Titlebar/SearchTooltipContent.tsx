@@ -111,6 +111,30 @@ function findScenarioInTree(
   return null
 }
 
+/** Walk the live tree to find the env-folder ancestor of an item
+ * (request, folder, or scenario), so the tooltip can read the
+ * always-fresh `tagColors` map straight from the model. The search
+ * index only caches tag labels, so we look the colours up here. */
+function findOwningEnvFolder(
+  collections: EnvironmentFolder[],
+  itemId: string
+): EnvironmentFolder | null {
+  for (const envFolder of collections) {
+    if (envFolder.id === itemId) return envFolder
+    if (containsItem(envFolder, itemId)) return envFolder
+  }
+  return null
+}
+
+function containsItem(folder: Folder | EnvironmentFolder | Scenario, itemId: string): boolean {
+  const items = 'items' in folder ? folder.items ?? [] : []
+  for (const item of items) {
+    if (item.id === itemId) return true
+    if ('items' in item && containsItem(item, itemId)) return true
+  }
+  return false
+}
+
 function walkForScenario(folder: Folder | EnvironmentFolder | Scenario, scenarioId: string): Scenario | null {
   const items = 'items' in folder ? folder.items ?? [] : []
   for (const item of items) {
@@ -152,9 +176,21 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
   const restormMetadata = metadata as RestormSearchMetadata | undefined
   const notes = restormMetadata?.notes
   const breadcrumb = restormMetadata?.breadcrumb ?? []
+  // Live tagColors lookup — the search index doesn't store colours
+  // (only labels), so we walk the tree from the result's owning
+  // env-folder at render time. That picks up colour edits the user
+  // made after the index was built without us having to re-index on
+  // every colour change.
+  const liveTagColors = useMemo<Record<string, string> | undefined>(() => {
+    const owning = findOwningEnvFolder(collections, resultId)
+    return owning?.tagColors
+  }, [collections, resultId])
   const ribbonBookmarks: Bookmark[] = useMemo(
-    () => (restormMetadata?.tags ?? []).map((label) => ({ label })),
-    [restormMetadata]
+    () => (restormMetadata?.tags ?? []).map((label) => {
+      const color = liveTagColors?.[label]
+      return color !== undefined ? { label, color } : { label }
+    }),
+    [restormMetadata, liveTagColors]
   )
 
   const requestDetailsMarkdown = useMemo(() => {
@@ -265,11 +301,12 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
   }
 
   if (category === 'scenario') {
-    // Scenario preview: same chrome as the request branch (bookmark
-    // ribbon + breadcrumb + Badge + title), then a read-only React
-    // Flow embed of the scenario's graph. Falls back to a notes-only
-    // panel when the scenario id doesn't resolve to a live scenario
-    // (stale index that hasn't been refreshed yet).
+    // Scenario preview: same chrome as the request DocumentationHost
+    // branch — bookmark ribbon, breadcrumb, big H1 title, then a
+    // `[Badge SCENARIO] scenario` kind row right under it — followed
+    // by the (optional) notes and a read-only React Flow embed of
+    // the scenario's graph. Falls back to a notes-only panel when
+    // the scenario id doesn't resolve (stale index).
     const scenario = findScenarioInTree(collections, resultId)
     return (
       <div
@@ -285,9 +322,10 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
         data-testid="search-tooltip-scenario"
       >
         {Header}
-        <div style={{ marginBottom: 8, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+        <h1 className="search-tooltip-scenario-title">{resultTitle}</h1>
+        <div className="search-tooltip-scenario-kind">
           <Badge type="SCENARIO" />
-          <strong style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{resultTitle}</strong>
+          <span>{t('search.tooltip.scenarioKind', 'scenario')}</span>
         </div>
         {notes && (
           <div style={{ marginBottom: 8, flexShrink: 0 }}>

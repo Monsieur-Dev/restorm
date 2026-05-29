@@ -373,7 +373,8 @@
     "tooltip": {
       "noDetails": "Nema dostupnih pojedinosti",
       "noContent": "Nema dokumentacije ni bilješki",
-      "noScenario": "Scenarij nedostupan"
+      "noScenario": "Scenarij nedostupan",
+      "scenarioKind": "scenarij"
     }
   },
   "httpStatus": {

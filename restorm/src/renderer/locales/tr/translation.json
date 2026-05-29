@@ -372,7 +372,8 @@
     "tooltip": {
       "noDetails": "Ayrıntı yok",
       "noContent": "Belge veya not yok",
-      "noScenario": "Senaryo kullanılamıyor"
+      "noScenario": "Senaryo kullanılamıyor",
+      "scenarioKind": "senaryo"
     }
   },
   "httpStatus": {

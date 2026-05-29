@@ -33,6 +33,7 @@ import type { Folder, EnvironmentFolder, FolderItem } from '../../../shared/type
 import { isEnvironmentFolder } from '../../../shared/types/collections'
 import { findItemById, findEnvironmentFolderById, getNearestEnvironmentsForBreadcrumbs, getFolderIcon } from '../utils/treeSearch'
 import { isAnyFolder, isScenario } from '../../../shared/types/collections'
+import { searchIndexService } from '../services/SearchIndexService'
 import type { FolderTab, EnvironmentFolderTab, HTTPRequestTab, BreadcrumbItem } from '../../../shared/types/editor'
 
 export interface UseWorkbenchUpdatesOptions {
@@ -68,6 +69,15 @@ export function useWorkbenchUpdates(options: UseWorkbenchUpdatesOptions): UseWor
       item.tags = newTags
     }
 
+    // Scenarios don't go through the `makeReactive*` event chain that
+    // re-indexes requests / folders on mutation, so adding a tag to a
+    // scenario wouldn't surface in the search index until the next
+    // project reload. Re-index the scenario tree explicitly so the
+    // bookmark ribbons stay live.
+    if (item && isScenario(item)) {
+      void searchIndexService.indexScenarioTree(item).catch(() => { /* swallow — non-fatal */ })
+    }
+
     // Force React re-render without breaking reactive proxies
     forceUpdate()
 
@@ -98,6 +108,18 @@ export function useWorkbenchUpdates(options: UseWorkbenchUpdatesOptions): UseWor
               ...restormTab,
               request: { ...restormTab.request, tags: newTags },
               contentVersion: (restormTab.contentVersion ?? 0) + 1
+            }
+          }
+
+          // Scenario tabs carry their own `scenario` payload — same
+          // recipe as the request branch above so tag changes show up
+          // live in the workbench title bar without a close/reopen.
+          if ('scenario' in restormTab && (restormTab as { scenario: { id: string } }).scenario.id === targetId) {
+            const scnTab = restormTab as { scenario: { id: string; tags?: string[] }; contentVersion?: number }
+            return {
+              ...restormTab,
+              scenario: { ...scnTab.scenario, tags: newTags },
+              contentVersion: (scnTab.contentVersion ?? 0) + 1
             }
           }
 
@@ -135,8 +157,11 @@ export function useWorkbenchUpdates(options: UseWorkbenchUpdatesOptions): UseWor
         if (restormTab.tabType === 'environment-folder' && restormTab.folder.id === envFolderId) {
           return { ...restormTab, contentVersion: (restormTab.contentVersion ?? 0) + 1 }
         }
-        // Bump contentVersion on any request tab that belongs to this folder
-        if ('request' in restormTab && restormTab.breadcrumbs?.some(bc => bc.id === envFolderId)) {
+        // Bump contentVersion on any descendant tab (request, scenario,
+        // folder) whose breadcrumb path passes through this env folder
+        // — without this, a scenario tab keeps its stale tag-colour
+        // chrome until the user closes + reopens the tab.
+        if (restormTab.breadcrumbs?.some((bc) => bc.id === envFolderId)) {
           return { ...restormTab, contentVersion: (restormTab.contentVersion ?? 0) + 1 }
         }
         return restormTab

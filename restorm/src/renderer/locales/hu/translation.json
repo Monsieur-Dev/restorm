@@ -372,7 +372,8 @@
     "tooltip": {
       "noDetails": "Nincs elérhető részlet",
       "noContent": "Nincs dokumentáció vagy jegyzet",
-      "noScenario": "Forgatókönyv nem érhető el"
+      "noScenario": "Forgatókönyv nem érhető el",
+      "scenarioKind": "forgatókönyv"
     }
   },
   "httpStatus": {

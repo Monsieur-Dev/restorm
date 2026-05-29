@@ -372,7 +372,8 @@
     "tooltip": {
       "noDetails": "Ingen detaljer tilgjengelig",
       "noContent": "Ingen dokumentasjon eller notater",
-      "noScenario": "Scenariet er utilgjengelig"
+      "noScenario": "Scenariet er utilgjengelig",
+      "scenarioKind": "scenario"
     }
   },
   "httpStatus": {

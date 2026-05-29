@@ -371,7 +371,8 @@
     "tooltip": {
       "noDetails": "Không có chi tiết",
       "noContent": "Không có tài liệu hoặc ghi chú",
-      "noScenario": "Kịch bản không khả dụng"
+      "noScenario": "Kịch bản không khả dụng",
+      "scenarioKind": "kịch bản"
     }
   },
   "httpStatus": {

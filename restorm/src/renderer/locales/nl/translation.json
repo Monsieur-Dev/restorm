@@ -372,7 +372,8 @@
     "tooltip": {
       "noDetails": "Geen details beschikbaar",
       "noContent": "Geen documentatie of notities",
-      "noScenario": "Scenario niet beschikbaar"
+      "noScenario": "Scenario niet beschikbaar",
+      "scenarioKind": "scenario"
     }
   },
   "httpStatus": {

@@ -372,7 +372,8 @@
     "tooltip": {
       "noDetails": "Sin detalles disponibles",
       "noContent": "Sin documentación ni notas",
-      "noScenario": "Escenario no disponible"
+      "noScenario": "Escenario no disponible",
+      "scenarioKind": "escenario"
     }
   },
   "httpStatus": {

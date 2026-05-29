@@ -374,7 +374,8 @@
     "tooltip": {
       "noDetails": "Деталі недоступні",
       "noContent": "Немає документації або нотаток",
-      "noScenario": "Сценарій недоступний"
+      "noScenario": "Сценарій недоступний",
+      "scenarioKind": "сценарій"
     }
   },
   "httpStatus": {

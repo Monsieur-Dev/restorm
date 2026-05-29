@@ -21,14 +21,14 @@ import {
   useStore,
   type Edge,
   type Node,
-  type NodeProps,
   type NodeTypes
 } from '@xyflow/react'
-import { Handle, Position } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
-import type { Scenario, ScenarioNode as PersistedNode, ScenarioEdge, ScenarioNodeKind } from '../../../../../shared/types/collections'
-import { scenarioNodeMeta } from '../../Scenario/scenarioNodeCatalogue'
-import { Badge } from '../../common/Badge'
+import type { Scenario, ScenarioNode as PersistedNode, ScenarioEdge, FolderItem } from '../../../../../shared/types/collections'
+import { ScenarioNodeView, type ScenarioNodeBoxData } from '../../Scenario/nodes'
+import { ScenarioBoundResolverContext } from '../../Scenario/scenarioBoundResolver'
+import { useRestormStore } from '../../../store/restormStore'
+import { findItemById } from '../../../utils/treeSearch'
 
 export interface ScenarioGraphPreviewProps {
   scenario: Scenario
@@ -37,31 +37,12 @@ export interface ScenarioGraphPreviewProps {
   testId?: string
 }
 
-const NODE_TYPES: NodeTypes = { scenarioPreview: ScenarioPreviewNode }
+// Reuse the live editor's `ScenarioNodeView` so the preview shows the
+// box exactly as the user sees it in the editor — colour, status,
+// every cell. Handlers are omitted, so clicks are no-ops in the
+// preview (read-only by design).
+const NODE_TYPES: NodeTypes = { scenarioNode: ScenarioNodeView }
 const FIT_VIEW_OPTIONS = { padding: 0.15 } as const
-
-/**
- * Compact read-only node used by the preview — kind icon (or
- * protocol badge for httpRequest / runScenario) + short title. Two
- * stub handles keep React Flow's edge endpoints anchored without
- * showing the dynamic-port list a live editor box renders.
- */
-function ScenarioPreviewNode({ data }: NodeProps): React.ReactElement {
-  const d = data as { kind: ScenarioNodeKind; title: string; badge?: 'request' | 'scenario' | undefined; method?: string | undefined }
-  const meta = scenarioNodeMeta(d.kind)
-  return (
-    <div className="scn-preview-node">
-      <Handle id="in" type="target" position={Position.Left} style={{ visibility: 'hidden' }} />
-      {d.badge === 'scenario'
-        ? <Badge type="SCENARIO" />
-        : d.badge === 'request' && d.method
-          ? <Badge type={d.method.toUpperCase() as Parameters<typeof Badge>[0]['type']} />
-          : <i className={`codicon codicon-${meta.icon}`} aria-hidden="true" />}
-      <span className="scn-preview-node-title">{d.title}</span>
-      <Handle id="out" type="source" position={Position.Right} style={{ visibility: 'hidden' }} />
-    </div>
-  )
-}
 
 /** Thin wrapper around React Flow that exposes the same pointer-lock
  * pan + Ctrl-wheel zoom semantics as `ModelGraph`. Kept as an inner
@@ -191,34 +172,48 @@ const ScenarioGraphPreviewCanvas: React.FC<{ scenario: Scenario; testId?: string
   )
 }
 
-export const ScenarioGraphPreview: React.FC<ScenarioGraphPreviewProps> = ({ scenario, testId }) => (
-  <ReactFlowProvider>
-    <ScenarioGraphPreviewCanvas scenario={scenario} {...(testId !== undefined ? { testId } : {})} />
-  </ReactFlowProvider>
-)
+export const ScenarioGraphPreview: React.FC<ScenarioGraphPreviewProps> = ({ scenario, testId }) => {
+  // The reused live `ScenarioNodeView` resolves bound requests /
+  // sub-scenarios through `ScenarioBoundResolverContext` to display
+  // the correct badge + name. Without it, a request box would fall
+  // back to a generic "HTTP Request" label. Wire a resolver that
+  // walks the live tree so the preview shows the same labels the
+  // editor does.
+  const collections = useRestormStore((s) => s.collections)
+  const resolveBoundItem = useMemo(
+    () => (itemId: string): FolderItem | null => findItemById(collections as unknown as FolderItem[], itemId),
+    [collections]
+  )
+  return (
+    <ScenarioBoundResolverContext.Provider value={resolveBoundItem}>
+      <ReactFlowProvider>
+        <ScenarioGraphPreviewCanvas scenario={scenario} {...(testId !== undefined ? { testId } : {})} />
+      </ReactFlowProvider>
+    </ScenarioBoundResolverContext.Provider>
+  )
+}
 
-/** Convert a persisted scenario node into React Flow's node shape.
- * The compact data carries only what the preview node renders —
- * title + kind + (optional) request method / scenario badge — so the
- * thumbnail stays light even on a large graph. */
-function toReactFlowNode(node: PersistedNode): Node {
-  const cfg = (node as { config?: Record<string, unknown> }).config ?? {}
-  let title = scenarioNodeMeta(node.kind).defaultLabel
-  let badge: 'request' | 'scenario' | undefined
-  let method: string | undefined
-  if (node.kind === 'httpRequest') {
-    badge = 'request'
-    method = typeof cfg['method'] === 'string' ? cfg['method'] : 'GET'
-    if (typeof cfg['title'] === 'string') title = cfg['title']
-  } else if (node.kind === 'runScenario') {
-    badge = 'scenario'
-    if (typeof cfg['title'] === 'string') title = cfg['title']
+/** Convert a persisted scenario node into the React-Flow node shape
+ * the editor uses, so `ScenarioNodeView` renders the box with the
+ * same chrome a user sees in the live editor. Handlers are omitted
+ * (the preview is read-only) — `ScenarioNodeBoxData`'s callbacks are
+ * all optional, so a missing handler just makes the corresponding
+ * interaction a no-op. */
+function toReactFlowNode(node: PersistedNode): Node<ScenarioNodeBoxData, 'scenarioNode'> {
+  const data: ScenarioNodeBoxData = {
+    kind: node.kind,
+    inputs: node.inputs,
+    outputs: node.outputs,
+    config: node.config,
+    ...(node.note ? { note: node.note } : {}),
+    ...(node.color ? { color: node.color } : {}),
+    ...(node.collapsed === true ? { collapsed: true } : {})
   }
   return {
     id: node.id,
-    type: 'scenarioPreview',
+    type: 'scenarioNode',
     position: { x: node.position.x, y: node.position.y },
-    data: { kind: node.kind, title, ...(badge !== undefined ? { badge } : {}), ...(method !== undefined ? { method } : {}) }
+    data
   }
 }
 
