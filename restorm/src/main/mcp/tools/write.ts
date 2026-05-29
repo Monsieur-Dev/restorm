@@ -17,7 +17,7 @@ import { z } from 'zod'
 import { BrowserWindow } from 'electron'
 import { McpService } from 'electron-core-ui'
 import { collectionStore } from '../../services/CollectionStore'
-import { isAnyFolder, isEnvironmentFolder, isRequest, KeyValue, Environment } from '../../../shared/models'
+import { isAnyFolder, isEnvironmentFolder, isRequest, isScenario, KeyValue, Environment } from '../../../shared/models'
 import type { EnvironmentFolder, CustomValueList, CustomValueEntry } from '../../../shared/types/collections'
 import { broadcastTreeReplace } from './import'
 
@@ -153,6 +153,37 @@ export function registerWriteTools(mcp: McpService): void {
       broadcastTreeReplace()
       triggerSave()
       return jsonReply({ id: created.id, name: created.name, protocol, parentId: parentFolderId })
+    }
+  )
+
+  mcp.registerTool(
+    'create_scenario',
+    {
+      title: 'Create scenario',
+      description:
+        'Create a new scenario (the dataflow-graph tree item) as a child of a folder, env-folder, or ' +
+        'another scenario (scenarios double as folder-like containers). Returns `{ id, name, parentId }`. ' +
+        'The scenario is empty (no nodes / edges / params) — use `create_scenario_node` + ' +
+        '`connect_scenario_nodes` to fill it.',
+      inputSchema: {
+        parentId: z.string().min(1).describe('Folder, env-folder, or scenario id to create the scenario under.'),
+        name: z.string().min(1).describe('Scenario name as it appears in the sidebar.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const argRecord = args
+      const parentId = typeof argRecord['parentId'] === 'string' ? argRecord['parentId'] : ''
+      const name = typeof argRecord['name'] === 'string' ? argRecord['name'] : ''
+      if (!parentId) return errorReply('parentId is required')
+      if (!name) return errorReply('name is required')
+      const parent = collectionStore.findById(parentId)
+      if (!parent || (!isAnyFolder(parent) && !isScenario(parent))) {
+        return errorReply(`parentId ${parentId} doesn't point at a folder or scenario`)
+      }
+      const created = collectionStore.createScenario(parentId, { name })
+      broadcastTreeReplace()
+      triggerSave()
+      return jsonReply({ id: created.id, name: created.name, parentId })
     }
   )
 
@@ -389,6 +420,13 @@ export function registerWriteTools(mcp: McpService): void {
         triggerSave()
         return jsonReply({ id, kind: 'request', deleted: true })
       }
+      if (isScenario(target)) {
+        const ok = collectionStore.deleteScenario(id)
+        if (!ok) return errorReply(`deleteScenario failed for ${id}`)
+        broadcastTreeReplace()
+        triggerSave()
+        return jsonReply({ id, kind: 'scenario', deleted: true })
+      }
       if (isAnyFolder(target)) {
         const ok = collectionStore.deleteFolder(id)
         if (!ok) return errorReply(`deleteFolder failed for ${id}`)
@@ -396,7 +434,7 @@ export function registerWriteTools(mcp: McpService): void {
         triggerSave()
         return jsonReply({ id, kind: isEnvironmentFolder(target) ? 'env-folder' : 'folder', deleted: true })
       }
-      return errorReply(`Item ${id} is not a folder, env-folder or request`)
+      return errorReply(`Item ${id} is not a folder, env-folder, scenario or request`)
     }
   )
 

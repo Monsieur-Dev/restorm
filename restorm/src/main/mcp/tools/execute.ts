@@ -301,7 +301,7 @@ function decodeStreamToken(token: string): { requestId: string; cursor: number }
  * the API answers "already at destination"). Pushing from main here
  * sidesteps the renderer entirely and keeps the executor authoritative.
  */
-function flushRequestStateToContext(req: Request): void {
+export function flushRequestStateToContext(req: Request): void {
   // Headers / params / pathParams / metadata are common across most
   // protocols — pull them off whichever shape the request takes.
   const headers = (req as { headers?: unknown }).headers

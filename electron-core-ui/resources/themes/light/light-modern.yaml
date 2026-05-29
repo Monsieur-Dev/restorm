@@ -3,6 +3,9 @@ name: Default Light Modern
 description: A modern light theme with refined colors
 
 colors:
+  scenarioNode.background: "#ffffff"
+  scenarioNode.headerBackground: "#f0f0f0"
+  scenarioNode.headerBackgroundSelected: "#d6e6fb"
   activityBar.activeBorder: "#005FB8"
   activityBar.background: "#F8F8F8"
   activityBar.border: "#E5E5E5"

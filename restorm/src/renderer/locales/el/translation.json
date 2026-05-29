@@ -169,7 +169,8 @@
         "soap": "Αίτημα SOAP",
         "websocket": "Αίτημα WebSocket",
         "odata": "Αίτημα OData",
-        "auth": "Αίτημα HTTP ταυτοποίησης"
+        "auth": "Αίτημα HTTP ταυτοποίησης",
+        "scenario": "Σενάριο"
       }
     },
     "deleteConfirm": {
@@ -178,6 +179,14 @@
       "itemMessage": "Είστε σίγουροι ότι θέλετε να διαγράψετε το \"{{name}}\";",
       "confirm": "Διαγραφή",
       "cancel": "Ακύρωση"
+    },
+    "scenarioDelete": {
+      "title": "Διαγραφή αιτήματος που χρησιμοποιείται από σενάρια",
+      "message": "Το «{{name}}» χρησιμοποιείται στα παρακάτω σενάρια. Τι θέλετε να κάνετε;",
+      "belongsTag": "ανήκει σε αυτό το σενάριο",
+      "moveInto": "Μετακίνηση σε αυτό το σενάριο",
+      "affectsNote": "Η διαγραφή αυτού του αιτήματος θα το αφαιρέσει και από αυτά τα σενάρια.",
+      "deleteAnyway": "Διαγραφή ούτως ή άλλως"
     }
   },
   "environment": {
@@ -302,7 +311,9 @@
       "dateTime": "Ημερομηνία/ώρα",
       "color": "Χρώμα",
       "expression": "Έκφραση",
-      "boolean": "Λογική τιμή"
+      "boolean": "Λογική τιμή",
+      "variables": "Μεταβλητές",
+      "environment": "Περιβάλλον"
     },
     "apiEnums": "Τύποι ορισμένοι στο API",
     "customLists": "Προσαρμοσμένοι τύποι",
@@ -355,11 +366,14 @@
       "folder": "Φάκελοι",
       "environment": "Περιβάλλοντα",
       "settings": "Ρυθμίσεις",
-      "tag": "Ετικέτες"
+      "tag": "Ετικέτες",
+      "scenario": "Σενάρια"
     },
     "tooltip": {
       "noDetails": "Δεν υπάρχουν διαθέσιμες λεπτομέρειες",
-      "noContent": "Δεν υπάρχει τεκμηρίωση ή σημειώσεις"
+      "noContent": "Δεν υπάρχει τεκμηρίωση ή σημειώσεις",
+      "noScenario": "Το σενάριο δεν είναι διαθέσιμο",
+      "scenarioKind": "σενάριο"
     }
   },
   "httpStatus": {
@@ -493,7 +507,8 @@
   },
   "common": {
     "cancel": "Ακύρωση",
-    "save": "Αποθήκευση"
+    "save": "Αποθήκευση",
+    "remove": "Αφαίρεση"
   },
   "helpers": {
     "categories": {
@@ -743,6 +758,202 @@
       "previousMatch": "Προηγούμενο αποτέλεσμα",
       "nextMatch": "Επόμενο αποτέλεσμα",
       "close": "Κλείσιμο"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "empty": "Empty scenario — right-click the canvas to add a node"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del"
+      },
+      "expand": "Επέκταση",
+      "collapse": "Σύμπτυξη"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Προσθήκη περίπτωσης",
+      "removeCase": "Αφαίρεση περίπτωσης",
+      "case": "περίπτωση"
+    },
+    "forEach": {
+      "items": "στοιχεία",
+      "each": "καθένα",
+      "done": "έτοιμο",
+      "parallelism": "παραλληλισμός"
+    },
+    "aggregate": {
+      "items": "στοιχεία",
+      "result": "αποτέλεσμα",
+      "field": "πεδίο",
+      "separator": "διαχωριστικό",
+      "op": {
+        "count": "Πλήθος",
+        "sum": "Άθροισμα",
+        "min": "Ελάχιστο",
+        "max": "Μέγιστο",
+        "average": "Μέσος όρος",
+        "join": "Ένωση"
+      }
+    },
+    "filter": {
+      "items": "στοιχεία",
+      "kept": "διατηρημένα",
+      "keepWhere": "διατήρηση αν"
+    },
+    "wait": {
+      "then": "έπειτα",
+      "duration": "διάρκεια"
+    },
+    "waitUntil": {
+      "until": "έως",
+      "then": "έπειτα"
+    },
+    "arithmetic": {
+      "result": "αποτέλεσμα"
+    },
+    "nodes": {
+      "arithmetic": "Αριθμητική",
+      "httpRequest": "Αίτημα HTTP",
+      "runScenario": "Εκτέλεση σεναρίου",
+      "wait": "Αναμονή",
+      "waitUntil": "Αναμονή έως",
+      "now": "Τώρα",
+      "comparator": "Συγκριτής",
+      "setVariable": "Ορισμός μεταβλητής",
+      "getVariable": "Λήψη μεταβλητής"
+    },
+    "comparator": {
+      "result": "αποτέλεσμα"
+    },
+    "boolean": {
+      "result": "αποτέλεσμα"
+    },
+    "map": {
+      "items": "στοιχεία",
+      "mapped": "μετασχηματισμένα"
+    },
+    "log": {
+      "message": "μήνυμα",
+      "data": "δεδομένα"
+    },
+    "assert": {
+      "message": "μήνυμα"
+    },
+    "editRequest": "Επεξεργασία αιτήματος",
+    "editScenario": "Επεξεργασία σεναρίου",
+    "object": {
+      "addProperty": "Προσθήκη ιδιότητας",
+      "removeProperty": "Αφαίρεση ιδιότητας",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "input": {
+      "required": "Απαιτείται",
+      "name": "Name",
+      "defaultType": "Default / type"
+    },
+    "runScenario": {
+      "orphanInput": "Δεν υπάρχει αντίστοιχη παράμετρος «{{name}}» στο υποσενάριο",
+      "orphanOutput": "Δεν υπάρχει αντίστοιχη έξοδος «{{name}}» στο υποσενάριο",
+      "then": "έπειτα"
+    },
+    "validation": {
+      "duplicateName": "Το όνομα «{{name}}» χρησιμοποιείται ήδη από άλλη ενέργεια.",
+      "panelTitle": "{{count}} σφάλμα(τα) ενεργειών",
+      "focusBox": "Μετάβαση σε αυτή την ενέργεια",
+      "showErrors": "Εμφάνιση σφαλμάτων",
+      "input": {
+        "missingName": "Αυτή η παράμετρος εισόδου πρέπει να έχει όνομα."
+      },
+      "dataLink": {
+        "emptyPath": "Ο εισερχόμενος σύνδεσμος δεδομένων χρειάζεται διαδρομή (JSON path).",
+        "badPath": "Η διαδρομή JSON «{{path}}» του συνδέσμου δεδομένων δεν είναι έγκυρη."
+      },
+      "output": {
+        "missingName": "Αυτή η έξοδος πρέπει να έχει όνομα.",
+        "duplicateName": "Το όνομα «{{name}}» χρησιμοποιείται ήδη από άλλη έξοδο.",
+        "valueRequired": "Η είσοδος «value» πρέπει να συνδεθεί με μια πηγή."
+      },
+      "getVariable": {
+        "noSelection": "Πρέπει να επιλεγεί μια μεταβλητή.",
+        "unknown": "Η μεταβλητή «{{name}}» δεν υπάρχει στο σενάριο."
+      },
+      "setVariable": {
+        "missingName": "Η μεταβλητή που θα οριστεί πρέπει να έχει όνομα."
+      },
+      "object": {
+        "propMissingName": "Κάθε ιδιότητα πρέπει να έχει όνομα.",
+        "propDuplicate": "Το όνομα ιδιότητας «{{name}}» είναι διπλό."
+      },
+      "arithmetic": {
+        "divisionByZero": "Η διαίρεση με το μηδέν είναι αδύνατη."
+      },
+      "switch": {
+        "caseDuplicate": "Η τιμή περίπτωσης «{{value}}» είναι διπλότυπη."
+      },
+      "transform": {
+        "emptyTemplate": "Το πρότυπο δεν πρέπει να είναι κενό.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "Το συνδεδεμένο αίτημα δεν υπάρχει πλέον."
+      },
+      "runScenario": {
+        "missing": "Το συνδεδεμένο σενάριο δεν υπάρχει πλέον.",
+        "requiredInput": "Η απαιτούμενη είσοδος «{{name}}» πρέπει να συνδεθεί σε μια πηγή."
+      }
+    },
+    "usage": {
+      "button": "Σενάρια που χρησιμοποιούν αυτό το αίτημα",
+      "title": "Αυτό το αίτημα χρησιμοποιείται στα σενάρια:"
+    },
+    "inspector": {
+      "run": "Εκτέλεση",
+      "debug": "Αποσφαλμάτωση",
+      "step": "Βήμα προς βήμα",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "Παύση",
+      "noRunsHint": "Δεν υπάρχει πρόσφατη εκτέλεση για αυτό το αίτημα — εκτέλεσέ το από εδώ για να γεμίσεις την προεπισκόπηση του σεναρίου.",
+      "syntheticInfo": "Δείγμα δεδομένων που δημιουργήθηκε από την τεκμηρίωση αυτού του αιτήματος.",
+      "syntheticRunHint": "Δείγμα δεδομένων — εκτελέστε το αίτημα για να τα αντικαταστήσετε με πραγματικό αποτέλεσμα."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

@@ -168,7 +168,8 @@
         "soap": "Yêu cầu SOAP",
         "websocket": "Yêu cầu WebSocket",
         "odata": "Yêu cầu OData",
-        "auth": "Yêu cầu xác thực HTTP"
+        "auth": "Yêu cầu xác thực HTTP",
+        "scenario": "Kịch bản"
       }
     },
     "deleteConfirm": {
@@ -177,6 +178,14 @@
       "itemMessage": "Bạn có chắc chắn muốn xóa \"{{name}}\" không?",
       "confirm": "Xóa",
       "cancel": "Hủy"
+    },
+    "scenarioDelete": {
+      "title": "Xóa một yêu cầu được kịch bản sử dụng",
+      "message": "\"{{name}}\" được dùng trong các kịch bản sau. Bạn muốn làm gì?",
+      "belongsTag": "thuộc về kịch bản này",
+      "moveInto": "Chuyển vào kịch bản này",
+      "affectsNote": "Xóa yêu cầu này cũng sẽ gỡ nó khỏi các kịch bản này.",
+      "deleteAnyway": "Vẫn xóa"
     }
   },
   "environment": {
@@ -301,7 +310,9 @@
       "dateTime": "Ngày/giờ",
       "color": "Màu",
       "expression": "Biểu thức",
-      "boolean": "Boolean"
+      "boolean": "Boolean",
+      "variables": "Biến",
+      "environment": "Môi trường"
     },
     "apiEnums": "Kiểu được định nghĩa bởi API",
     "customLists": "Loại tùy chỉnh",
@@ -354,11 +365,14 @@
       "folder": "Thư mục",
       "environment": "Môi trường",
       "settings": "Cài đặt",
-      "tag": "Thẻ"
+      "tag": "Thẻ",
+      "scenario": "Kịch bản"
     },
     "tooltip": {
       "noDetails": "Không có chi tiết",
-      "noContent": "Không có tài liệu hoặc ghi chú"
+      "noContent": "Không có tài liệu hoặc ghi chú",
+      "noScenario": "Kịch bản không khả dụng",
+      "scenarioKind": "kịch bản"
     }
   },
   "httpStatus": {
@@ -492,7 +506,8 @@
   },
   "common": {
     "cancel": "Hủy",
-    "save": "Lưu"
+    "save": "Lưu",
+    "remove": "Xóa"
   },
   "helpers": {
     "categories": {
@@ -742,6 +757,202 @@
       "previousMatch": "Kết quả trước",
       "nextMatch": "Kết quả tiếp theo",
       "close": "Đóng"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "empty": "Empty scenario — right-click the canvas to add a node"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del"
+      },
+      "expand": "Mở rộng",
+      "collapse": "Thu gọn"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Thêm trường hợp",
+      "removeCase": "Xóa trường hợp",
+      "case": "trường hợp"
+    },
+    "forEach": {
+      "items": "mục",
+      "each": "mỗi",
+      "done": "xong",
+      "parallelism": "song song"
+    },
+    "aggregate": {
+      "items": "mục",
+      "result": "kết quả",
+      "field": "trường",
+      "separator": "dấu phân cách",
+      "op": {
+        "count": "Đếm",
+        "sum": "Tổng",
+        "min": "Nhỏ nhất",
+        "max": "Lớn nhất",
+        "average": "Trung bình",
+        "join": "Nối"
+      }
+    },
+    "filter": {
+      "items": "mục",
+      "kept": "đã giữ",
+      "keepWhere": "giữ nếu"
+    },
+    "wait": {
+      "then": "rồi",
+      "duration": "thời lượng"
+    },
+    "waitUntil": {
+      "until": "đến",
+      "then": "rồi"
+    },
+    "arithmetic": {
+      "result": "kết quả"
+    },
+    "nodes": {
+      "arithmetic": "Số học",
+      "httpRequest": "Yêu cầu HTTP",
+      "runScenario": "Chạy kịch bản",
+      "wait": "Chờ",
+      "waitUntil": "Chờ đến",
+      "now": "Bây giờ",
+      "comparator": "Bộ so sánh",
+      "setVariable": "Đặt biến",
+      "getVariable": "Lấy biến"
+    },
+    "comparator": {
+      "result": "kết quả"
+    },
+    "boolean": {
+      "result": "kết quả"
+    },
+    "map": {
+      "items": "mục",
+      "mapped": "đã ánh xạ"
+    },
+    "log": {
+      "message": "thông báo",
+      "data": "dữ liệu"
+    },
+    "assert": {
+      "message": "thông báo"
+    },
+    "editRequest": "Sửa yêu cầu",
+    "editScenario": "Sửa kịch bản",
+    "object": {
+      "addProperty": "Thêm thuộc tính",
+      "removeProperty": "Xóa thuộc tính",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "input": {
+      "required": "Bắt buộc",
+      "name": "Name",
+      "defaultType": "Default / type"
+    },
+    "runScenario": {
+      "orphanInput": "Không có tham số \"{{name}}\" khớp trong kịch bản con",
+      "orphanOutput": "Không có đầu ra \"{{name}}\" khớp trong kịch bản con",
+      "then": "rồi"
+    },
+    "validation": {
+      "duplicateName": "Tên \"{{name}}\" đã được hành động khác sử dụng.",
+      "panelTitle": "{{count}} lỗi hành động",
+      "focusBox": "Đến hành động này",
+      "showErrors": "Hiện lỗi",
+      "input": {
+        "missingName": "Tham số đầu vào này phải có tên."
+      },
+      "dataLink": {
+        "emptyPath": "Liên kết dữ liệu đến cần một đường dẫn (JSON path).",
+        "badPath": "Đường dẫn JSON \"{{path}}\" của liên kết dữ liệu không hợp lệ."
+      },
+      "output": {
+        "missingName": "Đầu ra này phải có tên.",
+        "duplicateName": "Tên \"{{name}}\" đã được đầu ra khác sử dụng.",
+        "valueRequired": "Đầu vào \"value\" phải được nối với một nguồn."
+      },
+      "getVariable": {
+        "noSelection": "Phải chọn một biến.",
+        "unknown": "Biến \"{{name}}\" không tồn tại trong kịch bản."
+      },
+      "setVariable": {
+        "missingName": "Biến cần đặt phải có tên."
+      },
+      "object": {
+        "propMissingName": "Mỗi thuộc tính phải có tên.",
+        "propDuplicate": "Tên thuộc tính \"{{name}}\" bị trùng."
+      },
+      "arithmetic": {
+        "divisionByZero": "Không thể chia cho số không."
+      },
+      "switch": {
+        "caseDuplicate": "Giá trị case \"{{value}}\" bị trùng lặp."
+      },
+      "transform": {
+        "emptyTemplate": "Mẫu không được để trống.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "Yêu cầu được liên kết không còn tồn tại."
+      },
+      "runScenario": {
+        "missing": "Kịch bản được liên kết không còn tồn tại.",
+        "requiredInput": "Đầu vào bắt buộc \"{{name}}\" phải được nối với một nguồn."
+      }
+    },
+    "usage": {
+      "button": "Các kịch bản sử dụng yêu cầu này",
+      "title": "Yêu cầu này được dùng trong các kịch bản:"
+    },
+    "inspector": {
+      "run": "Chạy",
+      "debug": "Gỡ lỗi",
+      "step": "Từng bước",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "Tạm dừng",
+      "noRunsHint": "Chưa có lần chạy gần đây cho yêu cầu này — chạy nó từ đây để điền bản xem trước kịch bản.",
+      "syntheticInfo": "Dữ liệu mẫu được tạo từ tài liệu của yêu cầu này.",
+      "syntheticRunHint": "Dữ liệu mẫu — chạy yêu cầu để thay thế bằng kết quả thực."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

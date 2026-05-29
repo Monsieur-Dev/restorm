@@ -169,7 +169,8 @@
         "soap": "SOAP-pyyntö",
         "websocket": "WebSocket-pyyntö",
         "odata": "OData-pyyntö",
-        "auth": "HTTP-todennuspyyntö"
+        "auth": "HTTP-todennuspyyntö",
+        "scenario": "Skenaario"
       }
     },
     "deleteConfirm": {
@@ -178,6 +179,14 @@
       "itemMessage": "Haluatko varmasti poistaa kohteen \"{{name}}\"?",
       "confirm": "Poista",
       "cancel": "Peruuta"
+    },
+    "scenarioDelete": {
+      "title": "Poista skenaarioiden käyttämä pyyntö",
+      "message": "”{{name}}” on käytössä seuraavissa skenaarioissa. Mitä haluat tehdä?",
+      "belongsTag": "kuuluu tähän skenaarioon",
+      "moveInto": "Siirrä tähän skenaarioon",
+      "affectsNote": "Tämän pyynnön poistaminen poistaa sen myös näistä skenaarioista.",
+      "deleteAnyway": "Poista silti"
     }
   },
   "environment": {
@@ -302,7 +311,9 @@
       "dateTime": "Päivämäärä/aika",
       "color": "Väri",
       "expression": "Lauseke",
-      "boolean": "Totuusarvo"
+      "boolean": "Totuusarvo",
+      "variables": "Muuttujat",
+      "environment": "Ympäristö"
     },
     "apiEnums": "API:n määrittämät tyypit",
     "customLists": "Mukautetut tyypit",
@@ -355,11 +366,14 @@
       "folder": "Kansiot",
       "environment": "Ympäristöt",
       "settings": "Asetukset",
-      "tag": "Tagit"
+      "tag": "Tagit",
+      "scenario": "Skenaariot"
     },
     "tooltip": {
       "noDetails": "Ei tietoja saatavilla",
-      "noContent": "Ei dokumentaatiota tai muistiinpanoja"
+      "noContent": "Ei dokumentaatiota tai muistiinpanoja",
+      "noScenario": "Skenaario ei käytettävissä",
+      "scenarioKind": "skenaario"
     }
   },
   "httpStatus": {
@@ -493,7 +507,8 @@
   },
   "common": {
     "cancel": "Peruuta",
-    "save": "Tallenna"
+    "save": "Tallenna",
+    "remove": "Poista"
   },
   "helpers": {
     "categories": {
@@ -743,6 +758,202 @@
       "previousMatch": "Edellinen osuma",
       "nextMatch": "Seuraava osuma",
       "close": "Sulje"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "empty": "Empty scenario — right-click the canvas to add a node"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del"
+      },
+      "expand": "Laajenna",
+      "collapse": "Tiivistä"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Lisää tapaus",
+      "removeCase": "Poista tapaus",
+      "case": "tapaus"
+    },
+    "forEach": {
+      "items": "kohteet",
+      "each": "kukin",
+      "done": "valmis",
+      "parallelism": "rinnakkaisuus"
+    },
+    "aggregate": {
+      "items": "kohteet",
+      "result": "tulos",
+      "field": "kenttä",
+      "separator": "erotin",
+      "op": {
+        "count": "Lukumäärä",
+        "sum": "Summa",
+        "min": "Min",
+        "max": "Maks",
+        "average": "Keskiarvo",
+        "join": "Yhdistä"
+      }
+    },
+    "filter": {
+      "items": "kohteet",
+      "kept": "säilytetyt",
+      "keepWhere": "säilytä jos"
+    },
+    "wait": {
+      "then": "sitten",
+      "duration": "kesto"
+    },
+    "waitUntil": {
+      "until": "kunnes",
+      "then": "sitten"
+    },
+    "arithmetic": {
+      "result": "tulos"
+    },
+    "nodes": {
+      "arithmetic": "Aritmetiikka",
+      "httpRequest": "HTTP-pyyntö",
+      "runScenario": "Suorita skenaario",
+      "wait": "Odota",
+      "waitUntil": "Odota kunnes",
+      "now": "Nyt",
+      "comparator": "Vertailija",
+      "setVariable": "Aseta muuttuja",
+      "getVariable": "Hae muuttuja"
+    },
+    "comparator": {
+      "result": "tulos"
+    },
+    "boolean": {
+      "result": "tulos"
+    },
+    "map": {
+      "items": "kohteet",
+      "mapped": "muunnetut"
+    },
+    "log": {
+      "message": "viesti",
+      "data": "tiedot"
+    },
+    "assert": {
+      "message": "viesti"
+    },
+    "editRequest": "Muokkaa pyyntöä",
+    "editScenario": "Muokkaa skenaariota",
+    "object": {
+      "addProperty": "Lisää ominaisuus",
+      "removeProperty": "Poista ominaisuus",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "input": {
+      "required": "Pakollinen",
+      "name": "Name",
+      "defaultType": "Default / type"
+    },
+    "runScenario": {
+      "orphanInput": "Aliskenaariossa ei ole vastaavaa parametria \"{{name}}\"",
+      "orphanOutput": "Aliskenaariossa ei ole vastaavaa tulostetta \"{{name}}\"",
+      "then": "sitten"
+    },
+    "validation": {
+      "duplicateName": "Nimi ”{{name}}” on jo toisen toiminnon käytössä.",
+      "panelTitle": "{{count}} toimintovirhe(ttä)",
+      "focusBox": "Siirry tähän toimintoon",
+      "showErrors": "Näytä virheet",
+      "input": {
+        "missingName": "Tällä syöteparametrilla on oltava nimi."
+      },
+      "dataLink": {
+        "emptyPath": "Saapuva datalinkki tarvitsee JSON-polun.",
+        "badPath": "Datalinkin JSON-polku ”{{path}}” on virheellinen."
+      },
+      "output": {
+        "missingName": "Tällä tulosteella on oltava nimi.",
+        "duplicateName": "Nimi ”{{name}}” on jo toisen tulosteen käytössä.",
+        "valueRequired": "Syöte ”value” on liitettävä lähteeseen."
+      },
+      "getVariable": {
+        "noSelection": "Muuttuja on valittava.",
+        "unknown": "Muuttujaa ”{{name}}” ei ole skenaariossa."
+      },
+      "setVariable": {
+        "missingName": "Asetettavalla muuttujalla on oltava nimi."
+      },
+      "object": {
+        "propMissingName": "Jokaisella ominaisuudella on oltava nimi.",
+        "propDuplicate": "Ominaisuuden nimi ”{{name}}” on kahdesti."
+      },
+      "arithmetic": {
+        "divisionByZero": "Nollalla jakaminen ei ole mahdollista."
+      },
+      "switch": {
+        "caseDuplicate": "Tapauksen arvo ”{{value}}” on kahdennettu."
+      },
+      "transform": {
+        "emptyTemplate": "Mallipohja ei saa olla tyhjä.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "Liitettyä pyyntöä ei enää ole."
+      },
+      "runScenario": {
+        "missing": "Liitettyä skenaariota ei enää ole.",
+        "requiredInput": "Pakollinen syöte ”{{name}}” on liitettävä lähteeseen."
+      }
+    },
+    "usage": {
+      "button": "Skenaariot, jotka käyttävät tätä pyyntöä",
+      "title": "Tätä pyyntöä käytetään skenaarioissa:"
+    },
+    "inspector": {
+      "run": "Suorita",
+      "debug": "Vianjäljitys",
+      "step": "Askel kerrallaan",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "Tauko",
+      "noRunsHint": "Tälle pyynnölle ei ole tuoretta suoritusta — suorita se täältä täyttääksesi skenaarion esikatselun.",
+      "syntheticInfo": "Esimerkkidata, joka on luotu tämän pyynnön dokumentaatiosta.",
+      "syntheticRunHint": "Esimerkkidata — suorita pyyntö korvataksesi sen oikealla tuloksella."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

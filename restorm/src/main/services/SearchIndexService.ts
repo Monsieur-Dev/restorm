@@ -85,6 +85,19 @@ function isRequest(item: unknown): item is RequestData {
   return typeof item === 'object' && item !== null && 'type' in item && !('items' in item)
 }
 
+/** Simplified scenario type — a scenario doubles as a folder-like container,
+ * so the indexer descends it to index the requests authored inside it. */
+interface ScenarioData {
+  type: 'scenario'
+  id: string
+  items?: (FolderData | RequestData | ScenarioData)[]
+}
+
+/** Check if an item is a Scenario (a container, but not a folder). */
+function isScenarioData(item: unknown): item is ScenarioData {
+  return typeof item === 'object' && item !== null && (item as { type?: unknown }).type === 'scenario'
+}
+
 /**
  * Convert a Folder to a SearchDocument
  */
@@ -221,8 +234,30 @@ function indexFolderRecursively(folder: FolderData, parentPath: string[] = []): 
   for (const item of folder.items) {
     if (isFolder(item)) {
       indexFolderRecursively(item, currentPath)
+    } else if (isScenarioData(item)) {
+      indexScenarioRecursively(item, currentPath)
     } else if (isRequest(item)) {
       searchService.indexDocument(requestToSearchDocument(item, folder.id, currentPath))
+      publishIndexUpdate('indexed', item.id, 'request')
+    }
+  }
+}
+
+/**
+ * A scenario isn't a searchable document itself, but it's a container: descend
+ * it so the requests (and sub-folders) authored inside it are indexed with the
+ * scenario in their path — keeping scenario-child requests searchable after a
+ * project is reopened, not just at creation time.
+ */
+function indexScenarioRecursively(scenario: ScenarioData, parentPath: string[] = []): void {
+  const currentPath = [...parentPath, scenario.id]
+  for (const item of scenario.items ?? []) {
+    if (isFolder(item)) {
+      indexFolderRecursively(item, currentPath)
+    } else if (isScenarioData(item)) {
+      indexScenarioRecursively(item, currentPath)
+    } else if (isRequest(item)) {
+      searchService.indexDocument(requestToSearchDocument(item, scenario.id, currentPath))
       publishIndexUpdate('indexed', item.id, 'request')
     }
   }
@@ -240,6 +275,22 @@ function removeFolderRecursively(folder: FolderData): void {
   for (const item of folder.items) {
     if (isFolder(item)) {
       removeFolderRecursively(item)
+    } else if (isScenarioData(item)) {
+      removeScenarioRecursively(item)
+    } else {
+      searchService.removeDocument(item.id)
+      publishIndexUpdate('removed', item.id, 'request')
+    }
+  }
+}
+
+/** Remove a scenario's indexed children (the scenario itself isn't indexed). */
+function removeScenarioRecursively(scenario: ScenarioData): void {
+  for (const item of scenario.items ?? []) {
+    if (isFolder(item)) {
+      removeFolderRecursively(item)
+    } else if (isScenarioData(item)) {
+      removeScenarioRecursively(item)
     } else {
       searchService.removeDocument(item.id)
       publishIndexUpdate('removed', item.id, 'request')

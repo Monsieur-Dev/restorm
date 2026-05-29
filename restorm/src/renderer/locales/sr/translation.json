@@ -170,7 +170,8 @@
         "soap": "SOAP zahtev",
         "websocket": "WebSocket zahtev",
         "odata": "OData zahtev",
-        "auth": "HTTP zahtev za autentifikaciju"
+        "auth": "HTTP zahtev za autentifikaciju",
+        "scenario": "Сценарио"
       }
     },
     "deleteConfirm": {
@@ -179,6 +180,14 @@
       "itemMessage": "Da li ste sigurni da želite da obrišete \"{{name}}\"?",
       "confirm": "Obriši",
       "cancel": "Otkaži"
+    },
+    "scenarioDelete": {
+      "title": "Избриши захтев који користе сценарији",
+      "message": "„{{name}}“ се користи у следећим сценаријима. Шта желите да урадите?",
+      "belongsTag": "припада овом сценарију",
+      "moveInto": "Премести у овај сценарио",
+      "affectsNote": "Брисање овог захтева уклониће га и из ових сценарија.",
+      "deleteAnyway": "Свеједно избриши"
     }
   },
   "environment": {
@@ -303,7 +312,9 @@
       "dateTime": "Datum i vreme",
       "color": "Boja",
       "expression": "Izraz",
-      "boolean": "Bulova vrednost"
+      "boolean": "Bulova vrednost",
+      "variables": "Променљиве",
+      "environment": "Окружење"
     },
     "apiEnums": "Tipovi definisani u API-ju",
     "customLists": "Прилагођени типови",
@@ -356,11 +367,14 @@
       "folder": "Fascikle",
       "environment": "Okruženja",
       "settings": "Podešavanja",
-      "tag": "Oznake"
+      "tag": "Oznake",
+      "scenario": "Scenariji"
     },
     "tooltip": {
       "noDetails": "Nema dostupnih detalja",
-      "noContent": "Nema dokumentacije ni beleški"
+      "noContent": "Nema dokumentacije ni beleški",
+      "noScenario": "Scenario nije dostupan",
+      "scenarioKind": "scenario"
     }
   },
   "httpStatus": {
@@ -494,7 +508,8 @@
   },
   "common": {
     "cancel": "Otkaži",
-    "save": "Sačuvaj"
+    "save": "Sačuvaj",
+    "remove": "Уклони"
   },
   "helpers": {
     "categories": {
@@ -744,6 +759,202 @@
       "previousMatch": "Претходно подударање",
       "nextMatch": "Следеће подударање",
       "close": "Затвори"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "empty": "Empty scenario — right-click the canvas to add a node"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del"
+      },
+      "expand": "Прошири",
+      "collapse": "Сажми"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Додај случај",
+      "removeCase": "Уклони случај",
+      "case": "случај"
+    },
+    "forEach": {
+      "items": "ставке",
+      "each": "сваки",
+      "done": "готово",
+      "parallelism": "паралелизам"
+    },
+    "aggregate": {
+      "items": "ставке",
+      "result": "резултат",
+      "field": "поље",
+      "separator": "раздвајач",
+      "op": {
+        "count": "Број",
+        "sum": "Збир",
+        "min": "Мин",
+        "max": "Макс",
+        "average": "Просек",
+        "join": "Спајање"
+      }
+    },
+    "filter": {
+      "items": "ставке",
+      "kept": "задржани",
+      "keepWhere": "задржи ако"
+    },
+    "wait": {
+      "then": "затим",
+      "duration": "трајање"
+    },
+    "waitUntil": {
+      "until": "до",
+      "then": "затим"
+    },
+    "arithmetic": {
+      "result": "резултат"
+    },
+    "nodes": {
+      "arithmetic": "Аритметика",
+      "httpRequest": "HTTP захтев",
+      "runScenario": "Покрени сценарио",
+      "wait": "Чекај",
+      "waitUntil": "Чекај до",
+      "now": "Сада",
+      "comparator": "Упоређивач",
+      "setVariable": "Постави променљиву",
+      "getVariable": "Узми променљиву"
+    },
+    "comparator": {
+      "result": "резултат"
+    },
+    "boolean": {
+      "result": "резултат"
+    },
+    "map": {
+      "items": "ставке",
+      "mapped": "трансформисано"
+    },
+    "log": {
+      "message": "порука",
+      "data": "подаци"
+    },
+    "assert": {
+      "message": "порука"
+    },
+    "editRequest": "Уреди захтев",
+    "editScenario": "Уреди сценарио",
+    "object": {
+      "addProperty": "Додај својство",
+      "removeProperty": "Уклони својство",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "input": {
+      "required": "Обавезно",
+      "name": "Name",
+      "defaultType": "Default / type"
+    },
+    "runScenario": {
+      "orphanInput": "Нема одговарајућег параметра „{{name}}“ у подсценарију",
+      "orphanOutput": "Нема одговарајућег излаза „{{name}}“ у подсценарију",
+      "then": "затим"
+    },
+    "validation": {
+      "duplicateName": "Назив „{{name}}“ већ користи друга акција.",
+      "panelTitle": "Грешке акција: {{count}}",
+      "focusBox": "Иди на ову акцију",
+      "showErrors": "Прикажи грешке",
+      "input": {
+        "missingName": "Овај улазни параметар мора имати назив."
+      },
+      "dataLink": {
+        "emptyPath": "Долазна веза података захтева путању (JSON path).",
+        "badPath": "JSON путања „{{path}}“ везе података је неважећа."
+      },
+      "output": {
+        "missingName": "Овај излаз мора имати назив.",
+        "duplicateName": "Назив „{{name}}“ већ користи други излаз.",
+        "valueRequired": "Улаз „value“ мора бити повезан са извором."
+      },
+      "getVariable": {
+        "noSelection": "Мора се изабрати променљива.",
+        "unknown": "Променљива „{{name}}“ не постоји у сценарију."
+      },
+      "setVariable": {
+        "missingName": "Променљива која се поставља мора имати назив."
+      },
+      "object": {
+        "propMissingName": "Свако својство мора имати назив.",
+        "propDuplicate": "Назив својства „{{name}}“ је дуплиран."
+      },
+      "arithmetic": {
+        "divisionByZero": "Дељење нулом није могуће."
+      },
+      "switch": {
+        "caseDuplicate": "Вредност случаја „{{value}}“ је дуплирана."
+      },
+      "transform": {
+        "emptyTemplate": "Шаблон не сме бити празан.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "Повезани захтев више не постоји."
+      },
+      "runScenario": {
+        "missing": "Повезани сценарио више не постоји.",
+        "requiredInput": "Обавезни улаз „{{name}}“ мора бити повезан са извором."
+      }
+    },
+    "usage": {
+      "button": "Сценарији који користе овај захтев",
+      "title": "Овај захтев се користи у сценаријима:"
+    },
+    "inspector": {
+      "run": "Покрени",
+      "debug": "Отклањање грешака",
+      "step": "Корак по корак",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "Пауза",
+      "noRunsHint": "Nema skorašnjeg izvršavanja ovog zahteva — pokreni ga odavde da popuniš pregled scenarija.",
+      "syntheticInfo": "Primer podataka generisan iz dokumentacije ovog zahteva.",
+      "syntheticRunHint": "Primer podataka — pokrenite zahtev da ih zamenite stvarnim rezultatom."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

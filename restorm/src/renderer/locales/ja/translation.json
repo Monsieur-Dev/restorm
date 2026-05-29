@@ -168,7 +168,8 @@
         "soap": "SOAP リクエスト",
         "websocket": "WebSocket リクエスト",
         "odata": "OData リクエスト",
-        "auth": "HTTP 認証リクエスト"
+        "auth": "HTTP 認証リクエスト",
+        "scenario": "シナリオ"
       }
     },
     "deleteConfirm": {
@@ -177,6 +178,14 @@
       "itemMessage": "\"{{name}}\" を削除してもよろしいですか？",
       "confirm": "削除",
       "cancel": "キャンセル"
+    },
+    "scenarioDelete": {
+      "title": "シナリオで使用中のリクエストを削除",
+      "message": "「{{name}}」は次のシナリオで使用されています。どうしますか?",
+      "belongsTag": "このシナリオに属しています",
+      "moveInto": "このシナリオに移動",
+      "affectsNote": "このリクエストを削除すると、これらのシナリオからも削除されます。",
+      "deleteAnyway": "それでも削除"
     }
   },
   "environment": {
@@ -301,7 +310,9 @@
       "dateTime": "日時",
       "color": "色",
       "expression": "式",
-      "boolean": "ブール値"
+      "boolean": "ブール値",
+      "variables": "変数",
+      "environment": "環境"
     },
     "apiEnums": "API で定義された型",
     "customLists": "カスタム型",
@@ -354,11 +365,14 @@
       "folder": "フォルダ",
       "environment": "環境",
       "settings": "設定",
-      "tag": "タグ"
+      "tag": "タグ",
+      "scenario": "シナリオ"
     },
     "tooltip": {
       "noDetails": "詳細はありません",
-      "noContent": "ドキュメントやメモはありません"
+      "noContent": "ドキュメントやメモはありません",
+      "noScenario": "シナリオを利用できません",
+      "scenarioKind": "シナリオ"
     }
   },
   "httpStatus": {
@@ -492,7 +506,8 @@
   },
   "common": {
     "cancel": "キャンセル",
-    "save": "保存"
+    "save": "保存",
+    "remove": "削除"
   },
   "helpers": {
     "categories": {
@@ -742,6 +757,202 @@
       "previousMatch": "前の一致",
       "nextMatch": "次の一致",
       "close": "閉じる"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "empty": "Empty scenario — right-click the canvas to add a node"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del"
+      },
+      "expand": "展開",
+      "collapse": "折りたたむ"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "ケースを追加",
+      "removeCase": "ケースを削除",
+      "case": "ケース"
+    },
+    "forEach": {
+      "items": "項目",
+      "each": "各要素",
+      "done": "完了",
+      "parallelism": "並列処理"
+    },
+    "aggregate": {
+      "items": "項目",
+      "result": "結果",
+      "field": "フィールド",
+      "separator": "区切り文字",
+      "op": {
+        "count": "件数",
+        "sum": "合計",
+        "min": "最小",
+        "max": "最大",
+        "average": "平均",
+        "join": "連結"
+      }
+    },
+    "filter": {
+      "items": "項目",
+      "kept": "保持",
+      "keepWhere": "条件で保持"
+    },
+    "wait": {
+      "then": "次へ",
+      "duration": "期間"
+    },
+    "waitUntil": {
+      "until": "まで",
+      "then": "次へ"
+    },
+    "arithmetic": {
+      "result": "結果"
+    },
+    "nodes": {
+      "arithmetic": "算術",
+      "httpRequest": "HTTPリクエスト",
+      "runScenario": "シナリオ実行",
+      "wait": "待機",
+      "waitUntil": "指定時刻まで待機",
+      "now": "現在",
+      "comparator": "比較",
+      "setVariable": "変数を設定",
+      "getVariable": "変数を取得"
+    },
+    "comparator": {
+      "result": "結果"
+    },
+    "boolean": {
+      "result": "結果"
+    },
+    "map": {
+      "items": "項目",
+      "mapped": "変換後"
+    },
+    "log": {
+      "message": "メッセージ",
+      "data": "データ"
+    },
+    "assert": {
+      "message": "メッセージ"
+    },
+    "editRequest": "リクエストを編集",
+    "editScenario": "シナリオを編集",
+    "object": {
+      "addProperty": "プロパティを追加",
+      "removeProperty": "プロパティを削除",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "input": {
+      "required": "必須",
+      "name": "Name",
+      "defaultType": "Default / type"
+    },
+    "runScenario": {
+      "orphanInput": "サブシナリオに一致するパラメーター「{{name}}」がありません",
+      "orphanOutput": "サブシナリオに一致する出力「{{name}}」がありません",
+      "then": "次へ"
+    },
+    "validation": {
+      "duplicateName": "名前「{{name}}」は別のアクションで既に使われています。",
+      "panelTitle": "アクションのエラー {{count}} 件",
+      "focusBox": "このアクションへ移動",
+      "showErrors": "エラーを表示",
+      "input": {
+        "missingName": "この入力パラメーターには名前が必要です。"
+      },
+      "dataLink": {
+        "emptyPath": "入力データリンクには JSON パスが必要です。",
+        "badPath": "データリンクの JSON パス「{{path}}」が不正です。"
+      },
+      "output": {
+        "missingName": "この出力には名前が必要です。",
+        "duplicateName": "名前「{{name}}」は別の出力で既に使われています。",
+        "valueRequired": "「value」入力はソースに接続する必要があります。"
+      },
+      "getVariable": {
+        "noSelection": "変数を選択する必要があります。",
+        "unknown": "変数「{{name}}」はシナリオに存在しません。"
+      },
+      "setVariable": {
+        "missingName": "設定する変数には名前が必要です。"
+      },
+      "object": {
+        "propMissingName": "各プロパティには名前が必要です。",
+        "propDuplicate": "プロパティ名「{{name}}」が重複しています。"
+      },
+      "arithmetic": {
+        "divisionByZero": "ゼロによる除算はできません。"
+      },
+      "switch": {
+        "caseDuplicate": "ケース値「{{value}}」が重複しています。"
+      },
+      "transform": {
+        "emptyTemplate": "テンプレートを空にすることはできません。",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "リンクされたリクエストは存在しません。"
+      },
+      "runScenario": {
+        "missing": "リンクされたシナリオは存在しません。",
+        "requiredInput": "必須入力「{{name}}」はソースに接続する必要があります。"
+      }
+    },
+    "usage": {
+      "button": "このリクエストを使用するシナリオ",
+      "title": "このリクエストは次のシナリオで使用されています:"
+    },
+    "inspector": {
+      "run": "実行",
+      "debug": "デバッグ",
+      "step": "ステップ実行",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "一時停止",
+      "noRunsHint": "このリクエストの最近の実行がありません — ここから実行してシナリオのプレビューを埋めてください。",
+      "syntheticInfo": "このリクエストのドキュメントから生成されたサンプルデータです。",
+      "syntheticRunHint": "サンプルデータ — リクエストを実行して実際の結果に置き換えてください。"
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

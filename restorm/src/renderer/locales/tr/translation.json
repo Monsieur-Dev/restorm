@@ -169,7 +169,8 @@
         "soap": "SOAP isteği",
         "websocket": "WebSocket isteği",
         "odata": "OData isteği",
-        "auth": "HTTP kimlik doğrulama isteği"
+        "auth": "HTTP kimlik doğrulama isteği",
+        "scenario": "Senaryo"
       }
     },
     "deleteConfirm": {
@@ -178,6 +179,14 @@
       "itemMessage": "\"{{name}}\" öğesini silmek istediğinize emin misiniz?",
       "confirm": "Sil",
       "cancel": "İptal"
+    },
+    "scenarioDelete": {
+      "title": "Senaryolarda kullanılan bir isteği sil",
+      "message": "\"{{name}}\" şu senaryolarda kullanılıyor. Ne yapmak istersiniz?",
+      "belongsTag": "bu senaryoya ait",
+      "moveInto": "Bu senaryoya taşı",
+      "affectsNote": "Bu isteği silmek onu bu senaryolardan da kaldırır.",
+      "deleteAnyway": "Yine de sil"
     }
   },
   "environment": {
@@ -302,7 +311,9 @@
       "dateTime": "Tarih/saat",
       "color": "Renk",
       "expression": "İfade",
-      "boolean": "Boolean"
+      "boolean": "Boolean",
+      "variables": "Değişkenler",
+      "environment": "Ortam"
     },
     "apiEnums": "API tanımlı türler",
     "customLists": "Özel türler",
@@ -355,11 +366,14 @@
       "folder": "Klasörler",
       "environment": "Ortamlar",
       "settings": "Ayarlar",
-      "tag": "Etiketler"
+      "tag": "Etiketler",
+      "scenario": "Senaryolar"
     },
     "tooltip": {
       "noDetails": "Ayrıntı yok",
-      "noContent": "Belge veya not yok"
+      "noContent": "Belge veya not yok",
+      "noScenario": "Senaryo kullanılamıyor",
+      "scenarioKind": "senaryo"
     }
   },
   "httpStatus": {
@@ -493,7 +507,8 @@
   },
   "common": {
     "cancel": "İptal",
-    "save": "Kaydet"
+    "save": "Kaydet",
+    "remove": "Kaldır"
   },
   "helpers": {
     "categories": {
@@ -743,6 +758,202 @@
       "previousMatch": "Önceki eşleşme",
       "nextMatch": "Sonraki eşleşme",
       "close": "Kapat"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "empty": "Empty scenario — right-click the canvas to add a node"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del"
+      },
+      "expand": "Genişlet",
+      "collapse": "Daralt"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Durum ekle",
+      "removeCase": "Durumu kaldır",
+      "case": "durum"
+    },
+    "forEach": {
+      "items": "öğeler",
+      "each": "her",
+      "done": "bitti",
+      "parallelism": "paralellik"
+    },
+    "aggregate": {
+      "items": "öğeler",
+      "result": "sonuç",
+      "field": "alan",
+      "separator": "ayırıcı",
+      "op": {
+        "count": "Sayı",
+        "sum": "Toplam",
+        "min": "En küçük",
+        "max": "En büyük",
+        "average": "Ortalama",
+        "join": "Birleştir"
+      }
+    },
+    "filter": {
+      "items": "öğeler",
+      "kept": "tutulanlar",
+      "keepWhere": "şu durumda tut"
+    },
+    "wait": {
+      "then": "sonra",
+      "duration": "süre"
+    },
+    "waitUntil": {
+      "until": "kadar",
+      "then": "sonra"
+    },
+    "arithmetic": {
+      "result": "sonuç"
+    },
+    "nodes": {
+      "arithmetic": "Aritmetik",
+      "httpRequest": "HTTP isteği",
+      "runScenario": "Senaryoyu çalıştır",
+      "wait": "Bekle",
+      "waitUntil": "Şu ana kadar bekle",
+      "now": "Şimdi",
+      "comparator": "Karşılaştırıcı",
+      "setVariable": "Değişken ata",
+      "getVariable": "Değişkeni al"
+    },
+    "comparator": {
+      "result": "sonuç"
+    },
+    "boolean": {
+      "result": "sonuç"
+    },
+    "map": {
+      "items": "öğeler",
+      "mapped": "dönüştürülmüş"
+    },
+    "log": {
+      "message": "mesaj",
+      "data": "veri"
+    },
+    "assert": {
+      "message": "mesaj"
+    },
+    "editRequest": "İsteği düzenle",
+    "editScenario": "Senaryoyu düzenle",
+    "object": {
+      "addProperty": "Özellik ekle",
+      "removeProperty": "Özelliği kaldır",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "input": {
+      "required": "Zorunlu",
+      "name": "Name",
+      "defaultType": "Default / type"
+    },
+    "runScenario": {
+      "orphanInput": "Alt senaryoda eşleşen \"{{name}}\" parametresi yok",
+      "orphanOutput": "Alt senaryoda eşleşen \"{{name}}\" çıktısı yok",
+      "then": "sonra"
+    },
+    "validation": {
+      "duplicateName": "\"{{name}}\" adı zaten başka bir eylem tarafından kullanılıyor.",
+      "panelTitle": "{{count}} eylem hatası",
+      "focusBox": "Bu eyleme git",
+      "showErrors": "Hataları göster",
+      "input": {
+        "missingName": "Bu giriş parametresinin bir adı olmalı."
+      },
+      "dataLink": {
+        "emptyPath": "Gelen veri bağlantısı bir JSON yolu gerektirir.",
+        "badPath": "Veri bağlantısının \"{{path}}\" JSON yolu geçersiz."
+      },
+      "output": {
+        "missingName": "Bu çıktının bir adı olmalı.",
+        "duplicateName": "\"{{name}}\" adı zaten başka bir çıktı tarafından kullanılıyor.",
+        "valueRequired": "\"value\" girişi bir kaynağa bağlanmalı."
+      },
+      "getVariable": {
+        "noSelection": "Bir değişken seçilmeli.",
+        "unknown": "\"{{name}}\" değişkeni senaryoda yok."
+      },
+      "setVariable": {
+        "missingName": "Ayarlanacak değişkenin bir adı olmalı."
+      },
+      "object": {
+        "propMissingName": "Her özelliğin bir adı olmalı.",
+        "propDuplicate": "\"{{name}}\" özellik adı yinelenmiş."
+      },
+      "arithmetic": {
+        "divisionByZero": "Sıfıra bölme mümkün değil."
+      },
+      "switch": {
+        "caseDuplicate": "\"{{value}}\" durum değeri yinelenmiş."
+      },
+      "transform": {
+        "emptyTemplate": "Şablon boş olmamalıdır.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "Bağlı istek artık mevcut değil."
+      },
+      "runScenario": {
+        "missing": "Bağlı senaryo artık mevcut değil.",
+        "requiredInput": "Zorunlu giriş \"{{name}}\" bir kaynağa bağlanmalıdır."
+      }
+    },
+    "usage": {
+      "button": "Bu isteği kullanan senaryolar",
+      "title": "Bu istek şu senaryolarda kullanılıyor:"
+    },
+    "inspector": {
+      "run": "Çalıştır",
+      "debug": "Hata Ayıkla",
+      "step": "Adım adım",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "Duraklat",
+      "noRunsHint": "Bu istek için son çalışma yok — senaryo önizlemesini doldurmak için buradan çalıştır.",
+      "syntheticInfo": "Bu isteğin belgelerinden oluşturulan örnek veriler.",
+      "syntheticRunHint": "Örnek veriler — gerçek bir sonuçla değiştirmek için isteği çalıştırın."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

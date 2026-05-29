@@ -3,6 +3,9 @@ name: Default Dark Modern
 description: A modern dark theme with refined colors
 
 colors:
+  scenarioNode.background: "#232323"
+  scenarioNode.headerBackground: "#2d2d2d"
+  scenarioNode.headerBackgroundSelected: "#0e4a7b"
   activityBar.activeBorder: "#0078D4"
   activityBar.background: "#181818"
   activityBar.border: "#2B2B2B"

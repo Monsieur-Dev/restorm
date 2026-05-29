@@ -2,10 +2,12 @@
  * Hook for managing sidebar state and list view items
  */
 
-import React, { useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
+import { findItemById } from '../utils/treeSearch'
 import { useTranslation } from 'react-i18next'
 import type { ListViewItemData } from 'electron-core-ui/renderer'
-import type { Folder, EnvironmentFolder, Request } from '../../../shared/types/collections'
+import type { FolderItem } from '../../../shared/types/collections'
+import { isScenario } from '../../../shared/types/collections'
 import { folderAsRootListViewItem, folderItemToListViewItem } from '../services/FolderToListView'
 import { attachContextMenus } from '../components/MainView/Sidebar/contextMenuBuilder'
 import type { AddChildKind } from '../components/MainView/Sidebar/contextMenuBuilder'
@@ -14,7 +16,7 @@ import { mapToBadgeType } from '../utils/badgeUtils'
 import { useDeprecatedRequestIds } from './useDeprecatedRequestIds'
 
 export interface UseSidebarStateOptions {
-  rootItems: (EnvironmentFolder | Folder | Request)[]
+  rootItems: FolderItem[]
   expandedIds: string[]
   /** Counter incremented on in-place mutations to trigger re-computation */
   updateCount?: number
@@ -71,7 +73,11 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
     // `folderItemToListViewItem`, which already dispatches to the
     // right request-type adapter.
     return rootItems.map((item) =>
-      'items' in item
+      // A container (has `items`) renders as a root folder — except a scenario,
+      // which goes through `folderItemToListViewItem` to get its expandable
+      // scenario row. Keep the original `'items' in item` test (not `isAnyFolder`)
+      // so a folder missing a `configuration` field still renders with children.
+      'items' in item && !isScenario(item)
         ? folderAsRootListViewItem(item, renderOptions)
         : folderItemToListViewItem(item, renderOptions)
     )
@@ -81,6 +87,14 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
   // `isItemFavorite` / `onToggleFavorite` are optional: only spread
   // when defined so `exactOptionalPropertyTypes` doesn't reject an
   // explicit `undefined`.
+  // Walk the tree to flag scenarios — the context-menu builder routes
+  // them through a dedicated branch (toggle-favourite + Add child) so
+  // a scenario gets the bookmark affordance every request has.
+  const isItemScenario = useCallback((itemId: string): boolean => {
+    const item = findItemById(rootItems, itemId)
+    return item !== null && isScenario(item)
+  }, [rootItems])
+
   const sidebarItemsWithContextMenu: ListViewItemData[] = useMemo(
     () => attachContextMenus({
       items: sidebarItems,
@@ -92,9 +106,10 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
       ...(isItemFavorite !== undefined && { isItemFavorite }),
       ...(onToggleFavorite !== undefined && { onToggleFavorite }),
       ...(canRefreshFromSource !== undefined && { canRefreshFromSource }),
-      ...(onRefreshFromSource !== undefined && { onRefreshFromSource })
+      ...(onRefreshFromSource !== undefined && { onRefreshFromSource }),
+      isItemScenario
     }),
-    [sidebarItems, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, canRefreshFromSource, onRefreshFromSource]
+    [sidebarItems, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, canRefreshFromSource, onRefreshFromSource, isItemScenario]
   )
 
   return {

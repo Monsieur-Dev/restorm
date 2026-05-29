@@ -169,7 +169,8 @@
         "soap": "SOAP-anmodning",
         "websocket": "WebSocket-anmodning",
         "odata": "OData-anmodning",
-        "auth": "HTTP-godkendelsesanmodning"
+        "auth": "HTTP-godkendelsesanmodning",
+        "scenario": "Scenarie"
       }
     },
     "deleteConfirm": {
@@ -178,6 +179,14 @@
       "itemMessage": "Er du sikker på, at du vil slette \"{{name}}\"?",
       "confirm": "Slet",
       "cancel": "Annullér"
+    },
+    "scenarioDelete": {
+      "title": "Slet en anmodning brugt af scenarier",
+      "message": "\"{{name}}\" bruges i følgende scenarier. Hvad vil du gøre?",
+      "belongsTag": "tilhører dette scenarie",
+      "moveInto": "Flyt ind i dette scenarie",
+      "affectsNote": "Sletning af denne anmodning fjerner den også fra disse scenarier.",
+      "deleteAnyway": "Slet alligevel"
     }
   },
   "environment": {
@@ -302,7 +311,9 @@
       "dateTime": "Dato/tid",
       "color": "Farve",
       "expression": "Udtryk",
-      "boolean": "Boolean"
+      "boolean": "Boolean",
+      "variables": "Variabler",
+      "environment": "Miljø"
     },
     "apiEnums": "API-definerede typer",
     "customLists": "Brugerdefinerede typer",
@@ -355,11 +366,14 @@
       "folder": "Mapper",
       "environment": "Miljøer",
       "settings": "Indstillinger",
-      "tag": "Tags"
+      "tag": "Tags",
+      "scenario": "Scenarier"
     },
     "tooltip": {
       "noDetails": "Ingen detaljer tilgængelige",
-      "noContent": "Ingen dokumentation eller noter"
+      "noContent": "Ingen dokumentation eller noter",
+      "noScenario": "Scenarie utilgængeligt",
+      "scenarioKind": "scenarie"
     }
   },
   "httpStatus": {
@@ -493,7 +507,8 @@
   },
   "common": {
     "cancel": "Annullér",
-    "save": "Gem"
+    "save": "Gem",
+    "remove": "Fjern"
   },
   "helpers": {
     "categories": {
@@ -743,6 +758,202 @@
       "previousMatch": "Forrige match",
       "nextMatch": "Næste match",
       "close": "Luk"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "empty": "Empty scenario — right-click the canvas to add a node"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del"
+      },
+      "expand": "Udvid",
+      "collapse": "Komprimer"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Tilføj tilfælde",
+      "removeCase": "Fjern tilfælde",
+      "case": "tilfælde"
+    },
+    "forEach": {
+      "items": "elementer",
+      "each": "hver",
+      "done": "færdig",
+      "parallelism": "parallelisme"
+    },
+    "aggregate": {
+      "items": "elementer",
+      "result": "resultat",
+      "field": "felt",
+      "separator": "separator",
+      "op": {
+        "count": "Antal",
+        "sum": "Sum",
+        "min": "Min",
+        "max": "Maks",
+        "average": "Gennemsnit",
+        "join": "Sammenføj"
+      }
+    },
+    "filter": {
+      "items": "elementer",
+      "kept": "beholdt",
+      "keepWhere": "behold hvis"
+    },
+    "wait": {
+      "then": "derefter",
+      "duration": "varighed"
+    },
+    "waitUntil": {
+      "until": "indtil",
+      "then": "derefter"
+    },
+    "arithmetic": {
+      "result": "resultat"
+    },
+    "nodes": {
+      "arithmetic": "Aritmetik",
+      "httpRequest": "HTTP-anmodning",
+      "runScenario": "Kør scenarie",
+      "wait": "Vent",
+      "waitUntil": "Vent til",
+      "now": "Nu",
+      "comparator": "Sammenligner",
+      "setVariable": "Sæt variabel",
+      "getVariable": "Hent variabel"
+    },
+    "comparator": {
+      "result": "resultat"
+    },
+    "boolean": {
+      "result": "resultat"
+    },
+    "map": {
+      "items": "elementer",
+      "mapped": "transformeret"
+    },
+    "log": {
+      "message": "besked",
+      "data": "data"
+    },
+    "assert": {
+      "message": "besked"
+    },
+    "editRequest": "Rediger anmodning",
+    "editScenario": "Rediger scenarie",
+    "object": {
+      "addProperty": "Tilføj egenskab",
+      "removeProperty": "Fjern egenskab",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "input": {
+      "required": "Påkrævet",
+      "name": "Name",
+      "defaultType": "Default / type"
+    },
+    "runScenario": {
+      "orphanInput": "Ingen matchende parameter \"{{name}}\" i underscenariet",
+      "orphanOutput": "Intet matchende output \"{{name}}\" i underscenariet",
+      "then": "derefter"
+    },
+    "validation": {
+      "duplicateName": "Navnet \"{{name}}\" bruges allerede af en anden handling.",
+      "panelTitle": "{{count}} handlingsfejl",
+      "focusBox": "Gå til denne handling",
+      "showErrors": "Vis fejl",
+      "input": {
+        "missingName": "Denne inputparameter skal have et navn."
+      },
+      "dataLink": {
+        "emptyPath": "Det indgående datalink kræver en JSON-sti.",
+        "badPath": "Datalinkets JSON-sti \"{{path}}\" er ugyldig."
+      },
+      "output": {
+        "missingName": "Dette output skal have et navn.",
+        "duplicateName": "Navnet \"{{name}}\" bruges allerede af et andet output.",
+        "valueRequired": "Inputtet \"value\" skal være forbundet til en kilde."
+      },
+      "getVariable": {
+        "noSelection": "Der skal vælges en variabel.",
+        "unknown": "Variablen \"{{name}}\" findes ikke i scenariet."
+      },
+      "setVariable": {
+        "missingName": "Variablen, der skal angives, skal have et navn."
+      },
+      "object": {
+        "propMissingName": "Hver egenskab skal have et navn.",
+        "propDuplicate": "Egenskabsnavnet \"{{name}}\" er duplikeret."
+      },
+      "arithmetic": {
+        "divisionByZero": "Division med nul er umulig."
+      },
+      "switch": {
+        "caseDuplicate": "Case-værdien \"{{value}}\" er dubleret."
+      },
+      "transform": {
+        "emptyTemplate": "Skabelonen må ikke være tom.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "Den tilknyttede anmodning findes ikke længere."
+      },
+      "runScenario": {
+        "missing": "Det tilknyttede scenarie findes ikke længere.",
+        "requiredInput": "Det påkrævede input \"{{name}}\" skal være forbundet til en kilde."
+      }
+    },
+    "usage": {
+      "button": "Scenarier, der bruger denne anmodning",
+      "title": "Denne anmodning bruges i scenarierne:"
+    },
+    "inspector": {
+      "run": "Kør",
+      "debug": "Fejlsøg",
+      "step": "Trin for trin",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "Pause",
+      "noRunsHint": "Ingen nylig kørsel af denne anmodning — kør den herfra for at udfylde scenarie-forhåndsvisningen.",
+      "syntheticInfo": "Eksempeldata genereret ud fra dokumentationen for denne anmodning.",
+      "syntheticRunHint": "Eksempeldata — kør anmodningen for at erstatte den med et rigtigt resultat."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

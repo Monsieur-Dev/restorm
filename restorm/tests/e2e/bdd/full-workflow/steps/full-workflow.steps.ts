@@ -2038,7 +2038,11 @@ When('I open the {string} file via Ctrl+O', async ({}, fileName: string) => {
 const BENIGN_LOG_PATTERNS: RegExp[] = [
   /mime_util_xdg\.cc.*Invalid mime\.cache file/,
   /service_worker_storage\.cc.*Failed to delete the database/,
-  /Waiting for the debugger to disconnect/
+  /Waiting for the debugger to disconnect/,
+  // Chromium's X11 atom cache logging the desktop-portal clipboard atoms on
+  // hosts with an active xdg-desktop-portal — emitted on clipboard/drag use,
+  // unrelated to restorm.
+  /atom_cache\.cc.*kAtomsToCache/
 ]
 
 function isErrorLine(line: string): boolean {
@@ -2810,12 +2814,14 @@ When('I open the custom-list {string} request', async ({}, name: string) => {
   if (!page) throw new Error('app must be launched')
   const folderRow = cvlSidebarRow(page, 'Paint API')
   await expect(folderRow).toBeVisible({ timeout: 10000 })
-  if ((await folderRow.getAttribute('aria-expanded')) !== 'true') {
-    await folderRow.locator('button.list-view-expander').first().click()
-  }
-  await page.waitForTimeout(500)
   const row = cvlSidebarRow(page, name)
-  await expect(row).toBeVisible({ timeout: 5000 })
+  // "Paint API" auto-expands on open, so the child request appears on its own.
+  // Do NOT click the folder's expander to "ensure" expansion: on a cold load
+  // the folder's `aria-expanded` can read stale for a frame while the tree
+  // settles, and clicking an already-open folder TOGGLES it shut — hiding the
+  // child request. That errant collapse was the startup flake. Just wait for
+  // the request row to materialise.
+  await expect(row).toBeVisible({ timeout: 10000 })
   await row.click()
   await expect(page.locator('[data-testid="http-request-query-params-table"]')).toBeVisible({ timeout: 10000 })
 })

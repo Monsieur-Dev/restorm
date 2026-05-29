@@ -39,6 +39,7 @@ export type AddChildKind =
   | 'websocket'
   | 'odata'
   | 'auth'
+  | 'scenario'
 
 export type AddChildHandler = (parentId: string, kind: AddChildKind) => void
 
@@ -57,6 +58,11 @@ export interface BuildContextMenuOptions {
    * source attached. Drives the "Refresh from source" entry. */
   canRefreshFromSource?: (itemId: string) => boolean
   onRefreshFromSource?: ContextMenuActionHandler
+  /** `true` when the item is a Scenario. Routes the folder-like
+   * container through the request-style menu (toggle-favorite +
+   * Add submenu) so a user can bookmark / clone / delete a
+   * scenario the same way a request gets those entries. */
+  isItemScenario?: (itemId: string) => boolean
 }
 
 /** Build the "Ajouter" submenu that folders and environment folders
@@ -142,15 +148,69 @@ export const buildAddSubmenu = (
     label: t('sidebar.contextMenu.add.auth'),
     icon: React.createElement(Badge, { type: 'AUTH' }),
     onClick: () => { onAddChildItem(parentId, 'auth') }
+  },
+  { id: `sep-add-scenario-${parentId}`, isSeparator: true, label: '' },
+  {
+    id: `add-scenario-${parentId}`,
+    label: t('sidebar.contextMenu.add.scenario'),
+    icon: React.createElement(Badge, { type: 'SCENARIO' }),
+    onClick: () => { onAddChildItem(parentId, 'scenario') }
   }
 ]
 
 export const buildContextMenuForItem = (
   options: BuildContextMenuOptions
 ): SidebarContextMenuItem[] => {
-  const { item, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, canRefreshFromSource, onRefreshFromSource } = options
-  const isItemFolder = Array.isArray(item.children)
+  const { item, t, onCloneItem, onDeleteItem, onRenameItem, onAddChildItem, isItemFavorite, onToggleFavorite, canRefreshFromSource, onRefreshFromSource, isItemScenario } = options
   const itemId = item.id
+  // Scenarios are folder-shaped (they carry `children`) but the user
+  // wants the same favourite / add-child / clone affordances they get
+  // on a request — surface them via a dedicated branch above the
+  // generic folder one.
+  const isScenarioItem = isItemScenario?.(itemId) === true
+  const isItemFolder = Array.isArray(item.children) && !isScenarioItem
+
+  if (isScenarioItem) {
+    const isFav = isItemFavorite?.(itemId) ?? false
+    return [
+      {
+        id: 'toggle-favorite',
+        label: isFav ? t('sidebar.contextMenu.removeFromFavorites') : t('sidebar.contextMenu.addToFavorites'),
+        icon: isFav ? 'star-full' : 'star-empty',
+        onClick: () => { onToggleFavorite?.(itemId) }
+      },
+      { id: 'sep-fav', isSeparator: true, label: '' },
+      {
+        id: 'add-child',
+        label: t('sidebar.contextMenu.add.title'),
+        icon: 'add',
+        items: buildAddSubmenu(itemId, t, onAddChildItem)
+      },
+      { id: 'sep-add', isSeparator: true, label: '' },
+      {
+        id: 'clone-item',
+        label: t('sidebar.contextMenu.clone'),
+        icon: 'copy',
+        shortcut: 'Ctrl+D',
+        onClick: () => { onCloneItem(itemId) }
+      },
+      {
+        id: 'rename-item',
+        label: t('sidebar.contextMenu.rename'),
+        icon: 'edit',
+        shortcut: 'F2',
+        onClick: () => { onRenameItem(itemId) }
+      },
+      { id: 'sep-item', isSeparator: true, label: '' },
+      {
+        id: 'delete-item',
+        label: t('sidebar.contextMenu.delete'),
+        icon: 'trash',
+        shortcut: 'Suppr',
+        onClick: () => { onDeleteItem(itemId) }
+      }
+    ]
+  }
 
   if (isItemFolder) {
     const showRefresh = canRefreshFromSource?.(itemId) === true && onRefreshFromSource
@@ -378,6 +438,7 @@ export interface AttachContextMenusOptions {
   onToggleFavorite?: ContextMenuActionHandler
   canRefreshFromSource?: (itemId: string) => boolean
   onRefreshFromSource?: ContextMenuActionHandler
+  isItemScenario?: (itemId: string) => boolean
 }
 
 export const attachContextMenus = (

@@ -170,7 +170,8 @@
         "soap": "Cerere SOAP",
         "websocket": "Cerere WebSocket",
         "odata": "Cerere OData",
-        "auth": "Cerere HTTP de autentificare"
+        "auth": "Cerere HTTP de autentificare",
+        "scenario": "Scenariu"
       }
     },
     "deleteConfirm": {
@@ -179,6 +180,14 @@
       "itemMessage": "Sigur doriți să ștergeți \"{{name}}\"?",
       "confirm": "Șterge",
       "cancel": "Anulează"
+    },
+    "scenarioDelete": {
+      "title": "Șterge o cerere folosită de scenarii",
+      "message": "„{{name}}” este folosită în următoarele scenarii. Ce doriți să faceți?",
+      "belongsTag": "aparține acestui scenariu",
+      "moveInto": "Mută în acest scenariu",
+      "affectsNote": "Ștergerea acestei cereri o va elimina și din aceste scenarii.",
+      "deleteAnyway": "Șterge oricum"
     }
   },
   "environment": {
@@ -303,7 +312,9 @@
       "dateTime": "Dată și oră",
       "color": "Culoare",
       "expression": "Expresie",
-      "boolean": "Boolean"
+      "boolean": "Boolean",
+      "variables": "Variabile",
+      "environment": "Mediu"
     },
     "apiEnums": "Tipuri definite de API",
     "customLists": "Tipuri personalizate",
@@ -356,11 +367,14 @@
       "folder": "Foldere",
       "environment": "Medii",
       "settings": "Setări",
-      "tag": "Etichete"
+      "tag": "Etichete",
+      "scenario": "Scenarii"
     },
     "tooltip": {
       "noDetails": "Niciun detaliu disponibil",
-      "noContent": "Nicio documentație sau notiță"
+      "noContent": "Nicio documentație sau notiță",
+      "noScenario": "Scenariu indisponibil",
+      "scenarioKind": "scenariu"
     }
   },
   "httpStatus": {
@@ -494,7 +508,8 @@
   },
   "common": {
     "cancel": "Anulează",
-    "save": "Salvează"
+    "save": "Salvează",
+    "remove": "Elimină"
   },
   "helpers": {
     "categories": {
@@ -744,6 +759,202 @@
       "previousMatch": "Potrivirea anterioară",
       "nextMatch": "Potrivirea următoare",
       "close": "Închide"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "empty": "Empty scenario — right-click the canvas to add a node"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del"
+      },
+      "expand": "Extinde",
+      "collapse": "Restrânge"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Adaugă caz",
+      "removeCase": "Elimină caz",
+      "case": "caz"
+    },
+    "forEach": {
+      "items": "elemente",
+      "each": "fiecare",
+      "done": "gata",
+      "parallelism": "paralelism"
+    },
+    "aggregate": {
+      "items": "elemente",
+      "result": "rezultat",
+      "field": "câmp",
+      "separator": "separator",
+      "op": {
+        "count": "Număr",
+        "sum": "Sumă",
+        "min": "Min",
+        "max": "Max",
+        "average": "Medie",
+        "join": "Unește"
+      }
+    },
+    "filter": {
+      "items": "elemente",
+      "kept": "păstrate",
+      "keepWhere": "păstrează dacă"
+    },
+    "wait": {
+      "then": "apoi",
+      "duration": "durată"
+    },
+    "waitUntil": {
+      "until": "până la",
+      "then": "apoi"
+    },
+    "arithmetic": {
+      "result": "rezultat"
+    },
+    "nodes": {
+      "arithmetic": "Aritmetică",
+      "httpRequest": "Cerere HTTP",
+      "runScenario": "Rulează scenariul",
+      "wait": "Așteaptă",
+      "waitUntil": "Așteaptă până la",
+      "now": "Acum",
+      "comparator": "Comparator",
+      "setVariable": "Setează variabila",
+      "getVariable": "Obține variabila"
+    },
+    "comparator": {
+      "result": "rezultat"
+    },
+    "boolean": {
+      "result": "rezultat"
+    },
+    "map": {
+      "items": "elemente",
+      "mapped": "transformate"
+    },
+    "log": {
+      "message": "mesaj",
+      "data": "date"
+    },
+    "assert": {
+      "message": "mesaj"
+    },
+    "editRequest": "Editează cererea",
+    "editScenario": "Editează scenariul",
+    "object": {
+      "addProperty": "Adaugă proprietate",
+      "removeProperty": "Elimină proprietatea",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "input": {
+      "required": "Obligatoriu",
+      "name": "Name",
+      "defaultType": "Default / type"
+    },
+    "runScenario": {
+      "orphanInput": "Niciun parametru \"{{name}}\" corespunzător în subscenariu",
+      "orphanOutput": "Nicio ieșire \"{{name}}\" corespunzătoare în subscenariu",
+      "then": "apoi"
+    },
+    "validation": {
+      "duplicateName": "Numele „{{name}}” este deja folosit de altă acțiune.",
+      "panelTitle": "{{count}} acțiune/i cu erori",
+      "focusBox": "Mergi la această acțiune",
+      "showErrors": "Afișează erorile",
+      "input": {
+        "missingName": "Acest parametru de intrare trebuie să aibă un nume."
+      },
+      "dataLink": {
+        "emptyPath": "Legătura de date primită necesită o cale (JSON path).",
+        "badPath": "Calea JSON „{{path}}” a legăturii de date este invalidă."
+      },
+      "output": {
+        "missingName": "Această ieșire trebuie să aibă un nume.",
+        "duplicateName": "Numele „{{name}}” este deja folosit de altă ieșire.",
+        "valueRequired": "Intrarea „value” trebuie conectată la o sursă."
+      },
+      "getVariable": {
+        "noSelection": "Trebuie selectată o variabilă.",
+        "unknown": "Variabila „{{name}}” nu există în scenariu."
+      },
+      "setVariable": {
+        "missingName": "Variabila de setat trebuie să aibă un nume."
+      },
+      "object": {
+        "propMissingName": "Fiecare proprietate trebuie să aibă un nume.",
+        "propDuplicate": "Numele de proprietate „{{name}}” este duplicat."
+      },
+      "arithmetic": {
+        "divisionByZero": "Împărțirea la zero este imposibilă."
+      },
+      "switch": {
+        "caseDuplicate": "Valoarea cazului „{{value}}” este duplicată."
+      },
+      "transform": {
+        "emptyTemplate": "Șablonul nu trebuie să fie gol.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "Cererea asociată nu mai există."
+      },
+      "runScenario": {
+        "missing": "Scenariul asociat nu mai există.",
+        "requiredInput": "Intrarea obligatorie „{{name}}” trebuie conectată la o sursă."
+      }
+    },
+    "usage": {
+      "button": "Scenarii care folosesc această cerere",
+      "title": "Această cerere este folosită în scenariile:"
+    },
+    "inspector": {
+      "run": "Rulează",
+      "debug": "Depanare",
+      "step": "Pas cu pas",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "Pauză",
+      "noRunsHint": "Nicio rulare recentă pentru această cerere — rulează-o de aici ca să populezi previzualizarea scenariului.",
+      "syntheticInfo": "Date de exemplu generate din documentația acestei cereri.",
+      "syntheticRunHint": "Date de exemplu — rulați cererea pentru a le înlocui cu un rezultat real."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

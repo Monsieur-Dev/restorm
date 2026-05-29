@@ -169,7 +169,8 @@
         "soap": "SOAP request",
         "websocket": "WebSocket request",
         "odata": "OData request",
-        "auth": "HTTP authentication request"
+        "auth": "HTTP authentication request",
+        "scenario": "Scenario"
       }
     },
     "deleteConfirm": {
@@ -178,6 +179,14 @@
       "itemMessage": "Are you sure you want to delete \"{{name}}\"?",
       "confirm": "Delete",
       "cancel": "Cancel"
+    },
+    "scenarioDelete": {
+      "title": "Delete a request used by scenarios",
+      "message": "\"{{name}}\" is used in the following scenarios. What do you want to do?",
+      "belongsTag": "belongs to this scenario",
+      "moveInto": "Move into this scenario",
+      "affectsNote": "Deleting this request will also remove it from these scenarios.",
+      "deleteAnyway": "Delete anyway"
     }
   },
   "environment": {
@@ -302,7 +311,9 @@
       "dateTime": "Date time",
       "color": "Color",
       "expression": "Expression",
-      "boolean": "Boolean"
+      "boolean": "Boolean",
+      "variables": "Variables",
+      "environment": "Environment"
     },
     "apiEnums": "API defined types",
     "customLists": "Custom types",
@@ -355,11 +366,14 @@
       "folder": "Folders",
       "environment": "Environments",
       "settings": "Settings",
-      "tag": "Tags"
+      "tag": "Tags",
+      "scenario": "Scenarios"
     },
     "tooltip": {
       "noDetails": "No details available",
-      "noContent": "No documentation or notes"
+      "noContent": "No documentation or notes",
+      "noScenario": "Scenario unavailable",
+      "scenarioKind": "scenario"
     }
   },
   "httpStatus": {
@@ -493,7 +507,8 @@
   },
   "common": {
     "cancel": "Cancel",
-    "save": "Save"
+    "save": "Save",
+    "remove": "Remove"
   },
   "helpers": {
     "categories": {
@@ -743,6 +758,202 @@
       "previousMatch": "Previous match",
       "nextMatch": "Next match",
       "close": "Close"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "empty": "Empty scenario — right-click the canvas to add a node"
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del"
+      },
+      "expand": "Expand",
+      "collapse": "Collapse"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Add case",
+      "removeCase": "Remove case",
+      "case": "case"
+    },
+    "forEach": {
+      "items": "items",
+      "each": "each",
+      "done": "done",
+      "parallelism": "parallelism"
+    },
+    "aggregate": {
+      "items": "items",
+      "result": "result",
+      "field": "field",
+      "separator": "separator",
+      "op": {
+        "count": "Count",
+        "sum": "Sum",
+        "min": "Min",
+        "max": "Max",
+        "average": "Average",
+        "join": "Join"
+      }
+    },
+    "filter": {
+      "items": "items",
+      "kept": "kept",
+      "keepWhere": "keep where"
+    },
+    "wait": {
+      "then": "then",
+      "duration": "duration"
+    },
+    "waitUntil": {
+      "until": "until",
+      "then": "then"
+    },
+    "arithmetic": {
+      "result": "result"
+    },
+    "nodes": {
+      "arithmetic": "Arithmetic",
+      "httpRequest": "HTTP Request",
+      "runScenario": "Run scenario",
+      "wait": "Wait",
+      "waitUntil": "Wait until",
+      "now": "Now",
+      "comparator": "Comparator",
+      "setVariable": "Set variable",
+      "getVariable": "Get variable"
+    },
+    "comparator": {
+      "result": "result"
+    },
+    "boolean": {
+      "result": "result"
+    },
+    "map": {
+      "items": "items",
+      "mapped": "mapped"
+    },
+    "log": {
+      "message": "message",
+      "data": "data"
+    },
+    "assert": {
+      "message": "message"
+    },
+    "editRequest": "Edit request",
+    "editScenario": "Edit scenario",
+    "object": {
+      "addProperty": "Add property",
+      "removeProperty": "Remove property",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "input": {
+      "required": "Required",
+      "name": "Name",
+      "defaultType": "Default / type"
+    },
+    "runScenario": {
+      "orphanInput": "No matching parameter \"{{name}}\" in the sub-scenario",
+      "orphanOutput": "No matching output \"{{name}}\" in the sub-scenario",
+      "then": "then"
+    },
+    "validation": {
+      "duplicateName": "The name \"{{name}}\" is already used by another action.",
+      "panelTitle": "{{count}} action error(s)",
+      "focusBox": "Focus this action",
+      "showErrors": "Show errors",
+      "input": {
+        "missingName": "This input parameter must have a name."
+      },
+      "dataLink": {
+        "emptyPath": "The incoming data link needs a JSON path.",
+        "badPath": "The data link JSON path \"{{path}}\" is malformed."
+      },
+      "output": {
+        "missingName": "This output must have a name.",
+        "duplicateName": "The name \"{{name}}\" is already used by another output.",
+        "valueRequired": "The \"value\" input must be wired to a source."
+      },
+      "getVariable": {
+        "noSelection": "A variable must be selected.",
+        "unknown": "The variable \"{{name}}\" does not exist in the scenario."
+      },
+      "setVariable": {
+        "missingName": "The variable to set must have a name."
+      },
+      "object": {
+        "propMissingName": "Each property must have a name.",
+        "propDuplicate": "The property name \"{{name}}\" is duplicated."
+      },
+      "arithmetic": {
+        "divisionByZero": "Division by zero is impossible."
+      },
+      "switch": {
+        "caseDuplicate": "The case value \"{{value}}\" is duplicated."
+      },
+      "transform": {
+        "emptyTemplate": "The template must not be empty.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "The bound request no longer exists."
+      },
+      "runScenario": {
+        "missing": "The bound scenario no longer exists.",
+        "requiredInput": "The required input \"{{name}}\" must be wired to a source."
+      }
+    },
+    "usage": {
+      "button": "Scenarios using this request",
+      "title": "This request is used in the scenarios:"
+    },
+    "inspector": {
+      "run": "Run",
+      "debug": "Debug",
+      "step": "Step",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "Pause",
+      "noRunsHint": "No recent run for this request — run it from here to populate the scenario preview.",
+      "syntheticInfo": "Example data generated from this request's documentation.",
+      "syntheticRunHint": "Sample data — run the request to replace it with a real result."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

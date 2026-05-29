@@ -28,7 +28,7 @@ import React, { StrictMode, useEffect, act } from 'react'
 import { describe, it, expect, vi, beforeAll } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import type { WorkbenchTree, EditorTab } from './types'
-import { setEditorDragData, clearEditorDragData } from './dnd'
+import { setEditorDragData, clearEditorDragData, isEditorDragEvent, DND_MIME } from './dnd'
 
 // `EditorWorkbench` reaches into Electron-flavoured plumbing on mount
 // (window bounds, drag IPC, persistence, settings) — none of it is
@@ -251,6 +251,49 @@ describe('EditorWorkbench — tab content survives relocation (StrictMode)', () 
 				placeholder?.getAttribute('data-split-target'),
 				'a dragover on portalled tab content must reach the group split-drop handler'
 			).not.toBe('')
+		} finally {
+			clearEditorDragData()
+		}
+	})
+
+	it('clears the editor-drag payload after a split-drop, so a later foreign drag is not mistaken for one', () => {
+		// Dragging a tab to split moves it into the target group, so the source
+		// tab unmounts during the drop and its `dragend` never fires. If the
+		// module-level payload is not cleared on the drop, `isEditorDragEvent`'s
+		// fallback keeps reporting `true` for the next (sidebar) drag — and the
+		// split overlay then swallows drops meant for the editor content.
+		setEditorDragData(
+			{ dataTransfer: undefined } as unknown as React.DragEvent,
+			{ editorId: 'A', sourceGroupId: 'g1' }
+		)
+		// Sanity: the fallback currently reports an in-flight editor drag.
+		expect(isEditorDragEvent({ dataTransfer: undefined } as unknown as DragEvent)).toBe(true)
+		try {
+			render(
+				<StrictMode>
+					<EditorWorkbench
+						tree={{ orientation: 'vertical', groups: [{ id: 'g1', tabs: [tab('A'), tab('B')], activeTabId: 'A' }] }}
+						renderTabContent={renderTabContent}
+						data-testid="ewb"
+					/>
+				</StrictMode>
+			)
+			const content = screen.getByTestId('content-A')
+			const dataTransfer = {
+				getData: (type: string) => (type === DND_MIME.editor ? JSON.stringify({ editorId: 'A', sourceGroupId: 'g1' }) : ''),
+				types: [DND_MIME.editor],
+				dropEffect: '',
+				effectAllowed: ''
+			}
+			act(() => {
+				const drop = new Event('drop', { bubbles: true, cancelable: true })
+				Object.defineProperty(drop, 'dataTransfer', { value: dataTransfer })
+				content.dispatchEvent(drop)
+			})
+			expect(
+				isEditorDragEvent({ dataTransfer: undefined } as unknown as DragEvent),
+				'split-drop must clear the editor-drag payload'
+			).toBe(false)
 		} finally {
 			clearEditorDragData()
 		}

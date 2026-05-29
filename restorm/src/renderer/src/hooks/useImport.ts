@@ -8,11 +8,12 @@ import { DocumentEvents } from '../services/DocumentEvents'
 import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
 import { processAfterDeserialization } from '../utils/serialization'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
-import type { Folder, EnvironmentFolder, Environment, Request, FolderItem } from '../../../shared/types/collections'
+import type { Folder, EnvironmentFolder, Environment, FolderItem } from '../../../shared/types/collections'
+import { isScenario } from '../../../shared/types/collections'
 
 export interface UseImportOptions {
-  rootItems: (EnvironmentFolder | Folder | Request)[]
-  setRootItems: React.Dispatch<React.SetStateAction<(EnvironmentFolder | Folder | Request)[]>>
+  rootItems: FolderItem[]
+  setRootItems: React.Dispatch<React.SetStateAction<FolderItem[]>>
   setExpandedIds: React.Dispatch<React.SetStateAction<string[]>>
   /**
    * Fired once after every successful import, after the new tree has
@@ -70,7 +71,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
           return {
             ...folder,
             id: newId,
-            items: folder.items.map((child) => regenerateIds(child))
+            items: (folder.items ?? []).map((child) => regenerateIds(child))
           }
         } else {
           const request = item
@@ -111,7 +112,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         if (current !== undefined) {
           const remapped = idMap.get(current)
           if (remapped !== undefined && remapped !== current) {
-            return { ...item, authenticationRequestId: remapped }
+            return { ...item, authenticationRequestId: remapped } as FolderItem
           }
         }
         return item
@@ -158,7 +159,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
           }
         }
         for (const child of folder.items) {
-          if ('items' in child) emitNestedEnvironments(child)
+          if ('items' in child && !isScenario(child)) emitNestedEnvironments(child)
         }
       }
 
@@ -174,7 +175,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
       // a full-tree save right after, so crash recovery kicks in off
       // the persisted file, not off per-node drafts.
       const emitTopLevelCreated = (item: FolderItem): void => {
-        if ('items' in item) {
+        if ('items' in item && !isScenario(item)) {
           const folder = item
           eventBus.emitSync(DocumentEvents.FOLDER_CREATED, {
             id: folder.id,
@@ -238,7 +239,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
       // and flow into the dirty tracker / search index like any
       // nested request.
       const reactiveImported = itemsWithNewIds.map((item) =>
-        'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
+        isScenario(item) ? item : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
       )
       setRootItems((prev) => [...prev, ...reactiveImported])
       expandAfterImport()

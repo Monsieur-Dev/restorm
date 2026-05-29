@@ -10,7 +10,8 @@ import type {
   WebSocketRequest,
   ODataRequest,
   AuthenticationRequest,
-  Environment
+  Environment,
+  Scenario
 } from './collections'
 
 /** Breadcrumb item for navigation */
@@ -105,6 +106,13 @@ export interface AuthenticationRequestTab extends BaseRestormTab {
   environments?: Environment[] | undefined
 }
 
+/** Tab hosting the scenario (dataflow graph) editor. */
+export interface ScenarioEditorTab extends BaseRestormTab {
+  tabType: 'scenario-editor'
+  /** The scenario being edited. */
+  scenario: Scenario
+}
+
 /** Tab displaying the firewall + outgoing-request console.
  * Singleton — there is at most one open at any time, identified
  * by the constant `tabId` `console:singleton`. The tab content
@@ -152,6 +160,7 @@ export type RestormEditorTab =
   | WebSocketRequestTab
   | ODataRequestTab
   | AuthenticationRequestTab
+  | ScenarioEditorTab
   | ConsoleTab
   | FirewallTab
   | MiniBrowserTab
@@ -185,6 +194,11 @@ export function isEnvironmentFolderTab(tab: RestormEditorTab): tab is Environmen
 /** Type guard for HTTPRequestTab */
 export function isHTTPRequestTab(tab: RestormEditorTab): tab is HTTPRequestTab {
   return tab.tabType === 'http-request'
+}
+
+/** Type guard for ScenarioEditorTab */
+export function isScenarioEditorTab(tab: RestormEditorTab): tab is ScenarioEditorTab {
+  return tab.tabType === 'scenario-editor'
 }
 
 /** Type guard for GraphQLRequestTab */

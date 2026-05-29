@@ -171,7 +171,8 @@
         "soap": "Požadavek SOAP",
         "websocket": "Požadavek WebSocket",
         "odata": "Požadavek OData",
-        "auth": "Ověřovací požadavek HTTP"
+        "auth": "Ověřovací požadavek HTTP",
+        "scenario": "Scénář"
       }
     },
     "deleteConfirm": {
@@ -180,6 +181,14 @@
       "itemMessage": "Opravdu chcete smazat „{{name}}“?",
       "confirm": "Smazat",
       "cancel": "Zrušit"
+    },
+    "scenarioDelete": {
+      "title": "Smazat požadavek používaný scénáři",
+      "message": "„{{name}}“ se používá v následujících scénářích. Co chcete udělat?",
+      "belongsTag": "patří k tomuto scénáři",
+      "moveInto": "Přesunout do tohoto scénáře",
+      "affectsNote": "Smazáním tohoto požadavku jej také odeberete z těchto scénářů.",
+      "deleteAnyway": "Přesto smazat"
     }
   },
   "environment": {
@@ -304,7 +313,9 @@
       "dateTime": "Datum a čas",
       "color": "Barva",
       "expression": "Výraz",
-      "boolean": "Boolean"
+      "boolean": "Boolean",
+      "variables": "Proměnné",
+      "environment": "Prostředí"
     },
     "apiEnums": "Typy definované v API",
     "customLists": "Vlastní typy",
@@ -357,11 +368,14 @@
       "folder": "Složky",
       "environment": "Prostředí",
       "settings": "Nastavení",
-      "tag": "Štítky"
+      "tag": "Štítky",
+      "scenario": "Scénáře"
     },
     "tooltip": {
       "noDetails": "Žádné podrobnosti k dispozici",
-      "noContent": "Žádná dokumentace ani poznámky"
+      "noContent": "Žádná dokumentace ani poznámky",
+      "noScenario": "Scénář není k dispozici",
+      "scenarioKind": "scénář"
     }
   },
   "httpStatus": {
@@ -495,7 +509,8 @@
   },
   "common": {
     "cancel": "Zrušit",
-    "save": "Uložit"
+    "save": "Uložit",
+    "remove": "Odebrat"
   },
   "helpers": {
     "categories": {
@@ -745,6 +760,202 @@
       "previousMatch": "Předchozí shoda",
       "nextMatch": "Další shoda",
       "close": "Zavřít"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "empty": "Empty scenario — right-click the canvas to add a node"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del"
+      },
+      "expand": "Rozbalit",
+      "collapse": "Sbalit"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Přidat případ",
+      "removeCase": "Odebrat případ",
+      "case": "případ"
+    },
+    "forEach": {
+      "items": "položky",
+      "each": "každý",
+      "done": "hotovo",
+      "parallelism": "paralelismus"
+    },
+    "aggregate": {
+      "items": "položky",
+      "result": "výsledek",
+      "field": "pole",
+      "separator": "oddělovač",
+      "op": {
+        "count": "Počet",
+        "sum": "Součet",
+        "min": "Min",
+        "max": "Max",
+        "average": "Průměr",
+        "join": "Spojit"
+      }
+    },
+    "filter": {
+      "items": "položky",
+      "kept": "zachované",
+      "keepWhere": "zachovat když"
+    },
+    "wait": {
+      "then": "poté",
+      "duration": "doba trvání"
+    },
+    "waitUntil": {
+      "until": "do",
+      "then": "poté"
+    },
+    "arithmetic": {
+      "result": "výsledek"
+    },
+    "nodes": {
+      "arithmetic": "Aritmetika",
+      "httpRequest": "Požadavek HTTP",
+      "runScenario": "Spustit scénář",
+      "wait": "Čekat",
+      "waitUntil": "Čekat do",
+      "now": "Nyní",
+      "comparator": "Komparátor",
+      "setVariable": "Nastavit proměnnou",
+      "getVariable": "Získat proměnnou"
+    },
+    "comparator": {
+      "result": "výsledek"
+    },
+    "boolean": {
+      "result": "výsledek"
+    },
+    "map": {
+      "items": "položky",
+      "mapped": "transformované"
+    },
+    "log": {
+      "message": "zpráva",
+      "data": "data"
+    },
+    "assert": {
+      "message": "zpráva"
+    },
+    "editRequest": "Upravit požadavek",
+    "editScenario": "Upravit scénář",
+    "object": {
+      "addProperty": "Přidat vlastnost",
+      "removeProperty": "Odebrat vlastnost",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "input": {
+      "required": "Povinné",
+      "name": "Name",
+      "defaultType": "Default / type"
+    },
+    "runScenario": {
+      "orphanInput": "V dílčím scénáři chybí odpovídající parametr „{{name}}“",
+      "orphanOutput": "V dílčím scénáři chybí odpovídající výstup „{{name}}“",
+      "then": "poté"
+    },
+    "validation": {
+      "duplicateName": "Název „{{name}}“ už používá jiná akce.",
+      "panelTitle": "Chyby akcí: {{count}}",
+      "focusBox": "Přejít na tuto akci",
+      "showErrors": "Zobrazit chyby",
+      "input": {
+        "missingName": "Tento vstupní parametr musí mít název."
+      },
+      "dataLink": {
+        "emptyPath": "Příchozí datový odkaz vyžaduje cestu (JSON path).",
+        "badPath": "Cesta JSON „{{path}}“ datového odkazu je neplatná."
+      },
+      "output": {
+        "missingName": "Tento výstup musí mít název.",
+        "duplicateName": "Název „{{name}}“ už používá jiný výstup.",
+        "valueRequired": "Vstup „value“ musí být připojen ke zdroji."
+      },
+      "getVariable": {
+        "noSelection": "Je nutné vybrat proměnnou.",
+        "unknown": "Proměnná „{{name}}“ ve scénáři neexistuje."
+      },
+      "setVariable": {
+        "missingName": "Nastavovaná proměnná musí mít název."
+      },
+      "object": {
+        "propMissingName": "Každá vlastnost musí mít název.",
+        "propDuplicate": "Název vlastnosti „{{name}}“ je duplicitní."
+      },
+      "arithmetic": {
+        "divisionByZero": "Dělení nulou není možné."
+      },
+      "switch": {
+        "caseDuplicate": "Hodnota případu „{{value}}“ je duplicitní."
+      },
+      "transform": {
+        "emptyTemplate": "Šablona nesmí být prázdná.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "Propojený požadavek již neexistuje."
+      },
+      "runScenario": {
+        "missing": "Propojený scénář již neexistuje.",
+        "requiredInput": "Povinný vstup „{{name}}“ musí být připojen ke zdroji."
+      }
+    },
+    "usage": {
+      "button": "Scénáře používající tento požadavek",
+      "title": "Tento požadavek se používá ve scénářích:"
+    },
+    "inspector": {
+      "run": "Spustit",
+      "debug": "Ladit",
+      "step": "Krok za krokem",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "Pozastavit",
+      "noRunsHint": "Žádné nedávné spuštění tohoto požadavku — spusťte jej zde a naplňte náhled scénáře.",
+      "syntheticInfo": "Příklad dat vygenerovaný z dokumentace tohoto požadavku.",
+      "syntheticRunHint": "Příklad dat — spusťte požadavek, abyste je nahradili skutečným výsledkem."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

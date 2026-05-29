@@ -12,6 +12,7 @@ import React, {
   type ReactNode
 } from 'react'
 import { useColumnWidths, type WidthColumnDef } from './useColumnWidths'
+import { startDragPreview } from '../../utils/dragPreview'
 import './table.css'
 
 /**
@@ -202,31 +203,21 @@ function TableInner<TRow>(
     const row = event.currentTarget.closest('tr')
     if (!row) return
     const rect = row.getBoundingClientRect()
-    const table = document.createElement('table')
+    // Custom drag preview — native setDragImage is blank under Wayland.
+    // Wrap the cloned <tr> in a table so it keeps its row layout.
+    const ghost = document.createElement('table')
+    ghost.className = 'ecu-table-ghost'
+    ghost.style.borderCollapse = 'collapse'
+    ghost.style.width = `${rect.width}px`
     const tbody = document.createElement('tbody')
-    const ghostRow = row.cloneNode(true) as HTMLTableRowElement
-    table.appendChild(tbody)
-    tbody.appendChild(ghostRow)
-
-    const container = document.createElement('div')
-    container.className = 'ecu-table-ghost'
-    container.style.position = 'fixed'
-    container.style.top = '-10000px'
-    container.style.left = '-10000px'
-    container.style.pointerEvents = 'none'
-    container.style.borderRadius = '2px'
-    container.style.width = `${rect.width}px`
-    container.appendChild(table)
-    // Append to the closest `.workbench` ancestor so CSS variables and
-    // font inherit from the app theme. Fall back to body if absent
-    // (e.g. tests or embedded usage).
-    const themeRoot = row.closest<HTMLElement>('.workbench') ?? document.body
-    themeRoot.appendChild(container)
-    dragGhostRef.current = container
-
-    const offsetX = event.clientX - rect.left
-    const offsetY = event.clientY - rect.top
-    event.dataTransfer.setDragImage(container, offsetX, offsetY)
+    tbody.appendChild(row.cloneNode(true))
+    ghost.appendChild(tbody)
+    startDragPreview(event, {
+      preview: ghost,
+      offsetX: event.clientX - rect.left,
+      offsetY: event.clientY - rect.top,
+      mountInto: row.closest<HTMLElement>('.workbench')
+    })
 
     // Hide the source row after `dragstart` completes. Setting state
     // synchronously here would re-render the `<tr>` mid-dragstart and

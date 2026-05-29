@@ -168,7 +168,8 @@
         "soap": "SOAP 請求",
         "websocket": "WebSocket 請求",
         "odata": "OData 請求",
-        "auth": "HTTP 驗證請求"
+        "auth": "HTTP 驗證請求",
+        "scenario": "場景"
       }
     },
     "deleteConfirm": {
@@ -177,6 +178,14 @@
       "itemMessage": "確定要刪除 \"{{name}}\" 嗎？",
       "confirm": "刪除",
       "cancel": "取消"
+    },
+    "scenarioDelete": {
+      "title": "刪除被場景使用的請求",
+      "message": "「{{name}}」被用於以下場景。您想怎麼做?",
+      "belongsTag": "屬於此場景",
+      "moveInto": "移動到此場景",
+      "affectsNote": "刪除此請求也會將其從這些場景中移除。",
+      "deleteAnyway": "仍然刪除"
     }
   },
   "environment": {
@@ -301,7 +310,9 @@
       "dateTime": "日期時間",
       "color": "顏色",
       "expression": "運算式",
-      "boolean": "布林值"
+      "boolean": "布林值",
+      "variables": "變數",
+      "environment": "環境"
     },
     "apiEnums": "API 定義的型別",
     "customLists": "自訂類型",
@@ -354,11 +365,14 @@
       "folder": "資料夾",
       "environment": "環境",
       "settings": "設定",
-      "tag": "標籤"
+      "tag": "標籤",
+      "scenario": "情境"
     },
     "tooltip": {
       "noDetails": "沒有可用的詳細資料",
-      "noContent": "沒有文件或備註"
+      "noContent": "沒有文件或備註",
+      "noScenario": "情境無法使用",
+      "scenarioKind": "情境"
     }
   },
   "httpStatus": {
@@ -492,7 +506,8 @@
   },
   "common": {
     "cancel": "取消",
-    "save": "儲存"
+    "save": "儲存",
+    "remove": "移除"
   },
   "helpers": {
     "categories": {
@@ -742,6 +757,202 @@
       "previousMatch": "上一個相符項",
       "nextMatch": "下一個相符項",
       "close": "關閉"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "empty": "Empty scenario — right-click the canvas to add a node"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del"
+      },
+      "expand": "展開",
+      "collapse": "摺疊"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "新增分支",
+      "removeCase": "移除分支",
+      "case": "案例"
+    },
+    "forEach": {
+      "items": "項目",
+      "each": "每項",
+      "done": "完成",
+      "parallelism": "並行度"
+    },
+    "aggregate": {
+      "items": "項目",
+      "result": "結果",
+      "field": "欄位",
+      "separator": "分隔符",
+      "op": {
+        "count": "計數",
+        "sum": "總和",
+        "min": "最小值",
+        "max": "最大值",
+        "average": "平均值",
+        "join": "連接"
+      }
+    },
+    "filter": {
+      "items": "項目",
+      "kept": "保留",
+      "keepWhere": "保留條件"
+    },
+    "wait": {
+      "then": "然後",
+      "duration": "時長"
+    },
+    "waitUntil": {
+      "until": "直到",
+      "then": "然後"
+    },
+    "arithmetic": {
+      "result": "結果"
+    },
+    "nodes": {
+      "arithmetic": "算術",
+      "httpRequest": "HTTP 請求",
+      "runScenario": "執行場景",
+      "wait": "等待",
+      "waitUntil": "等待至",
+      "now": "現在",
+      "comparator": "比較器",
+      "setVariable": "設定變數",
+      "getVariable": "取得變數"
+    },
+    "comparator": {
+      "result": "結果"
+    },
+    "boolean": {
+      "result": "結果"
+    },
+    "map": {
+      "items": "項目",
+      "mapped": "已映射"
+    },
+    "log": {
+      "message": "訊息",
+      "data": "資料"
+    },
+    "assert": {
+      "message": "訊息"
+    },
+    "editRequest": "編輯請求",
+    "editScenario": "編輯場景",
+    "object": {
+      "addProperty": "新增屬性",
+      "removeProperty": "移除屬性",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "input": {
+      "required": "必填",
+      "name": "Name",
+      "defaultType": "Default / type"
+    },
+    "runScenario": {
+      "orphanInput": "子場景中沒有相符的參數「{{name}}」",
+      "orphanOutput": "子場景中沒有相符的輸出「{{name}}」",
+      "then": "然後"
+    },
+    "validation": {
+      "duplicateName": "名稱「{{name}}」已被另一個動作使用。",
+      "panelTitle": "{{count}} 個動作錯誤",
+      "focusBox": "定位到此動作",
+      "showErrors": "顯示錯誤",
+      "input": {
+        "missingName": "此輸入參數必須有名稱。"
+      },
+      "dataLink": {
+        "emptyPath": "傳入的資料連結需要一個 JSON 路徑。",
+        "badPath": "資料連結的 JSON 路徑「{{path}}」格式無效。"
+      },
+      "output": {
+        "missingName": "此輸出必須有名稱。",
+        "duplicateName": "名稱「{{name}}」已被另一個輸出使用。",
+        "valueRequired": "「value」輸入必須連接到一個來源。"
+      },
+      "getVariable": {
+        "noSelection": "必須選擇一個變數。",
+        "unknown": "變數「{{name}}」在場景中不存在。"
+      },
+      "setVariable": {
+        "missingName": "要設定的變數必須有名稱。"
+      },
+      "object": {
+        "propMissingName": "每個屬性都必須有名稱。",
+        "propDuplicate": "屬性名「{{name}}」重複了。"
+      },
+      "arithmetic": {
+        "divisionByZero": "無法除以零。"
+      },
+      "switch": {
+        "caseDuplicate": "分支值「{{value}}」重複。"
+      },
+      "transform": {
+        "emptyTemplate": "範本不能為空。",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "關聯的請求已不存在。"
+      },
+      "runScenario": {
+        "missing": "關聯的場景已不存在。",
+        "requiredInput": "必填輸入「{{name}}」必須連接到資料來源。"
+      }
+    },
+    "usage": {
+      "button": "使用此請求的場景",
+      "title": "此請求被用於以下場景:"
+    },
+    "inspector": {
+      "run": "執行",
+      "debug": "偵錯",
+      "step": "單步",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "暫停",
+      "noRunsHint": "此請求尚無最近一次執行結果 — 從此處執行以填入情境預覽。",
+      "syntheticInfo": "從此請求的文件產生的範例資料。",
+      "syntheticRunHint": "範例資料 — 執行請求以替換為真實結果。"
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

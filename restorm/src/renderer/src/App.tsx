@@ -47,6 +47,13 @@ import { Environment as EnvironmentClass } from '../../shared/models/Environment
  * produces on save — that's the invariant `commitIfDraftMatches`
  * relies on.
  */
+// Debounce handle + latest save-all callback for the scenario-edit autosave
+// (see handleScenarioChange). Module-scoped (single App instance) so the
+// debounced timer always invokes the current `handleMenuSaveAll` — capturing it
+// in the timer closure would save a stale `rootItems` snapshot.
+let scenarioSaveTimer: ReturnType<typeof setTimeout> | null = null
+let latestSaveAll: (() => Promise<boolean>) | null = null
+
 const classForDocument = (type: 'folder' | 'request' | 'environment', doc: Record<string, unknown>): object => {
   if (type === 'request') {
     const t = doc['type']
@@ -102,13 +109,17 @@ import { RestormSidebar } from './components/MainView/Sidebar/RestormSidebar'
 import { RestormWorkbenchContainer } from './components/MainView/Workbench/RestormWorkbenchContainer'
 import { SaveOptionsModal } from './components/Modals/SaveOptionsModal'
 import { DeleteConfirmationModal } from './components/Modals/DeleteConfirmationModal'
+import { RequestScenarioDeleteModal, type RequestScenarioDeleteUsage } from './components/Modals/RequestScenarioDeleteModal'
+import { removeItemFromTree } from './utils/treeManipulation'
 import { ImportModal, type RefreshContext } from './components/Modals/ImportModal'
 import { allLeafKeys } from './components/Modals/importSelectionHelpers'
 import { ApiSpecRefreshFlow } from './components/Folders/ApiSpecRefreshFlow'
 import { AvailableVariablesProvider } from './contexts/AvailableVariablesContext'
 import { VariableTransformProvider } from './contexts/VariableTransformContext'
 import { AuthRequestResolverContext, type AuthRequestResolver } from './contexts/authRequestResolverContext'
-import { collectAllFolderIds } from './services/FolderToListView'
+import { collectExpandableIds } from './services/FolderToListView'
+import { findScenariosUsingRequest, findScenariosUsingScenario, collectRequestScenarioRelations } from './services/scenarioRequestUsage'
+import { requestScenarioNodeFocus } from './services/scenarioFocusBus'
 import {
   findFolderById,
   findEnvironmentFolderById,
@@ -119,10 +130,13 @@ import {
 import { DesktopIndicator } from './components/MainView/DesktopIndicator'
 import { findItemById } from './utils/treeSearch'
 import { EnvironmentProvider } from './contexts/EnvironmentContext'
+import { getSessionRequestOverride, getSessionFolderEnv, findEnvironmentById } from './services/environmentSelectionStore'
+import type { RequestEnvInfo } from './components/Scenario/scenarioBoundResolver'
 import { StatusbarEnvironmentSelector } from './components/MainView/StatusbarEnvironmentSelector'
 import { StatusbarAuthSelector } from './components/MainView/StatusbarAuthSelector'
 import { shouldShowAuthSelector } from './components/MainView/statusbarAuthHelpers'
 import { useItemOperations } from './hooks/useItemOperations'
+import type { AddChildKind } from './components/MainView/Sidebar/contextMenuBuilder'
 import { useRequestCreationApi } from './hooks/useRequestCreationApi'
 import { RequestCreationProvider } from './contexts/RequestCreationContext'
 import { useNavigation } from './hooks/useNavigation'
@@ -149,15 +163,22 @@ import type {
   Folder,
   FolderItem,
   EnvironmentFolder,
-  Request
+  Request,
+  ScenarioNode,
+  ScenarioEdge
 } from '../../shared/types/collections'
 import {
   isRequest,
+  isScenario,
   isEnvironmentFolder,
   isAnyFolder,
   isAuthenticationRequest
 } from '../../shared/types/collections'
 import { buildRequestPath } from './utils/requestPath'
+import { findOperationForRoute } from '../../shared/utils/findOperationForRoute'
+import { routeFromRequest } from './hooks/routeFromRequest'
+import { synthesizeRequestPreview, type SyntheticRequestPreview } from '../../shared/utils/syntheticRequestPreview'
+import type { ApiDocumentation } from '../../shared/types/apiDocumentation'
 
 // Wire the ECUI Console feed to restorm's firewall IPC channel. The
 // store subscribes lazily on the first `useConsoleFeed` consumer, so
@@ -175,7 +196,7 @@ const WORKBENCH_ID = 'restorm-main-workbench'
 // Initial root items - empty at startup, populated when opening a file
 const initialRootItems: EnvironmentFolder[] = []
 
-const allFolderIds = initialRootItems.flatMap((folder) => collectAllFolderIds(folder))
+const allFolderIds = initialRootItems.flatMap((item) => collectExpandableIds(item))
 
 /**
  * Resolve the workbench's currently-active tab id. Walks the tree
@@ -278,7 +299,7 @@ const App: React.FC = () => {
 
   // Root items data (mutable for renaming)
   // Can contain EnvironmentFolders, Folders, or standalone Requests
-  const [rootItems, setRootItems] = useState<(EnvironmentFolder | Folder | Request)[]>(initialRootItems)
+  const [rootItems, setRootItems] = useState<FolderItem[]>(initialRootItems)
 
   // Push the project's auto-derived origins (every request URL,
   // resolved against available env vars) to the main-process
@@ -321,9 +342,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const ids: string[] = []
     for (const item of rootItems) {
-      if ('items' in item) {
-        ids.push(...collectAllFolderIds(item))
-      }
+      ids.push(...collectExpandableIds(item))
     }
     allFolderIdsRef.current = ids
   }, [rootItems])
@@ -588,7 +607,7 @@ const App: React.FC = () => {
     // have unsaved work on this folder document", not "something
     // somewhere below me is dirty".
     const cascadeParentById = new Map<string, string>()
-    const visit = (item: EnvironmentFolder | Folder | Request): void => {
+    const visit = (item: FolderItem): void => {
       if (!('items' in item)) return
       for (const child of item.items) visit(child)
       const itemIsEnvFolder = 'environments' in item && Array.isArray(item.environments)
@@ -658,6 +677,7 @@ const App: React.FC = () => {
     workbenchRef,
     hasRestoredWorkbenchRef,
     openFolderTab,
+    openScenarioEditorTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
     handleRebuildTab,
@@ -925,14 +945,32 @@ const App: React.FC = () => {
   // Bridge the AutoSaveController's `'file:autosave-trigger'` IPC to
   // the existing save-all flow. The controller (in main) owns the
   // when; the renderer owns the how.
+  //
+  // The trigger must NOT call `handleMenuSaveAll()` synchronously from
+  // the IPC callback. The MCP write tools (e.g. a scenario node edit in
+  // `mcp/tools/scenario.ts`) fire, in one main-process tick,
+  // `mcp:tree-replace` (→ `setRootItems`, async) immediately followed by
+  // `file:autosave-trigger`. A synchronous save here would close over the
+  // *pre-replace* `rootItems` and write the stale tree — the MCP edit
+  // would never reach disk. So we bump a counter and let a post-commit
+  // effect run the save once React has applied the new `rootItems` (same
+  // discipline as the post-import save below).
+  const [pendingAutoSave, setPendingAutoSave] = useState(0)
   useEffect(() => {
     const unsub = window.api.file.onAutoSaveTrigger(() => {
-      void handleMenuSaveAll().catch((err: unknown) => {
-        logger.error('[App] Autosave failed', { error: String(err) })
-      })
+      setPendingAutoSave((c) => c + 1)
     })
     return () => { unsub() }
-  }, [handleMenuSaveAll])
+  }, [])
+  const lastAutoSaveRef = useRef(0)
+  useEffect(() => {
+    if (pendingAutoSave === 0) return
+    if (lastAutoSaveRef.current === pendingAutoSave) return
+    lastAutoSaveRef.current = pendingAutoSave
+    void handleMenuSaveAll().catch((err: unknown) => {
+      logger.error('[App] Autosave failed', { error: String(err) })
+    })
+  }, [pendingAutoSave, handleMenuSaveAll])
 
   // After an import, persist the fresh tree to disk so the registry's
   // initial hydration reference matches what's on disk. Without this,
@@ -977,6 +1015,15 @@ const App: React.FC = () => {
     isFolder: boolean
   }>({ isOpen: false, itemId: '', itemName: '', isFolder: false })
 
+  // Enhanced deletion dialog for a request referenced by scenarios (move it in,
+  // or delete + strip its boxes). Empty `usages` means the plain modal is used.
+  const [scenarioDelete, setScenarioDelete] = useState<{
+    isOpen: boolean
+    requestId: string
+    requestName: string
+    usages: RequestScenarioDeleteUsage[]
+  }>({ isOpen: false, requestId: '', requestName: '', usages: [] })
+
   // Use custom hooks for various concerns
   const {
     handleItemDrop,
@@ -997,6 +1044,7 @@ const App: React.FC = () => {
     setWorkbenchTree,
     setDeleteConfirmation,
     openFolderTab,
+    openScenarioEditorTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
     projectUuid
@@ -1022,6 +1070,180 @@ const App: React.FC = () => {
     rootItems,
     setWorkbenchTree
   })
+
+  // Persist scenario graph edits (add node, move node, …) made in the
+  // editor back onto the scenario in `rootItems`, then nudge React so the
+  // whole-file save picks the change up (verified: scenarios round-trip
+  // through the standard save path).
+  // Keep the module-scoped handle pointing at the current whole-file save so
+  // the scenario autosave timer always flushes the latest `rootItems`. Done in
+  // an effect (post-commit) rather than during render — reassigning a global
+  // mid-render is an impure side effect.
+  useEffect(() => { latestSaveAll = handleMenuSaveAll }, [handleMenuSaveAll])
+  const handleScenarioChange = useCallback((scenarioId: string, patch: { nodes?: ScenarioNode[]; edges?: ScenarioEdge[]; notes?: string }) => {
+    const item = findItemById(rootItems, scenarioId)
+    if (item && isScenario(item)) {
+      if (patch.nodes !== undefined) item.nodes = patch.nodes
+      if (patch.edges !== undefined) item.edges = patch.edges
+      if (patch.notes !== undefined) item.notes = patch.notes
+      setRootItems((prev) => [...prev])
+      // Scenario node/edge/note edits mutate the tree in place, which doesn't
+      // trip the trackable dirty trap (those keys aren't indexable) — so unlike
+      // request/folder edits they never schedule an autosave, and the on-disk
+      // copy keeps its create-time state. The whole-file save serializes the
+      // live tree correctly, so debounce one here (via the always-current
+      // `latestSaveAll`) to push scenario edits — incl. those on MCP-created
+      // nodes — to disk.
+      if (scenarioSaveTimer) clearTimeout(scenarioSaveTimer)
+      scenarioSaveTimer = setTimeout(() => {
+        scenarioSaveTimer = null
+        void latestSaveAll?.().catch((err: unknown) => {
+          logger.error('[App] scenario autosave failed', { error: String(err) })
+        })
+      }, 600)
+    }
+  }, [rootItems, setRootItems])
+
+  // Deletion of a request referenced by scenarios. When a request is used, the
+  // plain confirm modal is replaced by one that offers to move the request into
+  // a scenario (for external references) or delete + strip the boxes.
+  const handleDeleteItemChecked = useCallback((itemId: string) => {
+    const item = findItemById(rootItems, itemId)
+    if (item && isRequest(item)) {
+      // Affected scenarios = bound-by-a-box OR holding the request in their
+      // subtree (a child request with no box still belongs to the scenario).
+      const usages: RequestScenarioDeleteUsage[] = collectRequestScenarioRelations(rootItems, itemId).map((u) => ({
+        scenarioId: u.scenario.id,
+        scenarioName: u.scenario.name,
+        inSubtree: u.inSubtree
+      }))
+      if (usages.length > 0) {
+        setScenarioDelete({ isOpen: true, requestId: itemId, requestName: item.name, usages })
+        return
+      }
+    }
+    handleDeleteItem(itemId)
+  }, [rootItems, handleDeleteItem])
+
+  // Move the request into a scenario's subtree instead of deleting it. The
+  // in-place `items` mutation isn't tracked by the dirty trap, so nudge a save.
+  const handleMoveRequestIntoScenario = useCallback((requestId: string, scenarioId: string) => {
+    const scenario = findItemById(rootItems, scenarioId)
+    if (!scenario || !isScenario(scenario)) return
+    const removed = removeItemFromTree(rootItems, requestId)
+    if (!removed) return
+    scenario.items = [...(scenario.items ?? []), removed]
+    setRootItems((prev) => [...prev])
+    if (scenarioSaveTimer) clearTimeout(scenarioSaveTimer)
+    scenarioSaveTimer = setTimeout(() => {
+      scenarioSaveTimer = null
+      void latestSaveAll?.().catch((err: unknown) => { logger.error('[App] move-into-scenario autosave failed', { error: String(err) }) })
+    }, 600)
+    setScenarioDelete((p) => ({ ...p, isOpen: false }))
+  }, [rootItems, setRootItems])
+
+  // Delete the request and strip every box that referenced it (plus the touched
+  // edges) from each using scenario, even if that leaves a scenario incomplete.
+  const handleDeleteRequestAnyway = useCallback(() => {
+    const requestId = scenarioDelete.requestId
+    if (!requestId) return
+    for (const u of findScenariosUsingRequest(rootItems, requestId)) {
+      const dropped = new Set(u.nodeIds)
+      const nodes = u.scenario.nodes.filter((n) => !dropped.has(n.id))
+      const edges = u.scenario.edges.filter((e) => !dropped.has(e.from.nodeId) && !dropped.has(e.to.nodeId))
+      handleScenarioChange(u.scenario.id, { nodes, edges })
+    }
+    setScenarioDelete((p) => ({ ...p, isOpen: false }))
+    confirmDeleteWithId(requestId)
+  }, [scenarioDelete.requestId, rootItems, handleScenarioChange, confirmDeleteWithId])
+
+  // Create a child item (request of any protocol, or a sub-scenario) under a
+  // scenario from the graph editor's add palette. `silent`: no sidebar
+  // selection/expand, no tab — stay on the graph so the user can keep editing
+  // without being whisked to the new item; the matching node is dropped by the
+  // editor. Returns the new item id (the editor binds its node to it).
+  const handleCreateScenarioChild = useCallback((scenarioId: string, kind: AddChildKind): string | null => {
+    const newId = handleAddChildItem(scenarioId, kind, { silent: true })
+    if (newId) {
+      if (scenarioSaveTimer) clearTimeout(scenarioSaveTimer)
+      scenarioSaveTimer = setTimeout(() => {
+        scenarioSaveTimer = null
+        void latestSaveAll?.().catch((err: unknown) => {
+          logger.error('[App] scenario child-item autosave failed', { error: String(err) })
+        })
+      }, 600)
+    }
+    return newId
+  }, [handleAddChildItem])
+  // Back-compat shim for the bare httpRequest node (link-drag auto-create path).
+  const handleCreateScenarioRequest = useCallback(
+    (scenarioId: string): string | null => handleCreateScenarioChild(scenarioId, 'http-get'),
+    [handleCreateScenarioChild]
+  )
+
+  // Resolve a tree item by id to its live object — used by the scenario editor
+  // both to decide what a sidebar drop creates (request/scenario/ignored) and
+  // to keep a request/sub-scenario node's badge + title in sync with renames.
+  // Depends on `rootItems` so the bound boxes re-resolve when the tree changes.
+  const resolveBoundItem = useCallback((itemId: string): FolderItem | null => {
+    return findItemById(rootItems, itemId) ?? null
+  }, [rootItems])
+
+  // A request's environment picture for its scenario node: the envs of its
+  // nearest ancestor env-folder + the env currently selected for the request
+  // (session override → folder default → first env). Null when the request
+  // has no ancestor env-folder, so the node hides its env-selector section.
+  const resolveRequestEnv = useCallback((requestId: string): RequestEnvInfo | null => {
+    const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, requestId)
+    const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
+    if (environments.length === 0) return null
+    let envFolderId: string | undefined
+    for (let i = breadcrumbs.length - 2; i >= 0; i -= 1) {
+      const id = breadcrumbs[i]?.id
+      if (!id) continue
+      const folder = findFolderById(rootItems, id)
+      if (folder && isEnvironmentFolder(folder as FolderItem)) { envFolderId = folder.id; break }
+    }
+    let selectedEnvId = environments[0]?.id ?? null
+    if (projectUuid && envFolderId) {
+      const reqOverride = getSessionRequestOverride(projectUuid, requestId)
+      const folderEnv = getSessionFolderEnv(projectUuid, envFolderId)
+      if (reqOverride && findEnvironmentById(environments, reqOverride)) selectedEnvId = reqOverride
+      else if (folderEnv && findEnvironmentById(environments, folderEnv)) selectedEnvId = folderEnv
+    }
+    return { environments, selectedEnvId }
+  }, [rootItems, projectUuid])
+
+  // Build a synthetic (documentation-derived) preview for a request that
+  // hasn't been run yet — the scenario inspector renders this in place of
+  // the "no recent run" prompt when the request's owning env-folder
+  // carries an imported spec. Pure lookup: walk the tree to find the
+  // request + its env-folder's `apiDocumentation`, match the operation,
+  // then call the shared synthesiser. Returns `null` when any link in
+  // the chain is missing (no request, no env-folder, no spec, no
+  // matching operation).
+  const resolveSyntheticPreview = useCallback((requestId: string): SyntheticRequestPreview | null => {
+    const request = findRequestById(rootItems, requestId)
+    if (!request) return null
+    const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, requestId)
+    let envFolder: EnvironmentFolder | undefined
+    for (let i = breadcrumbs.length - 2; i >= 0; i -= 1) {
+      const id = breadcrumbs[i]?.id
+      if (!id) continue
+      const f = findFolderById(rootItems, id)
+      if (f && isEnvironmentFolder(f as FolderItem)) { envFolder = f as EnvironmentFolder; break }
+    }
+    if (!envFolder) return null
+    const apiDoc = (envFolder as { apiDocumentation?: ApiDocumentation }).apiDocumentation
+    if (!apiDoc) return null
+    const route = routeFromRequest(request)
+    const operation = findOperationForRoute(apiDoc, route)
+    if (!operation) return null
+    return synthesizeRequestPreview(apiDoc, operation, {
+      ...(route.url !== undefined ? { url: route.url } : {}),
+      ...(route.method !== undefined ? { method: route.method } : {})
+    })
+  }, [rootItems])
 
   // Environments of the active request's nearest ancestor env-folder,
   // used to feed the status-bar env selector. Empty when the active
@@ -1432,7 +1654,7 @@ const App: React.FC = () => {
     onRenameFavoriteItem: handleStartRenameInFavorites,
     onRenameOpenedItem: handleStartRenameInOpened,
     onCloneItem: handleCloneItem,
-    onDeleteItem: handleDeleteItem,
+    onDeleteItem: handleDeleteItemChecked,
     onToggleFavorite: handleToggleFavorite,
     onUnfavorite: handleUnfavorite,
     onCloseTab: handleCloseTabById,
@@ -1447,7 +1669,7 @@ const App: React.FC = () => {
     updateCount,
     onCloneItem: handleCloneItem,
     onAddChildItem: handleAddChildItem,
-    onDeleteItem: handleDeleteItem,
+    onDeleteItem: handleDeleteItemChecked,
     onRenameItem: handleSidebarRenameItem,
     isItemFavorite,
     onToggleFavorite: handleToggleFavorite,
@@ -1656,12 +1878,12 @@ const App: React.FC = () => {
         // Use ref to ensure we call the latest version
         handleFileOpenedRef.current(fileState)
       },
-      setRootItems: (items: (EnvironmentFolder | Folder | Request)[]) => {
+      setRootItems: (items: FolderItem[]) => {
         // Folders/env-folders go through `makeReactiveFolder`; root-level
         // requests go through `makeReactiveRequest` (no parent id) so
         // edits emit `REQUEST_UPDATED` like nested requests.
         const reactiveItems = items.map((item) =>
-          'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
+          isScenario(item) ? item : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
         )
         setRootItems(reactiveItems)
         // Also trigger indexing
@@ -1669,7 +1891,9 @@ const App: React.FC = () => {
           await searchIndexService.clearIndex()
           await searchIndexService.initialize()
           for (const rootItem of reactiveItems) {
-            if ('items' in rootItem) {
+            if (isScenario(rootItem)) {
+              await searchIndexService.indexScenarioTree(rootItem)
+            } else if ('items' in rootItem) {
               await searchIndexService.indexFolderTree(rootItem)
             } else {
               await searchIndexService.indexRootRequest(rootItem)
@@ -1961,6 +2185,7 @@ const App: React.FC = () => {
   } = useNavigation({
     rootItems,
     openFolderTab,
+    openScenarioEditorTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
     setSelectedItemId,
@@ -1968,6 +2193,24 @@ const App: React.FC = () => {
     setFocusedGroupId,
     getNearestEnvironmentsForBreadcrumbs
   })
+
+  // Reverse navigation request → scenarios: list the scenarios using a request,
+  // and open one (optionally centring the bound box). Computed live from the
+  // tree, so deletes update it with no stored back-reference.
+  const getScenariosUsingRequestCb = useCallback(
+    (requestId: string) => findScenariosUsingRequest(rootItems, requestId),
+    [rootItems]
+  )
+  // Reverse navigation scenario → callers: same shape, but for sub-scenarios
+  // referenced by a `runScenario` node from another scenario.
+  const getScenariosUsingScenarioCb = useCallback(
+    (scenarioId: string) => findScenariosUsingScenario(rootItems, scenarioId),
+    [rootItems]
+  )
+  const openScenarioFromRequest = useCallback((scenarioId: string, focusNodeId?: string) => {
+    handleItemClick(scenarioId)
+    if (focusNodeId) requestScenarioNodeFocus(scenarioId, focusNodeId)
+  }, [handleItemClick])
 
   // Initialize navigation history with restored active tab only
   const hasInitializedNavRef = useRef(false)
@@ -2078,7 +2321,7 @@ const App: React.FC = () => {
                   }}
                   onItemDrop={handleItemDrop}
                   onItemRename={handleSidebarItemRename}
-                  onDeleteRequest={(payload) => { handleDeleteItem(payload.item.id) }}
+                  onDeleteRequest={(payload) => { handleDeleteItemChecked(payload.item.id) }}
                   onEditingStart={(itemId) => { setSidebarEditingItemId(itemId) }}
                   onEditingEnd={() => { setSidebarEditingItemId(null) }}
                   onAddRequest={() => { setShowImportModal(true) }}
@@ -2124,6 +2367,12 @@ const App: React.FC = () => {
               onTagsChange={handleTagsChange}
               onTagColorChange={handleTagColorChange}
               onFolderChange={handleFolderChange}
+              onScenarioChange={handleScenarioChange}
+              onCreateScenarioRequest={handleCreateScenarioRequest}
+              onCreateScenarioChild={handleCreateScenarioChild}
+              resolveBoundItem={resolveBoundItem}
+              resolveRequestEnv={resolveRequestEnv}
+              resolveSyntheticPreview={resolveSyntheticPreview}
               onEnvironmentFolderChange={handleEnvironmentFolderChange}
               onSizesChange={handleSizesChange}
               emptyFallback={<EmptyBench rootItems={rootItems} projectUuid={projectUuid} onImport={() => { setShowImportModal(true) }} onOpenRequest={handleItemClick} />}
@@ -2131,6 +2380,9 @@ const App: React.FC = () => {
               onRebuildTab={rootItems.length > 0 ? handleRebuildTab : undefined}
               onStateRestored={handleStateRestored}
               getRequestById={getRequestByIdCb}
+              getScenariosUsingRequest={getScenariosUsingRequestCb}
+              getScenariosUsingScenario={getScenariosUsingScenarioCb}
+              onOpenScenarioFromRequest={openScenarioFromRequest}
               getFolderById={getFolderByIdCb}
               getEnvironmentFolderById={getEnvironmentFolderByIdCb}
               navigationEnabled={navigationEnabled}
@@ -2157,6 +2409,12 @@ const App: React.FC = () => {
             onItemIconChange={handleItemIconChange}
             onTagsChange={handleTagsChange}
             onFolderChange={handleFolderChange}
+            onScenarioChange={handleScenarioChange}
+            onCreateScenarioRequest={handleCreateScenarioRequest}
+            onCreateScenarioChild={handleCreateScenarioChild}
+            resolveBoundItem={resolveBoundItem}
+            resolveRequestEnv={resolveRequestEnv}
+            resolveSyntheticPreview={resolveSyntheticPreview}
             onEnvironmentFolderChange={handleEnvironmentFolderChange}
             onSizesChange={handleSizesChange}
             emptyFallback={
@@ -2191,6 +2449,9 @@ const App: React.FC = () => {
             onRebuildTab={handleRebuildTab}
             onStateRestored={handleStateRestored}
             getRequestById={(id) => findRequestById(rootItems, id)}
+            getScenariosUsingRequest={getScenariosUsingRequestCb}
+            getScenariosUsingScenario={getScenariosUsingScenarioCb}
+            onOpenScenarioFromRequest={openScenarioFromRequest}
             getFolderById={(id) => findFolderById(rootItems, id)}
             getEnvironmentFolderById={(id) => findEnvironmentFolderById(rootItems, id)}
             navigationEnabled={navigationEnabled}
@@ -2280,6 +2541,16 @@ const App: React.FC = () => {
         onCancel={cancelDelete}
       />
 
+      {/* Deletion of a request used by scenarios: move it in, or delete + strip boxes. */}
+      <RequestScenarioDeleteModal
+        isOpen={scenarioDelete.isOpen}
+        requestName={scenarioDelete.requestName}
+        usages={scenarioDelete.usages}
+        onMoveIntoScenario={(scenarioId) => { handleMoveRequestIntoScenario(scenarioDelete.requestId, scenarioId) }}
+        onDeleteAnyway={handleDeleteRequestAnyway}
+        onCancel={() => { setScenarioDelete((p) => ({ ...p, isOpen: false })) }}
+      />
+
           {/* Save Options Modal */}
           <SaveOptionsModal
             isOpen={showSaveOptionsModal}
@@ -2316,7 +2587,7 @@ const App: React.FC = () => {
               // return primitive values), so cast through `unknown`.
               const authReq = (apiUpdate?.authenticationRequestId
                 ? resolveAuthRequestCb(apiUpdate.authenticationRequestId)
-                : null) as RefreshContext['authenticationRequest'] | null
+                : null)
               // Pre-compute the natural keys of every request already
               // in the env folder so the modal can lock the matching
               // leaves in the fetched preview tree. Walks the folder's
@@ -2324,7 +2595,7 @@ const App: React.FC = () => {
               const existingLeafKeys = folder ? allLeafKeys(folder.items) : new Set<string>()
               const refreshContext: RefreshContext = {
                 sourceUrl,
-                ...(authReq ? { authenticationRequest: authReq } : {}),
+                ...(authReq ? { authenticationRequest: authReq as unknown as NonNullable<RefreshContext['authenticationRequest']> } : {}),
                 ...(apiUpdate?.sourceHeaders ? { sourceHeaders: apiUpdate.sourceHeaders } : {}),
                 targetFolderId: targetId,
                 ...(existingLeafKeys.size > 0 ? { existingLeafKeys } : {}),

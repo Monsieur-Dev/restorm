@@ -169,7 +169,8 @@
         "soap": "Petición SOAP",
         "websocket": "Petición WebSocket",
         "odata": "Petición OData",
-        "auth": "Petición HTTP de autenticación"
+        "auth": "Petición HTTP de autenticación",
+        "scenario": "Escenario"
       }
     },
     "deleteConfirm": {
@@ -178,6 +179,14 @@
       "itemMessage": "¿Seguro que quieres eliminar \"{{name}}\"?",
       "confirm": "Eliminar",
       "cancel": "Cancelar"
+    },
+    "scenarioDelete": {
+      "title": "Eliminar una petición usada por escenarios",
+      "message": "«{{name}}» se usa en los siguientes escenarios. ¿Qué desea hacer?",
+      "belongsTag": "pertenece a este escenario",
+      "moveInto": "Mover a este escenario",
+      "affectsNote": "Eliminar esta petición también la quitará de estos escenarios.",
+      "deleteAnyway": "Eliminar de todos modos"
     }
   },
   "environment": {
@@ -302,7 +311,9 @@
       "dateTime": "Fecha/hora",
       "color": "Color",
       "expression": "Expresión",
-      "boolean": "Booleano"
+      "boolean": "Booleano",
+      "variables": "Variables",
+      "environment": "Entorno"
     },
     "apiEnums": "Tipos definidos en la API",
     "customLists": "Tipos personalizados",
@@ -355,11 +366,14 @@
       "folder": "Carpetas",
       "environment": "Entornos",
       "settings": "Ajustes",
-      "tag": "Etiquetas"
+      "tag": "Etiquetas",
+      "scenario": "Escenarios"
     },
     "tooltip": {
       "noDetails": "Sin detalles disponibles",
-      "noContent": "Sin documentación ni notas"
+      "noContent": "Sin documentación ni notas",
+      "noScenario": "Escenario no disponible",
+      "scenarioKind": "escenario"
     }
   },
   "httpStatus": {
@@ -493,7 +507,8 @@
   },
   "common": {
     "cancel": "Cancelar",
-    "save": "Guardar"
+    "save": "Guardar",
+    "remove": "Eliminar"
   },
   "helpers": {
     "categories": {
@@ -743,6 +758,202 @@
       "previousMatch": "Coincidencia anterior",
       "nextMatch": "Coincidencia siguiente",
       "close": "Cerrar"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "empty": "Empty scenario — right-click the canvas to add a node"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del"
+      },
+      "expand": "Expandir",
+      "collapse": "Contraer"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Añadir caso",
+      "removeCase": "Eliminar caso",
+      "case": "caso"
+    },
+    "forEach": {
+      "items": "elementos",
+      "each": "cada",
+      "done": "listo",
+      "parallelism": "paralelismo"
+    },
+    "aggregate": {
+      "items": "elementos",
+      "result": "resultado",
+      "field": "campo",
+      "separator": "separador",
+      "op": {
+        "count": "Recuento",
+        "sum": "Suma",
+        "min": "Mín",
+        "max": "Máx",
+        "average": "Promedio",
+        "join": "Unir"
+      }
+    },
+    "filter": {
+      "items": "elementos",
+      "kept": "conservados",
+      "keepWhere": "mantener si"
+    },
+    "wait": {
+      "then": "luego",
+      "duration": "duración"
+    },
+    "waitUntil": {
+      "until": "hasta",
+      "then": "luego"
+    },
+    "arithmetic": {
+      "result": "resultado"
+    },
+    "nodes": {
+      "arithmetic": "Aritmética",
+      "httpRequest": "Solicitud HTTP",
+      "runScenario": "Ejecutar escenario",
+      "wait": "Esperar",
+      "waitUntil": "Esperar hasta",
+      "now": "Ahora",
+      "comparator": "Comparador",
+      "setVariable": "Definir variable",
+      "getVariable": "Obtener variable"
+    },
+    "comparator": {
+      "result": "resultado"
+    },
+    "boolean": {
+      "result": "resultado"
+    },
+    "map": {
+      "items": "elementos",
+      "mapped": "transformados"
+    },
+    "log": {
+      "message": "mensaje",
+      "data": "datos"
+    },
+    "assert": {
+      "message": "mensaje"
+    },
+    "editRequest": "Editar la solicitud",
+    "editScenario": "Editar el escenario",
+    "object": {
+      "addProperty": "Añadir propiedad",
+      "removeProperty": "Eliminar propiedad",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "input": {
+      "required": "Obligatorio",
+      "name": "Name",
+      "defaultType": "Default / type"
+    },
+    "runScenario": {
+      "orphanInput": "No hay ningún parámetro \"{{name}}\" en el subescenario",
+      "orphanOutput": "No hay ninguna salida \"{{name}}\" en el subescenario",
+      "then": "luego"
+    },
+    "validation": {
+      "duplicateName": "El nombre «{{name}}» ya lo usa otra acción.",
+      "panelTitle": "{{count}} acción/es con error",
+      "focusBox": "Ir a esta acción",
+      "showErrors": "Ver errores",
+      "input": {
+        "missingName": "Este parámetro de entrada debe tener un nombre."
+      },
+      "dataLink": {
+        "emptyPath": "El enlace de datos entrante necesita una ruta (JSON path).",
+        "badPath": "La ruta JSON «{{path}}» del enlace de datos es inválida."
+      },
+      "output": {
+        "missingName": "Esta salida debe tener un nombre.",
+        "duplicateName": "El nombre «{{name}}» ya lo usa otra salida.",
+        "valueRequired": "La entrada «value» debe estar conectada a una fuente."
+      },
+      "getVariable": {
+        "noSelection": "Debe seleccionarse una variable.",
+        "unknown": "La variable «{{name}}» no existe en el escenario."
+      },
+      "setVariable": {
+        "missingName": "La variable a definir debe tener un nombre."
+      },
+      "object": {
+        "propMissingName": "Cada propiedad debe tener un nombre.",
+        "propDuplicate": "El nombre de propiedad «{{name}}» está duplicado."
+      },
+      "arithmetic": {
+        "divisionByZero": "La división por cero es imposible."
+      },
+      "switch": {
+        "caseDuplicate": "El valor del caso «{{value}}» está duplicado."
+      },
+      "transform": {
+        "emptyTemplate": "La plantilla no debe estar vacía.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "La petición vinculada ya no existe."
+      },
+      "runScenario": {
+        "missing": "El escenario vinculado ya no existe.",
+        "requiredInput": "La entrada obligatoria «{{name}}» debe conectarse a una fuente."
+      }
+    },
+    "usage": {
+      "button": "Escenarios que usan esta petición",
+      "title": "Esta petición se usa en los escenarios:"
+    },
+    "inspector": {
+      "run": "Ejecutar",
+      "debug": "Depurar",
+      "step": "Paso a paso",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "Pausa",
+      "noRunsHint": "Sin ejecución reciente para esta solicitud — ejecútala desde aquí para poblar la vista previa del escenario.",
+      "syntheticInfo": "Datos de ejemplo generados a partir de la documentación de esta solicitud.",
+      "syntheticRunHint": "Datos de ejemplo: ejecute la solicitud para reemplazarlos por un resultado real."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

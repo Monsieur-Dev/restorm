@@ -471,7 +471,7 @@ Returns every active `BrowserWindow` with its `id` (= `webContents.id`), `title`
 }
 ```
 
-Pair with the `windowId` parameter that every renderer-facing tool now accepts (`screenshot`, `refresh`, `dom-query`, `console-logs`, `dispatch-event`, `type-text`, `evaluate`, `wait-for`, `keyboard-shortcut`, `devtools`, `window-info`, `storage`, `scroll-into-view`, `inject-css`, `get-computed-style`, `drag-drop`) to target a specific window. When `windowId` is omitted those tools fall back to the focused / first-visible window.
+Pair with the `windowId` parameter that every renderer-facing tool now accepts (`screenshot`, `refresh`, `dom-query`, `console-logs`, `dispatch-event`, `type-text`, `evaluate`, `wait-for`, `keyboard-shortcut`, `devtools`, `window-info`, `storage`, `scroll-into-view`, `inject-css`, `get-computed-style`, `drag-drop`, `mouse-input`) to target a specific window. When `windowId` is omitted those tools fall back to the focused / first-visible window.
 
 ### `drag-drop`
 
@@ -499,6 +499,24 @@ dragstart (source)
 Why the walk + sustained hovers matter: many apps gate the drop indicator on the drag actually moving across nested zones (not just teleporting to the target), and on the cursor sitting still long enough for a debounced overlay to materialize. The default `steps: 10` + `sustainedHovers: 5` is enough to drive restorm's editor-group split overlay; tune up if your app needs more.
 
 Use to reorder workbench tabs, split editor groups (drop near a group edge), reorder tree nodes — anything wired through HTML5 drag-and-drop. Verified against editor-group split.
+
+### `mouse-input`
+
+Injects OS-level, **trusted** (`isTrusted=true`) mouse input via `webContents.sendInputEvent` — the mouse counterpart of `keyboard-shortcut`. Use it for interactions that ignore synthetic DOM events (which `dispatch-event` and `drag-drop` produce): pointer-capture drags (React Flow link/connection drags), hover-opened submenus (the ECUI `ContextMenu`, native-style menus), and Monaco wheel scrolling. The point comes from a `selector` (its rect centre) or explicit `x`/`y` (CSS px, viewport-relative).
+
+```jsonc
+{
+  "gesture": "drag",          // 'move' (hover) | 'click' | 'drag' | 'wheel'
+  "selector": ".react-flow__handle.source", // OR explicit "x"/"y"
+  "toSelector": ".react-flow__pane",         // drag target — OR "toX"/"toY"
+  "steps": 16,                // drag only, 1..60, default 16 (frame-paced moves)
+  "button": "left",           // 'left' (default) | 'middle' | 'right'
+  "deltaY": -120,             // wheel only (negative = scroll up)
+  "windowId": 1               // optional
+}
+```
+
+Why trusted input: React Flow's connection drag uses pointer capture and the ECUI submenu opens on a real hover — both ignore `isTrusted=false` synthetic events. `sendInputEvent` produces real pointer/mouse/wheel events Chromium dispatches like genuine user input, so these targets respond. Prefer `mouse-input` over `dispatch-event` / `drag-drop` whenever a target ignores synthetic events.
 
 ### `get-computed-style`
 

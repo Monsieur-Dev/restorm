@@ -15,6 +15,13 @@ import { renderSearchTooltipContent } from './renderSearchTooltipContent'
 import { Badge } from '../../common/Badge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 
+/** Categories whose search results render with the single-line badge
+ * layout (method/protocol pill + title + breadcrumb on one row). The
+ * default in ECUI is `['request']`; restorm also wants scenarios in
+ * there so the SCENARIO badge sits next to the title instead of an
+ * icon + two-line stacked breadcrumb. */
+const SEARCH_BADGED_CATEGORIES = ['request', 'scenario']
+
 export interface RestormTitlebarProps {
   fileName: string | null
   isDirty: boolean
@@ -119,6 +126,7 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
       onSearchResultClick={onSearchResultClick}
       renderSearchTooltipContent={renderSearchTooltipContent}
       renderSearchBadge={(method) => <Badge type={mapToBadgeType(method)} />}
+      searchBadgedCategories={SEARCH_BADGED_CATEGORIES}
       // The search popover hosts a draggable model graph; a fast pan
       // can push the cursor past the popover bounds for a frame
       // before pointer-lock pulls it back, which would dismiss it

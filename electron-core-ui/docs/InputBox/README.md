@@ -33,6 +33,7 @@ export interface InputBoxProps {
   'data-testid'?: string
   value?: string
   onChange?: (value: string) => void
+  /** Debounce (ms) before emitting onChange. Default 300; 0 opts out. */
   changeDebounceMs?: number
   onBlur?: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void
   onFocus?: () => void
@@ -105,6 +106,7 @@ const ValidatedNumber: React.FC = () => {
 ## Notes for AI Usage
 
 - Treat `InputBox` as a **controlled component**: always pass `value` and `onChange` from your own state instead of using it uncontrolled; this makes generated code easier to reason about and to test.
+- `onChange` is **debounced by default (300 ms)**. The field keeps its own draft so typing is always instant; only the parent callback (your persistence / side effect) is delayed, and a pending change is flushed on blur and on unmount. Do **not** add your own debounce around `onChange` — pass `changeDebounceMs={0}` only when you genuinely need every keystroke (e.g. an address bar that commits on Enter, or a live filter).
 - Keep validation logic in small, pure `IInputValidator` functions; avoid inlining complex conditions in JSX so that agents can reuse, replace or test them independently.
 - Use `ariaLabel` and `id` consistently so that form fields can be referenced by name in higher-level reasoning (e.g. "set the project name input to…" maps to a specific `InputBox`).
 - Prefer simple `type` values (`'text'`, `'number'`) and avoid mixing multiple concerns (e.g. format + validation + parsing) inside a single `onChange` handler; instead, chain small helpers.

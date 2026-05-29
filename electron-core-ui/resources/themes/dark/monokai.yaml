@@ -3,6 +3,9 @@ name: Monokai
 type: dark
 
 colors:
+  scenarioNode.background: "#2f302a"
+  scenarioNode.headerBackground: "#3b3c33"
+  scenarioNode.headerBackgroundSelected: "#5b5a44"
   dropdown.background: "#414339"
   list.activeSelectionBackground: "#75715E"
   quickInputList.focusBackground: "#414339"

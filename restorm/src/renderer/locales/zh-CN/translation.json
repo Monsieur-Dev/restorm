@@ -168,7 +168,8 @@
         "soap": "SOAP 请求",
         "websocket": "WebSocket 请求",
         "odata": "OData 请求",
-        "auth": "HTTP 身份验证请求"
+        "auth": "HTTP 身份验证请求",
+        "scenario": "场景"
       }
     },
     "deleteConfirm": {
@@ -177,6 +178,14 @@
       "itemMessage": "确定要删除 \"{{name}}\" 吗？",
       "confirm": "删除",
       "cancel": "取消"
+    },
+    "scenarioDelete": {
+      "title": "删除被场景使用的请求",
+      "message": "「{{name}}」被用于以下场景。您想怎么做?",
+      "belongsTag": "属于此场景",
+      "moveInto": "移动到此场景",
+      "affectsNote": "删除此请求也会将其从这些场景中移除。",
+      "deleteAnyway": "仍然删除"
     }
   },
   "environment": {
@@ -301,7 +310,9 @@
       "dateTime": "日期时间",
       "color": "颜色",
       "expression": "表达式",
-      "boolean": "布尔值"
+      "boolean": "布尔值",
+      "variables": "变量",
+      "environment": "环境"
     },
     "apiEnums": "API 定义的类型",
     "customLists": "自定义类型",
@@ -354,11 +365,14 @@
       "folder": "文件夹",
       "environment": "环境",
       "settings": "设置",
-      "tag": "标签"
+      "tag": "标签",
+      "scenario": "场景"
     },
     "tooltip": {
       "noDetails": "无可用详情",
-      "noContent": "无文档或笔记"
+      "noContent": "无文档或笔记",
+      "noScenario": "场景不可用",
+      "scenarioKind": "场景"
     }
   },
   "httpStatus": {
@@ -492,7 +506,8 @@
   },
   "common": {
     "cancel": "取消",
-    "save": "保存"
+    "save": "保存",
+    "remove": "移除"
   },
   "helpers": {
     "categories": {
@@ -742,6 +757,202 @@
       "previousMatch": "上一个匹配",
       "nextMatch": "下一个匹配",
       "close": "关闭"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "empty": "Empty scenario — right-click the canvas to add a node"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del"
+      },
+      "expand": "展开",
+      "collapse": "折叠"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "添加分支",
+      "removeCase": "移除分支",
+      "case": "案例"
+    },
+    "forEach": {
+      "items": "项",
+      "each": "每项",
+      "done": "完成",
+      "parallelism": "并行度"
+    },
+    "aggregate": {
+      "items": "项",
+      "result": "结果",
+      "field": "字段",
+      "separator": "分隔符",
+      "op": {
+        "count": "计数",
+        "sum": "求和",
+        "min": "最小值",
+        "max": "最大值",
+        "average": "平均值",
+        "join": "连接"
+      }
+    },
+    "filter": {
+      "items": "项",
+      "kept": "保留",
+      "keepWhere": "保留条件"
+    },
+    "wait": {
+      "then": "然后",
+      "duration": "时长"
+    },
+    "waitUntil": {
+      "until": "直到",
+      "then": "然后"
+    },
+    "arithmetic": {
+      "result": "结果"
+    },
+    "nodes": {
+      "arithmetic": "算术",
+      "httpRequest": "HTTP 请求",
+      "runScenario": "运行场景",
+      "wait": "等待",
+      "waitUntil": "等待至",
+      "now": "现在",
+      "comparator": "比较器",
+      "setVariable": "设置变量",
+      "getVariable": "获取变量"
+    },
+    "comparator": {
+      "result": "结果"
+    },
+    "boolean": {
+      "result": "结果"
+    },
+    "map": {
+      "items": "项",
+      "mapped": "已映射"
+    },
+    "log": {
+      "message": "消息",
+      "data": "数据"
+    },
+    "assert": {
+      "message": "消息"
+    },
+    "editRequest": "编辑请求",
+    "editScenario": "编辑场景",
+    "object": {
+      "addProperty": "添加属性",
+      "removeProperty": "删除属性",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "input": {
+      "required": "必填",
+      "name": "Name",
+      "defaultType": "Default / type"
+    },
+    "runScenario": {
+      "orphanInput": "子场景中没有匹配的参数“{{name}}”",
+      "orphanOutput": "子场景中没有匹配的输出“{{name}}”",
+      "then": "然后"
+    },
+    "validation": {
+      "duplicateName": "名称“{{name}}”已被另一个操作使用。",
+      "panelTitle": "{{count}} 个操作错误",
+      "focusBox": "定位到此操作",
+      "showErrors": "显示错误",
+      "input": {
+        "missingName": "此输入参数必须有名称。"
+      },
+      "dataLink": {
+        "emptyPath": "传入的数据连接需要一个 JSON 路径。",
+        "badPath": "数据连接的 JSON 路径“{{path}}”格式无效。"
+      },
+      "output": {
+        "missingName": "此输出必须有名称。",
+        "duplicateName": "名称“{{name}}”已被另一个输出使用。",
+        "valueRequired": "“value”输入必须连接到一个来源。"
+      },
+      "getVariable": {
+        "noSelection": "必须选择一个变量。",
+        "unknown": "变量“{{name}}”在场景中不存在。"
+      },
+      "setVariable": {
+        "missingName": "要设置的变量必须有名称。"
+      },
+      "object": {
+        "propMissingName": "每个属性都必须有名称。",
+        "propDuplicate": "属性名“{{name}}”重复了。"
+      },
+      "arithmetic": {
+        "divisionByZero": "不能除以零。"
+      },
+      "switch": {
+        "caseDuplicate": "分支值「{{value}}」重复。"
+      },
+      "transform": {
+        "emptyTemplate": "模板不能为空。",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "关联的请求已不存在。"
+      },
+      "runScenario": {
+        "missing": "关联的场景已不存在。",
+        "requiredInput": "必填输入「{{name}}」必须连接到数据源。"
+      }
+    },
+    "usage": {
+      "button": "使用此请求的场景",
+      "title": "此请求被用于以下场景:"
+    },
+    "inspector": {
+      "run": "运行",
+      "debug": "调试",
+      "step": "单步",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "暂停",
+      "noRunsHint": "此请求暂无最近一次运行结果 — 从此处运行以填充场景预览。",
+      "syntheticInfo": "从此请求的文档生成的示例数据。",
+      "syntheticRunHint": "示例数据 — 执行请求以替换为真实结果。"
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

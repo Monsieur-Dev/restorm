@@ -3,6 +3,9 @@ name: Kimbie Dark
 type: dark
 
 colors:
+  scenarioNode.background: "#2a2013"
+  scenarioNode.headerBackground: "#392c1a"
+  scenarioNode.headerBackgroundSelected: "#6e4a1f"
   input.background: "#51412c"
   dropdown.background: "#51412c"
   editor.background: "#221a0f"

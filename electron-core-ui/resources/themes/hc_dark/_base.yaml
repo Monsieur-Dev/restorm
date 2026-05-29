@@ -184,6 +184,19 @@ colors:
     value: "#f38518"
     description: Focus border color (high contrast orange)
 
+  # Scenario graph nodes (scenario editor)
+  - id: scenarioNode.background
+    value: "#0d0d0d"
+    description: Scenario node body background
+
+  - id: scenarioNode.headerBackground
+    value: "#1c1c1c"
+    description: Scenario node header background
+
+  - id: scenarioNode.headerBackgroundSelected
+    value: "#04518a"
+    description: Scenario node header background when selected
+
   # Scrollbar colors
   - id: scrollbarSlider.background
     value: "#79797966"

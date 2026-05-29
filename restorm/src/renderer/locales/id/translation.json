@@ -168,7 +168,8 @@
         "soap": "Permintaan SOAP",
         "websocket": "Permintaan WebSocket",
         "odata": "Permintaan OData",
-        "auth": "Permintaan autentikasi HTTP"
+        "auth": "Permintaan autentikasi HTTP",
+        "scenario": "Skenario"
       }
     },
     "deleteConfirm": {
@@ -177,6 +178,14 @@
       "itemMessage": "Apakah Anda yakin ingin menghapus \"{{name}}\"?",
       "confirm": "Hapus",
       "cancel": "Batal"
+    },
+    "scenarioDelete": {
+      "title": "Hapus permintaan yang dipakai skenario",
+      "message": "\"{{name}}\" digunakan dalam skenario berikut. Apa yang ingin Anda lakukan?",
+      "belongsTag": "milik skenario ini",
+      "moveInto": "Pindahkan ke skenario ini",
+      "affectsNote": "Menghapus permintaan ini juga akan menghapusnya dari skenario-skenario ini.",
+      "deleteAnyway": "Tetap hapus"
     }
   },
   "environment": {
@@ -301,7 +310,9 @@
       "dateTime": "Tanggal/waktu",
       "color": "Warna",
       "expression": "Ekspresi",
-      "boolean": "Boolean"
+      "boolean": "Boolean",
+      "variables": "Variabel",
+      "environment": "Lingkungan"
     },
     "apiEnums": "Tipe yang didefinisikan API",
     "customLists": "Tipe khusus",
@@ -354,11 +365,14 @@
       "folder": "Folder",
       "environment": "Lingkungan",
       "settings": "Pengaturan",
-      "tag": "Tag"
+      "tag": "Tag",
+      "scenario": "Skenario"
     },
     "tooltip": {
       "noDetails": "Tidak ada detail yang tersedia",
-      "noContent": "Tidak ada dokumentasi atau catatan"
+      "noContent": "Tidak ada dokumentasi atau catatan",
+      "noScenario": "Skenario tidak tersedia",
+      "scenarioKind": "skenario"
     }
   },
   "httpStatus": {
@@ -492,7 +506,8 @@
   },
   "common": {
     "cancel": "Batal",
-    "save": "Simpan"
+    "save": "Simpan",
+    "remove": "Hapus"
   },
   "helpers": {
     "categories": {
@@ -742,6 +757,202 @@
       "previousMatch": "Kecocokan sebelumnya",
       "nextMatch": "Kecocokan berikutnya",
       "close": "Tutup"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "empty": "Empty scenario — right-click the canvas to add a node"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del"
+      },
+      "expand": "Bentangkan",
+      "collapse": "Ciutkan"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Tambah kasus",
+      "removeCase": "Hapus kasus",
+      "case": "kasus"
+    },
+    "forEach": {
+      "items": "item",
+      "each": "tiap",
+      "done": "selesai",
+      "parallelism": "paralelisme"
+    },
+    "aggregate": {
+      "items": "item",
+      "result": "hasil",
+      "field": "bidang",
+      "separator": "pemisah",
+      "op": {
+        "count": "Jumlah",
+        "sum": "Total",
+        "min": "Min",
+        "max": "Maks",
+        "average": "Rata-rata",
+        "join": "Gabung"
+      }
+    },
+    "filter": {
+      "items": "item",
+      "kept": "disimpan",
+      "keepWhere": "simpan jika"
+    },
+    "wait": {
+      "then": "lalu",
+      "duration": "durasi"
+    },
+    "waitUntil": {
+      "until": "hingga",
+      "then": "lalu"
+    },
+    "arithmetic": {
+      "result": "hasil"
+    },
+    "nodes": {
+      "arithmetic": "Aritmatika",
+      "httpRequest": "Permintaan HTTP",
+      "runScenario": "Jalankan skenario",
+      "wait": "Tunggu",
+      "waitUntil": "Tunggu hingga",
+      "now": "Sekarang",
+      "comparator": "Pembanding",
+      "setVariable": "Atur variabel",
+      "getVariable": "Ambil variabel"
+    },
+    "comparator": {
+      "result": "hasil"
+    },
+    "boolean": {
+      "result": "hasil"
+    },
+    "map": {
+      "items": "item",
+      "mapped": "hasil map"
+    },
+    "log": {
+      "message": "pesan",
+      "data": "data"
+    },
+    "assert": {
+      "message": "pesan"
+    },
+    "editRequest": "Edit permintaan",
+    "editScenario": "Edit skenario",
+    "object": {
+      "addProperty": "Tambah properti",
+      "removeProperty": "Hapus properti",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "input": {
+      "required": "Wajib",
+      "name": "Name",
+      "defaultType": "Default / type"
+    },
+    "runScenario": {
+      "orphanInput": "Tidak ada parameter \"{{name}}\" yang cocok di sub-skenario",
+      "orphanOutput": "Tidak ada output \"{{name}}\" yang cocok di sub-skenario",
+      "then": "lalu"
+    },
+    "validation": {
+      "duplicateName": "Nama \"{{name}}\" sudah dipakai oleh aksi lain.",
+      "panelTitle": "{{count}} kesalahan aksi",
+      "focusBox": "Fokus ke aksi ini",
+      "showErrors": "Tampilkan kesalahan",
+      "input": {
+        "missingName": "Parameter masukan ini harus memiliki nama."
+      },
+      "dataLink": {
+        "emptyPath": "Tautan data masuk memerlukan jalur (JSON path).",
+        "badPath": "Jalur JSON \"{{path}}\" tautan data tidak valid."
+      },
+      "output": {
+        "missingName": "Keluaran ini harus memiliki nama.",
+        "duplicateName": "Nama \"{{name}}\" sudah dipakai oleh keluaran lain.",
+        "valueRequired": "Masukan \"value\" harus terhubung ke sumber."
+      },
+      "getVariable": {
+        "noSelection": "Variabel harus dipilih.",
+        "unknown": "Variabel \"{{name}}\" tidak ada dalam skenario."
+      },
+      "setVariable": {
+        "missingName": "Variabel yang akan diatur harus memiliki nama."
+      },
+      "object": {
+        "propMissingName": "Setiap properti harus memiliki nama.",
+        "propDuplicate": "Nama properti \"{{name}}\" terduplikasi."
+      },
+      "arithmetic": {
+        "divisionByZero": "Pembagian dengan nol tidak mungkin."
+      },
+      "switch": {
+        "caseDuplicate": "Nilai kasus \"{{value}}\" terduplikasi."
+      },
+      "transform": {
+        "emptyTemplate": "Templat tidak boleh kosong.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "Permintaan yang ditautkan tidak ada lagi."
+      },
+      "runScenario": {
+        "missing": "Skenario yang ditautkan tidak ada lagi.",
+        "requiredInput": "Input wajib \"{{name}}\" harus terhubung ke sumber."
+      }
+    },
+    "usage": {
+      "button": "Skenario yang menggunakan permintaan ini",
+      "title": "Permintaan ini digunakan dalam skenario:"
+    },
+    "inspector": {
+      "run": "Jalankan",
+      "debug": "Debug",
+      "step": "Langkah demi langkah",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "Jeda",
+      "noRunsHint": "Belum ada eksekusi terbaru untuk permintaan ini — jalankan dari sini untuk mengisi pratinjau skenario.",
+      "syntheticInfo": "Contoh data yang dihasilkan dari dokumentasi permintaan ini.",
+      "syntheticRunHint": "Contoh data — jalankan permintaan untuk menggantinya dengan hasil nyata."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

@@ -169,7 +169,8 @@
         "soap": "Requête SOAP",
         "websocket": "Requête WebSocket",
         "odata": "Requête OData",
-        "auth": "Requête HTTP d'authentification"
+        "auth": "Requête HTTP d'authentification",
+        "scenario": "Scénario"
       }
     },
     "deleteConfirm": {
@@ -178,6 +179,14 @@
       "itemMessage": "Êtes-vous sûr de vouloir supprimer \"{{name}}\" ?",
       "confirm": "Supprimer",
       "cancel": "Annuler"
+    },
+    "scenarioDelete": {
+      "title": "Supprimer une requête utilisée par des scénarios",
+      "message": "« {{name}} » est utilisée dans les scénarios suivants. Que souhaitez-vous faire ?",
+      "belongsTag": "appartient à ce scénario",
+      "moveInto": "Déplacer dans ce scénario",
+      "affectsNote": "Supprimer cette requête la retirera aussi de ces scénarios.",
+      "deleteAnyway": "Supprimer quand même"
     }
   },
   "environment": {
@@ -302,7 +311,9 @@
       "dateTime": "Date/heure",
       "color": "Couleur",
       "expression": "Expression",
-      "boolean": "Booléen"
+      "boolean": "Booléen",
+      "variables": "Variables",
+      "environment": "Environnement"
     },
     "apiEnums": "Types définis dans l'API",
     "customLists": "Types personnalisés",
@@ -355,11 +366,14 @@
       "folder": "Dossiers",
       "environment": "Environnements",
       "settings": "Paramètres",
-      "tag": "Tags"
+      "tag": "Tags",
+      "scenario": "Scénarios"
     },
     "tooltip": {
       "noDetails": "Aucun détail disponible",
-      "noContent": "Aucune documentation ni notes"
+      "noContent": "Aucune documentation ni notes",
+      "noScenario": "Scénario indisponible",
+      "scenarioKind": "scénario"
     }
   },
   "httpStatus": {
@@ -493,7 +507,8 @@
   },
   "common": {
     "cancel": "Annuler",
-    "save": "Enregistrer"
+    "save": "Enregistrer",
+    "remove": "Supprimer"
   },
   "helpers": {
     "categories": {
@@ -743,6 +758,202 @@
       "previousMatch": "Correspondance précédente",
       "nextMatch": "Correspondance suivante",
       "close": "Fermer"
+    }
+  },
+  "scenario": {
+    "tab": {
+      "graph": "Scénario",
+      "notes": "Notes"
+    },
+    "editor": {
+      "empty": "Scénario vide — clic droit sur le canevas pour ajouter un nœud"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Changer la couleur",
+        "resetColor": "Réinitialiser la couleur",
+        "addNote": "Ajouter/modifier une note",
+        "duplicate": "Dupliquer",
+        "delete": "Supprimer",
+        "deleteShortcut": "Suppr"
+      },
+      "expand": "Développer",
+      "collapse": "Réduire"
+    },
+    "pathSelector": {
+      "placeholder": "Chemin JSON",
+      "ariaLabel": "Sélecteur de chemin JSON",
+      "pick": "Choisir depuis le résultat",
+      "loading": "Chargement…",
+      "noResult": "Lancez l'action source pour choisir une propriété de son résultat."
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Changer la couleur",
+        "resetColor": "Réinitialiser la couleur",
+        "delete": "Supprimer"
+      }
+    },
+    "invalid": "{{count}} entrée(s) requise(s) non câblée(s) — scénario non exécutable",
+    "switch": {
+      "addCase": "Ajouter un cas",
+      "removeCase": "Supprimer le cas",
+      "case": "cas"
+    },
+    "forEach": {
+      "items": "éléments",
+      "each": "chaque",
+      "done": "terminé",
+      "parallelism": "parallélisme"
+    },
+    "aggregate": {
+      "items": "éléments",
+      "result": "résultat",
+      "field": "champ",
+      "separator": "séparateur",
+      "op": {
+        "count": "Nombre",
+        "sum": "Somme",
+        "min": "Min",
+        "max": "Max",
+        "average": "Moyenne",
+        "join": "Joindre"
+      }
+    },
+    "filter": {
+      "items": "éléments",
+      "kept": "gardés",
+      "keepWhere": "garder si"
+    },
+    "wait": {
+      "then": "ensuite",
+      "duration": "durée"
+    },
+    "waitUntil": {
+      "until": "jusqu’à",
+      "then": "ensuite"
+    },
+    "arithmetic": {
+      "result": "résultat"
+    },
+    "nodes": {
+      "arithmetic": "Arithmétique",
+      "httpRequest": "Requête HTTP",
+      "runScenario": "Exécuter le scénario",
+      "wait": "Attendre",
+      "waitUntil": "Attendre jusqu’à",
+      "now": "Maintenant",
+      "comparator": "Comparateur",
+      "setVariable": "Définir variable",
+      "getVariable": "Lire variable"
+    },
+    "comparator": {
+      "result": "résultat"
+    },
+    "boolean": {
+      "result": "résultat"
+    },
+    "map": {
+      "items": "éléments",
+      "mapped": "transformés"
+    },
+    "log": {
+      "message": "message",
+      "data": "données"
+    },
+    "assert": {
+      "message": "message"
+    },
+    "editRequest": "Éditer la requête",
+    "editScenario": "Éditer le scénario",
+    "object": {
+      "addProperty": "Ajouter une propriété",
+      "removeProperty": "Supprimer la propriété",
+      "propertyName": "Nom de la propriété",
+      "propertyValue": "valeur"
+    },
+    "input": {
+      "required": "Requis",
+      "name": "Nom",
+      "defaultType": "Défaut / type"
+    },
+    "runScenario": {
+      "orphanInput": "Aucun paramètre « {{name}} » correspondant dans le sous-scénario",
+      "orphanOutput": "Aucune sortie « {{name}} » correspondante dans le sous-scénario",
+      "then": "ensuite"
+    },
+    "validation": {
+      "duplicateName": "Le nom « {{name}} » est déjà utilisé par une autre action.",
+      "panelTitle": "{{count}} action(s) en erreur",
+      "focusBox": "Aller à cette action",
+      "showErrors": "Voir les erreurs",
+      "input": {
+        "missingName": "Ce paramètre d'entrée doit avoir un nom."
+      },
+      "dataLink": {
+        "emptyPath": "Le lien de données entrant nécessite un chemin (JSON path).",
+        "badPath": "Le chemin (JSON path) « {{path}} » du lien de données est invalide."
+      },
+      "output": {
+        "missingName": "Cette sortie doit avoir un nom.",
+        "duplicateName": "Le nom « {{name}} » est déjà utilisé par une autre sortie.",
+        "valueRequired": "L'entrée « value » doit être reliée à une source."
+      },
+      "getVariable": {
+        "noSelection": "Une variable doit être sélectionnée.",
+        "unknown": "La variable « {{name}} » n'existe pas dans le scénario."
+      },
+      "setVariable": {
+        "missingName": "La variable à définir doit avoir un nom."
+      },
+      "object": {
+        "propMissingName": "Chaque propriété doit avoir un nom.",
+        "propDuplicate": "Le nom de propriété « {{name}} » est en double."
+      },
+      "arithmetic": {
+        "divisionByZero": "La division par zéro est impossible."
+      },
+      "switch": {
+        "caseDuplicate": "La valeur de cas « {{value}} » est en double."
+      },
+      "transform": {
+        "emptyTemplate": "Le modèle ne doit pas être vide.",
+        "valueRequired": "Le champ \"value\" doit être connecté quand le template référence {{…}}."
+      },
+      "request": {
+        "missing": "La requête liée n'existe plus."
+      },
+      "runScenario": {
+        "missing": "Le scénario lié n'existe plus.",
+        "requiredInput": "L'entrée requise « {{name}} » doit être branchée à une source."
+      }
+    },
+    "usage": {
+      "button": "Scénarios utilisant cette requête",
+      "title": "Cette requête est utilisée dans les scénarios :"
+    },
+    "inspector": {
+      "run": "Exécuter",
+      "debug": "Déboguer",
+      "step": "Pas à pas",
+      "previewInfo": "Données d'exemple, basées sur les précédents résultats des requêtes.",
+      "pause": "Pause",
+      "noRunsHint": "Pas d'exécution récente pour cette requête — exécutez-la d'ici pour alimenter l'aperçu du scénario.",
+      "syntheticInfo": "Données d'exemple générées à partir de la documentation de cette requête.",
+      "syntheticRunHint": "Données d'exemple — exécutez la requête pour les remplacer par un vrai résultat."
+    },
+    "now": {
+      "timezone": "Fuseau horaire",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "Chaîne"
+      }
+    },
+    "callers": {
+      "button": "Scénarios qui appellent ce scénario",
+      "title": "Ce scénario est appelé par :"
     }
   }
 }

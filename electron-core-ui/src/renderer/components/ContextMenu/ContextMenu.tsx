@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { MenuItem, MenuItemSeparator } from '../MenuBar'
 import { registerOpenContextMenu } from './openContextMenuRegistry'
 
@@ -28,6 +28,12 @@ export interface ContextMenuItem {
   onClick?: () => void
   /** Optional submenu items */
   items?: ContextMenuItem[]
+  /**
+   * Optional test id applied to this item's row (and, via `MenuItem` /
+   * `MenuItemSeparator`, to its derived sub-elements — `${testId}-label`,
+   * `${testId}-submenu`, `${testId}-separator`, …).
+   */
+  'data-testid'?: string
 }
 
 export interface ContextMenuProps {
@@ -49,11 +55,31 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   'data-testid': dataTestId
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null)
+  // The requested anchor is the cursor position; we shift the menu back
+  // into the viewport when it would overflow the bottom / right edge, so a
+  // right-click low on the screen doesn't clip the last entries.
+  const [pos, setPos] = useState<{ top: number; left: number }>({ top: y, left: x })
+
+  useLayoutEffect(() => {
+    if (!visible) return
+    const el = containerRef.current
+    if (!el) return
+    const { width, height } = el.getBoundingClientRect()
+    const maxLeft = Math.max(0, window.innerWidth - width)
+    const maxTop = Math.max(0, window.innerHeight - height)
+    setPos({ left: Math.min(x, maxLeft), top: Math.min(y, maxTop) })
+  }, [visible, x, y, items])
 
   const renderItems = (menuItems: ContextMenuItem[]): React.ReactNode =>
     menuItems.map((item) => {
       if (item.isSeparator) {
-        return <MenuItemSeparator key={item.id} id={item.id} />
+        return (
+          <MenuItemSeparator
+            key={item.id}
+            id={item.id}
+            {...(item['data-testid'] !== undefined && { 'data-testid': item['data-testid'] })}
+          />
+        )
       }
 
       const hasSubmenu = Array.isArray(item.items) && item.items.length > 0
@@ -63,6 +89,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           key={item.id}
           id={item.id}
           title={item.label}
+          {...(item['data-testid'] !== undefined && { 'data-testid': item['data-testid'] })}
           {...(item.shortcut ? { shortcut: item.shortcut } : {})}
           disabled={!!item.disabled}
           checked={!!item.checked}
@@ -100,16 +127,22 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
 
     const deregister = registerOpenContextMenu(onRequestClose)
 
-    const handleMouseDown = (event: MouseEvent): void => {
+    const handlePointerDown = (event: PointerEvent): void => {
       if (!containerRef.current) return
       if (!containerRef.current.contains(event.target as Node)) {
         onRequestClose()
       }
     }
 
-    document.addEventListener('mousedown', handleMouseDown)
+    // `pointerdown` in the capture phase: fire on the way down, before a
+    // descendant can interfere. We use pointerdown (not mousedown) because
+    // surfaces like the React Flow pane call `preventDefault()` on their
+    // pan pointerdown, which suppresses the compatibility `mousedown` —
+    // so a left-click on the canvas never produced a mousedown and the
+    // menu stayed open. Capture + pointerdown sees every press.
+    document.addEventListener('pointerdown', handlePointerDown, true)
     return () => {
-      document.removeEventListener('mousedown', handleMouseDown)
+      document.removeEventListener('pointerdown', handlePointerDown, true)
       deregister()
     }
   }, [visible, onRequestClose])
@@ -121,8 +154,8 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
       className="ecui-context-menu"
       style={{
         position: 'fixed',
-        top: y,
-        left: x,
+        top: pos.top,
+        left: pos.left,
         zIndex: 1000,
       }}
       data-x={String(x)}

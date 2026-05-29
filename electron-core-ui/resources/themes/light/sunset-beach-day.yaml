@@ -6,6 +6,9 @@ description: A warm light theme inspired by golden sunsets on tropical beaches
 type: light
 
 colors:
+  scenarioNode.background: "#fffaf4"
+  scenarioNode.headerBackground: "#f0e6da"
+  scenarioNode.headerBackgroundSelected: "#bfe3dd"
   # Base colors
   editor.background: "#FDF8F3"
   editor.foreground: "#264653"

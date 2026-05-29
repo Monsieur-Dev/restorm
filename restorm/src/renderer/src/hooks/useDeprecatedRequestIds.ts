@@ -11,7 +11,7 @@
  * involved, the decision rides on the matcher's regex output.
  */
 import { useMemo } from 'react'
-import type { EnvironmentFolder, Folder, FolderItem, Request } from '../../../shared/types/collections'
+import type { EnvironmentFolder, FolderItem, Request } from '../../../shared/types/collections'
 import { isAnyFolder, isEnvironmentFolder, isRequest } from '../../../shared/types/collections'
 import type { ApiDocumentation } from '../../../shared/types/apiDocumentation'
 import { findOperationForRoute, type RouteLike } from '../../../shared/utils/findOperationForRoute'
@@ -98,7 +98,7 @@ function routeFromRequest(request: Request): RouteLike | null {
  *   the parent array reference flipping.
  */
 export function useDeprecatedRequestIds(
-  rootItems: readonly (EnvironmentFolder | Folder | Request)[],
+  rootItems: readonly FolderItem[],
   updateCount = 0
 ): Set<string> {
   return useMemo(() => {

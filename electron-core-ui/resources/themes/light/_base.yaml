@@ -449,6 +449,19 @@ colors:
     value: "#000000"
     description: WCO codicon foreground color
 
+  # Scenario graph nodes (scenario editor)
+  - id: scenarioNode.background
+    value: "#ffffff"
+    description: Scenario node body background
+
+  - id: scenarioNode.headerBackground
+    value: "#e8eaed"
+    description: Scenario node header background
+
+  - id: scenarioNode.headerBackgroundSelected
+    value: "#d3e6fb"
+    description: Scenario node header background when selected
+
   # Alert colors (info)
   - id: alert.info.background
     value: "#e1f5fe"

@@ -14,16 +14,17 @@ import {
   type CategoryMeta,
   logger
 } from 'electron-core-ui/renderer'
-import type { Folder, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, AuthenticationRequest, Request } from '../../../shared/types/collections'
-import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isRequest } from '../../../shared/types/collections'
+import type { Folder, Scenario, HTTPRequest, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, AuthenticationRequest, Request } from '../../../shared/types/collections'
+import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isRequest, isScenario } from '../../../shared/types/collections'
 
 /** Search categories configuration for Restorm */
 const RESTORM_SEARCH_CATEGORIES: Record<string, CategoryMeta> = {
   request: { label: 'search.categories.request', icon: 'cloud', order: 1 },
   folder: { label: 'search.categories.folder', icon: 'folder', order: 2 },
-  environment: { label: 'search.categories.environment', icon: 'folder-library', order: 3 },
-  settings: { label: 'search.categories.settings', icon: 'settings-gear', order: 4 },
-  tag: { label: 'search.categories.tag', icon: 'tag', order: 5 }
+  scenario: { label: 'search.categories.scenario', icon: 'circuit-board', order: 3 },
+  environment: { label: 'search.categories.environment', icon: 'folder-library', order: 4 },
+  settings: { label: 'search.categories.settings', icon: 'settings-gear', order: 5 },
+  tag: { label: 'search.categories.tag', icon: 'tag', order: 6 }
 }
 
 /** Metadata structure for search documents in restorm */
@@ -83,6 +84,45 @@ function folderToSearchDocument(folder: Folder, parentPath: string[] = [], paren
     metadata: {
       tags: folder.tags,
       ...(folder.notes ? { notes: folder.notes } : {}),
+      ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
+    }
+  }
+}
+
+/**
+ * Convert a Scenario to a SearchDocument. Mirrors the folder doc shape so
+ * the search list treats scenarios as first-class navigable entries: the
+ * same path / breadcrumb metadata, `type: 'scenario'` in the navigation so
+ * the click handler can route through the same `handleItemClick` pipeline
+ * as folders.
+ */
+function scenarioToSearchDocument(scenario: Scenario, parentPath: string[] = [], parentNames: string[] = []): {
+  id: string
+  title: string
+  description?: string
+  category: string
+  icon: string
+  keywords: string
+  navigation: Record<string, unknown>
+  metadata: Record<string, unknown>
+} {
+  return {
+    id: scenario.id,
+    title: scenario.name,
+    category: 'scenario',
+    // Per-item icon doubles as the badge label in the search list when
+    // 'scenario' is in `badgedCategories` on the SearchBar — `mapToBadgeType`
+    // turns `'scenario'` into the purple SCENARIO badge.
+    icon: 'scenario',
+    keywords: scenario.tags.join(' '),
+    navigation: {
+      type: 'scenario',
+      scenarioId: scenario.id,
+      path: [...parentPath, scenario.id]
+    },
+    metadata: {
+      tags: scenario.tags,
+      ...(scenario.notes ? { notes: scenario.notes } : {}),
       ...(parentNames.length > 0 ? { breadcrumb: parentNames } : {})
     }
   }
@@ -627,11 +667,42 @@ function collectFolderDocuments(
   for (const item of folder.items) {
     if (isFolder(item)) {
       documents.push(...collectFolderDocuments(item, currentPath, currentNames))
+    } else if (isScenario(item)) {
+      documents.push(...collectScenarioDocuments(item, currentPath, currentNames))
     } else if (isRequest(item)) {
       documents.push(requestToSearchDocument(item, folder.id, currentPath, currentNames))
     }
   }
 
+  return documents
+}
+
+/**
+ * A scenario is both a searchable document AND a folder-like container.
+ * Returns the scenario's own doc first (so the search list surfaces it
+ * directly by name), then the docs for the requests / sub-folders /
+ * sub-scenarios authored inside it — with the scenario in their path so
+ * a child request's breadcrumb shows the owning scenario.
+ */
+function collectScenarioDocuments(
+  scenario: Scenario,
+  parentPath: string[] = [],
+  parentNames: string[] = []
+): ReturnType<typeof collectFolderDocuments> {
+  const currentPath = [...parentPath, scenario.id]
+  const currentNames = [...parentNames, scenario.name]
+  const documents: ReturnType<typeof collectFolderDocuments> = [
+    scenarioToSearchDocument(scenario, parentPath, parentNames)
+  ]
+  for (const item of scenario.items ?? []) {
+    if (isFolder(item)) {
+      documents.push(...collectFolderDocuments(item, currentPath, currentNames))
+    } else if (isScenario(item)) {
+      documents.push(...collectScenarioDocuments(item, currentPath, currentNames))
+    } else if (isRequest(item)) {
+      documents.push(requestToSearchDocument(item, scenario.id, currentPath, currentNames))
+    }
+  }
   return documents
 }
 
@@ -669,6 +740,21 @@ class SearchIndexService {
       logger.debug('[SearchIndexService] Indexed folder tree', { documentCount: documents.length })
     } catch (error) {
       logger.error('[SearchIndexService] Error indexing folder tree', { error: String(error), folderId: folder.id })
+    }
+  }
+
+  /**
+   * Index a scenario that lives at the root of the collection — indexes the
+   * requests/sub-folders authored inside it (a scenario doubles as a container).
+   * Nested scenarios go through {@link collectFolderDocuments} via their folder.
+   */
+  async indexScenarioTree(scenario: Scenario): Promise<void> {
+    try {
+      const documents = collectScenarioDocuments(scenario)
+      const plainDocuments = JSON.parse(JSON.stringify(documents)) as typeof documents
+      await searchService.indexDocuments(plainDocuments)
+    } catch (error) {
+      logger.error('[SearchIndexService] Error indexing scenario tree', { error: String(error), scenarioId: scenario.id })
     }
   }
 

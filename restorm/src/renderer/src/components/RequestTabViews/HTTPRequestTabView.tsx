@@ -1,6 +1,5 @@
 import React, { type CSSProperties, useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { useRequestReset } from '../../hooks/useRequestReset'
-import { useEnvFolderValueTypes } from '../../hooks/useEnvFolderValueTypes'
 import { getRequestPanelState, setRequestPanelCollapsed } from '../../services/requestPanelStateStore'
 import { useTranslation } from 'react-i18next'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
@@ -146,10 +145,6 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
   const sendButtonStyle: React.CSSProperties | undefined = envColor
     ? { backgroundColor: envColor, color: getContrastColor(envColor), borderColor: envColor }
     : undefined
-
-  // Enum definitions + custom value lists from the nearest ancestor
-  // env-folder, so the KeyValue tables can offer the type submenus.
-  const { enumDefinitions, customValueLists } = useEnvFolderValueTypes(request.id)
 
   const [method, setMethod] = useState<string>(request.method)
   const [url, setUrl] = useState<string>(request.url)
@@ -836,10 +831,6 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           helpers={handlebarsHelpers}
           initialRows={request.pathParams ?? []}
           onRowsChange={handlePathParamsChange}
-          enumDefinitions={enumDefinitions}
-          customValueLists={customValueLists}
-          requestUrl={request.url}
-          requestMethod={request.method}
           persistenceId={`http-path-params:${request.id}`}
           data-testid="http-request-path-params-table"
         />
@@ -871,10 +862,6 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           helpers={handlebarsHelpers}
           initialRows={request.params}
           onRowsChange={handleParamsChange}
-          enumDefinitions={enumDefinitions}
-          customValueLists={customValueLists}
-          requestUrl={request.url}
-          requestMethod={request.method}
           persistenceId={`http-query-params:${request.id}`}
           data-testid="http-request-query-params-table"
         />

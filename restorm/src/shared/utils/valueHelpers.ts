@@ -2,7 +2,7 @@
  * Helper functions for working with Value types
  */
 
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, type ValueType } from '../types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue, type ValueType } from '../types/collections'
 
 /**
  * Convert a ValueType to a string using its toString() method
@@ -65,6 +65,20 @@ export function isPasswordValue(value: ValueType): value is PasswordValue {
  */
 export function isExpressionValue(value: ValueType): value is ExpressionValue {
   return value instanceof ExpressionValue || (value as { type?: string }).type === 'expression'
+}
+
+/**
+ * Check if a value is a VariableValue (a reference to a scenario variable).
+ */
+export function isVariableValue(value: ValueType): value is VariableValue {
+  return value instanceof VariableValue || (value as { type?: string }).type === 'variable'
+}
+
+/**
+ * Check if a value is an EnvironmentValue (a reference to an environment by id).
+ */
+export function isEnvironmentValue(value: ValueType): value is EnvironmentValue {
+  return value instanceof EnvironmentValue || (value as { type?: string }).type === 'environment'
 }
 
 /**

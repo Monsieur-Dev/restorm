@@ -171,7 +171,8 @@
         "soap": "Запит SOAP",
         "websocket": "Запит WebSocket",
         "odata": "Запит OData",
-        "auth": "Запит автентифікації HTTP"
+        "auth": "Запит автентифікації HTTP",
+        "scenario": "Сценарій"
       }
     },
     "deleteConfirm": {
@@ -180,6 +181,14 @@
       "itemMessage": "Ви дійсно хочете видалити «{{name}}»?",
       "confirm": "Видалити",
       "cancel": "Скасувати"
+    },
+    "scenarioDelete": {
+      "title": "Видалити запит, що використовується сценаріями",
+      "message": "«{{name}}» використовується в таких сценаріях. Що ви хочете зробити?",
+      "belongsTag": "належить цьому сценарію",
+      "moveInto": "Перемістити в цей сценарій",
+      "affectsNote": "Видалення цього запиту також прибере його з цих сценаріїв.",
+      "deleteAnyway": "Усе одно видалити"
     }
   },
   "environment": {
@@ -304,7 +313,9 @@
       "dateTime": "Дата/час",
       "color": "Колір",
       "expression": "Вираз",
-      "boolean": "Булеве"
+      "boolean": "Булеве",
+      "variables": "Змінні",
+      "environment": "Середовище"
     },
     "apiEnums": "Типи, визначені в API",
     "customLists": "Власні типи",
@@ -357,11 +368,14 @@
       "folder": "Теки",
       "environment": "Середовища",
       "settings": "Параметри",
-      "tag": "Теги"
+      "tag": "Теги",
+      "scenario": "Сценарії"
     },
     "tooltip": {
       "noDetails": "Деталі недоступні",
-      "noContent": "Немає документації або нотаток"
+      "noContent": "Немає документації або нотаток",
+      "noScenario": "Сценарій недоступний",
+      "scenarioKind": "сценарій"
     }
   },
   "httpStatus": {
@@ -495,7 +509,8 @@
   },
   "common": {
     "cancel": "Скасувати",
-    "save": "Зберегти"
+    "save": "Зберегти",
+    "remove": "Вилучити"
   },
   "helpers": {
     "categories": {
@@ -745,6 +760,202 @@
       "previousMatch": "Попередній збіг",
       "nextMatch": "Наступний збіг",
       "close": "Закрити"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "empty": "Empty scenario — right-click the canvas to add a node"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del"
+      },
+      "expand": "Розгорнути",
+      "collapse": "Згорнути"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Додати випадок",
+      "removeCase": "Вилучити випадок",
+      "case": "випадок"
+    },
+    "forEach": {
+      "items": "елементи",
+      "each": "кожен",
+      "done": "готово",
+      "parallelism": "паралелізм"
+    },
+    "aggregate": {
+      "items": "елементи",
+      "result": "результат",
+      "field": "поле",
+      "separator": "роздільник",
+      "op": {
+        "count": "Кількість",
+        "sum": "Сума",
+        "min": "Мінімум",
+        "max": "Максимум",
+        "average": "Середнє",
+        "join": "Обʼєднати"
+      }
+    },
+    "filter": {
+      "items": "елементи",
+      "kept": "залишені",
+      "keepWhere": "залишити якщо"
+    },
+    "wait": {
+      "then": "потім",
+      "duration": "тривалість"
+    },
+    "waitUntil": {
+      "until": "до",
+      "then": "потім"
+    },
+    "arithmetic": {
+      "result": "результат"
+    },
+    "nodes": {
+      "arithmetic": "Арифметика",
+      "httpRequest": "HTTP-запит",
+      "runScenario": "Запустити сценарій",
+      "wait": "Очікувати",
+      "waitUntil": "Очікувати до",
+      "now": "Зараз",
+      "comparator": "Компаратор",
+      "setVariable": "Задати змінну",
+      "getVariable": "Отримати змінну"
+    },
+    "comparator": {
+      "result": "результат"
+    },
+    "boolean": {
+      "result": "результат"
+    },
+    "map": {
+      "items": "елементи",
+      "mapped": "перетворені"
+    },
+    "log": {
+      "message": "повідомлення",
+      "data": "дані"
+    },
+    "assert": {
+      "message": "повідомлення"
+    },
+    "editRequest": "Редагувати запит",
+    "editScenario": "Редагувати сценарій",
+    "object": {
+      "addProperty": "Додати властивість",
+      "removeProperty": "Видалити властивість",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "input": {
+      "required": "Обовʼязково",
+      "name": "Name",
+      "defaultType": "Default / type"
+    },
+    "runScenario": {
+      "orphanInput": "Немає відповідного параметра «{{name}}» у підсценарії",
+      "orphanOutput": "Немає відповідного виходу «{{name}}» у підсценарії",
+      "then": "потім"
+    },
+    "validation": {
+      "duplicateName": "Назва «{{name}}» вже використовується іншою дією.",
+      "panelTitle": "{{count}} помилок дій",
+      "focusBox": "Перейти до цієї дії",
+      "showErrors": "Показати помилки",
+      "input": {
+        "missingName": "Цей вхідний параметр повинен мати назву."
+      },
+      "dataLink": {
+        "emptyPath": "Вхідне з’єднання даних потребує шляху (JSON path).",
+        "badPath": "Шлях JSON «{{path}}» з’єднання даних недійсний."
+      },
+      "output": {
+        "missingName": "Цей вихід повинен мати назву.",
+        "duplicateName": "Назва «{{name}}» вже використовується іншим виходом.",
+        "valueRequired": "Вхід «value» має бути зʼєднаний з джерелом."
+      },
+      "getVariable": {
+        "noSelection": "Потрібно вибрати змінну.",
+        "unknown": "Змінна «{{name}}» не існує у сценарії."
+      },
+      "setVariable": {
+        "missingName": "Змінна, що встановлюється, повинна мати назву."
+      },
+      "object": {
+        "propMissingName": "Кожна властивість повинна мати назву.",
+        "propDuplicate": "Назва властивості «{{name}}» повторюється."
+      },
+      "arithmetic": {
+        "divisionByZero": "Ділення на нуль неможливе."
+      },
+      "switch": {
+        "caseDuplicate": "Значення випадку «{{value}}» дублюється."
+      },
+      "transform": {
+        "emptyTemplate": "Шаблон не може бути порожнім.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "Пов'язаний запит більше не існує."
+      },
+      "runScenario": {
+        "missing": "Пов'язаний сценарій більше не існує.",
+        "requiredInput": "Обов'язковий вхід «{{name}}» має бути під'єднаний до джерела."
+      }
+    },
+    "usage": {
+      "button": "Сценарії, що використовують цей запит",
+      "title": "Цей запит використовується у сценаріях:"
+    },
+    "inspector": {
+      "run": "Запустити",
+      "debug": "Налагодження",
+      "step": "Крок за кроком",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "Пауза",
+      "noRunsHint": "Немає недавнього виконання для цього запиту — запусти його звідси, щоб заповнити прев'ю сценарію.",
+      "syntheticInfo": "Приклад даних, згенерований з документації цього запиту.",
+      "syntheticRunHint": "Приклад даних — виконайте запит, щоб замінити їх реальним результатом."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

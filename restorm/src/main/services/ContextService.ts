@@ -25,7 +25,7 @@ import {
   type DocumentChangedPayload,
   type DocumentDeletedPayload
 } from './DocumentEvents'
-import { registerHandlebarsHelpers } from '../utils/handlebarsHelpers'
+import { registerHandlebarsHelpers } from '../../shared/utils/handlebars/registerAll'
 import { pubsub, PUBSUB_TOPICS, collectionStore } from './CollectionStore'
 import { KeyValue as KeyValueModel } from '../../shared/models'
 import { StringValue, EnumListValue, CustomListValue, CustomListMultiValue } from '../../shared/types/collections'

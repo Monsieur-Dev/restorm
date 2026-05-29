@@ -170,7 +170,8 @@
         "soap": "SOAP zahtjev",
         "websocket": "WebSocket zahtjev",
         "odata": "OData zahtjev",
-        "auth": "HTTP zahtjev za autentifikaciju"
+        "auth": "HTTP zahtjev za autentifikaciju",
+        "scenario": "Scenarij"
       }
     },
     "deleteConfirm": {
@@ -179,6 +180,14 @@
       "itemMessage": "Jeste li sigurni da želite izbrisati \"{{name}}\"?",
       "confirm": "Izbriši",
       "cancel": "Odustani"
+    },
+    "scenarioDelete": {
+      "title": "Izbriši zahtjev koji koriste scenariji",
+      "message": "„{{name}}“ se koristi u sljedećim scenarijima. Što želite učiniti?",
+      "belongsTag": "pripada ovom scenariju",
+      "moveInto": "Premjesti u ovaj scenarij",
+      "affectsNote": "Brisanjem ovog zahtjeva ukloniti će se i iz ovih scenarija.",
+      "deleteAnyway": "Svejedno izbriši"
     }
   },
   "environment": {
@@ -303,7 +312,9 @@
       "dateTime": "Datum i vrijeme",
       "color": "Boja",
       "expression": "Izraz",
-      "boolean": "Booleova vrijednost"
+      "boolean": "Booleova vrijednost",
+      "variables": "Varijable",
+      "environment": "Okruženje"
     },
     "apiEnums": "Tipovi definirani u API-ju",
     "customLists": "Prilagođeni tipovi",
@@ -356,11 +367,14 @@
       "folder": "Mape",
       "environment": "Okruženja",
       "settings": "Postavke",
-      "tag": "Oznake"
+      "tag": "Oznake",
+      "scenario": "Scenariji"
     },
     "tooltip": {
       "noDetails": "Nema dostupnih pojedinosti",
-      "noContent": "Nema dokumentacije ni bilješki"
+      "noContent": "Nema dokumentacije ni bilješki",
+      "noScenario": "Scenarij nedostupan",
+      "scenarioKind": "scenarij"
     }
   },
   "httpStatus": {
@@ -494,7 +508,8 @@
   },
   "common": {
     "cancel": "Odustani",
-    "save": "Spremi"
+    "save": "Spremi",
+    "remove": "Ukloni"
   },
   "helpers": {
     "categories": {
@@ -744,6 +759,202 @@
       "previousMatch": "Prethodno podudaranje",
       "nextMatch": "Sljedeće podudaranje",
       "close": "Zatvori"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "empty": "Empty scenario — right-click the canvas to add a node"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del"
+      },
+      "expand": "Proširi",
+      "collapse": "Sažmi"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Dodaj slučaj",
+      "removeCase": "Ukloni slučaj",
+      "case": "slučaj"
+    },
+    "forEach": {
+      "items": "stavke",
+      "each": "svaki",
+      "done": "gotovo",
+      "parallelism": "paralelizam"
+    },
+    "aggregate": {
+      "items": "stavke",
+      "result": "rezultat",
+      "field": "polje",
+      "separator": "razdjelnik",
+      "op": {
+        "count": "Broj",
+        "sum": "Zbroj",
+        "min": "Min",
+        "max": "Maks",
+        "average": "Prosjek",
+        "join": "Spoji"
+      }
+    },
+    "filter": {
+      "items": "stavke",
+      "kept": "zadržani",
+      "keepWhere": "zadrži ako"
+    },
+    "wait": {
+      "then": "zatim",
+      "duration": "trajanje"
+    },
+    "waitUntil": {
+      "until": "do",
+      "then": "zatim"
+    },
+    "arithmetic": {
+      "result": "rezultat"
+    },
+    "nodes": {
+      "arithmetic": "Aritmetika",
+      "httpRequest": "HTTP zahtjev",
+      "runScenario": "Pokreni scenarij",
+      "wait": "Čekaj",
+      "waitUntil": "Čekaj do",
+      "now": "Sada",
+      "comparator": "Usporednik",
+      "setVariable": "Postavi varijablu",
+      "getVariable": "Dohvati varijablu"
+    },
+    "comparator": {
+      "result": "rezultat"
+    },
+    "boolean": {
+      "result": "rezultat"
+    },
+    "map": {
+      "items": "stavke",
+      "mapped": "transformirano"
+    },
+    "log": {
+      "message": "poruka",
+      "data": "podaci"
+    },
+    "assert": {
+      "message": "poruka"
+    },
+    "editRequest": "Uredi zahtjev",
+    "editScenario": "Uredi scenarij",
+    "object": {
+      "addProperty": "Dodaj svojstvo",
+      "removeProperty": "Ukloni svojstvo",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "input": {
+      "required": "Obavezno",
+      "name": "Name",
+      "defaultType": "Default / type"
+    },
+    "runScenario": {
+      "orphanInput": "Nema odgovarajućeg parametra \"{{name}}\" u podscenariju",
+      "orphanOutput": "Nema odgovarajućeg izlaza \"{{name}}\" u podscenariju",
+      "then": "zatim"
+    },
+    "validation": {
+      "duplicateName": "Naziv „{{name}}“ već koristi druga akcija.",
+      "panelTitle": "{{count}} pogreška/e akcija",
+      "focusBox": "Idi na ovu akciju",
+      "showErrors": "Prikaži pogreške",
+      "input": {
+        "missingName": "Ovaj ulazni parametar mora imati naziv."
+      },
+      "dataLink": {
+        "emptyPath": "Dolazna podatkovna veza treba putanju (JSON path).",
+        "badPath": "JSON putanja „{{path}}“ podatkovne veze nije valjana."
+      },
+      "output": {
+        "missingName": "Ovaj izlaz mora imati naziv.",
+        "duplicateName": "Naziv „{{name}}“ već koristi drugi izlaz.",
+        "valueRequired": "Ulaz „value“ mora biti povezan s izvorom."
+      },
+      "getVariable": {
+        "noSelection": "Mora se odabrati varijabla.",
+        "unknown": "Varijabla „{{name}}“ ne postoji u scenariju."
+      },
+      "setVariable": {
+        "missingName": "Varijabla koja se postavlja mora imati naziv."
+      },
+      "object": {
+        "propMissingName": "Svako svojstvo mora imati naziv.",
+        "propDuplicate": "Naziv svojstva „{{name}}“ je dupliciran."
+      },
+      "arithmetic": {
+        "divisionByZero": "Dijeljenje s nulom nije moguće."
+      },
+      "switch": {
+        "caseDuplicate": "Vrijednost slučaja „{{value}}“ je duplicirana."
+      },
+      "transform": {
+        "emptyTemplate": "Predložak ne smije biti prazan.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "Povezani zahtjev više ne postoji."
+      },
+      "runScenario": {
+        "missing": "Povezani scenarij više ne postoji.",
+        "requiredInput": "Obavezni ulaz „{{name}}“ mora biti povezan s izvorom."
+      }
+    },
+    "usage": {
+      "button": "Scenariji koji koriste ovaj zahtjev",
+      "title": "Ovaj zahtjev koristi se u scenarijima:"
+    },
+    "inspector": {
+      "run": "Pokreni",
+      "debug": "Otklanjanje pogrešaka",
+      "step": "Korak po korak",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "Pauza",
+      "noRunsHint": "Nema nedavnog izvođenja ovog zahtjeva — pokreni ga odavde da popuniš pretpregled scenarija.",
+      "syntheticInfo": "Primjer podataka generiran iz dokumentacije ovog zahtjeva.",
+      "syntheticRunHint": "Primjer podataka — pokrenite zahtjev kako biste ih zamijenili stvarnim rezultatom."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

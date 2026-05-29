@@ -169,7 +169,8 @@
         "soap": "SOAP-verzoek",
         "websocket": "WebSocket-verzoek",
         "odata": "OData-verzoek",
-        "auth": "HTTP-authenticatieverzoek"
+        "auth": "HTTP-authenticatieverzoek",
+        "scenario": "Scenario"
       }
     },
     "deleteConfirm": {
@@ -178,6 +179,14 @@
       "itemMessage": "Weet je zeker dat je \"{{name}}\" wilt verwijderen?",
       "confirm": "Verwijderen",
       "cancel": "Annuleren"
+    },
+    "scenarioDelete": {
+      "title": "Een door scenario's gebruikte aanvraag verwijderen",
+      "message": "\"{{name}}\" wordt gebruikt in de volgende scenario's. Wat wilt u doen?",
+      "belongsTag": "hoort bij dit scenario",
+      "moveInto": "Naar dit scenario verplaatsen",
+      "affectsNote": "Deze aanvraag verwijderen haalt deze ook uit deze scenario's.",
+      "deleteAnyway": "Toch verwijderen"
     }
   },
   "environment": {
@@ -302,7 +311,9 @@
       "dateTime": "Datum/tijd",
       "color": "Kleur",
       "expression": "Expressie",
-      "boolean": "Boolean"
+      "boolean": "Boolean",
+      "variables": "Variabelen",
+      "environment": "Omgeving"
     },
     "apiEnums": "Door de API gedefinieerde typen",
     "customLists": "Aangepaste typen",
@@ -355,11 +366,14 @@
       "folder": "Mappen",
       "environment": "Omgevingen",
       "settings": "Instellingen",
-      "tag": "Tags"
+      "tag": "Tags",
+      "scenario": "Scenario's"
     },
     "tooltip": {
       "noDetails": "Geen details beschikbaar",
-      "noContent": "Geen documentatie of notities"
+      "noContent": "Geen documentatie of notities",
+      "noScenario": "Scenario niet beschikbaar",
+      "scenarioKind": "scenario"
     }
   },
   "httpStatus": {
@@ -493,7 +507,8 @@
   },
   "common": {
     "cancel": "Annuleren",
-    "save": "Opslaan"
+    "save": "Opslaan",
+    "remove": "Verwijderen"
   },
   "helpers": {
     "categories": {
@@ -743,6 +758,202 @@
       "previousMatch": "Vorige overeenkomst",
       "nextMatch": "Volgende overeenkomst",
       "close": "Sluiten"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "empty": "Empty scenario — right-click the canvas to add a node"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del"
+      },
+      "expand": "Uitklappen",
+      "collapse": "Inklappen"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "switch": {
+      "addCase": "Case toevoegen",
+      "removeCase": "Case verwijderen",
+      "case": "geval"
+    },
+    "forEach": {
+      "items": "items",
+      "each": "elk",
+      "done": "klaar",
+      "parallelism": "parallellisme"
+    },
+    "aggregate": {
+      "items": "items",
+      "result": "resultaat",
+      "field": "veld",
+      "separator": "scheidingsteken",
+      "op": {
+        "count": "Aantal",
+        "sum": "Som",
+        "min": "Min",
+        "max": "Max",
+        "average": "Gemiddelde",
+        "join": "Samenvoegen"
+      }
+    },
+    "filter": {
+      "items": "items",
+      "kept": "behouden",
+      "keepWhere": "behoud als"
+    },
+    "wait": {
+      "then": "dan",
+      "duration": "duur"
+    },
+    "waitUntil": {
+      "until": "tot",
+      "then": "dan"
+    },
+    "arithmetic": {
+      "result": "resultaat"
+    },
+    "nodes": {
+      "arithmetic": "Rekenkunde",
+      "httpRequest": "HTTP-verzoek",
+      "runScenario": "Scenario uitvoeren",
+      "wait": "Wachten",
+      "waitUntil": "Wachten tot",
+      "now": "Nu",
+      "comparator": "Vergelijker",
+      "setVariable": "Variabele instellen",
+      "getVariable": "Variabele ophalen"
+    },
+    "comparator": {
+      "result": "resultaat"
+    },
+    "boolean": {
+      "result": "resultaat"
+    },
+    "map": {
+      "items": "items",
+      "mapped": "getransformeerd"
+    },
+    "log": {
+      "message": "bericht",
+      "data": "gegevens"
+    },
+    "assert": {
+      "message": "bericht"
+    },
+    "editRequest": "Verzoek bewerken",
+    "editScenario": "Scenario bewerken",
+    "object": {
+      "addProperty": "Eigenschap toevoegen",
+      "removeProperty": "Eigenschap verwijderen",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "input": {
+      "required": "Vereist",
+      "name": "Name",
+      "defaultType": "Default / type"
+    },
+    "runScenario": {
+      "orphanInput": "Geen overeenkomende parameter \"{{name}}\" in het subscenario",
+      "orphanOutput": "Geen overeenkomende uitvoer \"{{name}}\" in het subscenario",
+      "then": "dan"
+    },
+    "validation": {
+      "duplicateName": "De naam ‘{{name}}’ wordt al door een andere actie gebruikt.",
+      "panelTitle": "{{count}} actiefout(en)",
+      "focusBox": "Naar deze actie gaan",
+      "showErrors": "Fouten tonen",
+      "input": {
+        "missingName": "Deze invoerparameter moet een naam hebben."
+      },
+      "dataLink": {
+        "emptyPath": "De inkomende datakoppeling heeft een JSON-pad nodig.",
+        "badPath": "Het JSON-pad ‘{{path}}’ van de datakoppeling is ongeldig."
+      },
+      "output": {
+        "missingName": "Deze uitvoer moet een naam hebben.",
+        "duplicateName": "De naam ‘{{name}}’ wordt al door een andere uitvoer gebruikt.",
+        "valueRequired": "De invoer ‘value’ moet aan een bron gekoppeld zijn."
+      },
+      "getVariable": {
+        "noSelection": "Er moet een variabele worden geselecteerd.",
+        "unknown": "De variabele ‘{{name}}’ bestaat niet in het scenario."
+      },
+      "setVariable": {
+        "missingName": "De in te stellen variabele moet een naam hebben."
+      },
+      "object": {
+        "propMissingName": "Elke eigenschap moet een naam hebben.",
+        "propDuplicate": "De eigenschapsnaam ‘{{name}}’ is dubbel."
+      },
+      "arithmetic": {
+        "divisionByZero": "Delen door nul is onmogelijk."
+      },
+      "switch": {
+        "caseDuplicate": "De case-waarde \"{{value}}\" is dubbel."
+      },
+      "transform": {
+        "emptyTemplate": "De sjabloon mag niet leeg zijn.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "De gekoppelde aanvraag bestaat niet meer."
+      },
+      "runScenario": {
+        "missing": "Het gekoppelde scenario bestaat niet meer.",
+        "requiredInput": "De vereiste invoer \"{{name}}\" moet aan een bron worden gekoppeld."
+      }
+    },
+    "usage": {
+      "button": "Scenario's die deze aanvraag gebruiken",
+      "title": "Deze aanvraag wordt gebruikt in de scenario's:"
+    },
+    "inspector": {
+      "run": "Uitvoeren",
+      "debug": "Debuggen",
+      "step": "Stap voor stap",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "Pauze",
+      "noRunsHint": "Geen recente uitvoering voor dit verzoek — voer het hier uit om de scenario-preview te vullen.",
+      "syntheticInfo": "Voorbeeldgegevens gegenereerd uit de documentatie van deze aanvraag.",
+      "syntheticRunHint": "Voorbeeldgegevens — voer het verzoek uit om ze te vervangen door een echt resultaat."
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
     }
   }
 }

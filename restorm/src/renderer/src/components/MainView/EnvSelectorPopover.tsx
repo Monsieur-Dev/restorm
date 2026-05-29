@@ -48,6 +48,9 @@ export interface EnvPopoverListProps {
 	 * statusbar host's selectors; the Send-button host overrides it
 	 * to disambiguate. */
 	testIdPrefix?: string
+	/** Hide the "Apply to all requests" footer — used by hosts where the
+	 * selection is scoped to a single target (e.g. a scenario request node). */
+	hideApplyToAll?: boolean
 }
 
 /**
@@ -62,7 +65,7 @@ export interface EnvPopoverListProps {
  * the foreground text — selection state therefore reinforces the
  * env's identifier instead of fighting it.
  */
-export const EnvPopoverList: React.FC<EnvPopoverListProps> = ({ rows, selectedEnvId, applyToAll, onApplyToAllChange, onSelect, onCloseRequested, testIdPrefix = 'statusbar-env-selector' }) => {
+export const EnvPopoverList: React.FC<EnvPopoverListProps> = ({ rows, selectedEnvId, applyToAll, onApplyToAllChange, onSelect, onCloseRequested, testIdPrefix = 'statusbar-env-selector', hideApplyToAll = false }) => {
 	const { t } = useTranslation()
 	const handleEnvClick = useCallback((envId: string): void => {
 		onSelect(envId)
@@ -83,14 +86,36 @@ export const EnvPopoverList: React.FC<EnvPopoverListProps> = ({ rows, selectedEn
 				gap: 1
 			}}
 		>
-			{rows.map(({ env, depth }, i) => {
+			{rows.map(({ env, depth, groupLabel }, i) => {
 				const bg = env.color ?? DEFAULT_ENV_COLOR
 				const isSelected = env.id === selectedEnvId
 				const nextDepth = rows[i + 1]?.depth
 				const isParentToChildBoundary = depth === 0 && typeof nextDepth === 'number' && nextDepth > 0
 				const isLastRow = i === rows.length - 1
+				// Header above the first row of each group (its owning env folder).
+				const showGroupHeader = groupLabel !== undefined && groupLabel !== rows[i - 1]?.groupLabel
 				return (
 					<Fragment key={env.id}>
+						{showGroupHeader && (
+							<div
+								data-testid={`${testIdPrefix}-group-${i}`}
+								style={{
+									padding: '6px 8px 4px',
+									marginTop: i === 0 ? 0 : 8,
+									fontSize: 11,
+									fontWeight: 600,
+									letterSpacing: '0.04em',
+									textTransform: 'uppercase',
+									color: 'var(--descriptionForeground, var(--foreground))',
+									opacity: 0.75,
+									whiteSpace: 'nowrap',
+									overflow: 'hidden',
+									textOverflow: 'ellipsis'
+								}}
+							>
+								{groupLabel}
+							</div>
+						)}
 						<div
 							role="option"
 							aria-selected={isSelected}
@@ -188,6 +213,7 @@ export const EnvPopoverList: React.FC<EnvPopoverListProps> = ({ rows, selectedEn
 					</Fragment>
 				)
 			})}
+			{!hideApplyToAll && (
 			<label
 				data-testid={`${testIdPrefix}-apply-to-all`}
 				style={{
@@ -210,6 +236,7 @@ export const EnvPopoverList: React.FC<EnvPopoverListProps> = ({ rows, selectedEn
 				/>
 				<span>{t('statusbar.envSelector.applyToAll', 'Apply to all requests')}</span>
 			</label>
+			)}
 		</div>
 	)
 }

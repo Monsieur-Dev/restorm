@@ -3,6 +3,9 @@ name: Solarized (dark)
 type: dark
 
 colors:
+  scenarioNode.background: "#073642"
+  scenarioNode.headerBackground: "#0a4350"
+  scenarioNode.headerBackgroundSelected: "#00566b"
   focusBorder: "#2AA19899"
   selection.background: "#2AA19899"
   input.background: "#003847"

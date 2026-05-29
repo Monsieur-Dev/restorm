@@ -859,6 +859,27 @@ contextBridge.exposeInMainWorld('restorm', {
     pushMcpActiveEnv: (payload: { envFolderId: string; envId: string | null }): void => {
       ipcRenderer.send('mcp:active-env-changed', payload)
     },
+    /** Push an open scenario editor's React-Flow-measured node rects (position
+     * + size) to main, so the scenario MCP read tools can report box sizes
+     * (size isn't persisted in the model). Lets an agent lay out a scenario
+     * without overlap, no screenshots needed. */
+    pushScenarioLayout: (payload: { scenarioId: string; rects: Record<string, { x: number; y: number; width: number; height: number }> }): void => {
+      ipcRenderer.send('scenario:layout', payload)
+    },
+    /** Run a scenario box (request / wait) through the main-process engine —
+     * the same path the MCP `run_scenario_node` tool uses. Resolves with the
+     * run summary; rejects (the thrown engine error) on failure / cancel. */
+    runScenarioNode: (scenarioId: string, nodeId: string): Promise<unknown> =>
+      ipcRenderer.invoke('scenario:run-node', scenarioId, nodeId),
+    /** Cancel a box's in-flight run. The awaiting `runScenarioNode` promise
+     * then rejects (`wait`) or settles (`request` abort), clearing the run. */
+    cancelScenarioNode: (scenarioId: string, nodeId: string): Promise<{ cancelled: boolean; reason?: string }> =>
+      ipcRenderer.invoke('scenario:cancel-node', scenarioId, nodeId) as Promise<{ cancelled: boolean; reason?: string }>,
+    /** A box's last run result as its output context (resolved request, raw
+     * request, response). Null if it hasn't run yet. Feeds the JSON-path
+     * selector popover on a data link's receiving input. */
+    getScenarioNodeResult: (scenarioId: string, nodeId: string): Promise<Record<string, unknown> | null> =>
+      ipcRenderer.invoke('scenario:node-result', scenarioId, nodeId) as Promise<Record<string, unknown> | null>,
     /** Full-snapshot push fired on renderer (re)load — useful after an
      * HMR cycle so main's cache is always consistent with the renderer. */
     pushMcpActiveStateBootstrap: (payload: {
@@ -915,6 +936,15 @@ contextBridge.exposeInMainWorld('restorm', {
       const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; patch: Record<string, unknown> }) }
       ipcRenderer.on('mcp:request-updated', handler)
       return () => { ipcRenderer.off('mcp:request-updated', handler) }
+    },
+    /** Subscribe to MCP scenario mutations (create/update/move/delete node,
+     * connect/disconnect). Carries the full nodes + edges so an open editor
+     * re-seeds its React Flow state in place (the seed effect otherwise
+     * guards against same-id re-seeds to protect in-progress edits). */
+    onMcpScenarioUpdated: (callback: (payload: { scenarioId: string; nodes: unknown[]; edges: unknown[]; name?: string; params?: unknown[] }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { scenarioId: string; nodes: unknown[]; edges: unknown[]; name?: string; params?: unknown[] }) }
+      ipcRenderer.on('mcp:scenario-updated', handler)
+      return () => { ipcRenderer.off('mcp:scenario-updated', handler) }
     },
     /** Subscribe to MCP `update_folder`. Same shape as request-updated
      * but for Folder / EnvironmentFolder. Renderer applies the patch
