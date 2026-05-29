@@ -61,6 +61,22 @@ scripts/git-commit-timeout.sh -m "your message"
 
 If the script exits 124 (timeout), investigate before retrying — it usually points at flakiness, X-server contention, or a genuine perf regression in a Monaco-heavy panel.
 
+### Flaky tests — never just retry
+
+Every commit attempt — success or failure — prepends an entry to `.commit-flake-history.log` (newest-on-top, gitignored, repo root, written by `scripts/git-commit-timeout.sh`). Successful commits log a single `PASS` line; failed commits log a header block followed by the last 200 lines of hook output. So `head -200 .commit-flake-history.log` answers "what just broke and what was the failure pattern" without scrolling; `grep '^FAIL' .commit-flake-history.log | head` answers "how often does this branch flake".
+
+When `scripts/git-commit-timeout.sh` returns non-zero:
+
+1. **Open `.commit-flake-history.log` and read the most recent FAIL block** before deciding what to do. Cite the failing test + the assertion in your reply to the user — don't shrug it off as "probably a flake".
+2. **Scan the journal for the same failure signature in earlier blocks.** If you find the same test failing more than once across recent attempts (or more than once on the same branch), that's a recurring flake — stop, tell the user, and propose an investigation. Don't keep retrying.
+3. **First-time failure** is the only case where a single retry is acceptable. Even then, mention it to the user explicitly so they know to keep an eye on the test.
+4. **Never silently retry.** Flaky tests cost the user time on every commit and erode trust in the suite. The user's preference is explicit: investigate the root cause as soon as a pattern is visible, fix it, and validate the fix by re-running the suspect test many times back-to-back (the workflow used in the past has been "30 runs before / 30 runs after the fix").
+
+Common flake signatures already seen in this repo:
+- `electron.launch: Process failed to launch!` in any `tests/e2e/bdd/fixtures/*.fixture.ts` — the shared `bootstrap → SIGKILL → 300ms wait → relaunch` pattern is the usual culprit; the 300ms is too short on a loaded host.
+
+A flake report to the user should include: the failing test name, the journal block's timestamp, how many times the same signature already appears in the journal, and a one-sentence proposal of the next step.
+
 ## Self-review before push
 
 Before pushing a branch or asking for a merge, **always** run an independent code review of the diff. Use the `superpowers:code-reviewer` agent (or equivalent fresh-context agent) on the full PR scope and act on its findings — bugs, design smells, coverage gaps, stale comments, missed docs — before telling the user the PR is ready. Document agent findings that you're deliberately not addressing, don't silently skip them. Self-review applies even when the user hasn't explicitly asked for it; it's the last gate before human attention.
