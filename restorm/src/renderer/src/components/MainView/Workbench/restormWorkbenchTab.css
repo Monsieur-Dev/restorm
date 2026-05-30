@@ -46,6 +46,20 @@
   right: 0;
 }
 
+/* History modals (scenario runs, response history) scope their ECUI backdrop to
+ * `.restorm-workbench-tab`, so its default `inset: 0` overlay starts at the tab's
+ * content box. Two things live outside that box: the top-right cluster above
+ * (bookmark ribbon + scenario-usage button, anchored `top: -8px`), and the editor
+ * group's 6px of padding before its active-group border. Bleed the scoped overlay
+ * out over both so the blurred backdrop reaches the group border and dims those
+ * floating controls instead of leaving their tops poking above the blur. */
+.restorm-workbench-tab > .ecu-modal-overlay[data-scoped='true'] {
+  top: -8px;
+  right: -6px;
+  bottom: -6px;
+  left: -6px;
+}
+
 /* Header action cluster (request env selector + history button), anchored
  * top-right to the LEFT of the bookmark ribbon. Grows leftward into the
  * empty header space, so a wide env name never collides with the ribbon. */

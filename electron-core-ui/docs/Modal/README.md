@@ -44,6 +44,14 @@ export interface ModalProps {
   size?: 'full' | 'dialog'
   /** Optional test id applied to the modal container. Defaults to `modal`. */
   'data-testid'?: string
+  /**
+   * Scope the modal to a CONTAINER instead of the whole window. When set, the
+   * modal portals into the nearest ancestor matching this CSS selector and its
+   * overlay is positioned `absolute; inset: 0` over that container rather than
+   * `fixed` over the viewport. Falls back to full-window when no ancestor
+   * matches. See "Scoping to a container" below.
+   */
+  scopeToSelector?: string
 }
 ```
 
@@ -85,6 +93,26 @@ const Example: React.FC = () => {
   )
 }
 ```
+
+## Scoping to a container
+
+By default the modal portals to `document.body` and its overlay is `position: fixed` over the whole viewport. Pass `scopeToSelector` to instead contain it to a region — e.g. a single workbench tab — so the backdrop (and, with advanced visual effects on, its `backdrop-filter` blur) only covers that region:
+
+```tsx
+<Modal
+  title="Run history"
+  isOpen={isOpen}
+  onClose={onClose}
+  scopeToSelector=".my-workbench-tab"
+>
+  {/* … */}
+</Modal>
+```
+
+- An invisible in-place anchor resolves the nearest ancestor matching the selector (`anchor.closest(selector)`); the overlay portals **there** and gets `data-scoped="true"` → `position: absolute; inset: 0`. The matched ancestor must be a **positioned** element (`position: relative` or similar).
+- The anchor stays mounted across open/close so it can re-resolve on the next open — render the `<Modal>` unconditionally (drive visibility via `isOpen`), don't gate it behind `{isOpen && …}`.
+- The window-drag strip is suppressed and the container's top inset is tightened (no app title-bar to clear) in scoped mode.
+- If **no** matching ancestor is found, it falls back to the normal full-window behaviour.
 
 ## Theming and Layout
 

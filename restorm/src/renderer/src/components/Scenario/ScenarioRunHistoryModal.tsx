@@ -1,11 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Tabs, VerticalSashContainer, type Tab } from 'electron-core-ui/renderer'
+import { Modal, Tabs, VerticalSashContainer, type Tab } from 'electron-core-ui/renderer'
 import type {
   ScenarioRunHistoryDetail,
   ScenarioRunHistoryEntry
 } from '../../../../shared/types/scenarioRunHistory'
-import { TabContainedOverlay } from '../MainView/TabContainedOverlay'
 import { ScenarioRunLogView } from './ScenarioRunLogView'
 import { ScenarioRunGraphTab } from './ScenarioRunGraphTab'
 import './scenarioRunHistoryModal.css'
@@ -48,8 +47,21 @@ export const ScenarioRunHistoryModal: React.FC<ScenarioRunHistoryModalProps> = (
   // Above this available width the detail drops the tabs and shows the logs +
   // graph side by side; at or below it, the compact tabbed layout is kept.
   const SIDE_BY_SIDE_MIN = 500
-  const detailRef = useRef<HTMLDivElement>(null)
   const [detailWidth, setDetailWidth] = useState(0)
+  // Observe the detail pane's width via a callback ref (the Modal mounts its
+  // children a frame after `isOpen`, so an `[isOpen]` effect would miss the
+  // element). Re-attaches whenever the detail node mounts/unmounts.
+  const detailObserverRef = useRef<ResizeObserver | null>(null)
+  const attachDetailObserver = useCallback((el: HTMLDivElement | null): void => {
+    if (detailObserverRef.current) { detailObserverRef.current.disconnect(); detailObserverRef.current = null }
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const ro = new ResizeObserver((entries) => {
+      const w = entries[0]?.contentRect.width
+      if (typeof w === 'number') setDetailWidth(w)
+    })
+    ro.observe(el)
+    detailObserverRef.current = ro
+  }, [])
   // A run-log click → focus its emitter node in the graph. The token bumps so
   // the same target re-flashes; the graph tab consumes it.
   const [focusReq, setFocusReq] = useState<{ scenarioId: string; nodeId: string; token: number } | null>(null)
@@ -100,26 +112,6 @@ export const ScenarioRunHistoryModal: React.FC<ScenarioRunHistoryModalProps> = (
     return () => { cancelled = true }
   }, [selectedGuid])
 
-  useEffect(() => {
-    if (!isOpen) return undefined
-    const onKey = (e: KeyboardEvent): void => { if (e.key === 'Escape') onClose() }
-    document.addEventListener('keydown', onKey)
-    return () => { document.removeEventListener('keydown', onKey) }
-  }, [isOpen, onClose])
-
-  // Track the detail pane's available width to pick the tabbed vs side-by-side
-  // layout. Re-attach when the pane (re)mounts as the overlay opens.
-  useEffect(() => {
-    const el = detailRef.current
-    if (!el || typeof ResizeObserver === 'undefined') return undefined
-    const ro = new ResizeObserver((entries) => {
-      const w = entries[0]?.contentRect.width
-      if (typeof w === 'number') setDetailWidth(w)
-    })
-    ro.observe(el)
-    return () => { ro.disconnect() }
-  }, [isOpen])
-
   const togglePin = (entry: ScenarioRunHistoryEntry): void => {
     const next = !entry.pinned
     void bridge()?.scenarioRunHistoryTogglePin?.(entry.guid, next).then((ok) => {
@@ -149,30 +141,13 @@ export const ScenarioRunHistoryModal: React.FC<ScenarioRunHistoryModalProps> = (
   ]
 
   return (
-    <TabContainedOverlay>
-      {isOpen ? (
-    <div
-      className="scn-run-history-backdrop"
+    <Modal
+      title={t('scenario.runHistory.title', 'Run history')}
+      isOpen={isOpen}
+      onClose={onClose}
+      scopeToSelector=".restorm-workbench-tab"
       data-testid="scenario-run-history-modal"
-      onMouseDown={onClose}
     >
-      <div className="scn-run-history-panel" onMouseDown={(e) => { e.stopPropagation() }}>
-        <header
-          className="scn-run-history-header"
-          onMouseDown={(e) => { if (e.button === 1) { e.preventDefault(); onClose() } }}
-        >
-          <span className="scn-run-history-title">{t('scenario.runHistory.title', 'Run history')}</span>
-          <button
-            type="button"
-            className="scn-run-history-close"
-            onClick={onClose}
-            aria-label={t('common.close', 'Close')}
-            title={t('common.close', 'Close')}
-            data-testid="scenario-run-history-close"
-          >
-            <span className="codicon codicon-close" />
-          </button>
-        </header>
         <div className="scn-run-history-body">
           <ul className="scn-run-history-list" data-testid="scenario-run-history-list">
             {runs.length === 0 ? (
@@ -200,7 +175,7 @@ export const ScenarioRunHistoryModal: React.FC<ScenarioRunHistoryModalProps> = (
               ))
             )}
           </ul>
-          <div className="scn-run-history-detail" ref={detailRef} data-testid="scenario-run-history-detail">
+          <div className="scn-run-history-detail" ref={attachDetailObserver} data-testid="scenario-run-history-detail">
             {detail === null ? (
               <div className="scn-run-history-detail-empty">{t('scenario.runHistory.noLogs', 'No log for this run')}</div>
             ) : sideBySide ? (
@@ -226,10 +201,7 @@ export const ScenarioRunHistoryModal: React.FC<ScenarioRunHistoryModalProps> = (
             )}
           </div>
         </div>
-      </div>
-    </div>
-      ) : null}
-    </TabContainedOverlay>
+    </Modal>
   )
 }
 

@@ -41,15 +41,31 @@
   overflow-y: auto;
 }
 
+/* Label + field on one row: the label sits in a fixed left column, the
+ * editor fills the rest. `align-items: start` keeps the label aligned to
+ * the top of taller editors (the object textarea) rather than centring it. */
 .scn-input-prompt-field {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-direction: row;
+  align-items: start;
+  gap: 12px;
 }
 
 .scn-input-prompt-label {
-  font-size: 11px;
+  font-size: 12px;
   opacity: 0.85;
+  flex: 0 0 auto;
+  width: 96px;
+  /* Nudge down so the label baseline lines up with the field's text when
+   * the editor is a single-line control. */
+  padding-top: 6px;
+}
+
+/* The editor (TypedValueField / input / textarea / toggle) takes the
+ * remaining width on the same row as its label. */
+.scn-input-prompt-field > :not(.scn-input-prompt-label) {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .scn-input-prompt-input {

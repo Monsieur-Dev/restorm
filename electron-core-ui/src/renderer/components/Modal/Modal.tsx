@@ -27,6 +27,16 @@ export interface ModalProps {
   onClosed?: () => void
   /** Optional test id applied to the modal container. Defaults to `modal`. */
   'data-testid'?: string
+  /**
+   * Scope the modal to a CONTAINER instead of the whole window. When set, the
+   * modal portals into the nearest ancestor matching this CSS selector (an
+   * invisible in-place anchor resolves it) and its overlay is positioned
+   * `absolute; inset: 0` over that container rather than `fixed` over the
+   * viewport — so the backdrop (and its blur) covers only that region. The
+   * container must be a positioned element (`position: relative` or similar).
+   * Falls back to the full-window behaviour when no matching ancestor exists.
+   */
+  scopeToSelector?: string
 }
 
 const ModalInner: React.FC<ModalProps> = ({
@@ -36,9 +46,18 @@ const ModalInner: React.FC<ModalProps> = ({
   children,
   size = 'full',
   onClosed,
-  'data-testid': dataTestId
+  'data-testid': dataTestId,
+  scopeToSelector
 }) => {
   const [isRendered, setIsRendered] = useState(isOpen)
+  // Scoped mode: resolve the nearest ancestor matching `scopeToSelector` from
+  // an in-place anchor, then portal the overlay there (instead of the body).
+  const [scopedTarget, setScopedTarget] = useState<HTMLElement | null>(null)
+  const setAnchor = useCallback((el: HTMLSpanElement | null): void => {
+    if (!el || scopeToSelector === undefined) return
+    const found = el.closest(scopeToSelector)
+    setScopedTarget(found instanceof HTMLElement ? found : null)
+  }, [scopeToSelector])
   const [overlayState, setOverlayState] = useState<'open' | 'closing' | 'closed'>('closed')
   const wasOpenRef = useRef(isOpen)
   const rafIdsRef = useRef<number[]>([])
@@ -115,8 +134,14 @@ const ModalInner: React.FC<ModalProps> = ({
     }
   }, [emitCloseRequest, isOpen, onClose])
 
+  // In scoped mode the anchor must stay mounted across open/close so it can
+  // (re)resolve the target on the next open.
+  const scopedAnchor = scopeToSelector !== undefined
+    ? <span ref={setAnchor} style={{ display: 'none' }} aria-hidden="true" />
+    : null
+
   if (!isRendered) {
-    return null
+    return scopedAnchor
   }
 
   const overlayClassName = [
@@ -144,6 +169,7 @@ const ModalInner: React.FC<ModalProps> = ({
       ref={overlayRef}
       className={overlayClassName}
       data-state={overlayState}
+      data-scoped={scopedTarget !== null ? 'true' : undefined}
       data-testid={overlayTestId}
       onTransitionEnd={(event) => {
         if (event.target !== event.currentTarget) return
@@ -217,6 +243,17 @@ const ModalInner: React.FC<ModalProps> = ({
 
   if (typeof document === 'undefined') {
     return content
+  }
+
+  // Scoped: portal into the resolved container (keeping the anchor mounted);
+  // fall back to the full-window body portal until/unless a target resolves.
+  if (scopeToSelector !== undefined) {
+    return (
+      <>
+        {scopedAnchor}
+        {scopedTarget ? createPortal(content, scopedTarget) : createPortal(content, document.body)}
+      </>
+    )
   }
 
   return createPortal(content, document.body)
