@@ -1,5 +1,35 @@
 import { describe, it, expect } from 'vitest'
-import { transformExecutor, logExecutor } from './pureExecutors'
+import {
+  transformExecutor,
+  logExecutor,
+  switchExecutor,
+  nowExecutor,
+  objectExecutor,
+  setVariableExecutor,
+  getVariableExecutor,
+  assertExecutor,
+  mapExecutor,
+  filterExecutor,
+  arithmeticExecutor,
+  booleanExecutor
+} from './pureExecutors'
+import type { ExecResult, NodeExecutor } from '../types'
+
+/** Run a synchronous pure executor with a minimal activation + context. */
+function runPure(
+  executor: NodeExecutor,
+  config: Record<string, unknown>,
+  inputs: Record<string, unknown>,
+  variables = new Map<string, unknown>()
+): ExecResult {
+  const act = { nodeId: 'n', kind: 'x', scope: [], inputs } as never
+  const ctx = {
+    node: { id: 'n', kind: 'x', config, inputs: [], outputs: [], position: { x: 0, y: 0 } },
+    variables,
+    log: () => undefined
+  } as never
+  return executor(act, ctx) as ExecResult
+}
 
 /**
  * The transform ("Transform template") node compiles a Handlebars template.
@@ -75,5 +105,115 @@ describe('logExecutor', () => {
   it('falls back to the configured message value-object when unwired', () => {
     const entry = runLog({ message: { type: 'string', value: 'hi' } }, {})
     expect(entry.message).toBe('hi')
+  })
+})
+
+describe('switchExecutor', () => {
+  it('routes to the matching case port', () => {
+    const out = runPure(switchExecutor, { cases: [{ id: 'a', value: 'x' }, { id: 'b', value: 'y' }] }, { on: 'y' })
+    expect(out.outputs).toEqual([{ port: 'case-b', value: 'y' }])
+  })
+
+  it('routes to `default` when no case matches', () => {
+    const out = runPure(switchExecutor, { cases: [{ id: 'a', value: 'x' }] }, { on: 'z' })
+    expect(out.outputs).toEqual([{ port: 'default', value: 'z' }])
+  })
+})
+
+describe('nowExecutor', () => {
+  it('emits an epoch number when configured', () => {
+    const out = runPure(nowExecutor, { format: 'epoch' }, {})
+    expect(typeof out.outputs[0]?.value).toBe('number')
+  })
+
+  it('emits an ISO datetime string by default', () => {
+    const out = runPure(nowExecutor, {}, {})
+    expect(out.outputs[0]?.port).toBe('value')
+    expect(out.outputs[0]?.value).toMatch(/^\d{4}-\d{2}-\d{2}T.*Z$/)
+  })
+})
+
+describe('objectExecutor', () => {
+  it('assembles its inputs into one object on the `object` port', () => {
+    const out = runPure(objectExecutor, {}, { name: 'Bob', level: 3 })
+    expect(out.outputs).toEqual([{ port: 'object', value: { name: 'Bob', level: 3 } }])
+  })
+})
+
+describe('setVariable / getVariable', () => {
+  it('writes then reads the run variable store by name', () => {
+    const vars = new Map<string, unknown>()
+    const set = runPure(setVariableExecutor, { name: 'hp' }, { value: 42 }, vars)
+    // The write emits a passthrough signal on `event` and persists the value.
+    expect(set.outputs).toEqual([{ port: 'event', value: 42 }])
+    expect(vars.get('hp')).toBe(42)
+
+    const get = runPure(getVariableExecutor, { name: 'hp' }, {}, vars)
+    expect(get.outputs).toEqual([{ port: 'value', value: 42 }])
+  })
+})
+
+describe('assertExecutor', () => {
+  it('routes the trigger to `then` when the assertion holds', () => {
+    const out = runPure(assertExecutor, { operator: 'eq', a: { type: 'number', value: 2 }, b: { type: 'number', value: 2 } }, { in: 'sig' })
+    expect(out.outputs).toEqual([{ port: 'then', value: 'sig' }])
+  })
+
+  it('routes to `else` when the assertion fails (wired operands win over config)', () => {
+    const out = runPure(assertExecutor, { operator: 'eq', a: { type: 'number', value: 2 } }, { in: 'sig', a: 2, b: 3 })
+    expect(out.outputs[0]?.port).toBe('else')
+  })
+})
+
+describe('mapExecutor', () => {
+  it('projects each item onto the configured property', () => {
+    const out = runPure(mapExecutor, { property: 'n' }, { items: [{ n: 1 }, { n: 2 }, { n: 3 }] })
+    expect(out.outputs).toEqual([{ port: 'mapped', value: [1, 2, 3] }])
+  })
+
+  it('passes items through unchanged when no property is set', () => {
+    const out = runPure(mapExecutor, {}, { items: [1, 2] })
+    expect(out.outputs[0]?.value).toEqual([1, 2])
+  })
+
+  it('falls back to the configured items when `items` is unwired', () => {
+    const out = runPure(mapExecutor, { property: 'n', items: { type: 'enumList', value: [{ n: 5 }, { n: 6 }] } }, {})
+    expect(out.outputs[0]?.value).toEqual([5, 6])
+  })
+})
+
+describe('filterExecutor', () => {
+  it('keeps the items satisfying the comparator predicate', () => {
+    const out = runPure(
+      filterExecutor,
+      { property: 'n', operator: 'gt', value: { type: 'number', value: 1 } },
+      { items: [{ n: 0 }, { n: 2 }, { n: 3 }] }
+    )
+    expect(out.outputs).toEqual([{ port: 'kept', value: [{ n: 2 }, { n: 3 }] }])
+  })
+})
+
+describe('arithmeticExecutor', () => {
+  it('applies the configured operator to a and b', () => {
+    expect(runPure(arithmeticExecutor, { op: 'add' }, { a: 2, b: 3 }).outputs).toEqual([{ port: 'result', value: 5 }])
+    expect(runPure(arithmeticExecutor, { op: 'mul' }, { a: 4, b: 3 }).outputs[0]?.value).toBe(12)
+    expect(runPure(arithmeticExecutor, { op: 'sub' }, { a: 10, b: 4 }).outputs[0]?.value).toBe(6)
+  })
+
+  it('throws on division by zero (routes to the error path)', () => {
+    expect(() => runPure(arithmeticExecutor, { op: 'div' }, { a: 1, b: 0 })).toThrow('division by zero')
+  })
+
+  it('coerces string operands to numbers', () => {
+    expect(runPure(arithmeticExecutor, { op: 'add' }, { a: '2', b: '5' }).outputs[0]?.value).toBe(7)
+  })
+})
+
+describe('booleanExecutor', () => {
+  it('evaluates the configured boolean operator', () => {
+    expect(runPure(booleanExecutor, { op: 'and' }, { a: true, b: false }).outputs[0]?.value).toBe(false)
+    expect(runPure(booleanExecutor, { op: 'or' }, { a: true, b: false }).outputs[0]?.value).toBe(true)
+    expect(runPure(booleanExecutor, { op: 'xor' }, { a: true, b: true }).outputs[0]?.value).toBe(false)
+    expect(runPure(booleanExecutor, { op: 'not' }, { a: false }).outputs[0]?.value).toBe(true)
   })
 })

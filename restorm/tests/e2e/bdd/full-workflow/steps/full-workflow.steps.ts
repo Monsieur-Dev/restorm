@@ -2037,6 +2037,11 @@ const BENIGN_LOG_PATTERNS: RegExp[] = [
   /mime_util_xdg\.cc.*Invalid mime\.cache file/,
   /service_worker_storage\.cc.*Failed to delete the database/,
   /Waiting for the debugger to disconnect/,
+  // Node's inspector teardown chatter on stderr when the main process exits
+  // with a debugger port open — non-deterministic (depends on detach timing),
+  // unrelated to restorm. Pairs with "Waiting for the debugger to disconnect".
+  /Debugger ending on ws:\/\//,
+  /For help, see: https:\/\/nodejs\.org\/en\/docs\/inspector/,
   // Chromium's X11 atom cache logging the desktop-portal clipboard atoms on
   // hosts with an active xdg-desktop-portal — emitted on clipboard/drag use,
   // unrelated to restorm.

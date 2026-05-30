@@ -134,22 +134,44 @@ export const forEachExecutor: NodeExecutor = (act, ctx) => {
   }
 }
 
-/** Aggregate node: collects items inside its forEach scope. The
- * Scheduler delivers one activation per per-item completion; the
- * executor stashes the partial in `ctx.variables` under a
- * `__aggregate__${nodeId}` key and emits the final `result` on the
- * `done` arrival.
+/**
+ * Aggregate node: reduces a collection to a single `result`.
  *
- * For the prototype, aggregate is driven by a single `done` token
- * from the upstream forEach + an `items` collection: simpler than the
- * scope-close-listener approach in the spec, but covers the AC
- * scenarios while we focus on the scheduler primitives. The
- * scope-close path is reserved for a follow-up. */
+ * Two intakes, both reordered/ordered by the scheduler before they reach
+ * here:
+ *  - **scope-close streaming** — when wired to a `forEach`/`for` `done`
+ *    port, the scheduler buffers one contribution per iteration (on
+ *    `items`, inside the loop scope) and fires this executor ONCE at close
+ *    with the contributions reordered by iteration index, plus an
+ *    `__aggregate` meta describing how many iterations produced nothing.
+ *  - **array reduce** — when `items` is a ready-made array (wired from a
+ *    response body, config, …), it's reduced directly (no meta).
+ *
+ * Error policy (streaming only), from `config.errorPolicy`:
+ *  - `partial` (default) — reduce over the contributions that arrived and
+ *    surface the failed iteration indices as a `warn` log entry.
+ *  - `fail` — throw when any iteration produced nothing (routes to the
+ *    node's `error` branch, or fails the run if unwired).
+ */
 export const aggregateExecutor: NodeExecutor = (act, ctx) => {
-  const cfg = ctx.node.config as { op?: 'count' | 'sum' | 'min' | 'max' | 'average' | 'join'; field?: string; separator?: string }
+  const cfg = ctx.node.config as { op?: 'count' | 'sum' | 'min' | 'max' | 'average' | 'join'; field?: string; separator?: string; errorPolicy?: 'partial' | 'fail' }
   const items: unknown[] = Array.isArray(act.inputs['items'])
     ? act.inputs['items']
     : (literalConfigItems(ctx.node.config) ?? [])
+  const meta = act.inputs['__aggregate'] as { total: number; missingIndices: number[] } | undefined
+  if (meta && meta.missingIndices.length > 0) {
+    const policy = cfg.errorPolicy ?? 'partial'
+    if (policy === 'fail') {
+      throw new Error(`aggregate: ${meta.missingIndices.length} of ${meta.total} iteration(s) produced no result (indices ${meta.missingIndices.join(', ')})`)
+    }
+    ctx.log({
+      level: 'warn',
+      nodeId: ctx.node.id,
+      scope: act.scope,
+      message: `aggregate: ${meta.missingIndices.length}/${meta.total} iteration(s) produced no result — partial result kept`,
+      data: { missingIndices: meta.missingIndices }
+    })
+  }
   const op = cfg.op ?? 'count'
   const field = cfg.field
   const get = (it: unknown): unknown => (field !== undefined ? (it as Record<string, unknown> | null)?.[field] : it)

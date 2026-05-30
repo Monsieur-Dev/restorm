@@ -33,7 +33,7 @@ import type {
   ScenarioModel,
   Token
 } from './types'
-import { ScopeRegistry } from './scopeRegistry'
+import { ScopeRegistry, scopeKey } from './scopeRegistry'
 import { InputBuffer, type PortSpec } from './inputBuffer'
 import { resolveSelectorPath, concreteValue } from '../../shared/utils/scenarioStaticPreview'
 import { evaluateCondition } from './conditionEval'
@@ -112,6 +112,14 @@ export class Scheduler {
   /** Per node → port → set of source keys (`${fromNodeId}:${fromPort}`)
    * feeding that port. A port fed by >1 source is an AND-join barrier. */
   private readonly incomingSourcesByNodePort = new Map<string, Map<string, Set<string>>>()
+  /** Aggregate nodes wired to a `forEach`/`for` `done` port — they collect
+   * one contribution per iteration on `items` (inside the loop scope) and
+   * fire ONCE when the loop closes (the `done` trigger), reordered by index.
+   * Aggregates NOT fed by a `done` port keep the plain array-reduce path. */
+  private readonly streamingAggregates = new Set<string>()
+  /** Buffered per-iteration contributions for a streaming aggregate, keyed
+   * by `${aggregateNodeId}@${parentScopeKey}` → (iteration index → value). */
+  private readonly aggregateCollect = new Map<string, Map<number, unknown>>()
 
   constructor(init: SchedulerInit) {
     this.runId = randomId()
@@ -502,6 +510,12 @@ export class Scheduler {
     // scope-close handler keeps opening the next item (and its
     // sub-scenario) after a Stop.
     if (this.abortCtl.signal.aborted) return
+    // A streaming aggregate collects per-iteration contributions itself
+    // (buffered, not buffered-into-an-activation) and fires once on close.
+    if (this.streamingAggregates.has(token.toNodeId)) {
+      this.collectForAggregate(token)
+      return
+    }
     const decision = this.buffer.put(token)
     if (!decision) return
     const node = this.scenario.nodes.find((n) => n.id === token.toNodeId)
@@ -574,7 +588,54 @@ export class Scheduler {
       srcs.add(`${e.from.nodeId}:${e.from.portId}`)
       byPort.set(e.to.portId, srcs)
       this.incomingSourcesByNodePort.set(e.to.nodeId, byPort)
+      // An `aggregate` fed by a loop's `done` port is a scope-close collector:
+      // `done` only exists on `forEach` / `for`, so this edge marks the
+      // aggregate as streaming (collect per iteration, fire once on close).
+      if (e.from.portId === 'done') {
+        const target = this.scenario.nodes.find((n) => n.id === e.to.nodeId)
+        if (target?.kind === 'aggregate') this.streamingAggregates.add(target.id)
+      }
     }
+  }
+
+  /**
+   * Streaming-aggregate intake. While the loop runs, each iteration's
+   * contribution arrives on `items` inside that iteration's scope — buffer
+   * it by index, don't activate. When the loop closes, its `done` token
+   * arrives on the aggregate's trigger (any non-`items` port) in the parent
+   * scope: fire the aggregate ONCE with the contributions reordered by index,
+   * plus the indices that produced nothing (the default-policy error list).
+   */
+  private collectForAggregate(token: Token): void {
+    const node = this.scenario.nodes.find((n) => n.id === token.toNodeId)
+    if (!node) return
+    if (token.toPort === 'items' && token.scope.length > 0) {
+      const parent = token.scope.slice(0, -1)
+      const idx = token.scope[token.scope.length - 1]?.index ?? 0
+      const key = `${node.id}@${scopeKey(parent)}`
+      const m = this.aggregateCollect.get(key) ?? new Map<number, unknown>()
+      m.set(idx, token.value)
+      this.aggregateCollect.set(key, m)
+      return
+    }
+    // Trigger (`done`): collect, reorder by index, surface missing indices.
+    const key = `${node.id}@${scopeKey(token.scope)}`
+    const collected = this.aggregateCollect.get(key) ?? new Map<number, unknown>()
+    this.aggregateCollect.delete(key)
+    const total = typeof token.value === 'number' && token.value >= 0 ? token.value : collected.size
+    const items: unknown[] = []
+    const missingIndices: number[] = []
+    for (let i = 0; i < total; i++) {
+      if (collected.has(i)) items.push(collected.get(i))
+      else missingIndices.push(i)
+    }
+    this.queue.push({
+      nodeId: node.id,
+      kind: node.kind,
+      scope: token.scope,
+      inputs: { items, __aggregate: { total, missingIndices } }
+    })
+    this.scopes.enter(token.scope)
   }
 
   private registerPorts(overrides?: Map<RuntimeId, PortSpec[]>): void {

@@ -1,0 +1,166 @@
+import { describe, it, expect } from 'vitest'
+import { Scheduler } from './scheduler'
+import type { NodeExecutor, ScenarioModel } from './types'
+import { forEachExecutor, aggregateExecutor } from './executors/timeAndFlowExecutors'
+
+/**
+ * AC: "ForEach ∥ et séquentiel testés ; Aggregate collecte à la fermeture de
+ * scope, ré-ordonné sur l'index, politique d'erreur configurable (défaut :
+ * partiel + liste d'erreurs)."
+ *
+ * A streaming aggregate is wired downstream of a `forEach`: each iteration's
+ * body contributes one value on `items` (inside the iteration scope) and the
+ * loop's `done` triggers the aggregate, which reduces the contributions —
+ * reordered by iteration index, regardless of completion order — and applies
+ * its error policy to iterations that produced nothing.
+ */
+
+interface NodeSpec { id: string; kind: string; inputs?: string[]; outputs?: string[]; config?: Record<string, unknown> }
+interface EdgeSpec { from: [string, string]; to: [string, string] }
+
+function buildScenario(nodes: NodeSpec[], edges: EdgeSpec[]): ScenarioModel {
+  return {
+    id: 's', name: 'agg', tags: [], params: [], items: [], notes: '',
+    nodes: nodes.map((n) => ({
+      id: n.id,
+      kind: n.kind,
+      config: n.config ?? {},
+      inputs: (n.inputs ?? []).map((p) => ({ id: p, name: p, role: 'value', dataType: 'any' })),
+      outputs: (n.outputs ?? []).map((p) => ({ id: p, name: p, role: 'value', dataType: 'any' })),
+      position: { x: 0, y: 0 }
+    })),
+    edges: edges.map((e, i) => ({ id: `e${i}`, from: { nodeId: e.from[0], portId: e.from[1] }, to: { nodeId: e.to[0], portId: e.to[1] } }))
+  } as unknown as ScenarioModel
+}
+
+/** A forEach → body → aggregate → sink graph. `body` is supplied by the test
+ * so it can contribute (or skip) per item; `sink` captures the reduced result. */
+function aggGraph(aggConfig: Record<string, unknown>): ScenarioModel {
+  return buildScenario(
+    [
+      { id: 'src', kind: 'now', outputs: ['value'] },
+      { id: 'fe', kind: 'forEach', inputs: ['items'], outputs: ['each', 'done'], config: { parallelism: { enabled: true, count: 8 } } },
+      { id: 'body', kind: 'transform', inputs: ['item'], outputs: ['value'] },
+      { id: 'agg', kind: 'aggregate', inputs: ['items', 'in'], outputs: ['result'], config: aggConfig },
+      { id: 'sink', kind: 'object', inputs: ['result'], outputs: ['value'] }
+    ],
+    [
+      { from: ['src', 'value'], to: ['fe', 'items'] },
+      { from: ['fe', 'each'], to: ['body', 'item'] },
+      { from: ['body', 'value'], to: ['agg', 'items'] },
+      { from: ['fe', 'done'], to: ['agg', 'in'] },
+      { from: ['agg', 'result'], to: ['sink', 'result'] }
+    ]
+  )
+}
+
+describe('AC3 — Aggregate scope-close collection', () => {
+  it('collects each iteration on close and reduces in index order (sequential)', async () => {
+    const scenario = buildScenario(
+      [
+        { id: 'src', kind: 'now', outputs: ['value'] },
+        { id: 'fe', kind: 'forEach', inputs: ['items'], outputs: ['each', 'done'], config: {} }, // batch 1 → sequential
+        { id: 'body', kind: 'transform', inputs: ['item'], outputs: ['value'] },
+        { id: 'agg', kind: 'aggregate', inputs: ['items', 'in'], outputs: ['result'], config: { op: 'join', separator: '-' } },
+        { id: 'sink', kind: 'object', inputs: ['result'], outputs: ['value'] }
+      ],
+      [
+        { from: ['src', 'value'], to: ['fe', 'items'] },
+        { from: ['fe', 'each'], to: ['body', 'item'] },
+        { from: ['body', 'value'], to: ['agg', 'items'] },
+        { from: ['fe', 'done'], to: ['agg', 'in'] },
+        { from: ['agg', 'result'], to: ['sink', 'result'] }
+      ]
+    )
+    let result: unknown
+    const executors = new Map<string, NodeExecutor>([
+      ['src', () => ({ outputs: [{ port: 'value', value: ['a', 'b', 'c'] }] })],
+      ['fe', forEachExecutor],
+      ['body', (act) => ({ outputs: [{ port: 'value', value: act.inputs['item'] }] })],
+      ['agg', aggregateExecutor],
+      ['sink', (act) => { result = act.inputs['result']; return { outputs: [] } }]
+    ])
+    const s = new Scheduler({ scenario, executors })
+    await s.run()
+    expect(s.status().state).toBe('completed')
+    expect(result).toBe('a-b-c')
+  })
+
+  it('reorders by iteration index even when iterations complete out of order (parallel)', async () => {
+    // Items carry a settle delay so completion order (b,d,c,a) differs from
+    // index order (a,b,c,d). The reduced join must follow INDEX order.
+    const scenario = aggGraph({ op: 'join', separator: ',' })
+    let result: unknown
+    const executors = new Map<string, NodeExecutor>([
+      ['src', () => ({ outputs: [{ port: 'value', value: [
+        { v: 'a', d: 40 }, { v: 'b', d: 0 }, { v: 'c', d: 25 }, { v: 'd', d: 8 }
+      ] }] })],
+      ['fe', forEachExecutor],
+      ['body', async (act) => {
+        const item = act.inputs['item'] as { v: string; d: number }
+        await new Promise((r) => setTimeout(r, item.d))
+        return { outputs: [{ port: 'value', value: item.v }] }
+      }],
+      ['agg', aggregateExecutor],
+      ['sink', (act) => { result = act.inputs['result']; return { outputs: [] } }]
+    ])
+    const s = new Scheduler({ scenario, executors })
+    await s.run()
+    expect(result).toBe('a,b,c,d')
+  })
+
+  it('default error policy keeps the partial result and lists the failed indices', async () => {
+    const scenario = aggGraph({ op: 'join', separator: ',' })
+    let result: unknown
+    const executors = new Map<string, NodeExecutor>([
+      ['src', () => ({ outputs: [{ port: 'value', value: ['a', 'b', 'c', 'd'] }] })],
+      ['fe', forEachExecutor],
+      // Iterations 1 ('b') and 3 ('d') contribute NOTHING — they produce no
+      // token on `items`, so the aggregate records them as failed indices.
+      ['body', (act) => {
+        const item = act.inputs['item'] as string
+        return item === 'b' || item === 'd' ? { outputs: [] } : { outputs: [{ port: 'value', value: item }] }
+      }],
+      ['agg', aggregateExecutor],
+      ['sink', (act) => { result = act.inputs['result']; return { outputs: [] } }]
+    ])
+    const s = new Scheduler({ scenario, executors })
+    await s.run()
+    expect(s.status().state).toBe('completed')
+    // Partial: only the contributing iterations, in index order.
+    expect(result).toBe('a,c')
+    // Error list surfaced as a warn entry naming the missing indices.
+    const warn = s.readLog().find((e) => e.level === 'warn' && e.nodeId === 'agg')
+    expect(warn).toBeDefined()
+    expect((warn?.data as { missingIndices: number[] }).missingIndices).toEqual([1, 3])
+  })
+
+  it('counts only the iterations that produced a result under the default policy', async () => {
+    const scenario = aggGraph({ op: 'count' })
+    let result: unknown
+    const executors = new Map<string, NodeExecutor>([
+      ['src', () => ({ outputs: [{ port: 'value', value: ['a', 'b', 'c'] }] })],
+      ['fe', forEachExecutor],
+      ['body', (act) => (act.inputs['item'] === 'b' ? { outputs: [] } : { outputs: [{ port: 'value', value: act.inputs['item'] }] })],
+      ['agg', aggregateExecutor],
+      ['sink', (act) => { result = act.inputs['result']; return { outputs: [] } }]
+    ])
+    const s = new Scheduler({ scenario, executors })
+    await s.run()
+    expect(result).toBe(2)
+  })
+
+  it('`fail` policy fails the run when an iteration produces nothing', async () => {
+    const scenario = aggGraph({ op: 'join', separator: ',', errorPolicy: 'fail' })
+    const executors = new Map<string, NodeExecutor>([
+      ['src', () => ({ outputs: [{ port: 'value', value: ['a', 'b', 'c'] }] })],
+      ['fe', forEachExecutor],
+      ['body', (act) => (act.inputs['item'] === 'b' ? { outputs: [] } : { outputs: [{ port: 'value', value: act.inputs['item'] }] })],
+      ['agg', aggregateExecutor],
+      ['sink', () => ({ outputs: [] })]
+    ])
+    const s = new Scheduler({ scenario, executors })
+    await s.run()
+    expect(s.status().state).toBe('failed')
+  })
+})
