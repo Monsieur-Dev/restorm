@@ -79,6 +79,21 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // isn't a hard-required port; the predicate (field/operator/value) lives in
   // config. No header trigger — data-driven (runs once `items` resolves).
   filter: { inputs: [{ id: 'items', name: 'items', dataType: 'json' }], outputs: [{ id: 'kept', name: 'kept', dataType: 'json', flow: 'value' }] },
+  // Loops. `for` is a numeric-range forEach: `from` / `to` / `step` carry
+  // inline value fallbacks (like the `if` operands), so they aren't hard
+  // required; it fans out the range over `each` (the current number) and fires
+  // `done` once every iteration's scope has closed — reusing the forEach
+  // scope machinery + the parallelism control.
+  for: { inputs: [{ id: 'from', name: 'from', dataType: 'number' }, { id: 'to', name: 'to', dataType: 'number' }, { id: 'step', name: 'step', dataType: 'number' }], outputs: [{ id: 'each', name: 'index', role: 'then', flow: 'both' }, { id: 'done', name: 'done', role: 'else', flow: 'signal' }] },
+  // `while` / `doWhile` are the `if` mechanism in a loop dress: a header
+  // trigger + two operands compared by the operator toggle, routing to `then`
+  // (the loop body) when the condition holds and `else` (exit) when it fails.
+  // The loop is closed by a user-wired edge from the body back into `in` (or
+  // an operand) — the scheduler's merge-on-loop-back re-fires the node each
+  // pass. `while` tests at the top; `doWhile` is wired after the body so it
+  // runs at least once. The `then` label differs to hint the wiring.
+  while: { inputs: [IN, { id: 'left', name: 'left' }, { id: 'right', name: 'right' }], outputs: [{ id: 'then', name: 'body', role: 'then', flow: 'both' }, { id: 'else', name: 'done', role: 'else', flow: 'signal' }] },
+  doWhile: { inputs: [IN, { id: 'left', name: 'left' }, { id: 'right', name: 'right' }], outputs: [{ id: 'then', name: 'loop', role: 'then', flow: 'both' }, { id: 'else', name: 'done', role: 'else', flow: 'signal' }] },
   // Time
   wait: { inputs: [IN, { id: 'duration', name: 'duration', dataType: 'duration' }], outputs: [{ id: 'out', name: 'then', role: 'then', flow: 'signal' }] },
   // Aligned on `wait`: a header trigger + an inline value fallback (a date-time

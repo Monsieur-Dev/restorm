@@ -15,6 +15,7 @@ import { ArithmeticNodeBox } from './ArithmeticNodeBox'
 import { InputNodeBox, OutputNodeBox, GetVariableNodeBox, SetVariableNodeBox } from './VariableNodeBox'
 import { TransformNodeBox } from './TransformNodeBox'
 import { ForEachNodeBox } from './ForEachNodeBox'
+import { ForNodeBox, WhileNodeBox, DoWhileNodeBox } from './LoopNodeBoxes'
 import { AggregateNodeBox } from './AggregateNodeBox'
 import { FilterNodeBox } from './FilterNodeBox'
 import { MapNodeBox } from './MapNodeBox'
@@ -39,6 +40,9 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   httpRequest: RequestNodeBox,
   runScenario: RunScenarioNodeBox,
   forEach: ForEachNodeBox,
+  for: ForNodeBox,
+  while: WhileNodeBox,
+  doWhile: DoWhileNodeBox,
   aggregate: AggregateNodeBox,
   map: MapNodeBox,
   filter: FilterNodeBox,

@@ -39,6 +39,7 @@ import { searchIndexService, contextService, responseHistoryService, requestUsag
 import { firewallService, permissionService, registerFirewallIpc, installWorkerPatcher } from './services/firewall'
 import { writeMcpDiscoveryFile, cleanupMcpDiscoveryFile } from './services/mcpDiscovery'
 import { registerRestormMcp } from './mcp'
+import { RESTORM_MCP_INSTRUCTIONS } from './mcp/instructions'
 import { graphQLService } from 'electron-core-ui/main'
 import { clearUserSettings, parseCliArgs } from './cli/args'
 import { setupGraphQL } from './GraphQLSetup'
@@ -455,6 +456,7 @@ void app.whenReady().then(() => {
 const mcpAuthToken = randomBytes(16).toString('hex')
 const mcpService = new McpService({
   serverInfo: { name: 'restorm', version: app.getVersion() },
+  instructions: RESTORM_MCP_INSTRUCTIONS,
   authToken: mcpAuthToken
 })
 void app.whenReady().then(async () => {

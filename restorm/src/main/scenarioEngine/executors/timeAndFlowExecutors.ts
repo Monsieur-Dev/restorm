@@ -6,7 +6,8 @@
  */
 
 import type { NodeExecutor } from '../types'
-import { literalConfigItems } from '../../../shared/utils/scenarioStaticPreview'
+import { literalConfigItems, concreteValue } from '../../../shared/utils/scenarioStaticPreview'
+import { compareValues } from '../conditionEval'
 
 /** Wait node: sleep for `durationMs` (from input or config). Aborts
  * cleanly when the run is cancelled. */
@@ -67,6 +68,48 @@ export const waitUntilExecutor: NodeExecutor = (act, ctx) => {
     if (ctx.signal.aborted) onAbort()
     else ctx.signal.addEventListener('abort', onAbort, { once: true })
   })
+}
+
+/** Upper bound on the number of iterations a `for` range expands to —
+ * a guard against `from`/`to`/`step` that would otherwise materialise a
+ * gigantic array (the scheduler's own activation cap is a second net). */
+const FOR_MAX_ITERATIONS = 100_000
+
+/** Build the numeric range like a C `for`: `i = from; while (i <op> to) { …;
+ * i += step }`. The user picks the operator (`<` `≤` `=` `≥` `>` `≠`); the step
+ * is signed as given (`step` 0 → 1 to avoid a stuck loop). Bounded by
+ * {@link FOR_MAX_ITERATIONS} against a non-terminating operator/step combo. */
+function buildRange(from: number, to: number, step: number, op: string): number[] {
+  const out: number[] = []
+  if (!Number.isFinite(from) || !Number.isFinite(to)) return out
+  const s = Number.isFinite(step) && step !== 0 ? step : 1
+  for (let i = from; compareValues(op, i, to) && out.length < FOR_MAX_ITERATIONS; i += s) out.push(i)
+  return out
+}
+
+/** For node: a numeric-range forEach. Builds the range [from..to] step
+ * `step` (inputs win over config) and hands it to the same scope
+ * machinery as `forEach` — `each` carries the current number, `done`
+ * fires when every iteration's scope has closed. Parallelism behaves
+ * exactly as on `forEach` (bounded sliding window). */
+export const forExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { from?: unknown; to?: unknown; step?: unknown; operator?: unknown; parallelism?: { enabled?: boolean; count?: number } }
+  const num = (v: unknown, fallback: number): number => (typeof v === 'number' && Number.isFinite(v) ? v : (typeof v === 'string' && v.trim() !== '' && Number.isFinite(Number(v)) ? Number(v) : fallback))
+  // Config bounds are persisted as typed values (`{ type:'numeric', value }`),
+  // so resolve them through `concreteValue` before coercing — a raw number
+  // (legacy / wired) passes through unchanged. Wired input ports win.
+  const from = num(act.inputs['from'], num(concreteValue(cfg.from), 0))
+  const to = num(act.inputs['to'], num(concreteValue(cfg.to), 0))
+  const step = num(act.inputs['step'], num(concreteValue(cfg.step), 1))
+  // Loop-condition operator (`i <op> to`), user-selectable, default `<`.
+  const op = typeof cfg.operator === 'string' ? cfg.operator : '<'
+  const items = buildRange(from, to, step, op)
+  const par = cfg.parallelism
+  const batchSize = par?.enabled === true ? Math.max(1, Math.floor(par.count ?? 1)) : 1
+  return {
+    outputs: [],
+    scopeAction: { type: 'openForEach', items, parallel: batchSize > 1, batchSize }
+  }
 }
 
 /** ForEach node: opens a scope per item; the scheduler handles the

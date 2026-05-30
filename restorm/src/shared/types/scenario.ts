@@ -84,6 +84,12 @@ export type ScenarioNodeKind =
   | 'aggregate'
   | 'map'
   | 'filter'
+  // Loops — `for` is a numeric-range forEach; `while` / `doWhile` reuse the
+  // `if` condition mechanism (operands + operator → body/done), the loop
+  // closed by a user-wired edge back into the node.
+  | 'for'
+  | 'while'
+  | 'doWhile'
   // Time
   | 'wait'
   | 'waitUntil'

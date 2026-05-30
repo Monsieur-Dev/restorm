@@ -62,7 +62,7 @@ export interface ScenarioLogEntry {
   runId?: string
   scenarioId?: string
   level?: 'debug' | 'info' | 'warn' | 'error'
-  source?: 'engine' | 'user'
+  source?: 'engine' | 'user' | 'run'
   nodeId?: string
   message: string
   data?: unknown
@@ -101,6 +101,9 @@ export interface UseScenarioEngineResult {
 export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
   const [state, setState] = useState<RunState>('idle')
   const [runId, setRunId] = useState<string | null>(null)
+  // A `while`/`doWhile` loop node stays lit for the WHOLE loop because the
+  // scheduler defers its `node-completed` until the loop exits (like forEach),
+  // so the beam tracking below needs no special loop handling.
   const [runningNodeIds, setRunningNodeIds] = useState<Set<string>>(new Set())
   const [edgeTokens, setEdgeTokens] = useState<Map<string, number>>(new Map())
   const [pendingInputs, setPendingInputs] = useState<PendingUserInput[]>([])
@@ -161,6 +164,9 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
           clearBeamTimers()
           setRunningNodeIds(new Set())
           setEdgeTokens(new Map())
+          // Clear the previous run's logs the moment a new run starts, so the
+          // inspector panel doesn't show stale entries until the first poll.
+          setRunLog([])
         }
         return
       }
@@ -296,15 +302,17 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
     const b = bridge()
     if (!b?.scenarioEngineStart) return
     const { runId: newRunId } = await b.scenarioEngineStart(scenarioId, params)
-    // Latch the top-level runId so node/run events gate to this run even
-    // before `run-started` round-trips back over IPC.
+    // Latch the top-level runId so node/run events gate to this run.
     topRunIdRef.current = newRunId
     setRunId(newRunId)
     setState('running')
-    clearBeamTimers()
-    setRunningNodeIds(new Set())
-    setEdgeTokens(new Map())
-  }, [clearBeamTimers])
+    // DON'T reset the animation state (runningNodeIds / edgeTokens / runLog)
+    // here. The `run-started` event already cleared it — and crucially does so
+    // BEFORE any `node-started`. Clearing AFTER this `await` would wipe the
+    // beams of ROOT nodes (e.g. a `doWhile`) that fired during the await,
+    // which is why a UI-launched run showed no beam on the loop node while an
+    // MCP-launched run (no `start` callback) did.
+  }, [])
 
   const pause = useCallback(async (): Promise<void> => {
     const id = runIdRef.current

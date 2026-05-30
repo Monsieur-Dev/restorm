@@ -268,6 +268,19 @@ export function registerReadTools(mcp: McpService): void {
     },
     () => jsonReply(getCurrentTabSnapshot())
   )
+
+  mcp.registerTool(
+    'list_favorites',
+    {
+      title: 'List favorite items',
+      description:
+        'Return the user\'s starred (favorite) items in the open project: `{ projectUuid, favorites: [{ id, name, type }] }` ' +
+        '(type = request | folder | env-folder | scenario). These are the same favorites toggled with `set_favorite` and shown ' +
+        'in the sidebar Favorites pane. Driven by a renderer push (like `get_current_tab`); empty before a project is open.',
+      inputSchema: {} as Record<string, unknown>
+    },
+    () => jsonReply(getFavoritesSnapshot())
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -276,3 +289,4 @@ export function registerReadTools(mcp: McpService): void {
 // ---------------------------------------------------------------------------
 
 import { getCurrentTabSnapshot, pickSelectedEnvId } from './activeState'
+import { getFavoritesSnapshot } from '../favoritesBridge'

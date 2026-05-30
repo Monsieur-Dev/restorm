@@ -7,6 +7,7 @@
 import Handlebars from 'handlebars'
 import type { NodeExecutor } from '../types'
 import { literalConfigItems, concreteValue } from '../../../shared/utils/scenarioStaticPreview'
+import { compareValues, resolveOperand } from '../conditionEval'
 
 /** Arithmetic node: `op(a, b)` with op from config. */
 export const arithmeticExecutor: NodeExecutor = (act, ctx) => {
@@ -29,27 +30,15 @@ export const arithmeticExecutor: NodeExecutor = (act, ctx) => {
   return { outputs: [{ port: 'result', value }] }
 }
 
-/** Comparator: compares operands `a` and `b` via `op`, emits boolean
- * on `result`. (Canonical port ids are `a` / `b` / `result`.) */
+/** Comparator: compares operands `a` and `b` via the operator, emits
+ * boolean on `result`. Operands come from the wired ports when present,
+ * else the node's inline typed-value config — so `comparator 1 < 2`
+ * works without links. (Canonical port ids are `a` / `b` / `result`.) */
 export const comparatorExecutor: NodeExecutor = (act, ctx) => {
-  const cfg = ctx.node.config as { op?: string }
-  const l = act.inputs['a']
-  const r = act.inputs['b']
-  return { outputs: [{ port: 'result', value: compare(cfg.op, l, r) }] }
-}
-
-/** Shared comparison used by comparator / if / assert. */
-function compare(op: string | undefined, l: unknown, r: unknown): boolean {
-  switch (op) {
-    case 'lt': return (l as number) < (r as number)
-    case 'lte': return (l as number) <= (r as number)
-    case 'eq': return l === r
-    case 'gte': return (l as number) >= (r as number)
-    case 'gt': return (l as number) > (r as number)
-    case 'ne': return l !== r
-    case 'contains': return stringifySafely(l).includes(stringifySafely(r))
-    default: return l === r
-  }
+  const cfg = ctx.node.config as { op?: string; operator?: string; a?: unknown; b?: unknown }
+  const l = resolveOperand(act.inputs['a'], cfg.a, ctx.variables)
+  const r = resolveOperand(act.inputs['b'], cfg.b, ctx.variables)
+  return { outputs: [{ port: 'result', value: compareValues(cfg.operator ?? cfg.op, l, r) }] }
 }
 
 /** Boolean node: `op(a, b)` → boolean. */
@@ -74,14 +63,30 @@ export const booleanExecutor: NodeExecutor = (act, ctx) => {
  * no operator/operands are wired, falls back to the truthiness of the
  * `in` signal so a bare `if` still routes. */
 export const ifExecutor: NodeExecutor = (act, ctx) => {
-  const cfg = ctx.node.config as { op?: string }
-  const hasOperands = act.inputs['left'] !== undefined || act.inputs['right'] !== undefined
+  const cfg = ctx.node.config as { op?: string; operator?: string; left?: unknown; right?: unknown }
+  // Operands: a wired port wins; otherwise the box's inline typed value
+  // (resolved to a primitive). This is what makes `if 1 = 2`, and a
+  // while/doWhile whose condition is set inline, actually evaluate —
+  // rather than silently falling back to the trigger's truthiness.
+  const left = resolveOperand(act.inputs['left'], cfg.left, ctx.variables)
+  const right = resolveOperand(act.inputs['right'], cfg.right, ctx.variables)
+  const hasOperands = left !== undefined || right !== undefined
   const cond = hasOperands
-    ? compare(cfg.op, act.inputs['left'], act.inputs['right'])
+    ? compareValues(cfg.operator ?? cfg.op, left, right)
     : Boolean(act.inputs['in'])
-  const value = act.inputs['in'] ?? act.inputs['left']
+  const value = act.inputs['in'] ?? left
   return { outputs: [{ port: cond ? 'then' : 'else', value }] }
 }
+
+/** While / Do-While: a SCOPE-based conditional loop the scheduler drives.
+ * The executor only marks the loop; the scheduler runs the body (`then`)
+ * in a scope, waits for it to finish, re-evaluates the condition, and
+ * repeats while true — emitting `else` (done) when it turns false. `while`
+ * tests before the first body; `doWhile` runs the body once first. The
+ * condition is the same operand/operator as `if` (re-read each iteration
+ * from the inline config / wired latched values). */
+export const whileExecutor: NodeExecutor = () => ({ outputs: [], scopeAction: { type: 'conditionalLoop', mode: 'while' } })
+export const doWhileExecutor: NodeExecutor = () => ({ outputs: [], scopeAction: { type: 'conditionalLoop', mode: 'doWhile' } })
 
 /** Switch node: matches `on` against the `case` values in config; if
  * none match, emits on the `default` port. Each emission carries
@@ -160,9 +165,11 @@ export const logExecutor: NodeExecutor = (act, ctx) => {
  * the config operator, routing the trigger to `then` (pass) or `else`
  * (fail). Canonical inputs `in` / `a` / `b`; outputs `then` / `else`. */
 export const assertExecutor: NodeExecutor = (act, ctx) => {
-  const cfg = ctx.node.config as { op?: string }
-  const ok = compare(cfg.op ?? 'eq', act.inputs['a'], act.inputs['b'])
-  const value = act.inputs['in'] ?? act.inputs['a']
+  const cfg = ctx.node.config as { op?: string; operator?: string; a?: unknown; b?: unknown }
+  const a = resolveOperand(act.inputs['a'], cfg.a, ctx.variables)
+  const b = resolveOperand(act.inputs['b'], cfg.b, ctx.variables)
+  const ok = compareValues(cfg.operator ?? cfg.op ?? 'eq', a, b)
+  const value = act.inputs['in'] ?? a
   return { outputs: [{ port: ok ? 'then' : 'else', value }] }
 }
 
@@ -179,25 +186,18 @@ export const mapExecutor: NodeExecutor = (act, ctx) => {
   return { outputs: [{ port: 'mapped', value }] }
 }
 
-/** Filter node: keeps items satisfying a comparator predicate. */
+/** Filter node: keeps items satisfying a comparator predicate. Operator
+ * (toggle symbols or names) + compare value come from config; the value
+ * is an inline typed value resolved to a primitive. */
 export const filterExecutor: NodeExecutor = (act, ctx) => {
-  const cfg = ctx.node.config as { property?: string; op?: string; value?: unknown }
+  const cfg = ctx.node.config as { property?: string; op?: string; operator?: string; value?: unknown }
   const items = Array.isArray(act.inputs['items']) ? act.inputs['items'] : (literalConfigItems(ctx.node.config) ?? [])
-  const op = cfg.op ?? 'eq'
-  const cmp = cfg.value
+  const op = cfg.operator ?? cfg.op
+  const cmp = concreteValue(cfg.value)
   const prop = cfg.property
   const value = items.filter((it) => {
     const v: unknown = prop !== undefined ? (it as Record<string, unknown> | null)?.[prop] : it
-    switch (op) {
-      case 'lt': return (v as number) < (cmp as number)
-      case 'lte': return (v as number) <= (cmp as number)
-      case 'gte': return (v as number) >= (cmp as number)
-      case 'gt': return (v as number) > (cmp as number)
-      case 'ne': return v !== cmp
-      case 'contains': return stringifySafely(v).includes(String(cmp))
-      case 'eq':
-      default: return v === cmp
-    }
+    return compareValues(op, v, cmp)
   })
   return { outputs: [{ port: 'kept', value }] }
 }

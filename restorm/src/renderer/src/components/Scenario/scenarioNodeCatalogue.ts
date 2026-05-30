@@ -6,7 +6,7 @@ import type { ScenarioNodeKind } from '../../../../shared/types/collections'
  * add-node palette + the node box header (label + codicon).
  */
 /** Catalogue grouping — drives the separators in the add-node menu. */
-export type ScenarioNodeCategory = 'control' | 'composition' | 'collections' | 'time' | 'compute' | 'utility'
+export type ScenarioNodeCategory = 'control' | 'composition' | 'collections' | 'loops' | 'time' | 'compute' | 'utility'
 
 export interface ScenarioNodeKindMeta {
   kind: ScenarioNodeKind
@@ -29,11 +29,15 @@ export const SCENARIO_NODE_CATALOGUE: ScenarioNodeKindMeta[] = [
   // Requests & composition
   { kind: 'httpRequest', labelKey: 'scenario.nodes.httpRequest', defaultLabel: 'HTTP Request', icon: 'globe', category: 'composition' },
   { kind: 'runScenario', labelKey: 'scenario.nodes.runScenario', defaultLabel: 'Run scenario', icon: 'circuit-board', category: 'composition' },
-  // Iteration & collections
-  { kind: 'forEach', labelKey: 'scenario.nodes.forEach', defaultLabel: 'ForEach', icon: 'symbol-array', category: 'collections' },
+  // Collections
   { kind: 'aggregate', labelKey: 'scenario.nodes.aggregate', defaultLabel: 'Aggregate', icon: 'combine', category: 'collections' },
   { kind: 'map', labelKey: 'scenario.nodes.map', defaultLabel: 'Map', icon: 'arrow-swap', category: 'collections' },
   { kind: 'filter', labelKey: 'scenario.nodes.filter', defaultLabel: 'Filter', icon: 'filter', category: 'collections' },
+  // Loops (grouped into a "loops" submenu in the add-node menu)
+  { kind: 'forEach', labelKey: 'scenario.nodes.forEach', defaultLabel: 'ForEach', icon: 'symbol-array', category: 'loops' },
+  { kind: 'for', labelKey: 'scenario.nodes.for', defaultLabel: 'For', icon: 'list-ordered', category: 'loops' },
+  { kind: 'while', labelKey: 'scenario.nodes.while', defaultLabel: 'While', icon: 'sync', category: 'loops' },
+  { kind: 'doWhile', labelKey: 'scenario.nodes.doWhile', defaultLabel: 'Do…While', icon: 'debug-restart', category: 'loops' },
   // Time
   { kind: 'wait', labelKey: 'scenario.nodes.wait', defaultLabel: 'Wait', icon: 'watch', category: 'time' },
   { kind: 'waitUntil', labelKey: 'scenario.nodes.waitUntil', defaultLabel: 'Wait until', icon: 'clock', category: 'time' },

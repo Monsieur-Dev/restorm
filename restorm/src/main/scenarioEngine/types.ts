@@ -89,6 +89,11 @@ export interface ExecResult {
   scopeAction?:
     | { type: 'openForEach'; items: unknown[]; parallel: boolean; batchSize: number }
     | { type: 'closeScope' }
+    // A `while` / `doWhile`: the scheduler runs the body (`then`) in a child
+    // scope, waits for it to close, re-evaluates the condition, and repeats
+    // while true — emitting `else` when false. `while` tests first; `doWhile`
+    // runs the body once before the first test.
+    | { type: 'conditionalLoop'; mode: 'while' | 'doWhile' }
 }
 
 /**
@@ -122,7 +127,9 @@ export interface RunLogEntry {
   ts: string
   runId: RuntimeId
   level: 'debug' | 'info' | 'warn' | 'error'
-  source: 'engine' | 'user'
+  // `run` = a scenario-boundary marker (started / ended), shown in the
+  // inspector by default alongside `user` log entries (vs `engine` debug).
+  source: 'engine' | 'user' | 'run'
   nodeId?: RuntimeId
   scope?: ScopeStack
   message: string

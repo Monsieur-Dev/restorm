@@ -17,7 +17,9 @@ export const STATIC_PREVIEW_KINDS: ReadonlySet<ScenarioNode['kind']> = new Set<S
   'if',
   'switch',
   'wait', 'waitUntil',
-  'map', 'filter', 'aggregate'
+  'map', 'filter', 'aggregate',
+  // `while` / `doWhile` route a value to body/done exactly like `if`.
+  'while', 'doWhile'
 ])
 
 /** The minimal node + edge shapes the static-preview resolvers read. */
@@ -285,6 +287,28 @@ export function applyListOp(
     const batches = total === 0 ? 0 : Math.ceil(total / itemsPerBatch)
     return { totalItems: total, itemsPerBatch, batches }
   }
+  if (node.kind === 'for') {
+    // A numeric-range forEach: count the `for i = from; i <op> to; i += step`
+    // iterations (ignoring `items` — the range comes from config) and report
+    // the iteration / batch sizing readout.
+    const num = (v: unknown, fallback: number): number => asNumber(concreteValue(v)) ?? fallback
+    const from = num(cfg['from'], 0)
+    const to = num(cfg['to'], 0)
+    const stepRaw = num(cfg['step'], 1)
+    const step = stepRaw === 0 ? 1 : stepRaw
+    const op = typeof cfg['operator'] === 'string' ? cfg['operator'] : '<'
+    let total = 0
+    if (Number.isFinite(from) && Number.isFinite(to)) {
+      for (let i = from; compareValues(op, i, to) === true && total < 100_000; i += step) total += 1
+    }
+    const parRaw = cfg['parallelism']
+    const par = parRaw && typeof parRaw === 'object' ? parRaw as Record<string, unknown> : null
+    const enabled = par?.['enabled'] === true
+    const rawCount = par?.['count']
+    const itemsPerBatch = enabled && typeof rawCount === 'number' && rawCount >= 2 ? Math.floor(rawCount) : 1
+    const batches = total === 0 ? 0 : Math.ceil(total / itemsPerBatch)
+    return { totalItems: total, itemsPerBatch, batches }
+  }
   return null
 }
 
@@ -470,6 +494,10 @@ export function staticScenarioPreview(
       if (items === null) return null
       return applyListOp({ id: node.id, kind: node.kind, config: cfg }, items)
     }
+    case 'for':
+      // Range comes from config (`from`/`to`/`step`), not an `items` edge —
+      // `applyListOp` ignores the passed list for `for`.
+      return applyListOp({ id: node.id, kind: node.kind, config: cfg }, [])
     case 'log': {
       // Terminal sink — no output port, but the inspector summarises what
       // would be logged so the user can sanity-check the level + payload.
@@ -545,6 +573,18 @@ export function staticScenarioPreview(
       // signal branches (`then` / `else`) chosen by the boolean — reflect both
       // the underlying condition and the chosen branch so the inspector tells
       // the user what fires.
+      const a = operandPreviewValue(node.id, 'left', cfg['left'], nodes, edges)
+      const b = operandPreviewValue(node.id, 'right', cfg['right'], nodes, edges)
+      if (a === undefined || b === undefined) return null
+      const op = typeof cfg['operator'] === 'string' ? cfg['operator'] : '='
+      const r = compareValues(op, a, b)
+      if (r === null) return null
+      return { condition: r, branch: r ? 'then' : 'else' }
+    }
+    case 'while':
+    case 'doWhile': {
+      // The `if` mechanism in a loop: same operands + operator; `then` is the
+      // body (loop continues), `else` exits. Reflect the condition + branch.
       const a = operandPreviewValue(node.id, 'left', cfg['left'], nodes, edges)
       const b = operandPreviewValue(node.id, 'right', cfg['right'], nodes, edges)
       if (a === undefined || b === undefined) return null

@@ -965,6 +965,22 @@
       "title": "Parámetros de ejecución",
       "run": "Ejecutar",
       "midRunTitle": "Entrada solicitada"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
     }
   }
 }

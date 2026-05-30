@@ -701,15 +701,9 @@
   flex: 1;
   min-width: 0;
 }
-.scn-wait-input {
-  width: 50px;
-  background: var(--input-background, #3c3c3c);
-  color: var(--input-foreground, #cccccc);
-  border: 1px solid var(--input-border, #555555);
-  border-radius: 3px;
-  padding: 1px 4px;
-  font-size: 11px;
-  font-family: var(--editor-font-family, monospace);
+/* The duration field is an ECUI InputBox (number mode); just size it. */
+.scn-wait-duration .inputbox {
+  width: 72px;
 }
 .scn-unit-toggle {
   display: inline-flex;

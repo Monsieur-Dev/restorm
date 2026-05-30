@@ -36,13 +36,15 @@ import type {
 import { ScopeRegistry } from './scopeRegistry'
 import { InputBuffer, type PortSpec } from './inputBuffer'
 import { resolveSelectorPath, concreteValue } from '../../shared/utils/scenarioStaticPreview'
+import { evaluateCondition } from './conditionEval'
 
 /**
- * Hard-cap on activations executed in a single run. Protects against
- * a malformed graph that fans out without bound (a cycle whose `if`
- * never reaches `else`). Per-run override possible via `RunOptions`.
+ * No activation cap by default — a scenario can loop intentionally for as
+ * long as the user wants (days), stopped only by an explicit Stop. A finite
+ * cap is still settable per-run via `RunOptions.maxActivations` (the unit
+ * tests use it to assert the runaway-cycle guard still works on demand).
  */
-const DEFAULT_MAX_ACTIVATIONS = 10_000
+const DEFAULT_MAX_ACTIVATIONS = Number.POSITIVE_INFINITY
 
 export interface RunOptions {
   /** Params for the scenario's `input` nodes (keyed by param name). */
@@ -156,6 +158,7 @@ export class Scheduler {
     if (opts.maxActivations !== undefined) this.maxActivations = opts.maxActivations
     this.state = opts.startPaused === true ? 'paused' : 'running'
     this.emit({ type: 'run-started', runId: this.runId, scenarioId: this.scenario.id, at: now() })
+    this.logRunBoundary('start')
     this.seedRoots(opts.params ?? {})
     this.tick()
     return this.completionPromise()
@@ -202,6 +205,7 @@ export class Scheduler {
     // "when I hit Stop" traceable; also marks where an abort cascaded
     // into a sub-run via `reason: 'parent cancelled'`).
     this.log.push({ ts: now(), runId: this.runId, level: 'info', source: 'engine', message: `run aborted${reason !== undefined ? ` (${reason})` : ''}` })
+    this.logRunBoundary('end', reason === 'parent cancelled' ? 'parent cancelled' : 'cancelled')
     this.abortCtl.abort(reason ?? 'cancelled')
     this.queue = []
     // If we were idle, just emit; if running, the in-flight chain
@@ -256,7 +260,7 @@ export class Scheduler {
       return
     }
     this.inFlight += 1
-    this.log.push({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `start ${act.kind} inputs=[${Object.keys(act.inputs).join(',')}]` })
+    this.log.push({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `start ${act.kind}`, ...(Object.keys(act.inputs).length > 0 ? { data: logData(act.inputs) } : {}) })
     this.emit({ type: 'node-started', runId: this.runId, nodeId: act.nodeId, scope: act.scope, at: now() })
     const ctx: ExecContext = {
       signal: this.abortCtl.signal,
@@ -281,12 +285,15 @@ export class Scheduler {
           // run was cancelled while we awaited — silently land.
           return
         }
-        this.log.push({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `done ${act.kind} → [${result.outputs.map((o) => o.port).join(',') || '(none)'}]` })
+        const doneData: Record<string, unknown> = {}
+        for (const o of result.outputs) doneData[o.port] = o.value
+        this.log.push({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `done ${act.kind}`, ...(result.outputs.length > 0 ? { data: logData(doneData) } : {}) })
         this.handleExecResult(act, result)
-        // A `forEach` doesn't "complete" when its executor returns — it's
-        // still orchestrating its batches. `runForEach` emits the deferred
-        // `node-completed` once every item scope has closed.
-        if (result.scopeAction?.type !== 'openForEach') {
+        // A `forEach` / conditional loop doesn't "complete" when its executor
+        // returns — it's still orchestrating its iterations. The deferred
+        // `node-completed` fires once every iteration scope has closed (and,
+        // for a loop, the condition has turned false).
+        if (result.scopeAction?.type !== 'openForEach' && result.scopeAction?.type !== 'conditionalLoop') {
           this.emit({ type: 'node-completed', runId: this.runId, nodeId: act.nodeId, scope: act.scope, at: now(), outputs: result.outputs })
         }
       } catch (err) {
@@ -322,6 +329,10 @@ export class Scheduler {
       // item at once (preserves the legacy fully-parallel behaviour).
       const n = typeof action.batchSize === 'number' && action.batchSize > 0 ? action.batchSize : action.items.length
       this.runForEach(act, action.items, Math.max(1, n))
+      return
+    }
+    if (action?.type === 'conditionalLoop') {
+      this.runConditionalLoop(act, action.mode)
       return
     }
     // Plain emissions: route each one to the edges leaving the port.
@@ -418,6 +429,62 @@ export class Scheduler {
     this.log.push({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `forEach start: ${total} items, batchSize=${batchSize}, opening first ${initial}` })
     nextIndex = initial
     for (let i = 0; i < initial; i++) openItem(i)
+  }
+
+  /**
+   * Run a `while` / `doWhile` as an engine-managed loop. Each iteration
+   * runs the body (the subgraph wired off `then`) in its own child scope;
+   * when that scope closes (the iteration finished), the condition is
+   * re-evaluated and — while true — another iteration opens. When the
+   * condition turns false the `else` port fires and the loop node's own
+   * `node-completed` is emitted (deferred here so its running beam spans
+   * the WHOLE loop, like a forEach). `while` tests before the first body;
+   * `doWhile` runs the body once before the first test. No manual loop-back
+   * edge is needed — the scheduler closes the loop itself.
+   */
+  private runConditionalLoop(act: InternalActivation, mode: 'while' | 'doWhile'): void {
+    const thenEdges = this.outgoingByPort.get(`${act.nodeId}:then`) ?? []
+    const node = this.findNode(act.nodeId)
+    let iter = 0
+
+    const evalCond = (): boolean => {
+      try { return evaluateCondition(node.config, act.inputs, this.variables) } catch { return false }
+    }
+
+    const fireElse = (): void => {
+      const elseEdges = this.outgoingByPort.get(`${act.nodeId}:else`) ?? []
+      for (const edge of elseEdges) {
+        this.enqueueToken({ value: iter, fromNodeId: act.nodeId, fromPort: 'else', toNodeId: edge.toNodeId, toPort: edge.toPort, scope: act.scope, tokenId: ++this.tokenSeq })
+        this.emit({ type: 'data-flow-emitted', runId: this.runId, edgeId: edge.edgeId, tokenId: this.tokenSeq, at: now() })
+      }
+      this.log.push({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `${mode} done after ${iter} iteration(s)` })
+      this.emit({ type: 'node-completed', runId: this.runId, nodeId: act.nodeId, scope: act.scope, at: now(), outputs: [] })
+    }
+
+    const openBody = (): void => {
+      if (this.abortCtl.signal.aborted) return
+      const i = iter
+      iter += 1
+      const child: ScopeStack = [...act.scope, { scopeNodeId: act.nodeId, index: i }]
+      this.log.push({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `${mode} iteration ${i}` })
+      for (const edge of thenEdges) {
+        this.enqueueToken({ value: i, fromNodeId: act.nodeId, fromPort: 'then', toNodeId: edge.toNodeId, toPort: edge.toPort, scope: child, tokenId: ++this.tokenSeq })
+        this.emit({ type: 'data-flow-emitted', runId: this.runId, edgeId: edge.edgeId, tokenId: this.tokenSeq, at: now() })
+      }
+      // Iteration is done when its whole body chain has drained the scope;
+      // then re-evaluate and loop while true.
+      this.scopes.onClose(child, () => {
+        if (this.abortCtl.signal.aborted) return
+        if (evalCond()) openBody()
+        else fireElse()
+      })
+    }
+
+    // A loop with no body wired can't iterate — just take the exit branch.
+    if (thenEdges.length === 0) { fireElse(); return }
+    if (mode === 'doWhile') openBody()
+    else if (evalCond()) openBody()
+    else fireElse()
   }
 
   /** Push a token into the buffer; if a node becomes fireable, queue
@@ -586,6 +653,7 @@ export class Scheduler {
     }
     if (this.queue.length > 0 || this.inFlight > 0) return
     this.state = 'completed'
+    this.logRunBoundary('end')
     this.emit({ type: 'run-completed', runId: this.runId, at: now() })
     this.flushWaiters()
   }
@@ -594,9 +662,20 @@ export class Scheduler {
     if (this.state === 'completed' || this.state === 'cancelled' || this.state === 'failed') return
     this.state = 'failed'
     this.queue = []
+    this.logRunBoundary('end', 'failed')
     this.abortCtl.abort(reason)
     this.emit({ type: 'run-failed', runId: this.runId, at: now(), error: reason })
     this.flushWaiters()
+  }
+
+  /** A scenario-boundary log entry (started / ended), `source: 'run'` so the
+   * inspector shows it by default — a run that produced no user `log` entries
+   * (e.g. a loop whose condition was false at once) still shows it ran + ended,
+   * and a sub-scenario's own start/end nest in the run tree. */
+  private logRunBoundary(phase: 'start' | 'end', outcome?: string): void {
+    const name = this.scenario.name && this.scenario.name.trim() !== '' ? this.scenario.name : 'scénario'
+    const message = phase === 'start' ? `▶ ${name}` : `■ ${name}${outcome !== undefined ? ` (${outcome})` : ''}`
+    this.log.push({ ts: now(), runId: this.runId, level: 'info', source: 'run', message })
   }
 
   /** Surface a single-field input request to the renderer + return a
@@ -665,6 +744,14 @@ function randomId(): string {
 function deepClone<T>(v: T): T {
   if (v === undefined) return v
   return structuredClone(v)
+}
+
+/** Snapshot a value for a log entry's `data` (so the inspector can render
+ * it as a tree). Cloned so a later in-place mutation by the executor can't
+ * rewrite the logged value; never throws (a non-cloneable value collapses
+ * to a marker instead of breaking the dispatch / the IPC event send). */
+function logData(v: unknown): unknown {
+  try { return structuredClone(v) } catch { return '[unserializable]' }
 }
 
 // Suppress unused-import warning: ScopeFrame is part of the public

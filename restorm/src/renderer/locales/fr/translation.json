@@ -965,6 +965,22 @@
       "title": "Paramètres d'exécution",
       "run": "Exécuter",
       "midRunTitle": "Saisie demandée"
+    },
+    "for": {
+      "from": "de",
+      "to": "à",
+      "step": "pas",
+      "index": "indice",
+      "done": "terminé"
+    },
+    "while": {
+      "body": "corps"
+    },
+    "doWhile": {
+      "loop": "boucler"
+    },
+    "loop": {
+      "done": "terminé"
     }
   }
 }

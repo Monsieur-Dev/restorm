@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React from 'react'
+import { InputBox } from 'electron-core-ui/renderer'
 import { WAIT_UNITS, type WaitUnit } from './waitUnits'
 
 export interface WaitDurationControlProps {
@@ -19,29 +20,15 @@ export interface WaitDurationControlProps {
  * value arrives on the `duration` port and the toggle declares its unit.
  */
 export const WaitDurationControl: React.FC<WaitDurationControlProps> = ({ value, unit, unitOnly, onValueChange, onUnitChange }) => {
-  const [internalValue, setInternalValue] = useState<string>(value != null ? String(value) : '1000')
-  // Re-sync the field when the persisted value changes underneath us
-  // (compare-and-set in render — no effect, no clobbering mid-type).
-  const [lastValueProp, setLastValueProp] = useState<number | undefined>(value)
-  if (value !== lastValueProp) {
-    setLastValueProp(value)
-    if (value != null) setInternalValue(String(value))
-  }
   const selectedUnit: WaitUnit = unit ?? 'ms'
   return (
-    <div className="scn-wait-duration nodrag">
+    <div className="scn-wait-duration nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
       {unitOnly !== true && (
-        <input
-          type="number"
-          min={0}
-          className="scn-wait-input"
-          value={internalValue}
-          onMouseDown={(e) => { e.stopPropagation() }}
-          onChange={(e) => {
-            setInternalValue(e.target.value)
-            const n = Number(e.target.value)
-            if (!Number.isNaN(n)) onValueChange?.(n)
-          }}
+        <InputBox
+          value={value != null ? String(value) : '1000'}
+          onChange={(next) => { const n = Number(next); if (!Number.isNaN(n)) onValueChange?.(n) }}
+          options={{ type: 'number', min: 0, ariaLabel: 'duration' }}
+          data-testid="scn-wait-duration"
         />
       )}
       <div className="scn-unit-toggle" role="radiogroup" aria-label="unit">

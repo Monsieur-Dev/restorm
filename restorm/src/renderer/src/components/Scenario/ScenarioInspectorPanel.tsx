@@ -125,8 +125,9 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
   const { t } = useTranslation()
   const [result, setResult] = useState<Record<string, unknown> | null>(null)
   // Run-logs panel (shown when no box is selected): all entries vs only
-  // the user-pushed ones (the `log` action, source === 'user').
-  const [showAllLogs, setShowAllLogs] = useState(true)
+  // the user-pushed ones (the `log` action, source === 'user'). Defaults to
+  // user-only — the engine debug lines (start/done per node) are opt-in.
+  const [showAllLogs, setShowAllLogs] = useState(false)
   const [copied, setCopied] = useState(false)
   const fetchToken = useRef(0)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -267,9 +268,11 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
   const stopLabel = t('scenario.inspector.stop', 'Stop')
 
   // Run-logs view (only when no box is selected). `all` shows engine +
-  // user entries; otherwise only the user-pushed ones (the `log` action).
+  // user entries; otherwise only the user `log` action entries PLUS the
+  // scenario `run` boundaries (▶ start / ■ end, incl. sub-scenarios) — so an
+  // otherwise-silent run still shows it ran + ended.
   const allLogs = runLog ?? []
-  const visibleLogs = showAllLogs ? allLogs : allLogs.filter((e) => e.source === 'user')
+  const visibleLogs = showAllLogs ? allLogs : allLogs.filter((e) => e.source === 'user' || e.source === 'run')
   const logTs = (ts: string): string => (ts.length >= 23 ? ts.slice(11, 23) : ts)
   // Defensive: a log `message` may arrive as a non-string (e.g. a typed
   // ValueType `{ type, value }`); never hand a raw object to React.
@@ -298,6 +301,8 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
     if (e.data !== undefined) {
       const tree = buildScenarioPathTree(typeof e.data === 'object' && e.data !== null ? (e.data as Record<string, unknown>) : { value: e.data })
       item.children = prefixIds(tree, `log-${i}`)
+      // Collapsed by default — the data is a sub-element you expand on demand.
+      item.isExpanded = false
     }
     return item
   })
@@ -452,15 +457,15 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
                 data-testid="scenario-inspector-copy-logs"
               />
             </div>
-            <label className="scn-inspector-logs-toggle nodrag">
+            <div className="scn-inspector-logs-toggle nodrag">
               <Toggle
                 checked={showAllLogs}
                 onChange={(checked) => { setShowAllLogs(checked) }}
-                aria-label={t('scenario.inspector.logsShowAll', 'Show all logs')}
                 data-testid="scenario-inspector-logs-all"
-              />
-              <span>{t('scenario.inspector.logsShowAll', 'Show all logs')}</span>
-            </label>
+              >
+                {t('scenario.inspector.logsShowAll', 'Show all logs')}
+              </Toggle>
+            </div>
             {logItems.length === 0
               ? (
                 <div className="scn-inspector-info" role="note">

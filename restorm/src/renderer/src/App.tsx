@@ -148,6 +148,7 @@ import { useFirewallProjectOriginsSync } from './hooks/useFirewallProjectOrigins
 import { useSidebarState } from './hooks/useSidebarState'
 import {
   isFavorite as favoritesStoreIsFavorite,
+  getFavorites as favoritesStoreGet,
   toggleFavorite as favoritesStoreToggle,
   addFavorite as favoritesStoreAdd,
   removeFavorite as favoritesStoreRemove,
@@ -1436,6 +1437,33 @@ const App: React.FC = () => {
     })
     return () => { off?.() }
   }, [mcpEnabled])
+
+  // Push the resolved item-favorites to main so the MCP `list_favorites`
+  // tool can read them (the favorites store is renderer-only). Re-push on
+  // mount, on project / tree change, and on every favorites mutation.
+  useEffect(() => {
+    if (!mcpEnabled) return undefined
+    const push = (window as { restorm?: { runtime?: { pushMcpFavorites?: (p: { projectUuid: string | null; favorites: { id: string; name: string; type: string }[] }) => void } } }).restorm?.runtime?.pushMcpFavorites
+    if (!push) return undefined
+    const typeOf = (it: FolderItem): string => {
+      if ((it as { type?: unknown }).type === 'scenario') return 'scenario'
+      if ('folderType' in it && (it as { folderType?: unknown }).folderType === 'environment') return 'env-folder'
+      if ('items' in it) return 'folder'
+      return 'request'
+    }
+    const send = (): void => {
+      const ids = projectUuid ? favoritesStoreGet(projectUuid) : []
+      const favorites: { id: string; name: string; type: string }[] = []
+      for (const id of ids) {
+        const item = findItemById(rootItems, id)
+        if (item) favorites.push({ id, name: item.name, type: typeOf(item) })
+      }
+      push({ projectUuid, favorites })
+    }
+    send()
+    window.addEventListener('restorm:favorites-changed', send)
+    return () => { window.removeEventListener('restorm:favorites-changed', send) }
+  }, [mcpEnabled, projectUuid, rootItems])
 
   // Per-pane inline-edit targets so a rename triggered from Favorites
   // or Opened opens the input in that pane (not the Workspace tree row).

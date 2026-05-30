@@ -11,6 +11,8 @@ import {
   comparatorExecutor,
   booleanExecutor,
   ifExecutor,
+  whileExecutor,
+  doWhileExecutor,
   switchExecutor,
   nowExecutor,
   setVariableExecutor,
@@ -26,6 +28,7 @@ import {
   waitExecutor,
   waitUntilExecutor,
   forEachExecutor,
+  forExecutor,
   aggregateExecutor
 } from './timeAndFlowExecutors'
 import { httpRequestExecutor } from './httpRequestExecutor'
@@ -95,6 +98,12 @@ function pickExecutor(kind: string): NodeExecutor {
     case 'wait': return waitExecutor
     case 'waitUntil': return waitUntilExecutor
     case 'forEach': return forEachExecutor
+    case 'for': return forExecutor
+    // `while` / `doWhile` are engine-managed scope loops: the executor marks
+    // the loop, the scheduler runs the body + re-evaluates the condition each
+    // iteration (no manual loop-back edge needed).
+    case 'while': return whileExecutor
+    case 'doWhile': return doWhileExecutor
     case 'aggregate': return aggregateExecutor
     case 'httpRequest':
     case 'request': return httpRequestExecutor

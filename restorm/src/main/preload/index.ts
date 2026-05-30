@@ -859,6 +859,12 @@ contextBridge.exposeInMainWorld('restorm', {
     pushMcpActiveEnv: (payload: { envFolderId: string; envId: string | null }): void => {
       ipcRenderer.send('mcp:active-env-changed', payload)
     },
+    /** Push the resolved item-favorites for the active project so the MCP
+     * `list_favorites` tool can read them (the favorites store lives in the
+     * renderer). Called on mount + whenever favorites change. */
+    pushMcpFavorites: (payload: { projectUuid: string | null; favorites: { id: string; name: string; type: string }[] }): void => {
+      ipcRenderer.send('mcp:favorites-changed', payload)
+    },
     /** Push an open scenario editor's React-Flow-measured node rects (position
      * + size) to main, so the scenario MCP read tools can report box sizes
      * (size isn't persisted in the model). Lets an agent lay out a scenario

@@ -17,12 +17,13 @@ import { collectionStore } from '../../services/CollectionStore'
 import type { Scenario } from '../../../shared/models/Scenario'
 import type { ScenarioNode, ScenarioEdge, ScenarioNodeKind, ScenarioPort } from '../../../shared/types/scenario'
 import { defaultPortsForKind, isValidScenarioConnection, outputPortFlow, inputPortFlow, deriveRunScenarioPorts } from '../../../shared/scenarioNodePorts'
+import { SCENARIO_KIND_DOCS } from '../../../shared/scenarioKindDocs'
 import { STATIC_PREVIEW_KINDS, staticScenarioPreview, singleDeepPath, expectsObjectInput, type StaticPreviewEdge } from '../../../shared/utils/scenarioStaticPreview'
 import { broadcastTreeReplace } from './import'
 
 const SCENARIO_KINDS = [
-  'input', 'output', 'if', 'switch', 'httpRequest', 'runScenario', 'forEach', 'aggregate', 'map',
-  'filter', 'wait', 'waitUntil', 'now', 'arithmetic', 'comparator', 'boolean', 'object',
+  'input', 'output', 'if', 'switch', 'httpRequest', 'runScenario', 'forEach', 'for', 'while', 'doWhile',
+  'aggregate', 'map', 'filter', 'wait', 'waitUntil', 'now', 'arithmetic', 'comparator', 'boolean', 'object',
   'setVariable', 'getVariable', 'transform', 'log', 'assert'
 ] as const
 
@@ -131,7 +132,45 @@ function nodeView(n: ScenarioNode, rects?: Record<string, NodeRect>): Record<str
   }
 }
 
+/** Compose a self-describing record for one node kind: its purpose, its
+ * default ports (id + name + flow class + role), and its config keys. */
+function describeScenarioKind(kind: ScenarioNodeKind): Record<string, unknown> {
+  const { inputs, outputs } = defaultPortsForKind(kind)
+  const doc = SCENARIO_KIND_DOCS[kind]
+  const inPort = (p: ScenarioPort): Record<string, unknown> => ({ id: p.id, name: p.name || p.id, flow: inputPortFlow(inputs, p.id, kind), ...(p.role ? { role: p.role } : {}) })
+  const outPort = (p: ScenarioPort): Record<string, unknown> => ({ id: p.id, name: p.name || p.id, flow: outputPortFlow(outputs, p.id, kind), ...(p.role ? { role: p.role } : {}) })
+  return {
+    kind,
+    summary: doc.summary,
+    inputs: inputs.map(inPort),
+    // The `error` output is implicit on every box (drawn by the editor, not in
+    // the model) — surface it so a client knows it can wire failure handling.
+    outputs: [...outputs.map(outPort), { id: 'error', name: 'error', flow: 'both' }],
+    ...(doc.config && Object.keys(doc.config).length > 0 ? { config: doc.config } : {})
+  }
+}
+
 export function registerScenarioTools(mcp: McpService): void {
+  mcp.registerTool(
+    'describe_scenario_kinds',
+    {
+      title: 'Describe scenario node kinds',
+      description:
+        'Self-describing catalogue for authoring scenario graphs: for each node kind, its purpose (`summary`), its default ' +
+        'input/output ports (`id`, `name`, `flow` = value | signal | both, and `role`), and its `config` keys. The implicit ' +
+        '`error` output is included. Call this BEFORE create_scenario_node so you wire ports + set config correctly. Pass ' +
+        '`kind` to get one; omit for all.',
+      inputSchema: {
+        kind: z.enum(SCENARIO_KINDS).optional().describe('Limit to a single kind; omit for the full catalogue.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const one = typeof args['kind'] === 'string' ? args['kind'] as ScenarioNodeKind : null
+      const kinds: readonly ScenarioNodeKind[] = one ? [one] : (SCENARIO_KINDS as readonly ScenarioNodeKind[])
+      return jsonReply({ kinds: kinds.map(describeScenarioKind) })
+    }
+  )
+
   // An open editor pushes its React-Flow-measured node rects here so the read
   // tools can report box sizes (size isn't persisted in the model).
   ipcMain.removeAllListeners('scenario:layout')
@@ -191,6 +230,7 @@ export function registerScenarioTools(mcp: McpService): void {
       title: 'Add a box to a scenario',
       description:
         'Create a node (box) in a scenario. `kind` is one of: ' + SCENARIO_KINDS.join(', ') + '. ' +
+        '**Call `describe_scenario_kinds` first** for each kind\'s purpose, ports, and `config` keys. ' +
         'Default input/output ports for the kind are stamped automatically. `config` is the per-kind ' +
         'bag — e.g. an `httpRequest` node binds via `{ requestId, label }`, `runScenario` via `{ scenarioId, label }`. ' +
         'Returns `{ nodeId, kind, position, inputs, outputs }`.',

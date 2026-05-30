@@ -112,6 +112,11 @@ const PALETTE_ENTRIES: (ScenarioNodeKindMeta | { separator: true })[] = SCENARIO
   (meta, i, arr) => (i > 0 && arr[i - 1]?.category !== meta.category ? [{ separator: true as const }, meta] : [meta])
 )
 
+/** The loop kinds (forEach / for / while / doWhile) folded into one "loops"
+ * submenu in the add-node menu — keyed off the catalogue `loops` category so a
+ * new loop kind joins the submenu automatically. */
+const LOOP_METAS: ScenarioNodeKindMeta[] = SCENARIO_NODE_CATALOGUE.filter((m) => m.category === 'loops')
+
 /** Catalogue meta by kind — label/icon lookup for the filtered link palette. */
 const META_BY_KIND = new Map<ScenarioNodeKind, ScenarioNodeKindMeta>(SCENARIO_NODE_CATALOGUE.map((m) => [m.kind, m]))
 
@@ -480,10 +485,24 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
   // output nodes, so renaming or deleting a param there strands edges that
   // referenced the old port id — those become orphans we flag in red.
   const isOrphanEdge = useCallback((e: ScenarioEdge): boolean => {
-    const tgtDerived = derivedPortsOf(nodeStore.current.get(e.to.nodeId))
-    if (tgtDerived && !tgtDerived.inputs.some((p) => p.id === e.to.portId)) return true
-    const srcDerived = derivedPortsOf(nodeStore.current.get(e.from.nodeId))
-    if (srcDerived && !srcDerived.outputs.some((p) => p.id === e.from.portId)) return true
+    // A runScenario's VALID ports are its static ports (the `in` trigger, the
+    // `result` output) PLUS the derived `param:`/`output:` ports. Only a
+    // derived port can be stranded by a sub-scenario rename — so an edge is an
+    // orphan only when its endpoint is in NEITHER set. (Checking the derived
+    // set alone wrongly flags an edge to the static `in`/`result`, e.g. a loop
+    // body wired `…then → runScenario.in`.)
+    const tgt = nodeStore.current.get(e.to.nodeId)
+    const tgtDerived = derivedPortsOf(tgt)
+    if (tgtDerived && tgt) {
+      const valid = new Set<string>([...defaultPortsForKind(tgt.kind).inputs.map((p) => p.id), ...tgtDerived.inputs.map((p) => p.id)])
+      if (!valid.has(e.to.portId)) return true
+    }
+    const src = nodeStore.current.get(e.from.nodeId)
+    const srcDerived = derivedPortsOf(src)
+    if (srcDerived && src) {
+      const valid = new Set<string>(['error', ...defaultPortsForKind(src.kind).outputs.map((p) => p.id), ...srcDerived.outputs.map((p) => p.id)])
+      if (!valid.has(e.from.portId)) return true
+    }
     return false
   }, [derivedPortsOf])
 
@@ -1624,7 +1643,18 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
                         { id: `add-${SCENARIO_ADD_SCENARIO_ENTRY.kind}`, label: t(SCENARIO_ADD_SCENARIO_ENTRY.labelKey, SCENARIO_ADD_SCENARIO_ENTRY.defaultLabel), icon: scenarioAddIcon(SCENARIO_ADD_SCENARIO_ENTRY.badge), onClick: () => { addChildNode('scenario', palette.flow) } }
                       ]
                     }]
-                  : [{ id: e.kind, label: t(e.labelKey, e.defaultLabel), icon: e.icon, onClick: () => { addNode(e.kind, palette.flow) } }]
+                  // Fold all loop kinds into one "loops" submenu — emitted once,
+                  // at the first loop entry; the rest collapse into it.
+                  : e.category === 'loops'
+                    ? e.kind === LOOP_METAS[0]?.kind
+                      ? [{
+                          id: 'scenario-loops',
+                          label: t('scenario.nodes.loops', 'Loops'),
+                          icon: 'sync',
+                          items: LOOP_METAS.map((m): ContextMenuItem => ({ id: `loop-${m.kind}`, label: t(m.labelKey, m.defaultLabel), icon: m.icon, onClick: () => { addNode(m.kind, palette.flow) } }))
+                        }]
+                      : []
+                    : [{ id: e.kind, label: t(e.labelKey, e.defaultLabel), icon: e.icon, onClick: () => { addNode(e.kind, palette.flow) } }]
           )}
         />
       )}
