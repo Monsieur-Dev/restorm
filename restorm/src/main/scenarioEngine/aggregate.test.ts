@@ -150,6 +150,86 @@ describe('AC3 — Aggregate scope-close collection', () => {
     expect(result).toBe(2)
   })
 
+  it('aggregates per outer iteration when wired to a nested inner loop\'s `done`', async () => {
+    // outer forEach [[1,2],[3,4]] → inner forEach over each sub-array → body →
+    // agg.items ; inner.done → agg.in. The aggregate fires ONCE per outer
+    // iteration (in the outer scope), collecting that iteration's inner items.
+    const scenario = buildScenario(
+      [
+        { id: 'src', kind: 'now', outputs: ['value'] },
+        { id: 'outer', kind: 'forEach', inputs: ['items'], outputs: ['each', 'done'], config: { parallelism: { enabled: true, count: 4 } } },
+        { id: 'inner', kind: 'forEach', inputs: ['items'], outputs: ['each', 'done'], config: { parallelism: { enabled: true, count: 4 } } },
+        { id: 'body', kind: 'transform', inputs: ['item'], outputs: ['value'] },
+        { id: 'agg', kind: 'aggregate', inputs: ['items', 'in'], outputs: ['result'], config: { op: 'sum' } },
+        { id: 'sink', kind: 'object', inputs: ['result'], outputs: ['value'] }
+      ],
+      [
+        { from: ['src', 'value'], to: ['outer', 'items'] },
+        { from: ['outer', 'each'], to: ['inner', 'items'] },
+        { from: ['inner', 'each'], to: ['body', 'item'] },
+        { from: ['body', 'value'], to: ['agg', 'items'] },
+        { from: ['inner', 'done'], to: ['agg', 'in'] },
+        { from: ['agg', 'result'], to: ['sink', 'result'] }
+      ]
+    )
+    const results: unknown[] = []
+    const executors = new Map<string, NodeExecutor>([
+      ['src', () => ({ outputs: [{ port: 'value', value: [[1, 2], [3, 4]] }] })],
+      ['outer', forEachExecutor],
+      ['inner', forEachExecutor],
+      ['body', (act) => ({ outputs: [{ port: 'value', value: act.inputs['item'] }] })],
+      ['agg', aggregateExecutor],
+      ['sink', (act) => { results.push(act.inputs['result']); return { outputs: [] } }]
+    ])
+    const s = new Scheduler({ scenario, executors })
+    await s.run()
+    expect(s.status().state).toBe('completed')
+    // One aggregate per outer iteration: sum(1,2)=3 and sum(3,4)=7.
+    expect([...results].sort()).toEqual([3, 7])
+  })
+
+  it('reports (does not silently mis-reduce) a ready-made array wired into a scope-close aggregate', async () => {
+    // Contract violation: the aggregate is a scope-close collector (it has a
+    // `done` trigger) yet `items` is fed a ROOT-scope array. The array is not
+    // mistaken for the trigger; the loop's `done` fires once and the default
+    // policy surfaces the empty collection as a warn — detectable, not a
+    // silently wrong reduce.
+    const scenario = buildScenario(
+      [
+        { id: 'arr', kind: 'now', outputs: ['value'] },
+        { id: 'fe', kind: 'forEach', inputs: ['items'], outputs: ['each', 'done'], config: {} },
+        { id: 'noop', kind: 'now', inputs: ['tick'], outputs: ['value'] },
+        { id: 'agg', kind: 'aggregate', inputs: ['items', 'in'], outputs: ['result'], config: { op: 'count' } },
+        { id: 'sink', kind: 'object', inputs: ['result'], outputs: ['value'] }
+      ],
+      [
+        { from: ['arr', 'value'], to: ['agg', 'items'] },
+        { from: ['fe', 'each'], to: ['noop', 'tick'] },
+        { from: ['fe', 'done'], to: ['agg', 'in'] },
+        { from: ['agg', 'result'], to: ['sink', 'result'] }
+      ]
+    )
+    let result: unknown
+    let fired = 0
+    const executors = new Map<string, NodeExecutor>([
+      ['arr', () => ({ outputs: [{ port: 'value', value: [10, 20, 30] }] })],
+      // The forEach iterates a 2-item placeholder so `done` carries total 2;
+      // `each` feeds a real no-op body so iteration scopes open/close normally.
+      ['fe', () => ({ outputs: [], scopeAction: { type: 'openForEach', items: ['p', 'q'], parallel: false, batchSize: 1 } })],
+      ['noop', () => ({ outputs: [] })],
+      ['agg', (act, ctx) => { fired += 1; return aggregateExecutor(act, ctx) }],
+      ['sink', (act) => { result = act.inputs['result']; return { outputs: [] } }]
+    ])
+    const s = new Scheduler({ scenario, executors })
+    await s.run()
+    expect(s.status().state).toBe('completed')
+    // Fires exactly once (the root array does NOT spawn a second activation).
+    expect(fired).toBe(1)
+    expect(result).toBe(0)
+    const warn = s.readLog().find((e) => e.level === 'warn' && e.nodeId === 'agg')
+    expect(warn).toBeDefined()
+  })
+
   it('`fail` policy fails the run when an iteration produces nothing', async () => {
     const scenario = aggGraph({ op: 'join', separator: ',', errorPolicy: 'fail' })
     const executors = new Map<string, NodeExecutor>([

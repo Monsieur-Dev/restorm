@@ -605,11 +605,28 @@ export class Scheduler {
    * arrives on the aggregate's trigger (any non-`items` port) in the parent
    * scope: fire the aggregate ONCE with the contributions reordered by index,
    * plus the indices that produced nothing (the default-policy error list).
+   *
+   * Contract: the aggregate collects from the loop whose `done` triggers it —
+   * contributions must arrive exactly one scope frame deeper than the trigger
+   * (i.e. directly inside that loop). An aggregate triggered by an OUTER loop
+   * while its `items` are fed from a nested inner loop is unsupported (the
+   * contributions won't match the trigger's scope, so the run logs them as
+   * missing rather than guessing a cross-level ordering).
    */
   private collectForAggregate(token: Token): void {
     const node = this.scenario.nodes.find((n) => n.id === token.toNodeId)
     if (!node) return
-    if (token.toPort === 'items' && token.scope.length > 0) {
+    if (token.toPort === 'items') {
+      // A streaming aggregate only collects per-iteration contributions, which
+      // arrive one scope frame deeper than the trigger. A token at the
+      // aggregate's own (root) scope is a contract violation (a ready-made
+      // array wired into a node that's also a scope-close collector): drop it
+      // rather than mistake it for the trigger — the real `done` then fires
+      // once and the default policy's warn surfaces the empty collection.
+      if (token.scope.length === 0) return
+      // Per-iteration contribution → buffer by iteration index. A second
+      // contribution at the same index (a loop-back) is last-write-wins: the
+      // model is one collected value per iteration.
       const parent = token.scope.slice(0, -1)
       const idx = token.scope[token.scope.length - 1]?.index ?? 0
       const key = `${node.id}@${scopeKey(parent)}`
