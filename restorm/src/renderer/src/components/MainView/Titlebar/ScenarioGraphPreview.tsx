@@ -35,6 +35,13 @@ export interface ScenarioGraphPreviewProps {
   /** Optional test id stamped on the wrapper for snapshot/e2e
    * assertions. */
   testId?: string
+  /** When false, the preview is a static fit-to-view thumbnail: no
+   * pan, no zoom, no controls (used for the run-history snapshot
+   * thumbnails). Defaults to true (pan + Ctrl-wheel zoom). */
+  interactive?: boolean
+  /** Pan/zoom to + flash a node (e.g. a run-history log click). The
+   * `token` retriggers the framing + flash even for the same node. */
+  focusNode?: { nodeId: string; token: number } | null
 }
 
 // Reuse the live editor's `ScenarioNodeView` so the preview shows the
@@ -47,10 +54,16 @@ const FIT_VIEW_OPTIONS = { padding: 0.15 } as const
 /** Thin wrapper around React Flow that exposes the same pointer-lock
  * pan + Ctrl-wheel zoom semantics as `ModelGraph`. Kept as an inner
  * component so the wrapper can be guarded by `<ReactFlowProvider>`. */
-const ScenarioGraphPreviewCanvas: React.FC<{ scenario: Scenario; testId?: string }> = ({ scenario, testId }) => {
+const ScenarioGraphPreviewCanvas: React.FC<{ scenario: Scenario; testId?: string; interactive: boolean; focusNode?: { nodeId: string; token: number } | null }> = ({ scenario, testId, interactive, focusNode }) => {
   // Build the React-Flow shapes synchronously — there's no async layout
   // to wait for (positions come straight off the persisted scenario).
-  const nodes = useMemo(() => scenario.nodes.map(toReactFlowNode), [scenario])
+  // Inject the flash token into the focused node so its box pulses (the
+  // editor's run-log-click flash, reused for the run-history graph).
+  const nodes = useMemo(() => {
+    const base = scenario.nodes.map(toReactFlowNode)
+    if (!focusNode) return base
+    return base.map((n) => (n.id === focusNode.nodeId ? { ...n, data: { ...n.data, flashToken: focusNode.token } } : n))
+  }, [scenario, focusNode])
   const edges = useMemo(() => scenario.edges.map(toReactFlowEdge), [scenario])
   const [fitGeneration, setFitGeneration] = useState(0)
   const { fitView, getViewport, setViewport } = useReactFlow()
@@ -84,13 +97,28 @@ const ScenarioGraphPreviewCanvas: React.FC<{ scenario: Scenario; testId?: string
     if (viewportWidth <= 0 || viewportHeight <= 0) return
     if (fittedGenerationRef.current === fitGeneration) return
     fittedGenerationRef.current = fitGeneration
+    // A focus request frames the target node instead (handled below); don't
+    // also fit-to-whole or the two fights flicker.
+    if (focusNode) return
     void fitView(FIT_VIEW_OPTIONS).then(() => { void fitView(FIT_VIEW_OPTIONS) })
-  }, [nodesReady, fitGeneration, nodes.length, viewportWidth, viewportHeight, fitView])
+  }, [nodesReady, fitGeneration, nodes.length, viewportWidth, viewportHeight, fitView, focusNode])
+
+  // Pan/zoom to a focused node when a (new) focus request arrives. Declared
+  // after the fit-to-whole effect so on a fresh mount it runs last + wins.
+  const focusTokenRef = useRef<number | undefined>(undefined)
+  useEffect(() => {
+    if (!focusNode || !nodesReady) return
+    if (viewportWidth <= 0 || viewportHeight <= 0) return
+    if (focusTokenRef.current === focusNode.token) return
+    focusTokenRef.current = focusNode.token
+    void fitView({ nodes: [{ id: focusNode.nodeId }], duration: 300, maxZoom: 1.2 })
+  }, [focusNode, nodesReady, viewportWidth, viewportHeight, fitView])
 
   // Pointer-lock pan — same recipe as `ModelGraph`. Cursor disappears
   // for the drag, so the popover never registers a `mouseleave`
-  // mid-pan.
+  // mid-pan. Skipped entirely for a static (non-interactive) thumbnail.
   useEffect(() => {
+    if (!interactive) return
     const wrapper = wrapperRef.current
     if (!wrapper) return
     const pane = wrapper.querySelector<HTMLElement>('.react-flow__pane')
@@ -135,7 +163,7 @@ const ScenarioGraphPreviewCanvas: React.FC<{ scenario: Scenario; testId?: string
       document.removeEventListener('pointerlockchange', onLockChange)
       if (document.pointerLockElement === pane) document.exitPointerLock()
     }
-  }, [getViewport, setViewport])
+  }, [getViewport, setViewport, interactive])
 
   return (
     <div
@@ -153,9 +181,9 @@ const ScenarioGraphPreviewCanvas: React.FC<{ scenario: Scenario; testId?: string
         minZoom={0.2}
         maxZoom={2}
         panOnScroll={false}
-        zoomOnScroll
+        zoomOnScroll={interactive}
         zoomActivationKeyCode={['Control', 'Meta']}
-        zoomOnPinch
+        zoomOnPinch={interactive}
         preventScrolling={false}
         panOnDrag={false}
         nodesDraggable={false}
@@ -166,13 +194,13 @@ const ScenarioGraphPreviewCanvas: React.FC<{ scenario: Scenario; testId?: string
         selectionKeyCode={null}
         multiSelectionKeyCode={null}
       >
-        <Controls showInteractive={false} />
+        {interactive && <Controls showInteractive={false} />}
       </ReactFlow>
     </div>
   )
 }
 
-export const ScenarioGraphPreview: React.FC<ScenarioGraphPreviewProps> = ({ scenario, testId }) => {
+export const ScenarioGraphPreview: React.FC<ScenarioGraphPreviewProps> = ({ scenario, testId, interactive = true, focusNode = null }) => {
   // The reused live `ScenarioNodeView` resolves bound requests /
   // sub-scenarios through `ScenarioBoundResolverContext` to display
   // the correct badge + name. Without it, a request box would fall
@@ -187,7 +215,7 @@ export const ScenarioGraphPreview: React.FC<ScenarioGraphPreviewProps> = ({ scen
   return (
     <ScenarioBoundResolverContext.Provider value={resolveBoundItem}>
       <ReactFlowProvider>
-        <ScenarioGraphPreviewCanvas scenario={scenario} {...(testId !== undefined ? { testId } : {})} />
+        <ScenarioGraphPreviewCanvas scenario={scenario} interactive={interactive} focusNode={focusNode} {...(testId !== undefined ? { testId } : {})} />
       </ReactFlowProvider>
     </ScenarioBoundResolverContext.Provider>
   )
@@ -222,8 +250,12 @@ function toReactFlowEdge(edge: ScenarioEdge): Edge {
     id: edge.id,
     source: edge.from.nodeId,
     target: edge.to.nodeId,
-    sourceHandle: 'out',
-    targetHandle: 'in',
+    // Handles are named by PORT (e.g. `corps` / `terminé` / `each`), the
+    // same ids the editor wires (`sourceHandle: from.portId`). Hardcoding
+    // `out` / `in` would only match single-default-port boxes — every
+    // multi-port box (loops, forEach, if, …) would silently lose its edges.
+    sourceHandle: edge.from.portId,
+    targetHandle: edge.to.portId,
     type: 'default'
   }
 }

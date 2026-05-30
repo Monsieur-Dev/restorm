@@ -33,6 +33,7 @@ import {
 } from './timeAndFlowExecutors'
 import { httpRequestExecutor } from './httpRequestExecutor'
 import { runScenarioExecutor } from './runScenarioExecutor'
+import { concreteValue } from '../../../shared/utils/scenarioStaticPreview'
 
 /** An `input` node either: (a) seeded at run start with the user's
  * up-front value (the editor's pre-run modal) — pure passthrough; or
@@ -44,12 +45,20 @@ const inputExecutor: NodeExecutor = async (act, ctx) => {
   // The seed activation already carries the `{ [name]: value }` shape
   // (see `Scheduler.seedRoots`); pass it through verbatim.
   if (act.seeded === true) return { outputs: [{ port: 'value', value: act.inputs['value'] }] }
-  const cfg = ctx.node.config as { name?: string; valueType?: { type?: string } }
+  const cfg = ctx.node.config as { name?: string; value?: unknown; valueType?: unknown }
   const name = typeof cfg.name === 'string' && cfg.name !== '' ? cfg.name : 'value'
+  // Prefill the prompt with the upstream value when one was fed into the
+  // node, otherwise the node's OWN configured default (the box's
+  // "Default / type" field) — resolved to a concrete primitive the same
+  // way the seeded path does, so the modal honours the scenario default.
+  const configuredDefault = cfg.valueType !== undefined && cfg.valueType !== null
+    ? concreteValue(cfg.valueType)
+    : cfg.value
+  const prefill = act.inputs['value'] !== undefined ? act.inputs['value'] : configuredDefault
   const value = await ctx.requestUserInput({
     name: cfg.name ?? ctx.node.id,
-    defaultValue: act.inputs['value'],
-    hint: inferHint(cfg.valueType?.type)
+    defaultValue: prefill,
+    hint: inferHint((cfg.valueType as { type?: string } | undefined)?.type)
   })
   // Wrap to match the static preview shape so a wired selector
   // (auto-deduced to the param name) resolves the same as the seeded path.

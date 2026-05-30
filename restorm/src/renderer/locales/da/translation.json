@@ -258,7 +258,8 @@
     "addHeader": "Tilføj header",
     "addParam": "Tilføj parameter",
     "environmentSelector": {
-      "noEnvironment": "Intet miljø"
+      "noEnvironment": "Intet miljø",
+      "switchTooltip": "Skift miljø"
     },
     "body": {
       "fileLabel": "Fil eller URL:",
@@ -796,6 +797,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Redigering låst, mens scenariet kører",
     "switch": {
       "addCase": "Tilføj tilfælde",
       "removeCase": "Fjern tilfælde",
@@ -945,7 +947,9 @@
       "stop": "Stop",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "clearLogs": "Ryd logfiler",
       "logsShowAll": "Show all logs",
+      "showLevelLogs": "Vis {{level}}-logs",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -965,6 +969,17 @@
       "title": "Run parameters",
       "run": "Run",
       "midRunTitle": "Input påkrævet"
+    },
+    "runHistory": {
+      "title": "Kørselshistorik",
+      "tooltip": "Kørselshistorik",
+      "empty": "Ingen kørsel registreret endnu",
+      "noLogs": "Ingen log for denne kørsel",
+      "logsTab": "Logs",
+      "graphTab": "Graf",
+      "noGraph": "Intet scenarie-snapshot for denne kørsel",
+      "pin": "Fastgør",
+      "unpin": "Frigør"
     },
     "for": {
       "from": "from",

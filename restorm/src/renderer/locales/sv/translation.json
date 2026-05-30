@@ -258,7 +258,8 @@
     "addHeader": "Lägg till header",
     "addParam": "Lägg till parameter",
     "environmentSelector": {
-      "noEnvironment": "Ingen miljö"
+      "noEnvironment": "Ingen miljö",
+      "switchTooltip": "Byt miljö"
     },
     "body": {
       "fileLabel": "Fil eller URL:",
@@ -796,6 +797,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Redigering låst medan scenariot körs",
     "switch": {
       "addCase": "Lägg till fall",
       "removeCase": "Ta bort fall",
@@ -945,7 +947,9 @@
       "stop": "Stopp",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "clearLogs": "Rensa loggar",
       "logsShowAll": "Show all logs",
+      "showLevelLogs": "Visa {{level}}-loggar",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -965,6 +969,17 @@
       "title": "Run parameters",
       "run": "Run",
       "midRunTitle": "Inmatning krävs"
+    },
+    "runHistory": {
+      "title": "Körhistorik",
+      "tooltip": "Körhistorik",
+      "empty": "Inga körningar registrerade ännu",
+      "noLogs": "Ingen logg för denna körning",
+      "logsTab": "Logs",
+      "graphTab": "Graf",
+      "noGraph": "Ingen scenario-ögonblicksbild för denna körning",
+      "pin": "Fäst",
+      "unpin": "Lossa"
     },
     "for": {
       "from": "from",

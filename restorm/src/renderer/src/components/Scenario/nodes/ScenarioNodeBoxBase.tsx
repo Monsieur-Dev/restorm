@@ -21,6 +21,14 @@ export interface ScenarioNodeBoxData extends Record<string, unknown> {
   collapsed?: boolean
   /** Per-kind config bag (e.g. bound request/scenario id + display label). */
   config?: Record<string, unknown>
+  /** Read-only flag set while the owning scenario is running: the box body
+   * is rendered inert (no field edits). Drag / connect / delete are blocked
+   * at the React Flow level by the editor. */
+  locked?: boolean
+  /** Bumped each time a run-log row pointing at this node is clicked — the
+   * box flashes its outline. The changing token remounts the flash overlay
+   * so the animation replays even on a repeat click of the same node. */
+  flashToken?: number
   inputs: ScenarioPort[]
   outputs: ScenarioPort[]
   /** Run status for the live-execution overlay; populated when Phase 2
@@ -358,7 +366,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
   return (
     <div
       ref={boxRef}
-      className={`scn-node ${selected ? 'scn-node-selected' : ''} ${collapsed ? 'scn-node-collapsed' : ''} ${boxInError ? 'scn-node-error' : ''}`}
+      className={`scn-node ${selected ? 'scn-node-selected' : ''} ${collapsed ? 'scn-node-collapsed' : ''} ${boxInError ? 'scn-node-error' : ''} ${data.locked ? 'scn-node-locked' : ''}`}
       data-testid={`scn-node-${data.kind}`}
       data-animating={animating ? 'true' : 'false'}
       data-running={running ? 'true' : 'false'}
@@ -501,6 +509,9 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
           colorFrom="#facc15"
           colorTo="#22c55e"
         />
+      )}
+      {data.flashToken !== undefined && (
+        <div key={data.flashToken} className="scn-node-flash-ring" aria-hidden="true" />
       )}
     </div>
   )

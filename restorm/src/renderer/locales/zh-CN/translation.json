@@ -257,7 +257,8 @@
     "addHeader": "添加请求头",
     "addParam": "添加参数",
     "environmentSelector": {
-      "noEnvironment": "无环境"
+      "noEnvironment": "无环境",
+      "switchTooltip": "切换环境"
     },
     "body": {
       "fileLabel": "文件或 URL：",
@@ -795,6 +796,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "场景运行时编辑已锁定",
     "switch": {
       "addCase": "添加分支",
       "removeCase": "移除分支",
@@ -944,7 +946,9 @@
       "stop": "停止",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "clearLogs": "清除日志",
       "logsShowAll": "Show all logs",
+      "showLevelLogs": "显示 {{level}} 日志",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -964,6 +968,17 @@
       "title": "Run parameters",
       "run": "Run",
       "midRunTitle": "需要输入"
+    },
+    "runHistory": {
+      "title": "运行历史",
+      "tooltip": "运行历史",
+      "empty": "暂无运行记录",
+      "noLogs": "此运行没有日志",
+      "logsTab": "Logs",
+      "graphTab": "图",
+      "noGraph": "此运行没有场景快照",
+      "pin": "固定",
+      "unpin": "取消固定"
     },
     "for": {
       "from": "from",

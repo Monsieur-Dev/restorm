@@ -17,6 +17,7 @@
 
 import { BrowserWindow, ipcMain } from 'electron'
 import { scenarioEngine } from './engine'
+import { scenarioRunHistoryService } from '../services/ScenarioRunHistoryService'
 import type { EngineEvent, RuntimeId } from './types'
 
 let installed = false
@@ -33,7 +34,9 @@ export function installScenarioEngineIPC(): void {
   })
 
   ipcMain.handle('scenario:engine:start', (_e, scenarioId: string, params: Record<string, unknown> | undefined) => {
-    const handle = scenarioEngine.start(scenarioId, params ? { params } : {})
+    // From the editor (UI) → interactive: no-predecessor input nodes prompt
+    // the user (grouped "run parameters" modal) instead of using their default.
+    const handle = scenarioEngine.start(scenarioId, { ...(params ? { params } : {}), interactive: true })
     // `done` is intentionally NOT awaited — the renderer observes
     // the run via events, not the IPC return value. We return the
     // runId so a caller can pause / abort it later.
@@ -74,8 +77,26 @@ export function installScenarioEngineIPC(): void {
     return { ok: true }
   })
 
+  ipcMain.handle('scenario:engine:cancel-user-input', (_e, runId: string, requestId: string) => {
+    scenarioEngine.cancelUserInput(runId, requestId)
+    return { ok: true }
+  })
+
   ipcMain.handle('scenario:engine:active-statuses', () => {
     return scenarioEngine.activeStatuses()
+  })
+
+  // Persisted run history (disk archive, survives restart) — distinct from
+  // the in-memory `run-tree` archive above. Powers the scenario tab's
+  // run-history modal.
+  ipcMain.handle('scenario:history:list', (_e, scenarioId: string) => {
+    return scenarioRunHistoryService.list(scenarioId)
+  })
+  ipcMain.handle('scenario:history:detail', (_e, guid: string) => {
+    return scenarioRunHistoryService.getDetail(guid)
+  })
+  ipcMain.handle('scenario:history:toggle-pin', (_e, guid: string, pinned: boolean) => {
+    return scenarioRunHistoryService.togglePin(guid, pinned)
   })
 }
 

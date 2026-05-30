@@ -257,7 +257,8 @@
     "addHeader": "Thêm header",
     "addParam": "Thêm tham số",
     "environmentSelector": {
-      "noEnvironment": "Không có môi trường"
+      "noEnvironment": "Không có môi trường",
+      "switchTooltip": "Chuyển môi trường"
     },
     "body": {
       "fileLabel": "Tệp hoặc URL:",
@@ -795,6 +796,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Đã khóa chỉnh sửa khi kịch bản đang chạy",
     "switch": {
       "addCase": "Thêm trường hợp",
       "removeCase": "Xóa trường hợp",
@@ -944,7 +946,9 @@
       "stop": "Dừng",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "clearLogs": "Xóa nhật ký",
       "logsShowAll": "Show all logs",
+      "showLevelLogs": "Hiển thị log {{level}}",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -964,6 +968,17 @@
       "title": "Run parameters",
       "run": "Run",
       "midRunTitle": "Yêu cầu nhập liệu"
+    },
+    "runHistory": {
+      "title": "Lịch sử chạy",
+      "tooltip": "Lịch sử chạy",
+      "empty": "Chưa có lần chạy nào",
+      "noLogs": "Không có nhật ký cho lần chạy này",
+      "logsTab": "Logs",
+      "graphTab": "Đồ thị",
+      "noGraph": "Không có ảnh chụp kịch bản cho lần chạy này",
+      "pin": "Ghim",
+      "unpin": "Bỏ ghim"
     },
     "for": {
       "from": "from",

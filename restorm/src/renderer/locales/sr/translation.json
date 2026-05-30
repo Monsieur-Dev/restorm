@@ -259,7 +259,8 @@
     "addHeader": "Dodaj zaglavlje",
     "addParam": "Dodaj parametar",
     "environmentSelector": {
-      "noEnvironment": "Bez okruženja"
+      "noEnvironment": "Bez okruženja",
+      "switchTooltip": "Промени окружење"
     },
     "body": {
       "fileLabel": "Datoteka ili URL:",
@@ -797,6 +798,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Уређивање закључано док се сценарио извршава",
     "switch": {
       "addCase": "Додај случај",
       "removeCase": "Уклони случај",
@@ -946,7 +948,9 @@
       "stop": "Zaustavi",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "clearLogs": "Очисти записе",
       "logsShowAll": "Show all logs",
+      "showLevelLogs": "Прикажи {{level}} логове",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -966,6 +970,17 @@
       "title": "Run parameters",
       "run": "Run",
       "midRunTitle": "Potreban unos"
+    },
+    "runHistory": {
+      "title": "Историја извршавања",
+      "tooltip": "Историја извршавања",
+      "empty": "Још нема забележених извршавања",
+      "noLogs": "Нема записа за ово извршавање",
+      "logsTab": "Logs",
+      "graphTab": "Граф",
+      "noGraph": "Нема снимка сценарија за ово извршавање",
+      "pin": "Закачи",
+      "unpin": "Откачи"
     },
     "for": {
       "from": "from",

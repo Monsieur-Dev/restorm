@@ -258,7 +258,8 @@
     "addHeader": "Header hinzufügen",
     "addParam": "Parameter hinzufügen",
     "environmentSelector": {
-      "noEnvironment": "Keine Umgebung"
+      "noEnvironment": "Keine Umgebung",
+      "switchTooltip": "Umgebung wechseln"
     },
     "body": {
       "fileLabel": "Datei oder URL:",
@@ -796,6 +797,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Bearbeitung gesperrt, während das Szenario läuft",
     "switch": {
       "addCase": "Fall hinzufügen",
       "removeCase": "Fall entfernen",
@@ -945,7 +947,9 @@
       "stop": "Stopp",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "clearLogs": "Logs löschen",
       "logsShowAll": "Show all logs",
+      "showLevelLogs": "{{level}}-Logs anzeigen",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -965,6 +969,17 @@
       "title": "Ausführungsparameter",
       "run": "Ausführen",
       "midRunTitle": "Eingabe angefordert"
+    },
+    "runHistory": {
+      "title": "Ausführungsverlauf",
+      "tooltip": "Ausführungsverlauf",
+      "empty": "Noch keine Ausführung aufgezeichnet",
+      "noLogs": "Kein Log für diese Ausführung",
+      "logsTab": "Logs",
+      "graphTab": "Graph",
+      "noGraph": "Kein Szenario-Snapshot für diese Ausführung",
+      "pin": "Anheften",
+      "unpin": "Lösen"
     },
     "for": {
       "from": "from",

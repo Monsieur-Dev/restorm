@@ -257,7 +257,8 @@
     "addHeader": "ヘッダーを追加",
     "addParam": "パラメータを追加",
     "environmentSelector": {
-      "noEnvironment": "環境なし"
+      "noEnvironment": "環境なし",
+      "switchTooltip": "環境を切り替え"
     },
     "body": {
       "fileLabel": "ファイルまたは URL：",
@@ -795,6 +796,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "シナリオの実行中は編集がロックされます",
     "switch": {
       "addCase": "ケースを追加",
       "removeCase": "ケースを削除",
@@ -944,7 +946,9 @@
       "stop": "停止",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "clearLogs": "ログをクリア",
       "logsShowAll": "Show all logs",
+      "showLevelLogs": "{{level}} ログを表示",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -964,6 +968,17 @@
       "title": "Run parameters",
       "run": "Run",
       "midRunTitle": "入力が必要です"
+    },
+    "runHistory": {
+      "title": "実行履歴",
+      "tooltip": "実行履歴",
+      "empty": "まだ実行記録がありません",
+      "noLogs": "この実行のログはありません",
+      "logsTab": "Logs",
+      "graphTab": "グラフ",
+      "noGraph": "この実行のシナリオスナップショットはありません",
+      "pin": "ピン留め",
+      "unpin": "ピン留め解除"
     },
     "for": {
       "from": "from",

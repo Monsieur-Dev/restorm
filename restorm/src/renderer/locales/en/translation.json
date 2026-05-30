@@ -258,7 +258,8 @@
     "addHeader": "Add header",
     "addParam": "Add param",
     "environmentSelector": {
-      "noEnvironment": "No environment"
+      "noEnvironment": "No environment",
+      "switchTooltip": "Switch environment"
     },
     "body": {
       "fileLabel": "File or URL:",
@@ -796,6 +797,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Editing locked while the scenario is running",
     "switch": {
       "addCase": "Add case",
       "removeCase": "Remove case",
@@ -945,7 +947,9 @@
       "stop": "Stop",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "clearLogs": "Clear logs",
       "logsShowAll": "Show all logs",
+      "showLevelLogs": "Show {{level}} logs",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -965,6 +969,17 @@
       "title": "Run parameters",
       "run": "Run",
       "midRunTitle": "Input requested"
+    },
+    "runHistory": {
+      "title": "Run history",
+      "tooltip": "Run history",
+      "empty": "No run recorded yet",
+      "noLogs": "No log for this run",
+      "logsTab": "Logs",
+      "graphTab": "Graph",
+      "noGraph": "No scenario snapshot for this run",
+      "pin": "Pin",
+      "unpin": "Unpin"
     },
     "for": {
       "from": "from",

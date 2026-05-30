@@ -333,7 +333,7 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
           </div>
         )}
         {scenario
-          ? <div style={{ flex: 1, minHeight: 0 }}><ScenarioGraphPreview scenario={scenario} /></div>
+          ? <div style={{ flex: 1, minHeight: 0, minWidth: 0 }}><ScenarioGraphPreview scenario={scenario} /></div>
           : <div style={{ flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.6 }}>{t('search.tooltip.noScenario', 'Scenario unavailable')}</div>}
       </div>
     )

@@ -257,7 +257,8 @@
     "addHeader": "新增標頭",
     "addParam": "新增參數",
     "environmentSelector": {
-      "noEnvironment": "無環境"
+      "noEnvironment": "無環境",
+      "switchTooltip": "切換環境"
     },
     "body": {
       "fileLabel": "檔案或 URL：",
@@ -795,6 +796,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "場景執行時編輯已鎖定",
     "switch": {
       "addCase": "新增分支",
       "removeCase": "移除分支",
@@ -944,7 +946,9 @@
       "stop": "停止",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "clearLogs": "清除記錄",
       "logsShowAll": "Show all logs",
+      "showLevelLogs": "顯示 {{level}} 日誌",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -964,6 +968,17 @@
       "title": "Run parameters",
       "run": "Run",
       "midRunTitle": "需要輸入"
+    },
+    "runHistory": {
+      "title": "執行歷史",
+      "tooltip": "執行歷史",
+      "empty": "尚無執行記錄",
+      "noLogs": "此執行沒有日誌",
+      "logsTab": "Logs",
+      "graphTab": "圖",
+      "noGraph": "此執行沒有場景快照",
+      "pin": "釘選",
+      "unpin": "取消釘選"
     },
     "for": {
       "from": "from",

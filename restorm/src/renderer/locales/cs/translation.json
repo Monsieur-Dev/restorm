@@ -260,7 +260,8 @@
     "addHeader": "Přidat hlavičku",
     "addParam": "Přidat parametr",
     "environmentSelector": {
-      "noEnvironment": "Bez prostředí"
+      "noEnvironment": "Bez prostředí",
+      "switchTooltip": "Přepnout prostředí"
     },
     "body": {
       "fileLabel": "Soubor nebo URL:",
@@ -798,6 +799,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Úpravy uzamčeny během běhu scénáře",
     "switch": {
       "addCase": "Přidat případ",
       "removeCase": "Odebrat případ",
@@ -947,7 +949,9 @@
       "stop": "Zastavit",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "clearLogs": "Vymazat logy",
       "logsShowAll": "Show all logs",
+      "showLevelLogs": "Zobrazit logy {{level}}",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -967,6 +971,17 @@
       "title": "Run parameters",
       "run": "Run",
       "midRunTitle": "Vyžadována vstupní data"
+    },
+    "runHistory": {
+      "title": "Historie běhů",
+      "tooltip": "Historie běhů",
+      "empty": "Zatím žádný běh",
+      "noLogs": "Žádný log pro tento běh",
+      "logsTab": "Logs",
+      "graphTab": "Graf",
+      "noGraph": "Žádný snímek scénáře pro tento běh",
+      "pin": "Připnout",
+      "unpin": "Odepnout"
     },
     "for": {
       "from": "from",

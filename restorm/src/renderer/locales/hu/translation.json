@@ -258,7 +258,8 @@
     "addHeader": "Fejléc hozzáadása",
     "addParam": "Paraméter hozzáadása",
     "environmentSelector": {
-      "noEnvironment": "Nincs környezet"
+      "noEnvironment": "Nincs környezet",
+      "switchTooltip": "Környezet váltása"
     },
     "body": {
       "fileLabel": "Fájl vagy URL:",
@@ -796,6 +797,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "A szerkesztés zárolva, amíg a forgatókönyv fut",
     "switch": {
       "addCase": "Eset hozzáadása",
       "removeCase": "Eset eltávolítása",
@@ -945,7 +947,9 @@
       "stop": "Leállítás",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "clearLogs": "Naplók törlése",
       "logsShowAll": "Show all logs",
+      "showLevelLogs": "{{level}} naplók megjelenítése",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -965,6 +969,17 @@
       "title": "Run parameters",
       "run": "Run",
       "midRunTitle": "Bevitel szükséges"
+    },
+    "runHistory": {
+      "title": "Futtatási előzmények",
+      "tooltip": "Futtatási előzmények",
+      "empty": "Még nincs rögzített futtatás",
+      "noLogs": "Nincs napló ehhez a futtatáshoz",
+      "logsTab": "Logs",
+      "graphTab": "Gráf",
+      "noGraph": "Nincs forgatókönyv-pillanatkép ehhez a futtatáshoz",
+      "pin": "Rögzítés",
+      "unpin": "Feloldás"
     },
     "for": {
       "from": "from",

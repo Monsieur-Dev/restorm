@@ -32,7 +32,9 @@ describe('defaultPortsForKind', () => {
     // `now` is specified (no input); use a truly generic one to prove fallback.
     expect(inputs.length + outputs.length).toBeGreaterThan(0)
     const generic = defaultPortsForKind('transform')
-    expect(generic.inputs.map((p) => p.id)).toEqual(['value'])
+    // `transform` carries a header launch trigger (`in`) plus its optional
+    // `value` input.
+    expect(generic.inputs.map((p) => p.id)).toEqual(['in', 'value'])
   })
 
   it('returns fresh arrays each call (no shared mutable state)', () => {

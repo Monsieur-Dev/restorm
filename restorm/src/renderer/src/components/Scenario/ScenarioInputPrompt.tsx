@@ -23,7 +23,7 @@
 
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from 'electron-core-ui/renderer'
+import { Button, Toggle } from 'electron-core-ui/renderer'
 import type { ScenarioNode } from '../../../../shared/types/scenario'
 import type { ValueType } from '../../../../shared/types/collections'
 import { StringValue } from '../../../../shared/types/collections'
@@ -162,28 +162,42 @@ export interface ScenarioMidRunInputPromptProps {
   defaultValue: unknown
   hint: 'string' | 'number' | 'boolean' | 'object'
   onSubmit: (value: unknown) => void
+  /** Cancel the prompt — the engine routes the input node to its `error`
+   * output (or fails the run if `error` is unwired). */
+  onCancel: () => void
 }
 
-/** Surfaces a single `input` node's request mid-run. No Cancel —
- * cancelling here would orphan the run; the user can hit Stop in
- * the inspector toolbar if they want to abort. The default value
- * is the upstream node's emission. */
-export const ScenarioMidRunInputPrompt: React.FC<ScenarioMidRunInputPromptProps> = ({ open, name, defaultValue, hint, onSubmit }) => {
+function toBool(v: unknown): boolean {
+  if (typeof v === 'boolean') return v
+  if (typeof v === 'number') return v !== 0
+  if (typeof v === 'string') return v === 'true' || v === '1' || v.toLowerCase() === 'yes'
+  return Boolean(v)
+}
+
+/** Surfaces a single `input` node's request mid-run. The field matches the
+ * input's declared type (`hint`): a boolean renders a switch, a number a
+ * numeric field, an object a JSON textarea, everything else a text box.
+ * OK feeds the value into the node's `value` output; Cancel routes the node
+ * to its `error` output. The default value is the upstream node's emission. */
+export const ScenarioMidRunInputPrompt: React.FC<ScenarioMidRunInputPromptProps> = ({ open, name, defaultValue, hint, onSubmit, onCancel }) => {
   const { t } = useTranslation()
   // Compare-and-set in render: when the prompt mounts (or opens with a
   // fresh default), reset the input to the upstream default — without
   // a state-in-effect rule violation.
   const [lastSeed, setLastSeed] = useState<unknown>(open ? defaultValue : null)
   const [raw, setRaw] = useState(stringifyDefault(defaultValue))
+  const [bool, setBool] = useState<boolean>(toBool(defaultValue))
   if (open && lastSeed !== defaultValue) {
     setLastSeed(defaultValue)
     setRaw(stringifyDefault(defaultValue))
+    setBool(toBool(defaultValue))
   }
   if (!open) return null
   const submit = (e: React.SyntheticEvent): void => {
     e.preventDefault()
-    onSubmit(coerce(raw, hint))
+    onSubmit(hint === 'boolean' ? bool : coerce(raw, hint))
   }
+  const testId = `scn-mid-run-input-${name}`
   return (
     <div className="scn-input-prompt-backdrop" data-testid="scn-mid-run-input-prompt-backdrop">
       <form className="scn-input-prompt" onSubmit={submit} data-testid="scn-mid-run-input-prompt">
@@ -193,17 +207,36 @@ export const ScenarioMidRunInputPrompt: React.FC<ScenarioMidRunInputPromptProps>
         <div className="scn-input-prompt-body">
           <label className="scn-input-prompt-field">
             <span className="scn-input-prompt-label">{name}</span>
-            <input
-              type="text"
-              className="scn-input-prompt-input"
-              autoFocus
-              value={raw}
-              onChange={(e) => { setRaw(e.target.value) }}
-              data-testid={`scn-mid-run-input-${name}`}
-            />
+            {hint === 'boolean'
+              ? (
+                <Toggle checked={bool} onChange={(c) => { setBool(c) }} aria-label={name} data-testid={testId} />
+                )
+              : hint === 'object'
+                ? (
+                  <textarea
+                    className="scn-input-prompt-input scn-input-prompt-textarea"
+                    autoFocus
+                    value={raw}
+                    onChange={(e) => { setRaw(e.target.value) }}
+                    data-testid={testId}
+                  />
+                  )
+                : (
+                  <input
+                    type={hint === 'number' ? 'number' : 'text'}
+                    className="scn-input-prompt-input"
+                    autoFocus
+                    value={raw}
+                    onChange={(e) => { setRaw(e.target.value) }}
+                    data-testid={testId}
+                  />
+                  )}
           </label>
         </div>
         <footer className="scn-input-prompt-footer">
+          <Button secondary onClick={onCancel} options={{ ariaLabel: t('common.cancel', 'Cancel') }} data-testid="scn-mid-run-input-cancel">
+            {t('common.cancel', 'Cancel')}
+          </Button>
           <Button emphasis={1} icon="check" onClick={(e) => { submit(e) }} data-testid="scn-mid-run-input-submit">
             {t('common.ok', 'OK')}
           </Button>

@@ -38,12 +38,16 @@ import { EnvironmentFolderView } from '../../Folders/EnvironmentFolderView'
 import type { EnvironmentFolder, Folder, Request, ScenarioNode, ScenarioEdge } from '../../../../../shared/types/collections'
 import { getFolderIcon } from '../../../utils/treeSearch'
 import { Badge } from '../../common/Badge'
+import { ScenarioRunningBadge } from '../../common/ScenarioRunningBadge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { useTranslation } from 'react-i18next'
 import { RestormWorkbenchTab } from './RestormWorkbenchTab'
 import { DeprecationAwareRequestTab } from './DeprecationAwareRequestTab'
 import { RequestScenarioUsageButton } from './RequestScenarioUsageButton'
+import { RequestHeaderEnvSelector } from '../RequestHeaderEnvSelector'
+import { RequestHeaderHistoryButton } from '../RequestHeaderHistoryButton'
 import { ScenarioCallersButton } from './ScenarioCallersButton'
+import { ScenarioRunHistoryButton } from '../../Scenario/ScenarioRunHistoryButton'
 import type { ScenarioRequestUsage, ScenarioScenarioUsage } from '../../../services/scenarioRequestUsage'
 import { useTabSwitcher } from '../../../hooks/useTabSwitcher'
 
@@ -339,7 +343,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     if (isScenarioEditorTab(restormTab)) {
       return (
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Badge type="SCENARIO" />
+          <ScenarioRunningBadge scenarioId={restormTab.scenario.id}>
+            <Badge type="SCENARIO" />
+          </ScenarioRunningBadge>
           <span>{restormTab.scenario.name}</span>
           {renderDirtyIndicator(restormTab)}
         </span>
@@ -714,6 +720,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           tagColors={scnTagColors}
           {...(handleScnTagColorChange ? { onTagColorChange: handleScnTagColorChange } : {})}
           tabId={effectiveTab.id}
+          headerActions={<ScenarioRunHistoryButton scenarioId={scenario.id} />}
           {...(scenarioCallersAction ? { topRightAction: scenarioCallersAction } : {})}
           {...scnFav}
         >
@@ -859,6 +866,16 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       return ids
     })()
 
+    // Request tab-header action cluster (left of the bookmark ribbon):
+    // the env selector (reads the surrounding EnvironmentProvider) + the
+    // response-history button. Rendered for every request protocol.
+    const requestHeaderActionsFor = (id: string): React.ReactNode => (
+      <>
+        <RequestHeaderEnvSelector folderRequestIds={envFolderRequestIds ?? []} projectUuid={projectUuid ?? null} />
+        <RequestHeaderHistoryButton requestId={id} />
+      </>
+    )
+
     // HTTP request tab
     if (isHTTPRequestTab(effectiveTab)) {
       // Get reactive request if available, otherwise use tab's copy
@@ -879,6 +896,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id)}
             topRightAction={scenarioUsageActionFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
@@ -908,6 +926,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id)}
             topRightAction={scenarioUsageActionFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
@@ -937,6 +956,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id)}
             topRightAction={scenarioUsageActionFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
@@ -966,6 +986,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id)}
             topRightAction={scenarioUsageActionFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
@@ -995,6 +1016,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id)}
             topRightAction={scenarioUsageActionFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
@@ -1024,6 +1046,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id)}
             topRightAction={scenarioUsageActionFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
@@ -1052,6 +1075,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id)}
             topRightAction={scenarioUsageActionFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>

@@ -8,12 +8,16 @@
  * inner `runScenario` node fires.
  */
 
+import { logger } from 'electron-core-ui/main'
 import { collectionStore } from '../services/CollectionStore'
 import { isScenario } from '../../shared/types/collections'
 import type { Scenario } from '../../shared/types/scenario'
 import { Scheduler, type RunOptions } from './scheduler'
 import { buildExecutorRegistry } from './executors/registry'
 import { RunArchive, type ArchivedRun } from './runArchive'
+import { collectReferencedScenarios } from './collectReferencedScenarios'
+import { scenarioRunHistoryService } from '../services/ScenarioRunHistoryService'
+import type { ScenarioRunHistoryStatus, ScenarioRunLogEntry, ScenarioRunSnapshot } from '../../shared/types/scenarioRunHistory'
 import type { EngineEvent, RunLogEntry, RunStatus, RuntimeId } from './types'
 
 export interface RunHandle {
@@ -33,6 +37,11 @@ export interface RunCallContext {
   /** The run that launched this one (a `runScenario` node). Absent for
    * a top-level run. Links sub-runs to their parent in the archive. */
   parentRunId?: RuntimeId
+  /** Deep-copied snapshots of every statically-referenced scenario, taken at
+   * the top-level run's launch and shared by the whole run tree (keyed by
+   * scenario id). Every (sub-)run executes against — and the archive keeps —
+   * these copies, so editing a scenario mid-run never affects the run. */
+  snapshots?: Map<RuntimeId, ScenarioRunSnapshot>
 }
 
 export class ScenarioEngine {
@@ -43,10 +52,21 @@ export class ScenarioEngine {
   /** Retains run logs (incl. sub-runs) during AND after execution so
    * any client can harvest them by `runId`. Bounded — see defaults. */
   private readonly archive = new RunArchive({ maxRuns: 50, maxEntriesPerRun: 2000, ttlMs: 30 * 60 * 1000 })
+  /** Deep-copied scenario snapshots captured at each TOP-LEVEL run's start,
+   * keyed by its run id. Persisted into the history at run end so the archive
+   * keeps the versions that actually ran — never a sub-scenario edited
+   * mid-run. Cleared once the run is persisted. */
+  private readonly runSnapshots = new Map<RuntimeId, ScenarioRunSnapshot[]>()
 
   /** Top-level run entry point. */
   start(scenarioId: RuntimeId, options: RunOptions = {}): RunHandle {
-    return this.startWithStack(scenarioId, options, { stack: new Set(), launcherScenarioId: scenarioId })
+    // Snapshot every referenced scenario NOW (deep copies) so the whole run
+    // tree — and the persisted history — uses exactly these versions, immune
+    // to edits made while the run is in flight.
+    const snapshots = new Map<RuntimeId, ScenarioRunSnapshot>(
+      collectReferencedScenarios(scenarioId).map((s) => [s.id, s])
+    )
+    return this.startWithStack(scenarioId, options, { stack: new Set(), launcherScenarioId: scenarioId, snapshots })
   }
 
   /** Fanout subscription — every event from every active scheduler
@@ -98,8 +118,10 @@ export class ScenarioEngine {
   abort(runId: RuntimeId, reason?: string): void { this.activeRuns.get(runId)?.abort(reason) }
   resolveUserInput(runId: RuntimeId, requestId: string, value: unknown): void { this.activeRuns.get(runId)?.resolveUserInput(requestId, value) }
 
+  cancelUserInput(runId: RuntimeId, requestId: string): void { this.activeRuns.get(runId)?.cancelUserInput(requestId) }
+
   private startWithStack(scenarioId: RuntimeId, options: RunOptions, callCtx: RunCallContext, parentSignal?: AbortSignal): RunHandle {
-    const scenario = this.loadScenario(scenarioId)
+    const scenario = this.loadScenario(scenarioId, callCtx.snapshots)
     if (callCtx.stack.has(scenarioId)) {
       throw new Error(`recursion detected: scenario ${scenarioId} is already running on the call stack`)
     }
@@ -114,11 +136,17 @@ export class ScenarioEngine {
         // Forward the calling node's abort signal so a Stop cascades all
         // the way down the sub-scenario tree, and link the sub-run to
         // this run in the archive via `parentRunId`.
-        const handle = this.startWithStack(subId, { params }, { stack: subStack, launcherScenarioId: callCtx.launcherScenarioId, parentRunId: scheduler.runId }, subParentSignal)
+        const handle = this.startWithStack(subId, { params }, { stack: subStack, launcherScenarioId: callCtx.launcherScenarioId, parentRunId: scheduler.runId, ...(callCtx.snapshots ? { snapshots: callCtx.snapshots } : {}) }, subParentSignal)
         return handle.done
       }
     })
     this.activeRuns.set(scheduler.runId, scheduler)
+    // For a top-level run, retain the launch snapshots so the archived history
+    // (written at run end) reflects exactly what ran — not a sub-scenario the
+    // user may edit while the run is still going.
+    if (callCtx.parentRunId === undefined && callCtx.snapshots) {
+      this.runSnapshots.set(scheduler.runId, [...callCtx.snapshots.values()])
+    }
     this.archive.start({
       runId: scheduler.runId,
       scenarioId,
@@ -152,16 +180,78 @@ export class ScenarioEngine {
       // scheduler, so the run's logs survive for later harvesting.
       this.archive.complete(scheduler.runId, scheduler.status().state, Date.now(), scheduler.readLog())
       this.activeRuns.delete(scheduler.runId)
+      // Persist the whole run tree to disk history — only for a top-level
+      // run (sub-runs are folded into the parent's persisted log). Sub-runs
+      // have already archived their logs by now (the parent awaited them).
+      if (callCtx.parentRunId === undefined) {
+        this.persistRunHistory(scheduler.runId, scenarioId)
+        this.runSnapshots.delete(scheduler.runId)
+      }
     })
     return { scheduler, done }
   }
 
-  private loadScenario(id: RuntimeId): Scenario {
+  /** Snapshot a finished top-level run (its whole sub-run tree's logs +
+   * deep copies of every referenced scenario) into the on-disk history.
+   * Fire-and-forget: the run result never waits on the archive write. */
+  private persistRunHistory(topRunId: RuntimeId, scenarioId: RuntimeId): void {
+    try {
+      const tree = this.runTree(topRunId)
+      const top = tree.find((r) => r.runId === topRunId)
+      if (!top) return
+
+      const log: ScenarioRunLogEntry[] = []
+      for (const run of tree) {
+        for (const e of run.log) {
+          log.push({
+            ts: e.ts,
+            runId: e.runId,
+            level: e.level,
+            source: e.source,
+            ...(e.nodeId !== undefined ? { nodeId: e.nodeId } : {}),
+            scenarioId: run.scenarioId,
+            message: e.message,
+            ...(e.data !== undefined ? { data: e.data } : {})
+          })
+        }
+      }
+      log.sort((a, b) => a.ts.localeCompare(b.ts))
+
+      // Use the snapshot captured at run START (not a live re-fetch), so a
+      // sub-scenario edited mid-run is archived as it actually ran. Fall back
+      // to a live collect only if the snapshot is somehow missing.
+      const scenarios = this.runSnapshots.get(topRunId) ?? collectReferencedScenarios(scenarioId)
+      const foundName = scenarios.find((s) => s.id === scenarioId)?.name
+      const scenarioName = foundName !== undefined && foundName.trim() !== '' ? foundName : 'scénario'
+      const status: ScenarioRunHistoryStatus =
+        top.status === 'cancelled' || top.status === 'failed' ? top.status : 'completed'
+
+      void scenarioRunHistoryService.storeRun({
+        scenarioId,
+        scenarioName,
+        startedAt: top.startedAt,
+        endedAt: top.endedAt ?? top.startedAt,
+        status,
+        scenarios,
+        log
+      })
+    } catch (error) {
+      logger.error('[ScenarioEngine] Failed to persist run history', { topRunId, error: String(error) })
+    }
+  }
+
+  private loadScenario(id: RuntimeId, snapshots?: Map<RuntimeId, ScenarioRunSnapshot>): Scenario {
+    // Prefer the launch-time snapshot (a deep copy taken when the run started)
+    // so the run is ISOLATED from edits made while it's in flight. Statically-
+    // referenced scenarios are all pre-snapshotted; a dynamically-chosen sub
+    // (a `param:`-resolved `runScenario`) isn't, so fall back to a fresh copy.
+    const snap = snapshots?.get(id)
+    if (snap) return snap as unknown as Scenario
     const item = collectionStore.findById(id)
     if (!item || !isScenario(item)) {
       throw new Error(`no scenario with id ${id}`)
     }
-    return item as unknown as Scenario
+    return JSON.parse(JSON.stringify(item)) as Scenario
   }
 }
 

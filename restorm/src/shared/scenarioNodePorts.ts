@@ -116,10 +116,11 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   setVariable: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'event', name: 'event', flow: 'signal' }] },
   getVariable: { inputs: [IN], outputs: [{ id: 'value', name: 'value', flow: 'value' }] },
   // `transform` (a.k.a. "Transform template") applies an expression/Handlebars
-  // template to its optional `value` input and emits the result. The input is
-  // optional so the node runs on its own (a pure template); the expression
-  // determines the output type.
-  transform: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'out', name: 'value', flow: 'value' }] },
+  // template to its optional `value` input and emits the result. A header
+  // launch trigger (`in`) lets it be sequenced in a flow; the `value` input
+  // stays optional so the node can also run on its own (a pure template). The
+  // expression determines the output type.
+  transform: { inputs: [IN, { id: 'value', name: 'value' }], outputs: [{ id: 'out', name: 'value', flow: 'value' }] },
   // Utilities
   // A terminal sink: a header launch trigger (`in`) so it can be sequenced in
   // a flow, plus two optional inputs (wire either, or set inline). `message` is

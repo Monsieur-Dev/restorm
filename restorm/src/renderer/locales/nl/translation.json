@@ -258,7 +258,8 @@
     "addHeader": "Header toevoegen",
     "addParam": "Parameter toevoegen",
     "environmentSelector": {
-      "noEnvironment": "Geen omgeving"
+      "noEnvironment": "Geen omgeving",
+      "switchTooltip": "Omgeving wisselen"
     },
     "body": {
       "fileLabel": "Bestand of URL:",
@@ -796,6 +797,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Bewerken vergrendeld terwijl het scenario draait",
     "switch": {
       "addCase": "Case toevoegen",
       "removeCase": "Case verwijderen",
@@ -945,7 +947,9 @@
       "stop": "Stop",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "clearLogs": "Logboeken wissen",
       "logsShowAll": "Show all logs",
+      "showLevelLogs": "{{level}}-logs tonen",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -965,6 +969,17 @@
       "title": "Uitvoeringsparameters",
       "run": "Uitvoeren",
       "midRunTitle": "Invoer gevraagd"
+    },
+    "runHistory": {
+      "title": "Uitvoeringsgeschiedenis",
+      "tooltip": "Uitvoeringsgeschiedenis",
+      "empty": "Nog geen uitvoering vastgelegd",
+      "noLogs": "Geen log voor deze uitvoering",
+      "logsTab": "Logs",
+      "graphTab": "Grafiek",
+      "noGraph": "Geen scenario-momentopname voor deze uitvoering",
+      "pin": "Vastmaken",
+      "unpin": "Losmaken"
     },
     "for": {
       "from": "from",

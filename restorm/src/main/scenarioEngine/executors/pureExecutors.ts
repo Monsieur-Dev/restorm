@@ -144,10 +144,11 @@ export const objectExecutor: NodeExecutor = (act) => {
  * through so the chain can continue. */
 export const logExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { level?: 'debug' | 'info' | 'warn' | 'error'; message?: unknown; data?: unknown }
-  // `message` is persisted as a typed ValueType (`{ type, value }`), not a
-  // bare string — resolve it to its concrete string. Wired `data` wins;
-  // otherwise resolve the node's configured data value.
-  const resolvedMessage = concreteValue(cfg.message)
+  // `message` (like `data`) prefers a WIRED input over config: when an
+  // upstream node feeds `message`, log that; otherwise resolve the node's
+  // configured ValueType (`{ type, value }`) to its concrete string. Reading
+  // config only would silently drop a wired message and log an empty line.
+  const resolvedMessage = act.inputs['message'] !== undefined ? act.inputs['message'] : concreteValue(cfg.message)
   const message = typeof resolvedMessage === 'string' ? resolvedMessage : (resolvedMessage == null ? '' : stringifySafely(resolvedMessage))
   const data = act.inputs['data'] !== undefined ? act.inputs['data'] : (cfg.data !== undefined ? concreteValue(cfg.data) : undefined)
   ctx.log({
@@ -205,12 +206,36 @@ export const filterExecutor: NodeExecutor = (act, ctx) => {
 /** Template / transform node: applies a Handlebars template to the
  * inputs. Reuses the runtime's existing Handlebars helpers. */
 export const transformExecutor: NodeExecutor = (act, ctx) => {
-  const cfg = ctx.node.config as { expression?: string }
-  const tpl = cfg.expression ?? ''
-  // Canonical output port id is `out` (name "value").
-  if (tpl === '') return { outputs: [{ port: 'out', value: act.inputs['value'] }] }
-  const value = renderHandlebars(tpl, { ...act.inputs, ...Object.fromEntries(ctx.variables) })
-  return { outputs: [{ port: 'out', value }] }
+  // The expression field persists a typed value (`{ type: 'expression',
+  // value }`), not a bare string — unwrap it to the template text. Feeding
+  // the object straight to Handlebars throws "You must pass a string …".
+  const tpl = expressionTemplate(ctx.node.config)
+  // Output is wrapped as `{ result }` on the `out` port — the SAME shape the
+  // static preview models (`scenarioStaticPreview` → `{ result }`), so the
+  // auto-deduced edge selector (`result`) resolves identically at runtime.
+  // Emitting a bare value here would leave that selector pointing at a
+  // missing `.result` and downstream nodes would receive `undefined`.
+  if (tpl === '') return { outputs: [{ port: 'out', value: { result: act.inputs['value'] } }] }
+  // Template context: the wired inputs + run variables. When the `value`
+  // input is a plain object, also spread its keys so a template can reference
+  // a field directly (`{{name}}` for an input emitting `{ name }`), not only
+  // `{{value.name}}`.
+  const v = act.inputs['value']
+  const base = v !== null && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : {}
+  const result = renderHandlebars(tpl, { ...base, ...act.inputs, ...Object.fromEntries(ctx.variables) })
+  return { outputs: [{ port: 'out', value: { result } }] }
+}
+
+/** The transform's Handlebars template text, unwrapped from the persisted
+ * expression config (`{ type: 'expression', value }` or a bare string). */
+function expressionTemplate(config: unknown): string {
+  const raw = (config as { expression?: unknown } | null)?.expression
+  if (typeof raw === 'string') return raw
+  if (raw !== null && typeof raw === 'object' && 'value' in raw) {
+    const v = (raw as { value: unknown }).value
+    if (typeof v === 'string') return v
+  }
+  return ''
 }
 
 function renderHandlebars(template: string, ctx: Record<string, unknown>): string {

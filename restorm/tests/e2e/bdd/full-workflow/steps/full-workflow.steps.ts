@@ -475,11 +475,10 @@ When(
   'I select the {string} environment on the active request tab',
   async ({}, envName: string) => {
     if (!page) throw new Error('app must be launched')
-    // The dropdown lives in the status bar, not in the tab header.
-    // Click opens a `<Tooltip>`-backed popover above the cell; the
-    // env list inside is a ListView so we filter on the listview
-    // root to keep the click scoped to the popover content.
-    const dropdown = page.locator('[data-testid="statusbar-env-selector"]').first()
+    // The env selector lives in the request tab header (top-right). Click
+    // opens a popover BELOW the button; the env list inside is a ListView, so
+    // we filter on the listview root to keep the click scoped to the popover.
+    const dropdown = page.locator('[data-testid="request-header-env-selector"]').first()
     await expect(dropdown).toBeVisible({ timeout: 5000 })
     await dropdown.click()
     const popoverList = page.locator('[data-testid="statusbar-env-selector-listview"]').first()
@@ -1465,10 +1464,9 @@ Then(
   'the active request tab should show the {string} environment',
   async ({}, envName: string) => {
     if (!page) throw new Error('app must be launched')
-    // There's a single env selector in the status bar (not one per
-    // tab), so no `:visible` filter needed — the cell rerenders to
-    // reflect whichever request is the active tab.
-    const dropdown = page.locator('[data-testid="statusbar-env-selector"]').first()
+    // The active request tab's header carries the env selector; `.first()`
+    // targets it without a `:visible` filter (only the active tab is mounted).
+    const dropdown = page.locator('[data-testid="request-header-env-selector"]').first()
     await expect(dropdown).toContainText(envName, { timeout: 10000 })
   }
 )

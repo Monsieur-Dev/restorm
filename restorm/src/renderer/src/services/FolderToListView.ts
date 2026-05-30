@@ -8,6 +8,7 @@ import type { Icon } from 'electron-core-ui/types'
 import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, AuthenticationRequest, Scenario } from '../../../shared/types/collections'
 import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isScenario } from '../../../shared/types/collections'
 import React, { type ReactNode } from 'react'
+import { ScenarioRunningBadge } from '../components/common/ScenarioRunningBadge'
 
 /** Convert an Icon to a ListView-compatible icon (string for codicons, ReactNode for others) */
 function toListViewIcon(icon: Icon | undefined, fallback: string): string | ReactNode {
@@ -195,6 +196,12 @@ function scenarioToListViewItem(
   options: FolderToListViewOptions
 ): ListViewItemData {
   const badge = options.renderProtocolBadge?.('scenario', 'SCENARIO')
+  // Decorate the badge with the live-run border-beam (lit while the scenario
+  // has an in-flight run), the same orbiting trail the graph paints on a
+  // running node box.
+  const icon = badge != null
+    ? React.createElement(ScenarioRunningBadge, { scenarioId: scenario.id }, badge)
+    : badge
   const isExpanded = options.expandedIds.has(scenario.id)
   const children = (scenario.items ?? []).map((item) => folderItemToListViewItem(item, options))
   return {
@@ -202,7 +209,7 @@ function scenarioToListViewItem(
     title: scenario.name,
     isExpandable: children.length > 0,
     isExpanded,
-    icon: badge,
+    icon,
     children
   }
 }

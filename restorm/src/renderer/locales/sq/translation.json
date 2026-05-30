@@ -258,7 +258,8 @@
     "addHeader": "Shto kokë",
     "addParam": "Shto parametër",
     "environmentSelector": {
-      "noEnvironment": "Pa mjedis"
+      "noEnvironment": "Pa mjedis",
+      "switchTooltip": "Ndrysho mjedisin"
     },
     "body": {
       "fileLabel": "Skedar ose URL:",
@@ -796,6 +797,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Modifikimi i kyçur ndërsa skenari po ekzekutohet",
     "switch": {
       "addCase": "Shto rast",
       "removeCase": "Hiq rastin",
@@ -945,7 +947,9 @@
       "stop": "Ndalo",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "clearLogs": "Pastro regjistrat",
       "logsShowAll": "Show all logs",
+      "showLevelLogs": "Shfaq loget {{level}}",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -965,6 +969,17 @@
       "title": "Run parameters",
       "run": "Run",
       "midRunTitle": "Kërkohet hyrje"
+    },
+    "runHistory": {
+      "title": "Historiku i ekzekutimeve",
+      "tooltip": "Historiku i ekzekutimeve",
+      "empty": "Asnjë ekzekutim i regjistruar ende",
+      "noLogs": "Asnjë regjistër për këtë ekzekutim",
+      "logsTab": "Logs",
+      "graphTab": "Grafik",
+      "noGraph": "Asnjë fotografi skenari për këtë ekzekutim",
+      "pin": "Fikso",
+      "unpin": "Hiq fiksimin"
     },
     "for": {
       "from": "from",

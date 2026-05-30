@@ -257,7 +257,8 @@
     "addHeader": "헤더 추가",
     "addParam": "매개변수 추가",
     "environmentSelector": {
-      "noEnvironment": "환경 없음"
+      "noEnvironment": "환경 없음",
+      "switchTooltip": "환경 전환"
     },
     "body": {
       "fileLabel": "파일 또는 URL:",
@@ -795,6 +796,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "시나리오 실행 중에는 편집이 잠깁니다",
     "switch": {
       "addCase": "케이스 추가",
       "removeCase": "케이스 제거",
@@ -944,7 +946,9 @@
       "stop": "중지",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "clearLogs": "로그 지우기",
       "logsShowAll": "Show all logs",
+      "showLevelLogs": "{{level}} 로그 표시",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -964,6 +968,17 @@
       "title": "Run parameters",
       "run": "Run",
       "midRunTitle": "입력 필요"
+    },
+    "runHistory": {
+      "title": "실행 기록",
+      "tooltip": "실행 기록",
+      "empty": "기록된 실행이 없습니다",
+      "noLogs": "이 실행에 대한 로그가 없습니다",
+      "logsTab": "Logs",
+      "graphTab": "그래프",
+      "noGraph": "이 실행에 대한 시나리오 스냅샷이 없습니다",
+      "pin": "고정",
+      "unpin": "고정 해제"
     },
     "for": {
       "from": "from",

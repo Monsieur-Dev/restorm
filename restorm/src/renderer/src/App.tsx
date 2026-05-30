@@ -75,8 +75,7 @@ const classForDocument = (type: 'folder' | 'request' | 'environment', doc: Recor
   }
   return FolderClass
 }
-import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload, type RequestHistoryEventPayload } from './services/DocumentEvents'
-import { getResponseHistoryList } from './services/GraphQLIntegration'
+import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from './services/DocumentEvents'
 import type { EditorTab, WorkbenchTree, GroupNode, TabGroupNode, ContainerGroupNode } from 'electron-core-ui/renderer'
 import { isContainerNode, isTabGroupNode } from 'electron-core-ui/renderer'
 import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, type ConsoleTab, type FirewallTab, type MiniBrowserTab } from '../../shared/types/editor'
@@ -130,10 +129,8 @@ import {
 } from './utils/treeSearch'
 import { DesktopIndicator } from './components/MainView/DesktopIndicator'
 import { findItemById } from './utils/treeSearch'
-import { EnvironmentProvider } from './contexts/EnvironmentContext'
 import { getSessionRequestOverride, getSessionFolderEnv, findEnvironmentById } from './services/environmentSelectionStore'
 import type { RequestEnvInfo } from './components/Scenario/scenarioBoundResolver'
-import { StatusbarEnvironmentSelector } from './components/MainView/StatusbarEnvironmentSelector'
 import { StatusbarAuthSelector } from './components/MainView/StatusbarAuthSelector'
 import { shouldShowAuthSelector } from './components/MainView/statusbarAuthHelpers'
 import { useItemOperations } from './hooks/useItemOperations'
@@ -853,75 +850,17 @@ const App: React.FC = () => {
     return null
   }, [activeRequest, rootItems])
 
-  // `EnvironmentProvider` expects `{ projectUuid, envFolderId, requestId }`
-  // to wire up persistence (workspace-scoped, survives file renames).
-  // Falls back to `undefined` when any field is missing — the provider
-  // then runs in in-memory-only mode.
-  const activeEnvPersistenceKey = useMemo(() => {
-    if (!activeRequest || !projectUuid || !activeEnvFolderId) return undefined
-    return { projectUuid, envFolderId: activeEnvFolderId, requestId: activeRequest.id }
-  }, [activeRequest, projectUuid, activeEnvFolderId])
-
-  // Reactive "does the active request have any history yet?" used to
-  // drive the statusbar button's disabled state. The probe is tagged
-  // with the `requestId` it was fetched for so the button only trusts
-  // a `hasHistory: true` that matches the currently-active request —
-  // otherwise a stale `true` from a previous request could briefly
-  // re-enable the button after switching to a fresh request whose
-  // fetch hasn't landed yet.
-  const [activeHistoryProbe, setActiveHistoryProbe] = useState<{ requestId: string; hasHistory: boolean } | null>(null)
-
-  // Re-fetch count whenever the active request changes or a tab
-  // records a new history entry for that request. The tab views emit
-  // `REQUEST_HISTORY_RECORDED` right after `setHistoryRefreshKey` so a
-  // freshly-sent request flips the button from disabled to enabled
-  // without a window reload.
-  const activeRequestId = activeRequest?.id ?? null
-  useEffect(() => {
-    // When no request tab is active, the button is unmounted anyway
-    // (see `{activeRequest && ...}` in the statusbar render), so the
-    // probe value is unread and left stale on purpose — avoids a
-    // setState-in-effect for a value nobody reads. The probe is tagged
-    // with the fetched request id so callers ignore it when stale.
-    if (!activeRequestId) return
-    const requestId = activeRequestId
-    let cancelled = false
-    const refresh = async (): Promise<void> => {
-      try {
-        const entries = await getResponseHistoryList(requestId)
-        if (!cancelled) setActiveHistoryProbe({ requestId, hasHistory: entries.length > 0 })
-      } catch (error) {
-        if (!cancelled) {
-          logger.warn('[App] getResponseHistoryList failed', { error: String(error), requestId })
-          setActiveHistoryProbe({ requestId, hasHistory: false })
-        }
-      }
-    }
-    void refresh()
-    const subscription = eventBus.subscribe<RequestHistoryEventPayload>(
-      DocumentEvents.REQUEST_HISTORY_RECORDED,
-      (payload) => { if (payload.requestId === requestId) void refresh() }
-    )
-    return () => {
-      cancelled = true
-      subscription.unsubscribe()
-    }
-  }, [activeRequestId])
-
-  // The probe is only meaningful when it matches the request we're
-  // currently looking at — otherwise it's stale data from a previous
-  // active request and must be treated as "unknown → keep disabled".
-  const activeRequestHasHistory = Boolean(
-    activeRequest &&
-    activeHistoryProbe?.requestId === activeRequest.id &&
-    activeHistoryProbe.hasHistory
-  )
-
-  const handleOpenActiveRequestHistory = useCallback((): void => {
-    if (!activeRequest) return
-    if (!activeRequestHasHistory) return
-    eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_OPEN, { requestId: activeRequest.id } as RequestHistoryEventPayload)
-  }, [activeRequest, activeRequestHasHistory])
+  // Whether the statusbar auth selector mounts for the active request.
+  // With the env selector + history button moved to the request tab
+  // header, the auth selector is the only request-context statusbar
+  // cell left — so it (or, when absent, the MCP/bell group) carries the
+  // `right-aligned` auto-margin that pushes the right group over.
+  const authSelectorShown = useMemo<boolean>(() => {
+    if (!activeRequest || !activeEnvFolderId) return false
+    const req = findRequestById(rootItems, activeRequest.id)
+    const folder = findFolderById(rootItems, activeEnvFolderId)
+    return !!(req && folder && shouldShowAuthSelector(req, folder.items))
+  }, [activeRequest, activeEnvFolderId, rootItems])
 
   // Window-level Ctrl+S / Ctrl+Shift+S fallback — only fires if the
   // menu-bar's KeyboardShortcutService didn't intercept (e.g. when the
@@ -1247,63 +1186,6 @@ const App: React.FC = () => {
       ...(route.method !== undefined ? { method: route.method } : {})
     })
   }, [rootItems])
-
-  // Environments of the active request's nearest ancestor env-folder,
-  // used to feed the status-bar env selector. Empty when the active
-  // request has no env-folder ancestor (the selector then hides).
-  //
-  // `updateCount` ticks every time the reactive tree mutates in place
-  // (env color, icon, rename, etc.) — env-folder edits bump it via
-  // `handleEnvironmentFolderChange`. Without it the memo would keep
-  // returning the same `envs` array (proxy mutations are invisible to
-  // React's dep comparison), and the downstream `useMemo` that
-  // computes `envColor` inside `EnvironmentProvider` would never pick
-  // up a freshly-chosen color. Shallow-cloning each env below also
-  // gives the provider a new array reference on every bump so its
-  // own `envColor` memo re-runs.
-  const activeRequestEnvironments = useMemo(() => {
-    // Read `updateCount` so the memo re-runs when the reactive tree
-    // mutates in place — see the JSDoc above for the rationale. The
-    // value itself is unused; only its identity change matters.
-    void updateCount
-    if (!activeRequest) return []
-    const found = findItemWithBreadcrumbs(rootItems, activeRequest.id)
-    return getNearestEnvironmentsForBreadcrumbs(rootItems, found.breadcrumbs).map((env) => ({ ...env }))
-  }, [activeRequest, rootItems, updateCount])
-
-  // All request ids that sit under the same env folder as the active
-  // request (including the active one). Passed to the statusbar env
-  // selector so the "Apply to all" toggle can propagate a selection
-  // across siblings without each tab needing to be mounted.
-  const activeEnvFolderRequestIds = useMemo<string[]>(() => {
-    if (!activeRequest) return []
-    const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, activeRequest.id)
-    // Walk breadcrumbs backwards to find the nearest ancestor that is
-    // an EnvironmentFolder — the ticket scopes selection to that
-    // folder's requests only.
-    let envFolderId: string | undefined
-    for (let i = breadcrumbs.length - 2; i >= 0; i -= 1) {
-      const id = breadcrumbs[i]?.id
-      if (!id) continue
-      const folder = findFolderById(rootItems, id)
-      if (folder && isEnvironmentFolder(folder as FolderItem)) {
-        envFolderId = folder.id
-        break
-      }
-    }
-    if (!envFolderId) return [activeRequest.id]
-    const envFolder = findEnvironmentFolderById(rootItems, envFolderId)
-    if (!envFolder) return [activeRequest.id]
-    const ids: string[] = []
-    const walk = (items: FolderItem[]): void => {
-      for (const item of items) {
-        if ('items' in item) walk(item.items)
-        else if (isRequest(item)) ids.push(item.id)
-      }
-    }
-    walk(envFolder.items)
-    return ids
-  }, [activeRequest, rootItems])
 
   // Keep the ref in sync so __restormTestHelpers.setEnvFolderTagColor can
   // delegate to the live handler without re-listing hook deps below.
@@ -2501,11 +2383,10 @@ const App: React.FC = () => {
         {filePath && <StatusbarElement data-testid="app-statusbar-element" title={filePath} />}
         <DesktopIndicator />
         {(() => {
-          if (!activeRequest || !activeEnvFolderId) return null
+          if (!authSelectorShown || !activeRequest || !activeEnvFolderId) return null
           const reactiveActiveRequest = findRequestById(rootItems, activeRequest.id)
           const activeEnvFolder = findFolderById(rootItems, activeEnvFolderId)
           if (!reactiveActiveRequest || !activeEnvFolder) return null
-          if (!shouldShowAuthSelector(reactiveActiveRequest, activeEnvFolder.items)) return null
           return (
             <StatusbarAuthSelector
               activeRequest={reactiveActiveRequest}
@@ -2514,48 +2395,15 @@ const App: React.FC = () => {
             />
           )
         })()}
-        {(() => {
-          if (!activeRequest || activeRequestEnvironments.length === 0) return null
-          // Only push env right when no auth selector to its left.
-          const authActive = !!activeEnvFolderId && (() => {
-            const folder = findFolderById(rootItems, activeEnvFolderId)
-            const req = findRequestById(rootItems, activeRequest.id)
-            return !!(folder && req && shouldShowAuthSelector(req, folder.items))
-          })()
-          return (
-            <EnvironmentProvider
-              environments={activeRequestEnvironments}
-              persistenceKey={activeEnvPersistenceKey}
-            >
-              <StatusbarEnvironmentSelector
-                folderRequestIds={activeEnvFolderRequestIds}
-                projectUuid={projectUuid}
-                rightAligned={!authActive}
-              />
-            </EnvironmentProvider>
-          )
-        })()}
-        {activeRequest && (
-          <StatusbarElement
-            data-testid="statusbar-request-history"
-            className={activeRequestEnvironments.length > 0 ? '' : 'right-aligned'}
-            disabled={!activeRequestHasHistory}
-            onClick={handleOpenActiveRequestHistory}
-            icon={{ type: 'codicon', value: 'history' }}
-            title={t('statusbar.requestHistory')}
-          />
-        )}
-        {/* MCP indicator (only when restorm runs in MCP mode). When
-         * mounted and there's nothing else right-aligned, MCP carries
-         * the auto margin and the bell flows naturally to its right.
-         * The bell takes the auto margin only when MCP isn't going
-         * to render (mcp disabled) — otherwise both would each
-         * consume their own margin slot and MCP would be stranded
-         * mid-bar. */}
-        <StatusbarMcpIndicator rightAligned={!activeRequest} />
+        {/* The environment selector + request-history button now live in
+         * the request tab header (left of the bookmark ribbon), not here.
+         * MCP indicator (only when restorm runs in MCP mode). When the
+         * auth selector isn't shown, MCP carries the `right-aligned` auto
+         * margin; the bell takes it only when MCP won't render. */}
+        <StatusbarMcpIndicator rightAligned={!authSelectorShown} />
         <StatusBarBellButton
           toasterId="app"
-          {...(!activeRequest && !mcpEnabled ? { className: 'right-aligned' } : {})}
+          {...(!authSelectorShown && !mcpEnabled ? { className: 'right-aligned' } : {})}
         />
       </Statusbar>
 

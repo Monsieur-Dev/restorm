@@ -67,6 +67,12 @@
   border-color: var(--focusBorder, #0078d4);
 }
 
+.scn-input-prompt-textarea {
+  min-height: 72px;
+  resize: vertical;
+  font-family: var(--monospace-font, monospace);
+}
+
 .scn-input-prompt-footer {
   display: flex;
   justify-content: flex-end;

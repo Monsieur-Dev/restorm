@@ -12,7 +12,7 @@ import type {
  * exercise the scheduler without the rest of the main-process
  * surface (no electron, no IPC, no CollectionStore).
  *
- * The 9 OYO-285 acceptance criteria are addressed across these
+ * The scenario-engine acceptance criteria are addressed across these
  * tests, plus a couple of foundational ones (root-parallel start,
  * pause/step/abort).
  */
@@ -347,6 +347,54 @@ describe('AC7 — error port routing', () => {
   })
 })
 
+describe('mid-run input cancellation', () => {
+  // An executor that mirrors the real `input` node: it awaits a user
+  // prompt and emits the answer on `value`. A cancel rejects that await,
+  // so the throw propagates into the scheduler's error routing.
+  const askExecutor: NodeExecutor = async (_act, ctx) => {
+    const v = await ctx.requestUserInput({ name: 'q', defaultValue: null, hint: 'boolean' })
+    return { outputs: [{ port: 'value', value: v }] }
+  }
+  const firstRequestId = async (events: EngineEvent[]): Promise<string> => {
+    await vi.waitFor(() => { expect(events.some((e) => e.type === 'user-input-requested')).toBe(true) })
+    const ev = events.find((e) => e.type === 'user-input-requested') as { requestId: string }
+    return ev.requestId
+  }
+
+  it('cancelling a prompt routes the input node to its `error` port when wired', async () => {
+    const scenario = buildScenario(
+      [
+        { id: 'ask', kind: 'input', outputs: ['value', 'error'] },
+        { id: 'rescue', kind: 'object', inputs: ['err'], outputs: ['value'] }
+      ],
+      [{ from: ['ask', 'error'], to: ['rescue', 'err'] }]
+    )
+    const rescue = vi.fn()
+    const executors = new Map<string, NodeExecutor>([
+      ['ask', askExecutor],
+      ['rescue', (act) => { rescue(act.inputs); return { outputs: [] } }]
+    ])
+    const s = new Scheduler({ scenario, executors })
+    const events = captureEvents(s)
+    const runP = s.run()
+    s.cancelUserInput(await firstRequestId(events))
+    await runP
+    expect(rescue).toHaveBeenCalledTimes(1)
+    expect(s.status().state).toBe('completed')
+  })
+
+  it('cancelling a prompt with no `error` wire fails the run', async () => {
+    const scenario = buildScenario([{ id: 'ask', kind: 'input', outputs: ['value'] }], [])
+    const executors = new Map<string, NodeExecutor>([['ask', askExecutor]])
+    const s = new Scheduler({ scenario, executors })
+    const events = captureEvents(s)
+    const runP = s.run()
+    s.cancelUserInput(await firstRequestId(events))
+    await runP
+    expect(s.status().state).toBe('failed')
+  })
+})
+
 // ------------------------------------------------------------------
 // AC8 — infinite-loop safety net
 // ------------------------------------------------------------------
@@ -469,5 +517,42 @@ describe('AND-join barrier on `in`', () => {
     await s.run()
     expect(s.status().state).toBe('completed')
     expect(targetRuns).toBe(1)
+  })
+})
+
+describe('interactive vs headless input seeding', () => {
+  // Mirrors the real `input` executor: a SEEDED activation passes its value
+  // through; otherwise it prompts the user.
+  const inputExec: NodeExecutor = async (act, ctx) => {
+    if (act.seeded === true) return { outputs: [{ port: 'value', value: act.inputs['value'] }] }
+    const v = await ctx.requestUserInput({ name: 'name', defaultValue: 'Glaude', hint: 'string' })
+    return { outputs: [{ port: 'value', value: { name: v } }] }
+  }
+
+  it('interactive run: a no-predecessor input PROMPTS instead of using its default', async () => {
+    const scenario = buildScenario([{ id: 'in', kind: 'input', config: { name: 'name' }, outputs: ['value'] }], [])
+    const executors = new Map<string, NodeExecutor>([['in', inputExec]])
+    const s = new Scheduler({ scenario, executors })
+    const events = captureEvents(s)
+    const runP = s.run({ interactive: true })
+    await vi.waitFor(() => { expect(events.some((e) => e.type === 'user-input-requested')).toBe(true) })
+    expect(s.status().state).toBe('running') // live + waiting on the prompt
+    const ev = events.find((e) => e.type === 'user-input-requested') as { requestId: string }
+    s.resolveUserInput(ev.requestId, 'Bob')
+    await runP
+    expect(s.status().state).toBe('completed')
+  })
+
+  it('headless run: a no-predecessor input uses its configured default (no prompt)', async () => {
+    const scenario = buildScenario(
+      [{ id: 'in', kind: 'input', config: { name: 'name', valueType: { type: 'string', value: 'Glaude' } }, outputs: ['value'] }],
+      []
+    )
+    const executors = new Map<string, NodeExecutor>([['in', inputExec]])
+    const s = new Scheduler({ scenario, executors })
+    const events = captureEvents(s)
+    await s.run() // non-interactive (default)
+    expect(events.some((e) => e.type === 'user-input-requested')).toBe(false)
+    expect(s.status().state).toBe('completed')
   })
 })

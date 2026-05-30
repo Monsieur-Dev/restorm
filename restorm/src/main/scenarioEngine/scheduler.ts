@@ -53,6 +53,10 @@ export interface RunOptions {
   maxActivations?: number
   /** Begin paused — first `resume()` ticks the first activation. */
   startPaused?: boolean
+  /** Interactive (UI) run: no-predecessor `input` nodes prompt the user (and
+   * beam) instead of falling back to their configured default. Headless runs
+   * (MCP, sub-scenarios) leave this false so they never block on a prompt. */
+  interactive?: boolean
 }
 
 export interface SchedulerInit {
@@ -159,7 +163,7 @@ export class Scheduler {
     this.state = opts.startPaused === true ? 'paused' : 'running'
     this.emit({ type: 'run-started', runId: this.runId, scenarioId: this.scenario.id, at: now() })
     this.logRunBoundary('start')
-    this.seedRoots(opts.params ?? {})
+    this.seedRoots(opts.params ?? {}, opts.interactive === true)
     this.tick()
     return this.completionPromise()
   }
@@ -297,6 +301,10 @@ export class Scheduler {
           this.emit({ type: 'node-completed', runId: this.runId, nodeId: act.nodeId, scope: act.scope, at: now(), outputs: result.outputs })
         }
       } catch (err) {
+        // The run was cancelled while we awaited (Stop) — silently land,
+        // exactly like the success branch. Don't route to `error` / fail:
+        // an aborted run isn't a node error.
+        if (this.abortCtl.signal.aborted) return
         const msg = err instanceof Error ? err.message : String(err)
         this.log.push({ ts: now(), runId: this.runId, level: 'error', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: msg })
         // Route to the node's `error` output if anything is wired
@@ -513,33 +521,35 @@ export class Scheduler {
    * actually wired, and a node wired to nothing fires immediately.
    * This matches the spec ("nodes without predecessors all start at
    * once; a node with predecessors waits for all its inputs"). */
-  private seedRoots(params: Record<string, unknown>): void {
+  private seedRoots(params: Record<string, unknown>, interactive: boolean): void {
     for (const node of this.scenario.nodes) {
       if (this.nodesWithIncoming.has(node.id)) continue
-      // `input` nodes are special: their config carries the param
-      // name + a default. The seed activation's inputs map contains
-      // the resolved value so the executor doesn't need to read
-      // params separately.
-      const seedInputs: Record<string, unknown> = {}
       if (node.kind === 'input') {
         const cfg = node.config as { name?: string; value?: unknown; valueType?: unknown }
         const paramName = typeof cfg.name === 'string' && cfg.name !== '' ? cfg.name : 'value'
-        // Resolve the typed default to a concrete primitive: a
-        // `customList` carries its picked entry in `.label`, a numeric
-        // in `.value`, etc. `concreteValue` collapses every ValueType
-        // shape to the JS value the executor + slots actually consume.
-        const resolved = cfg.valueType !== undefined && cfg.valueType !== null
-          ? concreteValue(cfg.valueType)
-          : cfg.value
-        const value = paramName in params ? params[paramName] : resolved
-        // Emit the SAME shape the static preview models for an `input`
-        // box (`{ [name]: value }`), so the auto-deduced selector
-        // (`singleDeepPath` → the param name) drills back to the scalar
-        // at runtime. Keeping preview-shape and runtime-shape identical
-        // is what makes the JSON-path selector machinery uniform.
-        seedInputs['value'] = { [paramName]: value }
+        const passthrough = (value: unknown): void => {
+          // Emit the `{ [name]: value }` shape the static preview models so a
+          // wired selector resolves identically; `seeded` skips the prompt.
+          this.queue.push({ nodeId: node.id, kind: node.kind, scope: [], inputs: { value: { [paramName]: value } }, seeded: true })
+        }
+        if (paramName in params) {
+          // A value was supplied up-front — use it, no prompt.
+          passthrough(params[paramName])
+        } else if (interactive) {
+          // UI run, no value — the input RUNS and prompts the user, so it
+          // beams and a cancel routes to its `error` output exactly like a
+          // mid-run input. The renderer groups these start-time prompts into
+          // one "run parameters" modal; the run is live the whole time.
+          this.queue.push({ nodeId: node.id, kind: node.kind, scope: [], inputs: {}, seeded: false })
+        } else {
+          // Headless run (MCP / sub-scenario), no value — fall back to the
+          // node's configured default; there's no UI to prompt.
+          passthrough(cfg.valueType !== undefined && cfg.valueType !== null ? concreteValue(cfg.valueType) : cfg.value)
+        }
+        this.scopes.enter([])
+        continue
       }
-      this.queue.push({ nodeId: node.id, kind: node.kind, scope: [], inputs: seedInputs, seeded: true })
+      this.queue.push({ nodeId: node.id, kind: node.kind, scope: [], inputs: {}, seeded: true })
       this.scopes.enter([])
     }
   }
@@ -714,6 +724,18 @@ export class Scheduler {
     if (!pending) return
     this.pendingInputRequests.delete(requestId)
     pending.resolve(value)
+  }
+
+  /** Reject a pending input request because the user cancelled the prompt.
+   * The input executor's `await` throws, which the run loop routes to the
+   * node's `error` output (or fails the run if `error` is unwired) — the
+   * same path as any executor error. Distinct from a run abort (Stop):
+   * cancelling one prompt is a node-level error, not a run teardown. */
+  cancelUserInput(requestId: string): void {
+    const pending = this.pendingInputRequests.get(requestId)
+    if (!pending) return
+    this.pendingInputRequests.delete(requestId)
+    pending.reject(new Error('Input cancelled by user'))
   }
 
   private findNode(nodeId: string): typeof this.scenario.nodes[number] {

@@ -40,6 +40,10 @@
   border: 1px solid var(--editorHoverWidget-border, #454545);
   border-radius: 4px;
   overflow: hidden;
+  /* `width: 100%` + a 1px border would otherwise make the border-box 2px
+   * wider than the parent (content-box default), so the right border gets
+   * clipped by the parent's `overflow: hidden`. */
+  box-sizing: border-box;
 }
 .scn-preview-node {
   display: flex;

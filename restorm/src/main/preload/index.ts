@@ -906,6 +906,17 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.invoke('scenario:engine:run-tree', runId) as Promise<unknown[]>,
     scenarioEngineResolveUserInput: (runId: string, requestId: string, value: unknown): Promise<{ ok: boolean }> =>
       ipcRenderer.invoke('scenario:engine:resolve-user-input', runId, requestId, value) as Promise<{ ok: boolean }>,
+    scenarioEngineCancelUserInput: (runId: string, requestId: string): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke('scenario:engine:cancel-user-input', runId, requestId) as Promise<{ ok: boolean }>,
+    /** Persisted run history (disk archive). `list` returns lightweight
+     * entries for a scenario; `detail` the full logs + scenario snapshots;
+     * `togglePin` pins/unpins a run so it survives retention pruning. */
+    scenarioRunHistoryList: (scenarioId: string): Promise<unknown[]> =>
+      ipcRenderer.invoke('scenario:history:list', scenarioId) as Promise<unknown[]>,
+    scenarioRunHistoryDetail: (guid: string): Promise<unknown> =>
+      ipcRenderer.invoke('scenario:history:detail', guid) as Promise<unknown>,
+    scenarioRunHistoryTogglePin: (guid: string, pinned: boolean): Promise<boolean> =>
+      ipcRenderer.invoke('scenario:history:toggle-pin', guid, pinned) as Promise<boolean>,
     /** Subscribe to engine events (node-started/-completed/data-flow/run-…).
      * Returns an unsubscribe function. The renderer animates the graph
      * + edge beams off these events. */

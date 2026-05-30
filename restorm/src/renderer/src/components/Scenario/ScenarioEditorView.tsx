@@ -18,7 +18,7 @@ import {
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { useTranslation } from 'react-i18next'
-import { Button, ContextMenu, Tooltip, ColorPicker, Modal, MarkdownEditor, type ContextMenuItem } from 'electron-core-ui/renderer'
+import { Button, ContextMenu, Tooltip, ColorPicker, Modal, MarkdownEditor, eventBus, type ContextMenuItem } from 'electron-core-ui/renderer'
 import type { Scenario, ScenarioNode, ScenarioEdge, ScenarioNodeKind } from '../../../../shared/types/collections'
 import { isRequest, isScenario } from '../../../../shared/types/collections'
 import { Badge } from '../common/Badge'
@@ -42,8 +42,11 @@ import type { AddChildKind } from '../MainView/Sidebar/contextMenuBuilder'
 import { validateScenarioGraph, targetKey, type ScenarioNodeError, type ScenarioDataLink } from './scenarioValidation'
 import { ScenarioErrorsContext } from './scenarioErrorsContext'
 import { ScenarioInspectorPanel, type InspectorPreviewNode } from './ScenarioInspectorPanel'
+import { type LogProvenanceApi } from './ScenarioRunLogView'
 import { useScenarioEngine } from '../../hooks/useScenarioEngine'
 import { ScenarioInputPrompt, ScenarioMidRunInputPrompt } from './ScenarioInputPrompt'
+import { ScenarioRunHistoryModal } from './ScenarioRunHistoryModal'
+import { SCENARIO_RUN_HISTORY_OPEN, type ScenarioRunHistoryOpenPayload } from './scenarioRunHistoryEvents'
 import { ScenarioDebugBezierEdge } from './ScenarioDebugBezierEdge'
 import { staticScenarioPreview, singleDeepPath, expectsObjectInput, singleTopLevelKey, STATIC_PREVIEW_KINDS, resolveItems, applyListOp, resolveSelectorPath, type StaticPreviewNode, type StaticPreviewEdge } from '../../../../shared/utils/scenarioStaticPreview'
 import { consumePendingScenarioNodeFocus, onScenarioNodeFocus, clearPendingScenarioNodeFocus } from '../../services/scenarioFocusBus'
@@ -104,6 +107,16 @@ const invalidBannerStyle: CSSProperties = {
   background: 'var(--inputValidation-errorBackground, #5a1d1d)',
   color: 'var(--inputValidation-errorForeground, #fff)',
   border: '1px solid var(--inputValidation-errorBorder, #be1100)'
+}
+/** Banner shown while a run is in flight — the graph is read-only until it
+ * finishes (no drag / connect / delete / config edits / add-node). */
+const lockedBannerStyle: CSSProperties = {
+  position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', zIndex: 5,
+  display: 'flex', alignItems: 'center', gap: 6, pointerEvents: 'none',
+  padding: '4px 10px', borderRadius: 4, fontSize: 12,
+  background: 'var(--inputValidation-infoBackground, #063b49)',
+  color: 'var(--inputValidation-infoForeground, #fff)',
+  border: '1px solid var(--inputValidation-infoBorder, #1a85ff)'
 }
 /** The catalogue flattened with a separator marker between categories — the
  * add-node menu maps this to ContextMenu items. Computed once (no refs / no
@@ -232,12 +245,38 @@ function chooseColorTooltipPlacement(rect: DOMRect): { placement: 'above' | 'bel
 
 const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, projectUuid, onScenarioChange, resolveBoundItem, resolveRequestEnv, resolveSyntheticPreview, onOpenItem, onCreateRequest, onCreateChild }) => {
   const { t } = useTranslation()
-  const { screenToFlowPosition, fitView } = useReactFlow()
+  const { screenToFlowPosition, fitView, getNode } = useReactFlow()
   const wrapperRef = useRef<HTMLDivElement>(null)
   // Phase 2 — real engine controller for this scenario tab. Drives the
   // inspector's Run / Pause / Step / Stop buttons + animates nodes /
   // edges off engine events.
   const engine = useScenarioEngine(scenario.id)
+  // While a run is in flight (running OR paused) the graph is read-only:
+  // no node drag, connect, delete, add, or config edit. A `ref` mirror lets
+  // the imperative React Flow handlers (context menus, drop, connect) bail
+  // without being re-created on every state flip.
+  const locked = engine.state === 'running' || engine.state === 'paused'
+  const lockedRef = useRef(locked)
+  useEffect(() => { lockedRef.current = locked }, [locked])
+
+  // Click-a-log-to-find-its-box: focus + flash a node. `flashSeq` bumps on
+  // every request so re-clicking the SAME node replays the flash (the bumped
+  // token remounts the box's flash overlay). Cleared after the animation.
+  const [flash, setFlash] = useState<{ nodeId: string; seq: number } | null>(null)
+  const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const flashSeqRef = useRef(0)
+  useEffect(() => () => { if (flashTimerRef.current) clearTimeout(flashTimerRef.current) }, [])
+  const focusAndFlashNode = useCallback((nodeId: string): void => {
+    // Only act when the node is in THIS scenario's graph. A run-log row can
+    // point at a sub-scenario's node (not present here) or a since-deleted
+    // node — in both cases there's nothing to focus, so do nothing.
+    if (!getNode(nodeId)) return
+    void fitView({ nodes: [{ id: nodeId }], duration: 300, maxZoom: 1.2 })
+    flashSeqRef.current += 1
+    setFlash({ nodeId, seq: flashSeqRef.current })
+    if (flashTimerRef.current) clearTimeout(flashTimerRef.current)
+    flashTimerRef.current = setTimeout(() => { setFlash(null) }, 1200)
+  }, [fitView, getNode])
   // Restore the graph's saved pan+zoom (user scope, per scenario). Read
   // synchronously from the primed cache so React Flow can seed its
   // `defaultViewport` on first render; fall back to `fitView` when none
@@ -245,7 +284,15 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
   // `projectUuid` is passed from the workbench (this editor renders
   // OUTSIDE the EnvironmentProvider, so the env context isn't available).
   const savedViewport = projectUuid ? getScenarioViewport(projectUuid, scenario.id) : undefined
-  const [inputPromptOpen, setInputPromptOpen] = useState(false)
+  // Run-history overlay open state, driven by the tab-header button's
+  // SCENARIO_RUN_HISTORY_OPEN event (scoped to this scenario's id).
+  const [historyOpen, setHistoryOpen] = useState(false)
+  useEffect(() => {
+    const sub = eventBus.subscribe<ScenarioRunHistoryOpenPayload>(SCENARIO_RUN_HISTORY_OPEN, (payload) => {
+      if (payload.scenarioId === scenario.id) setHistoryOpen(true)
+    })
+    return () => { sub.unsubscribe() }
+  }, [scenario.id])
 
   // The authoritative per-node scenario data (config/ports/note/color),
   // keyed by id. React Flow only round-trips id + position; we merge it
@@ -469,6 +516,17 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
     const it = resolveBoundItem?.(sid) ?? null
     return it && isScenario(it) ? it : null
   }, [resolveBoundItem])
+
+  // Provenance link for inspector log rows emitted by a sub-scenario: resolve
+  // the source scenario's current name (null when deleted) + open it on click.
+  const logProvenance = useMemo<LogProvenanceApi | undefined>(() => {
+    if (!onOpenItem) return undefined
+    return {
+      currentScenarioId: scenario.id,
+      resolveName: (sid: string) => resolveScenario(sid)?.name ?? null,
+      open: onOpenItem
+    }
+  }, [scenario.id, resolveScenario, onOpenItem])
 
   // Ports a runScenario node derives from its bound sub-scenario (one per named
   // input/output node, plus a `done` trigger when it returns nothing) — null for
@@ -814,6 +872,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
   }, [nodes, edges, derivedPortsOf])
 
   const onConnect = useCallback((connection: Connection) => {
+    if (lockedRef.current) return
     if (!validateConnection(connection)) return
     const id = `e-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
     const src = nodes.find((n) => n.id === connection.source)
@@ -1054,6 +1113,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
   }, [resolveBoundItem])
 
   const onDrop = useCallback((event: React.DragEvent) => {
+    if (lockedRef.current) return
     if (!resolveBoundItem) return
     const itemId = event.dataTransfer.getData('text/plain')
     if (!itemId) return
@@ -1170,6 +1230,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
 
   const onPaneContextMenu = useCallback((event: React.MouseEvent | MouseEvent) => {
     event.preventDefault()
+    if (lockedRef.current) return
     const clientX = 'clientX' in event ? event.clientX : 0
     const clientY = 'clientY' in event ? event.clientY : 0
     // Screen coords for the ContextMenu (same convention as the node menu).
@@ -1180,6 +1241,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
   const onEdgeContextMenu = useCallback((event: React.MouseEvent, edge: Edge) => {
     event.preventDefault()
     event.stopPropagation()
+    if (lockedRef.current) return
     setEdges((curr) => curr.map((e) => (e.selected === (e.id === edge.id) ? e : { ...e, selected: e.id === edge.id })))
     setEdgeMenu({ edgeId: edge.id, x: event.clientX, y: event.clientY })
   }, [setEdges])
@@ -1466,18 +1528,44 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
     return blocked
   }, [scenario])
 
+  // Pending input prompts split by topology. No-predecessor inputs all fire at
+  // run start (the run is already live + they beam) and are collected together
+  // in the "run parameters" modal; inputs WITH predecessors prompt one-at-a-
+  // time mid-run. The start modal takes priority while any start input pends.
+  const startPendingInputs = engine.pendingInputs.filter((p) => !inputsWithPredecessors.has(p.nodeId))
+  const midRunPendingInput = engine.pendingInputs.find((p) => inputsWithPredecessors.has(p.nodeId))
+
   // Inject `data.fakeRunActive` for every node the engine reports as
   // currently running. The BorderBeam already reacts to that flag —
   // re-using it keeps the visual identical between fake-run + real
   // engine without per-source styling.
   const presentationalNodes = useMemo(() => {
-    if (engine.runningNodeIds.size === 0) return nodes
-    return nodes.map((n) =>
-      engine.runningNodeIds.has(n.id) && n.data['fakeRunActive'] !== true
-        ? { ...n, data: { ...n.data, fakeRunActive: true } }
-        : n
-    )
-  }, [nodes, engine.runningNodeIds])
+    let mapped = nodes
+    if (engine.runningNodeIds.size > 0) {
+      mapped = mapped.map((n) =>
+        engine.runningNodeIds.has(n.id) && n.data['fakeRunActive'] !== true
+          ? { ...n, data: { ...n.data, fakeRunActive: true } }
+          : n
+      )
+    }
+    // Read-only while running: flag each node for the inert-body CSS and drop
+    // the config / header-menu writers so no edit can commit even via keyboard.
+    if (locked) {
+      mapped = mapped.map((n) => {
+        const data = { ...n.data, locked: true }
+        delete data.onSetConfig
+        delete data.onHeaderContextMenu
+        return { ...n, data }
+      })
+    }
+    // Flash the box a log row pointed at (the token retriggers the overlay).
+    if (flash) {
+      mapped = mapped.map((n) =>
+        n.id === flash.nodeId ? { ...n, data: { ...n.data, flashToken: flash.seq } } : n
+      )
+    }
+    return mapped
+  }, [nodes, engine.runningNodeIds, locked, flash])
 
   // Wire-ports for the link-drag "Add" submenu — the port the link filter
   // computed for the (folded) request / sub-scenario kinds, when each is
@@ -1519,32 +1607,38 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
           {t('scenario.editor.empty', 'Empty scenario — right-click the canvas to add a node')}
         </div>
       )}
-      {invalidCount > 0 && (
+      {invalidCount > 0 && !locked && (
         <div data-testid="scenario-invalid-banner" style={invalidBannerStyle}>
           <i className="codicon codicon-warning" aria-hidden="true" />
           {t('scenario.invalid', { count: invalidCount, defaultValue: '{{count}} required input(s) not wired — scenario is not runnable' })}
+        </div>
+      )}
+      {locked && (
+        <div data-testid="scenario-locked-banner" style={lockedBannerStyle}>
+          <i className="codicon codicon-lock" aria-hidden="true" />
+          {t('scenario.locked', 'Editing locked while the scenario is running')}
         </div>
       )}
       <ScenarioInspectorPanel
         scenarioId={scenario.id}
         errors={workflowErrors}
         errorBoxCount={nodeErrors.size}
-        onFocusNode={(nodeId) => { void fitView({ nodes: [{ id: nodeId }], duration: 300, maxZoom: 1.2 }) }}
+        onFocusNode={focusAndFlashNode}
         previewNode={previewNode}
         onTriggerFakeRun={onTriggerFakeRun}
         onTriggerFakeDebug={onTriggerFakeDebug}
         {...(onOpenItem ? { onOpenItem } : {})}
         engineState={engine.state}
         runLog={engine.runLog}
+        onClearRunLog={engine.clearRunLog}
+        {...(logProvenance ? { logProvenance } : {})}
         onEngineRun={() => {
-          // Only open the params prompt when there's actually an input
-          // to collect (an `input` node with no required predecessor).
-          // Otherwise start directly — opening a fields-less prompt made
-          // it call `onSubmit` during render, which React could invoke
-          // several times → several concurrent runs from ONE Play click.
-          const hasInputsToCollect = scenario.nodes.some((n) => n.kind === 'input' && !inputsWithPredecessors.has(n.id))
-          if (hasInputsToCollect) setInputPromptOpen(true)
-          else void engine.start(scenario.id, {})
+          // Always launch the run immediately — the scenario is "started" the
+          // instant the user hits Play (badges + boxes beam). Any no-predecessor
+          // `input` nodes run as live nodes that prompt the user; the renderer
+          // groups those prompts into the "run parameters" modal below. This is
+          // what lets a cancel route them to their `error` output.
+          void engine.start(scenario.id, {})
         }}
         onEnginePause={() => { void engine.pause() }}
         onEngineResume={() => { void engine.resume() }}
@@ -1562,7 +1656,9 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
         onConnectStart={onConnectStart}
         onConnectEnd={onConnectEnd}
         isValidConnection={validateConnection}
-        deleteKeyCode={['Delete', 'Backspace']}
+        nodesDraggable={!locked}
+        nodesConnectable={!locked}
+        deleteKeyCode={locked ? null : ['Delete', 'Backspace']}
         multiSelectionKeyCode={['Control', 'Meta']}
         onPaneContextMenu={onPaneContextMenu}
         onEdgeContextMenu={onEdgeContextMenu}
@@ -1589,20 +1685,33 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
       <ScenarioInputPrompt
         inputNodes={scenario.nodes}
         predecessorBlocked={inputsWithPredecessors}
-        open={inputPromptOpen}
-        onCancel={() => { setInputPromptOpen(false) }}
+        open={startPendingInputs.length > 0}
+        onCancel={() => {
+          // Cancelling routes every start input to its `error` output (or
+          // fails the run if `error` is unwired) — same path as a mid-run cancel.
+          for (const p of startPendingInputs) void engine.cancelUserInput(p.requestId)
+        }}
         onSubmit={(values) => {
-          setInputPromptOpen(false)
-          void engine.start(scenario.id, values)
+          // Feed each collected value into the live run by resolving the
+          // matching input node's pending prompt (keyed by param name).
+          for (const p of startPendingInputs) void engine.resolveUserInput(p.requestId, values[p.name])
         }}
       />
-      {/* Mid-run prompt — the engine raises one when an input node
-        * with predecessors activates. Only the HEAD of the queue is
-        * shown; the resolution dequeues + reveals the next (if any),
-        * so the user answers them sequentially. */}
-      {engine.pendingInputs.length > 0 && (() => {
-        const head = engine.pendingInputs[0]
-        if (!head) return null
+      {/* Persisted run-history overlay — opened by the tab-header button
+        * (via the SCENARIO_RUN_HISTORY_OPEN event). Rendered here so its
+        * backdrop scopes to the editor's relative wrapper (fills the tab),
+        * not the small header cluster the button sits in. */}
+      <ScenarioRunHistoryModal
+        isOpen={historyOpen}
+        onClose={() => { setHistoryOpen(false) }}
+        scenarioId={scenario.id}
+      />
+      {/* Mid-run prompt — the engine raises one when an input node WITH
+        * predecessors activates. Deferred while the start modal is up (start
+        * inputs are collected together first); then shown one-at-a-time so the
+        * user answers sequentially. */}
+      {startPendingInputs.length === 0 && midRunPendingInput !== undefined && (() => {
+        const head = midRunPendingInput
         return (
           <ScenarioMidRunInputPrompt
             open
@@ -1610,6 +1719,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
             defaultValue={head.defaultValue}
             hint={head.hint}
             onSubmit={(value) => { void engine.resolveUserInput(head.requestId, value) }}
+            onCancel={() => { void engine.cancelUserInput(head.requestId) }}
           />
         )
       })()}

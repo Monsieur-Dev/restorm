@@ -512,7 +512,7 @@ When('I focus the {string} request tab', async ({}, tabName: string) => {
   await expect(tab).toBeVisible({ timeout: 5000 })
   await tab.click()
   // Give the workbench a moment to flip the active-tab modifier so
-  // the statusbar env selector reflects the newly-focused tab's env.
+  // the header env selector reflects the newly-focused tab's env.
   await p.waitForTimeout(150)
 })
 
@@ -520,7 +520,9 @@ When(
   'I select the {string} environment for the active tab without apply-to-all',
   async ({}, envName: string) => {
     const p = requirePage()
-    await p.locator('[data-testid="statusbar-env-selector"]').click()
+    // Per-tab selector: scope to the visible (active) request tab — several
+    // request tabs are open at once in this flow.
+    await p.locator('[data-testid="request-header-env-selector"]:visible').first().click()
     const popover = p.locator('[data-testid="statusbar-env-selector-listview"]')
     await expect(popover).toBeVisible({ timeout: 5000 })
     // Uncheck apply-to-all if checked — we want the env to land only
@@ -675,8 +677,10 @@ When(
   'I switch the active environment to the {string} sub-env with apply-to-all',
   async ({}, subEnvName: string) => {
     const p = requirePage()
-    // Open the statusbar env selector popover.
-    await p.locator('[data-testid="statusbar-env-selector"]').click()
+    // Open the header env selector popover.
+    // Per-tab selector: scope to the visible (active) request tab — several
+    // request tabs are open at once in this flow.
+    await p.locator('[data-testid="request-header-env-selector"]:visible').first().click()
     const popover = p.locator('[data-testid="statusbar-env-selector-listview"]')
     await expect(popover).toBeVisible({ timeout: 5000 })
     // Make sure "Apply to all" is checked — earlier steps in the

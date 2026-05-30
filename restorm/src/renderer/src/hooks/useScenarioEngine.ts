@@ -51,6 +51,7 @@ interface Bridge {
   scenarioEngineStep?: (runId: string) => Promise<{ ok: boolean }>
   scenarioEngineAbort?: (runId: string, reason?: string) => Promise<{ ok: boolean }>
   scenarioEngineResolveUserInput?: (runId: string, requestId: string, value: unknown) => Promise<{ ok: boolean }>
+  scenarioEngineCancelUserInput?: (runId: string, requestId: string) => Promise<{ ok: boolean }>
   scenarioEngineRunTree?: (runId: string) => Promise<unknown[]>
   onScenarioEngineEvent?: (cb: (event: EngineEventLike) => void) => () => void
 }
@@ -90,12 +91,17 @@ export interface UseScenarioEngineResult {
    * tree merged (parent + sub-scenario runs). Drives the inspector's
    * run-logs panel. */
   runLog: readonly ScenarioLogEntry[]
+  /** Clear the displayed run log (the inspector's "clear logs" action). */
+  clearRunLog: () => void
   start: (scenarioId: string, params?: Record<string, unknown>) => Promise<void>
   pause: () => Promise<void>
   resume: () => Promise<void>
   step: () => Promise<void>
   stop: () => Promise<void>
   resolveUserInput: (requestId: string, value: unknown) => Promise<void>
+  /** Cancel a pending mid-run input prompt. The engine routes the input
+   * node to its `error` output (or fails the run if `error` is unwired). */
+  cancelUserInput: (requestId: string) => Promise<void>
 }
 
 export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
@@ -345,5 +351,14 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
     setPendingInputs((prev) => prev.filter((p) => p.requestId !== requestId))
   }, [])
 
-  return { state, runId, runningNodeIds, edgeTokens, pendingInputs, runLog, start, pause, resume, step, stop, resolveUserInput }
+  const cancelUserInput = useCallback(async (requestId: string): Promise<void> => {
+    const id = runIdRef.current
+    if (id === null) return
+    await bridge()?.scenarioEngineCancelUserInput?.(id, requestId)
+    setPendingInputs((prev) => prev.filter((p) => p.requestId !== requestId))
+  }, [])
+
+  const clearRunLog = useCallback((): void => { setRunLog([]) }, [])
+
+  return { state, runId, runningNodeIds, edgeTokens, pendingInputs, runLog, clearRunLog, start, pause, resume, step, stop, resolveUserInput, cancelUserInput }
 }

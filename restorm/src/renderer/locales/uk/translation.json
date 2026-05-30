@@ -260,7 +260,8 @@
     "addHeader": "Додати заголовок",
     "addParam": "Додати параметр",
     "environmentSelector": {
-      "noEnvironment": "Немає середовища"
+      "noEnvironment": "Немає середовища",
+      "switchTooltip": "Змінити середовище"
     },
     "body": {
       "fileLabel": "Файл або URL:",
@@ -798,6 +799,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Редагування заблоковано під час виконання сценарію",
     "switch": {
       "addCase": "Додати випадок",
       "removeCase": "Вилучити випадок",
@@ -947,7 +949,9 @@
       "stop": "Зупинити",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "clearLogs": "Очистити журнали",
       "logsShowAll": "Show all logs",
+      "showLevelLogs": "Показати логи {{level}}",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -967,6 +971,17 @@
       "title": "Run parameters",
       "run": "Run",
       "midRunTitle": "Потрібен ввід"
+    },
+    "runHistory": {
+      "title": "Історія запусків",
+      "tooltip": "Історія запусків",
+      "empty": "Ще немає записаних запусків",
+      "noLogs": "Немає журналу для цього запуску",
+      "logsTab": "Logs",
+      "graphTab": "Граф",
+      "noGraph": "Немає знімка сценарію для цього запуску",
+      "pin": "Закріпити",
+      "unpin": "Відкріпити"
     },
     "for": {
       "from": "from",

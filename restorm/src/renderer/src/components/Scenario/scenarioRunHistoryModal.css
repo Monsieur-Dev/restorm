@@ -1,0 +1,162 @@
+/*
+ * Scenario run-history overlay — scoped to the scenario tab (an absolute
+ * backdrop against the tab's relative wrapper, NOT full-window), filling
+ * all the available space in the tab. Master/detail: run list on the
+ * left, the selected run's log on the right.
+ */
+.scn-run-history-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: rgb(0, 0, 0, 0.35);
+  display: flex;
+}
+
+.scn-run-history-panel {
+  background: var(--editorWidget-background, #252526);
+  border: 1px solid var(--editorWidget-border, #454545);
+  box-shadow: 0 8px 24px rgb(0, 0, 0, 0.35);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.scn-run-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--editorWidget-border, #454545);
+}
+
+.scn-run-history-close {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-secondary, #cccccc);
+}
+
+.scn-run-history-close:hover {
+  background: var(--list-hover-background, rgb(255, 255, 255, 0.08));
+}
+
+.scn-run-history-body {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+}
+
+/* Master — run list. */
+.scn-run-history-list {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  width: 240px;
+  flex: 0 0 240px;
+  overflow-y: auto;
+  border-right: 1px solid var(--editorWidget-border, #454545);
+}
+
+.scn-run-history-empty,
+.scn-run-history-detail-empty {
+  padding: 12px 14px;
+  font-size: 12px;
+  color: var(--text-secondary, #999);
+}
+
+.scn-run-history-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.scn-run-history-item:hover {
+  background: var(--list-hover-background, rgb(255, 255, 255, 0.06));
+}
+
+.scn-run-history-item.is-selected {
+  background: var(--list-active-selection-background, rgb(9, 71, 113, 0.6));
+}
+
+.scn-run-history-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: 0 0 8px;
+}
+
+.scn-run-history-dot-completed { background: #3fb950; }
+.scn-run-history-dot-cancelled { background: #d29922; }
+.scn-run-history-dot-failed { background: #f85149; }
+
+.scn-run-history-when {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scn-run-history-pin {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-secondary, #888);
+  padding: 2px;
+  border-radius: 4px;
+  opacity: 0.5;
+}
+
+.scn-run-history-item:hover .scn-run-history-pin,
+.scn-run-history-pin.is-pinned {
+  opacity: 1;
+}
+
+.scn-run-history-pin.is-pinned {
+  color: var(--focusBorder, #4daafc);
+}
+
+/* Detail — Logs / Graphe tabs. `overflow: hidden` (not auto) so the inner
+ * ListView / graph use their OWN scroll (ECUI), never a native scrollbar. */
+.scn-run-history-detail {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Logs tab body — padded (so the right-aligned copy button isn't flush to
+ * the edge) + a flex column so the ListView bounds + scrolls internally. */
+.scn-run-history-log-pane {
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 10px 8px;
+  box-sizing: border-box;
+}
+
+/* Wide layout: logs (resizable via the sash) + graph side by side instead of
+ * the compact tabs. The VerticalSashContainer manages the split itself. */
+.scn-run-history-split {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}

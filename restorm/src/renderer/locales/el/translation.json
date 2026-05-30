@@ -258,7 +258,8 @@
     "addHeader": "Προσθήκη κεφαλίδας",
     "addParam": "Προσθήκη παραμέτρου",
     "environmentSelector": {
-      "noEnvironment": "Χωρίς περιβάλλον"
+      "noEnvironment": "Χωρίς περιβάλλον",
+      "switchTooltip": "Εναλλαγή περιβάλλοντος"
     },
     "body": {
       "fileLabel": "Αρχείο ή URL:",
@@ -796,6 +797,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Η επεξεργασία είναι κλειδωμένη ενώ εκτελείται το σενάριο",
     "switch": {
       "addCase": "Προσθήκη περίπτωσης",
       "removeCase": "Αφαίρεση περίπτωσης",
@@ -945,7 +947,9 @@
       "stop": "Διακοπή",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "clearLogs": "Εκκαθάριση καταγραφών",
       "logsShowAll": "Show all logs",
+      "showLevelLogs": "Εμφάνιση logs {{level}}",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -965,6 +969,17 @@
       "title": "Run parameters",
       "run": "Run",
       "midRunTitle": "Απαιτείται είσοδος"
+    },
+    "runHistory": {
+      "title": "Ιστορικό εκτελέσεων",
+      "tooltip": "Ιστορικό εκτελέσεων",
+      "empty": "Δεν έχει καταγραφεί εκτέλεση ακόμη",
+      "noLogs": "Κανένα αρχείο για αυτήν την εκτέλεση",
+      "logsTab": "Logs",
+      "graphTab": "Γράφημα",
+      "noGraph": "Κανένα στιγμιότυπο σεναρίου για αυτήν την εκτέλεση",
+      "pin": "Καρφίτσωμα",
+      "unpin": "Ξεκαρφίτσωμα"
     },
     "for": {
       "from": "from",

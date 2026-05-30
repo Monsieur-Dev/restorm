@@ -85,14 +85,31 @@
 .scn-inspector-logs-toggle {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 6px;
   font-size: 12px;
   opacity: 0.9;
   margin: 4px 0;
   cursor: pointer;
 }
+/* Right-side action cluster: per-level filter buttons + the copy button. */
+.scn-log-toggle-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+.scn-log-actions-sep {
+  width: 1px;
+  align-self: stretch;
+  min-height: 16px;
+  margin: 0 2px;
+  background: var(--editorWidget-border, #454545);
+}
 .scn-log-line {
-  display: inline-flex;
+  /* `flex` (not inline-flex) so the line fills the ListView title cell and the
+   * message can shrink + ellipsis instead of overflowing the panel. */
+  display: flex;
   align-items: baseline;
   gap: 6px;
   min-width: 0;
@@ -104,9 +121,51 @@
   flex: 0 0 auto;
 }
 .scn-log-msg {
+  min-width: 0; /* allow the flex item to shrink below its content → ellipsis */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+/* Full message shown in the hover tooltip when the row is truncated — wraps so
+ * a long line stays readable. */
+.scn-log-tooltip {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 460px;
+  /* Re-enable pointer events so the provenance link inside is hoverable +
+   * clickable (tooltips are otherwise click-through). */
+  pointer-events: auto;
+}
+.scn-log-tooltip-msg {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.scn-log-tooltip-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  max-width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  color: var(--textLink-foreground, #3794ff);
+}
+.scn-log-tooltip-link:hover {
+  text-decoration: underline;
+  color: var(--textLink-activeForeground, #4daafc);
+}
+.scn-log-tooltip-link .codicon {
+  font-size: 13px;
+  flex: 0 0 auto;
+}
+.scn-log-tooltip-link > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 /* Colored level dot rendered as the row's icon. */
 .scn-log-dot {
@@ -268,6 +327,33 @@
  * legible even when an error keeps the border red. */
 .scn-node-selected .scn-node-header {
   background: var(--scenarioNode-headerBackgroundSelected, #2d5070);
+}
+
+/* Read-only while the scenario runs: the box body + notes are inert so no
+ * field can be edited mid-run. The header stays live (collapse, play/cancel),
+ * and clicks on the (now pointer-events:none) body bubble to the node so it
+ * can still be selected for inspection. */
+.scn-node-locked .scn-node-body,
+.scn-node-locked .scn-node-notes {
+  pointer-events: none;
+}
+
+/* Flash overlay — pulses the box outline when the user clicks the run-log row
+ * emitted by this node. Mounted with a changing React key so the animation
+ * replays on every click; auto-unmounts when the editor clears the flash. */
+.scn-node-flash-ring {
+  position: absolute;
+  inset: -2px;
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 5;
+  animation: scn-node-flash 0.55s ease-out 2;
+}
+
+@keyframes scn-node-flash {
+  0%   { box-shadow: 0 0 0 0 rgba(55, 148, 255, 0.9), 0 0 0 0 rgba(55, 148, 255, 0.5); }
+  40%  { box-shadow: 0 0 0 3px rgba(55, 148, 255, 0.95), 0 0 14px 4px rgba(55, 148, 255, 0.55); }
+  100% { box-shadow: 0 0 0 0 rgba(55, 148, 255, 0), 0 0 0 0 rgba(55, 148, 255, 0); }
 }
 
 .scn-node-header {

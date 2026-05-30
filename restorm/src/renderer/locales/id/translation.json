@@ -257,7 +257,8 @@
     "addHeader": "Tambah header",
     "addParam": "Tambah parameter",
     "environmentSelector": {
-      "noEnvironment": "Tidak ada lingkungan"
+      "noEnvironment": "Tidak ada lingkungan",
+      "switchTooltip": "Ganti lingkungan"
     },
     "body": {
       "fileLabel": "File atau URL:",
@@ -795,6 +796,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Pengeditan terkunci saat skenario berjalan",
     "switch": {
       "addCase": "Tambah kasus",
       "removeCase": "Hapus kasus",
@@ -944,7 +946,9 @@
       "stop": "Hentikan",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "clearLogs": "Hapus log",
       "logsShowAll": "Show all logs",
+      "showLevelLogs": "Tampilkan log {{level}}",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -964,6 +968,17 @@
       "title": "Run parameters",
       "run": "Run",
       "midRunTitle": "Input diminta"
+    },
+    "runHistory": {
+      "title": "Riwayat eksekusi",
+      "tooltip": "Riwayat eksekusi",
+      "empty": "Belum ada eksekusi tercatat",
+      "noLogs": "Tidak ada log untuk eksekusi ini",
+      "logsTab": "Logs",
+      "graphTab": "Grafik",
+      "noGraph": "Tidak ada snapshot skenario untuk eksekusi ini",
+      "pin": "Sematkan",
+      "unpin": "Lepas sematan"
     },
     "for": {
       "from": "from",

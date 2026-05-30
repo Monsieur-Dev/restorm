@@ -258,7 +258,8 @@
     "addHeader": "Lisää otsake",
     "addParam": "Lisää parametri",
     "environmentSelector": {
-      "noEnvironment": "Ei ympäristöä"
+      "noEnvironment": "Ei ympäristöä",
+      "switchTooltip": "Vaihda ympäristöä"
     },
     "body": {
       "fileLabel": "Tiedosto tai URL:",
@@ -796,6 +797,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Muokkaus lukittu skenaarion ollessa käynnissä",
     "switch": {
       "addCase": "Lisää tapaus",
       "removeCase": "Poista tapaus",
@@ -945,7 +947,9 @@
       "stop": "Pysäytä",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "clearLogs": "Tyhjennä lokit",
       "logsShowAll": "Show all logs",
+      "showLevelLogs": "Näytä {{level}}-lokit",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -965,6 +969,17 @@
       "title": "Run parameters",
       "run": "Run",
       "midRunTitle": "Syöte tarvitaan"
+    },
+    "runHistory": {
+      "title": "Suoritushistoria",
+      "tooltip": "Suoritushistoria",
+      "empty": "Ei suorituksia vielä",
+      "noLogs": "Ei lokia tälle suoritukselle",
+      "logsTab": "Logs",
+      "graphTab": "Graafi",
+      "noGraph": "Ei skenaario-tilannevedosta tälle suoritukselle",
+      "pin": "Kiinnitä",
+      "unpin": "Irrota"
     },
     "for": {
       "from": "from",

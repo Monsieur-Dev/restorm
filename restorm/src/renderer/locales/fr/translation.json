@@ -258,7 +258,8 @@
     "addHeader": "Ajouter un header",
     "addParam": "Ajouter un paramètre",
     "environmentSelector": {
-      "noEnvironment": "Aucun environnement"
+      "noEnvironment": "Aucun environnement",
+      "switchTooltip": "Changer d'environnement"
     },
     "body": {
       "fileLabel": "Fichier ou URL :",
@@ -796,6 +797,7 @@
       }
     },
     "invalid": "{{count}} entrée(s) requise(s) non câblée(s) — scénario non exécutable",
+    "locked": "Édition verrouillée pendant l’exécution du scénario",
     "switch": {
       "addCase": "Ajouter un cas",
       "removeCase": "Supprimer le cas",
@@ -945,7 +947,9 @@
       "stop": "Arrêter",
       "logsTitle": "Logs d'exécution",
       "copyLogs": "Copier les logs",
+      "clearLogs": "Effacer les logs",
       "logsShowAll": "Afficher tous les logs",
+      "showLevelLogs": "Afficher les logs {{level}}",
       "noUserLogs": "Aucun log utilisateur (entrées de l'action Log) dans ce run."
     },
     "now": {
@@ -965,6 +969,17 @@
       "title": "Paramètres d'exécution",
       "run": "Exécuter",
       "midRunTitle": "Saisie demandée"
+    },
+    "runHistory": {
+      "title": "Historique des runs",
+      "tooltip": "Historique des runs",
+      "empty": "Aucun run enregistré",
+      "noLogs": "Aucun log pour ce run",
+      "logsTab": "Logs",
+      "graphTab": "Graphe",
+      "noGraph": "Aucun snapshot de scénario pour ce run",
+      "pin": "Épingler",
+      "unpin": "Désépingler"
     },
     "for": {
       "from": "de",

@@ -258,7 +258,8 @@
     "addHeader": "Başlık ekle",
     "addParam": "Parametre ekle",
     "environmentSelector": {
-      "noEnvironment": "Ortam yok"
+      "noEnvironment": "Ortam yok",
+      "switchTooltip": "Ortamı değiştir"
     },
     "body": {
       "fileLabel": "Dosya veya URL:",
@@ -796,6 +797,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Senaryo çalışırken düzenleme kilitli",
     "switch": {
       "addCase": "Durum ekle",
       "removeCase": "Durumu kaldır",
@@ -945,7 +947,9 @@
       "stop": "Durdur",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "clearLogs": "Günlükleri temizle",
       "logsShowAll": "Show all logs",
+      "showLevelLogs": "{{level}} günlüklerini göster",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -965,6 +969,17 @@
       "title": "Run parameters",
       "run": "Run",
       "midRunTitle": "Giriş gerekli"
+    },
+    "runHistory": {
+      "title": "Çalıştırma geçmişi",
+      "tooltip": "Çalıştırma geçmişi",
+      "empty": "Henüz çalıştırma kaydı yok",
+      "noLogs": "Bu çalıştırma için günlük yok",
+      "logsTab": "Logs",
+      "graphTab": "Grafik",
+      "noGraph": "Bu çalıştırma için senaryo anlık görüntüsü yok",
+      "pin": "Sabitle",
+      "unpin": "Sabitlemeyi kaldır"
     },
     "for": {
       "from": "from",

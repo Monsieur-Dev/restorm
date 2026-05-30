@@ -160,6 +160,42 @@ const ToggleInner: React.FC<ToggleProps> = ({
     );
   }
 
+  // `'button'` appearance: a small toolbar-style button rendered pressed
+  // (active) when checked, normal when unchecked. The children are the
+  // button content (icon / colored dot). Reuses the ECUI Button surface
+  // classes so it matches a real small Button.
+  if (appearance === 'button') {
+    const pressed = effectiveState === 'checked';
+    const ariaLabel = ariaLabelProp ?? (typeof children === 'string' ? children : 'Toggle');
+    return (
+      <a
+        id={id}
+        className={[
+          'button', 'text-button', 'small-button', 'default-colors', 'custom-toggle-button',
+          pressed ? 'custom-toggle-button-pressed' : '',
+          !enabled ? 'disabled' : '',
+          actionClassName ?? '',
+          className
+        ].filter(Boolean).join(' ')}
+        role="checkbox"
+        aria-checked={ariaChecked}
+        aria-label={ariaLabel}
+        aria-disabled={!enabled}
+        tabIndex={notFocusable ? -1 : 0}
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        {...(dataTestId && {
+          'data-testid': `${dataTestId}-action`,
+          'data-state': effectiveState,
+          'data-is-checked': effectiveState === 'checked' ? 'true' : 'false',
+          'data-is-disabled': enabled ? 'false' : 'true'
+        })}
+      >
+        {children}
+      </a>
+    );
+  }
+
   return (
     <div
       className="toggle-container"
