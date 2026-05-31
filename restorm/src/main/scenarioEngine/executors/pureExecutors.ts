@@ -235,7 +235,10 @@ function expressionTemplate(config: unknown): string {
 }
 
 function renderHandlebars(template: string, ctx: unknown): string {
-  return Handlebars.compile(template)(ctx)
+  // `noEscape` to match the inspector preview + the map executor (both compile
+  // with it). Without it, `{{name}}` over "Tom & Jerry" renders "Tom &amp;
+  // Jerry" at runtime but "Tom & Jerry" in the preview — a silent drift.
+  return Handlebars.compile(template, { noEscape: true })(ctx)
 }
 
 function toNumber(v: unknown): number {

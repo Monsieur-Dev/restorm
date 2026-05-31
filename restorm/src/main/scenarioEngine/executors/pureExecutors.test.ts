@@ -90,6 +90,11 @@ describe('transformExecutor', () => {
     expect(out.value).toEqual({ result: 'x=y' })
   })
 
+  it('does not HTML-escape the rendered value (matches the preview / map)', () => {
+    const out = runTransform({ expression: { type: 'expression', value: '{{.}}' } }, { value: 'Tom & Jerry <go>' })
+    expect(out.value).toEqual({ result: 'Tom & Jerry <go>' })
+  })
+
   it('wraps the passed-through input under `result` when there is no expression', () => {
     const out = runTransform({}, { value: 42 })
     expect(out).toEqual({ port: 'out', value: { result: 42 } })

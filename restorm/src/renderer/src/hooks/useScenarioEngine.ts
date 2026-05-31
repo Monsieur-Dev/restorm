@@ -350,8 +350,14 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
     const b = bridge()
     if (!b?.scenarioEngineStart) return
     const { runId: newRunId } = await b.scenarioEngineStart(scenarioId, params, startPaused)
-    // Latch the top-level runId so node/run events gate to this run.
+    // Latch the top-level runId so node/run events gate to this run. Set
+    // `runIdRef` SYNCHRONOUSLY too (not only via the [runId] effect): a
+    // step-from-idle does `await start(); await step()` back-to-back, and
+    // `step`/`pause`/`stop` read `runIdRef.current` — the effect that mirrors
+    // `runId` hasn't run yet by then, so without this the immediate `step()`
+    // targets a stale/null runId and silently no-ops.
     topRunIdRef.current = newRunId
+    runIdRef.current = newRunId
     setRunId(newRunId)
     // Armed in step mode → paused; otherwise running. (The engine also emits
     // run-started + run-paused, but set it here so it's right regardless of

@@ -53,11 +53,16 @@ const ModalInner: React.FC<ModalProps> = ({
   // Scoped mode: resolve the nearest ancestor matching `scopeToSelector` from
   // an in-place anchor, then portal the overlay there (instead of the body).
   const [scopedTarget, setScopedTarget] = useState<HTMLElement | null>(null)
-  const setAnchor = useCallback((el: HTMLSpanElement | null): void => {
+  const anchorElRef = useRef<HTMLSpanElement | null>(null)
+  const resolveScopedTarget = useCallback((el: HTMLSpanElement | null): void => {
     if (!el || scopeToSelector === undefined) return
     const found = el.closest(scopeToSelector)
     setScopedTarget(found instanceof HTMLElement ? found : null)
   }, [scopeToSelector])
+  const setAnchor = useCallback((el: HTMLSpanElement | null): void => {
+    anchorElRef.current = el
+    resolveScopedTarget(el)
+  }, [resolveScopedTarget])
   const [overlayState, setOverlayState] = useState<'open' | 'closing' | 'closed'>('closed')
   const wasOpenRef = useRef(isOpen)
   const rafIdsRef = useRef<number[]>([])
@@ -133,6 +138,16 @@ const ModalInner: React.FC<ModalProps> = ({
       window.removeEventListener('keydown', handleKeyDown)
     }
   }, [emitCloseRequest, isOpen, onClose])
+
+  // Re-resolve the scoped container each time the modal OPENS. The anchor's
+  // ref callback only fires on mount; without this, a container that was
+  // unmounted / replaced between opens (tab switch, route change) would leave
+  // `scopedTarget` pointing at a stale, detached node and the portal would
+  // render into nothing. Re-resolving on every open keeps it pinned to the
+  // live ancestor.
+  useEffect(() => {
+    if (isOpen && scopeToSelector !== undefined) resolveScopedTarget(anchorElRef.current)
+  }, [isOpen, scopeToSelector, resolveScopedTarget])
 
   // In scoped mode the anchor must stay mounted across open/close so it can
   // (re)resolve the target on the next open.
