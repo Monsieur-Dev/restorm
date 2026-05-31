@@ -29,6 +29,7 @@ import {
   ODataRequestTabView
 } from '../../RequestTabViews'
 import { EnvironmentProvider } from '../../../contexts/EnvironmentContext'
+import { WorkbenchActiveTabContext } from '../../../contexts/WorkbenchActiveTabContext'
 import { ScenarioEditorView } from '../../Scenario/ScenarioEditorView'
 import type { ResolveBoundItem, ResolveRequestEnv } from '../../Scenario/scenarioBoundResolver'
 import type { SyntheticRequestPreview } from '../../../../../shared/utils/syntheticRequestPreview'
@@ -678,6 +679,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             <div style={{ height: '100%', minHeight: 0 }}>
               <ScenarioEditorView
                 scenario={scenario}
+                tabId={effectiveTab.id}
                 {...(projectUuid ? { projectUuid } : {})}
                 {...(onScenarioChange ? { onScenarioChange } : {})}
                 {...(resolveBoundItem ? { resolveBoundItem } : {})}
@@ -1342,7 +1344,18 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     return { top: rect.top, left: rect.left, width: rect.width }
   }, [tabSwitcherOpen, tabSwitcherAnchorSelector])
 
+  // The focused split-group's active tab id — fed to descendants (the scenario
+  // editors) via context so each can tell if it's THE active tab. Keyboard
+  // shortcuts + the Delete key gate on this so they only ever act on the
+  // focused tab, never a background split.
+  const activeWorkbenchTabId = useMemo((): string | null => {
+    if (!focusedGroupId) return null
+    const node = findGroup(tree, focusedGroupId).node
+    return node && isTabGroupNode(node) ? (node.activeTabId ?? null) : null
+  }, [tree, focusedGroupId])
+
   return (
+    <WorkbenchActiveTabContext.Provider value={activeWorkbenchTabId}>
     <div
       style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', flex: 1, ...style }}
       className={className}
@@ -1374,6 +1387,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         {...callbacks}
       />
     </div>
+    </WorkbenchActiveTabContext.Provider>
   )
 })
 

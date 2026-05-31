@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState, type CSSProperties } from 'react'
+import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type CSSProperties } from 'react'
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -30,6 +30,7 @@ import { ScenarioStaticPreviewContext, type ScenarioStaticPreviewApi, type Objec
 import { ScenarioVariablesContext, type ScenarioVariable } from '../../contexts/ScenarioVariablesContext'
 import { getScenarioViewport, setScenarioViewport } from '../../services/scenarioViewportStore'
 import { getScenarioBreakpoints, toggleBreakpoint, pruneScenarioBreakpoints } from '../../services/scenarioBreakpointStore'
+import { WorkbenchActiveTabContext } from '../../contexts/WorkbenchActiveTabContext'
 import { resolveValueTypeKind } from '../TypedValueField/castValue'
 import { normalizeValueType } from '../../utils/normalizeValueType'
 import { SCENARIO_NODE_CATALOGUE, scenarioNodeMeta, type ScenarioNodeKindMeta } from './scenarioNodeCatalogue'
@@ -56,6 +57,10 @@ import { dynamicHandleIds, pruneOrphanDynamicEdges, isOrphanDynamicEdge } from '
 export interface ScenarioEditorViewProps {
   /** The scenario being edited. */
   scenario: Scenario
+  /** This editor's workbench tab id — compared against the active-tab context
+   * so keyboard shortcuts + the Delete key only fire on the focused tab (never
+   * a background split). */
+  tabId?: string
   /** Workspace identity (user-scope key) for persisting graph pan+zoom.
    * Passed from the workbench — the editor renders outside the
    * EnvironmentProvider, so it can't read the env context. */
@@ -244,10 +249,20 @@ function chooseColorTooltipPlacement(rect: DOMRect): { placement: 'above' | 'bel
   return { placement: 'below', side: 'auto' }
 }
 
-const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, projectUuid, onScenarioChange, resolveBoundItem, resolveRequestEnv, resolveSyntheticPreview, onOpenItem, onCreateRequest, onCreateChild }) => {
+const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tabId, projectUuid, onScenarioChange, resolveBoundItem, resolveRequestEnv, resolveSyntheticPreview, onOpenItem, onCreateRequest, onCreateChild }) => {
   const { t } = useTranslation()
   const { screenToFlowPosition, fitView, getNode } = useReactFlow()
   const wrapperRef = useRef<HTMLDivElement>(null)
+  // Whether THIS editor is the focused workbench tab (vs a background split).
+  // Keyboard shortcuts + the Delete key gate on it, so e.g. F5 launches only
+  // the active scenario, never every open one.
+  const activeWorkbenchTabId = useContext(WorkbenchActiveTabContext)
+  const isActiveTab = tabId !== undefined && tabId === activeWorkbenchTabId
+  // Latest nodes (with their React-Flow `selected` flag) for the F9 keyboard
+  // handler — `useReactFlow().getNodes()` doesn't reflect the editor's
+  // selection here, but the `nodes` state does (it drives the inspector
+  // preview). Synced via an effect below, once `nodes` is declared.
+  const nodesRef = useRef<Node<NodeData>[]>([])
   // Phase 2 — real engine controller for this scenario tab. Drives the
   // inspector's Run / Pause / Step / Stop buttons + animates nodes /
   // edges off engine events.
@@ -308,6 +323,79 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
     // breakpoint added (or removed) mid-execution. No-ops when nothing's running.
     void engine.setEngineBreakpoints([...next])
   }, [projectUuid, scenario.id, engine])
+  // F9 = toggle breakpoints across the current selection: if ANY selected box
+  // lacks a breakpoint, all selected get one; otherwise (all already have one)
+  // all are cleared. Mirrors the per-node glyph but batched.
+  const toggleBreakpointsOnSelection = useCallback((): void => {
+    if (!projectUuid) return
+    const selected = nodesRef.current.filter((n) => n.selected).map((n) => n.id)
+    if (selected.length === 0) return
+    const current = getScenarioBreakpoints(projectUuid, scenario.id)
+    const anyMissing = selected.some((id) => !current.has(id))
+    for (const id of selected) {
+      const has = current.has(id)
+      // anyMissing → add to those without one; otherwise → remove from all.
+      if (anyMissing ? !has : has) toggleBreakpoint(projectUuid, scenario.id, id)
+    }
+    const next = getScenarioBreakpoints(projectUuid, scenario.id)
+    setBreakpointIds(next)
+    void engine.setEngineBreakpoints([...next])
+  }, [projectUuid, scenario.id, engine])
+
+  // Keyboard shortcuts — only the FOCUSED workbench tab handles them, so e.g.
+  // F5 launches just this scenario, never every open one. Ignored while typing
+  // in a field / Monaco. App scheme (not VS Code's): F5 run · F6 debug · F7
+  // step · F8 stop · Pause pause · F9 toggle breakpoint(s) on the selection.
+  // F5/F6/F7/F8 mirror the inspector toolbar buttons (ScenarioInspectorPanel's
+  // onRun/onDebug/onStep/onStop) — keep the run-control logic here in lockstep
+  // with those handlers.
+  useEffect(() => {
+    if (!isActiveTab) return undefined
+    const onKey = (e: KeyboardEvent): void => {
+      const el = e.target as HTMLElement | null
+      if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable || el.closest('.monaco-editor'))) return
+      const hasBreakpoints = breakpointIds.size > 0
+      switch (e.key) {
+        case 'F5':
+          e.preventDefault()
+          if (engine.state === 'running') void engine.pause()
+          else if (engine.state === 'paused') void engine.resume()
+          else void engine.start(scenario.id, {}, false, [...breakpointIds], false)
+          break
+        case 'F6':
+          e.preventDefault()
+          if (!hasBreakpoints) break
+          if (engine.state === 'running' || engine.state === 'paused') {
+            void engine.setEngineBreakpoints([...breakpointIds])
+            void engine.enableDebug()
+            if (engine.state === 'paused') void engine.resume()
+          } else void engine.start(scenario.id, {}, false, [...breakpointIds], true)
+          break
+        case 'F7':
+          e.preventDefault()
+          if (engine.state === 'paused' || engine.state === 'running') void engine.step()
+          else void (async () => { await engine.start(scenario.id, {}, true); await engine.step() })()
+          break
+        case 'F8':
+          e.preventDefault()
+          void engine.stop()
+          break
+        case 'Pause':
+          e.preventDefault()
+          if (engine.state === 'running') void engine.pause()
+          break
+        case 'F9':
+          e.preventDefault()
+          toggleBreakpointsOnSelection()
+          break
+        default:
+          break
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => { window.removeEventListener('keydown', onKey) }
+  }, [isActiveTab, engine, scenario.id, breakpointIds, toggleBreakpointsOnSelection])
+
   // Pan-zoom onto the node a debug run is paused at (breakpoint) or the box the
   // user just stepped into — only while paused, so a full-speed run isn't yanked
   // around. The breakpoint target wins; otherwise follow the step front.
@@ -340,6 +428,9 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
   const seededId = useRef<string | null>(null)
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<NodeData>>([])
+  // Keep `nodesRef` (used by the F9 keyboard handler defined above) pointed at
+  // the latest nodes + their selection.
+  useEffect(() => { nodesRef.current = nodes }, [nodes])
   const [edges, setEdges, onEdgesChange] = useEdgesState([] as Edge[])
   const [palette, setPalette] = useState<{ x: number; y: number; flow: { x: number; y: number } } | null>(null)
   const [nodeMenu, setNodeMenu] = useState<{ nodeId: string; x: number; y: number } | null>(null)
@@ -713,14 +804,22 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
     if (seededId.current === scenario.id) return
     seededId.current = scenario.id
     // Pre-existing scenarios may carry edges left orphaned by an earlier property
-    // / case removal (the bug class fixed in `setNodeConfig`). Drop them once at
-    // load so the persisted file converges with what the editor can actually
-    // render — and the console isn't flooded with React Flow handle warnings.
+    // / case removal (the bug class fixed in `setNodeConfig`), OR DUPLICATE edges
+    // sharing one id (a MERGE link persisted twice slips past the connect guard).
+    // Drop both once at load so the persisted file converges with what the editor
+    // can render — and React Flow isn't handed two children with the same key
+    // (which floods the console with key warnings on every run re-render).
     const nodeBy = new Map(scenario.nodes.map((n) => [n.id, n]))
-    const cleanEdges = scenario.edges.filter((e) => !isOrphanDynamicEdge(
-      { source: e.from.nodeId, target: e.to.nodeId, sourceHandle: e.from.portId, targetHandle: e.to.portId },
-      (id) => nodeBy.get(id)
-    ))
+    const seenEdgeIds = new Set<string>()
+    const cleanEdges = scenario.edges.filter((e) => {
+      if (isOrphanDynamicEdge(
+        { source: e.from.nodeId, target: e.to.nodeId, sourceHandle: e.from.portId, targetHandle: e.to.portId },
+        (id) => nodeBy.get(id)
+      )) return false
+      if (seenEdgeIds.has(e.id)) return false
+      seenEdgeIds.add(e.id)
+      return true
+    })
     nodeStore.current = new Map(scenario.nodes.map((n) => [n.id, n]))
     edgeStore.current = new Map(cleanEdges.map((e) => [e.id, e]))
     setNodes(scenario.nodes.map((n) => toFlowNode(n, handlers.current)))
@@ -1492,9 +1591,21 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
   // The token's identity (number value) drives the custom edge component's
   // single-shot travelling beam as data crosses the link during a run.
   const presentationalEdges = useMemo(() => {
+    // Last-line guard against duplicate edge ids reaching React Flow: a
+    // malformed scenario (two edges sharing an id) would otherwise spam
+    // React's "two children with the same key" warning every render. The
+    // seed effect heals the file, but other edge-sync effects re-read the
+    // still-duplicated `scenario.edges`, so dedup here at the render choke
+    // point keeps the warning gone until the heal round-trips to disk.
+    const seen = new Set<string>()
+    const uniqueEdges = edges.filter((e) => {
+      if (seen.has(e.id)) return false
+      seen.add(e.id)
+      return true
+    })
     const engineEdgeTokens = engine.edgeTokens
-    if (engineEdgeTokens.size === 0) return edges
-    return edges.map((e) => {
+    if (engineEdgeTokens.size === 0) return uniqueEdges
+    return uniqueEdges.map((e) => {
       const engineTok = engineEdgeTokens.get(e.id)
       if (engineTok === undefined) return e
       return { ...e, data: { ...(e.data ?? {}), debugToken: engineTok } }
@@ -1689,7 +1800,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
         isValidConnection={validateConnection}
         nodesDraggable={!locked}
         nodesConnectable={!locked}
-        deleteKeyCode={locked ? null : ['Delete', 'Backspace']}
+        deleteKeyCode={(!locked && isActiveTab) ? ['Delete', 'Backspace'] : null}
         multiSelectionKeyCode={['Control', 'Meta']}
         onPaneContextMenu={onPaneContextMenu}
         onEdgeContextMenu={onEdgeContextMenu}
