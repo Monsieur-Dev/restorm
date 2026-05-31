@@ -877,9 +877,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Zorunlu",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Çağıran senaryolar için gerekli"
     },
     "runScenario": {
       "orphanInput": "Alt senaryoda eşleşen \"{{name}}\" parametresi yok",
@@ -997,6 +997,13 @@
     },
     "loop": {
       "done": "done"
+    },
+    "breakpoint": {
+      "add": "Kesme noktası ekle",
+      "remove": "Kesme noktasını kaldır",
+      "toggle": "Kesme noktasını değiştir (F9)",
+      "reached": "Kesme noktasına ulaşıldı — bu eylem henüz çalıştırılmadı. Devam etmek için F5'e, adımlamak için F7'ya basın.",
+      "shortcut": "F9"
     }
   }
 }

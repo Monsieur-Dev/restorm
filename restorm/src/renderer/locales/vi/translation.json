@@ -876,9 +876,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Bắt buộc",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Bắt buộc cho các kịch bản gọi đến"
     },
     "runScenario": {
       "orphanInput": "Không có tham số \"{{name}}\" khớp trong kịch bản con",
@@ -996,6 +996,13 @@
     },
     "loop": {
       "done": "done"
+    },
+    "breakpoint": {
+      "add": "Thêm điểm dừng",
+      "remove": "Xóa điểm dừng",
+      "toggle": "Bật/tắt điểm dừng (F9)",
+      "reached": "Đã đến điểm dừng — hành động này chưa được thực thi. Nhấn F5 để tiếp tục, hoặc F7 để chạy từng bước.",
+      "shortcut": "F9"
     }
   }
 }

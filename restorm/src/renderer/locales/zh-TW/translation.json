@@ -876,9 +876,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "必填",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "呼叫此情境時必填"
     },
     "runScenario": {
       "orphanInput": "子場景中沒有相符的參數「{{name}}」",
@@ -996,6 +996,13 @@
     },
     "loop": {
       "done": "done"
+    },
+    "breakpoint": {
+      "add": "新增中斷點",
+      "remove": "移除中斷點",
+      "toggle": "切換中斷點 (F9)",
+      "reached": "已到達中斷點 — 此動作尚未執行。按 F5 繼續，或按 F7 逐步執行。",
+      "shortcut": "F9"
     }
   }
 }

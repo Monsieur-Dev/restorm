@@ -877,9 +877,9 @@
       "propertyValue": "valeur"
     },
     "input": {
-      "required": "Requis",
       "name": "Nom",
-      "defaultType": "Défaut / type"
+      "defaultType": "Défaut / type",
+      "required": "Requis pour les scénarios appelants"
     },
     "runScenario": {
       "orphanInput": "Aucun paramètre « {{name}} » correspondant dans le sous-scénario",
@@ -997,6 +997,13 @@
     },
     "loop": {
       "done": "terminé"
+    },
+    "breakpoint": {
+      "add": "Ajouter un point d'arrêt",
+      "remove": "Retirer le point d'arrêt",
+      "toggle": "Activer/désactiver le point d'arrêt (F9)",
+      "reached": "Point d'arrêt atteint — cette action n'a pas encore été exécutée. Appuyez sur F5 pour reprendre, ou F7 pour le pas à pas.",
+      "shortcut": "F9"
     }
   }
 }

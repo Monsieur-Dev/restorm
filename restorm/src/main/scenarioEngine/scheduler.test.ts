@@ -163,7 +163,7 @@ describe('Scheduler foundations', () => {
     expect(events.some((e) => e.type === 'run-cancelled')).toBe(true)
   })
 
-  it('step advances exactly one activation while paused', async () => {
+  it('step gives each box a before-stop then runs it; resume finishes the rest', async () => {
     const scenario = buildScenario(
       [
         { id: 'a', kind: 'now', outputs: ['value'] },
@@ -180,8 +180,12 @@ describe('Scheduler foundations', () => {
     const s = new Scheduler({ scenario, executors })
     void s.run({ startPaused: true })
     expect(s.status().state).toBe('paused')
+    // First step PRE-stops before the first box — nothing has run yet.
     s.step()
-    // microtask flush
+    await new Promise((r) => setTimeout(r, 0))
+    expect(aRan + bRan).toBe(0)
+    // Second step runs exactly that one box.
+    s.step()
     await new Promise((r) => setTimeout(r, 0))
     expect(aRan + bRan).toBe(1)
     s.resume()
@@ -554,5 +558,155 @@ describe('interactive vs headless input seeding', () => {
     await s.run() // non-interactive (default)
     expect(events.some((e) => e.type === 'user-input-requested')).toBe(false)
     expect(s.status().state).toBe('completed')
+  })
+})
+
+// ------------------------------------------------------------------
+// Breakpoints (debug run) — pause BEFORE entering a breakpointed node
+// ------------------------------------------------------------------
+
+describe('Breakpoints', () => {
+  const flush = (): Promise<void> => new Promise((r) => setTimeout(r, 0))
+
+  // a → b → c chain so breaking on `b` is deterministic (no root-parallel race).
+  function chain(): ScenarioModel {
+    return buildScenario(
+      [
+        { id: 'a', kind: 'now', outputs: ['value'] },
+        { id: 'b', kind: 'object', inputs: ['x'], outputs: ['value'] },
+        { id: 'c', kind: 'object', inputs: ['x'], outputs: ['value'] }
+      ],
+      [{ from: ['a', 'value'], to: ['b', 'x'] }, { from: ['b', 'value'], to: ['c', 'x'] }]
+    )
+  }
+
+  it('pauses BEFORE a breakpointed node (not executed), emits breakpoint-hit, then resumes past it', async () => {
+    let aRan = 0, bRan = 0
+    const executors = new Map<string, NodeExecutor>([
+      ['a', () => { aRan += 1; return { outputs: [{ port: 'value', value: 1 }] } }],
+      ['b', () => { bRan += 1; return { outputs: [{ port: 'value', value: 2 }] } }],
+      ['c', () => ({ outputs: [] })]
+    ])
+    const s = new Scheduler({ scenario: chain(), executors })
+    const events = captureEvents(s)
+    void s.run({ debug: true, breakpoints: ['b'] })
+    await flush()
+    // `a` ran; `b` is paused at its breakpoint and has NOT executed.
+    expect(aRan).toBe(1)
+    expect(bRan).toBe(0)
+    expect(s.status().state).toBe('paused')
+    expect(events.find((e) => e.type === 'breakpoint-hit')).toMatchObject({ type: 'breakpoint-hit', nodeId: 'b' })
+
+    s.resume()
+    await flush()
+    expect(bRan).toBe(1)
+    expect(s.status().state).toBe('completed')
+  })
+
+  it('step (F6) runs exactly the breakpointed node, then re-pauses before the next', async () => {
+    let bRan = 0, cRan = 0
+    const executors = new Map<string, NodeExecutor>([
+      ['a', () => ({ outputs: [{ port: 'value', value: 1 }] })],
+      ['b', () => { bRan += 1; return { outputs: [{ port: 'value', value: 2 }] } }],
+      ['c', () => { cRan += 1; return { outputs: [] } }]
+    ])
+    const s = new Scheduler({ scenario: chain(), executors })
+    void s.run({ debug: true, breakpoints: ['b'] })
+    await flush()
+    expect(bRan).toBe(0) // paused before b
+
+    s.step()
+    await flush()
+    expect(bRan).toBe(1) // b executed exactly once
+    expect(cRan).toBe(0) // re-paused before c
+    expect(s.status().state).toBe('paused')
+
+    s.resume()
+    await flush()
+    expect(cRan).toBe(1)
+  })
+
+  it('the plain Play run (no debug) ignores breakpoints entirely', async () => {
+    let bRan = 0
+    const executors = new Map<string, NodeExecutor>([
+      ['a', () => ({ outputs: [{ port: 'value', value: 1 }] })],
+      ['b', () => { bRan += 1; return { outputs: [{ port: 'value', value: 2 }] } }],
+      ['c', () => ({ outputs: [] })]
+    ])
+    const s = new Scheduler({ scenario: chain(), executors })
+    await s.run({ breakpoints: ['b'] }) // breakpoints present but debug !== true
+    expect(bRan).toBe(1)
+    expect(s.status().state).toBe('completed')
+  })
+
+  it('a stale breakpoint id (node no longer exists) never triggers and never crashes', async () => {
+    let aRan = 0
+    const scenario = buildScenario([{ id: 'a', kind: 'now', outputs: ['value'] }], [])
+    const executors = new Map<string, NodeExecutor>([['a', () => { aRan += 1; return { outputs: [] } }]])
+    const s = new Scheduler({ scenario, executors })
+    await s.run({ debug: true, breakpoints: ['ghost-deleted-node'] })
+    expect(aRan).toBe(1)
+    expect(s.status().state).toBe('completed')
+  })
+
+  it('setDebug + setBreakpoints honor a breakpoint added mid-run (Play → Debug)', async () => {
+    let aRan = 0, bRan = 0
+    const executors = new Map<string, NodeExecutor>([
+      ['a', () => { aRan += 1; return { outputs: [{ port: 'value', value: 1 }] } }],
+      ['b', () => { bRan += 1; return { outputs: [{ port: 'value', value: 2 }] } }],
+      ['c', () => ({ outputs: [] })]
+    ])
+    const s = new Scheduler({ scenario: chain(), executors })
+    const events = captureEvents(s)
+    // Launch as a NON-debug run (like Play), armed paused so we can arm debug
+    // before anything dispatches.
+    void s.run({ startPaused: true, debug: false })
+    await flush()
+
+    // Mid-run: the user adds a breakpoint on `b` and presses Debug.
+    s.setBreakpoints(['b'])
+    s.setDebug(true)
+    s.resume()
+    await flush()
+
+    // `a` ran (no breakpoint), but the run broke BEFORE `b`.
+    expect(aRan).toBe(1)
+    expect(bRan).toBe(0)
+    expect(s.status().state).toBe('paused')
+    expect(events.some((e) => e.type === 'breakpoint-hit' && e.nodeId === 'b')).toBe(true)
+  })
+
+  it('stepping gives each box TWO stops — one before it runs (step-paused) and one after', async () => {
+    let aRan = 0, bRan = 0
+    const executors = new Map<string, NodeExecutor>([
+      ['a', () => { aRan += 1; return { outputs: [{ port: 'value', value: 1 }] } }],
+      ['b', () => { bRan += 1; return { outputs: [{ port: 'value', value: 2 }] } }],
+      ['c', () => ({ outputs: [] })]
+    ])
+    const s = new Scheduler({ scenario: chain(), executors })
+    const events = captureEvents(s)
+    void s.run({ startPaused: true })
+    await flush()
+
+    // Step 1 → PRE-stop before `a`: it has NOT run, and a step-paused fired.
+    s.step(); await flush()
+    expect(aRan).toBe(0)
+    expect(s.status().state).toBe('paused')
+    expect(events.find((e) => e.type === 'step-paused')).toMatchObject({ nodeId: 'a' })
+
+    // Step 2 → `a` executes (post-stop), `b` not yet.
+    s.step(); await flush()
+    expect(aRan).toBe(1)
+    expect(bRan).toBe(0)
+    expect(s.status().state).toBe('paused')
+
+    // Step 3 → PRE-stop before `b` (still not run).
+    s.step(); await flush()
+    expect(bRan).toBe(0)
+    expect(events.some((e) => e.type === 'step-paused' && e.nodeId === 'b')).toBe(true)
+
+    // Step 4 → `b` executes.
+    s.step(); await flush()
+    expect(bRan).toBe(1)
   })
 })

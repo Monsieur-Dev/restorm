@@ -877,9 +877,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Required",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Required by calling scenarios"
     },
     "runScenario": {
       "orphanInput": "No matching parameter \"{{name}}\" in the sub-scenario",
@@ -997,6 +997,13 @@
     },
     "loop": {
       "done": "done"
+    },
+    "breakpoint": {
+      "add": "Add breakpoint",
+      "remove": "Remove breakpoint",
+      "toggle": "Toggle breakpoint (F9)",
+      "reached": "Breakpoint reached — this action has not run yet. Press F5 to resume, or F7 to step.",
+      "shortcut": "F9"
     }
   }
 }

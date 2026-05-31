@@ -107,6 +107,14 @@ export type EngineEvent = (
   | { type: 'run-failed'; runId: RuntimeId; at: string; error: string }
   | { type: 'run-paused'; runId: RuntimeId; at: string }
   | { type: 'run-resumed'; runId: RuntimeId; at: string }
+  // A debug run paused right BEFORE entering a breakpointed node — the node has
+  // NOT executed yet. Resume continues to the next breakpoint; step runs just
+  // this node then re-pauses.
+  | { type: 'breakpoint-hit'; runId: RuntimeId; nodeId: RuntimeId; scope: ScopeStack; at: string }
+  // Stepping paused right BEFORE entering a node (the pre-stop). Distinct from
+  // breakpoint-hit (no breakpoint involved, no "reached" tooltip) — drives the
+  // pan-zoom + yellow frame onto the about-to-run box.
+  | { type: 'step-paused'; runId: RuntimeId; nodeId: RuntimeId; scope: ScopeStack; at: string }
   | { type: 'node-started'; runId: RuntimeId; nodeId: RuntimeId; scope: ScopeStack; at: string }
   | { type: 'node-completed'; runId: RuntimeId; nodeId: RuntimeId; scope: ScopeStack; at: string; outputs: Emission[] }
   | { type: 'node-failed'; runId: RuntimeId; nodeId: RuntimeId; scope: ScopeStack; at: string; error: string }

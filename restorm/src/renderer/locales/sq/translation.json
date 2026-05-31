@@ -877,9 +877,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "E detyrueshme",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "E detyrueshme për skenarët thirrës"
     },
     "runScenario": {
       "orphanInput": "Asnjë parametër \"{{name}}\" përkatës në nën-skenar",
@@ -997,6 +997,13 @@
     },
     "loop": {
       "done": "done"
+    },
+    "breakpoint": {
+      "add": "Shto pikë ndërprerjeje",
+      "remove": "Hiq pikën e ndërprerjes",
+      "toggle": "Ndërro pikën e ndërprerjes (F9)",
+      "reached": "U arrit pika e ndërprerjes — ky veprim nuk është ekzekutuar ende. Shtypni F5 për të vazhduar, ose F7 për hap pas hapi.",
+      "shortcut": "F9"
     }
   }
 }

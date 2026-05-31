@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState, type CSSProperties } from 'react'
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -29,6 +29,7 @@ import { ScenarioEdgeSelectorContext, type ScenarioEdgeSelectorApi } from './sce
 import { ScenarioStaticPreviewContext, type ScenarioStaticPreviewApi, type ObjectWiredProperty } from './scenarioStaticPreviewContext'
 import { ScenarioVariablesContext, type ScenarioVariable } from '../../contexts/ScenarioVariablesContext'
 import { getScenarioViewport, setScenarioViewport } from '../../services/scenarioViewportStore'
+import { getScenarioBreakpoints, toggleBreakpoint, pruneScenarioBreakpoints } from '../../services/scenarioBreakpointStore'
 import { resolveValueTypeKind } from '../TypedValueField/castValue'
 import { normalizeValueType } from '../../utils/normalizeValueType'
 import { SCENARIO_NODE_CATALOGUE, scenarioNodeMeta, type ScenarioNodeKindMeta } from './scenarioNodeCatalogue'
@@ -284,6 +285,37 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
   // `projectUuid` is passed from the workbench (this editor renders
   // OUTSIDE the EnvironmentProvider, so the env context isn't available).
   const savedViewport = projectUuid ? getScenarioViewport(projectUuid, scenario.id) : undefined
+
+  // Debug breakpoints (user-scope store, NOT the scenario file). Mirrored into
+  // local state so toggling repaints; the broken node also pan-zooms below.
+  // `useReducer` (not `useState`) so the prune-on-load effect can refresh this
+  // without tripping the React Compiler's set-state-in-effect rule.
+  const [breakpointIds, setBreakpointIds] = useReducer((_prev: ReadonlySet<string>, next: ReadonlySet<string>) => next, new Set<string>())
+  // Prune breakpoints whose node no longer exists (file edited elsewhere, or a
+  // box deleted in-session) + reload, whenever the node set changes. A stale
+  // breakpoint can't crash a run (the engine just never matches its id).
+  useEffect(() => {
+    if (!projectUuid) { setBreakpointIds(new Set()); return }
+    pruneScenarioBreakpoints(projectUuid, scenario.id, new Set(scenario.nodes.map((n) => n.id)))
+    setBreakpointIds(getScenarioBreakpoints(projectUuid, scenario.id))
+  }, [projectUuid, scenario.id, scenario.nodes])
+  const onToggleBreakpoint = useCallback((nodeId: string): void => {
+    if (!projectUuid) return
+    toggleBreakpoint(projectUuid, scenario.id, nodeId)
+    const next = getScenarioBreakpoints(projectUuid, scenario.id)
+    setBreakpointIds(next)
+    // If a run is live, push the updated set so the scheduler honors a
+    // breakpoint added (or removed) mid-execution. No-ops when nothing's running.
+    void engine.setEngineBreakpoints([...next])
+  }, [projectUuid, scenario.id, engine])
+  // Pan-zoom onto the node a debug run is paused at (breakpoint) or the box the
+  // user just stepped into — only while paused, so a full-speed run isn't yanked
+  // around. The breakpoint target wins; otherwise follow the step front.
+  const debugFocusId = engine.pausedAtNodeId ?? engine.lastStartedNodeId
+  useEffect(() => {
+    if (engine.state !== 'paused' || !debugFocusId || !getNode(debugFocusId)) return
+    void fitView({ nodes: [{ id: debugFocusId }], duration: 400, maxZoom: 1.2 })
+  }, [engine.state, debugFocusId, fitView, getNode])
   // Run-history overlay open state, driven by the tab-header button's
   // SCENARIO_RUN_HISTORY_OPEN event (scoped to this scenario's id).
   const [historyOpen, setHistoryOpen] = useState(false)
@@ -1504,15 +1536,26 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
           : n
       )
     }
-    // Yellow "just finished" frame: nodes the engine completed since the last
-    // play — but ONLY shown while the run is PAUSED (it's a "where did I pause"
-    // cue, not a running trail). Set/clear per node; unchanged nodes keep their
-    // ref (no needless React Flow churn).
+    // Per-node debug state + the yellow frame. The yellow "just finished" frame
+    // shows a box the engine completed since the last play, ONLY while paused (a
+    // "where did I pause" cue) — and ALSO the box a breakpoint is paused at
+    // (not executed yet). `breakpoint` drives the gutter glyph, `breakpointPaused`
+    // the "reached" tooltip, `onToggleBreakpoint` the click. Unchanged nodes keep
+    // their ref (no React Flow churn).
     const showFinished = engine.state === 'paused'
     mapped = mapped.map((n) => {
-      const want = showFinished && engine.completedNodeIds.has(n.id)
-      if (want === (n.data.justFinished === true)) return n
-      return { ...n, data: { ...n.data, justFinished: want } }
+      const isBp = breakpointIds.has(n.id)
+      const isBpPaused = engine.breakpointNodeId === n.id
+      // Yellow frame: a box completed-while-paused OR the box we're paused right
+      // before (breakpoint or step pre-stop). The tooltip is breakpoint-only.
+      const want = (showFinished && engine.completedNodeIds.has(n.id)) || engine.pausedAtNodeId === n.id
+      const unchanged =
+        (n.data.justFinished === true) === want &&
+        (n.data.breakpoint === true) === isBp &&
+        (n.data.breakpointPaused === true) === isBpPaused &&
+        n.data.onToggleBreakpoint === onToggleBreakpoint
+      if (unchanged) return n
+      return { ...n, data: { ...n.data, justFinished: want, breakpoint: isBp, breakpointPaused: isBpPaused, onToggleBreakpoint } }
     })
     // Read-only while running: flag each node for the inert-body CSS and drop
     // the config / header-menu writers so no edit can commit even via keyboard.
@@ -1531,7 +1574,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
       )
     }
     return mapped
-  }, [nodes, engine.runningNodeIds, engine.completedNodeIds, engine.state, locked, flash])
+  }, [nodes, engine.runningNodeIds, engine.completedNodeIds, engine.breakpointNodeId, engine.pausedAtNodeId, engine.state, breakpointIds, onToggleBreakpoint, locked, flash])
 
   // Wire-ports for the link-drag "Add" submenu — the port the link filter
   // computed for the (folded) request / sub-scenario kinds, when each is
@@ -1602,7 +1645,9 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
           // `input` nodes run as live nodes that prompt the user; the renderer
           // groups those prompts into the "run parameters" modal below. This is
           // what lets a cancel route them to their `error` output.
-          void engine.start(scenario.id, {})
+          // Play arms the breakpoints (so a later Debug can honor them mid-run)
+          // but runs with debug:false → straight through, ignoring them.
+          void engine.start(scenario.id, {}, false, [...breakpointIds], false)
         }}
         onEnginePause={() => { void engine.pause() }}
         onEngineResume={() => { void engine.resume() }}
@@ -1616,6 +1661,20 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
           })()
         }}
         onEngineStop={() => { void engine.stop() }}
+        onEngineDebug={() => {
+          // Debug run = same launch as Play, but with debug:true so it pauses
+          // at the scenario's breakpoints.
+          void engine.start(scenario.id, {}, false, [...breakpointIds], true)
+        }}
+        onEngineDebugContinue={() => {
+          // Debug pressed on a live run (incl. a plain Play run): push the
+          // current breakpoints, flip the run to debug mode, and continue — it
+          // then stops at the next breakpoint.
+          void engine.setEngineBreakpoints([...breakpointIds])
+          void engine.enableDebug()
+          if (engine.state === 'paused') void engine.resume()
+        }}
+        hasBreakpoints={breakpointIds.size > 0}
       />
       <ReactFlow
         nodes={presentationalNodes}
@@ -1793,6 +1852,16 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
           items={[
             { id: 'color', label: t('scenario.node.menu.changeColor', 'Change colour'), icon: 'symbol-color', opensDialog: true, onClick: () => { openColorPicker(nodeMenu.nodeId) } },
             { id: 'note', label: t('scenario.node.menu.addNote', 'Add note'), icon: 'note', opensDialog: true, onClick: () => { openNoteEditor(nodeMenu.nodeId) } },
+            { id: 'sepBp', label: '', isSeparator: true },
+            {
+              id: 'breakpoint',
+              label: breakpointIds.has(nodeMenu.nodeId)
+                ? t('scenario.breakpoint.remove', 'Remove breakpoint')
+                : t('scenario.breakpoint.add', 'Add breakpoint'),
+              icon: breakpointIds.has(nodeMenu.nodeId) ? 'circle-filled' : 'circle-outline',
+              shortcut: t('scenario.breakpoint.shortcut', 'F9'),
+              onClick: () => { onToggleBreakpoint(nodeMenu.nodeId) }
+            },
             { id: 'sep1', label: '', isSeparator: true },
             { id: 'duplicate', label: t('scenario.node.menu.duplicate', 'Duplicate'), icon: 'copy', onClick: () => { duplicateNode(nodeMenu.nodeId) } },
             { id: 'sep2', label: '', isSeparator: true },

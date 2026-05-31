@@ -876,9 +876,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "必須",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "呼び出し元シナリオで必須"
     },
     "runScenario": {
       "orphanInput": "サブシナリオに一致するパラメーター「{{name}}」がありません",
@@ -996,6 +996,13 @@
     },
     "loop": {
       "done": "done"
+    },
+    "breakpoint": {
+      "add": "ブレークポイントを追加",
+      "remove": "ブレークポイントを削除",
+      "toggle": "ブレークポイントの切り替え (F9)",
+      "reached": "ブレークポイントに到達しました — このアクションはまだ実行されていません。F5 で再開、F7 でステップ実行します。",
+      "shortcut": "F9"
     }
   }
 }

@@ -95,6 +95,15 @@ export interface ScenarioInspectorPanelProps {
    * one step — wired to the Step button when no run is in progress. */
   onEngineStepStart?: () => void
   onEngineStop?: () => void
+  /** Launch a DEBUG run (honors breakpoints). Distinct from Run/Play, which
+   * ignores them. Wired to the debug disc, left of Play. */
+  onEngineDebug?: () => void
+  /** Debug pressed while a run is already live — turn it into a debug run
+   * (honor breakpoints from now on) and continue to the next breakpoint. */
+  onEngineDebugContinue?: () => void
+  /** Whether the scenario has ≥1 breakpoint — the debug disc is greyed when
+   * false (nothing to break on). */
+  hasBreakpoints?: boolean
   /** Chronological run log (current or last run, whole tree merged).
    * Shown in the panel body when NO box is selected. */
   runLog?: readonly ScenarioLogEntry[]
@@ -123,7 +132,7 @@ function scenarioRuntime(): ScenarioRuntime | undefined {
  * data + tree as the JSON-path selector's picker popover). Shown only when
  * exactly one box is selected.
  */
-export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ scenarioId, errors, errorBoxCount, onFocusNode, previewNode, onOpenItem, engineState, onEngineRun, onEnginePause, onEngineResume, onEngineStep, onEngineStepStart, onEngineStop, runLog, onClearRunLog, logProvenance }) => {
+export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ scenarioId, errors, errorBoxCount, onFocusNode, previewNode, onOpenItem, engineState, onEngineRun, onEnginePause, onEngineResume, onEngineStep, onEngineStepStart, onEngineStop, onEngineDebug, onEngineDebugContinue, hasBreakpoints, runLog, onClearRunLog, logProvenance }) => {
   const { t } = useTranslation()
   const [result, setResult] = useState<Record<string, unknown> | null>(null)
   const fetchToken = useRef(0)
@@ -246,6 +255,21 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
   const onStop = (): void => {
     if (engineWired) onEngineStop?.()
   }
+  // Debug disc = VS Code's F5 ("Start Debugging" / "Continue"): from idle it
+  // launches a debug run (honors breakpoints); while paused at a breakpoint it
+  // resumes to the NEXT one; while running it's a no-op. Only greyed when the
+  // scenario has no breakpoint to break on. The plain Play disc never honors
+  // breakpoints.
+  const onDebug = (): void => {
+    if (!engineWired || hasBreakpoints !== true) return
+    // From idle → launch a debug run. While a run is already live (running or
+    // paused, incl. a plain Play run) → turn it into a debug run + continue to
+    // the next breakpoint.
+    if (engineState === 'running' || engineState === 'paused') onEngineDebugContinue?.()
+    else onEngineDebug?.()
+  }
+  const debugDisabled = !engineWired || hasBreakpoints !== true
+  const debugLabel = t('scenario.inspector.debug', 'Debug')
   const runDisabled = !engineWired
   // Step is live whenever the engine is wired: it steps a paused/running run,
   // or launches a fresh one in step mode from idle/finished.
@@ -256,7 +280,17 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
   const runLabel = runIsPause
     ? t('scenario.inspector.pause', 'Pause')
     : t('scenario.inspector.run', 'Run')
+  const stepLabel = t('scenario.inspector.step', 'Step')
   const stopLabel = t('scenario.inspector.stop', 'Stop')
+  // Keyboard-shortcut hints shown in the hover tooltips. App-specific scheme
+  // (NOT VS Code's): F5 launches everywhere (kept consistent with running a
+  // request from its own tab), F6 debugs, F7 steps, and the Pause key pauses.
+  // `aria-label` stays the plain label; the shortcut only decorates the visible
+  // tooltip. (The actual key bindings land in a follow-up.)
+  const runTooltip = `${runLabel} (${runIsPause ? 'Pause' : 'F5'})`
+  const stepTooltip = `${stepLabel} (F7)`
+  const debugTooltip = `${debugLabel} (F6)`
+  const stopTooltip = `${stopLabel} (F8)`
 
   // Run-logs view (only when no box is selected) — the shared
   // `ScenarioRunLogView` (also used by the run-history modal) renders the
@@ -274,14 +308,19 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
         {/* aria-label kept (invisible — screen-reader name only); the styled
          * hover label comes from the ECUI Tooltip wrapper. No `title` so the
          * native browser tooltip never shows. */}
-        <HeaderHoverTooltip label={runLabel}>
+        <HeaderHoverTooltip label={runTooltip}>
           <Button small icon={runIcon} onClick={onRun} disabled={runDisabled} className={`scn-inspector-run-round${runIsPause ? ' scn-inspector-run-round-active' : ''}`} options={{ ariaLabel: runLabel }} data-testid="scenario-inspector-run" />
         </HeaderHoverTooltip>
-        <HeaderHoverTooltip label={t('scenario.inspector.step', 'Step')}>
-          <Button small icon="debug-step-over" onClick={onStep} disabled={stepDisabled} className="scn-inspector-step-round" options={{ ariaLabel: t('scenario.inspector.step', 'Step') }} data-testid="scenario-inspector-step" />
+        <HeaderHoverTooltip label={stepTooltip}>
+          <Button small icon="debug-step-over" onClick={onStep} disabled={stepDisabled} className="scn-inspector-step-round" options={{ ariaLabel: stepLabel }} data-testid="scenario-inspector-step" />
         </HeaderHoverTooltip>
         {engineWired && (
-          <HeaderHoverTooltip label={stopLabel}>
+          <HeaderHoverTooltip label={debugTooltip}>
+            <Button small icon="debug-alt" onClick={onDebug} disabled={debugDisabled} className="scn-inspector-debug-round" options={{ ariaLabel: debugLabel }} data-testid="scenario-inspector-debug" />
+          </HeaderHoverTooltip>
+        )}
+        {engineWired && (
+          <HeaderHoverTooltip label={stopTooltip}>
             <Button small icon="debug-stop" onClick={onStop} disabled={stopDisabled} className="scn-inspector-stop-round" options={{ ariaLabel: stopLabel }} data-testid="scenario-inspector-stop" />
           </HeaderHoverTooltip>
         )}

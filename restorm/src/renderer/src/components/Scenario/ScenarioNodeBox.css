@@ -60,8 +60,13 @@
   margin: -5px 8px -5px 0;
   z-index: 2;
 }
-.scn-inspector-toolbar > .header-hover-tooltip:has(.scn-inspector-run-round) {
+.scn-inspector-toolbar > .header-hover-tooltip:has(.scn-inspector-debug-round) {
   order: 3;
+  margin: -5px 8px -5px 0;
+  z-index: 2;
+}
+.scn-inspector-toolbar > .header-hover-tooltip:has(.scn-inspector-run-round) {
+  order: 4;
   margin: -8px 0;
   z-index: 2;
 }
@@ -96,6 +101,38 @@
   height: 100%;
   /* Nudge the step glyph 1px up-left to sit visually centred in the disc. */
   transform: translate(-1px, -1px);
+}
+/* Debug — same disc as Stop/Step (27px, white ring, shadow) but violet. Runs
+ * the scenario honoring breakpoints; greyed when the scenario has none. */
+.scn-inspector-debug-round.button.text-button {
+  width: 27px;
+  height: 27px;
+  min-width: 27px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  background: #8b5cf6;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.scn-inspector-debug-round.button.text-button:hover { background: #7c3aed; }
+.scn-inspector-debug-round.button.text-button.disabled {
+  background: #6b7280;
+  opacity: 0.55;
+}
+.scn-inspector-debug-round .codicon {
+  color: #fff !important;
+  font-size: 14px !important;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  transform: translate(0.5px, -1.5px);
 }
 .scn-inspector-stop-round.button.text-button {
   width: 27px;
@@ -558,15 +595,50 @@
 
 /* Header "!" error badge — red, on the right side of the header. Click opens
  * the ECUI Tooltip listing the box's errors (neutral tooltip background). */
+/* Flex spacer between the header's left content and the right cluster (error
+ * badge + breakpoint) so the cluster hugs the right edge as one group. */
+.scn-node-header-spacer { flex: 1 1 auto; min-width: 0; }
 .scn-node-errbadge {
   background: none; border: none; padding: 0;
-  /* Push to the right edge of the header content so the badge sits at the
-   * far end, just inside the header's right gutter. */
-  margin-left: auto; margin-right: 2px;
+  margin-right: 2px;
   color: #ef4444; cursor: pointer; display: inline-flex; align-items: center;
 }
 .scn-node-errbadge .codicon { font-size: 15px !important; color: #ef4444 !important; }
 .scn-node-errbadge:hover .codicon { color: #f87171 !important; }
+/* Debug breakpoint gutter glyph — sits at the head of the header row. Faint
+ * hollow circle by default (revealed a touch more on header hover so it's
+ * discoverable), a solid red disc when a breakpoint is set, and a pulsing red
+ * when the run is paused at it. */
+/* The glyph is wrapped in a `.header-hover-tooltip` (inline-flex span) — it sits
+ * at the header's right edge after the error badge (the spacer does the push). */
+.scn-node-header > .header-hover-tooltip:has(.scn-node-breakpoint) {
+  display: inline-flex;
+  align-items: center;
+}
+.scn-node-breakpoint {
+  background: none; border: none; padding: 0;
+  cursor: pointer; display: inline-flex; align-items: center;
+  flex: 0 0 auto;
+}
+.scn-node-breakpoint .codicon {
+  font-size: 12px !important;
+  color: #9aa0a6 !important;
+  opacity: 0.35;
+  transition: opacity 0.12s ease, color 0.12s ease;
+}
+.scn-node-header:hover .scn-node-breakpoint .codicon { opacity: 0.7; }
+.scn-node-breakpoint:hover .codicon { opacity: 1 !important; color: #ef4444 !important; }
+.scn-node-breakpoint.is-set .codicon { color: #e51400 !important; opacity: 1 !important; }
+.scn-node-breakpoint.is-paused .codicon {
+  color: #e51400 !important; opacity: 1 !important;
+  animation: scn-breakpoint-pulse 1s ease-in-out infinite;
+}
+@keyframes scn-breakpoint-pulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(229, 20, 0, 0.6)); }
+  50% { transform: scale(1.2); filter: drop-shadow(0 0 3px rgba(229, 20, 0, 0.9)); }
+}
+.scn-node-breakpoint-tip { font-size: 12px; white-space: normal; max-width: 260px; text-align: center; }
+
 .scn-node-errpopover-body { font-size: 12px; white-space: normal; max-width: 280px; }
 .scn-node-errpopover-row { padding: 1px 0; }
 .scn-node-errpopover-row + .scn-node-errpopover-row { margin-top: 2px; }
@@ -796,6 +868,17 @@
   left: auto;
   right: 12px;
 }
+/* Collapsed = header only, so the bottom-centred error handle straddles the
+ * header. Don't move it — just send it BEHIND the header (z-index) so its top
+ * half tucks under the header instead of overlapping the content; the half
+ * sticking out below stays visible + connectable. */
+.scn-node-collapsed .scn-node-header {
+  position: relative;
+  z-index: 2;
+}
+.scn-node-collapsed .scn-handle-error.react-flow__handle {
+  z-index: 1;
+}
 
 /* Collapsible left-column section (headers / params / body …). */
 .scn-section {
@@ -1019,7 +1102,7 @@
   font-size: 12px;
 }
 
-/* `input` node "required" toggle: a compact checkbox + label row. */
+/* `input` node "required by callers" toggle: a compact checkbox + label row. */
 .scn-required-toggle {
   display: flex;
   align-items: center;

@@ -33,11 +33,15 @@ export function installScenarioEngineIPC(): void {
     broadcast(event)
   })
 
-  ipcMain.handle('scenario:engine:start', (_e, scenarioId: string, params: Record<string, unknown> | undefined, startPaused?: boolean) => {
+  ipcMain.handle('scenario:engine:start', (_e, scenarioId: string, params: Record<string, unknown> | undefined, startPaused?: boolean, breakpoints?: string[], debug?: boolean) => {
     // From the editor (UI) → interactive: no-predecessor input nodes prompt
     // the user (grouped "run parameters" modal) instead of using their default.
     // `startPaused` arms the run at the start (step-by-step launched from idle).
-    const handle = scenarioEngine.start(scenarioId, { ...(params ? { params } : {}), interactive: true, ...(startPaused === true ? { startPaused: true } : {}) })
+    // `breakpoints` are always armed (so the Debug button can later honor them
+    // mid-run, see `set-debug`), but only HONORED when `debug` is true — the
+    // plain Play button passes `debug:false` and runs straight through.
+    const debugOpts = breakpoints && breakpoints.length > 0 ? { breakpoints, debug: debug === true } : {}
+    const handle = scenarioEngine.start(scenarioId, { ...(params ? { params } : {}), interactive: true, ...(startPaused === true ? { startPaused: true } : {}), ...debugOpts })
     // `done` is intentionally NOT awaited — the renderer observes
     // the run via events, not the IPC return value. We return the
     // runId so a caller can pause / abort it later.
@@ -55,6 +59,18 @@ export function installScenarioEngineIPC(): void {
   })
   ipcMain.handle('scenario:engine:step', (_e, runId: string) => {
     scenarioEngine.step(runId)
+    return { ok: true }
+  })
+  // Turn a live run into a debug run (Debug pressed mid-run): the scheduler
+  // starts honoring breakpoints from the next node.
+  ipcMain.handle('scenario:engine:set-debug', (_e, runId: string, enabled: boolean) => {
+    scenarioEngine.setDebug(runId, enabled)
+    return { ok: true }
+  })
+  // Push the current breakpoint set onto a live run (the user toggled one
+  // during execution).
+  ipcMain.handle('scenario:engine:set-breakpoints', (_e, runId: string, ids: string[]) => {
+    scenarioEngine.setBreakpoints(runId, Array.isArray(ids) ? ids : [])
     return { ok: true }
   })
   ipcMain.handle('scenario:engine:abort', (_e, runId: string, reason?: string) => {

@@ -876,9 +876,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "필수",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "호출하는 시나리오에 필수"
     },
     "runScenario": {
       "orphanInput": "하위 시나리오에 일치하는 매개변수 \"{{name}}\"가 없습니다",
@@ -996,6 +996,13 @@
     },
     "loop": {
       "done": "done"
+    },
+    "breakpoint": {
+      "add": "중단점 추가",
+      "remove": "중단점 제거",
+      "toggle": "중단점 전환 (F9)",
+      "reached": "중단점에 도달했습니다 — 이 작업은 아직 실행되지 않았습니다. F5를 눌러 계속하거나 F7으로 단계 실행하세요.",
+      "shortcut": "F9"
     }
   }
 }

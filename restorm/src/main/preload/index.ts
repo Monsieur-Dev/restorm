@@ -888,14 +888,18 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.invoke('scenario:node-result', scenarioId, nodeId) as Promise<Record<string, unknown> | null>,
     /** Full-scenario engine (Phase 2): start a run end-to-end. Returns
      * a runId the caller uses for subsequent pause / step / abort. */
-    scenarioEngineStart: (scenarioId: string, params?: Record<string, unknown>, startPaused?: boolean): Promise<{ runId: string }> =>
-      ipcRenderer.invoke('scenario:engine:start', scenarioId, params, startPaused) as Promise<{ runId: string }>,
+    scenarioEngineStart: (scenarioId: string, params?: Record<string, unknown>, startPaused?: boolean, breakpoints?: string[], debug?: boolean): Promise<{ runId: string }> =>
+      ipcRenderer.invoke('scenario:engine:start', scenarioId, params, startPaused, breakpoints, debug) as Promise<{ runId: string }>,
     scenarioEnginePause: (runId: string): Promise<{ ok: boolean }> =>
       ipcRenderer.invoke('scenario:engine:pause', runId) as Promise<{ ok: boolean }>,
     scenarioEngineResume: (runId: string): Promise<{ ok: boolean }> =>
       ipcRenderer.invoke('scenario:engine:resume', runId) as Promise<{ ok: boolean }>,
     scenarioEngineStep: (runId: string): Promise<{ ok: boolean }> =>
       ipcRenderer.invoke('scenario:engine:step', runId) as Promise<{ ok: boolean }>,
+    scenarioEngineSetDebug: (runId: string, enabled: boolean): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke('scenario:engine:set-debug', runId, enabled) as Promise<{ ok: boolean }>,
+    scenarioEngineSetBreakpoints: (runId: string, ids: string[]): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke('scenario:engine:set-breakpoints', runId, ids) as Promise<{ ok: boolean }>,
     scenarioEngineAbort: (runId: string, reason?: string): Promise<{ ok: boolean }> =>
       ipcRenderer.invoke('scenario:engine:abort', runId, reason) as Promise<{ ok: boolean }>,
     scenarioEngineReadLog: (runId: string): Promise<unknown[]> =>

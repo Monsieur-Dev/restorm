@@ -879,9 +879,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Povinné",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Vyžadováno pro volající scénáře"
     },
     "runScenario": {
       "orphanInput": "V dílčím scénáři chybí odpovídající parametr „{{name}}“",
@@ -999,6 +999,13 @@
     },
     "loop": {
       "done": "done"
+    },
+    "breakpoint": {
+      "add": "Přidat bod přerušení",
+      "remove": "Odebrat bod přerušení",
+      "toggle": "Přepnout bod přerušení (F9)",
+      "reached": "Dosažen bod přerušení – tato akce ještě nebyla provedena. Stiskněte F5 pro pokračování nebo F7 pro krokování.",
+      "shortcut": "F9"
     }
   }
 }

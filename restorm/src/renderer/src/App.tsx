@@ -32,6 +32,7 @@ import {
 import { PROJECT_UUID_KEY } from '../../shared/config/projectUuid'
 import { preloadRequestPanelStates, removeRequestPanelState } from './services/requestPanelStateStore'
 import { preloadScenarioViewports } from './services/scenarioViewportStore'
+import { preloadScenarioBreakpoints } from './services/scenarioBreakpointStore'
 import { HTTPRequest } from '../../shared/models/requests/HTTPRequest'
 import { SoapRequest } from '../../shared/models/requests/SoapRequest'
 import { GrpcRequest } from '../../shared/models/requests/GrpcRequest'
@@ -367,6 +368,7 @@ const App: React.FC = () => {
     if (!projectUuid) return
     void preloadRequestPanelStates(projectUuid)
     void preloadScenarioViewports(projectUuid)
+    void preloadScenarioBreakpoints(projectUuid)
   }, [projectUuid])
 
   // Persisted collapsed state for the Favorites + Opened sidebar panes,

@@ -877,9 +877,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Vereist",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Vereist voor aanroepende scenario's"
     },
     "runScenario": {
       "orphanInput": "Geen overeenkomende parameter \"{{name}}\" in het subscenario",
@@ -997,6 +997,13 @@
     },
     "loop": {
       "done": "done"
+    },
+    "breakpoint": {
+      "add": "Onderbrekingspunt toevoegen",
+      "remove": "Onderbrekingspunt verwijderen",
+      "toggle": "Onderbrekingspunt omschakelen (F9)",
+      "reached": "Onderbrekingspunt bereikt — deze actie is nog niet uitgevoerd. Druk op F5 om te hervatten of F7 om te stappen.",
+      "shortcut": "F9"
     }
   }
 }

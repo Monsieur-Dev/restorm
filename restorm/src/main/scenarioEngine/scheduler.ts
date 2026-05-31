@@ -57,6 +57,13 @@ export interface RunOptions {
    * beam) instead of falling back to their configured default. Headless runs
    * (MCP, sub-scenarios) leave this false so they never block on a prompt. */
   interactive?: boolean
+  /** Debug run: pause right BEFORE entering any node whose id is in
+   * `breakpoints` (the node hasn't executed yet). The normal Play run leaves
+   * this false and ignores breakpoints entirely. */
+  debug?: boolean
+  /** Node ids to break on — only honored when `debug` is true. An id that
+   * matches no node simply never triggers (stale breakpoints can't crash). */
+  breakpoints?: readonly RuntimeId[]
 }
 
 export interface SchedulerInit {
@@ -98,6 +105,18 @@ export class Scheduler {
 
   private queue: InternalActivation[] = []
   private state: State = 'idle'
+  /** Debug run + the set of breakpointed node ids (empty = no breakpoints).
+   * Set in `run()` from `RunOptions`. */
+  private debug = false
+  private breakpoints: ReadonlySet<RuntimeId> = new Set()
+  /** Activations already released past their breakpoint (so resume/step runs
+   * them instead of re-breaking). Per-activation — each forEach iteration is a
+   * distinct activation object, so every iteration breaks on its own. */
+  private readonly breakpointCleared = new WeakSet<InternalActivation>()
+  /** Activations already given their step PRE-stop (paused once BEFORE running).
+   * Stepping gives each box two stops — one before it executes (this), one
+   * after (the existing post-dispatch pause). */
+  private readonly stepPreStopped = new WeakSet<InternalActivation>()
   private inFlight = 0
   private tokenSeq = 0
   private activations = 0
@@ -168,6 +187,8 @@ export class Scheduler {
   run(opts: RunOptions = {}): Promise<void> {
     if (this.state !== 'idle') return this.completionPromise()
     if (opts.maxActivations !== undefined) this.maxActivations = opts.maxActivations
+    this.debug = opts.debug === true
+    if (opts.breakpoints && opts.breakpoints.length > 0) this.breakpoints = new Set(opts.breakpoints)
     this.state = opts.startPaused === true ? 'paused' : 'running'
     this.emit({ type: 'run-started', runId: this.runId, scenarioId: this.scenario.id, at: now() })
     // Launched in step mode: surface the paused state so observers (the editor
@@ -194,6 +215,16 @@ export class Scheduler {
     this.emit({ type: 'run-resumed', runId: this.runId, at: now() })
     this.tick()
   }
+
+  /** Turn breakpoint-honoring on/off mid-run — lets the Debug button convert a
+   * plain Play run (launched with `debug:false`) into one that stops at
+   * breakpoints. Honored from the next node dispatch. */
+  setDebug(enabled: boolean): void { this.debug = enabled }
+
+  /** Replace the live breakpoint set mid-run — the user toggled a breakpoint
+   * while the run is in flight; the change takes effect at the next dispatch
+   * (already-passed nodes are not revisited). */
+  setBreakpoints(ids: readonly RuntimeId[]): void { this.breakpoints = new Set(ids) }
 
   /** Dequeue exactly one activation while keeping the scheduler in a
    * paused state — the user's "step" gesture. No-op when not paused
@@ -249,6 +280,34 @@ export class Scheduler {
     ) {
       const next = this.queue.shift()
       if (!next) break
+      // Breakpoint: in a debug run, pause right BEFORE entering a breakpointed
+      // node — re-queue it un-executed and surface `breakpoint-hit`. The first
+      // resume/step clears this activation so the next pass runs it (keyed
+      // per-activation, so each forEach iteration breaks on its own). A hit
+      // supersedes any pending step latch.
+      if (this.debug && this.breakpoints.has(next.nodeId) && !this.breakpointCleared.has(next)) {
+        this.breakpointCleared.add(next)
+        // A breakpoint hit IS the "before" stop, so don't ALSO step-pre-stop it:
+        // the next step should run the node, not pause before it again.
+        this.stepPreStopped.add(next)
+        this.queue.unshift(next)
+        this.stepLatch = false
+        this.state = 'paused'
+        this.log.push({ ts: now(), runId: this.runId, level: 'info', source: 'engine', nodeId: next.nodeId, scope: next.scope, message: `breakpoint hit ${next.kind}` })
+        this.emit({ type: 'breakpoint-hit', runId: this.runId, nodeId: next.nodeId, scope: next.scope, at: now() })
+        return
+      }
+      // Step PRE-stop: while stepping, pause BEFORE entering a node (once per
+      // activation) so each box gets two stops — one before it runs (here) and
+      // one after it completes (the post-dispatch pause below).
+      if (this.stepLatch && !this.stepPreStopped.has(next)) {
+        this.stepPreStopped.add(next)
+        this.queue.unshift(next)
+        this.stepLatch = false
+        this.state = 'paused'
+        this.emit({ type: 'step-paused', runId: this.runId, nodeId: next.nodeId, scope: next.scope, at: now() })
+        return
+      }
       this.dispatch(next)
       if (this.stepLatch) {
         this.stepLatch = false

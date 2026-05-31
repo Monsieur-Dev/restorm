@@ -115,6 +115,8 @@ export class ScenarioEngine {
   pause(runId: RuntimeId): void { this.activeRuns.get(runId)?.pause() }
   resume(runId: RuntimeId): void { this.activeRuns.get(runId)?.resume() }
   step(runId: RuntimeId): void { this.activeRuns.get(runId)?.step() }
+  setDebug(runId: RuntimeId, enabled: boolean): void { this.activeRuns.get(runId)?.setDebug(enabled) }
+  setBreakpoints(runId: RuntimeId, ids: readonly RuntimeId[]): void { this.activeRuns.get(runId)?.setBreakpoints(ids) }
   abort(runId: RuntimeId, reason?: string): void { this.activeRuns.get(runId)?.abort(reason) }
   resolveUserInput(runId: RuntimeId, requestId: string, value: unknown): void { this.activeRuns.get(runId)?.resolveUserInput(requestId, value) }
 

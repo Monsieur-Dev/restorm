@@ -877,9 +877,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Obligatorio",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Obligatorio para los escenarios que lo llaman"
     },
     "runScenario": {
       "orphanInput": "No hay ningún parámetro \"{{name}}\" en el subescenario",
@@ -997,6 +997,13 @@
     },
     "loop": {
       "done": "done"
+    },
+    "breakpoint": {
+      "add": "Añadir punto de interrupción",
+      "remove": "Quitar punto de interrupción",
+      "toggle": "Alternar punto de interrupción (F9)",
+      "reached": "Punto de interrupción alcanzado: esta acción aún no se ha ejecutado. Pulse F5 para reanudar o F7 para avanzar paso a paso.",
+      "shortcut": "F9"
     }
   }
 }

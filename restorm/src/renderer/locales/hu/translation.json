@@ -877,9 +877,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Kötelező",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Kötelező a hívó forgatókönyvekhez"
     },
     "runScenario": {
       "orphanInput": "Nincs megfelelő „{{name}}\" paraméter az alforgatókönyvben",
@@ -997,6 +997,13 @@
     },
     "loop": {
       "done": "done"
+    },
+    "breakpoint": {
+      "add": "Töréspont hozzáadása",
+      "remove": "Töréspont eltávolítása",
+      "toggle": "Töréspont be/ki (F9)",
+      "reached": "Töréspont elérve – ez a művelet még nem futott le. Nyomja meg az F5-öt a folytatáshoz vagy az F7-ot a léptetéshez.",
+      "shortcut": "F9"
     }
   }
 }

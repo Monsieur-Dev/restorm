@@ -876,9 +876,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "必填",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "调用此场景时必填"
     },
     "runScenario": {
       "orphanInput": "子场景中没有匹配的参数“{{name}}”",
@@ -996,6 +996,13 @@
     },
     "loop": {
       "done": "done"
+    },
+    "breakpoint": {
+      "add": "添加断点",
+      "remove": "移除断点",
+      "toggle": "切换断点 (F9)",
+      "reached": "已到达断点 — 此操作尚未执行。按 F5 继续，或按 F7 单步执行。",
+      "shortcut": "F9"
     }
   }
 }

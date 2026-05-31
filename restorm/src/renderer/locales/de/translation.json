@@ -877,9 +877,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Erforderlich",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Erforderlich für aufrufende Szenarien"
     },
     "runScenario": {
       "orphanInput": "Kein passender Parameter \"{{name}}\" im Unterszenario",
@@ -997,6 +997,13 @@
     },
     "loop": {
       "done": "done"
+    },
+    "breakpoint": {
+      "add": "Haltepunkt hinzufügen",
+      "remove": "Haltepunkt entfernen",
+      "toggle": "Haltepunkt umschalten (F9)",
+      "reached": "Haltepunkt erreicht – diese Aktion wurde noch nicht ausgeführt. Drücken Sie F5 zum Fortsetzen oder F7 zum Einzelschritt.",
+      "shortcut": "F9"
     }
   }
 }

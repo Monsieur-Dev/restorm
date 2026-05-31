@@ -876,9 +876,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Wajib",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Wajib untuk skenario pemanggil"
     },
     "runScenario": {
       "orphanInput": "Tidak ada parameter \"{{name}}\" yang cocok di sub-skenario",
@@ -996,6 +996,13 @@
     },
     "loop": {
       "done": "done"
+    },
+    "breakpoint": {
+      "add": "Tambah breakpoint",
+      "remove": "Hapus breakpoint",
+      "toggle": "Alihkan breakpoint (F9)",
+      "reached": "Breakpoint tercapai — tindakan ini belum dijalankan. Tekan F5 untuk melanjutkan, atau F7 untuk melangkah.",
+      "shortcut": "F9"
     }
   }
 }

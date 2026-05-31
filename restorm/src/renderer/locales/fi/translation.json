@@ -877,9 +877,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Pakollinen",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Vaaditaan kutsuvilta skenaarioilta"
     },
     "runScenario": {
       "orphanInput": "Aliskenaariossa ei ole vastaavaa parametria \"{{name}}\"",
@@ -997,6 +997,13 @@
     },
     "loop": {
       "done": "done"
+    },
+    "breakpoint": {
+      "add": "Lisää keskeytyskohta",
+      "remove": "Poista keskeytyskohta",
+      "toggle": "Vaihda keskeytyskohta (F9)",
+      "reached": "Keskeytyskohta saavutettu – tätä toimintoa ei ole vielä suoritettu. Paina F5 jatkaaksesi tai F7 edetäksesi askel kerrallaan.",
+      "shortcut": "F9"
     }
   }
 }

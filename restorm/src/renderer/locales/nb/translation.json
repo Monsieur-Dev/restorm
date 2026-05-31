@@ -877,9 +877,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Påkrevd",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Påkrevd for kallende scenarier"
     },
     "runScenario": {
       "orphanInput": "Ingen samsvarende parameter «{{name}}» i underscenarioet",
@@ -997,6 +997,13 @@
     },
     "loop": {
       "done": "done"
+    },
+    "breakpoint": {
+      "add": "Legg til bruddpunkt",
+      "remove": "Fjern bruddpunkt",
+      "toggle": "Veksle bruddpunkt (F9)",
+      "reached": "Bruddpunkt nådd – denne handlingen er ikke kjørt ennå. Trykk F5 for å fortsette eller F7 for å gå trinnvis.",
+      "shortcut": "F9"
     }
   }
 }

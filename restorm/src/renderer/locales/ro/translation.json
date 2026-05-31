@@ -878,9 +878,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Obligatoriu",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Obligatoriu pentru scenariile apelante"
     },
     "runScenario": {
       "orphanInput": "Niciun parametru \"{{name}}\" corespunzător în subscenariu",
@@ -998,6 +998,13 @@
     },
     "loop": {
       "done": "done"
+    },
+    "breakpoint": {
+      "add": "Adăugare punct de întrerupere",
+      "remove": "Eliminare punct de întrerupere",
+      "toggle": "Comutare punct de întrerupere (F9)",
+      "reached": "Punct de întrerupere atins — această acțiune nu a fost încă executată. Apăsați F5 pentru reluare sau F7 pentru pas cu pas.",
+      "shortcut": "F9"
     }
   }
 }

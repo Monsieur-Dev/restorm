@@ -44,10 +44,12 @@ export interface PendingUserInput {
 }
 
 interface Bridge {
-  scenarioEngineStart?: (scenarioId: string, params?: Record<string, unknown>, startPaused?: boolean) => Promise<{ runId: string }>
+  scenarioEngineStart?: (scenarioId: string, params?: Record<string, unknown>, startPaused?: boolean, breakpoints?: string[], debug?: boolean) => Promise<{ runId: string }>
   scenarioEnginePause?: (runId: string) => Promise<{ ok: boolean }>
   scenarioEngineResume?: (runId: string) => Promise<{ ok: boolean }>
   scenarioEngineStep?: (runId: string) => Promise<{ ok: boolean }>
+  scenarioEngineSetDebug?: (runId: string, enabled: boolean) => Promise<{ ok: boolean }>
+  scenarioEngineSetBreakpoints?: (runId: string, ids: string[]) => Promise<{ ok: boolean }>
   scenarioEngineAbort?: (runId: string, reason?: string) => Promise<{ ok: boolean }>
   scenarioEngineResolveUserInput?: (runId: string, requestId: string, value: unknown) => Promise<{ ok: boolean }>
   scenarioEngineCancelUserInput?: (runId: string, requestId: string) => Promise<{ ok: boolean }>
@@ -81,6 +83,16 @@ export interface UseScenarioEngineResult {
   /** Node ids that completed since the last play — drives the yellow
    * "just finished" frame. Cleared on play / resume. */
   completedNodeIds: ReadonlySet<string>
+  /** The node a debug run is paused AT due to a BREAKPOINT (not yet executed),
+   * or null. Drives the "breakpoint reached" tooltip specifically. */
+  breakpointNodeId: string | null
+  /** The node the run is paused right BEFORE entering — set by a breakpoint hit
+   * OR a step pre-stop. Drives the yellow frame + pan-zoom onto the about-to-run
+   * box. (`breakpointNodeId` is the breakpoint-only subset, for the tooltip.) */
+  pausedAtNodeId: string | null
+  /** The most recently started node — lets the editor pan-zoom onto each box
+   * as the user steps through (and onto the box a breakpoint released into). */
+  lastStartedNodeId: string | null
   /** Monotonically-increasing token bump per edge — the
    * `ScenarioDebugBezierEdge` watches `data.debugToken` to fire its
    * single-shot travelling beam. */
@@ -95,10 +107,16 @@ export interface UseScenarioEngineResult {
   runLog: readonly ScenarioLogEntry[]
   /** Clear the displayed run log (the inspector's "clear logs" action). */
   clearRunLog: () => void
-  start: (scenarioId: string, params?: Record<string, unknown>, startPaused?: boolean) => Promise<void>
+  start: (scenarioId: string, params?: Record<string, unknown>, startPaused?: boolean, breakpoints?: string[], debug?: boolean) => Promise<void>
   pause: () => Promise<void>
   resume: () => Promise<void>
   step: () => Promise<void>
+  /** Turn the live run into a debug run (Debug pressed mid-run) so it starts
+   * honoring breakpoints. No-op when there's no active run. */
+  enableDebug: () => Promise<void>
+  /** Push the current breakpoint set onto the live run (a breakpoint was
+   * toggled during execution). No-op when there's no active run. */
+  setEngineBreakpoints: (ids: string[]) => Promise<void>
   stop: () => Promise<void>
   resolveUserInput: (requestId: string, value: unknown) => Promise<void>
   /** Cancel a pending mid-run input prompt. The engine routes the input
@@ -117,6 +135,14 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
   // frame stays on them (a progress marker, handy while paused). Cleared on the
   // next play / resume; a node that re-runs drops out of the set while it runs.
   const [completedNodeIds, setCompletedNodeIds] = useState<Set<string>>(new Set())
+  // The node a debug run is paused AT (breakpoint hit). Distinct from
+  // `completedNodeIds` because the broken node has NOT executed yet.
+  const [breakpointNodeId, setBreakpointNodeId] = useState<string | null>(null)
+  // The node we're paused right before entering (breakpoint OR step pre-stop) —
+  // drives the yellow frame + pan-zoom.
+  const [pausedAtNodeId, setPausedAtNodeId] = useState<string | null>(null)
+  // The latest node to fire `node-started` — drives step-by-step pan-zoom.
+  const [lastStartedNodeId, setLastStartedNodeId] = useState<string | null>(null)
   const [edgeTokens, setEdgeTokens] = useState<Map<string, number>>(new Map())
   const [pendingInputs, setPendingInputs] = useState<PendingUserInput[]>([])
   const [runLog, setRunLog] = useState<ScenarioLogEntry[]>([])
@@ -125,6 +151,10 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
   // stale state at mount time) read the latest value.
   const runIdRef = useRef<string | null>(null)
   useEffect(() => { runIdRef.current = runId }, [runId])
+  // Mirror the paused-at node so the event subscription can tell when a
+  // `node-started` belongs to the node we were paused before (stepped into it).
+  const pausedAtNodeIdRef = useRef<string | null>(null)
+  useEffect(() => { pausedAtNodeIdRef.current = pausedAtNodeId }, [pausedAtNodeId])
   // The scenario this editor shows — used to gate animations to runs
   // launched FROM this scenario (read via ref so the subscription needn't
   // re-bind when the id changes).
@@ -181,6 +211,9 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
           clearBeamTimers()
           setRunningNodeIds(new Set())
           setCompletedNodeIds(new Set())
+          setBreakpointNodeId(null)
+          setPausedAtNodeId(null)
+          setLastStartedNodeId(null)
           setEdgeTokens(new Map())
           // Clear the previous run's logs the moment a new run starts, so the
           // inspector panel doesn't show stale entries until the first poll.
@@ -199,26 +232,54 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
         case 'run-resumed':
           setState('running')
           pausedRef.current = false
-          // Resuming = the next "play": wipe the yellow just-finished frames.
+          // Resuming = the next "play": wipe the yellow just-finished frames +
+          // the paused-at marker (we're moving past it).
           setCompletedNodeIds(new Set())
+          setBreakpointNodeId(null)
+          setPausedAtNodeId(null)
+          break
+        case 'breakpoint-hit':
+          // Debug run paused right before entering this node (not executed yet):
+          // frame it yellow, pan-zoom onto it, and show the "breakpoint reached"
+          // tooltip (breakpointNodeId drives the tooltip; pausedAtNodeId the frame).
+          // Clear prior just-finished frames so EXACTLY one box is yellow.
+          setState('paused')
+          pausedRef.current = true
+          setCompletedNodeIds(new Set())
+          if (event.nodeId !== undefined) { setBreakpointNodeId(event.nodeId); setPausedAtNodeId(event.nodeId) }
+          break
+        case 'step-paused':
+          // Stepping paused right before entering this node — frame + pan-zoom,
+          // but NO breakpoint tooltip (it isn't a breakpoint). Clear prior
+          // just-finished frames so EXACTLY one box is yellow at a time.
+          setState('paused')
+          pausedRef.current = true
+          setCompletedNodeIds(new Set())
+          if (event.nodeId !== undefined) setPausedAtNodeId(event.nodeId)
           break
         case 'run-completed':
           setState('completed')
           pausedRef.current = false
           clearBeamTimers()
           setRunningNodeIds(new Set())
+          setBreakpointNodeId(null)
+          setPausedAtNodeId(null)
           break
         case 'run-cancelled':
           setState('cancelled')
           pausedRef.current = false
           clearBeamTimers()
           setRunningNodeIds(new Set())
+          setBreakpointNodeId(null)
+          setPausedAtNodeId(null)
           break
         case 'run-failed':
           setState('failed')
           pausedRef.current = false
           clearBeamTimers()
           setRunningNodeIds(new Set())
+          setBreakpointNodeId(null)
+          setPausedAtNodeId(null)
           break
         case 'node-started': {
           const id = event.nodeId
@@ -231,6 +292,10 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
             beamCountRef.current.set(id, count)
             if (count === 1) beamStartRef.current.set(id, Date.now())
             setRunningNodeIds((prev) => (prev.has(id) ? prev : new Set(prev).add(id)))
+            setLastStartedNodeId(id)
+            // Stepped/resumed INTO the node we were paused before — it's running
+            // now, so drop the paused-at marker (frame) + any breakpoint tooltip.
+            if (id === pausedAtNodeIdRef.current) { setPausedAtNodeId(null); setBreakpointNodeId(null) }
             // A box starting while paused means we STEPPED forward — the front
             // advanced, so wipe the previous yellow frames (only the box about
             // to finish stays the "current" one). Outside a pause, just drop
@@ -345,10 +410,10 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
     return () => { cancelled = true; clearInterval(interval) }
   }, [runId, state])
 
-  const start = useCallback(async (scenarioId: string, params?: Record<string, unknown>, startPaused?: boolean): Promise<void> => {
+  const start = useCallback(async (scenarioId: string, params?: Record<string, unknown>, startPaused?: boolean, breakpoints?: string[], debug?: boolean): Promise<void> => {
     const b = bridge()
     if (!b?.scenarioEngineStart) return
-    const { runId: newRunId } = await b.scenarioEngineStart(scenarioId, params, startPaused)
+    const { runId: newRunId } = await b.scenarioEngineStart(scenarioId, params, startPaused, breakpoints, debug)
     // Latch the top-level runId so node/run events gate to this run. Set
     // `runIdRef` SYNCHRONOUSLY too (not only via the [runId] effect): a
     // step-from-idle does `await start(); await step()` back-to-back, and
@@ -383,6 +448,18 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
     await bridge()?.scenarioEngineResume?.(id)
   }, [])
 
+  const enableDebug = useCallback(async (): Promise<void> => {
+    const id = runIdRef.current
+    if (id === null) return
+    await bridge()?.scenarioEngineSetDebug?.(id, true)
+  }, [])
+
+  const setEngineBreakpoints = useCallback(async (ids: string[]): Promise<void> => {
+    const id = runIdRef.current
+    if (id === null) return
+    await bridge()?.scenarioEngineSetBreakpoints?.(id, ids)
+  }, [])
+
   const step = useCallback(async (): Promise<void> => {
     const id = runIdRef.current
     if (id === null) return
@@ -411,5 +488,5 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
 
   const clearRunLog = useCallback((): void => { setRunLog([]) }, [])
 
-  return { state, runId, runningNodeIds, completedNodeIds, edgeTokens, pendingInputs, runLog, clearRunLog, start, pause, resume, step, stop, resolveUserInput, cancelUserInput }
+  return { state, runId, runningNodeIds, completedNodeIds, breakpointNodeId, pausedAtNodeId, lastStartedNodeId, edgeTokens, pendingInputs, runLog, clearRunLog, start, pause, resume, step, enableDebug, setEngineBreakpoints, stop, resolveUserInput, cancelUserInput }
 }

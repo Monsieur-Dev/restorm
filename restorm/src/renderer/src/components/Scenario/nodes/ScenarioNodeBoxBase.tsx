@@ -7,6 +7,7 @@ import { scenarioNodeMeta } from '../scenarioNodeCatalogue'
 import { useScenarioNodeErrors } from '../scenarioErrorsContext'
 import { ROLE_COLOR } from '../scenarioGraphMapping'
 import { ScenarioNodeSection } from './ScenarioNodeSection'
+import { HeaderHoverTooltip } from '../../MainView/HeaderHoverTooltip'
 import { anchorColor, cellBody, portAnchorColor, inputFlowRingClass, outputFlowRingClass, cellInputRingClass, cellOutputRingClass } from './scenarioCellRender'
 import '../ScenarioNodeBox.css'
 
@@ -33,6 +34,14 @@ export interface ScenarioNodeBoxData extends Record<string, unknown> {
    * the last play, so it wears a yellow "just finished" frame. Cleared on the
    * next play / resume, or when the node re-runs. */
   justFinished?: boolean
+  /** A debug breakpoint is set on this action — the gutter circle glyph fills
+   * in (red). Click toggles via `onToggleBreakpoint`. User-scope, not the file. */
+  breakpoint?: boolean
+  /** A debug run is paused right before entering THIS action (breakpoint hit) —
+   * shows the "breakpoint reached" tooltip on the glyph + the yellow frame. */
+  breakpointPaused?: boolean
+  /** Toggle this action's breakpoint (set by the editor; user-scope store). */
+  onToggleBreakpoint?: (id: string) => void
   inputs: ScenarioPort[]
   outputs: ScenarioPort[]
   /** Run status for the live-execution overlay; populated when Phase 2
@@ -323,6 +332,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
   // The header "!" badge reveals a tooltip listing this box's errors on hover.
   const [showErrors, setShowErrors] = useState(false)
   const errBadgeRef = useRef<HTMLSpanElement>(null)
+  const breakpointRef = useRef<HTMLSpanElement>(null)
 
   // "Running" animation — the BorderBeam orbits the box border continuously
   // while the engine reports the node as running. The trail always finishes
@@ -408,6 +418,10 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
           onClick={onToggle}
           options={{ ariaLabel: collapsed ? t('scenario.node.expand', 'Expand') : t('scenario.node.collapse', 'Collapse') }}
         />
+        {/* Spacer pushes the right cluster (error badge then breakpoint, in that
+         * order) to the header's right edge — no per-item `margin-left:auto`,
+         * which would split the gap and strand the breakpoint mid-header. */}
+        <span className="scn-node-header-spacer" aria-hidden="true" />
         {boxInError && (
           <span
             ref={errBadgeRef}
@@ -420,7 +434,34 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
             <i className="codicon codicon-error" aria-hidden="true" />
           </span>
         )}
+        {data.onToggleBreakpoint && (
+          <HeaderHoverTooltip label={t('scenario.breakpoint.toggle', 'Toggle breakpoint (F9)')} suppressed={data.breakpointPaused === true}>
+            <span
+              ref={breakpointRef}
+              className={`scn-node-breakpoint nodrag${data.breakpoint ? ' is-set' : ''}${data.breakpointPaused ? ' is-paused' : ''}`}
+              data-testid="scn-node-breakpoint"
+              aria-label={data.breakpoint ? t('scenario.breakpoint.remove', 'Remove breakpoint') : t('scenario.breakpoint.add', 'Add breakpoint')}
+              onClick={(e) => { e.stopPropagation(); data.onToggleBreakpoint?.(id) }}
+            >
+              <i className={`codicon codicon-${data.breakpoint ? 'circle-filled' : 'circle-outline'}`} aria-hidden="true" />
+            </span>
+          </HeaderHoverTooltip>
+        )}
       </div>
+
+      {data.breakpointPaused === true && (
+        <Tooltip
+          targetRef={breakpointRef}
+          show
+          placement="below"
+          data-testid="scn-node-breakpoint-tip"
+          content={
+            <div className="scn-node-breakpoint-tip">
+              {t('scenario.breakpoint.reached', 'Breakpoint reached — this action has not run yet. Press F5 to resume, or F7 to step.')}
+            </div>
+          }
+        />
+      )}
 
       {boxInError && (
         <Tooltip

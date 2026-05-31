@@ -82,9 +82,11 @@
 }
 
 .header-hover-tooltip-label {
+  display: block;
   white-space: nowrap;
   padding: 2px 4px;
   font-size: 12px;
+  text-align: center;
 }
 
 /* Icon-only header action button (history). Matches the "used in

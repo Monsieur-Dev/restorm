@@ -879,9 +879,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Обовʼязково",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Обов'язково для сценаріїв, що викликають"
     },
     "runScenario": {
       "orphanInput": "Немає відповідного параметра «{{name}}» у підсценарії",
@@ -999,6 +999,13 @@
     },
     "loop": {
       "done": "done"
+    },
+    "breakpoint": {
+      "add": "Додати точку зупину",
+      "remove": "Видалити точку зупину",
+      "toggle": "Перемкнути точку зупину (F9)",
+      "reached": "Досягнуто точку зупину — цю дію ще не виконано. Натисніть F5, щоб продовжити, або F7 для покрокового виконання.",
+      "shortcut": "F9"
     }
   }
 }

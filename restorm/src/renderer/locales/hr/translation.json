@@ -878,9 +878,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Obavezno",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Obavezno za scenarije koji ga pozivaju"
     },
     "runScenario": {
       "orphanInput": "Nema odgovarajućeg parametra \"{{name}}\" u podscenariju",
@@ -998,6 +998,13 @@
     },
     "loop": {
       "done": "done"
+    },
+    "breakpoint": {
+      "add": "Dodaj točku prekida",
+      "remove": "Ukloni točku prekida",
+      "toggle": "Uključi/isključi točku prekida (F9)",
+      "reached": "Dosegnuta točka prekida — ova radnja još nije izvršena. Pritisnite F5 za nastavak ili F7 za korak.",
+      "shortcut": "F9"
     }
   }
 }

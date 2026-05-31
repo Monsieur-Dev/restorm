@@ -877,9 +877,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Påkrævet",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Påkrævet for kaldende scenarier"
     },
     "runScenario": {
       "orphanInput": "Ingen matchende parameter \"{{name}}\" i underscenariet",
@@ -997,6 +997,13 @@
     },
     "loop": {
       "done": "done"
+    },
+    "breakpoint": {
+      "add": "Tilføj brydepunkt",
+      "remove": "Fjern brydepunkt",
+      "toggle": "Skift brydepunkt (F9)",
+      "reached": "Brydepunkt nået – denne handling er ikke kørt endnu. Tryk på F5 for at fortsætte eller F7 for at træde.",
+      "shortcut": "F9"
     }
   }
 }
