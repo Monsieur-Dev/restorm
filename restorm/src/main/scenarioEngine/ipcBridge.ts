@@ -33,10 +33,11 @@ export function installScenarioEngineIPC(): void {
     broadcast(event)
   })
 
-  ipcMain.handle('scenario:engine:start', (_e, scenarioId: string, params: Record<string, unknown> | undefined) => {
+  ipcMain.handle('scenario:engine:start', (_e, scenarioId: string, params: Record<string, unknown> | undefined, startPaused?: boolean) => {
     // From the editor (UI) → interactive: no-predecessor input nodes prompt
     // the user (grouped "run parameters" modal) instead of using their default.
-    const handle = scenarioEngine.start(scenarioId, { ...(params ? { params } : {}), interactive: true })
+    // `startPaused` arms the run at the start (step-by-step launched from idle).
+    const handle = scenarioEngine.start(scenarioId, { ...(params ? { params } : {}), interactive: true, ...(startPaused === true ? { startPaused: true } : {}) })
     // `done` is intentionally NOT awaited — the renderer observes
     // the run via events, not the IPC return value. We return the
     // runId so a caller can pause / abort it later.

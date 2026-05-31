@@ -1,6 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, ListView } from 'electron-core-ui/renderer'
+import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import type { ScenarioLogEntry } from '../../hooks/useScenarioEngine'
 import { ScenarioRunLogView, type LogProvenanceApi } from './ScenarioRunLogView'
 import type { ScenarioPort } from '../../../../shared/types/collections'
@@ -98,6 +99,9 @@ export interface ScenarioInspectorPanelProps {
   onEnginePause?: () => void
   onEngineResume?: () => void
   onEngineStep?: () => void
+  /** Launch a fresh run armed in step mode (paused at the start), then advance
+   * one step — wired to the Step button when no run is in progress. */
+  onEngineStepStart?: () => void
   onEngineStop?: () => void
   /** Chronological run log (current or last run, whole tree merged).
    * Shown in the panel body when NO box is selected. */
@@ -127,7 +131,7 @@ function scenarioRuntime(): ScenarioRuntime | undefined {
  * data + tree as the JSON-path selector's picker popover). Shown only when
  * exactly one box is selected.
  */
-export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ scenarioId, errors, errorBoxCount, onFocusNode, previewNode, onTriggerFakeRun, onTriggerFakeDebug, onOpenItem, engineState, onEngineRun, onEnginePause, onEngineResume, onEngineStep, onEngineStop, runLog, onClearRunLog, logProvenance }) => {
+export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ scenarioId, errors, errorBoxCount, onFocusNode, previewNode, onTriggerFakeRun, onTriggerFakeDebug, onOpenItem, engineState, onEngineRun, onEnginePause, onEngineResume, onEngineStep, onEngineStepStart, onEngineStop, runLog, onClearRunLog, logProvenance }) => {
   const { t } = useTranslation()
   const [result, setResult] = useState<Record<string, unknown> | null>(null)
   const fetchToken = useRef(0)
@@ -247,8 +251,12 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
     if (previewNode && onTriggerFakeDebug) onTriggerFakeDebug(previewNode.id)
   }
   const onStep = (): void => {
-    if (engineWired && (engineState === 'paused' || engineState === 'running')) {
+    if (!engineWired) return
+    if (engineState === 'paused' || engineState === 'running') {
       onEngineStep?.()
+    } else {
+      // Idle / finished → launch a fresh run armed in step mode, then advance.
+      onEngineStepStart?.()
     }
   }
   const onStop = (): void => {
@@ -256,7 +264,9 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
   }
   const runDisabled = engineWired ? false : !previewNode || !onTriggerFakeRun
   const debugDisabled = !previewNode || !onTriggerFakeDebug
-  const stepDisabled = !engineWired || (engineState !== 'paused' && engineState !== 'running')
+  // Step is live whenever the engine is wired: it steps a paused/running run,
+  // or launches a fresh one in step mode from idle/finished.
+  const stepDisabled = !engineWired
   const stopDisabled = !engineWired || (engineState !== 'running' && engineState !== 'paused')
   const runIsPause = engineWired
     ? engineState === 'running'
@@ -281,11 +291,22 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
        * the previewed box — represents one data/event crossing the link.
        * Step stays visual-only until the real engine wires in. */}
       <div className="scn-inspector-toolbar" data-testid="scenario-inspector-toolbar">
-        <Button small secondary icon={runIcon} onClick={onRun} disabled={runDisabled} options={{ ariaLabel: runLabel, title: runLabel }} data-testid="scenario-inspector-run" />
-        <Button small secondary icon="debug-alt" onClick={onDebug} disabled={debugDisabled} options={{ ariaLabel: debugLabel, title: debugLabel }} data-testid="scenario-inspector-debug" />
-        <Button small secondary icon="debug-step-over" onClick={onStep} disabled={stepDisabled} options={{ ariaLabel: t('scenario.inspector.step', 'Step'), title: t('scenario.inspector.step', 'Step') }} data-testid="scenario-inspector-step" />
+        {/* aria-label kept (invisible — screen-reader name only); the styled
+         * hover label comes from the ECUI Tooltip wrapper. No `title` so the
+         * native browser tooltip never shows. */}
+        <HeaderHoverTooltip label={runLabel}>
+          <Button small icon={runIcon} onClick={onRun} disabled={runDisabled} className={`scn-inspector-run-round${runIsPause ? ' scn-inspector-run-round-active' : ''}`} options={{ ariaLabel: runLabel }} data-testid="scenario-inspector-run" />
+        </HeaderHoverTooltip>
+        <HeaderHoverTooltip label={debugLabel}>
+          <Button small secondary icon="debug-alt" onClick={onDebug} disabled={debugDisabled} options={{ ariaLabel: debugLabel }} data-testid="scenario-inspector-debug" />
+        </HeaderHoverTooltip>
+        <HeaderHoverTooltip label={t('scenario.inspector.step', 'Step')}>
+          <Button small icon="debug-step-over" onClick={onStep} disabled={stepDisabled} className="scn-inspector-step-round" options={{ ariaLabel: t('scenario.inspector.step', 'Step') }} data-testid="scenario-inspector-step" />
+        </HeaderHoverTooltip>
         {engineWired && (
-          <Button small secondary icon="debug-stop" onClick={onStop} disabled={stopDisabled} options={{ ariaLabel: stopLabel, title: stopLabel }} data-testid="scenario-inspector-stop" />
+          <HeaderHoverTooltip label={stopLabel}>
+            <Button small icon="debug-stop" onClick={onStop} disabled={stopDisabled} className="scn-inspector-stop-round" options={{ ariaLabel: stopLabel }} data-testid="scenario-inspector-stop" />
+          </HeaderHoverTooltip>
         )}
       </div>
 

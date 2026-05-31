@@ -22,6 +22,9 @@ const Button: React.FC<ButtonProps> = ({
   className = '',
   style,
   id,
+  role = 'button',
+  'aria-checked': ariaChecked,
+  tabIndex,
   'data-testid': dataTestId,
   children
 }) => {
@@ -151,8 +154,9 @@ const Button: React.FC<ButtonProps> = ({
         onMouseLeave={onMouseLeave}
         title={typeof mergedOptions.title === 'string' ? mergedOptions.title : undefined}
         aria-label={mergedOptions.ariaLabel}
-        role="button"
-        tabIndex={disabled ? -1 : 0}
+        role={role}
+        {...(ariaChecked !== undefined ? { 'aria-checked': ariaChecked } : {})}
+        tabIndex={tabIndex ?? (disabled ? -1 : 0)}
         aria-disabled={disabled}
       >
         {renderIcon()}

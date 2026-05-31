@@ -45,7 +45,7 @@ export interface PendingUserInput {
 }
 
 interface Bridge {
-  scenarioEngineStart?: (scenarioId: string, params?: Record<string, unknown>) => Promise<{ runId: string }>
+  scenarioEngineStart?: (scenarioId: string, params?: Record<string, unknown>, startPaused?: boolean) => Promise<{ runId: string }>
   scenarioEnginePause?: (runId: string) => Promise<{ ok: boolean }>
   scenarioEngineResume?: (runId: string) => Promise<{ ok: boolean }>
   scenarioEngineStep?: (runId: string) => Promise<{ ok: boolean }>
@@ -79,6 +79,9 @@ export interface UseScenarioEngineResult {
   /** Set of node ids currently running. Drives the BorderBeam on each
    * box; events flip the membership. */
   runningNodeIds: ReadonlySet<string>
+  /** Node ids that completed since the last play — drives the yellow
+   * "just finished" frame. Cleared on play / resume. */
+  completedNodeIds: ReadonlySet<string>
   /** Monotonically-increasing token bump per edge — the
    * `ScenarioDebugBezierEdge` watches `data.debugToken` to fire its
    * single-shot travelling beam. */
@@ -93,7 +96,7 @@ export interface UseScenarioEngineResult {
   runLog: readonly ScenarioLogEntry[]
   /** Clear the displayed run log (the inspector's "clear logs" action). */
   clearRunLog: () => void
-  start: (scenarioId: string, params?: Record<string, unknown>) => Promise<void>
+  start: (scenarioId: string, params?: Record<string, unknown>, startPaused?: boolean) => Promise<void>
   pause: () => Promise<void>
   resume: () => Promise<void>
   step: () => Promise<void>
@@ -111,6 +114,10 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
   // scheduler defers its `node-completed` until the loop exits (like forEach),
   // so the beam tracking below needs no special loop handling.
   const [runningNodeIds, setRunningNodeIds] = useState<Set<string>>(new Set())
+  // Node ids that have COMPLETED since the last play — a yellow "just finished"
+  // frame stays on them (a progress marker, handy while paused). Cleared on the
+  // next play / resume; a node that re-runs drops out of the set while it runs.
+  const [completedNodeIds, setCompletedNodeIds] = useState<Set<string>>(new Set())
   const [edgeTokens, setEdgeTokens] = useState<Map<string, number>>(new Map())
   const [pendingInputs, setPendingInputs] = useState<PendingUserInput[]>([])
   const [runLog, setRunLog] = useState<ScenarioLogEntry[]>([])
@@ -144,6 +151,10 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
   // box invoked once per `forEach` item). Reference-count them so the beam
   // stays lit until the LAST occurrence finishes, not the first.
   const beamCountRef = useRef<Map<string, number>>(new Map())
+  // True only between `run-paused` and the next `run-resumed`/end. A box earns
+  // the yellow "just finished" frame ONLY if its completion lands while paused
+  // — i.e. it was the in-flight box AT the pause, not one finished earlier.
+  const pausedRef = useRef(false)
   const clearBeamTimers = useCallback(() => {
     for (const t of beamRemovalTimersRef.current.values()) clearTimeout(t)
     beamRemovalTimersRef.current.clear()
@@ -167,8 +178,10 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
           topRunIdRef.current = event.runId ?? null
           setRunId(event.runId ?? null)
           setState('running')
+          pausedRef.current = false
           clearBeamTimers()
           setRunningNodeIds(new Set())
+          setCompletedNodeIds(new Set())
           setEdgeTokens(new Map())
           // Clear the previous run's logs the moment a new run starts, so the
           // inspector panel doesn't show stale entries until the first poll.
@@ -180,22 +193,31 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
       switch (event.type) {
         case 'run-paused':
           setState('paused')
+          // From now until resume, a box that finishes was the one running at
+          // the pause → it'll earn the yellow frame.
+          pausedRef.current = true
           break
         case 'run-resumed':
           setState('running')
+          pausedRef.current = false
+          // Resuming = the next "play": wipe the yellow just-finished frames.
+          setCompletedNodeIds(new Set())
           break
         case 'run-completed':
           setState('completed')
+          pausedRef.current = false
           clearBeamTimers()
           setRunningNodeIds(new Set())
           break
         case 'run-cancelled':
           setState('cancelled')
+          pausedRef.current = false
           clearBeamTimers()
           setRunningNodeIds(new Set())
           break
         case 'run-failed':
           setState('failed')
+          pausedRef.current = false
           clearBeamTimers()
           setRunningNodeIds(new Set())
           break
@@ -210,6 +232,20 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
             beamCountRef.current.set(id, count)
             if (count === 1) beamStartRef.current.set(id, Date.now())
             setRunningNodeIds((prev) => (prev.has(id) ? prev : new Set(prev).add(id)))
+            // A box starting while paused means we STEPPED forward — the front
+            // advanced, so wipe the previous yellow frames (only the box about
+            // to finish stays the "current" one). Outside a pause, just drop
+            // this box's own leftover frame (it's running again).
+            if (pausedRef.current) {
+              setCompletedNodeIds((prev) => (prev.size === 0 ? prev : new Set()))
+            } else {
+              setCompletedNodeIds((prev) => {
+                if (!prev.has(id)) return prev
+                const next = new Set(prev)
+                next.delete(id)
+                return next
+              })
+            }
           }
           break
         }
@@ -221,6 +257,7 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
             beamCountRef.current.set(id, count)
             // Other occurrences of this box are still running — keep it lit.
             if (count > 0) break
+            const completedOk = event.type === 'node-completed'
             const removeNow = (): void => {
               beamRemovalTimersRef.current.delete(id)
               beamStartRef.current.delete(id)
@@ -231,6 +268,11 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
                 next.delete(id)
                 return next
               })
+              // Yellow frame only for a successful completion that is STILL
+              // paused at beam-end — the box that was running at the pause.
+              // Re-checked live (not captured) so a resume during the beam's
+              // min-duration hold doesn't leave a straggler frame.
+              if (completedOk && pausedRef.current) setCompletedNodeIds((prev) => (prev.has(id) ? prev : new Set(prev).add(id)))
             }
             const elapsed = Date.now() - (beamStartRef.current.get(id) ?? Date.now())
             if (elapsed >= MIN_BEAM_MS) {
@@ -304,14 +346,18 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
     return () => { cancelled = true; clearInterval(interval) }
   }, [runId, state])
 
-  const start = useCallback(async (scenarioId: string, params?: Record<string, unknown>): Promise<void> => {
+  const start = useCallback(async (scenarioId: string, params?: Record<string, unknown>, startPaused?: boolean): Promise<void> => {
     const b = bridge()
     if (!b?.scenarioEngineStart) return
-    const { runId: newRunId } = await b.scenarioEngineStart(scenarioId, params)
+    const { runId: newRunId } = await b.scenarioEngineStart(scenarioId, params, startPaused)
     // Latch the top-level runId so node/run events gate to this run.
     topRunIdRef.current = newRunId
     setRunId(newRunId)
-    setState('running')
+    // Armed in step mode → paused; otherwise running. (The engine also emits
+    // run-started + run-paused, but set it here so it's right regardless of
+    // event-vs-await ordering.)
+    setState(startPaused === true ? 'paused' : 'running')
+    pausedRef.current = startPaused === true
     // DON'T reset the animation state (runningNodeIds / edgeTokens / runLog)
     // here. The `run-started` event already cleared it — and crucially does so
     // BEFORE any `node-started`. Clearing AFTER this `await` would wipe the
@@ -360,5 +406,5 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
 
   const clearRunLog = useCallback((): void => { setRunLog([]) }, [])
 
-  return { state, runId, runningNodeIds, edgeTokens, pendingInputs, runLog, clearRunLog, start, pause, resume, step, stop, resolveUserInput, cancelUserInput }
+  return { state, runId, runningNodeIds, completedNodeIds, edgeTokens, pendingInputs, runLog, clearRunLog, start, pause, resume, step, stop, resolveUserInput, cancelUserInput }
 }

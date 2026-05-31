@@ -1548,6 +1548,16 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
           : n
       )
     }
+    // Yellow "just finished" frame: nodes the engine completed since the last
+    // play — but ONLY shown while the run is PAUSED (it's a "where did I pause"
+    // cue, not a running trail). Set/clear per node; unchanged nodes keep their
+    // ref (no needless React Flow churn).
+    const showFinished = engine.state === 'paused'
+    mapped = mapped.map((n) => {
+      const want = showFinished && engine.completedNodeIds.has(n.id)
+      if (want === (n.data.justFinished === true)) return n
+      return { ...n, data: { ...n.data, justFinished: want } }
+    })
     // Read-only while running: flag each node for the inert-body CSS and drop
     // the config / header-menu writers so no edit can commit even via keyboard.
     if (locked) {
@@ -1565,7 +1575,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
       )
     }
     return mapped
-  }, [nodes, engine.runningNodeIds, locked, flash])
+  }, [nodes, engine.runningNodeIds, engine.completedNodeIds, engine.state, locked, flash])
 
   // Wire-ports for the link-drag "Add" submenu — the port the link filter
   // computed for the (folded) request / sub-scenario kinds, when each is
@@ -1643,6 +1653,14 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
         onEnginePause={() => { void engine.pause() }}
         onEngineResume={() => { void engine.resume() }}
         onEngineStep={() => { void engine.step() }}
+        onEngineStepStart={() => {
+          // Launch armed in step mode (paused at the start), then advance one
+          // step so the first action runs straight away.
+          void (async () => {
+            await engine.start(scenario.id, {}, true)
+            await engine.step()
+          })()
+        }}
         onEngineStop={() => { void engine.stop() }}
       />
       <ReactFlow

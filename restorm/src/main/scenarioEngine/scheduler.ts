@@ -170,6 +170,9 @@ export class Scheduler {
     if (opts.maxActivations !== undefined) this.maxActivations = opts.maxActivations
     this.state = opts.startPaused === true ? 'paused' : 'running'
     this.emit({ type: 'run-started', runId: this.runId, scenarioId: this.scenario.id, at: now() })
+    // Launched in step mode: surface the paused state so observers (the editor
+    // toolbar) know the run is armed at the start, ready to step.
+    if (opts.startPaused === true) this.emit({ type: 'run-paused', runId: this.runId, at: now() })
     this.logRunBoundary('start')
     this.seedRoots(opts.params ?? {}, opts.interactive === true)
     this.tick()

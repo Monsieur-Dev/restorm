@@ -30,9 +30,129 @@
 }
 .scn-inspector-toolbar {
   display: flex;
+  align-items: center;
   gap: 6px;
   padding: 6px 8px;
   flex: 0 0 auto;
+}
+
+/* Run button — reuses the old node-header "play" design: a bigger green disc
+ * with a white ring + drop shadow, standing PROUD of the compact debug/step/
+ * stop buttons. It overflows the toolbar row (negative margin on its Button
+ * container) so the toolbar keeps its original height. Green = runnable, grey =
+ * disabled, amber = running (offers Pause). */
+/* Round Stop (smaller, red) + round Play sit together at the RIGHT edge of the
+ * toolbar — debug/step stay on the left. Stop carries the `auto` left margin so
+ * the [stop][play] pair is pushed right as a group; Play follows it. Both
+ * overflow the row (negative block margins) so the toolbar keeps its height. */
+/* Each button is wrapped in a `.header-hover-tooltip` (inline-flex span) for its
+ * ECUI hover tooltip, so the toolbar's flex items are those wrappers — the
+ * order / overflow rules target them (not the inner `.button-container`). */
+.scn-inspector-toolbar > .header-hover-tooltip:has(.scn-inspector-stop-round) {
+  order: 1;
+  /* `auto` left pushes the [stop][step][play] trio right; the right margin
+   * opens a gap before the next disc. */
+  margin: -5px 8px -5px auto;
+  z-index: 2;
+}
+.scn-inspector-toolbar > .header-hover-tooltip:has(.scn-inspector-step-round) {
+  order: 2;
+  margin: -5px 8px -5px 0;
+  z-index: 2;
+}
+.scn-inspector-toolbar > .header-hover-tooltip:has(.scn-inspector-run-round) {
+  order: 3;
+  margin: -8px 0;
+  z-index: 2;
+}
+/* Step — same disc as Stop (27px, white ring, shadow) but blue. */
+.scn-inspector-step-round.button.text-button {
+  width: 27px;
+  height: 27px;
+  min-width: 27px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  background: #3b82f6;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.scn-inspector-step-round.button.text-button:hover { background: #2563eb; }
+.scn-inspector-step-round.button.text-button.disabled {
+  background: #6b7280;
+  opacity: 0.55;
+}
+.scn-inspector-step-round .codicon {
+  color: #fff !important;
+  font-size: 14px !important;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  /* Nudge the step glyph 1px up-left to sit visually centred in the disc. */
+  transform: translate(-1px, -1px);
+}
+.scn-inspector-stop-round.button.text-button {
+  width: 27px;
+  height: 27px;
+  min-width: 27px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  background: #ef4444;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.scn-inspector-stop-round.button.text-button:hover { background: #dc2626; }
+.scn-inspector-stop-round.button.text-button.disabled {
+  background: #6b7280;
+  opacity: 0.55;
+}
+.scn-inspector-stop-round .codicon {
+  color: #fff !important;
+  font-size: 14px !important;
+  line-height: 1;
+  /* Center the glyph box, then nudge the `debug-stop` square up-left 1px — its
+   * codicon glyph sits a touch low-and-right inside its em box. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  transform: translate(-0.5px, -0.75px);
+}
+.scn-inspector-run-round.button.text-button {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  background: #22c55e;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.scn-inspector-run-round.button.text-button:hover { background: #16a34a; }
+.scn-inspector-run-round.button.text-button.disabled {
+  background: #6b7280;
+  opacity: 0.55;
+}
+.scn-inspector-run-round.scn-inspector-run-round-active.button.text-button { background: #eab308; }
+.scn-inspector-run-round.scn-inspector-run-round-active.button.text-button:hover { background: #d99e07; }
+.scn-inspector-run-round .codicon {
+  color: #fff !important;
+  font-size: 20px !important;
 }
 .scn-inspector-sep {
   border-top: 1px solid var(--widget-border, #454545);
@@ -327,6 +447,15 @@
  * legible even when an error keeps the border red. */
 .scn-node-selected .scn-node-header {
   background: var(--scenarioNode-headerBackgroundSelected, #2d5070);
+}
+
+/* Yellow frame on an action that JUST finished — a run-progress marker left
+ * behind once the running beam ends (so a paused run keeps the "where was I"
+ * cue). Cleared on the next play/resume, or when the node re-runs. Placed
+ * after the selected/error rules so the trail stays visible on top of them. */
+.scn-node.scn-node-finished {
+  border-color: var(--scn-flow-signal, #facc15);
+  box-shadow: 0 0 0 2px var(--scn-flow-signal, #facc15), 0 4px 14px rgba(0, 0, 0, 0.4);
 }
 
 /* Read-only while the scenario runs: the box body + notes are inert so no

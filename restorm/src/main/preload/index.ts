@@ -888,8 +888,8 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.invoke('scenario:node-result', scenarioId, nodeId) as Promise<Record<string, unknown> | null>,
     /** Full-scenario engine (Phase 2): start a run end-to-end. Returns
      * a runId the caller uses for subsequent pause / step / abort. */
-    scenarioEngineStart: (scenarioId: string, params?: Record<string, unknown>): Promise<{ runId: string }> =>
-      ipcRenderer.invoke('scenario:engine:start', scenarioId, params) as Promise<{ runId: string }>,
+    scenarioEngineStart: (scenarioId: string, params?: Record<string, unknown>, startPaused?: boolean): Promise<{ runId: string }> =>
+      ipcRenderer.invoke('scenario:engine:start', scenarioId, params, startPaused) as Promise<{ runId: string }>,
     scenarioEnginePause: (runId: string): Promise<{ ok: boolean }> =>
       ipcRenderer.invoke('scenario:engine:pause', runId) as Promise<{ ok: boolean }>,
     scenarioEngineResume: (runId: string): Promise<{ ok: boolean }> =>

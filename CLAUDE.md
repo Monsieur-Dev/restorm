@@ -128,6 +128,14 @@ The playbook is authoritative for: file layout, the three hard rules (UI reuse, 
 
 The matching PR template at [`.github/PULL_REQUEST_TEMPLATE/protocol.md`](.github/PULL_REQUEST_TEMPLATE/protocol.md) bundles the checklist — append `?template=protocol.md` to the PR URL when opening the PR.
 
+## Tooltips on ergonomic components
+
+For the hover label of **any** ergonomic component that accepts one (ECUI `Button`, `InputBox`, `Toggle`, `SelectBox`, icon buttons, …) — not just buttons — use the **electron-core-ui Tooltip**. In restorm, wrap the component in the `HeaderHoverTooltip` (`src/renderer/src/components/MainView/HeaderHoverTooltip.tsx`), which owns the hover state and anchors the ECUI `Tooltip`.
+
+**Keep `aria-label` / `ariaLabel`** — it's invisible (screen-reader name only), so it stays for accessibility. What you must NOT use for the hover text is the **`title`** attribute (`options.title` on the ECUI `Button`, or any `title=`): `title` renders the browser's native, unstyled tooltip, inconsistent with the rest of the app. Recipe: **keep `aria-label` (a11y) + drop `title` (native tooltip) + add the ECUI Tooltip (styled hover).** Never strip `aria-label` to "replace it with a tooltip" — that just removes the accessible name.
+
+`HeaderHoverTooltip` renders an `inline-flex` `<span>` wrapper. When the button lives in a flex layout whose CSS targets `.button-container` (order / margin / overflow), re-target those rules onto `.header-hover-tooltip` (the new flex item), e.g. `.toolbar > .header-hover-tooltip:has(.my-button-class) { … }`.
+
 ## Documentation
 
 Do not create documentation files (`/docs/`, README, etc.) unless explicitly requested.

@@ -29,6 +29,10 @@ export interface ScenarioNodeBoxData extends Record<string, unknown> {
    * box flashes its outline. The changing token remounts the flash overlay
    * so the animation replays even on a repeat click of the same node. */
   flashToken?: number
+  /** Set by the editor while a run is paused/active: the node completed since
+   * the last play, so it wears a yellow "just finished" frame. Cleared on the
+   * next play / resume, or when the node re-runs. */
+  justFinished?: boolean
   inputs: ScenarioPort[]
   outputs: ScenarioPort[]
   /** Run status for the live-execution overlay; populated when Phase 2
@@ -366,7 +370,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
   return (
     <div
       ref={boxRef}
-      className={`scn-node ${selected ? 'scn-node-selected' : ''} ${collapsed ? 'scn-node-collapsed' : ''} ${boxInError ? 'scn-node-error' : ''} ${data.locked ? 'scn-node-locked' : ''}`}
+      className={`scn-node ${selected ? 'scn-node-selected' : ''} ${collapsed ? 'scn-node-collapsed' : ''} ${boxInError ? 'scn-node-error' : ''} ${data.locked ? 'scn-node-locked' : ''} ${data.justFinished === true ? 'scn-node-finished' : ''}`}
       data-testid={`scn-node-${data.kind}`}
       data-animating={animating ? 'true' : 'false'}
       data-running={running ? 'true' : 'false'}
