@@ -324,27 +324,27 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
   const [showErrors, setShowErrors] = useState(false)
   const errBadgeRef = useRef<HTMLSpanElement>(null)
 
-  // Placeholder "running" animation — the BorderBeam orbits the box border
-  // continuously between Run and Pause (both wired on the inspector toolbar).
-  // The trail always finishes its current lap before unmounting, so a Pause
-  // click in the middle of a lap still completes that lap.
+  // "Running" animation — the BorderBeam orbits the box border continuously
+  // while the engine reports the node as running. The trail always finishes
+  // its current lap before unmounting, so the node finishing mid-lap still
+  // completes that lap.
   //
   // State machine:
-  //   - `data.fakeRunActive` (parent-owned): true between the user's Run
-  //     and Pause clicks. Single source of truth; toggled by the editor.
-  //   - `running` (local): drives the BorderBeam mount/unmount. Goes true
-  //     in sync with `fakeRunActive`; goes false only on the next
+  //   - `data.running` (engine-owned): true while the scheduler has this node
+  //     in flight. Single source of truth; injected by the editor.
+  //   - `running` (local): drives the BorderBeam mount/unmount. Goes true in
+  //     sync with `data.running`; goes false only on the next
   //     `animationiteration` after `wantsStopRef` flips true.
-  //   - `wantsStopRef` flips true the moment `fakeRunActive` goes false,
+  //   - `wantsStopRef` flips true the moment `data.running` goes false,
   //     so the unmount waits for lap completion.
   const BEAM_LAP_S = 1.5
   // `useReducer` instead of `useState` sidesteps the React Compiler's
   // set-state-in-effect rule for this prop-driven transition.
   const [running, dispatchRunning] = useReducer((_state: boolean, on: boolean) => on, false)
   const wantsStopRef = useRef(false)
-  const fakeRunActive = data['fakeRunActive'] === true
+  const engineRunning = data['running'] === true
   useEffect(() => {
-    if (fakeRunActive) {
+    if (engineRunning) {
       // Start (or stay) running. rAF ensures the mount lands before the
       // browser paints the trail, so we don't miss the first iteration.
       const raf = requestAnimationFrame(() => { dispatchRunning(true) })
@@ -356,7 +356,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
     // its lap first.
     wantsStopRef.current = true
     return undefined
-  }, [fakeRunActive])
+  }, [engineRunning])
   const onAnimationIteration = useCallback((e: React.AnimationEvent<HTMLDivElement>) => {
     // Only react to the BorderBeam's own keyframe, not other animations the
     // box might host (the collapse/expand transitions, the spinning status

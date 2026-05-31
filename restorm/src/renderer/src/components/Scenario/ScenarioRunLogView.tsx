@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { stringify as yamlStringify } from 'yaml'
 import { Button, ListView, Toggle, Tooltip, type ListViewItemData } from 'electron-core-ui/renderer'
 import { buildScenarioPathTree } from './scenarioPathTree'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
@@ -98,6 +99,10 @@ const LogMessageCell: React.FC<{ ts: string; message: string; scenarioId?: strin
 const LEVELS = ['debug', 'info', 'warn', 'error'] as const
 type LogLevel = typeof LEVELS[number]
 
+// Status-dot colour rendered as an emoji for the plain-text (YAML) copy, so a
+// pasted log keeps the level cue without the styled `<span>` dot.
+const LEVEL_EMOJI: Record<LogLevel, string> = { debug: '⚪', info: '🔵', warn: '🟠', error: '🔴' }
+
 /** Minimal log-entry shape the view needs — satisfied by both the live
  * `ScenarioLogEntry` (inspector) and the persisted `ScenarioRunLogEntry`
  * (run history). */
@@ -133,6 +138,10 @@ export interface ScenarioRunLogViewProps {
 }
 
 const logTs = (ts: string): string => (ts.length >= 23 ? ts.slice(11, 23) : ts)
+
+// Full, human-readable timestamp for the copied log (`YYYY-MM-DD HH:MM:SS.mmm`)
+// — unlike the row's time-only display, a pasted log may be read across days.
+const logDate = (ts: string): string => (ts.length >= 23 ? ts.slice(0, 23).replace('T', ' ') : ts)
 
 // Defensive: a log `message` may arrive as a non-string (e.g. a typed
 // ValueType `{ type, value }`); never hand a raw object to React.
@@ -190,11 +199,17 @@ export const ScenarioRunLogView: React.FC<ScenarioRunLogViewProps> = ({ logs, te
   })
 
   const copyLogs = (): void => {
-    const text = visibleLogs.map((e) => {
-      let dataStr = ''
-      if (e.data !== undefined) { try { dataStr = ` ${JSON.stringify(e.data)}` } catch { dataStr = '' } }
-      return `${logTs(e.ts)} [${(e.level ?? 'info').toUpperCase()}] ${asText(e.message)}${dataStr}`
-    }).join('\n')
+    // Serialize each entry as a YAML object: a single `message` line
+    // ("<level-emoji> [<date>] <text>") and, when present, the structured
+    // `data` object as a second property — far more human-readable when pasted
+    // than the previous inline-JSON-per-line form.
+    const entries = visibleLogs.map((e) => {
+      const level = e.level ?? 'info'
+      const message = `${LEVEL_EMOJI[level]} [${logDate(e.ts)}] ${asText(e.message)}`
+      return e.data !== undefined ? { message, data: e.data } : { message }
+    })
+    let text: string
+    try { text = yamlStringify(entries) } catch { text = '' }
     void navigator.clipboard.writeText(text).then(() => {
       setCopied(true)
       setTimeout(() => { setCopied(false) }, 1500)

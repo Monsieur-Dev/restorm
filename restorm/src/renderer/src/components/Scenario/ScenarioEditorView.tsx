@@ -615,42 +615,6 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
     })
   }, [setNodes, setEdges, persist])
 
-  // Toggle the (visual-only) "running" animation around a node — bumped by
-  // the inspector toolbar's Run/Pause button. The flag lives on the node's
-  // `data.fakeRunActive`; `ScenarioNodeBoxBase` watches it: on flip-true it
-  // mounts the BorderBeam (which loops infinitely), on flip-false it sets
-  // an internal "wants stop" ref + waits for the next `animationiteration`
-  // event before unmounting, guaranteeing the trail always finishes its
-  // current lap regardless of when Pause was clicked.
-  const onTriggerFakeRun = useCallback((nodeId: string) => {
-    setNodes((curr) => {
-      const target = curr.find((x) => x.id === nodeId)
-      if (!target) return curr
-      const nextActive = target.data['fakeRunActive'] !== true
-      return curr.map((fn) =>
-        fn.id === nodeId ? { ...fn, data: { ...fn.data, fakeRunActive: nextActive } } : fn
-      )
-    })
-  }, [setNodes])
-
-  // Debug button — one-shot trigger of a travelling beam along every
-  // outgoing edge of the previewed node. Each click bumps a monotonically
-  // increasing `data.fakeDebugToken`; the edge layer mirrors the bump into
-  // `edge.data.debugToken` for every edge whose `source === nodeId`, and
-  // the custom edge component plays a single lap of its bezier path per
-  // bump. No play/pause toggle — the animation always ends on its own,
-  // representing one data / event crossing the link.
-  const onTriggerFakeDebug = useCallback((nodeId: string) => {
-    setNodes((curr) => {
-      const target = curr.find((x) => x.id === nodeId)
-      if (!target) return curr
-      const prevToken = typeof target.data['fakeDebugToken'] === 'number' ? target.data['fakeDebugToken'] : 0
-      return curr.map((fn) =>
-        fn.id === nodeId ? { ...fn, data: { ...fn.data, fakeDebugToken: prevToken + 1 } } : fn
-      )
-    })
-  }, [setNodes])
-
   // Right-click on a header: select that node (deselect the rest) AND open
   // the node context menu at the cursor.
   const onHeaderContextMenu = useCallback((nodeId: string, x: number, y: number) => {
@@ -1484,33 +1448,26 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
       staticData,
       ...(wiredFetches.length > 0 ? { wiredFetches } : {}),
       ...(listOp ? { listOp } : {}),
-      ...(n.data['fakeRunActive'] === true ? { fakeRunActive: true } : {}),
+      ...(n.data['running'] === true ? { running: true } : {}),
       ...(runnable ? { runnable: true } : {}),
       ...(syntheticPreview ? { syntheticPreview } : {}),
       ...(openItemId && openItemKind ? { openItemId, openItemKind } : {})
     }
   }, [nodes, edges, t, derivedPortsOf, staticPreviewApi, resolveBoundItem, resolveSyntheticPreview])
 
-  // Edges propagated to React Flow with a transient `data.debugToken`
-  // mirroring the source node's `fakeDebugToken` AND any edge that
-  // received a token bump from the engine (`engine.edgeTokens`). The
-  // token's identity (number value) drives the custom edge
-  // component's single-shot travelling beam.
+  // Edges propagated to React Flow with a transient `data.debugToken` mirroring
+  // any edge that received a token bump from the engine (`engine.edgeTokens`).
+  // The token's identity (number value) drives the custom edge component's
+  // single-shot travelling beam as data crosses the link during a run.
   const presentationalEdges = useMemo(() => {
-    const debugTokenBySource = new Map<string, number>()
-    for (const n of nodes) {
-      const tok = n.data['fakeDebugToken']
-      if (typeof tok === 'number' && tok > 0) debugTokenBySource.set(n.id, tok)
-    }
     const engineEdgeTokens = engine.edgeTokens
-    if (debugTokenBySource.size === 0 && engineEdgeTokens.size === 0) return edges
+    if (engineEdgeTokens.size === 0) return edges
     return edges.map((e) => {
-      const tok = e.source ? debugTokenBySource.get(e.source) : undefined
       const engineTok = engineEdgeTokens.get(e.id)
-      if (tok === undefined && engineTok === undefined) return e
-      return { ...e, data: { ...(e.data ?? {}), debugToken: tok ?? engineTok } }
+      if (engineTok === undefined) return e
+      return { ...e, data: { ...(e.data ?? {}), debugToken: engineTok } }
     })
-  }, [nodes, edges, engine.edgeTokens])
+  }, [edges, engine.edgeTokens])
 
   // Set of `input` node ids that have an incoming edge — they're
   // skipped by the up-front prompt because they depend on upstream
@@ -1535,16 +1492,15 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
   const startPendingInputs = engine.pendingInputs.filter((p) => !inputsWithPredecessors.has(p.nodeId))
   const midRunPendingInput = engine.pendingInputs.find((p) => inputsWithPredecessors.has(p.nodeId))
 
-  // Inject `data.fakeRunActive` for every node the engine reports as
-  // currently running. The BorderBeam already reacts to that flag —
-  // re-using it keeps the visual identical between fake-run + real
-  // engine without per-source styling.
+  // Inject `data.running` for every node the engine reports as currently
+  // running — `ScenarioNodeBoxBase` reacts to that flag to mount/unmount the
+  // BorderBeam trail.
   const presentationalNodes = useMemo(() => {
     let mapped = nodes
     if (engine.runningNodeIds.size > 0) {
       mapped = mapped.map((n) =>
-        engine.runningNodeIds.has(n.id) && n.data['fakeRunActive'] !== true
-          ? { ...n, data: { ...n.data, fakeRunActive: true } }
+        engine.runningNodeIds.has(n.id) && n.data['running'] !== true
+          ? { ...n, data: { ...n.data, running: true } }
           : n
       )
     }
@@ -1635,8 +1591,6 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
         errorBoxCount={nodeErrors.size}
         onFocusNode={focusAndFlashNode}
         previewNode={previewNode}
-        onTriggerFakeRun={onTriggerFakeRun}
-        onTriggerFakeDebug={onTriggerFakeDebug}
         {...(onOpenItem ? { onOpenItem } : {})}
         engineState={engine.state}
         runLog={engine.runLog}

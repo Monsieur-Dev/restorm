@@ -8,9 +8,8 @@
  * the editor can drive node animations + edge beams off them.
  *
  * The animations themselves live on the node / edge components and
- * react to flags carried via `data.runningStatus` /
- * `data.fakeDebugToken` — this hook flips those flags in response to
- * incoming events.
+ * react to flags carried via the node's running flag + the edge's
+ * `data.debugToken` — this hook flips those in response to incoming events.
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
