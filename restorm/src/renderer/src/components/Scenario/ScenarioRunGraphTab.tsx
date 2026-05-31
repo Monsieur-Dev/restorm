@@ -89,6 +89,7 @@ export const ScenarioRunGraphTab: React.FC<ScenarioRunGraphTabProps> = ({ scenar
             key={current.id}
             scenario={current as unknown as Scenario}
             interactive
+            panMode="classic"
             focusNode={focusNode}
             testId="scenario-run-graph-detail-canvas"
           />

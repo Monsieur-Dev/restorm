@@ -498,4 +498,74 @@ export function registerScenarioTools(mcp: McpService): void {
       return jsonReply({ deletedEdgeId: edgeId })
     }
   )
+
+  mcp.registerTool(
+    'set_edge_selector',
+    {
+      title: 'Set or clear an edge selector',
+      description:
+        'Set the JSON selector applied to the value as it flows along an edge (e.g. ' +
+        '`data.cooldown.total_seconds`), reshaping it in transit. Pass an empty string to clear it ' +
+        '(identity passthrough). Edge ids come from `get_scenario`. This is the standalone editor for an ' +
+        'EXISTING edge — `connect_scenario_nodes` already takes a `selector` at creation time. Returns the edge.',
+      inputSchema: {
+        scenarioId: z.string().min(1),
+        edgeId: z.string().min(1).describe('Edge id (from get_scenario).'),
+        selector: z.string().describe('JSON selector to apply; empty string clears it.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const id = typeof args['scenarioId'] === 'string' ? args['scenarioId'] : ''
+      const scenario = findScenario(id)
+      if (!scenario) return errorReply(`No scenario with id ${id}`)
+      const edgeId = typeof args['edgeId'] === 'string' ? args['edgeId'] : ''
+      const edge = scenario.edges.find((e) => e.id === edgeId)
+      if (!edge) return errorReply(`No edge ${edgeId} in scenario ${id}`)
+      const selector = typeof args['selector'] === 'string' ? args['selector'] : ''
+      if (selector === '') delete edge.selector
+      else edge.selector = selector
+      broadcastScenario(scenario)
+      return jsonReply({ edgeId: edge.id, from: edge.from, to: edge.to, ...(edge.selector !== undefined ? { selector: edge.selector } : {}) })
+    }
+  )
+
+  mcp.registerTool(
+    'define_param',
+    {
+      title: 'Define a scenario input parameter',
+      description:
+        'Declare a named run parameter by adding an `input` node — the engine seeds `run_scenario` params ' +
+        'into input nodes BY NAME (there is no separate param store, so a param IS an input node). ' +
+        '`valueType` is the typed default `{ type, value }` used when no value is supplied; `required` marks ' +
+        'it required for calling scenarios (`runScenario`). Convenience over `create_scenario_node` with ' +
+        '`kind: "input"`. Returns the created node.',
+      inputSchema: {
+        scenarioId: z.string().min(1),
+        name: z.string().min(1).describe('Param name — the key callers pass to run_scenario.'),
+        valueType: z.record(z.string(), z.unknown()).optional().describe('Typed default `{ type, value }` used when no value is supplied.'),
+        required: z.boolean().optional().describe('Mark the param required for calling scenarios (runScenario).'),
+        x: z.coerce.number().optional().describe('X position in graph coords (default 0).'),
+        y: z.coerce.number().optional().describe('Y position in graph coords (default 0).')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const id = typeof args['scenarioId'] === 'string' ? args['scenarioId'] : ''
+      const scenario = findScenario(id)
+      if (!scenario) return errorReply(`No scenario with id ${id}`)
+      const name = typeof args['name'] === 'string' ? args['name'] : ''
+      if (name === '') return errorReply('name is required')
+      const config: Record<string, unknown> = { name }
+      if (args['valueType'] && typeof args['valueType'] === 'object' && !Array.isArray(args['valueType'])) {
+        config['valueType'] = args['valueType']
+      }
+      if (args['required'] === true) config['required'] = true
+      const x = typeof args['x'] === 'number' ? args['x'] : 0
+      const y = typeof args['y'] === 'number' ? args['y'] : 0
+      const { inputs, outputs } = defaultPortsForKind('input')
+      const node: ScenarioNode = { id: randomUUID(), kind: 'input', config, inputs, outputs, position: { x, y } }
+      scenario.nodes.push(node)
+      broadcastScenario(scenario)
+      return jsonReply({ nodeId: node.id, kind: 'input', name, position: node.position })
+    }
+  )
 }

@@ -43,7 +43,7 @@ interface FakeScenario {
   tags: string[]
   params: unknown[]
   nodes: { id: string; kind: string; config: Record<string, unknown>; inputs: { id: string }[]; outputs: { id: string }[]; position: { x: number; y: number }; note?: string; color?: string; collapsed?: boolean }[]
-  edges: { id: string; from: { nodeId: string; portId: string }; to: { nodeId: string; portId: string } }[]
+  edges: { id: string; from: { nodeId: string; portId: string }; to: { nodeId: string; portId: string }; selector?: string }[]
 }
 
 function makeScenario(): FakeScenario {
@@ -199,5 +199,43 @@ describe('scenario MCP tools', () => {
     const res = parse(mcp.invoke('get_scenario', { scenarioId: 's1' }))
     expect(res['id']).toBe('s1')
     expect((res['nodes'] as unknown[]).length).toBe(1)
+  })
+
+  it('set_edge_selector sets then clears an existing edge selector', () => {
+    const a = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'now' }))
+    const b = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'log' }))
+    const edge = parse(mcp.invoke('connect_scenario_nodes', { scenarioId: 's1', fromNodeId: a['nodeId'], fromPortId: 'value', toNodeId: b['nodeId'], toPortId: 'data' }))
+    const set = parse(mcp.invoke('set_edge_selector', { scenarioId: 's1', edgeId: edge['edgeId'], selector: 'data.cooldown.total_seconds' }))
+    expect(set['selector']).toBe('data.cooldown.total_seconds')
+    expect(scenario.edges[0]?.selector).toBe('data.cooldown.total_seconds')
+    // Empty string clears it.
+    const cleared = parse(mcp.invoke('set_edge_selector', { scenarioId: 's1', edgeId: edge['edgeId'], selector: '' }))
+    expect(cleared['selector']).toBeUndefined()
+    expect(scenario.edges[0]?.selector).toBeUndefined()
+  })
+
+  it('set_edge_selector rejects an unknown edge id', () => {
+    expect(mcp.invoke('set_edge_selector', { scenarioId: 's1', edgeId: 'nope', selector: 'x' }).isError).toBe(true)
+  })
+
+  it('define_param adds an input node carrying the param name, default + required', () => {
+    const res = parse(mcp.invoke('define_param', {
+      scenarioId: 's1',
+      name: 'character',
+      valueType: { type: 'string', value: 'Glaude' },
+      required: true
+    }))
+    expect(res['kind']).toBe('input')
+    expect(res['name']).toBe('character')
+    expect(scenario.nodes).toHaveLength(1)
+    const node = scenario.nodes[0]
+    expect(node?.kind).toBe('input')
+    expect(node?.config['name']).toBe('character')
+    expect(node?.config['required']).toBe(true)
+    expect(node?.config['valueType']).toEqual({ type: 'string', value: 'Glaude' })
+  })
+
+  it('define_param rejects an empty name', () => {
+    expect(mcp.invoke('define_param', { scenarioId: 's1', name: '' }).isError).toBe(true)
   })
 })

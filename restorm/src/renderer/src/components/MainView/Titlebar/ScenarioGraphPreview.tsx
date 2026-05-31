@@ -42,6 +42,14 @@ export interface ScenarioGraphPreviewProps {
   /** Pan/zoom to + flash a node (e.g. a run-history log click). The
    * `token` retriggers the framing + flash even for the same node. */
   focusNode?: { nodeId: string; token: number } | null
+  /** How dragging the canvas pans it.
+   * - `'pointerLock'` (default): the cursor disappears for the drag so a
+   *   hover popover never registers a `mouseleave` mid-pan — right for the
+   *   search tooltip, where leaving the bubble would dismiss it.
+   * - `'classic'`: plain React-Flow drag-pan + plain-wheel zoom (the live
+   *   editor's feel) — right for a docked panel like the run-history graph,
+   *   where there's no popover to keep alive. */
+  panMode?: 'pointerLock' | 'classic'
 }
 
 // Reuse the live editor's `ScenarioNodeView` so the preview shows the
@@ -54,7 +62,7 @@ const FIT_VIEW_OPTIONS = { padding: 0.15 } as const
 /** Thin wrapper around React Flow that exposes the same pointer-lock
  * pan + Ctrl-wheel zoom semantics as `ModelGraph`. Kept as an inner
  * component so the wrapper can be guarded by `<ReactFlowProvider>`. */
-const ScenarioGraphPreviewCanvas: React.FC<{ scenario: Scenario; testId?: string; interactive: boolean; focusNode?: { nodeId: string; token: number } | null }> = ({ scenario, testId, interactive, focusNode }) => {
+const ScenarioGraphPreviewCanvas: React.FC<{ scenario: Scenario; testId?: string; interactive: boolean; focusNode?: { nodeId: string; token: number } | null; panMode: 'pointerLock' | 'classic' }> = ({ scenario, testId, interactive, focusNode, panMode }) => {
   // Build the React-Flow shapes synchronously — there's no async layout
   // to wait for (positions come straight off the persisted scenario).
   // Inject the flash token into the focused node so its box pulses (the
@@ -116,9 +124,11 @@ const ScenarioGraphPreviewCanvas: React.FC<{ scenario: Scenario; testId?: string
 
   // Pointer-lock pan — same recipe as `ModelGraph`. Cursor disappears
   // for the drag, so the popover never registers a `mouseleave`
-  // mid-pan. Skipped entirely for a static (non-interactive) thumbnail.
+  // mid-pan. Skipped for a static (non-interactive) thumbnail AND for
+  // `panMode === 'classic'`, where React Flow's own drag-pan is used
+  // instead (a docked panel has no hover popover to keep alive).
   useEffect(() => {
-    if (!interactive) return
+    if (!interactive || panMode !== 'pointerLock') return
     const wrapper = wrapperRef.current
     if (!wrapper) return
     const pane = wrapper.querySelector<HTMLElement>('.react-flow__pane')
@@ -163,7 +173,7 @@ const ScenarioGraphPreviewCanvas: React.FC<{ scenario: Scenario; testId?: string
       document.removeEventListener('pointerlockchange', onLockChange)
       if (document.pointerLockElement === pane) document.exitPointerLock()
     }
-  }, [getViewport, setViewport, interactive])
+  }, [getViewport, setViewport, interactive, panMode])
 
   return (
     <div
@@ -182,10 +192,14 @@ const ScenarioGraphPreviewCanvas: React.FC<{ scenario: Scenario; testId?: string
         maxZoom={2}
         panOnScroll={false}
         zoomOnScroll={interactive}
-        zoomActivationKeyCode={['Control', 'Meta']}
+        // Classic: plain wheel zooms (the editor's feel). Pointer-lock:
+        // Ctrl/⌘+wheel, so a stray wheel inside the search bubble doesn't zoom.
+        zoomActivationKeyCode={panMode === 'classic' ? null : ['Control', 'Meta']}
         zoomOnPinch={interactive}
-        preventScrolling={false}
-        panOnDrag={false}
+        // Classic captures the wheel for zoom; pointer-lock lets the page scroll.
+        preventScrolling={interactive && panMode === 'classic'}
+        // Classic uses React Flow's own drag-pan; pointer-lock wires its own.
+        panOnDrag={interactive && panMode === 'classic'}
         nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}
@@ -200,7 +214,7 @@ const ScenarioGraphPreviewCanvas: React.FC<{ scenario: Scenario; testId?: string
   )
 }
 
-export const ScenarioGraphPreview: React.FC<ScenarioGraphPreviewProps> = ({ scenario, testId, interactive = true, focusNode = null }) => {
+export const ScenarioGraphPreview: React.FC<ScenarioGraphPreviewProps> = ({ scenario, testId, interactive = true, focusNode = null, panMode = 'pointerLock' }) => {
   // The reused live `ScenarioNodeView` resolves bound requests /
   // sub-scenarios through `ScenarioBoundResolverContext` to display
   // the correct badge + name. Without it, a request box would fall
@@ -215,7 +229,7 @@ export const ScenarioGraphPreview: React.FC<ScenarioGraphPreviewProps> = ({ scen
   return (
     <ScenarioBoundResolverContext.Provider value={resolveBoundItem}>
       <ReactFlowProvider>
-        <ScenarioGraphPreviewCanvas scenario={scenario} interactive={interactive} focusNode={focusNode} {...(testId !== undefined ? { testId } : {})} />
+        <ScenarioGraphPreviewCanvas scenario={scenario} interactive={interactive} focusNode={focusNode} panMode={panMode} {...(testId !== undefined ? { testId } : {})} />
       </ReactFlowProvider>
     </ScenarioBoundResolverContext.Provider>
   )
