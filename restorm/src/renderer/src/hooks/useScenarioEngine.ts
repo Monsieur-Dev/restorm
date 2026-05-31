@@ -322,6 +322,13 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
             // Other occurrences of this box are still running — keep it lit.
             if (count > 0) break
             const completedOk = event.type === 'node-completed'
+            // Did this box finish WHILE paused? Captured now (at completion),
+            // not re-read at beam-removal: a fast sub-chain that drained just
+            // BEFORE the pause has its delayed beam-removal fire DURING the
+            // pause, and a live re-check would wrongly frame the whole chain
+            // (a box AND its successor) yellow. Only the box still in flight at
+            // the pause completes while paused.
+            const completedWhilePaused = pausedRef.current
             const removeNow = (): void => {
               beamRemovalTimersRef.current.delete(id)
               beamStartRef.current.delete(id)
@@ -332,11 +339,11 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
                 next.delete(id)
                 return next
               })
-              // Yellow frame only for a successful completion that is STILL
-              // paused at beam-end — the box that was running at the pause.
-              // Re-checked live (not captured) so a resume during the beam's
-              // min-duration hold doesn't leave a straggler frame.
-              if (completedOk && pausedRef.current) setCompletedNodeIds((prev) => (prev.has(id) ? prev : new Set(prev).add(id)))
+              // Yellow frame only for a box that finished while paused AND is
+              // still paused now: the captured flag rejects boxes done before
+              // the pause; the live `pausedRef` re-check drops it on a resume
+              // during the beam's min-duration hold (no straggler frame).
+              if (completedOk && completedWhilePaused && pausedRef.current) setCompletedNodeIds((prev) => (prev.has(id) ? prev : new Set(prev).add(id)))
             }
             const elapsed = Date.now() - (beamStartRef.current.get(id) ?? Date.now())
             if (elapsed >= MIN_BEAM_MS) {

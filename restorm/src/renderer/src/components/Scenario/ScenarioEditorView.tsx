@@ -345,10 +345,11 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   // Keyboard shortcuts — only the FOCUSED workbench tab handles them, so e.g.
   // F5 launches just this scenario, never every open one. Ignored while typing
   // in a field / Monaco. App scheme (not VS Code's): F5 run · F6 debug · F7
-  // step · F8 stop · Pause pause · F9 toggle breakpoint(s) on the selection.
-  // F5/F6/F7/F8 mirror the inspector toolbar buttons (ScenarioInspectorPanel's
-  // onRun/onDebug/onStep/onStop) — keep the run-control logic here in lockstep
-  // with those handlers.
+  // step · F8 stop · Pause pause/resume · F9 toggle breakpoint(s).
+  // F5 LAUNCHES only — it never pauses a live run (the Pause key owns
+  // pause/resume, as a toggle). The inspector's play button still toggles
+  // run/pause, but the shortcut deliberately doesn't, so a double-tap of F5
+  // can't pause. F6/F7/F8 mirror the inspector handlers (onDebug/onStep/onStop).
   useEffect(() => {
     if (!isActiveTab) return undefined
     const onKey = (e: KeyboardEvent): void => {
@@ -358,9 +359,11 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       switch (e.key) {
         case 'F5':
           e.preventDefault()
-          if (engine.state === 'running') void engine.pause()
-          else if (engine.state === 'paused') void engine.resume()
-          else void engine.start(scenario.id, {}, false, [...breakpointIds], false)
+          // Launch only. A live run is left untouched — pausing is the Pause
+          // key's job, so hitting F5 twice can never pause.
+          if (engine.state !== 'running' && engine.state !== 'paused') {
+            void engine.start(scenario.id, {}, false, [...breakpointIds], false)
+          }
           break
         case 'F6':
           e.preventDefault()
@@ -382,7 +385,9 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
           break
         case 'Pause':
           e.preventDefault()
+          // Toggle: pause a running scenario, resume a paused one.
           if (engine.state === 'running') void engine.pause()
+          else if (engine.state === 'paused') void engine.resume()
           break
         case 'F9':
           e.preventDefault()
@@ -398,8 +403,15 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
 
   // Pan-zoom onto the node a debug run is paused at (breakpoint) or the box the
   // user just stepped into — only while paused, so a full-speed run isn't yanked
-  // around. The breakpoint target wins; otherwise follow the step front.
-  const debugFocusId = engine.pausedAtNodeId ?? engine.lastStartedNodeId
+  // around. On a breakpoint / step the engine names the exact node. On a PLAIN
+  // pause it doesn't, so aim at the frontier — the box that was in flight at the
+  // pause, i.e. the most recent one to finish WHILE paused (the same box that
+  // earns the yellow frame). `lastStartedNodeId` is wrong here: on a fan-out
+  // it's whichever sibling branch happened to fire last, not where we paused.
+  const frontierFocusId = engine.completedNodeIds.size > 0
+    ? [...engine.completedNodeIds][engine.completedNodeIds.size - 1]
+    : null
+  const debugFocusId = engine.pausedAtNodeId ?? frontierFocusId
   useEffect(() => {
     if (engine.state !== 'paused' || !debugFocusId || !getNode(debugFocusId)) return
     void fitView({ nodes: [{ id: debugFocusId }], duration: 400, maxZoom: 1.2 })
