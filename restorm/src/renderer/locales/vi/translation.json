@@ -824,6 +824,7 @@
     },
     "filter": {
       "items": "mục",
+      "rejected": "bị loại",
       "kept": "đã giữ",
       "keepWhere": "giữ nếu"
     },

@@ -825,6 +825,7 @@
     },
     "filter": {
       "items": "items",
+      "rejected": "rejected",
       "kept": "kept",
       "keepWhere": "keep where"
     },

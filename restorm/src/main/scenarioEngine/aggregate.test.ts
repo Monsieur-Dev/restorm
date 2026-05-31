@@ -109,14 +109,15 @@ describe('AC3 — Aggregate scope-close collection', () => {
     expect(result).toBe('a,b,c,d')
   })
 
-  it('default error policy keeps the partial result and lists the failed indices', async () => {
+  it('errors the run when an iteration produces nothing (strict — no silent partial)', async () => {
     const scenario = aggGraph({ op: 'join', separator: ',' })
     let result: unknown
     const executors = new Map<string, NodeExecutor>([
       ['src', () => ({ outputs: [{ port: 'value', value: ['a', 'b', 'c', 'd'] }] })],
       ['fe', forEachExecutor],
-      // Iterations 1 ('b') and 3 ('d') contribute NOTHING — they produce no
-      // token on `items`, so the aggregate records them as failed indices.
+      // Iterations 1 ('b') and 3 ('d') contribute NOTHING → missing → the
+      // aggregate throws (its `error` port is unwired here, so the whole run
+      // fails). No silently-wrong partial sum.
       ['body', (act) => {
         const item = act.inputs['item'] as string
         return item === 'b' || item === 'd' ? { outputs: [] } : { outputs: [{ port: 'value', value: item }] }
@@ -126,28 +127,41 @@ describe('AC3 — Aggregate scope-close collection', () => {
     ])
     const s = new Scheduler({ scenario, executors })
     await s.run()
-    expect(s.status().state).toBe('completed')
-    // Partial: only the contributing iterations, in index order.
-    expect(result).toBe('a,c')
-    // Error list surfaced as a warn entry naming the missing indices.
-    const warn = s.readLog().find((e) => e.level === 'warn' && e.nodeId === 'agg')
-    expect(warn).toBeDefined()
-    expect((warn?.data as { missingIndices: number[] }).missingIndices).toEqual([1, 3])
+    expect(s.status().state).toBe('failed')
+    expect(result).toBeUndefined()
   })
 
-  it('counts only the iterations that produced a result under the default policy', async () => {
-    const scenario = aggGraph({ op: 'count' })
-    let result: unknown
+  it('routes the missing-item error to the aggregate\'s `error` port when wired', async () => {
+    // Same missing-item case, but the aggregate's `error` port is wired to a
+    // rescue node → the run RECOVERS instead of failing.
+    const scenario = buildScenario(
+      [
+        { id: 'src', kind: 'now', outputs: ['value'] },
+        { id: 'fe', kind: 'forEach', inputs: ['items'], outputs: ['each', 'done'], config: { parallelism: { enabled: true, count: 8 } } },
+        { id: 'body', kind: 'transform', inputs: ['item'], outputs: ['value'] },
+        { id: 'agg', kind: 'aggregate', inputs: ['items', 'in'], outputs: ['result', 'error'], config: { op: 'count' } },
+        { id: 'rescue', kind: 'object', inputs: ['err'], outputs: ['value'] }
+      ],
+      [
+        { from: ['src', 'value'], to: ['fe', 'items'] },
+        { from: ['fe', 'each'], to: ['body', 'item'] },
+        { from: ['body', 'value'], to: ['agg', 'items'] },
+        { from: ['fe', 'done'], to: ['agg', 'in'] },
+        { from: ['agg', 'error'], to: ['rescue', 'err'] }
+      ]
+    )
+    let rescued = false
     const executors = new Map<string, NodeExecutor>([
       ['src', () => ({ outputs: [{ port: 'value', value: ['a', 'b', 'c'] }] })],
       ['fe', forEachExecutor],
       ['body', (act) => (act.inputs['item'] === 'b' ? { outputs: [] } : { outputs: [{ port: 'value', value: act.inputs['item'] }] })],
       ['agg', aggregateExecutor],
-      ['sink', (act) => { result = act.inputs['result']; return { outputs: [] } }]
+      ['rescue', () => { rescued = true; return { outputs: [] } }]
     ])
     const s = new Scheduler({ scenario, executors })
     await s.run()
-    expect(result).toBe(2)
+    expect(s.status().state).toBe('completed')
+    expect(rescued).toBe(true)
   })
 
   it('aggregates per outer iteration when wired to a nested inner loop\'s `done`', async () => {
@@ -188,12 +202,11 @@ describe('AC3 — Aggregate scope-close collection', () => {
     expect([...results].sort()).toEqual([3, 7])
   })
 
-  it('reports (does not silently mis-reduce) a ready-made array wired into a scope-close aggregate', async () => {
+  it('errors (does not silently mis-reduce) a ready-made array wired into a scope-close aggregate', async () => {
     // Contract violation: the aggregate is a scope-close collector (it has a
     // `done` trigger) yet `items` is fed a ROOT-scope array. The array is not
-    // mistaken for the trigger; the loop's `done` fires once and the default
-    // policy surfaces the empty collection as a warn — detectable, not a
-    // silently wrong reduce.
+    // mistaken for the trigger; the loop's `done` fires once with an empty
+    // collection vs total 2 → strict fail (not a silently wrong reduce).
     const scenario = buildScenario(
       [
         { id: 'arr', kind: 'now', outputs: ['value'] },
@@ -222,25 +235,10 @@ describe('AC3 — Aggregate scope-close collection', () => {
     ])
     const s = new Scheduler({ scenario, executors })
     await s.run()
-    expect(s.status().state).toBe('completed')
-    // Fires exactly once (the root array does NOT spawn a second activation).
+    // Fires exactly once (the root array does NOT spawn a second activation),
+    // then throws on the empty-vs-total mismatch → the run fails.
     expect(fired).toBe(1)
-    expect(result).toBe(0)
-    const warn = s.readLog().find((e) => e.level === 'warn' && e.nodeId === 'agg')
-    expect(warn).toBeDefined()
-  })
-
-  it('`fail` policy fails the run when an iteration produces nothing', async () => {
-    const scenario = aggGraph({ op: 'join', separator: ',', errorPolicy: 'fail' })
-    const executors = new Map<string, NodeExecutor>([
-      ['src', () => ({ outputs: [{ port: 'value', value: ['a', 'b', 'c'] }] })],
-      ['fe', forEachExecutor],
-      ['body', (act) => (act.inputs['item'] === 'b' ? { outputs: [] } : { outputs: [{ port: 'value', value: act.inputs['item'] }] })],
-      ['agg', aggregateExecutor],
-      ['sink', () => ({ outputs: [] })]
-    ])
-    const s = new Scheduler({ scenario, executors })
-    await s.run()
     expect(s.status().state).toBe('failed')
+    expect(result).toBeUndefined()
   })
 })

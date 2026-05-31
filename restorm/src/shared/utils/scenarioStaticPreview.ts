@@ -251,11 +251,14 @@ export function applyListOp(
     const field = typeof cfg['field'] === 'string' ? cfg['field'] : ''
     const op = typeof cfg['operator'] === 'string' ? cfg['operator'] : '='
     const compareTo = concreteValue(cfg['value'])
-    const kept = items.filter((item) => {
+    const kept: unknown[] = []
+    const rejected: unknown[] = []
+    for (const item of items) {
       const left = field ? resolveSelectorPath(item, field) : item
-      return compareValues(op, left, compareTo) === true
-    })
-    return { kept }
+      if (compareValues(op, left, compareTo) === true) kept.push(item)
+      else rejected.push(item)
+    }
+    return { kept, rejected }
   }
   if (node.kind === 'aggregate') {
     const op = typeof cfg['op'] === 'string' ? cfg['op'] : 'count'

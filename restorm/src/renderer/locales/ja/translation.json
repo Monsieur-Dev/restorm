@@ -824,6 +824,7 @@
     },
     "filter": {
       "items": "項目",
+      "rejected": "除外",
       "kept": "保持",
       "keepWhere": "条件で保持"
     },

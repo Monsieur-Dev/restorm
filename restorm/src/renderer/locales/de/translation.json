@@ -825,6 +825,7 @@
     },
     "filter": {
       "items": "Elemente",
+      "rejected": "aussortiert",
       "kept": "behalten",
       "keepWhere": "behalten wenn"
     },

@@ -78,7 +78,7 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // `items` has a value-selector fallback in the editor (like forEach), so it
   // isn't a hard-required port; the predicate (field/operator/value) lives in
   // config. No header trigger — data-driven (runs once `items` resolves).
-  filter: { inputs: [{ id: 'items', name: 'items', dataType: 'json' }], outputs: [{ id: 'kept', name: 'kept', dataType: 'json', flow: 'value' }] },
+  filter: { inputs: [{ id: 'items', name: 'items', dataType: 'json' }], outputs: [{ id: 'kept', name: 'kept', dataType: 'json', flow: 'value' }, { id: 'rejected', name: 'rejected', dataType: 'json', flow: 'value' }] },
   // Loops. `for` is a numeric-range forEach: `from` / `to` / `step` carry
   // inline value fallbacks (like the `if` operands), so they aren't hard
   // required; it fans out the range over `each` (the current number) and fires

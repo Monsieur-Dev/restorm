@@ -824,6 +824,7 @@
     },
     "filter": {
       "items": "item",
+      "rejected": "ditolak",
       "kept": "disimpan",
       "keepWhere": "simpan jika"
     },

@@ -78,7 +78,8 @@ export const FilterNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
     }
   ]
   const right: ScenarioNodeCell[] = [
-    { id: 'kept', label: t('scenario.filter.kept', 'kept'), port: { id: 'kept', type: 'source' } }
+    { id: 'kept', label: t('scenario.filter.kept', 'kept'), port: { id: 'kept', type: 'source' } },
+    { id: 'rejected', label: t('scenario.filter.rejected', 'rejected'), port: { id: 'rejected', type: 'source' } }
   ]
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
 }

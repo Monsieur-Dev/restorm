@@ -825,6 +825,7 @@
     },
     "filter": {
       "items": "itens",
+      "rejected": "descartados",
       "kept": "mantidos",
       "keepWhere": "manter se"
     },

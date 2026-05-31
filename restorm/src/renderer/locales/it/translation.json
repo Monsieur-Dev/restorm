@@ -825,6 +825,7 @@
     },
     "filter": {
       "items": "elementi",
+      "rejected": "scartati",
       "kept": "mantenuti",
       "keepWhere": "mantieni se"
     },

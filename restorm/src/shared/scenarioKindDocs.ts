@@ -67,7 +67,7 @@ export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
     config: { property: 'Item field to pick.', expression: 'Optional Handlebars template applied per item.' }
   },
   filter: {
-    summary: 'Keeps the items of a collection that satisfy a predicate, on `kept`.',
+    summary: 'Partitions a collection by a predicate: matches on `kept`, non-matches on `rejected` (so dropped items can be routed, not lost).',
     config: { property: 'Item field to test.', operator: 'lt | lte | eq | gte | gt | ne | contains', value: 'Value to compare against.' }
   },
   wait: {

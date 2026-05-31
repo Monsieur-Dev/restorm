@@ -824,6 +824,7 @@
     },
     "filter": {
       "items": "항목",
+      "rejected": "제외됨",
       "kept": "유지됨",
       "keepWhere": "조건 유지"
     },

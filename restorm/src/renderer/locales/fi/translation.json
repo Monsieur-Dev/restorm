@@ -825,6 +825,7 @@
     },
     "filter": {
       "items": "kohteet",
+      "rejected": "hylätyt",
       "kept": "säilytetyt",
       "keepWhere": "säilytä jos"
     },

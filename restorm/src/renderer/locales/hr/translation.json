@@ -826,6 +826,7 @@
     },
     "filter": {
       "items": "stavke",
+      "rejected": "odbačeni",
       "kept": "zadržani",
       "keepWhere": "zadrži ako"
     },

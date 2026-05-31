@@ -1920,6 +1920,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, pro
         isOpen={noteEditorNodeId !== null}
         onClose={() => { setNoteEditorNodeId(null) }}
         size="dialog"
+        scopeToSelector=".restorm-workbench-tab"
         data-testid="scenario-node-note-modal"
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 420, height: 300, boxSizing: 'border-box' }}>

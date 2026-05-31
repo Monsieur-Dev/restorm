@@ -6,7 +6,7 @@
 
 import Handlebars from 'handlebars'
 import type { NodeExecutor } from '../types'
-import { literalConfigItems, concreteValue } from '../../../shared/utils/scenarioStaticPreview'
+import { literalConfigItems, concreteValue, applyListOp } from '../../../shared/utils/scenarioStaticPreview'
 import { compareValues, resolveOperand } from '../conditionEval'
 
 /** Arithmetic node: `op(a, b)` with op from config. */
@@ -174,33 +174,28 @@ export const assertExecutor: NodeExecutor = (act, ctx) => {
   return { outputs: [{ port: ok ? 'then' : 'else', value }] }
 }
 
-/** Map node: applies a (statically-validated) transform to each item.
- * For now the transform is `(item) => item[property]` selected by
- * config; future iterations will allow a template / sub-expression. */
+/** Map node: applies the node's per-item Handlebars `expression` to each item,
+ * producing `mapped`. Delegates to the SAME `applyListOp` the inspector preview
+ * uses, so runtime and preview can never drift (the node persists `expression`,
+ * not a bare property key). */
 export const mapExecutor: NodeExecutor = (act, ctx) => {
-  const cfg = ctx.node.config as { property?: string }
   const items = Array.isArray(act.inputs['items']) ? act.inputs['items'] : (literalConfigItems(ctx.node.config) ?? [])
-  const prop = cfg.property
-  const value = prop
-    ? items.map((it) => (it as Record<string, unknown> | null)?.[prop])
-    : items
-  return { outputs: [{ port: 'mapped', value }] }
+  const out = applyListOp(ctx.node, items) ?? {}
+  const mapped = Array.isArray(out['mapped']) ? out['mapped'] : items
+  return { outputs: [{ port: 'mapped', value: mapped }] }
 }
 
-/** Filter node: keeps items satisfying a comparator predicate. Operator
- * (toggle symbols or names) + compare value come from config; the value
- * is an inline typed value resolved to a primitive. */
+/** Filter node: partitions items by the predicate `field <operator> value` —
+ * matches on `kept`, non-matches on `rejected` (so dropped items can be routed,
+ * not lost). Delegates to the SAME `applyListOp` the inspector preview uses, so
+ * runtime and preview can never drift (the node persists `field`, not the
+ * legacy `property`). */
 export const filterExecutor: NodeExecutor = (act, ctx) => {
-  const cfg = ctx.node.config as { property?: string; op?: string; operator?: string; value?: unknown }
   const items = Array.isArray(act.inputs['items']) ? act.inputs['items'] : (literalConfigItems(ctx.node.config) ?? [])
-  const op = cfg.operator ?? cfg.op
-  const cmp = concreteValue(cfg.value)
-  const prop = cfg.property
-  const value = items.filter((it) => {
-    const v: unknown = prop !== undefined ? (it as Record<string, unknown> | null)?.[prop] : it
-    return compareValues(op, v, cmp)
-  })
-  return { outputs: [{ port: 'kept', value }] }
+  const out = applyListOp(ctx.node, items) ?? {}
+  const kept = Array.isArray(out['kept']) ? out['kept'] : []
+  const rejected = Array.isArray(out['rejected']) ? out['rejected'] : []
+  return { outputs: [{ port: 'kept', value: kept }, { port: 'rejected', value: rejected }] }
 }
 
 /** Template / transform node: applies a Handlebars template to the
@@ -216,13 +211,14 @@ export const transformExecutor: NodeExecutor = (act, ctx) => {
   // Emitting a bare value here would leave that selector pointing at a
   // missing `.result` and downstream nodes would receive `undefined`.
   if (tpl === '') return { outputs: [{ port: 'out', value: { result: act.inputs['value'] } }] }
-  // Template context: the wired inputs + run variables. When the `value`
-  // input is a plain object, also spread its keys so a template can reference
-  // a field directly (`{{name}}` for an input emitting `{ name }`), not only
-  // `{{value.name}}`.
-  const v = act.inputs['value']
-  const base = v !== null && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : {}
-  const result = renderHandlebars(tpl, { ...base, ...act.inputs, ...Object.fromEntries(ctx.variables) })
+  // Render with the `value` input ITSELF as the Handlebars context — exactly
+  // like the inspector preview (`staticScenarioPreview`'s transform case). An
+  // object's keys are accessible directly (`{{name}}`); a primitive (e.g. after
+  // an edge selector picked `.name` → "Glaude") is `{{.}}` / `{{this}}`. Using
+  // the value as the context — not a `{ value, …inputs }` WRAPPER — is what
+  // makes `{{.}}` resolve to the value instead of rendering the wrapper object
+  // as "[object Object]". Keeps runtime and preview identical.
+  const result = renderHandlebars(tpl, act.inputs['value'] ?? {})
   return { outputs: [{ port: 'out', value: { result } }] }
 }
 
@@ -238,7 +234,7 @@ function expressionTemplate(config: unknown): string {
   return ''
 }
 
-function renderHandlebars(template: string, ctx: Record<string, unknown>): string {
+function renderHandlebars(template: string, ctx: unknown): string {
   return Handlebars.compile(template)(ctx)
 }
 

@@ -825,6 +825,7 @@
     },
     "filter": {
       "items": "öğeler",
+      "rejected": "elenenler",
       "kept": "tutulanlar",
       "keepWhere": "şu durumda tut"
     },

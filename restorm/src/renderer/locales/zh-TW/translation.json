@@ -824,6 +824,7 @@
     },
     "filter": {
       "items": "項目",
+      "rejected": "已排除",
       "kept": "保留",
       "keepWhere": "保留條件"
     },

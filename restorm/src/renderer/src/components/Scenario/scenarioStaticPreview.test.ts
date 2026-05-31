@@ -200,7 +200,7 @@ describe('staticScenarioPreview', () => {
       operator: '=',
       value: { type: 'string', value: 'x' }
     })
-    expect(staticScenarioPreview(fStr, [fStr], [])).toEqual({ kept: ['x', 'x'] })
+    expect(staticScenarioPreview(fStr, [fStr], [])).toEqual({ kept: ['x', 'x'], rejected: ['y', 'z'] })
     // Marker to keep TS happy with unused setup
     expect(items.length).toBe(3)
     expect(input.id).toBe('i')

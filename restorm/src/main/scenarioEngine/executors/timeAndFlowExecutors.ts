@@ -147,30 +147,21 @@ export const forEachExecutor: NodeExecutor = (act, ctx) => {
  *  - **array reduce** — when `items` is a ready-made array (wired from a
  *    response body, config, …), it's reduced directly (no meta).
  *
- * Error policy (streaming only), from `config.errorPolicy`:
- *  - `partial` (default) — reduce over the contributions that arrived and
- *    surface the failed iteration indices as a `warn` log entry.
- *  - `fail` — throw when any iteration produced nothing (routes to the
- *    node's `error` branch, or fails the run if unwired).
+ * Strict on missing contributions: if any iteration produced NOTHING on
+ * `items`, the aggregate throws → routes to its `error` port (or fails the
+ * run if unwired). There is no silent "partial" reduce — a sum that looks
+ * right but silently dropped a failed upstream route is a trap. Tolerance is
+ * the user's explicit job upstream (filter out bad items, or route a failed
+ * iteration to a default value so it still contributes).
  */
 export const aggregateExecutor: NodeExecutor = (act, ctx) => {
-  const cfg = ctx.node.config as { op?: 'count' | 'sum' | 'min' | 'max' | 'average' | 'join'; field?: string; separator?: string; errorPolicy?: 'partial' | 'fail' }
+  const cfg = ctx.node.config as { op?: 'count' | 'sum' | 'min' | 'max' | 'average' | 'join'; field?: string; separator?: string }
   const items: unknown[] = Array.isArray(act.inputs['items'])
     ? act.inputs['items']
     : (literalConfigItems(ctx.node.config) ?? [])
   const meta = act.inputs['__aggregate'] as { total: number; missingIndices: number[] } | undefined
   if (meta && meta.missingIndices.length > 0) {
-    const policy = cfg.errorPolicy ?? 'partial'
-    if (policy === 'fail') {
-      throw new Error(`aggregate: ${meta.missingIndices.length} of ${meta.total} iteration(s) produced no result (indices ${meta.missingIndices.join(', ')})`)
-    }
-    ctx.log({
-      level: 'warn',
-      nodeId: ctx.node.id,
-      scope: act.scope,
-      message: `aggregate: ${meta.missingIndices.length}/${meta.total} iteration(s) produced no result — partial result kept`,
-      data: { missingIndices: meta.missingIndices }
-    })
+    throw new Error(`aggregate: ${meta.missingIndices.length} of ${meta.total} iteration(s) produced no result (indices ${meta.missingIndices.join(', ')})`)
   }
   const op = cfg.op ?? 'count'
   const field = cfg.field

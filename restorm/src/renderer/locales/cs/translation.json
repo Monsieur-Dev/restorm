@@ -827,6 +827,7 @@
     },
     "filter": {
       "items": "položky",
+      "rejected": "vyřazené",
       "kept": "zachované",
       "keepWhere": "zachovat když"
     },

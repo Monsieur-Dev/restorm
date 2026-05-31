@@ -15,16 +15,18 @@ import {
 } from './pureExecutors'
 import type { ExecResult, NodeExecutor } from '../types'
 
-/** Run a synchronous pure executor with a minimal activation + context. */
+/** Run a synchronous pure executor with a minimal activation + context. Pass a
+ * real `kind` for executors that dispatch on it (map / filter via applyListOp). */
 function runPure(
   executor: NodeExecutor,
   config: Record<string, unknown>,
   inputs: Record<string, unknown>,
-  variables = new Map<string, unknown>()
+  variables = new Map<string, unknown>(),
+  kind = 'x'
 ): ExecResult {
-  const act = { nodeId: 'n', kind: 'x', scope: [], inputs } as never
+  const act = { nodeId: 'n', kind, scope: [], inputs } as never
   const ctx = {
-    node: { id: 'n', kind: 'x', config, inputs: [], outputs: [], position: { x: 0, y: 0 } },
+    node: { id: 'n', kind, config, inputs: [], outputs: [], position: { x: 0, y: 0 } },
     variables,
     log: () => undefined
   } as never
@@ -64,7 +66,7 @@ describe('transformExecutor', () => {
     expect(out).toEqual({ port: 'out', value: { result: 'Glaude part en guerre' } })
   })
 
-  it('spreads an object input so a template can reference its fields directly', () => {
+  it('renders an object value\'s fields directly (value IS the context)', () => {
     const out = runTransform(
       { expression: { type: 'expression', value: 'hi {{name}}' } },
       { value: { name: 'Bob' } }
@@ -72,8 +74,19 @@ describe('transformExecutor', () => {
     expect(out.value).toEqual({ result: 'hi Bob' })
   })
 
-  it('still accepts a bare-string expression', () => {
-    const out = runTransform({ expression: 'x={{value}}' }, { value: 'y' })
+  it('renders `{{.}}` as the scalar value (e.g. after an edge selector), not "[object Object]"', () => {
+    // Repro of the inspector-preview-vs-runtime bug: an Input emits `{name}`,
+    // the edge selector picks `.name` → the value reaching the transform is the
+    // scalar "Glaude"; `{{.}}` must render it, matching the preview.
+    const out = runTransform(
+      { expression: { type: 'expression', value: '{{.}} est bien reposé' } },
+      { value: 'Glaude' }
+    )
+    expect(out.value).toEqual({ result: 'Glaude est bien reposé' })
+  })
+
+  it('accepts a bare-string expression, with the value as context', () => {
+    const out = runTransform({ expression: 'x={{.}}' }, { value: 'y' })
     expect(out.value).toEqual({ result: 'x=y' })
   })
 
@@ -166,30 +179,36 @@ describe('assertExecutor', () => {
 })
 
 describe('mapExecutor', () => {
-  it('projects each item onto the configured property', () => {
-    const out = runPure(mapExecutor, { property: 'n' }, { items: [{ n: 1 }, { n: 2 }, { n: 3 }] })
-    expect(out.outputs).toEqual([{ port: 'mapped', value: [1, 2, 3] }])
+  it('renders the per-item Handlebars expression (same as the preview)', () => {
+    const out = runPure(mapExecutor, { expression: { type: 'expression', value: '{{n}}' } }, { items: [{ n: 1 }, { n: 2 }, { n: 3 }] }, new Map(), 'map')
+    // Handlebars renders to strings (the preview shape).
+    expect(out.outputs).toEqual([{ port: 'mapped', value: ['1', '2', '3'] }])
   })
 
-  it('passes items through unchanged when no property is set', () => {
-    const out = runPure(mapExecutor, {}, { items: [1, 2] })
+  it('passes items through unchanged when no expression is set', () => {
+    const out = runPure(mapExecutor, {}, { items: [1, 2] }, new Map(), 'map')
     expect(out.outputs[0]?.value).toEqual([1, 2])
   })
 
   it('falls back to the configured items when `items` is unwired', () => {
-    const out = runPure(mapExecutor, { property: 'n', items: { type: 'enumList', value: [{ n: 5 }, { n: 6 }] } }, {})
-    expect(out.outputs[0]?.value).toEqual([5, 6])
+    const out = runPure(mapExecutor, { items: { type: 'enumList', value: [{ n: 5 }, { n: 6 }] } }, {}, new Map(), 'map')
+    expect(out.outputs[0]?.value).toEqual([{ n: 5 }, { n: 6 }])
   })
 })
 
 describe('filterExecutor', () => {
-  it('keeps the items satisfying the comparator predicate', () => {
+  it('partitions items into kept (match) and rejected (non-match)', () => {
     const out = runPure(
       filterExecutor,
-      { property: 'n', operator: 'gt', value: { type: 'number', value: 1 } },
-      { items: [{ n: 0 }, { n: 2 }, { n: 3 }] }
+      { operator: '>', value: { type: 'numeric', value: 1 } },
+      { items: [0, 2, 3] },
+      new Map(),
+      'filter'
     )
-    expect(out.outputs).toEqual([{ port: 'kept', value: [{ n: 2 }, { n: 3 }] }])
+    expect(out.outputs).toEqual([
+      { port: 'kept', value: [2, 3] },
+      { port: 'rejected', value: [0] }
+    ])
   })
 })
 

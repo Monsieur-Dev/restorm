@@ -827,6 +827,7 @@
     },
     "filter": {
       "items": "elementy",
+      "rejected": "odrzucone",
       "kept": "zachowane",
       "keepWhere": "zachowaj gdy"
     },
