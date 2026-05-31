@@ -486,6 +486,95 @@ describe('AC2 — loop termination via if + return edge', () => {
 })
 
 // ------------------------------------------------------------------
+// AC3 — ForEach re-fed by a cycle: hierarchical scopes don't leak
+// ------------------------------------------------------------------
+
+describe('AC3 — ForEach nested in a cycle', () => {
+  it('re-running the forEach from a back-edge keeps each outer iteration isolated', async () => {
+    // The pointed case from the design: a forEach whose `done` port loops
+    // back to re-drive it (a true graph cycle). `seed` kicks `tick` once;
+    // `tick` emits a fresh 2-item batch per outer iteration, then `stop`.
+    // The forEach fans the batch out to `writer`; when every item scope
+    // closes, `done` feeds back into `tick` → the NEXT outer iteration.
+    //
+    // Each outer iteration the forEach opens the SAME scope keys
+    // (`fe#0`, `fe#1`) because it lives at the root scope — so the test
+    // proves isolation comes from per-activation scope LIFECYCLE, not
+    // from distinct keys: despite the keys recurring, no item from one
+    // iteration bleeds into the next.
+    const ITERS = 3
+    const scenario = buildScenario(
+      [
+        { id: 'seed', kind: 'now', outputs: ['go'] },
+        { id: 'tick', kind: 'now', inputs: ['in'], outputs: ['batch', 'stop'] },
+        { id: 'fe', kind: 'forEach', inputs: ['items'], outputs: ['each', 'done'] },
+        { id: 'writer', kind: 'object', inputs: ['item'], outputs: ['value'] },
+        { id: 'sink', kind: 'object', inputs: ['done'], outputs: ['value'] }
+      ],
+      [
+        { from: ['seed', 'go'], to: ['tick', 'in'] },
+        { from: ['tick', 'batch'], to: ['fe', 'items'] },
+        { from: ['fe', 'each'], to: ['writer', 'item'] },
+        // back-edge: a completed fan-out re-drives the cycle
+        { from: ['fe', 'done'], to: ['tick', 'in'] },
+        { from: ['tick', 'stop'], to: ['sink', 'done'] }
+      ]
+    )
+    const writes: { item: number; scope: string }[] = []
+    let sinkRuns = 0
+    let outer = 0
+    const executors = new Map<string, NodeExecutor>([
+      ['seed', () => ({ outputs: [{ port: 'go', value: 'start' }] })],
+      ['tick', () => {
+        if (outer >= ITERS) return { outputs: [{ port: 'stop', value: 'done' }] }
+        const base = outer * 10
+        outer += 1
+        return { outputs: [{ port: 'batch', value: [base, base + 1] }] }
+      }],
+      ['fe', (act) => ({
+        outputs: [],
+        scopeAction: { type: 'openForEach', items: Array.isArray(act.inputs['items']) ? act.inputs['items'] as unknown[] : [], parallel: true }
+      })],
+      ['writer', (act) => {
+        writes.push({
+          item: act.inputs['item'] as number,
+          scope: act.scope.map((f) => `${f.scopeNodeId}#${f.index}`).join('/')
+        })
+        return { outputs: [] }
+      }],
+      ['sink', () => { sinkRuns += 1; return { outputs: [] } }]
+    ])
+    const s = new Scheduler({ scenario, executors })
+    await s.run()
+
+    // The cycle terminated cleanly via the `stop` branch — no safety net.
+    expect(s.status().state).toBe('completed')
+    expect(sinkRuns).toBe(1)
+
+    // Every batch was processed exactly once: 3 iterations × 2 items, the
+    // full set [0,1,10,11,20,21] with NO duplication (a leak would replay
+    // a prior iteration's items) and NO drops (a leak could swallow one).
+    expect(writes).toHaveLength(ITERS * 2)
+    expect(writes.map((w) => w.item).sort((a, b) => a - b)).toEqual([0, 1, 10, 11, 20, 21])
+
+    // Each outer iteration saw exactly its own two items — grouped by the
+    // tens digit, no cross-iteration contamination.
+    for (let k = 0; k < ITERS; k++) {
+      const inIter = writes.map((w) => w.item).filter((n) => Math.floor(n / 10) === k).sort((a, b) => a - b)
+      expect(inIter).toEqual([k * 10, k * 10 + 1])
+    }
+
+    // Despite living in a cycle, every writer ran in a depth-1 forEach
+    // child scope whose keys recur (fe#0 / fe#1) across iterations — the
+    // hierarchy re-alimente without the registry confusing two same-key
+    // scopes from different activations.
+    for (const w of writes) expect(w.scope).toMatch(/^fe#[01]$/)
+    expect(writes.filter((w) => w.scope === 'fe#0')).toHaveLength(ITERS)
+    expect(writes.filter((w) => w.scope === 'fe#1')).toHaveLength(ITERS)
+  })
+})
+
+// ------------------------------------------------------------------
 // AND-join barrier — several "ensuite" edges into one `in`
 // ------------------------------------------------------------------
 
