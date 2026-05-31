@@ -1,5 +1,5 @@
 import React from 'react'
-import type { NodeProps } from '@xyflow/react'
+import { useNodeConnections, type NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { ScenarioNameInput } from './ScenarioNameInput'
@@ -31,7 +31,15 @@ export const InputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
   const config = data.config ?? {}
   const name = typeof config['name'] === 'string' ? config['name'] : ''
   const nameInvalid = useScenarioFieldInvalid(id, 'name')
+  // When this scenario is called as a SUB-scenario, `required` marks the
+  // derived `param:<name>` port as mandatory on the parent's runScenario box
+  // (red until wired) — see `deriveRunScenarioPorts`.
   const required = config['required'] === true
+  // A no-trigger input runs at the very start, before any variable is set, so
+  // it can't reference one as its default → hide the Variables menu entirely.
+  // With a trigger it runs mid-flow, so variables are fair game EXCEPT its own
+  // name (an input referencing itself is meaningless).
+  const hasTrigger = useNodeConnections({ id, handleType: 'target', handleId: 'in' }).length > 0
   // `normalizeValueType` already returns a StringValue('') for an absent
   // config, so this both rehydrates a saved typed value and seeds the default.
   const value = normalizeValueType(config['valueType'])
@@ -66,7 +74,8 @@ export const InputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
                 value={value}
                 onChange={(next) => { data.onSetConfig?.(id, { valueType: serializeValueForPersistence(next) }) }}
                 valueTypeGroups={valueTypeGroups}
-                excludeTypes={['expression']}
+                excludeTypes={hasTrigger ? ['expression'] : ['expression', 'variable']}
+                {...(hasTrigger ? { excludeVariableName: name } : {})}
                 allowEnvironment
                 dataTestId="scn-input"
               />
@@ -83,7 +92,7 @@ export const InputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
                 onChange={(e) => { data.onSetConfig?.(id, { required: e.target.checked }) }}
                 data-testid="scn-input-required"
               />
-              <span>{t('scenario.input.required', 'Required')}</span>
+              <span>{t('scenario.input.required', 'Required by calling scenarios')}</span>
             </label>
           )
         }

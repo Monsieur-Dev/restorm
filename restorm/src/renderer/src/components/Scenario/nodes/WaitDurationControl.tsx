@@ -1,40 +1,36 @@
-import React, { useState } from 'react'
-
-/** Time units offered by the wait node's inline duration control. */
-export const WAIT_UNITS = ['ms', 's', 'min', 'h'] as const
-export type WaitUnit = (typeof WAIT_UNITS)[number]
+import React from 'react'
+import { InputBox } from 'electron-core-ui/renderer'
+import { WAIT_UNITS, type WaitUnit } from './waitUnits'
 
 export interface WaitDurationControlProps {
   value?: number
   unit?: WaitUnit
+  /** Render ONLY the unit toggle (no numeric field). Used when the
+   * `duration` port is wired: the value comes from upstream, but the
+   * unit still needs to say how to read it (s / ms / min / h). */
+  unitOnly?: boolean
   onValueChange?: (v: number) => void
   onUnitChange?: (u: WaitUnit) => void
 }
 
 /**
  * Inline duration editor for the `wait` node: a numeric field + a compact
- * unit toggle (ms / s / min / h). Shown only when no value is wired into the
- * node's `duration` input. Uncontrolled by default (local state); visual
- * only until the node config schema lands.
+ * unit toggle (ms / s / min / h). When `unitOnly` is set the numeric field is
+ * dropped and only the unit toggle shows — that's the wired case, where the
+ * value arrives on the `duration` port and the toggle declares its unit.
  */
-export const WaitDurationControl: React.FC<WaitDurationControlProps> = ({ value, unit, onValueChange, onUnitChange }) => {
-  const [internalValue, setInternalValue] = useState<string>(value != null ? String(value) : '1000')
-  const [internalUnit, setInternalUnit] = useState<WaitUnit>('ms')
-  const selectedUnit = unit ?? internalUnit
+export const WaitDurationControl: React.FC<WaitDurationControlProps> = ({ value, unit, unitOnly, onValueChange, onUnitChange }) => {
+  const selectedUnit: WaitUnit = unit ?? 'ms'
   return (
-    <div className="scn-wait-duration nodrag">
-      <input
-        type="number"
-        min={0}
-        className="scn-wait-input"
-        value={internalValue}
-        onMouseDown={(e) => { e.stopPropagation() }}
-        onChange={(e) => {
-          setInternalValue(e.target.value)
-          const n = Number(e.target.value)
-          if (!Number.isNaN(n)) onValueChange?.(n)
-        }}
-      />
+    <div className="scn-wait-duration nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
+      {unitOnly !== true && (
+        <InputBox
+          value={value != null ? String(value) : '1000'}
+          onChange={(next) => { const n = Number(next); if (!Number.isNaN(n)) onValueChange?.(n) }}
+          options={{ type: 'number', min: 0, ariaLabel: 'duration' }}
+          data-testid="scn-wait-duration"
+        />
+      )}
       <div className="scn-unit-toggle" role="radiogroup" aria-label="unit">
         {WAIT_UNITS.map((u) => (
           <button
@@ -42,7 +38,8 @@ export const WaitDurationControl: React.FC<WaitDurationControlProps> = ({ value,
             type="button"
             className={`scn-unit-option ${u === selectedUnit ? 'scn-unit-option-active' : ''}`}
             aria-pressed={u === selectedUnit}
-            onClick={(e) => { e.stopPropagation(); setInternalUnit(u); onUnitChange?.(u) }}
+            onMouseDown={(e) => { e.stopPropagation() }}
+            onClick={(e) => { e.stopPropagation(); onUnitChange?.(u) }}
           >
             {u}
           </button>

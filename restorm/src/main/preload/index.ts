@@ -859,6 +859,12 @@ contextBridge.exposeInMainWorld('restorm', {
     pushMcpActiveEnv: (payload: { envFolderId: string; envId: string | null }): void => {
       ipcRenderer.send('mcp:active-env-changed', payload)
     },
+    /** Push the resolved item-favorites for the active project so the MCP
+     * `list_favorites` tool can read them (the favorites store lives in the
+     * renderer). Called on mount + whenever favorites change. */
+    pushMcpFavorites: (payload: { projectUuid: string | null; favorites: { id: string; name: string; type: string }[] }): void => {
+      ipcRenderer.send('mcp:favorites-changed', payload)
+    },
     /** Push an open scenario editor's React-Flow-measured node rects (position
      * + size) to main, so the scenario MCP read tools can report box sizes
      * (size isn't persisted in the model). Lets an agent lay out a scenario
@@ -880,6 +886,49 @@ contextBridge.exposeInMainWorld('restorm', {
      * selector popover on a data link's receiving input. */
     getScenarioNodeResult: (scenarioId: string, nodeId: string): Promise<Record<string, unknown> | null> =>
       ipcRenderer.invoke('scenario:node-result', scenarioId, nodeId) as Promise<Record<string, unknown> | null>,
+    /** Full-scenario engine (Phase 2): start a run end-to-end. Returns
+     * a runId the caller uses for subsequent pause / step / abort. */
+    scenarioEngineStart: (scenarioId: string, params?: Record<string, unknown>, startPaused?: boolean, breakpoints?: string[], debug?: boolean): Promise<{ runId: string }> =>
+      ipcRenderer.invoke('scenario:engine:start', scenarioId, params, startPaused, breakpoints, debug) as Promise<{ runId: string }>,
+    scenarioEnginePause: (runId: string): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke('scenario:engine:pause', runId) as Promise<{ ok: boolean }>,
+    scenarioEngineResume: (runId: string): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke('scenario:engine:resume', runId) as Promise<{ ok: boolean }>,
+    scenarioEngineStep: (runId: string): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke('scenario:engine:step', runId) as Promise<{ ok: boolean }>,
+    scenarioEngineSetDebug: (runId: string, enabled: boolean): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke('scenario:engine:set-debug', runId, enabled) as Promise<{ ok: boolean }>,
+    scenarioEngineSetBreakpoints: (runId: string, ids: string[]): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke('scenario:engine:set-breakpoints', runId, ids) as Promise<{ ok: boolean }>,
+    scenarioEngineAbort: (runId: string, reason?: string): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke('scenario:engine:abort', runId, reason) as Promise<{ ok: boolean }>,
+    scenarioEngineReadLog: (runId: string): Promise<unknown[]> =>
+      ipcRenderer.invoke('scenario:engine:read-log', runId) as Promise<unknown[]>,
+    /** The run + every sub-run it launched, each with metadata + log —
+     * powers the inspector's run-logs panel (incl. sub-scenario logs). */
+    scenarioEngineRunTree: (runId: string): Promise<unknown[]> =>
+      ipcRenderer.invoke('scenario:engine:run-tree', runId) as Promise<unknown[]>,
+    scenarioEngineResolveUserInput: (runId: string, requestId: string, value: unknown): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke('scenario:engine:resolve-user-input', runId, requestId, value) as Promise<{ ok: boolean }>,
+    scenarioEngineCancelUserInput: (runId: string, requestId: string): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke('scenario:engine:cancel-user-input', runId, requestId) as Promise<{ ok: boolean }>,
+    /** Persisted run history (disk archive). `list` returns lightweight
+     * entries for a scenario; `detail` the full logs + scenario snapshots;
+     * `togglePin` pins/unpins a run so it survives retention pruning. */
+    scenarioRunHistoryList: (scenarioId: string): Promise<unknown[]> =>
+      ipcRenderer.invoke('scenario:history:list', scenarioId) as Promise<unknown[]>,
+    scenarioRunHistoryDetail: (guid: string): Promise<unknown> =>
+      ipcRenderer.invoke('scenario:history:detail', guid) as Promise<unknown>,
+    scenarioRunHistoryTogglePin: (guid: string, pinned: boolean): Promise<boolean> =>
+      ipcRenderer.invoke('scenario:history:toggle-pin', guid, pinned) as Promise<boolean>,
+    /** Subscribe to engine events (node-started/-completed/data-flow/run-…).
+     * Returns an unsubscribe function. The renderer animates the graph
+     * + edge beams off these events. */
+    onScenarioEngineEvent: (cb: (event: unknown) => void): (() => void) => {
+      const handler = (_e: unknown, ev: unknown): void => { cb(ev) }
+      ipcRenderer.on('scenario:engine:event', handler)
+      return () => { ipcRenderer.off('scenario:engine:event', handler) }
+    },
     /** Full-snapshot push fired on renderer (re)load — useful after an
      * HMR cycle so main's cache is always consistent with the renderer. */
     pushMcpActiveStateBootstrap: (payload: {

@@ -259,7 +259,8 @@
     "addHeader": "Dodaj zaglavlje",
     "addParam": "Dodaj parametar",
     "environmentSelector": {
-      "noEnvironment": "Bez okruženja"
+      "noEnvironment": "Bez okruženja",
+      "switchTooltip": "Промени окружење"
     },
     "body": {
       "fileLabel": "Datoteka ili URL:",
@@ -509,7 +510,8 @@
   "common": {
     "cancel": "Otkaži",
     "save": "Sačuvaj",
-    "remove": "Уклони"
+    "remove": "Уклони",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -796,6 +798,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Уређивање закључано док се сценарио извршава",
     "switch": {
       "addCase": "Додај случај",
       "removeCase": "Уклони случај",
@@ -823,6 +826,7 @@
     },
     "filter": {
       "items": "ставке",
+      "rejected": "одбачени",
       "kept": "задржани",
       "keepWhere": "задржи ако"
     },
@@ -874,9 +878,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Обавезно",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Обавезно за сценарије који га позивају"
     },
     "runScenario": {
       "orphanInput": "Нема одговарајућег параметра „{{name}}“ у подсценарију",
@@ -941,7 +945,14 @@
       "pause": "Пауза",
       "noRunsHint": "Nema skorašnjeg izvršavanja ovog zahteva — pokreni ga odavde da popuniš pregled scenarija.",
       "syntheticInfo": "Primer podataka generisan iz dokumentacije ovog zahteva.",
-      "syntheticRunHint": "Primer podataka — pokrenite zahtev da ih zamenite stvarnim rezultatom."
+      "syntheticRunHint": "Primer podataka — pokrenite zahtev da ih zamenite stvarnim rezultatom.",
+      "stop": "Zaustavi",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "clearLogs": "Очисти записе",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "Прикажи {{level}} логове",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -955,6 +966,45 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Potreban unos"
+    },
+    "runHistory": {
+      "title": "Историја извршавања",
+      "tooltip": "Историја извршавања",
+      "empty": "Још нема забележених извршавања",
+      "noLogs": "Нема записа за ово извршавање",
+      "logsTab": "Logs",
+      "graphTab": "Граф",
+      "noGraph": "Нема снимка сценарија за ово извршавање",
+      "pin": "Закачи",
+      "unpin": "Откачи"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "Додај тачку прекида",
+      "remove": "Уклони тачку прекида",
+      "toggle": "Укључи/искључи тачку прекида (F9)",
+      "reached": "Достигнута тачка прекида — ова радња још није извршена. Притисните F5 за наставак или F7 за корак.",
+      "shortcut": "F9"
     }
   }
 }

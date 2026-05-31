@@ -78,7 +78,22 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // `items` has a value-selector fallback in the editor (like forEach), so it
   // isn't a hard-required port; the predicate (field/operator/value) lives in
   // config. No header trigger — data-driven (runs once `items` resolves).
-  filter: { inputs: [{ id: 'items', name: 'items', dataType: 'json' }], outputs: [{ id: 'kept', name: 'kept', dataType: 'json', flow: 'value' }] },
+  filter: { inputs: [{ id: 'items', name: 'items', dataType: 'json' }], outputs: [{ id: 'kept', name: 'kept', dataType: 'json', flow: 'value' }, { id: 'rejected', name: 'rejected', dataType: 'json', flow: 'value' }] },
+  // Loops. `for` is a numeric-range forEach: `from` / `to` / `step` carry
+  // inline value fallbacks (like the `if` operands), so they aren't hard
+  // required; it fans out the range over `each` (the current number) and fires
+  // `done` once every iteration's scope has closed — reusing the forEach
+  // scope machinery + the parallelism control.
+  for: { inputs: [{ id: 'from', name: 'from', dataType: 'number' }, { id: 'to', name: 'to', dataType: 'number' }, { id: 'step', name: 'step', dataType: 'number' }], outputs: [{ id: 'each', name: 'index', role: 'then', flow: 'both' }, { id: 'done', name: 'done', role: 'else', flow: 'signal' }] },
+  // `while` / `doWhile` are the `if` mechanism in a loop dress: a header
+  // trigger + two operands compared by the operator toggle, routing to `then`
+  // (the loop body) when the condition holds and `else` (exit) when it fails.
+  // The loop is closed by a user-wired edge from the body back into `in` (or
+  // an operand) — the scheduler's merge-on-loop-back re-fires the node each
+  // pass. `while` tests at the top; `doWhile` is wired after the body so it
+  // runs at least once. The `then` label differs to hint the wiring.
+  while: { inputs: [IN, { id: 'left', name: 'left' }, { id: 'right', name: 'right' }], outputs: [{ id: 'then', name: 'body', role: 'then', flow: 'both' }, { id: 'else', name: 'done', role: 'else', flow: 'signal' }] },
+  doWhile: { inputs: [IN, { id: 'left', name: 'left' }, { id: 'right', name: 'right' }], outputs: [{ id: 'then', name: 'loop', role: 'then', flow: 'both' }, { id: 'else', name: 'done', role: 'else', flow: 'signal' }] },
   // Time
   wait: { inputs: [IN, { id: 'duration', name: 'duration', dataType: 'duration' }], outputs: [{ id: 'out', name: 'then', role: 'then', flow: 'signal' }] },
   // Aligned on `wait`: a header trigger + an inline value fallback (a date-time
@@ -101,14 +116,16 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   setVariable: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'event', name: 'event', flow: 'signal' }] },
   getVariable: { inputs: [IN], outputs: [{ id: 'value', name: 'value', flow: 'value' }] },
   // `transform` (a.k.a. "Transform template") applies an expression/Handlebars
-  // template to its optional `value` input and emits the result. The input is
-  // optional so the node runs on its own (a pure template); the expression
-  // determines the output type.
-  transform: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'out', name: 'value', flow: 'value' }] },
+  // template to its optional `value` input and emits the result. A header
+  // launch trigger (`in`) lets it be sequenced in a flow; the `value` input
+  // stays optional so the node can also run on its own (a pure template). The
+  // expression determines the output type.
+  transform: { inputs: [IN, { id: 'value', name: 'value' }], outputs: [{ id: 'out', name: 'value', flow: 'value' }] },
   // Utilities
-  // A terminal sink: both inputs optional (wire either, or set inline), no
-  // output. `message` is a string, `data` any value.
-  log: { inputs: [{ id: 'message', name: 'message', dataType: 'string' }, { id: 'data', name: 'data' }], outputs: [] },
+  // A terminal sink: a header launch trigger (`in`) so it can be sequenced in
+  // a flow, plus two optional inputs (wire either, or set inline). `message` is
+  // a string, `data` any value. No output (terminal).
+  log: { inputs: [IN, { id: 'message', name: 'message', dataType: 'string' }, { id: 'data', name: 'data' }], outputs: [] },
   // An assertion compares two operands (`actual` / `expected`) with the same
   // operator toggle as `if`/`comparator`; both operands carry inline
   // value-selector fallbacks, so they aren't hard-required ports. A header

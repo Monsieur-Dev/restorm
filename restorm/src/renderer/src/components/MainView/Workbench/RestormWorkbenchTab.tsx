@@ -45,6 +45,10 @@ export interface RestormWorkbenchTabProps {
   /** Called when a tag color changes. Pass null to remove the color. */
   onTagColorChange?: ((tag: string, color: string | null) => void) | undefined
   headerRight?: React.ReactNode
+  /** Optional cluster of buttons anchored in the tab's top-right toolbar,
+   * to the LEFT of the bookmark ribbon (e.g. a request's env selector +
+   * history button). Rendered in a flex row; the wrapper positions it. */
+  headerActions?: React.ReactNode
   /** Optional action anchored in the tab's top-right toolbar, between the
    * bookmark ribbon and the favourite star (e.g. the "used in scenarios"
    * button). Brings its own absolute positioning. */
@@ -72,6 +76,7 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
   tagColors,
   onTagColorChange,
   headerRight,
+  headerActions,
   topRightAction,
   callout,
   tabId,
@@ -127,16 +132,25 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
 
   return (
     <div className="restorm-workbench-tab">
-      {/* Bookmark ribbons anchored to the top-right of the tab's
-       * positioned root. Replaces the old inline `TagsView` cluster. */}
-      <BookmarkRibbonStack
-        bookmarks={ribbonBookmarks}
-        onRename={handleRibbonRename}
-        {...(onTagColorChange ? { onColorChange: handleRibbonColorChange } : {})}
-        onRemove={handleRibbonRemove}
-        onAdd={handleRibbonAdd}
-        data-testid={`${testIdPrefix}-bookmarks`}
-      />
+      {/* Top-right cluster: optional header actions (e.g. a request's env
+       * selector + history button) flow in a flex row to the LEFT of the
+       * bookmark ribbon, so the ribbon's variable width never collides
+       * with them. Anchored where the ribbon used to sit. */}
+      <div className="restorm-workbench-tab-top-right">
+        {headerActions ? (
+          <div className="restorm-workbench-tab-header-actions" data-testid={`${testIdPrefix}-header-actions`}>
+            {headerActions}
+          </div>
+        ) : null}
+        <BookmarkRibbonStack
+          bookmarks={ribbonBookmarks}
+          onRename={handleRibbonRename}
+          {...(onTagColorChange ? { onColorChange: handleRibbonColorChange } : {})}
+          onRemove={handleRibbonRemove}
+          onAdd={handleRibbonAdd}
+          data-testid={`${testIdPrefix}-bookmarks`}
+        />
+      </div>
       {/* Top-right action (e.g. "used in scenarios"), sitting between the
        * bookmark ribbon and the favourite star. Self-positioned. */}
       {topRightAction}

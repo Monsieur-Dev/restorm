@@ -20,6 +20,7 @@ import { collectionStore } from '../../services/CollectionStore'
 import { isAnyFolder, isEnvironmentFolder, isRequest, isScenario, KeyValue, Environment } from '../../../shared/models'
 import type { EnvironmentFolder, CustomValueList, CustomValueEntry } from '../../../shared/types/collections'
 import { broadcastTreeReplace } from './import'
+import { broadcastScenario } from './scenario'
 
 /**
  * Walk a `update_request` patch and convert any plain-object key-value
@@ -190,10 +191,10 @@ export function registerWriteTools(mcp: McpService): void {
   mcp.registerTool(
     'rename_item',
     {
-      title: 'Rename a folder or request',
+      title: 'Rename a folder, request or scenario',
       description:
-        'Update the `name` of an existing folder, env-folder or request. The new name appears in ' +
-        'the sidebar immediately via the renderer\'s GraphQL subscriptions.',
+        'Update the `name` of an existing folder, env-folder, request or scenario. The new name ' +
+        'appears in the sidebar immediately via the renderer\'s GraphQL subscriptions.',
       inputSchema: {
         id: z.string().min(1).describe('Item id to rename.'),
         newName: z.string().min(1).describe('New name.')
@@ -221,7 +222,13 @@ export function registerWriteTools(mcp: McpService): void {
         triggerSave()
         return jsonReply({ id, kind: isEnvironmentFolder(updated) ? 'env-folder' : 'folder', name: updated.name })
       }
-      return errorReply(`Item ${id} is not a folder, env-folder or request`)
+      if (isScenario(target)) {
+        const updated = collectionStore.updateScenario(id, { name: newName })
+        if (!updated) return errorReply(`updateScenario failed for ${id}`)
+        broadcastScenario(updated)
+        return jsonReply({ id, kind: 'scenario', name: updated.name })
+      }
+      return errorReply(`Item ${id} is not a folder, env-folder, request or scenario`)
     }
   )
 

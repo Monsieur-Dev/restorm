@@ -1,22 +1,8 @@
-import { existsSync, statSync } from 'fs'
-import { promises as fs } from 'fs'
-import { join } from 'path'
 import { randomUUID } from 'crypto'
-import {
-  ZipReader,
-  ZipWriter,
-  TextReader,
-  TextWriter,
-  Uint8ArrayReader,
-  Uint8ArrayWriter,
-  configure
-} from '@zip.js/zip.js'
 import {
   eventBusService,
   logger,
-  type Subscription,
-  getFileService,
-  isFileServiceInitialized
+  type Subscription
 } from 'electron-core-ui/main'
 import {
   DocumentEvents,
@@ -25,13 +11,21 @@ import {
 import { collectionStore } from './CollectionStore'
 import { contextService } from './ContextService'
 import {
+  getHistoryArchivePath,
+  readHistoryArchive,
+  writeHistoryArchive,
+  queueHistoryWrite,
+  INDEX_FILE_NAME,
+  RESPONSES_FOLDER,
+  type HistoryArchiveIndex
+} from './historyArchive'
+import {
   isRequest
 } from '../../shared/models'
 import type {
   ResponseHistoryDetail,
   ResponseHistoryEntry,
   ResponseHistoryHttpBody,
-  ResponseHistoryIndex,
   ResponseHistoryKeyValue,
   ResponseHistoryOutcome,
   ResponseHistoryRequestMeta,
@@ -48,13 +42,6 @@ import { redactTokensFromBody } from './AuthenticationRedaction'
 import { isAuthenticationRequest } from '../../shared/types/collections'
 
 const DEFAULT_MAX_PER_REQUEST = 10
-const INDEX_FILE_NAME = 'index.json'
-const RESPONSES_FOLDER = 'responses'
-
-configure({
-  useWebWorkers: false,
-  useCompressionStream: false
-})
 
 type ExecutionResult =
   | HTTPExecutionResult
@@ -105,7 +92,6 @@ function outcomeToSuccess(outcome: ResponseHistoryOutcome): boolean {
 class ResponseHistoryService {
   private subscriptions: Subscription[] = []
   private initialized = false
-  private writeQueue = Promise.resolve()
 
   initialize(): void {
     if (this.initialized) return
@@ -132,7 +118,7 @@ class ResponseHistoryService {
     result: ExecutionResult
   ): Promise<void> {
     try {
-      const archivePath = this.getArchivePath()
+      const archivePath = getHistoryArchivePath()
       if (!archivePath) {
         logger.debug('[ResponseHistoryService] No archive path, skipping history save')
         return
@@ -146,8 +132,8 @@ class ResponseHistoryService {
         return
       }
 
-      await this.queueWrite(async () => {
-        const { index, entriesData } = await this.readArchive(archivePath)
+      await queueHistoryWrite(async () => {
+        const { index, entriesData } = await readHistoryArchive(archivePath)
         const guid = detail.guid
 
         const { updatedIndex, keptGuids } = this.addEntryAndPrune(index, detail)
@@ -155,17 +141,18 @@ class ResponseHistoryService {
         const nextEntriesData = new Map<string, string>()
         for (const [entryName, entryText] of entriesData.entries()) {
           if (entryName === INDEX_FILE_NAME) continue
-          const match = entryName.startsWith(`${RESPONSES_FOLDER}/`) ? entryName.slice(`${RESPONSES_FOLDER}/`.length) : null
-          if (match?.endsWith('.json')) {
-            const entryGuid = match.slice(0, -'.json'.length)
-            if (keptGuids.has(entryGuid)) {
-              nextEntriesData.set(entryName, entryText)
-            }
+          if (entryName.startsWith(`${RESPONSES_FOLDER}/`) && entryName.endsWith('.json')) {
+            const entryGuid = entryName.slice(`${RESPONSES_FOLDER}/`.length, -'.json'.length)
+            if (keptGuids.has(entryGuid)) nextEntriesData.set(entryName, entryText)
+          } else {
+            // Preserve other domains' entries (e.g. scenarioRuns/…) — this
+            // service owns only the `responses/` slice.
+            nextEntriesData.set(entryName, entryText)
           }
         }
 
         nextEntriesData.set(this.getDetailEntryName(guid), JSON.stringify(detail))
-        await this.writeArchive(archivePath, updatedIndex, nextEntriesData)
+        await writeHistoryArchive(archivePath, updatedIndex, nextEntriesData)
       })
     } catch (error) {
       logger.error('[ResponseHistoryService] Failed to store response history', {
@@ -177,19 +164,19 @@ class ResponseHistoryService {
   }
 
   async list(requestId: string): Promise<ResponseHistoryEntry[]> {
-    const archivePath = this.getArchivePath()
-    if (!archivePath || !existsSync(archivePath)) return []
+    const archivePath = getHistoryArchivePath()
+    if (!archivePath) return []
 
-    const { index } = await this.readArchive(archivePath)
+    const { index } = await readHistoryArchive(archivePath)
     const request = index.requests.find((req) => req.requestId === requestId)
     return request?.entries.slice().sort((a, b) => b.timestamp.localeCompare(a.timestamp)) ?? []
   }
 
   async getDetail(guid: string): Promise<ResponseHistoryDetail | null> {
-    const archivePath = this.getArchivePath()
-    if (!archivePath || !existsSync(archivePath)) return null
+    const archivePath = getHistoryArchivePath()
+    if (!archivePath) return null
 
-    const { entriesData } = await this.readArchive(archivePath)
+    const { entriesData } = await readHistoryArchive(archivePath)
     const entryName = this.getDetailEntryName(guid)
     const detailText = entriesData.get(entryName)
     if (!detailText) return null
@@ -203,11 +190,11 @@ class ResponseHistoryService {
   }
 
   async togglePin(guid: string, pinned: boolean): Promise<boolean> {
-    const archivePath = this.getArchivePath()
-    if (!archivePath || !existsSync(archivePath)) return false
+    const archivePath = getHistoryArchivePath()
+    if (!archivePath) return false
 
-    return this.queueWrite(async () => {
-      const { index, entriesData } = await this.readArchive(archivePath)
+    return queueHistoryWrite(async () => {
+      const { index, entriesData } = await readHistoryArchive(archivePath)
       let entry: ResponseHistoryEntry | null = null
       for (const request of index.requests) {
         const found = request.entries.find((item) => item.guid === guid)
@@ -231,17 +218,17 @@ class ResponseHistoryService {
         }
       }
 
-      await this.writeArchive(archivePath, index, entriesData)
+      await writeHistoryArchive(archivePath, index, entriesData)
       return true
     })
   }
 
   private async handleRequestDeleted(requestId: string): Promise<void> {
-    const archivePath = this.getArchivePath()
-    if (!archivePath || !existsSync(archivePath)) return
+    const archivePath = getHistoryArchivePath()
+    if (!archivePath) return
 
-    await this.queueWrite(async () => {
-      const { index, entriesData } = await this.readArchive(archivePath)
+    await queueHistoryWrite(async () => {
+      const { index, entriesData } = await readHistoryArchive(archivePath)
       const removedRequest = index.requests.find((req) => req.requestId === requestId)
       const removedGuids = new Set(removedRequest?.entries.map((e) => e.guid) ?? [])
       const remainingRequests = index.requests.filter((req) => req.requestId !== requestId)
@@ -251,23 +238,23 @@ class ResponseHistoryService {
       const nextEntriesData = new Map<string, string>()
       for (const [entryName, entryText] of entriesData.entries()) {
         if (entryName === INDEX_FILE_NAME) continue
-        const match = entryName.startsWith(`${RESPONSES_FOLDER}/`) ? entryName.slice(`${RESPONSES_FOLDER}/`.length) : null
-        if (match?.endsWith('.json')) {
-          const entryGuid = match.slice(0, -'.json'.length)
-          if (!removedGuids.has(entryGuid)) {
-            nextEntriesData.set(entryName, entryText)
-          }
+        if (entryName.startsWith(`${RESPONSES_FOLDER}/`) && entryName.endsWith('.json')) {
+          const entryGuid = entryName.slice(`${RESPONSES_FOLDER}/`.length, -'.json'.length)
+          if (!removedGuids.has(entryGuid)) nextEntriesData.set(entryName, entryText)
+        } else {
+          // Preserve other domains' entries (scenarioRuns/…).
+          nextEntriesData.set(entryName, entryText)
         }
       }
 
-      await this.writeArchive(archivePath, {
+      await writeHistoryArchive(archivePath, {
         ...index,
         requests: remainingRequests
       }, nextEntriesData)
     })
   }
 
-  private addEntryAndPrune(index: ResponseHistoryIndex, detail: ResponseHistoryDetail): { updatedIndex: ResponseHistoryIndex; keptGuids: Set<string> } {
+  private addEntryAndPrune(index: HistoryArchiveIndex, detail: ResponseHistoryDetail): { updatedIndex: HistoryArchiveIndex; keptGuids: Set<string> } {
     const entry: ResponseHistoryEntry = {
       guid: detail.guid,
       timestamp: detail.timestamp,
@@ -703,50 +690,6 @@ class ResponseHistoryService {
     }
   }
 
-  private parseHistoryIndex(text: string): ResponseHistoryIndex | null {
-    try {
-      const parsed: unknown = JSON.parse(text)
-      if (!this.isRecord(parsed)) return null
-      // Only v2 (requestId-keyed) archives are supported. Older v1
-      // (requestPath-keyed) archives produced before this refactor get
-      // treated as invalid — the user loses pre-existing history. No
-      // back-compat per design.
-      if (parsed['version'] !== 2) return null
-      if (!Array.isArray(parsed['requests'])) return null
-      const requests = parsed['requests']
-        .filter((item) => this.isRecord(item))
-        .map((req) => {
-          const requestId = typeof req['requestId'] === 'string' ? req['requestId'] : ''
-          const entriesRaw = Array.isArray(req['entries']) ? req['entries'] : []
-          const entries = entriesRaw
-            .filter((item) => this.isRecord(item))
-            .map((entry) => this.parseHistoryEntry(entry))
-            .filter((entry): entry is ResponseHistoryEntry => entry !== null)
-          return requestId ? { requestId, entries } : null
-        })
-        .filter((req): req is { requestId: string; entries: ResponseHistoryEntry[] } => req !== null)
-      return { version: 2, requests }
-    } catch {
-      return null
-    }
-  }
-
-  private parseHistoryEntry(raw: Record<string, unknown>): ResponseHistoryEntry | null {
-    const guid = typeof raw['guid'] === 'string' ? raw['guid'] : ''
-    const timestamp = typeof raw['timestamp'] === 'string' ? raw['timestamp'] : ''
-    const pinned = typeof raw['pinned'] === 'boolean' ? raw['pinned'] : false
-    const success = typeof raw['success'] === 'boolean' ? raw['success'] : false
-    if (!guid || !timestamp) return null
-    const rawOutcome = raw['outcome']
-    const outcome: ResponseHistoryOutcome | undefined =
-      rawOutcome === 'ok' || rawOutcome === 'warning' || rawOutcome === 'failure'
-        ? rawOutcome
-        : undefined
-    return outcome
-      ? { guid, timestamp, pinned, success, outcome }
-      : { guid, timestamp, pinned, success }
-  }
-
   private getRequestFullData(requestId: string): Record<string, unknown> | null {
     const ctx = contextService.getRequestContext(requestId) as unknown
     if (!this.isRecord(ctx)) return null
@@ -858,96 +801,8 @@ class ResponseHistoryService {
     return entries
   }
 
-  private getArchivePath(): string | null {
-    if (!isFileServiceInitialized()) return null
-    const filePath = getFileService().getFilePath()
-    if (!filePath) return null
-    try {
-      const isDirectory = existsSync(filePath) && statSync(filePath).isDirectory()
-      if (isDirectory) {
-        return join(filePath, 'responses.zip')
-      }
-      return `${filePath}.responses.zip`
-    } catch {
-      return `${filePath}.responses.zip`
-    }
-  }
-
   private getDetailEntryName(guid: string): string {
     return `${RESPONSES_FOLDER}/${guid}.json`
-  }
-
-  private async readArchive(archivePath: string): Promise<{ index: ResponseHistoryIndex; entriesData: Map<string, string> }> {
-    if (!existsSync(archivePath)) {
-      return {
-        index: {
-          version: 2,
-          requests: []
-        },
-        entriesData: new Map()
-      }
-    }
-
-    const buffer = await fs.readFile(archivePath)
-    const reader = new ZipReader(new Uint8ArrayReader(buffer))
-    const entries = await reader.getEntries() as { filename?: string; getData: (writer: TextWriter) => Promise<string> }[]
-    const entriesData = new Map<string, string>()
-    let index: ResponseHistoryIndex = {
-      version: 2,
-      requests: []
-    }
-
-    for (const entry of entries) {
-      if (!entry.filename) continue
-      const raw = await entry.getData(new TextWriter())
-      const text = typeof raw === 'string' ? raw : ''
-      entriesData.set(entry.filename, text)
-      if (entry.filename === INDEX_FILE_NAME) {
-        const parsed = this.parseHistoryIndex(text)
-        if (parsed) {
-          index = parsed
-        } else {
-          logger.warn('[ResponseHistoryService] Failed to parse index.json')
-        }
-      }
-    }
-    await reader.close()
-
-    return { index, entriesData }
-  }
-
-  private async writeArchive(
-    archivePath: string,
-    index: ResponseHistoryIndex,
-    entriesData: Map<string, string>
-  ): Promise<void> {
-    const writer = new ZipWriter(new Uint8ArrayWriter())
-    await writer.add(INDEX_FILE_NAME, new TextReader(JSON.stringify(index)))
-
-    for (const [entryName, entryText] of entriesData.entries()) {
-      if (entryName === INDEX_FILE_NAME) continue
-      await writer.add(entryName, new TextReader(entryText))
-    }
-
-    const data = await writer.close()
-    // Atomic publish: write to a sibling tmp file then `rename` over the
-    // live archive. `fs.writeFile` truncates+writes which is NOT atomic
-    // — a concurrent reader (`list` / `getDetail`, neither of which goes
-    // through `writeQueue`) can land between the truncate and the final
-    // flush and see a partial zip, surfacing as
-    // "End of central directory not found" from `ZipReader`. `rename`
-    // on POSIX (and on Windows since Node 10+) atomically swaps the
-    // inode, so any concurrent read sees either the old or the new
-    // archive, never a half-written one.
-    const tmpPath = `${archivePath}.tmp-${process.pid}-${Date.now()}`
-    await fs.writeFile(tmpPath, Buffer.from(data))
-    await fs.rename(tmpPath, archivePath)
-  }
-
-  private async queueWrite<T>(fn: () => Promise<T>): Promise<T> {
-    const next = this.writeQueue.then(fn, fn)
-    this.writeQueue = next.then(() => undefined, () => undefined)
-    return next
   }
 
 }

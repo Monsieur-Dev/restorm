@@ -258,7 +258,8 @@
     "addHeader": "Header toevoegen",
     "addParam": "Parameter toevoegen",
     "environmentSelector": {
-      "noEnvironment": "Geen omgeving"
+      "noEnvironment": "Geen omgeving",
+      "switchTooltip": "Omgeving wisselen"
     },
     "body": {
       "fileLabel": "Bestand of URL:",
@@ -508,7 +509,8 @@
   "common": {
     "cancel": "Annuleren",
     "save": "Opslaan",
-    "remove": "Verwijderen"
+    "remove": "Verwijderen",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -795,6 +797,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Bewerken vergrendeld terwijl het scenario draait",
     "switch": {
       "addCase": "Case toevoegen",
       "removeCase": "Case verwijderen",
@@ -822,6 +825,7 @@
     },
     "filter": {
       "items": "items",
+      "rejected": "afgewezen",
       "kept": "behouden",
       "keepWhere": "behoud als"
     },
@@ -873,9 +877,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Vereist",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Vereist voor aanroepende scenario's"
     },
     "runScenario": {
       "orphanInput": "Geen overeenkomende parameter \"{{name}}\" in het subscenario",
@@ -940,7 +944,14 @@
       "pause": "Pauze",
       "noRunsHint": "Geen recente uitvoering voor dit verzoek — voer het hier uit om de scenario-preview te vullen.",
       "syntheticInfo": "Voorbeeldgegevens gegenereerd uit de documentatie van deze aanvraag.",
-      "syntheticRunHint": "Voorbeeldgegevens — voer het verzoek uit om ze te vervangen door een echt resultaat."
+      "syntheticRunHint": "Voorbeeldgegevens — voer het verzoek uit om ze te vervangen door een echt resultaat.",
+      "stop": "Stop",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "clearLogs": "Logboeken wissen",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "{{level}}-logs tonen",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -954,6 +965,45 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Uitvoeringsparameters",
+      "run": "Uitvoeren",
+      "midRunTitle": "Invoer gevraagd"
+    },
+    "runHistory": {
+      "title": "Uitvoeringsgeschiedenis",
+      "tooltip": "Uitvoeringsgeschiedenis",
+      "empty": "Nog geen uitvoering vastgelegd",
+      "noLogs": "Geen log voor deze uitvoering",
+      "logsTab": "Logs",
+      "graphTab": "Grafiek",
+      "noGraph": "Geen scenario-momentopname voor deze uitvoering",
+      "pin": "Vastmaken",
+      "unpin": "Losmaken"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "Onderbrekingspunt toevoegen",
+      "remove": "Onderbrekingspunt verwijderen",
+      "toggle": "Onderbrekingspunt omschakelen (F9)",
+      "reached": "Onderbrekingspunt bereikt — deze actie is nog niet uitgevoerd. Druk op F5 om te hervatten of F7 om te stappen.",
+      "shortcut": "F9"
     }
   }
 }

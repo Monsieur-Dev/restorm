@@ -258,7 +258,8 @@
     "addHeader": "Legg til header",
     "addParam": "Legg til parameter",
     "environmentSelector": {
-      "noEnvironment": "Ingen miljø"
+      "noEnvironment": "Ingen miljø",
+      "switchTooltip": "Bytt miljø"
     },
     "body": {
       "fileLabel": "Fil eller URL:",
@@ -508,7 +509,8 @@
   "common": {
     "cancel": "Avbryt",
     "save": "Lagre",
-    "remove": "Fjern"
+    "remove": "Fjern",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -795,6 +797,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Redigering låst mens scenariet kjører",
     "switch": {
       "addCase": "Legg til tilfelle",
       "removeCase": "Fjern tilfelle",
@@ -822,6 +825,7 @@
     },
     "filter": {
       "items": "elementer",
+      "rejected": "forkastet",
       "kept": "beholdt",
       "keepWhere": "behold hvis"
     },
@@ -873,9 +877,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Påkrevd",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Påkrevd for kallende scenarier"
     },
     "runScenario": {
       "orphanInput": "Ingen samsvarende parameter «{{name}}» i underscenarioet",
@@ -940,7 +944,14 @@
       "pause": "Pause",
       "noRunsHint": "Ingen nylig kjøring for denne forespørselen — kjør den herfra for å fylle scenario-forhåndsvisningen.",
       "syntheticInfo": "Eksempeldata generert fra dokumentasjonen for denne forespørselen.",
-      "syntheticRunHint": "Eksempeldata — kjør forespørselen for å erstatte dem med et reelt resultat."
+      "syntheticRunHint": "Eksempeldata — kjør forespørselen for å erstatte dem med et reelt resultat.",
+      "stop": "Stopp",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "clearLogs": "Tøm logger",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "Vis {{level}}-logger",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -954,6 +965,45 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Inndata kreves"
+    },
+    "runHistory": {
+      "title": "Kjørelogg",
+      "tooltip": "Kjørelogg",
+      "empty": "Ingen kjøring registrert ennå",
+      "noLogs": "Ingen logg for denne kjøringen",
+      "logsTab": "Logs",
+      "graphTab": "Graf",
+      "noGraph": "Ingen scenario-øyeblikksbilde for denne kjøringen",
+      "pin": "Fest",
+      "unpin": "Løsne"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "Legg til bruddpunkt",
+      "remove": "Fjern bruddpunkt",
+      "toggle": "Veksle bruddpunkt (F9)",
+      "reached": "Bruddpunkt nådd – denne handlingen er ikke kjørt ennå. Trykk F5 for å fortsette eller F7 for å gå trinnvis.",
+      "shortcut": "F9"
     }
   }
 }

@@ -257,7 +257,8 @@
     "addHeader": "Thêm header",
     "addParam": "Thêm tham số",
     "environmentSelector": {
-      "noEnvironment": "Không có môi trường"
+      "noEnvironment": "Không có môi trường",
+      "switchTooltip": "Chuyển môi trường"
     },
     "body": {
       "fileLabel": "Tệp hoặc URL:",
@@ -507,7 +508,8 @@
   "common": {
     "cancel": "Hủy",
     "save": "Lưu",
-    "remove": "Xóa"
+    "remove": "Xóa",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -794,6 +796,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Đã khóa chỉnh sửa khi kịch bản đang chạy",
     "switch": {
       "addCase": "Thêm trường hợp",
       "removeCase": "Xóa trường hợp",
@@ -821,6 +824,7 @@
     },
     "filter": {
       "items": "mục",
+      "rejected": "bị loại",
       "kept": "đã giữ",
       "keepWhere": "giữ nếu"
     },
@@ -872,9 +876,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Bắt buộc",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Bắt buộc cho các kịch bản gọi đến"
     },
     "runScenario": {
       "orphanInput": "Không có tham số \"{{name}}\" khớp trong kịch bản con",
@@ -939,7 +943,14 @@
       "pause": "Tạm dừng",
       "noRunsHint": "Chưa có lần chạy gần đây cho yêu cầu này — chạy nó từ đây để điền bản xem trước kịch bản.",
       "syntheticInfo": "Dữ liệu mẫu được tạo từ tài liệu của yêu cầu này.",
-      "syntheticRunHint": "Dữ liệu mẫu — chạy yêu cầu để thay thế bằng kết quả thực."
+      "syntheticRunHint": "Dữ liệu mẫu — chạy yêu cầu để thay thế bằng kết quả thực.",
+      "stop": "Dừng",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "clearLogs": "Xóa nhật ký",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "Hiển thị log {{level}}",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -953,6 +964,45 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Yêu cầu nhập liệu"
+    },
+    "runHistory": {
+      "title": "Lịch sử chạy",
+      "tooltip": "Lịch sử chạy",
+      "empty": "Chưa có lần chạy nào",
+      "noLogs": "Không có nhật ký cho lần chạy này",
+      "logsTab": "Logs",
+      "graphTab": "Đồ thị",
+      "noGraph": "Không có ảnh chụp kịch bản cho lần chạy này",
+      "pin": "Ghim",
+      "unpin": "Bỏ ghim"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "Thêm điểm dừng",
+      "remove": "Xóa điểm dừng",
+      "toggle": "Bật/tắt điểm dừng (F9)",
+      "reached": "Đã đến điểm dừng — hành động này chưa được thực thi. Nhấn F5 để tiếp tục, hoặc F7 để chạy từng bước.",
+      "shortcut": "F9"
     }
   }
 }

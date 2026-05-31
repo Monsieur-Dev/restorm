@@ -259,7 +259,8 @@
     "addHeader": "Adaugă antet",
     "addParam": "Adaugă parametru",
     "environmentSelector": {
-      "noEnvironment": "Niciun mediu"
+      "noEnvironment": "Niciun mediu",
+      "switchTooltip": "Schimbă mediul"
     },
     "body": {
       "fileLabel": "Fișier sau URL:",
@@ -509,7 +510,8 @@
   "common": {
     "cancel": "Anulează",
     "save": "Salvează",
-    "remove": "Elimină"
+    "remove": "Elimină",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -796,6 +798,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Editare blocată în timp ce scenariul rulează",
     "switch": {
       "addCase": "Adaugă caz",
       "removeCase": "Elimină caz",
@@ -823,6 +826,7 @@
     },
     "filter": {
       "items": "elemente",
+      "rejected": "respinse",
       "kept": "păstrate",
       "keepWhere": "păstrează dacă"
     },
@@ -874,9 +878,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Obligatoriu",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Obligatoriu pentru scenariile apelante"
     },
     "runScenario": {
       "orphanInput": "Niciun parametru \"{{name}}\" corespunzător în subscenariu",
@@ -941,7 +945,14 @@
       "pause": "Pauză",
       "noRunsHint": "Nicio rulare recentă pentru această cerere — rulează-o de aici ca să populezi previzualizarea scenariului.",
       "syntheticInfo": "Date de exemplu generate din documentația acestei cereri.",
-      "syntheticRunHint": "Date de exemplu — rulați cererea pentru a le înlocui cu un rezultat real."
+      "syntheticRunHint": "Date de exemplu — rulați cererea pentru a le înlocui cu un rezultat real.",
+      "stop": "Oprește",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "clearLogs": "Șterge jurnalele",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "Afișează jurnalele {{level}}",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -955,6 +966,45 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Date solicitate"
+    },
+    "runHistory": {
+      "title": "Istoric execuții",
+      "tooltip": "Istoric execuții",
+      "empty": "Nicio execuție înregistrată încă",
+      "noLogs": "Niciun jurnal pentru această execuție",
+      "logsTab": "Logs",
+      "graphTab": "Grafic",
+      "noGraph": "Niciun instantaneu de scenariu pentru această execuție",
+      "pin": "Fixează",
+      "unpin": "Anulează fixarea"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "Adăugare punct de întrerupere",
+      "remove": "Eliminare punct de întrerupere",
+      "toggle": "Comutare punct de întrerupere (F9)",
+      "reached": "Punct de întrerupere atins — această acțiune nu a fost încă executată. Apăsați F5 pentru reluare sau F7 pentru pas cu pas.",
+      "shortcut": "F9"
     }
   }
 }

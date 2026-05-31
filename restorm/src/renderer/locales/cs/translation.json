@@ -260,7 +260,8 @@
     "addHeader": "Přidat hlavičku",
     "addParam": "Přidat parametr",
     "environmentSelector": {
-      "noEnvironment": "Bez prostředí"
+      "noEnvironment": "Bez prostředí",
+      "switchTooltip": "Přepnout prostředí"
     },
     "body": {
       "fileLabel": "Soubor nebo URL:",
@@ -510,7 +511,8 @@
   "common": {
     "cancel": "Zrušit",
     "save": "Uložit",
-    "remove": "Odebrat"
+    "remove": "Odebrat",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -797,6 +799,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Úpravy uzamčeny během běhu scénáře",
     "switch": {
       "addCase": "Přidat případ",
       "removeCase": "Odebrat případ",
@@ -824,6 +827,7 @@
     },
     "filter": {
       "items": "položky",
+      "rejected": "vyřazené",
       "kept": "zachované",
       "keepWhere": "zachovat když"
     },
@@ -875,9 +879,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Povinné",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Vyžadováno pro volající scénáře"
     },
     "runScenario": {
       "orphanInput": "V dílčím scénáři chybí odpovídající parametr „{{name}}“",
@@ -942,7 +946,14 @@
       "pause": "Pozastavit",
       "noRunsHint": "Žádné nedávné spuštění tohoto požadavku — spusťte jej zde a naplňte náhled scénáře.",
       "syntheticInfo": "Příklad dat vygenerovaný z dokumentace tohoto požadavku.",
-      "syntheticRunHint": "Příklad dat — spusťte požadavek, abyste je nahradili skutečným výsledkem."
+      "syntheticRunHint": "Příklad dat — spusťte požadavek, abyste je nahradili skutečným výsledkem.",
+      "stop": "Zastavit",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "clearLogs": "Vymazat logy",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "Zobrazit logy {{level}}",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -956,6 +967,45 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Vyžadována vstupní data"
+    },
+    "runHistory": {
+      "title": "Historie běhů",
+      "tooltip": "Historie běhů",
+      "empty": "Zatím žádný běh",
+      "noLogs": "Žádný log pro tento běh",
+      "logsTab": "Logs",
+      "graphTab": "Graf",
+      "noGraph": "Žádný snímek scénáře pro tento běh",
+      "pin": "Připnout",
+      "unpin": "Odepnout"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "Přidat bod přerušení",
+      "remove": "Odebrat bod přerušení",
+      "toggle": "Přepnout bod přerušení (F9)",
+      "reached": "Dosažen bod přerušení – tato akce ještě nebyla provedena. Stiskněte F5 pro pokračování nebo F7 pro krokování.",
+      "shortcut": "F9"
     }
   }
 }

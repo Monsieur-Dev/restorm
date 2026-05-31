@@ -257,7 +257,8 @@
     "addHeader": "添加请求头",
     "addParam": "添加参数",
     "environmentSelector": {
-      "noEnvironment": "无环境"
+      "noEnvironment": "无环境",
+      "switchTooltip": "切换环境"
     },
     "body": {
       "fileLabel": "文件或 URL：",
@@ -507,7 +508,8 @@
   "common": {
     "cancel": "取消",
     "save": "保存",
-    "remove": "移除"
+    "remove": "移除",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -794,6 +796,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "场景运行时编辑已锁定",
     "switch": {
       "addCase": "添加分支",
       "removeCase": "移除分支",
@@ -821,6 +824,7 @@
     },
     "filter": {
       "items": "项",
+      "rejected": "已排除",
       "kept": "保留",
       "keepWhere": "保留条件"
     },
@@ -872,9 +876,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "必填",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "调用此场景时必填"
     },
     "runScenario": {
       "orphanInput": "子场景中没有匹配的参数“{{name}}”",
@@ -939,7 +943,14 @@
       "pause": "暂停",
       "noRunsHint": "此请求暂无最近一次运行结果 — 从此处运行以填充场景预览。",
       "syntheticInfo": "从此请求的文档生成的示例数据。",
-      "syntheticRunHint": "示例数据 — 执行请求以替换为真实结果。"
+      "syntheticRunHint": "示例数据 — 执行请求以替换为真实结果。",
+      "stop": "停止",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "clearLogs": "清除日志",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "显示 {{level}} 日志",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -953,6 +964,45 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "需要输入"
+    },
+    "runHistory": {
+      "title": "运行历史",
+      "tooltip": "运行历史",
+      "empty": "暂无运行记录",
+      "noLogs": "此运行没有日志",
+      "logsTab": "Logs",
+      "graphTab": "图",
+      "noGraph": "此运行没有场景快照",
+      "pin": "固定",
+      "unpin": "取消固定"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "添加断点",
+      "remove": "移除断点",
+      "toggle": "切换断点 (F9)",
+      "reached": "已到达断点 — 此操作尚未执行。按 F5 继续，或按 F7 单步执行。",
+      "shortcut": "F9"
     }
   }
 }

@@ -1,0 +1,21 @@
+/*
+ * Response-history — rendered inside a scoped ECUI `Modal` (the Modal owns the
+ * backdrop + header + close). This rule styles the modal BODY so the
+ * master/detail history view fills the available space.
+ */
+.response-history-overlay-body {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Stretch the ResponseHistoryTab to fill the body's full width + height
+ * (a bare flex child would otherwise shrink to its content, leaving the
+ * right side empty). */
+.response-history-overlay-body > * {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}

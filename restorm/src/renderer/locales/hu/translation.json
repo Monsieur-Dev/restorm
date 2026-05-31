@@ -258,7 +258,8 @@
     "addHeader": "Fejléc hozzáadása",
     "addParam": "Paraméter hozzáadása",
     "environmentSelector": {
-      "noEnvironment": "Nincs környezet"
+      "noEnvironment": "Nincs környezet",
+      "switchTooltip": "Környezet váltása"
     },
     "body": {
       "fileLabel": "Fájl vagy URL:",
@@ -508,7 +509,8 @@
   "common": {
     "cancel": "Mégse",
     "save": "Mentés",
-    "remove": "Eltávolítás"
+    "remove": "Eltávolítás",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -795,6 +797,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "A szerkesztés zárolva, amíg a forgatókönyv fut",
     "switch": {
       "addCase": "Eset hozzáadása",
       "removeCase": "Eset eltávolítása",
@@ -822,6 +825,7 @@
     },
     "filter": {
       "items": "elemek",
+      "rejected": "elvetett",
       "kept": "megtartott",
       "keepWhere": "megtart ha"
     },
@@ -873,9 +877,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Kötelező",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Kötelező a hívó forgatókönyvekhez"
     },
     "runScenario": {
       "orphanInput": "Nincs megfelelő „{{name}}\" paraméter az alforgatókönyvben",
@@ -940,7 +944,14 @@
       "pause": "Szünet",
       "noRunsHint": "Nincs friss futtatás ehhez a kéréshez — futtasd innen, hogy feltöltsd a forgatókönyv előnézetét.",
       "syntheticInfo": "Példa adatok generálva ennek a kérésnek a dokumentációjából.",
-      "syntheticRunHint": "Példa adatok — futtassa a kérést, hogy valódi eredménnyel cserélje ki."
+      "syntheticRunHint": "Példa adatok — futtassa a kérést, hogy valódi eredménnyel cserélje ki.",
+      "stop": "Leállítás",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "clearLogs": "Naplók törlése",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "{{level}} naplók megjelenítése",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -954,6 +965,45 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Bevitel szükséges"
+    },
+    "runHistory": {
+      "title": "Futtatási előzmények",
+      "tooltip": "Futtatási előzmények",
+      "empty": "Még nincs rögzített futtatás",
+      "noLogs": "Nincs napló ehhez a futtatáshoz",
+      "logsTab": "Logs",
+      "graphTab": "Gráf",
+      "noGraph": "Nincs forgatókönyv-pillanatkép ehhez a futtatáshoz",
+      "pin": "Rögzítés",
+      "unpin": "Feloldás"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "Töréspont hozzáadása",
+      "remove": "Töréspont eltávolítása",
+      "toggle": "Töréspont be/ki (F9)",
+      "reached": "Töréspont elérve – ez a művelet még nem futott le. Nyomja meg az F5-öt a folytatáshoz vagy az F7-ot a léptetéshez.",
+      "shortcut": "F9"
     }
   }
 }

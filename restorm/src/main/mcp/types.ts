@@ -25,6 +25,18 @@ export interface ListedRequest {
   parentId: string | null
 }
 
+export interface ListedScenario {
+  id: string
+  name: string
+  /** Folder-mode breadcrumb: ancestor container names + this scenario's name,
+   * joined by " / ". A human-writable identifier that doesn't need the uuid. */
+  path: string
+  tags: string[]
+  nodeCount: number
+  edgeCount: number
+  parentId: string | null
+}
+
 export interface CurrentTabInfo {
   tabId: string | null
   itemId: string | null

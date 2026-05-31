@@ -119,6 +119,20 @@ export interface ButtonProps {
   /** Inline style overrides (e.g. for custom backgroundColor on color swatches) */
   style?: React.CSSProperties;
   id?: string;
+  /**
+   * ARIA role of the rendered surface. Defaults to `'button'`. Set
+   * `'checkbox'` (paired with `aria-checked`) to reuse the Button surface
+   * as a toggle — e.g. a small toolbar toggle button — without re-styling
+   * a bare anchor.
+   */
+  role?: React.AriaRole;
+  /**
+   * Checked state for a toggle/checkbox-role Button. Rendered as the
+   * `aria-checked` attribute (`true` / `false` / `'mixed'`).
+   */
+  'aria-checked'?: boolean | 'false' | 'true' | 'mixed';
+  /** Tab order override. Defaults to `0` (focusable), `-1` when disabled. */
+  tabIndex?: number;
   'data-testid'?: string;
   children?: React.ReactNode;
 }

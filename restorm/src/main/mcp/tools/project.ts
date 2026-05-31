@@ -30,6 +30,23 @@ function broadcastSaveTrigger(): void {
 
 export function registerProjectTools(mcp: McpService): void {
   mcp.registerTool(
+    'list_recent_projects',
+    {
+      title: 'List recently opened projects',
+      description:
+        'List the recently opened .restorm projects (most recent first), so a client can discover what to open ' +
+        'with `open_project`. Each entry: `{ path, name, lastOpened (epoch ms), isFavorite }`. Dead paths are pruned. ' +
+        'Returns an empty list when none / before the FileService is ready.',
+      inputSchema: {} as Record<string, unknown>
+    },
+    () => {
+      if (!isFileServiceInitialized()) return jsonReply({ recent: [] })
+      const recent = getFileService().getRecentFiles().map((f) => ({ path: f.path, name: f.name, lastOpened: f.lastOpened, isFavorite: f.isFavorite }))
+      return jsonReply({ recent })
+    }
+  )
+
+  mcp.registerTool(
     'create_project',
     {
       title: 'Create new project',

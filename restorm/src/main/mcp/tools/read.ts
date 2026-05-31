@@ -24,7 +24,7 @@ import {
   isEnvironmentFolder,
   isRequest
 } from '../../../shared/models'
-import { flattenTree, listChildren } from '../tree'
+import { flattenTree, flattenScenarios, listChildren } from '../tree'
 
 const MAX_SEARCH_RESULTS = 50
 const ABS_MAX_SEARCH_RESULTS = 200
@@ -70,6 +70,20 @@ export function registerReadTools(mcp: McpService): void {
       }
       return jsonReply(listChildren(target).folders)
     }
+  )
+
+  mcp.registerTool(
+    'list_scenarios',
+    {
+      title: 'List scenarios',
+      description:
+        'List every scenario (dataflow graph) in the open restorm project. Returns ' +
+        '`[{ id, name, path, tags, nodeCount, edgeCount, parentId }]` — `path` is the folder-mode ' +
+        'breadcrumb ("<folder> / … / <name>"), a human-writable handle that avoids the uuid. ' +
+        'Use `get_scenario(id)` for the full graph, `run_scenario(id)` to execute it.',
+      inputSchema: {} as Record<string, unknown>
+    },
+    () => jsonReply(flattenScenarios(collectionStore.getCollections()))
   )
 
   mcp.registerTool(
@@ -268,6 +282,19 @@ export function registerReadTools(mcp: McpService): void {
     },
     () => jsonReply(getCurrentTabSnapshot())
   )
+
+  mcp.registerTool(
+    'list_favorites',
+    {
+      title: 'List favorite items',
+      description:
+        'Return the user\'s starred (favorite) items in the open project: `{ projectUuid, favorites: [{ id, name, type }] }` ' +
+        '(type = request | folder | env-folder | scenario). These are the same favorites toggled with `set_favorite` and shown ' +
+        'in the sidebar Favorites pane. Driven by a renderer push (like `get_current_tab`); empty before a project is open.',
+      inputSchema: {} as Record<string, unknown>
+    },
+    () => jsonReply(getFavoritesSnapshot())
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -276,3 +303,4 @@ export function registerReadTools(mcp: McpService): void {
 // ---------------------------------------------------------------------------
 
 import { getCurrentTabSnapshot, pickSelectedEnvId } from './activeState'
+import { getFavoritesSnapshot } from '../favoritesBridge'

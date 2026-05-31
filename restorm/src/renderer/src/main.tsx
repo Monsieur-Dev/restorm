@@ -58,6 +58,7 @@ import daTranslation from '../locales/da/translation.json'
 import nbTranslation from '../locales/nb/translation.json'
 import huTranslation from '../locales/hu/translation.json'
 import roTranslation from '../locales/ro/translation.json'
+import { installScenarioEngineConsoleLogger } from './services/scenarioEngineConsoleLogger'
 
 // Filter harmless Monaco cancellations so they don't spam the console
 const isMonacoCancellation = (reason: unknown): boolean => {
@@ -390,6 +391,11 @@ void Promise.all([initI18n(), graphqlReady])
         </ElectronCoreUiProvider>
       </React.StrictMode>
     )
+
+    // Temporary: stream every scenario-engine event to the DevTools
+    // console (run start/stop, action start/end, caller id, timestamp)
+    // until the in-app logs panel exists.
+    installScenarioEngineConsoleLogger()
   })
   .catch((error: unknown) => {
     logger.error('Failed to initialize i18n', { error: String(error) })

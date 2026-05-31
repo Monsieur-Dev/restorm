@@ -48,8 +48,8 @@ export const LogNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data,
           label: t('scenario.log.message', 'message'),
           port: { id: 'message', type: 'target' },
           content: (
-            <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
-              <div className="scn-field-caption">{t('scenario.log.message', 'message')}</div>
+            <div className="nodrag scn-stacked-field" onMouseDown={(e) => { e.stopPropagation() }}>
+              <span className="scn-port-label">{t('scenario.log.message', 'message')}</span>
               <TypedValueField
                 value={config['message'] !== undefined ? normalizeValueType(config['message']) : new StringValue('')}
                 onChange={(next) => { data.onSetConfig?.(id, { message: serializeValueForPersistence(next) }) }}
@@ -81,9 +81,9 @@ export const LogNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data,
       ]
     }
   ]
-  // Terminal sink: no output at all (no passthrough, and logging can't fail, so
-  // no error port either).
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} hasError={false} />
+  // Terminal sink: a header launch trigger (`in`) so it can be sequenced, but
+  // no output (no passthrough, and logging can't fail, so no error port either).
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} hasError={false} launchInput />
 }
 
 /**

@@ -10,6 +10,7 @@
 
 import { McpService } from 'electron-core-ui'
 import { registerActiveStateBridge } from './tools/activeState'
+import { registerFavoritesBridge } from './favoritesBridge'
 import { registerReadTools } from './tools/read'
 import { registerNavigationTools } from './tools/navigation'
 import { registerProjectTools } from './tools/project'
@@ -19,10 +20,13 @@ import { registerExecutionTools } from './tools/execute'
 import { registerWorkbenchTabTools } from './tools/workbenchTabs'
 import { registerScenarioTools } from './tools/scenario'
 import { registerScenarioRunTools } from './tools/scenarioRun'
+import { registerScenarioEngineTools } from './tools/scenarioEngineTools'
+import { installScenarioEngineIPC } from '../scenarioEngine/ipcBridge'
 import { registerResources } from './resources'
 
 export function registerRestormMcp(mcp: McpService): void {
   registerActiveStateBridge()
+  registerFavoritesBridge()
   registerReadTools(mcp)
   registerNavigationTools(mcp)
   registerProjectTools(mcp)
@@ -32,5 +36,7 @@ export function registerRestormMcp(mcp: McpService): void {
   registerWorkbenchTabTools(mcp)
   registerScenarioTools(mcp)
   registerScenarioRunTools(mcp)
+  registerScenarioEngineTools(mcp)
+  installScenarioEngineIPC()
   registerResources(mcp)
 }

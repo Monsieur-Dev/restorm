@@ -1,8 +1,9 @@
 import React from 'react'
-import { Modal } from 'electron-core-ui/renderer'
 import type { ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { ResponseHistoryTab } from '../RequestTabViews/ResponseHistoryTab'
 import { useTranslation } from 'react-i18next'
+import { Modal } from 'electron-core-ui/renderer'
+import './responseHistoryModal.css'
 
 export interface ResponseHistoryModalProps {
   isOpen: boolean
@@ -16,6 +17,12 @@ export interface ResponseHistoryModalProps {
   }
 }
 
+/**
+ * Response-history viewer, rendered as an ECUI `Modal` scoped to the request
+ * tab (`scopeToSelector=".restorm-workbench-tab"`) rather than the whole
+ * window — so the sidebar + other tabs stay interactive. The Modal supplies
+ * the backdrop, header (title + close), Escape / middle-click handling.
+ */
 export const ResponseHistoryModal: React.FC<ResponseHistoryModalProps> = ({
   isOpen,
   onClose,
@@ -27,12 +34,13 @@ export const ResponseHistoryModal: React.FC<ResponseHistoryModalProps> = ({
 
   return (
     <Modal
+      title={t('requestTab.tabs.responsesHistory')}
       isOpen={isOpen}
       onClose={onClose}
-      title={t('requestTab.tabs.responsesHistory')}
+      scopeToSelector=".restorm-workbench-tab"
       data-testid="response-history-modal"
     >
-      <div style={{ flex: 1, minHeight: 0, minWidth: 0 }}>
+      <div className="response-history-overlay-body">
         <ResponseHistoryTab
           requestId={requestId}
           refreshKey={refreshKey}

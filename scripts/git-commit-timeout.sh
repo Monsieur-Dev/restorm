@@ -1,24 +1,31 @@
 #!/usr/bin/env bash
-# Wrap `git commit` with a hard 15-minute timeout.
+# Wrap `git commit` with a hard 20-minute timeout.
 #
-# The repo's pre-commit hook runs the full e2e suite (roughly 5–6
-# minutes on a healthy host). On a slow / loaded machine, a single
-# Monaco timing flake can extend the run well past 15 minutes — at
-# which point we'd rather kill the commit and let the human investigate
-# than let an automated agent block for an hour.
+# The repo's pre-commit hook runs the full e2e suite. On a healthy host
+# the unit + e2e pass in well under the cap; on a loaded machine (a
+# concurrent VM / Docker / video on a 16-thread box with modest RAM) the
+# 33-test e2e suite alone can take 12–14 minutes and the whole run
+# brushes the cap. Past it we'd rather kill the commit and let the human
+# investigate than let an automated agent block for an hour. A single
+# Monaco timing flake hanging the run is the other case this guards.
 #
 # Usage: scripts/git-commit-timeout.sh <git commit args>
 #   e.g. scripts/git-commit-timeout.sh -m "feat: ..."
 #
 # Exit codes:
 #   0   commit succeeded
-#   124 timeout hit (15 min) — investigate the hook output
+#   124 timeout hit (20 min) — investigate the hook output
 #   *   git commit's own exit code (hook failure, conflict, etc.)
 
 set -uo pipefail
 
+# Wall-clock start — reported at the end + recorded in every journal entry
+# so a reader can see how long each attempt actually took (and how close to
+# the cap a "passing" run brushed).
+START_TS=$(date +%s)
+
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-TIMEOUT_SEC=900
+TIMEOUT_SEC=1200
 LOG_FILE="${REPO_ROOT}/.git/commit-timeout.log"
 # Commit-attempt journal, newest-on-top — every invocation prepends one
 # entry (success = single PASS line, failure = header + tail of hook
@@ -36,6 +43,11 @@ FLAKE_LOG="${REPO_ROOT}/.commit-flake-history.log"
 exec > >(tee "${LOG_FILE}") 2>&1
 timeout --foreground --kill-after=30 "${TIMEOUT_SEC}" git commit "$@"
 EXIT_CODE=$?
+
+# Elapsed wall-clock, formatted `<m>m<ss>s` — woven into the journal headers
+# below and echoed at the end.
+ELAPSED=$(( $(date +%s) - START_TS ))
+DURATION="$(printf '%dm%02ds' $((ELAPSED / 60)) $((ELAPSED % 60)))"
 
 # Append one line per invocation to the journal so a reader can compute
 # a flake rate over any date range (success vs fail counts). Headers
@@ -67,13 +79,13 @@ if [ "${EXIT_CODE}" -eq 0 ]; then
   # land?" forensics.
   NEW_HEAD="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
   {
-    echo "PASS at ${TS} — branch ${BRANCH} — commit ${NEW_HEAD}"
+    echo "PASS at ${TS} — branch ${BRANCH} — commit ${NEW_HEAD} — took ${DURATION}"
     echo "${SEP}"
     cat "${FLAKE_LOG}" 2>/dev/null || true
   } > "${TMP_LOG}"
 else
   {
-    echo "FAIL ${EXIT_CODE} at ${TS} — branch ${BRANCH} — HEAD ${HEAD_AT_ATTEMPT}"
+    echo "FAIL ${EXIT_CODE} at ${TS} — branch ${BRANCH} — HEAD ${HEAD_AT_ATTEMPT} — took ${DURATION}"
     echo
     tail -n 200 "${LOG_FILE}" 2>/dev/null || true
     echo
@@ -91,5 +103,7 @@ elif [ "${EXIT_CODE}" -ne 0 ]; then
   echo
   echo "git-commit-timeout: git commit failed with exit code ${EXIT_CODE} (likely pre-commit hook). Hook output saved to ${LOG_FILE}; appended to ${FLAKE_LOG}." >&2
 fi
+
+echo "git-commit-timeout: finished in ${DURATION} (exit ${EXIT_CODE})." >&2
 
 exit "${EXIT_CODE}"

@@ -7,6 +7,7 @@ import { scenarioNodeMeta } from '../scenarioNodeCatalogue'
 import { useScenarioNodeErrors } from '../scenarioErrorsContext'
 import { ROLE_COLOR } from '../scenarioGraphMapping'
 import { ScenarioNodeSection } from './ScenarioNodeSection'
+import { HeaderHoverTooltip } from '../../MainView/HeaderHoverTooltip'
 import { anchorColor, cellBody, portAnchorColor, inputFlowRingClass, outputFlowRingClass, cellInputRingClass, cellOutputRingClass } from './scenarioCellRender'
 import '../ScenarioNodeBox.css'
 
@@ -21,6 +22,26 @@ export interface ScenarioNodeBoxData extends Record<string, unknown> {
   collapsed?: boolean
   /** Per-kind config bag (e.g. bound request/scenario id + display label). */
   config?: Record<string, unknown>
+  /** Read-only flag set while the owning scenario is running: the box body
+   * is rendered inert (no field edits). Drag / connect / delete are blocked
+   * at the React Flow level by the editor. */
+  locked?: boolean
+  /** Bumped each time a run-log row pointing at this node is clicked — the
+   * box flashes its outline. The changing token remounts the flash overlay
+   * so the animation replays even on a repeat click of the same node. */
+  flashToken?: number
+  /** Set by the editor while a run is paused/active: the node completed since
+   * the last play, so it wears a yellow "just finished" frame. Cleared on the
+   * next play / resume, or when the node re-runs. */
+  justFinished?: boolean
+  /** A debug breakpoint is set on this action — the gutter circle glyph fills
+   * in (red). Click toggles via `onToggleBreakpoint`. User-scope, not the file. */
+  breakpoint?: boolean
+  /** A debug run is paused right before entering THIS action (breakpoint hit) —
+   * shows the "breakpoint reached" tooltip on the glyph + the yellow frame. */
+  breakpointPaused?: boolean
+  /** Toggle this action's breakpoint (set by the editor; user-scope store). */
+  onToggleBreakpoint?: (id: string) => void
   inputs: ScenarioPort[]
   outputs: ScenarioPort[]
   /** Run status for the live-execution overlay; populated when Phase 2
@@ -311,28 +332,29 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
   // The header "!" badge reveals a tooltip listing this box's errors on hover.
   const [showErrors, setShowErrors] = useState(false)
   const errBadgeRef = useRef<HTMLSpanElement>(null)
+  const breakpointRef = useRef<HTMLSpanElement>(null)
 
-  // Placeholder "running" animation — the BorderBeam orbits the box border
-  // continuously between Run and Pause (both wired on the inspector toolbar).
-  // The trail always finishes its current lap before unmounting, so a Pause
-  // click in the middle of a lap still completes that lap.
+  // "Running" animation — the BorderBeam orbits the box border continuously
+  // while the engine reports the node as running. The trail always finishes
+  // its current lap before unmounting, so the node finishing mid-lap still
+  // completes that lap.
   //
   // State machine:
-  //   - `data.fakeRunActive` (parent-owned): true between the user's Run
-  //     and Pause clicks. Single source of truth; toggled by the editor.
-  //   - `running` (local): drives the BorderBeam mount/unmount. Goes true
-  //     in sync with `fakeRunActive`; goes false only on the next
+  //   - `data.running` (engine-owned): true while the scheduler has this node
+  //     in flight. Single source of truth; injected by the editor.
+  //   - `running` (local): drives the BorderBeam mount/unmount. Goes true in
+  //     sync with `data.running`; goes false only on the next
   //     `animationiteration` after `wantsStopRef` flips true.
-  //   - `wantsStopRef` flips true the moment `fakeRunActive` goes false,
+  //   - `wantsStopRef` flips true the moment `data.running` goes false,
   //     so the unmount waits for lap completion.
   const BEAM_LAP_S = 1.5
   // `useReducer` instead of `useState` sidesteps the React Compiler's
   // set-state-in-effect rule for this prop-driven transition.
   const [running, dispatchRunning] = useReducer((_state: boolean, on: boolean) => on, false)
   const wantsStopRef = useRef(false)
-  const fakeRunActive = data['fakeRunActive'] === true
+  const engineRunning = data['running'] === true
   useEffect(() => {
-    if (fakeRunActive) {
+    if (engineRunning) {
       // Start (or stay) running. rAF ensures the mount lands before the
       // browser paints the trail, so we don't miss the first iteration.
       const raf = requestAnimationFrame(() => { dispatchRunning(true) })
@@ -344,7 +366,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
     // its lap first.
     wantsStopRef.current = true
     return undefined
-  }, [fakeRunActive])
+  }, [engineRunning])
   const onAnimationIteration = useCallback((e: React.AnimationEvent<HTMLDivElement>) => {
     // Only react to the BorderBeam's own keyframe, not other animations the
     // box might host (the collapse/expand transitions, the spinning status
@@ -358,7 +380,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
   return (
     <div
       ref={boxRef}
-      className={`scn-node ${selected ? 'scn-node-selected' : ''} ${collapsed ? 'scn-node-collapsed' : ''} ${boxInError ? 'scn-node-error' : ''}`}
+      className={`scn-node ${selected ? 'scn-node-selected' : ''} ${collapsed ? 'scn-node-collapsed' : ''} ${boxInError ? 'scn-node-error' : ''} ${data.locked ? 'scn-node-locked' : ''} ${data.justFinished === true ? 'scn-node-finished' : ''}`}
       data-testid={`scn-node-${data.kind}`}
       data-animating={animating ? 'true' : 'false'}
       data-running={running ? 'true' : 'false'}
@@ -396,6 +418,10 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
           onClick={onToggle}
           options={{ ariaLabel: collapsed ? t('scenario.node.expand', 'Expand') : t('scenario.node.collapse', 'Collapse') }}
         />
+        {/* Spacer pushes the right cluster (error badge then breakpoint, in that
+         * order) to the header's right edge — no per-item `margin-left:auto`,
+         * which would split the gap and strand the breakpoint mid-header. */}
+        <span className="scn-node-header-spacer" aria-hidden="true" />
         {boxInError && (
           <span
             ref={errBadgeRef}
@@ -408,7 +434,34 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
             <i className="codicon codicon-error" aria-hidden="true" />
           </span>
         )}
+        {data.onToggleBreakpoint && (
+          <HeaderHoverTooltip label={t('scenario.breakpoint.toggle', 'Toggle breakpoint (F9)')} suppressed={data.breakpointPaused === true}>
+            <span
+              ref={breakpointRef}
+              className={`scn-node-breakpoint nodrag${data.breakpoint ? ' is-set' : ''}${data.breakpointPaused ? ' is-paused' : ''}`}
+              data-testid="scn-node-breakpoint"
+              aria-label={data.breakpoint ? t('scenario.breakpoint.remove', 'Remove breakpoint') : t('scenario.breakpoint.add', 'Add breakpoint')}
+              onClick={(e) => { e.stopPropagation(); data.onToggleBreakpoint?.(id) }}
+            >
+              <i className={`codicon codicon-${data.breakpoint ? 'circle-filled' : 'circle-outline'}`} aria-hidden="true" />
+            </span>
+          </HeaderHoverTooltip>
+        )}
       </div>
+
+      {data.breakpointPaused === true && (
+        <Tooltip
+          targetRef={breakpointRef}
+          show
+          placement="below"
+          data-testid="scn-node-breakpoint-tip"
+          content={
+            <div className="scn-node-breakpoint-tip">
+              {t('scenario.breakpoint.reached', 'Breakpoint reached — this action has not run yet. Press F5 to resume, or F7 to step.')}
+            </div>
+          }
+        />
+      )}
 
       {boxInError && (
         <Tooltip
@@ -501,6 +554,9 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
           colorFrom="#facc15"
           colorTo="#22c55e"
         />
+      )}
+      {data.flashToken !== undefined && (
+        <div key={data.flashToken} className="scn-node-flash-ring" aria-hidden="true" />
       )}
     </div>
   )

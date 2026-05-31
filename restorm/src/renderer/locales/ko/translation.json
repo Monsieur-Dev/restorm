@@ -257,7 +257,8 @@
     "addHeader": "헤더 추가",
     "addParam": "매개변수 추가",
     "environmentSelector": {
-      "noEnvironment": "환경 없음"
+      "noEnvironment": "환경 없음",
+      "switchTooltip": "환경 전환"
     },
     "body": {
       "fileLabel": "파일 또는 URL:",
@@ -507,7 +508,8 @@
   "common": {
     "cancel": "취소",
     "save": "저장",
-    "remove": "제거"
+    "remove": "제거",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -794,6 +796,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "시나리오 실행 중에는 편집이 잠깁니다",
     "switch": {
       "addCase": "케이스 추가",
       "removeCase": "케이스 제거",
@@ -821,6 +824,7 @@
     },
     "filter": {
       "items": "항목",
+      "rejected": "제외됨",
       "kept": "유지됨",
       "keepWhere": "조건 유지"
     },
@@ -872,9 +876,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "필수",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "호출하는 시나리오에 필수"
     },
     "runScenario": {
       "orphanInput": "하위 시나리오에 일치하는 매개변수 \"{{name}}\"가 없습니다",
@@ -939,7 +943,14 @@
       "pause": "일시 중지",
       "noRunsHint": "이 요청의 최근 실행 결과가 없습니다 — 여기서 실행해 시나리오 미리보기를 채우세요.",
       "syntheticInfo": "이 요청의 문서에서 생성된 예시 데이터입니다.",
-      "syntheticRunHint": "예시 데이터 — 실제 결과로 바꾸려면 요청을 실행하세요."
+      "syntheticRunHint": "예시 데이터 — 실제 결과로 바꾸려면 요청을 실행하세요.",
+      "stop": "중지",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "clearLogs": "로그 지우기",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "{{level}} 로그 표시",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -953,6 +964,45 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "입력 필요"
+    },
+    "runHistory": {
+      "title": "실행 기록",
+      "tooltip": "실행 기록",
+      "empty": "기록된 실행이 없습니다",
+      "noLogs": "이 실행에 대한 로그가 없습니다",
+      "logsTab": "Logs",
+      "graphTab": "그래프",
+      "noGraph": "이 실행에 대한 시나리오 스냅샷이 없습니다",
+      "pin": "고정",
+      "unpin": "고정 해제"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "중단점 추가",
+      "remove": "중단점 제거",
+      "toggle": "중단점 전환 (F9)",
+      "reached": "중단점에 도달했습니다 — 이 작업은 아직 실행되지 않았습니다. F5를 눌러 계속하거나 F7으로 단계 실행하세요.",
+      "shortcut": "F9"
     }
   }
 }

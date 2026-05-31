@@ -258,7 +258,8 @@
     "addHeader": "Add header",
     "addParam": "Add param",
     "environmentSelector": {
-      "noEnvironment": "No environment"
+      "noEnvironment": "No environment",
+      "switchTooltip": "Switch environment"
     },
     "body": {
       "fileLabel": "File or URL:",
@@ -508,7 +509,8 @@
   "common": {
     "cancel": "Cancel",
     "save": "Save",
-    "remove": "Remove"
+    "remove": "Remove",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -795,6 +797,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Editing locked while the scenario is running",
     "switch": {
       "addCase": "Add case",
       "removeCase": "Remove case",
@@ -822,6 +825,7 @@
     },
     "filter": {
       "items": "items",
+      "rejected": "rejected",
       "kept": "kept",
       "keepWhere": "keep where"
     },
@@ -873,9 +877,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Required",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Required by calling scenarios"
     },
     "runScenario": {
       "orphanInput": "No matching parameter \"{{name}}\" in the sub-scenario",
@@ -940,7 +944,14 @@
       "pause": "Pause",
       "noRunsHint": "No recent run for this request — run it from here to populate the scenario preview.",
       "syntheticInfo": "Example data generated from this request's documentation.",
-      "syntheticRunHint": "Sample data — run the request to replace it with a real result."
+      "syntheticRunHint": "Sample data — run the request to replace it with a real result.",
+      "stop": "Stop",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "clearLogs": "Clear logs",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "Show {{level}} logs",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -954,6 +965,45 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Input requested"
+    },
+    "runHistory": {
+      "title": "Run history",
+      "tooltip": "Run history",
+      "empty": "No run recorded yet",
+      "noLogs": "No log for this run",
+      "logsTab": "Logs",
+      "graphTab": "Graph",
+      "noGraph": "No scenario snapshot for this run",
+      "pin": "Pin",
+      "unpin": "Unpin"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "Add breakpoint",
+      "remove": "Remove breakpoint",
+      "toggle": "Toggle breakpoint (F9)",
+      "reached": "Breakpoint reached — this action has not run yet. Press F5 to resume, or F7 to step.",
+      "shortcut": "F9"
     }
   }
 }

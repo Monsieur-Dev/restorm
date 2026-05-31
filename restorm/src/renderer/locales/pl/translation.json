@@ -260,7 +260,8 @@
     "addHeader": "Dodaj nagłówek",
     "addParam": "Dodaj parametr",
     "environmentSelector": {
-      "noEnvironment": "Brak środowiska"
+      "noEnvironment": "Brak środowiska",
+      "switchTooltip": "Przełącz środowisko"
     },
     "body": {
       "fileLabel": "Plik lub URL:",
@@ -510,7 +511,8 @@
   "common": {
     "cancel": "Anuluj",
     "save": "Zapisz",
-    "remove": "Usuń"
+    "remove": "Usuń",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -797,6 +799,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Edycja zablokowana podczas działania scenariusza",
     "switch": {
       "addCase": "Dodaj przypadek",
       "removeCase": "Usuń przypadek",
@@ -824,6 +827,7 @@
     },
     "filter": {
       "items": "elementy",
+      "rejected": "odrzucone",
       "kept": "zachowane",
       "keepWhere": "zachowaj gdy"
     },
@@ -875,9 +879,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Wymagane",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Wymagane dla scenariuszy wywołujących"
     },
     "runScenario": {
       "orphanInput": "Brak pasującego parametru „{{name}}\" w podscenariuszu",
@@ -942,7 +946,14 @@
       "pause": "Wstrzymaj",
       "noRunsHint": "Brak ostatniego wykonania dla tego żądania — uruchom je stąd, aby wypełnić podgląd scenariusza.",
       "syntheticInfo": "Przykładowe dane wygenerowane z dokumentacji tego żądania.",
-      "syntheticRunHint": "Przykładowe dane — uruchom żądanie, aby zastąpić je rzeczywistym wynikiem."
+      "syntheticRunHint": "Przykładowe dane — uruchom żądanie, aby zastąpić je rzeczywistym wynikiem.",
+      "stop": "Zatrzymaj",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "clearLogs": "Wyczyść logi",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "Pokaż logi {{level}}",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -956,6 +967,45 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Wymagane dane"
+    },
+    "runHistory": {
+      "title": "Historia uruchomień",
+      "tooltip": "Historia uruchomień",
+      "empty": "Brak zarejestrowanych uruchomień",
+      "noLogs": "Brak dziennika dla tego uruchomienia",
+      "logsTab": "Logs",
+      "graphTab": "Graf",
+      "noGraph": "Brak migawki scenariusza dla tego uruchomienia",
+      "pin": "Przypnij",
+      "unpin": "Odepnij"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "Dodaj punkt przerwania",
+      "remove": "Usuń punkt przerwania",
+      "toggle": "Przełącz punkt przerwania (F9)",
+      "reached": "Osiągnięto punkt przerwania — ta akcja nie została jeszcze wykonana. Naciśnij F5, aby wznowić, lub F7, aby wykonać krok.",
+      "shortcut": "F9"
     }
   }
 }

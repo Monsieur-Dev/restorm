@@ -258,7 +258,8 @@
     "addHeader": "Header hinzufügen",
     "addParam": "Parameter hinzufügen",
     "environmentSelector": {
-      "noEnvironment": "Keine Umgebung"
+      "noEnvironment": "Keine Umgebung",
+      "switchTooltip": "Umgebung wechseln"
     },
     "body": {
       "fileLabel": "Datei oder URL:",
@@ -508,7 +509,8 @@
   "common": {
     "cancel": "Abbrechen",
     "save": "Speichern",
-    "remove": "Entfernen"
+    "remove": "Entfernen",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -795,6 +797,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Bearbeitung gesperrt, während das Szenario läuft",
     "switch": {
       "addCase": "Fall hinzufügen",
       "removeCase": "Fall entfernen",
@@ -822,6 +825,7 @@
     },
     "filter": {
       "items": "Elemente",
+      "rejected": "aussortiert",
       "kept": "behalten",
       "keepWhere": "behalten wenn"
     },
@@ -873,9 +877,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Erforderlich",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Erforderlich für aufrufende Szenarien"
     },
     "runScenario": {
       "orphanInput": "Kein passender Parameter \"{{name}}\" im Unterszenario",
@@ -940,7 +944,14 @@
       "pause": "Pause",
       "noRunsHint": "Keine aktuelle Ausführung für diese Anfrage — führe sie hier aus, um die Szenario-Vorschau zu füllen.",
       "syntheticInfo": "Beispieldaten generiert aus der Dokumentation dieser Anfrage.",
-      "syntheticRunHint": "Beispieldaten — führen Sie die Anfrage aus, um sie durch ein echtes Ergebnis zu ersetzen."
+      "syntheticRunHint": "Beispieldaten — führen Sie die Anfrage aus, um sie durch ein echtes Ergebnis zu ersetzen.",
+      "stop": "Stopp",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "clearLogs": "Logs löschen",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "{{level}}-Logs anzeigen",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -954,6 +965,45 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Ausführungsparameter",
+      "run": "Ausführen",
+      "midRunTitle": "Eingabe angefordert"
+    },
+    "runHistory": {
+      "title": "Ausführungsverlauf",
+      "tooltip": "Ausführungsverlauf",
+      "empty": "Noch keine Ausführung aufgezeichnet",
+      "noLogs": "Kein Log für diese Ausführung",
+      "logsTab": "Logs",
+      "graphTab": "Graph",
+      "noGraph": "Kein Szenario-Snapshot für diese Ausführung",
+      "pin": "Anheften",
+      "unpin": "Lösen"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "Haltepunkt hinzufügen",
+      "remove": "Haltepunkt entfernen",
+      "toggle": "Haltepunkt umschalten (F9)",
+      "reached": "Haltepunkt erreicht – diese Aktion wurde noch nicht ausgeführt. Drücken Sie F5 zum Fortsetzen oder F7 zum Einzelschritt.",
+      "shortcut": "F9"
     }
   }
 }

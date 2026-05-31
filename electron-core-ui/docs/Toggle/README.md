@@ -13,7 +13,7 @@ The single `checked` prop accepts either a boolean (binary checked / unchecked) 
 ```typescript
 export type ToggleState = 'checked' | 'unchecked' | 'indeterminate';
 export type ToggleValue = boolean | 'indeterminate';
-export type ToggleAppearance = 'switch' | 'star';
+export type ToggleAppearance = 'switch' | 'star' | 'button';
 
 export interface IToggleStyles {
   readonly inputActiveOptionBorder: string | undefined;
@@ -213,7 +213,7 @@ Reusable steps from `electron-core-ui/testing/playwright-bdd`:
 
 ## Appearance variants
 
-By default the Toggle renders the existing checkbox-like square with a centered codicon (`appearance="switch"`, the default). Pass `appearance="star"` to swap the entire visual for a Lottie-driven favorite star — same `checked` / `onChange` contract, same keyboard handling, different paint.
+By default the Toggle renders the existing checkbox-like square with a centered codicon (`appearance="switch"`, the default). Pass `appearance="star"` to swap the entire visual for a Lottie-driven favorite star, or `appearance="button"` for a small toolbar-style button — all three share the same `checked` / `onChange` contract and keyboard handling, only the paint differs.
 
 ```tsx
 <Toggle
@@ -231,3 +231,21 @@ By default the Toggle renders the existing checkbox-like square with a centered 
 - The `'indeterminate'` value is treated as `'unchecked'`; `icon` / `indeterminateIcon` / `styles` props have no effect.
 - `aria-label` (or string children, falling back to `'Toggle'`) is the accessible name. Children are still rendered as a label `<span>` next to the star — pass `aria-label` and skip children if you want a label-less star (e.g. inside a list row that already names the item).
 - The lottie runtime is **lazy-loaded**: consumers that never use `appearance="star"` don't bundle it. First mount of a star Toggle resolves the dynamic import (Suspense fallback is a blank 32×32 box).
+
+### `'button'` specifics
+
+Renders as a small ECUI button (`.button.small-button`) that reads **pressed** (active/depressed, using the find-widget `--inputOption-active*` tokens) when `checked` is `true` and normal when `false`. Built for a row of filter toggles where each button shows an icon or a colored dot rather than a text label.
+
+```tsx
+<Toggle
+  appearance="button"
+  checked={showErrors}
+  onChange={(next) => { setShowErrors(next) }}
+  aria-label="Show error logs"
+>
+  <span className="my-level-dot" aria-hidden="true" />
+</Toggle>
+```
+
+- The `children` are the button content (an icon / colored dot). `icon` / `indeterminateIcon` / `styles` have no effect and `'indeterminate'` reads as unchecked.
+- Pass `aria-label` for the accessible name when the children are purely decorative (e.g. a colored dot).

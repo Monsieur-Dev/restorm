@@ -33,6 +33,8 @@ const mockState = {
   createScenario: vi.fn<(parentId: string, init: { name: string }) => FakeScenario>()
 }
 
+const updateScenarioSpy = vi.fn<(id: string, updates: Record<string, unknown>) => unknown>()
+
 const broadcastSpy = vi.fn<() => void>()
 const getAllWindowsSpy = vi.fn<() => unknown[]>(() => [])
 
@@ -43,13 +45,16 @@ vi.mock('electron', () => ({
 vi.mock('../../services/CollectionStore', () => ({
   collectionStore: {
     findById: (id: string) => mockState.findById(id),
-    createScenario: (parentId: string, init: { name: string }) => mockState.createScenario(parentId, init)
+    createScenario: (parentId: string, init: { name: string }) => mockState.createScenario(parentId, init),
+    updateScenario: (id: string, updates: Record<string, unknown>) => updateScenarioSpy(id, updates)
   }
 }))
 
 vi.mock('./import', () => ({
   broadcastTreeReplace: () => { broadcastSpy() }
 }))
+
+vi.mock('./scenario', () => ({ broadcastScenario: () => { broadcastSpy() } }))
 
 function parse(result: { content: { type: 'text'; text: string }[] }): Record<string, unknown> {
   return JSON.parse(result.content[0]?.text ?? '{}') as Record<string, unknown>
@@ -61,6 +66,7 @@ describe('create_scenario MCP tool', () => {
   beforeEach(async () => {
     mockState.findById.mockReset()
     mockState.createScenario.mockReset()
+    updateScenarioSpy.mockReset()
     broadcastSpy.mockReset()
     getAllWindowsSpy.mockReset()
     getAllWindowsSpy.mockImplementation(() => [])
@@ -116,5 +122,22 @@ describe('create_scenario MCP tool', () => {
     expect(res.isError).toBeUndefined()
     expect(parse(res).parentId).toBe('parent-scn')
     expect(mockState.createScenario).toHaveBeenCalledWith('parent-scn', { name: 'Child' })
+  })
+
+  it('rename_item renames a scenario through updateScenario', () => {
+    const scenario: FakeScenario = { type: 'scenario', id: 's1', name: 'Old', nodes: [], edges: [] }
+    mockState.findById.mockImplementation((id) => (id === 's1' ? scenario : null))
+    updateScenarioSpy.mockImplementation((id, updates) => {
+      if (id !== 's1') return null
+      Object.assign(scenario, updates)
+      return scenario
+    })
+    const res = mcp.invoke('rename_item', { id: 's1', newName: 'New' })
+    expect(res.isError).toBeUndefined()
+    expect(parse(res)).toEqual({ id: 's1', kind: 'scenario', name: 'New' })
+    expect(updateScenarioSpy).toHaveBeenCalledWith('s1', { name: 'New' })
+    expect(scenario.name).toBe('New')
+    // broadcastScenario (mocked onto broadcastSpy) repaints editor + sidebar.
+    expect(broadcastSpy).toHaveBeenCalled()
   })
 })

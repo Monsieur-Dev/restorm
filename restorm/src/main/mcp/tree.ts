@@ -10,12 +10,14 @@ import {
   type EnvironmentFolder,
   type FolderItem,
   type Request,
+  type Scenario,
   isAnyFolder,
   isEnvironmentFolder,
   isFolder,
-  isRequest
+  isRequest,
+  isScenario
 } from '../../shared/models'
-import type { ListedFolder, ListedRequest, FolderKind } from './types'
+import type { ListedFolder, ListedRequest, ListedScenario, FolderKind } from './types'
 
 /**
  * Default protocol value when a request type field is unexpectedly
@@ -109,6 +111,48 @@ function walkAndCollect(folder: Folder | EnvironmentFolder, folders: ListedFolde
       walkAndCollect(item, folders, requests)
     } else if (isRequest(item)) {
       requests.push(projectRequest(item, folder.id))
+    }
+  }
+}
+
+export function projectScenario(scenario: Scenario, parentId: string | null, path: string): ListedScenario {
+  return {
+    id: scenario.id,
+    name: scenario.name,
+    path,
+    tags: scenario.tags,
+    nodeCount: scenario.nodes.length,
+    edgeCount: scenario.edges.length,
+    parentId
+  }
+}
+
+/**
+ * Every scenario reachable from the roots, each with its `parentId` and a
+ * folder-mode `path` (ancestor container names + the scenario name). Descends
+ * through folders, env-folders AND scenarios (a scenario is folder-like and
+ * may nest other scenarios). Used by `list_scenarios()`.
+ */
+export function flattenScenarios(roots: readonly (Folder | EnvironmentFolder)[]): ListedScenario[] {
+  const out: ListedScenario[] = []
+  for (const root of roots) walkForScenarios(root, root.name, root.id, out)
+  return out
+}
+
+function walkForScenarios(
+  container: Folder | EnvironmentFolder | Scenario,
+  prefix: string,
+  parentId: string,
+  out: ListedScenario[]
+): void {
+  const items = isScenario(container) ? (container.items ?? []) : container.items
+  for (const item of items) {
+    if (isScenario(item)) {
+      const path = `${prefix} / ${item.name}`
+      out.push(projectScenario(item, parentId, path))
+      walkForScenarios(item, path, item.id, out)
+    } else if (isFolder(item) || isEnvironmentFolder(item)) {
+      walkForScenarios(item, `${prefix} / ${item.name}`, item.id, out)
     }
   }
 }

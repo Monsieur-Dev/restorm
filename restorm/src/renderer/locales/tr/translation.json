@@ -258,7 +258,8 @@
     "addHeader": "Başlık ekle",
     "addParam": "Parametre ekle",
     "environmentSelector": {
-      "noEnvironment": "Ortam yok"
+      "noEnvironment": "Ortam yok",
+      "switchTooltip": "Ortamı değiştir"
     },
     "body": {
       "fileLabel": "Dosya veya URL:",
@@ -508,7 +509,8 @@
   "common": {
     "cancel": "İptal",
     "save": "Kaydet",
-    "remove": "Kaldır"
+    "remove": "Kaldır",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -795,6 +797,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Senaryo çalışırken düzenleme kilitli",
     "switch": {
       "addCase": "Durum ekle",
       "removeCase": "Durumu kaldır",
@@ -822,6 +825,7 @@
     },
     "filter": {
       "items": "öğeler",
+      "rejected": "elenenler",
       "kept": "tutulanlar",
       "keepWhere": "şu durumda tut"
     },
@@ -873,9 +877,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Zorunlu",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Çağıran senaryolar için gerekli"
     },
     "runScenario": {
       "orphanInput": "Alt senaryoda eşleşen \"{{name}}\" parametresi yok",
@@ -940,7 +944,14 @@
       "pause": "Duraklat",
       "noRunsHint": "Bu istek için son çalışma yok — senaryo önizlemesini doldurmak için buradan çalıştır.",
       "syntheticInfo": "Bu isteğin belgelerinden oluşturulan örnek veriler.",
-      "syntheticRunHint": "Örnek veriler — gerçek bir sonuçla değiştirmek için isteği çalıştırın."
+      "syntheticRunHint": "Örnek veriler — gerçek bir sonuçla değiştirmek için isteği çalıştırın.",
+      "stop": "Durdur",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "clearLogs": "Günlükleri temizle",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "{{level}} günlüklerini göster",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -954,6 +965,45 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Giriş gerekli"
+    },
+    "runHistory": {
+      "title": "Çalıştırma geçmişi",
+      "tooltip": "Çalıştırma geçmişi",
+      "empty": "Henüz çalıştırma kaydı yok",
+      "noLogs": "Bu çalıştırma için günlük yok",
+      "logsTab": "Logs",
+      "graphTab": "Grafik",
+      "noGraph": "Bu çalıştırma için senaryo anlık görüntüsü yok",
+      "pin": "Sabitle",
+      "unpin": "Sabitlemeyi kaldır"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "Kesme noktası ekle",
+      "remove": "Kesme noktasını kaldır",
+      "toggle": "Kesme noktasını değiştir (F9)",
+      "reached": "Kesme noktasına ulaşıldı — bu eylem henüz çalıştırılmadı. Devam etmek için F5'e, adımlamak için F7'ya basın.",
+      "shortcut": "F9"
     }
   }
 }

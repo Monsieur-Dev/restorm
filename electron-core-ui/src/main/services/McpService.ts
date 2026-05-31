@@ -26,6 +26,16 @@ export interface McpServiceOptions {
   serverInfo?: { name: string; version: string }
 
   /**
+   * Optional onboarding text forwarded to MCP clients in the
+   * `initialize` response (`instructions`). A new client (often an AI
+   * agent) reads this first to orient itself — what the server is for,
+   * the core workflows, the key tool groups, conventions. Keep it a
+   * concise but self-sufficient "read me first" so a fresh client can
+   * use the server out-of-the-box without trial-and-error.
+   */
+  instructions?: string
+
+  /**
    * Optional bearer token. When set to a non-empty string, every
    * incoming HTTP request must carry `Authorization: Bearer <token>`;
    * mismatched / missing headers get a `401 Unauthorized`. When omitted
@@ -1943,7 +1953,11 @@ export class McpService {
       let transport: StreamableHTTPServerTransport | null = null
       try {
         const serverInfo = this.options.serverInfo ?? { name: 'electron-core-ui-mcp', version: '0.1.0' }
-        server = new McpServer(serverInfo)
+        // `instructions` rides the `initialize` response so a fresh client
+        // (e.g. an AI agent) gets its orientation up front.
+        server = this.options.instructions
+          ? new McpServer(serverInfo, { instructions: this.options.instructions })
+          : new McpServer(serverInfo)
         for (const tool of this.tools) {
           // Cast through `unknown` — the SDK's overloads union expects
           // very specific shapes per overload; we already validate the

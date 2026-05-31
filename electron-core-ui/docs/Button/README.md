@@ -49,10 +49,19 @@ interface ButtonProps {
   className?: string
   style?: React.CSSProperties
   id?: string
+  /** ARIA role of the surface. Defaults to `'button'`. Set `'checkbox'`
+   *  (with `aria-checked`) to reuse the Button surface as a toggle. */
+  role?: React.AriaRole
+  /** Checked state for a toggle/checkbox-role Button → `aria-checked`. */
+  'aria-checked'?: boolean | 'false' | 'true' | 'mixed'
+  /** Tab order override. Defaults to `0`, `-1` when disabled. */
+  tabIndex?: number
   'data-testid'?: string
   children?: React.ReactNode
 }
 ```
+
+> **Toggle surface.** Pass `role="checkbox"` + `aria-checked` to reuse the themed Button as a small toolbar toggle (pressed/normal) instead of hand-styling a bare anchor — this is exactly how `Toggle`'s `appearance="button"` is built. Button's own keyboard handler toggles on Enter / Space, so the consumer only wires `onClick`.
 
 #### Usage
 

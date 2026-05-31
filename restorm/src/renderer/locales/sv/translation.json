@@ -258,7 +258,8 @@
     "addHeader": "Lägg till header",
     "addParam": "Lägg till parameter",
     "environmentSelector": {
-      "noEnvironment": "Ingen miljö"
+      "noEnvironment": "Ingen miljö",
+      "switchTooltip": "Byt miljö"
     },
     "body": {
       "fileLabel": "Fil eller URL:",
@@ -508,7 +509,8 @@
   "common": {
     "cancel": "Avbryt",
     "save": "Spara",
-    "remove": "Ta bort"
+    "remove": "Ta bort",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -795,6 +797,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Redigering låst medan scenariot körs",
     "switch": {
       "addCase": "Lägg till fall",
       "removeCase": "Ta bort fall",
@@ -822,6 +825,7 @@
     },
     "filter": {
       "items": "objekt",
+      "rejected": "bortvalda",
       "kept": "behållna",
       "keepWhere": "behåll om"
     },
@@ -873,9 +877,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Obligatoriskt",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Krävs för anropande scenarier"
     },
     "runScenario": {
       "orphanInput": "Ingen matchande parameter \"{{name}}\" i underscenariot",
@@ -940,7 +944,14 @@
       "pause": "Pausa",
       "noRunsHint": "Ingen nyligen utförd körning för denna förfrågan — kör den härifrån för att fylla scenariot.",
       "syntheticInfo": "Exempeldata genererad från denna förfrågans dokumentation.",
-      "syntheticRunHint": "Exempeldata — kör förfrågan för att ersätta dem med ett verkligt resultat."
+      "syntheticRunHint": "Exempeldata — kör förfrågan för att ersätta dem med ett verkligt resultat.",
+      "stop": "Stopp",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "clearLogs": "Rensa loggar",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "Visa {{level}}-loggar",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -954,6 +965,45 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Inmatning krävs"
+    },
+    "runHistory": {
+      "title": "Körhistorik",
+      "tooltip": "Körhistorik",
+      "empty": "Inga körningar registrerade ännu",
+      "noLogs": "Ingen logg för denna körning",
+      "logsTab": "Logs",
+      "graphTab": "Graf",
+      "noGraph": "Ingen scenario-ögonblicksbild för denna körning",
+      "pin": "Fäst",
+      "unpin": "Lossa"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "Lägg till brytpunkt",
+      "remove": "Ta bort brytpunkt",
+      "toggle": "Växla brytpunkt (F9)",
+      "reached": "Brytpunkt nådd – den här åtgärden har inte körts ännu. Tryck på F5 för att återuppta eller F7 för att stega.",
+      "shortcut": "F9"
     }
   }
 }

@@ -17,12 +17,13 @@ import { collectionStore } from '../../services/CollectionStore'
 import type { Scenario } from '../../../shared/models/Scenario'
 import type { ScenarioNode, ScenarioEdge, ScenarioNodeKind, ScenarioPort } from '../../../shared/types/scenario'
 import { defaultPortsForKind, isValidScenarioConnection, outputPortFlow, inputPortFlow, deriveRunScenarioPorts } from '../../../shared/scenarioNodePorts'
+import { SCENARIO_KIND_DOCS } from '../../../shared/scenarioKindDocs'
 import { STATIC_PREVIEW_KINDS, staticScenarioPreview, singleDeepPath, expectsObjectInput, type StaticPreviewEdge } from '../../../shared/utils/scenarioStaticPreview'
 import { broadcastTreeReplace } from './import'
 
 const SCENARIO_KINDS = [
-  'input', 'output', 'if', 'switch', 'httpRequest', 'runScenario', 'forEach', 'aggregate', 'map',
-  'filter', 'wait', 'waitUntil', 'now', 'arithmetic', 'comparator', 'boolean', 'object',
+  'input', 'output', 'if', 'switch', 'httpRequest', 'runScenario', 'forEach', 'for', 'while', 'doWhile',
+  'aggregate', 'map', 'filter', 'wait', 'waitUntil', 'now', 'arithmetic', 'comparator', 'boolean', 'object',
   'setVariable', 'getVariable', 'transform', 'log', 'assert'
 ] as const
 
@@ -59,11 +60,44 @@ function effectivePorts(node: ScenarioNode): { inputs: ScenarioPort[]; outputs: 
     const derived = deriveRunScenarioPorts(sub as unknown as Parameters<typeof deriveRunScenarioPorts>[0])
     return { inputs: [...node.inputs, ...derived.inputs], outputs: [...node.outputs, ...derived.outputs] }
   }
+  if (node.kind === 'httpRequest' || node.kind === 'request') {
+    // Each writable slot of the bound request (path param / header /
+    // query param / body) is exposed as a derived input port so a link
+    // can short-circuit its resolution. Port ids mirror the renderer's
+    // RequestNodeBox: `pathParams:<key>`, `headers:<key>`,
+    // `params:<key>`, `body`. The engine's httpRequest executor reads
+    // these same ids.
+    return { inputs: [...node.inputs, ...deriveRequestSlotPorts(node)], outputs: node.outputs }
+  }
   return { inputs: node.inputs, outputs: node.outputs }
 }
 
+/** Derived input ports for an httpRequest node's writable slots. */
+function deriveRequestSlotPorts(node: ScenarioNode): ScenarioPort[] {
+  const requestId = typeof node.config['requestId'] === 'string' ? node.config['requestId'] : undefined
+  if (!requestId) return []
+  const req = collectionStore.findById(requestId) as { headers?: KV[]; params?: KV[]; pathParams?: KV[]; body?: unknown } | null
+  if (!req) return []
+  const ports: ScenarioPort[] = []
+  const add = (prefix: 'pathParams' | 'headers' | 'params', kvs: KV[] | undefined): void => {
+    for (const kv of kvs ?? []) {
+      if (kv.enabled === false || !kv.key) continue
+      ports.push({ id: `${prefix}:${kv.key}`, name: kv.key, dataType: 'any', flow: 'value' })
+    }
+  }
+  add('pathParams', req.pathParams)
+  add('headers', req.headers)
+  add('params', req.params)
+  if (req.body !== undefined && req.body !== null) {
+    ports.push({ id: 'body', name: 'body', dataType: 'any', flow: 'value' })
+  }
+  return ports
+}
+
+interface KV { key: string; value?: unknown; enabled?: boolean }
+
 /** Push the mutated scenario to any open editor + sidebar, then autosave. */
-function broadcastScenario(scenario: Scenario): void {
+export function broadcastScenario(scenario: Scenario): void {
   for (const win of BrowserWindow.getAllWindows()) {
     if (win.isDestroyed()) continue
     win.webContents.send('mcp:scenario-updated', {
@@ -98,7 +132,45 @@ function nodeView(n: ScenarioNode, rects?: Record<string, NodeRect>): Record<str
   }
 }
 
+/** Compose a self-describing record for one node kind: its purpose, its
+ * default ports (id + name + flow class + role), and its config keys. */
+function describeScenarioKind(kind: ScenarioNodeKind): Record<string, unknown> {
+  const { inputs, outputs } = defaultPortsForKind(kind)
+  const doc = SCENARIO_KIND_DOCS[kind]
+  const inPort = (p: ScenarioPort): Record<string, unknown> => ({ id: p.id, name: p.name || p.id, flow: inputPortFlow(inputs, p.id, kind), ...(p.role ? { role: p.role } : {}) })
+  const outPort = (p: ScenarioPort): Record<string, unknown> => ({ id: p.id, name: p.name || p.id, flow: outputPortFlow(outputs, p.id, kind), ...(p.role ? { role: p.role } : {}) })
+  return {
+    kind,
+    summary: doc.summary,
+    inputs: inputs.map(inPort),
+    // The `error` output is implicit on every box (drawn by the editor, not in
+    // the model) — surface it so a client knows it can wire failure handling.
+    outputs: [...outputs.map(outPort), { id: 'error', name: 'error', flow: 'both' }],
+    ...(doc.config && Object.keys(doc.config).length > 0 ? { config: doc.config } : {})
+  }
+}
+
 export function registerScenarioTools(mcp: McpService): void {
+  mcp.registerTool(
+    'describe_scenario_kinds',
+    {
+      title: 'Describe scenario node kinds',
+      description:
+        'Self-describing catalogue for authoring scenario graphs: for each node kind, its purpose (`summary`), its default ' +
+        'input/output ports (`id`, `name`, `flow` = value | signal | both, and `role`), and its `config` keys. The implicit ' +
+        '`error` output is included. Call this BEFORE create_scenario_node so you wire ports + set config correctly. Pass ' +
+        '`kind` to get one; omit for all.',
+      inputSchema: {
+        kind: z.enum(SCENARIO_KINDS).optional().describe('Limit to a single kind; omit for the full catalogue.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const one = typeof args['kind'] === 'string' ? args['kind'] as ScenarioNodeKind : null
+      const kinds: readonly ScenarioNodeKind[] = one ? [one] : (SCENARIO_KINDS as readonly ScenarioNodeKind[])
+      return jsonReply({ kinds: kinds.map(describeScenarioKind) })
+    }
+  )
+
   // An open editor pushes its React-Flow-measured node rects here so the read
   // tools can report box sizes (size isn't persisted in the model).
   ipcMain.removeAllListeners('scenario:layout')
@@ -136,6 +208,37 @@ export function registerScenarioTools(mcp: McpService): void {
   )
 
   mcp.registerTool(
+    'update_scenario',
+    {
+      title: 'Update a scenario\'s metadata',
+      description:
+        'Patch a scenario\'s tree-level metadata: `name`, `notes`, and `tags` (tags REPLACE the list ' +
+        'wholesale). The graph itself (nodes / edges / params) is edited via the authoring tools ' +
+        '(`create_scenario_node`, `connect_scenario_nodes`, …), never here. Repaints an open editor ' +
+        'tab + the sidebar and autosaves. To rename, you can also use `rename_item`. To delete, use `delete_item`.',
+      inputSchema: {
+        scenarioId: z.string().min(1).describe('Scenario id.'),
+        name: z.string().min(1).optional().describe('New display name.'),
+        notes: z.string().optional().describe('User notes (empty string clears).'),
+        tags: z.array(z.string()).optional().describe('Replaces the tag list wholesale.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const id = typeof args['scenarioId'] === 'string' ? args['scenarioId'] : ''
+      const scenario = findScenario(id)
+      if (!scenario) return errorReply(`No scenario with id ${id}`)
+      const patch: Partial<Scenario> = {}
+      if (typeof args['name'] === 'string' && args['name'] !== '') patch.name = args['name']
+      if (typeof args['notes'] === 'string') patch.notes = args['notes']
+      if (Array.isArray(args['tags'])) patch.tags = (args['tags'] as unknown[]).filter((t): t is string => typeof t === 'string')
+      const updated = collectionStore.updateScenario(id, patch)
+      if (!updated) return errorReply(`updateScenario failed for ${id}`)
+      broadcastScenario(updated as unknown as Scenario)
+      return jsonReply({ id, name: updated.name, notes: updated.notes, tags: updated.tags })
+    }
+  )
+
+  mcp.registerTool(
     'list_scenario_nodes',
     {
       title: 'List a scenario\'s nodes',
@@ -158,6 +261,7 @@ export function registerScenarioTools(mcp: McpService): void {
       title: 'Add a box to a scenario',
       description:
         'Create a node (box) in a scenario. `kind` is one of: ' + SCENARIO_KINDS.join(', ') + '. ' +
+        '**Call `describe_scenario_kinds` first** for each kind\'s purpose, ports, and `config` keys. ' +
         'Default input/output ports for the kind are stamped automatically. `config` is the per-kind ' +
         'bag — e.g. an `httpRequest` node binds via `{ requestId, label }`, `runScenario` via `{ scenarioId, label }`. ' +
         'Returns `{ nodeId, kind, position, inputs, outputs }`.',
@@ -337,19 +441,27 @@ export function registerScenarioTools(mcp: McpService): void {
       if (explicitSelector === undefined) {
         const outFlow = outputPortFlow(fromPorts.outputs, fromPortId, fromNode.kind)
         const inFlow = inputPortFlow(toPorts.inputs, toPortId, toNode.kind)
-        if (inFlow === 'value' && outFlow !== 'signal' && expectsObjectInput(toNode.kind, toPortId)) {
-          // Object-context input — default to the identity selector `.`.
-          autoSelector = '.'
-        } else if (inFlow === 'value' && outFlow !== 'signal' && STATIC_PREVIEW_KINDS.has(fromNode.kind)) {
-          const previewNodes = scenario.nodes.map((n) => ({ id: n.id, kind: n.kind, config: n.config }))
-          const previewEdges: StaticPreviewEdge[] = scenario.edges.map((e) => ({
-            from: e.from,
-            to: e.to,
-            ...(e.selector !== undefined ? { selector: e.selector } : {})
-          }))
-          const preview = staticScenarioPreview({ id: fromNode.id, kind: fromNode.kind, config: fromNode.config }, previewNodes, previewEdges)
-          const path = preview ? singleDeepPath(preview) : null
-          if (path) autoSelector = path
+        if (inFlow === 'value' && outFlow !== 'signal') {
+          if (expectsObjectInput(toNode.kind, toPortId)) {
+            // Object-context input — default to the identity selector `.`.
+            autoSelector = '.'
+          } else if (STATIC_PREVIEW_KINDS.has(fromNode.kind)) {
+            const previewNodes = scenario.nodes.map((n) => ({ id: n.id, kind: n.kind, config: n.config }))
+            const previewEdges: StaticPreviewEdge[] = scenario.edges.map((e) => ({
+              from: e.from,
+              to: e.to,
+              ...(e.selector !== undefined ? { selector: e.selector } : {})
+            }))
+            const preview = staticScenarioPreview({ id: fromNode.id, kind: fromNode.kind, config: fromNode.config }, previewNodes, previewEdges)
+            const path = preview ? singleDeepPath(preview) : null
+            // Default to identity `.` when no single-deep path is deducible.
+            autoSelector = path ?? '.'
+          } else {
+            // Runtime-only source (httpRequest response, forEach `each`, …):
+            // default to identity `.` so the data link isn't left without a
+            // selector (which trips the "needs a JSON path" validation).
+            autoSelector = '.'
+          }
         }
       }
       const edge: ScenarioEdge = {
@@ -384,6 +496,76 @@ export function registerScenarioTools(mcp: McpService): void {
       scenario.edges = scenario.edges.filter((e) => e.id !== edgeId)
       broadcastScenario(scenario)
       return jsonReply({ deletedEdgeId: edgeId })
+    }
+  )
+
+  mcp.registerTool(
+    'set_edge_selector',
+    {
+      title: 'Set or clear an edge selector',
+      description:
+        'Set the JSON selector applied to the value as it flows along an edge (e.g. ' +
+        '`data.cooldown.total_seconds`), reshaping it in transit. Pass an empty string to clear it ' +
+        '(identity passthrough). Edge ids come from `get_scenario`. This is the standalone editor for an ' +
+        'EXISTING edge — `connect_scenario_nodes` already takes a `selector` at creation time. Returns the edge.',
+      inputSchema: {
+        scenarioId: z.string().min(1),
+        edgeId: z.string().min(1).describe('Edge id (from get_scenario).'),
+        selector: z.string().describe('JSON selector to apply; empty string clears it.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const id = typeof args['scenarioId'] === 'string' ? args['scenarioId'] : ''
+      const scenario = findScenario(id)
+      if (!scenario) return errorReply(`No scenario with id ${id}`)
+      const edgeId = typeof args['edgeId'] === 'string' ? args['edgeId'] : ''
+      const edge = scenario.edges.find((e) => e.id === edgeId)
+      if (!edge) return errorReply(`No edge ${edgeId} in scenario ${id}`)
+      const selector = typeof args['selector'] === 'string' ? args['selector'] : ''
+      if (selector === '') delete edge.selector
+      else edge.selector = selector
+      broadcastScenario(scenario)
+      return jsonReply({ edgeId: edge.id, from: edge.from, to: edge.to, ...(edge.selector !== undefined ? { selector: edge.selector } : {}) })
+    }
+  )
+
+  mcp.registerTool(
+    'define_param',
+    {
+      title: 'Define a scenario input parameter',
+      description:
+        'Declare a named run parameter by adding an `input` node — the engine seeds `run_scenario` params ' +
+        'into input nodes BY NAME (there is no separate param store, so a param IS an input node). ' +
+        '`valueType` is the typed default `{ type, value }` used when no value is supplied; `required` marks ' +
+        'it required for calling scenarios (`runScenario`). Convenience over `create_scenario_node` with ' +
+        '`kind: "input"`. Returns the created node.',
+      inputSchema: {
+        scenarioId: z.string().min(1),
+        name: z.string().min(1).describe('Param name — the key callers pass to run_scenario.'),
+        valueType: z.record(z.string(), z.unknown()).optional().describe('Typed default `{ type, value }` used when no value is supplied.'),
+        required: z.boolean().optional().describe('Mark the param required for calling scenarios (runScenario).'),
+        x: z.coerce.number().optional().describe('X position in graph coords (default 0).'),
+        y: z.coerce.number().optional().describe('Y position in graph coords (default 0).')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const id = typeof args['scenarioId'] === 'string' ? args['scenarioId'] : ''
+      const scenario = findScenario(id)
+      if (!scenario) return errorReply(`No scenario with id ${id}`)
+      const name = typeof args['name'] === 'string' ? args['name'] : ''
+      if (name === '') return errorReply('name is required')
+      const config: Record<string, unknown> = { name }
+      if (args['valueType'] && typeof args['valueType'] === 'object' && !Array.isArray(args['valueType'])) {
+        config['valueType'] = args['valueType']
+      }
+      if (args['required'] === true) config['required'] = true
+      const x = typeof args['x'] === 'number' ? args['x'] : 0
+      const y = typeof args['y'] === 'number' ? args['y'] : 0
+      const { inputs, outputs } = defaultPortsForKind('input')
+      const node: ScenarioNode = { id: randomUUID(), kind: 'input', config, inputs, outputs, position: { x, y } }
+      scenario.nodes.push(node)
+      broadcastScenario(scenario)
+      return jsonReply({ nodeId: node.id, kind: 'input', name, position: node.position })
     }
   )
 }

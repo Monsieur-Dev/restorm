@@ -39,6 +39,15 @@ interface McpServiceOptions {
   serverInfo?: { name: string; version: string }
 
   /**
+   * Optional onboarding text forwarded to clients in the `initialize`
+   * response (`instructions`). A fresh client — often an AI agent —
+   * reads it first to orient itself: what the server is for, the core
+   * workflows, the key tool groups, conventions. Keep it concise but
+   * self-sufficient so the server is usable out-of-the-box.
+   */
+  instructions?: string
+
+  /**
    * Optional bearer token. When set, every incoming HTTP request must
    * carry `Authorization: Bearer <token>`; mismatched / missing headers
    * get a `401 Unauthorized`. When omitted, no auth is enforced —

@@ -6,7 +6,9 @@ import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, t
 import { ScenarioExpressionField } from './ScenarioExpressionField'
 import { useScenarioFieldInvalid } from '../scenarioErrorsContext'
 import { useScenarioStaticPreview } from '../scenarioStaticPreviewContext'
+import { useScenarioEdgeSelector } from '../scenarioEdgeSelector'
 import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroups'
+import { resolveSelectorPath } from '../../../../../shared/utils/scenarioStaticPreview'
 
 /** Short hover preview of a value used as a variable in the expression
  * autocomplete — primitives stringified, objects/arrays compacted so the
@@ -33,14 +35,28 @@ export const TransformNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id,
   const staticPreview = useScenarioStaticPreview()
   const config = data.config ?? {}
   const exprInvalid = useScenarioFieldInvalid(id, 'expression')
+  const edgeSelectorApi = useScenarioEdgeSelector()
   const valueConnections = useNodeConnections({ handleType: 'target', handleId: 'value' })
   const sourceId = valueConnections[0]?.source
+  const valueEdgeId = valueConnections[0]?.edgeId
   const variables = useMemo<VariableDefinition[]>(() => {
     if (!sourceId) return []
     const preview = staticPreview?.getPreview(sourceId) ?? null
     if (!preview) return []
-    return Object.entries(preview).map(([name, val]) => ({ name, value: shortPreview(val) }))
-  }, [sourceId, staticPreview])
+    // The suggestions must reflect the value AFTER the link's JSON-path
+    // selector: when the edge extracts a field (e.g. `name`), the value
+    // reaching the template IS that field — often a primitive, referenced by
+    // `{{.}}`, not the source's original keys. Resolve through the selector
+    // first; only an object exposes its keys, anything else maps to `.`.
+    const selector = valueEdgeId ? edgeSelectorApi?.getSelector(valueEdgeId) : undefined
+    const resolved: unknown = selector !== undefined && selector !== '' && selector !== '.'
+      ? resolveSelectorPath(preview, selector)
+      : preview
+    if (resolved !== null && typeof resolved === 'object' && !Array.isArray(resolved)) {
+      return Object.entries(resolved as Record<string, unknown>).map(([name, val]) => ({ name, value: shortPreview(val) }))
+    }
+    return [{ name: '.', value: shortPreview(resolved) }]
+  }, [sourceId, valueEdgeId, staticPreview, edgeSelectorApi])
 
   const left: ScenarioNodeSection[] = [
     {
@@ -68,5 +84,5 @@ export const TransformNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id,
     }
   ]
   const right: ScenarioNodeCell[] = [{ id: 'out', label: 'value', port: { id: 'out', type: 'source' } }]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} launchInput />
 }

@@ -30,9 +30,166 @@
 }
 .scn-inspector-toolbar {
   display: flex;
+  align-items: center;
   gap: 6px;
   padding: 6px 8px;
   flex: 0 0 auto;
+}
+
+/* Run button — reuses the old node-header "play" design: a bigger green disc
+ * with a white ring + drop shadow, standing PROUD of the compact debug/step/
+ * stop buttons. It overflows the toolbar row (negative margin on its Button
+ * container) so the toolbar keeps its original height. Green = runnable, grey =
+ * disabled, amber = running (offers Pause). */
+/* Round Stop (smaller, red) + round Play sit together at the RIGHT edge of the
+ * toolbar — debug/step stay on the left. Stop carries the `auto` left margin so
+ * the [stop][play] pair is pushed right as a group; Play follows it. Both
+ * overflow the row (negative block margins) so the toolbar keeps its height. */
+/* Each button is wrapped in a `.header-hover-tooltip` (inline-flex span) for its
+ * ECUI hover tooltip, so the toolbar's flex items are those wrappers — the
+ * order / overflow rules target them (not the inner `.button-container`). */
+.scn-inspector-toolbar > .header-hover-tooltip:has(.scn-inspector-stop-round) {
+  order: 1;
+  /* `auto` left pushes the [stop][step][play] trio right; the right margin
+   * opens a gap before the next disc. */
+  margin: -5px 8px -5px auto;
+  z-index: 2;
+}
+.scn-inspector-toolbar > .header-hover-tooltip:has(.scn-inspector-step-round) {
+  order: 2;
+  margin: -5px 8px -5px 0;
+  z-index: 2;
+}
+.scn-inspector-toolbar > .header-hover-tooltip:has(.scn-inspector-debug-round) {
+  order: 3;
+  margin: -5px 8px -5px 0;
+  z-index: 2;
+}
+.scn-inspector-toolbar > .header-hover-tooltip:has(.scn-inspector-run-round) {
+  order: 4;
+  margin: -8px 0;
+  z-index: 2;
+}
+/* Step — same disc as Stop (27px, white ring, shadow) but blue. */
+.scn-inspector-step-round.button.text-button {
+  width: 27px;
+  height: 27px;
+  min-width: 27px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  background: #3b82f6;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.scn-inspector-step-round.button.text-button:hover { background: #2563eb; }
+.scn-inspector-step-round.button.text-button.disabled {
+  background: #6b7280;
+  opacity: 0.55;
+}
+.scn-inspector-step-round .codicon {
+  color: #fff !important;
+  font-size: 14px !important;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  /* Nudge the step glyph 1px up-left to sit visually centred in the disc. */
+  transform: translate(-1px, -1px);
+}
+/* Debug — same disc as Stop/Step (27px, white ring, shadow) but violet. Runs
+ * the scenario honoring breakpoints; greyed when the scenario has none. */
+.scn-inspector-debug-round.button.text-button {
+  width: 27px;
+  height: 27px;
+  min-width: 27px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  background: #8b5cf6;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.scn-inspector-debug-round.button.text-button:hover { background: #7c3aed; }
+.scn-inspector-debug-round.button.text-button.disabled {
+  background: #6b7280;
+  opacity: 0.55;
+}
+.scn-inspector-debug-round .codicon {
+  color: #fff !important;
+  font-size: 14px !important;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  transform: translate(0.5px, -1.5px);
+}
+.scn-inspector-stop-round.button.text-button {
+  width: 27px;
+  height: 27px;
+  min-width: 27px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  background: #ef4444;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.scn-inspector-stop-round.button.text-button:hover { background: #dc2626; }
+.scn-inspector-stop-round.button.text-button.disabled {
+  background: #6b7280;
+  opacity: 0.55;
+}
+.scn-inspector-stop-round .codicon {
+  color: #fff !important;
+  font-size: 14px !important;
+  line-height: 1;
+  /* Center the glyph box, then nudge the `debug-stop` square up-left 1px — its
+   * codicon glyph sits a touch low-and-right inside its em box. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  transform: translate(-0.5px, -0.75px);
+}
+.scn-inspector-run-round.button.text-button {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  background: #22c55e;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.scn-inspector-run-round.button.text-button:hover { background: #16a34a; }
+.scn-inspector-run-round.button.text-button.disabled {
+  background: #6b7280;
+  opacity: 0.55;
+}
+.scn-inspector-run-round.scn-inspector-run-round-active.button.text-button { background: #eab308; }
+.scn-inspector-run-round.scn-inspector-run-round-active.button.text-button:hover { background: #d99e07; }
+.scn-inspector-run-round .codicon {
+  color: #fff !important;
+  font-size: 20px !important;
 }
 .scn-inspector-sep {
   border-top: 1px solid var(--widget-border, #454545);
@@ -49,7 +206,8 @@
 .scn-inspector-errors {
   flex: 0 0 auto;
 }
-.scn-inspector-preview {
+.scn-inspector-preview,
+.scn-inspector-logs {
   flex: 1 1 auto;
   min-height: 0;
 }
@@ -73,6 +231,111 @@
   align-items: center;
   gap: 6px;
 }
+
+/* Run-logs panel (shown when no box is selected). */
+.scn-inspector-logs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.scn-inspector-logs-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 12px;
+  opacity: 0.9;
+  margin: 4px 0;
+  cursor: pointer;
+}
+/* Right-side action cluster: per-level filter buttons + the copy button. */
+.scn-log-toggle-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+.scn-log-actions-sep {
+  width: 1px;
+  align-self: stretch;
+  min-height: 16px;
+  margin: 0 2px;
+  background: var(--editorWidget-border, #454545);
+}
+.scn-log-line {
+  /* `flex` (not inline-flex) so the line fills the ListView title cell and the
+   * message can shrink + ellipsis instead of overflowing the panel. */
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+.scn-log-ts {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.55;
+  font-size: 11px;
+  flex: 0 0 auto;
+}
+.scn-log-msg {
+  min-width: 0; /* allow the flex item to shrink below its content → ellipsis */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Full message shown in the hover tooltip when the row is truncated — wraps so
+ * a long line stays readable. */
+.scn-log-tooltip {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 460px;
+  /* Re-enable pointer events so the provenance link inside is hoverable +
+   * clickable (tooltips are otherwise click-through). */
+  pointer-events: auto;
+}
+.scn-log-tooltip-msg {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.scn-log-tooltip-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  max-width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  color: var(--textLink-foreground, #3794ff);
+}
+.scn-log-tooltip-link:hover {
+  text-decoration: underline;
+  color: var(--textLink-activeForeground, #4daafc);
+}
+.scn-log-tooltip-link .codicon {
+  font-size: 13px;
+  flex: 0 0 auto;
+}
+.scn-log-tooltip-link > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Colored level dot rendered as the row's icon. */
+.scn-log-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--scn-log-dot-color, #888);
+}
+.scn-log-dot-debug { --scn-log-dot-color: #8a8a8a; }
+.scn-log-dot-info  { --scn-log-dot-color: #3794ff; }
+.scn-log-dot-warn  { --scn-log-dot-color: #e0a030; }
+.scn-log-dot-error { --scn-log-dot-color: #f14c4c; }
 .scn-inspector-note {
   opacity: 0.8;
   white-space: pre-wrap;
@@ -223,6 +486,42 @@
   background: var(--scenarioNode-headerBackgroundSelected, #2d5070);
 }
 
+/* Yellow frame on an action that JUST finished — a run-progress marker left
+ * behind once the running beam ends (so a paused run keeps the "where was I"
+ * cue). Cleared on the next play/resume, or when the node re-runs. Placed
+ * after the selected/error rules so the trail stays visible on top of them. */
+.scn-node.scn-node-finished {
+  border-color: var(--scn-flow-signal, #facc15);
+  box-shadow: 0 0 0 2px var(--scn-flow-signal, #facc15), 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+/* Read-only while the scenario runs: the box body + notes are inert so no
+ * field can be edited mid-run. The header stays live (collapse, play/cancel),
+ * and clicks on the (now pointer-events:none) body bubble to the node so it
+ * can still be selected for inspection. */
+.scn-node-locked .scn-node-body,
+.scn-node-locked .scn-node-notes {
+  pointer-events: none;
+}
+
+/* Flash overlay — pulses the box outline when the user clicks the run-log row
+ * emitted by this node. Mounted with a changing React key so the animation
+ * replays on every click; auto-unmounts when the editor clears the flash. */
+.scn-node-flash-ring {
+  position: absolute;
+  inset: -2px;
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 5;
+  animation: scn-node-flash 0.55s ease-out 2;
+}
+
+@keyframes scn-node-flash {
+  0%   { box-shadow: 0 0 0 0 rgba(55, 148, 255, 0.9), 0 0 0 0 rgba(55, 148, 255, 0.5); }
+  40%  { box-shadow: 0 0 0 3px rgba(55, 148, 255, 0.95), 0 0 14px 4px rgba(55, 148, 255, 0.55); }
+  100% { box-shadow: 0 0 0 0 rgba(55, 148, 255, 0), 0 0 0 0 rgba(55, 148, 255, 0); }
+}
+
 .scn-node-header {
   display: flex;
   align-items: center;
@@ -296,15 +595,50 @@
 
 /* Header "!" error badge — red, on the right side of the header. Click opens
  * the ECUI Tooltip listing the box's errors (neutral tooltip background). */
+/* Flex spacer between the header's left content and the right cluster (error
+ * badge + breakpoint) so the cluster hugs the right edge as one group. */
+.scn-node-header-spacer { flex: 1 1 auto; min-width: 0; }
 .scn-node-errbadge {
   background: none; border: none; padding: 0;
-  /* Push to the right edge of the header content so the badge sits at the
-   * far end, just inside the header's right gutter. */
-  margin-left: auto; margin-right: 2px;
+  margin-right: 2px;
   color: #ef4444; cursor: pointer; display: inline-flex; align-items: center;
 }
 .scn-node-errbadge .codicon { font-size: 15px !important; color: #ef4444 !important; }
 .scn-node-errbadge:hover .codicon { color: #f87171 !important; }
+/* Debug breakpoint gutter glyph — sits at the head of the header row. Faint
+ * hollow circle by default (revealed a touch more on header hover so it's
+ * discoverable), a solid red disc when a breakpoint is set, and a pulsing red
+ * when the run is paused at it. */
+/* The glyph is wrapped in a `.header-hover-tooltip` (inline-flex span) — it sits
+ * at the header's right edge after the error badge (the spacer does the push). */
+.scn-node-header > .header-hover-tooltip:has(.scn-node-breakpoint) {
+  display: inline-flex;
+  align-items: center;
+}
+.scn-node-breakpoint {
+  background: none; border: none; padding: 0;
+  cursor: pointer; display: inline-flex; align-items: center;
+  flex: 0 0 auto;
+}
+.scn-node-breakpoint .codicon {
+  font-size: 12px !important;
+  color: #9aa0a6 !important;
+  opacity: 0.35;
+  transition: opacity 0.12s ease, color 0.12s ease;
+}
+.scn-node-header:hover .scn-node-breakpoint .codicon { opacity: 0.7; }
+.scn-node-breakpoint:hover .codicon { opacity: 1 !important; color: #ef4444 !important; }
+.scn-node-breakpoint.is-set .codicon { color: #e51400 !important; opacity: 1 !important; }
+.scn-node-breakpoint.is-paused .codicon {
+  color: #e51400 !important; opacity: 1 !important;
+  animation: scn-breakpoint-pulse 1s ease-in-out infinite;
+}
+@keyframes scn-breakpoint-pulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(229, 20, 0, 0.6)); }
+  50% { transform: scale(1.2); filter: drop-shadow(0 0 3px rgba(229, 20, 0, 0.9)); }
+}
+.scn-node-breakpoint-tip { font-size: 12px; white-space: normal; max-width: 260px; text-align: center; }
+
 .scn-node-errpopover-body { font-size: 12px; white-space: normal; max-width: 280px; }
 .scn-node-errpopover-row { padding: 1px 0; }
 .scn-node-errpopover-row + .scn-node-errpopover-row { margin-top: 2px; }
@@ -534,6 +868,17 @@
   left: auto;
   right: 12px;
 }
+/* Collapsed = header only, so the bottom-centred error handle straddles the
+ * header. Don't move it — just send it BEHIND the header (z-index) so its top
+ * half tucks under the header instead of overlapping the content; the half
+ * sticking out below stays visible + connectable. */
+.scn-node-collapsed .scn-node-header {
+  position: relative;
+  z-index: 2;
+}
+.scn-node-collapsed .scn-handle-error.react-flow__handle {
+  z-index: 1;
+}
 
 /* Collapsible left-column section (headers / params / body …). */
 .scn-section {
@@ -654,15 +999,9 @@
   flex: 1;
   min-width: 0;
 }
-.scn-wait-input {
-  width: 50px;
-  background: var(--input-background, #3c3c3c);
-  color: var(--input-foreground, #cccccc);
-  border: 1px solid var(--input-border, #555555);
-  border-radius: 3px;
-  padding: 1px 4px;
-  font-size: 11px;
-  font-family: var(--editor-font-family, monospace);
+/* The duration field is an ECUI InputBox (number mode); just size it. */
+.scn-wait-duration .inputbox {
+  width: 72px;
 }
 .scn-unit-toggle {
   display: inline-flex;
@@ -763,7 +1102,7 @@
   font-size: 12px;
 }
 
-/* `input` node "required" toggle: a compact checkbox + label row. */
+/* `input` node "required by callers" toggle: a compact checkbox + label row. */
 .scn-required-toggle {
   display: flex;
   align-items: center;

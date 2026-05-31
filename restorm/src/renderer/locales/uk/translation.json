@@ -260,7 +260,8 @@
     "addHeader": "Додати заголовок",
     "addParam": "Додати параметр",
     "environmentSelector": {
-      "noEnvironment": "Немає середовища"
+      "noEnvironment": "Немає середовища",
+      "switchTooltip": "Змінити середовище"
     },
     "body": {
       "fileLabel": "Файл або URL:",
@@ -510,7 +511,8 @@
   "common": {
     "cancel": "Скасувати",
     "save": "Зберегти",
-    "remove": "Вилучити"
+    "remove": "Вилучити",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -797,6 +799,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Редагування заблоковано під час виконання сценарію",
     "switch": {
       "addCase": "Додати випадок",
       "removeCase": "Вилучити випадок",
@@ -824,6 +827,7 @@
     },
     "filter": {
       "items": "елементи",
+      "rejected": "відхилені",
       "kept": "залишені",
       "keepWhere": "залишити якщо"
     },
@@ -875,9 +879,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Обовʼязково",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Обов'язково для сценаріїв, що викликають"
     },
     "runScenario": {
       "orphanInput": "Немає відповідного параметра «{{name}}» у підсценарії",
@@ -942,7 +946,14 @@
       "pause": "Пауза",
       "noRunsHint": "Немає недавнього виконання для цього запиту — запусти його звідси, щоб заповнити прев'ю сценарію.",
       "syntheticInfo": "Приклад даних, згенерований з документації цього запиту.",
-      "syntheticRunHint": "Приклад даних — виконайте запит, щоб замінити їх реальним результатом."
+      "syntheticRunHint": "Приклад даних — виконайте запит, щоб замінити їх реальним результатом.",
+      "stop": "Зупинити",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "clearLogs": "Очистити журнали",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "Показати логи {{level}}",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -956,6 +967,45 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Потрібен ввід"
+    },
+    "runHistory": {
+      "title": "Історія запусків",
+      "tooltip": "Історія запусків",
+      "empty": "Ще немає записаних запусків",
+      "noLogs": "Немає журналу для цього запуску",
+      "logsTab": "Logs",
+      "graphTab": "Граф",
+      "noGraph": "Немає знімка сценарію для цього запуску",
+      "pin": "Закріпити",
+      "unpin": "Відкріпити"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "Додати точку зупину",
+      "remove": "Видалити точку зупину",
+      "toggle": "Перемкнути точку зупину (F9)",
+      "reached": "Досягнуто точку зупину — цю дію ще не виконано. Натисніть F5, щоб продовжити, або F7 для покрокового виконання.",
+      "shortcut": "F9"
     }
   }
 }

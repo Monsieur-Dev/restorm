@@ -39,6 +39,25 @@
 	opacity: 1;
 }
 
+/* Scoped mode: the overlay covers its CONTAINER (an `absolute; inset: 0`
+ * over a positioned ancestor) instead of the viewport, so the backdrop +
+ * blur stay inside that region. */
+.ecu-modal-overlay[data-scoped="true"] {
+	position: absolute;
+	z-index: 50;
+}
+
+/* No window-drag strip inside a scoped (in-tab) modal — there's no titlebar
+ * to drag, and the strip would only eat clicks. */
+.ecu-modal-overlay[data-scoped="true"] .ecu-modal-drag-strip {
+	display: none;
+}
+
+/* No app titlebar to clear, so the full-size container sits closer to the top. */
+.ecu-modal-overlay[data-scoped="true"] .ecu-modal-container:not(.ecu-modal-dialog) {
+	top: 12px;
+}
+
 .ecu-modal-overlay.ecu-modal-closing,
 .ecu-modal-overlay[data-state="closing"] {
 	opacity: 0;

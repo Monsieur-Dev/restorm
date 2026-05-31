@@ -258,7 +258,8 @@
     "addHeader": "Adicionar cabeçalho",
     "addParam": "Adicionar parâmetro",
     "environmentSelector": {
-      "noEnvironment": "Sem ambiente"
+      "noEnvironment": "Sem ambiente",
+      "switchTooltip": "Alternar ambiente"
     },
     "body": {
       "fileLabel": "Ficheiro ou URL:",
@@ -508,7 +509,8 @@
   "common": {
     "cancel": "Cancelar",
     "save": "Guardar",
-    "remove": "Remover"
+    "remove": "Remover",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -795,6 +797,7 @@
       }
     },
     "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
+    "locked": "Edição bloqueada enquanto o cenário está em execução",
     "switch": {
       "addCase": "Adicionar caso",
       "removeCase": "Remover caso",
@@ -822,6 +825,7 @@
     },
     "filter": {
       "items": "itens",
+      "rejected": "descartados",
       "kept": "mantidos",
       "keepWhere": "manter se"
     },
@@ -873,9 +877,9 @@
       "propertyValue": "value"
     },
     "input": {
-      "required": "Obrigatório",
       "name": "Name",
-      "defaultType": "Default / type"
+      "defaultType": "Default / type",
+      "required": "Obrigatório para os cenários que o chamam"
     },
     "runScenario": {
       "orphanInput": "Nenhum parâmetro \"{{name}}\" correspondente no subcenário",
@@ -940,7 +944,14 @@
       "pause": "Pausa",
       "noRunsHint": "Sem execução recente para esta requisição — execute-a daqui para preencher a pré-visualização do cenário.",
       "syntheticInfo": "Dados de exemplo gerados a partir da documentação desta requisição.",
-      "syntheticRunHint": "Dados de exemplo — execute a requisição para substituí-los por um resultado real."
+      "syntheticRunHint": "Dados de exemplo — execute a requisição para substituí-los por um resultado real.",
+      "stop": "Parar",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "clearLogs": "Limpar registos",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "Mostrar logs {{level}}",
+      "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
       "timezone": "Timezone",
@@ -954,6 +965,45 @@
     "callers": {
       "button": "Scenarios calling this scenario",
       "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Parâmetros de execução",
+      "run": "Executar",
+      "midRunTitle": "Entrada solicitada"
+    },
+    "runHistory": {
+      "title": "Histórico de execuções",
+      "tooltip": "Histórico de execuções",
+      "empty": "Nenhuma execução registrada",
+      "noLogs": "Sem registro para esta execução",
+      "logsTab": "Logs",
+      "graphTab": "Gráfico",
+      "noGraph": "Nenhum instantâneo de cenário para esta execução",
+      "pin": "Fixar",
+      "unpin": "Desafixar"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "Adicionar ponto de interrupção",
+      "remove": "Remover ponto de interrupção",
+      "toggle": "Alternar ponto de interrupção (F9)",
+      "reached": "Ponto de interrupção atingido — esta ação ainda não foi executada. Pressione F5 para retomar ou F7 para avançar passo a passo.",
+      "shortcut": "F9"
     }
   }
 }
