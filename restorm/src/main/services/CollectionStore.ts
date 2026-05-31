@@ -319,6 +319,21 @@ class CollectionStore {
     return false
   }
 
+  /**
+   * Update a scenario's tree-level metadata (name / notes / tags). A scenario
+   * is a folder-like item, so this mirrors {@link updateFolder} and emits a
+   * folder-updated event so the sidebar relabels. Graph mutations (nodes /
+   * edges / config / params) go through the scenario authoring tools + the
+   * editor, never here.
+   */
+  updateScenario(id: string, updates: Partial<Scenario>): Scenario | null {
+    const scenario = this.findById(id)
+    if (!scenario || !isScenario(scenario)) return null
+    Object.assign(scenario, updates)
+    this.emitFolderUpdated(scenario)
+    return scenario
+  }
+
   // ==========================================================================
   // Mutations - Requests
   // ==========================================================================
@@ -731,7 +746,7 @@ class CollectionStore {
     logger.debug('[CollectionStore] Folder created', { id: folder.id, name: folder.name })
   }
 
-  private emitFolderUpdated(folder: Folder | EnvironmentFolder): void {
+  private emitFolderUpdated(folder: Folder | EnvironmentFolder | Scenario): void {
     const payload: DocumentChangedPayload = {
       id: folder.id,
       type: 'folder',

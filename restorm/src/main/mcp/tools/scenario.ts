@@ -97,7 +97,7 @@ function deriveRequestSlotPorts(node: ScenarioNode): ScenarioPort[] {
 interface KV { key: string; value?: unknown; enabled?: boolean }
 
 /** Push the mutated scenario to any open editor + sidebar, then autosave. */
-function broadcastScenario(scenario: Scenario): void {
+export function broadcastScenario(scenario: Scenario): void {
   for (const win of BrowserWindow.getAllWindows()) {
     if (win.isDestroyed()) continue
     win.webContents.send('mcp:scenario-updated', {
@@ -204,6 +204,37 @@ export function registerScenarioTools(mcp: McpService): void {
         nodes: scenario.nodes.map((n) => nodeView(n, layoutCache.get(id))),
         edges: scenario.edges
       })
+    }
+  )
+
+  mcp.registerTool(
+    'update_scenario',
+    {
+      title: 'Update a scenario\'s metadata',
+      description:
+        'Patch a scenario\'s tree-level metadata: `name`, `notes`, and `tags` (tags REPLACE the list ' +
+        'wholesale). The graph itself (nodes / edges / params) is edited via the authoring tools ' +
+        '(`create_scenario_node`, `connect_scenario_nodes`, …), never here. Repaints an open editor ' +
+        'tab + the sidebar and autosaves. To rename, you can also use `rename_item`. To delete, use `delete_item`.',
+      inputSchema: {
+        scenarioId: z.string().min(1).describe('Scenario id.'),
+        name: z.string().min(1).optional().describe('New display name.'),
+        notes: z.string().optional().describe('User notes (empty string clears).'),
+        tags: z.array(z.string()).optional().describe('Replaces the tag list wholesale.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const id = typeof args['scenarioId'] === 'string' ? args['scenarioId'] : ''
+      const scenario = findScenario(id)
+      if (!scenario) return errorReply(`No scenario with id ${id}`)
+      const patch: Partial<Scenario> = {}
+      if (typeof args['name'] === 'string' && args['name'] !== '') patch.name = args['name']
+      if (typeof args['notes'] === 'string') patch.notes = args['notes']
+      if (Array.isArray(args['tags'])) patch.tags = (args['tags'] as unknown[]).filter((t): t is string => typeof t === 'string')
+      const updated = collectionStore.updateScenario(id, patch)
+      if (!updated) return errorReply(`updateScenario failed for ${id}`)
+      broadcastScenario(updated as unknown as Scenario)
+      return jsonReply({ id, name: updated.name, notes: updated.notes, tags: updated.tags })
     }
   )
 

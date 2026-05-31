@@ -24,7 +24,7 @@ import {
   isEnvironmentFolder,
   isRequest
 } from '../../../shared/models'
-import { flattenTree, listChildren } from '../tree'
+import { flattenTree, flattenScenarios, listChildren } from '../tree'
 
 const MAX_SEARCH_RESULTS = 50
 const ABS_MAX_SEARCH_RESULTS = 200
@@ -70,6 +70,20 @@ export function registerReadTools(mcp: McpService): void {
       }
       return jsonReply(listChildren(target).folders)
     }
+  )
+
+  mcp.registerTool(
+    'list_scenarios',
+    {
+      title: 'List scenarios',
+      description:
+        'List every scenario (dataflow graph) in the open restorm project. Returns ' +
+        '`[{ id, name, path, tags, nodeCount, edgeCount, parentId }]` — `path` is the folder-mode ' +
+        'breadcrumb ("<folder> / … / <name>"), a human-writable handle that avoids the uuid. ' +
+        'Use `get_scenario(id)` for the full graph, `run_scenario(id)` to execute it.',
+      inputSchema: {} as Record<string, unknown>
+    },
+    () => jsonReply(flattenScenarios(collectionStore.getCollections()))
   )
 
   mcp.registerTool(

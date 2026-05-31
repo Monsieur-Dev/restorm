@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { folderKind, findParentId, projectFolder, projectRequest, listChildren, flattenTree, buildTree } from './tree'
+import { folderKind, findParentId, projectFolder, projectRequest, listChildren, flattenTree, flattenScenarios, buildTree } from './tree'
 import type { Folder, EnvironmentFolder, FolderItem } from '../../shared/models'
 
 // Minimal stubs that satisfy the runtime predicates (`isFolder`,
@@ -36,6 +36,24 @@ function ef(id: string, name: string, items: FolderItem[] = []): EnvironmentFold
 
 function r(id: string, name: string, type = 'http', method?: string): FolderItem {
   return { id, name, type, ...(method !== undefined ? { method } : {}) } as unknown as FolderItem
+}
+
+// A scenario stub: `isScenario` accepts `{ type: 'scenario' }`. `items` makes
+// it a container (so a nested scenario is reachable by the walk).
+function sc(
+  id: string,
+  name: string,
+  opts: { nodes?: unknown[]; edges?: unknown[]; tags?: string[]; items?: FolderItem[] } = {}
+): FolderItem {
+  return {
+    type: 'scenario',
+    id,
+    name,
+    nodes: opts.nodes ?? [],
+    edges: opts.edges ?? [],
+    tags: opts.tags ?? [],
+    items: opts.items ?? []
+  } as unknown as FolderItem
 }
 
 describe('mcp/tree', () => {
@@ -126,6 +144,40 @@ describe('mcp/tree', () => {
         { id: 'rn', name: 'rn', protocol: 'http', method: 'POST', parentId: 'mid' },
         { id: 'rt', name: 'rt', protocol: 'http', parentId: 'root' }
       ])
+    })
+  })
+
+  describe('flattenScenarios', () => {
+    it('collects scenarios anywhere in the tree with a folder-mode path + counts', () => {
+      const tree = [
+        ef('root', 'root', [
+          sc('s-top', 'Top', { nodes: [{}, {}], edges: [{}], tags: ['smoke'] }),
+          f('mid', 'mid', [
+            r('rn', 'rn'),
+            sc('s-deep', 'Deep', { nodes: [{}, {}, {}] })
+          ])
+        ])
+      ]
+      expect(flattenScenarios(tree)).toEqual([
+        { id: 's-top', name: 'Top', path: 'root / Top', tags: ['smoke'], nodeCount: 2, edgeCount: 1, parentId: 'root' },
+        { id: 's-deep', name: 'Deep', path: 'root / mid / Deep', tags: [], nodeCount: 3, edgeCount: 0, parentId: 'mid' }
+      ])
+    })
+
+    it('descends into a scenario to surface a nested sub-scenario', () => {
+      const tree = [
+        ef('root', 'root', [
+          sc('parent', 'Parent', { items: [sc('child', 'Child')] })
+        ])
+      ]
+      expect(flattenScenarios(tree)).toEqual([
+        { id: 'parent', name: 'Parent', path: 'root / Parent', tags: [], nodeCount: 0, edgeCount: 0, parentId: 'root' },
+        { id: 'child', name: 'Child', path: 'root / Parent / Child', tags: [], nodeCount: 0, edgeCount: 0, parentId: 'parent' }
+      ])
+    })
+
+    it('returns an empty list when there are no scenarios', () => {
+      expect(flattenScenarios([ef('root', 'root', [f('mid', 'mid', [r('rn', 'rn')])])])).toEqual([])
     })
   })
 

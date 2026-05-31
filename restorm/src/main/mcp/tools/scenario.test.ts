@@ -23,7 +23,16 @@ vi.mock('electron', () => ({
 }))
 vi.mock('./import', () => ({ broadcastTreeReplace: () => { /* noop */ } }))
 vi.mock('../../services/CollectionStore', () => ({
-  collectionStore: { findById: (id: string) => mockState.findById(id) }
+  collectionStore: {
+    findById: (id: string) => mockState.findById(id),
+    // Mirror the real `updateScenario`: find, type-guard, shallow-assign.
+    updateScenario: (id: string, updates: Record<string, unknown>) => {
+      const s = mockState.findById(id)
+      if (!s || (s as { type?: string }).type !== 'scenario') return null
+      Object.assign(s, updates)
+      return s
+    }
+  }
 }))
 
 interface FakeScenario {
@@ -69,6 +78,26 @@ describe('scenario MCP tools', () => {
   it('rejects an unknown scenario id', () => {
     const res = mcp.invoke('create_scenario_node', { scenarioId: 'nope', kind: 'log' })
     expect(res.isError).toBe(true)
+  })
+
+  it('update_scenario patches name / notes / tags, leaving the graph untouched', () => {
+    scenario.nodes.push({ id: 'n', kind: 'log', config: {}, inputs: [], outputs: [], position: { x: 0, y: 0 } })
+    const res = parse(mcp.invoke('update_scenario', { scenarioId: 's1', name: 'Renamed', notes: 'hi', tags: ['a', 'b'] }))
+    expect(res).toEqual({ id: 's1', name: 'Renamed', notes: 'hi', tags: ['a', 'b'] })
+    expect(scenario.name).toBe('Renamed')
+    expect(scenario.notes).toBe('hi')
+    expect(scenario.tags).toEqual(['a', 'b'])
+    expect(scenario.nodes).toHaveLength(1) // graph not touched
+  })
+
+  it('update_scenario ignores an empty name but still applies notes', () => {
+    const res = parse(mcp.invoke('update_scenario', { scenarioId: 's1', name: '', notes: 'kept' }))
+    expect(scenario.name).toBe('Test') // unchanged
+    expect(res['notes']).toBe('kept')
+  })
+
+  it('update_scenario rejects an unknown scenario id', () => {
+    expect(mcp.invoke('update_scenario', { scenarioId: 'nope', name: 'x' }).isError).toBe(true)
   })
 
   it('connect_scenario_nodes validates ports + adds an edge', () => {
