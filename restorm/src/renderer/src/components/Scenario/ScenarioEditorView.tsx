@@ -223,6 +223,20 @@ function dismissOffCanvasPopovers(): void {
   }
 }
 
+/** True only when a React Flow click event actually originated on the canvas.
+ *
+ * Popovers a node opens (the datetime calendar, the color picker, the type
+ * menu, the autocomplete widget) are portaled to `<body>` but stay React
+ * children of their host node — so React's synthetic events bubble from them up
+ * the React tree into React Flow's `onNodeClick`/`onEdgeClick`, even though the
+ * click landed outside the canvas DOM. Treating that as a node click would run
+ * `dismissOffCanvasPopovers()` and immediately close the popover the user is
+ * interacting with. A genuine node/edge click has its DOM target inside
+ * `.react-flow`; a portal-bubbled one does not. */
+function isCanvasOriginatedClick(event: { target: EventTarget | null }): boolean {
+  return event.target instanceof Element && event.target.closest('.react-flow') !== null
+}
+
 /** The "leaf" identifier of a JSON-path selector — the last name-like segment
  * (e.g. `response.body.items[0].name` → `"name"`, `now` → `"now"`). Returns
  * null for paths ending on a numeric index or anything malformed, so callers
@@ -1816,6 +1830,18 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         nodesConnectable={!locked}
         deleteKeyCode={(!locked && isActiveTab) ? ['Delete', 'Backspace'] : null}
         multiSelectionKeyCode={['Control', 'Meta']}
+        // React Flow's default `selectionKeyCode='Shift'` registers a
+        // window-level `keydown` listener that calls `event.preventDefault()`
+        // on EVERY Shift press (Shift is a modifier, so its internal
+        // `preventDefault` guard always fires) — globally, for every tab. On
+        // Linux that `preventDefault` on a bare modifier keydown wedges
+        // Chromium's input pipeline into a composition-like state that
+        // swallows the next printable character, so the first letter of every
+        // capital (Shift + letter) is eaten in every text field on the page.
+        // Disabling the Shift selection activator removes the global listener.
+        // Click-select and Ctrl/Meta+click multi-select still work; only the
+        // Shift+drag rubber-band box-select is given up to fix the typing bug.
+        selectionKeyCode={null}
         onPaneContextMenu={onPaneContextMenu}
         onEdgeContextMenu={onEdgeContextMenu}
         onPaneClick={() => {
@@ -1823,8 +1849,8 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
           if (linkPaletteJustOpened.current) { linkPaletteJustOpened.current = false } else { setLinkPalette(null) }
           dismissOffCanvasPopovers()
         }}
-        onNodeClick={() => { setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null); dismissOffCanvasPopovers() }}
-        onEdgeClick={() => { setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null); dismissOffCanvasPopovers() }}
+        onNodeClick={(e) => { if (!isCanvasOriginatedClick(e)) return; setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null); dismissOffCanvasPopovers() }}
+        onEdgeClick={(e) => { if (!isCanvasOriginatedClick(e)) return; setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null); dismissOffCanvasPopovers() }}
         onMoveStart={() => { setNodeMenu(null); setPalette(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null) }}
         onMove={(_, viewport) => { if (projectUuid) setScenarioViewport(projectUuid, scenario.id, viewport) }}
         onNodeDragStart={() => { setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null) }}

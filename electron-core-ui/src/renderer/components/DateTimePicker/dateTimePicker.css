@@ -58,12 +58,6 @@
 
 .ecu-date-time-picker-time-input {
   width: 64px;
-  height: 28px;
-  border: 1px solid var(--panel-border);
-  background: var(--input-background);
-  color: var(--input-foreground);
-  border-radius: 4px;
-  padding: 0 8px;
   box-sizing: border-box;
 }
 

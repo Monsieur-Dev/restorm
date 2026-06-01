@@ -165,8 +165,20 @@ export const getVariableExecutor: NodeExecutor = (_act, ctx) => {
 
 /** Object builder: assembles inputs (port id == property name) into
  * an object on the `object` port (canonical id). */
-export const objectExecutor: NodeExecutor = (act) => {
-  const value: Record<string, unknown> = { ...act.inputs }
+export const objectExecutor: NodeExecutor = (act, ctx) => {
+  // Properties live in `config.properties` (`{ id, name, value }[]`), the same
+  // shape the inspector preview reads. A wired property arrives in `act.inputs`
+  // keyed by its port id (`prop.id`); an inline one resolves from `prop.value`.
+  // The assembled object keys by `prop.name`. Reading only `act.inputs` (keyed
+  // by id, not name) silently dropped every inline property → an empty object.
+  const cfg = ctx.node.config as { properties?: unknown }
+  const props = Array.isArray(cfg.properties) ? cfg.properties : []
+  const value: Record<string, unknown> = {}
+  for (const p of props) {
+    const prop = p as { id?: unknown; name?: unknown; value?: unknown }
+    if (typeof prop.name !== 'string' || prop.name === '' || typeof prop.id !== 'string') continue
+    value[prop.name] = resolveOperand(act.inputs[prop.id], prop.value, ctx.variables)
+  }
   return { outputs: [{ port: 'object', value }] }
 }
 
@@ -174,13 +186,17 @@ export const objectExecutor: NodeExecutor = (act) => {
  * through so the chain can continue. */
 export const logExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { level?: 'debug' | 'info' | 'warn' | 'error'; message?: unknown; data?: unknown }
-  // `message` (like `data`) prefers a WIRED input over config; an unwired
-  // operand is resolved through `resolveOperand` so a `variable` type reads
-  // the run's LIVE value — not the `{{cpt}}` template `concreteValue` renders
-  // for the static preview (which would log the literal `{{cpt}}`).
-  const resolvedMessage = resolveOperand(act.inputs['message'], cfg.message, ctx.variables)
-  const message = typeof resolvedMessage === 'string' ? resolvedMessage : (resolvedMessage == null ? '' : stringifySafely(resolvedMessage))
   const data = resolveOperand(act.inputs['data'], cfg.data, ctx.variables)
+  // `message` accepts any type. A wired input wins; otherwise an EXPRESSION
+  // config renders Handlebars with the resolved `data` as its context (so
+  // `{{name}}` reads `data.name`), and every other type resolves through
+  // `resolveOperand` (a `variable` reads its LIVE value, not the `{{cpt}}`
+  // template `concreteValue` renders for the static preview).
+  const msgCfg = cfg.message as { type?: unknown; value?: unknown } | undefined
+  const resolvedMessage = act.inputs['message'] === undefined && msgCfg?.type === 'expression' && typeof msgCfg.value === 'string'
+    ? renderHandlebars(msgCfg.value, data ?? {})
+    : resolveOperand(act.inputs['message'], cfg.message, ctx.variables)
+  const message = typeof resolvedMessage === 'string' ? resolvedMessage : (resolvedMessage == null ? '' : stringifySafely(resolvedMessage))
   ctx.log({
     level: cfg.level ?? 'info',
     source: 'user',

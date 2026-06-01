@@ -258,12 +258,20 @@ export interface ScenarioDataLink {
   selector: string | undefined
 }
 
-/** A JSON-path selector: a root identifier then dot-fields / [index] /
- * ['key'] segments (e.g. `response.body.items[0].name`). Used to reject a
- * malformed selector on a data link. A lone `.` is the identity selector —
- * the source's whole value flows through (used by object-context inputs like
- * `transform.value`). */
-const SELECTOR_RE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\[\d+\]|\['[^']*'\]|\["[^"]*"\])*$/
+/** A JSON-path selector: a root segment then dot-fields / [index] / ['key']
+ * segments (e.g. `response.body.items[0].name`). Used to reject a malformed
+ * selector on a data link. A lone `.` is the identity selector — the source's
+ * whole value flows through (used by object-context inputs like
+ * `transform.value`).
+ *
+ * The ROOT may itself be a bracket-quoted key (`['Anwser to the universe']`),
+ * because an upstream object key can contain spaces / punctuation that a bare
+ * identifier can't express. Subsequent segments also allow `.<digit>` for the
+ * array indices the path picker historically emitted (`response.body.0.id`),
+ * alongside the canonical `[<digit>]`. */
+const SELECTOR_SEGMENT = String.raw`\.[A-Za-z_$][\w$]*|\.\d+|\[\d+\]|\['[^']*'\]|\["[^"]*"\]`
+const SELECTOR_ROOT = String.raw`[A-Za-z_$][\w$]*|\[\d+\]|\['[^']*'\]|\["[^"]*"\]`
+const SELECTOR_RE = new RegExp(`^(?:${SELECTOR_ROOT})(?:${SELECTOR_SEGMENT})*$`)
 
 export function isValidSelectorPath(selector: string): boolean {
   const trimmed = selector.trim()

@@ -140,6 +140,21 @@ describe('scenarioValidation — data-link selector', () => {
     expect(isValidSelectorPath('a..b')).toBe(false)
   })
 
+  it('isValidSelectorPath accepts a bracket-quoted root key (name with spaces)', () => {
+    expect(isValidSelectorPath("['Anwser to the universe']")).toBe(true)
+    expect(isValidSelectorPath('["full name"].first')).toBe(true)
+    expect(isValidSelectorPath("['a b']['c d']")).toBe(true)
+  })
+
+  it('isValidSelectorPath accepts a `.<digit>` array segment (legacy generated paths)', () => {
+    expect(isValidSelectorPath('response.body.0.id')).toBe(true)
+  })
+
+  it('isValidSelectorPath still rejects a stray bracket or empty segment', () => {
+    expect(isValidSelectorPath("[]")).toBe(false)
+    expect(isValidSelectorPath("['a'].")).toBe(false)
+  })
+
   it('isValidSelectorPath accepts `.` (identity selector)', () => {
     expect(isValidSelectorPath('.')).toBe(true)
   })

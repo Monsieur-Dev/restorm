@@ -119,6 +119,16 @@ describe('staticScenarioPreview', () => {
     expect(staticScenarioPreview(n, [n], [])).toEqual({ result: 5 })
   })
 
+  it('resolves an inline `variable` operand to its static value (not the {{N}} template → null)', () => {
+    const set = node('s', 'setVariable', { name: 'N', value: { type: 'numeric', value: 5, format: 'decimal' } })
+    const n = node('a', 'arithmetic', {
+      operator: '+',
+      a: { type: 'numeric', value: 5, format: 'decimal' },
+      b: { type: 'variable', value: 'N' }
+    })
+    expect(staticScenarioPreview(n, [set, n], [])).toEqual({ result: 10 })
+  })
+
   it('arithmetic divide-by-zero → null (no preview)', () => {
     const n = node('a', 'arithmetic', {
       operator: '÷',
@@ -258,6 +268,33 @@ describe('staticScenarioPreview', () => {
     expect(out?.['data']).toBe(42)
     expect(typeof out?.['timestamp']).toBe('string')
     expect(out?.['timestamp']).toMatch(/^\d{4}-\d{2}-\d{2}T/)
+  })
+
+  it('log renders an inline Expression message against the resolved data (object)', () => {
+    const obj = node('o', 'object', {
+      properties: [
+        { id: 'p1', name: 'hello', value: { type: 'string', value: 'world' } }
+      ]
+    })
+    const l = node('lg', 'log', {
+      level: 'info',
+      message: { type: 'expression', value: 'Hello {{hello}}' }
+    })
+    const edges: StaticPreviewEdge[] = [
+      { from: { nodeId: 'o', portId: 'object' }, to: { nodeId: 'lg', portId: 'data' } }
+    ]
+    const out = staticScenarioPreview(l, [obj, l], edges)
+    expect(out?.['message']).toBe('Hello world')
+    expect(out?.['data']).toEqual({ hello: 'world' })
+  })
+
+  it('log renders an inline Expression message against a scalar data ({{.}})', () => {
+    const l = node('lg', 'log', {
+      message: { type: 'expression', value: '5+5 = {{.}}' },
+      data: { type: 'numeric', value: 10, format: 'decimal' }
+    })
+    const out = staticScenarioPreview(l, [l], [])
+    expect(out?.['message']).toBe('5+5 = 10')
   })
 
   it('log defaults to info + null placeholders when both inputs are wired to non-static', () => {

@@ -87,7 +87,7 @@ export function expectsObjectInput(targetKind: ScenarioNode['kind'], targetPortI
  * For these the wrapper must NOT be unwrapped (the downstream selector drills
  * into it). Every other static-preview kind emits the BARE value, with the
  * preview key only a display label. */
-const PREVIEW_WRAPPER_KINDS = new Set<ScenarioNode['kind']>(['transform', 'input'])
+const PREVIEW_WRAPPER_KINDS = new Set<ScenarioNode['kind']>(['transform', 'input', 'object'])
 
 /**
  * The runtime VALUE a given output port carries, unwrapped from the preview's
@@ -100,8 +100,9 @@ const PREVIEW_WRAPPER_KINDS = new Set<ScenarioNode['kind']>(['transform', 'input
  * value). Unwrap when the port id is a key (`arithmetic` → `{ result }`,
  * `filter` → `{ kept, rejected }`) or when the wrapper is a single display-named
  * entry (`now` → `{ now }`, `getVariable` → `{ <var> }`). The genuine wrappers
- * (`transform`, `input` — see {@link PREVIEW_WRAPPER_KINDS}) are returned
- * unchanged: their token IS the object.
+ * (`transform`, `input`, `object` — see {@link PREVIEW_WRAPPER_KINDS}) are
+ * returned unchanged: their token IS the object (so a single-property object
+ * isn't mistaken for a single display-named wrapper and unwrapped to its value).
  */
 export function portPreviewValue(preview: Record<string, unknown>, portId: string, kind?: ScenarioNode['kind']): unknown {
   if (kind !== undefined && PREVIEW_WRAPPER_KINDS.has(kind)) return preview
@@ -385,7 +386,17 @@ function operandPreviewValue(
   edges: readonly StaticPreviewEdge[]
 ): unknown {
   const edge = edges.find((e) => e.to.nodeId === nodeId && e.to.portId === portId)
-  if (!edge) return concreteValue(configLiteral)
+  if (!edge) {
+    // An inline `variable` operand resolves to that variable's STATIC value
+    // (from the setVariable / input nodes), not the `{{name}}` template
+    // `concreteValue` renders — otherwise an operand fed by a variable makes the
+    // whole node's preview NaN/null (so a downstream box has nothing to suggest).
+    const lit = configLiteral as { type?: unknown; value?: unknown } | null | undefined
+    if (lit !== null && typeof lit === 'object' && lit.type === 'variable' && typeof lit.value === 'string') {
+      return variableValues(nodes).get(lit.value)
+    }
+    return concreteValue(configLiteral)
+  }
   const source = nodes.find((n) => n.id === edge.from.nodeId)
   if (!source || !STATIC_PREVIEW_KINDS.has(source.kind)) return undefined
   const sourcePreview = staticScenarioPreview(source, nodes, edges)
@@ -544,8 +555,23 @@ export function staticScenarioPreview(
       const allowedLevels = ['debug', 'info', 'warn', 'error']
       const rawLevel = cfg['level']
       const level = typeof rawLevel === 'string' && allowedLevels.includes(rawLevel) ? rawLevel : 'info'
-      const message = operandPreviewValue(node.id, 'message', cfg['message'], nodes, edges)
       const dataVal = operandPreviewValue(node.id, 'data', cfg['data'], nodes, edges)
+      // Mirror `logExecutor`: an inline (un-wired) Expression message renders
+      // Handlebars against the resolved `data` as its context (so `{{name}}`
+      // reads `data.name`, `{{.}}` the scalar) — not the raw template the
+      // generic operand preview would otherwise surface.
+      const messageWired = edges.some((e) => e.to.nodeId === node.id && e.to.portId === 'message')
+      const msgCfg = cfg['message'] as { type?: unknown; value?: unknown } | undefined
+      let message: unknown
+      if (!messageWired && msgCfg?.type === 'expression' && typeof msgCfg.value === 'string') {
+        try {
+          message = Handlebars.compile(msgCfg.value, { noEscape: true })(dataVal ?? {})
+        } catch {
+          message = msgCfg.value
+        }
+      } else {
+        message = operandPreviewValue(node.id, 'message', cfg['message'], nodes, edges)
+      }
       return {
         timestamp: new Date().toISOString(),
         level,

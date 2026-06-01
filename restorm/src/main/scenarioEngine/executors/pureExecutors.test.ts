@@ -125,6 +125,17 @@ describe('logExecutor', () => {
     expect(entry.message).toBe('hi')
   })
 
+  it('renders an EXPRESSION message with the `data` value as the Handlebars context', () => {
+    // message now accepts any type; an Expression is rendered against `data`.
+    const entry = runLog({ message: { type: 'expression', value: '{{name}} wins' } }, { data: { name: 'Bob' } })
+    expect(entry.message).toBe('Bob wins')
+  })
+
+  it('logs a non-string message (number) as its string form', () => {
+    const entry = runLog({ message: { type: 'numeric', value: 42 } }, {})
+    expect(entry.message).toBe('42')
+  })
+
   it('resolves a `variable` data operand to the live value (not the `{{cpt}}` template)', () => {
     // A variable in the log `data` must show the run value, not the raw
     // Handlebars template `concreteValue` renders for the static preview.
@@ -164,9 +175,25 @@ describe('nowExecutor', () => {
 })
 
 describe('objectExecutor', () => {
-  it('assembles its inputs into one object on the `object` port', () => {
-    const out = runPure(objectExecutor, {}, { name: 'Bob', level: 3 })
-    expect(out.outputs).toEqual([{ port: 'object', value: { name: 'Bob', level: 3 } }])
+  it('assembles inline config properties keyed by property name', () => {
+    const properties = [
+      { id: 'p1', name: 'hello', value: { type: 'string', value: 'world' } },
+      { id: 'p2', name: 'answer', value: { type: 'numeric', value: 42 } }
+    ]
+    const out = runPure(objectExecutor, { properties }, {})
+    expect(out.outputs).toEqual([{ port: 'object', value: { hello: 'world', answer: 42 } }])
+  })
+
+  it('a wired property (keyed by its port id) overrides the inline value', () => {
+    const properties = [{ id: 'p1', name: 'hello', value: { type: 'string', value: 'inline' } }]
+    const out = runPure(objectExecutor, { properties }, { p1: 'wired' })
+    expect(out.outputs).toEqual([{ port: 'object', value: { hello: 'wired' } }])
+  })
+
+  it('resolves a `variable` property against the run store', () => {
+    const properties = [{ id: 'p1', name: 'cpt', value: { type: 'variable', value: 'counter' } }]
+    const out = runPure(objectExecutor, { properties }, {}, new Map([['counter', 7]]))
+    expect(out.outputs).toEqual([{ port: 'object', value: { cpt: 7 } }])
   })
 })
 

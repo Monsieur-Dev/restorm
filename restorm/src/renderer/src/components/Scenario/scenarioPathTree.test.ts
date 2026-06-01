@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { buildScenarioPathTree, isDataLink } from './scenarioPathTree'
+import { isValidSelectorPath } from './scenarioValidation'
 import type { ListViewItemData } from 'electron-core-ui/renderer'
 
 /** Flatten the tree to a id→title map for terse path assertions. */
@@ -68,5 +69,24 @@ describe('buildScenarioPathTree', () => {
   it('returns an empty tree for a null/non-object context', () => {
     expect(buildScenarioPathTree(null)).toEqual([])
     expect(buildScenarioPathTree('nope')).toEqual([])
+  })
+
+  it('emits bracket notation for keys that are not bare identifiers (root + nested)', () => {
+    const map = flatten(buildScenarioPathTree({
+      'Anwser to the universe': 42,
+      obj: { 'full name': 'Marty' }
+    }))
+    expect(map["['Anwser to the universe']"]).toBe('Anwser to the universe: 42')
+    expect(map["obj['full name']"]).toBe('full name: "Marty"')
+  })
+
+  it('every generated path id is a valid selector', () => {
+    const map = flatten(buildScenarioPathTree({
+      'a b': { c: [1, 2], 'x.y': 'z' },
+      plain: 'v'
+    }))
+    for (const id of Object.keys(map)) {
+      expect(isValidSelectorPath(id), id).toBe(true)
+    }
   })
 })

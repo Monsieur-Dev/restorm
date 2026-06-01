@@ -1,29 +1,43 @@
-import React from 'react'
-import type { NodeProps } from '@xyflow/react'
+import React, { useMemo } from 'react'
+import { type NodeProps, useNodeConnections } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
-import { SelectBox, RadioGroup, type ISelectOptionItem } from 'electron-core-ui/renderer'
+import { SelectBox, RadioGroup, type ISelectOptionItem, type VariableDefinition } from 'electron-core-ui/renderer'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { SegmentedToggle } from './SegmentedToggle'
 import { OperatorToggle, OPERATOR_OPTIONS, type OperatorOption } from './OperatorToggle'
 import { TypedValueField } from '../../TypedValueField'
 import type { ValueTypeKind } from '../../TypedValueField/castValue'
 import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroups'
+import { useHandlebarsHelpers } from '../../../hooks/useHandlebarsHelpers'
+import { useScenarioStaticPreview } from '../scenarioStaticPreviewContext'
+import { useScenarioEdgeSelector } from '../scenarioEdgeSelector'
 import { normalizeValueType } from '../../../utils/normalizeValueType'
 import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
+import { resolveSelectorPath, concreteValue, portPreviewValue } from '../../../../../shared/utils/scenarioStaticPreview'
 import { StringValue } from '../../../../../shared/types/collections'
 
+/** One-line preview of a value used as an expression-autocomplete suggestion. */
+function shortLogPreview(v: unknown): string {
+  if (v === null || v === undefined) return ''
+  if (typeof v === 'string') return v.length > 32 ? `"${v.slice(0, 32)}…"` : `"${v}"`
+  if (typeof v === 'number' || typeof v === 'boolean' || typeof v === 'bigint') return String(v)
+  if (Array.isArray(v)) return `[${v.length}]`
+  return '{…}'
+}
+
 const LOG_LEVELS = ['debug', 'info', 'warn', 'error'] as const
-/** The message is a plain text label — lock its selector to the `string` kind
- * (no expression / variable / typed alternatives), so it renders a bare text
- * input. It stays connectable: wire an upstream string in instead of typing. */
+/** The assert message is a plain text label — lock its selector to the `string`
+ * kind (no expression / variable / typed alternatives), so it renders a bare
+ * text input. It stays connectable: wire an upstream string in instead. */
 const STRING_ONLY_EXCLUDE: ValueTypeKind[] = [
   'secret', 'number', 'dateTime', 'color', 'boolean', 'expression', 'variable', 'enum', 'enumList', 'customList', 'customListMulti'
 ]
 
 /**
  * `log` — records a value at a chosen level during the run; a terminal sink (no
- * output). `level` is a radio toggle; `message` (a connectable string, locked to
- * the string kind) and `data` (a connectable value of any type, with the full
+ * output). `level` is a radio toggle; `message` accepts ANY type (an Expression
+ * is rendered against the `data` value as its Handlebars context, so `{{name}}`
+ * reads `data.name`) and `data` (a connectable value of any type, with the full
  * variable picker) are both optional — wire either, or set it inline.
  * {@link ScenarioInputCell} swaps an input for the JSON-path selector when a
  * data link is wired. Level + message + data persist in config.
@@ -34,6 +48,39 @@ export const LogNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data,
   const config = data.config ?? {}
   const rawLevel = config['level']
   const level = typeof rawLevel === 'string' && (LOG_LEVELS as readonly string[]).includes(rawLevel) ? rawLevel : 'info'
+
+  // An Expression message renders against `data`, so its autocomplete proposes
+  // the Handlebars helpers (Ctrl+Space) + the `data` value's keys — the same
+  // editor experience as `transform`. `data` keys come from the wired source's
+  // preview (after the edge selector) or the inline `data` config.
+  const helpers = useHandlebarsHelpers()
+  const staticPreview = useScenarioStaticPreview()
+  const edgeSelectorApi = useScenarioEdgeSelector()
+  const dataConnections = useNodeConnections({ handleType: 'target', handleId: 'data' })
+  const dataSourceId = dataConnections[0]?.source
+  const dataSourceHandle = dataConnections[0]?.sourceHandle
+  const dataEdgeId = dataConnections[0]?.edgeId
+  const dataConfig = config['data']
+  const messageVariables = useMemo<VariableDefinition[]>(() => {
+    let resolved: unknown
+    if (dataSourceId) {
+      const preview = staticPreview?.getPreview(dataSourceId) ?? null
+      // Wired but the source has no static preview (a runtime-only source, an
+      // unresolved variable…): still offer `.` so `{{.}}` is at least suggested.
+      if (!preview) return [{ name: '.', value: '' }]
+      // Unwrap the source's display wrapper to the value the PORT carries (a
+      // `result`-keyed node feeds its bare value), then apply the edge selector.
+      const portVal = portPreviewValue(preview, dataSourceHandle ?? '.')
+      const selector = dataEdgeId ? edgeSelectorApi?.getSelector(dataEdgeId) : undefined
+      resolved = selector !== undefined && selector !== '' && selector !== '.' ? resolveSelectorPath(portVal, selector) : portVal
+    } else {
+      resolved = concreteValue(dataConfig)
+    }
+    if (resolved !== null && typeof resolved === 'object' && !Array.isArray(resolved)) {
+      return Object.entries(resolved as Record<string, unknown>).map(([name, val]) => ({ name, value: shortLogPreview(val) }))
+    }
+    return resolved === null || resolved === undefined || resolved === '' ? [] : [{ name: '.', value: shortLogPreview(resolved) }]
+  }, [dataSourceId, dataSourceHandle, dataEdgeId, staticPreview, edgeSelectorApi, dataConfig])
 
   const left: ScenarioNodeSection[] = [
     {
@@ -48,13 +95,17 @@ export const LogNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data,
           label: t('scenario.log.message', 'message'),
           port: { id: 'message', type: 'target' },
           content: (
-            <div className="nodrag scn-stacked-field" onMouseDown={(e) => { e.stopPropagation() }}>
+            <div className="nodrag scn-stacked-field scn-template-field" onMouseDown={(e) => { e.stopPropagation() }}>
               <span className="scn-port-label">{t('scenario.log.message', 'message')}</span>
               <TypedValueField
                 value={config['message'] !== undefined ? normalizeValueType(config['message']) : new StringValue('')}
                 onChange={(next) => { data.onSetConfig?.(id, { message: serializeValueForPersistence(next) }) }}
                 valueTypeGroups={valueTypeGroups}
-                excludeTypes={STRING_ONLY_EXCLUDE}
+                allowAllVariables
+                allowEnvironment
+                variables={messageVariables}
+                helpers={helpers}
+                expressionVariableId={`scn-log-message-${id}`}
                 dataTestId="scn-log-message"
               />
             </div>
