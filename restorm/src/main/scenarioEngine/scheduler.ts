@@ -36,7 +36,7 @@ import type {
 import { ScopeRegistry, scopeKey } from './scopeRegistry'
 import { InputBuffer, type PortSpec } from './inputBuffer'
 import { resolveSelectorPath, concreteValue } from '../../shared/utils/scenarioStaticPreview'
-import { evaluateCondition } from './conditionEval'
+import { evaluateCondition, resolveOperand } from './conditionEval'
 
 /**
  * No activation cap by default — a scenario can loop intentionally for as
@@ -352,6 +352,29 @@ export class Scheduler {
     this.terminateIfDone()
   }
 
+  /** The action's RESOLVED input parameters, for the `start` debug log so a run
+   * trace shows what actually went in: each typed-value config operand resolved
+   * to its concrete / live value (`a: 5`, `b: <cpt's value>`), plus primitive
+   * config (operator, name, level…), with any WIRED input overlaid on top (a
+   * link supersedes the inline value). Structural config (arrays, nested
+   * objects like `parallelism` / `cases`) is omitted to keep the line readable. */
+  private startLogParams(act: InternalActivation): Record<string, unknown> {
+    const node = this.scenario.nodes.find((n) => n.id === act.nodeId)
+    const config = node?.config ?? {}
+    const params: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(config)) {
+      if (v === null || v === undefined) continue
+      if (typeof v === 'object') {
+        if (!Array.isArray(v) && 'type' in v) params[k] = resolveOperand(undefined, v, this.variables)
+        // else: structural config (array / nested object) — skip.
+      } else {
+        params[k] = v
+      }
+    }
+    for (const [k, v] of Object.entries(act.inputs)) params[k] = v
+    return params
+  }
+
   /** Hand an activation to its executor + wire up the completion
    * machinery (emit events, route emissions, update counters). */
   private dispatch(act: InternalActivation): void {
@@ -368,7 +391,8 @@ export class Scheduler {
       return
     }
     this.inFlight += 1
-    this.log.push({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `start ${act.kind}`, ...(Object.keys(act.inputs).length > 0 ? { data: logData(act.inputs) } : {}) })
+    const startParams = this.startLogParams(act)
+    this.log.push({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `start ${act.kind}`, ...(Object.keys(startParams).length > 0 ? { data: logData(startParams) } : {}) })
     this.emit({ type: 'node-started', runId: this.runId, nodeId: act.nodeId, scope: act.scope, at: now() })
     const ctx: ExecContext = {
       signal: this.abortCtl.signal,

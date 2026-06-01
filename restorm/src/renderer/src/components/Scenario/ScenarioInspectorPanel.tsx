@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Button, ListView } from 'electron-core-ui/renderer'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import type { ScenarioLogEntry } from '../../hooks/useScenarioEngine'
-import { ScenarioRunLogView, type LogProvenanceApi } from './ScenarioRunLogView'
+import { ScenarioRunLogView, type LogProvenanceApi, type LogLevelFilter } from './ScenarioRunLogView'
 import type { ScenarioPort } from '../../../../shared/types/collections'
 import type { ScenarioNodeError } from './scenarioValidation'
 import { buildScenarioPathTree } from './scenarioPathTree'
@@ -137,6 +137,11 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
   const [result, setResult] = useState<Record<string, unknown> | null>(null)
   const fetchToken = useRef(0)
   const panelRef = useRef<HTMLDivElement>(null)
+  // Log-view filters live HERE (the panel persists across runs), not inside
+  // `ScenarioRunLogView` — which unmounts on each new run, so its own state
+  // would reset the "show all" toggle + level filters every run.
+  const [showAllLogs, setShowAllLogs] = useState(false)
+  const [logLevels, setLogLevels] = useState<LogLevelFilter>({ debug: true, info: true, warn: true, error: true })
 
   // The panel sizes to its content but never past the canvas — and a definite
   // pixel height is what lets the response tree's ListView scroll (a bare
@@ -149,10 +154,18 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
     const parent = panel?.parentElement
     if (!panel || !parent) return undefined
     const apply = (): void => {
+      // Measuring the natural height means briefly setting `height: auto`, which
+      // removes the overflow on any nested scrollable (the run-log ListView) for
+      // one reflow — the browser then clamps its scrollTop to 0. Snapshot every
+      // inner scroller and restore it once the definite (overflowing) height is
+      // back, or the log list jumps to the top on every expand/collapse.
+      const scrollers = Array.from(panel.querySelectorAll<HTMLElement>('.scrollable-content'))
+      const tops = scrollers.map((s) => s.scrollTop)
       panel.style.height = 'auto'
       const natural = panel.scrollHeight
       const available = parent.clientHeight - 16
       panel.style.height = `${Math.min(natural, available)}px`
+      scrollers.forEach((s, i) => { const t = tops[i]; if (t !== undefined && s.scrollTop !== t) s.scrollTop = t })
     }
     apply()
     // Canvas resize → recompute available height; tree expand/collapse changes
@@ -440,7 +453,7 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
             <div className="scn-inspector-section-title scn-inspector-logs-header">
               <span>{t('scenario.inspector.logsTitle', 'Run logs')}</span>
             </div>
-            <ScenarioRunLogView logs={allLogs} testIdPrefix="scenario-inspector-logs" onFocusNode={onFocusNode} {...(onClearRunLog ? { onClear: onClearRunLog } : {})} {...(logProvenance ? { provenance: logProvenance } : {})} />
+            <ScenarioRunLogView logs={allLogs} testIdPrefix="scenario-inspector-logs" onFocusNode={onFocusNode} showAllLogs={showAllLogs} onShowAllLogsChange={setShowAllLogs} levels={logLevels} onLevelsChange={setLogLevels} {...(onClearRunLog ? { onClear: onClearRunLog } : {})} {...(logProvenance ? { provenance: logProvenance } : {})} />
           </div>
         </>
       )}

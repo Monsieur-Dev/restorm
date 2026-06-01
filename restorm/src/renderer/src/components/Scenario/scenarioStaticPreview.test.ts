@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { singleDeepPath, staticScenarioPreview, expectsObjectInput, type StaticPreviewNode, type StaticPreviewEdge } from '../../../../shared/utils/scenarioStaticPreview'
+import { singleDeepPath, singleTopLevelKey, portPreviewValue, staticScenarioPreview, expectsObjectInput, type StaticPreviewNode, type StaticPreviewEdge } from '../../../../shared/utils/scenarioStaticPreview'
 
 describe('expectsObjectInput', () => {
   it('skips auto-deduce for transform.value (the Handlebars context)', () => {
@@ -10,6 +10,32 @@ describe('expectsObjectInput', () => {
     expect(expectsObjectInput('wait', 'duration')).toBe(false)
     expect(expectsObjectInput('arithmetic', 'a')).toBe(false)
     expect(expectsObjectInput('comparator', 'b')).toBe(false)
+  })
+})
+
+describe('portPreviewValue — unwraps a node that emits a bare value', () => {
+  it('unwraps the value under the port id (arithmetic/comparator `{result}`, filter `{kept}`)', () => {
+    expect(portPreviewValue({ result: 5 }, 'result', 'arithmetic')).toBe(5)
+    expect(portPreviewValue({ kept: [1, 2], rejected: [3] }, 'kept', 'filter')).toEqual([1, 2])
+  })
+
+  it('unwraps a single display-named entry (`now` → `{now}`, `getVariable` → `{<var>}`)', () => {
+    expect(portPreviewValue({ now: 1 }, 'value', 'now')).toBe(1)
+    expect(portPreviewValue({ cpt: 5 }, 'value', 'getVariable')).toBe(5)
+  })
+
+  it('keeps the wrapper for the genuine wrapper kinds (transform `{result}`, input `{name}`)', () => {
+    expect(portPreviewValue({ result: 'x' }, 'out', 'transform')).toEqual({ result: 'x' })
+    expect(portPreviewValue({ value: 5 }, 'value', 'input')).toEqual({ value: 5 })
+  })
+
+  it('drives the right auto-selector: bare emitters → `.`, transform → `result`', () => {
+    // The reported bug: arithmetic.result → log.data deduced "result" (wrong).
+    // The port carries the bare number, so it must deduce "." (identity).
+    expect(singleTopLevelKey(portPreviewValue({ result: 5 }, 'result', 'arithmetic'))).toBeNull() // → "."
+    expect(singleDeepPath(portPreviewValue({ cpt: 5 }, 'value', 'getVariable'))).toBeNull() // → "."
+    // transform genuinely wraps `{ result }` on its `out` port → keep "result".
+    expect(singleTopLevelKey(portPreviewValue({ result: 'x' }, 'out', 'transform'))).toBe('result')
   })
 })
 

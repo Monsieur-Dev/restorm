@@ -47,6 +47,9 @@ export const BooleanNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, d
           onChange={(next) => { data.onSetConfig?.(id, { [key]: serializeValueForPersistence(next) }) }}
           valueTypeGroups={valueTypeGroups}
           excludeTypes={NON_BOOL_TYPES}
+          // List every run variable regardless of declared type — the op coerces
+          // to a boolean at run time, so any variable is a valid operand.
+          allowAllVariables
           dataTestId={`scn-boolean-${key}`}
         />
       </div>

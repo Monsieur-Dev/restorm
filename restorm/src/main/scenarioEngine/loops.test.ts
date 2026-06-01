@@ -272,6 +272,45 @@ describe('scenario run boundaries in the log', () => {
 })
 
 // ------------------------------------------------------------------
+// start-log input parameters (resolved config operands + primitives)
+// ------------------------------------------------------------------
+
+describe('start log surfaces an action`s resolved input parameters', () => {
+  it('resolves typed-value config operands + keeps primitive config (a=5, operator=+)', async () => {
+    const scenario = buildScenario(
+      [{ id: 'n', kind: 'arithmetic', inputs: ['b'], outputs: ['result'], config: { a: { type: 'numeric', value: 5 }, operator: '+', name: 'x', parallelism: { enabled: false } } }],
+      []
+    )
+    const executors = new Map<string, NodeExecutor>([['n', () => ({ outputs: [] })]])
+    const s = new Scheduler({ scenario, executors })
+    await s.run()
+    const start = s.readLog().find((e) => e.message === 'start arithmetic')
+    // Typed value resolved (a→5), primitive config kept (operator, name);
+    // structural config (`parallelism` object) omitted.
+    expect(start?.data).toMatchObject({ a: 5, operator: '+', name: 'x' })
+    expect((start?.data as Record<string, unknown>)['parallelism']).toBeUndefined()
+  })
+
+  it('a wired input overlays the inline config value of the same port', async () => {
+    const scenario = buildScenario(
+      [
+        { id: 'src', kind: 'now', outputs: ['out'] },
+        { id: 'n', kind: 'arithmetic', inputs: ['b'], outputs: ['result'], config: { a: { type: 'numeric', value: 5 }, b: { type: 'numeric', value: 99 } } }
+      ],
+      [{ from: ['src', 'out'], to: ['n', 'b'] }]
+    )
+    const executors = new Map<string, NodeExecutor>([
+      ['src', () => ({ outputs: [{ port: 'out', value: 7 }] })],
+      ['n', () => ({ outputs: [] })]
+    ])
+    const s = new Scheduler({ scenario, executors })
+    await s.run()
+    const start = s.readLog().find((e) => e.message === 'start arithmetic')
+    expect(start?.data).toMatchObject({ a: 5, b: 7 }) // wired 7 wins over config 99
+  })
+})
+
+// ------------------------------------------------------------------
 // registry — for/while/doWhile resolve to executors
 // ------------------------------------------------------------------
 

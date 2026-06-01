@@ -139,9 +139,13 @@ export const nowExecutor: NodeExecutor = (_act, ctx) => {
 /** Set / Get variable: writes / reads the run's variable store.
  * `setVariable` emits a signal on `event` (canonical port id). */
 export const setVariableExecutor: NodeExecutor = (act, ctx) => {
-  const cfg = ctx.node.config as { name?: string }
+  const cfg = ctx.node.config as { name?: string; value?: unknown }
   const name = cfg.name ?? ''
-  const value = act.inputs['value']
+  // A wired `value` wins; otherwise resolve the box's INLINE typed-value field
+  // (`config.value`) — including a `variable` reference read live. Reading only
+  // the wired input stored `undefined` for an inline `N = 5`, collapsing every
+  // downstream read to 0.
+  const value = resolveOperand(act.inputs['value'], cfg.value, ctx.variables)
   if (name) ctx.variables.set(name, value)
   // No `event` output any more — completion is signalled by the universal
   // `Done` port (driven by the scheduler when the box's sub-graph drains).
@@ -149,8 +153,12 @@ export const setVariableExecutor: NodeExecutor = (act, ctx) => {
 }
 
 export const getVariableExecutor: NodeExecutor = (_act, ctx) => {
-  const cfg = ctx.node.config as { name?: string }
-  const name = cfg.name ?? ''
+  const cfg = ctx.node.config as { value?: unknown; name?: string }
+  // The node box stores the picked variable under `config.value` as a typed
+  // `variable` reference (`{ type:'variable', value:'<name>' }`) — the same key
+  // the static preview reads. A legacy `config.name` is the fallback.
+  const ref = cfg.value as { type?: unknown; value?: unknown } | undefined
+  const name = ref?.type === 'variable' && typeof ref.value === 'string' ? ref.value : (cfg.name ?? '')
   const value = ctx.variables.get(name)
   return { outputs: [{ port: 'value', value }] }
 }
@@ -263,13 +271,25 @@ function renderHandlebars(template: string, ctx: unknown): string {
   return Handlebars.compile(template, { noEscape: true })(ctx)
 }
 
+/** Coerce an arithmetic operand to a finite number, or THROW so the run routes
+ * to the node's `error` port. An unset / empty operand is the field's `0`
+ * placeholder (not an error); a real non-numeric value (a string like "aaa", an
+ * object, NaN/∞) is a genuine mistake the user must see — silently treating it
+ * as 0 hides the bug. */
 function toNumber(v: unknown): number {
-  if (typeof v === 'number') return v
-  if (typeof v === 'string') {
-    const n = Number(v)
-    return Number.isFinite(n) ? n : 0
+  if (v === undefined || v === null) return 0
+  if (typeof v === 'boolean') return v ? 1 : 0
+  if (typeof v === 'number') {
+    if (!Number.isFinite(v)) throw new Error(`arithmetic operand is not a number: ${v}`)
+    return v
   }
-  return 0
+  if (typeof v === 'string') {
+    if (v.trim() === '') return 0
+    const n = Number(v)
+    if (Number.isFinite(n)) return n
+    throw new Error(`arithmetic operand is not a number: "${v}"`)
+  }
+  throw new Error(`arithmetic operand is not a number: ${typeof v}`)
 }
 
 function stringifySafely(v: unknown): string {

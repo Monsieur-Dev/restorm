@@ -52,6 +52,11 @@ export const ArithmeticNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id
           onChange={(next) => { data.onSetConfig?.(id, { [key]: serializeValueForPersistence(next) }) }}
           valueTypeGroups={valueTypeGroups}
           excludeTypes={NON_ADDABLE_TYPES}
+          // List EVERY run variable regardless of its declared type — arithmetic
+          // coerces to a number at run time (toNumber), so a variable declared
+          // as e.g. a string is still a valid operand. Without this, a variable
+          // whose type the slot excludes is silently hidden from the picker.
+          allowAllVariables
           dataTestId={`scn-arith-${key}`}
         />
       </div>

@@ -103,6 +103,10 @@ type LogLevel = typeof LEVELS[number]
 // pasted log keeps the level cue without the styled `<span>` dot.
 const LEVEL_EMOJI: Record<LogLevel, string> = { debug: '⚪', info: '🔵', warn: '🟠', error: '🔴' }
 
+/** The level-filter map (which severities are shown). */
+export type LogLevelFilter = Record<LogLevel, boolean>
+const ALL_LEVELS_ON: LogLevelFilter = { debug: true, info: true, warn: true, error: true }
+
 /** Minimal log-entry shape the view needs — satisfied by both the live
  * `ScenarioLogEntry` (inspector) and the persisted `ScenarioRunLogEntry`
  * (run history). */
@@ -135,6 +139,13 @@ export interface ScenarioRunLogViewProps {
   /** When provided, a log row from a DIFFERENT scenario shows a provenance
    * link in its hover tooltip. Only the live inspector passes this. */
   provenance?: LogProvenanceApi
+  /** Controlled "show all logs" toggle + its filters. The inspector lifts these
+   * into the (persistent) panel so they survive the log view's per-run remount;
+   * the run-history modal omits them and keeps its own ephemeral state. */
+  showAllLogs?: boolean
+  onShowAllLogsChange?: (next: boolean) => void
+  levels?: LogLevelFilter
+  onLevelsChange?: (next: LogLevelFilter) => void
 }
 
 const logTs = (ts: string): string => (ts.length >= 23 ? ts.slice(11, 23) : ts)
@@ -166,11 +177,17 @@ const prefixIds = (items: ListViewItemData[], prefix: string): ListViewItemData[
  * object becomes collapsible children (the same JSON tree the JSON-path
  * picker uses).
  */
-export const ScenarioRunLogView: React.FC<ScenarioRunLogViewProps> = ({ logs, testIdPrefix = 'scenario-run-log', onClear, onFocusNode, provenance }) => {
+export const ScenarioRunLogView: React.FC<ScenarioRunLogViewProps> = ({ logs, testIdPrefix = 'scenario-run-log', onClear, onFocusNode, provenance, showAllLogs: showAllProp, onShowAllLogsChange, levels: levelsProp, onLevelsChange }) => {
   const { t } = useTranslation()
-  const [showAllLogs, setShowAllLogs] = useState(false)
   const [copied, setCopied] = useState(false)
-  const [levels, setLevels] = useState<Record<LogLevel, boolean>>({ debug: true, info: true, warn: true, error: true })
+  // Controlled when the caller (the inspector) owns these — so the choice
+  // survives this view's per-run remount; otherwise local (the run-history modal).
+  const [internalShowAll, setInternalShowAll] = useState(false)
+  const showAllLogs = showAllProp ?? internalShowAll
+  const setShowAllLogs = onShowAllLogsChange ?? setInternalShowAll
+  const [internalLevels, setInternalLevels] = useState<LogLevelFilter>(ALL_LEVELS_ON)
+  const levels = levelsProp ?? internalLevels
+  const setLevels = onLevelsChange ?? setInternalLevels
 
   // Unchecked "show all" = only the user-produced `Log` action entries
   // (engine debug + `run` boundaries are "system"). Then keep only the
@@ -236,7 +253,7 @@ export const ScenarioRunLogView: React.FC<ScenarioRunLogViewProps> = ({ logs, te
               <Toggle
                 appearance="button"
                 checked={levels[lvl]}
-                onChange={(checked) => { setLevels((prev) => ({ ...prev, [lvl]: checked })) }}
+                onChange={(checked) => { setLevels({ ...levels, [lvl]: checked }) }}
                 data-testid={`${testIdPrefix}-level-${lvl}`}
                 aria-label={t('scenario.inspector.showLevelLogs', { level: lvl, defaultValue: 'Show {{level}} logs' })}
               >

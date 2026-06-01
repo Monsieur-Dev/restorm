@@ -182,6 +182,30 @@ describe('setVariable / getVariable', () => {
     const get = runPure(getVariableExecutor, { name: 'hp' }, {}, vars)
     expect(get.outputs).toEqual([{ port: 'value', value: 42 }])
   })
+
+  it('getVariable reads the variable reference from `config.value` (the selector), not `config.name`', () => {
+    // The node box stores the picked variable under `config.value` as a typed
+    // `variable` value — reading `config.name` (which it never sets) emitted
+    // `undefined`, so a downstream operand silently became 0.
+    const vars = new Map<string, unknown>([['stringvariable', 'aaa']])
+    const out = runPure(getVariableExecutor, { value: { type: 'variable', value: 'stringvariable' } }, {}, vars)
+    expect(out.outputs).toEqual([{ port: 'value', value: 'aaa' }])
+  })
+
+  it('stores the INLINE config value when `value` is unwired (N = 5 typed inline)', () => {
+    // The box has an inline typed-value field persisted under `config.value`.
+    // Reading only the wired input stored `undefined` — so an inline `N = 5`
+    // silently set the variable to nothing (downstream reads collapsed to 0).
+    const vars = new Map<string, unknown>()
+    runPure(setVariableExecutor, { name: 'N', value: { type: 'numeric', value: 5 } }, {}, vars)
+    expect(vars.get('N')).toBe(5)
+  })
+
+  it('reads a `variable` inline value from the live store (copy one variable into another)', () => {
+    const vars = new Map<string, unknown>([['src', 7]])
+    runPure(setVariableExecutor, { name: 'dst', value: { type: 'variable', value: 'src' } }, {}, vars)
+    expect(vars.get('dst')).toBe(7)
+  })
 })
 
 describe('assertExecutor', () => {
@@ -239,6 +263,20 @@ describe('arithmeticExecutor', () => {
 
   it('throws on division by zero (routes to the error path)', () => {
     expect(() => runPure(arithmeticExecutor, { op: 'div' }, { a: 1, b: 0 })).toThrow('division by zero')
+  })
+
+  it('throws on a non-numeric operand instead of silently coercing to 0 (routes to error)', () => {
+    // A getVariable of a string ("aaa") into an operand must surface an error,
+    // not quietly compute 0 + 0.
+    expect(() => runPure(arithmeticExecutor, { operator: '+' }, { a: 0, b: 'aaa' })).toThrow(/not a number/)
+    expect(() => runPure(arithmeticExecutor, { operator: '+' }, { a: {}, b: 1 })).toThrow(/not a number/)
+  })
+
+  it('treats an unset / empty operand as 0 (the field placeholder), not an error', () => {
+    // An unwired operand with no config shows "0" in the UI — keep that default
+    // rather than erroring; only a REAL non-numeric value throws.
+    expect(runPure(arithmeticExecutor, { operator: '+' }, { a: 5 }).outputs[0]?.value).toBe(5)
+    expect(runPure(arithmeticExecutor, { operator: '+' }, { a: 5, b: '' }).outputs[0]?.value).toBe(5)
   })
 
   it('coerces string operands to numbers', () => {

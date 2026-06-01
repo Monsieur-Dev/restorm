@@ -50,7 +50,7 @@ import { ScenarioInputPrompt, ScenarioMidRunInputPrompt } from './ScenarioInputP
 import { ScenarioRunHistoryModal } from './ScenarioRunHistoryModal'
 import { SCENARIO_RUN_HISTORY_OPEN, type ScenarioRunHistoryOpenPayload } from './scenarioRunHistoryEvents'
 import { ScenarioDebugBezierEdge } from './ScenarioDebugBezierEdge'
-import { staticScenarioPreview, singleDeepPath, expectsObjectInput, singleTopLevelKey, STATIC_PREVIEW_KINDS, resolveItems, applyListOp, resolveSelectorPath, type StaticPreviewNode, type StaticPreviewEdge } from '../../../../shared/utils/scenarioStaticPreview'
+import { staticScenarioPreview, singleDeepPath, expectsObjectInput, singleTopLevelKey, portPreviewValue, STATIC_PREVIEW_KINDS, resolveItems, applyListOp, resolveSelectorPath, type StaticPreviewNode, type StaticPreviewEdge } from '../../../../shared/utils/scenarioStaticPreview'
 import { consumePendingScenarioNodeFocus, onScenarioNodeFocus, clearPendingScenarioNodeFocus } from '../../services/scenarioFocusBus'
 import { dynamicHandleIds, pruneOrphanDynamicEdges, isOrphanDynamicEdge } from './orphanEdgeSanitizer'
 
@@ -1008,7 +1008,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
                 : [])
             )
           : null
-        const top = preview ? singleTopLevelKey(preview) : null
+        const top = preview ? singleTopLevelKey(portPreviewValue(preview, connection.sourceHandle, src.data.kind)) : null
         selector = top ?? '.'
         edgeStore.current.set(id, {
           id,
@@ -1024,7 +1024,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
             ? [{ from: { nodeId: e.source, portId: e.sourceHandle }, to: { nodeId: e.target, portId: e.targetHandle }, ...(typeof e.data?.['selector'] === 'string' ? { selector: e.data['selector'] } : {}) }]
             : [])
         )
-        const path = preview ? singleDeepPath(preview) : null
+        const path = preview ? singleDeepPath(portPreviewValue(preview, connection.sourceHandle, src.data.kind)) : null
         // Default to the identity selector `.` when no single-deep path is
         // deducible — e.g. an array output, or a runtime-only source like an
         // httpRequest `response` or a forEach `each`. The whole value flows

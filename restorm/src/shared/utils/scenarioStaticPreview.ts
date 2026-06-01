@@ -82,6 +82,35 @@ export function expectsObjectInput(targetKind: ScenarioNode['kind'], targetPortI
   )
 }
 
+/** Kinds whose output token genuinely IS the wrapper object their preview
+ * models — `transform` emits `{ result }`, `input` emits `{ <name>: value }`.
+ * For these the wrapper must NOT be unwrapped (the downstream selector drills
+ * into it). Every other static-preview kind emits the BARE value, with the
+ * preview key only a display label. */
+const PREVIEW_WRAPPER_KINDS = new Set<ScenarioNode['kind']>(['transform', 'input'])
+
+/**
+ * The runtime VALUE a given output port carries, unwrapped from the preview's
+ * display object.
+ *
+ * The preview wraps each output under a meaningful name for the inspector tree,
+ * but most nodes emit the BARE value on the port — so a downstream selector /
+ * preview must unwrap it (else it deduces the wrapper's KEY, e.g. `result` or
+ * the variable name, as the path — wrong, since the token already IS that
+ * value). Unwrap when the port id is a key (`arithmetic` → `{ result }`,
+ * `filter` → `{ kept, rejected }`) or when the wrapper is a single display-named
+ * entry (`now` → `{ now }`, `getVariable` → `{ <var> }`). The genuine wrappers
+ * (`transform`, `input` — see {@link PREVIEW_WRAPPER_KINDS}) are returned
+ * unchanged: their token IS the object.
+ */
+export function portPreviewValue(preview: Record<string, unknown>, portId: string, kind?: ScenarioNode['kind']): unknown {
+  if (kind !== undefined && PREVIEW_WRAPPER_KINDS.has(kind)) return preview
+  if (portId in preview) return preview[portId]
+  const keys = Object.keys(preview)
+  const only = keys.length === 1 ? keys[0] : undefined
+  return only !== undefined ? preview[only] : preview
+}
+
 /** If the value is an object with exactly one top-level key, return that key.
  * Used by the JSON-path auto-deduce on object-input ports: a source with a
  * single top-level property is unambiguous (use that property), otherwise we
@@ -361,7 +390,11 @@ function operandPreviewValue(
   if (!source || !STATIC_PREVIEW_KINDS.has(source.kind)) return undefined
   const sourcePreview = staticScenarioPreview(source, nodes, edges)
   if (sourcePreview === null) return undefined
-  return edge.selector ? resolveSelectorPath(sourcePreview, edge.selector) : sourcePreview
+  // Unwrap to the value the SOURCE PORT actually carries before applying the
+  // selector, so a `result`-keyed node feeds its bare value (matching runtime),
+  // not the `{ result: … }` display wrapper.
+  const portValue = portPreviewValue(sourcePreview, edge.from.portId, source.kind)
+  return edge.selector ? resolveSelectorPath(portValue, edge.selector) : portValue
 }
 
 /** Apply a comparator-style operator (`<`/`≤`/`=`/`≥`/`>`/`≠`/`contains`) to
