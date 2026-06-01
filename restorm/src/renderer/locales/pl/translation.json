@@ -878,10 +878,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "addOutput": "Dodaj wyjście",
+      "removeOutput": "Usuń"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Wymagane dla scenariuszy wywołujących"
+      "required": "Wymagane dla scenariuszy wywołujących",
+      "addParam": "Dodaj parametr",
+      "removeParam": "Usuń"
     },
     "runScenario": {
       "orphanInput": "Brak pasującego parametru „{{name}}\" w podscenariuszu",
@@ -891,6 +897,7 @@
     "validation": {
       "duplicateName": "Nazwa „{{name}}” jest już używana przez inną akcję.",
       "panelTitle": "{{count}} błąd(y) akcji",
+      "runBlocked": "Napraw {{count}} błąd(y) akcji przed uruchomieniem",
       "focusBox": "Przejdź do tej akcji",
       "showErrors": "Pokaż błędy",
       "input": {
@@ -953,6 +960,7 @@
       "clearLogs": "Wyczyść logi",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Pokaż logi {{level}}",
+      "showLevelOnly": "Kliknij prawym przyciskiem: tylko ten poziom",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {

@@ -878,10 +878,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "addOutput": "Додати вихід",
+      "removeOutput": "Видалити"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Обов'язково для сценаріїв, що викликають"
+      "required": "Обов'язково для сценаріїв, що викликають",
+      "addParam": "Додати параметр",
+      "removeParam": "Видалити"
     },
     "runScenario": {
       "orphanInput": "Немає відповідного параметра «{{name}}» у підсценарії",
@@ -891,6 +897,7 @@
     "validation": {
       "duplicateName": "Назва «{{name}}» вже використовується іншою дією.",
       "panelTitle": "{{count}} помилок дій",
+      "runBlocked": "Виправте {{count}} помилку(и) дії перед запуском",
       "focusBox": "Перейти до цієї дії",
       "showErrors": "Показати помилки",
       "input": {
@@ -953,6 +960,7 @@
       "clearLogs": "Очистити журнали",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Показати логи {{level}}",
+      "showLevelOnly": "Клацніть правою кнопкою: лише цей рівень",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {

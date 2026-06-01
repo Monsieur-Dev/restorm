@@ -23,8 +23,40 @@
 
 import { z } from 'zod'
 import type { McpService } from 'electron-core-ui'
+import type { TFunction } from 'i18next'
 import { scenarioEngine, type RunHandle } from '../../scenarioEngine/engine'
 import type { EngineEvent, RunLogEntry, RuntimeId } from '../../scenarioEngine/types'
+import { collectionStore } from '../../services/CollectionStore'
+import { validateScenarioModel } from '../../../shared/scenarioValidation'
+import type { Scenario } from '../../../shared/models/Scenario'
+
+/** Minimal interpolating translator so the model validator yields readable
+ * English messages without pulling i18next into the main process. */
+const validationT = ((_key: string, def: string, opts?: Record<string, unknown>): string => {
+  let out = def
+  if (opts) for (const [k, v] of Object.entries(opts)) out = out.replace(`{{${k}}}`, String(v))
+  return out
+}) as unknown as TFunction
+
+function findScenarioModel(id: string): Scenario | null {
+  const item = collectionStore.findById(id)
+  if (!item || (item as { type?: string }).type !== 'scenario') return null
+  return item as unknown as Scenario
+}
+
+/** A scenario carrying editor-level validation errors must not run — mirror the
+ * disabled Play button. Returns a human-readable summary, or null when clean. */
+function blockingValidationSummary(scenarioId: string): string | null {
+  const scenario = findScenarioModel(scenarioId)
+  if (!scenario) return null
+  const byNode = validateScenarioModel(scenario, validationT)
+  if (byNode.size === 0) return null
+  const lines: string[] = []
+  for (const [nodeId, errs] of byNode) {
+    for (const e of errs) lines.push(`  • [${nodeId}${e.field ? `/${e.field}` : ''}] ${e.message}`)
+  }
+  return `Cannot run "${scenario.name || scenarioId}": ${lines.length} validation error(s) must be fixed first:\n${lines.join('\n')}`
+}
 
 /** Default cap on a blocking run before degrading to a handle. */
 const DEFAULT_BLOCKING_TIMEOUT_MS = 60_000
@@ -87,6 +119,10 @@ export function registerScenarioEngineTools(mcp: McpService): void {
     async (args) => {
       try {
         const scenarioId = String(args['scenarioId'])
+        // Refuse a scenario with editor-level validation errors — same gate as
+        // the disabled Play button, so MCP can't bypass it.
+        const invalid = blockingValidationSummary(scenarioId)
+        if (invalid !== null) return errorReply(invalid)
         const params = (args['params'] as Record<string, unknown> | undefined) ?? {}
         const blocking = args['blocking'] !== false
         const timeoutMs = typeof args['blockingTimeoutMs'] === 'number' && args['blockingTimeoutMs'] > 0

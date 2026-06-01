@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { buildScenarioPathTree, isDataLink } from './scenarioPathTree'
-import { isValidSelectorPath } from './scenarioValidation'
+import { isValidSelectorPath } from '../../../../shared/scenarioValidation'
 import type { ListViewItemData } from 'electron-core-ui/renderer'
 
 /** Flatten the tree to a id→title map for terse path assertions. */

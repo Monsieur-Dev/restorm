@@ -875,10 +875,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "addOutput": "출력 추가",
+      "removeOutput": "제거"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "호출하는 시나리오에 필수"
+      "required": "호출하는 시나리오에 필수",
+      "addParam": "매개변수 추가",
+      "removeParam": "제거"
     },
     "runScenario": {
       "orphanInput": "하위 시나리오에 일치하는 매개변수 \"{{name}}\"가 없습니다",
@@ -888,6 +894,7 @@
     "validation": {
       "duplicateName": "이름 \"{{name}}\"은(는) 다른 액션에서 이미 사용 중입니다.",
       "panelTitle": "액션 오류 {{count}}건",
+      "runBlocked": "실행하기 전에 {{count}}개의 작업 오류를 수정하세요",
       "focusBox": "이 액션으로 이동",
       "showErrors": "오류 표시",
       "input": {
@@ -950,6 +957,7 @@
       "clearLogs": "로그 지우기",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "{{level}} 로그 표시",
+      "showLevelOnly": "마우스 오른쪽 클릭: 이 수준만",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {

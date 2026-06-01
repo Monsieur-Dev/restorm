@@ -876,10 +876,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "addOutput": "Lisää tuloste",
+      "removeOutput": "Poista"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Vaaditaan kutsuvilta skenaarioilta"
+      "required": "Vaaditaan kutsuvilta skenaarioilta",
+      "addParam": "Lisää parametri",
+      "removeParam": "Poista"
     },
     "runScenario": {
       "orphanInput": "Aliskenaariossa ei ole vastaavaa parametria \"{{name}}\"",
@@ -889,6 +895,7 @@
     "validation": {
       "duplicateName": "Nimi ”{{name}}” on jo toisen toiminnon käytössä.",
       "panelTitle": "{{count}} toimintovirhe(ttä)",
+      "runBlocked": "Korjaa {{count}} toimintovirhe(ttä) ennen suoritusta",
       "focusBox": "Siirry tähän toimintoon",
       "showErrors": "Näytä virheet",
       "input": {
@@ -951,6 +958,7 @@
       "clearLogs": "Tyhjennä lokit",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Näytä {{level}}-lokit",
+      "showLevelOnly": "Napsauta hiiren oikealla: vain tämä taso",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { Scheduler } from './scheduler'
+import { buildExecutorRegistry } from './executors/registry'
 import type {
   EngineEvent,
   NodeExecutor,
@@ -634,6 +635,71 @@ describe('interactive vs headless input seeding', () => {
     s.resolveUserInput(ev.requestId, 'Bob')
     await runP
     expect(s.status().state).toBe('completed')
+  })
+
+  it('an interactive multi-param input raises ALL its param prompts AT ONCE (one submit resolves them)', async () => {
+    // Regression: the executor used to `await` each param prompt sequentially,
+    // so only one param was pending at a time — the up-front modal then needed
+    // one Run click PER param to advance. All params must pend concurrently so a
+    // single submit feeds them all.
+    const scenario = buildScenario(
+      [{ id: 'in', kind: 'input', outputs: ['value'], config: { params: [
+        { id: 'p1', name: 'string', valueType: { type: 'string', value: 's!' } },
+        { id: 'p2', name: 'string2', valueType: { type: 'string', value: '' } }
+      ] } }],
+      []
+    )
+    const executors = buildExecutorRegistry(scenario)
+    const s = new Scheduler({ scenario, executors })
+    const events = captureEvents(s)
+    const runP = s.run({ interactive: true })
+    // BOTH prompts pending before either resolves — the bug only ever surfaced one.
+    await vi.waitFor(() => {
+      expect(events.filter((e) => e.type === 'user-input-requested')).toHaveLength(2)
+    })
+    const reqs = events.filter((e) => e.type === 'user-input-requested') as { requestId: string; name: string }[]
+    for (const r of reqs) s.resolveUserInput(r.requestId, `${r.name}-val`)
+    await runP
+    expect(s.status().state).toBe('completed')
+  })
+
+  it('carries each param`s valueType on the prompt event (so the modal renders the typed editor)', async () => {
+    const dt = { type: 'datetime', value: '2026-06-02T10:18:27.766Z' }
+    const scenario = buildScenario(
+      [{ id: 'in', kind: 'input', outputs: ['value'], config: { params: [
+        { id: 'p1', name: 'SecondInput', valueType: dt }
+      ] } }],
+      []
+    )
+    const executors = buildExecutorRegistry(scenario)
+    const s = new Scheduler({ scenario, executors })
+    const events = captureEvents(s)
+    const runP = s.run({ interactive: true })
+    await vi.waitFor(() => { expect(events.some((e) => e.type === 'user-input-requested')).toBe(true) })
+    const ev = events.find((e) => e.type === 'user-input-requested') as { requestId: string; valueType?: unknown }
+    expect(ev.valueType).toEqual(dt)
+    s.resolveUserInput(ev.requestId, '2026-06-02T10:18:27.766Z')
+    await runP
+    expect(s.status().state).toBe('completed')
+  })
+
+  it('a multi-output node emits one `output:<name>` per decl from its OWN value inputs', async () => {
+    const scenario = buildScenario(
+      [
+        { id: 'sa', kind: 'now', outputs: ['out'] },
+        { id: 'sb', kind: 'now', outputs: ['out'] },
+        { id: 'o', kind: 'output', inputs: ['d1', 'd2'], config: { outputs: [{ id: 'd1', name: 'a' }, { id: 'd2', name: 'b' }] } }
+      ],
+      [{ from: ['sa', 'out'], to: ['o', 'd1'] }, { from: ['sb', 'out'], to: ['o', 'd2'] }]
+    )
+    const executors = buildExecutorRegistry(scenario)
+    executors.set('sa', () => ({ outputs: [{ port: 'out', value: 'A' }] }))
+    executors.set('sb', () => ({ outputs: [{ port: 'out', value: 'B' }] }))
+    const s = new Scheduler({ scenario, executors })
+    const events = captureEvents(s)
+    await s.run()
+    const done = events.find((e) => e.type === 'node-completed' && e.nodeId === 'o') as { outputs: { port: string; value: unknown }[] }
+    expect(done.outputs).toEqual([{ port: 'output:a', value: 'A' }, { port: 'output:b', value: 'B' }])
   })
 
   it('headless run: a no-predecessor input uses its configured default (no prompt)', async () => {

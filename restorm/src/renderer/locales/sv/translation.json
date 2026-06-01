@@ -876,10 +876,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "addOutput": "Lägg till utdata",
+      "removeOutput": "Ta bort"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Krävs för anropande scenarier"
+      "required": "Krävs för anropande scenarier",
+      "addParam": "Lägg till parameter",
+      "removeParam": "Ta bort"
     },
     "runScenario": {
       "orphanInput": "Ingen matchande parameter \"{{name}}\" i underscenariot",
@@ -889,6 +895,7 @@
     "validation": {
       "duplicateName": "Namnet ”{{name}}” används redan av en annan åtgärd.",
       "panelTitle": "{{count}} åtgärdsfel",
+      "runBlocked": "Åtgärda {{count}} åtgärdsfel innan körning",
       "focusBox": "Gå till denna åtgärd",
       "showErrors": "Visa fel",
       "input": {
@@ -951,6 +958,7 @@
       "clearLogs": "Rensa loggar",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Visa {{level}}-loggar",
+      "showLevelOnly": "Högerklick: endast denna nivå",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {

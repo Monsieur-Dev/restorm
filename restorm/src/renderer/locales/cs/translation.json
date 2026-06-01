@@ -878,10 +878,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "addOutput": "Přidat výstup",
+      "removeOutput": "Odebrat"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Vyžadováno pro volající scénáře"
+      "required": "Vyžadováno pro volající scénáře",
+      "addParam": "Přidat parametr",
+      "removeParam": "Odebrat"
     },
     "runScenario": {
       "orphanInput": "V dílčím scénáři chybí odpovídající parametr „{{name}}“",
@@ -891,6 +897,7 @@
     "validation": {
       "duplicateName": "Název „{{name}}“ už používá jiná akce.",
       "panelTitle": "Chyby akcí: {{count}}",
+      "runBlocked": "Před spuštěním opravte {{count}} chyb akcí",
       "focusBox": "Přejít na tuto akci",
       "showErrors": "Zobrazit chyby",
       "input": {
@@ -953,6 +960,7 @@
       "clearLogs": "Vymazat logy",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Zobrazit logy {{level}}",
+      "showLevelOnly": "Klikněte pravým tlačítkem: pouze tato úroveň",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {

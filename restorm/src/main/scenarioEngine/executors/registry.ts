@@ -34,6 +34,8 @@ import {
 import { httpRequestExecutor } from './httpRequestExecutor'
 import { runScenarioExecutor } from './runScenarioExecutor'
 import { concreteValue } from '../../../shared/utils/scenarioStaticPreview'
+import { readInputParams } from '../../../shared/scenarioInputParams'
+import { readOutputDecls } from '../../../shared/scenarioOutputDecls'
 
 /** An `input` node either: (a) seeded at run start with the user's
  * up-front value (the editor's pre-run modal) — pure passthrough; or
@@ -42,27 +44,43 @@ import { concreteValue } from '../../../shared/utils/scenarioStaticPreview'
  * confirm / edit before the value flows downstream. The `seeded`
  * flag on the activation distinguishes the two paths. */
 const inputExecutor: NodeExecutor = async (act, ctx) => {
-  // The seed activation already carries the `{ [name]: value }` shape
+  // The seed activation already carries the `{ [name]: value, … }` object
   // (see `Scheduler.seedRoots`); pass it through verbatim.
   if (act.seeded === true) return { outputs: [{ port: 'value', value: act.inputs['value'] }] }
-  const cfg = ctx.node.config as { name?: string; value?: unknown; valueType?: unknown }
-  const name = typeof cfg.name === 'string' && cfg.name !== '' ? cfg.name : 'value'
-  // Prefill the prompt with the upstream value when one was fed into the
-  // node, otherwise the node's OWN configured default (the box's
-  // "Default / type" field) — resolved to a concrete primitive the same
-  // way the seeded path does, so the modal honours the scenario default.
-  const configuredDefault = cfg.valueType !== undefined && cfg.valueType !== null
-    ? concreteValue(cfg.valueType)
-    : cfg.value
-  const prefill = act.inputs['value'] !== undefined ? act.inputs['value'] : configuredDefault
-  const value = await ctx.requestUserInput({
-    name: cfg.name ?? ctx.node.id,
-    defaultValue: prefill,
-    hint: inferHint((cfg.valueType as { type?: string } | undefined)?.type)
-  })
-  // Wrap to match the static preview shape so a wired selector
-  // (auto-deduced to the param name) resolves the same as the seeded path.
-  return { outputs: [{ port: 'value', value: { [name]: value } }] }
+  // An input prompts for EACH declared param and emits one object keyed by the
+  // param names — the same shape the static preview + seeded path model, so a
+  // wired selector resolves identically. The prompts are raised CONCURRENTLY
+  // (not awaited one-at-a-time): the up-front modal collects every param at once
+  // and resolves them in a single submit, so all requests must be pending
+  // together — a sequential await would force one Run click per param. A
+  // predecessor-wired (mid-run) input still surfaces them one-at-a-time, since
+  // the editor shows the single-field prompt for whichever request it finds
+  // first; the others simply stay pending until their turn.
+  const params = readInputParams(ctx.node.config)
+  const wired = act.inputs['value']
+  const wiredObj = wired !== null && typeof wired === 'object' ? wired as Record<string, unknown> : null
+  const entries = await Promise.all(params.map(async (param) => {
+    const name = param.name.trim() !== '' ? param.name.trim() : 'value'
+    const configuredDefault = param.valueType !== undefined && param.valueType !== null
+      ? concreteValue(param.valueType)
+      : undefined
+    // Prefill: a wired object carrying this param name wins; a single bare
+    // wired value prefills a single param; otherwise the param's own default.
+    const prefill = wiredObj && name in wiredObj
+      ? wiredObj[name]
+      : (params.length === 1 && wired !== undefined ? wired : configuredDefault)
+    const value = await ctx.requestUserInput({
+      name,
+      defaultValue: prefill,
+      hint: inferHint((param.valueType as { type?: string } | undefined)?.type),
+      // Carry the param's full typed-value shape so the mid-run prompt can render
+      // the matching editor (a datetime picker, a custom-list combobox, …) rather
+      // than collapsing every non-number/boolean type to a bare text field.
+      ...(param.valueType !== undefined && param.valueType !== null ? { valueType: param.valueType } : {})
+    })
+    return [name, value] as const
+  }))
+  return { outputs: [{ port: 'value', value: Object.fromEntries(entries) }] }
 }
 
 function inferHint(t: string | undefined): 'string' | 'number' | 'boolean' | 'object' {
@@ -75,10 +93,18 @@ function inferHint(t: string | undefined): 'string' | 'number' | 'boolean' | 'ob
   }
 }
 
-/** `output` node: forwards its incoming value to the run's result
- * map. Wired by the engine container — here we just emit on the
- * `value` port (the scheduler bubbles it up). */
-const outputPassthroughExecutor: NodeExecutor = (act) => ({ outputs: [{ port: 'value', value: act.inputs['value'] }] })
+/** `output` node: exposes one or more named scenario outputs. Each declared
+ * output reads its OWN `value` input port (id = the decl id) and emits on an
+ * `output:<name>` port; the engine container (see `engine.startWithStack`)
+ * harvests those into the run's result map. A blank-named decl is skipped. */
+const outputPassthroughExecutor: NodeExecutor = (act, ctx) => {
+  const decls = readOutputDecls(ctx.node.config)
+  return {
+    outputs: decls
+      .filter((d) => d.name.trim() !== '')
+      .map((d) => ({ port: `output:${d.name.trim()}`, value: act.inputs[d.id] }))
+  }
+}
 
 export function buildExecutorRegistry(scenario: ScenarioModel): Map<string, NodeExecutor> {
   const out = new Map<string, NodeExecutor>()

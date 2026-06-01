@@ -875,10 +875,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "addOutput": "Thêm đầu ra",
+      "removeOutput": "Xóa"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Bắt buộc cho các kịch bản gọi đến"
+      "required": "Bắt buộc cho các kịch bản gọi đến",
+      "addParam": "Thêm tham số",
+      "removeParam": "Xóa"
     },
     "runScenario": {
       "orphanInput": "Không có tham số \"{{name}}\" khớp trong kịch bản con",
@@ -888,6 +894,7 @@
     "validation": {
       "duplicateName": "Tên \"{{name}}\" đã được hành động khác sử dụng.",
       "panelTitle": "{{count}} lỗi hành động",
+      "runBlocked": "Sửa {{count}} lỗi hành động trước khi chạy",
       "focusBox": "Đến hành động này",
       "showErrors": "Hiện lỗi",
       "input": {
@@ -950,6 +957,7 @@
       "clearLogs": "Xóa nhật ký",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Hiển thị log {{level}}",
+      "showLevelOnly": "Nhấp chuột phải: chỉ cấp độ này",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {

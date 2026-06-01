@@ -36,6 +36,7 @@ import type {
 import { ScopeRegistry, scopeKey } from './scopeRegistry'
 import { InputBuffer, type PortSpec } from './inputBuffer'
 import { resolveSelectorPath, concreteValue } from '../../shared/utils/scenarioStaticPreview'
+import { readInputParams } from '../../shared/scenarioInputParams'
 import { evaluateCondition, resolveOperand } from './conditionEval'
 
 /**
@@ -361,6 +362,26 @@ export class Scheduler {
   private startLogParams(act: InternalActivation): Record<string, unknown> {
     const node = this.scenario.nodes.find((n) => n.id === act.nodeId)
     const config = node?.config ?? {}
+    // An input node declares MANY params (`config.params`) — surface every one
+    // by NAME (`string: …, string2: …`), resolving each default and overlaying
+    // the seeded/prompted value from the combined `value` object. The generic
+    // config walk below can't do this (it skips the `params` array and would
+    // leak the stale legacy `name`/`valueType` keys that linger post-migration).
+    if (node?.kind === 'input') {
+      const wired = act.inputs['value']
+      const wiredObj = typeof wired === 'object' && wired !== null && !Array.isArray(wired)
+        ? (wired as Record<string, unknown>)
+        : undefined
+      const out: Record<string, unknown> = {}
+      for (const param of readInputParams(config)) {
+        const name = param.name.trim()
+        if (!name) continue
+        out[name] = wiredObj && name in wiredObj
+          ? wiredObj[name]
+          : (param.valueType !== undefined && param.valueType !== null ? resolveOperand(undefined, param.valueType, this.variables) : undefined)
+      }
+      return out
+    }
     const params: Record<string, unknown> = {}
     for (const [k, v] of Object.entries(config)) {
       if (v === null || v === undefined) continue
@@ -788,30 +809,38 @@ export class Scheduler {
     for (const node of this.scenario.nodes) {
       if (this.nodesWithIncoming.has(node.id)) continue
       if (node.kind === 'input') {
-        const cfg = node.config as { name?: string; value?: unknown; valueType?: unknown }
-        const paramName = typeof cfg.name === 'string' && cfg.name !== '' ? cfg.name : 'value'
-        const passthrough = (value: unknown): void => {
-          // Emit the `{ [name]: value }` shape the static preview models so a
-          // wired selector resolves identically; `seeded` skips the prompt.
-          const act: InternalActivation = { nodeId: node.id, kind: node.kind, scope: [], inputs: { value: { [paramName]: value } }, seeded: true }
+        // The input declares N params; it emits ONE object `{ name: value, … }`
+        // (the shape the static preview + executor model) so a wired selector
+        // resolves identically.
+        const inputParams = readInputParams(node.config)
+        const paramName = (p: { name: string }): string => (p.name.trim() !== '' ? p.name.trim() : 'value')
+        const passthrough = (valueObj: Record<string, unknown>): void => {
+          const act: InternalActivation = { nodeId: node.id, kind: node.kind, scope: [], inputs: { value: valueObj }, seeded: true }
           this.registerActivation(act, [])
           this.queue.push(act)
         }
-        if (paramName in params) {
-          // A value was supplied up-front — use it, no prompt.
-          passthrough(params[paramName])
+        const allSupplied = inputParams.every((p) => paramName(p) in params)
+        if (allSupplied) {
+          // Every param was supplied up-front — no prompt.
+          const obj: Record<string, unknown> = {}
+          for (const p of inputParams) obj[paramName(p)] = params[paramName(p)]
+          passthrough(obj)
         } else if (interactive) {
-          // UI run, no value — the input RUNS and prompts the user, so it
-          // beams and a cancel routes to its `error` output exactly like a
-          // mid-run input. The renderer groups these start-time prompts into
-          // one "run parameters" modal; the run is live the whole time.
+          // UI run, missing value(s) — the input RUNS and prompts the user for
+          // each param; it beams and a cancel routes to `error`. The renderer
+          // groups these start-time prompts into one "run parameters" modal.
           const act: InternalActivation = { nodeId: node.id, kind: node.kind, scope: [], inputs: {}, seeded: false }
           this.registerActivation(act, [])
           this.queue.push(act)
         } else {
-          // Headless run (MCP / sub-scenario), no value — fall back to the
-          // node's configured default; there's no UI to prompt.
-          passthrough(cfg.valueType !== undefined && cfg.valueType !== null ? concreteValue(cfg.valueType) : cfg.value)
+          // Headless run (MCP / sub-scenario) — supplied params win, the rest
+          // fall back to each param's configured default; there's no UI.
+          const obj: Record<string, unknown> = {}
+          for (const p of inputParams) {
+            const n = paramName(p)
+            obj[n] = n in params ? params[n] : (p.valueType !== undefined && p.valueType !== null ? concreteValue(p.valueType) : undefined)
+          }
+          passthrough(obj)
         }
         this.scopes.enter([])
         continue
@@ -1028,7 +1057,7 @@ export class Scheduler {
   /** Surface a single-field input request to the renderer + return a
    * Promise the input executor awaits. Cancellation via the run's
    * AbortSignal rejects pending requests so the executor unwinds. */
-  private openUserInputRequest(nodeId: string, req: { name: string; defaultValue: unknown; hint: 'string' | 'number' | 'boolean' | 'object' }): Promise<unknown> {
+  private openUserInputRequest(nodeId: string, req: { name: string; defaultValue: unknown; hint: 'string' | 'number' | 'boolean' | 'object'; valueType?: unknown }): Promise<unknown> {
     const requestId = `${this.runId}:input:${++this.userInputSeq}`
     return new Promise<unknown>((resolve, reject) => {
       this.pendingInputRequests.set(requestId, { resolve, reject })
@@ -1040,6 +1069,7 @@ export class Scheduler {
         name: req.name,
         defaultValue: req.defaultValue,
         hint: req.hint,
+        ...(req.valueType !== undefined ? { valueType: req.valueType } : {}),
         at: now()
       })
       // If the run aborts while we wait, reject so the executor's

@@ -876,10 +876,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "addOutput": "Προσθήκη εξόδου",
+      "removeOutput": "Αφαίρεση"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Απαιτείται για τα σενάρια που το καλούν"
+      "required": "Απαιτείται για τα σενάρια που το καλούν",
+      "addParam": "Προσθήκη παραμέτρου",
+      "removeParam": "Αφαίρεση"
     },
     "runScenario": {
       "orphanInput": "Δεν υπάρχει αντίστοιχη παράμετρος «{{name}}» στο υποσενάριο",
@@ -889,6 +895,7 @@
     "validation": {
       "duplicateName": "Το όνομα «{{name}}» χρησιμοποιείται ήδη από άλλη ενέργεια.",
       "panelTitle": "{{count}} σφάλμα(τα) ενεργειών",
+      "runBlocked": "Διορθώστε {{count}} σφάλμα(τα) ενέργειας πριν την εκτέλεση",
       "focusBox": "Μετάβαση σε αυτή την ενέργεια",
       "showErrors": "Εμφάνιση σφαλμάτων",
       "input": {
@@ -951,6 +958,7 @@
       "clearLogs": "Εκκαθάριση καταγραφών",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Εμφάνιση logs {{level}}",
+      "showLevelOnly": "Δεξί κλικ: μόνο αυτό το επίπεδο",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {

@@ -876,10 +876,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "addOutput": "Uitvoer toevoegen",
+      "removeOutput": "Verwijderen"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Vereist voor aanroepende scenario's"
+      "required": "Vereist voor aanroepende scenario's",
+      "addParam": "Parameter toevoegen",
+      "removeParam": "Verwijderen"
     },
     "runScenario": {
       "orphanInput": "Geen overeenkomende parameter \"{{name}}\" in het subscenario",
@@ -889,6 +895,7 @@
     "validation": {
       "duplicateName": "De naam ‘{{name}}’ wordt al door een andere actie gebruikt.",
       "panelTitle": "{{count}} actiefout(en)",
+      "runBlocked": "Los {{count}} actiefout(en) op voordat u uitvoert",
       "focusBox": "Naar deze actie gaan",
       "showErrors": "Fouten tonen",
       "input": {
@@ -951,6 +958,7 @@
       "clearLogs": "Logboeken wissen",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "{{level}}-logs tonen",
+      "showLevelOnly": "Rechtermuisklik: alleen dit niveau",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {

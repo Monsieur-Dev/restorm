@@ -876,10 +876,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "addOutput": "Add output",
+      "removeOutput": "Remove"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Required by calling scenarios"
+      "required": "Required by calling scenarios",
+      "addParam": "Add parameter",
+      "removeParam": "Remove"
     },
     "runScenario": {
       "orphanInput": "No matching parameter \"{{name}}\" in the sub-scenario",
@@ -889,6 +895,7 @@
     "validation": {
       "duplicateName": "The name \"{{name}}\" is already used by another action.",
       "panelTitle": "{{count}} action error(s)",
+      "runBlocked": "Fix {{count}} action error(s) before running",
       "focusBox": "Focus this action",
       "showErrors": "Show errors",
       "input": {
@@ -951,6 +958,7 @@
       "clearLogs": "Clear logs",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Show {{level}} logs",
+      "showLevelOnly": "Right-click: this level only",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {

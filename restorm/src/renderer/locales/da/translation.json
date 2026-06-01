@@ -876,10 +876,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "addOutput": "Tilføj output",
+      "removeOutput": "Fjern"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Påkrævet for kaldende scenarier"
+      "required": "Påkrævet for kaldende scenarier",
+      "addParam": "Tilføj parameter",
+      "removeParam": "Fjern"
     },
     "runScenario": {
       "orphanInput": "Ingen matchende parameter \"{{name}}\" i underscenariet",
@@ -889,6 +895,7 @@
     "validation": {
       "duplicateName": "Navnet \"{{name}}\" bruges allerede af en anden handling.",
       "panelTitle": "{{count}} handlingsfejl",
+      "runBlocked": "Ret {{count}} handlingsfejl før kørsel",
       "focusBox": "Gå til denne handling",
       "showErrors": "Vis fejl",
       "input": {
@@ -951,6 +958,7 @@
       "clearLogs": "Ryd logfiler",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Vis {{level}}-logs",
+      "showLevelOnly": "Højreklik: kun dette niveau",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {

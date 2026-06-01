@@ -875,10 +875,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "addOutput": "新增輸出",
+      "removeOutput": "移除"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "呼叫此情境時必填"
+      "required": "呼叫此情境時必填",
+      "addParam": "新增參數",
+      "removeParam": "移除"
     },
     "runScenario": {
       "orphanInput": "子場景中沒有相符的參數「{{name}}」",
@@ -888,6 +894,7 @@
     "validation": {
       "duplicateName": "名稱「{{name}}」已被另一個動作使用。",
       "panelTitle": "{{count}} 個動作錯誤",
+      "runBlocked": "執行前請修正 {{count}} 個動作錯誤",
       "focusBox": "定位到此動作",
       "showErrors": "顯示錯誤",
       "input": {
@@ -950,6 +957,7 @@
       "clearLogs": "清除記錄",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "顯示 {{level}} 日誌",
+      "showLevelOnly": "右鍵點選：僅此層級",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {

@@ -877,10 +877,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "addOutput": "Adaugă ieșire",
+      "removeOutput": "Elimină"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Obligatoriu pentru scenariile apelante"
+      "required": "Obligatoriu pentru scenariile apelante",
+      "addParam": "Adaugă parametru",
+      "removeParam": "Elimină"
     },
     "runScenario": {
       "orphanInput": "Niciun parametru \"{{name}}\" corespunzător în subscenariu",
@@ -890,6 +896,7 @@
     "validation": {
       "duplicateName": "Numele „{{name}}” este deja folosit de altă acțiune.",
       "panelTitle": "{{count}} acțiune/i cu erori",
+      "runBlocked": "Remediați {{count}} eroare/erori de acțiune înainte de rulare",
       "focusBox": "Mergi la această acțiune",
       "showErrors": "Afișează erorile",
       "input": {
@@ -952,6 +959,7 @@
       "clearLogs": "Șterge jurnalele",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Afișează jurnalele {{level}}",
+      "showLevelOnly": "Clic dreapta: doar acest nivel",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {

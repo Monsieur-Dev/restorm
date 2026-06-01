@@ -37,7 +37,7 @@ export const HeaderHoverTooltip: React.FC<HeaderHoverTooltipProps> = ({
         show={hover && !suppressed}
         placement="below"
         {...(dataTestId ? { 'data-testid': dataTestId } : {})}
-        content={<span className="header-hover-tooltip-label">{label}</span>}
+        content={<span className="header-hover-tooltip-label" style={{ whiteSpace: 'pre-line' }}>{label}</span>}
       />
     </span>
   )

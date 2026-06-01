@@ -876,10 +876,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "addOutput": "Legg til utdata",
+      "removeOutput": "Fjern"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Påkrevd for kallende scenarier"
+      "required": "Påkrevd for kallende scenarier",
+      "addParam": "Legg til parameter",
+      "removeParam": "Fjern"
     },
     "runScenario": {
       "orphanInput": "Ingen samsvarende parameter «{{name}}» i underscenarioet",
@@ -889,6 +895,7 @@
     "validation": {
       "duplicateName": "Navnet «{{name}}» brukes allerede av en annen handling.",
       "panelTitle": "{{count}} handlingsfeil",
+      "runBlocked": "Rett {{count}} handlingsfeil før kjøring",
       "focusBox": "Gå til denne handlingen",
       "showErrors": "Vis feil",
       "input": {
@@ -951,6 +958,7 @@
       "clearLogs": "Tøm logger",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Vis {{level}}-logger",
+      "showLevelOnly": "Høyreklikk: bare dette nivået",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {

@@ -876,10 +876,16 @@
       "propertyName": "Nom de la propriété",
       "propertyValue": "valeur"
     },
+    "output": {
+      "addOutput": "Ajouter une sortie",
+      "removeOutput": "Supprimer"
+    },
     "input": {
       "name": "Nom",
       "defaultType": "Défaut / type",
-      "required": "Requis pour les scénarios appelants"
+      "required": "Requis pour les scénarios appelants",
+      "addParam": "Ajouter un paramètre",
+      "removeParam": "Supprimer"
     },
     "runScenario": {
       "orphanInput": "Aucun paramètre « {{name}} » correspondant dans le sous-scénario",
@@ -889,6 +895,7 @@
     "validation": {
       "duplicateName": "Le nom « {{name}} » est déjà utilisé par une autre action.",
       "panelTitle": "{{count}} action(s) en erreur",
+      "runBlocked": "Corrigez les {{count}} erreur(s) d'action avant de lancer",
       "focusBox": "Aller à cette action",
       "showErrors": "Voir les erreurs",
       "input": {
@@ -951,6 +958,7 @@
       "clearLogs": "Effacer les logs",
       "logsShowAll": "Afficher tous les logs",
       "showLevelLogs": "Afficher les logs {{level}}",
+      "showLevelOnly": "Clic droit : ce niveau uniquement",
       "noUserLogs": "Aucun log utilisateur (entrées de l'action Log) dans ce run."
     },
     "now": {

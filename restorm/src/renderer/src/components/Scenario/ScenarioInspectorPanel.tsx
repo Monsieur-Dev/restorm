@@ -5,7 +5,7 @@ import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import type { ScenarioLogEntry } from '../../hooks/useScenarioEngine'
 import { ScenarioRunLogView, type LogProvenanceApi, type LogLevelFilter } from './ScenarioRunLogView'
 import type { ScenarioPort } from '../../../../shared/types/collections'
-import type { ScenarioNodeError } from './scenarioValidation'
+import type { ScenarioNodeError } from '../../../../shared/scenarioValidation'
 import { buildScenarioPathTree } from './scenarioPathTree'
 import { resolveSelectorPath } from '../../../../shared/utils/scenarioStaticPreview'
 import type { SyntheticRequestPreview } from '../../../../shared/utils/syntheticRequestPreview'
@@ -281,12 +281,17 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
     if (engineState === 'running' || engineState === 'paused') onEngineDebugContinue?.()
     else onEngineDebug?.()
   }
-  const debugDisabled = !engineWired || hasBreakpoints !== true
+  // A scenario carrying validation errors can't START a run — block Play / Step
+  // / Debug while idle/finished (mirrors the engine + MCP gate). Live controls
+  // (pause/resume/step a RUNNING or PAUSED run) stay enabled: errors can't
+  // appear mid-run (the graph is edit-locked while running).
+  const cannotStartFresh = errorBoxCount > 0 && engineState !== 'running' && engineState !== 'paused'
+  const debugDisabled = !engineWired || hasBreakpoints !== true || cannotStartFresh
   const debugLabel = t('scenario.inspector.debug', 'Debug')
-  const runDisabled = !engineWired
+  const runDisabled = !engineWired || cannotStartFresh
   // Step is live whenever the engine is wired: it steps a paused/running run,
   // or launches a fresh one in step mode from idle/finished.
-  const stepDisabled = !engineWired
+  const stepDisabled = !engineWired || cannotStartFresh
   const stopDisabled = !engineWired || (engineState !== 'running' && engineState !== 'paused')
   const runIsPause = engineState === 'running'
   const runIcon = runIsPause ? 'debug-pause' : 'play'
@@ -300,7 +305,9 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
   // request from its own tab), F6 debugs, F7 steps, and the Pause key pauses.
   // `aria-label` stays the plain label; the shortcut only decorates the visible
   // tooltip. (The actual key bindings land in a follow-up.)
-  const runTooltip = `${runLabel} (${runIsPause ? 'Pause' : 'F5'})`
+  const runTooltip = cannotStartFresh
+    ? t('scenario.validation.runBlocked', { count: errorBoxCount, defaultValue: 'Fix {{count}} action error(s) before running' })
+    : `${runLabel} (${runIsPause ? 'Pause' : 'F5'})`
   const stepTooltip = `${stepLabel} (F7)`
   const debugTooltip = `${debugLabel} (F6)`
   const stopTooltip = `${stopLabel} (F8)`

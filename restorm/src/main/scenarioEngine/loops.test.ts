@@ -308,6 +308,43 @@ describe('start log surfaces an action`s resolved input parameters', () => {
     const start = s.readLog().find((e) => e.message === 'start arithmetic')
     expect(start?.data).toMatchObject({ a: 5, b: 7 }) // wired 7 wins over config 99
   })
+
+  it('an input node surfaces EVERY declared param, not just the first', async () => {
+    const scenario = buildScenario(
+      [{ id: 'n', kind: 'input', outputs: ['value'], config: { params: [
+        { id: 'p1', name: 'string', valueType: { type: 'string', value: 'string!' } },
+        { id: 'p2', name: 'string2', valueType: { type: 'string', value: '' } }
+      ] } }],
+      []
+    )
+    const executors = new Map<string, NodeExecutor>([['n', () => ({ outputs: [] })]])
+    const s = new Scheduler({ scenario, executors })
+    await s.run()
+    const start = s.readLog().find((e) => e.message === 'start input')
+    // Both params must show — the multi-param `config.params` array, not the
+    // legacy single `name`/`valueType` shape.
+    expect(start?.data).toMatchObject({ string: 'string!', string2: '' })
+  })
+
+  it('an input start log ignores stale legacy name/valueType once params exist', async () => {
+    const scenario = buildScenario(
+      [{ id: 'n', kind: 'input', outputs: ['value'], config: {
+        name: 'string', valueType: { type: 'string', value: 'string!' },
+        params: [
+          { id: 'p1', name: 'string', valueType: { type: 'string', value: 'string!' } },
+          { id: 'p2', name: 'string2', valueType: { type: 'string', value: 'two' } }
+        ]
+      } }],
+      []
+    )
+    const executors = new Map<string, NodeExecutor>([['n', () => ({ outputs: [] })]])
+    const s = new Scheduler({ scenario, executors })
+    await s.run()
+    const start = s.readLog().find((e) => e.message === 'start input')
+    expect(start?.data).toMatchObject({ string: 'string!', string2: 'two' })
+    // The lingering top-level `valueType` key must not leak into the log.
+    expect((start?.data as Record<string, unknown>)['valueType']).toBeUndefined()
+  })
 })
 
 // ------------------------------------------------------------------

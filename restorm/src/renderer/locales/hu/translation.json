@@ -876,10 +876,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "addOutput": "Kimenet hozzáadása",
+      "removeOutput": "Eltávolítás"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Kötelező a hívó forgatókönyvekhez"
+      "required": "Kötelező a hívó forgatókönyvekhez",
+      "addParam": "Paraméter hozzáadása",
+      "removeParam": "Eltávolítás"
     },
     "runScenario": {
       "orphanInput": "Nincs megfelelő „{{name}}\" paraméter az alforgatókönyvben",
@@ -889,6 +895,7 @@
     "validation": {
       "duplicateName": "A(z) „{{name}}” nevet már egy másik művelet használja.",
       "panelTitle": "{{count}} műveleti hiba",
+      "runBlocked": "Futtatás előtt javítson {{count}} művelethibát",
       "focusBox": "Ugrás erre a műveletre",
       "showErrors": "Hibák megjelenítése",
       "input": {
@@ -951,6 +958,7 @@
       "clearLogs": "Naplók törlése",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "{{level}} naplók megjelenítése",
+      "showLevelOnly": "Jobb kattintás: csak ez a szint",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {

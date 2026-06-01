@@ -124,6 +124,7 @@ export const LogNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data,
                 valueTypeGroups={valueTypeGroups}
                 excludeTypes={['expression']}
                 allowAllVariables
+                allowEnvironment
                 dataTestId="scn-log-data"
               />
             </div>

@@ -877,10 +877,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "addOutput": "Dodaj izlaz",
+      "removeOutput": "Ukloni"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Obavezno za scenarije koji ga pozivaju"
+      "required": "Obavezno za scenarije koji ga pozivaju",
+      "addParam": "Dodaj parametar",
+      "removeParam": "Ukloni"
     },
     "runScenario": {
       "orphanInput": "Nema odgovarajućeg parametra \"{{name}}\" u podscenariju",
@@ -890,6 +896,7 @@
     "validation": {
       "duplicateName": "Naziv „{{name}}“ već koristi druga akcija.",
       "panelTitle": "{{count}} pogreška/e akcija",
+      "runBlocked": "Ispravite {{count}} pogrešaka radnje prije pokretanja",
       "focusBox": "Idi na ovu akciju",
       "showErrors": "Prikaži pogreške",
       "input": {
@@ -952,6 +959,7 @@
       "clearLogs": "Očisti zapise",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Prikaži {{level}} zapise",
+      "showLevelOnly": "Desni klik: samo ova razina",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {

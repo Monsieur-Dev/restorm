@@ -34,19 +34,22 @@ import { WorkbenchActiveTabContext } from '../../contexts/WorkbenchActiveTabCont
 import { resolveValueTypeKind } from '../TypedValueField/castValue'
 import { normalizeValueType } from '../../utils/normalizeValueType'
 import { SCENARIO_NODE_CATALOGUE, scenarioNodeMeta, type ScenarioNodeKindMeta } from './scenarioNodeCatalogue'
-import { scenarioEdgeToFlowEdge, flowEdgeToScenarioEdge, portColor } from './scenarioGraphMapping'
+import { scenarioEdgeToFlowEdge, flowEdgeToScenarioEdge, edgeColorForHandle } from './scenarioGraphMapping'
 import { ScenarioNodeView, type ScenarioNodeBoxData } from './nodes'
 import { defaultPortsForKind, isValidScenarioConnection, deriveRunScenarioPorts, inputPortFlow, outputPortFlow } from './scenarioNodePorts'
 import { isDataLink } from './scenarioPathTree'
 import { linkPaletteEntries } from './scenarioLinkPalette'
+// Side-effect: registers the env → { name, variables } resolver used by the
+// inspector's static preview (mirrors the runtime's env resolution).
+import './scenarioEnvPreview'
 import { SCENARIO_ADD_REQUEST_GROUPS, SCENARIO_ADD_SCENARIO_ENTRY, scenarioAddIcon } from './scenarioChildPalette'
 import type { AddChildKind } from '../MainView/Sidebar/contextMenuBuilder'
-import { validateScenarioGraph, targetKey, type ScenarioNodeError, type ScenarioDataLink } from './scenarioValidation'
+import { validateScenarioGraph, targetKey, type ScenarioNodeError, type ScenarioDataLink } from '../../../../shared/scenarioValidation'
 import { ScenarioErrorsContext } from './scenarioErrorsContext'
 import { ScenarioInspectorPanel, type InspectorPreviewNode } from './ScenarioInspectorPanel'
 import { type LogProvenanceApi } from './ScenarioRunLogView'
 import { useScenarioEngine } from '../../hooks/useScenarioEngine'
-import { ScenarioInputPrompt, ScenarioMidRunInputPrompt } from './ScenarioInputPrompt'
+import { ScenarioInputPrompt } from './ScenarioInputPrompt'
 import { ScenarioRunHistoryModal } from './ScenarioRunHistoryModal'
 import { SCENARIO_RUN_HISTORY_OPEN, type ScenarioRunHistoryOpenPayload } from './scenarioRunHistoryEvents'
 import { ScenarioDebugBezierEdge } from './ScenarioDebugBezierEdge'
@@ -731,7 +734,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     // colour edges off its `response` / `done` ports.
     const port = src?.outputs.find((o) => o.id === e.from.portId)
       ?? derivedPortsOf(src)?.outputs.find((o) => o.id === e.from.portId)
-    const stroke = e.color ?? (port ? portColor(port) : undefined)
+    const stroke = e.color ?? edgeColorForHandle(e.from.portId, port)
     return withSel(stroke ? { ...fe, style: { ...(fe.style ?? {}), stroke } } : fe)
   }, [isOrphanEdge, derivedPortsOf])
 
@@ -1000,7 +1003,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     const tgt = nodes.find((n) => n.id === connection.target)
     const port = src?.data.outputs.find((o) => o.id === connection.sourceHandle)
       ?? (src ? derivedPortsOf(src.data)?.outputs.find((o) => o.id === connection.sourceHandle) : undefined)
-    const stroke = port ? portColor(port) : undefined
+    const stroke = edgeColorForHandle(connection.sourceHandle, port)
     // Auto-fill the JSON path when a data link's source has an unambiguous
     // (single-deep) preview — e.g. a getVariable `{ timer }` link deduces
     // `timer` outright, so the user needn't open the picker.
@@ -1204,11 +1207,19 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     const srcN = nodeStore.current.get(edge.source)
     const srcPort = srcN?.outputs.find((o) => o.id === edge.sourceHandle)
       ?? derivedPortsOf(srcN)?.outputs.find((o) => o.id === edge.sourceHandle)
-    const stroke = srcPort ? portColor(srcPort) : undefined
+    const stroke = edgeColorForHandle(edge.sourceHandle, srcPort)
     if (stroke) edge.style = { stroke }
+    // Append idempotently: `setEdges` runs INSIDE the `setNodes` updater, and
+    // React StrictMode double-invokes that updater in dev — without the
+    // id-guards the edge (and node) got appended twice, so the new box fired
+    // twice (two identical log entries) and the dupe was persisted.
     setNodes((curr) => {
-      const next = [...curr, toFlowNode(node, handlers.current)]
-      setEdges((e) => { const ne = [...e, edge]; persist(next, ne); return ne })
+      const next = curr.some((n) => n.id === node.id) ? curr : [...curr, toFlowNode(node, handlers.current)]
+      setEdges((e) => {
+        const ne = e.some((x) => x.id === edge.id) ? e : [...e, edge]
+        persist(next, ne)
+        return ne
+      })
       return next
     })
     setLinkPalette(null)
@@ -1407,7 +1418,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
           const port = sc
             ? (src?.outputs.find((o) => o.id === sc.from.portId) ?? derivedPortsOf(src)?.outputs.find((o) => o.id === sc.from.portId))
             : undefined
-          const stroke = color ?? (port ? portColor(port) : undefined)
+          const stroke = color ?? edgeColorForHandle(sc?.from.portId, port)
           return { ...e, style: { ...(e.style ?? {}), ...(stroke ? { stroke } : {}) } }
         })
         persist(n, next)
@@ -1640,29 +1651,6 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     })
   }, [edges, engine.edgeTokens])
 
-  // Set of `input` node ids that have an incoming edge — they're
-  // skipped by the up-front prompt because they depend on upstream
-  // values. The engine will pause those nodes mid-run + raise a
-  // single-field prompt once it gets there (future task).
-  const inputsWithPredecessors = useMemo(() => {
-    const incomingByTarget = new Set<string>()
-    for (const e of scenario.edges) {
-      if (e.to.nodeId) incomingByTarget.add(e.to.nodeId)
-    }
-    const blocked = new Set<string>()
-    for (const n of scenario.nodes) {
-      if (n.kind === 'input' && incomingByTarget.has(n.id)) blocked.add(n.id)
-    }
-    return blocked
-  }, [scenario])
-
-  // Pending input prompts split by topology. No-predecessor inputs all fire at
-  // run start (the run is already live + they beam) and are collected together
-  // in the "run parameters" modal; inputs WITH predecessors prompt one-at-a-
-  // time mid-run. The start modal takes priority while any start input pends.
-  const startPendingInputs = engine.pendingInputs.filter((p) => !inputsWithPredecessors.has(p.nodeId))
-  const midRunPendingInput = engine.pendingInputs.find((p) => inputsWithPredecessors.has(p.nodeId))
-
   // Inject `data.running` for every node the engine reports as currently
   // running — `ScenarioNodeBoxBase` reacts to that flag to mount/unmount the
   // BorderBeam trail.
@@ -1869,20 +1857,13 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         <Background id={scenario.id} />
         <Controls showInteractive={false} />
       </ReactFlow>
+      {/* One prompt for every pending input — up-front params (all pending at
+        * run start) and mid-run inputs (pending when the flow reaches them)
+        * surface through the same modal, driven by `engine.pendingInputs`. */}
       <ScenarioInputPrompt
-        inputNodes={scenario.nodes}
-        predecessorBlocked={inputsWithPredecessors}
-        open={startPendingInputs.length > 0}
-        onCancel={() => {
-          // Cancelling routes every start input to its `error` output (or
-          // fails the run if `error` is unwired) — same path as a mid-run cancel.
-          for (const p of startPendingInputs) void engine.cancelUserInput(p.requestId)
-        }}
-        onSubmit={(values) => {
-          // Feed each collected value into the live run by resolving the
-          // matching input node's pending prompt (keyed by param name).
-          for (const p of startPendingInputs) void engine.resolveUserInput(p.requestId, values[p.name])
-        }}
+        pendingInputs={engine.pendingInputs}
+        onResolve={(requestId, value) => { void engine.resolveUserInput(requestId, value) }}
+        onCancel={(requestIds) => { for (const id of requestIds) void engine.cancelUserInput(id) }}
       />
       {/* Persisted run-history overlay — opened by the tab-header button
         * (via the SCENARIO_RUN_HISTORY_OPEN event). Rendered here so its
@@ -1893,23 +1874,6 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         onClose={() => { setHistoryOpen(false) }}
         scenarioId={scenario.id}
       />
-      {/* Mid-run prompt — the engine raises one when an input node WITH
-        * predecessors activates. Deferred while the start modal is up (start
-        * inputs are collected together first); then shown one-at-a-time so the
-        * user answers sequentially. */}
-      {startPendingInputs.length === 0 && midRunPendingInput !== undefined && (() => {
-        const head = midRunPendingInput
-        return (
-          <ScenarioMidRunInputPrompt
-            open
-            name={head.name}
-            defaultValue={head.defaultValue}
-            hint={head.hint}
-            onSubmit={(value) => { void engine.resolveUserInput(head.requestId, value) }}
-            onCancel={() => { void engine.cancelUserInput(head.requestId) }}
-          />
-        )
-      })()}
       {palette && (
         <ContextMenu
           visible

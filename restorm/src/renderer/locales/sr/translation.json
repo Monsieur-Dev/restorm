@@ -877,10 +877,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "addOutput": "Додај излаз",
+      "removeOutput": "Уклони"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Обавезно за сценарије који га позивају"
+      "required": "Обавезно за сценарије који га позивају",
+      "addParam": "Додај параметар",
+      "removeParam": "Уклони"
     },
     "runScenario": {
       "orphanInput": "Нема одговарајућег параметра „{{name}}“ у подсценарију",
@@ -890,6 +896,7 @@
     "validation": {
       "duplicateName": "Назив „{{name}}“ већ користи друга акција.",
       "panelTitle": "Грешке акција: {{count}}",
+      "runBlocked": "Исправите {{count}} грешака радње пре покретања",
       "focusBox": "Иди на ову акцију",
       "showErrors": "Прикажи грешке",
       "input": {
@@ -952,6 +959,7 @@
       "clearLogs": "Очисти записе",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Прикажи {{level}} логове",
+      "showLevelOnly": "Десни клик: само овај ниво",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {

@@ -61,6 +61,14 @@ describe('deriveRunScenarioPorts — runScenario ports from the sub-scenario', (
     expect(deriveRunScenarioPorts(sub).outputs.map((p) => p.id)).toEqual(['output:cooldown'])
   })
 
+  it('derives one output port per decl of a MULTI-output node (plus legacy single)', () => {
+    const sub = scenarioWith([
+      { kind: 'output', config: { outputs: [{ id: 'd1', name: 'first' }, { id: 'd2', name: 'second' }] } },
+      { kind: 'output', config: { name: 'legacy' } }
+    ])
+    expect(deriveRunScenarioPorts(sub).outputs.map((p) => p.id)).toEqual(['output:first', 'output:second', 'output:legacy'])
+  })
+
   it('returns empty ports for a missing sub-scenario', () => {
     expect(deriveRunScenarioPorts(null)).toEqual({ inputs: [], outputs: [] })
   })

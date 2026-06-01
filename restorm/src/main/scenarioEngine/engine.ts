@@ -172,10 +172,11 @@ export class ScenarioEngine {
       if (e.type !== 'node-completed') return
       const node = scenario.nodes.find((n) => n.id === e.nodeId)
       if (node?.kind !== 'output') return
-      const cfg = node.config as { name?: string }
-      const name = cfg.name ?? node.id
-      const out = e.outputs.find((o) => o.port === 'value')
-      if (out) outputBucket[name] = out.value
+      // A multi-output node emits one `output:<name>` port per declared output
+      // (see `outputPassthroughExecutor`); harvest each into the result map.
+      for (const o of e.outputs) {
+        if (o.port.startsWith('output:')) outputBucket[o.port.slice('output:'.length)] = o.value
+      }
     })
     const done = scheduler.run(options).then(() => outputBucket).finally(() => {
       // Snapshot the final log into the archive BEFORE dropping the live

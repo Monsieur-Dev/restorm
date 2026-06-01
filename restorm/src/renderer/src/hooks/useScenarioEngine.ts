@@ -33,6 +33,7 @@ export interface EngineEventLike {
   name?: string
   defaultValue?: unknown
   hint?: 'string' | 'number' | 'boolean' | 'object'
+  valueType?: unknown
 }
 
 export interface PendingUserInput {
@@ -41,6 +42,9 @@ export interface PendingUserInput {
   name: string
   defaultValue: unknown
   hint: 'string' | 'number' | 'boolean' | 'object'
+  /** The param's persisted typed-value shape (`{ type, value }`), so the
+   * mid-run prompt can render the matching editor (datetime picker, etc.). */
+  valueType?: unknown
 }
 
 interface Bridge {
@@ -376,7 +380,8 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
               nodeId: event.nodeId,
               name: event.name,
               defaultValue: event.defaultValue,
-              hint: event.hint ?? 'string'
+              hint: event.hint ?? 'string',
+              ...(event.valueType !== undefined ? { valueType: event.valueType } : {})
             }
             setPendingInputs((prev) => [...prev, pending])
           }

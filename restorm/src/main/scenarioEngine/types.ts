@@ -129,7 +129,7 @@ export type EngineEvent = (
   | { type: 'node-completed'; runId: RuntimeId; nodeId: RuntimeId; scope: ScopeStack; at: string; outputs: Emission[] }
   | { type: 'node-failed'; runId: RuntimeId; nodeId: RuntimeId; scope: ScopeStack; at: string; error: string }
   | { type: 'data-flow-emitted'; runId: RuntimeId; edgeId: RuntimeId; tokenId: number; at: string }
-  | { type: 'user-input-requested'; runId: RuntimeId; nodeId: RuntimeId; requestId: RuntimeId; name: string; defaultValue: unknown; hint: 'string' | 'number' | 'boolean' | 'object'; at: string }
+  | { type: 'user-input-requested'; runId: RuntimeId; nodeId: RuntimeId; requestId: RuntimeId; name: string; defaultValue: unknown; hint: 'string' | 'number' | 'boolean' | 'object'; valueType?: unknown; at: string }
 ) & {
   /** The TOP-LEVEL ("launcher") scenario whose run produced this event.
    * Sub-scenario events inherit the launcher's id (NOT the sub's), so the
@@ -183,7 +183,7 @@ export interface ExecContext {
    * (which may be the default or an edited one). Used by the `input`
    * executor when an upstream node has already supplied a value the
    * user can still override. */
-  requestUserInput: (req: { name: string; defaultValue: unknown; hint: 'string' | 'number' | 'boolean' | 'object' }) => Promise<unknown>
+  requestUserInput: (req: { name: string; defaultValue: unknown; hint: 'string' | 'number' | 'boolean' | 'object'; valueType?: unknown }) => Promise<unknown>
   /** The node being executed — handy when the executor needs to read
    * its `config` (request id, comparator op, switch cases, …) without
    * the engine having to pre-extract everything. */

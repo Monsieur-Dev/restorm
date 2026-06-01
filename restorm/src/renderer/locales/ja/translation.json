@@ -875,10 +875,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "addOutput": "出力を追加",
+      "removeOutput": "削除"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "呼び出し元シナリオで必須"
+      "required": "呼び出し元シナリオで必須",
+      "addParam": "パラメータを追加",
+      "removeParam": "削除"
     },
     "runScenario": {
       "orphanInput": "サブシナリオに一致するパラメーター「{{name}}」がありません",
@@ -888,6 +894,7 @@
     "validation": {
       "duplicateName": "名前「{{name}}」は別のアクションで既に使われています。",
       "panelTitle": "アクションのエラー {{count}} 件",
+      "runBlocked": "実行する前に{{count}}件のアクションエラーを修正してください",
       "focusBox": "このアクションへ移動",
       "showErrors": "エラーを表示",
       "input": {
@@ -950,6 +957,7 @@
       "clearLogs": "ログをクリア",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "{{level}} ログを表示",
+      "showLevelOnly": "右クリック: このレベルのみ",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {

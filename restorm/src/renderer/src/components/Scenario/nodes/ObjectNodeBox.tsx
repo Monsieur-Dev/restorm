@@ -11,6 +11,7 @@ import { TypedValueField } from '../../TypedValueField'
 import { useAllEnvValueTypeGroups, type EnvValueTypeGroup } from '../../../hooks/useAllEnvValueTypeGroups'
 import { normalizeValueType } from '../../../utils/normalizeValueType'
 import { serializeValueForPersistence, type PersistedValue } from '../../../../../shared/utils/valuePersistence'
+import { OBJECT_DEFAULT_PROPERTY_ID } from '../../../../../shared/scenarioObjectProps'
 
 interface ObjectProperty {
   id: string
@@ -21,6 +22,11 @@ interface ObjectProperty {
 function propertyId(): string {
   return `prop-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 }
+
+/** Stable id for the default (not-yet-persisted) first row shown on an empty
+ * object, so React keeps its input state across renders until the user types.
+ * Shared with the validator so it can flag this exact row red. */
+const OBJECT_DEFAULT_ROW_ID = OBJECT_DEFAULT_PROPERTY_ID
 
 function readProperties(config: Record<string, unknown>): ObjectProperty[] {
   const raw = config['properties']
@@ -86,6 +92,7 @@ const ObjectPropertyRow: React.FC<ObjectPropertyRowProps> = ({
           onChange={(next) => { onValueChange(serializeValueForPersistence(next)) }}
           valueTypeGroups={valueTypeGroups}
           allowAllVariables
+          allowEnvironment
           onRemove={onRemove}
           removeLabel={removeLabel}
           dataTestId={dataTestId}
@@ -109,13 +116,20 @@ export const ObjectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
   const valueTypeGroups = useAllEnvValueTypeGroups()
   const config = data.config ?? {}
   const properties = readProperties(config)
+  // A fresh / emptied object shows ONE ready-to-fill row by default. It is NOT
+  // persisted (so an empty object stays `{}` and doesn't trip the
+  // "property must have a name" validation) — it materialises into config only
+  // once the user types into it, via the row handlers below.
+  const displayProperties: ObjectProperty[] = properties.length > 0
+    ? properties
+    : [{ id: OBJECT_DEFAULT_ROW_ID, name: '', value: { type: 'string', value: '' } }]
   // Property ids flagged by a validation error (missing / duplicate name) →
   // outline that property's name input red.
   const invalidProps = new Set(useScenarioNodeErrors(id).map((e) => e.field).filter((f): f is string => f != null))
 
   const setProperties = (next: ObjectProperty[]): void => { data.onSetConfig?.(id, { properties: next }) }
 
-  const rows: ScenarioNodeCell[] = properties.map((p): ScenarioNodeCell => ({
+  const rows: ScenarioNodeCell[] = displayProperties.map((p): ScenarioNodeCell => ({
     id: p.id,
     // Carries the user-given property name onto the port so the collapsed
     // box tooltip shows "started_at" / "total_seconds" instead of the
@@ -130,9 +144,9 @@ export const ObjectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
         {...(data.scenarioId !== undefined ? { scenarioId: data.scenarioId } : {})}
         valueTypeGroups={valueTypeGroups}
         t={t}
-        onNameCommit={(name) => { setProperties(properties.map((x) => (x.id === p.id ? { ...x, name } : x))) }}
-        onValueChange={(value) => { setProperties(properties.map((x) => (x.id === p.id ? { ...x, value } : x))) }}
-        onRemove={() => { setProperties(properties.filter((x) => x.id !== p.id)) }}
+        onNameCommit={(name) => { setProperties(displayProperties.map((x) => (x.id === p.id ? { ...x, name } : x))) }}
+        onValueChange={(value) => { setProperties(displayProperties.map((x) => (x.id === p.id ? { ...x, value } : x))) }}
+        onRemove={() => { setProperties(displayProperties.filter((x) => x.id !== p.id)) }}
         removeLabel={t('scenario.object.removeProperty', 'Supprimer')}
         dataTestId={`scn-object-${p.id}`}
       />
@@ -145,7 +159,7 @@ export const ObjectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
         small
         secondary
         icon="add"
-        onClick={() => { setProperties([...properties, { id: propertyId(), name: '', value: { type: 'string', value: '' } }]) }}
+        onClick={() => { setProperties([...displayProperties, { id: propertyId(), name: '', value: { type: 'string', value: '' } }]) }}
         options={{ ariaLabel: t('scenario.object.addProperty', 'Add property'), title: t('scenario.object.addProperty', 'Add property') }}
         data-testid="scenario-object-add-property"
       />

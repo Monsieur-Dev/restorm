@@ -15,6 +15,10 @@ interface SwitchCase {
   value: PersistedValue
 }
 
+/** Stable id for the default (not-yet-persisted) first case row shown on a
+ * freshly-created switch, mirroring the object / input nodes' default row. */
+const SWITCH_DEFAULT_CASE_ID = 'switch-default-case'
+
 function caseId(): string {
   return `case-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 }
@@ -112,6 +116,12 @@ export const SwitchNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
   const valueTypeGroups = useAllEnvValueTypeGroups()
   const config = data.config ?? {}
   const cases = readCases(config)
+  // A fresh switch shows ONE ready-to-fill case row by default — NOT persisted
+  // (so it doesn't trip the duplicate-value validation) until the user edits it.
+  // Mirrors the object / input nodes.
+  const displayCases: SwitchCase[] = cases.length > 0
+    ? cases
+    : [{ id: SWITCH_DEFAULT_CASE_ID, value: { type: 'string', value: '' } }]
   // Case ids flagged by a duplicate-value error → outline that case's value selector.
   const invalidCases = new Set(useScenarioNodeErrors(id).map((e) => e.field).filter((f): f is string => f != null))
 
@@ -145,7 +155,7 @@ export const SwitchNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
   ]
 
   const right: ScenarioNodeCell[] = [
-    ...cases.map((c): ScenarioNodeCell => ({
+    ...displayCases.map((c): ScenarioNodeCell => ({
       id: c.id,
       // Carries the case's user-readable label onto the port — eg. the
       // customList entry name ("Glaude"), the literal string value, or the
@@ -156,11 +166,11 @@ export const SwitchNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
         <div className={`nodrag${invalidCases.has(c.id) ? ' scn-field-invalid' : ''}`} onMouseDown={stop}>
           <TypedValueField
             value={normalizeValueType(c.value)}
-            onChange={(next) => { setCases(cases.map((x) => (x.id === c.id ? { ...x, value: serializeValueForPersistence(next) } : x))) }}
+            onChange={(next) => { setCases(displayCases.map((x) => (x.id === c.id ? { ...x, value: serializeValueForPersistence(next) } : x))) }}
             valueTypeGroups={valueTypeGroups}
             excludeTypes={['expression']}
             allowEnvironment
-            onRemove={() => { setCases(cases.filter((x) => x.id !== c.id)) }}
+            onRemove={() => { setCases(displayCases.filter((x) => x.id !== c.id)) }}
             removeLabel={t('scenario.switch.removeCase', 'Supprimer')}
             dataTestId={`scn-switch-${c.id}`}
           />
@@ -181,9 +191,9 @@ export const SwitchNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
             // so a switch on a 5-value enum can be filled by clicking `+` four
             // times. First case still defaults to `string` as the most
             // generic starting point.
-            const last = cases[cases.length - 1]
+            const last = displayCases[displayCases.length - 1]
             const seed = last ? nextOfSameType(last.value, valueTypeGroups) : { type: 'string' as const, value: '' }
-            setCases([...cases, { id: caseId(), value: seed }])
+            setCases([...displayCases, { id: caseId(), value: seed }])
           }}
           options={{ ariaLabel: t('scenario.switch.addCase', 'Add case'), title: t('scenario.switch.addCase', 'Add case') }}
           data-testid="scenario-switch-add-case"

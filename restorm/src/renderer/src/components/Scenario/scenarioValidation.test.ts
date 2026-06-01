@@ -2,12 +2,13 @@ import { describe, it, expect } from 'vitest'
 import type { TFunction } from 'i18next'
 import {
   validateScenarioGraph,
+  validateScenarioModel,
   isValidSelectorPath,
   targetKey,
   type ValidationNode,
   type ScenarioNodeError,
   type ScenarioDataLink
-} from './scenarioValidation'
+} from '../../../../shared/scenarioValidation'
 
 // Identity-ish translator: return the default text so message assertions read
 // naturally and `{{name}}`-style interpolation can be checked on substrings.
@@ -86,8 +87,11 @@ describe('scenarioValidation — object properties', () => {
     ]))
   })
 
-  it('accepts an object with no properties', () => {
-    expect(run([node('o', 'object', { properties: [] })]).has('o')).toBe(false)
+  it('flags an object with NO properties (the empty default row must declare a name)', () => {
+    // A fresh object shows one empty default property row — it must be flagged
+    // just like a typed-then-cleared name, so the error appears immediately.
+    expect(codes(run([node('o', 'object', { properties: [] })]), 'o')).toContain('object-prop-missing-name')
+    expect(codes(run([node('o', 'object', {})]), 'o')).toContain('object-prop-missing-name')
   })
 })
 
@@ -117,9 +121,70 @@ describe('scenarioValidation — names', () => {
     expect(codes(map, 'i3')).toContain('missing-name')
   })
 
-  it('requires an output value to be wired', () => {
+  it('exempts a predecessor-wired input from the inter-input duplicate rule', () => {
+    // `i2` runs mid-flow (its `in` trigger is wired), so reusing the name a
+    // top-level input declares is legitimate — only predecessor-less inputs
+    // collide with each other.
+    const map = run([
+      node('i1', 'input', { name: 'dup' }),
+      node('i2', 'input', { name: 'dup' })
+    ], { connected: [targetKey('i2', 'in')] })
+    expect(codes(map, 'i1')).not.toContain('duplicate-name')
+    expect(map.has('i2')).toBe(false)
+  })
+
+  it('still flags duplicate names among two predecessor-less inputs even when a wired input shares the name', () => {
+    const map = run([
+      node('i1', 'input', { name: 'dup' }),
+      node('i2', 'input', { name: 'dup' }),
+      node('i3', 'input', { name: 'dup' })
+    ], { connected: [targetKey('i3', 'in')] })
+    expect(codes(map, 'i1')).toContain('duplicate-name')
+    expect(codes(map, 'i2')).toContain('duplicate-name')
+    expect(map.has('i3')).toBe(false)
+  })
+
+  it('still flags duplicate params within a single predecessor-wired input', () => {
+    const map = run([
+      node('i1', 'input', { params: [{ id: 'a', name: 'x' }, { id: 'b', name: 'x' }] })
+    ], { connected: [targetKey('i1', 'in')] })
+    expect(codes(map, 'i1')).toContain('duplicate-name')
+  })
+
+  it('flags an input with NO params (the empty default row must declare a name)', () => {
+    expect(codes(run([node('i', 'input', {})]), 'i')).toContain('missing-name')
+    expect(codes(run([node('i', 'input', { params: [] })]), 'i')).toContain('missing-name')
+  })
+
+  it('requires an output value to be wired (legacy single output migrates to the `value` port)', () => {
     expect(codes(run([node('o', 'output', { name: 'out' })]), 'o')).toContain('value-required')
     expect(run([node('o', 'output', { name: 'out' })], { connected: [targetKey('o', 'value')] }).has('o')).toBe(false)
+  })
+
+  it('flags an output with NO decls (the empty default row must declare a name)', () => {
+    expect(codes(run([node('o', 'output', {})]), 'o')).toContain('missing-name')
+    expect(codes(run([node('o', 'output', { outputs: [] })]), 'o')).toContain('missing-name')
+  })
+
+  it('validates a MULTI-output node per decl (each name + each value wired)', () => {
+    const decls = [{ id: 'd1', name: 'a' }, { id: 'd2', name: 'b' }, { id: 'd3', name: '' }]
+    const map = run([node('o', 'output', { outputs: decls })], { connected: [targetKey('o', 'd1')] })
+    const byField = (map.get('o') ?? []).map((e) => [e.code, e.field])
+    expect(byField).toEqual(expect.arrayContaining([
+      ['value-required', 'd2'], // named but unwired
+      ['missing-name', 'd3'] // blank name
+    ]))
+    // d1 is named AND wired → no error for it.
+    expect(byField.some(([, f]) => f === 'd1')).toBe(false)
+  })
+
+  it('flags duplicate output names across decls / nodes', () => {
+    const map = run([
+      node('o1', 'output', { outputs: [{ id: 'd1', name: 'dup' }] }),
+      node('o2', 'output', { outputs: [{ id: 'd2', name: 'dup' }] })
+    ], { connected: [targetKey('o1', 'd1'), targetKey('o2', 'd2')] })
+    expect(codes(map, 'o1')).toContain('duplicate-name')
+    expect(codes(map, 'o2')).toContain('duplicate-name')
   })
 })
 
@@ -157,5 +222,38 @@ describe('scenarioValidation — data-link selector', () => {
 
   it('isValidSelectorPath accepts `.` (identity selector)', () => {
     expect(isValidSelectorPath('.')).toBe(true)
+  })
+})
+
+describe('validateScenarioModel — engine/MCP gate from the persisted model', () => {
+  it('derives errors straight from a scenario model (duplicate input names)', () => {
+    const scenario = {
+      nodes: [
+        { id: 'i1', kind: 'input', config: { name: 'dup' }, inputs: [], outputs: [] },
+        { id: 'i2', kind: 'input', config: { name: 'dup' }, inputs: [], outputs: [] }
+      ],
+      edges: []
+    }
+    const byNode = validateScenarioModel(scenario as never, t)
+    expect(codes(byNode, 'i1')).toContain('duplicate-name')
+    expect(codes(byNode, 'i2')).toContain('duplicate-name')
+  })
+
+  it('passes a clean model', () => {
+    const scenario = { nodes: [{ id: 'i1', kind: 'input', config: { name: 'ok' }, inputs: [], outputs: [] }], edges: [] }
+    expect(validateScenarioModel(scenario as never, t).size).toBe(0)
+  })
+
+  it('derives connectedTargets from edges (a wired ÷ operand resolves at run time)', () => {
+    const scenario = {
+      nodes: [
+        { id: 'src', kind: 'now', config: {}, inputs: [], outputs: [{ id: 'value', name: 'value', dataType: 'any' }] },
+        { id: 'a', kind: 'arithmetic', config: { operator: '÷' }, inputs: [{ id: 'b', name: 'b', dataType: 'number' }], outputs: [] }
+      ],
+      // `.` identity selector keeps the data-link rule happy; the edge proves the
+      // connectedTargets derivation suppresses the division-by-zero error.
+      edges: [{ id: 'e', from: { nodeId: 'src', portId: 'value' }, to: { nodeId: 'a', portId: 'b' }, selector: '.' }]
+    }
+    expect(validateScenarioModel(scenario as never, t).has('a')).toBe(false)
   })
 })

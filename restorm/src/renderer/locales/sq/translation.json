@@ -876,10 +876,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "addOutput": "Shto dalje",
+      "removeOutput": "Hiq"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "E detyrueshme për skenarët thirrës"
+      "required": "E detyrueshme për skenarët thirrës",
+      "addParam": "Shto parametër",
+      "removeParam": "Hiq"
     },
     "runScenario": {
       "orphanInput": "Asnjë parametër \"{{name}}\" përkatës në nën-skenar",
@@ -889,6 +895,7 @@
     "validation": {
       "duplicateName": "Emri «{{name}}» përdoret tashmë nga një veprim tjetër.",
       "panelTitle": "{{count}} gabim(e) veprimi",
+      "runBlocked": "Rregulloni {{count}} gabim(e) veprimi para ekzekutimit",
       "focusBox": "Shko te ky veprim",
       "showErrors": "Shfaq gabimet",
       "input": {
@@ -951,6 +958,7 @@
       "clearLogs": "Pastro regjistrat",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Shfaq loget {{level}}",
+      "showLevelOnly": "Klik me të djathtën: vetëm ky nivel",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {

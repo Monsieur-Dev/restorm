@@ -1,6 +1,7 @@
 import Handlebars from 'handlebars'
 import { registerHandlebarsHelpers } from './handlebars/registerAll'
 import type { ScenarioNode } from '../types/scenario'
+import { readInputParams } from '../scenarioInputParams'
 
 // Register the full helper suite on first import so a chained `transform`
 // preview can use `{{year now}}`, `{{add a b}}`, `{{upper x}}`, … directly —
@@ -43,6 +44,16 @@ function str(v: unknown): string {
  * to a string. Self-contained so the module is usable from both renderer and
  * main (which loads scenarios from disk as plain JSON, never as instantiated
  * `ValueType` instances). */
+/** Renderer-injected resolver turning an environment id into its preview shape
+ * `{ name, variables }`, mirroring the runtime. The preview lives in shared
+ * code that can't reach the renderer's env store, so the renderer registers a
+ * lookup once; when absent (e.g. main-process callers), an environment operand
+ * falls back to its `{{$id}}` template. */
+let environmentPreviewResolver: ((envId: string) => unknown) | null = null
+export function setEnvironmentPreviewResolver(fn: ((envId: string) => unknown) | null): void {
+  environmentPreviewResolver = fn
+}
+
 export function concreteValue(persisted: unknown): unknown {
   if (persisted === null || persisted === undefined) return null
   if (typeof persisted !== 'object') return persisted
@@ -60,8 +71,11 @@ export function concreteValue(persisted: unknown): unknown {
       return Array.isArray(p.labels) ? p.labels.filter((v): v is string => typeof v === 'string').join(',') : ''
     case 'variable':
       return typeof p.value === 'string' ? `{{${p.value}}}` : ''
-    case 'environment':
-      return typeof p.value === 'string' ? `{{$${p.value}}}` : ''
+    case 'environment': {
+      if (typeof p.value !== 'string') return ''
+      const resolved = environmentPreviewResolver?.(p.value)
+      return resolved !== undefined ? resolved : `{{$${p.value}}}`
+    }
     // 'string' | 'expression' | 'password' | 'color' | 'datetime' | 'enum' |
     // 'enumList' | unknown — value carries the renderable string.
     default:
@@ -494,8 +508,13 @@ export function staticScenarioPreview(
       }
     }
     case 'input': {
-      const name = str(cfg['name']) || 'value'
-      return { [name]: concreteValue(cfg['valueType']) }
+      // The input emits one object keyed by EACH declared param's name, with
+      // that param's typed default as the example value.
+      const out: Record<string, unknown> = {}
+      for (const param of readInputParams(cfg)) {
+        out[param.name.trim() || 'value'] = concreteValue(param.valueType)
+      }
+      return out
     }
     case 'setVariable': {
       const name = str(cfg['name'])

@@ -876,10 +876,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "addOutput": "Çıktı ekle",
+      "removeOutput": "Kaldır"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Çağıran senaryolar için gerekli"
+      "required": "Çağıran senaryolar için gerekli",
+      "addParam": "Parametre ekle",
+      "removeParam": "Kaldır"
     },
     "runScenario": {
       "orphanInput": "Alt senaryoda eşleşen \"{{name}}\" parametresi yok",
@@ -889,6 +895,7 @@
     "validation": {
       "duplicateName": "\"{{name}}\" adı zaten başka bir eylem tarafından kullanılıyor.",
       "panelTitle": "{{count}} eylem hatası",
+      "runBlocked": "Çalıştırmadan önce {{count}} eylem hatasını düzeltin",
       "focusBox": "Bu eyleme git",
       "showErrors": "Hataları göster",
       "input": {
@@ -951,6 +958,7 @@
       "clearLogs": "Günlükleri temizle",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "{{level}} günlüklerini göster",
+      "showLevelOnly": "Sağ tıklama: yalnızca bu düzey",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {

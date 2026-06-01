@@ -1,4 +1,6 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
+import { collectionStore } from '../../services/CollectionStore'
+import { contextService } from '../../services/ContextService'
 import {
   transformExecutor,
   logExecutor,
@@ -8,6 +10,7 @@ import {
   setVariableExecutor,
   getVariableExecutor,
   assertExecutor,
+  ifExecutor,
   mapExecutor,
   filterExecutor,
   arithmeticExecutor,
@@ -195,6 +198,34 @@ describe('objectExecutor', () => {
     const out = runPure(objectExecutor, { properties }, {}, new Map([['counter', 7]]))
     expect(out.outputs).toEqual([{ port: 'object', value: { cpt: 7 } }])
   })
+
+  it('resolves an `environment` property to { name, variables } (resolved env vars)', () => {
+    const envSpy = vi.spyOn(collectionStore, 'findEnvironmentById')
+      .mockReturnValue({ id: 'env-uuid-123', name: 'localhost' } as never)
+    const ctxSpy = vi.spyOn(contextService, 'getContext')
+      .mockReturnValue({ baseUrl: 'http://localhost:5110', clientId: 'VALID' } as never)
+    const properties = [{ id: 'p1', name: 'targetEnv', value: { type: 'environment', value: 'env-uuid-123' } }]
+    const out = runPure(objectExecutor, { properties }, {})
+    expect(out.outputs).toEqual([{
+      port: 'object',
+      value: { targetEnv: { name: 'localhost', variables: { baseUrl: 'http://localhost:5110', clientId: 'VALID' } } }
+    }])
+    expect(envSpy).toHaveBeenCalledWith('env-uuid-123')
+    expect(ctxSpy).toHaveBeenCalledWith('env-uuid-123')
+    envSpy.mockRestore(); ctxSpy.mockRestore()
+  })
+
+  it('omits the `variables` key for an environment with NO variables', () => {
+    // An empty `variables: {}` rendered a misleading expandable-but-empty node
+    // in the run log — drop the key entirely when the env has no variables.
+    const envSpy = vi.spyOn(collectionStore, 'findEnvironmentById')
+      .mockReturnValue({ id: 'env-empty', name: 'Sub-env' } as never)
+    const ctxSpy = vi.spyOn(contextService, 'getContext').mockReturnValue({} as never)
+    const properties = [{ id: 'p1', name: 'targetEnv', value: { type: 'environment', value: 'env-empty' } }]
+    const out = runPure(objectExecutor, { properties }, {})
+    expect(out.outputs).toEqual([{ port: 'object', value: { targetEnv: { name: 'Sub-env' } } }])
+    envSpy.mockRestore(); ctxSpy.mockRestore()
+  })
 })
 
 describe('setVariable / getVariable', () => {
@@ -244,6 +275,32 @@ describe('assertExecutor', () => {
   it('routes to `else` when the assertion fails (wired operands win over config)', () => {
     const out = runPure(assertExecutor, { operator: 'eq', a: { type: 'number', value: 2 } }, { in: 'sig', a: 2, b: 3 })
     expect(out.outputs[0]?.port).toBe('else')
+  })
+})
+
+describe('ifExecutor', () => {
+  it('compares objects structurally (deep) so two equal-but-distinct objects take `then`', () => {
+    const left = { type: 'string', value: 'x' }
+    const right = { type: 'string', value: 'x' }
+    // wired operands are distinct object instances with identical contents
+    const out = runPure(ifExecutor, { operator: '=' }, { left: { a: 1, b: { c: 2 } }, right: { a: 1, b: { c: 2 } } }, undefined, 'if')
+    expect(out.outputs[0]?.port).toBe('then')
+    void left; void right
+  })
+
+  it('routes to `else` when the deep contents differ', () => {
+    const out = runPure(ifExecutor, { operator: '=' }, { left: { a: 1 }, right: { a: 2 } }, undefined, 'if')
+    expect(out.outputs[0]?.port).toBe('else')
+  })
+
+  it('emits BOTH operands as { left, right } on the taken branch (no wired `in`)', () => {
+    const out = runPure(ifExecutor, { operator: '=', left: { type: 'number', value: 5 }, right: { type: 'number', value: 5 } }, {}, undefined, 'if')
+    expect(out.outputs).toEqual([{ port: 'then', value: { left: 5, right: 5 } }])
+  })
+
+  it('passes a wired `in` straight through to the taken branch', () => {
+    const out = runPure(ifExecutor, { operator: '=', left: { type: 'number', value: 1 }, right: { type: 'number', value: 2 } }, { in: 'payload' }, undefined, 'if')
+    expect(out.outputs).toEqual([{ port: 'else', value: 'payload' }])
   })
 })
 

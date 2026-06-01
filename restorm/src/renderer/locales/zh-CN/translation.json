@@ -875,10 +875,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "addOutput": "添加输出",
+      "removeOutput": "移除"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "调用此场景时必填"
+      "required": "调用此场景时必填",
+      "addParam": "添加参数",
+      "removeParam": "移除"
     },
     "runScenario": {
       "orphanInput": "子场景中没有匹配的参数“{{name}}”",
@@ -888,6 +894,7 @@
     "validation": {
       "duplicateName": "名称“{{name}}”已被另一个操作使用。",
       "panelTitle": "{{count}} 个操作错误",
+      "runBlocked": "运行前请修复 {{count}} 个操作错误",
       "focusBox": "定位到此操作",
       "showErrors": "显示错误",
       "input": {
@@ -950,6 +957,7 @@
       "clearLogs": "清除日志",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "显示 {{level}} 日志",
+      "showLevelOnly": "右键单击：仅此级别",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {

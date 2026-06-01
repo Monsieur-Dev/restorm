@@ -876,10 +876,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "addOutput": "Ausgabe hinzufügen",
+      "removeOutput": "Entfernen"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Erforderlich für aufrufende Szenarien"
+      "required": "Erforderlich für aufrufende Szenarien",
+      "addParam": "Parameter hinzufügen",
+      "removeParam": "Entfernen"
     },
     "runScenario": {
       "orphanInput": "Kein passender Parameter \"{{name}}\" im Unterszenario",
@@ -889,6 +895,7 @@
     "validation": {
       "duplicateName": "Der Name „{{name}}“ wird bereits von einer anderen Aktion verwendet.",
       "panelTitle": "{{count}} Aktionsfehler",
+      "runBlocked": "Beheben Sie {{count}} Aktionsfehler vor dem Ausführen",
       "focusBox": "Zu dieser Aktion springen",
       "showErrors": "Fehler anzeigen",
       "input": {
@@ -951,6 +958,7 @@
       "clearLogs": "Logs löschen",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "{{level}}-Logs anzeigen",
+      "showLevelOnly": "Rechtsklick: nur diese Stufe",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {

@@ -875,10 +875,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "addOutput": "Tambah keluaran",
+      "removeOutput": "Hapus"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Wajib untuk skenario pemanggil"
+      "required": "Wajib untuk skenario pemanggil",
+      "addParam": "Tambah parameter",
+      "removeParam": "Hapus"
     },
     "runScenario": {
       "orphanInput": "Tidak ada parameter \"{{name}}\" yang cocok di sub-skenario",
@@ -888,6 +894,7 @@
     "validation": {
       "duplicateName": "Nama \"{{name}}\" sudah dipakai oleh aksi lain.",
       "panelTitle": "{{count}} kesalahan aksi",
+      "runBlocked": "Perbaiki {{count}} kesalahan tindakan sebelum menjalankan",
       "focusBox": "Fokus ke aksi ini",
       "showErrors": "Tampilkan kesalahan",
       "input": {
@@ -950,6 +957,7 @@
       "clearLogs": "Hapus log",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Tampilkan log {{level}}",
+      "showLevelOnly": "Klik kanan: hanya level ini",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {

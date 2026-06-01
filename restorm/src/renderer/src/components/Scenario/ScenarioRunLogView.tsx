@@ -247,18 +247,33 @@ export const ScenarioRunLogView: React.FC<ScenarioRunLogViewProps> = ({ logs, te
           {LEVELS.map((lvl) => (
             <HeaderHoverTooltip
               key={lvl}
-              label={t('scenario.inspector.showLevelLogs', { level: lvl, defaultValue: 'Show {{level}} logs' })}
+              label={`${t('scenario.inspector.showLevelLogs', { level: lvl, defaultValue: 'Show {{level}} logs' })}\n${t('scenario.inspector.showLevelOnly', 'Right-click: this level only')}`}
               data-testid={`${testIdPrefix}-level-${lvl}-tip`}
             >
-              <Toggle
-                appearance="button"
-                checked={levels[lvl]}
-                onChange={(checked) => { setLevels({ ...levels, [lvl]: checked }) }}
-                data-testid={`${testIdPrefix}-level-${lvl}`}
-                aria-label={t('scenario.inspector.showLevelLogs', { level: lvl, defaultValue: 'Show {{level}} logs' })}
+              {/* Toggle doesn't forward onContextMenu; this transparent
+                  (display:contents) wrapper catches the bubbled right-click.
+                  Toggle: if this level is the ONLY one shown, restore all;
+                  otherwise solo it (keep only this level). */}
+              <span
+                style={{ display: 'contents' }}
+                onContextMenu={(e) => {
+                  e.preventDefault()
+                  const onlyThis = LEVELS.every((l) => levels[l] === (l === lvl))
+                  setLevels(onlyThis
+                    ? { ...ALL_LEVELS_ON }
+                    : (Object.fromEntries(LEVELS.map((l) => [l, l === lvl])) as LogLevelFilter))
+                }}
               >
-                <span className={`scn-log-dot scn-log-dot-${lvl}`} aria-hidden="true" />
-              </Toggle>
+                <Toggle
+                  appearance="button"
+                  checked={levels[lvl]}
+                  onChange={(checked) => { setLevels({ ...levels, [lvl]: checked }) }}
+                  data-testid={`${testIdPrefix}-level-${lvl}`}
+                  aria-label={t('scenario.inspector.showLevelLogs', { level: lvl, defaultValue: 'Show {{level}} logs' })}
+                >
+                  <span className={`scn-log-dot scn-log-dot-${lvl}`} aria-hidden="true" />
+                </Toggle>
+              </span>
             </HeaderHoverTooltip>
           ))}
           <span className="scn-log-actions-sep" aria-hidden="true" />

@@ -1,9 +1,12 @@
 import React from 'react'
 import { useNodeConnections, type NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
+import { Button } from 'electron-core-ui/renderer'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { ScenarioNameInput } from './ScenarioNameInput'
-import { useScenarioFieldInvalid } from '../scenarioErrorsContext'
+import { useScenarioFieldInvalid, useScenarioNodeErrors } from '../scenarioErrorsContext'
+import { readInputParams, INPUT_DEFAULT_PARAM_ID, type InputParam } from '../../../../../shared/scenarioInputParams'
+import { readOutputDecls, OUTPUT_DEFAULT_DECL_ID, type OutputDecl } from '../../../../../shared/scenarioOutputDecls'
 import { TypedValueField } from '../../TypedValueField'
 import type { ValueTypeKind } from '../../TypedValueField/castValue'
 import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroups'
@@ -20,6 +23,10 @@ const VARIABLE_ONLY_EXCLUDE: ValueTypeKind[] = [
 
 const VALUE_OUT: ScenarioNodeCell = { id: 'value', label: 'value', port: { id: 'value', type: 'source' } }
 
+function paramId(): string {
+  return `param-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+}
+
 /**
  * `input` — a named scenario parameter with a default typed value; produces
  * `value`. Runnable on its own, and chainable via the optional header launch
@@ -29,108 +36,135 @@ export const InputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
   const { t } = useTranslation()
   const valueTypeGroups = useAllEnvValueTypeGroups()
   const config = data.config ?? {}
-  const name = typeof config['name'] === 'string' ? config['name'] : ''
-  const nameInvalid = useScenarioFieldInvalid(id, 'name')
-  // When this scenario is called as a SUB-scenario, `required` marks the
-  // derived `param:<name>` port as mandatory on the parent's runScenario box
-  // (red until wired) — see `deriveRunScenarioPorts`.
-  const required = config['required'] === true
-  // A no-trigger input runs at the very start, before any variable is set, so
-  // it can't reference one as its default → hide the Variables menu entirely.
-  // With a trigger it runs mid-flow, so variables are fair game EXCEPT its own
-  // name (an input referencing itself is meaningless).
+  const params = readInputParams(config)
+  // A fresh / emptied input shows ONE ready-to-fill param row by default — NOT
+  // persisted (so it doesn't trip the "must have a name" validation) until the
+  // user types into it. Mirrors the object node.
+  const displayParams: InputParam[] = params.length > 0
+    ? params
+    : [{ id: INPUT_DEFAULT_PARAM_ID, name: '', valueType: { type: 'string', value: '' }, required: false }]
+  // A no-trigger input runs at the very start, before any variable is set, so a
+  // default can't reference a variable → hide the Variables menu. With a
+  // trigger it runs mid-flow, so variables are fair game EXCEPT a param's own
+  // name (a param referencing itself is meaningless). The `required` flag marks
+  // the derived `param:<name>` port mandatory on a calling runScenario box.
   const hasTrigger = useNodeConnections({ id, handleType: 'target', handleId: 'in' }).length > 0
-  // `normalizeValueType` already returns a StringValue('') for an absent
-  // config, so this both rehydrates a saved typed value and seeds the default.
-  const value = normalizeValueType(config['valueType'])
+  const invalidParams = new Set(useScenarioNodeErrors(id).map((e) => e.field).filter((f): f is string => f != null))
+  const setParams = (next: InputParam[]): void => { data.onSetConfig?.(id, { params: next }) }
 
-  const left: ScenarioNodeSection[] = [
-    {
-      id: 'main',
-      rows: [
-        {
-          id: 'name',
-          content: (
-            <div className="nodrag scn-stacked-field" onMouseDown={(e) => { e.stopPropagation() }}>
-              <span className="scn-port-label">{t('scenario.input.name', 'Name')}</span>
-              <ScenarioNameInput
-                value={name}
-                placeholder="name"
-                invalid={nameInvalid}
-                onCommit={(next) => { data.onSetConfig?.(id, { name: next }) }}
-              />
-            </div>
-          )
-        },
-        {
-          id: 'default',
-          content: (
-            <div
-              className="nodrag scn-stacked-field"
-              onMouseDown={(e) => { e.stopPropagation() }}
-            >
-              <span className="scn-port-label">{t('scenario.input.defaultType', 'Default / type')}</span>
-              <TypedValueField
-                value={value}
-                onChange={(next) => { data.onSetConfig?.(id, { valueType: serializeValueForPersistence(next) }) }}
-                valueTypeGroups={valueTypeGroups}
-                excludeTypes={hasTrigger ? ['expression'] : ['expression', 'variable']}
-                {...(hasTrigger ? { excludeVariableName: name } : {})}
-                allowEnvironment
-                dataTestId="scn-input"
-              />
-            </div>
-          )
-        },
-        {
-          id: 'required',
-          content: (
-            <label className="scn-required-toggle nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
-              <input
-                type="checkbox"
-                checked={required}
-                onChange={(e) => { data.onSetConfig?.(id, { required: e.target.checked }) }}
-                data-testid="scn-input-required"
-              />
-              <span>{t('scenario.input.required', 'Required by calling scenarios')}</span>
-            </label>
-          )
-        }
-      ]
-    }
-  ]
+  const rows: ScenarioNodeCell[] = displayParams.map((p): ScenarioNodeCell => ({
+    id: p.id,
+    content: (
+      <div className="nodrag scn-stacked-field" onMouseDown={(e) => { e.stopPropagation() }}>
+        <span className="scn-port-label">{t('scenario.input.name', 'Name')}</span>
+        <ScenarioNameInput
+          value={p.name}
+          placeholder="name"
+          invalid={invalidParams.has(p.id)}
+          onCommit={(next) => { setParams(displayParams.map((x) => (x.id === p.id ? { ...x, name: next } : x))) }}
+        />
+        <span className="scn-port-label">{t('scenario.input.defaultType', 'Default / type')}</span>
+        <TypedValueField
+          value={normalizeValueType(p.valueType)}
+          onChange={(next) => { setParams(displayParams.map((x) => (x.id === p.id ? { ...x, valueType: serializeValueForPersistence(next) } : x))) }}
+          valueTypeGroups={valueTypeGroups}
+          excludeTypes={hasTrigger ? ['expression'] : ['expression', 'variable']}
+          {...(hasTrigger ? { excludeVariableName: p.name } : {})}
+          allowEnvironment
+          onRemove={() => { setParams(displayParams.filter((x) => x.id !== p.id)) }}
+          removeLabel={t('scenario.input.removeParam', 'Supprimer')}
+          dataTestId={`scn-input-${p.id}`}
+        />
+        <label className="scn-required-toggle nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
+          <input
+            type="checkbox"
+            checked={p.required === true}
+            onChange={(e) => { setParams(displayParams.map((x) => (x.id === p.id ? { ...x, required: e.target.checked } : x))) }}
+            data-testid={`scn-input-${p.id}-required`}
+          />
+          <span>{t('scenario.input.required', 'Required by calling scenarios')}</span>
+        </label>
+      </div>
+    )
+  }))
+  rows.push({
+    id: 'add-param',
+    content: (
+      <Button
+        small
+        secondary
+        icon="add"
+        onClick={() => { setParams([...displayParams, { id: paramId(), name: '', valueType: { type: 'string', value: '' }, required: false }]) }}
+        options={{ ariaLabel: t('scenario.input.addParam', 'Add parameter'), title: t('scenario.input.addParam', 'Add parameter') }}
+        data-testid="scenario-input-add-param"
+      />
+    )
+  })
+
+  const left: ScenarioNodeSection[] = [{ id: 'main', rows }]
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[VALUE_OUT]} launchInput />
 }
 
+function declId(): string {
+  return `out-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+}
+
 /**
- * `output` — declares a named scenario output (the symmetric counterpart of
- * `input`): a name + a `value` input port. The value wired in is exposed as one
- * of the scenario's outputs, which a parent `runScenario` derives into an output
- * port. Terminal sink — no output, no error port. The name persists in config.
+ * `output` — declares ONE OR MORE named scenario outputs (the symmetric
+ * counterpart of an `input` node's params). Each output has a name and its own
+ * `value` input port; the value wired in is exposed under that name, which a
+ * parent `runScenario` derives into an `output:<name>` port. A fresh / emptied
+ * output shows one default row (not persisted until typed), mirroring input /
+ * object. Terminal sink — no output port. The decls persist in config.
  */
 export const OutputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
+  const { t } = useTranslation()
   const config = data.config ?? {}
-  const name = typeof config['name'] === 'string' ? config['name'] : ''
-  const nameInvalid = useScenarioFieldInvalid(id, 'name')
-  const left: ScenarioNodeSection[] = [
-    {
-      id: 'main',
-      rows: [
-        {
-          id: 'name',
-          content: (
-            <ScenarioNameInput
-              value={name}
-              placeholder="output"
-              invalid={nameInvalid}
-              onCommit={(next) => { data.onSetConfig?.(id, { name: next }) }}
-            />
-          )
-        },
-        { id: 'value', label: 'value', port: { id: 'value', type: 'target' } }
-      ]
-    }
-  ]
+  const decls = readOutputDecls(config)
+  const displayDecls: OutputDecl[] = decls.length > 0 ? decls : [{ id: OUTPUT_DEFAULT_DECL_ID, name: '' }]
+  const invalidDecls = new Set(useScenarioNodeErrors(id).map((e) => e.field).filter((f): f is string => f != null))
+  const setDecls = (next: OutputDecl[]): void => { data.onSetConfig?.(id, { outputs: next }) }
+
+  const rows: ScenarioNodeCell[] = displayDecls.map((d): ScenarioNodeCell => ({
+    id: d.id,
+    label: 'value',
+    port: { id: d.id, type: 'target' },
+    content: (
+      <div className="nodrag scn-output-decl-row" onMouseDown={(e) => { e.stopPropagation() }}>
+        <ScenarioNameInput
+          value={d.name}
+          placeholder="output"
+          invalid={invalidDecls.has(d.id)}
+          onCommit={(next) => { setDecls(displayDecls.map((x) => (x.id === d.id ? { ...x, name: next } : x))) }}
+        />
+        {decls.length > 0 && (
+          <Button
+            small
+            secondary
+            icon="close"
+            onClick={() => { setDecls(displayDecls.filter((x) => x.id !== d.id)) }}
+            options={{ ariaLabel: t('scenario.output.removeOutput', 'Supprimer') }}
+            data-testid={`scn-output-${d.id}-remove`}
+          />
+        )}
+      </div>
+    )
+  }))
+  rows.push({
+    id: 'add-output',
+    content: (
+      <Button
+        small
+        secondary
+        icon="add"
+        onClick={() => { setDecls([...displayDecls, { id: declId(), name: '' }]) }}
+        options={{ ariaLabel: t('scenario.output.addOutput', 'Add output'), title: t('scenario.output.addOutput', 'Add output') }}
+        data-testid="scenario-output-add-output"
+      />
+    )
+  })
+
+  const left: ScenarioNodeSection[] = [{ id: 'main', rows }]
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} hasError={false} />
 }
 

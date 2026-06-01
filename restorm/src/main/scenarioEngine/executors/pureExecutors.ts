@@ -94,7 +94,10 @@ export const ifExecutor: NodeExecutor = (act, ctx) => {
   const cond = hasOperands
     ? compareValues(cfg.operator ?? cfg.op, left, right)
     : Boolean(act.inputs['in'])
-  const value = act.inputs['in'] ?? left
+  // The taken branch carries data forward. A wired `in` passes straight
+  // through; otherwise emit BOTH operands as `{ left, right }` — surfacing one
+  // operand and not the other (the old behaviour) made no sense.
+  const value = act.inputs['in'] !== undefined ? act.inputs['in'] : { left, right }
   return { outputs: [{ port: cond ? 'then' : 'else', value }] }
 }
 

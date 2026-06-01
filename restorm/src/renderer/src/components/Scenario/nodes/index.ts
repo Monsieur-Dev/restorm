@@ -87,6 +87,9 @@ export const ScenarioNodeView: NodeBoxComponent = (props) => {
   // The map is exhaustive over known kinds at the type level, but on-disk data
   // can carry a kind this build no longer knows — so treat the lookup as
   // possibly-undefined and fall back to the inert placeholder.
-  const Component = SCENARIO_NODE_COMPONENTS[props.data.kind] as NodeBoxComponent | undefined
+  // `Partial` view on purpose: the map is exhaustive over known kinds at the
+  // type level, but on-disk data can carry a kind this build dropped — so the
+  // lookup is genuinely possibly-undefined, and the fallback is real.
+  const Component = (SCENARIO_NODE_COMPONENTS as Partial<Record<ScenarioNodeKind, NodeBoxComponent>>)[props.data.kind]
   return createElement(Component ?? UnknownNodeBox, props)
 }

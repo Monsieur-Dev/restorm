@@ -1,4 +1,6 @@
 import type { ScenarioNodeKind, ScenarioPort, ScenarioDataType, ScenarioPortRole, PortFlow, Scenario } from './types/collections'
+import { readInputParams } from './scenarioInputParams'
+import { readOutputDecls } from './scenarioOutputDecls'
 
 /**
  * Default input/output ports per node kind (epic §5b "per-kind
@@ -177,14 +179,24 @@ export function deriveRunScenarioPorts(subScenario: Scenario | null | undefined)
   const seenIn = new Set<string>()
   const seenOut = new Set<string>()
   for (const node of subScenario.nodes) {
-    const name = typeof node.config['name'] === 'string' ? node.config['name'].trim() : ''
-    if (!name) continue
-    if (node.kind === 'input' && !seenIn.has(name)) {
-      seenIn.add(name)
-      inputs.push(p({ id: `param:${name}`, name, dataType: dataTypeForValueType(node.config['valueType']), flow: 'value', ...(node.config['required'] === true ? { required: true } : {}) }))
-    } else if (node.kind === 'output' && !seenOut.has(name)) {
-      seenOut.add(name)
-      outputs.push(p({ id: `output:${name}`, name, role: 'response', flow: 'both' }))
+    // An input node now declares MANY params — one `param:<name>` port each.
+    if (node.kind === 'input') {
+      for (const param of readInputParams(node.config)) {
+        const name = param.name.trim()
+        if (!name || seenIn.has(name)) continue
+        seenIn.add(name)
+        inputs.push(p({ id: `param:${name}`, name, dataType: dataTypeForValueType(param.valueType), flow: 'value', ...(param.required === true ? { required: true } : {}) }))
+      }
+      continue
+    }
+    // An output node now declares MANY outputs — one `output:<name>` port each.
+    if (node.kind === 'output') {
+      for (const decl of readOutputDecls(node.config)) {
+        const name = decl.name.trim()
+        if (!name || seenOut.has(name)) continue
+        seenOut.add(name)
+        outputs.push(p({ id: `output:${name}`, name, role: 'response', flow: 'both' }))
+      }
     }
   }
   // A sub-scenario that returns no data still needs to signal completion so a
