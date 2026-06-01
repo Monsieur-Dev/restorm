@@ -1839,9 +1839,14 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         // swallows the next printable character, so the first letter of every
         // capital (Shift + letter) is eaten in every text field on the page.
         // Disabling the Shift selection activator removes the global listener.
-        // Click-select and Ctrl/Meta+click multi-select still work; only the
-        // Shift+drag rubber-band box-select is given up to fix the typing bug.
+        // To keep rubber-band selection without a (modifier) keyboard key, it
+        // moves onto the mouse: left-drag on the pane box-selects
+        // (`selectionOnDrag`), and panning moves to the middle mouse button
+        // (`panOnDrag={[1]}`) so left-drag is free. Click + Ctrl/Meta+click
+        // single/multi-select still work; right-drag stays the context menu.
         selectionKeyCode={null}
+        selectionOnDrag
+        panOnDrag={[1]}
         onPaneContextMenu={onPaneContextMenu}
         onEdgeContextMenu={onEdgeContextMenu}
         onPaneClick={() => {
