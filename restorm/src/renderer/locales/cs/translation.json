@@ -938,7 +938,7 @@
       },
       "runScenario": {
         "missing": "Propojený scénář již neexistuje.",
-        "requiredInput": "Povinný vstup „{{name}}“ musí být připojen ke zdroji."
+        "requiredInput": "Povinný vstup „{{name}}\" musí být propojen nebo musí mít hodnotu."
       }
     },
     "usage": {

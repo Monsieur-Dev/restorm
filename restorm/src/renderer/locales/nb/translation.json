@@ -936,7 +936,7 @@
       },
       "runScenario": {
         "missing": "Det tilknyttede scenarioet finnes ikke lenger.",
-        "requiredInput": "Den obligatoriske inngangen «{{name}}» må kobles til en kilde."
+        "requiredInput": "Den påkrevde inngangen «{{name}}» må kobles eller gis en verdi."
       }
     },
     "usage": {

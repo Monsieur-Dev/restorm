@@ -935,7 +935,7 @@
       },
       "runScenario": {
         "missing": "關聯的場景已不存在。",
-        "requiredInput": "必填輸入「{{name}}」必須連接到資料來源。"
+        "requiredInput": "必填輸入「{{name}}」必須連線或給定值。"
       }
     },
     "usage": {

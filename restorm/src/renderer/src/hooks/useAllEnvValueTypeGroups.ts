@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { eventBus } from 'electron-core-ui/renderer'
 import { DocumentEvents } from '../services/DocumentEvents'
 import { useRestormStore } from '../store/restormStore'
@@ -25,9 +25,14 @@ export function useAllEnvValueTypeGroups(): EnvValueTypeGroup[] {
     return () => { sub.unsubscribe() }
   }, [])
 
-  // Computed inline (not memoised) so it re-reads the live folder proxies on
-  // every render — folders mutate in place, so a `FOLDER_UPDATED` event bumps
-  // `version` to force the re-read after an edit in "Variables personnalisées".
-  void version
-  return collectEnvValueTypeGroups(collections)
+  // Memoised on `[collections, version]` so the result is a STABLE reference
+  // across unrelated re-renders (a fresh array each render cascades a re-render
+  // into every consuming TypedValueField — costly on a box with many fields).
+  // Folders mutate in place, so a `FOLDER_UPDATED` event bumps `version` to
+  // force the re-read after an edit in "Variables personnalisées"; a new
+  // `collections` reference re-reads too.
+  return useMemo(() => {
+    void version // a FOLDER_UPDATED bump forces the re-read of in-place folder proxies
+    return collectEnvValueTypeGroups(collections)
+  }, [collections, version])
 }

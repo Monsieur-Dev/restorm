@@ -936,7 +936,7 @@
       },
       "runScenario": {
         "missing": "Liitettyä skenaariota ei enää ole.",
-        "requiredInput": "Pakollinen syöte ”{{name}}” on liitettävä lähteeseen."
+        "requiredInput": "Pakollinen syöte \"{{name}}\" on kytkettävä tai sille on annettava arvo."
       }
     },
     "usage": {

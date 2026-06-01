@@ -936,7 +936,7 @@
       },
       "runScenario": {
         "missing": "Det länkade scenariot finns inte längre.",
-        "requiredInput": "Den obligatoriska indata ”{{name}}” måste anslutas till en källa."
+        "requiredInput": "Den obligatoriska indata \"{{name}}\" måste kopplas eller ges ett värde."
       }
     },
     "usage": {

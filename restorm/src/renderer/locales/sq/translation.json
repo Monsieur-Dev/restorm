@@ -936,7 +936,7 @@
       },
       "runScenario": {
         "missing": "Skenari i lidhur nuk ekziston më.",
-        "requiredInput": "Hyrja e detyrueshme «{{name}}» duhet të lidhet me një burim."
+        "requiredInput": "Hyrja e detyrueshme \"{{name}}\" duhet të lidhet ose t'i jepet një vlerë."
       }
     },
     "usage": {

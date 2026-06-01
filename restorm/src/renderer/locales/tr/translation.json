@@ -936,7 +936,7 @@
       },
       "runScenario": {
         "missing": "Bağlı senaryo artık mevcut değil.",
-        "requiredInput": "Zorunlu giriş \"{{name}}\" bir kaynağa bağlanmalıdır."
+        "requiredInput": "Gerekli giriş \"{{name}}\" bağlanmalı veya bir değer verilmelidir."
       }
     },
     "usage": {

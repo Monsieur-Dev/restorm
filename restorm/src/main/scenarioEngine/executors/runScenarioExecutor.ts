@@ -10,6 +10,7 @@
  */
 
 import type { NodeExecutor } from '../types'
+import { resolveOperand } from '../conditionEval'
 
 export const runScenarioExecutor: NodeExecutor = async (act, ctx) => {
   const cfg = ctx.node.config as { scenarioId?: string }
@@ -24,6 +25,17 @@ export const runScenarioExecutor: NodeExecutor = async (act, ctx) => {
     if (v === undefined) continue
     const key = k.startsWith('param:') ? k.slice('param:'.length) : k
     params[key] = v
+  }
+  // Inline values entered on the call site (`config.paramValues[<name>]`) fill
+  // any param NOT wired by a link — resolved like any operand, so an
+  // `environment` value becomes `{ name, variables }`, a colour its hex, etc.
+  const inlineValues: unknown = ctx.node.config['paramValues']
+  if (inlineValues !== null && typeof inlineValues === 'object') {
+    for (const [name, valueType] of Object.entries(inlineValues as Record<string, unknown>)) {
+      if (name in params) continue // a wired link wins over the inline value
+      const resolved = resolveOperand(undefined, valueType, undefined)
+      if (resolved !== undefined) params[name] = resolved
+    }
   }
   // Pass our own abort signal so cancelling THIS run cascades into the
   // sub-scenario (its in-flight HTTP / wait timers abort too) — without

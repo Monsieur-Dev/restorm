@@ -936,7 +936,7 @@
       },
       "runScenario": {
         "missing": "Det tilknyttede scenarie findes ikke længere.",
-        "requiredInput": "Det påkrævede input \"{{name}}\" skal være forbundet til en kilde."
+        "requiredInput": "Den påkrævede indgang \"{{name}}\" skal forbindes eller have en værdi."
       }
     },
     "usage": {

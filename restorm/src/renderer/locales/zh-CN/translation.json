@@ -935,7 +935,7 @@
       },
       "runScenario": {
         "missing": "关联的场景已不存在。",
-        "requiredInput": "必填输入「{{name}}」必须连接到数据源。"
+        "requiredInput": "必填输入\"{{name}}\"必须连线或赋值。"
       }
     },
     "usage": {

@@ -936,7 +936,7 @@
       },
       "runScenario": {
         "missing": "Le scénario lié n'existe plus.",
-        "requiredInput": "L'entrée requise « {{name}} » doit être branchée à une source."
+        "requiredInput": "L'entrée requise « {{name}} » doit être reliée ou recevoir une valeur."
       }
     },
     "usage": {

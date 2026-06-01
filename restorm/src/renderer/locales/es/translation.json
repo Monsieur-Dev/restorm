@@ -936,7 +936,7 @@
       },
       "runScenario": {
         "missing": "El escenario vinculado ya no existe.",
-        "requiredInput": "La entrada obligatoria «{{name}}» debe conectarse a una fuente."
+        "requiredInput": "La entrada requerida \"{{name}}\" debe conectarse o recibir un valor."
       }
     },
     "usage": {

@@ -936,7 +936,7 @@
       },
       "runScenario": {
         "missing": "The bound scenario no longer exists.",
-        "requiredInput": "The required input \"{{name}}\" must be wired to a source."
+        "requiredInput": "The required input \"{{name}}\" must be wired or given a value."
       }
     },
     "usage": {

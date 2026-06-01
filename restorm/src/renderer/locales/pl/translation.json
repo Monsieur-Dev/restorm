@@ -938,7 +938,7 @@
       },
       "runScenario": {
         "missing": "Powiązany scenariusz już nie istnieje.",
-        "requiredInput": "Wymagane wejście „{{name}}” musi być podłączone do źródła."
+        "requiredInput": "Wymagane wejście „{{name}}\" musi być połączone lub mieć wartość."
       }
     },
     "usage": {

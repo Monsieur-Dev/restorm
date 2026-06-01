@@ -936,7 +936,7 @@
       },
       "runScenario": {
         "missing": "Lo scenario collegato non esiste più.",
-        "requiredInput": "L'input obbligatorio «{{name}}» deve essere collegato a una sorgente."
+        "requiredInput": "L'input richiesto \"{{name}}\" deve essere collegato o avere un valore."
       }
     },
     "usage": {

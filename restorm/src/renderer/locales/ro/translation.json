@@ -937,7 +937,7 @@
       },
       "runScenario": {
         "missing": "Scenariul asociat nu mai există.",
-        "requiredInput": "Intrarea obligatorie „{{name}}” trebuie conectată la o sursă."
+        "requiredInput": "Intrarea necesară „{{name}}\" trebuie conectată sau să primească o valoare."
       }
     },
     "usage": {

@@ -936,7 +936,7 @@
       },
       "runScenario": {
         "missing": "Das verknüpfte Szenario existiert nicht mehr.",
-        "requiredInput": "Die erforderliche Eingabe „{{name}}“ muss mit einer Quelle verbunden sein."
+        "requiredInput": "Die erforderliche Eingabe „{{name}}\" muss verbunden werden oder einen Wert erhalten."
       }
     },
     "usage": {

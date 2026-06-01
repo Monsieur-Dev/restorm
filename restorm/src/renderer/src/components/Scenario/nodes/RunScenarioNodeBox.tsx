@@ -6,6 +6,26 @@ import { Badge } from '../../common/Badge'
 import { useScenarioBoundResolver } from '../scenarioBoundResolver'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { deriveRunScenarioPorts } from '../../../../../shared/scenarioNodePorts'
+import { readInputParams } from '../../../../../shared/scenarioInputParams'
+import { TypedValueField } from '../../TypedValueField'
+import { resolveValueTypeKind, type ValueTypeKind } from '../../TypedValueField/castValue'
+import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroups'
+import { normalizeValueType } from '../../../utils/normalizeValueType'
+import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
+
+/** The literal value kinds (variable / environment are gated by the dedicated
+ * props, not `excludeTypes`). Bounding a field to ONE kind excludes the rest. */
+const LITERAL_VALUE_KINDS: ValueTypeKind[] = ['string', 'secret', 'number', 'dateTime', 'color', 'expression', 'boolean', 'enum', 'enumList', 'customList', 'customListMulti']
+
+/** Lock a value field to a single declared kind — exclude every other literal,
+ * and only enable the variable / environment menus when that IS the kind. */
+function boundFieldProps(kind: ValueTypeKind): { excludeTypes: ValueTypeKind[]; allowEnvironment: boolean; allowAllVariables: boolean } {
+  return {
+    excludeTypes: LITERAL_VALUE_KINDS.filter((k) => k !== kind),
+    allowEnvironment: kind === 'environment',
+    allowAllVariables: kind === 'variable'
+  }
+}
 
 /** Stale-port label: a warning glyph + the vanished param/output name. */
 const OrphanLabel: React.FC<{ name: string; title: string }> = ({ name, title }) => (
@@ -36,17 +56,39 @@ function useConnectedHandles(id: string, handleType: 'target' | 'source'): Set<s
 export const RunScenarioNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
   const { t } = useTranslation()
   const resolve = useScenarioBoundResolver()
+  const valueTypeGroups = useAllEnvValueTypeGroups()
   const scenarioId = typeof data.config?.['scenarioId'] === 'string' ? data.config['scenarioId'] : undefined
   const item = scenarioId && resolve ? resolve(scenarioId) : null
   const scenario = item && isScenario(item) ? item : null
+
+  // Each sub-scenario param's declared typed-value (by name), so a call-site
+  // input can offer a value editor bounded to that exact type (an Environment
+  // param → the env picker, a colour param → the colour picker, …). Inline
+  // values entered here persist under `config.paramValues[<name>]`.
+  const paramTypeByName = useMemo(() => {
+    const m = new Map<string, unknown>()
+    if (scenario) {
+      for (const node of scenario.nodes) {
+        if (node.kind !== 'input') continue
+        for (const p of readInputParams(node.config)) {
+          const name = p.name.trim()
+          if (name && !m.has(name)) m.set(name, p.valueType)
+        }
+      }
+    }
+    return m
+  }, [scenario])
+  const paramValues = (data.config?.['paramValues'] as Record<string, unknown> | undefined) ?? {}
 
   const fallbackLabel = typeof data.config?.['label'] === 'string' ? data.config['label'] : undefined
   const title = scenario?.name ?? fallbackLabel
   const headerIcon = scenario ? <Badge type="SCENARIO" /> : undefined
 
   // Ports derived from the sub-scenario's input / output nodes (shared with the
-  // MCP authoring path, so both agree on the exact port ids).
-  const derived = deriveRunScenarioPorts(scenario)
+  // MCP authoring path, so both agree on the exact port ids). Memoised so an
+  // unrelated re-render doesn't rebuild the port arrays (a box with many params
+  // re-measures + tells React Flow to recompute handles on every change).
+  const derived = useMemo(() => deriveRunScenarioPorts(scenario), [scenario])
 
   // Incoming / outgoing links whose derived port has since vanished (a param
   // renamed or deleted in the sub-scenario). React Flow drops an edge with no
@@ -76,10 +118,32 @@ export const RunScenarioNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
       )
     })
   }
-  // One input port per named `input` node of the sub-scenario (a required param
-  // shows the red unmet-required anchor until wired).
+  // One input port per named `input` node of the sub-scenario. Unwired, it
+  // offers an inline value editor bounded to the param's declared type; wiring
+  // a data link swaps it for the JSON-path selector (via {@link ScenarioInputCell}).
   for (const port of derived.inputs) {
-    rows.push({ id: port.id, label: port.name, port: { id: port.id, type: 'target', ...(port.required ? { required: true } : {}), ...(port.flow ? { flow: port.flow } : {}) } })
+    const name = port.name
+    const value = normalizeValueType(paramValues[name] ?? paramTypeByName.get(name))
+    const bound = boundFieldProps(resolveValueTypeKind(value))
+    rows.push({
+      id: port.id,
+      label: port.name,
+      port: { id: port.id, type: 'target', ...(port.required ? { required: true } : {}), ...(port.flow ? { flow: port.flow } : {}) },
+      content: (
+        <div className="nodrag scn-stacked-field" onMouseDown={(e) => { e.stopPropagation() }}>
+          <span className="scn-port-label">{port.name}</span>
+          <TypedValueField
+            value={value}
+            onChange={(next) => { data.onSetConfig?.(id, { paramValues: { ...paramValues, [name]: serializeValueForPersistence(next) } }) }}
+            valueTypeGroups={valueTypeGroups}
+            excludeTypes={bound.excludeTypes}
+            {...(bound.allowEnvironment ? { allowEnvironment: true } : {})}
+            {...(bound.allowAllVariables ? { allowAllVariables: true } : {})}
+            dataTestId={`scn-runscenario-${name}`}
+          />
+        </div>
+      )
+    })
   }
   // Stale incoming param ports (red), so the orphaned edge keeps an anchor.
   for (const handleId of orphanInIds) {

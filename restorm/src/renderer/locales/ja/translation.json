@@ -935,7 +935,7 @@
       },
       "runScenario": {
         "missing": "リンクされたシナリオは存在しません。",
-        "requiredInput": "必須入力「{{name}}」はソースに接続する必要があります。"
+        "requiredInput": "必須入力「{{name}}」は接続するか値を指定する必要があります。"
       }
     },
     "usage": {

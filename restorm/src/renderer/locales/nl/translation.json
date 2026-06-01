@@ -936,7 +936,7 @@
       },
       "runScenario": {
         "missing": "Het gekoppelde scenario bestaat niet meer.",
-        "requiredInput": "De vereiste invoer \"{{name}}\" moet aan een bron worden gekoppeld."
+        "requiredInput": "De vereiste invoer \"{{name}}\" moet worden verbonden of een waarde krijgen."
       }
     },
     "usage": {

@@ -1657,9 +1657,12 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
           if (!sub) {
             add(n.id, { code: 'scenario-missing', message: t('scenario.validation.runScenario.missing', 'The bound scenario no longer exists.') })
           } else {
+            // A required param is satisfied by a wired link OR an inline value
+            // entered on the call site (`config.paramValues[<name>]`).
+            const inlineValues = (n.data.config?.['paramValues'] as Record<string, unknown> | undefined) ?? {}
             for (const port of deriveRunScenarioPorts(sub).inputs) {
-              if (port.required && !connectedTargets.has(targetKey(n.id, port.id))) {
-                add(n.id, { code: 'required-input', field: port.id, message: t('scenario.validation.runScenario.requiredInput', 'The required input "{{name}}" must be wired to a source.', { name: port.name }) })
+              if (port.required && !connectedTargets.has(targetKey(n.id, port.id)) && inlineValues[port.name] === undefined) {
+                add(n.id, { code: 'required-input', field: port.id, message: t('scenario.validation.runScenario.requiredInput', 'The required input "{{name}}" must be wired or given a value.', { name: port.name }) })
               }
             }
           }

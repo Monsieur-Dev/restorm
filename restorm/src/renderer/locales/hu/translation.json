@@ -936,7 +936,7 @@
       },
       "runScenario": {
         "missing": "A hozzárendelt forgatókönyv már nem létezik.",
-        "requiredInput": "A(z) „{{name}}” kötelező bemenetet egy forráshoz kell kötni."
+        "requiredInput": "A kötelező bemenetet „{{name}}\" össze kell kötni vagy értéket kell adni neki."
       }
     },
     "usage": {
