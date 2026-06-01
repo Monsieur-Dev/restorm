@@ -6,16 +6,35 @@
 
 import Handlebars from 'handlebars'
 import type { NodeExecutor } from '../types'
-import { literalConfigItems, concreteValue, applyListOp } from '../../../shared/utils/scenarioStaticPreview'
+import { literalConfigItems, applyListOp } from '../../../shared/utils/scenarioStaticPreview'
 import { compareValues, resolveOperand } from '../conditionEval'
 
-/** Arithmetic node: `op(a, b)` with op from config. */
+/** The arithmetic operator toggle persists its SYMBOL vocabulary (`+ − × ÷ %`,
+ * with `−` the Unicode minus U+2212, `×` U+00D7, `÷` U+00F7); the executor
+ * speaks canonical names. Map both (plus ASCII fallbacks) so the persisted
+ * symbol drives the right operation instead of silently defaulting to add. */
+const ARITH_OP_ALIASES: Record<string, 'add' | 'sub' | 'mul' | 'div' | 'mod' | 'pow'> = {
+  '+': 'add', add: 'add',
+  '−': 'sub', '-': 'sub', sub: 'sub',
+  '×': 'mul', '*': 'mul', mul: 'mul',
+  '÷': 'div', '/': 'div', div: 'div',
+  '%': 'mod', mod: 'mod',
+  '^': 'pow', pow: 'pow'
+}
+
+/** Arithmetic node: `op(a, b)`. The operator comes from `config.operator` (the
+ * toggle's persisted SYMBOL) with `config.op` as a legacy fallback. Operands
+ * come from the wired ports when present, else the box's inline typed-value
+ * config — so `cpt − 1` (a `variable` operand read live from the run store)
+ * works without links, exactly like `comparator` / `if`. */
 export const arithmeticExecutor: NodeExecutor = (act, ctx) => {
-  const cfg = ctx.node.config as { op?: string }
-  const a = toNumber(act.inputs['a'])
-  const b = toNumber(act.inputs['b'])
+  const cfg = ctx.node.config as { op?: string; operator?: string; a?: unknown; b?: unknown }
+  const a = toNumber(resolveOperand(act.inputs['a'], cfg.a, ctx.variables))
+  const b = toNumber(resolveOperand(act.inputs['b'], cfg.b, ctx.variables))
+  const rawOp = cfg.operator ?? cfg.op
+  const op = (rawOp !== undefined ? ARITH_OP_ALIASES[rawOp] : undefined) ?? 'add'
   let value: number
-  switch (cfg.op) {
+  switch (op) {
     case 'add': value = a + b; break
     case 'sub': value = a - b; break
     case 'mul': value = a * b; break
@@ -25,7 +44,6 @@ export const arithmeticExecutor: NodeExecutor = (act, ctx) => {
       break
     case 'mod': value = a % b; break
     case 'pow': value = a ** b; break
-    default: value = a + b; break
   }
   return { outputs: [{ port: 'result', value }] }
 }
@@ -43,11 +61,13 @@ export const comparatorExecutor: NodeExecutor = (act, ctx) => {
 
 /** Boolean node: `op(a, b)` → boolean. */
 export const booleanExecutor: NodeExecutor = (act, ctx) => {
-  const cfg = ctx.node.config as { op?: string }
+  const cfg = ctx.node.config as { op?: string; operator?: string }
   const a = Boolean(act.inputs['a'])
   const b = Boolean(act.inputs['b'])
   let value: boolean
-  switch (cfg.op) {
+  // The toggle persists `operator` with the uppercase label (`AND`/`OR`/`XOR`);
+  // accept that, the legacy `op`, and any case.
+  switch ((cfg.operator ?? cfg.op ?? '').toLowerCase()) {
     case 'and': value = a && b; break
     case 'or': value = a || b; break
     case 'xor': value = a !== b; break
@@ -123,7 +143,9 @@ export const setVariableExecutor: NodeExecutor = (act, ctx) => {
   const name = cfg.name ?? ''
   const value = act.inputs['value']
   if (name) ctx.variables.set(name, value)
-  return { outputs: [{ port: 'event', value }] }
+  // No `event` output any more — completion is signalled by the universal
+  // `Done` port (driven by the scheduler when the box's sub-graph drains).
+  return { outputs: [] }
 }
 
 export const getVariableExecutor: NodeExecutor = (_act, ctx) => {
@@ -144,13 +166,13 @@ export const objectExecutor: NodeExecutor = (act) => {
  * through so the chain can continue. */
 export const logExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { level?: 'debug' | 'info' | 'warn' | 'error'; message?: unknown; data?: unknown }
-  // `message` (like `data`) prefers a WIRED input over config: when an
-  // upstream node feeds `message`, log that; otherwise resolve the node's
-  // configured ValueType (`{ type, value }`) to its concrete string. Reading
-  // config only would silently drop a wired message and log an empty line.
-  const resolvedMessage = act.inputs['message'] !== undefined ? act.inputs['message'] : concreteValue(cfg.message)
+  // `message` (like `data`) prefers a WIRED input over config; an unwired
+  // operand is resolved through `resolveOperand` so a `variable` type reads
+  // the run's LIVE value — not the `{{cpt}}` template `concreteValue` renders
+  // for the static preview (which would log the literal `{{cpt}}`).
+  const resolvedMessage = resolveOperand(act.inputs['message'], cfg.message, ctx.variables)
   const message = typeof resolvedMessage === 'string' ? resolvedMessage : (resolvedMessage == null ? '' : stringifySafely(resolvedMessage))
-  const data = act.inputs['data'] !== undefined ? act.inputs['data'] : (cfg.data !== undefined ? concreteValue(cfg.data) : undefined)
+  const data = resolveOperand(act.inputs['data'], cfg.data, ctx.variables)
   ctx.log({
     level: cfg.level ?? 'info',
     source: 'user',

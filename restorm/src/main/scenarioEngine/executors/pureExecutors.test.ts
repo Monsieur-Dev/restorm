@@ -101,12 +101,12 @@ describe('transformExecutor', () => {
   })
 })
 
-function runLog(config: Record<string, unknown>, inputs: Record<string, unknown>): { message: unknown; level: unknown; data: unknown } {
+function runLog(config: Record<string, unknown>, inputs: Record<string, unknown>, variables = new Map<string, unknown>()): { message: unknown; level: unknown; data: unknown } {
   const logged: { message: unknown; level: unknown; data: unknown }[] = []
   const act = { nodeId: 'l', kind: 'log', scope: [], inputs } as never
   const ctx = {
     node: { id: 'l', kind: 'log', config, inputs: [], outputs: [], position: { x: 0, y: 0 } },
-    variables: new Map<string, unknown>(),
+    variables,
     log: (e: { message: unknown; level: unknown; data: unknown }) => { logged.push(e) }
   } as never
   void logExecutor(act, ctx)
@@ -123,6 +123,18 @@ describe('logExecutor', () => {
   it('falls back to the configured message value-object when unwired', () => {
     const entry = runLog({ message: { type: 'string', value: 'hi' } }, {})
     expect(entry.message).toBe('hi')
+  })
+
+  it('resolves a `variable` data operand to the live value (not the `{{cpt}}` template)', () => {
+    // A variable in the log `data` must show the run value, not the raw
+    // Handlebars template `concreteValue` renders for the static preview.
+    const entry = runLog({ message: { type: 'string', value: 'cpt' }, data: { type: 'variable', value: 'cpt' } }, {}, new Map([['cpt', 7]]))
+    expect(entry.data).toBe(7)
+  })
+
+  it('resolves a `variable` message operand to the live value', () => {
+    const entry = runLog({ message: { type: 'variable', value: 'cpt' } }, {}, new Map([['cpt', 'Rouge']]))
+    expect(entry.message).toBe('Rouge')
   })
 })
 
@@ -162,8 +174,9 @@ describe('setVariable / getVariable', () => {
   it('writes then reads the run variable store by name', () => {
     const vars = new Map<string, unknown>()
     const set = runPure(setVariableExecutor, { name: 'hp' }, { value: 42 }, vars)
-    // The write emits a passthrough signal on `event` and persists the value.
-    expect(set.outputs).toEqual([{ port: 'event', value: 42 }])
+    // Persists the value; emits no port (the old `event` signal was removed —
+    // completion chains via the universal `Done` port).
+    expect(set.outputs).toEqual([])
     expect(vars.get('hp')).toBe(42)
 
     const get = runPure(getVariableExecutor, { name: 'hp' }, {}, vars)
@@ -231,6 +244,36 @@ describe('arithmeticExecutor', () => {
   it('coerces string operands to numbers', () => {
     expect(runPure(arithmeticExecutor, { op: 'add' }, { a: '2', b: '5' }).outputs[0]?.value).toBe(7)
   })
+
+  it('resolves inline typed-value config operands when a port is unwired', () => {
+    // The node persists operands as `{ type:'numeric', value }`; an unwired
+    // operand must read them (like comparator / if), not collapse to 0.
+    const out = runPure(arithmeticExecutor, { op: 'add', a: { type: 'numeric', value: 4 }, b: { type: 'numeric', value: 1 } }, {})
+    expect(out.outputs[0]?.value).toBe(5)
+  })
+
+  it('reads a `variable` config operand from the live run store (cpt = cpt + 1)', () => {
+    const vars = new Map<string, unknown>([['cpt', 2]])
+    const out = runPure(arithmeticExecutor, { op: 'add', a: { type: 'variable', value: 'cpt' }, b: { type: 'numeric', value: 1 } }, {}, vars)
+    expect(out.outputs[0]?.value).toBe(3)
+  })
+
+  it('lets a wired port override the inline config operand', () => {
+    const out = runPure(arithmeticExecutor, { op: 'add', a: { type: 'numeric', value: 99 }, b: { type: 'numeric', value: 1 } }, { a: 4 })
+    expect(out.outputs[0]?.value).toBe(5)
+  })
+
+  it('honours the toggle SYMBOL operator persisted under `operator` (cpt − 1 subtracts, not adds)', () => {
+    // The node box persists the operator as the toggle symbol (`+ − × ÷ %`) in
+    // `config.operator` — NOT the canonical `op` name. Reading only `op` made
+    // every operation fall through to the `add` default (so `cpt − 1` did
+    // `cpt + 1`). Each symbol must map to its operation.
+    expect(runPure(arithmeticExecutor, { operator: '−' }, { a: 5, b: 1 }).outputs[0]?.value).toBe(4)
+    expect(runPure(arithmeticExecutor, { operator: '+' }, { a: 5, b: 1 }).outputs[0]?.value).toBe(6)
+    expect(runPure(arithmeticExecutor, { operator: '×' }, { a: 5, b: 3 }).outputs[0]?.value).toBe(15)
+    expect(runPure(arithmeticExecutor, { operator: '÷' }, { a: 6, b: 2 }).outputs[0]?.value).toBe(3)
+    expect(runPure(arithmeticExecutor, { operator: '%' }, { a: 7, b: 3 }).outputs[0]?.value).toBe(1)
+  })
 })
 
 describe('booleanExecutor', () => {
@@ -239,5 +282,14 @@ describe('booleanExecutor', () => {
     expect(runPure(booleanExecutor, { op: 'or' }, { a: true, b: false }).outputs[0]?.value).toBe(true)
     expect(runPure(booleanExecutor, { op: 'xor' }, { a: true, b: true }).outputs[0]?.value).toBe(false)
     expect(runPure(booleanExecutor, { op: 'not' }, { a: false }).outputs[0]?.value).toBe(true)
+  })
+
+  it('honours the toggle value persisted under `operator` (AND/OR/XOR), case-insensitively', () => {
+    // The node box persists the toggle as `operator` with the uppercase label
+    // (`AND`/`OR`/`XOR`) — reading only lowercase `op` made every boolean
+    // default to AND.
+    expect(runPure(booleanExecutor, { operator: 'OR' }, { a: true, b: false }).outputs[0]?.value).toBe(true)
+    expect(runPure(booleanExecutor, { operator: 'XOR' }, { a: true, b: true }).outputs[0]?.value).toBe(false)
+    expect(runPure(booleanExecutor, { operator: 'AND' }, { a: true, b: false }).outputs[0]?.value).toBe(false)
   })
 })
