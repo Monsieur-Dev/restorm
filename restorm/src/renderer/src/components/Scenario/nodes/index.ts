@@ -1,4 +1,4 @@
-import { createElement, type FC } from 'react'
+import { createElement, memo, type FC } from 'react'
 import type { NodeProps } from '@xyflow/react'
 import type { ScenarioNodeKind } from '../../../../../shared/types/collections'
 import { type ScenarioNodeBoxType } from './ScenarioNodeBoxBase'
@@ -83,7 +83,14 @@ const UnknownNodeBox: NodeBoxComponent = (props) =>
     createElement('div', { className: 'scn-node-header' }, `Unknown node: ${props.data.kind}`)
   )
 
-export const ScenarioNodeView: NodeBoxComponent = (props) => {
+// `memo` with a custom compare: a scenario box only renders from `id`, `data`
+// and `selected` — never its position. React Flow re-renders the dragged node's
+// component on every pointer move (new `positionAbsoluteX/Y`, `dragging`), but
+// the box CONTENT is position-independent (React Flow moves it via the wrapper
+// transform). Skipping those prop changes means dragging a box re-renders no box
+// at all — the move is pure CSS transform. Only a real data/selection change
+// re-renders the box.
+const ScenarioNodeViewInner: NodeBoxComponent = (props) => {
   // The map is exhaustive over known kinds at the type level, but on-disk data
   // can carry a kind this build no longer knows — so treat the lookup as
   // possibly-undefined and fall back to the inert placeholder.
@@ -93,3 +100,7 @@ export const ScenarioNodeView: NodeBoxComponent = (props) => {
   const Component = (SCENARIO_NODE_COMPONENTS as Partial<Record<ScenarioNodeKind, NodeBoxComponent>>)[props.data.kind]
   return createElement(Component ?? UnknownNodeBox, props)
 }
+export const ScenarioNodeView: NodeBoxComponent = memo(
+  ScenarioNodeViewInner,
+  (prev, next) => prev.id === next.id && prev.data === next.data && prev.selected === next.selected
+)

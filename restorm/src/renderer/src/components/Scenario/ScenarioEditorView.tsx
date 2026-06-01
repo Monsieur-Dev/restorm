@@ -7,6 +7,7 @@ import {
   useNodesState,
   useEdgesState,
   useReactFlow,
+  useUpdateNodeInternals,
   addEdge,
   type Node,
   type Edge,
@@ -14,7 +15,8 @@ import {
   type NodeChange,
   type EdgeChange,
   type OnConnectStart,
-  type OnConnectEnd
+  type OnConnectEnd,
+  type Viewport
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { useTranslation } from 'react-i18next'
@@ -46,9 +48,10 @@ import { SCENARIO_ADD_REQUEST_GROUPS, SCENARIO_ADD_SCENARIO_ENTRY, scenarioAddIc
 import type { AddChildKind } from '../MainView/Sidebar/contextMenuBuilder'
 import type { TFunction } from 'i18next'
 import { ScenarioGraphPreview } from '../MainView/Titlebar/ScenarioGraphPreview'
-import { validateScenarioGraph, targetKey, type ScenarioNodeError, type ScenarioDataLink } from '../../../../shared/scenarioValidation'
+import { validateScenarioGraph, targetKey, type ScenarioNodeError, type ScenarioDataLink, type ValidationNode } from '../../../../shared/scenarioValidation'
 import { readOutputDecls } from '../../../../shared/scenarioOutputDecls'
 import { ScenarioErrorsContext } from './scenarioErrorsContext'
+import { ScenarioInternalsContext } from './scenarioInternalsContext'
 import { ScenarioInspectorPanel, type InspectorPreviewNode } from './ScenarioInspectorPanel'
 import { useScenarioEngine } from '../../hooks/useScenarioEngine'
 import { ScenarioInputPrompt } from './ScenarioInputPrompt'
@@ -107,6 +110,78 @@ const nodeTypes = { scenarioNode: ScenarioNodeView }
 const edgeTypes = { default: ScenarioDebugBezierEdge }
 
 const containerStyle: CSSProperties = { width: '100%', height: '100%', position: 'relative' }
+
+// React Flow syncs these props into its internal store; passing a fresh
+// array/object literal on every editor render (which happens on EVERY drag
+// tick, via `setNodes`) churns the store and cascades a re-render into every
+// node — turning one box move into "re-render all boxes" each pointer move.
+// Hoisting the stable values to module scope keeps their identity constant.
+const PAN_ON_DRAG = [1]
+const MULTI_SELECTION_KEYS = ['Control', 'Meta']
+const DELETE_KEYS = ['Delete', 'Backspace']
+const PRO_OPTIONS = { hideAttribution: true }
+
+// Static-preview helpers as pure module functions taking explicit nodes/edges,
+// so they can be called both during render (inspector preview, with the live
+// `nodes` / `edges`) AND from the stable `ScenarioStaticPreviewContext` API
+// (with the post-commit refs) — without the context object closing over the
+// live arrays (which would rebuild it, and re-render every box, each drag tick).
+function collectObjectWiredProps(target: Node<ScenarioNodeBoxData>, nodes: Node<ScenarioNodeBoxData>[], edges: Edge[]): ObjectWiredProperty[] {
+  const out: ObjectWiredProperty[] = []
+  const collect = (previewKey: string, portId: string): void => {
+    const edge = edges.find((e) => e.target === target.id && e.targetHandle === portId)
+    if (!edge) return
+    const source = nodes.find((n) => n.id === edge.source)
+    if (!source || STATIC_PREVIEW_KINDS.has(source.data.kind)) return
+    const sel = typeof edge.data?.['selector'] === 'string' ? edge.data['selector'] : undefined
+    out.push({ name: previewKey, sourceNodeId: source.id, ...(sel !== undefined ? { selector: sel } : {}) })
+  }
+  if (target.data.kind === 'object') {
+    const propsRaw = target.data.config?.['properties']
+    const props = Array.isArray(propsRaw) ? (propsRaw as { id?: unknown; name?: unknown }[]) : []
+    for (const p of props) {
+      if (typeof p.id !== 'string' || typeof p.name !== 'string' || p.name === '') continue
+      collect(p.name, p.id)
+    }
+  } else if (target.data.kind === 'wait') {
+    collect('duration', 'duration')
+  } else if (target.data.kind === 'waitUntil') {
+    collect('until', 'until')
+  } else if (target.data.kind === 'log') {
+    collect('message', 'message')
+    collect('data', 'data')
+  }
+  return out
+}
+
+function computeRunScenarioOutputs(runNode: Node<ScenarioNodeBoxData>, resolveBoundItem: ResolveBoundItem | null | undefined): Record<string, unknown> | null {
+  if (runNode.data.kind !== 'runScenario') return null
+  const runCfg = runNode.data.config ?? {}
+  const subId = typeof runCfg['scenarioId'] === 'string' ? runCfg['scenarioId'] : null
+  if (!subId) return null
+  const subItem = resolveBoundItem?.(subId) ?? null
+  const sub = subItem && isScenario(subItem) ? subItem : null
+  if (!sub) return null
+  const subNodes: StaticPreviewNode[] = sub.nodes.map((n) => ({ id: n.id, kind: n.kind, config: n.config }))
+  const subEdges: StaticPreviewEdge[] = sub.edges.map((e) => ({ from: e.from, to: e.to, ...(e.selector !== undefined ? { selector: e.selector } : {}) }))
+  const out: Record<string, unknown> = {}
+  for (const node of sub.nodes) {
+    if (node.kind !== 'output') continue
+    for (const decl of readOutputDecls(node.config)) {
+      const name = decl.name.trim()
+      if (!name) continue
+      const incoming = subEdges.find((e) => e.to.nodeId === node.id && e.to.portId === decl.id)
+      if (!incoming) { out[name] = null; continue }
+      const source = subNodes.find((n) => n.id === incoming.from.nodeId)
+      if (!source || !STATIC_PREVIEW_KINDS.has(source.kind)) { out[name] = null; continue }
+      const sp = staticScenarioPreview(source, subNodes, subEdges)
+      if (sp === null) { out[name] = null; continue }
+      const v = incoming.selector ? resolveSelectorPath(sp, incoming.selector) : sp
+      out[name] = v === undefined ? null : v
+    }
+  }
+  return out
+}
 const emptyStyle: CSSProperties = {
   position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
   pointerEvents: 'none', opacity: 0.6, fontSize: 13, zIndex: 1
@@ -208,6 +283,7 @@ interface NodeHandlers {
   onToggleCollapse: (id: string) => void
   onHeaderContextMenu: (id: string, x: number, y: number) => void
   onSetConfig: (id: string, config: Record<string, unknown>) => void
+  onToggleBreakpoint: (id: string) => void
   onOpenItem?: (itemId: string) => void
 }
 
@@ -225,6 +301,7 @@ function toFlowNode(n: ScenarioNode, handlers: NodeHandlers): Node<NodeData> {
       onToggleCollapse: handlers.onToggleCollapse,
       onHeaderContextMenu: handlers.onHeaderContextMenu,
       onSetConfig: handlers.onSetConfig,
+      onToggleBreakpoint: handlers.onToggleBreakpoint,
       ...(handlers.onOpenItem ? { onOpenItem: handlers.onOpenItem } : {}),
       ...(n.note !== undefined ? { note: n.note } : {}),
       ...(n.color !== undefined ? { color: n.color } : {}),
@@ -331,6 +408,26 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   const { t } = useTranslation()
   const { screenToFlowPosition, fitView, getNode } = useReactFlow()
   const wrapperRef = useRef<HTMLDivElement>(null)
+
+  // Batched node-internals sync. Each box asks to re-measure its handles after
+  // it has measured its own row centres; a per-id `updateNodeInternals` is an
+  // O(N) full-graph pass, so N boxes settling on open were O(N²) (seconds of
+  // freeze). Coalesce a frame's worth of ids into a single
+  // `updateNodeInternals([...ids])` — one O(N) pass for the whole batch.
+  const updateNodeInternals = useUpdateNodeInternals()
+  const pendingInternals = useRef<Set<string>>(new Set())
+  const internalsRaf = useRef<number | null>(null)
+  const requestNodeInternals = useCallback((nodeId: string) => {
+    pendingInternals.current.add(nodeId)
+    if (internalsRaf.current != null) return
+    internalsRaf.current = requestAnimationFrame(() => {
+      internalsRaf.current = null
+      const ids = [...pendingInternals.current]
+      pendingInternals.current.clear()
+      if (ids.length > 0) updateNodeInternals(ids)
+    })
+  }, [updateNodeInternals])
+  useEffect(() => () => { if (internalsRaf.current != null) cancelAnimationFrame(internalsRaf.current) }, [])
   // Whether THIS editor is the focused workbench tab (vs a background split).
   // Keyboard shortcuts + the Delete key gate on it, so e.g. F5 launches only
   // the active scenario, never every open one.
@@ -341,6 +438,11 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   // selection here, but the `nodes` state does (it drives the inspector
   // preview). Synced via an effect below, once `nodes` is declared.
   const nodesRef = useRef<Node<NodeData>[]>([])
+  // Same idea for edges — the static-preview callbacks (inspector / JSON-path
+  // picker) read the live graph, but they run on user interaction, never during
+  // render, so a post-commit ref keeps the preview API's identity stable instead
+  // of rebuilding it (and re-rendering every box) on every drag tick.
+  const edgesRef = useRef<Edge[]>([])
   // Phase 2 — real engine controller for this scenario tab. Drives the
   // inspector's Run / Pause / Step / Stop buttons + animates nodes /
   // edges off engine events.
@@ -539,6 +641,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   // the latest nodes + their selection.
   useEffect(() => { nodesRef.current = nodes }, [nodes])
   const [edges, setEdges, onEdgesChange] = useEdgesState([] as Edge[])
+  useEffect(() => { edgesRef.current = edges }, [edges])
   const [palette, setPalette] = useState<{ x: number; y: number; flow: { x: number; y: number } } | null>(null)
   const [nodeMenu, setNodeMenu] = useState<{ nodeId: string; x: number; y: number } | null>(null)
   // Bulk menu for a MULTI-selection right-click (change colour / delete), and
@@ -648,6 +751,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   // `transform`, …) shows its tree immediately — no "run the source" detour.
   const staticPreviewApi = useMemo<ScenarioStaticPreviewApi>(() => ({
     getPreview: (sourceNodeId: string) => {
+      const nodes = nodesRef.current, edges = edgesRef.current
       const src = nodes.find((n) => n.id === sourceNodeId)
       if (!src) return null
       const staticEdges = edges.flatMap((e) => {
@@ -662,40 +766,11 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       )
     },
     getObjectWiredProperties: (nodeId: string) => {
-      // Return every (preview-key, sourceId, selector) tuple the inspector
-      // needs to fetch + inject into the assembled preview, so the user sees
-      // the real value instead of a `null` placeholder. Covers:
-      //   • `object` — one entry per property whose source isn't static.
-      //   • `wait` / `waitUntil` — single entry on the data input.
-      const target = nodes.find((n) => n.id === nodeId)
-      if (!target) return []
-      const out: ObjectWiredProperty[] = []
-      const collect = (previewKey: string, portId: string): void => {
-        const edge = edges.find((e) => e.target === nodeId && e.targetHandle === portId)
-        if (!edge) return
-        const source = nodes.find((n) => n.id === edge.source)
-        if (!source || STATIC_PREVIEW_KINDS.has(source.data.kind)) return
-        const sel = typeof edge.data?.['selector'] === 'string' ? edge.data['selector'] : undefined
-        out.push({ name: previewKey, sourceNodeId: source.id, ...(sel !== undefined ? { selector: sel } : {}) })
-      }
-      if (target.data.kind === 'object') {
-        const propsRaw = target.data.config?.['properties']
-        const props = Array.isArray(propsRaw) ? (propsRaw as { id?: unknown; name?: unknown }[]) : []
-        for (const p of props) {
-          if (typeof p.id !== 'string' || typeof p.name !== 'string' || p.name === '') continue
-          collect(p.name, p.id)
-        }
-      } else if (target.data.kind === 'wait') {
-        collect('duration', 'duration')
-      } else if (target.data.kind === 'waitUntil') {
-        collect('until', 'until')
-      } else if (target.data.kind === 'log') {
-        collect('message', 'message')
-        collect('data', 'data')
-      }
-      return out
+      const target = nodesRef.current.find((n) => n.id === nodeId)
+      return target ? collectObjectWiredProps(target, nodesRef.current, edgesRef.current) : []
     },
     getListItemShape: (listNodeId: string) => {
+      const nodes = nodesRef.current, edges = edgesRef.current
       const target = nodes.find((n) => n.id === listNodeId)
       if (!target) return null
       const cfg = target.data.config ?? {}
@@ -712,42 +787,13 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       return first as Record<string, unknown>
     },
     getRunScenarioOutputs: (runScenarioNodeId: string) => {
-      // Resolve the bound sub-scenario, then for each Output node compute
-      // its value via the static-preview machinery applied to the
-      // sub-scenario's own nodes + edges. Sources without a static preview
-      // (httpRequest, …) leave the slot at `null`; the user runs the box to
-      // see actuals.
-      const runNode = nodes.find((n) => n.id === runScenarioNodeId)
-      if (runNode?.data.kind !== 'runScenario') return null
-      const runCfg = runNode.data.config ?? {}
-      const subId = typeof runCfg['scenarioId'] === 'string' ? runCfg['scenarioId'] : null
-      if (!subId) return null
-      const subItem = resolveBoundItem?.(subId) ?? null
-      const sub = subItem && isScenario(subItem) ? subItem : null
-      if (!sub) return null
-      const subNodes: StaticPreviewNode[] = sub.nodes.map((n) => ({ id: n.id, kind: n.kind, config: n.config }))
-      const subEdges: StaticPreviewEdge[] = sub.edges.map((e) => ({ from: e.from, to: e.to, ...(e.selector !== undefined ? { selector: e.selector } : {}) }))
-      const out: Record<string, unknown> = {}
-      for (const node of sub.nodes) {
-        if (node.kind !== 'output') continue
-        // An output node declares MANY named outputs — each wired through its
-        // OWN value port (id = the decl id). Preview every one.
-        for (const decl of readOutputDecls(node.config)) {
-          const name = decl.name.trim()
-          if (!name) continue
-          const incoming = subEdges.find((e) => e.to.nodeId === node.id && e.to.portId === decl.id)
-          if (!incoming) { out[name] = null; continue }
-          const source = subNodes.find((n) => n.id === incoming.from.nodeId)
-          if (!source || !STATIC_PREVIEW_KINDS.has(source.kind)) { out[name] = null; continue }
-          const sp = staticScenarioPreview(source, subNodes, subEdges)
-          if (sp === null) { out[name] = null; continue }
-          const v = incoming.selector ? resolveSelectorPath(sp, incoming.selector) : sp
-          out[name] = v === undefined ? null : v
-        }
-      }
-      return out
+      const runNode = nodesRef.current.find((n) => n.id === runScenarioNodeId)
+      return runNode ? computeRunScenarioOutputs(runNode, resolveBoundItem) : null
     }
-  }), [nodes, edges, resolveBoundItem])
+    // Reads live `nodes` / `edges` via refs inside the callbacks (they fire on
+    // user interaction, not render), so this API's identity stays stable across
+    // drag ticks — only `resolveBoundItem` actually parameterizes it.
+  }), [resolveBoundItem])
 
   // Resolve a scenario reference (a runScenario's sub-scenario) to derive its
   // ports — for orphan-edge detection and the required-input validity count.
@@ -934,8 +980,8 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     })
   }, [setNodes, setEdges, persist])
 
-  const handlers = useRef<NodeHandlers>({ scenarioId: scenario.id, onToggleCollapse, onHeaderContextMenu, onSetConfig: setNodeConfig, ...(onOpenItem ? { onOpenItem } : {}) })
-  useEffect(() => { handlers.current = { scenarioId: scenario.id, onToggleCollapse, onHeaderContextMenu, onSetConfig: setNodeConfig, ...(onOpenItem ? { onOpenItem } : {}) } }, [scenario.id, onToggleCollapse, onHeaderContextMenu, setNodeConfig, onOpenItem])
+  const handlers = useRef<NodeHandlers>({ scenarioId: scenario.id, onToggleCollapse, onHeaderContextMenu, onSetConfig: setNodeConfig, onToggleBreakpoint, ...(onOpenItem ? { onOpenItem } : {}) })
+  useEffect(() => { handlers.current = { scenarioId: scenario.id, onToggleCollapse, onHeaderContextMenu, onSetConfig: setNodeConfig, onToggleBreakpoint, ...(onOpenItem ? { onOpenItem } : {}) } }, [scenario.id, onToggleCollapse, onHeaderContextMenu, setNodeConfig, onToggleBreakpoint, onOpenItem])
 
   // Seed from the scenario only when the open scenario changes (tab switch).
   // The guard makes our own persist writes (which replace `scenario.nodes`)
@@ -1599,25 +1645,30 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   // Incoming data links (value/both output → data input) with their JSON-path
   // selector — feeds the empty/malformed-path validation rule. A runScenario's
   // outputs are derived, so merge them when classifying the source flow.
+  // Node lookup from the persisted `scenario.nodes` (stable mid-drag), NOT the
+  // live React Flow `nodes` — dragging a box gives `nodes` a fresh array each
+  // tick, and this memo's output feeds `nodeErrors` → the error context → every
+  // box. Link-ness depends only on kind / ports / config, never position.
   const dataLinks = useMemo<ScenarioDataLink[]>(() => {
+    const byId = new Map(scenario.nodes.map((n) => [n.id, n]))
     const out: ScenarioDataLink[] = []
     for (const e of edges) {
       if (!e.source || !e.target || !e.sourceHandle || !e.targetHandle) continue
-      const src = nodes.find((n) => n.id === e.source)
-      const tgt = nodes.find((n) => n.id === e.target)
+      const src = byId.get(e.source)
+      const tgt = byId.get(e.target)
       if (!src || !tgt) continue
       // Object property inputs keep their own value field (no JSON-path
       // selector), so the empty/malformed-path rule doesn't apply to them.
-      if (tgt.data.kind === 'object') continue
-      const srcDerived = derivedPortsOf(src.data)?.outputs ?? []
-      const outFlow = outputPortFlow([...src.data.outputs, ...srcDerived], e.sourceHandle, src.data.kind)
-      const inFlow = inputPortFlow(tgt.data.inputs, e.targetHandle, tgt.data.kind)
+      if (tgt.kind === 'object') continue
+      const srcDerived = derivedPortsOf({ kind: src.kind, config: src.config })?.outputs ?? []
+      const outFlow = outputPortFlow([...src.outputs, ...srcDerived], e.sourceHandle, src.kind)
+      const inFlow = inputPortFlow(tgt.inputs, e.targetHandle, tgt.kind)
       if (!isDataLink(inFlow, outFlow)) continue
       const selector = typeof e.data?.['selector'] === 'string' ? e.data['selector'] : undefined
       out.push({ targetNodeId: e.target, targetPort: e.targetHandle, selector })
     }
     return out
-  }, [edges, nodes, derivedPortsOf])
+  }, [edges, scenario.nodes, derivedPortsOf])
 
   // Wired input ports (any incoming edge), keyed for the "input must be
   // connected" checks (e.g. an Output's `value`).
@@ -1633,25 +1684,38 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   // rules; a second pass adds the resolver-dependent ones (a bound request /
   // scenario that's unset or deleted, and a runScenario's required sub-scenario
   // inputs left unwired) which need the tree, not just the node config.
+  // Validation + the error context read each node's id / kind / config — never
+  // its x/y. Deriving them from the live React Flow `nodes` re-ran validation on
+  // every drag tick (the moved node's new position makes a fresh `nodes` array)
+  // and handed `ScenarioErrorsContext` a brand-new Map each tick, re-rendering
+  // EVERY box for the whole drag. Derive from the persisted `scenario.nodes`
+  // instead — the upstream source `nodes` is built from, which only changes
+  // when something structural/config is committed (never mid-drag) — so a drag
+  // leaves `validationNodes`, `nodeErrors`, and the context value referentially
+  // stable and no box re-renders while one is being moved.
+  const validationNodes = useMemo<ValidationNode[]>(
+    () => scenario.nodes.map((n) => ({ id: n.id, kind: n.kind, config: n.config })),
+    [scenario.nodes]
+  )
   const nodeErrors = useMemo(() => {
-    const byNode = validateScenarioGraph(nodes.map((n) => ({ id: n.id, kind: n.data.kind, config: n.data.config ?? {} })), dataLinks, connectedTargets, t)
+    const byNode = validateScenarioGraph(validationNodes, dataLinks, connectedTargets, t)
     const add = (id: string, error: ScenarioNodeError): void => {
       const list = byNode.get(id)
       if (list) list.push(error)
       else byNode.set(id, [error])
     }
-    for (const n of nodes) {
+    for (const n of validationNodes) {
       // A request / runScenario box is always created bound (palette or drag),
       // so an *unbound* box can't occur — only a *deleted* binding can, which
       // we flag as a safety net (incoherent state from an external delete).
-      if (n.data.kind === 'httpRequest') {
-        const requestId = typeof n.data.config?.['requestId'] === 'string' ? n.data.config['requestId'] : ''
+      if (n.kind === 'httpRequest') {
+        const requestId = typeof n.config['requestId'] === 'string' ? n.config['requestId'] : ''
         if (requestId) {
           const item = resolveBoundItem?.(requestId) ?? null
           if (!item || !isRequest(item)) add(n.id, { code: 'request-missing', message: t('scenario.validation.request.missing', 'The bound request no longer exists.') })
         }
-      } else if (n.data.kind === 'runScenario') {
-        const scenarioId = typeof n.data.config?.['scenarioId'] === 'string' ? n.data.config['scenarioId'] : ''
+      } else if (n.kind === 'runScenario') {
+        const scenarioId = typeof n.config['scenarioId'] === 'string' ? n.config['scenarioId'] : ''
         if (scenarioId) {
           const sub = resolveScenario(scenarioId)
           if (!sub) {
@@ -1659,7 +1723,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
           } else {
             // A required param is satisfied by a wired link OR an inline value
             // entered on the call site (`config.paramValues[<name>]`).
-            const inlineValues = (n.data.config?.['paramValues'] as Record<string, unknown> | undefined) ?? {}
+            const inlineValues = (n.config['paramValues'] as Record<string, unknown> | undefined) ?? {}
             for (const port of deriveRunScenarioPorts(sub).inputs) {
               if (port.required && !connectedTargets.has(targetKey(n.id, port.id)) && inlineValues[port.name] === undefined) {
                 add(n.id, { code: 'required-input', field: port.id, message: t('scenario.validation.runScenario.requiredInput', 'The required input "{{name}}" must be wired or given a value.', { name: port.name }) })
@@ -1670,16 +1734,16 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       }
     }
     return byNode
-  }, [nodes, dataLinks, connectedTargets, resolveBoundItem, resolveScenario, t])
+  }, [validationNodes, dataLinks, connectedTargets, resolveBoundItem, resolveScenario, t])
   // Flat list of every box error, with the box's display title, for the panel.
   const workflowErrors = useMemo<{ nodeId: string; title: string; error: ScenarioNodeError }[]>(() => {
-    const meta = new Map(nodes.map((n) => [n.id, t(scenarioNodeMeta(n.data.kind).labelKey, scenarioNodeMeta(n.data.kind).defaultLabel)]))
+    const meta = new Map(validationNodes.map((n) => [n.id, t(scenarioNodeMeta(n.kind).labelKey, scenarioNodeMeta(n.kind).defaultLabel)]))
     const out: { nodeId: string; title: string; error: ScenarioNodeError }[] = []
     for (const [nodeId, errs] of nodeErrors) {
       for (const error of errs) out.push({ nodeId, title: meta.get(nodeId) ?? nodeId, error })
     }
     return out
-  }, [nodeErrors, nodes, t])
+  }, [nodeErrors, validationNodes, t])
 
   // The single selected box, previewed in the inspector panel (name, note, and
   // each output's value). Null when zero or several boxes are selected.
@@ -1725,7 +1789,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     // see across scenarios, so the editor branches it through a dedicated
     // context API method.
     const staticData = n.data.kind === 'runScenario'
-      ? staticPreviewApi.getRunScenarioOutputs(n.id)
+      ? computeRunScenarioOutputs(n, resolveBoundItem)
       : staticScenarioPreview(
           { id: n.id, kind: n.data.kind, config: cfg },
           nodes.map((x) => ({ id: x.id, kind: x.data.kind, config: x.data.config ?? {} })),
@@ -1733,7 +1797,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         )
     // For an object / wait / waitUntil, also surface the wired non-static
     // properties so the inspector can fetch + inject (cf. wiredFetches).
-    const wiredFetches = staticPreviewApi.getObjectWiredProperties(n.id)
+    const wiredFetches = collectObjectWiredProps(n, nodes, edges)
     // For a list-op box (map / filter / aggregate) whose `items` come from a
     // non-static source, hand the inspector a recipe: where to fetch the
     // items + how to apply the box's operation once they're resolved.
@@ -1791,7 +1855,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       ...(syntheticPreview ? { syntheticPreview } : {}),
       ...(openItemId && openItemKind ? { openItemId, openItemKind } : {})
     }
-  }, [nodes, edges, t, derivedPortsOf, staticPreviewApi, resolveBoundItem, resolveSyntheticPreview])
+  }, [nodes, edges, t, derivedPortsOf, resolveBoundItem, resolveSyntheticPreview])
 
   // Edges propagated to React Flow with a transient `data.debugToken` mirroring
   // any edge that received a token bump from the engine (`engine.edgeTokens`).
@@ -1844,13 +1908,19 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       // Yellow frame: a box completed-while-paused OR the box we're paused right
       // before (breakpoint or step pre-stop). The tooltip is breakpoint-only.
       const want = (showFinished && engine.completedNodeIds.has(n.id)) || engine.pausedAtNodeId === n.id
+      // `onToggleBreakpoint` is NOT compared/injected here: it lives in the base
+      // node data (via the handlers ref, like onSetConfig) so it's already
+      // stable. Injecting it per-render meant the base node (which never carries
+      // it) always failed this check, rebuilding EVERY node's data on every
+      // render — which gave React Flow a fresh node object for all nodes each
+      // drag tick and re-rendered every box. Now only the few nodes whose
+      // breakpoint / finished state actually changed get a new ref.
       const unchanged =
         (n.data.justFinished === true) === want &&
         (n.data.breakpoint === true) === isBp &&
-        (n.data.breakpointPaused === true) === isBpPaused &&
-        n.data.onToggleBreakpoint === onToggleBreakpoint
+        (n.data.breakpointPaused === true) === isBpPaused
       if (unchanged) return n
-      return { ...n, data: { ...n.data, justFinished: want, breakpoint: isBp, breakpointPaused: isBpPaused, onToggleBreakpoint } }
+      return { ...n, data: { ...n.data, justFinished: want, breakpoint: isBp, breakpointPaused: isBpPaused } }
     })
     // Read-only while running: flag each node for the inert-body CSS and drop
     // the config / header-menu writers so no edit can commit even via keyboard.
@@ -1869,7 +1939,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       )
     }
     return mapped
-  }, [nodes, engine.runningNodeIds, engine.completedNodeIds, engine.breakpointNodeId, engine.pausedAtNodeId, engine.state, breakpointIds, onToggleBreakpoint, locked, flash])
+  }, [nodes, engine.runningNodeIds, engine.completedNodeIds, engine.breakpointNodeId, engine.pausedAtNodeId, engine.state, breakpointIds, locked, flash])
 
   // Wire-ports for the link-drag "Add" submenu — the port the link filter
   // computed for the (folded) request / sub-scenario kinds, when each is
@@ -1881,24 +1951,64 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   // Variables in scope — declared by `setVariable` nodes and named `input`/param
   // nodes, each carrying the type it was declared with. Drives the value
   // selector's "Variables" menu (and lets a slot hide incompatible-typed ones).
+  // Derive from the persisted `scenario.nodes` (stable mid-drag), NOT the live
+  // React Flow `nodes`. Variable names/types are position-independent, so keying
+  // on `nodes` recreated this array — hence the ScenarioVariablesContext value —
+  // on every drag tick, re-rendering every box that hosts a TypedValueField.
   const scenarioVariables = useMemo<ScenarioVariable[]>(() => {
     const byName = new Map<string, ScenarioVariable>()
-    for (const node of nodes) {
-      const kind = node.data.kind
+    for (const node of scenario.nodes) {
+      const kind = node.kind
       if (kind !== 'setVariable' && kind !== 'input') continue
-      const config = node.data.config as { name?: unknown; value?: unknown; valueType?: unknown } | undefined
-      const name = config?.name
+      const config = node.config as { name?: unknown; value?: unknown; valueType?: unknown }
+      const name = config.name
       if (typeof name !== 'string' || name.trim() === '') continue
       // setVariable stores the value under `value`; the input/param node under
       // `valueType`. The declared type is that value's kind.
-      const rawValue = kind === 'setVariable' ? config?.value : config?.valueType
+      const rawValue = kind === 'setVariable' ? config.value : config.valueType
       const type = resolveValueTypeKind(normalizeValueType(rawValue))
       byName.set(name, { name, type })
     }
     return [...byName.values()]
-  }, [nodes])
+  }, [scenario.nodes])
+
+  // STABLE React Flow event handlers. React Flow's `NodeRenderer` + `NodeWrapper`
+  // are `memo()`'d and receive `onNodeClick` (and friends) as props; passing a
+  // fresh inline closure on every editor render — which happens on EVERY drag
+  // tick — breaks that memo for ALL nodes, re-rendering every box on each
+  // pointer move. Hoisting these to stable `useCallback`s lets the memo hold so
+  // only the dragged node re-renders. (React Compiler would do this, but it
+  // bails on this large component.)
+  const closeAllMenus = useCallback(() => {
+    setNodeMenu(null); setSelectionMenu(null); setMultiColorPicker(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null)
+  }, [])
+  const onPaneClickStable = useCallback(() => {
+    setPalette(null); setNodeMenu(null); setSelectionMenu(null); setMultiColorPicker(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null)
+    if (linkPaletteJustOpened.current) { linkPaletteJustOpened.current = false } else { setLinkPalette(null) }
+    dismissOffCanvasPopovers()
+  }, [])
+  const onCanvasItemClickStable = useCallback((e: React.MouseEvent) => {
+    if (!isCanvasOriginatedClick(e)) return
+    setNodeMenu(null); setSelectionMenu(null); setMultiColorPicker(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null)
+    dismissOffCanvasPopovers()
+  }, [])
+  const onMoveStartStable = useCallback(() => {
+    setNodeMenu(null); setSelectionMenu(null); setMultiColorPicker(null); setPalette(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null)
+  }, [])
+  const onNodeDragStartStable = useCallback(() => { closeAllMenus() }, [closeAllMenus])
+  const onMoveStable = useCallback((_e: MouseEvent | TouchEvent | null, viewport: Viewport) => {
+    if (projectUuid) setScenarioViewport(projectUuid, scenario.id, viewport)
+  }, [projectUuid, scenario.id])
+  const onSelectionContextMenuStable = useCallback((event: React.MouseEvent, selNodes: Node<NodeData>[]) => {
+    // Right-click on a multi-selection (the box / a selected node's body) → the
+    // bulk menu. The header's own onContextMenu covers header clicks.
+    event.preventDefault()
+    const ids = selNodes.map((n) => n.id)
+    if (ids.length > 1) { setNodeMenu(null); setSelectionMenu({ x: event.clientX, y: event.clientY, nodeIds: ids }) }
+  }, [])
 
   return (
+    <ScenarioInternalsContext.Provider value={requestNodeInternals}>
     <ScenarioBoundResolverContext.Provider value={resolveBoundItem ?? null}>
     <ScenarioRequestEnvContext.Provider value={resolveRequestEnv ?? null}>
     <ScenarioVariablesContext.Provider value={scenarioVariables}>
@@ -1975,6 +2085,10 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         edges={presentationalEdges}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
+        // Only mount + measure the nodes inside the viewport — a scenario box is
+        // a heavy DOM subtree, so rendering the whole graph at once froze the
+        // editor for seconds on a large scenario. Off-screen boxes mount lazily.
+        onlyRenderVisibleElements
         onNodesChange={handleNodesChange}
         onEdgesChange={handleEdgesChange}
         onConnect={onConnect}
@@ -1983,8 +2097,8 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         isValidConnection={validateConnection}
         nodesDraggable={!locked}
         nodesConnectable={!locked}
-        deleteKeyCode={(!locked && isActiveTab) ? ['Delete', 'Backspace'] : null}
-        multiSelectionKeyCode={['Control', 'Meta']}
+        deleteKeyCode={(!locked && isActiveTab) ? DELETE_KEYS : null}
+        multiSelectionKeyCode={MULTI_SELECTION_KEYS}
         // React Flow's default `selectionKeyCode='Shift'` registers a
         // window-level `keydown` listener that calls `event.preventDefault()`
         // on EVERY Shift press (Shift is a modifier, so its internal
@@ -2001,28 +2115,18 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         // single/multi-select still work; right-drag stays the context menu.
         selectionKeyCode={null}
         selectionOnDrag
-        panOnDrag={[1]}
+        panOnDrag={PAN_ON_DRAG}
         onPaneContextMenu={onPaneContextMenu}
         onEdgeContextMenu={onEdgeContextMenu}
-        onSelectionContextMenu={(event, selNodes) => {
-          // Right-click on a multi-selection (the box / a selected node's body)
-          // → the bulk menu. The header's own onContextMenu covers header clicks.
-          event.preventDefault()
-          const ids = selNodes.map((n) => n.id)
-          if (ids.length > 1) { setNodeMenu(null); setSelectionMenu({ x: event.clientX, y: event.clientY, nodeIds: ids }) }
-        }}
-        onPaneClick={() => {
-          setPalette(null); setNodeMenu(null); setSelectionMenu(null); setMultiColorPicker(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null)
-          if (linkPaletteJustOpened.current) { linkPaletteJustOpened.current = false } else { setLinkPalette(null) }
-          dismissOffCanvasPopovers()
-        }}
-        onNodeClick={(e) => { if (!isCanvasOriginatedClick(e)) return; setNodeMenu(null); setSelectionMenu(null); setMultiColorPicker(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null); dismissOffCanvasPopovers() }}
-        onEdgeClick={(e) => { if (!isCanvasOriginatedClick(e)) return; setNodeMenu(null); setSelectionMenu(null); setMultiColorPicker(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null); dismissOffCanvasPopovers() }}
-        onMoveStart={() => { setNodeMenu(null); setSelectionMenu(null); setMultiColorPicker(null); setPalette(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null) }}
-        onMove={(_, viewport) => { if (projectUuid) setScenarioViewport(projectUuid, scenario.id, viewport) }}
-        onNodeDragStart={() => { setNodeMenu(null); setSelectionMenu(null); setMultiColorPicker(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null) }}
+        onSelectionContextMenu={onSelectionContextMenuStable}
+        onPaneClick={onPaneClickStable}
+        onNodeClick={onCanvasItemClickStable}
+        onEdgeClick={onCanvasItemClickStable}
+        onMoveStart={onMoveStartStable}
+        onMove={onMoveStable}
+        onNodeDragStart={onNodeDragStartStable}
         {...(savedViewport ? { defaultViewport: savedViewport } : { fitView: true })}
-        proOptions={{ hideAttribution: true }}
+        proOptions={PRO_OPTIONS}
       >
         {/* Unique pattern id per scenario: React Flow's Background derives its
             SVG <pattern> id from this, and with several scenario tabs mounted
@@ -2289,6 +2393,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     </ScenarioVariablesContext.Provider>
     </ScenarioRequestEnvContext.Provider>
     </ScenarioBoundResolverContext.Provider>
+    </ScenarioInternalsContext.Provider>
   )
 }
 

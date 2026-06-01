@@ -12,7 +12,7 @@
  * `data.debugToken` — this hook flips those in response to incoming events.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 type RunState = 'idle' | 'running' | 'paused' | 'completed' | 'cancelled' | 'failed'
 
@@ -264,8 +264,14 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
         case 'run-completed':
           setState('completed')
           pausedRef.current = false
-          clearBeamTimers()
-          setRunningNodeIds(new Set())
+          // Do NOT force-clear the beams here. Every node that ran already armed
+          // its own min-beam removal timer at `node-completed`, so each beam
+          // stays lit for its MIN_BEAM_MS hold and then finishes the lap it
+          // started (the box drops `running` on the next `animationiteration`).
+          // A fast run fires all its node events plus `run-completed` inside one
+          // React batch — clearing `runningNodeIds` here collapsed that batch to
+          // empty, so no frame ever painted a beam. Leaving the per-node timers
+          // to drain is what makes the orbit visible on an instant run.
           setBreakpointNodeId(null)
           setPausedAtNodeId(null)
           break
@@ -500,5 +506,13 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
 
   const clearRunLog = useCallback((): void => { setRunLog([]) }, [])
 
-  return { state, runId, runningNodeIds, completedNodeIds, breakpointNodeId, pausedAtNodeId, lastStartedNodeId, edgeTokens, pendingInputs, runLog, clearRunLog, start, pause, resume, step, enableDebug, setEngineBreakpoints, stop, resolveUserInput, cancelUserInput }
+  // Memoise the returned facade so its identity only changes when some piece of
+  // engine state actually changes. Consumers (the editor) spread `engine.*` into
+  // many callbacks/derived values; a fresh object every render would make all of
+  // those recompute on every unrelated render (notably each drag tick), which
+  // cascaded a re-render into every scenario box.
+  return useMemo(
+    () => ({ state, runId, runningNodeIds, completedNodeIds, breakpointNodeId, pausedAtNodeId, lastStartedNodeId, edgeTokens, pendingInputs, runLog, clearRunLog, start, pause, resume, step, enableDebug, setEngineBreakpoints, stop, resolveUserInput, cancelUserInput }),
+    [state, runId, runningNodeIds, completedNodeIds, breakpointNodeId, pausedAtNodeId, lastStartedNodeId, edgeTokens, pendingInputs, runLog, clearRunLog, start, pause, resume, step, enableDebug, setEngineBreakpoints, stop, resolveUserInput, cancelUserInput]
+  )
 }
