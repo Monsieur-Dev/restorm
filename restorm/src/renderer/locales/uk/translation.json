@@ -957,6 +957,7 @@
       "stop": "Зупинити",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "Копіювати цей запис",
       "clearLogs": "Очистити журнали",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Показати логи {{level}}",

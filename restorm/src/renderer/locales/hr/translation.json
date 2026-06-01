@@ -956,6 +956,7 @@
       "stop": "Zaustavi",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "Kopiraj ovaj zapis",
       "clearLogs": "Očisti zapise",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Prikaži {{level}} zapise",

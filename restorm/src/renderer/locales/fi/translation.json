@@ -955,6 +955,7 @@
       "stop": "Pysäytä",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "Kopioi tämä loki",
       "clearLogs": "Tyhjennä lokit",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Näytä {{level}}-lokit",

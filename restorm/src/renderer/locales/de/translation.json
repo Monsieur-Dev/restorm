@@ -955,6 +955,7 @@
       "stop": "Stopp",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "Dieses Log kopieren",
       "clearLogs": "Logs löschen",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "{{level}}-Logs anzeigen",

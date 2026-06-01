@@ -19,7 +19,7 @@ import {
 import '@xyflow/react/dist/style.css'
 import { useTranslation } from 'react-i18next'
 import { Button, ContextMenu, Tooltip, ColorPicker, Modal, MarkdownEditor, eventBus, type ContextMenuItem } from 'electron-core-ui/renderer'
-import type { Scenario, ScenarioNode, ScenarioEdge, ScenarioNodeKind } from '../../../../shared/types/collections'
+import type { Scenario, ScenarioNode, ScenarioEdge, ScenarioNodeKind, ScenarioPort } from '../../../../shared/types/collections'
 import { isRequest, isScenario } from '../../../../shared/types/collections'
 import { Badge } from '../common/Badge'
 import { requestBadgeType } from '../../utils/badgeUtils'
@@ -44,10 +44,12 @@ import { linkPaletteEntries } from './scenarioLinkPalette'
 import './scenarioEnvPreview'
 import { SCENARIO_ADD_REQUEST_GROUPS, SCENARIO_ADD_SCENARIO_ENTRY, scenarioAddIcon } from './scenarioChildPalette'
 import type { AddChildKind } from '../MainView/Sidebar/contextMenuBuilder'
+import type { TFunction } from 'i18next'
+import { ScenarioGraphPreview } from '../MainView/Titlebar/ScenarioGraphPreview'
 import { validateScenarioGraph, targetKey, type ScenarioNodeError, type ScenarioDataLink } from '../../../../shared/scenarioValidation'
+import { readOutputDecls } from '../../../../shared/scenarioOutputDecls'
 import { ScenarioErrorsContext } from './scenarioErrorsContext'
 import { ScenarioInspectorPanel, type InspectorPreviewNode } from './ScenarioInspectorPanel'
-import { type LogProvenanceApi } from './ScenarioRunLogView'
 import { useScenarioEngine } from '../../hooks/useScenarioEngine'
 import { ScenarioInputPrompt } from './ScenarioInputPrompt'
 import { ScenarioRunHistoryModal } from './ScenarioRunHistoryModal'
@@ -139,8 +141,67 @@ const PALETTE_ENTRIES: (ScenarioNodeKindMeta | { separator: true })[] = SCENARIO
  * new loop kind joins the submenu automatically. */
 const LOOP_METAS: ScenarioNodeKindMeta[] = SCENARIO_NODE_CATALOGUE.filter((m) => m.category === 'loops')
 
-/** Catalogue meta by kind — label/icon lookup for the filtered link palette. */
-const META_BY_KIND = new Map<ScenarioNodeKind, ScenarioNodeKindMeta>(SCENARIO_NODE_CATALOGUE.map((m) => [m.kind, m]))
+interface PaletteBuildParams {
+  t: TFunction
+  /** True when child request/sub-scenario creation is available. */
+  withAddSubmenu: boolean
+  /** onClick for a plain node kind, or null to omit it (link palette filter). */
+  pickNode: (kind: ScenarioNodeKind) => (() => void) | null
+  /** onClick for a child request-protocol / sub-scenario kind, or null to omit. */
+  pickChild: (kind: string) => (() => void) | null
+}
+
+/** Drop orphan separators (leading, trailing, consecutive) left after filtering. */
+function tidyPaletteSeparators(items: ContextMenuItem[]): ContextMenuItem[] {
+  const out: ContextMenuItem[] = []
+  for (const it of items) {
+    if (it.isSeparator && (out.length === 0 || out[out.length - 1]?.isSeparator)) continue
+    out.push(it)
+  }
+  while (out.length > 0 && out[out.length - 1]?.isSeparator) out.pop()
+  return out
+}
+
+/**
+ * Build the add-node ContextMenu items in the CANONICAL catalogue order, shared
+ * by the canvas palette AND the link-drop palette so both read identically —
+ * request/sub-scenario folded into one "Add" submenu at the httpRequest slot,
+ * the loop kinds into one "Loops" submenu. Unavailable kinds (pick* → null) are
+ * dropped, then the category separators are tidied.
+ */
+function buildScenarioPaletteItems(p: PaletteBuildParams): ContextMenuItem[] {
+  const sep = (id: string): ContextMenuItem => ({ id, label: '', isSeparator: true })
+  const items = PALETTE_ENTRIES.flatMap((e, i): ContextMenuItem[] => {
+    if ('separator' in e) return [sep(`sep-${i}`)]
+    if (p.withAddSubmenu && e.kind === 'runScenario') return [] // folds into "Add"
+    if (p.withAddSubmenu && e.kind === 'httpRequest') {
+      const reqItems = SCENARIO_ADD_REQUEST_GROUPS.flatMap((group, gi): ContextMenuItem[] => {
+        const picked = group.flatMap((c): ContextMenuItem[] => {
+          const cb = p.pickChild(c.kind)
+          return cb ? [{ id: `add-${c.kind}`, label: p.t(c.labelKey, c.defaultLabel), icon: scenarioAddIcon(c.badge), onClick: cb }] : []
+        })
+        return picked.length > 0 ? [...(gi > 0 ? [sep(`add-rsep-${gi}`)] : []), ...picked] : []
+      })
+      const scnCb = p.pickChild(SCENARIO_ADD_SCENARIO_ENTRY.kind)
+      const scnItems: ContextMenuItem[] = scnCb
+        ? [...(reqItems.length > 0 ? [sep('add-scn-sep')] : []), { id: `add-${SCENARIO_ADD_SCENARIO_ENTRY.kind}`, label: p.t(SCENARIO_ADD_SCENARIO_ENTRY.labelKey, SCENARIO_ADD_SCENARIO_ENTRY.defaultLabel), icon: scenarioAddIcon(SCENARIO_ADD_SCENARIO_ENTRY.badge), onClick: scnCb }]
+        : []
+      const sub = [...reqItems, ...scnItems]
+      return sub.length > 0 ? [{ id: 'scenario-add', label: p.t('sidebar.contextMenu.add.title', 'Add'), icon: 'add', items: sub }] : []
+    }
+    if (e.category === 'loops') {
+      if (e.kind !== LOOP_METAS[0]?.kind) return [] // emitted once, at the first loop
+      const loopItems = LOOP_METAS.flatMap((m): ContextMenuItem[] => {
+        const cb = p.pickNode(m.kind)
+        return cb ? [{ id: `loop-${m.kind}`, label: p.t(m.labelKey, m.defaultLabel), icon: m.icon, onClick: cb }] : []
+      })
+      return loopItems.length > 0 ? [{ id: 'scenario-loops', label: p.t('scenario.nodes.loops', 'Loops'), icon: 'sync', items: loopItems }] : []
+    }
+    const cb = p.pickNode(e.kind)
+    return cb ? [{ id: e.kind, label: p.t(e.labelKey, e.defaultLabel), icon: e.icon, onClick: cb }] : []
+  })
+  return tidyPaletteSeparators(items)
+}
 
 interface NodeHandlers {
   scenarioId: string
@@ -298,7 +359,24 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   const [flash, setFlash] = useState<{ nodeId: string; seq: number } | null>(null)
   const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const flashSeqRef = useRef(0)
+  // A read-only preview of a SUB-scenario, popped to the left of a clicked run-
+  // log row that a sub-scenario produced — pan-zoomed + flashing the emitter
+  // box. `token` retriggers the framing/flash when re-clicking the same node.
+  const [subLogPopover, setSubLogPopover] = useState<{ scenario: Scenario; nodeId: string; x: number; y: number; token: number } | null>(null)
+  const subLogTokenRef = useRef(0)
+  const subLogAnchorRef = useRef<HTMLDivElement>(null)
   useEffect(() => () => { if (flashTimerRef.current) clearTimeout(flashTimerRef.current) }, [])
+  // Dismiss the sub-scenario log popover on any pointer-down outside it (a click
+  // on another log row closes this one, then re-opens for the new row). Deferred
+  // a tick so the opening click doesn't immediately close it.
+  useEffect(() => {
+    if (!subLogPopover) return
+    const onDown = (e: MouseEvent): void => {
+      if (!(e.target as HTMLElement | null)?.closest('[data-scn-sublog-popover]')) setSubLogPopover(null)
+    }
+    const id = setTimeout(() => { window.addEventListener('mousedown', onDown) }, 0)
+    return () => { clearTimeout(id); window.removeEventListener('mousedown', onDown) }
+  }, [subLogPopover])
   const focusAndFlashNode = useCallback((nodeId: string): void => {
     // Only act when the node is in THIS scenario's graph. A run-log row can
     // point at a sub-scenario's node (not present here) or a since-deleted
@@ -463,6 +541,11 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   const [edges, setEdges, onEdgesChange] = useEdgesState([] as Edge[])
   const [palette, setPalette] = useState<{ x: number; y: number; flow: { x: number; y: number } } | null>(null)
   const [nodeMenu, setNodeMenu] = useState<{ nodeId: string; x: number; y: number } | null>(null)
+  // Bulk menu for a MULTI-selection right-click (change colour / delete), and
+  // the cursor-anchored colour picker it opens (applied to every selected box).
+  const [selectionMenu, setSelectionMenu] = useState<{ x: number; y: number; nodeIds: string[] } | null>(null)
+  const [multiColorPicker, setMultiColorPicker] = useState<{ x: number; y: number; nodeIds: string[] } | null>(null)
+  const multiColorAnchorRef = useRef<HTMLDivElement>(null)
   const [colorPickerNodeId, setColorPickerNodeId] = useState<string | null>(null)
   // The header element the colour-picker tooltip anchors its beak to.
   const colorTargetRef = useRef<HTMLElement | null>(null)
@@ -647,16 +730,20 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       const out: Record<string, unknown> = {}
       for (const node of sub.nodes) {
         if (node.kind !== 'output') continue
-        const name = typeof node.config['name'] === 'string' ? node.config['name'] : ''
-        if (!name) continue
-        const incoming = subEdges.find((e) => e.to.nodeId === node.id && e.to.portId === 'value')
-        if (!incoming) { out[name] = null; continue }
-        const source = subNodes.find((n) => n.id === incoming.from.nodeId)
-        if (!source || !STATIC_PREVIEW_KINDS.has(source.kind)) { out[name] = null; continue }
-        const sp = staticScenarioPreview(source, subNodes, subEdges)
-        if (sp === null) { out[name] = null; continue }
-        const v = incoming.selector ? resolveSelectorPath(sp, incoming.selector) : sp
-        out[name] = v === undefined ? null : v
+        // An output node declares MANY named outputs — each wired through its
+        // OWN value port (id = the decl id). Preview every one.
+        for (const decl of readOutputDecls(node.config)) {
+          const name = decl.name.trim()
+          if (!name) continue
+          const incoming = subEdges.find((e) => e.to.nodeId === node.id && e.to.portId === decl.id)
+          if (!incoming) { out[name] = null; continue }
+          const source = subNodes.find((n) => n.id === incoming.from.nodeId)
+          if (!source || !STATIC_PREVIEW_KINDS.has(source.kind)) { out[name] = null; continue }
+          const sp = staticScenarioPreview(source, subNodes, subEdges)
+          if (sp === null) { out[name] = null; continue }
+          const v = incoming.selector ? resolveSelectorPath(sp, incoming.selector) : sp
+          out[name] = v === undefined ? null : v
+        }
       }
       return out
     }
@@ -669,16 +756,22 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     return it && isScenario(it) ? it : null
   }, [resolveBoundItem])
 
-  // Provenance link for inspector log rows emitted by a sub-scenario: resolve
-  // the source scenario's current name (null when deleted) + open it on click.
-  const logProvenance = useMemo<LogProvenanceApi | undefined>(() => {
-    if (!onOpenItem) return undefined
-    return {
-      currentScenarioId: scenario.id,
-      resolveName: (sid: string) => resolveScenario(sid)?.name ?? null,
-      open: onOpenItem
+  // A run-log row click. Same-scenario node → pan-zoom + flash it in place.
+  // A node from a SUB-scenario (the entry carries that scenario's id, and it's
+  // not in this graph) → pop a read-only preview of that sub-scenario to the
+  // left of the row, pan-zoomed + flashing the emitter. A since-deleted node /
+  // unresolvable scenario falls through to the in-place attempt (a no-op).
+  const onLogFocus = useCallback((nodeId: string, scenarioId?: string, anchor?: { x: number; y: number }): void => {
+    if (scenarioId !== undefined && scenarioId !== scenario.id && !getNode(nodeId)) {
+      const sub = resolveScenario(scenarioId)
+      if (sub) {
+        subLogTokenRef.current += 1
+        setSubLogPopover({ scenario: sub, nodeId, x: anchor?.x ?? 0, y: anchor?.y ?? 0, token: subLogTokenRef.current })
+        return
+      }
     }
-  }, [scenario.id, resolveScenario, onOpenItem])
+    focusAndFlashNode(nodeId)
+  }, [scenario.id, getNode, resolveScenario, focusAndFlashNode])
 
   // Ports a runScenario node derives from its bound sub-scenario (one per named
   // input/output node, plus a `done` trigger when it returns nothing) — null for
@@ -769,10 +862,28 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
 
   // Right-click on a header: select that node (deselect the rest) AND open
   // the node context menu at the cursor.
+  // Close the cursor-anchored Tooltip popovers (colour pickers, sub-log preview)
+  // — unlike the ContextMenus, which self-dismiss on any outside pointerdown,
+  // these only close on the left-click pane handler, so a right-click that opens
+  // a new menu would otherwise leave them lingering. Each right-click opener
+  // calls this first.
+  const closeOverlays = useCallback((): void => {
+    setMultiColorPicker(null); setColorPickerNodeId(null); setEdgeColorPicker(null); setSubLogPopover(null)
+  }, [])
+
   const onHeaderContextMenu = useCallback((nodeId: string, x: number, y: number) => {
+    closeOverlays()
+    // Right-clicking a box that's part of a MULTI-selection → the bulk menu,
+    // selection preserved (don't collapse it to the one box).
+    const selectedIds = nodesRef.current.filter((n) => n.selected).map((n) => n.id)
+    if (selectedIds.length > 1 && selectedIds.includes(nodeId)) {
+      setNodeMenu(null)
+      setSelectionMenu({ x, y, nodeIds: selectedIds })
+      return
+    }
     setNodes((curr) => curr.map((fn) => (fn.selected === (fn.id === nodeId) ? fn : { ...fn, selected: fn.id === nodeId })))
     setNodeMenu({ nodeId, x, y })
-  }, [setNodes])
+  }, [setNodes, closeOverlays])
 
   // Merge a patch into a node's per-kind config bag; update the live node +
   // the authoritative store + persist. Modeled on `setNodeColor`.
@@ -995,6 +1106,37 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     })
   }, [nodes, edges, derivedPortsOf])
 
+  // The JSON-path selector to seed on a new DATA link (a value/both output into
+  // a data input). Mirrors what the user would otherwise pick: an object-context
+  // input gets the source's single top-level key (or `.`); any other data input
+  // gets the single-deep path (or `.`). Returns undefined when it isn't a data
+  // link (a signal / header wire carries no selectable value). Shared by the
+  // drag-onto-existing-box (`onConnect`) and drag-into-empty (`addLinkedNode`)
+  // paths so both auto-discover the path identically.
+  const computeDataLinkSelector = useCallback((
+    src: { id: string; kind: ScenarioNodeKind; config?: Record<string, unknown>; outputs: ScenarioPort[] },
+    srcHandle: string,
+    tgt: { kind: ScenarioNodeKind; inputs: ScenarioPort[] },
+    tgtHandle: string
+  ): string | undefined => {
+    const srcDerived = derivedPortsOf(src)?.outputs ?? []
+    const outFlow = outputPortFlow([...src.outputs, ...srcDerived], srcHandle, src.kind)
+    const inFlow = inputPortFlow(tgt.inputs, tgtHandle, tgt.kind)
+    if (!isDataLink(inFlow, outFlow)) return undefined
+    const preview = STATIC_PREVIEW_KINDS.has(src.kind)
+      ? staticScenarioPreview(
+          { id: src.id, kind: src.kind, config: src.config ?? {} },
+          nodes.map((x) => ({ id: x.id, kind: x.data.kind, config: x.data.config ?? {} })),
+          edges.flatMap((e) => (e.source && e.target && e.sourceHandle && e.targetHandle)
+            ? [{ from: { nodeId: e.source, portId: e.sourceHandle }, to: { nodeId: e.target, portId: e.targetHandle }, ...(typeof e.data?.['selector'] === 'string' ? { selector: e.data['selector'] } : {}) }]
+            : [])
+        )
+      : null
+    const pv = preview ? portPreviewValue(preview, srcHandle, src.kind) : null
+    if (expectsObjectInput(tgt.kind, tgtHandle)) return (pv ? singleTopLevelKey(pv) : null) ?? '.'
+    return (pv ? singleDeepPath(pv) : null) ?? '.'
+  }, [derivedPortsOf, nodes, edges])
+
   const onConnect = useCallback((connection: Connection) => {
     if (lockedRef.current) return
     if (!validateConnection(connection)) return
@@ -1009,48 +1151,17 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     // `timer` outright, so the user needn't open the picker.
     let selector: string | undefined
     if (src && tgt && connection.sourceHandle && connection.targetHandle) {
-      const srcDerived = derivedPortsOf(src.data)?.outputs ?? []
-      const outFlow = outputPortFlow([...src.data.outputs, ...srcDerived], connection.sourceHandle, src.data.kind)
-      const inFlow = inputPortFlow(tgt.data.inputs, connection.targetHandle, tgt.data.kind)
-      if (isDataLink(inFlow, outFlow) && expectsObjectInput(tgt.data.kind, connection.targetHandle)) {
-        // Object-context input: if the source's preview narrows to a single
-        // top-level key, mirror it (the most natural shortcut); otherwise
-        // default to the identity selector `.` (whole object flows through).
-        const preview = STATIC_PREVIEW_KINDS.has(src.data.kind)
-          ? staticScenarioPreview(
-              { id: src.id, kind: src.data.kind, config: src.data.config ?? {} },
-              nodes.map((x) => ({ id: x.id, kind: x.data.kind, config: x.data.config ?? {} })),
-              edges.flatMap((e) => (e.source && e.target && e.sourceHandle && e.targetHandle)
-                ? [{ from: { nodeId: e.source, portId: e.sourceHandle }, to: { nodeId: e.target, portId: e.targetHandle }, ...(typeof e.data?.['selector'] === 'string' ? { selector: e.data['selector'] } : {}) }]
-                : [])
-            )
-          : null
-        const top = preview ? singleTopLevelKey(portPreviewValue(preview, connection.sourceHandle, src.data.kind)) : null
-        selector = top ?? '.'
-        edgeStore.current.set(id, {
-          id,
-          from: { nodeId: src.id, portId: connection.sourceHandle },
-          to: { nodeId: tgt.id, portId: connection.targetHandle },
-          selector
-        })
-      } else if (isDataLink(inFlow, outFlow)) {
-        const preview = staticScenarioPreview(
-          { id: src.id, kind: src.data.kind, config: src.data.config ?? {} },
-          nodes.map((x) => ({ id: x.id, kind: x.data.kind, config: x.data.config ?? {} })),
-          edges.flatMap((e) => (e.source && e.target && e.sourceHandle && e.targetHandle)
-            ? [{ from: { nodeId: e.source, portId: e.sourceHandle }, to: { nodeId: e.target, portId: e.targetHandle }, ...(typeof e.data?.['selector'] === 'string' ? { selector: e.data['selector'] } : {}) }]
-            : [])
-        )
-        const path = preview ? singleDeepPath(portPreviewValue(preview, connection.sourceHandle, src.data.kind)) : null
-        // Default to the identity selector `.` when no single-deep path is
-        // deducible — e.g. an array output, or a runtime-only source like an
-        // httpRequest `response` or a forEach `each`. The whole value flows
-        // through (the user drills further via the picker if needed), and the
-        // link no longer trips the "needs a JSON path" validation by being
-        // left selector-less. The selector lives authoritatively in
-        // `edgeStore` (persist rebuilds each ScenarioEdge from it), so seed it
-        // there too — otherwise it's dropped on the next save.
-        selector = path ?? '.'
+      // Auto-discover the JSON path for a data link (`.` when none is deducible
+      // — an array / runtime-only source — so the link never trips the "needs a
+      // path" validation). The selector lives authoritatively in `edgeStore`
+      // (persist rebuilds each ScenarioEdge from it), so seed it there too.
+      selector = computeDataLinkSelector(
+        { id: src.id, kind: src.data.kind, config: src.data.config ?? {}, outputs: src.data.outputs },
+        connection.sourceHandle,
+        { kind: tgt.data.kind, inputs: tgt.data.inputs },
+        connection.targetHandle
+      )
+      if (selector !== undefined) {
         edgeStore.current.set(id, {
           id,
           from: { nodeId: src.id, portId: connection.sourceHandle },
@@ -1098,7 +1209,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       })
       return next
     })
-  }, [setEdges, setNodes, persist, validateConnection, nodes, edges, derivedPortsOf])
+  }, [setEdges, setNodes, persist, validateConnection, nodes, derivedPortsOf, computeDataLinkSelector])
 
   const addNode = useCallback((kind: ScenarioNodeKind, flow: { x: number; y: number }, config: Record<string, unknown> = {}) => {
     // A "Requête HTTP" node added from the palette (no bound request yet)
@@ -1147,7 +1258,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   const [linkPalette, setLinkPalette] = useState<{
     x: number; y: number; flow: { x: number; y: number }
     fromNodeId: string; fromHandle: string; fromIsSource: boolean
-    entries: { kind: ScenarioNodeKind; label: string; icon: string; wirePort: string }[]
+    entries: { kind: ScenarioNodeKind; wirePort: string }[]
   } | null>(null)
 
   const onConnectStart = useCallback<OnConnectStart>((_e, params) => {
@@ -1164,10 +1275,11 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     if (!srcNode) return
     const fromHandle = start.handleId
     const fromIsSource = start.handleType !== 'target'
-    // Filtered, header-prioritising palette (see linkPaletteEntries); decorate
-    // each with its catalogue label/icon. A runScenario's derived ports (incl.
-    // the `done` trigger) join the static set so the dragged port's flow is
-    // classified correctly.
+    // Connectable kinds + the port to auto-wire on each (see linkPaletteEntries).
+    // The render orders / labels them via the shared catalogue builder, so the
+    // link palette reads identically to the canvas one. A runScenario's derived
+    // ports (incl. the `done` trigger) join the static set so the dragged port's
+    // flow is classified correctly.
     const srcDerived = derivedPortsOf(srcNode.data)
     const entries = linkPaletteEntries(
       {
@@ -1177,17 +1289,14 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       },
       fromHandle,
       fromIsSource
-    ).map((e) => {
-      const m = META_BY_KIND.get(e.kind)
-      return { kind: e.kind, label: m ? t(m.labelKey, m.defaultLabel) : e.kind, icon: m?.icon ?? 'circle-outline', wirePort: e.wirePort }
-    })
+    )
     if (entries.length === 0) return
     const pt = 'changedTouches' in event ? event.changedTouches[0] : event
     const x = pt?.clientX ?? 0
     const y = pt?.clientY ?? 0
     linkPaletteJustOpened.current = true
     setLinkPalette({ x, y, flow: screenToFlowPosition({ x, y }), fromNodeId: start.nodeId, fromHandle, fromIsSource, entries })
-  }, [nodes, t, screenToFlowPosition, derivedPortsOf])
+  }, [nodes, screenToFlowPosition, derivedPortsOf])
 
   // Create the picked kind at the drop point and wire it to the dragged port.
   // The id + node + edge are built ONCE, outside any state updater — React
@@ -1209,6 +1318,21 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       ?? derivedPortsOf(srcN)?.outputs.find((o) => o.id === edge.sourceHandle)
     const stroke = edgeColorForHandle(edge.sourceHandle, srcPort)
     if (stroke) edge.style = { stroke }
+    // Auto-discover the JSON path for the new DATA link — exactly like a drag
+    // onto an existing box — so it lands ready (not red for a missing path).
+    const tgtN = nodeStore.current.get(edge.target)
+    if (srcN && tgtN && edge.sourceHandle && edge.targetHandle) {
+      const selector = computeDataLinkSelector(srcN, edge.sourceHandle, tgtN, edge.targetHandle)
+      if (selector !== undefined) {
+        edge.data = { ...(edge.data ?? {}), selector }
+        edgeStore.current.set(edge.id, {
+          id: edge.id,
+          from: { nodeId: edge.source, portId: edge.sourceHandle },
+          to: { nodeId: edge.target, portId: edge.targetHandle },
+          selector
+        })
+      }
+    }
     // Append idempotently: `setEdges` runs INSIDE the `setNodes` updater, and
     // React StrictMode double-invokes that updater in dev — without the
     // id-guards the edge (and node) got appended twice, so the new box fired
@@ -1223,7 +1347,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       return next
     })
     setLinkPalette(null)
-  }, [linkPalette, setNodes, setEdges, persist, derivedPortsOf])
+  }, [linkPalette, setNodes, setEdges, persist, derivedPortsOf, computeDataLinkSelector])
 
   // Link-drag variant of {@link addChildNode}: create the child + drop its
   // bound node pre-wired to the dragged port. A freshly-created sub-scenario is
@@ -1275,6 +1399,45 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         persist(next, ne)
         return ne
       })
+      return next
+    })
+  }, [setNodes, setEdges, persist])
+
+  // Bulk-delete every node in `ids` (+ any edge touching one) in a single pass.
+  const deleteNodes = useCallback((ids: string[]) => {
+    setSelectionMenu(null)
+    const idSet = new Set(ids)
+    setNodes((curr) => {
+      const next = curr.filter((n) => !idSet.has(n.id))
+      setEdges((e) => {
+        const ne = e.filter((ed) => !idSet.has(ed.source) && !idSet.has(ed.target))
+        persist(next, ne)
+        return ne
+      })
+      return next
+    })
+  }, [setNodes, setEdges, persist])
+
+  // Set (or reset, with `undefined`) the box colour of EVERY node in `ids`.
+  const setNodesColor = useCallback((ids: string[], color: string | undefined) => {
+    const idSet = new Set(ids)
+    setNodes((curr) => {
+      const next = curr.map((fn) => {
+        if (!idSet.has(fn.id)) return fn
+        const data = { ...fn.data }
+        if (color === undefined) delete data.color
+        else data.color = color
+        return { ...fn, data }
+      })
+      for (const id of ids) {
+        const prior = nodeStore.current.get(id)
+        if (!prior) continue
+        const updated = { ...prior }
+        if (color === undefined) delete updated.color
+        else updated.color = color
+        nodeStore.current.set(id, updated)
+      }
+      setEdges((e) => { persist(next, e); return e })
       return next
     })
   }, [setNodes, setEdges, persist])
@@ -1365,20 +1528,22 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   const onPaneContextMenu = useCallback((event: React.MouseEvent | MouseEvent) => {
     event.preventDefault()
     if (lockedRef.current) return
+    closeOverlays()
     const clientX = 'clientX' in event ? event.clientX : 0
     const clientY = 'clientY' in event ? event.clientY : 0
     // Screen coords for the ContextMenu (same convention as the node menu).
     setPalette({ x: clientX, y: clientY, flow: screenToFlowPosition({ x: clientX, y: clientY }) })
-  }, [screenToFlowPosition])
+  }, [screenToFlowPosition, closeOverlays])
 
   // Right-click on an edge: select it (deselect the rest) + open the edge menu.
   const onEdgeContextMenu = useCallback((event: React.MouseEvent, edge: Edge) => {
     event.preventDefault()
     event.stopPropagation()
     if (lockedRef.current) return
+    closeOverlays()
     setEdges((curr) => curr.map((e) => (e.selected === (e.id === edge.id) ? e : { ...e, selected: e.id === edge.id })))
     setEdgeMenu({ edgeId: edge.id, x: event.clientX, y: event.clientY })
-  }, [setEdges])
+  }, [setEdges, closeOverlays])
 
   // Delete an edge (context-menu action; the Delete key is handled by React Flow).
   const deleteEdge = useCallback((edgeId: string) => {
@@ -1759,13 +1924,12 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         scenarioId={scenario.id}
         errors={workflowErrors}
         errorBoxCount={nodeErrors.size}
-        onFocusNode={focusAndFlashNode}
+        onFocusNode={onLogFocus}
         previewNode={previewNode}
         {...(onOpenItem ? { onOpenItem } : {})}
         engineState={engine.state}
         runLog={engine.runLog}
         onClearRunLog={engine.clearRunLog}
-        {...(logProvenance ? { logProvenance } : {})}
         onEngineRun={() => {
           // Always launch the run immediately — the scenario is "started" the
           // instant the user hits Play (badges + boxes beam). Any no-predecessor
@@ -1837,16 +2001,23 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         panOnDrag={[1]}
         onPaneContextMenu={onPaneContextMenu}
         onEdgeContextMenu={onEdgeContextMenu}
+        onSelectionContextMenu={(event, selNodes) => {
+          // Right-click on a multi-selection (the box / a selected node's body)
+          // → the bulk menu. The header's own onContextMenu covers header clicks.
+          event.preventDefault()
+          const ids = selNodes.map((n) => n.id)
+          if (ids.length > 1) { setNodeMenu(null); setSelectionMenu({ x: event.clientX, y: event.clientY, nodeIds: ids }) }
+        }}
         onPaneClick={() => {
-          setPalette(null); setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null)
+          setPalette(null); setNodeMenu(null); setSelectionMenu(null); setMultiColorPicker(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null)
           if (linkPaletteJustOpened.current) { linkPaletteJustOpened.current = false } else { setLinkPalette(null) }
           dismissOffCanvasPopovers()
         }}
-        onNodeClick={(e) => { if (!isCanvasOriginatedClick(e)) return; setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null); dismissOffCanvasPopovers() }}
-        onEdgeClick={(e) => { if (!isCanvasOriginatedClick(e)) return; setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null); dismissOffCanvasPopovers() }}
-        onMoveStart={() => { setNodeMenu(null); setPalette(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null) }}
+        onNodeClick={(e) => { if (!isCanvasOriginatedClick(e)) return; setNodeMenu(null); setSelectionMenu(null); setMultiColorPicker(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null); dismissOffCanvasPopovers() }}
+        onEdgeClick={(e) => { if (!isCanvasOriginatedClick(e)) return; setNodeMenu(null); setSelectionMenu(null); setMultiColorPicker(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null); dismissOffCanvasPopovers() }}
+        onMoveStart={() => { setNodeMenu(null); setSelectionMenu(null); setMultiColorPicker(null); setPalette(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null) }}
         onMove={(_, viewport) => { if (projectUuid) setScenarioViewport(projectUuid, scenario.id, viewport) }}
-        onNodeDragStart={() => { setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null) }}
+        onNodeDragStart={() => { setNodeMenu(null); setSelectionMenu(null); setMultiColorPicker(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null) }}
         {...(savedViewport ? { defaultViewport: savedViewport } : { fitView: true })}
         proOptions={{ hideAttribution: true }}
       >
@@ -1881,42 +2052,12 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
           y={palette.y}
           onRequestClose={() => { setPalette(null) }}
           data-testid="scenario-node-palette"
-          items={PALETTE_ENTRIES.flatMap((e, i): ContextMenuItem[] =>
-            // Fold the request + run-scenario entries into a single "Add"
-            // submenu (child request of any protocol / sub-scenario, created in
-            // the sidebar + dropped on the graph). Without `onCreateChild`, keep
-            // the two bare entries.
-            'separator' in e
-              ? [{ id: `sep-${i}`, label: '', isSeparator: true }]
-              : onCreateChild && e.kind === 'runScenario'
-                ? []
-                : onCreateChild && e.kind === 'httpRequest'
-                  ? [{
-                      id: 'scenario-add',
-                      label: t('sidebar.contextMenu.add.title', 'Add'),
-                      icon: 'add',
-                      items: [
-                        ...SCENARIO_ADD_REQUEST_GROUPS.flatMap((group, gi): ContextMenuItem[] => [
-                          ...(gi > 0 ? [{ id: `add-rsep-${gi}`, label: '', isSeparator: true } as ContextMenuItem] : []),
-                          ...group.map((c): ContextMenuItem => ({ id: `add-${c.kind}`, label: t(c.labelKey, c.defaultLabel), icon: scenarioAddIcon(c.badge), onClick: () => { addChildNode(c.kind, palette.flow) } }))
-                        ]),
-                        { id: 'add-scn-sep', label: '', isSeparator: true },
-                        { id: `add-${SCENARIO_ADD_SCENARIO_ENTRY.kind}`, label: t(SCENARIO_ADD_SCENARIO_ENTRY.labelKey, SCENARIO_ADD_SCENARIO_ENTRY.defaultLabel), icon: scenarioAddIcon(SCENARIO_ADD_SCENARIO_ENTRY.badge), onClick: () => { addChildNode('scenario', palette.flow) } }
-                      ]
-                    }]
-                  // Fold all loop kinds into one "loops" submenu — emitted once,
-                  // at the first loop entry; the rest collapse into it.
-                  : e.category === 'loops'
-                    ? e.kind === LOOP_METAS[0]?.kind
-                      ? [{
-                          id: 'scenario-loops',
-                          label: t('scenario.nodes.loops', 'Loops'),
-                          icon: 'sync',
-                          items: LOOP_METAS.map((m): ContextMenuItem => ({ id: `loop-${m.kind}`, label: t(m.labelKey, m.defaultLabel), icon: m.icon, onClick: () => { addNode(m.kind, palette.flow) } }))
-                        }]
-                      : []
-                    : [{ id: e.kind, label: t(e.labelKey, e.defaultLabel), icon: e.icon, onClick: () => { addNode(e.kind, palette.flow) } }]
-          )}
+          items={buildScenarioPaletteItems({
+            t,
+            withAddSubmenu: onCreateChild !== undefined,
+            pickNode: (kind) => () => { addNode(kind, palette.flow) },
+            pickChild: (kind) => () => { addChildNode(kind as AddChildKind, palette.flow) }
+          })}
         />
       )}
       {linkPalette && (
@@ -1926,40 +2067,21 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
           y={linkPalette.y}
           onRequestClose={() => { setLinkPalette(null) }}
           data-testid="scenario-link-palette"
-          items={
-            // Fold the flow-compatible request / run-scenario entries into one
-            // "Add" submenu, wired through the port the filter computed (a fresh
-            // sub-scenario only has its `done` trigger, so the helper remaps
-            // `result`). Without `onCreateChild`, entries stay flat.
-            !onCreateChild
-              ? linkPalette.entries.map((e): ContextMenuItem => ({ id: e.kind, label: e.label, icon: e.icon, onClick: () => { addLinkedNode(e.kind, e.wirePort) } }))
-              : [
-                  ...(linkReqWire !== undefined || linkScnWire !== undefined
-                    ? [{
-                        id: 'scenario-add',
-                        label: t('sidebar.contextMenu.add.title', 'Add'),
-                        icon: 'add',
-                        items: [
-                          ...(linkReqWire !== undefined
-                            ? SCENARIO_ADD_REQUEST_GROUPS.flatMap((group, gi): ContextMenuItem[] => [
-                                ...(gi > 0 ? [{ id: `add-rsep-${gi}`, label: '', isSeparator: true } as ContextMenuItem] : []),
-                                ...group.map((c): ContextMenuItem => ({ id: `add-${c.kind}`, label: t(c.labelKey, c.defaultLabel), icon: scenarioAddIcon(c.badge), onClick: () => { addChildLinkedNode(c.kind, linkReqWire) } }))
-                              ])
-                            : []),
-                          ...(linkScnWire !== undefined
-                            ? [
-                                ...(linkReqWire !== undefined ? [{ id: 'add-scn-sep', label: '', isSeparator: true } as ContextMenuItem] : []),
-                                { id: `add-${SCENARIO_ADD_SCENARIO_ENTRY.kind}`, label: t(SCENARIO_ADD_SCENARIO_ENTRY.labelKey, SCENARIO_ADD_SCENARIO_ENTRY.defaultLabel), icon: scenarioAddIcon(SCENARIO_ADD_SCENARIO_ENTRY.badge), onClick: () => { addChildLinkedNode('scenario', linkScnWire) } } as ContextMenuItem
-                              ]
-                            : [])
-                        ]
-                      } as ContextMenuItem]
-                    : []),
-                  ...linkPalette.entries
-                    .filter((e) => e.kind !== 'httpRequest' && e.kind !== 'runScenario')
-                    .map((e): ContextMenuItem => ({ id: e.kind, label: e.label, icon: e.icon, onClick: () => { addLinkedNode(e.kind, e.wirePort) } }))
-                ]
-          }
+          items={buildScenarioPaletteItems({
+            t,
+            withAddSubmenu: onCreateChild !== undefined,
+            // Only the flow-compatible kinds the filter kept are offered; each
+            // wires through the port it computed.
+            pickNode: (kind) => {
+              const e = linkPalette.entries.find((x) => x.kind === kind)
+              return e ? () => { addLinkedNode(kind, e.wirePort) } : null
+            },
+            // Child request kinds wire through the request port the filter found;
+            // the sub-scenario through its own. Either may be unavailable.
+            pickChild: (kind) => kind === SCENARIO_ADD_SCENARIO_ENTRY.kind
+              ? (linkScnWire !== undefined ? () => { addChildLinkedNode('scenario', linkScnWire) } : null)
+              : (linkReqWire !== undefined ? () => { addChildLinkedNode(kind as AddChildKind, linkReqWire) } : null)
+          })}
         />
       )}
       {nodeMenu && (
@@ -2015,6 +2137,50 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
           </div>
         }
       />
+      {/* Bulk menu for a multi-selection right-click: change colour / delete,
+        * applied to every selected box. */}
+      {selectionMenu && (
+        <ContextMenu
+          visible
+          x={selectionMenu.x}
+          y={selectionMenu.y}
+          onRequestClose={() => { setSelectionMenu(null) }}
+          data-testid="scenario-selection-menu"
+          items={[
+            { id: 'color', label: t('scenario.node.menu.changeColor', 'Change colour'), icon: 'symbol-color', opensDialog: true, onClick: () => { setMultiColorPicker({ x: selectionMenu.x, y: selectionMenu.y, nodeIds: selectionMenu.nodeIds }); setSelectionMenu(null) } },
+            { id: 'delete', label: t('scenario.node.menu.delete', 'Delete'), icon: 'trash', shortcut: t('scenario.node.menu.deleteShortcut', 'Del'), onClick: () => { deleteNodes(selectionMenu.nodeIds) } }
+          ]}
+        />
+      )}
+      {multiColorPicker && (
+        <div ref={multiColorAnchorRef} style={{ position: 'fixed', left: multiColorPicker.x, top: multiColorPicker.y, width: 0, height: 0, pointerEvents: 'none' }} />
+      )}
+      <Tooltip
+        targetRef={multiColorAnchorRef}
+        show={multiColorPicker !== null}
+        repositionKey={multiColorPicker ? multiColorPicker.nodeIds.join(',') : null}
+        data-testid="scenario-selection-color-picker-tooltip"
+        placement="below"
+        side="auto"
+        content={
+          <div onMouseDown={(e) => { e.stopPropagation() }} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <ColorPicker
+              value="#3b82f6"
+              onChange={(color) => { if (multiColorPicker) setNodesColor(multiColorPicker.nodeIds, color) }}
+              disableAlpha
+              data-testid="scenario-selection-color-picker"
+            />
+            <Button
+              secondary
+              fullWidth
+              icon="trash"
+              onClick={() => { if (multiColorPicker) { setNodesColor(multiColorPicker.nodeIds, undefined); setMultiColorPicker(null) } }}
+              options={{ ariaLabel: t('scenario.node.menu.resetColor', 'Reset colour'), title: t('scenario.node.menu.resetColor', 'Reset colour') }}
+              data-testid="scenario-selection-color-reset"
+            />
+          </div>
+        }
+      />
       {edgeMenu && (
         <ContextMenu
           visible
@@ -2057,6 +2223,43 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
             />
           </div>
         }
+      />
+      {/* Sub-scenario log preview — popped left of a run-log row whose emitter
+        * lives in a sub-scenario. A cursor-anchored ECUI Tooltip (same pattern
+        * as the edge colour picker) hosts the read-only graph, pan-zoomed +
+        * flashing the box; the title links through to that scenario. */}
+      {subLogPopover && (
+        <div ref={subLogAnchorRef} style={{ position: 'fixed', left: subLogPopover.x, top: subLogPopover.y, width: 0, height: 0, pointerEvents: 'none' }} />
+      )}
+      <Tooltip
+        targetRef={subLogAnchorRef}
+        show={subLogPopover !== null}
+        repositionKey={subLogPopover ? `${subLogPopover.nodeId}:${subLogPopover.token}` : null}
+        data-testid="scenario-sublog-popover"
+        placement="auto"
+        side="left"
+        content={subLogPopover && (
+          <div data-scn-sublog-popover className="scn-sublog-popover" onMouseDown={(e) => { e.stopPropagation() }}>
+            <button
+              type="button"
+              className="scn-sublog-popover-title"
+              onClick={() => { onOpenItem?.(subLogPopover.scenario.id); setSubLogPopover(null) }}
+              data-testid="scenario-sublog-popover-title"
+            >
+              <Badge type="SCENARIO" />
+              <span>{subLogPopover.scenario.name}</span>
+            </button>
+            <div className="scn-sublog-popover-graph">
+              <ScenarioGraphPreview
+                scenario={subLogPopover.scenario}
+                interactive
+                panMode="classic"
+                focusNode={{ nodeId: subLogPopover.nodeId, token: subLogPopover.token }}
+                testId="scenario-sublog-popover-graph"
+              />
+            </div>
+          </div>
+        )}
       />
       <Modal
         title={t('scenario.node.menu.addNote', 'Add note')}

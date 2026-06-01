@@ -17,6 +17,45 @@
   stroke-width: 2.75px;
 }
 
+/* Sub-scenario log preview popover: a titled card hosting a read-only graph.
+ * The hosting ECUI Tooltip caps its own width (~max-content for a text tip),
+ * which would clip our wide graph — lift that cap for this specific tip. */
+.tooltip[data-testid="scenario-sublog-popover"],
+.tooltip[data-testid="scenario-sublog-popover"] .tooltip-content {
+  max-width: 92vw !important;
+}
+.scn-sublog-popover {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 880px;
+  max-width: 90vw;
+}
+.scn-sublog-popover-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 2px 2px 0;
+  margin: 0;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--textLink-foreground, #4daafc);
+  text-align: left;
+}
+.scn-sublog-popover-title:hover { text-decoration: underline; }
+.scn-sublog-popover-title .codicon { font-size: 13px; }
+.scn-sublog-popover-graph {
+  width: 100%;
+  height: 600px;
+  max-height: 75vh;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--widget-border, #454545);
+}
+
 /* `output` node decl row: the name input grows, the remove button hugs the end. */
 .scn-output-decl-row {
   display: flex;

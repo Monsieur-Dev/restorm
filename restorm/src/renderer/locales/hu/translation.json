@@ -955,6 +955,7 @@
       "stop": "Leállítás",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "Napló másolása",
       "clearLogs": "Naplók törlése",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "{{level}} naplók megjelenítése",

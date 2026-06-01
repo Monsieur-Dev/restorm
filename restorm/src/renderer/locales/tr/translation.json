@@ -955,6 +955,7 @@
       "stop": "Durdur",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "Bu günlüğü kopyala",
       "clearLogs": "Günlükleri temizle",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "{{level}} günlüklerini göster",

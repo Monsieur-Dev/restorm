@@ -955,6 +955,7 @@
       "stop": "Stop",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "Dit logbericht kopiëren",
       "clearLogs": "Logboeken wissen",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "{{level}}-logs tonen",

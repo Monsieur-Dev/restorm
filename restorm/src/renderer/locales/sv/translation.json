@@ -955,6 +955,7 @@
       "stop": "Stopp",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "Kopiera denna logg",
       "clearLogs": "Rensa loggar",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Visa {{level}}-loggar",

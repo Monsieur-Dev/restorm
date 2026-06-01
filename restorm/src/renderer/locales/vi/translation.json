@@ -954,6 +954,7 @@
       "stop": "Dừng",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "Sao chép log này",
       "clearLogs": "Xóa nhật ký",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Hiển thị log {{level}}",

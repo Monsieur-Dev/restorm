@@ -954,6 +954,7 @@
       "stop": "중지",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "이 로그 복사",
       "clearLogs": "로그 지우기",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "{{level}} 로그 표시",

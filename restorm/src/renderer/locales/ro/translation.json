@@ -956,6 +956,7 @@
       "stop": "Oprește",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "Copiază acest jurnal",
       "clearLogs": "Șterge jurnalele",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Afișează jurnalele {{level}}",

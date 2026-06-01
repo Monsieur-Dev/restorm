@@ -954,6 +954,7 @@
       "stop": "Hentikan",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "Salin log ini",
       "clearLogs": "Hapus log",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Tampilkan log {{level}}",

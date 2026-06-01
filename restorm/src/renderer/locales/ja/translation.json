@@ -954,6 +954,7 @@
       "stop": "停止",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "このログをコピー",
       "clearLogs": "ログをクリア",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "{{level}} ログを表示",

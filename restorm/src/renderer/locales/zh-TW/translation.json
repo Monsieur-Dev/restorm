@@ -954,6 +954,7 @@
       "stop": "停止",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "複製此日誌",
       "clearLogs": "清除記錄",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "顯示 {{level}} 日誌",

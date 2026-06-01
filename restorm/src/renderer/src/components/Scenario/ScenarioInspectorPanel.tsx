@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Button, ListView } from 'electron-core-ui/renderer'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import type { ScenarioLogEntry } from '../../hooks/useScenarioEngine'
-import { ScenarioRunLogView, type LogProvenanceApi, type LogLevelFilter } from './ScenarioRunLogView'
+import { ScenarioRunLogView, type LogLevelFilter } from './ScenarioRunLogView'
 import type { ScenarioPort } from '../../../../shared/types/collections'
 import type { ScenarioNodeError } from '../../../../shared/scenarioValidation'
 import { buildScenarioPathTree } from './scenarioPathTree'
@@ -76,7 +76,7 @@ export interface ScenarioInspectorPanelProps {
   /** Distinct boxes in error — drives the section header count. */
   errorBoxCount: number
   /** Centre the canvas on a box (clicking an error row). */
-  onFocusNode: (nodeId: string) => void
+  onFocusNode: (nodeId: string, scenarioId?: string, anchor?: { x: number; y: number }) => void
   /** The node to preview, or null when zero / many boxes are selected. */
   previewNode: InspectorPreviewNode | null
   /** Open the previewed node's bound item (request / sub-scenario) in a
@@ -110,8 +110,6 @@ export interface ScenarioInspectorPanelProps {
   /** Clears the displayed run log. Wired only in the live inspector — the
    * persisted run-history is read-only and offers no clear action. */
   onClearRunLog?: () => void
-  /** Provenance link support for log rows that came from a sub-scenario. */
-  logProvenance?: LogProvenanceApi
 }
 
 interface ScenarioRuntime {
@@ -132,7 +130,7 @@ function scenarioRuntime(): ScenarioRuntime | undefined {
  * data + tree as the JSON-path selector's picker popover). Shown only when
  * exactly one box is selected.
  */
-export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ scenarioId, errors, errorBoxCount, onFocusNode, previewNode, onOpenItem, engineState, onEngineRun, onEnginePause, onEngineResume, onEngineStep, onEngineStepStart, onEngineStop, onEngineDebug, onEngineDebugContinue, hasBreakpoints, runLog, onClearRunLog, logProvenance }) => {
+export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ scenarioId, errors, errorBoxCount, onFocusNode, previewNode, onOpenItem, engineState, onEngineRun, onEnginePause, onEngineResume, onEngineStep, onEngineStepStart, onEngineStop, onEngineDebug, onEngineDebugContinue, hasBreakpoints, runLog, onClearRunLog }) => {
   const { t } = useTranslation()
   const [result, setResult] = useState<Record<string, unknown> | null>(null)
   const fetchToken = useRef(0)
@@ -460,7 +458,7 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
             <div className="scn-inspector-section-title scn-inspector-logs-header">
               <span>{t('scenario.inspector.logsTitle', 'Run logs')}</span>
             </div>
-            <ScenarioRunLogView logs={allLogs} testIdPrefix="scenario-inspector-logs" onFocusNode={onFocusNode} showAllLogs={showAllLogs} onShowAllLogsChange={setShowAllLogs} levels={logLevels} onLevelsChange={setLogLevels} {...(onClearRunLog ? { onClear: onClearRunLog } : {})} {...(logProvenance ? { provenance: logProvenance } : {})} />
+            <ScenarioRunLogView logs={allLogs} testIdPrefix="scenario-inspector-logs" onFocusNode={onFocusNode} showAllLogs={showAllLogs} onShowAllLogsChange={setShowAllLogs} levels={logLevels} onLevelsChange={setLogLevels} {...(onClearRunLog ? { onClear: onClearRunLog } : {})} />
           </div>
         </>
       )}

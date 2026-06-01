@@ -955,6 +955,7 @@
       "stop": "Διακοπή",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "Αντιγραφή αυτού του αρχείου",
       "clearLogs": "Εκκαθάριση καταγραφών",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Εμφάνιση logs {{level}}",

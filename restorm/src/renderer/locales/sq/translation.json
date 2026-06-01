@@ -955,6 +955,7 @@
       "stop": "Ndalo",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "Kopjo këtë regjistër",
       "clearLogs": "Pastro regjistrat",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Shfaq loget {{level}}",

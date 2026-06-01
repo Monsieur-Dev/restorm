@@ -955,6 +955,7 @@
       "stop": "Stop",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "Kopiér denne log",
       "clearLogs": "Ryd logfiler",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Vis {{level}}-logs",

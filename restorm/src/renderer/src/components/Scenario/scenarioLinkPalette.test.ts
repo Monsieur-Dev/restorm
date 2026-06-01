@@ -10,18 +10,19 @@ const srcOf = (kind: ScenarioNodeKind): { kind: ScenarioNodeKind; inputs: Return
 }
 
 describe('linkPaletteEntries — drag from an output', () => {
-  // Example 1: a request's `response` (a `both` output) → wait, which has a
-  // header input → wire to the header.
-  it('a response (both) output wires to the header input when the kind has one (wait → in)', () => {
+  // Example 1: a request's `response` (a typed `both` output, type `response`)
+  // → wait, whose only data input `duration` is a `duration` — incompatible —
+  // so it falls back to the event/header input.
+  it('a typed output with no compatible data input falls back to the event input (response → wait → in)', () => {
     const entries = linkPaletteEntries(srcOf('httpRequest'), 'response', true)
     expect(entries.find((e) => e.kind === 'wait')?.wirePort).toBe('in')
   })
 
-  // Example 2: same response → `if`, which has a header launch trigger → wire
-  // to the header (its left/right operands are set via the value selectors).
-  it('a response (both) output wires to the header input when the kind has one (if → in)', () => {
+  // Example 2: same response → `if`, whose first data input `left` is untyped
+  // (`any`) → compatible, so the link prefers it over the event input.
+  it('prefers the first compatible DATA input over the event input (if → left)', () => {
     const entries = linkPaletteEntries(srcOf('httpRequest'), 'response', true)
-    expect(entries.find((e) => e.kind === 'if')?.wirePort).toBe('in')
+    expect(entries.find((e) => e.kind === 'if')?.wirePort).toBe('left')
   })
 
   // Example 3: a PURE signal output (the while body `then`) carries no value, so
@@ -37,13 +38,29 @@ describe('linkPaletteEntries — drag from an output', () => {
     expect(kinds).not.toContain('aggregate') // no header → a signal can't reach it
   })
 
-  // Example 4: a `both` output (waitUntil's `out`) carries a value AND triggers,
-  // so it reaches header-trigger kinds (wired to `in`) AND data-driven kinds
-  // (wired to their data input).
-  it('a `both` output also reaches data-driven kinds, wiring to their data input', () => {
+  // Example 4: an untyped (`any`) `both` output (waitUntil's `out`) is
+  // compatible with every data input, so it wires to each kind's FIRST data
+  // input — `wait`'s `duration`, `aggregate`'s `items` — not the event input.
+  it('an `any` output wires to each kind`s first data input', () => {
     const entries = linkPaletteEntries(srcOf('waitUntil'), 'out', true)
-    expect(entries.find((e) => e.kind === 'wait')?.wirePort).toBe('in')
+    expect(entries.find((e) => e.kind === 'wait')?.wirePort).toBe('duration')
     expect(entries.find((e) => e.kind === 'aggregate')?.wirePort).toBe('items')
+  })
+
+  // The env/string rule: a typed output picks the FIRST input whose type it
+  // matches, skipping an earlier incompatible one. `arithmetic.result` is a
+  // `number`; a second arithmetic's first data input `a` is a `number` → it
+  // wires there (not the event input, not a later port).
+  it('a number output wires to the first number data input (arithmetic → a)', () => {
+    const entries = linkPaletteEntries(srcOf('arithmetic'), 'result', true)
+    expect(entries.find((e) => e.kind === 'arithmetic')?.wirePort).toBe('a')
+  })
+
+  // A pure-signal source (no value) can never feed a data input, so it always
+  // lands on the event/header — even on a kind that has data inputs (`if`).
+  it('a pure signal output always wires to the event input, never a data input (if → in)', () => {
+    const entries = linkPaletteEntries(srcOf('while'), 'then', true)
+    expect(entries.find((e) => e.kind === 'if')?.wirePort).toBe('in')
   })
 
   it('lists getVariable (it now owns a header launch trigger), wired to it', () => {
