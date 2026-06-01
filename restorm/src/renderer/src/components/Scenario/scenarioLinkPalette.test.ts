@@ -24,17 +24,26 @@ describe('linkPaletteEntries — drag from an output', () => {
     expect(entries.find((e) => e.kind === 'if')?.wirePort).toBe('in')
   })
 
-  // Example 3: a trigger output (waitUntil's `out`, flow signal) → only kinds
-  // that own a header input, each wired to it.
-  it('a signal (trigger) output lists only kinds with a header input, all wired to it', () => {
-    const entries = linkPaletteEntries(srcOf('waitUntil'), 'out', true)
+  // Example 3: a PURE signal output (the while body `then`) carries no value, so
+  // it lists only kinds that own a header trigger, each wired to it — never a
+  // data-driven kind (aggregate has no header, so a signal can't reach it).
+  it('a pure signal (body) output lists only kinds with a header input, all wired to it', () => {
+    const entries = linkPaletteEntries(srcOf('while'), 'then', true)
     expect(entries.length).toBeGreaterThan(0)
     expect(entries.every((e) => e.wirePort === 'in')).toBe(true)
     const kinds = entries.map((e) => e.kind)
     expect(kinds).toContain('wait')
-    expect(kinds).toContain('httpRequest')
-    expect(kinds).toContain('if') // now owns a header launch trigger
-    expect(kinds).not.toContain('arithmetic')
+    expect(kinds).toContain('arithmetic') // owns a header trigger → wired to `in`
+    expect(kinds).not.toContain('aggregate') // no header → a signal can't reach it
+  })
+
+  // Example 4: a `both` output (waitUntil's `out`) carries a value AND triggers,
+  // so it reaches header-trigger kinds (wired to `in`) AND data-driven kinds
+  // (wired to their data input).
+  it('a `both` output also reaches data-driven kinds, wiring to their data input', () => {
+    const entries = linkPaletteEntries(srcOf('waitUntil'), 'out', true)
+    expect(entries.find((e) => e.kind === 'wait')?.wirePort).toBe('in')
+    expect(entries.find((e) => e.kind === 'aggregate')?.wirePort).toBe('items')
   })
 
   it('lists getVariable (it now owns a header launch trigger), wired to it', () => {

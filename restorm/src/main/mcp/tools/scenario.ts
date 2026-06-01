@@ -143,9 +143,11 @@ function describeScenarioKind(kind: ScenarioNodeKind): Record<string, unknown> {
     kind,
     summary: doc.summary,
     inputs: inputs.map(inPort),
-    // The `error` output is implicit on every box (drawn by the editor, not in
-    // the model) — surface it so a client knows it can wire failure handling.
-    outputs: [...outputs.map(outPort), { id: 'error', name: 'error', flow: 'both' }],
+    // `error` (both) and `done` (signal) are implicit on every box — drawn by
+    // the editor, not in the model. `done` fires once the box AND its whole
+    // downstream sub-graph have completed. Surface both so a client knows it
+    // can wire failure handling + sequence after a sub-flow finishes.
+    outputs: [...outputs.map(outPort), { id: 'error', name: 'error', flow: 'both' }, { id: 'done', name: 'done', flow: 'signal' }],
     ...(doc.config && Object.keys(doc.config).length > 0 ? { config: doc.config } : {})
   }
 }
@@ -415,7 +417,7 @@ export function registerScenarioTools(mcp: McpService): void {
       // Effective ports include a runScenario's ports derived from its sub-scenario.
       const fromPorts = effectivePorts(fromNode)
       const toPorts = effectivePorts(toNode)
-      if (fromPortId !== 'error' && !fromPorts.outputs.some((p) => p.id === fromPortId)) {
+      if (fromPortId !== 'error' && fromPortId !== 'done' && !fromPorts.outputs.some((p) => p.id === fromPortId)) {
         return errorReply(`${fromPortId} is not an output of ${fromNodeId} (outputs: ${fromPorts.outputs.map((p) => p.id).join(', ') || 'none'})`)
       }
       if (!toPorts.inputs.some((p) => p.id === toPortId)) {

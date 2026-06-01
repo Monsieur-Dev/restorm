@@ -752,7 +752,9 @@
   display: flex;
   justify-content: space-between;
   gap: 16px;
-  padding: 7px 0;
+  /* Extra bottom padding so the bottom-edge handles (error / done) sit in clear
+   * space below the content instead of overlapping the last row. */
+  padding: 7px 0 16px;
 }
 
 .scn-node-col {
@@ -866,17 +868,27 @@
 
 .scn-handle-error {
   left: auto;
-  right: 12px;
+  right: 46px;
 }
-/* Collapsed = header only, so the bottom-centred error handle straddles the
- * header. Don't move it — just send it BEHIND the header (z-index) so its top
- * half tucks under the header instead of overlapping the content; the half
- * sticking out below stays visible + connectable. */
+/* Universal completion (`done`) handle: a blue dot to the RIGHT of the error
+ * ball on the bottom edge. The yellow ring is the STANDARD flow halo (the
+ * `scn-handle--flow-signal` `::after`), so its thickness matches every other
+ * handle — only the centre dot colour is overridden here. */
+.scn-handle-done.react-flow__handle {
+  left: auto;
+  right: 12px;
+  background: #3b82f6;
+}
+/* Collapsed = header only, so the bottom-centred error/done handles straddle
+ * the header. Don't move them — just send them BEHIND the header (z-index) so
+ * their top half tucks under the header instead of overlapping the content; the
+ * half sticking out below stays visible + connectable. */
 .scn-node-collapsed .scn-node-header {
   position: relative;
   z-index: 2;
 }
-.scn-node-collapsed .scn-handle-error.react-flow__handle {
+.scn-node-collapsed .scn-handle-error.react-flow__handle,
+.scn-node-collapsed .scn-handle-done.react-flow__handle {
   z-index: 1;
 }
 

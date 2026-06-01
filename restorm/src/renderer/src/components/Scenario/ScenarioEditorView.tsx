@@ -693,7 +693,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     const src = nodeStore.current.get(e.from.nodeId)
     const srcDerived = derivedPortsOf(src)
     if (srcDerived && src) {
-      const valid = new Set<string>(['error', ...defaultPortsForKind(src.kind).outputs.map((p) => p.id), ...srcDerived.outputs.map((p) => p.id)])
+      const valid = new Set<string>(['error', 'done', ...defaultPortsForKind(src.kind).outputs.map((p) => p.id), ...srcDerived.outputs.map((p) => p.id)])
       if (!valid.has(e.from.portId)) return true
     }
     return false
@@ -1121,10 +1121,12 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   // or input←new output). ---
   const connectStart = useRef<{ nodeId: string | null; handleId: string | null; handleType: 'source' | 'target' | null } | null>(null)
   // Releasing a connection drag on empty canvas fires `onConnectEnd` (which
-  // opens the link palette) immediately followed by `onPaneClick` (~20ms) —
-  // the same release counts as a pane click and would close the palette we
-  // just opened. Record when we open it so `onPaneClick` can ignore that one.
-  const linkPaletteOpenedAt = useRef(0)
+  // opens the link palette) immediately followed by `onPaneClick` — the same
+  // release counts as a pane click and would close the palette we just opened.
+  // Flag it so that ONE pane-click is ignored. (A time-based guard was flaky: a
+  // slow re-render delays the pane-click past any fixed threshold, so the
+  // palette opened then closed itself intermittently.)
+  const linkPaletteJustOpened = useRef(false)
   const [linkPalette, setLinkPalette] = useState<{
     x: number; y: number; flow: { x: number; y: number }
     fromNodeId: string; fromHandle: string; fromIsSource: boolean
@@ -1166,7 +1168,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     const pt = 'changedTouches' in event ? event.changedTouches[0] : event
     const x = pt?.clientX ?? 0
     const y = pt?.clientY ?? 0
-    linkPaletteOpenedAt.current = Date.now()
+    linkPaletteJustOpened.current = true
     setLinkPalette({ x, y, flow: screenToFlowPosition({ x, y }), fromNodeId: start.nodeId, fromHandle, fromIsSource, entries })
   }, [nodes, t, screenToFlowPosition, derivedPortsOf])
 
@@ -1818,7 +1820,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         onEdgeContextMenu={onEdgeContextMenu}
         onPaneClick={() => {
           setPalette(null); setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null)
-          if (Date.now() - linkPaletteOpenedAt.current > 250) setLinkPalette(null)
+          if (linkPaletteJustOpened.current) { linkPaletteJustOpened.current = false } else { setLinkPalette(null) }
           dismissOffCanvasPopovers()
         }}
         onNodeClick={() => { setNodeMenu(null); setColorPickerNodeId(null); setEdgeMenu(null); setEdgeColorPicker(null); setLinkPalette(null); dismissOffCanvasPopovers() }}

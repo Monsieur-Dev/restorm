@@ -28,11 +28,12 @@ export const ForEachNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, d
 
   const right: ScenarioNodeCell[] = [
     { id: 'each', label: t('scenario.forEach.each', 'each'), port: { id: 'each', role: 'then', type: 'source' } },
-    { id: 'done', label: t('scenario.forEach.done', 'done'), port: { id: 'done', role: 'else', type: 'source' } },
+    // Loop completion is the universal `Done` port (drawn by the box base), so
+    // no explicit "done" row here — it would duplicate it.
     buildParallelismCell({ id, config, onSetConfig: data.onSetConfig, label: t('scenario.forEach.parallelism', 'parallelism'), testIdPrefix: 'scn-foreach' })
   ]
 
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} launchInput />
 }
 
 export default ForEachNodeBox

@@ -46,6 +46,13 @@ import { evaluateCondition } from './conditionEval'
  */
 const DEFAULT_MAX_ACTIVATIONS = Number.POSITIVE_INFINITY
 
+/** Conditional-loop iterations to run synchronously before yielding once to
+ * the macrotask queue (so a Stop / IPC can interleave instead of being
+ * starved by the microtask chain — see `runConditionalLoop`). Small enough
+ * that a runaway loop stays snappy to Stop; large enough that an ordinary
+ * finite loop pays no measurable yield overhead. */
+const LOOP_YIELD_EVERY = 256
+
 export interface RunOptions {
   /** Params for the scenario's `input` nodes (keyed by param name). */
   params?: Record<string, unknown>
@@ -139,6 +146,33 @@ export class Scheduler {
   /** Buffered per-iteration contributions for a streaming aggregate, keyed
    * by `${aggregateNodeId}@${parentScopeKey}` → (iteration index → value). */
   private readonly aggregateCollect = new Map<string, Map<number, unknown>>()
+
+  // --- Completion tree (universal `done` port) --------------------------
+  // Every action box emits an implicit `done` signal once its ENTIRE data
+  // subtree has drained (post-order completion). We track that with a tree
+  // PARALLEL to the dataflow — leaving the scope / buffer / join machinery
+  // untouched (those drive data lineage, which `done` must not perturb).
+  /** Monotonic completion-id source — one per created activation. */
+  private completionSeq = 0
+  /** completionId → the activations whose DATA subtree this one belongs to
+   * (the emitters of the tokens it consumed). Draining decrements them. */
+  private readonly parentsOf = new Map<number, number[]>()
+  /** completionId → count of not-yet-drained DATA descendants. Hits 0 (and
+   * the executor has returned) ⇒ the box's subtree is fully drained. */
+  private readonly pending = new Map<number, number>()
+  /** Completion ids whose executor has returned (so a later pending→0 can
+   * fire `done`). */
+  private readonly returned = new Set<number>()
+  /** completionId → its activation (to fire `done` + read scope on drain). */
+  private readonly actById = new Map<number, InternalActivation>()
+  /** Tokens already counted toward a parent obligation — a latched token
+   * re-read on a later firing must NOT re-attribute its emitter. WeakSet so
+   * a long / infinite loop doesn't leak (entries vanish with the token). */
+  private readonly consumedTokens = new WeakSet<Token>()
+  /** Loop iterations deferred to the macrotask queue (the anti-freeze yield):
+   * counted as live work so the run isn't reported "done" while a re-entry is
+   * still pending on a timer. */
+  private pendingReentry = 0
 
   constructor(init: SchedulerInit) {
     this.runId = randomId()
@@ -369,6 +403,9 @@ export class Scheduler {
         // for a loop, the condition has turned false).
         if (result.scopeAction?.type !== 'openForEach' && result.scopeAction?.type !== 'conditionalLoop') {
           this.emit({ type: 'node-completed', runId: this.runId, nodeId: act.nodeId, scope: act.scope, at: now(), outputs: result.outputs })
+          // The executor returned: arm the universal `done` port. It fires now
+          // if the box has no data descendants, else once they all drain.
+          this.markReturned(act)
         }
       } catch (err) {
         // The run was cancelled while we awaited (Stop) — silently land,
@@ -383,6 +420,10 @@ export class Scheduler {
         if (errorEdges.length > 0) {
           this.handleExecResult(act, { outputs: [{ port: 'error', value: { message: msg, startedAt } }] })
           this.emit({ type: 'node-failed', runId: this.runId, nodeId: act.nodeId, scope: act.scope, at: now(), error: msg })
+          // Keep the completion tree consistent: the error route IS this box's
+          // outcome, so arm `done` against the error-handler subtree (else an
+          // ancestor waiting on this box would stall forever).
+          this.markReturned(act)
         } else {
           this.emit({ type: 'node-failed', runId: this.runId, nodeId: act.nodeId, scope: act.scope, at: now(), error: msg })
           this.fail(msg)
@@ -416,12 +457,16 @@ export class Scheduler {
     // Plain emissions: route each one to the edges leaving the port.
     // An edge `selector` reshapes the value in transit (e.g. picking
     // `body.data.cooldown.total_seconds` out of an HTTP response).
+    const cid = act.completionId
     for (const out of result.outputs) {
       const edges = this.outgoingByPort.get(`${act.nodeId}:${out.port}`) ?? []
       for (const edge of edges) {
         const routed = edge.selector !== undefined && edge.selector !== ''
           ? resolveSelectorPath(out.value, edge.selector)
           : out.value
+        // Each routed data token is one obligation on the emitter's subtree:
+        // its `done` waits until this token's downstream chain has drained.
+        if (cid !== undefined) this.pending.set(cid, (this.pending.get(cid) ?? 0) + 1)
         this.enqueueToken({
           value: deepClone(routed),
           fromNodeId: act.nodeId,
@@ -429,10 +474,92 @@ export class Scheduler {
           toNodeId: edge.toNodeId,
           toPort: edge.toPort,
           scope: act.scope,
-          tokenId: ++this.tokenSeq
+          tokenId: ++this.tokenSeq,
+          ...(cid !== undefined ? { emitter: cid } : {})
         })
         this.emit({ type: 'data-flow-emitted', runId: this.runId, edgeId: edge.edgeId, tokenId: this.tokenSeq, at: now() })
       }
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // Completion tree — universal `done` port (post-order subtree drain)
+  // ------------------------------------------------------------------
+
+  /** Assign a completion id + record the activation's subtree parents (the
+   * emitters of the tokens it consumed). Called once, when the activation is
+   * created — before it is queued. */
+  private registerActivation(act: InternalActivation, parents: number[]): void {
+    const cid = ++this.completionSeq
+    act.completionId = cid
+    this.parentsOf.set(cid, parents)
+    this.pending.set(cid, 0)
+    this.actById.set(cid, act)
+  }
+
+  /** A non-loop executor returned: mark it returned, and if its subtree is
+   * already empty (no pending data descendants) fire `done` right away. */
+  private markReturned(act: InternalActivation): void {
+    const cid = act.completionId
+    if (cid === undefined) return
+    this.returned.add(cid)
+    if ((this.pending.get(cid) ?? 0) <= 0) this.onSubtreeDrained(cid)
+  }
+
+  /** A non-loop box's whole data subtree has drained → fire its `done` port
+   * (a continuation, untagged) then release it from each parent's count. */
+  private onSubtreeDrained(cid: number): void {
+    const act = this.actById.get(cid)
+    if (!act) return // already drained — keep idempotent
+    this.actById.delete(cid)
+    this.returned.delete(cid)
+    this.pending.delete(cid)
+    const parents = this.parentsOf.get(cid) ?? []
+    this.parentsOf.delete(cid)
+    this.fireDonePort(act)
+    this.releaseParents(parents)
+  }
+
+  /** A loop fully completed (every iteration scope closed; it already emitted
+   * its OWN `done`). Don't re-fire `done` — just release it from its parents
+   * so a box that fed the loop waits for the whole loop to finish. */
+  private completeLoop(act: InternalActivation): void {
+    const cid = act.completionId
+    if (cid === undefined || !this.actById.has(cid)) return
+    this.actById.delete(cid)
+    this.returned.delete(cid)
+    this.pending.delete(cid)
+    const parents = this.parentsOf.get(cid) ?? []
+    this.parentsOf.delete(cid)
+    this.releaseParents(parents)
+  }
+
+  /** Decrement each parent's pending-descendant count; a parent that reaches
+   * 0 after its executor already returned has now fully drained → cascade. */
+  private releaseParents(parents: number[]): void {
+    for (const p of parents) {
+      const n = (this.pending.get(p) ?? 0) - 1
+      this.pending.set(p, n)
+      if (n <= 0 && this.returned.has(p)) this.onSubtreeDrained(p)
+    }
+  }
+
+  /** Route a token off a box's implicit `done` port to its outgoing edges.
+   * Carries no value (a pure signal) and no `emitter` (a continuation, not a
+   * child of the box that just finished). */
+  private fireDonePort(act: InternalActivation): void {
+    const edges = this.outgoingByPort.get(`${act.nodeId}:done`) ?? []
+    for (const edge of edges) {
+      this.enqueueToken({
+        value: true,
+        fromNodeId: act.nodeId,
+        fromPort: 'done',
+        toNodeId: edge.toNodeId,
+        toPort: edge.toPort,
+        scope: act.scope,
+        tokenId: ++this.tokenSeq
+      })
+      this.emit({ type: 'data-flow-emitted', runId: this.runId, edgeId: edge.edgeId, tokenId: this.tokenSeq, at: now() })
     }
   }
 
@@ -468,6 +595,9 @@ export class Scheduler {
       // Deferred completion: the forEach box stops "running" only now,
       // once every batch has drained.
       this.emit({ type: 'node-completed', runId: this.runId, nodeId: act.nodeId, scope: act.scope, at: now(), outputs: [] })
+      // The loop already emitted its own `done`; release it from its parents
+      // so a box that fed this loop waits for the WHOLE loop to finish.
+      this.completeLoop(act)
     }
 
     const openItem = (i: number): void => {
@@ -529,14 +659,19 @@ export class Scheduler {
       try { return evaluateCondition(node.config, act.inputs, this.variables) } catch { return false }
     }
 
-    const fireElse = (): void => {
-      const elseEdges = this.outgoingByPort.get(`${act.nodeId}:else`) ?? []
-      for (const edge of elseEdges) {
-        this.enqueueToken({ value: iter, fromNodeId: act.nodeId, fromPort: 'else', toNodeId: edge.toNodeId, toPort: edge.toPort, scope: act.scope, tokenId: ++this.tokenSeq })
+    const fireExit = (): void => {
+      // The loop exit IS the box's completion: it routes through the universal
+      // implicit `done` port (the old `else` output was removed as a duplicate).
+      const doneEdges = this.outgoingByPort.get(`${act.nodeId}:done`) ?? []
+      for (const edge of doneEdges) {
+        this.enqueueToken({ value: iter, fromNodeId: act.nodeId, fromPort: 'done', toNodeId: edge.toNodeId, toPort: edge.toPort, scope: act.scope, tokenId: ++this.tokenSeq })
         this.emit({ type: 'data-flow-emitted', runId: this.runId, edgeId: edge.edgeId, tokenId: this.tokenSeq, at: now() })
       }
       this.log.push({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `${mode} done after ${iter} iteration(s)` })
       this.emit({ type: 'node-completed', runId: this.runId, nodeId: act.nodeId, scope: act.scope, at: now(), outputs: [] })
+      // Loop fully exited (it emitted its own `done`): release it from its
+      // parents so an upstream box's `done` waits for the whole loop.
+      this.completeLoop(act)
     }
 
     const openBody = (): void => {
@@ -546,23 +681,40 @@ export class Scheduler {
       const child: ScopeStack = [...act.scope, { scopeNodeId: act.nodeId, index: i }]
       this.log.push({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `${mode} iteration ${i}` })
       for (const edge of thenEdges) {
-        this.enqueueToken({ value: i, fromNodeId: act.nodeId, fromPort: 'then', toNodeId: edge.toNodeId, toPort: edge.toPort, scope: child, tokenId: ++this.tokenSeq })
+        // `then` is a pure signal: fire the body, carry no per-iteration value.
+        this.enqueueToken({ value: true, fromNodeId: act.nodeId, fromPort: 'then', toNodeId: edge.toNodeId, toPort: edge.toPort, scope: child, tokenId: ++this.tokenSeq })
         this.emit({ type: 'data-flow-emitted', runId: this.runId, edgeId: edge.edgeId, tokenId: this.tokenSeq, at: now() })
       }
       // Iteration is done when its whole body chain has drained the scope;
       // then re-evaluate and loop while true.
       this.scopes.onClose(child, () => {
         if (this.abortCtl.signal.aborted) return
-        if (evalCond()) openBody()
-        else fireElse()
+        if (!evalCond()) { fireExit(); return }
+        // Anti-freeze: a synchronous body would chain the next iteration on a
+        // microtask, and an unbounded loop starves the macrotask queue — so a
+        // Stop (an IPC macrotask) never lands and the app freezes. Every N
+        // iterations, hand control back to the macrotask queue so the run
+        // stays interruptible. Counted as `pendingReentry` so the scheduler
+        // doesn't report "done" while a re-entry is still on the timer.
+        if (iter % LOOP_YIELD_EVERY === 0) {
+          this.pendingReentry += 1
+          setImmediate(() => {
+            this.pendingReentry -= 1
+            if (this.abortCtl.signal.aborted) { this.terminateIfDone(); return }
+            openBody()
+            this.tick()
+          })
+        } else {
+          openBody()
+        }
       })
     }
 
     // A loop with no body wired can't iterate — just take the exit branch.
-    if (thenEdges.length === 0) { fireElse(); return }
+    if (thenEdges.length === 0) { fireExit(); return }
     if (mode === 'doWhile') openBody()
     else if (evalCond()) openBody()
-    else fireElse()
+    else fireExit()
   }
 
   /** Push a token into the buffer; if a node becomes fireable, queue
@@ -586,8 +738,19 @@ export class Scheduler {
     for (const portId of Object.keys(decision.tokensByPort)) {
       inputs[portId] = deepClone(decision.tokensByPort[portId]?.value)
     }
+    // Subtree parents: the emitters of the matched tokens, counted once each
+    // (a latched token re-read on a later firing has already transferred its
+    // obligation, so it must not re-attribute its emitter here).
+    const parents = new Set<number>()
+    for (const m of decision.matched) {
+      if (this.consumedTokens.has(m.token)) continue
+      this.consumedTokens.add(m.token)
+      if (typeof m.token.emitter === 'number') parents.add(m.token.emitter)
+    }
     this.buffer.consume(node.id, decision)
-    this.queue.push({ nodeId: node.id, kind: node.kind, scope: decision.scope, inputs })
+    const act: InternalActivation = { nodeId: node.id, kind: node.kind, scope: decision.scope, inputs }
+    this.registerActivation(act, [...parents])
+    this.queue.push(act)
     this.scopes.enter(decision.scope)
   }
 
@@ -606,7 +769,9 @@ export class Scheduler {
         const passthrough = (value: unknown): void => {
           // Emit the `{ [name]: value }` shape the static preview models so a
           // wired selector resolves identically; `seeded` skips the prompt.
-          this.queue.push({ nodeId: node.id, kind: node.kind, scope: [], inputs: { value: { [paramName]: value } }, seeded: true })
+          const act: InternalActivation = { nodeId: node.id, kind: node.kind, scope: [], inputs: { value: { [paramName]: value } }, seeded: true }
+          this.registerActivation(act, [])
+          this.queue.push(act)
         }
         if (paramName in params) {
           // A value was supplied up-front — use it, no prompt.
@@ -616,7 +781,9 @@ export class Scheduler {
           // beams and a cancel routes to its `error` output exactly like a
           // mid-run input. The renderer groups these start-time prompts into
           // one "run parameters" modal; the run is live the whole time.
-          this.queue.push({ nodeId: node.id, kind: node.kind, scope: [], inputs: {}, seeded: false })
+          const act: InternalActivation = { nodeId: node.id, kind: node.kind, scope: [], inputs: {}, seeded: false }
+          this.registerActivation(act, [])
+          this.queue.push(act)
         } else {
           // Headless run (MCP / sub-scenario), no value — fall back to the
           // node's configured default; there's no UI to prompt.
@@ -625,7 +792,9 @@ export class Scheduler {
         this.scopes.enter([])
         continue
       }
-      this.queue.push({ nodeId: node.id, kind: node.kind, scope: [], inputs: {}, seeded: true })
+      const act: InternalActivation = { nodeId: node.id, kind: node.kind, scope: [], inputs: {}, seeded: true }
+      this.registerActivation(act, [])
+      this.queue.push(act)
       this.scopes.enter([])
     }
   }
@@ -708,12 +877,16 @@ export class Scheduler {
       if (collected.has(i)) items.push(collected.get(i))
       else missingIndices.push(i)
     }
-    this.queue.push({
+    const act: InternalActivation = {
       nodeId: node.id,
       kind: node.kind,
       scope: token.scope,
       inputs: { items, __aggregate: { total, missingIndices } }
-    })
+    }
+    // The aggregate is triggered by a loop's `done` (a continuation), so it
+    // roots a fresh subtree — no parents.
+    this.registerActivation(act, [])
+    this.queue.push(act)
     this.scopes.enter(token.scope)
   }
 
@@ -801,7 +974,7 @@ export class Scheduler {
       this.flushWaiters()
       return
     }
-    if (this.queue.length > 0 || this.inFlight > 0) return
+    if (this.queue.length > 0 || this.inFlight > 0 || this.pendingReentry > 0) return
     this.state = 'completed'
     this.logRunBoundary('end')
     this.emit({ type: 'run-completed', runId: this.runId, at: now() })

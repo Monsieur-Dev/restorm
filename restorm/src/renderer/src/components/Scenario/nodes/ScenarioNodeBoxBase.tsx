@@ -543,6 +543,16 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
           title="error"
         />
       )}
+      {/* Universal completion signal: fires once this box AND its whole
+       * downstream sub-graph have finished. Implicit like `error` (drawn on
+       * every box, never listed per-kind) so it stays consistent everywhere. */}
+      <Handle
+        id="done"
+        type="source"
+        position={Position.Bottom}
+        className={`scn-handle scn-handle-done ${outputFlowRingClass('done', data.outputs, data.kind)}`}
+        title="done"
+      />
       {/* The BorderBeam orbits the full box outline. Rendered LAST so it
        * paints on top of the header background — otherwise the trail's lap
        * along the top edge disappears behind the header's solid fill. */}

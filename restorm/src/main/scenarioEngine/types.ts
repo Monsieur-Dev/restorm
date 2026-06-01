@@ -48,6 +48,12 @@ export interface Token {
   /** Monotonically-increasing token id (for trace + dedupe). Assigned
    * by the engine when the token leaves an executor. */
   tokenId: number
+  /** Completion id of the activation that emitted this token, when the
+   * token is part of that activation's DATA subtree (drives the universal
+   * `done` port). Left undefined for CONTINUATION tokens — a `done` signal,
+   * a loop's `each` / `then` / `done` — which start a fresh sub-tree rather
+   * than extending the emitter's. */
+  emitter?: number
 }
 
 /**
@@ -67,6 +73,10 @@ export interface Activation {
    * this to skip the mid-run prompt — the up-front form already
    * collected the value. */
   seeded?: boolean
+  /** Completion id assigned by the scheduler when the activation is created
+   * — the key into the completion tree that drives the universal `done`
+   * port (post-order subtree completion). */
+  completionId?: number
 }
 
 /** One output emission from an executor: the port + the value to put

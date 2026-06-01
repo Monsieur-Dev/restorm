@@ -128,14 +128,15 @@ describe('while / doWhile — engine-managed scope loop', () => {
     const scenario = buildScenario(
       [
         { id: 'init', kind: 'now', outputs: ['out'] },
-        { id: 'w', kind: 'while', inputs: ['in'], outputs: ['then', 'else'], config: { operator: '>', left: { type: 'variable', value: 'n' }, right: { type: 'numeric', value: 0 } } },
+        { id: 'w', kind: 'while', inputs: ['in'], outputs: ['then', 'done'], config: { operator: '>', left: { type: 'variable', value: 'n' }, right: { type: 'numeric', value: 0 } } },
         { id: 'body', kind: 'now', inputs: ['in'], outputs: [] },
         { id: 'exit', kind: 'now', inputs: ['in'], outputs: [] }
       ],
       [
         { from: ['init', 'out'], to: ['w', 'in'] },
         { from: ['w', 'then'], to: ['body', 'in'] },
-        { from: ['w', 'else'], to: ['exit', 'in'] }
+        // Loop exit routes through the universal `done` port (no `else` output).
+        { from: ['w', 'done'], to: ['exit', 'in'] }
       ]
     )
     let bodyRuns = 0
@@ -157,14 +158,15 @@ describe('while / doWhile — engine-managed scope loop', () => {
     const scenario = buildScenario(
       [
         { id: 'init', kind: 'now', outputs: ['out'] },
-        { id: 'dw', kind: 'doWhile', inputs: ['in'], outputs: ['then', 'else'], config: { operator: '>', left: { type: 'variable', value: 'n' }, right: { type: 'numeric', value: 0 } } },
+        { id: 'dw', kind: 'doWhile', inputs: ['in'], outputs: ['then', 'done'], config: { operator: '>', left: { type: 'variable', value: 'n' }, right: { type: 'numeric', value: 0 } } },
         { id: 'body', kind: 'now', inputs: ['in'], outputs: [] },
         { id: 'exit', kind: 'now', inputs: ['in'], outputs: [] }
       ],
       [
         { from: ['init', 'out'], to: ['dw', 'in'] },
         { from: ['dw', 'then'], to: ['body', 'in'] },
-        { from: ['dw', 'else'], to: ['exit', 'in'] }
+        // Loop exit routes through the universal `done` port (no `else` output).
+        { from: ['dw', 'done'], to: ['exit', 'in'] }
       ]
     )
     let bodyRuns = 0
@@ -181,6 +183,37 @@ describe('while / doWhile — engine-managed scope loop', () => {
     expect(bodyRuns).toBe(1) // body-first: runs once, then 0>0 false → exit
     expect(exitRuns).toBe(1)
   })
+
+  it('a runaway synchronous loop stays Stoppable (yields to the macrotask queue)', async () => {
+    // A while with a synchronous body that would iterate a very long time. A
+    // Stop scheduled on a MACROTASK (setTimeout — exactly how the IPC Stop
+    // arrives) must land and cancel the run. Without periodic yielding, the
+    // microtask chain starves the macrotask queue: the Stop never fires and
+    // the app freezes. The loop must yield so it stays interruptible.
+    const scenario = buildScenario(
+      [
+        { id: 'init', kind: 'now', outputs: ['out'] },
+        { id: 'w', kind: 'while', inputs: ['in'], outputs: ['then', 'done'], config: { operator: '<', left: { type: 'variable', value: 'n' }, right: { type: 'numeric', value: 300_000 } } },
+        { id: 'body', kind: 'now', inputs: ['in'], outputs: [] }
+      ],
+      [
+        { from: ['init', 'out'], to: ['w', 'in'] },
+        { from: ['w', 'then'], to: ['body', 'in'] }
+      ]
+    )
+    let bodyRuns = 0
+    const executors = new Map<string, NodeExecutor>([
+      ['init', (_act, ctx) => { ctx.variables.set('n', 0); return { outputs: [{ port: 'out', value: 1 }] } }],
+      ['w', whileExecutor],
+      ['body', (_act, ctx) => { bodyRuns += 1; const n = ctx.variables.get('n'); ctx.variables.set('n', (typeof n === 'number' ? n : 0) + 1); return { outputs: [] } }]
+    ])
+    const s = new Scheduler({ scenario, executors })
+    const done = s.run()
+    setTimeout(() => { s.abort('stop') }, 10)
+    await done
+    expect(s.status().state).toBe('cancelled')
+    expect(bodyRuns).toBeLessThan(300_000) // interrupted well before the natural exit
+  }, 5000)
 })
 
 // ------------------------------------------------------------------

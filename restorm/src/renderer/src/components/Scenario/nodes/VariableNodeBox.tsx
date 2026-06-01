@@ -222,7 +222,8 @@ export const SetVariableNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
     }
   ]
   // No data `value` output: a setVariable stores its input into the named
-  // variable (referenced elsewhere via the value selector's "Variables" menu)
-  // and only emits a header `event` signal on completion to chain the next node.
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerEventOutput />
+  // variable (referenced elsewhere via the value selector's "Variables" menu).
+  // A header `in` trigger sequences it; completion chains via the universal
+  // `Done` port (which replaced the old redundant `event` signal).
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} launchInput />
 }
