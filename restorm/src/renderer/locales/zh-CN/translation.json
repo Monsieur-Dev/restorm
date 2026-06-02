@@ -798,7 +798,6 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "locked": "场景运行时编辑已锁定",
     "switch": {
       "addCase": "添加分支",
@@ -886,7 +885,6 @@
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "调用此场景时必填",
       "addParam": "添加参数",
       "removeParam": "移除"
     },
@@ -910,8 +908,7 @@
       },
       "output": {
         "missingName": "此输出必须有名称。",
-        "duplicateName": "名称“{{name}}”已被另一个输出使用。",
-        "valueRequired": "“value”输入必须连接到一个来源。"
+        "duplicateName": "名称“{{name}}”已被另一个输出使用。"
       },
       "getVariable": {
         "noSelection": "必须选择一个变量。",
@@ -938,8 +935,7 @@
         "missing": "关联的请求已不存在。"
       },
       "runScenario": {
-        "missing": "关联的场景已不存在。",
-        "requiredInput": "必填输入\"{{name}}\"必须连线或赋值。"
+        "missing": "关联的场景已不存在。"
       }
     },
     "usage": {

@@ -19,9 +19,9 @@ describe('defaultPortsForKind — header `in` trigger from the capability', () =
     }
   })
 
-  it('does NOT stamp `in` for the `output` sink', () => {
-    expect(hasIn('output')).toBe(false)
-    expect(acceptsInputEvent('output')).toBe(false)
+  it('stamps `in` for the `output` sink too (it can be sequenced)', () => {
+    expect(hasIn('output')).toBe(true)
+    expect(acceptsInputEvent('output')).toBe(true)
   })
 
   it('keeps `in` first on a kind that already had it (if)', () => {
@@ -58,20 +58,6 @@ describe('deriveRunScenarioPorts — runScenario ports from the sub-scenario', (
       { kind: 'input', config: { name: 'a' } }
     ])
     expect(deriveRunScenarioPorts(sub).inputs.map((p) => p.id)).toEqual(['param:a'])
-  })
-
-  it('marks a derived input port required when the input node is flagged required', () => {
-    const sub = scenarioWith([
-      { kind: 'input', config: { name: 'token', required: true } },
-      { kind: 'input', config: { name: 'note', required: false } },
-      { kind: 'input', config: { name: 'page' } }
-    ])
-    const { inputs } = deriveRunScenarioPorts(sub)
-    expect(inputs.map((p) => [p.name, p.required ?? false])).toEqual([
-      ['token', true],
-      ['note', false],
-      ['page', false]
-    ])
   })
 
   it('exposes a single `done` signal output when the sub-scenario returns no data', () => {

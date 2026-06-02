@@ -798,7 +798,6 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "locked": "Đã khóa chỉnh sửa khi kịch bản đang chạy",
     "switch": {
       "addCase": "Thêm trường hợp",
@@ -886,7 +885,6 @@
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Bắt buộc cho các kịch bản gọi đến",
       "addParam": "Thêm tham số",
       "removeParam": "Xóa"
     },
@@ -910,8 +908,7 @@
       },
       "output": {
         "missingName": "Đầu ra này phải có tên.",
-        "duplicateName": "Tên \"{{name}}\" đã được đầu ra khác sử dụng.",
-        "valueRequired": "Đầu vào \"value\" phải được nối với một nguồn."
+        "duplicateName": "Tên \"{{name}}\" đã được đầu ra khác sử dụng."
       },
       "getVariable": {
         "noSelection": "Phải chọn một biến.",
@@ -938,8 +935,7 @@
         "missing": "Yêu cầu được liên kết không còn tồn tại."
       },
       "runScenario": {
-        "missing": "Kịch bản được liên kết không còn tồn tại.",
-        "requiredInput": "Đầu vào bắt buộc \"{{name}}\" phải được kết nối hoặc được gán giá trị."
+        "missing": "Kịch bản được liên kết không còn tồn tại."
       }
     },
     "usage": {

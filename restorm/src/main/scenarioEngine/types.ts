@@ -184,6 +184,11 @@ export interface ExecContext {
    * executor when an upstream node has already supplied a value the
    * user can still override. */
   requestUserInput: (req: { name: string; defaultValue: unknown; hint: 'string' | 'number' | 'boolean' | 'object'; valueType?: unknown }) => Promise<unknown>
+  /** Whether this run prompts the user (a UI run). A mid-flow `input` only
+   * raises its prompt when true; a non-interactive run (MCP / headless e2e)
+   * falls back to the param's configured default so it never blocks. The flag
+   * propagates into sub-scenarios. */
+  interactive: boolean
   /** The node being executed — handy when the executor needs to read
    * its `config` (request id, comparator op, switch cases, …) without
    * the engine having to pre-extract everything. */

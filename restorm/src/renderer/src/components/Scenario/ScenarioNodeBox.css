@@ -1250,21 +1250,6 @@
   font-size: 12px;
 }
 
-/* `input` node "required by callers" toggle: a compact checkbox + label row. */
-.scn-required-toggle {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  color: var(--descriptionForeground, #999);
-  cursor: pointer;
-  user-select: none;
-}
-.scn-required-toggle input {
-  margin: 0;
-  cursor: pointer;
-}
-
 /* Object-builder property row: name field stacked above its value selector. */
 .scn-object-property {
   display: flex;

@@ -43,12 +43,11 @@ export const InputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
   // user types into it. Mirrors the object node.
   const displayParams: InputParam[] = params.length > 0
     ? params
-    : [{ id: INPUT_DEFAULT_PARAM_ID, name: '', valueType: { type: 'string', value: '' }, required: false }]
+    : [{ id: INPUT_DEFAULT_PARAM_ID, name: '', valueType: { type: 'string', value: '' } }]
   // A no-trigger input runs at the very start, before any variable is set, so a
   // default can't reference a variable → hide the Variables menu. With a
   // trigger it runs mid-flow, so variables are fair game EXCEPT a param's own
-  // name (a param referencing itself is meaningless). The `required` flag marks
-  // the derived `param:<name>` port mandatory on a calling runScenario box.
+  // name (a param referencing itself is meaningless).
   const hasTrigger = useNodeConnections({ id, handleType: 'target', handleId: 'in' }).length > 0
   const invalidParams = new Set(useScenarioNodeErrors(id).map((e) => e.field).filter((f): f is string => f != null))
   const setParams = (next: InputParam[]): void => { data.onSetConfig?.(id, { params: next }) }
@@ -76,15 +75,6 @@ export const InputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
           removeLabel={t('scenario.input.removeParam', 'Supprimer')}
           dataTestId={`scn-input-${p.id}`}
         />
-        <label className="scn-required-toggle nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
-          <input
-            type="checkbox"
-            checked={p.required === true}
-            onChange={(e) => { setParams(displayParams.map((x) => (x.id === p.id ? { ...x, required: e.target.checked } : x))) }}
-            data-testid={`scn-input-${p.id}-required`}
-          />
-          <span>{t('scenario.input.required', 'Required by calling scenarios')}</span>
-        </label>
       </div>
     )
   }))
@@ -95,7 +85,7 @@ export const InputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
         small
         secondary
         icon="add"
-        onClick={() => { setParams([...displayParams, { id: paramId(), name: '', valueType: { type: 'string', value: '' }, required: false }]) }}
+        onClick={() => { setParams([...displayParams, { id: paramId(), name: '', valueType: { type: 'string', value: '' } }]) }}
         options={{ ariaLabel: t('scenario.input.addParam', 'Add parameter'), title: t('scenario.input.addParam', 'Add parameter') }}
         data-testid="scenario-input-add-param"
       />
@@ -168,9 +158,9 @@ const OutputDeclRow: React.FC<{
  * under that name, which a parent `runScenario` derives into an `output:<name>`
  * port. Same row interface as the `object` builder — the name survives wiring,
  * only the value sub-area swaps to the JSON-path selector. A fresh / emptied
- * output shows one default row (not persisted until typed). Terminal sink — no
- * `done` / `error` / output port (see `scenarioNodeCapabilities`). Decls persist
- * in config.
+ * output shows one default row (not persisted until typed). Carries the header
+ * `in` trigger (so it can be sequenced) but no `done` / `error` / output port
+ * (see `scenarioNodeCapabilities`). Decls persist in config.
  */
 export const OutputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
   const { t } = useTranslation()

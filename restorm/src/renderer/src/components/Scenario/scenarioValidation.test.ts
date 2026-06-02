@@ -156,8 +156,10 @@ describe('scenarioValidation — names', () => {
     expect(codes(run([node('i', 'input', { params: [] })]), 'i')).toContain('missing-name')
   })
 
-  it('requires an output value to be wired (legacy single output migrates to the `value` port)', () => {
-    expect(codes(run([node('o', 'output', { name: 'out' })]), 'o')).toContain('value-required')
+  it('a named legacy single output is valid whether its value is wired or not', () => {
+    // Legacy `{ name }` migrates to one decl on the `value` port. A name is all
+    // it needs — an unwired value is fine (it emits an empty string).
+    expect(run([node('o', 'output', { name: 'out' })]).has('o')).toBe(false)
     expect(run([node('o', 'output', { name: 'out' })], { connected: [targetKey('o', 'value')] }).has('o')).toBe(false)
   })
 
@@ -166,16 +168,14 @@ describe('scenarioValidation — names', () => {
     expect(codes(run([node('o', 'output', { outputs: [] })]), 'o')).toContain('missing-name')
   })
 
-  it('validates a MULTI-output node per decl (each name + each value wired)', () => {
+  it('validates a MULTI-output node per decl (names only; an unwired value is fine)', () => {
     const decls = [{ id: 'd1', name: 'a' }, { id: 'd2', name: 'b' }, { id: 'd3', name: '' }]
     const map = run([node('o', 'output', { outputs: decls })], { connected: [targetKey('o', 'd1')] })
     const byField = (map.get('o') ?? []).map((e) => [e.code, e.field])
-    expect(byField).toEqual(expect.arrayContaining([
-      ['value-required', 'd2'], // named but unwired
-      ['missing-name', 'd3'] // blank name
-    ]))
-    // d1 is named AND wired → no error for it.
-    expect(byField.some(([, f]) => f === 'd1')).toBe(false)
+    // Only the blank-named decl errors; an unwired value (d2) is NOT an error —
+    // an output simply emits its literal (an empty string by default).
+    expect(byField).toEqual([['missing-name', 'd3']])
+    expect(byField.some(([, f]) => f === 'd1' || f === 'd2')).toBe(false)
   })
 
   it('flags duplicate output names across decls / nodes', () => {

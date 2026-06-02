@@ -47,8 +47,12 @@ export const ScenarioDebugBezierEdge: React.FC<EdgeProps> = ({
 
   // Compare-and-set in RENDER (not in an effect): React Compiler's
   // `react-hooks/set-state-in-effect` rule blocks the effect-based variant,
-  // and this is the textbook prop-driven transition pattern.
-  const [lastSeenToken, setLastSeenToken] = useState(0)
+  // and this is the textbook prop-driven transition pattern. `lastSeenToken`
+  // SEEDS to the token present at mount, so the beam fires only when the token
+  // CHANGES on an already-mounted edge — never on a fresh mount that happens to
+  // carry a stale token (e.g. an edge restored by Ctrl+Z after a delete, or
+  // re-keyed mid-run), which would otherwise replay a phantom lap.
+  const [lastSeenToken, setLastSeenToken] = useState(token)
   const [activeToken, setActiveToken] = useState(0)
   if (token !== lastSeenToken) {
     setLastSeenToken(token)

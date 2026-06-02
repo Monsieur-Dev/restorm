@@ -799,7 +799,6 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "locked": "Edición bloqueada mientras el escenario se está ejecutando",
     "switch": {
       "addCase": "Añadir caso",
@@ -887,7 +886,6 @@
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Obligatorio para los escenarios que lo llaman",
       "addParam": "Añadir parámetro",
       "removeParam": "Eliminar"
     },
@@ -911,8 +909,7 @@
       },
       "output": {
         "missingName": "Esta salida debe tener un nombre.",
-        "duplicateName": "El nombre «{{name}}» ya lo usa otra salida.",
-        "valueRequired": "La entrada «value» debe estar conectada a una fuente."
+        "duplicateName": "El nombre «{{name}}» ya lo usa otra salida."
       },
       "getVariable": {
         "noSelection": "Debe seleccionarse una variable.",
@@ -939,8 +936,7 @@
         "missing": "La petición vinculada ya no existe."
       },
       "runScenario": {
-        "missing": "El escenario vinculado ya no existe.",
-        "requiredInput": "La entrada requerida \"{{name}}\" debe conectarse o recibir un valor."
+        "missing": "El escenario vinculado ya no existe."
       }
     },
     "usage": {

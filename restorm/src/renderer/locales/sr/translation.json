@@ -800,7 +800,6 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "locked": "Уређивање закључано док се сценарио извршава",
     "switch": {
       "addCase": "Додај случај",
@@ -888,7 +887,6 @@
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Обавезно за сценарије који га позивају",
       "addParam": "Додај параметар",
       "removeParam": "Уклони"
     },
@@ -912,8 +910,7 @@
       },
       "output": {
         "missingName": "Овај излаз мора имати назив.",
-        "duplicateName": "Назив „{{name}}“ већ користи други излаз.",
-        "valueRequired": "Улаз „value“ мора бити повезан са извором."
+        "duplicateName": "Назив „{{name}}“ већ користи други излаз."
       },
       "getVariable": {
         "noSelection": "Мора се изабрати променљива.",
@@ -940,8 +937,7 @@
         "missing": "Повезани захтев више не постоји."
       },
       "runScenario": {
-        "missing": "Повезани сценарио више не постоји.",
-        "requiredInput": "Обавезни улаз „{{name}}\" мора бити повезан или му се мора дати вредност."
+        "missing": "Повезани сценарио више не постоји."
       }
     },
     "usage": {

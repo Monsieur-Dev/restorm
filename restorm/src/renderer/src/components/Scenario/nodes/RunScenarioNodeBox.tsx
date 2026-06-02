@@ -128,7 +128,7 @@ export const RunScenarioNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
     rows.push({
       id: port.id,
       label: port.name,
-      port: { id: port.id, type: 'target', ...(port.required ? { required: true } : {}), ...(port.flow ? { flow: port.flow } : {}) },
+      port: { id: port.id, type: 'target', ...(port.flow ? { flow: port.flow } : {}) },
       content: (
         <div className="nodrag scn-stacked-field" onMouseDown={(e) => { e.stopPropagation() }}>
           <span className="scn-port-label">{port.name}</span>

@@ -11,14 +11,14 @@ import type { ScenarioNodeKind } from './types/scenario'
 /**
  * Kinds that do NOT accept a header input-event (the `in` launch trigger).
  *
- * Default: every kind accepts one. Even the "data-driven" nodes (comparator,
- * object, map/filter/aggregate, boolean, arithmetic, …) benefit from it: they
+ * Default: every kind accepts one — including the "data-driven" nodes
+ * (comparator, object, map/filter/aggregate, boolean, arithmetic, …), which
  * routinely read variables, so a trigger lets a flow say WHEN to (re)compute /
  * re-fetch a variable's current value rather than only running once their value
- * inputs resolve. The sole opt-out is a terminal sink that has nothing to
- * sequence: `output` consumes a value and exposes it as a scenario output.
+ * inputs resolve. Even the `output` sink keeps it, so it can be sequenced in a
+ * flow. No kind opts out today (kept as the hook for any that should).
  */
-const NO_INPUT_EVENT = new Set<ScenarioNodeKind>(['output'])
+const NO_INPUT_EVENT = new Set<ScenarioNodeKind>()
 
 /**
  * Kinds whose inspector preview is fully derived from their config (no run / no

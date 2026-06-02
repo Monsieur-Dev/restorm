@@ -798,7 +798,6 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "locked": "シナリオの実行中は編集がロックされます",
     "switch": {
       "addCase": "ケースを追加",
@@ -886,7 +885,6 @@
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "呼び出し元シナリオで必須",
       "addParam": "パラメータを追加",
       "removeParam": "削除"
     },
@@ -910,8 +908,7 @@
       },
       "output": {
         "missingName": "この出力には名前が必要です。",
-        "duplicateName": "名前「{{name}}」は別の出力で既に使われています。",
-        "valueRequired": "「value」入力はソースに接続する必要があります。"
+        "duplicateName": "名前「{{name}}」は別の出力で既に使われています。"
       },
       "getVariable": {
         "noSelection": "変数を選択する必要があります。",
@@ -938,8 +935,7 @@
         "missing": "リンクされたリクエストは存在しません。"
       },
       "runScenario": {
-        "missing": "リンクされたシナリオは存在しません。",
-        "requiredInput": "必須入力「{{name}}」は接続するか値を指定する必要があります。"
+        "missing": "リンクされたシナリオは存在しません。"
       }
     },
     "usage": {

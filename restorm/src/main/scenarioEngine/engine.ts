@@ -131,14 +131,17 @@ export class ScenarioEngine {
     const scheduler = new Scheduler({
       scenario,
       executors,
+      isSubScenario: callCtx.parentRunId !== undefined,
       ...(parentSignal ? { parentSignal } : {}),
       runSubScenario: async (subId, params, subParentSignal) => {
         const subStack = new Set(callCtx.stack)
         subStack.add(scenarioId)
         // Forward the calling node's abort signal so a Stop cascades all
         // the way down the sub-scenario tree, and link the sub-run to
-        // this run in the archive via `parentRunId`.
-        const handle = this.startWithStack(subId, { params }, { stack: subStack, launcherScenarioId: callCtx.launcherScenarioId, parentRunId: scheduler.runId, ...(callCtx.snapshots ? { snapshots: callCtx.snapshots } : {}) }, subParentSignal)
+        // this run in the archive via `parentRunId`. The interactive flag
+        // propagates too, so a mid-flow input inside a called scenario still
+        // prompts the user (its entry inputs come from `params`, no prompt).
+        const handle = this.startWithStack(subId, { params, ...(options.interactive !== undefined ? { interactive: options.interactive } : {}) }, { stack: subStack, launcherScenarioId: callCtx.launcherScenarioId, parentRunId: scheduler.runId, ...(callCtx.snapshots ? { snapshots: callCtx.snapshots } : {}) }, subParentSignal)
         return handle.done
       }
     })

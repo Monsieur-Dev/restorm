@@ -801,7 +801,6 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "locked": "Редагування заблоковано під час виконання сценарію",
     "switch": {
       "addCase": "Додати випадок",
@@ -889,7 +888,6 @@
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Обов'язково для сценаріїв, що викликають",
       "addParam": "Додати параметр",
       "removeParam": "Видалити"
     },
@@ -913,8 +911,7 @@
       },
       "output": {
         "missingName": "Цей вихід повинен мати назву.",
-        "duplicateName": "Назва «{{name}}» вже використовується іншим виходом.",
-        "valueRequired": "Вхід «value» має бути зʼєднаний з джерелом."
+        "duplicateName": "Назва «{{name}}» вже використовується іншим виходом."
       },
       "getVariable": {
         "noSelection": "Потрібно вибрати змінну.",
@@ -941,8 +938,7 @@
         "missing": "Пов'язаний запит більше не існує."
       },
       "runScenario": {
-        "missing": "Пов'язаний сценарій більше не існує.",
-        "requiredInput": "Обов'язковий вхід «{{name}}» має бути з'єднаний або отримати значення."
+        "missing": "Пов'язаний сценарій більше не існує."
       }
     },
     "usage": {

@@ -798,7 +798,6 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "locked": "場景執行時編輯已鎖定",
     "switch": {
       "addCase": "新增分支",
@@ -886,7 +885,6 @@
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "呼叫此情境時必填",
       "addParam": "新增參數",
       "removeParam": "移除"
     },
@@ -910,8 +908,7 @@
       },
       "output": {
         "missingName": "此輸出必須有名稱。",
-        "duplicateName": "名稱「{{name}}」已被另一個輸出使用。",
-        "valueRequired": "「value」輸入必須連接到一個來源。"
+        "duplicateName": "名稱「{{name}}」已被另一個輸出使用。"
       },
       "getVariable": {
         "noSelection": "必須選擇一個變數。",
@@ -938,8 +935,7 @@
         "missing": "關聯的請求已不存在。"
       },
       "runScenario": {
-        "missing": "關聯的場景已不存在。",
-        "requiredInput": "必填輸入「{{name}}」必須連線或給定值。"
+        "missing": "關聯的場景已不存在。"
       }
     },
     "usage": {

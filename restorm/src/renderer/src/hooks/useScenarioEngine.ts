@@ -37,6 +37,10 @@ export interface EngineEventLike {
 }
 
 export interface PendingUserInput {
+  /** The run that raised this prompt — the TOP-LEVEL run for an entry input, or
+   * a SUB-scenario's run for a mid-flow input inside a called scenario. The
+   * answer must route back to THIS run, not the top-level one. */
+  runId: string
   requestId: string
   nodeId: string
   name: string
@@ -149,6 +153,10 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
   const [lastStartedNodeId, setLastStartedNodeId] = useState<string | null>(null)
   const [edgeTokens, setEdgeTokens] = useState<Map<string, number>>(new Map())
   const [pendingInputs, setPendingInputs] = useState<PendingUserInput[]>([])
+  // Mirror so `resolveUserInput` / `cancelUserInput` can route an answer back to
+  // the run that raised it (a sub-scenario's run, not always the top-level one).
+  const pendingInputsRef = useRef<PendingUserInput[]>([])
+  useEffect(() => { pendingInputsRef.current = pendingInputs }, [pendingInputs])
   const [runLog, setRunLog] = useState<ScenarioLogEntry[]>([])
   // Mirror runId into a ref via useEffect — never assign during
   // render. The ref lets the event subscription (which closes over a
@@ -222,6 +230,30 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
           // Clear the previous run's logs the moment a new run starts, so the
           // inspector panel doesn't show stale entries until the first poll.
           setRunLog([])
+          // Drop any prompt left dangling by a previous (e.g. stopped) run.
+          setPendingInputs([])
+        }
+        return
+      }
+      // Input prompts are surfaced for THIS tab's WHOLE run tree — including
+      // sub-scenarios, whose runId differs from the top-level run. A mid-flow
+      // input inside a called scenario must still ask the user (otherwise its
+      // executor awaits forever and the parent run hangs). Gate by the launcher
+      // (the tab that started the run), NOT the top runId, and remember the
+      // request's own runId so the answer routes back to the right scheduler.
+      if (event.type === 'user-input-requested') {
+        if (event.launcherScenarioId !== scenarioIdRef.current) return
+        if (event.runId && event.requestId && event.nodeId && event.name) {
+          const pending: PendingUserInput = {
+            runId: event.runId,
+            requestId: event.requestId,
+            nodeId: event.nodeId,
+            name: event.name,
+            defaultValue: event.defaultValue,
+            hint: event.hint ?? 'string',
+            ...(event.valueType !== undefined ? { valueType: event.valueType } : {})
+          }
+          setPendingInputs((prev) => [...prev, pending])
         }
         return
       }
@@ -379,20 +411,6 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
           }
           break
         }
-        case 'user-input-requested': {
-          if (event.requestId && event.nodeId && event.name) {
-            const pending: PendingUserInput = {
-              requestId: event.requestId,
-              nodeId: event.nodeId,
-              name: event.name,
-              defaultValue: event.defaultValue,
-              hint: event.hint ?? 'string',
-              ...(event.valueType !== undefined ? { valueType: event.valueType } : {})
-            }
-            setPendingInputs((prev) => [...prev, pending])
-          }
-          break
-        }
         default: break
       }
     })
@@ -491,14 +509,16 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
   }, [])
 
   const resolveUserInput = useCallback(async (requestId: string, value: unknown): Promise<void> => {
-    const id = runIdRef.current
+    // Route to the run that raised THIS request (a sub-scenario's run for a
+    // mid-flow input), not the top-level run.
+    const id = pendingInputsRef.current.find((p) => p.requestId === requestId)?.runId ?? runIdRef.current
     if (id === null) return
     await bridge()?.scenarioEngineResolveUserInput?.(id, requestId, value)
     setPendingInputs((prev) => prev.filter((p) => p.requestId !== requestId))
   }, [])
 
   const cancelUserInput = useCallback(async (requestId: string): Promise<void> => {
-    const id = runIdRef.current
+    const id = pendingInputsRef.current.find((p) => p.requestId === requestId)?.runId ?? runIdRef.current
     if (id === null) return
     await bridge()?.scenarioEngineCancelUserInput?.(id, requestId)
     setPendingInputs((prev) => prev.filter((p) => p.requestId !== requestId))

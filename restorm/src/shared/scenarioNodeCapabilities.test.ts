@@ -3,9 +3,8 @@ import type { ScenarioNodeKind } from './types/collections'
 import { acceptsInputEvent, hasStaticPreview, hasErrorPort, hasDonePort, STATIC_PREVIEW_KINDS } from './scenarioNodeCapabilities'
 
 describe('scenario node capabilities', () => {
-  it('every kind accepts an input event EXCEPT output', () => {
-    expect(acceptsInputEvent('output')).toBe(false)
-    for (const k of ['if', 'comparator', 'object', 'log', 'httpRequest', 'forEach', 'arithmetic'] as ScenarioNodeKind[]) {
+  it('every kind accepts an input event (incl. the output sink)', () => {
+    for (const k of ['if', 'comparator', 'object', 'log', 'httpRequest', 'forEach', 'arithmetic', 'output'] as ScenarioNodeKind[]) {
       expect(acceptsInputEvent(k), `${k} should accept an input event`).toBe(true)
     }
   })

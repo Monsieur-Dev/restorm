@@ -800,7 +800,6 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "locked": "Editare blocată în timp ce scenariul rulează",
     "switch": {
       "addCase": "Adaugă caz",
@@ -888,7 +887,6 @@
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Obligatoriu pentru scenariile apelante",
       "addParam": "Adaugă parametru",
       "removeParam": "Elimină"
     },
@@ -912,8 +910,7 @@
       },
       "output": {
         "missingName": "Această ieșire trebuie să aibă un nume.",
-        "duplicateName": "Numele „{{name}}” este deja folosit de altă ieșire.",
-        "valueRequired": "Intrarea „value” trebuie conectată la o sursă."
+        "duplicateName": "Numele „{{name}}” este deja folosit de altă ieșire."
       },
       "getVariable": {
         "noSelection": "Trebuie selectată o variabilă.",
@@ -940,8 +937,7 @@
         "missing": "Cererea asociată nu mai există."
       },
       "runScenario": {
-        "missing": "Scenariul asociat nu mai există.",
-        "requiredInput": "Intrarea necesară „{{name}}\" trebuie conectată sau să primească o valoare."
+        "missing": "Scenariul asociat nu mai există."
       }
     },
     "usage": {

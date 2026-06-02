@@ -801,7 +801,6 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "locked": "Úpravy uzamčeny během běhu scénáře",
     "switch": {
       "addCase": "Přidat případ",
@@ -889,7 +888,6 @@
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Vyžadováno pro volající scénáře",
       "addParam": "Přidat parametr",
       "removeParam": "Odebrat"
     },
@@ -913,8 +911,7 @@
       },
       "output": {
         "missingName": "Tento výstup musí mít název.",
-        "duplicateName": "Název „{{name}}“ už používá jiný výstup.",
-        "valueRequired": "Vstup „value“ musí být připojen ke zdroji."
+        "duplicateName": "Název „{{name}}“ už používá jiný výstup."
       },
       "getVariable": {
         "noSelection": "Je nutné vybrat proměnnou.",
@@ -941,8 +938,7 @@
         "missing": "Propojený požadavek již neexistuje."
       },
       "runScenario": {
-        "missing": "Propojený scénář již neexistuje.",
-        "requiredInput": "Povinný vstup „{{name}}\" musí být propojen nebo musí mít hodnotu."
+        "missing": "Propojený scénář již neexistuje."
       }
     },
     "usage": {

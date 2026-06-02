@@ -193,14 +193,6 @@ const emptyStyle: CSSProperties = {
   position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
   pointerEvents: 'none', opacity: 0.6, fontSize: 13, zIndex: 1
 }
-const invalidBannerStyle: CSSProperties = {
-  position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', zIndex: 5,
-  display: 'flex', alignItems: 'center', gap: 6, pointerEvents: 'none',
-  padding: '4px 10px', borderRadius: 4, fontSize: 12,
-  background: 'var(--inputValidation-errorBackground, #5a1d1d)',
-  color: 'var(--inputValidation-errorForeground, #fff)',
-  border: '1px solid var(--inputValidation-errorBorder, #be1100)'
-}
 /** Banner shown while a run is in flight — the graph is read-only until it
  * finishes (no drag / connect / delete / config edits / add-node). */
 const lockedBannerStyle: CSSProperties = {
@@ -350,33 +342,6 @@ function toFlowNode(n: ScenarioNode, handlers: NodeHandlers): Node<NodeData> {
       ...(n.collapsed !== undefined ? { collapsed: n.collapsed } : {})
     }
   }
-}
-
-/**
- * Count required inputs left unsatisfied across the graph — a required port
- * (from the kind's canonical ports, which is what the boxes render) with no
- * incoming edge. A non-zero count makes the scenario invalid / non-runnable.
- * (Literal-value satisfaction lands with the per-slot config model.)
- */
-function countUnsatisfiedRequired(
-  flowNodes: Node<NodeData>[],
-  flowEdges: Edge[],
-  resolveScenario: (id: string) => Scenario | null
-): number {
-  let n = 0
-  for (const node of flowNodes) {
-    const required = defaultPortsForKind(node.data.kind).inputs.filter((i) => i.required)
-    // A runScenario's required inputs are its sub-scenario's required params (derived).
-    if (node.data.kind === 'runScenario') {
-      const subId = typeof node.data.config?.['scenarioId'] === 'string' ? node.data.config['scenarioId'] : undefined
-      const sub = subId ? resolveScenario(subId) : null
-      required.push(...deriveRunScenarioPorts(sub).inputs.filter((i) => i.required))
-    }
-    for (const inp of required) {
-      if (!flowEdges.some((e) => e.target === node.id && e.targetHandle === inp.id)) n++
-    }
-  }
-  return n
 }
 
 /**
@@ -888,7 +853,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   }), [resolveBoundItem])
 
   // Resolve a scenario reference (a runScenario's sub-scenario) to derive its
-  // ports — for orphan-edge detection and the required-input validity count.
+  // ports — for orphan-edge detection and the derived call-signature ports.
   const resolveScenario = useCallback((sid: string): Scenario | null => {
     const it = resolveBoundItem?.(sid) ?? null
     return it && isScenario(it) ? it : null
@@ -1975,9 +1940,6 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     })
   }, [setNodes, setEdges, persist, derivedPortsOf])
 
-  // A required input left unwired makes the scenario non-runnable.
-  const invalidCount = useMemo(() => countUnsatisfiedRequired(nodes, edges, resolveScenario), [nodes, edges, resolveScenario])
-
   // Incoming data links (value/both output → data input) with their JSON-path
   // selector — feeds the empty/malformed-path validation rule. A runScenario's
   // outputs are derived, so merge them when classifying the source flow.
@@ -2056,15 +2018,6 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
           const sub = resolveScenario(scenarioId)
           if (!sub) {
             add(n.id, { code: 'scenario-missing', message: t('scenario.validation.runScenario.missing', 'The bound scenario no longer exists.') })
-          } else {
-            // A required param is satisfied by a wired link OR an inline value
-            // entered on the call site (`config.paramValues[<name>]`).
-            const inlineValues = (n.config['paramValues'] as Record<string, unknown> | undefined) ?? {}
-            for (const port of deriveRunScenarioPorts(sub).inputs) {
-              if (port.required && !connectedTargets.has(targetKey(n.id, port.id)) && inlineValues[port.name] === undefined) {
-                add(n.id, { code: 'required-input', field: port.id, message: t('scenario.validation.runScenario.requiredInput', 'The required input "{{name}}" must be wired or given a value.', { name: port.name }) })
-              }
-            }
           }
         }
       }
@@ -2355,12 +2308,6 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       {nodes.length === 0 && (
         <div data-testid="scenario-editor-empty" style={emptyStyle}>
           {t('scenario.editor.empty', 'Empty scenario — right-click the canvas to add a node')}
-        </div>
-      )}
-      {invalidCount > 0 && !locked && (
-        <div data-testid="scenario-invalid-banner" style={invalidBannerStyle}>
-          <i className="codicon codicon-warning" aria-hidden="true" />
-          {t('scenario.invalid', { count: invalidCount, defaultValue: '{{count}} required input(s) not wired — scenario is not runnable' })}
         </div>
       )}
       {locked && (

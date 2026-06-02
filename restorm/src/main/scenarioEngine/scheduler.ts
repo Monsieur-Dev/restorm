@@ -90,6 +90,11 @@ export interface SchedulerInit {
   /** When set, this run aborts as soon as the parent run aborts — so a
    * Stop on a parent scenario cascades into its sub-scenarios. */
   parentSignal?: AbortSignal
+  /** True when this scheduler runs a SUB-scenario (invoked by a parent's
+   * `runScenario`). A sub never raises the start-time "run parameters" prompt
+   * for its entry inputs — the caller supplies those — but its mid-flow inputs
+   * still prompt (when interactive). */
+  isSubScenario?: boolean
 }
 
 type State = 'idle' | 'running' | 'paused' | 'completed' | 'cancelled' | 'failed'
@@ -116,6 +121,11 @@ export class Scheduler {
   /** Debug run + the set of breakpointed node ids (empty = no breakpoints).
    * Set in `run()` from `RunOptions`. */
   private debug = false
+  /** UI run: mid-flow `input` nodes prompt the user (propagated into subs).
+   * Set in `run()` from `RunOptions`. */
+  private interactive = false
+  /** True for a sub-scenario run (see {@link SchedulerInit.isSubScenario}). */
+  private readonly isSubScenario: boolean
   private breakpoints: ReadonlySet<RuntimeId> = new Set()
   /** Activations already released past their breakpoint (so resume/step runs
    * them instead of re-breaking). Per-activation — each forEach iteration is a
@@ -179,6 +189,7 @@ export class Scheduler {
     this.runId = randomId()
     this.scenario = init.scenario
     this.executors = init.executors
+    this.isSubScenario = init.isSubScenario === true
     if (init.runSubScenario) this.runSubScenario = init.runSubScenario
     // Cascade a parent abort into this (sub-)run: cancelling the parent
     // scenario must stop everything it launched.
@@ -223,6 +234,7 @@ export class Scheduler {
     if (this.state !== 'idle') return this.completionPromise()
     if (opts.maxActivations !== undefined) this.maxActivations = opts.maxActivations
     this.debug = opts.debug === true
+    this.interactive = opts.interactive === true
     if (opts.breakpoints && opts.breakpoints.length > 0) this.breakpoints = new Set(opts.breakpoints)
     this.state = opts.startPaused === true ? 'paused' : 'running'
     this.emit({ type: 'run-started', runId: this.runId, scenarioId: this.scenario.id, at: now() })
@@ -230,7 +242,11 @@ export class Scheduler {
     // toolbar) know the run is armed at the start, ready to step.
     if (opts.startPaused === true) this.emit({ type: 'run-paused', runId: this.runId, at: now() })
     this.logRunBoundary('start')
-    this.seedRoots(opts.params ?? {}, opts.interactive === true)
+    // The start-time "run parameters" prompt for predecessor-less inputs is
+    // raised ONLY for a top-level interactive run. A sub-scenario's entry inputs
+    // are supplied by the calling `runScenario` (or fall back to their default),
+    // so it never re-asks for them.
+    this.seedRoots(opts.params ?? {}, this.interactive && !this.isSubScenario)
     this.tick()
     return this.completionPromise()
   }
@@ -428,6 +444,7 @@ export class Scheduler {
       variables: this.variables,
       runSubScenario: this.runSubScenario ?? (() => Promise.reject<Record<string, unknown>>(new Error('runSubScenario not wired'))),
       requestUserInput: (req) => this.openUserInputRequest(act.nodeId, req),
+      interactive: this.interactive,
       node: this.findNode(act.nodeId)
     }
     const startedAt = now()

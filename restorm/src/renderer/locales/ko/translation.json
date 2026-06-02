@@ -798,7 +798,6 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "locked": "시나리오 실행 중에는 편집이 잠깁니다",
     "switch": {
       "addCase": "케이스 추가",
@@ -886,7 +885,6 @@
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "호출하는 시나리오에 필수",
       "addParam": "매개변수 추가",
       "removeParam": "제거"
     },
@@ -910,8 +908,7 @@
       },
       "output": {
         "missingName": "이 출력에는 이름이 필요합니다.",
-        "duplicateName": "이름 \"{{name}}\"은(는) 다른 출력에서 이미 사용 중입니다.",
-        "valueRequired": "\"value\" 입력은 소스에 연결되어야 합니다."
+        "duplicateName": "이름 \"{{name}}\"은(는) 다른 출력에서 이미 사용 중입니다."
       },
       "getVariable": {
         "noSelection": "변수를 선택해야 합니다.",
@@ -938,8 +935,7 @@
         "missing": "연결된 요청이 더 이상 존재하지 않습니다."
       },
       "runScenario": {
-        "missing": "연결된 시나리오가 더 이상 존재하지 않습니다.",
-        "requiredInput": "필수 입력 \"{{name}}\"은(는) 연결하거나 값을 지정해야 합니다."
+        "missing": "연결된 시나리오가 더 이상 존재하지 않습니다."
       }
     },
     "usage": {

@@ -69,15 +69,20 @@ const inputExecutor: NodeExecutor = async (act, ctx) => {
     const prefill = wiredObj && name in wiredObj
       ? wiredObj[name]
       : (params.length === 1 && wired !== undefined ? wired : configuredDefault)
-    const value = await ctx.requestUserInput({
-      name,
-      defaultValue: prefill,
-      hint: inferHint((param.valueType as { type?: string } | undefined)?.type),
-      // Carry the param's full typed-value shape so the mid-run prompt can render
-      // the matching editor (a datetime picker, a custom-list combobox, …) rather
-      // than collapsing every non-number/boolean type to a bare text field.
-      ...(param.valueType !== undefined && param.valueType !== null ? { valueType: param.valueType } : {})
-    })
+    // A non-interactive run (MCP / headless e2e / a sub-scenario reached by a
+    // headless parent) can't surface a prompt — it would await forever — so it
+    // takes the prefill (wired value or configured default) straight through.
+    const value = ctx.interactive
+      ? await ctx.requestUserInput({
+        name,
+        defaultValue: prefill,
+        hint: inferHint((param.valueType as { type?: string } | undefined)?.type),
+        // Carry the param's full typed-value shape so the mid-run prompt can render
+        // the matching editor (a datetime picker, a custom-list combobox, …) rather
+        // than collapsing every non-number/boolean type to a bare text field.
+        ...(param.valueType !== undefined && param.valueType !== null ? { valueType: param.valueType } : {})
+      })
+      : prefill
     return [name, value] as const
   }))
   return { outputs: [{ port: 'value', value: Object.fromEntries(entries) }] }

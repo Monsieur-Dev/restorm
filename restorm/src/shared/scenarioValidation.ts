@@ -123,9 +123,8 @@ function validateOutput(node: ValidationNode, ctx: ScenarioValidationContext): S
     if ((counts.get(name) ?? 0) > 1) {
       errors.push({ code: 'duplicate-name', field: d.id, message: ctx.t('scenario.validation.output.duplicateName', 'The name "{{name}}" is already used by another output.', { name }) })
     }
-    if (!ctx.connectedTargets.has(targetKey(node.id, d.id))) {
-      errors.push({ code: 'value-required', field: d.id, message: ctx.t('scenario.validation.output.valueRequired', 'The "value" input must be wired to a source.') })
-    }
+    // No "value must be wired" check: an unwired output simply emits its literal
+    // value, which defaults to an empty string — a perfectly valid output.
   }
   return errors
 }

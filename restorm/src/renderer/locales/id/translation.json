@@ -798,7 +798,6 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "locked": "Pengeditan terkunci saat skenario berjalan",
     "switch": {
       "addCase": "Tambah kasus",
@@ -886,7 +885,6 @@
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Wajib untuk skenario pemanggil",
       "addParam": "Tambah parameter",
       "removeParam": "Hapus"
     },
@@ -910,8 +908,7 @@
       },
       "output": {
         "missingName": "Keluaran ini harus memiliki nama.",
-        "duplicateName": "Nama \"{{name}}\" sudah dipakai oleh keluaran lain.",
-        "valueRequired": "Masukan \"value\" harus terhubung ke sumber."
+        "duplicateName": "Nama \"{{name}}\" sudah dipakai oleh keluaran lain."
       },
       "getVariable": {
         "noSelection": "Variabel harus dipilih.",
@@ -938,8 +935,7 @@
         "missing": "Permintaan yang ditautkan tidak ada lagi."
       },
       "runScenario": {
-        "missing": "Skenario yang ditautkan tidak ada lagi.",
-        "requiredInput": "Input wajib \"{{name}}\" harus dihubungkan atau diberi nilai."
+        "missing": "Skenario yang ditautkan tidak ada lagi."
       }
     },
     "usage": {

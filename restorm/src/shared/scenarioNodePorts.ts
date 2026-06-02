@@ -190,7 +190,7 @@ export function deriveRunScenarioPorts(subScenario: Scenario | null | undefined)
         const name = param.name.trim()
         if (!name || seenIn.has(name)) continue
         seenIn.add(name)
-        inputs.push(p({ id: `param:${name}`, name, dataType: dataTypeForValueType(param.valueType), flow: 'value', ...(param.required === true ? { required: true } : {}) }))
+        inputs.push(p({ id: `param:${name}`, name, dataType: dataTypeForValueType(param.valueType), flow: 'value' }))
       }
       continue
     }
