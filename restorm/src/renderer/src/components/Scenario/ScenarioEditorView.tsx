@@ -1510,6 +1510,62 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     })
   }, [setNodes, setEdges, persist])
 
+  // Duplicate EVERY node in `ids` at once (the multi-selection bulk action):
+  // clone each box offset from its source AND re-create the edges that run
+  // BETWEEN two selected boxes (remapped onto the clones), then select the copies.
+  // An edge with one end outside the selection is left alone — its other end
+  // has no counterpart on the copy.
+  const duplicateNodes = useCallback((ids: string[]) => {
+    setSelectionMenu(null)
+    const idSet = new Set(ids)
+    const idMap = new Map<string, string>()
+    const clones: ScenarioNode[] = []
+    let cloneIndex = 0
+    for (const oldId of ids) {
+      const src = nodeStore.current.get(oldId)
+      if (!src) continue
+      // Fresh, unique id per clone — never the source's id. The loop index makes
+      // it collision-proof even when several clones are minted in the same ms
+      // (Date.now() is identical across a synchronous batch).
+      const newId = `${Date.now()}-${cloneIndex++}-${Math.random().toString(36).slice(2, 8)}`
+      idMap.set(oldId, newId)
+      const clone: ScenarioNode = {
+        ...src,
+        id: newId,
+        position: { x: src.position.x + 40, y: src.position.y + 40 },
+        config: { ...src.config },
+        inputs: src.inputs.map((p) => ({ ...p })),
+        outputs: src.outputs.map((p) => ({ ...p }))
+      }
+      nodeStore.current.set(newId, clone)
+      clones.push(clone)
+    }
+    if (clones.length === 0) return
+    // Build the next nodes + edges ONCE from the live refs, then set both and
+    // persist in one shot. Do NOT nest `setEdges` inside a `setNodes` updater:
+    // React StrictMode double-invokes updaters, so a nested `setEdges` runs
+    // twice and — because it APPENDS clones derived from the current edges — the
+    // internal links get cloned twice (the phantom duplicate-link bug).
+    const nextNodes = [
+      ...nodesRef.current.map((n) => ({ ...n, selected: false })),
+      ...clones.map((c) => ({ ...toFlowNode(c, handlers.current), selected: true }))
+    ]
+    const clonedEdges = edgesRef.current
+      .filter((ed) => idSet.has(ed.source) && idSet.has(ed.target))
+      .map((ed, i) => ({
+        ...ed,
+        id: `e-${Date.now()}-${i}-${Math.random().toString(36).slice(2, 8)}`,
+        source: idMap.get(ed.source) ?? ed.source,
+        target: idMap.get(ed.target) ?? ed.target,
+        selected: false,
+        ...(ed.data ? { data: { ...ed.data } } : {})
+      }))
+    const nextEdges = [...edgesRef.current, ...clonedEdges]
+    setNodes(nextNodes)
+    setEdges(nextEdges)
+    persist(nextNodes, nextEdges)
+  }, [setNodes, setEdges, persist])
+
   // Open the colour picker anchored to a node's header.
   const openColorPicker = useCallback((nodeId: string) => {
     setNodeMenu(null)
@@ -2255,6 +2311,9 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
           data-testid="scenario-selection-menu"
           items={[
             { id: 'color', label: t('scenario.node.menu.changeColor', 'Change colour'), icon: 'symbol-color', opensDialog: true, onClick: () => { setMultiColorPicker({ x: selectionMenu.x, y: selectionMenu.y, nodeIds: selectionMenu.nodeIds }); setSelectionMenu(null) } },
+            { id: 'sel-sep-1', label: '', isSeparator: true },
+            { id: 'duplicate', label: t('scenario.node.menu.duplicate', 'Duplicate'), icon: 'copy', onClick: () => { duplicateNodes(selectionMenu.nodeIds) } },
+            { id: 'sel-sep-2', label: '', isSeparator: true },
             { id: 'delete', label: t('scenario.node.menu.delete', 'Delete'), icon: 'trash', shortcut: t('scenario.node.menu.deleteShortcut', 'Del'), onClick: () => { deleteNodes(selectionMenu.nodeIds) } }
           ]}
         />

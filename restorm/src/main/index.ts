@@ -44,6 +44,7 @@ import { graphQLService } from 'electron-core-ui/main'
 import { clearUserSettings, parseCliArgs } from './cli/args'
 import { setupGraphQL } from './GraphQLSetup'
 import { registerRestormIPC } from './IPCHandlers'
+import { installScenarioEngineIPC } from './scenarioEngine/ipcBridge'
 import { registerApiUpdateIPC } from './services/apiUpdate/registerApiUpdateIPC'
 import { runApiUpdateApply } from './services/apiUpdate/orchestrateApply'
 import { loadFolderStructure, attachDraftStoreForFolder, attachDraftStoreForFile, getDraftsRootDir } from './FileOperations'
@@ -539,6 +540,12 @@ ipcMain.handle('runtime:get-config', () => ({
 
 // Register all restorm-specific IPC handlers
 registerRestormIPC({ editorWindows, closeAllWindows })
+
+// Wire the scenario execution engine's IPC bridge unconditionally — the Run /
+// Debug / Step controls in the scenario editor drive it, so it must exist in
+// every build, not only when the embedded MCP server is enabled. Idempotent:
+// the MCP setup path calls it again as a no-op.
+installScenarioEngineIPC()
 
 // Wire the periodic API-update flow. The CollectionStore + persistence
 // hooks are passed in so this module stays unaware of where the data

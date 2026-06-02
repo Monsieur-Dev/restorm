@@ -7,7 +7,11 @@
 import Handlebars from 'handlebars'
 import type { NodeExecutor } from '../types'
 import { literalConfigItems, applyListOp } from '../../../shared/utils/scenarioStaticPreview'
-import { compareValues, resolveOperand } from '../conditionEval'
+import { compareValues, hintFromConfig, resolveOperand, type OperandHint } from '../conditionEval'
+
+/** A wired operand's kind is inferred from its value (pass no hint); an inline
+ * operand's comes from its declared type (incl. all-numeric-enum detection). */
+const hint = (wired: unknown, cfg: unknown): OperandHint | undefined => (wired !== undefined ? undefined : hintFromConfig(cfg))
 
 /** The arithmetic operator toggle persists its SYMBOL vocabulary (`+ − × ÷ %`,
  * with `−` the Unicode minus U+2212, `×` U+00D7, `÷` U+00F7); the executor
@@ -56,7 +60,7 @@ export const comparatorExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { op?: string; operator?: string; a?: unknown; b?: unknown }
   const l = resolveOperand(act.inputs['a'], cfg.a, ctx.variables)
   const r = resolveOperand(act.inputs['b'], cfg.b, ctx.variables)
-  return { outputs: [{ port: 'result', value: compareValues(cfg.operator ?? cfg.op, l, r) }] }
+  return { outputs: [{ port: 'result', value: compareValues(cfg.operator ?? cfg.op, l, r, hint(act.inputs['a'], cfg.a), hint(act.inputs['b'], cfg.b)) }] }
 }
 
 /** Boolean node: `op(a, b)` → boolean. */
@@ -92,7 +96,7 @@ export const ifExecutor: NodeExecutor = (act, ctx) => {
   const right = resolveOperand(act.inputs['right'], cfg.right, ctx.variables)
   const hasOperands = left !== undefined || right !== undefined
   const cond = hasOperands
-    ? compareValues(cfg.operator ?? cfg.op, left, right)
+    ? compareValues(cfg.operator ?? cfg.op, left, right, hint(act.inputs['left'], cfg.left), hint(act.inputs['right'], cfg.right))
     : Boolean(act.inputs['in'])
   // The taken branch carries data forward. A wired `in` passes straight
   // through; otherwise emit BOTH operands as `{ left, right }` — surfacing one
@@ -218,7 +222,7 @@ export const assertExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { op?: string; operator?: string; a?: unknown; b?: unknown }
   const a = resolveOperand(act.inputs['a'], cfg.a, ctx.variables)
   const b = resolveOperand(act.inputs['b'], cfg.b, ctx.variables)
-  const ok = compareValues(cfg.operator ?? cfg.op ?? 'eq', a, b)
+  const ok = compareValues(cfg.operator ?? cfg.op ?? 'eq', a, b, hint(act.inputs['a'], cfg.a), hint(act.inputs['b'], cfg.b))
   const value = act.inputs['in'] ?? a
   return { outputs: [{ port: ok ? 'then' : 'else', value }] }
 }

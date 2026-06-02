@@ -3,8 +3,12 @@
 ## Overview
 
 `DateTimePicker` is a small composite component built on top of `InputBox` and `Tooltip`.
-It displays the selected `Date` as `Date.toString()` in a non-editable input and provides a clock button
-to open a calendar popover for selection.
+It shows the selected `Date` formatted per the active output mode/pattern in an **editable** input, and
+provides a clock button to open a calendar popover for selection. Typing a complete, valid date in the
+input commits it through `onChange` (parsed with luxon to match the displayed format); an incomplete or
+invalid entry is ignored until it becomes valid, so a mid-edit keystroke never commits a wrong value, and
+the input shows a **red validation border** (`aria-invalid`) while the typed text isn't a parseable date
+(an empty field stays neutral).
 
 ## Component Location
 

@@ -44,16 +44,197 @@ export function deepEqual(a: unknown, b: unknown): boolean {
   return true
 }
 
-export function compareValues(op: string | undefined, l: unknown, r: unknown): boolean {
-  switch (op !== undefined ? OPERATOR_ALIASES[op] ?? op : 'eq') {
-    case 'lt': return (l as number) < (r as number)
-    case 'lte': return (l as number) <= (r as number)
-    case 'eq': return deepEqual(l, r)
-    case 'gte': return (l as number) >= (r as number)
-    case 'gt': return (l as number) > (r as number)
-    case 'ne': return !deepEqual(l, r)
-    case 'contains': return stringify(l).includes(stringify(r))
-    default: return deepEqual(l, r)
+/** Semantic kind of an operand — drives which comparisons are meaningful. */
+export type OperandKind = 'number' | 'boolean' | 'string' | 'date' | 'color' | 'enum' | 'object' | 'list' | 'unknown'
+
+/** A kind hint plus, for an enum, whether its WHOLE option set is numeric (so
+ * ordering goes numeric vs lexicographic). A bare `OperandKind` is accepted as
+ * shorthand for `{ kind }`. */
+export interface OperandHint { kind: OperandKind; enumNumeric?: boolean }
+
+function normHint(h: OperandKind | OperandHint | undefined): OperandHint | undefined {
+  return h === undefined ? undefined : typeof h === 'string' ? { kind: h } : h
+}
+
+/** Walk the whole collection tree for the custom value list with `listId`
+ * (RuntimeIds are unique, so no folder context is needed) and report whether
+ * EVERY entry label trims-and-casts to a finite number. `undefined` when the
+ * list is unknown / empty, so callers can fall back to a per-value guess. */
+export function enumOptionsAllNumeric(listId: string): boolean | undefined {
+  const stack: unknown[] = [...collectionStore.getCollections()]
+  while (stack.length > 0) {
+    const item = stack.pop()
+    if (item === null || typeof item !== 'object') continue
+    const lists = (item as { customValueLists?: { id: string; entries?: { label?: unknown }[] }[] }).customValueLists
+    const list = lists?.find((l) => l.id === listId)
+    if (list) {
+      const entries = list.entries ?? []
+      return entries.length > 0 && entries.every((e) => typeof e.label === 'string' && isNumericString(e.label))
+    }
+    const children = (item as { items?: unknown[] }).items
+    if (Array.isArray(children)) stack.push(...children)
+  }
+  return undefined
+}
+
+/** Build the comparison hint for an INLINE operand from its typed-value config:
+ * its declared kind, plus (for an enum) whether its option set is all-numeric. */
+export function hintFromConfig(cfg: unknown): OperandHint | undefined {
+  const kind = kindFromConfig(cfg)
+  if (kind === undefined) return undefined
+  if (kind !== 'enum') return { kind }
+  const listId = cfg !== null && typeof cfg === 'object' ? (cfg as { listId?: unknown }).listId : undefined
+  return { kind, ...(typeof listId === 'string' ? { enumNumeric: enumOptionsAllNumeric(listId) } : {}) }
+}
+
+/** Declared kind of an INLINE operand (from its typed-value config). Wired
+ * operands carry no config type, so their kind is inferred from the value —
+ * which means a wired date/colour/enum (all plain strings at runtime) is
+ * treated as a string. Returns undefined for kinds inferred from the value. */
+export function kindFromConfig(cfg: unknown): OperandKind | undefined {
+  if (cfg === null || typeof cfg !== 'object') return undefined
+  switch ((cfg as { type?: string }).type) {
+    case 'numeric': return 'number'
+    case 'boolean': return 'boolean'
+    case 'datetime': return 'date'
+    case 'color': return 'color'
+    case 'enum': case 'enumList': case 'customList': case 'customListMulti': return 'enum'
+    case 'string': case 'password': case 'expression': return 'string'
+    default: return undefined
+  }
+}
+
+function inferKind(v: unknown): OperandKind {
+  if (Array.isArray(v)) return 'list'
+  if (v !== null && typeof v === 'object') return 'object'
+  if (typeof v === 'number') return 'number'
+  if (typeof v === 'boolean') return 'boolean'
+  if (typeof v === 'string') return 'string'
+  return 'unknown'
+}
+
+/** The value's structure is authoritative for list/object/number/boolean (a
+ * wired array is a list whatever the config claimed); a hint only refines the
+ * string-backed subtypes (date / colour / enum). */
+function effectiveKind(v: unknown, hint?: OperandKind): OperandKind {
+  const inferred = inferKind(v)
+  return inferred === 'string' ? hint ?? 'string' : inferred
+}
+
+const isNumericString = (s: string): boolean => {
+  const t = s.trim()
+  return t !== '' && Number.isFinite(Number(t))
+}
+
+type OrderMode = { t: 'num'; v: number } | { t: 'str'; v: string } | null
+
+/** Reduce an operand to a single ordered axis (number or string), or `null`
+ * when the kind has no meaningful order. Dates order by instant; an enum whose
+ * value is numeric orders numerically, otherwise by its label. */
+function orderModeOf(value: unknown, kind: OperandKind, enumNumeric?: boolean): OrderMode {
+  switch (kind) {
+    case 'number': return { t: 'num', v: typeof value === 'number' ? value : Number(value) }
+    case 'string': return { t: 'str', v: String(value) }
+    case 'date': {
+      const ms = Date.parse(String(value))
+      return Number.isNaN(ms) ? { t: 'str', v: String(value) } : { t: 'num', v: ms }
+    }
+    case 'enum': {
+      // Numeric ordering when the enum's WHOLE option set is numeric (caller-
+      // supplied); without that knowledge, fall back to this value's own shape.
+      const s = String(value)
+      const asNum = enumNumeric ?? isNumericString(s)
+      return asNum ? { t: 'num', v: Number(s.trim()) } : { t: 'str', v: s }
+    }
+    default: return null // boolean, color, object, list, unknown
+  }
+}
+
+const ORDER_SYMBOL: Record<string, string> = { lt: '<', lte: '≤', gt: '>', gte: '≥' }
+
+function orderingCompare(op: string, l: unknown, r: unknown, lk: OperandKind, rk: OperandKind, lEnumNumeric?: boolean, rEnumNumeric?: boolean): boolean {
+  const lm = orderModeOf(l, lk, lEnumNumeric)
+  const rm = orderModeOf(r, rk, rEnumNumeric)
+  const sym = ORDER_SYMBOL[op] ?? op
+  if (lm === null) throw new Error(`Operator "${sym}" cannot order ${lk} values`)
+  if (rm === null) throw new Error(`Operator "${sym}" cannot order ${rk} values`)
+  let lMode = lm
+  let rMode = rm
+  if (lMode.t !== rMode.t) {
+    // A NUMERIC string compared against a number is still a number (a numeric
+    // literal is routinely stored as a string operand) — coerce and compare
+    // numerically. A non-numeric string vs a number is a real type mismatch.
+    if (lMode.t === 'num' && rMode.t === 'str' && isNumericString(rMode.v)) rMode = { t: 'num', v: Number(rMode.v.trim()) }
+    else if (rMode.t === 'num' && lMode.t === 'str' && isNumericString(lMode.v)) lMode = { t: 'num', v: Number(lMode.v.trim()) }
+    else throw new Error(`Operator "${sym}" cannot compare a ${lk} with a ${rk}`)
+  }
+  if (lMode.t === 'str' && rMode.t === 'str') {
+    const a = lMode.v, b = rMode.v
+    return op === 'lt' ? a < b : op === 'lte' ? a <= b : op === 'gt' ? a > b : a >= b
+  }
+  const a = lMode.v as number, b = rMode.v as number
+  return op === 'lt' ? a < b : op === 'lte' ? a <= b : op === 'gt' ? a > b : a >= b
+}
+
+/** Unordered multiset equality: same length, and every element of `a` has a
+ * distinct deep-equal partner in `b`. */
+function listEqual(a: unknown[], b: unknown[]): boolean {
+  if (a.length !== b.length) return false
+  const used = new Array<boolean>(b.length).fill(false)
+  for (const x of a) {
+    const i = b.findIndex((y, j) => !used[j] && deepEqual(x, y))
+    if (i === -1) return false
+    used[i] = true
+  }
+  return true
+}
+
+function equalityCompare(l: unknown, r: unknown, lk: OperandKind, rk: OperandKind): boolean {
+  if (lk === 'list' || rk === 'list') return lk === 'list' && rk === 'list' && listEqual(l as unknown[], r as unknown[])
+  if (lk === 'date' && rk === 'date') {
+    const a = Date.parse(String(l)), b = Date.parse(String(r))
+    if (!Number.isNaN(a) && !Number.isNaN(b)) return a === b
+    return String(l) === String(r)
+  }
+  return deepEqual(l, r) // objects deep; primitives by value; cross-type → false
+}
+
+const STRINGISH = new Set<OperandKind>(['string', 'enum', 'date', 'color'])
+
+/** `right ⊆ left`: every key of `right` exists in `left` with a deep-equal value. */
+function objectSubset(left: unknown, right: unknown): boolean {
+  if (left === null || typeof left !== 'object' || right === null || typeof right !== 'object') return false
+  const l = left as Record<string, unknown>, r = right as Record<string, unknown>
+  for (const k of Object.keys(r)) {
+    if (!Object.prototype.hasOwnProperty.call(l, k) || !deepEqual(l[k], r[k])) return false
+  }
+  return true
+}
+
+function containsCompare(l: unknown, r: unknown, lk: OperandKind, rk: OperandKind): boolean {
+  if (lk === 'object' && rk === 'object') return objectSubset(l, r)
+  if (lk === 'list') return (l as unknown[]).some((x) => deepEqual(x, r))
+  if (STRINGISH.has(lk) && STRINGISH.has(rk)) return stringify(l).includes(stringify(r))
+  throw new Error(`Operator "∋" cannot test a ${lk} for containment of a ${rk}`)
+}
+
+/** Compare two values with the operator. Optional kind hints carry the DECLARED
+ * type of an inline operand so string-backed subtypes (date/colour/enum) get
+ * the right treatment; without a hint the kind is inferred from the value.
+ * Ordering THROWS for kinds with no meaningful order (object/list/boolean/
+ * colour) and for mixed types. */
+export function compareValues(op: string | undefined, l: unknown, r: unknown, lHint?: OperandKind | OperandHint, rHint?: OperandKind | OperandHint): boolean {
+  const lh = normHint(lHint)
+  const rh = normHint(rHint)
+  const canon = op !== undefined ? OPERATOR_ALIASES[op] ?? op : 'eq'
+  const lk = effectiveKind(l, lh?.kind)
+  const rk = effectiveKind(r, rh?.kind)
+  switch (canon) {
+    case 'eq': return equalityCompare(l, r, lk, rk)
+    case 'ne': return !equalityCompare(l, r, lk, rk)
+    case 'contains': return containsCompare(l, r, lk, rk)
+    case 'lt': case 'lte': case 'gt': case 'gte': return orderingCompare(canon, l, r, lk, rk, lh?.enumNumeric, rh?.enumNumeric)
+    default: return equalityCompare(l, r, lk, rk)
   }
 }
 
@@ -97,10 +278,17 @@ export function resolveOperand(wired: unknown, cfgVal: unknown, variables?: Read
  * operands at all, falls back to the truthiness of the `in` trigger. Pass
  * `variables` so a `variable` operand reads the run's live value. */
 export function evaluateCondition(config: Record<string, unknown>, inputs: Record<string, unknown>, variables?: ReadonlyMap<string, unknown>): boolean {
-  const left = resolveOperand(inputs['left'], config['left'], variables)
-  const right = resolveOperand(inputs['right'], config['right'], variables)
+  const leftWired = inputs['left']
+  const rightWired = inputs['right']
+  const left = resolveOperand(leftWired, config['left'], variables)
+  const right = resolveOperand(rightWired, config['right'], variables)
   const hasOperands = left !== undefined || right !== undefined
   if (!hasOperands) return Boolean(inputs['in'])
   const op = typeof config['operator'] === 'string' ? config['operator'] : (typeof config['op'] === 'string' ? config['op'] : undefined)
-  return compareValues(op, left, right)
+  // A wired operand's kind comes from its runtime value; an inline operand's
+  // from its declared type (so a date/colour/enum isn't mistaken for a string,
+  // and an all-numeric enum orders numerically).
+  const lHint = leftWired !== undefined ? undefined : hintFromConfig(config['left'])
+  const rHint = rightWired !== undefined ? undefined : hintFromConfig(config['right'])
+  return compareValues(op, left, right, lHint, rHint)
 }
