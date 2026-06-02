@@ -167,6 +167,20 @@ export type NodeExecutor = (
  * the abort signal for cooperative cancellation, a logger so it can
  * push user-facing entries, and a thin handle to the engine for
  * sub-scenario calls + variable scope. */
+/** A single input prompt a run is awaiting — surfaced so a non-UI consumer
+ * (the MCP status tool) can see the question and answer it by requestId. */
+export interface PendingUserInputInfo {
+  requestId: string
+  nodeId: string
+  /** Param name being asked for. */
+  name: string
+  /** The prefilled value (a literal default or an upstream-wired value). */
+  defaultValue: unknown
+  hint: 'string' | 'number' | 'boolean' | 'object'
+  /** The param's persisted typed-value shape, when known. */
+  valueType?: unknown
+}
+
 export interface ExecContext {
   signal: AbortSignal
   log: (entry: Omit<RunLogEntry, 'ts' | 'runId' | 'source'> & { source?: 'engine' | 'user' }) => void

@@ -18,7 +18,7 @@ import { RunArchive, type ArchivedRun } from './runArchive'
 import { collectReferencedScenarios } from './collectReferencedScenarios'
 import { scenarioRunHistoryService } from '../services/ScenarioRunHistoryService'
 import type { ScenarioRunHistoryStatus, ScenarioRunLogEntry, ScenarioRunSnapshot } from '../../shared/types/scenarioRunHistory'
-import type { EngineEvent, RunLogEntry, RunStatus, RuntimeId } from './types'
+import type { EngineEvent, PendingUserInputInfo, RunLogEntry, RunStatus, RuntimeId } from './types'
 
 export interface RunHandle {
   scheduler: Scheduler
@@ -121,6 +121,19 @@ export class ScenarioEngine {
   resolveUserInput(runId: RuntimeId, requestId: string, value: unknown): void { this.activeRuns.get(runId)?.resolveUserInput(requestId, value) }
 
   cancelUserInput(runId: RuntimeId, requestId: string): void { this.activeRuns.get(runId)?.cancelUserInput(requestId) }
+
+  /** Every input prompt awaiting an answer across a run's whole live tree
+   * (the top run + its in-flight sub-scenarios). Each entry carries the `runId`
+   * that raised it, so a caller answers via `resolveUserInput(runId, …)`. */
+  pendingUserInputs(runId: RuntimeId): (PendingUserInputInfo & { runId: RuntimeId })[] {
+    const out: (PendingUserInputInfo & { runId: RuntimeId })[] = []
+    for (const r of this.runTree(runId)) {
+      const sched = this.activeRuns.get(r.runId)
+      if (!sched) continue
+      for (const info of sched.pendingUserInputs()) out.push({ ...info, runId: r.runId })
+    }
+    return out
+  }
 
   private startWithStack(scenarioId: RuntimeId, options: RunOptions, callCtx: RunCallContext, parentSignal?: AbortSignal): RunHandle {
     const scenario = this.loadScenario(scenarioId, callCtx.snapshots)

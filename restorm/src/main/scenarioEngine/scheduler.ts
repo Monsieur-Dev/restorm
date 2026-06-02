@@ -25,6 +25,7 @@ import type {
   ExecContext,
   ExecResult,
   NodeExecutor,
+  PendingUserInputInfo,
   RunLogEntry,
   RunStatus,
   RuntimeId,
@@ -140,7 +141,7 @@ export class Scheduler {
   private activations = 0
   private maxActivations = DEFAULT_MAX_ACTIVATIONS
   private completionWaiters: (() => void)[] = []
-  private readonly pendingInputRequests = new Map<string, { resolve: (v: unknown) => void; reject: (e: Error) => void }>()
+  private readonly pendingInputRequests = new Map<string, { resolve: (v: unknown) => void; reject: (e: Error) => void; info: PendingUserInputInfo }>()
   private userInputSeq = 0
   /** Node ids that have ≥1 incoming edge (so they're NOT roots). */
   private readonly nodesWithIncoming = new Set<string>()
@@ -1077,7 +1078,15 @@ export class Scheduler {
   private openUserInputRequest(nodeId: string, req: { name: string; defaultValue: unknown; hint: 'string' | 'number' | 'boolean' | 'object'; valueType?: unknown }): Promise<unknown> {
     const requestId = `${this.runId}:input:${++this.userInputSeq}`
     return new Promise<unknown>((resolve, reject) => {
-      this.pendingInputRequests.set(requestId, { resolve, reject })
+      const info: PendingUserInputInfo = {
+        requestId,
+        nodeId,
+        name: req.name,
+        defaultValue: req.defaultValue,
+        hint: req.hint,
+        ...(req.valueType !== undefined ? { valueType: req.valueType } : {})
+      }
+      this.pendingInputRequests.set(requestId, { resolve, reject, info })
       this.emit({
         type: 'user-input-requested',
         runId: this.runId,
@@ -1120,6 +1129,13 @@ export class Scheduler {
     if (!pending) return
     this.pendingInputRequests.delete(requestId)
     pending.reject(new Error('Input cancelled by user'))
+  }
+
+  /** The input prompts this run is currently awaiting (an interactive run that
+   * hit an `input` node). Lets a non-UI consumer (the MCP status tool) SEE the
+   * pending question and answer it via {@link resolveUserInput}. */
+  pendingUserInputs(): PendingUserInputInfo[] {
+    return [...this.pendingInputRequests.values()].map((p) => p.info)
   }
 
   private findNode(nodeId: string): typeof this.scenario.nodes[number] {

@@ -67,6 +67,10 @@ export interface UseWorkbenchTabsOptions {
   focusedGroupId: string | null
   setWorkbenchTree: React.Dispatch<React.SetStateAction<WorkbenchTree>>
   registerTabDirtyState: (id: string, checksum: string) => void
+  /** Move workbench focus to a group. Called when a foreground open lands a tab
+   * in a group OTHER than the focused one (e.g. activating an already-open tab
+   * in a side-by-side split) so the destination pane actually gets selected. */
+  focusGroup?: (groupId: string) => void
 }
 
 /** Control whether opening a tab moves focus to it. Middle-click ("open in
@@ -96,7 +100,8 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     rootItems,
     focusedGroupId,
     setWorkbenchTree,
-    registerTabDirtyState
+    registerTabDirtyState,
+    focusGroup
   } = options
 
   const workbenchRef = useRef<RestormWorkbenchHandle>(null)
@@ -192,6 +197,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     // content (the alternative is a blank workbench with a hidden tab
     // in an unreachable group).
     if (prev.groups.length === 0) {
+      if (focus && focusGroup) queueMicrotask(() => { focusGroup('restorm-main-group') })
       return {
         ...prev,
         groups: [
@@ -209,6 +215,9 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     const existingGroupId = findGroupIdForTab(prev.groups, tabId)
     if (existingGroupId) {
       if (!focus) return prev
+      // Move focus to the group that owns the tab, so a foreground open SELECTS
+      // it even when it already lives in another pane of a side-by-side split.
+      if (focusGroup) queueMicrotask(() => { focusGroup(existingGroupId) })
       return {
         ...prev,
         groups: updateGroupById(prev.groups, existingGroupId, (group) => ({
@@ -227,6 +236,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     if (typeof itemId === 'string' && itemId.length > 0) {
       const stale = findTabByItemId(prev.groups, itemId)
       if (stale !== null) {
+        if (focus && focusGroup) queueMicrotask(() => { focusGroup(stale.groupId) })
         const replacedGroups = updateGroupById(prev.groups, stale.groupId, (group) => {
           const nextActive = focus
             ? tabId
@@ -249,6 +259,8 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
       preferredGroupId && hasGroupWithId(prev.groups, preferredGroupId)
         ? preferredGroupId
         : findFirstTabGroupId(prev.groups) ?? 'restorm-main-group'
+
+    if (focus && focusGroup) queueMicrotask(() => { focusGroup(targetGroupId) })
 
     const updatedGroups = hasGroupWithId(prev.groups, targetGroupId)
       ? updateGroupById(prev.groups, targetGroupId, (group) => ({
@@ -275,7 +287,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
       ...prev,
       groups: updatedGroups
     }
-  }, [focusedGroupId, findTabByItemId])
+  }, [focusedGroupId, findTabByItemId, focusGroup])
 
   // Open a folder tab in the workbench
   const openFolderTab = useCallback((folder: Folder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => {

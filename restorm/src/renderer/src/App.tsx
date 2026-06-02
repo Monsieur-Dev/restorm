@@ -691,7 +691,8 @@ const App: React.FC = () => {
     rootItems,
     focusedGroupId,
     setWorkbenchTree,
-    registerTabDirtyState
+    registerTabDirtyState,
+    focusGroup: setFocusedGroupId
   })
 
   // After an import lands, increment `pendingImportSave` so the effect

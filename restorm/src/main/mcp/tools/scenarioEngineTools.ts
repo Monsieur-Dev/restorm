@@ -111,7 +111,8 @@ export function registerScenarioEngineTools(mcp: McpService): void {
         'polls `get_scenario_run_status` from there. Non-blocking mode returns the runId immediately.',
       inputSchema: {
         scenarioId: z.string().min(1).describe('Scenario id to run.'),
-        params: z.record(z.unknown()).optional().describe('Param map for the scenario\'s `input` nodes, keyed by param name.'),
+        params: z.record(z.unknown()).optional().describe('Param map for the scenario\'s predecessor-less `input` nodes, keyed by param name. Supplied params skip their prompt.'),
+        interactive: z.boolean().optional().describe('When true, the run PROMPTS for inputs (entry params not supplied via `params`, AND mid-flow inputs) instead of using their defaults. The run then pauses waiting for answers: poll `get_scenario_run_status` to read the pending questions (`pendingInputs`) and answer them with `answer_scenario_input`. Default false (inputs take their configured defaults).'),
         blocking: z.boolean().optional().describe('When true (default), awaits completion within blockingTimeoutMs. When false, returns runId immediately.'),
         blockingTimeoutMs: z.number().int().positive().optional().describe('Cap for blocking mode in ms (default 60 000). When the cap hits, the call degrades into a non-blocking handle.')
       } as Record<string, unknown>
@@ -124,11 +125,12 @@ export function registerScenarioEngineTools(mcp: McpService): void {
         const invalid = blockingValidationSummary(scenarioId)
         if (invalid !== null) return errorReply(invalid)
         const params = (args['params'] as Record<string, unknown> | undefined) ?? {}
+        const interactive = args['interactive'] === true
         const blocking = args['blocking'] !== false
         const timeoutMs = typeof args['blockingTimeoutMs'] === 'number' && args['blockingTimeoutMs'] > 0
           ? args['blockingTimeoutMs']
           : DEFAULT_BLOCKING_TIMEOUT_MS
-        const handle = scenarioEngine.start(scenarioId, { params })
+        const handle = scenarioEngine.start(scenarioId, { params, interactive })
         const runId = handle.scheduler.runId
         const entry: ActiveRun = { handle, output: null, state: 'running' }
         recentRuns.set(runId, entry)
@@ -174,11 +176,16 @@ export function registerScenarioEngineTools(mcp: McpService): void {
       const [root] = tree
       if (!root) return errorReply(`unknown runId ${runId}`)
       const entry = recentRuns.get(runId)
+      // Input prompts the run is waiting on (interactive runs). Answer each with
+      // `answer_scenario_input(runId, requestId, value)` — note the per-prompt
+      // `runId` (a mid-flow input inside a sub-scenario carries the sub's runId).
+      const pendingInputs = scenarioEngine.pendingUserInputs(runId)
       return jsonReply({
         status: entry?.state ?? root.status,
         runId,
         scenarioId: root.scenarioId,
         launcherScenarioId: root.launcherScenarioId,
+        ...(pendingInputs.length > 0 ? { pendingInputs } : {}),
         ...(entry?.output != null ? { output: entry.output } : {}),
         ...(entry?.error !== undefined ? { error: entry.error } : {}),
         log: root.log,
@@ -246,6 +253,32 @@ export function registerScenarioEngineTools(mcp: McpService): void {
       scenarioEngine.abort(runId, reason)
       const entry = recentRuns.get(runId)
       return jsonReply({ runId, state: entry?.state ?? 'unknown' })
+    }
+  )
+
+  mcp.registerTool(
+    'answer_scenario_input',
+    {
+      title: 'Answer a scenario input prompt',
+      description:
+        'Answer (or cancel) an input prompt an interactive run is waiting on. Discover pending prompts via `get_scenario_run_status` → `pendingInputs[]` (each has `runId`, `requestId`, `name`, `defaultValue`, `hint`, `valueType?`). ' +
+        'Pass the prompt\'s OWN `runId` (a mid-flow input inside a sub-scenario carries the sub-run\'s id, NOT the top-level one). On answer the input emits the value and the flow continues; on cancel the input routes to its `error` output (or fails the run if `error` is unwired).',
+      inputSchema: {
+        runId: z.string().min(1).describe('The runId that raised the prompt (from `pendingInputs[].runId`).'),
+        requestId: z.string().min(1).describe('The prompt\'s requestId (from `pendingInputs[].requestId`).'),
+        value: z.unknown().optional().describe('The value to emit for this input. Required unless `cancel` is true. Match the param\'s type (string / number / boolean / object).'),
+        cancel: z.boolean().optional().describe('When true, cancel the prompt (route the input to its `error` output) instead of answering.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const runId = String(args['runId'])
+      const requestId = String(args['requestId'])
+      if (args['cancel'] === true) {
+        scenarioEngine.cancelUserInput(runId, requestId)
+        return jsonReply({ runId, requestId, cancelled: true })
+      }
+      scenarioEngine.resolveUserInput(runId, requestId, args['value'])
+      return jsonReply({ runId, requestId, answered: true })
     }
   )
 }

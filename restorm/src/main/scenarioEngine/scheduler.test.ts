@@ -637,6 +637,22 @@ describe('interactive vs headless input seeding', () => {
     expect(s.status().state).toBe('completed')
   })
 
+  it('exposes pending prompts via pendingUserInputs() and resolves them by requestId', async () => {
+    const scenario = buildScenario([{ id: 'in', kind: 'input', config: { name: 'name' }, outputs: ['value'] }], [])
+    const executors = new Map<string, NodeExecutor>([['in', inputExec]])
+    const s = new Scheduler({ scenario, executors })
+    const runP = s.run({ interactive: true })
+    // The non-UI status path (MCP) reads the pending question straight off the scheduler.
+    await vi.waitFor(() => { expect(s.pendingUserInputs()).toHaveLength(1) })
+    const pending = s.pendingUserInputs()[0]
+    if (!pending) throw new Error('expected a pending input')
+    expect(pending).toMatchObject({ nodeId: 'in', name: 'name', hint: 'string', defaultValue: 'Glaude' })
+    s.resolveUserInput(pending.requestId, 'Bob')
+    await runP
+    expect(s.status().state).toBe('completed')
+    expect(s.pendingUserInputs()).toHaveLength(0)
+  })
+
   it('an interactive multi-param input raises ALL its param prompts AT ONCE (one submit resolves them)', async () => {
     // Regression: the executor used to `await` each param prompt sequentially,
     // so only one param was pending at a time — the up-front modal then needed

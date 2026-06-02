@@ -65,7 +65,12 @@ export const RunScenarioNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
   // input can offer a value editor bounded to that exact type (an Environment
   // param → the env picker, a colour param → the colour picker, …). Inline
   // values entered here persist under `config.paramValues[<name>]`.
-  const paramTypeByName = useMemo(() => {
+  // NOT memoised on `scenario`: editing the sub mutates it IN PLACE
+  // (`handleScenarioChange` keeps the same object ref, reassigning only `.nodes`),
+  // so a `[scenario]`-keyed memo would never recompute and the call signature
+  // would go stale. Recomputed each render instead — cheap, and the node only
+  // re-renders on a real change (it's `memo`'d, so drags don't touch it).
+  const paramTypeByName = ((): Map<string, unknown> => {
     const m = new Map<string, unknown>()
     if (scenario) {
       for (const node of scenario.nodes) {
@@ -77,7 +82,7 @@ export const RunScenarioNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
       }
     }
     return m
-  }, [scenario])
+  })()
   const paramValues = (data.config?.['paramValues'] as Record<string, unknown> | undefined) ?? {}
 
   const fallbackLabel = typeof data.config?.['label'] === 'string' ? data.config['label'] : undefined
@@ -88,7 +93,12 @@ export const RunScenarioNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
   // MCP authoring path, so both agree on the exact port ids). Memoised so an
   // unrelated re-render doesn't rebuild the port arrays (a box with many params
   // re-measures + tells React Flow to recompute handles on every change).
-  const derived = useMemo(() => deriveRunScenarioPorts(scenario), [scenario])
+  // Derived fresh each render (NOT memoised on `scenario`) for the same reason as
+  // `paramTypeByName` above: the sub is mutated in place, so a `[scenario]`-keyed
+  // memo would never see a renamed / added / removed param or output. The base
+  // re-measures handles only when the port COUNT changes, so a same-length
+  // rebuild is free.
+  const derived = deriveRunScenarioPorts(scenario)
 
   // Incoming / outgoing links whose derived port has since vanished (a param
   // renamed or deleted in the sub-scenario). React Flow drops an edge with no

@@ -163,8 +163,8 @@ collections:
                     dataType: any
                 outputs: []
                 position:
-                  x: 1360
-                  'y': 160
+                  x: 1340
+                  'y': 360
               - id: 1780421882628-8oym4p
                 kind: log
                 config:
@@ -184,8 +184,8 @@ collections:
                     dataType: any
                 outputs: []
                 position:
-                  x: 1360
-                  'y': 380
+                  x: 1340
+                  'y': 160
             edges:
               - id: e-1780418276241-f2q3hz
                 from:
