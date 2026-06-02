@@ -150,6 +150,7 @@
       "createEnvironmentFolder": "Napravi fasciklu okruženja",
       "delete": "Obriši",
       "clone": "Kloniraj",
+      "copySuffix": "копија",
       "rename": "Preimenuj",
       "addToFavorites": "Dodaj u omiljeno",
       "removeFromFavorites": "Ukloni iz omiljenog",
@@ -785,7 +786,9 @@
         "addNote": "Add / edit note",
         "duplicate": "Duplicate",
         "delete": "Delete",
-        "deleteShortcut": "Del"
+        "deleteShortcut": "Del",
+        "copy": "Копирај",
+        "paste": "Налепи"
       },
       "expand": "Прошири",
       "collapse": "Сажми"
@@ -947,6 +950,8 @@
     "inspector": {
       "run": "Покрени",
       "debug": "Отклањање грешака",
+      "undo": "Поништи",
+      "redo": "Понови",
       "step": "Корак по корак",
       "previewInfo": "Example data, based on previous request results.",
       "pause": "Пауза",
@@ -1014,6 +1019,9 @@
       "toggle": "Укључи/искључи тачку прекида (F9)",
       "reached": "Достигнута тачка прекида — ова радња још није извршена. Притисните F5 за наставак или F7 за корак.",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Укључи/искључи минимапу"
     }
   }
 }

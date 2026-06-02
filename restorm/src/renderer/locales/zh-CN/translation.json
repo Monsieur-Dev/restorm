@@ -148,6 +148,7 @@
       "createEnvironmentFolder": "创建环境文件夹",
       "delete": "删除",
       "clone": "克隆",
+      "copySuffix": "副本",
       "rename": "重命名",
       "addToFavorites": "添加到收藏",
       "removeFromFavorites": "从收藏中移除",
@@ -783,7 +784,9 @@
         "addNote": "Add / edit note",
         "duplicate": "Duplicate",
         "delete": "Delete",
-        "deleteShortcut": "Del"
+        "deleteShortcut": "Del",
+        "copy": "复制",
+        "paste": "粘贴"
       },
       "expand": "展开",
       "collapse": "折叠"
@@ -945,6 +948,8 @@
     "inspector": {
       "run": "运行",
       "debug": "调试",
+      "undo": "撤销",
+      "redo": "重做",
       "step": "单步",
       "previewInfo": "Example data, based on previous request results.",
       "pause": "暂停",
@@ -1012,6 +1017,9 @@
       "toggle": "切换断点 (F9)",
       "reached": "已到达断点 — 此操作尚未执行。按 F5 继续，或按 F7 单步执行。",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "切换小地图"
     }
   }
 }

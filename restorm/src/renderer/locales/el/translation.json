@@ -149,6 +149,7 @@
       "createEnvironmentFolder": "Δημιουργία φακέλου περιβάλλοντος",
       "delete": "Διαγραφή",
       "clone": "Κλωνοποίηση",
+      "copySuffix": "αντίγραφο",
       "rename": "Μετονομασία",
       "addToFavorites": "Προσθήκη στα αγαπημένα",
       "removeFromFavorites": "Αφαίρεση από τα αγαπημένα",
@@ -784,7 +785,9 @@
         "addNote": "Add / edit note",
         "duplicate": "Duplicate",
         "delete": "Delete",
-        "deleteShortcut": "Del"
+        "deleteShortcut": "Del",
+        "copy": "Αντιγραφή",
+        "paste": "Επικόλληση"
       },
       "expand": "Επέκταση",
       "collapse": "Σύμπτυξη"
@@ -946,6 +949,8 @@
     "inspector": {
       "run": "Εκτέλεση",
       "debug": "Αποσφαλμάτωση",
+      "undo": "Αναίρεση",
+      "redo": "Επανάληψη",
       "step": "Βήμα προς βήμα",
       "previewInfo": "Example data, based on previous request results.",
       "pause": "Παύση",
@@ -1013,6 +1018,9 @@
       "toggle": "Εναλλαγή σημείου διακοπής (F9)",
       "reached": "Επιτεύχθηκε σημείο διακοπής — αυτή η ενέργεια δεν έχει εκτελεστεί ακόμη. Πατήστε F5 για συνέχιση ή F7 για βηματισμό.",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Εναλλαγή μικρού χάρτη"
     }
   }
 }

@@ -148,6 +148,7 @@
       "createEnvironmentFolder": "建立環境資料夾",
       "delete": "刪除",
       "clone": "複製",
+      "copySuffix": "複本",
       "rename": "重新命名",
       "addToFavorites": "加入我的最愛",
       "removeFromFavorites": "從我的最愛移除",
@@ -783,7 +784,9 @@
         "addNote": "Add / edit note",
         "duplicate": "Duplicate",
         "delete": "Delete",
-        "deleteShortcut": "Del"
+        "deleteShortcut": "Del",
+        "copy": "複製",
+        "paste": "貼上"
       },
       "expand": "展開",
       "collapse": "摺疊"
@@ -945,6 +948,8 @@
     "inspector": {
       "run": "執行",
       "debug": "偵錯",
+      "undo": "復原",
+      "redo": "重做",
       "step": "單步",
       "previewInfo": "Example data, based on previous request results.",
       "pause": "暫停",
@@ -1012,6 +1017,9 @@
       "toggle": "切換中斷點 (F9)",
       "reached": "已到達中斷點 — 此動作尚未執行。按 F5 繼續，或按 F7 逐步執行。",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "切換縮圖"
     }
   }
 }

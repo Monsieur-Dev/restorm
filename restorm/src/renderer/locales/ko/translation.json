@@ -148,6 +148,7 @@
       "createEnvironmentFolder": "환경 폴더 만들기",
       "delete": "삭제",
       "clone": "복제",
+      "copySuffix": "복사본",
       "rename": "이름 바꾸기",
       "addToFavorites": "즐겨찾기에 추가",
       "removeFromFavorites": "즐겨찾기에서 제거",
@@ -783,7 +784,9 @@
         "addNote": "Add / edit note",
         "duplicate": "Duplicate",
         "delete": "Delete",
-        "deleteShortcut": "Del"
+        "deleteShortcut": "Del",
+        "copy": "복사",
+        "paste": "붙여넣기"
       },
       "expand": "펼치기",
       "collapse": "접기"
@@ -945,6 +948,8 @@
     "inspector": {
       "run": "실행",
       "debug": "디버그",
+      "undo": "실행 취소",
+      "redo": "다시 실행",
       "step": "단계 실행",
       "previewInfo": "Example data, based on previous request results.",
       "pause": "일시 중지",
@@ -1012,6 +1017,9 @@
       "toggle": "중단점 전환 (F9)",
       "reached": "중단점에 도달했습니다 — 이 작업은 아직 실행되지 않았습니다. F5를 눌러 계속하거나 F7으로 단계 실행하세요.",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "미니맵 토글"
     }
   }
 }

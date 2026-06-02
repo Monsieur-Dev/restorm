@@ -149,6 +149,7 @@
       "createEnvironmentFolder": "Krijo dosje mjedisi",
       "delete": "Fshi",
       "clone": "Klono",
+      "copySuffix": "kopje",
       "rename": "Riemërto",
       "addToFavorites": "Shto te të preferuarat",
       "removeFromFavorites": "Hiq nga të preferuarat",
@@ -784,7 +785,9 @@
         "addNote": "Add / edit note",
         "duplicate": "Duplicate",
         "delete": "Delete",
-        "deleteShortcut": "Del"
+        "deleteShortcut": "Del",
+        "copy": "Kopjo",
+        "paste": "Ngjit"
       },
       "expand": "Zgjero",
       "collapse": "Mblidh"
@@ -946,6 +949,8 @@
     "inspector": {
       "run": "Ekzekuto",
       "debug": "Korrigjo",
+      "undo": "Zhbëj",
+      "redo": "Ribëj",
       "step": "Hap pas hapi",
       "previewInfo": "Example data, based on previous request results.",
       "pause": "Pauzë",
@@ -1013,6 +1018,9 @@
       "toggle": "Ndërro pikën e ndërprerjes (F9)",
       "reached": "U arrit pika e ndërprerjes — ky veprim nuk është ekzekutuar ende. Shtypni F5 për të vazhduar, ose F7 për hap pas hapi.",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Aktivizo/çaktivizo minihartën"
     }
   }
 }

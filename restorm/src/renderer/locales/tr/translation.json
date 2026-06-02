@@ -149,6 +149,7 @@
       "createEnvironmentFolder": "Ortam klasörü oluştur",
       "delete": "Sil",
       "clone": "Çoğalt",
+      "copySuffix": "kopya",
       "rename": "Yeniden adlandır",
       "addToFavorites": "Favorilere ekle",
       "removeFromFavorites": "Favorilerden çıkar",
@@ -784,7 +785,9 @@
         "addNote": "Add / edit note",
         "duplicate": "Duplicate",
         "delete": "Delete",
-        "deleteShortcut": "Del"
+        "deleteShortcut": "Del",
+        "copy": "Kopyala",
+        "paste": "Yapıştır"
       },
       "expand": "Genişlet",
       "collapse": "Daralt"
@@ -946,6 +949,8 @@
     "inspector": {
       "run": "Çalıştır",
       "debug": "Hata Ayıkla",
+      "undo": "Geri al",
+      "redo": "Yinele",
       "step": "Adım adım",
       "previewInfo": "Example data, based on previous request results.",
       "pause": "Duraklat",
@@ -1013,6 +1018,9 @@
       "toggle": "Kesme noktasını değiştir (F9)",
       "reached": "Kesme noktasına ulaşıldı — bu eylem henüz çalıştırılmadı. Devam etmek için F5'e, adımlamak için F7'ya basın.",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Mini haritayı aç/kapat"
     }
   }
 }

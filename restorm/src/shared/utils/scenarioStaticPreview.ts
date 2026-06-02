@@ -1,6 +1,6 @@
 import Handlebars from 'handlebars'
 import { registerHandlebarsHelpers } from './handlebars/registerAll'
-import type { ScenarioNode } from '../types/scenario'
+import type { ScenarioNode, ScenarioEdge } from '../types/scenario'
 import { readInputParams } from '../scenarioInputParams'
 
 // Register the full helper suite on first import so a chained `transform`
@@ -738,4 +738,44 @@ export function staticScenarioPreview(
     default:
       return null
   }
+}
+
+/** One action of a scenario paired with the data suggestion the inspector shows
+ * for it BEFORE any run — the static, config-derived preview. */
+export interface ScenarioActionSuggestion {
+  /** The action's node id (stable, persisted). */
+  id: string
+  kind: ScenarioNode['kind']
+  /** The static preview the inspector would display, or `null` when the kind
+   * has no config-derived suggestion (e.g. an `httpRequest`, or a box whose
+   * only inputs are wired to non-static sources). */
+  suggestion: Record<string, unknown> | null
+}
+
+/**
+ * Extract every action of a scenario together with its inspector data
+ * suggestion (the pre-run static preview). This mirrors how the editor computes
+ * an action's `staticData`, so freezing the result into a snapshot and
+ * re-extracting on each run detects regressions in the inspector's suggestions.
+ *
+ * Cross-scenario `runScenario` outputs are NOT resolved here (they need the
+ * whole project tree, which a single scenario doesn't carry) — such a node gets
+ * whatever {@link staticScenarioPreview} returns for it in isolation. The
+ * scenarios this is first used on (e.g. the log-actions scenario) have no
+ * `runScenario`, so the snapshot is faithful + deterministic.
+ */
+export function extractScenarioActionSuggestions(
+  scenario: { nodes: readonly ScenarioNode[]; edges: readonly ScenarioEdge[] }
+): ScenarioActionSuggestion[] {
+  const nodes: StaticPreviewNode[] = scenario.nodes.map((n) => ({ id: n.id, kind: n.kind, config: n.config }))
+  const edges: StaticPreviewEdge[] = scenario.edges.map((e) => ({
+    from: e.from,
+    to: e.to,
+    ...(e.selector !== undefined ? { selector: e.selector } : {})
+  }))
+  return scenario.nodes.map((n) => ({
+    id: n.id,
+    kind: n.kind,
+    suggestion: staticScenarioPreview({ id: n.id, kind: n.kind, config: n.config }, nodes, edges)
+  }))
 }

@@ -3,7 +3,7 @@
  */
 
 import type { FolderItem } from '../../../shared/types/collections'
-import { isAnyFolder } from '../../../shared/types/collections'
+import { isAnyFolder, isScenario, isEnvironmentFolder } from '../../../shared/types/collections'
 import { findItemWithParent } from './treeSearch'
 
 /** Generate a unique ID */
@@ -19,26 +19,67 @@ function childrenArray(container: { items?: FolderItem[] }): FolderItem[] {
   return container.items
 }
 
-/** Deep clone an item with new IDs */
-export function deepCloneItem(item: FolderItem): FolderItem {
-  const newId = generateUniqueId()
+/** Give a fresh id to this object and to every descendant that carries one and
+ * could collide in the tree: child `items` (folders / scenarios / requests),
+ * an environment folder's `environments` and `customValueLists`. Records every
+ * old→new mapping so references can be remapped afterwards. Scenario graph
+ * node/edge ids are left untouched — they are scenario-scoped and the deep copy
+ * already unshared them (edges keep referencing their own nodes). */
+function reassignTreeIds(node: unknown, idMap: Map<string, string>): void {
+  if (node === null || typeof node !== 'object') return
+  const rec = node as Record<string, unknown>
+  const id = rec['id']
+  if (typeof id === 'string' && id !== '') {
+    const next = generateUniqueId()
+    idMap.set(id, next)
+    rec['id'] = next
+  }
+  for (const key of ['items', 'environments', 'customValueLists']) {
+    const arr = rec[key]
+    if (Array.isArray(arr)) for (const child of arr) reassignTreeIds(child, idMap)
+  }
+}
 
-  if (isAnyFolder(item)) {
-    const clonedFolder = {
-      ...item,
-      id: newId,
-      name: `${item.name} (copy)`,
-      items: item.items.map((child) => deepCloneItem(child))
+/** After ids are reassigned, walk the whole cloned subtree and replace any
+ * STRING value that still holds an old id with its new id — so references to
+ * the cloned items/environments/lists (a request's bound id, an operand's
+ * `listId`, a `runScenario` target, an environment reference…) follow the copy.
+ * The `id` fields themselves already hold new ids, so they're skipped. Tree ids
+ * are unique timestamp-random strings, so a coincidental match in real data is
+ * not a concern. */
+function remapReferences(node: unknown, idMap: Map<string, string>): void {
+  if (Array.isArray(node)) {
+    for (const v of node) remapReferences(v, idMap)
+    return
+  }
+  if (node === null || typeof node !== 'object') return
+  const rec = node as Record<string, unknown>
+  for (const [key, value] of Object.entries(rec)) {
+    if (key === 'id') continue
+    if (typeof value === 'string') {
+      const mapped = idMap.get(value)
+      if (mapped !== undefined) rec[key] = mapped
+    } else {
+      remapReferences(value, idMap)
     }
-    return clonedFolder
   }
+}
 
-  // It's a request
-  return {
-    ...item,
-    id: newId,
-    name: `${item.name} (copy)`
-  }
+/** Deep-clone a tree item for the "Clone" action: a fully independent copy that
+ * shares NO arrays/objects with the source (so editing the copy — or adding a
+ * child to it — never touches the original), with a fresh id for the item and
+ * every descendant id, and intra-subtree references remapped onto the new ids.
+ * Only the top-level clone is renamed "(copy)". Handles folders, environment
+ * folders, scenarios (their `items` + `nodes` + `edges`) and requests alike. */
+export function deepCloneItem(item: FolderItem, copyLabel = 'copy'): FolderItem {
+  // JSON round-trip: a plain, reference-free deep copy that also strips the
+  // reactive Proxy wrappers (which structuredClone can't ferry).
+  const clone = JSON.parse(JSON.stringify(item)) as FolderItem
+  const idMap = new Map<string, string>()
+  reassignTreeIds(clone, idMap)
+  remapReferences(clone, idMap)
+  clone.name = `${item.name} (${copyLabel})`
+  return clone
 }
 
 /** Remove an item from its parent folder and return a copy of the item */
@@ -65,12 +106,15 @@ export function insertItemIntoTree(
   if (!target) return false
 
   if (position === 'into') {
-    // Insert into the target (which must be a folder)
-    if (isAnyFolder(target)) {
-      target.items.push(item)
+    // A scenario is a folder-like container too (it carries `items`), so it
+    // accepts dropped children — every kind EXCEPT an environment folder, which
+    // mirrors what the scenario's "Add" context menu allows.
+    const canContain = isAnyFolder(target) || (isScenario(target) && !isEnvironmentFolder(item))
+    if (canContain) {
+      childrenArray(target).push(item)
       return true
     }
-    // If target is not a folder, insert after it instead
+    // If target can't contain the item, insert after it instead.
     if (parent) {
       childrenArray(parent).splice(index + 1, 0, item)
       return true
@@ -89,16 +133,20 @@ export function insertItemIntoTree(
 /** Clone an item and insert the clone after it */
 export function cloneItemInTree(
   rootItems: FolderItem[],
-  itemId: string
+  itemId: string,
+  copyLabel = 'copy'
 ): FolderItem | null {
   const { item, parent, index } = findItemWithParent(rootItems, itemId)
-  if (!item || !parent || index < 0) return null
+  if (!item || index < 0) return null
 
   // Deep clone the item
-  const clonedItem = deepCloneItem(item)
+  const clonedItem = deepCloneItem(item, copyLabel)
 
-  // Insert after the original
-  childrenArray(parent).splice(index + 1, 0, clonedItem)
+  // Insert right after the original — into its parent's children, or directly
+  // into the root list when the original is a root item (e.g. an environment
+  // folder), which has no `parent`.
+  const siblings = parent ? childrenArray(parent) : rootItems
+  siblings.splice(index + 1, 0, clonedItem)
 
   return clonedItem
 }

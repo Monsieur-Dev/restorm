@@ -18,6 +18,7 @@ export { initializeI18n, default as i18n } from './i18n'
 // Utilities
 export { getContrastColor } from './utils/colorContrast'
 export { getColorFromString } from './utils/colorFromString'
+export { isUndoKeyEvent, isRedoKeyEvent } from './utils/undoRedoKeys'
 export {
   runThemeRevealTransition,
   setPendingThemeRevealOrigin,

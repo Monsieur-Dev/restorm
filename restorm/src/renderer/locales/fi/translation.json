@@ -149,6 +149,7 @@
       "createEnvironmentFolder": "Luo ympäristökansio",
       "delete": "Poista",
       "clone": "Kloonaa",
+      "copySuffix": "kopio",
       "rename": "Nimeä uudelleen",
       "addToFavorites": "Lisää suosikkeihin",
       "removeFromFavorites": "Poista suosikeista",
@@ -784,7 +785,9 @@
         "addNote": "Add / edit note",
         "duplicate": "Duplicate",
         "delete": "Delete",
-        "deleteShortcut": "Del"
+        "deleteShortcut": "Del",
+        "copy": "Kopioi",
+        "paste": "Liitä"
       },
       "expand": "Laajenna",
       "collapse": "Tiivistä"
@@ -946,6 +949,8 @@
     "inspector": {
       "run": "Suorita",
       "debug": "Vianjäljitys",
+      "undo": "Kumoa",
+      "redo": "Tee uudelleen",
       "step": "Askel kerrallaan",
       "previewInfo": "Example data, based on previous request results.",
       "pause": "Tauko",
@@ -1013,6 +1018,9 @@
       "toggle": "Vaihda keskeytyskohta (F9)",
       "reached": "Keskeytyskohta saavutettu – tätä toimintoa ei ole vielä suoritettu. Paina F5 jatkaaksesi tai F7 edetäksesi askel kerrallaan.",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Näytä/piilota pienoiskartta"
     }
   }
 }

@@ -148,6 +148,7 @@
       "createEnvironmentFolder": "環境フォルダを作成",
       "delete": "削除",
       "clone": "複製",
+      "copySuffix": "コピー",
       "rename": "名前を変更",
       "addToFavorites": "お気に入りに追加",
       "removeFromFavorites": "お気に入りから削除",
@@ -783,7 +784,9 @@
         "addNote": "Add / edit note",
         "duplicate": "Duplicate",
         "delete": "Delete",
-        "deleteShortcut": "Del"
+        "deleteShortcut": "Del",
+        "copy": "コピー",
+        "paste": "貼り付け"
       },
       "expand": "展開",
       "collapse": "折りたたむ"
@@ -945,6 +948,8 @@
     "inspector": {
       "run": "実行",
       "debug": "デバッグ",
+      "undo": "元に戻す",
+      "redo": "やり直し",
       "step": "ステップ実行",
       "previewInfo": "Example data, based on previous request results.",
       "pause": "一時停止",
@@ -1012,6 +1017,9 @@
       "toggle": "ブレークポイントの切り替え (F9)",
       "reached": "ブレークポイントに到達しました — このアクションはまだ実行されていません。F5 で再開、F7 でステップ実行します。",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "ミニマップの切り替え"
     }
   }
 }

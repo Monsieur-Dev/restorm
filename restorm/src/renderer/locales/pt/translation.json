@@ -149,6 +149,7 @@
       "createEnvironmentFolder": "Criar pasta de ambiente",
       "delete": "Eliminar",
       "clone": "Clonar",
+      "copySuffix": "cópia",
       "rename": "Renomear",
       "addToFavorites": "Adicionar aos favoritos",
       "removeFromFavorites": "Remover dos favoritos",
@@ -784,7 +785,9 @@
         "addNote": "Add / edit note",
         "duplicate": "Duplicate",
         "delete": "Delete",
-        "deleteShortcut": "Del"
+        "deleteShortcut": "Del",
+        "copy": "Copiar",
+        "paste": "Colar"
       },
       "expand": "Expandir",
       "collapse": "Recolher"
@@ -946,6 +949,8 @@
     "inspector": {
       "run": "Executar",
       "debug": "Depurar",
+      "undo": "Desfazer",
+      "redo": "Refazer",
       "step": "Passo a passo",
       "previewInfo": "Example data, based on previous request results.",
       "pause": "Pausa",
@@ -1013,6 +1018,9 @@
       "toggle": "Alternar ponto de interrupção (F9)",
       "reached": "Ponto de interrupção atingido — esta ação ainda não foi executada. Pressione F5 para retomar ou F7 para avançar passo a passo.",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Alternar minimapa"
     }
   }
 }

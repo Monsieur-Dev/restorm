@@ -151,6 +151,7 @@
       "createEnvironmentFolder": "Utwórz folder środowisk",
       "delete": "Usuń",
       "clone": "Klonuj",
+      "copySuffix": "kopia",
       "rename": "Zmień nazwę",
       "addToFavorites": "Dodaj do ulubionych",
       "removeFromFavorites": "Usuń z ulubionych",
@@ -786,7 +787,9 @@
         "addNote": "Add / edit note",
         "duplicate": "Duplicate",
         "delete": "Delete",
-        "deleteShortcut": "Del"
+        "deleteShortcut": "Del",
+        "copy": "Kopiuj",
+        "paste": "Wklej"
       },
       "expand": "Rozwiń",
       "collapse": "Zwiń"
@@ -948,6 +951,8 @@
     "inspector": {
       "run": "Uruchom",
       "debug": "Debuguj",
+      "undo": "Cofnij",
+      "redo": "Ponów",
       "step": "Krok po kroku",
       "previewInfo": "Example data, based on previous request results.",
       "pause": "Wstrzymaj",
@@ -1015,6 +1020,9 @@
       "toggle": "Przełącz punkt przerwania (F9)",
       "reached": "Osiągnięto punkt przerwania — ta akcja nie została jeszcze wykonana. Naciśnij F5, aby wznowić, lub F7, aby wykonać krok.",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Przełącz minimapę"
     }
   }
 }

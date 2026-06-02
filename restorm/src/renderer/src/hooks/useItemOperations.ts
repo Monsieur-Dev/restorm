@@ -186,19 +186,16 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     })
   }, [rootItems, setRootItems, setWorkbenchTree])
 
-  // Handle "Clone" context menu action
+  // Handle "Clone" context menu action. Works for any item — including a
+  // ROOT-level folder / environment folder (cloneItemInTree inserts the deep
+  // copy back into the root list when there's no parent).
   const handleCloneItem = useCallback((itemId: string) => {
-    // Don't allow cloning root folders
-    const isRootItem = rootItems.some((f) => f.id === itemId)
-    if (isRootItem) return
-
-    // Clone the item
-    const clonedItem = cloneItemInTree(rootItems, itemId)
+    const clonedItem = cloneItemInTree(rootItems, itemId, t('sidebar.contextMenu.copySuffix', 'copy'))
     if (!clonedItem) return
 
     // Force React re-render by creating new reference
     setRootItems((prevItems) => [...prevItems])
-  }, [rootItems, setRootItems])
+  }, [rootItems, setRootItems, t])
 
   // Handle "Delete" context menu action - show confirmation
   const handleDeleteItem = useCallback((itemId: string) => {

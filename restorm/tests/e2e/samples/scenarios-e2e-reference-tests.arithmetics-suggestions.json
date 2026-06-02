@@ -1,0 +1,305 @@
+[
+  {
+    "id": "1780275642843-16zrdk",
+    "kind": "arithmetic",
+    "suggestion": {
+      "result": 10
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780275660454-p9cmhm",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "5+5 = 10",
+      "data": 10
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780275679035-gxdtrn",
+    "kind": "arithmetic",
+    "suggestion": {
+      "result": 5
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780275709162-fnrl7j",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "10-5 = 5",
+      "data": 5
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780275743791-pwt1wq",
+    "kind": "arithmetic",
+    "suggestion": {
+      "result": 25
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780275759422-9v8kkt",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "5x5 = 25",
+      "data": 25
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780275780351-ehbolg",
+    "kind": "arithmetic",
+    "suggestion": {
+      "result": 1
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780275795655-asir8w",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "16%5 = 1",
+      "data": 1
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780276685741-f7j2k4",
+    "kind": "arithmetic",
+    "suggestion": {
+      "result": 5
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780276698111-kkdo2f",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "25/5 = 5",
+      "data": 5
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780276778906-lwbsyh",
+    "kind": "setVariable",
+    "suggestion": {
+      "N": 5
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780276800476-1dnwfu",
+    "kind": "arithmetic",
+    "suggestion": {
+      "result": 10
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780276805395-hsl12y",
+    "kind": "arithmetic",
+    "suggestion": {
+      "result": 25
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780276807834-lxe68y",
+    "kind": "arithmetic",
+    "suggestion": {
+      "result": 5
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780276809853-8dhhws",
+    "kind": "arithmetic",
+    "suggestion": {
+      "result": 1
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780276826787-wbidob",
+    "kind": "arithmetic",
+    "suggestion": {
+      "result": 5
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780276832905-f8af3n",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "warn",
+      "message": "5+5 = 10",
+      "data": 10
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780276835290-k19p9o",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "warn",
+      "message": "10-5 = 5",
+      "data": 5
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780276838508-pzx73f",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "warn",
+      "message": "5x5 = 25",
+      "data": 25
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780276855302-tjm8lh",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "warn",
+      "message": "25/5 = 5",
+      "data": 5
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780276862931-74ybn2",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "warn",
+      "message": "16%5 = 1",
+      "data": 1
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780278121669-u0t7h5",
+    "kind": "arithmetic",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780278156256-9oc1dj",
+    "kind": "getVariable",
+    "suggestion": {
+      "N": 5
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780278176649-pordlq",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "5+5 = [object Object]",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780278754040-p38pr7",
+    "kind": "arithmetic",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780278760132-e7bksn",
+    "kind": "setVariable",
+    "suggestion": {
+      "zero": 0
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780278794428-u3n65i",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "Divide by zero properly catched",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780278907177-1qun8x",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Error not properly catched",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780279158921-wdh1ab",
+    "kind": "setVariable",
+    "suggestion": {
+      "stringvariable": "aaa"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780279171408-cx767g",
+    "kind": "getVariable",
+    "suggestion": {
+      "stringvariable": "aaa"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780279178926-2vjr31",
+    "kind": "arithmetic",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780279233234-d4wh1a",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "Error properly catched (wrong type in operand)",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780279273422-q77lr5",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Error properly NOT catched (wrong type in operand)",
+      "data": null
+    },
+    "source": "static"
+  }
+]

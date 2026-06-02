@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, ListView } from 'electron-core-ui/renderer'
+import { Button, ListView, usePlatform } from 'electron-core-ui/renderer'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import type { ScenarioLogEntry } from '../../hooks/useScenarioEngine'
 import { ScenarioRunLogView, type LogLevelFilter } from './ScenarioRunLogView'
@@ -110,6 +110,13 @@ export interface ScenarioInspectorPanelProps {
   /** Clears the displayed run log. Wired only in the live inspector — the
    * persisted run-history is read-only and offers no clear action. */
   onClearRunLog?: () => void
+  /** Whether an undo / redo step is available — drives the toolbar buttons'
+   * disabled state. */
+  canUndo?: boolean
+  canRedo?: boolean
+  /** Undo / redo the last graph edit on the active scenario tab. */
+  onUndo?: () => void
+  onRedo?: () => void
 }
 
 interface ScenarioRuntime {
@@ -130,8 +137,9 @@ function scenarioRuntime(): ScenarioRuntime | undefined {
  * data + tree as the JSON-path selector's picker popover). Shown only when
  * exactly one box is selected.
  */
-export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ scenarioId, errors, errorBoxCount, onFocusNode, previewNode, onOpenItem, engineState, onEngineRun, onEnginePause, onEngineResume, onEngineStep, onEngineStepStart, onEngineStop, onEngineDebug, onEngineDebugContinue, hasBreakpoints, runLog, onClearRunLog }) => {
+export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ scenarioId, errors, errorBoxCount, onFocusNode, previewNode, onOpenItem, engineState, onEngineRun, onEnginePause, onEngineResume, onEngineStep, onEngineStepStart, onEngineStop, onEngineDebug, onEngineDebugContinue, hasBreakpoints, runLog, onClearRunLog, canUndo, canRedo, onUndo, onRedo }) => {
   const { t } = useTranslation()
+  const { isMacintosh, isWindows } = usePlatform()
   const [result, setResult] = useState<Record<string, unknown> | null>(null)
   const fetchToken = useRef(0)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -309,6 +317,14 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
   const stepTooltip = `${stepLabel} (F7)`
   const debugTooltip = `${debugLabel} (F6)`
   const stopTooltip = `${stopLabel} (F8)`
+  // Undo / redo — the visible shortcut hint follows the platform mapping owned
+  // by ECUI (Cmd on macOS, Ctrl elsewhere; redo is Ctrl+Y on Windows but
+  // Ctrl/Cmd+Shift+Z on Linux/macOS).
+  const undoLabel = t('scenario.inspector.undo', 'Undo')
+  const redoLabel = t('scenario.inspector.redo', 'Redo')
+  const mod = isMacintosh ? '⌘' : 'Ctrl'
+  const undoTooltip = `${undoLabel} (${mod}+Z)`
+  const redoTooltip = `${redoLabel} (${isMacintosh ? '⌘+⇧+Z' : isWindows ? 'Ctrl+Y' : 'Ctrl+Shift+Z'})`
 
   // Run-logs view (only when no box is selected) — the shared
   // `ScenarioRunLogView` (also used by the run-history modal) renders the
@@ -326,6 +342,17 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
         {/* aria-label kept (invisible — screen-reader name only); the styled
          * hover label comes from the ECUI Tooltip wrapper. No `title` so the
          * native browser tooltip never shows. */}
+        {onUndo && (
+          <>
+            <HeaderHoverTooltip label={undoTooltip}>
+              <Button small icon="discard" onClick={onUndo} disabled={canUndo !== true} className="scn-inspector-undo-round" options={{ ariaLabel: undoLabel }} data-testid="scenario-inspector-undo" />
+            </HeaderHoverTooltip>
+            <HeaderHoverTooltip label={redoTooltip}>
+              <Button small icon="redo" onClick={onRedo} disabled={canRedo !== true} className="scn-inspector-redo-round" options={{ ariaLabel: redoLabel }} data-testid="scenario-inspector-redo" />
+            </HeaderHoverTooltip>
+            <div className="scn-inspector-toolbar-sep" aria-hidden="true" />
+          </>
+        )}
         <HeaderHoverTooltip label={runTooltip}>
           <Button small icon={runIcon} onClick={onRun} disabled={runDisabled} className={`scn-inspector-run-round${runIsPause ? ' scn-inspector-run-round-active' : ''}`} options={{ ariaLabel: runLabel }} data-testid="scenario-inspector-run" />
         </HeaderHoverTooltip>

@@ -149,6 +149,7 @@
       "createEnvironmentFolder": "Skapa miljömapp",
       "delete": "Ta bort",
       "clone": "Klona",
+      "copySuffix": "kopia",
       "rename": "Byt namn",
       "addToFavorites": "Lägg till i favoriter",
       "removeFromFavorites": "Ta bort från favoriter",
@@ -784,7 +785,9 @@
         "addNote": "Add / edit note",
         "duplicate": "Duplicate",
         "delete": "Delete",
-        "deleteShortcut": "Del"
+        "deleteShortcut": "Del",
+        "copy": "Kopiera",
+        "paste": "Klistra in"
       },
       "expand": "Expandera",
       "collapse": "Komprimera"
@@ -946,6 +949,8 @@
     "inspector": {
       "run": "Kör",
       "debug": "Felsök",
+      "undo": "Ångra",
+      "redo": "Gör om",
       "step": "Steg för steg",
       "previewInfo": "Example data, based on previous request results.",
       "pause": "Pausa",
@@ -1013,6 +1018,9 @@
       "toggle": "Växla brytpunkt (F9)",
       "reached": "Brytpunkt nådd – den här åtgärden har inte körts ännu. Tryck på F5 för att återuppta eller F7 för att stega.",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Växla minikarta"
     }
   }
 }

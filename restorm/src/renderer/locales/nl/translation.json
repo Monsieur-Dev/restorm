@@ -149,6 +149,7 @@
       "createEnvironmentFolder": "Omgevingsmap maken",
       "delete": "Verwijderen",
       "clone": "Klonen",
+      "copySuffix": "kopie",
       "rename": "Naam wijzigen",
       "addToFavorites": "Toevoegen aan favorieten",
       "removeFromFavorites": "Verwijderen uit favorieten",
@@ -784,7 +785,9 @@
         "addNote": "Add / edit note",
         "duplicate": "Duplicate",
         "delete": "Delete",
-        "deleteShortcut": "Del"
+        "deleteShortcut": "Del",
+        "copy": "Kopiëren",
+        "paste": "Plakken"
       },
       "expand": "Uitklappen",
       "collapse": "Inklappen"
@@ -946,6 +949,8 @@
     "inspector": {
       "run": "Uitvoeren",
       "debug": "Debuggen",
+      "undo": "Ongedaan maken",
+      "redo": "Opnieuw",
       "step": "Stap voor stap",
       "previewInfo": "Example data, based on previous request results.",
       "pause": "Pauze",
@@ -1013,6 +1018,9 @@
       "toggle": "Onderbrekingspunt omschakelen (F9)",
       "reached": "Onderbrekingspunt bereikt — deze actie is nog niet uitgevoerd. Druk op F5 om te hervatten of F7 om te stappen.",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Minimap aan/uit"
     }
   }
 }

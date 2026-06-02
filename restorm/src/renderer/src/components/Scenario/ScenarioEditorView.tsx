@@ -4,6 +4,8 @@ import {
   ReactFlowProvider,
   Background,
   Controls,
+  ControlButton,
+  MiniMap,
   useNodesState,
   useEdgesState,
   useReactFlow,
@@ -20,7 +22,7 @@ import {
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { useTranslation } from 'react-i18next'
-import { Button, ContextMenu, Tooltip, ColorPicker, Modal, MarkdownEditor, eventBus, type ContextMenuItem } from 'electron-core-ui/renderer'
+import { Button, ContextMenu, Tooltip, ColorPicker, Modal, MarkdownEditor, eventBus, isUndoKeyEvent, isRedoKeyEvent, type ContextMenuItem } from 'electron-core-ui/renderer'
 import type { Scenario, ScenarioNode, ScenarioEdge, ScenarioNodeKind, ScenarioPort } from '../../../../shared/types/collections'
 import { isRequest, isScenario } from '../../../../shared/types/collections'
 import { Badge } from '../common/Badge'
@@ -38,6 +40,7 @@ import { normalizeValueType } from '../../utils/normalizeValueType'
 import { SCENARIO_NODE_CATALOGUE, scenarioNodeMeta, type ScenarioNodeKindMeta } from './scenarioNodeCatalogue'
 import { scenarioEdgeToFlowEdge, flowEdgeToScenarioEdge, edgeColorForHandle } from './scenarioGraphMapping'
 import { ScenarioNodeView, type ScenarioNodeBoxData } from './nodes'
+import { setScenarioClipboard, getScenarioClipboard, hasScenarioClipboard, nextPasteDelta } from './scenarioActionClipboard'
 import { defaultPortsForKind, isValidScenarioConnection, deriveRunScenarioPorts, inputPortFlow, outputPortFlow } from './scenarioNodePorts'
 import { isDataLink } from './scenarioPathTree'
 import { linkPaletteEntries } from './scenarioLinkPalette'
@@ -120,6 +123,10 @@ const PAN_ON_DRAG = [1]
 const MULTI_SELECTION_KEYS = ['Control', 'Meta']
 const DELETE_KEYS = ['Delete', 'Backspace']
 const PRO_OPTIONS = { hideAttribution: true }
+// Grid pitch shared by the dotted Background and snap-to-grid, so dropped /
+// dragged boxes land on the visible dots. Matches React Flow's default gap.
+const GRID_SIZE = 20
+const SNAP_GRID: [number, number] = [GRID_SIZE, GRID_SIZE]
 
 // Static-preview helpers as pure module functions taking explicit nodes/edges,
 // so they can be called both during render (inspector preview, with the live
@@ -287,6 +294,41 @@ interface NodeHandlers {
   onOpenItem?: (itemId: string) => void
 }
 
+/** One undo/redo step: a full copy of the scenario graph. */
+interface ScenarioSnapshot {
+  nodes: ScenarioNode[]
+  edges: ScenarioEdge[]
+}
+
+/** Build a `ScenarioNode` in one fixed field order. Used by BOTH `persist` and
+ * the undo/redo baseline so an unchanged graph serializes identically — the
+ * history dedup compares JSON, so byte-identical output is what keeps a no-op
+ * persist (e.g. the one React Flow fires on load) from recording a phantom
+ * undo step. */
+function canonicalScenarioNode(p: {
+  id: string
+  kind: ScenarioNode['kind']
+  config: Record<string, unknown>
+  inputs: ScenarioNode['inputs']
+  outputs: ScenarioNode['outputs']
+  position: ScenarioNode['position']
+  note?: string
+  color?: string
+  collapsed?: boolean
+}): ScenarioNode {
+  return {
+    id: p.id,
+    kind: p.kind,
+    config: p.config,
+    inputs: p.inputs,
+    outputs: p.outputs,
+    position: p.position,
+    ...(p.note !== undefined ? { note: p.note } : {}),
+    ...(p.color !== undefined ? { color: p.color } : {}),
+    ...(p.collapsed !== undefined ? { collapsed: p.collapsed } : {})
+  }
+}
+
 function toFlowNode(n: ScenarioNode, handlers: NodeHandlers): Node<NodeData> {
   return {
     id: n.id,
@@ -406,7 +448,7 @@ function chooseColorTooltipPlacement(rect: DOMRect): { placement: 'above' | 'bel
 
 const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tabId, projectUuid, onScenarioChange, resolveBoundItem, resolveRequestEnv, resolveSyntheticPreview, onOpenItem, onCreateRequest, onCreateChild }) => {
   const { t } = useTranslation()
-  const { screenToFlowPosition, fitView, getNode } = useReactFlow()
+  const { screenToFlowPosition, fitView, getNode, getViewport } = useReactFlow()
   const wrapperRef = useRef<HTMLDivElement>(null)
 
   // Batched node-internals sync. Each box asks to re-measure its handles after
@@ -643,6 +685,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   const [edges, setEdges, onEdgesChange] = useEdgesState([] as Edge[])
   useEffect(() => { edgesRef.current = edges }, [edges])
   const [palette, setPalette] = useState<{ x: number; y: number; flow: { x: number; y: number } } | null>(null)
+  const [showMinimap, setShowMinimap] = useState(false)
   const [nodeMenu, setNodeMenu] = useState<{ nodeId: string; x: number; y: number } | null>(null)
   // Bulk menu for a MULTI-selection right-click (change colour / delete), and
   // the cursor-anchored colour picker it opens (applied to every selected box).
@@ -658,6 +701,23 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   const [noteEditorNodeId, setNoteEditorNodeId] = useState<string | null>(null)
   const [noteDraft, setNoteDraft] = useState('')
 
+  // Undo / redo history for this scenario tab. A snapshot is the full graph
+  // (nodes + edges), so undo restores structure, positions, config edits,
+  // colours and breakpoints alike. The stack is ref-held (no re-render on
+  // capture) and bounded; `currentJson` dedupes consecutive identical persists
+  // and short-circuits the persist a restore itself triggers. History is
+  // per-scenario: the seed effect resets it when the open scenario changes.
+  const HISTORY_LIMIT = 50
+  const historyRef = useRef<{
+    past: ScenarioSnapshot[]
+    future: ScenarioSnapshot[]
+    current: ScenarioSnapshot | null
+    currentJson: string
+  }>({ past: [], future: [], current: null, currentJson: '' })
+  const isRestoringRef = useRef(false)
+  const [canUndo, setCanUndo] = useState(false)
+  const [canRedo, setCanRedo] = useState(false)
+
   const persist = useCallback((flowNodes: Node<NodeData>[], flowEdges: Edge[]) => {
     const nextNodes: ScenarioNode[] = flowNodes.map((fn) => {
       const prior = nodeStore.current.get(fn.id)
@@ -667,7 +727,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       // `prior.config` stale — which is why successive config edits persisted
       // only the first. The store stays the fallback for `config` (the only
       // optional field on the node data); `inputs`/`outputs` are always carried.
-      return {
+      return canonicalScenarioNode({
         id: fn.id,
         kind: fn.data.kind,
         config: fn.data.config ?? prior?.config ?? {},
@@ -677,7 +737,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         ...(prior?.note !== undefined ? { note: prior.note } : {}),
         ...(prior?.color !== undefined ? { color: prior.color } : {}),
         ...(prior?.collapsed !== undefined ? { collapsed: prior.collapsed } : {})
-      }
+      })
     })
     const nextEdges: ScenarioEdge[] = flowEdges.map((fe) =>
       flowEdgeToScenarioEdge(
@@ -693,7 +753,24 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     // React's "cannot update a component while rendering a different one" and
     // the update is dropped — which is why scenario config edits never reached
     // the parent (and thus never autosaved). A microtask runs it after commit.
-    queueMicrotask(() => { onScenarioChange?.(scenario.id, { nodes: nextNodes, edges: nextEdges }) })
+    queueMicrotask(() => {
+      onScenarioChange?.(scenario.id, { nodes: nextNodes, edges: nextEdges })
+      // Snapshot for undo/redo — skip the write a restore itself triggers and
+      // any persist that didn't actually change the serialized graph.
+      if (isRestoringRef.current) return
+      const snapJson = JSON.stringify({ n: nextNodes, e: nextEdges })
+      const h = historyRef.current
+      if (snapJson === h.currentJson) return
+      if (h.current) {
+        h.past.push(h.current)
+        if (h.past.length > HISTORY_LIMIT) h.past.shift()
+      }
+      h.future = []
+      h.current = { nodes: nextNodes, edges: nextEdges }
+      h.currentJson = snapJson
+      setCanUndo(h.past.length > 0)
+      setCanRedo(false)
+    })
   }, [onScenarioChange, scenario.id])
 
   // The JSON-path selector on a data link reads + writes that edge's `selector`
@@ -877,6 +954,46 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     return withSel(stroke ? { ...fe, style: { ...(fe.style ?? {}), stroke } } : fe)
   }, [isOrphanEdge, derivedPortsOf])
 
+  // Re-seed the canvas + authoritative stores from a history snapshot, then push
+  // it to the parent so it autosaves. The `isRestoringRef` guard keeps the
+  // resulting persist from recording a new history entry; `currentJson` is set
+  // so a redundant follow-up persist is a no-op too.
+  const restoreSnapshot = useCallback((snap: ScenarioSnapshot) => {
+    isRestoringRef.current = true
+    nodeStore.current = new Map(snap.nodes.map((n) => [n.id, n]))
+    edgeStore.current = new Map(snap.edges.map((e) => [e.id, e]))
+    setNodes(snap.nodes.map((n) => toFlowNode(n, handlers.current)))
+    setEdges(snap.edges.map(buildFlowEdge))
+    historyRef.current.current = snap
+    historyRef.current.currentJson = JSON.stringify({ n: snap.nodes, e: snap.edges })
+    queueMicrotask(() => {
+      onScenarioChange?.(scenario.id, { nodes: snap.nodes, edges: snap.edges })
+      isRestoringRef.current = false
+    })
+  }, [setNodes, setEdges, buildFlowEdge, onScenarioChange, scenario.id])
+
+  const undo = useCallback(() => {
+    const h = historyRef.current
+    const prev = h.past[h.past.length - 1]
+    if (prev === undefined || !h.current) return
+    h.past.pop()
+    h.future.push(h.current)
+    restoreSnapshot(prev)
+    setCanUndo(h.past.length > 0)
+    setCanRedo(true)
+  }, [restoreSnapshot])
+
+  const redo = useCallback(() => {
+    const h = historyRef.current
+    const next = h.future[h.future.length - 1]
+    if (next === undefined || !h.current) return
+    h.future.pop()
+    h.past.push(h.current)
+    restoreSnapshot(next)
+    setCanUndo(true)
+    setCanRedo(h.future.length > 0)
+  }, [restoreSnapshot])
+
   const [edgeMenu, setEdgeMenu] = useState<{ edgeId: string; x: number; y: number } | null>(null)
   const [edgeColorPicker, setEdgeColorPicker] = useState<{ edgeId: string; x: number; y: number } | null>(null)
   // Cursor-anchored invisible target for the edge colour-picker tooltip (edges
@@ -1010,6 +1127,38 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     edgeStore.current = new Map(cleanEdges.map((e) => [e.id, e]))
     setNodes(scenario.nodes.map((n) => toFlowNode(n, handlers.current)))
     setEdges(cleanEdges.map(buildFlowEdge))
+    // Reset undo/redo to the freshly loaded graph as the baseline — history is
+    // per-scenario, so switching tabs starts a clean stack the first edit can
+    // undo back to. The baseline is serialized through the SAME canonical
+    // shapes `persist` emits, so the no-op persist React Flow fires right after
+    // a load matches `currentJson` and is deduped (no phantom undo step).
+    const baseNodes = scenario.nodes.map((n) =>
+      canonicalScenarioNode({
+        id: n.id,
+        kind: n.kind,
+        config: n.config,
+        inputs: n.inputs,
+        outputs: n.outputs,
+        position: n.position,
+        ...(n.note !== undefined ? { note: n.note } : {}),
+        ...(n.color !== undefined ? { color: n.color } : {}),
+        ...(n.collapsed !== undefined ? { collapsed: n.collapsed } : {})
+      })
+    )
+    const baseEdges = cleanEdges.map((e) =>
+      flowEdgeToScenarioEdge(
+        { id: e.id, source: e.from.nodeId, target: e.to.nodeId, sourceHandle: e.from.portId, targetHandle: e.to.portId },
+        e
+      )
+    )
+    historyRef.current = {
+      past: [],
+      future: [],
+      current: { nodes: baseNodes, edges: baseEdges },
+      currentJson: JSON.stringify({ n: baseNodes, e: baseEdges })
+    }
+    setCanUndo(false)
+    setCanRedo(false)
     if (cleanEdges.length !== scenario.edges.length) {
       // Schedule a persist so the cleanup makes it back to disk on the next
       // autosave. Defer to a microtask: the parent owns scenario state, and a
@@ -1565,6 +1714,121 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     setEdges(nextEdges)
     persist(nextNodes, nextEdges)
   }, [setNodes, setEdges, persist])
+
+  // Copy the selected boxes + the edges BETWEEN them to the app-internal
+  // clipboard, so they can be pasted into this or another scenario.
+  const copyNodes = useCallback((ids: string[]) => {
+    setNodeMenu(null)
+    setSelectionMenu(null)
+    const idSet = new Set(ids)
+    const nodes = ids.map((id) => nodeStore.current.get(id)).filter((n): n is ScenarioNode => n !== undefined)
+    if (nodes.length === 0) return
+    const edges = edgesRef.current
+      .filter((ed) => idSet.has(ed.source) && idSet.has(ed.target))
+      .map((ed) => edgeStore.current.get(ed.id))
+      .filter((e): e is ScenarioEdge => e !== undefined)
+    // Centre of the copied group in flow coords (bbox of the live flow nodes,
+    // which carry measured sizes) + the viewport at copy time — drives the
+    // pan-aware paste placement.
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
+    for (const fn of nodesRef.current) {
+      if (!idSet.has(fn.id)) continue
+      const w = fn.measured?.width ?? fn.width ?? 0
+      const h = fn.measured?.height ?? fn.height ?? 0
+      minX = Math.min(minX, fn.position.x)
+      minY = Math.min(minY, fn.position.y)
+      maxX = Math.max(maxX, fn.position.x + w)
+      maxY = Math.max(maxY, fn.position.y + h)
+    }
+    const center = Number.isFinite(minX)
+      ? { x: (minX + maxX) / 2, y: (minY + maxY) / 2 }
+      : { x: 0, y: 0 }
+    setScenarioClipboard(nodes, edges, center, getViewport())
+  }, [getViewport])
+
+  // Paste the clipboard into THIS scenario: fresh ids for every box + its
+  // internal edges (remapped), offset like a duplicate, copies selected.
+  const pasteNodes = useCallback(() => {
+    setPalette(null)
+    setNodeMenu(null)
+    setSelectionMenu(null)
+    const clip = getScenarioClipboard()
+    if (!clip || clip.nodes.length === 0) return
+    // Pan-aware placement: same view → stack diagonally (+40 each paste); after a
+    // pan or in another scenario → re-centre the group on the current view so it
+    // never lands off-screen. The delta applies to every node's stored position,
+    // preserving the group's internal layout.
+    const rect = wrapperRef.current?.getBoundingClientRect()
+    const viewCenter = rect
+      ? screenToFlowPosition({ x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 })
+      : { x: 0, y: 0 }
+    const delta = nextPasteDelta(getViewport(), viewCenter)
+    const idMap = new Map<string, string>()
+    let i = 0
+    const stamp = Date.now()
+    const newNodes: ScenarioNode[] = clip.nodes.map((n) => {
+      const newId = `${stamp}-${i++}-${Math.random().toString(36).slice(2, 8)}`
+      idMap.set(n.id, newId)
+      const clonedNode: ScenarioNode = { ...n, id: newId, position: { x: n.position.x + delta.x, y: n.position.y + delta.y } }
+      nodeStore.current.set(newId, clonedNode)
+      return clonedNode
+    })
+    const newEdges: ScenarioEdge[] = clip.edges.map((e) => {
+      const ne: ScenarioEdge = {
+        ...e,
+        id: `e-${stamp}-${i++}-${Math.random().toString(36).slice(2, 8)}`,
+        from: { ...e.from, nodeId: idMap.get(e.from.nodeId) ?? e.from.nodeId },
+        to: { ...e.to, nodeId: idMap.get(e.to.nodeId) ?? e.to.nodeId }
+      }
+      edgeStore.current.set(ne.id, ne)
+      return ne
+    })
+    const nextNodes = [
+      ...nodesRef.current.map((n) => ({ ...n, selected: false })),
+      ...newNodes.map((n) => ({ ...toFlowNode(n, handlers.current), selected: true }))
+    ]
+    const nextEdges = [...edgesRef.current, ...newEdges.map((e) => buildFlowEdge(e))]
+    setNodes(nextNodes)
+    setEdges(nextEdges)
+    persist(nextNodes, nextEdges)
+  }, [setNodes, setEdges, persist, buildFlowEdge, screenToFlowPosition, getViewport])
+
+  // Clipboard / duplicate keyboard shortcuts — Ctrl on Win/Linux, Cmd on macOS
+  // (both surface as ctrlKey/metaKey). Scoped to the ACTIVE scenario tab, like
+  // Delete. Copy needs a selection; paste + duplicate are no-ops while the
+  // scenario is locked (running/paused). Kept in its own effect (after the
+  // callbacks are defined) so they can be real dependencies.
+  useEffect(() => {
+    if (!isActiveTab) return undefined
+    const onKey = (e: KeyboardEvent): void => {
+      const el = e.target as HTMLElement | null
+      const typing = !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable || !!el.closest('.monaco-editor'))
+      // Undo / redo first — the platform mapping lives in ECUI. Redo's
+      // Ctrl+Shift+Z variant would be rejected by the no-shift guard below, so
+      // it has to be handled ahead of the clipboard combos. Blocked while a run
+      // holds the graph read-only, and while typing into a field.
+      if (!typing && !lockedRef.current) {
+        if (isUndoKeyEvent(e)) { e.preventDefault(); undo(); return }
+        if (isRedoKeyEvent(e)) { e.preventDefault(); redo(); return }
+      }
+      if (!((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey)) return
+      const key = e.key.toLowerCase()
+      if (key !== 'c' && key !== 'v' && key !== 'd') return
+      if (typing) return
+      const selectedIds = nodesRef.current.filter((n) => n.selected).map((n) => n.id)
+      if (key === 'c') {
+        if (selectedIds.length > 0) { e.preventDefault(); copyNodes(selectedIds) }
+        return
+      }
+      if (lockedRef.current) return
+      e.preventDefault()
+      if (key === 'v') pasteNodes()
+      else if (selectedIds.length > 1) duplicateNodes(selectedIds)
+      else if (selectedIds.length === 1 && selectedIds[0] !== undefined) duplicateNode(selectedIds[0])
+    }
+    window.addEventListener('keydown', onKey)
+    return () => { window.removeEventListener('keydown', onKey) }
+  }, [isActiveTab, copyNodes, pasteNodes, duplicateNodes, duplicateNode, undo, redo])
 
   // Open the colour picker anchored to a node's header.
   const openColorPicker = useCallback((nodeId: string) => {
@@ -2135,6 +2399,10 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
           if (engine.state === 'paused') void engine.resume()
         }}
         hasBreakpoints={breakpointIds.size > 0}
+        canUndo={canUndo}
+        canRedo={canRedo}
+        onUndo={undo}
+        onRedo={redo}
       />
       <ReactFlow
         nodes={presentationalNodes}
@@ -2171,6 +2439,8 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         // single/multi-select still work; right-drag stays the context menu.
         selectionKeyCode={null}
         selectionOnDrag
+        snapToGrid
+        snapGrid={SNAP_GRID}
         panOnDrag={PAN_ON_DRAG}
         onPaneContextMenu={onPaneContextMenu}
         onEdgeContextMenu={onEdgeContextMenu}
@@ -2188,8 +2458,32 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
             SVG <pattern> id from this, and with several scenario tabs mounted
             at once a shared id makes `url(#pattern-…)` resolve to the first
             (often a hidden 0×0 tab), leaving the visible grid blank. */}
-        <Background id={scenario.id} />
-        <Controls showInteractive={false} />
+        {/* `offset={GRID_SIZE}` cancels React Flow's default half-cell dot
+            centering, so the dots sit on the cell CORNERS — i.e. exactly the
+            multiples of `GRID_SIZE` that `snapGrid` snaps a box's top-left to.
+            A snapped box then lands its top-left corner right on a dot. */}
+        <Background id={scenario.id} gap={GRID_SIZE} offset={GRID_SIZE} />
+        <Controls showInteractive={false}>
+          {/* Minimap toggle sits at the bottom of the control stack — i.e. just
+            * below the fit-to-view button. */}
+          <ControlButton
+            onClick={() => { setShowMinimap((v) => !v) }}
+            title={t('scenario.minimap.toggle', 'Toggle minimap')}
+            aria-label={t('scenario.minimap.toggle', 'Toggle minimap')}
+            data-testid="scenario-minimap-toggle"
+            data-active={showMinimap ? 'true' : 'false'}
+          >
+            <span className="codicon codicon-map" aria-hidden="true" />
+          </ControlButton>
+        </Controls>
+        {showMinimap && (
+          <MiniMap
+            pannable
+            zoomable
+            className="scn-minimap"
+            nodeColor={(n) => (typeof (n.data as { color?: unknown }).color === 'string' ? (n.data as { color: string }).color : '#a855f7')}
+          />
+        )}
       </ReactFlow>
       {/* One prompt for every pending input — up-front params (all pending at
         * run start) and mid-run inputs (pending when the flow reaches them)
@@ -2215,12 +2509,20 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
           y={palette.y}
           onRequestClose={() => { setPalette(null) }}
           data-testid="scenario-node-palette"
-          items={buildScenarioPaletteItems({
-            t,
-            withAddSubmenu: onCreateChild !== undefined,
-            pickNode: (kind) => () => { addNode(kind, palette.flow) },
-            pickChild: (kind) => () => { addChildNode(kind as AddChildKind, palette.flow) }
-          })}
+          items={[
+            ...(hasScenarioClipboard()
+              ? [
+                { id: 'paste', label: t('scenario.node.menu.paste', 'Paste'), icon: 'copy', onClick: () => { pasteNodes() } },
+                { id: 'paste-sep', isSeparator: true, label: '' }
+              ]
+              : []),
+            ...buildScenarioPaletteItems({
+              t,
+              withAddSubmenu: onCreateChild !== undefined,
+              pickNode: (kind) => () => { addNode(kind, palette.flow) },
+              pickChild: (kind) => () => { addChildNode(kind as AddChildKind, palette.flow) }
+            })
+          ]}
         />
       )}
       {linkPalette && (
@@ -2268,7 +2570,8 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
               onClick: () => { onToggleBreakpoint(nodeMenu.nodeId) }
             },
             { id: 'sep1', label: '', isSeparator: true },
-            { id: 'duplicate', label: t('scenario.node.menu.duplicate', 'Duplicate'), icon: 'copy', onClick: () => { duplicateNode(nodeMenu.nodeId) } },
+            { id: 'copy', label: t('scenario.node.menu.copy', 'Copy'), icon: 'copy', shortcut: 'Ctrl+C', onClick: () => { copyNodes([nodeMenu.nodeId]) } },
+            { id: 'duplicate', label: t('scenario.node.menu.duplicate', 'Duplicate'), icon: 'files', shortcut: 'Ctrl+D', onClick: () => { duplicateNode(nodeMenu.nodeId) } },
             { id: 'sep2', label: '', isSeparator: true },
             { id: 'delete', label: t('scenario.node.menu.delete', 'Delete'), icon: 'trash', shortcut: t('scenario.node.menu.deleteShortcut', 'Del'), onClick: () => { deleteNode(nodeMenu.nodeId) } }
           ]}
@@ -2312,7 +2615,8 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
           items={[
             { id: 'color', label: t('scenario.node.menu.changeColor', 'Change colour'), icon: 'symbol-color', opensDialog: true, onClick: () => { setMultiColorPicker({ x: selectionMenu.x, y: selectionMenu.y, nodeIds: selectionMenu.nodeIds }); setSelectionMenu(null) } },
             { id: 'sel-sep-1', label: '', isSeparator: true },
-            { id: 'duplicate', label: t('scenario.node.menu.duplicate', 'Duplicate'), icon: 'copy', onClick: () => { duplicateNodes(selectionMenu.nodeIds) } },
+            { id: 'copy', label: t('scenario.node.menu.copy', 'Copy'), icon: 'copy', shortcut: 'Ctrl+C', onClick: () => { copyNodes(selectionMenu.nodeIds) } },
+            { id: 'duplicate', label: t('scenario.node.menu.duplicate', 'Duplicate'), icon: 'files', shortcut: 'Ctrl+D', onClick: () => { duplicateNodes(selectionMenu.nodeIds) } },
             { id: 'sel-sep-2', label: '', isSeparator: true },
             { id: 'delete', label: t('scenario.node.menu.delete', 'Delete'), icon: 'trash', shortcut: t('scenario.node.menu.deleteShortcut', 'Del'), onClick: () => { deleteNodes(selectionMenu.nodeIds) } }
           ]}

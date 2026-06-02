@@ -17,6 +17,63 @@
   stroke-width: 2.75px;
 }
 
+/* Empty scenario surface keeps the default cursor — only actions / edges /
+ * handles get their own (pointer / grab). React Flow defaults the pane to
+ * `grab`; override it just inside the scenario editor so hovering an empty area
+ * doesn't show a grab hand. Active gestures (box-select, middle-drag pan) still
+ * set their own cursor while in progress. */
+[data-testid="scenario-editor"] .react-flow__pane {
+  cursor: default;
+}
+
+/* React Flow zoom/fit/minimap controls: theme them so the icons stay readable
+ * on EVERY theme (React Flow's default white icons vanish on a light control
+ * background). Panel-styled via the theme's own variables so the controls read
+ * as distinct from the canvas yet respect each theme — no per-theme hand-tuning
+ * needed; a theme can still override these vars. */
+[data-testid="scenario-editor"] .react-flow__controls {
+  background: var(--editorWidget-background, var(--editor-background, #252526));
+  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.22));
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+}
+[data-testid="scenario-editor"] .react-flow__controls-button {
+  background: var(--editorWidget-background, var(--editor-background, #252526));
+  border-bottom: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+  color: var(--editor-foreground, #d4d4d4);
+}
+[data-testid="scenario-editor"] .react-flow__controls-button:hover {
+  background: var(--list-hoverBackground, rgba(127, 127, 127, 0.14));
+}
+[data-testid="scenario-editor"] .react-flow__controls-button svg {
+  fill: var(--editor-foreground, #d4d4d4);
+}
+/* The minimap toggle paints a codicon FONT glyph (not an SVG), so the global
+ * `.codicon { color: ... !important }` rule overrides the button's inherited
+ * colour. Pin it (with matching `!important`) to the same var the zoom SVGs
+ * fill with, so the map icon matches the zoom icons exactly. */
+[data-testid="scenario-editor"] .react-flow__controls-button .codicon {
+  color: var(--editor-foreground, #d4d4d4) !important;
+}
+[data-testid="scenario-editor"] .react-flow__controls-button[data-active="true"] {
+  color: var(--scn-flow-signal, #facc15);
+}
+[data-testid="scenario-editor"] .react-flow__controls-button[data-active="true"] .codicon {
+  color: var(--scn-flow-signal, #facc15) !important;
+}
+
+/* Minimap (bottom-right): themed panel + dimmed mask. */
+[data-testid="scenario-editor"] .scn-minimap {
+  background: var(--editorWidget-background, var(--editor-background, #252526));
+  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.22));
+  border-radius: 4px;
+}
+[data-testid="scenario-editor"] .scn-minimap .react-flow__minimap-mask {
+  fill: var(--editor-background, #1e1e1e);
+  fill-opacity: 0.6;
+}
+
 /* Sub-scenario log preview popover: a titled card hosting a read-only graph.
  * The hosting ECUI Tooltip caps its own width (~max-content for a text tip),
  * which would clip our wide graph — lift that cap for this specific tip. */
@@ -253,6 +310,46 @@
   color: #fff !important;
   font-size: 20px !important;
 }
+/* Undo / redo — flat, theme-coloured icon buttons sitting at the LEFT of the
+ * toolbar (no `order` → before the run/step/debug/stop discs). Secondary
+ * utility controls, so they're understated next to the coloured run discs. */
+.scn-inspector-undo-round.button.text-button,
+.scn-inspector-redo-round.button.text-button {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  padding: 0;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.scn-inspector-undo-round.button.text-button:hover,
+.scn-inspector-redo-round.button.text-button:hover {
+  background: var(--toolbar-hoverBackground, rgba(127, 127, 127, 0.2));
+}
+.scn-inspector-undo-round.button.text-button.disabled,
+.scn-inspector-redo-round.button.text-button.disabled {
+  opacity: 0.35;
+  background: transparent;
+}
+.scn-inspector-undo-round .codicon,
+.scn-inspector-redo-round .codicon {
+  color: var(--foreground, #ccc) !important;
+  font-size: 15px !important;
+}
+/* Vertical divider between the undo/redo pair and the run controls. */
+.scn-inspector-toolbar-sep {
+  width: 1px;
+  align-self: stretch;
+  margin: 4px 2px;
+  background: var(--widget-border, #454545);
+  flex: 0 0 auto;
+}
+
 .scn-inspector-sep {
   border-top: 1px solid var(--widget-border, #454545);
   flex: 0 0 auto;
@@ -1212,6 +1309,15 @@
   /* Fills the row's spare width so a typed-value editor (dropdown,
    * env button, input) stretches to the row's right edge instead of
    * sizing to its label / content. */
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* `if` / `comparator` operand value selector — grow to the row's full width so
+ * the typed-value editor (type dropdown + input + env button) spans the box
+ * instead of sizing to its current content. `min-width: 0` lets the inner input
+ * shrink inside the flex row. */
+.scn-operand-field {
   flex: 1 1 auto;
   min-width: 0;
 }

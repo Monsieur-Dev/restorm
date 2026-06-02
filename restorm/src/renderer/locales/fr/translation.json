@@ -149,6 +149,7 @@
       "createEnvironmentFolder": "Créer un dossier de variables",
       "delete": "Supprimer",
       "clone": "Cloner",
+      "copySuffix": "copie",
       "rename": "Renommer",
       "addToFavorites": "Ajouter aux favoris",
       "removeFromFavorites": "Retirer des favoris",
@@ -777,7 +778,9 @@
         "addNote": "Ajouter/modifier une note",
         "duplicate": "Dupliquer",
         "delete": "Supprimer",
-        "deleteShortcut": "Suppr"
+        "deleteShortcut": "Suppr",
+        "copy": "Copier",
+        "paste": "Coller"
       },
       "expand": "Développer",
       "collapse": "Réduire"
@@ -946,6 +949,8 @@
     "inspector": {
       "run": "Exécuter",
       "debug": "Déboguer",
+      "undo": "Annuler",
+      "redo": "Rétablir",
       "step": "Pas à pas",
       "previewInfo": "Données d'exemple, basées sur les précédents résultats des requêtes.",
       "pause": "Pause",
@@ -1013,6 +1018,9 @@
       "toggle": "Activer/désactiver le point d'arrêt (F9)",
       "reached": "Point d'arrêt atteint — cette action n'a pas encore été exécutée. Appuyez sur F5 pour reprendre, ou F7 pour le pas à pas.",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Afficher/masquer la minimap"
     }
   }
 }

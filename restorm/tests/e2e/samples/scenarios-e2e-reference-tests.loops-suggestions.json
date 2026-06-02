@@ -1,0 +1,158 @@
+[
+  {
+    "id": "1780260666354-ng60bf",
+    "kind": "forEach",
+    "suggestion": {
+      "totalItems": 3,
+      "itemsPerBatch": 1,
+      "batches": 3
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780260767376-nztk8x",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "ForEachOutput",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780260905141-5ldonh",
+    "kind": "for",
+    "suggestion": {
+      "totalItems": 3,
+      "itemsPerBatch": 1,
+      "batches": 3
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780260964288-f92lwp",
+    "kind": "doWhile",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780260983665-gj9nge",
+    "kind": "while",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780266252124-xn88ev",
+    "kind": "setVariable",
+    "suggestion": {
+      "cpt": 0
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780266804440-8uxw08",
+    "kind": "arithmetic",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780267000002-y1n9rz",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "cpt in DoWhile",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780267292271-e4lomo",
+    "kind": "setVariable",
+    "suggestion": {
+      "cpt": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780267600232-mmm3yu",
+    "kind": "arithmetic",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780267712890-jr5j5o",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "For",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780267814929-w499o5",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "DoWhile loop is done, testing For",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780268282439-idtdxo",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "cpt in While",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780268614379-18gj74",
+    "kind": "setVariable",
+    "suggestion": {
+      "cpt": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780268656706-g9lim1",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "For loop is done, testing While",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780268694412-ut8ojk",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "While loop is done",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780268726667-cgn82p",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "ForEach loop is done, testing DoWhile",
+      "data": null
+    },
+    "source": "static"
+  }
+]

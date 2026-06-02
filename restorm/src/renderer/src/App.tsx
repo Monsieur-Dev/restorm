@@ -106,6 +106,7 @@ import { useMcpRunRequest } from './hooks/useMcpRunRequest'
 import { useMcpRequestPatch } from './hooks/useMcpRequestPatch'
 import { useMcpWorkbenchTabsBridge } from './hooks/useMcpWorkbenchTabsBridge'
 import { useMcpFolderPatch } from './hooks/useMcpFolderPatch'
+import { useScenarioSuggestionsBridge } from './testing/scenarioSuggestionsBridge'
 import { RestormSidebar } from './components/MainView/Sidebar/RestormSidebar'
 import { RestormWorkbenchContainer } from './components/MainView/Workbench/RestormWorkbenchContainer'
 import { SaveOptionsModal } from './components/Modals/SaveOptionsModal'
@@ -1255,6 +1256,9 @@ const App: React.FC = () => {
   const bumpAllTabContentVersionsStable = useCallback((): void => { bumpAllTabContentVersionsRef.current() }, [])
   useMcpTreeReplace({ enabled: mcpEnabled, setRootItems, mcpDrivenRef, bumpAllTabContentVersions: bumpAllTabContentVersionsStable })
   useMcpRunRequest({ enabled: mcpEnabled })
+  // Read-only e2e automation hook: exposes window.__restormSuggestions to pull
+  // each action's inspector data suggestion for a scenario from the running app.
+  useScenarioSuggestionsBridge()
   // Forward-ref dance: `bumpTabContentVersionFor` is declared further
   // down (depends on `setWorkbenchTree`). Hand the patch hook a stable
   // wrapper that reads the ref so we can wire it up without restructuring

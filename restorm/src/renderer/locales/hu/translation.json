@@ -149,6 +149,7 @@
       "createEnvironmentFolder": "Környezeti mappa létrehozása",
       "delete": "Törlés",
       "clone": "Klónozás",
+      "copySuffix": "másolat",
       "rename": "Átnevezés",
       "addToFavorites": "Hozzáadás a kedvencekhez",
       "removeFromFavorites": "Eltávolítás a kedvencekből",
@@ -784,7 +785,9 @@
         "addNote": "Add / edit note",
         "duplicate": "Duplicate",
         "delete": "Delete",
-        "deleteShortcut": "Del"
+        "deleteShortcut": "Del",
+        "copy": "Másolás",
+        "paste": "Beillesztés"
       },
       "expand": "Kibont",
       "collapse": "Összecsuk"
@@ -946,6 +949,8 @@
     "inspector": {
       "run": "Futtatás",
       "debug": "Hibakeresés",
+      "undo": "Visszavonás",
+      "redo": "Újra",
       "step": "Lépésenként",
       "previewInfo": "Example data, based on previous request results.",
       "pause": "Szünet",
@@ -1013,6 +1018,9 @@
       "toggle": "Töréspont be/ki (F9)",
       "reached": "Töréspont elérve – ez a művelet még nem futott le. Nyomja meg az F5-öt a folytatáshoz vagy az F7-ot a léptetéshez.",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Minitérkép be/ki"
     }
   }
 }

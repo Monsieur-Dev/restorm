@@ -1,0 +1,5156 @@
+collections:
+  - folderType: environment
+    fileFormatVersion: 1
+    tags:
+      - auth
+    tagColors: {}
+    configuration: {}
+    environments:
+      - variables:
+          - key: baseUrl
+            enabled: true
+            value:
+              type: string
+              value: http://localhost:5110
+            description: ''
+          - key: clientId
+            enabled: true
+            value:
+              type: string
+              value: VALID_CLIENT_ID
+            description: ''
+        id: 6c323ee6-0513-42a0-9d9a-68b329b405b4
+        name: localhost
+        subEnvironments:
+          - variables: []
+            id: env-1780300487228-md0ml0o
+            name: Sub-env
+            color: '#bd10e0'
+    items:
+      - documentation: ''
+        tags:
+          - auth
+        id: a1000000-0000-0000-0000-00000000auth
+        name: Login
+        method: POST
+        url: '{{baseUrl}}/login'
+        headers:
+          - key: Content-Type
+            enabled: true
+            value:
+              type: string
+              value: application/json
+        params: []
+        pathParams: []
+        body:
+          type: text
+          contentType: application/json
+          text: |
+            {
+              "client_id": "{{clientId}}"
+            }
+        producedHeaders:
+          - key: Authorization
+            enabled: true
+            value:
+              type: expression
+              value: '{{auth_type}} {{auth_token}}'
+        authErrorCodes:
+          - 401
+          - 403
+        deprecated: false
+        type: auth
+      - tags: []
+        configuration: {}
+        items:
+          - documentation: Liveness probe — no auth required.
+            tags: []
+            id: d1000000-0000-0000-0000-00000000auth
+            name: Health
+            method: GET
+            url: '{{baseUrl}}/health'
+            headers: []
+            params: []
+            pathParams: []
+            body:
+              type: text
+              content: A
+            deprecated: false
+            type: http
+          - documentation: Requires the Login auth route.
+            tags: []
+            id: d2000000-0000-0000-0000-00000000auth
+            name: Get Pet by Id
+            authenticationRequestId: a1000000-0000-0000-0000-00000000auth
+            method: GET
+            url: '{{baseUrl}}/pet/1'
+            headers:
+              - key: Accept
+                enabled: true
+                value:
+                  type: string
+                  value: application/json
+            params: []
+            pathParams: []
+            deprecated: false
+            type: http
+          - type: scenario
+            tags: []
+            params: []
+            nodes:
+              - id: 1780315669511-p567l6
+                kind: log
+                config:
+                  message:
+                    type: string
+                    value: First
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                  - id: message
+                    name: message
+                    dataType: string
+                  - id: data
+                    name: data
+                    dataType: any
+                outputs: []
+                position:
+                  x: 203.41299656977253
+                  'y': 240.57463197258966
+              - id: 1780324493299-z019qs
+                kind: runScenario
+                config:
+                  scenarioId: 1780290655312-0z6px87
+                  label: Inputs/outputs
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 814.3825108806394
+                  'y': 193.4616715494965
+            edges: []
+            id: c1573ce0-985c-44b5-b5d4-e081de2d4303
+            name: Main
+            items:
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 101ed7a2-75dd-4679-979b-e87589150002
+                    kind: input
+                    config:
+                      name: msg
+                      valueType:
+                        type: string
+                        value: hi
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: value
+                        name: value
+                        dataType: any
+                        flow: value
+                    position:
+                      x: -106.44149614125591
+                      'y': 77.63585625681974
+                  - id: 92e6fd90-3012-48f0-b6b1-159439d34928
+                    kind: transform
+                    config:
+                      expression:
+                        type: expression
+                        value: '{{value}} echoed'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: out
+                        name: value
+                        dataType: any
+                        flow: value
+                    position:
+                      x: 340
+                      'y': 80
+                  - id: 3457f371-dac1-4a38-bf99-a40290f59332
+                    kind: output
+                    config:
+                      name: echoed
+                    inputs:
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 773.1149079463048
+                      'y': 93.3074539731524
+                edges:
+                  - id: 617723f6-177d-43b5-990b-86ea6d32ed58
+                    from:
+                      nodeId: 101ed7a2-75dd-4679-979b-e87589150002
+                      portId: value
+                    to:
+                      nodeId: 92e6fd90-3012-48f0-b6b1-159439d34928
+                      portId: value
+                    selector: .
+                  - id: b0612ca1-1863-42a3-81f8-4ad74a66f7c9
+                    from:
+                      nodeId: 92e6fd90-3012-48f0-b6b1-159439d34928
+                      portId: out
+                    to:
+                      nodeId: 3457f371-dac1-4a38-bf99-a40290f59332
+                      portId: value
+                    selector: result
+                id: 01e784fc-73b3-450b-b4bc-8930e6e491c1
+                name: Echo Sub
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 1780260666354-ng60bf
+                    kind: forEach
+                    config:
+                      items:
+                        type: customListMulti
+                        listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                        labels:
+                          - Rouge
+                          - Vert
+                          - Bleu
+                    inputs:
+                      - id: items
+                        name: items
+                        dataType: json
+                    outputs:
+                      - id: each
+                        name: each
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: done
+                        name: done
+                        dataType: any
+                        role: else
+                        flow: signal
+                    position:
+                      x: -149.17650625389984
+                      'y': 120.74344296546482
+                  - id: 1780260767376-nztk8x
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: ForEachOutput
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 378.84538963945613
+                      'y': 88.81870579202952
+                  - id: 1780260905141-5ldonh
+                    kind: for
+                    config:
+                      to:
+                        type: numeric
+                        value: 3
+                        format: decimal
+                    inputs:
+                      - id: from
+                        name: from
+                        dataType: number
+                      - id: to
+                        name: to
+                        dataType: number
+                      - id: step
+                        name: step
+                        dataType: number
+                    outputs:
+                      - id: each
+                        name: index
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: done
+                        name: done
+                        dataType: any
+                        role: else
+                        flow: signal
+                    position:
+                      x: 1383.723439921258
+                      'y': 681.91581227856
+                  - id: 1780260964288-f92lwp
+                    kind: doWhile
+                    config:
+                      left:
+                        type: variable
+                        value: cpt
+                      operator: <
+                      right:
+                        type: string
+                        value: '3'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: loop
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: done
+                        dataType: any
+                        role: else
+                        flow: signal
+                    position:
+                      x: 710.902990784637
+                      'y': 478.7999517793196
+                  - id: 1780260983665-gj9nge
+                    kind: while
+                    config:
+                      left:
+                        type: variable
+                        value: cpt
+                      operator: ≥
+                      right:
+                        type: string
+                        value: '0'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: body
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: done
+                        dataType: any
+                        role: else
+                        flow: signal
+                    position:
+                      x: 2174.637098183718
+                      'y': 1274.812616573072
+                    collapsed: false
+                  - id: 1780266252124-xn88ev
+                    kind: setVariable
+                    config:
+                      name: cpt
+                      value:
+                        type: numeric
+                        value: 0
+                        format: decimal
+                    inputs:
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: event
+                        name: event
+                        dataType: any
+                        flow: signal
+                    position:
+                      x: 517.3475204038045
+                      'y': 318.93195578977804
+                  - id: 1780266804440-8uxw08
+                    kind: arithmetic
+                    config:
+                      a:
+                        type: variable
+                        value: cpt
+                      b:
+                        type: numeric
+                        value: 1
+                        format: decimal
+                    inputs:
+                      - id: a
+                        name: a
+                        dataType: number
+                      - id: b
+                        name: b
+                        dataType: number
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: number
+                        flow: value
+                    position:
+                      x: 1129.2756462336113
+                      'y': 412.8213317582814
+                  - id: 1780267000002-y1n9rz
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: cpt in DoWhile
+                      data:
+                        type: variable
+                        value: cpt
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1863.1527140693097
+                      'y': 461.0254309647953
+                  - id: 1780267292271-e4lomo
+                    kind: setVariable
+                    config:
+                      name: cpt
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1524.5993345220465
+                      'y': 333.75659410059444
+                  - id: 1780267600232-mmm3yu
+                    kind: arithmetic
+                    config:
+                      a:
+                        type: variable
+                        value: cpt
+                      b:
+                        type: numeric
+                        value: 1
+                        format: decimal
+                      operator: −
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: a
+                        dataType: number
+                      - id: b
+                        name: b
+                        dataType: number
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: number
+                        flow: value
+                    position:
+                      x: 2545.0286049165697
+                      'y': 1193.5856161279412
+                  - id: 1780267712890-jr5j5o
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: For
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1882.0378360161728
+                      'y': 682.9591854220454
+                  - id: 1780267814929-w499o5
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: DoWhile loop is done, testing For
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1008.2077666952782
+                      'y': 684.6063674565805
+                  - id: 1780268282439-idtdxo
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: cpt in While
+                      data:
+                        type: variable
+                        value: cpt
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 3239.308501418292
+                      'y': 1386.2734480685417
+                  - id: 1780268614379-18gj74
+                    kind: setVariable
+                    config:
+                      name: cpt
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 2954.9747936040994
+                      'y': 1169.5263597205378
+                  - id: 1780268656706-g9lim1
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: For loop is done, testing While
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1844.339947594624
+                      'y': 1014.4594209654537
+                  - id: 1780268694412-ut8ojk
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: While loop is done
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 2469.3699026529985
+                      'y': 1486.0720985829746
+                  - id: 1780268726667-cgn82p
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: ForEach loop is done, testing DoWhile
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 208.96852009962157
+                      'y': 330.9298612026808
+                edges:
+                  - id: e-1780260773347-apo86y
+                    from:
+                      nodeId: 1780260666354-ng60bf
+                      portId: each
+                    to:
+                      nodeId: 1780260767376-nztk8x
+                      portId: data
+                    selector: .
+                  - id: e-1780266764521-80wclf
+                    from:
+                      nodeId: 1780266252124-xn88ev
+                      portId: done
+                    to:
+                      nodeId: 1780260964288-f92lwp
+                      portId: in
+                  - id: e-1780267297793-5lj90j
+                    from:
+                      nodeId: 1780266804440-8uxw08
+                      portId: result
+                    to:
+                      nodeId: 1780267292271-e4lomo
+                      portId: value
+                    selector: .
+                  - id: e-1780267322282-jlwe6u
+                    from:
+                      nodeId: 1780267292271-e4lomo
+                      portId: done
+                    to:
+                      nodeId: 1780267000002-y1n9rz
+                      portId: in
+                  - id: e-1780267820923-bm8fg7
+                    from:
+                      nodeId: 1780260964288-f92lwp
+                      portId: done
+                    to:
+                      nodeId: 1780267814929-w499o5
+                      portId: in
+                  - id: e-1780267823483-gx43s2
+                    from:
+                      nodeId: 1780267814929-w499o5
+                      portId: done
+                    to:
+                      nodeId: 1780260905141-5ldonh
+                      portId: in
+                  - id: e-1780268625441-u8s54t
+                    from:
+                      nodeId: 1780267600232-mmm3yu
+                      portId: result
+                    to:
+                      nodeId: 1780268614379-18gj74
+                      portId: value
+                    selector: .
+                  - id: e-1780268637394-5gplem
+                    from:
+                      nodeId: 1780268614379-18gj74
+                      portId: done
+                    to:
+                      nodeId: 1780268282439-idtdxo
+                      portId: in
+                  - id: e-1780268666284-j9sqpd
+                    from:
+                      nodeId: 1780268656706-g9lim1
+                      portId: done
+                    to:
+                      nodeId: 1780260983665-gj9nge
+                      portId: in
+                  - id: e-1780268699305-ubr8ye
+                    from:
+                      nodeId: 1780260983665-gj9nge
+                      portId: done
+                    to:
+                      nodeId: 1780268694412-ut8ojk
+                      portId: in
+                  - id: e-1780268734719-yj88cy
+                    from:
+                      nodeId: 1780260666354-ng60bf
+                      portId: done
+                    to:
+                      nodeId: 1780268726667-cgn82p
+                      portId: in
+                  - id: e-1780268736505-upcp2n
+                    from:
+                      nodeId: 1780268726667-cgn82p
+                      portId: done
+                    to:
+                      nodeId: 1780266252124-xn88ev
+                      portId: in
+                  - id: e-1780272645502-5w821e
+                    from:
+                      nodeId: 1780260964288-f92lwp
+                      portId: then
+                    to:
+                      nodeId: 1780266804440-8uxw08
+                      portId: in
+                  - id: e-1780272662007-6t4r14
+                    from:
+                      nodeId: 1780260905141-5ldonh
+                      portId: each
+                    to:
+                      nodeId: 1780267712890-jr5j5o
+                      portId: data
+                    selector: .
+                  - id: e-1780273393080-rhc3i1
+                    from:
+                      nodeId: 1780260905141-5ldonh
+                      portId: done
+                    to:
+                      nodeId: 1780268656706-g9lim1
+                      portId: in
+                  - id: e-1780274645039-0bq491
+                    from:
+                      nodeId: 1780260983665-gj9nge
+                      portId: then
+                    to:
+                      nodeId: 1780267600232-mmm3yu
+                      portId: in
+                id: 1780260652264-uon8bia
+                name: Loops
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 1780275642843-16zrdk
+                    kind: arithmetic
+                    config:
+                      b:
+                        type: numeric
+                        value: 5
+                        format: decimal
+                      a:
+                        type: numeric
+                        value: 5
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: a
+                        dataType: number
+                      - id: b
+                        name: b
+                        dataType: number
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: number
+                        flow: both
+                    position:
+                      x: 402
+                      'y': 393.39062500000006
+                  - id: 1780275660454-p9cmhm
+                    kind: log
+                    config:
+                      message:
+                        type: expression
+                        value: 5+5 = {{.}}
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 860.7156622739653
+                      'y': 366.32025152334387
+                    collapsed: false
+                  - id: 1780275679035-gxdtrn
+                    kind: arithmetic
+                    config:
+                      a:
+                        type: numeric
+                        value: 10
+                        format: decimal
+                      operator: −
+                      b:
+                        type: numeric
+                        value: 5
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: a
+                        dataType: number
+                      - id: b
+                        name: b
+                        dataType: number
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: number
+                        flow: both
+                    position:
+                      x: 737.1184239022675
+                      'y': 944.2772432519467
+                  - id: 1780275709162-fnrl7j
+                    kind: log
+                    config:
+                      message:
+                        type: expression
+                        value: 10-5 = {{.}}
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 572.4927153288402
+                      'y': 937.117839136346
+                  - id: 1780275743791-pwt1wq
+                    kind: arithmetic
+                    config:
+                      operator: ×
+                      a:
+                        type: numeric
+                        value: 5
+                        format: decimal
+                      b:
+                        type: numeric
+                        value: 5
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: a
+                        dataType: number
+                      - id: b
+                        name: b
+                        dataType: number
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: number
+                        flow: both
+                    position:
+                      x: 829.1836760411305
+                      'y': 551.3230215168433
+                  - id: 1780275759422-9v8kkt
+                    kind: log
+                    config:
+                      message:
+                        type: expression
+                        value: 5x5 = {{.}}
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 879.1408811753681
+                      'y': 848.8808753959798
+                  - id: 1780275780351-ehbolg
+                    kind: arithmetic
+                    config:
+                      a:
+                        type: numeric
+                        value: 16
+                        format: decimal
+                      b:
+                        type: numeric
+                        value: 5
+                        format: decimal
+                      operator: '%'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: a
+                        dataType: number
+                      - id: b
+                        name: b
+                        dataType: number
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: number
+                        flow: both
+                    position:
+                      x: 433.945312001631
+                      'y': 1314.5028139252222
+                  - id: 1780275795655-asir8w
+                    kind: log
+                    config:
+                      message:
+                        type: expression
+                        value: 16%5 = {{.}}
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 911.9675371501954
+                      'y': 1301.7935903570035
+                  - id: 1780276685741-f7j2k4
+                    kind: arithmetic
+                    config:
+                      operator: ÷
+                      a:
+                        type: numeric
+                        value: 25
+                        format: decimal
+                      b:
+                        type: numeric
+                        value: 5
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: a
+                        dataType: number
+                      - id: b
+                        name: b
+                        dataType: number
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: number
+                        flow: both
+                    position:
+                      x: 642.1142034642528
+                      'y': 739.4893692891322
+                  - id: 1780276698111-kkdo2f
+                    kind: log
+                    config:
+                      message:
+                        type: expression
+                        value: 25/5 = {{.}}
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 888.5650961085994
+                      'y': 1080.7474971893068
+                  - id: 1780276778906-lwbsyh
+                    kind: setVariable
+                    config:
+                      name: 'N'
+                      value:
+                        type: numeric
+                        value: 5
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1141.5200984307673
+                      'y': 188.75493195670649
+                  - id: 1780276800476-1dnwfu
+                    kind: arithmetic
+                    config:
+                      b:
+                        type: variable
+                        value: 'N'
+                      a:
+                        type: numeric
+                        value: 5
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: a
+                        dataType: number
+                      - id: b
+                        name: b
+                        dataType: number
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: number
+                        flow: both
+                    position:
+                      x: 1451.5218026961331
+                      'y': 390.6341850288231
+                  - id: 1780276805395-hsl12y
+                    kind: arithmetic
+                    config:
+                      operator: ×
+                      b:
+                        type: variable
+                        value: 'N'
+                      a:
+                        type: numeric
+                        value: 5
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: a
+                        dataType: number
+                      - id: b
+                        name: b
+                        dataType: number
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: number
+                        flow: both
+                    position:
+                      x: 1481.1425999669782
+                      'y': 849.745699886071
+                  - id: 1780276807834-lxe68y
+                    kind: arithmetic
+                    config:
+                      operator: ÷
+                      b:
+                        type: variable
+                        value: 'N'
+                      a:
+                        type: numeric
+                        value: 25
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: a
+                        dataType: number
+                      - id: b
+                        name: b
+                        dataType: number
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: number
+                        flow: both
+                    position:
+                      x: 1471.9446072270673
+                      'y': 1088.6767140083211
+                  - id: 1780276809853-8dhhws
+                    kind: arithmetic
+                    config:
+                      operator: '%'
+                      b:
+                        type: variable
+                        value: 'N'
+                      a:
+                        type: numeric
+                        value: 16
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: a
+                        dataType: number
+                      - id: b
+                        name: b
+                        dataType: number
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: number
+                        flow: both
+                    position:
+                      x: 1481.9980029505991
+                      'y': 1316.9125123175472
+                  - id: 1780276826787-wbidob
+                    kind: arithmetic
+                    config:
+                      operator: −
+                      b:
+                        type: variable
+                        value: 'N'
+                      a:
+                        type: numeric
+                        value: 10
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: a
+                        dataType: number
+                      - id: b
+                        name: b
+                        dataType: number
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: number
+                        flow: both
+                    position:
+                      x: 1469.3778625726518
+                      'y': 613.381430418236
+                  - id: 1780276832905-f8af3n
+                    kind: log
+                    config:
+                      message:
+                        type: expression
+                        value: 5+5 = {{.}}
+                      level: warn
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1954.5129589921403
+                      'y': 379.798024202498
+                  - id: 1780276835290-k19p9o
+                    kind: log
+                    config:
+                      message:
+                        type: expression
+                        value: 10-5 = {{.}}
+                      level: warn
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1944.8872647604185
+                      'y': 606.536599438611
+                  - id: 1780276838508-pzx73f
+                    kind: log
+                    config:
+                      message:
+                        type: expression
+                        value: 5x5 = {{.}}
+                      level: warn
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1947.0263079230235
+                      'y': 832.2056530934217
+                  - id: 1780276855302-tjm8lh
+                    kind: log
+                    config:
+                      message:
+                        type: expression
+                        value: 25/5 = {{.}}
+                      level: warn
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1941.3893534103258
+                      'y': 1071.6338140020712
+                  - id: 1780276862931-74ybn2
+                    kind: log
+                    config:
+                      message:
+                        type: expression
+                        value: 16%5 = {{.}}
+                      level: warn
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1934.1920489473941
+                      'y': 1316.6989294234181
+                  - id: 1780278121669-u0t7h5
+                    kind: arithmetic
+                    config:
+                      b:
+                        type: variable
+                        value: 'N'
+                      a:
+                        type: numeric
+                        value: 5
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: a
+                        dataType: number
+                      - id: b
+                        name: b
+                        dataType: number
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: number
+                        flow: both
+                    position:
+                      x: 2641.5735156801034
+                      'y': 765.2534949631795
+                  - id: 1780278156256-9oc1dj
+                    kind: getVariable
+                    config:
+                      value:
+                        type: variable
+                        value: 'N'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: value
+                        name: value
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 2296.8170878160518
+                      'y': 753.2038384347351
+                  - id: 1780278176649-pordlq
+                    kind: log
+                    config:
+                      message:
+                        type: expression
+                        value: 5+5 = {{.}}
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 3058.686932388048
+                      'y': 863.6494804430024
+                  - id: 1780278754040-p38pr7
+                    kind: arithmetic
+                    config:
+                      a:
+                        type: numeric
+                        value: 5
+                        format: decimal
+                      b:
+                        type: variable
+                        value: zero
+                      operator: ÷
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: a
+                        dataType: number
+                      - id: b
+                        name: b
+                        dataType: number
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: number
+                        flow: both
+                    position:
+                      x: 2637.9944722515243
+                      'y': 391.7055439545171
+                  - id: 1780278760132-e7bksn
+                    kind: setVariable
+                    config:
+                      name: zero
+                      value:
+                        type: numeric
+                        value: 0
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 2311.7903899542853
+                      'y': 388.4969792106099
+                  - id: 1780278794428-u3n65i
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: Divide by zero properly catched
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 3044.412673146444
+                      'y': 594.9146444019768
+                  - id: 1780278907177-1qun8x
+                    kind: log
+                    config:
+                      level: error
+                      message:
+                        type: string
+                        value: Error not properly catched
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 3042.2736299838384
+                      'y': 397.6965359372814
+                  - id: 1780279158921-wdh1ab
+                    kind: setVariable
+                    config:
+                      name: stringvariable
+                      value:
+                        type: string
+                        value: aaa
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 2281.6665220753466
+                      'y': 1148.5916002602391
+                  - id: 1780279171408-cx767g
+                    kind: getVariable
+                    config:
+                      value:
+                        type: variable
+                        value: stringvariable
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: value
+                        name: value
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 2270.9713062623223
+                      'y': 1377.469218658957
+                  - id: 1780279178926-2vjr31
+                    kind: arithmetic
+                    config: {}
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: a
+                        dataType: number
+                      - id: b
+                        name: b
+                        dataType: number
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: number
+                        flow: both
+                    position:
+                      x: 2621.806636645057
+                      'y': 1095.0621254715854
+                  - id: 1780279233234-d4wh1a
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: Error properly catched (wrong type in operand)
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 3035.239891990641
+                      'y': 1325.9397438703036
+                  - id: 1780279273422-q77lr5
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: Error properly NOT catched (wrong type in operand)
+                      level: error
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 3050.1286180969078
+                      'y': 1091.6182981220052
+                edges:
+                  - id: e-1780275665825-62hhd5
+                    from:
+                      nodeId: 1780275642843-16zrdk
+                      portId: result
+                    to:
+                      nodeId: 1780275660454-p9cmhm
+                      portId: data
+                    selector: .
+                  - id: e-1780275730642-8j7flh
+                    from:
+                      nodeId: 1780275679035-gxdtrn
+                      portId: result
+                    to:
+                      nodeId: 1780275709162-fnrl7j
+                      portId: data
+                    selector: .
+                  - id: e-1780275738146-y4w032
+                    from:
+                      nodeId: 1780275642843-16zrdk
+                      portId: done
+                    to:
+                      nodeId: 1780275679035-gxdtrn
+                      portId: in
+                  - id: e-1780275747560-jrk7yt
+                    from:
+                      nodeId: 1780275679035-gxdtrn
+                      portId: done
+                    to:
+                      nodeId: 1780275743791-pwt1wq
+                      portId: in
+                  - id: e-1780276421352-3ydvfk
+                    from:
+                      nodeId: 1780275743791-pwt1wq
+                      portId: result
+                    to:
+                      nodeId: 1780275759422-9v8kkt
+                      portId: data
+                    selector: .
+                  - id: e-1780276425551-7dx115
+                    from:
+                      nodeId: 1780275780351-ehbolg
+                      portId: result
+                    to:
+                      nodeId: 1780275795655-asir8w
+                      portId: data
+                    selector: .
+                  - id: e-1780276691642-uu9hp2
+                    from:
+                      nodeId: 1780275743791-pwt1wq
+                      portId: done
+                    to:
+                      nodeId: 1780276685741-f7j2k4
+                      portId: in
+                  - id: e-1780276703653-1a14ul
+                    from:
+                      nodeId: 1780276685741-f7j2k4
+                      portId: result
+                    to:
+                      nodeId: 1780276698111-kkdo2f
+                      portId: data
+                    selector: .
+                  - id: e-1780276730256-1zpcaq
+                    from:
+                      nodeId: 1780276685741-f7j2k4
+                      portId: done
+                    to:
+                      nodeId: 1780275780351-ehbolg
+                      portId: in
+                  - id: e-1780276843885-pt3ysi
+                    from:
+                      nodeId: 1780276800476-1dnwfu
+                      portId: result
+                    to:
+                      nodeId: 1780276832905-f8af3n
+                      portId: data
+                    selector: .
+                  - id: e-1780276848581-0en6eh
+                    from:
+                      nodeId: 1780276826787-wbidob
+                      portId: result
+                    to:
+                      nodeId: 1780276835290-k19p9o
+                      portId: data
+                    selector: .
+                  - id: e-1780276853144-y5zkks
+                    from:
+                      nodeId: 1780276805395-hsl12y
+                      portId: result
+                    to:
+                      nodeId: 1780276838508-pzx73f
+                      portId: data
+                    selector: .
+                  - id: e-1780276860294-si1zms
+                    from:
+                      nodeId: 1780276807834-lxe68y
+                      portId: result
+                    to:
+                      nodeId: 1780276855302-tjm8lh
+                      portId: data
+                    selector: .
+                  - id: e-1780276867744-adh01j
+                    from:
+                      nodeId: 1780276809853-8dhhws
+                      portId: result
+                    to:
+                      nodeId: 1780276862931-74ybn2
+                      portId: data
+                    selector: .
+                  - id: e-1780276871628-28zgz1
+                    from:
+                      nodeId: 1780276778906-lwbsyh
+                      portId: done
+                    to:
+                      nodeId: 1780276800476-1dnwfu
+                      portId: in
+                  - id: e-1780276873754-laprsi
+                    from:
+                      nodeId: 1780276800476-1dnwfu
+                      portId: done
+                    to:
+                      nodeId: 1780276826787-wbidob
+                      portId: in
+                  - id: e-1780276876075-ll6vgb
+                    from:
+                      nodeId: 1780276826787-wbidob
+                      portId: done
+                    to:
+                      nodeId: 1780276805395-hsl12y
+                      portId: in
+                  - id: e-1780276878505-f20l9e
+                    from:
+                      nodeId: 1780276805395-hsl12y
+                      portId: done
+                    to:
+                      nodeId: 1780276807834-lxe68y
+                      portId: in
+                  - id: e-1780276880332-5x6y9d
+                    from:
+                      nodeId: 1780276807834-lxe68y
+                      portId: done
+                    to:
+                      nodeId: 1780276809853-8dhhws
+                      portId: in
+                  - id: e-1780278141072-gugw3i
+                    from:
+                      nodeId: 1780275780351-ehbolg
+                      portId: done
+                    to:
+                      nodeId: 1780276778906-lwbsyh
+                      portId: in
+                  - id: e-1780278169672-9ttnxy
+                    from:
+                      nodeId: 1780278156256-9oc1dj
+                      portId: value
+                    to:
+                      nodeId: 1780278121669-u0t7h5
+                      portId: b
+                    selector: 'N'
+                  - id: e-1780278183037-efklut
+                    from:
+                      nodeId: 1780278121669-u0t7h5
+                      portId: result
+                    to:
+                      nodeId: 1780278176649-pordlq
+                      portId: data
+                    selector: .
+                  - id: e-1780278784790-rk3dic
+                    from:
+                      nodeId: 1780278760132-e7bksn
+                      portId: done
+                    to:
+                      nodeId: 1780278754040-p38pr7
+                      portId: in
+                  - id: e-1780278826694-ikp3xy
+                    from:
+                      nodeId: 1780276809853-8dhhws
+                      portId: done
+                    to:
+                      nodeId: 1780278760132-e7bksn
+                      portId: in
+                  - id: e-1780278833642-qb2cja
+                    from:
+                      nodeId: 1780278754040-p38pr7
+                      portId: error
+                    to:
+                      nodeId: 1780278794428-u3n65i
+                      portId: data
+                    selector: .
+                  - id: e-1780278844759-w9l2s9
+                    from:
+                      nodeId: 1780278754040-p38pr7
+                      portId: done
+                    to:
+                      nodeId: 1780278156256-9oc1dj
+                      portId: in
+                  - id: e-1780278919001-lp6ylf
+                    from:
+                      nodeId: 1780278754040-p38pr7
+                      portId: result
+                    to:
+                      nodeId: 1780278907177-1qun8x
+                      portId: data
+                    selector: .
+                  - id: e-1780279182075-r45t1u
+                    from:
+                      nodeId: 1780279171408-cx767g
+                      portId: value
+                    to:
+                      nodeId: 1780279178926-2vjr31
+                      portId: b
+                    selector: .
+                  - id: e-1780279222651-461u5a
+                    from:
+                      nodeId: 1780279158921-wdh1ab
+                      portId: done
+                    to:
+                      nodeId: 1780279171408-cx767g
+                      portId: in
+                  - id: e-1780279228328-4xxhxv
+                    from:
+                      nodeId: 1780278121669-u0t7h5
+                      portId: done
+                    to:
+                      nodeId: 1780279158921-wdh1ab
+                      portId: in
+                  - id: e-1780279238504-ee1ugj
+                    from:
+                      nodeId: 1780279178926-2vjr31
+                      portId: error
+                    to:
+                      nodeId: 1780279233234-d4wh1a
+                      portId: data
+                    selector: .
+                  - id: e-1780279280046-4hhw3a
+                    from:
+                      nodeId: 1780279178926-2vjr31
+                      portId: result
+                    to:
+                      nodeId: 1780279273422-q77lr5
+                      portId: data
+                    selector: .
+                id: 1780275585571-xt0vqiw
+                name: Arithmetics
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 1780289475256-suvmxw
+                    kind: log
+                    config:
+                      message:
+                        type: expression
+                        value: Hello {{hello}}
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 347.29829031719083
+                      'y': -36.622575114384
+                  - id: 1780289497914-vaslvd
+                    kind: object
+                    config:
+                      properties:
+                        - id: prop-1780289500141-4fpgfv
+                          name: hello
+                          value:
+                            type: string
+                            value: world
+                        - id: prop-1780289517669-beux5g
+                          name: foo
+                          value:
+                            type: string
+                            value: bar
+                        - id: prop-1780289527052-kyu7zq
+                          name: Anwser to the universeA
+                          value:
+                            type: numeric
+                            value: 42
+                            format: decimal
+                        - id: prop-1780291207910-ibofpi
+                          name: BTTFArrivalDate
+                          value:
+                            type: datetime
+                            value: '2025-10-21T14:29:00.000Z'
+                            format: yyyy-MM-dd HH:mm:ss
+                        - id: prop-1780292579574-tl4v8r
+                          name: 🔥
+                          value:
+                            type: boolean
+                            value: true
+                        - id: prop-1780292805270-lsj5dk
+                          name: color
+                          value:
+                            type: color
+                            value: '#000000'
+                        - id: prop-1780300198346-9snqq4
+                          name: moulin
+                          value:
+                            type: customList
+                            listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                            label: Rouge
+                        - id: prop-1780300298678-gkrhk0
+                          name: expression
+                          value:
+                            type: expression
+                            value: My expression
+                        - id: prop-1780300414464-meltvl
+                          name: SelectedEnv
+                          value:
+                            type: environment
+                            value: 6c323ee6-0513-42a0-9d9a-68b329b405b4
+                    inputs: []
+                    outputs:
+                      - id: object
+                        name: object
+                        dataType: json
+                        flow: both
+                    position:
+                      x: -95.37673504485088
+                      'y': 44.52209099322562
+                  - id: 1780290957897-x639ht
+                    kind: log
+                    config:
+                      message:
+                        type: expression
+                        value: foo {{.}}
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 342.13162365052426
+                      'y': 175.86961238561594
+                  - id: 1780290977645-3nmegg
+                    kind: log
+                    config:
+                      message:
+                        type: expression
+                        value: 'Anwser to the universe : {{''Anwser to the universe''}}'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 350.46495698385763
+                      'y': 380.8696123856161
+                  - id: 1780291655759-lj9oe9
+                    kind: log
+                    config:
+                      message:
+                        type: expression
+                        value: 'Marty ! It''s time ! '
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 347.96495698385763
+                      'y': 590.869612385616
+                  - id: 1780292630011-3vtl9m
+                    kind: log
+                    config:
+                      message:
+                        type: expression
+                        value: Fire {{#if '🔥'}}🔥{{/if}}
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 347.13162365052426
+                      'y': 799.2029457189493
+                  - id: 1780292852611-83t4mk
+                    kind: log
+                    config:
+                      message:
+                        type: expression
+                        value: 'Selected color: {{color}}'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 339.1232649551489
+                      'y': 1003.6809451598924
+                  - id: 1780300215561-wwbtkd
+                    kind: log
+                    config:
+                      message:
+                        type: expression
+                        value: Bienvenue au Moulin {{moulin}}
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 342.72724637063385
+                      'y': 1206.2969897110208
+                  - id: 1780300289869-2h5wir
+                    kind: log
+                    config:
+                      message:
+                        type: expression
+                        value: 'Original expression: {{expression}}'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 340.2140019182925
+                      'y': 1411.2379029188521
+                  - id: 1780300412760-cuokfm
+                    kind: log
+                    config:
+                      message:
+                        type: expression
+                        value: 'Selected environment : {{name}}'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 352.567867177306
+                      'y': 1633.8836164963918
+                edges:
+                  - id: e-1780289553600-08y2bp
+                    from:
+                      nodeId: 1780289497914-vaslvd
+                      portId: object
+                    to:
+                      nodeId: 1780289475256-suvmxw
+                      portId: data
+                    selector: .
+                  - id: e-1780290967857-c9lw5i
+                    from:
+                      nodeId: 1780289497914-vaslvd
+                      portId: object
+                    to:
+                      nodeId: 1780290957897-x639ht
+                      portId: data
+                    selector: foo
+                  - id: e-1780290983513-ygkjua
+                    from:
+                      nodeId: 1780289497914-vaslvd
+                      portId: object
+                    to:
+                      nodeId: 1780290977645-3nmegg
+                      portId: data
+                    selector: .
+                  - id: e-1780291027920-w0m98x
+                    from:
+                      nodeId: 1780289475256-suvmxw
+                      portId: done
+                    to:
+                      nodeId: 1780290957897-x639ht
+                      portId: in
+                  - id: e-1780291030867-c6ra8o
+                    from:
+                      nodeId: 1780290957897-x639ht
+                      portId: done
+                    to:
+                      nodeId: 1780290977645-3nmegg
+                      portId: in
+                  - id: e-1780291698683-xszemx
+                    from:
+                      nodeId: 1780289497914-vaslvd
+                      portId: object
+                    to:
+                      nodeId: 1780291655759-lj9oe9
+                      portId: data
+                    selector: '[''Anwser to the universe'']'
+                  - id: e-1780292651422-po6374
+                    from:
+                      nodeId: 1780289497914-vaslvd
+                      portId: object
+                    to:
+                      nodeId: 1780292630011-3vtl9m
+                      portId: data
+                    selector: .
+                  - id: e-1780292859382-03m6d9
+                    from:
+                      nodeId: 1780290977645-3nmegg
+                      portId: done
+                    to:
+                      nodeId: 1780291655759-lj9oe9
+                      portId: in
+                  - id: e-1780292860902-qbbu5a
+                    from:
+                      nodeId: 1780291655759-lj9oe9
+                      portId: done
+                    to:
+                      nodeId: 1780292630011-3vtl9m
+                      portId: in
+                  - id: e-1780292863217-wxp2fd
+                    from:
+                      nodeId: 1780292630011-3vtl9m
+                      portId: done
+                    to:
+                      nodeId: 1780292852611-83t4mk
+                      portId: in
+                  - id: e-1780292873389-r7lvn9
+                    from:
+                      nodeId: 1780289497914-vaslvd
+                      portId: object
+                    to:
+                      nodeId: 1780292852611-83t4mk
+                      portId: data
+                    selector: .
+                  - id: e-1780300236160-43g8b9
+                    from:
+                      nodeId: 1780292852611-83t4mk
+                      portId: done
+                    to:
+                      nodeId: 1780300215561-wwbtkd
+                      portId: in
+                  - id: e-1780300246227-pnpmi7
+                    from:
+                      nodeId: 1780289497914-vaslvd
+                      portId: object
+                    to:
+                      nodeId: 1780300215561-wwbtkd
+                      portId: data
+                    selector: .
+                  - id: e-1780300292554-s64lt9
+                    from:
+                      nodeId: 1780300215561-wwbtkd
+                      portId: done
+                    to:
+                      nodeId: 1780300289869-2h5wir
+                      portId: in
+                  - id: e-1780300329519-wyhrod
+                    from:
+                      nodeId: 1780289497914-vaslvd
+                      portId: object
+                    to:
+                      nodeId: 1780300289869-2h5wir
+                      portId: data
+                    selector: .
+                  - id: e-1780300441380-w2fg6q
+                    from:
+                      nodeId: 1780300289869-2h5wir
+                      portId: done
+                    to:
+                      nodeId: 1780300412760-cuokfm
+                      portId: in
+                  - id: e-1780300612737-kjj5kl
+                    from:
+                      nodeId: 1780289497914-vaslvd
+                      portId: object
+                    to:
+                      nodeId: 1780300412760-cuokfm
+                      portId: data
+                    selector: SelectedEnv
+                id: 1780289470272-ya33ye4
+                name: Logs
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 1780290664616-qdq134
+                    kind: input
+                    config:
+                      name: string
+                      valueType:
+                        type: string
+                        value: string!
+                      params:
+                        - id: param-legacy
+                          name: string
+                          valueType:
+                            type: string
+                            value: string!
+                          required: false
+                        - id: param-1780306710895-t5jsh2
+                          name: bool
+                          valueType:
+                            type: boolean
+                            value: true
+                          required: false
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: value
+                        name: value
+                        dataType: any
+                        flow: both
+                    position:
+                      x: -168.60401633522144
+                      'y': 193.64436306803896
+                  - id: 1780290692642-heguvc
+                    kind: input
+                    config:
+                      name: number
+                      valueType:
+                        type: numeric
+                        value: 10
+                        format: decimal
+                      params:
+                        - id: param-legacy
+                          name: number
+                          valueType:
+                            type: numeric
+                            value: 10
+                            format: decimal
+                          required: false
+                        - id: param-1780309821860-4324je
+                          name: Env
+                          valueType:
+                            type: environment
+                            value: env-1780300487228-md0ml0o
+                          required: false
+                        - id: param-1780312623036-ns50u0
+                          name: color
+                          valueType:
+                            type: color
+                            value: '#000000'
+                          required: false
+                        - id: param-1780312733050-k32a4a
+                          name: PetColor
+                          valueType:
+                            type: customList
+                            listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                            label: Bleu
+                          required: false
+                        - id: param-1780312752536-xhink4
+                          name: PetColors
+                          valueType:
+                            type: customListMulti
+                            listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                            labels:
+                              - Vert
+                          required: false
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: value
+                        name: value
+                        dataType: any
+                        flow: both
+                    position:
+                      x: -186.43780960472878
+                      'y': 837.7945489499781
+                  - id: 1780290720988-a9nymy
+                    kind: object
+                    config:
+                      properties:
+                        - id: prop-1780290722891-dqtdnz
+                          name: first
+                          value:
+                            type: string
+                            value: ''
+                        - id: prop-1780290727683-0vof3k
+                          name: second
+                          value:
+                            type: string
+                            value: ''
+                        - id: prop-1780309901267-y0r3mt
+                          name: third
+                          value:
+                            type: string
+                            value: ''
+                    inputs: []
+                    outputs:
+                      - id: object
+                        name: object
+                        dataType: json
+                        flow: both
+                    position:
+                      x: 777.8370359025163
+                      'y': 169.95714491925952
+                  - id: 1780290752840-vsgq4n
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: List of received values
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1143.188716970036
+                      'y': 665.5896291161151
+                  - id: 1780290777340-49nhwc
+                    kind: output
+                    config:
+                      name: first
+                    inputs:
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1340.2077027359596
+                      'y': 183.43941976045983
+                    collapsed: false
+                  - id: 1780290831425-s4gwdu
+                    kind: output
+                    config:
+                      name: all
+                    inputs:
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1472.941864938708
+                      'y': 549.121322337346
+                  - id: 1780290862498-v56qy9
+                    kind: log
+                    config:
+                      level: warn
+                      message:
+                        type: string
+                        value: Run failed or cancelled 2
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 287.45879132923096
+                      'y': 1306.8168971126508
+                  - id: 1780309092683-gzd75p
+                    kind: input
+                    config:
+                      params:
+                        - id: input-default-param
+                          name: SecondInput
+                          valueType:
+                            type: datetime
+                            value: '2026-06-02T10:18:27.766Z'
+                            format: yyyy-MM-dd HH:mm:ss
+                          required: false
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: value
+                        name: value
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 266.75515935343384
+                      'y': 958.3213883054423
+                  - id: 1780309544681-wuznn3
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: Run failed or cancelled 1
+                      level: warn
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 126.79976714897344
+                      'y': 551.945759440944
+                  - id: 1780309585119-sop24w
+                    kind: log
+                    config:
+                      level: warn
+                      message:
+                        type: string
+                        value: Run failed or cancelled 3
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 648.4088661838526
+                      'y': 1217.0933648991004
+                  - id: 1780310052383-xikuhr
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: Err
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1317.4285643113394
+                      'y': 917.8675642940315
+                  - id: 1780313034252-ciervm
+                    kind: output
+                    config:
+                      name: second
+                    inputs:
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1429.324338170204
+                      'y': 358.0771036444503
+                edges:
+                  - id: e-1780290725124-dhwv12
+                    from:
+                      nodeId: 1780290664616-qdq134
+                      portId: value
+                    to:
+                      nodeId: 1780290720988-a9nymy
+                      portId: prop-1780290722891-dqtdnz
+                    selector: .
+                  - id: e-1780290729580-zpnqm6
+                    from:
+                      nodeId: 1780290692642-heguvc
+                      portId: value
+                    to:
+                      nodeId: 1780290720988-a9nymy
+                      portId: prop-1780290727683-0vof3k
+                    selector: .
+                  - id: e-1780290757819-i3x11y
+                    from:
+                      nodeId: 1780290720988-a9nymy
+                      portId: object
+                    to:
+                      nodeId: 1780290752840-vsgq4n
+                      portId: data
+                    selector: .
+                  - id: e-1780290793889-0mxseh
+                    from:
+                      nodeId: 1780290720988-a9nymy
+                      portId: object
+                    to:
+                      nodeId: 1780290777340-49nhwc
+                      portId: value
+                    selector: first
+                  - id: e-1780290836525-8jn8pm
+                    from:
+                      nodeId: 1780290720988-a9nymy
+                      portId: object
+                    to:
+                      nodeId: 1780290831425-s4gwdu
+                      portId: value
+                    selector: .
+                  - id: e-1780309562051-nq7ycv
+                    from:
+                      nodeId: 1780290692642-heguvc
+                      portId: error
+                    to:
+                      nodeId: 1780290862498-v56qy9
+                      portId: in
+                  - id: e-1780309565366-j35fgv
+                    from:
+                      nodeId: 1780290664616-qdq134
+                      portId: error
+                    to:
+                      nodeId: 1780309544681-wuznn3
+                      portId: in
+                  - id: e-1780309591464-yfqnwf
+                    from:
+                      nodeId: 1780309092683-gzd75p
+                      portId: error
+                    to:
+                      nodeId: 1780309585119-sop24w
+                      portId: in
+                  - id: e-1780310069717-tdvjgz
+                    from:
+                      nodeId: 1780290720988-a9nymy
+                      portId: error
+                    to:
+                      nodeId: 1780310052383-xikuhr
+                      portId: data
+                    selector: .
+                  - id: e-1780310464433-l823ga
+                    from:
+                      nodeId: 1780290692642-heguvc
+                      portId: value
+                    to:
+                      nodeId: 1780309092683-gzd75p
+                      portId: in
+                  - id: e-1780310489833-e35zg6
+                    from:
+                      nodeId: 1780309092683-gzd75p
+                      portId: value
+                    to:
+                      nodeId: 1780290720988-a9nymy
+                      portId: prop-1780309901267-y0r3mt
+                    selector: SecondInput
+                  - id: e-1780313222657-sp3n5u
+                    from:
+                      nodeId: 1780290720988-a9nymy
+                      portId: object
+                    to:
+                      nodeId: 1780313034252-ciervm
+                      portId: value
+                    selector: second.PetColor
+                id: 1780290655312-0z6px87
+                name: Inputs/outputs
+                items: []
+              - type: scenario
+                id: 1780387606015-te2kvqt
+                name: Conditions
+                tags: []
+                params: []
+                nodes:
+                  - id: 1780387633982-uicb3q
+                    kind: if
+                    config:
+                      left:
+                        type: numeric
+                        value: 1
+                        format: decimal
+                      right:
+                        type: numeric
+                        value: 2
+                        format: decimal
+                      operator: <
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 580
+                      'y': -1160
+                  - id: 1780387678718-qppka1
+                    kind: log
+                    config:
+                      level: error
+                      data:
+                        type: string
+                        value: ''
+                      message:
+                        type: string
+                        value: Operator < not working
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 940
+                      'y': -960
+                    color: '#d0021b'
+                  - id: 1780387742504-wk8th6
+                    kind: if
+                    config:
+                      left:
+                        type: numeric
+                        value: 1
+                        format: decimal
+                      right:
+                        type: numeric
+                        value: 2
+                        format: decimal
+                      operator: ≤
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 940
+                      'y': -1160
+                  - id: 1780387838698-3b7u3t
+                    kind: log
+                    config:
+                      level: error
+                      data:
+                        type: string
+                        value: ''
+                      message:
+                        type: string
+                        value: Operator < not working
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1300
+                      'y': -960
+                    color: '#d0021b'
+                  - id: 1780387856983-37p0qd
+                    kind: if
+                    config:
+                      left:
+                        type: numeric
+                        value: 1
+                        format: decimal
+                      right:
+                        type: numeric
+                        value: 1
+                        format: decimal
+                      operator: '='
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1300
+                      'y': -1160
+                  - id: 1780387871677-cxtrvz
+                    kind: log
+                    config:
+                      level: error
+                      data:
+                        type: string
+                        value: ''
+                      message:
+                        type: string
+                        value: Operator = not working
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1660
+                      'y': -960
+                    color: '#d0021b'
+                  - id: 1780387886665-gt267d
+                    kind: if
+                    config:
+                      left:
+                        type: numeric
+                        value: 2
+                        format: decimal
+                      right:
+                        type: numeric
+                        value: 1
+                        format: decimal
+                      operator: ≥
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1660
+                      'y': -1160
+                  - id: 1780387900668-hvu99j
+                    kind: log
+                    config:
+                      level: error
+                      data:
+                        type: string
+                        value: ''
+                      message:
+                        type: string
+                        value: Operator ≤ not working
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 2020
+                      'y': -960
+                    color: '#d0021b'
+                  - id: 1780387917677-3qx41r
+                    kind: if
+                    config:
+                      left:
+                        type: numeric
+                        value: 2
+                        format: decimal
+                      right:
+                        type: numeric
+                        value: 1
+                        format: decimal
+                      operator: '>'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 2020
+                      'y': -1160
+                  - id: 1780387930055-mvsog6
+                    kind: log
+                    config:
+                      level: error
+                      data:
+                        type: string
+                        value: ''
+                      message:
+                        type: string
+                        value: Operator > not working
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 2380
+                      'y': -960
+                    color: '#d0021b'
+                  - id: 1780387940768-5vf8jv
+                    kind: if
+                    config:
+                      left:
+                        type: numeric
+                        value: 2
+                        format: decimal
+                      right:
+                        type: numeric
+                        value: 1
+                        format: decimal
+                      operator: ≠
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 2380
+                      'y': -1160
+                  - id: 1780387962152-pnmvv7
+                    kind: log
+                    config:
+                      level: error
+                      data:
+                        type: string
+                        value: ''
+                      message:
+                        type: string
+                        value: Operator ≠ not working
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 2740
+                      'y': -960
+                    color: '#d0021b'
+                  - id: 1780387973219-wpeju1
+                    kind: if
+                    config:
+                      left:
+                        type: customListMulti
+                        listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                        labels:
+                          - Rouge
+                          - Vert
+                      right:
+                        type: customList
+                        listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                        label: Vert
+                      operator: contains
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 580
+                      'y': 120
+                  - id: 1780388011535-pcs0cm
+                    kind: log
+                    config:
+                      level: error
+                      data:
+                        type: string
+                        value: ''
+                      message:
+                        type: string
+                        value: Operator ∈ not working
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 900
+                      'y': 400
+                    color: '#d0021b'
+                  - id: 1780388501906-005s1w
+                    kind: object
+                    config:
+                      properties:
+                        - id: object-default-property
+                          name: prop1
+                          value:
+                            type: string
+                            value: test
+                        - id: prop-1780389296510-zw4hc1
+                          name: prop2
+                          value:
+                            type: string
+                            value: test2
+                    inputs: []
+                    outputs:
+                      - id: object
+                        name: object
+                        dataType: json
+                        flow: both
+                    position:
+                      x: 180
+                      'y': 580
+                  - id: 1780388513371-n986c3
+                    kind: object
+                    config:
+                      properties:
+                        - id: object-default-property
+                          name: prop1
+                          value:
+                            type: string
+                            value: test
+                        - id: prop-1780389312207-ev71uv
+                          name: prop2
+                          value:
+                            type: string
+                            value: test2
+                    inputs: []
+                    outputs:
+                      - id: object
+                        name: object
+                        dataType: json
+                        flow: both
+                    position:
+                      x: 180
+                      'y': 860
+                  - id: 1780388527402-0lbz98
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: numbers - Basic operators are working fine
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 2740
+                      'y': -1160
+                  - id: 1780388628549-8vbjmf
+                    kind: if
+                    config:
+                      operator: '='
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 580
+                      'y': 760
+                  - id: 1780388636963-qacc92
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: Object comparison is working fine
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 960
+                      'y': 760
+                  - id: 1780388639494-cyh7zt
+                    kind: log
+                    config:
+                      level: error
+                      message:
+                        type: string
+                        value: Objects should be equal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 960
+                      'y': 980
+                    color: '#d0021b'
+                  - id: 1780390696622-isdmc6
+                    kind: object
+                    config:
+                      properties:
+                        - id: object-default-property
+                          name: prop1
+                          value:
+                            type: string
+                            value: test
+                        - id: prop-1780389296510-zw4hc1
+                          name: prop2
+                          value:
+                            type: string
+                            value: test2
+                    inputs: []
+                    outputs:
+                      - id: object
+                        name: object
+                        dataType: json
+                        flow: both
+                    position:
+                      x: 2540
+                      'y': 580
+                  - id: 1780390702262-tjxbij
+                    kind: object
+                    config:
+                      properties:
+                        - id: object-default-property
+                          name: prop1
+                          value:
+                            type: string
+                            value: test
+                    inputs: []
+                    outputs:
+                      - id: object
+                        name: object
+                        dataType: json
+                        flow: both
+                    position:
+                      x: 2540
+                      'y': 860
+                  - id: 1780390708884-pqkb06
+                    kind: if
+                    config:
+                      operator: ≠
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 2940
+                      'y': 760
+                  - id: 1780390729852-1psrby
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: Object comparison ≠ is working fine
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 3320
+                      'y': 760
+                  - id: 1780390787275-19qo6d
+                    kind: log
+                    config:
+                      level: error
+                      message:
+                        type: string
+                        value: Objects should be different
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 3320
+                      'y': 980
+                    color: '#d0021b'
+                  - id: 1780390856686-wbsvzx
+                    kind: object
+                    config:
+                      properties:
+                        - id: object-default-property
+                          name: prop1
+                          value:
+                            type: string
+                            value: test
+                        - id: prop-1780389296510-zw4hc1
+                          name: prop2
+                          value:
+                            type: string
+                            value: test2
+                    inputs: []
+                    outputs:
+                      - id: object
+                        name: object
+                        dataType: json
+                        flow: both
+                    position:
+                      x: 2600
+                      'y': 1420
+                  - id: 1780390863285-kktu7r
+                    kind: object
+                    config:
+                      properties:
+                        - id: object-default-property
+                          name: prop1
+                          value:
+                            type: string
+                            value: test
+                        - id: prop-1780389312207-ev71uv
+                          name: prop2
+                          value:
+                            type: string
+                            value: test2
+                    inputs: []
+                    outputs:
+                      - id: object
+                        name: object
+                        dataType: json
+                        flow: both
+                    position:
+                      x: 2603
+                      'y': 1720
+                  - id: 1780390869519-2liw8c
+                    kind: if
+                    config:
+                      operator: <
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 3306
+                      'y': 1268
+                  - id: 1780390882893-dx4a4e
+                    kind: if
+                    config:
+                      operator: ≤
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 3308
+                      'y': 1483
+                  - id: 1780390904559-gyceep
+                    kind: if
+                    config:
+                      operator: ≥
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 3311
+                      'y': 1687
+                  - id: 1780390918770-66g77o
+                    kind: if
+                    config:
+                      operator: '>'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 3306
+                      'y': 1908
+                  - id: 1780390997986-8bkf67
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: Objects comparison with gt or lt should throw
+                      level: error
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 3948
+                      'y': 1447
+                    color: '#d0021b'
+                  - id: 1780392272727-s6jmis
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: Object comparison is throwind as it shoud
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 3948
+                      'y': 1666
+                  - id: 1780393281979-7andwt
+                    kind: object
+                    config:
+                      properties:
+                        - id: object-default-property
+                          name: prop2
+                          value:
+                            type: string
+                            value: test2
+                        - id: prop-1780389296510-zw4hc1
+                          name: prop1
+                          value:
+                            type: string
+                            value: test
+                    inputs: []
+                    outputs:
+                      - id: object
+                        name: object
+                        dataType: json
+                        flow: both
+                    position:
+                      x: 1280
+                      'y': 580
+                  - id: 1780393281979-otkf2i
+                    kind: object
+                    config:
+                      properties:
+                        - id: object-default-property
+                          name: prop1
+                          value:
+                            type: string
+                            value: test
+                        - id: prop-1780389312207-ev71uv
+                          name: prop2
+                          value:
+                            type: string
+                            value: test2
+                    inputs: []
+                    outputs:
+                      - id: object
+                        name: object
+                        dataType: json
+                        flow: both
+                    position:
+                      x: 1280
+                      'y': 860
+                  - id: 1780393281979-bl7len
+                    kind: if
+                    config:
+                      operator: '='
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1680
+                      'y': 760
+                  - id: 1780393281979-t45r0j
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: Object comparison is working fine
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 2080
+                      'y': 760
+                  - id: 1780393281979-ygotuv
+                    kind: log
+                    config:
+                      level: error
+                      message:
+                        type: string
+                        value: Objects should be equal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 2080
+                      'y': 980
+                    color: '#d0021b'
+                  - id: 1780393545056-b31aui
+                    kind: if
+                    config:
+                      left:
+                        type: string
+                        value: a
+                      right:
+                        type: string
+                        value: b
+                      operator: <
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 580
+                      'y': -740
+                  - id: 1780393545056-3dz1nz
+                    kind: log
+                    config:
+                      level: error
+                      data:
+                        type: string
+                        value: ''
+                      message:
+                        type: string
+                        value: Operator < not working
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 940
+                      'y': -540
+                    color: '#d0021b'
+                  - id: 1780393545056-6bm834
+                    kind: if
+                    config:
+                      left:
+                        type: string
+                        value: a
+                      right:
+                        type: string
+                        value: b
+                      operator: ≤
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 940
+                      'y': -740
+                  - id: 1780393545056-xs2jmy
+                    kind: log
+                    config:
+                      level: error
+                      data:
+                        type: string
+                        value: ''
+                      message:
+                        type: string
+                        value: Operator < not working
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1300
+                      'y': -540
+                    color: '#d0021b'
+                  - id: 1780393545056-t0xge5
+                    kind: if
+                    config:
+                      left:
+                        type: string
+                        value: a
+                      right:
+                        type: string
+                        value: a
+                      operator: '='
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1300
+                      'y': -740
+                  - id: 1780393545056-kes0xh
+                    kind: log
+                    config:
+                      level: error
+                      data:
+                        type: string
+                        value: ''
+                      message:
+                        type: string
+                        value: Operator = not working
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1660
+                      'y': -540
+                    color: '#d0021b'
+                  - id: 1780393545056-fw9fkt
+                    kind: if
+                    config:
+                      left:
+                        type: string
+                        value: b
+                      right:
+                        type: string
+                        value: a
+                      operator: ≥
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1660
+                      'y': -740
+                  - id: 1780393545056-nl8oax
+                    kind: log
+                    config:
+                      level: error
+                      data:
+                        type: string
+                        value: ''
+                      message:
+                        type: string
+                        value: Operator ≤ not working
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 2020
+                      'y': -540
+                    color: '#d0021b'
+                  - id: 1780393545056-ajsbj2
+                    kind: if
+                    config:
+                      left:
+                        type: string
+                        value: b
+                      right:
+                        type: string
+                        value: a
+                      operator: '>'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 2020
+                      'y': -740
+                  - id: 1780393545056-yxt1ta
+                    kind: log
+                    config:
+                      level: error
+                      data:
+                        type: string
+                        value: ''
+                      message:
+                        type: string
+                        value: Operator > not working
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 2380
+                      'y': -540
+                    color: '#d0021b'
+                  - id: 1780393545056-pvvijv
+                    kind: if
+                    config:
+                      left:
+                        type: string
+                        value: b
+                      right:
+                        type: string
+                        value: a
+                      operator: ≠
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 2380
+                      'y': -740
+                  - id: 1780393545056-vckco3
+                    kind: log
+                    config:
+                      level: error
+                      data:
+                        type: string
+                        value: ''
+                      message:
+                        type: string
+                        value: Operator ≠ not working
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 2740
+                      'y': -540
+                    color: '#d0021b'
+                  - id: 1780393545056-cqqaa4
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: strings - Basic operators are working fine
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 2740
+                      'y': -740
+                  - id: 1780395506824-skr6u9
+                    kind: if
+                    config:
+                      left:
+                        type: datetime
+                        value: '1985-10-26T00:22:00.000Z'
+                        format: yyyy-MM-dd HH:mm:ss
+                      right:
+                        type: datetime
+                        value: '2015-06-08T23:21:00.000Z'
+                        format: yyyy-MM-dd HH:mm:ss
+                      operator: <
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 580
+                      'y': -320
+                  - id: 1780395506824-ofduiv
+                    kind: log
+                    config:
+                      level: error
+                      data:
+                        type: string
+                        value: ''
+                      message:
+                        type: string
+                        value: Operator < not working
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 940
+                      'y': -120
+                    color: '#d0021b'
+                  - id: 1780395506824-m909dk
+                    kind: if
+                    config:
+                      left:
+                        type: datetime
+                        value: '1985-10-26T00:22:00.000Z'
+                        format: yyyy-MM-dd HH:mm:ss
+                      right:
+                        type: datetime
+                        value: '2015-06-08T23:21:00.000Z'
+                        format: yyyy-MM-dd HH:mm:ss
+                      operator: ≤
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 940
+                      'y': -320
+                  - id: 1780395506824-ks1txa
+                    kind: log
+                    config:
+                      level: error
+                      data:
+                        type: string
+                        value: ''
+                      message:
+                        type: string
+                        value: Operator < not working
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1300
+                      'y': -120
+                    color: '#d0021b'
+                  - id: 1780395506824-cmypk8
+                    kind: if
+                    config:
+                      left:
+                        type: datetime
+                        value: '1985-10-26T00:22:00.000Z'
+                        format: yyyy-MM-dd HH:mm:ss
+                      right:
+                        type: datetime
+                        value: '1985-10-26T00:22:00.000Z'
+                        format: yyyy-MM-dd HH:mm:ss
+                      operator: '='
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1300
+                      'y': -320
+                  - id: 1780395506824-61o5jx
+                    kind: log
+                    config:
+                      level: error
+                      data:
+                        type: string
+                        value: ''
+                      message:
+                        type: string
+                        value: Operator = not working
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1660
+                      'y': -120
+                    color: '#d0021b'
+                  - id: 1780395506824-ww8pb5
+                    kind: if
+                    config:
+                      left:
+                        type: datetime
+                        value: '2015-06-08T23:21:00.000Z'
+                        format: yyyy-MM-dd HH:mm:ss
+                      right:
+                        type: datetime
+                        value: '1985-10-26T00:22:00.000Z'
+                        format: yyyy-MM-dd HH:mm:ss
+                      operator: ≥
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1660
+                      'y': -320
+                  - id: 1780395506824-pn7g2k
+                    kind: log
+                    config:
+                      level: error
+                      data:
+                        type: string
+                        value: ''
+                      message:
+                        type: string
+                        value: Operator ≤ not working
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 2020
+                      'y': -120
+                    color: '#d0021b'
+                  - id: 1780395506824-t84xjd
+                    kind: if
+                    config:
+                      left:
+                        type: datetime
+                        value: '2015-06-08T23:21:00.000Z'
+                        format: yyyy-MM-dd HH:mm:ss
+                      right:
+                        type: datetime
+                        value: '1985-10-26T00:22:00.000Z'
+                        format: yyyy-MM-dd HH:mm:ss
+                      operator: '>'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 2020
+                      'y': -320
+                  - id: 1780395506824-b79qqa
+                    kind: log
+                    config:
+                      level: error
+                      data:
+                        type: string
+                        value: ''
+                      message:
+                        type: string
+                        value: Operator > not working
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 2380
+                      'y': -120
+                    color: '#d0021b'
+                  - id: 1780395506824-jklyri
+                    kind: if
+                    config:
+                      left:
+                        type: datetime
+                        value: '2015-06-08T23:21:00.000Z'
+                        format: yyyy-MM-dd HH:mm:ss
+                      right:
+                        type: datetime
+                        value: '1985-10-26T00:22:00.000Z'
+                        format: yyyy-MM-dd HH:mm:ss
+                      operator: ≠
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 2380
+                      'y': -320
+                  - id: 1780395506824-gazgld
+                    kind: log
+                    config:
+                      level: error
+                      data:
+                        type: string
+                        value: ''
+                      message:
+                        type: string
+                        value: Operator ≠ not working
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 2740
+                      'y': -120
+                    color: '#d0021b'
+                  - id: 1780395506824-cc6fuv
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: dates - Basic operators are working fine
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 2740
+                      'y': -320
+                  - id: 1780399005765-il3r61
+                    kind: setVariable
+                    config:
+                      name: from
+                      value:
+                        type: datetime
+                        value: '1985-10-26T00:22:00.000Z'
+                        format: yyyy-MM-dd HH:mm:ss
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 900
+                      'y': 120
+                  - id: 1780399016130-15dw9r
+                    kind: setVariable
+                    config:
+                      name: to
+                      value:
+                        type: datetime
+                        value: '2015-06-08T23:21:00.000Z'
+                        format: yyyy-MM-dd HH:mm:ss
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 900
+                      'y': 260
+                  - id: 1780399063954-fivtc9
+                    kind: if
+                    config:
+                      left:
+                        type: variable
+                        value: from
+                      right:
+                        type: variable
+                        value: to
+                      operator: ≤
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1300
+                      'y': 120
+                  - id: 1780399167083-563gdm
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: Comparison from variables is working
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1660
+                      'y': 120
+                  - id: 1780399171740-hyuxvr
+                    kind: log
+                    config:
+                      level: error
+                      message:
+                        type: string
+                        value: Comparison from variables is NOT working
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1660
+                      'y': 320
+                    color: '#d0021b'
+                edges:
+                  - id: e-1780387720495-le3op1
+                    from:
+                      nodeId: 1780387633982-uicb3q
+                      portId: else
+                    to:
+                      nodeId: 1780387678718-qppka1
+                      portId: in
+                  - id: e-1780387764272-z46zdy
+                    from:
+                      nodeId: 1780387633982-uicb3q
+                      portId: then
+                    to:
+                      nodeId: 1780387742504-wk8th6
+                      portId: in
+                  - id: e-1780387846171-38fqrl
+                    from:
+                      nodeId: 1780387742504-wk8th6
+                      portId: else
+                    to:
+                      nodeId: 1780387838698-3b7u3t
+                      portId: in
+                  - id: e-1780387862251-kut9e4
+                    from:
+                      nodeId: 1780387742504-wk8th6
+                      portId: then
+                    to:
+                      nodeId: 1780387856983-37p0qd
+                      portId: in
+                  - id: e-1780387883224-xispqq
+                    from:
+                      nodeId: 1780387856983-37p0qd
+                      portId: else
+                    to:
+                      nodeId: 1780387871677-cxtrvz
+                      portId: in
+                  - id: e-1780387890738-9hfyxq
+                    from:
+                      nodeId: 1780387856983-37p0qd
+                      portId: then
+                    to:
+                      nodeId: 1780387886665-gt267d
+                      portId: in
+                  - id: e-1780387904851-phrzed
+                    from:
+                      nodeId: 1780387886665-gt267d
+                      portId: else
+                    to:
+                      nodeId: 1780387900668-hvu99j
+                      portId: in
+                  - id: e-1780387923650-cb8tpu
+                    from:
+                      nodeId: 1780387886665-gt267d
+                      portId: then
+                    to:
+                      nodeId: 1780387917677-3qx41r
+                      portId: in
+                  - id: e-1780387934469-bg45so
+                    from:
+                      nodeId: 1780387917677-3qx41r
+                      portId: else
+                    to:
+                      nodeId: 1780387930055-mvsog6
+                      portId: in
+                  - id: e-1780387945670-ka8afx
+                    from:
+                      nodeId: 1780387917677-3qx41r
+                      portId: then
+                    to:
+                      nodeId: 1780387940768-5vf8jv
+                      portId: in
+                  - id: e-1780387966399-othn5b
+                    from:
+                      nodeId: 1780387940768-5vf8jv
+                      portId: else
+                    to:
+                      nodeId: 1780387962152-pnmvv7
+                      portId: in
+                  - id: e-1780388016310-o1m7ab
+                    from:
+                      nodeId: 1780387973219-wpeju1
+                      portId: else
+                    to:
+                      nodeId: 1780388011535-pcs0cm
+                      portId: in
+                  - id: e-1780388646829-rm84x0
+                    from:
+                      nodeId: 1780388628549-8vbjmf
+                      portId: then
+                    to:
+                      nodeId: 1780388636963-qacc92
+                      portId: in
+                  - id: e-1780388649197-2ezat3
+                    from:
+                      nodeId: 1780388628549-8vbjmf
+                      portId: else
+                    to:
+                      nodeId: 1780388639494-cyh7zt
+                      portId: in
+                  - id: e-1780389330038-cksti8
+                    from:
+                      nodeId: 1780388501906-005s1w
+                      portId: object
+                    to:
+                      nodeId: 1780388628549-8vbjmf
+                      portId: left
+                    selector: .
+                  - id: e-1780389332585-v9cvkr
+                    from:
+                      nodeId: 1780388513371-n986c3
+                      portId: object
+                    to:
+                      nodeId: 1780388628549-8vbjmf
+                      portId: right
+                    selector: .
+                  - id: e-1780390722960-old10l
+                    from:
+                      nodeId: 1780390696622-isdmc6
+                      portId: object
+                    to:
+                      nodeId: 1780390708884-pqkb06
+                      portId: left
+                    selector: .
+                  - id: e-1780390724844-q5el4o
+                    from:
+                      nodeId: 1780390702262-tjxbij
+                      portId: object
+                    to:
+                      nodeId: 1780390708884-pqkb06
+                      portId: right
+                    selector: prop1
+                  - id: e-1780390794211-bfum7r
+                    from:
+                      nodeId: 1780390708884-pqkb06
+                      portId: else
+                    to:
+                      nodeId: 1780390787275-19qo6d
+                      portId: in
+                  - id: e-1780390836876-yqq2pp
+                    from:
+                      nodeId: 1780390708884-pqkb06
+                      portId: then
+                    to:
+                      nodeId: 1780390729852-1psrby
+                      portId: in
+                  - id: e-1780390888552-b03ozn
+                    from:
+                      nodeId: 1780390856686-wbsvzx
+                      portId: object
+                    to:
+                      nodeId: 1780390869519-2liw8c
+                      portId: left
+                    selector: .
+                  - id: e-1780390893421-61dzb9
+                    from:
+                      nodeId: 1780390863285-kktu7r
+                      portId: object
+                    to:
+                      nodeId: 1780390869519-2liw8c
+                      portId: right
+                    selector: .
+                  - id: e-1780390895620-ildy08
+                    from:
+                      nodeId: 1780390856686-wbsvzx
+                      portId: object
+                    to:
+                      nodeId: 1780390882893-dx4a4e
+                      portId: left
+                    selector: .
+                  - id: e-1780390897624-qoy5q2
+                    from:
+                      nodeId: 1780390863285-kktu7r
+                      portId: object
+                    to:
+                      nodeId: 1780390882893-dx4a4e
+                      portId: right
+                    selector: .
+                  - id: e-1780390909507-fog2wx
+                    from:
+                      nodeId: 1780390856686-wbsvzx
+                      portId: object
+                    to:
+                      nodeId: 1780390904559-gyceep
+                      portId: left
+                    selector: .
+                  - id: e-1780390915847-un81zi
+                    from:
+                      nodeId: 1780390863285-kktu7r
+                      portId: object
+                    to:
+                      nodeId: 1780390904559-gyceep
+                      portId: right
+                    selector: .
+                  - id: e-1780390924134-8quq2b
+                    from:
+                      nodeId: 1780390856686-wbsvzx
+                      portId: object
+                    to:
+                      nodeId: 1780390918770-66g77o
+                      portId: left
+                    selector: .
+                  - id: e-1780390926976-4iumj2
+                    from:
+                      nodeId: 1780390863285-kktu7r
+                      portId: object
+                    to:
+                      nodeId: 1780390918770-66g77o
+                      portId: right
+                    selector: .
+                  - id: e-1780391030480-9vp4b1
+                    from:
+                      nodeId: 1780390869519-2liw8c
+                      portId: then
+                    to:
+                      nodeId: 1780390997986-8bkf67
+                      portId: in
+                  - id: e-1780391033833-hyeqyy
+                    from:
+                      nodeId: 1780390869519-2liw8c
+                      portId: else
+                    to:
+                      nodeId: 1780390997986-8bkf67
+                      portId: in
+                  - id: e-1780391037121-60j3r0
+                    from:
+                      nodeId: 1780390882893-dx4a4e
+                      portId: then
+                    to:
+                      nodeId: 1780390997986-8bkf67
+                      portId: in
+                  - id: e-1780391039131-uhldnk
+                    from:
+                      nodeId: 1780390882893-dx4a4e
+                      portId: else
+                    to:
+                      nodeId: 1780390997986-8bkf67
+                      portId: in
+                  - id: e-1780391041595-jdsy2u
+                    from:
+                      nodeId: 1780390904559-gyceep
+                      portId: then
+                    to:
+                      nodeId: 1780390997986-8bkf67
+                      portId: in
+                  - id: e-1780391044435-yifnet
+                    from:
+                      nodeId: 1780390904559-gyceep
+                      portId: else
+                    to:
+                      nodeId: 1780390997986-8bkf67
+                      portId: in
+                  - id: e-1780391047040-c7hbt6
+                    from:
+                      nodeId: 1780390918770-66g77o
+                      portId: then
+                    to:
+                      nodeId: 1780390997986-8bkf67
+                      portId: in
+                  - id: e-1780391049194-6jhkgh
+                    from:
+                      nodeId: 1780390918770-66g77o
+                      portId: else
+                    to:
+                      nodeId: 1780390997986-8bkf67
+                      portId: in
+                  - id: e-1780391110472-ka9byl
+                    from:
+                      nodeId: 1780390708884-pqkb06
+                      portId: done
+                    to:
+                      nodeId: 1780390869519-2liw8c
+                      portId: in
+                  - id: e-1780392291446-acnutf
+                    from:
+                      nodeId: 1780390869519-2liw8c
+                      portId: error
+                    to:
+                      nodeId: 1780392272727-s6jmis
+                      portId: in
+                  - id: e-1780392293807-5zzxpl
+                    from:
+                      nodeId: 1780390882893-dx4a4e
+                      portId: error
+                    to:
+                      nodeId: 1780392272727-s6jmis
+                      portId: in
+                  - id: e-1780392296366-5q90qk
+                    from:
+                      nodeId: 1780390904559-gyceep
+                      portId: error
+                    to:
+                      nodeId: 1780392272727-s6jmis
+                      portId: in
+                  - id: e-1780392300132-827xvk
+                    from:
+                      nodeId: 1780390918770-66g77o
+                      portId: error
+                    to:
+                      nodeId: 1780392272727-s6jmis
+                      portId: in
+                  - id: e-1780393281980-dnnw4w
+                    from:
+                      nodeId: 1780393281979-bl7len
+                      portId: then
+                    to:
+                      nodeId: 1780393281979-t45r0j
+                      portId: in
+                  - id: e-1780393281980-b0xh0x
+                    from:
+                      nodeId: 1780393281979-bl7len
+                      portId: else
+                    to:
+                      nodeId: 1780393281979-ygotuv
+                      portId: in
+                  - id: e-1780393281980-9rilo4
+                    from:
+                      nodeId: 1780393281979-bl7len
+                      portId: else
+                    to:
+                      nodeId: 1780393281979-ygotuv
+                      portId: in
+                  - id: e-1780393293616-yask73
+                    from:
+                      nodeId: 1780388628549-8vbjmf
+                      portId: done
+                    to:
+                      nodeId: 1780393281979-bl7len
+                      portId: in
+                  - id: e-1780393297446-33ga37
+                    from:
+                      nodeId: 1780393281979-bl7len
+                      portId: done
+                    to:
+                      nodeId: 1780390708884-pqkb06
+                      portId: in
+                  - id: e-1780393545056-e5lmu2
+                    from:
+                      nodeId: 1780393545056-b31aui
+                      portId: else
+                    to:
+                      nodeId: 1780393545056-3dz1nz
+                      portId: in
+                  - id: e-1780393545056-eef1w9
+                    from:
+                      nodeId: 1780393545056-b31aui
+                      portId: then
+                    to:
+                      nodeId: 1780393545056-6bm834
+                      portId: in
+                  - id: e-1780393545056-ui2d1z
+                    from:
+                      nodeId: 1780393545056-6bm834
+                      portId: else
+                    to:
+                      nodeId: 1780393545056-xs2jmy
+                      portId: in
+                  - id: e-1780393545056-npwlls
+                    from:
+                      nodeId: 1780393545056-t0xge5
+                      portId: else
+                    to:
+                      nodeId: 1780393545056-kes0xh
+                      portId: in
+                  - id: e-1780393545056-8nyvte
+                    from:
+                      nodeId: 1780393545056-fw9fkt
+                      portId: else
+                    to:
+                      nodeId: 1780393545056-nl8oax
+                      portId: in
+                  - id: e-1780393545056-zizio1
+                    from:
+                      nodeId: 1780393545056-fw9fkt
+                      portId: then
+                    to:
+                      nodeId: 1780393545056-ajsbj2
+                      portId: in
+                  - id: e-1780393545056-u27ra9
+                    from:
+                      nodeId: 1780393545056-ajsbj2
+                      portId: else
+                    to:
+                      nodeId: 1780393545056-yxt1ta
+                      portId: in
+                  - id: e-1780393545056-pju1it
+                    from:
+                      nodeId: 1780393545056-ajsbj2
+                      portId: then
+                    to:
+                      nodeId: 1780393545056-pvvijv
+                      portId: in
+                  - id: e-1780393545056-1tnkxj
+                    from:
+                      nodeId: 1780393545056-pvvijv
+                      portId: else
+                    to:
+                      nodeId: 1780393545056-vckco3
+                      portId: in
+                  - id: e-1780394187276-4mp0w2
+                    from:
+                      nodeId: 1780390708884-pqkb06
+                      portId: done
+                    to:
+                      nodeId: 1780390882893-dx4a4e
+                      portId: in
+                  - id: e-1780394191929-67pi1f
+                    from:
+                      nodeId: 1780390708884-pqkb06
+                      portId: done
+                    to:
+                      nodeId: 1780390904559-gyceep
+                      portId: in
+                  - id: e-1780394195190-uohxua
+                    from:
+                      nodeId: 1780390708884-pqkb06
+                      portId: done
+                    to:
+                      nodeId: 1780390918770-66g77o
+                      portId: in
+                  - id: e-1780394378301-e4k1gq
+                    from:
+                      nodeId: 1780387633982-uicb3q
+                      portId: done
+                    to:
+                      nodeId: 1780393545056-b31aui
+                      portId: in
+                  - id: e-1780394739508-j71xwo
+                    from:
+                      nodeId: 1780393545056-6bm834
+                      portId: then
+                    to:
+                      nodeId: 1780393545056-t0xge5
+                      portId: in
+                  - id: e-1780394743291-76gjfl
+                    from:
+                      nodeId: 1780393545056-t0xge5
+                      portId: then
+                    to:
+                      nodeId: 1780393545056-fw9fkt
+                      portId: in
+                  - id: e-1780394871289-hmug4r
+                    from:
+                      nodeId: 1780393545056-pvvijv
+                      portId: then
+                    to:
+                      nodeId: 1780393545056-cqqaa4
+                      portId: in
+                  - id: e-1780394922629-lsq5zs
+                    from:
+                      nodeId: 1780387940768-5vf8jv
+                      portId: then
+                    to:
+                      nodeId: 1780388527402-0lbz98
+                      portId: in
+                  - id: e-1780395506824-0-mos4go
+                    from:
+                      nodeId: 1780395506824-skr6u9
+                      portId: else
+                    to:
+                      nodeId: 1780395506824-ofduiv
+                      portId: in
+                  - id: e-1780395506824-1-igr2e5
+                    from:
+                      nodeId: 1780395506824-skr6u9
+                      portId: then
+                    to:
+                      nodeId: 1780395506824-m909dk
+                      portId: in
+                  - id: e-1780395506824-2-484jq5
+                    from:
+                      nodeId: 1780395506824-m909dk
+                      portId: else
+                    to:
+                      nodeId: 1780395506824-ks1txa
+                      portId: in
+                  - id: e-1780395506824-3-sq7anv
+                    from:
+                      nodeId: 1780395506824-cmypk8
+                      portId: else
+                    to:
+                      nodeId: 1780395506824-61o5jx
+                      portId: in
+                  - id: e-1780395506824-4-3iqhzf
+                    from:
+                      nodeId: 1780395506824-ww8pb5
+                      portId: else
+                    to:
+                      nodeId: 1780395506824-pn7g2k
+                      portId: in
+                  - id: e-1780395506824-5-dpaegq
+                    from:
+                      nodeId: 1780395506824-ww8pb5
+                      portId: then
+                    to:
+                      nodeId: 1780395506824-t84xjd
+                      portId: in
+                  - id: e-1780395506824-6-r1gzuw
+                    from:
+                      nodeId: 1780395506824-t84xjd
+                      portId: else
+                    to:
+                      nodeId: 1780395506824-b79qqa
+                      portId: in
+                  - id: e-1780395506824-7-4bi0nd
+                    from:
+                      nodeId: 1780395506824-t84xjd
+                      portId: then
+                    to:
+                      nodeId: 1780395506824-jklyri
+                      portId: in
+                  - id: e-1780395506824-8-p7pukl
+                    from:
+                      nodeId: 1780395506824-jklyri
+                      portId: else
+                    to:
+                      nodeId: 1780395506824-gazgld
+                      portId: in
+                  - id: e-1780395506824-15-hba7k0
+                    from:
+                      nodeId: 1780395506824-m909dk
+                      portId: then
+                    to:
+                      nodeId: 1780395506824-cmypk8
+                      portId: in
+                  - id: e-1780395506824-16-1vjmjc
+                    from:
+                      nodeId: 1780395506824-cmypk8
+                      portId: then
+                    to:
+                      nodeId: 1780395506824-ww8pb5
+                      portId: in
+                  - id: e-1780395506824-17-lqybuz
+                    from:
+                      nodeId: 1780395506824-jklyri
+                      portId: then
+                    to:
+                      nodeId: 1780395506824-cc6fuv
+                      portId: in
+                  - id: e-1780395517549-aw15al
+                    from:
+                      nodeId: 1780393545056-b31aui
+                      portId: done
+                    to:
+                      nodeId: 1780395506824-skr6u9
+                      portId: in
+                  - id: e-1780395524441-rqgrwx
+                    from:
+                      nodeId: 1780395506824-skr6u9
+                      portId: done
+                    to:
+                      nodeId: 1780387973219-wpeju1
+                      portId: in
+                  - id: e-1780396063374-h6la75
+                    from:
+                      nodeId: 1780393281979-7andwt
+                      portId: object
+                    to:
+                      nodeId: 1780393281979-bl7len
+                      portId: left
+                    selector: .
+                  - id: e-1780396064976-2sr2ky
+                    from:
+                      nodeId: 1780393281979-otkf2i
+                      portId: object
+                    to:
+                      nodeId: 1780393281979-bl7len
+                      portId: right
+                    selector: .
+                  - id: e-1780399176967-jggu98
+                    from:
+                      nodeId: 1780399063954-fivtc9
+                      portId: then
+                    to:
+                      nodeId: 1780399167083-563gdm
+                      portId: in
+                  - id: e-1780399178995-2n9h1x
+                    from:
+                      nodeId: 1780399063954-fivtc9
+                      portId: else
+                    to:
+                      nodeId: 1780399171740-hyuxvr
+                      portId: in
+                  - id: e-1780399286183-luyhcg
+                    from:
+                      nodeId: 1780399063954-fivtc9
+                      portId: done
+                    to:
+                      nodeId: 1780388628549-8vbjmf
+                      portId: in
+                  - id: e-1780399288644-cuwaqd
+                    from:
+                      nodeId: 1780387973219-wpeju1
+                      portId: then
+                    to:
+                      nodeId: 1780399063954-fivtc9
+                      portId: in
+                  - id: e-1780399335508-ae6wga
+                    from:
+                      nodeId: 1780399005765-il3r61
+                      portId: done
+                    to:
+                      nodeId: 1780399063954-fivtc9
+                      portId: in
+                  - id: e-1780399338767-pdjg2b
+                    from:
+                      nodeId: 1780399016130-15dw9r
+                      portId: done
+                    to:
+                      nodeId: 1780399063954-fivtc9
+                      portId: in
+                items: []
+        id: f1000000-0000-0000-0000-00000000auth
+        name: Pet API
+      - documentation: ''
+        tags: []
+        id: 268e8d63-6d7c-431f-81fa-5ab6c984c784
+        name: Clear Tokens
+        method: POST
+        url: '{{baseUrl}}/cleartokens'
+        headers: []
+        params: []
+        pathParams: []
+        deprecated: false
+        type: http
+    id: a0000000-0000-0000-0000-00000000auth
+    name: Auth Service
+    customValueLists:
+      - id: b0cd9e29-a779-4b49-a092-8b033ffb1674
+        name: Pet Colors
+        entries:
+          - id: 96a8cf1a-17f7-4ea0-afda-f7a16b115dcd
+            label: Rouge
+            value: FF0000
+          - id: 963ded6d-aabc-4a14-b6ea-2e06dcd1b535
+            label: Vert
+            value: 00FF00
+          - id: 6d015220-3937-4878-9139-5193389a2f4f
+            label: Bleu
+            value: 0000FF
+_projectUuid: 54d8cc46-49a5-45c0-aa39-0250d7aa2a5c
