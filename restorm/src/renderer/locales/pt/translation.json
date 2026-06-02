@@ -880,6 +880,7 @@
       "propertyValue": "value"
     },
     "output": {
+      "outputName": "Nome da saída",
       "addOutput": "Adicionar saída",
       "removeOutput": "Remover"
     },

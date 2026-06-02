@@ -881,6 +881,7 @@
       "propertyValue": "value"
     },
     "output": {
+      "outputName": "Nume ieșire",
       "addOutput": "Adaugă ieșire",
       "removeOutput": "Elimină"
     },

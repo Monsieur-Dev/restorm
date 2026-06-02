@@ -73,7 +73,7 @@ export const ForNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data,
     // Loop completion is the universal `Done` port (drawn by the box base).
     buildParallelismCell({ id, config, onSetConfig: data.onSetConfig, label: t('scenario.forEach.parallelism', 'parallelism'), testIdPrefix: 'scn-for' })
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} launchInput />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
 }
 
 /**
@@ -132,7 +132,7 @@ const ConditionLoopNodeBox: React.FC<NodeProps<ScenarioNodeBoxType> & { bodyLabe
     { id: 'then', label: bodyLabel, port: { id: 'then', role: 'then', type: 'source', flow: 'signal' } }
     // Loop exit / completion is the universal `Done` port (drawn by the box base).
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} launchInput />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
 }
 
 /** `while` — condition tested at the top of the loop (body output: "body"). */

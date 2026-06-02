@@ -880,6 +880,7 @@
       "propertyValue": "value"
     },
     "output": {
+      "outputName": "Çıktı adı",
       "addOutput": "Çıktı ekle",
       "removeOutput": "Kaldır"
     },

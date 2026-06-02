@@ -179,7 +179,7 @@ export const RunScenarioNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
       selected={selected}
       left={left}
       right={right}
-      launchInput
+     
       {...(headerIcon ? { headerIcon } : {})}
       {...(title ? { title } : {})}
     />

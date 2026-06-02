@@ -879,6 +879,7 @@
       "propertyValue": "value"
     },
     "output": {
+      "outputName": "출력 이름",
       "addOutput": "출력 추가",
       "removeOutput": "제거"
     },

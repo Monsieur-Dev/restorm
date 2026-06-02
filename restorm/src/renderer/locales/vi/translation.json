@@ -879,6 +879,7 @@
       "propertyValue": "value"
     },
     "output": {
+      "outputName": "Tên đầu ra",
       "addOutput": "Thêm đầu ra",
       "removeOutput": "Xóa"
     },

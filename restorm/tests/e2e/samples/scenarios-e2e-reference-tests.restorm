@@ -98,32 +98,19 @@ collections:
             tags: []
             params: []
             nodes:
-              - id: 1780315669511-p567l6
-                kind: log
-                config:
-                  message:
-                    type: string
-                    value: First
-                inputs:
-                  - id: in
-                    name: ''
-                    dataType: any
-                    flow: signal
-                  - id: message
-                    name: message
-                    dataType: string
-                  - id: data
-                    name: data
-                    dataType: any
-                outputs: []
-                position:
-                  x: 203.41299656977253
-                  'y': 240.57463197258966
               - id: 1780324493299-z019qs
                 kind: runScenario
                 config:
                   scenarioId: 1780290655312-0z6px87
                   label: Inputs/outputs
+                  paramValues:
+                    string:
+                      type: variable
+                      value: origin
+                    number:
+                      type: numeric
+                      value: 10
+                      format: decimal
                 inputs:
                   - id: in
                     name: ''
@@ -138,7 +125,33 @@ collections:
                 position:
                   x: 814.3825108806394
                   'y': 193.4616715494965
-            edges: []
+              - id: 1780418232553-8cfmhw
+                kind: setVariable
+                config:
+                  name: origin
+                  value:
+                    type: string
+                    value: main
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                  - id: value
+                    name: value
+                    dataType: any
+                outputs: []
+                position:
+                  x: 320
+                  'y': 180
+            edges:
+              - id: e-1780418276241-f2q3hz
+                from:
+                  nodeId: 1780418232553-8cfmhw
+                  portId: done
+                to:
+                  nodeId: 1780324493299-z019qs
+                  portId: in
             id: c1573ce0-985c-44b5-b5d4-e081de2d4303
             name: Main
             items:
@@ -250,8 +263,8 @@ collections:
                         role: else
                         flow: signal
                     position:
-                      x: -149.17650625389984
-                      'y': 120.74344296546482
+                      x: -140
+                      'y': 20
                   - id: 1780260767376-nztk8x
                     kind: log
                     config:
@@ -271,8 +284,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 378.84538963945613
-                      'y': 88.81870579202952
+                      x: 360
+                      'y': 20
                   - id: 1780260905141-5ldonh
                     kind: for
                     config:
@@ -302,8 +315,8 @@ collections:
                         role: else
                         flow: signal
                     position:
-                      x: 1383.723439921258
-                      'y': 681.91581227856
+                      x: 760
+                      'y': 680
                   - id: 1780260964288-f92lwp
                     kind: doWhile
                     config:
@@ -337,8 +350,8 @@ collections:
                         role: else
                         flow: signal
                     position:
-                      x: 710.902990784637
-                      'y': 478.7999517793196
+                      x: 360
+                      'y': 480
                   - id: 1780260983665-gj9nge
                     kind: while
                     config:
@@ -372,8 +385,8 @@ collections:
                         role: else
                         flow: signal
                     position:
-                      x: 2174.637098183718
-                      'y': 1274.812616573072
+                      x: -100
+                      'y': 1140
                     collapsed: false
                   - id: 1780266252124-xn88ev
                     kind: setVariable
@@ -393,8 +406,8 @@ collections:
                         dataType: any
                         flow: signal
                     position:
-                      x: 517.3475204038045
-                      'y': 318.93195578977804
+                      x: -140
+                      'y': 480
                   - id: 1780266804440-8uxw08
                     kind: arithmetic
                     config:
@@ -418,8 +431,8 @@ collections:
                         dataType: number
                         flow: value
                     position:
-                      x: 1129.2756462336113
-                      'y': 412.8213317582814
+                      x: 760
+                      'y': 480
                   - id: 1780267000002-y1n9rz
                     kind: log
                     config:
@@ -442,8 +455,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 1863.1527140693097
-                      'y': 461.0254309647953
+                      x: 1420
+                      'y': 480
                   - id: 1780267292271-e4lomo
                     kind: setVariable
                     config:
@@ -458,8 +471,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 1524.5993345220465
-                      'y': 333.75659410059444
+                      x: 1120
+                      'y': 480
                   - id: 1780267600232-mmm3yu
                     kind: arithmetic
                     config:
@@ -488,8 +501,8 @@ collections:
                         dataType: number
                         flow: value
                     position:
-                      x: 2545.0286049165697
-                      'y': 1193.5856161279412
+                      x: 360
+                      'y': 1160
                   - id: 1780267712890-jr5j5o
                     kind: log
                     config:
@@ -509,8 +522,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 1882.0378360161728
-                      'y': 682.9591854220454
+                      x: 1420
+                      'y': 680
                   - id: 1780267814929-w499o5
                     kind: log
                     config:
@@ -530,8 +543,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 1008.2077666952782
-                      'y': 684.6063674565805
+                      x: 420
+                      'y': 680
                   - id: 1780268282439-idtdxo
                     kind: log
                     config:
@@ -554,8 +567,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 3239.308501418292
-                      'y': 1386.2734480685417
+                      x: 1100
+                      'y': 1160
                   - id: 1780268614379-18gj74
                     kind: setVariable
                     config:
@@ -570,8 +583,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 2954.9747936040994
-                      'y': 1169.5263597205378
+                      x: 760
+                      'y': 1160
                   - id: 1780268656706-g9lim1
                     kind: log
                     config:
@@ -591,8 +604,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 1844.339947594624
-                      'y': 1014.4594209654537
+                      x: 1420
+                      'y': 880
                   - id: 1780268694412-ut8ojk
                     kind: log
                     config:
@@ -612,8 +625,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 2469.3699026529985
-                      'y': 1486.0720985829746
+                      x: 360
+                      'y': 1340
                   - id: 1780268726667-cgn82p
                     kind: log
                     config:
@@ -633,8 +646,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 208.96852009962157
-                      'y': 330.9298612026808
+                      x: 360
+                      'y': 220
                 edges:
                   - id: e-1780260773347-apo86y
                     from:
@@ -752,6 +765,13 @@ collections:
                     to:
                       nodeId: 1780267600232-mmm3yu
                       portId: in
+                  - id: e-1780415040158-gvb6je
+                    from:
+                      nodeId: 1780268726667-cgn82p
+                      portId: done
+                    to:
+                      nodeId: 1780260964288-f92lwp
+                      portId: in
                 id: 1780260652264-uon8bia
                 name: Loops
                 items: []
@@ -787,8 +807,8 @@ collections:
                         dataType: number
                         flow: both
                     position:
-                      x: 402
-                      'y': 393.39062500000006
+                      x: 320
+                      'y': 280
                   - id: 1780275660454-p9cmhm
                     kind: log
                     config:
@@ -808,8 +828,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 860.7156622739653
-                      'y': 366.32025152334387
+                      x: 700
+                      'y': 280
                     collapsed: false
                   - id: 1780275679035-gxdtrn
                     kind: arithmetic
@@ -840,8 +860,8 @@ collections:
                         dataType: number
                         flow: both
                     position:
-                      x: 737.1184239022675
-                      'y': 944.2772432519467
+                      x: 320
+                      'y': 500
                   - id: 1780275709162-fnrl7j
                     kind: log
                     config:
@@ -861,8 +881,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 572.4927153288402
-                      'y': 937.117839136346
+                      x: 700
+                      'y': 500
                   - id: 1780275743791-pwt1wq
                     kind: arithmetic
                     config:
@@ -892,8 +912,8 @@ collections:
                         dataType: number
                         flow: both
                     position:
-                      x: 829.1836760411305
-                      'y': 551.3230215168433
+                      x: 320
+                      'y': 720
                   - id: 1780275759422-9v8kkt
                     kind: log
                     config:
@@ -913,8 +933,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 879.1408811753681
-                      'y': 848.8808753959798
+                      x: 700
+                      'y': 720
                   - id: 1780275780351-ehbolg
                     kind: arithmetic
                     config:
@@ -944,8 +964,8 @@ collections:
                         dataType: number
                         flow: both
                     position:
-                      x: 433.945312001631
-                      'y': 1314.5028139252222
+                      x: 320
+                      'y': 1160
                   - id: 1780275795655-asir8w
                     kind: log
                     config:
@@ -965,8 +985,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 911.9675371501954
-                      'y': 1301.7935903570035
+                      x: 700
+                      'y': 1160
                   - id: 1780276685741-f7j2k4
                     kind: arithmetic
                     config:
@@ -996,8 +1016,8 @@ collections:
                         dataType: number
                         flow: both
                     position:
-                      x: 642.1142034642528
-                      'y': 739.4893692891322
+                      x: 320
+                      'y': 940
                   - id: 1780276698111-kkdo2f
                     kind: log
                     config:
@@ -1017,8 +1037,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 888.5650961085994
-                      'y': 1080.7474971893068
+                      x: 700
+                      'y': 940
                   - id: 1780276778906-lwbsyh
                     kind: setVariable
                     config:
@@ -1037,8 +1057,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 1141.5200984307673
-                      'y': 188.75493195670649
+                      x: 1020
+                      'y': 280
                   - id: 1780276800476-1dnwfu
                     kind: arithmetic
                     config:
@@ -1066,8 +1086,8 @@ collections:
                         dataType: number
                         flow: both
                     position:
-                      x: 1451.5218026961331
-                      'y': 390.6341850288231
+                      x: 1340
+                      'y': 280
                   - id: 1780276805395-hsl12y
                     kind: arithmetic
                     config:
@@ -1096,8 +1116,8 @@ collections:
                         dataType: number
                         flow: both
                     position:
-                      x: 1481.1425999669782
-                      'y': 849.745699886071
+                      x: 1340
+                      'y': 720
                   - id: 1780276807834-lxe68y
                     kind: arithmetic
                     config:
@@ -1126,8 +1146,8 @@ collections:
                         dataType: number
                         flow: both
                     position:
-                      x: 1471.9446072270673
-                      'y': 1088.6767140083211
+                      x: 1340
+                      'y': 940
                   - id: 1780276809853-8dhhws
                     kind: arithmetic
                     config:
@@ -1156,8 +1176,8 @@ collections:
                         dataType: number
                         flow: both
                     position:
-                      x: 1481.9980029505991
-                      'y': 1316.9125123175472
+                      x: 1340
+                      'y': 1160
                   - id: 1780276826787-wbidob
                     kind: arithmetic
                     config:
@@ -1186,8 +1206,8 @@ collections:
                         dataType: number
                         flow: both
                     position:
-                      x: 1469.3778625726518
-                      'y': 613.381430418236
+                      x: 1340
+                      'y': 500
                   - id: 1780276832905-f8af3n
                     kind: log
                     config:
@@ -1208,8 +1228,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 1954.5129589921403
-                      'y': 379.798024202498
+                      x: 1720
+                      'y': 280
                   - id: 1780276835290-k19p9o
                     kind: log
                     config:
@@ -1230,8 +1250,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 1944.8872647604185
-                      'y': 606.536599438611
+                      x: 1720
+                      'y': 500
                   - id: 1780276838508-pzx73f
                     kind: log
                     config:
@@ -1252,8 +1272,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 1947.0263079230235
-                      'y': 832.2056530934217
+                      x: 1720
+                      'y': 720
                   - id: 1780276855302-tjm8lh
                     kind: log
                     config:
@@ -1274,8 +1294,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 1941.3893534103258
-                      'y': 1071.6338140020712
+                      x: 1720
+                      'y': 940
                   - id: 1780276862931-74ybn2
                     kind: log
                     config:
@@ -1296,8 +1316,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 1934.1920489473941
-                      'y': 1316.6989294234181
+                      x: 1720
+                      'y': 1160
                   - id: 1780278121669-u0t7h5
                     kind: arithmetic
                     config:
@@ -1325,8 +1345,8 @@ collections:
                         dataType: number
                         flow: both
                     position:
-                      x: 2641.5735156801034
-                      'y': 765.2534949631795
+                      x: 2360
+                      'y': 720
                   - id: 1780278156256-9oc1dj
                     kind: getVariable
                     config:
@@ -1344,8 +1364,8 @@ collections:
                         dataType: any
                         flow: both
                     position:
-                      x: 2296.8170878160518
-                      'y': 753.2038384347351
+                      x: 2020
+                      'y': 720
                   - id: 1780278176649-pordlq
                     kind: log
                     config:
@@ -1365,8 +1385,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 3058.686932388048
-                      'y': 863.6494804430024
+                      x: 2740
+                      'y': 720
                   - id: 1780278754040-p38pr7
                     kind: arithmetic
                     config:
@@ -1395,8 +1415,8 @@ collections:
                         dataType: number
                         flow: both
                     position:
-                      x: 2637.9944722515243
-                      'y': 391.7055439545171
+                      x: 2360
+                      'y': 280
                   - id: 1780278760132-e7bksn
                     kind: setVariable
                     config:
@@ -1415,8 +1435,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 2311.7903899542853
-                      'y': 388.4969792106099
+                      x: 2040
+                      'y': 280
                   - id: 1780278794428-u3n65i
                     kind: log
                     config:
@@ -1437,8 +1457,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 3044.412673146444
-                      'y': 594.9146444019768
+                      x: 2740
+                      'y': 480
                   - id: 1780278907177-1qun8x
                     kind: log
                     config:
@@ -1459,8 +1479,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 3042.2736299838384
-                      'y': 397.6965359372814
+                      x: 2740
+                      'y': 280
                   - id: 1780279158921-wdh1ab
                     kind: setVariable
                     config:
@@ -1478,8 +1498,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 2281.6665220753466
-                      'y': 1148.5916002602391
+                      x: 2020
+                      'y': 980
                   - id: 1780279171408-cx767g
                     kind: getVariable
                     config:
@@ -1497,8 +1517,8 @@ collections:
                         dataType: any
                         flow: both
                     position:
-                      x: 2270.9713062623223
-                      'y': 1377.469218658957
+                      x: 2020
+                      'y': 1120
                   - id: 1780279178926-2vjr31
                     kind: arithmetic
                     config: {}
@@ -1519,8 +1539,8 @@ collections:
                         dataType: number
                         flow: both
                     position:
-                      x: 2621.806636645057
-                      'y': 1095.0621254715854
+                      x: 2360
+                      'y': 980
                   - id: 1780279233234-d4wh1a
                     kind: log
                     config:
@@ -1540,8 +1560,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 3035.239891990641
-                      'y': 1325.9397438703036
+                      x: 2740
+                      'y': 1180
                   - id: 1780279273422-q77lr5
                     kind: log
                     config:
@@ -1562,8 +1582,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 3050.1286180969078
-                      'y': 1091.6182981220052
+                      x: 2740
+                      'y': 980
                 edges:
                   - id: e-1780275665825-62hhd5
                     from:
@@ -1832,8 +1852,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 347.29829031719083
-                      'y': -36.622575114384
+                      x: 360
+                      'y': -60
                   - id: 1780289497914-vaslvd
                     kind: object
                     config:
@@ -1893,8 +1913,8 @@ collections:
                         dataType: json
                         flow: both
                     position:
-                      x: -95.37673504485088
-                      'y': 44.52209099322562
+                      x: -280
+                      'y': -60
                   - id: 1780290957897-x639ht
                     kind: log
                     config:
@@ -1914,8 +1934,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 342.13162365052426
-                      'y': 175.86961238561594
+                      x: 360
+                      'y': 140
                   - id: 1780290977645-3nmegg
                     kind: log
                     config:
@@ -1935,8 +1955,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 350.46495698385763
-                      'y': 380.8696123856161
+                      x: 360
+                      'y': 340
                   - id: 1780291655759-lj9oe9
                     kind: log
                     config:
@@ -1956,8 +1976,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 347.96495698385763
-                      'y': 590.869612385616
+                      x: 360
+                      'y': 540
                   - id: 1780292630011-3vtl9m
                     kind: log
                     config:
@@ -1977,8 +1997,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 347.13162365052426
-                      'y': 799.2029457189493
+                      x: 360
+                      'y': 740
                   - id: 1780292852611-83t4mk
                     kind: log
                     config:
@@ -1998,8 +2018,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 339.1232649551489
-                      'y': 1003.6809451598924
+                      x: 360
+                      'y': 940
                   - id: 1780300215561-wwbtkd
                     kind: log
                     config:
@@ -2019,8 +2039,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 342.72724637063385
-                      'y': 1206.2969897110208
+                      x: 360
+                      'y': 1140
                   - id: 1780300289869-2h5wir
                     kind: log
                     config:
@@ -2040,8 +2060,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 340.2140019182925
-                      'y': 1411.2379029188521
+                      x: 360
+                      'y': 1340
                   - id: 1780300412760-cuokfm
                     kind: log
                     config:
@@ -2061,8 +2081,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 352.567867177306
-                      'y': 1633.8836164963918
+                      x: 360
+                      'y': 1540
                 edges:
                   - id: e-1780289553600-08y2bp
                     from:
@@ -2212,7 +2232,7 @@ collections:
                           valueType:
                             type: string
                             value: string!
-                          required: false
+                          required: true
                         - id: param-1780306710895-t5jsh2
                           name: bool
                           valueType:
@@ -2341,6 +2361,11 @@ collections:
                     kind: output
                     config:
                       name: first
+                      outputs:
+                        - id: value
+                          name: first
+                        - id: out-1780418132134-j5um65
+                          name: second
                     inputs:
                       - id: value
                         name: value
@@ -2349,7 +2374,6 @@ collections:
                     position:
                       x: 1340.2077027359596
                       'y': 183.43941976045983
-                    collapsed: false
                   - id: 1780290831425-s4gwdu
                     kind: output
                     config:
@@ -2360,8 +2384,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 1472.941864938708
-                      'y': 549.121322337346
+                      x: 1340
+                      'y': 460
                   - id: 1780290862498-v56qy9
                     kind: log
                     config:
@@ -2473,18 +2497,6 @@ collections:
                     position:
                       x: 1317.4285643113394
                       'y': 917.8675642940315
-                  - id: 1780313034252-ciervm
-                    kind: output
-                    config:
-                      name: second
-                    inputs:
-                      - id: value
-                        name: value
-                        dataType: any
-                    outputs: []
-                    position:
-                      x: 1429.324338170204
-                      'y': 358.0771036444503
                 edges:
                   - id: e-1780290725124-dhwv12
                     from:
@@ -2502,22 +2514,6 @@ collections:
                       nodeId: 1780290720988-a9nymy
                       portId: prop-1780290727683-0vof3k
                     selector: .
-                  - id: e-1780290757819-i3x11y
-                    from:
-                      nodeId: 1780290720988-a9nymy
-                      portId: object
-                    to:
-                      nodeId: 1780290752840-vsgq4n
-                      portId: data
-                    selector: .
-                  - id: e-1780290793889-0mxseh
-                    from:
-                      nodeId: 1780290720988-a9nymy
-                      portId: object
-                    to:
-                      nodeId: 1780290777340-49nhwc
-                      portId: value
-                    selector: first
                   - id: e-1780290836525-8jn8pm
                     from:
                       nodeId: 1780290720988-a9nymy
@@ -2570,14 +2566,29 @@ collections:
                       nodeId: 1780290720988-a9nymy
                       portId: prop-1780309901267-y0r3mt
                     selector: SecondInput
-                  - id: e-1780313222657-sp3n5u
+                  - id: e-1780415351958-3gv27u
                     from:
                       nodeId: 1780290720988-a9nymy
                       portId: object
                     to:
-                      nodeId: 1780313034252-ciervm
+                      nodeId: 1780290777340-49nhwc
                       portId: value
-                    selector: second.PetColor
+                    selector: .
+                  - id: e-1780415367436-hhnm4a
+                    from:
+                      nodeId: 1780290720988-a9nymy
+                      portId: object
+                    to:
+                      nodeId: 1780290752840-vsgq4n
+                      portId: in
+                  - id: e-1780418171878-6v4tkb
+                    from:
+                      nodeId: 1780290720988-a9nymy
+                      portId: object
+                    to:
+                      nodeId: 1780290777340-49nhwc
+                      portId: out-1780418132134-j5um65
+                    selector: second
                 id: 1780290655312-0z6px87
                 name: Inputs/outputs
                 items: []

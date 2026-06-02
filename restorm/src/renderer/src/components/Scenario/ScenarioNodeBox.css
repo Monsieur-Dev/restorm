@@ -113,18 +113,6 @@
   border: 1px solid var(--widget-border, #454545);
 }
 
-/* `output` node decl row: the name input grows, the remove button hugs the end. */
-.scn-output-decl-row {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  width: 100%;
-}
-.scn-output-decl-row > :first-child {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
 /* Editor side panel: a run toolbar, the workflow errors, and the selected-box
  * preview — stacked sections split by separators, anchored top-right. */
 .scn-inspector {
@@ -698,18 +686,6 @@
    * any later header affordance — doesn't sit flush against the corner. */
   padding-left: 16px;
   padding-right: 16px;
-}
-
-/* "event" output anchor: centred on the header's right border. */
-.scn-handle-event.react-flow__handle {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translate(50%, -50%);
-  z-index: 7;
-}
-.scn-node-header-has-event {
-  padding-right: 28px;
 }
 
 /* Generic "launch" input anchor: centred on the header's left border. Raised

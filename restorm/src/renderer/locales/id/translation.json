@@ -879,6 +879,7 @@
       "propertyValue": "value"
     },
     "output": {
+      "outputName": "Nama output",
       "addOutput": "Tambah keluaran",
       "removeOutput": "Hapus"
     },

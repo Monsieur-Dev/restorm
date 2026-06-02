@@ -10,6 +10,7 @@ import { ScenarioNodeSection } from './ScenarioNodeSection'
 import { useScenarioInternalsRequester } from '../scenarioInternalsContext'
 import { HeaderHoverTooltip } from '../../MainView/HeaderHoverTooltip'
 import { anchorColor, cellBody, portAnchorColor, inputFlowRingClass, outputFlowRingClass, cellInputRingClass, cellOutputRingClass } from './scenarioCellRender'
+import { hasDonePort, hasErrorPort } from '../../../../../shared/scenarioNodeCapabilities'
 import '../ScenarioNodeBox.css'
 
 /** React Flow node data shared by every scenario node box. */
@@ -100,26 +101,6 @@ export interface ScenarioNodeBoxBaseProps {
   headerIcon?: ReactNode
   /** Override the header title; defaults to the kind's label. */
   title?: string
-  /**
-   * Whether the node accepts a generic "launch" input — a target anchor on
-   * the left of the header (id `in`). Lets nodes be chained without a
-   * dedicated condition (e.g. one request's `response` → the next's launch,
-   * or a `setVariable`'s `event` → an `if`'s launch).
-   */
-  launchInput?: boolean
-  /**
-   * Whether the node emits a generic "event" output — a source anchor on the
-   * right of the header (id `event`, signal flow). Lets a node signal
-   * completion to chain the next node's launch input without producing a data
-   * value (e.g. `setVariable`, which stores its input and fires this event).
-   */
-  headerEventOutput?: boolean
-  /**
-   * Whether the node exposes the dedicated error output port (bottom). Most
-   * nodes can fail, so it defaults to true; set false for kinds that can't
-   * error (e.g. `now`), where an error anchor would be meaningless.
-   */
-  hasError?: boolean
 }
 
 /**
@@ -129,8 +110,13 @@ export interface ScenarioNodeBoxBaseProps {
  * box colour with auto-contrast, and the dedicated error port. Per-kind
  * components (IfNodeBox, …) compose this and only declare their columns.
  */
-export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, data, selected, left, right, headerIcon, title, launchInput, headerEventOutput, hasError }) => {
+export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, data, selected, left, right, headerIcon, title }) => {
   const { t } = useTranslation()
+  // The header launch trigger is rendered straight off the node's ports: it
+  // shows iff the node carries the `in` signal input. That input is stamped by
+  // `defaultPortsForKind` for every kind that `acceptsInputEvent`, so the single
+  // source of truth (the capability table) drives both the port and this handle.
+  const launchInput = data.inputs.some((port) => port.id === 'in')
   const meta = scenarioNodeMeta(data.kind)
   // A box in a non-executable state (missing name, unsatisfied input, …) is
   // flagged red and its play button disabled; the errors are aggregated into
@@ -423,7 +409,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
       style={collapsed && expandedWidth !== null ? { width: `${expandedWidth}px` } : {}}
       onAnimationIteration={onAnimationIteration}
     >
-      <div ref={headerRef} className={`scn-node-header ${headerEventOutput ? 'scn-node-header-has-event' : ''}`} style={headerStyle} onContextMenu={onHeaderContextMenu}>
+      <div ref={headerRef} className="scn-node-header" style={headerStyle} onContextMenu={onHeaderContextMenu}>
         {launchInput && (
           <Handle
             id="in"
@@ -432,16 +418,6 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
             className={`scn-handle scn-handle-launch ${inputFlowRingClass('in', data.inputs, data.kind)}`}
             style={{ background: anchorColor() }}
             title="in"
-          />
-        )}
-        {headerEventOutput && (
-          <Handle
-            id="event"
-            type="source"
-            position={Position.Right}
-            className={`scn-handle scn-handle-event ${outputFlowRingClass('event', data.outputs, data.kind)}`}
-            style={{ background: anchorColor() }}
-            title="event"
           />
         )}
         {headerIcon ?? <i className={`codicon codicon-${meta.icon} scn-node-icon`} aria-hidden="true" />}
@@ -569,7 +545,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
         )
       })}
 
-      {hasError !== false && (
+      {hasErrorPort(data.kind) && (
         <Handle
           id="error"
           type="source"
@@ -580,15 +556,18 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
         />
       )}
       {/* Universal completion signal: fires once this box AND its whole
-       * downstream sub-graph have finished. Implicit like `error` (drawn on
-       * every box, never listed per-kind) so it stays consistent everywhere. */}
-      <Handle
-        id="done"
-        type="source"
-        position={Position.Bottom}
-        className={`scn-handle scn-handle-done ${outputFlowRingClass('done', data.outputs, data.kind)}`}
-        title="done"
-      />
+       * downstream sub-graph have finished. Implicit (drawn on every box that
+       * has it, never listed per-kind) and driven by the capability table —
+       * the `output` sink opts out (nothing runs after it). */}
+      {hasDonePort(data.kind) && (
+        <Handle
+          id="done"
+          type="source"
+          position={Position.Bottom}
+          className={`scn-handle scn-handle-done ${outputFlowRingClass('done', data.outputs, data.kind)}`}
+          title="done"
+        />
+      )}
       {/* The BorderBeam orbits the full box outline. Rendered LAST so it
        * paints on top of the header background — otherwise the trail's lap
        * along the top edge disappears behind the header's solid fill. */}

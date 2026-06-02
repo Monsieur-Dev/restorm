@@ -135,7 +135,7 @@ export const LogNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data,
   ]
   // Terminal sink: a header launch trigger (`in`) so it can be sequenced, but
   // no output (no passthrough, and logging can't fail, so no error port either).
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} hasError={false} launchInput />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} />
 }
 
 /**
@@ -212,7 +212,7 @@ export const AssertNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
     { id: 'then', label: 'pass', port: { id: 'then', role: 'then', type: 'source' } },
     { id: 'else', label: 'fail', port: { id: 'else', role: 'else', type: 'source' } }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} launchInput />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
 }
 
 /** Output formats the `now` box can emit. The runtime + static preview both
@@ -321,5 +321,5 @@ export const NowNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data,
     }
   ]
   const right: ScenarioNodeCell[] = [{ id: 'value', label: 'now', port: { id: 'value', type: 'source' } }]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} launchInput hasError={false} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
 }

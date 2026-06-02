@@ -26,8 +26,10 @@ describe('linkPaletteEntries — drag from an output', () => {
   })
 
   // Example 3: a PURE signal output (the while body `then`) carries no value, so
-  // it lists only kinds that own a header trigger, each wired to it — never a
-  // data-driven kind (aggregate has no header, so a signal can't reach it).
+  // it lists only kinds that own a header trigger, each wired to it — never the
+  // one kind without a header (`output`, the terminal sink), which a signal
+  // can't reach. Every other kind (incl. the data-driven ones, which now carry
+  // the trigger too) is wired to `in`.
   it('a pure signal (body) output lists only kinds with a header input, all wired to it', () => {
     const entries = linkPaletteEntries(srcOf('while'), 'then', true)
     expect(entries.length).toBeGreaterThan(0)
@@ -35,7 +37,8 @@ describe('linkPaletteEntries — drag from an output', () => {
     const kinds = entries.map((e) => e.kind)
     expect(kinds).toContain('wait')
     expect(kinds).toContain('arithmetic') // owns a header trigger → wired to `in`
-    expect(kinds).not.toContain('aggregate') // no header → a signal can't reach it
+    expect(kinds).toContain('aggregate') // data-driven, but now owns the trigger too
+    expect(kinds).not.toContain('output') // the sole kind with no header trigger
   })
 
   // Example 4: an untyped (`any`) `both` output (waitUntil's `out`) is

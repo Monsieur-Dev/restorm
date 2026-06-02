@@ -2,26 +2,17 @@ import Handlebars from 'handlebars'
 import { registerHandlebarsHelpers } from './handlebars/registerAll'
 import type { ScenarioNode, ScenarioEdge } from '../types/scenario'
 import { readInputParams } from '../scenarioInputParams'
+import { STATIC_PREVIEW_KINDS } from '../scenarioNodeCapabilities'
 
 // Register the full helper suite on first import so a chained `transform`
 // preview can use `{{year now}}`, `{{add a b}}`, `{{upper x}}`, … directly —
 // same surface the runtime exposes. The helper module is idempotent.
 registerHandlebarsHelpers()
 
-/** Node kinds whose inspector preview is derived directly from their config
- * (no run / no play needed). The runner doesn't execute these yet, but their
- * output is fully determined by the box's configuration. */
-export const STATIC_PREVIEW_KINDS: ReadonlySet<ScenarioNode['kind']> = new Set<ScenarioNode['kind']>([
-  'now', 'input', 'setVariable', 'getVariable', 'object',
-  'arithmetic', 'comparator', 'boolean',
-  'transform',
-  'if',
-  'switch',
-  'wait', 'waitUntil',
-  'map', 'filter', 'aggregate',
-  // `while` / `doWhile` route a value to body/done exactly like `if`.
-  'while', 'doWhile'
-])
+// Node kinds whose inspector preview is derived directly from their config (no
+// run / no play needed) — sourced from the per-kind capability table (the
+// single source of truth) and re-exported so existing importers keep working.
+export { STATIC_PREVIEW_KINDS }
 
 /** The minimal node + edge shapes the static-preview resolvers read. */
 export interface StaticPreviewNode {

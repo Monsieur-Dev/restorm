@@ -203,7 +203,7 @@ export const SwitchNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
     { id: 'default', label: 'default', port: { id: 'default', role: 'default', type: 'source' } }
   ]
 
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} launchInput />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
 }
 
 export default SwitchNodeBox

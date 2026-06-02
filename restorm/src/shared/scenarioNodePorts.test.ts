@@ -1,6 +1,33 @@
 import { describe, it, expect } from 'vitest'
-import type { Scenario } from './types/collections'
-import { deriveRunScenarioPorts } from './scenarioNodePorts'
+import type { Scenario, ScenarioNodeKind } from './types/collections'
+import { deriveRunScenarioPorts, defaultPortsForKind } from './scenarioNodePorts'
+import { acceptsInputEvent } from './scenarioNodeCapabilities'
+
+describe('defaultPortsForKind — header `in` trigger from the capability', () => {
+  const hasIn = (kind: ScenarioNodeKind): boolean =>
+    defaultPortsForKind(kind).inputs.some((p) => p.id === 'in')
+
+  it('stamps the `in` trigger for a data-driven kind (comparator)', () => {
+    expect(hasIn('comparator')).toBe(true)
+    // and it comes FIRST, ahead of the kind's own value inputs
+    expect(defaultPortsForKind('comparator').inputs[0]?.id).toBe('in')
+  })
+
+  it('stamps `in` for object / map / filter / aggregate / boolean too', () => {
+    for (const k of ['object', 'map', 'filter', 'aggregate', 'boolean'] as ScenarioNodeKind[]) {
+      expect(hasIn(k), `${k} should carry the in trigger`).toBe(true)
+    }
+  })
+
+  it('does NOT stamp `in` for the `output` sink', () => {
+    expect(hasIn('output')).toBe(false)
+    expect(acceptsInputEvent('output')).toBe(false)
+  })
+
+  it('keeps `in` first on a kind that already had it (if)', () => {
+    expect(defaultPortsForKind('if').inputs.map((p) => p.id)).toEqual(['in', 'left', 'right'])
+  })
+})
 
 /** Minimal sub-scenario fixture — only `nodes` (kind + config) matter. */
 function scenarioWith(nodes: { kind: string; config: Record<string, unknown> }[]): Scenario {

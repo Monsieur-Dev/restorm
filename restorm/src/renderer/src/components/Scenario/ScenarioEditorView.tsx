@@ -715,6 +715,13 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     currentJson: string
   }>({ past: [], future: [], current: null, currentJson: '' })
   const isRestoringRef = useRef(false)
+  // True while a single user action's burst of persists is being coalesced into
+  // ONE history step. Deleting a box, for instance, fires two persists (the node
+  // removal AND the removal of its connected edges); without this they'd land as
+  // two separate undo steps, so one Ctrl+Z would bring the box back but not its
+  // links. Set on the first persist of a batch, cleared on the next macrotask
+  // (after the event's synchronous + microtask work has drained).
+  const coalesceRef = useRef(false)
   const [canUndo, setCanUndo] = useState(false)
   const [canRedo, setCanRedo] = useState(false)
 
@@ -761,9 +768,17 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       const snapJson = JSON.stringify({ n: nextNodes, e: nextEdges })
       const h = historyRef.current
       if (snapJson === h.currentJson) return
-      if (h.current) {
-        h.past.push(h.current)
-        if (h.past.length > HISTORY_LIMIT) h.past.shift()
+      // Coalesce a burst of persists from ONE user action into a single undo
+      // step: only the first persist of the batch pushes the pre-batch state
+      // onto `past`; the rest just advance `current`. The flag clears on the
+      // next macrotask, once the event's synchronous + microtask work is done.
+      if (!coalesceRef.current) {
+        if (h.current) {
+          h.past.push(h.current)
+          if (h.past.length > HISTORY_LIMIT) h.past.shift()
+        }
+        coalesceRef.current = true
+        setTimeout(() => { coalesceRef.current = false }, 0)
       }
       h.future = []
       h.current = { nodes: nextNodes, edges: nextEdges }
@@ -1157,6 +1172,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       current: { nodes: baseNodes, edges: baseEdges },
       currentJson: JSON.stringify({ n: baseNodes, e: baseEdges })
     }
+    coalesceRef.current = false
     setCanUndo(false)
     setCanRedo(false)
     if (cleanEdges.length !== scenario.edges.length) {

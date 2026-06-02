@@ -1,6 +1,7 @@
 import type { ScenarioNodeKind, ScenarioPort, ScenarioDataType, ScenarioPortRole, PortFlow, Scenario } from './types/collections'
 import { readInputParams } from './scenarioInputParams'
 import { readOutputDecls } from './scenarioOutputDecls'
+import { acceptsInputEvent } from './scenarioNodeCapabilities'
 
 /**
  * Default input/output ports per node kind (epic §5b "per-kind
@@ -45,50 +46,55 @@ interface KindPorts {
   outputs: PortSpec[]
 }
 
-/** Generic header launch trigger — a `signal` input (accepts B/AB). */
+/** Generic header launch trigger — a `signal` input (accepts B/AB). Stamped
+ * centrally by {@link defaultPortsForKind} for every kind that
+ * {@link acceptsInputEvent}, so it is NOT listed per-kind below. */
 const IN: PortSpec = { id: 'in', flow: 'signal' }
 /** Generic output — carries a value AND acts as a trigger (`both`). */
 const OUT: PortSpec = { id: 'out', flow: 'both' }
 
+// The header `in` trigger is no longer listed per entry: `defaultPortsForKind`
+// prepends it for every kind that `acceptsInputEvent` (the default — every kind
+// except the `output` sink). So a spec's `inputs` here lists ONLY the kind's
+// own data/value inputs; the launch trigger is the capability's business.
 const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // Sources & control
-  input: { inputs: [IN], outputs: [{ id: 'value', name: 'value', flow: 'both' }] },
+  input: { inputs: [], outputs: [{ id: 'value', name: 'value', flow: 'both' }] },
   // `output` — declares a named scenario output (the symmetric counterpart of
   // `input`): it consumes a `value` and exposes it as one of the scenario's
   // outputs, which a parent `runScenario` derives into an output port. A
-  // terminal sink — no output of its own.
+  // terminal sink — no output of its own, and the SOLE kind with no header
+  // trigger (see `acceptsInputEvent`).
   output: { inputs: [{ id: 'value', name: 'value' }], outputs: [] },
-  if: { inputs: [IN, { id: 'left', name: 'left' }, { id: 'right', name: 'right' }], outputs: [{ id: 'then', name: 'then', role: 'then', flow: 'both' }, { id: 'else', name: 'else', role: 'else', flow: 'both' }] },
-  switch: { inputs: [IN, { id: 'on', name: 'on' }], outputs: [{ id: 'default', name: 'default', role: 'default', flow: 'both' }] },
+  if: { inputs: [{ id: 'left', name: 'left' }, { id: 'right', name: 'right' }], outputs: [{ id: 'then', name: 'then', role: 'then', flow: 'both' }, { id: 'else', name: 'else', role: 'else', flow: 'both' }] },
+  switch: { inputs: [{ id: 'on', name: 'on' }], outputs: [{ id: 'default', name: 'default', role: 'default', flow: 'both' }] },
   // Requests & composition
-  httpRequest: { inputs: [IN, { id: 'env', name: 'env', flow: 'value' }], outputs: [{ id: 'response', name: 'response', dataType: 'response', role: 'response', flow: 'both' }] },
-  runScenario: { inputs: [IN], outputs: [{ id: 'result', name: 'result', role: 'response', flow: 'both' }] },
+  httpRequest: { inputs: [{ id: 'env', name: 'env', flow: 'value' }], outputs: [{ id: 'response', name: 'response', dataType: 'response', role: 'response', flow: 'both' }] },
+  runScenario: { inputs: [], outputs: [{ id: 'result', name: 'result', role: 'response', flow: 'both' }] },
   // Iteration & collections. `items` carries a value-selector fallback in the
   // editor (list-typed sources), so it isn't a hard-required port — like the
   // `if` operands; the editor flags it red only when no list type is available.
-  // No header trigger — collection nodes are data-driven (run once `items`
-  // resolves). Loop completion is the universal implicit `Done` port (drawn on
-  // every box), so no explicit `done` output here — it would be a duplicate.
-  forEach: { inputs: [IN, { id: 'items', name: 'items', dataType: 'json' }], outputs: [{ id: 'each', name: 'each', role: 'then', flow: 'both' }] },
+  // Loop completion is the universal implicit `Done` port (drawn on every box),
+  // so no explicit `done` output here — it would be a duplicate.
+  forEach: { inputs: [{ id: 'items', name: 'items', dataType: 'json' }], outputs: [{ id: 'each', name: 'each', role: 'then', flow: 'both' }] },
   // `items` has a value-selector fallback in the editor (like forEach), so it
   // isn't a hard-required port; the editor flags it red only when no list type
-  // is available to pick. No header trigger — a reduce is data-driven (it runs
-  // once its inputs resolve and exposes `result`).
+  // is available to pick.
   aggregate: { inputs: [{ id: 'items', name: 'items', dataType: 'json' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
   // `items` has a value-selector fallback (like forEach); the per-item
-  // transform lives in config. No header trigger — data-driven.
+  // transform lives in config.
   map: { inputs: [{ id: 'items', name: 'items', dataType: 'json' }], outputs: [{ id: 'mapped', name: 'mapped', dataType: 'json', flow: 'both' }] },
   // `items` has a value-selector fallback in the editor (like forEach), so it
   // isn't a hard-required port; the predicate (field/operator/value) lives in
-  // config. No header trigger — data-driven (runs once `items` resolves).
+  // config.
   filter: { inputs: [{ id: 'items', name: 'items', dataType: 'json' }], outputs: [{ id: 'kept', name: 'kept', dataType: 'json', flow: 'both' }, { id: 'rejected', name: 'rejected', dataType: 'json', flow: 'both' }] },
   // Loops. `for` is a numeric-range forEach: `from` / `to` / `step` carry
   // inline value fallbacks (like the `if` operands), so they aren't hard
   // required; it fans out the range over `each` (the current number) and fires
   // `done` once every iteration's scope has closed — reusing the forEach
   // scope machinery + the parallelism control.
-  for: { inputs: [IN, { id: 'from', name: 'from', dataType: 'number' }, { id: 'to', name: 'to', dataType: 'number' }, { id: 'step', name: 'step', dataType: 'number' }], outputs: [{ id: 'each', name: 'index', role: 'then', flow: 'both' }] },
-  // `while` / `doWhile` are the `if` mechanism in a loop dress: a header
+  for: { inputs: [{ id: 'from', name: 'from', dataType: 'number' }, { id: 'to', name: 'to', dataType: 'number' }, { id: 'step', name: 'step', dataType: 'number' }], outputs: [{ id: 'each', name: 'index', role: 'then', flow: 'both' }] },
+  // `while` / `doWhile` are the `if` mechanism in a loop dress: the header
   // trigger + two operands compared by the operator toggle, routing to `then`
   // (the loop body) when the condition holds and `else` (exit) when it fails.
   // The loop is closed by a user-wired edge from the body back into `in` (or
@@ -99,57 +105,56 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // `Done` port — no explicit `else`/`done` output here (it would duplicate it).
   // The body branch (`then`) is a pure SIGNAL — it just fires the loop body each
   // pass; there's no per-iteration value to carry (unlike a forEach `each` item).
-  while: { inputs: [IN, { id: 'left', name: 'left' }, { id: 'right', name: 'right' }], outputs: [{ id: 'then', name: 'body', role: 'then', flow: 'signal' }] },
-  doWhile: { inputs: [IN, { id: 'left', name: 'left' }, { id: 'right', name: 'right' }], outputs: [{ id: 'then', name: 'loop', role: 'then', flow: 'signal' }] },
+  while: { inputs: [{ id: 'left', name: 'left' }, { id: 'right', name: 'right' }], outputs: [{ id: 'then', name: 'body', role: 'then', flow: 'signal' }] },
+  doWhile: { inputs: [{ id: 'left', name: 'left' }, { id: 'right', name: 'right' }], outputs: [{ id: 'then', name: 'loop', role: 'then', flow: 'signal' }] },
   // Time
-  wait: { inputs: [IN, { id: 'duration', name: 'duration', dataType: 'duration' }], outputs: [{ id: 'out', name: 'then', role: 'then', flow: 'both' }] },
-  // Aligned on `wait`: a header trigger + an inline value fallback (a date-time
-  // picker) on `until`, so it isn't a hard-required port and the node is
-  // runnable on its own.
-  waitUntil: { inputs: [IN, { id: 'until', name: 'until' }], outputs: [{ id: 'out', name: 'then', role: 'then', flow: 'both' }] },
-  now: { inputs: [IN], outputs: [{ id: 'value', name: 'now', dataType: 'string', flow: 'both' }] },
+  wait: { inputs: [{ id: 'duration', name: 'duration', dataType: 'duration' }], outputs: [{ id: 'out', name: 'then', role: 'then', flow: 'both' }] },
+  // Aligned on `wait`: an inline value fallback (a date-time picker) on `until`,
+  // so it isn't a hard-required port and the node is runnable on its own.
+  waitUntil: { inputs: [{ id: 'until', name: 'until' }], outputs: [{ id: 'out', name: 'then', role: 'then', flow: 'both' }] },
+  now: { inputs: [], outputs: [{ id: 'value', name: 'now', dataType: 'string', flow: 'both' }] },
   // Data & compute. Operands carry typed value-selector fallbacks (like `if`),
-  // so they aren't hard-required ports. No header trigger — these are pure
-  // value nodes (data-driven: they run once their inputs resolve and expose
-  // `result`), so they don't need a launch signal to sequence them.
-  arithmetic: { inputs: [IN, { id: 'a', name: 'a', dataType: 'number' }, { id: 'b', name: 'b', dataType: 'number' }], outputs: [{ id: 'result', name: 'result', dataType: 'number', flow: 'both' }] },
+  // so they aren't hard-required ports. These are data-driven (they run once
+  // their inputs resolve and expose `result`), but they still carry the header
+  // trigger so a flow can gate WHEN they (re)compute / re-read a variable.
+  arithmetic: { inputs: [{ id: 'a', name: 'a', dataType: 'number' }, { id: 'b', name: 'b', dataType: 'number' }], outputs: [{ id: 'result', name: 'result', dataType: 'number', flow: 'both' }] },
   comparator: { inputs: [{ id: 'a', name: 'a' }, { id: 'b', name: 'b' }], outputs: [{ id: 'result', name: 'result', dataType: 'boolean', flow: 'both' }] },
   // `object` builds a structured object from N named properties. The property
   // inputs are user-configured (rendered from config like the switch cases), so
-  // none are stamped here; the single output is the assembled JSON object. No
-  // header trigger — data-driven (runs once its property inputs resolve).
+  // none are stamped here; the single output is the assembled JSON object.
   object: { inputs: [], outputs: [{ id: 'object', name: 'object', dataType: 'json', flow: 'both' }] },
   boolean: { inputs: [{ id: 'a', name: 'a', dataType: 'boolean' }, { id: 'b', name: 'b', dataType: 'boolean' }], outputs: [{ id: 'result', name: 'result', dataType: 'boolean', flow: 'both' }] },
-  // Header trigger to sequence it; no `event` output — completion is the
-  // universal `Done` port (which made the old `event` signal redundant).
-  setVariable: { inputs: [IN, { id: 'value', name: 'value' }], outputs: [] },
-  getVariable: { inputs: [IN], outputs: [{ id: 'value', name: 'value', flow: 'both' }] },
+  // No `event` output — completion is the universal `Done` port (which made the
+  // old `event` signal redundant).
+  setVariable: { inputs: [{ id: 'value', name: 'value' }], outputs: [] },
+  getVariable: { inputs: [], outputs: [{ id: 'value', name: 'value', flow: 'both' }] },
   // `transform` (a.k.a. "Transform template") applies an expression/Handlebars
-  // template to its optional `value` input and emits the result. A header
-  // launch trigger (`in`) lets it be sequenced in a flow; the `value` input
-  // stays optional so the node can also run on its own (a pure template). The
-  // expression determines the output type.
-  transform: { inputs: [IN, { id: 'value', name: 'value' }], outputs: [{ id: 'out', name: 'value', flow: 'both' }] },
+  // template to its optional `value` input and emits the result. The `value`
+  // input stays optional so the node can also run on its own (a pure template).
+  // The expression determines the output type.
+  transform: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'out', name: 'value', flow: 'both' }] },
   // Utilities
-  // A terminal sink: a header launch trigger (`in`) so it can be sequenced in
-  // a flow, plus two optional inputs (wire either, or set inline). `message` is
-  // a string, `data` any value. No output (terminal).
-  log: { inputs: [IN, { id: 'message', name: 'message', dataType: 'string' }, { id: 'data', name: 'data' }], outputs: [] },
+  // A terminal sink with two optional inputs (wire either, or set inline).
+  // `message` is a string, `data` any value. No output (terminal).
+  log: { inputs: [{ id: 'message', name: 'message', dataType: 'string' }, { id: 'data', name: 'data' }], outputs: [] },
   // An assertion compares two operands (`actual` / `expected`) with the same
   // operator toggle as `if`/`comparator`; both operands carry inline
-  // value-selector fallbacks, so they aren't hard-required ports. A header
-  // trigger sequences it like an `if`. Branches `pass` / `fail`; the failure
-  // label lives in config (`message`).
-  assert: { inputs: [IN, { id: 'a', name: 'actual' }, { id: 'b', name: 'expected' }], outputs: [{ id: 'then', name: 'pass', role: 'then', flow: 'both' }, { id: 'else', name: 'fail', role: 'else', flow: 'both' }] }
+  // value-selector fallbacks, so they aren't hard-required ports. Branches
+  // `pass` / `fail`; the failure label lives in config (`message`).
+  assert: { inputs: [{ id: 'a', name: 'actual' }, { id: 'b', name: 'expected' }], outputs: [{ id: 'then', name: 'pass', role: 'then', flow: 'both' }, { id: 'else', name: 'fail', role: 'else', flow: 'both' }] }
 }
 
-/** A generic single-in/single-out node for any kind without a spec. */
-const FALLBACK: KindPorts = { inputs: [IN], outputs: [OUT] }
+/** A generic single-in/single-out node for any kind without a spec (the `in`
+ * trigger is added by {@link defaultPortsForKind}, so only the output here). */
+const FALLBACK: KindPorts = { inputs: [], outputs: [OUT] }
 
-/** Fresh default ports for a node of the given kind (new arrays each call). */
+/** Fresh default ports for a node of the given kind (new arrays each call). The
+ * header `in` launch trigger is prepended for every kind that
+ * {@link acceptsInputEvent} — i.e. all but the `output` sink. */
 export function defaultPortsForKind(kind: ScenarioNodeKind): { inputs: ScenarioPort[]; outputs: ScenarioPort[] } {
   const spec = PORTS[kind] ?? FALLBACK
-  return { inputs: spec.inputs.map(p), outputs: spec.outputs.map(p) }
+  const inputs = acceptsInputEvent(kind) ? [IN, ...spec.inputs] : spec.inputs
+  return { inputs: inputs.map(p), outputs: spec.outputs.map(p) }
 }
 
 /** Map a persisted value-type kind (an `input` node's `valueType`) to a port

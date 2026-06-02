@@ -880,6 +880,7 @@
       "propertyValue": "value"
     },
     "output": {
+      "outputName": "Kimenet neve",
       "addOutput": "Kimenet hozzáadása",
       "removeOutput": "Eltávolítás"
     },

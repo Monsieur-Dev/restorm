@@ -880,6 +880,7 @@
       "propertyValue": "value"
     },
     "output": {
+      "outputName": "Tulosteen nimi",
       "addOutput": "Lisää tuloste",
       "removeOutput": "Poista"
     },

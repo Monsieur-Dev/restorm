@@ -66,7 +66,7 @@ export const WaitNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data
   const right: ScenarioNodeCell[] = [
     { id: 'out', label: t('scenario.wait.then', 'then'), port: { id: 'out', role: 'then', type: 'source' } }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} launchInput />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
 }
 
 export default WaitNodeBox

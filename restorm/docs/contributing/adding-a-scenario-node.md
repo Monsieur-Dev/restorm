@@ -20,13 +20,13 @@ new import format see [`adding-an-import.md`](./adding-an-import.md).
 A new kind `foo` is done when all of these are true:
 
 - [ ] **1. Kind union** — `foo` added to `ScenarioNodeKind` (`src/shared/types/scenario.ts`).
-- [ ] **2. Ports** — `foo` entry in `PORTS` (`src/shared/scenarioNodePorts.ts`): inputs/outputs + their `flow` class.
+- [ ] **2. Ports** — `foo` entry in `PORTS` (`src/shared/scenarioNodePorts.ts`): its own inputs/outputs + their `flow` class (the header `in` trigger is added automatically — see step 2). Declare any non-default capability in `src/shared/scenarioNodeCapabilities.ts` (e.g. opt out of the input event, or opt into static preview).
 - [ ] **3. Executor** — a `NodeExecutor` implemented under `src/main/scenarioEngine/executors/`.
 - [ ] **4. Registry** — `pickExecutor` case in `src/main/scenarioEngine/executors/registry.ts`.
 - [ ] **5. Scheduler** — only if the executor returns a new `scopeAction` (see step 5).
 - [ ] **6. Node box** — a component under `src/renderer/src/components/Scenario/nodes/` + a line in that folder's `index.ts` (`Record<ScenarioNodeKind, …>` — type-enforced).
 - [ ] **7. Catalogue** — entry in `scenarioNodeCatalogue.ts` (label, icon, category).
-- [ ] **8. Static preview** — `STATIC_PREVIEW_KINDS` and/or `applyListOp` + the preview `switch` in `src/shared/utils/scenarioStaticPreview.ts`, plus the inspector wiring in `ScenarioEditorView.tsx` if it consumes an `items` list.
+- [ ] **8. Static preview** — opt into `STATIC_PREVIEW` in `src/shared/scenarioNodeCapabilities.ts` and/or `applyListOp` + the preview `switch` in `src/shared/utils/scenarioStaticPreview.ts`, plus the inspector wiring in `ScenarioEditorView.tsx` if it consumes an `items` list.
 - [ ] **9. MCP** — `foo` added to `SCENARIO_KINDS` in `src/main/mcp/tools/scenario.ts`, AND a `SCENARIO_KIND_DOCS` entry in `src/shared/scenarioKindDocs.ts` (purpose + config keys — `Record<ScenarioNodeKind>`, type-enforced) so `describe_scenario_kinds` exposes it to MCP clients.
 - [ ] **10. i18n** — port/field labels added to **every** locale under `src/renderer/locales/*/translation.json` (see step 10).
 - [ ] **11. Tests** — a `*.test.ts` exercising the executor + (if it fans out) an end-to-end scheduler run.
@@ -64,8 +64,11 @@ fail to compile until every kind is covered.
   - `signal` — a pure trigger (the header `in`, a `then`/`done`). Accepts B/AB.
   - `value` — data only. Accepts A/AB.
   - `both` — carries data *and* sequences (e.g. an HTTP `response`, a `forEach.each`).
-- The header launch trigger is the shared `IN` const (`{ id: 'in', flow: 'signal' }`); add it only if the node should be sequenceable. Data-driven nodes (collections, pure value) omit it and run once their wired inputs resolve.
-- The implicit `error` output is drawn by the box automatically — never list it.
+- The header launch trigger (`in`, the shared `IN` const `{ id: 'in', flow: 'signal' }`) is **NOT listed here** — `defaultPortsForKind` prepends it for every kind that `acceptsInputEvent` (`src/shared/scenarioNodeCapabilities.ts`), which is the default. So a `PORTS` entry lists only the kind's own data inputs. The trigger is the capability's business: a kind opts OUT only by joining `NO_INPUT_EVENT` there (today just `output`, a terminal sink). Data-driven nodes (collections, pure value) DO carry it — a wired `in` lets a flow gate WHEN they (re)compute / re-read a variable; left unwired, they still run once their value inputs resolve.
+- The implicit `error` and `done` outputs are drawn by the box automatically —
+  never list them. Both are capability-driven (`hasErrorPort` / `hasDonePort` in
+  `scenarioNodeCapabilities.ts`, true by default); opt a kind out there (e.g. the
+  `output` sink has neither, `log` / `now` have no `error`).
 
 **Requiredness is edge-driven**, not declared here: the scheduler awaits a port
 only when an edge points at it. So operands with an inline value fallback (the
@@ -119,6 +122,12 @@ parallelism row. Then add **one line** to `nodes/index.ts`'
 `SCENARIO_NODE_COMPONENTS` (`Record<ScenarioNodeKind, …>` — TypeScript rejects a
 missing kind here).
 
+The header launch-trigger handle is drawn by `ScenarioNodeBoxBase` itself,
+straight off the node's ports (it shows iff the node carries the `in` port) —
+there is no prop to pass. `nodes/scenarioNodePortCells.test.tsx` renders every
+kind and asserts each spec port has a matching cell and the trigger matches the
+capability, so a drifted/missing cell id fails the build.
+
 ## Step 7 — Catalogue (palette + add-node menu)
 
 `scenarioNodeCatalogue.ts` — `{ kind, labelKey, defaultLabel, icon, category }`.
@@ -135,8 +144,9 @@ the `loops` category (forEach / for / while / doWhile) is folded into one
 `src/shared/utils/scenarioStaticPreview.ts` powers the inspector's
 "expected output" without a run:
 
-- Add the kind to `STATIC_PREVIEW_KINDS` if its output is computable from
-  config + upstream static values (every control/value node; `if`-likes).
+- Add the kind to the `STATIC_PREVIEW` set in `src/shared/scenarioNodeCapabilities.ts`
+  (it backs `STATIC_PREVIEW_KINDS`) if its output is computable from config +
+  upstream static values (every control/value node; `if`-likes).
 - Add a `case` to the `staticScenarioPreview` switch returning the preview
   shape (e.g. `{ condition, branch }` for `if`-likes).
 - For list/iteration nodes, add an `applyListOp` branch (sizing readout:

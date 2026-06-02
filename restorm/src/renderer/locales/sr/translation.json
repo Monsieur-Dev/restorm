@@ -881,6 +881,7 @@
       "propertyValue": "value"
     },
     "output": {
+      "outputName": "Назив излаза",
       "addOutput": "Додај излаз",
       "removeOutput": "Уклони"
     },

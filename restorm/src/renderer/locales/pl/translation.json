@@ -882,6 +882,7 @@
       "propertyValue": "value"
     },
     "output": {
+      "outputName": "Nazwa wyjścia",
       "addOutput": "Dodaj wyjście",
       "removeOutput": "Usuń"
     },

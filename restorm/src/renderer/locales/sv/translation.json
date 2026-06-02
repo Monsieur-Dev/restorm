@@ -880,6 +880,7 @@
       "propertyValue": "value"
     },
     "output": {
+      "outputName": "Utdatanamn",
       "addOutput": "Lägg till utdata",
       "removeOutput": "Ta bort"
     },

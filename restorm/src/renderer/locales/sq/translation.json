@@ -880,6 +880,7 @@
       "propertyValue": "value"
     },
     "output": {
+      "outputName": "Emri i daljes",
       "addOutput": "Shto dalje",
       "removeOutput": "Hiq"
     },

@@ -880,6 +880,7 @@
       "propertyValue": "value"
     },
     "output": {
+      "outputName": "Outputnavn",
       "addOutput": "Tilføj output",
       "removeOutput": "Fjern"
     },

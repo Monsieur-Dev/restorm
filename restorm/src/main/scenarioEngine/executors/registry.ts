@@ -102,7 +102,12 @@ const outputPassthroughExecutor: NodeExecutor = (act, ctx) => {
   return {
     outputs: decls
       .filter((d) => d.name.trim() !== '')
-      .map((d) => ({ port: `output:${d.name.trim()}`, value: act.inputs[d.id] }))
+      // Wired value wins; otherwise fall back to the decl's literal `value`
+      // (the same affordance the `object` builder gives each property).
+      .map((d) => ({
+        port: `output:${d.name.trim()}`,
+        value: act.inputs[d.id] !== undefined ? act.inputs[d.id] : (d.value !== undefined ? concreteValue(d.value) : undefined)
+      }))
   }
 }
 

@@ -882,6 +882,7 @@
       "propertyValue": "value"
     },
     "output": {
+      "outputName": "Název výstupu",
       "addOutput": "Přidat výstup",
       "removeOutput": "Odebrat"
     },

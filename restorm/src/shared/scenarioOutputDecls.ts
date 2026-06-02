@@ -11,6 +11,10 @@
 export interface OutputDecl {
   id: string
   name: string
+  /** Literal fallback emitted when the decl's `value` input port is NOT wired —
+   * mirrors the `object` builder's per-property value. A persisted typed value
+   * (`{ type, value }`); absent on legacy / wired-only decls. */
+  value?: unknown
 }
 
 /** Stable id for the default (not-yet-persisted) first output row shown on an

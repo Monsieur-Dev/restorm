@@ -33,7 +33,7 @@ export const ForEachNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, d
     buildParallelismCell({ id, config, onSetConfig: data.onSetConfig, label: t('scenario.forEach.parallelism', 'parallelism'), testIdPrefix: 'scn-foreach' })
   ]
 
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} launchInput />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
 }
 
 export default ForEachNodeBox

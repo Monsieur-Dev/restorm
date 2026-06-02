@@ -143,7 +143,7 @@ export const RequestNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, d
       selected={selected}
       left={left}
       right={right}
-      launchInput
+     
       {...(headerIcon ? { headerIcon } : {})}
       {...(title ? { title } : {})}
     />

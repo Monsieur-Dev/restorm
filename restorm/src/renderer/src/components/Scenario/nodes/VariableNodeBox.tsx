@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from 'electron-core-ui/renderer'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { ScenarioNameInput } from './ScenarioNameInput'
+import { ScenarioPathSelector } from './ScenarioPathSelector'
 import { useScenarioFieldInvalid, useScenarioNodeErrors } from '../scenarioErrorsContext'
 import { readInputParams, INPUT_DEFAULT_PARAM_ID, type InputParam } from '../../../../../shared/scenarioInputParams'
 import { readOutputDecls, OUTPUT_DEFAULT_DECL_ID, type OutputDecl } from '../../../../../shared/scenarioOutputDecls'
@@ -11,7 +12,7 @@ import { TypedValueField } from '../../TypedValueField'
 import type { ValueTypeKind } from '../../TypedValueField/castValue'
 import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroups'
 import { normalizeValueType } from '../../../utils/normalizeValueType'
-import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
+import { serializeValueForPersistence, type PersistedValue } from '../../../../../shared/utils/valuePersistence'
 import { VariableValue } from '../../../../../shared/types/collections'
 
 /** `getVariable` reads an existing variable: its selector is locked to the
@@ -102,20 +103,74 @@ export const InputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
   })
 
   const left: ScenarioNodeSection[] = [{ id: 'main', rows }]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[VALUE_OUT]} launchInput />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[VALUE_OUT]} />
 }
 
 function declId(): string {
   return `out-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 }
 
+/** One declared output row — its own component so `useNodeConnections` can run
+ * per port. Mirrors the `object` builder's property row: the NAME field is
+ * always shown (so it survives wiring), and only the value sub-area swaps to the
+ * JSON-path selector when an edge feeds the decl's `value` port. */
+const OutputDeclRow: React.FC<{
+  nodeId: string
+  decl: OutputDecl
+  nameInvalid: boolean
+  scenarioId?: string | undefined
+  canRemove: boolean
+  onNameCommit: (name: string) => void
+  onValueChange: (value: PersistedValue) => void
+  onRemove: () => void
+}> = ({ nodeId, decl, nameInvalid, scenarioId, canRemove, onNameCommit, onValueChange, onRemove }) => {
+  const { t } = useTranslation()
+  const valueTypeGroups = useAllEnvValueTypeGroups()
+  const connections = useNodeConnections({ handleType: 'target', handleId: decl.id })
+  const incoming = connections[0]
+  const valueInvalid = useScenarioFieldInvalid(nodeId, decl.id)
+  return (
+    <div className="nodrag scn-object-property" onMouseDown={(e) => { e.stopPropagation() }}>
+      <span className="scn-port-label scn-object-property-label">{t('scenario.output.outputName', 'Output name')}</span>
+      <ScenarioNameInput
+        value={decl.name}
+        placeholder="output"
+        invalid={nameInvalid}
+        onCommit={onNameCommit}
+      />
+      <span className="scn-port-label scn-object-property-label">{t('scenario.object.propertyValue', 'value')}</span>
+      {incoming ? (
+        <ScenarioPathSelector
+          edgeId={incoming.edgeId}
+          sourceNodeId={incoming.source}
+          invalid={valueInvalid}
+          {...(scenarioId !== undefined ? { scenarioId } : {})}
+        />
+      ) : (
+        <TypedValueField
+          value={normalizeValueType(decl.value)}
+          onChange={(next) => { onValueChange(serializeValueForPersistence(next)) }}
+          valueTypeGroups={valueTypeGroups}
+          allowAllVariables
+          allowEnvironment
+          {...(canRemove ? { onRemove, removeLabel: t('scenario.output.removeOutput', 'Supprimer') } : {})}
+          dataTestId={`scn-output-${decl.id}`}
+        />
+      )}
+    </div>
+  )
+}
+
 /**
  * `output` — declares ONE OR MORE named scenario outputs (the symmetric
  * counterpart of an `input` node's params). Each output has a name and its own
- * `value` input port; the value wired in is exposed under that name, which a
- * parent `runScenario` derives into an `output:<name>` port. A fresh / emptied
- * output shows one default row (not persisted until typed), mirroring input /
- * object. Terminal sink — no output port. The decls persist in config.
+ * `value` input port; the value wired in (or a literal fallback) is exposed
+ * under that name, which a parent `runScenario` derives into an `output:<name>`
+ * port. Same row interface as the `object` builder — the name survives wiring,
+ * only the value sub-area swaps to the JSON-path selector. A fresh / emptied
+ * output shows one default row (not persisted until typed). Terminal sink — no
+ * `done` / `error` / output port (see `scenarioNodeCapabilities`). Decls persist
+ * in config.
  */
 export const OutputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
   const { t } = useTranslation()
@@ -127,27 +182,19 @@ export const OutputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
 
   const rows: ScenarioNodeCell[] = displayDecls.map((d): ScenarioNodeCell => ({
     id: d.id,
-    label: 'value',
+    label: d.name || t('scenario.output.outputName', 'Output name'),
     port: { id: d.id, type: 'target' },
     content: (
-      <div className="nodrag scn-output-decl-row" onMouseDown={(e) => { e.stopPropagation() }}>
-        <ScenarioNameInput
-          value={d.name}
-          placeholder="output"
-          invalid={invalidDecls.has(d.id)}
-          onCommit={(next) => { setDecls(displayDecls.map((x) => (x.id === d.id ? { ...x, name: next } : x))) }}
-        />
-        {decls.length > 0 && (
-          <Button
-            small
-            secondary
-            icon="close"
-            onClick={() => { setDecls(displayDecls.filter((x) => x.id !== d.id)) }}
-            options={{ ariaLabel: t('scenario.output.removeOutput', 'Supprimer') }}
-            data-testid={`scn-output-${d.id}-remove`}
-          />
-        )}
-      </div>
+      <OutputDeclRow
+        nodeId={id}
+        decl={d}
+        nameInvalid={invalidDecls.has(d.id)}
+        {...(data.scenarioId !== undefined ? { scenarioId: data.scenarioId } : {})}
+        canRemove={decls.length > 0}
+        onNameCommit={(name) => { setDecls(displayDecls.map((x) => (x.id === d.id ? { ...x, name } : x))) }}
+        onValueChange={(value) => { setDecls(displayDecls.map((x) => (x.id === d.id ? { ...x, value } : x))) }}
+        onRemove={() => { setDecls(displayDecls.filter((x) => x.id !== d.id)) }}
+      />
     )
   }))
   rows.push({
@@ -165,7 +212,7 @@ export const OutputNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
   })
 
   const left: ScenarioNodeSection[] = [{ id: 'main', rows }]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} hasError={false} />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} />
 }
 
 /** `getVariable` — reads a named variable; produces `value`. Runnable (no input). */
@@ -202,7 +249,7 @@ export const GetVariableNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
       ]
     }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[VALUE_OUT]} launchInput />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[VALUE_OUT]} />
 }
 
 /**
@@ -259,5 +306,5 @@ export const SetVariableNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
   // variable (referenced elsewhere via the value selector's "Variables" menu).
   // A header `in` trigger sequences it; completion chains via the universal
   // `Done` port (which replaced the old redundant `event` signal).
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} launchInput />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} />
 }

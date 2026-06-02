@@ -880,6 +880,7 @@
       "propertyValue": "value"
     },
     "output": {
+      "outputName": "Όνομα εξόδου",
       "addOutput": "Προσθήκη εξόδου",
       "removeOutput": "Αφαίρεση"
     },

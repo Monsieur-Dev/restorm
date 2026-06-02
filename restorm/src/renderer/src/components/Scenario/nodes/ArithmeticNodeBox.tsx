@@ -86,7 +86,7 @@ export const ArithmeticNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id
   const right: ScenarioNodeCell[] = [
     { id: 'result', label: t('scenario.arithmetic.result', 'result'), port: { id: 'result', type: 'source' } }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} launchInput />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
 }
 
 export default ArithmeticNodeBox

@@ -882,6 +882,7 @@
       "propertyValue": "value"
     },
     "output": {
+      "outputName": "Назва виходу",
       "addOutput": "Додати вихід",
       "removeOutput": "Видалити"
     },
