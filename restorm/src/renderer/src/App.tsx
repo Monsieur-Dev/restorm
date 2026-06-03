@@ -122,6 +122,7 @@ import { VariableTransformProvider } from './contexts/VariableTransformContext'
 import { AuthRequestResolverContext, type AuthRequestResolver } from './contexts/authRequestResolverContext'
 import { collectExpandableIds } from './services/FolderToListView'
 import { findScenariosUsingRequest, findScenariosUsingScenario, collectRequestScenarioRelations } from './services/scenarioRequestUsage'
+import { diffScenarioPortRenames, remapCallerScenarioEdges, isEmptyRenameMap } from '../../shared/scenarioPortRename'
 import { requestScenarioNodeFocus } from './services/scenarioFocusBus'
 import {
   findFolderById,
@@ -302,6 +303,14 @@ const App: React.FC = () => {
   // Root items data (mutable for renaming)
   // Can contain EnvironmentFolders, Folders, or standalone Requests
   const [rootItems, setRootItems] = useState<FolderItem[]>(initialRootItems)
+  // Live-updating ref to the current tree. Several stable callbacks (the
+  // scenario-change handler, test helpers) must read the CURRENT collections
+  // without listing `rootItems` as a dep — otherwise their closure goes stale
+  // after an async re-seed (e.g. a hard renderer reload re-fetching from main),
+  // mutating an item that's no longer in the live tree, so the whole-file save
+  // serializes the unchanged current tree and silently writes nothing.
+  const rootItemsRef = useRef(rootItems)
+  useEffect(() => { rootItemsRef.current = rootItems }, [rootItems])
 
   // Push the project's auto-derived origins (every request URL,
   // resolved against available env vars) to the main-process
@@ -1070,11 +1079,32 @@ const App: React.FC = () => {
   // mid-render is an impure side effect.
   useEffect(() => { latestSaveAll = handleMenuSaveAll }, [handleMenuSaveAll])
   const handleScenarioChange = useCallback((scenarioId: string, patch: { nodes?: ScenarioNode[]; edges?: ScenarioEdge[]; notes?: string }) => {
-    const item = findItemById(rootItems, scenarioId)
+    // Resolve against the CURRENT tree (via the ref), not this callback's
+    // closure — after an async re-seed (a hard renderer reload re-fetches the
+    // collections from main) a `rootItems`-keyed closure would find a stale
+    // item that's no longer in the live tree, so the in-place mutation lands on
+    // an orphan and the whole-file save sees no change (silent edit loss).
+    const item = findItemById(rootItemsRef.current, scenarioId)
     if (item && isScenario(item)) {
+      // Detect output/input port renames (matched by stable decl id) BEFORE the
+      // nodes are overwritten, so we can follow them in the callers' edges.
+      const renames = patch.nodes !== undefined ? diffScenarioPortRenames(item.nodes, patch.nodes) : null
       if (patch.nodes !== undefined) item.nodes = patch.nodes
       if (patch.edges !== undefined) item.edges = patch.edges
       if (patch.notes !== undefined) item.notes = patch.notes
+      // A renamed sub-scenario port (output:<name> / param:<name>) would orphan
+      // the edges of every `runScenario` box that calls it — the handle ids are
+      // name-based. Remap those caller edges so the connection follows the new
+      // name, and tell any OPEN caller editor to re-seed its live edges.
+      if (renames && !isEmptyRenameMap(renames)) {
+        for (const { scenario: caller } of findScenariosUsingScenario(rootItemsRef.current, scenarioId)) {
+          const remapped = remapCallerScenarioEdges(caller, scenarioId, renames)
+          if (remapped !== caller.edges) {
+            caller.edges = remapped
+            eventBus.emitLocalSync('restorm:scenario:edges-remapped', { scenarioId: caller.id, edges: remapped })
+          }
+        }
+      }
       setRootItems((prev) => [...prev])
       // Scenario node/edge/note edits mutate the tree in place, which doesn't
       // trip the trackable dirty trap (those keys aren't indexable) — so unlike
@@ -1091,7 +1121,7 @@ const App: React.FC = () => {
         })
       }, 600)
     }
-  }, [rootItems, setRootItems])
+  }, [setRootItems])
 
   // Deletion of a request referenced by scenarios. When a request is used, the
   // plain confirm modal is replaced by one that offers to move the request into
@@ -1829,13 +1859,6 @@ const App: React.FC = () => {
   useEffect(() => {
     handleFileOpenedRef.current = handleFileOpened
   }, [handleFileOpened])
-
-  // Keep a live-updating ref so the test-helper closure below always sees
-  // the current collections without listing `rootItems` as an effect dep.
-  const rootItemsRef = useRef(rootItems)
-  useEffect(() => {
-    rootItemsRef.current = rootItems
-  }, [rootItems])
 
   // Same pattern for `handleTagColorChange` — the closure below needs a
   // stable reference the helper can call without tracking the hook's

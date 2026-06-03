@@ -2,6 +2,7 @@ import Handlebars from 'handlebars'
 import { registerHandlebarsHelpers } from './handlebars/registerAll'
 import type { ScenarioNode, ScenarioEdge } from '../types/scenario'
 import { readInputParams } from '../scenarioInputParams'
+import { readOutputDecls } from '../scenarioOutputDecls'
 import { STATIC_PREVIEW_KINDS } from '../scenarioNodeCapabilities'
 
 // Register the full helper suite on first import so a chained `transform`
@@ -63,7 +64,10 @@ export function concreteValue(persisted: unknown): unknown {
     case 'variable':
       return typeof p.value === 'string' ? `{{${p.value}}}` : ''
     case 'environment': {
-      if (typeof p.value !== 'string') return ''
+      // No environment selected yet → no value (null), not a `{{$}}` template
+      // with an empty id. A selected-but-unresolved id keeps its `{{$id}}` form
+      // (mirrors how a `variable` operand renders `{{name}}`).
+      if (typeof p.value !== 'string' || p.value === '') return null
       const resolved = environmentPreviewResolver?.(p.value)
       return resolved !== undefined ? resolved : `{{$${p.value}}}`
     }
@@ -198,8 +202,13 @@ function variableValues(nodes: readonly StaticPreviewNode[]): Map<string, unknow
   const m = new Map<string, unknown>()
   for (const n of nodes) {
     if (n.kind === 'input') {
-      const name = str(n.config['name'])
-      if (name) m.set(name, concreteValue(n.config['valueType']))
+      // Each declared param is a scenario variable carrying its typed default —
+      // so a `{{param1}}` reference resolves in the preview exactly as it does
+      // at runtime (where `inputExecutor` publishes the same names).
+      for (const param of readInputParams(n.config)) {
+        const name = param.name.trim()
+        if (name) m.set(name, concreteValue(param.valueType))
+      }
     } else if (n.kind === 'setVariable') {
       const name = str(n.config['name'])
       if (name) m.set(name, concreteValue(n.config['value']))
@@ -722,6 +731,20 @@ export function staticScenarioPreview(
         // panel overrides it asynchronously with the source's actual run
         // result (via `getObjectWiredProperties` + `getScenarioNodeResult`).
         const value = operandPreviewValue(node.id, prop.id, prop.value, nodes, edges)
+        out[name] = value === undefined ? null : value
+      }
+      return out
+    }
+    case 'output': {
+      // The `output` sink is the symmetric counterpart of `object`: each decl
+      // reads its OWN `value` input port (id = the decl id) — wired value wins,
+      // else the decl's literal fallback. A property wired to a non-static
+      // source lands as `null` and the inspector overrides it asynchronously.
+      const out: Record<string, unknown> = {}
+      for (const decl of readOutputDecls(cfg)) {
+        const name = decl.name.trim()
+        if (!name) continue
+        const value = operandPreviewValue(node.id, decl.id, decl.value, nodes, edges)
         out[name] = value === undefined ? null : value
       }
       return out

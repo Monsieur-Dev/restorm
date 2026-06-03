@@ -12,11 +12,15 @@ describe('scenario node capabilities', () => {
   it('hasStaticPreview agrees with STATIC_PREVIEW_KINDS', () => {
     expect(hasStaticPreview('comparator')).toBe(true)
     expect(hasStaticPreview('httpRequest')).toBe(false)
+    // The `output` sink is statically previewable (literal fallbacks + wired
+    // sources), even though it has no outgoing port — its preview is what the
+    // inspector and a parent runScenario's output suggestion read.
+    expect(hasStaticPreview('output')).toBe(true)
     for (const k of STATIC_PREVIEW_KINDS) expect(hasStaticPreview(k)).toBe(true)
   })
 
   it('keeps execution-bound kinds out of the static-preview set', () => {
-    for (const k of ['httpRequest', 'runScenario', 'forEach', 'for', 'output', 'log', 'assert'] as ScenarioNodeKind[]) {
+    for (const k of ['httpRequest', 'runScenario', 'forEach', 'for', 'log', 'assert'] as ScenarioNodeKind[]) {
       expect(STATIC_PREVIEW_KINDS.has(k), `${k} should not be static-previewable`).toBe(false)
     }
   })

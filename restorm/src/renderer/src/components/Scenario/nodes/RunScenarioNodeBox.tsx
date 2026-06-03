@@ -119,7 +119,7 @@ export const RunScenarioNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
       id: 'edit',
       content: (
         <Button
-          link
+          externalLink
           className="nodrag"
           data-testid="scn-runscenario-edit-link"
           onClick={(e) => { e.stopPropagation(); data.onOpenItem?.(scenarioId) }}

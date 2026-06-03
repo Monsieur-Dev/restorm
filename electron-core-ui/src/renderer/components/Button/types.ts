@@ -95,10 +95,16 @@ export interface ButtonProps {
   medium?: boolean;
   line?: boolean;
   /**
-   * Link appearance: no background, left-aligned text, and a trailing
-   * `codicon-link` glyph a few pixels after the label. For inline "open /
-   * edit this item" affordances that should read as a link, not a chip. */
+   * Link appearance: no background, left-aligned, pointer cursor. The leading
+   * `icon` is rendered un-underlined; only the text label is underlined — so it
+   * reads as an inline link, not a chip. No trailing glyph (use `externalLink`
+   * for the "opens elsewhere" variant). For inline navigation affordances. */
   link?: boolean;
+  /**
+   * Same look & feel as `link` (no background, underlined label, pointer
+   * cursor), PLUS a trailing `codicon-link-external` a few pixels after the
+   * label — for affordances that open the target in another tab / window. */
+  externalLink?: boolean;
   /**
    * Emphasis level (0 = default, 1+ = emphasized).
    * When > 0, uses CSS variables --button-background-emphasis-N, --button-border-emphasis-N,

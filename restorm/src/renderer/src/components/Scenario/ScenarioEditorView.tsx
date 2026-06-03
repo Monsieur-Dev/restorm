@@ -52,7 +52,7 @@ import type { AddChildKind } from '../MainView/Sidebar/contextMenuBuilder'
 import type { TFunction } from 'i18next'
 import { ScenarioGraphPreview } from '../MainView/Titlebar/ScenarioGraphPreview'
 import { validateScenarioGraph, targetKey, type ScenarioNodeError, type ScenarioDataLink, type ValidationNode } from '../../../../shared/scenarioValidation'
-import { readOutputDecls } from '../../../../shared/scenarioOutputDecls'
+import { readInputParams } from '../../../../shared/scenarioInputParams'
 import { ScenarioErrorsContext } from './scenarioErrorsContext'
 import { ScenarioInternalsContext } from './scenarioInternalsContext'
 import { ScenarioInspectorPanel, type InspectorPreviewNode } from './ScenarioInspectorPanel'
@@ -61,7 +61,7 @@ import { ScenarioInputPrompt } from './ScenarioInputPrompt'
 import { ScenarioRunHistoryModal } from './ScenarioRunHistoryModal'
 import { SCENARIO_RUN_HISTORY_OPEN, type ScenarioRunHistoryOpenPayload } from './scenarioRunHistoryEvents'
 import { ScenarioDebugBezierEdge } from './ScenarioDebugBezierEdge'
-import { staticScenarioPreview, singleDeepPath, expectsObjectInput, singleTopLevelKey, portPreviewValue, STATIC_PREVIEW_KINDS, resolveItems, applyListOp, resolveSelectorPath, type StaticPreviewNode, type StaticPreviewEdge } from '../../../../shared/utils/scenarioStaticPreview'
+import { staticScenarioPreview, singleDeepPath, expectsObjectInput, singleTopLevelKey, portPreviewValue, STATIC_PREVIEW_KINDS, resolveItems, applyListOp, type StaticPreviewNode, type StaticPreviewEdge } from '../../../../shared/utils/scenarioStaticPreview'
 import { consumePendingScenarioNodeFocus, onScenarioNodeFocus, clearPendingScenarioNodeFocus } from '../../services/scenarioFocusBus'
 import { dynamicHandleIds, pruneOrphanDynamicEdges, isOrphanDynamicEdge } from './orphanEdgeSanitizer'
 
@@ -161,6 +161,21 @@ function collectObjectWiredProps(target: Node<ScenarioNodeBoxData>, nodes: Node<
   return out
 }
 
+/** Rewrite an `input` node's config so each param's typed default is replaced
+ * by the matching value entered in the parent `runScenario` (keyed by param
+ * name). Params with no matching entry (e.g. predecessor-fed inputs) keep their
+ * own default. Writing `config.params` covers the legacy single-param shape too
+ * — `readInputParams` reads `params` first. */
+function applyParamValuesToInputConfig(config: Record<string, unknown>, paramValues: Record<string, unknown>): Record<string, unknown> {
+  const params = readInputParams(config)
+  if (params.length === 0 || !params.some((p) => paramValues[p.name] !== undefined)) return config
+  const nextParams = params.map((p) => {
+    const override = paramValues[p.name]
+    return override === undefined ? p : { ...p, valueType: override }
+  })
+  return { ...config, params: nextParams }
+}
+
 function computeRunScenarioOutputs(runNode: Node<ScenarioNodeBoxData>, resolveBoundItem: ResolveBoundItem | null | undefined): Record<string, unknown> | null {
   if (runNode.data.kind !== 'runScenario') return null
   const runCfg = runNode.data.config ?? {}
@@ -169,23 +184,29 @@ function computeRunScenarioOutputs(runNode: Node<ScenarioNodeBoxData>, resolveBo
   const subItem = resolveBoundItem?.(subId) ?? null
   const sub = subItem && isScenario(subItem) ? subItem : null
   if (!sub) return null
-  const subNodes: StaticPreviewNode[] = sub.nodes.map((n) => ({ id: n.id, kind: n.kind, config: n.config }))
+  // The values entered in the runScenario's parameters (keyed by param name)
+  // override each matching sub-scenario `input` node's typed default, so the
+  // output preview reflects what the parent passes in — not the sub-scenario's
+  // own defaults. Predecessor-fed params carry no entry and keep their default.
+  const paramValuesRaw = runCfg['paramValues']
+  const paramValues = paramValuesRaw && typeof paramValuesRaw === 'object' && !Array.isArray(paramValuesRaw)
+    ? (paramValuesRaw as Record<string, unknown>)
+    : null
+  const subNodes: StaticPreviewNode[] = sub.nodes.map((n) => ({
+    id: n.id,
+    kind: n.kind,
+    config: paramValues && n.kind === 'input' ? applyParamValuesToInputConfig(n.config, paramValues) : n.config
+  }))
   const subEdges: StaticPreviewEdge[] = sub.edges.map((e) => ({ from: e.from, to: e.to, ...(e.selector !== undefined ? { selector: e.selector } : {}) }))
+  // Each `output` node's static preview resolves every decl — wired sources
+  // (selector applied) AND literal fallbacks on unwired decls — keyed by output
+  // name, the same shape `runSubScenario` returns. Reusing it (over a manual
+  // edge walk) keeps the unwired-literal path in sync with the inspector.
   const out: Record<string, unknown> = {}
-  for (const node of sub.nodes) {
+  for (const node of subNodes) {
     if (node.kind !== 'output') continue
-    for (const decl of readOutputDecls(node.config)) {
-      const name = decl.name.trim()
-      if (!name) continue
-      const incoming = subEdges.find((e) => e.to.nodeId === node.id && e.to.portId === decl.id)
-      if (!incoming) { out[name] = null; continue }
-      const source = subNodes.find((n) => n.id === incoming.from.nodeId)
-      if (!source || !STATIC_PREVIEW_KINDS.has(source.kind)) { out[name] = null; continue }
-      const sp = staticScenarioPreview(source, subNodes, subEdges)
-      if (sp === null) { out[name] = null; continue }
-      const v = incoming.selector ? resolveSelectorPath(sp, incoming.selector) : sp
-      out[name] = v === undefined ? null : v
-    }
+    const sp = staticScenarioPreview(node, subNodes, subEdges)
+    if (sp) Object.assign(out, sp)
   }
   return out
 }
@@ -319,6 +340,25 @@ function canonicalScenarioNode(p: {
     ...(p.color !== undefined ? { color: p.color } : {}),
     ...(p.collapsed !== undefined ? { collapsed: p.collapsed } : {})
   }
+}
+
+/** Drop the obsolete single-param fields (`config.name` / `config.valueType`)
+ * from an input node that already carries a `params` array. They're a leftover
+ * of the single→multi-param migration: `readInputParams` reads `params` and
+ * ignores them, so they're inert — but they linger in the persisted file and
+ * mislead anything still glancing at `config.name`. Non-input nodes and
+ * pure-legacy inputs (no `params` yet — e.g. an MCP-created one) are untouched,
+ * since for those `config.name` IS the live declaration. */
+function stripLegacyInputFields(node: ScenarioNode): ScenarioNode {
+  if (node.kind !== 'input') return node
+  const cfg = node.config
+  const params = cfg['params']
+  if (!Array.isArray(params) || params.length === 0) return node
+  if (!('name' in cfg) && !('valueType' in cfg)) return node
+  const rest = { ...cfg }
+  delete rest['name']
+  delete rest['valueType']
+  return { ...node, config: rest }
 }
 
 function toFlowNode(n: ScenarioNode, handlers: NodeHandlers): Node<NodeData> {
@@ -1133,7 +1173,11 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     // Drop both once at load so the persisted file converges with what the editor
     // can render — and React Flow isn't handed two children with the same key
     // (which floods the console with key warnings on every run re-render).
-    const nodeBy = new Map(scenario.nodes.map((n) => [n.id, n]))
+    // Strip obsolete legacy single-param fields off migrated input nodes (same
+    // converge-on-load treatment as the orphan-edge sweep below).
+    const cleanNodes = scenario.nodes.map(stripLegacyInputFields)
+    const nodesChanged = cleanNodes.some((n, i) => n !== scenario.nodes[i])
+    const nodeBy = new Map(cleanNodes.map((n) => [n.id, n]))
     const seenEdgeIds = new Set<string>()
     const cleanEdges = scenario.edges.filter((e) => {
       if (isOrphanDynamicEdge(
@@ -1144,16 +1188,16 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       seenEdgeIds.add(e.id)
       return true
     })
-    nodeStore.current = new Map(scenario.nodes.map((n) => [n.id, n]))
+    nodeStore.current = new Map(cleanNodes.map((n) => [n.id, n]))
     edgeStore.current = new Map(cleanEdges.map((e) => [e.id, e]))
-    setNodes(scenario.nodes.map((n) => toFlowNode(n, handlers.current)))
+    setNodes(cleanNodes.map((n) => toFlowNode(n, handlers.current)))
     setEdges(cleanEdges.map(buildFlowEdge))
     // Reset undo/redo to the freshly loaded graph as the baseline — history is
     // per-scenario, so switching tabs starts a clean stack the first edit can
     // undo back to. The baseline is serialized through the SAME canonical
     // shapes `persist` emits, so the no-op persist React Flow fires right after
     // a load matches `currentJson` and is deduped (no phantom undo step).
-    const baseNodes = scenario.nodes.map((n) =>
+    const baseNodes = cleanNodes.map((n) =>
       canonicalScenarioNode({
         id: n.id,
         kind: n.kind,
@@ -1181,12 +1225,15 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     coalesceRef.current = false
     setCanUndo(false)
     setCanRedo(false)
-    if (cleanEdges.length !== scenario.edges.length) {
+    if (nodesChanged || cleanEdges.length !== scenario.edges.length) {
       // Schedule a persist so the cleanup makes it back to disk on the next
       // autosave. Defer to a microtask: the parent owns scenario state, and a
       // synchronous patch dispatch from inside this effect would race the
       // initial render that just seeded the editor.
-      queueMicrotask(() => { onScenarioChange?.(scenario.id, { edges: cleanEdges }) })
+      const patch: { nodes?: ScenarioNode[]; edges?: Scenario['edges'] } = {}
+      if (nodesChanged) patch.nodes = cleanNodes
+      if (cleanEdges.length !== scenario.edges.length) patch.edges = cleanEdges
+      queueMicrotask(() => { onScenarioChange?.(scenario.id, patch) })
     }
   }, [scenario.id, scenario.nodes, scenario.edges, setNodes, setEdges, buildFlowEdge, onScenarioChange])
 
@@ -1231,6 +1278,21 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       setEdges(es.map(buildFlowEdge))
     })
   }, [scenario.id, setNodes, setEdges, buildFlowEdge])
+
+  // Re-seed edges when a bound sub-scenario renamed a port: the parent App
+  // remaps THIS caller's `output:<name>` / `param:<name>` edge handles to the
+  // new name (so the connection follows the rename instead of orphaning) and
+  // pushes the remapped edges here. Edges only — the node set is unchanged.
+  useEffect(() => {
+    const sub = eventBus.subscribe('restorm:scenario:edges-remapped', (payload: unknown) => {
+      const p = payload as { scenarioId?: unknown; edges?: unknown }
+      if (p.scenarioId !== scenario.id || !Array.isArray(p.edges)) return
+      const es = p.edges as Scenario['edges']
+      edgeStore.current = new Map(es.map((e) => [e.id, e]))
+      setEdges(es.map(buildFlowEdge))
+    })
+    return () => { sub.unsubscribe() }
+  }, [scenario.id, setEdges, buildFlowEdge])
 
   // Centre on a box when navigated here from a request's "used in scenarios"
   // link. A pending request set just before the tab opened is read on mount; a
@@ -2289,15 +2351,24 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     const byName = new Map<string, ScenarioVariable>()
     for (const node of scenario.nodes) {
       const kind = node.kind
-      if (kind !== 'setVariable' && kind !== 'input') continue
-      const config = node.config as { name?: unknown; value?: unknown; valueType?: unknown }
+      if (kind === 'input') {
+        // Every declared param of an input node is a scenario variable (its
+        // value is published into the run store by `inputExecutor`) — so the
+        // user can reference `{{param1}}` directly without a relay setVariable.
+        for (const param of readInputParams(node.config)) {
+          const name = param.name.trim()
+          if (name === '') continue
+          byName.set(name, { name, type: resolveValueTypeKind(normalizeValueType(param.valueType)) })
+        }
+        continue
+      }
+      if (kind !== 'setVariable') continue
+      // setVariable stores the value under `value`; its declared type is that
+      // value's kind.
+      const config = node.config as { name?: unknown; value?: unknown }
       const name = config.name
       if (typeof name !== 'string' || name.trim() === '') continue
-      // setVariable stores the value under `value`; the input/param node under
-      // `valueType`. The declared type is that value's kind.
-      const rawValue = kind === 'setVariable' ? config.value : config.valueType
-      const type = resolveValueTypeKind(normalizeValueType(rawValue))
-      byName.set(name, { name, type })
+      byName.set(name, { name, type: resolveValueTypeKind(normalizeValueType(config.value)) })
     }
     return [...byName.values()]
   }, [scenario.nodes])
@@ -2715,7 +2786,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         content={subLogPopover && (
           <div data-scn-sublog-popover className="scn-sublog-popover" onMouseDown={(e) => { e.stopPropagation() }}>
             <Button
-              link
+              externalLink
               icon={<Badge type="SCENARIO" />}
               onClick={() => { onOpenItem?.(subLogPopover.scenario.id); setSubLogPopover(null) }}
               data-testid="scenario-sublog-popover-title"

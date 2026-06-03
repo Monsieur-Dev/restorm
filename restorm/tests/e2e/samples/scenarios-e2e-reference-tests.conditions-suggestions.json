@@ -1,0 +1,672 @@
+[
+  {
+    "id": "1780387633982-uicb3q",
+    "kind": "if",
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780387678718-qppka1",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Operator < not working",
+      "data": ""
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780387742504-wk8th6",
+    "kind": "if",
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780387838698-3b7u3t",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Operator < not working",
+      "data": ""
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780387856983-37p0qd",
+    "kind": "if",
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780387871677-cxtrvz",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Operator = not working",
+      "data": ""
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780387886665-gt267d",
+    "kind": "if",
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780387900668-hvu99j",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Operator ≤ not working",
+      "data": ""
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780387917677-3qx41r",
+    "kind": "if",
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780387930055-mvsog6",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Operator > not working",
+      "data": ""
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780387940768-5vf8jv",
+    "kind": "if",
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780387962152-pnmvv7",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Operator ≠ not working",
+      "data": ""
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780387973219-wpeju1",
+    "kind": "if",
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780388011535-pcs0cm",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Operator ∈ not working",
+      "data": ""
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780388501906-005s1w",
+    "kind": "object",
+    "suggestion": {
+      "prop1": "test",
+      "prop2": "test2"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780388513371-n986c3",
+    "kind": "object",
+    "suggestion": {
+      "prop1": "test",
+      "prop2": "test2"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780388527402-0lbz98",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "numbers - Basic operators are working fine",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780388628549-8vbjmf",
+    "kind": "if",
+    "suggestion": {
+      "condition": false,
+      "branch": "else"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780388636963-qacc92",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "Object comparison is working fine",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780388639494-cyh7zt",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Objects should be equal",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780390696622-isdmc6",
+    "kind": "object",
+    "suggestion": {
+      "prop1": "test",
+      "prop2": "test2"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780390702262-tjxbij",
+    "kind": "object",
+    "suggestion": {
+      "prop1": "test"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780390708884-pqkb06",
+    "kind": "if",
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780390729852-1psrby",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "Object comparison ≠ is working fine",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780390787275-19qo6d",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Objects should be different",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780390856686-wbsvzx",
+    "kind": "object",
+    "suggestion": {
+      "prop1": "test",
+      "prop2": "test2"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780390863285-kktu7r",
+    "kind": "object",
+    "suggestion": {
+      "prop1": "test",
+      "prop2": "test2"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780390869519-2liw8c",
+    "kind": "if",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780390882893-dx4a4e",
+    "kind": "if",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780390904559-gyceep",
+    "kind": "if",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780390918770-66g77o",
+    "kind": "if",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780390997986-8bkf67",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Objects comparison with gt or lt should throw",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780392272727-s6jmis",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "Object comparison is throwind as it shoud",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780393281979-7andwt",
+    "kind": "object",
+    "suggestion": {
+      "prop2": "test2",
+      "prop1": "test"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780393281979-otkf2i",
+    "kind": "object",
+    "suggestion": {
+      "prop1": "test",
+      "prop2": "test2"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780393281979-bl7len",
+    "kind": "if",
+    "suggestion": {
+      "condition": false,
+      "branch": "else"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780393281979-t45r0j",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "Object comparison is working fine",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780393281979-ygotuv",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Objects should be equal",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780393545056-b31aui",
+    "kind": "if",
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780393545056-3dz1nz",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Operator < not working",
+      "data": ""
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780393545056-6bm834",
+    "kind": "if",
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780393545056-xs2jmy",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Operator < not working",
+      "data": ""
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780393545056-t0xge5",
+    "kind": "if",
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780393545056-kes0xh",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Operator = not working",
+      "data": ""
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780393545056-fw9fkt",
+    "kind": "if",
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780393545056-nl8oax",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Operator ≤ not working",
+      "data": ""
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780393545056-ajsbj2",
+    "kind": "if",
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780393545056-yxt1ta",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Operator > not working",
+      "data": ""
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780393545056-pvvijv",
+    "kind": "if",
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780393545056-vckco3",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Operator ≠ not working",
+      "data": ""
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780393545056-cqqaa4",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "strings - Basic operators are working fine",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780395506824-skr6u9",
+    "kind": "if",
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780395506824-ofduiv",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Operator < not working",
+      "data": ""
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780395506824-m909dk",
+    "kind": "if",
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780395506824-ks1txa",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Operator < not working",
+      "data": ""
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780395506824-cmypk8",
+    "kind": "if",
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780395506824-61o5jx",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Operator = not working",
+      "data": ""
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780395506824-ww8pb5",
+    "kind": "if",
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780395506824-pn7g2k",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Operator ≤ not working",
+      "data": ""
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780395506824-t84xjd",
+    "kind": "if",
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780395506824-b79qqa",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Operator > not working",
+      "data": ""
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780395506824-jklyri",
+    "kind": "if",
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780395506824-gazgld",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Operator ≠ not working",
+      "data": ""
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780395506824-cc6fuv",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "dates - Basic operators are working fine",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780399005765-il3r61",
+    "kind": "setVariable",
+    "suggestion": {
+      "from": "1985-10-26T00:22:00.000Z"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780399016130-15dw9r",
+    "kind": "setVariable",
+    "suggestion": {
+      "to": "2015-06-08T23:21:00.000Z"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780399063954-fivtc9",
+    "kind": "if",
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780399167083-563gdm",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "Comparison from variables is working",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780399171740-hyuxvr",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Comparison from variables is NOT working",
+      "data": null
+    },
+    "source": "static"
+  }
+]

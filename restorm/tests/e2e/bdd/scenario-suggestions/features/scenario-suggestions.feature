@@ -12,7 +12,10 @@ Feature: Scenario inspector data suggestions end-to-end
     Then the extracted suggestions match the snapshot
 
     Examples:
-      | scenario    |
-      | Logs        |
-      | Arithmetics |
-      | Loops       |
+      | scenario       |
+      | Logs           |
+      | Arithmetics    |
+      | Loops          |
+      | Inputs/outputs |
+      | Conditions     |
+      | Main           |

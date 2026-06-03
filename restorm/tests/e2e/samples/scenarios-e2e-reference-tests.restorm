@@ -25,10 +25,10 @@ collections:
           - variables: []
             id: env-1780300487228-md0ml0o
             name: Sub-env
-            color: '#bd10e0'
             icon:
               type: phosphor
               value: ArrowFatLineDown
+            color: '#bd10e0'
     items:
       - documentation: ''
         tags:
@@ -168,7 +168,7 @@ collections:
                     dataType: any
                 outputs: []
                 position:
-                  x: 320
+                  x: 460
                   'y': 160
               - id: 1780420981592-6osi6r
                 kind: log
@@ -212,52 +212,82 @@ collections:
                 position:
                   x: 1280
                   'y': 260
-              - id: 1780475714078-r56z1g
-                kind: arithmetic
+              - id: 1780482115336-0v2aq0
+                kind: runScenario
                 config:
-                  operator: +
+                  scenarioId: 1780260652264-uon8bia
+                  label: Loops
                 inputs:
                   - id: in
                     name: ''
                     dataType: any
                     flow: signal
-                  - id: a
-                    name: a
-                    dataType: number
-                  - id: b
-                    name: b
-                    dataType: number
                 outputs:
                   - id: result
                     name: result
-                    dataType: number
+                    dataType: any
+                    role: response
                     flow: both
                 position:
-                  x: 1420
-                  'y': 620
-              - id: 1780479085233-pcv0ra
-                kind: httpRequest
+                  x: 840
+                  'y': 740
+              - id: 1780482218173-lsnebg
+                kind: runScenario
                 config:
-                  requestId: d1000000-0000-0000-0000-00000000auth
-                  label: Health
+                  scenarioId: 1780275585571-xt0vqiw
+                  label: Arithmetics
                 inputs:
                   - id: in
                     name: ''
                     dataType: any
                     flow: signal
-                  - id: env
-                    name: env
-                    dataType: any
-                    flow: value
                 outputs:
-                  - id: response
-                    name: response
-                    dataType: response
+                  - id: result
+                    name: result
+                    dataType: any
                     role: response
                     flow: both
                 position:
-                  x: 1040
-                  'y': 720
+                  x: 1120
+                  'y': 740
+              - id: 1780482287906-hje41a
+                kind: runScenario
+                config:
+                  scenarioId: 1780289470272-ya33ye4
+                  label: Logs
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 840
+                  'y': 940
+              - id: 1780482293466-yfntnl
+                kind: runScenario
+                config:
+                  scenarioId: 1780387606015-te2kvqt
+                  label: Conditions
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 1120
+                  'y': 940
             edges:
               - id: e-1780418276241-f2q3hz
                 from:
@@ -282,87 +312,37 @@ collections:
                   nodeId: 1780421882628-8oym4p
                   portId: data
                 selector: .
+              - id: e-1780482118467-i6sb4d
+                from:
+                  nodeId: 1780324493299-z019qs
+                  portId: done
+                to:
+                  nodeId: 1780482115336-0v2aq0
+                  portId: in
+              - id: e-1780482870019-jw11ry
+                from:
+                  nodeId: 1780482115336-0v2aq0
+                  portId: done
+                to:
+                  nodeId: 1780482218173-lsnebg
+                  portId: in
+              - id: e-1780482872164-19yb3h
+                from:
+                  nodeId: 1780482218173-lsnebg
+                  portId: done
+                to:
+                  nodeId: 1780482287906-hje41a
+                  portId: in
+              - id: e-1780482875634-q1ltvf
+                from:
+                  nodeId: 1780482287906-hje41a
+                  portId: done
+                to:
+                  nodeId: 1780482293466-yfntnl
+                  portId: in
             id: c1573ce0-985c-44b5-b5d4-e081de2d4303
             name: Main
             items:
-              - type: scenario
-                tags: []
-                params: []
-                nodes:
-                  - id: 101ed7a2-75dd-4679-979b-e87589150002
-                    kind: input
-                    config:
-                      name: msg
-                      valueType:
-                        type: string
-                        value: hi
-                    inputs:
-                      - id: in
-                        name: ''
-                        dataType: any
-                        flow: signal
-                    outputs:
-                      - id: value
-                        name: value
-                        dataType: any
-                        flow: value
-                    position:
-                      x: -106.44149614125591
-                      'y': 77.63585625681974
-                  - id: 92e6fd90-3012-48f0-b6b1-159439d34928
-                    kind: transform
-                    config:
-                      expression:
-                        type: expression
-                        value: '{{value}} echoed'
-                    inputs:
-                      - id: in
-                        name: ''
-                        dataType: any
-                        flow: signal
-                      - id: value
-                        name: value
-                        dataType: any
-                    outputs:
-                      - id: out
-                        name: value
-                        dataType: any
-                        flow: value
-                    position:
-                      x: 340
-                      'y': 80
-                  - id: 3457f371-dac1-4a38-bf99-a40290f59332
-                    kind: output
-                    config:
-                      name: echoed
-                    inputs:
-                      - id: value
-                        name: value
-                        dataType: any
-                    outputs: []
-                    position:
-                      x: 773.1149079463048
-                      'y': 93.3074539731524
-                edges:
-                  - id: 617723f6-177d-43b5-990b-86ea6d32ed58
-                    from:
-                      nodeId: 101ed7a2-75dd-4679-979b-e87589150002
-                      portId: value
-                    to:
-                      nodeId: 92e6fd90-3012-48f0-b6b1-159439d34928
-                      portId: value
-                    selector: .
-                  - id: b0612ca1-1863-42a3-81f8-4ad74a66f7c9
-                    from:
-                      nodeId: 92e6fd90-3012-48f0-b6b1-159439d34928
-                      portId: out
-                    to:
-                      nodeId: 3457f371-dac1-4a38-bf99-a40290f59332
-                      portId: value
-                    selector: result
-                id: 01e784fc-73b3-450b-b4bc-8930e6e491c1
-                name: Echo Sub
-                items: []
               - type: scenario
                 tags: []
                 params: []
@@ -2352,10 +2332,6 @@ collections:
                   - id: 1780290664616-qdq134
                     kind: input
                     config:
-                      name: string
-                      valueType:
-                        type: string
-                        value: string!
                       params:
                         - id: param-legacy
                           name: param1
@@ -2381,16 +2357,11 @@ collections:
                         flow: both
                     position:
                       x: -180
-                      'y': 200
+                      'y': 180
                     color: '#f8e61b'
                   - id: 1780290692642-heguvc
                     kind: input
                     config:
-                      name: number
-                      valueType:
-                        type: numeric
-                        value: 10
-                        format: decimal
                       params:
                         - id: param-legacy
                           name: param2
@@ -2438,7 +2409,7 @@ collections:
                         flow: both
                     position:
                       x: -180
-                      'y': 540
+                      'y': 580
                     color: '#f8e61b'
                   - id: 1780290720988-a9nymy
                     kind: object
@@ -2491,7 +2462,7 @@ collections:
                         dataType: json
                         flow: both
                     position:
-                      x: 600
+                      x: 640
                       'y': 200
                   - id: 1780290752840-vsgq4n
                     kind: log
@@ -2638,6 +2609,16 @@ collections:
                           value:
                             type: boolean
                             value: true
+                        - id: out-1780481159889-trbdu5
+                          name: env
+                          value:
+                            type: environment
+                            value: ''
+                        - id: out-1780483681510-1fxdv4
+                          name: color
+                          value:
+                            type: variable
+                            value: param5
                     inputs:
                       - id: in
                         name: ''
@@ -2648,8 +2629,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 260
-                      'y': 20
+                      x: 300
+                      'y': -140
                     color: '#bd10e0'
                   - id: 1780421829778-9wm8ei
                     kind: output
@@ -2850,8 +2831,6 @@ collections:
                 name: Inputs/outputs
                 items: []
               - type: scenario
-                id: 1780387606015-te2kvqt
-                name: Conditions
                 tags: []
                 params: []
                 nodes:
@@ -5392,6 +5371,8 @@ collections:
                     to:
                       nodeId: 1780399063954-fivtc9
                       portId: in
+                id: 1780387606015-te2kvqt
+                name: Conditions
                 items: []
         id: f1000000-0000-0000-0000-00000000auth
         name: Pet API

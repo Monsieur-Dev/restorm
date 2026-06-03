@@ -114,7 +114,7 @@ export const RequestNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, d
         id: 'edit',
         content: (
           <Button
-            link
+            externalLink
             className="nodrag"
             data-testid="scn-request-edit-link"
             onClick={(e) => { e.stopPropagation(); data.onOpenItem?.(requestId) }}

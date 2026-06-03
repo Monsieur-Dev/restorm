@@ -25,7 +25,7 @@ const NO_INPUT_EVENT = new Set<ScenarioNodeKind>()
  * play needed) — the output is determined entirely by the box's configuration.
  */
 const STATIC_PREVIEW = new Set<ScenarioNodeKind>([
-  'now', 'input', 'setVariable', 'getVariable', 'object',
+  'now', 'input', 'setVariable', 'getVariable', 'object', 'output',
   'arithmetic', 'comparator', 'boolean', 'transform',
   'if', 'switch', 'wait', 'waitUntil',
   'map', 'filter', 'aggregate',

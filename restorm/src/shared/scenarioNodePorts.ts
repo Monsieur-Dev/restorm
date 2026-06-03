@@ -229,12 +229,11 @@ export function deriveRunScenarioPorts(subScenario: Scenario | null | undefined)
   // stable, predictable order independent of node/authoring order.
   if (inputSources > 1) inputs.sort((a, b) => a.name.localeCompare(b.name))
   if (outputSources > 1) outputs.sort((a, b) => a.name.localeCompare(b.name))
-  // A sub-scenario that returns no data still needs to signal completion so a
-  // parent can sequence the next node: with no `output` node, expose a single
-  // `done` trigger ("Ensuite") instead of an empty output column.
-  if (outputs.length === 0) {
-    outputs.push(p({ id: 'done', name: 'then', role: 'then', flow: 'signal' }))
-  }
+  // A sub-scenario that returns no data exposes NO derived output port: every
+  // box already carries the universal `done` completion port (drawn by the box
+  // chrome), which a parent uses to sequence the next node. An explicit `done`
+  // port here would just duplicate that same `done` handle id and intercept its
+  // connections.
   return { inputs, outputs }
 }
 

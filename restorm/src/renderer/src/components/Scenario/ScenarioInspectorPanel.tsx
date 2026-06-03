@@ -382,11 +382,10 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
             {errors.map(({ nodeId, title, error }) => (
               <Button
                 key={`${nodeId}-${error.code}`}
-                fullWidth
-                align="left"
+                link
                 className="scn-error-row"
                 onClick={() => { onFocusNode(nodeId) }}
-                options={{ title: t('scenario.validation.focusBox', 'Focus this action') }}
+                options={{ ariaLabel: t('scenario.validation.focusBox', 'Focus this action') }}
               >
                 <span style={{ opacity: 0.8 }}>{title}</span> — {error.message}
               </Button>
@@ -399,28 +398,31 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
         <>
           <div className="scn-inspector-sep" />
           <div className="scn-inspector-section scn-inspector-preview">
+            {/* When the box wraps a navigable item, the title IS the link to its
+              * tab (badge as the leading icon) — the inspector doubles as the
+              * box's "open" affordance, so no separate "Edit" row is needed.
+              * Otherwise the title is plain text. */}
             <div className="scn-inspector-section-title scn-inspector-preview-header">
-              {previewNode.titleBadge}
-              <span>{previewNode.title}</span>
+              {previewNode.openItemId && previewNode.openItemKind && onOpenItem ? (
+                <Button
+                  externalLink
+                  icon={previewNode.titleBadge as React.ReactElement}
+                  className="scn-inspector-title-link"
+                  onClick={() => {
+                    const id = previewNode.openItemId
+                    if (id) onOpenItem(id)
+                  }}
+                  data-testid="scenario-inspector-open"
+                >
+                  {previewNode.title}
+                </Button>
+              ) : (
+                <>
+                  {previewNode.titleBadge}
+                  <span>{previewNode.title}</span>
+                </>
+              )}
             </div>
-            {/* First row when the box wraps a navigable item — a small
-              * link to its tab so the inspector doubles as the box's
-              * "open" affordance. Same handler the node-box's
-              * "Edit request / scenario" row uses. */}
-            {previewNode.openItemId && previewNode.openItemKind && onOpenItem && (
-              <Button
-                className="scn-inspector-open"
-                onClick={() => {
-                  const id = previewNode.openItemId
-                  if (id) onOpenItem(id)
-                }}
-                data-testid="scenario-inspector-open"
-              >
-                {previewNode.openItemKind === 'request'
-                  ? t('scenario.editRequest', 'Edit request')
-                  : t('scenario.editScenario', 'Edit scenario')}
-              </Button>
-            )}
             {previewNode.note && <div className="scn-inspector-note">{previewNode.note}</div>}
             {/* Inline play button — visible whenever the box is runnable AND
               * carries no real run result yet, both for the "no data at all"

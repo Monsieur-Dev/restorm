@@ -4,7 +4,7 @@
  * (no need to do a switch on every dispatch).
  */
 
-import type { NodeExecutor } from '../types'
+import type { NodeExecutor, ExecContext } from '../types'
 import type { ScenarioModel } from '../types'
 import {
   arithmeticExecutor,
@@ -43,10 +43,22 @@ import { readOutputDecls } from '../../../shared/scenarioOutputDecls'
  * — in that case we surface a single-field prompt so the user can
  * confirm / edit before the value flows downstream. The `seeded`
  * flag on the activation distinguishes the two paths. */
-const inputExecutor: NodeExecutor = async (act, ctx) => {
+/** Publish each of the input's resolved params into the run's variable store,
+ * so a `{{param1}}` reference resolves at execution exactly as the editor's
+ * picker + static preview advertise it (input params ARE scenario variables). */
+function publishInputVariables(value: unknown, ctx: ExecContext): void {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return
+  for (const [name, v] of Object.entries(value as Record<string, unknown>)) ctx.variables.set(name, v)
+}
+
+export const inputExecutor: NodeExecutor = async (act, ctx) => {
   // The seed activation already carries the `{ [name]: value, … }` object
   // (see `Scheduler.seedRoots`); pass it through verbatim.
-  if (act.seeded === true) return { outputs: [{ port: 'value', value: act.inputs['value'] }] }
+  if (act.seeded === true) {
+    const value = act.inputs['value']
+    publishInputVariables(value, ctx)
+    return { outputs: [{ port: 'value', value }] }
+  }
   // An input prompts for EACH declared param and emits one object keyed by the
   // param names — the same shape the static preview + seeded path model, so a
   // wired selector resolves identically. The prompts are raised CONCURRENTLY
@@ -85,7 +97,9 @@ const inputExecutor: NodeExecutor = async (act, ctx) => {
       : prefill
     return [name, value] as const
   }))
-  return { outputs: [{ port: 'value', value: Object.fromEntries(entries) }] }
+  const value = Object.fromEntries(entries)
+  publishInputVariables(value, ctx)
+  return { outputs: [{ port: 'value', value }] }
 }
 
 function inferHint(t: string | undefined): 'string' | 'number' | 'boolean' | 'object' {

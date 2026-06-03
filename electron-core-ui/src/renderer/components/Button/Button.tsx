@@ -14,6 +14,7 @@ const Button: React.FC<ButtonProps> = ({
   medium = false,
   line = false,
   link = false,
+  externalLink = false,
   emphasis = 0,
   fullWidth = false,
   backgroundColor,
@@ -129,7 +130,8 @@ const Button: React.FC<ButtonProps> = ({
     effectiveSize === 'xl' ? 'xl-button' : '',
     appearance !== 'default' ? `appearance-${appearance}` : '',
     line ? 'line-button' : '',
-    link ? 'link-button' : '',
+    link || externalLink ? 'link-button' : '',
+    externalLink ? 'external-link-button' : '',
     secondary ? 'secondary' : '',
     disabled ? 'disabled' : '',
     fullWidth ? 'full-width' : '',
@@ -177,8 +179,8 @@ const Button: React.FC<ButtonProps> = ({
         aria-disabled={disabled}
       >
         {renderIcon()}
-        {link ? <span className="button-link-label">{renderChildren()}</span> : renderChildren()}
-        {link && <span className="codicon codicon-link-external button-link-trailing-icon" aria-hidden="true" />}
+        {link || externalLink ? <span className="button-link-label">{renderChildren()}</span> : renderChildren()}
+        {externalLink && <span className="codicon codicon-link-external button-link-trailing-icon" aria-hidden="true" />}
       </a>
     </div>
   )

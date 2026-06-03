@@ -343,8 +343,9 @@
 }
 
 /* Link appearance — reads as an inline link, not a chip: no background/border,
-   left-aligned, content-width, with a trailing codicon-link a few pixels after
-   the label. */
+   left-aligned, content-width, pointer cursor. `link` shows just the (un-
+   underlined) icon + underlined label; `external-link` adds a trailing
+   codicon-link-external a few pixels after the label. */
 .text-button.link-button {
 	width: auto;
 	max-width: 100%;
@@ -353,6 +354,7 @@
 	background-color: transparent;
 	justify-content: flex-start;
 	text-align: left;
+	cursor: pointer;
 }
 
 .text-button.link-button:hover {

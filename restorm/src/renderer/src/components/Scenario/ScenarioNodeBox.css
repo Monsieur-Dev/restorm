@@ -514,25 +514,13 @@
  * bound item (request / sub-scenario) in a workbench tab. Sized like a
  * normal-weight link, not a button, so it doesn't compete with the
  * toolbar's actual buttons. */
-.scn-inspector-open {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  background: transparent;
-  border: 0;
-  padding: 0;
-  margin-bottom: 6px;
-  color: var(--textLink-foreground, #3794ff);
-  cursor: pointer;
-  text-decoration: none;
+/* The preview title doubles as the "open this item" link. Keep the header's
+   type scale on the link (13px / 600) so it reads as the title, not a chip. */
+.scn-inspector-title-link.link-button {
+  font-size: 13px;
 }
-.scn-inspector-open:hover {
-  text-decoration: underline;
-}
-.scn-inspector-open .codicon {
-  font-size: 14px;
-  flex-shrink: 0;
+.scn-inspector-title-link .button-link-label {
+  font-weight: 600;
 }
 /* Replaces `.scn-inspector-info` when the previewed box is runnable AND
  * has no recent result: a small play button + the same italic hint, so
@@ -608,18 +596,14 @@
   box-shadow: 0 0 0 1px #ef4444, 0 4px 14px rgba(0, 0, 0, 0.4);
 }
 /* Workflow error panel rows (click to focus the box). */
-.scn-error-row {
-  background: none;
-  border: none;
+/* Error row is an ECUI `link` Button — background/underline/cursor come from
+   .link-button; keep only the error-list font size + the error text colour. */
+.scn-error-row.link-button {
   padding: 1px 0;
   margin: 0;
-  font: inherit;
   font-size: 12px;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
+  color: var(--inputValidation-errorForeground, var(--errorForeground, #f48771));
 }
-.scn-error-row:hover { text-decoration: underline; }
 
 /* Selected: the focus ring + a drop shadow so the box lifts off the canvas. */
 .scn-node-selected {

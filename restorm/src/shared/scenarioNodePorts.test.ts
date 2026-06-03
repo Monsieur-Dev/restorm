@@ -93,13 +93,12 @@ describe('deriveRunScenarioPorts — runScenario ports from the sub-scenario', (
     expect(deriveRunScenarioPorts(sub).inputs.map((p) => p.name)).toEqual(['count', 'token'])
   })
 
-  it('exposes a single `done` signal output when the sub-scenario returns no data', () => {
+  it('derives NO output port when the sub-scenario returns no data (the box`s universal `done` port covers completion)', () => {
     const sub = scenarioWith([{ kind: 'input', config: { name: 'token' } }])
-    const { outputs } = deriveRunScenarioPorts(sub)
-    expect(outputs.map((p) => [p.id, p.role, p.flow])).toEqual([['done', 'then', 'signal']])
+    expect(deriveRunScenarioPorts(sub).outputs).toEqual([])
   })
 
-  it('omits the `done` signal once the sub-scenario declares an output node', () => {
+  it('omits any derived output once the sub-scenario declares an output node', () => {
     const sub = scenarioWith([
       { kind: 'input', config: { name: 'token' } },
       { kind: 'output', config: { name: 'cooldown' } }

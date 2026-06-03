@@ -1,0 +1,62 @@
+[
+  {
+    "id": "1780324493299-z019qs",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780418232553-8cfmhw",
+    "kind": "setVariable",
+    "suggestion": {
+      "origin": "main"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780420981592-6osi6r",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "Received in main",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780421882628-8oym4p",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "statuc_output received in main",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780482115336-0v2aq0",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780482218173-lsnebg",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780482287906-hje41a",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780482293466-yfntnl",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  }
+]
