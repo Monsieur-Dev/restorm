@@ -45,6 +45,20 @@ describe('diffScenarioPortRenames', () => {
     expect([...diffScenarioPortRenames(before, after).outputs]).toEqual([['static_output', 'renamed']])
   })
 
+  it('skips an ambiguous rename when another decl still carries the old name', () => {
+    // o1 renames first→primary, but o2 still has a decl named "first". A caller's
+    // `output:first` edge could belong to either, so we must NOT remap it.
+    const before = [
+      outputNode('o1', [{ id: 'd1', name: 'first' }]),
+      outputNode('o2', [{ id: 'd2', name: 'first' }])
+    ]
+    const after = [
+      outputNode('o1', [{ id: 'd1', name: 'primary' }]),
+      outputNode('o2', [{ id: 'd2', name: 'first' }])
+    ]
+    expect(isEmptyRenameMap(diffScenarioPortRenames(before, after))).toBe(true)
+  })
+
   it('ignores blank names and additions/removals (id changed = not a rename)', () => {
     const before = [outputNode('o1', [{ id: 'd1', name: 'a' }])]
     const after = [outputNode('o1', [{ id: 'd1', name: '' }, { id: 'd2', name: 'b' }])]

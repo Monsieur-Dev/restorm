@@ -188,6 +188,11 @@ function computeRunScenarioOutputs(runNode: Node<ScenarioNodeBoxData>, resolveBo
   // override each matching sub-scenario `input` node's typed default, so the
   // output preview reflects what the parent passes in — not the sub-scenario's
   // own defaults. Predecessor-fed params carry no entry and keep their default.
+  // This is a STATIC approximation: the override is read through `concreteValue`,
+  // whereas the runtime resolves the same typed value through `resolveOperand`.
+  // They agree for scalars; an `environment` operand differs (preview shows the
+  // resolver shape / null, runtime the live `{name,variables}`) — acceptable for
+  // a pre-run hint.
   const paramValuesRaw = runCfg['paramValues']
   const paramValues = paramValuesRaw && typeof paramValuesRaw === 'object' && !Array.isArray(paramValuesRaw)
     ? (paramValuesRaw as Record<string, unknown>)

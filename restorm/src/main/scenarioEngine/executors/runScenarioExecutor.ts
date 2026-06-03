@@ -45,12 +45,13 @@ export const runScenarioExecutor: NodeExecutor = async (act, ctx) => {
   // `output` node, with id `output:<name>` (see `deriveRunScenarioPorts`).
   // Emit on those derived ids; also emit the whole map on the default
   // `result` port so a node wired to `result` still receives the bundle.
-  // ALWAYS emit a `done` completion signal too: when the sub-scenario has
-  // no `output` node, the box exposes a single `done` ("Ensuite") trigger
-  // — without this emission, wiring it would never fire the next node.
+  // Do NOT emit `done` here: completion is signalled by the UNIVERSAL `done`
+  // port (the scheduler fires it as a pure `true` continuation once the box
+  // returns — see `Scheduler.fireDonePort`). Emitting our own `done` token too
+  // would double-fire every downstream node, so a chain of runScenarios would
+  // re-trigger and cascade non-deterministically.
   const emissions = [
     { port: 'result', value: outputs },
-    { port: 'done', value: outputs },
     ...Object.entries(outputs).map(([name, value]) => ({ port: `output:${name}`, value }))
   ]
   return { outputs: emissions }
