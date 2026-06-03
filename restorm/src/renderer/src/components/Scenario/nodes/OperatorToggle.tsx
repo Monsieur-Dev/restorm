@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { RadioGroup } from 'electron-core-ui/renderer'
 
 /** Comparison operators offered by the operator toggle (If + Filter predicate). */
 export const OPERATOR_OPTIONS = ['<', '≤', '=', '≥', '>', '≠', 'contains'] as const
@@ -25,21 +26,23 @@ export const OperatorToggle: React.FC<OperatorToggleProps> = ({ value, onChange 
   const [internal, setInternal] = useState<OperatorOption>('=')
   const selected = value ?? internal
   return (
-    <div className="scn-operator-toggle nodrag" role="radiogroup" aria-label="operator">
-      {OPERATOR_OPTIONS.map((op) => (
-        <button
-          key={op}
-          type="button"
-          title={op}
-          className={`scn-operator-option ${op === selected ? 'scn-operator-option-active' : ''}`}
-          aria-pressed={op === selected}
-          aria-label={op}
-          onClick={(e) => { e.stopPropagation(); setInternal(op); onChange?.(op) }}
-        >
-          {OPERATOR_GLYPH[op]}
-        </button>
-      ))}
-    </div>
+    <span
+      className="scn-operator-toggle-anchor nodrag"
+      aria-label="operator"
+      onClick={(e) => { e.stopPropagation() }}
+    >
+      <RadioGroup
+        className="scn-operator-toggle nodrag"
+        options={{
+          items: OPERATOR_OPTIONS.map((op) => ({
+            text: OPERATOR_GLYPH[op],
+            tooltip: op,
+            isActive: op === selected
+          }))
+        }}
+        onSelect={(i) => { const op = OPERATOR_OPTIONS[i]; if (op) { setInternal(op); onChange?.(op) } }}
+      />
+    </span>
   )
 }
 

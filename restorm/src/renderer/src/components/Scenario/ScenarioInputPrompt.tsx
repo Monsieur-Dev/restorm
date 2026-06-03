@@ -52,7 +52,19 @@ function stringifyDefault(v: unknown): string {
 function seedTypedValue(valueType: unknown, defaultValue: unknown): ValueType {
   if (valueType !== null && typeof valueType === 'object') {
     const pojo = valueType as Record<string, unknown>
-    return normalizeValueType(defaultValue !== undefined && 'value' in pojo ? { ...pojo, value: defaultValue } : valueType)
+    // `environment` and `variable` keep a REFERENCE in `value` (an environment
+    // id / a variable name). The engine's concrete default for them is a
+    // resolved or templated form (`{{$env-id}}`, `{{name}}`) — overlaying it
+    // would overwrite the reference, leaving the picker unable to match it (it
+    // shows "—"). Seed those straight from the declared type so the configured
+    // default (e.g. the selected environment) shows through. Other typed values
+    // hold their concrete in `value`, so the default overlays cleanly — and a
+    // mid-run input still prefills with the upstream value.
+    const holdsReference = pojo['type'] === 'environment' || pojo['type'] === 'variable'
+    if (!holdsReference && defaultValue !== undefined && 'value' in pojo) {
+      return normalizeValueType({ ...pojo, value: defaultValue })
+    }
+    return normalizeValueType(valueType)
   }
   return new StringValue(stringifyDefault(defaultValue))
 }

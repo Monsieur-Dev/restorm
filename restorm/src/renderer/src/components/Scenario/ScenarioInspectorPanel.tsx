@@ -380,15 +380,16 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
               {t('scenario.validation.panelTitle', { count: errorBoxCount, defaultValue: '{{count}} action error(s)' })}
             </div>
             {errors.map(({ nodeId, title, error }) => (
-              <button
+              <Button
                 key={`${nodeId}-${error.code}`}
-                type="button"
+                fullWidth
+                align="left"
                 className="scn-error-row"
                 onClick={() => { onFocusNode(nodeId) }}
-                title={t('scenario.validation.focusBox', 'Focus this action')}
+                options={{ title: t('scenario.validation.focusBox', 'Focus this action') }}
               >
                 <span style={{ opacity: 0.8 }}>{title}</span> — {error.message}
-              </button>
+              </Button>
             ))}
           </div>
         </>
@@ -407,8 +408,7 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
               * "open" affordance. Same handler the node-box's
               * "Edit request / scenario" row uses. */}
             {previewNode.openItemId && previewNode.openItemKind && onOpenItem && (
-              <button
-                type="button"
+              <Button
                 className="scn-inspector-open"
                 onClick={() => {
                   const id = previewNode.openItemId
@@ -419,7 +419,7 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
                 {previewNode.openItemKind === 'request'
                   ? t('scenario.editRequest', 'Edit request')
                   : t('scenario.editScenario', 'Edit scenario')}
-              </button>
+              </Button>
             )}
             {previewNode.note && <div className="scn-inspector-note">{previewNode.note}</div>}
             {/* Inline play button — visible whenever the box is runnable AND

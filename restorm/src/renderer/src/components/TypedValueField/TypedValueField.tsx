@@ -38,33 +38,19 @@ interface TypeIndicatorProps {
   onMenuOpen?: (e: React.MouseEvent) => void
 }
 
-const typeIndicatorStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: 28,
-  height: 28,
-  borderRadius: 4,
-  border: '1px solid var(--editorWidget-border, rgba(255,255,255,0.12))',
-  cursor: 'pointer',
-  fontSize: 14,
-  opacity: 0.7,
-  boxSizing: 'border-box'
-}
-
 const TypeIndicator: React.FC<TypeIndicatorProps> = ({ icon, ariaLabel, dataTestId, onMenuOpen }) => (
-  <div
-    style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center' }}
+  // A real ECUI Button (medium = 28×28 square) so it auto-styles with the theme
+  // and lines up flush with the value cell inside the ControlGroup. Opens the
+  // type-pick menu on either a primary or a context (right) click.
+  <Button
+    medium
+    secondary
+    icon={icon}
     onClick={onMenuOpen}
-    onContextMenu={(e) => { e.preventDefault(); onMenuOpen?.(e) }}
-  >
-    <div
-      style={typeIndicatorStyle}
-      {...(dataTestId && { 'data-testid': dataTestId })}
-    >
-      <span className={`codicon codicon-${icon}`} aria-label={ariaLabel} />
-    </div>
-  </div>
+    onContextMenu={onMenuOpen}
+    options={{ ariaLabel }}
+    {...(dataTestId && { 'data-testid': dataTestId })}
+  />
 )
 
 interface ColorValueCellProps {
@@ -74,7 +60,7 @@ interface ColorValueCellProps {
 }
 
 const ColorValueCell: React.FC<ColorValueCellProps> = ({ hex, onChangeHex, dataTestId }) => {
-  const targetRef = useRef<HTMLDivElement | null>(null)
+  const targetRef = useRef<HTMLSpanElement | null>(null)
   const [isOpen, setIsOpen] = useState(false)
   const tooltipClassName = 'restorm-color-picker-tooltip'
 
@@ -104,27 +90,21 @@ const ColorValueCell: React.FC<ColorValueCellProps> = ({ hex, onChangeHex, dataT
     }
   }, [isOpen])
 
+  // A fragment (not a wrapping div) so the hex field + swatch land as DIRECT
+  // children of the value cell's ControlGroup — only then does the group stretch
+  // the disabled InputBox to the full 28px row height (a nested InputBox stays at
+  // its natural 27px, dropping its bottom border above the buttons'). The Tooltip
+  // renders null / a portal, so it adds no stray control-group child.
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 0,
-        width: '100%',
-        height: '100%',
-        minWidth: 0
-      }}
-    >
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <InputBox
-          value={hex}
-          options={{ type: 'text' }}
-          disabled
-          {...(dataTestId && { 'data-testid': `${dataTestId}-color-input` })}
-        />
-      </div>
+    <>
+      <InputBox
+        value={hex}
+        options={{ type: 'text' }}
+        disabled
+        {...(dataTestId && { 'data-testid': `${dataTestId}-color-input` })}
+      />
 
-      <div ref={targetRef} style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center' }}>
+      <span ref={targetRef} className="tvf-color-swatch">
         <Button
           line
           options={{ ariaLabel: 'Open color picker' }}
@@ -135,7 +115,7 @@ const ColorValueCell: React.FC<ColorValueCellProps> = ({ hex, onChangeHex, dataT
           style={{ backgroundColor: hex }}
           {...(dataTestId && { 'data-testid': `${dataTestId}-color-button` })}
         />
-      </div>
+      </span>
 
       <Tooltip
         targetRef={targetRef as unknown as React.RefObject<HTMLElement | null>}
@@ -160,7 +140,7 @@ const ColorValueCell: React.FC<ColorValueCellProps> = ({ hex, onChangeHex, dataT
           </div>
         }
       />
-    </div>
+    </>
   )
 }
 

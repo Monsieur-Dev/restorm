@@ -1,5 +1,8 @@
 .tvf-control-group { width: 100%; min-width: 100px; }
 .tvf-control-group > :first-child { flex: 1 1 auto; min-width: 0; }
+/* The colour swatch is a fixed-size trailing button — it must not grow/shrink,
+ * so the hex field keeps the flex space. */
+.tvf-color-swatch { display: inline-flex; flex: 0 0 auto; }
 /* The environment picker button fills the field side of the control group. */
 .tvf-env-button { flex: 1 1 auto; min-width: 0; }
 /* Give the env label breathing room: 20px of inner side padding. (The button's

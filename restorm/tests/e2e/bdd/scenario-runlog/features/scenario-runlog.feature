@@ -13,7 +13,8 @@ Feature: Scenario run-log end-to-end
     Then the copied run-log matches the snapshot
 
     Examples:
-      | scenario    |
-      | Logs        |
-      | Arithmetics |
-      | Loops       |
+      | scenario       |
+      | Logs           |
+      | Arithmetics    |
+      | Loops          |
+      | Inputs/outputs |

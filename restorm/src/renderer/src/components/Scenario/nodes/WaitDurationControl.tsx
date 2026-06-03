@@ -1,5 +1,5 @@
 import React from 'react'
-import { InputBox } from 'electron-core-ui/renderer'
+import { InputBox, RadioGroup } from 'electron-core-ui/renderer'
 import { WAIT_UNITS, type WaitUnit } from './waitUnits'
 
 export interface WaitDurationControlProps {
@@ -31,20 +31,13 @@ export const WaitDurationControl: React.FC<WaitDurationControlProps> = ({ value,
           data-testid="scn-wait-duration"
         />
       )}
-      <div className="scn-unit-toggle" role="radiogroup" aria-label="unit">
-        {WAIT_UNITS.map((u) => (
-          <button
-            key={u}
-            type="button"
-            className={`scn-unit-option ${u === selectedUnit ? 'scn-unit-option-active' : ''}`}
-            aria-pressed={u === selectedUnit}
-            onMouseDown={(e) => { e.stopPropagation() }}
-            onClick={(e) => { e.stopPropagation(); onUnitChange?.(u) }}
-          >
-            {u}
-          </button>
-        ))}
-      </div>
+      <span className="scn-unit-toggle-anchor" aria-label="unit" onClick={(e) => { e.stopPropagation() }}>
+        <RadioGroup
+          className="scn-unit-toggle"
+          options={{ items: WAIT_UNITS.map((u) => ({ text: u, isActive: u === selectedUnit })) }}
+          onSelect={(i) => { const u = WAIT_UNITS[i]; if (u !== undefined) onUnitChange?.(u) }}
+        />
+      </span>
     </div>
   )
 }

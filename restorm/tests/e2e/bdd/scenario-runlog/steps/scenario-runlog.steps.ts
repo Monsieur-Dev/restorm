@@ -88,6 +88,115 @@ function normalizeRunLogYaml(raw: string): string {
   return yamlStringify(normalized)
 }
 
+const INPUT_PROMPT = '[data-testid="scn-input-prompt"]'
+
+/**
+ * Fill ONE pending input field with a deterministic, NON-DEFAULT value chosen by
+ * its value-type — so the run exercises real user-supplied inputs (not the
+ * seeded defaults) while keeping the golden stable. `base` is the field's testid
+ * prefix (`scn-input-prompt-<paramName>`); `type` is the `-value-type-<type>`
+ * suffix the TypedValueField stamps, so this stays generic across any scenario's
+ * inputs rather than hard-coding param names.
+ */
+async function fillScenarioInputField(p: Page, field: Locator, base: string, type: string): Promise<void> {
+  switch (type) {
+    case 'string':
+      await field.locator(`[data-testid="${base}-value-input-string-input"]`).fill('e2e-value')
+      return
+    case 'numeric':
+      await field.locator(`[data-testid="${base}-value-input-number-input"]`).fill('42')
+      return
+    case 'boolean':
+      // Toggle once — the sample seeds `true`, so this lands on `false`.
+      await field.locator(`[data-testid="${base}-value-input-boolean-action"]`).click()
+      return
+    case 'color': {
+      // The hex InputBox is disabled by design — colour is set through the
+      // picker popover. Open it via the swatch button, drive the Sketch picker's
+      // HEX field (`.w-color-editable-input`, first input), then toggle it shut.
+      const swatch = field.locator(`[data-testid="${base}-value-color-color-button"]`)
+      await swatch.click()
+      const hexInput = p.locator(`[data-testid="${base}-value-color-color-picker"] .w-color-editable-input input`).first()
+      await hexInput.click()
+      await hexInput.fill('abcdef')
+      await hexInput.press('Enter')
+      await swatch.click()
+      return
+    }
+    case 'datetime':
+      await field.locator(`[data-testid="${base}-value-datetime-picker"] input`).first().fill('2030-01-15 08:30:00')
+      return
+    case 'customlist':
+      // ECUI SelectBox: the native <select> is decorative, so drive the custom
+      // trigger + pick the first option (≠ the seeded default).
+      await field.locator(`[data-testid="${base}-value-input-customlist-trigger"]`).click()
+      await p.locator(`[data-testid="${base}-value-input-customlist-option-0"]`).click()
+      return
+    case 'customlistmulti': {
+      // MultiSelectCombo: open, ADD the first not-yet-selected option (so the set
+      // changes vs the default), then re-click the combo to close its dropdown —
+      // an open dropdown would otherwise intercept the submit click.
+      const combo = field.locator(`[data-testid="${base}-value-input-customlistmulti"]`)
+      await combo.click()
+      await p.locator(`[data-testid="${base}-value-input-customlistmulti-dropdown"] [role="option"][aria-selected="false"]`).first().click()
+      await combo.click()
+      return
+    }
+    case 'environment':
+      // Pick the first environment in the picker (≠ the configured default).
+      await field.locator(`[data-testid="${base}-value-input-environment"]`).click()
+      await p.locator('[data-testid="tvf-env-selector-listview"] [data-testid^="tvf-env-selector-item-"]').first().click()
+      return
+    default:
+      // Unknown/unhandled type: leave the seeded default — still answered on submit.
+  }
+}
+
+/** Answer every field of the currently-open run-parameters prompt, then submit. */
+async function answerScenarioInputPrompt(p: Page): Promise<void> {
+  const prompt = p.locator(INPUT_PROMPT)
+  const fields = prompt.locator('.scn-input-prompt-field')
+  const count = await fields.count()
+  for (let i = 0; i < count; i++) {
+    const field = fields.nth(i)
+    const typeTestid = await field.locator('[data-testid*="-value-type-"]').first().getAttribute('data-testid')
+    const m = typeTestid?.match(/^(.*)-value-type-([a-z]+)$/i)
+    if (!m) continue
+    await fillScenarioInputField(p, field, m[1], m[2].toLowerCase())
+  }
+  await prompt.locator('[data-testid="scn-input-prompt-submit"]').click()
+}
+
+/**
+ * Run a scenario to completion, answering EVERY input prompt it raises along the
+ * way — the up-front run-parameters modal AND any predecessor-wired input that
+ * pends mid-run. A scenario with no inputs never shows a prompt and falls
+ * straight through, so this single driver serves every scenario in the suite.
+ *
+ * Completion mirrors the engine's own signal: logs have been produced AND the
+ * Run button has dropped its active class (engineState left 'running').
+ */
+async function runScenarioAnsweringPrompts(p: Page): Promise<void> {
+  await p.locator('[data-testid="scenario-inspector-run"]').click()
+  const deadline = Date.now() + 60000
+  for (;;) {
+    const done = await p.evaluate(() => {
+      const run = document.querySelector('[data-testid="scenario-inspector-run"]')
+      const logList = document.querySelector('[data-testid="scenario-inspector-logs-list"]')
+      const running = run?.classList.contains('scn-inspector-run-round-active') ?? false
+      return !!logList && !running
+    })
+    if (done) return
+    if (await p.locator(INPUT_PROMPT).isVisible().catch(() => false)) {
+      await answerScenarioInputPrompt(p)
+    } else if (Date.now() > deadline) {
+      throw new Error('scenario did not finish (or an input prompt was left unanswered) within 60s')
+    } else {
+      await p.waitForTimeout(150)
+    }
+  }
+}
+
 Given('I open the scenarios reference-tests sample', async ({ launchApp }) => {
   const launched = await launchApp()
   electronApp = launched.app
@@ -115,18 +224,11 @@ When('I run the scenario {string} and copy all its logs', async ({}, scenarioNam
   await expect(p.locator('[data-testid="scenario-editor"]')).toBeVisible({ timeout: 15000 })
   await expect(p.locator('[data-testid="scenario-inspector-toolbar"]')).toBeVisible({ timeout: 15000 })
 
-  // Run via the inspector Run button (no node selected → whole scenario).
-  await p.locator('[data-testid="scenario-inspector-run"]').click()
-
-  // Completion: logs have been produced AND the engine is no longer running
-  // (the Run button drops its active class only when engineState leaves
-  // 'running'). engineState is event-driven, decoupled from the visual beams.
-  await p.waitForFunction(() => {
-    const run = document.querySelector('[data-testid="scenario-inspector-run"]')
-    const logList = document.querySelector('[data-testid="scenario-inspector-logs-list"]')
-    const running = run?.classList.contains('scn-inspector-run-round-active') ?? false
-    return !!logList && !running
-  }, null, { timeout: 30000 })
+  // Run via the inspector Run button (no node selected → whole scenario),
+  // answering every input prompt the run raises with deterministic non-default
+  // values. Prompt-free scenarios (Logs / Arithmetics / Loops) fall straight
+  // through; Inputs/outputs raises an up-front modal + a mid-run input.
+  await runScenarioAnsweringPrompts(p)
 
   // Show every entry (engine + run + user), then copy. The toggle defaults off
   // (user logs only); flip it on so the copy covers the full pipeline. The

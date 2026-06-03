@@ -1,6 +1,7 @@
 import React from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
+import { Button } from 'electron-core-ui/renderer'
 import { isRequest } from '../../../../../shared/types/collections'
 import type { KeyValue } from '../../../../../shared/types/baseTypes'
 import { Badge } from '../../common/Badge'
@@ -112,14 +113,14 @@ export const RequestNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, d
       rows: [{
         id: 'edit',
         content: (
-          <button
-            type="button"
-            className="scn-edit-link nodrag"
+          <Button
+            link
+            className="nodrag"
             data-testid="scn-request-edit-link"
             onClick={(e) => { e.stopPropagation(); data.onOpenItem?.(requestId) }}
           >
             {t('scenario.editRequest', 'Edit request')}
-          </button>
+          </Button>
         )
       }]
     }

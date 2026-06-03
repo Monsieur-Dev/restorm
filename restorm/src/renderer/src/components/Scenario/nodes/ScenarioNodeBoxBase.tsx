@@ -448,14 +448,15 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
         )}
         {data.onToggleBreakpoint && (
           <HeaderHoverTooltip label={t('scenario.breakpoint.toggle', 'Toggle breakpoint (F9)')} suppressed={data.breakpointPaused === true}>
-            <span
-              ref={breakpointRef}
-              className={`scn-node-breakpoint nodrag${data.breakpoint ? ' is-set' : ''}${data.breakpointPaused ? ' is-paused' : ''}`}
-              data-testid="scn-node-breakpoint"
-              aria-label={data.breakpoint ? t('scenario.breakpoint.remove', 'Remove breakpoint') : t('scenario.breakpoint.add', 'Add breakpoint')}
-              onClick={(e) => { e.stopPropagation(); data.onToggleBreakpoint?.(id) }}
-            >
-              <i className={`codicon codicon-${data.breakpoint ? 'circle-filled' : 'circle-outline'}`} aria-hidden="true" />
+            <span ref={breakpointRef} className="scn-node-breakpoint-anchor">
+              <Button
+                small
+                className={`scn-node-breakpoint nodrag${data.breakpoint ? ' is-set' : ''}${data.breakpointPaused ? ' is-paused' : ''}`}
+                icon={data.breakpoint ? 'circle-large-filled' : 'circle-large-outline'}
+                data-testid="scn-node-breakpoint"
+                options={{ ariaLabel: data.breakpoint ? t('scenario.breakpoint.remove', 'Remove breakpoint') : t('scenario.breakpoint.add', 'Add breakpoint') }}
+                onClick={(e) => { e.stopPropagation(); data.onToggleBreakpoint?.(id) }}
+              />
             </span>
           </HeaderHoverTooltip>
         )}

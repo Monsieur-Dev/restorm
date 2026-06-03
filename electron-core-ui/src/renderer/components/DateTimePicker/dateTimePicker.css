@@ -13,6 +13,18 @@
 .ecu-date-time-picker-input {
   flex: 1;
   min-width: 0;
+
+  /* Stretch the wrapped InputBox to the full row height. The ControlGroup
+   * stretches this wrapper (a direct child) to the tallest cell (28px), but a
+   * plain block wrapper would let the InputBox keep its natural height and drop
+   * its bottom border ~1px above the calendar button's. */
+  display: flex;
+  align-items: stretch;
+}
+
+.ecu-date-time-picker-input > * {
+  flex: 1;
+  min-width: 0;
 }
 
 .ecu-date-time-picker-button {

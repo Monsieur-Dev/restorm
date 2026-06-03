@@ -26,6 +26,9 @@ collections:
             id: env-1780300487228-md0ml0o
             name: Sub-env
             color: '#bd10e0'
+            icon:
+              type: phosphor
+              value: ArrowFatLineDown
     items:
       - documentation: ''
         tags:
@@ -108,6 +111,32 @@ collections:
                       type: numeric
                       value: 10
                       format: decimal
+                    param1:
+                      type: string
+                      value: main
+                    param2:
+                      type: numeric
+                      value: 20
+                      format: decimal
+                    param3:
+                      type: boolean
+                      value: false
+                    param4:
+                      type: environment
+                      value: 6c323ee6-0513-42a0-9d9a-68b329b405b4
+                    param5:
+                      type: customList
+                      listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                      label: Vert
+                    param6:
+                      type: color
+                      value: '#d01d1d'
+                    param7:
+                      type: customListMulti
+                      listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                      labels:
+                        - Rouge
+                        - Bleu
                 inputs:
                   - id: in
                     name: ''
@@ -160,8 +189,8 @@ collections:
                     dataType: any
                 outputs: []
                 position:
-                  x: 1340
-                  'y': 360
+                  x: 1280
+                  'y': 60
               - id: 1780421882628-8oym4p
                 kind: log
                 config:
@@ -181,8 +210,54 @@ collections:
                     dataType: any
                 outputs: []
                 position:
-                  x: 1340
-                  'y': 160
+                  x: 1280
+                  'y': 260
+              - id: 1780475714078-r56z1g
+                kind: arithmetic
+                config:
+                  operator: +
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                  - id: a
+                    name: a
+                    dataType: number
+                  - id: b
+                    name: b
+                    dataType: number
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: number
+                    flow: both
+                position:
+                  x: 1420
+                  'y': 620
+              - id: 1780479085233-pcv0ra
+                kind: httpRequest
+                config:
+                  requestId: d1000000-0000-0000-0000-00000000auth
+                  label: Health
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                  - id: env
+                    name: env
+                    dataType: any
+                    flow: value
+                outputs:
+                  - id: response
+                    name: response
+                    dataType: response
+                    role: response
+                    flow: both
+                position:
+                  x: 1040
+                  'y': 720
             edges:
               - id: e-1780418276241-f2q3hz
                 from:
@@ -2283,13 +2358,13 @@ collections:
                         value: string!
                       params:
                         - id: param-legacy
-                          name: string
+                          name: param1
                           valueType:
                             type: string
                             value: string!
                           required: true
                         - id: param-1780306710895-t5jsh2
-                          name: bool
+                          name: param3
                           valueType:
                             type: boolean
                             value: true
@@ -2307,6 +2382,7 @@ collections:
                     position:
                       x: -180
                       'y': 200
+                    color: '#f8e61b'
                   - id: 1780290692642-heguvc
                     kind: input
                     config:
@@ -2317,33 +2393,33 @@ collections:
                         format: decimal
                       params:
                         - id: param-legacy
-                          name: number
+                          name: param2
                           valueType:
                             type: numeric
                             value: 10
                             format: decimal
                           required: false
                         - id: param-1780309821860-4324je
-                          name: Env
+                          name: param4
                           valueType:
                             type: environment
                             value: env-1780300487228-md0ml0o
                           required: false
                         - id: param-1780312623036-ns50u0
-                          name: color
+                          name: param6
                           valueType:
                             type: color
                             value: '#000000'
                           required: false
                         - id: param-1780312733050-k32a4a
-                          name: PetColor
+                          name: param5
                           valueType:
                             type: customList
                             listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
                             label: Bleu
                           required: false
                         - id: param-1780312752536-xhink4
-                          name: PetColors
+                          name: param7
                           valueType:
                             type: customListMulti
                             listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
@@ -2362,23 +2438,49 @@ collections:
                         flow: both
                     position:
                       x: -180
-                      'y': 840
+                      'y': 540
+                    color: '#f8e61b'
                   - id: 1780290720988-a9nymy
                     kind: object
                     config:
                       properties:
                         - id: prop-1780290722891-dqtdnz
-                          name: first
+                          name: obj_param1
                           value:
                             type: string
                             value: ''
                         - id: prop-1780290727683-0vof3k
-                          name: second
+                          name: obj_param3
                           value:
                             type: string
                             value: ''
                         - id: prop-1780309901267-y0r3mt
-                          name: third
+                          name: obj_param2
+                          value:
+                            type: string
+                            value: ''
+                        - id: prop-1780469151969-7v0w3g
+                          name: obj_param4
+                          value:
+                            type: string
+                            value: ''
+                        - id: prop-1780469244879-3a6v38
+                          name: obj_param5
+                          value:
+                            type: string
+                            value: ''
+                        - id: prop-1780469259770-ffodx7
+                          name: obj_param6
+                          value:
+                            type: string
+                            value: ''
+                        - id: prop-1780469273581-zsg6rn
+                          name: obj_param7
+                          value:
+                            type: string
+                            value: ''
+                        - id: prop-1780469304463-iq60rc
+                          name: obj_SecondInput
                           value:
                             type: string
                             value: ''
@@ -2389,14 +2491,14 @@ collections:
                         dataType: json
                         flow: both
                     position:
-                      x: 777.8370359025163
-                      'y': 169.95714491925952
+                      x: 600
+                      'y': 200
                   - id: 1780290752840-vsgq4n
                     kind: log
                     config:
                       message:
                         type: string
-                        value: List of received values
+                        value: List of all values
                     inputs:
                       - id: in
                         name: ''
@@ -2410,12 +2512,12 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 1143.188716970036
-                      'y': 665.5896291161151
+                      x: 1000
+                      'y': 480
                   - id: 1780290862498-v56qy9
                     kind: log
                     config:
-                      level: warn
+                      level: error
                       message:
                         type: string
                         value: Run failed or cancelled 2
@@ -2432,8 +2534,9 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 287.45879132923096
-                      'y': 1306.8168971126508
+                      x: 140
+                      'y': 1180
+                    color: '#d0021b'
                   - id: 1780309092683-gzd75p
                     kind: input
                     config:
@@ -2456,15 +2559,16 @@ collections:
                         dataType: any
                         flow: both
                     position:
-                      x: 280
-                      'y': 1040
+                      x: 220
+                      'y': 940
+                    color: '#f8e61b'
                   - id: 1780309544681-wuznn3
                     kind: log
                     config:
                       message:
                         type: string
                         value: Run failed or cancelled 1
-                      level: warn
+                      level: error
                     inputs:
                       - id: in
                         name: ''
@@ -2478,12 +2582,13 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 126.79976714897344
-                      'y': 551.945759440944
+                      x: 220
+                      'y': 480
+                    color: '#d0021b'
                   - id: 1780309585119-sop24w
                     kind: log
                     config:
-                      level: warn
+                      level: error
                       message:
                         type: string
                         value: Run failed or cancelled 3
@@ -2500,8 +2605,9 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 648.4088661838526
-                      'y': 1217.0933648991004
+                      x: 560
+                      'y': 1180
+                    color: '#d0021b'
                   - id: 1780310052383-xikuhr
                     kind: log
                     config:
@@ -2521,8 +2627,8 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 1317.4285643113394
-                      'y': 917.8675642940315
+                      x: 1320
+                      'y': 1020
                   - id: 1780421789097-rblttd
                     kind: output
                     config:
@@ -2542,8 +2648,9 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 400
-                      'y': -100
+                      x: 260
+                      'y': 20
+                    color: '#bd10e0'
                   - id: 1780421829778-9wm8ei
                     kind: output
                     config:
@@ -2562,8 +2669,9 @@ collections:
                         dataType: any
                     outputs: []
                     position:
-                      x: 1560
+                      x: 1540
                       'y': 160
+                    color: '#bd10e0'
                   - id: 1780421853347-83orom
                     kind: output
                     config:
@@ -2582,6 +2690,8 @@ collections:
                     position:
                       x: 1540
                       'y': 480
+                    color: '#bd10e0'
+                    collapsed: false
                 edges:
                   - id: e-1780290725124-dhwv12
                     from:
@@ -2590,15 +2700,7 @@ collections:
                     to:
                       nodeId: 1780290720988-a9nymy
                       portId: prop-1780290722891-dqtdnz
-                    selector: .
-                  - id: e-1780290729580-zpnqm6
-                    from:
-                      nodeId: 1780290692642-heguvc
-                      portId: value
-                    to:
-                      nodeId: 1780290720988-a9nymy
-                      portId: prop-1780290727683-0vof3k
-                    selector: .
+                    selector: param1
                   - id: e-1780309562051-nq7ycv
                     from:
                       nodeId: 1780290692642-heguvc
@@ -2635,21 +2737,6 @@ collections:
                     to:
                       nodeId: 1780309092683-gzd75p
                       portId: in
-                  - id: e-1780310489833-e35zg6
-                    from:
-                      nodeId: 1780309092683-gzd75p
-                      portId: value
-                    to:
-                      nodeId: 1780290720988-a9nymy
-                      portId: prop-1780309901267-y0r3mt
-                    selector: SecondInput
-                  - id: e-1780415367436-hhnm4a
-                    from:
-                      nodeId: 1780290720988-a9nymy
-                      portId: object
-                    to:
-                      nodeId: 1780290752840-vsgq4n
-                      portId: in
                   - id: e-1780421811834-os6q3d
                     from:
                       nodeId: 1780290664616-qdq134
@@ -2664,7 +2751,7 @@ collections:
                     to:
                       nodeId: 1780421829778-9wm8ei
                       portId: output-default-decl
-                    selector: first
+                    selector: obj_param1
                   - id: e-1780421842606-dds95v
                     from:
                       nodeId: 1780290720988-a9nymy
@@ -2672,7 +2759,7 @@ collections:
                     to:
                       nodeId: 1780421829778-9wm8ei
                       portId: out-1780421838890-ciymih
-                    selector: second
+                    selector: obj_param2
                   - id: e-1780421864606-bouxoa
                     from:
                       nodeId: 1780290720988-a9nymy
@@ -2695,6 +2782,70 @@ collections:
                     to:
                       nodeId: 1780421853347-83orom
                       portId: in
+                  - id: e-1780469163413-8b6v2h
+                    from:
+                      nodeId: 1780290664616-qdq134
+                      portId: value
+                    to:
+                      nodeId: 1780290720988-a9nymy
+                      portId: prop-1780290727683-0vof3k
+                    selector: .
+                  - id: e-1780469222178-hxcfx8
+                    from:
+                      nodeId: 1780290692642-heguvc
+                      portId: value
+                    to:
+                      nodeId: 1780290720988-a9nymy
+                      portId: prop-1780309901267-y0r3mt
+                    selector: param2
+                  - id: e-1780469237586-p1q0zg
+                    from:
+                      nodeId: 1780290692642-heguvc
+                      portId: value
+                    to:
+                      nodeId: 1780290720988-a9nymy
+                      portId: prop-1780469151969-7v0w3g
+                    selector: param4
+                  - id: e-1780469251640-x4c6wp
+                    from:
+                      nodeId: 1780290692642-heguvc
+                      portId: value
+                    to:
+                      nodeId: 1780290720988-a9nymy
+                      portId: prop-1780469244879-3a6v38
+                    selector: param5
+                  - id: e-1780469268379-iu734w
+                    from:
+                      nodeId: 1780290692642-heguvc
+                      portId: value
+                    to:
+                      nodeId: 1780290720988-a9nymy
+                      portId: prop-1780469259770-ffodx7
+                    selector: param6
+                  - id: e-1780469283845-xy2ygg
+                    from:
+                      nodeId: 1780290692642-heguvc
+                      portId: value
+                    to:
+                      nodeId: 1780290720988-a9nymy
+                      portId: prop-1780469273581-zsg6rn
+                    selector: param7
+                  - id: e-1780469317571-779qgk
+                    from:
+                      nodeId: 1780309092683-gzd75p
+                      portId: value
+                    to:
+                      nodeId: 1780290720988-a9nymy
+                      portId: prop-1780469304463-iq60rc
+                    selector: SecondInput
+                  - id: e-1780469393281-l2noue
+                    from:
+                      nodeId: 1780290720988-a9nymy
+                      portId: object
+                    to:
+                      nodeId: 1780290752840-vsgq4n
+                      portId: data
+                    selector: .
                 id: 1780290655312-0z6px87
                 name: Inputs/outputs
                 items: []

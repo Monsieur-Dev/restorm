@@ -37,15 +37,24 @@ interface ButtonProps {
   disabled?: boolean
   secondary?: boolean
   appearance?: 'default' | 'rainbow'
-  size?: 'sm' | 'default' | 'lg' | 'xl'
+  size?: 'sm' | 'md' | 'default' | 'lg' | 'xl'  // 'md' = 28×28 square icon button
   /** Shorthand for `size="sm"` — convenient for compact toolbar / icon buttons. */
   small?: boolean
+  /** Shorthand for `size="md"` — a 28×28 square icon button that lines up flush
+   *  with a 28px-tall control (InputBox / SelectBox) inside a ControlGroup. */
+  medium?: boolean
   line?: boolean
+  /** Link appearance: no background, left-aligned text, trailing `codicon-link`
+   *  glyph after the label. For inline "open / edit this item" affordances. */
+  link?: boolean
   emphasis?: number
   fullWidth?: boolean
   backgroundColor?: string
   align?: 'left' | 'center' | 'right'
   onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void
+  /** Right-click handler (the Button calls preventDefault for you) — e.g. an
+   *  icon button that opens the same menu on primary and context click. */
+  onContextMenu?: (event: React.MouseEvent<HTMLAnchorElement>) => void
   className?: string
   style?: React.CSSProperties
   id?: string

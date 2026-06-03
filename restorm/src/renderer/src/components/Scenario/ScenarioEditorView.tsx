@@ -2714,15 +2714,14 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         side="left"
         content={subLogPopover && (
           <div data-scn-sublog-popover className="scn-sublog-popover" onMouseDown={(e) => { e.stopPropagation() }}>
-            <button
-              type="button"
-              className="scn-sublog-popover-title"
+            <Button
+              link
+              icon={<Badge type="SCENARIO" />}
               onClick={() => { onOpenItem?.(subLogPopover.scenario.id); setSubLogPopover(null) }}
               data-testid="scenario-sublog-popover-title"
             >
-              <Badge type="SCENARIO" />
-              <span>{subLogPopover.scenario.name}</span>
-            </button>
+              {subLogPopover.scenario.name}
+            </Button>
             <div className="scn-sublog-popover-graph">
               <ScenarioGraphPreview
                 scenario={subLogPopover.scenario}

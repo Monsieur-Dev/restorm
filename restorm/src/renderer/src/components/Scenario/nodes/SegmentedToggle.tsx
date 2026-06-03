@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { RadioGroup } from 'electron-core-ui/renderer'
 
 export interface SegmentedToggleProps {
   options: readonly string[]
@@ -18,19 +19,18 @@ export const SegmentedToggle: React.FC<SegmentedToggleProps> = ({ options, value
   const [internal, setInternal] = useState<string>(defaultValue ?? options[0] ?? '')
   const selected = value ?? internal
   return (
-    <div className="scn-operator-toggle nodrag" role="radiogroup" aria-label={ariaLabel ?? 'options'}>
-      {options.map((op) => (
-        <button
-          key={op}
-          type="button"
-          className={`scn-operator-option ${op === selected ? 'scn-operator-option-active' : ''}`}
-          aria-pressed={op === selected}
-          onClick={(e) => { e.stopPropagation(); setInternal(op); onChange?.(op) }}
-        >
-          {op}
-        </button>
-      ))}
-    </div>
+    <span
+      className="scn-operator-toggle-anchor nodrag"
+      aria-label={ariaLabel ?? 'options'}
+      onClick={(e) => { e.stopPropagation() }}
+      onMouseDown={(e) => { e.stopPropagation() }}
+    >
+      <RadioGroup
+        className="scn-operator-toggle nodrag"
+        options={{ items: options.map((op) => ({ text: op, isActive: op === selected })) }}
+        onSelect={(i) => { const op = options[i]; if (op !== undefined) { setInternal(op); onChange?.(op) } }}
+      />
+    </span>
   )
 }
 

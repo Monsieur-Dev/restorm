@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react'
 import { useNodeConnections, type NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
+import { Button } from 'electron-core-ui/renderer'
 import { isScenario } from '../../../../../shared/types/collections'
 import { Badge } from '../../common/Badge'
 import { useScenarioBoundResolver } from '../scenarioBoundResolver'
@@ -117,14 +118,14 @@ export const RunScenarioNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
     rows.push({
       id: 'edit',
       content: (
-        <button
-          type="button"
-          className="scn-edit-link nodrag"
+        <Button
+          link
+          className="nodrag"
           data-testid="scn-runscenario-edit-link"
           onClick={(e) => { e.stopPropagation(); data.onOpenItem?.(scenarioId) }}
         >
           {t('scenario.editScenario', 'Edit scenario')}
-        </button>
+        </Button>
       )
     })
   }

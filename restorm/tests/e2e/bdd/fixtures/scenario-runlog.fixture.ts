@@ -40,7 +40,12 @@ export const test = base.extend<ScenarioRunlogFixtures>({
       ...withE2ECoverageEnv(restormRoot, process.env),
       NODE_ENV: 'development',
       RESTORM_USER_DATA_OVERRIDE: isolatedUserDataDir,
-      ECUI_DISABLE_GPU: '1'
+      ECUI_DISABLE_GPU: '1',
+      // Pin the wall-clock zone so any value typed into a date-time input parses
+      // identically on every machine. Without this a typed "yyyy-MM-dd HH:mm:ss"
+      // resolves in the host's local zone, so the serialized UTC instant — and
+      // thus the run-log golden — would drift between dev boxes and CI.
+      TZ: 'UTC'
     }
 
     const launcher = async (): Promise<LaunchedApp> => {
