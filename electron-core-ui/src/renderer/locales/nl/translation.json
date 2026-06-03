@@ -148,6 +148,10 @@
       "autoSaveDelay": {
         "title": "Vertraging voor automatisch opslaan",
         "description": "Bepaalt de vertraging in milliseconden waarna een gewijzigde editor automatisch wordt opgeslagen. Geldt alleen wanneer Automatisch opslaan is ingesteld op Na vertraging."
+      },
+      "reopenLastFile": {
+        "title": "Het laatst geopende bestand automatisch opnieuw openen",
+        "description": "Indien ingeschakeld, wordt bij het opstarten het laatste bestand dat u open had opnieuw geopend — maar alleen als de applicatie is afgesloten terwijl er een bestand open was."
       }
     }
   },

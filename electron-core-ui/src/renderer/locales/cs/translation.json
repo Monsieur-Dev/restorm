@@ -148,6 +148,10 @@
       "autoSaveDelay": {
         "title": "Prodleva automatického ukládání",
         "description": "Určuje prodlevu v milisekundách, po které se změněný editor automaticky uloží. Platí jen tehdy, pokud je automatické ukládání nastaveno na „Po prodlevě“."
+      },
+      "reopenLastFile": {
+        "title": "Automaticky znovu otevřít naposledy otevřený soubor",
+        "description": "Je-li zapnuto, znovu při spuštění otevře poslední soubor, který jste měli otevřený — ale jen pokud byla aplikace zavřena s otevřeným souborem."
       }
     }
   },

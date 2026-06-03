@@ -148,6 +148,10 @@
       "autoSaveDelay": {
         "title": "Retardo de guardado automático",
         "description": "Controla el retardo en milisegundos tras el cual un editor modificado se guarda automáticamente. Solo se aplica cuando el guardado automático está configurado en «Tras una espera»."
+      },
+      "reopenLastFile": {
+        "title": "Volver a abrir automáticamente el último archivo abierto",
+        "description": "Si está activado, vuelve a abrir al iniciar el último archivo que tenía abierto, pero solo si la aplicación se cerró mientras había un archivo abierto."
       }
     }
   },

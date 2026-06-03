@@ -22,7 +22,8 @@ installMainProcessInterceptor()
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { randomBytes } from 'node:crypto'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, initAutoSaveController, McpService } from 'electron-core-ui'
+import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, getStorageService, initAutoSaveController, McpService } from 'electron-core-ui'
+import { REOPEN_LAST_FILE_SETTING_KEY, REOPEN_LAST_FILE_STORAGE_KEY } from '../shared/config/reopenLastFile'
 // Restorm-specific renderer translations (notably the `behavior.*`
 // keys referenced by `restorm/resources/settings.yaml`). The main
 // process needs them so `SettingsService.reindexSearch()` and any
@@ -142,58 +143,77 @@ function createWindow(): void {
         mainWindow = null
       })
 
-      // Open file or folder from command line argument if specified
-      if (fileToOpenOnStart) {
-        // Use dom-ready which fires reliably with app:// protocol
-        mainWindow.webContents.on('dom-ready', () => {
-          logger.info('DOM ready, will open from command line:', { path: fileToOpenOnStart })
-          // Wait for the renderer React app to be fully initialized and hooks mounted
-          setTimeout(() => {
-            // Check if it's a file or directory
-            const isDirectory = existsSync(fileToOpenOnStart) && statSync(fileToOpenOnStart).isDirectory()
+      // Open a file or folder on startup. Handles both files and folders; the
+      // caller decides WHICH path (command line, or the reopen-last-file path).
+      const openPathOnStart = (targetPath: string): void => {
+        const isDirectory = existsSync(targetPath) && statSync(targetPath).isDirectory()
 
-            if (isDirectory) {
-              // Open as folder
-              logger.info('Opening folder...', { path: fileToOpenOnStart })
-              if (!isPersistenceServiceInitialized()) {
-                logger.warn('PersistenceService not initialized, cannot load folder')
-                return
-              }
-              void loadFolderStructure(fileToOpenOnStart).then(async (result) => {
-                if (result && mainWindow && isFileServiceInitialized()) {
-                  logger.info('Folder loaded, sending to renderer', {
-                    collectionsCount: (result.data as { collections?: unknown[] }).collections?.length,
-                    format: result.format
-                  })
-                  // Set the file state in FileService so the UI knows a file is open
-                  const fileService = getFileService() as { setOpenedFolder: (path: string, content: unknown, format?: string) => void }
-                  fileService.setOpenedFolder(fileToOpenOnStart, result.data, result.format)
-                  await attachDraftStoreForFolder(fileToOpenOnStart, result.format)
-                } else {
-                  logger.error('Failed to load folder from command line', { result })
-                }
+        if (isDirectory) {
+          logger.info('Opening folder...', { path: targetPath })
+          if (!isPersistenceServiceInitialized()) {
+            logger.warn('PersistenceService not initialized, cannot load folder')
+            return
+          }
+          void loadFolderStructure(targetPath).then(async (result) => {
+            if (result && mainWindow && isFileServiceInitialized()) {
+              logger.info('Folder loaded, sending to renderer', {
+                collectionsCount: (result.data as { collections?: unknown[] }).collections?.length,
+                format: result.format
               })
-            } else if (isFileServiceInitialized()) {
-              // Open as file — FileService itself stamps `_projectUuid`
-              // before broadcasting `file:opened` (configured via
-              // `uuidKey` on init), so this path stays a simple
-              // open + draft-store attach.
-              logger.info('Opening file...', { path: fileToOpenOnStart })
-              void getFileService().open(fileToOpenOnStart).then(async (result) => {
-                if (result.success) {
-                  logger.info('File opened successfully from command line')
-                  const format = (result as { format?: string }).format ?? 'yaml'
-                  await attachDraftStoreForFile(fileToOpenOnStart, format as PersistenceFormat)
-                } else {
-                  logger.error('Failed to open file from command line:', { path: fileToOpenOnStart })
-                }
-              })
+              // Set the file state in FileService so the UI knows a file is open
+              const fileService = getFileService() as { setOpenedFolder: (path: string, content: unknown, format?: string) => void }
+              fileService.setOpenedFolder(targetPath, result.data, result.format)
+              await attachDraftStoreForFolder(targetPath, result.format)
             } else {
-              logger.warn('FileService not initialized, cannot open file')
+              logger.error('Failed to load folder on startup', { result })
             }
-          }, DEFAULT_UI_DELAY_MS)
-        })
+          })
+        } else if (isFileServiceInitialized()) {
+          // FileService stamps `_projectUuid` before broadcasting `file:opened`
+          // (configured via `uuidKey` on init), so this stays a simple open +
+          // draft-store attach.
+          logger.info('Opening file...', { path: targetPath })
+          void getFileService().open(targetPath).then(async (result) => {
+            if (result.success) {
+              logger.info('File opened successfully on startup')
+              const format = (result as { format?: string }).format ?? 'yaml'
+              await attachDraftStoreForFile(targetPath, format as PersistenceFormat)
+            } else {
+              logger.error('Failed to open file on startup:', { path: targetPath })
+            }
+          })
+        } else {
+          logger.warn('FileService not initialized, cannot open file')
+        }
       }
+
+      // The "reopen last file" path: only when the `files:reopenLastFile` user
+      // setting is on AND the renderer-recorded path still exists on disk.
+      const resolveReopenLastFilePath = (): string | null => {
+        if (!isSettingsServiceInitialized()) return null
+        if (getSettingsService().get(REOPEN_LAST_FILE_SETTING_KEY) !== true) return null
+        const stored = getStorageService().get(REOPEN_LAST_FILE_STORAGE_KEY)
+        if (typeof stored !== 'string' || stored.length === 0) return null
+        return existsSync(stored) ? stored : null
+      }
+
+      // Open on startup via dom-ready (fires reliably with the app:// protocol).
+      // Command-line path wins; otherwise honour the reopen-last-file setting.
+      mainWindow.webContents.on('dom-ready', () => {
+        // Wait for the renderer React app to be fully initialized and hooks mounted.
+        setTimeout(() => {
+          if (fileToOpenOnStart) {
+            logger.info('Opening from command line', { path: fileToOpenOnStart })
+            openPathOnStart(fileToOpenOnStart)
+            return
+          }
+          const reopenPath = resolveReopenLastFilePath()
+          if (reopenPath) {
+            logger.info('Reopening last opened file', { path: reopenPath })
+            openPathOnStart(reopenPath)
+          }
+        }, DEFAULT_UI_DELAY_MS)
+      })
     }
 
     logger.info('Main window created successfully')

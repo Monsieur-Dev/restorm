@@ -78,7 +78,8 @@ const classForDocument = (type: 'folder' | 'request' | 'environment', doc: Recor
 }
 import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from './services/DocumentEvents'
 import type { EditorTab, WorkbenchTree, GroupNode, TabGroupNode, ContainerGroupNode } from 'electron-core-ui/renderer'
-import { isContainerNode, isTabGroupNode, loadWorkbenchTabIds } from 'electron-core-ui/renderer'
+import { isContainerNode, isTabGroupNode, loadWorkbenchTabIds, useSetting } from 'electron-core-ui/renderer'
+import { REOPEN_LAST_FILE_STORAGE_KEY, REOPEN_LAST_FILE_SETTING_KEY } from '../../shared/config/reopenLastFile'
 import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, type ConsoleTab, type FirewallTab, type MiniBrowserTab } from '../../shared/types/editor'
 import { findGroupIdForTab, hasGroupWithId, updateGroupById } from './utils/workbenchHelpers'
 
@@ -1711,6 +1712,17 @@ const App: React.FC = () => {
       hasRestoredWorkbenchRef.current = false
       handleFileClosed()
 
+      // The user explicitly closed the file → forget the auto-reopen record.
+      // This is the ONLY place the record is cleared on a closed file: a
+      // genuine close broadcasts `file:closed`, whereas an app quit does not
+      // (neither `before-quit` nor the window `close` handler calls
+      // FileService.close()), so the record correctly survives a quit and is
+      // available to the main process on the next launch.
+      const storageOnClose = (window as unknown as {
+        api?: { storage?: { delete: (k: string) => Promise<unknown> } }
+      }).api?.storage
+      void storageOnClose?.delete(REOPEN_LAST_FILE_STORAGE_KEY)
+
       // Close all open tabs for the currently opened file.
       requestAnimationFrame(() => {
         setWorkbenchTree({
@@ -1726,6 +1738,34 @@ const App: React.FC = () => {
       unsubscribe2()
     }
   }, [handleFileOpened, handleFileClosed, filePath, hasRestoredWorkbenchRef])
+
+  // Auto-reopen-last-file: when the `files:reopenLastFile` user setting is on,
+  // record the currently-open file's path so the main process can reopen it on
+  // the next launch.
+  //
+  // The record is RECORDED here (setting on + a file open) and only CLEARED on
+  // two explicit user actions: closing the file (handled in the `onFileClosed`
+  // listener above) and turning the setting off (the `prev === true` branch
+  // below). It is deliberately NOT cleared just because `filePath` is null —
+  // that condition is also true on every fresh launch, before the main process
+  // has had a chance to reopen the file, so clearing on it would wipe the
+  // record out from under main's startup read and defeat the whole feature.
+  const [reopenLastFileSetting] = useSetting(REOPEN_LAST_FILE_SETTING_KEY)
+  const prevReopenSettingRef = useRef<boolean | undefined>(undefined)
+  useEffect(() => {
+    const storage = (window as unknown as {
+      api?: { storage?: { set: (k: string, v: unknown) => Promise<unknown>; delete: (k: string) => Promise<unknown> } }
+    }).api?.storage
+    if (!storage) return
+    const wasEnabled = prevReopenSettingRef.current
+    prevReopenSettingRef.current = reopenLastFileSetting === true
+    if (reopenLastFileSetting === true) {
+      if (filePath) void storage.set(REOPEN_LAST_FILE_STORAGE_KEY, filePath)
+    } else if (wasEnabled === true) {
+      // Setting was just turned off by the user → forget the recorded file.
+      void storage.delete(REOPEN_LAST_FILE_STORAGE_KEY)
+    }
+  }, [reopenLastFileSetting, filePath])
 
   // Restore workbench state after rootItems are available (autosave relies on onRebuildTab)
   useEffect(() => {

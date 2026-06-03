@@ -148,6 +148,10 @@
       "autoSaveDelay": {
         "title": "Odlaganje automatskog čuvanja",
         "description": "Kontroliše odlaganje u milisekundama nakon kojeg se izmenjeni editor automatski čuva. Primenjuje se samo kada je Automatsko čuvanje postavljeno na Posle odlaganja."
+      },
+      "reopenLastFile": {
+        "title": "Аутоматски поново отвори последње отворену датотеку",
+        "description": "Када је омогућено, при покретању поново отвара последњу датотеку коју сте имали отворену — али само ако је апликација затворена док је датотека била отворена."
       }
     }
   },
