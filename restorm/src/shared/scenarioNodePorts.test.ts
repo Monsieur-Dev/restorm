@@ -74,6 +74,25 @@ describe('deriveRunScenarioPorts — runScenario ports from the sub-scenario', (
     expect(deriveRunScenarioPorts(sub).inputs.map((p) => p.id)).toEqual(['param:a'])
   })
 
+  it('excludes an input node fed from a predecessor (internally driven, not a caller param)', () => {
+    const sub = {
+      type: 'scenario', id: 's', name: 'Sub', tags: [], params: [],
+      nodes: [
+        { id: 'free-1', kind: 'input', config: { name: 'token' } },
+        { id: 'free-2', kind: 'input', config: { name: 'count' } },
+        { id: 'driven', kind: 'input', config: { name: 'secondInput' } }
+      ],
+      // `free-2`'s value feeds `driven`'s `in` trigger → `driven` is wired from a
+      // predecessor, so its value comes from inside the sub-scenario, not the caller.
+      edges: [
+        { id: 'e1', from: { nodeId: 'free-2', portId: 'value' }, to: { nodeId: 'driven', portId: 'in' } }
+      ]
+    } as unknown as Scenario
+    // Only the two FREE inputs surface (sorted, >1 source); the predecessor-fed
+    // one is dropped. Being an edge SOURCE (`free-2`) does not exclude a node.
+    expect(deriveRunScenarioPorts(sub).inputs.map((p) => p.name)).toEqual(['count', 'token'])
+  })
+
   it('exposes a single `done` signal output when the sub-scenario returns no data', () => {
     const sub = scenarioWith([{ kind: 'input', config: { name: 'token' } }])
     const { outputs } = deriveRunScenarioPorts(sub)

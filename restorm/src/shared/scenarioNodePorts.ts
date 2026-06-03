@@ -181,6 +181,13 @@ export function deriveRunScenarioPorts(subScenario: Scenario | null | undefined)
   const inputs: ScenarioPort[] = []
   const outputs: ScenarioPort[] = []
   if (!subScenario) return { inputs, outputs }
+  // An `input` node that is the target of an edge is fed from inside the
+  // sub-scenario (its `in` trigger — its only input port — is wired to a
+  // predecessor), so its value is produced internally. It is NOT a parameter
+  // the caller supplies, so it must not surface as a `param:` port. Only the
+  // FREE input nodes (no incoming edge) are the scenario's call parameters.
+  const internallyDrivenNodeIds = new Set<string>()
+  for (const edge of subScenario.edges) internallyDrivenNodeIds.add(edge.to.nodeId)
   const seenIn = new Set<string>()
   const seenOut = new Set<string>()
   // Count the distinct source nodes that actually contribute a port. When a
@@ -192,6 +199,8 @@ export function deriveRunScenarioPorts(subScenario: Scenario | null | undefined)
   for (const node of subScenario.nodes) {
     // An input node now declares MANY params — one `param:<name>` port each.
     if (node.kind === 'input') {
+      // Skip internally-driven inputs (wired from a predecessor) — not caller params.
+      if (internallyDrivenNodeIds.has(node.id)) continue
       let contributed = false
       for (const param of readInputParams(node.config)) {
         const name = param.name.trim()
