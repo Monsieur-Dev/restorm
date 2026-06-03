@@ -484,7 +484,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Ви дійсно хочете видалити «{{fileName}}» з обраного?",
-    "noFilesHint": "Відкрийте файл або створіть новий, щоб почати",
     "newAriaLabel": "Створити нову колекцію",
     "openAriaLabel": "Відкрити колекцію з диска",
     "landmarkLabel": "Ласкаво просимо"

@@ -481,7 +481,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "确定要将 \"{{fileName}}\" 从收藏中移除吗？",
-    "noFilesHint": "打开一个文件或新建一个文件以开始",
     "newAriaLabel": "新建集合",
     "openAriaLabel": "从磁盘打开集合",
     "landmarkLabel": "欢迎"
@@ -685,7 +684,7 @@
         "trademark": "Postman 是 Postman, Inc. 的注册商标，此处仅用于兼容性参考。"
       },
       "insomnia": {
-        "description": "从 Insomnia 迁移过来？拖入你的导出文件。restorm 能识别其 v4 / v5 集合格式，将每个请求、请求头、正文和环境一并带过来，并以 restorm 树呈现。",
+        "description": "从 Insomnia 迁移过来？拖入您的导出文件。restorm 能识别其 v4 / v5 集合格式，将每个请求、请求头、正文和环境一并带过来，并以 restorm 树呈现。",
         "trademark": "Insomnia 是 Kong Inc. 的注册商标，此处仅用于兼容性参考。"
       },
       "bruno": {
@@ -693,7 +692,7 @@
         "trademark": "Bruno 是 Anoop M. D. 开发的开源软件（MIT），在此按其许可证条款使用。"
       },
       "graphql": {
-        "description": "粘贴 GraphQL SDL（.graphql / .gql 或从你的 GraphQL 客户端复制的内容），restorm 会为每个操作搭建一个请求，准确连接到对应的 query / mutation / subscription 类型，并已结构化变量。",
+        "description": "粘贴 GraphQL SDL（.graphql / .gql 或从您的 GraphQL 客户端复制的内容），restorm 会为每个操作搭建一个请求，准确连接到对应的 query / mutation / subscription 类型，并已结构化变量。",
         "trademark": "GraphQL 是 Joint Development Foundation 项目 GraphQL Foundation 的商标。"
       },
       "grpc": {
@@ -708,7 +707,7 @@
         "trademark": "WebSocket 是由 IETF（RFC 6455）和 W3C 标准化的协议。"
       },
       "kafka": {
-        "description": "粘贴 Apache Kafka bootstrap-server URL（或主题列表）——restorm 会按主题注册 consumer 与 producer，通过你的 Schema Registry 解码 Avro / Protobuf 载荷，并让你一键回放单个 offset。",
+        "description": "粘贴 Apache Kafka bootstrap-server URL（或主题列表）——restorm 会按主题注册 consumer 与 producer，通过您的 Schema Registry 解码 Avro / Protobuf 载荷，并让您一键回放单个 offset。",
         "trademark": "Apache Kafka 与 Kafka 标志是 Apache Software Foundation 的商标。"
       },
       "socketio": {

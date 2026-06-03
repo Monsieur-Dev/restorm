@@ -484,7 +484,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Opravdu chcete odebrat „{{fileName}}“ z oblíbených?",
-    "noFilesHint": "Začněte otevřením souboru nebo vytvořením nového",
     "newAriaLabel": "Vytvořit novou kolekci",
     "openAriaLabel": "Otevřít kolekci z disku",
     "landmarkLabel": "Úvodní obrazovka"
@@ -676,19 +675,19 @@
         "trademark": "OpenAPI je projekt OpenAPI Initiative pod záštitou Linux Foundation."
       },
       "curl": {
-        "description": "Už máš požadavek spuštěný v terminálu? Vlož celý příkaz curl — flagy, hlavičky, tělo, query string — a Restorm ho znovu sestaví jako skutečný požadavek, který můžeš znovu spustit, upravit a připnout.",
+        "description": "Už máte požadavek spuštěný v terminálu? Vložte celý příkaz curl — flagy, hlavičky, tělo, query string — a Restorm ho znovu sestaví jako skutečný požadavek, který můžete znovu spustit, upravit a připnout.",
         "trademark": "curl je open source software © Daniel Stenberg, použitý zde dle jeho podmínek."
       },
       "powershell": {
-        "description": "Stejný princip, ale v PowerShellu. Vlož příkaz Invoke-WebRequest nebo Invoke-RestMethod a Restorm přečte URI, metodu, hlavičky a tělo, aby z nich vytvořil požadavek, který lze vizuálně upravovat.",
+        "description": "Stejný princip, ale v PowerShellu. Vložte příkaz Invoke-WebRequest nebo Invoke-RestMethod a Restorm přečte URI, metodu, hlavičky a tělo, aby z nich vytvořil požadavek, který lze vizuálně upravovat.",
         "trademark": "PowerShell je registrovaná ochranná známka Microsoft Corporation."
       },
       "postman": {
-        "description": "Máš v práci uloženou kolekci Postman? Pusť ji jako JSON — Restorm přečte každý požadavek, každý příklad odpovědi a každou proměnnou prostředí, a kolekci přestaví jako strom Restorm, který můžeš spouštět vedle zbytku svých API.",
+        "description": "Máte v práci uloženou kolekci Postman? Pusťte ji jako JSON — Restorm přečte každý požadavek, každý příklad odpovědi a každou proměnnou prostředí, a kolekci přestaví jako strom Restorm, který můžete spouštět vedle zbytku svých API.",
         "trademark": "Postman je registrovaná ochranná známka Postman, Inc., použitá zde pouze pro účely kompatibility."
       },
       "insomnia": {
-        "description": "Přicházíš z Insomnia? Pusť svůj export. Restorm rozumí formátu kolekcí v4 / v5, přenese každý požadavek, hlavičku, tělo i prostředí, a vše zobrazí jako strom Restorm.",
+        "description": "Přicházíte z Insomnia? Pusťte svůj export. Restorm rozumí formátu kolekcí v4 / v5, přenese každý požadavek, hlavičku, tělo i prostředí, a vše zobrazí jako strom Restorm.",
         "trademark": "Insomnia je registrovaná ochranná známka Kong Inc., použitá zde pouze pro účely kompatibility."
       },
       "bruno": {
@@ -696,33 +695,33 @@
         "trademark": "Bruno je open source software (MIT) Anoopa M. D., použitý zde dle jeho podmínek."
       },
       "graphql": {
-        "description": "Vlož GraphQL SDL (.graphql / .gql / vložení z tvého GraphQL klienta) a Restorm připraví jeden požadavek na každou operaci, navázaný na správný typ query / mutation / subscription s předem strukturovanými proměnnými.",
+        "description": "Vložte GraphQL SDL (.graphql / .gql / vložení z vašeho GraphQL klienta) a Restorm připraví jeden požadavek na každou operaci, navázaný na správný typ query / mutation / subscription s předem strukturovanými proměnnými.",
         "trademark": "GraphQL je ochranná známka GraphQL Foundation, projektu Joint Development Foundation."
       },
       "grpc": {
-        "description": "Pusť soubor .proto (nebo celý adresář s nimi) a Restorm projde každou službu, každé RPC, každou zprávu — z každé metody udělá typovaný požadavek, který lze odeslat přes gRPC exekutor bez nutnosti dotýkat se codegenu.",
+        "description": "Pusťte soubor .proto (nebo celý adresář s nimi) a Restorm projde každou službu, každé RPC, každou zprávu — z každé metody udělá typovaný požadavek, který lze odeslat přes gRPC exekutor bez nutnosti dotýkat se codegenu.",
         "trademark": "gRPC je projekt Cloud Native Computing Foundation."
       },
       "soap": {
-        "description": "Máš WSDL? Vlož ho (nebo jeho URL) — Restorm naparsuje každý <port> a každou <operation> a vytvoří SOAP obálky připravené k odeslání se správnou hlavičkou SOAPAction, skelety těla typované schématem a se schématem ověření, které WSDL deklaruje."
+        "description": "Máte WSDL? Vložte ho (nebo jeho URL) — Restorm naparsuje každý <port> a každou <operation> a vytvoří SOAP obálky připravené k odeslání se správnou hlavičkou SOAPAction, skelety těla typované schématem a se schématem ověření, které WSDL deklaruje."
       },
       "websocket": {
-        "description": "Vlož WebSocket endpoint (ws:// nebo wss://) — Restorm otevře spojení, zachytí uvítací rámce ze serveru a vytvoří požadavky send / subscribe s opakovatelnými šablonami payloadu.",
+        "description": "Vložte WebSocket endpoint (ws:// nebo wss://) — Restorm otevře spojení, zachytí uvítací rámce ze serveru a vytvoří požadavky send / subscribe s opakovatelnými šablonami payloadu.",
         "trademark": "WebSocket je protokol standardizovaný IETF (RFC 6455) a W3C."
       },
       "kafka": {
-        "description": "Vlož URL bootstrap-serveru Apache Kafka (nebo seznam topiků) — Restorm zaregistruje konzumenty a producenty pro každý topic, dekóduje payloady Avro / Protobuf přes tvůj Schema Registry a umožní jedním klikem přehrát konkrétní offset.",
+        "description": "Vložte URL bootstrap-serveru Apache Kafka (nebo seznam topiků) — Restorm zaregistruje konzumenty a producenty pro každý topic, dekóduje payloady Avro / Protobuf přes váš Schema Registry a umožní jedním klikem přehrát konkrétní offset.",
         "trademark": "Apache Kafka a logo Kafka jsou ochranné známky Apache Software Foundation."
       },
       "socketio": {
-        "description": "Vlož URL serveru Socket.IO — Restorm vyjedná handshake, vypíše namespaces a názvy událostí, které server vysílá, a poskytne ti jeden požadavek na každý emit / on s validací payloadu.",
+        "description": "Vložte URL serveru Socket.IO — Restorm vyjedná handshake, vypíše namespaces a názvy událostí, které server vysílá, a poskytne vám jeden požadavek na každý emit / on s validací payloadu.",
         "trademark": "Socket.IO je open-source knihovna vydaná pod licencí MIT; název a logo jsou použity nominativně."
       },
       "odata": {
-        "description": "Vlož URL OData service-document nebo soubor $metadata — Restorm přečte CSDL, znovu vytvoří entity sets, function imports a actions a předvyplní možnosti $filter / $select / $top / $skip u každé operace."
+        "description": "Vložte URL OData service-document nebo soubor $metadata — Restorm přečte CSDL, znovu vytvoří entity sets, function imports a actions a předvyplní možnosti $filter / $select / $top / $skip u každé operace."
       },
       "mqtt": {
-        "description": "Vlož URL MQTT brokeru nebo katalog topiků — Restorm vytvoří požadavky publish / subscribe pro každý topic, udržuje spojení živé pro náhledy streamování a pamatuje si snapshoty zachovaných zpráv, abys je mohl později přehrát.",
+        "description": "Vložte URL MQTT brokeru nebo katalog topiků — Restorm vytvoří požadavky publish / subscribe pro každý topic, udržuje spojení živé pro náhledy streamování a pamatuje si snapshoty zachovaných zpráv, abyste je mohli později přehrát.",
         "trademark": "MQTT je standard OASIS; název a logo MQTT jsou ochranné známky OASIS Open."
       }
     },

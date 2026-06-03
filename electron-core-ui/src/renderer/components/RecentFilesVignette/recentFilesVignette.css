@@ -16,6 +16,14 @@
   gap: 18px;
 }
 
+/* Keep the favorites/recents sections stacked with the original spacing now
+ * that they live inside the scroll content rather than directly in the panel. */
+.ecu-recent-files-vignette-scroll-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
 .ecu-recent-files-vignette-section {
   width: 100%;
 }

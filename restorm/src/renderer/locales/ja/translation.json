@@ -481,7 +481,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "\"{{fileName}}\" をお気に入りから削除してもよろしいですか？",
-    "noFilesHint": "既存のファイルを開くか、新規ファイルを作成して開始してください",
     "newAriaLabel": "新しいコレクションを作成",
     "openAriaLabel": "ディスクからコレクションを開く",
     "landmarkLabel": "ようこそ"
@@ -673,7 +672,7 @@
         "trademark": "OpenAPI は Linux Foundation 配下の OpenAPI Initiative のプロジェクトです。"
       },
       "curl": {
-        "description": "ターミナルで動いているリクエストがある？完全な curl コマンド（フラグ、ヘッダー、ボディ、クエリ文字列）を貼り付けるだけで、restorm は再実行・編集・ピン留めできる実際のリクエストとして組み立て直します。",
+        "description": "ターミナルで動いているリクエストはありますか？完全な curl コマンド（フラグ、ヘッダー、ボディ、クエリ文字列）を貼り付けるだけで、restorm は再実行・編集・ピン留めできる実際のリクエストとして組み立て直します。",
         "trademark": "curl は © Daniel Stenberg のオープンソースソフトウェアで、その条項に基づき使用しています。"
       },
       "powershell": {

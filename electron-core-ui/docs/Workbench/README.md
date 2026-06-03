@@ -36,6 +36,12 @@ This folder contains:
 #### Round-tripping per-tab state
 
 Each `EditorTab` may set an opt-in `persistedState?: unknown` field. ECUI captures it on every autosave (parallel array next to `tabIds`) and feeds it back into the second argument of `onRebuildTab(tabId, data)` on restore. Use it for tab-local state that doesn't belong in the tab id — e.g. a Mini browser's current URL, a markdown preview's scroll position, the active sub-tab inside a multi-pane editor. The payload must be JSON-serialisable; ECUI treats it as opaque.
+
+#### Peeking the persisted tabs (`loadWorkbenchTabIds`)
+
+`loadWorkbenchTabIds(workbenchId: string): Promise<string[]>` reads the persisted state and returns every tab id that a mount-time restore would reopen — walking split-pane containers, in document order — **without** rebuilding any tab. Returns `[]` when nothing is persisted.
+
+Use it to decide up front whether a restore will reopen tabs: a consumer that shows an onboarding / empty placeholder can query this on mount and hold the placeholder back when the answer is non-empty, then drop it in once the restore (signalled by `onStateRestored`) has reopened those tabs — avoiding a flash of the empty state during the async restore window. The empty case (`[]`) means there is nothing to wait for, so the placeholder can render immediately.
 - Sizing:
   - `onSizesChange?: (nodeId: string, sizes: number[]) => void`
 - Tab callbacks / extensibility:

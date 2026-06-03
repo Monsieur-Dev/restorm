@@ -482,7 +482,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Haluatko varmasti poistaa kohteen \"{{fileName}}\" suosikeista?",
-    "noFilesHint": "Avaa tiedosto tai luo uusi aloittaaksesi",
     "newAriaLabel": "Luo uusi kokoelma",
     "openAriaLabel": "Avaa kokoelma levyltä",
     "landmarkLabel": "Tervetuloa"

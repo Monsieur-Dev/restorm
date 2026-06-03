@@ -481,7 +481,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "確定要將 \"{{fileName}}\" 從我的最愛中移除嗎？",
-    "noFilesHint": "開啟現有檔案或新增一個檔案以開始",
     "newAriaLabel": "建立新集合",
     "openAriaLabel": "從磁碟開啟集合",
     "landmarkLabel": "歡迎"
@@ -708,7 +707,7 @@
         "trademark": "WebSocket 為由 IETF（RFC 6455）與 W3C 制定的標準通訊協定。"
       },
       "kafka": {
-        "description": "貼上 Apache Kafka bootstrap-server URL（或主題清單）——restorm 會為每個主題註冊 consumer 與 producer，透過你的 Schema Registry 解碼 Avro / Protobuf 酬載，並讓你一鍵重播個別 offset。",
+        "description": "貼上 Apache Kafka bootstrap-server URL（或主題清單）——restorm 會為每個主題註冊 consumer 與 producer，透過您的 Schema Registry 解碼 Avro / Protobuf 酬載，並讓您一鍵重播個別 offset。",
         "trademark": "Apache Kafka 與 Kafka 標誌為 Apache Software Foundation 的商標。"
       },
       "socketio": {

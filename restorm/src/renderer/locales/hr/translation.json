@@ -483,7 +483,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Jeste li sigurni da želite ukloniti \"{{fileName}}\" iz favorita?",
-    "noFilesHint": "Otvorite datoteku ili stvorite novu da biste započeli",
     "newAriaLabel": "Stvori novu kolekciju",
     "openAriaLabel": "Otvori kolekciju s diska",
     "landmarkLabel": "Dobrodošli"

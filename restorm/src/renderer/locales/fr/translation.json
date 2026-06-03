@@ -482,7 +482,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Voulez-vous vraiment retirer \"{{fileName}}\" des favoris ?",
-    "noFilesHint": "Ouvrez un fichier ou créez-en un nouveau pour commencer",
     "newAriaLabel": "Créer une nouvelle collection",
     "openAriaLabel": "Ouvrir une collection depuis le disque",
     "landmarkLabel": "Accueil"
@@ -674,19 +673,19 @@
         "trademark": "OpenAPI est un projet de l'OpenAPI Initiative sous l'égide de la Linux Foundation."
       },
       "curl": {
-        "description": "Tu as déjà la requête qui tourne dans ton terminal ? Colle la commande curl complète — flags, headers, body, query string — et Restorm la reconstruit en vraie requête à rejouer, éditer, épingler.",
+        "description": "Vous avez déjà la requête qui tourne dans votre terminal ? Collez la commande curl complète — flags, headers, body, query string — et Restorm la reconstruit en vraie requête à rejouer, éditer, épingler.",
         "trademark": "curl est un logiciel libre © Daniel Stenberg, utilisé ici sous ses conditions."
       },
       "powershell": {
-        "description": "Même principe, en PowerShell. Colle un Invoke-WebRequest ou Invoke-RestMethod et Restorm lit l'URI, la méthode, les headers et le body pour amorcer une requête éditable visuellement.",
+        "description": "Même principe, en PowerShell. Collez un Invoke-WebRequest ou Invoke-RestMethod et Restorm lit l'URI, la méthode, les headers et le body pour amorcer une requête éditable visuellement.",
         "trademark": "PowerShell est une marque déposée de Microsoft Corporation."
       },
       "postman": {
-        "description": "Une collection Postman qui traîne au bureau ? Dépose le JSON — Restorm lit chaque requête, chaque exemple de réponse et chaque variable d'environnement, puis reconstruit la collection en arborescence Restorm utilisable à côté du reste de tes APIs.",
+        "description": "Une collection Postman qui traîne au bureau ? Déposez le JSON — Restorm lit chaque requête, chaque exemple de réponse et chaque variable d'environnement, puis reconstruit la collection en arborescence Restorm utilisable à côté du reste de vos APIs.",
         "trademark": "Postman est une marque déposée de Postman, Inc., utilisée ici uniquement à titre de référence pour la compatibilité."
       },
       "insomnia": {
-        "description": "Tu viens d'Insomnia ? Dépose ton export. Restorm comprend son format de collection v4 / v5, récupère chaque requête, header, body et environnement, et restitue le tout en arborescence Restorm.",
+        "description": "Vous venez d'Insomnia ? Déposez votre export. Restorm comprend son format de collection v4 / v5, récupère chaque requête, header, body et environnement, et restitue le tout en arborescence Restorm.",
         "trademark": "Insomnia est une marque déposée de Kong Inc., utilisée ici uniquement à titre de référence pour la compatibilité."
       },
       "bruno": {
@@ -694,33 +693,33 @@
         "trademark": "Bruno est un logiciel libre (MIT) d'Anoop M. D., utilisé ici sous ses conditions."
       },
       "graphql": {
-        "description": "Colle un SDL GraphQL (.graphql / .gql / un copier-coller depuis ton client GraphQL) et Restorm scaffolde une requête par opération, déjà câblée au bon type query / mutation / subscription avec les variables structurées.",
+        "description": "Collez un SDL GraphQL (.graphql / .gql / un copier-coller depuis votre client GraphQL) et Restorm scaffolde une requête par opération, déjà câblée au bon type query / mutation / subscription avec les variables structurées.",
         "trademark": "GraphQL est une marque de la GraphQL Foundation, projet de la Joint Development Foundation."
       },
       "grpc": {
-        "description": "Dépose un fichier .proto (ou un dossier entier) et Restorm parcourt chaque service, chaque RPC, chaque message — chaque méthode devient une requête typée envoyable via l'exécuteur gRPC sans toucher au codegen.",
+        "description": "Déposez un fichier .proto (ou un dossier entier) et Restorm parcourt chaque service, chaque RPC, chaque message — chaque méthode devient une requête typée envoyable via l'exécuteur gRPC sans toucher au codegen.",
         "trademark": "gRPC est un projet de la Cloud Native Computing Foundation."
       },
       "soap": {
-        "description": "Un WSDL ? Colle-le (ou son URL) — Restorm parse chaque <port> et chaque <operation>, génère des enveloppes SOAP prêtes à envoyer avec le bon header SOAPAction, des skeletons de body typés par le schéma, et le mode d'auth déclaré dans le WSDL."
+        "description": "Un WSDL ? Collez-le (ou son URL) — Restorm parse chaque <port> et chaque <operation>, génère des enveloppes SOAP prêtes à envoyer avec le bon header SOAPAction, des skeletons de body typés par le schéma, et le mode d'auth déclaré dans le WSDL."
       },
       "websocket": {
-        "description": "Colle un endpoint WebSocket (ws:// ou wss://) — Restorm ouvre la connexion, capture les frames de hello envoyées par le serveur, et fabrique les requêtes send / subscribe avec des templates de payload rejouables.",
+        "description": "Collez un endpoint WebSocket (ws:// ou wss://) — Restorm ouvre la connexion, capture les frames de hello envoyées par le serveur, et fabrique les requêtes send / subscribe avec des templates de payload rejouables.",
         "trademark": "WebSocket est un protocole standardisé par l'IETF (RFC 6455) et le W3C."
       },
       "kafka": {
-        "description": "Colle l'URL d'un bootstrap-server Apache Kafka (ou une liste de topics) — Restorm enregistre consumers et producers par topic, décode les payloads Avro / Protobuf via ton Schema Registry, et permet de rejouer un offset précis en un clic.",
+        "description": "Collez l'URL d'un bootstrap-server Apache Kafka (ou une liste de topics) — Restorm enregistre consumers et producers par topic, décode les payloads Avro / Protobuf via votre Schema Registry, et permet de rejouer un offset précis en un clic.",
         "trademark": "Apache Kafka et le logo Kafka sont des marques de l'Apache Software Foundation."
       },
       "socketio": {
-        "description": "Colle l'URL d'un serveur Socket.IO — Restorm négocie le handshake, liste les namespaces et les noms d'événements émis par le serveur, et te donne une requête par emit / on avec validation de payload.",
+        "description": "Collez l'URL d'un serveur Socket.IO — Restorm négocie le handshake, liste les namespaces et les noms d'événements émis par le serveur, et vous donne une requête par emit / on avec validation de payload.",
         "trademark": "Socket.IO est une bibliothèque open-source publiée sous licence MIT ; le nom et le logo sont utilisés à titre nominatif."
       },
       "odata": {
-        "description": "Colle l'URL d'un service-document OData ou un fichier $metadata — Restorm lit le CSDL, reconstruit les entity sets, les function imports et les actions, et pré-remplit les options $filter / $select / $top / $skip sur chaque opération."
+        "description": "Collez l'URL d'un service-document OData ou un fichier $metadata — Restorm lit le CSDL, reconstruit les entity sets, les function imports et les actions, et pré-remplit les options $filter / $select / $top / $skip sur chaque opération."
       },
       "mqtt": {
-        "description": "Colle l'URL d'un broker MQTT ou un catalogue de topics — Restorm fabrique les requêtes publish / subscribe par topic, garde la connexion ouverte pour les previews en streaming, et retient les snapshots des messages retained pour pouvoir les rejouer plus tard.",
+        "description": "Collez l'URL d'un broker MQTT ou un catalogue de topics — Restorm fabrique les requêtes publish / subscribe par topic, garde la connexion ouverte pour les previews en streaming, et retient les snapshots des messages retained pour pouvoir les rejouer plus tard.",
         "trademark": "MQTT est un standard OASIS ; le nom et le logo MQTT sont des marques d'OASIS Open."
       }
     },

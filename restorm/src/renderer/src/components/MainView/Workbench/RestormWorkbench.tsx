@@ -239,7 +239,30 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   // split pane (not just `groups[0]`) when the tree mutates
   // programmatically (e.g. via back/forward navigation).
   const lastActiveByGroupRef = useRef<Map<string, string>>(new Map())
-  
+
+  // Keep the per-group active-tab tracker in sync with EXTERNAL tree changes
+  // (e.g. a sidebar click opening a tab, which updates the controlled tree but
+  // never flows through `handleTreeChange`). Without this the tracker goes
+  // stale: closing an externally-opened tab reverts the active tab to its
+  // previous value, and because the stale "previous" still equals that value
+  // the revert looks like "no change" — so `onTabActivate` never fires and a
+  // sidebar that follows the active tab stays stuck on the just-closed item.
+  // We only refresh the tracker here (deliberately no `onTabActivate`):
+  // external opens already sync the sidebar through their own click handler,
+  // so firing again would double the navigation history.
+  useEffect(() => {
+    const syncTracker = (nodes: WorkbenchTree['groups']): void => {
+      for (const node of nodes) {
+        if (isTabGroupNode(node)) {
+          if (node.activeTabId) lastActiveByGroupRef.current.set(node.id, node.activeTabId)
+        } else if (isContainerNode(node)) {
+          syncTracker(node.groups)
+        }
+      }
+    }
+    syncTracker(tree.groups)
+  }, [tree])
+
   // Cache for tabs dropped from other windows (stores the full RestormEditorTab data)
   const droppedTabsCacheRef = useRef<Map<string, RestormEditorTab>>(new Map())
   

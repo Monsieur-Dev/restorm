@@ -483,7 +483,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Sigur doriți să eliminați \"{{fileName}}\" din favorite?",
-    "noFilesHint": "Deschideți un fișier sau creați unul nou pentru a începe",
     "newAriaLabel": "Creează o colecție nouă",
     "openAriaLabel": "Deschide o colecție de pe disc",
     "landmarkLabel": "Bine ați venit"

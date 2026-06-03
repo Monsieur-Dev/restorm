@@ -481,7 +481,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Apakah Anda yakin ingin menghapus \"{{fileName}}\" dari favorit?",
-    "noFilesHint": "Buka file atau buat yang baru untuk memulai",
     "newAriaLabel": "Buat koleksi baru",
     "openAriaLabel": "Buka koleksi dari disk",
     "landmarkLabel": "Selamat datang"

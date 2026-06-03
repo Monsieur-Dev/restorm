@@ -482,7 +482,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "\"{{fileName}}\" dosyasını favorilerden çıkarmak istediğinize emin misiniz?",
-    "noFilesHint": "Başlamak için bir dosya açın veya yeni bir tane oluşturun",
     "newAriaLabel": "Yeni bir koleksiyon oluştur",
     "openAriaLabel": "Diskten bir koleksiyon aç",
     "landmarkLabel": "Hoş geldiniz"

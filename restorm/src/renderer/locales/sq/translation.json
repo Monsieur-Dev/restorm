@@ -482,7 +482,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Jeni i sigurt se doni të hiqni \"{{fileName}}\" nga të preferuarat?",
-    "noFilesHint": "Hap një skedar ose krijo një të ri për të filluar",
     "newAriaLabel": "Krijo një koleksion të ri",
     "openAriaLabel": "Hap një koleksion nga disku",
     "landmarkLabel": "Mirësevini"
@@ -674,11 +673,11 @@
         "trademark": "OpenAPI është një projekt i OpenAPI Initiative nën Linux Foundation."
       },
       "curl": {
-        "description": "E keni tashmë kërkesën duke punuar në terminal? Ngjit thirrjen e plotë curl — flamurët, kokat, trupin, query string — dhe Restorm e rindërton si një kërkesë reale që mund ta rinisni, redaktoni dhe fiksoni.",
+        "description": "E keni tashmë kërkesën duke punuar në terminal? Ngjisni thirrjen e plotë curl — flamurët, kokat, trupin, query string — dhe Restorm e rindërton si një kërkesë reale që mund ta rinisni, redaktoni dhe fiksoni.",
         "trademark": "curl është software me kod të hapur © Daniel Stenberg, i përdorur këtu sipas kushteve të tij."
       },
       "powershell": {
-        "description": "E njëjta ide, në stil PowerShell. Ngjit një komandë Invoke-WebRequest ose Invoke-RestMethod dhe Restorm lexon URI-në, metodën, kokat dhe trupin për të farësuar një kërkesë mbi të cilën mund të iteroni vizualisht.",
+        "description": "E njëjta ide, në stil PowerShell. Ngjisni një komandë Invoke-WebRequest ose Invoke-RestMethod dhe Restorm lexon URI-në, metodën, kokat dhe trupin për të farësuar një kërkesë mbi të cilën mund të iteroni vizualisht.",
         "trademark": "PowerShell është një markë tregtare e regjistruar e Microsoft Corporation."
       },
       "postman": {
@@ -694,7 +693,7 @@
         "trademark": "Bruno është software me kod të hapur (MIT) nga Anoop M. D., i përdorur këtu sipas kushteve të tij."
       },
       "graphql": {
-        "description": "Ngjit një SDL GraphQL (.graphql / .gql / një ngjitje nga klienti juaj GraphQL) dhe Restorm ndërton një kërkesë për operacion, e lidhur me llojin e duhur query / mutation / subscription me variablat tashmë të strukturuara.",
+        "description": "Ngjisni një SDL GraphQL (.graphql / .gql / një ngjitje nga klienti juaj GraphQL) dhe Restorm ndërton një kërkesë për operacion, e lidhur me llojin e duhur query / mutation / subscription me variablat tashmë të strukturuara.",
         "trademark": "GraphQL është një markë tregtare e GraphQL Foundation, projekt i Joint Development Foundation."
       },
       "grpc": {
@@ -705,22 +704,22 @@
         "description": "Keni një WSDL? Ngjiteni (ose URL-në e tij) — Restorm parsezon çdo <port> dhe <operation> dhe prodhon zarfe SOAP gati për t'u dërguar me kokën e duhur SOAPAction, skelete trupi të tipizuara sipas skemës dhe skemën e vërtetimit që deklaron WSDL-ja."
       },
       "websocket": {
-        "description": "Ngjit një pikë fundore WebSocket (ws:// ose wss://) — Restorm hap lidhjen, kap kornizat hello të serverit dhe ndërton kërkesa send / subscribe me modele payload që mund të riluhen.",
+        "description": "Ngjisni një pikë fundore WebSocket (ws:// ose wss://) — Restorm hap lidhjen, kap kornizat hello të serverit dhe ndërton kërkesa send / subscribe me modele payload që mund të riluhen.",
         "trademark": "WebSocket është një protokoll i standardizuar nga IETF (RFC 6455) dhe W3C."
       },
       "kafka": {
-        "description": "Ngjit një URL të një bootstrap-server Apache Kafka (ose një listë temash) — Restorm regjistron konsumatorët dhe prodhuesit për temë, dekodon payload-et Avro / Protobuf përmes Schema Registry-së suaj dhe ju lejon të riluani offsetet individuale me një klikim.",
+        "description": "Ngjisni një URL të një bootstrap-server Apache Kafka (ose një listë temash) — Restorm regjistron konsumatorët dhe prodhuesit për temë, dekodon payload-et Avro / Protobuf përmes Schema Registry-së suaj dhe ju lejon të riluani offsetet individuale me një klikim.",
         "trademark": "Apache Kafka dhe logoja Kafka janë marka tregtare të Apache Software Foundation."
       },
       "socketio": {
-        "description": "Ngjit një URL serveri Socket.IO — Restorm negocion handshake-un, liston namespace-t dhe emrat e ngjarjeve që emiton serveri dhe ju jep një kërkesë për ngjarje emit / on me validim payload-i.",
+        "description": "Ngjisni një URL serveri Socket.IO — Restorm negocion handshake-un, liston namespace-t dhe emrat e ngjarjeve që emiton serveri dhe ju jep një kërkesë për ngjarje emit / on me validim payload-i.",
         "trademark": "Socket.IO është një bibliotekë me kod të hapur e publikuar nën licencën MIT; emri dhe logoja përdoren në mënyrë emërtore."
       },
       "odata": {
-        "description": "Ngjit një URL të një service-document OData ose një skedar $metadata — Restorm lexon CSDL-në, rindërton entity sets, function imports dhe actions, plus parambush opsionet e query $filter / $select / $top / $skip për çdo operacion."
+        "description": "Ngjisni një URL të një service-document OData ose një skedar $metadata — Restorm lexon CSDL-në, rindërton entity sets, function imports dhe actions, plus parambush opsionet e query $filter / $select / $top / $skip për çdo operacion."
       },
       "mqtt": {
-        "description": "Ngjit një URL të një broker-i MQTT ose një katalog temash — Restorm ndërton kërkesa publish / subscribe për temë, e mban lidhjen të gjallë për pamje paraprake në streaming dhe mban mend snapshot-et e mesazheve të mbajtura për t'i riluajtur më vonë.",
+        "description": "Ngjisni një URL të një broker-i MQTT ose një katalog temash — Restorm ndërton kërkesa publish / subscribe për temë, e mban lidhjen të gjallë për pamje paraprake në streaming dhe mban mend snapshot-et e mesazheve të mbajtura për t'i riluajtur më vonë.",
         "trademark": "MQTT është një standard OASIS; emri dhe logoja MQTT janë marka tregtare të OASIS Open."
       }
     },

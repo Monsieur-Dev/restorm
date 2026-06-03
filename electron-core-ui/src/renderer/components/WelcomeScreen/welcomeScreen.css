@@ -117,13 +117,6 @@
   width: 280px;
 }
 
-.ecu-welcome-screen-hint {
-  font-size: 14px;
-  color: var(--descriptionForeground);
-  text-align: center;
-  padding: 0;
-}
-
 .ecu-welcome-screen-recent-files-vignette {
   position: absolute;
   bottom: 32px;

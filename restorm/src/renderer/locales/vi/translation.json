@@ -481,7 +481,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Bạn có chắc chắn muốn xóa \"{{fileName}}\" khỏi mục yêu thích không?",
-    "noFilesHint": "Mở một tệp hoặc tạo tệp mới để bắt đầu",
     "newAriaLabel": "Tạo bộ sưu tập mới",
     "openAriaLabel": "Mở bộ sưu tập từ đĩa",
     "landmarkLabel": "Chào mừng"

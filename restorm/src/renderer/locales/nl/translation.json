@@ -482,7 +482,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Weet je zeker dat je \"{{fileName}}\" uit favorieten wilt verwijderen?",
-    "noFilesHint": "Open een bestand of maak een nieuwe aan om te beginnen",
     "newAriaLabel": "Een nieuwe collectie maken",
     "openAriaLabel": "Een collectie van schijf openen",
     "landmarkLabel": "Welkom"
@@ -674,19 +673,19 @@
         "trademark": "OpenAPI is een project van het OpenAPI Initiative onder de Linux Foundation."
       },
       "curl": {
-        "description": "Heb je het verzoek al draaien in je terminal? Plak de volledige curl-aanroep — vlaggen, headers, body, querystring — en Restorm bouwt het opnieuw als een echt verzoek dat je opnieuw kunt uitvoeren, bewerken en vastmaken.",
+        "description": "Hebt u het verzoek al draaien in uw terminal? Plak de volledige curl-aanroep — vlaggen, headers, body, querystring — en Restorm bouwt het opnieuw als een echt verzoek dat u opnieuw kunt uitvoeren, bewerken en vastmaken.",
         "trademark": "curl is opensourcesoftware © Daniel Stenberg, hier gebruikt onder de bijbehorende voorwaarden."
       },
       "powershell": {
-        "description": "Hetzelfde idee, PowerShell-versie. Plak een Invoke-WebRequest- of Invoke-RestMethod-commando en Restorm leest de URI, methode, headers en body om een verzoek te starten dat je visueel kunt itereren.",
+        "description": "Hetzelfde idee, PowerShell-versie. Plak een Invoke-WebRequest- of Invoke-RestMethod-commando en Restorm leest de URI, methode, headers en body om een verzoek te starten dat u visueel kunt itereren.",
         "trademark": "PowerShell is een gedeponeerd handelsmerk van Microsoft Corporation."
       },
       "postman": {
-        "description": "Een Postman-collectie die op kantoor rondslingert? Sleep de JSON erin — Restorm leest elk verzoek, elk voorbeeldantwoord en elke omgevingsvariabele, en bouwt de collectie opnieuw op als een Restorm-boom die je naast je andere API's kunt gebruiken.",
+        "description": "Een Postman-collectie die op kantoor rondslingert? Sleep de JSON erin — Restorm leest elk verzoek, elk voorbeeldantwoord en elke omgevingsvariabele, en bouwt de collectie opnieuw op als een Restorm-boom die u naast uw andere API's kunt gebruiken.",
         "trademark": "Postman is een gedeponeerd handelsmerk van Postman, Inc., hier alleen ter referentie voor compatibiliteit gebruikt."
       },
       "insomnia": {
-        "description": "Kom je van Insomnia? Sleep je export erin. Restorm begrijpt het v4-/v5-collectieformaat, neemt elk verzoek, elke header, body en omgeving mee en presenteert het geheel als een Restorm-boom.",
+        "description": "Komt u van Insomnia? Sleep uw export erin. Restorm begrijpt het v4-/v5-collectieformaat, neemt elk verzoek, elke header, body en omgeving mee en presenteert het geheel als een Restorm-boom.",
         "trademark": "Insomnia is een gedeponeerd handelsmerk van Kong Inc., hier alleen ter referentie voor compatibiliteit gebruikt."
       },
       "bruno": {
@@ -698,7 +697,7 @@
         "trademark": "GraphQL is een handelsmerk van de GraphQL Foundation, een project van de Joint Development Foundation."
       },
       "grpc": {
-        "description": "Sleep een .proto-bestand (of een map vol .proto-bestanden) en Restorm doorloopt elke service, elke RPC en elk bericht — en zet elke methode om in een getypeerd verzoek dat je via de gRPC-executor kunt verzenden zonder aan codegen te raken.",
+        "description": "Sleep een .proto-bestand (of een map vol .proto-bestanden) en Restorm doorloopt elke service, elke RPC en elk bericht — en zet elke methode om in een getypeerd verzoek dat u via de gRPC-executor kunt verzenden zonder aan codegen te raken.",
         "trademark": "gRPC is een project van de Cloud Native Computing Foundation."
       },
       "soap": {
@@ -709,18 +708,18 @@
         "trademark": "WebSocket is een protocol dat is gestandaardiseerd door de IETF (RFC 6455) en het W3C."
       },
       "kafka": {
-        "description": "Plak de URL van een Apache Kafka bootstrap-server (of een lijst met topics) — Restorm registreert consumers en producers per topic, decodeert Avro-/Protobuf-payloads via je Schema Registry en laat je met één klik individuele offsets opnieuw afspelen.",
+        "description": "Plak de URL van een Apache Kafka bootstrap-server (of een lijst met topics) — Restorm registreert consumers en producers per topic, decodeert Avro-/Protobuf-payloads via uw Schema Registry en laat u met één klik individuele offsets opnieuw afspelen.",
         "trademark": "Apache Kafka en het Kafka-logo zijn handelsmerken van de Apache Software Foundation."
       },
       "socketio": {
-        "description": "Plak de URL van een Socket.IO-server — Restorm onderhandelt de handshake, somt de namespaces en gebeurtenisnamen op die de server uitzendt, en geeft je één verzoek per emit/on-gebeurtenis met payload-validatie.",
+        "description": "Plak de URL van een Socket.IO-server — Restorm onderhandelt de handshake, somt de namespaces en gebeurtenisnamen op die de server uitzendt, en geeft u één verzoek per emit/on-gebeurtenis met payload-validatie.",
         "trademark": "Socket.IO is een opensourcebibliotheek uitgebracht onder de MIT-licentie; de naam en het logo worden hier ter aanduiding gebruikt."
       },
       "odata": {
         "description": "Plak de URL van een OData service-document of een $metadata-bestand — Restorm leest de CSDL, bouwt de entity sets, function imports en actions opnieuw op en vult de query-opties $filter/$select/$top/$skip vooraf in op elke operatie."
       },
       "mqtt": {
-        "description": "Plak de URL van een MQTT-broker of een topiccatalogus — Restorm steigert publish-/subscribe-verzoeken per topic, houdt de verbinding open voor streaming-previews en onthoudt snapshots van retained messages zodat je ze later kunt afspelen.",
+        "description": "Plak de URL van een MQTT-broker of een topiccatalogus — Restorm steigert publish-/subscribe-verzoeken per topic, houdt de verbinding open voor streaming-previews en onthoudt snapshots van retained messages zodat u ze later kunt afspelen.",
         "trademark": "MQTT is een OASIS-standaard; de naam en het logo van MQTT zijn handelsmerken van OASIS Open."
       }
     },

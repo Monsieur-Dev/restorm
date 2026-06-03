@@ -482,7 +482,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Möchten Sie „{{fileName}}“ wirklich aus den Favoriten entfernen?",
-    "noFilesHint": "Öffnen Sie eine Datei oder erstellen Sie eine neue, um loszulegen",
     "newAriaLabel": "Eine neue Sammlung erstellen",
     "openAriaLabel": "Eine Sammlung von der Festplatte öffnen",
     "landmarkLabel": "Willkommen"

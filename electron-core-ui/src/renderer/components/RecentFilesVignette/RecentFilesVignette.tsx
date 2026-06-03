@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Toggle } from '../Toggle'
 import { Vignette, type VignetteDecoration } from '../Vignette'
+import { ScrollableElement } from '../ScrollableElement'
 import { useFileService } from '../../hooks/useFileService'
 import './recentFilesVignette.css'
 
@@ -196,6 +197,17 @@ export const RecentFilesVignette: React.FC<RecentFilesVignetteProps> = ({
       data-testid={dataTestId}
       {...(style ? { style } : {})}
     >
+      <ScrollableElement
+        className="ecu-recent-files-vignette-scroll"
+        contentClassName="ecu-recent-files-vignette-scroll-content"
+        // `fitContent` keeps the panel sized to its content for short lists and
+        // caps + scrolls long ones. The cap is the available height under the
+        // title bar: window height minus the title bar + status bar + the
+        // panel's own bottom margin / padding (a constant), so it tracks window
+        // resizes. `fitContent` reads this max-height from the inline `style`.
+        options={{ vertical: 'auto', horizontal: 'hidden', useShadows: false, handleMouseWheel: true, fitContent: true }}
+        style={{ maxHeight: 'calc(100vh - 174px)' }}
+      >
       {hasFavorites && (
         <section
           className="ecu-recent-files-vignette-section ecu-vignette-row"
@@ -303,6 +315,7 @@ export const RecentFilesVignette: React.FC<RecentFilesVignetteProps> = ({
           </div>
         </section>
       )}
+      </ScrollableElement>
     </Vignette>
   )
 }

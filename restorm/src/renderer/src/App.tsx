@@ -78,7 +78,7 @@ const classForDocument = (type: 'folder' | 'request' | 'environment', doc: Recor
 }
 import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from './services/DocumentEvents'
 import type { EditorTab, WorkbenchTree, GroupNode, TabGroupNode, ContainerGroupNode } from 'electron-core-ui/renderer'
-import { isContainerNode, isTabGroupNode } from 'electron-core-ui/renderer'
+import { isContainerNode, isTabGroupNode, loadWorkbenchTabIds } from 'electron-core-ui/renderer'
 import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, type ConsoleTab, type FirewallTab, type MiniBrowserTab } from '../../shared/types/editor'
 import { findGroupIdForTab, hasGroupWithId, updateGroupById } from './utils/workbenchHelpers'
 
@@ -95,7 +95,7 @@ const tabMatchesItem = (tab: EditorTab, itemId: string): boolean => {
   const t = tab as ItemBackedTab
   return t.request?.id === itemId || t.folder?.id === itemId
 }
-import { EmptyBench } from './components/MainView/Workbench/EmptyBench'
+import { Onboarding } from './components/MainView/Workbench/Onboarding'
 import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
 import { StatusbarMcpIndicator } from './components/MainView/StatusbarMcpIndicator'
 import { useMcpEnabled } from './hooks/useMcpEnabled'
@@ -339,6 +339,40 @@ const App: React.FC = () => {
     () => (projectUuid ? `${WORKBENCH_ID}:${projectUuid}` : undefined),
     [projectUuid]
   )
+
+  // Gate the project's onboarding placeholder so it doesn't flash during the
+  // async tab restore on load. We ask ECUI up front which tabs its mount-time
+  // restore will reopen (`loadWorkbenchTabIds`): while a restore that WILL
+  // reopen tabs is pending, the onboarding is held back; once it has settled
+  // (no persisted tabs, or ECUI reported the restore) it shows — which also
+  // re-shows it after the user closes the last tab. Keyed by workbench id so
+  // switching projects re-peeks and re-gates without a reset effect.
+  const [tabPeek, setTabPeek] = useState<{ id: string; count: number } | null>(null)
+  const [restoredWorkbenchId, setRestoredWorkbenchId] = useState<string | undefined>(undefined)
+  useEffect(() => {
+    if (!workbenchId) return
+    let cancelled = false
+    void loadWorkbenchTabIds(workbenchId)
+      .then((ids) => { if (!cancelled) setTabPeek({ id: workbenchId, count: ids.length }) })
+      .catch(() => { if (!cancelled) setTabPeek({ id: workbenchId, count: 0 }) })
+    return () => { cancelled = true }
+  }, [workbenchId])
+
+  // Pending (hold the onboarding back) while:
+  //  - a file is still loading (`isFileServiceLoading` is true from mount until
+  //    the read completes — covers the window before the project is even
+  //    identified, when `workbenchId` is briefly undefined), OR
+  //  - the peek for the current project hasn't resolved yet (don't know → a
+  //    restore may come), OR
+  //  - the peek found persisted tabs and ECUI hasn't reported the restore
+  //    (`restoredWorkbenchId`) for this project yet — the async reopen window.
+  // A stale peek (`tabPeek.id !== workbenchId`) also keeps it pending across a
+  // project switch until the re-peek resolves.
+  const onboardingRestorePending =
+    isFileServiceLoading ||
+    (workbenchId !== undefined &&
+      (tabPeek?.id !== workbenchId || (tabPeek.count > 0 && restoredWorkbenchId !== workbenchId)))
+
   const allFolderIdsRef = useRef<string[]>(allFolderIds)
   useEffect(() => {
     const ids: string[] = []
@@ -694,6 +728,14 @@ const App: React.FC = () => {
     registerTabDirtyState,
     focusGroup: setFocusedGroupId
   })
+
+  // Record the restore against the current workbench id once ECUI has reported
+  // one (the tree it reopened, or `null` when there was nothing persisted) so
+  // the onboarding can render again without flashing mid-restore.
+  const handleStateRestoredGated = useCallback((restoredTree: WorkbenchTree | null) => {
+    handleStateRestored(restoredTree)
+    setRestoredWorkbenchId(workbenchId)
+  }, [handleStateRestored, workbenchId])
 
   // After an import lands, increment `pendingImportSave` so the effect
   // below triggers a whole-tree save once React has committed the new
@@ -2294,10 +2336,17 @@ const App: React.FC = () => {
               resolveSyntheticPreview={resolveSyntheticPreview}
               onEnvironmentFolderChange={handleEnvironmentFolderChange}
               onSizesChange={handleSizesChange}
-              emptyFallback={<EmptyBench rootItems={rootItems} projectUuid={projectUuid} onImport={() => { setShowImportModal(true) }} onOpenRequest={handleItemClick} />}
+              emptyFallback={
+                // Held back while a tab restore that will reopen tabs is still
+                // pending, so the onboarding never flashes during the async
+                // reopen on load. See `onboardingRestorePending`.
+                onboardingRestorePending
+                  ? null
+                  : <Onboarding rootItems={rootItems} projectUuid={projectUuid} onImport={() => { setShowImportModal(true) }} onOpenRequest={handleItemClick} />
+              }
               workbenchId={workbenchId}
               onRebuildTab={rootItems.length > 0 ? handleRebuildTab : undefined}
-              onStateRestored={handleStateRestored}
+              onStateRestored={handleStateRestoredGated}
               getRequestById={getRequestByIdCb}
               getScenariosUsingRequest={getScenariosUsingRequestCb}
               getScenariosUsingScenario={getScenariosUsingScenarioCb}
@@ -2342,7 +2391,6 @@ const App: React.FC = () => {
                 ariaLabel={t('welcome.landmarkLabel')}
                 onOpenFile={(path) => { void window.restorm?.file.openPath(path) }}
                 confirmRemoveFavorite={(fileName) => window.confirm(t('welcome.confirmRemoveFavorite', { fileName }))}
-                emptyStateHint={t('welcome.noFilesHint')}
               >
                 <Button
                   appearance="rainbow"

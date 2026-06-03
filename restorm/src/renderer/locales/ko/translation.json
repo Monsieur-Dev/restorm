@@ -481,7 +481,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "\"{{fileName}}\"을(를) 즐겨찾기에서 제거하시겠습니까?",
-    "noFilesHint": "기존 파일을 열거나 새 파일을 만들어 시작하세요",
     "newAriaLabel": "새 컬렉션 만들기",
     "openAriaLabel": "디스크에서 컬렉션 열기",
     "landmarkLabel": "시작 화면"

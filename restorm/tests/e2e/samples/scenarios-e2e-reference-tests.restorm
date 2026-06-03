@@ -72,9 +72,6 @@ collections:
             headers: []
             params: []
             pathParams: []
-            body:
-              type: text
-              content: A
             deprecated: false
             type: http
           - documentation: Requires the Login auth route.

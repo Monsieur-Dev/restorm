@@ -482,7 +482,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Biztosan eltávolítja a(z) \"{{fileName}}\" elemet a kedvencek közül?",
-    "noFilesHint": "Nyisson meg egy fájlt vagy hozzon létre egy újat a kezdéshez",
     "newAriaLabel": "Új gyűjtemény létrehozása",
     "openAriaLabel": "Gyűjtemény megnyitása lemezről",
     "landmarkLabel": "Üdvözöljük"

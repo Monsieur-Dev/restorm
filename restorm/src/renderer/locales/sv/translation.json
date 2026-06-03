@@ -482,7 +482,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Vill du verkligen ta bort \"{{fileName}}\" från favoriter?",
-    "noFilesHint": "Öppna en fil eller skapa en ny för att komma igång",
     "newAriaLabel": "Skapa en ny samling",
     "openAriaLabel": "Öppna en samling från disken",
     "landmarkLabel": "Välkommen"
