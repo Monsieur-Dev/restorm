@@ -4,7 +4,7 @@ import type { FileService } from './FileService'
 import type { SettingsService } from './SettingsService'
 
 /**
- * Auto-save modes mirroring VSCode's `files.autoSave`:
+ * Auto-save modes (the familiar editor `files.autoSave` set):
  *
  * - `off`             — autosave disabled.
  * - `afterDelay`      — debounce on dirty transitions; save after

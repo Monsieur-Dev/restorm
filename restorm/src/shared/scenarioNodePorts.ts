@@ -183,27 +183,43 @@ export function deriveRunScenarioPorts(subScenario: Scenario | null | undefined)
   if (!subScenario) return { inputs, outputs }
   const seenIn = new Set<string>()
   const seenOut = new Set<string>()
+  // Count the distinct source nodes that actually contribute a port. When a
+  // column draws from MORE THAN ONE source the per-source authoring order is
+  // meaningless to the caller, so we sort it alphabetically (below); a single
+  // source keeps its own declaration order.
+  let inputSources = 0
+  let outputSources = 0
   for (const node of subScenario.nodes) {
     // An input node now declares MANY params — one `param:<name>` port each.
     if (node.kind === 'input') {
+      let contributed = false
       for (const param of readInputParams(node.config)) {
         const name = param.name.trim()
         if (!name || seenIn.has(name)) continue
         seenIn.add(name)
+        contributed = true
         inputs.push(p({ id: `param:${name}`, name, dataType: dataTypeForValueType(param.valueType), flow: 'value' }))
       }
+      if (contributed) inputSources += 1
       continue
     }
     // An output node now declares MANY outputs — one `output:<name>` port each.
     if (node.kind === 'output') {
+      let contributed = false
       for (const decl of readOutputDecls(node.config)) {
         const name = decl.name.trim()
         if (!name || seenOut.has(name)) continue
         seenOut.add(name)
+        contributed = true
         outputs.push(p({ id: `output:${name}`, name, role: 'response', flow: 'both' }))
       }
+      if (contributed) outputSources += 1
     }
   }
+  // Multiple sources → sort alphabetically by port name so the column has a
+  // stable, predictable order independent of node/authoring order.
+  if (inputSources > 1) inputs.sort((a, b) => a.name.localeCompare(b.name))
+  if (outputSources > 1) outputs.sort((a, b) => a.name.localeCompare(b.name))
   // A sub-scenario that returns no data still needs to signal completion so a
   // parent can sequence the next node: with no `output` node, expose a single
   // `done` trigger ("Ensuite") instead of an empty output column.

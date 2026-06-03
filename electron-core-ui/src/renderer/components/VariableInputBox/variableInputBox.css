@@ -20,17 +20,17 @@ body > .overflowingContentWidgets {
  * with VS Code's default Monaco palette (works for both light + dark since the
  * suggest widget's text colour is set inline by Monaco). */
 body > .overflowingContentWidgets .suggest-widget {
-	background-color: var(--vscode-editorSuggestWidget-background, #f3f3f3);
-	border: 1px solid var(--vscode-editorSuggestWidget-border, #c8c8c8);
-	color: var(--vscode-editorSuggestWidget-foreground, #000);
+	background-color: var(--editorSuggestWidget-background, #f3f3f3);
+	border: 1px solid var(--editorSuggestWidget-border, #c8c8c8);
+	color: var(--editorSuggestWidget-foreground, #000);
 	box-shadow: 0 2px 8px rgb(0, 0, 0, 0.16);
 }
 
 body > .overflowingContentWidgets .suggest-widget .monaco-list-row.focused {
-	background-color: var(--vscode-editorSuggestWidget-selectedBackground, #0060c0);
-	color: var(--vscode-editorSuggestWidget-selectedForeground, #fff);
+	background-color: var(--editorSuggestWidget-selectedBackground, #0060c0);
+	color: var(--editorSuggestWidget-selectedForeground, #fff);
 }
 
 body > .overflowingContentWidgets .suggest-widget .monaco-list-row .label-name .label-description {
-	color: var(--vscode-editorSuggestWidget-foreground, #6c6c6c);
+	color: var(--editorSuggestWidget-foreground, #6c6c6c);
 }

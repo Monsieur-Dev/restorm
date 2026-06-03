@@ -416,6 +416,47 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   const { screenToFlowPosition, fitView, getNode, getViewport } = useReactFlow()
   const wrapperRef = useRef<HTMLDivElement>(null)
 
+  // Gate mouse-wheel over a number input inside a scenario box. A number
+  // InputBox consumes the wheel to increment/decrement AND stops propagation
+  // (so the canvas can't zoom). That's only what the user wants when they are
+  // deliberately editing that one box — i.e. it is the SOLE selected node.
+  // Otherwise (no selection, a different box selected, or several selected) the
+  // wheel should zoom the canvas, not nudge a value the cursor happened to land
+  // on. We intercept in the capture phase — before the InputBox's own wheel
+  // listener — and when the box isn't the sole selection we block the increment
+  // and re-emit the wheel on the pane so React Flow zooms as usual.
+  useEffect(() => {
+    const root = wrapperRef.current
+    if (!root) return
+    const onWheelCapture = (e: WheelEvent): void => {
+      const target = e.target as Element | null
+      const numberInput = target?.closest('input[type="number"]')
+      if (!numberInput) return
+      const node = numberInput.closest('.react-flow__node')
+      const selectedCount = root.querySelectorAll('.react-flow__node.selected').length
+      const soleSelected = node !== null && node.classList.contains('selected') && selectedCount === 1
+      if (soleSelected) return
+      // Not the sole selection → suppress the value change and let the canvas
+      // zoom instead by replaying the wheel on the pane (the re-dispatched
+      // event targets the pane, not a number input, so it is ignored here).
+      e.stopPropagation()
+      e.preventDefault()
+      const pane = root.querySelector('.react-flow__pane')
+      pane?.dispatchEvent(new WheelEvent('wheel', {
+        deltaX: e.deltaX,
+        deltaY: e.deltaY,
+        deltaMode: e.deltaMode,
+        clientX: e.clientX,
+        clientY: e.clientY,
+        ctrlKey: e.ctrlKey,
+        bubbles: true,
+        cancelable: true
+      }))
+    }
+    root.addEventListener('wheel', onWheelCapture, { capture: true, passive: false })
+    return () => { root.removeEventListener('wheel', onWheelCapture, { capture: true }) }
+  }, [])
+
   // Batched node-internals sync. Each box asks to re-measure its handles after
   // it has measured its own row centres; a per-id `updateNodeInternals` is an
   // O(N) full-graph pass, so N boxes settling on open were O(N²) (seconds of

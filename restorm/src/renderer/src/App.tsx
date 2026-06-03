@@ -1527,7 +1527,7 @@ const App: React.FC = () => {
   useEffect(() => { closeTabByItemIdRef.current = handleCloseTabById }, [handleCloseTabById])
 
   // Close-others / close-to-the-right are scoped to the group containing
-  // the targeted tab — VSCode-style semantics. The Workspace stays
+  // the targeted tab — the usual editor semantics. The Workspace stays
   // intact across other split groups; if the user wants a global wipe
   // they call Close all.
   const handleCloseOtherTabsById = useCallback((itemId: string): void => {

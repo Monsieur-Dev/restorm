@@ -45,7 +45,7 @@ const typeIndicatorStyle: React.CSSProperties = {
   width: 28,
   height: 28,
   borderRadius: 4,
-  border: '1px solid var(--vscode-editorWidget-border, rgba(255,255,255,0.12))',
+  border: '1px solid var(--editorWidget-border, rgba(255,255,255,0.12))',
   cursor: 'pointer',
   fontSize: 14,
   opacity: 0.7,
@@ -109,7 +109,7 @@ const ColorValueCell: React.FC<ColorValueCellProps> = ({ hex, onChangeHex, dataT
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: 6,
+        gap: 0,
         width: '100%',
         height: '100%',
         minWidth: 0

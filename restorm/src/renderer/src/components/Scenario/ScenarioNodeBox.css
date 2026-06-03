@@ -523,7 +523,7 @@
   border: 0;
   padding: 0;
   margin-bottom: 6px;
-  color: var(--vscode-textLink-foreground, #3794ff);
+  color: var(--textLink-foreground, #3794ff);
   cursor: pointer;
   text-decoration: none;
 }

@@ -16,6 +16,10 @@ colors:
     value: "#FFFFFF"
     description: Editor widget background color
 
+  - id: editorWidget.border
+    value: "#0F4A85"
+    description: Editor widget border color
+
   # Hover widget / tooltip colors
   - id: editorHoverWidget.background
     value: "#FFFFFF"

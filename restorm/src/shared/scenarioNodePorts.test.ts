@@ -35,7 +35,7 @@ function scenarioWith(nodes: { kind: string; config: Record<string, unknown> }[]
 }
 
 describe('deriveRunScenarioPorts — runScenario ports from the sub-scenario', () => {
-  it('derives one input port per named input node and one output port per named output node', () => {
+  it('derives one input port per named input node and one output port per named output node (>1 source → sorted)', () => {
     const sub = scenarioWith([
       { kind: 'input', config: { name: 'token', valueType: { type: 'string', value: '' } } },
       { kind: 'input', config: { name: 'count', valueType: { type: 'numeric', value: 0, format: 'decimal' } } },
@@ -43,11 +43,25 @@ describe('deriveRunScenarioPorts — runScenario ports from the sub-scenario', (
       { kind: 'if', config: {} }
     ])
     const { inputs, outputs } = deriveRunScenarioPorts(sub)
+    // Two input nodes → more than one source → ports sorted alphabetically.
     expect(inputs.map((p) => [p.id, p.name, p.dataType])).toEqual([
-      ['param:token', 'token', 'string'],
-      ['param:count', 'count', 'number']
+      ['param:count', 'count', 'number'],
+      ['param:token', 'token', 'string']
     ])
+    // A single output node → one source → its own order is kept.
     expect(outputs.map((p) => [p.id, p.name])).toEqual([['output:cooldown', 'cooldown']])
+  })
+
+  it('keeps declaration order when all ports come from a SINGLE source node', () => {
+    const sub = scenarioWith([
+      { kind: 'input', config: { params: [
+        { id: 'p1', name: 'token' },
+        { id: 'p2', name: 'count' },
+        { id: 'p3', name: 'abc' }
+      ] } }
+    ])
+    // One input node → no cross-source ambiguity → original order, NOT sorted.
+    expect(deriveRunScenarioPorts(sub).inputs.map((p) => p.name)).toEqual(['token', 'count', 'abc'])
   })
 
   it('skips unnamed/blank nodes and collapses duplicate names', () => {
@@ -74,12 +88,13 @@ describe('deriveRunScenarioPorts — runScenario ports from the sub-scenario', (
     expect(deriveRunScenarioPorts(sub).outputs.map((p) => p.id)).toEqual(['output:cooldown'])
   })
 
-  it('derives one output port per decl of a MULTI-output node (plus legacy single)', () => {
+  it('derives one output port per decl of a MULTI-output node (plus legacy single), sorted across >1 source', () => {
     const sub = scenarioWith([
       { kind: 'output', config: { outputs: [{ id: 'd1', name: 'first' }, { id: 'd2', name: 'second' }] } },
       { kind: 'output', config: { name: 'legacy' } }
     ])
-    expect(deriveRunScenarioPorts(sub).outputs.map((p) => p.id)).toEqual(['output:first', 'output:second', 'output:legacy'])
+    // Two output nodes → more than one source → sorted alphabetically.
+    expect(deriveRunScenarioPorts(sub).outputs.map((p) => p.id)).toEqual(['output:first', 'output:legacy', 'output:second'])
   })
 
   it('returns empty ports for a missing sub-scenario', () => {

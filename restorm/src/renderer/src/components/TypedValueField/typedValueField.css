@@ -9,3 +9,15 @@
   padding-left: 20px;
   padding-right: 20px;
 }
+
+/* ControlGroup deliberately excludes a `.select-box.custom-trigger` from its
+ * border-merge (it assumes such a combo is the last child and keeps its right
+ * border). In the typed-value field the SelectBox is followed by the type
+ * indicator, so that exclusion leaves a doubled border between the combo and
+ * the indicator — unlike MultiSelectCombo, whose border IS merged. Re-merge it
+ * here, scoped to this control group so other ControlGroup users are untouched. */
+.tvf-control-group.ecu-control-group--horizontal > *:not(:last-child) .select-box.custom-trigger {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-right-color: transparent !important;
+}
