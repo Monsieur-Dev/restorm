@@ -313,6 +313,7 @@
       "color": "顏色",
       "expression": "運算式",
       "boolean": "布林值",
+      "null": "Null",
       "variables": "變數",
       "environment": "環境"
     },

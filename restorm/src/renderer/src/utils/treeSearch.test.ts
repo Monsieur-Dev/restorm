@@ -5,7 +5,8 @@ import {
   findItemById,
   findItemWithParent,
   findItemWithBreadcrumbs,
-  findFolderById
+  findFolderById,
+  findScenarioById
 } from './treeSearch'
 
 // Minimal fixtures — only the fields the guards + walkers read.
@@ -45,6 +46,12 @@ describe('treeSearch — scenarios are folder-like containers', () => {
     expect(findFolderById(rootItems, 'folder-in-scn')?.id).toBe('folder-in-scn')
     // The scenario itself is not a folder.
     expect(findFolderById(rootItems, 'scn')).toBeUndefined()
+  })
+
+  it('findScenarioById returns the live scenario nested under an env folder', () => {
+    expect(findScenarioById(rootItems, 'scn')?.id).toBe('scn')
+    // A request is not a scenario.
+    expect(findScenarioById(rootItems, 'req-in-scn')).toBeUndefined()
   })
 
   it('findItemWithParent reports the scenario as the parent of its child request', () => {

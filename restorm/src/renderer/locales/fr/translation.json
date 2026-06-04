@@ -314,6 +314,7 @@
       "color": "Couleur",
       "expression": "Expression",
       "boolean": "Booléen",
+      "null": "Null",
       "variables": "Variables",
       "environment": "Environnement"
     },

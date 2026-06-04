@@ -314,6 +314,7 @@
       "color": "Färg",
       "expression": "Uttryck",
       "boolean": "Boolesk",
+      "null": "Null",
       "variables": "Variabler",
       "environment": "Miljö"
     },

@@ -1267,6 +1267,158 @@
   data:
     name: to
     value: 2015-06-08T23:21:00.000Z
+- message: ⚪ [<time>] start if
+  data:
+    left: null
+    right: null
+- message: ⚪ [<time>] start setVariable
+  data:
+    value: null
+    name: null_var
+- message: ⚪ [<time>] start if
+  data:
+    left: null
+    operator: <
+    right: abc
+- message: 🔴 [<time>] Operator "<" cannot order null values
+- message: ⚪ [<time>] start if
+  data:
+    left: null
+    operator: ">"
+    right: 3
+- message: 🔴 [<time>] Operator ">" cannot order null values
+- message: ⚪ [<time>] start if
+  data:
+    left: null
+    operator: ≤
+    right: 2026-06-04T08:37:31.105Z
+- message: 🔴 [<time>] Operator "≤" cannot order null values
+- message: ⚪ [<time>] start if
+  data:
+    left: null
+    operator: ">"
+    right: "#000000"
+- message: 🔴 [<time>] Operator ">" cannot order null values
+- message: ⚪ [<time>] start if
+  data:
+    left: null
+    operator: ">"
+    right: Rouge
+- message: 🔴 [<time>] Operator ">" cannot order null values
+- message: ⚪ [<time>] start if
+  data:
+    right: Vert,Bleu,Rouge
+    left: null
+- message: ⚪ [<time>] start if
+  data:
+    right: 1985-10-26T00:22:00.000Z
+    left: null
+- message: ⚪ [<time>] start if
+  data:
+    right: null
+    left: null
+- message: ⚪ [<time>] start if
+  data:
+    right:
+      name: localhost
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+    left: null
+- message: ⚪ [<time>] start if
+  data:
+    left: abc
+    operator: ">"
+    right: null
+- message: 🔴 [<time>] Operator ">" cannot order null values
+- message: ⚪ [<time>] start if
+  data:
+    left: 3
+    operator: ">"
+    right: null
+- message: 🔴 [<time>] Operator ">" cannot order null values
+- message: ⚪ [<time>] start if
+  data:
+    left: 2026-06-04T08:37:31.000Z
+    operator: ≤
+    right: null
+- message: 🔴 [<time>] Operator "≤" cannot order null values
+- message: ⚪ [<time>] start if
+  data:
+    left: "#000000"
+    operator: ">"
+    right: null
+- message: 🔴 [<time>] Operator ">" cannot order null values
+- message: ⚪ [<time>] start if
+  data:
+    left: Rouge
+    operator: ">"
+    right: null
+- message: 🔴 [<time>] Operator ">" cannot order null values
+- message: ⚪ [<time>] start if
+  data:
+    right: null
+    left: Bleu,Vert,Rouge
+- message: ⚪ [<time>] start if
+  data:
+    right: null
+    left: 1985-10-26T00:22:00.000Z
+- message: ⚪ [<time>] start if
+  data:
+    right: null
+    left: null
+- message: ⚪ [<time>] start if
+  data:
+    right: null
+    left:
+      name: Sub-env
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] start switch
+  data:
+    on: null
+- message: ⚪ [<time>] start switch
+  data:
+    on: null
+- message: ⚪ [<time>] start switch
+  data:
+    on: null
+- message: ⚪ [<time>] start switch
+  data:
+    on: null
+- message: ⚪ [<time>] start switch
+  data:
+    on: 1
+- message: ⚪ [<time>] start switch
+  data:
+    on: null
+- message: ⚪ [<time>] start switch
+  data:
+    on:
+      name: localhost
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] start switch
+  data:
+    on:
+      name: Sub-env
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] start switch
+  data:
+    on:
+      name: Sub-env
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] start if
+  data:
+    right: null
+    left: null
+    operator: ≠
 - message: ⚪ [<time>] done if
   data:
     then:
@@ -1312,6 +1464,12 @@
       prop1: test
       prop2: test2
 - message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done if
+  data:
+    then:
+      left: null
+      right: null
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] start if
   data:
@@ -1321,11 +1479,111 @@
     in:
       left: 1
       right: 2
+- message: ⚪ [<time>] start if
+  data:
+    right: null
+    left: null
+    in: true
+- message: ⚪ [<time>] done if
+  data:
+    else:
+      left: null
+      right: Vert,Bleu,Rouge
+- message: ⚪ [<time>] done if
+  data:
+    else:
+      left: null
+      right: 1985-10-26T00:22:00.000Z
+- message: ⚪ [<time>] done if
+  data:
+    then:
+      left: null
+      right: null
+- message: ⚪ [<time>] done if
+  data:
+    else:
+      left: null
+      right:
+        name: localhost
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] done if
+  data:
+    else:
+      left: Bleu,Vert,Rouge
+      right: null
+- message: ⚪ [<time>] done if
+  data:
+    else:
+      left: 1985-10-26T00:22:00.000Z
+      right: null
+- message: ⚪ [<time>] done if
+  data:
+    then:
+      left: null
+      right: null
+- message: ⚪ [<time>] done if
+  data:
+    else:
+      left:
+        name: Sub-env
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+      right: null
+- message: ⚪ [<time>] done switch
+  data:
+    switch-default-case: null
+- message: ⚪ [<time>] done switch
+  data:
+    default: null
+- message: ⚪ [<time>] done switch
+  data:
+    default: null
+- message: ⚪ [<time>] done switch
+  data:
+    switch-default-case: null
+- message: ⚪ [<time>] done switch
+  data:
+    switch-default-case: 1
+- message: ⚪ [<time>] done switch
+  data:
+    case-1780563106757-232n5w: null
+- message: ⚪ [<time>] done switch
+  data:
+    case-1780563106757-232n5w:
+      name: localhost
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] done switch
+  data:
+    default:
+      name: Sub-env
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] done switch
+  data:
+    case-1780563106757-232n5w:
+      name: Sub-env
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] done if
+  data:
+    else:
+      left: null
+      right: null
 - message: ⚪ [<time>] done if
   data:
     then:
       left: 1
       right: 2
+- message: ⚪ [<time>] done if
+  data:
+    then: true
 - message: ⚪ [<time>] start if
   data:
     left: 1
@@ -1645,6 +1903,22 @@
 - message: 🔵 [<time>] Object comparison is throwind as it shoud
 - message: ⚪ [<time>] done log
   data: {}
+- message: ⚪ [<time>] start log
+  data:
+    message: Null comparisons are ok
+    level: info
+    in: true
+- message: 🔵 [<time>] Null comparisons are ok
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] start log
+  data:
+    message: Switch vs NULL is ok
+    level: info
+    in: true
+- message: 🔵 [<time>] Switch vs NULL is ok
+- message: ⚪ [<time>] done log
+  data: {}
 - message: 🔵 [<time>] ■ Conditions
 - message: ⚪ [<time>] done runScenario
   data:
@@ -1826,6 +2100,7 @@
 - message: ⚪ [<time>] start setVariable
   data:
     name: env
+    value: null
     in: true
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] done setVariable
@@ -1879,6 +2154,8 @@
     in: true
 - message: ⚪ [<time>] start assert
   data:
+    a: null
+    b: null
     message: env should be null
     in: true
 - message: ⚪ [<time>] done assert
@@ -1965,6 +2242,7 @@
     in: true
 - message: ⚪ [<time>] start assert
   data:
+    a: null
     b:
       name: Sub-env
       variables:
@@ -2021,6 +2299,7 @@
       bool: false
       petcolor: Bleu
       petcolors: Bleu,Vert
+      env: null
 - message: ⚪ [<time>] done object
   data:
     object:
@@ -2030,6 +2309,7 @@
       bool: false
       petcolor: Bleu
       petcolors: Bleu,Vert
+      env: null
 - message: ⚪ [<time>] start setVariable
   data:
     name: object1
@@ -2040,6 +2320,7 @@
       bool: false
       petcolor: Bleu
       petcolors: Bleu,Vert
+      env: null
 - message: ⚪ [<time>] start setVariable
   data:
     name: object2
@@ -2050,6 +2331,7 @@
       bool: false
       petcolor: Bleu
       petcolors: Bleu,Vert
+      env: null
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] start comparator
@@ -2061,6 +2343,7 @@
       bool: false
       petcolor: Bleu
       petcolors: Bleu,Vert
+      env: null
     b:
       string: cba
       number: -10
@@ -2068,6 +2351,7 @@
       bool: false
       petcolor: Bleu
       petcolors: Bleu,Vert
+      env: null
     in: true
 - message: ⚪ [<time>] start comparator
   data:
@@ -2078,6 +2362,7 @@
       bool: false
       petcolor: Bleu
       petcolors: Bleu,Vert
+      env: null
     b:
       string: cba
       number: -10
@@ -2085,6 +2370,7 @@
       bool: false
       petcolor: Bleu
       petcolors: Bleu,Vert
+      env: null
     operator: contains
     in: true
 - message: ⚪ [<time>] done comparator
@@ -2118,6 +2404,122 @@
   data:
     value: ""
 - message: 🔵 [<time>] ■ Variables & asserts
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: 1780566592512-gxyr48d
+    label: Templates
+    in: true
+- message: 🔵 [<time>] ▶ Templates
+- message: ⚪ [<time>] start log
+  data:
+    message: "Environment name: {{name}}"
+    data:
+      name: localhost
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+- message: "🔵 [<time>] Environment name: localhost"
+  data:
+    name: localhost
+    variables:
+      baseUrl: http://localhost:5110
+      clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] start object
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      name: localhost
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] done object
+  data:
+    object:
+      env:
+        name: Sub-env
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+      color: "#bd10e0"
+- message: ⚪ [<time>] start transform
+  data:
+    expression: env {{env.name}} is {{color}}
+    value:
+      env:
+        name: Sub-env
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+      color: "#bd10e0"
+- message: ⚪ [<time>] done transform
+  data:
+    out:
+      result: "env Sub-env is #bd10e0"
+- message: ⚪ [<time>] start log
+  data:
+    message: "env Sub-env is #bd10e0"
+    data:
+      env:
+        name: Sub-env
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+      color: "#bd10e0"
+    in: true
+- message: "🔵 [<time>] env Sub-env is #bd10e0"
+  data:
+    env:
+      name: Sub-env
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+    color: "#bd10e0"
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      env:
+        name: Sub-env
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+      color: "#bd10e0"
+- message: 🔵 [<time>] ■ Templates
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: 1780566844766-gsmdkp9
+    label: Lists operations
+    in: true
+- message: 🔵 [<time>] ▶ Lists operations
+- message: ⚪ [<time>] start setVariable
+  data:
+    value: Vert,Bleu
+    name: PetColors
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] start aggregate
+  data:
+    items: []
+    __aggregate:
+      total: 0
+      missingIndices: []
+- message: ⚪ [<time>] done aggregate
+  data:
+    result: 0
+- message: ⚪ [<time>] start log
+  data:
+    message: "{{.}} colors selected"
+    data: 0
+- message: 🔵 [<time>] 0 colors selected
+  data: 0
+- message: ⚪ [<time>] done log
+  data:
+    value: 0
+- message: 🔵 [<time>] ■ Lists operations
 - message: ⚪ [<time>] done runScenario
   data:
     result: {}

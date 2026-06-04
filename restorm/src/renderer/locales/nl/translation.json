@@ -314,6 +314,7 @@
       "color": "Kleur",
       "expression": "Expressie",
       "boolean": "Boolean",
+      "null": "Null",
       "variables": "Variabelen",
       "environment": "Omgeving"
     },

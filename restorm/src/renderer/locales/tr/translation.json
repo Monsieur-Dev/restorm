@@ -314,6 +314,7 @@
       "color": "Renk",
       "expression": "İfade",
       "boolean": "Boolean",
+      "null": "Null",
       "variables": "Değişkenler",
       "environment": "Ortam"
     },

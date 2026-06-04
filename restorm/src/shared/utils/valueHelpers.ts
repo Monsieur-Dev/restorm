@@ -2,7 +2,7 @@
  * Helper functions for working with Value types
  */
 
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue, type ValueType } from '../types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue, NullValue, type ValueType } from '../types/collections'
 
 /**
  * Convert a ValueType to a string using its toString() method
@@ -86,6 +86,13 @@ export function isEnvironmentValue(value: ValueType): value is EnvironmentValue 
  */
 export function isBooleanValue(value: ValueType): value is BooleanValue {
   return value instanceof BooleanValue || (value as { type?: string }).type === 'boolean'
+}
+
+/**
+ * Check if a value is the explicit NullValue (a deliberate "no value").
+ */
+export function isNullValue(value: ValueType): value is NullValue {
+  return value instanceof NullValue || (value as { type?: string }).type === 'null'
 }
 
 /**

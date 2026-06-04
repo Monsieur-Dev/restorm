@@ -314,6 +314,7 @@
       "color": "Farbe",
       "expression": "Ausdruck",
       "boolean": "Boolesch",
+      "null": "Null",
       "variables": "Variablen",
       "environment": "Umgebung"
     },

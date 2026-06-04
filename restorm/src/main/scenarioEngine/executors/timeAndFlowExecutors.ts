@@ -17,6 +17,10 @@ import { compareValues } from '../conditionEval'
 const WAIT_UNIT_MS: Record<string, number> = { ms: 1, s: 1000, min: 60_000, h: 3_600_000 }
 
 export const waitExecutor: NodeExecutor = (act, ctx) => {
+  // A null duration (e.g. a variable that resolved to null wired into
+  // `duration`) is not a waitable value — throw rather than silently waiting
+  // the default.
+  if (act.inputs['duration'] === null) throw new Error('cannot wait for a null duration')
   const cfg = ctx.node.config as { durationMs?: number; duration?: number; inputUnit?: string }
   const fromInput = act.inputs['duration']
   // A wired `duration` is typically an API cooldown expressed in
@@ -49,6 +53,7 @@ export const waitExecutor: NodeExecutor = (act, ctx) => {
 /** WaitUntil node: sleep until the `until` time (ISO string or epoch
  * ms). Treats a past target as "fire immediately". */
 export const waitUntilExecutor: NodeExecutor = (act, ctx) => {
+  if (act.inputs['until'] === null) throw new Error('cannot wait until a null time')
   const target = act.inputs['until']
   let untilMs: number
   if (typeof target === 'number') untilMs = target

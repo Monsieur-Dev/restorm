@@ -143,6 +143,7 @@ const OutputDeclRow: React.FC<{
           valueTypeGroups={valueTypeGroups}
           allowAllVariables
           allowEnvironment
+          allowNull
           {...(canRemove ? { onRemove, removeLabel: t('scenario.output.removeOutput', 'Supprimer') } : {})}
           dataTestId={`scn-output-${decl.id}`}
         />
@@ -284,6 +285,7 @@ export const SetVariableNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
                 excludeTypes={['expression']}
                 excludeVariableName={name}
                 allowEnvironment
+                allowNull
                 dataTestId="scn-setvar-value"
               />
             </div>

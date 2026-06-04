@@ -313,6 +313,7 @@
       "color": "Màu",
       "expression": "Biểu thức",
       "boolean": "Boolean",
+      "null": "Null",
       "variables": "Biến",
       "environment": "Môi trường"
     },

@@ -313,6 +313,7 @@
       "color": "颜色",
       "expression": "表达式",
       "boolean": "布尔值",
+      "null": "Null",
       "variables": "变量",
       "environment": "环境"
     },

@@ -314,6 +314,7 @@
       "color": "Farve",
       "expression": "Udtryk",
       "boolean": "Boolean",
+      "null": "Null",
       "variables": "Variabler",
       "environment": "Miljø"
     },

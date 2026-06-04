@@ -93,6 +93,7 @@ const ObjectPropertyRow: React.FC<ObjectPropertyRowProps> = ({
           valueTypeGroups={valueTypeGroups}
           allowAllVariables
           allowEnvironment
+          allowNull
           onRemove={onRemove}
           removeLabel={removeLabel}
           dataTestId={dataTestId}

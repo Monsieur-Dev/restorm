@@ -31,6 +31,7 @@ export const IfNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, 
           valueTypeGroups={valueTypeGroups}
           excludeTypes={['expression']}
           allowEnvironment
+          allowNull
           dataTestId={`scn-if-${key}`}
         />
       </div>

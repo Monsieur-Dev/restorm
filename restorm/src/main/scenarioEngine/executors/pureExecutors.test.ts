@@ -153,14 +153,41 @@ describe('logExecutor', () => {
 })
 
 describe('switchExecutor', () => {
-  it('routes to the matching case port', () => {
-    const out = runPure(switchExecutor, { cases: [{ id: 'a', value: 'x' }, { id: 'b', value: 'y' }] }, { on: 'y' })
-    expect(out.outputs).toEqual([{ port: 'case-b', value: 'y' }])
+  it('routes the trigger to the FIRST matching case (port id = the case id, no prefix)', () => {
+    const cases = [{ id: 'a', value: { type: 'string', value: 'x' } }, { id: 'b', value: { type: 'string', value: 'y' } }]
+    const out = runPure(switchExecutor, { cases }, { on: 'y' })
+    expect(out.outputs).toEqual([{ port: 'b', value: 'y' }])
   })
 
   it('routes to `default` when no case matches', () => {
-    const out = runPure(switchExecutor, { cases: [{ id: 'a', value: 'x' }] }, { on: 'z' })
+    const cases = [{ id: 'a', value: { type: 'string', value: 'x' } }]
+    const out = runPure(switchExecutor, { cases }, { on: 'z' })
     expect(out.outputs).toEqual([{ port: 'default', value: 'z' }])
+  })
+
+  it('resolves the inline `on` value (not just a wired input) — numeric vs numeric case', () => {
+    const cases = [{ id: 'one', value: { type: 'numeric', value: 1, format: 'decimal' } }, { id: 'two', value: { type: 'numeric', value: 2, format: 'decimal' } }]
+    const out = runPure(switchExecutor, { on: { type: 'numeric', value: 2, format: 'decimal' }, cases }, {})
+    expect(out.outputs).toEqual([{ port: 'two', value: 2 }])
+  })
+
+  it('matches a null `on` against a null case (null IS equal to null)', () => {
+    const cases = [{ id: 'switch-default-case', value: { type: 'null' } }]
+    const out = runPure(switchExecutor, { on: { type: 'null' }, cases }, {})
+    expect(out.outputs).toEqual([{ port: 'switch-default-case', value: null }])
+  })
+
+  it('does NOT match a non-null `on` against a null case', () => {
+    const cases = [{ id: 'nullcase', value: { type: 'null' } }]
+    const out = runPure(switchExecutor, { on: { type: 'string', value: '' }, cases }, {})
+    // The empty string is not null → falls through to `default`.
+    expect(out.outputs).toEqual([{ port: 'default', value: '' }])
+  })
+
+  it('resolves a `variable` case value against the live run variables', () => {
+    const cases = [{ id: 'v', value: { type: 'variable', value: 'null_var' } }]
+    const out = runPure(switchExecutor, { on: { type: 'null' }, cases }, {}, new Map([['null_var', null]]))
+    expect(out.outputs).toEqual([{ port: 'v', value: null }])
   })
 })
 
@@ -302,6 +329,22 @@ describe('ifExecutor', () => {
     const out = runPure(ifExecutor, { operator: '=', left: { type: 'number', value: 1 }, right: { type: 'number', value: 2 } }, { in: 'payload' }, undefined, 'if')
     expect(out.outputs).toEqual([{ port: 'else', value: 'payload' }])
   })
+
+  it('treats an UNSELECTED environment operand as null → `null = env(none)` takes `then`', () => {
+    // No environment chosen (empty selection) resolves to null, so comparing it
+    // to null is reflexive equality.
+    const empty = runPure(ifExecutor, { operator: '=', left: { type: 'null' }, right: { type: 'environment', value: '' } }, {}, undefined, 'if')
+    expect(empty.outputs[0]?.port).toBe('then')
+  })
+
+  it('treats an environment id that no longer resolves (shows "—") as null too', () => {
+    // A stored env id that finds no environment renders as "—" in the UI — same
+    // "no environment chosen" meaning → null → `then`.
+    const envSpy = vi.spyOn(collectionStore, 'findEnvironmentById').mockReturnValue(undefined as never)
+    const out = runPure(ifExecutor, { operator: '=', left: { type: 'null' }, right: { type: 'environment', value: 'stale-or-garbage-id' } }, {}, undefined, 'if')
+    expect(out.outputs[0]?.port).toBe('then')
+    envSpy.mockRestore()
+  })
 })
 
 describe('mapExecutor', () => {
@@ -347,6 +390,11 @@ describe('arithmeticExecutor', () => {
 
   it('throws on division by zero (routes to the error path)', () => {
     expect(() => runPure(arithmeticExecutor, { op: 'div' }, { a: 1, b: 0 })).toThrow('division by zero')
+  })
+
+  it('throws when an operand is null (wired null, or an inline NullValue) instead of coercing to 0', () => {
+    expect(() => runPure(arithmeticExecutor, { op: 'add' }, { a: null, b: 3 })).toThrow(/null/)
+    expect(() => runPure(arithmeticExecutor, { op: 'add', a: { type: 'null' }, b: { type: 'numeric', value: 3, format: 'decimal' } }, {})).toThrow(/null/)
   })
 
   it('throws on a non-numeric operand instead of silently coercing to 0 (routes to error)', () => {

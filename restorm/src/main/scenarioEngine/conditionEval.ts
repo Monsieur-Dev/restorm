@@ -45,7 +45,7 @@ export function deepEqual(a: unknown, b: unknown): boolean {
 }
 
 /** Semantic kind of an operand — drives which comparisons are meaningful. */
-export type OperandKind = 'number' | 'boolean' | 'string' | 'date' | 'color' | 'enum' | 'object' | 'list' | 'unknown'
+export type OperandKind = 'number' | 'boolean' | 'string' | 'date' | 'color' | 'enum' | 'object' | 'list' | 'null' | 'unknown'
 
 /** A kind hint plus, for an enum, whether its WHOLE option set is numeric (so
  * ordering goes numeric vs lexicographic). A bare `OperandKind` is accepted as
@@ -100,13 +100,15 @@ export function kindFromConfig(cfg: unknown): OperandKind | undefined {
     case 'color': return 'color'
     case 'enum': case 'enumList': case 'customList': case 'customListMulti': return 'enum'
     case 'string': case 'password': case 'expression': return 'string'
+    case 'null': return 'null'
     default: return undefined
   }
 }
 
 function inferKind(v: unknown): OperandKind {
+  if (v === null) return 'null'
   if (Array.isArray(v)) return 'list'
-  if (v !== null && typeof v === 'object') return 'object'
+  if (typeof v === 'object') return 'object'
   if (typeof v === 'number') return 'number'
   if (typeof v === 'boolean') return 'boolean'
   if (typeof v === 'string') return 'string'
@@ -171,6 +173,14 @@ function orderModeOf(value: unknown, kind: OperandKind, enumNumeric?: boolean): 
 const ORDER_SYMBOL: Record<string, string> = { lt: '<', lte: '≤', gt: '>', gte: '≥' }
 
 function orderingCompare(op: string, l: unknown, r: unknown, lk: OperandKind, rk: OperandKind, lEnumNumeric?: boolean, rEnumNumeric?: boolean): boolean {
+  // Null ordering: there is no meaningful strict order for null, so any null in
+  // a `<` / `>` (and a null compared against a non-null in `<=` / `>=`) throws.
+  // The ONE meaningful case is the reflexive equality `null <= null` /
+  // `null >= null` → true (null IS equal to null).
+  if (lk === 'null' || rk === 'null') {
+    if (lk === 'null' && rk === 'null' && (op === 'lte' || op === 'gte')) return true
+    throw new Error(`Operator "${ORDER_SYMBOL[op] ?? op}" cannot order null values`)
+  }
   const lm = orderModeOf(l, lk, lEnumNumeric)
   const rm = orderModeOf(r, rk, rEnumNumeric)
   const sym = ORDER_SYMBOL[op] ?? op
@@ -208,6 +218,9 @@ function listEqual(a: unknown[], b: unknown[]): boolean {
 }
 
 function equalityCompare(l: unknown, r: unknown, lk: OperandKind, rk: OperandKind): boolean {
+  // Null equality: null IS equal ONLY to null; anything else (object, string,
+  // number, even the empty string "") is NOT equal to null.
+  if (lk === 'null' || rk === 'null') return lk === 'null' && rk === 'null'
   if (lk === 'list' || rk === 'list') return lk === 'list' && rk === 'list' && listEqual(l as unknown[], r as unknown[])
   if (lk === 'date' && rk === 'date') {
     const a = dateSeconds(l), b = dateSeconds(r)
@@ -288,9 +301,12 @@ export function resolveOperand(wired: unknown, cfgVal: unknown, variables?: Read
   // `concreteValue` would render.
   if (typeof cfgVal === 'object' && (cfgVal as { type?: unknown }).type === 'environment') {
     const id = (cfgVal as { value?: unknown }).value
-    if (typeof id !== 'string') return undefined
-    const env = collectionStore.findEnvironmentById(id)
-    if (!env) return undefined
+    const env = typeof id === 'string' && id !== '' ? collectionStore.findEnvironmentById(id) : undefined
+    // No environment chosen resolves to NULL — whether the selection is empty
+    // OR the stored id no longer resolves to a real environment (the field
+    // shows "—"). An unselected environment is treated as null, so `if env =
+    // null` takes `then` (and switch/assert/object/log see null, not undefined).
+    if (!env) return null
     // Omit `variables` entirely for an env with none — an empty `{}` rendered a
     // misleading expandable-but-empty node in the run log.
     const variables = { ...(contextService.getContext(id) ?? {}) }

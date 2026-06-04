@@ -18,7 +18,7 @@ import {
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import type { TranslatedHelperDefinition } from '../../utils/handlebarsHelpersDefinitions'
 import type { ValueType, EnumDefinition, CustomValueList } from '../../../../shared/types/collections'
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue } from '../../../../shared/types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue, NullValue } from '../../../../shared/types/collections'
 import { EnvironmentValueCell } from './EnvironmentValueCell'
 import type { EnvValueTypeGroup } from '../../hooks/collectEnvValueTypeGroups'
 import { useScenarioVariables } from '../../contexts/ScenarioVariablesContext'
@@ -181,6 +181,13 @@ export interface TypedValueFieldProps {
    */
   allowEnvironment?: boolean | undefined
   /**
+   * Offer the `null` type — an explicit "no value" (distinct from the empty
+   * string). Off by default; the slots that accept it opt in (comparison nodes
+   * if / switch / assert / comparator / boolean, set+object+output values, and
+   * a log's `data`). NOT offered on arithmetic / wait / loop / input fields.
+   */
+  allowNull?: boolean | undefined
+  /**
    * When set, the type-pick menu gains a trailing separator + a "remove" entry
    * (e.g. a switch case removing itself). The label defaults to "Supprimer".
    */
@@ -223,6 +230,7 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
   excludeVariableName,
   allowAllVariables,
   allowEnvironment,
+  allowNull,
   onRemove,
   removeLabel,
   variables = [],
@@ -445,6 +453,17 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
     // precedes it, otherwise an all-excluded tail (e.g. the list-only forEach
     // `items` selector) leaves an orphan divider with nothing to separate.
     const tail: ContextMenuItem[] = []
+    // `null` — an explicit "no value" — heads the trailing group where the slot
+    // opted in. Picking it casts to a `NullValue` (no editable widget).
+    if (allowNull) {
+      tail.push({
+        id: 'null',
+        label: t('keyValueTable.types.null', 'Null'),
+        checked: activeType === 'null',
+        onClick: () => { cast('null') },
+        ...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-null` })
+      })
+    }
     // `environment` sits just before `secret`, only where the slot opted in.
     // Picking it casts to an empty EnvironmentValue; the env-picker button then
     // resolves the actual environment (there's no submenu).
@@ -492,7 +511,7 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
     }
 
     return items
-  }, [t, cast, dataTestId, groups, activeType, activeDefId, isExcluded, variableNames, allowAllVariables, allowEnvironment, value, onRemove, removeLabel])
+  }, [t, cast, dataTestId, groups, activeType, activeDefId, isExcluded, variableNames, allowAllVariables, allowEnvironment, allowNull, value, onRemove, removeLabel])
 
   const widget = ((): React.ReactNode => {
     if (value instanceof PasswordValue) {
@@ -579,6 +598,20 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
           {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-expression` })}
         />,
         { icon: 'code', ariaLabel: 'Expression (Handlebars template)', typeTestid: 'expression' }
+      )
+    }
+
+    // NullValue → a read-only "null" cell (no value to type); the ø icon marks
+    // the type. Recast via the type menu like any other.
+    if (value instanceof NullValue) {
+      return withTypeControl(
+        <InputBox
+          value="null"
+          options={{ type: 'text' }}
+          disabled
+          {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-null` })}
+        />,
+        { icon: 'circle-slash', ariaLabel: 'Null value', typeTestid: 'null' }
       )
     }
 

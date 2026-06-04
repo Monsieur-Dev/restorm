@@ -104,6 +104,34 @@ export function findEnvironmentFolderById(rootItems: FolderItem[], id: string): 
   return undefined
 }
 
+/** Find a scenario by ID in a single tree (scenarios can nest other scenarios). */
+function findScenarioByIdInTree(container: TreeContainer, id: string): Scenario | undefined {
+  if (isScenario(container) && container.id === id) return container
+  for (const item of childItemsOf(container)) {
+    if (isScenario(item) && item.id === id) return item
+    if (isContainer(item)) {
+      const found = findScenarioByIdInTree(item, id)
+      if (found) return found
+    }
+  }
+  return undefined
+}
+
+/** Find a scenario by ID across multiple root folders. The workbench uses this
+ * to re-fetch the live scenario from `rootItems` instead of rendering the tab's
+ * stale snapshot — so edits (renamed variables, added ports) reach the editor
+ * even after a hard refresh restores the tab from a disconnected copy. */
+export function findScenarioById(rootItems: FolderItem[], id: string): Scenario | undefined {
+  for (const root of rootItems) {
+    if (isScenario(root) && root.id === id) return root
+    if ('items' in root) {
+      const found = findScenarioByIdInTree(root, id)
+      if (found) return found
+    }
+  }
+  return undefined
+}
+
 /** Find any request by ID in a single tree (descends scenarios). */
 function findRequestByIdInTree(container: TreeContainer, id: string): Request | undefined {
   for (const item of childItemsOf(container)) {

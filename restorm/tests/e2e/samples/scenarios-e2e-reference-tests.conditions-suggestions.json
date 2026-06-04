@@ -668,5 +668,285 @@
       "data": null
     },
     "source": "static"
+  },
+  {
+    "id": "1780561771400-vt3e2a",
+    "kind": "if",
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780561796528-hcjn6n",
+    "kind": "if",
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780561807317-3zak6b",
+    "kind": "setVariable",
+    "suggestion": {
+      "null_var": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780561834165-gjaov7",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "Null comparisons are ok",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780562184344-4z9xdv",
+    "kind": "if",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780562197490-x3hxqm",
+    "kind": "if",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780562209269-kfd5rb",
+    "kind": "if",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780562253479-76ixev",
+    "kind": "if",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780562265950-rii8z8",
+    "kind": "if",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780562311102-8xhyts",
+    "kind": "if",
+    "suggestion": {
+      "condition": false,
+      "branch": "else"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780562334721-xma6jd",
+    "kind": "if",
+    "suggestion": {
+      "condition": false,
+      "branch": "else"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780562379577-zbb2w9",
+    "kind": "if",
+    "suggestion": {
+      "condition": false,
+      "branch": "else"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780562420376-wpn65s",
+    "kind": "if",
+    "suggestion": {
+      "condition": false,
+      "branch": "else"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780562516327-2-44fhpg",
+    "kind": "if",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780562516327-3-0de2m4",
+    "kind": "if",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780562516327-4-5s3mjf",
+    "kind": "if",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780562516327-5-hbbgl6",
+    "kind": "if",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780562516327-6-movxlq",
+    "kind": "if",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780562516327-7-ts8gu8",
+    "kind": "if",
+    "suggestion": {
+      "condition": false,
+      "branch": "else"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780562516327-8-06ayts",
+    "kind": "if",
+    "suggestion": {
+      "condition": false,
+      "branch": "else"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780562516327-10-j9ze0x",
+    "kind": "if",
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780562516327-11-pe0z56",
+    "kind": "if",
+    "suggestion": {
+      "condition": false,
+      "branch": "else"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780562958541-msgjva",
+    "kind": "switch",
+    "suggestion": {
+      "value": null,
+      "branch": 1
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780562985404-hr2efq",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "Switch vs NULL is ok",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780563007305-0-cx0ngs",
+    "kind": "switch",
+    "suggestion": {
+      "value": null,
+      "branch": "default"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780563028169-0-tjwr07",
+    "kind": "switch",
+    "suggestion": {
+      "value": null,
+      "branch": "default"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780563056249-0-c1162v",
+    "kind": "switch",
+    "suggestion": {
+      "value": null,
+      "branch": 1
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780563069017-0-9y428j",
+    "kind": "switch",
+    "suggestion": {
+      "value": 1,
+      "branch": 1
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780563113640-0-hioqnv",
+    "kind": "switch",
+    "suggestion": {
+      "value": "{{$1}}",
+      "branch": "default"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780563139567-0-vhr8ta",
+    "kind": "switch",
+    "suggestion": {
+      "value": {
+        "name": "localhost",
+        "variables": {
+          "baseUrl": "http://localhost:5110",
+          "clientId": "VALID_CLIENT_ID"
+        }
+      },
+      "branch": "default"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780563182543-0-xe7ggj",
+    "kind": "switch",
+    "suggestion": {
+      "value": {
+        "name": "Sub-env"
+      },
+      "branch": "default"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780563196850-0-xywd7s",
+    "kind": "switch",
+    "suggestion": {
+      "value": {
+        "name": "Sub-env"
+      },
+      "branch": "default"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780563520427-0-wt4zoi",
+    "kind": "if",
+    "suggestion": {
+      "condition": false,
+      "branch": "else"
+    },
+    "source": "static"
   }
 ]

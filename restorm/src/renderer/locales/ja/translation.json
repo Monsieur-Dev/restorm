@@ -313,6 +313,7 @@
       "color": "色",
       "expression": "式",
       "boolean": "ブール値",
+      "null": "Null",
       "variables": "変数",
       "environment": "環境"
     },

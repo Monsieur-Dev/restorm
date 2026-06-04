@@ -126,6 +126,7 @@ import { diffScenarioPortRenames, remapCallerScenarioEdges, isEmptyRenameMap } f
 import { requestScenarioNodeFocus } from './services/scenarioFocusBus'
 import {
   findFolderById,
+  findScenarioById,
   findEnvironmentFolderById,
   findRequestById,
   findItemWithBreadcrumbs,
@@ -1826,6 +1827,7 @@ const App: React.FC = () => {
   // Stable lookup callbacks — avoids re-render cascade through RestormWorkbench → EditorGroupView
   const getRequestByIdCb = useCallback((id: string) => findRequestById(rootItems, id), [rootItems])
   const getFolderByIdCb = useCallback((id: string) => findFolderById(rootItems, id), [rootItems])
+  const getScenarioByIdCb = useCallback((id: string) => findScenarioById(rootItems, id), [rootItems])
   const getEnvironmentFolderByIdCb = useCallback((id: string) => findEnvironmentFolderById(rootItems, id), [rootItems])
 
   // Send-time hook: request tab views call this to resolve their
@@ -2415,6 +2417,7 @@ const App: React.FC = () => {
               getScenariosUsingScenario={getScenariosUsingScenarioCb}
               onOpenScenarioFromRequest={openScenarioFromRequest}
               getFolderById={getFolderByIdCb}
+              getScenarioById={getScenarioByIdCb}
               getEnvironmentFolderById={getEnvironmentFolderByIdCb}
               navigationEnabled={navigationEnabled}
               tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
@@ -2483,6 +2486,7 @@ const App: React.FC = () => {
             getScenariosUsingScenario={getScenariosUsingScenarioCb}
             onOpenScenarioFromRequest={openScenarioFromRequest}
             getFolderById={(id) => findFolderById(rootItems, id)}
+            getScenarioById={(id) => findScenarioById(rootItems, id)}
             getEnvironmentFolderById={(id) => findEnvironmentFolderById(rootItems, id)}
             navigationEnabled={navigationEnabled}
             tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'

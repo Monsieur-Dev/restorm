@@ -314,6 +314,7 @@
       "color": "Ngjyrë",
       "expression": "Shprehje",
       "boolean": "Booleane",
+      "null": "Null",
       "variables": "Variablat",
       "environment": "Mjedisi"
     },

@@ -1,6 +1,6 @@
 import type { ValueTypeName } from '../types/valueTypes/BaseValueType'
 import type { ValueType } from '../types/collections'
-import { DateTimeValue, NumericValue, PasswordValue, StringValue, ColorValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue } from '../types/collections'
+import { DateTimeValue, NumericValue, PasswordValue, StringValue, ColorValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue, NullValue } from '../types/collections'
 
 export type PersistedValue =
   | { type: 'string'; value: string }
@@ -16,13 +16,14 @@ export type PersistedValue =
   | { type: 'customListMulti'; listId: string; labels: string[] }
   | { type: 'variable'; value: string }
   | { type: 'environment'; value: string }
+  | { type: 'null' }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
 
 function isValueTypeName(value: unknown): value is ValueTypeName {
-  return value === 'string' || value === 'color' || value === 'numeric' || value === 'datetime' || value === 'password' || value === 'expression' || value === 'boolean' || value === 'enum' || value === 'enumList' || value === 'customList' || value === 'customListMulti' || value === 'variable' || value === 'environment'
+  return value === 'string' || value === 'color' || value === 'numeric' || value === 'datetime' || value === 'password' || value === 'expression' || value === 'boolean' || value === 'enum' || value === 'enumList' || value === 'customList' || value === 'customListMulti' || value === 'variable' || value === 'environment' || value === 'null'
 }
 
 /**
@@ -31,6 +32,9 @@ function isValueTypeName(value: unknown): value is ValueTypeName {
  * - DateTimeValue is persisted as ISO string to avoid Date serialization ambiguity.
  */
 export function serializeValueForPersistence(value: unknown): PersistedValue {
+  if (value instanceof NullValue) {
+    return { type: 'null' }
+  }
   if (value instanceof PasswordValue) {
     return { type: 'password' }
   }
@@ -78,6 +82,7 @@ export function serializeValueForPersistence(value: unknown): PersistedValue {
       // fall through
     } else {
       const type = existingType
+    if (type === 'null') return { type: 'null' }
     if (type === 'password') return { type: 'password' }
     if (type === 'numeric') {
       const raw = (value as { value?: unknown }).value

@@ -315,6 +315,7 @@
       "color": "Boja",
       "expression": "Izraz",
       "boolean": "Bulova vrednost",
+      "null": "Null",
       "variables": "Променљиве",
       "environment": "Окружење"
     },

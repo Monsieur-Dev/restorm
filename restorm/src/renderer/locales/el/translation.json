@@ -314,6 +314,7 @@
       "color": "Χρώμα",
       "expression": "Έκφραση",
       "boolean": "Λογική τιμή",
+      "null": "Null",
       "variables": "Μεταβλητές",
       "environment": "Περιβάλλον"
     },

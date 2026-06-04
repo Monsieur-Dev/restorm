@@ -316,6 +316,7 @@
       "color": "Kolor",
       "expression": "Wyrażenie",
       "boolean": "Wartość logiczna",
+      "null": "Null",
       "variables": "Zmienne",
       "environment": "Środowisko"
     },

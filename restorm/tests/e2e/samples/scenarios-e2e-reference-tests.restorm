@@ -309,6 +309,44 @@ collections:
                 position:
                   x: 1620
                   'y': 740
+              - id: 1780566802666-s7yjvf
+                kind: runScenario
+                config:
+                  scenarioId: 1780566592512-gxyr48d
+                  label: Templates
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 1920
+                  'y': 740
+              - id: 1780566962422-32dd3c
+                kind: runScenario
+                config:
+                  scenarioId: 1780566844766-gsmdkp9
+                  label: Lists operations
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 2160
+                  'y': 740
             edges:
               - id: e-1780418276241-f2q3hz
                 from:
@@ -367,6 +405,20 @@ collections:
                   portId: done
                 to:
                   nodeId: 1780558249766-gq42u7
+                  portId: in
+              - id: e-1780566806373-3h9nv1
+                from:
+                  nodeId: 1780558249766-gq42u7
+                  portId: done
+                to:
+                  nodeId: 1780566802666-s7yjvf
+                  portId: in
+              - id: e-1780566966557-oe5e83
+                from:
+                  nodeId: 1780566802666-s7yjvf
+                  portId: done
+                to:
+                  nodeId: 1780566962422-32dd3c
                   portId: in
             id: c1573ce0-985c-44b5-b5d4-e081de2d4303
             name: Main
@@ -4789,6 +4841,1059 @@ collections:
                       x: 1660
                       'y': 320
                     color: '#d0021b'
+                  - id: 1780561771400-vt3e2a
+                    kind: if
+                    config:
+                      left:
+                        type: 'null'
+                      right:
+                        type: 'null'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 300
+                      'y': 1780
+                  - id: 1780561796528-hcjn6n
+                    kind: if
+                    config:
+                      right:
+                        type: 'null'
+                      left:
+                        type: variable
+                        value: null_var
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 300
+                      'y': 1980
+                  - id: 1780561807317-3zak6b
+                    kind: setVariable
+                    config:
+                      value:
+                        type: 'null'
+                      name: null_var
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: -80
+                      'y': 2000
+                  - id: 1780561834165-gjaov7
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: Null comparisons are ok
+                      level: info
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1900
+                      'y': 1800
+                  - id: 1780562184344-4z9xdv
+                    kind: if
+                    config:
+                      left:
+                        type: 'null'
+                      operator: <
+                      right:
+                        type: string
+                        value: abc
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 300
+                      'y': 2180
+                  - id: 1780562197490-x3hxqm
+                    kind: if
+                    config:
+                      left:
+                        type: 'null'
+                      operator: '>'
+                      right:
+                        type: numeric
+                        value: 3
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 300
+                      'y': 2380
+                  - id: 1780562209269-kfd5rb
+                    kind: if
+                    config:
+                      left:
+                        type: 'null'
+                      operator: ≤
+                      right:
+                        type: datetime
+                        value: '2026-06-04T08:37:31.105Z'
+                        format: yyyy-MM-dd HH:mm:ss
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 300
+                      'y': 2580
+                  - id: 1780562253479-76ixev
+                    kind: if
+                    config:
+                      left:
+                        type: 'null'
+                      operator: '>'
+                      right:
+                        type: color
+                        value: '#000000'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 300
+                      'y': 2780
+                  - id: 1780562265950-rii8z8
+                    kind: if
+                    config:
+                      left:
+                        type: 'null'
+                      operator: '>'
+                      right:
+                        type: customList
+                        listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                        label: Rouge
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 300
+                      'y': 2980
+                  - id: 1780562311102-8xhyts
+                    kind: if
+                    config:
+                      right:
+                        type: customListMulti
+                        listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                        labels:
+                          - Vert
+                          - Bleu
+                          - Rouge
+                      left:
+                        type: 'null'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 300
+                      'y': 3180
+                  - id: 1780562334721-xma6jd
+                    kind: if
+                    config:
+                      right:
+                        type: variable
+                        value: from
+                      left:
+                        type: 'null'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 300
+                      'y': 3380
+                  - id: 1780562379577-zbb2w9
+                    kind: if
+                    config:
+                      right:
+                        type: environment
+                        value: Vert,Bleu,Rouge
+                      left:
+                        type: 'null'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 300
+                      'y': 3580
+                  - id: 1780562420376-wpn65s
+                    kind: if
+                    config:
+                      right:
+                        type: environment
+                        value: 6c323ee6-0513-42a0-9d9a-68b329b405b4
+                      left:
+                        type: 'null'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 300
+                      'y': 3780
+                  - id: 1780562516327-2-44fhpg
+                    kind: if
+                    config:
+                      left:
+                        type: string
+                        value: abc
+                      operator: '>'
+                      right:
+                        type: 'null'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1060
+                      'y': 2200
+                  - id: 1780562516327-3-0de2m4
+                    kind: if
+                    config:
+                      left:
+                        type: numeric
+                        value: 3
+                        format: decimal
+                      operator: '>'
+                      right:
+                        type: 'null'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1060
+                      'y': 2400
+                  - id: 1780562516327-4-5s3mjf
+                    kind: if
+                    config:
+                      left:
+                        type: datetime
+                        value: '2026-06-04T08:37:31.000Z'
+                        format: yyyy-MM-dd HH:mm:ss
+                      operator: ≤
+                      right:
+                        type: 'null'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1060
+                      'y': 2600
+                  - id: 1780562516327-5-hbbgl6
+                    kind: if
+                    config:
+                      left:
+                        type: color
+                        value: '#000000'
+                      operator: '>'
+                      right:
+                        type: 'null'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1060
+                      'y': 2800
+                  - id: 1780562516327-6-movxlq
+                    kind: if
+                    config:
+                      left:
+                        type: customList
+                        listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                        label: Rouge
+                      operator: '>'
+                      right:
+                        type: 'null'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1060
+                      'y': 3000
+                  - id: 1780562516327-7-ts8gu8
+                    kind: if
+                    config:
+                      right:
+                        type: 'null'
+                      left:
+                        type: customListMulti
+                        listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                        labels:
+                          - Bleu
+                          - Vert
+                          - Rouge
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1060
+                      'y': 3200
+                  - id: 1780562516327-8-06ayts
+                    kind: if
+                    config:
+                      right:
+                        type: 'null'
+                      left:
+                        type: variable
+                        value: from
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1060
+                      'y': 3400
+                  - id: 1780562516327-10-j9ze0x
+                    kind: if
+                    config:
+                      right:
+                        type: 'null'
+                      left:
+                        type: environment
+                        value: ''
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1060
+                      'y': 3600
+                  - id: 1780562516327-11-pe0z56
+                    kind: if
+                    config:
+                      right:
+                        type: 'null'
+                      left:
+                        type: environment
+                        value: env-1780300487228-md0ml0o
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1060
+                      'y': 3800
+                  - id: 1780562958541-msgjva
+                    kind: switch
+                    config:
+                      'on':
+                        type: 'null'
+                      cases:
+                        - id: switch-default-case
+                          value:
+                            type: 'null'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: 'on'
+                        name: 'on'
+                        dataType: any
+                    outputs:
+                      - id: default
+                        name: default
+                        dataType: any
+                        role: default
+                        flow: both
+                    position:
+                      x: 1760
+                      'y': 2140
+                  - id: 1780562985404-hr2efq
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: Switch vs NULL is ok
+                      level: info
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 2600
+                      'y': 2180
+                  - id: 1780563007305-0-cx0ngs
+                    kind: switch
+                    config:
+                      'on':
+                        type: 'null'
+                      cases:
+                        - id: switch-default-case
+                          value:
+                            type: numeric
+                            value: 1
+                            format: decimal
+                        - id: case-1780563011782-d88vr8
+                          value:
+                            type: string
+                            value: '2'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: 'on'
+                        name: 'on'
+                        dataType: any
+                    outputs:
+                      - id: default
+                        name: default
+                        dataType: any
+                        role: default
+                        flow: both
+                    position:
+                      x: 1760
+                      'y': 2320
+                  - id: 1780563028169-0-tjwr07
+                    kind: switch
+                    config:
+                      'on':
+                        type: variable
+                        value: null_var
+                      cases:
+                        - id: switch-default-case
+                          value:
+                            type: numeric
+                            value: 1
+                            format: decimal
+                        - id: case-1780563011782-d88vr8
+                          value:
+                            type: string
+                            value: '2'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: 'on'
+                        name: 'on'
+                        dataType: any
+                    outputs:
+                      - id: default
+                        name: default
+                        dataType: any
+                        role: default
+                        flow: both
+                    position:
+                      x: 1760
+                      'y': 2540
+                  - id: 1780563056249-0-c1162v
+                    kind: switch
+                    config:
+                      'on':
+                        type: variable
+                        value: null_var
+                      cases:
+                        - id: switch-default-case
+                          value:
+                            type: 'null'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: 'on'
+                        name: 'on'
+                        dataType: any
+                    outputs:
+                      - id: default
+                        name: default
+                        dataType: any
+                        role: default
+                        flow: both
+                    position:
+                      x: 1760
+                      'y': 2760
+                  - id: 1780563069017-0-9y428j
+                    kind: switch
+                    config:
+                      'on':
+                        type: numeric
+                        value: 1
+                        format: decimal
+                      cases:
+                        - id: switch-default-case
+                          value:
+                            type: numeric
+                            value: 1
+                            format: decimal
+                        - id: case-1780563091942-9ca31k
+                          value:
+                            type: variable
+                            value: null_var
+                        - id: case-1780563106757-232n5w
+                          value:
+                            type: 'null'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: 'on'
+                        name: 'on'
+                        dataType: any
+                    outputs:
+                      - id: default
+                        name: default
+                        dataType: any
+                        role: default
+                        flow: both
+                    position:
+                      x: 1760
+                      'y': 2940
+                  - id: 1780563113640-0-hioqnv
+                    kind: switch
+                    config:
+                      'on':
+                        type: environment
+                        value: '1'
+                      cases:
+                        - id: case-1780563106757-232n5w
+                          value:
+                            type: 'null'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: 'on'
+                        name: 'on'
+                        dataType: any
+                    outputs:
+                      - id: default
+                        name: default
+                        dataType: any
+                        role: default
+                        flow: both
+                    position:
+                      x: 1760
+                      'y': 3180
+                  - id: 1780563139567-0-vhr8ta
+                    kind: switch
+                    config:
+                      'on':
+                        type: environment
+                        value: 6c323ee6-0513-42a0-9d9a-68b329b405b4
+                      cases:
+                        - id: case-1780563106757-232n5w
+                          value:
+                            type: environment
+                            value: 6c323ee6-0513-42a0-9d9a-68b329b405b4
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: 'on'
+                        name: 'on'
+                        dataType: any
+                    outputs:
+                      - id: default
+                        name: default
+                        dataType: any
+                        role: default
+                        flow: both
+                    position:
+                      x: 1760
+                      'y': 3360
+                  - id: 1780563182543-0-xe7ggj
+                    kind: switch
+                    config:
+                      'on':
+                        type: environment
+                        value: env-1780300487228-md0ml0o
+                      cases:
+                        - id: case-1780563106757-232n5w
+                          value:
+                            type: environment
+                            value: 6c323ee6-0513-42a0-9d9a-68b329b405b4
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: 'on'
+                        name: 'on'
+                        dataType: any
+                    outputs:
+                      - id: default
+                        name: default
+                        dataType: any
+                        role: default
+                        flow: both
+                    position:
+                      x: 1760
+                      'y': 3540
+                  - id: 1780563196850-0-xywd7s
+                    kind: switch
+                    config:
+                      'on':
+                        type: environment
+                        value: env-1780300487228-md0ml0o
+                      cases:
+                        - id: case-1780563106757-232n5w
+                          value:
+                            type: environment
+                            value: env-1780300487228-md0ml0o
+                        - id: case-1780563204960-zhp706
+                          value:
+                            type: environment
+                            value: 6c323ee6-0513-42a0-9d9a-68b329b405b4
+                        - id: case-1780563209098-v9sy1p
+                          value:
+                            type: environment
+                            value: ''
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: 'on'
+                        name: 'on'
+                        dataType: any
+                    outputs:
+                      - id: default
+                        name: default
+                        dataType: any
+                        role: default
+                        flow: both
+                    position:
+                      x: 1760
+                      'y': 3720
+                  - id: 1780563520427-0-wt4zoi
+                    kind: if
+                    config:
+                      right:
+                        type: variable
+                        value: null_var
+                      left:
+                        type: 'null'
+                      operator: ≠
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: left
+                        name: left
+                        dataType: any
+                      - id: right
+                        name: right
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: else
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1060
+                      'y': 1980
                 edges:
                   - id: e-1780387720495-le3op1
                     from:
@@ -5399,12 +6504,241 @@ collections:
                     to:
                       nodeId: 1780399063954-fivtc9
                       portId: in
+                  - id: e-1780561817498-shjvl8
+                    from:
+                      nodeId: 1780561807317-3zak6b
+                      portId: done
+                    to:
+                      nodeId: 1780561796528-hcjn6n
+                      portId: in
+                  - id: e-1780561838157-z9tpoo
+                    from:
+                      nodeId: 1780561771400-vt3e2a
+                      portId: then
+                    to:
+                      nodeId: 1780561834165-gjaov7
+                      portId: in
+                  - id: e-1780562201868-rvchm6
+                    from:
+                      nodeId: 1780562184344-4z9xdv
+                      portId: error
+                    to:
+                      nodeId: 1780561834165-gjaov7
+                      portId: in
+                  - id: e-1780562291323-lj0lgx
+                    from:
+                      nodeId: 1780562265950-rii8z8
+                      portId: error
+                    to:
+                      nodeId: 1780561834165-gjaov7
+                      portId: in
+                  - id: e-1780562294166-9sxyso
+                    from:
+                      nodeId: 1780562253479-76ixev
+                      portId: error
+                    to:
+                      nodeId: 1780561834165-gjaov7
+                      portId: in
+                  - id: e-1780562296459-xnluhc
+                    from:
+                      nodeId: 1780562209269-kfd5rb
+                      portId: error
+                    to:
+                      nodeId: 1780561834165-gjaov7
+                      portId: in
+                  - id: e-1780562298723-n8pq87
+                    from:
+                      nodeId: 1780562197490-x3hxqm
+                      portId: error
+                    to:
+                      nodeId: 1780561834165-gjaov7
+                      portId: in
+                  - id: e-1780562357790-m6tys1
+                    from:
+                      nodeId: 1780562334721-xma6jd
+                      portId: else
+                    to:
+                      nodeId: 1780561834165-gjaov7
+                      portId: in
+                  - id: e-1780562415942-7v65mr
+                    from:
+                      nodeId: 1780562379577-zbb2w9
+                      portId: then
+                    to:
+                      nodeId: 1780561834165-gjaov7
+                      portId: in
+                  - id: e-1780562434432-yy8a5a
+                    from:
+                      nodeId: 1780562420376-wpn65s
+                      portId: else
+                    to:
+                      nodeId: 1780561834165-gjaov7
+                      portId: in
+                  - id: e-1780562744608-jv8y7q
+                    from:
+                      nodeId: 1780562516327-11-pe0z56
+                      portId: else
+                    to:
+                      nodeId: 1780561834165-gjaov7
+                      portId: in
+                  - id: e-1780562747755-f79e95
+                    from:
+                      nodeId: 1780562516327-10-j9ze0x
+                      portId: then
+                    to:
+                      nodeId: 1780561834165-gjaov7
+                      portId: in
+                  - id: e-1780562757212-m5afgz
+                    from:
+                      nodeId: 1780562516327-8-06ayts
+                      portId: else
+                    to:
+                      nodeId: 1780561834165-gjaov7
+                      portId: in
+                  - id: e-1780562761639-ghd76j
+                    from:
+                      nodeId: 1780562516327-7-ts8gu8
+                      portId: else
+                    to:
+                      nodeId: 1780561834165-gjaov7
+                      portId: in
+                  - id: e-1780562764894-x1q3fy
+                    from:
+                      nodeId: 1780562516327-6-movxlq
+                      portId: error
+                    to:
+                      nodeId: 1780561834165-gjaov7
+                      portId: in
+                  - id: e-1780562768546-kftpls
+                    from:
+                      nodeId: 1780562516327-5-hbbgl6
+                      portId: error
+                    to:
+                      nodeId: 1780561834165-gjaov7
+                      portId: in
+                  - id: e-1780562773208-qq1gtm
+                    from:
+                      nodeId: 1780562516327-4-5s3mjf
+                      portId: error
+                    to:
+                      nodeId: 1780561834165-gjaov7
+                      portId: in
+                  - id: e-1780562781813-m5h0i0
+                    from:
+                      nodeId: 1780562516327-3-0de2m4
+                      portId: error
+                    to:
+                      nodeId: 1780561834165-gjaov7
+                      portId: in
+                  - id: e-1780562786772-9swaph
+                    from:
+                      nodeId: 1780562516327-2-44fhpg
+                      portId: error
+                    to:
+                      nodeId: 1780561834165-gjaov7
+                      portId: in
+                  - id: e-1780563003081-6imy8g
+                    from:
+                      nodeId: 1780562958541-msgjva
+                      portId: switch-default-case
+                    to:
+                      nodeId: 1780562985404-hr2efq
+                      portId: in
+                  - id: e-1780563025935-w83dwm
+                    from:
+                      nodeId: 1780563007305-0-cx0ngs
+                      portId: default
+                    to:
+                      nodeId: 1780562985404-hr2efq
+                      portId: in
+                  - id: e-1780563044481-mxvexz
+                    from:
+                      nodeId: 1780563028169-0-tjwr07
+                      portId: default
+                    to:
+                      nodeId: 1780562985404-hr2efq
+                      portId: in
+                  - id: e-1780563063705-hd7gd6
+                    from:
+                      nodeId: 1780563056249-0-c1162v
+                      portId: switch-default-case
+                    to:
+                      nodeId: 1780562985404-hr2efq
+                      portId: in
+                  - id: e-1780563099096-f6v62x
+                    from:
+                      nodeId: 1780563069017-0-9y428j
+                      portId: switch-default-case
+                    to:
+                      nodeId: 1780562985404-hr2efq
+                      portId: in
+                  - id: e-1780563137510-tr4xfs
+                    from:
+                      nodeId: 1780563113640-0-hioqnv
+                      portId: case-1780563106757-232n5w
+                    to:
+                      nodeId: 1780562985404-hr2efq
+                      portId: in
+                  - id: e-1780563194589-8nkaxh
+                    from:
+                      nodeId: 1780563182543-0-xe7ggj
+                      portId: default
+                    to:
+                      nodeId: 1780562985404-hr2efq
+                      portId: in
+                  - id: e-1780563217034-lt574h
+                    from:
+                      nodeId: 1780563196850-0-xywd7s
+                      portId: case-1780563106757-232n5w
+                    to:
+                      nodeId: 1780562985404-hr2efq
+                      portId: in
+                  - id: e-1780563406373-st5qhd
+                    from:
+                      nodeId: 1780561834165-gjaov7
+                      portId: done
+                    to:
+                      nodeId: 1780562985404-hr2efq
+                      portId: in
+                  - id: e-1780563542972-48bakr
+                    from:
+                      nodeId: 1780561796528-hcjn6n
+                      portId: then
+                    to:
+                      nodeId: 1780561834165-gjaov7
+                      portId: in
+                  - id: e-1780563565710-s3cbh8
+                    from:
+                      nodeId: 1780563520427-0-wt4zoi
+                      portId: else
+                    to:
+                      nodeId: 1780561834165-gjaov7
+                      portId: in
+                  - id: e-1780565244652-077onb
+                    from:
+                      nodeId: 1780562311102-8xhyts
+                      portId: else
+                    to:
+                      nodeId: 1780561834165-gjaov7
+                      portId: in
+                  - id: e-1780566372176-gd1rep
+                    from:
+                      nodeId: 1780392272727-s6jmis
+                      portId: done
+                    to:
+                      nodeId: 1780561834165-gjaov7
+                      portId: in
+                  - id: e-1780566453584-ocb9uf
+                    from:
+                      nodeId: 1780563139567-0-vhr8ta
+                      portId: case-1780563106757-232n5w
+                    to:
+                      nodeId: 1780562985404-hr2efq
+                      portId: in
                 id: 1780387606015-te2kvqt
                 name: Conditions
                 items: []
               - type: scenario
-                id: 1780545696124-73s4yub
-                name: Variables & asserts
                 tags: []
                 params: []
                 nodes:
@@ -7746,6 +9080,227 @@ collections:
                     to:
                       nodeId: 1780556183058-9-kxy6sk
                       portId: in
+                id: 1780545696124-73s4yub
+                name: Variables & asserts
+                items: []
+              - type: scenario
+                id: 1780566592512-gxyr48d
+                name: Templates
+                tags: []
+                params: []
+                nodes:
+                  - id: 1780566596359-yexp3k
+                    kind: log
+                    config:
+                      message:
+                        type: expression
+                        value: 'Environment name: {{name}}'
+                      data:
+                        type: environment
+                        value: 6c323ee6-0513-42a0-9d9a-68b329b405b4
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 580
+                      'y': 60
+                  - id: 1780566641842-q2r53x
+                    kind: transform
+                    config:
+                      expression:
+                        type: expression
+                        value: env {{env.name}} is {{color}}
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: out
+                        name: value
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 580
+                      'y': 440
+                  - id: 1780566672716-g6hr30
+                    kind: object
+                    config:
+                      properties:
+                        - id: object-default-property
+                          name: env
+                          value:
+                            type: environment
+                            value: env-1780300487228-md0ml0o
+                        - id: prop-1780566696016-lsvr21
+                          name: color
+                          value:
+                            type: color
+                            value: '#bd10e0'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: object
+                        name: object
+                        dataType: json
+                        flow: both
+                    position:
+                      x: 140
+                      'y': 320
+                  - id: 1780566730035-86fj2f
+                    kind: log
+                    config: {}
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1120
+                      'y': 420
+                edges:
+                  - id: e-1780566712391-xxhuvm
+                    from:
+                      nodeId: 1780566672716-g6hr30
+                      portId: object
+                    to:
+                      nodeId: 1780566641842-q2r53x
+                      portId: value
+                    selector: .
+                  - id: e-1780566733605-h69nl4
+                    from:
+                      nodeId: 1780566641842-q2r53x
+                      portId: out
+                    to:
+                      nodeId: 1780566730035-86fj2f
+                      portId: message
+                    selector: result
+                  - id: e-1780566768040-s8lxf9
+                    from:
+                      nodeId: 1780566672716-g6hr30
+                      portId: object
+                    to:
+                      nodeId: 1780566730035-86fj2f
+                      portId: data
+                    selector: .
+                  - id: e-1780566785544-hjh0kh
+                    from:
+                      nodeId: 1780566596359-yexp3k
+                      portId: done
+                    to:
+                      nodeId: 1780566730035-86fj2f
+                      portId: in
+                items: []
+              - type: scenario
+                id: 1780566844766-gsmdkp9
+                name: Lists operations
+                tags: []
+                params: []
+                nodes:
+                  - id: 1780566849308-3wj6vi
+                    kind: aggregate
+                    config:
+                      items:
+                        type: variable
+                        value: PetColors
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: items
+                        name: items
+                        dataType: json
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 560
+                      'y': 240
+                    color: '#4a90e2'
+                  - id: 1780566856530-yvh90e
+                    kind: setVariable
+                    config:
+                      value:
+                        type: customListMulti
+                        listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                        labels:
+                          - Vert
+                          - Bleu
+                      name: PetColors
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 220
+                      'y': 240
+                  - id: 1780566885205-poed2s
+                    kind: log
+                    config:
+                      message:
+                        type: expression
+                        value: '{{.}} colors selected'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 960
+                      'y': 240
+                edges:
+                  - id: e-1780566878417-eme44s
+                    from:
+                      nodeId: 1780566856530-yvh90e
+                      portId: done
+                    to:
+                      nodeId: 1780566849308-3wj6vi
+                      portId: in
+                  - id: e-1780566894627-8x8u34
+                    from:
+                      nodeId: 1780566849308-3wj6vi
+                      portId: result
+                    to:
+                      nodeId: 1780566885205-poed2s
+                      portId: data
+                    selector: .
                 items: []
         id: f1000000-0000-0000-0000-00000000auth
         name: Pet API

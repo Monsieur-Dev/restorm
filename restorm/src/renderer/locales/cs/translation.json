@@ -316,6 +316,7 @@
       "color": "Barva",
       "expression": "Výraz",
       "boolean": "Boolean",
+      "null": "Null",
       "variables": "Proměnné",
       "environment": "Prostředí"
     },

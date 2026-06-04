@@ -14,7 +14,7 @@ import { useScenarioEdgeSelector } from '../scenarioEdgeSelector'
 import { normalizeValueType } from '../../../utils/normalizeValueType'
 import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
 import { resolveSelectorPath, concreteValue, portPreviewValue } from '../../../../../shared/utils/scenarioStaticPreview'
-import { StringValue } from '../../../../../shared/types/collections'
+import { StringValue, NullValue } from '../../../../../shared/types/collections'
 
 /** One-line preview of a value used as an expression-autocomplete suggestion. */
 function shortLogPreview(v: unknown): string {
@@ -119,12 +119,13 @@ export const LogNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data,
             <div className="nodrag scn-stacked-field scn-log-data-field" onMouseDown={(e) => { e.stopPropagation() }}>
               <span className="scn-port-label">{t('scenario.log.data', 'data')}</span>
               <TypedValueField
-                value={normalizeValueType(config['data'])}
+                value={config['data'] !== undefined ? normalizeValueType(config['data']) : new NullValue()}
                 onChange={(next) => { data.onSetConfig?.(id, { data: serializeValueForPersistence(next) }) }}
                 valueTypeGroups={valueTypeGroups}
                 excludeTypes={['expression']}
                 allowAllVariables
                 allowEnvironment
+                allowNull
                 dataTestId="scn-log-data"
               />
             </div>
@@ -169,6 +170,7 @@ export const AssertNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
           valueTypeGroups={valueTypeGroups}
           excludeTypes={['expression']}
           allowEnvironment
+          allowNull
           dataTestId={`scn-assert-${key}`}
         />
       </div>

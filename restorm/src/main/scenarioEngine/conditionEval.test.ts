@@ -112,6 +112,37 @@ describe('compareValues — equality (= ≠)', () => {
   })
 })
 
+describe('compareValues — null', () => {
+  it('null is equal ONLY to null', () => {
+    expect(compareValues('=', null, null, 'null', 'null')).toBe(true)
+    expect(compareValues('≠', null, null, 'null', 'null')).toBe(false)
+    // anything else vs null → not equal (object, string, number, bool, and the
+    // EMPTY STRING — `""` is NOT null).
+    expect(compareValues('=', { a: 1 }, null, undefined, 'null')).toBe(false)
+    expect(compareValues('=', 'x', null, undefined, 'null')).toBe(false)
+    expect(compareValues('=', '', null, undefined, 'null')).toBe(false)
+    expect(compareValues('=', 0, null, undefined, 'null')).toBe(false)
+    expect(compareValues('≠', '', null, undefined, 'null')).toBe(true)
+  })
+
+  it('infers `null` from a raw null value (no hint needed — a wired null)', () => {
+    expect(compareValues('=', null, null)).toBe(true)
+    expect(compareValues('=', 'x', null)).toBe(false)
+  })
+
+  it('orders: `<` `>` always throw with null; `<=` `>=` only when both null', () => {
+    expect(() => compareValues('<', null, null, 'null', 'null')).toThrow()
+    expect(() => compareValues('>', null, null, 'null', 'null')).toThrow()
+    expect(() => compareValues('<', null, 5, 'null', undefined)).toThrow()
+    // ≤ / ≥ : both null is the reflexive equality → true (no throw).
+    expect(compareValues('≤', null, null, 'null', 'null')).toBe(true)
+    expect(compareValues('≥', null, null, 'null', 'null')).toBe(true)
+    // ≤ / ≥ with a null on ONE side → still throws (ordering a null vs a value).
+    expect(() => compareValues('≤', null, 5, 'null', undefined)).toThrow()
+    expect(() => compareValues('≥', 5, null, undefined, 'null')).toThrow()
+  })
+})
+
 describe('compareValues — contains (∋)', () => {
   it('object ∋ object is subset (right ⊆ left, common props equal)', () => {
     expect(compareValues('∋', { a: 1, b: 2 }, { a: 1 })).toBe(true)

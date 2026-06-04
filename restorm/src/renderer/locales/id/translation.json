@@ -313,6 +313,7 @@
       "color": "Warna",
       "expression": "Ekspresi",
       "boolean": "Boolean",
+      "null": "Null",
       "variables": "Variabel",
       "environment": "Lingkungan"
     },

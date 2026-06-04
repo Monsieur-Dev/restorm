@@ -313,6 +313,7 @@
       "color": "색상",
       "expression": "표현식",
       "boolean": "부울",
+      "null": "Null",
       "variables": "변수",
       "environment": "환경"
     },

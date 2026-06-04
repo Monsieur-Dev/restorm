@@ -33,8 +33,14 @@ const ARITH_OP_ALIASES: Record<string, 'add' | 'sub' | 'mul' | 'div' | 'mod' | '
  * works without links, exactly like `comparator` / `if`. */
 export const arithmeticExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { op?: string; operator?: string; a?: unknown; b?: unknown }
-  const a = toNumber(resolveOperand(act.inputs['a'], cfg.a, ctx.variables))
-  const b = toNumber(resolveOperand(act.inputs['b'], cfg.b, ctx.variables))
+  const ra = resolveOperand(act.inputs['a'], cfg.a, ctx.variables)
+  const rb = resolveOperand(act.inputs['b'], cfg.b, ctx.variables)
+  // Arithmetic with null is undefined — adding / dividing / … a null operand
+  // (inline NullValue or a variable that resolved to null) throws rather than
+  // silently coercing null to 0.
+  if (ra === null || rb === null) throw new Error('cannot do arithmetic with a null operand')
+  const a = toNumber(ra)
+  const b = toNumber(rb)
   const rawOp = cfg.operator ?? cfg.op
   const op = (rawOp !== undefined ? ARITH_OP_ALIASES[rawOp] : undefined) ?? 'add'
   let value: number
@@ -115,15 +121,28 @@ export const ifExecutor: NodeExecutor = (act, ctx) => {
 export const whileExecutor: NodeExecutor = () => ({ outputs: [], scopeAction: { type: 'conditionalLoop', mode: 'while' } })
 export const doWhileExecutor: NodeExecutor = () => ({ outputs: [], scopeAction: { type: 'conditionalLoop', mode: 'doWhile' } })
 
-/** Switch node: matches `on` against the `case` values in config; if
- * none match, emits on the `default` port. Each emission carries
- * `on` so a chain can keep routing the value. */
+/** Switch node: matches `on` against each `case` value (equality), emitting
+ * the trigger on the FIRST matching case's port; if none match, emits on the
+ * `default` port. Each emission carries `on` so a chain can keep routing the
+ * value.
+ *
+ * `on` and the case values resolve exactly like `if` operands — a wired `on`
+ * wins, otherwise the inline typed value (literal / `variable` / `environment`)
+ * — and the match uses the shared `compareValues` equality so it honours the
+ * type semantics (null IS only equal to null, dates at second precision, lists
+ * by contents, …). The emitted port is the case's own id (`switch-default-case`
+ * for the seeded case, `case-…` for added ones); `default` is the separate
+ * always-present fallback. */
 export const switchExecutor: NodeExecutor = (act, ctx) => {
-  const cfg = ctx.node.config as { cases?: { id: string; value: unknown }[] }
-  const on = act.inputs['on']
+  const cfg = ctx.node.config as { on?: unknown; cases?: { id: string; value: unknown }[] }
+  const on = resolveOperand(act.inputs['on'], cfg.on, ctx.variables)
+  const onHint = hint(act.inputs['on'], cfg.on)
   const cases = cfg.cases ?? []
   for (const c of cases) {
-    if (c.value === on) return { outputs: [{ port: `case-${c.id}`, value: on }] }
+    const caseValue = resolveOperand(undefined, c.value, ctx.variables)
+    if (compareValues('eq', on, caseValue, onHint, hintFromConfig(c.value))) {
+      return { outputs: [{ port: c.id, value: on }] }
+    }
   }
   return { outputs: [{ port: 'default', value: on }] }
 }

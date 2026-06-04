@@ -316,6 +316,7 @@
       "color": "Колір",
       "expression": "Вираз",
       "boolean": "Булеве",
+      "null": "Null",
       "variables": "Змінні",
       "environment": "Середовище"
     },

@@ -137,6 +137,34 @@ describe('universal Done port — subtree completion', () => {
     expect(order).toEqual(['body', 'after'])
   })
 
+  it('AND-joins two `done` ports into one `in`: target fires once both predecessors complete', async () => {
+    // p1.done AND p2.done → target.in. Two forward `done` edges into `in` form
+    // an AND-join barrier — the target must fire exactly once, after BOTH
+    // predecessors have finished. (Mirrors a real scenario: a setVariable's
+    // `done` and an `if`'s `done` both gating a downstream box.)
+    let targetRuns = 0
+    const scenario = buildScenario(
+      [
+        { id: 'p1', kind: 'now', outputs: ['value', 'done'] },
+        { id: 'p2', kind: 'now', outputs: ['value', 'done'] },
+        { id: 'target', kind: 'now', inputs: ['in'], outputs: [] }
+      ],
+      [
+        { from: ['p1', 'done'], to: ['target', 'in'] },
+        { from: ['p2', 'done'], to: ['target', 'in'] }
+      ]
+    )
+    const executors = new Map<string, NodeExecutor>([
+      ['p1', () => ({ outputs: [{ port: 'value', value: 1 }] })],
+      ['p2', () => ({ outputs: [{ port: 'value', value: 2 }] })],
+      ['target', () => { targetRuns += 1; return { outputs: [] } }]
+    ])
+    const s = new Scheduler({ scenario, executors })
+    await s.run()
+    expect(s.status().state).toBe('completed')
+    expect(targetRuns).toBe(1)
+  })
+
   it('a loop`s upstream `done` waits for the whole loop (done is the loop`s exit)', async () => {
     // a → (data) → for(0..2) → body×3 ;  a → (done) → after.  `after` runs
     // only once the loop has fully iterated.

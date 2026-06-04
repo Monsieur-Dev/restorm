@@ -314,6 +314,7 @@
       "color": "Szín",
       "expression": "Kifejezés",
       "boolean": "Logikai",
+      "null": "Null",
       "variables": "Változók",
       "environment": "Környezet"
     },

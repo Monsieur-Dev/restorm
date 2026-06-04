@@ -314,6 +314,7 @@
       "color": "Väri",
       "expression": "Lauseke",
       "boolean": "Totuusarvo",
+      "null": "Null",
       "variables": "Muuttujat",
       "environment": "Ympäristö"
     },

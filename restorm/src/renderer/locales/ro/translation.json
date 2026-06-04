@@ -315,6 +315,7 @@
       "color": "Culoare",
       "expression": "Expresie",
       "boolean": "Boolean",
+      "null": "Null",
       "variables": "Variabile",
       "environment": "Mediu"
     },

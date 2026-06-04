@@ -51,6 +51,8 @@ export function concreteValue(persisted: unknown): unknown {
   if (typeof persisted !== 'object') return persisted
   const p = persisted as { type?: unknown; value?: unknown; label?: unknown; labels?: unknown }
   switch (p.type) {
+    case 'null':
+      return null
     case 'numeric': {
       const n = typeof p.value === 'number' ? p.value : Number(p.value)
       return Number.isFinite(n) ? n : 0
