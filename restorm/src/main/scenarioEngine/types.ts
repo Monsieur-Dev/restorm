@@ -143,6 +143,11 @@ export type EngineEvent = (
 /** One entry in the run log (engine-internal). Persistence is OYO-286. */
 export interface RunLogEntry {
   ts: string
+  /** Process-wide monotonic emission ordinal — the causal tiebreak when two
+   * entries (often a sub-run and its parent) share a millisecond `ts`. Stamped
+   * by the scheduler at push time; merges sort by this, falling back to `ts`
+   * for entries archived before the field existed. */
+  seq?: number
   runId: RuntimeId
   level: 'debug' | 'info' | 'warn' | 'error'
   // `run` = a scenario-boundary marker (started / ended), shown in the

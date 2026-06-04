@@ -215,6 +215,13 @@ export class Scheduler {
     return this.log
   }
 
+  /** Append a log entry, stamping a monotonic `seq` so the run-tree merge can
+   * restore causal order when two entries share a millisecond `ts`. EVERY log
+   * write goes through here — never push to `this.log` directly. */
+  private pushLog(entry: RunLogEntry): void {
+    this.log.push({ ...entry, seq: nextLogSeq() })
+  }
+
   /** Current status snapshot. */
   status(): RunStatus {
     return {
@@ -302,7 +309,7 @@ export class Scheduler {
     // Record the stop moment in the run log (the user explicitly wants
     // "when I hit Stop" traceable; also marks where an abort cascaded
     // into a sub-run via `reason: 'parent cancelled'`).
-    this.log.push({ ts: now(), runId: this.runId, level: 'info', source: 'engine', message: `run aborted${reason !== undefined ? ` (${reason})` : ''}` })
+    this.pushLog({ ts: now(), runId: this.runId, level: 'info', source: 'engine', message: `run aborted${reason !== undefined ? ` (${reason})` : ''}` })
     this.logRunBoundary('end', reason === 'parent cancelled' ? 'parent cancelled' : 'cancelled')
     this.abortCtl.abort(reason ?? 'cancelled')
     this.queue = []
@@ -345,7 +352,7 @@ export class Scheduler {
         this.queue.unshift(next)
         this.stepLatch = false
         this.state = 'paused'
-        this.log.push({ ts: now(), runId: this.runId, level: 'info', source: 'engine', nodeId: next.nodeId, scope: next.scope, message: `breakpoint hit ${next.kind}` })
+        this.pushLog({ ts: now(), runId: this.runId, level: 'info', source: 'engine', nodeId: next.nodeId, scope: next.scope, message: `breakpoint hit ${next.kind}` })
         this.emit({ type: 'breakpoint-hit', runId: this.runId, nodeId: next.nodeId, scope: next.scope, at: now() })
         return
       }
@@ -418,7 +425,7 @@ export class Scheduler {
   private dispatch(act: InternalActivation): void {
     const executor = this.executors.get(act.nodeId)
     if (!executor) {
-      this.log.push({ ts: now(), runId: this.runId, level: 'error', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `no executor for node ${act.nodeId}` })
+      this.pushLog({ ts: now(), runId: this.runId, level: 'error', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `no executor for node ${act.nodeId}` })
       this.emit({ type: 'node-failed', runId: this.runId, nodeId: act.nodeId, scope: act.scope, at: now(), error: 'no executor' })
       this.scopes.leave(act.scope)
       return
@@ -430,12 +437,12 @@ export class Scheduler {
     }
     this.inFlight += 1
     const startParams = this.startLogParams(act)
-    this.log.push({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `start ${act.kind}`, ...(Object.keys(startParams).length > 0 ? { data: logData(startParams) } : {}) })
+    this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `start ${act.kind}`, ...(Object.keys(startParams).length > 0 ? { data: logData(startParams) } : {}) })
     this.emit({ type: 'node-started', runId: this.runId, nodeId: act.nodeId, scope: act.scope, at: now() })
     const ctx: ExecContext = {
       signal: this.abortCtl.signal,
       log: (entry) => {
-        this.log.push({
+        this.pushLog({
           ts: now(),
           runId: this.runId,
           source: entry.source ?? 'user',
@@ -458,7 +465,7 @@ export class Scheduler {
         }
         const doneData: Record<string, unknown> = {}
         for (const o of result.outputs) doneData[o.port] = o.value
-        this.log.push({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `done ${act.kind}`, ...(result.outputs.length > 0 ? { data: logData(doneData) } : {}) })
+        this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `done ${act.kind}`, ...(result.outputs.length > 0 ? { data: logData(doneData) } : {}) })
         this.handleExecResult(act, result)
         // A `forEach` / conditional loop doesn't "complete" when its executor
         // returns — it's still orchestrating its iterations. The deferred
@@ -476,7 +483,7 @@ export class Scheduler {
         // an aborted run isn't a node error.
         if (this.abortCtl.signal.aborted) return
         const msg = err instanceof Error ? err.message : String(err)
-        this.log.push({ ts: now(), runId: this.runId, level: 'error', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: msg })
+        this.pushLog({ ts: now(), runId: this.runId, level: 'error', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: msg })
         // Route to the node's `error` output if anything is wired
         // there; otherwise fail the whole run.
         const errorEdges = this.outgoingByPort.get(`${act.nodeId}:error`) ?? []
@@ -669,7 +676,7 @@ export class Scheduler {
       // close synchronously and cascade through the rest, churning the
       // log + falsely reporting completion after a Stop).
       if (this.abortCtl.signal.aborted) return
-      this.log.push({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `forEach open item ${i} (${completed}/${total} done, batch≤${batchSize})` })
+      this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `forEach open item ${i} (${completed}/${total} done, batch≤${batchSize})` })
       const child: ScopeStack = [...act.scope, { scopeNodeId: act.nodeId, index: i }]
       for (const edge of eachEdges) {
         this.enqueueToken({
@@ -686,7 +693,7 @@ export class Scheduler {
       // The item is done when its whole chain has drained this scope.
       this.scopes.onClose(child, () => {
         completed += 1
-        this.log.push({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `forEach item ${i} closed (${completed}/${total} done)` })
+        this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `forEach item ${i} closed (${completed}/${total} done)` })
         if (nextIndex < total) openItem(nextIndex++)
         if (completed === total) fireDone()
       })
@@ -697,7 +704,7 @@ export class Scheduler {
       return
     }
     const initial = Math.min(batchSize, total)
-    this.log.push({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `forEach start: ${total} items, batchSize=${batchSize}, opening first ${initial}` })
+    this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `forEach start: ${total} items, batchSize=${batchSize}, opening first ${initial}` })
     nextIndex = initial
     for (let i = 0; i < initial; i++) openItem(i)
   }
@@ -730,7 +737,7 @@ export class Scheduler {
         this.enqueueToken({ value: iter, fromNodeId: act.nodeId, fromPort: 'done', toNodeId: edge.toNodeId, toPort: edge.toPort, scope: act.scope, tokenId: ++this.tokenSeq })
         this.emit({ type: 'data-flow-emitted', runId: this.runId, edgeId: edge.edgeId, tokenId: this.tokenSeq, at: now() })
       }
-      this.log.push({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `${mode} done after ${iter} iteration(s)` })
+      this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `${mode} done after ${iter} iteration(s)` })
       this.emit({ type: 'node-completed', runId: this.runId, nodeId: act.nodeId, scope: act.scope, at: now(), outputs: [] })
       // Loop fully exited (it emitted its own `done`): release it from its
       // parents so an upstream box's `done` waits for the whole loop.
@@ -742,7 +749,7 @@ export class Scheduler {
       const i = iter
       iter += 1
       const child: ScopeStack = [...act.scope, { scopeNodeId: act.nodeId, index: i }]
-      this.log.push({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `${mode} iteration ${i}` })
+      this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `${mode} iteration ${i}` })
       for (const edge of thenEdges) {
         // `then` is a pure signal: fire the body, carry no per-iteration value.
         this.enqueueToken({ value: true, fromNodeId: act.nodeId, fromPort: 'then', toNodeId: edge.toNodeId, toPort: edge.toPort, scope: child, tokenId: ++this.tokenSeq })
@@ -801,18 +808,23 @@ export class Scheduler {
     for (const portId of Object.keys(decision.tokensByPort)) {
       inputs[portId] = deepClone(decision.tokensByPort[portId]?.value)
     }
-    // Subtree parents: the emitters of the matched tokens, counted once each
-    // (a latched token re-read on a later firing has already transferred its
-    // obligation, so it must not re-attribute its emitter here).
-    const parents = new Set<number>()
+    // Subtree parents: the emitters of the matched tokens. ONE obligation per
+    // matched token (NOT deduped per emitter) — a single port fanning out to
+    // several ports of THIS node enqueues several tokens, each of which
+    // incremented its emitter's pending count (see `handleExecResult`). The
+    // emitter's `done` must wait for every one of them, so the same emitter
+    // legitimately appears multiple times here. A latched token re-read on a
+    // later firing has already transferred its obligation, so the
+    // `consumedTokens` guard skips it (it must not re-attribute its emitter).
+    const parents: number[] = []
     for (const m of decision.matched) {
       if (this.consumedTokens.has(m.token)) continue
       this.consumedTokens.add(m.token)
-      if (typeof m.token.emitter === 'number') parents.add(m.token.emitter)
+      if (typeof m.token.emitter === 'number') parents.push(m.token.emitter)
     }
     this.buffer.consume(node.id, decision)
     const act: InternalActivation = { nodeId: node.id, kind: node.kind, scope: decision.scope, inputs }
-    this.registerActivation(act, [...parents])
+    this.registerActivation(act, parents)
     this.queue.push(act)
     this.scopes.enter(decision.scope)
   }
@@ -1069,7 +1081,7 @@ export class Scheduler {
   private logRunBoundary(phase: 'start' | 'end', outcome?: string): void {
     const name = this.scenario.name && this.scenario.name.trim() !== '' ? this.scenario.name : 'scénario'
     const message = phase === 'start' ? `▶ ${name}` : `■ ${name}${outcome !== undefined ? ` (${outcome})` : ''}`
-    this.log.push({ ts: now(), runId: this.runId, level: 'info', source: 'run', message })
+    this.pushLog({ ts: now(), runId: this.runId, level: 'info', source: 'run', message })
   }
 
   /** Surface a single-field input request to the renderer + return a
@@ -1157,6 +1169,20 @@ export class Scheduler {
 
 function now(): string {
   return new Date().toISOString()
+}
+
+// Process-wide monotonic log ordinal. `ts` only has millisecond resolution, so
+// two entries emitted in the same millisecond (common — a sub-run and its
+// parent's post-call log routinely collide) can't be ordered by timestamp
+// without violating happens-before. Every log entry across the whole run tree
+// (parent + sub-runs all run in this one process) gets a strictly-increasing
+// `seq` at emission time, so the merge can restore causal order on a ts tie.
+// Monotonic-only matters; the absolute value and cross-run continuity are
+// irrelevant (each run tree's entries are sorted among themselves).
+let LOG_SEQ = 0
+function nextLogSeq(): number {
+  LOG_SEQ += 1
+  return LOG_SEQ
 }
 
 function randomId(): string {

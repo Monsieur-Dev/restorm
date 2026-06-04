@@ -176,6 +176,7 @@ collections:
                   message:
                     type: string
                     value: Received in main
+                  level: info
                 inputs:
                   - id: in
                     name: ''
@@ -197,6 +198,7 @@ collections:
                   message:
                     type: string
                     value: statuc_output received in main
+                  level: info
                 inputs:
                   - id: in
                     name: ''

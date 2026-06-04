@@ -10,6 +10,10 @@ export type ScenarioRunHistoryStatus = 'completed' | 'cancelled' | 'failed'
  * every sub-run) so a whole run is recoverable from one detail blob. */
 export interface ScenarioRunLogEntry {
   ts: string
+  /** Monotonic emission ordinal — the causal tiebreak when entries share a
+   * millisecond `ts` (see `RunLogEntry.seq`). Absent on logs archived before
+   * the field existed; merges fall back to `ts` then. */
+  seq?: number
   runId: string
   level: 'debug' | 'info' | 'warn' | 'error'
   /** `run` = scenario-boundary marker, `user` = Log action, `engine` =

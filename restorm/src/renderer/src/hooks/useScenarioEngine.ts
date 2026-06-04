@@ -69,6 +69,9 @@ interface Bridge {
  * `RunLogEntry` plus the `scenarioId` of the (sub-)run it came from. */
 export interface ScenarioLogEntry {
   ts: string
+  /** Monotonic emission ordinal — the causal tiebreak when merged entries
+   * share a millisecond `ts` (see the engine's `RunLogEntry.seq`). */
+  seq?: number
   runId?: string
   scenarioId?: string
   level?: 'debug' | 'info' | 'warn' | 'error'
@@ -437,7 +440,15 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
           merged.push({ ...e, ...(r.scenarioId !== undefined ? { scenarioId: r.scenarioId } : {}) })
         }
       }
-      merged.sort((a, b) => (a.ts < b.ts ? -1 : a.ts > b.ts ? 1 : 0))
+      // Causal order: the monotonic emission `seq` is authoritative — a
+      // sub-run entry and its parent's post-call entry routinely share a
+      // millisecond `ts`, and a pure-`ts` sort then breaks happens-before.
+      // Fall back to `ts` only when either entry predates the `seq` field.
+      merged.sort((a, b) =>
+        a.seq !== undefined && b.seq !== undefined
+          ? a.seq - b.seq
+          : a.ts < b.ts ? -1 : a.ts > b.ts ? 1 : 0
+      )
       setRunLog(merged)
     }
     void fetchLog()

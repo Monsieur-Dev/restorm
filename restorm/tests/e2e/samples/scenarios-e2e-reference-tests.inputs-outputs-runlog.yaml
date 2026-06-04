@@ -166,4 +166,12 @@
       obj_param6: "#abcdef"
       obj_param7: Vert,Rouge
       obj_SecondInput: 2030-01-15T08:30:00.000Z
+- message: ⚪ [<time>] start output
+  data:
+    in: true
+- message: ⚪ [<time>] done output
+  data:
+    output:static_output: true
+    output:env: null
+    output:color: "{{param5}}"
 - message: 🔵 [<time>] ■ Inputs/outputs

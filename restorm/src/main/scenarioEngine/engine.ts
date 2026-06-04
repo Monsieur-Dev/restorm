@@ -224,6 +224,7 @@ export class ScenarioEngine {
         for (const e of run.log) {
           log.push({
             ts: e.ts,
+            ...(e.seq !== undefined ? { seq: e.seq } : {}),
             runId: e.runId,
             level: e.level,
             source: e.source,
@@ -234,7 +235,10 @@ export class ScenarioEngine {
           })
         }
       }
-      log.sort((a, b) => a.ts.localeCompare(b.ts))
+      // Causal order: the monotonic emission `seq` is authoritative (a sub-run's
+      // entry and its parent's post-call entry routinely share a millisecond
+      // `ts`). Fall back to `ts` for entries archived before `seq` existed.
+      log.sort((a, b) => (a.seq !== undefined && b.seq !== undefined ? a.seq - b.seq : a.ts.localeCompare(b.ts)))
 
       // Use the snapshot captured at run START (not a live re-fetch), so a
       // sub-scenario edited mid-run is archived as it actually ran. Fall back
