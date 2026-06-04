@@ -854,7 +854,9 @@
       "now": "Сада",
       "comparator": "Упоређивач",
       "setVariable": "Постави променљиву",
-      "getVariable": "Узми променљиву"
+      "getVariable": "Узми променљиву",
+      "addToList": "Додај на листу",
+      "removeFromList": "Уклони са листе"
     },
     "comparator": {
       "result": "резултат"
@@ -1027,7 +1029,8 @@
       "values": "values",
       "result": "result",
       "addValue": "Додај вредност",
-      "removeValue": "Уклони вредност"
+      "removeValue": "Уклони вредност",
+      "updateVariable": "Ажурирај изворну променљиву"
     }
   }
 }

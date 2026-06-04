@@ -852,7 +852,9 @@
       "now": "現在",
       "comparator": "比較器",
       "setVariable": "設定變數",
-      "getVariable": "取得變數"
+      "getVariable": "取得變數",
+      "addToList": "新增至清單",
+      "removeFromList": "從清單移除"
     },
     "comparator": {
       "result": "結果"
@@ -1025,7 +1027,8 @@
       "values": "values",
       "result": "result",
       "addValue": "新增值",
-      "removeValue": "移除值"
+      "removeValue": "移除值",
+      "updateVariable": "更新來源變數"
     }
   }
 }

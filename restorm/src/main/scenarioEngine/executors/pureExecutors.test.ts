@@ -374,14 +374,14 @@ describe('addToList / removeFromList', () => {
     expect(out.outputs).toEqual([{ port: 'result', value: ['x', 'a', 'wired'] }])
   })
 
-  it('a row that resolves to a list is added as a single nested element (no spread)', () => {
+  it('a row that resolves to a LIST is concatenated (spread), not nested', () => {
     const out = runPure(
       addToListExecutor,
       { values: [{ id: 'v1', value: { type: 'variable', value: 'extra' } }] },
       { list: ['x'] },
       new Map([['extra', ['y', 'z']]])
     )
-    expect(out.outputs).toEqual([{ port: 'result', value: ['x', ['y', 'z']] }])
+    expect(out.outputs).toEqual([{ port: 'result', value: ['x', 'y', 'z'] }])
   })
 
   it('removeFromList drops every element deep-equal to any row value', () => {
@@ -421,6 +421,51 @@ describe('addToList / removeFromList', () => {
       { list: ['a'], 'list-mutation-default-value': 'b' }
     )
     expect(out.outputs).toEqual([{ port: 'result', value: ['a', 'b'] }])
+  })
+
+  it('writes the result back into the source variable when updateSourceVariable is on', () => {
+    const vars = new Map<string, unknown>([['basket', ['a']]])
+    const out = runPure(
+      addToListExecutor,
+      { list: { type: 'variable', value: 'basket' }, updateSourceVariable: true, values: [{ id: 'v1', value: { type: 'string', value: 'b' } }] },
+      {},
+      vars
+    )
+    expect(out.outputs).toEqual([{ port: 'result', value: ['a', 'b'] }])
+    expect(vars.get('basket')).toEqual(['a', 'b']) // pushed back into the variable
+  })
+
+  it('stays pure (no writeback) when updateSourceVariable is off', () => {
+    const vars = new Map<string, unknown>([['basket', ['a']]])
+    runPure(
+      addToListExecutor,
+      { list: { type: 'variable', value: 'basket' }, values: [{ id: 'v1', value: { type: 'string', value: 'b' } }] },
+      {},
+      vars
+    )
+    expect(vars.get('basket')).toEqual(['a']) // unchanged
+  })
+
+  it('does NOT write back when the list is WIRED (no source variable to push to)', () => {
+    const vars = new Map<string, unknown>([['basket', ['a']]])
+    runPure(
+      addToListExecutor,
+      { list: { type: 'variable', value: 'basket' }, updateSourceVariable: true, values: [] },
+      { list: ['x'] },
+      vars
+    )
+    expect(vars.get('basket')).toEqual(['a']) // the list came from the wire, not the variable
+  })
+
+  it('removeFromList also writes back when updateSourceVariable is on', () => {
+    const vars = new Map<string, unknown>([['basket', ['a', 'b', 'a']]])
+    runPure(
+      removeFromListExecutor,
+      { list: { type: 'variable', value: 'basket' }, updateSourceVariable: true, values: [{ id: 'v1', value: { type: 'string', value: 'a' } }] },
+      {},
+      vars
+    )
+    expect(vars.get('basket')).toEqual(['b'])
   })
 })
 

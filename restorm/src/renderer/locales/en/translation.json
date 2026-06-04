@@ -853,7 +853,9 @@
       "now": "Now",
       "comparator": "Comparator",
       "setVariable": "Set variable",
-      "getVariable": "Get variable"
+      "getVariable": "Get variable",
+      "addToList": "Add to list",
+      "removeFromList": "Remove from list"
     },
     "comparator": {
       "result": "result"
@@ -1026,7 +1028,8 @@
       "values": "values",
       "result": "result",
       "addValue": "Add value",
-      "removeValue": "Remove value"
+      "removeValue": "Remove value",
+      "updateVariable": "Update the source variable"
     }
   }
 }

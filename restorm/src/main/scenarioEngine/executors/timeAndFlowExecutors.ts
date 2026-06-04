@@ -6,7 +6,7 @@
  */
 
 import type { NodeExecutor } from '../types'
-import { resolveConfigItems, concreteValue } from '../../../shared/utils/scenarioStaticPreview'
+import { resolveConfigItems, concreteValue, strictAggregateNumber, aggregateValueLabel } from '../../../shared/utils/scenarioStaticPreview'
 import { compareValues } from '../conditionEval'
 
 /** Wait node: sleep for `durationMs` (from input or config). Aborts
@@ -171,13 +171,22 @@ export const aggregateExecutor: NodeExecutor = (act, ctx) => {
   const op = cfg.op ?? 'count'
   const field = cfg.field
   const get = (it: unknown): unknown => (field !== undefined ? (it as Record<string, unknown> | null)?.[field] : it)
+  // sum/min/max/average require numeric items — a non-numeric value (boolean,
+  // object, garbage/empty string, missing `field`) THROWS to the `error` port,
+  // sharing the SAME strict rule as the inspector preview (no silent coercion).
+  const num = (it: unknown): number => {
+    const raw = get(it)
+    const n = strictAggregateNumber(raw)
+    if (n === null) throw new Error(`Cannot ${op} a non-numeric value: ${aggregateValueLabel(raw)}`)
+    return n
+  }
   let value: unknown
   switch (op) {
     case 'count': value = items.length; break
-    case 'sum': value = items.reduce<number>((s, it) => s + (Number(get(it)) || 0), 0); break
-    case 'min': value = items.length === 0 ? null : items.reduce<number>((m, it) => Math.min(m, Number(get(it)) || 0), Infinity); break
-    case 'max': value = items.length === 0 ? null : items.reduce<number>((m, it) => Math.max(m, Number(get(it)) || 0), -Infinity); break
-    case 'average': value = items.length === 0 ? 0 : items.reduce<number>((s, it) => s + (Number(get(it)) || 0), 0) / items.length; break
+    case 'sum': value = items.reduce<number>((s, it) => s + num(it), 0); break
+    case 'min': value = items.length === 0 ? null : items.reduce<number>((m, it) => Math.min(m, num(it)), Infinity); break
+    case 'max': value = items.length === 0 ? null : items.reduce<number>((m, it) => Math.max(m, num(it)), -Infinity); break
+    case 'average': value = items.length === 0 ? null : items.reduce<number>((s, it) => s + num(it), 0) / items.length; break
     case 'join': value = items.map((it) => stringifyValue(get(it))).join(cfg.separator ?? ','); break
   }
   return { outputs: [{ port: 'result', value }] }

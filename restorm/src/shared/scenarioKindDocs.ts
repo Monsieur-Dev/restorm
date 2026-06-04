@@ -17,6 +17,33 @@ export interface ScenarioKindDoc {
   config?: Record<string, string>
 }
 
+/**
+ * Documentation for every typed-value shape a node `config` (or an input's
+ * `valueType`) can carry — the `{ type, … }` objects that flow through ports.
+ * A scenario `config` accepts a free-form bag, so these are not schema-enforced;
+ * this is the reference an MCP client needs to author them without reading
+ * source. Surfaced by `describe_scenario_kinds` alongside the kind catalogue.
+ *
+ * Keyed by the literal `type` discriminator (the union in `valuePersistence.ts`).
+ */
+export const VALUE_TYPE_DOCS: Record<string, { shape: string; summary: string }> = {
+  string: { shape: '{ type: "string", value: "<text>" }', summary: 'A plain text value.' },
+  numeric: { shape: '{ type: "numeric", value: 42, format: "decimal" }', summary: 'A number. `format` is a display hint (e.g. decimal).' },
+  boolean: { shape: '{ type: "boolean", value: true }', summary: 'A boolean.' },
+  datetime: { shape: '{ type: "datetime", value: "<ISO-8601>", format: "<fmt>" }', summary: 'A date/time (ISO string).' },
+  color: { shape: '{ type: "color", value: "#rrggbb" }', summary: 'A colour (hex string).' },
+  expression: { shape: '{ type: "expression", value: "{{handlebars}}" }', summary: 'A Handlebars template rendered at runtime against inputs + run variables.' },
+  password: { shape: '{ type: "password" }', summary: 'A secret/password value (the secret itself is held out-of-band, not in the graph).' },
+  null: { shape: '{ type: "null" }', summary: 'The null value. Equal only to another null (no coercion).' },
+  list: { shape: '{ type: "list", items: [ <PersistedValue>, … ] }', summary: 'An agnostic, untyped list — an array of any typed values (lists can nest).' },
+  enum: { shape: '{ type: "enum", value: "<option>", enumDefinitionId: "<id>" }', summary: 'A single pick from an enum definition.' },
+  enumList: { shape: '{ type: "enumList", value: ["a","b"], enumDefinitionId: "<id>" }', summary: 'A multi-pick from an enum → resolves to a real array.' },
+  customList: { shape: '{ type: "customList", listId: "<id>", label: "<picked>" }', summary: 'A single pick from a user-defined value list.' },
+  customListMulti: { shape: '{ type: "customListMulti", listId: "<id>", labels: ["a","b"] }', summary: 'A multi-pick from a user-defined value list → resolves to a real array.' },
+  variable: { shape: '{ type: "variable", value: "<name>" }', summary: 'A reference to a run variable (declared by an input/setVariable); read live at runtime.' },
+  environment: { shape: '{ type: "environment", value: "<environmentId>" }', summary: 'The selected environment; an empty / unresolvable id resolves to null.' }
+}
+
 export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
   input: {
     summary: 'Declares a named scenario input/param. Seeded at run start from run_scenario params; prompts the user mid-run if reached without a value.',
@@ -71,12 +98,12 @@ export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
     config: { property: 'Item field to test.', operator: 'lt | lte | eq | gte | gt | ne | contains', value: 'Value to compare against.' }
   },
   addToList: {
-    summary: 'Appends each `values` row (one element apiece) to the `list` target, emitting the new list on `result`. Pure — persist it back with a downstream setVariable.',
-    config: { list: 'Target list (a list value / list-typed variable, or wire the `list` port).', values: 'Rows of values to append: `{ id, value }[]` (like object properties); each row gets a `<id>` input port to wire.' }
+    summary: 'Appends each `values` row (one element apiece) to the `list` target, emitting the new list on `result`. Pure by default — persist it back with a downstream setVariable, or set `updateSourceVariable` to write it straight into the source variable.',
+    config: { list: 'Target list: a list-typed variable reference `{ type:"variable", value:"<name>" }`, or wire a list into the `list` port. (No inline list literal — you can\'t author a list here.)', values: 'Rows of values to append: `{ id, value }[]` (like object properties); each row gets a `<id>` input port to wire.', updateSourceVariable: 'When true AND `list` is an un-wired variable, also writes the new list back into that variable (push). Default false (pure).' }
   },
   removeFromList: {
-    summary: 'Removes from `list` every element deep-equal to any `values` row, emitting the new list on `result`.',
-    config: { list: 'Target list (a list value / list-typed variable, or wire the `list` port).', values: 'Rows of values to remove: `{ id, value }[]` (like object properties); each row gets a `<id>` input port to wire.' }
+    summary: 'Removes from `list` every element deep-equal to any `values` row, emitting the new list on `result`. Pure by default; `updateSourceVariable` writes it back to the source variable.',
+    config: { list: 'Target list: a list-typed variable reference `{ type:"variable", value:"<name>" }`, or wire a list into the `list` port. (No inline list literal.)', values: 'Rows of values to remove: `{ id, value }[]` (like object properties); each row gets a `<id>` input port to wire.', updateSourceVariable: 'When true AND `list` is an un-wired variable, also writes the new list back into that variable. Default false (pure).' }
   },
   wait: {
     summary: 'Sleeps for a duration, then passes the trigger through. Aborts cleanly on Stop.',

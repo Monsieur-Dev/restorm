@@ -852,7 +852,9 @@
       "now": "Sekarang",
       "comparator": "Pembanding",
       "setVariable": "Atur variabel",
-      "getVariable": "Ambil variabel"
+      "getVariable": "Ambil variabel",
+      "addToList": "Tambahkan ke daftar",
+      "removeFromList": "Hapus dari daftar"
     },
     "comparator": {
       "result": "hasil"
@@ -1025,7 +1027,8 @@
       "values": "values",
       "result": "result",
       "addValue": "Tambah nilai",
-      "removeValue": "Hapus nilai"
+      "removeValue": "Hapus nilai",
+      "updateVariable": "Perbarui variabel sumber"
     }
   }
 }

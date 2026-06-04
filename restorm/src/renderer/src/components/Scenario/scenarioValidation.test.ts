@@ -156,6 +156,45 @@ describe('scenarioValidation — names', () => {
     expect(codes(run([node('i', 'input', { params: [] })]), 'i')).toContain('missing-name')
   })
 
+  it('flags two predecessor-less setVariables sharing a name (ambiguous up-front seed)', () => {
+    const map = run([
+      node('s1', 'setVariable', { name: 'x' }),
+      node('s2', 'setVariable', { name: 'x' })
+    ])
+    expect(codes(map, 's1')).toContain('duplicate-name')
+    expect(codes(map, 's2')).toContain('duplicate-name')
+  })
+
+  it('allows two setVariables with the same name once one runs mid-flow (legit re-assignment)', () => {
+    // `s2` has a predecessor (wired `in`), so it runs mid-flow — writing the same
+    // variable is the normal mutation pattern. `s1` is then the sole up-front
+    // declaration, so neither collides.
+    const map = run([
+      node('s1', 'setVariable', { name: 'x' }),
+      node('s2', 'setVariable', { name: 'x' })
+    ], { connected: [targetKey('s2', 'in')] })
+    expect(codes(map, 's1')).not.toContain('duplicate-name')
+    expect(codes(map, 's2')).not.toContain('duplicate-name')
+  })
+
+  it('a setVariable with a wired VALUE also counts as mid-flow (exempt)', () => {
+    const map = run([
+      node('s1', 'setVariable', { name: 'x' }),
+      node('s2', 'setVariable', { name: 'x' })
+    ], { connected: [targetKey('s2', 'value')] })
+    expect(codes(map, 's1')).not.toContain('duplicate-name')
+    expect(codes(map, 's2')).not.toContain('duplicate-name')
+  })
+
+  it('flags a free setVariable colliding with a free input param (on BOTH sides)', () => {
+    const map = run([
+      node('i1', 'input', { name: 'x' }),
+      node('s1', 'setVariable', { name: 'x' })
+    ])
+    expect(codes(map, 'i1')).toContain('duplicate-name')
+    expect(codes(map, 's1')).toContain('duplicate-name')
+  })
+
   it('a named legacy single output is valid whether its value is wired or not', () => {
     // Legacy `{ name }` migrates to one decl on the `value` port. A name is all
     // it needs — an unwired value is fine (it emits an empty string).

@@ -852,7 +852,9 @@
       "now": "Bây giờ",
       "comparator": "Bộ so sánh",
       "setVariable": "Đặt biến",
-      "getVariable": "Lấy biến"
+      "getVariable": "Lấy biến",
+      "addToList": "Thêm vào danh sách",
+      "removeFromList": "Xóa khỏi danh sách"
     },
     "comparator": {
       "result": "kết quả"
@@ -1025,7 +1027,8 @@
       "values": "values",
       "result": "result",
       "addValue": "Thêm giá trị",
-      "removeValue": "Xóa giá trị"
+      "removeValue": "Xóa giá trị",
+      "updateVariable": "Cập nhật biến nguồn"
     }
   }
 }

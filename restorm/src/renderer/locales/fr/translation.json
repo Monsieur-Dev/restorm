@@ -853,7 +853,9 @@
       "now": "Maintenant",
       "comparator": "Comparateur",
       "setVariable": "Définir variable",
-      "getVariable": "Lire variable"
+      "getVariable": "Lire variable",
+      "addToList": "Ajouter à la liste",
+      "removeFromList": "Retirer de la liste"
     },
     "comparator": {
       "result": "résultat"
@@ -1026,7 +1028,8 @@
       "values": "valeurs",
       "result": "résultat",
       "addValue": "Ajouter une valeur",
-      "removeValue": "Supprimer la valeur"
+      "removeValue": "Supprimer la valeur",
+      "updateVariable": "Mettre à jour la variable source"
     }
   }
 }

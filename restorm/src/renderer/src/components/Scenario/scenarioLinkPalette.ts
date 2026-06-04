@@ -1,14 +1,6 @@
-import type { ScenarioNodeKind, ScenarioPort, ScenarioDataType } from '../../../../shared/types/collections'
+import type { ScenarioNodeKind, ScenarioPort } from '../../../../shared/types/collections'
 import { SCENARIO_NODE_CATALOGUE } from './scenarioNodeCatalogue'
-import { defaultPortsForKind, outputPortFlow, inputPortFlow, canConnectFlow } from './scenarioNodePorts'
-
-/** Whether a value of `out` can flow into an input declaring `inp`. `any` on
- * either side is the universal wildcard (an unconstrained port); otherwise the
- * declared types must match. So a `string` output skips an `environment` input
- * but fills a `string` one, while an `any` output fits any input. */
-function dataTypesCompatible(out: ScenarioDataType, inp: ScenarioDataType): boolean {
-  return out === 'any' || inp === 'any' || out === inp
-}
+import { defaultPortsForKind, outputPortFlow, inputPortFlow, canConnectFlow, dataTypesCompatible, canonicalOutputType } from './scenarioNodePorts'
 
 /** A kind offered by the link-drop palette + the port to auto-wire on it. */
 export interface LinkPaletteEntry {
@@ -43,7 +35,10 @@ export function linkPaletteEntries(
     let wirePort: string | undefined
     if (fromIsSource) {
       const srcFlow = outputPortFlow(src.outputs, srcHandle, src.kind)
-      const srcType = src.outputs.find((o) => o.id === srcHandle)?.dataType ?? 'any'
+      // Canonical (fresh-from-defaults) source type, so a node persisted with a
+      // stale port type (e.g. an old `object` output stamped `json`) still routes
+      // by its CURRENT type — otherwise an object would land on a list target.
+      const srcType = canonicalOutputType(src.kind, src.outputs, srcHandle)
       // First DATA input (a `value`/`both` port, never the signal header) the
       // output can feed AND whose type is compatible.
       const dataInput = inputs.find((i) => {

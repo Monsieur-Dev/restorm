@@ -2,6 +2,7 @@ import type { ScenarioNodeKind, ScenarioPort, ScenarioDataType, ScenarioPortRole
 import { readInputParams } from './scenarioInputParams'
 import { readOutputDecls } from './scenarioOutputDecls'
 import { acceptsInputEvent } from './scenarioNodeCapabilities'
+import { LIST_MUTATION_DEFAULT_VALUE_ID } from './scenarioListMutationValues'
 
 /**
  * Default input/output ports per node kind (epic §5b "per-kind
@@ -92,8 +93,12 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // value-selector fallback). The values to add/remove are N per-row inputs (each
   // its own connectable port, derived from config like the object node's
   // properties — not listed here). `result` is the new list.
-  addToList: { inputs: [{ id: 'list', name: 'list', dataType: 'json' }], outputs: [{ id: 'result', name: 'result', dataType: 'json', flow: 'both' }] },
-  removeFromList: { inputs: [{ id: 'list', name: 'list', dataType: 'json' }], outputs: [{ id: 'result', name: 'result', dataType: 'json', flow: 'both' }] },
+  // `list` is the list-only TARGET (a list-typed variable or a wired list — a
+  // plain `object` can't land here). The default value-row port is declared
+  // (dataType `any`) so a dragged value/object lands on it rather than `list`
+  // (the box renders it as the first value row when none are persisted yet).
+  addToList: { inputs: [{ id: 'list', name: 'list', dataType: 'list' }, { id: LIST_MUTATION_DEFAULT_VALUE_ID, name: '', dataType: 'any' }], outputs: [{ id: 'result', name: 'result', dataType: 'json', flow: 'both' }] },
+  removeFromList: { inputs: [{ id: 'list', name: 'list', dataType: 'list' }, { id: LIST_MUTATION_DEFAULT_VALUE_ID, name: '', dataType: 'any' }], outputs: [{ id: 'result', name: 'result', dataType: 'json', flow: 'both' }] },
   // Loops. `for` is a numeric-range forEach: `from` / `to` / `step` carry
   // inline value fallbacks (like the `if` operands), so they aren't hard
   // required; it fans out the range over `each` (the current number) and fires
@@ -128,7 +133,7 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // `object` builds a structured object from N named properties. The property
   // inputs are user-configured (rendered from config like the switch cases), so
   // none are stamped here; the single output is the assembled JSON object.
-  object: { inputs: [], outputs: [{ id: 'object', name: 'object', dataType: 'json', flow: 'both' }] },
+  object: { inputs: [], outputs: [{ id: 'object', name: 'object', dataType: 'object', flow: 'both' }] },
   boolean: { inputs: [{ id: 'a', name: 'a', dataType: 'boolean' }, { id: 'b', name: 'b', dataType: 'boolean' }], outputs: [{ id: 'result', name: 'result', dataType: 'boolean', flow: 'both' }] },
   // No `event` output — completion is the universal `Done` port (which made the
   // old `event` signal redundant).
@@ -282,7 +287,40 @@ export function inputPortFlow(inputs: ScenarioPort[], handleId: string, kind?: S
   return 'value'
 }
 
-/** Validate a scenario edge by port flow class (value / signal / both). */
+/** Whether a value of declared type `out` can flow into an input declaring
+ * `inp`. `any` on either side is the universal wildcard. `json` is the
+ * ambiguous collection/value type, so it is treated as compatible with a
+ * concrete `list` (an array IS json) — this lets a json/response source still
+ * feed a list-only target while a plain `object` (a distinct type) cannot. */
+export function dataTypesCompatible(out: ScenarioDataType, inp: ScenarioDataType): boolean {
+  if (out === 'any' || inp === 'any' || out === inp) return true
+  if ((out === 'json' && inp === 'list') || (out === 'list' && inp === 'json')) return true
+  return false
+}
+
+/** The CANONICAL dataType of a kind's static output port — fresh from
+ * {@link defaultPortsForKind}, so a node persisted before a port's dataType
+ * changed (e.g. an `object` output stamped `json` before it became `object`)
+ * still resolves by the CURRENT type. Falls back to the passed port (dynamic
+ * ports like runScenario's `output:<name>` aren't in the static defaults). */
+export function canonicalOutputType(kind: ScenarioNodeKind, outputs: ScenarioPort[], handleId: string): ScenarioDataType {
+  return defaultPortsForKind(kind).outputs.find((p) => p.id === handleId)?.dataType
+    ?? outputs.find((p) => p.id === handleId)?.dataType ?? 'any'
+}
+
+/** The CANONICAL dataType of a kind's static input port (see
+ * {@link canonicalOutputType}). Falls back to the passed port for dynamic
+ * inputs (object properties, list-mutation value rows, runScenario params). */
+export function canonicalInputType(kind: ScenarioNodeKind, inputs: ScenarioPort[], handleId: string): ScenarioDataType {
+  return defaultPortsForKind(kind).inputs.find((p) => p.id === handleId)?.dataType
+    ?? inputs.find((p) => p.id === handleId)?.dataType ?? 'any'
+}
+
+/** Validate a scenario edge. Primary gate is the port flow class (value /
+ * signal / both). On top of that, a list-only target (`dataType: 'list'` — the
+ * AddToList/RemoveFromList `list` slot) refuses a source whose type isn't
+ * list-compatible (so a plain `object` can't be wired as the list target,
+ * while a list / json / variable source still can). */
 export function isValidScenarioConnection(args: {
   sourceKind: ScenarioNodeKind
   sourceOutputs: ScenarioPort[]
@@ -291,6 +329,15 @@ export function isValidScenarioConnection(args: {
   targetInputs: ScenarioPort[]
   targetHandle: string
 }): boolean {
+  // Resolve dataTypes canonically (fresh from the kind's defaults) so a node
+  // persisted before a port's type changed — e.g. an old `object` output stamped
+  // `json`, or an old AddToList `list` port stamped `json` — still validates by
+  // the current type instead of the stale stamp.
+  const targetType = canonicalInputType(args.targetKind, args.targetInputs, args.targetHandle)
+  if (targetType === 'list') {
+    const sourceType = canonicalOutputType(args.sourceKind, args.sourceOutputs, args.sourceHandle)
+    if (!dataTypesCompatible(sourceType, 'list')) return false
+  }
   return canConnectFlow(
     outputPortFlow(args.sourceOutputs, args.sourceHandle, args.sourceKind),
     inputPortFlow(args.targetInputs, args.targetHandle, args.targetKind)

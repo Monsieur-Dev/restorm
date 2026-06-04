@@ -852,7 +852,9 @@
       "now": "현재",
       "comparator": "비교기",
       "setVariable": "변수 설정",
-      "getVariable": "변수 가져오기"
+      "getVariable": "변수 가져오기",
+      "addToList": "목록에 추가",
+      "removeFromList": "목록에서 제거"
     },
     "comparator": {
       "result": "결과"
@@ -1025,7 +1027,8 @@
       "values": "values",
       "result": "result",
       "addValue": "값 추가",
-      "removeValue": "값 제거"
+      "removeValue": "값 제거",
+      "updateVariable": "원본 변수 업데이트"
     }
   }
 }

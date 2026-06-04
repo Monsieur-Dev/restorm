@@ -279,9 +279,11 @@ function resolveListOperand(wired: unknown, cfg: unknown, variables: ReadonlyMap
 }
 
 /** Resolve the `values` rows (`config.values` = `{ id, value }[]`, the same
- * shape as the object node's properties) into the ordered list of operands to
- * add/remove. Each row is one element — a wired row arrives in `act.inputs`
- * keyed by its port id; an inline one resolves from `row.value`.
+ * shape as the object node's properties) into the FLAT ordered list of elements
+ * to add/remove. A row that resolves to a LIST is CONCATENATED (spread) — adding
+ * a list to a list appends its elements, symmetric with the target list — while
+ * a scalar row contributes one element. A wired row arrives in `act.inputs` keyed
+ * by its port id; an inline one resolves from `row.value`.
  *
  * Special-case the DEFAULT row: an unconfigured box still shows one row under
  * {@link LIST_MUTATION_DEFAULT_VALUE_ID} that is NOT persisted to
@@ -298,30 +300,52 @@ function resolveValueRows(act: Activation, ctx: ExecContext): unknown[] {
   for (const r of rows) {
     const row = r as { id?: unknown; value?: unknown }
     if (typeof row.id !== 'string') continue
-    out.push(resolveOperand(act.inputs[row.id], row.value, ctx.variables))
+    const v = resolveOperand(act.inputs[row.id], row.value, ctx.variables)
+    if (Array.isArray(v)) out.push(...(v as unknown[]))
+    else out.push(v)
   }
   return out
 }
 
+/** When the `list` target is an (un-wired) variable AND the box opts into
+ * `updateSourceVariable`, the name of that variable — so the executor can write
+ * the new list back into it (a push-style mutation), on top of emitting
+ * `result`. Returns undefined when the toggle is off, the list is wired (no
+ * source variable), or the target isn't a variable reference. */
+function listWritebackVar(act: Activation, ctx: ExecContext): string | undefined {
+  const cfg = ctx.node.config as { updateSourceVariable?: unknown; list?: unknown }
+  if (cfg.updateSourceVariable !== true) return undefined
+  if (act.inputs['list'] !== undefined) return undefined
+  const ref = cfg.list as { type?: unknown; value?: unknown } | undefined
+  return ref?.type === 'variable' && typeof ref.value === 'string' && ref.value.trim() !== '' ? ref.value : undefined
+}
+
 /** AddToList: `result` is the target list with every `values` row APPENDED (in
  * order). The list resolves like any list — a wired port, a `list` editor, or a
- * list-typed variable; each value row is one element. Pure: it outputs the new
- * list; persisting it back into a variable is an explicit `setVariable`
- * downstream. */
+ * list-typed variable; each value row is one element. Pure by default (emits
+ * `result`); with `updateSourceVariable` on AND a variable target, it also
+ * writes the new list back into that variable (push ergonomics, explicit). */
 export const addToListExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { list?: unknown }
   const list = resolveListOperand(act.inputs['list'], cfg.list, ctx.variables)
   const values = resolveValueRows(act, ctx)
-  return { outputs: [{ port: 'result', value: [...list, ...values] }] }
+  const result = [...list, ...values]
+  const writeback = listWritebackVar(act, ctx)
+  if (writeback) ctx.variables.set(writeback, result)
+  return { outputs: [{ port: 'result', value: result }] }
 }
 
 /** RemoveFromList: `result` is the target list with every element deep-equal to
- * any `values` row removed (all occurrences). */
+ * any `values` row removed (all occurrences). Same optional `updateSourceVariable`
+ * writeback as AddToList. */
 export const removeFromListExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { list?: unknown }
   const list = resolveListOperand(act.inputs['list'], cfg.list, ctx.variables)
   const values = resolveValueRows(act, ctx)
-  return { outputs: [{ port: 'result', value: list.filter((x) => !values.some((v) => deepEqual(x, v))) }] }
+  const result = list.filter((x) => !values.some((v) => deepEqual(x, v)))
+  const writeback = listWritebackVar(act, ctx)
+  if (writeback) ctx.variables.set(writeback, result)
+  return { outputs: [{ port: 'result', value: result }] }
 }
 
 /** Template / transform node: applies a Handlebars template to the

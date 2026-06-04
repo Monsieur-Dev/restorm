@@ -854,7 +854,9 @@
       "now": "Sada",
       "comparator": "Usporednik",
       "setVariable": "Postavi varijablu",
-      "getVariable": "Dohvati varijablu"
+      "getVariable": "Dohvati varijablu",
+      "addToList": "Dodaj na popis",
+      "removeFromList": "Ukloni s popisa"
     },
     "comparator": {
       "result": "rezultat"
@@ -1027,7 +1029,8 @@
       "values": "values",
       "result": "result",
       "addValue": "Dodaj vrijednost",
-      "removeValue": "Ukloni vrijednost"
+      "removeValue": "Ukloni vrijednost",
+      "updateVariable": "Ažuriraj izvornu varijablu"
     }
   }
 }

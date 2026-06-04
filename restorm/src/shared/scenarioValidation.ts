@@ -141,9 +141,22 @@ function collisionNameCounts(ctx: ScenarioValidationContext): Map<string, number
     if (n.kind === 'input') {
       if (ctx.connectedTargets.has(targetKey(n.id, 'in'))) continue
       for (const p of readInputParams(n.config)) add(p.name)
-    } else if (n.kind === 'setVariable') { add(trimmedName(n)) }
+    } else if (n.kind === 'setVariable') {
+      // Only a predecessor-LESS setVariable runs up-front (mirrors the input
+      // rule): no incoming trigger AND no wired value. One WITH a predecessor
+      // runs mid-flow — a legitimate re-assignment — so it reserves no up-front
+      // name and doesn't trip / cause a collision.
+      if (ctx.connectedTargets.has(targetKey(n.id, 'in')) || ctx.connectedTargets.has(targetKey(n.id, 'value'))) continue
+      add(trimmedName(n))
+    }
   }
   return counts
+}
+
+/** Whether a `setVariable` runs up-front — no incoming trigger AND no wired
+ * value — so it participates in the up-front name-collision rule. */
+function setVariableIsUpFront(node: ValidationNode, ctx: ScenarioValidationContext): boolean {
+  return !ctx.connectedTargets.has(targetKey(node.id, 'in')) && !ctx.connectedTargets.has(targetKey(node.id, 'value'))
 }
 
 /** Names that EXIST in scenario scope — every `input` param (wired or not) +
@@ -174,12 +187,20 @@ function validateGetVariable(node: ValidationNode, ctx: ScenarioValidationContex
   return []
 }
 
-/** `setVariable` — stores a value into a named variable. A name is required;
- * an empty value is allowed, and writing the same variable from several boxes
- * is legitimate (so no duplicate-name rule). */
+/** `setVariable` — stores a value into a named variable. A name is required.
+ * Writing the same variable from several boxes mid-flow is legitimate (the
+ * normal mutation pattern), so a predecessor-WIRED setVariable is exempt from
+ * the duplicate-name rule. But a predecessor-LESS one runs up-front: sharing its
+ * name with another up-front declaration (a free input param or another free
+ * setVariable) makes the initial value ambiguous — flag it, like the input
+ * rule. */
 function validateSetVariable(node: ValidationNode, ctx: ScenarioValidationContext): ScenarioNodeError[] {
-  if (!trimmedName(node)) {
+  const name = trimmedName(node)
+  if (!name) {
     return [{ code: 'missing-name', field: 'name', message: ctx.t('scenario.validation.setVariable.missingName', 'The variable to set must have a name.') }]
+  }
+  if (setVariableIsUpFront(node, ctx) && (collisionNameCounts(ctx).get(name) ?? 0) > 1) {
+    return [{ code: 'duplicate-name', field: 'name', message: ctx.t('scenario.validation.duplicateName', 'The name "{{name}}" is already used by another action.', { name }) }]
   }
   return []
 }

@@ -855,7 +855,9 @@
       "now": "Nyní",
       "comparator": "Komparátor",
       "setVariable": "Nastavit proměnnou",
-      "getVariable": "Získat proměnnou"
+      "getVariable": "Získat proměnnou",
+      "addToList": "Přidat do seznamu",
+      "removeFromList": "Odebrat ze seznamu"
     },
     "comparator": {
       "result": "výsledek"
@@ -1028,7 +1030,8 @@
       "values": "values",
       "result": "result",
       "addValue": "Přidat hodnotu",
-      "removeValue": "Odebrat hodnotu"
+      "removeValue": "Odebrat hodnotu",
+      "updateVariable": "Aktualizovat zdrojovou proměnnou"
     }
   }
 }

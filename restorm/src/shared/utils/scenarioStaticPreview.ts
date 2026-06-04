@@ -204,27 +204,101 @@ export function resolveSelectorPath(value: unknown, path: string): unknown {
   return cur
 }
 
-/** Map of scenario variable name → its declared value, from `input` and
- * `setVariable` boxes — used to resolve a `getVariable`'s reference. */
-function variableValues(nodes: readonly StaticPreviewNode[]): Map<string, unknown> {
-  const m = new Map<string, unknown>()
+const VARIABLE_RESOLVE_MAX_DEPTH = 16
+
+/** Does `node` WRITE the variable `name`? A `setVariable(name)`, OR an
+ * `addToList`/`removeFromList` whose `list` target IS the variable `name` and
+ * which has `updateSourceVariable` on (it pushes its `result` back into that
+ * variable). */
+function writesVariable(node: StaticPreviewNode, name: string): boolean {
+  if (node.kind === 'setVariable') return str(node.config['name']) === name
+  if (node.kind === 'addToList' || node.kind === 'removeFromList') {
+    if (node.config['updateSourceVariable'] !== true) return false
+    const ref = node.config['list'] as { type?: unknown; value?: unknown } | null | undefined
+    return ref?.type === 'variable' && typeof ref.value === 'string' && ref.value.trim() === name
+  }
+  return false
+}
+
+/** Walk BACKWARD from `consumerNodeId` along incoming edges (the execution
+ * ancestry) to the NEAREST node WRITING `name` (see {@link writesVariable}) —
+ * the "dominating assignment" closest to where the variable is read. Returns it,
+ * or null when no upstream writer exists (e.g. the variable is an input param,
+ * or set on a parallel branch). BFS, so nearest-by-hops wins; a visited set
+ * guards cycles (loop-backs). */
+function nearestUpstreamWriter(
+  name: string,
+  consumerNodeId: string,
+  nodes: readonly StaticPreviewNode[],
+  edges: readonly StaticPreviewEdge[]
+): StaticPreviewNode | null {
+  const nodeById = new Map(nodes.map((n) => [n.id, n]))
+  const visited = new Set<string>([consumerNodeId])
+  let frontier = edges.filter((e) => e.to.nodeId === consumerNodeId).map((e) => e.from.nodeId)
+  let hops = 0
+  while (frontier.length > 0 && hops < 1024) {
+    hops += 1
+    const next: string[] = []
+    for (const nid of frontier) {
+      if (visited.has(nid)) continue
+      visited.add(nid)
+      const node = nodeById.get(nid)
+      if (node && writesVariable(node, name)) return node
+      for (const e of edges) if (e.to.nodeId === nid && !visited.has(e.from.nodeId)) next.push(e.from.nodeId)
+    }
+    frontier = next
+  }
+  return null
+}
+
+/** Resolve a variable's STATIC value AT a given consumer node, following the
+ * graph: the nearest upstream writer of `name` is evaluated — a `setVariable`'s
+ * value (literal or wired source preview), or a push-mutation's `result` (an
+ * addToList/removeFromList writing the variable). Falls back to the order-less
+ * global map (input params / off-path setVariables) when no upstream writer is
+ * found. `depth` bounds a chain of variable→variable references. */
+function resolveVariableAt(
+  name: string,
+  consumerNodeId: string,
+  nodes: readonly StaticPreviewNode[],
+  edges: readonly StaticPreviewEdge[],
+  depth: number
+): unknown {
+  if (depth >= VARIABLE_RESOLVE_MAX_DEPTH) return globalVariableValue(name, nodes, edges)
+  const writer = nearestUpstreamWriter(name, consumerNodeId, nodes, edges)
+  if (!writer) return globalVariableValue(name, nodes, edges)
+  // A push-mutation (addToList/removeFromList) writes its `result` output into
+  // the variable; a setVariable writes its `value` input. Evaluate accordingly.
+  if (writer.kind === 'addToList' || writer.kind === 'removeFromList') {
+    const sp = staticScenarioPreview(writer, nodes, edges)
+    return sp === null ? globalVariableValue(name, nodes, edges) : portPreviewValue(sp, 'result', writer.kind)
+  }
+  // A list-typed LITERAL value (customListMulti / enumList) resolves to its ARRAY
+  // — mirrors the runtime `resolveOperand` — so list comparisons / contains see a
+  // real list, not the joined display string `concreteValue` would render.
+  const litArray = listValueArray(writer.config['value'])
+  if (litArray) return litArray
+  return operandPreviewValue(writer.id, 'value', writer.config['value'], nodes, edges, depth + 1)
+}
+
+/** A variable's value from the UP-FRONT scope only — an `input` param, or a
+ * predecessor-LESS `setVariable` (one that runs at the very start). A mid-flow
+ * setVariable (its `in` or `value` is wired) is NOT globally available: it only
+ * resolves DOWNSTREAM of itself via {@link nearestUpstreamWriter}, so a read
+ * placed BEFORE it (the writer isn't a predecessor) correctly sees nothing
+ * instead of the future value. */
+function globalVariableValue(name: string, nodes: readonly StaticPreviewNode[], edges: readonly StaticPreviewEdge[]): unknown {
   for (const n of nodes) {
     if (n.kind === 'input') {
-      // Each declared param is a scenario variable carrying its typed default —
-      // so a `{{param1}}` reference resolves in the preview exactly as it does
-      // at runtime (where `inputExecutor` publishes the same names).
-      for (const param of readInputParams(n.config)) {
-        const name = param.name.trim()
-        // A multi-select default resolves to its ARRAY (mirrors the runtime
-        // `resolveOperand`), so list ops / comparisons see a real list.
-        if (name) m.set(name, listValueArray(param.valueType) ?? concreteValue(param.valueType))
+      for (const p of readInputParams(n.config)) {
+        if (p.name.trim() === name) return listValueArray(p.valueType) ?? concreteValue(p.valueType)
       }
-    } else if (n.kind === 'setVariable') {
-      const name = str(n.config['name'])
-      if (name) m.set(name, listValueArray(n.config['value']) ?? concreteValue(n.config['value']))
+    } else if (n.kind === 'setVariable' && str(n.config['name']) === name) {
+      const hasPredecessor = edges.some((e) => e.to.nodeId === n.id && (e.to.portId === 'in' || e.to.portId === 'value'))
+      if (!hasPredecessor) return listValueArray(n.config['value']) ?? concreteValue(n.config['value'])
     }
   }
-  return m
+  return undefined
 }
 
 /** Resolve the `items` input of a list-operating box (`map`/`filter`/
@@ -256,12 +330,13 @@ export function resolveItems(
   }
   const lit = literalConfigItems(cfg)
   if (lit) return lit
-  // An inline `variable` items resolves to that variable's STATIC value (from a
-  // `setVariable` / `input` box) — so `setVariable list → aggregate over the
-  // variable` previews its count/items, not nothing.
+  // An inline `variable` items resolves to that variable's STATIC value,
+  // following the graph (nearest upstream `setVariable`) — so an aggregate over
+  // a variable built by a chain (object→addToList→setVariable) previews the real
+  // list, not nothing.
   const raw = cfg['items'] as { type?: unknown; value?: unknown } | null | undefined
   if (raw && typeof raw === 'object' && raw.type === 'variable' && typeof raw.value === 'string') {
-    const v = variableValues(nodes).get(raw.value)
+    const v = resolveVariableAt(raw.value, nodeId, nodes, edges, 0)
     if (Array.isArray(v)) return v as unknown[]
   }
   return null
@@ -370,11 +445,18 @@ export function applyListOp(
     const valueOf = (item: unknown): unknown => field ? resolveSelectorPath(item, field) : item
     if (op === 'count') return { result: items.length }
     if (op === 'join') return { result: items.map((item) => joinPart(valueOf(item))).join(separator) }
-    const nums: number[] = []
-    for (const item of items) {
-      const n = asNumber(valueOf(item))
-      if (n !== null) nums.push(n)
-    }
+    // sum/min/max/average require EVERY item to be a number (a numeric string is
+    // accepted). A non-numeric value — a boolean, an object, an empty/garbage
+    // string, or an invalid `field` path that yields nothing — is a genuine
+    // mistake, so THROW rather than silently coercing (boolean true → 1) or
+    // skipping. The runtime routes the throw to the error port; the preview
+    // catches it and shows no (misleading) result.
+    const nums = items.map((item) => {
+      const raw = valueOf(item)
+      const n = strictAggregateNumber(raw)
+      if (n === null) throw new Error(`Cannot ${op} a non-numeric value: ${aggregateValueLabel(raw)}`)
+      return n
+    })
     if (op === 'sum') return { result: nums.reduce((a, b) => a + b, 0) }
     if (op === 'min') return { result: nums.length === 0 ? null : Math.min(...nums) }
     if (op === 'max') return { result: nums.length === 0 ? null : Math.max(...nums) }
@@ -456,17 +538,19 @@ function operandPreviewValue(
   portId: string,
   configLiteral: unknown,
   nodes: readonly StaticPreviewNode[],
-  edges: readonly StaticPreviewEdge[]
+  edges: readonly StaticPreviewEdge[],
+  depth = 0
 ): unknown {
   const edge = edges.find((e) => e.to.nodeId === nodeId && e.to.portId === portId)
   if (!edge) {
-    // An inline `variable` operand resolves to that variable's STATIC value
-    // (from the setVariable / input nodes), not the `{{name}}` template
-    // `concreteValue` renders — otherwise an operand fed by a variable makes the
-    // whole node's preview NaN/null (so a downstream box has nothing to suggest).
+    // An inline `variable` operand resolves to that variable's STATIC value,
+    // following the graph: the nearest upstream `setVariable` wins (so a variable
+    // built by a chain — object→addToList→setVariable — previews the real list),
+    // not the order-less global map. Otherwise an operand fed by a variable makes
+    // the whole node's preview NaN/null (a downstream box has nothing to suggest).
     const lit = configLiteral as { type?: unknown; value?: unknown } | null | undefined
     if (lit !== null && typeof lit === 'object' && lit.type === 'variable' && typeof lit.value === 'string') {
-      return variableValues(nodes).get(lit.value)
+      return resolveVariableAt(lit.value, nodeId, nodes, edges, depth)
     }
     return concreteValue(configLiteral)
   }
@@ -481,6 +565,34 @@ function operandPreviewValue(
   return edge.selector ? resolveSelectorPath(portValue, edge.selector) : portValue
 }
 
+/** Deep structural equality for preview comparisons — mirrors the runtime
+ * `conditionEval.deepEqual` (kept here because shared code can't import the
+ * main-process comparator). */
+function previewDeepEqual(a: unknown, b: unknown): boolean {
+  if (a === b) return true
+  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) return false
+  const ka = Object.keys(a as Record<string, unknown>)
+  const kb = Object.keys(b as Record<string, unknown>)
+  if (ka.length !== kb.length) return false
+  for (const k of ka) {
+    if (!Object.prototype.hasOwnProperty.call(b, k)) return false
+    if (!previewDeepEqual((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k])) return false
+  }
+  return true
+}
+
+/** Order-independent (multiset) list equality — `[a, b] = [b, a]`. */
+function previewListEqual(a: unknown[], b: unknown[]): boolean {
+  if (a.length !== b.length) return false
+  const used = new Array<boolean>(b.length).fill(false)
+  for (const x of a) {
+    const i = b.findIndex((y, j) => !used[j] && previewDeepEqual(x, y))
+    if (i === -1) return false
+    used[i] = true
+  }
+  return true
+}
+
 /** Apply a comparator-style operator (`<`/`≤`/`=`/`≥`/`>`/`≠`/`contains`) to
  * two resolved values. Returns `null` for combinations the operator can't
  * handle (e.g. ordering on objects) so the caller drops the preview. Shared
@@ -489,13 +601,27 @@ function compareValues(op: string, a: unknown, b: unknown): boolean | null {
   const na = asNumber(a); const nb = asNumber(b)
   const numeric = na !== null && nb !== null
   const bothStr = typeof a === 'string' && typeof b === 'string'
+  // Lists compare by SET (order-independent) and SUBSET (contains) — the same
+  // semantics as the runtime `conditionEval` (kept in sync here because shared
+  // code can't import the main-process comparator).
+  if (Array.isArray(a)) {
+    if (op === 'contains') {
+      return Array.isArray(b)
+        ? b.every((y) => a.some((x) => previewDeepEqual(x, y))) // list ⊇ list (subset)
+        : a.some((x) => previewDeepEqual(x, b)) // list ∋ element (membership)
+    }
+    if (Array.isArray(b)) {
+      if (op === '=') return previewListEqual(a, b)
+      if (op === '≠') return !previewListEqual(a, b)
+      return null // ordering between lists is undefined
+    }
+  }
   if (op === '=') return numeric ? na === nb : a === b
   if (op === '≠') return numeric ? na !== nb : a !== b
   if (op === 'contains') {
     if (typeof a === 'string' && (typeof b === 'string' || typeof b === 'number' || typeof b === 'boolean')) {
       return a.includes(typeof b === 'string' ? b : String(b))
     }
-    if (Array.isArray(a)) return a.includes(b)
     return null
   }
   if (numeric) {
@@ -530,6 +656,29 @@ function asNumber(v: unknown): number | null {
   }
   if (typeof v === 'boolean') return v ? 1 : 0
   return null
+}
+
+/** STRICT numeric coercion for aggregate sum/min/max/average: a number or a
+ * clean numeric string only. Unlike {@link asNumber} it does NOT coerce a
+ * boolean (true → 1) and rejects an empty string — those are non-numeric and
+ * must surface as an error, not a silent 1/0. `null` = not a number. Exported so
+ * the runtime aggregate executor shares the SAME rule as the preview. */
+export function strictAggregateNumber(v: unknown): number | null {
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null
+  if (typeof v === 'string' && v.trim() !== '') {
+    const n = Number(v)
+    return Number.isFinite(n) ? n : null
+  }
+  return null
+}
+
+/** A short, safe label for a non-numeric value in an aggregate error message. */
+export function aggregateValueLabel(v: unknown): string {
+  if (v === null) return 'null'
+  if (v === undefined) return 'undefined'
+  if (typeof v === 'string') return `"${v}"`
+  if (typeof v === 'number' || typeof v === 'boolean' || typeof v === 'bigint') return String(v)
+  try { const s = JSON.stringify(v); return typeof s === 'string' ? s : 'value' } catch { return 'value' }
 }
 
 /**
@@ -583,7 +732,10 @@ export function staticScenarioPreview(
       const ref = cfg['value'] as { type?: unknown; value?: unknown } | undefined
       const name = ref?.type === 'variable' && typeof ref.value === 'string' ? ref.value : ''
       if (!name) return null
-      return { [name]: variableValues(nodes).get(name) ?? null }
+      // Resolve the variable AT this getVariable, following the graph (nearest
+      // upstream setVariable), so reading a variable built mid-flow previews its
+      // real value rather than only an up-front literal.
+      return { [name]: resolveVariableAt(name, node.id, nodes, edges, 0) ?? null }
     }
     case 'arithmetic': {
       const a = operandPreviewValue(node.id, 'a', cfg['a'], nodes, edges)
@@ -617,7 +769,13 @@ export function staticScenarioPreview(
     case 'forEach': {
       const items = resolveItems(node.id, cfg, nodes, edges)
       if (items === null) return null
-      return applyListOp({ id: node.id, kind: node.kind, config: cfg }, items)
+      // An aggregate over non-numeric values THROWS — catch it so the inspector
+      // shows no result instead of crashing (the runtime surfaces it on `error`).
+      try {
+        return applyListOp({ id: node.id, kind: node.kind, config: cfg }, items)
+      } catch {
+        return null
+      }
     }
     case 'addToList':
     case 'removeFromList': {
@@ -639,7 +797,10 @@ export function staticScenarioPreview(
         const row = r as { id?: unknown; value?: unknown }
         if (typeof row.id !== 'string') continue
         const v = operandPreviewValue(node.id, row.id, row.value, nodes, edges)
-        if (v !== undefined) values.push(v)
+        // A list-valued row is CONCATENATED (spread), matching the runtime — so
+        // adding a list to a list appends its elements, not a nested list.
+        if (Array.isArray(v)) values.push(...(v as unknown[]))
+        else if (v !== undefined) values.push(v)
       }
       const result = node.kind === 'addToList'
         ? [...list, ...values]

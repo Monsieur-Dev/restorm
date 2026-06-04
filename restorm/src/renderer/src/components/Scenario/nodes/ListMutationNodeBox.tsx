@@ -1,6 +1,6 @@
 import React from 'react'
 import { type NodeProps, useNodeConnections } from '@xyflow/react'
-import { Button } from 'electron-core-ui/renderer'
+import { Button, Toggle } from 'electron-core-ui/renderer'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
@@ -8,17 +8,19 @@ import { ScenarioPathSelector } from './ScenarioPathSelector'
 import { useScenarioFieldInvalid } from '../scenarioErrorsContext'
 import { TypedValueField } from '../../TypedValueField'
 import type { ValueTypeKind } from '../../TypedValueField/castValue'
-import { ListValue } from '../../../../../shared/types/collections'
+import { VariableValue } from '../../../../../shared/types/collections'
 import { useAllEnvValueTypeGroups, type EnvValueTypeGroup } from '../../../hooks/useAllEnvValueTypeGroups'
 import { normalizeValueType } from '../../../utils/normalizeValueType'
 import { serializeValueForPersistence, type PersistedValue } from '../../../../../shared/utils/valuePersistence'
 import { LIST_MUTATION_DEFAULT_VALUE_ID } from '../../../../../shared/scenarioListMutationValues'
 
-/** The `list` target offers only list-typed sources: a list literal, an
- * enum/custom list, or a list-typed variable (the value selector filters the
- * Variables menu by each variable's declared type). Scalars are excluded. */
-const NON_LIST_TYPES: ValueTypeKind[] = [
-  'string', 'secret', 'number', 'dateTime', 'color', 'expression', 'boolean', 'enum', 'customList'
+/** The `list` target is a list-typed SLOT, never an authoring field: you pick a
+ * variable (the Variables menu) or wire a list in. Authoring a list literal here
+ * makes no sense — you'd be creating a list just to add/remove from it — so every
+ * literal type (incl. `list`, `null`, environment) is excluded; only `variable`
+ * remains. */
+const LIST_TARGET_EXCLUDE: ValueTypeKind[] = [
+  'string', 'secret', 'number', 'dateTime', 'color', 'expression', 'boolean', 'enum', 'enumList', 'customList', 'customListMulti'
 ]
 
 const stop = (e: React.MouseEvent): void => { e.stopPropagation() }
@@ -94,6 +96,48 @@ const ValueRowCell: React.FC<ValueRowCellProps> = ({
   )
 }
 
+/** The `list` TARGET cell — a list-typed variable picker (no literal authoring),
+ * swapped for the JSON-path selector when a list is wired into the `list` port.
+ * Mirrors the getVariable selector + the value rows' wired-swap. */
+const ListTargetCell: React.FC<{
+  nodeId: string
+  scenarioId?: string | undefined
+  value: PersistedValue | undefined
+  valueTypeGroups: EnvValueTypeGroup[]
+  onChange: (value: PersistedValue) => void
+}> = ({ nodeId, scenarioId, value, valueTypeGroups, onChange }) => {
+  const connections = useNodeConnections({ handleType: 'target', handleId: 'list' })
+  const incoming = connections[0]
+  const invalid = useScenarioFieldInvalid(nodeId, 'list')
+  return (
+    <div className="nodrag" onMouseDown={stop}>
+      {incoming ? (
+        <ScenarioPathSelector
+          edgeId={incoming.edgeId}
+          sourceNodeId={incoming.source}
+          invalid={invalid}
+          {...(scenarioId !== undefined ? { scenarioId } : {})}
+        />
+      ) : (
+        <TypedValueField
+          // Variable-only: pick a list-typed variable. No literal authoring
+          // (excludeTypes hides every value type; no allowList/allowNull/
+          // allowEnvironment), so the only choice is an existing variable. A
+          // legacy non-variable value (e.g. an old inline list literal) is
+          // coerced to an empty variable picker rather than rendering the
+          // dropped list editor.
+          value={value !== undefined && (value as { type?: unknown }).type === 'variable' ? normalizeValueType(value) : new VariableValue('')}
+          onChange={(next) => { onChange(serializeValueForPersistence(next)) }}
+          valueTypeGroups={valueTypeGroups}
+          excludeTypes={LIST_TARGET_EXCLUDE}
+          allowAllVariables
+          dataTestId="scn-listmut-list"
+        />
+      )}
+    </div>
+  )
+}
+
 /**
  * `addToList` / `removeFromList` — both render the same box: a `list` target (a
  * list-typed source / variable, connectable) and N `values` rows (the items to
@@ -117,28 +161,48 @@ export const ListMutationNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ 
 
   const setValues = (next: ValueRow[]): void => { data.onSetConfig?.(id, { values: next }) }
 
+  // The "update the source variable" toggle is only meaningful when the `list`
+  // target is an (un-wired) variable reference — there's a variable to write the
+  // result back into. Wired / literal targets have no variable, so the toggle is
+  // hidden. Default OFF: the action stays pure (emits `result`) unless opted in.
+  const listWired = useNodeConnections({ handleType: 'target', handleId: 'list' }).length > 0
+  const listRef = config['list'] as { type?: unknown; value?: unknown } | undefined
+  const listVarName = !listWired && listRef?.type === 'variable' && typeof listRef.value === 'string' ? listRef.value.trim() : ''
+  const updateVar = config['updateSourceVariable'] === true
+
   const rows: ScenarioNodeCell[] = [
     {
       id: 'list',
       label: t('scenario.listMutation.list', 'list'),
       port: { id: 'list', type: 'target' },
       content: (
-        <div className="nodrag" onMouseDown={stop}>
-          <TypedValueField
-            // The list target only accepts list-typed sources, so an
-            // unconfigured field starts as an empty List — never a string (which
-            // isn't even offered in this field's type menu).
-            value={config['list'] !== undefined ? normalizeValueType(config['list']) : new ListValue([])}
-            onChange={(next) => { data.onSetConfig?.(id, { list: serializeValueForPersistence(next) }) }}
-            valueTypeGroups={valueTypeGroups}
-            excludeTypes={NON_LIST_TYPES}
-            allowList
-            dataTestId="scn-listmut-list"
-          />
-        </div>
+        <ListTargetCell
+          nodeId={id}
+          {...(data.scenarioId !== undefined ? { scenarioId: data.scenarioId } : {})}
+          value={config['list'] as PersistedValue | undefined}
+          valueTypeGroups={valueTypeGroups}
+          onChange={(next) => { data.onSetConfig?.(id, { list: serializeValueForPersistence(next) }) }}
+        />
       )
     }
   ]
+  if (listVarName) {
+    const updateLabel = t('scenario.listMutation.updateVariable', 'Update the source variable')
+    rows.push({
+      id: 'update-variable',
+      content: (
+        <div className="scn-listmut-update nodrag" onMouseDown={stop}>
+          <Toggle
+            checked={updateVar}
+            onChange={(checked) => { data.onSetConfig?.(id, { updateSourceVariable: checked }) }}
+            aria-label={updateLabel}
+            data-testid="scn-listmut-update-variable"
+          />
+          <span className="scn-field-caption">{updateLabel}</span>
+        </div>
+      )
+    })
+  }
   displayValues.forEach((row) => {
     rows.push({
       id: row.id,

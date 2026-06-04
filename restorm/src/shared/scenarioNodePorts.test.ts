@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import type { Scenario, ScenarioNodeKind } from './types/collections'
-import { deriveRunScenarioPorts, defaultPortsForKind } from './scenarioNodePorts'
+import { deriveRunScenarioPorts, defaultPortsForKind, isValidScenarioConnection, dataTypesCompatible } from './scenarioNodePorts'
 import { acceptsInputEvent } from './scenarioNodeCapabilities'
+import { LIST_MUTATION_DEFAULT_VALUE_ID } from './scenarioListMutationValues'
 
 describe('defaultPortsForKind — header `in` trigger from the capability', () => {
   const hasIn = (kind: ScenarioNodeKind): boolean =>
@@ -117,5 +118,65 @@ describe('deriveRunScenarioPorts — runScenario ports from the sub-scenario', (
 
   it('returns empty ports for a missing sub-scenario', () => {
     expect(deriveRunScenarioPorts(null)).toEqual({ inputs: [], outputs: [] })
+  })
+})
+
+describe('dataTypesCompatible — list vs object vs json', () => {
+  it('json and list are mutually compatible (an array IS json); any is a wildcard', () => {
+    expect(dataTypesCompatible('json', 'list')).toBe(true)
+    expect(dataTypesCompatible('list', 'json')).toBe(true)
+    expect(dataTypesCompatible('any', 'list')).toBe(true)
+    expect(dataTypesCompatible('list', 'list')).toBe(true)
+  })
+
+  it('a plain object is NOT a list, and unrelated scalars stay incompatible', () => {
+    expect(dataTypesCompatible('object', 'list')).toBe(false)
+    expect(dataTypesCompatible('string', 'number')).toBe(false)
+  })
+})
+
+describe('isValidScenarioConnection — list-only target', () => {
+  const connect = (
+    sourceKind: ScenarioNodeKind, sourceHandle: string,
+    targetKind: ScenarioNodeKind, targetHandle: string
+  ): boolean => isValidScenarioConnection({
+    sourceKind, sourceOutputs: defaultPortsForKind(sourceKind).outputs, sourceHandle,
+    targetKind, targetInputs: defaultPortsForKind(targetKind).inputs, targetHandle
+  })
+
+  it('rejects an object output wired onto the AddToList/RemoveFromList `list` target', () => {
+    expect(connect('object', 'object', 'addToList', 'list')).toBe(false)
+    expect(connect('object', 'object', 'removeFromList', 'list')).toBe(false)
+  })
+
+  it('accepts a list/json source (map.mapped) onto the `list` target', () => {
+    expect(connect('map', 'mapped', 'addToList', 'list')).toBe(true)
+  })
+
+  it('accepts an `any` source (getVariable.value) onto the `list` target (unknown type, not blocked)', () => {
+    expect(connect('getVariable', 'value', 'addToList', 'list')).toBe(true)
+  })
+
+  it('accepts an object onto a VALUE row (the default value-row port, type any)', () => {
+    expect(connect('object', 'object', 'addToList', LIST_MUTATION_DEFAULT_VALUE_ID)).toBe(true)
+  })
+
+  it('rejects a STALE-typed object output (persisted as json) onto a list target — canonical type wins', () => {
+    // A node persisted before object's output became `object` still carries
+    // dataType `json`; the canonical (fresh-from-defaults) lookup resolves it to
+    // `object`, so it's still refused.
+    const staleObjectOutputs = [{ id: 'object', name: 'object', dataType: 'json' as const }]
+    expect(isValidScenarioConnection({
+      sourceKind: 'object', sourceOutputs: staleObjectOutputs, sourceHandle: 'object',
+      targetKind: 'addToList', targetInputs: defaultPortsForKind('addToList').inputs, targetHandle: 'list'
+    })).toBe(false)
+  })
+
+  it('rejects onto a STALE-typed list target (persisted as json) — canonical type wins', () => {
+    const staleAddInputs = [{ id: 'in', name: '', dataType: 'any' as const }, { id: 'list', name: 'list', dataType: 'json' as const }]
+    expect(isValidScenarioConnection({
+      sourceKind: 'object', sourceOutputs: defaultPortsForKind('object').outputs, sourceHandle: 'object',
+      targetKind: 'addToList', targetInputs: staleAddInputs, targetHandle: 'list'
+    })).toBe(false)
   })
 })

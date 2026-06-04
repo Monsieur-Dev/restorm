@@ -1074,6 +1074,16 @@
 .scn-foreach-parallelism .inputbox {
   width: 56px;
 }
+/* AddToList/RemoveFromList "update the source variable" toggle row. */
+.scn-listmut-update {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.scn-listmut-update .scn-field-caption {
+  margin-bottom: 0;
+}
 /* When collapsed, the section's anchors gather on the title row. They keep
  * the per-row edge alignment (first anchor centred on the node border), then
  * flow rightward in front of the title. */

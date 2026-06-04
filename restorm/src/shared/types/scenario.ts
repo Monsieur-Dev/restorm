@@ -26,6 +26,13 @@ export type ScenarioDataType =
   | 'duration'
   | 'response'
   | 'status'
+  // A collection (array). Distinct from `object` so a list-only input (the
+  // AddToList/RemoveFromList target) accepts lists/arrays but refuses a plain
+  // object. `json` stays the ambiguous "either" — compatible with both.
+  | 'list'
+  // A structured object (the `object` node's output). Distinct from `list` so
+  // it can't land on a list-only target.
+  | 'object'
 
 /**
  * Semantic role of a port. Drives the default edge colour (then=green,

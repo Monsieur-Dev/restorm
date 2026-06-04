@@ -44,7 +44,13 @@ export const ListValueCell: React.FC<ListValueCellProps> = ({ value, onChange, v
       if (!(t instanceof Node)) return
       if (anchorRef.current?.contains(t)) return
       if (document.querySelector('[data-testid="tvf-list-popover"]')?.contains(t)) return
-      setOpen(false)
+      // Dismiss only when the click lands on the React Flow canvas (its pane or
+      // another node) — the natural "click away". EVERY editing surface a row can
+      // spawn (type menu, date / colour / environment picker, dropdown) is
+      // portalled OUTSIDE the canvas, so a click on one must NOT dismiss the list
+      // editor — that would unmount the picker before the choice registers.
+      const el = t instanceof Element ? t : t.parentElement
+      if (el?.closest('.react-flow')) setOpen(false)
     }
     document.addEventListener('mousedown', onDown, true)
     return () => { document.removeEventListener('mousedown', onDown, true) }
@@ -76,8 +82,12 @@ export const ListValueCell: React.FC<ListValueCellProps> = ({ value, onChange, v
           <div
             data-testid="tvf-list-popover"
             className="tvf-list-popover nodrag"
-            onMouseDown={(e) => { e.stopPropagation() }}
-            style={{ display: 'flex', flexDirection: 'column', gap: 6, width: 320 }}
+            // No stopPropagation: it would swallow the mousedown that a nested
+            // picker (dropdown / date / colour) listens for to dismiss itself.
+            // The popover is portalled off-canvas, so the click can't reach the
+            // React Flow pane anyway, and the editor's own dismiss ignores clicks
+            // inside [data-testid="tvf-list-popover"].
+            style={{ display: 'flex', flexDirection: 'column', gap: 8, width: 320, padding: 10, boxSizing: 'border-box' }}
           >
             <ScrollableElement options={{ horizontal: 'hidden' }} style={{ maxHeight: '40vh' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingRight: 4 }}>
@@ -90,6 +100,9 @@ export const ListValueCell: React.FC<ListValueCellProps> = ({ value, onChange, v
                       value={it}
                       onChange={(next) => { const n = items.slice(); n[i] = next; setItems(n) }}
                       onRemove={() => { setItems(items.filter((_, j) => j !== i)) }}
+                      // Handlebars expressions make no sense as a literal list
+                      // element (a list is data, not a template), so exclude them.
+                      excludeTypes={['expression']}
                       allowEnvironment
                       allowNull
                       allowList

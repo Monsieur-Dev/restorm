@@ -852,7 +852,9 @@
       "now": "現在",
       "comparator": "比較",
       "setVariable": "変数を設定",
-      "getVariable": "変数を取得"
+      "getVariable": "変数を取得",
+      "addToList": "リストに追加",
+      "removeFromList": "リストから削除"
     },
     "comparator": {
       "result": "結果"
@@ -1025,7 +1027,8 @@
       "values": "values",
       "result": "result",
       "addValue": "値を追加",
-      "removeValue": "値を削除"
+      "removeValue": "値を削除",
+      "updateVariable": "元の変数を更新"
     }
   }
 }

@@ -304,3 +304,33 @@ describe('plain aggregate (non-streaming) over a variable list', () => {
     expect(result).toBe(2)
   })
 })
+
+describe('aggregate sum/min/max/average — strict numeric (throws, no silent coercion)', () => {
+  const run = (op: string, items: unknown[]): unknown => {
+    const act = { nodeId: 'a', kind: 'aggregate', scope: [], inputs: { items } } as never
+    const ctx = { node: { id: 'a', kind: 'aggregate', config: { op }, inputs: [], outputs: [], position: { x: 0, y: 0 } }, variables: new Map() } as never
+    return (aggregateExecutor(act, ctx) as { outputs: { value: unknown }[] }).outputs[0]?.value
+  }
+
+  it('throws on a boolean item instead of coercing true→1', () => {
+    expect(() => run('sum', [1, 2, true])).toThrow(/non-numeric/)
+  })
+
+  it('throws on a non-numeric string / object / empty string', () => {
+    expect(() => run('sum', [1, 'abc'])).toThrow(/non-numeric/)
+    expect(() => run('max', [{ a: 1 }])).toThrow(/non-numeric/)
+    expect(() => run('average', [''])).toThrow(/non-numeric/)
+  })
+
+  it('accepts numbers and clean numeric strings', () => {
+    expect(run('sum', [15, '5'])).toBe(20)
+    expect(run('average', [10, 20])).toBe(15)
+    expect(run('min', [3, '1', 2])).toBe(1)
+  })
+
+  it('an empty list is fine — sum 0, min/max/average null (no throw)', () => {
+    expect(run('sum', [])).toBe(0)
+    expect(run('min', [])).toBeNull()
+    expect(run('average', [])).toBeNull()
+  })
+})

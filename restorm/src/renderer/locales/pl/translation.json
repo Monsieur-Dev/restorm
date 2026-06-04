@@ -855,7 +855,9 @@
       "now": "Teraz",
       "comparator": "Komparator",
       "setVariable": "Ustaw zmienną",
-      "getVariable": "Pobierz zmienną"
+      "getVariable": "Pobierz zmienną",
+      "addToList": "Dodaj do listy",
+      "removeFromList": "Usuń z listy"
     },
     "comparator": {
       "result": "wynik"
@@ -1028,7 +1030,8 @@
       "values": "values",
       "result": "result",
       "addValue": "Dodaj wartość",
-      "removeValue": "Usuń wartość"
+      "removeValue": "Usuń wartość",
+      "updateVariable": "Zaktualizuj zmienną źródłową"
     }
   }
 }

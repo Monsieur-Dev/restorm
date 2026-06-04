@@ -853,7 +853,9 @@
       "now": "Nå",
       "comparator": "Sammenligner",
       "setVariable": "Sett variabel",
-      "getVariable": "Hent variabel"
+      "getVariable": "Hent variabel",
+      "addToList": "Legg til i liste",
+      "removeFromList": "Fjern fra liste"
     },
     "comparator": {
       "result": "resultat"
@@ -1026,7 +1028,8 @@
       "values": "values",
       "result": "result",
       "addValue": "Legg til verdi",
-      "removeValue": "Fjern verdi"
+      "removeValue": "Fjern verdi",
+      "updateVariable": "Oppdater kildevariabelen"
     }
   }
 }

@@ -33,13 +33,19 @@
   {
     "id": "1780260964288-f92lwp",
     "kind": "doWhile",
-    "suggestion": null,
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
     "source": "static"
   },
   {
     "id": "1780260983665-gj9nge",
     "kind": "while",
-    "suggestion": null,
+    "suggestion": {
+      "condition": true,
+      "branch": "then"
+    },
     "source": "static"
   },
   {
@@ -53,7 +59,9 @@
   {
     "id": "1780266804440-8uxw08",
     "kind": "arithmetic",
-    "suggestion": null,
+    "suggestion": {
+      "result": 1
+    },
     "source": "static"
   },
   {
@@ -63,7 +71,7 @@
       "timestamp": "<dynamic-time>",
       "level": "info",
       "message": "cpt in DoWhile",
-      "data": null
+      "data": 1
     },
     "source": "static"
   },
@@ -78,7 +86,9 @@
   {
     "id": "1780267600232-mmm3yu",
     "kind": "arithmetic",
-    "suggestion": null,
+    "suggestion": {
+      "result": -1
+    },
     "source": "static"
   },
   {
@@ -110,7 +120,7 @@
       "timestamp": "<dynamic-time>",
       "level": "info",
       "message": "cpt in While",
-      "data": null
+      "data": -1
     },
     "source": "static"
   },

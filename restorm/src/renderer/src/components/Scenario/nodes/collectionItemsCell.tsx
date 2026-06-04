@@ -3,6 +3,7 @@ import type { ValueTypeKind } from '../../TypedValueField/castValue'
 import type { EnvValueTypeGroup } from '../../../hooks/useAllEnvValueTypeGroups'
 import { normalizeValueType } from '../../../utils/normalizeValueType'
 import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
+import { VariableValue } from '../../../../../shared/types/collections'
 import type { ScenarioNodeBoxData, ScenarioNodeCell } from './ScenarioNodeBoxBase'
 
 /**
@@ -49,7 +50,10 @@ export function buildListItemsCell(args: {
           content: (
             <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
               <TypedValueField
-                value={normalizeValueType(config['items'])}
+                // `items` is a list slot, never an authoring field — default to a
+                // (list-typed) variable picker, not a string. The type menu still
+                // offers the list literals (enumList / customListMulti).
+                value={config['items'] !== undefined ? normalizeValueType(config['items']) : new VariableValue('')}
                 onChange={(next) => { data.onSetConfig?.(id, { items: serializeValueForPersistence(next) }) }}
                 valueTypeGroups={valueTypeGroups}
                 excludeTypes={ITEMS_NON_LIST_TYPES}

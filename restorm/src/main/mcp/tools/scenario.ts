@@ -17,7 +17,7 @@ import { collectionStore } from '../../services/CollectionStore'
 import type { Scenario } from '../../../shared/models/Scenario'
 import type { ScenarioNode, ScenarioEdge, ScenarioNodeKind, ScenarioPort } from '../../../shared/types/scenario'
 import { defaultPortsForKind, isValidScenarioConnection, outputPortFlow, inputPortFlow, deriveRunScenarioPorts } from '../../../shared/scenarioNodePorts'
-import { SCENARIO_KIND_DOCS } from '../../../shared/scenarioKindDocs'
+import { SCENARIO_KIND_DOCS, VALUE_TYPE_DOCS } from '../../../shared/scenarioKindDocs'
 import { STATIC_PREVIEW_KINDS, staticScenarioPreview, singleDeepPath, expectsObjectInput, type StaticPreviewEdge } from '../../../shared/utils/scenarioStaticPreview'
 import { broadcastTreeReplace } from './import'
 
@@ -160,8 +160,9 @@ export function registerScenarioTools(mcp: McpService): void {
       description:
         'Self-describing catalogue for authoring scenario graphs: for each node kind, its purpose (`summary`), its default ' +
         'input/output ports (`id`, `name`, `flow` = value | signal | both, and `role`), and its `config` keys. The implicit ' +
-        '`error` output is included. Call this BEFORE create_scenario_node so you wire ports + set config correctly. Pass ' +
-        '`kind` to get one; omit for all.',
+        '`error` output is included. The top-level `valueTypes` map documents every typed-value shape a `config` / `valueType` ' +
+        'can carry (`{ type, … }` — string, numeric, boolean, null, list, variable, environment, enum, …). Call this BEFORE ' +
+        'create_scenario_node so you wire ports + set config correctly. Pass `kind` to get one kind; omit for all.',
       inputSchema: {
         kind: z.enum(SCENARIO_KINDS).optional().describe('Limit to a single kind; omit for the full catalogue.')
       } as Record<string, unknown>
@@ -169,7 +170,9 @@ export function registerScenarioTools(mcp: McpService): void {
     (args) => {
       const one = typeof args['kind'] === 'string' ? args['kind'] as ScenarioNodeKind : null
       const kinds: readonly ScenarioNodeKind[] = one ? [one] : (SCENARIO_KINDS as readonly ScenarioNodeKind[])
-      return jsonReply({ kinds: kinds.map(describeScenarioKind) })
+      // `valueTypes` is the same regardless of `kind` — it's the value-shape
+      // reference an author needs to fill `config` / `valueType` correctly.
+      return jsonReply({ kinds: kinds.map(describeScenarioKind), valueTypes: VALUE_TYPE_DOCS })
     }
   )
 

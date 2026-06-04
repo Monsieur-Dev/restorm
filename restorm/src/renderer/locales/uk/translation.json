@@ -855,7 +855,9 @@
       "now": "Зараз",
       "comparator": "Компаратор",
       "setVariable": "Задати змінну",
-      "getVariable": "Отримати змінну"
+      "getVariable": "Отримати змінну",
+      "addToList": "Додати до списку",
+      "removeFromList": "Видалити зі списку"
     },
     "comparator": {
       "result": "результат"
@@ -1028,7 +1030,8 @@
       "values": "values",
       "result": "result",
       "addValue": "Додати значення",
-      "removeValue": "Видалити значення"
+      "removeValue": "Видалити значення",
+      "updateVariable": "Оновити вихідну змінну"
     }
   }
 }

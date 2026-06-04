@@ -178,6 +178,14 @@
     right: null
     left: null
     operator: ≠
+- message: ⚪ [<time>] start if
+  data:
+    left: null
+    right: true
+- message: ⚪ [<time>] start if
+  data:
+    left: null
+    right: ""
 - message: ⚪ [<time>] done if
   data:
     then:
@@ -341,6 +349,16 @@
     else:
       left: null
       right: null
+- message: ⚪ [<time>] done if
+  data:
+    else:
+      left: null
+      right: true
+- message: ⚪ [<time>] done if
+  data:
+    else:
+      left: null
+      right: ""
 - message: ⚪ [<time>] done if
   data:
     then:

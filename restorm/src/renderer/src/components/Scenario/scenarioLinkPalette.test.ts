@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { linkPaletteEntries } from './scenarioLinkPalette'
 import { defaultPortsForKind } from './scenarioNodePorts'
+import { LIST_MUTATION_DEFAULT_VALUE_ID } from '../../../../shared/scenarioListMutationValues'
 import type { ScenarioNodeKind } from '../../../../shared/types/collections'
 
 /** A source node shaped from a kind's canonical ports. */
@@ -73,5 +74,21 @@ describe('linkPaletteEntries — drag from an output', () => {
   it('lists input (it owns a header launch trigger), wired to it', () => {
     const entries = linkPaletteEntries(srcOf('httpRequest'), 'response', true)
     expect(entries.find((e) => e.kind === 'input')?.wirePort).toBe('in')
+  })
+
+  // An `object` output (type `object`) is NOT a list, so on AddToList/RemoveFromList
+  // it skips the list-only `list` target and lands on the first VALUE row — you
+  // want to ADD the object as an element, not set it as the target list.
+  it('an object output → AddToList/RemoveFromList lands on the first value row, not the list target', () => {
+    const entries = linkPaletteEntries(srcOf('object'), 'object', true)
+    expect(entries.find((e) => e.kind === 'addToList')?.wirePort).toBe(LIST_MUTATION_DEFAULT_VALUE_ID)
+    expect(entries.find((e) => e.kind === 'removeFromList')?.wirePort).toBe(LIST_MUTATION_DEFAULT_VALUE_ID)
+  })
+
+  // A list-ish output (`map.mapped` is `json`, compatible with a `list` target)
+  // DOES set the `list` target.
+  it('a json/list output → AddToList lands on the `list` target', () => {
+    const entries = linkPaletteEntries(srcOf('map'), 'mapped', true)
+    expect(entries.find((e) => e.kind === 'addToList')?.wirePort).toBe('list')
   })
 })

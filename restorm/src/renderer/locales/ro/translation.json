@@ -854,7 +854,9 @@
       "now": "Acum",
       "comparator": "Comparator",
       "setVariable": "Setează variabila",
-      "getVariable": "Obține variabila"
+      "getVariable": "Obține variabila",
+      "addToList": "Adaugă în listă",
+      "removeFromList": "Elimină din listă"
     },
     "comparator": {
       "result": "rezultat"
@@ -1027,7 +1029,8 @@
       "values": "values",
       "result": "result",
       "addValue": "Adaugă valoare",
-      "removeValue": "Elimină valoarea"
+      "removeValue": "Elimină valoarea",
+      "updateVariable": "Actualizează variabila sursă"
     }
   }
 }

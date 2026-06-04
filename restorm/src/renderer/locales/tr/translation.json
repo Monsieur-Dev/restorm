@@ -853,7 +853,9 @@
       "now": "Şimdi",
       "comparator": "Karşılaştırıcı",
       "setVariable": "Değişken ata",
-      "getVariable": "Değişkeni al"
+      "getVariable": "Değişkeni al",
+      "addToList": "Listeye ekle",
+      "removeFromList": "Listeden kaldır"
     },
     "comparator": {
       "result": "sonuç"
@@ -1026,7 +1028,8 @@
       "values": "values",
       "result": "result",
       "addValue": "Değer ekle",
-      "removeValue": "Değeri kaldır"
+      "removeValue": "Değeri kaldır",
+      "updateVariable": "Kaynak değişkeni güncelle"
     }
   }
 }

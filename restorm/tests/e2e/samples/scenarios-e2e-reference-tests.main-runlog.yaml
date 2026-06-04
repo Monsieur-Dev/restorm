@@ -1456,6 +1456,14 @@
     right: null
     left: null
     operator: ≠
+- message: ⚪ [<time>] start if
+  data:
+    left: null
+    right: true
+- message: ⚪ [<time>] start if
+  data:
+    left: null
+    right: ""
 - message: ⚪ [<time>] done if
   data:
     then:
@@ -1619,6 +1627,16 @@
     else:
       left: null
       right: null
+- message: ⚪ [<time>] done if
+  data:
+    else:
+      left: null
+      right: true
+- message: ⚪ [<time>] done if
+  data:
+    else:
+      left: null
+      right: ""
 - message: ⚪ [<time>] done if
   data:
     then:
@@ -2479,6 +2497,28 @@
 - message: ⚪ [<time>] done log
   data:
     value: ""
+- message: ⚪ [<time>] start getVariable
+  data:
+    in: true
+- message: ⚪ [<time>] start getVariable
+  data:
+    in: true
+- message: ⚪ [<time>] done getVariable
+  data: {}
+- message: ⚪ [<time>] done getVariable
+  data: {}
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: readbefore
+    value: test
+    in: true
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: readbefore
+    value: test
+    in: true
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
 - message: 🔵 [<time>] ■ Variables & asserts
 - message: ⚪ [<time>] done runScenario
   data:
@@ -2591,6 +2631,116 @@
   data:
     name: basket
     value: []
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: basket2
+    value: []
+- message: ⚪ [<time>] start setVariable
+  data:
+    value:
+      - abc
+      - 2026-06-04T17:15:02.603Z
+      - true
+      - "#b72525"
+      - Rouge
+      - []
+      - null
+      - name: Sub-env
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+      - - Bleu
+        - Vert
+      - ""
+    name: stuff
+- message: ⚪ [<time>] start aggregate
+  data:
+    op: min
+    items:
+      - abc
+      - 2026-06-04T17:15:02.603Z
+      - true
+      - "#b72525"
+      - Rouge
+      - []
+      - null
+      - name: Sub-env
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+      - - Bleu
+        - Vert
+      - ""
+    field: ""
+- message: "🔴 [<time>] Cannot min a non-numeric value: undefined"
+- message: ⚪ [<time>] start aggregate
+  data:
+    op: max
+    items:
+      - abc
+      - 2026-06-04T17:15:02.603Z
+      - true
+      - "#b72525"
+      - Rouge
+      - []
+      - null
+      - name: Sub-env
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+      - - Bleu
+        - Vert
+      - ""
+    field: ""
+- message: "🔴 [<time>] Cannot max a non-numeric value: undefined"
+- message: ⚪ [<time>] start aggregate
+  data:
+    op: average
+    items:
+      - abc
+      - 2026-06-04T17:15:02.603Z
+      - true
+      - "#b72525"
+      - Rouge
+      - []
+      - null
+      - name: Sub-env
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+      - - Bleu
+        - Vert
+      - ""
+    field: ""
+- message: "🔴 [<time>] Cannot average a non-numeric value: undefined"
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: list1
+    value:
+      - abc
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: list2
+    value:
+      - def
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: vars
+    value:
+      - 1
+      - 2
+- message: ⚪ [<time>] start setVariable
+  data:
+    value:
+      - Rouge
+      - Vert
+    name: petColors1
+- message: ⚪ [<time>] start setVariable
+  data:
+    value:
+      - Vert
+      - Rouge
+    name: petColors2
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] done object
@@ -2609,11 +2759,70 @@
       sku: product_2
       price: 15
 - message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] start aggregate
   data:
     items:
       - Vert
       - Bleu
+    in: true
+- message: ⚪ [<time>] start aggregate
+  data:
+    op: sum
+    items:
+      - abc
+      - 2026-06-04T17:15:02.603Z
+      - true
+      - "#b72525"
+      - Rouge
+      - []
+      - null
+      - name: Sub-env
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+      - - Bleu
+        - Vert
+      - ""
+    field: ""
+    in: true
+- message: "🔴 [<time>] Cannot sum a non-numeric value: undefined"
+- message: ⚪ [<time>] start aggregate
+  data:
+    op: min
+    items:
+      - abc
+      - 2026-06-04T17:15:02.603Z
+      - true
+      - "#b72525"
+      - Rouge
+      - []
+      - null
+      - name: Sub-env
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+      - - Bleu
+        - Vert
+      - ""
+    field: ""
+    in: true
+- message: "🔴 [<time>] Cannot min a non-numeric value: undefined"
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] start comparator
+  data:
+    a:
+      - Rouge
+      - Vert
+    b:
+      - Vert
+      - Rouge
+    operator: contains
     in: true
 - message: ⚪ [<time>] done aggregate
   data:
@@ -2621,9 +2830,13 @@
 - message: ⚪ [<time>] start log
   data:
     message: "{{.}} colors selected"
+    level: info
     data: 2
 - message: 🔵 [<time>] 2 colors selected
   data: 2
+- message: ⚪ [<time>] done comparator
+  data:
+    result: true
 - message: ⚪ [<time>] done log
   data:
     value: 2
@@ -2774,14 +2987,104 @@
     result: 12.5
 - message: ⚪ [<time>] start log
   data:
-    message: test
+    message: Avg basket 1
     level: warn
     data: 12.5
-- message: 🟠 [<time>] test
+- message: 🟠 [<time>] Avg basket 1
   data: 12.5
 - message: ⚪ [<time>] done log
   data:
     value: 12.5
+- message: ⚪ [<time>] start addToList
+  data:
+    list: []
+    updateSourceVariable: true
+    in: true
+    list-mutation-default-value:
+      sku: product_1
+      price: 10
+    val-1780586258056-gps012:
+      sku: product_2
+      price: 15
+- message: ⚪ [<time>] done addToList
+  data:
+    result:
+      - sku: product_1
+        price: 10
+      - sku: product_2
+        price: 15
+- message: ⚪ [<time>] start aggregate
+  data:
+    op: max
+    field: price
+    items:
+      - sku: product_1
+        price: 10
+      - sku: product_2
+        price: 15
+    in: true
+- message: ⚪ [<time>] done aggregate
+  data:
+    result: 15
+- message: ⚪ [<time>] start log
+  data:
+    message: Max basket 2
+    level: warn
+    data: 15
+- message: 🟠 [<time>] Max basket 2
+  data: 15
+- message: ⚪ [<time>] done log
+  data:
+    value: 15
+- message: ⚪ [<time>] start log
+  data:
+    message: Error cases are OK on aggregate
+    in: true
+- message: 🔵 [<time>] Error cases are OK on aggregate
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] start addToList
+  data:
+    list:
+      - abc
+    in: true
+- message: ⚪ [<time>] done addToList
+  data:
+    result:
+      - abc
+      - def
+- message: ⚪ [<time>] start aggregate
+  data:
+    items:
+      - abc
+      - def
+- message: ⚪ [<time>] done aggregate
+  data:
+    result: 2
+- message: ⚪ [<time>] start removeFromList
+  data:
+    list:
+      - 1
+      - 2
+    in: true
+- message: ⚪ [<time>] done removeFromList
+  data:
+    result:
+      - 1
+      - 2
+- message: ⚪ [<time>] start comparator
+  data:
+    a:
+      - Rouge
+      - Vert
+    b:
+      - Vert
+      - Rouge
+    operator: =
+    in: true
+- message: ⚪ [<time>] done comparator
+  data:
+    result: true
 - message: 🔵 [<time>] ■ Lists operations
 - message: ⚪ [<time>] done runScenario
   data:
