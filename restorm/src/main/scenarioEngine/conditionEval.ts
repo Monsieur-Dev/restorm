@@ -5,7 +5,7 @@
  * the executors and the scheduler agree on operand resolution + the
  * operator vocabulary.
  */
-import { concreteValue } from '../../shared/utils/scenarioStaticPreview'
+import { concreteValue, listValueArray } from '../../shared/utils/scenarioStaticPreview'
 import { collectionStore } from '../services/CollectionStore'
 import { contextService } from '../services/ContextService'
 
@@ -244,6 +244,11 @@ function objectSubset(left: unknown, right: unknown): boolean {
 
 function containsCompare(l: unknown, r: unknown, lk: OperandKind, rk: OperandKind): boolean {
   if (lk === 'object' && rk === 'object') return objectSubset(l, r)
+  // A list contains a LIST when the right is a (multiset) SUBSET of the left —
+  // every element of `r` has a deep-equal match in `l`. So a multi-select
+  // `[Vert, Rouge] ∋ [Vert]` is true. A list against a non-list tests element
+  // membership (`[Vert, Rouge] ∋ "Vert"`).
+  if (lk === 'list' && rk === 'list') return (r as unknown[]).every((y) => (l as unknown[]).some((x) => deepEqual(x, y)))
   if (lk === 'list') return (l as unknown[]).some((x) => deepEqual(x, r))
   if (STRINGISH.has(lk) && STRINGISH.has(rk)) return stringify(l).includes(stringify(r))
   throw new Error(`Operator "∋" cannot test a ${lk} for containment of a ${rk}`)
@@ -312,6 +317,13 @@ export function resolveOperand(wired: unknown, cfgVal: unknown, variables?: Read
     const variables = { ...(contextService.getContext(id) ?? {}) }
     return Object.keys(variables).length > 0 ? { name: env.name, variables } : { name: env.name }
   }
+  // A multi-select (`customListMulti` / `enumList`) IS a list — resolve it to its
+  // ARRAY so list ops count/iterate it and comparisons use list semantics (a
+  // variable set to one stays a list). `concreteValue` joins it to a display
+  // string; that form stays for log templates and request params, which resolve
+  // through a different path, NOT this one.
+  const listArr = listValueArray(cfgVal)
+  if (listArr) return listArr
   return concreteValue(cfgVal)
 }
 

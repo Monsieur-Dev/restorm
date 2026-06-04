@@ -1,7 +1,10 @@
 - message: 🔵 [<time>] ▶ Loops
 - message: ⚪ [<time>] start forEach
   data:
-    items: Rouge,Vert,Bleu
+    items:
+      - Rouge
+      - Vert
+      - Bleu
 - message: ⚪ [<time>] done forEach
 - message: "⚪ [<time>] forEach start: 3 items, batchSize=1, opening first 1"
 - message: ⚪ [<time>] forEach open item 0 (0/3 done, batch≤1)

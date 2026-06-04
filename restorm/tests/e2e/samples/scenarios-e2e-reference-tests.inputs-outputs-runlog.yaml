@@ -13,7 +13,8 @@
         clientId: VALID_CLIENT_ID
     param6: "#000000"
     param5: Bleu
-    param7: Vert
+    param7:
+      - Vert
 - message: ⚪ [<time>] done input
   data:
     value:

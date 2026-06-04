@@ -165,6 +165,13 @@ describe('compareValues — contains (∋)', () => {
     expect(compareValues('∋', 'Rouge,Vert', 'Vert', 'enum', 'enum')).toBe(true)
   })
 
+  it('list ∋ list is multiset SUBSET — a multi-select contains another', () => {
+    expect(compareValues('∋', ['Vert', 'Rouge'], ['Vert'])).toBe(true)
+    expect(compareValues('∋', ['Vert', 'Rouge'], ['Vert', 'Rouge'])).toBe(true)
+    expect(compareValues('∋', ['Vert', 'Rouge'], ['Vert', 'Bleu'])).toBe(false)
+    expect(compareValues('∋', ['Vert'], ['Vert', 'Rouge'])).toBe(false)
+  })
+
   it('THROWS for unsupported left kinds (e.g. boolean)', () => {
     expect(() => compareValues('∋', true, false)).toThrow()
   })

@@ -24,7 +24,9 @@
         clientId: VALID_CLIENT_ID
     param6: "#d01d1d"
     param5: Vert
-    param7: Rouge,Bleu
+    param7:
+      - Rouge
+      - Bleu
 - message: ⚪ [<time>] done input
   data:
     value:
@@ -41,7 +43,9 @@
           clientId: VALID_CLIENT_ID
       param6: "#d01d1d"
       param5: Vert
-      param7: Rouge,Bleu
+      param7:
+        - Rouge
+        - Bleu
 - message: ⚪ [<time>] start input
   data:
     SecondInput: 2026-06-02T10:18:27.766Z
@@ -63,7 +67,9 @@
         clientId: VALID_CLIENT_ID
     prop-1780469244879-3a6v38: Vert
     prop-1780469259770-ffodx7: "#d01d1d"
-    prop-1780469273581-zsg6rn: Rouge,Bleu
+    prop-1780469273581-zsg6rn:
+      - Rouge
+      - Bleu
     prop-1780469304463-iq60rc: 2030-01-15T08:30:00.000Z
 - message: ⚪ [<time>] done object
   data:
@@ -80,7 +86,9 @@
           clientId: VALID_CLIENT_ID
       obj_param5: Vert
       obj_param6: "#d01d1d"
-      obj_param7: Rouge,Bleu
+      obj_param7:
+        - Rouge
+        - Bleu
       obj_SecondInput: 2030-01-15T08:30:00.000Z
 - message: ⚪ [<time>] start log
   data:
@@ -98,7 +106,9 @@
           clientId: VALID_CLIENT_ID
       obj_param5: Vert
       obj_param6: "#d01d1d"
-      obj_param7: Rouge,Bleu
+      obj_param7:
+        - Rouge
+        - Bleu
       obj_SecondInput: 2030-01-15T08:30:00.000Z
 - message: 🔵 [<time>] List of all values
   data:
@@ -114,7 +124,9 @@
         clientId: VALID_CLIENT_ID
     obj_param5: Vert
     obj_param6: "#d01d1d"
-    obj_param7: Rouge,Bleu
+    obj_param7:
+      - Rouge
+      - Bleu
     obj_SecondInput: 2030-01-15T08:30:00.000Z
 - message: ⚪ [<time>] done log
   data:
@@ -131,7 +143,9 @@
           clientId: VALID_CLIENT_ID
       obj_param5: Vert
       obj_param6: "#d01d1d"
-      obj_param7: Rouge,Bleu
+      obj_param7:
+        - Rouge
+        - Bleu
       obj_SecondInput: 2030-01-15T08:30:00.000Z
 - message: ⚪ [<time>] start output
   data:
@@ -153,7 +167,9 @@
           clientId: VALID_CLIENT_ID
       obj_param5: Vert
       obj_param6: "#d01d1d"
-      obj_param7: Rouge,Bleu
+      obj_param7:
+        - Rouge
+        - Bleu
       obj_SecondInput: 2030-01-15T08:30:00.000Z
     in: true
 - message: ⚪ [<time>] done output
@@ -175,7 +191,9 @@
           clientId: VALID_CLIENT_ID
       obj_param5: Vert
       obj_param6: "#d01d1d"
-      obj_param7: Rouge,Bleu
+      obj_param7:
+        - Rouge
+        - Bleu
       obj_SecondInput: 2030-01-15T08:30:00.000Z
 - message: ⚪ [<time>] start output
   data:
@@ -204,7 +222,9 @@
             clientId: VALID_CLIENT_ID
         obj_param5: Vert
         obj_param6: "#d01d1d"
-        obj_param7: Rouge,Bleu
+        obj_param7:
+          - Rouge
+          - Bleu
         obj_SecondInput: 2030-01-15T08:30:00.000Z
       static_output: true
       env: null
@@ -224,7 +244,9 @@
           clientId: VALID_CLIENT_ID
       obj_param5: Vert
       obj_param6: "#d01d1d"
-      obj_param7: Rouge,Bleu
+      obj_param7:
+        - Rouge
+        - Bleu
       obj_SecondInput: 2030-01-15T08:30:00.000Z
     output:static_output: true
     output:env: null
@@ -246,7 +268,9 @@
           clientId: VALID_CLIENT_ID
       obj_param5: Vert
       obj_param6: "#d01d1d"
-      obj_param7: Rouge,Bleu
+      obj_param7:
+        - Rouge
+        - Bleu
       obj_SecondInput: 2030-01-15T08:30:00.000Z
 - message: 🔵 [<time>] Received in main
   data:
@@ -262,7 +286,9 @@
         clientId: VALID_CLIENT_ID
     obj_param5: Vert
     obj_param6: "#d01d1d"
-    obj_param7: Rouge,Bleu
+    obj_param7:
+      - Rouge
+      - Bleu
     obj_SecondInput: 2030-01-15T08:30:00.000Z
 - message: ⚪ [<time>] start log
   data:
@@ -286,7 +312,9 @@
           clientId: VALID_CLIENT_ID
       obj_param5: Vert
       obj_param6: "#d01d1d"
-      obj_param7: Rouge,Bleu
+      obj_param7:
+        - Rouge
+        - Bleu
       obj_SecondInput: 2030-01-15T08:30:00.000Z
 - message: ⚪ [<time>] done log
   data:
@@ -299,7 +327,10 @@
 - message: 🔵 [<time>] ▶ Loops
 - message: ⚪ [<time>] start forEach
   data:
-    items: Rouge,Vert,Bleu
+    items:
+      - Rouge
+      - Vert
+      - Bleu
 - message: ⚪ [<time>] done forEach
 - message: "⚪ [<time>] forEach start: 3 items, batchSize=1, opening first 1"
 - message: ⚪ [<time>] forEach open item 0 (0/3 done, batch≤1)
@@ -1307,7 +1338,10 @@
 - message: 🔴 [<time>] Operator ">" cannot order null values
 - message: ⚪ [<time>] start if
   data:
-    right: Vert,Bleu,Rouge
+    right:
+      - Vert
+      - Bleu
+      - Rouge
     left: null
 - message: ⚪ [<time>] start if
   data:
@@ -1358,7 +1392,10 @@
 - message: ⚪ [<time>] start if
   data:
     right: null
-    left: Bleu,Vert,Rouge
+    left:
+      - Bleu
+      - Vert
+      - Rouge
 - message: ⚪ [<time>] start if
   data:
     right: null
@@ -1488,7 +1525,10 @@
   data:
     else:
       left: null
-      right: Vert,Bleu,Rouge
+      right:
+        - Vert
+        - Bleu
+        - Rouge
 - message: ⚪ [<time>] done if
   data:
     else:
@@ -1511,7 +1551,10 @@
 - message: ⚪ [<time>] done if
   data:
     else:
-      left: Bleu,Vert,Rouge
+      left:
+        - Bleu
+        - Vert
+        - Rouge
       right: null
 - message: ⚪ [<time>] done if
   data:
@@ -1769,7 +1812,9 @@
   data: {}
 - message: ⚪ [<time>] start if
   data:
-    left: Rouge,Vert
+    left:
+      - Rouge
+      - Vert
     right: Vert
     operator: contains
     in: true
@@ -1956,7 +2001,9 @@
 - message: ⚪ [<time>] start setVariable
   data:
     name: petcolors
-    value: Vert,Rouge
+    value:
+      - Vert
+      - Rouge
 - message: ⚪ [<time>] start setVariable
   data:
     value:
@@ -2011,8 +2058,12 @@
     in: true
 - message: ⚪ [<time>] start assert
   data:
-    a: Vert,Rouge
-    b: Vert,Rouge
+    a:
+      - Vert
+      - Rouge
+    b:
+      - Vert
+      - Rouge
     message: petcolors should be vert, rouge
     in: true
 - message: ⚪ [<time>] start assert
@@ -2095,7 +2146,9 @@
 - message: ⚪ [<time>] start setVariable
   data:
     name: petcolors
-    value: Bleu,Vert
+    value:
+      - Bleu
+      - Vert
     in: true
 - message: ⚪ [<time>] start setVariable
   data:
@@ -2148,8 +2201,12 @@
     in: true
 - message: ⚪ [<time>] start assert
   data:
-    a: Bleu,Vert
-    b: Bleu,Vert
+    a:
+      - Bleu
+      - Vert
+    b:
+      - Bleu
+      - Vert
     message: petcolors should be bleu, vert
     in: true
 - message: ⚪ [<time>] start assert
@@ -2235,8 +2292,11 @@
     in: true
 - message: ⚪ [<time>] start assert
   data:
-    a: Bleu,Vert
-    b: Vert
+    a:
+      - Bleu
+      - Vert
+    b:
+      - Vert
     message: petcolors should include vert
     operator: contains
     in: true
@@ -2298,7 +2358,9 @@
       datetime: 2026-06-04T04:09:55.794Z
       bool: false
       petcolor: Bleu
-      petcolors: Bleu,Vert
+      petcolors:
+        - Bleu
+        - Vert
       env: null
 - message: ⚪ [<time>] done object
   data:
@@ -2308,7 +2370,9 @@
       datetime: 2026-06-04T04:09:55.794Z
       bool: false
       petcolor: Bleu
-      petcolors: Bleu,Vert
+      petcolors:
+        - Bleu
+        - Vert
       env: null
 - message: ⚪ [<time>] start setVariable
   data:
@@ -2319,7 +2383,9 @@
       datetime: 2026-06-04T04:09:55.794Z
       bool: false
       petcolor: Bleu
-      petcolors: Bleu,Vert
+      petcolors:
+        - Bleu
+        - Vert
       env: null
 - message: ⚪ [<time>] start setVariable
   data:
@@ -2330,7 +2396,9 @@
       datetime: 2026-06-04T04:09:55.794Z
       bool: false
       petcolor: Bleu
-      petcolors: Bleu,Vert
+      petcolors:
+        - Bleu
+        - Vert
       env: null
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] done setVariable
@@ -2342,7 +2410,9 @@
       datetime: 2026-06-04T04:09:55.794Z
       bool: false
       petcolor: Bleu
-      petcolors: Bleu,Vert
+      petcolors:
+        - Bleu
+        - Vert
       env: null
     b:
       string: cba
@@ -2350,7 +2420,9 @@
       datetime: 2026-06-04T04:09:55.794Z
       bool: false
       petcolor: Bleu
-      petcolors: Bleu,Vert
+      petcolors:
+        - Bleu
+        - Vert
       env: null
     in: true
 - message: ⚪ [<time>] start comparator
@@ -2361,7 +2433,9 @@
       datetime: 2026-06-04T04:09:55.794Z
       bool: false
       petcolor: Bleu
-      petcolors: Bleu,Vert
+      petcolors:
+        - Bleu
+        - Vert
       env: null
     b:
       string: cba
@@ -2369,7 +2443,9 @@
       datetime: 2026-06-04T04:09:55.794Z
       bool: false
       petcolor: Bleu
-      petcolors: Bleu,Vert
+      petcolors:
+        - Bleu
+        - Vert
       env: null
     operator: contains
     in: true
@@ -2498,25 +2574,29 @@
 - message: 🔵 [<time>] ▶ Lists operations
 - message: ⚪ [<time>] start setVariable
   data:
-    value: Vert,Bleu
+    value:
+      - Vert
+      - Bleu
     name: PetColors
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] start aggregate
   data:
-    items: Vert,Bleu
+    items:
+      - Vert
+      - Bleu
     in: true
 - message: ⚪ [<time>] done aggregate
   data:
-    result: 0
+    result: 2
 - message: ⚪ [<time>] start log
   data:
     message: "{{.}} colors selected"
-    data: 0
-- message: 🔵 [<time>] 0 colors selected
-  data: 0
+    data: 2
+- message: 🔵 [<time>] 2 colors selected
+  data: 2
 - message: ⚪ [<time>] done log
   data:
-    value: 0
+    value: 2
 - message: 🔵 [<time>] ■ Lists operations
 - message: ⚪ [<time>] done runScenario
   data:

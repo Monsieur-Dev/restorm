@@ -58,6 +58,25 @@ describe('staticScenarioPreview — output node', () => {
   })
 })
 
+describe('staticScenarioPreview — aggregate over a variable list', () => {
+  it('previews the count of a customListMulti stashed in a setVariable, read via the variable', () => {
+    // setVariable PetColors = [Vert, Bleu]; aggregate(count, items = variable
+    // PetColors). The static preview resolves the variable to the setVariable's
+    // list value (an array) so the inspector shows the count without a run.
+    const sv: StaticPreviewNode = {
+      id: 'sv',
+      kind: 'setVariable',
+      config: { name: 'PetColors', value: { type: 'customListMulti', listId: 'L', labels: ['Vert', 'Bleu'] } }
+    }
+    const agg: StaticPreviewNode = {
+      id: 'agg',
+      kind: 'aggregate',
+      config: { op: 'count', items: { type: 'variable', value: 'PetColors' } }
+    }
+    expect(staticScenarioPreview(agg, [sv, agg], [])).toEqual({ result: 2 })
+  })
+})
+
 describe('concreteValue — environment', () => {
   it('returns null when no environment is selected (empty id)', () => {
     expect(concreteValue({ type: 'environment', value: '' })).toBeNull()

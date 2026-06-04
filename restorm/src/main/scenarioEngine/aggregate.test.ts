@@ -276,4 +276,31 @@ describe('plain aggregate (non-streaming) over a variable list', () => {
     expect(s.status().state).toBe('completed')
     expect(result).toBe(3)
   })
+
+  it('counts a customListMulti stashed in a variable — a multi-select is a real list', async () => {
+    // setVariable PetColors = customListMulti[Vert, Bleu] (stored as the ARRAY,
+    // since a multi-select resolves to a list); aggregate(count) over the
+    // variable → 2. This is the end-to-end of "a list of colors is a real list".
+    const scenario = buildScenario(
+      [
+        { id: 'sv', kind: 'setVariable', inputs: ['in', 'value'], outputs: [], config: { name: 'PetColors', value: { type: 'customListMulti', listId: 'L', labels: ['Vert', 'Bleu'] } } },
+        { id: 'agg', kind: 'aggregate', inputs: ['items', 'in'], outputs: ['result'], config: { op: 'count', items: { type: 'variable', value: 'PetColors' } } },
+        { id: 'sink', kind: 'object', inputs: ['result'], outputs: [] }
+      ],
+      [
+        { from: ['sv', 'done'], to: ['agg', 'in'] },
+        { from: ['agg', 'result'], to: ['sink', 'result'] }
+      ]
+    )
+    let result: unknown
+    const executors = new Map<string, NodeExecutor>([
+      ['sv', setVariableExecutor],
+      ['agg', aggregateExecutor],
+      ['sink', (act) => { result = act.inputs['result']; return { outputs: [] } }]
+    ])
+    const s = new Scheduler({ scenario, executors })
+    await s.run()
+    expect(s.status().state).toBe('completed')
+    expect(result).toBe(2)
+  })
 })

@@ -209,11 +209,13 @@ function variableValues(nodes: readonly StaticPreviewNode[]): Map<string, unknow
       // at runtime (where `inputExecutor` publishes the same names).
       for (const param of readInputParams(n.config)) {
         const name = param.name.trim()
-        if (name) m.set(name, concreteValue(param.valueType))
+        // A multi-select default resolves to its ARRAY (mirrors the runtime
+        // `resolveOperand`), so list ops / comparisons see a real list.
+        if (name) m.set(name, listValueArray(param.valueType) ?? concreteValue(param.valueType))
       }
     } else if (n.kind === 'setVariable') {
       const name = str(n.config['name'])
-      if (name) m.set(name, concreteValue(n.config['value']))
+      if (name) m.set(name, listValueArray(n.config['value']) ?? concreteValue(n.config['value']))
     }
   }
   return m
@@ -239,7 +241,17 @@ export function resolveItems(
     const v = edge.selector ? resolveSelectorPath(sp, edge.selector) : sp
     return Array.isArray(v) ? v : null
   }
-  return literalConfigItems(cfg)
+  const lit = literalConfigItems(cfg)
+  if (lit) return lit
+  // An inline `variable` items resolves to that variable's STATIC value (from a
+  // `setVariable` / `input` box) — so `setVariable list → aggregate over the
+  // variable` previews its count/items, not nothing.
+  const raw = cfg['items'] as { type?: unknown; value?: unknown } | null | undefined
+  if (raw && typeof raw === 'object' && raw.type === 'variable' && typeof raw.value === 'string') {
+    const v = variableValues(nodes).get(raw.value)
+    if (Array.isArray(v)) return v as unknown[]
+  }
+  return null
 }
 
 /** Resolve a list box's `items` from its CONFIG literal alone (no wired

@@ -60,7 +60,10 @@
 - message: 🔴 [<time>] Operator ">" cannot order null values
 - message: ⚪ [<time>] start if
   data:
-    right: Vert,Bleu,Rouge
+    right:
+      - Vert
+      - Bleu
+      - Rouge
     left: null
 - message: ⚪ [<time>] start if
   data:
@@ -111,7 +114,10 @@
 - message: ⚪ [<time>] start if
   data:
     right: null
-    left: Bleu,Vert,Rouge
+    left:
+      - Bleu
+      - Vert
+      - Rouge
 - message: ⚪ [<time>] start if
   data:
     right: null
@@ -241,7 +247,10 @@
   data:
     else:
       left: null
-      right: Vert,Bleu,Rouge
+      right:
+        - Vert
+        - Bleu
+        - Rouge
 - message: ⚪ [<time>] done if
   data:
     else:
@@ -264,7 +273,10 @@
 - message: ⚪ [<time>] done if
   data:
     else:
-      left: Bleu,Vert,Rouge
+      left:
+        - Bleu
+        - Vert
+        - Rouge
       right: null
 - message: ⚪ [<time>] done if
   data:
@@ -522,7 +534,9 @@
   data: {}
 - message: ⚪ [<time>] start if
   data:
-    left: Rouge,Vert
+    left:
+      - Rouge
+      - Vert
     right: Vert
     operator: contains
     in: true
