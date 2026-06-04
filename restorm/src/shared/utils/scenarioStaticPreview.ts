@@ -4,6 +4,7 @@ import type { ScenarioNode, ScenarioEdge } from '../types/scenario'
 import { readInputParams } from '../scenarioInputParams'
 import { readOutputDecls } from '../scenarioOutputDecls'
 import { STATIC_PREVIEW_KINDS } from '../scenarioNodeCapabilities'
+import { compareValues as compareValuesShared } from '../scenarioComparison'
 import { LIST_MUTATION_DEFAULT_VALUE_ID } from '../scenarioListMutationValues'
 
 // Register the full helper suite on first import so a chained `transform`
@@ -565,84 +566,19 @@ function operandPreviewValue(
   return edge.selector ? resolveSelectorPath(portValue, edge.selector) : portValue
 }
 
-/** Deep structural equality for preview comparisons — mirrors the runtime
- * `conditionEval.deepEqual` (kept here because shared code can't import the
- * main-process comparator). */
-function previewDeepEqual(a: unknown, b: unknown): boolean {
-  if (a === b) return true
-  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) return false
-  const ka = Object.keys(a as Record<string, unknown>)
-  const kb = Object.keys(b as Record<string, unknown>)
-  if (ka.length !== kb.length) return false
-  for (const k of ka) {
-    if (!Object.prototype.hasOwnProperty.call(b, k)) return false
-    if (!previewDeepEqual((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k])) return false
-  }
-  return true
-}
-
-/** Order-independent (multiset) list equality — `[a, b] = [b, a]`. */
-function previewListEqual(a: unknown[], b: unknown[]): boolean {
-  if (a.length !== b.length) return false
-  const used = new Array<boolean>(b.length).fill(false)
-  for (const x of a) {
-    const i = b.findIndex((y, j) => !used[j] && previewDeepEqual(x, y))
-    if (i === -1) return false
-    used[i] = true
-  }
-  return true
-}
-
-/** Apply a comparator-style operator (`<`/`≤`/`=`/`≥`/`>`/`≠`/`contains`) to
- * two resolved values. Returns `null` for combinations the operator can't
- * handle (e.g. ordering on objects) so the caller drops the preview. Shared
- * by `comparator` and `if` (both branch on the same op set). */
+/** Apply a comparator-style operator (`<`/`≤`/`=`/`≥`/`>`/`≠`/`contains`) to two
+ * resolved values for the inspector preview. Delegates to the SHARED
+ * `compareValues` — the SAME implementation the runtime uses, so the preview
+ * can't drift — catching its throws: the shared comparator errors on undefined
+ * orderings (null/object ordering, mixed types), but the preview wants `null` to
+ * drop the preview rather than surface an error. Shared by `comparator` / `if` /
+ * `filter` / `for` / `switch` / `assert`. */
 function compareValues(op: string, a: unknown, b: unknown): boolean | null {
-  const na = asNumber(a); const nb = asNumber(b)
-  const numeric = na !== null && nb !== null
-  const bothStr = typeof a === 'string' && typeof b === 'string'
-  // Lists compare by SET (order-independent) and SUBSET (contains) — the same
-  // semantics as the runtime `conditionEval` (kept in sync here because shared
-  // code can't import the main-process comparator).
-  if (Array.isArray(a)) {
-    if (op === 'contains') {
-      return Array.isArray(b)
-        ? b.every((y) => a.some((x) => previewDeepEqual(x, y))) // list ⊇ list (subset)
-        : a.some((x) => previewDeepEqual(x, b)) // list ∋ element (membership)
-    }
-    if (Array.isArray(b)) {
-      if (op === '=') return previewListEqual(a, b)
-      if (op === '≠') return !previewListEqual(a, b)
-      return null // ordering between lists is undefined
-    }
-  }
-  if (op === '=') return numeric ? na === nb : a === b
-  if (op === '≠') return numeric ? na !== nb : a !== b
-  if (op === 'contains') {
-    if (typeof a === 'string' && (typeof b === 'string' || typeof b === 'number' || typeof b === 'boolean')) {
-      return a.includes(typeof b === 'string' ? b : String(b))
-    }
+  try {
+    return compareValuesShared(op, a, b)
+  } catch {
     return null
   }
-  if (numeric) {
-    switch (op) {
-      case '<': return na < nb
-      case '≤': return na <= nb
-      case '≥': return na >= nb
-      case '>': return na > nb
-      default: return null
-    }
-  }
-  if (bothStr) {
-    switch (op) {
-      case '<': return a < b
-      case '≤': return a <= b
-      case '≥': return a >= b
-      case '>': return a > b
-      default: return null
-    }
-  }
-  return null
 }
 
 /** Coerce a preview value to a finite number for arithmetic / numeric
