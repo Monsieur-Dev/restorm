@@ -128,6 +128,24 @@ const isNumericString = (s: string): boolean => {
 
 type OrderMode = { t: 'num'; v: number } | { t: 'str'; v: string } | null
 
+/** Datetime comparison is at SECOND precision: parse to epoch and floor off the
+ * sub-second part. Two instants that render identically at the usual second
+ * format (`yyyy-MM-dd HH:mm:ss`) but differ only in milliseconds — e.g. a value
+ * captured as `…:55.794Z` vs an expected `…:55.000Z` — compare equal. Both
+ * equality and ordering go through this so they stay consistent. NaN (unparsable)
+ * propagates so callers fall back to string compare. */
+function dateSeconds(value: unknown): number {
+  return Math.floor(Date.parse(String(value)) / 1000)
+}
+
+/** Does this value parse as a real date? Used to promote a `string` operand to
+ * `date` when its partner is a declared datetime (e.g. a `{{datetime}}` variable
+ * resolves to an ISO string with no date hint). A non-date string (`"abc"`) and
+ * a bare number stay put. */
+function parsesAsDate(value: unknown): boolean {
+  return typeof value === 'string' && !Number.isNaN(Date.parse(value))
+}
+
 /** Reduce an operand to a single ordered axis (number or string), or `null`
  * when the kind has no meaningful order. Dates order by instant; an enum whose
  * value is numeric orders numerically, otherwise by its label. */
@@ -136,8 +154,8 @@ function orderModeOf(value: unknown, kind: OperandKind, enumNumeric?: boolean): 
     case 'number': return { t: 'num', v: typeof value === 'number' ? value : Number(value) }
     case 'string': return { t: 'str', v: String(value) }
     case 'date': {
-      const ms = Date.parse(String(value))
-      return Number.isNaN(ms) ? { t: 'str', v: String(value) } : { t: 'num', v: ms }
+      const s = dateSeconds(value)
+      return Number.isNaN(s) ? { t: 'str', v: String(value) } : { t: 'num', v: s }
     }
     case 'enum': {
       // Numeric ordering when the enum's WHOLE option set is numeric (caller-
@@ -192,7 +210,7 @@ function listEqual(a: unknown[], b: unknown[]): boolean {
 function equalityCompare(l: unknown, r: unknown, lk: OperandKind, rk: OperandKind): boolean {
   if (lk === 'list' || rk === 'list') return lk === 'list' && rk === 'list' && listEqual(l as unknown[], r as unknown[])
   if (lk === 'date' && rk === 'date') {
-    const a = Date.parse(String(l)), b = Date.parse(String(r))
+    const a = dateSeconds(l), b = dateSeconds(r)
     if (!Number.isNaN(a) && !Number.isNaN(b)) return a === b
     return String(l) === String(r)
   }
@@ -227,8 +245,16 @@ export function compareValues(op: string | undefined, l: unknown, r: unknown, lH
   const lh = normHint(lHint)
   const rh = normHint(rHint)
   const canon = op !== undefined ? OPERATOR_ALIASES[op] ?? op : 'eq'
-  const lk = effectiveKind(l, lh?.kind)
-  const rk = effectiveKind(r, rh?.kind)
+  let lk = effectiveKind(l, lh?.kind)
+  let rk = effectiveKind(r, rh?.kind)
+  // Date promotion: a declared `datetime` is routinely compared against a
+  // `variable` (or any wired value) that RESOLVES to a date string but carries
+  // no date hint — so it lands as `string`. When one side is a date and the
+  // other is a string that actually parses as a date, treat both as dates, so
+  // equality + ordering compare instants at SECOND precision instead of the raw
+  // ISO strings (where stray sub-second ms would break an otherwise-equal time).
+  if (lk === 'date' && rk === 'string' && parsesAsDate(r)) rk = 'date'
+  else if (rk === 'date' && lk === 'string' && parsesAsDate(l)) lk = 'date'
   switch (canon) {
     case 'eq': return equalityCompare(l, r, lk, rk)
     case 'ne': return !equalityCompare(l, r, lk, rk)

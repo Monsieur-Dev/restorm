@@ -231,7 +231,7 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 840
+                  x: 580
                   'y': 740
               - id: 1780482218173-lsnebg
                 kind: runScenario
@@ -250,7 +250,7 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1120
+                  x: 820
                   'y': 740
               - id: 1780482287906-hje41a
                 kind: runScenario
@@ -269,8 +269,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 840
-                  'y': 940
+                  x: 1100
+                  'y': 740
               - id: 1780482293466-yfntnl
                 kind: runScenario
                 config:
@@ -288,8 +288,27 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1120
-                  'y': 940
+                  x: 1360
+                  'y': 740
+              - id: 1780558249766-gq42u7
+                kind: runScenario
+                config:
+                  scenarioId: 1780545696124-73s4yub
+                  label: Variables & asserts
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 1620
+                  'y': 740
             edges:
               - id: e-1780418276241-f2q3hz
                 from:
@@ -341,6 +360,13 @@ collections:
                   portId: done
                 to:
                   nodeId: 1780482293466-yfntnl
+                  portId: in
+              - id: e-1780558278319-iuoc6y
+                from:
+                  nodeId: 1780482293466-yfntnl
+                  portId: done
+                to:
+                  nodeId: 1780558249766-gq42u7
                   portId: in
             id: c1573ce0-985c-44b5-b5d4-e081de2d4303
             name: Main
@@ -5375,6 +5401,2351 @@ collections:
                       portId: in
                 id: 1780387606015-te2kvqt
                 name: Conditions
+                items: []
+              - type: scenario
+                id: 1780545696124-73s4yub
+                name: Variables & asserts
+                tags: []
+                params: []
+                nodes:
+                  - id: 1780545715862-e2wbo0
+                    kind: setVariable
+                    config:
+                      name: string
+                      value:
+                        type: string
+                        value: abc
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: -500
+                      'y': 280
+                  - id: 1780545731729-6nzxt4
+                    kind: setVariable
+                    config:
+                      value:
+                        type: numeric
+                        value: 10
+                        format: decimal
+                      name: number
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: -520
+                      'y': 580
+                  - id: 1780545750796-cqzlty
+                    kind: setVariable
+                    config:
+                      value:
+                        type: datetime
+                        value: '2026-06-04T04:02:35.000Z'
+                        format: yyyy-MM-dd HH:mm:ss
+                      name: datetime
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: -520
+                      'y': 760
+                  - id: 1780545766020-2dav2h
+                    kind: setVariable
+                    config:
+                      value:
+                        type: boolean
+                        value: true
+                      name: bool
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: -520
+                      'y': 1040
+                  - id: 1780545780177-lm8b5r
+                    kind: setVariable
+                    config:
+                      value:
+                        type: color
+                        value: '#9013fe'
+                      name: color
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: -520
+                      'y': 1260
+                  - id: 1780545793793-dcn6me
+                    kind: setVariable
+                    config:
+                      value:
+                        type: customList
+                        listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                        label: Vert
+                      name: petcolor
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: -520
+                      'y': 1500
+                  - id: 1780545810736-yxld5o
+                    kind: setVariable
+                    config:
+                      name: petcolors
+                      value:
+                        type: customListMulti
+                        listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                        labels:
+                          - Vert
+                          - Rouge
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: -520
+                      'y': 1740
+                  - id: 1780545832677-otu7y0
+                    kind: setVariable
+                    config:
+                      value:
+                        type: environment
+                        value: 6c323ee6-0513-42a0-9d9a-68b329b405b4
+                      name: env
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: -520
+                      'y': 1980
+                  - id: 1780545903845-hkzdt9
+                    kind: assert
+                    config:
+                      a:
+                        type: variable
+                        value: string
+                      b:
+                        type: string
+                        value: abc
+                      message:
+                        type: string
+                        value: string should be abc
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: -160
+                      'y': 280
+                  - id: 1780545961645-djlzqb
+                    kind: setVariable
+                    config:
+                      name: string
+                      value:
+                        type: string
+                        value: cba
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1260
+                      'y': 300
+                  - id: 1780545985937-9b4fsp
+                    kind: assert
+                    config:
+                      a:
+                        type: variable
+                        value: string
+                      b:
+                        type: string
+                        value: cba
+                      message:
+                        type: string
+                        value: string should be cba
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1560
+                      'y': 300
+                  - id: 1780546024421-0-24o321
+                    kind: assert
+                    config:
+                      a:
+                        type: variable
+                        value: number
+                      b:
+                        type: numeric
+                        value: 10
+                        format: decimal
+                      message:
+                        type: string
+                        value: number should be 10
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: -160
+                      'y': 520
+                  - id: 1780546024421-1-7cird3
+                    kind: setVariable
+                    config:
+                      name: number
+                      value:
+                        type: numeric
+                        value: -10
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1260
+                      'y': 540
+                  - id: 1780546024421-2-4flubx
+                    kind: assert
+                    config:
+                      a:
+                        type: variable
+                        value: number
+                      b:
+                        type: numeric
+                        value: -10
+                        format: decimal
+                      message:
+                        type: string
+                        value: number should be -10
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1560
+                      'y': 540
+                  - id: 1780546113990-0-vse3ak
+                    kind: assert
+                    config:
+                      a:
+                        type: variable
+                        value: datetime
+                      b:
+                        type: datetime
+                        value: '2026-06-04T04:02:35.000Z'
+                        format: yyyy-MM-dd HH:mm:ss
+                      message:
+                        type: string
+                        value: datetime should be 2026-06-04 06:02:35
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: -160
+                      'y': 760
+                  - id: 1780546113990-1-ftm4rb
+                    kind: setVariable
+                    config:
+                      name: datetime
+                      value:
+                        type: datetime
+                        value: '2026-06-04T04:09:55.794Z'
+                        format: yyyy-MM-dd HH:mm:ss
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1260
+                      'y': 780
+                  - id: 1780546113990-2-wienwb
+                    kind: assert
+                    config:
+                      a:
+                        type: variable
+                        value: datetime
+                      b:
+                        type: datetime
+                        value: '2026-06-04T04:09:55.000Z'
+                        format: yyyy-MM-dd HH:mm:ss
+                      message:
+                        type: string
+                        value: datetime should be 2026-06-04 06:09:55
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1560
+                      'y': 780
+                  - id: 1780546214640-0-h4g77d
+                    kind: assert
+                    config:
+                      a:
+                        type: variable
+                        value: bool
+                      b:
+                        type: boolean
+                        value: true
+                      message:
+                        type: string
+                        value: bool should be true
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: -160
+                      'y': 1020
+                  - id: 1780546214640-1-peyjid
+                    kind: setVariable
+                    config:
+                      name: bool
+                      value:
+                        type: boolean
+                        value: false
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1260
+                      'y': 1040
+                  - id: 1780546214640-2-xdlfkf
+                    kind: assert
+                    config:
+                      a:
+                        type: variable
+                        value: bool
+                      b:
+                        type: boolean
+                        value: false
+                      message:
+                        type: string
+                        value: bool should be false
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1560
+                      'y': 1040
+                  - id: 1780546293383-0-w1i0xo
+                    kind: assert
+                    config:
+                      a:
+                        type: variable
+                        value: color
+                      b:
+                        type: color
+                        value: '#9013fe'
+                      message:
+                        type: string
+                        value: color should be purple
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: -160
+                      'y': 1260
+                  - id: 1780546293383-1-5jyogr
+                    kind: setVariable
+                    config:
+                      name: color
+                      value:
+                        type: color
+                        value: '#f8e61b'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1260
+                      'y': 1280
+                  - id: 1780546293383-2-9rgwco
+                    kind: assert
+                    config:
+                      a:
+                        type: variable
+                        value: color
+                      b:
+                        type: color
+                        value: '#f8e61b'
+                      message:
+                        type: string
+                        value: color should be yellow
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1560
+                      'y': 1280
+                  - id: 1780546375877-0-st0p9f
+                    kind: assert
+                    config:
+                      a:
+                        type: variable
+                        value: petcolor
+                      b:
+                        type: customList
+                        listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                        label: Vert
+                      message:
+                        type: string
+                        value: petcolor should be vert
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: -160
+                      'y': 1500
+                  - id: 1780546375877-1-t2fdv5
+                    kind: setVariable
+                    config:
+                      name: petcolor
+                      value:
+                        type: customList
+                        listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                        label: Bleu
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1260
+                      'y': 1520
+                  - id: 1780546375877-2-q3vppf
+                    kind: assert
+                    config:
+                      a:
+                        type: variable
+                        value: petcolor
+                      b:
+                        type: customList
+                        listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                        label: Bleu
+                      message:
+                        type: string
+                        value: petcolor should be bleu
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1560
+                      'y': 1520
+                  - id: 1780546483615-0-5ysrxf
+                    kind: assert
+                    config:
+                      a:
+                        type: variable
+                        value: petcolors
+                      b:
+                        type: customListMulti
+                        listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                        labels:
+                          - Vert
+                          - Rouge
+                      message:
+                        type: string
+                        value: petcolors should be vert, rouge
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: -160
+                      'y': 1740
+                  - id: 1780546483615-1-a4n5qn
+                    kind: setVariable
+                    config:
+                      name: petcolors
+                      value:
+                        type: customListMulti
+                        listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                        labels:
+                          - Bleu
+                          - Vert
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1260
+                      'y': 1760
+                  - id: 1780546483615-2-u1wakz
+                    kind: assert
+                    config:
+                      a:
+                        type: variable
+                        value: petcolors
+                      b:
+                        type: customListMulti
+                        listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                        labels:
+                          - Bleu
+                          - Vert
+                      message:
+                        type: string
+                        value: petcolors should be bleu, vert
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1560
+                      'y': 1760
+                  - id: 1780546583507-0-7nm8hc
+                    kind: assert
+                    config:
+                      a:
+                        type: variable
+                        value: env
+                      b:
+                        type: environment
+                        value: 6c323ee6-0513-42a0-9d9a-68b329b405b4
+                      message:
+                        type: string
+                        value: env should be localhost
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: -160
+                      'y': 1980
+                  - id: 1780546583507-1-qcb9py
+                    kind: setVariable
+                    config:
+                      name: env
+                      value:
+                        type: environment
+                        value: Bleu,Vert
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1260
+                      'y': 2000
+                  - id: 1780546583507-2-mum191
+                    kind: assert
+                    config:
+                      a:
+                        type: variable
+                        value: env
+                      b:
+                        type: environment
+                        value: Bleu,Vert
+                      message:
+                        type: string
+                        value: env should be null
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1560
+                      'y': 2000
+                  - id: 1780546679900-c1clfr
+                    kind: log
+                    config:
+                      level: error
+                      message:
+                        type: string
+                        value: This log should never occur
+                      runOnEachEvent: true
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 560
+                      'y': 1680
+                    color: '#d0021b'
+                  - id: 1780548668281-u4o55w
+                    kind: object
+                    config:
+                      properties:
+                        - id: object-default-property
+                          name: string
+                          value:
+                            type: variable
+                            value: string
+                        - id: prop-1780548715720-u6uc2l
+                          name: number
+                          value:
+                            type: variable
+                            value: number
+                        - id: prop-1780548732281-u7lacz
+                          name: datetime
+                          value:
+                            type: variable
+                            value: datetime
+                        - id: prop-1780548744809-suigd0
+                          name: bool
+                          value:
+                            type: variable
+                            value: bool
+                        - id: prop-1780548758117-k51p3q
+                          name: petcolor
+                          value:
+                            type: variable
+                            value: petcolor
+                        - id: prop-1780548766709-vef759
+                          name: petcolors
+                          value:
+                            type: variable
+                            value: petcolors
+                        - id: prop-1780548779536-9vwzlz
+                          name: env
+                          value:
+                            type: variable
+                            value: env
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: object
+                        name: object
+                        dataType: json
+                        flow: both
+                    position:
+                      x: 3880
+                      'y': 680
+                  - id: 1780548672512-t5vnik
+                    kind: setVariable
+                    config:
+                      name: object1
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 4340
+                      'y': 680
+                  - id: 1780553963985-2sm5vy
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: This log should occur
+                      runOnEachEvent: false
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 560
+                      'y': 500
+                    color: '#417505'
+                  - id: 1780554121373-n9cfml
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: This log should occur
+                      runOnEachEvent: false
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 2220
+                      'y': 500
+                    color: '#417505'
+                  - id: 1780554489686-1e3vrb
+                    kind: log
+                    config:
+                      level: error
+                      message:
+                        type: string
+                        value: This log should never occur
+                      runOnEachEvent: true
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 2220
+                      'y': 1680
+                    color: '#d0021b'
+                  - id: 1780554575354-o9j2rc
+                    kind: object
+                    config:
+                      properties:
+                        - id: object-default-property
+                          name: string
+                          value:
+                            type: variable
+                            value: string
+                        - id: prop-1780548715720-u6uc2l
+                          name: number
+                          value:
+                            type: variable
+                            value: number
+                        - id: prop-1780548732281-u7lacz
+                          name: datetime
+                          value:
+                            type: variable
+                            value: datetime
+                        - id: prop-1780548744809-suigd0
+                          name: bool
+                          value:
+                            type: variable
+                            value: bool
+                        - id: prop-1780548758117-k51p3q
+                          name: petcolor
+                          value:
+                            type: variable
+                            value: petcolor
+                        - id: prop-1780548766709-vef759
+                          name: petcolors
+                          value:
+                            type: variable
+                            value: petcolors
+                        - id: prop-1780548779536-9vwzlz
+                          name: env
+                          value:
+                            type: variable
+                            value: env
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: object
+                        name: object
+                        dataType: json
+                        flow: both
+                    position:
+                      x: 3880
+                      'y': 1440
+                  - id: 1780554603950-9590bh
+                    kind: setVariable
+                    config:
+                      name: object2
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 4340
+                      'y': 1440
+                  - id: 1780554699039-lfd91d
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: This log should occur (object compare)
+                      runOnEachEvent: true
+                      data:
+                        type: string
+                        value: ''
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 5180
+                      'y': 920
+                    color: '#417505'
+                  - id: 1780556183058-0-mqp0wy
+                    kind: assert
+                    config:
+                      a:
+                        type: variable
+                        value: string
+                      b:
+                        type: string
+                        value: a
+                      message:
+                        type: string
+                        value: string should include a
+                      operator: contains
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 2680
+                      'y': 300
+                  - id: 1780556183058-1-wbgx92
+                    kind: assert
+                    config:
+                      a:
+                        type: variable
+                        value: number
+                      b:
+                        type: numeric
+                        value: -10
+                        format: decimal
+                      message:
+                        type: string
+                        value: number should be >= -10
+                      operator: ≥
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 2680
+                      'y': 540
+                  - id: 1780556183058-2-i6k5fq
+                    kind: assert
+                    config:
+                      a:
+                        type: variable
+                        value: datetime
+                      b:
+                        type: datetime
+                        value: '2026-05-04T04:09:55.000Z'
+                        format: yyyy-MM-dd HH:mm:ss
+                      message:
+                        type: string
+                        value: datetime should be 2026-06-04 06:09:55
+                      operator: ≠
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 2680
+                      'y': 780
+                  - id: 1780556183058-3-zyld2l
+                    kind: assert
+                    config:
+                      a:
+                        type: variable
+                        value: bool
+                      b:
+                        type: boolean
+                        value: true
+                      message:
+                        type: string
+                        value: bool should not be true
+                      operator: ≠
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 2680
+                      'y': 1040
+                  - id: 1780556183058-4-yjrjjw
+                    kind: assert
+                    config:
+                      a:
+                        type: variable
+                        value: color
+                      b:
+                        type: color
+                        value: '#d0021b'
+                      message:
+                        type: string
+                        value: color should not be red
+                      operator: ≠
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 2680
+                      'y': 1280
+                  - id: 1780556183058-5-0ye4om
+                    kind: assert
+                    config:
+                      a:
+                        type: variable
+                        value: petcolor
+                      b:
+                        type: customList
+                        listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                        label: Vert
+                      message:
+                        type: string
+                        value: petcolor should not be vert
+                      operator: ≠
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 2680
+                      'y': 1520
+                  - id: 1780556183058-6-3mgihm
+                    kind: assert
+                    config:
+                      a:
+                        type: variable
+                        value: petcolors
+                      b:
+                        type: customListMulti
+                        listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                        labels:
+                          - Vert
+                      message:
+                        type: string
+                        value: petcolors should include vert
+                      operator: contains
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 2680
+                      'y': 1760
+                  - id: 1780556183058-7-yxxlj3
+                    kind: assert
+                    config:
+                      a:
+                        type: variable
+                        value: env
+                      b:
+                        type: environment
+                        value: env-1780300487228-md0ml0o
+                      message:
+                        type: string
+                        value: env should be not null
+                      operator: ≠
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 2680
+                      'y': 2000
+                  - id: 1780556183058-8-6711qj
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: This log should occur
+                      runOnEachEvent: false
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 3340
+                      'y': 500
+                    color: '#417505'
+                  - id: 1780556183058-9-kxy6sk
+                    kind: log
+                    config:
+                      level: error
+                      message:
+                        type: string
+                        value: This log should never occur
+                      runOnEachEvent: true
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 3340
+                      'y': 1680
+                    color: '#d0021b'
+                  - id: 1780556605384-i9h0eu
+                    kind: comparator
+                    config:
+                      a:
+                        type: variable
+                        value: object1
+                      b:
+                        type: variable
+                        value: object2
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: a
+                        dataType: any
+                      - id: b
+                        name: b
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: boolean
+                        flow: both
+                    position:
+                      x: 4760
+                      'y': 980
+                  - id: 1780556631421-2zn1ut
+                    kind: comparator
+                    config:
+                      a:
+                        type: variable
+                        value: object1
+                      b:
+                        type: variable
+                        value: object2
+                      operator: contains
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: a
+                        dataType: any
+                      - id: b
+                        name: b
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: boolean
+                        flow: both
+                    position:
+                      x: 4760
+                      'y': 1160
+                edges:
+                  - id: e-1780545919559-zk6grv
+                    from:
+                      nodeId: 1780545715862-e2wbo0
+                      portId: done
+                    to:
+                      nodeId: 1780545903845-hkzdt9
+                      portId: in
+                  - id: e-1780545991594-96bnuu
+                    from:
+                      nodeId: 1780545961645-djlzqb
+                      portId: done
+                    to:
+                      nodeId: 1780545985937-9b4fsp
+                      portId: in
+                  - id: e-1780546024421-4-dervl2
+                    from:
+                      nodeId: 1780546024421-1-7cird3
+                      portId: done
+                    to:
+                      nodeId: 1780546024421-2-4flubx
+                      portId: in
+                  - id: e-1780546031668-rbsnx4
+                    from:
+                      nodeId: 1780545731729-6nzxt4
+                      portId: done
+                    to:
+                      nodeId: 1780546024421-0-24o321
+                      portId: in
+                  - id: e-1780546113990-4-gxndd8
+                    from:
+                      nodeId: 1780546113990-1-ftm4rb
+                      portId: done
+                    to:
+                      nodeId: 1780546113990-2-wienwb
+                      portId: in
+                  - id: e-1780546154129-c1ja87
+                    from:
+                      nodeId: 1780545750796-cqzlty
+                      portId: done
+                    to:
+                      nodeId: 1780546113990-0-vse3ak
+                      portId: in
+                  - id: e-1780546214640-4-z619xz
+                    from:
+                      nodeId: 1780546214640-1-peyjid
+                      portId: done
+                    to:
+                      nodeId: 1780546214640-2-xdlfkf
+                      portId: in
+                  - id: e-1780546282360-l6068n
+                    from:
+                      nodeId: 1780545766020-2dav2h
+                      portId: done
+                    to:
+                      nodeId: 1780546214640-0-h4g77d
+                      portId: in
+                  - id: e-1780546293383-4-zmo6ft
+                    from:
+                      nodeId: 1780546293383-1-5jyogr
+                      portId: done
+                    to:
+                      nodeId: 1780546293383-2-9rgwco
+                      portId: in
+                  - id: e-1780546373322-dkmuh2
+                    from:
+                      nodeId: 1780545780177-lm8b5r
+                      portId: done
+                    to:
+                      nodeId: 1780546293383-0-w1i0xo
+                      portId: in
+                  - id: e-1780546375877-4-flqy9r
+                    from:
+                      nodeId: 1780546375877-1-t2fdv5
+                      portId: done
+                    to:
+                      nodeId: 1780546375877-2-q3vppf
+                      portId: in
+                  - id: e-1780546381040-unfbaf
+                    from:
+                      nodeId: 1780545793793-dcn6me
+                      portId: done
+                    to:
+                      nodeId: 1780546375877-0-st0p9f
+                      portId: in
+                  - id: e-1780546483615-4-eyqqnq
+                    from:
+                      nodeId: 1780546483615-1-a4n5qn
+                      portId: done
+                    to:
+                      nodeId: 1780546483615-2-u1wakz
+                      portId: in
+                  - id: e-1780546495964-au3wae
+                    from:
+                      nodeId: 1780545810736-yxld5o
+                      portId: done
+                    to:
+                      nodeId: 1780546483615-0-5ysrxf
+                      portId: in
+                  - id: e-1780546583507-4-nucsvh
+                    from:
+                      nodeId: 1780546583507-1-qcb9py
+                      portId: done
+                    to:
+                      nodeId: 1780546583507-2-mum191
+                      portId: in
+                  - id: e-1780548680536-5ciyb1
+                    from:
+                      nodeId: 1780548668281-u4o55w
+                      portId: object
+                    to:
+                      nodeId: 1780548672512-t5vnik
+                      portId: value
+                    selector: .
+                  - id: e-1780554029666-tt44vd
+                    from:
+                      nodeId: 1780545903845-hkzdt9
+                      portId: then
+                    to:
+                      nodeId: 1780553963985-2sm5vy
+                      portId: in
+                  - id: e-1780554031975-fwuk3n
+                    from:
+                      nodeId: 1780546024421-0-24o321
+                      portId: then
+                    to:
+                      nodeId: 1780553963985-2sm5vy
+                      portId: in
+                  - id: e-1780554034076-y4rt6u
+                    from:
+                      nodeId: 1780546113990-0-vse3ak
+                      portId: then
+                    to:
+                      nodeId: 1780553963985-2sm5vy
+                      portId: in
+                  - id: e-1780554037383-uox9s4
+                    from:
+                      nodeId: 1780546214640-0-h4g77d
+                      portId: then
+                    to:
+                      nodeId: 1780553963985-2sm5vy
+                      portId: in
+                  - id: e-1780554039963-g9kz94
+                    from:
+                      nodeId: 1780546293383-0-w1i0xo
+                      portId: then
+                    to:
+                      nodeId: 1780553963985-2sm5vy
+                      portId: in
+                  - id: e-1780554046254-6lg062
+                    from:
+                      nodeId: 1780546375877-0-st0p9f
+                      portId: then
+                    to:
+                      nodeId: 1780553963985-2sm5vy
+                      portId: in
+                  - id: e-1780554049168-sj8853
+                    from:
+                      nodeId: 1780546483615-0-5ysrxf
+                      portId: then
+                    to:
+                      nodeId: 1780553963985-2sm5vy
+                      portId: in
+                  - id: e-1780554052096-fthyo1
+                    from:
+                      nodeId: 1780546583507-0-7nm8hc
+                      portId: then
+                    to:
+                      nodeId: 1780553963985-2sm5vy
+                      portId: in
+                  - id: e-1780554055210-6ql9oy
+                    from:
+                      nodeId: 1780553963985-2sm5vy
+                      portId: done
+                    to:
+                      nodeId: 1780545961645-djlzqb
+                      portId: in
+                  - id: e-1780554071987-5w8onl
+                    from:
+                      nodeId: 1780553963985-2sm5vy
+                      portId: done
+                    to:
+                      nodeId: 1780546024421-1-7cird3
+                      portId: in
+                  - id: e-1780554080222-fa7ndh
+                    from:
+                      nodeId: 1780553963985-2sm5vy
+                      portId: done
+                    to:
+                      nodeId: 1780546113990-1-ftm4rb
+                      portId: in
+                  - id: e-1780554083179-c984li
+                    from:
+                      nodeId: 1780553963985-2sm5vy
+                      portId: done
+                    to:
+                      nodeId: 1780546214640-1-peyjid
+                      portId: in
+                  - id: e-1780554085644-tnm9qy
+                    from:
+                      nodeId: 1780553963985-2sm5vy
+                      portId: done
+                    to:
+                      nodeId: 1780546293383-1-5jyogr
+                      portId: in
+                  - id: e-1780554088437-4qmhbz
+                    from:
+                      nodeId: 1780553963985-2sm5vy
+                      portId: done
+                    to:
+                      nodeId: 1780546375877-1-t2fdv5
+                      portId: in
+                  - id: e-1780554090409-iiqw5p
+                    from:
+                      nodeId: 1780553963985-2sm5vy
+                      portId: done
+                    to:
+                      nodeId: 1780546483615-1-a4n5qn
+                      portId: in
+                  - id: e-1780554093486-863dwz
+                    from:
+                      nodeId: 1780553963985-2sm5vy
+                      portId: done
+                    to:
+                      nodeId: 1780546583507-1-qcb9py
+                      portId: in
+                  - id: e-1780554128507-nfn4d9
+                    from:
+                      nodeId: 1780546024421-2-4flubx
+                      portId: then
+                    to:
+                      nodeId: 1780554121373-n9cfml
+                      portId: in
+                  - id: e-1780554149205-aasoru
+                    from:
+                      nodeId: 1780545985937-9b4fsp
+                      portId: then
+                    to:
+                      nodeId: 1780554121373-n9cfml
+                      portId: in
+                  - id: e-1780554153714-q0hmab
+                    from:
+                      nodeId: 1780546113990-2-wienwb
+                      portId: then
+                    to:
+                      nodeId: 1780554121373-n9cfml
+                      portId: in
+                  - id: e-1780554156994-u4f105
+                    from:
+                      nodeId: 1780546214640-2-xdlfkf
+                      portId: then
+                    to:
+                      nodeId: 1780554121373-n9cfml
+                      portId: in
+                  - id: e-1780554194016-6wwiu6
+                    from:
+                      nodeId: 1780546293383-2-9rgwco
+                      portId: then
+                    to:
+                      nodeId: 1780554121373-n9cfml
+                      portId: in
+                  - id: e-1780554197073-zl2t3y
+                    from:
+                      nodeId: 1780546375877-2-q3vppf
+                      portId: then
+                    to:
+                      nodeId: 1780554121373-n9cfml
+                      portId: in
+                  - id: e-1780554200154-pawpj5
+                    from:
+                      nodeId: 1780546483615-2-u1wakz
+                      portId: then
+                    to:
+                      nodeId: 1780554121373-n9cfml
+                      portId: in
+                  - id: e-1780554203917-r8vtlo
+                    from:
+                      nodeId: 1780546583507-2-mum191
+                      portId: then
+                    to:
+                      nodeId: 1780554121373-n9cfml
+                      portId: in
+                  - id: e-1780554304206-jl4oef
+                    from:
+                      nodeId: 1780545832677-otu7y0
+                      portId: done
+                    to:
+                      nodeId: 1780546583507-0-7nm8hc
+                      portId: in
+                  - id: e-1780554390114-1zlsi4
+                    from:
+                      nodeId: 1780546483615-0-5ysrxf
+                      portId: else
+                    to:
+                      nodeId: 1780546679900-c1clfr
+                      portId: in
+                  - id: e-1780554393036-1fn721
+                    from:
+                      nodeId: 1780546583507-0-7nm8hc
+                      portId: else
+                    to:
+                      nodeId: 1780546679900-c1clfr
+                      portId: in
+                  - id: e-1780554397619-73bhy7
+                    from:
+                      nodeId: 1780546375877-0-st0p9f
+                      portId: else
+                    to:
+                      nodeId: 1780546679900-c1clfr
+                      portId: in
+                  - id: e-1780554423463-6pca08
+                    from:
+                      nodeId: 1780546293383-0-w1i0xo
+                      portId: else
+                    to:
+                      nodeId: 1780546679900-c1clfr
+                      portId: in
+                  - id: e-1780554427660-arlrlg
+                    from:
+                      nodeId: 1780546214640-0-h4g77d
+                      portId: else
+                    to:
+                      nodeId: 1780546679900-c1clfr
+                      portId: in
+                  - id: e-1780554435010-cod2q5
+                    from:
+                      nodeId: 1780546113990-0-vse3ak
+                      portId: else
+                    to:
+                      nodeId: 1780546679900-c1clfr
+                      portId: in
+                  - id: e-1780554439530-c50fun
+                    from:
+                      nodeId: 1780546024421-0-24o321
+                      portId: else
+                    to:
+                      nodeId: 1780546679900-c1clfr
+                      portId: in
+                  - id: e-1780554456119-zfg5cx
+                    from:
+                      nodeId: 1780545903845-hkzdt9
+                      portId: else
+                    to:
+                      nodeId: 1780546679900-c1clfr
+                      portId: in
+                  - id: e-1780554542347-rhlzlx
+                    from:
+                      nodeId: 1780546375877-2-q3vppf
+                      portId: else
+                    to:
+                      nodeId: 1780554489686-1e3vrb
+                      portId: in
+                  - id: e-1780554544792-zxdot4
+                    from:
+                      nodeId: 1780546483615-2-u1wakz
+                      portId: else
+                    to:
+                      nodeId: 1780554489686-1e3vrb
+                      portId: in
+                  - id: e-1780554547173-2y3xxo
+                    from:
+                      nodeId: 1780546583507-2-mum191
+                      portId: else
+                    to:
+                      nodeId: 1780554489686-1e3vrb
+                      portId: in
+                  - id: e-1780554622094-pdos17
+                    from:
+                      nodeId: 1780554575354-o9j2rc
+                      portId: object
+                    to:
+                      nodeId: 1780554603950-9590bh
+                      portId: value
+                    selector: .
+                  - id: e-1780554937540-v0n5lh
+                    from:
+                      nodeId: 1780545985937-9b4fsp
+                      portId: else
+                    to:
+                      nodeId: 1780554489686-1e3vrb
+                      portId: in
+                  - id: e-1780554944472-gk1irk
+                    from:
+                      nodeId: 1780546024421-2-4flubx
+                      portId: else
+                    to:
+                      nodeId: 1780554489686-1e3vrb
+                      portId: in
+                  - id: e-1780554971949-bh4cmj
+                    from:
+                      nodeId: 1780546214640-2-xdlfkf
+                      portId: else
+                    to:
+                      nodeId: 1780554489686-1e3vrb
+                      portId: in
+                  - id: e-1780555048815-0cw91l
+                    from:
+                      nodeId: 1780546293383-2-9rgwco
+                      portId: else
+                    to:
+                      nodeId: 1780554489686-1e3vrb
+                      portId: in
+                  - id: e-1780555054864-o3shs6
+                    from:
+                      nodeId: 1780546113990-2-wienwb
+                      portId: else
+                    to:
+                      nodeId: 1780554489686-1e3vrb
+                      portId: in
+                  - id: e-1780556183058-10-ea1slw
+                    from:
+                      nodeId: 1780556183058-1-wbgx92
+                      portId: then
+                    to:
+                      nodeId: 1780556183058-8-6711qj
+                      portId: in
+                  - id: e-1780556183058-11-5fdvoh
+                    from:
+                      nodeId: 1780556183058-0-mqp0wy
+                      portId: then
+                    to:
+                      nodeId: 1780556183058-8-6711qj
+                      portId: in
+                  - id: e-1780556183058-12-wgqoeh
+                    from:
+                      nodeId: 1780556183058-2-i6k5fq
+                      portId: then
+                    to:
+                      nodeId: 1780556183058-8-6711qj
+                      portId: in
+                  - id: e-1780556183058-13-q670fa
+                    from:
+                      nodeId: 1780556183058-3-zyld2l
+                      portId: then
+                    to:
+                      nodeId: 1780556183058-8-6711qj
+                      portId: in
+                  - id: e-1780556183058-14-32dad4
+                    from:
+                      nodeId: 1780556183058-4-yjrjjw
+                      portId: then
+                    to:
+                      nodeId: 1780556183058-8-6711qj
+                      portId: in
+                  - id: e-1780556183058-15-bpef60
+                    from:
+                      nodeId: 1780556183058-5-0ye4om
+                      portId: then
+                    to:
+                      nodeId: 1780556183058-8-6711qj
+                      portId: in
+                  - id: e-1780556183058-16-pcyjl7
+                    from:
+                      nodeId: 1780556183058-6-3mgihm
+                      portId: then
+                    to:
+                      nodeId: 1780556183058-8-6711qj
+                      portId: in
+                  - id: e-1780556183058-17-xm8uqe
+                    from:
+                      nodeId: 1780556183058-7-yxxlj3
+                      portId: then
+                    to:
+                      nodeId: 1780556183058-8-6711qj
+                      portId: in
+                  - id: e-1780556183058-18-m16wpv
+                    from:
+                      nodeId: 1780556183058-5-0ye4om
+                      portId: else
+                    to:
+                      nodeId: 1780556183058-9-kxy6sk
+                      portId: in
+                  - id: e-1780556183058-19-djsdbm
+                    from:
+                      nodeId: 1780556183058-6-3mgihm
+                      portId: else
+                    to:
+                      nodeId: 1780556183058-9-kxy6sk
+                      portId: in
+                  - id: e-1780556183058-20-3mc9ge
+                    from:
+                      nodeId: 1780556183058-7-yxxlj3
+                      portId: else
+                    to:
+                      nodeId: 1780556183058-9-kxy6sk
+                      portId: in
+                  - id: e-1780556183058-21-xd9nvj
+                    from:
+                      nodeId: 1780556183058-0-mqp0wy
+                      portId: else
+                    to:
+                      nodeId: 1780556183058-9-kxy6sk
+                      portId: in
+                  - id: e-1780556183058-22-7mpzg2
+                    from:
+                      nodeId: 1780556183058-1-wbgx92
+                      portId: else
+                    to:
+                      nodeId: 1780556183058-9-kxy6sk
+                      portId: in
+                  - id: e-1780556183058-23-5ki1lr
+                    from:
+                      nodeId: 1780556183058-3-zyld2l
+                      portId: else
+                    to:
+                      nodeId: 1780556183058-9-kxy6sk
+                      portId: in
+                  - id: e-1780556183058-24-hugzmu
+                    from:
+                      nodeId: 1780556183058-4-yjrjjw
+                      portId: else
+                    to:
+                      nodeId: 1780556183058-9-kxy6sk
+                      portId: in
+                  - id: e-1780556183058-25-1t1exe
+                    from:
+                      nodeId: 1780556183058-2-i6k5fq
+                      portId: else
+                    to:
+                      nodeId: 1780556183058-9-kxy6sk
+                      portId: in
+                  - id: e-1780556204325-zbq278
+                    from:
+                      nodeId: 1780554121373-n9cfml
+                      portId: done
+                    to:
+                      nodeId: 1780556183058-0-mqp0wy
+                      portId: in
+                  - id: e-1780556207408-v69lgn
+                    from:
+                      nodeId: 1780554121373-n9cfml
+                      portId: done
+                    to:
+                      nodeId: 1780556183058-1-wbgx92
+                      portId: in
+                  - id: e-1780556208846-jo3ukw
+                    from:
+                      nodeId: 1780554121373-n9cfml
+                      portId: done
+                    to:
+                      nodeId: 1780556183058-2-i6k5fq
+                      portId: in
+                  - id: e-1780556210944-2rhorg
+                    from:
+                      nodeId: 1780554121373-n9cfml
+                      portId: done
+                    to:
+                      nodeId: 1780556183058-3-zyld2l
+                      portId: in
+                  - id: e-1780556235204-txf2ux
+                    from:
+                      nodeId: 1780554121373-n9cfml
+                      portId: done
+                    to:
+                      nodeId: 1780556183058-4-yjrjjw
+                      portId: in
+                  - id: e-1780556237334-0fp9ah
+                    from:
+                      nodeId: 1780554121373-n9cfml
+                      portId: done
+                    to:
+                      nodeId: 1780556183058-5-0ye4om
+                      portId: in
+                  - id: e-1780556241251-6vczrt
+                    from:
+                      nodeId: 1780554121373-n9cfml
+                      portId: done
+                    to:
+                      nodeId: 1780556183058-6-3mgihm
+                      portId: in
+                  - id: e-1780556246711-mfxb3p
+                    from:
+                      nodeId: 1780554121373-n9cfml
+                      portId: done
+                    to:
+                      nodeId: 1780556183058-7-yxxlj3
+                      portId: in
+                  - id: e-1780556542709-0cv1e6
+                    from:
+                      nodeId: 1780556183058-8-6711qj
+                      portId: done
+                    to:
+                      nodeId: 1780548668281-u4o55w
+                      portId: in
+                  - id: e-1780556545078-oyzrne
+                    from:
+                      nodeId: 1780556183058-8-6711qj
+                      portId: done
+                    to:
+                      nodeId: 1780554575354-o9j2rc
+                      portId: in
+                  - id: e-1780556614099-e36vv6
+                    from:
+                      nodeId: 1780548672512-t5vnik
+                      portId: done
+                    to:
+                      nodeId: 1780556605384-i9h0eu
+                      portId: in
+                  - id: e-1780556619798-0y8jh1
+                    from:
+                      nodeId: 1780554603950-9590bh
+                      portId: done
+                    to:
+                      nodeId: 1780556605384-i9h0eu
+                      portId: in
+                  - id: e-1780556645380-ajjl1c
+                    from:
+                      nodeId: 1780548672512-t5vnik
+                      portId: done
+                    to:
+                      nodeId: 1780556631421-2zn1ut
+                      portId: in
+                  - id: e-1780556648023-yrt9nq
+                    from:
+                      nodeId: 1780554603950-9590bh
+                      portId: done
+                    to:
+                      nodeId: 1780556631421-2zn1ut
+                      portId: in
+                  - id: e-1780556684378-4tryj8
+                    from:
+                      nodeId: 1780556605384-i9h0eu
+                      portId: result
+                    to:
+                      nodeId: 1780554699039-lfd91d
+                      portId: in
+                  - id: e-1780556686587-djknge
+                    from:
+                      nodeId: 1780556631421-2zn1ut
+                      portId: result
+                    to:
+                      nodeId: 1780554699039-lfd91d
+                      portId: in
+                  - id: e-1780558126701-povb7h
+                    from:
+                      nodeId: 1780545985937-9b4fsp
+                      portId: error
+                    to:
+                      nodeId: 1780554489686-1e3vrb
+                      portId: in
+                  - id: e-1780558129815-s6ibus
+                    from:
+                      nodeId: 1780546024421-2-4flubx
+                      portId: error
+                    to:
+                      nodeId: 1780554489686-1e3vrb
+                      portId: in
+                  - id: e-1780558133662-cglil2
+                    from:
+                      nodeId: 1780546113990-2-wienwb
+                      portId: error
+                    to:
+                      nodeId: 1780554489686-1e3vrb
+                      portId: in
+                  - id: e-1780558138640-043ww4
+                    from:
+                      nodeId: 1780546293383-2-9rgwco
+                      portId: error
+                    to:
+                      nodeId: 1780554489686-1e3vrb
+                      portId: in
+                  - id: e-1780558140859-troeh4
+                    from:
+                      nodeId: 1780546214640-2-xdlfkf
+                      portId: error
+                    to:
+                      nodeId: 1780554489686-1e3vrb
+                      portId: in
+                  - id: e-1780558142776-qonk3o
+                    from:
+                      nodeId: 1780546375877-2-q3vppf
+                      portId: error
+                    to:
+                      nodeId: 1780554489686-1e3vrb
+                      portId: in
+                  - id: e-1780558146295-hj63h7
+                    from:
+                      nodeId: 1780546483615-2-u1wakz
+                      portId: error
+                    to:
+                      nodeId: 1780554489686-1e3vrb
+                      portId: in
+                  - id: e-1780558149652-enzi8o
+                    from:
+                      nodeId: 1780546583507-2-mum191
+                      portId: error
+                    to:
+                      nodeId: 1780554489686-1e3vrb
+                      portId: in
+                  - id: e-1780558152790-2gutgt
+                    from:
+                      nodeId: 1780556183058-7-yxxlj3
+                      portId: error
+                    to:
+                      nodeId: 1780556183058-9-kxy6sk
+                      portId: in
+                  - id: e-1780558155570-vzktjs
+                    from:
+                      nodeId: 1780556183058-6-3mgihm
+                      portId: error
+                    to:
+                      nodeId: 1780556183058-9-kxy6sk
+                      portId: in
+                  - id: e-1780558157833-82tdko
+                    from:
+                      nodeId: 1780556183058-5-0ye4om
+                      portId: error
+                    to:
+                      nodeId: 1780556183058-9-kxy6sk
+                      portId: in
+                  - id: e-1780558160297-bkm0rx
+                    from:
+                      nodeId: 1780556183058-4-yjrjjw
+                      portId: error
+                    to:
+                      nodeId: 1780556183058-9-kxy6sk
+                      portId: in
+                  - id: e-1780558162798-9sxms8
+                    from:
+                      nodeId: 1780556183058-3-zyld2l
+                      portId: error
+                    to:
+                      nodeId: 1780556183058-9-kxy6sk
+                      portId: in
+                  - id: e-1780558167486-nmj68l
+                    from:
+                      nodeId: 1780556183058-2-i6k5fq
+                      portId: error
+                    to:
+                      nodeId: 1780556183058-9-kxy6sk
+                      portId: in
+                  - id: e-1780558170482-rxybbb
+                    from:
+                      nodeId: 1780556183058-1-wbgx92
+                      portId: error
+                    to:
+                      nodeId: 1780556183058-9-kxy6sk
+                      portId: in
+                  - id: e-1780558173474-o9jezp
+                    from:
+                      nodeId: 1780556183058-0-mqp0wy
+                      portId: error
+                    to:
+                      nodeId: 1780556183058-9-kxy6sk
+                      portId: in
                 items: []
         id: f1000000-0000-0000-0000-00000000auth
         name: Pet API

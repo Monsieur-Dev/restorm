@@ -775,6 +775,7 @@
         "changeColor": "Changer la couleur",
         "resetColor": "Réinitialiser la couleur",
         "addNote": "Ajouter/modifier une note",
+        "runOnEachEvent": "Jouer à chaque évènement reçu",
         "duplicate": "Dupliquer",
         "delete": "Supprimer",
         "deleteShortcut": "Suppr",

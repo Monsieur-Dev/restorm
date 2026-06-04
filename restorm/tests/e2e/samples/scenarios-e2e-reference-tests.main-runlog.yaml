@@ -1649,4 +1649,476 @@
 - message: ⚪ [<time>] done runScenario
   data:
     result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: 1780545696124-73s4yub
+    label: Variables & asserts
+    in: true
+- message: 🔵 [<time>] ▶ Variables & asserts
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: string
+    value: abc
+- message: ⚪ [<time>] start setVariable
+  data:
+    value: 10
+    name: number
+- message: ⚪ [<time>] start setVariable
+  data:
+    value: 2026-06-04T04:02:35.000Z
+    name: datetime
+- message: ⚪ [<time>] start setVariable
+  data:
+    value: true
+    name: bool
+- message: ⚪ [<time>] start setVariable
+  data:
+    value: "#9013fe"
+    name: color
+- message: ⚪ [<time>] start setVariable
+  data:
+    value: Vert
+    name: petcolor
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: petcolors
+    value: Vert,Rouge
+- message: ⚪ [<time>] start setVariable
+  data:
+    value:
+      name: localhost
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+    name: env
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] start assert
+  data:
+    a: abc
+    b: abc
+    message: string should be abc
+    in: true
+- message: ⚪ [<time>] start assert
+  data:
+    a: 10
+    b: 10
+    message: number should be 10
+    in: true
+- message: ⚪ [<time>] start assert
+  data:
+    a: 2026-06-04T04:02:35.000Z
+    b: 2026-06-04T04:02:35.000Z
+    message: datetime should be 2026-06-04 06:02:35
+    in: true
+- message: ⚪ [<time>] start assert
+  data:
+    a: true
+    b: true
+    message: bool should be true
+    in: true
+- message: ⚪ [<time>] start assert
+  data:
+    a: "#9013fe"
+    b: "#9013fe"
+    message: color should be purple
+    in: true
+- message: ⚪ [<time>] start assert
+  data:
+    a: Vert
+    b: Vert
+    message: petcolor should be vert
+    in: true
+- message: ⚪ [<time>] start assert
+  data:
+    a: Vert,Rouge
+    b: Vert,Rouge
+    message: petcolors should be vert, rouge
+    in: true
+- message: ⚪ [<time>] start assert
+  data:
+    a:
+      name: localhost
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+    b:
+      name: localhost
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+    message: env should be localhost
+    in: true
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: This log should occur
+    runOnEachEvent: false
+    in: true
+- message: 🔵 [<time>] This log should occur
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: string
+    value: cba
+    in: true
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: number
+    value: -10
+    in: true
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: datetime
+    value: 2026-06-04T04:09:55.794Z
+    in: true
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: bool
+    value: false
+    in: true
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: color
+    value: "#f8e61b"
+    in: true
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: petcolor
+    value: Bleu
+    in: true
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: petcolors
+    value: Bleu,Vert
+    in: true
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: env
+    in: true
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] start assert
+  data:
+    a: cba
+    b: cba
+    message: string should be cba
+    in: true
+- message: ⚪ [<time>] start assert
+  data:
+    a: -10
+    b: -10
+    message: number should be -10
+    in: true
+- message: ⚪ [<time>] start assert
+  data:
+    a: 2026-06-04T04:09:55.794Z
+    b: 2026-06-04T04:09:55.000Z
+    message: datetime should be 2026-06-04 06:09:55
+    in: true
+- message: ⚪ [<time>] start assert
+  data:
+    a: false
+    b: false
+    message: bool should be false
+    in: true
+- message: ⚪ [<time>] start assert
+  data:
+    a: "#f8e61b"
+    b: "#f8e61b"
+    message: color should be yellow
+    in: true
+- message: ⚪ [<time>] start assert
+  data:
+    a: Bleu
+    b: Bleu
+    message: petcolor should be bleu
+    in: true
+- message: ⚪ [<time>] start assert
+  data:
+    a: Bleu,Vert
+    b: Bleu,Vert
+    message: petcolors should be bleu, vert
+    in: true
+- message: ⚪ [<time>] start assert
+  data:
+    message: env should be null
+    in: true
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: This log should occur
+    runOnEachEvent: false
+    in: true
+- message: 🔵 [<time>] This log should occur
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] start assert
+  data:
+    a: cba
+    b: a
+    message: string should include a
+    operator: contains
+    in: true
+- message: ⚪ [<time>] start assert
+  data:
+    a: -10
+    b: -10
+    message: number should be >= -10
+    operator: ≥
+    in: true
+- message: ⚪ [<time>] start assert
+  data:
+    a: 2026-06-04T04:09:55.794Z
+    b: 2026-05-04T04:09:55.000Z
+    message: datetime should be 2026-06-04 06:09:55
+    operator: ≠
+    in: true
+- message: ⚪ [<time>] start assert
+  data:
+    a: false
+    b: true
+    message: bool should not be true
+    operator: ≠
+    in: true
+- message: ⚪ [<time>] start assert
+  data:
+    a: "#f8e61b"
+    b: "#d0021b"
+    message: color should not be red
+    operator: ≠
+    in: true
+- message: ⚪ [<time>] start assert
+  data:
+    a: Bleu
+    b: Vert
+    message: petcolor should not be vert
+    operator: ≠
+    in: true
+- message: ⚪ [<time>] start assert
+  data:
+    a: Bleu,Vert
+    b: Vert
+    message: petcolors should include vert
+    operator: contains
+    in: true
+- message: ⚪ [<time>] start assert
+  data:
+    b:
+      name: Sub-env
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+    message: env should be not null
+    operator: ≠
+    in: true
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] done assert
+  data:
+    then: true
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: This log should occur
+    runOnEachEvent: false
+    in: true
+- message: 🔵 [<time>] This log should occur
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] start object
+  data:
+    in: true
+- message: ⚪ [<time>] start object
+  data:
+    in: true
+- message: ⚪ [<time>] done object
+  data:
+    object:
+      string: cba
+      number: -10
+      datetime: 2026-06-04T04:09:55.794Z
+      bool: false
+      petcolor: Bleu
+      petcolors: Bleu,Vert
+- message: ⚪ [<time>] done object
+  data:
+    object:
+      string: cba
+      number: -10
+      datetime: 2026-06-04T04:09:55.794Z
+      bool: false
+      petcolor: Bleu
+      petcolors: Bleu,Vert
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: object1
+    value:
+      string: cba
+      number: -10
+      datetime: 2026-06-04T04:09:55.794Z
+      bool: false
+      petcolor: Bleu
+      petcolors: Bleu,Vert
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: object2
+    value:
+      string: cba
+      number: -10
+      datetime: 2026-06-04T04:09:55.794Z
+      bool: false
+      petcolor: Bleu
+      petcolors: Bleu,Vert
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] start comparator
+  data:
+    a:
+      string: cba
+      number: -10
+      datetime: 2026-06-04T04:09:55.794Z
+      bool: false
+      petcolor: Bleu
+      petcolors: Bleu,Vert
+    b:
+      string: cba
+      number: -10
+      datetime: 2026-06-04T04:09:55.794Z
+      bool: false
+      petcolor: Bleu
+      petcolors: Bleu,Vert
+    in: true
+- message: ⚪ [<time>] start comparator
+  data:
+    a:
+      string: cba
+      number: -10
+      datetime: 2026-06-04T04:09:55.794Z
+      bool: false
+      petcolor: Bleu
+      petcolors: Bleu,Vert
+    b:
+      string: cba
+      number: -10
+      datetime: 2026-06-04T04:09:55.794Z
+      bool: false
+      petcolor: Bleu
+      petcolors: Bleu,Vert
+    operator: contains
+    in: true
+- message: ⚪ [<time>] done comparator
+  data:
+    result: true
+- message: ⚪ [<time>] done comparator
+  data:
+    result: true
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: This log should occur (object compare)
+    runOnEachEvent: true
+    data: ""
+    in: true
+- message: 🔵 [<time>] This log should occur (object compare)
+  data: ""
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: This log should occur (object compare)
+    runOnEachEvent: true
+    data: ""
+    in: true
+- message: 🔵 [<time>] This log should occur (object compare)
+  data: ""
+- message: ⚪ [<time>] done log
+  data:
+    value: ""
+- message: ⚪ [<time>] done log
+  data:
+    value: ""
+- message: 🔵 [<time>] ■ Variables & asserts
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
 - message: 🔵 [<time>] ■ Main

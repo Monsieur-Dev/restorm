@@ -783,6 +783,7 @@
         "changeColor": "Change colour",
         "resetColor": "Reset colour",
         "addNote": "Add / edit note",
+        "runOnEachEvent": "Rulează la fiecare eveniment primit",
         "duplicate": "Duplicate",
         "delete": "Delete",
         "deleteShortcut": "Del",

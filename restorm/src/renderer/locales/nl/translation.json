@@ -782,6 +782,7 @@
         "changeColor": "Change colour",
         "resetColor": "Reset colour",
         "addNote": "Add / edit note",
+        "runOnEachEvent": "Uitvoeren bij elk ontvangen event",
         "duplicate": "Duplicate",
         "delete": "Delete",
         "deleteShortcut": "Del",

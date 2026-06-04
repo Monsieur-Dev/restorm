@@ -1017,7 +1017,16 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     const port = src?.outputs.find((o) => o.id === e.from.portId)
       ?? derivedPortsOf(src)?.outputs.find((o) => o.id === e.from.portId)
     const stroke = e.color ?? edgeColorForHandle(e.from.portId, port)
-    return withSel(stroke ? { ...fe, style: { ...(fe.style ?? {}), stroke } } : fe)
+    const styled = withSel(stroke ? { ...fe, style: { ...(fe.style ?? {}), stroke } } : fe)
+    // An OR-gate receiver ("run on each event") draws its `in` predecessor
+    // links DASHED, so the non-blocking fire-on-each join reads at a glance vs
+    // the solid AND-join. View-only: derived from the target node's flag, never
+    // persisted on the edge (re-derived here on every reseed).
+    const targetRunsOnEach = e.to.portId === 'in'
+      && nodeStore.current.get(e.to.nodeId)?.config['runOnEachEvent'] === true
+    return targetRunsOnEach
+      ? { ...styled, data: { ...(styled.data ?? {}), runOnEachReceiver: true }, style: { ...(styled.style ?? {}), strokeDasharray: '6 4' } }
+      : styled
   }, [isOrphanEdge, derivedPortsOf])
 
   // Re-seed the canvas + authoritative stores from a history snapshot, then push
@@ -1162,6 +1171,22 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       return next
     })
   }, [setNodes, setEdges, persist])
+
+  // Flip a node's `in` join mode: AND-join barrier (default) ⇄ OR gate (fire on
+  // each event). The flag is persisted in the node config (the scheduler reads
+  // it at run start); the dashed `in` predecessor links are view-only, restyled
+  // here in step with the toggle (and re-derived by `buildFlowEdge` on reseed).
+  const toggleRunOnEachEvent = useCallback((nodeId: string) => {
+    const next = nodeStore.current.get(nodeId)?.config['runOnEachEvent'] !== true
+    setNodeConfig(nodeId, { runOnEachEvent: next })
+    setEdges((es) => es.map((fe) => {
+      if (fe.target !== nodeId || fe.targetHandle !== 'in' || fe.data?.['orphan'] === true) return fe
+      const style = { ...(fe.style ?? {}) }
+      if (next) style.strokeDasharray = '6 4'
+      else delete style.strokeDasharray
+      return { ...fe, data: { ...(fe.data ?? {}), runOnEachReceiver: next || undefined }, style }
+    }))
+  }, [setNodeConfig, setEdges])
 
   const handlers = useRef<NodeHandlers>({ scenarioId: scenario.id, onToggleCollapse, onHeaderContextMenu, onSetConfig: setNodeConfig, onToggleBreakpoint, ...(onOpenItem ? { onOpenItem } : {}) })
   useEffect(() => { handlers.current = { scenarioId: scenario.id, onToggleCollapse, onHeaderContextMenu, onSetConfig: setNodeConfig, onToggleBreakpoint, ...(onOpenItem ? { onOpenItem } : {}) } }, [scenario.id, onToggleCollapse, onHeaderContextMenu, setNodeConfig, onToggleBreakpoint, onOpenItem])
@@ -1469,8 +1494,14 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         propertyRename = { propertyId: connection.targetHandle }
       }
     }
+    // A link drawn ONTO an OR-gate receiver's `in` must be dashed too (the
+    // existing links got restyled when the flag flipped; a fresh one is born
+    // after, so it needs the same view-only dash here).
+    const targetRunsOnEach = connection.targetHandle === 'in' && tgt?.data.config?.['runOnEachEvent'] === true
+    const newStyle = { ...(stroke ? { stroke } : {}), ...(targetRunsOnEach ? { strokeDasharray: '6 4' } : {}) }
+    const newData = { ...(selector ? { selector } : {}), ...(targetRunsOnEach ? { runOnEachReceiver: true } : {}) }
     setEdges((curr) => {
-      const next = addEdge({ ...connection, id, ...(stroke ? { style: { stroke } } : {}), ...(selector ? { data: { selector } } : {}) }, curr)
+      const next = addEdge({ ...connection, id, ...(Object.keys(newStyle).length ? { style: newStyle } : {}), ...(Object.keys(newData).length ? { data: newData } : {}) }, curr)
       setNodes((n) => {
         // Apply the property-name mirror first, so persist captures it.
         const rename = propertyRename
@@ -2649,6 +2680,18 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
               shortcut: t('scenario.breakpoint.shortcut', 'F9'),
               onClick: () => { onToggleBreakpoint(nodeMenu.nodeId) }
             },
+            // Only actions with an `in` port can receive events, so only they
+            // expose the AND/OR join toggle.
+            ...(nodeStore.current.get(nodeMenu.nodeId)?.inputs.some((p) => p.id === 'in')
+              ? [{
+                  id: 'run-on-each',
+                  label: t('scenario.node.menu.runOnEachEvent', 'Play on each event received'),
+                  // `checked` renders the ✓ that shows the on/off state — no
+                  // `icon` (MenuItem gives an icon precedence over the check).
+                  checked: nodeStore.current.get(nodeMenu.nodeId)?.config['runOnEachEvent'] === true,
+                  onClick: () => { toggleRunOnEachEvent(nodeMenu.nodeId) }
+                } as ContextMenuItem]
+              : []),
             { id: 'sep1', label: '', isSeparator: true },
             { id: 'copy', label: t('scenario.node.menu.copy', 'Copy'), icon: 'copy', shortcut: 'Ctrl+C', onClick: () => { copyNodes([nodeMenu.nodeId]) } },
             { id: 'duplicate', label: t('scenario.node.menu.duplicate', 'Duplicate'), icon: 'files', shortcut: 'Ctrl+D', onClick: () => { duplicateNode(nodeMenu.nodeId) } },

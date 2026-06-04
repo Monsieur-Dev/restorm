@@ -85,6 +85,31 @@ describe('compareValues — equality (= ≠)', () => {
   it('compares dates by instant when declared', () => {
     expect(compareValues('=', '2020-01-01T00:00:00Z', '2020-01-01T00:00:00.000Z', 'date', 'date')).toBe(true)
   })
+
+  it('compares dates at SECOND precision — ignores sub-second (milliseconds)', () => {
+    // Same wall-clock second, different ms: equal (two `HH:mm:ss` values that
+    // render identically must compare equal even if one carries stray ms).
+    expect(compareValues('=', '2026-06-04T04:09:55.794Z', '2026-06-04T04:09:55.000Z', 'date', 'date')).toBe(true)
+    expect(compareValues('≠', '2026-06-04T04:09:55.794Z', '2026-06-04T04:09:55.000Z', 'date', 'date')).toBe(false)
+    // A different second is still not equal.
+    expect(compareValues('=', '2026-06-04T04:09:55.999Z', '2026-06-04T04:09:56.000Z', 'date', 'date')).toBe(false)
+    // Ordering stays consistent with equality: same second ⇒ neither strictly
+    // before/after, but ≤ / ≥ hold.
+    expect(compareValues('>', '2026-06-04T04:09:55.794Z', '2026-06-04T04:09:55.000Z', 'date', 'date')).toBe(false)
+    expect(compareValues('≥', '2026-06-04T04:09:55.794Z', '2026-06-04T04:09:55.000Z', 'date', 'date')).toBe(true)
+  })
+
+  it('promotes a hint-less date string (a `variable` operand) against a declared datetime', () => {
+    // The real `assert {{datetime}} == <datetime>` case: the variable side has
+    // NO hint (kind string), the expected side is declared `date`. The string
+    // parses as a date, so both compare as instants at second precision.
+    expect(compareValues('=', '2026-06-04T04:09:55.794Z', '2026-06-04T04:09:55.000Z', undefined, 'date')).toBe(true)
+    expect(compareValues('=', '2026-06-04T04:09:55.000Z', '2026-06-04T04:09:55.794Z', 'date', undefined)).toBe(true)
+    // Ordering across the promoted pair also works (no "cannot compare string with date").
+    expect(compareValues('>', '2026-06-04T04:10:00.000Z', '2026-06-04T04:09:55.000Z', undefined, 'date')).toBe(true)
+    // A non-date string vs a datetime stays a plain (unequal) comparison, no throw.
+    expect(compareValues('=', 'not-a-date', '2026-06-04T04:09:55.000Z', undefined, 'date')).toBe(false)
+  })
 })
 
 describe('compareValues — contains (∋)', () => {

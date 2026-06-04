@@ -782,6 +782,7 @@
         "changeColor": "Change colour",
         "resetColor": "Reset colour",
         "addNote": "Add / edit note",
+        "runOnEachEvent": "Alınan her olayda çalıştır",
         "duplicate": "Duplicate",
         "delete": "Delete",
         "deleteShortcut": "Del",
