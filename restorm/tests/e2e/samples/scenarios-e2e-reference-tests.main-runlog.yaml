@@ -2578,6 +2578,36 @@
       - Vert
       - Bleu
     name: PetColors
+- message: ⚪ [<time>] start setVariable
+  data:
+    value:
+      - 1
+      - 2
+    name: mylist_numbers
+- message: ⚪ [<time>] start object
+- message: ⚪ [<time>] start object
+- message: ⚪ [<time>] start object
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: basket
+    value: []
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done object
+  data:
+    object:
+      sku: product_1
+      price: 10
+- message: ⚪ [<time>] done object
+  data:
+    object:
+      sku: product_2
+      price: 15
+- message: ⚪ [<time>] done object
+  data:
+    object:
+      sku: product_2
+      price: 15
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] start aggregate
   data:
@@ -2597,6 +2627,161 @@
 - message: ⚪ [<time>] done log
   data:
     value: 2
+- message: ⚪ [<time>] start aggregate
+  data:
+    items:
+      - 1
+      - 2
+    op: sum
+    in: true
+- message: ⚪ [<time>] done aggregate
+  data:
+    result: 3
+- message: ⚪ [<time>] start aggregate
+  data:
+    items:
+      - 1
+      - 2
+    op: min
+    in: true
+- message: ⚪ [<time>] done aggregate
+  data:
+    result: 1
+- message: ⚪ [<time>] start aggregate
+  data:
+    items:
+      - 1
+      - 2
+    op: max
+    in: true
+- message: ⚪ [<time>] done aggregate
+  data:
+    result: 2
+- message: ⚪ [<time>] start aggregate
+  data:
+    items:
+      - 1
+      - 2
+    op: average
+    in: true
+- message: ⚪ [<time>] done aggregate
+  data:
+    result: 1.5
+- message: ⚪ [<time>] start aggregate
+  data:
+    items:
+      - 1
+      - 2
+    op: join
+    separator: "!"
+    in: true
+- message: ⚪ [<time>] done aggregate
+  data:
+    result: 1!2
+- message: ⚪ [<time>] start addToList
+  data:
+    list: []
+    list-mutation-default-value:
+      sku: product_1
+      price: 10
+    val-1780583363493-8zt1ak:
+      sku: product_2
+      price: 15
+    in: true
+- message: ⚪ [<time>] done addToList
+  data:
+    result:
+      - sku: product_1
+        price: 10
+      - sku: product_2
+        price: 15
+- message: ⚪ [<time>] start aggregate
+  data:
+    op: sum
+    field: price
+    items:
+      - sku: product_1
+        price: 10
+      - sku: product_2
+        price: 15
+- message: ⚪ [<time>] done aggregate
+  data:
+    result: 25
+- message: ⚪ [<time>] start removeFromList
+  data:
+    list:
+      - sku: product_1
+        price: 10
+      - sku: product_2
+        price: 15
+    list-mutation-default-value:
+      sku: product_2
+      price: 15
+    in: true
+- message: ⚪ [<time>] done removeFromList
+  data:
+    result:
+      - sku: product_1
+        price: 10
+- message: ⚪ [<time>] start aggregate
+  data:
+    op: average
+    field: price
+    items:
+      - sku: product_1
+        price: 10
+- message: ⚪ [<time>] done aggregate
+  data:
+    result: 10
+- message: ⚪ [<time>] start addToList
+  data:
+    list: []
+    in: true
+    list-mutation-default-value:
+      sku: product_1
+      price: 10
+    val-1780586258056-gps012:
+      sku: product_2
+      price: 15
+- message: ⚪ [<time>] done addToList
+  data:
+    result:
+      - sku: product_1
+        price: 10
+      - sku: product_2
+        price: 15
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: basket
+    value:
+      - sku: product_1
+        price: 10
+      - sku: product_2
+        price: 15
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] start aggregate
+  data:
+    op: average
+    field: price
+    items:
+      - sku: product_1
+        price: 10
+      - sku: product_2
+        price: 15
+    in: true
+- message: ⚪ [<time>] done aggregate
+  data:
+    result: 12.5
+- message: ⚪ [<time>] start log
+  data:
+    message: test
+    level: warn
+    data: 12.5
+- message: 🟠 [<time>] test
+  data: 12.5
+- message: ⚪ [<time>] done log
+  data:
+    value: 12.5
 - message: 🔵 [<time>] ■ Lists operations
 - message: ⚪ [<time>] done runScenario
   data:

@@ -317,6 +317,7 @@
       "expression": "Wyrażenie",
       "boolean": "Wartość logiczna",
       "null": "Null",
+      "list": "Lista",
       "variables": "Zmienne",
       "environment": "Środowisko"
     },
@@ -1021,6 +1022,13 @@
     },
     "minimap": {
       "toggle": "Przełącz minimapę"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Dodaj wartość",
+      "removeValue": "Usuń wartość"
     }
   }
 }

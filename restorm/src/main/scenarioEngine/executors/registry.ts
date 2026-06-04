@@ -22,6 +22,8 @@ import {
   assertExecutor,
   mapExecutor,
   filterExecutor,
+  addToListExecutor,
+  removeFromListExecutor,
   transformExecutor
 } from './pureExecutors'
 import {
@@ -153,6 +155,8 @@ function pickExecutor(kind: string): NodeExecutor {
     case 'assert': return assertExecutor
     case 'map': return mapExecutor
     case 'filter': return filterExecutor
+    case 'addToList': return addToListExecutor
+    case 'removeFromList': return removeFromListExecutor
     case 'transform': return transformExecutor
     case 'wait': return waitExecutor
     case 'waitUntil': return waitUntilExecutor

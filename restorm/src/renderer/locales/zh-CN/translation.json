@@ -314,6 +314,7 @@
       "expression": "表达式",
       "boolean": "布尔值",
       "null": "Null",
+      "list": "列表",
       "variables": "变量",
       "environment": "环境"
     },
@@ -1018,6 +1019,13 @@
     },
     "minimap": {
       "toggle": "切换小地图"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "添加值",
+      "removeValue": "移除值"
     }
   }
 }

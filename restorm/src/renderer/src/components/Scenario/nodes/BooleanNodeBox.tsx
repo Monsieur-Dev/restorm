@@ -51,6 +51,7 @@ export const BooleanNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, d
           // to a boolean at run time, so any variable is a valid operand.
           allowAllVariables
           allowNull
+          allowList
           dataTestId={`scn-boolean-${key}`}
         />
       </div>

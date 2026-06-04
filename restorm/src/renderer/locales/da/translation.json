@@ -315,6 +315,7 @@
       "expression": "Udtryk",
       "boolean": "Boolean",
       "null": "Null",
+      "list": "Liste",
       "variables": "Variabler",
       "environment": "Miljø"
     },
@@ -1019,6 +1020,13 @@
     },
     "minimap": {
       "toggle": "Skift minikort"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Tilføj værdi",
+      "removeValue": "Fjern værdi"
     }
   }
 }

@@ -23,7 +23,7 @@ import { broadcastTreeReplace } from './import'
 
 const SCENARIO_KINDS = [
   'input', 'output', 'if', 'switch', 'httpRequest', 'runScenario', 'forEach', 'for', 'while', 'doWhile',
-  'aggregate', 'map', 'filter', 'wait', 'waitUntil', 'now', 'arithmetic', 'comparator', 'boolean', 'object',
+  'aggregate', 'map', 'filter', 'addToList', 'removeFromList', 'wait', 'waitUntil', 'now', 'arithmetic', 'comparator', 'boolean', 'object',
   'setVariable', 'getVariable', 'transform', 'log', 'assert'
 ] as const
 

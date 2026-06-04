@@ -146,6 +146,7 @@ export const SwitchNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
                 excludeTypes={['expression']}
                 allowEnvironment
                 allowNull
+                allowList
                 dataTestId="scn-switch-on"
               />
             </div>
@@ -172,6 +173,7 @@ export const SwitchNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
             excludeTypes={['expression']}
             allowEnvironment
             allowNull
+            allowList
             onRemove={() => { setCases(displayCases.filter((x) => x.id !== c.id)) }}
             removeLabel={t('scenario.switch.removeCase', 'Supprimer')}
             dataTestId={`scn-switch-${c.id}`}

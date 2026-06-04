@@ -316,6 +316,7 @@
       "expression": "Izraz",
       "boolean": "Bulova vrednost",
       "null": "Null",
+      "list": "Листа",
       "variables": "Променљиве",
       "environment": "Окружење"
     },
@@ -1020,6 +1021,13 @@
     },
     "minimap": {
       "toggle": "Укључи/искључи минимапу"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Додај вредност",
+      "removeValue": "Уклони вредност"
     }
   }
 }

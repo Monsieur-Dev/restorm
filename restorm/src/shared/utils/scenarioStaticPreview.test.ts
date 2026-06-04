@@ -77,6 +77,33 @@ describe('staticScenarioPreview — aggregate over a variable list', () => {
   })
 })
 
+describe('staticScenarioPreview — aggregate over a WIRED list', () => {
+  it('previews the sum of a list piped from addToList.result through a `.` selector', () => {
+    // addToList.result = [10, 15]; aggregate(sum) reads it via a wired `items`
+    // link whose selector is `.` (array identity, relative to the port value).
+    // The preview must unwrap the source PORT value before applying the selector
+    // — applying `.` to the `{ result: [...] }` display wrapper instead returns
+    // the object (not an array) and the inspector shows nothing.
+    const add: StaticPreviewNode = {
+      id: 'add',
+      kind: 'addToList',
+      config: {
+        list: { type: 'list', items: [{ type: 'numeric', value: 10, format: 'decimal' }, { type: 'numeric', value: 15, format: 'decimal' }] },
+        values: []
+      }
+    }
+    const agg: StaticPreviewNode = {
+      id: 'agg',
+      kind: 'aggregate',
+      config: { op: 'sum', items: { type: 'variable', value: 'basket' } }
+    }
+    const edges: StaticPreviewEdge[] = [
+      { from: { nodeId: 'add', portId: 'result' }, to: { nodeId: 'agg', portId: 'items' }, selector: '.' }
+    ]
+    expect(staticScenarioPreview(agg, [add, agg], edges)).toEqual({ result: 25 })
+  })
+})
+
 describe('concreteValue — environment', () => {
   it('returns null when no environment is selected (empty id)', () => {
     expect(concreteValue({ type: 'environment', value: '' })).toBeNull()

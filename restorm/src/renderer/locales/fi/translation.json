@@ -315,6 +315,7 @@
       "expression": "Lauseke",
       "boolean": "Totuusarvo",
       "null": "Null",
+      "list": "Luettelo",
       "variables": "Muuttujat",
       "environment": "Ympäristö"
     },
@@ -1019,6 +1020,13 @@
     },
     "minimap": {
       "toggle": "Näytä/piilota pienoiskartta"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Lisää arvo",
+      "removeValue": "Poista arvo"
     }
   }
 }

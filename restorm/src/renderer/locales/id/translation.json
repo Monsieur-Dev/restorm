@@ -314,6 +314,7 @@
       "expression": "Ekspresi",
       "boolean": "Boolean",
       "null": "Null",
+      "list": "Daftar",
       "variables": "Variabel",
       "environment": "Lingkungan"
     },
@@ -1018,6 +1019,13 @@
     },
     "minimap": {
       "toggle": "Alihkan minimap"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Tambah nilai",
+      "removeValue": "Hapus nilai"
     }
   }
 }

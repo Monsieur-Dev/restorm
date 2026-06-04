@@ -156,7 +156,11 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         position: 'fixed',
         top: pos.top,
         left: pos.left,
-        zIndex: 1000,
+        // A context menu is the active interaction layer — it must sit ABOVE
+        // tooltips/popovers and modal overlays (both `z-index: 10000`), e.g. a
+        // type-pick menu opened from a field inside a Tooltip-based popover.
+        // Stays below the window controls (`100001`).
+        zIndex: 10002,
       }}
       data-x={String(x)}
       data-y={String(y)}

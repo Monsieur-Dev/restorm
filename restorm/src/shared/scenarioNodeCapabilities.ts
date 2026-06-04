@@ -29,6 +29,7 @@ const STATIC_PREVIEW = new Set<ScenarioNodeKind>([
   'arithmetic', 'comparator', 'boolean', 'transform',
   'if', 'switch', 'wait', 'waitUntil',
   'map', 'filter', 'aggregate',
+  'addToList', 'removeFromList',
   // `while` / `doWhile` route a value to body/done exactly like `if`.
   'while', 'doWhile'
 ])

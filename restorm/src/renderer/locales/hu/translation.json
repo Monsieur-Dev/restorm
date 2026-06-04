@@ -315,6 +315,7 @@
       "expression": "Kifejezés",
       "boolean": "Logikai",
       "null": "Null",
+      "list": "Lista",
       "variables": "Változók",
       "environment": "Környezet"
     },
@@ -1019,6 +1020,13 @@
     },
     "minimap": {
       "toggle": "Minitérkép be/ki"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Érték hozzáadása",
+      "removeValue": "Érték eltávolítása"
     }
   }
 }

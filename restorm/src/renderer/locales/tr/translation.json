@@ -315,6 +315,7 @@
       "expression": "İfade",
       "boolean": "Boolean",
       "null": "Null",
+      "list": "Liste",
       "variables": "Değişkenler",
       "environment": "Ortam"
     },
@@ -1019,6 +1020,13 @@
     },
     "minimap": {
       "toggle": "Mini haritayı aç/kapat"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Değer ekle",
+      "removeValue": "Değeri kaldır"
     }
   }
 }

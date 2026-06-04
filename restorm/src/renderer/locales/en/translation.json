@@ -315,6 +315,7 @@
       "expression": "Expression",
       "boolean": "Boolean",
       "null": "Null",
+      "list": "List",
       "variables": "Variables",
       "environment": "Environment"
     },
@@ -1019,6 +1020,13 @@
     },
     "minimap": {
       "toggle": "Toggle minimap"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Add value",
+      "removeValue": "Remove value"
     }
   }
 }

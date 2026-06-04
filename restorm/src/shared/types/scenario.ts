@@ -84,6 +84,9 @@ export type ScenarioNodeKind =
   | 'aggregate'
   | 'map'
   | 'filter'
+  // List mutation — append / remove values to / from a list.
+  | 'addToList'
+  | 'removeFromList'
   // Loops — `for` is a numeric-range forEach; `while` / `doWhile` reuse the
   // `if` condition mechanism (operands + operator → body/done), the loop
   // closed by a user-wired edge back into the node.

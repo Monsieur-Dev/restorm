@@ -316,6 +316,7 @@
       "expression": "Expresie",
       "boolean": "Boolean",
       "null": "Null",
+      "list": "Listă",
       "variables": "Variabile",
       "environment": "Mediu"
     },
@@ -1020,6 +1021,13 @@
     },
     "minimap": {
       "toggle": "Comută minimapa"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Adaugă valoare",
+      "removeValue": "Elimină valoarea"
     }
   }
 }

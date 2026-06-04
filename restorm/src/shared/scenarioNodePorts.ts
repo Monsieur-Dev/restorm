@@ -88,6 +88,12 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // isn't a hard-required port; the predicate (field/operator/value) lives in
   // config.
   filter: { inputs: [{ id: 'items', name: 'items', dataType: 'json' }], outputs: [{ id: 'kept', name: 'kept', dataType: 'json', flow: 'both' }, { id: 'rejected', name: 'rejected', dataType: 'json', flow: 'both' }] },
+  // List mutation: `list` is the target collection (a list-typed source/variable,
+  // value-selector fallback). The values to add/remove are N per-row inputs (each
+  // its own connectable port, derived from config like the object node's
+  // properties — not listed here). `result` is the new list.
+  addToList: { inputs: [{ id: 'list', name: 'list', dataType: 'json' }], outputs: [{ id: 'result', name: 'result', dataType: 'json', flow: 'both' }] },
+  removeFromList: { inputs: [{ id: 'list', name: 'list', dataType: 'json' }], outputs: [{ id: 'result', name: 'result', dataType: 'json', flow: 'both' }] },
   // Loops. `for` is a numeric-range forEach: `from` / `to` / `step` carry
   // inline value fallbacks (like the `if` operands), so they aren't hard
   // required; it fans out the range over `each` (the current number) and fires

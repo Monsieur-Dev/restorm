@@ -315,6 +315,7 @@
       "expression": "Expressie",
       "boolean": "Boolean",
       "null": "Null",
+      "list": "Lijst",
       "variables": "Variabelen",
       "environment": "Omgeving"
     },
@@ -1019,6 +1020,13 @@
     },
     "minimap": {
       "toggle": "Minimap aan/uit"
+    },
+    "listMutation": {
+      "list": "lijst",
+      "values": "waarden",
+      "result": "resultaat",
+      "addValue": "Waarde toevoegen",
+      "removeValue": "Waarde verwijderen"
     }
   }
 }

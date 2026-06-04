@@ -315,6 +315,7 @@
       "expression": "Ausdruck",
       "boolean": "Boolesch",
       "null": "Null",
+      "list": "Liste",
       "variables": "Variablen",
       "environment": "Umgebung"
     },
@@ -1019,6 +1020,13 @@
     },
     "minimap": {
       "toggle": "Minimap umschalten"
+    },
+    "listMutation": {
+      "list": "Liste",
+      "values": "Werte",
+      "result": "Ergebnis",
+      "addValue": "Wert hinzufügen",
+      "removeValue": "Wert entfernen"
     }
   }
 }

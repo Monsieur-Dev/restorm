@@ -19,6 +19,7 @@ import { ForNodeBox, WhileNodeBox, DoWhileNodeBox } from './LoopNodeBoxes'
 import { AggregateNodeBox } from './AggregateNodeBox'
 import { FilterNodeBox } from './FilterNodeBox'
 import { MapNodeBox } from './MapNodeBox'
+import { ListMutationNodeBox } from './ListMutationNodeBox'
 import { LogNodeBox, AssertNodeBox, NowNodeBox } from './UtilityNodeBoxes'
 
 export type { ScenarioNodeBoxData, ScenarioNodeBoxType, ScenarioNodeCell } from './ScenarioNodeBoxBase'
@@ -46,6 +47,8 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   aggregate: AggregateNodeBox,
   map: MapNodeBox,
   filter: FilterNodeBox,
+  addToList: ListMutationNodeBox,
+  removeFromList: ListMutationNodeBox,
   wait: WaitNodeBox,
   waitUntil: WaitUntilNodeBox,
   now: NowNodeBox,

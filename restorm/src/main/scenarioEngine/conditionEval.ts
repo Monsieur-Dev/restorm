@@ -290,12 +290,21 @@ export function compareValues(op: string | undefined, l: unknown, r: unknown, lH
  * A `variable` operand resolves to the run's LIVE value (read from
  * `variables` each call) — so a `while`/`doWhile` condition reacts to the
  * body mutating that variable across iterations (e.g. `while counter < 10`). */
-export function resolveOperand(wired: unknown, cfgVal: unknown, variables?: ReadonlyMap<string, unknown>): unknown {
+export function resolveOperand(wired: unknown, cfgVal: unknown, variables?: ReadonlyMap<string, unknown>, depth = 0): unknown {
   if (wired !== undefined) return wired
   if (cfgVal === undefined || cfgVal === null) return undefined
   if (variables && typeof cfgVal === 'object' && (cfgVal as { type?: unknown }).type === 'variable') {
     const name = (cfgVal as { value?: unknown }).value
     return typeof name === 'string' ? variables.get(name) : undefined
+  }
+  // A `list` is an agnostic array — resolve EACH item (a `variable` item reads
+  // its live value, a nested `list` recurses). Variables hold already-resolved
+  // values (flat lookups), so a self/ancestor reference can't loop; the depth
+  // cap is a hard safety net against pathological literal nesting.
+  if (typeof cfgVal === 'object' && (cfgVal as { type?: unknown }).type === 'list') {
+    if (depth >= 32) return []
+    const items = (cfgVal as { items?: unknown }).items
+    return Array.isArray(items) ? items.map((it) => resolveOperand(undefined, it, variables, depth + 1)) : []
   }
   // An `environment` operand is a reference to an environment BY ITS ID (see
   // `EnvironmentValue`). A pure node that reads it (if / switch / comparator /

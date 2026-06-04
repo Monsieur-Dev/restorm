@@ -314,6 +314,7 @@
       "expression": "Biểu thức",
       "boolean": "Boolean",
       "null": "Null",
+      "list": "Danh sách",
       "variables": "Biến",
       "environment": "Môi trường"
     },
@@ -1018,6 +1019,13 @@
     },
     "minimap": {
       "toggle": "Bật/tắt minimap"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Thêm giá trị",
+      "removeValue": "Xóa giá trị"
     }
   }
 }

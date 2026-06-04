@@ -315,6 +315,7 @@
       "expression": "Έκφραση",
       "boolean": "Λογική τιμή",
       "null": "Null",
+      "list": "Λίστα",
       "variables": "Μεταβλητές",
       "environment": "Περιβάλλον"
     },
@@ -1019,6 +1020,13 @@
     },
     "minimap": {
       "toggle": "Εναλλαγή μικρού χάρτη"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Προσθήκη τιμής",
+      "removeValue": "Αφαίρεση τιμής"
     }
   }
 }

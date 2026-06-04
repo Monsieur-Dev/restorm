@@ -315,6 +315,7 @@
       "expression": "Uttrykk",
       "boolean": "Boolean",
       "null": "Null",
+      "list": "Liste",
       "variables": "Variabler",
       "environment": "Miljø"
     },
@@ -1019,6 +1020,13 @@
     },
     "minimap": {
       "toggle": "Veksle minikart"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Legg til verdi",
+      "removeValue": "Fjern verdi"
     }
   }
 }

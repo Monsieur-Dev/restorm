@@ -315,6 +315,7 @@
       "expression": "Uttryck",
       "boolean": "Boolesk",
       "null": "Null",
+      "list": "Lista",
       "variables": "Variabler",
       "environment": "Miljö"
     },
@@ -1019,6 +1020,13 @@
     },
     "minimap": {
       "toggle": "Växla minikarta"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Lägg till värde",
+      "removeValue": "Ta bort värde"
     }
   }
 }

@@ -317,6 +317,7 @@
       "expression": "Вираз",
       "boolean": "Булеве",
       "null": "Null",
+      "list": "Список",
       "variables": "Змінні",
       "environment": "Середовище"
     },
@@ -1021,6 +1022,13 @@
     },
     "minimap": {
       "toggle": "Перемкнути мінікарту"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Додати значення",
+      "removeValue": "Видалити значення"
     }
   }
 }

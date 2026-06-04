@@ -316,6 +316,7 @@
       "expression": "Izraz",
       "boolean": "Booleova vrijednost",
       "null": "Null",
+      "list": "Popis",
       "variables": "Varijable",
       "environment": "Okruženje"
     },
@@ -1020,6 +1021,13 @@
     },
     "minimap": {
       "toggle": "Uključi/isključi minikartu"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Dodaj vrijednost",
+      "removeValue": "Ukloni vrijednost"
     }
   }
 }

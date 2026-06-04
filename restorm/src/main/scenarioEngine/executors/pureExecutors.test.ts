@@ -13,6 +13,8 @@ import {
   ifExecutor,
   mapExecutor,
   filterExecutor,
+  addToListExecutor,
+  removeFromListExecutor,
   arithmeticExecutor,
   booleanExecutor
 } from './pureExecutors'
@@ -344,6 +346,81 @@ describe('ifExecutor', () => {
     const out = runPure(ifExecutor, { operator: '=', left: { type: 'null' }, right: { type: 'environment', value: 'stale-or-garbage-id' } }, {}, undefined, 'if')
     expect(out.outputs[0]?.port).toBe('then')
     envSpy.mockRestore()
+  })
+})
+
+describe('addToList / removeFromList', () => {
+  it('addToList appends each `values` row (one element apiece) to the wired target list', () => {
+    const out = runPure(
+      addToListExecutor,
+      { values: [{ id: 'v1', value: { type: 'string', value: 'c' } }, { id: 'v2', value: { type: 'string', value: 'd' } }] },
+      { list: ['a', 'b'] }
+    )
+    expect(out.outputs).toEqual([{ port: 'result', value: ['a', 'b', 'c', 'd'] }])
+  })
+
+  it('resolves an inline `list` literal as the target; a wired row wins over its inline value, and each row is ONE element', () => {
+    const out = runPure(
+      addToListExecutor,
+      {
+        list: { type: 'list', items: [{ type: 'string', value: 'x' }] },
+        values: [
+          { id: 'v1', value: { type: 'string', value: 'a' } },
+          { id: 'v2', value: { type: 'string', value: 'IGNORED' } }
+        ]
+      },
+      { v2: 'wired' } // a wired row arrives by its port id and wins over the inline value
+    )
+    expect(out.outputs).toEqual([{ port: 'result', value: ['x', 'a', 'wired'] }])
+  })
+
+  it('a row that resolves to a list is added as a single nested element (no spread)', () => {
+    const out = runPure(
+      addToListExecutor,
+      { values: [{ id: 'v1', value: { type: 'variable', value: 'extra' } }] },
+      { list: ['x'] },
+      new Map([['extra', ['y', 'z']]])
+    )
+    expect(out.outputs).toEqual([{ port: 'result', value: ['x', ['y', 'z']] }])
+  })
+
+  it('removeFromList drops every element deep-equal to any row value', () => {
+    const out = runPure(
+      removeFromListExecutor,
+      { values: [{ id: 'v1', value: { type: 'string', value: 'a' } }] },
+      { list: ['a', 'b', 'a', 'c'] }
+    )
+    expect(out.outputs).toEqual([{ port: 'result', value: ['b', 'c'] }])
+  })
+
+  it('removeFromList matches objects by deep equality (wired row carries the object)', () => {
+    const out = runPure(
+      removeFromListExecutor,
+      { values: [{ id: 'v1', value: { type: 'string', value: '' } }] },
+      { list: [{ id: 1 }, { id: 2 }], v1: { id: 1 } }
+    )
+    expect(out.outputs).toEqual([{ port: 'result', value: [{ id: 2 }] }])
+  })
+
+  it('honours a source wired into the DEFAULT (unpersisted) row when config.values is empty', () => {
+    // A box with a single, never-persisted value row: the wire lands on the
+    // default id and `config.values` stays absent. The lone wired value must
+    // still count — else removeFromList drops nothing.
+    const out = runPure(
+      removeFromListExecutor,
+      {},
+      { list: [{ sku: 'p1', price: 10 }, { sku: 'p2', price: 15 }], 'list-mutation-default-value': { sku: 'p2', price: 15 } }
+    )
+    expect(out.outputs).toEqual([{ port: 'result', value: [{ sku: 'p1', price: 10 }] }])
+  })
+
+  it('addToList appends a source wired into the default row when config.values is empty', () => {
+    const out = runPure(
+      addToListExecutor,
+      {},
+      { list: ['a'], 'list-mutation-default-value': 'b' }
+    )
+    expect(out.outputs).toEqual([{ port: 'result', value: ['a', 'b'] }])
   })
 })
 

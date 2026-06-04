@@ -70,6 +70,14 @@ export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
     summary: 'Partitions a collection by a predicate: matches on `kept`, non-matches on `rejected` (so dropped items can be routed, not lost).',
     config: { property: 'Item field to test.', operator: 'lt | lte | eq | gte | gt | ne | contains', value: 'Value to compare against.' }
   },
+  addToList: {
+    summary: 'Appends each `values` row (one element apiece) to the `list` target, emitting the new list on `result`. Pure — persist it back with a downstream setVariable.',
+    config: { list: 'Target list (a list value / list-typed variable, or wire the `list` port).', values: 'Rows of values to append: `{ id, value }[]` (like object properties); each row gets a `<id>` input port to wire.' }
+  },
+  removeFromList: {
+    summary: 'Removes from `list` every element deep-equal to any `values` row, emitting the new list on `result`.',
+    config: { list: 'Target list (a list value / list-typed variable, or wire the `list` port).', values: 'Rows of values to remove: `{ id, value }[]` (like object properties); each row gets a `<id>` input port to wire.' }
+  },
   wait: {
     summary: 'Sleeps for a duration, then passes the trigger through. Aborts cleanly on Stop.',
     config: { duration: 'Duration value.', inputUnit: 'ms | s | min | h — unit for a wired `duration` (default s).', durationMs: 'Alternative fixed duration in ms.' }

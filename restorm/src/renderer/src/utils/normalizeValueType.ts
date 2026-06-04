@@ -1,4 +1,4 @@
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue, NullValue, type ValueType } from '../../../shared/types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue, NullValue, ListValue, type ValueType } from '../../../shared/types/collections'
 
 export function normalizeValueType(input: unknown): ValueType {
   if (
@@ -15,7 +15,8 @@ export function normalizeValueType(input: unknown): ValueType {
     input instanceof CustomListMultiValue ||
     input instanceof VariableValue ||
     input instanceof EnvironmentValue ||
-    input instanceof NullValue
+    input instanceof NullValue ||
+    input instanceof ListValue
   ) {
     return input
   }
@@ -57,6 +58,11 @@ export function normalizeValueType(input: unknown): ValueType {
         return new EnvironmentValue(typeof plain.value === 'string' ? plain.value : '')
       case 'null':
         return new NullValue()
+      case 'list': {
+        // Recurse: each item is itself a persisted typed value (lists nest).
+        const items = (plain as { items?: unknown }).items
+        return new ListValue(Array.isArray(items) ? items.map(normalizeValueType) : [])
+      }
       case 'boolean':
         return new BooleanValue(plain.value === true || plain.value === 'true')
       case 'enum': {

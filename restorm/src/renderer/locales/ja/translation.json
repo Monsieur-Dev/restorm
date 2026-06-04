@@ -314,6 +314,7 @@
       "expression": "式",
       "boolean": "ブール値",
       "null": "Null",
+      "list": "リスト",
       "variables": "変数",
       "environment": "環境"
     },
@@ -1018,6 +1019,13 @@
     },
     "minimap": {
       "toggle": "ミニマップの切り替え"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "値を追加",
+      "removeValue": "値を削除"
     }
   }
 }

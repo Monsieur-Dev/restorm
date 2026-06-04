@@ -317,6 +317,7 @@
       "expression": "Výraz",
       "boolean": "Boolean",
       "null": "Null",
+      "list": "Seznam",
       "variables": "Proměnné",
       "environment": "Prostředí"
     },
@@ -1021,6 +1022,13 @@
     },
     "minimap": {
       "toggle": "Přepnout minimapu"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Přidat hodnotu",
+      "removeValue": "Odebrat hodnotu"
     }
   }
 }

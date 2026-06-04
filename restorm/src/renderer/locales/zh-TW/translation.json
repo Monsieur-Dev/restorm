@@ -314,6 +314,7 @@
       "expression": "運算式",
       "boolean": "布林值",
       "null": "Null",
+      "list": "清單",
       "variables": "變數",
       "environment": "環境"
     },
@@ -1018,6 +1019,13 @@
     },
     "minimap": {
       "toggle": "切換縮圖"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "新增值",
+      "removeValue": "移除值"
     }
   }
 }

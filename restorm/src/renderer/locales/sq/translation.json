@@ -315,6 +315,7 @@
       "expression": "Shprehje",
       "boolean": "Booleane",
       "null": "Null",
+      "list": "Listë",
       "variables": "Variablat",
       "environment": "Mjedisi"
     },
@@ -1019,6 +1020,13 @@
     },
     "minimap": {
       "toggle": "Aktivizo/çaktivizo minihartën"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Shto vlerë",
+      "removeValue": "Hiq vlerën"
     }
   }
 }

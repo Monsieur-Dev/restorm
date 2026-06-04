@@ -18,8 +18,9 @@ import {
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import type { TranslatedHelperDefinition } from '../../utils/handlebarsHelpersDefinitions'
 import type { ValueType, EnumDefinition, CustomValueList } from '../../../../shared/types/collections'
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue, NullValue } from '../../../../shared/types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue, NullValue, ListValue } from '../../../../shared/types/collections'
 import { EnvironmentValueCell } from './EnvironmentValueCell'
+import { ListValueCell } from './ListValueCell'
 import type { EnvValueTypeGroup } from '../../hooks/collectEnvValueTypeGroups'
 import { useScenarioVariables } from '../../contexts/ScenarioVariablesContext'
 import { castValueToKind, resolveValueTypeKind, type ValueTypeKind } from './castValue'
@@ -188,6 +189,12 @@ export interface TypedValueFieldProps {
    */
   allowNull?: boolean | undefined
   /**
+   * When set, the type-pick menu offers `list` — an agnostic, untyped list
+   * edited in a popover (rows of nested TypedValueFields). Off by default; the
+   * slots that accept a list value opt in.
+   */
+  allowList?: boolean | undefined
+  /**
    * When set, the type-pick menu gains a trailing separator + a "remove" entry
    * (e.g. a switch case removing itself). The label defaults to "Supprimer".
    */
@@ -231,6 +238,7 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
   allowAllVariables,
   allowEnvironment,
   allowNull,
+  allowList,
   onRemove,
   removeLabel,
   variables = [],
@@ -464,6 +472,17 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
         ...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-null` })
       })
     }
+    // `list` — an agnostic, untyped list edited in a popover. Picking it casts
+    // to an empty `ListValue`; the field's button opens the row editor.
+    if (allowList) {
+      tail.push({
+        id: 'list',
+        label: t('keyValueTable.types.list', 'List'),
+        checked: activeType === 'list',
+        onClick: () => { cast('list') },
+        ...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-list` })
+      })
+    }
     // `environment` sits just before `secret`, only where the slot opted in.
     // Picking it casts to an empty EnvironmentValue; the env-picker button then
     // resolves the actual environment (there's no submenu).
@@ -511,7 +530,7 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
     }
 
     return items
-  }, [t, cast, dataTestId, groups, activeType, activeDefId, isExcluded, variableNames, allowAllVariables, allowEnvironment, allowNull, value, onRemove, removeLabel])
+  }, [t, cast, dataTestId, groups, activeType, activeDefId, isExcluded, variableNames, allowAllVariables, allowEnvironment, allowNull, allowList, value, onRemove, removeLabel])
 
   const widget = ((): React.ReactNode => {
     if (value instanceof PasswordValue) {
@@ -612,6 +631,21 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
           {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-null` })}
         />,
         { icon: 'circle-slash', ariaLabel: 'Null value', typeTestid: 'null' }
+      )
+    }
+
+    // ListValue → a preview field + a popover editor (rows of nested
+    // TypedValueFields). The ø/list icon marks the type.
+    if (value instanceof ListValue) {
+      return withTypeControl(
+        <ListValueCell
+          value={value}
+          onChange={onChange}
+          {...(valueTypeGroups ? { valueTypeGroups } : {})}
+          {...(excludeVariableName ? { excludeVariableName } : {})}
+          {...(dataTestId ? { dataTestId } : {})}
+        />,
+        { icon: 'list-unordered', ariaLabel: 'List value', typeTestid: 'list' }
       )
     }
 

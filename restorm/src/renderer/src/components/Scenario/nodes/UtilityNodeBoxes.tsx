@@ -126,6 +126,7 @@ export const LogNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data,
                 allowAllVariables
                 allowEnvironment
                 allowNull
+                allowList
                 dataTestId="scn-log-data"
               />
             </div>
@@ -171,6 +172,7 @@ export const AssertNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
           excludeTypes={['expression']}
           allowEnvironment
           allowNull
+          allowList
           dataTestId={`scn-assert-${key}`}
         />
       </div>

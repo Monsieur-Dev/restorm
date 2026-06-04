@@ -5,9 +5,10 @@
  */
 
 import Handlebars from 'handlebars'
-import type { NodeExecutor } from '../types'
+import type { Activation, ExecContext, NodeExecutor } from '../types'
+import { LIST_MUTATION_DEFAULT_VALUE_ID } from '../../../shared/scenarioListMutationValues'
 import { resolveConfigItems, applyListOp } from '../../../shared/utils/scenarioStaticPreview'
-import { compareValues, hintFromConfig, resolveOperand, type OperandHint } from '../conditionEval'
+import { compareValues, deepEqual, hintFromConfig, resolveOperand, type OperandHint } from '../conditionEval'
 
 /** A wired operand's kind is inferred from its value (pass no hint); an inline
  * operand's comes from its declared type (incl. all-numeric-enum detection). */
@@ -268,6 +269,59 @@ export const filterExecutor: NodeExecutor = (act, ctx) => {
   const kept = Array.isArray(out['kept']) ? out['kept'] : []
   const rejected = Array.isArray(out['rejected']) ? out['rejected'] : []
   return { outputs: [{ port: 'kept', value: kept }, { port: 'rejected', value: rejected }] }
+}
+
+/** Resolve the `list` target (wired or inline `list` config) to an array.
+ * A non-list resolves to `[]` (the ops only make sense over a collection). */
+function resolveListOperand(wired: unknown, cfg: unknown, variables: ReadonlyMap<string, unknown>): unknown[] {
+  const v = resolveOperand(wired, cfg, variables)
+  return Array.isArray(v) ? (v as unknown[]) : []
+}
+
+/** Resolve the `values` rows (`config.values` = `{ id, value }[]`, the same
+ * shape as the object node's properties) into the ordered list of operands to
+ * add/remove. Each row is one element — a wired row arrives in `act.inputs`
+ * keyed by its port id; an inline one resolves from `row.value`.
+ *
+ * Special-case the DEFAULT row: an unconfigured box still shows one row under
+ * {@link LIST_MUTATION_DEFAULT_VALUE_ID} that is NOT persisted to
+ * `config.values` until edited. If a source is wired into it, its value arrives
+ * under that id with no matching config row — so honour a single wired default
+ * row even when `config.values` is empty (else a lone wired value is silently
+ * dropped, e.g. removeFromList finds nothing to remove). */
+function resolveValueRows(act: Activation, ctx: ExecContext): unknown[] {
+  const cfg = ctx.node.config as { values?: unknown }
+  const rows = Array.isArray(cfg.values) && cfg.values.length > 0
+    ? cfg.values
+    : (act.inputs[LIST_MUTATION_DEFAULT_VALUE_ID] !== undefined ? [{ id: LIST_MUTATION_DEFAULT_VALUE_ID }] : [])
+  const out: unknown[] = []
+  for (const r of rows) {
+    const row = r as { id?: unknown; value?: unknown }
+    if (typeof row.id !== 'string') continue
+    out.push(resolveOperand(act.inputs[row.id], row.value, ctx.variables))
+  }
+  return out
+}
+
+/** AddToList: `result` is the target list with every `values` row APPENDED (in
+ * order). The list resolves like any list — a wired port, a `list` editor, or a
+ * list-typed variable; each value row is one element. Pure: it outputs the new
+ * list; persisting it back into a variable is an explicit `setVariable`
+ * downstream. */
+export const addToListExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { list?: unknown }
+  const list = resolveListOperand(act.inputs['list'], cfg.list, ctx.variables)
+  const values = resolveValueRows(act, ctx)
+  return { outputs: [{ port: 'result', value: [...list, ...values] }] }
+}
+
+/** RemoveFromList: `result` is the target list with every element deep-equal to
+ * any `values` row removed (all occurrences). */
+export const removeFromListExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { list?: unknown }
+  const list = resolveListOperand(act.inputs['list'], cfg.list, ctx.variables)
+  const values = resolveValueRows(act, ctx)
+  return { outputs: [{ port: 'result', value: list.filter((x) => !values.some((v) => deepEqual(x, v))) }] }
 }
 
 /** Template / transform node: applies a Handlebars template to the

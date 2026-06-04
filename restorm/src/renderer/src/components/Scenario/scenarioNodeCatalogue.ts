@@ -33,6 +33,8 @@ export const SCENARIO_NODE_CATALOGUE: ScenarioNodeKindMeta[] = [
   { kind: 'aggregate', labelKey: 'scenario.nodes.aggregate', defaultLabel: 'Aggregate', icon: 'combine', category: 'collections' },
   { kind: 'map', labelKey: 'scenario.nodes.map', defaultLabel: 'Map', icon: 'arrow-swap', category: 'collections' },
   { kind: 'filter', labelKey: 'scenario.nodes.filter', defaultLabel: 'Filter', icon: 'filter', category: 'collections' },
+  { kind: 'addToList', labelKey: 'scenario.nodes.addToList', defaultLabel: 'Add to list', icon: 'diff-added', category: 'collections' },
+  { kind: 'removeFromList', labelKey: 'scenario.nodes.removeFromList', defaultLabel: 'Remove from list', icon: 'diff-removed', category: 'collections' },
   // Loops (grouped into a "loops" submenu in the add-node menu)
   { kind: 'forEach', labelKey: 'scenario.nodes.forEach', defaultLabel: 'ForEach', icon: 'symbol-array', category: 'loops' },
   { kind: 'for', labelKey: 'scenario.nodes.for', defaultLabel: 'For', icon: 'list-ordered', category: 'loops' },

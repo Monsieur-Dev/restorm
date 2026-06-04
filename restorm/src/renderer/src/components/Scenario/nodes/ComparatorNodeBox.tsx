@@ -36,6 +36,7 @@ export const ComparatorNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id
           excludeTypes={['expression']}
           allowEnvironment
           allowNull
+          allowList
           dataTestId={`scn-comparator-${key}`}
         />
       </div>

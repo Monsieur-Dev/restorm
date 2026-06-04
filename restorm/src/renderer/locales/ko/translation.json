@@ -314,6 +314,7 @@
       "expression": "표현식",
       "boolean": "부울",
       "null": "Null",
+      "list": "목록",
       "variables": "변수",
       "environment": "환경"
     },
@@ -1018,6 +1019,13 @@
     },
     "minimap": {
       "toggle": "미니맵 토글"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "값 추가",
+      "removeValue": "값 제거"
     }
   }
 }

@@ -315,6 +315,7 @@
       "expression": "Expression",
       "boolean": "Booléen",
       "null": "Null",
+      "list": "Liste",
       "variables": "Variables",
       "environment": "Environnement"
     },
@@ -1019,6 +1020,13 @@
     },
     "minimap": {
       "toggle": "Afficher/masquer la minimap"
+    },
+    "listMutation": {
+      "list": "liste",
+      "values": "valeurs",
+      "result": "résultat",
+      "addValue": "Ajouter une valeur",
+      "removeValue": "Supprimer la valeur"
     }
   }
 }

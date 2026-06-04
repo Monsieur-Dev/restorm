@@ -45,7 +45,7 @@ export const FilterNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
               <InputBox
                 value={field}
                 onChange={(next) => { data.onSetConfig?.(id, { field: next }) }}
-                options={{ type: 'text', placeholder: '$.level' }}
+                options={{ type: 'text', placeholder: 'level' }}
                 data-testid="scn-filter-field"
               />
             </div>

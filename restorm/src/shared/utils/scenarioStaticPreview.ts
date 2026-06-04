@@ -4,6 +4,7 @@ import type { ScenarioNode, ScenarioEdge } from '../types/scenario'
 import { readInputParams } from '../scenarioInputParams'
 import { readOutputDecls } from '../scenarioOutputDecls'
 import { STATIC_PREVIEW_KINDS } from '../scenarioNodeCapabilities'
+import { LIST_MUTATION_DEFAULT_VALUE_ID } from '../scenarioListMutationValues'
 
 // Register the full helper suite on first import so a chained `transform`
 // preview can use `{{year now}}`, `{{add a b}}`, `{{upper x}}`, … directly —
@@ -53,6 +54,11 @@ export function concreteValue(persisted: unknown): unknown {
   switch (p.type) {
     case 'null':
       return null
+    case 'list': {
+      // A `list` is a real JS array — each item resolved recursively (lists nest).
+      const items = (p as { items?: unknown }).items
+      return Array.isArray(items) ? items.map((it) => concreteValue(it)) : []
+    }
     case 'numeric': {
       const n = typeof p.value === 'number' ? p.value : Number(p.value)
       return Number.isFinite(n) ? n : 0
@@ -238,7 +244,14 @@ export function resolveItems(
     if (!source || !STATIC_PREVIEW_KINDS.has(source.kind)) return null
     const sp = staticScenarioPreview(source, nodes, edges)
     if (sp === null) return null
-    const v = edge.selector ? resolveSelectorPath(sp, edge.selector) : sp
+    // Unwrap to the value the SOURCE PORT carries before applying the selector
+    // (a `result`/`mapped`-keyed node exposes `{ result: [...] }` as its preview;
+    // the wired `items` link's selector — typically `.` for an array — is
+    // relative to that port's bare value, exactly as the runtime delivers it).
+    // Applying the selector to the whole `{ result: … }` wrapper instead yielded
+    // the wrapper object (not an array) → `null` → an empty inspector preview.
+    const portValue = portPreviewValue(sp, edge.from.portId, source.kind)
+    const v = edge.selector ? resolveSelectorPath(portValue, edge.selector) : portValue
     return Array.isArray(v) ? v : null
   }
   const lit = literalConfigItems(cfg)
@@ -287,6 +300,13 @@ export function resolveConfigItems(cfg: Record<string, unknown>, variables?: Rea
   const lit = listValueArray(cfg['items'])
   if (lit) return lit
   const raw = cfg['items']
+  // An inline `list` value → its concrete array (each item resolved). Lets an
+  // `aggregate`/`forEach`/`map`/`filter` iterate a list authored directly in
+  // the `items` field, not only one stashed in a variable.
+  if (raw && typeof raw === 'object' && (raw as { type?: unknown }).type === 'list') {
+    const arr = concreteValue(raw)
+    if (Array.isArray(arr)) return arr as unknown[]
+  }
   if (raw && typeof raw === 'object' && (raw as { type?: unknown }).type === 'variable' && variables) {
     const name = (raw as { value?: unknown }).value
     const v = typeof name === 'string' ? variables.get(name) : undefined
@@ -598,6 +618,33 @@ export function staticScenarioPreview(
       const items = resolveItems(node.id, cfg, nodes, edges)
       if (items === null) return null
       return applyListOp({ id: node.id, kind: node.kind, config: cfg }, items)
+    }
+    case 'addToList':
+    case 'removeFromList': {
+      // `list` resolves like any operand (a list literal, an enum/custom list,
+      // or a list-typed variable's static value → an array). `values` is N rows
+      // (`config.values` = `{ id, value }[]`, like object properties) — each one
+      // an element to add/remove, resolved under its own port id.
+      const listV = operandPreviewValue(node.id, 'list', cfg['list'], nodes, edges)
+      const list: unknown[] = Array.isArray(listV) ? (listV as unknown[]) : []
+      let valueRows = Array.isArray(cfg['values']) && cfg['values'].length > 0 ? cfg['values'] : []
+      // The DEFAULT (unpersisted) value row carries a wired source under
+      // LIST_MUTATION_DEFAULT_VALUE_ID without ever landing in `config.values`;
+      // surface it so a lone wired value previews (matches the runtime).
+      if (valueRows.length === 0 && edges.some((e) => e.to.nodeId === node.id && e.to.portId === LIST_MUTATION_DEFAULT_VALUE_ID)) {
+        valueRows = [{ id: LIST_MUTATION_DEFAULT_VALUE_ID }]
+      }
+      const values: unknown[] = []
+      for (const r of valueRows) {
+        const row = r as { id?: unknown; value?: unknown }
+        if (typeof row.id !== 'string') continue
+        const v = operandPreviewValue(node.id, row.id, row.value, nodes, edges)
+        if (v !== undefined) values.push(v)
+      }
+      const result = node.kind === 'addToList'
+        ? [...list, ...values]
+        : list.filter((x) => !values.some((v) => JSON.stringify(v) === JSON.stringify(x)))
+      return { result }
     }
     case 'for':
       // Range comes from config (`from`/`to`/`step`), not an `items` edge —
