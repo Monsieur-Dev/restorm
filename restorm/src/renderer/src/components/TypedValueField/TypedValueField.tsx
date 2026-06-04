@@ -41,13 +41,15 @@ interface TypeIndicatorProps {
 const TypeIndicator: React.FC<TypeIndicatorProps> = ({ icon, ariaLabel, dataTestId, onMenuOpen }) => (
   // A real ECUI Button (medium = 28×28 square) so it auto-styles with the theme
   // and lines up flush with the value cell inside the ControlGroup. Opens the
-  // type-pick menu on either a primary or a context (right) click.
+  // type-pick menu on either a primary or a context (right) click — UNLESS the
+  // field locks its type (`onMenuOpen` omitted): then it stays a pure, inert
+  // indicator (icon still shows the type, but it opens nothing and drops its
+  // clickable affordance).
   <Button
     medium
     secondary
     icon={icon}
-    onClick={onMenuOpen}
-    onContextMenu={onMenuOpen}
+    {...(onMenuOpen ? { onClick: onMenuOpen, onContextMenu: onMenuOpen } : { className: 'tvf-type-indicator-locked' })}
     options={{ ariaLabel }}
     {...(dataTestId && { 'data-testid': dataTestId })}
   />
@@ -196,6 +198,14 @@ export interface TypedValueFieldProps {
   expressionVariableId?: string | undefined
   /** Test id prefix; widget + menu testids are derived from it. */
   dataTestId?: string | undefined
+  /**
+   * Lock the value's TYPE: keep the type-indicator button (it still shows which
+   * type the value holds) but suppress its type-pick menu, so the type can't be
+   * recast. Used by the run-parameters prompt, where each field's type is fixed
+   * by the input node's declared param type — the user supplies a VALUE, not a
+   * new type.
+   */
+  lockType?: boolean | undefined
 }
 
 /**
@@ -218,7 +228,8 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
   variables = [],
   helpers = [],
   expressionVariableId,
-  dataTestId
+  dataTestId,
+  lockType
 }) => {
   const { t } = useTranslation()
 
@@ -281,7 +292,7 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
       <TypeIndicator
         icon={o.icon}
         ariaLabel={o.ariaLabel}
-        onMenuOpen={openMenu}
+        {...(!lockType && { onMenuOpen: openMenu })}
         {...(dataTestId && { dataTestId: `${dataTestId}-value-type-${o.typeTestid}` })}
       />
     </ControlGroup>
@@ -682,7 +693,8 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
   return (
     <>
       {widget}
-      {createPortal(
+      {/* No type-pick menu when the type is locked — the indicator is inert. */}
+      {!lockType && createPortal(
         // Portal up to the `.workbench` root: `ContextMenu` is `position: fixed`,
         // but inside the scenario editor a React Flow ancestor carries a CSS
         // `transform` (pan/zoom) that would re-anchor `fixed` to that transformed

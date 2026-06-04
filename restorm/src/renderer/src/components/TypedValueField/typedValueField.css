@@ -24,3 +24,10 @@
   border-bottom-right-radius: 0 !important;
   border-right-color: transparent !important;
 }
+
+/* A type-locked field (e.g. the run-parameters prompt): the indicator button
+ * stays so the icon still tells the user which type to enter, but it opens no
+ * menu — drop the clickable affordance so it doesn't read as interactive. */
+.tvf-type-indicator-locked {
+  cursor: default;
+}

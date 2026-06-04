@@ -116,6 +116,7 @@ export const ScenarioInputPrompt: React.FC<ScenarioInputPromptProps> = ({ pendin
                 value={values[p.requestId] ?? seedTypedValue(p.valueType, p.defaultValue)}
                 onChange={(next) => { setValues((prev) => ({ ...prev, [p.requestId]: next })) }}
                 valueTypeGroups={valueTypeGroups}
+                lockType
                 dataTestId={`scn-input-prompt-${p.name}`}
               />
             </div>

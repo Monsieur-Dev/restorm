@@ -7,13 +7,14 @@ Feature: Scenario run-log end-to-end
   matches a committed golden. This guards the whole run-log pipeline (engine
   events → renderer run-log → YAML copy), not just a pure function.
 
-  These are LEAF scenarios. The orchestrator (Main) is NOT run-log tested: even
-  though its sub-scenario CALLS are serialized (chained `done`→`in`) and each
-  runScenario now fires its continuation exactly once (see the runScenarioExecutor
-  fix that dropped the redundant `done` emission), the NODES inside a sub-scenario
-  still run concurrently in the data-driven engine — e.g. Inputs/outputs' three
-  independent `output` nodes — so their entries interleave non-deterministically
-  in Main's merged log. Main's static suggestions ARE covered (scenario-suggestions).
+  Logs / Arithmetics / Loops / Inputs/outputs / Conditions are LEAF scenarios.
+  Main is the ORCHESTRATOR — it chains all five sub-scenarios (`done`→`in`) and
+  its merged run-log interleaves the sub-runs' entries with its own. That merge
+  is ordered by a monotonic per-emission `seq` (not the millisecond `ts`), so a
+  sub-run entry and its parent's post-call entry keep their causal order even
+  when they share a millisecond — making Main's log deterministic and snapshot-
+  testable. (Before `seq`, the ts-only sort tie-broke arbitrarily and Main's log
+  was non-deterministic, which is why it used to be excluded here.)
 
   Scenario Outline: The <scenario> scenario run-log matches the snapshot
     Given I open the scenarios reference-tests sample
@@ -27,3 +28,4 @@ Feature: Scenario run-log end-to-end
       | Loops          |
       | Inputs/outputs |
       | Conditions     |
+      | Main           |
