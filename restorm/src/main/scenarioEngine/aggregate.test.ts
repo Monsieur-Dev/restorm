@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { Scheduler } from './scheduler'
 import type { NodeExecutor, ScenarioModel } from './types'
 import { forEachExecutor, aggregateExecutor } from './executors/timeAndFlowExecutors'
+import { setVariableExecutor } from './executors/pureExecutors'
 
 /**
  * AC: "ForEach ∥ et séquentiel testés ; Aggregate collecte à la fermeture de
@@ -240,5 +241,39 @@ describe('AC3 — Aggregate scope-close collection', () => {
     expect(fired).toBe(1)
     expect(s.status().state).toBe('failed')
     expect(result).toBeUndefined()
+  })
+})
+
+describe('plain aggregate (non-streaming) over a variable list', () => {
+  it('counts a variable holding an array, triggered by a plain (non-loop) `done`', async () => {
+    // A variable holds a real list; an aggregate(items = that variable) is
+    // triggered by the setVariable's UNIVERSAL `done` port. That `done` must
+    // keep the aggregate a plain array-reduce — it used to be mis-flagged as a
+    // loop collector (any `done` source), collect nothing → empty result. And
+    // the `items` variable reference must resolve to the live array.
+    const scenario = buildScenario(
+      [
+        { id: 'src', kind: 'now', outputs: ['value'] },
+        { id: 'sv', kind: 'setVariable', inputs: ['in', 'value'], outputs: [], config: { name: 'PetColors' } },
+        { id: 'agg', kind: 'aggregate', inputs: ['items', 'in'], outputs: ['result'], config: { op: 'count', items: { type: 'variable', value: 'PetColors' } } },
+        { id: 'sink', kind: 'object', inputs: ['result'], outputs: [] }
+      ],
+      [
+        { from: ['src', 'value'], to: ['sv', 'value'] },
+        { from: ['sv', 'done'], to: ['agg', 'in'] },
+        { from: ['agg', 'result'], to: ['sink', 'result'] }
+      ]
+    )
+    let result: unknown
+    const executors = new Map<string, NodeExecutor>([
+      ['src', () => ({ outputs: [{ port: 'value', value: ['Vert', 'Bleu', 'Rouge'] }] })],
+      ['sv', setVariableExecutor],
+      ['agg', aggregateExecutor],
+      ['sink', (act) => { result = act.inputs['result']; return { outputs: [] } }]
+    ])
+    const s = new Scheduler({ scenario, executors })
+    await s.run()
+    expect(s.status().state).toBe('completed')
+    expect(result).toBe(3)
   })
 })

@@ -2503,10 +2503,8 @@
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] start aggregate
   data:
-    items: []
-    __aggregate:
-      total: 0
-      missingIndices: []
+    items: Vert,Bleu
+    in: true
 - message: ⚪ [<time>] done aggregate
   data:
     result: 0

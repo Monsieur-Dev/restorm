@@ -6,7 +6,7 @@
 
 import Handlebars from 'handlebars'
 import type { NodeExecutor } from '../types'
-import { literalConfigItems, applyListOp } from '../../../shared/utils/scenarioStaticPreview'
+import { resolveConfigItems, applyListOp } from '../../../shared/utils/scenarioStaticPreview'
 import { compareValues, hintFromConfig, resolveOperand, type OperandHint } from '../conditionEval'
 
 /** A wired operand's kind is inferred from its value (pass no hint); an inline
@@ -251,7 +251,7 @@ export const assertExecutor: NodeExecutor = (act, ctx) => {
  * uses, so runtime and preview can never drift (the node persists `expression`,
  * not a bare property key). */
 export const mapExecutor: NodeExecutor = (act, ctx) => {
-  const items = Array.isArray(act.inputs['items']) ? act.inputs['items'] : (literalConfigItems(ctx.node.config) ?? [])
+  const items = Array.isArray(act.inputs['items']) ? act.inputs['items'] : (resolveConfigItems(ctx.node.config, ctx.variables) ?? [])
   const out = applyListOp(ctx.node, items) ?? {}
   const mapped = Array.isArray(out['mapped']) ? out['mapped'] : items
   return { outputs: [{ port: 'mapped', value: mapped }] }
@@ -263,7 +263,7 @@ export const mapExecutor: NodeExecutor = (act, ctx) => {
  * runtime and preview can never drift (the node persists `field`, not the
  * legacy `property`). */
 export const filterExecutor: NodeExecutor = (act, ctx) => {
-  const items = Array.isArray(act.inputs['items']) ? act.inputs['items'] : (literalConfigItems(ctx.node.config) ?? [])
+  const items = Array.isArray(act.inputs['items']) ? act.inputs['items'] : (resolveConfigItems(ctx.node.config, ctx.variables) ?? [])
   const out = applyListOp(ctx.node, items) ?? {}
   const kept = Array.isArray(out['kept']) ? out['kept'] : []
   const rejected = Array.isArray(out['rejected']) ? out['rejected'] : []

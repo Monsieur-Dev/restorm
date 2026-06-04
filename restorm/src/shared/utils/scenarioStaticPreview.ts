@@ -249,11 +249,36 @@ export function resolveItems(
  * `filter` / `aggregate`) so an unwired list box iterates over its
  * configured items instead of nothing. */
 export function literalConfigItems(cfg: Record<string, unknown>): unknown[] | null {
-  const lit = cfg['items']
-  if (lit && typeof lit === 'object') {
-    const p = lit as { type?: unknown; labels?: unknown; value?: unknown }
+  return listValueArray(cfg['items'])
+}
+
+/** The ARRAY form of a list-typed value: a `customListMulti` yields its picked
+ * labels, an `enumList` its values. `null` for anything else. A multi-select IS
+ * a list, so this is its data representation — distinct from `concreteValue`,
+ * which joins it to a display string. */
+export function listValueArray(v: unknown): unknown[] | null {
+  if (v && typeof v === 'object') {
+    const p = v as { type?: unknown; labels?: unknown; value?: unknown }
     if (p.type === 'customListMulti' && Array.isArray(p.labels)) return p.labels as unknown[]
     if (p.type === 'enumList' && Array.isArray(p.value)) return p.value as unknown[]
+  }
+  return null
+}
+
+/** Runtime `items` resolution for the list boxes (`forEach` / `map` / `filter`
+ * / `aggregate`): a literal list value, OR a `variable` reference whose LIVE
+ * value is an array (so `setVariable list → aggregate over that variable`
+ * works). `null` when nothing list-like is configured. The variable arm needs
+ * the run's `variables`; the static preview passes none and gets the literal
+ * arm only. */
+export function resolveConfigItems(cfg: Record<string, unknown>, variables?: ReadonlyMap<string, unknown>): unknown[] | null {
+  const lit = listValueArray(cfg['items'])
+  if (lit) return lit
+  const raw = cfg['items']
+  if (raw && typeof raw === 'object' && (raw as { type?: unknown }).type === 'variable' && variables) {
+    const name = (raw as { value?: unknown }).value
+    const v = typeof name === 'string' ? variables.get(name) : undefined
+    if (Array.isArray(v)) return v as unknown[]
   }
   return null
 }

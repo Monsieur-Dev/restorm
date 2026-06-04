@@ -902,12 +902,17 @@ export class Scheduler {
       srcs.add(`${e.from.nodeId}:${e.from.portId}`)
       byPort.set(e.to.portId, srcs)
       this.incomingSourcesByNodePort.set(e.to.nodeId, byPort)
-      // An `aggregate` fed by a loop's `done` port is a scope-close collector:
-      // `done` only exists on `forEach` / `for`, so this edge marks the
-      // aggregate as streaming (collect per iteration, fire once on close).
+      // An `aggregate` fed by a LOOP's `done` port is a scope-close collector
+      // (collect per iteration, fire once on close). Gate on the SOURCE kind:
+      // the universal `done` port now exists on every box, so a plain
+      // `setVariable.done → aggregate.in` must stay a normal array-reduce — not
+      // a streaming collector that finds no iterations and yields nothing.
       if (e.from.portId === 'done') {
         const target = this.scenario.nodes.find((n) => n.id === e.to.nodeId)
-        if (target?.kind === 'aggregate') this.streamingAggregates.add(target.id)
+        const source = this.scenario.nodes.find((n) => n.id === e.from.nodeId)
+        if (target?.kind === 'aggregate' && (source?.kind === 'forEach' || source?.kind === 'for')) {
+          this.streamingAggregates.add(target.id)
+        }
       }
     }
   }

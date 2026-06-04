@@ -6,7 +6,7 @@
  */
 
 import type { NodeExecutor } from '../types'
-import { literalConfigItems, concreteValue } from '../../../shared/utils/scenarioStaticPreview'
+import { resolveConfigItems, concreteValue } from '../../../shared/utils/scenarioStaticPreview'
 import { compareValues } from '../conditionEval'
 
 /** Wait node: sleep for `durationMs` (from input or config). Aborts
@@ -126,7 +126,7 @@ export const forEachExecutor: NodeExecutor = (act, ctx) => {
   // still fans out over its picked items instead of doing nothing.
   const items: unknown[] = Array.isArray(act.inputs['items'])
     ? act.inputs['items']
-    : (literalConfigItems(ctx.node.config) ?? [])
+    : (resolveConfigItems(ctx.node.config, ctx.variables) ?? [])
   // Bounded concurrency: N = the parallelism count (1 when parallelism
   // is off → strictly sequential batches of 1). The scheduler opens at
   // most N item-scopes at a time and slides the window forward as each
@@ -163,7 +163,7 @@ export const aggregateExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { op?: 'count' | 'sum' | 'min' | 'max' | 'average' | 'join'; field?: string; separator?: string }
   const items: unknown[] = Array.isArray(act.inputs['items'])
     ? act.inputs['items']
-    : (literalConfigItems(ctx.node.config) ?? [])
+    : (resolveConfigItems(ctx.node.config, ctx.variables) ?? [])
   const meta = act.inputs['__aggregate'] as { total: number; missingIndices: number[] } | undefined
   if (meta && meta.missingIndices.length > 0) {
     throw new Error(`aggregate: ${meta.missingIndices.length} of ${meta.total} iteration(s) produced no result (indices ${meta.missingIndices.join(', ')})`)
