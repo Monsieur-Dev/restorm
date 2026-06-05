@@ -36,7 +36,7 @@ collections:
         id: a1000000-0000-0000-0000-00000000auth
         name: Login
         method: POST
-        url: '{{baseUrl}}/login'
+        url: '{{baseUrl}}/login?probe=1'
         headers:
           - key: Content-Type
             enabled: true
@@ -47,11 +47,8 @@ collections:
         pathParams: []
         body:
           type: text
+          content: '{"client_id":"{{clientId}}"}'
           contentType: application/json
-          text: |
-            {
-              "client_id": "{{clientId}}"
-            }
         producedHeaders:
           - key: Authorization
             enabled: true
@@ -383,8 +380,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1620
-                  'y': 880
+                  x: 580
+                  'y': 1020
               - id: 98ba2f6d-ef0a-42b4-9c38-9dacfaef1582
                 kind: runScenario
                 config:
@@ -402,8 +399,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1840
-                  'y': 880
+                  x: 800
+                  'y': 1020
               - id: 35b1f372-380f-4274-8db2-5f4e9ad0d7bf
                 kind: runScenario
                 config:
@@ -421,8 +418,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 2060
-                  'y': 880
+                  x: 1020
+                  'y': 1020
               - id: eecb3bb4-6cb7-4179-809e-52834891a835
                 kind: runScenario
                 config:
@@ -440,8 +437,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 2280
-                  'y': 880
+                  x: 1240
+                  'y': 1020
               - id: 7e852f31-d7df-4e7b-9278-f88df6656850
                 kind: runScenario
                 config:
@@ -459,8 +456,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 2520
-                  'y': 880
+                  x: 580
+                  'y': 1160
               - id: 7b8355af-9f3e-43cd-96e4-4b7685a84b93
                 kind: runScenario
                 config:
@@ -478,8 +475,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 2760
-                  'y': 880
+                  x: 820
+                  'y': 1160
               - id: 56ca0175-a6fd-4653-88f9-7be393a23075
                 kind: runScenario
                 config:
@@ -497,8 +494,27 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 2980
-                  'y': 880
+                  x: 1040
+                  'y': 1160
+              - id: 83d62b4f-0a3e-46da-9e50-712459bbf736
+                kind: runScenario
+                config:
+                  scenarioId: 53efa407-dfb5-4ce9-be03-738ad44a02c1
+                  label: Auth login
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 4340
+                  'y': 740
             edges:
               - id: e-1780418276241-f2q3hz
                 from:
@@ -627,6 +643,13 @@ collections:
                   portId: done
                 to:
                   nodeId: 56ca0175-a6fd-4653-88f9-7be393a23075
+                  portId: in
+              - id: abc2b4f6-5876-4a9b-8350-ec228761cae0
+                from:
+                  nodeId: 56ca0175-a6fd-4653-88f9-7be393a23075
+                  portId: done
+                to:
+                  nodeId: 83d62b4f-0a3e-46da-9e50-712459bbf736
                   portId: in
             id: c1573ce0-985c-44b5-b5d4-e081de2d4303
             name: Main
@@ -12655,8 +12678,8 @@ collections:
                     to:
                       nodeId: 2f59a72e-0cfe-4385-a98b-7eb9b3829f8d
                       portId: in
-                name: Crypto
                 id: 1fdd8d40-4e34-4918-8ee2-c0afd4754b15
+                name: Crypto
                 items: []
               - type: scenario
                 tags: []
@@ -12775,8 +12798,8 @@ collections:
                     to:
                       nodeId: 2c65da54-e217-4126-ad50-c2cce29b4442
                       portId: in
-                name: JWT
                 id: b98de5ac-3cc6-48c1-9bbb-39f3cf9d7ca8
+                name: JWT
                 items: []
               - type: scenario
                 tags: []
@@ -12971,8 +12994,8 @@ collections:
                     to:
                       nodeId: 15c6c741-b8b2-4888-ba01-bf16909785fb
                       portId: in
-                name: DateTime
                 id: b1b5b19c-5eca-4c7b-aa0e-112541ebaa08
+                name: DateTime
                 items: []
               - type: scenario
                 tags: []
@@ -13184,8 +13207,8 @@ collections:
                     to:
                       nodeId: fa83b7fb-ecc8-469c-8fce-094337c6771a
                       portId: in
-                name: XML
                 id: 828d1a5b-4bac-46ad-b7f7-69b80234202d
+                name: XML
                 items: []
               - type: scenario
                 tags: []
@@ -13485,8 +13508,304 @@ collections:
                     to:
                       nodeId: 7ac69db1-b1b4-4425-bef6-e269228c99c1
                       portId: in
-                name: YAML
                 id: 1effb862-a658-4af4-9d5c-c1c8c5cb2ed1
+                name: YAML
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: f907d98d-0ded-4c90-88c1-fb6c24c4eee1
+                    kind: httpRequest
+                    config:
+                      requestId: d2000000-0000-0000-0000-00000000auth
+                      label: Get Pet by Id
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: env
+                        name: env
+                        dataType: any
+                        flow: value
+                    outputs:
+                      - id: response
+                        name: response
+                        dataType: response
+                        role: response
+                        flow: both
+                    position:
+                      x: 720
+                      'y': 40
+                    note: auth route → auto-login (probe, non-blocking)
+                  - id: 80722418-1020-43e8-aa44-c80eb927e71f
+                    kind: httpRequest
+                    config:
+                      requestId: 638797b2-2101-4a85-8d17-713fb43c3334
+                      label: Clear Logs
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: env
+                        name: env
+                        dataType: any
+                        flow: value
+                    outputs:
+                      - id: response
+                        name: response
+                        dataType: response
+                        role: response
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 40
+                    note: reset call log + probe
+                  - id: 9736938e-20c0-4d6c-910f-c45b578b1ce7
+                    kind: httpRequest
+                    config:
+                      requestId: 268e8d63-6d7c-431f-81fa-5ab6c984c784
+                      label: Clear Tokens
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: env
+                        name: env
+                        dataType: any
+                        flow: value
+                    outputs:
+                      - id: response
+                        name: response
+                        dataType: response
+                        role: response
+                        flow: both
+                    position:
+                      x: 380
+                      'y': 40
+                    note: force re-login (clear server tokens)
+                  - id: 1a104c98-6533-47c4-8410-5b0c911171a5
+                    kind: assert
+                    config:
+                      operator: contains
+                      b:
+                        type: string
+                        value: Rex
+                      message: Get Pet by Id should return Rex
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1100
+                      'y': 40
+                    note: assert response body contains Rex
+                  - id: f6a6ad25-7ce8-44e2-ad7a-229d01761305
+                    kind: httpRequest
+                    config:
+                      requestId: e633f808-9fea-4235-9433-d92112ffa2e6
+                      label: Login Probe
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: env
+                        name: env
+                        dataType: any
+                        flow: value
+                    outputs:
+                      - id: response
+                        name: response
+                        dataType: response
+                        role: response
+                        flow: both
+                    position:
+                      x: 1480
+                      'y': 40
+                    note: GET /loginprobe
+                  - id: dfb1c016-ad08-4abd-89c2-6d442796a195
+                    kind: assert
+                    config:
+                      operator: contains
+                      b:
+                        type: string
+                        value: 'probe login: VALID_CLIENT_ID -> 200'
+                      message: Login route should have been called
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: a
+                        name: actual
+                        dataType: any
+                      - id: b
+                        name: expected
+                        dataType: any
+                    outputs:
+                      - id: then
+                        name: pass
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: else
+                        name: fail
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 1860
+                      'y': 40
+                    note: assert the login route was called
+                  - id: b81ce485-ba51-4911-b4c8-a686cbea2356
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: Login triggered by Get Pet by Id
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1860
+                      'y': 360
+                  - id: 0f20328c-0205-4069-a7bd-e553152689dc
+                    kind: log
+                    config:
+                      level: error
+                      message:
+                        type: string
+                        value: Get Pet by Id did not return Rex
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1100
+                      'y': 360
+                  - id: d2b77b6e-395c-4d9a-afed-58ad9a26149a
+                    kind: log
+                    config:
+                      level: error
+                      message:
+                        type: string
+                        value: login was not triggered
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1860
+                      'y': 600
+                edges:
+                  - id: 90c08ac6-057c-4a6e-882a-500c150f9370
+                    from:
+                      nodeId: 80722418-1020-43e8-aa44-c80eb927e71f
+                      portId: done
+                    to:
+                      nodeId: 9736938e-20c0-4d6c-910f-c45b578b1ce7
+                      portId: in
+                  - id: c8f4637d-963f-4374-85f1-a2ebdde0dc97
+                    from:
+                      nodeId: 9736938e-20c0-4d6c-910f-c45b578b1ce7
+                      portId: done
+                    to:
+                      nodeId: f907d98d-0ded-4c90-88c1-fb6c24c4eee1
+                      portId: in
+                  - id: 5ebcd022-1adf-4638-b54d-b8bee9d3756d
+                    from:
+                      nodeId: f907d98d-0ded-4c90-88c1-fb6c24c4eee1
+                      portId: response
+                    to:
+                      nodeId: 1a104c98-6533-47c4-8410-5b0c911171a5
+                      portId: a
+                    selector: response.body
+                  - id: 2f897e57-97f6-4e8e-891e-469018c3b243
+                    from:
+                      nodeId: 1a104c98-6533-47c4-8410-5b0c911171a5
+                      portId: then
+                    to:
+                      nodeId: f6a6ad25-7ce8-44e2-ad7a-229d01761305
+                      portId: in
+                  - id: 8d77f0a2-b304-4ddc-83b8-10e1c9add22b
+                    from:
+                      nodeId: 1a104c98-6533-47c4-8410-5b0c911171a5
+                      portId: else
+                    to:
+                      nodeId: 0f20328c-0205-4069-a7bd-e553152689dc
+                      portId: in
+                  - id: a74d1dce-22bd-4963-b2dd-fd659596833a
+                    from:
+                      nodeId: f6a6ad25-7ce8-44e2-ad7a-229d01761305
+                      portId: response
+                    to:
+                      nodeId: dfb1c016-ad08-4abd-89c2-6d442796a195
+                      portId: a
+                    selector: response.body
+                  - id: 8f2668fe-f3a6-474b-8832-2a195673316f
+                    from:
+                      nodeId: dfb1c016-ad08-4abd-89c2-6d442796a195
+                      portId: then
+                    to:
+                      nodeId: b81ce485-ba51-4911-b4c8-a686cbea2356
+                      portId: in
+                  - id: 2e9dc9ae-6d3c-4a34-8b9b-eb8eb9f20295
+                    from:
+                      nodeId: dfb1c016-ad08-4abd-89c2-6d442796a195
+                      portId: else
+                    to:
+                      nodeId: d2b77b6e-395c-4d9a-afed-58ad9a26149a
+                      portId: in
+                name: Auth login
+                id: 53efa407-dfb5-4ce9-be03-738ad44a02c1
                 items: []
         id: f1000000-0000-0000-0000-00000000auth
         name: Pet API
@@ -13501,6 +13820,28 @@ collections:
         pathParams: []
         deprecated: false
         type: http
+      - documentation: ''
+        tags: []
+        name: Clear Logs
+        method: POST
+        url: '{{baseUrl}}/clear_logs'
+        headers: []
+        params: []
+        pathParams: []
+        deprecated: false
+        type: http
+        id: 638797b2-2101-4a85-8d17-713fb43c3334
+      - documentation: ''
+        tags: []
+        name: Login Probe
+        method: GET
+        url: '{{baseUrl}}/loginprobe'
+        headers: []
+        params: []
+        pathParams: []
+        deprecated: false
+        type: http
+        id: e633f808-9fea-4235-9433-d92112ffa2e6
     id: a0000000-0000-0000-0000-00000000auth
     name: Auth Service
     customValueLists:

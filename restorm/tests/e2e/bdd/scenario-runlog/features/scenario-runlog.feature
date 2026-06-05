@@ -36,4 +36,5 @@ Feature: Scenario run-log end-to-end
       | DateTime       |
       | XML            |
       | YAML           |
+      | Auth login     |
       | Main           |

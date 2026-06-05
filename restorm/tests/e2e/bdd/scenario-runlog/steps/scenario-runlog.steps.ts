@@ -58,7 +58,16 @@ async function expandRowIfCollapsed(p: Page, name: string): Promise<void> {
  * `log` of the current time, or the engine's error context). Placeholdered so
  * the golden stays stable; config-embedded dates live under OTHER keys (e.g.
  * `BTTFArrivalDate`) and are left intact so real value regressions surface. */
-const DYNAMIC_TIME_KEYS = new Set(['timestamp', 'now', 'startedAt', 'finishedAt', 'endedAt', 'completedAt'])
+const DYNAMIC_TIME_KEYS = new Set([
+  'timestamp', 'now', 'startedAt', 'finishedAt', 'endedAt', 'completedAt',
+  // HTTP-response noise stamped per run (an httpRequest node logs its full
+  // response): the round-trip latency and the server `Date` header.
+  'durationMs', 'date'
+])
+
+/** Header keys whose value is a per-run secret (a freshly-issued Bearer token an
+ * auth route attaches) — masked so the auth-scenario golden stays stable. */
+const MASKED_VALUE_KEYS = new Set(['authorization'])
 
 /** The copied message is `<emoji> [<date>] <text>`; the bracketed run-time would
  * make the golden flaky. Replace just that leading date bracket. */
@@ -73,7 +82,9 @@ function normalizeData(v: unknown): unknown {
   if (v !== null && typeof v === 'object') {
     const out: Record<string, unknown> = {}
     for (const [k, val] of Object.entries(v as Record<string, unknown>)) {
-      out[k] = DYNAMIC_TIME_KEYS.has(k) ? '<dynamic-time>' : normalizeData(val)
+      if (DYNAMIC_TIME_KEYS.has(k)) out[k] = '<dynamic-time>'
+      else if (MASKED_VALUE_KEYS.has(k.toLowerCase())) out[k] = '<masked>'
+      else out[k] = normalizeData(val)
     }
     return out
   }
