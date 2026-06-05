@@ -5,10 +5,17 @@ import { logger } from 'electron-core-ui'
 
 /**
  * Where running restorm instances drop their per-pid lockfile so MCP
- * launchers can find them. Kept under `os.tmpdir()` so it's
- * cross-platform and self-cleaning on reboot.
+ * launchers can find them. `RESTORM_MCP_DIR` pins it to a fixed path; unset, it
+ * falls back to `os.tmpdir()` (cross-platform, self-cleaning on reboot).
+ *
+ * The resolution MUST stay identical to `DISCOVERY_DIR` in
+ * `scripts/mcp-launcher.mjs`: the launcher and restorm rendezvous here. When an
+ * embedder launches restorm with a `TMPDIR` different from the launcher's, the
+ * two `os.tmpdir()` values diverge and discovery silently fails — exporting the
+ * same `RESTORM_MCP_DIR` to both removes that race.
  */
-export const MCP_DISCOVERY_DIR = join(tmpdir(), 'restorm-mcp')
+const RESTORM_MCP_DIR = process.env.RESTORM_MCP_DIR?.trim()
+export const MCP_DISCOVERY_DIR = RESTORM_MCP_DIR !== undefined && RESTORM_MCP_DIR !== '' ? RESTORM_MCP_DIR : join(tmpdir(), 'restorm-mcp')
 
 export interface McpDiscoveryEntry {
   /** OS-picked port the MCP HTTP server is bound to. */

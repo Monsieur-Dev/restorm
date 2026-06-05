@@ -55,8 +55,18 @@ const HTTP_PROBE_TIMEOUT_MS = 800
 const PROTOCOL_VERSION = '2025-03-26'
 
 // Where running restorm instances drop their per-pid lockfile. Must
-// match `MCP_DISCOVERY_DIR` in `restorm/src/main/services/mcpDiscovery.ts`.
-const DISCOVERY_DIR = join(tmpdir(), 'restorm-mcp')
+// match `MCP_DISCOVERY_DIR` in `restorm/src/main/services/mcpDiscovery.ts`
+// — the launcher and restorm rendezvous here, so the resolution MUST be
+// identical on both sides.
+//
+// `RESTORM_MCP_DIR` pins it to a fixed, deterministic path. When an embedder
+// (Claude Code / Cursor / Windsurf) launches restorm OUT OF BAND — i.e. not via
+// our own `spawnRestormDetached`, which would share this process's env — the two
+// sides otherwise resolve `os.tmpdir()` independently and can diverge (a shell
+// that overrides `TMPDIR` writes the lockfile somewhere the launcher never
+// looks). Setting the SAME `RESTORM_MCP_DIR` for both removes that race. Unset
+// → the cross-platform, self-cleaning `os.tmpdir()` default (unchanged).
+const DISCOVERY_DIR = process.env.RESTORM_MCP_DIR?.trim() || join(tmpdir(), 'restorm-mcp')
 
 // Last `tools/list` restorm actually returned, persisted so the next session
 // can answer `tools/list` (while restorm is still down) with the real, current
@@ -67,7 +77,9 @@ const DISCOVERY_DIR = join(tmpdir(), 'restorm-mcp')
 // Deliberately a SIBLING of DISCOVERY_DIR, not a file inside it: that dir holds
 // per-pid `*.json` lockfiles and the launcher GCs any `.json` there without a
 // live pid — a cache file living inside would be swept on the next relaunch.
-const TOOLS_CACHE_FILE = join(tmpdir(), 'restorm-mcp-tools-cache.json')
+// Derived from DISCOVERY_DIR so it follows the same `RESTORM_MCP_DIR` override
+// (default `/…/restorm-mcp` → `/…/restorm-mcp-tools-cache.json`, as before).
+const TOOLS_CACHE_FILE = `${DISCOVERY_DIR}-tools-cache.json`
 
 // Resolved at runtime — restorm picks a free OS port at boot and
 // announces it via the lockfile. `null` means we haven't discovered
