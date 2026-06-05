@@ -6,6 +6,8 @@ import { readOutputDecls } from '../scenarioOutputDecls'
 import { STATIC_PREVIEW_KINDS } from '../scenarioNodeCapabilities'
 import { compareValues as compareValuesShared } from '../scenarioComparison'
 import { castValue, isScenarioCastType } from '../scenarioCast'
+import { applyRegex, isRegexOp } from '../scenarioRegex'
+import { applyJson, isJsonOp } from '../scenarioJson'
 import { LIST_MUTATION_DEFAULT_VALUE_ID } from '../scenarioListMutationValues'
 
 // Register the full helper suite on first import so a chained `transform`
@@ -912,6 +914,36 @@ export function staticScenarioPreview(
       const target = isScenarioCastType(cfg['targetType']) ? cfg['targetType'] : 'string'
       try {
         return { result: castValue(value, target) }
+      } catch {
+        return null
+      }
+    }
+    case 'regex': {
+      // Run the configured op over the resolved `value` via the SHARED
+      // `applyRegex` — the SAME implementation the runtime calls. An invalid
+      // pattern THROWS (runtime → `error`); the preview catches it → no result.
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      if (value === undefined) return null
+      const op = isRegexOp(cfg['op']) ? cfg['op'] : 'extract'
+      const pattern = typeof cfg['pattern'] === 'string' ? cfg['pattern'] : ''
+      const flags = typeof cfg['flags'] === 'string' ? cfg['flags'] : ''
+      const replacement = typeof cfg['replacement'] === 'string' ? cfg['replacement'] : ''
+      try {
+        return { result: applyRegex(value, op, pattern, flags, replacement) }
+      } catch {
+        return null
+      }
+    }
+    case 'json': {
+      // Parse / stringify the resolved `value` via the SHARED `applyJson` — the
+      // SAME implementation the runtime calls. Malformed JSON / non-serialisable
+      // value THROWS (runtime → `error`); the preview catches it → no result.
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      if (value === undefined) return null
+      const op = isJsonOp(cfg['op']) ? cfg['op'] : 'parse'
+      const indent = typeof cfg['indent'] === 'number' ? cfg['indent'] : 0
+      try {
+        return { result: applyJson(value, op, indent) }
       } catch {
         return null
       }

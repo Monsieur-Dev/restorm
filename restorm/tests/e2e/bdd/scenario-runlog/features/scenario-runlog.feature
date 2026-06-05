@@ -29,4 +29,6 @@ Feature: Scenario run-log end-to-end
       | Inputs/outputs |
       | Conditions     |
       | Casts          |
+      | Regex          |
+      | JSON           |
       | Main           |

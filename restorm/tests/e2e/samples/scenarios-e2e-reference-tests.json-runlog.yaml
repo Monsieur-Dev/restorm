@@ -1,0 +1,94 @@
+- message: 🔵 [<time>] ▶ JSON
+- message: ⚪ [<time>] start json
+  data:
+    op: parse
+    value: '{"a":1,"b":[2,3]}'
+- message: ⚪ [<time>] done json
+  data:
+    result:
+      a: 1
+      b:
+        - 2
+        - 3
+- message: ⚪ [<time>] start json
+  data:
+    op: parse
+    value: "42"
+    in: true
+- message: ⚪ [<time>] done json
+  data:
+    result: 42
+- message: ⚪ [<time>] start json
+  data:
+    op: parse
+    value: "[1,2,3]"
+    in: true
+- message: ⚪ [<time>] done json
+  data:
+    result:
+      - 1
+      - 2
+      - 3
+- message: ⚪ [<time>] start json
+  data:
+    op: stringify
+    value:
+      - 1
+      - 2
+      - 3
+    in: true
+- message: ⚪ [<time>] done json
+  data:
+    result: "[1,2,3]"
+- message: ⚪ [<time>] start json
+  data:
+    op: stringify
+    indent: 2
+    value:
+      - 1
+      - 2
+    in: true
+- message: ⚪ [<time>] done json
+  data:
+    result: |-
+      [
+        1,
+        2
+      ]
+- message: ⚪ [<time>] start json
+  data:
+    op: parse
+    value: '{"name":"Glaude","age":42}'
+    in: true
+- message: ⚪ [<time>] done json
+  data:
+    result:
+      name: Glaude
+      age: 42
+- message: ⚪ [<time>] start json
+  data:
+    op: stringify
+    value:
+      name: Glaude
+      age: 42
+- message: ⚪ [<time>] done json
+  data:
+    result: '{"name":"Glaude","age":42}'
+- message: ⚪ [<time>] start json
+  data:
+    op: parse
+    value: "{bad}"
+    in: true
+- message: 🔴 [<time>] Expected property name or '}' in JSON at position 1 (line 1
+    column 2)
+- message: ⚪ [<time>] start log
+  data:
+    level: error
+    message: "json error: malformed JSON"
+    in:
+      message: Expected property name or '}' in JSON at position 1 (line 1 column 2)
+      startedAt: <dynamic-time>
+- message: "🔴 [<time>] json error: malformed JSON"
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ JSON

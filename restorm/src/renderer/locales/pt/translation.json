@@ -856,7 +856,9 @@
       "getVariable": "Obter variável",
       "addToList": "Adicionar à lista",
       "removeFromList": "Remover da lista",
-      "cast": "Converter"
+      "cast": "Converter",
+      "regex": "Regex",
+      "json": "JSON"
     },
     "comparator": {
       "result": "resultado"
@@ -1042,6 +1044,36 @@
         "boolean": "booleano",
         "date": "data",
         "list": "lista"
+      }
+    },
+    "regex": {
+      "value": "valor",
+      "operation": "operação",
+      "pattern": "padrão",
+      "flags": "flags",
+      "replacement": "substituição",
+      "result": "resultado",
+      "op": {
+        "extract": "extrair",
+        "extractAll": "extrair tudo",
+        "test": "testar",
+        "replace": "substituir",
+        "split": "dividir"
+      },
+      "flag": {
+        "i": "Sem distinção de maiúsculas",
+        "m": "Multilinha (^ e $ por linha)",
+        "s": "Dotall (. inclui quebras de linha)"
+      }
+    },
+    "json": {
+      "value": "valor",
+      "operation": "operação",
+      "indent": "indentação",
+      "result": "resultado",
+      "op": {
+        "parse": "analisar",
+        "stringify": "serializar"
       }
     }
   }

@@ -25,7 +25,9 @@ import {
   addToListExecutor,
   removeFromListExecutor,
   transformExecutor,
-  castExecutor
+  castExecutor,
+  regexExecutor,
+  jsonExecutor
 } from './pureExecutors'
 import {
   waitExecutor,
@@ -160,6 +162,8 @@ function pickExecutor(kind: string): NodeExecutor {
     case 'removeFromList': return removeFromListExecutor
     case 'transform': return transformExecutor
     case 'cast': return castExecutor
+    case 'regex': return regexExecutor
+    case 'json': return jsonExecutor
     case 'wait': return waitExecutor
     case 'waitUntil': return waitUntilExecutor
     case 'forEach': return forEachExecutor

@@ -3293,4 +3293,237 @@
 - message: ⚪ [<time>] done runScenario
   data:
     result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: 333c0aeb-1b4b-47ab-a829-db7e2b344e69
+    label: Regex
+    in: true
+- message: 🔵 [<time>] ▶ Regex
+- message: ⚪ [<time>] start regex
+  data:
+    op: extract
+    pattern: "#(\\d+)"
+    value: "order #12345 shipped"
+- message: ⚪ [<time>] done regex
+  data:
+    result: "12345"
+- message: ⚪ [<time>] start regex
+  data:
+    op: extract
+    pattern: \w+
+    value: hello world
+    in: true
+- message: ⚪ [<time>] done regex
+  data:
+    result: hello
+- message: ⚪ [<time>] start regex
+  data:
+    op: extract
+    pattern: (?<y>\d{4})-(?<m>\d{2})-(?<d>\d{2})
+    value: 2026-06-05
+    in: true
+- message: ⚪ [<time>] done regex
+  data:
+    result:
+      y: "2026"
+      m: "06"
+      d: "05"
+- message: ⚪ [<time>] start regex
+  data:
+    op: extractAll
+    pattern: "[a-z](\\d)"
+    value: a1 b2 c3
+    in: true
+- message: ⚪ [<time>] done regex
+  data:
+    result:
+      - "1"
+      - "2"
+      - "3"
+- message: ⚪ [<time>] start regex
+  data:
+    op: extractAll
+    pattern: (?<key>\w)=(?<val>\d)
+    value: k=1;k=2
+    in: true
+- message: ⚪ [<time>] done regex
+  data:
+    result:
+      - key: k
+        val: "1"
+      - key: k
+        val: "2"
+- message: ⚪ [<time>] start regex
+  data:
+    op: test
+    pattern: \d+
+    value: abc123
+    in: true
+- message: ⚪ [<time>] done regex
+  data:
+    result: true
+- message: ⚪ [<time>] start regex
+  data:
+    op: test
+    pattern: \d+
+    value: abc
+    in: true
+- message: ⚪ [<time>] done regex
+  data:
+    result: false
+- message: ⚪ [<time>] start regex
+  data:
+    op: replace
+    pattern: (\w+) (\w+)
+    replacement: $2 $1
+    value: John Smith
+    in: true
+- message: ⚪ [<time>] done regex
+  data:
+    result: Smith John
+- message: ⚪ [<time>] start regex
+  data:
+    op: replace
+    pattern: (?<y>\d{4})-(?<m>\d{2})-(?<d>\d{2})
+    replacement: $<d>/$<m>/$<y>
+    value: 2026-06-05
+    in: true
+- message: ⚪ [<time>] done regex
+  data:
+    result: 05/06/2026
+- message: ⚪ [<time>] start regex
+  data:
+    op: split
+    pattern: \s*,\s*
+    value: a, b ,c
+    in: true
+- message: ⚪ [<time>] done regex
+  data:
+    result:
+      - a
+      - b
+      - c
+- message: ⚪ [<time>] start regex
+  data:
+    op: extract
+    pattern: (unclosed
+    value: x
+    in: true
+- message: "🔴 [<time>] Invalid regular expression: /(unclosed/: Unterminated group"
+- message: ⚪ [<time>] start log
+  data:
+    level: error
+    message: "regex error: invalid pattern"
+    in:
+      message: "Invalid regular expression: /(unclosed/: Unterminated group"
+      startedAt: <dynamic-time>
+- message: "🔴 [<time>] regex error: invalid pattern"
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ Regex
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: a8df7003-8355-4c28-aa5c-9f8f70c380f7
+    label: JSON
+    in: true
+- message: 🔵 [<time>] ▶ JSON
+- message: ⚪ [<time>] start json
+  data:
+    op: parse
+    value: '{"a":1,"b":[2,3]}'
+- message: ⚪ [<time>] done json
+  data:
+    result:
+      a: 1
+      b:
+        - 2
+        - 3
+- message: ⚪ [<time>] start json
+  data:
+    op: parse
+    value: "42"
+    in: true
+- message: ⚪ [<time>] done json
+  data:
+    result: 42
+- message: ⚪ [<time>] start json
+  data:
+    op: parse
+    value: "[1,2,3]"
+    in: true
+- message: ⚪ [<time>] done json
+  data:
+    result:
+      - 1
+      - 2
+      - 3
+- message: ⚪ [<time>] start json
+  data:
+    op: stringify
+    value:
+      - 1
+      - 2
+      - 3
+    in: true
+- message: ⚪ [<time>] done json
+  data:
+    result: "[1,2,3]"
+- message: ⚪ [<time>] start json
+  data:
+    op: stringify
+    indent: 2
+    value:
+      - 1
+      - 2
+    in: true
+- message: ⚪ [<time>] done json
+  data:
+    result: |-
+      [
+        1,
+        2
+      ]
+- message: ⚪ [<time>] start json
+  data:
+    op: parse
+    value: '{"name":"Glaude","age":42}'
+    in: true
+- message: ⚪ [<time>] done json
+  data:
+    result:
+      name: Glaude
+      age: 42
+- message: ⚪ [<time>] start json
+  data:
+    op: stringify
+    value:
+      name: Glaude
+      age: 42
+- message: ⚪ [<time>] done json
+  data:
+    result: '{"name":"Glaude","age":42}'
+- message: ⚪ [<time>] start json
+  data:
+    op: parse
+    value: "{bad}"
+    in: true
+- message: 🔴 [<time>] Expected property name or '}' in JSON at position 1 (line 1
+    column 2)
+- message: ⚪ [<time>] start log
+  data:
+    level: error
+    message: "json error: malformed JSON"
+    in:
+      message: Expected property name or '}' in JSON at position 1 (line 1 column 2)
+      startedAt: <dynamic-time>
+- message: "🔴 [<time>] json error: malformed JSON"
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ JSON
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
 - message: 🔵 [<time>] ■ Main

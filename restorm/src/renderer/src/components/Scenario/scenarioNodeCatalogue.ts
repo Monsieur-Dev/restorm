@@ -53,6 +53,8 @@ export const SCENARIO_NODE_CATALOGUE: ScenarioNodeKindMeta[] = [
   { kind: 'getVariable', labelKey: 'scenario.nodes.getVariable', defaultLabel: 'Get variable', icon: 'symbol-variable', category: 'compute' },
   { kind: 'transform', labelKey: 'scenario.nodes.transform', defaultLabel: 'Transform template', icon: 'symbol-string', category: 'compute' },
   { kind: 'cast', labelKey: 'scenario.nodes.cast', defaultLabel: 'Cast', icon: 'replace', category: 'compute' },
+  { kind: 'regex', labelKey: 'scenario.nodes.regex', defaultLabel: 'Regex', icon: 'regex', category: 'compute' },
+  { kind: 'json', labelKey: 'scenario.nodes.json', defaultLabel: 'JSON', icon: 'json', category: 'compute' },
   // Utilities
   { kind: 'log', labelKey: 'scenario.nodes.log', defaultLabel: 'Log', icon: 'output', category: 'utility' },
   { kind: 'assert', labelKey: 'scenario.nodes.assert', defaultLabel: 'Assert', icon: 'verified', category: 'utility' }

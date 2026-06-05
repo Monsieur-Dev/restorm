@@ -856,7 +856,9 @@
       "getVariable": "Get variable",
       "addToList": "Add to list",
       "removeFromList": "Remove from list",
-      "cast": "Cast"
+      "cast": "Cast",
+      "regex": "Regex",
+      "json": "JSON"
     },
     "comparator": {
       "result": "result"
@@ -1042,6 +1044,36 @@
         "boolean": "boolean",
         "date": "date",
         "list": "list"
+      }
+    },
+    "regex": {
+      "value": "value",
+      "operation": "operation",
+      "pattern": "pattern",
+      "flags": "flags",
+      "replacement": "replacement",
+      "result": "result",
+      "op": {
+        "extract": "extract",
+        "extractAll": "extract all",
+        "test": "test",
+        "replace": "replace",
+        "split": "split"
+      },
+      "flag": {
+        "i": "Case-insensitive",
+        "m": "Multiline (^ and $ match line breaks)",
+        "s": "Dotall (. matches newlines)"
+      }
+    },
+    "json": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
       }
     }
   }

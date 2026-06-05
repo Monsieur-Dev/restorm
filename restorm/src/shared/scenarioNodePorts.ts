@@ -147,6 +147,12 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // `cast` converts its `value` input to the configured target type (the output
   // type is the chosen target, so no fixed dataType is stamped here).
   cast: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
+  // `regex` runs the configured operation (extract / match / replace / split)
+  // over its `value` string input; the output type depends on the op.
+  regex: { inputs: [{ id: 'value', name: 'value', dataType: 'string' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
+  // `json` parses its `value` string into a value, or stringifies its `value`;
+  // the output type depends on the op (parsed value vs JSON string).
+  json: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
   // Utilities
   // A terminal sink with two optional inputs (wire either, or set inline).
   // `message` is a string, `data` any value. No output (terminal).

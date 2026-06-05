@@ -9,6 +9,8 @@ import type { Activation, ExecContext, NodeExecutor } from '../types'
 import { LIST_MUTATION_DEFAULT_VALUE_ID } from '../../../shared/scenarioListMutationValues'
 import { resolveConfigItems, applyListOp } from '../../../shared/utils/scenarioStaticPreview'
 import { castValue, isScenarioCastType } from '../../../shared/scenarioCast'
+import { applyRegex, isRegexOp } from '../../../shared/scenarioRegex'
+import { applyJson, isJsonOp } from '../../../shared/scenarioJson'
 import { compareValues, deepEqual, hintFromConfig, resolveOperand, type OperandHint } from '../conditionEval'
 
 /** A wired operand's kind is inferred from its value (pass no hint); an inline
@@ -401,6 +403,32 @@ export const castExecutor: NodeExecutor = (act, ctx) => {
   const value = resolveOperand(act.inputs['value'], cfg.value, ctx.variables)
   const target = isScenarioCastType(cfg.targetType) ? cfg.targetType : 'string'
   return { outputs: [{ port: 'result', value: castValue(value, target) }] }
+}
+
+/** `regex`: run the configured operation (extract / extractAll / test / replace /
+ * split) over the `value` string via the SHARED `applyRegex` — the SAME
+ * implementation the inspector preview calls. An invalid pattern/flags THROWS,
+ * routed to the `error` port; a non-match is never an error. */
+export const regexExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { op?: unknown; pattern?: unknown; flags?: unknown; replacement?: unknown; value?: unknown }
+  const value = resolveOperand(act.inputs['value'], cfg.value, ctx.variables)
+  const op = isRegexOp(cfg.op) ? cfg.op : 'extract'
+  const pattern = typeof cfg.pattern === 'string' ? cfg.pattern : ''
+  const flags = typeof cfg.flags === 'string' ? cfg.flags : ''
+  const replacement = typeof cfg.replacement === 'string' ? cfg.replacement : ''
+  return { outputs: [{ port: 'result', value: applyRegex(value, op, pattern, flags, replacement) }] }
+}
+
+/** `json`: parse the `value` string into a value, or stringify the `value`, via
+ * the SHARED `applyJson` — the SAME implementation the inspector preview calls.
+ * Malformed JSON (parse) or a non-serialisable value (stringify) THROWS, routed
+ * to the `error` port. */
+export const jsonExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { op?: unknown; indent?: unknown; value?: unknown }
+  const value = resolveOperand(act.inputs['value'], cfg.value, ctx.variables)
+  const op = isJsonOp(cfg.op) ? cfg.op : 'parse'
+  const indent = typeof cfg.indent === 'number' ? cfg.indent : 0
+  return { outputs: [{ port: 'result', value: applyJson(value, op, indent) }] }
 }
 
 /** Coerce an arithmetic operand to a finite number, or THROW so the run routes

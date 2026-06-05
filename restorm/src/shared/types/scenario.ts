@@ -114,6 +114,10 @@ export type ScenarioNodeKind =
   | 'transform'
   // Type conversion — explicit cast since comparisons / aggregates are strict.
   | 'cast'
+  // Regular expressions — extract / match / replace / split on a string.
+  | 'regex'
+  // JSON — parse a string into a value, or stringify a value.
+  | 'json'
   // Utilities
   | 'log'
   | 'assert'

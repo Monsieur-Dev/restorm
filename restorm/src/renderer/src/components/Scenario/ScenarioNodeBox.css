@@ -403,6 +403,14 @@
   gap: 4px;
   flex: 0 0 auto;
 }
+/* Regex flag toggles (i / m / s) sit unpressed by default — unlike the inspector
+ * log filters, which are almost always ON. An unpressed ECUI button-toggle has no
+ * border, so OFF flags read as bare letters. Give them a discreet outline (scoped
+ * to the regex node only) so OFF = outlined, ON = filled — like a real switch. The
+ * inspector filters are untouched. */
+.scn-regex-flags .custom-toggle-button:not(.custom-toggle-button-pressed) {
+  border: 1px solid var(--inputOption-activeBorder, var(--editorWidget-border, #454545));
+}
 .scn-log-actions-sep {
   width: 1px;
   align-self: stretch;

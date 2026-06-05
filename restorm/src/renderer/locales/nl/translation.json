@@ -856,7 +856,9 @@
       "getVariable": "Variabele ophalen",
       "addToList": "Aan lijst toevoegen",
       "removeFromList": "Uit lijst verwijderen",
-      "cast": "Omzetten"
+      "cast": "Omzetten",
+      "regex": "Regex",
+      "json": "JSON"
     },
     "comparator": {
       "result": "resultaat"
@@ -1042,6 +1044,36 @@
         "boolean": "boolean",
         "date": "datum",
         "list": "lijst"
+      }
+    },
+    "regex": {
+      "value": "waarde",
+      "operation": "bewerking",
+      "pattern": "patroon",
+      "flags": "vlaggen",
+      "replacement": "vervanging",
+      "result": "resultaat",
+      "op": {
+        "extract": "extraheren",
+        "extractAll": "alles extraheren",
+        "test": "testen",
+        "replace": "vervangen",
+        "split": "splitsen"
+      },
+      "flag": {
+        "i": "Hoofdletterongevoelig",
+        "m": "Meerregelig (^ en $ per regel)",
+        "s": "Dotall (. matcht regeleindes)"
+      }
+    },
+    "json": {
+      "value": "waarde",
+      "operation": "bewerking",
+      "indent": "inspringen",
+      "result": "resultaat",
+      "op": {
+        "parse": "parsen",
+        "stringify": "serialiseren"
       }
     }
   }

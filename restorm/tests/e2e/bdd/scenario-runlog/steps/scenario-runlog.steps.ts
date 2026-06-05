@@ -235,12 +235,17 @@ When('I run the scenario {string} and copy all its logs', async ({}, scenarioNam
   // interactive element is the ECUI Toggle's `-action` node (role=checkbox).
   const allToggle = p.locator('[data-testid="scenario-inspector-logs-all-action"]')
   if ((await allToggle.getAttribute('aria-checked')) !== 'true') await allToggle.click()
-  await p.locator('[data-testid="scenario-inspector-logs-copy"]').click()
 
-  // The copy button writes the YAML to the clipboard via navigator.clipboard;
-  // read it back from Electron's main-process clipboard module.
-  const text = await requireApp().evaluate(({ clipboard }) => clipboard.readText())
-  expect(text.trim().length, 'clipboard was empty after clicking copy').toBeGreaterThan(0)
+  // Click copy + read the clipboard back from Electron's main-process clipboard,
+  // RETRYING: the run-log panel can render a beat after the engine stops (and the
+  // `navigator.clipboard` write is async), so under suite load a single copy can
+  // grab an empty panel. Re-click until the clipboard lands (copy is idempotent).
+  let text = ''
+  await expect(async () => {
+    await p.locator('[data-testid="scenario-inspector-logs-copy"]').click()
+    text = await requireApp().evaluate(({ clipboard }) => clipboard.readText())
+    expect(text.trim().length, 'clipboard was empty after clicking copy').toBeGreaterThan(0)
+  }).toPass({ timeout: 8000 })
   copiedYaml = normalizeRunLogYaml(text)
   copiedFor = scenarioName
 })
