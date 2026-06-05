@@ -855,7 +855,8 @@
       "setVariable": "Aseta muuttuja",
       "getVariable": "Hae muuttuja",
       "addToList": "Lisää luetteloon",
-      "removeFromList": "Poista luettelosta"
+      "removeFromList": "Poista luettelosta",
+      "cast": "Cast"
     },
     "comparator": {
       "result": "tulos"
@@ -1030,6 +1031,18 @@
       "addValue": "Lisää arvo",
       "removeValue": "Poista arvo",
       "updateVariable": "Päivitä lähdemuuttuja"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
     }
   }
 }

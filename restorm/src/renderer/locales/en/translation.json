@@ -855,7 +855,8 @@
       "setVariable": "Set variable",
       "getVariable": "Get variable",
       "addToList": "Add to list",
-      "removeFromList": "Remove from list"
+      "removeFromList": "Remove from list",
+      "cast": "Cast"
     },
     "comparator": {
       "result": "result"
@@ -1030,6 +1031,18 @@
       "addValue": "Add value",
       "removeValue": "Remove value",
       "updateVariable": "Update the source variable"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
     }
   }
 }

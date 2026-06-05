@@ -24,30 +24,68 @@ function formatOutput(date: Date, outputMode: 'pattern' | 'unix' | 'epoch' | 'is
   }
 }
 
-/** Inverse of {@link formatOutput}: parse user-typed text back into a Date in
- * the active output mode. Returns null when the text isn't a complete, valid
- * date — so a partial edit mid-typing never commits a wrong value. */
+/** Best-effort parse of arbitrary date text, INDEPENDENT of the active output
+ * mode. Lets a user paste/type any common representation — an epoch number
+ * (Unix SECONDS or JS MILLISECONDS, disambiguated by magnitude: ≥ 1e12 is ms),
+ * an ISO 8601 string, a SQL-ish `YYYY-MM-DD HH:mm:ss`, or an RFC 2822 date —
+ * even when the field is configured for a different format. `null` when none
+ * match. */
+function parseFlexibleDate(trimmed: string): Date | null {
+  // A bare integer is an epoch ONLY when it's a plausible timestamp: ≥ 10 digits
+  // (≥ 1e9 ≈ year 2001). This keeps a mid-typing partial like a bare year
+  // ("2025") from prematurely committing as 1970-01-01T…+2025s. ≥ 1e12 → JS
+  // milliseconds, otherwise Unix seconds.
+  if (/^\d+$/.test(trimmed)) {
+    if (trimmed.length < 10) return null
+    const n = Number(trimmed)
+    if (!Number.isFinite(n)) return null
+    const dt = n >= 1e12 ? DateTime.fromMillis(n) : DateTime.fromSeconds(n)
+    return dt.isValid ? dt.toJSDate() : null
+  }
+  // A date string must carry a COMPLETE date (full `YYYY-MM-DD`), so a partial
+  // mid-edit value like "2025-03" doesn't commit as the 1st of the month. Accept
+  // a space OR `T` between the date and time by normalising to ISO (so both the
+  // ISO `…T08:45:00Z` and the SQL-ish `… 08:45:00` forms parse).
+  if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
+    const dt = DateTime.fromISO(trimmed.replace(' ', 'T'))
+    return dt.isValid ? dt.toJSDate() : null
+  }
+  return null
+}
+
+/** Inverse of {@link formatOutput}: parse user-typed text back into a Date.
+ * Tries the active output mode FIRST (so the configured format round-trips
+ * exactly), then falls back to {@link parseFlexibleDate} so typing an epoch or
+ * an ISO string still commits regardless of the field's mode. Returns null when
+ * the text isn't a complete, valid date — so a partial edit mid-typing never
+ * commits a wrong value. */
 function parseInput(text: string, outputMode: 'pattern' | 'unix' | 'epoch' | 'iso', pattern: string): Date | null {
   const trimmed = text.trim()
   if (trimmed === '') return null
-  let dt: DateTime
+  let strict: Date | null = null
   switch (outputMode) {
     case 'unix': {
       const n = Number(trimmed)
-      return Number.isFinite(n) ? DateTime.fromSeconds(n).toJSDate() : null
+      strict = Number.isFinite(n) && /^[-+]?\d+(?:\.\d+)?$/.test(trimmed) ? DateTime.fromSeconds(n).toJSDate() : null
+      break
     }
     case 'epoch': {
       const n = Number(trimmed)
-      return Number.isFinite(n) ? DateTime.fromMillis(n).toJSDate() : null
+      strict = Number.isFinite(n) && /^[-+]?\d+(?:\.\d+)?$/.test(trimmed) ? DateTime.fromMillis(n).toJSDate() : null
+      break
     }
-    case 'iso':
-      dt = DateTime.fromISO(trimmed)
+    case 'iso': {
+      const dt = DateTime.fromISO(trimmed)
+      strict = dt.isValid ? dt.toJSDate() : null
       break
-    default:
-      dt = DateTime.fromFormat(trimmed, pattern)
+    }
+    default: {
+      const dt = DateTime.fromFormat(trimmed, pattern)
+      strict = dt.isValid ? dt.toJSDate() : null
       break
+    }
   }
-  return dt.isValid ? dt.toJSDate() : null
+  return strict ?? parseFlexibleDate(trimmed)
 }
 
 const DateTimePickerInner: React.FC<DateTimePickerProps> = ({

@@ -855,7 +855,8 @@
       "setVariable": "Variable setzen",
       "getVariable": "Variable lesen",
       "addToList": "Zur Liste hinzufügen",
-      "removeFromList": "Aus Liste entfernen"
+      "removeFromList": "Aus Liste entfernen",
+      "cast": "Umwandeln"
     },
     "comparator": {
       "result": "Ergebnis"
@@ -1030,6 +1031,18 @@
       "addValue": "Wert hinzufügen",
       "removeValue": "Wert entfernen",
       "updateVariable": "Quellvariable aktualisieren"
+    },
+    "cast": {
+      "value": "Wert",
+      "targetType": "umwandeln in",
+      "result": "Ergebnis",
+      "type": {
+        "number": "Zahl",
+        "string": "Zeichenkette",
+        "boolean": "Boolean",
+        "date": "Datum",
+        "list": "Liste"
+      }
     }
   }
 }

@@ -855,7 +855,8 @@
       "setVariable": "Değişken ata",
       "getVariable": "Değişkeni al",
       "addToList": "Listeye ekle",
-      "removeFromList": "Listeden kaldır"
+      "removeFromList": "Listeden kaldır",
+      "cast": "Cast"
     },
     "comparator": {
       "result": "sonuç"
@@ -1030,6 +1031,18 @@
       "addValue": "Değer ekle",
       "removeValue": "Değeri kaldır",
       "updateVariable": "Kaynak değişkeni güncelle"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
     }
   }
 }

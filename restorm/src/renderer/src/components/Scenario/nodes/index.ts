@@ -14,6 +14,7 @@ import { ObjectNodeBox } from './ObjectNodeBox'
 import { ArithmeticNodeBox } from './ArithmeticNodeBox'
 import { InputNodeBox, OutputNodeBox, GetVariableNodeBox, SetVariableNodeBox } from './VariableNodeBox'
 import { TransformNodeBox } from './TransformNodeBox'
+import { CastNodeBox } from './CastNodeBox'
 import { ForEachNodeBox } from './ForEachNodeBox'
 import { ForNodeBox, WhileNodeBox, DoWhileNodeBox } from './LoopNodeBoxes'
 import { AggregateNodeBox } from './AggregateNodeBox'
@@ -59,6 +60,7 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   setVariable: SetVariableNodeBox,
   getVariable: GetVariableNodeBox,
   transform: TransformNodeBox,
+  cast: CastNodeBox,
   log: LogNodeBox,
   assert: AssertNodeBox
 }

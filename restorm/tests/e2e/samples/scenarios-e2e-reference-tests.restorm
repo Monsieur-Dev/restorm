@@ -250,7 +250,7 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 820
+                  x: 800
                   'y': 740
               - id: 1780482287906-hje41a
                 kind: runScenario
@@ -269,7 +269,7 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1100
+                  x: 1060
                   'y': 740
               - id: 1780482293466-yfntnl
                 kind: runScenario
@@ -288,7 +288,7 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1360
+                  x: 1280
                   'y': 740
               - id: 1780558249766-gq42u7
                 kind: runScenario
@@ -307,7 +307,7 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1620
+                  x: 1520
                   'y': 740
               - id: 1780566802666-s7yjvf
                 kind: runScenario
@@ -326,7 +326,7 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1920
+                  x: 1820
                   'y': 740
               - id: 1780566962422-32dd3c
                 kind: runScenario
@@ -345,7 +345,26 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 2160
+                  x: 2060
+                  'y': 740
+              - id: 1780638522135-nqxwn6
+                kind: runScenario
+                config:
+                  scenarioId: 1780636312910-zsddxdw
+                  label: Casts
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 2340
                   'y': 740
             edges:
               - id: e-1780418276241-f2q3hz
@@ -419,6 +438,13 @@ collections:
                   portId: done
                 to:
                   nodeId: 1780566962422-32dd3c
+                  portId: in
+              - id: e-1780638524196-9cautm
+                from:
+                  nodeId: 1780566962422-32dd3c
+                  portId: done
+                to:
+                  nodeId: 1780638522135-nqxwn6
                   portId: in
             id: c1573ce0-985c-44b5-b5d4-e081de2d4303
             name: Main
@@ -9216,8 +9242,6 @@ collections:
                 name: Variables & asserts
                 items: []
               - type: scenario
-                id: 1780566592512-gxyr48d
-                name: Templates
                 tags: []
                 params: []
                 nodes:
@@ -9344,10 +9368,10 @@ collections:
                     to:
                       nodeId: 1780566730035-86fj2f
                       portId: in
+                id: 1780566592512-gxyr48d
+                name: Templates
                 items: []
               - type: scenario
-                id: 1780566844766-gsmdkp9
-                name: Lists operations
                 tags: []
                 params: []
                 nodes:
@@ -10749,6 +10773,725 @@ collections:
                     to:
                       nodeId: 1780595278355-0-g9o69m
                       portId: in
+                id: 1780566844766-gsmdkp9
+                name: Lists operations
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: e8822cc4-2b4e-427b-b184-aad1b7d15604
+                    kind: cast
+                    config:
+                      targetType: date
+                      value:
+                        type: string
+                        value: '2026-06-05'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 1180
+                      'y': 300
+                    note: string → date (today)
+                  - id: 01dfbfa0-4092-4604-b94b-43f7029f1f48
+                    kind: cast
+                    config:
+                      targetType: number
+                      value:
+                        type: string
+                        value: '123'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 40
+                    note: string → number
+                  - id: 46c33389-2678-40f6-a39d-e644a327d3eb
+                    kind: cast
+                    config:
+                      targetType: number
+                      value:
+                        type: boolean
+                        value: true
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 420
+                      'y': 40
+                    note: boolean → number (true=1)
+                  - id: e96ac497-4975-4f49-914f-2ed81390d7aa
+                    kind: cast
+                    config:
+                      targetType: string
+                      value:
+                        type: numeric
+                        value: 123
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 800
+                      'y': 40
+                    note: number → string
+                  - id: 42485b8e-49ba-4d24-8a4c-66a0a0e8cddc
+                    kind: cast
+                    config:
+                      targetType: string
+                      value:
+                        type: boolean
+                        value: false
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 1180
+                      'y': 40
+                    note: boolean → string
+                  - id: 369acfde-ee1c-418a-870b-43fcde18464d
+                    kind: cast
+                    config:
+                      targetType: boolean
+                      value:
+                        type: numeric
+                        value: 0
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 1560
+                      'y': 40
+                    note: number 0 → boolean (false)
+                  - id: b6c6103e-7785-4d9b-94b2-e1eb1c7caa0e
+                    kind: cast
+                    config:
+                      targetType: boolean
+                      value:
+                        type: numeric
+                        value: 5
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 300
+                    note: number 5 → boolean (true)
+                  - id: 15a36bec-de97-468d-8c96-8d5d76b30f87
+                    kind: cast
+                    config:
+                      targetType: boolean
+                      value:
+                        type: string
+                        value: 'yes'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 420
+                      'y': 300
+                    note: string 'yes' → boolean
+                  - id: 4d49903f-89f4-4544-b3bb-2f3b814b538c
+                    kind: cast
+                    config:
+                      targetType: boolean
+                      value:
+                        type: string
+                        value: 'off'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 800
+                      'y': 300
+                    note: string 'off' → boolean
+                  - id: 3297bb19-4cfe-4dc8-a439-1a4b6f9e3297
+                    kind: cast
+                    config:
+                      targetType: date
+                      value:
+                        type: string
+                        value: '2026-06-05 07:14:11'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 1560
+                      'y': 300
+                    note: string datetime → date
+                  - id: 46a282eb-2cd4-4d69-8504-357563585281
+                    kind: cast
+                    config:
+                      targetType: date
+                      value:
+                        type: numeric
+                        value: 1717520102
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 560
+                    note: number → date (epoch seconds)
+                  - id: befc6072-341f-4a0e-9fb3-9576aae908f1
+                    kind: cast
+                    config:
+                      targetType: date
+                      value:
+                        type: numeric
+                        value: 1717520102000
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 420
+                      'y': 560
+                    note: number → date (epoch ms)
+                  - id: c6f9fe02-e208-4e45-9991-35983e1a5c0b
+                    kind: cast
+                    config:
+                      targetType: date
+                      value:
+                        type: string
+                        value: '1717520102000'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 800
+                      'y': 560
+                    note: string epoch → date
+                  - id: 17f884b5-7e00-4157-b0c6-dfed4a2ff754
+                    kind: cast
+                    config:
+                      targetType: list
+                      value:
+                        type: numeric
+                        value: 42
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 1180
+                      'y': 560
+                    note: number → list (wrap)
+                  - id: 91f1b2dc-bc00-4dbd-a60f-de27caf4d0a8
+                    kind: cast
+                    config:
+                      targetType: list
+                      value:
+                        type: string
+                        value: hello
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 1560
+                      'y': 560
+                    note: string → list (wrap)
+                  - id: ecbe6499-9e38-43a5-aee9-3f3dd096951f
+                    kind: cast
+                    config:
+                      targetType: number
+                      value:
+                        type: string
+                        value: abc
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 820
+                    note: 'ERROR: ''abc'' → number'
+                  - id: a24f7a86-1065-41be-a161-927b41af7ac2
+                    kind: cast
+                    config:
+                      targetType: boolean
+                      value:
+                        type: string
+                        value: maybe
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 420
+                      'y': 820
+                    note: 'ERROR: ''maybe'' → boolean'
+                  - id: e0904af0-935c-48db-afdd-7fdc5451b53d
+                    kind: cast
+                    config:
+                      targetType: number
+                      value:
+                        type: list
+                        items:
+                          - type: numeric
+                            value: 1
+                            format: decimal
+                          - type: numeric
+                            value: 2
+                            format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 800
+                      'y': 820
+                    note: 'ERROR: list → number'
+                  - id: 1eac75fc-ce1d-47c5-9be1-b8bf38d706c3
+                    kind: cast
+                    config:
+                      targetType: string
+                      value:
+                        type: 'null'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 1180
+                      'y': 820
+                    note: 'ERROR: null → string'
+                  - id: bd37cb0d-7250-4264-9fd3-82c23e6777fb
+                    kind: log
+                    config:
+                      level: error
+                      message:
+                        type: string
+                        value: 'cast error: ''abc'' -> number'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 40
+                      'y': 1100
+                  - id: af98a780-5c1d-44ac-a74a-98ec81638938
+                    kind: log
+                    config:
+                      level: error
+                      message:
+                        type: string
+                        value: 'cast error: ''maybe'' -> boolean'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 420
+                      'y': 1100
+                  - id: 17da26b9-9fe4-4789-a5d0-760c73ca071e
+                    kind: log
+                    config:
+                      level: error
+                      message:
+                        type: string
+                        value: 'cast error: [1,2] -> number'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 800
+                      'y': 1100
+                  - id: 4f0d8bb5-bb05-426c-8371-ca777e96cb4d
+                    kind: log
+                    config:
+                      level: error
+                      message:
+                        type: string
+                        value: 'cast error: null -> string'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1180
+                      'y': 1100
+                edges:
+                  - id: 14d98e1d-9cef-4299-967d-0f9ea642a9f5
+                    from:
+                      nodeId: 01dfbfa0-4092-4604-b94b-43f7029f1f48
+                      portId: done
+                    to:
+                      nodeId: 46c33389-2678-40f6-a39d-e644a327d3eb
+                      portId: in
+                  - id: edf9287e-cefe-4284-8d6d-34c2feb389cc
+                    from:
+                      nodeId: 46c33389-2678-40f6-a39d-e644a327d3eb
+                      portId: done
+                    to:
+                      nodeId: e96ac497-4975-4f49-914f-2ed81390d7aa
+                      portId: in
+                  - id: f9518840-c10b-45d7-8572-3196266ac16f
+                    from:
+                      nodeId: e96ac497-4975-4f49-914f-2ed81390d7aa
+                      portId: done
+                    to:
+                      nodeId: 42485b8e-49ba-4d24-8a4c-66a0a0e8cddc
+                      portId: in
+                  - id: 773fbd29-6f02-47e7-980d-59ac00cd70ce
+                    from:
+                      nodeId: 42485b8e-49ba-4d24-8a4c-66a0a0e8cddc
+                      portId: done
+                    to:
+                      nodeId: 369acfde-ee1c-418a-870b-43fcde18464d
+                      portId: in
+                  - id: 360cbf73-69a6-4a8b-859c-148ce6a34c34
+                    from:
+                      nodeId: 369acfde-ee1c-418a-870b-43fcde18464d
+                      portId: done
+                    to:
+                      nodeId: b6c6103e-7785-4d9b-94b2-e1eb1c7caa0e
+                      portId: in
+                  - id: a4361ac1-48aa-4fe0-bcdb-5d939d7b8f14
+                    from:
+                      nodeId: b6c6103e-7785-4d9b-94b2-e1eb1c7caa0e
+                      portId: done
+                    to:
+                      nodeId: 15a36bec-de97-468d-8c96-8d5d76b30f87
+                      portId: in
+                  - id: 3ceecb8e-8b32-4169-878f-bc1b5a95f337
+                    from:
+                      nodeId: 15a36bec-de97-468d-8c96-8d5d76b30f87
+                      portId: done
+                    to:
+                      nodeId: 4d49903f-89f4-4544-b3bb-2f3b814b538c
+                      portId: in
+                  - id: 6c7ce811-5c7f-440b-ac48-369bff43d1c1
+                    from:
+                      nodeId: 4d49903f-89f4-4544-b3bb-2f3b814b538c
+                      portId: done
+                    to:
+                      nodeId: e8822cc4-2b4e-427b-b184-aad1b7d15604
+                      portId: in
+                  - id: c700af99-f8ab-4aea-9c81-dff0f65400cd
+                    from:
+                      nodeId: e8822cc4-2b4e-427b-b184-aad1b7d15604
+                      portId: done
+                    to:
+                      nodeId: 3297bb19-4cfe-4dc8-a439-1a4b6f9e3297
+                      portId: in
+                  - id: e01fb011-a69d-4635-9482-11e2e5c9ce50
+                    from:
+                      nodeId: 3297bb19-4cfe-4dc8-a439-1a4b6f9e3297
+                      portId: done
+                    to:
+                      nodeId: 46a282eb-2cd4-4d69-8504-357563585281
+                      portId: in
+                  - id: 382bb6b2-a33c-4853-a217-ef357c73f98c
+                    from:
+                      nodeId: 46a282eb-2cd4-4d69-8504-357563585281
+                      portId: done
+                    to:
+                      nodeId: befc6072-341f-4a0e-9fb3-9576aae908f1
+                      portId: in
+                  - id: 44480135-8859-486f-89c7-5433b3ab021c
+                    from:
+                      nodeId: befc6072-341f-4a0e-9fb3-9576aae908f1
+                      portId: done
+                    to:
+                      nodeId: c6f9fe02-e208-4e45-9991-35983e1a5c0b
+                      portId: in
+                  - id: ec9a3b85-6947-4fcc-890e-9f3845b9eea7
+                    from:
+                      nodeId: c6f9fe02-e208-4e45-9991-35983e1a5c0b
+                      portId: done
+                    to:
+                      nodeId: 17f884b5-7e00-4157-b0c6-dfed4a2ff754
+                      portId: in
+                  - id: a96b4d4f-a428-405f-9f3f-416b4403be37
+                    from:
+                      nodeId: 17f884b5-7e00-4157-b0c6-dfed4a2ff754
+                      portId: done
+                    to:
+                      nodeId: 91f1b2dc-bc00-4dbd-a60f-de27caf4d0a8
+                      portId: in
+                  - id: 67f4c363-17ca-4c54-b893-773632facf5f
+                    from:
+                      nodeId: 91f1b2dc-bc00-4dbd-a60f-de27caf4d0a8
+                      portId: done
+                    to:
+                      nodeId: ecbe6499-9e38-43a5-aee9-3f3dd096951f
+                      portId: in
+                  - id: 2362140a-2cee-4f7b-ae53-43838b667fde
+                    from:
+                      nodeId: ecbe6499-9e38-43a5-aee9-3f3dd096951f
+                      portId: error
+                    to:
+                      nodeId: a24f7a86-1065-41be-a161-927b41af7ac2
+                      portId: in
+                  - id: 2f0aa057-c9ff-4600-8166-67fb91d2d2a8
+                    from:
+                      nodeId: a24f7a86-1065-41be-a161-927b41af7ac2
+                      portId: error
+                    to:
+                      nodeId: e0904af0-935c-48db-afdd-7fdc5451b53d
+                      portId: in
+                  - id: 003977c3-bba1-4b2b-bace-39aacacb5a53
+                    from:
+                      nodeId: e0904af0-935c-48db-afdd-7fdc5451b53d
+                      portId: error
+                    to:
+                      nodeId: 1eac75fc-ce1d-47c5-9be1-b8bf38d706c3
+                      portId: in
+                  - id: 6642e30e-da4f-4008-b6dd-5fe6a859323c
+                    from:
+                      nodeId: ecbe6499-9e38-43a5-aee9-3f3dd096951f
+                      portId: error
+                    to:
+                      nodeId: bd37cb0d-7250-4264-9fd3-82c23e6777fb
+                      portId: in
+                  - id: 171c0d87-4670-48da-826e-b91d63a73e98
+                    from:
+                      nodeId: a24f7a86-1065-41be-a161-927b41af7ac2
+                      portId: error
+                    to:
+                      nodeId: af98a780-5c1d-44ac-a74a-98ec81638938
+                      portId: in
+                  - id: 30c8116e-318a-476b-996a-835054aadb7d
+                    from:
+                      nodeId: e0904af0-935c-48db-afdd-7fdc5451b53d
+                      portId: error
+                    to:
+                      nodeId: 17da26b9-9fe4-4789-a5d0-760c73ca071e
+                      portId: in
+                  - id: 00c7927b-05d1-48cc-a0f0-972a165d0c62
+                    from:
+                      nodeId: 1eac75fc-ce1d-47c5-9be1-b8bf38d706c3
+                      portId: error
+                    to:
+                      nodeId: 4f0d8bb5-bb05-426c-8371-ca777e96cb4d
+                      portId: in
+                id: 1780636312910-zsddxdw
+                name: Casts
                 items: []
         id: f1000000-0000-0000-0000-00000000auth
         name: Pet API

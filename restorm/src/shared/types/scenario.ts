@@ -112,6 +112,8 @@ export type ScenarioNodeKind =
   | 'setVariable'
   | 'getVariable'
   | 'transform'
+  // Type conversion — explicit cast since comparisons / aggregates are strict.
+  | 'cast'
   // Utilities
   | 'log'
   | 'assert'

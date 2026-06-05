@@ -855,7 +855,8 @@
       "setVariable": "Cakto variablën",
       "getVariable": "Merr variablën",
       "addToList": "Shto në listë",
-      "removeFromList": "Hiq nga lista"
+      "removeFromList": "Hiq nga lista",
+      "cast": "Cast"
     },
     "comparator": {
       "result": "rezultati"
@@ -1030,6 +1031,18 @@
       "addValue": "Shto vlerë",
       "removeValue": "Hiq vlerën",
       "updateVariable": "Përditëso variablën burim"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
     }
   }
 }

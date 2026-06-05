@@ -857,7 +857,8 @@
       "setVariable": "Nastavit proměnnou",
       "getVariable": "Získat proměnnou",
       "addToList": "Přidat do seznamu",
-      "removeFromList": "Odebrat ze seznamu"
+      "removeFromList": "Odebrat ze seznamu",
+      "cast": "Cast"
     },
     "comparator": {
       "result": "výsledek"
@@ -1032,6 +1033,18 @@
       "addValue": "Přidat hodnotu",
       "removeValue": "Odebrat hodnotu",
       "updateVariable": "Aktualizovat zdrojovou proměnnou"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
     }
   }
 }

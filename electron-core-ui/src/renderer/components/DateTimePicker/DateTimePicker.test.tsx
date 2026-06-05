@@ -122,4 +122,38 @@ describe('DateTimePicker typed input', () => {
       vi.useRealTimers()
     }
   })
+
+  it('falls back to flexible parsing — an epoch number or ISO string commits even in pattern mode', () => {
+    vi.useFakeTimers()
+    try {
+      const onChange = vi.fn()
+      const { getByTestId } = render(
+        // Default mode is the `yyyy-MM-dd HH:mm:ss` pattern — neither an epoch
+        // number nor an ISO 8601 string matches it, but both must still commit.
+        <DateTimePicker value={new Date(2024, 0, 15, 10, 30, 0)} onChange={onChange} />
+      )
+      const input = getByTestId('datetimepicker-input-input')
+
+      // JS milliseconds epoch (≥ 1e12).
+      fireEvent.change(input, { target: { value: '1717520102000' } })
+      act(() => { vi.advanceTimersByTime(500) })
+      // Unix seconds epoch (< 1e12) → SAME instant.
+      fireEvent.change(input, { target: { value: '1717520102' } })
+      act(() => { vi.advanceTimersByTime(500) })
+      // ISO 8601 string.
+      fireEvent.change(input, { target: { value: '2025-03-09T08:45:00Z' } })
+      act(() => { vi.advanceTimersByTime(500) })
+
+      expect(onChange).toHaveBeenCalledTimes(3)
+      const ms = onChange.mock.calls[0]?.[0] as Date
+      const secs = onChange.mock.calls[1]?.[0] as Date
+      const iso = onChange.mock.calls[2]?.[0] as Date
+      expect(ms.getTime()).toBe(1717520102000)
+      expect(secs.getTime()).toBe(1717520102000)
+      expect(iso.getUTCFullYear()).toBe(2025)
+      expect(iso.getUTCHours()).toBe(8)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
 })

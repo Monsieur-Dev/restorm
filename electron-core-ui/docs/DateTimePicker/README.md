@@ -10,6 +10,13 @@ invalid entry is ignored until it becomes valid, so a mid-edit keystroke never c
 the input shows a **red validation border** (`aria-invalid`) while the typed text isn't a parseable date
 (an empty field stays neutral).
 
+Typed input is **format-tolerant**: the active output mode/pattern is tried first (so the configured
+format round-trips exactly), then a flexible fallback accepts other complete representations regardless of
+the field's mode — an **epoch number** (Unix seconds, or JS milliseconds when the value is ≥ 1e12), a full
+**ISO 8601** string, or a SQL-ish `YYYY-MM-DD HH:mm:ss`. The fallback only accepts *complete* values (a
+bare year or `YYYY-MM` never commits, and a short integer is not read as an epoch), preserving the
+mid-edit protection above.
+
 ## Component Location
 
 - Source: `electron-core-ui/src/renderer/components/DateTimePicker/DateTimePicker.tsx`

@@ -144,6 +144,9 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // input stays optional so the node can also run on its own (a pure template).
   // The expression determines the output type.
   transform: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'out', name: 'value', flow: 'both' }] },
+  // `cast` converts its `value` input to the configured target type (the output
+  // type is the chosen target, so no fixed dataType is stamped here).
+  cast: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
   // Utilities
   // A terminal sink with two optional inputs (wire either, or set inline).
   // `message` is a string, `data` any value. No output (terminal).

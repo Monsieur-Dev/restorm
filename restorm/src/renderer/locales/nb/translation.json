@@ -855,7 +855,8 @@
       "setVariable": "Sett variabel",
       "getVariable": "Hent variabel",
       "addToList": "Legg til i liste",
-      "removeFromList": "Fjern fra liste"
+      "removeFromList": "Fjern fra liste",
+      "cast": "Cast"
     },
     "comparator": {
       "result": "resultat"
@@ -1030,6 +1031,18 @@
       "addValue": "Legg til verdi",
       "removeValue": "Fjern verdi",
       "updateVariable": "Oppdater kildevariabelen"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
     }
   }
 }

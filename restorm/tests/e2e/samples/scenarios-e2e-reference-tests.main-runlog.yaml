@@ -3089,4 +3089,208 @@
 - message: ⚪ [<time>] done runScenario
   data:
     result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: 1780636312910-zsddxdw
+    label: Casts
+    in: true
+- message: 🔵 [<time>] ▶ Casts
+- message: ⚪ [<time>] start cast
+  data:
+    targetType: number
+    value: "123"
+- message: ⚪ [<time>] done cast
+  data:
+    result: 123
+- message: ⚪ [<time>] start cast
+  data:
+    targetType: number
+    value: true
+    in: true
+- message: ⚪ [<time>] done cast
+  data:
+    result: 1
+- message: ⚪ [<time>] start cast
+  data:
+    targetType: string
+    value: 123
+    in: true
+- message: ⚪ [<time>] done cast
+  data:
+    result: "123"
+- message: ⚪ [<time>] start cast
+  data:
+    targetType: string
+    value: false
+    in: true
+- message: ⚪ [<time>] done cast
+  data:
+    result: "false"
+- message: ⚪ [<time>] start cast
+  data:
+    targetType: boolean
+    value: 0
+    in: true
+- message: ⚪ [<time>] done cast
+  data:
+    result: false
+- message: ⚪ [<time>] start cast
+  data:
+    targetType: boolean
+    value: 5
+    in: true
+- message: ⚪ [<time>] done cast
+  data:
+    result: true
+- message: ⚪ [<time>] start cast
+  data:
+    targetType: boolean
+    value: yes
+    in: true
+- message: ⚪ [<time>] done cast
+  data:
+    result: true
+- message: ⚪ [<time>] start cast
+  data:
+    targetType: boolean
+    value: off
+    in: true
+- message: ⚪ [<time>] done cast
+  data:
+    result: false
+- message: ⚪ [<time>] start cast
+  data:
+    targetType: date
+    value: 2026-06-05
+    in: true
+- message: ⚪ [<time>] done cast
+  data:
+    result: 2026-06-05T00:00:00.000Z
+- message: ⚪ [<time>] start cast
+  data:
+    targetType: date
+    value: 2026-06-05 07:14:11
+    in: true
+- message: ⚪ [<time>] done cast
+  data:
+    result: 2026-06-05T07:14:11.000Z
+- message: ⚪ [<time>] start cast
+  data:
+    targetType: date
+    value: 1717520102
+    in: true
+- message: ⚪ [<time>] done cast
+  data:
+    result: 2024-06-04T16:55:02.000Z
+- message: ⚪ [<time>] start cast
+  data:
+    targetType: date
+    value: 1717520102000
+    in: true
+- message: ⚪ [<time>] done cast
+  data:
+    result: 2024-06-04T16:55:02.000Z
+- message: ⚪ [<time>] start cast
+  data:
+    targetType: date
+    value: "1717520102000"
+    in: true
+- message: ⚪ [<time>] done cast
+  data:
+    result: 2024-06-04T16:55:02.000Z
+- message: ⚪ [<time>] start cast
+  data:
+    targetType: list
+    value: 42
+    in: true
+- message: ⚪ [<time>] done cast
+  data:
+    result:
+      - 42
+- message: ⚪ [<time>] start cast
+  data:
+    targetType: list
+    value: hello
+    in: true
+- message: ⚪ [<time>] done cast
+  data:
+    result:
+      - hello
+- message: ⚪ [<time>] start cast
+  data:
+    targetType: number
+    value: abc
+    in: true
+- message: 🔴 [<time>] Cannot cast "abc" to number — not a numeric value
+- message: ⚪ [<time>] start cast
+  data:
+    targetType: boolean
+    value: maybe
+    in:
+      message: Cannot cast "abc" to number — not a numeric value
+      startedAt: <dynamic-time>
+- message: 🔴 [<time>] Cannot cast "maybe" to boolean — expected
+    true/false/1/0/yes/no/on/off
+- message: ⚪ [<time>] start log
+  data:
+    level: error
+    message: "cast error: 'abc' -> number"
+    in:
+      message: Cannot cast "abc" to number — not a numeric value
+      startedAt: <dynamic-time>
+- message: "🔴 [<time>] cast error: 'abc' -> number"
+- message: ⚪ [<time>] start cast
+  data:
+    targetType: number
+    value:
+      - 1
+      - 2
+    in:
+      message: Cannot cast "maybe" to boolean — expected true/false/1/0/yes/no/on/off
+      startedAt: <dynamic-time>
+- message: 🔴 [<time>] Cannot cast a list (2) (list) to number
+- message: ⚪ [<time>] start log
+  data:
+    level: error
+    message: "cast error: 'maybe' -> boolean"
+    in:
+      message: Cannot cast "maybe" to boolean — expected true/false/1/0/yes/no/on/off
+      startedAt: <dynamic-time>
+- message: "🔴 [<time>] cast error: 'maybe' -> boolean"
+- message: ⚪ [<time>] start cast
+  data:
+    targetType: string
+    value: null
+    in:
+      message: Cannot cast a list (2) (list) to number
+      startedAt: <dynamic-time>
+- message: 🔴 [<time>] Cannot cast null value
+- message: ⚪ [<time>] start log
+  data:
+    level: error
+    message: "cast error: [1,2] -> number"
+    in:
+      message: Cannot cast a list (2) (list) to number
+      startedAt: <dynamic-time>
+- message: "🔴 [<time>] cast error: [1,2] -> number"
+- message: ⚪ [<time>] start log
+  data:
+    level: error
+    message: "cast error: null -> string"
+    in:
+      message: Cannot cast null value
+      startedAt: <dynamic-time>
+- message: "🔴 [<time>] cast error: null -> string"
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ Casts
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
 - message: 🔵 [<time>] ■ Main

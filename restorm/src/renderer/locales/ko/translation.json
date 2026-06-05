@@ -854,7 +854,8 @@
       "setVariable": "변수 설정",
       "getVariable": "변수 가져오기",
       "addToList": "목록에 추가",
-      "removeFromList": "목록에서 제거"
+      "removeFromList": "목록에서 제거",
+      "cast": "Cast"
     },
     "comparator": {
       "result": "결과"
@@ -1029,6 +1030,18 @@
       "addValue": "값 추가",
       "removeValue": "값 제거",
       "updateVariable": "원본 변수 업데이트"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
     }
   }
 }

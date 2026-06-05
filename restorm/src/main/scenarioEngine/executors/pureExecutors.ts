@@ -8,6 +8,7 @@ import Handlebars from 'handlebars'
 import type { Activation, ExecContext, NodeExecutor } from '../types'
 import { LIST_MUTATION_DEFAULT_VALUE_ID } from '../../../shared/scenarioListMutationValues'
 import { resolveConfigItems, applyListOp } from '../../../shared/utils/scenarioStaticPreview'
+import { castValue, isScenarioCastType } from '../../../shared/scenarioCast'
 import { compareValues, deepEqual, hintFromConfig, resolveOperand, type OperandHint } from '../conditionEval'
 
 /** A wired operand's kind is inferred from its value (pass no hint); an inline
@@ -389,6 +390,17 @@ function renderHandlebars(template: string, ctx: unknown): string {
   // with it). Without it, `{{name}}` over "Tom & Jerry" renders "Tom &amp;
   // Jerry" at runtime but "Tom & Jerry" in the preview — a silent drift.
   return Handlebars.compile(template, { noEscape: true })(ctx)
+}
+
+/** `cast`: convert the `value` operand (wired port, else inline config) to the
+ * configured `targetType` via the SHARED `castValue` — the SAME implementation
+ * the inspector preview calls, so they can't drift. An impossible cast (or a
+ * null/empty value) THROWS, which the scheduler routes to the `error` port. */
+export const castExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { targetType?: unknown; value?: unknown }
+  const value = resolveOperand(act.inputs['value'], cfg.value, ctx.variables)
+  const target = isScenarioCastType(cfg.targetType) ? cfg.targetType : 'string'
+  return { outputs: [{ port: 'result', value: castValue(value, target) }] }
 }
 
 /** Coerce an arithmetic operand to a finite number, or THROW so the run routes

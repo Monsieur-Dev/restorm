@@ -855,7 +855,8 @@
       "setVariable": "Ορισμός μεταβλητής",
       "getVariable": "Λήψη μεταβλητής",
       "addToList": "Προσθήκη στη λίστα",
-      "removeFromList": "Αφαίρεση από τη λίστα"
+      "removeFromList": "Αφαίρεση από τη λίστα",
+      "cast": "Cast"
     },
     "comparator": {
       "result": "αποτέλεσμα"
@@ -1030,6 +1031,18 @@
       "addValue": "Προσθήκη τιμής",
       "removeValue": "Αφαίρεση τιμής",
       "updateVariable": "Ενημέρωση μεταβλητής προέλευσης"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
     }
   }
 }

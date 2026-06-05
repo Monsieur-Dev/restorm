@@ -854,7 +854,8 @@
       "setVariable": "Atur variabel",
       "getVariable": "Ambil variabel",
       "addToList": "Tambahkan ke daftar",
-      "removeFromList": "Hapus dari daftar"
+      "removeFromList": "Hapus dari daftar",
+      "cast": "Cast"
     },
     "comparator": {
       "result": "hasil"
@@ -1029,6 +1030,18 @@
       "addValue": "Tambah nilai",
       "removeValue": "Hapus nilai",
       "updateVariable": "Perbarui variabel sumber"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
     }
   }
 }

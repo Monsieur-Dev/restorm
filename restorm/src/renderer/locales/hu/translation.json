@@ -855,7 +855,8 @@
       "setVariable": "Változó beállítása",
       "getVariable": "Változó lekérése",
       "addToList": "Hozzáadás a listához",
-      "removeFromList": "Eltávolítás a listából"
+      "removeFromList": "Eltávolítás a listából",
+      "cast": "Cast"
     },
     "comparator": {
       "result": "eredmény"
@@ -1030,6 +1031,18 @@
       "addValue": "Érték hozzáadása",
       "removeValue": "Érték eltávolítása",
       "updateVariable": "Forrásváltozó frissítése"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
     }
   }
 }

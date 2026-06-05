@@ -857,7 +857,8 @@
       "setVariable": "Задати змінну",
       "getVariable": "Отримати змінну",
       "addToList": "Додати до списку",
-      "removeFromList": "Видалити зі списку"
+      "removeFromList": "Видалити зі списку",
+      "cast": "Cast"
     },
     "comparator": {
       "result": "результат"
@@ -1032,6 +1033,18 @@
       "addValue": "Додати значення",
       "removeValue": "Видалити значення",
       "updateVariable": "Оновити вихідну змінну"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
     }
   }
 }

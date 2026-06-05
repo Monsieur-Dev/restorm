@@ -856,7 +856,8 @@
       "setVariable": "Postavi varijablu",
       "getVariable": "Dohvati varijablu",
       "addToList": "Dodaj na popis",
-      "removeFromList": "Ukloni s popisa"
+      "removeFromList": "Ukloni s popisa",
+      "cast": "Cast"
     },
     "comparator": {
       "result": "rezultat"
@@ -1031,6 +1032,18 @@
       "addValue": "Dodaj vrijednost",
       "removeValue": "Ukloni vrijednost",
       "updateVariable": "Ažuriraj izvornu varijablu"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
     }
   }
 }

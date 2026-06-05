@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon'
+
 export type ValueKind = 'datetime' | 'numeric' | 'color' | 'string'
 
 export interface DateTimeCast {
@@ -59,6 +61,34 @@ export function tryParseNumberString(value: string): number | null {
   const n = Number(value)
   if (!Number.isFinite(n)) return null
   return n
+}
+
+/** Interpret a finite number as an epoch instant. A magnitude ≥ 1e12 is read as
+ * milliseconds (JS `Date.getTime()` ≈ 1.7e12 today); anything smaller is read as
+ * Unix SECONDS (≈ 1.7e9 today). One heuristic covers both common epoch flavours
+ * for any realistic timestamp. Parsing is delegated to luxon (the same library
+ * the DateTimePicker uses), so epoch + ISO handling stays consistent app-wide.
+ * `null` when the number isn't finite / overflows the Date range. */
+export function epochToDate(value: number): Date | null {
+  if (!Number.isFinite(value)) return null
+  const dt = Math.abs(value) >= 1e12 ? DateTime.fromMillis(value) : DateTime.fromSeconds(value)
+  return dt.isValid ? dt.toJSDate() : null
+}
+
+/** Parse a string into a Date from EITHER a bare epoch number (seconds or ms,
+ * via {@link epochToDate}) OR a date string parsed by luxon — ISO 8601, or the
+ * SQL-ish `YYYY-MM-DD HH:mm:ss` form (a space between date and time is
+ * normalised to `T`). `null` when it is neither — so callers can reject / fall
+ * through. Uses luxon rather than a hand-rolled regex so the cast and the
+ * DateTimePicker share one battle-tested parser. */
+export function tryParseDateOrEpoch(value: string): Date | null {
+  const trimmed = value.trim()
+  if (/^[-+]?\d+$/.test(trimmed)) {
+    const n = Number(trimmed)
+    return Number.isFinite(n) ? epochToDate(n) : null
+  }
+  const dt = DateTime.fromISO(trimmed.replace(' ', 'T'))
+  return dt.isValid ? dt.toJSDate() : null
 }
 
 export function isHexColorString(value: string): boolean {

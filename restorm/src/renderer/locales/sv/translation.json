@@ -855,7 +855,8 @@
       "setVariable": "Ange variabel",
       "getVariable": "Hämta variabel",
       "addToList": "Lägg till i listan",
-      "removeFromList": "Ta bort från listan"
+      "removeFromList": "Ta bort från listan",
+      "cast": "Cast"
     },
     "comparator": {
       "result": "resultat"
@@ -1030,6 +1031,18 @@
       "addValue": "Lägg till värde",
       "removeValue": "Ta bort värde",
       "updateVariable": "Uppdatera källvariabeln"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
     }
   }
 }

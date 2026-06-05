@@ -856,7 +856,8 @@
       "setVariable": "Setează variabila",
       "getVariable": "Obține variabila",
       "addToList": "Adaugă în listă",
-      "removeFromList": "Elimină din listă"
+      "removeFromList": "Elimină din listă",
+      "cast": "Cast"
     },
     "comparator": {
       "result": "rezultat"
@@ -1031,6 +1032,18 @@
       "addValue": "Adaugă valoare",
       "removeValue": "Elimină valoarea",
       "updateVariable": "Actualizează variabila sursă"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
     }
   }
 }

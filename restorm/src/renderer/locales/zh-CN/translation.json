@@ -854,7 +854,8 @@
       "setVariable": "设置变量",
       "getVariable": "获取变量",
       "addToList": "添加到列表",
-      "removeFromList": "从列表移除"
+      "removeFromList": "从列表移除",
+      "cast": "Cast"
     },
     "comparator": {
       "result": "结果"
@@ -1029,6 +1030,18 @@
       "addValue": "添加值",
       "removeValue": "移除值",
       "updateVariable": "更新源变量"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
     }
   }
 }

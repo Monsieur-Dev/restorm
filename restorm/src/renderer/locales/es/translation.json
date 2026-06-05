@@ -855,7 +855,8 @@
       "setVariable": "Definir variable",
       "getVariable": "Obtener variable",
       "addToList": "Añadir a la lista",
-      "removeFromList": "Eliminar de la lista"
+      "removeFromList": "Eliminar de la lista",
+      "cast": "Convertir"
     },
     "comparator": {
       "result": "resultado"
@@ -1030,6 +1031,18 @@
       "addValue": "Añadir valor",
       "removeValue": "Eliminar valor",
       "updateVariable": "Actualizar la variable de origen"
+    },
+    "cast": {
+      "value": "valor",
+      "targetType": "convertir a",
+      "result": "resultado",
+      "type": {
+        "number": "número",
+        "string": "cadena",
+        "boolean": "booleano",
+        "date": "fecha",
+        "list": "lista"
+      }
     }
   }
 }

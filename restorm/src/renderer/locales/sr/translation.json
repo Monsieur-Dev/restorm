@@ -856,7 +856,8 @@
       "setVariable": "Постави променљиву",
       "getVariable": "Узми променљиву",
       "addToList": "Додај на листу",
-      "removeFromList": "Уклони са листе"
+      "removeFromList": "Уклони са листе",
+      "cast": "Cast"
     },
     "comparator": {
       "result": "резултат"
@@ -1031,6 +1032,18 @@
       "addValue": "Додај вредност",
       "removeValue": "Уклони вредност",
       "updateVariable": "Ажурирај изворну променљиву"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
     }
   }
 }

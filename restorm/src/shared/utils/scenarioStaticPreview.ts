@@ -5,6 +5,7 @@ import { readInputParams } from '../scenarioInputParams'
 import { readOutputDecls } from '../scenarioOutputDecls'
 import { STATIC_PREVIEW_KINDS } from '../scenarioNodeCapabilities'
 import { compareValues as compareValuesShared } from '../scenarioComparison'
+import { castValue, isScenarioCastType } from '../scenarioCast'
 import { LIST_MUTATION_DEFAULT_VALUE_ID } from '../scenarioListMutationValues'
 
 // Register the full helper suite on first import so a chained `transform`
@@ -898,6 +899,20 @@ export function staticScenarioPreview(
       } catch {
         // Helpers aren't registered in the shared preview, so any template
         // that needs one (e.g. `{{date now}}`) falls back to no preview.
+        return null
+      }
+    }
+    case 'cast': {
+      // Convert the resolved `value` operand to the configured target via the
+      // SHARED `castValue` — the SAME implementation the runtime calls. It THROWS
+      // on an impossible / null cast (which the runtime routes to `error`); the
+      // preview catches it and shows no result.
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      if (value === undefined) return null
+      const target = isScenarioCastType(cfg['targetType']) ? cfg['targetType'] : 'string'
+      try {
+        return { result: castValue(value, target) }
+      } catch {
         return null
       }
     }

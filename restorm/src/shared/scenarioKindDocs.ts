@@ -145,6 +145,10 @@ export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
     summary: 'Applies a Handlebars `expression` to its inputs + run variables, emitting the rendered result on `out`.',
     config: { expression: 'Handlebars template.' }
   },
+  cast: {
+    summary: 'Converts the `value` input (wired or inline) to `targetType` on `result`; an impossible cast (or a null value) routes to `error`. number↔boolean (0/1, truthiness), numeric/boolean string parsing, dates ISO; any → list wraps into [value].',
+    config: { targetType: 'number | string | boolean | date | list', value: 'Inline value to cast (typed value) when not wired.' }
+  },
   log: {
     summary: 'Writes one entry to the run log (visible via get_scenario_run_status + the inspector panel) and passes the value through. Sequence it via the `in` trigger.',
     config: { level: 'debug | info | warn | error', message: 'Text (typed value).', data: 'Optional structured payload (or wire `data`).' }

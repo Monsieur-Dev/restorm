@@ -854,7 +854,8 @@
       "setVariable": "Đặt biến",
       "getVariable": "Lấy biến",
       "addToList": "Thêm vào danh sách",
-      "removeFromList": "Xóa khỏi danh sách"
+      "removeFromList": "Xóa khỏi danh sách",
+      "cast": "Cast"
     },
     "comparator": {
       "result": "kết quả"
@@ -1029,6 +1030,18 @@
       "addValue": "Thêm giá trị",
       "removeValue": "Xóa giá trị",
       "updateVariable": "Cập nhật biến nguồn"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
     }
   }
 }
