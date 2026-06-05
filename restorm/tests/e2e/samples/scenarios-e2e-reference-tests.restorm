@@ -307,8 +307,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1520
-                  'y': 740
+                  x: 580
+                  'y': 880
               - id: 1780566802666-s7yjvf
                 kind: runScenario
                 config:
@@ -326,8 +326,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1820
-                  'y': 740
+                  x: 880
+                  'y': 880
               - id: 1780566962422-32dd3c
                 kind: runScenario
                 config:
@@ -345,8 +345,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 2060
-                  'y': 740
+                  x: 1120
+                  'y': 880
               - id: 1780638522135-nqxwn6
                 kind: runScenario
                 config:
@@ -364,8 +364,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 2340
-                  'y': 740
+                  x: 1400
+                  'y': 880
               - id: a0a5db3a-449c-4fb3-970d-00983066ad53
                 kind: runScenario
                 config:
@@ -383,8 +383,8 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 2560
-                  'y': 740
+                  x: 1620
+                  'y': 880
               - id: 98ba2f6d-ef0a-42b4-9c38-9dacfaef1582
                 kind: runScenario
                 config:
@@ -402,8 +402,103 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 2780
-                  'y': 740
+                  x: 1840
+                  'y': 880
+              - id: 35b1f372-380f-4274-8db2-5f4e9ad0d7bf
+                kind: runScenario
+                config:
+                  scenarioId: 1fdd8d40-4e34-4918-8ee2-c0afd4754b15
+                  label: Crypto
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 2060
+                  'y': 880
+              - id: eecb3bb4-6cb7-4179-809e-52834891a835
+                kind: runScenario
+                config:
+                  scenarioId: b98de5ac-3cc6-48c1-9bbb-39f3cf9d7ca8
+                  label: JWT
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 2280
+                  'y': 880
+              - id: 7e852f31-d7df-4e7b-9278-f88df6656850
+                kind: runScenario
+                config:
+                  scenarioId: b1b5b19c-5eca-4c7b-aa0e-112541ebaa08
+                  label: DateTime
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 2520
+                  'y': 880
+              - id: 7b8355af-9f3e-43cd-96e4-4b7685a84b93
+                kind: runScenario
+                config:
+                  scenarioId: 828d1a5b-4bac-46ad-b7f7-69b80234202d
+                  label: XML
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 2760
+                  'y': 880
+              - id: 56ca0175-a6fd-4653-88f9-7be393a23075
+                kind: runScenario
+                config:
+                  scenarioId: 1effb862-a658-4af4-9d5c-c1c8c5cb2ed1
+                  label: YAML
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 2980
+                  'y': 880
             edges:
               - id: e-1780418276241-f2q3hz
                 from:
@@ -497,6 +592,41 @@ collections:
                   portId: done
                 to:
                   nodeId: 98ba2f6d-ef0a-42b4-9c38-9dacfaef1582
+                  portId: in
+              - id: d560e5b1-3c12-4301-89f3-95e55690a4a5
+                from:
+                  nodeId: 98ba2f6d-ef0a-42b4-9c38-9dacfaef1582
+                  portId: done
+                to:
+                  nodeId: 35b1f372-380f-4274-8db2-5f4e9ad0d7bf
+                  portId: in
+              - id: 3e73076b-a3c8-407d-9e03-8e60154ffd8e
+                from:
+                  nodeId: 35b1f372-380f-4274-8db2-5f4e9ad0d7bf
+                  portId: done
+                to:
+                  nodeId: eecb3bb4-6cb7-4179-809e-52834891a835
+                  portId: in
+              - id: 223757e9-65df-4f79-a7f8-4eca47d2281d
+                from:
+                  nodeId: eecb3bb4-6cb7-4179-809e-52834891a835
+                  portId: done
+                to:
+                  nodeId: 7e852f31-d7df-4e7b-9278-f88df6656850
+                  portId: in
+              - id: d3b530bc-6962-43f5-be84-5218bf5d4f20
+                from:
+                  nodeId: 7e852f31-d7df-4e7b-9278-f88df6656850
+                  portId: done
+                to:
+                  nodeId: 7b8355af-9f3e-43cd-96e4-4b7685a84b93
+                  portId: in
+              - id: efa10f44-78b0-496e-acf6-76e7b54879cb
+                from:
+                  nodeId: 7b8355af-9f3e-43cd-96e4-4b7685a84b93
+                  portId: done
+                to:
+                  nodeId: 56ca0175-a6fd-4653-88f9-7be393a23075
                   portId: in
             id: c1573ce0-985c-44b5-b5d4-e081de2d4303
             name: Main
@@ -12220,6 +12350,1143 @@ collections:
                       portId: in
                 id: a8df7003-8355-4c28-aa5c-9f8f70c380f7
                 name: JSON
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 9f49b84f-446b-413f-966d-f63a57f3af2e
+                    kind: crypto
+                    config:
+                      op: base64Encode
+                      value:
+                        type: string
+                        value: hello
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: string
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: string
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 40
+                    note: base64 encode
+                  - id: dd6a8975-c261-4b66-b9ab-37bf5db38e3b
+                    kind: crypto
+                    config:
+                      op: base64Decode
+                      value:
+                        type: string
+                        value: aGVsbG8=
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: string
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: string
+                        flow: both
+                    position:
+                      x: 480
+                      'y': 40
+                    note: base64 decode
+                  - id: 25d7dd7a-0790-4a54-ad57-1016d89458c8
+                    kind: crypto
+                    config:
+                      op: md5
+                      value:
+                        type: string
+                        value: abc
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: string
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: string
+                        flow: both
+                    position:
+                      x: 920
+                      'y': 40
+                    note: MD5
+                  - id: 63e689be-ef9a-4267-b886-22b7afdd00ec
+                    kind: crypto
+                    config:
+                      op: sha1
+                      value:
+                        type: string
+                        value: abc
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: string
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: string
+                        flow: both
+                    position:
+                      x: 1360
+                      'y': 40
+                    note: SHA-1
+                  - id: f831b9a3-6c63-4f5e-aa94-faf76360c52c
+                    kind: crypto
+                    config:
+                      op: sha256
+                      value:
+                        type: string
+                        value: abc
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: string
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: string
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 400
+                    note: SHA-256
+                  - id: d0dcff9b-f7fb-40e7-a561-816069892b15
+                    kind: crypto
+                    config:
+                      op: sha512
+                      value:
+                        type: string
+                        value: abc
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: string
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: string
+                        flow: both
+                    position:
+                      x: 480
+                      'y': 400
+                    note: SHA-512
+                  - id: 829cfeca-2320-4465-a878-778c474591a4
+                    kind: crypto
+                    config:
+                      op: hmacSha256
+                      key: key
+                      value:
+                        type: string
+                        value: The quick brown fox jumps over the lazy dog
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: string
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: string
+                        flow: both
+                    position:
+                      x: 920
+                      'y': 400
+                    note: HMAC-SHA256 (key)
+                  - id: 7c0b5af4-4f59-4290-93a7-e32942ffc846
+                    kind: crypto
+                    config:
+                      op: uuid
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: string
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: string
+                        flow: both
+                    position:
+                      x: 1360
+                      'y': 400
+                    note: UUID v4 (random)
+                  - id: 02af060f-f2aa-46b1-9ceb-79141e831e4a
+                    kind: crypto
+                    config:
+                      op: base64Decode
+                      value:
+                        type: string
+                        value: //4=
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: string
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: string
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 760
+                    note: 'ERROR: bad base64'
+                  - id: 2f59a72e-0cfe-4385-a98b-7eb9b3829f8d
+                    kind: log
+                    config:
+                      level: error
+                      message:
+                        type: string
+                        value: 'crypto error: bad base64'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 480
+                      'y': 760
+                edges:
+                  - id: b40b537b-fa3f-4506-a748-ed4b0da1a5b4
+                    from:
+                      nodeId: 9f49b84f-446b-413f-966d-f63a57f3af2e
+                      portId: done
+                    to:
+                      nodeId: dd6a8975-c261-4b66-b9ab-37bf5db38e3b
+                      portId: in
+                  - id: 8d183816-9475-47ad-aa1a-322023ec9ee5
+                    from:
+                      nodeId: dd6a8975-c261-4b66-b9ab-37bf5db38e3b
+                      portId: done
+                    to:
+                      nodeId: 25d7dd7a-0790-4a54-ad57-1016d89458c8
+                      portId: in
+                  - id: 1fa9e802-57a6-4608-b54d-32ed6df192b8
+                    from:
+                      nodeId: 25d7dd7a-0790-4a54-ad57-1016d89458c8
+                      portId: done
+                    to:
+                      nodeId: 63e689be-ef9a-4267-b886-22b7afdd00ec
+                      portId: in
+                  - id: d80761c9-bdbb-417a-8023-81e873521cb0
+                    from:
+                      nodeId: 63e689be-ef9a-4267-b886-22b7afdd00ec
+                      portId: done
+                    to:
+                      nodeId: f831b9a3-6c63-4f5e-aa94-faf76360c52c
+                      portId: in
+                  - id: 2cdb9ebe-d329-4627-8d6e-c18d650630c9
+                    from:
+                      nodeId: f831b9a3-6c63-4f5e-aa94-faf76360c52c
+                      portId: done
+                    to:
+                      nodeId: d0dcff9b-f7fb-40e7-a561-816069892b15
+                      portId: in
+                  - id: b0b20cff-20f5-4515-951c-3ae4a9997416
+                    from:
+                      nodeId: d0dcff9b-f7fb-40e7-a561-816069892b15
+                      portId: done
+                    to:
+                      nodeId: 829cfeca-2320-4465-a878-778c474591a4
+                      portId: in
+                  - id: 25eacbd3-254c-4181-b70e-68280f35efd3
+                    from:
+                      nodeId: 829cfeca-2320-4465-a878-778c474591a4
+                      portId: done
+                    to:
+                      nodeId: 7c0b5af4-4f59-4290-93a7-e32942ffc846
+                      portId: in
+                  - id: b68071e4-c78f-4e59-90dd-572b49ac8dbd
+                    from:
+                      nodeId: 7c0b5af4-4f59-4290-93a7-e32942ffc846
+                      portId: done
+                    to:
+                      nodeId: 02af060f-f2aa-46b1-9ceb-79141e831e4a
+                      portId: in
+                  - id: 801d0412-4e12-4624-a356-fe5eed110278
+                    from:
+                      nodeId: 02af060f-f2aa-46b1-9ceb-79141e831e4a
+                      portId: error
+                    to:
+                      nodeId: 2f59a72e-0cfe-4385-a98b-7eb9b3829f8d
+                      portId: in
+                name: Crypto
+                id: 1fdd8d40-4e34-4918-8ee2-c0afd4754b15
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 06bddb85-3921-4446-ab8e-046ea5f73018
+                    kind: jwt
+                    config:
+                      value:
+                        type: string
+                        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: string
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 40
+                    note: decode → header + payload + signature
+                  - id: 912d5576-4a9b-43a1-86dd-28b77af2b171
+                    kind: jwt
+                    config:
+                      value:
+                        type: string
+                        value: eyJhbGciOiJub25lIn0.eyJuYW1lIjoiQ2Fmw6kg4oKsIn0
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: string
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 480
+                      'y': 40
+                    note: decode unsigned (UTF-8 claim, no signature)
+                  - id: af22b78e-c102-429b-ae49-3eaa93e9f357
+                    kind: jwt
+                    config:
+                      value:
+                        type: string
+                        value: notajwt
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: string
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 920
+                      'y': 40
+                    note: 'ERROR: malformed token'
+                  - id: 2c65da54-e217-4126-ad50-c2cce29b4442
+                    kind: log
+                    config:
+                      level: error
+                      message:
+                        type: string
+                        value: 'jwt error: malformed token'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 920
+                      'y': 400
+                edges:
+                  - id: 2c51723b-dd27-4186-be39-b4725ffbe0e4
+                    from:
+                      nodeId: 06bddb85-3921-4446-ab8e-046ea5f73018
+                      portId: done
+                    to:
+                      nodeId: 912d5576-4a9b-43a1-86dd-28b77af2b171
+                      portId: in
+                  - id: 877d300f-c277-4733-8fac-fc912adbe02f
+                    from:
+                      nodeId: 912d5576-4a9b-43a1-86dd-28b77af2b171
+                      portId: done
+                    to:
+                      nodeId: af22b78e-c102-429b-ae49-3eaa93e9f357
+                      portId: in
+                  - id: 8a7607bd-ae21-481f-a0fe-5deebf92046d
+                    from:
+                      nodeId: af22b78e-c102-429b-ae49-3eaa93e9f357
+                      portId: error
+                    to:
+                      nodeId: 2c65da54-e217-4126-ad50-c2cce29b4442
+                      portId: in
+                name: JWT
+                id: b98de5ac-3cc6-48c1-9bbb-39f3cf9d7ca8
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 9bca60cf-de73-4710-bf63-09a40ef19872
+                    kind: datetime
+                    config:
+                      op: add
+                      amount: 2
+                      unit: days
+                      value:
+                        type: string
+                        value: '2026-01-01T00:00:00.000Z'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 40
+                    note: add 2 days
+                  - id: a8afe1d3-00c2-4689-a084-e92dd937b236
+                    kind: datetime
+                    config:
+                      op: subtract
+                      amount: 1
+                      unit: hours
+                      value:
+                        type: string
+                        value: '2026-01-01T00:00:00.000Z'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 480
+                      'y': 40
+                    note: subtract 1 hour
+                  - id: 7f5c13fd-2c0f-4224-8e48-eafa6feddf1a
+                    kind: datetime
+                    config:
+                      op: format
+                      format: yyyy-LL-dd
+                      value:
+                        type: string
+                        value: '2026-06-05T08:09:10.000Z'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 920
+                      'y': 40
+                    note: format yyyy-LL-dd
+                  - id: 6cb4cf9c-d0f0-49c5-80f8-cbe3438121b6
+                    kind: datetime
+                    config:
+                      op: diff
+                      unit: days
+                      other:
+                        type: string
+                        value: '2026-01-11T00:00:00.000Z'
+                      value:
+                        type: string
+                        value: '2026-01-01T00:00:00.000Z'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 1360
+                      'y': 40
+                    note: diff (other − value) in days
+                  - id: 5ccaaff7-9b8a-4483-b4ac-32de83db77e5
+                    kind: datetime
+                    config:
+                      op: add
+                      amount: 1
+                      unit: days
+                      value:
+                        type: string
+                        value: not a date
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 400
+                    note: 'ERROR: unreadable date'
+                  - id: 15c6c741-b8b2-4888-ba01-bf16909785fb
+                    kind: log
+                    config:
+                      level: error
+                      message:
+                        type: string
+                        value: 'datetime error: bad date'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 480
+                      'y': 400
+                edges:
+                  - id: 6e66cbc1-8553-45e0-aaca-0e7ab39ec914
+                    from:
+                      nodeId: 9bca60cf-de73-4710-bf63-09a40ef19872
+                      portId: done
+                    to:
+                      nodeId: a8afe1d3-00c2-4689-a084-e92dd937b236
+                      portId: in
+                  - id: e451a4bb-dc26-4acb-b09d-29dfce50a861
+                    from:
+                      nodeId: a8afe1d3-00c2-4689-a084-e92dd937b236
+                      portId: done
+                    to:
+                      nodeId: 7f5c13fd-2c0f-4224-8e48-eafa6feddf1a
+                      portId: in
+                  - id: 9d07bd84-464e-4560-904d-61e3a5692621
+                    from:
+                      nodeId: 7f5c13fd-2c0f-4224-8e48-eafa6feddf1a
+                      portId: done
+                    to:
+                      nodeId: 6cb4cf9c-d0f0-49c5-80f8-cbe3438121b6
+                      portId: in
+                  - id: c91c87a1-859b-4a70-8050-a045eac330b0
+                    from:
+                      nodeId: 6cb4cf9c-d0f0-49c5-80f8-cbe3438121b6
+                      portId: done
+                    to:
+                      nodeId: 5ccaaff7-9b8a-4483-b4ac-32de83db77e5
+                      portId: in
+                  - id: 2e4f14e7-27bb-490d-8186-39ef1543cd32
+                    from:
+                      nodeId: 5ccaaff7-9b8a-4483-b4ac-32de83db77e5
+                      portId: error
+                    to:
+                      nodeId: 15c6c741-b8b2-4888-ba01-bf16909785fb
+                      portId: in
+                name: DateTime
+                id: b1b5b19c-5eca-4c7b-aa0e-112541ebaa08
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: a2330370-9d40-4b07-9d03-e0ee17f08d05
+                    kind: xml
+                    config:
+                      op: parse
+                      value:
+                        type: string
+                        value: <note id="1"><to>Tove</to><from>Jani</from></note>
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 40
+                    note: parse → object (attrs @_)
+                  - id: c9489440-0812-4401-9764-f2dd2781cbbc
+                    kind: xml
+                    config:
+                      op: parse
+                      value:
+                        type: string
+                        value: <p><x>1</x></p>
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 480
+                      'y': 40
+                    note: parse → object (feeds stringify)
+                  - id: 39239e0d-7dc1-48f0-acac-3311ae8a8350
+                    kind: xml
+                    config:
+                      op: stringify
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 920
+                      'y': 40
+                    note: stringify ← wired (compact)
+                  - id: 6826b5bf-07e5-4843-a8b0-9414f181f7f6
+                    kind: xml
+                    config:
+                      op: parse
+                      value:
+                        type: string
+                        value: <q><y>2</y></q>
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 1360
+                      'y': 40
+                    note: parse → object (feeds stringify)
+                  - id: c11359fe-201a-43f2-87a5-20d6de542732
+                    kind: xml
+                    config:
+                      op: stringify
+                      indent: 2
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 400
+                    note: stringify ← wired (indent 2)
+                  - id: 072c789e-4b75-42e5-8560-d6b607dfc08c
+                    kind: xml
+                    config:
+                      op: parse
+                      value:
+                        type: string
+                        value: <a><b></a>
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 480
+                      'y': 400
+                    note: 'ERROR: malformed XML'
+                  - id: fa83b7fb-ecc8-469c-8fce-094337c6771a
+                    kind: log
+                    config:
+                      level: error
+                      message:
+                        type: string
+                        value: 'xml error: malformed XML'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 480
+                      'y': 760
+                edges:
+                  - id: 8e2d7ada-8c3f-46d9-98c5-c034fa7a2601
+                    from:
+                      nodeId: a2330370-9d40-4b07-9d03-e0ee17f08d05
+                      portId: done
+                    to:
+                      nodeId: c9489440-0812-4401-9764-f2dd2781cbbc
+                      portId: in
+                  - id: 213f5215-1263-479f-a9eb-6876a16f1f39
+                    from:
+                      nodeId: c9489440-0812-4401-9764-f2dd2781cbbc
+                      portId: result
+                    to:
+                      nodeId: 39239e0d-7dc1-48f0-acac-3311ae8a8350
+                      portId: value
+                    selector: .
+                  - id: 02daa6c7-b0a9-4bac-9908-01dc5bd2b0de
+                    from:
+                      nodeId: 39239e0d-7dc1-48f0-acac-3311ae8a8350
+                      portId: done
+                    to:
+                      nodeId: 6826b5bf-07e5-4843-a8b0-9414f181f7f6
+                      portId: in
+                  - id: 57a6709f-56b5-4f7d-8abf-0c82160734f0
+                    from:
+                      nodeId: 6826b5bf-07e5-4843-a8b0-9414f181f7f6
+                      portId: result
+                    to:
+                      nodeId: c11359fe-201a-43f2-87a5-20d6de542732
+                      portId: value
+                    selector: .
+                  - id: 87d606f6-5304-4aa8-bafd-82a972173638
+                    from:
+                      nodeId: c11359fe-201a-43f2-87a5-20d6de542732
+                      portId: done
+                    to:
+                      nodeId: 072c789e-4b75-42e5-8560-d6b607dfc08c
+                      portId: in
+                  - id: 12002068-2f83-45aa-8a35-95b56186d8f8
+                    from:
+                      nodeId: 072c789e-4b75-42e5-8560-d6b607dfc08c
+                      portId: error
+                    to:
+                      nodeId: fa83b7fb-ecc8-469c-8fce-094337c6771a
+                      portId: in
+                name: XML
+                id: 828d1a5b-4bac-46ad-b7f7-69b80234202d
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 4a15ce05-2b9f-4767-8e2f-2ca05d85d753
+                    kind: yaml
+                    config:
+                      op: parse
+                      value:
+                        type: string
+                        value: |
+                          a: 1
+                          b:
+                            - 2
+                            - 3
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 40
+                    note: parse → object
+                  - id: 9edb3f7e-1dbe-40f6-a1fd-eb4868d3ee27
+                    kind: yaml
+                    config:
+                      op: parse
+                      value:
+                        type: string
+                        value: '42'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 480
+                      'y': 40
+                    note: parse → number
+                  - id: 8db6dfdf-e9f7-49d3-9306-d25ee15b621f
+                    kind: yaml
+                    config:
+                      op: parse
+                      value:
+                        type: string
+                        value: |
+                          - 1
+                          - 2
+                          - 3
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 920
+                      'y': 40
+                    note: parse → array
+                  - id: a4b05c38-fb6e-4ce6-900d-5d2ec32caa36
+                    kind: yaml
+                    config:
+                      op: stringify
+                      value:
+                        type: list
+                        items:
+                          - type: numeric
+                            value: 1
+                            format: decimal
+                          - type: numeric
+                            value: 2
+                            format: decimal
+                          - type: numeric
+                            value: 3
+                            format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 1360
+                      'y': 40
+                    note: stringify → list
+                  - id: 1c8de0a8-3d0d-40de-9d20-c53245100dee
+                    kind: yaml
+                    config:
+                      op: stringify
+                      indent: 4
+                      value:
+                        type: list
+                        items:
+                          - type: numeric
+                            value: 1
+                            format: decimal
+                          - type: numeric
+                            value: 2
+                            format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 400
+                    note: stringify → indent 4
+                  - id: 19f9ac87-c5ee-4dda-9e23-a291fc7cce69
+                    kind: yaml
+                    config:
+                      op: parse
+                      value:
+                        type: string
+                        value: |
+                          name: Glaude
+                          age: 42
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 480
+                      'y': 400
+                    note: parse → object (feeds stringify)
+                  - id: bd662dd1-3c5e-4aef-8ba0-1d2b5a5856e0
+                    kind: yaml
+                    config:
+                      op: stringify
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 920
+                      'y': 400
+                    note: stringify ← wired (round-trip)
+                  - id: 9faab333-c404-4e61-95cd-697da5025210
+                    kind: yaml
+                    config:
+                      op: parse
+                      value:
+                        type: string
+                        value: 'a: [1, 2'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 1360
+                      'y': 400
+                    note: 'ERROR: malformed YAML'
+                  - id: 7ac69db1-b1b4-4425-bef6-e269228c99c1
+                    kind: log
+                    config:
+                      level: error
+                      message:
+                        type: string
+                        value: 'yaml error: malformed YAML'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1360
+                      'y': 760
+                edges:
+                  - id: 1e998e10-4a44-470d-b3c2-234398dca1d7
+                    from:
+                      nodeId: 4a15ce05-2b9f-4767-8e2f-2ca05d85d753
+                      portId: done
+                    to:
+                      nodeId: 9edb3f7e-1dbe-40f6-a1fd-eb4868d3ee27
+                      portId: in
+                  - id: 82fda1e3-c064-42bf-8663-437522a9db08
+                    from:
+                      nodeId: 9edb3f7e-1dbe-40f6-a1fd-eb4868d3ee27
+                      portId: done
+                    to:
+                      nodeId: 8db6dfdf-e9f7-49d3-9306-d25ee15b621f
+                      portId: in
+                  - id: fbfe6ebc-1baf-4834-ac57-c4fc9cc18119
+                    from:
+                      nodeId: 8db6dfdf-e9f7-49d3-9306-d25ee15b621f
+                      portId: done
+                    to:
+                      nodeId: a4b05c38-fb6e-4ce6-900d-5d2ec32caa36
+                      portId: in
+                  - id: af143cc5-33db-49b7-b630-832ac0a822b2
+                    from:
+                      nodeId: a4b05c38-fb6e-4ce6-900d-5d2ec32caa36
+                      portId: done
+                    to:
+                      nodeId: 1c8de0a8-3d0d-40de-9d20-c53245100dee
+                      portId: in
+                  - id: 10407d0e-289e-4394-9caf-f2fd3eac8bd9
+                    from:
+                      nodeId: 1c8de0a8-3d0d-40de-9d20-c53245100dee
+                      portId: done
+                    to:
+                      nodeId: 19f9ac87-c5ee-4dda-9e23-a291fc7cce69
+                      portId: in
+                  - id: 06090c9b-f213-4b3b-8b14-9faf685c6b57
+                    from:
+                      nodeId: 19f9ac87-c5ee-4dda-9e23-a291fc7cce69
+                      portId: result
+                    to:
+                      nodeId: bd662dd1-3c5e-4aef-8ba0-1d2b5a5856e0
+                      portId: value
+                    selector: .
+                  - id: fdbb615f-d935-40cc-9486-b5938d56af36
+                    from:
+                      nodeId: bd662dd1-3c5e-4aef-8ba0-1d2b5a5856e0
+                      portId: done
+                    to:
+                      nodeId: 9faab333-c404-4e61-95cd-697da5025210
+                      portId: in
+                  - id: a628125c-86dd-44dd-a892-5f876140fa0d
+                    from:
+                      nodeId: 9faab333-c404-4e61-95cd-697da5025210
+                      portId: error
+                    to:
+                      nodeId: 7ac69db1-b1b4-4425-bef6-e269228c99c1
+                      portId: in
+                name: YAML
+                id: 1effb862-a658-4af4-9d5c-c1c8c5cb2ed1
                 items: []
         id: f1000000-0000-0000-0000-00000000auth
         name: Pet API

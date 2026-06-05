@@ -44,6 +44,7 @@ export const SCENARIO_NODE_CATALOGUE: ScenarioNodeKindMeta[] = [
   { kind: 'wait', labelKey: 'scenario.nodes.wait', defaultLabel: 'Wait', icon: 'watch', category: 'time' },
   { kind: 'waitUntil', labelKey: 'scenario.nodes.waitUntil', defaultLabel: 'Wait until', icon: 'clock', category: 'time' },
   { kind: 'now', labelKey: 'scenario.nodes.now', defaultLabel: 'Now', icon: 'calendar', category: 'time' },
+  { kind: 'datetime', labelKey: 'scenario.nodes.datetime', defaultLabel: 'Date math', icon: 'history', category: 'time' },
   // Data & compute
   { kind: 'arithmetic', labelKey: 'scenario.nodes.arithmetic', defaultLabel: 'Arithmetic', icon: 'symbol-operator', category: 'compute' },
   { kind: 'comparator', labelKey: 'scenario.nodes.comparator', defaultLabel: 'Comparator', icon: 'equals', category: 'compute' },
@@ -55,6 +56,10 @@ export const SCENARIO_NODE_CATALOGUE: ScenarioNodeKindMeta[] = [
   { kind: 'cast', labelKey: 'scenario.nodes.cast', defaultLabel: 'Cast', icon: 'replace', category: 'compute' },
   { kind: 'regex', labelKey: 'scenario.nodes.regex', defaultLabel: 'Regex', icon: 'regex', category: 'compute' },
   { kind: 'json', labelKey: 'scenario.nodes.json', defaultLabel: 'JSON', icon: 'json', category: 'compute' },
+  { kind: 'xml', labelKey: 'scenario.nodes.xml', defaultLabel: 'XML', icon: 'code', category: 'compute' },
+  { kind: 'yaml', labelKey: 'scenario.nodes.yaml', defaultLabel: 'YAML', icon: 'symbol-structure', category: 'compute' },
+  { kind: 'crypto', labelKey: 'scenario.nodes.crypto', defaultLabel: 'Crypto', icon: 'lock', category: 'compute' },
+  { kind: 'jwt', labelKey: 'scenario.nodes.jwt', defaultLabel: 'JWT', icon: 'key', category: 'compute' },
   // Utilities
   { kind: 'log', labelKey: 'scenario.nodes.log', defaultLabel: 'Log', icon: 'output', category: 'utility' },
   { kind: 'assert', labelKey: 'scenario.nodes.assert', defaultLabel: 'Assert', icon: 'verified', category: 'utility' }

@@ -153,6 +153,18 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // `json` parses its `value` string into a value, or stringifies its `value`;
   // the output type depends on the op (parsed value vs JSON string).
   json: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
+  // `xml` / `yaml` parse their `value` string into a value, or stringify their
+  // `value`; the output type depends on the op (parsed value vs markup string).
+  xml: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
+  yaml: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
+  // `crypto` encodes / hashes / signs its `value` string (or generates a UUID);
+  // the result is always a string.
+  crypto: { inputs: [{ id: 'value', name: 'value', dataType: 'string' }], outputs: [{ id: 'result', name: 'result', dataType: 'string', flow: 'both' }] },
+  // `jwt` decodes its `value` token string into `{ header, payload, signature }`.
+  jwt: { inputs: [{ id: 'value', name: 'value', dataType: 'string' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
+  // `datetime` shifts / formats / diffs its `value` date; output is an ISO string
+  // (add / subtract / format) or a number (diff).
+  datetime: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
   // Utilities
   // A terminal sink with two optional inputs (wire either, or set inline).
   // `message` is a string, `data` any value. No output (terminal).

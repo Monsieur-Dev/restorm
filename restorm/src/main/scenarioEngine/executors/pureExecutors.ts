@@ -11,6 +11,11 @@ import { resolveConfigItems, applyListOp } from '../../../shared/utils/scenarioS
 import { castValue, isScenarioCastType } from '../../../shared/scenarioCast'
 import { applyRegex, isRegexOp } from '../../../shared/scenarioRegex'
 import { applyJson, isJsonOp } from '../../../shared/scenarioJson'
+import { applyXml, isXmlOp } from '../../../shared/scenarioXml'
+import { applyYaml, isYamlOp } from '../../../shared/scenarioYaml'
+import { applyCrypto, isCryptoOp } from '../../../shared/scenarioCrypto'
+import { applyJwt } from '../../../shared/scenarioJwt'
+import { applyDateTime, isDateTimeOp, isDateTimeUnit } from '../../../shared/scenarioDateTime'
 import { compareValues, deepEqual, hintFromConfig, resolveOperand, type OperandHint } from '../conditionEval'
 
 /** A wired operand's kind is inferred from its value (pass no hint); an inline
@@ -429,6 +434,66 @@ export const jsonExecutor: NodeExecutor = (act, ctx) => {
   const op = isJsonOp(cfg.op) ? cfg.op : 'parse'
   const indent = typeof cfg.indent === 'number' ? cfg.indent : 0
   return { outputs: [{ port: 'result', value: applyJson(value, op, indent) }] }
+}
+
+/** `xml`: parse the `value` string into an object, or stringify the `value`, via
+ * the SHARED `applyXml` — the SAME implementation the inspector preview calls.
+ * Malformed XML (parse) or a non-serialisable value (stringify) THROWS, routed
+ * to the `error` port. */
+export const xmlExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { op?: unknown; indent?: unknown; value?: unknown }
+  const value = resolveOperand(act.inputs['value'], cfg.value, ctx.variables)
+  const op = isXmlOp(cfg.op) ? cfg.op : 'parse'
+  const indent = typeof cfg.indent === 'number' ? cfg.indent : 0
+  return { outputs: [{ port: 'result', value: applyXml(value, op, indent) }] }
+}
+
+/** `yaml`: parse the `value` string into a value, or stringify the `value`, via
+ * the SHARED `applyYaml` — the SAME implementation the inspector preview calls.
+ * Malformed YAML (parse) or a non-serialisable value (stringify) THROWS, routed
+ * to the `error` port. */
+export const yamlExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { op?: unknown; indent?: unknown; value?: unknown }
+  const value = resolveOperand(act.inputs['value'], cfg.value, ctx.variables)
+  const op = isYamlOp(cfg.op) ? cfg.op : 'parse'
+  const indent = typeof cfg.indent === 'number' ? cfg.indent : 2
+  return { outputs: [{ port: 'result', value: applyYaml(value, op, indent) }] }
+}
+
+/** `crypto`: encode / hash / sign the `value` string (or generate a UUID) via
+ * the SHARED `applyCrypto` — the SAME implementation the inspector preview calls.
+ * A `hmacSha256` with no `key`, or a `base64Decode` of a non-UTF-8 string,
+ * THROWS, routed to the `error` port. */
+export const cryptoExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { op?: unknown; key?: unknown; value?: unknown }
+  const value = resolveOperand(act.inputs['value'], cfg.value, ctx.variables)
+  const op = isCryptoOp(cfg.op) ? cfg.op : 'sha256'
+  const key = typeof cfg.key === 'string' ? cfg.key : ''
+  return { outputs: [{ port: 'result', value: applyCrypto(value, op, key) }] }
+}
+
+/** `jwt`: decode the `value` token string into `{ header, payload, signature }`
+ * via the SHARED `applyJwt` — the SAME implementation the inspector preview
+ * calls. A malformed token THROWS, routed to the `error` port. */
+export const jwtExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { value?: unknown }
+  const value = resolveOperand(act.inputs['value'], cfg.value, ctx.variables)
+  return { outputs: [{ port: 'result', value: applyJwt(value) }] }
+}
+
+/** `datetime`: shift / format / diff the `value` date via the SHARED
+ * `applyDateTime` — the SAME implementation the inspector preview calls. An
+ * unreadable date (or `other` operand for diff) THROWS, routed to the `error`
+ * port. */
+export const dateTimeExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { op?: unknown; amount?: unknown; unit?: unknown; format?: unknown; other?: unknown; value?: unknown }
+  const value = resolveOperand(act.inputs['value'], cfg.value, ctx.variables)
+  const op = isDateTimeOp(cfg.op) ? cfg.op : 'add'
+  const amount = typeof cfg.amount === 'number' ? cfg.amount : 0
+  const unit = isDateTimeUnit(cfg.unit) ? cfg.unit : 'days'
+  const format = typeof cfg.format === 'string' ? cfg.format : ''
+  const other = resolveOperand(act.inputs['other'], cfg.other, ctx.variables)
+  return { outputs: [{ port: 'result', value: applyDateTime(value, op, { amount, unit, format, other }) }] }
 }
 
 /** Coerce an arithmetic operand to a finite number, or THROW so the run routes

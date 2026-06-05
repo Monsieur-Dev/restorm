@@ -65,6 +65,9 @@ const DYNAMIC_TIME_KEYS = new Set(['timestamp', 'now', 'startedAt', 'finishedAt'
 function normalizeMessage(message: string): string {
   return message.replace(/^(\S+ )\[[^\]]*\]/, '$1[<time>]')
 }
+/** A freshly-generated UUID (e.g. the crypto `uuid` op) is non-deterministic, so
+ * mask any v4 UUID string to keep the golden stable. */
+const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 function normalizeData(v: unknown): unknown {
   if (Array.isArray(v)) return v.map(normalizeData)
   if (v !== null && typeof v === 'object') {
@@ -74,6 +77,7 @@ function normalizeData(v: unknown): unknown {
     }
     return out
   }
+  if (typeof v === 'string' && UUID_V4.test(v)) return '<uuid>'
   return v
 }
 

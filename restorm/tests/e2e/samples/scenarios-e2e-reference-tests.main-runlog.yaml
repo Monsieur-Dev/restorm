@@ -3295,7 +3295,7 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: 333c0aeb-1b4b-47ab-a829-db7e2b344e69
+    scenarioId: <uuid>
     label: Regex
     in: true
 - message: 🔵 [<time>] ▶ Regex
@@ -3426,7 +3426,7 @@
     result: {}
 - message: ⚪ [<time>] start runScenario
   data:
-    scenarioId: a8df7003-8355-4c28-aa5c-9f8f70c380f7
+    scenarioId: <uuid>
     label: JSON
     in: true
 - message: 🔵 [<time>] ▶ JSON
@@ -3523,6 +3523,419 @@
 - message: ⚪ [<time>] done log
   data: {}
 - message: 🔵 [<time>] ■ JSON
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: Crypto
+    in: true
+- message: 🔵 [<time>] ▶ Crypto
+- message: ⚪ [<time>] start crypto
+  data:
+    op: base64Encode
+    value: hello
+- message: ⚪ [<time>] done crypto
+  data:
+    result: aGVsbG8=
+- message: ⚪ [<time>] start crypto
+  data:
+    op: base64Decode
+    value: aGVsbG8=
+    in: true
+- message: ⚪ [<time>] done crypto
+  data:
+    result: hello
+- message: ⚪ [<time>] start crypto
+  data:
+    op: md5
+    value: abc
+    in: true
+- message: ⚪ [<time>] done crypto
+  data:
+    result: 900150983cd24fb0d6963f7d28e17f72
+- message: ⚪ [<time>] start crypto
+  data:
+    op: sha1
+    value: abc
+    in: true
+- message: ⚪ [<time>] done crypto
+  data:
+    result: a9993e364706816aba3e25717850c26c9cd0d89d
+- message: ⚪ [<time>] start crypto
+  data:
+    op: sha256
+    value: abc
+    in: true
+- message: ⚪ [<time>] done crypto
+  data:
+    result: ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
+- message: ⚪ [<time>] start crypto
+  data:
+    op: sha512
+    value: abc
+    in: true
+- message: ⚪ [<time>] done crypto
+  data:
+    result: ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f
+- message: ⚪ [<time>] start crypto
+  data:
+    op: hmacSha256
+    key: key
+    value: The quick brown fox jumps over the lazy dog
+    id: <uuid>
+    in: true
+- message: ⚪ [<time>] done crypto
+  data:
+    result: f7bc83f430538424b13298e6aa6fb143ef4d59a14946175997479dbc2d1a3cd8
+- message: ⚪ [<time>] start crypto
+  data:
+    op: uuid
+    in: true
+- message: ⚪ [<time>] done crypto
+  data:
+    result: <uuid>
+- message: ⚪ [<time>] start crypto
+  data:
+    op: base64Decode
+    value: //4=
+    in: true
+- message: 🔴 [<time>] Malformed UTF-8 data
+- message: ⚪ [<time>] start log
+  data:
+    level: error
+    message: "crypto error: bad base64"
+    in:
+      message: Malformed UTF-8 data
+      startedAt: <dynamic-time>
+- message: "🔴 [<time>] crypto error: bad base64"
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ Crypto
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: JWT
+    in: true
+- message: 🔵 [<time>] ▶ JWT
+- message: ⚪ [<time>] start jwt
+  data:
+    value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+- message: ⚪ [<time>] done jwt
+  data:
+    result:
+      header:
+        alg: HS256
+        typ: JWT
+      payload:
+        sub: "1234567890"
+        name: John Doe
+        iat: 1516239022
+      signature: SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+- message: ⚪ [<time>] start jwt
+  data:
+    value: eyJhbGciOiJub25lIn0.eyJuYW1lIjoiQ2Fmw6kg4oKsIn0
+    in: true
+- message: ⚪ [<time>] done jwt
+  data:
+    result:
+      header:
+        alg: none
+      payload:
+        name: Café €
+      signature: ""
+- message: ⚪ [<time>] start jwt
+  data:
+    value: notajwt
+    in: true
+- message: 🔴 [<time>] Not a JWT — expected header.payload.signature segments
+- message: ⚪ [<time>] start log
+  data:
+    level: error
+    message: "jwt error: malformed token"
+    in:
+      message: Not a JWT — expected header.payload.signature segments
+      startedAt: <dynamic-time>
+- message: "🔴 [<time>] jwt error: malformed token"
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ JWT
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: DateTime
+    in: true
+- message: 🔵 [<time>] ▶ DateTime
+- message: ⚪ [<time>] start datetime
+  data:
+    op: add
+    amount: 2
+    unit: days
+    value: 2026-01-01T00:00:00.000Z
+- message: ⚪ [<time>] done datetime
+  data:
+    result: 2026-01-03T00:00:00.000Z
+- message: ⚪ [<time>] start datetime
+  data:
+    op: subtract
+    amount: 1
+    unit: hours
+    value: 2026-01-01T00:00:00.000Z
+    in: true
+- message: ⚪ [<time>] done datetime
+  data:
+    result: 2025-12-31T23:00:00.000Z
+- message: ⚪ [<time>] start datetime
+  data:
+    op: format
+    format: yyyy-LL-dd
+    value: 2026-06-05T08:09:10.000Z
+    in: true
+- message: ⚪ [<time>] done datetime
+  data:
+    result: 2026-06-05
+- message: ⚪ [<time>] start datetime
+  data:
+    op: diff
+    unit: days
+    other: 2026-01-11T00:00:00.000Z
+    value: 2026-01-01T00:00:00.000Z
+    in: true
+- message: ⚪ [<time>] done datetime
+  data:
+    result: 10
+- message: ⚪ [<time>] start datetime
+  data:
+    op: add
+    amount: 1
+    unit: days
+    value: not a date
+    in: true
+- message: 🔴 [<time>] Cannot read "not a date" as a date
+- message: ⚪ [<time>] start log
+  data:
+    level: error
+    message: "datetime error: bad date"
+    in:
+      message: Cannot read "not a date" as a date
+      startedAt: <dynamic-time>
+- message: "🔴 [<time>] datetime error: bad date"
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ DateTime
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: XML
+    in: true
+- message: 🔵 [<time>] ▶ XML
+- message: ⚪ [<time>] start xml
+  data:
+    op: parse
+    value: <note id="1"><to>Tove</to><from>Jani</from></note>
+- message: ⚪ [<time>] done xml
+  data:
+    result:
+      note:
+        to: Tove
+        from: Jani
+        "@_id": "1"
+- message: ⚪ [<time>] start xml
+  data:
+    op: parse
+    value: <p><x>1</x></p>
+    in: true
+- message: ⚪ [<time>] done xml
+  data:
+    result:
+      p:
+        x: 1
+- message: ⚪ [<time>] start xml
+  data:
+    op: stringify
+    value:
+      p:
+        x: 1
+- message: ⚪ [<time>] done xml
+  data:
+    result: <p><x>1</x></p>
+- message: ⚪ [<time>] start xml
+  data:
+    op: parse
+    value: <q><y>2</y></q>
+    in: true
+- message: ⚪ [<time>] done xml
+  data:
+    result:
+      q:
+        y: 2
+- message: ⚪ [<time>] start xml
+  data:
+    op: stringify
+    indent: 2
+    value:
+      q:
+        y: 2
+- message: ⚪ [<time>] done xml
+  data:
+    result: |-
+      <q>
+        <y>2</y>
+      </q>
+- message: ⚪ [<time>] start xml
+  data:
+    op: parse
+    value: <a><b></a>
+    in: true
+- message: "🔴 [<time>] Invalid XML: Expected closing tag 'b' (opened in line 1,
+    col 4) instead of closing tag 'a'."
+- message: ⚪ [<time>] start log
+  data:
+    level: error
+    message: "xml error: malformed XML"
+    in:
+      message: "Invalid XML: Expected closing tag 'b' (opened in line 1, col 4)
+        instead of closing tag 'a'."
+      startedAt: <dynamic-time>
+- message: "🔴 [<time>] xml error: malformed XML"
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ XML
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: YAML
+    in: true
+- message: 🔵 [<time>] ▶ YAML
+- message: ⚪ [<time>] start yaml
+  data:
+    op: parse
+    value: |
+      a: 1
+      b:
+        - 2
+        - 3
+- message: ⚪ [<time>] done yaml
+  data:
+    result:
+      a: 1
+      b:
+        - 2
+        - 3
+- message: ⚪ [<time>] start yaml
+  data:
+    op: parse
+    value: "42"
+    in: true
+- message: ⚪ [<time>] done yaml
+  data:
+    result: 42
+- message: ⚪ [<time>] start yaml
+  data:
+    op: parse
+    value: |
+      - 1
+      - 2
+      - 3
+    in: true
+- message: ⚪ [<time>] done yaml
+  data:
+    result:
+      - 1
+      - 2
+      - 3
+- message: ⚪ [<time>] start yaml
+  data:
+    op: stringify
+    value:
+      - 1
+      - 2
+      - 3
+    in: true
+- message: ⚪ [<time>] done yaml
+  data:
+    result: |
+      - 1
+      - 2
+      - 3
+- message: ⚪ [<time>] start yaml
+  data:
+    op: stringify
+    indent: 4
+    value:
+      - 1
+      - 2
+    in: true
+- message: ⚪ [<time>] done yaml
+  data:
+    result: |
+      - 1
+      - 2
+- message: ⚪ [<time>] start yaml
+  data:
+    op: parse
+    value: |
+      name: Glaude
+      age: 42
+    in: true
+- message: ⚪ [<time>] done yaml
+  data:
+    result:
+      name: Glaude
+      age: 42
+- message: ⚪ [<time>] start yaml
+  data:
+    op: stringify
+    value:
+      name: Glaude
+      age: 42
+- message: ⚪ [<time>] done yaml
+  data:
+    result: |
+      name: Glaude
+      age: 42
+- message: ⚪ [<time>] start yaml
+  data:
+    op: parse
+    value: "a: [1, 2"
+    in: true
+- message: >
+    🔴 [<time>] Flow sequence in block collection must be sufficiently indented
+    and end with a ] at line 1, column 9:
+
+
+    a: [1, 2
+            ^
+- message: ⚪ [<time>] start log
+  data:
+    level: error
+    message: "yaml error: malformed YAML"
+    in:
+      message: >
+        Flow sequence in block collection must be sufficiently indented and end
+        with a ] at line 1, column 9:
+
+
+        a: [1, 2
+                ^
+      startedAt: <dynamic-time>
+- message: "🔴 [<time>] yaml error: malformed YAML"
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ YAML
 - message: ⚪ [<time>] done runScenario
   data:
     result: {}

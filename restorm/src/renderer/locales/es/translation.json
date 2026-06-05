@@ -858,7 +858,12 @@
       "removeFromList": "Eliminar de la lista",
       "cast": "Convertir",
       "regex": "Regex",
-      "json": "JSON"
+      "json": "JSON",
+      "xml": "XML",
+      "yaml": "YAML",
+      "crypto": "Crypto",
+      "jwt": "JWT",
+      "datetime": "Date math"
     },
     "comparator": {
       "result": "resultado"
@@ -1074,6 +1079,72 @@
       "op": {
         "parse": "analizar",
         "stringify": "serializar"
+      }
+    },
+    "xml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "yaml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "crypto": {
+      "value": "value",
+      "operation": "operation",
+      "key": "key",
+      "keyPlaceholder": "secret",
+      "result": "result",
+      "op": {
+        "base64Encode": "base64 encode",
+        "base64Decode": "base64 decode",
+        "md5": "MD5",
+        "sha1": "SHA-1",
+        "sha256": "SHA-256",
+        "sha512": "SHA-512",
+        "hmacSha256": "HMAC-SHA256",
+        "uuid": "UUID v4"
+      }
+    },
+    "jwt": {
+      "value": "token",
+      "result": "result"
+    },
+    "datetime": {
+      "value": "date",
+      "operation": "operation",
+      "amount": "amount",
+      "unitLabel": "unit",
+      "format": "format",
+      "other": "second date",
+      "result": "result",
+      "op": {
+        "add": "add",
+        "subtract": "subtract",
+        "format": "format",
+        "diff": "diff"
+      },
+      "unit": {
+        "milliseconds": "milliseconds",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months",
+        "years": "years"
       }
     }
   }

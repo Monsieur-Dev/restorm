@@ -8,6 +8,11 @@ import { compareValues as compareValuesShared } from '../scenarioComparison'
 import { castValue, isScenarioCastType } from '../scenarioCast'
 import { applyRegex, isRegexOp } from '../scenarioRegex'
 import { applyJson, isJsonOp } from '../scenarioJson'
+import { applyXml, isXmlOp } from '../scenarioXml'
+import { applyYaml, isYamlOp } from '../scenarioYaml'
+import { applyCrypto, isCryptoOp } from '../scenarioCrypto'
+import { applyJwt } from '../scenarioJwt'
+import { applyDateTime, isDateTimeOp, isDateTimeUnit } from '../scenarioDateTime'
 import { LIST_MUTATION_DEFAULT_VALUE_ID } from '../scenarioListMutationValues'
 
 // Register the full helper suite on first import so a chained `transform`
@@ -944,6 +949,78 @@ export function staticScenarioPreview(
       const indent = typeof cfg['indent'] === 'number' ? cfg['indent'] : 0
       try {
         return { result: applyJson(value, op, indent) }
+      } catch {
+        return null
+      }
+    }
+    case 'xml': {
+      // Parse / stringify the resolved `value` via the SHARED `applyXml` — the
+      // SAME implementation the runtime calls. Malformed XML / non-serialisable
+      // value THROWS (runtime → `error`); the preview catches it → no result.
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      if (value === undefined) return null
+      const op = isXmlOp(cfg['op']) ? cfg['op'] : 'parse'
+      const indent = typeof cfg['indent'] === 'number' ? cfg['indent'] : 0
+      try {
+        return { result: applyXml(value, op, indent) }
+      } catch {
+        return null
+      }
+    }
+    case 'yaml': {
+      // Parse / stringify the resolved `value` via the SHARED `applyYaml` — the
+      // SAME implementation the runtime calls. Malformed YAML / non-serialisable
+      // value THROWS (runtime → `error`); the preview catches it → no result.
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      if (value === undefined) return null
+      const op = isYamlOp(cfg['op']) ? cfg['op'] : 'parse'
+      const indent = typeof cfg['indent'] === 'number' ? cfg['indent'] : 2
+      try {
+        return { result: applyYaml(value, op, indent) }
+      } catch {
+        return null
+      }
+    }
+    case 'crypto': {
+      // Encode / hash / sign the resolved `value` via the SHARED `applyCrypto` —
+      // the SAME implementation the runtime calls. A missing HMAC key / bad
+      // base64 THROWS (runtime → `error`); the preview catches it → no result.
+      const op = isCryptoOp(cfg['op']) ? cfg['op'] : 'sha256'
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      // `uuid` ignores its input; every other op needs a resolved value.
+      if (op !== 'uuid' && value === undefined) return null
+      const key = typeof cfg['key'] === 'string' ? cfg['key'] : ''
+      try {
+        return { result: applyCrypto(value, op, key) }
+      } catch {
+        return null
+      }
+    }
+    case 'jwt': {
+      // Decode the resolved `value` token via the SHARED `applyJwt` — the SAME
+      // implementation the runtime calls. A malformed token THROWS (runtime →
+      // `error`); the preview catches it → no result.
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      if (value === undefined) return null
+      try {
+        return { result: applyJwt(value) }
+      } catch {
+        return null
+      }
+    }
+    case 'datetime': {
+      // Shift / format / diff the resolved `value` date via the SHARED
+      // `applyDateTime` — the SAME implementation the runtime calls. An unreadable
+      // date THROWS (runtime → `error`); the preview catches it → no result.
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      if (value === undefined) return null
+      const op = isDateTimeOp(cfg['op']) ? cfg['op'] : 'add'
+      const amount = typeof cfg['amount'] === 'number' ? cfg['amount'] : 0
+      const unit = isDateTimeUnit(cfg['unit']) ? cfg['unit'] : 'days'
+      const format = typeof cfg['format'] === 'string' ? cfg['format'] : ''
+      const other = operandPreviewValue(node.id, 'other', cfg['other'], nodes, edges)
+      try {
+        return { result: applyDateTime(value, op, { amount, unit, format, other }) }
       } catch {
         return null
       }

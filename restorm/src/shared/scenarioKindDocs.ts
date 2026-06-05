@@ -157,6 +157,26 @@ export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
     summary: 'parse → the `value` JSON string into a value (malformed JSON → `error`; an already-structured value passes through); stringify → any `value` to a JSON string on `result` (`indent>0` pretty-prints; a circular / non-serialisable value → `error`).',
     config: { op: 'parse | stringify', indent: 'Pretty-print spaces for stringify (0 = compact, max 10).', value: 'Inline value when not wired (a JSON string for parse).' }
   },
+  xml: {
+    summary: 'parse → the `value` XML string into an object (attributes under `@_`; malformed XML → `error`; an already-structured value passes through); stringify → an object `value` to an XML string on `result` (`indent>0` pretty-prints).',
+    config: { op: 'parse | stringify', indent: 'Pretty-print spaces for stringify (0 = single-line, max 10).', value: 'Inline value when not wired (an XML string for parse).' }
+  },
+  yaml: {
+    summary: 'parse → the `value` YAML string into a value (malformed YAML → `error`; an already-structured value passes through); stringify → any `value` to a YAML string on `result` (indented by `indent` spaces, 1–10).',
+    config: { op: 'parse | stringify', indent: 'Indent spaces for stringify (1–10, default 2).', value: 'Inline value when not wired (a YAML string for parse).' }
+  },
+  crypto: {
+    summary: 'Transforms the `value` string on `result`: base64Encode/base64Decode, md5/sha1/sha256/sha512 (hex digest), hmacSha256 (keyed, hex), uuid (a fresh v4, ignores value). A missing HMAC key or a non-UTF-8 base64Decode → `error`.',
+    config: { op: 'base64Encode | base64Decode | md5 | sha1 | sha256 | sha512 | hmacSha256 | uuid', key: 'Secret key (hmacSha256 only).', value: 'Inline string when not wired.' }
+  },
+  jwt: {
+    summary: 'Decodes the `value` JWT/JWS token string into `{ header, payload, signature }` on `result` (signature is the raw segment, NOT verified). A non-string or malformed token → `error`.',
+    config: { value: 'Inline token string when not wired.' }
+  },
+  datetime: {
+    summary: 'Transforms an existing date wired/inline on `value` (the clock itself is the `now` node). add/subtract → shift by `amount` of `unit` → ISO string; format → a luxon pattern string; diff → `other − value` in `unit` → number. An unreadable date → `error`.',
+    config: { op: 'add | subtract | format | diff', amount: 'Amount for add/subtract.', unit: 'milliseconds | seconds | minutes | hours | days | weeks | months | years.', format: 'luxon format pattern (format op; empty = ISO).', other: 'Second date for diff (typed value).', value: 'Inline date when not wired.' }
+  },
   log: {
     summary: 'Writes one entry to the run log (visible via get_scenario_run_status + the inspector panel) and passes the value through. Sequence it via the `in` trigger.',
     config: { level: 'debug | info | warn | error', message: 'Text (typed value).', data: 'Optional structured payload (or wire `data`).' }

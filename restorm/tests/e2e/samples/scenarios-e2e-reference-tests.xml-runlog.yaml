@@ -1,0 +1,73 @@
+- message: 🔵 [<time>] ▶ XML
+- message: ⚪ [<time>] start xml
+  data:
+    op: parse
+    value: <note id="1"><to>Tove</to><from>Jani</from></note>
+- message: ⚪ [<time>] done xml
+  data:
+    result:
+      note:
+        to: Tove
+        from: Jani
+        "@_id": "1"
+- message: ⚪ [<time>] start xml
+  data:
+    op: parse
+    value: <p><x>1</x></p>
+    in: true
+- message: ⚪ [<time>] done xml
+  data:
+    result:
+      p:
+        x: 1
+- message: ⚪ [<time>] start xml
+  data:
+    op: stringify
+    value:
+      p:
+        x: 1
+- message: ⚪ [<time>] done xml
+  data:
+    result: <p><x>1</x></p>
+- message: ⚪ [<time>] start xml
+  data:
+    op: parse
+    value: <q><y>2</y></q>
+    in: true
+- message: ⚪ [<time>] done xml
+  data:
+    result:
+      q:
+        y: 2
+- message: ⚪ [<time>] start xml
+  data:
+    op: stringify
+    indent: 2
+    value:
+      q:
+        y: 2
+- message: ⚪ [<time>] done xml
+  data:
+    result: |-
+      <q>
+        <y>2</y>
+      </q>
+- message: ⚪ [<time>] start xml
+  data:
+    op: parse
+    value: <a><b></a>
+    in: true
+- message: "🔴 [<time>] Invalid XML: Expected closing tag 'b' (opened in line 1,
+    col 4) instead of closing tag 'a'."
+- message: ⚪ [<time>] start log
+  data:
+    level: error
+    message: "xml error: malformed XML"
+    in:
+      message: "Invalid XML: Expected closing tag 'b' (opened in line 1, col 4)
+        instead of closing tag 'a'."
+      startedAt: <dynamic-time>
+- message: "🔴 [<time>] xml error: malformed XML"
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ XML

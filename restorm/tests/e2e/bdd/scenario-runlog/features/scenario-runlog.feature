@@ -31,4 +31,9 @@ Feature: Scenario run-log end-to-end
       | Casts          |
       | Regex          |
       | JSON           |
+      | Crypto         |
+      | JWT            |
+      | DateTime       |
+      | XML            |
+      | YAML           |
       | Main           |

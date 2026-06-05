@@ -1,0 +1,43 @@
+- message: 🔵 [<time>] ▶ JWT
+- message: ⚪ [<time>] start jwt
+  data:
+    value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+- message: ⚪ [<time>] done jwt
+  data:
+    result:
+      header:
+        alg: HS256
+        typ: JWT
+      payload:
+        sub: "1234567890"
+        name: John Doe
+        iat: 1516239022
+      signature: SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+- message: ⚪ [<time>] start jwt
+  data:
+    value: eyJhbGciOiJub25lIn0.eyJuYW1lIjoiQ2Fmw6kg4oKsIn0
+    in: true
+- message: ⚪ [<time>] done jwt
+  data:
+    result:
+      header:
+        alg: none
+      payload:
+        name: Café €
+      signature: ""
+- message: ⚪ [<time>] start jwt
+  data:
+    value: notajwt
+    in: true
+- message: 🔴 [<time>] Not a JWT — expected header.payload.signature segments
+- message: ⚪ [<time>] start log
+  data:
+    level: error
+    message: "jwt error: malformed token"
+    in:
+      message: Not a JWT — expected header.payload.signature segments
+      startedAt: <dynamic-time>
+- message: "🔴 [<time>] jwt error: malformed token"
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ JWT

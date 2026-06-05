@@ -27,7 +27,12 @@ import {
   transformExecutor,
   castExecutor,
   regexExecutor,
-  jsonExecutor
+  jsonExecutor,
+  xmlExecutor,
+  yamlExecutor,
+  cryptoExecutor,
+  jwtExecutor,
+  dateTimeExecutor
 } from './pureExecutors'
 import {
   waitExecutor,
@@ -164,6 +169,11 @@ function pickExecutor(kind: string): NodeExecutor {
     case 'cast': return castExecutor
     case 'regex': return regexExecutor
     case 'json': return jsonExecutor
+    case 'xml': return xmlExecutor
+    case 'yaml': return yamlExecutor
+    case 'crypto': return cryptoExecutor
+    case 'jwt': return jwtExecutor
+    case 'datetime': return dateTimeExecutor
     case 'wait': return waitExecutor
     case 'waitUntil': return waitUntilExecutor
     case 'forEach': return forEachExecutor

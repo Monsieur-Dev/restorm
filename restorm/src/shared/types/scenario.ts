@@ -118,6 +118,15 @@ export type ScenarioNodeKind =
   | 'regex'
   // JSON — parse a string into a value, or stringify a value.
   | 'json'
+  // XML / YAML — parse a string into a value, or stringify a value.
+  | 'xml'
+  | 'yaml'
+  // Crypto — base64 / hashes / HMAC / UUID over a string.
+  | 'crypto'
+  // JWT — decode a compact token into header + payload + signature.
+  | 'jwt'
+  // Date math — shift / format / diff an existing date (the clock is `now`).
+  | 'datetime'
   // Utilities
   | 'log'
   | 'assert'

@@ -17,6 +17,11 @@ import { TransformNodeBox } from './TransformNodeBox'
 import { CastNodeBox } from './CastNodeBox'
 import { RegexNodeBox } from './RegexNodeBox'
 import { JsonNodeBox } from './JsonNodeBox'
+import { XmlNodeBox } from './XmlNodeBox'
+import { YamlNodeBox } from './YamlNodeBox'
+import { CryptoNodeBox } from './CryptoNodeBox'
+import { JwtNodeBox } from './JwtNodeBox'
+import { DateTimeNodeBox } from './DateTimeNodeBox'
 import { ForEachNodeBox } from './ForEachNodeBox'
 import { ForNodeBox, WhileNodeBox, DoWhileNodeBox } from './LoopNodeBoxes'
 import { AggregateNodeBox } from './AggregateNodeBox'
@@ -65,6 +70,11 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   cast: CastNodeBox,
   regex: RegexNodeBox,
   json: JsonNodeBox,
+  xml: XmlNodeBox,
+  yaml: YamlNodeBox,
+  crypto: CryptoNodeBox,
+  jwt: JwtNodeBox,
+  datetime: DateTimeNodeBox,
   log: LogNodeBox,
   assert: AssertNodeBox
 }

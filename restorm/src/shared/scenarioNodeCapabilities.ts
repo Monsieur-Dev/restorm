@@ -27,6 +27,7 @@ const NO_INPUT_EVENT = new Set<ScenarioNodeKind>()
 const STATIC_PREVIEW = new Set<ScenarioNodeKind>([
   'now', 'input', 'setVariable', 'getVariable', 'object', 'output',
   'arithmetic', 'comparator', 'boolean', 'transform', 'cast', 'regex', 'json',
+  'xml', 'yaml', 'crypto', 'jwt', 'datetime',
   'if', 'switch', 'wait', 'waitUntil',
   'map', 'filter', 'aggregate',
   'addToList', 'removeFromList',
