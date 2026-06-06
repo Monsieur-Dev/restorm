@@ -36,6 +36,9 @@ import {
   objectOpExecutor,
   urlExecutor,
   randomExecutor,
+  listOpExecutor,
+  csvExecutor,
+  mathExecutor,
   throwExecutor
 } from './pureExecutors'
 import {
@@ -182,6 +185,9 @@ function pickExecutor(kind: string): NodeExecutor {
     case 'objectOp': return objectOpExecutor
     case 'url': return urlExecutor
     case 'random': return randomExecutor
+    case 'listOp': return listOpExecutor
+    case 'csv': return csvExecutor
+    case 'math': return mathExecutor
     case 'throw': return throwExecutor
     case 'retry': return retryExecutor
     case 'wait': return waitExecutor

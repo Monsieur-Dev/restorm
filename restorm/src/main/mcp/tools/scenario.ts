@@ -18,14 +18,14 @@ import type { Scenario } from '../../../shared/models/Scenario'
 import type { ScenarioNode, ScenarioEdge, ScenarioNodeKind, ScenarioPort } from '../../../shared/types/scenario'
 import { defaultPortsForKind, isValidScenarioConnection, outputPortFlow, inputPortFlow, deriveRunScenarioPorts } from '../../../shared/scenarioNodePorts'
 import { SCENARIO_KIND_DOCS, VALUE_TYPE_DOCS } from '../../../shared/scenarioKindDocs'
-import { STATIC_PREVIEW_KINDS, staticScenarioPreview, singleDeepPath, expectsObjectInput, type StaticPreviewEdge } from '../../../shared/utils/scenarioStaticPreview'
+import { STATIC_PREVIEW_KINDS, staticScenarioPreview, singleDeepPath, singleTopLevelKey, portPreviewValue, expectsObjectInput, type StaticPreviewEdge } from '../../../shared/utils/scenarioStaticPreview'
 import { broadcastTreeReplace } from './import'
 
 const SCENARIO_KINDS = [
   'input', 'output', 'if', 'switch', 'httpRequest', 'runScenario', 'forEach', 'for', 'while', 'doWhile',
   'aggregate', 'map', 'filter', 'addToList', 'removeFromList', 'wait', 'waitUntil', 'now', 'arithmetic', 'comparator', 'boolean', 'object',
   'setVariable', 'getVariable', 'transform', 'cast', 'regex', 'json', 'xml', 'yaml', 'crypto', 'jwt', 'datetime',
-  'objectOp', 'url', 'random', 'retry', 'log', 'assert', 'throw'
+  'objectOp', 'url', 'random', 'listOp', 'csv', 'math', 'retry', 'log', 'assert', 'throw'
 ] as const
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
@@ -448,26 +448,29 @@ export function registerScenarioTools(mcp: McpService): void {
         const outFlow = outputPortFlow(fromPorts.outputs, fromPortId, fromNode.kind)
         const inFlow = inputPortFlow(toPorts.inputs, toPortId, toNode.kind)
         if (inFlow === 'value' && outFlow !== 'signal') {
-          if (expectsObjectInput(toNode.kind, toPortId)) {
-            // Object-context input — default to the identity selector `.`.
-            autoSelector = '.'
-          } else if (STATIC_PREVIEW_KINDS.has(fromNode.kind)) {
+          // Deduce the selector from the PREVIEW VALUE AT THE WIRED PORT, exactly
+          // like the editor's onConnect (ScenarioEditorView). `portPreviewValue`
+          // unwraps a single-output box's port-map — a bare `math`/`arithmetic`
+          // result is `16`, not `{ result: 16 }` — so a primitive output deduces
+          // identity `.`, not the port name. (The earlier code ran the path
+          // deduction on the whole port-map, so `{ result: 16 }` wrongly yielded
+          // the selector `result`, which resolved to `undefined` at runtime.) A
+          // runtime-only source (httpRequest response, forEach `each`, …) has no
+          // static preview → identity `.`.
+          let preview: Record<string, unknown> | null = null
+          if (STATIC_PREVIEW_KINDS.has(fromNode.kind)) {
             const previewNodes = scenario.nodes.map((n) => ({ id: n.id, kind: n.kind, config: n.config }))
             const previewEdges: StaticPreviewEdge[] = scenario.edges.map((e) => ({
               from: e.from,
               to: e.to,
               ...(e.selector !== undefined ? { selector: e.selector } : {})
             }))
-            const preview = staticScenarioPreview({ id: fromNode.id, kind: fromNode.kind, config: fromNode.config }, previewNodes, previewEdges)
-            const path = preview ? singleDeepPath(preview) : null
-            // Default to identity `.` when no single-deep path is deducible.
-            autoSelector = path ?? '.'
-          } else {
-            // Runtime-only source (httpRequest response, forEach `each`, …):
-            // default to identity `.` so the data link isn't left without a
-            // selector (which trips the "needs a JSON path" validation).
-            autoSelector = '.'
+            preview = staticScenarioPreview({ id: fromNode.id, kind: fromNode.kind, config: fromNode.config }, previewNodes, previewEdges)
           }
+          const pv = preview ? portPreviewValue(preview, fromPortId, fromNode.kind) : null
+          autoSelector = (expectsObjectInput(toNode.kind, toPortId)
+            ? (pv ? singleTopLevelKey(pv) : null)
+            : (pv ? singleDeepPath(pv) : null)) ?? '.'
         }
       }
       const edge: ScenarioEdge = {

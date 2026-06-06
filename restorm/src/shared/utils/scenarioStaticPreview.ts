@@ -16,6 +16,9 @@ import { applyDateTime, isDateTimeOp, isDateTimeUnit } from '../scenarioDateTime
 import { applyObjectOp, isObjectOp } from '../scenarioObject'
 import { applyUrl, isUrlOp } from '../scenarioUrl'
 import { applyRandom, isRandomOp } from '../scenarioRandom'
+import { applyListOp as applyListReshape, isListOp } from '../scenarioList'
+import { applyCsv, isCsvOp } from '../scenarioCsv'
+import { applyMath, isMathOp } from '../scenarioMath'
 import { LIST_MUTATION_DEFAULT_VALUE_ID } from '../scenarioListMutationValues'
 
 // Register the full helper suite on first import so a chained `transform`
@@ -1067,6 +1070,54 @@ export function staticScenarioPreview(
       const items = resolveConfigItems(cfg) ?? undefined
       try {
         return { result: applyRandom(op, { min, max, length, seed, items }) }
+      } catch {
+        return null
+      }
+    }
+    case 'listOp': {
+      // Reshape the resolved `value` list via the SHARED `applyListOp`
+      // (scenarioList). A non-list operand THROWS (runtime → `error`); caught.
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      if (value === undefined) return null
+      const op = isListOp(cfg['op']) ? cfg['op'] : 'sort'
+      const key = typeof cfg['key'] === 'string' && cfg['key'] !== '' ? cfg['key'] : undefined
+      const order = cfg['order'] === 'desc' ? 'desc' : 'asc'
+      const depth = typeof cfg['depth'] === 'number' ? cfg['depth'] : undefined
+      const size = typeof cfg['size'] === 'number' ? cfg['size'] : undefined
+      const start = typeof cfg['start'] === 'number' ? cfg['start'] : undefined
+      const end = typeof cfg['end'] === 'number' ? cfg['end'] : undefined
+      try {
+        return { result: applyListReshape(value, op, { key, order, depth, size, start, end }) }
+      } catch {
+        return null
+      }
+    }
+    case 'csv': {
+      // Parse / stringify the resolved `value` via the SHARED `applyCsv`. The
+      // wrong operand shape THROWS (runtime → `error`); the preview catches it.
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      if (value === undefined) return null
+      const op = isCsvOp(cfg['op']) ? cfg['op'] : 'parse'
+      const delimiter = typeof cfg['delimiter'] === 'string' && cfg['delimiter'] !== '' ? cfg['delimiter'] : undefined
+      const header = cfg['header'] !== false
+      try {
+        return { result: applyCsv(value, op, { delimiter, header }) }
+      } catch {
+        return null
+      }
+    }
+    case 'math': {
+      // Run the scalar op on the resolved `a` via the SHARED `applyMath`. A
+      // non-finite operand (or negative sqrt) THROWS (runtime → `error`); caught.
+      const a = operandPreviewValue(node.id, 'a', cfg['a'], nodes, edges)
+      if (a === undefined) return null
+      const op = isMathOp(cfg['op']) ? cfg['op'] : 'round'
+      const b = operandPreviewValue(node.id, 'b', cfg['b'], nodes, edges)
+      const min = operandPreviewValue(node.id, 'min', cfg['min'], nodes, edges)
+      const max = operandPreviewValue(node.id, 'max', cfg['max'], nodes, edges)
+      const precision = typeof cfg['precision'] === 'number' ? cfg['precision'] : undefined
+      try {
+        return { result: applyMath(a, op, { b, min, max, precision }) }
       } catch {
         return null
       }

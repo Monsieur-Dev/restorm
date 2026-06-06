@@ -25,6 +25,9 @@ import { DateTimeNodeBox } from './DateTimeNodeBox'
 import { ObjectOpNodeBox } from './ObjectOpNodeBox'
 import { UrlNodeBox } from './UrlNodeBox'
 import { RandomNodeBox } from './RandomNodeBox'
+import { ListOpNodeBox } from './ListOpNodeBox'
+import { CsvNodeBox } from './CsvNodeBox'
+import { MathNodeBox } from './MathNodeBox'
 import { ThrowNodeBox } from './ThrowNodeBox'
 import { RetryNodeBox } from './RetryNodeBox'
 import { ForEachNodeBox } from './ForEachNodeBox'
@@ -83,6 +86,9 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   objectOp: ObjectOpNodeBox,
   url: UrlNodeBox,
   random: RandomNodeBox,
+  listOp: ListOpNodeBox,
+  csv: CsvNodeBox,
+  math: MathNodeBox,
   throw: ThrowNodeBox,
   retry: RetryNodeBox,
   log: LogNodeBox,

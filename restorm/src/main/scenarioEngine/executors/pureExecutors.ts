@@ -19,6 +19,9 @@ import { applyDateTime, isDateTimeOp, isDateTimeUnit } from '../../../shared/sce
 import { applyObjectOp, isObjectOp } from '../../../shared/scenarioObject'
 import { applyUrl, isUrlOp } from '../../../shared/scenarioUrl'
 import { applyRandom, isRandomOp } from '../../../shared/scenarioRandom'
+import { applyListOp as applyListReshape, isListOp } from '../../../shared/scenarioList'
+import { applyCsv, isCsvOp } from '../../../shared/scenarioCsv'
+import { applyMath, isMathOp } from '../../../shared/scenarioMath'
 import { compareValues, deepEqual, hintFromConfig, resolveOperand, type OperandHint } from '../conditionEval'
 
 /** A wired operand's kind is inferred from its value (pass no hint); an inline
@@ -533,6 +536,46 @@ export const randomExecutor: NodeExecutor = (_act, ctx) => {
   const seed = typeof cfg.seed === 'number' || typeof cfg.seed === 'string' ? cfg.seed : undefined
   const items = resolveConfigItems(ctx.node.config, ctx.variables) ?? undefined
   return { outputs: [{ port: 'result', value: applyRandom(op, { min, max, length, seed, items }) }] }
+}
+
+/** `listOp`: reshape a list via the SHARED `applyListOp` (scenarioList). A
+ * non-list operand THROWS, routed to the `error` port. */
+export const listOpExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { op?: unknown; value?: unknown; key?: unknown; order?: unknown; depth?: unknown; size?: unknown; start?: unknown; end?: unknown }
+  const value = resolveOperand(act.inputs['value'], cfg.value, ctx.variables)
+  const op = isListOp(cfg.op) ? cfg.op : 'sort'
+  const key = typeof cfg.key === 'string' && cfg.key !== '' ? cfg.key : undefined
+  const order = cfg.order === 'desc' ? 'desc' : 'asc'
+  const depth = typeof cfg.depth === 'number' ? cfg.depth : undefined
+  const size = typeof cfg.size === 'number' ? cfg.size : undefined
+  const start = typeof cfg.start === 'number' ? cfg.start : undefined
+  const end = typeof cfg.end === 'number' ? cfg.end : undefined
+  return { outputs: [{ port: 'result', value: applyListReshape(value, op, { key, order, depth, size, start, end }) }] }
+}
+
+/** `csv`: parse a CSV string / stringify a list via the SHARED `applyCsv`. The
+ * wrong operand shape THROWS, routed to the `error` port. */
+export const csvExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { op?: unknown; value?: unknown; delimiter?: unknown; header?: unknown }
+  const value = resolveOperand(act.inputs['value'], cfg.value, ctx.variables)
+  const op = isCsvOp(cfg.op) ? cfg.op : 'parse'
+  const delimiter = typeof cfg.delimiter === 'string' && cfg.delimiter !== '' ? cfg.delimiter : undefined
+  const header = cfg.header !== false
+  return { outputs: [{ port: 'result', value: applyCsv(value, op, { delimiter, header }) }] }
+}
+
+/** `math`: run a scalar op on `a` via the SHARED `applyMath`. The second
+ * operand (min/max), clamp bounds + round precision come from config. A
+ * non-finite operand (or a negative sqrt) THROWS, routed to the `error` port. */
+export const mathExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { op?: unknown; a?: unknown; b?: unknown; min?: unknown; max?: unknown; precision?: unknown }
+  const a = resolveOperand(act.inputs['a'], cfg.a, ctx.variables)
+  const op = isMathOp(cfg.op) ? cfg.op : 'round'
+  const b = resolveOperand(undefined, cfg.b, ctx.variables)
+  const min = resolveOperand(undefined, cfg.min, ctx.variables)
+  const max = resolveOperand(undefined, cfg.max, ctx.variables)
+  const precision = typeof cfg.precision === 'number' ? cfg.precision : undefined
+  return { outputs: [{ port: 'result', value: applyMath(a, op, { b, min, max, precision }) }] }
 }
 
 /** `throw`: deliberately fail with the resolved `message` (wired or inline). The

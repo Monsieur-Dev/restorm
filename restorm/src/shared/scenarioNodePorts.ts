@@ -174,6 +174,15 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // `random` generates a value (int / float / string / boolean / pick) — no data
   // input; every parameter is config.
   random: { inputs: [], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
+  // `listOp` reshapes its `value` list (sort/unique/reverse/flatten/chunk/slice/
+  // groupBy); the key / order / size / bounds live in config.
+  listOp: { inputs: [{ id: 'value', name: 'value', dataType: 'list' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
+  // `csv` parses a CSV string → rows / stringifies a list → CSV; delimiter +
+  // header are config. Like json/xml/yaml the `value` shape depends on the op.
+  csv: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
+  // `math` runs a scalar op on `a`; the second operand (min/max), clamp bounds
+  // and round precision live in config.
+  math: { inputs: [{ id: 'a', name: 'a', dataType: 'number' }], outputs: [{ id: 'result', name: 'result', dataType: 'number', flow: 'both' }] },
   // `retry` runs the body wired off `attempt` as an error-boundary scope; the
   // implicit `done` is the success exit, `exhausted` the give-up branch.
   retry: { inputs: [], outputs: [{ id: 'attempt', name: 'attempt', role: 'then', flow: 'both' }, { id: 'exhausted', name: 'exhausted', role: 'else', flow: 'both' }] },

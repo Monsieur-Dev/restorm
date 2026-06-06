@@ -135,6 +135,12 @@ export type ScenarioNodeKind =
   | 'url'
   // Random / faker — int / float / string / boolean / pick (optional seed).
   | 'random'
+  // List reshaping — sort / unique / reverse / flatten / chunk / slice / groupBy.
+  | 'listOp'
+  // CSV — parse a CSV string into rows / stringify a list back to CSV.
+  | 'csv'
+  // Scalar math — round / floor / ceil / trunc / abs / sign / sqrt / min / max / clamp.
+  | 'math'
   // Utilities
   | 'log'
   // Deliberate failure — throws a message (for error branches / retry tests).

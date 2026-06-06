@@ -37,7 +37,7 @@ import { getScenarioBreakpoints, toggleBreakpoint, pruneScenarioBreakpoints } fr
 import { WorkbenchActiveTabContext } from '../../contexts/WorkbenchActiveTabContext'
 import { resolveValueTypeKind } from '../TypedValueField/castValue'
 import { normalizeValueType } from '../../utils/normalizeValueType'
-import { SCENARIO_NODE_CATALOGUE, scenarioNodeMeta, type ScenarioNodeKindMeta } from './scenarioNodeCatalogue'
+import { SCENARIO_NODE_CATALOGUE, SCENARIO_SUBMENU_CATEGORIES, scenarioNodeMeta, type ScenarioNodeKindMeta, type ScenarioNodeCategory } from './scenarioNodeCatalogue'
 import { scenarioEdgeToFlowEdge, flowEdgeToScenarioEdge, edgeColorForHandle } from './scenarioGraphMapping'
 import { ScenarioNodeView, type ScenarioNodeBoxData } from './nodes'
 import { setScenarioClipboard, getScenarioClipboard, hasScenarioClipboard, nextPasteDelta } from './scenarioActionClipboard'
@@ -236,10 +236,10 @@ const PALETTE_ENTRIES: (ScenarioNodeKindMeta | { separator: true })[] = SCENARIO
   (meta, i, arr) => (i > 0 && arr[i - 1]?.category !== meta.category ? [{ separator: true as const }, meta] : [meta])
 )
 
-/** The loop kinds (forEach / for / while / doWhile) folded into one "loops"
- * submenu in the add-node menu — keyed off the catalogue `loops` category so a
- * new loop kind joins the submenu automatically. */
-const LOOP_METAS: ScenarioNodeKindMeta[] = SCENARIO_NODE_CATALOGUE.filter((m) => m.category === 'loops')
+/** Kinds in a catalogue category, in order — submenu categories fold theirs into
+ * one nested menu (keyed off the category so a new kind joins automatically). */
+const metasInCategory = (category: ScenarioNodeCategory): ScenarioNodeKindMeta[] =>
+  SCENARIO_NODE_CATALOGUE.filter((m) => m.category === category)
 
 interface PaletteBuildParams {
   t: TFunction
@@ -289,13 +289,15 @@ function buildScenarioPaletteItems(p: PaletteBuildParams): ContextMenuItem[] {
       const sub = [...reqItems, ...scnItems]
       return sub.length > 0 ? [{ id: 'scenario-add', label: p.t('sidebar.contextMenu.add.title', 'Add'), icon: 'add', items: sub }] : []
     }
-    if (e.category === 'loops') {
-      if (e.kind !== LOOP_METAS[0]?.kind) return [] // emitted once, at the first loop
-      const loopItems = LOOP_METAS.flatMap((m): ContextMenuItem[] => {
+    const submenu = SCENARIO_SUBMENU_CATEGORIES[e.category]
+    if (submenu) {
+      const groupMetas = metasInCategory(e.category)
+      if (e.kind !== groupMetas[0]?.kind) return [] // emitted once, at the category's first kind
+      const subItems = groupMetas.flatMap((m): ContextMenuItem[] => {
         const cb = p.pickNode(m.kind)
-        return cb ? [{ id: `loop-${m.kind}`, label: p.t(m.labelKey, m.defaultLabel), icon: m.icon, onClick: cb }] : []
+        return cb ? [{ id: `submenu-${m.kind}`, label: p.t(m.labelKey, m.defaultLabel), icon: m.icon, onClick: cb }] : []
       })
-      return loopItems.length > 0 ? [{ id: 'scenario-loops', label: p.t('scenario.nodes.loops', 'Loops'), icon: 'sync', items: loopItems }] : []
+      return subItems.length > 0 ? [{ id: `scenario-group-${e.category}`, label: p.t(submenu.labelKey, submenu.defaultLabel), icon: submenu.icon, items: subItems }] : []
     }
     const cb = p.pickNode(e.kind)
     return cb ? [{ id: e.kind, label: p.t(e.labelKey, e.defaultLabel), icon: e.icon, onClick: cb }] : []

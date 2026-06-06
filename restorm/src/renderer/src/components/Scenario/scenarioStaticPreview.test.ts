@@ -33,6 +33,7 @@ describe('portPreviewValue — unwraps a node that emits a bare value', () => {
     // The reported bug: arithmetic.result → log.data deduced "result" (wrong).
     // The port carries the bare number, so it must deduce "." (identity).
     expect(singleTopLevelKey(portPreviewValue({ result: 5 }, 'result', 'arithmetic'))).toBeNull() // → "."
+    expect(singleDeepPath(portPreviewValue({ result: 16 }, 'result', 'math'))).toBeNull() // → "." (math/listOp/csv: bare primitive)
     expect(singleDeepPath(portPreviewValue({ cpt: 5 }, 'value', 'getVariable'))).toBeNull() // → "."
     // transform genuinely wraps `{ result }` on its `out` port → keep "result".
     expect(singleTopLevelKey(portPreviewValue({ result: 'x' }, 'out', 'transform'))).toBe('result')

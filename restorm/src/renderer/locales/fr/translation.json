@@ -868,7 +868,10 @@
       "url": "URL",
       "random": "Aléatoire",
       "throw": "Throw",
-      "retry": "Retry"
+      "retry": "Retry",
+      "listOp": "Opérations liste",
+      "csv": "CSV",
+      "math": "Math"
     },
     "comparator": {
       "result": "résultat"
@@ -1216,6 +1219,64 @@
         "fixed": "fixe",
         "linear": "linéaire",
         "exponential": "exponentiel"
+      }
+    },
+    "menuGroups": {
+      "lists": "Listes",
+      "math": "Maths",
+      "dataFormats": "Formats de données",
+      "encoding": "Encodage"
+    },
+    "listOp": {
+      "value": "liste",
+      "operation": "opération",
+      "result": "résultat",
+      "key": "clé",
+      "order": "ordre",
+      "depth": "profondeur",
+      "size": "taille",
+      "start": "début",
+      "end": "fin",
+      "op": {
+        "sort": "trier",
+        "unique": "dédoublonner",
+        "reverse": "inverser",
+        "flatten": "aplatir",
+        "chunk": "découper",
+        "slice": "extraire",
+        "groupBy": "grouper par"
+      }
+    },
+    "csv": {
+      "value": "valeur",
+      "operation": "opération",
+      "result": "résultat",
+      "delimiter": "séparateur",
+      "header": "ligne d'en-tête",
+      "op": {
+        "parse": "analyser",
+        "stringify": "sérialiser"
+      }
+    },
+    "math": {
+      "a": "valeur",
+      "operation": "opération",
+      "result": "résultat",
+      "b": "avec",
+      "min": "min",
+      "max": "max",
+      "precision": "précision",
+      "op": {
+        "round": "arrondir",
+        "floor": "plancher",
+        "ceil": "plafond",
+        "trunc": "tronquer",
+        "abs": "valeur absolue",
+        "sign": "signe",
+        "sqrt": "racine carrée",
+        "min": "min",
+        "max": "max",
+        "clamp": "borner"
       }
     }
   }

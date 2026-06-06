@@ -869,7 +869,10 @@
       "url": "URL",
       "random": "Random",
       "throw": "Throw",
-      "retry": "Retry"
+      "retry": "Retry",
+      "listOp": "List ops",
+      "csv": "CSV",
+      "math": "Math"
     },
     "comparator": {
       "result": "резултат"
@@ -1217,6 +1220,64 @@
         "fixed": "fixed",
         "linear": "linear",
         "exponential": "exponential"
+      }
+    },
+    "menuGroups": {
+      "lists": "Lists",
+      "math": "Math",
+      "dataFormats": "Data formats",
+      "encoding": "Encoding"
+    },
+    "listOp": {
+      "value": "list",
+      "operation": "operation",
+      "result": "result",
+      "key": "key",
+      "order": "order",
+      "depth": "depth",
+      "size": "size",
+      "start": "start",
+      "end": "end",
+      "op": {
+        "sort": "sort",
+        "unique": "unique",
+        "reverse": "reverse",
+        "flatten": "flatten",
+        "chunk": "chunk",
+        "slice": "slice",
+        "groupBy": "group by"
+      }
+    },
+    "csv": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "delimiter": "delimiter",
+      "header": "header row",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "math": {
+      "a": "value",
+      "operation": "operation",
+      "result": "result",
+      "b": "with",
+      "min": "min",
+      "max": "max",
+      "precision": "precision",
+      "op": {
+        "round": "round",
+        "floor": "floor",
+        "ceil": "ceil",
+        "trunc": "truncate",
+        "abs": "absolute",
+        "sign": "sign",
+        "sqrt": "square root",
+        "min": "min",
+        "max": "max",
+        "clamp": "clamp"
       }
     }
   }

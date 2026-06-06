@@ -42,4 +42,7 @@ Feature: Scenario run-log end-to-end
       | Random         |
       | Throw          |
       | Retry          |
+      | List ops       |
+      | CSV            |
+      | Math           |
       | Main           |

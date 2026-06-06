@@ -193,6 +193,18 @@ export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
     summary: 'Generates a value on `result`: int/float in [min,max], string of `length`, boolean, or pick from a list. A `seed` (number or string) makes it deterministic. `pick` over an empty list → `error`. No data input.',
     config: { op: 'int | float | string | boolean | pick', min: 'Range min (int/float).', max: 'Range max (int/float).', length: 'String length.', seed: 'Optional seed for reproducible output.', items: 'List to pick from (pick op).' }
   },
+  listOp: {
+    summary: 'Reshapes the `value` list on `result` (distinct from `aggregate`, which reduces, and `map`/`filter`, which work item-by-item): sort, unique, reverse, flatten, chunk, slice, or groupBy. A non-list operand → `error`.',
+    config: { op: 'sort | unique | reverse | flatten | chunk | slice | groupBy', key: 'Item dot-path for sort/unique/groupBy.', order: 'asc | desc (sort).', depth: 'flatten depth (default 1).', size: 'chunk size.', start: 'slice start.', end: 'slice end.', value: 'Inline list when not wired.' }
+  },
+  csv: {
+    summary: 'parse a CSV string → rows (objects when `header`, else cell arrays) / stringify a list → CSV. The wrong operand shape → `error`. The CSV member of the data-format family (json/xml/yaml).',
+    config: { op: 'parse | stringify', delimiter: 'Field separator (default ",").', header: 'First row is a header → row-objects (default true).', value: 'Inline value when not wired.' }
+  },
+  math: {
+    summary: 'Runs a scalar op on `a` → number on `result` (complements `arithmetic`): round/floor/ceil/trunc/abs/sign/sqrt, the two-operand min/max, or the bounded clamp. A non-finite operand / negative sqrt → `error`.',
+    config: { op: 'round | floor | ceil | trunc | abs | sign | sqrt | min | max | clamp', b: 'Second operand (min/max).', min: 'Lower bound (clamp).', max: 'Upper bound (clamp).', precision: 'Decimal places (round).', a: 'Inline operand when not wired.' }
+  },
   throw: {
     summary: 'Deliberately fails with `message` (wired or inline) — routed to the implicit `error` port, or fails the run if nothing handles it. For error branches + retry tests. No `done`/value output.',
     config: { message: 'Failure message (typed value; or wire `message`).' }
