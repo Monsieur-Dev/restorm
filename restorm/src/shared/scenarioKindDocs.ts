@@ -177,6 +177,26 @@ export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
     summary: 'Transforms an existing date wired/inline on `value` (the clock itself is the `now` node). add/subtract → shift by `amount` of `unit` → ISO string; format → a luxon pattern string; diff → `other − value` in `unit` → number. An unreadable date → `error`.',
     config: { op: 'add | subtract | format | diff', amount: 'Amount for add/subtract.', unit: 'milliseconds | seconds | minutes | hours | days | weeks | months | years.', format: 'luxon format pattern (format op; empty = ISO).', other: 'Second date for diff (typed value).', value: 'Inline date when not wired.' }
   },
+  retry: {
+    summary: 'Re-runs the body wired off `attempt` as an ERROR-BOUNDARY scope: an unhandled error in the body (or, for an httpRequest child, a response matching `retryOnStatus` / a non-2xx when `retryOnFailure`) marks the attempt failed and re-runs it per the backoff policy, up to `maxAttempts`. Success exits via the implicit `done` port; giving up exits via `exhausted`. Wire `attempt` → the action(s) to retry.',
+    config: { maxAttempts: 'Max attempts (default 3).', backoff: 'fixed | linear | exponential.', delay: 'Base delay.', delayUnit: 'ms | s | min.', factor: 'Exponential factor (default 2).', maxDelay: 'Optional delay cap.', maxDelayUnit: 'ms | s | min.', retryOnError: 'Retry on a bubbled error (default true).', retryOnFailure: 'Retry on a non-2xx httpRequest response (default false).', retryOnStatus: 'HTTP status codes to retry on (e.g. [429, 503]).' }
+  },
+  objectOp: {
+    summary: 'Reshapes the `value` object on `result` (distinct from the `object` BUILDER): get/set a dot-`path`, merge with `other`, pick/omit `keys`, or list keys/values. A non-object operand (where the op needs one) → `error`.',
+    config: { op: 'get | set | merge | pick | omit | keys | values', path: 'Dot-path for get/set.', keys: 'Comma-separated keys for pick/omit.', other: 'Value to set / object to merge (typed value).', value: 'Inline object when not wired.' }
+  },
+  url: {
+    summary: 'encode/decode a URI component, parseQuery (string → object) / buildQuery (object → string), or parseUrl (→ { protocol, hostname, port, pathname, search, hash, origin, query }). A malformed escape / non-object buildQuery / bad URL → `error`.',
+    config: { op: 'encode | decode | parseQuery | buildQuery | parseUrl', value: 'Inline value when not wired.' }
+  },
+  random: {
+    summary: 'Generates a value on `result`: int/float in [min,max], string of `length`, boolean, or pick from a list. A `seed` (number or string) makes it deterministic. `pick` over an empty list → `error`. No data input.',
+    config: { op: 'int | float | string | boolean | pick', min: 'Range min (int/float).', max: 'Range max (int/float).', length: 'String length.', seed: 'Optional seed for reproducible output.', items: 'List to pick from (pick op).' }
+  },
+  throw: {
+    summary: 'Deliberately fails with `message` (wired or inline) — routed to the implicit `error` port, or fails the run if nothing handles it. For error branches + retry tests. No `done`/value output.',
+    config: { message: 'Failure message (typed value; or wire `message`).' }
+  },
   log: {
     summary: 'Writes one entry to the run log (visible via get_scenario_run_status + the inspector panel) and passes the value through. Sequence it via the `in` trigger.',
     config: { level: 'debug | info | warn | error', message: 'Text (typed value).', data: 'Optional structured payload (or wire `data`).' }

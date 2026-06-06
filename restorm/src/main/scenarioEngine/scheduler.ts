@@ -110,6 +110,11 @@ export class Scheduler {
   private readonly executors: Map<RuntimeId, NodeExecutor>
   private readonly buffer = new InputBuffer()
   private readonly scopes = new ScopeRegistry()
+  // Per-attempt state for an open `retry` scope, keyed by the attempt's child
+  // scope. `failed` is set by the error boundary when a node in the attempt
+  // raises an unhandled error; `lastStatus` records the latest httpRequest
+  // response status seen in the attempt (for the status-based retry condition).
+  private readonly retryScopes = new Map<string, { failed: boolean; lastStatus?: number }>()
   private readonly emitter = new EventEmitter()
   private readonly log: RunLogEntry[] = []
   private readonly variables = new Map<string, unknown>()
@@ -471,7 +476,11 @@ export class Scheduler {
         // returns — it's still orchestrating its iterations. The deferred
         // `node-completed` fires once every iteration scope has closed (and,
         // for a loop, the condition has turned false).
-        if (result.scopeAction?.type !== 'openForEach' && result.scopeAction?.type !== 'conditionalLoop') {
+        const sa = result.scopeAction?.type
+        if (sa !== 'openForEach' && sa !== 'conditionalLoop' && sa !== 'openRetry') {
+          // Record an httpRequest response's status against the enclosing retry
+          // attempt (for the status-based retry condition), before completion.
+          this.recordRetryStatus(act, result)
           this.emit({ type: 'node-completed', runId: this.runId, nodeId: act.nodeId, scope: act.scope, at: now(), outputs: result.outputs })
           // The executor returned: arm the universal `done` port. It fires now
           // if the box has no data descendants, else once they all drain.
@@ -496,7 +505,17 @@ export class Scheduler {
           this.markReturned(act)
         } else {
           this.emit({ type: 'node-failed', runId: this.runId, nodeId: act.nodeId, scope: act.scope, at: now(), error: msg })
-          this.fail(msg)
+          // ERROR BOUNDARY: an unhandled error inside a `retry` attempt marks the
+          // attempt failed (so the retry re-runs) instead of failing the whole
+          // run. Keep the completion tree consistent so the scope can drain.
+          const retryKey = this.enclosingRetryKey(act.scope)
+          if (retryKey !== undefined) {
+            const st = this.retryScopes.get(retryKey)
+            if (st) st.failed = true
+            this.markReturned(act)
+          } else {
+            this.fail(msg)
+          }
         }
       } finally {
         this.inFlight -= 1
@@ -522,6 +541,10 @@ export class Scheduler {
     }
     if (action?.type === 'conditionalLoop') {
       this.runConditionalLoop(act, action.mode)
+      return
+    }
+    if (action?.type === 'openRetry') {
+      this.runRetry(act, action)
       return
     }
     // Plain emissions: route each one to the edges leaving the port.
@@ -785,6 +808,129 @@ export class Scheduler {
     if (mode === 'doWhile') openBody()
     else if (evalCond()) openBody()
     else fireExit()
+  }
+
+  /** Stable key for a scope stack (used to track per-attempt retry state). */
+  private scopeKey(scope: ScopeStack): string {
+    return scope.map((f) => `${f.scopeNodeId}#${f.index}`).join('/')
+  }
+
+  /** If `scope` sits inside an OPEN retry attempt, return that attempt's scope
+   * key (the innermost enclosing `retry` frame's prefix). Used by the error
+   * boundary + the status recorder to attribute a body event to its retry. */
+  private enclosingRetryKey(scope: ScopeStack): string | undefined {
+    for (let i = scope.length - 1; i >= 0; i--) {
+      const frame = scope[i]
+      if (!frame) continue
+      let kind: string | undefined
+      try { kind = this.findNode(frame.scopeNodeId).kind } catch { kind = undefined }
+      if (kind === 'retry') {
+        const key = this.scopeKey(scope.slice(0, i + 1))
+        if (this.retryScopes.has(key)) return key
+      }
+    }
+    return undefined
+  }
+
+  /** Record an httpRequest response's status against the enclosing retry attempt
+   * (the `response` output carries `{ response: { status } }`). */
+  private recordRetryStatus(act: InternalActivation, result: ExecResult): void {
+    const key = this.enclosingRetryKey(act.scope)
+    if (key === undefined) return
+    for (const out of result.outputs) {
+      const v = out.value as { response?: { status?: unknown } } | undefined
+      const status = v?.response?.status
+      if (typeof status === 'number') {
+        const st = this.retryScopes.get(key)
+        if (st) st.lastStatus = status
+      }
+    }
+  }
+
+  /** Did the just-closed attempt fail, per the retry's policy? */
+  private retryAttemptFailed(
+    state: { failed: boolean; lastStatus?: number } | undefined,
+    action: { retryOnError: boolean; retryOnFailure: boolean; retryOnStatus: number[] }
+  ): boolean {
+    if (!state) return false
+    if (state.failed && action.retryOnError) return true
+    if (state.lastStatus !== undefined) {
+      if (action.retryOnStatus.includes(state.lastStatus)) return true
+      if (action.retryOnFailure && (state.lastStatus < 200 || state.lastStatus >= 300)) return true
+    }
+    return false
+  }
+
+  /**
+   * Run a `retry` as an engine-managed scope. Each attempt runs the body wired
+   * off `attempt` in its own child scope; the retry is that scope's ERROR
+   * BOUNDARY (an unhandled error in the body marks the attempt failed instead of
+   * failing the run). When the attempt's scope closes, the failure policy is
+   * evaluated — and on failure, after a backoff delay, another attempt opens, up
+   * to `maxAttempts`. Success fires `done`; giving up fires `exhausted`.
+   */
+  private runRetry(
+    act: InternalActivation,
+    action: { maxAttempts: number; backoff: 'fixed' | 'linear' | 'exponential'; delayMs: number; factor: number; maxDelayMs: number; retryOnError: boolean; retryOnFailure: boolean; retryOnStatus: number[] }
+  ): void {
+    const attemptEdges = this.outgoingByPort.get(`${act.nodeId}:attempt`) ?? []
+    let attempt = 0
+
+    const fire = (port: 'done' | 'exhausted'): void => {
+      const edges = this.outgoingByPort.get(`${act.nodeId}:${port}`) ?? []
+      for (const edge of edges) {
+        this.enqueueToken({ value: attempt, fromNodeId: act.nodeId, fromPort: port, toNodeId: edge.toNodeId, toPort: edge.toPort, scope: act.scope, tokenId: ++this.tokenSeq })
+        this.emit({ type: 'data-flow-emitted', runId: this.runId, edgeId: edge.edgeId, tokenId: this.tokenSeq, at: now() })
+      }
+      this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `retry ${port} after ${attempt} attempt(s)` })
+      this.emit({ type: 'node-completed', runId: this.runId, nodeId: act.nodeId, scope: act.scope, at: now(), outputs: [] })
+      this.completeLoop(act)
+    }
+
+    const backoffMs = (failedAttempt: number): number => {
+      const base = action.delayMs
+      let d = action.backoff === 'exponential'
+        ? base * Math.pow(action.factor, failedAttempt - 1)
+        : action.backoff === 'linear'
+          ? base * failedAttempt
+          : base
+      if (action.maxDelayMs > 0) d = Math.min(d, action.maxDelayMs)
+      return Math.max(0, Math.floor(d))
+    }
+
+    const openAttempt = (): void => {
+      if (this.abortCtl.signal.aborted) return
+      const i = attempt
+      attempt += 1
+      const child: ScopeStack = [...act.scope, { scopeNodeId: act.nodeId, index: i }]
+      const key = this.scopeKey(child)
+      this.retryScopes.set(key, { failed: false })
+      this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `retry attempt ${attempt}/${action.maxAttempts}` })
+      for (const edge of attemptEdges) {
+        this.enqueueToken({ value: attempt, fromNodeId: act.nodeId, fromPort: 'attempt', toNodeId: edge.toNodeId, toPort: edge.toPort, scope: child, tokenId: ++this.tokenSeq })
+        this.emit({ type: 'data-flow-emitted', runId: this.runId, edgeId: edge.edgeId, tokenId: this.tokenSeq, at: now() })
+      }
+      this.scopes.onClose(child, () => {
+        if (this.abortCtl.signal.aborted) return
+        const state = this.retryScopes.get(key)
+        this.retryScopes.delete(key)
+        if (!this.retryAttemptFailed(state, action)) { fire('done'); return }
+        if (attempt >= action.maxAttempts) { fire('exhausted'); return }
+        const delay = backoffMs(attempt)
+        this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `retry attempt ${attempt} failed, waiting ${delay}ms` })
+        this.pendingReentry += 1
+        setTimeout(() => {
+          this.pendingReentry -= 1
+          if (this.abortCtl.signal.aborted) { this.terminateIfDone(); return }
+          openAttempt()
+          this.tick()
+        }, delay)
+      })
+    }
+
+    // No body wired → nothing to retry; succeed immediately.
+    if (attemptEdges.length === 0) { fire('done'); return }
+    openAttempt()
   }
 
   /** Push a token into the buffer; if a node becomes fireable, queue

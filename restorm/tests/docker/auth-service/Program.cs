@@ -38,6 +38,10 @@ using System.Text.Json.Serialization;
 //   GET  /getlogs         — snapshot of the log store.
 //   GET  /loginprobe      — snapshot of the probe store (the `?probe=1`
 //                            logins seen since the last /clear_logs).
+//   GET  /flaky           — fails its first N calls (`?fail=N&code=C`) since the
+//                            last /clearflaky, then 200. NOT auth-gated. For the
+//                            scenario-engine `retry` demo.
+//   POST /clearflaky      — resets the /flaky counter.
 //
 //   GET  /health          — liveness probe, NOT logged.
 
@@ -225,6 +229,30 @@ app.MapPost("/clear_logs", () =>
 });
 
 app.MapGet("/getlogs", () => Results.Ok(new { logs = LogStore.Snapshot() }));
+
+// Predictable flaky endpoint for the scenario-engine `retry` demo. NOT gated on
+// auth. `GET /flaky?fail=N&code=C` fails its first N calls (since the last
+// /clearflaky) with status C, then returns 200 — so a `retry` with N failures
+// configured deterministically converges. `POST /clearflaky` resets the counter.
+app.MapPost("/clearflaky", () =>
+{
+    FlakyStore.Reset();
+    return Results.Ok(new { cleared = true });
+});
+
+app.MapGet("/flaky", (HttpRequest req) =>
+{
+    var fail = int.TryParse(req.Query["fail"], out var f) ? f : 2;
+    var code = int.TryParse(req.Query["code"], out var c) ? c : 503;
+    var n = FlakyStore.Next();
+    if (n <= fail)
+    {
+        LogStore.Append($"GET /flaky -> {code}");
+        return Results.Json(new { attempt = n, failing = true }, statusCode: code);
+    }
+    LogStore.Append("GET /flaky -> 200");
+    return Results.Ok(new { attempt = n, ok = true });
+});
 
 // Test-only: the probe-marked (`?probe=1`) logins received since the last
 // /clear_logs. The scenario-engine auth e2e reads this to confirm a downstream
@@ -461,6 +489,27 @@ public static class ProbeStore
     public static void Clear()
     {
         lock (_lock) _entries.Clear();
+    }
+}
+
+/// <summary>
+/// Monotonic call counter for the `/flaky` endpoint, reset by `/clearflaky`.
+/// Lets the scenario-engine `retry` demo see a deterministic "fail N times then
+/// succeed" sequence.
+/// </summary>
+public static class FlakyStore
+{
+    private static int _count;
+    private static readonly object _lock = new();
+
+    public static int Next()
+    {
+        lock (_lock) return ++_count;
+    }
+
+    public static void Reset()
+    {
+        lock (_lock) _count = 0;
     }
 }
 

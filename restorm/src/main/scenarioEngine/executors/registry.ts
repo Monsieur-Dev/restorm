@@ -32,13 +32,18 @@ import {
   yamlExecutor,
   cryptoExecutor,
   jwtExecutor,
-  dateTimeExecutor
+  dateTimeExecutor,
+  objectOpExecutor,
+  urlExecutor,
+  randomExecutor,
+  throwExecutor
 } from './pureExecutors'
 import {
   waitExecutor,
   waitUntilExecutor,
   forEachExecutor,
   forExecutor,
+  retryExecutor,
   aggregateExecutor
 } from './timeAndFlowExecutors'
 import { httpRequestExecutor } from './httpRequestExecutor'
@@ -174,6 +179,11 @@ function pickExecutor(kind: string): NodeExecutor {
     case 'crypto': return cryptoExecutor
     case 'jwt': return jwtExecutor
     case 'datetime': return dateTimeExecutor
+    case 'objectOp': return objectOpExecutor
+    case 'url': return urlExecutor
+    case 'random': return randomExecutor
+    case 'throw': return throwExecutor
+    case 'retry': return retryExecutor
     case 'wait': return waitExecutor
     case 'waitUntil': return waitUntilExecutor
     case 'forEach': return forEachExecutor

@@ -26,6 +26,7 @@ export const SCENARIO_NODE_CATALOGUE: ScenarioNodeKindMeta[] = [
   { kind: 'output', labelKey: 'scenario.nodes.output', defaultLabel: 'Output / Return', icon: 'export', category: 'control' },
   { kind: 'if', labelKey: 'scenario.nodes.if', defaultLabel: 'If', icon: 'git-compare', category: 'control' },
   { kind: 'switch', labelKey: 'scenario.nodes.switch', defaultLabel: 'Switch', icon: 'list-tree', category: 'control' },
+  { kind: 'retry', labelKey: 'scenario.nodes.retry', defaultLabel: 'Retry', icon: 'refresh', category: 'control' },
   // Requests & composition
   { kind: 'httpRequest', labelKey: 'scenario.nodes.httpRequest', defaultLabel: 'HTTP Request', icon: 'globe', category: 'composition' },
   { kind: 'runScenario', labelKey: 'scenario.nodes.runScenario', defaultLabel: 'Run scenario', icon: 'circuit-board', category: 'composition' },
@@ -60,9 +61,13 @@ export const SCENARIO_NODE_CATALOGUE: ScenarioNodeKindMeta[] = [
   { kind: 'yaml', labelKey: 'scenario.nodes.yaml', defaultLabel: 'YAML', icon: 'symbol-structure', category: 'compute' },
   { kind: 'crypto', labelKey: 'scenario.nodes.crypto', defaultLabel: 'Crypto', icon: 'lock', category: 'compute' },
   { kind: 'jwt', labelKey: 'scenario.nodes.jwt', defaultLabel: 'JWT', icon: 'key', category: 'compute' },
+  { kind: 'objectOp', labelKey: 'scenario.nodes.objectOp', defaultLabel: 'Object ops', icon: 'symbol-object', category: 'compute' },
+  { kind: 'url', labelKey: 'scenario.nodes.url', defaultLabel: 'URL', icon: 'link', category: 'compute' },
+  { kind: 'random', labelKey: 'scenario.nodes.random', defaultLabel: 'Random', icon: 'wand', category: 'compute' },
   // Utilities
   { kind: 'log', labelKey: 'scenario.nodes.log', defaultLabel: 'Log', icon: 'output', category: 'utility' },
-  { kind: 'assert', labelKey: 'scenario.nodes.assert', defaultLabel: 'Assert', icon: 'verified', category: 'utility' }
+  { kind: 'assert', labelKey: 'scenario.nodes.assert', defaultLabel: 'Assert', icon: 'verified', category: 'utility' },
+  { kind: 'throw', labelKey: 'scenario.nodes.throw', defaultLabel: 'Throw', icon: 'error', category: 'utility' }
 ]
 
 const byKind = new Map(SCENARIO_NODE_CATALOGUE.map((m) => [m.kind, m]))

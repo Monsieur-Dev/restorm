@@ -24,7 +24,8 @@ import { broadcastTreeReplace } from './import'
 const SCENARIO_KINDS = [
   'input', 'output', 'if', 'switch', 'httpRequest', 'runScenario', 'forEach', 'for', 'while', 'doWhile',
   'aggregate', 'map', 'filter', 'addToList', 'removeFromList', 'wait', 'waitUntil', 'now', 'arithmetic', 'comparator', 'boolean', 'object',
-  'setVariable', 'getVariable', 'transform', 'cast', 'regex', 'json', 'xml', 'yaml', 'crypto', 'jwt', 'datetime', 'log', 'assert'
+  'setVariable', 'getVariable', 'transform', 'cast', 'regex', 'json', 'xml', 'yaml', 'crypto', 'jwt', 'datetime',
+  'objectOp', 'url', 'random', 'retry', 'log', 'assert', 'throw'
 ] as const
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {

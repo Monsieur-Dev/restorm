@@ -1,0 +1,16 @@
+- message: 🔵 [<time>] ▶ Throw
+- message: ⚪ [<time>] start throw
+  data:
+    message: deliberate failure
+- message: 🔴 [<time>] deliberate failure
+- message: ⚪ [<time>] start log
+  data:
+    level: error
+    message: caught the deliberate throw
+    in:
+      message: deliberate failure
+      startedAt: <dynamic-time>
+- message: 🔴 [<time>] caught the deliberate throw
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ Throw

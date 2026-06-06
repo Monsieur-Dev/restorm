@@ -4072,4 +4072,575 @@
 - message: ⚪ [<time>] done runScenario
   data:
     result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: Object ops
+    in: true
+- message: 🔵 [<time>] ▶ Object ops
+- message: ⚪ [<time>] start json
+  data:
+    op: parse
+    value: '{"id":1,"name":"Rex","meta":{"tag":"dog","age":4}}'
+- message: ⚪ [<time>] done json
+  data:
+    result:
+      id: 1
+      name: Rex
+      meta:
+        tag: dog
+        age: 4
+- message: ⚪ [<time>] start objectOp
+  data:
+    op: get
+    path: meta.tag
+    value:
+      id: 1
+      name: Rex
+      meta:
+        tag: dog
+        age: 4
+- message: ⚪ [<time>] done objectOp
+  data:
+    result: dog
+- message: ⚪ [<time>] start objectOp
+  data:
+    op: pick
+    keys: id,name
+    in: true
+    value:
+      id: 1
+      name: Rex
+      meta:
+        tag: dog
+        age: 4
+- message: ⚪ [<time>] done objectOp
+  data:
+    result:
+      id: 1
+      name: Rex
+- message: ⚪ [<time>] start objectOp
+  data:
+    op: omit
+    keys: meta
+    in: true
+    value:
+      id: 1
+      name: Rex
+      meta:
+        tag: dog
+        age: 4
+- message: ⚪ [<time>] done objectOp
+  data:
+    result:
+      id: 1
+      name: Rex
+- message: ⚪ [<time>] start objectOp
+  data:
+    op: keys
+    in: true
+    value:
+      id: 1
+      name: Rex
+      meta:
+        tag: dog
+        age: 4
+- message: ⚪ [<time>] done objectOp
+  data:
+    result:
+      - id
+      - name
+      - meta
+- message: ⚪ [<time>] start objectOp
+  data:
+    op: values
+    in: true
+    value:
+      id: 1
+      name: Rex
+      meta:
+        tag: dog
+        age: 4
+- message: ⚪ [<time>] done objectOp
+  data:
+    result:
+      - 1
+      - Rex
+      - tag: dog
+        age: 4
+- message: ⚪ [<time>] start objectOp
+  data:
+    op: set
+    path: meta.age
+    other: 5
+    in: true
+    value:
+      id: 1
+      name: Rex
+      meta:
+        tag: dog
+        age: 4
+- message: ⚪ [<time>] done objectOp
+  data:
+    result:
+      id: 1
+      name: Rex
+      meta:
+        tag: dog
+        age: 5
+- message: ⚪ [<time>] start objectOp
+  data:
+    op: keys
+    value: not an object
+    in: true
+- message: 🔴 [<time>] objectOp "keys" expects an object
+- message: ⚪ [<time>] start log
+  data:
+    level: error
+    message: "objectOp error: not an object"
+    in:
+      message: objectOp "keys" expects an object
+      startedAt: <dynamic-time>
+- message: "🔴 [<time>] objectOp error: not an object"
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ Object ops
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: URL
+    in: true
+- message: 🔵 [<time>] ▶ URL
+- message: ⚪ [<time>] start url
+  data:
+    op: encode
+    value: a b&c=d
+- message: ⚪ [<time>] done url
+  data:
+    result: a%20b%26c%3Dd
+- message: ⚪ [<time>] start url
+  data:
+    op: decode
+    value: a%20b%26c%3Dd
+    in: true
+- message: ⚪ [<time>] done url
+  data:
+    result: a b&c=d
+- message: ⚪ [<time>] start url
+  data:
+    op: parseQuery
+    value: ?a=1&b=two
+    in: true
+- message: ⚪ [<time>] done url
+  data:
+    result:
+      a: "1"
+      b: two
+- message: ⚪ [<time>] start url
+  data:
+    op: parseUrl
+    value: https://api.example.com:8443/v1/pets?limit=5#top
+    in: true
+- message: ⚪ [<time>] done url
+  data:
+    result:
+      protocol: "https:"
+      hostname: api.example.com
+      port: "8443"
+      pathname: /v1/pets
+      search: ?limit=5
+      hash: "#top"
+      origin: https://api.example.com:8443
+      query:
+        limit: "5"
+- message: ⚪ [<time>] start url
+  data:
+    op: decode
+    value: "%"
+    in: true
+- message: 🔴 [<time>] URI malformed
+- message: ⚪ [<time>] start log
+  data:
+    level: error
+    message: "url error: bad escape"
+    in:
+      message: URI malformed
+      startedAt: <dynamic-time>
+- message: "🔴 [<time>] url error: bad escape"
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ URL
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: Random
+    in: true
+- message: 🔵 [<time>] ▶ Random
+- message: ⚪ [<time>] start random
+  data:
+    op: int
+    min: 1
+    max: 100
+    seed: "42"
+- message: ⚪ [<time>] done random
+  data:
+    result: 31
+- message: ⚪ [<time>] start random
+  data:
+    op: float
+    min: 0
+    max: 1
+    seed: "7"
+    in: true
+- message: ⚪ [<time>] done random
+  data:
+    result: 0.5916928979568183
+- message: ⚪ [<time>] start random
+  data:
+    op: string
+    length: 12
+    seed: abc
+    in: true
+- message: ⚪ [<time>] done random
+  data:
+    result: goA3sd4msXTg
+- message: ⚪ [<time>] start random
+  data:
+    op: boolean
+    seed: "9"
+    in: true
+- message: ⚪ [<time>] done random
+  data:
+    result: true
+- message: ⚪ [<time>] start random
+  data:
+    op: pick
+    seed: "3"
+    items:
+      - rock
+      - paper
+      - scissors
+    in: true
+- message: ⚪ [<time>] done random
+  data:
+    result: scissors
+- message: 🔵 [<time>] ■ Random
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: Throw
+    in: true
+- message: 🔵 [<time>] ▶ Throw
+- message: ⚪ [<time>] start throw
+  data:
+    message: deliberate failure
+- message: 🔴 [<time>] deliberate failure
+- message: ⚪ [<time>] start log
+  data:
+    level: error
+    message: caught the deliberate throw
+    in:
+      message: deliberate failure
+      startedAt: <dynamic-time>
+- message: 🔴 [<time>] caught the deliberate throw
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ Throw
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: Retry
+    in: true
+- message: 🔵 [<time>] ▶ Retry
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: Clear Flaky
+    id: <uuid>
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:5110/clearflaky
+        method: POST
+        headers: {}
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json; charset=utf-8
+          date: <dynamic-time>
+          server: Kestrel
+          transfer-encoding: chunked
+        body: '{"cleared":true}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start retry
+  data:
+    maxAttempts: 5
+    backoff: fixed
+    delay: 10
+    delayUnit: ms
+    retryOnStatus: "503"
+    in: true
+- message: ⚪ [<time>] done retry
+- message: ⚪ [<time>] retry attempt 1/5
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: Flaky 503
+    id: <uuid>
+    in: 1
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:5110/flaky?fail=2&code=503
+        method: GET
+        headers: {}
+      response:
+        status: 503
+        statusText: Service Unavailable
+        headers:
+          content-type: application/json; charset=utf-8
+          date: <dynamic-time>
+          server: Kestrel
+          transfer-encoding: chunked
+        body: '{"attempt":1,"failing":true}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] retry attempt 1 failed, waiting 10ms
+- message: ⚪ [<time>] retry attempt 2/5
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: Flaky 503
+    id: <uuid>
+    in: 2
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:5110/flaky?fail=2&code=503
+        method: GET
+        headers: {}
+      response:
+        status: 503
+        statusText: Service Unavailable
+        headers:
+          content-type: application/json; charset=utf-8
+          date: <dynamic-time>
+          server: Kestrel
+          transfer-encoding: chunked
+        body: '{"attempt":2,"failing":true}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] retry attempt 2 failed, waiting 10ms
+- message: ⚪ [<time>] retry attempt 3/5
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: Flaky 503
+    id: <uuid>
+    in: 3
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:5110/flaky?fail=2&code=503
+        method: GET
+        headers: {}
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json; charset=utf-8
+          date: <dynamic-time>
+          server: Kestrel
+          transfer-encoding: chunked
+        body: '{"attempt":3,"ok":true}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] retry done after 3 attempt(s)
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: flaky 503 recovered after retries
+    in: 3
+- message: 🔵 [<time>] flaky 503 recovered after retries
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] start retry
+  data:
+    maxAttempts: 3
+    backoff: fixed
+    delay: 5
+    delayUnit: ms
+    retryOnError: true
+    in: true
+- message: ⚪ [<time>] done retry
+- message: ⚪ [<time>] retry attempt 1/3
+- message: ⚪ [<time>] start throw
+  data:
+    message: always fails
+    in: 1
+- message: 🔴 [<time>] always fails
+- message: ⚪ [<time>] retry attempt 1 failed, waiting 5ms
+- message: ⚪ [<time>] retry attempt 2/3
+- message: ⚪ [<time>] start throw
+  data:
+    message: always fails
+    in: 2
+- message: 🔴 [<time>] always fails
+- message: ⚪ [<time>] retry attempt 2 failed, waiting 5ms
+- message: ⚪ [<time>] retry attempt 3/3
+- message: ⚪ [<time>] start throw
+  data:
+    message: always fails
+    in: 3
+- message: 🔴 [<time>] always fails
+- message: ⚪ [<time>] retry exhausted after 3 attempt(s)
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: "error-boundary: exhausted as expected"
+    in: 3
+- message: "🔵 [<time>] error-boundary: exhausted as expected"
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: Clear Flaky
+    id: <uuid>
+    in: true
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:5110/clearflaky
+        method: POST
+        headers: {}
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json; charset=utf-8
+          date: <dynamic-time>
+          server: Kestrel
+          transfer-encoding: chunked
+        body: '{"cleared":true}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start retry
+  data:
+    maxAttempts: 3
+    backoff: fixed
+    delay: 5
+    delayUnit: ms
+    retryOnStatus: "500"
+    in: true
+- message: ⚪ [<time>] done retry
+- message: ⚪ [<time>] retry attempt 1/3
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: Flaky 500
+    id: <uuid>
+    in: 1
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:5110/flaky?fail=5&code=500
+        method: GET
+        headers: {}
+      response:
+        status: 500
+        statusText: Internal Server Error
+        headers:
+          content-type: application/json; charset=utf-8
+          date: <dynamic-time>
+          server: Kestrel
+          transfer-encoding: chunked
+        body: '{"attempt":1,"failing":true}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] retry attempt 1 failed, waiting 5ms
+- message: ⚪ [<time>] retry attempt 2/3
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: Flaky 500
+    id: <uuid>
+    in: 2
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:5110/flaky?fail=5&code=500
+        method: GET
+        headers: {}
+      response:
+        status: 500
+        statusText: Internal Server Error
+        headers:
+          content-type: application/json; charset=utf-8
+          date: <dynamic-time>
+          server: Kestrel
+          transfer-encoding: chunked
+        body: '{"attempt":2,"failing":true}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] retry attempt 2 failed, waiting 5ms
+- message: ⚪ [<time>] retry attempt 3/3
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: Flaky 500
+    id: <uuid>
+    in: 3
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:5110/flaky?fail=5&code=500
+        method: GET
+        headers: {}
+      response:
+        status: 500
+        statusText: Internal Server Error
+        headers:
+          content-type: application/json; charset=utf-8
+          date: <dynamic-time>
+          server: Kestrel
+          transfer-encoding: chunked
+        body: '{"attempt":3,"failing":true}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] retry exhausted after 3 attempt(s)
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: "HTTP 500: exhausted as expected"
+    in: 3
+- message: "🔵 [<time>] HTTP 500: exhausted as expected"
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ Retry
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
 - message: 🔵 [<time>] ■ Main

@@ -27,7 +27,7 @@ const NO_INPUT_EVENT = new Set<ScenarioNodeKind>()
 const STATIC_PREVIEW = new Set<ScenarioNodeKind>([
   'now', 'input', 'setVariable', 'getVariable', 'object', 'output',
   'arithmetic', 'comparator', 'boolean', 'transform', 'cast', 'regex', 'json',
-  'xml', 'yaml', 'crypto', 'jwt', 'datetime',
+  'xml', 'yaml', 'crypto', 'jwt', 'datetime', 'objectOp', 'url', 'random',
   'if', 'switch', 'wait', 'waitUntil',
   'map', 'filter', 'aggregate',
   'addToList', 'removeFromList',
@@ -40,14 +40,14 @@ const STATIC_PREVIEW = new Set<ScenarioNodeKind>([
  * kind can fail, so it carries one. Opt-outs are sinks / pure reads where an
  * error anchor is meaningless (`output`, `log`, `now`).
  */
-const NO_ERROR_PORT = new Set<ScenarioNodeKind>(['output', 'log', 'now'])
+const NO_ERROR_PORT = new Set<ScenarioNodeKind>(['output', 'log', 'now', 'retry'])
 
 /**
  * Kinds that do NOT expose the implicit `done` completion port. Default: every
  * kind signals completion so a flow can sequence what comes next. The `output`
  * sink opts out — it terminates the (sub-)scenario, there is nothing after it.
  */
-const NO_DONE_PORT = new Set<ScenarioNodeKind>(['output'])
+const NO_DONE_PORT = new Set<ScenarioNodeKind>(['output', 'throw'])
 
 /** Whether a kind carries the header input-event launch trigger (`in` port). */
 export function acceptsInputEvent(kind: ScenarioNodeKind): boolean {

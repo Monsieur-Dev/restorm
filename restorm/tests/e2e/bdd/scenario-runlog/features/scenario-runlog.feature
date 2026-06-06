@@ -37,4 +37,9 @@ Feature: Scenario run-log end-to-end
       | XML            |
       | YAML           |
       | Auth login     |
+      | Object ops     |
+      | URL            |
+      | Random         |
+      | Throw          |
+      | Retry          |
       | Main           |

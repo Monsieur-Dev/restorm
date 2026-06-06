@@ -1,0 +1,50 @@
+- message: 🔵 [<time>] ▶ Random
+- message: ⚪ [<time>] start random
+  data:
+    op: int
+    min: 1
+    max: 100
+    seed: "42"
+- message: ⚪ [<time>] done random
+  data:
+    result: 31
+- message: ⚪ [<time>] start random
+  data:
+    op: float
+    min: 0
+    max: 1
+    seed: "7"
+    in: true
+- message: ⚪ [<time>] done random
+  data:
+    result: 0.5916928979568183
+- message: ⚪ [<time>] start random
+  data:
+    op: string
+    length: 12
+    seed: abc
+    in: true
+- message: ⚪ [<time>] done random
+  data:
+    result: goA3sd4msXTg
+- message: ⚪ [<time>] start random
+  data:
+    op: boolean
+    seed: "9"
+    in: true
+- message: ⚪ [<time>] done random
+  data:
+    result: true
+- message: ⚪ [<time>] start random
+  data:
+    op: pick
+    seed: "3"
+    items:
+      - rock
+      - paper
+      - scissors
+    in: true
+- message: ⚪ [<time>] done random
+  data:
+    result: scissors
+- message: 🔵 [<time>] ■ Random

@@ -104,6 +104,23 @@ export interface ExecResult {
     // while true — emitting `else` when false. `while` tests first; `doWhile`
     // runs the body once before the first test.
     | { type: 'conditionalLoop'; mode: 'while' | 'doWhile' }
+    // A `retry`: the scheduler runs the body (`attempt`) in a child scope and
+    // acts as that scope's ERROR BOUNDARY. When the attempt fails — an unhandled
+    // error bubbles to the scope, or (for an httpRequest child) the response
+    // status matches `retryOnStatus` / is a non-2xx when `retryOnFailure` —
+    // it waits per the backoff policy and re-runs, up to `maxAttempts`. Success
+    // fires `done`; giving up fires `exhausted`.
+    | {
+        type: 'openRetry'
+        maxAttempts: number
+        backoff: 'fixed' | 'linear' | 'exponential'
+        delayMs: number
+        factor: number
+        maxDelayMs: number
+        retryOnError: boolean
+        retryOnFailure: boolean
+        retryOnStatus: number[]
+      }
 }
 
 /**

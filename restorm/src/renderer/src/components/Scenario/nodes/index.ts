@@ -22,6 +22,11 @@ import { YamlNodeBox } from './YamlNodeBox'
 import { CryptoNodeBox } from './CryptoNodeBox'
 import { JwtNodeBox } from './JwtNodeBox'
 import { DateTimeNodeBox } from './DateTimeNodeBox'
+import { ObjectOpNodeBox } from './ObjectOpNodeBox'
+import { UrlNodeBox } from './UrlNodeBox'
+import { RandomNodeBox } from './RandomNodeBox'
+import { ThrowNodeBox } from './ThrowNodeBox'
+import { RetryNodeBox } from './RetryNodeBox'
 import { ForEachNodeBox } from './ForEachNodeBox'
 import { ForNodeBox, WhileNodeBox, DoWhileNodeBox } from './LoopNodeBoxes'
 import { AggregateNodeBox } from './AggregateNodeBox'
@@ -75,6 +80,11 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   crypto: CryptoNodeBox,
   jwt: JwtNodeBox,
   datetime: DateTimeNodeBox,
+  objectOp: ObjectOpNodeBox,
+  url: UrlNodeBox,
+  random: RandomNodeBox,
+  throw: ThrowNodeBox,
+  retry: RetryNodeBox,
   log: LogNodeBox,
   assert: AssertNodeBox
 }

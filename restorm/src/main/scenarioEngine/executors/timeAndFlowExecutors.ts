@@ -140,6 +140,40 @@ export const forEachExecutor: NodeExecutor = (act, ctx) => {
 }
 
 /**
+ * `retry` — opens a retry scope. The scheduler runs the body wired off
+ * `attempt`, acts as that scope's ERROR BOUNDARY, and re-runs on failure per the
+ * backoff policy up to `maxAttempts`. All the policy lives in config; the
+ * scheduler (`runRetry`) does the orchestration.
+ */
+export const retryExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as {
+    maxAttempts?: unknown; backoff?: unknown; delay?: unknown; delayUnit?: unknown
+    factor?: unknown; maxDelay?: unknown; maxDelayUnit?: unknown
+    retryOnError?: unknown; retryOnFailure?: unknown; retryOnStatus?: unknown
+  }
+  const toMs = (v: unknown, unit: unknown): number => {
+    const n = typeof v === 'number' && Number.isFinite(v) ? v : 0
+    return unit === 's' ? n * 1000 : unit === 'min' ? n * 60000 : n
+  }
+  const maxAttempts = typeof cfg.maxAttempts === 'number' && cfg.maxAttempts >= 1 ? Math.floor(cfg.maxAttempts) : 3
+  const backoff = cfg.backoff === 'linear' || cfg.backoff === 'exponential' ? cfg.backoff : 'fixed'
+  const delayMs = toMs(cfg.delay, cfg.delayUnit ?? 'ms')
+  const factor = typeof cfg.factor === 'number' && cfg.factor > 0 ? cfg.factor : 2
+  const maxDelayMs = toMs(cfg.maxDelay, cfg.maxDelayUnit ?? 'ms')
+  const retryOnError = cfg.retryOnError !== false
+  const retryOnFailure = cfg.retryOnFailure === true
+  const retryOnStatus = Array.isArray(cfg.retryOnStatus)
+    ? cfg.retryOnStatus.filter((n): n is number => typeof n === 'number')
+    : typeof cfg.retryOnStatus === 'string'
+      ? cfg.retryOnStatus.split(',').map((s) => Number(s.trim())).filter((n) => Number.isFinite(n))
+      : []
+  return {
+    outputs: [],
+    scopeAction: { type: 'openRetry', maxAttempts, backoff, delayMs, factor, maxDelayMs, retryOnError, retryOnFailure, retryOnStatus }
+  }
+}
+
+/**
  * Aggregate node: reduces a collection to a single `result`.
  *
  * Two intakes, both reordered/ordered by the scheduler before they reach

@@ -863,7 +863,12 @@
       "yaml": "YAML",
       "crypto": "Crypto",
       "jwt": "JWT",
-      "datetime": "Calcul de date"
+      "datetime": "Calcul de date",
+      "objectOp": "Object ops",
+      "url": "URL",
+      "random": "Aléatoire",
+      "throw": "Throw",
+      "retry": "Retry"
     },
     "comparator": {
       "result": "résultat"
@@ -1145,6 +1150,72 @@
         "weeks": "semaines",
         "months": "mois",
         "years": "années"
+      }
+    },
+    "objectOp": {
+      "value": "objet",
+      "operation": "opération",
+      "path": "chemin",
+      "keys": "clés",
+      "setValue": "valeur",
+      "mergeWith": "fusionner avec",
+      "result": "résultat",
+      "op": {
+        "get": "lire",
+        "set": "écrire",
+        "merge": "fusionner",
+        "pick": "garder",
+        "omit": "retirer",
+        "keys": "clés",
+        "values": "valeurs"
+      }
+    },
+    "url": {
+      "value": "valeur",
+      "operation": "opération",
+      "result": "résultat",
+      "op": {
+        "encode": "encoder",
+        "decode": "décoder",
+        "parseQuery": "parser query",
+        "buildQuery": "construire query",
+        "parseUrl": "parser URL"
+      }
+    },
+    "random": {
+      "operation": "opération",
+      "min": "min",
+      "max": "max",
+      "length": "longueur",
+      "items": "éléments",
+      "seed": "graine (optionnel)",
+      "seedPlaceholder": "reproductible",
+      "result": "résultat",
+      "op": {
+        "int": "entier",
+        "float": "décimal",
+        "string": "chaîne",
+        "boolean": "booléen",
+        "pick": "choisir"
+      }
+    },
+    "throw": {
+      "message": "message"
+    },
+    "retry": {
+      "maxAttempts": "essais max",
+      "backoff": "backoff",
+      "delay": "délai",
+      "factor": "facteur",
+      "retryOnError": "re-tenter sur erreur",
+      "retryOnStatus": "re-tenter sur status HTTP",
+      "retryOnFailure": "re-tenter sur tout non-2xx",
+      "attempt": "tentative",
+      "exhausted": "épuisé",
+      "backoffOpt": {
+        "fixed": "fixe",
+        "linear": "linéaire",
+        "exponential": "exponentiel"
       }
     }
   }

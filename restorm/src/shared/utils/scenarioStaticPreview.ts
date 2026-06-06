@@ -13,6 +13,9 @@ import { applyYaml, isYamlOp } from '../scenarioYaml'
 import { applyCrypto, isCryptoOp } from '../scenarioCrypto'
 import { applyJwt } from '../scenarioJwt'
 import { applyDateTime, isDateTimeOp, isDateTimeUnit } from '../scenarioDateTime'
+import { applyObjectOp, isObjectOp } from '../scenarioObject'
+import { applyUrl, isUrlOp } from '../scenarioUrl'
+import { applyRandom, isRandomOp } from '../scenarioRandom'
 import { LIST_MUTATION_DEFAULT_VALUE_ID } from '../scenarioListMutationValues'
 
 // Register the full helper suite on first import so a chained `transform`
@@ -1021,6 +1024,49 @@ export function staticScenarioPreview(
       const other = operandPreviewValue(node.id, 'other', cfg['other'], nodes, edges)
       try {
         return { result: applyDateTime(value, op, { amount, unit, format, other }) }
+      } catch {
+        return null
+      }
+    }
+    case 'objectOp': {
+      // Reshape the resolved `value` object via the SHARED `applyObjectOp`. A
+      // non-object operand THROWS (runtime → `error`); the preview catches it.
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      if (value === undefined) return null
+      const op = isObjectOp(cfg['op']) ? cfg['op'] : 'get'
+      const path = typeof cfg['path'] === 'string' ? cfg['path'] : ''
+      const keys = typeof cfg['keys'] === 'string' ? cfg['keys'].split(',').map((k) => k.trim()).filter(Boolean) : []
+      const other = operandPreviewValue(node.id, 'other', cfg['other'], nodes, edges)
+      try {
+        return { result: applyObjectOp(value, op, { path, keys, other }) }
+      } catch {
+        return null
+      }
+    }
+    case 'url': {
+      // Encode / decode / parse / build the resolved `value` via the SHARED
+      // `applyUrl`. A malformed input THROWS (runtime → `error`); preview catches.
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      if (value === undefined) return null
+      const op = isUrlOp(cfg['op']) ? cfg['op'] : 'encode'
+      try {
+        return { result: applyUrl(value, op) }
+      } catch {
+        return null
+      }
+    }
+    case 'random': {
+      // Generate a value via the SHARED `applyRandom`. With a `seed` the preview
+      // is stable; unseeded it shows a fresh sample. `pick` over an empty list
+      // THROWS (runtime → `error`); the preview catches it.
+      const op = isRandomOp(cfg['op']) ? cfg['op'] : 'int'
+      const min = typeof cfg['min'] === 'number' ? cfg['min'] : undefined
+      const max = typeof cfg['max'] === 'number' ? cfg['max'] : undefined
+      const length = typeof cfg['length'] === 'number' ? cfg['length'] : undefined
+      const seed = typeof cfg['seed'] === 'number' || typeof cfg['seed'] === 'string' ? cfg['seed'] : undefined
+      const items = resolveConfigItems(cfg) ?? undefined
+      try {
+        return { result: applyRandom(op, { min, max, length, seed, items }) }
       } catch {
         return null
       }

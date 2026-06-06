@@ -127,8 +127,18 @@ export type ScenarioNodeKind =
   | 'jwt'
   // Date math — shift / format / diff an existing date (the clock is `now`).
   | 'datetime'
+  // Retry — re-runs its body (an error-boundary scope) with a backoff policy.
+  | 'retry'
+  // Object reshaping — get / set / merge / pick / omit / keys / values.
+  | 'objectOp'
+  // URL — encode / decode a component, parse / build a query, parse a URL.
+  | 'url'
+  // Random / faker — int / float / string / boolean / pick (optional seed).
+  | 'random'
   // Utilities
   | 'log'
+  // Deliberate failure — throws a message (for error branches / retry tests).
+  | 'throw'
   | 'assert'
 
 /**

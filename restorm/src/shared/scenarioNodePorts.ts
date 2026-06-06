@@ -165,6 +165,18 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // `datetime` shifts / formats / diffs its `value` date; output is an ISO string
   // (add / subtract / format) or a number (diff).
   datetime: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
+  // `objectOp` reshapes its `value` object (get/set/merge/pick/omit/keys/values);
+  // path / keys / the set-or-merge operand live in config.
+  objectOp: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
+  // `url` encodes / decodes / parses / builds its `value` (a string, or an object
+  // for buildQuery); the output type depends on the op.
+  url: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
+  // `random` generates a value (int / float / string / boolean / pick) — no data
+  // input; every parameter is config.
+  random: { inputs: [], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
+  // `retry` runs the body wired off `attempt` as an error-boundary scope; the
+  // implicit `done` is the success exit, `exhausted` the give-up branch.
+  retry: { inputs: [], outputs: [{ id: 'attempt', name: 'attempt', role: 'then', flow: 'both' }, { id: 'exhausted', name: 'exhausted', role: 'else', flow: 'both' }] },
   // Utilities
   // A terminal sink with two optional inputs (wire either, or set inline).
   // `message` is a string, `data` any value. No output (terminal).
@@ -173,7 +185,11 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // operator toggle as `if`/`comparator`; both operands carry inline
   // value-selector fallbacks, so they aren't hard-required ports. Branches
   // `pass` / `fail`; the failure label lives in config (`message`).
-  assert: { inputs: [{ id: 'a', name: 'actual' }, { id: 'b', name: 'expected' }], outputs: [{ id: 'then', name: 'pass', role: 'then', flow: 'both' }, { id: 'else', name: 'fail', role: 'else', flow: 'both' }] }
+  assert: { inputs: [{ id: 'a', name: 'actual' }, { id: 'b', name: 'expected' }], outputs: [{ id: 'then', name: 'pass', role: 'then', flow: 'both' }, { id: 'else', name: 'fail', role: 'else', flow: 'both' }] },
+  // `throw` deliberately fails with a `message` (wired or inline) — routed to the
+  // node's implicit `error` port (or it fails the run if nothing handles it). No
+  // value output: a throw never completes normally.
+  throw: { inputs: [{ id: 'message', name: 'message', dataType: 'string' }], outputs: [] }
 }
 
 /** A generic single-in/single-out node for any kind without a spec (the `in`

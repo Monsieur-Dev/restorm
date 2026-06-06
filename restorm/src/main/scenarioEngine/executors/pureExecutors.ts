@@ -16,6 +16,9 @@ import { applyYaml, isYamlOp } from '../../../shared/scenarioYaml'
 import { applyCrypto, isCryptoOp } from '../../../shared/scenarioCrypto'
 import { applyJwt } from '../../../shared/scenarioJwt'
 import { applyDateTime, isDateTimeOp, isDateTimeUnit } from '../../../shared/scenarioDateTime'
+import { applyObjectOp, isObjectOp } from '../../../shared/scenarioObject'
+import { applyUrl, isUrlOp } from '../../../shared/scenarioUrl'
+import { applyRandom, isRandomOp } from '../../../shared/scenarioRandom'
 import { compareValues, deepEqual, hintFromConfig, resolveOperand, type OperandHint } from '../conditionEval'
 
 /** A wired operand's kind is inferred from its value (pass no hint); an inline
@@ -494,6 +497,51 @@ export const dateTimeExecutor: NodeExecutor = (act, ctx) => {
   const format = typeof cfg.format === 'string' ? cfg.format : ''
   const other = resolveOperand(act.inputs['other'], cfg.other, ctx.variables)
   return { outputs: [{ port: 'result', value: applyDateTime(value, op, { amount, unit, format, other }) }] }
+}
+
+/** `objectOp`: reshape the `value` object (get/set/merge/pick/omit/keys/values)
+ * via the SHARED `applyObjectOp`. A non-object operand (where the op needs one)
+ * THROWS, routed to the `error` port. */
+export const objectOpExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { op?: unknown; path?: unknown; keys?: unknown; other?: unknown; value?: unknown }
+  const value = resolveOperand(act.inputs['value'], cfg.value, ctx.variables)
+  const op = isObjectOp(cfg.op) ? cfg.op : 'get'
+  const path = typeof cfg.path === 'string' ? cfg.path : ''
+  const keys = typeof cfg.keys === 'string' ? cfg.keys.split(',').map((k) => k.trim()).filter(Boolean) : []
+  const other = resolveOperand(act.inputs['other'], cfg.other, ctx.variables)
+  return { outputs: [{ port: 'result', value: applyObjectOp(value, op, { path, keys, other }) }] }
+}
+
+/** `url`: encode / decode / parse / build over the `value` via the SHARED
+ * `applyUrl`. A malformed escape, a non-object buildQuery operand, or an
+ * unparseable URL THROWS, routed to the `error` port. */
+export const urlExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { op?: unknown; value?: unknown }
+  const value = resolveOperand(act.inputs['value'], cfg.value, ctx.variables)
+  const op = isUrlOp(cfg.op) ? cfg.op : 'encode'
+  return { outputs: [{ port: 'result', value: applyUrl(value, op) }] }
+}
+
+/** `random`: generate a value via the SHARED `applyRandom`. A `seed` makes it
+ * deterministic. `pick` over an empty list THROWS, routed to the `error` port. */
+export const randomExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { op?: unknown; min?: unknown; max?: unknown; length?: unknown; seed?: unknown }
+  const op = isRandomOp(cfg.op) ? cfg.op : 'int'
+  const min = typeof cfg.min === 'number' ? cfg.min : undefined
+  const max = typeof cfg.max === 'number' ? cfg.max : undefined
+  const length = typeof cfg.length === 'number' ? cfg.length : undefined
+  const seed = typeof cfg.seed === 'number' || typeof cfg.seed === 'string' ? cfg.seed : undefined
+  const items = resolveConfigItems(ctx.node.config, ctx.variables) ?? undefined
+  return { outputs: [{ port: 'result', value: applyRandom(op, { min, max, length, seed, items }) }] }
+}
+
+/** `throw`: deliberately fail with the resolved `message` (wired or inline). The
+ * scheduler routes the throw to the node's `error` port, or fails the run if
+ * nothing handles it — the basis of error branches + retry testing. */
+export const throwExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { message?: unknown }
+  const msg = resolveOperand(act.inputs['message'], cfg.message, ctx.variables)
+  throw new Error(typeof msg === 'string' && msg !== '' ? msg : 'Scenario threw deliberately')
 }
 
 /** Coerce an arithmetic operand to a finite number, or THROW so the run routes

@@ -513,8 +513,103 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 4340
-                  'y': 740
+                  x: 1240
+                  'y': 1160
+              - id: 35b9fd90-6241-44a4-bc07-9f36bfb42685
+                kind: runScenario
+                config:
+                  scenarioId: 419de5a4-5d61-4d9d-8d3c-449bf36070d4
+                  label: Object ops
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 580
+                  'y': 1300
+              - id: 3e2c6312-90b9-400f-a67d-77883c30629b
+                kind: runScenario
+                config:
+                  scenarioId: e42957ee-3655-497a-911e-1ef5a2dabbc9
+                  label: URL
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 840
+                  'y': 1300
+              - id: ca5dbefc-13a8-4b25-9bcf-61863464b3fd
+                kind: runScenario
+                config:
+                  scenarioId: 001d5d28-f714-4e44-b74a-7750ca691331
+                  label: Random
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 1100
+                  'y': 1300
+              - id: 13851015-dd4b-4fec-b21f-9daa6793f025
+                kind: runScenario
+                config:
+                  scenarioId: 7837587b-f5ae-4137-b41d-52070021000d
+                  label: Throw
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 1360
+                  'y': 1300
+              - id: d36843a0-7257-471d-8a08-c468c09d2a5b
+                kind: runScenario
+                config:
+                  scenarioId: 8042bde2-a1ff-470a-b971-113756f020ab
+                  label: Retry
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 1620
+                  'y': 1300
             edges:
               - id: e-1780418276241-f2q3hz
                 from:
@@ -650,6 +745,41 @@ collections:
                   portId: done
                 to:
                   nodeId: 83d62b4f-0a3e-46da-9e50-712459bbf736
+                  portId: in
+              - id: 52a9434e-40c5-4f44-8cac-4ab97e6fac82
+                from:
+                  nodeId: 83d62b4f-0a3e-46da-9e50-712459bbf736
+                  portId: done
+                to:
+                  nodeId: 35b9fd90-6241-44a4-bc07-9f36bfb42685
+                  portId: in
+              - id: d0bcca3b-36ff-41bc-97a7-74601bf70e10
+                from:
+                  nodeId: 35b9fd90-6241-44a4-bc07-9f36bfb42685
+                  portId: done
+                to:
+                  nodeId: 3e2c6312-90b9-400f-a67d-77883c30629b
+                  portId: in
+              - id: 46598def-965f-48fe-be0f-a2ece8955da0
+                from:
+                  nodeId: 3e2c6312-90b9-400f-a67d-77883c30629b
+                  portId: done
+                to:
+                  nodeId: ca5dbefc-13a8-4b25-9bcf-61863464b3fd
+                  portId: in
+              - id: 3ed54e9d-90d8-4e88-a0fd-e39e9292560c
+                from:
+                  nodeId: ca5dbefc-13a8-4b25-9bcf-61863464b3fd
+                  portId: done
+                to:
+                  nodeId: 13851015-dd4b-4fec-b21f-9daa6793f025
+                  portId: in
+              - id: e82ecbeb-aa88-4359-afc2-4aaacddb7d8f
+                from:
+                  nodeId: 13851015-dd4b-4fec-b21f-9daa6793f025
+                  portId: done
+                to:
+                  nodeId: d36843a0-7257-471d-8a08-c468c09d2a5b
                   portId: in
             id: c1573ce0-985c-44b5-b5d4-e081de2d4303
             name: Main
@@ -13520,6 +13650,7 @@ collections:
                     config:
                       requestId: d2000000-0000-0000-0000-00000000auth
                       label: Get Pet by Id
+                      id: 97e178da-569b-4d41-8478-d7737eeb7f9c
                     inputs:
                       - id: in
                         name: ''
@@ -13544,6 +13675,7 @@ collections:
                     config:
                       requestId: 638797b2-2101-4a85-8d17-713fb43c3334
                       label: Clear Logs
+                      id: 2b52e116-67ed-4ddc-a55e-c6501a31d85d
                     inputs:
                       - id: in
                         name: ''
@@ -13568,6 +13700,7 @@ collections:
                     config:
                       requestId: 268e8d63-6d7c-431f-81fa-5ab6c984c784
                       label: Clear Tokens
+                      id: 1da307fa-2b09-4642-9e70-becb16ac29b0
                     inputs:
                       - id: in
                         name: ''
@@ -13626,6 +13759,7 @@ collections:
                     config:
                       requestId: e633f808-9fea-4235-9433-d92112ffa2e6
                       label: Login Probe
+                      id: 77da7e53-8e57-4738-9a9e-d5ee3d0f6105
                     inputs:
                       - id: in
                         name: ''
@@ -13804,8 +13938,1040 @@ collections:
                     to:
                       nodeId: d2b77b6e-395c-4d9a-afed-58ad9a26149a
                       portId: in
-                name: Auth login
                 id: 53efa407-dfb5-4ce9-be03-738ad44a02c1
+                name: Auth login
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 80d1eb92-c395-4e49-b731-704dbcaa08bf
+                    kind: httpRequest
+                    config:
+                      requestId: 8edf5e58-e640-4f72-bca4-c9cec95a4dfe
+                      label: Clear Flaky
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: env
+                        name: env
+                        dataType: any
+                        flow: value
+                    outputs:
+                      - id: response
+                        name: response
+                        dataType: response
+                        role: response
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 40
+                  - id: 0d9b0f94-2e82-458c-807d-7b7bc9485461
+                    kind: retry
+                    config:
+                      maxAttempts: 5
+                      backoff: fixed
+                      delay: 10
+                      delayUnit: ms
+                      retryOnStatus: '503'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: attempt
+                        name: attempt
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: exhausted
+                        name: exhausted
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 380
+                      'y': 40
+                    note: retry on 503 → recovers on the 3rd try
+                  - id: 0e82107c-5b22-4a26-90a5-4ab6c457435a
+                    kind: httpRequest
+                    config:
+                      requestId: 70b7e14f-ed3f-47e1-b791-647deeb8db90
+                      label: Flaky 503
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: env
+                        name: env
+                        dataType: any
+                        flow: value
+                    outputs:
+                      - id: response
+                        name: response
+                        dataType: response
+                        role: response
+                        flow: both
+                    position:
+                      x: 760
+                      'y': 40
+                  - id: c592e8fd-b741-4554-ae11-3f721ed32969
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: flaky 503 recovered after retries
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1140
+                      'y': 40
+                  - id: bf46e0f7-3c9f-4767-8408-98eb49ab3a65
+                    kind: retry
+                    config:
+                      maxAttempts: 3
+                      backoff: fixed
+                      delay: 5
+                      delayUnit: ms
+                      retryOnError: true
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: attempt
+                        name: attempt
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: exhausted
+                        name: exhausted
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 380
+                      'y': 440
+                    note: 'error boundary: throw → exhausted'
+                  - id: 8c87e12e-bb08-443c-ae0c-f8a49bbef8a1
+                    kind: throw
+                    config:
+                      message:
+                        type: string
+                        value: always fails
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                    outputs: []
+                    position:
+                      x: 760
+                      'y': 440
+                  - id: a0c0026e-b2a6-422f-b63c-1b02238e4152
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: 'error-boundary: exhausted as expected'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1140
+                      'y': 440
+                  - id: fe5a8cdb-2cc0-4951-b20b-b6a4d600ea8d
+                    kind: httpRequest
+                    config:
+                      requestId: 8edf5e58-e640-4f72-bca4-c9cec95a4dfe
+                      label: Clear Flaky
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: env
+                        name: env
+                        dataType: any
+                        flow: value
+                    outputs:
+                      - id: response
+                        name: response
+                        dataType: response
+                        role: response
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 840
+                  - id: f03ca054-7425-4a58-946f-e1fab159eeab
+                    kind: retry
+                    config:
+                      maxAttempts: 3
+                      backoff: fixed
+                      delay: 5
+                      delayUnit: ms
+                      retryOnStatus: '500'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: attempt
+                        name: attempt
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: exhausted
+                        name: exhausted
+                        dataType: any
+                        role: else
+                        flow: both
+                    position:
+                      x: 380
+                      'y': 840
+                    note: retry on 500 (always) → exhausted
+                  - id: 25195145-6a95-450a-831b-9d2db90c0d40
+                    kind: httpRequest
+                    config:
+                      requestId: 66d657c9-2ce1-4229-b98f-42e2e5fa96a4
+                      label: Flaky 500
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: env
+                        name: env
+                        dataType: any
+                        flow: value
+                    outputs:
+                      - id: response
+                        name: response
+                        dataType: response
+                        role: response
+                        flow: both
+                    position:
+                      x: 760
+                      'y': 840
+                  - id: b2ee9d5f-2348-4e2a-b8aa-dc7615916e4d
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: 'HTTP 500: exhausted as expected'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1140
+                      'y': 840
+                edges:
+                  - id: f6dd8377-a3c6-4990-a116-3b66729fe2fe
+                    from:
+                      nodeId: 80d1eb92-c395-4e49-b731-704dbcaa08bf
+                      portId: done
+                    to:
+                      nodeId: 0d9b0f94-2e82-458c-807d-7b7bc9485461
+                      portId: in
+                  - id: 92877cdd-97ad-4a6a-99cb-a127e28b2fc6
+                    from:
+                      nodeId: 0d9b0f94-2e82-458c-807d-7b7bc9485461
+                      portId: attempt
+                    to:
+                      nodeId: 0e82107c-5b22-4a26-90a5-4ab6c457435a
+                      portId: in
+                  - id: eed26f0f-9426-430d-b024-03d763f3965e
+                    from:
+                      nodeId: 0d9b0f94-2e82-458c-807d-7b7bc9485461
+                      portId: done
+                    to:
+                      nodeId: c592e8fd-b741-4554-ae11-3f721ed32969
+                      portId: in
+                  - id: e491c50d-d08c-460a-8115-661e1a13fccc
+                    from:
+                      nodeId: c592e8fd-b741-4554-ae11-3f721ed32969
+                      portId: done
+                    to:
+                      nodeId: bf46e0f7-3c9f-4767-8408-98eb49ab3a65
+                      portId: in
+                  - id: e9c57607-67aa-4deb-858b-a3f1cc476080
+                    from:
+                      nodeId: bf46e0f7-3c9f-4767-8408-98eb49ab3a65
+                      portId: attempt
+                    to:
+                      nodeId: 8c87e12e-bb08-443c-ae0c-f8a49bbef8a1
+                      portId: in
+                  - id: a8d27b46-0337-465a-b49f-f86b5943907c
+                    from:
+                      nodeId: bf46e0f7-3c9f-4767-8408-98eb49ab3a65
+                      portId: exhausted
+                    to:
+                      nodeId: a0c0026e-b2a6-422f-b63c-1b02238e4152
+                      portId: in
+                  - id: 3c792866-bca1-494c-8d11-4c47e2e208c5
+                    from:
+                      nodeId: a0c0026e-b2a6-422f-b63c-1b02238e4152
+                      portId: done
+                    to:
+                      nodeId: fe5a8cdb-2cc0-4951-b20b-b6a4d600ea8d
+                      portId: in
+                  - id: ff046764-6369-440d-b354-7e92b3bab225
+                    from:
+                      nodeId: fe5a8cdb-2cc0-4951-b20b-b6a4d600ea8d
+                      portId: done
+                    to:
+                      nodeId: f03ca054-7425-4a58-946f-e1fab159eeab
+                      portId: in
+                  - id: b48d84ba-041d-47f7-b5fb-5b441ad0abe3
+                    from:
+                      nodeId: f03ca054-7425-4a58-946f-e1fab159eeab
+                      portId: attempt
+                    to:
+                      nodeId: 25195145-6a95-450a-831b-9d2db90c0d40
+                      portId: in
+                  - id: aef81e12-c786-45cd-afe5-bd004bbf21bc
+                    from:
+                      nodeId: f03ca054-7425-4a58-946f-e1fab159eeab
+                      portId: exhausted
+                    to:
+                      nodeId: b2ee9d5f-2348-4e2a-b8aa-dc7615916e4d
+                      portId: in
+                name: Retry
+                id: 8042bde2-a1ff-470a-b971-113756f020ab
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: d39f2d87-2b07-4951-b224-afa375e04272
+                    kind: url
+                    config:
+                      op: encode
+                      value:
+                        type: string
+                        value: a b&c=d
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 40
+                    note: encode component
+                  - id: 968daff6-9995-4b8e-9a84-3b8aaf10bc84
+                    kind: url
+                    config:
+                      op: decode
+                      value:
+                        type: string
+                        value: a%20b%26c%3Dd
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 420
+                      'y': 40
+                    note: decode component
+                  - id: 9d53b7ce-510e-4109-8565-fcc57a8bb9c8
+                    kind: url
+                    config:
+                      op: parseQuery
+                      value:
+                        type: string
+                        value: '?a=1&b=two'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 800
+                      'y': 40
+                    note: parse query → object
+                  - id: 82b5a23b-90c6-4dc1-9c44-77c57a46a5e8
+                    kind: url
+                    config:
+                      op: parseUrl
+                      value:
+                        type: string
+                        value: https://api.example.com:8443/v1/pets?limit=5#top
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 1180
+                      'y': 40
+                    note: parse URL → parts
+                  - id: 66743a74-fff0-47b7-a07c-610c99b436ff
+                    kind: url
+                    config:
+                      op: decode
+                      value:
+                        type: string
+                        value: '%'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 400
+                    note: 'ERROR: bad % escape'
+                  - id: 8e73ea43-7dd4-42bf-843e-4a77ed630e86
+                    kind: log
+                    config:
+                      level: error
+                      message:
+                        type: string
+                        value: 'url error: bad escape'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 420
+                      'y': 400
+                edges:
+                  - id: 659c3f9f-4684-4d15-ab8e-a3c9e3ce7228
+                    from:
+                      nodeId: d39f2d87-2b07-4951-b224-afa375e04272
+                      portId: done
+                    to:
+                      nodeId: 968daff6-9995-4b8e-9a84-3b8aaf10bc84
+                      portId: in
+                  - id: 496d42fe-13b0-4d41-8fe8-854399893fb3
+                    from:
+                      nodeId: 968daff6-9995-4b8e-9a84-3b8aaf10bc84
+                      portId: done
+                    to:
+                      nodeId: 9d53b7ce-510e-4109-8565-fcc57a8bb9c8
+                      portId: in
+                  - id: 16a1ef79-52d1-47df-a3c1-5b47c10a7a30
+                    from:
+                      nodeId: 9d53b7ce-510e-4109-8565-fcc57a8bb9c8
+                      portId: done
+                    to:
+                      nodeId: 82b5a23b-90c6-4dc1-9c44-77c57a46a5e8
+                      portId: in
+                  - id: ea5892cd-aa9c-408d-8880-6ac573c77b95
+                    from:
+                      nodeId: 82b5a23b-90c6-4dc1-9c44-77c57a46a5e8
+                      portId: done
+                    to:
+                      nodeId: 66743a74-fff0-47b7-a07c-610c99b436ff
+                      portId: in
+                  - id: b383cd28-24b3-46cd-80a9-688a0334feb8
+                    from:
+                      nodeId: 66743a74-fff0-47b7-a07c-610c99b436ff
+                      portId: error
+                    to:
+                      nodeId: 8e73ea43-7dd4-42bf-843e-4a77ed630e86
+                      portId: in
+                name: URL
+                id: e42957ee-3655-497a-911e-1ef5a2dabbc9
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 05762d90-ff10-41c6-ba5d-e51f3b962424
+                    kind: json
+                    config:
+                      op: parse
+                      value:
+                        type: string
+                        value: '{"id":1,"name":"Rex","meta":{"tag":"dog","age":4}}'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 40
+                  - id: 20b0c0eb-89c0-4793-8169-5fcc58218382
+                    kind: objectOp
+                    config:
+                      op: get
+                      path: meta.tag
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 420
+                      'y': 40
+                    note: get meta.tag
+                  - id: 9edafd06-752e-4711-afc3-5ac1cdb03639
+                    kind: objectOp
+                    config:
+                      op: pick
+                      keys: id,name
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 800
+                      'y': 40
+                    note: pick id,name
+                  - id: 0a772ea4-772b-4a94-9eb3-acb5b857e991
+                    kind: objectOp
+                    config:
+                      op: omit
+                      keys: meta
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 1180
+                      'y': 40
+                    note: omit meta
+                  - id: 36e7f845-f7e7-4df3-b0e9-74ce29f90229
+                    kind: objectOp
+                    config:
+                      op: keys
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 380
+                    note: keys
+                  - id: da75932e-cc23-4013-bcd3-8a8408005a8e
+                    kind: objectOp
+                    config:
+                      op: values
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 420
+                      'y': 380
+                    note: values
+                  - id: b6f9ffc1-8f65-42cc-95c2-3af619b0d123
+                    kind: objectOp
+                    config:
+                      op: set
+                      path: meta.age
+                      other:
+                        type: numeric
+                        value: 5
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 800
+                      'y': 380
+                    note: set meta.age = 5
+                  - id: 3a088524-7148-48c9-b826-737857fd58b1
+                    kind: objectOp
+                    config:
+                      op: keys
+                      value:
+                        type: string
+                        value: not an object
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 1180
+                      'y': 380
+                    note: 'ERROR: not an object'
+                  - id: b62b5a3f-a47e-4bcf-b62d-3c2d11f090a7
+                    kind: log
+                    config:
+                      level: error
+                      message:
+                        type: string
+                        value: 'objectOp error: not an object'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1180
+                      'y': 680
+                edges:
+                  - id: dbedef69-c86c-4c6a-a5f5-dbe5bb7aa8e2
+                    from:
+                      nodeId: 05762d90-ff10-41c6-ba5d-e51f3b962424
+                      portId: result
+                    to:
+                      nodeId: 20b0c0eb-89c0-4793-8169-5fcc58218382
+                      portId: value
+                    selector: .
+                  - id: 2cef6eef-2f95-4d27-af13-8e1c3d79e420
+                    from:
+                      nodeId: 20b0c0eb-89c0-4793-8169-5fcc58218382
+                      portId: done
+                    to:
+                      nodeId: 9edafd06-752e-4711-afc3-5ac1cdb03639
+                      portId: in
+                  - id: 1416177b-6bc4-438f-9902-c1e32b599b18
+                    from:
+                      nodeId: 05762d90-ff10-41c6-ba5d-e51f3b962424
+                      portId: result
+                    to:
+                      nodeId: 9edafd06-752e-4711-afc3-5ac1cdb03639
+                      portId: value
+                    selector: .
+                  - id: f66f95ee-198f-434b-bafa-44bba11fc907
+                    from:
+                      nodeId: 9edafd06-752e-4711-afc3-5ac1cdb03639
+                      portId: done
+                    to:
+                      nodeId: 0a772ea4-772b-4a94-9eb3-acb5b857e991
+                      portId: in
+                  - id: 9789ac87-1d56-43b2-9280-b3c0bb8ba5e3
+                    from:
+                      nodeId: 05762d90-ff10-41c6-ba5d-e51f3b962424
+                      portId: result
+                    to:
+                      nodeId: 0a772ea4-772b-4a94-9eb3-acb5b857e991
+                      portId: value
+                    selector: .
+                  - id: ce5a1e30-787e-4840-8689-7ca3ab2c9a63
+                    from:
+                      nodeId: 0a772ea4-772b-4a94-9eb3-acb5b857e991
+                      portId: done
+                    to:
+                      nodeId: 36e7f845-f7e7-4df3-b0e9-74ce29f90229
+                      portId: in
+                  - id: 899ad1be-bb52-46ea-84eb-ebe78b4fcd6e
+                    from:
+                      nodeId: 05762d90-ff10-41c6-ba5d-e51f3b962424
+                      portId: result
+                    to:
+                      nodeId: 36e7f845-f7e7-4df3-b0e9-74ce29f90229
+                      portId: value
+                    selector: .
+                  - id: 4024cf0b-e571-407a-bb76-4d67a7348ed4
+                    from:
+                      nodeId: 36e7f845-f7e7-4df3-b0e9-74ce29f90229
+                      portId: done
+                    to:
+                      nodeId: da75932e-cc23-4013-bcd3-8a8408005a8e
+                      portId: in
+                  - id: c482175a-b8f5-4369-9402-1628677b3138
+                    from:
+                      nodeId: 05762d90-ff10-41c6-ba5d-e51f3b962424
+                      portId: result
+                    to:
+                      nodeId: da75932e-cc23-4013-bcd3-8a8408005a8e
+                      portId: value
+                    selector: .
+                  - id: cabe957c-2dcc-4b68-b65b-bac338f34263
+                    from:
+                      nodeId: da75932e-cc23-4013-bcd3-8a8408005a8e
+                      portId: done
+                    to:
+                      nodeId: b6f9ffc1-8f65-42cc-95c2-3af619b0d123
+                      portId: in
+                  - id: 19b876fe-78c2-4fc7-9fc3-6de38244c27a
+                    from:
+                      nodeId: 05762d90-ff10-41c6-ba5d-e51f3b962424
+                      portId: result
+                    to:
+                      nodeId: b6f9ffc1-8f65-42cc-95c2-3af619b0d123
+                      portId: value
+                    selector: .
+                  - id: bcb95b97-3320-44ff-9cbf-9a597aa5ab2b
+                    from:
+                      nodeId: b6f9ffc1-8f65-42cc-95c2-3af619b0d123
+                      portId: done
+                    to:
+                      nodeId: 3a088524-7148-48c9-b826-737857fd58b1
+                      portId: in
+                  - id: b309e914-2595-4a7d-a00a-d929d1fdaa22
+                    from:
+                      nodeId: 3a088524-7148-48c9-b826-737857fd58b1
+                      portId: error
+                    to:
+                      nodeId: b62b5a3f-a47e-4bcf-b62d-3c2d11f090a7
+                      portId: in
+                name: Object ops
+                id: 419de5a4-5d61-4d9d-8d3c-449bf36070d4
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: f47125d1-c585-4aca-b74e-098afc48d187
+                    kind: random
+                    config:
+                      op: int
+                      min: 1
+                      max: 100
+                      seed: '42'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 40
+                    note: int 1..100 (seed 42)
+                  - id: 57bb406d-51a5-4ebc-9656-044ad4495173
+                    kind: random
+                    config:
+                      op: float
+                      min: 0
+                      max: 1
+                      seed: '7'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 420
+                      'y': 40
+                    note: float 0..1 (seed 7)
+                  - id: 605072bc-69b3-44a4-b0b6-be2efdec39ab
+                    kind: random
+                    config:
+                      op: string
+                      length: 12
+                      seed: abc
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 800
+                      'y': 40
+                    note: string len 12 (seed abc)
+                  - id: d7f8feac-ca7d-40d7-9876-63f96f3326c3
+                    kind: random
+                    config:
+                      op: boolean
+                      seed: '9'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 1180
+                      'y': 40
+                    note: boolean (seed 9)
+                  - id: 1ccc92bb-f6e1-4557-ab48-6455258e458a
+                    kind: random
+                    config:
+                      op: pick
+                      seed: '3'
+                      items:
+                        type: list
+                        items:
+                          - type: string
+                            value: rock
+                          - type: string
+                            value: paper
+                          - type: string
+                            value: scissors
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 380
+                    note: pick rock/paper/scissors (seed 3)
+                edges:
+                  - id: 4bd53f83-cdd2-491e-aebb-026246d5c239
+                    from:
+                      nodeId: f47125d1-c585-4aca-b74e-098afc48d187
+                      portId: done
+                    to:
+                      nodeId: 57bb406d-51a5-4ebc-9656-044ad4495173
+                      portId: in
+                  - id: d63f8115-43e6-47ef-b459-6ad9f3bab7a7
+                    from:
+                      nodeId: 57bb406d-51a5-4ebc-9656-044ad4495173
+                      portId: done
+                    to:
+                      nodeId: 605072bc-69b3-44a4-b0b6-be2efdec39ab
+                      portId: in
+                  - id: 2e94ae96-6f62-447e-994f-57925fade9c7
+                    from:
+                      nodeId: 605072bc-69b3-44a4-b0b6-be2efdec39ab
+                      portId: done
+                    to:
+                      nodeId: d7f8feac-ca7d-40d7-9876-63f96f3326c3
+                      portId: in
+                  - id: 511fcd33-1465-4f96-8130-af3ee565e301
+                    from:
+                      nodeId: d7f8feac-ca7d-40d7-9876-63f96f3326c3
+                      portId: done
+                    to:
+                      nodeId: 1ccc92bb-f6e1-4557-ab48-6455258e458a
+                      portId: in
+                name: Random
+                id: 001d5d28-f714-4e44-b74a-7750ca691331
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 2d4b469e-f010-4a3a-8d0b-0e0e0b9ec1da
+                    kind: throw
+                    config:
+                      message:
+                        type: string
+                        value: deliberate failure
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                    outputs: []
+                    position:
+                      x: 40
+                      'y': 40
+                    note: always throws → error handled by the log
+                  - id: d20fa024-5bd2-4eee-be61-365d6e68adeb
+                    kind: log
+                    config:
+                      level: error
+                      message:
+                        type: string
+                        value: caught the deliberate throw
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 420
+                      'y': 40
+                edges:
+                  - id: 89018820-05af-497e-bbff-dd93ad4201c5
+                    from:
+                      nodeId: 2d4b469e-f010-4a3a-8d0b-0e0e0b9ec1da
+                      portId: error
+                    to:
+                      nodeId: d20fa024-5bd2-4eee-be61-365d6e68adeb
+                      portId: in
+                name: Throw
+                id: 7837587b-f5ae-4137-b41d-52070021000d
                 items: []
         id: f1000000-0000-0000-0000-00000000auth
         name: Pet API
@@ -13822,6 +14988,7 @@ collections:
         type: http
       - documentation: ''
         tags: []
+        id: 638797b2-2101-4a85-8d17-713fb43c3334
         name: Clear Logs
         method: POST
         url: '{{baseUrl}}/clear_logs'
@@ -13830,9 +14997,9 @@ collections:
         pathParams: []
         deprecated: false
         type: http
-        id: 638797b2-2101-4a85-8d17-713fb43c3334
       - documentation: ''
         tags: []
+        id: e633f808-9fea-4235-9433-d92112ffa2e6
         name: Login Probe
         method: GET
         url: '{{baseUrl}}/loginprobe'
@@ -13841,7 +15008,39 @@ collections:
         pathParams: []
         deprecated: false
         type: http
-        id: e633f808-9fea-4235-9433-d92112ffa2e6
+      - documentation: ''
+        tags: []
+        name: Clear Flaky
+        method: POST
+        url: '{{baseUrl}}/clearflaky'
+        headers: []
+        params: []
+        pathParams: []
+        deprecated: false
+        type: http
+        id: 8edf5e58-e640-4f72-bca4-c9cec95a4dfe
+      - documentation: ''
+        tags: []
+        name: Flaky 503
+        method: GET
+        url: '{{baseUrl}}/flaky?fail=2&code=503'
+        headers: []
+        params: []
+        pathParams: []
+        deprecated: false
+        type: http
+        id: 70b7e14f-ed3f-47e1-b791-647deeb8db90
+      - documentation: ''
+        tags: []
+        name: Flaky 500
+        method: GET
+        url: '{{baseUrl}}/flaky?fail=5&code=500'
+        headers: []
+        params: []
+        pathParams: []
+        deprecated: false
+        type: http
+        id: 66d657c9-2ce1-4229-b98f-42e2e5fa96a4
     id: a0000000-0000-0000-0000-00000000auth
     name: Auth Service
     customValueLists:

@@ -197,9 +197,16 @@ async function runScenarioAnsweringPrompts(p: Page): Promise<void> {
   for (;;) {
     const done = await p.evaluate(() => {
       const run = document.querySelector('[data-testid="scenario-inspector-run"]')
-      const logList = document.querySelector('[data-testid="scenario-inspector-logs-list"]')
+      // The run-log section (toolbar + copy button) renders as soon as the run
+      // has ANY log entry — independently of the "show all logs" toggle and the
+      // level filters. The list row container, by contrast, only mounts when the
+      // CURRENTLY-FILTERED set is non-empty; a scenario with no user `log` action
+      // (e.g. pure compute nodes) shows the "no user logs" placeholder by default,
+      // so keying completion off the list would hang forever on those. The copy
+      // button is the filter-independent "logs are ready" signal.
+      const logsReady = document.querySelector('[data-testid="scenario-inspector-logs-copy"]')
       const running = run?.classList.contains('scn-inspector-run-round-active') ?? false
-      return !!logList && !running
+      return !!logsReady && !running
     })
     if (done) return
     if (await p.locator(INPUT_PROMPT).isVisible().catch(() => false)) {
@@ -252,14 +259,20 @@ When('I run the scenario {string} and copy all its logs', async ({}, scenarioNam
   if ((await allToggle.getAttribute('aria-checked')) !== 'true') await allToggle.click()
 
   // Click copy + read the clipboard back from Electron's main-process clipboard,
-  // RETRYING: the run-log panel can render a beat after the engine stops (and the
-  // `navigator.clipboard` write is async), so under suite load a single copy can
-  // grab an empty panel. Re-click until the clipboard lands (copy is idempotent).
+  // RETRYING until the clipboard holds THIS scenario's log. The OS clipboard is
+  // system-wide and survives across the per-test Electron processes, so the
+  // PREVIOUS scenario's copied log lingers there; a copy that grabs a not-yet-
+  // rendered panel leaves that stale value in place. A bare non-empty guard then
+  // false-passes on the neighbour's log and snapshots the wrong run. Every run
+  // log opens with a `▶ <scenario>` boundary marker, so assert on that: it is
+  // unique to this scenario among its neighbours and only appears once the panel
+  // has actually re-rendered with this run's entries. Copy is idempotent.
+  const ownMarker = `▶ ${scenarioName}`
   let text = ''
   await expect(async () => {
     await p.locator('[data-testid="scenario-inspector-logs-copy"]').click()
     text = await requireApp().evaluate(({ clipboard }) => clipboard.readText())
-    expect(text.trim().length, 'clipboard was empty after clicking copy').toBeGreaterThan(0)
+    expect(text, `clipboard did not hold this run's log (missing "${ownMarker}")`).toContain(ownMarker)
   }).toPass({ timeout: 8000 })
   copiedYaml = normalizeRunLogYaml(text)
   copiedFor = scenarioName
