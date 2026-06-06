@@ -1182,6 +1182,47 @@
   color: #fff;
 }
 
+/* Field controls in an action's input cells span the full available width
+ * instead of shrinking to their default/content size: the cell wrapper grows
+ * to fill the row, and the InputBox / SelectBox inside stretch to match. */
+.scn-node-col-in .scn-row-left > .nodrag {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+/* :where() keeps this at zero specificity, so a node that needs a compact field
+ * (wait duration, forEach parallelism) can still pin a narrower width with an
+ * ordinary class rule without fighting an !important-style cascade. */
+:where(.scn-node-col-in .scn-row-left .inputbox),
+:where(.scn-node-col-in .scn-row-left .select-container) {
+  width: 100%;
+}
+
+/* A "number + unit toggle" row (e.g. the retry delay): the numeric field keeps
+ * a 100px floor and the unit toggle fills the remaining space, spreading its
+ * options evenly across it. */
+.scn-num-unit-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+.scn-num-unit-row .scn-num-unit-field {
+  flex: 0 1 100px;
+  min-width: 100px;
+}
+.scn-num-unit-row .scn-unit-toggle-anchor {
+  flex: 1 1 auto;
+  display: inline-flex;
+}
+.scn-num-unit-row .scn-unit-toggle {
+  display: flex;
+  width: 100%;
+}
+.scn-num-unit-row .scn-unit-toggle .button {
+  flex: 1 1 0;
+  justify-content: center;
+}
+
 /* Node name field (input / get-/set-variable) — a thin InputBox wrapper. The
    field chrome (border / background) comes from InputBox's themed styles, so
    this only sizes the wrapper and keeps the compact node font. */

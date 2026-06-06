@@ -1,8 +1,9 @@
-import React from 'react'
-import type { NodeProps } from '@xyflow/react'
+import React, { useMemo } from 'react'
+import { useStore, type NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
-import { SelectBox, InputBox, Toggle, type ISelectData } from 'electron-core-ui/renderer'
+import { SelectBox, InputBox, Toggle, RadioGroup, type ISelectData } from 'electron-core-ui/renderer'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
+import { selectHasHttpInScope } from './retryHttpScope'
 
 const BACKOFFS = ['fixed', 'linear', 'exponential'] as const
 const UNITS = ['ms', 's', 'min'] as const
@@ -24,6 +25,12 @@ export const RetryNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
   const retryOnError = config['retryOnError'] !== false
   const retryOnFailure = config['retryOnFailure'] === true
   const retryOnStatus = typeof config['retryOnStatus'] === 'string' ? config['retryOnStatus'] : ''
+
+  // Reveal the HTTP-status conditions only when they can actually apply: an
+  // httpRequest is in the retried body. Keep them visible once configured so a
+  // value can never be silently hidden (e.g. after rewiring the body away).
+  const hasHttpInScope = useStore(useMemo(() => selectHasHttpInScope(id), [id]))
+  const showHttpConditions = hasHttpInScope || retryOnStatus !== '' || retryOnFailure
 
   const numRow = (key: string, val: number, testid: string, placeholder?: string): ScenarioNodeCell => ({
     id: key,
@@ -63,21 +70,21 @@ export const RetryNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
       content: (
         <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
           <div className="scn-field-caption">{t('scenario.retry.delay', 'delay')}</div>
-          <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+          <div className="scn-num-unit-row">
             <InputBox
+              className="scn-num-unit-field"
               value={String(delay)}
               onChange={(next) => { const n = Number(next); data.onSetConfig?.(id, { delay: Number.isFinite(n) ? n : 0 }) }}
               options={{ type: 'number' }}
               data-testid="scn-retry-delay"
             />
-            <SelectBox
-              id={`scn-retry-delayunit-${id}`}
-              className=""
-              options={UNITS.map((u) => ({ text: u, label: u }))}
-              selected={Math.max(0, UNITS.indexOf(delayUnit as typeof UNITS[number]))}
-              onDidSelect={(d: ISelectData) => { const next = UNITS[d.index]; if (next) data.onSetConfig?.(id, { delayUnit: next }) }}
-              data-testid="scn-retry-delayunit"
-            />
+            <span className="scn-unit-toggle-anchor" aria-label="unit" onClick={(e) => { e.stopPropagation() }} data-testid="scn-retry-delayunit">
+              <RadioGroup
+                className="scn-unit-toggle"
+                options={{ items: UNITS.map((u) => ({ text: u, isActive: u === delayUnit })) }}
+                onSelect={(i) => { const next = UNITS[i]; if (next) data.onSetConfig?.(id, { delayUnit: next }) }}
+              />
+            </span>
           </div>
         </div>
       )
@@ -88,50 +95,53 @@ export const RetryNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
     rows.push(numRow('factor', factor, 'scn-retry-factor', '2'))
   }
 
-  rows.push(
-    {
-      id: 'retryOnError',
-      content: (
-        <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
-          <Toggle
-            checked={retryOnError}
-            onChange={(checked) => { data.onSetConfig?.(id, { retryOnError: checked }) }}
-            data-testid="scn-retry-onerror"
-          >
-            {t('scenario.retry.retryOnError', 'retry on error')}
-          </Toggle>
-        </div>
-      )
-    },
-    {
-      id: 'retryOnStatus',
-      content: (
-        <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
-          <div className="scn-field-caption">{t('scenario.retry.retryOnStatus', 'retry on HTTP status')}</div>
-          <InputBox
-            value={retryOnStatus}
-            onChange={(next) => { data.onSetConfig?.(id, { retryOnStatus: next }) }}
-            options={{ type: 'text', placeholder: '429, 503' }}
-            data-testid="scn-retry-onstatus"
-          />
-        </div>
-      )
-    },
-    {
-      id: 'retryOnFailure',
-      content: (
-        <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
-          <Toggle
-            checked={retryOnFailure}
-            onChange={(checked) => { data.onSetConfig?.(id, { retryOnFailure: checked }) }}
-            data-testid="scn-retry-onfailure"
-          >
-            {t('scenario.retry.retryOnFailure', 'retry on any non-2xx')}
-          </Toggle>
-        </div>
-      )
-    }
-  )
+  rows.push({
+    id: 'retryOnError',
+    content: (
+      <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
+        <Toggle
+          checked={retryOnError}
+          onChange={(checked) => { data.onSetConfig?.(id, { retryOnError: checked }) }}
+          data-testid="scn-retry-onerror"
+        >
+          {t('scenario.retry.retryOnError', 'retry on error')}
+        </Toggle>
+      </div>
+    )
+  })
+
+  if (showHttpConditions) {
+    rows.push(
+      {
+        id: 'retryOnStatus',
+        content: (
+          <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
+            <div className="scn-field-caption">{t('scenario.retry.retryOnStatus', 'retry on HTTP status')}</div>
+            <InputBox
+              value={retryOnStatus}
+              onChange={(next) => { data.onSetConfig?.(id, { retryOnStatus: next }) }}
+              options={{ type: 'text', placeholder: '429, 503' }}
+              data-testid="scn-retry-onstatus"
+            />
+          </div>
+        )
+      },
+      {
+        id: 'retryOnFailure',
+        content: (
+          <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
+            <Toggle
+              checked={retryOnFailure}
+              onChange={(checked) => { data.onSetConfig?.(id, { retryOnFailure: checked }) }}
+              data-testid="scn-retry-onfailure"
+            >
+              {t('scenario.retry.retryOnFailure', 'retry on any non-2xx')}
+            </Toggle>
+          </div>
+        )
+      }
+    )
+  }
 
   const left: ScenarioNodeSection[] = [{ id: 'main', rows }]
   const right: ScenarioNodeCell[] = [

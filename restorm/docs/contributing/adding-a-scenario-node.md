@@ -31,6 +31,7 @@ A new kind `foo` is done when all of these are true:
 - [ ] **10. i18n** — port/field labels added to **every** locale under `src/renderer/locales/*/translation.json` (see step 10).
 - [ ] **11. Tests** — a `*.test.ts` exercising the executor + (if it fans out) an end-to-end scheduler run.
 - [ ] **12. Lint + typecheck + tests** green: `npm run lint && npm run typecheck && npx vitest run src/main/scenarioEngine`.
+- [ ] **13. Bestiary** — drop one box of the new kind into the **Bestiary** scenario so the catalogue stays visually complete (see step 13).
 
 ---
 
@@ -192,3 +193,22 @@ Then verify on the running app: a renderer/box change rides HMR; a `main`
 (executor / scheduler / ports-in-main) or preload/MCP change needs a full
 restorm restart. Confirm the new box drops from the add-node menu, wires, and
 runs — don't trust the diff alone.
+
+## Step 13 — Bestiary
+
+The **Bestiary** is a reference scenario that holds exactly one box of every
+kind — no wiring, no execution, no run-log golden. It is the at-a-glance visual
+catalogue of "what does each action look like", and it lives next to `Main` in
+the e2e reference sample:
+
+```
+restorm/tests/e2e/samples/scenarios-e2e-reference-tests.restorm
+  → Auth Service / Pet API / Bestiary
+```
+
+When you add a new kind, drop one default box of it into the Bestiary, placed on
+the grid so it does **not** overlap its neighbours (the existing boxes sit on a
+~480 × 460 px grid). Leave it unwired — the Bestiary is never run and is
+deliberately excluded from the run-log feature + goldens. The easiest way to add
+one is via the MCP `create_scenario_node` tool against the Bestiary's scenario
+id, or by dragging the box in from the add-node menu and saving.

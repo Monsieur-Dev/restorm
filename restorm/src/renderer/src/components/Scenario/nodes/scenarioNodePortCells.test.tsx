@@ -45,7 +45,11 @@ vi.mock('@xyflow/react', () => ({
     createElement('div', { 'data-mock-handle': '', 'data-handle-id': props.id ?? '', 'data-handle-type': props.type ?? '' }),
   useNodeConnections: () => [],
   useNodesData: () => null,
-  useUpdateNodeInternals: () => () => undefined
+  useUpdateNodeInternals: () => () => undefined,
+  // Boxes that read the graph store (e.g. retry's "is an httpRequest in scope")
+  // run their selector against an empty graph — no provider tree here.
+  useStore: (selector: (s: { edges: unknown[]; nodeLookup: Map<string, unknown> }) => unknown) =>
+    selector({ edges: [], nodeLookup: new Map() })
 }))
 vi.mock('../scenarioErrorsContext', () => ({
   useScenarioNodeErrors: () => [],
