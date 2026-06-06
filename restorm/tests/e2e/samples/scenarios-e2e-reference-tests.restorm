@@ -513,7 +513,7 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1240
+                  x: 1260
                   'y': 1160
               - id: 35b9fd90-6241-44a4-bc07-9f36bfb42685
                 kind: runScenario
@@ -551,7 +551,7 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 840
+                  x: 820
                   'y': 1300
               - id: ca5dbefc-13a8-4b25-9bcf-61863464b3fd
                 kind: runScenario
@@ -570,7 +570,7 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1100
+                  x: 1040
                   'y': 1300
               - id: 13851015-dd4b-4fec-b21f-9daa6793f025
                 kind: runScenario
@@ -589,7 +589,7 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1360
+                  x: 1280
                   'y': 1300
               - id: d36843a0-7257-471d-8a08-c468c09d2a5b
                 kind: runScenario
@@ -627,7 +627,7 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 820
+                  x: 800
                   'y': 1440
               - id: ba75fb9a-5c62-4304-a786-b65d7e03ee1f
                 kind: runScenario
@@ -646,7 +646,7 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1080
+                  x: 1020
                   'y': 1440
               - id: 3294bbcf-cade-4f60-97c0-557784ae134a
                 kind: runScenario
@@ -665,7 +665,7 @@ collections:
                     role: response
                     flow: both
                 position:
-                  x: 1340
+                  x: 1240
                   'y': 1440
             edges:
               - id: e-1780418276241-f2q3hz
@@ -14967,6 +14967,234 @@ collections:
                       x: 40
                       'y': 380
                     note: pick rock/paper/scissors (seed 3)
+                  - id: 1780780488256-fhfbjb
+                    kind: for
+                    config:
+                      from:
+                        type: numeric
+                        value: 1
+                        format: decimal
+                      to:
+                        type: numeric
+                        value: 10
+                        format: decimal
+                      step:
+                        type: numeric
+                        value: 1
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: from
+                        name: from
+                        dataType: number
+                      - id: to
+                        name: to
+                        dataType: number
+                      - id: step
+                        name: step
+                        dataType: number
+                    outputs:
+                      - id: each
+                        name: index
+                        dataType: any
+                        role: then
+                        flow: both
+                    position:
+                      x: 500
+                      'y': 400
+                  - id: 1780780530526-t3o310
+                    kind: random
+                    config:
+                      seed:
+                        type: variable
+                        value: seed
+                      min:
+                        type: variable
+                        value: min
+                      max:
+                        type: variable
+                        value: max
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 980
+                      'y': 400
+                  - id: 1780780555444-5f1yma
+                    kind: log
+                    config:
+                      message:
+                        type: expression
+                        value: 'Seeded random value: {{.}}'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1320
+                      'y': 400
+                  - id: 1780781093824-0-su7pgd
+                    kind: for
+                    config:
+                      from:
+                        type: numeric
+                        value: 1
+                        format: decimal
+                      to:
+                        type: numeric
+                        value: 10
+                        format: decimal
+                      step:
+                        type: numeric
+                        value: 1
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: from
+                        name: from
+                        dataType: number
+                      - id: to
+                        name: to
+                        dataType: number
+                      - id: step
+                        name: step
+                        dataType: number
+                    outputs:
+                      - id: each
+                        name: index
+                        dataType: any
+                        role: then
+                        flow: both
+                    position:
+                      x: 500
+                      'y': 720
+                  - id: 1780781093824-1-qscy6k
+                    kind: random
+                    config:
+                      seed:
+                        type: variable
+                        value: seed
+                      min:
+                        type: variable
+                        value: min
+                      max:
+                        type: variable
+                        value: max
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 980
+                      'y': 720
+                  - id: 1780781093824-2-bl0xgc
+                    kind: log
+                    config:
+                      message:
+                        type: expression
+                        value: 'Seeded random value: {{.}}'
+                      level: warn
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1320
+                      'y': 720
+                  - id: 1780781751097-rfirhb
+                    kind: setVariable
+                    config:
+                      name: seed
+                      value:
+                        type: string
+                        value: '5'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 40
+                      'y': 1000
+                  - id: 1780781776526-y1skac
+                    kind: setVariable
+                    config:
+                      name: min
+                      value:
+                        type: numeric
+                        value: 0
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 40
+                      'y': 720
+                  - id: 1780781789767-aurs6r
+                    kind: setVariable
+                    config:
+                      name: max
+                      value:
+                        type: numeric
+                        value: 100
+                        format: decimal
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 40
+                      'y': 860
                 edges:
                   - id: 4bd53f83-cdd2-491e-aebb-026246d5c239
                     from:
@@ -14996,6 +15224,71 @@ collections:
                     to:
                       nodeId: 1ccc92bb-f6e1-4557-ab48-6455258e458a
                       portId: in
+                  - id: e-1780780533553-ayhdb4
+                    from:
+                      nodeId: 1780780488256-fhfbjb
+                      portId: each
+                    to:
+                      nodeId: 1780780530526-t3o310
+                      portId: in
+                  - id: e-1780780561373-q4vczz
+                    from:
+                      nodeId: 1ccc92bb-f6e1-4557-ab48-6455258e458a
+                      portId: done
+                    to:
+                      nodeId: 1780780488256-fhfbjb
+                      portId: in
+                  - id: e-1780780566667-p8m1rs
+                    from:
+                      nodeId: 1780780530526-t3o310
+                      portId: result
+                    to:
+                      nodeId: 1780780555444-5f1yma
+                      portId: data
+                    selector: .
+                  - id: e-1780781093824-0-zc5zha
+                    from:
+                      nodeId: 1780781093824-0-su7pgd
+                      portId: each
+                    to:
+                      nodeId: 1780781093824-1-qscy6k
+                      portId: in
+                  - id: e-1780781100187-azz9gg
+                    from:
+                      nodeId: 1780780488256-fhfbjb
+                      portId: done
+                    to:
+                      nodeId: 1780781093824-0-su7pgd
+                      portId: in
+                  - id: e-1780781812081-s18q7z
+                    from:
+                      nodeId: 1780781776526-y1skac
+                      portId: done
+                    to:
+                      nodeId: 1780781789767-aurs6r
+                      portId: in
+                  - id: e-1780781813659-voqfk7
+                    from:
+                      nodeId: 1780781789767-aurs6r
+                      portId: done
+                    to:
+                      nodeId: 1780781751097-rfirhb
+                      portId: in
+                  - id: e-1780781820591-3x64ry
+                    from:
+                      nodeId: 1780781751097-rfirhb
+                      portId: done
+                    to:
+                      nodeId: 1780780488256-fhfbjb
+                      portId: in
+                  - id: e-1780782092417-thl1p4
+                    from:
+                      nodeId: 1780781093824-1-qscy6k
+                      portId: result
+                    to:
+                      nodeId: 1780781093824-2-bl0xgc
+                      portId: data
+                    selector: .
                 id: 001d5d28-f714-4e44-b74a-7750ca691331
                 name: Random
                 items: []
@@ -15279,6 +15572,13 @@ collections:
                       nodeId: 5636eeb0-ed4f-4ce3-899b-f282969099b2
                       portId: data
                     selector: .
+                  - id: e-1780784087039-f8z7ky
+                    from:
+                      nodeId: 53212dc9-3bfe-4504-aa87-d35c064b7abe
+                      portId: done
+                    to:
+                      nodeId: 20e1a957-dce6-4005-b684-66dd36427bf9
+                      portId: in
                 id: 8be8154d-3ba8-4e99-bf41-2cbd23dba661
                 name: List ops
                 items: []
@@ -15431,6 +15731,13 @@ collections:
                       nodeId: 452ef22c-0396-494e-81a2-f94f1a9c03f8
                       portId: data
                     selector: .
+                  - id: e-1780784082557-fspzm3
+                    from:
+                      nodeId: c295a462-19ce-468a-8dc6-d71774e99d7f
+                      portId: done
+                    to:
+                      nodeId: b46bda60-ebc8-4183-8377-0b93bd29f44a
+                      portId: in
                 id: c5c33a4a-47dd-4562-8cdd-77477fa6c899
                 name: CSV
                 items: []
@@ -15644,8 +15951,460 @@ collections:
                       nodeId: 91d60702-0e06-4892-af44-421fd832e457
                       portId: data
                     selector: .
-                name: Math
+                  - id: e-1780784075402-7ysrmh
+                    from:
+                      nodeId: cb1cefc9-63b7-41d4-9518-466da8af0854
+                      portId: done
+                    to:
+                      nodeId: 4c10692d-8f6e-4dbc-a923-6261f266f824
+                      portId: in
                 id: ad2933a1-e683-45d5-af31-cf5b7675e67d
+                name: Math
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 63c5dc2b-ebaf-462c-a7b1-3b7964d106be
+                    kind: json
+                    config:
+                      op: parse
+                      value:
+                        type: string
+                        value: '{"id":7,"name":"Rex"}'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 40
+                  - id: e838276e-623d-400c-ba14-eb7f7197b104
+                    kind: schema
+                    config:
+                      schema: |-
+                        {
+                          "type": "object",
+                          "required": ["id", "name"],
+                          "properties": {
+                            "id": { "type": "number" },
+                            "name": { "type": "string" }
+                          }
+                        }
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: valid
+                        name: valid
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: invalid
+                        name: invalid
+                        dataType: any
+                        role: else
+                        flow: both
+                      - id: errors
+                        name: errors
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 460
+                      'y': 40
+                  - id: 97166be5-54a6-44fc-9515-f4acc65acee9
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: 'schema: pet valide'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 900
+                      'y': 40
+                  - id: 220e7d6d-0a13-4960-a0db-d3fcf1384f82
+                    kind: json
+                    config:
+                      op: parse
+                      value:
+                        type: string
+                        value: '{"id":7}'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 360
+                  - id: ef7978ac-da5d-4cea-be41-faebb767533d
+                    kind: schema
+                    config:
+                      schema: |-
+                        {
+                          "type": "object",
+                          "required": ["id", "name"],
+                          "properties": {
+                            "id": { "type": "number" },
+                            "name": { "type": "string" }
+                          }
+                        }
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: valid
+                        name: valid
+                        dataType: any
+                        role: then
+                        flow: both
+                      - id: invalid
+                        name: invalid
+                        dataType: any
+                        role: else
+                        flow: both
+                      - id: errors
+                        name: errors
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 460
+                      'y': 360
+                  - id: 0e8c3b21-acd3-47d4-b267-40fae0001f22
+                    kind: log
+                    config:
+                      level: warn
+                      message:
+                        type: string
+                        value: 'schema: pet invalide'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 900
+                      'y': 360
+                edges:
+                  - id: 0da3e0f0-6f4e-462b-b889-0921c3cd4363
+                    from:
+                      nodeId: 63c5dc2b-ebaf-462c-a7b1-3b7964d106be
+                      portId: result
+                    to:
+                      nodeId: e838276e-623d-400c-ba14-eb7f7197b104
+                      portId: value
+                    selector: .
+                  - id: d465a9cf-a5fb-437e-b37b-ccfc55cef3ae
+                    from:
+                      nodeId: e838276e-623d-400c-ba14-eb7f7197b104
+                      portId: valid
+                    to:
+                      nodeId: 97166be5-54a6-44fc-9515-f4acc65acee9
+                      portId: in
+                  - id: 126a24db-2a5b-4e1c-afcb-11b0eecc75a7
+                    from:
+                      nodeId: 220e7d6d-0a13-4960-a0db-d3fcf1384f82
+                      portId: result
+                    to:
+                      nodeId: ef7978ac-da5d-4cea-be41-faebb767533d
+                      portId: value
+                    selector: .
+                  - id: d33cecba-4a14-443a-8203-d2b68af5ceac
+                    from:
+                      nodeId: ef7978ac-da5d-4cea-be41-faebb767533d
+                      portId: invalid
+                    to:
+                      nodeId: 0e8c3b21-acd3-47d4-b267-40fae0001f22
+                      portId: in
+                  - id: 9d042856-fb68-4f90-9d32-95222fe884a1
+                    from:
+                      nodeId: ef7978ac-da5d-4cea-be41-faebb767533d
+                      portId: errors
+                    to:
+                      nodeId: 0e8c3b21-acd3-47d4-b267-40fae0001f22
+                      portId: data
+                    selector: .
+                  - id: e-1780784060816-jagj0o
+                    from:
+                      nodeId: e838276e-623d-400c-ba14-eb7f7197b104
+                      portId: done
+                    to:
+                      nodeId: ef7978ac-da5d-4cea-be41-faebb767533d
+                      portId: in
+                id: af022334-037f-4aa9-8158-68dde34c3dcb
+                name: Schema
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 506e0aba-0fed-4017-a6c0-da3c6a9ec9ff
+                    kind: readFile
+                    config:
+                      path:
+                        type: string
+                        value: scenarios-e2e-reference-tests.pet-sample.json
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: path
+                        name: path
+                        dataType: string
+                    outputs:
+                      - id: content
+                        name: content
+                        dataType: string
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 40
+                  - id: 9e4966f5-faf2-40a6-9287-d130ba3ebf85
+                    kind: json
+                    config:
+                      op: parse
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 460
+                      'y': 40
+                  - id: 0c3a8a59-37d3-4add-a2cf-cf24ac2bdbea
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: fichier lu
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 900
+                      'y': 40
+                  - id: 46e27970-3fdb-49f8-b8d2-02764ab06502
+                    kind: writeFile
+                    config:
+                      path:
+                        type: string
+                        value: scenarios-e2e-reference-tests.writefile-out.json
+                      mode: replace
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: path
+                        name: path
+                        dataType: string
+                      - id: content
+                        name: content
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 40
+                      'y': 360
+                  - id: 5c590a51-c30f-4f12-8e3e-807abafca51e
+                    kind: readFile
+                    config:
+                      path:
+                        type: string
+                        value: scenarios-e2e-reference-tests.writefile-out.json
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: path
+                        name: path
+                        dataType: string
+                    outputs:
+                      - id: content
+                        name: content
+                        dataType: string
+                        flow: both
+                    position:
+                      x: 460
+                      'y': 360
+                  - id: 7fd03db4-db2e-4d4a-971d-975e78aaa9bc
+                    kind: json
+                    config:
+                      op: parse
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 900
+                      'y': 360
+                  - id: 0fc79402-7381-4eb4-9fea-91ef68e0b724
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: roundtrip
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1320
+                      'y': 360
+                edges:
+                  - id: 2384e238-d921-485d-b541-109bf1366651
+                    from:
+                      nodeId: 506e0aba-0fed-4017-a6c0-da3c6a9ec9ff
+                      portId: content
+                    to:
+                      nodeId: 9e4966f5-faf2-40a6-9287-d130ba3ebf85
+                      portId: value
+                    selector: .
+                  - id: 9b4c9324-fb6f-4c76-9584-6f0810b319b8
+                    from:
+                      nodeId: 9e4966f5-faf2-40a6-9287-d130ba3ebf85
+                      portId: result
+                    to:
+                      nodeId: 0c3a8a59-37d3-4add-a2cf-cf24ac2bdbea
+                      portId: data
+                    selector: .
+                  - id: 5c10fcf0-d629-4116-97e5-b47a7ec603ef
+                    from:
+                      nodeId: 0c3a8a59-37d3-4add-a2cf-cf24ac2bdbea
+                      portId: done
+                    to:
+                      nodeId: 46e27970-3fdb-49f8-b8d2-02764ab06502
+                      portId: in
+                  - id: 06e75fd7-ac66-4b9c-9f2e-261ac202d433
+                    from:
+                      nodeId: 506e0aba-0fed-4017-a6c0-da3c6a9ec9ff
+                      portId: content
+                    to:
+                      nodeId: 46e27970-3fdb-49f8-b8d2-02764ab06502
+                      portId: content
+                    selector: .
+                  - id: d5aa4451-aa42-4c68-aaf6-8e6396b2b3fc
+                    from:
+                      nodeId: 46e27970-3fdb-49f8-b8d2-02764ab06502
+                      portId: done
+                    to:
+                      nodeId: 5c590a51-c30f-4f12-8e3e-807abafca51e
+                      portId: in
+                  - id: 74ef301f-4601-4a48-baa6-20dfecfbcdb9
+                    from:
+                      nodeId: 5c590a51-c30f-4f12-8e3e-807abafca51e
+                      portId: content
+                    to:
+                      nodeId: 7fd03db4-db2e-4d4a-971d-975e78aaa9bc
+                      portId: value
+                    selector: .
+                  - id: 83ab3d84-e379-49e3-8e2b-0a99eca770ef
+                    from:
+                      nodeId: 7fd03db4-db2e-4d4a-971d-975e78aaa9bc
+                      portId: result
+                    to:
+                      nodeId: 0fc79402-7381-4eb4-9fea-91ef68e0b724
+                      portId: data
+                    selector: .
+                  - id: a6577471-540e-4cc3-a06f-59f3a95cd087
+                    from:
+                      nodeId: 9e4966f5-faf2-40a6-9287-d130ba3ebf85
+                      portId: result
+                    to:
+                      nodeId: 0c3a8a59-37d3-4add-a2cf-cf24ac2bdbea
+                      portId: in
+                  - id: 42507a54-aad3-45b4-9e22-c8469c9f3104
+                    from:
+                      nodeId: 7fd03db4-db2e-4d4a-971d-975e78aaa9bc
+                      portId: result
+                    to:
+                      nodeId: 0fc79402-7381-4eb4-9fea-91ef68e0b724
+                      portId: in
+                id: b7fd471f-f8bc-45c3-b32c-2e8b62b16a69
+                name: Files
                 items: []
           - type: scenario
             tags: []
@@ -15804,7 +16563,11 @@ collections:
                   'y': 500
               - id: 5ff3b966-d3d3-4632-b379-b07e178c4d94
                 kind: forEach
-                config: {}
+                config:
+                  items:
+                    type: customListMulti
+                    listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                    labels: []
                 inputs:
                   - id: in
                     name: ''
@@ -15824,7 +16587,11 @@ collections:
                   'y': 500
               - id: 08e1aa1a-34a8-4e3a-9778-2e5777dc744d
                 kind: aggregate
-                config: {}
+                config:
+                  items:
+                    type: customListMulti
+                    listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                    labels: []
                 inputs:
                   - id: in
                     name: ''
@@ -15843,7 +16610,11 @@ collections:
                   'y': 500
               - id: 3aef64e5-5af5-4e43-ae01-0847363c9547
                 kind: map
-                config: {}
+                config:
+                  items:
+                    type: customListMulti
+                    listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                    labels: []
                 inputs:
                   - id: in
                     name: ''
@@ -15862,7 +16633,11 @@ collections:
                   'y': 500
               - id: 675e8996-812b-44e8-805f-ac17e0d69672
                 kind: filter
-                config: {}
+                config:
+                  items:
+                    type: customListMulti
+                    listId: b0cd9e29-a779-4b49-a092-8b033ffb1674
+                    labels: []
                 inputs:
                   - id: in
                     name: ''
@@ -15885,7 +16660,10 @@ collections:
                   'y': 500
               - id: 797a8700-ec95-489a-bfbc-372b19baafd2
                 kind: addToList
-                config: {}
+                config:
+                  list:
+                    type: variable
+                    value: test
                 inputs:
                   - id: in
                     name: ''
@@ -15907,7 +16685,10 @@ collections:
                   'y': 500
               - id: 40734c36-e168-4437-b71c-6b15a783f67f
                 kind: removeFromList
-                config: {}
+                config:
+                  list:
+                    type: variable
+                    value: test
                 inputs:
                   - id: in
                     name: ''
@@ -16029,7 +16810,10 @@ collections:
                   'y': 960
               - id: c27b3c0d-a8f4-4e71-a2fa-2203182e6a91
                 kind: boolean
-                config: {}
+                config:
+                  a:
+                    type: boolean
+                    value: false
                 inputs:
                   - id: in
                     name: ''
@@ -16051,7 +16835,13 @@ collections:
                   'y': 1420
               - id: 7cd2faa8-6080-46f1-864a-40d603832004
                 kind: object
-                config: {}
+                config:
+                  properties:
+                    - id: object-default-property
+                      name: ''
+                      value:
+                        type: string
+                        value: ''
                 inputs:
                   - id: in
                     name: ''
@@ -16143,7 +16933,10 @@ collections:
                   'y': 1420
               - id: 54a1ac5e-10cb-48a7-ba2f-cd3df9561f19
                 kind: json
-                config: {}
+                config:
+                  value:
+                    type: string
+                    value: ''
                 inputs:
                   - id: in
                     name: ''
@@ -16238,7 +17031,9 @@ collections:
                   'y': 1880
               - id: 055a1df0-ae17-4538-97f5-fdeed5298c73
                 kind: datetime
-                config: {}
+                config:
+                  amount: 0
+                  op: add
                 inputs:
                   - id: in
                     name: ''
@@ -16276,7 +17071,8 @@ collections:
                   'y': 2340
               - id: 1e8c056f-7e05-4544-b30b-ba966133bf87
                 kind: random
-                config: {}
+                config:
+                  op: int
                 inputs:
                   - id: in
                     name: ''
@@ -16292,7 +17088,11 @@ collections:
                   'y': 2340
               - id: 63e7a931-a458-4c72-8f3f-2b3c20f62ab1
                 kind: setVariable
-                config: {}
+                config:
+                  name: test
+                  value:
+                    type: string
+                    value: '0'
                 inputs:
                   - id: in
                     name: ''
@@ -16498,6 +17298,76 @@ collections:
                     flow: both
                 position:
                   x: 40
+                  'y': 3260
+              - id: fed2f860-0126-43b3-b675-9ea0e5b76fe5
+                kind: schema
+                config: {}
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                  - id: value
+                    name: value
+                    dataType: any
+                outputs:
+                  - id: valid
+                    name: valid
+                    dataType: any
+                    role: then
+                    flow: both
+                  - id: invalid
+                    name: invalid
+                    dataType: any
+                    role: else
+                    flow: both
+                  - id: errors
+                    name: errors
+                    dataType: any
+                    flow: both
+                position:
+                  x: 520
+                  'y': 3260
+              - id: cb8643f8-0ff8-4a97-815f-ff8d43f0ebd7
+                kind: readFile
+                config: {}
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                  - id: path
+                    name: path
+                    dataType: string
+                outputs:
+                  - id: content
+                    name: content
+                    dataType: string
+                    flow: both
+                position:
+                  x: 1000
+                  'y': 3260
+              - id: 1055e33c-8175-4226-98e5-697515919fc1
+                kind: writeFile
+                config:
+                  mode: replace
+                  path:
+                    type: string
+                    value: ''
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                  - id: path
+                    name: path
+                    dataType: string
+                  - id: content
+                    name: content
+                    dataType: any
+                outputs: []
+                position:
+                  x: 1480
                   'y': 3260
             edges: []
             id: cfb401ce-df62-4d41-88e2-8989206abe2f

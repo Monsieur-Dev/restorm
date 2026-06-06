@@ -28,7 +28,7 @@ const STATIC_PREVIEW = new Set<ScenarioNodeKind>([
   'now', 'input', 'setVariable', 'getVariable', 'object', 'output',
   'arithmetic', 'comparator', 'boolean', 'transform', 'cast', 'regex', 'json',
   'xml', 'yaml', 'crypto', 'jwt', 'datetime', 'objectOp', 'url', 'random',
-  'listOp', 'csv', 'math',
+  'listOp', 'csv', 'math', 'schema',
   'if', 'switch', 'wait', 'waitUntil',
   'map', 'filter', 'aggregate',
   'addToList', 'removeFromList',

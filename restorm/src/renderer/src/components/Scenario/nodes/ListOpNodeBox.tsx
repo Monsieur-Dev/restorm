@@ -55,6 +55,7 @@ export const ListOpNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
 
   const textRow = (cfgKey: string, val: string, testid: string, placeholder: string): ScenarioNodeCell => ({
     id: cfgKey,
+    port: { id: cfgKey, type: 'target' },
     content: (
       <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
         <div className="scn-field-caption">{t(`scenario.listOp.${cfgKey}`, cfgKey)}</div>

@@ -7,8 +7,13 @@ import { TypedValueField } from '../../TypedValueField'
 import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroups'
 import { normalizeValueType } from '../../../utils/normalizeValueType'
 import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
-import { ListValue } from '../../../../../shared/types/collections'
+import { ListValue, NumericValue, StringValue } from '../../../../../shared/types/collections'
 import { RANDOM_OPS, isRandomOp, type RandomOp } from '../../../../../shared/scenarioRandom'
+import type { ValueTypeKind } from '../../TypedValueField/castValue'
+import { NUMERIC_VALUE_EXCLUDE } from './valueTypePolicies'
+
+/** seed accepts a number OR a string (both reproducible), + variable / env. */
+const SEED_EXCLUDE: ValueTypeKind[] = ['dateTime', 'color', 'boolean', 'enum', 'enumList', 'customList', 'customListMulti', 'null', 'list']
 
 /**
  * `random` — generates a value (no data input). The operation picker drives the
@@ -21,14 +26,10 @@ export const RandomNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
   const valueTypeGroups = useAllEnvValueTypeGroups()
   const config = data.config ?? {}
   const op: RandomOp = isRandomOp(config['op']) ? config['op'] : 'int'
-  const min = typeof config['min'] === 'number' ? config['min'] : 0
-  const max = typeof config['max'] === 'number' ? config['max'] : (op === 'float' ? 1 : 100)
   const length = typeof config['length'] === 'number' ? config['length'] : 16
-  const seedRaw = config['seed']
-  const seed = typeof seedRaw === 'string' ? seedRaw : typeof seedRaw === 'number' ? String(seedRaw) : ''
 
   const opOptions = RANDOM_OPS.map((o) => ({ text: o, label: t(`scenario.random.op.${o}`, o) }))
-  const numField = (key: 'min' | 'max' | 'length', val: number, fallback: number): ScenarioNodeCell => ({
+  const numField = (key: 'length', val: number, fallback: number): ScenarioNodeCell => ({
     id: key,
     content: (
       <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
@@ -38,6 +39,26 @@ export const RandomNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
           onChange={(next) => { const n = Number(next); data.onSetConfig?.(id, { [key]: Number.isFinite(n) ? n : fallback }) }}
           options={{ type: 'number' }}
           data-testid={`scn-random-${key}`}
+        />
+      </div>
+    )
+  })
+
+  // min / max — a numeric typed value (so the user can pick a variable / env or
+  // wire the port), with an input port.
+  const numericRow = (key: 'min' | 'max', fallback: number): ScenarioNodeCell => ({
+    id: key,
+    port: { id: key, type: 'target' },
+    content: (
+      <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
+        <div className="scn-field-caption">{t(`scenario.random.${key}`, key)}</div>
+        <TypedValueField
+          value={config[key] !== undefined ? normalizeValueType(config[key]) : new NumericValue(fallback, 'decimal')}
+          onChange={(next) => { data.onSetConfig?.(id, { [key]: serializeValueForPersistence(next) }) }}
+          valueTypeGroups={valueTypeGroups}
+          excludeTypes={NUMERIC_VALUE_EXCLUDE}
+          allowAllVariables
+          dataTestId={`scn-random-${key}`}
         />
       </div>
     )
@@ -63,7 +84,7 @@ export const RandomNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
   ]
 
   if (op === 'int' || op === 'float') {
-    rows.push(numField('min', min, 0), numField('max', max, op === 'float' ? 1 : 100))
+    rows.push(numericRow('min', 0), numericRow('max', op === 'float' ? 1 : 100))
   }
   if (op === 'string') {
     rows.push(numField('length', length, 16))
@@ -88,14 +109,17 @@ export const RandomNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
 
   rows.push({
     id: 'seed',
+    port: { id: 'seed', type: 'target' },
     content: (
       <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
         <div className="scn-field-caption">{t('scenario.random.seed', 'seed (optional)')}</div>
-        <InputBox
-          value={seed}
-          onChange={(next) => { data.onSetConfig?.(id, { seed: next }) }}
-          options={{ type: 'text', placeholder: t('scenario.random.seedPlaceholder', 'reproducible') }}
-          data-testid="scn-random-seed"
+        <TypedValueField
+          value={config['seed'] !== undefined ? normalizeValueType(config['seed']) : new StringValue('')}
+          onChange={(next) => { data.onSetConfig?.(id, { seed: serializeValueForPersistence(next) }) }}
+          valueTypeGroups={valueTypeGroups}
+          excludeTypes={SEED_EXCLUDE}
+          allowAllVariables
+          dataTestId={`scn-random-seed-${id}`}
         />
       </div>
     )

@@ -107,6 +107,10 @@ describe('scenarioValidation — transform template', () => {
   it('flags a template that interpolates {{…}} when the value input is unwired', () => {
     expect(codes(run([node('tr', 'transform', { expression: { type: 'expression', value: '{{name}}' } })]), 'tr')).toContain('value-input-required')
   })
+
+  it('skips template checks when the expression input is wired (dynamic template)', () => {
+    expect(run([node('tr', 'transform')], { connected: [targetKey('tr', 'expression')] }).has('tr')).toBe(false)
+  })
 })
 
 describe('scenarioValidation — names', () => {
@@ -281,6 +285,16 @@ describe('validateScenarioModel — engine/MCP gate from the persisted model', (
   it('passes a clean model', () => {
     const scenario = { nodes: [{ id: 'i1', kind: 'input', config: { name: 'ok' }, inputs: [], outputs: [] }], edges: [] }
     expect(validateScenarioModel(scenario as never, t).size).toBe(0)
+  })
+
+  it('flags readFile / writeFile with no path (inline empty, not wired)', () => {
+    expect(codes(run([node('r', 'readFile', { path: { type: 'string', value: '   ' } })]), 'r')).toEqual(['missing-path'])
+    expect(codes(run([node('w', 'writeFile')]), 'w')).toEqual(['missing-path'])
+  })
+
+  it('passes readFile with an inline path, or a wired path', () => {
+    expect(run([node('r', 'readFile', { path: { type: 'string', value: 'data.json' } })]).has('r')).toBe(false)
+    expect(run([node('w', 'writeFile')], { connected: [targetKey('w', 'path')] }).has('w')).toBe(false)
   })
 
   it('derives connectedTargets from edges (a wired ÷ operand resolves at run time)', () => {

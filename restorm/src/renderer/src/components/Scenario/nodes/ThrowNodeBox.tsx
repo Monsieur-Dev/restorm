@@ -7,6 +7,7 @@ import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroup
 import { normalizeValueType } from '../../../utils/normalizeValueType'
 import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
 import { StringValue } from '../../../../../shared/types/collections'
+import { STRING_VALUE_EXCLUDE } from './valueTypePolicies'
 
 /**
  * `throw` — deliberately fails with a `message` (wired or inline). The failure
@@ -32,6 +33,7 @@ export const ThrowNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
                 value={config['message'] !== undefined ? normalizeValueType(config['message']) : new StringValue('')}
                 onChange={(next) => { data.onSetConfig?.(id, { message: serializeValueForPersistence(next) }) }}
                 valueTypeGroups={valueTypeGroups}
+                excludeTypes={STRING_VALUE_EXCLUDE}
                 allowAllVariables
                 dataTestId={`scn-throw-message-${id}`}
               />

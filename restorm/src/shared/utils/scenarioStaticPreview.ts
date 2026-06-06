@@ -19,6 +19,7 @@ import { applyRandom, isRandomOp } from '../scenarioRandom'
 import { applyListOp as applyListReshape, isListOp } from '../scenarioList'
 import { applyCsv, isCsvOp } from '../scenarioCsv'
 import { applyMath, isMathOp } from '../scenarioMath'
+import { validateAgainstSchema } from '../schemaValidate'
 import { LIST_MUTATION_DEFAULT_VALUE_ID } from '../scenarioListMutationValues'
 
 // Register the full helper suite on first import so a chained `transform`
@@ -955,6 +956,23 @@ export function staticScenarioPreview(
       const indent = typeof cfg['indent'] === 'number' ? cfg['indent'] : 0
       try {
         return { result: applyJson(value, op, indent) }
+      } catch {
+        return null
+      }
+    }
+    case 'schema': {
+      // Validate the resolved `value` against the config JSON Schema via the
+      // SHARED `validateAgainstSchema` (ajv) — the SAME implementation the
+      // runtime calls. Mirror the executor's port outputs: the value on
+      // `valid`/`invalid` + the error list on `errors`. A malformed / empty
+      // schema THROWS (runtime → `error`); the preview catches it → no result.
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      if (value === undefined) return null
+      const schemaText = typeof cfg['schema'] === 'string' ? cfg['schema'] : ''
+      if (schemaText.trim() === '') return null
+      try {
+        const { valid, errors } = validateAgainstSchema(value, schemaText)
+        return valid ? { valid: value, errors } : { invalid: value, errors }
       } catch {
         return null
       }

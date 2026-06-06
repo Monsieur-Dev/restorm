@@ -288,6 +288,7 @@ export const SetVariableNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ i
                 allowEnvironment
                 allowNull
                 allowList
+                multilineLanguage="plaintext"
                 dataTestId="scn-setvar-value"
               />
             </div>

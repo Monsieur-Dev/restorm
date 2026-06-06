@@ -23,7 +23,7 @@ vi.mock('electron-core-ui/renderer', () => {
   const C = (): null => null // inert component / function stub
   return {
     __esModule: true,
-    BorderBeam: C, Button: C, ColorPicker: C, ContextMenu: C, ControlGroup: C,
+    BorderBeam: C, Button: C, CodeEditor: C, ColorPicker: C, ContextMenu: C, ControlGroup: C,
     DateTimePicker: C, InputBox: C, ListView: C, MarkdownEditor: C, MarkdownViewer: C,
     Modal: C, RadioGroup: C, ScrollableElement: C, SelectBox: C, Tab: C, Tabs: C,
     Toggle: C, Tooltip: C, VerticalSashContainer: C,
@@ -82,7 +82,10 @@ import type { ScenarioNodeKind } from '../../../../../shared/types/collections'
 //   - output      : renders config-driven output-declaration rows, not a fixed
 //                   `value` cell.
 // All still get their launch-trigger checked below.
-const SPEC_DRIVEN_CELLS_EXEMPT = new Set<ScenarioNodeKind>(['runScenario', 'httpRequest', 'output'])
+// Some kinds render certain operand ports CONDITIONALLY by op, so no single
+// default render shows every spec input port: `datetime` (amount add/subtract
+// XOR other diff), `objectOp` (path get/set), `listOp` (key sort/unique/groupBy).
+const SPEC_DRIVEN_CELLS_EXEMPT = new Set<ScenarioNodeKind>(['runScenario', 'httpRequest', 'output', 'datetime', 'objectOp', 'listOp'])
 
 function propsFor(kind: ScenarioNodeKind): Record<string, unknown> {
   const { inputs, outputs } = defaultPortsForKind(kind)

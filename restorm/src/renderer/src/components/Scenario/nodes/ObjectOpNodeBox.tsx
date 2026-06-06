@@ -64,6 +64,7 @@ export const ObjectOpNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, 
   if (op === 'get' || op === 'set') {
     rows.push({
       id: 'path',
+      port: { id: 'path', type: 'target' },
       content: (
         <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
           <div className="scn-field-caption">{t('scenario.objectOp.path', 'path')}</div>

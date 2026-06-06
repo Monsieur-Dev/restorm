@@ -142,8 +142,8 @@ export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
     config: { name: 'Variable name.' }
   },
   transform: {
-    summary: 'Applies a Handlebars `expression` to its inputs + run variables, emitting the rendered result on `out`.',
-    config: { expression: 'Handlebars template.' }
+    summary: 'Applies a Handlebars `expression` to its `value` input + run variables, emitting the rendered result on `out`. Wire the optional `expression` input to drive the template text from an upstream value instead of the inline editor.',
+    config: { expression: 'Handlebars template (used when the `expression` input is not wired).' }
   },
   cast: {
     summary: 'Converts the `value` input (wired or inline) to `targetType` on `result`; an impossible cast (or a null value) routes to `error`. number↔boolean (0/1, truthiness), numeric/boolean string parsing, dates ISO; any → list wraps into [value].',
@@ -205,6 +205,18 @@ export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
     summary: 'Runs a scalar op on `a` → number on `result` (complements `arithmetic`): round/floor/ceil/trunc/abs/sign/sqrt, the two-operand min/max, or the bounded clamp. A non-finite operand / negative sqrt → `error`.',
     config: { op: 'round | floor | ceil | trunc | abs | sign | sqrt | min | max | clamp', b: 'Second operand (min/max).', min: 'Lower bound (clamp).', max: 'Upper bound (clamp).', precision: 'Decimal places (round).', a: 'Inline operand when not wired.' }
   },
+  schema: {
+    summary: 'Validates `value` against a JSON Schema (ajv) → routes the value to `valid` / `invalid` and emits the error list on `errors`. A malformed / missing schema → `error`.',
+    config: { schema: 'JSON Schema (a JSON string; draft-07 / 2019-09 / 2020-12).', value: 'Inline value to validate when not wired.' }
+  },
+  readFile: {
+    summary: 'Reads the file at `path` → its text on `content`. `path` is absolute, or relative to the open `.restorm` file. A missing path / read error → `error`.',
+    config: { path: 'File path (absolute or relative to the scenario); or wire `path`.' }
+  },
+  writeFile: {
+    summary: 'Writes (replace) or appends `content` to the file at `path`. `path` is absolute, or relative to the open `.restorm` file. Terminal (no value output). A missing path / write error → `error`.',
+    config: { path: 'File path (absolute or relative to the scenario); or wire `path`.', mode: 'replace (default) | append.', content: 'Text to write (typed value; or wire `content`).' }
+  },
   throw: {
     summary: 'Deliberately fails with `message` (wired or inline) — routed to the implicit `error` port, or fails the run if nothing handles it. For error branches + retry tests. No `done`/value output.',
     config: { message: 'Failure message (typed value; or wire `message`).' }
@@ -214,7 +226,7 @@ export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
     config: { level: 'debug | info | warn | error', message: 'Text (typed value).', data: 'Optional structured payload (or wire `data`).' }
   },
   assert: {
-    summary: 'Compares `actual`/`expected` with `operator`, routing the trigger to `then` (pass) or `else` (fail).',
-    config: { operator: 'lt | lte | eq | gte | gt | ne | contains', message: 'Failure label.' }
+    summary: 'Asserts `actual` (vs `expected`) with `operator`, routing the trigger to `then` (pass) or `else` (fail). Beyond the shared comparators, chai-style operators: type checks, presence/emptiness, regex match, membership, deep equality and length.',
+    config: { operator: 'eq | ne | lt | lte | gt | gte | contains | isString | isNumber | isBoolean | isArray | isObject | isNull | exists | isEmpty | matchesRegex | isOneOf | deepEquals | lengthEq | lengthGt | lengthLt', a: 'Actual operand (or wire `a`).', b: 'Expected operand / pattern / list / length (binary operators).', message: 'Failure label.' }
   }
 }

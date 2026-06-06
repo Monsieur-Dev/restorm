@@ -1,7 +1,8 @@
 import React from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
-import { SelectBox, InputBox, type ISelectData } from 'electron-core-ui/renderer'
+import { InputBox } from 'electron-core-ui/renderer'
+import { SegmentedToggle } from './SegmentedToggle'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { TypedValueField } from '../../TypedValueField'
 import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroups'
@@ -9,6 +10,7 @@ import { normalizeValueType } from '../../../utils/normalizeValueType'
 import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
 import { StringValue } from '../../../../../shared/types/collections'
 import { YAML_OPS, isYamlOp, type YamlOp } from '../../../../../shared/scenarioYaml'
+import { STRING_VALUE_EXCLUDE } from './valueTypePolicies'
 
 /**
  * `yaml` — parses a YAML string into a value, or stringifies a value. The
@@ -25,8 +27,6 @@ export const YamlNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data
   const op: YamlOp = isYamlOp(config['op']) ? config['op'] : 'parse'
   const indent = typeof config['indent'] === 'number' ? config['indent'] : 2
 
-  const opOptions = YAML_OPS.map((o) => ({ text: o, label: t(`scenario.yaml.op.${o}`, o) }))
-
   const rows: ScenarioNodeCell[] = [
     {
       id: 'value',
@@ -38,8 +38,10 @@ export const YamlNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data
             value={config['value'] !== undefined ? normalizeValueType(config['value']) : new StringValue('')}
             onChange={(next) => { data.onSetConfig?.(id, { value: serializeValueForPersistence(next) }) }}
             valueTypeGroups={valueTypeGroups}
+            excludeTypes={STRING_VALUE_EXCLUDE}
             allowAllVariables
             dataTestId={`scn-yaml-value-${id}`}
+            multilineLanguage="yaml"
           />
         </div>
       )
@@ -49,13 +51,12 @@ export const YamlNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data
       content: (
         <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
           <div className="scn-field-caption">{t('scenario.yaml.operation', 'operation')}</div>
-          <SelectBox
-            id={`scn-yaml-op-${id}`}
-            className=""
-            options={opOptions}
-            selected={Math.max(0, YAML_OPS.indexOf(op))}
-            onDidSelect={(d: ISelectData) => { const next = YAML_OPS[d.index]; if (next) data.onSetConfig?.(id, { op: next }) }}
-            data-testid="scn-yaml-op"
+          <SegmentedToggle
+            options={YAML_OPS}
+            labels={YAML_OPS.map((o) => t(`scenario.yaml.op.${o}`, o))}
+            value={op}
+            onChange={(next) => { if (isYamlOp(next)) data.onSetConfig?.(id, { op: next }) }}
+            ariaLabel={t('scenario.yaml.operation', 'operation')}
           />
         </div>
       )

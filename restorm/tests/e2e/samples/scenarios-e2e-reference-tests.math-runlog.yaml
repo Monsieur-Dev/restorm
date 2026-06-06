@@ -3,51 +3,24 @@
   data:
     op: abs
     a: -16
-- message: ⚪ [<time>] start math
-  data:
-    op: round
-    precision: 3
-    a: 3.14159
 - message: ⚪ [<time>] done math
   data:
     result: 16
-- message: ⚪ [<time>] done math
-  data:
-    result: 3.142
 - message: ⚪ [<time>] start math
   data:
     op: sqrt
     a: 16
-- message: ⚪ [<time>] start math
-  data:
-    op: clamp
-    min: 0
-    max: 3
-    a: 3.142
 - message: ⚪ [<time>] done math
   data:
     result: 4
-- message: ⚪ [<time>] done math
-  data:
-    result: 3
 - message: ⚪ [<time>] start math
   data:
     op: min
     b: 10
     a: 4
-- message: ⚪ [<time>] start log
-  data:
-    level: info
-    message: "round(3dp) -> clamp[0,3]: 3.14159 -> 3.142 -> 3"
-    data: 3
-- message: "🔵 [<time>] round(3dp) -> clamp[0,3]: 3.14159 -> 3.142 -> 3"
-  data: 3
 - message: ⚪ [<time>] done math
   data:
     result: 4
-- message: ⚪ [<time>] done log
-  data:
-    value: 3
 - message: ⚪ [<time>] start log
   data:
     level: info
@@ -58,4 +31,32 @@
 - message: ⚪ [<time>] done log
   data:
     value: 4
+- message: ⚪ [<time>] start math
+  data:
+    op: round
+    precision: 3
+    a: 3.14159
+    in: true
+- message: ⚪ [<time>] done math
+  data:
+    result: 3.142
+- message: ⚪ [<time>] start math
+  data:
+    op: clamp
+    min: 0
+    max: 3
+    a: 3.142
+- message: ⚪ [<time>] done math
+  data:
+    result: 3
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: "round(3dp) -> clamp[0,3]: 3.14159 -> 3.142 -> 3"
+    data: 3
+- message: "🔵 [<time>] round(3dp) -> clamp[0,3]: 3.14159 -> 3.142 -> 3"
+  data: 3
+- message: ⚪ [<time>] done log
+  data:
+    value: 3
 - message: 🔵 [<time>] ■ Math

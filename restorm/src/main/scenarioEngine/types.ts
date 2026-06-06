@@ -229,6 +229,10 @@ export interface ExecContext {
    * its `config` (request id, comparator op, switch cases, …) without
    * the engine having to pre-extract everything. */
   node: ScenarioNode
+  /** Directory of the open `.restorm` file (SettingsService workspace path),
+   * for resolving a `readFile`/`writeFile` relative path. Undefined in a
+   * headless run with no open workspace → such paths resolve against cwd. */
+  workspaceDir?: string
 }
 
 /**

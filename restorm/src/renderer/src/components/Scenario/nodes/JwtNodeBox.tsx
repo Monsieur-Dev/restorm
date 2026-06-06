@@ -7,6 +7,7 @@ import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroup
 import { normalizeValueType } from '../../../utils/normalizeValueType'
 import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
 import { StringValue } from '../../../../../shared/types/collections'
+import { STRING_VALUE_EXCLUDE } from './valueTypePolicies'
 
 /**
  * `jwt` — decodes its `value` token string into `{ header, payload, signature }`
@@ -34,6 +35,7 @@ export const JwtNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data,
                 value={config['value'] !== undefined ? normalizeValueType(config['value']) : new StringValue('')}
                 onChange={(next) => { data.onSetConfig?.(id, { value: serializeValueForPersistence(next) }) }}
                 valueTypeGroups={valueTypeGroups}
+                excludeTypes={STRING_VALUE_EXCLUDE}
                 allowAllVariables
                 dataTestId={`scn-jwt-value-${id}`}
               />

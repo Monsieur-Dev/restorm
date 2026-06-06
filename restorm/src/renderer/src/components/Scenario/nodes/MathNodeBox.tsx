@@ -87,6 +87,7 @@ export const MathNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data
   if (op === 'round') {
     rows.push({
       id: 'precision',
+      port: { id: 'precision', type: 'target' },
       content: (
         <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
           <div className="scn-field-caption">{t('scenario.math.precision', 'precision')}</div>

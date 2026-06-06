@@ -3,6 +3,9 @@ import { RadioGroup } from 'electron-core-ui/renderer'
 
 export interface SegmentedToggleProps {
   options: readonly string[]
+  /** Display labels parallel to `options` (e.g. translated). Falls back to the
+   * raw option string when absent. */
+  labels?: readonly string[]
   value?: string
   defaultValue?: string
   onChange?: (value: string) => void
@@ -15,7 +18,7 @@ export interface SegmentedToggleProps {
  * boolean (AND OR XOR). Uncontrolled by default (local state); visual only
  * until the node config schema lands.
  */
-export const SegmentedToggle: React.FC<SegmentedToggleProps> = ({ options, value, defaultValue, onChange, ariaLabel }) => {
+export const SegmentedToggle: React.FC<SegmentedToggleProps> = ({ options, labels, value, defaultValue, onChange, ariaLabel }) => {
   const [internal, setInternal] = useState<string>(defaultValue ?? options[0] ?? '')
   const selected = value ?? internal
   return (
@@ -27,7 +30,7 @@ export const SegmentedToggle: React.FC<SegmentedToggleProps> = ({ options, value
     >
       <RadioGroup
         className="scn-operator-toggle nodrag"
-        options={{ items: options.map((op) => ({ text: op, isActive: op === selected })) }}
+        options={{ items: options.map((op, i) => ({ text: labels?.[i] ?? op, isActive: op === selected })) }}
         onSelect={(i) => { const op = options[i]; if (op !== undefined) { setInternal(op); onChange?.(op) } }}
       />
     </span>

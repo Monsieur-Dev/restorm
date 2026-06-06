@@ -299,6 +299,9 @@ function validateSwitch(node: ValidationNode, ctx: ScenarioValidationContext): S
  * left to run time (a static parse risks false positives). The error points at
  * the `expression` field. */
 function validateTransform(node: ValidationNode, ctx: ScenarioValidationContext): ScenarioNodeError[] {
+  // A wired `expression` input supplies the template at run time — the inline
+  // body is then irrelevant, so skip the empty-template + value-required checks.
+  if (ctx.connectedTargets.has(targetKey(node.id, 'expression'))) return []
   const expr = node.config['expression'] as { value?: unknown } | undefined
   const body = typeof expr?.value === 'string' ? expr.value.trim() : ''
   if (!body) {
@@ -308,6 +311,21 @@ function validateTransform(node: ValidationNode, ctx: ScenarioValidationContext)
   // to feed the Handlebars context — the input has no inline fallback.
   if (body.includes('{{') && !ctx.connectedTargets.has(targetKey(node.id, 'value'))) {
     return [{ code: 'value-input-required', field: 'value', message: ctx.t('scenario.validation.transform.valueRequired', 'The "value" input must be connected when the template references {{…}}.') }]
+  }
+  return []
+}
+
+/** `readFile` / `writeFile` — a non-empty `path` is required to know which file
+ * to touch. The path may be wired (resolved at run time) OR set inline; only a
+ * box with NEITHER is flagged. An INVALID-looking path is allowed on purpose —
+ * it may be an absolute server path the editor can't vet. The error points at
+ * the `path` field. */
+function validateFilePath(node: ValidationNode, ctx: ScenarioValidationContext): ScenarioNodeError[] {
+  if (ctx.connectedTargets.has(targetKey(node.id, 'path'))) return []
+  const raw = node.config['path'] as { value?: unknown } | undefined
+  const path = typeof raw?.value === 'string' ? raw.value.trim() : ''
+  if (!path) {
+    return [{ code: 'missing-path', field: 'path', message: ctx.t('scenario.validation.file.missingPath', 'A file path is required.') }]
   }
   return []
 }
@@ -331,6 +349,9 @@ export function validateScenarioNode(node: ValidationNode, ctx: ScenarioValidati
       return validateSwitch(node, ctx)
     case 'transform':
       return validateTransform(node, ctx)
+    case 'readFile':
+    case 'writeFile':
+      return validateFilePath(node, ctx)
     default:
       return []
   }

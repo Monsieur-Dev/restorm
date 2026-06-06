@@ -871,7 +871,10 @@
       "retry": "Retry",
       "listOp": "Opérations liste",
       "csv": "CSV",
-      "math": "Math"
+      "math": "Math",
+      "schema": "Validation schéma",
+      "readFile": "Lire fichier",
+      "writeFile": "Écrire fichier"
     },
     "comparator": {
       "result": "résultat"
@@ -888,7 +891,31 @@
       "data": "données"
     },
     "assert": {
-      "message": "message"
+      "message": "message",
+      "operator": "opérateur",
+      "op": {
+        "eq": "égal",
+        "ne": "différent",
+        "lt": "inférieur à",
+        "lte": "inférieur ou égal",
+        "gt": "supérieur à",
+        "gte": "supérieur ou égal",
+        "contains": "contient",
+        "isString": "est une chaîne",
+        "isNumber": "est un nombre",
+        "isBoolean": "est un booléen",
+        "isArray": "est une liste",
+        "isObject": "est un objet",
+        "isNull": "est null",
+        "exists": "existe",
+        "isEmpty": "est vide",
+        "matchesRegex": "correspond à la regex",
+        "isOneOf": "fait partie de",
+        "deepEquals": "égalité profonde",
+        "lengthEq": "longueur ==",
+        "lengthGt": "longueur >",
+        "lengthLt": "longueur <"
+      }
     },
     "editRequest": "Éditer la requête",
     "editScenario": "Éditer le scénario",
@@ -957,6 +984,9 @@
       },
       "runScenario": {
         "missing": "Le scénario lié n'existe plus."
+      },
+      "file": {
+        "missingPath": "Un chemin de fichier est requis."
       }
     },
     "usage": {
@@ -1278,6 +1308,29 @@
         "max": "max",
         "clamp": "borner"
       }
+    },
+    "schema": {
+      "value": "valeur",
+      "schema": "Schéma JSON",
+      "valid": "valide",
+      "invalid": "invalide",
+      "errors": "erreurs",
+      "editTitle": "Éditer le schéma JSON"
+    },
+    "readFile": {
+      "path": "chemin",
+      "content": "contenu"
+    },
+    "writeFile": {
+      "path": "chemin",
+      "mode": "mode",
+      "content": "contenu"
+    },
+    "codeField": {
+      "title": "Éditer",
+      "edit": "Ouvrir l’éditeur",
+      "moreLines": "+{{count}} lignes",
+      "editTemplate": "Éditer le modèle"
     }
   }
 }

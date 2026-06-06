@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { SelectBox, RadioGroup, type ISelectOptionItem, type VariableDefinition } from 'electron-core-ui/renderer'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { SegmentedToggle } from './SegmentedToggle'
-import { OperatorToggle, OPERATOR_OPTIONS, type OperatorOption } from './OperatorToggle'
+import { ASSERT_OPS, isAssertUnaryOp, type AssertOp } from '../../../../../shared/scenarioAssert'
 import { TypedValueField } from '../../TypedValueField'
 import type { ValueTypeKind } from '../../TypedValueField/castValue'
 import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroups'
@@ -15,6 +15,7 @@ import { normalizeValueType } from '../../../utils/normalizeValueType'
 import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
 import { resolveSelectorPath, concreteValue, portPreviewValue } from '../../../../../shared/utils/scenarioStaticPreview'
 import { StringValue, NullValue } from '../../../../../shared/types/collections'
+import { STRING_VALUE_EXCLUDE } from './valueTypePolicies'
 
 /** One-line preview of a value used as an expression-autocomplete suggestion. */
 function shortLogPreview(v: unknown): string {
@@ -101,6 +102,7 @@ export const LogNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data,
                 value={config['message'] !== undefined ? normalizeValueType(config['message']) : new StringValue('')}
                 onChange={(next) => { data.onSetConfig?.(id, { message: serializeValueForPersistence(next) }) }}
                 valueTypeGroups={valueTypeGroups}
+                excludeTypes={STRING_VALUE_EXCLUDE}
                 allowAllVariables
                 allowEnvironment
                 variables={messageVariables}
@@ -156,8 +158,7 @@ export const AssertNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
   const valueTypeGroups = useAllEnvValueTypeGroups()
   const config = data.config ?? {}
   const rawOp = config['operator']
-  const operator: OperatorOption | undefined =
-    typeof rawOp === 'string' && (OPERATOR_OPTIONS as readonly string[]).includes(rawOp) ? (rawOp as OperatorOption) : undefined
+  const assertOp: AssertOp = typeof rawOp === 'string' && (ASSERT_OPS as readonly string[]).includes(rawOp) ? (rawOp as AssertOp) : 'eq'
 
   const operand = (key: 'a' | 'b', label: string): ScenarioNodeCell => ({
     id: key,
@@ -179,39 +180,45 @@ export const AssertNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
     )
   })
 
-  const left: ScenarioNodeSection[] = [
+  const rows: ScenarioNodeCell[] = [
+    operand('a', 'actual'),
     {
-      id: 'main',
-      rows: [
-        operand('a', 'actual'),
-        {
-          id: 'operator',
-          content: (
-            <OperatorToggle
-              {...(operator !== undefined ? { value: operator } : {})}
-              onChange={(op) => { data.onSetConfig?.(id, { operator: op }) }}
-            />
-          )
-        },
-        operand('b', 'expected'),
-        {
-          id: 'message',
-          content: (
-            <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
-              <div className="scn-field-caption">{t('scenario.assert.message', 'message')}</div>
-              <TypedValueField
-                value={config['message'] !== undefined ? normalizeValueType(config['message']) : new StringValue('')}
-                onChange={(next) => { data.onSetConfig?.(id, { message: serializeValueForPersistence(next) }) }}
-                valueTypeGroups={valueTypeGroups}
-                excludeTypes={STRING_ONLY_EXCLUDE}
-                dataTestId="scn-assert-message"
-              />
-            </div>
-          )
-        }
-      ]
+      id: 'operator',
+      content: (
+        <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
+          <div className="scn-field-caption">{t('scenario.assert.operator', 'operator')}</div>
+          <SelectBox
+            id={`scn-assert-op-${id}`}
+            className=""
+            options={ASSERT_OPS.map((o) => ({ text: o, label: t(`scenario.assert.op.${o}`, o) }))}
+            selected={Math.max(0, ASSERT_OPS.indexOf(assertOp))}
+            onDidSelect={({ selected }) => { data.onSetConfig?.(id, { operator: selected }) }}
+            data-testid="scn-assert-op"
+          />
+        </div>
+      )
     }
   ]
+  // The unary operators (type checks, exists, isEmpty…) read only `actual` —
+  // hide the `expected` operand for them.
+  if (!isAssertUnaryOp(assertOp)) rows.push(operand('b', 'expected'))
+  rows.push({
+    id: 'message',
+    port: { id: 'message', type: 'target' },
+    content: (
+      <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
+        <div className="scn-field-caption">{t('scenario.assert.message', 'message')}</div>
+        <TypedValueField
+          value={config['message'] !== undefined ? normalizeValueType(config['message']) : new StringValue('')}
+          onChange={(next) => { data.onSetConfig?.(id, { message: serializeValueForPersistence(next) }) }}
+          valueTypeGroups={valueTypeGroups}
+          excludeTypes={STRING_ONLY_EXCLUDE}
+          dataTestId="scn-assert-message"
+        />
+      </div>
+    )
+  })
+  const left: ScenarioNodeSection[] = [{ id: 'main', rows }]
   const right: ScenarioNodeCell[] = [
     { id: 'then', label: 'pass', port: { id: 'then', role: 'then', type: 'source' } },
     { id: 'else', label: 'fail', port: { id: 'else', role: 'else', type: 'source' } }

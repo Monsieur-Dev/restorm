@@ -20,6 +20,7 @@ import { applyObjectOp, isObjectOp } from '../../../shared/scenarioObject'
 import { applyUrl, isUrlOp } from '../../../shared/scenarioUrl'
 import { applyRandom, isRandomOp } from '../../../shared/scenarioRandom'
 import { applyListOp as applyListReshape, isListOp } from '../../../shared/scenarioList'
+import { evalAssert } from '../../../shared/scenarioAssert'
 import { applyCsv, isCsvOp } from '../../../shared/scenarioCsv'
 import { applyMath, isMathOp } from '../../../shared/scenarioMath'
 import { compareValues, deepEqual, hintFromConfig, resolveOperand, type OperandHint } from '../conditionEval'
@@ -256,7 +257,9 @@ export const assertExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { op?: string; operator?: string; a?: unknown; b?: unknown }
   const a = resolveOperand(act.inputs['a'], cfg.a, ctx.variables)
   const b = resolveOperand(act.inputs['b'], cfg.b, ctx.variables)
-  const ok = compareValues(cfg.operator ?? cfg.op ?? 'eq', a, b, hint(act.inputs['a'], cfg.a), hint(act.inputs['b'], cfg.b))
+  // The richer assert-only operators (type checks, regex, length, …) live in
+  // `evalAssert`, which delegates the shared comparators back to compareValues.
+  const ok = evalAssert(cfg.operator ?? cfg.op ?? 'eq', a, b, compareValues, { a: hint(act.inputs['a'], cfg.a), b: hint(act.inputs['b'], cfg.b) })
   const value = act.inputs['in'] ?? a
   return { outputs: [{ port: ok ? 'then' : 'else', value }] }
 }
@@ -365,10 +368,13 @@ export const removeFromListExecutor: NodeExecutor = (act, ctx) => {
 /** Template / transform node: applies a Handlebars template to the
  * inputs. Reuses the runtime's existing Handlebars helpers. */
 export const transformExecutor: NodeExecutor = (act, ctx) => {
-  // The expression field persists a typed value (`{ type: 'expression',
-  // value }`), not a bare string — unwrap it to the template text. Feeding
-  // the object straight to Handlebars throws "You must pass a string …".
-  const tpl = expressionTemplate(ctx.node.config)
+  // The template text comes from the wired `expression` input when connected
+  // (an upstream value drives the template), else from the inline editor's
+  // config. The config field persists a typed value (`{ type: 'expression',
+  // value }`), not a bare string — unwrap it. Feeding the object straight to
+  // Handlebars throws "You must pass a string …".
+  const wired = act.inputs['expression']
+  const tpl = typeof wired === 'string' ? wired : expressionTemplate(ctx.node.config)
   // Output is wrapped as `{ result }` on the `out` port — the SAME shape the
   // static preview models (`scenarioStaticPreview` → `{ result }`), so the
   // auto-deduced edge selector (`result`) resolves identically at runtime.
@@ -424,7 +430,9 @@ export const regexExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { op?: unknown; pattern?: unknown; flags?: unknown; replacement?: unknown; value?: unknown }
   const value = resolveOperand(act.inputs['value'], cfg.value, ctx.variables)
   const op = isRegexOp(cfg.op) ? cfg.op : 'extract'
-  const pattern = typeof cfg.pattern === 'string' ? cfg.pattern : ''
+  // `pattern` may be wired (a string input) or set inline in config.
+  const wiredPattern = act.inputs['pattern']
+  const pattern = typeof wiredPattern === 'string' ? wiredPattern : typeof cfg.pattern === 'string' ? cfg.pattern : ''
   const flags = typeof cfg.flags === 'string' ? cfg.flags : ''
   const replacement = typeof cfg.replacement === 'string' ? cfg.replacement : ''
   return { outputs: [{ port: 'result', value: applyRegex(value, op, pattern, flags, replacement) }] }
@@ -495,7 +503,10 @@ export const dateTimeExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { op?: unknown; amount?: unknown; unit?: unknown; format?: unknown; other?: unknown; value?: unknown }
   const value = resolveOperand(act.inputs['value'], cfg.value, ctx.variables)
   const op = isDateTimeOp(cfg.op) ? cfg.op : 'add'
-  const amount = typeof cfg.amount === 'number' ? cfg.amount : 0
+  // `amount` may be wired, a typed numeric value, or a legacy plain number.
+  const amountRaw = resolveOperand(act.inputs['amount'], cfg.amount, ctx.variables)
+  const amountNum = typeof amountRaw === 'number' ? amountRaw : Number.parseFloat(String(amountRaw))
+  const amount = Number.isFinite(amountNum) ? amountNum : 0
   const unit = isDateTimeUnit(cfg.unit) ? cfg.unit : 'days'
   const format = typeof cfg.format === 'string' ? cfg.format : ''
   const other = resolveOperand(act.inputs['other'], cfg.other, ctx.variables)
@@ -509,7 +520,9 @@ export const objectOpExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { op?: unknown; path?: unknown; keys?: unknown; other?: unknown; value?: unknown }
   const value = resolveOperand(act.inputs['value'], cfg.value, ctx.variables)
   const op = isObjectOp(cfg.op) ? cfg.op : 'get'
-  const path = typeof cfg.path === 'string' ? cfg.path : ''
+  // `path` may be wired (a string input) or set inline in config.
+  const wiredPath = act.inputs['path']
+  const path = typeof wiredPath === 'string' ? wiredPath : typeof cfg.path === 'string' ? cfg.path : ''
   const keys = typeof cfg.keys === 'string' ? cfg.keys.split(',').map((k) => k.trim()).filter(Boolean) : []
   const other = resolveOperand(act.inputs['other'], cfg.other, ctx.variables)
   return { outputs: [{ port: 'result', value: applyObjectOp(value, op, { path, keys, other }) }] }
@@ -527,15 +540,29 @@ export const urlExecutor: NodeExecutor = (act, ctx) => {
 
 /** `random`: generate a value via the SHARED `applyRandom`. A `seed` makes it
  * deterministic. `pick` over an empty list THROWS, routed to the `error` port. */
-export const randomExecutor: NodeExecutor = (_act, ctx) => {
+export const randomExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { op?: unknown; min?: unknown; max?: unknown; length?: unknown; seed?: unknown }
   const op = isRandomOp(cfg.op) ? cfg.op : 'int'
-  const min = typeof cfg.min === 'number' ? cfg.min : undefined
-  const max = typeof cfg.max === 'number' ? cfg.max : undefined
+  // min / max / seed may be wired, an inline variable, or a literal.
+  const numOpt = (wired: unknown, inline: unknown): number | undefined => {
+    const r = resolveOperand(wired, inline, ctx.variables)
+    const n = typeof r === 'number' ? r : Number.parseFloat(String(r))
+    return Number.isFinite(n) ? n : undefined
+  }
+  const min = numOpt(act.inputs['min'], cfg.min)
+  const max = numOpt(act.inputs['max'], cfg.max)
   const length = typeof cfg.length === 'number' ? cfg.length : undefined
-  const seed = typeof cfg.seed === 'number' || typeof cfg.seed === 'string' ? cfg.seed : undefined
+  const seedRaw = resolveOperand(act.inputs['seed'], cfg.seed, ctx.variables)
+  const seed = typeof seedRaw === 'number' || typeof seedRaw === 'string' ? seedRaw : undefined
   const items = resolveConfigItems(ctx.node.config, ctx.variables) ?? undefined
-  return { outputs: [{ port: 'result', value: applyRandom(op, { min, max, length, seed, items }) }] }
+  // Per-run, per-node call index (kept in the run's variable store under a
+  // reserved key) so a SEEDED random ADVANCES its sequence across repeated
+  // calls (e.g. each loop iteration) instead of restarting at the same value.
+  const seqKey = `__rng:${act.nodeId}`
+  const seqPrev = ctx.variables.get(seqKey)
+  const sequence = typeof seqPrev === 'number' ? seqPrev : 0
+  ctx.variables.set(seqKey, sequence + 1)
+  return { outputs: [{ port: 'result', value: applyRandom(op, { min, max, length, seed, items, sequence }) }] }
 }
 
 /** `listOp`: reshape a list via the SHARED `applyListOp` (scenarioList). A
@@ -544,7 +571,10 @@ export const listOpExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { op?: unknown; value?: unknown; key?: unknown; order?: unknown; depth?: unknown; size?: unknown; start?: unknown; end?: unknown }
   const value = resolveOperand(act.inputs['value'], cfg.value, ctx.variables)
   const op = isListOp(cfg.op) ? cfg.op : 'sort'
-  const key = typeof cfg.key === 'string' && cfg.key !== '' ? cfg.key : undefined
+  // `key` may be wired (a string input) or set inline in config.
+  const wiredKey = act.inputs['key']
+  const keyRaw = typeof wiredKey === 'string' ? wiredKey : typeof cfg.key === 'string' ? cfg.key : ''
+  const key = keyRaw !== '' ? keyRaw : undefined
   const order = cfg.order === 'desc' ? 'desc' : 'asc'
   const depth = typeof cfg.depth === 'number' ? cfg.depth : undefined
   const size = typeof cfg.size === 'number' ? cfg.size : undefined
@@ -559,7 +589,10 @@ export const csvExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { op?: unknown; value?: unknown; delimiter?: unknown; header?: unknown }
   const value = resolveOperand(act.inputs['value'], cfg.value, ctx.variables)
   const op = isCsvOp(cfg.op) ? cfg.op : 'parse'
-  const delimiter = typeof cfg.delimiter === 'string' && cfg.delimiter !== '' ? cfg.delimiter : undefined
+  // `delimiter` may be wired (a string input) or set inline in config.
+  const wiredDelim = act.inputs['delimiter']
+  const delimRaw = typeof wiredDelim === 'string' ? wiredDelim : typeof cfg.delimiter === 'string' ? cfg.delimiter : ''
+  const delimiter = delimRaw !== '' ? delimRaw : undefined
   const header = cfg.header !== false
   return { outputs: [{ port: 'result', value: applyCsv(value, op, { delimiter, header }) }] }
 }
@@ -574,7 +607,10 @@ export const mathExecutor: NodeExecutor = (act, ctx) => {
   const b = resolveOperand(undefined, cfg.b, ctx.variables)
   const min = resolveOperand(undefined, cfg.min, ctx.variables)
   const max = resolveOperand(undefined, cfg.max, ctx.variables)
-  const precision = typeof cfg.precision === 'number' ? cfg.precision : undefined
+  // `precision` may be wired (a number input) or set inline in config.
+  const precRaw = resolveOperand(act.inputs['precision'], cfg.precision, ctx.variables)
+  const precN = typeof precRaw === 'number' ? precRaw : Number.parseFloat(String(precRaw))
+  const precision = Number.isFinite(precN) ? precN : undefined
   return { outputs: [{ port: 'result', value: applyMath(a, op, { b, min, max, precision }) }] }
 }
 

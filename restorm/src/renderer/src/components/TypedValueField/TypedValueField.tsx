@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
+import { collectTypeLeaves } from './typePickMenu'
+import { ScenarioInlineCodeField, type ScenarioCodeLanguage } from '../Scenario/nodes/ScenarioCodeField'
 import {
   InputBox,
   Button,
@@ -213,6 +215,21 @@ export interface TypedValueFieldProps {
   /** Test id prefix; widget + menu testids are derived from it. */
   dataTestId?: string | undefined
   /**
+   * Extra control(s) appended INSIDE the value's ControlGroup, right after the
+   * type-indicator button — so they sit flush beside the field like the colour /
+   * date pickers (e.g. the expression field's "expand to full-screen editor"
+   * button). Rendered for every type, so callers that lock the type (expression)
+   * get a single, predictable trailing button.
+   */
+  trailingControls?: React.ReactNode | undefined
+  /**
+   * Render a STRING value as a roomy multiline preview + a full-screen editor
+   * modal (in the given language) instead of the single-line input — for
+   * document operands (json / xml / yaml / csv value, writeFile content, …). The
+   * type-pick button is kept, so the value can still be recast / wired.
+   */
+  multilineLanguage?: ScenarioCodeLanguage | undefined
+  /**
    * Lock the value's TYPE: keep the type-indicator button (it still shows which
    * type the value holds) but suppress its type-pick menu, so the type can't be
    * recast. Used by the run-parameters prompt, where each field's type is fixed
@@ -245,7 +262,9 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
   helpers = [],
   expressionVariableId,
   dataTestId,
-  lockType
+  lockType,
+  trailingControls,
+  multilineLanguage
 }) => {
   const { t } = useTranslation()
 
@@ -305,12 +324,15 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
   ): React.ReactNode => (
     <ControlGroup className="tvf-control-group">
       {editor}
-      <TypeIndicator
-        icon={o.icon}
-        ariaLabel={o.ariaLabel}
-        {...(!lockType && { onMenuOpen: openMenu })}
-        {...(dataTestId && { dataTestId: `${dataTestId}-value-type-${o.typeTestid}` })}
-      />
+      {trailingControls}
+      {!hideTypeButton && (
+        <TypeIndicator
+          icon={o.icon}
+          ariaLabel={o.ariaLabel}
+          {...(!lockType && { onMenuOpen: openMenu })}
+          {...(dataTestId && { dataTestId: `${dataTestId}-value-type-${o.typeTestid}` })}
+        />
+      )}
     </ControlGroup>
   )
 
@@ -532,6 +554,21 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
     return items
   }, [t, cast, dataTestId, groups, activeType, activeDefId, isExcluded, variableNames, allowAllVariables, allowEnvironment, allowNull, allowList, value, onRemove, removeLabel])
 
+  // When the type-pick menu offers at most ONE selectable type, the choice is
+  // forced: hide the type button (keep it for `lockType`, whose icon is purely
+  // informational). Derived from the SAME live `menuItems`, so adding a scenario
+  // variable (which can grow a variable-only field from 0→1→2 options)
+  // re-evaluates the button's visibility automatically.
+  const typeLeaves = useMemo(() => collectTypeLeaves(menuItems), [menuItems])
+  const hideTypeButton = !lockType && typeLeaves.length <= 1
+  // With exactly one option, force the value onto it (so the left widget already
+  // shows the right type — e.g. a boolean-only slot renders its toggle).
+  useEffect(() => {
+    if (typeLeaves.length !== 1) return
+    const only = typeLeaves[0]
+    if (only && only.checked !== true && only.onClick) only.onClick()
+  }, [typeLeaves])
+
   const widget = ((): React.ReactNode => {
     if (value instanceof PasswordValue) {
       return withTypeControl(
@@ -746,6 +783,21 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
       )
     }
 
+    // A document operand (json / xml / yaml / csv value, writeFile content, …):
+    // a roomy multiline preview + full-screen editor modal, keeping the type
+    // button so the value can still be recast / wired.
+    if (multilineLanguage) {
+      return withTypeControl(
+        <ScenarioInlineCodeField
+          value={value.toString()}
+          onChange={(next) => { onChange(new StringValue(next)) }}
+          language={multilineLanguage}
+          title={t('scenario.codeField.title', 'Edit')}
+          {...(dataTestId && { dataTestId: `${dataTestId}-value-string` })}
+        />,
+        { icon: 'symbol-string', ariaLabel: 'String value', typeTestid: 'string' }
+      )
+    }
     return withTypeControl(
       <InputBox
         value={value.toString()}

@@ -7,7 +7,7 @@
 
 import type { NodeExecutor } from '../types'
 import { resolveConfigItems, concreteValue, strictAggregateNumber, aggregateValueLabel } from '../../../shared/utils/scenarioStaticPreview'
-import { compareValues } from '../conditionEval'
+import { compareValues, resolveOperand } from '../conditionEval'
 
 /** Wait node: sleep for `durationMs` (from input or config). Aborts
  * cleanly when the run is cancelled. */
@@ -145,7 +145,7 @@ export const forEachExecutor: NodeExecutor = (act, ctx) => {
  * backoff policy up to `maxAttempts`. All the policy lives in config; the
  * scheduler (`runRetry`) does the orchestration.
  */
-export const retryExecutor: NodeExecutor = (_act, ctx) => {
+export const retryExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as {
     maxAttempts?: unknown; backoff?: unknown; delay?: unknown; delayUnit?: unknown
     factor?: unknown; maxDelay?: unknown; maxDelayUnit?: unknown
@@ -155,9 +155,13 @@ export const retryExecutor: NodeExecutor = (_act, ctx) => {
     const n = typeof v === 'number' && Number.isFinite(v) ? v : 0
     return unit === 's' ? n * 1000 : unit === 'min' ? n * 60000 : n
   }
-  const maxAttempts = typeof cfg.maxAttempts === 'number' && cfg.maxAttempts >= 1 ? Math.floor(cfg.maxAttempts) : 3
+  // `maxAttempts` + `delay` may be wired (or an inline variable) — resolve them.
+  const toNum = (v: unknown): number => (typeof v === 'number' ? v : Number.parseFloat(String(v)))
+  const maxAttemptsN = toNum(resolveOperand(act.inputs['maxAttempts'], cfg.maxAttempts, ctx.variables))
+  const maxAttempts = Number.isFinite(maxAttemptsN) && maxAttemptsN >= 1 ? Math.floor(maxAttemptsN) : 3
   const backoff = cfg.backoff === 'linear' || cfg.backoff === 'exponential' ? cfg.backoff : 'fixed'
-  const delayMs = toMs(cfg.delay, cfg.delayUnit ?? 'ms')
+  const delayResolved = toNum(resolveOperand(act.inputs['delay'], cfg.delay, ctx.variables))
+  const delayMs = toMs(Number.isFinite(delayResolved) ? delayResolved : 0, cfg.delayUnit ?? 'ms')
   const factor = typeof cfg.factor === 'number' && cfg.factor > 0 ? cfg.factor : 2
   const maxDelayMs = toMs(cfg.maxDelay, cfg.maxDelayUnit ?? 'ms')
   const retryOnError = cfg.retryOnError !== false

@@ -871,7 +871,10 @@
       "retry": "Retry",
       "listOp": "List ops",
       "csv": "CSV",
-      "math": "Math"
+      "math": "Math",
+      "schema": "Schema validate",
+      "readFile": "Read file",
+      "writeFile": "Write file"
     },
     "comparator": {
       "result": "αποτέλεσμα"
@@ -888,7 +891,31 @@
       "data": "δεδομένα"
     },
     "assert": {
-      "message": "μήνυμα"
+      "message": "μήνυμα",
+      "operator": "operator",
+      "op": {
+        "eq": "equals",
+        "ne": "not equals",
+        "lt": "less than",
+        "lte": "less or equal",
+        "gt": "greater than",
+        "gte": "greater or equal",
+        "contains": "contains",
+        "isString": "is string",
+        "isNumber": "is number",
+        "isBoolean": "is boolean",
+        "isArray": "is array",
+        "isObject": "is object",
+        "isNull": "is null",
+        "exists": "exists",
+        "isEmpty": "is empty",
+        "matchesRegex": "matches regex",
+        "isOneOf": "is one of",
+        "deepEquals": "deep equals",
+        "lengthEq": "length ==",
+        "lengthGt": "length >",
+        "lengthLt": "length <"
+      }
     },
     "editRequest": "Επεξεργασία αιτήματος",
     "editScenario": "Επεξεργασία σεναρίου",
@@ -957,6 +984,9 @@
       },
       "runScenario": {
         "missing": "Το συνδεδεμένο σενάριο δεν υπάρχει πλέον."
+      },
+      "file": {
+        "missingPath": "A file path is required."
       }
     },
     "usage": {
@@ -1278,6 +1308,29 @@
         "max": "max",
         "clamp": "clamp"
       }
+    },
+    "schema": {
+      "value": "value",
+      "schema": "JSON Schema",
+      "valid": "valid",
+      "invalid": "invalid",
+      "errors": "errors",
+      "editTitle": "Edit JSON Schema"
+    },
+    "readFile": {
+      "path": "path",
+      "content": "content"
+    },
+    "writeFile": {
+      "path": "path",
+      "mode": "mode",
+      "content": "content"
+    },
+    "codeField": {
+      "title": "Edit",
+      "edit": "Open editor",
+      "moreLines": "+{{count}} lines",
+      "editTemplate": "Edit template"
     }
   }
 }

@@ -5,9 +5,14 @@
     min: 1
     max: 100
     seed: "42"
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: min
+    value: 0
 - message: ⚪ [<time>] done random
   data:
     result: 31
+- message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] start random
   data:
     op: float
@@ -15,18 +20,30 @@
     max: 1
     seed: "7"
     in: true
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: max
+    value: 100
+    in: true
 - message: ⚪ [<time>] done random
   data:
     result: 0.5916928979568183
+- message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] start random
   data:
     op: string
     length: 12
     seed: abc
     in: true
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: seed
+    value: "5"
+    in: true
 - message: ⚪ [<time>] done random
   data:
     result: goA3sd4msXTg
+- message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] start random
   data:
     op: boolean
@@ -47,4 +64,389 @@
 - message: ⚪ [<time>] done random
   data:
     result: scissors
+- message: ⚪ [<time>] start for
+  data:
+    from: 1
+    to: 10
+    step: 1
+    in: true
+- message: ⚪ [<time>] done for
+- message: "⚪ [<time>] forEach start: 9 items, batchSize=1, opening first 1"
+- message: ⚪ [<time>] forEach open item 0 (0/9 done, batch≤1)
+- message: ⚪ [<time>] start random
+  data:
+    seed: "5"
+    min: 0
+    max: 100
+    in: 1
+- message: ⚪ [<time>] done random
+  data:
+    result: 20
+- message: ⚪ [<time>] start log
+  data:
+    message: "Seeded random value: {{.}}"
+    data: 20
+- message: "🔵 [<time>] Seeded random value: 20"
+  data: 20
+- message: ⚪ [<time>] done log
+  data:
+    value: 20
+- message: ⚪ [<time>] forEach item 0 closed (1/9 done)
+- message: ⚪ [<time>] forEach open item 1 (1/9 done, batch≤1)
+- message: ⚪ [<time>] start random
+  data:
+    seed: "5"
+    min: 0
+    max: 100
+    in: 2
+- message: ⚪ [<time>] done random
+  data:
+    result: 99
+- message: ⚪ [<time>] start log
+  data:
+    message: "Seeded random value: {{.}}"
+    data: 99
+- message: "🔵 [<time>] Seeded random value: 99"
+  data: 99
+- message: ⚪ [<time>] done log
+  data:
+    value: 99
+- message: ⚪ [<time>] forEach item 1 closed (2/9 done)
+- message: ⚪ [<time>] forEach open item 2 (2/9 done, batch≤1)
+- message: ⚪ [<time>] start random
+  data:
+    seed: "5"
+    min: 0
+    max: 100
+    in: 3
+- message: ⚪ [<time>] done random
+  data:
+    result: 61
+- message: ⚪ [<time>] start log
+  data:
+    message: "Seeded random value: {{.}}"
+    data: 61
+- message: "🔵 [<time>] Seeded random value: 61"
+  data: 61
+- message: ⚪ [<time>] done log
+  data:
+    value: 61
+- message: ⚪ [<time>] forEach item 2 closed (3/9 done)
+- message: ⚪ [<time>] forEach open item 3 (3/9 done, batch≤1)
+- message: ⚪ [<time>] start random
+  data:
+    seed: "5"
+    min: 0
+    max: 100
+    in: 4
+- message: ⚪ [<time>] done random
+  data:
+    result: 48
+- message: ⚪ [<time>] start log
+  data:
+    message: "Seeded random value: {{.}}"
+    data: 48
+- message: "🔵 [<time>] Seeded random value: 48"
+  data: 48
+- message: ⚪ [<time>] done log
+  data:
+    value: 48
+- message: ⚪ [<time>] forEach item 3 closed (4/9 done)
+- message: ⚪ [<time>] forEach open item 4 (4/9 done, batch≤1)
+- message: ⚪ [<time>] start random
+  data:
+    seed: "5"
+    min: 0
+    max: 100
+    in: 5
+- message: ⚪ [<time>] done random
+  data:
+    result: 78
+- message: ⚪ [<time>] start log
+  data:
+    message: "Seeded random value: {{.}}"
+    data: 78
+- message: "🔵 [<time>] Seeded random value: 78"
+  data: 78
+- message: ⚪ [<time>] done log
+  data:
+    value: 78
+- message: ⚪ [<time>] forEach item 4 closed (5/9 done)
+- message: ⚪ [<time>] forEach open item 5 (5/9 done, batch≤1)
+- message: ⚪ [<time>] start random
+  data:
+    seed: "5"
+    min: 0
+    max: 100
+    in: 6
+- message: ⚪ [<time>] done random
+  data:
+    result: 39
+- message: ⚪ [<time>] start log
+  data:
+    message: "Seeded random value: {{.}}"
+    data: 39
+- message: "🔵 [<time>] Seeded random value: 39"
+  data: 39
+- message: ⚪ [<time>] done log
+  data:
+    value: 39
+- message: ⚪ [<time>] forEach item 5 closed (6/9 done)
+- message: ⚪ [<time>] forEach open item 6 (6/9 done, batch≤1)
+- message: ⚪ [<time>] start random
+  data:
+    seed: "5"
+    min: 0
+    max: 100
+    in: 7
+- message: ⚪ [<time>] done random
+  data:
+    result: 42
+- message: ⚪ [<time>] start log
+  data:
+    message: "Seeded random value: {{.}}"
+    data: 42
+- message: "🔵 [<time>] Seeded random value: 42"
+  data: 42
+- message: ⚪ [<time>] done log
+  data:
+    value: 42
+- message: ⚪ [<time>] forEach item 6 closed (7/9 done)
+- message: ⚪ [<time>] forEach open item 7 (7/9 done, batch≤1)
+- message: ⚪ [<time>] start random
+  data:
+    seed: "5"
+    min: 0
+    max: 100
+    in: 8
+- message: ⚪ [<time>] done random
+  data:
+    result: 13
+- message: ⚪ [<time>] start log
+  data:
+    message: "Seeded random value: {{.}}"
+    data: 13
+- message: "🔵 [<time>] Seeded random value: 13"
+  data: 13
+- message: ⚪ [<time>] done log
+  data:
+    value: 13
+- message: ⚪ [<time>] forEach item 7 closed (8/9 done)
+- message: ⚪ [<time>] forEach open item 8 (8/9 done, batch≤1)
+- message: ⚪ [<time>] start random
+  data:
+    seed: "5"
+    min: 0
+    max: 100
+    in: 9
+- message: ⚪ [<time>] done random
+  data:
+    result: 93
+- message: ⚪ [<time>] start log
+  data:
+    message: "Seeded random value: {{.}}"
+    data: 93
+- message: "🔵 [<time>] Seeded random value: 93"
+  data: 93
+- message: ⚪ [<time>] done log
+  data:
+    value: 93
+- message: ⚪ [<time>] forEach item 8 closed (9/9 done)
+- message: ⚪ [<time>] start for
+  data:
+    from: 1
+    to: 10
+    step: 1
+    in: 9
+- message: ⚪ [<time>] done for
+- message: "⚪ [<time>] forEach start: 9 items, batchSize=1, opening first 1"
+- message: ⚪ [<time>] forEach open item 0 (0/9 done, batch≤1)
+- message: ⚪ [<time>] start random
+  data:
+    seed: "5"
+    min: 0
+    max: 100
+    in: 1
+- message: ⚪ [<time>] done random
+  data:
+    result: 20
+- message: ⚪ [<time>] start log
+  data:
+    message: "Seeded random value: {{.}}"
+    level: warn
+    data: 20
+- message: "🟠 [<time>] Seeded random value: 20"
+  data: 20
+- message: ⚪ [<time>] done log
+  data:
+    value: 20
+- message: ⚪ [<time>] forEach item 0 closed (1/9 done)
+- message: ⚪ [<time>] forEach open item 1 (1/9 done, batch≤1)
+- message: ⚪ [<time>] start random
+  data:
+    seed: "5"
+    min: 0
+    max: 100
+    in: 2
+- message: ⚪ [<time>] done random
+  data:
+    result: 99
+- message: ⚪ [<time>] start log
+  data:
+    message: "Seeded random value: {{.}}"
+    level: warn
+    data: 99
+- message: "🟠 [<time>] Seeded random value: 99"
+  data: 99
+- message: ⚪ [<time>] done log
+  data:
+    value: 99
+- message: ⚪ [<time>] forEach item 1 closed (2/9 done)
+- message: ⚪ [<time>] forEach open item 2 (2/9 done, batch≤1)
+- message: ⚪ [<time>] start random
+  data:
+    seed: "5"
+    min: 0
+    max: 100
+    in: 3
+- message: ⚪ [<time>] done random
+  data:
+    result: 61
+- message: ⚪ [<time>] start log
+  data:
+    message: "Seeded random value: {{.}}"
+    level: warn
+    data: 61
+- message: "🟠 [<time>] Seeded random value: 61"
+  data: 61
+- message: ⚪ [<time>] done log
+  data:
+    value: 61
+- message: ⚪ [<time>] forEach item 2 closed (3/9 done)
+- message: ⚪ [<time>] forEach open item 3 (3/9 done, batch≤1)
+- message: ⚪ [<time>] start random
+  data:
+    seed: "5"
+    min: 0
+    max: 100
+    in: 4
+- message: ⚪ [<time>] done random
+  data:
+    result: 48
+- message: ⚪ [<time>] start log
+  data:
+    message: "Seeded random value: {{.}}"
+    level: warn
+    data: 48
+- message: "🟠 [<time>] Seeded random value: 48"
+  data: 48
+- message: ⚪ [<time>] done log
+  data:
+    value: 48
+- message: ⚪ [<time>] forEach item 3 closed (4/9 done)
+- message: ⚪ [<time>] forEach open item 4 (4/9 done, batch≤1)
+- message: ⚪ [<time>] start random
+  data:
+    seed: "5"
+    min: 0
+    max: 100
+    in: 5
+- message: ⚪ [<time>] done random
+  data:
+    result: 78
+- message: ⚪ [<time>] start log
+  data:
+    message: "Seeded random value: {{.}}"
+    level: warn
+    data: 78
+- message: "🟠 [<time>] Seeded random value: 78"
+  data: 78
+- message: ⚪ [<time>] done log
+  data:
+    value: 78
+- message: ⚪ [<time>] forEach item 4 closed (5/9 done)
+- message: ⚪ [<time>] forEach open item 5 (5/9 done, batch≤1)
+- message: ⚪ [<time>] start random
+  data:
+    seed: "5"
+    min: 0
+    max: 100
+    in: 6
+- message: ⚪ [<time>] done random
+  data:
+    result: 39
+- message: ⚪ [<time>] start log
+  data:
+    message: "Seeded random value: {{.}}"
+    level: warn
+    data: 39
+- message: "🟠 [<time>] Seeded random value: 39"
+  data: 39
+- message: ⚪ [<time>] done log
+  data:
+    value: 39
+- message: ⚪ [<time>] forEach item 5 closed (6/9 done)
+- message: ⚪ [<time>] forEach open item 6 (6/9 done, batch≤1)
+- message: ⚪ [<time>] start random
+  data:
+    seed: "5"
+    min: 0
+    max: 100
+    in: 7
+- message: ⚪ [<time>] done random
+  data:
+    result: 42
+- message: ⚪ [<time>] start log
+  data:
+    message: "Seeded random value: {{.}}"
+    level: warn
+    data: 42
+- message: "🟠 [<time>] Seeded random value: 42"
+  data: 42
+- message: ⚪ [<time>] done log
+  data:
+    value: 42
+- message: ⚪ [<time>] forEach item 6 closed (7/9 done)
+- message: ⚪ [<time>] forEach open item 7 (7/9 done, batch≤1)
+- message: ⚪ [<time>] start random
+  data:
+    seed: "5"
+    min: 0
+    max: 100
+    in: 8
+- message: ⚪ [<time>] done random
+  data:
+    result: 13
+- message: ⚪ [<time>] start log
+  data:
+    message: "Seeded random value: {{.}}"
+    level: warn
+    data: 13
+- message: "🟠 [<time>] Seeded random value: 13"
+  data: 13
+- message: ⚪ [<time>] done log
+  data:
+    value: 13
+- message: ⚪ [<time>] forEach item 7 closed (8/9 done)
+- message: ⚪ [<time>] forEach open item 8 (8/9 done, batch≤1)
+- message: ⚪ [<time>] start random
+  data:
+    seed: "5"
+    min: 0
+    max: 100
+    in: 9
+- message: ⚪ [<time>] done random
+  data:
+    result: 93
+- message: ⚪ [<time>] start log
+  data:
+    message: "Seeded random value: {{.}}"
+    level: warn
+    data: 93
+- message: "🟠 [<time>] Seeded random value: 93"
+  data: 93
+- message: ⚪ [<time>] done log
+  data:
+    value: 93
+- message: ⚪ [<time>] forEach item 8 closed (9/9 done)
 - message: 🔵 [<time>] ■ Random

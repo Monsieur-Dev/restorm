@@ -34,6 +34,7 @@ export const RetryNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
 
   const numRow = (key: string, val: number, testid: string, placeholder?: string): ScenarioNodeCell => ({
     id: key,
+    port: { id: key, type: 'target' },
     content: (
       <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
         <div className="scn-field-caption">{t(`scenario.retry.${key}`, key)}</div>
@@ -67,6 +68,7 @@ export const RetryNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
     },
     {
       id: 'delay',
+      port: { id: 'delay', type: 'target' },
       content: (
         <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
           <div className="scn-field-caption">{t('scenario.retry.delay', 'delay')}</div>

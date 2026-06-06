@@ -1,0 +1,93 @@
+- message: 🔵 [<time>] ▶ Files
+- message: ⚪ [<time>] start readFile
+  data:
+    path: scenarios-e2e-reference-tests.pet-sample.json
+- message: ⚪ [<time>] done readFile
+  data:
+    content: |
+      { "id": 3, "name": "Pixel", "tag": "cat" }
+- message: ⚪ [<time>] start json
+  data:
+    op: parse
+    value: |
+      { "id": 3, "name": "Pixel", "tag": "cat" }
+- message: ⚪ [<time>] done json
+  data:
+    result:
+      id: 3
+      name: Pixel
+      tag: cat
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: fichier lu
+    data:
+      id: 3
+      name: Pixel
+      tag: cat
+    in:
+      id: 3
+      name: Pixel
+      tag: cat
+- message: 🔵 [<time>] fichier lu
+  data:
+    id: 3
+    name: Pixel
+    tag: cat
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      id: 3
+      name: Pixel
+      tag: cat
+- message: ⚪ [<time>] start writeFile
+  data:
+    path: scenarios-e2e-reference-tests.writefile-out.json
+    mode: replace
+    in: true
+    content: |
+      { "id": 3, "name": "Pixel", "tag": "cat" }
+- message: ⚪ [<time>] done writeFile
+- message: ⚪ [<time>] start readFile
+  data:
+    path: scenarios-e2e-reference-tests.writefile-out.json
+    in: true
+- message: ⚪ [<time>] done readFile
+  data:
+    content: |
+      { "id": 3, "name": "Pixel", "tag": "cat" }
+- message: ⚪ [<time>] start json
+  data:
+    op: parse
+    value: |
+      { "id": 3, "name": "Pixel", "tag": "cat" }
+- message: ⚪ [<time>] done json
+  data:
+    result:
+      id: 3
+      name: Pixel
+      tag: cat
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: roundtrip
+    data:
+      id: 3
+      name: Pixel
+      tag: cat
+    in:
+      id: 3
+      name: Pixel
+      tag: cat
+- message: 🔵 [<time>] roundtrip
+  data:
+    id: 3
+    name: Pixel
+    tag: cat
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      id: 3
+      name: Pixel
+      tag: cat
+- message: 🔵 [<time>] ■ Files

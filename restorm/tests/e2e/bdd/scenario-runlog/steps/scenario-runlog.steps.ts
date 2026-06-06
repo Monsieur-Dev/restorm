@@ -13,6 +13,9 @@ const REFERENCE_SAMPLE = join(SAMPLES_DIR, 'scenarios-e2e-reference-tests.restor
 // app + tests rewrite it per run). We copy this reference into the temp working
 // dir, so the samples tree never churns.
 const REFERENCE_RESPONSES = join(SAMPLES_DIR, 'scenarios-e2e-reference-tests.restorm.responses-history.zip')
+// Sidecar JSON the `Files` scenario's readFile loads via a RELATIVE path — it
+// must travel next to the working copy of the .restorm (the workspace dir).
+const REFERENCE_SIDECAR = join(SAMPLES_DIR, 'scenarios-e2e-reference-tests.pet-sample.json')
 
 /** Folders/containers to expand (in order) to reach the leaf scenarios in the
  * reference project's tree: Auth Service > Pet API > Main > <scenario>. */
@@ -229,6 +232,9 @@ Given('I open the scenarios reference-tests sample', async ({ launchApp }) => {
   const workingCopy = join(SCENARIO_RUNLOG_TEMP_DIR, 'scenarios-e2e-reference-tests.restorm')
   copyFileSync(REFERENCE_SAMPLE, workingCopy)
   copyFileSync(REFERENCE_RESPONSES, `${workingCopy}.responses.zip`)
+  // The `Files` scenario reads this sidecar by a relative path → place it in the
+  // same (temp) workspace dir as the .restorm.
+  copyFileSync(REFERENCE_SIDECAR, join(SCENARIO_RUNLOG_TEMP_DIR, 'scenarios-e2e-reference-tests.pet-sample.json'))
 
   await configureNextOpenDialogForE2E(requireApp(), { kind: 'openFile', path: workingCopy })
   await requirePage().locator('[data-testid="titlebar-menubar-item-file"]').click()

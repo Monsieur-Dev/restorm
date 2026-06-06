@@ -25,6 +25,16 @@ export function normalizeValueType(input: unknown): ValueType {
     return new StringValue(input)
   }
 
+  // Bare primitives (legacy config stored a raw number/boolean before the field
+  // used a typed value) — wrap them so the value isn't lost to the empty-string
+  // fallback below.
+  if (typeof input === 'number') {
+    return new NumericValue(input, 'decimal')
+  }
+  if (typeof input === 'boolean') {
+    return new BooleanValue(input)
+  }
+
   if (input && typeof input === 'object') {
     const plain = input as { type?: unknown; value?: unknown; format?: unknown }
     const type = typeof plain.type === 'string' ? plain.type : ''

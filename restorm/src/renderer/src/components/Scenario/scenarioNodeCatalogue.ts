@@ -83,6 +83,9 @@ export const SCENARIO_NODE_CATALOGUE: ScenarioNodeKindMeta[] = [
   { kind: 'url', labelKey: 'scenario.nodes.url', defaultLabel: 'URL', icon: 'link', category: 'encoding' },
   // Utilities
   { kind: 'random', labelKey: 'scenario.nodes.random', defaultLabel: 'Random', icon: 'wand', category: 'utility' },
+  { kind: 'schema', labelKey: 'scenario.nodes.schema', defaultLabel: 'Schema validate', icon: 'checklist', category: 'utility' },
+  { kind: 'readFile', labelKey: 'scenario.nodes.readFile', defaultLabel: 'Read file', icon: 'file', category: 'utility' },
+  { kind: 'writeFile', labelKey: 'scenario.nodes.writeFile', defaultLabel: 'Write file', icon: 'save', category: 'utility' },
   { kind: 'log', labelKey: 'scenario.nodes.log', defaultLabel: 'Log', icon: 'output', category: 'utility' },
   { kind: 'assert', labelKey: 'scenario.nodes.assert', defaultLabel: 'Assert', icon: 'verified', category: 'utility' },
   { kind: 'throw', labelKey: 'scenario.nodes.throw', defaultLabel: 'Throw', icon: 'error', category: 'utility' }

@@ -78,6 +78,7 @@ export const RegexNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, dat
     },
     {
       id: 'pattern',
+      port: { id: 'pattern', type: 'target' },
       content: (
         <div className={`nodrag${patternInvalid ? ' scn-field-invalid' : ''}`} onMouseDown={(e) => { e.stopPropagation() }}>
           <div className="scn-field-caption">{t('scenario.regex.pattern', 'pattern')}</div>

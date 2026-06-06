@@ -46,8 +46,8 @@ describe('defaultPortsForKind', () => {
     expect(inputs.length + outputs.length).toBeGreaterThan(0)
     const generic = defaultPortsForKind('transform')
     // `transform` carries a header launch trigger (`in`) plus its optional
-    // `value` input.
-    expect(generic.inputs.map((p) => p.id)).toEqual(['in', 'value'])
+    // `value` input and the optional `expression` input (wire the template).
+    expect(generic.inputs.map((p) => p.id)).toEqual(['in', 'value', 'expression'])
   })
 
   it('returns fresh arrays each call (no shared mutable state)', () => {

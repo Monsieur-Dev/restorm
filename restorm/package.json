@@ -55,6 +55,7 @@
     "@vscode/codicons": "^0.0.45",
     "@xyflow/react": "^12.10.2",
     "@zip.js/zip.js": "^2.8.26",
+    "ajv": "^8.20.0",
     "axios": "^1.16.1",
     "crypto-js": "^4.2.0",
     "electron-core-ui": "workspace:*",

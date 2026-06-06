@@ -56,6 +56,10 @@ export interface RandomOptions {
   length?: number | undefined
   seed?: unknown
   items?: unknown[] | undefined
+  /** How many prior draws to skip before generating — so a SEEDED random
+   * called repeatedly (e.g. in a loop) ADVANCES its sequence instead of
+   * restarting at the same value. The caller tracks the per-run call index. */
+  sequence?: number | undefined
 }
 
 /**
@@ -69,6 +73,9 @@ export interface RandomOptions {
  */
 export function applyRandom(op: RandomOp, opts: RandomOptions = {}): unknown {
   const rng = makeRng(opts.seed)
+  // Skip prior draws so repeated calls advance the (seeded) sequence.
+  const skip = typeof opts.sequence === 'number' && opts.sequence > 0 ? Math.floor(opts.sequence) : 0
+  for (let i = 0; i < skip; i++) rng()
   switch (op) {
     case 'int': {
       const lo = Math.floor(typeof opts.min === 'number' ? opts.min : 0)

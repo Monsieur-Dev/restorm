@@ -1,7 +1,8 @@
 import React from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
-import { SelectBox, InputBox, Toggle, type ISelectData } from 'electron-core-ui/renderer'
+import { InputBox, Toggle } from 'electron-core-ui/renderer'
+import { SegmentedToggle } from './SegmentedToggle'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { TypedValueField } from '../../TypedValueField'
 import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroups'
@@ -9,6 +10,7 @@ import { normalizeValueType } from '../../../utils/normalizeValueType'
 import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
 import { StringValue } from '../../../../../shared/types/collections'
 import { CSV_OPS, isCsvOp, type CsvOp } from '../../../../../shared/scenarioCsv'
+import { STRING_VALUE_EXCLUDE } from './valueTypePolicies'
 
 /**
  * `csv` — the CSV member of the data-format family (json / xml / yaml): `parse`
@@ -23,8 +25,6 @@ export const CsvNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data,
   const delimiter = typeof config['delimiter'] === 'string' ? config['delimiter'] : ''
   const header = config['header'] !== false
 
-  const opOptions = CSV_OPS.map((o) => ({ text: o, label: t(`scenario.csv.op.${o}`, o) }))
-
   const rows: ScenarioNodeCell[] = [
     {
       id: 'value',
@@ -36,8 +36,10 @@ export const CsvNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data,
             value={config['value'] !== undefined ? normalizeValueType(config['value']) : new StringValue('')}
             onChange={(next) => { data.onSetConfig?.(id, { value: serializeValueForPersistence(next) }) }}
             valueTypeGroups={valueTypeGroups}
+            excludeTypes={STRING_VALUE_EXCLUDE}
             allowAllVariables
             dataTestId={`scn-csv-value-${id}`}
+            multilineLanguage="csv"
           />
         </div>
       )
@@ -47,19 +49,19 @@ export const CsvNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data,
       content: (
         <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
           <div className="scn-field-caption">{t('scenario.csv.operation', 'operation')}</div>
-          <SelectBox
-            id={`scn-csv-op-${id}`}
-            className=""
-            options={opOptions}
-            selected={Math.max(0, CSV_OPS.indexOf(op))}
-            onDidSelect={(d: ISelectData) => { const next = CSV_OPS[d.index]; if (next) data.onSetConfig?.(id, { op: next }) }}
-            data-testid="scn-csv-op"
+          <SegmentedToggle
+            options={CSV_OPS}
+            labels={CSV_OPS.map((o) => t(`scenario.csv.op.${o}`, o))}
+            value={op}
+            onChange={(next) => { if (isCsvOp(next)) data.onSetConfig?.(id, { op: next }) }}
+            ariaLabel={t('scenario.csv.operation', 'operation')}
           />
         </div>
       )
     },
     {
       id: 'delimiter',
+      port: { id: 'delimiter', type: 'target' },
       content: (
         <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
           <div className="scn-field-caption">{t('scenario.csv.delimiter', 'delimiter')}</div>

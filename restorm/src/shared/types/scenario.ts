@@ -141,6 +141,12 @@ export type ScenarioNodeKind =
   | 'csv'
   // Scalar math — round / floor / ceil / trunc / abs / sign / sqrt / min / max / clamp.
   | 'math'
+  // JSON Schema validation (ajv) — routes valid / invalid + the error list.
+  | 'schema'
+  // Read a file (path relative to the scenario, or absolute) → its text.
+  | 'readFile'
+  // Write / append text to a file (path relative to the scenario, or absolute).
+  | 'writeFile'
   // Utilities
   | 'log'
   // Deliberate failure — throws a message (for error branches / retry tests).

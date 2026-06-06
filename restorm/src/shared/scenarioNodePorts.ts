@@ -142,14 +142,16 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // `transform` (a.k.a. "Transform template") applies an expression/Handlebars
   // template to its optional `value` input and emits the result. The `value`
   // input stays optional so the node can also run on its own (a pure template).
-  // The expression determines the output type.
-  transform: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'out', name: 'value', flow: 'both' }] },
+  // The `expression` input is also optional: wire it to drive the template text
+  // from an upstream value, else the inline editor's template is used. The
+  // expression determines the output type.
+  transform: { inputs: [{ id: 'value', name: 'value' }, { id: 'expression', name: 'expression' }], outputs: [{ id: 'out', name: 'value', flow: 'both' }] },
   // `cast` converts its `value` input to the configured target type (the output
   // type is the chosen target, so no fixed dataType is stamped here).
   cast: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
   // `regex` runs the configured operation (extract / match / replace / split)
   // over its `value` string input; the output type depends on the op.
-  regex: { inputs: [{ id: 'value', name: 'value', dataType: 'string' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
+  regex: { inputs: [{ id: 'value', name: 'value', dataType: 'string' }, { id: 'pattern', name: 'pattern', dataType: 'string' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
   // `json` parses its `value` string into a value, or stringifies its `value`;
   // the output type depends on the op (parsed value vs JSON string).
   json: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
@@ -163,29 +165,39 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // `jwt` decodes its `value` token string into `{ header, payload, signature }`.
   jwt: { inputs: [{ id: 'value', name: 'value', dataType: 'string' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
   // `datetime` shifts / formats / diffs its `value` date; output is an ISO string
-  // (add / subtract / format) or a number (diff).
-  datetime: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
+  // (add / subtract / format) or a number (diff). The `amount` (add/subtract) and
+  // `other` second date (diff) are optional inputs: wire them, else use the inline
+  // fields.
+  datetime: { inputs: [{ id: 'value', name: 'value' }, { id: 'amount', name: 'amount' }, { id: 'other', name: 'other' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
   // `objectOp` reshapes its `value` object (get/set/merge/pick/omit/keys/values);
   // path / keys / the set-or-merge operand live in config.
-  objectOp: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
+  objectOp: { inputs: [{ id: 'value', name: 'value' }, { id: 'path', name: 'path', dataType: 'string' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
   // `url` encodes / decodes / parses / builds its `value` (a string, or an object
   // for buildQuery); the output type depends on the op.
   url: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
   // `random` generates a value (int / float / string / boolean / pick) — no data
   // input; every parameter is config.
-  random: { inputs: [], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
+  random: { inputs: [{ id: 'min', name: 'min', dataType: 'number' }, { id: 'max', name: 'max', dataType: 'number' }, { id: 'seed', name: 'seed' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
   // `listOp` reshapes its `value` list (sort/unique/reverse/flatten/chunk/slice/
   // groupBy); the key / order / size / bounds live in config.
-  listOp: { inputs: [{ id: 'value', name: 'value', dataType: 'list' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
+  listOp: { inputs: [{ id: 'value', name: 'value', dataType: 'list' }, { id: 'key', name: 'key', dataType: 'string' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
   // `csv` parses a CSV string → rows / stringifies a list → CSV; delimiter +
   // header are config. Like json/xml/yaml the `value` shape depends on the op.
-  csv: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
+  csv: { inputs: [{ id: 'value', name: 'value' }, { id: 'delimiter', name: 'delimiter', dataType: 'string' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
   // `math` runs a scalar op on `a`; the second operand (min/max), clamp bounds
   // and round precision live in config.
-  math: { inputs: [{ id: 'a', name: 'a', dataType: 'number' }], outputs: [{ id: 'result', name: 'result', dataType: 'number', flow: 'both' }] },
+  math: { inputs: [{ id: 'a', name: 'a', dataType: 'number' }, { id: 'precision', name: 'precision', dataType: 'number' }], outputs: [{ id: 'result', name: 'result', dataType: 'number', flow: 'both' }] },
+  // `schema` validates `value` against a JSON Schema → routes the value to
+  // `valid` / `invalid` + the error list on `errors`.
+  schema: { inputs: [{ id: 'value', name: 'value' }, { id: 'schema', name: 'schema', dataType: 'string' }], outputs: [{ id: 'valid', name: 'valid', role: 'then', flow: 'both' }, { id: 'invalid', name: 'invalid', role: 'else', flow: 'both' }, { id: 'errors', name: 'errors', flow: 'both' }] },
+  // `readFile` reads the file at `path` (relative to the scenario, or absolute)
+  // → its text on `content`.
+  readFile: { inputs: [{ id: 'path', name: 'path', dataType: 'string' }], outputs: [{ id: 'content', name: 'content', dataType: 'string', flow: 'both' }] },
+  // `writeFile` writes / appends `content` to `path`. Terminal (no value output).
+  writeFile: { inputs: [{ id: 'path', name: 'path', dataType: 'string' }, { id: 'content', name: 'content' }], outputs: [] },
   // `retry` runs the body wired off `attempt` as an error-boundary scope; the
   // implicit `done` is the success exit, `exhausted` the give-up branch.
-  retry: { inputs: [], outputs: [{ id: 'attempt', name: 'attempt', role: 'then', flow: 'both' }, { id: 'exhausted', name: 'exhausted', role: 'else', flow: 'both' }] },
+  retry: { inputs: [{ id: 'maxAttempts', name: 'maxAttempts', dataType: 'number' }, { id: 'delay', name: 'delay', dataType: 'number' }], outputs: [{ id: 'attempt', name: 'attempt', role: 'then', flow: 'both' }, { id: 'exhausted', name: 'exhausted', role: 'else', flow: 'both' }] },
   // Utilities
   // A terminal sink with two optional inputs (wire either, or set inline).
   // `message` is a string, `data` any value. No output (terminal).
@@ -194,7 +206,7 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // operator toggle as `if`/`comparator`; both operands carry inline
   // value-selector fallbacks, so they aren't hard-required ports. Branches
   // `pass` / `fail`; the failure label lives in config (`message`).
-  assert: { inputs: [{ id: 'a', name: 'actual' }, { id: 'b', name: 'expected' }], outputs: [{ id: 'then', name: 'pass', role: 'then', flow: 'both' }, { id: 'else', name: 'fail', role: 'else', flow: 'both' }] },
+  assert: { inputs: [{ id: 'a', name: 'actual' }, { id: 'b', name: 'expected' }, { id: 'message', name: 'message', dataType: 'string' }], outputs: [{ id: 'then', name: 'pass', role: 'then', flow: 'both' }, { id: 'else', name: 'fail', role: 'else', flow: 'both' }] },
   // `throw` deliberately fails with a `message` (wired or inline) — routed to the
   // node's implicit `error` port (or it fails the run if nothing handles it). No
   // value output: a throw never completes normally.

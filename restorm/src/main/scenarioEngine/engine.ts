@@ -8,7 +8,7 @@
  * inner `runScenario` node fires.
  */
 
-import { logger } from 'electron-core-ui/main'
+import { logger, getSettingsService, isSettingsServiceInitialized } from 'electron-core-ui/main'
 import { collectionStore } from '../services/CollectionStore'
 import { isScenario } from '../../shared/types/collections'
 import type { Scenario } from '../../shared/types/scenario'
@@ -141,10 +141,15 @@ export class ScenarioEngine {
       throw new Error(`recursion detected: scenario ${scenarioId} is already running on the call stack`)
     }
     const executors = buildExecutorRegistry(scenario)
+    // Directory of the open `.restorm` file — for readFile/writeFile relative
+    // paths. Read at run start (the SettingsService may not be ready in a very
+    // early/headless run → undefined, paths then resolve against cwd).
+    const workspaceDir = isSettingsServiceInitialized() ? (getSettingsService().getWorkspacePath() ?? undefined) : undefined
     const scheduler = new Scheduler({
       scenario,
       executors,
       isSubScenario: callCtx.parentRunId !== undefined,
+      ...(workspaceDir !== undefined ? { workspaceDir } : {}),
       ...(parentSignal ? { parentSignal } : {}),
       runSubScenario: async (subId, params, subParentSignal) => {
         const subStack = new Set(callCtx.stack)

@@ -45,4 +45,6 @@ Feature: Scenario run-log end-to-end
       | List ops       |
       | CSV            |
       | Math           |
+      | Schema         |
+      | Files          |
       | Main           |

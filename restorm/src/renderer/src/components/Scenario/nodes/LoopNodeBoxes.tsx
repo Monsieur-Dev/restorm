@@ -37,7 +37,7 @@ export const ForNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data,
       <div className="nodrag scn-stacked-field" onMouseDown={(e) => { e.stopPropagation() }}>
         <span className="scn-port-label">{label}</span>
         <TypedValueField
-          value={normalizeValueType(config[key] ?? { type: 'numeric', value: 0 })}
+          value={normalizeValueType(config[key] ?? { type: 'numeric', value: key === 'step' ? 1 : 0 })}
           onChange={(next) => { data.onSetConfig?.(id, { [key]: serializeValueForPersistence(next) }) }}
           excludeTypes={NON_NUMERIC_VALUE_TYPES}
           dataTestId={`scn-for-${key}`}

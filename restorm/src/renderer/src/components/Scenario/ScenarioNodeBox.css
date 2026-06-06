@@ -1223,6 +1223,82 @@
   justify-content: center;
 }
 
+/* Multiline code field (schema JSON, …): a read-only preview in the node box +
+ * an edit button opening a full-screen CodeEditor modal. */
+.scn-code-field-wrap {
+  width: 100%;
+}
+
+/* Read-only preview of a multiline value + an edit button that opens the
+   full-screen CodeEditor modal (mirrors the calendar / colour pickers). */
+.scn-code-preview-row {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  width: 100%;
+}
+
+/* Text/value inputs in a node box never collapse below a readable width.
+   Specificity (0,3,0) beats `.tvf-control-group > :first-child { min-width: 0 }`
+   from typedValueField.css, which would otherwise crush the field. */
+.react-flow__node .tvf-control-group .inputbox,
+.react-flow__node .tvf-control-group .scn-code-preview {
+  min-width: 100px;
+}
+
+.scn-code-preview {
+  flex: 1 1 auto;
+  min-width: 100px;
+  margin: 0;
+  max-height: 72px;
+  overflow: hidden;
+  box-sizing: border-box;
+  font-family: var(--editor-font-family, monospace);
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: pre;
+  text-overflow: ellipsis;
+  background: var(--input-background, #2d2d30);
+  color: var(--input-foreground, #cccccc);
+  border: 1px solid var(--editorWidget-border, #454545);
+  border-radius: 4px;
+  padding: 4px 6px;
+}
+
+.scn-code-preview.is-placeholder {
+  color: var(--input-placeholderForeground, #888);
+  font-style: italic;
+}
+
+.scn-code-preview-more {
+  display: block;
+  margin-top: 2px;
+  color: var(--descriptionForeground, #999);
+  font-style: italic;
+}
+
+.scn-code-preview-row.scn-field-invalid .scn-code-preview {
+  border-color: var(--inputValidation-errorBorder, #be1100);
+}
+
+.scn-code-edit-button {
+  flex: 0 0 auto;
+  align-self: flex-start;
+}
+
+/* The CodeEditor must fill the modal body. */
+.scn-code-modal-body {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+}
+
+.scn-code-modal-body .ecui-code-editor {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
 /* Node name field (input / get-/set-variable) — a thin InputBox wrapper. The
    field chrome (border / background) comes from InputBox's themed styles, so
    this only sizes the wrapper and keeps the compact node font. */

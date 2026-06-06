@@ -9,6 +9,7 @@ import { normalizeValueType } from '../../../utils/normalizeValueType'
 import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
 import { StringValue } from '../../../../../shared/types/collections'
 import { CRYPTO_OPS, isCryptoOp, cryptoOpNeedsKey, cryptoOpNeedsInput, type CryptoOp } from '../../../../../shared/scenarioCrypto'
+import { STRING_VALUE_EXCLUDE } from './valueTypePolicies'
 
 /**
  * `crypto` — encodes / hashes / signs its `value` string, or generates a UUID.
@@ -39,8 +40,10 @@ export const CryptoNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, da
             value={config['value'] !== undefined ? normalizeValueType(config['value']) : new StringValue('')}
             onChange={(next) => { data.onSetConfig?.(id, { value: serializeValueForPersistence(next) }) }}
             valueTypeGroups={valueTypeGroups}
+            excludeTypes={STRING_VALUE_EXCLUDE}
             allowAllVariables
             dataTestId={`scn-crypto-value-${id}`}
+            multilineLanguage="plaintext"
           />
         </div>
       )

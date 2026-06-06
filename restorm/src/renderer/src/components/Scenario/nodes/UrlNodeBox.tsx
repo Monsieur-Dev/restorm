@@ -9,6 +9,7 @@ import { normalizeValueType } from '../../../utils/normalizeValueType'
 import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
 import { StringValue } from '../../../../../shared/types/collections'
 import { URL_OPS, isUrlOp, type UrlOp } from '../../../../../shared/scenarioUrl'
+import { STRING_VALUE_EXCLUDE } from './valueTypePolicies'
 
 /**
  * `url` — encode / decode a component, parse / build a query string, or parse a
@@ -38,6 +39,7 @@ export const UrlNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data,
                 value={config['value'] !== undefined ? normalizeValueType(config['value']) : new StringValue('')}
                 onChange={(next) => { data.onSetConfig?.(id, { value: serializeValueForPersistence(next) }) }}
                 valueTypeGroups={valueTypeGroups}
+                excludeTypes={STRING_VALUE_EXCLUDE}
                 allowAllVariables
                 dataTestId={`scn-url-value-${id}`}
               />

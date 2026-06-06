@@ -1,7 +1,8 @@
 import React from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
-import { SelectBox, InputBox, type ISelectData } from 'electron-core-ui/renderer'
+import { InputBox } from 'electron-core-ui/renderer'
+import { SegmentedToggle } from './SegmentedToggle'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { TypedValueField } from '../../TypedValueField'
 import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroups'
@@ -9,6 +10,7 @@ import { normalizeValueType } from '../../../utils/normalizeValueType'
 import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
 import { StringValue } from '../../../../../shared/types/collections'
 import { JSON_OPS, isJsonOp, type JsonOp } from '../../../../../shared/scenarioJson'
+import { STRING_VALUE_EXCLUDE } from './valueTypePolicies'
 
 /**
  * `json` — parses a JSON string into a value, or stringifies a value. The
@@ -25,8 +27,6 @@ export const JsonNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data
   const op: JsonOp = isJsonOp(config['op']) ? config['op'] : 'parse'
   const indent = typeof config['indent'] === 'number' ? config['indent'] : 0
 
-  const opOptions = JSON_OPS.map((o) => ({ text: o, label: t(`scenario.json.op.${o}`, o) }))
-
   const rows: ScenarioNodeCell[] = [
     {
       id: 'value',
@@ -38,8 +38,10 @@ export const JsonNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data
             value={config['value'] !== undefined ? normalizeValueType(config['value']) : new StringValue('')}
             onChange={(next) => { data.onSetConfig?.(id, { value: serializeValueForPersistence(next) }) }}
             valueTypeGroups={valueTypeGroups}
+            excludeTypes={STRING_VALUE_EXCLUDE}
             allowAllVariables
             dataTestId={`scn-json-value-${id}`}
+            multilineLanguage="json"
           />
         </div>
       )
@@ -49,13 +51,12 @@ export const JsonNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data
       content: (
         <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
           <div className="scn-field-caption">{t('scenario.json.operation', 'operation')}</div>
-          <SelectBox
-            id={`scn-json-op-${id}`}
-            className=""
-            options={opOptions}
-            selected={Math.max(0, JSON_OPS.indexOf(op))}
-            onDidSelect={(d: ISelectData) => { const next = JSON_OPS[d.index]; if (next) data.onSetConfig?.(id, { op: next }) }}
-            data-testid="scn-json-op"
+          <SegmentedToggle
+            options={JSON_OPS}
+            labels={JSON_OPS.map((o) => t(`scenario.json.op.${o}`, o))}
+            value={op}
+            onChange={(next) => { if (isJsonOp(next)) data.onSetConfig?.(id, { op: next }) }}
+            ariaLabel={t('scenario.json.operation', 'operation')}
           />
         </div>
       )

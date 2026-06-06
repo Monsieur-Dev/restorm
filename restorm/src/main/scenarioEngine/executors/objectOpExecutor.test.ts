@@ -47,6 +47,21 @@ describe('randomExecutor — wires applyRandom onto `result`', () => {
     const v = run(randomExecutor, 'random', { op: 'pick', seed: 3, items: { type: 'list', items: [{ type: 'string', value: 'x' }, { type: 'string', value: 'y' }] } })
     expect(['x', 'y']).toContain(v)
   })
+  it('advances the seeded sequence across calls that share a run (not a constant)', () => {
+    // Same run = shared variable store → the per-node call index advances, so a
+    // seeded random in a loop yields a SEQUENCE, not the same value every time.
+    const vars = new Map<string, unknown>()
+    const seq = Array.from({ length: 5 }, () =>
+      run(randomExecutor, 'random', { op: 'int', min: 1, max: 1_000_000, seed: 42 }, {}, vars)
+    )
+    expect(new Set(seq).size).toBeGreaterThan(1)
+    // …yet the sequence is reproducible: a fresh run with the same seed repeats it.
+    const vars2 = new Map<string, unknown>()
+    const seq2 = Array.from({ length: 5 }, () =>
+      run(randomExecutor, 'random', { op: 'int', min: 1, max: 1_000_000, seed: 42 }, {}, vars2)
+    )
+    expect(seq2).toEqual(seq)
+  })
 })
 
 describe('throwExecutor — always throws', () => {

@@ -7,8 +7,9 @@ import { TypedValueField } from '../../TypedValueField'
 import { useAllEnvValueTypeGroups } from '../../../hooks/useAllEnvValueTypeGroups'
 import { normalizeValueType } from '../../../utils/normalizeValueType'
 import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
-import { StringValue } from '../../../../../shared/types/collections'
+import { StringValue, NumericValue } from '../../../../../shared/types/collections'
 import { DATETIME_OPS, DATETIME_UNITS, isDateTimeOp, isDateTimeUnit, type DateTimeOp, type DateTimeUnit } from '../../../../../shared/scenarioDateTime'
+import { DATETIME_VALUE_EXCLUDE, NUMERIC_VALUE_EXCLUDE } from './valueTypePolicies'
 
 /**
  * `datetime` — transforms an existing date wired/inline on `value` (the clock
@@ -23,7 +24,6 @@ export const DateTimeNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, 
   const valueTypeGroups = useAllEnvValueTypeGroups()
   const config = data.config ?? {}
   const op: DateTimeOp = isDateTimeOp(config['op']) ? config['op'] : 'add'
-  const amount = typeof config['amount'] === 'number' ? config['amount'] : 0
   const unit: DateTimeUnit = isDateTimeUnit(config['unit']) ? config['unit'] : 'days'
   const format = typeof config['format'] === 'string' ? config['format'] : ''
 
@@ -41,6 +41,7 @@ export const DateTimeNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, 
             value={config['value'] !== undefined ? normalizeValueType(config['value']) : new StringValue('')}
             onChange={(next) => { data.onSetConfig?.(id, { value: serializeValueForPersistence(next) }) }}
             valueTypeGroups={valueTypeGroups}
+            excludeTypes={DATETIME_VALUE_EXCLUDE}
             allowAllVariables
             dataTestId={`scn-datetime-value-${id}`}
           />
@@ -68,14 +69,17 @@ export const DateTimeNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, 
   if (op === 'add' || op === 'subtract') {
     rows.push({
       id: 'amount',
+      label: t('scenario.datetime.amount', 'amount'),
+      port: { id: 'amount', type: 'target' },
       content: (
         <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
-          <div className="scn-field-caption">{t('scenario.datetime.amount', 'amount')}</div>
-          <InputBox
-            value={String(amount)}
-            onChange={(next) => { const n = Number.parseFloat(next); data.onSetConfig?.(id, { amount: Number.isFinite(n) ? n : 0 }) }}
-            options={{ type: 'number', placeholder: '1' }}
-            data-testid="scn-datetime-amount"
+          <TypedValueField
+            value={config['amount'] !== undefined ? normalizeValueType(config['amount']) : new NumericValue(1, 'decimal')}
+            onChange={(next) => { data.onSetConfig?.(id, { amount: serializeValueForPersistence(next) }) }}
+            valueTypeGroups={valueTypeGroups}
+            excludeTypes={NUMERIC_VALUE_EXCLUDE}
+            allowAllVariables
+            dataTestId={`scn-datetime-amount-${id}`}
           />
         </div>
       )
@@ -85,13 +89,15 @@ export const DateTimeNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, 
   if (op === 'diff') {
     rows.push({
       id: 'other',
+      label: t('scenario.datetime.other', 'second date'),
+      port: { id: 'other', type: 'target' },
       content: (
         <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
-          <div className="scn-field-caption">{t('scenario.datetime.other', 'second date')}</div>
           <TypedValueField
             value={config['other'] !== undefined ? normalizeValueType(config['other']) : new StringValue('')}
             onChange={(next) => { data.onSetConfig?.(id, { other: serializeValueForPersistence(next) }) }}
             valueTypeGroups={valueTypeGroups}
+            excludeTypes={DATETIME_VALUE_EXCLUDE}
             allowAllVariables
             dataTestId={`scn-datetime-other-${id}`}
           />

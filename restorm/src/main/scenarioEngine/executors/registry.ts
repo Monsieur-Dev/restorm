@@ -41,6 +41,7 @@ import {
   mathExecutor,
   throwExecutor
 } from './pureExecutors'
+import { schemaExecutor, readFileExecutor, writeFileExecutor } from './ioExecutors'
 import {
   waitExecutor,
   waitUntilExecutor,
@@ -188,6 +189,9 @@ function pickExecutor(kind: string): NodeExecutor {
     case 'listOp': return listOpExecutor
     case 'csv': return csvExecutor
     case 'math': return mathExecutor
+    case 'schema': return schemaExecutor
+    case 'readFile': return readFileExecutor
+    case 'writeFile': return writeFileExecutor
     case 'throw': return throwExecutor
     case 'retry': return retryExecutor
     case 'wait': return waitExecutor

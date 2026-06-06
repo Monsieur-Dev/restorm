@@ -96,6 +96,10 @@ export interface SchedulerInit {
    * for its entry inputs — the caller supplies those — but its mid-flow inputs
    * still prompt (when interactive). */
   isSubScenario?: boolean
+  /** Directory of the open `.restorm` file — threaded into each ExecContext so
+   * `readFile`/`writeFile` can resolve a relative path against the scenario's
+   * own folder. */
+  workspaceDir?: string
 }
 
 type State = 'idle' | 'running' | 'paused' | 'completed' | 'cancelled' | 'failed'
@@ -132,6 +136,7 @@ export class Scheduler {
   private interactive = false
   /** True for a sub-scenario run (see {@link SchedulerInit.isSubScenario}). */
   private readonly isSubScenario: boolean
+  private readonly workspaceDir?: string
   private breakpoints: ReadonlySet<RuntimeId> = new Set()
   /** Activations already released past their breakpoint (so resume/step runs
    * them instead of re-breaking). Per-activation — each forEach iteration is a
@@ -196,6 +201,7 @@ export class Scheduler {
     this.scenario = init.scenario
     this.executors = init.executors
     this.isSubScenario = init.isSubScenario === true
+    if (init.workspaceDir !== undefined) this.workspaceDir = init.workspaceDir
     if (init.runSubScenario) this.runSubScenario = init.runSubScenario
     // Cascade a parent abort into this (sub-)run: cancelling the parent
     // scenario must stop everything it launched.
@@ -458,7 +464,8 @@ export class Scheduler {
       runSubScenario: this.runSubScenario ?? (() => Promise.reject<Record<string, unknown>>(new Error('runSubScenario not wired'))),
       requestUserInput: (req) => this.openUserInputRequest(act.nodeId, req),
       interactive: this.interactive,
-      node: this.findNode(act.nodeId)
+      node: this.findNode(act.nodeId),
+      ...(this.workspaceDir !== undefined ? { workspaceDir: this.workspaceDir } : {})
     }
     const startedAt = now()
     void (async () => {

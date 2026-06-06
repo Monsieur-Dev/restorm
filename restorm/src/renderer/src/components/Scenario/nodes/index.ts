@@ -37,6 +37,7 @@ import { FilterNodeBox } from './FilterNodeBox'
 import { MapNodeBox } from './MapNodeBox'
 import { ListMutationNodeBox } from './ListMutationNodeBox'
 import { LogNodeBox, AssertNodeBox, NowNodeBox } from './UtilityNodeBoxes'
+import { SchemaNodeBox, ReadFileNodeBox, WriteFileNodeBox } from './IoNodeBoxes'
 
 export type { ScenarioNodeBoxData, ScenarioNodeBoxType, ScenarioNodeCell } from './ScenarioNodeBoxBase'
 export { ScenarioNodeBoxBase } from './ScenarioNodeBoxBase'
@@ -89,6 +90,9 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   listOp: ListOpNodeBox,
   csv: CsvNodeBox,
   math: MathNodeBox,
+  schema: SchemaNodeBox,
+  readFile: ReadFileNodeBox,
+  writeFile: WriteFileNodeBox,
   throw: ThrowNodeBox,
   retry: RetryNodeBox,
   log: LogNodeBox,
