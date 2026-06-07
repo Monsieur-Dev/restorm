@@ -873,7 +873,8 @@
       "math": "Math",
       "schema": "Schema validate",
       "readFile": "Read file",
-      "writeFile": "Write file"
+      "writeFile": "Write file",
+      "timer": "定时器"
     },
     "comparator": {
       "result": "结果"
@@ -1254,7 +1255,8 @@
       "lists": "Lists",
       "math": "Math",
       "dataFormats": "Data formats",
-      "encoding": "Encoding"
+      "encoding": "Encoding",
+      "time": "定时"
     },
     "listOp": {
       "value": "list",
@@ -1330,6 +1332,25 @@
       "edit": "Open editor",
       "moreLines": "+{{count}} lines",
       "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "模式",
+      "modeOpt": {
+        "frequency": "频率",
+        "cron": "cron"
+      },
+      "frequency": "频率",
+      "unit": "单位",
+      "cron": "cron",
+      "stop": "停止条件",
+      "stopOpt": {
+        "none": "从不",
+        "duration": "持续时间",
+        "endDate": "结束日期"
+      },
+      "duration": "持续时间",
+      "endDate": "结束日期",
+      "tick": "滴答"
     }
   }
 }

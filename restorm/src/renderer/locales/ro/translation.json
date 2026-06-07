@@ -875,7 +875,8 @@
       "math": "Math",
       "schema": "Schema validate",
       "readFile": "Read file",
-      "writeFile": "Write file"
+      "writeFile": "Write file",
+      "timer": "Cronometru"
     },
     "comparator": {
       "result": "rezultat"
@@ -1256,7 +1257,8 @@
       "lists": "Lists",
       "math": "Math",
       "dataFormats": "Data formats",
-      "encoding": "Encoding"
+      "encoding": "Encoding",
+      "time": "Sincronizare"
     },
     "listOp": {
       "value": "list",
@@ -1332,6 +1334,25 @@
       "edit": "Open editor",
       "moreLines": "+{{count}} lines",
       "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "mod",
+      "modeOpt": {
+        "frequency": "frecvență",
+        "cron": "cron"
+      },
+      "frequency": "frecvență",
+      "unit": "unitate",
+      "cron": "cron",
+      "stop": "oprire după",
+      "stopOpt": {
+        "none": "niciodată",
+        "duration": "durată",
+        "endDate": "dată de sfârșit"
+      },
+      "duration": "durată",
+      "endDate": "dată de sfârșit",
+      "tick": "tic"
     }
   }
 }

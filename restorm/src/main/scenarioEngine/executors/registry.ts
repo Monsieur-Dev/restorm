@@ -48,6 +48,7 @@ import {
   forEachExecutor,
   forExecutor,
   retryExecutor,
+  timerExecutor,
   aggregateExecutor
 } from './timeAndFlowExecutors'
 import { httpRequestExecutor } from './httpRequestExecutor'
@@ -194,6 +195,7 @@ function pickExecutor(kind: string): NodeExecutor {
     case 'writeFile': return writeFileExecutor
     case 'throw': return throwExecutor
     case 'retry': return retryExecutor
+    case 'timer': return timerExecutor
     case 'wait': return waitExecutor
     case 'waitUntil': return waitUntilExecutor
     case 'forEach': return forEachExecutor

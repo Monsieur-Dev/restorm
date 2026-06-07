@@ -117,8 +117,13 @@ export default defineConfig({
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
 
-  /* Single worker for Electron tests */
-  workers: 1,
+  /* Electron projects run across workers (each project/file stays serial
+   * internally — `fullyParallel: false`), so the long-pole projects (scenario
+   * run-log, full-workflow) overlap instead of summing — a full run drops from
+   * ~24min serial to ~6min. The render-heavy doc-viewer no longer flakes at high
+   * worker counts now that its fixture disables renderer background-throttling
+   * (occluded windows on the shared Xvfb were getting their timers starved). */
+  workers: 4,
 
   /* Reporter */
   reporter: [

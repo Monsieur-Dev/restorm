@@ -875,7 +875,8 @@
       "math": "Math",
       "schema": "Schema validate",
       "readFile": "Read file",
-      "writeFile": "Write file"
+      "writeFile": "Write file",
+      "timer": "Mjerač vremena"
     },
     "comparator": {
       "result": "rezultat"
@@ -1256,7 +1257,8 @@
       "lists": "Lists",
       "math": "Math",
       "dataFormats": "Data formats",
-      "encoding": "Encoding"
+      "encoding": "Encoding",
+      "time": "Tempiranje"
     },
     "listOp": {
       "value": "list",
@@ -1332,6 +1334,25 @@
       "edit": "Open editor",
       "moreLines": "+{{count}} lines",
       "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "način",
+      "modeOpt": {
+        "frequency": "frekvencija",
+        "cron": "cron"
+      },
+      "frequency": "frekvencija",
+      "unit": "jedinica",
+      "cron": "cron",
+      "stop": "zaustavi nakon",
+      "stopOpt": {
+        "none": "nikad",
+        "duration": "trajanje",
+        "endDate": "datum završetka"
+      },
+      "duration": "trajanje",
+      "endDate": "datum završetka",
+      "tick": "otkucaj"
     }
   }
 }

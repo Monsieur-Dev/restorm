@@ -57,6 +57,7 @@
     "@zip.js/zip.js": "^2.8.26",
     "ajv": "^8.20.0",
     "axios": "^1.16.1",
+    "cron-parser": "^5.5.0",
     "crypto-js": "^4.2.0",
     "electron-core-ui": "workspace:*",
     "elkjs": "^0.11.1",

@@ -104,6 +104,9 @@ export type ScenarioNodeKind =
   | 'wait'
   | 'waitUntil'
   | 'now'
+  // Timer — fires its `tick` body on each interval (frequency or cron), bounded
+  // by an optional duration / end date.
+  | 'timer'
   // Data & compute
   | 'arithmetic'
   | 'comparator'

@@ -873,7 +873,8 @@
       "math": "Math",
       "schema": "Schema validate",
       "readFile": "Read file",
-      "writeFile": "Write file"
+      "writeFile": "Write file",
+      "timer": "타이머"
     },
     "comparator": {
       "result": "결과"
@@ -1254,7 +1255,8 @@
       "lists": "Lists",
       "math": "Math",
       "dataFormats": "Data formats",
-      "encoding": "Encoding"
+      "encoding": "Encoding",
+      "time": "타이밍"
     },
     "listOp": {
       "value": "list",
@@ -1330,6 +1332,25 @@
       "edit": "Open editor",
       "moreLines": "+{{count}} lines",
       "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "모드",
+      "modeOpt": {
+        "frequency": "빈도",
+        "cron": "cron"
+      },
+      "frequency": "빈도",
+      "unit": "단위",
+      "cron": "cron",
+      "stop": "정지 시점",
+      "stopOpt": {
+        "none": "안 함",
+        "duration": "기간",
+        "endDate": "종료 날짜"
+      },
+      "duration": "기간",
+      "endDate": "종료 날짜",
+      "tick": "틱"
     }
   }
 }

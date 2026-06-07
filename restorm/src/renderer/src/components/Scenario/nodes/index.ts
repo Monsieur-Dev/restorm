@@ -38,6 +38,7 @@ import { MapNodeBox } from './MapNodeBox'
 import { ListMutationNodeBox } from './ListMutationNodeBox'
 import { LogNodeBox, AssertNodeBox, NowNodeBox } from './UtilityNodeBoxes'
 import { SchemaNodeBox, ReadFileNodeBox, WriteFileNodeBox } from './IoNodeBoxes'
+import { TimerNodeBox } from './TimerNodeBox'
 
 export type { ScenarioNodeBoxData, ScenarioNodeBoxType, ScenarioNodeCell } from './ScenarioNodeBoxBase'
 export { ScenarioNodeBoxBase } from './ScenarioNodeBoxBase'
@@ -69,6 +70,7 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   wait: WaitNodeBox,
   waitUntil: WaitUntilNodeBox,
   now: NowNodeBox,
+  timer: TimerNodeBox,
   arithmetic: ArithmeticNodeBox,
   comparator: ComparatorNodeBox,
   boolean: BooleanNodeBox,

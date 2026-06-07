@@ -874,7 +874,8 @@
       "math": "Math",
       "schema": "Schema validate",
       "readFile": "Read file",
-      "writeFile": "Write file"
+      "writeFile": "Write file",
+      "timer": "Kohëmatës"
     },
     "comparator": {
       "result": "rezultati"
@@ -1255,7 +1256,8 @@
       "lists": "Lists",
       "math": "Math",
       "dataFormats": "Data formats",
-      "encoding": "Encoding"
+      "encoding": "Encoding",
+      "time": "Kohëmatja"
     },
     "listOp": {
       "value": "list",
@@ -1331,6 +1333,25 @@
       "edit": "Open editor",
       "moreLines": "+{{count}} lines",
       "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "mënyra",
+      "modeOpt": {
+        "frequency": "frekuenca",
+        "cron": "cron"
+      },
+      "frequency": "frekuenca",
+      "unit": "njësia",
+      "cron": "cron",
+      "stop": "ndalo pas",
+      "stopOpt": {
+        "none": "kurrë",
+        "duration": "kohëzgjatja",
+        "endDate": "data e fundit"
+      },
+      "duration": "kohëzgjatja",
+      "endDate": "data e fundit",
+      "tick": "tik"
     }
   }
 }

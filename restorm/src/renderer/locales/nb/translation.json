@@ -874,7 +874,8 @@
       "math": "Math",
       "schema": "Schema validate",
       "readFile": "Read file",
-      "writeFile": "Write file"
+      "writeFile": "Write file",
+      "timer": "Tidsur"
     },
     "comparator": {
       "result": "resultat"
@@ -1255,7 +1256,8 @@
       "lists": "Lists",
       "math": "Math",
       "dataFormats": "Data formats",
-      "encoding": "Encoding"
+      "encoding": "Encoding",
+      "time": "Tidsstyring"
     },
     "listOp": {
       "value": "list",
@@ -1331,6 +1333,25 @@
       "edit": "Open editor",
       "moreLines": "+{{count}} lines",
       "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "modus",
+      "modeOpt": {
+        "frequency": "frekvens",
+        "cron": "cron"
+      },
+      "frequency": "frekvens",
+      "unit": "enhet",
+      "cron": "cron",
+      "stop": "stopp etter",
+      "stopOpt": {
+        "none": "aldri",
+        "duration": "varighet",
+        "endDate": "sluttdato"
+      },
+      "duration": "varighet",
+      "endDate": "sluttdato",
+      "tick": "tikk"
     }
   }
 }

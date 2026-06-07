@@ -117,6 +117,10 @@ export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
     summary: 'Emits the current time.',
     config: { format: 'datetime (ISO, default) | epoch | string.' }
   },
+  timer: {
+    summary: 'Fires its `tick` body on each interval — a frequency (number + unit) OR a `cron` expression — bounded by an optional total duration / end date, else it runs until the run is stopped. The `tick` value is the 0-based tick index; `done` fires (with the total tick count) when it stops. frequency / cron / duration / endDate are wireable inputs.',
+    config: { mode: 'frequency | cron', frequency: 'Interval count when not wired (with `unit`).', unit: 's | min | h (default s).', cron: 'A 5/6-field cron expression (mode=cron).', duration: 'Optional total duration when not wired (with `durationUnit`).', durationUnit: 's | min | h.', endDate: 'Optional ISO end date (stop firing after it).' }
+  },
   arithmetic: {
     summary: 'Computes `a op b` → number on `result`.',
     config: { op: 'add | sub | mul | div | mod | pow' }

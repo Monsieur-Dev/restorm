@@ -39,6 +39,7 @@ import { InputBuffer, type PortSpec } from './inputBuffer'
 import { resolveSelectorPath, concreteValue } from '../../shared/utils/scenarioStaticPreview'
 import { readInputParams } from '../../shared/scenarioInputParams'
 import { evaluateCondition, resolveOperand } from './conditionEval'
+import { CronExpressionParser } from 'cron-parser'
 
 /**
  * No activation cap by default — a scenario can loop intentionally for as
@@ -54,6 +55,12 @@ const DEFAULT_MAX_ACTIVATIONS = Number.POSITIVE_INFINITY
  * that a runaway loop stays snappy to Stop; large enough that an ordinary
  * finite loop pays no measurable yield overhead. */
 const LOOP_YIELD_EVERY = 256
+
+/** Hard safety cap on a single `timer`'s total ticks — a backstop against a
+ * runaway (e.g. a 1ms interval with a huge duration) so a bounded timer can't
+ * pin the run indefinitely. An unbounded timer (no duration / end date) stops
+ * only on an explicit Stop, but still won't exceed this. */
+const TIMER_MAX_TICKS = 100_000
 
 export interface RunOptions {
   /** Params for the scenario's `input` nodes (keyed by param name). */
@@ -484,7 +491,7 @@ export class Scheduler {
         // `node-completed` fires once every iteration scope has closed (and,
         // for a loop, the condition has turned false).
         const sa = result.scopeAction?.type
-        if (sa !== 'openForEach' && sa !== 'conditionalLoop' && sa !== 'openRetry') {
+        if (sa !== 'openForEach' && sa !== 'conditionalLoop' && sa !== 'openRetry' && sa !== 'openTimer') {
           // Record an httpRequest response's status against the enclosing retry
           // attempt (for the status-based retry condition), before completion.
           this.recordRetryStatus(act, result)
@@ -552,6 +559,10 @@ export class Scheduler {
     }
     if (action?.type === 'openRetry') {
       this.runRetry(act, action)
+      return
+    }
+    if (action?.type === 'openTimer') {
+      this.runTimer(act, action)
       return
     }
     // Plain emissions: route each one to the edges leaving the port.
@@ -938,6 +949,87 @@ export class Scheduler {
     // No body wired → nothing to retry; succeed immediately.
     if (attemptEdges.length === 0) { fire('done'); return }
     openAttempt()
+  }
+
+  /**
+   * Run a `timer` as an engine-managed interval loop. Each tick runs the body
+   * (the subgraph wired off `tick`) in its own child scope; when that scope
+   * closes, the next tick is scheduled at its wall-clock fire time (a fixed
+   * `intervalMs`, or the next `cron` occurrence), until an optional total
+   * `durationMs` / `endDateMs` is reached (or the run is stopped). Each pending
+   * wait counts as `pendingReentry` so the run isn't reported done while the
+   * timer is between ticks; a Stop aborts via the shared signal. Bounded by
+   * {@link TIMER_MAX_TICKS} as a runaway backstop.
+   */
+  private runTimer(
+    act: InternalActivation,
+    action: { intervalMs: number; cron?: string; durationMs?: number; endDateMs?: number }
+  ): void {
+    const tickEdges = this.outgoingByPort.get(`${act.nodeId}:tick`) ?? []
+    const start = Date.now()
+    const endBound = action.endDateMs ?? (action.durationMs !== undefined ? start + action.durationMs : undefined)
+    let iter = 0
+    // Cron mode keeps a lazy occurrence iterator; frequency mode derives the
+    // next fire time from the start + interval (so body duration can't drift it).
+    let cronIt: { next: () => { toDate: () => Date } } | undefined
+    if (action.cron !== undefined) {
+      try { cronIt = CronExpressionParser.parse(action.cron, { currentDate: new Date(start) }) } catch { cronIt = undefined }
+    }
+    const nextFireAt = (): number | undefined => {
+      if (action.cron !== undefined) {
+        if (!cronIt) return undefined
+        try { return cronIt.next().toDate().getTime() } catch { return undefined }
+      }
+      return start + (iter + 1) * action.intervalMs
+    }
+
+    const fireDone = (): void => {
+      const doneEdges = this.outgoingByPort.get(`${act.nodeId}:done`) ?? []
+      for (const edge of doneEdges) {
+        this.enqueueToken({ value: iter, fromNodeId: act.nodeId, fromPort: 'done', toNodeId: edge.toNodeId, toPort: edge.toPort, scope: act.scope, tokenId: ++this.tokenSeq })
+        this.emit({ type: 'data-flow-emitted', runId: this.runId, edgeId: edge.edgeId, tokenId: this.tokenSeq, at: now() })
+      }
+      this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `timer done after ${iter} tick(s)` })
+      this.emit({ type: 'node-completed', runId: this.runId, nodeId: act.nodeId, scope: act.scope, at: now(), outputs: [] })
+      this.completeLoop(act)
+    }
+
+    const scheduleNext = (next: number): void => {
+      const delay = Math.max(0, next - Date.now())
+      this.pendingReentry += 1
+      setTimeout(() => {
+        this.pendingReentry -= 1
+        if (this.abortCtl.signal.aborted) { this.terminateIfDone(); return }
+        openTick()
+        this.tick()
+      }, delay)
+    }
+
+    const openTick = (): void => {
+      if (this.abortCtl.signal.aborted) return
+      const i = iter
+      iter += 1
+      const child: ScopeStack = [...act.scope, { scopeNodeId: act.nodeId, index: i }]
+      this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `timer tick ${i}` })
+      for (const edge of tickEdges) {
+        this.enqueueToken({ value: i, fromNodeId: act.nodeId, fromPort: 'tick', toNodeId: edge.toNodeId, toPort: edge.toPort, scope: child, tokenId: ++this.tokenSeq })
+        this.emit({ type: 'data-flow-emitted', runId: this.runId, edgeId: edge.edgeId, tokenId: this.tokenSeq, at: now() })
+      }
+      this.scopes.onClose(child, () => {
+        if (this.abortCtl.signal.aborted) return
+        if (iter >= TIMER_MAX_TICKS) { fireDone(); return }
+        const next = nextFireAt()
+        if (next === undefined || (endBound !== undefined && next > endBound)) { fireDone(); return }
+        scheduleNext(next)
+      })
+    }
+
+    // No tick body wired → nothing to fire; complete immediately.
+    if (tickEdges.length === 0) { fireDone(); return }
+    const first = nextFireAt()
+    if (first === undefined || (endBound !== undefined && first > endBound)) { fireDone(); return }
+    this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `timer start (interval ${action.intervalMs}ms${action.cron !== undefined ? `, cron ${action.cron}` : ''}${endBound !== undefined ? `, until +${endBound - start}ms` : ''})` })
+    scheduleNext(first)
   }
 
   /** Push a token into the buffer; if a node becomes fireable, queue

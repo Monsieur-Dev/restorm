@@ -873,7 +873,8 @@
       "math": "Math",
       "schema": "Schema validate",
       "readFile": "Read file",
-      "writeFile": "Write file"
+      "writeFile": "Write file",
+      "timer": "Pengatur waktu"
     },
     "comparator": {
       "result": "hasil"
@@ -1254,7 +1255,8 @@
       "lists": "Lists",
       "math": "Math",
       "dataFormats": "Data formats",
-      "encoding": "Encoding"
+      "encoding": "Encoding",
+      "time": "Pewaktuan"
     },
     "listOp": {
       "value": "list",
@@ -1330,6 +1332,25 @@
       "edit": "Open editor",
       "moreLines": "+{{count}} lines",
       "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "mode",
+      "modeOpt": {
+        "frequency": "frekuensi",
+        "cron": "cron"
+      },
+      "frequency": "frekuensi",
+      "unit": "satuan",
+      "cron": "cron",
+      "stop": "berhenti setelah",
+      "stopOpt": {
+        "none": "tidak pernah",
+        "duration": "durasi",
+        "endDate": "tanggal akhir"
+      },
+      "duration": "durasi",
+      "endDate": "tanggal akhir",
+      "tick": "tik"
     }
   }
 }

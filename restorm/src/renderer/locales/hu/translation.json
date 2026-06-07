@@ -874,7 +874,8 @@
       "math": "Math",
       "schema": "Schema validate",
       "readFile": "Read file",
-      "writeFile": "Write file"
+      "writeFile": "Write file",
+      "timer": "Időzítő"
     },
     "comparator": {
       "result": "eredmény"
@@ -1255,7 +1256,8 @@
       "lists": "Lists",
       "math": "Math",
       "dataFormats": "Data formats",
-      "encoding": "Encoding"
+      "encoding": "Encoding",
+      "time": "Időzítés"
     },
     "listOp": {
       "value": "list",
@@ -1331,6 +1333,25 @@
       "edit": "Open editor",
       "moreLines": "+{{count}} lines",
       "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "mód",
+      "modeOpt": {
+        "frequency": "gyakoriság",
+        "cron": "cron"
+      },
+      "frequency": "gyakoriság",
+      "unit": "egység",
+      "cron": "cron",
+      "stop": "leállítás után",
+      "stopOpt": {
+        "none": "soha",
+        "duration": "időtartam",
+        "endDate": "befejezés dátuma"
+      },
+      "duration": "időtartam",
+      "endDate": "befejezés dátuma",
+      "tick": "ütés"
     }
   }
 }

@@ -121,6 +121,17 @@ export interface ExecResult {
         retryOnFailure: boolean
         retryOnStatus: number[]
       }
+    // A `timer`: the scheduler fires the `tick` body in a child scope on each
+    // interval (a fixed `intervalMs` OR a `cron` expression), waiting for the
+    // body to close before scheduling the next tick, bounded by an optional
+    // total `durationMs` / `endDateMs` (else it runs until the run is stopped).
+    | {
+        type: 'openTimer'
+        intervalMs: number
+        cron?: string
+        durationMs?: number
+        endDateMs?: number
+      }
 }
 
 /**

@@ -874,7 +874,8 @@
       "math": "Math",
       "schema": "Schema validate",
       "readFile": "Read file",
-      "writeFile": "Write file"
+      "writeFile": "Write file",
+      "timer": "Χρονοδιακόπτης"
     },
     "comparator": {
       "result": "αποτέλεσμα"
@@ -1255,7 +1256,8 @@
       "lists": "Lists",
       "math": "Math",
       "dataFormats": "Data formats",
-      "encoding": "Encoding"
+      "encoding": "Encoding",
+      "time": "Χρονισμός"
     },
     "listOp": {
       "value": "list",
@@ -1331,6 +1333,25 @@
       "edit": "Open editor",
       "moreLines": "+{{count}} lines",
       "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "λειτουργία",
+      "modeOpt": {
+        "frequency": "συχνότητα",
+        "cron": "cron"
+      },
+      "frequency": "συχνότητα",
+      "unit": "μονάδα",
+      "cron": "cron",
+      "stop": "διακοπή μετά",
+      "stopOpt": {
+        "none": "ποτέ",
+        "duration": "διάρκεια",
+        "endDate": "ημερομηνία λήξης"
+      },
+      "duration": "διάρκεια",
+      "endDate": "ημερομηνία λήξης",
+      "tick": "παλμός"
     }
   }
 }

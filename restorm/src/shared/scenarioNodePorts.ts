@@ -124,6 +124,10 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // so it isn't a hard-required port and the node is runnable on its own.
   waitUntil: { inputs: [{ id: 'until', name: 'until' }], outputs: [{ id: 'out', name: 'then', role: 'then', flow: 'both' }] },
   now: { inputs: [], outputs: [{ id: 'value', name: 'now', dataType: 'string', flow: 'both' }] },
+  // `timer` fires its `tick` body on each interval (a frequency number+unit OR a
+  // cron), optionally bounded by a total duration / end date, until it stops.
+  // The frequency, cron, duration and endDate are all wireable inputs.
+  timer: { inputs: [{ id: 'frequency', name: 'frequency', dataType: 'number' }, { id: 'cron', name: 'cron', dataType: 'string' }, { id: 'duration', name: 'duration', dataType: 'number' }, { id: 'endDate', name: 'endDate' }], outputs: [{ id: 'tick', name: 'tick', role: 'then', flow: 'both' }] },
   // Data & compute. Operands carry typed value-selector fallbacks (like `if`),
   // so they aren't hard-required ports. These are data-driven (they run once
   // their inputs resolve and expose `result`), but they still carry the header

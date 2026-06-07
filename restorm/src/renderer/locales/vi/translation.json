@@ -873,7 +873,8 @@
       "math": "Math",
       "schema": "Schema validate",
       "readFile": "Read file",
-      "writeFile": "Write file"
+      "writeFile": "Write file",
+      "timer": "Bộ hẹn giờ"
     },
     "comparator": {
       "result": "kết quả"
@@ -1254,7 +1255,8 @@
       "lists": "Lists",
       "math": "Math",
       "dataFormats": "Data formats",
-      "encoding": "Encoding"
+      "encoding": "Encoding",
+      "time": "Hẹn giờ"
     },
     "listOp": {
       "value": "list",
@@ -1330,6 +1332,25 @@
       "edit": "Open editor",
       "moreLines": "+{{count}} lines",
       "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "chế độ",
+      "modeOpt": {
+        "frequency": "tần suất",
+        "cron": "cron"
+      },
+      "frequency": "tần suất",
+      "unit": "đơn vị",
+      "cron": "cron",
+      "stop": "dừng sau",
+      "stopOpt": {
+        "none": "không bao giờ",
+        "duration": "thời lượng",
+        "endDate": "ngày kết thúc"
+      },
+      "duration": "thời lượng",
+      "endDate": "ngày kết thúc",
+      "tick": "tích tắc"
     }
   }
 }

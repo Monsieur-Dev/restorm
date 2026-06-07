@@ -876,7 +876,8 @@
       "math": "Math",
       "schema": "Schema validate",
       "readFile": "Read file",
-      "writeFile": "Write file"
+      "writeFile": "Write file",
+      "timer": "Таймер"
     },
     "comparator": {
       "result": "результат"
@@ -1257,7 +1258,8 @@
       "lists": "Lists",
       "math": "Math",
       "dataFormats": "Data formats",
-      "encoding": "Encoding"
+      "encoding": "Encoding",
+      "time": "Таймінг"
     },
     "listOp": {
       "value": "list",
@@ -1333,6 +1335,25 @@
       "edit": "Open editor",
       "moreLines": "+{{count}} lines",
       "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "режим",
+      "modeOpt": {
+        "frequency": "частота",
+        "cron": "cron"
+      },
+      "frequency": "частота",
+      "unit": "одиниця",
+      "cron": "cron",
+      "stop": "зупинити після",
+      "stopOpt": {
+        "none": "ніколи",
+        "duration": "тривалість",
+        "endDate": "дата завершення"
+      },
+      "duration": "тривалість",
+      "endDate": "дата завершення",
+      "tick": "тік"
     }
   }
 }

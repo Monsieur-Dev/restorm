@@ -84,8 +84,9 @@ import type { ScenarioNodeKind } from '../../../../../shared/types/collections'
 // All still get their launch-trigger checked below.
 // Some kinds render certain operand ports CONDITIONALLY by op, so no single
 // default render shows every spec input port: `datetime` (amount add/subtract
-// XOR other diff), `objectOp` (path get/set), `listOp` (key sort/unique/groupBy).
-const SPEC_DRIVEN_CELLS_EXEMPT = new Set<ScenarioNodeKind>(['runScenario', 'httpRequest', 'output', 'datetime', 'objectOp', 'listOp'])
+// XOR other diff), `objectOp` (path get/set), `listOp` (key sort/unique/groupBy),
+// `timer` (frequency XOR cron by mode; duration/endDate only when bounded).
+const SPEC_DRIVEN_CELLS_EXEMPT = new Set<ScenarioNodeKind>(['runScenario', 'httpRequest', 'output', 'datetime', 'objectOp', 'listOp', 'timer'])
 
 function propsFor(kind: ScenarioNodeKind): Record<string, unknown> {
   const { inputs, outputs } = defaultPortsForKind(kind)

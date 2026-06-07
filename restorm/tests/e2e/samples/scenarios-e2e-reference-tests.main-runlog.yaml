@@ -5373,4 +5373,55 @@
 - message: ⚪ [<time>] done runScenario
   data:
     result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: Timer
+    in: true
+- message: 🔵 [<time>] ▶ Timer
+- message: ⚪ [<time>] start timer
+  data:
+    mode: frequency
+    frequency: 1
+    unit: s
+    stopMode: duration
+    duration: 2.5
+    durationUnit: s
+- message: ⚪ [<time>] done timer
+- message: ⚪ [<time>] timer start (interval 1000ms, until +2500ms)
+- message: ⚪ [<time>] timer tick 0
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: "Tick #{{.}}"
+    data: 0
+- message: "🔵 [<time>] Tick #0"
+  data: 0
+- message: ⚪ [<time>] done log
+  data:
+    value: 0
+- message: ⚪ [<time>] timer tick 1
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: "Tick #{{.}}"
+    data: 1
+- message: "🔵 [<time>] Tick #1"
+  data: 1
+- message: ⚪ [<time>] done log
+  data:
+    value: 1
+- message: ⚪ [<time>] timer done after 2 tick(s)
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: Timer finished — all ticks fired
+    in: 2
+- message: 🔵 [<time>] Timer finished — all ticks fired
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ Timer
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
 - message: 🔵 [<time>] ■ Main

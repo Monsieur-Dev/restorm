@@ -15,6 +15,7 @@ export type ScenarioNodeCategory =
 export const SCENARIO_SUBMENU_CATEGORIES: Partial<Record<ScenarioNodeCategory, { labelKey: string; defaultLabel: string; icon: string }>> = {
   lists: { labelKey: 'scenario.menuGroups.lists', defaultLabel: 'Lists', icon: 'list-unordered' },
   loops: { labelKey: 'scenario.nodes.loops', defaultLabel: 'Loops', icon: 'sync' },
+  time: { labelKey: 'scenario.menuGroups.time', defaultLabel: 'Timing', icon: 'watch' },
   math: { labelKey: 'scenario.menuGroups.math', defaultLabel: 'Math', icon: 'symbol-operator' },
   dataFormats: { labelKey: 'scenario.menuGroups.dataFormats', defaultLabel: 'Data formats', icon: 'file-code' },
   encoding: { labelKey: 'scenario.menuGroups.encoding', defaultLabel: 'Encoding', icon: 'lock' }
@@ -54,9 +55,10 @@ export const SCENARIO_NODE_CATALOGUE: ScenarioNodeKindMeta[] = [
   { kind: 'for', labelKey: 'scenario.nodes.for', defaultLabel: 'For', icon: 'list-ordered', category: 'loops' },
   { kind: 'while', labelKey: 'scenario.nodes.while', defaultLabel: 'While', icon: 'sync', category: 'loops' },
   { kind: 'doWhile', labelKey: 'scenario.nodes.doWhile', defaultLabel: 'Do…While', icon: 'debug-restart', category: 'loops' },
-  // Time
+  // Time (grouped into a "Timing" submenu)
   { kind: 'wait', labelKey: 'scenario.nodes.wait', defaultLabel: 'Wait', icon: 'watch', category: 'time' },
   { kind: 'waitUntil', labelKey: 'scenario.nodes.waitUntil', defaultLabel: 'Wait until', icon: 'clock', category: 'time' },
+  { kind: 'timer', labelKey: 'scenario.nodes.timer', defaultLabel: 'Timer', icon: 'pulse', category: 'time' },
   { kind: 'now', labelKey: 'scenario.nodes.now', defaultLabel: 'Now', icon: 'calendar', category: 'time' },
   { kind: 'datetime', labelKey: 'scenario.nodes.datetime', defaultLabel: 'Date math', icon: 'history', category: 'time' },
   // Math (grouped into a "Math" submenu)

@@ -874,7 +874,8 @@
       "math": "Math",
       "schema": "Schema validate",
       "readFile": "Read file",
-      "writeFile": "Write file"
+      "writeFile": "Write file",
+      "timer": "Timer"
     },
     "comparator": {
       "result": "resultaat"
@@ -1255,7 +1256,8 @@
       "lists": "Lists",
       "math": "Math",
       "dataFormats": "Data formats",
-      "encoding": "Encoding"
+      "encoding": "Encoding",
+      "time": "Timing"
     },
     "listOp": {
       "value": "list",
@@ -1331,6 +1333,25 @@
       "edit": "Open editor",
       "moreLines": "+{{count}} lines",
       "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "modus",
+      "modeOpt": {
+        "frequency": "frequentie",
+        "cron": "cron"
+      },
+      "frequency": "frequentie",
+      "unit": "eenheid",
+      "cron": "cron",
+      "stop": "stoppen na",
+      "stopOpt": {
+        "none": "nooit",
+        "duration": "duur",
+        "endDate": "einddatum"
+      },
+      "duration": "duur",
+      "endDate": "einddatum",
+      "tick": "tik"
     }
   }
 }

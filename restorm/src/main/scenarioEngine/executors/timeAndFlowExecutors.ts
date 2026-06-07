@@ -177,6 +177,42 @@ export const retryExecutor: NodeExecutor = (act, ctx) => {
   }
 }
 
+/** Timer node: fires its `tick` body on each interval — a frequency (number +
+ * unit) OR a `cron` expression — bounded by an optional total duration / end
+ * date. Frequency, cron, duration and endDate may be wired (or inline). Returns
+ * an `openTimer` scope action the scheduler drives. */
+export const timerExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { mode?: unknown; frequency?: unknown; unit?: unknown; cron?: unknown; duration?: unknown; durationUnit?: unknown; endDate?: unknown }
+  const toMs = (v: number, unit: unknown): number => unit === 'min' ? v * 60000 : unit === 'h' ? v * 3600000 : unit === 'ms' ? v : v * 1000
+  const num = (v: unknown): number => (typeof v === 'number' ? v : Number.parseFloat(String(v)))
+  const useCron = cfg.mode === 'cron'
+  const cronRaw = resolveOperand(act.inputs['cron'], cfg.cron, ctx.variables)
+  const cron = useCron && typeof cronRaw === 'string' && cronRaw.trim() !== '' ? cronRaw.trim() : undefined
+  const freqN = num(resolveOperand(act.inputs['frequency'], cfg.frequency, ctx.variables))
+  const intervalMs = Math.max(1, toMs(Number.isFinite(freqN) && freqN > 0 ? freqN : 1, cfg.unit ?? 's'))
+  const durN = num(resolveOperand(act.inputs['duration'], cfg.duration, ctx.variables))
+  const durationMs = Number.isFinite(durN) && durN > 0 ? toMs(durN, cfg.durationUnit ?? 's') : undefined
+  const endRaw = resolveOperand(act.inputs['endDate'], cfg.endDate, ctx.variables)
+  let endDateMs: number | undefined
+  if (endRaw instanceof Date) {
+    const t = endRaw.getTime()
+    if (Number.isFinite(t)) endDateMs = t
+  } else if (typeof endRaw === 'number' || (typeof endRaw === 'string' && endRaw.trim() !== '')) {
+    const t = new Date(endRaw).getTime()
+    if (Number.isFinite(t)) endDateMs = t
+  }
+  return {
+    outputs: [],
+    scopeAction: {
+      type: 'openTimer',
+      intervalMs,
+      ...(cron ? { cron } : {}),
+      ...(durationMs !== undefined ? { durationMs } : {}),
+      ...(endDateMs !== undefined ? { endDateMs } : {})
+    }
+  }
+}
+
 /**
  * Aggregate node: reduces a collection to a single `result`.
  *

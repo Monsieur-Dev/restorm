@@ -874,7 +874,8 @@
       "math": "Math",
       "schema": "Schema validate",
       "readFile": "Read file",
-      "writeFile": "Write file"
+      "writeFile": "Write file",
+      "timer": "Zamanlayıcı"
     },
     "comparator": {
       "result": "sonuç"
@@ -1255,7 +1256,8 @@
       "lists": "Lists",
       "math": "Math",
       "dataFormats": "Data formats",
-      "encoding": "Encoding"
+      "encoding": "Encoding",
+      "time": "Zamanlama"
     },
     "listOp": {
       "value": "list",
@@ -1331,6 +1333,25 @@
       "edit": "Open editor",
       "moreLines": "+{{count}} lines",
       "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "mod",
+      "modeOpt": {
+        "frequency": "sıklık",
+        "cron": "cron"
+      },
+      "frequency": "sıklık",
+      "unit": "birim",
+      "cron": "cron",
+      "stop": "sonra durdur",
+      "stopOpt": {
+        "none": "asla",
+        "duration": "süre",
+        "endDate": "bitiş tarihi"
+      },
+      "duration": "süre",
+      "endDate": "bitiş tarihi",
+      "tick": "tik"
     }
   }
 }

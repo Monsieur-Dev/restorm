@@ -876,7 +876,8 @@
       "math": "Math",
       "schema": "Schema validate",
       "readFile": "Read file",
-      "writeFile": "Write file"
+      "writeFile": "Write file",
+      "timer": "Časovač"
     },
     "comparator": {
       "result": "výsledek"
@@ -1257,7 +1258,8 @@
       "lists": "Lists",
       "math": "Math",
       "dataFormats": "Data formats",
-      "encoding": "Encoding"
+      "encoding": "Encoding",
+      "time": "Časování"
     },
     "listOp": {
       "value": "list",
@@ -1333,6 +1335,25 @@
       "edit": "Open editor",
       "moreLines": "+{{count}} lines",
       "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "režim",
+      "modeOpt": {
+        "frequency": "frekvence",
+        "cron": "cron"
+      },
+      "frequency": "frekvence",
+      "unit": "jednotka",
+      "cron": "cron",
+      "stop": "zastavit po",
+      "stopOpt": {
+        "none": "nikdy",
+        "duration": "doba trvání",
+        "endDate": "datum konce"
+      },
+      "duration": "doba trvání",
+      "endDate": "datum konce",
+      "tick": "tik"
     }
   }
 }

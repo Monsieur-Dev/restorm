@@ -873,7 +873,8 @@
       "math": "Math",
       "schema": "Schema validate",
       "readFile": "Read file",
-      "writeFile": "Write file"
+      "writeFile": "Write file",
+      "timer": "タイマー"
     },
     "comparator": {
       "result": "結果"
@@ -1254,7 +1255,8 @@
       "lists": "Lists",
       "math": "Math",
       "dataFormats": "Data formats",
-      "encoding": "Encoding"
+      "encoding": "Encoding",
+      "time": "タイミング"
     },
     "listOp": {
       "value": "list",
@@ -1330,6 +1332,25 @@
       "edit": "Open editor",
       "moreLines": "+{{count}} lines",
       "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "モード",
+      "modeOpt": {
+        "frequency": "頻度",
+        "cron": "cron"
+      },
+      "frequency": "頻度",
+      "unit": "単位",
+      "cron": "cron",
+      "stop": "停止条件",
+      "stopOpt": {
+        "none": "なし",
+        "duration": "期間",
+        "endDate": "終了日"
+      },
+      "duration": "期間",
+      "endDate": "終了日",
+      "tick": "ティック"
     }
   }
 }

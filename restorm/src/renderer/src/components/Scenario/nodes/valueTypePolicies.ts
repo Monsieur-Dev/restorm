@@ -15,9 +15,18 @@ export const STRING_VALUE_EXCLUDE: ValueTypeKind[] = [
 ]
 
 /** A date/time operand (datetime value / second date): keeps `dateTime`,
- * `string`, `secret`, `expression`, `variable`, `environment`. */
+ * `string`, `secret`, `expression`, `variable`, `environment`. The date-math
+ * node accepts a literal ISO string (and templated dates), so those stay. */
 export const DATETIME_VALUE_EXCLUDE: ValueTypeKind[] = [
   'number', 'color', 'boolean', 'enum', 'enumList', 'customList', 'customListMulti', 'null', 'list'
+]
+
+/** A picked date operand (a timer's end date): a real date or a reference only
+ * — keeps `dateTime`, `variable`, `environment`. A stop date is picked from the
+ * calendar or wired/referenced, never typed as a raw string / secret / template,
+ * so those are dropped from the menu. */
+export const DATE_PICK_VALUE_EXCLUDE: ValueTypeKind[] = [
+  'string', 'secret', 'expression', 'number', 'color', 'boolean', 'enum', 'enumList', 'customList', 'customListMulti', 'null', 'list'
 ]
 
 /** A numeric operand (a count / amount / min / max): keeps `number`,

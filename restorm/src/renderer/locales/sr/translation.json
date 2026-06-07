@@ -875,7 +875,8 @@
       "math": "Math",
       "schema": "Schema validate",
       "readFile": "Read file",
-      "writeFile": "Write file"
+      "writeFile": "Write file",
+      "timer": "Тајмер"
     },
     "comparator": {
       "result": "резултат"
@@ -1256,7 +1257,8 @@
       "lists": "Lists",
       "math": "Math",
       "dataFormats": "Data formats",
-      "encoding": "Encoding"
+      "encoding": "Encoding",
+      "time": "Тајминг"
     },
     "listOp": {
       "value": "list",
@@ -1332,6 +1334,25 @@
       "edit": "Open editor",
       "moreLines": "+{{count}} lines",
       "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "режим",
+      "modeOpt": {
+        "frequency": "фреквенција",
+        "cron": "cron"
+      },
+      "frequency": "фреквенција",
+      "unit": "јединица",
+      "cron": "cron",
+      "stop": "заустави након",
+      "stopOpt": {
+        "none": "никад",
+        "duration": "трајање",
+        "endDate": "датум завршетка"
+      },
+      "duration": "трајање",
+      "endDate": "датум завршетка",
+      "tick": "откуцај"
     }
   }
 }

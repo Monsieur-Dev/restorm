@@ -147,7 +147,7 @@ collections:
                     flow: both
                 position:
                   x: 820
-                  'y': 160
+                  'y': 260
               - id: 1780418232553-8cfmhw
                 kind: setVariable
                 config:
@@ -165,8 +165,8 @@ collections:
                     dataType: any
                 outputs: []
                 position:
-                  x: 460
-                  'y': 160
+                  x: 560
+                  'y': 280
               - id: 1780420981592-6osi6r
                 kind: log
                 config:
@@ -188,7 +188,7 @@ collections:
                 outputs: []
                 position:
                   x: 1280
-                  'y': 60
+                  'y': 260
               - id: 1780421882628-8oym4p
                 kind: log
                 config:
@@ -210,7 +210,7 @@ collections:
                 outputs: []
                 position:
                   x: 1280
-                  'y': 260
+                  'y': 460
               - id: 1780482115336-0v2aq0
                 kind: runScenario
                 config:
@@ -667,6 +667,25 @@ collections:
                 position:
                   x: 1240
                   'y': 1440
+              - id: e0610fff-f0f4-49aa-9818-975ddd7bc993
+                kind: runScenario
+                config:
+                  scenarioId: 907a7e52-e1e9-44b5-9a83-d5954524faf8
+                  label: Timer
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 580
+                  'y': 1580
             edges:
               - id: e-1780418276241-f2q3hz
                 from:
@@ -858,6 +877,13 @@ collections:
                   portId: done
                 to:
                   nodeId: 3294bbcf-cade-4f60-97c0-557784ae134a
+                  portId: in
+              - id: 8e4322a0-9f40-4452-9aed-7603204ddacf
+                from:
+                  nodeId: 3294bbcf-cade-4f60-97c0-557784ae134a
+                  portId: done
+                to:
+                  nodeId: e0610fff-f0f4-49aa-9818-975ddd7bc993
                   portId: in
             id: c1573ce0-985c-44b5-b5d4-e081de2d4303
             name: Main
@@ -16406,6 +16432,109 @@ collections:
                 id: b7fd471f-f8bc-45c3-b32c-2e8b62b16a69
                 name: Files
                 items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 7d7434b0-3e42-4f2f-96bf-547c323d65ab
+                    kind: timer
+                    config:
+                      mode: frequency
+                      frequency: 1
+                      unit: s
+                      stopMode: duration
+                      duration: 2.5
+                      durationUnit: s
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: frequency
+                        name: frequency
+                        dataType: number
+                      - id: cron
+                        name: cron
+                        dataType: string
+                      - id: duration
+                        name: duration
+                        dataType: number
+                      - id: endDate
+                        name: endDate
+                        dataType: any
+                    outputs:
+                      - id: tick
+                        name: tick
+                        dataType: any
+                        role: then
+                        flow: both
+                    position:
+                      x: 40
+                      'y': 120
+                    note: Every 1s, stop after 2.5s → exactly 2 ticks
+                  - id: a2b5c974-1eef-4fea-beb8-3a484d484776
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: expression
+                        value: 'Tick #{{.}}'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 480
+                      'y': 120
+                  - id: bf298866-50ec-4f98-92b5-682a2a170b7c
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: Timer finished — all ticks fired
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 480
+                      'y': 360
+                edges:
+                  - id: 8fd439c2-d69a-4815-8e8a-889b0704116e
+                    from:
+                      nodeId: 7d7434b0-3e42-4f2f-96bf-547c323d65ab
+                      portId: tick
+                    to:
+                      nodeId: a2b5c974-1eef-4fea-beb8-3a484d484776
+                      portId: data
+                    selector: .
+                  - id: 04c1d069-43c8-422e-9e59-c23e11d05780
+                    from:
+                      nodeId: 7d7434b0-3e42-4f2f-96bf-547c323d65ab
+                      portId: done
+                    to:
+                      nodeId: bf298866-50ec-4f98-92b5-682a2a170b7c
+                      portId: in
+                id: 907a7e52-e1e9-44b5-9a83-d5954524faf8
+                name: Timer
+                items: []
           - type: scenario
             tags: []
             params: []
@@ -17368,6 +17497,35 @@ collections:
                 outputs: []
                 position:
                   x: 1480
+                  'y': 3260
+              - id: cdddce49-0965-4157-bf6a-6a8385efa9e2
+                kind: timer
+                config: {}
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                  - id: frequency
+                    name: frequency
+                    dataType: number
+                  - id: cron
+                    name: cron
+                    dataType: string
+                  - id: duration
+                    name: duration
+                    dataType: number
+                  - id: endDate
+                    name: endDate
+                    dataType: any
+                outputs:
+                  - id: tick
+                    name: tick
+                    dataType: any
+                    role: then
+                    flow: both
+                position:
+                  x: 1960
                   'y': 3260
             edges: []
             id: cfb401ce-df62-4d41-88e2-8989206abe2f

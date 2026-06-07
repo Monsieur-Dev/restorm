@@ -874,7 +874,8 @@
       "math": "Math",
       "schema": "Schema validate",
       "readFile": "Read file",
-      "writeFile": "Write file"
+      "writeFile": "Write file",
+      "timer": "Ajastin"
     },
     "comparator": {
       "result": "tulos"
@@ -1255,7 +1256,8 @@
       "lists": "Lists",
       "math": "Math",
       "dataFormats": "Data formats",
-      "encoding": "Encoding"
+      "encoding": "Encoding",
+      "time": "Ajoitus"
     },
     "listOp": {
       "value": "list",
@@ -1331,6 +1333,25 @@
       "edit": "Open editor",
       "moreLines": "+{{count}} lines",
       "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "tila",
+      "modeOpt": {
+        "frequency": "taajuus",
+        "cron": "cron"
+      },
+      "frequency": "taajuus",
+      "unit": "yksikkö",
+      "cron": "cron",
+      "stop": "pysäytä jälkeen",
+      "stopOpt": {
+        "none": "ei koskaan",
+        "duration": "kesto",
+        "endDate": "päättymispäivä"
+      },
+      "duration": "kesto",
+      "endDate": "päättymispäivä",
+      "tick": "tikitys"
     }
   }
 }
