@@ -36,7 +36,7 @@ import type { SyntheticRequestPreview } from '../../../../../shared/utils/synthe
 import type { AddChildKind } from '../Sidebar/contextMenuBuilder'
 import { FolderView } from '../../Folders/FolderView'
 import { EnvironmentFolderView } from '../../Folders/EnvironmentFolderView'
-import type { EnvironmentFolder, Folder, Request, ScenarioNode, ScenarioEdge } from '../../../../../shared/types/collections'
+import type { EnvironmentFolder, Folder, Request, Scenario, ScenarioNode, ScenarioEdge } from '../../../../../shared/types/collections'
 import { getFolderIcon } from '../../../utils/treeSearch'
 import { Badge } from '../../common/Badge'
 import { ScenarioRunningBadge } from '../../common/ScenarioRunningBadge'
@@ -144,6 +144,10 @@ export interface RestormWorkbenchProps {
   getScenariosUsingScenario?: ((scenarioId: string) => ScenarioScenarioUsage[]) | undefined
   /** Get a reactive Folder by ID (for reactivity support) */
   getFolderById?: (id: string) => Folder | undefined
+  /** Get a reactive Scenario by ID (for reactivity support) — the editor tab
+   * re-fetches the live scenario from this rather than rendering its stored
+   * snapshot, so variable/port edits survive a hard refresh + tab restore. */
+  getScenarioById?: (id: string) => Scenario | undefined
   /** Check if a request is a favorite */
   isItemFavorite?: ((itemId: string) => boolean) | undefined
   /** Toggle favorite status on a request */
@@ -210,6 +214,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   onStateRestored,
   getRequestById,
   getFolderById,
+  getScenarioById,
   getEnvironmentFolderById,
   navigationEnabled,
   tabSwitcherAnchorSelector,
@@ -239,7 +244,30 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   // split pane (not just `groups[0]`) when the tree mutates
   // programmatically (e.g. via back/forward navigation).
   const lastActiveByGroupRef = useRef<Map<string, string>>(new Map())
-  
+
+  // Keep the per-group active-tab tracker in sync with EXTERNAL tree changes
+  // (e.g. a sidebar click opening a tab, which updates the controlled tree but
+  // never flows through `handleTreeChange`). Without this the tracker goes
+  // stale: closing an externally-opened tab reverts the active tab to its
+  // previous value, and because the stale "previous" still equals that value
+  // the revert looks like "no change" — so `onTabActivate` never fires and a
+  // sidebar that follows the active tab stays stuck on the just-closed item.
+  // We only refresh the tracker here (deliberately no `onTabActivate`):
+  // external opens already sync the sidebar through their own click handler,
+  // so firing again would double the navigation history.
+  useEffect(() => {
+    const syncTracker = (nodes: WorkbenchTree['groups']): void => {
+      for (const node of nodes) {
+        if (isTabGroupNode(node)) {
+          if (node.activeTabId) lastActiveByGroupRef.current.set(node.id, node.activeTabId)
+        } else if (isContainerNode(node)) {
+          syncTracker(node.groups)
+        }
+      }
+    }
+    syncTracker(tree.groups)
+  }, [tree])
+
   // Cache for tabs dropped from other windows (stores the full RestormEditorTab data)
   const droppedTabsCacheRef = useRef<Map<string, RestormEditorTab>>(new Map())
   
@@ -653,7 +681,12 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     // editable title + bookmark ribbons + favourite star, then two
     // sub-tabs (the graph + a Notes markdown editor).
     if (isScenarioEditorTab(effectiveTab)) {
-      const scenario = effectiveTab.scenario
+      // Re-fetch the live scenario from `rootItems` (like folder/env-folder
+      // tabs do) instead of trusting the tab's stored snapshot. After a hard
+      // refresh + tab restore, `effectiveTab.scenario` is a fresh copy
+      // disconnected from the model, so in-place edits (renamed variables,
+      // new ports) would never reach the editor without this lookup.
+      const scenario = getScenarioById?.(effectiveTab.scenario.id) ?? effectiveTab.scenario
       const scnTagColors = getTagColorsFromBreadcrumbs(breadcrumbs)
       const scnEnvFolderId = getEnvFolderIdFromBreadcrumbs(breadcrumbs)
       const handleScnTagColorChange = scnEnvFolderId && onTagColorChange
@@ -1122,7 +1155,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [t, onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onScenarioChange, onCreateScenarioRequest, onCreateScenarioChild, resolveBoundItem, resolveRequestEnv, resolveSyntheticPreview, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, getScenariosUsingRequest, onOpenScenarioFromRequest, getScenariosUsingScenario, updateMiniBrowserUrl])
+  }, [t, onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onScenarioChange, onCreateScenarioRequest, onCreateScenarioChild, resolveBoundItem, resolveRequestEnv, resolveSyntheticPreview, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getScenarioById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, getScenariosUsingRequest, onOpenScenarioFromRequest, getScenariosUsingScenario, updateMiniBrowserUrl])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(

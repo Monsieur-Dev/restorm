@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { Scheduler } from './scheduler'
 import type { NodeExecutor, ScenarioModel } from './types'
 import { forEachExecutor, aggregateExecutor } from './executors/timeAndFlowExecutors'
+import { setVariableExecutor } from './executors/pureExecutors'
 
 /**
  * AC: "ForEach ∥ et séquentiel testés ; Aggregate collecte à la fermeture de
@@ -240,5 +241,96 @@ describe('AC3 — Aggregate scope-close collection', () => {
     expect(fired).toBe(1)
     expect(s.status().state).toBe('failed')
     expect(result).toBeUndefined()
+  })
+})
+
+describe('plain aggregate (non-streaming) over a variable list', () => {
+  it('counts a variable holding an array, triggered by a plain (non-loop) `done`', async () => {
+    // A variable holds a real list; an aggregate(items = that variable) is
+    // triggered by the setVariable's UNIVERSAL `done` port. That `done` must
+    // keep the aggregate a plain array-reduce — it used to be mis-flagged as a
+    // loop collector (any `done` source), collect nothing → empty result. And
+    // the `items` variable reference must resolve to the live array.
+    const scenario = buildScenario(
+      [
+        { id: 'src', kind: 'now', outputs: ['value'] },
+        { id: 'sv', kind: 'setVariable', inputs: ['in', 'value'], outputs: [], config: { name: 'PetColors' } },
+        { id: 'agg', kind: 'aggregate', inputs: ['items', 'in'], outputs: ['result'], config: { op: 'count', items: { type: 'variable', value: 'PetColors' } } },
+        { id: 'sink', kind: 'object', inputs: ['result'], outputs: [] }
+      ],
+      [
+        { from: ['src', 'value'], to: ['sv', 'value'] },
+        { from: ['sv', 'done'], to: ['agg', 'in'] },
+        { from: ['agg', 'result'], to: ['sink', 'result'] }
+      ]
+    )
+    let result: unknown
+    const executors = new Map<string, NodeExecutor>([
+      ['src', () => ({ outputs: [{ port: 'value', value: ['Vert', 'Bleu', 'Rouge'] }] })],
+      ['sv', setVariableExecutor],
+      ['agg', aggregateExecutor],
+      ['sink', (act) => { result = act.inputs['result']; return { outputs: [] } }]
+    ])
+    const s = new Scheduler({ scenario, executors })
+    await s.run()
+    expect(s.status().state).toBe('completed')
+    expect(result).toBe(3)
+  })
+
+  it('counts a customListMulti stashed in a variable — a multi-select is a real list', async () => {
+    // setVariable PetColors = customListMulti[Vert, Bleu] (stored as the ARRAY,
+    // since a multi-select resolves to a list); aggregate(count) over the
+    // variable → 2. This is the end-to-end of "a list of colors is a real list".
+    const scenario = buildScenario(
+      [
+        { id: 'sv', kind: 'setVariable', inputs: ['in', 'value'], outputs: [], config: { name: 'PetColors', value: { type: 'customListMulti', listId: 'L', labels: ['Vert', 'Bleu'] } } },
+        { id: 'agg', kind: 'aggregate', inputs: ['items', 'in'], outputs: ['result'], config: { op: 'count', items: { type: 'variable', value: 'PetColors' } } },
+        { id: 'sink', kind: 'object', inputs: ['result'], outputs: [] }
+      ],
+      [
+        { from: ['sv', 'done'], to: ['agg', 'in'] },
+        { from: ['agg', 'result'], to: ['sink', 'result'] }
+      ]
+    )
+    let result: unknown
+    const executors = new Map<string, NodeExecutor>([
+      ['sv', setVariableExecutor],
+      ['agg', aggregateExecutor],
+      ['sink', (act) => { result = act.inputs['result']; return { outputs: [] } }]
+    ])
+    const s = new Scheduler({ scenario, executors })
+    await s.run()
+    expect(s.status().state).toBe('completed')
+    expect(result).toBe(2)
+  })
+})
+
+describe('aggregate sum/min/max/average — strict numeric (throws, no silent coercion)', () => {
+  const run = (op: string, items: unknown[]): unknown => {
+    const act = { nodeId: 'a', kind: 'aggregate', scope: [], inputs: { items } } as never
+    const ctx = { node: { id: 'a', kind: 'aggregate', config: { op }, inputs: [], outputs: [], position: { x: 0, y: 0 } }, variables: new Map() } as never
+    return (aggregateExecutor(act, ctx) as { outputs: { value: unknown }[] }).outputs[0]?.value
+  }
+
+  it('throws on a boolean item instead of coercing true→1', () => {
+    expect(() => run('sum', [1, 2, true])).toThrow(/non-numeric/)
+  })
+
+  it('throws on a non-numeric string / object / empty string', () => {
+    expect(() => run('sum', [1, 'abc'])).toThrow(/non-numeric/)
+    expect(() => run('max', [{ a: 1 }])).toThrow(/non-numeric/)
+    expect(() => run('average', [''])).toThrow(/non-numeric/)
+  })
+
+  it('accepts numbers and clean numeric strings', () => {
+    expect(run('sum', [15, '5'])).toBe(20)
+    expect(run('average', [10, 20])).toBe(15)
+    expect(run('min', [3, '1', 2])).toBe(1)
+  })
+
+  it('an empty list is fine — sum 0, min/max/average null (no throw)', () => {
+    expect(run('sum', [])).toBe(0)
+    expect(run('min', [])).toBeNull()
+    expect(run('average', [])).toBeNull()
   })
 })

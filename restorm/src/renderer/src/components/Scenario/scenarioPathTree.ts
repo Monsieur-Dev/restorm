@@ -62,6 +62,25 @@ function typeIcon(value: unknown): string {
   }
 }
 
+const BARE_IDENTIFIER = /^[A-Za-z_$][\w$]*$/
+
+/** Bracket-quote an object key for a JSON path. Prefers single quotes; falls
+ * back to double quotes when the key contains a single quote (the selector
+ * grammar reads `['…']` / `["…"]` but not escaped quotes inside them). */
+function bracketKey(key: string): string {
+  return key.includes("'") ? `["${key}"]` : `['${key}']`
+}
+
+/** Append an object key to a parent path. A clean identifier uses dot notation
+ * (`parent.key`); anything else (spaces, dots, punctuation) uses bracket
+ * notation (`parent['key with spaces']`) so the path stays a VALID, resolvable
+ * selector. An empty `parent` yields the root segment — a bare identifier, or a
+ * leading `['key']` for a special root key. */
+function appendKey(parent: string, key: string): string {
+  if (BARE_IDENTIFIER.test(key)) return parent ? `${parent}.${key}` : key
+  return `${parent}${bracketKey(key)}`
+}
+
 function buildNode(key: string, rawValue: unknown, path: string, expand: boolean): ListViewItemData {
   // A JSON-string body is shown drilled-into, not as one opaque string.
   const value = typeof rawValue === 'string' ? maybeParseJson(rawValue) ?? rawValue : rawValue
@@ -94,7 +113,7 @@ function buildNode(key: string, rawValue: unknown, path: string, expand: boolean
       isExpandable: true,
       isExpanded: expand,
       data: { path },
-      children: entries.map(([k, v]) => buildNode(k, v, `${path}.${k}`, true))
+      children: entries.map(([k, v]) => buildNode(k, v, appendKey(path, k), true))
     }
   }
   return {
@@ -115,5 +134,5 @@ export function buildScenarioPathTree(context: unknown): ListViewItemData[] {
   if (context === null || typeof context !== 'object') return []
   return Object.entries(context as Record<string, unknown>)
     .filter(([k]) => !ROOT_HIDDEN.has(k))
-    .map(([k, v]) => buildNode(k, v, k, k === 'response'))
+    .map(([k, v]) => buildNode(k, v, appendKey('', k), k === 'response'))
 }

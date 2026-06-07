@@ -338,7 +338,13 @@ const Tooltip: React.FC<TooltipProps> = ({
         {content}
       </div>
     </div>,
-    document.body
+    // Portal into the `.workbench` root when present (else `document.body`) — the
+    // SAME root a `ContextMenu` portals to. This keeps a tooltip/popover and a
+    // context menu opened from inside it in ONE stacking context, so the menu's
+    // higher `z-index` actually paints above the popover (a body-level popover
+    // would otherwise trap a workbench-level menu beneath it). The workbench
+    // root also carries the app font.
+    document.querySelector('.workbench') ?? document.body
   )
 }
 

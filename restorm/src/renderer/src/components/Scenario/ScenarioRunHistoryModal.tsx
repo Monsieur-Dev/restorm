@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Modal, Tabs, VerticalSashContainer, type Tab } from 'electron-core-ui/renderer'
+import { Button, Modal, Tabs, VerticalSashContainer, type Tab } from 'electron-core-ui/renderer'
 import type {
   ScenarioRunHistoryDetail,
   ScenarioRunHistoryEntry
@@ -162,15 +162,16 @@ export const ScenarioRunHistoryModal: React.FC<ScenarioRunHistoryModalProps> = (
                 >
                   <span className={`scn-run-history-dot scn-run-history-dot-${run.status}`} />
                   <span className="scn-run-history-when">{formatTimestamp(run.timestamp)}</span>
-                  <button
-                    type="button"
+                  <Button
+                    small
                     className={`scn-run-history-pin${run.pinned ? ' is-pinned' : ''}`}
+                    icon={run.pinned ? 'pinned' : 'pin'}
                     onClick={(e) => { e.stopPropagation(); togglePin(run) }}
-                    aria-label={run.pinned ? t('scenario.runHistory.unpin', 'Unpin') : t('scenario.runHistory.pin', 'Pin')}
-                    title={run.pinned ? t('scenario.runHistory.unpin', 'Unpin') : t('scenario.runHistory.pin', 'Pin')}
-                  >
-                    <span className={`codicon codicon-${run.pinned ? 'pinned' : 'pin'}`} />
-                  </button>
+                    options={{
+                      ariaLabel: run.pinned ? t('scenario.runHistory.unpin', 'Unpin') : t('scenario.runHistory.pin', 'Pin'),
+                      title: run.pinned ? t('scenario.runHistory.unpin', 'Unpin') : t('scenario.runHistory.pin', 'Pin')
+                    }}
+                  />
                 </li>
               ))
             )}

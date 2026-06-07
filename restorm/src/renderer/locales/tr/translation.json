@@ -149,6 +149,7 @@
       "createEnvironmentFolder": "Ortam klasörü oluştur",
       "delete": "Sil",
       "clone": "Çoğalt",
+      "copySuffix": "kopya",
       "rename": "Yeniden adlandır",
       "addToFavorites": "Favorilere ekle",
       "removeFromFavorites": "Favorilerden çıkar",
@@ -313,6 +314,8 @@
       "color": "Renk",
       "expression": "İfade",
       "boolean": "Boolean",
+      "null": "Null",
+      "list": "Liste",
       "variables": "Değişkenler",
       "environment": "Ortam"
     },
@@ -481,7 +484,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "\"{{fileName}}\" dosyasını favorilerden çıkarmak istediğinize emin misiniz?",
-    "noFilesHint": "Başlamak için bir dosya açın veya yeni bir tane oluşturun",
     "newAriaLabel": "Yeni bir koleksiyon oluştur",
     "openAriaLabel": "Diskten bir koleksiyon aç",
     "landmarkLabel": "Hoş geldiniz"
@@ -782,9 +784,12 @@
         "changeColor": "Change colour",
         "resetColor": "Reset colour",
         "addNote": "Add / edit note",
+        "runOnEachEvent": "Alınan her olayda çalıştır",
         "duplicate": "Duplicate",
         "delete": "Delete",
-        "deleteShortcut": "Del"
+        "deleteShortcut": "Del",
+        "copy": "Kopyala",
+        "paste": "Yapıştır"
       },
       "expand": "Genişlet",
       "collapse": "Daralt"
@@ -796,7 +801,6 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "locked": "Senaryo çalışırken düzenleme kilitli",
     "switch": {
       "addCase": "Durum ekle",
@@ -849,7 +853,30 @@
       "now": "Şimdi",
       "comparator": "Karşılaştırıcı",
       "setVariable": "Değişken ata",
-      "getVariable": "Değişkeni al"
+      "getVariable": "Değişkeni al",
+      "addToList": "Listeye ekle",
+      "removeFromList": "Listeden kaldır",
+      "cast": "Cast",
+      "regex": "Regex",
+      "json": "JSON",
+      "xml": "XML",
+      "yaml": "YAML",
+      "crypto": "Crypto",
+      "jwt": "JWT",
+      "datetime": "Date math",
+      "objectOp": "Object ops",
+      "url": "URL",
+      "random": "Random",
+      "throw": "Throw",
+      "retry": "Retry",
+      "listOp": "List ops",
+      "csv": "CSV",
+      "math": "Math",
+      "schema": "Schema validate",
+      "readFile": "Read file",
+      "writeFile": "Write file",
+      "timer": "Zamanlayıcı",
+      "code": "Kod"
     },
     "comparator": {
       "result": "sonuç"
@@ -866,7 +893,31 @@
       "data": "veri"
     },
     "assert": {
-      "message": "mesaj"
+      "message": "mesaj",
+      "operator": "operator",
+      "op": {
+        "eq": "equals",
+        "ne": "not equals",
+        "lt": "less than",
+        "lte": "less or equal",
+        "gt": "greater than",
+        "gte": "greater or equal",
+        "contains": "contains",
+        "isString": "is string",
+        "isNumber": "is number",
+        "isBoolean": "is boolean",
+        "isArray": "is array",
+        "isObject": "is object",
+        "isNull": "is null",
+        "exists": "exists",
+        "isEmpty": "is empty",
+        "matchesRegex": "matches regex",
+        "isOneOf": "is one of",
+        "deepEquals": "deep equals",
+        "lengthEq": "length ==",
+        "lengthGt": "length >",
+        "lengthLt": "length <"
+      }
     },
     "editRequest": "İsteği düzenle",
     "editScenario": "Senaryoyu düzenle",
@@ -876,10 +927,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "outputName": "Çıktı adı",
+      "addOutput": "Çıktı ekle",
+      "removeOutput": "Kaldır"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Çağıran senaryolar için gerekli"
+      "addParam": "Parametre ekle",
+      "removeParam": "Kaldır"
     },
     "runScenario": {
       "orphanInput": "Alt senaryoda eşleşen \"{{name}}\" parametresi yok",
@@ -889,6 +946,7 @@
     "validation": {
       "duplicateName": "\"{{name}}\" adı zaten başka bir eylem tarafından kullanılıyor.",
       "panelTitle": "{{count}} eylem hatası",
+      "runBlocked": "Çalıştırmadan önce {{count}} eylem hatasını düzeltin",
       "focusBox": "Bu eyleme git",
       "showErrors": "Hataları göster",
       "input": {
@@ -900,8 +958,7 @@
       },
       "output": {
         "missingName": "Bu çıktının bir adı olmalı.",
-        "duplicateName": "\"{{name}}\" adı zaten başka bir çıktı tarafından kullanılıyor.",
-        "valueRequired": "\"value\" girişi bir kaynağa bağlanmalı."
+        "duplicateName": "\"{{name}}\" adı zaten başka bir çıktı tarafından kullanılıyor."
       },
       "getVariable": {
         "noSelection": "Bir değişken seçilmeli.",
@@ -928,8 +985,10 @@
         "missing": "Bağlı istek artık mevcut değil."
       },
       "runScenario": {
-        "missing": "Bağlı senaryo artık mevcut değil.",
-        "requiredInput": "Zorunlu giriş \"{{name}}\" bir kaynağa bağlanmalıdır."
+        "missing": "Bağlı senaryo artık mevcut değil."
+      },
+      "file": {
+        "missingPath": "A file path is required."
       }
     },
     "usage": {
@@ -939,6 +998,8 @@
     "inspector": {
       "run": "Çalıştır",
       "debug": "Hata Ayıkla",
+      "undo": "Geri al",
+      "redo": "Yinele",
       "step": "Adım adım",
       "previewInfo": "Example data, based on previous request results.",
       "pause": "Duraklat",
@@ -948,9 +1009,11 @@
       "stop": "Durdur",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "Bu günlüğü kopyala",
       "clearLogs": "Günlükleri temizle",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "{{level}} günlüklerini göster",
+      "showLevelOnly": "Sağ tıklama: yalnızca bu düzey",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -1004,6 +1067,299 @@
       "toggle": "Kesme noktasını değiştir (F9)",
       "reached": "Kesme noktasına ulaşıldı — bu eylem henüz çalıştırılmadı. Devam etmek için F5'e, adımlamak için F7'ya basın.",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Mini haritayı aç/kapat"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Değer ekle",
+      "removeValue": "Değeri kaldır",
+      "updateVariable": "Kaynak değişkeni güncelle"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
+    },
+    "regex": {
+      "value": "value",
+      "operation": "operation",
+      "pattern": "pattern",
+      "flags": "flags",
+      "replacement": "replacement",
+      "result": "result",
+      "op": {
+        "extract": "extract",
+        "extractAll": "extract all",
+        "test": "test",
+        "replace": "replace",
+        "split": "split"
+      },
+      "flag": {
+        "i": "Case-insensitive",
+        "m": "Multiline (^ and $ match line breaks)",
+        "s": "Dotall (. matches newlines)"
+      }
+    },
+    "json": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "xml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "yaml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "crypto": {
+      "value": "value",
+      "operation": "operation",
+      "key": "key",
+      "keyPlaceholder": "secret",
+      "result": "result",
+      "op": {
+        "base64Encode": "base64 encode",
+        "base64Decode": "base64 decode",
+        "md5": "MD5",
+        "sha1": "SHA-1",
+        "sha256": "SHA-256",
+        "sha512": "SHA-512",
+        "hmacSha256": "HMAC-SHA256",
+        "uuid": "UUID v4"
+      }
+    },
+    "jwt": {
+      "value": "token",
+      "result": "result"
+    },
+    "datetime": {
+      "value": "date",
+      "operation": "operation",
+      "amount": "amount",
+      "unitLabel": "unit",
+      "format": "format",
+      "other": "second date",
+      "result": "result",
+      "op": {
+        "add": "add",
+        "subtract": "subtract",
+        "format": "format",
+        "diff": "diff"
+      },
+      "unit": {
+        "milliseconds": "milliseconds",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months",
+        "years": "years"
+      }
+    },
+    "objectOp": {
+      "value": "object",
+      "operation": "operation",
+      "path": "path",
+      "keys": "keys",
+      "setValue": "value",
+      "mergeWith": "merge with",
+      "result": "result",
+      "op": {
+        "get": "get",
+        "set": "set",
+        "merge": "merge",
+        "pick": "pick",
+        "omit": "omit",
+        "keys": "keys",
+        "values": "values"
+      }
+    },
+    "url": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "op": {
+        "encode": "encode",
+        "decode": "decode",
+        "parseQuery": "parse query",
+        "buildQuery": "build query",
+        "parseUrl": "parse URL"
+      }
+    },
+    "random": {
+      "operation": "operation",
+      "min": "min",
+      "max": "max",
+      "length": "length",
+      "items": "items",
+      "seed": "seed (optional)",
+      "seedPlaceholder": "reproducible",
+      "result": "result",
+      "op": {
+        "int": "integer",
+        "float": "float",
+        "string": "string",
+        "boolean": "boolean",
+        "pick": "pick"
+      }
+    },
+    "throw": {
+      "message": "message"
+    },
+    "retry": {
+      "maxAttempts": "max attempts",
+      "backoff": "backoff",
+      "delay": "delay",
+      "factor": "factor",
+      "retryOnError": "retry on error",
+      "retryOnStatus": "retry on HTTP status",
+      "retryOnFailure": "retry on any non-2xx",
+      "attempt": "attempt",
+      "exhausted": "exhausted",
+      "backoffOpt": {
+        "fixed": "fixed",
+        "linear": "linear",
+        "exponential": "exponential"
+      }
+    },
+    "menuGroups": {
+      "lists": "Lists",
+      "math": "Math",
+      "dataFormats": "Data formats",
+      "encoding": "Encoding",
+      "time": "Zamanlama"
+    },
+    "listOp": {
+      "value": "list",
+      "operation": "operation",
+      "result": "result",
+      "key": "key",
+      "order": "order",
+      "depth": "depth",
+      "size": "size",
+      "start": "start",
+      "end": "end",
+      "op": {
+        "sort": "sort",
+        "unique": "unique",
+        "reverse": "reverse",
+        "flatten": "flatten",
+        "chunk": "chunk",
+        "slice": "slice",
+        "groupBy": "group by"
+      }
+    },
+    "csv": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "delimiter": "delimiter",
+      "header": "header row",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "math": {
+      "a": "value",
+      "operation": "operation",
+      "result": "result",
+      "b": "with",
+      "min": "min",
+      "max": "max",
+      "precision": "precision",
+      "op": {
+        "round": "round",
+        "floor": "floor",
+        "ceil": "ceil",
+        "trunc": "truncate",
+        "abs": "absolute",
+        "sign": "sign",
+        "sqrt": "square root",
+        "min": "min",
+        "max": "max",
+        "clamp": "clamp"
+      }
+    },
+    "schema": {
+      "value": "value",
+      "schema": "JSON Schema",
+      "valid": "valid",
+      "invalid": "invalid",
+      "errors": "errors",
+      "editTitle": "Edit JSON Schema"
+    },
+    "readFile": {
+      "path": "path",
+      "content": "content"
+    },
+    "writeFile": {
+      "path": "path",
+      "mode": "mode",
+      "content": "content"
+    },
+    "codeField": {
+      "title": "Edit",
+      "edit": "Open editor",
+      "moreLines": "+{{count}} lines",
+      "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "mod",
+      "modeOpt": {
+        "frequency": "sıklık",
+        "cron": "cron"
+      },
+      "frequency": "sıklık",
+      "unit": "birim",
+      "cron": "cron",
+      "stop": "sonra durdur",
+      "stopOpt": {
+        "none": "asla",
+        "duration": "süre",
+        "endDate": "bitiş tarihi"
+      },
+      "duration": "süre",
+      "endDate": "bitiş tarihi",
+      "tick": "tik"
+    },
+    "code": {
+      "input": "girdi",
+      "code": "kod (TypeScript)",
+      "modalTitle": "Kodu düzenle",
+      "result": "sonuç",
+      "timeout": "Zaman aşımı (sn)"
     }
   }
 }

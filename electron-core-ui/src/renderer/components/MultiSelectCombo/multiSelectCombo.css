@@ -47,7 +47,11 @@
 
 .ecu-multi-select-combo-dropdown {
   position: fixed;
-  z-index: 3000;
+
+  /* Above a popover/tooltip (z-index 10000), matching SelectBox / CustomDropdown
+   * (10001), so a multi-select opened from inside a popover paints over it
+   * instead of being trapped beneath. */
+  z-index: 10001;
   border: 1px solid var(--dropdown-border, var(--panel-border));
   border-radius: 4px;
   background: var(--dropdown-background, var(--editor-background));

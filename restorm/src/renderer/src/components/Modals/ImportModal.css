@@ -28,7 +28,7 @@
   display: block;
   font-weight: 500;
   font-size: 13px;
-  color: var(--vscode-foreground);
+  color: var(--foreground);
   /* The label isn't `for=""`-bound to its input (the InputBox sits in
    * a sibling wrapper), so the default `<label>` clickable behaviour
    * doesn't actually focus anything — drop the pointer cursor that
@@ -48,21 +48,21 @@
 }
 
 .import-loading {
-  background: var(--vscode-inputValidation-infoBackground);
-  border: 1px solid var(--vscode-inputValidation-infoBorder);
-  color: var(--vscode-inputValidation-infoForeground);
+  background: var(--inputValidation-infoBackground);
+  border: 1px solid var(--inputValidation-infoBorder);
+  color: var(--inputValidation-infoForeground);
 }
 
 .import-error {
-  background: var(--vscode-inputValidation-errorBackground);
-  border: 1px solid var(--vscode-inputValidation-errorBorder);
-  color: var(--vscode-inputValidation-errorForeground);
+  background: var(--inputValidation-errorBackground);
+  border: 1px solid var(--inputValidation-errorBorder);
+  color: var(--inputValidation-errorForeground);
 }
 
 .import-no-results {
-  background: var(--vscode-inputValidation-warningBackground);
-  border: 1px solid var(--vscode-inputValidation-warningBorder);
-  color: var(--vscode-inputValidation-warningForeground);
+  background: var(--inputValidation-warningBackground);
+  border: 1px solid var(--inputValidation-warningBorder);
+  color: var(--inputValidation-warningForeground);
 }
 
 .import-preview-section {
@@ -147,12 +147,12 @@
 }
 
 .import-preview {
-  border: 1px solid var(--vscode-editorWidget-border);
+  border: 1px solid var(--editorWidget-border);
   border-radius: 4px;
   overflow: auto;
   flex: 1;
   min-height: 0;
-  background: var(--vscode-editor-background);
+  background: var(--editor-background);
 }
 
 /* Drop-zone marker. The wrapper takes the remaining vertical space
@@ -253,7 +253,7 @@
   justify-content: flex-end;
   gap: 8px;
   padding-top: 8px;
-  border-top: 1px solid var(--vscode-editorWidget-border);
+  border-top: 1px solid var(--editorWidget-border);
 }
 
 /* Cross-section fade between the rotating-format showcase (empty input)

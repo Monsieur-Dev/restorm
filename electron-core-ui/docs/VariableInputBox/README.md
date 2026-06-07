@@ -20,7 +20,9 @@ It reuses the visual look & feel of the standard `InputBox` while providing Hand
 - Autocompletion of variables:
   - Triggered by `Ctrl+Space`
   - Triggered by typing `{`
-  - Inserts `{{variableName}}`
+  - Inserts `{{variableName}}` — or `{{'variable name'}}` when the name contains
+    whitespace, since a bare `{{a b}}` parses as a Handlebars helper call and
+    never resolves the value (the hover lookup understands both forms)
 - Hover tooltip displaying the variable value (and optional description)
 - Theme integration:
   - Uses `document.documentElement.dataset.theme` (`data-theme` attribute) to detect dark/light/hc

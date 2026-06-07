@@ -1,5 +1,8 @@
 .tvf-control-group { width: 100%; min-width: 100px; }
 .tvf-control-group > :first-child { flex: 1 1 auto; min-width: 0; }
+/* The colour swatch is a fixed-size trailing button — it must not grow/shrink,
+ * so the hex field keeps the flex space. */
+.tvf-color-swatch { display: inline-flex; flex: 0 0 auto; }
 /* The environment picker button fills the field side of the control group. */
 .tvf-env-button { flex: 1 1 auto; min-width: 0; }
 /* Give the env label breathing room: 20px of inner side padding. (The button's
@@ -8,4 +11,23 @@
 .tvf-env-button .button {
   padding-left: 20px;
   padding-right: 20px;
+}
+
+/* ControlGroup deliberately excludes a `.select-box.custom-trigger` from its
+ * border-merge (it assumes such a combo is the last child and keeps its right
+ * border). In the typed-value field the SelectBox is followed by the type
+ * indicator, so that exclusion leaves a doubled border between the combo and
+ * the indicator — unlike MultiSelectCombo, whose border IS merged. Re-merge it
+ * here, scoped to this control group so other ControlGroup users are untouched. */
+.tvf-control-group.ecu-control-group--horizontal > *:not(:last-child) .select-box.custom-trigger {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-right-color: transparent !important;
+}
+
+/* A type-locked field (e.g. the run-parameters prompt): the indicator button
+ * stays so the icon still tells the user which type to enter, but it opens no
+ * menu — drop the clickable affordance so it doesn't read as interactive. */
+.tvf-type-indicator-locked {
+  cursor: default;
 }

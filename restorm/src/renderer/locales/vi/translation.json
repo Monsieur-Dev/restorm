@@ -148,6 +148,7 @@
       "createEnvironmentFolder": "Tạo thư mục môi trường",
       "delete": "Xóa",
       "clone": "Nhân bản",
+      "copySuffix": "bản sao",
       "rename": "Đổi tên",
       "addToFavorites": "Thêm vào mục yêu thích",
       "removeFromFavorites": "Xóa khỏi mục yêu thích",
@@ -312,6 +313,8 @@
       "color": "Màu",
       "expression": "Biểu thức",
       "boolean": "Boolean",
+      "null": "Null",
+      "list": "Danh sách",
       "variables": "Biến",
       "environment": "Môi trường"
     },
@@ -480,7 +483,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Bạn có chắc chắn muốn xóa \"{{fileName}}\" khỏi mục yêu thích không?",
-    "noFilesHint": "Mở một tệp hoặc tạo tệp mới để bắt đầu",
     "newAriaLabel": "Tạo bộ sưu tập mới",
     "openAriaLabel": "Mở bộ sưu tập từ đĩa",
     "landmarkLabel": "Chào mừng"
@@ -781,9 +783,12 @@
         "changeColor": "Change colour",
         "resetColor": "Reset colour",
         "addNote": "Add / edit note",
+        "runOnEachEvent": "Chạy mỗi khi nhận sự kiện",
         "duplicate": "Duplicate",
         "delete": "Delete",
-        "deleteShortcut": "Del"
+        "deleteShortcut": "Del",
+        "copy": "Sao chép",
+        "paste": "Dán"
       },
       "expand": "Mở rộng",
       "collapse": "Thu gọn"
@@ -795,7 +800,6 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "locked": "Đã khóa chỉnh sửa khi kịch bản đang chạy",
     "switch": {
       "addCase": "Thêm trường hợp",
@@ -848,7 +852,30 @@
       "now": "Bây giờ",
       "comparator": "Bộ so sánh",
       "setVariable": "Đặt biến",
-      "getVariable": "Lấy biến"
+      "getVariable": "Lấy biến",
+      "addToList": "Thêm vào danh sách",
+      "removeFromList": "Xóa khỏi danh sách",
+      "cast": "Cast",
+      "regex": "Regex",
+      "json": "JSON",
+      "xml": "XML",
+      "yaml": "YAML",
+      "crypto": "Crypto",
+      "jwt": "JWT",
+      "datetime": "Date math",
+      "objectOp": "Object ops",
+      "url": "URL",
+      "random": "Random",
+      "throw": "Throw",
+      "retry": "Retry",
+      "listOp": "List ops",
+      "csv": "CSV",
+      "math": "Math",
+      "schema": "Schema validate",
+      "readFile": "Read file",
+      "writeFile": "Write file",
+      "timer": "Bộ hẹn giờ",
+      "code": "Mã"
     },
     "comparator": {
       "result": "kết quả"
@@ -865,7 +892,31 @@
       "data": "dữ liệu"
     },
     "assert": {
-      "message": "thông báo"
+      "message": "thông báo",
+      "operator": "operator",
+      "op": {
+        "eq": "equals",
+        "ne": "not equals",
+        "lt": "less than",
+        "lte": "less or equal",
+        "gt": "greater than",
+        "gte": "greater or equal",
+        "contains": "contains",
+        "isString": "is string",
+        "isNumber": "is number",
+        "isBoolean": "is boolean",
+        "isArray": "is array",
+        "isObject": "is object",
+        "isNull": "is null",
+        "exists": "exists",
+        "isEmpty": "is empty",
+        "matchesRegex": "matches regex",
+        "isOneOf": "is one of",
+        "deepEquals": "deep equals",
+        "lengthEq": "length ==",
+        "lengthGt": "length >",
+        "lengthLt": "length <"
+      }
     },
     "editRequest": "Sửa yêu cầu",
     "editScenario": "Sửa kịch bản",
@@ -875,10 +926,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "outputName": "Tên đầu ra",
+      "addOutput": "Thêm đầu ra",
+      "removeOutput": "Xóa"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Bắt buộc cho các kịch bản gọi đến"
+      "addParam": "Thêm tham số",
+      "removeParam": "Xóa"
     },
     "runScenario": {
       "orphanInput": "Không có tham số \"{{name}}\" khớp trong kịch bản con",
@@ -888,6 +945,7 @@
     "validation": {
       "duplicateName": "Tên \"{{name}}\" đã được hành động khác sử dụng.",
       "panelTitle": "{{count}} lỗi hành động",
+      "runBlocked": "Sửa {{count}} lỗi hành động trước khi chạy",
       "focusBox": "Đến hành động này",
       "showErrors": "Hiện lỗi",
       "input": {
@@ -899,8 +957,7 @@
       },
       "output": {
         "missingName": "Đầu ra này phải có tên.",
-        "duplicateName": "Tên \"{{name}}\" đã được đầu ra khác sử dụng.",
-        "valueRequired": "Đầu vào \"value\" phải được nối với một nguồn."
+        "duplicateName": "Tên \"{{name}}\" đã được đầu ra khác sử dụng."
       },
       "getVariable": {
         "noSelection": "Phải chọn một biến.",
@@ -927,8 +984,10 @@
         "missing": "Yêu cầu được liên kết không còn tồn tại."
       },
       "runScenario": {
-        "missing": "Kịch bản được liên kết không còn tồn tại.",
-        "requiredInput": "Đầu vào bắt buộc \"{{name}}\" phải được nối với một nguồn."
+        "missing": "Kịch bản được liên kết không còn tồn tại."
+      },
+      "file": {
+        "missingPath": "A file path is required."
       }
     },
     "usage": {
@@ -938,6 +997,8 @@
     "inspector": {
       "run": "Chạy",
       "debug": "Gỡ lỗi",
+      "undo": "Hoàn tác",
+      "redo": "Làm lại",
       "step": "Từng bước",
       "previewInfo": "Example data, based on previous request results.",
       "pause": "Tạm dừng",
@@ -947,9 +1008,11 @@
       "stop": "Dừng",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "Sao chép log này",
       "clearLogs": "Xóa nhật ký",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Hiển thị log {{level}}",
+      "showLevelOnly": "Nhấp chuột phải: chỉ cấp độ này",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -1003,6 +1066,299 @@
       "toggle": "Bật/tắt điểm dừng (F9)",
       "reached": "Đã đến điểm dừng — hành động này chưa được thực thi. Nhấn F5 để tiếp tục, hoặc F7 để chạy từng bước.",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Bật/tắt minimap"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Thêm giá trị",
+      "removeValue": "Xóa giá trị",
+      "updateVariable": "Cập nhật biến nguồn"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
+    },
+    "regex": {
+      "value": "value",
+      "operation": "operation",
+      "pattern": "pattern",
+      "flags": "flags",
+      "replacement": "replacement",
+      "result": "result",
+      "op": {
+        "extract": "extract",
+        "extractAll": "extract all",
+        "test": "test",
+        "replace": "replace",
+        "split": "split"
+      },
+      "flag": {
+        "i": "Case-insensitive",
+        "m": "Multiline (^ and $ match line breaks)",
+        "s": "Dotall (. matches newlines)"
+      }
+    },
+    "json": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "xml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "yaml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "crypto": {
+      "value": "value",
+      "operation": "operation",
+      "key": "key",
+      "keyPlaceholder": "secret",
+      "result": "result",
+      "op": {
+        "base64Encode": "base64 encode",
+        "base64Decode": "base64 decode",
+        "md5": "MD5",
+        "sha1": "SHA-1",
+        "sha256": "SHA-256",
+        "sha512": "SHA-512",
+        "hmacSha256": "HMAC-SHA256",
+        "uuid": "UUID v4"
+      }
+    },
+    "jwt": {
+      "value": "token",
+      "result": "result"
+    },
+    "datetime": {
+      "value": "date",
+      "operation": "operation",
+      "amount": "amount",
+      "unitLabel": "unit",
+      "format": "format",
+      "other": "second date",
+      "result": "result",
+      "op": {
+        "add": "add",
+        "subtract": "subtract",
+        "format": "format",
+        "diff": "diff"
+      },
+      "unit": {
+        "milliseconds": "milliseconds",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months",
+        "years": "years"
+      }
+    },
+    "objectOp": {
+      "value": "object",
+      "operation": "operation",
+      "path": "path",
+      "keys": "keys",
+      "setValue": "value",
+      "mergeWith": "merge with",
+      "result": "result",
+      "op": {
+        "get": "get",
+        "set": "set",
+        "merge": "merge",
+        "pick": "pick",
+        "omit": "omit",
+        "keys": "keys",
+        "values": "values"
+      }
+    },
+    "url": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "op": {
+        "encode": "encode",
+        "decode": "decode",
+        "parseQuery": "parse query",
+        "buildQuery": "build query",
+        "parseUrl": "parse URL"
+      }
+    },
+    "random": {
+      "operation": "operation",
+      "min": "min",
+      "max": "max",
+      "length": "length",
+      "items": "items",
+      "seed": "seed (optional)",
+      "seedPlaceholder": "reproducible",
+      "result": "result",
+      "op": {
+        "int": "integer",
+        "float": "float",
+        "string": "string",
+        "boolean": "boolean",
+        "pick": "pick"
+      }
+    },
+    "throw": {
+      "message": "message"
+    },
+    "retry": {
+      "maxAttempts": "max attempts",
+      "backoff": "backoff",
+      "delay": "delay",
+      "factor": "factor",
+      "retryOnError": "retry on error",
+      "retryOnStatus": "retry on HTTP status",
+      "retryOnFailure": "retry on any non-2xx",
+      "attempt": "attempt",
+      "exhausted": "exhausted",
+      "backoffOpt": {
+        "fixed": "fixed",
+        "linear": "linear",
+        "exponential": "exponential"
+      }
+    },
+    "menuGroups": {
+      "lists": "Lists",
+      "math": "Math",
+      "dataFormats": "Data formats",
+      "encoding": "Encoding",
+      "time": "Hẹn giờ"
+    },
+    "listOp": {
+      "value": "list",
+      "operation": "operation",
+      "result": "result",
+      "key": "key",
+      "order": "order",
+      "depth": "depth",
+      "size": "size",
+      "start": "start",
+      "end": "end",
+      "op": {
+        "sort": "sort",
+        "unique": "unique",
+        "reverse": "reverse",
+        "flatten": "flatten",
+        "chunk": "chunk",
+        "slice": "slice",
+        "groupBy": "group by"
+      }
+    },
+    "csv": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "delimiter": "delimiter",
+      "header": "header row",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "math": {
+      "a": "value",
+      "operation": "operation",
+      "result": "result",
+      "b": "with",
+      "min": "min",
+      "max": "max",
+      "precision": "precision",
+      "op": {
+        "round": "round",
+        "floor": "floor",
+        "ceil": "ceil",
+        "trunc": "truncate",
+        "abs": "absolute",
+        "sign": "sign",
+        "sqrt": "square root",
+        "min": "min",
+        "max": "max",
+        "clamp": "clamp"
+      }
+    },
+    "schema": {
+      "value": "value",
+      "schema": "JSON Schema",
+      "valid": "valid",
+      "invalid": "invalid",
+      "errors": "errors",
+      "editTitle": "Edit JSON Schema"
+    },
+    "readFile": {
+      "path": "path",
+      "content": "content"
+    },
+    "writeFile": {
+      "path": "path",
+      "mode": "mode",
+      "content": "content"
+    },
+    "codeField": {
+      "title": "Edit",
+      "edit": "Open editor",
+      "moreLines": "+{{count}} lines",
+      "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "chế độ",
+      "modeOpt": {
+        "frequency": "tần suất",
+        "cron": "cron"
+      },
+      "frequency": "tần suất",
+      "unit": "đơn vị",
+      "cron": "cron",
+      "stop": "dừng sau",
+      "stopOpt": {
+        "none": "không bao giờ",
+        "duration": "thời lượng",
+        "endDate": "ngày kết thúc"
+      },
+      "duration": "thời lượng",
+      "endDate": "ngày kết thúc",
+      "tick": "tích tắc"
+    },
+    "code": {
+      "input": "đầu vào",
+      "code": "mã (TypeScript)",
+      "modalTitle": "Sửa mã",
+      "result": "kết quả",
+      "timeout": "Thời gian chờ (s)"
     }
   }
 }

@@ -1,0 +1,125 @@
+- message: 🔵 [<time>] ▶ Auth login
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: Clear Logs
+    id: <uuid>
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:5110/clear_logs
+        method: POST
+        headers: {}
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json; charset=utf-8
+          date: <dynamic-time>
+          server: Kestrel
+          transfer-encoding: chunked
+        body: '{"cleared":true}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: Clear Tokens
+    id: <uuid>
+    in: true
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:5110/cleartokens
+        method: POST
+        headers: {}
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json; charset=utf-8
+          date: <dynamic-time>
+          server: Kestrel
+          transfer-encoding: chunked
+        body: '{"cleared":true}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: d2000000-0000-0000-0000-00000000auth
+    label: Get Pet by Id
+    id: <uuid>
+    in: true
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:5110/pet/1
+        method: GET
+        headers:
+          Accept: application/json
+          Authorization: <masked>
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json; charset=utf-8
+          date: <dynamic-time>
+          server: Kestrel
+          transfer-encoding: chunked
+        body: '{"id":1,"name":"Rex","status":"available","category":{"id":1,"name":"Dogs"},"tags":[{"id":1,"name":"friendly"}]}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start assert
+  data:
+    operator: contains
+    b: Rex
+    message: Get Pet by Id should return Rex
+    a: '{"id":1,"name":"Rex","status":"available","category":{"id":1,"name":"Dogs"},"tags":[{"id":1,"name":"friendly"}]}'
+- message: ⚪ [<time>] done assert
+  data:
+    then: '{"id":1,"name":"Rex","status":"available","category":{"id":1,"name":"Dogs"},"tags":[{"id":1,"name":"friendly"}]}'
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: Login Probe
+    id: <uuid>
+    in: '{"id":1,"name":"Rex","status":"available","category":{"id":1,"name":"Dogs"},"tags":[{"id":1,"name":"friendly"}]}'
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: http://localhost:5110/loginprobe
+        method: GET
+        headers: {}
+      response:
+        status: 200
+        statusText: OK
+        headers:
+          content-type: application/json; charset=utf-8
+          date: <dynamic-time>
+          server: Kestrel
+          transfer-encoding: chunked
+        body: '{"calls":["probe login: VALID_CLIENT_ID -> 200"]}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start assert
+  data:
+    operator: contains
+    b: "probe login: VALID_CLIENT_ID -> 200"
+    message: Login route should have been called
+    a: '{"calls":["probe login: VALID_CLIENT_ID -> 200"]}'
+- message: ⚪ [<time>] done assert
+  data:
+    then: '{"calls":["probe login: VALID_CLIENT_ID -> 200"]}'
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: Login triggered by Get Pet by Id
+    in: '{"calls":["probe login: VALID_CLIENT_ID -> 200"]}'
+- message: 🔵 [<time>] Login triggered by Get Pet by Id
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ Auth login

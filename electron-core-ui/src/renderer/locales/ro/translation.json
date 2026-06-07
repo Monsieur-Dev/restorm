@@ -148,6 +148,10 @@
       "autoSaveDelay": {
         "title": "Întârziere salvare automată",
         "description": "Controlează întârzierea în milisecunde după care un editor modificat este salvat automat. Se aplică numai când Salvarea automată este setată pe După întârziere."
+      },
+      "reopenLastFile": {
+        "title": "Redeschide automat ultimul fișier deschis",
+        "description": "Când este activat, redeschide la pornire ultimul fișier pe care l-ați avut deschis — dar numai dacă aplicația a fost închisă în timp ce un fișier era deschis."
       }
     }
   },

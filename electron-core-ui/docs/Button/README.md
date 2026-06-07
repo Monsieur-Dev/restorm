@@ -37,15 +37,28 @@ interface ButtonProps {
   disabled?: boolean
   secondary?: boolean
   appearance?: 'default' | 'rainbow'
-  size?: 'sm' | 'default' | 'lg' | 'xl'
+  size?: 'sm' | 'md' | 'default' | 'lg' | 'xl'  // 'md' = 28×28 square icon button
   /** Shorthand for `size="sm"` — convenient for compact toolbar / icon buttons. */
   small?: boolean
+  /** Shorthand for `size="md"` — a 28×28 square icon button that lines up flush
+   *  with a 28px-tall control (InputBox / SelectBox) inside a ControlGroup. */
+  medium?: boolean
   line?: boolean
+  /** Link appearance: no background, left-aligned, pointer cursor. Leading
+   *  `icon` is NOT underlined; only the text label is. No trailing glyph — use
+   *  `externalLink` for the "opens elsewhere" variant. Inline navigation. */
+  link?: boolean
+  /** Same look as `link` + a trailing `codicon-link-external` after the label,
+   *  for affordances that open the target in another tab / window. */
+  externalLink?: boolean
   emphasis?: number
   fullWidth?: boolean
   backgroundColor?: string
   align?: 'left' | 'center' | 'right'
   onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void
+  /** Right-click handler (the Button calls preventDefault for you) — e.g. an
+   *  icon button that opens the same menu on primary and context click. */
+  onContextMenu?: (event: React.MouseEvent<HTMLAnchorElement>) => void
   className?: string
   style?: React.CSSProperties
   id?: string
@@ -118,6 +131,22 @@ Horizontal alignment of the label. Defaults to `'center'` (CTA-style). `'left'` 
 ```typescript
 <Button fullWidth secondary line align="left" onClick={pickEnv}>
   {env.name}
+</Button>
+```
+
+##### `link` and `externalLink`
+
+Render the button as an inline link: no background, left-aligned, pointer cursor, only the text label underlined (the leading `icon` stays un-underlined, so a badge/glyph keeps its own look). `link` is for navigation within the current view; `externalLink` adds a trailing `codicon-link-external` for affordances that open the target somewhere else (another tab / window).
+
+```typescript
+// In-view navigation (e.g. jump to the erroring node)
+<Button link icon="warning" onClick={() => focusNode(err.nodeId)}>
+  {err.message}
+</Button>
+
+// Opens the bound item in another tab — trailing external-link glyph
+<Button externalLink icon={<Badge type="SCENARIO" />} onClick={() => openTab(scenario.id)}>
+  {scenario.name}
 </Button>
 ```
 

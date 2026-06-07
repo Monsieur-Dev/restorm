@@ -17,6 +17,33 @@ export interface ScenarioKindDoc {
   config?: Record<string, string>
 }
 
+/**
+ * Documentation for every typed-value shape a node `config` (or an input's
+ * `valueType`) can carry — the `{ type, … }` objects that flow through ports.
+ * A scenario `config` accepts a free-form bag, so these are not schema-enforced;
+ * this is the reference an MCP client needs to author them without reading
+ * source. Surfaced by `describe_scenario_kinds` alongside the kind catalogue.
+ *
+ * Keyed by the literal `type` discriminator (the union in `valuePersistence.ts`).
+ */
+export const VALUE_TYPE_DOCS: Record<string, { shape: string; summary: string }> = {
+  string: { shape: '{ type: "string", value: "<text>" }', summary: 'A plain text value.' },
+  numeric: { shape: '{ type: "numeric", value: 42, format: "decimal" }', summary: 'A number. `format` is a display hint (e.g. decimal).' },
+  boolean: { shape: '{ type: "boolean", value: true }', summary: 'A boolean.' },
+  datetime: { shape: '{ type: "datetime", value: "<ISO-8601>", format: "<fmt>" }', summary: 'A date/time (ISO string).' },
+  color: { shape: '{ type: "color", value: "#rrggbb" }', summary: 'A colour (hex string).' },
+  expression: { shape: '{ type: "expression", value: "{{handlebars}}" }', summary: 'A Handlebars template rendered at runtime against inputs + run variables.' },
+  password: { shape: '{ type: "password" }', summary: 'A secret/password value (the secret itself is held out-of-band, not in the graph).' },
+  null: { shape: '{ type: "null" }', summary: 'The null value. Equal only to another null (no coercion).' },
+  list: { shape: '{ type: "list", items: [ <PersistedValue>, … ] }', summary: 'An agnostic, untyped list — an array of any typed values (lists can nest).' },
+  enum: { shape: '{ type: "enum", value: "<option>", enumDefinitionId: "<id>" }', summary: 'A single pick from an enum definition.' },
+  enumList: { shape: '{ type: "enumList", value: ["a","b"], enumDefinitionId: "<id>" }', summary: 'A multi-pick from an enum → resolves to a real array.' },
+  customList: { shape: '{ type: "customList", listId: "<id>", label: "<picked>" }', summary: 'A single pick from a user-defined value list.' },
+  customListMulti: { shape: '{ type: "customListMulti", listId: "<id>", labels: ["a","b"] }', summary: 'A multi-pick from a user-defined value list → resolves to a real array.' },
+  variable: { shape: '{ type: "variable", value: "<name>" }', summary: 'A reference to a run variable (declared by an input/setVariable); read live at runtime.' },
+  environment: { shape: '{ type: "environment", value: "<environmentId>" }', summary: 'The selected environment; an empty / unresolvable id resolves to null.' }
+}
+
 export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
   input: {
     summary: 'Declares a named scenario input/param. Seeded at run start from run_scenario params; prompts the user mid-run if reached without a value.',
@@ -70,6 +97,14 @@ export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
     summary: 'Partitions a collection by a predicate: matches on `kept`, non-matches on `rejected` (so dropped items can be routed, not lost).',
     config: { property: 'Item field to test.', operator: 'lt | lte | eq | gte | gt | ne | contains', value: 'Value to compare against.' }
   },
+  addToList: {
+    summary: 'Appends each `values` row (one element apiece) to the `list` target, emitting the new list on `result`. Pure by default — persist it back with a downstream setVariable, or set `updateSourceVariable` to write it straight into the source variable.',
+    config: { list: 'Target list: a list-typed variable reference `{ type:"variable", value:"<name>" }`, or wire a list into the `list` port. (No inline list literal — you can\'t author a list here.)', values: 'Rows of values to append: `{ id, value }[]` (like object properties); each row gets a `<id>` input port to wire.', updateSourceVariable: 'When true AND `list` is an un-wired variable, also writes the new list back into that variable (push). Default false (pure).' }
+  },
+  removeFromList: {
+    summary: 'Removes from `list` every element deep-equal to any `values` row, emitting the new list on `result`. Pure by default; `updateSourceVariable` writes it back to the source variable.',
+    config: { list: 'Target list: a list-typed variable reference `{ type:"variable", value:"<name>" }`, or wire a list into the `list` port. (No inline list literal.)', values: 'Rows of values to remove: `{ id, value }[]` (like object properties); each row gets a `<id>` input port to wire.', updateSourceVariable: 'When true AND `list` is an un-wired variable, also writes the new list back into that variable. Default false (pure).' }
+  },
   wait: {
     summary: 'Sleeps for a duration, then passes the trigger through. Aborts cleanly on Stop.',
     config: { duration: 'Duration value.', inputUnit: 'ms | s | min | h — unit for a wired `duration` (default s).', durationMs: 'Alternative fixed duration in ms.' }
@@ -81,6 +116,10 @@ export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
   now: {
     summary: 'Emits the current time.',
     config: { format: 'datetime (ISO, default) | epoch | string.' }
+  },
+  timer: {
+    summary: 'Fires its `tick` body on each interval — a frequency (number + unit) OR a `cron` expression — bounded by an optional total duration / end date, else it runs until the run is stopped. The `tick` value is the 0-based tick index; `done` fires (with the total tick count) when it stops. frequency / cron / duration / endDate are wireable inputs.',
+    config: { mode: 'frequency | cron', frequency: 'Interval count when not wired (with `unit`).', unit: 's | min | h (default s).', cron: 'A 5/6-field cron expression (mode=cron).', duration: 'Optional total duration when not wired (with `durationUnit`).', durationUnit: 's | min | h.', endDate: 'Optional ISO end date (stop firing after it).' }
   },
   arithmetic: {
     summary: 'Computes `a op b` → number on `result`.',
@@ -107,15 +146,95 @@ export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
     config: { name: 'Variable name.' }
   },
   transform: {
-    summary: 'Applies a Handlebars `expression` to its inputs + run variables, emitting the rendered result on `out`.',
-    config: { expression: 'Handlebars template.' }
+    summary: 'Applies a Handlebars `expression` to its `value` input + run variables, emitting the rendered result on `out`. Wire the optional `expression` input to drive the template text from an upstream value instead of the inline editor.',
+    config: { expression: 'Handlebars template (used when the `expression` input is not wired).' }
+  },
+  code: {
+    summary: 'Runs the user TypeScript/JavaScript `code` in a QuickJS sandbox (no host / filesystem / network access). The wired `value` input is exposed as `input`, the run variables as `vars`, and a curated standard library as globals + `require()` (lodash/`_`, moment, uuid, nanoid, CryptoJS, Ajv). The body runs as an async function, so a top-level `return` and `await` (Promise / async-await) both work. Whatever the script returns flows out of `result`; `console.log(...)` lines appear in the run log; a script error or timeout routes to `error`.',
+    config: { code: 'TypeScript/JavaScript source — a function body that may `return` the result.', timeout: 'Execution budget in seconds (default 5, max 60).' }
+  },
+  cast: {
+    summary: 'Converts the `value` input (wired or inline) to `targetType` on `result`; an impossible cast (or a null value) routes to `error`. number↔boolean (0/1, truthiness), numeric/boolean string parsing, dates ISO; any → list wraps into [value].',
+    config: { targetType: 'number | string | boolean | date | list', value: 'Inline value to cast (typed value) when not wired.' }
+  },
+  regex: {
+    summary: 'Runs `op` over the `value` string on `result`; an invalid pattern routes to `error`, a non-match is not an error. extract → first match (named-groups object | first group | whole match, else null); extractAll → list; test → boolean; replace → string (supports $1 / $<name>); split → list.',
+    config: { op: 'extract | extractAll | test | replace | split', pattern: 'Regular-expression source.', flags: 'Flags i/m/s (g is implicit for extractAll/replace).', replacement: 'Replacement string (replace op).', value: 'Inline string when not wired.' }
+  },
+  json: {
+    summary: 'parse → the `value` JSON string into a value (malformed JSON → `error`; an already-structured value passes through); stringify → any `value` to a JSON string on `result` (`indent>0` pretty-prints; a circular / non-serialisable value → `error`).',
+    config: { op: 'parse | stringify', indent: 'Pretty-print spaces for stringify (0 = compact, max 10).', value: 'Inline value when not wired (a JSON string for parse).' }
+  },
+  xml: {
+    summary: 'parse → the `value` XML string into an object (attributes under `@_`; malformed XML → `error`; an already-structured value passes through); stringify → an object `value` to an XML string on `result` (`indent>0` pretty-prints).',
+    config: { op: 'parse | stringify', indent: 'Pretty-print spaces for stringify (0 = single-line, max 10).', value: 'Inline value when not wired (an XML string for parse).' }
+  },
+  yaml: {
+    summary: 'parse → the `value` YAML string into a value (malformed YAML → `error`; an already-structured value passes through); stringify → any `value` to a YAML string on `result` (indented by `indent` spaces, 1–10).',
+    config: { op: 'parse | stringify', indent: 'Indent spaces for stringify (1–10, default 2).', value: 'Inline value when not wired (a YAML string for parse).' }
+  },
+  crypto: {
+    summary: 'Transforms the `value` string on `result`: base64Encode/base64Decode, md5/sha1/sha256/sha512 (hex digest), hmacSha256 (keyed, hex), uuid (a fresh v4, ignores value). A missing HMAC key or a non-UTF-8 base64Decode → `error`.',
+    config: { op: 'base64Encode | base64Decode | md5 | sha1 | sha256 | sha512 | hmacSha256 | uuid', key: 'Secret key (hmacSha256 only).', value: 'Inline string when not wired.' }
+  },
+  jwt: {
+    summary: 'Decodes the `value` JWT/JWS token string into `{ header, payload, signature }` on `result` (signature is the raw segment, NOT verified). A non-string or malformed token → `error`.',
+    config: { value: 'Inline token string when not wired.' }
+  },
+  datetime: {
+    summary: 'Transforms an existing date wired/inline on `value` (the clock itself is the `now` node). add/subtract → shift by `amount` of `unit` → ISO string; format → a luxon pattern string; diff → `other − value` in `unit` → number. An unreadable date → `error`.',
+    config: { op: 'add | subtract | format | diff', amount: 'Amount for add/subtract.', unit: 'milliseconds | seconds | minutes | hours | days | weeks | months | years.', format: 'luxon format pattern (format op; empty = ISO).', other: 'Second date for diff (typed value).', value: 'Inline date when not wired.' }
+  },
+  retry: {
+    summary: 'Re-runs the body wired off `attempt` as an ERROR-BOUNDARY scope: an unhandled error in the body (or, for an httpRequest child, a response matching `retryOnStatus` / a non-2xx when `retryOnFailure`) marks the attempt failed and re-runs it per the backoff policy, up to `maxAttempts`. Success exits via the implicit `done` port; giving up exits via `exhausted`. Wire `attempt` → the action(s) to retry.',
+    config: { maxAttempts: 'Max attempts (default 3).', backoff: 'fixed | linear | exponential.', delay: 'Base delay.', delayUnit: 'ms | s | min.', factor: 'Exponential factor (default 2).', maxDelay: 'Optional delay cap.', maxDelayUnit: 'ms | s | min.', retryOnError: 'Retry on a bubbled error (default true).', retryOnFailure: 'Retry on a non-2xx httpRequest response (default false).', retryOnStatus: 'HTTP status codes to retry on (e.g. [429, 503]).' }
+  },
+  objectOp: {
+    summary: 'Reshapes the `value` object on `result` (distinct from the `object` BUILDER): get/set a dot-`path`, merge with `other`, pick/omit `keys`, or list keys/values. A non-object operand (where the op needs one) → `error`.',
+    config: { op: 'get | set | merge | pick | omit | keys | values', path: 'Dot-path for get/set.', keys: 'Comma-separated keys for pick/omit.', other: 'Value to set / object to merge (typed value).', value: 'Inline object when not wired.' }
+  },
+  url: {
+    summary: 'encode/decode a URI component, parseQuery (string → object) / buildQuery (object → string), or parseUrl (→ { protocol, hostname, port, pathname, search, hash, origin, query }). A malformed escape / non-object buildQuery / bad URL → `error`.',
+    config: { op: 'encode | decode | parseQuery | buildQuery | parseUrl', value: 'Inline value when not wired.' }
+  },
+  random: {
+    summary: 'Generates a value on `result`: int/float in [min,max], string of `length`, boolean, or pick from a list. A `seed` (number or string) makes it deterministic. `pick` over an empty list → `error`. No data input.',
+    config: { op: 'int | float | string | boolean | pick', min: 'Range min (int/float).', max: 'Range max (int/float).', length: 'String length.', seed: 'Optional seed for reproducible output.', items: 'List to pick from (pick op).' }
+  },
+  listOp: {
+    summary: 'Reshapes the `value` list on `result` (distinct from `aggregate`, which reduces, and `map`/`filter`, which work item-by-item): sort, unique, reverse, flatten, chunk, slice, or groupBy. A non-list operand → `error`.',
+    config: { op: 'sort | unique | reverse | flatten | chunk | slice | groupBy', key: 'Item dot-path for sort/unique/groupBy.', order: 'asc | desc (sort).', depth: 'flatten depth (default 1).', size: 'chunk size.', start: 'slice start.', end: 'slice end.', value: 'Inline list when not wired.' }
+  },
+  csv: {
+    summary: 'parse a CSV string → rows (objects when `header`, else cell arrays) / stringify a list → CSV. The wrong operand shape → `error`. The CSV member of the data-format family (json/xml/yaml).',
+    config: { op: 'parse | stringify', delimiter: 'Field separator (default ",").', header: 'First row is a header → row-objects (default true).', value: 'Inline value when not wired.' }
+  },
+  math: {
+    summary: 'Runs a scalar op on `a` → number on `result` (complements `arithmetic`): round/floor/ceil/trunc/abs/sign/sqrt, the two-operand min/max, or the bounded clamp. A non-finite operand / negative sqrt → `error`.',
+    config: { op: 'round | floor | ceil | trunc | abs | sign | sqrt | min | max | clamp', b: 'Second operand (min/max).', min: 'Lower bound (clamp).', max: 'Upper bound (clamp).', precision: 'Decimal places (round).', a: 'Inline operand when not wired.' }
+  },
+  schema: {
+    summary: 'Validates `value` against a JSON Schema (ajv) → routes the value to `valid` / `invalid` and emits the error list on `errors`. A malformed / missing schema → `error`.',
+    config: { schema: 'JSON Schema (a JSON string; draft-07 / 2019-09 / 2020-12).', value: 'Inline value to validate when not wired.' }
+  },
+  readFile: {
+    summary: 'Reads the file at `path` → its text on `content`. `path` is absolute, or relative to the open `.restorm` file. A missing path / read error → `error`.',
+    config: { path: 'File path (absolute or relative to the scenario); or wire `path`.' }
+  },
+  writeFile: {
+    summary: 'Writes (replace) or appends `content` to the file at `path`. `path` is absolute, or relative to the open `.restorm` file. Terminal (no value output). A missing path / write error → `error`.',
+    config: { path: 'File path (absolute or relative to the scenario); or wire `path`.', mode: 'replace (default) | append.', content: 'Text to write (typed value; or wire `content`).' }
+  },
+  throw: {
+    summary: 'Deliberately fails with `message` (wired or inline) — routed to the implicit `error` port, or fails the run if nothing handles it. For error branches + retry tests. No `done`/value output.',
+    config: { message: 'Failure message (typed value; or wire `message`).' }
   },
   log: {
     summary: 'Writes one entry to the run log (visible via get_scenario_run_status + the inspector panel) and passes the value through. Sequence it via the `in` trigger.',
     config: { level: 'debug | info | warn | error', message: 'Text (typed value).', data: 'Optional structured payload (or wire `data`).' }
   },
   assert: {
-    summary: 'Compares `actual`/`expected` with `operator`, routing the trigger to `then` (pass) or `else` (fail).',
-    config: { operator: 'lt | lte | eq | gte | gt | ne | contains', message: 'Failure label.' }
+    summary: 'Asserts `actual` (vs `expected`) with `operator`, routing the trigger to `then` (pass) or `else` (fail). Beyond the shared comparators, chai-style operators: type checks, presence/emptiness, regex match, membership, deep equality and length.',
+    config: { operator: 'eq | ne | lt | lte | gt | gte | contains | isString | isNumber | isBoolean | isArray | isObject | isNull | exists | isEmpty | matchesRegex | isOneOf | deepEquals | lengthEq | lengthGt | lengthLt', a: 'Actual operand (or wire `a`).', b: 'Expected operand / pattern / list / length (binary operators).', message: 'Failure label.' }
   }
 }

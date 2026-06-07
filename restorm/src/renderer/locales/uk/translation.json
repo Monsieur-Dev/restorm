@@ -151,6 +151,7 @@
       "createEnvironmentFolder": "Створити теку середовищ",
       "delete": "Видалити",
       "clone": "Клонувати",
+      "copySuffix": "копія",
       "rename": "Перейменувати",
       "addToFavorites": "Додати до обраного",
       "removeFromFavorites": "Видалити з обраного",
@@ -315,6 +316,8 @@
       "color": "Колір",
       "expression": "Вираз",
       "boolean": "Булеве",
+      "null": "Null",
+      "list": "Список",
       "variables": "Змінні",
       "environment": "Середовище"
     },
@@ -483,7 +486,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Ви дійсно хочете видалити «{{fileName}}» з обраного?",
-    "noFilesHint": "Відкрийте файл або створіть новий, щоб почати",
     "newAriaLabel": "Створити нову колекцію",
     "openAriaLabel": "Відкрити колекцію з диска",
     "landmarkLabel": "Ласкаво просимо"
@@ -784,9 +786,12 @@
         "changeColor": "Change colour",
         "resetColor": "Reset colour",
         "addNote": "Add / edit note",
+        "runOnEachEvent": "Запускати при кожній отриманій події",
         "duplicate": "Duplicate",
         "delete": "Delete",
-        "deleteShortcut": "Del"
+        "deleteShortcut": "Del",
+        "copy": "Копіювати",
+        "paste": "Вставити"
       },
       "expand": "Розгорнути",
       "collapse": "Згорнути"
@@ -798,7 +803,6 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "locked": "Редагування заблоковано під час виконання сценарію",
     "switch": {
       "addCase": "Додати випадок",
@@ -851,7 +855,30 @@
       "now": "Зараз",
       "comparator": "Компаратор",
       "setVariable": "Задати змінну",
-      "getVariable": "Отримати змінну"
+      "getVariable": "Отримати змінну",
+      "addToList": "Додати до списку",
+      "removeFromList": "Видалити зі списку",
+      "cast": "Cast",
+      "regex": "Regex",
+      "json": "JSON",
+      "xml": "XML",
+      "yaml": "YAML",
+      "crypto": "Crypto",
+      "jwt": "JWT",
+      "datetime": "Date math",
+      "objectOp": "Object ops",
+      "url": "URL",
+      "random": "Random",
+      "throw": "Throw",
+      "retry": "Retry",
+      "listOp": "List ops",
+      "csv": "CSV",
+      "math": "Math",
+      "schema": "Schema validate",
+      "readFile": "Read file",
+      "writeFile": "Write file",
+      "timer": "Таймер",
+      "code": "Код"
     },
     "comparator": {
       "result": "результат"
@@ -868,7 +895,31 @@
       "data": "дані"
     },
     "assert": {
-      "message": "повідомлення"
+      "message": "повідомлення",
+      "operator": "operator",
+      "op": {
+        "eq": "equals",
+        "ne": "not equals",
+        "lt": "less than",
+        "lte": "less or equal",
+        "gt": "greater than",
+        "gte": "greater or equal",
+        "contains": "contains",
+        "isString": "is string",
+        "isNumber": "is number",
+        "isBoolean": "is boolean",
+        "isArray": "is array",
+        "isObject": "is object",
+        "isNull": "is null",
+        "exists": "exists",
+        "isEmpty": "is empty",
+        "matchesRegex": "matches regex",
+        "isOneOf": "is one of",
+        "deepEquals": "deep equals",
+        "lengthEq": "length ==",
+        "lengthGt": "length >",
+        "lengthLt": "length <"
+      }
     },
     "editRequest": "Редагувати запит",
     "editScenario": "Редагувати сценарій",
@@ -878,10 +929,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "outputName": "Назва виходу",
+      "addOutput": "Додати вихід",
+      "removeOutput": "Видалити"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Обов'язково для сценаріїв, що викликають"
+      "addParam": "Додати параметр",
+      "removeParam": "Видалити"
     },
     "runScenario": {
       "orphanInput": "Немає відповідного параметра «{{name}}» у підсценарії",
@@ -891,6 +948,7 @@
     "validation": {
       "duplicateName": "Назва «{{name}}» вже використовується іншою дією.",
       "panelTitle": "{{count}} помилок дій",
+      "runBlocked": "Виправте {{count}} помилку(и) дії перед запуском",
       "focusBox": "Перейти до цієї дії",
       "showErrors": "Показати помилки",
       "input": {
@@ -902,8 +960,7 @@
       },
       "output": {
         "missingName": "Цей вихід повинен мати назву.",
-        "duplicateName": "Назва «{{name}}» вже використовується іншим виходом.",
-        "valueRequired": "Вхід «value» має бути зʼєднаний з джерелом."
+        "duplicateName": "Назва «{{name}}» вже використовується іншим виходом."
       },
       "getVariable": {
         "noSelection": "Потрібно вибрати змінну.",
@@ -930,8 +987,10 @@
         "missing": "Пов'язаний запит більше не існує."
       },
       "runScenario": {
-        "missing": "Пов'язаний сценарій більше не існує.",
-        "requiredInput": "Обов'язковий вхід «{{name}}» має бути під'єднаний до джерела."
+        "missing": "Пов'язаний сценарій більше не існує."
+      },
+      "file": {
+        "missingPath": "A file path is required."
       }
     },
     "usage": {
@@ -941,6 +1000,8 @@
     "inspector": {
       "run": "Запустити",
       "debug": "Налагодження",
+      "undo": "Скасувати",
+      "redo": "Повторити",
       "step": "Крок за кроком",
       "previewInfo": "Example data, based on previous request results.",
       "pause": "Пауза",
@@ -950,9 +1011,11 @@
       "stop": "Зупинити",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "Копіювати цей запис",
       "clearLogs": "Очистити журнали",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Показати логи {{level}}",
+      "showLevelOnly": "Клацніть правою кнопкою: лише цей рівень",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -1006,6 +1069,299 @@
       "toggle": "Перемкнути точку зупину (F9)",
       "reached": "Досягнуто точку зупину — цю дію ще не виконано. Натисніть F5, щоб продовжити, або F7 для покрокового виконання.",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Перемкнути мінікарту"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Додати значення",
+      "removeValue": "Видалити значення",
+      "updateVariable": "Оновити вихідну змінну"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
+    },
+    "regex": {
+      "value": "value",
+      "operation": "operation",
+      "pattern": "pattern",
+      "flags": "flags",
+      "replacement": "replacement",
+      "result": "result",
+      "op": {
+        "extract": "extract",
+        "extractAll": "extract all",
+        "test": "test",
+        "replace": "replace",
+        "split": "split"
+      },
+      "flag": {
+        "i": "Case-insensitive",
+        "m": "Multiline (^ and $ match line breaks)",
+        "s": "Dotall (. matches newlines)"
+      }
+    },
+    "json": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "xml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "yaml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "crypto": {
+      "value": "value",
+      "operation": "operation",
+      "key": "key",
+      "keyPlaceholder": "secret",
+      "result": "result",
+      "op": {
+        "base64Encode": "base64 encode",
+        "base64Decode": "base64 decode",
+        "md5": "MD5",
+        "sha1": "SHA-1",
+        "sha256": "SHA-256",
+        "sha512": "SHA-512",
+        "hmacSha256": "HMAC-SHA256",
+        "uuid": "UUID v4"
+      }
+    },
+    "jwt": {
+      "value": "token",
+      "result": "result"
+    },
+    "datetime": {
+      "value": "date",
+      "operation": "operation",
+      "amount": "amount",
+      "unitLabel": "unit",
+      "format": "format",
+      "other": "second date",
+      "result": "result",
+      "op": {
+        "add": "add",
+        "subtract": "subtract",
+        "format": "format",
+        "diff": "diff"
+      },
+      "unit": {
+        "milliseconds": "milliseconds",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months",
+        "years": "years"
+      }
+    },
+    "objectOp": {
+      "value": "object",
+      "operation": "operation",
+      "path": "path",
+      "keys": "keys",
+      "setValue": "value",
+      "mergeWith": "merge with",
+      "result": "result",
+      "op": {
+        "get": "get",
+        "set": "set",
+        "merge": "merge",
+        "pick": "pick",
+        "omit": "omit",
+        "keys": "keys",
+        "values": "values"
+      }
+    },
+    "url": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "op": {
+        "encode": "encode",
+        "decode": "decode",
+        "parseQuery": "parse query",
+        "buildQuery": "build query",
+        "parseUrl": "parse URL"
+      }
+    },
+    "random": {
+      "operation": "operation",
+      "min": "min",
+      "max": "max",
+      "length": "length",
+      "items": "items",
+      "seed": "seed (optional)",
+      "seedPlaceholder": "reproducible",
+      "result": "result",
+      "op": {
+        "int": "integer",
+        "float": "float",
+        "string": "string",
+        "boolean": "boolean",
+        "pick": "pick"
+      }
+    },
+    "throw": {
+      "message": "message"
+    },
+    "retry": {
+      "maxAttempts": "max attempts",
+      "backoff": "backoff",
+      "delay": "delay",
+      "factor": "factor",
+      "retryOnError": "retry on error",
+      "retryOnStatus": "retry on HTTP status",
+      "retryOnFailure": "retry on any non-2xx",
+      "attempt": "attempt",
+      "exhausted": "exhausted",
+      "backoffOpt": {
+        "fixed": "fixed",
+        "linear": "linear",
+        "exponential": "exponential"
+      }
+    },
+    "menuGroups": {
+      "lists": "Lists",
+      "math": "Math",
+      "dataFormats": "Data formats",
+      "encoding": "Encoding",
+      "time": "Таймінг"
+    },
+    "listOp": {
+      "value": "list",
+      "operation": "operation",
+      "result": "result",
+      "key": "key",
+      "order": "order",
+      "depth": "depth",
+      "size": "size",
+      "start": "start",
+      "end": "end",
+      "op": {
+        "sort": "sort",
+        "unique": "unique",
+        "reverse": "reverse",
+        "flatten": "flatten",
+        "chunk": "chunk",
+        "slice": "slice",
+        "groupBy": "group by"
+      }
+    },
+    "csv": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "delimiter": "delimiter",
+      "header": "header row",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "math": {
+      "a": "value",
+      "operation": "operation",
+      "result": "result",
+      "b": "with",
+      "min": "min",
+      "max": "max",
+      "precision": "precision",
+      "op": {
+        "round": "round",
+        "floor": "floor",
+        "ceil": "ceil",
+        "trunc": "truncate",
+        "abs": "absolute",
+        "sign": "sign",
+        "sqrt": "square root",
+        "min": "min",
+        "max": "max",
+        "clamp": "clamp"
+      }
+    },
+    "schema": {
+      "value": "value",
+      "schema": "JSON Schema",
+      "valid": "valid",
+      "invalid": "invalid",
+      "errors": "errors",
+      "editTitle": "Edit JSON Schema"
+    },
+    "readFile": {
+      "path": "path",
+      "content": "content"
+    },
+    "writeFile": {
+      "path": "path",
+      "mode": "mode",
+      "content": "content"
+    },
+    "codeField": {
+      "title": "Edit",
+      "edit": "Open editor",
+      "moreLines": "+{{count}} lines",
+      "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "режим",
+      "modeOpt": {
+        "frequency": "частота",
+        "cron": "cron"
+      },
+      "frequency": "частота",
+      "unit": "одиниця",
+      "cron": "cron",
+      "stop": "зупинити після",
+      "stopOpt": {
+        "none": "ніколи",
+        "duration": "тривалість",
+        "endDate": "дата завершення"
+      },
+      "duration": "тривалість",
+      "endDate": "дата завершення",
+      "tick": "тік"
+    },
+    "code": {
+      "input": "вхід",
+      "code": "код (TypeScript)",
+      "modalTitle": "Редагувати код",
+      "result": "результат",
+      "timeout": "Час очікування (с)"
     }
   }
 }

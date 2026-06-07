@@ -47,7 +47,11 @@ export const ScenarioNodeSection: React.FC<{
     <div className={`scn-section ${collapsed ? 'scn-section-collapsed' : ''}`}>
       <div
         className="scn-section-header nodrag"
+        role="button"
+        tabIndex={0}
+        aria-expanded={!collapsed}
         onClick={(e) => { e.stopPropagation(); setCollapsed((c) => !c) }}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); setCollapsed((c) => !c) } }}
       >
         {/* When the section is collapsed, the port-id markers move here so
          * the box-level layout pass anchors the handles to the title row. */}

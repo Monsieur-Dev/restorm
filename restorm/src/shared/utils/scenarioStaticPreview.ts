@@ -1,26 +1,36 @@
 import Handlebars from 'handlebars'
 import { registerHandlebarsHelpers } from './handlebars/registerAll'
-import type { ScenarioNode } from '../types/scenario'
+import type { ScenarioNode, ScenarioEdge } from '../types/scenario'
+import { readInputParams } from '../scenarioInputParams'
+import { readOutputDecls } from '../scenarioOutputDecls'
+import { STATIC_PREVIEW_KINDS } from '../scenarioNodeCapabilities'
+import { compareValues as compareValuesShared } from '../scenarioComparison'
+import { castValue, isScenarioCastType } from '../scenarioCast'
+import { applyRegex, isRegexOp } from '../scenarioRegex'
+import { applyJson, isJsonOp } from '../scenarioJson'
+import { applyXml, isXmlOp } from '../scenarioXml'
+import { applyYaml, isYamlOp } from '../scenarioYaml'
+import { applyCrypto, isCryptoOp } from '../scenarioCrypto'
+import { applyJwt } from '../scenarioJwt'
+import { applyDateTime, isDateTimeOp, isDateTimeUnit } from '../scenarioDateTime'
+import { applyObjectOp, isObjectOp } from '../scenarioObject'
+import { applyUrl, isUrlOp } from '../scenarioUrl'
+import { applyRandom, isRandomOp } from '../scenarioRandom'
+import { applyListOp as applyListReshape, isListOp } from '../scenarioList'
+import { applyCsv, isCsvOp } from '../scenarioCsv'
+import { applyMath, isMathOp } from '../scenarioMath'
+import { validateAgainstSchema } from '../schemaValidate'
+import { LIST_MUTATION_DEFAULT_VALUE_ID } from '../scenarioListMutationValues'
 
 // Register the full helper suite on first import so a chained `transform`
 // preview can use `{{year now}}`, `{{add a b}}`, `{{upper x}}`, … directly —
 // same surface the runtime exposes. The helper module is idempotent.
 registerHandlebarsHelpers()
 
-/** Node kinds whose inspector preview is derived directly from their config
- * (no run / no play needed). The runner doesn't execute these yet, but their
- * output is fully determined by the box's configuration. */
-export const STATIC_PREVIEW_KINDS: ReadonlySet<ScenarioNode['kind']> = new Set<ScenarioNode['kind']>([
-  'now', 'input', 'setVariable', 'getVariable', 'object',
-  'arithmetic', 'comparator', 'boolean',
-  'transform',
-  'if',
-  'switch',
-  'wait', 'waitUntil',
-  'map', 'filter', 'aggregate',
-  // `while` / `doWhile` route a value to body/done exactly like `if`.
-  'while', 'doWhile'
-])
+// Node kinds whose inspector preview is derived directly from their config (no
+// run / no play needed) — sourced from the per-kind capability table (the
+// single source of truth) and re-exported so existing importers keep working.
+export { STATIC_PREVIEW_KINDS }
 
 /** The minimal node + edge shapes the static-preview resolvers read. */
 export interface StaticPreviewNode {
@@ -43,11 +53,28 @@ function str(v: unknown): string {
  * to a string. Self-contained so the module is usable from both renderer and
  * main (which loads scenarios from disk as plain JSON, never as instantiated
  * `ValueType` instances). */
+/** Renderer-injected resolver turning an environment id into its preview shape
+ * `{ name, variables }`, mirroring the runtime. The preview lives in shared
+ * code that can't reach the renderer's env store, so the renderer registers a
+ * lookup once; when absent (e.g. main-process callers), an environment operand
+ * falls back to its `{{$id}}` template. */
+let environmentPreviewResolver: ((envId: string) => unknown) | null = null
+export function setEnvironmentPreviewResolver(fn: ((envId: string) => unknown) | null): void {
+  environmentPreviewResolver = fn
+}
+
 export function concreteValue(persisted: unknown): unknown {
   if (persisted === null || persisted === undefined) return null
   if (typeof persisted !== 'object') return persisted
   const p = persisted as { type?: unknown; value?: unknown; label?: unknown; labels?: unknown }
   switch (p.type) {
+    case 'null':
+      return null
+    case 'list': {
+      // A `list` is a real JS array — each item resolved recursively (lists nest).
+      const items = (p as { items?: unknown }).items
+      return Array.isArray(items) ? items.map((it) => concreteValue(it)) : []
+    }
     case 'numeric': {
       const n = typeof p.value === 'number' ? p.value : Number(p.value)
       return Number.isFinite(n) ? n : 0
@@ -60,8 +87,14 @@ export function concreteValue(persisted: unknown): unknown {
       return Array.isArray(p.labels) ? p.labels.filter((v): v is string => typeof v === 'string').join(',') : ''
     case 'variable':
       return typeof p.value === 'string' ? `{{${p.value}}}` : ''
-    case 'environment':
-      return typeof p.value === 'string' ? `{{$${p.value}}}` : ''
+    case 'environment': {
+      // No environment selected yet → no value (null), not a `{{$}}` template
+      // with an empty id. A selected-but-unresolved id keeps its `{{$id}}` form
+      // (mirrors how a `variable` operand renders `{{name}}`).
+      if (typeof p.value !== 'string' || p.value === '') return null
+      const resolved = environmentPreviewResolver?.(p.value)
+      return resolved !== undefined ? resolved : `{{$${p.value}}}`
+    }
     // 'string' | 'expression' | 'password' | 'color' | 'datetime' | 'enum' |
     // 'enumList' | unknown — value carries the renderable string.
     default:
@@ -80,6 +113,36 @@ export function expectsObjectInput(targetKind: ScenarioNode['kind'], targetPortI
     (targetKind === 'transform' && targetPortId === 'value')
     || (targetKind === 'log' && targetPortId === 'data')
   )
+}
+
+/** Kinds whose output token genuinely IS the wrapper object their preview
+ * models — `transform` emits `{ result }`, `input` emits `{ <name>: value }`.
+ * For these the wrapper must NOT be unwrapped (the downstream selector drills
+ * into it). Every other static-preview kind emits the BARE value, with the
+ * preview key only a display label. */
+const PREVIEW_WRAPPER_KINDS = new Set<ScenarioNode['kind']>(['transform', 'input', 'object'])
+
+/**
+ * The runtime VALUE a given output port carries, unwrapped from the preview's
+ * display object.
+ *
+ * The preview wraps each output under a meaningful name for the inspector tree,
+ * but most nodes emit the BARE value on the port — so a downstream selector /
+ * preview must unwrap it (else it deduces the wrapper's KEY, e.g. `result` or
+ * the variable name, as the path — wrong, since the token already IS that
+ * value). Unwrap when the port id is a key (`arithmetic` → `{ result }`,
+ * `filter` → `{ kept, rejected }`) or when the wrapper is a single display-named
+ * entry (`now` → `{ now }`, `getVariable` → `{ <var> }`). The genuine wrappers
+ * (`transform`, `input`, `object` — see {@link PREVIEW_WRAPPER_KINDS}) are
+ * returned unchanged: their token IS the object (so a single-property object
+ * isn't mistaken for a single display-named wrapper and unwrapped to its value).
+ */
+export function portPreviewValue(preview: Record<string, unknown>, portId: string, kind?: ScenarioNode['kind']): unknown {
+  if (kind !== undefined && PREVIEW_WRAPPER_KINDS.has(kind)) return preview
+  if (portId in preview) return preview[portId]
+  const keys = Object.keys(preview)
+  const only = keys.length === 1 ? keys[0] : undefined
+  return only !== undefined ? preview[only] : preview
 }
 
 /** If the value is an object with exactly one top-level key, return that key.
@@ -157,20 +220,101 @@ export function resolveSelectorPath(value: unknown, path: string): unknown {
   return cur
 }
 
-/** Map of scenario variable name → its declared value, from `input` and
- * `setVariable` boxes — used to resolve a `getVariable`'s reference. */
-function variableValues(nodes: readonly StaticPreviewNode[]): Map<string, unknown> {
-  const m = new Map<string, unknown>()
+const VARIABLE_RESOLVE_MAX_DEPTH = 16
+
+/** Does `node` WRITE the variable `name`? A `setVariable(name)`, OR an
+ * `addToList`/`removeFromList` whose `list` target IS the variable `name` and
+ * which has `updateSourceVariable` on (it pushes its `result` back into that
+ * variable). */
+function writesVariable(node: StaticPreviewNode, name: string): boolean {
+  if (node.kind === 'setVariable') return str(node.config['name']) === name
+  if (node.kind === 'addToList' || node.kind === 'removeFromList') {
+    if (node.config['updateSourceVariable'] !== true) return false
+    const ref = node.config['list'] as { type?: unknown; value?: unknown } | null | undefined
+    return ref?.type === 'variable' && typeof ref.value === 'string' && ref.value.trim() === name
+  }
+  return false
+}
+
+/** Walk BACKWARD from `consumerNodeId` along incoming edges (the execution
+ * ancestry) to the NEAREST node WRITING `name` (see {@link writesVariable}) —
+ * the "dominating assignment" closest to where the variable is read. Returns it,
+ * or null when no upstream writer exists (e.g. the variable is an input param,
+ * or set on a parallel branch). BFS, so nearest-by-hops wins; a visited set
+ * guards cycles (loop-backs). */
+function nearestUpstreamWriter(
+  name: string,
+  consumerNodeId: string,
+  nodes: readonly StaticPreviewNode[],
+  edges: readonly StaticPreviewEdge[]
+): StaticPreviewNode | null {
+  const nodeById = new Map(nodes.map((n) => [n.id, n]))
+  const visited = new Set<string>([consumerNodeId])
+  let frontier = edges.filter((e) => e.to.nodeId === consumerNodeId).map((e) => e.from.nodeId)
+  let hops = 0
+  while (frontier.length > 0 && hops < 1024) {
+    hops += 1
+    const next: string[] = []
+    for (const nid of frontier) {
+      if (visited.has(nid)) continue
+      visited.add(nid)
+      const node = nodeById.get(nid)
+      if (node && writesVariable(node, name)) return node
+      for (const e of edges) if (e.to.nodeId === nid && !visited.has(e.from.nodeId)) next.push(e.from.nodeId)
+    }
+    frontier = next
+  }
+  return null
+}
+
+/** Resolve a variable's STATIC value AT a given consumer node, following the
+ * graph: the nearest upstream writer of `name` is evaluated — a `setVariable`'s
+ * value (literal or wired source preview), or a push-mutation's `result` (an
+ * addToList/removeFromList writing the variable). Falls back to the order-less
+ * global map (input params / off-path setVariables) when no upstream writer is
+ * found. `depth` bounds a chain of variable→variable references. */
+function resolveVariableAt(
+  name: string,
+  consumerNodeId: string,
+  nodes: readonly StaticPreviewNode[],
+  edges: readonly StaticPreviewEdge[],
+  depth: number
+): unknown {
+  if (depth >= VARIABLE_RESOLVE_MAX_DEPTH) return globalVariableValue(name, nodes, edges)
+  const writer = nearestUpstreamWriter(name, consumerNodeId, nodes, edges)
+  if (!writer) return globalVariableValue(name, nodes, edges)
+  // A push-mutation (addToList/removeFromList) writes its `result` output into
+  // the variable; a setVariable writes its `value` input. Evaluate accordingly.
+  if (writer.kind === 'addToList' || writer.kind === 'removeFromList') {
+    const sp = staticScenarioPreview(writer, nodes, edges)
+    return sp === null ? globalVariableValue(name, nodes, edges) : portPreviewValue(sp, 'result', writer.kind)
+  }
+  // A list-typed LITERAL value (customListMulti / enumList) resolves to its ARRAY
+  // — mirrors the runtime `resolveOperand` — so list comparisons / contains see a
+  // real list, not the joined display string `concreteValue` would render.
+  const litArray = listValueArray(writer.config['value'])
+  if (litArray) return litArray
+  return operandPreviewValue(writer.id, 'value', writer.config['value'], nodes, edges, depth + 1)
+}
+
+/** A variable's value from the UP-FRONT scope only — an `input` param, or a
+ * predecessor-LESS `setVariable` (one that runs at the very start). A mid-flow
+ * setVariable (its `in` or `value` is wired) is NOT globally available: it only
+ * resolves DOWNSTREAM of itself via {@link nearestUpstreamWriter}, so a read
+ * placed BEFORE it (the writer isn't a predecessor) correctly sees nothing
+ * instead of the future value. */
+function globalVariableValue(name: string, nodes: readonly StaticPreviewNode[], edges: readonly StaticPreviewEdge[]): unknown {
   for (const n of nodes) {
     if (n.kind === 'input') {
-      const name = str(n.config['name'])
-      if (name) m.set(name, concreteValue(n.config['valueType']))
-    } else if (n.kind === 'setVariable') {
-      const name = str(n.config['name'])
-      if (name) m.set(name, concreteValue(n.config['value']))
+      for (const p of readInputParams(n.config)) {
+        if (p.name.trim() === name) return listValueArray(p.valueType) ?? concreteValue(p.valueType)
+      }
+    } else if (n.kind === 'setVariable' && str(n.config['name']) === name) {
+      const hasPredecessor = edges.some((e) => e.to.nodeId === n.id && (e.to.portId === 'in' || e.to.portId === 'value'))
+      if (!hasPredecessor) return listValueArray(n.config['value']) ?? concreteValue(n.config['value'])
     }
   }
-  return m
+  return undefined
 }
 
 /** Resolve the `items` input of a list-operating box (`map`/`filter`/
@@ -190,10 +334,28 @@ export function resolveItems(
     if (!source || !STATIC_PREVIEW_KINDS.has(source.kind)) return null
     const sp = staticScenarioPreview(source, nodes, edges)
     if (sp === null) return null
-    const v = edge.selector ? resolveSelectorPath(sp, edge.selector) : sp
+    // Unwrap to the value the SOURCE PORT carries before applying the selector
+    // (a `result`/`mapped`-keyed node exposes `{ result: [...] }` as its preview;
+    // the wired `items` link's selector — typically `.` for an array — is
+    // relative to that port's bare value, exactly as the runtime delivers it).
+    // Applying the selector to the whole `{ result: … }` wrapper instead yielded
+    // the wrapper object (not an array) → `null` → an empty inspector preview.
+    const portValue = portPreviewValue(sp, edge.from.portId, source.kind)
+    const v = edge.selector ? resolveSelectorPath(portValue, edge.selector) : portValue
     return Array.isArray(v) ? v : null
   }
-  return literalConfigItems(cfg)
+  const lit = literalConfigItems(cfg)
+  if (lit) return lit
+  // An inline `variable` items resolves to that variable's STATIC value,
+  // following the graph (nearest upstream `setVariable`) — so an aggregate over
+  // a variable built by a chain (object→addToList→setVariable) previews the real
+  // list, not nothing.
+  const raw = cfg['items'] as { type?: unknown; value?: unknown } | null | undefined
+  if (raw && typeof raw === 'object' && raw.type === 'variable' && typeof raw.value === 'string') {
+    const v = resolveVariableAt(raw.value, nodeId, nodes, edges, 0)
+    if (Array.isArray(v)) return v as unknown[]
+  }
+  return null
 }
 
 /** Resolve a list box's `items` from its CONFIG literal alone (no wired
@@ -203,11 +365,43 @@ export function resolveItems(
  * `filter` / `aggregate`) so an unwired list box iterates over its
  * configured items instead of nothing. */
 export function literalConfigItems(cfg: Record<string, unknown>): unknown[] | null {
-  const lit = cfg['items']
-  if (lit && typeof lit === 'object') {
-    const p = lit as { type?: unknown; labels?: unknown; value?: unknown }
+  return listValueArray(cfg['items'])
+}
+
+/** The ARRAY form of a list-typed value: a `customListMulti` yields its picked
+ * labels, an `enumList` its values. `null` for anything else. A multi-select IS
+ * a list, so this is its data representation — distinct from `concreteValue`,
+ * which joins it to a display string. */
+export function listValueArray(v: unknown): unknown[] | null {
+  if (v && typeof v === 'object') {
+    const p = v as { type?: unknown; labels?: unknown; value?: unknown }
     if (p.type === 'customListMulti' && Array.isArray(p.labels)) return p.labels as unknown[]
     if (p.type === 'enumList' && Array.isArray(p.value)) return p.value as unknown[]
+  }
+  return null
+}
+
+/** Runtime `items` resolution for the list boxes (`forEach` / `map` / `filter`
+ * / `aggregate`): a literal list value, OR a `variable` reference whose LIVE
+ * value is an array (so `setVariable list → aggregate over that variable`
+ * works). `null` when nothing list-like is configured. The variable arm needs
+ * the run's `variables`; the static preview passes none and gets the literal
+ * arm only. */
+export function resolveConfigItems(cfg: Record<string, unknown>, variables?: ReadonlyMap<string, unknown>): unknown[] | null {
+  const lit = listValueArray(cfg['items'])
+  if (lit) return lit
+  const raw = cfg['items']
+  // An inline `list` value → its concrete array (each item resolved). Lets an
+  // `aggregate`/`forEach`/`map`/`filter` iterate a list authored directly in
+  // the `items` field, not only one stashed in a variable.
+  if (raw && typeof raw === 'object' && (raw as { type?: unknown }).type === 'list') {
+    const arr = concreteValue(raw)
+    if (Array.isArray(arr)) return arr as unknown[]
+  }
+  if (raw && typeof raw === 'object' && (raw as { type?: unknown }).type === 'variable' && variables) {
+    const name = (raw as { value?: unknown }).value
+    const v = typeof name === 'string' ? variables.get(name) : undefined
+    if (Array.isArray(v)) return v as unknown[]
   }
   return null
 }
@@ -267,11 +461,18 @@ export function applyListOp(
     const valueOf = (item: unknown): unknown => field ? resolveSelectorPath(item, field) : item
     if (op === 'count') return { result: items.length }
     if (op === 'join') return { result: items.map((item) => joinPart(valueOf(item))).join(separator) }
-    const nums: number[] = []
-    for (const item of items) {
-      const n = asNumber(valueOf(item))
-      if (n !== null) nums.push(n)
-    }
+    // sum/min/max/average require EVERY item to be a number (a numeric string is
+    // accepted). A non-numeric value — a boolean, an object, an empty/garbage
+    // string, or an invalid `field` path that yields nothing — is a genuine
+    // mistake, so THROW rather than silently coercing (boolean true → 1) or
+    // skipping. The runtime routes the throw to the error port; the preview
+    // catches it and shows no (misleading) result.
+    const nums = items.map((item) => {
+      const raw = valueOf(item)
+      const n = strictAggregateNumber(raw)
+      if (n === null) throw new Error(`Cannot ${op} a non-numeric value: ${aggregateValueLabel(raw)}`)
+      return n
+    })
     if (op === 'sum') return { result: nums.reduce((a, b) => a + b, 0) }
     if (op === 'min') return { result: nums.length === 0 ? null : Math.min(...nums) }
     if (op === 'max') return { result: nums.length === 0 ? null : Math.max(...nums) }
@@ -353,53 +554,46 @@ function operandPreviewValue(
   portId: string,
   configLiteral: unknown,
   nodes: readonly StaticPreviewNode[],
-  edges: readonly StaticPreviewEdge[]
+  edges: readonly StaticPreviewEdge[],
+  depth = 0
 ): unknown {
   const edge = edges.find((e) => e.to.nodeId === nodeId && e.to.portId === portId)
-  if (!edge) return concreteValue(configLiteral)
+  if (!edge) {
+    // An inline `variable` operand resolves to that variable's STATIC value,
+    // following the graph: the nearest upstream `setVariable` wins (so a variable
+    // built by a chain — object→addToList→setVariable — previews the real list),
+    // not the order-less global map. Otherwise an operand fed by a variable makes
+    // the whole node's preview NaN/null (a downstream box has nothing to suggest).
+    const lit = configLiteral as { type?: unknown; value?: unknown } | null | undefined
+    if (lit !== null && typeof lit === 'object' && lit.type === 'variable' && typeof lit.value === 'string') {
+      return resolveVariableAt(lit.value, nodeId, nodes, edges, depth)
+    }
+    return concreteValue(configLiteral)
+  }
   const source = nodes.find((n) => n.id === edge.from.nodeId)
   if (!source || !STATIC_PREVIEW_KINDS.has(source.kind)) return undefined
   const sourcePreview = staticScenarioPreview(source, nodes, edges)
   if (sourcePreview === null) return undefined
-  return edge.selector ? resolveSelectorPath(sourcePreview, edge.selector) : sourcePreview
+  // Unwrap to the value the SOURCE PORT actually carries before applying the
+  // selector, so a `result`-keyed node feeds its bare value (matching runtime),
+  // not the `{ result: … }` display wrapper.
+  const portValue = portPreviewValue(sourcePreview, edge.from.portId, source.kind)
+  return edge.selector ? resolveSelectorPath(portValue, edge.selector) : portValue
 }
 
-/** Apply a comparator-style operator (`<`/`≤`/`=`/`≥`/`>`/`≠`/`contains`) to
- * two resolved values. Returns `null` for combinations the operator can't
- * handle (e.g. ordering on objects) so the caller drops the preview. Shared
- * by `comparator` and `if` (both branch on the same op set). */
+/** Apply a comparator-style operator (`<`/`≤`/`=`/`≥`/`>`/`≠`/`contains`) to two
+ * resolved values for the inspector preview. Delegates to the SHARED
+ * `compareValues` — the SAME implementation the runtime uses, so the preview
+ * can't drift — catching its throws: the shared comparator errors on undefined
+ * orderings (null/object ordering, mixed types), but the preview wants `null` to
+ * drop the preview rather than surface an error. Shared by `comparator` / `if` /
+ * `filter` / `for` / `switch` / `assert`. */
 function compareValues(op: string, a: unknown, b: unknown): boolean | null {
-  const na = asNumber(a); const nb = asNumber(b)
-  const numeric = na !== null && nb !== null
-  const bothStr = typeof a === 'string' && typeof b === 'string'
-  if (op === '=') return numeric ? na === nb : a === b
-  if (op === '≠') return numeric ? na !== nb : a !== b
-  if (op === 'contains') {
-    if (typeof a === 'string' && (typeof b === 'string' || typeof b === 'number' || typeof b === 'boolean')) {
-      return a.includes(typeof b === 'string' ? b : String(b))
-    }
-    if (Array.isArray(a)) return a.includes(b)
+  try {
+    return compareValuesShared(op, a, b)
+  } catch {
     return null
   }
-  if (numeric) {
-    switch (op) {
-      case '<': return na < nb
-      case '≤': return na <= nb
-      case '≥': return na >= nb
-      case '>': return na > nb
-      default: return null
-    }
-  }
-  if (bothStr) {
-    switch (op) {
-      case '<': return a < b
-      case '≤': return a <= b
-      case '≥': return a >= b
-      case '>': return a > b
-      default: return null
-    }
-  }
-  return null
 }
 
 /** Coerce a preview value to a finite number for arithmetic / numeric
@@ -413,6 +607,29 @@ function asNumber(v: unknown): number | null {
   }
   if (typeof v === 'boolean') return v ? 1 : 0
   return null
+}
+
+/** STRICT numeric coercion for aggregate sum/min/max/average: a number or a
+ * clean numeric string only. Unlike {@link asNumber} it does NOT coerce a
+ * boolean (true → 1) and rejects an empty string — those are non-numeric and
+ * must surface as an error, not a silent 1/0. `null` = not a number. Exported so
+ * the runtime aggregate executor shares the SAME rule as the preview. */
+export function strictAggregateNumber(v: unknown): number | null {
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null
+  if (typeof v === 'string' && v.trim() !== '') {
+    const n = Number(v)
+    return Number.isFinite(n) ? n : null
+  }
+  return null
+}
+
+/** A short, safe label for a non-numeric value in an aggregate error message. */
+export function aggregateValueLabel(v: unknown): string {
+  if (v === null) return 'null'
+  if (v === undefined) return 'undefined'
+  if (typeof v === 'string') return `"${v}"`
+  if (typeof v === 'number' || typeof v === 'boolean' || typeof v === 'bigint') return String(v)
+  try { const s = JSON.stringify(v); return typeof s === 'string' ? s : 'value' } catch { return 'value' }
 }
 
 /**
@@ -450,8 +667,13 @@ export function staticScenarioPreview(
       }
     }
     case 'input': {
-      const name = str(cfg['name']) || 'value'
-      return { [name]: concreteValue(cfg['valueType']) }
+      // The input emits one object keyed by EACH declared param's name, with
+      // that param's typed default as the example value.
+      const out: Record<string, unknown> = {}
+      for (const param of readInputParams(cfg)) {
+        out[param.name.trim() || 'value'] = concreteValue(param.valueType)
+      }
+      return out
     }
     case 'setVariable': {
       const name = str(cfg['name'])
@@ -461,7 +683,10 @@ export function staticScenarioPreview(
       const ref = cfg['value'] as { type?: unknown; value?: unknown } | undefined
       const name = ref?.type === 'variable' && typeof ref.value === 'string' ? ref.value : ''
       if (!name) return null
-      return { [name]: variableValues(nodes).get(name) ?? null }
+      // Resolve the variable AT this getVariable, following the graph (nearest
+      // upstream setVariable), so reading a variable built mid-flow previews its
+      // real value rather than only an up-front literal.
+      return { [name]: resolveVariableAt(name, node.id, nodes, edges, 0) ?? null }
     }
     case 'arithmetic': {
       const a = operandPreviewValue(node.id, 'a', cfg['a'], nodes, edges)
@@ -495,7 +720,43 @@ export function staticScenarioPreview(
     case 'forEach': {
       const items = resolveItems(node.id, cfg, nodes, edges)
       if (items === null) return null
-      return applyListOp({ id: node.id, kind: node.kind, config: cfg }, items)
+      // An aggregate over non-numeric values THROWS — catch it so the inspector
+      // shows no result instead of crashing (the runtime surfaces it on `error`).
+      try {
+        return applyListOp({ id: node.id, kind: node.kind, config: cfg }, items)
+      } catch {
+        return null
+      }
+    }
+    case 'addToList':
+    case 'removeFromList': {
+      // `list` resolves like any operand (a list literal, an enum/custom list,
+      // or a list-typed variable's static value → an array). `values` is N rows
+      // (`config.values` = `{ id, value }[]`, like object properties) — each one
+      // an element to add/remove, resolved under its own port id.
+      const listV = operandPreviewValue(node.id, 'list', cfg['list'], nodes, edges)
+      const list: unknown[] = Array.isArray(listV) ? (listV as unknown[]) : []
+      let valueRows = Array.isArray(cfg['values']) && cfg['values'].length > 0 ? cfg['values'] : []
+      // The DEFAULT (unpersisted) value row carries a wired source under
+      // LIST_MUTATION_DEFAULT_VALUE_ID without ever landing in `config.values`;
+      // surface it so a lone wired value previews (matches the runtime).
+      if (valueRows.length === 0 && edges.some((e) => e.to.nodeId === node.id && e.to.portId === LIST_MUTATION_DEFAULT_VALUE_ID)) {
+        valueRows = [{ id: LIST_MUTATION_DEFAULT_VALUE_ID }]
+      }
+      const values: unknown[] = []
+      for (const r of valueRows) {
+        const row = r as { id?: unknown; value?: unknown }
+        if (typeof row.id !== 'string') continue
+        const v = operandPreviewValue(node.id, row.id, row.value, nodes, edges)
+        // A list-valued row is CONCATENATED (spread), matching the runtime — so
+        // adding a list to a list appends its elements, not a nested list.
+        if (Array.isArray(v)) values.push(...(v as unknown[]))
+        else if (v !== undefined) values.push(v)
+      }
+      const result = node.kind === 'addToList'
+        ? [...list, ...values]
+        : list.filter((x) => !values.some((v) => JSON.stringify(v) === JSON.stringify(x)))
+      return { result }
     }
     case 'for':
       // Range comes from config (`from`/`to`/`step`), not an `items` edge —
@@ -511,8 +772,23 @@ export function staticScenarioPreview(
       const allowedLevels = ['debug', 'info', 'warn', 'error']
       const rawLevel = cfg['level']
       const level = typeof rawLevel === 'string' && allowedLevels.includes(rawLevel) ? rawLevel : 'info'
-      const message = operandPreviewValue(node.id, 'message', cfg['message'], nodes, edges)
       const dataVal = operandPreviewValue(node.id, 'data', cfg['data'], nodes, edges)
+      // Mirror `logExecutor`: an inline (un-wired) Expression message renders
+      // Handlebars against the resolved `data` as its context (so `{{name}}`
+      // reads `data.name`, `{{.}}` the scalar) — not the raw template the
+      // generic operand preview would otherwise surface.
+      const messageWired = edges.some((e) => e.to.nodeId === node.id && e.to.portId === 'message')
+      const msgCfg = cfg['message'] as { type?: unknown; value?: unknown } | undefined
+      let message: unknown
+      if (!messageWired && msgCfg?.type === 'expression' && typeof msgCfg.value === 'string') {
+        try {
+          message = Handlebars.compile(msgCfg.value, { noEscape: true })(dataVal ?? {})
+        } catch {
+          message = msgCfg.value
+        }
+      } else {
+        message = operandPreviewValue(node.id, 'message', cfg['message'], nodes, edges)
+      }
       return {
         timestamp: new Date().toISOString(),
         level,
@@ -640,6 +916,230 @@ export function staticScenarioPreview(
         return null
       }
     }
+    case 'cast': {
+      // Convert the resolved `value` operand to the configured target via the
+      // SHARED `castValue` — the SAME implementation the runtime calls. It THROWS
+      // on an impossible / null cast (which the runtime routes to `error`); the
+      // preview catches it and shows no result.
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      if (value === undefined) return null
+      const target = isScenarioCastType(cfg['targetType']) ? cfg['targetType'] : 'string'
+      try {
+        return { result: castValue(value, target) }
+      } catch {
+        return null
+      }
+    }
+    case 'regex': {
+      // Run the configured op over the resolved `value` via the SHARED
+      // `applyRegex` — the SAME implementation the runtime calls. An invalid
+      // pattern THROWS (runtime → `error`); the preview catches it → no result.
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      if (value === undefined) return null
+      const op = isRegexOp(cfg['op']) ? cfg['op'] : 'extract'
+      const pattern = typeof cfg['pattern'] === 'string' ? cfg['pattern'] : ''
+      const flags = typeof cfg['flags'] === 'string' ? cfg['flags'] : ''
+      const replacement = typeof cfg['replacement'] === 'string' ? cfg['replacement'] : ''
+      try {
+        return { result: applyRegex(value, op, pattern, flags, replacement) }
+      } catch {
+        return null
+      }
+    }
+    case 'json': {
+      // Parse / stringify the resolved `value` via the SHARED `applyJson` — the
+      // SAME implementation the runtime calls. Malformed JSON / non-serialisable
+      // value THROWS (runtime → `error`); the preview catches it → no result.
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      if (value === undefined) return null
+      const op = isJsonOp(cfg['op']) ? cfg['op'] : 'parse'
+      const indent = typeof cfg['indent'] === 'number' ? cfg['indent'] : 0
+      try {
+        return { result: applyJson(value, op, indent) }
+      } catch {
+        return null
+      }
+    }
+    case 'schema': {
+      // Validate the resolved `value` against the config JSON Schema via the
+      // SHARED `validateAgainstSchema` (ajv) — the SAME implementation the
+      // runtime calls. Mirror the executor's port outputs: the value on
+      // `valid`/`invalid` + the error list on `errors`. A malformed / empty
+      // schema THROWS (runtime → `error`); the preview catches it → no result.
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      if (value === undefined) return null
+      const schemaText = typeof cfg['schema'] === 'string' ? cfg['schema'] : ''
+      if (schemaText.trim() === '') return null
+      try {
+        const { valid, errors } = validateAgainstSchema(value, schemaText)
+        return valid ? { valid: value, errors } : { invalid: value, errors }
+      } catch {
+        return null
+      }
+    }
+    case 'xml': {
+      // Parse / stringify the resolved `value` via the SHARED `applyXml` — the
+      // SAME implementation the runtime calls. Malformed XML / non-serialisable
+      // value THROWS (runtime → `error`); the preview catches it → no result.
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      if (value === undefined) return null
+      const op = isXmlOp(cfg['op']) ? cfg['op'] : 'parse'
+      const indent = typeof cfg['indent'] === 'number' ? cfg['indent'] : 0
+      try {
+        return { result: applyXml(value, op, indent) }
+      } catch {
+        return null
+      }
+    }
+    case 'yaml': {
+      // Parse / stringify the resolved `value` via the SHARED `applyYaml` — the
+      // SAME implementation the runtime calls. Malformed YAML / non-serialisable
+      // value THROWS (runtime → `error`); the preview catches it → no result.
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      if (value === undefined) return null
+      const op = isYamlOp(cfg['op']) ? cfg['op'] : 'parse'
+      const indent = typeof cfg['indent'] === 'number' ? cfg['indent'] : 2
+      try {
+        return { result: applyYaml(value, op, indent) }
+      } catch {
+        return null
+      }
+    }
+    case 'crypto': {
+      // Encode / hash / sign the resolved `value` via the SHARED `applyCrypto` —
+      // the SAME implementation the runtime calls. A missing HMAC key / bad
+      // base64 THROWS (runtime → `error`); the preview catches it → no result.
+      const op = isCryptoOp(cfg['op']) ? cfg['op'] : 'sha256'
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      // `uuid` ignores its input; every other op needs a resolved value.
+      if (op !== 'uuid' && value === undefined) return null
+      const key = typeof cfg['key'] === 'string' ? cfg['key'] : ''
+      try {
+        return { result: applyCrypto(value, op, key) }
+      } catch {
+        return null
+      }
+    }
+    case 'jwt': {
+      // Decode the resolved `value` token via the SHARED `applyJwt` — the SAME
+      // implementation the runtime calls. A malformed token THROWS (runtime →
+      // `error`); the preview catches it → no result.
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      if (value === undefined) return null
+      try {
+        return { result: applyJwt(value) }
+      } catch {
+        return null
+      }
+    }
+    case 'datetime': {
+      // Shift / format / diff the resolved `value` date via the SHARED
+      // `applyDateTime` — the SAME implementation the runtime calls. An unreadable
+      // date THROWS (runtime → `error`); the preview catches it → no result.
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      if (value === undefined) return null
+      const op = isDateTimeOp(cfg['op']) ? cfg['op'] : 'add'
+      const amount = typeof cfg['amount'] === 'number' ? cfg['amount'] : 0
+      const unit = isDateTimeUnit(cfg['unit']) ? cfg['unit'] : 'days'
+      const format = typeof cfg['format'] === 'string' ? cfg['format'] : ''
+      const other = operandPreviewValue(node.id, 'other', cfg['other'], nodes, edges)
+      try {
+        return { result: applyDateTime(value, op, { amount, unit, format, other }) }
+      } catch {
+        return null
+      }
+    }
+    case 'objectOp': {
+      // Reshape the resolved `value` object via the SHARED `applyObjectOp`. A
+      // non-object operand THROWS (runtime → `error`); the preview catches it.
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      if (value === undefined) return null
+      const op = isObjectOp(cfg['op']) ? cfg['op'] : 'get'
+      const path = typeof cfg['path'] === 'string' ? cfg['path'] : ''
+      const keys = typeof cfg['keys'] === 'string' ? cfg['keys'].split(',').map((k) => k.trim()).filter(Boolean) : []
+      const other = operandPreviewValue(node.id, 'other', cfg['other'], nodes, edges)
+      try {
+        return { result: applyObjectOp(value, op, { path, keys, other }) }
+      } catch {
+        return null
+      }
+    }
+    case 'url': {
+      // Encode / decode / parse / build the resolved `value` via the SHARED
+      // `applyUrl`. A malformed input THROWS (runtime → `error`); preview catches.
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      if (value === undefined) return null
+      const op = isUrlOp(cfg['op']) ? cfg['op'] : 'encode'
+      try {
+        return { result: applyUrl(value, op) }
+      } catch {
+        return null
+      }
+    }
+    case 'random': {
+      // Generate a value via the SHARED `applyRandom`. With a `seed` the preview
+      // is stable; unseeded it shows a fresh sample. `pick` over an empty list
+      // THROWS (runtime → `error`); the preview catches it.
+      const op = isRandomOp(cfg['op']) ? cfg['op'] : 'int'
+      const min = typeof cfg['min'] === 'number' ? cfg['min'] : undefined
+      const max = typeof cfg['max'] === 'number' ? cfg['max'] : undefined
+      const length = typeof cfg['length'] === 'number' ? cfg['length'] : undefined
+      const seed = typeof cfg['seed'] === 'number' || typeof cfg['seed'] === 'string' ? cfg['seed'] : undefined
+      const items = resolveConfigItems(cfg) ?? undefined
+      try {
+        return { result: applyRandom(op, { min, max, length, seed, items }) }
+      } catch {
+        return null
+      }
+    }
+    case 'listOp': {
+      // Reshape the resolved `value` list via the SHARED `applyListOp`
+      // (scenarioList). A non-list operand THROWS (runtime → `error`); caught.
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      if (value === undefined) return null
+      const op = isListOp(cfg['op']) ? cfg['op'] : 'sort'
+      const key = typeof cfg['key'] === 'string' && cfg['key'] !== '' ? cfg['key'] : undefined
+      const order = cfg['order'] === 'desc' ? 'desc' : 'asc'
+      const depth = typeof cfg['depth'] === 'number' ? cfg['depth'] : undefined
+      const size = typeof cfg['size'] === 'number' ? cfg['size'] : undefined
+      const start = typeof cfg['start'] === 'number' ? cfg['start'] : undefined
+      const end = typeof cfg['end'] === 'number' ? cfg['end'] : undefined
+      try {
+        return { result: applyListReshape(value, op, { key, order, depth, size, start, end }) }
+      } catch {
+        return null
+      }
+    }
+    case 'csv': {
+      // Parse / stringify the resolved `value` via the SHARED `applyCsv`. The
+      // wrong operand shape THROWS (runtime → `error`); the preview catches it.
+      const value = operandPreviewValue(node.id, 'value', cfg['value'], nodes, edges)
+      if (value === undefined) return null
+      const op = isCsvOp(cfg['op']) ? cfg['op'] : 'parse'
+      const delimiter = typeof cfg['delimiter'] === 'string' && cfg['delimiter'] !== '' ? cfg['delimiter'] : undefined
+      const header = cfg['header'] !== false
+      try {
+        return { result: applyCsv(value, op, { delimiter, header }) }
+      } catch {
+        return null
+      }
+    }
+    case 'math': {
+      // Run the scalar op on the resolved `a` via the SHARED `applyMath`. A
+      // non-finite operand (or negative sqrt) THROWS (runtime → `error`); caught.
+      const a = operandPreviewValue(node.id, 'a', cfg['a'], nodes, edges)
+      if (a === undefined) return null
+      const op = isMathOp(cfg['op']) ? cfg['op'] : 'round'
+      const b = operandPreviewValue(node.id, 'b', cfg['b'], nodes, edges)
+      const min = operandPreviewValue(node.id, 'min', cfg['min'], nodes, edges)
+      const max = operandPreviewValue(node.id, 'max', cfg['max'], nodes, edges)
+      const precision = typeof cfg['precision'] === 'number' ? cfg['precision'] : undefined
+      try {
+        return { result: applyMath(a, op, { b, min, max, precision }) }
+      } catch {
+        return null
+      }
+    }
     case 'object': {
       const raw = cfg['properties']
       const props = Array.isArray(raw) ? raw : []
@@ -657,7 +1157,61 @@ export function staticScenarioPreview(
       }
       return out
     }
+    case 'output': {
+      // The `output` sink is the symmetric counterpart of `object`: each decl
+      // reads its OWN `value` input port (id = the decl id) — wired value wins,
+      // else the decl's literal fallback. A property wired to a non-static
+      // source lands as `null` and the inspector overrides it asynchronously.
+      const out: Record<string, unknown> = {}
+      for (const decl of readOutputDecls(cfg)) {
+        const name = decl.name.trim()
+        if (!name) continue
+        const value = operandPreviewValue(node.id, decl.id, decl.value, nodes, edges)
+        out[name] = value === undefined ? null : value
+      }
+      return out
+    }
     default:
       return null
   }
+}
+
+/** One action of a scenario paired with the data suggestion the inspector shows
+ * for it BEFORE any run — the static, config-derived preview. */
+export interface ScenarioActionSuggestion {
+  /** The action's node id (stable, persisted). */
+  id: string
+  kind: ScenarioNode['kind']
+  /** The static preview the inspector would display, or `null` when the kind
+   * has no config-derived suggestion (e.g. an `httpRequest`, or a box whose
+   * only inputs are wired to non-static sources). */
+  suggestion: Record<string, unknown> | null
+}
+
+/**
+ * Extract every action of a scenario together with its inspector data
+ * suggestion (the pre-run static preview). This mirrors how the editor computes
+ * an action's `staticData`, so freezing the result into a snapshot and
+ * re-extracting on each run detects regressions in the inspector's suggestions.
+ *
+ * Cross-scenario `runScenario` outputs are NOT resolved here (they need the
+ * whole project tree, which a single scenario doesn't carry) — such a node gets
+ * whatever {@link staticScenarioPreview} returns for it in isolation. The
+ * scenarios this is first used on (e.g. the log-actions scenario) have no
+ * `runScenario`, so the snapshot is faithful + deterministic.
+ */
+export function extractScenarioActionSuggestions(
+  scenario: { nodes: readonly ScenarioNode[]; edges: readonly ScenarioEdge[] }
+): ScenarioActionSuggestion[] {
+  const nodes: StaticPreviewNode[] = scenario.nodes.map((n) => ({ id: n.id, kind: n.kind, config: n.config }))
+  const edges: StaticPreviewEdge[] = scenario.edges.map((e) => ({
+    from: e.from,
+    to: e.to,
+    ...(e.selector !== undefined ? { selector: e.selector } : {})
+  }))
+  return scenario.nodes.map((n) => ({
+    id: n.id,
+    kind: n.kind,
+    suggestion: staticScenarioPreview({ id: n.id, kind: n.kind, config: n.config }, nodes, edges)
+  }))
 }

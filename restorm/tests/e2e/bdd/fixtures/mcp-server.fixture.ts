@@ -149,7 +149,7 @@ export const test = base.extend<McpServerFixtures>({
       const app = await electron.launch({
         executablePath: electronExePath,
         args: [
-          '--no-sandbox', '--ozone-platform=x11',
+          '--no-sandbox', '--ozone-platform=x11', '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows',
           mainJsPath,
           '--clear-settings',
           '--mcp',

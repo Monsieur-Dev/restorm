@@ -12,7 +12,7 @@ import { useScenarioEngine, type EngineEventLike } from './useScenarioEngine'
 
 type Emit = (e: EngineEventLike) => void
 
-describe('useScenarioEngine — yellow "paused-here" frame', () => {
+describe('useScenarioEngine — beam hold + yellow "paused-here" frame', () => {
   let cb: Emit | null = null
   let emit: Emit
 
@@ -75,5 +75,27 @@ describe('useScenarioEngine — yellow "paused-here" frame', () => {
     act(() => { vi.advanceTimersByTime(MIN_BEAM_MS) })
 
     expect([...result.current.completedNodeIds]).toEqual([])
+  })
+
+  it('keeps an instant run\'s beams lit through run-completed, then drains them on the min-beam hold', () => {
+    const { result } = renderHook(() => useScenarioEngine('scn-1'))
+    startRun()
+    // A fast pure-node run: every node starts AND completes, then the whole run
+    // reports done — all in one burst, the way an instant scenario does.
+    emit({ type: 'node-started', runId: 'r1', nodeId: 'a' })
+    emit({ type: 'node-completed', runId: 'r1', nodeId: 'a' })
+    emit({ type: 'node-started', runId: 'r1', nodeId: 'b' })
+    emit({ type: 'node-completed', runId: 'r1', nodeId: 'b' })
+    emit({ type: 'run-completed', runId: 'r1' })
+
+    // The run is done, but the beams must still be lit so each finishes the lap
+    // it started — `run-completed` must NOT wipe them (that collapsed the whole
+    // burst to "no beam ever painted" on an instant run).
+    expect(result.current.state).toBe('completed')
+    expect([...result.current.runningNodeIds].sort()).toEqual(['a', 'b'])
+
+    // The per-node min-beam holds then drain them once their duration elapses.
+    act(() => { vi.advanceTimersByTime(MIN_BEAM_MS) })
+    expect([...result.current.runningNodeIds]).toEqual([])
   })
 })

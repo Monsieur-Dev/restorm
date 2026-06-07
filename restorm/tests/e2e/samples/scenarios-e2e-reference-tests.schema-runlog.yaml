@@ -1,0 +1,84 @@
+- message: 🔵 [<time>] ▶ Schema
+- message: ⚪ [<time>] start json
+  data:
+    op: parse
+    value: '{"id":7,"name":"Rex"}'
+- message: ⚪ [<time>] start json
+  data:
+    op: parse
+    value: '{"id":7}'
+- message: ⚪ [<time>] done json
+  data:
+    result:
+      id: 7
+      name: Rex
+- message: ⚪ [<time>] done json
+  data:
+    result:
+      id: 7
+- message: ⚪ [<time>] start schema
+  data:
+    schema: |-
+      {
+        "type": "object",
+        "required": ["id", "name"],
+        "properties": {
+          "id": { "type": "number" },
+          "name": { "type": "string" }
+        }
+      }
+    value:
+      id: 7
+      name: Rex
+- message: ⚪ [<time>] done schema
+  data:
+    valid:
+      id: 7
+      name: Rex
+    errors: []
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: "schema: pet valide"
+    in:
+      id: 7
+      name: Rex
+- message: "🔵 [<time>] schema: pet valide"
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] start schema
+  data:
+    schema: |-
+      {
+        "type": "object",
+        "required": ["id", "name"],
+        "properties": {
+          "id": { "type": "number" },
+          "name": { "type": "string" }
+        }
+      }
+    value:
+      id: 7
+    in: true
+- message: ⚪ [<time>] done schema
+  data:
+    invalid:
+      id: 7
+    errors:
+      - / must have required property 'name'
+- message: ⚪ [<time>] start log
+  data:
+    level: warn
+    message: "schema: pet invalide"
+    in:
+      id: 7
+    data:
+      - / must have required property 'name'
+- message: "🟠 [<time>] schema: pet invalide"
+  data:
+    - / must have required property 'name'
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      - / must have required property 'name'
+- message: 🔵 [<time>] ■ Schema

@@ -144,15 +144,15 @@ export function registerReadTools(mcp: McpService): void {
     {
       title: 'Search project',
       description:
-        'Run a typed search across folders / requests / environments using restorm\'s in-memory ' +
-        'search index. Optional `kinds` filter narrows the result categories; `maxResults` caps ' +
+        'Run a typed search across folders / requests / environments / scenarios using restorm\'s ' +
+        'in-memory search index. Optional `kinds` filter narrows the result categories; `maxResults` caps ' +
         'the response length (default 50, max 200). Each match carries `{ id, title, category, ' +
         'description?, score }`; request-kind matches additionally carry `method` and `url` so ' +
         'callers can disambiguate hits (e.g. two requests named "List Users" on different paths) ' +
         'without a follow-up `get_request`.',
       inputSchema: {
         query: z.string().min(1).describe('Free-text query, e.g. "users" or "POST /pets".'),
-        kinds: z.array(z.enum(['request', 'folder', 'environment', 'tag', 'settings'])).optional().describe(
+        kinds: z.array(z.enum(['request', 'folder', 'environment', 'scenario', 'tag', 'settings'])).optional().describe(
           'Restrict matches to one or more categories. Omit for all kinds.'
         ),
         maxResults: z.coerce.number().int().min(1).max(ABS_MAX_SEARCH_RESULTS).optional().describe(

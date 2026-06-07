@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { singleDeepPath, staticScenarioPreview, expectsObjectInput, type StaticPreviewNode, type StaticPreviewEdge } from '../../../../shared/utils/scenarioStaticPreview'
+import { singleDeepPath, singleTopLevelKey, portPreviewValue, staticScenarioPreview, expectsObjectInput, type StaticPreviewNode, type StaticPreviewEdge } from '../../../../shared/utils/scenarioStaticPreview'
 
 describe('expectsObjectInput', () => {
   it('skips auto-deduce for transform.value (the Handlebars context)', () => {
@@ -10,6 +10,33 @@ describe('expectsObjectInput', () => {
     expect(expectsObjectInput('wait', 'duration')).toBe(false)
     expect(expectsObjectInput('arithmetic', 'a')).toBe(false)
     expect(expectsObjectInput('comparator', 'b')).toBe(false)
+  })
+})
+
+describe('portPreviewValue — unwraps a node that emits a bare value', () => {
+  it('unwraps the value under the port id (arithmetic/comparator `{result}`, filter `{kept}`)', () => {
+    expect(portPreviewValue({ result: 5 }, 'result', 'arithmetic')).toBe(5)
+    expect(portPreviewValue({ kept: [1, 2], rejected: [3] }, 'kept', 'filter')).toEqual([1, 2])
+  })
+
+  it('unwraps a single display-named entry (`now` → `{now}`, `getVariable` → `{<var>}`)', () => {
+    expect(portPreviewValue({ now: 1 }, 'value', 'now')).toBe(1)
+    expect(portPreviewValue({ cpt: 5 }, 'value', 'getVariable')).toBe(5)
+  })
+
+  it('keeps the wrapper for the genuine wrapper kinds (transform `{result}`, input `{name}`)', () => {
+    expect(portPreviewValue({ result: 'x' }, 'out', 'transform')).toEqual({ result: 'x' })
+    expect(portPreviewValue({ value: 5 }, 'value', 'input')).toEqual({ value: 5 })
+  })
+
+  it('drives the right auto-selector: bare emitters → `.`, transform → `result`', () => {
+    // The reported bug: arithmetic.result → log.data deduced "result" (wrong).
+    // The port carries the bare number, so it must deduce "." (identity).
+    expect(singleTopLevelKey(portPreviewValue({ result: 5 }, 'result', 'arithmetic'))).toBeNull() // → "."
+    expect(singleDeepPath(portPreviewValue({ result: 16 }, 'result', 'math'))).toBeNull() // → "." (math/listOp/csv: bare primitive)
+    expect(singleDeepPath(portPreviewValue({ cpt: 5 }, 'value', 'getVariable'))).toBeNull() // → "."
+    // transform genuinely wraps `{ result }` on its `out` port → keep "result".
+    expect(singleTopLevelKey(portPreviewValue({ result: 'x' }, 'out', 'transform'))).toBe('result')
   })
 })
 
@@ -91,6 +118,16 @@ describe('staticScenarioPreview', () => {
       b: { type: 'numeric', value: 3, format: 'decimal' }
     })
     expect(staticScenarioPreview(n, [n], [])).toEqual({ result: 5 })
+  })
+
+  it('resolves an inline `variable` operand to its static value (not the {{N}} template → null)', () => {
+    const set = node('s', 'setVariable', { name: 'N', value: { type: 'numeric', value: 5, format: 'decimal' } })
+    const n = node('a', 'arithmetic', {
+      operator: '+',
+      a: { type: 'numeric', value: 5, format: 'decimal' },
+      b: { type: 'variable', value: 'N' }
+    })
+    expect(staticScenarioPreview(n, [set, n], [])).toEqual({ result: 10 })
   })
 
   it('arithmetic divide-by-zero → null (no preview)', () => {
@@ -232,6 +269,33 @@ describe('staticScenarioPreview', () => {
     expect(out?.['data']).toBe(42)
     expect(typeof out?.['timestamp']).toBe('string')
     expect(out?.['timestamp']).toMatch(/^\d{4}-\d{2}-\d{2}T/)
+  })
+
+  it('log renders an inline Expression message against the resolved data (object)', () => {
+    const obj = node('o', 'object', {
+      properties: [
+        { id: 'p1', name: 'hello', value: { type: 'string', value: 'world' } }
+      ]
+    })
+    const l = node('lg', 'log', {
+      level: 'info',
+      message: { type: 'expression', value: 'Hello {{hello}}' }
+    })
+    const edges: StaticPreviewEdge[] = [
+      { from: { nodeId: 'o', portId: 'object' }, to: { nodeId: 'lg', portId: 'data' } }
+    ]
+    const out = staticScenarioPreview(l, [obj, l], edges)
+    expect(out?.['message']).toBe('Hello world')
+    expect(out?.['data']).toEqual({ hello: 'world' })
+  })
+
+  it('log renders an inline Expression message against a scalar data ({{.}})', () => {
+    const l = node('lg', 'log', {
+      message: { type: 'expression', value: '5+5 = {{.}}' },
+      data: { type: 'numeric', value: 10, format: 'decimal' }
+    })
+    const out = staticScenarioPreview(l, [l], [])
+    expect(out?.['message']).toBe('5+5 = 10')
   })
 
   it('log defaults to info + null placeholders when both inputs are wired to non-static', () => {

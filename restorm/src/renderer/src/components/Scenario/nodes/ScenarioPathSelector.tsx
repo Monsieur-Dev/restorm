@@ -151,7 +151,7 @@ export const ScenarioPathSelector: React.FC<ScenarioPathSelectorProps> = ({ edge
         />
         <span ref={targetRef} className="scn-path-target">
           <Button
-            small
+            medium
             secondary
             icon="target"
             onClick={toggleOpen}

@@ -43,14 +43,18 @@ export function flowEdgeToScenarioEdge(fe: FlowEdgeShape, prior?: ScenarioEdge):
   }
 }
 
-/** Default handle/edge colour per semantic port role (epic §5b). */
+/** Default handle/edge colour per semantic port role. The scheme splits
+ * "classic" outputs (the normal/happy path → GREEN) from "alternative" outputs
+ * (branches the flow takes only on a specific condition → BLUE), with `error`
+ * its own RED. So an `if`'s `then` + a `switch`'s `default` (the fall-through)
+ * are green, while the `if`'s `else` + each `switch` `case` are blue. */
 export const ROLE_COLOR: Record<string, string> = {
   then: '#22c55e',
-  case: '#22c55e',
+  default: '#22c55e',
   response: '#22c55e',
   status: '#3b82f6',
   else: '#3b82f6',
-  default: '#3b82f6',
+  case: '#3b82f6',
   error: '#ef4444'
 }
 
@@ -59,6 +63,17 @@ const NEUTRAL_PORT_COLOR = '#9ca3af'
 /** The colour for a port handle: explicit override → role colour → neutral. */
 export function portColor(p: ScenarioPort): string {
   return p.defaultEdgeColor ?? (p.role ? ROLE_COLOR[p.role] ?? NEUTRAL_PORT_COLOR : NEUTRAL_PORT_COLOR)
+}
+
+/** Default edge stroke for a source handle. The universal completion (`done`)
+ * and `error` ports are implicit — drawn on every box, never listed in a kind's
+ * outputs — so they carry no port `role` and must be resolved by handle id:
+ * `done` is the classic completion (GREEN), `error` is RED. Every other handle
+ * resolves from its port role (or stays uncoloured when the port is unknown). */
+export function edgeColorForHandle(handleId: string | null | undefined, port: ScenarioPort | undefined): string | undefined {
+  if (handleId === 'error') return ROLE_COLOR['error']
+  if (handleId === 'done') return ROLE_COLOR['then']
+  return port ? portColor(port) : undefined
 }
 
 /**

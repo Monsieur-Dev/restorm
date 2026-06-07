@@ -53,22 +53,25 @@ export type ButtonAppearance = 'default' | 'rainbow';
  * For the `'rainbow'` appearance the size only affects padding /
  * font-size / radius — the toolbar reset does not apply.
  *
- * - `'sm'` — small (toolbar icon for default appearance).
+ * - `'sm'` — small (toolbar icon for default appearance, 20×20).
+ * - `'md'` — medium square icon button (28×28), sized to sit flush next to a
+ *   28px-tall control (an `InputBox`, a `SelectBox`) inside a `ControlGroup`.
  * - `'default'` — standard call-to-action.
  * - `'lg'` — section CTA (16px / 14×28).
  * - `'xl'` — hero CTA on welcome / landing surfaces (20px / 20×40).
  */
-export type ButtonSize = 'sm' | 'default' | 'lg' | 'xl';
+export type ButtonSize = 'sm' | 'md' | 'default' | 'lg' | 'xl';
 
 export interface ButtonProps {
   options?: IButtonOptions;
   /**
    * Leading icon. Pass a string for the codicon shorthand
-   * (`icon="save"`) or a full `Icon` object for any library
-   * supported by `IconView` (codicon, emoji, iconoir, phosphor,
-   * material, simpleicons, feather, fontawesome).
+   * (`icon="save"`), a full `Icon` object for any library supported by
+   * `IconView` (codicon, emoji, iconoir, phosphor, material, simpleicons,
+   * feather, fontawesome), or a ready-made React element (e.g. a `<Badge>`) to
+   * render verbatim in the leading slot.
    */
-  icon?: string | Icon | undefined;
+  icon?: string | Icon | React.ReactElement | undefined;
   disabled?: boolean;
   secondary?: boolean;
   /**
@@ -85,7 +88,23 @@ export interface ButtonProps {
    * set, `size` wins.
    */
   small?: boolean;
+  /**
+   * Shorthand for `size="md"` — a 28×28 square icon button that lines up flush
+   * with a 28px-tall control in a `ControlGroup`. When both are set, `size` wins.
+   */
+  medium?: boolean;
   line?: boolean;
+  /**
+   * Link appearance: no background, left-aligned, pointer cursor. The leading
+   * `icon` is rendered un-underlined; only the text label is underlined — so it
+   * reads as an inline link, not a chip. No trailing glyph (use `externalLink`
+   * for the "opens elsewhere" variant). For inline navigation affordances. */
+  link?: boolean;
+  /**
+   * Same look & feel as `link` (no background, underlined label, pointer
+   * cursor), PLUS a trailing `codicon-link-external` a few pixels after the
+   * label — for affordances that open the target in another tab / window. */
+  externalLink?: boolean;
   /**
    * Emphasis level (0 = default, 1+ = emphasized).
    * When > 0, uses CSS variables --button-background-emphasis-N, --button-border-emphasis-N,
@@ -113,6 +132,9 @@ export interface ButtonProps {
    */
   align?: 'left' | 'center' | 'right';
   onClick?: ((event: React.MouseEvent<HTMLAnchorElement>) => void) | undefined;
+  /** Right-click handler — e.g. an icon button that opens the same menu on
+   * primary and context click. The button calls `preventDefault()` for you. */
+  onContextMenu?: ((event: React.MouseEvent<HTMLAnchorElement>) => void) | undefined;
   onMouseEnter?: ((event: React.MouseEvent<HTMLAnchorElement>) => void) | undefined;
   onMouseLeave?: ((event: React.MouseEvent<HTMLAnchorElement>) => void) | undefined;
   className?: string;

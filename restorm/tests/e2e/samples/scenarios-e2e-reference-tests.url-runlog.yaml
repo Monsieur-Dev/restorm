@@ -1,0 +1,60 @@
+- message: 🔵 [<time>] ▶ URL
+- message: ⚪ [<time>] start url
+  data:
+    op: encode
+    value: a b&c=d
+- message: ⚪ [<time>] done url
+  data:
+    result: a%20b%26c%3Dd
+- message: ⚪ [<time>] start url
+  data:
+    op: decode
+    value: a%20b%26c%3Dd
+    in: true
+- message: ⚪ [<time>] done url
+  data:
+    result: a b&c=d
+- message: ⚪ [<time>] start url
+  data:
+    op: parseQuery
+    value: ?a=1&b=two
+    in: true
+- message: ⚪ [<time>] done url
+  data:
+    result:
+      a: "1"
+      b: two
+- message: ⚪ [<time>] start url
+  data:
+    op: parseUrl
+    value: https://api.example.com:8443/v1/pets?limit=5#top
+    in: true
+- message: ⚪ [<time>] done url
+  data:
+    result:
+      protocol: "https:"
+      hostname: api.example.com
+      port: "8443"
+      pathname: /v1/pets
+      search: ?limit=5
+      hash: "#top"
+      origin: https://api.example.com:8443
+      query:
+        limit: "5"
+- message: ⚪ [<time>] start url
+  data:
+    op: decode
+    value: "%"
+    in: true
+- message: 🔴 [<time>] URI malformed
+- message: ⚪ [<time>] start log
+  data:
+    level: error
+    message: "url error: bad escape"
+    in:
+      message: URI malformed
+      startedAt: <dynamic-time>
+- message: "🔴 [<time>] url error: bad escape"
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ URL

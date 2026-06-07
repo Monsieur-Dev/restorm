@@ -24,13 +24,15 @@ export const IfNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, 
     label: key,
     port: { id: key, type: 'target' },
     content: (
-      <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
+      <div className="nodrag scn-operand-field" onMouseDown={(e) => { e.stopPropagation() }}>
         <TypedValueField
           value={normalizeValueType(config[key])}
           onChange={(next) => { data.onSetConfig?.(id, { [key]: serializeValueForPersistence(next) }) }}
           valueTypeGroups={valueTypeGroups}
           excludeTypes={['expression']}
           allowEnvironment
+          allowNull
+          allowList
           dataTestId={`scn-if-${key}`}
         />
       </div>
@@ -63,7 +65,7 @@ export const IfNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, 
     { id: 'then', label: 'then', port: { id: 'then', role: 'then', type: 'source' } },
     { id: 'else', label: 'else', port: { id: 'else', role: 'else', type: 'source' } }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} launchInput />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
 }
 
 export default IfNodeBox

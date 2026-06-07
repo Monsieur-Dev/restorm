@@ -1,23 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { stringify as yamlStringify } from 'yaml'
-import { Button, ListView, Toggle, Tooltip, type ListViewItemData } from 'electron-core-ui/renderer'
+import { Button, ListView, Toggle, Tooltip, ContextMenu, type ContextMenuItem, type ListViewItemData } from 'electron-core-ui/renderer'
 import { buildScenarioPathTree } from './scenarioPathTree'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
-
-/** Lets a log row whose entry came from a DIFFERENT scenario than the one
- * being viewed surface its provenance (a link to the source scenario). */
-export interface LogProvenanceApi {
-  /** The scenario the view belongs to — an entry with a different
-   * `scenarioId` came from a sub-scenario. */
-  currentScenarioId: string
-  /** The source scenario's CURRENT name, or null if it's been deleted since
-   * the log was produced. Resolved lazily (on hover) so the "still exists"
-   * check reflects the moment the tooltip is shown. */
-  resolveName: (scenarioId: string) => string | null
-  /** Open the source scenario in a workbench tab. */
-  open: (scenarioId: string) => void
-}
 
 /**
  * A log row's `ts + message`. The message ellipsis-truncates; on hover an ECUI
@@ -29,11 +15,10 @@ export interface LogProvenanceApi {
  * The tooltip is hover-bridged (a short close delay) so the user can move into
  * it to click the link without it vanishing.
  */
-const LogMessageCell: React.FC<{ ts: string; message: string; scenarioId?: string; provenance?: LogProvenanceApi }> = ({ ts, message, scenarioId, provenance }) => {
+const LogMessageCell: React.FC<{ ts: string; message: string }> = ({ ts, message }) => {
   const msgRef = useRef<HTMLSpanElement>(null)
   const [hover, setHover] = useState(false)
   const [truncated, setTruncated] = useState(false)
-  const [sourceName, setSourceName] = useState<string | null>(null)
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const showTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => () => {
@@ -41,20 +26,15 @@ const LogMessageCell: React.FC<{ ts: string; message: string; scenarioId?: strin
     if (showTimer.current) clearTimeout(showTimer.current)
   }, [])
 
-  const fromSubScenario = provenance !== undefined && scenarioId !== undefined && scenarioId !== provenance.currentScenarioId
-
   const open = (): void => {
     if (closeTimer.current) { clearTimeout(closeTimer.current); closeTimer.current = null }
     if (hover || showTimer.current) return // already shown, or appearance pending
     // Delay before the tooltip appears, so a quick pass over the row doesn't
-    // flash it. Measuring + provenance resolution happen when it actually shows.
+    // flash it. Measuring happens when it actually shows.
     showTimer.current = setTimeout(() => {
       showTimer.current = null
       const el = msgRef.current
       setTruncated(el !== null && el.scrollWidth > el.clientWidth)
-      // Resolve provenance NOW so the link reflects whether the scenario still
-      // exists at display time.
-      setSourceName(fromSubScenario ? provenance.resolveName(scenarioId) : null)
       setHover(true)
     }, 600)
   }
@@ -65,30 +45,20 @@ const LogMessageCell: React.FC<{ ts: string; message: string; scenarioId?: strin
     closeTimer.current = setTimeout(() => { setHover(false) }, 160)
   }
 
-  const hasLink = fromSubScenario && sourceName !== null
-  const show = hover && (truncated || hasLink)
-
+  // Hover only surfaces the FULL message when the row truncates it — the
+  // sub-scenario provenance is now reached by clicking the row (which pops a
+  // read-only preview), so the old hover link is gone.
   return (
     <span className="scn-log-line" onMouseEnter={open} onMouseLeave={scheduleClose}>
       <span className="scn-log-ts">{ts}</span>
       <span className="scn-log-msg" ref={msgRef}>{message}</span>
       <Tooltip
         targetRef={msgRef}
-        show={show}
+        show={hover && truncated}
         placement="below"
         content={
           <span className="scn-log-tooltip" onMouseEnter={open} onMouseLeave={scheduleClose}>
-            {truncated && <span className="scn-log-tooltip-msg">{message}</span>}
-            {hasLink && (
-              <button
-                type="button"
-                className="scn-log-tooltip-link"
-                onClick={() => { provenance.open(scenarioId) }}
-              >
-                <i className="codicon codicon-link-external" aria-hidden="true" />
-                <span>{sourceName}</span>
-              </button>
-            )}
+            <span className="scn-log-tooltip-msg">{message}</span>
           </span>
         }
       />
@@ -102,6 +72,10 @@ type LogLevel = typeof LEVELS[number]
 // Status-dot colour rendered as an emoji for the plain-text (YAML) copy, so a
 // pasted log keeps the level cue without the styled `<span>` dot.
 const LEVEL_EMOJI: Record<LogLevel, string> = { debug: '⚪', info: '🔵', warn: '🟠', error: '🔴' }
+
+/** The level-filter map (which severities are shown). */
+export type LogLevelFilter = Record<LogLevel, boolean>
+const ALL_LEVELS_ON: LogLevelFilter = { debug: true, info: true, warn: true, error: true }
 
 /** Minimal log-entry shape the view needs — satisfied by both the live
  * `ScenarioLogEntry` (inspector) and the persisted `ScenarioRunLogEntry`
@@ -129,12 +103,18 @@ export interface ScenarioRunLogViewProps {
    * run-history is read-only and never offers a clear action. */
   onClear?: () => void
   /** When provided, clicking a log row focuses + flashes its emitter node.
-   * The optional `scenarioId` (set on run-history entries) tells the caller
-   * which (sub-)scenario the node lives in. */
-  onFocusNode?: (nodeId: string, scenarioId?: string) => void
-  /** When provided, a log row from a DIFFERENT scenario shows a provenance
-   * link in its hover tooltip. Only the live inspector passes this. */
-  provenance?: LogProvenanceApi
+   * The optional `scenarioId` (set on cross-scenario entries) tells the caller
+   * which (sub-)scenario the node lives in; `anchor` is the viewport point of
+   * the clicked row (the inspector's left edge × the row's y) so a caller can
+   * pop a sub-scenario preview to the LEFT of the row. */
+  onFocusNode?: (nodeId: string, scenarioId?: string, anchor?: { x: number; y: number }) => void
+  /** Controlled "show all logs" toggle + its filters. The inspector lifts these
+   * into the (persistent) panel so they survive the log view's per-run remount;
+   * the run-history modal omits them and keeps its own ephemeral state. */
+  showAllLogs?: boolean
+  onShowAllLogsChange?: (next: boolean) => void
+  levels?: LogLevelFilter
+  onLevelsChange?: (next: LogLevelFilter) => void
 }
 
 const logTs = (ts: string): string => (ts.length >= 23 ? ts.slice(11, 23) : ts)
@@ -166,11 +146,23 @@ const prefixIds = (items: ListViewItemData[], prefix: string): ListViewItemData[
  * object becomes collapsible children (the same JSON tree the JSON-path
  * picker uses).
  */
-export const ScenarioRunLogView: React.FC<ScenarioRunLogViewProps> = ({ logs, testIdPrefix = 'scenario-run-log', onClear, onFocusNode, provenance }) => {
+export const ScenarioRunLogView: React.FC<ScenarioRunLogViewProps> = ({ logs, testIdPrefix = 'scenario-run-log', onClear, onFocusNode, showAllLogs: showAllProp, onShowAllLogsChange, levels: levelsProp, onLevelsChange }) => {
   const { t } = useTranslation()
-  const [showAllLogs, setShowAllLogs] = useState(false)
   const [copied, setCopied] = useState(false)
-  const [levels, setLevels] = useState<Record<LogLevel, boolean>>({ debug: true, info: true, warn: true, error: true })
+  // Right-click context menu on a log row → copy just that entry.
+  const [rowMenu, setRowMenu] = useState<{ x: number; y: number; rowId: string } | null>(null)
+  // The log tree wrapper + the y of the last pointer-down on it — together they
+  // give the anchor a row click hands to `onFocusNode` (left edge × row y).
+  const treeRef = useRef<HTMLDivElement>(null)
+  const lastPointerY = useRef(0)
+  // Controlled when the caller (the inspector) owns these — so the choice
+  // survives this view's per-run remount; otherwise local (the run-history modal).
+  const [internalShowAll, setInternalShowAll] = useState(false)
+  const showAllLogs = showAllProp ?? internalShowAll
+  const setShowAllLogs = onShowAllLogsChange ?? setInternalShowAll
+  const [internalLevels, setInternalLevels] = useState<LogLevelFilter>(ALL_LEVELS_ON)
+  const levels = levelsProp ?? internalLevels
+  const setLevels = onLevelsChange ?? setInternalLevels
 
   // Unchecked "show all" = only the user-produced `Log` action entries
   // (engine debug + `run` boundaries are "system"). Then keep only the
@@ -187,7 +179,7 @@ export const ScenarioRunLogView: React.FC<ScenarioRunLogViewProps> = ({ logs, te
     const item: ListViewItemData = {
       id: `log-${i}`,
       icon: <span className={`scn-log-dot scn-log-dot-${level}`} aria-hidden="true" />,
-      title: <LogMessageCell ts={logTs(e.ts)} message={asText(e.message)} {...(e.scenarioId !== undefined ? { scenarioId: e.scenarioId } : {})} {...(provenance ? { provenance } : {})} />
+      title: <LogMessageCell ts={logTs(e.ts)} message={asText(e.message)} />
     }
     if (e.data !== undefined) {
       const tree = buildScenarioPathTree(typeof e.data === 'object' && e.data !== null ? (e.data as Record<string, unknown>) : { value: e.data })
@@ -216,6 +208,20 @@ export const ScenarioRunLogView: React.FC<ScenarioRunLogViewProps> = ({ logs, te
     }).catch(() => { /* clipboard denied — no-op */ })
   }
 
+  // Copy a SINGLE row's entry — the same YAML shape as `copyLogs`, scoped to
+  // the right-clicked row (its `log-<i>` id, or a `log-<i>/…` data child).
+  const copyEntry = (rowId: string): void => {
+    const idx = Number((rowId.split('/')[0] ?? '').replace('log-', ''))
+    const e = Number.isInteger(idx) ? visibleLogs[idx] : undefined
+    if (!e) return
+    const level = e.level ?? 'info'
+    const message = `${LEVEL_EMOJI[level]} [${logDate(e.ts)}] ${asText(e.message)}`
+    const entry = e.data !== undefined ? { message, data: e.data } : { message }
+    let text: string
+    try { text = yamlStringify(entry) } catch { text = '' }
+    void navigator.clipboard.writeText(text).catch(() => { /* clipboard denied — no-op */ })
+  }
+
   return (
     <>
       <div className="scn-inspector-logs-toggle nodrag">
@@ -230,18 +236,33 @@ export const ScenarioRunLogView: React.FC<ScenarioRunLogViewProps> = ({ logs, te
           {LEVELS.map((lvl) => (
             <HeaderHoverTooltip
               key={lvl}
-              label={t('scenario.inspector.showLevelLogs', { level: lvl, defaultValue: 'Show {{level}} logs' })}
+              label={`${t('scenario.inspector.showLevelLogs', { level: lvl, defaultValue: 'Show {{level}} logs' })}\n${t('scenario.inspector.showLevelOnly', 'Right-click: this level only')}`}
               data-testid={`${testIdPrefix}-level-${lvl}-tip`}
             >
-              <Toggle
-                appearance="button"
-                checked={levels[lvl]}
-                onChange={(checked) => { setLevels((prev) => ({ ...prev, [lvl]: checked })) }}
-                data-testid={`${testIdPrefix}-level-${lvl}`}
-                aria-label={t('scenario.inspector.showLevelLogs', { level: lvl, defaultValue: 'Show {{level}} logs' })}
+              {/* Toggle doesn't forward onContextMenu; this transparent
+                  (display:contents) wrapper catches the bubbled right-click.
+                  Toggle: if this level is the ONLY one shown, restore all;
+                  otherwise solo it (keep only this level). */}
+              <span
+                style={{ display: 'contents' }}
+                onContextMenu={(e) => {
+                  e.preventDefault()
+                  const onlyThis = LEVELS.every((l) => levels[l] === (l === lvl))
+                  setLevels(onlyThis
+                    ? { ...ALL_LEVELS_ON }
+                    : (Object.fromEntries(LEVELS.map((l) => [l, l === lvl])) as LogLevelFilter))
+                }}
               >
-                <span className={`scn-log-dot scn-log-dot-${lvl}`} aria-hidden="true" />
-              </Toggle>
+                <Toggle
+                  appearance="button"
+                  checked={levels[lvl]}
+                  onChange={(checked) => { setLevels({ ...levels, [lvl]: checked }) }}
+                  data-testid={`${testIdPrefix}-level-${lvl}`}
+                  aria-label={t('scenario.inspector.showLevelLogs', { level: lvl, defaultValue: 'Show {{level}} logs' })}
+                >
+                  <span className={`scn-log-dot scn-log-dot-${lvl}`} aria-hidden="true" />
+                </Toggle>
+              </span>
             </HeaderHoverTooltip>
           ))}
           <span className="scn-log-actions-sep" aria-hidden="true" />
@@ -276,7 +297,7 @@ export const ScenarioRunLogView: React.FC<ScenarioRunLogViewProps> = ({ logs, te
           )
         : (
           <div className="scn-inspector-output">
-            <div className="scn-inspector-tree">
+            <div className="scn-inspector-tree" ref={treeRef} onMouseDownCapture={(e) => { lastPointerY.current = e.clientY }}>
               <ListView
                 items={logItems}
                 selectionMode="single"
@@ -285,15 +306,39 @@ export const ScenarioRunLogView: React.FC<ScenarioRunLogViewProps> = ({ logs, te
                   ? {
                       onItemClick: (payload: { item: ListViewItemData }) => {
                         const emitter = emitterByRow.get(payload.item.id.split('/')[0] ?? '')
-                        if (emitter) onFocusNode(emitter.nodeId, emitter.scenarioId)
+                        if (!emitter) return
+                        // Anchor a possible sub-scenario preview to the LEFT of the
+                        // row: the inspector tree's left edge × the clicked y.
+                        const rect = treeRef.current?.getBoundingClientRect()
+                        const anchor = { x: rect?.left ?? 0, y: lastPointerY.current }
+                        onFocusNode(emitter.nodeId, emitter.scenarioId, anchor)
                       }
                     }
                   : {})}
+                onItemContextMenu={(payload, event) => {
+                  event.preventDefault()
+                  setRowMenu({ x: event.clientX, y: event.clientY, rowId: payload.item.id })
+                }}
                 data-testid={`${testIdPrefix}-list`}
               />
             </div>
           </div>
           )}
+      {rowMenu && (
+        <ContextMenu
+          visible
+          x={rowMenu.x}
+          y={rowMenu.y}
+          onRequestClose={() => { setRowMenu(null) }}
+          data-testid={`${testIdPrefix}-row-menu`}
+          items={[{
+            id: 'copy-entry',
+            label: t('scenario.inspector.copyThisLog', 'Copy this log'),
+            icon: 'copy',
+            onClick: () => { copyEntry(rowMenu.rowId); setRowMenu(null) }
+          } as ContextMenuItem]}
+        />
+      )}
     </>
   )
 }

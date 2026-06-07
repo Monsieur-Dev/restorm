@@ -148,6 +148,10 @@
       "autoSaveDelay": {
         "title": "Automatikus mentés késleltetése",
         "description": "Szabályozza azt a késleltetést ezredmásodpercben, amely után egy módosított szerkesztő automatikusan mentésre kerül. Csak akkor érvényes, ha az automatikus mentés Késleltetés után értékre van állítva."
+      },
+      "reopenLastFile": {
+        "title": "Utolsó megnyitott fájl automatikus újranyitása",
+        "description": "Ha engedélyezve van, indításkor újra megnyitja az utoljára megnyitott fájlt — de csak akkor, ha az alkalmazást úgy zárták be, hogy egy fájl nyitva volt."
       }
     }
   },

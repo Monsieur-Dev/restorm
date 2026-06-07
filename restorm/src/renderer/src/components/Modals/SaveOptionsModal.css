@@ -12,7 +12,7 @@
   margin-bottom: 10px;
   font-weight: 500;
   font-size: 13px;
-  color: var(--vscode-foreground);
+  color: var(--foreground);
 }
 
 .save-option-description {
@@ -35,22 +35,22 @@
   justify-content: center;
   gap: 8px;
   padding: 16px 12px;
-  border: 2px solid var(--vscode-input-border, #3c3c3c);
+  border: 2px solid var(--input-border, #3c3c3c);
   border-radius: 8px;
-  background: var(--vscode-input-background, #1e1e1e);
-  color: var(--vscode-foreground);
+  background: var(--input-background, #1e1e1e);
+  color: var(--foreground);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .save-mode-button:hover {
-  border-color: var(--vscode-focusBorder, #007acc);
-  background: var(--vscode-list-hoverBackground, #2a2d2e);
+  border-color: var(--focusBorder, #007acc);
+  background: var(--list-hoverBackground, #2a2d2e);
 }
 
 .save-mode-button.active {
-  border-color: var(--vscode-focusBorder, #007acc);
-  background: var(--vscode-list-activeSelectionBackground, #094771);
+  border-color: var(--focusBorder, #007acc);
+  background: var(--list-activeSelectionBackground, #094771);
 }
 
 .save-mode-button .codicon {
@@ -60,7 +60,7 @@
 
 .save-mode-button.active .codicon {
   opacity: 1;
-  color: var(--vscode-focusBorder, #007acc);
+  color: var(--focusBorder, #007acc);
 }
 
 .save-mode-button-label {
@@ -88,22 +88,22 @@
   justify-content: center;
   gap: 4px;
   padding: 12px 8px;
-  border: 2px solid var(--vscode-input-border, #3c3c3c);
+  border: 2px solid var(--input-border, #3c3c3c);
   border-radius: 8px;
-  background: var(--vscode-input-background, #1e1e1e);
-  color: var(--vscode-foreground);
+  background: var(--input-background, #1e1e1e);
+  color: var(--foreground);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .save-format-button:hover {
-  border-color: var(--vscode-focusBorder, #007acc);
-  background: var(--vscode-list-hoverBackground, #2a2d2e);
+  border-color: var(--focusBorder, #007acc);
+  background: var(--list-hoverBackground, #2a2d2e);
 }
 
 .save-format-button.active {
-  border-color: var(--vscode-focusBorder, #007acc);
-  background: var(--vscode-list-activeSelectionBackground, #094771);
+  border-color: var(--focusBorder, #007acc);
+  background: var(--list-activeSelectionBackground, #094771);
 }
 
 .save-format-button-label {
@@ -119,13 +119,13 @@
 
 /* Preview styling */
 .save-preview-content {
-  background: var(--vscode-editor-background);
-  border: 1px solid var(--vscode-editorWidget-border);
+  background: var(--editor-background);
+  border: 1px solid var(--editorWidget-border);
   border-radius: 4px;
   padding: 8px;
   max-height: 200px;
   overflow: auto;
-  font-family: var(--vscode-editor-font-family, monospace);
+  font-family: var(--editor-font-family, monospace);
   font-size: 12px;
 }
 

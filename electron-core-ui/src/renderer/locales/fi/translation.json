@@ -148,6 +148,10 @@
       "autoSaveDelay": {
         "title": "Automaattisen tallennuksen viive",
         "description": "Ohjaa viivettä millisekunteina, jonka jälkeen muokattu editori tallennetaan automaattisesti. Käytössä vain, kun automaattinen tallennus on asetettu tilaan Viiveen jälkeen."
+      },
+      "reopenLastFile": {
+        "title": "Avaa viimeksi avattu tiedosto automaattisesti uudelleen",
+        "description": "Kun käytössä, avaa käynnistyksen yhteydessä uudelleen viimeksi avoinna olleen tiedoston — mutta vain, jos sovellus suljettiin tiedoston ollessa auki."
       }
     }
   },

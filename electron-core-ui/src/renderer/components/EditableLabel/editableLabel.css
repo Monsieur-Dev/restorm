@@ -31,7 +31,7 @@
  * mouse-click path leaves focus on the trigger; surfacing a ring
  * would highlight something the user just clicked past. The
  * `!important` overrides the workbench-wide `button:focus` outline
- * declared by the global VSCode-style stylesheet. */
+ * declared by the global theme stylesheet. */
 .ecui-editable-label-trigger:focus,
 .ecui-editable-label-trigger:focus-visible {
   outline: none !important;

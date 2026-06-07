@@ -1,6 +1,6 @@
 import type { ValueType, CustomValueList } from '../../../../shared/types/collections'
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue } from '../../../../shared/types/collections'
-import { isPasswordValue, isNumericValue, isDateTimeValue, isColorValue, isExpressionValue, isBooleanValue, isEnumValue, isEnumListValue, isCustomListValue, isCustomListMultiValue, isVariableValue, isEnvironmentValue } from '../../../../shared/utils/valueHelpers'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue, NullValue, ListValue } from '../../../../shared/types/collections'
+import { isPasswordValue, isNumericValue, isDateTimeValue, isColorValue, isExpressionValue, isBooleanValue, isEnumValue, isEnumListValue, isCustomListValue, isCustomListMultiValue, isVariableValue, isEnvironmentValue, isNullValue, isListValue } from '../../../../shared/utils/valueHelpers'
 import { isHexColorString, tryParseDateString, tryParseNumberString } from '../../../../shared/utils/valueCasting'
 
 export type ValueTypeKind =
@@ -17,10 +17,14 @@ export type ValueTypeKind =
   | 'customListMulti'
   | 'variable'
   | 'environment'
+  | 'null'
+  | 'list'
 
 /** Map a concrete ValueType instance to its UI kind discriminator. */
 export function resolveValueTypeKind(value: ValueType | undefined): ValueTypeKind {
   if (!value) return 'string'
+  if (isNullValue(value)) return 'null'
+  if (isListValue(value)) return 'list'
   if (isVariableValue(value)) return 'variable'
   if (isEnvironmentValue(value)) return 'environment'
   if (isPasswordValue(value)) return 'secret'
@@ -71,6 +75,11 @@ export function castValueToKind(
       const labels = currentLabels.filter((l) => enabledLabels.includes(l))
       return new CustomListMultiValue(listId, labels)
     }
+    case 'null':
+      return new NullValue()
+    case 'list':
+      // A fresh empty list — there's no meaningful seed from a scalar's text.
+      return new ListValue([])
     case 'string':
       return new StringValue(raw)
     case 'secret':

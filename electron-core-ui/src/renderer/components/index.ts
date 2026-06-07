@@ -258,6 +258,7 @@ export {
 	rebuildWorkbenchTree,
 	saveWorkbenchState,
 	loadWorkbenchState,
+	loadWorkbenchTabIds,
 	clearWorkbenchState
 } from './Workbench/persistence'
 export type {

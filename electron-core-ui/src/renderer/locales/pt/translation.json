@@ -148,6 +148,10 @@
       "autoSaveDelay": {
         "title": "Atraso de gravação automática",
         "description": "Controla o atraso em milissegundos após o qual um editor modificado é guardado automaticamente. Aplica-se apenas quando a gravação automática está definida como Após atraso."
+      },
+      "reopenLastFile": {
+        "title": "Reabrir automaticamente o último ficheiro aberto",
+        "description": "Quando ativado, reabre no arranque o último ficheiro que tinha aberto — mas apenas se a aplicação tiver sido fechada com um ficheiro aberto."
       }
     }
   },

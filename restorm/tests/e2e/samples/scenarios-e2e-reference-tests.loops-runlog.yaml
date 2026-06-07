@@ -1,0 +1,304 @@
+- message: 🔵 [<time>] ▶ Loops
+- message: ⚪ [<time>] start forEach
+  data:
+    items:
+      - Rouge
+      - Vert
+      - Bleu
+- message: ⚪ [<time>] done forEach
+- message: "⚪ [<time>] forEach start: 3 items, batchSize=1, opening first 1"
+- message: ⚪ [<time>] forEach open item 0 (0/3 done, batch≤1)
+- message: ⚪ [<time>] start log
+  data:
+    message: ForEachOutput
+    data: Rouge
+- message: 🔵 [<time>] ForEachOutput
+  data: Rouge
+- message: ⚪ [<time>] done log
+  data:
+    value: Rouge
+- message: ⚪ [<time>] forEach item 0 closed (1/3 done)
+- message: ⚪ [<time>] forEach open item 1 (1/3 done, batch≤1)
+- message: ⚪ [<time>] start log
+  data:
+    message: ForEachOutput
+    data: Vert
+- message: 🔵 [<time>] ForEachOutput
+  data: Vert
+- message: ⚪ [<time>] done log
+  data:
+    value: Vert
+- message: ⚪ [<time>] forEach item 1 closed (2/3 done)
+- message: ⚪ [<time>] forEach open item 2 (2/3 done, batch≤1)
+- message: ⚪ [<time>] start log
+  data:
+    message: ForEachOutput
+    data: Bleu
+- message: 🔵 [<time>] ForEachOutput
+  data: Bleu
+- message: ⚪ [<time>] done log
+  data:
+    value: Bleu
+- message: ⚪ [<time>] forEach item 2 closed (3/3 done)
+- message: ⚪ [<time>] start log
+  data:
+    message: ForEach loop is done, testing DoWhile
+    in: 3
+- message: 🔵 [<time>] ForEach loop is done, testing DoWhile
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: cpt
+    value: 0
+    in: true
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] start doWhile
+  data:
+    left: 0
+    operator: <
+    right: "3"
+    in: true
+- message: ⚪ [<time>] done doWhile
+- message: ⚪ [<time>] doWhile iteration 0
+- message: ⚪ [<time>] start arithmetic
+  data:
+    a: 0
+    b: 1
+    in: true
+- message: ⚪ [<time>] done arithmetic
+  data:
+    result: 1
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: cpt
+    value: 1
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] start log
+  data:
+    message: cpt in DoWhile
+    data: 1
+    in: true
+- message: 🔵 [<time>] cpt in DoWhile
+  data: 1
+- message: ⚪ [<time>] done log
+  data:
+    value: 1
+- message: ⚪ [<time>] doWhile iteration 1
+- message: ⚪ [<time>] start arithmetic
+  data:
+    a: 1
+    b: 1
+    in: true
+- message: ⚪ [<time>] done arithmetic
+  data:
+    result: 2
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: cpt
+    value: 2
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] start log
+  data:
+    message: cpt in DoWhile
+    data: 2
+    in: true
+- message: 🔵 [<time>] cpt in DoWhile
+  data: 2
+- message: ⚪ [<time>] done log
+  data:
+    value: 2
+- message: ⚪ [<time>] doWhile iteration 2
+- message: ⚪ [<time>] start arithmetic
+  data:
+    a: 2
+    b: 1
+    in: true
+- message: ⚪ [<time>] done arithmetic
+  data:
+    result: 3
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: cpt
+    value: 3
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] start log
+  data:
+    message: cpt in DoWhile
+    data: 3
+    in: true
+- message: 🔵 [<time>] cpt in DoWhile
+  data: 3
+- message: ⚪ [<time>] done log
+  data:
+    value: 3
+- message: ⚪ [<time>] doWhile done after 3 iteration(s)
+- message: ⚪ [<time>] start log
+  data:
+    message: DoWhile loop is done, testing For
+    in: 3
+- message: 🔵 [<time>] DoWhile loop is done, testing For
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] start for
+  data:
+    to: 3
+    in: true
+- message: ⚪ [<time>] done for
+- message: "⚪ [<time>] forEach start: 3 items, batchSize=1, opening first 1"
+- message: ⚪ [<time>] forEach open item 0 (0/3 done, batch≤1)
+- message: ⚪ [<time>] start log
+  data:
+    message: For
+    data: 0
+- message: 🔵 [<time>] For
+  data: 0
+- message: ⚪ [<time>] done log
+  data:
+    value: 0
+- message: ⚪ [<time>] forEach item 0 closed (1/3 done)
+- message: ⚪ [<time>] forEach open item 1 (1/3 done, batch≤1)
+- message: ⚪ [<time>] start log
+  data:
+    message: For
+    data: 1
+- message: 🔵 [<time>] For
+  data: 1
+- message: ⚪ [<time>] done log
+  data:
+    value: 1
+- message: ⚪ [<time>] forEach item 1 closed (2/3 done)
+- message: ⚪ [<time>] forEach open item 2 (2/3 done, batch≤1)
+- message: ⚪ [<time>] start log
+  data:
+    message: For
+    data: 2
+- message: 🔵 [<time>] For
+  data: 2
+- message: ⚪ [<time>] done log
+  data:
+    value: 2
+- message: ⚪ [<time>] forEach item 2 closed (3/3 done)
+- message: ⚪ [<time>] start log
+  data:
+    message: For loop is done, testing While
+    in: 3
+- message: 🔵 [<time>] For loop is done, testing While
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] start while
+  data:
+    left: 3
+    operator: ≥
+    right: "0"
+    in: true
+- message: ⚪ [<time>] done while
+- message: ⚪ [<time>] while iteration 0
+- message: ⚪ [<time>] start arithmetic
+  data:
+    a: 3
+    b: 1
+    operator: −
+    in: true
+- message: ⚪ [<time>] done arithmetic
+  data:
+    result: 2
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: cpt
+    value: 2
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] start log
+  data:
+    message: cpt in While
+    data: 2
+    in: true
+- message: 🔵 [<time>] cpt in While
+  data: 2
+- message: ⚪ [<time>] done log
+  data:
+    value: 2
+- message: ⚪ [<time>] while iteration 1
+- message: ⚪ [<time>] start arithmetic
+  data:
+    a: 2
+    b: 1
+    operator: −
+    in: true
+- message: ⚪ [<time>] done arithmetic
+  data:
+    result: 1
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: cpt
+    value: 1
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] start log
+  data:
+    message: cpt in While
+    data: 1
+    in: true
+- message: 🔵 [<time>] cpt in While
+  data: 1
+- message: ⚪ [<time>] done log
+  data:
+    value: 1
+- message: ⚪ [<time>] while iteration 2
+- message: ⚪ [<time>] start arithmetic
+  data:
+    a: 1
+    b: 1
+    operator: −
+    in: true
+- message: ⚪ [<time>] done arithmetic
+  data:
+    result: 0
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: cpt
+    value: 0
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] start log
+  data:
+    message: cpt in While
+    data: 0
+    in: true
+- message: 🔵 [<time>] cpt in While
+  data: 0
+- message: ⚪ [<time>] done log
+  data:
+    value: 0
+- message: ⚪ [<time>] while iteration 3
+- message: ⚪ [<time>] start arithmetic
+  data:
+    a: 0
+    b: 1
+    operator: −
+    in: true
+- message: ⚪ [<time>] done arithmetic
+  data:
+    result: -1
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: cpt
+    value: -1
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] start log
+  data:
+    message: cpt in While
+    data: -1
+    in: true
+- message: 🔵 [<time>] cpt in While
+  data: -1
+- message: ⚪ [<time>] done log
+  data:
+    value: -1
+- message: ⚪ [<time>] while done after 4 iteration(s)
+- message: ⚪ [<time>] start log
+  data:
+    message: While loop is done
+    in: 4
+- message: 🔵 [<time>] While loop is done
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ Loops

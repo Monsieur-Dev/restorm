@@ -5,19 +5,25 @@ import { isEnvironmentFolder, type EnvironmentFolder, type FolderItem } from '..
 import './EmptyBench.css'
 
 /**
- * EmptyBench — landing surface when a file is open but no workbench
- * tab is active. Composes the restorm-specific MosaicCard variants
- * (`ImportCard`, `RecentActivityCard`, `ApiCard`, `TipsCard`) into
- * an ECUI `MosaicLayout` over a faded Restorm logo.
+ * Onboarding — landing surface shown when a project is open but no workbench
+ * tab is active (a fresh project, or after the user closes the last tab).
+ * Composes the restorm-specific MosaicCard variants (`ImportCard`,
+ * `RecentActivityCard`, `ApiCard`, `TipsCard`) into an ECUI `MosaicLayout` over
+ * a faded Restorm logo.
  *
- * Env-folder ApiCards are driven from the open project's `rootItems`
- * passed in from `App`. The card list reactively re-renders whenever
- * the tree changes — including env-folder + request renames —
- * because `App` swaps `rootItems` by reference on each mutation.
+ * This component is purely presentational — WHEN it is shown is decided by the
+ * caller (`App`), which holds it back until the workbench's tab restore has
+ * settled so it never flashes during the async reopen on load. See
+ * `loadWorkbenchTabIds` (ECUI) + the onboarding gate in `App`.
+ *
+ * Env-folder ApiCards are driven from the open project's `rootItems` passed in
+ * from `App`. The card list reactively re-renders whenever the tree changes —
+ * including env-folder + request renames — because `App` swaps `rootItems` by
+ * reference on each mutation.
  */
-interface EmptyBenchProps {
+interface OnboardingProps {
   /** The open project's full tree (env-folders, folders, and root
-   *  requests). EmptyBench filters env-folders for its ApiCards. */
+   *  requests). Onboarding filters env-folders for its ApiCards. */
   readonly rootItems: readonly FolderItem[]
   /** Project UUID stamped on the collection file. Scopes the favourites
    *  lookup in `ApiCard`. `null` until the file is hydrated. */
@@ -31,7 +37,7 @@ interface EmptyBenchProps {
   readonly onOpenRequest: (requestId: string) => void
 }
 
-export const EmptyBench: React.FC<EmptyBenchProps> = ({ rootItems, projectUuid, onImport, onOpenRequest }) => {
+export const Onboarding: React.FC<OnboardingProps> = ({ rootItems, projectUuid, onImport, onOpenRequest }) => {
   const envFolders = useMemo<EnvironmentFolder[]>(
     () => rootItems.filter(isEnvironmentFolder),
     [rootItems]
@@ -56,4 +62,4 @@ export const EmptyBench: React.FC<EmptyBenchProps> = ({ rootItems, projectUuid, 
   )
 }
 
-export default EmptyBench
+export default Onboarding

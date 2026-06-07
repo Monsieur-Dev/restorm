@@ -1,0 +1,128 @@
+- message: 🔵 [<time>] ▶ Object ops
+- message: ⚪ [<time>] start json
+  data:
+    op: parse
+    value: '{"id":1,"name":"Rex","meta":{"tag":"dog","age":4}}'
+- message: ⚪ [<time>] done json
+  data:
+    result:
+      id: 1
+      name: Rex
+      meta:
+        tag: dog
+        age: 4
+- message: ⚪ [<time>] start objectOp
+  data:
+    op: get
+    path: meta.tag
+    value:
+      id: 1
+      name: Rex
+      meta:
+        tag: dog
+        age: 4
+- message: ⚪ [<time>] done objectOp
+  data:
+    result: dog
+- message: ⚪ [<time>] start objectOp
+  data:
+    op: pick
+    keys: id,name
+    in: true
+    value:
+      id: 1
+      name: Rex
+      meta:
+        tag: dog
+        age: 4
+- message: ⚪ [<time>] done objectOp
+  data:
+    result:
+      id: 1
+      name: Rex
+- message: ⚪ [<time>] start objectOp
+  data:
+    op: omit
+    keys: meta
+    in: true
+    value:
+      id: 1
+      name: Rex
+      meta:
+        tag: dog
+        age: 4
+- message: ⚪ [<time>] done objectOp
+  data:
+    result:
+      id: 1
+      name: Rex
+- message: ⚪ [<time>] start objectOp
+  data:
+    op: keys
+    in: true
+    value:
+      id: 1
+      name: Rex
+      meta:
+        tag: dog
+        age: 4
+- message: ⚪ [<time>] done objectOp
+  data:
+    result:
+      - id
+      - name
+      - meta
+- message: ⚪ [<time>] start objectOp
+  data:
+    op: values
+    in: true
+    value:
+      id: 1
+      name: Rex
+      meta:
+        tag: dog
+        age: 4
+- message: ⚪ [<time>] done objectOp
+  data:
+    result:
+      - 1
+      - Rex
+      - tag: dog
+        age: 4
+- message: ⚪ [<time>] start objectOp
+  data:
+    op: set
+    path: meta.age
+    other: 5
+    in: true
+    value:
+      id: 1
+      name: Rex
+      meta:
+        tag: dog
+        age: 4
+- message: ⚪ [<time>] done objectOp
+  data:
+    result:
+      id: 1
+      name: Rex
+      meta:
+        tag: dog
+        age: 5
+- message: ⚪ [<time>] start objectOp
+  data:
+    op: keys
+    value: not an object
+    in: true
+- message: 🔴 [<time>] objectOp "keys" expects an object
+- message: ⚪ [<time>] start log
+  data:
+    level: error
+    message: "objectOp error: not an object"
+    in:
+      message: objectOp "keys" expects an object
+      startedAt: <dynamic-time>
+- message: "🔴 [<time>] objectOp error: not an object"
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ Object ops

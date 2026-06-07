@@ -12,7 +12,11 @@ using System.Text.Json.Serialization;
 //                              validate it.
 //                            • INVALID_CLIENT_ID → 401.
 //                            The response is GATED — it doesn't come
-//                            back until `GET /releaselogins` fires.
+//                            back until `GET /releaselogins` fires —
+//                            UNLESS the request carries `?probe=1`, which
+//                            makes it NON-blocking and records it in the
+//                            probe store (used by the scenario-engine auth
+//                            e2e, which drives the auto-login unattended).
 //                            Every call is appended to the log store.
 //   GET  /releaselogins   — unblocks every login currently waiting on
 //                            the gate; installs a fresh gate for the
@@ -30,8 +34,14 @@ using System.Text.Json.Serialization;
 // called directly by the e2e via raw HTTP):
 //
 //   POST /cleartokens     — empties the token store.
-//   POST /clear_logs      — empties the log store.
+//   POST /clear_logs      — empties the log store AND the probe store.
 //   GET  /getlogs         — snapshot of the log store.
+//   GET  /loginprobe      — snapshot of the probe store (the `?probe=1`
+//                            logins seen since the last /clear_logs).
+//   GET  /flaky           — fails its first N calls (`?fail=N&code=C`) since the
+//                            last /clearflaky, then 200. NOT auth-gated. For the
+//                            scenario-engine `retry` demo.
+//   POST /clearflaky      — resets the /flaky counter.
 //
 //   GET  /health          — liveness probe, NOT logged.
 
@@ -51,6 +61,14 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
 app.MapPost("/login", async (HttpRequest req) =>
 {
+    // A `?probe=1` marker flips this login into NON-blocking mode AND records
+    // it in the ProbeStore. The scenario-engine auth e2e drives the auto-login
+    // unattended (it can't pump /releaselogins mid-run), and asserts the login
+    // fired by reading GET /loginprobe afterwards. Every OTHER caller — the
+    // auth-login e2e, the import flow — omits the marker and keeps the normal
+    // gated behaviour, so this is purely additive.
+    bool isProbe = req.Query.ContainsKey("probe");
+
     // Accept both JSON and application/x-www-form-urlencoded bodies —
     // real clients use either, and the e2e drives this endpoint via
     // the inline auth form which has a form-fields KeyValueTable that
@@ -78,8 +96,11 @@ app.MapPost("/login", async (HttpRequest req) =>
     // Capture the current gate BEFORE we await. A concurrent
     // `/releaselogins` swaps the gate in-place; we must wait on the
     // instance that was active when we started so release semantics
-    // stay batch-scoped.
-    await LoginGate.CurrentTask;
+    // stay batch-scoped. A `?probe=1` login skips the gate entirely.
+    if (!isProbe)
+    {
+        await LoginGate.CurrentTask;
+    }
 
     if (string.IsNullOrWhiteSpace(clientId))
     {
@@ -104,6 +125,12 @@ app.MapPost("/login", async (HttpRequest req) =>
     var token = Guid.NewGuid().ToString("N");
     TokenStore.Add(token);
     LogStore.Append("POST /login -> 200");
+    if (isProbe)
+    {
+        // Deterministic marker (no token, no timestamp) so the run-log golden
+        // of the auth scenario stays stable.
+        ProbeStore.Append($"probe login: {clientId} -> 200");
+    }
 
     return Results.Ok(new
     {
@@ -197,10 +224,40 @@ app.MapPost("/cleartokens", () =>
 app.MapPost("/clear_logs", () =>
 {
     LogStore.Clear();
+    ProbeStore.Clear();
     return Results.Ok(new { cleared = true });
 });
 
 app.MapGet("/getlogs", () => Results.Ok(new { logs = LogStore.Snapshot() }));
+
+// Predictable flaky endpoint for the scenario-engine `retry` demo. NOT gated on
+// auth. `GET /flaky?fail=N&code=C` fails its first N calls (since the last
+// /clearflaky) with status C, then returns 200 — so a `retry` with N failures
+// configured deterministically converges. `POST /clearflaky` resets the counter.
+app.MapPost("/clearflaky", () =>
+{
+    FlakyStore.Reset();
+    return Results.Ok(new { cleared = true });
+});
+
+app.MapGet("/flaky", (HttpRequest req) =>
+{
+    var fail = int.TryParse(req.Query["fail"], out var f) ? f : 2;
+    var code = int.TryParse(req.Query["code"], out var c) ? c : 503;
+    var n = FlakyStore.Next();
+    if (n <= fail)
+    {
+        LogStore.Append($"GET /flaky -> {code}");
+        return Results.Json(new { attempt = n, failing = true }, statusCode: code);
+    }
+    LogStore.Append("GET /flaky -> 200");
+    return Results.Ok(new { attempt = n, ok = true });
+});
+
+// Test-only: the probe-marked (`?probe=1`) logins received since the last
+// /clear_logs. The scenario-engine auth e2e reads this to confirm a downstream
+// `/pet/{id}` actually triggered its preconfigured login route.
+app.MapGet("/loginprobe", () => Results.Ok(new { calls = ProbeStore.Snapshot() }));
 
 app.Run();
 
@@ -405,6 +462,54 @@ public static class LogStore
     public static void Clear()
     {
         lock (_lock) _entries.Clear();
+    }
+}
+
+/// <summary>
+/// Append-only list of probe-marked (`?probe=1`) login calls. Separate from
+/// <see cref="LogStore"/> so the auth-scenario e2e can assert "the login route
+/// fired" without coupling to whatever else the log happens to hold. Cleared by
+/// /clear_logs alongside the main log.
+/// </summary>
+public static class ProbeStore
+{
+    private static readonly List<string> _entries = new();
+    private static readonly object _lock = new();
+
+    public static void Append(string entry)
+    {
+        lock (_lock) _entries.Add(entry);
+    }
+
+    public static IReadOnlyList<string> Snapshot()
+    {
+        lock (_lock) return _entries.ToList();
+    }
+
+    public static void Clear()
+    {
+        lock (_lock) _entries.Clear();
+    }
+}
+
+/// <summary>
+/// Monotonic call counter for the `/flaky` endpoint, reset by `/clearflaky`.
+/// Lets the scenario-engine `retry` demo see a deterministic "fail N times then
+/// succeed" sequence.
+/// </summary>
+public static class FlakyStore
+{
+    private static int _count;
+    private static readonly object _lock = new();
+
+    public static int Next()
+    {
+        lock (_lock) return ++_count;
+    }
+
+    public static void Reset()
+    {
+        lock (_lock) _count = 0;
     }
 }
 

@@ -1,0 +1,117 @@
+- message: 🔵 [<time>] ▶ YAML
+- message: ⚪ [<time>] start yaml
+  data:
+    op: parse
+    value: |
+      a: 1
+      b:
+        - 2
+        - 3
+- message: ⚪ [<time>] done yaml
+  data:
+    result:
+      a: 1
+      b:
+        - 2
+        - 3
+- message: ⚪ [<time>] start yaml
+  data:
+    op: parse
+    value: "42"
+    in: true
+- message: ⚪ [<time>] done yaml
+  data:
+    result: 42
+- message: ⚪ [<time>] start yaml
+  data:
+    op: parse
+    value: |
+      - 1
+      - 2
+      - 3
+    in: true
+- message: ⚪ [<time>] done yaml
+  data:
+    result:
+      - 1
+      - 2
+      - 3
+- message: ⚪ [<time>] start yaml
+  data:
+    op: stringify
+    value:
+      - 1
+      - 2
+      - 3
+    in: true
+- message: ⚪ [<time>] done yaml
+  data:
+    result: |
+      - 1
+      - 2
+      - 3
+- message: ⚪ [<time>] start yaml
+  data:
+    op: stringify
+    indent: 4
+    value:
+      - 1
+      - 2
+    in: true
+- message: ⚪ [<time>] done yaml
+  data:
+    result: |
+      - 1
+      - 2
+- message: ⚪ [<time>] start yaml
+  data:
+    op: parse
+    value: |
+      name: Glaude
+      age: 42
+    in: true
+- message: ⚪ [<time>] done yaml
+  data:
+    result:
+      name: Glaude
+      age: 42
+- message: ⚪ [<time>] start yaml
+  data:
+    op: stringify
+    value:
+      name: Glaude
+      age: 42
+- message: ⚪ [<time>] done yaml
+  data:
+    result: |
+      name: Glaude
+      age: 42
+- message: ⚪ [<time>] start yaml
+  data:
+    op: parse
+    value: "a: [1, 2"
+    in: true
+- message: >
+    🔴 [<time>] Flow sequence in block collection must be sufficiently indented
+    and end with a ] at line 1, column 9:
+
+
+    a: [1, 2
+            ^
+- message: ⚪ [<time>] start log
+  data:
+    level: error
+    message: "yaml error: malformed YAML"
+    in:
+      message: >
+        Flow sequence in block collection must be sufficiently indented and end
+        with a ] at line 1, column 9:
+
+
+        a: [1, 2
+                ^
+      startedAt: <dynamic-time>
+- message: "🔴 [<time>] yaml error: malformed YAML"
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ YAML

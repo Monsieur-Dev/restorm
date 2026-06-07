@@ -1,4 +1,4 @@
-export type ValueTypeName = 'string' | 'color' | 'datetime' | 'numeric' | 'password' | 'expression' | 'boolean' | 'enum' | 'enumList' | 'customList' | 'customListMulti' | 'variable' | 'environment'
+export type ValueTypeName = 'string' | 'color' | 'datetime' | 'numeric' | 'password' | 'expression' | 'boolean' | 'enum' | 'enumList' | 'customList' | 'customListMulti' | 'variable' | 'environment' | 'null' | 'list'
 
 /**
  * Abstract base class for all value objects.

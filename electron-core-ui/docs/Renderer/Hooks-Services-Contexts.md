@@ -14,6 +14,7 @@ This document describes the React hooks, services, and contexts available in `el
   - [useDebouncedCallback](#usedebouncedcallback)
   - [usePlatform](#useplatform)
   - [useKeyboardShortcut](#usekeyboardshortcut)
+  - [isUndoKeyEvent / isRedoKeyEvent](#isundokeyevent--isredokeyevent)
   - [useDirtyState](#usedirtystate)
 - [Services](#services)
   - [logger](#logger)
@@ -299,6 +300,27 @@ useKeyboardShortcut('Ctrl+S', () => {
 useKeyboardShortcut('F2', handleRename, isEditing)
 
 // Supported formats: "Ctrl+O", "Ctrl+Shift+S", "F2", "Delete", "Alt+F4"
+```
+
+---
+
+### isUndoKeyEvent / isRedoKeyEvent
+
+Platform-correct undo / redo keyboard matchers (imperative helpers, not hooks).
+Feed them a native `KeyboardEvent` from a `keydown` listener. They own the
+per-OS mapping so consumers don't branch on platform themselves:
+
+- Windows: `Ctrl+Z` (undo), `Ctrl+Y` (redo)
+- Linux: `Ctrl+Z` (undo), `Ctrl+Shift+Z` (redo)
+- macOS: `Cmd+Z` (undo), `Cmd+Shift+Z` (redo)
+
+```typescript
+import { isUndoKeyEvent, isRedoKeyEvent } from 'electron-core-ui/renderer'
+
+const onKeyDown = (e: KeyboardEvent): void => {
+  if (isUndoKeyEvent(e)) { e.preventDefault(); undo() }
+  else if (isRedoKeyEvent(e)) { e.preventDefault(); redo() }
+}
 ```
 
 ---

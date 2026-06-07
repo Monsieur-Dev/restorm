@@ -26,6 +26,13 @@ export type ScenarioDataType =
   | 'duration'
   | 'response'
   | 'status'
+  // A collection (array). Distinct from `object` so a list-only input (the
+  // AddToList/RemoveFromList target) accepts lists/arrays but refuses a plain
+  // object. `json` stays the ambiguous "either" — compatible with both.
+  | 'list'
+  // A structured object (the `object` node's output). Distinct from `list` so
+  // it can't land on a list-only target.
+  | 'object'
 
 /**
  * Semantic role of a port. Drives the default edge colour (then=green,
@@ -84,6 +91,9 @@ export type ScenarioNodeKind =
   | 'aggregate'
   | 'map'
   | 'filter'
+  // List mutation — append / remove values to / from a list.
+  | 'addToList'
+  | 'removeFromList'
   // Loops — `for` is a numeric-range forEach; `while` / `doWhile` reuse the
   // `if` condition mechanism (operands + operator → body/done), the loop
   // closed by a user-wired edge back into the node.
@@ -94,6 +104,9 @@ export type ScenarioNodeKind =
   | 'wait'
   | 'waitUntil'
   | 'now'
+  // Timer — fires its `tick` body on each interval (frequency or cron), bounded
+  // by an optional duration / end date.
+  | 'timer'
   // Data & compute
   | 'arithmetic'
   | 'comparator'
@@ -102,8 +115,48 @@ export type ScenarioNodeKind =
   | 'setVariable'
   | 'getVariable'
   | 'transform'
+  // Run user TypeScript/JavaScript in a sandbox (QuickJS) — transform/validate
+  // data with a curated stdlib; the returned value is the node's `result`.
+  | 'code'
+  // Type conversion — explicit cast since comparisons / aggregates are strict.
+  | 'cast'
+  // Regular expressions — extract / match / replace / split on a string.
+  | 'regex'
+  // JSON — parse a string into a value, or stringify a value.
+  | 'json'
+  // XML / YAML — parse a string into a value, or stringify a value.
+  | 'xml'
+  | 'yaml'
+  // Crypto — base64 / hashes / HMAC / UUID over a string.
+  | 'crypto'
+  // JWT — decode a compact token into header + payload + signature.
+  | 'jwt'
+  // Date math — shift / format / diff an existing date (the clock is `now`).
+  | 'datetime'
+  // Retry — re-runs its body (an error-boundary scope) with a backoff policy.
+  | 'retry'
+  // Object reshaping — get / set / merge / pick / omit / keys / values.
+  | 'objectOp'
+  // URL — encode / decode a component, parse / build a query, parse a URL.
+  | 'url'
+  // Random / faker — int / float / string / boolean / pick (optional seed).
+  | 'random'
+  // List reshaping — sort / unique / reverse / flatten / chunk / slice / groupBy.
+  | 'listOp'
+  // CSV — parse a CSV string into rows / stringify a list back to CSV.
+  | 'csv'
+  // Scalar math — round / floor / ceil / trunc / abs / sign / sqrt / min / max / clamp.
+  | 'math'
+  // JSON Schema validation (ajv) — routes valid / invalid + the error list.
+  | 'schema'
+  // Read a file (path relative to the scenario, or absolute) → its text.
+  | 'readFile'
+  // Write / append text to a file (path relative to the scenario, or absolute).
+  | 'writeFile'
   // Utilities
   | 'log'
+  // Deliberate failure — throws a message (for error branches / retry tests).
+  | 'throw'
   | 'assert'
 
 /**

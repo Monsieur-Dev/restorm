@@ -38,6 +38,10 @@ describe('waitExecutor', () => {
     expect(await p).toEqual({ outputs: [{ port: 'out', value: 'sig' }] })
   })
 
+  it('throws when the wired duration is null (no silent default)', () => {
+    expect(() => waitExecutor(act({ duration: null, in: 'sig' }), makeCtx(new AbortController().signal, { inputUnit: 's' }))).toThrow(/null/)
+  })
+
   it('uses the config duration (ms) when no duration is wired', async () => {
     const p = waitExecutor(act({}), makeCtx(new AbortController().signal, { durationMs: 500 })) as Promise<ExecResult>
     let done = false
@@ -57,6 +61,10 @@ describe('waitExecutor', () => {
 })
 
 describe('waitUntilExecutor', () => {
+  it('throws when the wired target is null', () => {
+    expect(() => waitUntilExecutor(act({ until: null, in: 'sig' }), makeCtx(new AbortController().signal, {}))).toThrow(/null/)
+  })
+
   it('fires immediately for a target already in the past', async () => {
     const past = new Date(Date.now() - 5000).toISOString()
     const p = waitUntilExecutor(act({ until: past, in: 'sig' }), makeCtx(new AbortController().signal, {})) as Promise<ExecResult>

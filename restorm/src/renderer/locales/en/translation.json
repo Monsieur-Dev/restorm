@@ -149,6 +149,7 @@
       "createEnvironmentFolder": "Create environment folder",
       "delete": "Delete",
       "clone": "Clone",
+      "copySuffix": "copy",
       "rename": "Rename",
       "addToFavorites": "Add to favorites",
       "removeFromFavorites": "Remove from favorites",
@@ -313,6 +314,8 @@
       "color": "Color",
       "expression": "Expression",
       "boolean": "Boolean",
+      "null": "Null",
+      "list": "List",
       "variables": "Variables",
       "environment": "Environment"
     },
@@ -481,7 +484,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Are you sure you want to remove \"{{fileName}}\" from favorites?",
-    "noFilesHint": "Open a file or create a new one to get started",
     "newAriaLabel": "Create a new collection",
     "openAriaLabel": "Open a collection from disk",
     "landmarkLabel": "Welcome"
@@ -775,9 +777,12 @@
         "changeColor": "Change colour",
         "resetColor": "Reset colour",
         "addNote": "Add / edit note",
+        "runOnEachEvent": "Play on each event received",
         "duplicate": "Duplicate",
         "delete": "Delete",
-        "deleteShortcut": "Del"
+        "deleteShortcut": "Del",
+        "copy": "Copy",
+        "paste": "Paste"
       },
       "expand": "Expand",
       "collapse": "Collapse"
@@ -796,7 +801,6 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "locked": "Editing locked while the scenario is running",
     "switch": {
       "addCase": "Add case",
@@ -849,7 +853,30 @@
       "now": "Now",
       "comparator": "Comparator",
       "setVariable": "Set variable",
-      "getVariable": "Get variable"
+      "getVariable": "Get variable",
+      "addToList": "Add to list",
+      "removeFromList": "Remove from list",
+      "cast": "Cast",
+      "regex": "Regex",
+      "json": "JSON",
+      "xml": "XML",
+      "yaml": "YAML",
+      "crypto": "Crypto",
+      "jwt": "JWT",
+      "datetime": "Date math",
+      "objectOp": "Object ops",
+      "url": "URL",
+      "random": "Random",
+      "throw": "Throw",
+      "retry": "Retry",
+      "listOp": "List ops",
+      "csv": "CSV",
+      "math": "Math",
+      "schema": "Schema validate",
+      "readFile": "Read file",
+      "writeFile": "Write file",
+      "timer": "Timer",
+      "code": "Code"
     },
     "comparator": {
       "result": "result"
@@ -866,7 +893,31 @@
       "data": "data"
     },
     "assert": {
-      "message": "message"
+      "message": "message",
+      "operator": "operator",
+      "op": {
+        "eq": "equals",
+        "ne": "not equals",
+        "lt": "less than",
+        "lte": "less or equal",
+        "gt": "greater than",
+        "gte": "greater or equal",
+        "contains": "contains",
+        "isString": "is string",
+        "isNumber": "is number",
+        "isBoolean": "is boolean",
+        "isArray": "is array",
+        "isObject": "is object",
+        "isNull": "is null",
+        "exists": "exists",
+        "isEmpty": "is empty",
+        "matchesRegex": "matches regex",
+        "isOneOf": "is one of",
+        "deepEquals": "deep equals",
+        "lengthEq": "length ==",
+        "lengthGt": "length >",
+        "lengthLt": "length <"
+      }
     },
     "editRequest": "Edit request",
     "editScenario": "Edit scenario",
@@ -876,10 +927,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "outputName": "Output name",
+      "addOutput": "Add output",
+      "removeOutput": "Remove"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Required by calling scenarios"
+      "addParam": "Add parameter",
+      "removeParam": "Remove"
     },
     "runScenario": {
       "orphanInput": "No matching parameter \"{{name}}\" in the sub-scenario",
@@ -889,6 +946,7 @@
     "validation": {
       "duplicateName": "The name \"{{name}}\" is already used by another action.",
       "panelTitle": "{{count}} action error(s)",
+      "runBlocked": "Fix {{count}} action error(s) before running",
       "focusBox": "Focus this action",
       "showErrors": "Show errors",
       "input": {
@@ -900,8 +958,7 @@
       },
       "output": {
         "missingName": "This output must have a name.",
-        "duplicateName": "The name \"{{name}}\" is already used by another output.",
-        "valueRequired": "The \"value\" input must be wired to a source."
+        "duplicateName": "The name \"{{name}}\" is already used by another output."
       },
       "getVariable": {
         "noSelection": "A variable must be selected.",
@@ -928,8 +985,10 @@
         "missing": "The bound request no longer exists."
       },
       "runScenario": {
-        "missing": "The bound scenario no longer exists.",
-        "requiredInput": "The required input \"{{name}}\" must be wired to a source."
+        "missing": "The bound scenario no longer exists."
+      },
+      "file": {
+        "missingPath": "A file path is required."
       }
     },
     "usage": {
@@ -939,6 +998,8 @@
     "inspector": {
       "run": "Run",
       "debug": "Debug",
+      "undo": "Undo",
+      "redo": "Redo",
       "step": "Step",
       "previewInfo": "Example data, based on previous request results.",
       "pause": "Pause",
@@ -948,9 +1009,11 @@
       "stop": "Stop",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "Copy this log",
       "clearLogs": "Clear logs",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Show {{level}} logs",
+      "showLevelOnly": "Right-click: this level only",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -1004,6 +1067,299 @@
       "toggle": "Toggle breakpoint (F9)",
       "reached": "Breakpoint reached — this action has not run yet. Press F5 to resume, or F7 to step.",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Toggle minimap"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Add value",
+      "removeValue": "Remove value",
+      "updateVariable": "Update the source variable"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
+    },
+    "regex": {
+      "value": "value",
+      "operation": "operation",
+      "pattern": "pattern",
+      "flags": "flags",
+      "replacement": "replacement",
+      "result": "result",
+      "op": {
+        "extract": "extract",
+        "extractAll": "extract all",
+        "test": "test",
+        "replace": "replace",
+        "split": "split"
+      },
+      "flag": {
+        "i": "Case-insensitive",
+        "m": "Multiline (^ and $ match line breaks)",
+        "s": "Dotall (. matches newlines)"
+      }
+    },
+    "json": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "xml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "yaml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "crypto": {
+      "value": "value",
+      "operation": "operation",
+      "key": "key",
+      "keyPlaceholder": "secret",
+      "result": "result",
+      "op": {
+        "base64Encode": "base64 encode",
+        "base64Decode": "base64 decode",
+        "md5": "MD5",
+        "sha1": "SHA-1",
+        "sha256": "SHA-256",
+        "sha512": "SHA-512",
+        "hmacSha256": "HMAC-SHA256",
+        "uuid": "UUID v4"
+      }
+    },
+    "jwt": {
+      "value": "token",
+      "result": "result"
+    },
+    "datetime": {
+      "value": "date",
+      "operation": "operation",
+      "amount": "amount",
+      "unitLabel": "unit",
+      "format": "format",
+      "other": "second date",
+      "result": "result",
+      "op": {
+        "add": "add",
+        "subtract": "subtract",
+        "format": "format",
+        "diff": "diff"
+      },
+      "unit": {
+        "milliseconds": "milliseconds",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months",
+        "years": "years"
+      }
+    },
+    "objectOp": {
+      "value": "object",
+      "operation": "operation",
+      "path": "path",
+      "keys": "keys",
+      "setValue": "value",
+      "mergeWith": "merge with",
+      "result": "result",
+      "op": {
+        "get": "get",
+        "set": "set",
+        "merge": "merge",
+        "pick": "pick",
+        "omit": "omit",
+        "keys": "keys",
+        "values": "values"
+      }
+    },
+    "url": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "op": {
+        "encode": "encode",
+        "decode": "decode",
+        "parseQuery": "parse query",
+        "buildQuery": "build query",
+        "parseUrl": "parse URL"
+      }
+    },
+    "random": {
+      "operation": "operation",
+      "min": "min",
+      "max": "max",
+      "length": "length",
+      "items": "items",
+      "seed": "seed (optional)",
+      "seedPlaceholder": "reproducible",
+      "result": "result",
+      "op": {
+        "int": "integer",
+        "float": "float",
+        "string": "string",
+        "boolean": "boolean",
+        "pick": "pick"
+      }
+    },
+    "throw": {
+      "message": "message"
+    },
+    "retry": {
+      "maxAttempts": "max attempts",
+      "backoff": "backoff",
+      "delay": "delay",
+      "factor": "factor",
+      "retryOnError": "retry on error",
+      "retryOnStatus": "retry on HTTP status",
+      "retryOnFailure": "retry on any non-2xx",
+      "attempt": "attempt",
+      "exhausted": "exhausted",
+      "backoffOpt": {
+        "fixed": "fixed",
+        "linear": "linear",
+        "exponential": "exponential"
+      }
+    },
+    "menuGroups": {
+      "lists": "Lists",
+      "math": "Math",
+      "dataFormats": "Data formats",
+      "encoding": "Encoding",
+      "time": "Timing"
+    },
+    "listOp": {
+      "value": "list",
+      "operation": "operation",
+      "result": "result",
+      "key": "key",
+      "order": "order",
+      "depth": "depth",
+      "size": "size",
+      "start": "start",
+      "end": "end",
+      "op": {
+        "sort": "sort",
+        "unique": "unique",
+        "reverse": "reverse",
+        "flatten": "flatten",
+        "chunk": "chunk",
+        "slice": "slice",
+        "groupBy": "group by"
+      }
+    },
+    "csv": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "delimiter": "delimiter",
+      "header": "header row",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "math": {
+      "a": "value",
+      "operation": "operation",
+      "result": "result",
+      "b": "with",
+      "min": "min",
+      "max": "max",
+      "precision": "precision",
+      "op": {
+        "round": "round",
+        "floor": "floor",
+        "ceil": "ceil",
+        "trunc": "truncate",
+        "abs": "absolute",
+        "sign": "sign",
+        "sqrt": "square root",
+        "min": "min",
+        "max": "max",
+        "clamp": "clamp"
+      }
+    },
+    "schema": {
+      "value": "value",
+      "schema": "JSON Schema",
+      "valid": "valid",
+      "invalid": "invalid",
+      "errors": "errors",
+      "editTitle": "Edit JSON Schema"
+    },
+    "readFile": {
+      "path": "path",
+      "content": "content"
+    },
+    "writeFile": {
+      "path": "path",
+      "mode": "mode",
+      "content": "content"
+    },
+    "codeField": {
+      "title": "Edit",
+      "edit": "Open editor",
+      "moreLines": "+{{count}} lines",
+      "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "mode",
+      "modeOpt": {
+        "frequency": "frequency",
+        "cron": "cron"
+      },
+      "frequency": "frequency",
+      "unit": "unit",
+      "cron": "cron",
+      "stop": "stop after",
+      "stopOpt": {
+        "none": "never",
+        "duration": "duration",
+        "endDate": "end date"
+      },
+      "duration": "duration",
+      "endDate": "end date",
+      "tick": "tick"
+    },
+    "code": {
+      "input": "input",
+      "code": "code (TypeScript)",
+      "modalTitle": "Edit code",
+      "result": "result",
+      "timeout": "Timeout (s)"
     }
   }
 }

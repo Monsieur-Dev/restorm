@@ -148,6 +148,7 @@
       "createEnvironmentFolder": "Buat folder lingkungan",
       "delete": "Hapus",
       "clone": "Klon",
+      "copySuffix": "salinan",
       "rename": "Ubah nama",
       "addToFavorites": "Tambah ke favorit",
       "removeFromFavorites": "Hapus dari favorit",
@@ -312,6 +313,8 @@
       "color": "Warna",
       "expression": "Ekspresi",
       "boolean": "Boolean",
+      "null": "Null",
+      "list": "Daftar",
       "variables": "Variabel",
       "environment": "Lingkungan"
     },
@@ -480,7 +483,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Apakah Anda yakin ingin menghapus \"{{fileName}}\" dari favorit?",
-    "noFilesHint": "Buka file atau buat yang baru untuk memulai",
     "newAriaLabel": "Buat koleksi baru",
     "openAriaLabel": "Buka koleksi dari disk",
     "landmarkLabel": "Selamat datang"
@@ -781,9 +783,12 @@
         "changeColor": "Change colour",
         "resetColor": "Reset colour",
         "addNote": "Add / edit note",
+        "runOnEachEvent": "Jalankan pada setiap event yang diterima",
         "duplicate": "Duplicate",
         "delete": "Delete",
-        "deleteShortcut": "Del"
+        "deleteShortcut": "Del",
+        "copy": "Salin",
+        "paste": "Tempel"
       },
       "expand": "Bentangkan",
       "collapse": "Ciutkan"
@@ -795,7 +800,6 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "locked": "Pengeditan terkunci saat skenario berjalan",
     "switch": {
       "addCase": "Tambah kasus",
@@ -848,7 +852,30 @@
       "now": "Sekarang",
       "comparator": "Pembanding",
       "setVariable": "Atur variabel",
-      "getVariable": "Ambil variabel"
+      "getVariable": "Ambil variabel",
+      "addToList": "Tambahkan ke daftar",
+      "removeFromList": "Hapus dari daftar",
+      "cast": "Cast",
+      "regex": "Regex",
+      "json": "JSON",
+      "xml": "XML",
+      "yaml": "YAML",
+      "crypto": "Crypto",
+      "jwt": "JWT",
+      "datetime": "Date math",
+      "objectOp": "Object ops",
+      "url": "URL",
+      "random": "Random",
+      "throw": "Throw",
+      "retry": "Retry",
+      "listOp": "List ops",
+      "csv": "CSV",
+      "math": "Math",
+      "schema": "Schema validate",
+      "readFile": "Read file",
+      "writeFile": "Write file",
+      "timer": "Pengatur waktu",
+      "code": "Kode"
     },
     "comparator": {
       "result": "hasil"
@@ -865,7 +892,31 @@
       "data": "data"
     },
     "assert": {
-      "message": "pesan"
+      "message": "pesan",
+      "operator": "operator",
+      "op": {
+        "eq": "equals",
+        "ne": "not equals",
+        "lt": "less than",
+        "lte": "less or equal",
+        "gt": "greater than",
+        "gte": "greater or equal",
+        "contains": "contains",
+        "isString": "is string",
+        "isNumber": "is number",
+        "isBoolean": "is boolean",
+        "isArray": "is array",
+        "isObject": "is object",
+        "isNull": "is null",
+        "exists": "exists",
+        "isEmpty": "is empty",
+        "matchesRegex": "matches regex",
+        "isOneOf": "is one of",
+        "deepEquals": "deep equals",
+        "lengthEq": "length ==",
+        "lengthGt": "length >",
+        "lengthLt": "length <"
+      }
     },
     "editRequest": "Edit permintaan",
     "editScenario": "Edit skenario",
@@ -875,10 +926,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "outputName": "Nama output",
+      "addOutput": "Tambah keluaran",
+      "removeOutput": "Hapus"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Wajib untuk skenario pemanggil"
+      "addParam": "Tambah parameter",
+      "removeParam": "Hapus"
     },
     "runScenario": {
       "orphanInput": "Tidak ada parameter \"{{name}}\" yang cocok di sub-skenario",
@@ -888,6 +945,7 @@
     "validation": {
       "duplicateName": "Nama \"{{name}}\" sudah dipakai oleh aksi lain.",
       "panelTitle": "{{count}} kesalahan aksi",
+      "runBlocked": "Perbaiki {{count}} kesalahan tindakan sebelum menjalankan",
       "focusBox": "Fokus ke aksi ini",
       "showErrors": "Tampilkan kesalahan",
       "input": {
@@ -899,8 +957,7 @@
       },
       "output": {
         "missingName": "Keluaran ini harus memiliki nama.",
-        "duplicateName": "Nama \"{{name}}\" sudah dipakai oleh keluaran lain.",
-        "valueRequired": "Masukan \"value\" harus terhubung ke sumber."
+        "duplicateName": "Nama \"{{name}}\" sudah dipakai oleh keluaran lain."
       },
       "getVariable": {
         "noSelection": "Variabel harus dipilih.",
@@ -927,8 +984,10 @@
         "missing": "Permintaan yang ditautkan tidak ada lagi."
       },
       "runScenario": {
-        "missing": "Skenario yang ditautkan tidak ada lagi.",
-        "requiredInput": "Input wajib \"{{name}}\" harus terhubung ke sumber."
+        "missing": "Skenario yang ditautkan tidak ada lagi."
+      },
+      "file": {
+        "missingPath": "A file path is required."
       }
     },
     "usage": {
@@ -938,6 +997,8 @@
     "inspector": {
       "run": "Jalankan",
       "debug": "Debug",
+      "undo": "Urungkan",
+      "redo": "Ulangi",
       "step": "Langkah demi langkah",
       "previewInfo": "Example data, based on previous request results.",
       "pause": "Jeda",
@@ -947,9 +1008,11 @@
       "stop": "Hentikan",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "Salin log ini",
       "clearLogs": "Hapus log",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Tampilkan log {{level}}",
+      "showLevelOnly": "Klik kanan: hanya level ini",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -1003,6 +1066,299 @@
       "toggle": "Alihkan breakpoint (F9)",
       "reached": "Breakpoint tercapai — tindakan ini belum dijalankan. Tekan F5 untuk melanjutkan, atau F7 untuk melangkah.",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Alihkan minimap"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Tambah nilai",
+      "removeValue": "Hapus nilai",
+      "updateVariable": "Perbarui variabel sumber"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
+    },
+    "regex": {
+      "value": "value",
+      "operation": "operation",
+      "pattern": "pattern",
+      "flags": "flags",
+      "replacement": "replacement",
+      "result": "result",
+      "op": {
+        "extract": "extract",
+        "extractAll": "extract all",
+        "test": "test",
+        "replace": "replace",
+        "split": "split"
+      },
+      "flag": {
+        "i": "Case-insensitive",
+        "m": "Multiline (^ and $ match line breaks)",
+        "s": "Dotall (. matches newlines)"
+      }
+    },
+    "json": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "xml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "yaml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "crypto": {
+      "value": "value",
+      "operation": "operation",
+      "key": "key",
+      "keyPlaceholder": "secret",
+      "result": "result",
+      "op": {
+        "base64Encode": "base64 encode",
+        "base64Decode": "base64 decode",
+        "md5": "MD5",
+        "sha1": "SHA-1",
+        "sha256": "SHA-256",
+        "sha512": "SHA-512",
+        "hmacSha256": "HMAC-SHA256",
+        "uuid": "UUID v4"
+      }
+    },
+    "jwt": {
+      "value": "token",
+      "result": "result"
+    },
+    "datetime": {
+      "value": "date",
+      "operation": "operation",
+      "amount": "amount",
+      "unitLabel": "unit",
+      "format": "format",
+      "other": "second date",
+      "result": "result",
+      "op": {
+        "add": "add",
+        "subtract": "subtract",
+        "format": "format",
+        "diff": "diff"
+      },
+      "unit": {
+        "milliseconds": "milliseconds",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months",
+        "years": "years"
+      }
+    },
+    "objectOp": {
+      "value": "object",
+      "operation": "operation",
+      "path": "path",
+      "keys": "keys",
+      "setValue": "value",
+      "mergeWith": "merge with",
+      "result": "result",
+      "op": {
+        "get": "get",
+        "set": "set",
+        "merge": "merge",
+        "pick": "pick",
+        "omit": "omit",
+        "keys": "keys",
+        "values": "values"
+      }
+    },
+    "url": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "op": {
+        "encode": "encode",
+        "decode": "decode",
+        "parseQuery": "parse query",
+        "buildQuery": "build query",
+        "parseUrl": "parse URL"
+      }
+    },
+    "random": {
+      "operation": "operation",
+      "min": "min",
+      "max": "max",
+      "length": "length",
+      "items": "items",
+      "seed": "seed (optional)",
+      "seedPlaceholder": "reproducible",
+      "result": "result",
+      "op": {
+        "int": "integer",
+        "float": "float",
+        "string": "string",
+        "boolean": "boolean",
+        "pick": "pick"
+      }
+    },
+    "throw": {
+      "message": "message"
+    },
+    "retry": {
+      "maxAttempts": "max attempts",
+      "backoff": "backoff",
+      "delay": "delay",
+      "factor": "factor",
+      "retryOnError": "retry on error",
+      "retryOnStatus": "retry on HTTP status",
+      "retryOnFailure": "retry on any non-2xx",
+      "attempt": "attempt",
+      "exhausted": "exhausted",
+      "backoffOpt": {
+        "fixed": "fixed",
+        "linear": "linear",
+        "exponential": "exponential"
+      }
+    },
+    "menuGroups": {
+      "lists": "Lists",
+      "math": "Math",
+      "dataFormats": "Data formats",
+      "encoding": "Encoding",
+      "time": "Pewaktuan"
+    },
+    "listOp": {
+      "value": "list",
+      "operation": "operation",
+      "result": "result",
+      "key": "key",
+      "order": "order",
+      "depth": "depth",
+      "size": "size",
+      "start": "start",
+      "end": "end",
+      "op": {
+        "sort": "sort",
+        "unique": "unique",
+        "reverse": "reverse",
+        "flatten": "flatten",
+        "chunk": "chunk",
+        "slice": "slice",
+        "groupBy": "group by"
+      }
+    },
+    "csv": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "delimiter": "delimiter",
+      "header": "header row",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "math": {
+      "a": "value",
+      "operation": "operation",
+      "result": "result",
+      "b": "with",
+      "min": "min",
+      "max": "max",
+      "precision": "precision",
+      "op": {
+        "round": "round",
+        "floor": "floor",
+        "ceil": "ceil",
+        "trunc": "truncate",
+        "abs": "absolute",
+        "sign": "sign",
+        "sqrt": "square root",
+        "min": "min",
+        "max": "max",
+        "clamp": "clamp"
+      }
+    },
+    "schema": {
+      "value": "value",
+      "schema": "JSON Schema",
+      "valid": "valid",
+      "invalid": "invalid",
+      "errors": "errors",
+      "editTitle": "Edit JSON Schema"
+    },
+    "readFile": {
+      "path": "path",
+      "content": "content"
+    },
+    "writeFile": {
+      "path": "path",
+      "mode": "mode",
+      "content": "content"
+    },
+    "codeField": {
+      "title": "Edit",
+      "edit": "Open editor",
+      "moreLines": "+{{count}} lines",
+      "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "mode",
+      "modeOpt": {
+        "frequency": "frekuensi",
+        "cron": "cron"
+      },
+      "frequency": "frekuensi",
+      "unit": "satuan",
+      "cron": "cron",
+      "stop": "berhenti setelah",
+      "stopOpt": {
+        "none": "tidak pernah",
+        "duration": "durasi",
+        "endDate": "tanggal akhir"
+      },
+      "duration": "durasi",
+      "endDate": "tanggal akhir",
+      "tick": "tik"
+    },
+    "code": {
+      "input": "input",
+      "code": "kode (TypeScript)",
+      "modalTitle": "Edit kode",
+      "result": "hasil",
+      "timeout": "Batas waktu (s)"
     }
   }
 }

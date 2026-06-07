@@ -38,8 +38,11 @@ function r(id: string, name: string, type = 'http', method?: string): FolderItem
   return { id, name, type, ...(method !== undefined ? { method } : {}) } as unknown as FolderItem
 }
 
-// A scenario stub: `isScenario` accepts `{ type: 'scenario' }`. `items` makes
-// it a container (so a nested scenario is reachable by the walk).
+// A scenario stub. `isScenario` keys on `type: 'scenario'`. Crucially it also
+// carries `items` AND `configuration` to mirror the real runtime object — that
+// combination makes `isFolder`/`isAnyFolder` return true for a scenario, so the
+// projection has to test `isScenario` first or it mis-renders a scenario as a
+// `kind: "folder"`. Leaving `configuration` off here would hide that bug.
 function sc(
   id: string,
   name: string,
@@ -49,6 +52,7 @@ function sc(
     type: 'scenario',
     id,
     name,
+    configuration: {},
     nodes: opts.nodes ?? [],
     edges: opts.edges ?? [],
     tags: opts.tags ?? [],
@@ -125,6 +129,28 @@ describe('mcp/tree', () => {
       expect(folders[1]?.kind).toBe('env-folder')
       expect(requests.map((x) => x.id)).toEqual(['req-1', 'req-2'])
     })
+
+    it('does not list a child scenario as a folder', () => {
+      const parent = f('p', 'P', [
+        f('sub-folder', 'sub'),
+        sc('scn', 'Scenario'),
+        r('req-1', 'r1')
+      ])
+      const { folders, requests } = listChildren(parent)
+      // The scenario carries `configuration` at runtime, so without the
+      // `isScenario` guard it would leak into the folder list.
+      expect(folders.map((x) => x.id)).toEqual(['sub-folder'])
+      expect(requests.map((x) => x.id)).toEqual(['req-1'])
+    })
+
+    it('lists the requests authored directly inside a scenario container', () => {
+      const scn = sc('scn', 'Scenario', { items: [f('sf', 'sf'), r('inner', 'inner', 'http', 'GET')] })
+      const { folders, requests } = listChildren(scn as unknown as Folder)
+      expect(folders.map((x) => x.id)).toEqual(['sf'])
+      expect(requests).toEqual([
+        { id: 'inner', name: 'inner', protocol: 'http', method: 'GET', parentId: 'scn' }
+      ])
+    })
   })
 
   describe('flattenTree', () => {
@@ -143,6 +169,24 @@ describe('mcp/tree', () => {
       expect(requests).toEqual([
         { id: 'rn', name: 'rn', protocol: 'http', method: 'POST', parentId: 'mid' },
         { id: 'rt', name: 'rt', protocol: 'http', parentId: 'root' }
+      ])
+    })
+
+    it('descends into a scenario container without listing it as a folder', () => {
+      const tree = [
+        ef('root', 'root', [
+          sc('scn', 'Scenario', { items: [f('inner-folder', 'inner'), r('inner-req', 'inner-req', 'http', 'GET')] })
+        ])
+      ]
+      const { folders, requests } = flattenTree(tree)
+      // The scenario itself is not a folder; its inner folder + request are
+      // still reachable, parented to the scenario id.
+      expect(folders).toEqual([
+        { id: 'root', name: 'root', kind: 'env-folder', parentId: null },
+        { id: 'inner-folder', name: 'inner', kind: 'folder', parentId: 'scn' }
+      ])
+      expect(requests).toEqual([
+        { id: 'inner-req', name: 'inner-req', protocol: 'http', method: 'GET', parentId: 'scn' }
       ])
     })
   })
@@ -201,6 +245,32 @@ describe('mcp/tree', () => {
               kind: 'folder',
               children: [
                 { id: 'leaf', name: 'leaf', kind: 'request', protocol: 'soap' }
+              ]
+            }
+          ]
+        }
+      ])
+    })
+
+    it('renders a scenario as a distinct "scenario" node with its child items', () => {
+      const tree = [
+        ef('root', 'root', [
+          sc('scn', 'Scenario', { items: [r('inner', 'inner', 'graphql'), sc('child', 'Child')] })
+        ])
+      ]
+      expect(buildTree(tree)).toEqual([
+        {
+          id: 'root',
+          name: 'root',
+          kind: 'env-folder',
+          children: [
+            {
+              id: 'scn',
+              name: 'Scenario',
+              kind: 'scenario',
+              children: [
+                { id: 'inner', name: 'inner', kind: 'request', protocol: 'graphql' },
+                { id: 'child', name: 'Child', kind: 'scenario', children: [] }
               ]
             }
           ]

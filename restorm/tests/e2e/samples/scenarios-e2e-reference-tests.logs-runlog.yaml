@@ -1,0 +1,351 @@
+- message: 🔵 [<time>] ▶ Logs
+- message: ⚪ [<time>] start object
+- message: ⚪ [<time>] done object
+  data:
+    object:
+      hello: world
+      foo: bar
+      Anwser to the universeA: 42
+      BTTFArrivalDate: 2025-10-21T14:29:00.000Z
+      🔥: true
+      color: "#000000"
+      moulin: Rouge
+      expression: My expression
+      SelectedEnv:
+        name: localhost
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] start log
+  data:
+    message: Hello {{hello}}
+    data:
+      hello: world
+      foo: bar
+      Anwser to the universeA: 42
+      BTTFArrivalDate: 2025-10-21T14:29:00.000Z
+      🔥: true
+      color: "#000000"
+      moulin: Rouge
+      expression: My expression
+      SelectedEnv:
+        name: localhost
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+- message: 🔵 [<time>] Hello world
+  data:
+    hello: world
+    foo: bar
+    Anwser to the universeA: 42
+    BTTFArrivalDate: 2025-10-21T14:29:00.000Z
+    🔥: true
+    color: "#000000"
+    moulin: Rouge
+    expression: My expression
+    SelectedEnv:
+      name: localhost
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      hello: world
+      foo: bar
+      Anwser to the universeA: 42
+      BTTFArrivalDate: 2025-10-21T14:29:00.000Z
+      🔥: true
+      color: "#000000"
+      moulin: Rouge
+      expression: My expression
+      SelectedEnv:
+        name: localhost
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] start log
+  data:
+    message: foo {{.}}
+    data: bar
+    in: true
+- message: 🔵 [<time>] foo bar
+  data: bar
+- message: ⚪ [<time>] done log
+  data:
+    value: bar
+- message: ⚪ [<time>] start log
+  data:
+    message: "Anwser to the universe : {{'Anwser to the universe'}}"
+    data:
+      hello: world
+      foo: bar
+      Anwser to the universeA: 42
+      BTTFArrivalDate: 2025-10-21T14:29:00.000Z
+      🔥: true
+      color: "#000000"
+      moulin: Rouge
+      expression: My expression
+      SelectedEnv:
+        name: localhost
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+    in: true
+- message: "🔵 [<time>] Anwser to the universe : "
+  data:
+    hello: world
+    foo: bar
+    Anwser to the universeA: 42
+    BTTFArrivalDate: 2025-10-21T14:29:00.000Z
+    🔥: true
+    color: "#000000"
+    moulin: Rouge
+    expression: My expression
+    SelectedEnv:
+      name: localhost
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      hello: world
+      foo: bar
+      Anwser to the universeA: 42
+      BTTFArrivalDate: 2025-10-21T14:29:00.000Z
+      🔥: true
+      color: "#000000"
+      moulin: Rouge
+      expression: My expression
+      SelectedEnv:
+        name: localhost
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] start log
+  data:
+    message: "Marty ! It's time ! "
+    in: true
+- message: "🔵 [<time>] Marty ! It's time ! "
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] start log
+  data:
+    message: Fire {{#if '🔥'}}🔥{{/if}}
+    data:
+      hello: world
+      foo: bar
+      Anwser to the universeA: 42
+      BTTFArrivalDate: 2025-10-21T14:29:00.000Z
+      🔥: true
+      color: "#000000"
+      moulin: Rouge
+      expression: My expression
+      SelectedEnv:
+        name: localhost
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+    in: true
+- message: 🔵 [<time>] Fire 🔥
+  data:
+    hello: world
+    foo: bar
+    Anwser to the universeA: 42
+    BTTFArrivalDate: 2025-10-21T14:29:00.000Z
+    🔥: true
+    color: "#000000"
+    moulin: Rouge
+    expression: My expression
+    SelectedEnv:
+      name: localhost
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      hello: world
+      foo: bar
+      Anwser to the universeA: 42
+      BTTFArrivalDate: 2025-10-21T14:29:00.000Z
+      🔥: true
+      color: "#000000"
+      moulin: Rouge
+      expression: My expression
+      SelectedEnv:
+        name: localhost
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] start log
+  data:
+    message: "Selected color: {{color}}"
+    in: true
+    data:
+      hello: world
+      foo: bar
+      Anwser to the universeA: 42
+      BTTFArrivalDate: 2025-10-21T14:29:00.000Z
+      🔥: true
+      color: "#000000"
+      moulin: Rouge
+      expression: My expression
+      SelectedEnv:
+        name: localhost
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+- message: "🔵 [<time>] Selected color: #000000"
+  data:
+    hello: world
+    foo: bar
+    Anwser to the universeA: 42
+    BTTFArrivalDate: 2025-10-21T14:29:00.000Z
+    🔥: true
+    color: "#000000"
+    moulin: Rouge
+    expression: My expression
+    SelectedEnv:
+      name: localhost
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      hello: world
+      foo: bar
+      Anwser to the universeA: 42
+      BTTFArrivalDate: 2025-10-21T14:29:00.000Z
+      🔥: true
+      color: "#000000"
+      moulin: Rouge
+      expression: My expression
+      SelectedEnv:
+        name: localhost
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] start log
+  data:
+    message: Bienvenue au Moulin {{moulin}}
+    in: true
+    data:
+      hello: world
+      foo: bar
+      Anwser to the universeA: 42
+      BTTFArrivalDate: 2025-10-21T14:29:00.000Z
+      🔥: true
+      color: "#000000"
+      moulin: Rouge
+      expression: My expression
+      SelectedEnv:
+        name: localhost
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+- message: 🔵 [<time>] Bienvenue au Moulin Rouge
+  data:
+    hello: world
+    foo: bar
+    Anwser to the universeA: 42
+    BTTFArrivalDate: 2025-10-21T14:29:00.000Z
+    🔥: true
+    color: "#000000"
+    moulin: Rouge
+    expression: My expression
+    SelectedEnv:
+      name: localhost
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      hello: world
+      foo: bar
+      Anwser to the universeA: 42
+      BTTFArrivalDate: 2025-10-21T14:29:00.000Z
+      🔥: true
+      color: "#000000"
+      moulin: Rouge
+      expression: My expression
+      SelectedEnv:
+        name: localhost
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] start log
+  data:
+    message: "Original expression: {{expression}}"
+    in: true
+    data:
+      hello: world
+      foo: bar
+      Anwser to the universeA: 42
+      BTTFArrivalDate: 2025-10-21T14:29:00.000Z
+      🔥: true
+      color: "#000000"
+      moulin: Rouge
+      expression: My expression
+      SelectedEnv:
+        name: localhost
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+- message: "🔵 [<time>] Original expression: My expression"
+  data:
+    hello: world
+    foo: bar
+    Anwser to the universeA: 42
+    BTTFArrivalDate: 2025-10-21T14:29:00.000Z
+    🔥: true
+    color: "#000000"
+    moulin: Rouge
+    expression: My expression
+    SelectedEnv:
+      name: localhost
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      hello: world
+      foo: bar
+      Anwser to the universeA: 42
+      BTTFArrivalDate: 2025-10-21T14:29:00.000Z
+      🔥: true
+      color: "#000000"
+      moulin: Rouge
+      expression: My expression
+      SelectedEnv:
+        name: localhost
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] start log
+  data:
+    message: "Selected environment : {{name}}"
+    in: true
+    data:
+      name: localhost
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+- message: "🔵 [<time>] Selected environment : localhost"
+  data:
+    name: localhost
+    variables:
+      baseUrl: http://localhost:5110
+      clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      name: localhost
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+- message: 🔵 [<time>] ■ Logs

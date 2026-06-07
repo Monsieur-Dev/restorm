@@ -20,17 +20,21 @@ new import format see [`adding-an-import.md`](./adding-an-import.md).
 A new kind `foo` is done when all of these are true:
 
 - [ ] **1. Kind union** — `foo` added to `ScenarioNodeKind` (`src/shared/types/scenario.ts`).
-- [ ] **2. Ports** — `foo` entry in `PORTS` (`src/shared/scenarioNodePorts.ts`): inputs/outputs + their `flow` class.
+- [ ] **2. Ports** — `foo` entry in `PORTS` (`src/shared/scenarioNodePorts.ts`): its own inputs/outputs + their `flow` class (the header `in` trigger is added automatically — see step 2). Declare any non-default capability in `src/shared/scenarioNodeCapabilities.ts` (e.g. opt out of the input event, or opt into static preview).
 - [ ] **3. Executor** — a `NodeExecutor` implemented under `src/main/scenarioEngine/executors/`.
 - [ ] **4. Registry** — `pickExecutor` case in `src/main/scenarioEngine/executors/registry.ts`.
 - [ ] **5. Scheduler** — only if the executor returns a new `scopeAction` (see step 5).
 - [ ] **6. Node box** — a component under `src/renderer/src/components/Scenario/nodes/` + a line in that folder's `index.ts` (`Record<ScenarioNodeKind, …>` — type-enforced).
+- [ ] **6a. Restrict the value-field types** — every `TypedValueField` in the box must pass `excludeTypes` so its type-pick menu only offers types that make sense for that operand. A string-parse operand (`json`/`xml`/`yaml`/`csv` value, regex/crypto value) keeps `string` + `expression` (+ `environment` + `secret`, all string-resolvable) and excludes `number`/`dateTime`/`boolean`/`color`/`list`. A `dateTime` operand keeps `dateTime` + `string` + `expression` (+ env/secret) and excludes `color`/`boolean`/`number`/`list`. A numeric operand keeps `number` + `expression`. **Never leave the full type menu on an operand that can't accept most of those types** — it ships nonsensical choices (e.g. a colour into a date). When in doubt, look at what the executor actually does with the value.
+- [ ] **6b. Roomy editing where it helps** — a multiline operand (a document to parse: `csv`/`json`/`xml`/`yaml` value, a schema, a long template) should use `ScenarioCodeField` (read-only preview + full-screen `ScenarioCodeEditorModal`) or expose the `ScenarioCodeEditButton` beside the inline editor (see `ScenarioExpressionField`). Don't cram a multiline value into a single-line field.
+- [ ] **6c. Inspector output preview** — opt the kind into `STATIC_PREVIEW` (step 8) so a selected box shows its output value in the inspector panel. Verify it live: select the box, confirm the inspector actually renders preview data (not an empty panel). A node whose output can't be previewed statically is the exception, not the default — most pure nodes should preview.
 - [ ] **7. Catalogue** — entry in `scenarioNodeCatalogue.ts` (label, icon, category).
-- [ ] **8. Static preview** — `STATIC_PREVIEW_KINDS` and/or `applyListOp` + the preview `switch` in `src/shared/utils/scenarioStaticPreview.ts`, plus the inspector wiring in `ScenarioEditorView.tsx` if it consumes an `items` list.
+- [ ] **8. Static preview** — opt into `STATIC_PREVIEW` in `src/shared/scenarioNodeCapabilities.ts` and/or `applyListOp` + the preview `switch` in `src/shared/utils/scenarioStaticPreview.ts`, plus the inspector wiring in `ScenarioEditorView.tsx` if it consumes an `items` list.
 - [ ] **9. MCP** — `foo` added to `SCENARIO_KINDS` in `src/main/mcp/tools/scenario.ts`, AND a `SCENARIO_KIND_DOCS` entry in `src/shared/scenarioKindDocs.ts` (purpose + config keys — `Record<ScenarioNodeKind>`, type-enforced) so `describe_scenario_kinds` exposes it to MCP clients.
 - [ ] **10. i18n** — port/field labels added to **every** locale under `src/renderer/locales/*/translation.json` (see step 10).
 - [ ] **11. Tests** — a `*.test.ts` exercising the executor + (if it fans out) an end-to-end scheduler run.
 - [ ] **12. Lint + typecheck + tests** green: `npm run lint && npm run typecheck && npx vitest run src/main/scenarioEngine`.
+- [ ] **13. Bestiary** — drop one box of the new kind into the **Bestiary** scenario so the catalogue stays visually complete (see step 13).
 
 ---
 
@@ -64,8 +68,11 @@ fail to compile until every kind is covered.
   - `signal` — a pure trigger (the header `in`, a `then`/`done`). Accepts B/AB.
   - `value` — data only. Accepts A/AB.
   - `both` — carries data *and* sequences (e.g. an HTTP `response`, a `forEach.each`).
-- The header launch trigger is the shared `IN` const (`{ id: 'in', flow: 'signal' }`); add it only if the node should be sequenceable. Data-driven nodes (collections, pure value) omit it and run once their wired inputs resolve.
-- The implicit `error` output is drawn by the box automatically — never list it.
+- The header launch trigger (`in`, the shared `IN` const `{ id: 'in', flow: 'signal' }`) is **NOT listed here** — `defaultPortsForKind` prepends it for every kind that `acceptsInputEvent` (`src/shared/scenarioNodeCapabilities.ts`), which is the default. So a `PORTS` entry lists only the kind's own data inputs. The trigger is the capability's business: a kind opts OUT only by joining `NO_INPUT_EVENT` there (empty today — every kind carries the trigger, including the `output` sink so it can be sequenced). Data-driven nodes (collections, pure value) DO carry it — a wired `in` lets a flow gate WHEN they (re)compute / re-read a variable; left unwired, they still run once their value inputs resolve.
+- The implicit `error` and `done` outputs are drawn by the box automatically —
+  never list them. Both are capability-driven (`hasErrorPort` / `hasDonePort` in
+  `scenarioNodeCapabilities.ts`, true by default); opt a kind out there (e.g. the
+  `output` sink has neither, `log` / `now` have no `error`).
 
 **Requiredness is edge-driven**, not declared here: the scheduler awaits a port
 only when an edge points at it. So operands with an inline value fallback (the
@@ -119,6 +126,12 @@ parallelism row. Then add **one line** to `nodes/index.ts`'
 `SCENARIO_NODE_COMPONENTS` (`Record<ScenarioNodeKind, …>` — TypeScript rejects a
 missing kind here).
 
+The header launch-trigger handle is drawn by `ScenarioNodeBoxBase` itself,
+straight off the node's ports (it shows iff the node carries the `in` port) —
+there is no prop to pass. `nodes/scenarioNodePortCells.test.tsx` renders every
+kind and asserts each spec port has a matching cell and the trigger matches the
+capability, so a drifted/missing cell id fails the build.
+
 ## Step 7 — Catalogue (palette + add-node menu)
 
 `scenarioNodeCatalogue.ts` — `{ kind, labelKey, defaultLabel, icon, category }`.
@@ -135,8 +148,9 @@ the `loops` category (forEach / for / while / doWhile) is folded into one
 `src/shared/utils/scenarioStaticPreview.ts` powers the inspector's
 "expected output" without a run:
 
-- Add the kind to `STATIC_PREVIEW_KINDS` if its output is computable from
-  config + upstream static values (every control/value node; `if`-likes).
+- Add the kind to the `STATIC_PREVIEW` set in `src/shared/scenarioNodeCapabilities.ts`
+  (it backs `STATIC_PREVIEW_KINDS`) if its output is computable from config +
+  upstream static values (every control/value node; `if`-likes).
 - Add a `case` to the `staticScenarioPreview` switch returning the preview
   shape (e.g. `{ condition, branch }` for `if`-likes).
 - For list/iteration nodes, add an `applyListOp` branch (sizing readout:
@@ -182,3 +196,22 @@ Then verify on the running app: a renderer/box change rides HMR; a `main`
 (executor / scheduler / ports-in-main) or preload/MCP change needs a full
 restorm restart. Confirm the new box drops from the add-node menu, wires, and
 runs — don't trust the diff alone.
+
+## Step 13 — Bestiary
+
+The **Bestiary** is a reference scenario that holds exactly one box of every
+kind — no wiring, no execution, no run-log golden. It is the at-a-glance visual
+catalogue of "what does each action look like", and it lives next to `Main` in
+the e2e reference sample:
+
+```
+restorm/tests/e2e/samples/scenarios-e2e-reference-tests.restorm
+  → Auth Service / Pet API / Bestiary
+```
+
+When you add a new kind, drop one default box of it into the Bestiary, placed on
+the grid so it does **not** overlap its neighbours (the existing boxes sit on a
+~480 × 460 px grid). Leave it unwired — the Bestiary is never run and is
+deliberately excluded from the run-log feature + goldens. The easiest way to add
+one is via the MCP `create_scenario_node` tool against the Bestiary's scenario
+id, or by dragging the box in from the add-node menu and saving.

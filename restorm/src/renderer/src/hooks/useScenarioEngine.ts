@@ -12,7 +12,7 @@
  * `data.debugToken` — this hook flips those in response to incoming events.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 type RunState = 'idle' | 'running' | 'paused' | 'completed' | 'cancelled' | 'failed'
 
@@ -33,14 +33,22 @@ export interface EngineEventLike {
   name?: string
   defaultValue?: unknown
   hint?: 'string' | 'number' | 'boolean' | 'object'
+  valueType?: unknown
 }
 
 export interface PendingUserInput {
+  /** The run that raised this prompt — the TOP-LEVEL run for an entry input, or
+   * a SUB-scenario's run for a mid-flow input inside a called scenario. The
+   * answer must route back to THIS run, not the top-level one. */
+  runId: string
   requestId: string
   nodeId: string
   name: string
   defaultValue: unknown
   hint: 'string' | 'number' | 'boolean' | 'object'
+  /** The param's persisted typed-value shape (`{ type, value }`), so the
+   * mid-run prompt can render the matching editor (datetime picker, etc.). */
+  valueType?: unknown
 }
 
 interface Bridge {
@@ -61,6 +69,9 @@ interface Bridge {
  * `RunLogEntry` plus the `scenarioId` of the (sub-)run it came from. */
 export interface ScenarioLogEntry {
   ts: string
+  /** Monotonic emission ordinal — the causal tiebreak when merged entries
+   * share a millisecond `ts` (see the engine's `RunLogEntry.seq`). */
+  seq?: number
   runId?: string
   scenarioId?: string
   level?: 'debug' | 'info' | 'warn' | 'error'
@@ -145,6 +156,10 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
   const [lastStartedNodeId, setLastStartedNodeId] = useState<string | null>(null)
   const [edgeTokens, setEdgeTokens] = useState<Map<string, number>>(new Map())
   const [pendingInputs, setPendingInputs] = useState<PendingUserInput[]>([])
+  // Mirror so `resolveUserInput` / `cancelUserInput` can route an answer back to
+  // the run that raised it (a sub-scenario's run, not always the top-level one).
+  const pendingInputsRef = useRef<PendingUserInput[]>([])
+  useEffect(() => { pendingInputsRef.current = pendingInputs }, [pendingInputs])
   const [runLog, setRunLog] = useState<ScenarioLogEntry[]>([])
   // Mirror runId into a ref via useEffect — never assign during
   // render. The ref lets the event subscription (which closes over a
@@ -218,6 +233,30 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
           // Clear the previous run's logs the moment a new run starts, so the
           // inspector panel doesn't show stale entries until the first poll.
           setRunLog([])
+          // Drop any prompt left dangling by a previous (e.g. stopped) run.
+          setPendingInputs([])
+        }
+        return
+      }
+      // Input prompts are surfaced for THIS tab's WHOLE run tree — including
+      // sub-scenarios, whose runId differs from the top-level run. A mid-flow
+      // input inside a called scenario must still ask the user (otherwise its
+      // executor awaits forever and the parent run hangs). Gate by the launcher
+      // (the tab that started the run), NOT the top runId, and remember the
+      // request's own runId so the answer routes back to the right scheduler.
+      if (event.type === 'user-input-requested') {
+        if (event.launcherScenarioId !== scenarioIdRef.current) return
+        if (event.runId && event.requestId && event.nodeId && event.name) {
+          const pending: PendingUserInput = {
+            runId: event.runId,
+            requestId: event.requestId,
+            nodeId: event.nodeId,
+            name: event.name,
+            defaultValue: event.defaultValue,
+            hint: event.hint ?? 'string',
+            ...(event.valueType !== undefined ? { valueType: event.valueType } : {})
+          }
+          setPendingInputs((prev) => [...prev, pending])
         }
         return
       }
@@ -260,8 +299,14 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
         case 'run-completed':
           setState('completed')
           pausedRef.current = false
-          clearBeamTimers()
-          setRunningNodeIds(new Set())
+          // Do NOT force-clear the beams here. Every node that ran already armed
+          // its own min-beam removal timer at `node-completed`, so each beam
+          // stays lit for its MIN_BEAM_MS hold and then finishes the lap it
+          // started (the box drops `running` on the next `animationiteration`).
+          // A fast run fires all its node events plus `run-completed` inside one
+          // React batch — clearing `runningNodeIds` here collapsed that batch to
+          // empty, so no frame ever painted a beam. Leaving the per-node timers
+          // to drain is what makes the orbit visible on an instant run.
           setBreakpointNodeId(null)
           setPausedAtNodeId(null)
           break
@@ -369,19 +414,6 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
           }
           break
         }
-        case 'user-input-requested': {
-          if (event.requestId && event.nodeId && event.name) {
-            const pending: PendingUserInput = {
-              requestId: event.requestId,
-              nodeId: event.nodeId,
-              name: event.name,
-              defaultValue: event.defaultValue,
-              hint: event.hint ?? 'string'
-            }
-            setPendingInputs((prev) => [...prev, pending])
-          }
-          break
-        }
         default: break
       }
     })
@@ -408,7 +440,15 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
           merged.push({ ...e, ...(r.scenarioId !== undefined ? { scenarioId: r.scenarioId } : {}) })
         }
       }
-      merged.sort((a, b) => (a.ts < b.ts ? -1 : a.ts > b.ts ? 1 : 0))
+      // Causal order: the monotonic emission `seq` is authoritative — a
+      // sub-run entry and its parent's post-call entry routinely share a
+      // millisecond `ts`, and a pure-`ts` sort then breaks happens-before.
+      // Fall back to `ts` only when either entry predates the `seq` field.
+      merged.sort((a, b) =>
+        a.seq !== undefined && b.seq !== undefined
+          ? a.seq - b.seq
+          : a.ts < b.ts ? -1 : a.ts > b.ts ? 1 : 0
+      )
       setRunLog(merged)
     }
     void fetchLog()
@@ -480,14 +520,16 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
   }, [])
 
   const resolveUserInput = useCallback(async (requestId: string, value: unknown): Promise<void> => {
-    const id = runIdRef.current
+    // Route to the run that raised THIS request (a sub-scenario's run for a
+    // mid-flow input), not the top-level run.
+    const id = pendingInputsRef.current.find((p) => p.requestId === requestId)?.runId ?? runIdRef.current
     if (id === null) return
     await bridge()?.scenarioEngineResolveUserInput?.(id, requestId, value)
     setPendingInputs((prev) => prev.filter((p) => p.requestId !== requestId))
   }, [])
 
   const cancelUserInput = useCallback(async (requestId: string): Promise<void> => {
-    const id = runIdRef.current
+    const id = pendingInputsRef.current.find((p) => p.requestId === requestId)?.runId ?? runIdRef.current
     if (id === null) return
     await bridge()?.scenarioEngineCancelUserInput?.(id, requestId)
     setPendingInputs((prev) => prev.filter((p) => p.requestId !== requestId))
@@ -495,5 +537,13 @@ export function useScenarioEngine(scenarioId: string): UseScenarioEngineResult {
 
   const clearRunLog = useCallback((): void => { setRunLog([]) }, [])
 
-  return { state, runId, runningNodeIds, completedNodeIds, breakpointNodeId, pausedAtNodeId, lastStartedNodeId, edgeTokens, pendingInputs, runLog, clearRunLog, start, pause, resume, step, enableDebug, setEngineBreakpoints, stop, resolveUserInput, cancelUserInput }
+  // Memoise the returned facade so its identity only changes when some piece of
+  // engine state actually changes. Consumers (the editor) spread `engine.*` into
+  // many callbacks/derived values; a fresh object every render would make all of
+  // those recompute on every unrelated render (notably each drag tick), which
+  // cascaded a re-render into every scenario box.
+  return useMemo(
+    () => ({ state, runId, runningNodeIds, completedNodeIds, breakpointNodeId, pausedAtNodeId, lastStartedNodeId, edgeTokens, pendingInputs, runLog, clearRunLog, start, pause, resume, step, enableDebug, setEngineBreakpoints, stop, resolveUserInput, cancelUserInput }),
+    [state, runId, runningNodeIds, completedNodeIds, breakpointNodeId, pausedAtNodeId, lastStartedNodeId, edgeTokens, pendingInputs, runLog, clearRunLog, start, pause, resume, step, enableDebug, setEngineBreakpoints, stop, resolveUserInput, cancelUserInput]
+  )
 }

@@ -149,6 +149,7 @@
       "createEnvironmentFolder": "Omgevingsmap maken",
       "delete": "Verwijderen",
       "clone": "Klonen",
+      "copySuffix": "kopie",
       "rename": "Naam wijzigen",
       "addToFavorites": "Toevoegen aan favorieten",
       "removeFromFavorites": "Verwijderen uit favorieten",
@@ -313,6 +314,8 @@
       "color": "Kleur",
       "expression": "Expressie",
       "boolean": "Boolean",
+      "null": "Null",
+      "list": "Lijst",
       "variables": "Variabelen",
       "environment": "Omgeving"
     },
@@ -481,7 +484,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Weet je zeker dat je \"{{fileName}}\" uit favorieten wilt verwijderen?",
-    "noFilesHint": "Open een bestand of maak een nieuwe aan om te beginnen",
     "newAriaLabel": "Een nieuwe collectie maken",
     "openAriaLabel": "Een collectie van schijf openen",
     "landmarkLabel": "Welkom"
@@ -673,19 +675,19 @@
         "trademark": "OpenAPI is een project van het OpenAPI Initiative onder de Linux Foundation."
       },
       "curl": {
-        "description": "Heb je het verzoek al draaien in je terminal? Plak de volledige curl-aanroep — vlaggen, headers, body, querystring — en Restorm bouwt het opnieuw als een echt verzoek dat je opnieuw kunt uitvoeren, bewerken en vastmaken.",
+        "description": "Hebt u het verzoek al draaien in uw terminal? Plak de volledige curl-aanroep — vlaggen, headers, body, querystring — en Restorm bouwt het opnieuw als een echt verzoek dat u opnieuw kunt uitvoeren, bewerken en vastmaken.",
         "trademark": "curl is opensourcesoftware © Daniel Stenberg, hier gebruikt onder de bijbehorende voorwaarden."
       },
       "powershell": {
-        "description": "Hetzelfde idee, PowerShell-versie. Plak een Invoke-WebRequest- of Invoke-RestMethod-commando en Restorm leest de URI, methode, headers en body om een verzoek te starten dat je visueel kunt itereren.",
+        "description": "Hetzelfde idee, PowerShell-versie. Plak een Invoke-WebRequest- of Invoke-RestMethod-commando en Restorm leest de URI, methode, headers en body om een verzoek te starten dat u visueel kunt itereren.",
         "trademark": "PowerShell is een gedeponeerd handelsmerk van Microsoft Corporation."
       },
       "postman": {
-        "description": "Een Postman-collectie die op kantoor rondslingert? Sleep de JSON erin — Restorm leest elk verzoek, elk voorbeeldantwoord en elke omgevingsvariabele, en bouwt de collectie opnieuw op als een Restorm-boom die je naast je andere API's kunt gebruiken.",
+        "description": "Een Postman-collectie die op kantoor rondslingert? Sleep de JSON erin — Restorm leest elk verzoek, elk voorbeeldantwoord en elke omgevingsvariabele, en bouwt de collectie opnieuw op als een Restorm-boom die u naast uw andere API's kunt gebruiken.",
         "trademark": "Postman is een gedeponeerd handelsmerk van Postman, Inc., hier alleen ter referentie voor compatibiliteit gebruikt."
       },
       "insomnia": {
-        "description": "Kom je van Insomnia? Sleep je export erin. Restorm begrijpt het v4-/v5-collectieformaat, neemt elk verzoek, elke header, body en omgeving mee en presenteert het geheel als een Restorm-boom.",
+        "description": "Komt u van Insomnia? Sleep uw export erin. Restorm begrijpt het v4-/v5-collectieformaat, neemt elk verzoek, elke header, body en omgeving mee en presenteert het geheel als een Restorm-boom.",
         "trademark": "Insomnia is een gedeponeerd handelsmerk van Kong Inc., hier alleen ter referentie voor compatibiliteit gebruikt."
       },
       "bruno": {
@@ -697,7 +699,7 @@
         "trademark": "GraphQL is een handelsmerk van de GraphQL Foundation, een project van de Joint Development Foundation."
       },
       "grpc": {
-        "description": "Sleep een .proto-bestand (of een map vol .proto-bestanden) en Restorm doorloopt elke service, elke RPC en elk bericht — en zet elke methode om in een getypeerd verzoek dat je via de gRPC-executor kunt verzenden zonder aan codegen te raken.",
+        "description": "Sleep een .proto-bestand (of een map vol .proto-bestanden) en Restorm doorloopt elke service, elke RPC en elk bericht — en zet elke methode om in een getypeerd verzoek dat u via de gRPC-executor kunt verzenden zonder aan codegen te raken.",
         "trademark": "gRPC is een project van de Cloud Native Computing Foundation."
       },
       "soap": {
@@ -708,18 +710,18 @@
         "trademark": "WebSocket is een protocol dat is gestandaardiseerd door de IETF (RFC 6455) en het W3C."
       },
       "kafka": {
-        "description": "Plak de URL van een Apache Kafka bootstrap-server (of een lijst met topics) — Restorm registreert consumers en producers per topic, decodeert Avro-/Protobuf-payloads via je Schema Registry en laat je met één klik individuele offsets opnieuw afspelen.",
+        "description": "Plak de URL van een Apache Kafka bootstrap-server (of een lijst met topics) — Restorm registreert consumers en producers per topic, decodeert Avro-/Protobuf-payloads via uw Schema Registry en laat u met één klik individuele offsets opnieuw afspelen.",
         "trademark": "Apache Kafka en het Kafka-logo zijn handelsmerken van de Apache Software Foundation."
       },
       "socketio": {
-        "description": "Plak de URL van een Socket.IO-server — Restorm onderhandelt de handshake, somt de namespaces en gebeurtenisnamen op die de server uitzendt, en geeft je één verzoek per emit/on-gebeurtenis met payload-validatie.",
+        "description": "Plak de URL van een Socket.IO-server — Restorm onderhandelt de handshake, somt de namespaces en gebeurtenisnamen op die de server uitzendt, en geeft u één verzoek per emit/on-gebeurtenis met payload-validatie.",
         "trademark": "Socket.IO is een opensourcebibliotheek uitgebracht onder de MIT-licentie; de naam en het logo worden hier ter aanduiding gebruikt."
       },
       "odata": {
         "description": "Plak de URL van een OData service-document of een $metadata-bestand — Restorm leest de CSDL, bouwt de entity sets, function imports en actions opnieuw op en vult de query-opties $filter/$select/$top/$skip vooraf in op elke operatie."
       },
       "mqtt": {
-        "description": "Plak de URL van een MQTT-broker of een topiccatalogus — Restorm steigert publish-/subscribe-verzoeken per topic, houdt de verbinding open voor streaming-previews en onthoudt snapshots van retained messages zodat je ze later kunt afspelen.",
+        "description": "Plak de URL van een MQTT-broker of een topiccatalogus — Restorm steigert publish-/subscribe-verzoeken per topic, houdt de verbinding open voor streaming-previews en onthoudt snapshots van retained messages zodat u ze later kunt afspelen.",
         "trademark": "MQTT is een OASIS-standaard; de naam en het logo van MQTT zijn handelsmerken van OASIS Open."
       }
     },
@@ -782,9 +784,12 @@
         "changeColor": "Change colour",
         "resetColor": "Reset colour",
         "addNote": "Add / edit note",
+        "runOnEachEvent": "Uitvoeren bij elk ontvangen event",
         "duplicate": "Duplicate",
         "delete": "Delete",
-        "deleteShortcut": "Del"
+        "deleteShortcut": "Del",
+        "copy": "Kopiëren",
+        "paste": "Plakken"
       },
       "expand": "Uitklappen",
       "collapse": "Inklappen"
@@ -796,7 +801,6 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "locked": "Bewerken vergrendeld terwijl het scenario draait",
     "switch": {
       "addCase": "Case toevoegen",
@@ -849,7 +853,30 @@
       "now": "Nu",
       "comparator": "Vergelijker",
       "setVariable": "Variabele instellen",
-      "getVariable": "Variabele ophalen"
+      "getVariable": "Variabele ophalen",
+      "addToList": "Aan lijst toevoegen",
+      "removeFromList": "Uit lijst verwijderen",
+      "cast": "Omzetten",
+      "regex": "Regex",
+      "json": "JSON",
+      "xml": "XML",
+      "yaml": "YAML",
+      "crypto": "Crypto",
+      "jwt": "JWT",
+      "datetime": "Date math",
+      "objectOp": "Object ops",
+      "url": "URL",
+      "random": "Random",
+      "throw": "Throw",
+      "retry": "Retry",
+      "listOp": "List ops",
+      "csv": "CSV",
+      "math": "Math",
+      "schema": "Schema validate",
+      "readFile": "Read file",
+      "writeFile": "Write file",
+      "timer": "Timer",
+      "code": "Code"
     },
     "comparator": {
       "result": "resultaat"
@@ -866,7 +893,31 @@
       "data": "gegevens"
     },
     "assert": {
-      "message": "bericht"
+      "message": "bericht",
+      "operator": "operator",
+      "op": {
+        "eq": "equals",
+        "ne": "not equals",
+        "lt": "less than",
+        "lte": "less or equal",
+        "gt": "greater than",
+        "gte": "greater or equal",
+        "contains": "contains",
+        "isString": "is string",
+        "isNumber": "is number",
+        "isBoolean": "is boolean",
+        "isArray": "is array",
+        "isObject": "is object",
+        "isNull": "is null",
+        "exists": "exists",
+        "isEmpty": "is empty",
+        "matchesRegex": "matches regex",
+        "isOneOf": "is one of",
+        "deepEquals": "deep equals",
+        "lengthEq": "length ==",
+        "lengthGt": "length >",
+        "lengthLt": "length <"
+      }
     },
     "editRequest": "Verzoek bewerken",
     "editScenario": "Scenario bewerken",
@@ -876,10 +927,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "outputName": "Uitvoernaam",
+      "addOutput": "Uitvoer toevoegen",
+      "removeOutput": "Verwijderen"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Vereist voor aanroepende scenario's"
+      "addParam": "Parameter toevoegen",
+      "removeParam": "Verwijderen"
     },
     "runScenario": {
       "orphanInput": "Geen overeenkomende parameter \"{{name}}\" in het subscenario",
@@ -889,6 +946,7 @@
     "validation": {
       "duplicateName": "De naam ‘{{name}}’ wordt al door een andere actie gebruikt.",
       "panelTitle": "{{count}} actiefout(en)",
+      "runBlocked": "Los {{count}} actiefout(en) op voordat u uitvoert",
       "focusBox": "Naar deze actie gaan",
       "showErrors": "Fouten tonen",
       "input": {
@@ -900,8 +958,7 @@
       },
       "output": {
         "missingName": "Deze uitvoer moet een naam hebben.",
-        "duplicateName": "De naam ‘{{name}}’ wordt al door een andere uitvoer gebruikt.",
-        "valueRequired": "De invoer ‘value’ moet aan een bron gekoppeld zijn."
+        "duplicateName": "De naam ‘{{name}}’ wordt al door een andere uitvoer gebruikt."
       },
       "getVariable": {
         "noSelection": "Er moet een variabele worden geselecteerd.",
@@ -928,8 +985,10 @@
         "missing": "De gekoppelde aanvraag bestaat niet meer."
       },
       "runScenario": {
-        "missing": "Het gekoppelde scenario bestaat niet meer.",
-        "requiredInput": "De vereiste invoer \"{{name}}\" moet aan een bron worden gekoppeld."
+        "missing": "Het gekoppelde scenario bestaat niet meer."
+      },
+      "file": {
+        "missingPath": "A file path is required."
       }
     },
     "usage": {
@@ -939,6 +998,8 @@
     "inspector": {
       "run": "Uitvoeren",
       "debug": "Debuggen",
+      "undo": "Ongedaan maken",
+      "redo": "Opnieuw",
       "step": "Stap voor stap",
       "previewInfo": "Example data, based on previous request results.",
       "pause": "Pauze",
@@ -948,9 +1009,11 @@
       "stop": "Stop",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "Dit logbericht kopiëren",
       "clearLogs": "Logboeken wissen",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "{{level}}-logs tonen",
+      "showLevelOnly": "Rechtermuisklik: alleen dit niveau",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -1004,6 +1067,299 @@
       "toggle": "Onderbrekingspunt omschakelen (F9)",
       "reached": "Onderbrekingspunt bereikt — deze actie is nog niet uitgevoerd. Druk op F5 om te hervatten of F7 om te stappen.",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Minimap aan/uit"
+    },
+    "listMutation": {
+      "list": "lijst",
+      "values": "waarden",
+      "result": "resultaat",
+      "addValue": "Waarde toevoegen",
+      "removeValue": "Waarde verwijderen",
+      "updateVariable": "Bronvariabele bijwerken"
+    },
+    "cast": {
+      "value": "waarde",
+      "targetType": "omzetten naar",
+      "result": "resultaat",
+      "type": {
+        "number": "getal",
+        "string": "tekst",
+        "boolean": "boolean",
+        "date": "datum",
+        "list": "lijst"
+      }
+    },
+    "regex": {
+      "value": "waarde",
+      "operation": "bewerking",
+      "pattern": "patroon",
+      "flags": "vlaggen",
+      "replacement": "vervanging",
+      "result": "resultaat",
+      "op": {
+        "extract": "extraheren",
+        "extractAll": "alles extraheren",
+        "test": "testen",
+        "replace": "vervangen",
+        "split": "splitsen"
+      },
+      "flag": {
+        "i": "Hoofdletterongevoelig",
+        "m": "Meerregelig (^ en $ per regel)",
+        "s": "Dotall (. matcht regeleindes)"
+      }
+    },
+    "json": {
+      "value": "waarde",
+      "operation": "bewerking",
+      "indent": "inspringen",
+      "result": "resultaat",
+      "op": {
+        "parse": "parsen",
+        "stringify": "serialiseren"
+      }
+    },
+    "xml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "yaml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "crypto": {
+      "value": "value",
+      "operation": "operation",
+      "key": "key",
+      "keyPlaceholder": "secret",
+      "result": "result",
+      "op": {
+        "base64Encode": "base64 encode",
+        "base64Decode": "base64 decode",
+        "md5": "MD5",
+        "sha1": "SHA-1",
+        "sha256": "SHA-256",
+        "sha512": "SHA-512",
+        "hmacSha256": "HMAC-SHA256",
+        "uuid": "UUID v4"
+      }
+    },
+    "jwt": {
+      "value": "token",
+      "result": "result"
+    },
+    "datetime": {
+      "value": "date",
+      "operation": "operation",
+      "amount": "amount",
+      "unitLabel": "unit",
+      "format": "format",
+      "other": "second date",
+      "result": "result",
+      "op": {
+        "add": "add",
+        "subtract": "subtract",
+        "format": "format",
+        "diff": "diff"
+      },
+      "unit": {
+        "milliseconds": "milliseconds",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months",
+        "years": "years"
+      }
+    },
+    "objectOp": {
+      "value": "object",
+      "operation": "operation",
+      "path": "path",
+      "keys": "keys",
+      "setValue": "value",
+      "mergeWith": "merge with",
+      "result": "result",
+      "op": {
+        "get": "get",
+        "set": "set",
+        "merge": "merge",
+        "pick": "pick",
+        "omit": "omit",
+        "keys": "keys",
+        "values": "values"
+      }
+    },
+    "url": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "op": {
+        "encode": "encode",
+        "decode": "decode",
+        "parseQuery": "parse query",
+        "buildQuery": "build query",
+        "parseUrl": "parse URL"
+      }
+    },
+    "random": {
+      "operation": "operation",
+      "min": "min",
+      "max": "max",
+      "length": "length",
+      "items": "items",
+      "seed": "seed (optional)",
+      "seedPlaceholder": "reproducible",
+      "result": "result",
+      "op": {
+        "int": "integer",
+        "float": "float",
+        "string": "string",
+        "boolean": "boolean",
+        "pick": "pick"
+      }
+    },
+    "throw": {
+      "message": "message"
+    },
+    "retry": {
+      "maxAttempts": "max attempts",
+      "backoff": "backoff",
+      "delay": "delay",
+      "factor": "factor",
+      "retryOnError": "retry on error",
+      "retryOnStatus": "retry on HTTP status",
+      "retryOnFailure": "retry on any non-2xx",
+      "attempt": "attempt",
+      "exhausted": "exhausted",
+      "backoffOpt": {
+        "fixed": "fixed",
+        "linear": "linear",
+        "exponential": "exponential"
+      }
+    },
+    "menuGroups": {
+      "lists": "Lists",
+      "math": "Math",
+      "dataFormats": "Data formats",
+      "encoding": "Encoding",
+      "time": "Timing"
+    },
+    "listOp": {
+      "value": "list",
+      "operation": "operation",
+      "result": "result",
+      "key": "key",
+      "order": "order",
+      "depth": "depth",
+      "size": "size",
+      "start": "start",
+      "end": "end",
+      "op": {
+        "sort": "sort",
+        "unique": "unique",
+        "reverse": "reverse",
+        "flatten": "flatten",
+        "chunk": "chunk",
+        "slice": "slice",
+        "groupBy": "group by"
+      }
+    },
+    "csv": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "delimiter": "delimiter",
+      "header": "header row",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "math": {
+      "a": "value",
+      "operation": "operation",
+      "result": "result",
+      "b": "with",
+      "min": "min",
+      "max": "max",
+      "precision": "precision",
+      "op": {
+        "round": "round",
+        "floor": "floor",
+        "ceil": "ceil",
+        "trunc": "truncate",
+        "abs": "absolute",
+        "sign": "sign",
+        "sqrt": "square root",
+        "min": "min",
+        "max": "max",
+        "clamp": "clamp"
+      }
+    },
+    "schema": {
+      "value": "value",
+      "schema": "JSON Schema",
+      "valid": "valid",
+      "invalid": "invalid",
+      "errors": "errors",
+      "editTitle": "Edit JSON Schema"
+    },
+    "readFile": {
+      "path": "path",
+      "content": "content"
+    },
+    "writeFile": {
+      "path": "path",
+      "mode": "mode",
+      "content": "content"
+    },
+    "codeField": {
+      "title": "Edit",
+      "edit": "Open editor",
+      "moreLines": "+{{count}} lines",
+      "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "modus",
+      "modeOpt": {
+        "frequency": "frequentie",
+        "cron": "cron"
+      },
+      "frequency": "frequentie",
+      "unit": "eenheid",
+      "cron": "cron",
+      "stop": "stoppen na",
+      "stopOpt": {
+        "none": "nooit",
+        "duration": "duur",
+        "endDate": "einddatum"
+      },
+      "duration": "duur",
+      "endDate": "einddatum",
+      "tick": "tik"
+    },
+    "code": {
+      "input": "invoer",
+      "code": "code (TypeScript)",
+      "modalTitle": "Code bewerken",
+      "result": "resultaat",
+      "timeout": "Time-out (s)"
     }
   }
 }

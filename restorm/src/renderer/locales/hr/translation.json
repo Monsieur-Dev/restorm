@@ -150,6 +150,7 @@
       "createEnvironmentFolder": "Stvori mapu okruženja",
       "delete": "Izbriši",
       "clone": "Kloniraj",
+      "copySuffix": "kopija",
       "rename": "Preimenuj",
       "addToFavorites": "Dodaj u favorite",
       "removeFromFavorites": "Ukloni iz favorita",
@@ -314,6 +315,8 @@
       "color": "Boja",
       "expression": "Izraz",
       "boolean": "Booleova vrijednost",
+      "null": "Null",
+      "list": "Popis",
       "variables": "Varijable",
       "environment": "Okruženje"
     },
@@ -482,7 +485,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Jeste li sigurni da želite ukloniti \"{{fileName}}\" iz favorita?",
-    "noFilesHint": "Otvorite datoteku ili stvorite novu da biste započeli",
     "newAriaLabel": "Stvori novu kolekciju",
     "openAriaLabel": "Otvori kolekciju s diska",
     "landmarkLabel": "Dobrodošli"
@@ -783,9 +785,12 @@
         "changeColor": "Change colour",
         "resetColor": "Reset colour",
         "addNote": "Add / edit note",
+        "runOnEachEvent": "Pokreni pri svakom primljenom događaju",
         "duplicate": "Duplicate",
         "delete": "Delete",
-        "deleteShortcut": "Del"
+        "deleteShortcut": "Del",
+        "copy": "Kopiraj",
+        "paste": "Zalijepi"
       },
       "expand": "Proširi",
       "collapse": "Sažmi"
@@ -797,7 +802,6 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "locked": "Uređivanje zaključano dok se scenarij izvodi",
     "switch": {
       "addCase": "Dodaj slučaj",
@@ -850,7 +854,30 @@
       "now": "Sada",
       "comparator": "Usporednik",
       "setVariable": "Postavi varijablu",
-      "getVariable": "Dohvati varijablu"
+      "getVariable": "Dohvati varijablu",
+      "addToList": "Dodaj na popis",
+      "removeFromList": "Ukloni s popisa",
+      "cast": "Cast",
+      "regex": "Regex",
+      "json": "JSON",
+      "xml": "XML",
+      "yaml": "YAML",
+      "crypto": "Crypto",
+      "jwt": "JWT",
+      "datetime": "Date math",
+      "objectOp": "Object ops",
+      "url": "URL",
+      "random": "Random",
+      "throw": "Throw",
+      "retry": "Retry",
+      "listOp": "List ops",
+      "csv": "CSV",
+      "math": "Math",
+      "schema": "Schema validate",
+      "readFile": "Read file",
+      "writeFile": "Write file",
+      "timer": "Mjerač vremena",
+      "code": "Kôd"
     },
     "comparator": {
       "result": "rezultat"
@@ -867,7 +894,31 @@
       "data": "podaci"
     },
     "assert": {
-      "message": "poruka"
+      "message": "poruka",
+      "operator": "operator",
+      "op": {
+        "eq": "equals",
+        "ne": "not equals",
+        "lt": "less than",
+        "lte": "less or equal",
+        "gt": "greater than",
+        "gte": "greater or equal",
+        "contains": "contains",
+        "isString": "is string",
+        "isNumber": "is number",
+        "isBoolean": "is boolean",
+        "isArray": "is array",
+        "isObject": "is object",
+        "isNull": "is null",
+        "exists": "exists",
+        "isEmpty": "is empty",
+        "matchesRegex": "matches regex",
+        "isOneOf": "is one of",
+        "deepEquals": "deep equals",
+        "lengthEq": "length ==",
+        "lengthGt": "length >",
+        "lengthLt": "length <"
+      }
     },
     "editRequest": "Uredi zahtjev",
     "editScenario": "Uredi scenarij",
@@ -877,10 +928,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "outputName": "Naziv izlaza",
+      "addOutput": "Dodaj izlaz",
+      "removeOutput": "Ukloni"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Obavezno za scenarije koji ga pozivaju"
+      "addParam": "Dodaj parametar",
+      "removeParam": "Ukloni"
     },
     "runScenario": {
       "orphanInput": "Nema odgovarajućeg parametra \"{{name}}\" u podscenariju",
@@ -890,6 +947,7 @@
     "validation": {
       "duplicateName": "Naziv „{{name}}“ već koristi druga akcija.",
       "panelTitle": "{{count}} pogreška/e akcija",
+      "runBlocked": "Ispravite {{count}} pogrešaka radnje prije pokretanja",
       "focusBox": "Idi na ovu akciju",
       "showErrors": "Prikaži pogreške",
       "input": {
@@ -901,8 +959,7 @@
       },
       "output": {
         "missingName": "Ovaj izlaz mora imati naziv.",
-        "duplicateName": "Naziv „{{name}}“ već koristi drugi izlaz.",
-        "valueRequired": "Ulaz „value“ mora biti povezan s izvorom."
+        "duplicateName": "Naziv „{{name}}“ već koristi drugi izlaz."
       },
       "getVariable": {
         "noSelection": "Mora se odabrati varijabla.",
@@ -929,8 +986,10 @@
         "missing": "Povezani zahtjev više ne postoji."
       },
       "runScenario": {
-        "missing": "Povezani scenarij više ne postoji.",
-        "requiredInput": "Obavezni ulaz „{{name}}“ mora biti povezan s izvorom."
+        "missing": "Povezani scenarij više ne postoji."
+      },
+      "file": {
+        "missingPath": "A file path is required."
       }
     },
     "usage": {
@@ -940,6 +999,8 @@
     "inspector": {
       "run": "Pokreni",
       "debug": "Otklanjanje pogrešaka",
+      "undo": "Poništi",
+      "redo": "Ponovi",
       "step": "Korak po korak",
       "previewInfo": "Example data, based on previous request results.",
       "pause": "Pauza",
@@ -949,9 +1010,11 @@
       "stop": "Zaustavi",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "Kopiraj ovaj zapis",
       "clearLogs": "Očisti zapise",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Prikaži {{level}} zapise",
+      "showLevelOnly": "Desni klik: samo ova razina",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -1005,6 +1068,299 @@
       "toggle": "Uključi/isključi točku prekida (F9)",
       "reached": "Dosegnuta točka prekida — ova radnja još nije izvršena. Pritisnite F5 za nastavak ili F7 za korak.",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Uključi/isključi minikartu"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Dodaj vrijednost",
+      "removeValue": "Ukloni vrijednost",
+      "updateVariable": "Ažuriraj izvornu varijablu"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
+    },
+    "regex": {
+      "value": "value",
+      "operation": "operation",
+      "pattern": "pattern",
+      "flags": "flags",
+      "replacement": "replacement",
+      "result": "result",
+      "op": {
+        "extract": "extract",
+        "extractAll": "extract all",
+        "test": "test",
+        "replace": "replace",
+        "split": "split"
+      },
+      "flag": {
+        "i": "Case-insensitive",
+        "m": "Multiline (^ and $ match line breaks)",
+        "s": "Dotall (. matches newlines)"
+      }
+    },
+    "json": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "xml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "yaml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "crypto": {
+      "value": "value",
+      "operation": "operation",
+      "key": "key",
+      "keyPlaceholder": "secret",
+      "result": "result",
+      "op": {
+        "base64Encode": "base64 encode",
+        "base64Decode": "base64 decode",
+        "md5": "MD5",
+        "sha1": "SHA-1",
+        "sha256": "SHA-256",
+        "sha512": "SHA-512",
+        "hmacSha256": "HMAC-SHA256",
+        "uuid": "UUID v4"
+      }
+    },
+    "jwt": {
+      "value": "token",
+      "result": "result"
+    },
+    "datetime": {
+      "value": "date",
+      "operation": "operation",
+      "amount": "amount",
+      "unitLabel": "unit",
+      "format": "format",
+      "other": "second date",
+      "result": "result",
+      "op": {
+        "add": "add",
+        "subtract": "subtract",
+        "format": "format",
+        "diff": "diff"
+      },
+      "unit": {
+        "milliseconds": "milliseconds",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months",
+        "years": "years"
+      }
+    },
+    "objectOp": {
+      "value": "object",
+      "operation": "operation",
+      "path": "path",
+      "keys": "keys",
+      "setValue": "value",
+      "mergeWith": "merge with",
+      "result": "result",
+      "op": {
+        "get": "get",
+        "set": "set",
+        "merge": "merge",
+        "pick": "pick",
+        "omit": "omit",
+        "keys": "keys",
+        "values": "values"
+      }
+    },
+    "url": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "op": {
+        "encode": "encode",
+        "decode": "decode",
+        "parseQuery": "parse query",
+        "buildQuery": "build query",
+        "parseUrl": "parse URL"
+      }
+    },
+    "random": {
+      "operation": "operation",
+      "min": "min",
+      "max": "max",
+      "length": "length",
+      "items": "items",
+      "seed": "seed (optional)",
+      "seedPlaceholder": "reproducible",
+      "result": "result",
+      "op": {
+        "int": "integer",
+        "float": "float",
+        "string": "string",
+        "boolean": "boolean",
+        "pick": "pick"
+      }
+    },
+    "throw": {
+      "message": "message"
+    },
+    "retry": {
+      "maxAttempts": "max attempts",
+      "backoff": "backoff",
+      "delay": "delay",
+      "factor": "factor",
+      "retryOnError": "retry on error",
+      "retryOnStatus": "retry on HTTP status",
+      "retryOnFailure": "retry on any non-2xx",
+      "attempt": "attempt",
+      "exhausted": "exhausted",
+      "backoffOpt": {
+        "fixed": "fixed",
+        "linear": "linear",
+        "exponential": "exponential"
+      }
+    },
+    "menuGroups": {
+      "lists": "Lists",
+      "math": "Math",
+      "dataFormats": "Data formats",
+      "encoding": "Encoding",
+      "time": "Tempiranje"
+    },
+    "listOp": {
+      "value": "list",
+      "operation": "operation",
+      "result": "result",
+      "key": "key",
+      "order": "order",
+      "depth": "depth",
+      "size": "size",
+      "start": "start",
+      "end": "end",
+      "op": {
+        "sort": "sort",
+        "unique": "unique",
+        "reverse": "reverse",
+        "flatten": "flatten",
+        "chunk": "chunk",
+        "slice": "slice",
+        "groupBy": "group by"
+      }
+    },
+    "csv": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "delimiter": "delimiter",
+      "header": "header row",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "math": {
+      "a": "value",
+      "operation": "operation",
+      "result": "result",
+      "b": "with",
+      "min": "min",
+      "max": "max",
+      "precision": "precision",
+      "op": {
+        "round": "round",
+        "floor": "floor",
+        "ceil": "ceil",
+        "trunc": "truncate",
+        "abs": "absolute",
+        "sign": "sign",
+        "sqrt": "square root",
+        "min": "min",
+        "max": "max",
+        "clamp": "clamp"
+      }
+    },
+    "schema": {
+      "value": "value",
+      "schema": "JSON Schema",
+      "valid": "valid",
+      "invalid": "invalid",
+      "errors": "errors",
+      "editTitle": "Edit JSON Schema"
+    },
+    "readFile": {
+      "path": "path",
+      "content": "content"
+    },
+    "writeFile": {
+      "path": "path",
+      "mode": "mode",
+      "content": "content"
+    },
+    "codeField": {
+      "title": "Edit",
+      "edit": "Open editor",
+      "moreLines": "+{{count}} lines",
+      "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "način",
+      "modeOpt": {
+        "frequency": "frekvencija",
+        "cron": "cron"
+      },
+      "frequency": "frekvencija",
+      "unit": "jedinica",
+      "cron": "cron",
+      "stop": "zaustavi nakon",
+      "stopOpt": {
+        "none": "nikad",
+        "duration": "trajanje",
+        "endDate": "datum završetka"
+      },
+      "duration": "trajanje",
+      "endDate": "datum završetka",
+      "tick": "otkucaj"
+    },
+    "code": {
+      "input": "ulaz",
+      "code": "kôd (TypeScript)",
+      "modalTitle": "Uredi kôd",
+      "result": "rezultat",
+      "timeout": "Vremensko ograničenje (s)"
     }
   }
 }

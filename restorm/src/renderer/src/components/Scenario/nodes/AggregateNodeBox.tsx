@@ -61,7 +61,7 @@ export const AggregateNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id,
           <InputBox
             value={field}
             onChange={(next) => { data.onSetConfig?.(id, { field: next }) }}
-            options={{ type: 'text', placeholder: '$.price' }}
+            options={{ type: 'text', placeholder: 'price' }}
             data-testid="scn-aggregate-field"
           />
         </div>

@@ -148,6 +148,10 @@
       "autoSaveDelay": {
         "title": "Opóźnienie automatycznego zapisu",
         "description": "Kontroluje opóźnienie w milisekundach, po którym zmodyfikowany edytor jest zapisywany automatycznie. Działa wyłącznie, gdy automatyczny zapis jest ustawiony na Po opóźnieniu."
+      },
+      "reopenLastFile": {
+        "title": "Automatycznie otwórz ponownie ostatnio otwarty plik",
+        "description": "Gdy włączone, przy uruchomieniu ponownie otwiera ostatni plik, który był otwarty — ale tylko wtedy, gdy aplikacja została zamknięta przy otwartym pliku."
       }
     }
   },

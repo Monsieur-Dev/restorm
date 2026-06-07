@@ -128,14 +128,15 @@ describe('while / doWhile — engine-managed scope loop', () => {
     const scenario = buildScenario(
       [
         { id: 'init', kind: 'now', outputs: ['out'] },
-        { id: 'w', kind: 'while', inputs: ['in'], outputs: ['then', 'else'], config: { operator: '>', left: { type: 'variable', value: 'n' }, right: { type: 'numeric', value: 0 } } },
+        { id: 'w', kind: 'while', inputs: ['in'], outputs: ['then', 'done'], config: { operator: '>', left: { type: 'variable', value: 'n' }, right: { type: 'numeric', value: 0 } } },
         { id: 'body', kind: 'now', inputs: ['in'], outputs: [] },
         { id: 'exit', kind: 'now', inputs: ['in'], outputs: [] }
       ],
       [
         { from: ['init', 'out'], to: ['w', 'in'] },
         { from: ['w', 'then'], to: ['body', 'in'] },
-        { from: ['w', 'else'], to: ['exit', 'in'] }
+        // Loop exit routes through the universal `done` port (no `else` output).
+        { from: ['w', 'done'], to: ['exit', 'in'] }
       ]
     )
     let bodyRuns = 0
@@ -157,14 +158,15 @@ describe('while / doWhile — engine-managed scope loop', () => {
     const scenario = buildScenario(
       [
         { id: 'init', kind: 'now', outputs: ['out'] },
-        { id: 'dw', kind: 'doWhile', inputs: ['in'], outputs: ['then', 'else'], config: { operator: '>', left: { type: 'variable', value: 'n' }, right: { type: 'numeric', value: 0 } } },
+        { id: 'dw', kind: 'doWhile', inputs: ['in'], outputs: ['then', 'done'], config: { operator: '>', left: { type: 'variable', value: 'n' }, right: { type: 'numeric', value: 0 } } },
         { id: 'body', kind: 'now', inputs: ['in'], outputs: [] },
         { id: 'exit', kind: 'now', inputs: ['in'], outputs: [] }
       ],
       [
         { from: ['init', 'out'], to: ['dw', 'in'] },
         { from: ['dw', 'then'], to: ['body', 'in'] },
-        { from: ['dw', 'else'], to: ['exit', 'in'] }
+        // Loop exit routes through the universal `done` port (no `else` output).
+        { from: ['dw', 'done'], to: ['exit', 'in'] }
       ]
     )
     let bodyRuns = 0
@@ -181,6 +183,37 @@ describe('while / doWhile — engine-managed scope loop', () => {
     expect(bodyRuns).toBe(1) // body-first: runs once, then 0>0 false → exit
     expect(exitRuns).toBe(1)
   })
+
+  it('a runaway synchronous loop stays Stoppable (yields to the macrotask queue)', async () => {
+    // A while with a synchronous body that would iterate a very long time. A
+    // Stop scheduled on a MACROTASK (setTimeout — exactly how the IPC Stop
+    // arrives) must land and cancel the run. Without periodic yielding, the
+    // microtask chain starves the macrotask queue: the Stop never fires and
+    // the app freezes. The loop must yield so it stays interruptible.
+    const scenario = buildScenario(
+      [
+        { id: 'init', kind: 'now', outputs: ['out'] },
+        { id: 'w', kind: 'while', inputs: ['in'], outputs: ['then', 'done'], config: { operator: '<', left: { type: 'variable', value: 'n' }, right: { type: 'numeric', value: 300_000 } } },
+        { id: 'body', kind: 'now', inputs: ['in'], outputs: [] }
+      ],
+      [
+        { from: ['init', 'out'], to: ['w', 'in'] },
+        { from: ['w', 'then'], to: ['body', 'in'] }
+      ]
+    )
+    let bodyRuns = 0
+    const executors = new Map<string, NodeExecutor>([
+      ['init', (_act, ctx) => { ctx.variables.set('n', 0); return { outputs: [{ port: 'out', value: 1 }] } }],
+      ['w', whileExecutor],
+      ['body', (_act, ctx) => { bodyRuns += 1; const n = ctx.variables.get('n'); ctx.variables.set('n', (typeof n === 'number' ? n : 0) + 1); return { outputs: [] } }]
+    ])
+    const s = new Scheduler({ scenario, executors })
+    const done = s.run()
+    setTimeout(() => { s.abort('stop') }, 10)
+    await done
+    expect(s.status().state).toBe('cancelled')
+    expect(bodyRuns).toBeLessThan(300_000) // interrupted well before the natural exit
+  }, 5000)
 })
 
 // ------------------------------------------------------------------
@@ -235,6 +268,82 @@ describe('scenario run boundaries in the log', () => {
     expect(boundaries).toHaveLength(2)
     expect(boundaries[0]?.message.startsWith('▶')).toBe(true)
     expect(boundaries[1]?.message.startsWith('■')).toBe(true)
+  })
+})
+
+// ------------------------------------------------------------------
+// start-log input parameters (resolved config operands + primitives)
+// ------------------------------------------------------------------
+
+describe('start log surfaces an action`s resolved input parameters', () => {
+  it('resolves typed-value config operands + keeps primitive config (a=5, operator=+)', async () => {
+    const scenario = buildScenario(
+      [{ id: 'n', kind: 'arithmetic', inputs: ['b'], outputs: ['result'], config: { a: { type: 'numeric', value: 5 }, operator: '+', name: 'x', parallelism: { enabled: false } } }],
+      []
+    )
+    const executors = new Map<string, NodeExecutor>([['n', () => ({ outputs: [] })]])
+    const s = new Scheduler({ scenario, executors })
+    await s.run()
+    const start = s.readLog().find((e) => e.message === 'start arithmetic')
+    // Typed value resolved (a→5), primitive config kept (operator, name);
+    // structural config (`parallelism` object) omitted.
+    expect(start?.data).toMatchObject({ a: 5, operator: '+', name: 'x' })
+    expect((start?.data as Record<string, unknown>)['parallelism']).toBeUndefined()
+  })
+
+  it('a wired input overlays the inline config value of the same port', async () => {
+    const scenario = buildScenario(
+      [
+        { id: 'src', kind: 'now', outputs: ['out'] },
+        { id: 'n', kind: 'arithmetic', inputs: ['b'], outputs: ['result'], config: { a: { type: 'numeric', value: 5 }, b: { type: 'numeric', value: 99 } } }
+      ],
+      [{ from: ['src', 'out'], to: ['n', 'b'] }]
+    )
+    const executors = new Map<string, NodeExecutor>([
+      ['src', () => ({ outputs: [{ port: 'out', value: 7 }] })],
+      ['n', () => ({ outputs: [] })]
+    ])
+    const s = new Scheduler({ scenario, executors })
+    await s.run()
+    const start = s.readLog().find((e) => e.message === 'start arithmetic')
+    expect(start?.data).toMatchObject({ a: 5, b: 7 }) // wired 7 wins over config 99
+  })
+
+  it('an input node surfaces EVERY declared param, not just the first', async () => {
+    const scenario = buildScenario(
+      [{ id: 'n', kind: 'input', outputs: ['value'], config: { params: [
+        { id: 'p1', name: 'string', valueType: { type: 'string', value: 'string!' } },
+        { id: 'p2', name: 'string2', valueType: { type: 'string', value: '' } }
+      ] } }],
+      []
+    )
+    const executors = new Map<string, NodeExecutor>([['n', () => ({ outputs: [] })]])
+    const s = new Scheduler({ scenario, executors })
+    await s.run()
+    const start = s.readLog().find((e) => e.message === 'start input')
+    // Both params must show — the multi-param `config.params` array, not the
+    // legacy single `name`/`valueType` shape.
+    expect(start?.data).toMatchObject({ string: 'string!', string2: '' })
+  })
+
+  it('an input start log ignores stale legacy name/valueType once params exist', async () => {
+    const scenario = buildScenario(
+      [{ id: 'n', kind: 'input', outputs: ['value'], config: {
+        name: 'string', valueType: { type: 'string', value: 'string!' },
+        params: [
+          { id: 'p1', name: 'string', valueType: { type: 'string', value: 'string!' } },
+          { id: 'p2', name: 'string2', valueType: { type: 'string', value: 'two' } }
+        ]
+      } }],
+      []
+    )
+    const executors = new Map<string, NodeExecutor>([['n', () => ({ outputs: [] })]])
+    const s = new Scheduler({ scenario, executors })
+    await s.run()
+    const start = s.readLog().find((e) => e.message === 'start input')
+    expect(start?.data).toMatchObject({ string: 'string!', string2: 'two' })
+    // The lingering top-level `valueType` key must not leak into the log.
+    expect((start?.data as Record<string, unknown>)['valueType']).toBeUndefined()
   })
 })
 

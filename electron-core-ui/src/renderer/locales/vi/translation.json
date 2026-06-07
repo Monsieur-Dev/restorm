@@ -148,6 +148,10 @@
       "autoSaveDelay": {
         "title": "Độ trễ tự động lưu",
         "description": "Điều khiển độ trễ tính bằng mili giây trước khi trình soạn thảo đã chỉnh sửa được tự động lưu. Chỉ áp dụng khi Tự động lưu được đặt thành Sau độ trễ."
+      },
+      "reopenLastFile": {
+        "title": "Tự động mở lại tệp được mở gần nhất",
+        "description": "Khi được bật, sẽ mở lại tệp cuối cùng bạn đang mở khi khởi động — nhưng chỉ khi ứng dụng bị đóng trong lúc một tệp đang được mở."
       }
     }
   },

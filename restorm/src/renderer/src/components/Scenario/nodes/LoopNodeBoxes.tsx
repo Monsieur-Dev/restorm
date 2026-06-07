@@ -37,7 +37,7 @@ export const ForNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data,
       <div className="nodrag scn-stacked-field" onMouseDown={(e) => { e.stopPropagation() }}>
         <span className="scn-port-label">{label}</span>
         <TypedValueField
-          value={normalizeValueType(config[key] ?? { type: 'numeric', value: 0 })}
+          value={normalizeValueType(config[key] ?? { type: 'numeric', value: key === 'step' ? 1 : 0 })}
           onChange={(next) => { data.onSetConfig?.(id, { [key]: serializeValueForPersistence(next) }) }}
           excludeTypes={NON_NUMERIC_VALUE_TYPES}
           dataTestId={`scn-for-${key}`}
@@ -70,7 +70,7 @@ export const ForNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data,
   }]
   const right: ScenarioNodeCell[] = [
     { id: 'each', label: t('scenario.for.index', 'index'), port: { id: 'each', role: 'then', type: 'source' } },
-    { id: 'done', label: t('scenario.for.done', 'done'), port: { id: 'done', role: 'else', type: 'source' } },
+    // Loop completion is the universal `Done` port (drawn by the box base).
     buildParallelismCell({ id, config, onSetConfig: data.onSetConfig, label: t('scenario.forEach.parallelism', 'parallelism'), testIdPrefix: 'scn-for' })
   ]
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
@@ -86,7 +86,6 @@ export const ForNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data,
  * body-output label differs to hint the wiring.
  */
 const ConditionLoopNodeBox: React.FC<NodeProps<ScenarioNodeBoxType> & { bodyLabel: string; testId: string }> = ({ id, data, selected, bodyLabel, testId }) => {
-  const { t } = useTranslation()
   const valueTypeGroups = useAllEnvValueTypeGroups()
   const config = data.config ?? {}
 
@@ -129,10 +128,11 @@ const ConditionLoopNodeBox: React.FC<NodeProps<ScenarioNodeBoxType> & { bodyLabe
     ]
   }]
   const right: ScenarioNodeCell[] = [
-    { id: 'then', label: bodyLabel, port: { id: 'then', role: 'then', type: 'source' } },
-    { id: 'else', label: t('scenario.loop.done', 'done'), port: { id: 'else', role: 'else', type: 'source' } }
+    // Body is a pure SIGNAL (fires the body each pass; no per-iteration value).
+    { id: 'then', label: bodyLabel, port: { id: 'then', role: 'then', type: 'source', flow: 'signal' } }
+    // Loop exit / completion is the universal `Done` port (drawn by the box base).
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} launchInput />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
 }
 
 /** `while` — condition tested at the top of the loop (body output: "body"). */

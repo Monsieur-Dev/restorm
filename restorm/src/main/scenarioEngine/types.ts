@@ -48,6 +48,12 @@ export interface Token {
   /** Monotonically-increasing token id (for trace + dedupe). Assigned
    * by the engine when the token leaves an executor. */
   tokenId: number
+  /** Completion id of the activation that emitted this token, when the
+   * token is part of that activation's DATA subtree (drives the universal
+   * `done` port). Left undefined for CONTINUATION tokens — a `done` signal,
+   * a loop's `each` / `then` / `done` — which start a fresh sub-tree rather
+   * than extending the emitter's. */
+  emitter?: number
 }
 
 /**
@@ -67,6 +73,10 @@ export interface Activation {
    * this to skip the mid-run prompt — the up-front form already
    * collected the value. */
   seeded?: boolean
+  /** Completion id assigned by the scheduler when the activation is created
+   * — the key into the completion tree that drives the universal `done`
+   * port (post-order subtree completion). */
+  completionId?: number
 }
 
 /** One output emission from an executor: the port + the value to put
@@ -94,6 +104,34 @@ export interface ExecResult {
     // while true — emitting `else` when false. `while` tests first; `doWhile`
     // runs the body once before the first test.
     | { type: 'conditionalLoop'; mode: 'while' | 'doWhile' }
+    // A `retry`: the scheduler runs the body (`attempt`) in a child scope and
+    // acts as that scope's ERROR BOUNDARY. When the attempt fails — an unhandled
+    // error bubbles to the scope, or (for an httpRequest child) the response
+    // status matches `retryOnStatus` / is a non-2xx when `retryOnFailure` —
+    // it waits per the backoff policy and re-runs, up to `maxAttempts`. Success
+    // fires `done`; giving up fires `exhausted`.
+    | {
+        type: 'openRetry'
+        maxAttempts: number
+        backoff: 'fixed' | 'linear' | 'exponential'
+        delayMs: number
+        factor: number
+        maxDelayMs: number
+        retryOnError: boolean
+        retryOnFailure: boolean
+        retryOnStatus: number[]
+      }
+    // A `timer`: the scheduler fires the `tick` body in a child scope on each
+    // interval (a fixed `intervalMs` OR a `cron` expression), waiting for the
+    // body to close before scheduling the next tick, bounded by an optional
+    // total `durationMs` / `endDateMs` (else it runs until the run is stopped).
+    | {
+        type: 'openTimer'
+        intervalMs: number
+        cron?: string
+        durationMs?: number
+        endDateMs?: number
+      }
 }
 
 /**
@@ -119,7 +157,7 @@ export type EngineEvent = (
   | { type: 'node-completed'; runId: RuntimeId; nodeId: RuntimeId; scope: ScopeStack; at: string; outputs: Emission[] }
   | { type: 'node-failed'; runId: RuntimeId; nodeId: RuntimeId; scope: ScopeStack; at: string; error: string }
   | { type: 'data-flow-emitted'; runId: RuntimeId; edgeId: RuntimeId; tokenId: number; at: string }
-  | { type: 'user-input-requested'; runId: RuntimeId; nodeId: RuntimeId; requestId: RuntimeId; name: string; defaultValue: unknown; hint: 'string' | 'number' | 'boolean' | 'object'; at: string }
+  | { type: 'user-input-requested'; runId: RuntimeId; nodeId: RuntimeId; requestId: RuntimeId; name: string; defaultValue: unknown; hint: 'string' | 'number' | 'boolean' | 'object'; valueType?: unknown; at: string }
 ) & {
   /** The TOP-LEVEL ("launcher") scenario whose run produced this event.
    * Sub-scenario events inherit the launcher's id (NOT the sub's), so the
@@ -133,6 +171,11 @@ export type EngineEvent = (
 /** One entry in the run log (engine-internal). Persistence is OYO-286. */
 export interface RunLogEntry {
   ts: string
+  /** Process-wide monotonic emission ordinal — the causal tiebreak when two
+   * entries (often a sub-run and its parent) share a millisecond `ts`. Stamped
+   * by the scheduler at push time; merges sort by this, falling back to `ts`
+   * for entries archived before the field existed. */
+  seq?: number
   runId: RuntimeId
   level: 'debug' | 'info' | 'warn' | 'error'
   // `run` = a scenario-boundary marker (started / ended), shown in the
@@ -157,6 +200,20 @@ export type NodeExecutor = (
  * the abort signal for cooperative cancellation, a logger so it can
  * push user-facing entries, and a thin handle to the engine for
  * sub-scenario calls + variable scope. */
+/** A single input prompt a run is awaiting — surfaced so a non-UI consumer
+ * (the MCP status tool) can see the question and answer it by requestId. */
+export interface PendingUserInputInfo {
+  requestId: string
+  nodeId: string
+  /** Param name being asked for. */
+  name: string
+  /** The prefilled value (a literal default or an upstream-wired value). */
+  defaultValue: unknown
+  hint: 'string' | 'number' | 'boolean' | 'object'
+  /** The param's persisted typed-value shape, when known. */
+  valueType?: unknown
+}
+
 export interface ExecContext {
   signal: AbortSignal
   log: (entry: Omit<RunLogEntry, 'ts' | 'runId' | 'source'> & { source?: 'engine' | 'user' }) => void
@@ -173,11 +230,20 @@ export interface ExecContext {
    * (which may be the default or an edited one). Used by the `input`
    * executor when an upstream node has already supplied a value the
    * user can still override. */
-  requestUserInput: (req: { name: string; defaultValue: unknown; hint: 'string' | 'number' | 'boolean' | 'object' }) => Promise<unknown>
+  requestUserInput: (req: { name: string; defaultValue: unknown; hint: 'string' | 'number' | 'boolean' | 'object'; valueType?: unknown }) => Promise<unknown>
+  /** Whether this run prompts the user (a UI run). A mid-flow `input` only
+   * raises its prompt when true; a non-interactive run (MCP / headless e2e)
+   * falls back to the param's configured default so it never blocks. The flag
+   * propagates into sub-scenarios. */
+  interactive: boolean
   /** The node being executed — handy when the executor needs to read
    * its `config` (request id, comparator op, switch cases, …) without
    * the engine having to pre-extract everything. */
   node: ScenarioNode
+  /** Directory of the open `.restorm` file (SettingsService workspace path),
+   * for resolving a `readFile`/`writeFile` relative path. Undefined in a
+   * headless run with no open workspace → such paths resolve against cwd. */
+  workspaceDir?: string
 }
 
 /**

@@ -11,3 +11,5 @@ restorm/tests/e2e/.tmp/
 # Append-only flake journal written by `scripts/git-commit-timeout.sh`
 # on every failed commit — local to the worktree, never committed.
 .commit-flake-history.log
+# restorm scenario writeFile demo output (transient, written at run time)
+restorm/tests/e2e/samples/scenarios-e2e-reference-tests.writefile-out.json

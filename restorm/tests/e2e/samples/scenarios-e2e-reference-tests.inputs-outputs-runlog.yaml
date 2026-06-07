@@ -1,0 +1,178 @@
+- message: 🔵 [<time>] ▶ Inputs/outputs
+- message: ⚪ [<time>] start input
+  data:
+    param1: string!
+    param3: true
+- message: ⚪ [<time>] start input
+  data:
+    param2: 10
+    param4:
+      name: Sub-env
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+    param6: "#000000"
+    param5: Bleu
+    param7:
+      - Vert
+- message: ⚪ [<time>] done input
+  data:
+    value:
+      param1: e2e-value
+      param3: false
+- message: ⚪ [<time>] done input
+  data:
+    value:
+      param2: 42
+      param4:
+        name: localhost
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+      param6: "#abcdef"
+      param5: Rouge
+      param7: Vert,Rouge
+- message: ⚪ [<time>] start input
+  data:
+    SecondInput: 2026-06-02T10:18:27.766Z
+- message: ⚪ [<time>] done input
+  data:
+    value:
+      SecondInput: 2030-01-15T08:30:00.000Z
+- message: ⚪ [<time>] start object
+  data:
+    prop-1780290722891-dqtdnz: e2e-value
+    prop-1780290727683-0vof3k:
+      param1: e2e-value
+      param3: false
+    prop-1780309901267-y0r3mt: 42
+    prop-1780469151969-7v0w3g:
+      name: localhost
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+    prop-1780469244879-3a6v38: Rouge
+    prop-1780469259770-ffodx7: "#abcdef"
+    prop-1780469273581-zsg6rn: Vert,Rouge
+    prop-1780469304463-iq60rc: 2030-01-15T08:30:00.000Z
+- message: ⚪ [<time>] done object
+  data:
+    object:
+      obj_param1: e2e-value
+      obj_param3:
+        param1: e2e-value
+        param3: false
+      obj_param2: 42
+      obj_param4:
+        name: localhost
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+      obj_param5: Rouge
+      obj_param6: "#abcdef"
+      obj_param7: Vert,Rouge
+      obj_SecondInput: 2030-01-15T08:30:00.000Z
+- message: ⚪ [<time>] start log
+  data:
+    message: List of all values
+    data:
+      obj_param1: e2e-value
+      obj_param3:
+        param1: e2e-value
+        param3: false
+      obj_param2: 42
+      obj_param4:
+        name: localhost
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+      obj_param5: Rouge
+      obj_param6: "#abcdef"
+      obj_param7: Vert,Rouge
+      obj_SecondInput: 2030-01-15T08:30:00.000Z
+- message: 🔵 [<time>] List of all values
+  data:
+    obj_param1: e2e-value
+    obj_param3:
+      param1: e2e-value
+      param3: false
+    obj_param2: 42
+    obj_param4:
+      name: localhost
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+    obj_param5: Rouge
+    obj_param6: "#abcdef"
+    obj_param7: Vert,Rouge
+    obj_SecondInput: 2030-01-15T08:30:00.000Z
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      obj_param1: e2e-value
+      obj_param3:
+        param1: e2e-value
+        param3: false
+      obj_param2: 42
+      obj_param4:
+        name: localhost
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+      obj_param5: Rouge
+      obj_param6: "#abcdef"
+      obj_param7: Vert,Rouge
+      obj_SecondInput: 2030-01-15T08:30:00.000Z
+- message: ⚪ [<time>] start output
+  data:
+    output-default-decl: e2e-value
+    out-1780421838890-ciymih: 42
+    in: true
+- message: ⚪ [<time>] start output
+  data:
+    output-default-decl:
+      obj_param1: e2e-value
+      obj_param3:
+        param1: e2e-value
+        param3: false
+      obj_param2: 42
+      obj_param4:
+        name: localhost
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+      obj_param5: Rouge
+      obj_param6: "#abcdef"
+      obj_param7: Vert,Rouge
+      obj_SecondInput: 2030-01-15T08:30:00.000Z
+    in: true
+- message: ⚪ [<time>] done output
+  data:
+    output:first: e2e-value
+    output:second: 42
+- message: ⚪ [<time>] done output
+  data:
+    output:all:
+      obj_param1: e2e-value
+      obj_param3:
+        param1: e2e-value
+        param3: false
+      obj_param2: 42
+      obj_param4:
+        name: localhost
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+      obj_param5: Rouge
+      obj_param6: "#abcdef"
+      obj_param7: Vert,Rouge
+      obj_SecondInput: 2030-01-15T08:30:00.000Z
+- message: ⚪ [<time>] start output
+  data:
+    in: true
+- message: ⚪ [<time>] done output
+  data:
+    output:static_output: true
+    output:env: null
+    output:color: "{{param5}}"
+- message: 🔵 [<time>] ■ Inputs/outputs

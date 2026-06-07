@@ -148,6 +148,7 @@
       "createEnvironmentFolder": "환경 폴더 만들기",
       "delete": "삭제",
       "clone": "복제",
+      "copySuffix": "복사본",
       "rename": "이름 바꾸기",
       "addToFavorites": "즐겨찾기에 추가",
       "removeFromFavorites": "즐겨찾기에서 제거",
@@ -312,6 +313,8 @@
       "color": "색상",
       "expression": "표현식",
       "boolean": "부울",
+      "null": "Null",
+      "list": "목록",
       "variables": "변수",
       "environment": "환경"
     },
@@ -480,7 +483,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "\"{{fileName}}\"을(를) 즐겨찾기에서 제거하시겠습니까?",
-    "noFilesHint": "기존 파일을 열거나 새 파일을 만들어 시작하세요",
     "newAriaLabel": "새 컬렉션 만들기",
     "openAriaLabel": "디스크에서 컬렉션 열기",
     "landmarkLabel": "시작 화면"
@@ -781,9 +783,12 @@
         "changeColor": "Change colour",
         "resetColor": "Reset colour",
         "addNote": "Add / edit note",
+        "runOnEachEvent": "이벤트를 받을 때마다 실행",
         "duplicate": "Duplicate",
         "delete": "Delete",
-        "deleteShortcut": "Del"
+        "deleteShortcut": "Del",
+        "copy": "복사",
+        "paste": "붙여넣기"
       },
       "expand": "펼치기",
       "collapse": "접기"
@@ -795,7 +800,6 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "locked": "시나리오 실행 중에는 편집이 잠깁니다",
     "switch": {
       "addCase": "케이스 추가",
@@ -848,7 +852,30 @@
       "now": "현재",
       "comparator": "비교기",
       "setVariable": "변수 설정",
-      "getVariable": "변수 가져오기"
+      "getVariable": "변수 가져오기",
+      "addToList": "목록에 추가",
+      "removeFromList": "목록에서 제거",
+      "cast": "Cast",
+      "regex": "Regex",
+      "json": "JSON",
+      "xml": "XML",
+      "yaml": "YAML",
+      "crypto": "Crypto",
+      "jwt": "JWT",
+      "datetime": "Date math",
+      "objectOp": "Object ops",
+      "url": "URL",
+      "random": "Random",
+      "throw": "Throw",
+      "retry": "Retry",
+      "listOp": "List ops",
+      "csv": "CSV",
+      "math": "Math",
+      "schema": "Schema validate",
+      "readFile": "Read file",
+      "writeFile": "Write file",
+      "timer": "타이머",
+      "code": "코드"
     },
     "comparator": {
       "result": "결과"
@@ -865,7 +892,31 @@
       "data": "데이터"
     },
     "assert": {
-      "message": "메시지"
+      "message": "메시지",
+      "operator": "operator",
+      "op": {
+        "eq": "equals",
+        "ne": "not equals",
+        "lt": "less than",
+        "lte": "less or equal",
+        "gt": "greater than",
+        "gte": "greater or equal",
+        "contains": "contains",
+        "isString": "is string",
+        "isNumber": "is number",
+        "isBoolean": "is boolean",
+        "isArray": "is array",
+        "isObject": "is object",
+        "isNull": "is null",
+        "exists": "exists",
+        "isEmpty": "is empty",
+        "matchesRegex": "matches regex",
+        "isOneOf": "is one of",
+        "deepEquals": "deep equals",
+        "lengthEq": "length ==",
+        "lengthGt": "length >",
+        "lengthLt": "length <"
+      }
     },
     "editRequest": "요청 편집",
     "editScenario": "시나리오 편집",
@@ -875,10 +926,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "outputName": "출력 이름",
+      "addOutput": "출력 추가",
+      "removeOutput": "제거"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "호출하는 시나리오에 필수"
+      "addParam": "매개변수 추가",
+      "removeParam": "제거"
     },
     "runScenario": {
       "orphanInput": "하위 시나리오에 일치하는 매개변수 \"{{name}}\"가 없습니다",
@@ -888,6 +945,7 @@
     "validation": {
       "duplicateName": "이름 \"{{name}}\"은(는) 다른 액션에서 이미 사용 중입니다.",
       "panelTitle": "액션 오류 {{count}}건",
+      "runBlocked": "실행하기 전에 {{count}}개의 작업 오류를 수정하세요",
       "focusBox": "이 액션으로 이동",
       "showErrors": "오류 표시",
       "input": {
@@ -899,8 +957,7 @@
       },
       "output": {
         "missingName": "이 출력에는 이름이 필요합니다.",
-        "duplicateName": "이름 \"{{name}}\"은(는) 다른 출력에서 이미 사용 중입니다.",
-        "valueRequired": "\"value\" 입력은 소스에 연결되어야 합니다."
+        "duplicateName": "이름 \"{{name}}\"은(는) 다른 출력에서 이미 사용 중입니다."
       },
       "getVariable": {
         "noSelection": "변수를 선택해야 합니다.",
@@ -927,8 +984,10 @@
         "missing": "연결된 요청이 더 이상 존재하지 않습니다."
       },
       "runScenario": {
-        "missing": "연결된 시나리오가 더 이상 존재하지 않습니다.",
-        "requiredInput": "필수 입력 \"{{name}}\"은(는) 소스에 연결되어야 합니다."
+        "missing": "연결된 시나리오가 더 이상 존재하지 않습니다."
+      },
+      "file": {
+        "missingPath": "A file path is required."
       }
     },
     "usage": {
@@ -938,6 +997,8 @@
     "inspector": {
       "run": "실행",
       "debug": "디버그",
+      "undo": "실행 취소",
+      "redo": "다시 실행",
       "step": "단계 실행",
       "previewInfo": "Example data, based on previous request results.",
       "pause": "일시 중지",
@@ -947,9 +1008,11 @@
       "stop": "중지",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "이 로그 복사",
       "clearLogs": "로그 지우기",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "{{level}} 로그 표시",
+      "showLevelOnly": "마우스 오른쪽 클릭: 이 수준만",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -1003,6 +1066,299 @@
       "toggle": "중단점 전환 (F9)",
       "reached": "중단점에 도달했습니다 — 이 작업은 아직 실행되지 않았습니다. F5를 눌러 계속하거나 F7으로 단계 실행하세요.",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "미니맵 토글"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "값 추가",
+      "removeValue": "값 제거",
+      "updateVariable": "원본 변수 업데이트"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
+    },
+    "regex": {
+      "value": "value",
+      "operation": "operation",
+      "pattern": "pattern",
+      "flags": "flags",
+      "replacement": "replacement",
+      "result": "result",
+      "op": {
+        "extract": "extract",
+        "extractAll": "extract all",
+        "test": "test",
+        "replace": "replace",
+        "split": "split"
+      },
+      "flag": {
+        "i": "Case-insensitive",
+        "m": "Multiline (^ and $ match line breaks)",
+        "s": "Dotall (. matches newlines)"
+      }
+    },
+    "json": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "xml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "yaml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "crypto": {
+      "value": "value",
+      "operation": "operation",
+      "key": "key",
+      "keyPlaceholder": "secret",
+      "result": "result",
+      "op": {
+        "base64Encode": "base64 encode",
+        "base64Decode": "base64 decode",
+        "md5": "MD5",
+        "sha1": "SHA-1",
+        "sha256": "SHA-256",
+        "sha512": "SHA-512",
+        "hmacSha256": "HMAC-SHA256",
+        "uuid": "UUID v4"
+      }
+    },
+    "jwt": {
+      "value": "token",
+      "result": "result"
+    },
+    "datetime": {
+      "value": "date",
+      "operation": "operation",
+      "amount": "amount",
+      "unitLabel": "unit",
+      "format": "format",
+      "other": "second date",
+      "result": "result",
+      "op": {
+        "add": "add",
+        "subtract": "subtract",
+        "format": "format",
+        "diff": "diff"
+      },
+      "unit": {
+        "milliseconds": "milliseconds",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months",
+        "years": "years"
+      }
+    },
+    "objectOp": {
+      "value": "object",
+      "operation": "operation",
+      "path": "path",
+      "keys": "keys",
+      "setValue": "value",
+      "mergeWith": "merge with",
+      "result": "result",
+      "op": {
+        "get": "get",
+        "set": "set",
+        "merge": "merge",
+        "pick": "pick",
+        "omit": "omit",
+        "keys": "keys",
+        "values": "values"
+      }
+    },
+    "url": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "op": {
+        "encode": "encode",
+        "decode": "decode",
+        "parseQuery": "parse query",
+        "buildQuery": "build query",
+        "parseUrl": "parse URL"
+      }
+    },
+    "random": {
+      "operation": "operation",
+      "min": "min",
+      "max": "max",
+      "length": "length",
+      "items": "items",
+      "seed": "seed (optional)",
+      "seedPlaceholder": "reproducible",
+      "result": "result",
+      "op": {
+        "int": "integer",
+        "float": "float",
+        "string": "string",
+        "boolean": "boolean",
+        "pick": "pick"
+      }
+    },
+    "throw": {
+      "message": "message"
+    },
+    "retry": {
+      "maxAttempts": "max attempts",
+      "backoff": "backoff",
+      "delay": "delay",
+      "factor": "factor",
+      "retryOnError": "retry on error",
+      "retryOnStatus": "retry on HTTP status",
+      "retryOnFailure": "retry on any non-2xx",
+      "attempt": "attempt",
+      "exhausted": "exhausted",
+      "backoffOpt": {
+        "fixed": "fixed",
+        "linear": "linear",
+        "exponential": "exponential"
+      }
+    },
+    "menuGroups": {
+      "lists": "Lists",
+      "math": "Math",
+      "dataFormats": "Data formats",
+      "encoding": "Encoding",
+      "time": "타이밍"
+    },
+    "listOp": {
+      "value": "list",
+      "operation": "operation",
+      "result": "result",
+      "key": "key",
+      "order": "order",
+      "depth": "depth",
+      "size": "size",
+      "start": "start",
+      "end": "end",
+      "op": {
+        "sort": "sort",
+        "unique": "unique",
+        "reverse": "reverse",
+        "flatten": "flatten",
+        "chunk": "chunk",
+        "slice": "slice",
+        "groupBy": "group by"
+      }
+    },
+    "csv": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "delimiter": "delimiter",
+      "header": "header row",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "math": {
+      "a": "value",
+      "operation": "operation",
+      "result": "result",
+      "b": "with",
+      "min": "min",
+      "max": "max",
+      "precision": "precision",
+      "op": {
+        "round": "round",
+        "floor": "floor",
+        "ceil": "ceil",
+        "trunc": "truncate",
+        "abs": "absolute",
+        "sign": "sign",
+        "sqrt": "square root",
+        "min": "min",
+        "max": "max",
+        "clamp": "clamp"
+      }
+    },
+    "schema": {
+      "value": "value",
+      "schema": "JSON Schema",
+      "valid": "valid",
+      "invalid": "invalid",
+      "errors": "errors",
+      "editTitle": "Edit JSON Schema"
+    },
+    "readFile": {
+      "path": "path",
+      "content": "content"
+    },
+    "writeFile": {
+      "path": "path",
+      "mode": "mode",
+      "content": "content"
+    },
+    "codeField": {
+      "title": "Edit",
+      "edit": "Open editor",
+      "moreLines": "+{{count}} lines",
+      "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "모드",
+      "modeOpt": {
+        "frequency": "빈도",
+        "cron": "cron"
+      },
+      "frequency": "빈도",
+      "unit": "단위",
+      "cron": "cron",
+      "stop": "정지 시점",
+      "stopOpt": {
+        "none": "안 함",
+        "duration": "기간",
+        "endDate": "종료 날짜"
+      },
+      "duration": "기간",
+      "endDate": "종료 날짜",
+      "tick": "틱"
+    },
+    "code": {
+      "input": "입력",
+      "code": "코드 (TypeScript)",
+      "modalTitle": "코드 편집",
+      "result": "결과",
+      "timeout": "시간 제한 (초)"
     }
   }
 }

@@ -8,7 +8,7 @@
  * inner `runScenario` node fires.
  */
 
-import { logger } from 'electron-core-ui/main'
+import { logger, getSettingsService, isSettingsServiceInitialized } from 'electron-core-ui/main'
 import { collectionStore } from '../services/CollectionStore'
 import { isScenario } from '../../shared/types/collections'
 import type { Scenario } from '../../shared/types/scenario'
@@ -18,7 +18,7 @@ import { RunArchive, type ArchivedRun } from './runArchive'
 import { collectReferencedScenarios } from './collectReferencedScenarios'
 import { scenarioRunHistoryService } from '../services/ScenarioRunHistoryService'
 import type { ScenarioRunHistoryStatus, ScenarioRunLogEntry, ScenarioRunSnapshot } from '../../shared/types/scenarioRunHistory'
-import type { EngineEvent, RunLogEntry, RunStatus, RuntimeId } from './types'
+import type { EngineEvent, PendingUserInputInfo, RunLogEntry, RunStatus, RuntimeId } from './types'
 
 export interface RunHandle {
   scheduler: Scheduler
@@ -122,23 +122,44 @@ export class ScenarioEngine {
 
   cancelUserInput(runId: RuntimeId, requestId: string): void { this.activeRuns.get(runId)?.cancelUserInput(requestId) }
 
+  /** Every input prompt awaiting an answer across a run's whole live tree
+   * (the top run + its in-flight sub-scenarios). Each entry carries the `runId`
+   * that raised it, so a caller answers via `resolveUserInput(runId, …)`. */
+  pendingUserInputs(runId: RuntimeId): (PendingUserInputInfo & { runId: RuntimeId })[] {
+    const out: (PendingUserInputInfo & { runId: RuntimeId })[] = []
+    for (const r of this.runTree(runId)) {
+      const sched = this.activeRuns.get(r.runId)
+      if (!sched) continue
+      for (const info of sched.pendingUserInputs()) out.push({ ...info, runId: r.runId })
+    }
+    return out
+  }
+
   private startWithStack(scenarioId: RuntimeId, options: RunOptions, callCtx: RunCallContext, parentSignal?: AbortSignal): RunHandle {
     const scenario = this.loadScenario(scenarioId, callCtx.snapshots)
     if (callCtx.stack.has(scenarioId)) {
       throw new Error(`recursion detected: scenario ${scenarioId} is already running on the call stack`)
     }
     const executors = buildExecutorRegistry(scenario)
+    // Directory of the open `.restorm` file — for readFile/writeFile relative
+    // paths. Read at run start (the SettingsService may not be ready in a very
+    // early/headless run → undefined, paths then resolve against cwd).
+    const workspaceDir = isSettingsServiceInitialized() ? (getSettingsService().getWorkspacePath() ?? undefined) : undefined
     const scheduler = new Scheduler({
       scenario,
       executors,
+      isSubScenario: callCtx.parentRunId !== undefined,
+      ...(workspaceDir !== undefined ? { workspaceDir } : {}),
       ...(parentSignal ? { parentSignal } : {}),
       runSubScenario: async (subId, params, subParentSignal) => {
         const subStack = new Set(callCtx.stack)
         subStack.add(scenarioId)
         // Forward the calling node's abort signal so a Stop cascades all
         // the way down the sub-scenario tree, and link the sub-run to
-        // this run in the archive via `parentRunId`.
-        const handle = this.startWithStack(subId, { params }, { stack: subStack, launcherScenarioId: callCtx.launcherScenarioId, parentRunId: scheduler.runId, ...(callCtx.snapshots ? { snapshots: callCtx.snapshots } : {}) }, subParentSignal)
+        // this run in the archive via `parentRunId`. The interactive flag
+        // propagates too, so a mid-flow input inside a called scenario still
+        // prompts the user (its entry inputs come from `params`, no prompt).
+        const handle = this.startWithStack(subId, { params, ...(options.interactive !== undefined ? { interactive: options.interactive } : {}) }, { stack: subStack, launcherScenarioId: callCtx.launcherScenarioId, parentRunId: scheduler.runId, ...(callCtx.snapshots ? { snapshots: callCtx.snapshots } : {}) }, subParentSignal)
         return handle.done
       }
     })
@@ -172,10 +193,11 @@ export class ScenarioEngine {
       if (e.type !== 'node-completed') return
       const node = scenario.nodes.find((n) => n.id === e.nodeId)
       if (node?.kind !== 'output') return
-      const cfg = node.config as { name?: string }
-      const name = cfg.name ?? node.id
-      const out = e.outputs.find((o) => o.port === 'value')
-      if (out) outputBucket[name] = out.value
+      // A multi-output node emits one `output:<name>` port per declared output
+      // (see `outputPassthroughExecutor`); harvest each into the result map.
+      for (const o of e.outputs) {
+        if (o.port.startsWith('output:')) outputBucket[o.port.slice('output:'.length)] = o.value
+      }
     })
     const done = scheduler.run(options).then(() => outputBucket).finally(() => {
       // Snapshot the final log into the archive BEFORE dropping the live
@@ -207,6 +229,7 @@ export class ScenarioEngine {
         for (const e of run.log) {
           log.push({
             ts: e.ts,
+            ...(e.seq !== undefined ? { seq: e.seq } : {}),
             runId: e.runId,
             level: e.level,
             source: e.source,
@@ -217,7 +240,10 @@ export class ScenarioEngine {
           })
         }
       }
-      log.sort((a, b) => a.ts.localeCompare(b.ts))
+      // Causal order: the monotonic emission `seq` is authoritative (a sub-run's
+      // entry and its parent's post-call entry routinely share a millisecond
+      // `ts`). Fall back to `ts` for entries archived before `seq` existed.
+      log.sort((a, b) => (a.seq !== undefined && b.seq !== undefined ? a.seq - b.seq : a.ts.localeCompare(b.ts)))
 
       // Use the snapshot captured at run START (not a live re-fetch), so a
       // sub-scenario edited mid-run is archived as it actually ran. Fall back

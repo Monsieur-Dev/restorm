@@ -6,8 +6,8 @@
  */
 
 import type { NodeExecutor } from '../types'
-import { literalConfigItems, concreteValue } from '../../../shared/utils/scenarioStaticPreview'
-import { compareValues } from '../conditionEval'
+import { resolveConfigItems, concreteValue, strictAggregateNumber, aggregateValueLabel } from '../../../shared/utils/scenarioStaticPreview'
+import { compareValues, resolveOperand } from '../conditionEval'
 
 /** Wait node: sleep for `durationMs` (from input or config). Aborts
  * cleanly when the run is cancelled. */
@@ -17,6 +17,10 @@ import { compareValues } from '../conditionEval'
 const WAIT_UNIT_MS: Record<string, number> = { ms: 1, s: 1000, min: 60_000, h: 3_600_000 }
 
 export const waitExecutor: NodeExecutor = (act, ctx) => {
+  // A null duration (e.g. a variable that resolved to null wired into
+  // `duration`) is not a waitable value — throw rather than silently waiting
+  // the default.
+  if (act.inputs['duration'] === null) throw new Error('cannot wait for a null duration')
   const cfg = ctx.node.config as { durationMs?: number; duration?: number; inputUnit?: string }
   const fromInput = act.inputs['duration']
   // A wired `duration` is typically an API cooldown expressed in
@@ -49,6 +53,7 @@ export const waitExecutor: NodeExecutor = (act, ctx) => {
 /** WaitUntil node: sleep until the `until` time (ISO string or epoch
  * ms). Treats a past target as "fire immediately". */
 export const waitUntilExecutor: NodeExecutor = (act, ctx) => {
+  if (act.inputs['until'] === null) throw new Error('cannot wait until a null time')
   const target = act.inputs['until']
   let untilMs: number
   if (typeof target === 'number') untilMs = target
@@ -121,7 +126,7 @@ export const forEachExecutor: NodeExecutor = (act, ctx) => {
   // still fans out over its picked items instead of doing nothing.
   const items: unknown[] = Array.isArray(act.inputs['items'])
     ? act.inputs['items']
-    : (literalConfigItems(ctx.node.config) ?? [])
+    : (resolveConfigItems(ctx.node.config, ctx.variables) ?? [])
   // Bounded concurrency: N = the parallelism count (1 when parallelism
   // is off → strictly sequential batches of 1). The scheduler opens at
   // most N item-scopes at a time and slides the window forward as each
@@ -131,6 +136,80 @@ export const forEachExecutor: NodeExecutor = (act, ctx) => {
   return {
     outputs: [],
     scopeAction: { type: 'openForEach', items, parallel: batchSize > 1, batchSize }
+  }
+}
+
+/**
+ * `retry` — opens a retry scope. The scheduler runs the body wired off
+ * `attempt`, acts as that scope's ERROR BOUNDARY, and re-runs on failure per the
+ * backoff policy up to `maxAttempts`. All the policy lives in config; the
+ * scheduler (`runRetry`) does the orchestration.
+ */
+export const retryExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as {
+    maxAttempts?: unknown; backoff?: unknown; delay?: unknown; delayUnit?: unknown
+    factor?: unknown; maxDelay?: unknown; maxDelayUnit?: unknown
+    retryOnError?: unknown; retryOnFailure?: unknown; retryOnStatus?: unknown
+  }
+  const toMs = (v: unknown, unit: unknown): number => {
+    const n = typeof v === 'number' && Number.isFinite(v) ? v : 0
+    return unit === 's' ? n * 1000 : unit === 'min' ? n * 60000 : n
+  }
+  // `maxAttempts` + `delay` may be wired (or an inline variable) — resolve them.
+  const toNum = (v: unknown): number => (typeof v === 'number' ? v : Number.parseFloat(String(v)))
+  const maxAttemptsN = toNum(resolveOperand(act.inputs['maxAttempts'], cfg.maxAttempts, ctx.variables))
+  const maxAttempts = Number.isFinite(maxAttemptsN) && maxAttemptsN >= 1 ? Math.floor(maxAttemptsN) : 3
+  const backoff = cfg.backoff === 'linear' || cfg.backoff === 'exponential' ? cfg.backoff : 'fixed'
+  const delayResolved = toNum(resolveOperand(act.inputs['delay'], cfg.delay, ctx.variables))
+  const delayMs = toMs(Number.isFinite(delayResolved) ? delayResolved : 0, cfg.delayUnit ?? 'ms')
+  const factor = typeof cfg.factor === 'number' && cfg.factor > 0 ? cfg.factor : 2
+  const maxDelayMs = toMs(cfg.maxDelay, cfg.maxDelayUnit ?? 'ms')
+  const retryOnError = cfg.retryOnError !== false
+  const retryOnFailure = cfg.retryOnFailure === true
+  const retryOnStatus = Array.isArray(cfg.retryOnStatus)
+    ? cfg.retryOnStatus.filter((n): n is number => typeof n === 'number')
+    : typeof cfg.retryOnStatus === 'string'
+      ? cfg.retryOnStatus.split(',').map((s) => Number(s.trim())).filter((n) => Number.isFinite(n))
+      : []
+  return {
+    outputs: [],
+    scopeAction: { type: 'openRetry', maxAttempts, backoff, delayMs, factor, maxDelayMs, retryOnError, retryOnFailure, retryOnStatus }
+  }
+}
+
+/** Timer node: fires its `tick` body on each interval — a frequency (number +
+ * unit) OR a `cron` expression — bounded by an optional total duration / end
+ * date. Frequency, cron, duration and endDate may be wired (or inline). Returns
+ * an `openTimer` scope action the scheduler drives. */
+export const timerExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { mode?: unknown; frequency?: unknown; unit?: unknown; cron?: unknown; duration?: unknown; durationUnit?: unknown; endDate?: unknown }
+  const toMs = (v: number, unit: unknown): number => unit === 'min' ? v * 60000 : unit === 'h' ? v * 3600000 : unit === 'ms' ? v : v * 1000
+  const num = (v: unknown): number => (typeof v === 'number' ? v : Number.parseFloat(String(v)))
+  const useCron = cfg.mode === 'cron'
+  const cronRaw = resolveOperand(act.inputs['cron'], cfg.cron, ctx.variables)
+  const cron = useCron && typeof cronRaw === 'string' && cronRaw.trim() !== '' ? cronRaw.trim() : undefined
+  const freqN = num(resolveOperand(act.inputs['frequency'], cfg.frequency, ctx.variables))
+  const intervalMs = Math.max(1, toMs(Number.isFinite(freqN) && freqN > 0 ? freqN : 1, cfg.unit ?? 's'))
+  const durN = num(resolveOperand(act.inputs['duration'], cfg.duration, ctx.variables))
+  const durationMs = Number.isFinite(durN) && durN > 0 ? toMs(durN, cfg.durationUnit ?? 's') : undefined
+  const endRaw = resolveOperand(act.inputs['endDate'], cfg.endDate, ctx.variables)
+  let endDateMs: number | undefined
+  if (endRaw instanceof Date) {
+    const t = endRaw.getTime()
+    if (Number.isFinite(t)) endDateMs = t
+  } else if (typeof endRaw === 'number' || (typeof endRaw === 'string' && endRaw.trim() !== '')) {
+    const t = new Date(endRaw).getTime()
+    if (Number.isFinite(t)) endDateMs = t
+  }
+  return {
+    outputs: [],
+    scopeAction: {
+      type: 'openTimer',
+      intervalMs,
+      ...(cron ? { cron } : {}),
+      ...(durationMs !== undefined ? { durationMs } : {}),
+      ...(endDateMs !== undefined ? { endDateMs } : {})
+    }
   }
 }
 
@@ -158,7 +237,7 @@ export const aggregateExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { op?: 'count' | 'sum' | 'min' | 'max' | 'average' | 'join'; field?: string; separator?: string }
   const items: unknown[] = Array.isArray(act.inputs['items'])
     ? act.inputs['items']
-    : (literalConfigItems(ctx.node.config) ?? [])
+    : (resolveConfigItems(ctx.node.config, ctx.variables) ?? [])
   const meta = act.inputs['__aggregate'] as { total: number; missingIndices: number[] } | undefined
   if (meta && meta.missingIndices.length > 0) {
     throw new Error(`aggregate: ${meta.missingIndices.length} of ${meta.total} iteration(s) produced no result (indices ${meta.missingIndices.join(', ')})`)
@@ -166,13 +245,22 @@ export const aggregateExecutor: NodeExecutor = (act, ctx) => {
   const op = cfg.op ?? 'count'
   const field = cfg.field
   const get = (it: unknown): unknown => (field !== undefined ? (it as Record<string, unknown> | null)?.[field] : it)
+  // sum/min/max/average require numeric items — a non-numeric value (boolean,
+  // object, garbage/empty string, missing `field`) THROWS to the `error` port,
+  // sharing the SAME strict rule as the inspector preview (no silent coercion).
+  const num = (it: unknown): number => {
+    const raw = get(it)
+    const n = strictAggregateNumber(raw)
+    if (n === null) throw new Error(`Cannot ${op} a non-numeric value: ${aggregateValueLabel(raw)}`)
+    return n
+  }
   let value: unknown
   switch (op) {
     case 'count': value = items.length; break
-    case 'sum': value = items.reduce<number>((s, it) => s + (Number(get(it)) || 0), 0); break
-    case 'min': value = items.length === 0 ? null : items.reduce<number>((m, it) => Math.min(m, Number(get(it)) || 0), Infinity); break
-    case 'max': value = items.length === 0 ? null : items.reduce<number>((m, it) => Math.max(m, Number(get(it)) || 0), -Infinity); break
-    case 'average': value = items.length === 0 ? 0 : items.reduce<number>((s, it) => s + (Number(get(it)) || 0), 0) / items.length; break
+    case 'sum': value = items.reduce<number>((s, it) => s + num(it), 0); break
+    case 'min': value = items.length === 0 ? null : items.reduce<number>((m, it) => Math.min(m, num(it)), Infinity); break
+    case 'max': value = items.length === 0 ? null : items.reduce<number>((m, it) => Math.max(m, num(it)), -Infinity); break
+    case 'average': value = items.length === 0 ? null : items.reduce<number>((s, it) => s + num(it), 0) / items.length; break
     case 'join': value = items.map((it) => stringifyValue(get(it))).join(cfg.separator ?? ','); break
   }
   return { outputs: [{ port: 'result', value }] }

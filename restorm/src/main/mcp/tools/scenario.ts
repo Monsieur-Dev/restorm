@@ -5,8 +5,9 @@
  * the main-process `collectionStore` (source of truth), are broadcast to the
  * renderer (so an open editor repaints + the file autosaves).
  *
- * Execution (`run` a box) waits on the scenario runtime engine and is not wired
- * here yet.
+ * Execution (running a scenario or a single box) is wired separately, on the
+ * runtime engine, in `scenarioEngineTools.ts` (`run_scenario`,
+ * `get_scenario_run_status`, …) and `scenarioRun.ts` (`run_scenario_node`).
  */
 
 import { z } from 'zod'
@@ -17,14 +18,15 @@ import { collectionStore } from '../../services/CollectionStore'
 import type { Scenario } from '../../../shared/models/Scenario'
 import type { ScenarioNode, ScenarioEdge, ScenarioNodeKind, ScenarioPort } from '../../../shared/types/scenario'
 import { defaultPortsForKind, isValidScenarioConnection, outputPortFlow, inputPortFlow, deriveRunScenarioPorts } from '../../../shared/scenarioNodePorts'
-import { SCENARIO_KIND_DOCS } from '../../../shared/scenarioKindDocs'
-import { STATIC_PREVIEW_KINDS, staticScenarioPreview, singleDeepPath, expectsObjectInput, type StaticPreviewEdge } from '../../../shared/utils/scenarioStaticPreview'
+import { SCENARIO_KIND_DOCS, VALUE_TYPE_DOCS } from '../../../shared/scenarioKindDocs'
+import { STATIC_PREVIEW_KINDS, staticScenarioPreview, singleDeepPath, singleTopLevelKey, portPreviewValue, expectsObjectInput, type StaticPreviewEdge } from '../../../shared/utils/scenarioStaticPreview'
 import { broadcastTreeReplace } from './import'
 
 const SCENARIO_KINDS = [
   'input', 'output', 'if', 'switch', 'httpRequest', 'runScenario', 'forEach', 'for', 'while', 'doWhile',
-  'aggregate', 'map', 'filter', 'wait', 'waitUntil', 'now', 'arithmetic', 'comparator', 'boolean', 'object',
-  'setVariable', 'getVariable', 'transform', 'log', 'assert'
+  'aggregate', 'map', 'filter', 'addToList', 'removeFromList', 'wait', 'waitUntil', 'now', 'timer', 'arithmetic', 'comparator', 'boolean', 'object',
+  'setVariable', 'getVariable', 'transform', 'code', 'cast', 'regex', 'json', 'xml', 'yaml', 'crypto', 'jwt', 'datetime',
+  'objectOp', 'url', 'random', 'listOp', 'csv', 'math', 'schema', 'readFile', 'writeFile', 'retry', 'log', 'assert', 'throw'
 ] as const
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
@@ -143,9 +145,11 @@ function describeScenarioKind(kind: ScenarioNodeKind): Record<string, unknown> {
     kind,
     summary: doc.summary,
     inputs: inputs.map(inPort),
-    // The `error` output is implicit on every box (drawn by the editor, not in
-    // the model) — surface it so a client knows it can wire failure handling.
-    outputs: [...outputs.map(outPort), { id: 'error', name: 'error', flow: 'both' }],
+    // `error` (both) and `done` (signal) are implicit on every box — drawn by
+    // the editor, not in the model. `done` fires once the box AND its whole
+    // downstream sub-graph have completed. Surface both so a client knows it
+    // can wire failure handling + sequence after a sub-flow finishes.
+    outputs: [...outputs.map(outPort), { id: 'error', name: 'error', flow: 'both' }, { id: 'done', name: 'done', flow: 'signal' }],
     ...(doc.config && Object.keys(doc.config).length > 0 ? { config: doc.config } : {})
   }
 }
@@ -158,8 +162,9 @@ export function registerScenarioTools(mcp: McpService): void {
       description:
         'Self-describing catalogue for authoring scenario graphs: for each node kind, its purpose (`summary`), its default ' +
         'input/output ports (`id`, `name`, `flow` = value | signal | both, and `role`), and its `config` keys. The implicit ' +
-        '`error` output is included. Call this BEFORE create_scenario_node so you wire ports + set config correctly. Pass ' +
-        '`kind` to get one; omit for all.',
+        '`error` output is included. The top-level `valueTypes` map documents every typed-value shape a `config` / `valueType` ' +
+        'can carry (`{ type, … }` — string, numeric, boolean, null, list, variable, environment, enum, …). Call this BEFORE ' +
+        'create_scenario_node so you wire ports + set config correctly. Pass `kind` to get one kind; omit for all.',
       inputSchema: {
         kind: z.enum(SCENARIO_KINDS).optional().describe('Limit to a single kind; omit for the full catalogue.')
       } as Record<string, unknown>
@@ -167,7 +172,9 @@ export function registerScenarioTools(mcp: McpService): void {
     (args) => {
       const one = typeof args['kind'] === 'string' ? args['kind'] as ScenarioNodeKind : null
       const kinds: readonly ScenarioNodeKind[] = one ? [one] : (SCENARIO_KINDS as readonly ScenarioNodeKind[])
-      return jsonReply({ kinds: kinds.map(describeScenarioKind) })
+      // `valueTypes` is the same regardless of `kind` — it's the value-shape
+      // reference an author needs to fill `config` / `valueType` correctly.
+      return jsonReply({ kinds: kinds.map(describeScenarioKind), valueTypes: VALUE_TYPE_DOCS })
     }
   )
 
@@ -415,7 +422,7 @@ export function registerScenarioTools(mcp: McpService): void {
       // Effective ports include a runScenario's ports derived from its sub-scenario.
       const fromPorts = effectivePorts(fromNode)
       const toPorts = effectivePorts(toNode)
-      if (fromPortId !== 'error' && !fromPorts.outputs.some((p) => p.id === fromPortId)) {
+      if (fromPortId !== 'error' && fromPortId !== 'done' && !fromPorts.outputs.some((p) => p.id === fromPortId)) {
         return errorReply(`${fromPortId} is not an output of ${fromNodeId} (outputs: ${fromPorts.outputs.map((p) => p.id).join(', ') || 'none'})`)
       }
       if (!toPorts.inputs.some((p) => p.id === toPortId)) {
@@ -442,26 +449,29 @@ export function registerScenarioTools(mcp: McpService): void {
         const outFlow = outputPortFlow(fromPorts.outputs, fromPortId, fromNode.kind)
         const inFlow = inputPortFlow(toPorts.inputs, toPortId, toNode.kind)
         if (inFlow === 'value' && outFlow !== 'signal') {
-          if (expectsObjectInput(toNode.kind, toPortId)) {
-            // Object-context input — default to the identity selector `.`.
-            autoSelector = '.'
-          } else if (STATIC_PREVIEW_KINDS.has(fromNode.kind)) {
+          // Deduce the selector from the PREVIEW VALUE AT THE WIRED PORT, exactly
+          // like the editor's onConnect (ScenarioEditorView). `portPreviewValue`
+          // unwraps a single-output box's port-map — a bare `math`/`arithmetic`
+          // result is `16`, not `{ result: 16 }` — so a primitive output deduces
+          // identity `.`, not the port name. (The earlier code ran the path
+          // deduction on the whole port-map, so `{ result: 16 }` wrongly yielded
+          // the selector `result`, which resolved to `undefined` at runtime.) A
+          // runtime-only source (httpRequest response, forEach `each`, …) has no
+          // static preview → identity `.`.
+          let preview: Record<string, unknown> | null = null
+          if (STATIC_PREVIEW_KINDS.has(fromNode.kind)) {
             const previewNodes = scenario.nodes.map((n) => ({ id: n.id, kind: n.kind, config: n.config }))
             const previewEdges: StaticPreviewEdge[] = scenario.edges.map((e) => ({
               from: e.from,
               to: e.to,
               ...(e.selector !== undefined ? { selector: e.selector } : {})
             }))
-            const preview = staticScenarioPreview({ id: fromNode.id, kind: fromNode.kind, config: fromNode.config }, previewNodes, previewEdges)
-            const path = preview ? singleDeepPath(preview) : null
-            // Default to identity `.` when no single-deep path is deducible.
-            autoSelector = path ?? '.'
-          } else {
-            // Runtime-only source (httpRequest response, forEach `each`, …):
-            // default to identity `.` so the data link isn't left without a
-            // selector (which trips the "needs a JSON path" validation).
-            autoSelector = '.'
+            preview = staticScenarioPreview({ id: fromNode.id, kind: fromNode.kind, config: fromNode.config }, previewNodes, previewEdges)
           }
+          const pv = preview ? portPreviewValue(preview, fromPortId, fromNode.kind) : null
+          autoSelector = (expectsObjectInput(toNode.kind, toPortId)
+            ? (pv ? singleTopLevelKey(pv) : null)
+            : (pv ? singleDeepPath(pv) : null)) ?? '.'
         }
       }
       const edge: ScenarioEdge = {

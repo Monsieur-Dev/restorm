@@ -148,6 +148,10 @@
       "autoSaveDelay": {
         "title": "Auto-gem-forsinkelse",
         "description": "Styrer forsinkelsen i millisekunder, hvorefter en ændret editor automatisk gemmes. Gælder kun, når Auto-gem er sat til Efter forsinkelse."
+      },
+      "reopenLastFile": {
+        "title": "Genåbn automatisk den senest åbnede fil",
+        "description": "Når dette er aktiveret, genåbnes den sidste fil, du havde åben, ved opstart — men kun hvis programmet blev lukket, mens en fil var åben."
       }
     }
   },

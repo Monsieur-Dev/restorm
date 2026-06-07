@@ -189,6 +189,9 @@ describe('read tools — search', () => {
       ] },
       { category: 'environment', items: [
         { id: 'e1', title: 'staging', category: 'environment', score: 0.3 }
+      ] },
+      { category: 'scenario', items: [
+        { id: 's1', title: 'Main', category: 'scenario', score: 0.2 }
       ] }
     ])
   })
@@ -197,8 +200,16 @@ describe('read tools — search', () => {
     const mcp = new FakeMcpService()
     registerReadTools(mcp as unknown as McpService)
     const { payload } = parseReply(mcp.invoke('search', { query: 'u' })) as { payload: { matchCount: number; matches: { category: string }[] } }
-    expect(payload.matchCount).toBe(4)
-    expect(payload.matches.map((m) => m.category)).toEqual(['request', 'request', 'folder', 'environment'])
+    expect(payload.matchCount).toBe(5)
+    expect(payload.matches.map((m) => m.category)).toEqual(['request', 'request', 'folder', 'environment', 'scenario'])
+  })
+
+  it('restricts to scenario matches via the `kinds` filter', () => {
+    const mcp = new FakeMcpService()
+    registerReadTools(mcp as unknown as McpService)
+    const { payload } = parseReply(mcp.invoke('search', { query: 'u', kinds: ['scenario'] })) as { payload: { matchCount: number; matches: { id: string; category: string }[] } }
+    expect(payload.matchCount).toBe(1)
+    expect(payload.matches[0]).toEqual(expect.objectContaining({ id: 's1', category: 'scenario' }))
   })
 
   it('respects the `kinds` filter', () => {

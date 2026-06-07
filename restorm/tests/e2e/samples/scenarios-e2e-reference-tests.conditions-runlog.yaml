@@ -1,0 +1,707 @@
+- message: 🔵 [<time>] ▶ Conditions
+- message: ⚪ [<time>] start if
+  data:
+    left: 1
+    right: 2
+    operator: <
+- message: ⚪ [<time>] start object
+- message: ⚪ [<time>] start object
+- message: ⚪ [<time>] start object
+- message: ⚪ [<time>] start object
+- message: ⚪ [<time>] start object
+- message: ⚪ [<time>] start object
+- message: ⚪ [<time>] start object
+- message: ⚪ [<time>] start object
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: from
+    value: 1985-10-26T00:22:00.000Z
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: to
+    value: 2015-06-08T23:21:00.000Z
+- message: ⚪ [<time>] start if
+  data:
+    left: null
+    right: null
+- message: ⚪ [<time>] start setVariable
+  data:
+    value: null
+    name: null_var
+- message: ⚪ [<time>] start if
+  data:
+    left: null
+    operator: <
+    right: abc
+- message: 🔴 [<time>] Operator "<" cannot order null values
+- message: ⚪ [<time>] start if
+  data:
+    left: null
+    operator: ">"
+    right: 3
+- message: 🔴 [<time>] Operator ">" cannot order null values
+- message: ⚪ [<time>] start if
+  data:
+    left: null
+    operator: ≤
+    right: 2026-06-04T08:37:31.105Z
+- message: 🔴 [<time>] Operator "≤" cannot order null values
+- message: ⚪ [<time>] start if
+  data:
+    left: null
+    operator: ">"
+    right: "#000000"
+- message: 🔴 [<time>] Operator ">" cannot order null values
+- message: ⚪ [<time>] start if
+  data:
+    left: null
+    operator: ">"
+    right: Rouge
+- message: 🔴 [<time>] Operator ">" cannot order null values
+- message: ⚪ [<time>] start if
+  data:
+    right:
+      - Vert
+      - Bleu
+      - Rouge
+    left: null
+- message: ⚪ [<time>] start if
+  data:
+    right: 1985-10-26T00:22:00.000Z
+    left: null
+- message: ⚪ [<time>] start if
+  data:
+    right: null
+    left: null
+- message: ⚪ [<time>] start if
+  data:
+    right:
+      name: localhost
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+    left: null
+- message: ⚪ [<time>] start if
+  data:
+    left: abc
+    operator: ">"
+    right: null
+- message: 🔴 [<time>] Operator ">" cannot order null values
+- message: ⚪ [<time>] start if
+  data:
+    left: 3
+    operator: ">"
+    right: null
+- message: 🔴 [<time>] Operator ">" cannot order null values
+- message: ⚪ [<time>] start if
+  data:
+    left: 2026-06-04T08:37:31.000Z
+    operator: ≤
+    right: null
+- message: 🔴 [<time>] Operator "≤" cannot order null values
+- message: ⚪ [<time>] start if
+  data:
+    left: "#000000"
+    operator: ">"
+    right: null
+- message: 🔴 [<time>] Operator ">" cannot order null values
+- message: ⚪ [<time>] start if
+  data:
+    left: Rouge
+    operator: ">"
+    right: null
+- message: 🔴 [<time>] Operator ">" cannot order null values
+- message: ⚪ [<time>] start if
+  data:
+    right: null
+    left:
+      - Bleu
+      - Vert
+      - Rouge
+- message: ⚪ [<time>] start if
+  data:
+    right: null
+    left: 1985-10-26T00:22:00.000Z
+- message: ⚪ [<time>] start if
+  data:
+    right: null
+    left: null
+- message: ⚪ [<time>] start if
+  data:
+    right: null
+    left:
+      name: Sub-env
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] start switch
+  data:
+    on: null
+- message: ⚪ [<time>] start switch
+  data:
+    on: null
+- message: ⚪ [<time>] start switch
+  data:
+    on: null
+- message: ⚪ [<time>] start switch
+  data:
+    on: null
+- message: ⚪ [<time>] start switch
+  data:
+    on: 1
+- message: ⚪ [<time>] start switch
+  data:
+    on: null
+- message: ⚪ [<time>] start switch
+  data:
+    on:
+      name: localhost
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] start switch
+  data:
+    on:
+      name: Sub-env
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] start switch
+  data:
+    on:
+      name: Sub-env
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] start if
+  data:
+    right: null
+    left: null
+    operator: ≠
+- message: ⚪ [<time>] start if
+  data:
+    left: null
+    right: true
+- message: ⚪ [<time>] start if
+  data:
+    left: null
+    right: ""
+- message: ⚪ [<time>] done if
+  data:
+    then:
+      left: 1
+      right: 2
+- message: ⚪ [<time>] done object
+  data:
+    object:
+      prop1: test
+      prop2: test2
+- message: ⚪ [<time>] done object
+  data:
+    object:
+      prop1: test
+      prop2: test2
+- message: ⚪ [<time>] done object
+  data:
+    object:
+      prop1: test
+      prop2: test2
+- message: ⚪ [<time>] done object
+  data:
+    object:
+      prop1: test
+- message: ⚪ [<time>] done object
+  data:
+    object:
+      prop1: test
+      prop2: test2
+- message: ⚪ [<time>] done object
+  data:
+    object:
+      prop1: test
+      prop2: test2
+- message: ⚪ [<time>] done object
+  data:
+    object:
+      prop2: test2
+      prop1: test
+- message: ⚪ [<time>] done object
+  data:
+    object:
+      prop1: test
+      prop2: test2
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] done if
+  data:
+    then:
+      left: null
+      right: null
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] start if
+  data:
+    left: 1
+    right: 2
+    operator: ≤
+    in:
+      left: 1
+      right: 2
+- message: ⚪ [<time>] start if
+  data:
+    right: null
+    left: null
+    in: true
+- message: ⚪ [<time>] done if
+  data:
+    else:
+      left: null
+      right:
+        - Vert
+        - Bleu
+        - Rouge
+- message: ⚪ [<time>] done if
+  data:
+    else:
+      left: null
+      right: 1985-10-26T00:22:00.000Z
+- message: ⚪ [<time>] done if
+  data:
+    then:
+      left: null
+      right: null
+- message: ⚪ [<time>] done if
+  data:
+    else:
+      left: null
+      right:
+        name: localhost
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] done if
+  data:
+    else:
+      left:
+        - Bleu
+        - Vert
+        - Rouge
+      right: null
+- message: ⚪ [<time>] done if
+  data:
+    else:
+      left: 1985-10-26T00:22:00.000Z
+      right: null
+- message: ⚪ [<time>] done if
+  data:
+    then:
+      left: null
+      right: null
+- message: ⚪ [<time>] done if
+  data:
+    else:
+      left:
+        name: Sub-env
+        variables:
+          baseUrl: http://localhost:5110
+          clientId: VALID_CLIENT_ID
+      right: null
+- message: ⚪ [<time>] done switch
+  data:
+    switch-default-case: null
+- message: ⚪ [<time>] done switch
+  data:
+    default: null
+- message: ⚪ [<time>] done switch
+  data:
+    default: null
+- message: ⚪ [<time>] done switch
+  data:
+    switch-default-case: null
+- message: ⚪ [<time>] done switch
+  data:
+    switch-default-case: 1
+- message: ⚪ [<time>] done switch
+  data:
+    case-1780563106757-232n5w: null
+- message: ⚪ [<time>] done switch
+  data:
+    case-1780563106757-232n5w:
+      name: localhost
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] done switch
+  data:
+    default:
+      name: Sub-env
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] done switch
+  data:
+    case-1780563106757-232n5w:
+      name: Sub-env
+      variables:
+        baseUrl: http://localhost:5110
+        clientId: VALID_CLIENT_ID
+- message: ⚪ [<time>] done if
+  data:
+    else:
+      left: null
+      right: null
+- message: ⚪ [<time>] done if
+  data:
+    else:
+      left: null
+      right: true
+- message: ⚪ [<time>] done if
+  data:
+    else:
+      left: null
+      right: ""
+- message: ⚪ [<time>] done if
+  data:
+    then:
+      left: 1
+      right: 2
+- message: ⚪ [<time>] done if
+  data:
+    then: true
+- message: ⚪ [<time>] start if
+  data:
+    left: 1
+    right: 1
+    operator: =
+    in:
+      left: 1
+      right: 2
+- message: ⚪ [<time>] done if
+  data:
+    then:
+      left: 1
+      right: 2
+- message: ⚪ [<time>] start if
+  data:
+    left: 2
+    right: 1
+    operator: ≥
+    in:
+      left: 1
+      right: 2
+- message: ⚪ [<time>] done if
+  data:
+    then:
+      left: 1
+      right: 2
+- message: ⚪ [<time>] start if
+  data:
+    left: 2
+    right: 1
+    operator: ">"
+    in:
+      left: 1
+      right: 2
+- message: ⚪ [<time>] done if
+  data:
+    then:
+      left: 1
+      right: 2
+- message: ⚪ [<time>] start if
+  data:
+    left: 2
+    right: 1
+    operator: ≠
+    in:
+      left: 1
+      right: 2
+- message: ⚪ [<time>] done if
+  data:
+    then:
+      left: 1
+      right: 2
+- message: ⚪ [<time>] start log
+  data:
+    message: numbers - Basic operators are working fine
+    in:
+      left: 1
+      right: 2
+- message: 🔵 [<time>] numbers - Basic operators are working fine
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] start if
+  data:
+    left: a
+    right: b
+    operator: <
+    in: true
+- message: ⚪ [<time>] done if
+  data:
+    then: true
+- message: ⚪ [<time>] start if
+  data:
+    left: a
+    right: b
+    operator: ≤
+    in: true
+- message: ⚪ [<time>] done if
+  data:
+    then: true
+- message: ⚪ [<time>] start if
+  data:
+    left: a
+    right: a
+    operator: =
+    in: true
+- message: ⚪ [<time>] done if
+  data:
+    then: true
+- message: ⚪ [<time>] start if
+  data:
+    left: b
+    right: a
+    operator: ≥
+    in: true
+- message: ⚪ [<time>] done if
+  data:
+    then: true
+- message: ⚪ [<time>] start if
+  data:
+    left: b
+    right: a
+    operator: ">"
+    in: true
+- message: ⚪ [<time>] done if
+  data:
+    then: true
+- message: ⚪ [<time>] start if
+  data:
+    left: b
+    right: a
+    operator: ≠
+    in: true
+- message: ⚪ [<time>] done if
+  data:
+    then: true
+- message: ⚪ [<time>] start log
+  data:
+    message: strings - Basic operators are working fine
+    in: true
+- message: 🔵 [<time>] strings - Basic operators are working fine
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] start if
+  data:
+    left: 1985-10-26T00:22:00.000Z
+    right: 2015-06-08T23:21:00.000Z
+    operator: <
+    in: true
+- message: ⚪ [<time>] done if
+  data:
+    then: true
+- message: ⚪ [<time>] start if
+  data:
+    left: 1985-10-26T00:22:00.000Z
+    right: 2015-06-08T23:21:00.000Z
+    operator: ≤
+    in: true
+- message: ⚪ [<time>] done if
+  data:
+    then: true
+- message: ⚪ [<time>] start if
+  data:
+    left: 1985-10-26T00:22:00.000Z
+    right: 1985-10-26T00:22:00.000Z
+    operator: =
+    in: true
+- message: ⚪ [<time>] done if
+  data:
+    then: true
+- message: ⚪ [<time>] start if
+  data:
+    left: 2015-06-08T23:21:00.000Z
+    right: 1985-10-26T00:22:00.000Z
+    operator: ≥
+    in: true
+- message: ⚪ [<time>] done if
+  data:
+    then: true
+- message: ⚪ [<time>] start if
+  data:
+    left: 2015-06-08T23:21:00.000Z
+    right: 1985-10-26T00:22:00.000Z
+    operator: ">"
+    in: true
+- message: ⚪ [<time>] done if
+  data:
+    then: true
+- message: ⚪ [<time>] start if
+  data:
+    left: 2015-06-08T23:21:00.000Z
+    right: 1985-10-26T00:22:00.000Z
+    operator: ≠
+    in: true
+- message: ⚪ [<time>] done if
+  data:
+    then: true
+- message: ⚪ [<time>] start log
+  data:
+    message: dates - Basic operators are working fine
+    in: true
+- message: 🔵 [<time>] dates - Basic operators are working fine
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] start if
+  data:
+    left:
+      - Rouge
+      - Vert
+    right: Vert
+    operator: contains
+    in: true
+- message: ⚪ [<time>] done if
+  data:
+    then: true
+- message: ⚪ [<time>] start if
+  data:
+    left: 1985-10-26T00:22:00.000Z
+    right: 2015-06-08T23:21:00.000Z
+    operator: ≤
+    in: true
+- message: ⚪ [<time>] done if
+  data:
+    then: true
+- message: ⚪ [<time>] start log
+  data:
+    message: Comparison from variables is working
+    in: true
+- message: 🔵 [<time>] Comparison from variables is working
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] start if
+  data:
+    operator: =
+    left:
+      prop1: test
+      prop2: test2
+    right:
+      prop1: test
+      prop2: test2
+    in: true
+- message: ⚪ [<time>] done if
+  data:
+    then: true
+- message: ⚪ [<time>] start log
+  data:
+    message: Object comparison is working fine
+    in: true
+- message: 🔵 [<time>] Object comparison is working fine
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] start if
+  data:
+    operator: =
+    in: true
+    left:
+      prop2: test2
+      prop1: test
+    right:
+      prop1: test
+      prop2: test2
+- message: ⚪ [<time>] done if
+  data:
+    then: true
+- message: ⚪ [<time>] start log
+  data:
+    message: Object comparison is working fine
+    in: true
+- message: 🔵 [<time>] Object comparison is working fine
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] start if
+  data:
+    operator: ≠
+    left:
+      prop1: test
+      prop2: test2
+    right: test
+    in: true
+- message: ⚪ [<time>] done if
+  data:
+    then: true
+- message: ⚪ [<time>] start log
+  data:
+    message: Object comparison ≠ is working fine
+    in: true
+- message: 🔵 [<time>] Object comparison ≠ is working fine
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] start if
+  data:
+    operator: <
+    left:
+      prop1: test
+      prop2: test2
+    right:
+      prop1: test
+      prop2: test2
+    in: true
+- message: 🔴 [<time>] Operator "<" cannot order object values
+- message: ⚪ [<time>] start if
+  data:
+    operator: ≤
+    left:
+      prop1: test
+      prop2: test2
+    right:
+      prop1: test
+      prop2: test2
+    in: true
+- message: 🔴 [<time>] Operator "≤" cannot order object values
+- message: ⚪ [<time>] start if
+  data:
+    operator: ≥
+    left:
+      prop1: test
+      prop2: test2
+    right:
+      prop1: test
+      prop2: test2
+    in: true
+- message: 🔴 [<time>] Operator "≥" cannot order object values
+- message: ⚪ [<time>] start if
+  data:
+    operator: ">"
+    left:
+      prop1: test
+      prop2: test2
+    right:
+      prop1: test
+      prop2: test2
+    in: true
+- message: 🔴 [<time>] Operator ">" cannot order object values
+- message: ⚪ [<time>] start log
+  data:
+    message: Object comparison is throwind as it shoud
+    in:
+      message: Operator ">" cannot order object values
+      startedAt: <dynamic-time>
+- message: 🔵 [<time>] Object comparison is throwind as it shoud
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] start log
+  data:
+    message: Null comparisons are ok
+    level: info
+    in: true
+- message: 🔵 [<time>] Null comparisons are ok
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] start log
+  data:
+    message: Switch vs NULL is ok
+    level: info
+    in: true
+- message: 🔵 [<time>] Switch vs NULL is ok
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ Conditions

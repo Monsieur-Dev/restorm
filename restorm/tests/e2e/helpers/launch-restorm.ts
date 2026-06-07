@@ -67,7 +67,7 @@ export async function launchRestormElectronApp({
 
   const app = await electron.launch({
     executablePath: electronExePath,
-    args: ['--no-sandbox', '--ozone-platform=x11', mainJsPath, ...extraArgs],
+    args: ['--no-sandbox', '--ozone-platform=x11', '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows', mainJsPath, ...extraArgs],
     env: {
       ...withE2ECoverageEnv(restormRoot, process.env),
       NODE_ENV: 'development',

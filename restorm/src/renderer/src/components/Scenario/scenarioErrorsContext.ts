@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import type { ScenarioNodeError } from './scenarioValidation'
+import type { ScenarioNodeError } from '../../../../shared/scenarioValidation'
 
 /**
  * Per-node validation errors for the open scenario, keyed by node id. Computed

@@ -149,6 +149,7 @@
       "createEnvironmentFolder": "Opret miljømappe",
       "delete": "Slet",
       "clone": "Klon",
+      "copySuffix": "kopi",
       "rename": "Omdøb",
       "addToFavorites": "Føj til favoritter",
       "removeFromFavorites": "Fjern fra favoritter",
@@ -313,6 +314,8 @@
       "color": "Farve",
       "expression": "Udtryk",
       "boolean": "Boolean",
+      "null": "Null",
+      "list": "Liste",
       "variables": "Variabler",
       "environment": "Miljø"
     },
@@ -481,7 +484,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Er du sikker på, at du vil fjerne \"{{fileName}}\" fra favoritter?",
-    "noFilesHint": "Åbn en fil eller opret en ny for at komme i gang",
     "newAriaLabel": "Opret en ny samling",
     "openAriaLabel": "Åbn en samling fra disken",
     "landmarkLabel": "Velkomst"
@@ -782,9 +784,12 @@
         "changeColor": "Change colour",
         "resetColor": "Reset colour",
         "addNote": "Add / edit note",
+        "runOnEachEvent": "Kør ved hver modtaget hændelse",
         "duplicate": "Duplicate",
         "delete": "Delete",
-        "deleteShortcut": "Del"
+        "deleteShortcut": "Del",
+        "copy": "Kopiér",
+        "paste": "Indsæt"
       },
       "expand": "Udvid",
       "collapse": "Komprimer"
@@ -796,7 +801,6 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "locked": "Redigering låst, mens scenariet kører",
     "switch": {
       "addCase": "Tilføj tilfælde",
@@ -849,7 +853,30 @@
       "now": "Nu",
       "comparator": "Sammenligner",
       "setVariable": "Sæt variabel",
-      "getVariable": "Hent variabel"
+      "getVariable": "Hent variabel",
+      "addToList": "Føj til liste",
+      "removeFromList": "Fjern fra liste",
+      "cast": "Cast",
+      "regex": "Regex",
+      "json": "JSON",
+      "xml": "XML",
+      "yaml": "YAML",
+      "crypto": "Crypto",
+      "jwt": "JWT",
+      "datetime": "Date math",
+      "objectOp": "Object ops",
+      "url": "URL",
+      "random": "Random",
+      "throw": "Throw",
+      "retry": "Retry",
+      "listOp": "List ops",
+      "csv": "CSV",
+      "math": "Math",
+      "schema": "Schema validate",
+      "readFile": "Read file",
+      "writeFile": "Write file",
+      "timer": "Timer",
+      "code": "Kode"
     },
     "comparator": {
       "result": "resultat"
@@ -866,7 +893,31 @@
       "data": "data"
     },
     "assert": {
-      "message": "besked"
+      "message": "besked",
+      "operator": "operator",
+      "op": {
+        "eq": "equals",
+        "ne": "not equals",
+        "lt": "less than",
+        "lte": "less or equal",
+        "gt": "greater than",
+        "gte": "greater or equal",
+        "contains": "contains",
+        "isString": "is string",
+        "isNumber": "is number",
+        "isBoolean": "is boolean",
+        "isArray": "is array",
+        "isObject": "is object",
+        "isNull": "is null",
+        "exists": "exists",
+        "isEmpty": "is empty",
+        "matchesRegex": "matches regex",
+        "isOneOf": "is one of",
+        "deepEquals": "deep equals",
+        "lengthEq": "length ==",
+        "lengthGt": "length >",
+        "lengthLt": "length <"
+      }
     },
     "editRequest": "Rediger anmodning",
     "editScenario": "Rediger scenarie",
@@ -876,10 +927,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "outputName": "Outputnavn",
+      "addOutput": "Tilføj output",
+      "removeOutput": "Fjern"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "Påkrævet for kaldende scenarier"
+      "addParam": "Tilføj parameter",
+      "removeParam": "Fjern"
     },
     "runScenario": {
       "orphanInput": "Ingen matchende parameter \"{{name}}\" i underscenariet",
@@ -889,6 +946,7 @@
     "validation": {
       "duplicateName": "Navnet \"{{name}}\" bruges allerede af en anden handling.",
       "panelTitle": "{{count}} handlingsfejl",
+      "runBlocked": "Ret {{count}} handlingsfejl før kørsel",
       "focusBox": "Gå til denne handling",
       "showErrors": "Vis fejl",
       "input": {
@@ -900,8 +958,7 @@
       },
       "output": {
         "missingName": "Dette output skal have et navn.",
-        "duplicateName": "Navnet \"{{name}}\" bruges allerede af et andet output.",
-        "valueRequired": "Inputtet \"value\" skal være forbundet til en kilde."
+        "duplicateName": "Navnet \"{{name}}\" bruges allerede af et andet output."
       },
       "getVariable": {
         "noSelection": "Der skal vælges en variabel.",
@@ -928,8 +985,10 @@
         "missing": "Den tilknyttede anmodning findes ikke længere."
       },
       "runScenario": {
-        "missing": "Det tilknyttede scenarie findes ikke længere.",
-        "requiredInput": "Det påkrævede input \"{{name}}\" skal være forbundet til en kilde."
+        "missing": "Det tilknyttede scenarie findes ikke længere."
+      },
+      "file": {
+        "missingPath": "A file path is required."
       }
     },
     "usage": {
@@ -939,6 +998,8 @@
     "inspector": {
       "run": "Kør",
       "debug": "Fejlsøg",
+      "undo": "Fortryd",
+      "redo": "Gentag",
       "step": "Trin for trin",
       "previewInfo": "Example data, based on previous request results.",
       "pause": "Pause",
@@ -948,9 +1009,11 @@
       "stop": "Stop",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "Kopiér denne log",
       "clearLogs": "Ryd logfiler",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Vis {{level}}-logs",
+      "showLevelOnly": "Højreklik: kun dette niveau",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -1004,6 +1067,299 @@
       "toggle": "Skift brydepunkt (F9)",
       "reached": "Brydepunkt nået – denne handling er ikke kørt endnu. Tryk på F5 for at fortsætte eller F7 for at træde.",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Skift minikort"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Tilføj værdi",
+      "removeValue": "Fjern værdi",
+      "updateVariable": "Opdater kildevariablen"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
+    },
+    "regex": {
+      "value": "value",
+      "operation": "operation",
+      "pattern": "pattern",
+      "flags": "flags",
+      "replacement": "replacement",
+      "result": "result",
+      "op": {
+        "extract": "extract",
+        "extractAll": "extract all",
+        "test": "test",
+        "replace": "replace",
+        "split": "split"
+      },
+      "flag": {
+        "i": "Case-insensitive",
+        "m": "Multiline (^ and $ match line breaks)",
+        "s": "Dotall (. matches newlines)"
+      }
+    },
+    "json": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "xml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "yaml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "crypto": {
+      "value": "value",
+      "operation": "operation",
+      "key": "key",
+      "keyPlaceholder": "secret",
+      "result": "result",
+      "op": {
+        "base64Encode": "base64 encode",
+        "base64Decode": "base64 decode",
+        "md5": "MD5",
+        "sha1": "SHA-1",
+        "sha256": "SHA-256",
+        "sha512": "SHA-512",
+        "hmacSha256": "HMAC-SHA256",
+        "uuid": "UUID v4"
+      }
+    },
+    "jwt": {
+      "value": "token",
+      "result": "result"
+    },
+    "datetime": {
+      "value": "date",
+      "operation": "operation",
+      "amount": "amount",
+      "unitLabel": "unit",
+      "format": "format",
+      "other": "second date",
+      "result": "result",
+      "op": {
+        "add": "add",
+        "subtract": "subtract",
+        "format": "format",
+        "diff": "diff"
+      },
+      "unit": {
+        "milliseconds": "milliseconds",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months",
+        "years": "years"
+      }
+    },
+    "objectOp": {
+      "value": "object",
+      "operation": "operation",
+      "path": "path",
+      "keys": "keys",
+      "setValue": "value",
+      "mergeWith": "merge with",
+      "result": "result",
+      "op": {
+        "get": "get",
+        "set": "set",
+        "merge": "merge",
+        "pick": "pick",
+        "omit": "omit",
+        "keys": "keys",
+        "values": "values"
+      }
+    },
+    "url": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "op": {
+        "encode": "encode",
+        "decode": "decode",
+        "parseQuery": "parse query",
+        "buildQuery": "build query",
+        "parseUrl": "parse URL"
+      }
+    },
+    "random": {
+      "operation": "operation",
+      "min": "min",
+      "max": "max",
+      "length": "length",
+      "items": "items",
+      "seed": "seed (optional)",
+      "seedPlaceholder": "reproducible",
+      "result": "result",
+      "op": {
+        "int": "integer",
+        "float": "float",
+        "string": "string",
+        "boolean": "boolean",
+        "pick": "pick"
+      }
+    },
+    "throw": {
+      "message": "message"
+    },
+    "retry": {
+      "maxAttempts": "max attempts",
+      "backoff": "backoff",
+      "delay": "delay",
+      "factor": "factor",
+      "retryOnError": "retry on error",
+      "retryOnStatus": "retry on HTTP status",
+      "retryOnFailure": "retry on any non-2xx",
+      "attempt": "attempt",
+      "exhausted": "exhausted",
+      "backoffOpt": {
+        "fixed": "fixed",
+        "linear": "linear",
+        "exponential": "exponential"
+      }
+    },
+    "menuGroups": {
+      "lists": "Lists",
+      "math": "Math",
+      "dataFormats": "Data formats",
+      "encoding": "Encoding",
+      "time": "Timing"
+    },
+    "listOp": {
+      "value": "list",
+      "operation": "operation",
+      "result": "result",
+      "key": "key",
+      "order": "order",
+      "depth": "depth",
+      "size": "size",
+      "start": "start",
+      "end": "end",
+      "op": {
+        "sort": "sort",
+        "unique": "unique",
+        "reverse": "reverse",
+        "flatten": "flatten",
+        "chunk": "chunk",
+        "slice": "slice",
+        "groupBy": "group by"
+      }
+    },
+    "csv": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "delimiter": "delimiter",
+      "header": "header row",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "math": {
+      "a": "value",
+      "operation": "operation",
+      "result": "result",
+      "b": "with",
+      "min": "min",
+      "max": "max",
+      "precision": "precision",
+      "op": {
+        "round": "round",
+        "floor": "floor",
+        "ceil": "ceil",
+        "trunc": "truncate",
+        "abs": "absolute",
+        "sign": "sign",
+        "sqrt": "square root",
+        "min": "min",
+        "max": "max",
+        "clamp": "clamp"
+      }
+    },
+    "schema": {
+      "value": "value",
+      "schema": "JSON Schema",
+      "valid": "valid",
+      "invalid": "invalid",
+      "errors": "errors",
+      "editTitle": "Edit JSON Schema"
+    },
+    "readFile": {
+      "path": "path",
+      "content": "content"
+    },
+    "writeFile": {
+      "path": "path",
+      "mode": "mode",
+      "content": "content"
+    },
+    "codeField": {
+      "title": "Edit",
+      "edit": "Open editor",
+      "moreLines": "+{{count}} lines",
+      "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "tilstand",
+      "modeOpt": {
+        "frequency": "frekvens",
+        "cron": "cron"
+      },
+      "frequency": "frekvens",
+      "unit": "enhed",
+      "cron": "cron",
+      "stop": "stop efter",
+      "stopOpt": {
+        "none": "aldrig",
+        "duration": "varighed",
+        "endDate": "slutdato"
+      },
+      "duration": "varighed",
+      "endDate": "slutdato",
+      "tick": "tik"
+    },
+    "code": {
+      "input": "input",
+      "code": "kode (TypeScript)",
+      "modalTitle": "Rediger kode",
+      "result": "resultat",
+      "timeout": "Timeout (s)"
     }
   }
 }

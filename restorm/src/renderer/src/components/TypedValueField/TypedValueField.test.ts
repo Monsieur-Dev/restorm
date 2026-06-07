@@ -11,7 +11,8 @@ import {
   EnumValue,
   EnumListValue,
   CustomListValue,
-  CustomListMultiValue
+  CustomListMultiValue,
+  NullValue
 } from '../../../../shared/types/collections'
 import type { CustomValueList } from '../../../../shared/types/collections'
 
@@ -32,6 +33,10 @@ describe('resolveValueTypeKind', () => {
 
   it('defaults to string for undefined', () => {
     expect(resolveValueTypeKind(undefined)).toBe('string')
+  })
+
+  it('maps NullValue to `null`', () => {
+    expect(resolveValueTypeKind(new NullValue())).toBe('null')
   })
 })
 

@@ -56,7 +56,7 @@ export const WaitUntilNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id,
   const right: ScenarioNodeCell[] = [
     { id: 'out', label: t('scenario.waitUntil.then', 'then'), port: { id: 'out', role: 'then', type: 'source' } }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} launchInput />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
 }
 
 export default WaitUntilNodeBox

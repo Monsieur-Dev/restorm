@@ -149,6 +149,7 @@
       "createEnvironmentFolder": "Krijo dosje mjedisi",
       "delete": "Fshi",
       "clone": "Klono",
+      "copySuffix": "kopje",
       "rename": "Riemërto",
       "addToFavorites": "Shto te të preferuarat",
       "removeFromFavorites": "Hiq nga të preferuarat",
@@ -313,6 +314,8 @@
       "color": "Ngjyrë",
       "expression": "Shprehje",
       "boolean": "Booleane",
+      "null": "Null",
+      "list": "Listë",
       "variables": "Variablat",
       "environment": "Mjedisi"
     },
@@ -481,7 +484,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Jeni i sigurt se doni të hiqni \"{{fileName}}\" nga të preferuarat?",
-    "noFilesHint": "Hap një skedar ose krijo një të ri për të filluar",
     "newAriaLabel": "Krijo një koleksion të ri",
     "openAriaLabel": "Hap një koleksion nga disku",
     "landmarkLabel": "Mirësevini"
@@ -673,11 +675,11 @@
         "trademark": "OpenAPI është një projekt i OpenAPI Initiative nën Linux Foundation."
       },
       "curl": {
-        "description": "E keni tashmë kërkesën duke punuar në terminal? Ngjit thirrjen e plotë curl — flamurët, kokat, trupin, query string — dhe Restorm e rindërton si një kërkesë reale që mund ta rinisni, redaktoni dhe fiksoni.",
+        "description": "E keni tashmë kërkesën duke punuar në terminal? Ngjisni thirrjen e plotë curl — flamurët, kokat, trupin, query string — dhe Restorm e rindërton si një kërkesë reale që mund ta rinisni, redaktoni dhe fiksoni.",
         "trademark": "curl është software me kod të hapur © Daniel Stenberg, i përdorur këtu sipas kushteve të tij."
       },
       "powershell": {
-        "description": "E njëjta ide, në stil PowerShell. Ngjit një komandë Invoke-WebRequest ose Invoke-RestMethod dhe Restorm lexon URI-në, metodën, kokat dhe trupin për të farësuar një kërkesë mbi të cilën mund të iteroni vizualisht.",
+        "description": "E njëjta ide, në stil PowerShell. Ngjisni një komandë Invoke-WebRequest ose Invoke-RestMethod dhe Restorm lexon URI-në, metodën, kokat dhe trupin për të farësuar një kërkesë mbi të cilën mund të iteroni vizualisht.",
         "trademark": "PowerShell është një markë tregtare e regjistruar e Microsoft Corporation."
       },
       "postman": {
@@ -693,7 +695,7 @@
         "trademark": "Bruno është software me kod të hapur (MIT) nga Anoop M. D., i përdorur këtu sipas kushteve të tij."
       },
       "graphql": {
-        "description": "Ngjit një SDL GraphQL (.graphql / .gql / një ngjitje nga klienti juaj GraphQL) dhe Restorm ndërton një kërkesë për operacion, e lidhur me llojin e duhur query / mutation / subscription me variablat tashmë të strukturuara.",
+        "description": "Ngjisni një SDL GraphQL (.graphql / .gql / një ngjitje nga klienti juaj GraphQL) dhe Restorm ndërton një kërkesë për operacion, e lidhur me llojin e duhur query / mutation / subscription me variablat tashmë të strukturuara.",
         "trademark": "GraphQL është një markë tregtare e GraphQL Foundation, projekt i Joint Development Foundation."
       },
       "grpc": {
@@ -704,22 +706,22 @@
         "description": "Keni një WSDL? Ngjiteni (ose URL-në e tij) — Restorm parsezon çdo <port> dhe <operation> dhe prodhon zarfe SOAP gati për t'u dërguar me kokën e duhur SOAPAction, skelete trupi të tipizuara sipas skemës dhe skemën e vërtetimit që deklaron WSDL-ja."
       },
       "websocket": {
-        "description": "Ngjit një pikë fundore WebSocket (ws:// ose wss://) — Restorm hap lidhjen, kap kornizat hello të serverit dhe ndërton kërkesa send / subscribe me modele payload që mund të riluhen.",
+        "description": "Ngjisni një pikë fundore WebSocket (ws:// ose wss://) — Restorm hap lidhjen, kap kornizat hello të serverit dhe ndërton kërkesa send / subscribe me modele payload që mund të riluhen.",
         "trademark": "WebSocket është një protokoll i standardizuar nga IETF (RFC 6455) dhe W3C."
       },
       "kafka": {
-        "description": "Ngjit një URL të një bootstrap-server Apache Kafka (ose një listë temash) — Restorm regjistron konsumatorët dhe prodhuesit për temë, dekodon payload-et Avro / Protobuf përmes Schema Registry-së suaj dhe ju lejon të riluani offsetet individuale me një klikim.",
+        "description": "Ngjisni një URL të një bootstrap-server Apache Kafka (ose një listë temash) — Restorm regjistron konsumatorët dhe prodhuesit për temë, dekodon payload-et Avro / Protobuf përmes Schema Registry-së suaj dhe ju lejon të riluani offsetet individuale me një klikim.",
         "trademark": "Apache Kafka dhe logoja Kafka janë marka tregtare të Apache Software Foundation."
       },
       "socketio": {
-        "description": "Ngjit një URL serveri Socket.IO — Restorm negocion handshake-un, liston namespace-t dhe emrat e ngjarjeve që emiton serveri dhe ju jep një kërkesë për ngjarje emit / on me validim payload-i.",
+        "description": "Ngjisni një URL serveri Socket.IO — Restorm negocion handshake-un, liston namespace-t dhe emrat e ngjarjeve që emiton serveri dhe ju jep një kërkesë për ngjarje emit / on me validim payload-i.",
         "trademark": "Socket.IO është një bibliotekë me kod të hapur e publikuar nën licencën MIT; emri dhe logoja përdoren në mënyrë emërtore."
       },
       "odata": {
-        "description": "Ngjit një URL të një service-document OData ose një skedar $metadata — Restorm lexon CSDL-në, rindërton entity sets, function imports dhe actions, plus parambush opsionet e query $filter / $select / $top / $skip për çdo operacion."
+        "description": "Ngjisni një URL të një service-document OData ose një skedar $metadata — Restorm lexon CSDL-në, rindërton entity sets, function imports dhe actions, plus parambush opsionet e query $filter / $select / $top / $skip për çdo operacion."
       },
       "mqtt": {
-        "description": "Ngjit një URL të një broker-i MQTT ose një katalog temash — Restorm ndërton kërkesa publish / subscribe për temë, e mban lidhjen të gjallë për pamje paraprake në streaming dhe mban mend snapshot-et e mesazheve të mbajtura për t'i riluajtur më vonë.",
+        "description": "Ngjisni një URL të një broker-i MQTT ose një katalog temash — Restorm ndërton kërkesa publish / subscribe për temë, e mban lidhjen të gjallë për pamje paraprake në streaming dhe mban mend snapshot-et e mesazheve të mbajtura për t'i riluajtur më vonë.",
         "trademark": "MQTT është një standard OASIS; emri dhe logoja MQTT janë marka tregtare të OASIS Open."
       }
     },
@@ -782,9 +784,12 @@
         "changeColor": "Change colour",
         "resetColor": "Reset colour",
         "addNote": "Add / edit note",
+        "runOnEachEvent": "Ekzekuto në çdo ngjarje të marrë",
         "duplicate": "Duplicate",
         "delete": "Delete",
-        "deleteShortcut": "Del"
+        "deleteShortcut": "Del",
+        "copy": "Kopjo",
+        "paste": "Ngjit"
       },
       "expand": "Zgjero",
       "collapse": "Mblidh"
@@ -796,7 +801,6 @@
         "delete": "Delete"
       }
     },
-    "invalid": "{{count}} required input(s) not wired — scenario is not runnable",
     "locked": "Modifikimi i kyçur ndërsa skenari po ekzekutohet",
     "switch": {
       "addCase": "Shto rast",
@@ -849,7 +853,30 @@
       "now": "Tani",
       "comparator": "Krahasues",
       "setVariable": "Cakto variablën",
-      "getVariable": "Merr variablën"
+      "getVariable": "Merr variablën",
+      "addToList": "Shto në listë",
+      "removeFromList": "Hiq nga lista",
+      "cast": "Cast",
+      "regex": "Regex",
+      "json": "JSON",
+      "xml": "XML",
+      "yaml": "YAML",
+      "crypto": "Crypto",
+      "jwt": "JWT",
+      "datetime": "Date math",
+      "objectOp": "Object ops",
+      "url": "URL",
+      "random": "Random",
+      "throw": "Throw",
+      "retry": "Retry",
+      "listOp": "List ops",
+      "csv": "CSV",
+      "math": "Math",
+      "schema": "Schema validate",
+      "readFile": "Read file",
+      "writeFile": "Write file",
+      "timer": "Kohëmatës",
+      "code": "Kodi"
     },
     "comparator": {
       "result": "rezultati"
@@ -866,7 +893,31 @@
       "data": "të dhëna"
     },
     "assert": {
-      "message": "mesazh"
+      "message": "mesazh",
+      "operator": "operator",
+      "op": {
+        "eq": "equals",
+        "ne": "not equals",
+        "lt": "less than",
+        "lte": "less or equal",
+        "gt": "greater than",
+        "gte": "greater or equal",
+        "contains": "contains",
+        "isString": "is string",
+        "isNumber": "is number",
+        "isBoolean": "is boolean",
+        "isArray": "is array",
+        "isObject": "is object",
+        "isNull": "is null",
+        "exists": "exists",
+        "isEmpty": "is empty",
+        "matchesRegex": "matches regex",
+        "isOneOf": "is one of",
+        "deepEquals": "deep equals",
+        "lengthEq": "length ==",
+        "lengthGt": "length >",
+        "lengthLt": "length <"
+      }
     },
     "editRequest": "Modifiko kërkesën",
     "editScenario": "Modifiko skenarin",
@@ -876,10 +927,16 @@
       "propertyName": "Property name",
       "propertyValue": "value"
     },
+    "output": {
+      "outputName": "Emri i daljes",
+      "addOutput": "Shto dalje",
+      "removeOutput": "Hiq"
+    },
     "input": {
       "name": "Name",
       "defaultType": "Default / type",
-      "required": "E detyrueshme për skenarët thirrës"
+      "addParam": "Shto parametër",
+      "removeParam": "Hiq"
     },
     "runScenario": {
       "orphanInput": "Asnjë parametër \"{{name}}\" përkatës në nën-skenar",
@@ -889,6 +946,7 @@
     "validation": {
       "duplicateName": "Emri «{{name}}» përdoret tashmë nga një veprim tjetër.",
       "panelTitle": "{{count}} gabim(e) veprimi",
+      "runBlocked": "Rregulloni {{count}} gabim(e) veprimi para ekzekutimit",
       "focusBox": "Shko te ky veprim",
       "showErrors": "Shfaq gabimet",
       "input": {
@@ -900,8 +958,7 @@
       },
       "output": {
         "missingName": "Kjo dalje duhet të ketë një emër.",
-        "duplicateName": "Emri «{{name}}» përdoret tashmë nga një dalje tjetër.",
-        "valueRequired": "Hyrja «value» duhet të lidhet me një burim."
+        "duplicateName": "Emri «{{name}}» përdoret tashmë nga një dalje tjetër."
       },
       "getVariable": {
         "noSelection": "Duhet zgjedhur një variabël.",
@@ -928,8 +985,10 @@
         "missing": "Kërkesa e lidhur nuk ekziston më."
       },
       "runScenario": {
-        "missing": "Skenari i lidhur nuk ekziston më.",
-        "requiredInput": "Hyrja e detyrueshme «{{name}}» duhet të lidhet me një burim."
+        "missing": "Skenari i lidhur nuk ekziston më."
+      },
+      "file": {
+        "missingPath": "A file path is required."
       }
     },
     "usage": {
@@ -939,6 +998,8 @@
     "inspector": {
       "run": "Ekzekuto",
       "debug": "Korrigjo",
+      "undo": "Zhbëj",
+      "redo": "Ribëj",
       "step": "Hap pas hapi",
       "previewInfo": "Example data, based on previous request results.",
       "pause": "Pauzë",
@@ -948,9 +1009,11 @@
       "stop": "Ndalo",
       "logsTitle": "Run logs",
       "copyLogs": "Copy logs",
+      "copyThisLog": "Kopjo këtë regjistër",
       "clearLogs": "Pastro regjistrat",
       "logsShowAll": "Show all logs",
       "showLevelLogs": "Shfaq loget {{level}}",
+      "showLevelOnly": "Klik me të djathtën: vetëm ky nivel",
       "noUserLogs": "No user logs (entries from the Log action) in this run."
     },
     "now": {
@@ -1004,6 +1067,299 @@
       "toggle": "Ndërro pikën e ndërprerjes (F9)",
       "reached": "U arrit pika e ndërprerjes — ky veprim nuk është ekzekutuar ende. Shtypni F5 për të vazhduar, ose F7 për hap pas hapi.",
       "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Aktivizo/çaktivizo minihartën"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Shto vlerë",
+      "removeValue": "Hiq vlerën",
+      "updateVariable": "Përditëso variablën burim"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
+    },
+    "regex": {
+      "value": "value",
+      "operation": "operation",
+      "pattern": "pattern",
+      "flags": "flags",
+      "replacement": "replacement",
+      "result": "result",
+      "op": {
+        "extract": "extract",
+        "extractAll": "extract all",
+        "test": "test",
+        "replace": "replace",
+        "split": "split"
+      },
+      "flag": {
+        "i": "Case-insensitive",
+        "m": "Multiline (^ and $ match line breaks)",
+        "s": "Dotall (. matches newlines)"
+      }
+    },
+    "json": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "xml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "yaml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "crypto": {
+      "value": "value",
+      "operation": "operation",
+      "key": "key",
+      "keyPlaceholder": "secret",
+      "result": "result",
+      "op": {
+        "base64Encode": "base64 encode",
+        "base64Decode": "base64 decode",
+        "md5": "MD5",
+        "sha1": "SHA-1",
+        "sha256": "SHA-256",
+        "sha512": "SHA-512",
+        "hmacSha256": "HMAC-SHA256",
+        "uuid": "UUID v4"
+      }
+    },
+    "jwt": {
+      "value": "token",
+      "result": "result"
+    },
+    "datetime": {
+      "value": "date",
+      "operation": "operation",
+      "amount": "amount",
+      "unitLabel": "unit",
+      "format": "format",
+      "other": "second date",
+      "result": "result",
+      "op": {
+        "add": "add",
+        "subtract": "subtract",
+        "format": "format",
+        "diff": "diff"
+      },
+      "unit": {
+        "milliseconds": "milliseconds",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months",
+        "years": "years"
+      }
+    },
+    "objectOp": {
+      "value": "object",
+      "operation": "operation",
+      "path": "path",
+      "keys": "keys",
+      "setValue": "value",
+      "mergeWith": "merge with",
+      "result": "result",
+      "op": {
+        "get": "get",
+        "set": "set",
+        "merge": "merge",
+        "pick": "pick",
+        "omit": "omit",
+        "keys": "keys",
+        "values": "values"
+      }
+    },
+    "url": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "op": {
+        "encode": "encode",
+        "decode": "decode",
+        "parseQuery": "parse query",
+        "buildQuery": "build query",
+        "parseUrl": "parse URL"
+      }
+    },
+    "random": {
+      "operation": "operation",
+      "min": "min",
+      "max": "max",
+      "length": "length",
+      "items": "items",
+      "seed": "seed (optional)",
+      "seedPlaceholder": "reproducible",
+      "result": "result",
+      "op": {
+        "int": "integer",
+        "float": "float",
+        "string": "string",
+        "boolean": "boolean",
+        "pick": "pick"
+      }
+    },
+    "throw": {
+      "message": "message"
+    },
+    "retry": {
+      "maxAttempts": "max attempts",
+      "backoff": "backoff",
+      "delay": "delay",
+      "factor": "factor",
+      "retryOnError": "retry on error",
+      "retryOnStatus": "retry on HTTP status",
+      "retryOnFailure": "retry on any non-2xx",
+      "attempt": "attempt",
+      "exhausted": "exhausted",
+      "backoffOpt": {
+        "fixed": "fixed",
+        "linear": "linear",
+        "exponential": "exponential"
+      }
+    },
+    "menuGroups": {
+      "lists": "Lists",
+      "math": "Math",
+      "dataFormats": "Data formats",
+      "encoding": "Encoding",
+      "time": "Kohëmatja"
+    },
+    "listOp": {
+      "value": "list",
+      "operation": "operation",
+      "result": "result",
+      "key": "key",
+      "order": "order",
+      "depth": "depth",
+      "size": "size",
+      "start": "start",
+      "end": "end",
+      "op": {
+        "sort": "sort",
+        "unique": "unique",
+        "reverse": "reverse",
+        "flatten": "flatten",
+        "chunk": "chunk",
+        "slice": "slice",
+        "groupBy": "group by"
+      }
+    },
+    "csv": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "delimiter": "delimiter",
+      "header": "header row",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "math": {
+      "a": "value",
+      "operation": "operation",
+      "result": "result",
+      "b": "with",
+      "min": "min",
+      "max": "max",
+      "precision": "precision",
+      "op": {
+        "round": "round",
+        "floor": "floor",
+        "ceil": "ceil",
+        "trunc": "truncate",
+        "abs": "absolute",
+        "sign": "sign",
+        "sqrt": "square root",
+        "min": "min",
+        "max": "max",
+        "clamp": "clamp"
+      }
+    },
+    "schema": {
+      "value": "value",
+      "schema": "JSON Schema",
+      "valid": "valid",
+      "invalid": "invalid",
+      "errors": "errors",
+      "editTitle": "Edit JSON Schema"
+    },
+    "readFile": {
+      "path": "path",
+      "content": "content"
+    },
+    "writeFile": {
+      "path": "path",
+      "mode": "mode",
+      "content": "content"
+    },
+    "codeField": {
+      "title": "Edit",
+      "edit": "Open editor",
+      "moreLines": "+{{count}} lines",
+      "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "mënyra",
+      "modeOpt": {
+        "frequency": "frekuenca",
+        "cron": "cron"
+      },
+      "frequency": "frekuenca",
+      "unit": "njësia",
+      "cron": "cron",
+      "stop": "ndalo pas",
+      "stopOpt": {
+        "none": "kurrë",
+        "duration": "kohëzgjatja",
+        "endDate": "data e fundit"
+      },
+      "duration": "kohëzgjatja",
+      "endDate": "data e fundit",
+      "tick": "tik"
+    },
+    "code": {
+      "input": "hyrje",
+      "code": "kodi (TypeScript)",
+      "modalTitle": "Modifiko kodin",
+      "result": "rezultati",
+      "timeout": "Afati kohor (s)"
     }
   }
 }

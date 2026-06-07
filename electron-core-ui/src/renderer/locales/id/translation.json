@@ -148,6 +148,10 @@
       "autoSaveDelay": {
         "title": "Jeda simpan otomatis",
         "description": "Mengontrol jeda dalam milidetik sebelum editor yang dimodifikasi disimpan otomatis. Hanya berlaku saat Simpan Otomatis diatur ke Setelah Jeda."
+      },
+      "reopenLastFile": {
+        "title": "Buka kembali file terakhir yang dibuka secara otomatis",
+        "description": "Jika diaktifkan, membuka kembali file terakhir yang Anda buka saat memulai — tetapi hanya jika aplikasi ditutup saat sebuah file sedang terbuka."
       }
     }
   },

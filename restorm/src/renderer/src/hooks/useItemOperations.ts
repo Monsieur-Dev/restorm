@@ -22,7 +22,8 @@ import type { HTTPMethod } from '../../../shared/models/types'
 import { findItemById, findItemWithBreadcrumbs, getFolderIcon, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
 import { generateUniqueId, cloneItemInTree, removeItemFromTree, insertItemIntoTree } from '../utils/treeManipulation'
-import type { WorkbenchTree } from 'electron-core-ui/renderer'
+import { mapAllWorkbenchTabs } from '../utils/workbenchTabs'
+import type { WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
 import type { BreadcrumbItem, FolderTab, EnvironmentFolderTab, HTTPRequestTab, ScenarioEditorTab } from '../../../shared/types/editor'
 import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
 import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
@@ -126,79 +127,69 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     // Force React re-render by creating new reference
     setRootItems((prevItems) => [...prevItems])
 
-    // Update breadcrumbs in open workbench tabs
-    setWorkbenchTree((prevTree) => {
-      const group = prevTree.groups[0]
-      if (!group || !isTabGroupNode(group)) return prevTree
-
-      const updatedTabs = group.tabs.map((tab) => {
-        const tabType = (tab as { tabType?: string }).tabType
-        // Singleton tabs (Console, Firewall) aren't tied to any
-        // tree item — skip them. Without this guard the `else`
-        // branch below would dereference `.request.id` on a tab
-        // that doesn't carry one and crash with "Cannot read
-        // properties of undefined (reading 'id')" the moment a
-        // sidebar drag-and-drop fires the breadcrumb refresh.
-        if (tabType === 'console' || tabType === 'firewall') {
-          return tab
-        }
-        const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab | ScenarioEditorTab
-
-        // Get the item ID from the tab. Scenario-editor tabs carry their
-        // payload under `scenario` (not `request` / `folder`); without this
-        // branch the breadcrumb refresh after a sidebar drag-and-drop would
-        // hit the `else` and dereference `.request.id` on the wrong shape,
-        // crashing with "Cannot read properties of undefined (reading 'id')".
-        let itemId: string
-        if (restormTab.tabType === 'folder') {
-          itemId = restormTab.folder.id
-        } else if (restormTab.tabType === 'environment-folder') {
-          itemId = restormTab.folder.id
-        } else if (restormTab.tabType === 'scenario-editor') {
-          itemId = restormTab.scenario.id
-        } else {
-          itemId = restormTab.request.id
-        }
-
-        // Recalculate breadcrumbs for this tab
-        const { breadcrumbs: newBreadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
-        if (newBreadcrumbs.length === 0) return tab
-
-        // For HTTP request tabs, also recalculate environments
-        if (restormTab.tabType === 'http-request') {
-          // This would need getNearestEnvironmentsForBreadcrumbs but we'll simplify for now
-          return {
-            ...restormTab,
-            breadcrumbs: newBreadcrumbs
-          }
-        }
-
-        return {
-          ...restormTab,
-          breadcrumbs: newBreadcrumbs
-        }
-      })
-
-      return {
-        ...prevTree,
-        groups: [{ ...group, tabs: updatedTabs }]
+    // Recalculate breadcrumbs for a single tab after the reorder. Returns
+    // the tab unchanged for singleton tabs (Console / Firewall, which aren't
+    // tied to a tree item) and when the item can no longer be located.
+    const refreshTabBreadcrumbs = (
+      tab: EditorTab
+    ): EditorTab | FolderTab | EnvironmentFolderTab | HTTPRequestTab | ScenarioEditorTab => {
+      const tabType = (tab as { tabType?: string }).tabType
+      // Singleton tabs (Console, Firewall) aren't tied to any tree item —
+      // skip them. Without this guard the `else` branch below would
+      // dereference `.request.id` on a tab that doesn't carry one and crash
+      // with "Cannot read properties of undefined (reading 'id')".
+      if (tabType === 'console' || tabType === 'firewall') {
+        return tab
       }
-    })
+      const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab | ScenarioEditorTab
+
+      // Get the item ID from the tab. Scenario-editor tabs carry their
+      // payload under `scenario` (not `request` / `folder`); without this
+      // branch the breadcrumb refresh after a sidebar drag-and-drop would
+      // hit the `else` and dereference `.request.id` on the wrong shape.
+      let itemId: string
+      if (restormTab.tabType === 'folder') {
+        itemId = restormTab.folder.id
+      } else if (restormTab.tabType === 'environment-folder') {
+        itemId = restormTab.folder.id
+      } else if (restormTab.tabType === 'scenario-editor') {
+        itemId = restormTab.scenario.id
+      } else {
+        itemId = restormTab.request.id
+      }
+
+      const { breadcrumbs: newBreadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
+      if (newBreadcrumbs.length === 0) return tab
+
+      // For HTTP request tabs the environments are left as-is for now
+      // (recalculating them would need getNearestEnvironmentsForBreadcrumbs).
+      return {
+        ...restormTab,
+        breadcrumbs: newBreadcrumbs
+      }
+    }
+
+    // Update breadcrumbs in EVERY open workbench tab, recursing into the
+    // container nodes of split-pane layouts. The previous implementation only
+    // rewrote `groups[0]` and returned a single-element groups array, which
+    // silently dropped every other pane — so reordering a sidebar item with a
+    // side-by-side split open collapsed the second group.
+    setWorkbenchTree((prevTree) => ({
+      ...prevTree,
+      groups: mapAllWorkbenchTabs(prevTree.groups, refreshTabBreadcrumbs)
+    }))
   }, [rootItems, setRootItems, setWorkbenchTree])
 
-  // Handle "Clone" context menu action
+  // Handle "Clone" context menu action. Works for any item — including a
+  // ROOT-level folder / environment folder (cloneItemInTree inserts the deep
+  // copy back into the root list when there's no parent).
   const handleCloneItem = useCallback((itemId: string) => {
-    // Don't allow cloning root folders
-    const isRootItem = rootItems.some((f) => f.id === itemId)
-    if (isRootItem) return
-
-    // Clone the item
-    const clonedItem = cloneItemInTree(rootItems, itemId)
+    const clonedItem = cloneItemInTree(rootItems, itemId, t('sidebar.contextMenu.copySuffix', 'copy'))
     if (!clonedItem) return
 
     // Force React re-render by creating new reference
     setRootItems((prevItems) => [...prevItems])
-  }, [rootItems, setRootItems])
+  }, [rootItems, setRootItems, t])
 
   // Handle "Delete" context menu action - show confirmation
   const handleDeleteItem = useCallback((itemId: string) => {

@@ -65,24 +65,23 @@ export const TransformNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id,
         { id: 'value', label: 'value', port: { id: 'value', type: 'target' } },
         {
           id: 'expr',
+          port: { id: 'expression', type: 'target' },
           content: (
-            <>
-              <div className="scn-field-caption">{t('keyValueTable.types.expression', 'Expression')}</div>
-              <ScenarioExpressionField
-                value={config['expression']}
-                onChange={(next) => { data.onSetConfig?.(id, { expression: next }) }}
-                valueTypeGroups={valueTypeGroups}
-                variables={variables}
-                expressionVariableId={`scn-transform-${id}`}
-                invalid={exprInvalid}
-                dataTestId="scn-transform-expr"
-              />
-            </>
+            <ScenarioExpressionField
+              value={config['expression']}
+              onChange={(next) => { data.onSetConfig?.(id, { expression: next }) }}
+              valueTypeGroups={valueTypeGroups}
+              variables={variables}
+              expressionVariableId={`scn-transform-${id}`}
+              invalid={exprInvalid}
+              caption={t('keyValueTable.types.expression', 'Expression')}
+              dataTestId="scn-transform-expr"
+            />
           )
         }
       ]
     }
   ]
   const right: ScenarioNodeCell[] = [{ id: 'out', label: 'value', port: { id: 'out', type: 'source' } }]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} launchInput />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
 }

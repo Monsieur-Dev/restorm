@@ -28,13 +28,15 @@ export const ComparatorNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id
     label: key,
     port: { id: key, type: 'target' },
     content: (
-      <div className="nodrag" onMouseDown={(e) => { e.stopPropagation() }}>
+      <div className="nodrag scn-operand-field" onMouseDown={(e) => { e.stopPropagation() }}>
         <TypedValueField
           value={normalizeValueType(config[key])}
           onChange={(next) => { data.onSetConfig?.(id, { [key]: serializeValueForPersistence(next) }) }}
           valueTypeGroups={valueTypeGroups}
           excludeTypes={['expression']}
           allowEnvironment
+          allowNull
+          allowList
           dataTestId={`scn-comparator-${key}`}
         />
       </div>

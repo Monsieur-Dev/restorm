@@ -1,11 +1,11 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, ListView } from 'electron-core-ui/renderer'
+import { Button, ListView, usePlatform } from 'electron-core-ui/renderer'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import type { ScenarioLogEntry } from '../../hooks/useScenarioEngine'
-import { ScenarioRunLogView, type LogProvenanceApi } from './ScenarioRunLogView'
+import { ScenarioRunLogView, type LogLevelFilter } from './ScenarioRunLogView'
 import type { ScenarioPort } from '../../../../shared/types/collections'
-import type { ScenarioNodeError } from './scenarioValidation'
+import type { ScenarioNodeError } from '../../../../shared/scenarioValidation'
 import { buildScenarioPathTree } from './scenarioPathTree'
 import { resolveSelectorPath } from '../../../../shared/utils/scenarioStaticPreview'
 import type { SyntheticRequestPreview } from '../../../../shared/utils/syntheticRequestPreview'
@@ -76,7 +76,7 @@ export interface ScenarioInspectorPanelProps {
   /** Distinct boxes in error — drives the section header count. */
   errorBoxCount: number
   /** Centre the canvas on a box (clicking an error row). */
-  onFocusNode: (nodeId: string) => void
+  onFocusNode: (nodeId: string, scenarioId?: string, anchor?: { x: number; y: number }) => void
   /** The node to preview, or null when zero / many boxes are selected. */
   previewNode: InspectorPreviewNode | null
   /** Open the previewed node's bound item (request / sub-scenario) in a
@@ -110,8 +110,13 @@ export interface ScenarioInspectorPanelProps {
   /** Clears the displayed run log. Wired only in the live inspector — the
    * persisted run-history is read-only and offers no clear action. */
   onClearRunLog?: () => void
-  /** Provenance link support for log rows that came from a sub-scenario. */
-  logProvenance?: LogProvenanceApi
+  /** Whether an undo / redo step is available — drives the toolbar buttons'
+   * disabled state. */
+  canUndo?: boolean
+  canRedo?: boolean
+  /** Undo / redo the last graph edit on the active scenario tab. */
+  onUndo?: () => void
+  onRedo?: () => void
 }
 
 interface ScenarioRuntime {
@@ -132,11 +137,17 @@ function scenarioRuntime(): ScenarioRuntime | undefined {
  * data + tree as the JSON-path selector's picker popover). Shown only when
  * exactly one box is selected.
  */
-export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ scenarioId, errors, errorBoxCount, onFocusNode, previewNode, onOpenItem, engineState, onEngineRun, onEnginePause, onEngineResume, onEngineStep, onEngineStepStart, onEngineStop, onEngineDebug, onEngineDebugContinue, hasBreakpoints, runLog, onClearRunLog, logProvenance }) => {
+export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ scenarioId, errors, errorBoxCount, onFocusNode, previewNode, onOpenItem, engineState, onEngineRun, onEnginePause, onEngineResume, onEngineStep, onEngineStepStart, onEngineStop, onEngineDebug, onEngineDebugContinue, hasBreakpoints, runLog, onClearRunLog, canUndo, canRedo, onUndo, onRedo }) => {
   const { t } = useTranslation()
+  const { isMacintosh, isWindows } = usePlatform()
   const [result, setResult] = useState<Record<string, unknown> | null>(null)
   const fetchToken = useRef(0)
   const panelRef = useRef<HTMLDivElement>(null)
+  // Log-view filters live HERE (the panel persists across runs), not inside
+  // `ScenarioRunLogView` — which unmounts on each new run, so its own state
+  // would reset the "show all" toggle + level filters every run.
+  const [showAllLogs, setShowAllLogs] = useState(false)
+  const [logLevels, setLogLevels] = useState<LogLevelFilter>({ debug: true, info: true, warn: true, error: true })
 
   // The panel sizes to its content but never past the canvas — and a definite
   // pixel height is what lets the response tree's ListView scroll (a bare
@@ -149,10 +160,18 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
     const parent = panel?.parentElement
     if (!panel || !parent) return undefined
     const apply = (): void => {
+      // Measuring the natural height means briefly setting `height: auto`, which
+      // removes the overflow on any nested scrollable (the run-log ListView) for
+      // one reflow — the browser then clamps its scrollTop to 0. Snapshot every
+      // inner scroller and restore it once the definite (overflowing) height is
+      // back, or the log list jumps to the top on every expand/collapse.
+      const scrollers = Array.from(panel.querySelectorAll<HTMLElement>('.scrollable-content'))
+      const tops = scrollers.map((s) => s.scrollTop)
       panel.style.height = 'auto'
       const natural = panel.scrollHeight
       const available = parent.clientHeight - 16
       panel.style.height = `${Math.min(natural, available)}px`
+      scrollers.forEach((s, i) => { const t = tops[i]; if (t !== undefined && s.scrollTop !== t) s.scrollTop = t })
     }
     apply()
     // Canvas resize → recompute available height; tree expand/collapse changes
@@ -268,12 +287,17 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
     if (engineState === 'running' || engineState === 'paused') onEngineDebugContinue?.()
     else onEngineDebug?.()
   }
-  const debugDisabled = !engineWired || hasBreakpoints !== true
+  // A scenario carrying validation errors can't START a run — block Play / Step
+  // / Debug while idle/finished (mirrors the engine + MCP gate). Live controls
+  // (pause/resume/step a RUNNING or PAUSED run) stay enabled: errors can't
+  // appear mid-run (the graph is edit-locked while running).
+  const cannotStartFresh = errorBoxCount > 0 && engineState !== 'running' && engineState !== 'paused'
+  const debugDisabled = !engineWired || hasBreakpoints !== true || cannotStartFresh
   const debugLabel = t('scenario.inspector.debug', 'Debug')
-  const runDisabled = !engineWired
+  const runDisabled = !engineWired || cannotStartFresh
   // Step is live whenever the engine is wired: it steps a paused/running run,
   // or launches a fresh one in step mode from idle/finished.
-  const stepDisabled = !engineWired
+  const stepDisabled = !engineWired || cannotStartFresh
   const stopDisabled = !engineWired || (engineState !== 'running' && engineState !== 'paused')
   const runIsPause = engineState === 'running'
   const runIcon = runIsPause ? 'debug-pause' : 'play'
@@ -287,10 +311,20 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
   // request from its own tab), F6 debugs, F7 steps, and the Pause key pauses.
   // `aria-label` stays the plain label; the shortcut only decorates the visible
   // tooltip. (The actual key bindings land in a follow-up.)
-  const runTooltip = `${runLabel} (${runIsPause ? 'Pause' : 'F5'})`
+  const runTooltip = cannotStartFresh
+    ? t('scenario.validation.runBlocked', { count: errorBoxCount, defaultValue: 'Fix {{count}} action error(s) before running' })
+    : `${runLabel} (${runIsPause ? 'Pause' : 'F5'})`
   const stepTooltip = `${stepLabel} (F7)`
   const debugTooltip = `${debugLabel} (F6)`
   const stopTooltip = `${stopLabel} (F8)`
+  // Undo / redo — the visible shortcut hint follows the platform mapping owned
+  // by ECUI (Cmd on macOS, Ctrl elsewhere; redo is Ctrl+Y on Windows but
+  // Ctrl/Cmd+Shift+Z on Linux/macOS).
+  const undoLabel = t('scenario.inspector.undo', 'Undo')
+  const redoLabel = t('scenario.inspector.redo', 'Redo')
+  const mod = isMacintosh ? '⌘' : 'Ctrl'
+  const undoTooltip = `${undoLabel} (${mod}+Z)`
+  const redoTooltip = `${redoLabel} (${isMacintosh ? '⌘+⇧+Z' : isWindows ? 'Ctrl+Y' : 'Ctrl+Shift+Z'})`
 
   // Run-logs view (only when no box is selected) — the shared
   // `ScenarioRunLogView` (also used by the run-history modal) renders the
@@ -308,6 +342,17 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
         {/* aria-label kept (invisible — screen-reader name only); the styled
          * hover label comes from the ECUI Tooltip wrapper. No `title` so the
          * native browser tooltip never shows. */}
+        {onUndo && (
+          <>
+            <HeaderHoverTooltip label={undoTooltip}>
+              <Button small icon="discard" onClick={onUndo} disabled={canUndo !== true} className="scn-inspector-undo-round" options={{ ariaLabel: undoLabel }} data-testid="scenario-inspector-undo" />
+            </HeaderHoverTooltip>
+            <HeaderHoverTooltip label={redoTooltip}>
+              <Button small icon="redo" onClick={onRedo} disabled={canRedo !== true} className="scn-inspector-redo-round" options={{ ariaLabel: redoLabel }} data-testid="scenario-inspector-redo" />
+            </HeaderHoverTooltip>
+            <div className="scn-inspector-toolbar-sep" aria-hidden="true" />
+          </>
+        )}
         <HeaderHoverTooltip label={runTooltip}>
           <Button small icon={runIcon} onClick={onRun} disabled={runDisabled} className={`scn-inspector-run-round${runIsPause ? ' scn-inspector-run-round-active' : ''}`} options={{ ariaLabel: runLabel }} data-testid="scenario-inspector-run" />
         </HeaderHoverTooltip>
@@ -335,15 +380,15 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
               {t('scenario.validation.panelTitle', { count: errorBoxCount, defaultValue: '{{count}} action error(s)' })}
             </div>
             {errors.map(({ nodeId, title, error }) => (
-              <button
+              <Button
                 key={`${nodeId}-${error.code}`}
-                type="button"
+                link
                 className="scn-error-row"
                 onClick={() => { onFocusNode(nodeId) }}
-                title={t('scenario.validation.focusBox', 'Focus this action')}
+                options={{ ariaLabel: t('scenario.validation.focusBox', 'Focus this action') }}
               >
                 <span style={{ opacity: 0.8 }}>{title}</span> — {error.message}
-              </button>
+              </Button>
             ))}
           </div>
         </>
@@ -353,29 +398,31 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
         <>
           <div className="scn-inspector-sep" />
           <div className="scn-inspector-section scn-inspector-preview">
+            {/* When the box wraps a navigable item, the title IS the link to its
+              * tab (badge as the leading icon) — the inspector doubles as the
+              * box's "open" affordance, so no separate "Edit" row is needed.
+              * Otherwise the title is plain text. */}
             <div className="scn-inspector-section-title scn-inspector-preview-header">
-              {previewNode.titleBadge}
-              <span>{previewNode.title}</span>
+              {previewNode.openItemId && previewNode.openItemKind && onOpenItem ? (
+                <Button
+                  externalLink
+                  icon={previewNode.titleBadge as React.ReactElement}
+                  className="scn-inspector-title-link"
+                  onClick={() => {
+                    const id = previewNode.openItemId
+                    if (id) onOpenItem(id)
+                  }}
+                  data-testid="scenario-inspector-open"
+                >
+                  {previewNode.title}
+                </Button>
+              ) : (
+                <>
+                  {previewNode.titleBadge}
+                  <span>{previewNode.title}</span>
+                </>
+              )}
             </div>
-            {/* First row when the box wraps a navigable item — a small
-              * link to its tab so the inspector doubles as the box's
-              * "open" affordance. Same handler the node-box's
-              * "Edit request / scenario" row uses. */}
-            {previewNode.openItemId && previewNode.openItemKind && onOpenItem && (
-              <button
-                type="button"
-                className="scn-inspector-open"
-                onClick={() => {
-                  const id = previewNode.openItemId
-                  if (id) onOpenItem(id)
-                }}
-                data-testid="scenario-inspector-open"
-              >
-                {previewNode.openItemKind === 'request'
-                  ? t('scenario.editRequest', 'Edit request')
-                  : t('scenario.editScenario', 'Edit scenario')}
-              </button>
-            )}
             {previewNode.note && <div className="scn-inspector-note">{previewNode.note}</div>}
             {/* Inline play button — visible whenever the box is runnable AND
               * carries no real run result yet, both for the "no data at all"
@@ -440,7 +487,7 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
             <div className="scn-inspector-section-title scn-inspector-logs-header">
               <span>{t('scenario.inspector.logsTitle', 'Run logs')}</span>
             </div>
-            <ScenarioRunLogView logs={allLogs} testIdPrefix="scenario-inspector-logs" onFocusNode={onFocusNode} {...(onClearRunLog ? { onClear: onClearRunLog } : {})} {...(logProvenance ? { provenance: logProvenance } : {})} />
+            <ScenarioRunLogView logs={allLogs} testIdPrefix="scenario-inspector-logs" onFocusNode={onFocusNode} showAllLogs={showAllLogs} onShowAllLogsChange={setShowAllLogs} levels={logLevels} onLevelsChange={setLogLevels} {...(onClearRunLog ? { onClear: onClearRunLog } : {})} />
           </div>
         </>
       )}

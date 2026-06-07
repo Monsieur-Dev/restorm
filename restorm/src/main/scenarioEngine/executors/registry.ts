@@ -4,7 +4,7 @@
  * (no need to do a switch on every dispatch).
  */
 
-import type { NodeExecutor } from '../types'
+import type { NodeExecutor, ExecContext } from '../types'
 import type { ScenarioModel } from '../types'
 import {
   arithmeticExecutor,
@@ -22,18 +22,41 @@ import {
   assertExecutor,
   mapExecutor,
   filterExecutor,
-  transformExecutor
+  addToListExecutor,
+  removeFromListExecutor,
+  transformExecutor,
+  castExecutor,
+  regexExecutor,
+  jsonExecutor,
+  xmlExecutor,
+  yamlExecutor,
+  cryptoExecutor,
+  jwtExecutor,
+  dateTimeExecutor,
+  objectOpExecutor,
+  urlExecutor,
+  randomExecutor,
+  listOpExecutor,
+  csvExecutor,
+  mathExecutor,
+  throwExecutor
 } from './pureExecutors'
+import { schemaExecutor, readFileExecutor, writeFileExecutor } from './ioExecutors'
+import { codeExecutor } from './codeExecutor'
 import {
   waitExecutor,
   waitUntilExecutor,
   forEachExecutor,
   forExecutor,
+  retryExecutor,
+  timerExecutor,
   aggregateExecutor
 } from './timeAndFlowExecutors'
 import { httpRequestExecutor } from './httpRequestExecutor'
 import { runScenarioExecutor } from './runScenarioExecutor'
 import { concreteValue } from '../../../shared/utils/scenarioStaticPreview'
+import { readInputParams } from '../../../shared/scenarioInputParams'
+import { readOutputDecls } from '../../../shared/scenarioOutputDecls'
 
 /** An `input` node either: (a) seeded at run start with the user's
  * up-front value (the editor's pre-run modal) — pure passthrough; or
@@ -41,28 +64,63 @@ import { concreteValue } from '../../../shared/utils/scenarioStaticPreview'
  * — in that case we surface a single-field prompt so the user can
  * confirm / edit before the value flows downstream. The `seeded`
  * flag on the activation distinguishes the two paths. */
-const inputExecutor: NodeExecutor = async (act, ctx) => {
-  // The seed activation already carries the `{ [name]: value }` shape
+/** Publish each of the input's resolved params into the run's variable store,
+ * so a `{{param1}}` reference resolves at execution exactly as the editor's
+ * picker + static preview advertise it (input params ARE scenario variables). */
+function publishInputVariables(value: unknown, ctx: ExecContext): void {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return
+  for (const [name, v] of Object.entries(value as Record<string, unknown>)) ctx.variables.set(name, v)
+}
+
+export const inputExecutor: NodeExecutor = async (act, ctx) => {
+  // The seed activation already carries the `{ [name]: value, … }` object
   // (see `Scheduler.seedRoots`); pass it through verbatim.
-  if (act.seeded === true) return { outputs: [{ port: 'value', value: act.inputs['value'] }] }
-  const cfg = ctx.node.config as { name?: string; value?: unknown; valueType?: unknown }
-  const name = typeof cfg.name === 'string' && cfg.name !== '' ? cfg.name : 'value'
-  // Prefill the prompt with the upstream value when one was fed into the
-  // node, otherwise the node's OWN configured default (the box's
-  // "Default / type" field) — resolved to a concrete primitive the same
-  // way the seeded path does, so the modal honours the scenario default.
-  const configuredDefault = cfg.valueType !== undefined && cfg.valueType !== null
-    ? concreteValue(cfg.valueType)
-    : cfg.value
-  const prefill = act.inputs['value'] !== undefined ? act.inputs['value'] : configuredDefault
-  const value = await ctx.requestUserInput({
-    name: cfg.name ?? ctx.node.id,
-    defaultValue: prefill,
-    hint: inferHint((cfg.valueType as { type?: string } | undefined)?.type)
-  })
-  // Wrap to match the static preview shape so a wired selector
-  // (auto-deduced to the param name) resolves the same as the seeded path.
-  return { outputs: [{ port: 'value', value: { [name]: value } }] }
+  if (act.seeded === true) {
+    const value = act.inputs['value']
+    publishInputVariables(value, ctx)
+    return { outputs: [{ port: 'value', value }] }
+  }
+  // An input prompts for EACH declared param and emits one object keyed by the
+  // param names — the same shape the static preview + seeded path model, so a
+  // wired selector resolves identically. The prompts are raised CONCURRENTLY
+  // (not awaited one-at-a-time): the up-front modal collects every param at once
+  // and resolves them in a single submit, so all requests must be pending
+  // together — a sequential await would force one Run click per param. A
+  // predecessor-wired (mid-run) input still surfaces them one-at-a-time, since
+  // the editor shows the single-field prompt for whichever request it finds
+  // first; the others simply stay pending until their turn.
+  const params = readInputParams(ctx.node.config)
+  const wired = act.inputs['value']
+  const wiredObj = wired !== null && typeof wired === 'object' ? wired as Record<string, unknown> : null
+  const entries = await Promise.all(params.map(async (param) => {
+    const name = param.name.trim() !== '' ? param.name.trim() : 'value'
+    const configuredDefault = param.valueType !== undefined && param.valueType !== null
+      ? concreteValue(param.valueType)
+      : undefined
+    // Prefill: a wired object carrying this param name wins; a single bare
+    // wired value prefills a single param; otherwise the param's own default.
+    const prefill = wiredObj && name in wiredObj
+      ? wiredObj[name]
+      : (params.length === 1 && wired !== undefined ? wired : configuredDefault)
+    // A non-interactive run (MCP / headless e2e / a sub-scenario reached by a
+    // headless parent) can't surface a prompt — it would await forever — so it
+    // takes the prefill (wired value or configured default) straight through.
+    const value = ctx.interactive
+      ? await ctx.requestUserInput({
+        name,
+        defaultValue: prefill,
+        hint: inferHint((param.valueType as { type?: string } | undefined)?.type),
+        // Carry the param's full typed-value shape so the mid-run prompt can render
+        // the matching editor (a datetime picker, a custom-list combobox, …) rather
+        // than collapsing every non-number/boolean type to a bare text field.
+        ...(param.valueType !== undefined && param.valueType !== null ? { valueType: param.valueType } : {})
+      })
+      : prefill
+    return [name, value] as const
+  }))
+  const value = Object.fromEntries(entries)
+  publishInputVariables(value, ctx)
+  return { outputs: [{ port: 'value', value }] }
 }
 
 function inferHint(t: string | undefined): 'string' | 'number' | 'boolean' | 'object' {
@@ -75,10 +133,23 @@ function inferHint(t: string | undefined): 'string' | 'number' | 'boolean' | 'ob
   }
 }
 
-/** `output` node: forwards its incoming value to the run's result
- * map. Wired by the engine container — here we just emit on the
- * `value` port (the scheduler bubbles it up). */
-const outputPassthroughExecutor: NodeExecutor = (act) => ({ outputs: [{ port: 'value', value: act.inputs['value'] }] })
+/** `output` node: exposes one or more named scenario outputs. Each declared
+ * output reads its OWN `value` input port (id = the decl id) and emits on an
+ * `output:<name>` port; the engine container (see `engine.startWithStack`)
+ * harvests those into the run's result map. A blank-named decl is skipped. */
+const outputPassthroughExecutor: NodeExecutor = (act, ctx) => {
+  const decls = readOutputDecls(ctx.node.config)
+  return {
+    outputs: decls
+      .filter((d) => d.name.trim() !== '')
+      // Wired value wins; otherwise fall back to the decl's literal `value`
+      // (the same affordance the `object` builder gives each property).
+      .map((d) => ({
+        port: `output:${d.name.trim()}`,
+        value: act.inputs[d.id] !== undefined ? act.inputs[d.id] : (d.value !== undefined ? concreteValue(d.value) : undefined)
+      }))
+  }
+}
 
 export function buildExecutorRegistry(scenario: ScenarioModel): Map<string, NodeExecutor> {
   const out = new Map<string, NodeExecutor>()
@@ -103,7 +174,30 @@ function pickExecutor(kind: string): NodeExecutor {
     case 'assert': return assertExecutor
     case 'map': return mapExecutor
     case 'filter': return filterExecutor
+    case 'addToList': return addToListExecutor
+    case 'removeFromList': return removeFromListExecutor
     case 'transform': return transformExecutor
+    case 'code': return codeExecutor
+    case 'cast': return castExecutor
+    case 'regex': return regexExecutor
+    case 'json': return jsonExecutor
+    case 'xml': return xmlExecutor
+    case 'yaml': return yamlExecutor
+    case 'crypto': return cryptoExecutor
+    case 'jwt': return jwtExecutor
+    case 'datetime': return dateTimeExecutor
+    case 'objectOp': return objectOpExecutor
+    case 'url': return urlExecutor
+    case 'random': return randomExecutor
+    case 'listOp': return listOpExecutor
+    case 'csv': return csvExecutor
+    case 'math': return mathExecutor
+    case 'schema': return schemaExecutor
+    case 'readFile': return readFileExecutor
+    case 'writeFile': return writeFileExecutor
+    case 'throw': return throwExecutor
+    case 'retry': return retryExecutor
+    case 'timer': return timerExecutor
     case 'wait': return waitExecutor
     case 'waitUntil': return waitUntilExecutor
     case 'forEach': return forEachExecutor

@@ -234,6 +234,13 @@ export const buildContextMenuForItem = (
       },
       { id: 'sep-add', isSeparator: true, label: '' },
       {
+        id: 'clone-item',
+        label: t('sidebar.contextMenu.clone'),
+        icon: 'copy',
+        shortcut: 'Ctrl+D',
+        onClick: () => { onCloneItem(itemId) }
+      },
+      {
         id: 'rename-item',
         label: t('sidebar.contextMenu.rename'),
         icon: 'edit',

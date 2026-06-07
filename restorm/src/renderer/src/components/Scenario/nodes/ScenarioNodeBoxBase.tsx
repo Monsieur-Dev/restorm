@@ -7,8 +7,10 @@ import { scenarioNodeMeta } from '../scenarioNodeCatalogue'
 import { useScenarioNodeErrors } from '../scenarioErrorsContext'
 import { ROLE_COLOR } from '../scenarioGraphMapping'
 import { ScenarioNodeSection } from './ScenarioNodeSection'
+import { useScenarioInternalsRequester } from '../scenarioInternalsContext'
 import { HeaderHoverTooltip } from '../../MainView/HeaderHoverTooltip'
 import { anchorColor, cellBody, portAnchorColor, inputFlowRingClass, outputFlowRingClass, cellInputRingClass, cellOutputRingClass } from './scenarioCellRender'
+import { hasDonePort, hasErrorPort } from '../../../../../shared/scenarioNodeCapabilities'
 import '../ScenarioNodeBox.css'
 
 /** React Flow node data shared by every scenario node box. */
@@ -99,26 +101,6 @@ export interface ScenarioNodeBoxBaseProps {
   headerIcon?: ReactNode
   /** Override the header title; defaults to the kind's label. */
   title?: string
-  /**
-   * Whether the node accepts a generic "launch" input — a target anchor on
-   * the left of the header (id `in`). Lets nodes be chained without a
-   * dedicated condition (e.g. one request's `response` → the next's launch,
-   * or a `setVariable`'s `event` → an `if`'s launch).
-   */
-  launchInput?: boolean
-  /**
-   * Whether the node emits a generic "event" output — a source anchor on the
-   * right of the header (id `event`, signal flow). Lets a node signal
-   * completion to chain the next node's launch input without producing a data
-   * value (e.g. `setVariable`, which stores its input and fires this event).
-   */
-  headerEventOutput?: boolean
-  /**
-   * Whether the node exposes the dedicated error output port (bottom). Most
-   * nodes can fail, so it defaults to true; set false for kinds that can't
-   * error (e.g. `now`), where an error anchor would be meaningless.
-   */
-  hasError?: boolean
 }
 
 /**
@@ -128,8 +110,13 @@ export interface ScenarioNodeBoxBaseProps {
  * box colour with auto-contrast, and the dedicated error port. Per-kind
  * components (IfNodeBox, …) compose this and only declare their columns.
  */
-export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, data, selected, left, right, headerIcon, title, launchInput, headerEventOutput, hasError }) => {
+export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, data, selected, left, right, headerIcon, title }) => {
   const { t } = useTranslation()
+  // The header launch trigger is rendered straight off the node's ports: it
+  // shows iff the node carries the `in` signal input. That input is stamped by
+  // `defaultPortsForKind` for every kind that `acceptsInputEvent`, so the single
+  // source of truth (the capability table) drives both the port and this handle.
+  const launchInput = data.inputs.some((port) => port.id === 'in')
   const meta = scenarioNodeMeta(data.kind)
   // A box in a non-executable state (missing name, unsatisfied input, …) is
   // flagged red and its play button disabled; the errors are aggregated into
@@ -212,6 +199,17 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
     return () => { clearTimeout(timer) }
   }, [collapsed, animating])
 
+  // Which input (target) handles currently have an incoming link — drives the
+  // red "missing required link" flag on mandatory inputs AND the JSON-path
+  // selector swap (a wired data input renders a taller selector cell). Computed
+  // before the row measurement so the structural key below can fold the wired
+  // set in: a swap changes a row's height without changing its port id.
+  const targetConnections = useNodeConnections({ id, handleType: 'target' })
+  const connectedInputs = useMemo(
+    () => new Set(targetConnections.map((c) => c.targetHandle).filter((h): h is string => h != null)),
+    [targetConnections]
+  )
+
   // Single source of port handles: rendered as siblings of the body, absolute-
   // positioned on the box. Their `top` value comes from a layout-time
   // measurement of each row's vertical centre (the `[data-port-id]` marker on
@@ -222,6 +220,22 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
   const boxRef = useRef<HTMLDivElement>(null)
   const headerRef = useRef<HTMLDivElement>(null)
   const [rowTops, setRowTops] = useState<Map<string, number>>(new Map())
+  // A STABLE signature of everything that shifts a row's vertical centre:
+  // the ordered port ids + per-row labels (add / remove / rename / reorder),
+  // the notes band, the node-level error band, and the wired-input set (the
+  // JSON-path swap). `left` / `right` are fresh array refs every render, so
+  // depending on them re-ran this forced-reflow measurement on every unrelated
+  // re-render (engine ticks, flash tokens, selection). Keying on the value
+  // instead runs it only when a row actually moves.
+  const measureKey = useMemo(
+    () => [
+      ...allPorts.map((p) => `${p.id}:${p._label ?? ''}`),
+      note ? `note:${note.length}` : '',
+      `err:${errors.length}`,
+      ...[...connectedInputs].sort()
+    ].join('|'),
+    [allPorts, note, errors.length, connectedInputs]
+  )
   useLayoutEffect(() => {
     const box = boxRef.current
     if (!box) return
@@ -254,7 +268,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
         return prev
       })
     })
-  }, [bodyMounted, bodyOpen, left, right, errors.length, collapsed])
+  }, [bodyMounted, bodyOpen, measureKey, collapsed])
   // Collapsed-mode handle position = vertical centre of the header. Measured
   // once per header layout so a coloured/notes-bearing header still places
   // the gathered handles correctly.
@@ -279,7 +293,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
     queueMicrotask(() => {
       setExpandedWidth((prev) => (prev === w ? prev : w))
     })
-  }, [collapsed, bodyMounted, bodyOpen, left, right])
+  }, [collapsed, bodyMounted, bodyOpen, measureKey])
 
   // Whether a collapse/expand transition is in progress. Only true between
   // the user's click on the chevron and ANIM_MS later — never during initial
@@ -299,16 +313,24 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
   // When we move the handle DOM (different `top` after a measurement or a
   // collapse), we have to tell the store explicitly — otherwise edges keep
   // pointing at the old positions.
-  const updateInternals = useUpdateNodeInternals()
-  useEffect(() => { updateInternals(id) }, [id, updateInternals, rowTops, headerCenterY, collapsed])
-
-  // Which input (target) handles currently have an incoming link — drives the
-  // red "missing required link" flag on mandatory inputs.
-  const targetConnections = useNodeConnections({ id, handleType: 'target' })
-  const connectedInputs = useMemo(
-    () => new Set(targetConnections.map((c) => c.targetHandle).filter((h): h is string => h != null)),
-    [targetConnections]
-  )
+  const fallbackUpdateInternals = useUpdateNodeInternals()
+  const requestInternals = useScenarioInternalsRequester()
+  useEffect(() => {
+    // Skip the redundant mount-time sync. Before `rowTops` is measured, every
+    // positioned handle renders at the header centre (its `top` fallback) —
+    // exactly where React Flow's own initial node measurement already places
+    // it. Only the post-measurement move (rowTops settles) and the collapsed
+    // gather actually relocate a handle, so only those need an explicit
+    // internals update.
+    if (!collapsed && rowTops.size === 0 && allPorts.length > 0) return
+    // Route through the editor's batching requester: a single-id
+    // `updateNodeInternals` per box is O(N), so N boxes settling on open were
+    // O(N²) (a multi-second freeze). The requester coalesces a frame's worth of
+    // ids into one flush. Fall back to the direct per-id update outside the
+    // editor (preview / no provider).
+    if (requestInternals) requestInternals(id)
+    else fallbackUpdateInternals(id)
+  }, [id, requestInternals, fallbackUpdateInternals, rowTops, headerCenterY, collapsed, allPorts.length])
 
   const headerStyle: CSSProperties = data.color
     ? { background: data.color, color: getContrastColor(data.color) }
@@ -387,7 +409,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
       style={collapsed && expandedWidth !== null ? { width: `${expandedWidth}px` } : {}}
       onAnimationIteration={onAnimationIteration}
     >
-      <div ref={headerRef} className={`scn-node-header ${headerEventOutput ? 'scn-node-header-has-event' : ''}`} style={headerStyle} onContextMenu={onHeaderContextMenu}>
+      <div ref={headerRef} className="scn-node-header" style={headerStyle} onContextMenu={onHeaderContextMenu}>
         {launchInput && (
           <Handle
             id="in"
@@ -396,16 +418,6 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
             className={`scn-handle scn-handle-launch ${inputFlowRingClass('in', data.inputs, data.kind)}`}
             style={{ background: anchorColor() }}
             title="in"
-          />
-        )}
-        {headerEventOutput && (
-          <Handle
-            id="event"
-            type="source"
-            position={Position.Right}
-            className={`scn-handle scn-handle-event ${outputFlowRingClass('event', data.outputs, data.kind)}`}
-            style={{ background: anchorColor() }}
-            title="event"
           />
         )}
         {headerIcon ?? <i className={`codicon codicon-${meta.icon} scn-node-icon`} aria-hidden="true" />}
@@ -436,14 +448,15 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
         )}
         {data.onToggleBreakpoint && (
           <HeaderHoverTooltip label={t('scenario.breakpoint.toggle', 'Toggle breakpoint (F9)')} suppressed={data.breakpointPaused === true}>
-            <span
-              ref={breakpointRef}
-              className={`scn-node-breakpoint nodrag${data.breakpoint ? ' is-set' : ''}${data.breakpointPaused ? ' is-paused' : ''}`}
-              data-testid="scn-node-breakpoint"
-              aria-label={data.breakpoint ? t('scenario.breakpoint.remove', 'Remove breakpoint') : t('scenario.breakpoint.add', 'Add breakpoint')}
-              onClick={(e) => { e.stopPropagation(); data.onToggleBreakpoint?.(id) }}
-            >
-              <i className={`codicon codicon-${data.breakpoint ? 'circle-filled' : 'circle-outline'}`} aria-hidden="true" />
+            <span ref={breakpointRef} className="scn-node-breakpoint-anchor">
+              <Button
+                small
+                className={`scn-node-breakpoint nodrag${data.breakpoint ? ' is-set' : ''}${data.breakpointPaused ? ' is-paused' : ''}`}
+                icon={data.breakpoint ? 'circle-large-filled' : 'circle-large-outline'}
+                data-testid="scn-node-breakpoint"
+                options={{ ariaLabel: data.breakpoint ? t('scenario.breakpoint.remove', 'Remove breakpoint') : t('scenario.breakpoint.add', 'Add breakpoint') }}
+                onClick={(e) => { e.stopPropagation(); data.onToggleBreakpoint?.(id) }}
+              />
             </span>
           </HeaderHoverTooltip>
         )}
@@ -533,7 +546,7 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
         )
       })}
 
-      {hasError !== false && (
+      {hasErrorPort(data.kind) && (
         <Handle
           id="error"
           type="source"
@@ -541,6 +554,19 @@ export const ScenarioNodeBoxBase: React.FC<ScenarioNodeBoxBaseProps> = ({ id, da
           className={`scn-handle scn-handle-error ${outputFlowRingClass('error', data.outputs, data.kind)}`}
           style={{ background: ROLE_COLOR['error'] }}
           title="error"
+        />
+      )}
+      {/* Universal completion signal: fires once this box AND its whole
+       * downstream sub-graph have finished. Implicit (drawn on every box that
+       * has it, never listed per-kind) and driven by the capability table —
+       * the `output` sink opts out (nothing runs after it). */}
+      {hasDonePort(data.kind) && (
+        <Handle
+          id="done"
+          type="source"
+          position={Position.Bottom}
+          className={`scn-handle scn-handle-done ${outputFlowRingClass('done', data.outputs, data.kind)}`}
+          title="done"
         />
       )}
       {/* The BorderBeam orbits the full box outline. Rendered LAST so it

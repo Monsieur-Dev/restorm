@@ -5,6 +5,7 @@ import type { VariableInputBoxProps, VariableDefinition } from './types'
 import { defaultInputBoxStyles } from '../InputBox/types'
 import { CodeEditor } from '../CodeEditor/CodeEditor'
 import { ContextMenu, type ContextMenuItem } from '../ContextMenu/ContextMenu'
+import { handlebarsReference, extractVariableName } from './handlebarsReference'
 import '../InputBox/inputBox.css'
 import './variableInputBox.css'
 
@@ -268,7 +269,7 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
               suggestions.push({
                 label: labelObj as monacoEditor.languages.CompletionItemLabel,
                 kind: monacoInstance.languages.CompletionItemKind.Variable,
-                insertText: `{{${v.name}}}`,
+                insertText: handlebarsReference(v.name),
                 documentation: v.description ?? v.value,
                 detail: 'variable',
                 sortText: `0_${v.name}`,
@@ -298,9 +299,10 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
               return { contents: [] }
             }
 
-            // Extract the content between {{ and }}, get first word (variable name)
-            const innerContent = lineText.substring(openIndex + 2, closeIndex).trim()
-            const name = innerContent.split(/\s+/)[0] ?? ''
+            // Extract the variable name between {{ and }} — a quoted segment
+            // (`'a b'`) is one whitespace-bearing name, otherwise the first token.
+            const innerContent = lineText.substring(openIndex + 2, closeIndex)
+            const name = extractVariableName(innerContent)
 
             const data = getProviderState().modelDataMap.get(model) ?? { variables: [] }
 

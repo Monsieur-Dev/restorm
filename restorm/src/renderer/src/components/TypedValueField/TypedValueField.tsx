@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
+import { collectTypeLeaves } from './typePickMenu'
+import { ScenarioInlineCodeField, type ScenarioCodeLanguage } from '../Scenario/nodes/ScenarioCodeField'
 import {
   InputBox,
   Button,
@@ -18,8 +20,9 @@ import {
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import type { TranslatedHelperDefinition } from '../../utils/handlebarsHelpersDefinitions'
 import type { ValueType, EnumDefinition, CustomValueList } from '../../../../shared/types/collections'
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue } from '../../../../shared/types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue, NullValue, ListValue } from '../../../../shared/types/collections'
 import { EnvironmentValueCell } from './EnvironmentValueCell'
+import { ListValueCell } from './ListValueCell'
 import type { EnvValueTypeGroup } from '../../hooks/collectEnvValueTypeGroups'
 import { useScenarioVariables } from '../../contexts/ScenarioVariablesContext'
 import { castValueToKind, resolveValueTypeKind, type ValueTypeKind } from './castValue'
@@ -38,33 +41,21 @@ interface TypeIndicatorProps {
   onMenuOpen?: (e: React.MouseEvent) => void
 }
 
-const typeIndicatorStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: 28,
-  height: 28,
-  borderRadius: 4,
-  border: '1px solid var(--vscode-editorWidget-border, rgba(255,255,255,0.12))',
-  cursor: 'pointer',
-  fontSize: 14,
-  opacity: 0.7,
-  boxSizing: 'border-box'
-}
-
 const TypeIndicator: React.FC<TypeIndicatorProps> = ({ icon, ariaLabel, dataTestId, onMenuOpen }) => (
-  <div
-    style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center' }}
-    onClick={onMenuOpen}
-    onContextMenu={(e) => { e.preventDefault(); onMenuOpen?.(e) }}
-  >
-    <div
-      style={typeIndicatorStyle}
-      {...(dataTestId && { 'data-testid': dataTestId })}
-    >
-      <span className={`codicon codicon-${icon}`} aria-label={ariaLabel} />
-    </div>
-  </div>
+  // A real ECUI Button (medium = 28×28 square) so it auto-styles with the theme
+  // and lines up flush with the value cell inside the ControlGroup. Opens the
+  // type-pick menu on either a primary or a context (right) click — UNLESS the
+  // field locks its type (`onMenuOpen` omitted): then it stays a pure, inert
+  // indicator (icon still shows the type, but it opens nothing and drops its
+  // clickable affordance).
+  <Button
+    medium
+    secondary
+    icon={icon}
+    {...(onMenuOpen ? { onClick: onMenuOpen, onContextMenu: onMenuOpen } : { className: 'tvf-type-indicator-locked' })}
+    options={{ ariaLabel }}
+    {...(dataTestId && { 'data-testid': dataTestId })}
+  />
 )
 
 interface ColorValueCellProps {
@@ -74,7 +65,7 @@ interface ColorValueCellProps {
 }
 
 const ColorValueCell: React.FC<ColorValueCellProps> = ({ hex, onChangeHex, dataTestId }) => {
-  const targetRef = useRef<HTMLDivElement | null>(null)
+  const targetRef = useRef<HTMLSpanElement | null>(null)
   const [isOpen, setIsOpen] = useState(false)
   const tooltipClassName = 'restorm-color-picker-tooltip'
 
@@ -104,27 +95,21 @@ const ColorValueCell: React.FC<ColorValueCellProps> = ({ hex, onChangeHex, dataT
     }
   }, [isOpen])
 
+  // A fragment (not a wrapping div) so the hex field + swatch land as DIRECT
+  // children of the value cell's ControlGroup — only then does the group stretch
+  // the disabled InputBox to the full 28px row height (a nested InputBox stays at
+  // its natural 27px, dropping its bottom border above the buttons'). The Tooltip
+  // renders null / a portal, so it adds no stray control-group child.
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 6,
-        width: '100%',
-        height: '100%',
-        minWidth: 0
-      }}
-    >
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <InputBox
-          value={hex}
-          options={{ type: 'text' }}
-          disabled
-          {...(dataTestId && { 'data-testid': `${dataTestId}-color-input` })}
-        />
-      </div>
+    <>
+      <InputBox
+        value={hex}
+        options={{ type: 'text' }}
+        disabled
+        {...(dataTestId && { 'data-testid': `${dataTestId}-color-input` })}
+      />
 
-      <div ref={targetRef} style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center' }}>
+      <span ref={targetRef} className="tvf-color-swatch">
         <Button
           line
           options={{ ariaLabel: 'Open color picker' }}
@@ -135,7 +120,7 @@ const ColorValueCell: React.FC<ColorValueCellProps> = ({ hex, onChangeHex, dataT
           style={{ backgroundColor: hex }}
           {...(dataTestId && { 'data-testid': `${dataTestId}-color-button` })}
         />
-      </div>
+      </span>
 
       <Tooltip
         targetRef={targetRef as unknown as React.RefObject<HTMLElement | null>}
@@ -160,7 +145,7 @@ const ColorValueCell: React.FC<ColorValueCellProps> = ({ hex, onChangeHex, dataT
           </div>
         }
       />
-    </div>
+    </>
   )
 }
 
@@ -199,6 +184,19 @@ export interface TypedValueFieldProps {
    */
   allowEnvironment?: boolean | undefined
   /**
+   * Offer the `null` type — an explicit "no value" (distinct from the empty
+   * string). Off by default; the slots that accept it opt in (comparison nodes
+   * if / switch / assert / comparator / boolean, set+object+output values, and
+   * a log's `data`). NOT offered on arithmetic / wait / loop / input fields.
+   */
+  allowNull?: boolean | undefined
+  /**
+   * When set, the type-pick menu offers `list` — an agnostic, untyped list
+   * edited in a popover (rows of nested TypedValueFields). Off by default; the
+   * slots that accept a list value opt in.
+   */
+  allowList?: boolean | undefined
+  /**
    * When set, the type-pick menu gains a trailing separator + a "remove" entry
    * (e.g. a switch case removing itself). The label defaults to "Supprimer".
    */
@@ -216,6 +214,29 @@ export interface TypedValueFieldProps {
   expressionVariableId?: string | undefined
   /** Test id prefix; widget + menu testids are derived from it. */
   dataTestId?: string | undefined
+  /**
+   * Extra control(s) appended INSIDE the value's ControlGroup, right after the
+   * type-indicator button — so they sit flush beside the field like the colour /
+   * date pickers (e.g. the expression field's "expand to full-screen editor"
+   * button). Rendered for every type, so callers that lock the type (expression)
+   * get a single, predictable trailing button.
+   */
+  trailingControls?: React.ReactNode | undefined
+  /**
+   * Render a STRING value as a roomy multiline preview + a full-screen editor
+   * modal (in the given language) instead of the single-line input — for
+   * document operands (json / xml / yaml / csv value, writeFile content, …). The
+   * type-pick button is kept, so the value can still be recast / wired.
+   */
+  multilineLanguage?: ScenarioCodeLanguage | undefined
+  /**
+   * Lock the value's TYPE: keep the type-indicator button (it still shows which
+   * type the value holds) but suppress its type-pick menu, so the type can't be
+   * recast. Used by the run-parameters prompt, where each field's type is fixed
+   * by the input node's declared param type — the user supplies a VALUE, not a
+   * new type.
+   */
+  lockType?: boolean | undefined
 }
 
 /**
@@ -233,12 +254,17 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
   excludeVariableName,
   allowAllVariables,
   allowEnvironment,
+  allowNull,
+  allowList,
   onRemove,
   removeLabel,
   variables = [],
   helpers = [],
   expressionVariableId,
-  dataTestId
+  dataTestId,
+  lockType,
+  trailingControls,
+  multilineLanguage
 }) => {
   const { t } = useTranslation()
 
@@ -298,12 +324,15 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
   ): React.ReactNode => (
     <ControlGroup className="tvf-control-group">
       {editor}
-      <TypeIndicator
-        icon={o.icon}
-        ariaLabel={o.ariaLabel}
-        onMenuOpen={openMenu}
-        {...(dataTestId && { dataTestId: `${dataTestId}-value-type-${o.typeTestid}` })}
-      />
+      {trailingControls}
+      {!hideTypeButton && (
+        <TypeIndicator
+          icon={o.icon}
+          ariaLabel={o.ariaLabel}
+          {...(!lockType && { onMenuOpen: openMenu })}
+          {...(dataTestId && { dataTestId: `${dataTestId}-value-type-${o.typeTestid}` })}
+        />
+      )}
     </ControlGroup>
   )
 
@@ -454,6 +483,28 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
     // precedes it, otherwise an all-excluded tail (e.g. the list-only forEach
     // `items` selector) leaves an orphan divider with nothing to separate.
     const tail: ContextMenuItem[] = []
+    // `null` — an explicit "no value" — heads the trailing group where the slot
+    // opted in. Picking it casts to a `NullValue` (no editable widget).
+    if (allowNull) {
+      tail.push({
+        id: 'null',
+        label: t('keyValueTable.types.null', 'Null'),
+        checked: activeType === 'null',
+        onClick: () => { cast('null') },
+        ...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-null` })
+      })
+    }
+    // `list` — an agnostic, untyped list edited in a popover. Picking it casts
+    // to an empty `ListValue`; the field's button opens the row editor.
+    if (allowList) {
+      tail.push({
+        id: 'list',
+        label: t('keyValueTable.types.list', 'List'),
+        checked: activeType === 'list',
+        onClick: () => { cast('list') },
+        ...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-list` })
+      })
+    }
     // `environment` sits just before `secret`, only where the slot opted in.
     // Picking it casts to an empty EnvironmentValue; the env-picker button then
     // resolves the actual environment (there's no submenu).
@@ -501,7 +552,22 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
     }
 
     return items
-  }, [t, cast, dataTestId, groups, activeType, activeDefId, isExcluded, variableNames, allowAllVariables, allowEnvironment, value, onRemove, removeLabel])
+  }, [t, cast, dataTestId, groups, activeType, activeDefId, isExcluded, variableNames, allowAllVariables, allowEnvironment, allowNull, allowList, value, onRemove, removeLabel])
+
+  // When the type-pick menu offers at most ONE selectable type, the choice is
+  // forced: hide the type button (keep it for `lockType`, whose icon is purely
+  // informational). Derived from the SAME live `menuItems`, so adding a scenario
+  // variable (which can grow a variable-only field from 0→1→2 options)
+  // re-evaluates the button's visibility automatically.
+  const typeLeaves = useMemo(() => collectTypeLeaves(menuItems), [menuItems])
+  const hideTypeButton = !lockType && typeLeaves.length <= 1
+  // With exactly one option, force the value onto it (so the left widget already
+  // shows the right type — e.g. a boolean-only slot renders its toggle).
+  useEffect(() => {
+    if (typeLeaves.length !== 1) return
+    const only = typeLeaves[0]
+    if (only && only.checked !== true && only.onClick) only.onClick()
+  }, [typeLeaves])
 
   const widget = ((): React.ReactNode => {
     if (value instanceof PasswordValue) {
@@ -588,6 +654,35 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
           {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-expression` })}
         />,
         { icon: 'code', ariaLabel: 'Expression (Handlebars template)', typeTestid: 'expression' }
+      )
+    }
+
+    // NullValue → a read-only "null" cell (no value to type); the ø icon marks
+    // the type. Recast via the type menu like any other.
+    if (value instanceof NullValue) {
+      return withTypeControl(
+        <InputBox
+          value="null"
+          options={{ type: 'text' }}
+          disabled
+          {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-null` })}
+        />,
+        { icon: 'circle-slash', ariaLabel: 'Null value', typeTestid: 'null' }
+      )
+    }
+
+    // ListValue → a preview field + a popover editor (rows of nested
+    // TypedValueFields). The ø/list icon marks the type.
+    if (value instanceof ListValue) {
+      return withTypeControl(
+        <ListValueCell
+          value={value}
+          onChange={onChange}
+          {...(valueTypeGroups ? { valueTypeGroups } : {})}
+          {...(excludeVariableName ? { excludeVariableName } : {})}
+          {...(dataTestId ? { dataTestId } : {})}
+        />,
+        { icon: 'list-unordered', ariaLabel: 'List value', typeTestid: 'list' }
       )
     }
 
@@ -688,6 +783,21 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
       )
     }
 
+    // A document operand (json / xml / yaml / csv value, writeFile content, …):
+    // a roomy multiline preview + full-screen editor modal, keeping the type
+    // button so the value can still be recast / wired.
+    if (multilineLanguage) {
+      return withTypeControl(
+        <ScenarioInlineCodeField
+          value={value.toString()}
+          onChange={(next) => { onChange(new StringValue(next)) }}
+          language={multilineLanguage}
+          title={t('scenario.codeField.title', 'Edit')}
+          {...(dataTestId && { dataTestId: `${dataTestId}-value-string` })}
+        />,
+        { icon: 'symbol-string', ariaLabel: 'String value', typeTestid: 'string' }
+      )
+    }
     return withTypeControl(
       <InputBox
         value={value.toString()}
@@ -702,7 +812,8 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
   return (
     <>
       {widget}
-      {createPortal(
+      {/* No type-pick menu when the type is locked — the indicator is inert. */}
+      {!lockType && createPortal(
         // Portal up to the `.workbench` root: `ContextMenu` is `position: fixed`,
         // but inside the scenario editor a React Flow ancestor carries a CSS
         // `transform` (pan/zoom) that would re-anchor `fixed` to that transformed
