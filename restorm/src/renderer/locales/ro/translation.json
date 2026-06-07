@@ -1359,7 +1359,8 @@
       "input": "intrare",
       "code": "cod (TypeScript)",
       "modalTitle": "Editează codul",
-      "result": "rezultat"
+      "result": "rezultat",
+      "timeout": "Timp limită (s)"
     }
   }
 }

@@ -1359,7 +1359,8 @@
       "input": "ulaz",
       "code": "kôd (TypeScript)",
       "modalTitle": "Uredi kôd",
-      "result": "rezultat"
+      "result": "rezultat",
+      "timeout": "Vremensko ograničenje (s)"
     }
   }
 }

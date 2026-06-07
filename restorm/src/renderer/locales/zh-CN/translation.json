@@ -1357,7 +1357,8 @@
       "input": "输入",
       "code": "代码 (TypeScript)",
       "modalTitle": "编辑代码",
-      "result": "结果"
+      "result": "结果",
+      "timeout": "超时 (秒)"
     }
   }
 }

@@ -1358,7 +1358,8 @@
       "input": "girdi",
       "code": "kod (TypeScript)",
       "modalTitle": "Kodu düzenle",
-      "result": "sonuç"
+      "result": "sonuç",
+      "timeout": "Zaman aşımı (sn)"
     }
   }
 }

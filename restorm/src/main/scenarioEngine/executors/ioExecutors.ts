@@ -1,8 +1,12 @@
-import { readFileSync, writeFileSync, appendFileSync } from 'node:fs'
+import { readFileSync, writeFileSync, appendFileSync, statSync } from 'node:fs'
 import type { NodeExecutor } from '../types'
 import { resolveOperand } from '../conditionEval'
 import { resolveWorkspacePath } from '../scenarioFilePath'
 import { validateAgainstSchema } from '../../../shared/schemaValidate'
+
+/** Upper bound on a `readFile` so a scenario can't slurp a multi-GB file into a
+ * string on the main process (and through the run-log archive). */
+const MAX_READ_BYTES = 50 * 1024 * 1024
 
 /** `schema`: validate the resolved `value` against the configured JSON Schema
  * (ajv). Emits the value on `valid` or `invalid` + the error list on `errors`.
@@ -26,7 +30,10 @@ export const readFileExecutor: NodeExecutor = (act, ctx) => {
   const raw = resolveOperand(act.inputs['path'], cfg.path, ctx.variables)
   const p = typeof raw === 'string' ? raw : ''
   if (p.trim() === '') throw new Error('readFile: no path provided')
-  const content = readFileSync(resolveWorkspacePath(p, ctx.workspaceDir), 'utf-8')
+  const resolved = resolveWorkspacePath(p, ctx.workspaceDir)
+  const size = statSync(resolved).size
+  if (size > MAX_READ_BYTES) throw new Error(`readFile: file too large (${size} bytes, max ${MAX_READ_BYTES})`)
+  const content = readFileSync(resolved, 'utf-8')
   return { outputs: [{ port: 'content', value: content }] }
 }
 

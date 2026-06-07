@@ -1358,7 +1358,8 @@
       "input": "entrada",
       "code": "código (TypeScript)",
       "modalTitle": "Editar código",
-      "result": "resultado"
+      "result": "resultado",
+      "timeout": "Tempo limite (s)"
     }
   }
 }

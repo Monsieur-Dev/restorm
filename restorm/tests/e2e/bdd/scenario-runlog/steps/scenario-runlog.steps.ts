@@ -287,8 +287,13 @@ When('I run the scenario {string} and copy all its logs', async ({}, scenarioNam
 Then('the copied run-log matches the snapshot', async () => {
   expect(copiedYaml.length).toBeGreaterThan(0)
   const golden = goldenPathFor(copiedFor)
-  if (process.env.UPDATE_RUNLOG_GOLDEN === '1' || !existsSync(golden)) {
+  if (process.env.UPDATE_RUNLOG_GOLDEN === '1') {
     writeFileSync(golden, copiedYaml, 'utf-8')
+  } else if (!existsSync(golden)) {
+    // Don't silently self-bless a missing golden — that would let a renamed /
+    // mistyped scenario slug pass green. Creating a golden is always an explicit
+    // UPDATE_RUNLOG_GOLDEN=1 action.
+    throw new Error(`run-log golden missing: ${golden} — create it with UPDATE_RUNLOG_GOLDEN=1`)
   }
   expect(copiedYaml, `run-log drifted from ${golden} — regenerate with UPDATE_RUNLOG_GOLDEN=1 if intended`).toBe(
     readFileSync(golden, 'utf-8')

@@ -1358,7 +1358,8 @@
       "input": "inndata",
       "code": "kode (TypeScript)",
       "modalTitle": "Rediger kode",
-      "result": "resultat"
+      "result": "resultat",
+      "timeout": "Tidsavbrudd (s)"
     }
   }
 }

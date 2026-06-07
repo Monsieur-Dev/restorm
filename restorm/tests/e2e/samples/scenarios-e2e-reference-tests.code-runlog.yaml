@@ -27,6 +27,7 @@
       const hash = CryptoJS.MD5('restorm').toString().slice(0, 8)
       console.log('total =', total, '| names =', names.join(','))
       return { total, names, hash, momentType: typeof moment }
+    timeout: 5
     value:
       - n: a
         v: 3

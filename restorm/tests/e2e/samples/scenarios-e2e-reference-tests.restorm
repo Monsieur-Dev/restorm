@@ -16603,6 +16603,7 @@ collections:
                         const hash = CryptoJS.MD5('restorm').toString().slice(0, 8)
                         console.log('total =', total, '| names =', names.join(','))
                         return { total, names, hash, momentType: typeof moment }
+                      timeout: 5
                     inputs:
                       - id: in
                         name: ''
@@ -16668,7 +16669,7 @@ collections:
                         dataType: any
                         flow: both
                     position:
-                      x: 480
+                      x: 300
                       'y': 380
                     note: await Promise.all + setTimeout → async works
                   - id: 2bfc137c-40db-48ae-a3a2-114895c7ef5a
@@ -16743,8 +16744,8 @@ collections:
                         dataType: any
                         flow: both
                     position:
-                      x: 380
-                      'y': 760
+                      x: -240
+                      'y': 1060
                     note: cheerio — jQuery-style HTML scraping
                   - id: cecd6dc3-d342-40a6-b1b7-fe58a05159e9
                     kind: code
@@ -16770,7 +16771,7 @@ collections:
                         dataType: any
                         flow: both
                     position:
-                      x: 1000
+                      x: 680
                       'y': 760
                     note: xml2js — XML → JS (await, events/timers shim)
                   - id: 4b83cb0a-ac2b-44f4-ab36-11fb035fbcf6
@@ -16803,8 +16804,8 @@ collections:
                         dataType: any
                         flow: both
                     position:
-                      x: 1620
-                      'y': 760
+                      x: 680
+                      'y': 1060
                     note: ajv-formats — JSON-schema validation w/ formats
                 edges:
                   - id: 441b0bb7-1bf1-48c5-8d55-c9c46c7fa7e3

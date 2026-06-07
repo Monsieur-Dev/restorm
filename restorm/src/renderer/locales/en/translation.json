@@ -1358,7 +1358,8 @@
       "input": "input",
       "code": "code (TypeScript)",
       "modalTitle": "Edit code",
-      "result": "result"
+      "result": "result",
+      "timeout": "Timeout (s)"
     }
   }
 }

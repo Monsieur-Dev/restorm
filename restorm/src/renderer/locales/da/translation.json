@@ -1358,7 +1358,8 @@
       "input": "input",
       "code": "kode (TypeScript)",
       "modalTitle": "Rediger kode",
-      "result": "resultat"
+      "result": "resultat",
+      "timeout": "Timeout (s)"
     }
   }
 }

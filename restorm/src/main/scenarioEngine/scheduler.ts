@@ -56,6 +56,16 @@ const DEFAULT_MAX_ACTIVATIONS = Number.POSITIVE_INFINITY
  * finite loop pays no measurable yield overhead. */
 const LOOP_YIELD_EVERY = 256
 
+/** Total activations between forced macrotask yields in the post-dispatch
+ * re-tick. The normal re-tick is a microtask (cheap, preserves ordering), but a
+ * user-wired *manual* cycle (a back-edge MERGE) propagates entirely through
+ * microtasks and would starve the macrotask queue — freezing the main process
+ * and defeating Stop. Yielding to `setImmediate` every N activations keeps such
+ * a cycle interruptible. Set far above any real scenario's activation count
+ * (Main, the richest, runs dozens), so a finite run NEVER crosses it — only an
+ * unbounded cycle does — and the goldens are untouched. */
+const ACTIVATION_YIELD_EVERY = 1024
+
 /** Hard safety cap on a single `timer`'s total ticks — a backstop against a
  * runaway (e.g. a 1ms interval with a huge duration) so a bounded timer can't
  * pin the run indefinitely. An unbounded timer (no duration / end date) stops
@@ -125,7 +135,7 @@ export class Scheduler {
   // scope. `failed` is set by the error boundary when a node in the attempt
   // raises an unhandled error; `lastStatus` records the latest httpRequest
   // response status seen in the attempt (for the status-based retry condition).
-  private readonly retryScopes = new Map<string, { failed: boolean; lastStatus?: number }>()
+  private readonly retryScopes = new Map<string, { failed: boolean; lastStatus?: number; error?: string }>()
   private readonly emitter = new EventEmitter()
   private readonly log: RunLogEntry[] = []
   private readonly variables = new Map<string, unknown>()
@@ -525,7 +535,7 @@ export class Scheduler {
           const retryKey = this.enclosingRetryKey(act.scope)
           if (retryKey !== undefined) {
             const st = this.retryScopes.get(retryKey)
-            if (st) st.failed = true
+            if (st) { st.failed = true; st.error = msg }
             this.markReturned(act)
           } else {
             this.fail(msg)
@@ -534,10 +544,18 @@ export class Scheduler {
       } finally {
         this.inFlight -= 1
         this.scopes.leave(act.scope)
-        // Re-tick the queue if we're still runnable. Done via
-        // microtask to avoid blowing the stack on long synchronous
-        // chains (a `now` → `arithmetic` → `if` → ... pipeline).
-        queueMicrotask(() => { this.tick() })
+        // Re-tick the queue if we're still runnable. Normally via a microtask to
+        // avoid blowing the stack on long synchronous chains (a `now` →
+        // `arithmetic` → `if` → ... pipeline). But every ACTIVATION_YIELD_EVERY
+        // activations, yield to the MACROTASK queue instead, so a user-wired
+        // manual cycle can't starve IPC — Stop / pause stay responsive. A finite
+        // run never reaches the threshold, so ordering (and the goldens) are
+        // unchanged; only an unbounded cycle crosses it.
+        if (this.activations % ACTIVATION_YIELD_EVERY === 0) {
+          setImmediate(() => { this.tick() })
+        } else {
+          queueMicrotask(() => { this.tick() })
+        }
       }
     })()
   }
@@ -688,8 +706,16 @@ export class Scheduler {
     const total = items.length
     let nextIndex = 0
     let completed = 0
+    let fired = false
 
     const fireDone = (): void => {
+      // Guard against a double-fire: with bounded concurrency and an `each`
+      // target that buffers (its scope closes synchronously), the `onClose`
+      // recursion below can drive `completed` to `total` inside a nested frame
+      // (firing here), after which the unwound outer frame re-tests and would
+      // fire again — emitting a duplicate `done` token + node-completed event.
+      if (fired) return
+      fired = true
       const doneEdges = this.outgoingByPort.get(`${act.nodeId}:done`) ?? []
       for (const edge of doneEdges) {
         this.enqueueToken({
@@ -932,7 +958,13 @@ export class Scheduler {
         if (this.abortCtl.signal.aborted) return
         const state = this.retryScopes.get(key)
         this.retryScopes.delete(key)
-        if (!this.retryAttemptFailed(state, action)) { fire('done'); return }
+        if (!this.retryAttemptFailed(state, action)) {
+          // An attempt that ERRORED (a body exception) which the policy won't
+          // retry on (`retryOnError: false`) must NOT be reported as success —
+          // propagate it instead of silently swallowing the exception.
+          if (state?.failed) { this.fail(state.error ?? 'retry body failed'); return }
+          fire('done'); return
+        }
         if (attempt >= action.maxAttempts) { fire('exhausted'); return }
         const delay = backoffMs(attempt)
         this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `retry attempt ${attempt} failed, waiting ${delay}ms` })

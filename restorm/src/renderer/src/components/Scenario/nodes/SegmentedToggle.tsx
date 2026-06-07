@@ -15,8 +15,8 @@ export interface SegmentedToggleProps {
 /**
  * Compact segmented control (a row of mutually-exclusive buttons). Used for
  * node operator pickers — comparator (< ≤ = ≥ >), arithmetic (+ − × ÷),
- * boolean (AND OR XOR). Uncontrolled by default (local state); visual only
- * until the node config schema lands.
+ * boolean (AND OR XOR). Controlled via `value` + `onChange` (persists the node
+ * config), or uncontrolled with local state via `defaultValue`.
  */
 export const SegmentedToggle: React.FC<SegmentedToggleProps> = ({ options, labels, value, defaultValue, onChange, ariaLabel }) => {
   const [internal, setInternal] = useState<string>(defaultValue ?? options[0] ?? '')

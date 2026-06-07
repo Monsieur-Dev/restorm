@@ -1357,7 +1357,8 @@
       "input": "입력",
       "code": "코드 (TypeScript)",
       "modalTitle": "코드 편집",
-      "result": "결과"
+      "result": "결과",
+      "timeout": "시간 제한 (초)"
     }
   }
 }

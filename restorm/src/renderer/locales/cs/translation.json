@@ -1360,7 +1360,8 @@
       "input": "vstup",
       "code": "kód (TypeScript)",
       "modalTitle": "Upravit kód",
-      "result": "výsledek"
+      "result": "výsledek",
+      "timeout": "Časový limit (s)"
     }
   }
 }

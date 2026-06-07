@@ -1358,7 +1358,8 @@
       "input": "hyrje",
       "code": "kodi (TypeScript)",
       "modalTitle": "Modifiko kodin",
-      "result": "rezultati"
+      "result": "rezultati",
+      "timeout": "Afati kohor (s)"
     }
   }
 }

@@ -1357,7 +1357,8 @@
       "input": "input",
       "code": "kode (TypeScript)",
       "modalTitle": "Edit kode",
-      "result": "hasil"
+      "result": "hasil",
+      "timeout": "Batas waktu (s)"
     }
   }
 }

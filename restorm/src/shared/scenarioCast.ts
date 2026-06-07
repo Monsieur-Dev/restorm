@@ -72,7 +72,8 @@ function fail(value: unknown, target: ScenarioCastType): never {
  *   `true/false/1/0/yes/no/on/off` (case-insensitive, else throw); date / list /
  *   object → throw.
  * - **→ date**: date → itself; string → parsed `Date` (throws if unparseable);
- *   number / boolean / list / object → throw.
+ *   number → epoch instant (Unix seconds or milliseconds, by magnitude);
+ *   boolean / list / object → throw.
  *
  * A null / undefined source ALWAYS throws — casting an empty value is meaningless.
  */

@@ -561,7 +561,10 @@ export const randomExecutor: NodeExecutor = (act, ctx) => {
   const seqKey = `__rng:${act.nodeId}`
   const seqPrev = ctx.variables.get(seqKey)
   const sequence = typeof seqPrev === 'number' ? seqPrev : 0
-  ctx.variables.set(seqKey, sequence + 1)
+  // Only a SEEDED random advances (and needs to persist) the sequence; for an
+  // unseeded random the sequence is ignored, so don't write the reserved key —
+  // it would just clutter the user-visible variable store.
+  if (seed !== undefined) ctx.variables.set(seqKey, sequence + 1)
   return { outputs: [{ port: 'result', value: applyRandom(op, { min, max, length, seed, items, sequence }) }] }
 }
 

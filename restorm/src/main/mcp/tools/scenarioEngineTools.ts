@@ -75,6 +75,21 @@ interface ActiveRun {
 const recentRuns = new Map<RuntimeId, ActiveRun>()
 let captureInstalled = false
 
+/** Cap on the run history kept here (mirrors the engine archive's bound). Past
+ * this, the oldest FINISHED runs are evicted in insertion order; in-flight runs
+ * are never evicted, so a status poll always finds a live run. */
+const MAX_RECENT_RUNS = 100
+
+/** Evict the oldest finished runs once `recentRuns` grows past the cap. */
+function pruneRecentRuns(): void {
+  if (recentRuns.size <= MAX_RECENT_RUNS) return
+  for (const [id, entry] of recentRuns) {
+    if (recentRuns.size <= MAX_RECENT_RUNS) break
+    if (entry.state === 'running' || entry.state === 'paused') continue
+    recentRuns.delete(id)
+  }
+}
+
 /** Install the fan-out listener once — keeps `recentRuns` updated as
  * engine events stream past. */
 function ensureCapture(): void {
@@ -134,10 +149,10 @@ export function registerScenarioEngineTools(mcp: McpService): void {
         const runId = handle.scheduler.runId
         const entry: ActiveRun = { handle, output: null, state: 'running' }
         recentRuns.set(runId, entry)
+        pruneRecentRuns()
         // Wire completion → entry so a later `get_scenario_run_status`
-        // can return the output even if `recentRuns` has shrunk past
-        // the run (we keep it indefinitely for now; a TTL is a
-        // follow-up).
+        // can return the output even after the engine's own activeRuns map has
+        // cleared the run (kept here until evicted past MAX_RECENT_RUNS).
         void handle.done.then((output) => { entry.output = output }).catch(() => { /* failure already captured via events */ })
         if (!blocking) {
           return jsonReply({ status: 'running', runId })

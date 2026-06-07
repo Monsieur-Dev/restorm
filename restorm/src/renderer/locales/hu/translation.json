@@ -1358,7 +1358,8 @@
       "input": "bemenet",
       "code": "kód (TypeScript)",
       "modalTitle": "Kód szerkesztése",
-      "result": "eredmény"
+      "result": "eredmény",
+      "timeout": "Időkorlát (s)"
     }
   }
 }

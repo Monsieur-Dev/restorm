@@ -96,8 +96,12 @@ Then('the extracted suggestions match the snapshot', async () => {
   expect(extracted).not.toBeNull()
   const golden = goldenPathFor(extractedFor)
   const actual = `${JSON.stringify(extracted, null, 2)}\n`
-  if (process.env.UPDATE_SUGGESTIONS_GOLDEN === '1' || !existsSync(golden)) {
+  if (process.env.UPDATE_SUGGESTIONS_GOLDEN === '1') {
     writeFileSync(golden, actual, 'utf-8')
+  } else if (!existsSync(golden)) {
+    // Don't silently self-bless a missing golden — a renamed slug must fail, not
+    // create a fresh golden. Creating one is always an explicit UPDATE action.
+    throw new Error(`suggestions golden missing: ${golden} — create it with UPDATE_SUGGESTIONS_GOLDEN=1`)
   }
   expect(actual, `suggestions drifted from ${golden} — regenerate with UPDATE_SUGGESTIONS_GOLDEN=1 if intended`).toBe(
     readFileSync(golden, 'utf-8')

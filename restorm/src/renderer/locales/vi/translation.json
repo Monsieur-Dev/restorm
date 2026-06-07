@@ -1357,7 +1357,8 @@
       "input": "đầu vào",
       "code": "mã (TypeScript)",
       "modalTitle": "Sửa mã",
-      "result": "kết quả"
+      "result": "kết quả",
+      "timeout": "Thời gian chờ (s)"
     }
   }
 }

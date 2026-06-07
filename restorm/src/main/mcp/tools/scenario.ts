@@ -5,8 +5,9 @@
  * the main-process `collectionStore` (source of truth), are broadcast to the
  * renderer (so an open editor repaints + the file autosaves).
  *
- * Execution (`run` a box) waits on the scenario runtime engine and is not wired
- * here yet.
+ * Execution (running a scenario or a single box) is wired separately, on the
+ * runtime engine, in `scenarioEngineTools.ts` (`run_scenario`,
+ * `get_scenario_run_status`, …) and `scenarioRun.ts` (`run_scenario_node`).
  */
 
 import { z } from 'zod'

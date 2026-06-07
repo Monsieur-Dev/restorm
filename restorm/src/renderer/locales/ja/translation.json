@@ -1357,7 +1357,8 @@
       "input": "入力",
       "code": "コード (TypeScript)",
       "modalTitle": "コードを編集",
-      "result": "結果"
+      "result": "結果",
+      "timeout": "タイムアウト (秒)"
     }
   }
 }

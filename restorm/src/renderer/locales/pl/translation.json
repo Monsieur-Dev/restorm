@@ -1360,7 +1360,8 @@
       "input": "wejście",
       "code": "kod (TypeScript)",
       "modalTitle": "Edytuj kod",
-      "result": "wynik"
+      "result": "wynik",
+      "timeout": "Limit czasu (s)"
     }
   }
 }

@@ -1358,7 +1358,8 @@
       "input": "indata",
       "code": "kod (TypeScript)",
       "modalTitle": "Redigera kod",
-      "result": "resultat"
+      "result": "resultat",
+      "timeout": "Tidsgräns (s)"
     }
   }
 }

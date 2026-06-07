@@ -1358,7 +1358,8 @@
       "input": "syöte",
       "code": "koodi (TypeScript)",
       "modalTitle": "Muokkaa koodia",
-      "result": "tulos"
+      "result": "tulos",
+      "timeout": "Aikakatkaisu (s)"
     }
   }
 }

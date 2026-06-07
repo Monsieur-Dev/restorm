@@ -1358,7 +1358,8 @@
       "input": "invoer",
       "code": "code (TypeScript)",
       "modalTitle": "Code bewerken",
-      "result": "resultaat"
+      "result": "resultaat",
+      "timeout": "Time-out (s)"
     }
   }
 }

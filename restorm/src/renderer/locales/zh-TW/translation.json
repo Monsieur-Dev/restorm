@@ -1357,7 +1357,8 @@
       "input": "輸入",
       "code": "程式碼 (TypeScript)",
       "modalTitle": "編輯程式碼",
-      "result": "結果"
+      "result": "結果",
+      "timeout": "逾時 (秒)"
     }
   }
 }

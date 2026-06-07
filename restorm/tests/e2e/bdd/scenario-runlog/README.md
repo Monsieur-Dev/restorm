@@ -37,14 +37,15 @@ accumulation, and the YAML copy format all at once.
 The goldens are **never hand-written** — they are captured from the live copy:
 
 1. Add the scenario name to the `Examples` table in the `.feature` (see below).
-2. Run the test once. When a golden is **missing** (or `UPDATE_RUNLOG_GOLDEN=1`
-   is set), the `Then` step writes whatever the copy button produced — after
-   normalization — to `scenarios-e2e-reference-tests.<slug>-runlog.yaml`, and
-   the test passes.
+2. Run the test with `UPDATE_RUNLOG_GOLDEN=1` set — the `Then` step then writes
+   whatever the copy button produced (after normalization) to
+   `scenarios-e2e-reference-tests.<slug>-runlog.yaml`. (A **missing** golden
+   without the flag is a hard failure, never a silent self-bless — that way a
+   renamed / mistyped slug can't pass green.)
 
    ```bash
-   npm run build                                   # only if app/main code changed
-   npm run test:e2e -- --project=scenario-runlog   # first run writes the goldens
+   npm run build                                                        # only if app/main code changed
+   UPDATE_RUNLOG_GOLDEN=1 npm run test:e2e -- --project=scenario-runlog # writes the goldens
    ```
 
 3. **Read the generated YAML** to sanity-check the run-log, then run the command
