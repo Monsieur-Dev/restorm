@@ -5560,6 +5560,109 @@
         - 2
         - 4
       asyncTotal: 12
+- message: ⚪ [<time>] start code
+  data:
+    code: >-
+      // chai — fluent assertions. In Postman, `pm.expect(...)` IS chai's
+      expect.
+
+      chai.expect(_.sum([1, 2, 3])).to.equal(6)
+
+      chai.expect('restorm').to.be.a('string').with.lengthOf(7)
+
+      expect([10, 20, 30]).to.include(20) // the bare `expect` alias works too
+
+      console.log('chai: 3 assertions passed')
+
+      return { library: 'chai', assertionsPassed: 3 }
+    in: true
+- message: "🔵 [<time>] chai: 3 assertions passed"
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      library: chai
+      assertionsPassed: 3
+- message: ⚪ [<time>] start code
+  data:
+    code: >-
+      // cheerio — jQuery-style HTML/XML scraping (server-side).
+
+      const $ = cheerio.load('<ul><li
+      class="first">one</li><li>two</li><li>three</li></ul>')
+
+      const items = $('li').map((i, el) => $(el).text()).get()
+
+      console.log('cheerio items =', items.join(','))
+
+      return { library: 'cheerio', items, first: $('.first').text(), count:
+      items.length }
+    in: true
+- message: 🔵 [<time>] cheerio items = one,two,three
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      library: cheerio
+      items:
+        - one
+        - two
+        - three
+      first: one
+      count: 3
+- message: ⚪ [<time>] start code
+  data:
+    code: >-
+      // xml2js — XML → JS object (async; exercises the events/timers shim).
+
+      const xml = '<catalog><book id="1"><title>Restorm</title></book><book
+      id="2"><title>QuickJS</title></book></catalog>'
+
+      const parsed = await xml2js.parseStringPromise(xml)
+
+      const titles = parsed.catalog.book.map((b) => b.title[0])
+
+      console.log('xml2js titles =', titles.join(','))
+
+      return { library: 'xml2js', titles, count: parsed.catalog.book.length }
+    in: true
+- message: 🔵 [<time>] xml2js titles = Restorm,QuickJS
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      library: xml2js
+      titles:
+        - Restorm
+        - QuickJS
+      count: 2
+- message: ⚪ [<time>] start code
+  data:
+    code: >-
+      // Ajv + ajv-formats — JSON-schema validation with string formats.
+
+      const ajv = new Ajv()
+
+      ajvFormats(ajv)
+
+      const validate = ajv.compile({
+        type: 'object',
+        properties: { email: { type: 'string', format: 'email' }, when: { type: 'string', format: 'date' } },
+        required: ['email']
+      })
+
+      const ok = validate({ email: 'team@restorm.dev', when: '2026-01-01' })
+
+      const bad = validate({ email: 'not-an-email', when: '2026-01-01' })
+
+      console.log('ajv-formats: ok =', ok, '| bad =', bad)
+
+      return { library: 'ajv-formats', ok, bad }
+    in: true
+- message: "🔵 [<time>] ajv-formats: ok = true | bad = false"
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      library: ajv-formats
+      ok: true
+      bad: false
 - message: 🔵 [<time>] ■ Code
 - message: ⚪ [<time>] done runScenario
   data:

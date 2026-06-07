@@ -28,6 +28,10 @@
     "lodash",
     "moment",
     "uuid",
-    "nanoid"
+    "nanoid",
+    "chai",
+    "cheerio",
+    "xml2js",
+    "ajv-formats"
   ]
 }

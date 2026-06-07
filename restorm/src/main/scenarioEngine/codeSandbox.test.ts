@@ -74,4 +74,35 @@ describe('codeSandbox', () => {
   it('times out an await that never settles', async () => {
     await expect(runCodeInSandbox({ code: 'await new Promise(() => {}); return 1', timeoutMs: 300 })).rejects.toThrow(/timed out/)
   }, 5000)
+
+  // The pure-JS slice of the Postman/Bruno standard library. Each runs the lib
+  // for real inside QuickJS (not just "does it bundle").
+  describe('Postman/Bruno stdlib', () => {
+    it('bundles chai (chai.expect + the bare `expect` alias)', async () => {
+      const ok = await runCodeInSandbox({ code: 'chai.expect(2 + 2).to.equal(4); chai.expect([1, 2, 3]).to.have.lengthOf(3); return "ok"' })
+      expect(ok.result).toBe('ok')
+      const alias = await runCodeInSandbox({ code: 'expect("hi").to.be.a("string"); return "ok"' })
+      expect(alias.result).toBe('ok')
+      await expect(runCodeInSandbox({ code: 'chai.expect(1).to.equal(2); return "unreached"' })).rejects.toThrow(/expected 1 to equal 2/)
+    })
+
+    it('bundles cheerio (jQuery-style HTML traversal)', async () => {
+      const { result } = await runCodeInSandbox({
+        code: 'const $ = cheerio.load("<h1>Hello</h1><p class=\\"x\\">World</p>"); return $("h1").text() + " " + $(".x").text()'
+      })
+      expect(result).toBe('Hello World')
+    })
+
+    it('bundles xml2js (await parseStringPromise — exercises the events/timers shim)', async () => {
+      const { result } = await runCodeInSandbox({ code: 'return await xml2js.parseStringPromise("<root><item>1</item><item>2</item></root>")' })
+      expect(result).toEqual({ root: { item: ['1', '2'] } })
+    })
+
+    it('bundles ajv-formats (format validators on top of Ajv)', async () => {
+      const { result } = await runCodeInSandbox({
+        code: 'const ajv = new Ajv(); ajvFormats(ajv); const validate = ajv.compile({ type: "string", format: "email" }); return [validate("a@b.com"), validate("not-an-email")]'
+      })
+      expect(result).toEqual([true, false])
+    })
+  })
 })
