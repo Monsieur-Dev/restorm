@@ -686,6 +686,25 @@ collections:
                 position:
                   x: 580
                   'y': 1580
+              - id: d33f8e17-abe7-438c-8951-408ada8bfba7
+                kind: runScenario
+                config:
+                  scenarioId: 4a614aaf-83a0-478a-8b1f-42169cfdcbd4
+                  label: Code
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 800
+                  'y': 1580
             edges:
               - id: e-1780418276241-f2q3hz
                 from:
@@ -884,6 +903,13 @@ collections:
                   portId: done
                 to:
                   nodeId: e0610fff-f0f4-49aa-9818-975ddd7bc993
+                  portId: in
+              - id: 1f3aef6c-4cb0-4895-a0e6-7c35ee554445
+                from:
+                  nodeId: e0610fff-f0f4-49aa-9818-975ddd7bc993
+                  portId: done
+                to:
+                  nodeId: d33f8e17-abe7-438c-8951-408ada8bfba7
                   portId: in
             id: c1573ce0-985c-44b5-b5d4-e081de2d4303
             name: Main
@@ -16535,6 +16561,181 @@ collections:
                 id: 907a7e52-e1e9-44b5-9a83-d5954524faf8
                 name: Timer
                 items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: e076ef48-ae88-452b-9059-82aee5f4339c
+                    kind: code
+                    config:
+                      code: |-
+                        // Fixed dataset (no input needed — runs at start)
+                        return [
+                          { n: 'a', v: 3 },
+                          { n: 'b', v: 1 },
+                          { n: 'c', v: 2 }
+                        ]
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: -240
+                      'y': 60
+                    note: Build a fixed dataset (no input → runs at start)
+                  - id: ea7d7854-50ca-44a0-8346-f390486fd408
+                    kind: code
+                    config:
+                      code: |-
+                        // TypeScript types are stripped before running in the QuickJS sandbox.
+                        // `input` = wired value; curated stdlib available as globals.
+                        const total: number = _.sumBy(input, 'v')
+                        const names: string[] = _.map(_.sortBy(input, 'v'), 'n')
+                        const hash = CryptoJS.MD5('restorm').toString().slice(0, 8)
+                        console.log('total =', total, '| names =', names.join(','))
+                        return { total, names, hash, momentType: typeof moment }
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 300
+                      'y': 60
+                    note: TS + lodash + crypto-js on the wired input → result object
+                  - id: 977b099d-6755-4163-9bd3-88caf723b0a1
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: expression
+                        value: 'Code result: {{.}}'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 960
+                      'y': 60
+                  - id: ef2d6919-693d-4559-8b68-a7fdf154a8b2
+                    kind: code
+                    config:
+                      code: |-
+                        // `await` works: the body runs as an async function.
+                        async function doubleAfterTick(n: number): Promise<number> {
+                          await new Promise((r) => setTimeout(r, 5))
+                          return n * 2
+                        }
+                        const doubled = await Promise.all(input.map((x) => doubleAfterTick(x.v)))
+                        console.log('async doubled =', doubled.join(','))
+                        return { doubled, asyncTotal: _.sum(doubled) }
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 480
+                      'y': 380
+                    note: await Promise.all + setTimeout → async works
+                  - id: 2bfc137c-40db-48ae-a3a2-114895c7ef5a
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: expression
+                        value: 'Async result: {{.}}'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 920
+                      'y': 380
+                edges:
+                  - id: 441b0bb7-1bf1-48c5-8d55-c9c46c7fa7e3
+                    from:
+                      nodeId: e076ef48-ae88-452b-9059-82aee5f4339c
+                      portId: result
+                    to:
+                      nodeId: ea7d7854-50ca-44a0-8346-f390486fd408
+                      portId: value
+                    selector: .
+                  - id: ddf9fe24-c681-4ef4-8709-01dfdc759a4b
+                    from:
+                      nodeId: ea7d7854-50ca-44a0-8346-f390486fd408
+                      portId: result
+                    to:
+                      nodeId: 977b099d-6755-4163-9bd3-88caf723b0a1
+                      portId: data
+                    selector: .
+                  - id: beec4d3b-b975-4311-9126-44925f08abd4
+                    from:
+                      nodeId: e076ef48-ae88-452b-9059-82aee5f4339c
+                      portId: result
+                    to:
+                      nodeId: ef2d6919-693d-4559-8b68-a7fdf154a8b2
+                      portId: value
+                    selector: .
+                  - id: b670b26b-a07f-4a0f-8558-0ecebc2ecdff
+                    from:
+                      nodeId: 977b099d-6755-4163-9bd3-88caf723b0a1
+                      portId: done
+                    to:
+                      nodeId: ef2d6919-693d-4559-8b68-a7fdf154a8b2
+                      portId: in
+                  - id: ed080925-91a8-4520-a226-db3bf50de61a
+                    from:
+                      nodeId: ef2d6919-693d-4559-8b68-a7fdf154a8b2
+                      portId: result
+                    to:
+                      nodeId: 2bfc137c-40db-48ae-a3a2-114895c7ef5a
+                      portId: data
+                    selector: .
+                id: 4a614aaf-83a0-478a-8b1f-42169cfdcbd4
+                name: Code
+                items: []
           - type: scenario
             tags: []
             params: []
@@ -17526,6 +17727,25 @@ collections:
                     flow: both
                 position:
                   x: 1960
+                  'y': 3260
+              - id: e368ea74-5929-4f51-a10b-0ef258ce75d6
+                kind: code
+                config: {}
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                  - id: value
+                    name: input
+                    dataType: any
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    flow: both
+                position:
+                  x: 2440
                   'y': 3260
             edges: []
             id: cfb401ce-df62-4d41-88e2-8989206abe2f

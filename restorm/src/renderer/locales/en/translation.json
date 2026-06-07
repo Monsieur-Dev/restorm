@@ -875,7 +875,8 @@
       "schema": "Schema validate",
       "readFile": "Read file",
       "writeFile": "Write file",
-      "timer": "Timer"
+      "timer": "Timer",
+      "code": "Code"
     },
     "comparator": {
       "result": "result"
@@ -1352,6 +1353,12 @@
       "duration": "duration",
       "endDate": "end date",
       "tick": "tick"
+    },
+    "code": {
+      "input": "input",
+      "code": "code (TypeScript)",
+      "modalTitle": "Edit code",
+      "result": "result"
     }
   }
 }

@@ -150,6 +150,9 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // from an upstream value, else the inline editor's template is used. The
   // expression determines the output type.
   transform: { inputs: [{ id: 'value', name: 'value' }, { id: 'expression', name: 'expression' }], outputs: [{ id: 'out', name: 'value', flow: 'both' }] },
+  // `code` runs user TS/JS: its `value` input is exposed as `input`, the script's
+  // return value flows out of `result`.
+  code: { inputs: [{ id: 'value', name: 'input' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
   // `cast` converts its `value` input to the configured target type (the output
   // type is the chosen target, so no fixed dataType is stamped here).
   cast: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },

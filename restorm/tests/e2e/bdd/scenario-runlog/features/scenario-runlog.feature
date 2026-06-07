@@ -48,4 +48,5 @@ Feature: Scenario run-log end-to-end
       | Schema         |
       | Files          |
       | Timer          |
+      | Code           |
       | Main           |

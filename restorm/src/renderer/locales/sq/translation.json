@@ -875,7 +875,8 @@
       "schema": "Schema validate",
       "readFile": "Read file",
       "writeFile": "Write file",
-      "timer": "Kohëmatës"
+      "timer": "Kohëmatës",
+      "code": "Kodi"
     },
     "comparator": {
       "result": "rezultati"
@@ -1352,6 +1353,12 @@
       "duration": "kohëzgjatja",
       "endDate": "data e fundit",
       "tick": "tik"
+    },
+    "code": {
+      "input": "hyrje",
+      "code": "kodi (TypeScript)",
+      "modalTitle": "Modifiko kodin",
+      "result": "rezultati"
     }
   }
 }

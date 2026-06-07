@@ -874,7 +874,8 @@
       "schema": "Schema validate",
       "readFile": "Read file",
       "writeFile": "Write file",
-      "timer": "Pengatur waktu"
+      "timer": "Pengatur waktu",
+      "code": "Kode"
     },
     "comparator": {
       "result": "hasil"
@@ -1351,6 +1352,12 @@
       "duration": "durasi",
       "endDate": "tanggal akhir",
       "tick": "tik"
+    },
+    "code": {
+      "input": "input",
+      "code": "kode (TypeScript)",
+      "modalTitle": "Edit kode",
+      "result": "hasil"
     }
   }
 }

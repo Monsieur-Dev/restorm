@@ -874,7 +874,8 @@
       "schema": "Schema validate",
       "readFile": "Read file",
       "writeFile": "Write file",
-      "timer": "Bộ hẹn giờ"
+      "timer": "Bộ hẹn giờ",
+      "code": "Mã"
     },
     "comparator": {
       "result": "kết quả"
@@ -1351,6 +1352,12 @@
       "duration": "thời lượng",
       "endDate": "ngày kết thúc",
       "tick": "tích tắc"
+    },
+    "code": {
+      "input": "đầu vào",
+      "code": "mã (TypeScript)",
+      "modalTitle": "Sửa mã",
+      "result": "kết quả"
     }
   }
 }

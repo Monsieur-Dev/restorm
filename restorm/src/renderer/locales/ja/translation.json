@@ -874,7 +874,8 @@
       "schema": "Schema validate",
       "readFile": "Read file",
       "writeFile": "Write file",
-      "timer": "タイマー"
+      "timer": "タイマー",
+      "code": "コード"
     },
     "comparator": {
       "result": "結果"
@@ -1351,6 +1352,12 @@
       "duration": "期間",
       "endDate": "終了日",
       "tick": "ティック"
+    },
+    "code": {
+      "input": "入力",
+      "code": "コード (TypeScript)",
+      "modalTitle": "コードを編集",
+      "result": "結果"
     }
   }
 }

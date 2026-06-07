@@ -1,10 +1,63 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, CodeEditor, Modal } from 'electron-core-ui/renderer'
+import { loader, type OnMount } from '@monaco-editor/react'
+import type * as Monaco from 'monaco-editor'
+
+/** Ambient declarations of everything the `code` node injects into the sandbox,
+ * so Monaco's TypeScript service stops red-underlining `input`, `_`, `CryptoJS`,
+ * … and the implicit top-level `return` (the script is run as a function body). */
+const CODE_NODE_GLOBALS_DTS = [
+  '/** The wired `value` input passed into this code node. */',
+  'declare const input: any;',
+  '/** The run variables (set by input / setVariable nodes), keyed by name. */',
+  'declare const vars: Record<string, any>;',
+  'declare const _: any;        // lodash',
+  'declare const lodash: any;',
+  'declare const moment: any;',
+  'declare const uuid: any;',
+  'declare const nanoid: any;',
+  'declare const CryptoJS: any;',
+  'declare const Ajv: any;',
+  'declare function require(name: string): any;'
+].join('\n')
+
+/** Teach Monaco's TS/JS language service about the `code` node's sandbox: the
+ * injected globals (above) + tolerate a top-level `return` (1108) since the body
+ * runs inside a function. typescriptDefaults is a singleton, but restorm only
+ * edits TS in this node, so configuring it here is safe + idempotent. */
+/** Minimal slice of a Monaco TS/JS `LanguageServiceDefaults` we drive. Monaco
+ * 0.55 types `languages.typescript` as a deprecated stub, but the runtime API is
+ * intact — so reach it through an explicit typed cast rather than `any`. */
+interface TsLanguageDefaults {
+  getDiagnosticsOptions: () => { diagnosticCodesToIgnore?: number[] }
+  setDiagnosticsOptions: (opts: { diagnosticCodesToIgnore?: number[] }) => void
+  addExtraLib: (content: string, filePath?: string) => void
+}
+
+function configureTsDefaults(monaco: typeof Monaco): void {
+  const ts = (monaco.languages as unknown as { typescript?: { typescriptDefaults: TsLanguageDefaults; javascriptDefaults: TsLanguageDefaults } }).typescript
+  if (!ts) return
+  for (const defaults of [ts.typescriptDefaults, ts.javascriptDefaults]) {
+    const current = defaults.getDiagnosticsOptions()
+    const ignore = new Set([...(current.diagnosticCodesToIgnore ?? []), 1108, 1375])
+    defaults.setDiagnosticsOptions({ ...current, diagnosticCodesToIgnore: [...ignore] })
+    defaults.addExtraLib(CODE_NODE_GLOBALS_DTS, 'restorm-code-node-globals.d.ts')
+  }
+}
+
+// Configure the TS service as soon as Monaco loads — BEFORE the first code-node
+// editor opens — so the very first validation already knows the globals and
+// tolerates the top-level `return`. (Belt-and-suspenders with the onMount below.)
+// (`@monaco-editor/react` types the monaco namespace loosely, so cast to the
+// real `monaco-editor` shape that `configureTsDefaults` consumes.)
+void loader.init().then((monaco) => { configureTsDefaults(monaco as typeof Monaco) }).catch(() => undefined)
+
+const configureMonacoForCodeNode: OnMount = (_editor, monaco) => { configureTsDefaults(monaco as typeof Monaco) }
 
 /** Languages the embedded editor knows how to highlight. Kept as a closed union
  * so callers pick a sensible Monaco mode for the content they edit. */
-export type ScenarioCodeLanguage = 'json' | 'xml' | 'yaml' | 'csv' | 'handlebars' | 'plaintext' | 'sql' | 'html'
+export type ScenarioCodeLanguage = 'json' | 'xml' | 'yaml' | 'csv' | 'handlebars' | 'plaintext' | 'sql' | 'html' | 'typescript' | 'javascript'
 
 /** How many lines of the value to show in the collapsed preview. */
 const PREVIEW_LINES = 4
@@ -53,6 +106,7 @@ export const ScenarioCodeEditorModal: React.FC<ScenarioCodeEditorModalProps> = (
         height="100%"
         onChange={(next) => { onChange(next ?? '') }}
         options={{ wordWrap: 'on', automaticLayout: true }}
+        {...((language === 'typescript' || language === 'javascript') && { onMount: configureMonacoForCodeNode })}
         {...(dataTestId && { 'data-testid': `${dataTestId}-editor` })}
       />
     </div>

@@ -875,7 +875,8 @@
       "schema": "Schema validate",
       "readFile": "Read file",
       "writeFile": "Write file",
-      "timer": "Időzítő"
+      "timer": "Időzítő",
+      "code": "Kód"
     },
     "comparator": {
       "result": "eredmény"
@@ -1352,6 +1353,12 @@
       "duration": "időtartam",
       "endDate": "befejezés dátuma",
       "tick": "ütés"
+    },
+    "code": {
+      "input": "bemenet",
+      "code": "kód (TypeScript)",
+      "modalTitle": "Kód szerkesztése",
+      "result": "eredmény"
     }
   }
 }

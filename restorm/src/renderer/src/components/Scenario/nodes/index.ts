@@ -39,6 +39,7 @@ import { ListMutationNodeBox } from './ListMutationNodeBox'
 import { LogNodeBox, AssertNodeBox, NowNodeBox } from './UtilityNodeBoxes'
 import { SchemaNodeBox, ReadFileNodeBox, WriteFileNodeBox } from './IoNodeBoxes'
 import { TimerNodeBox } from './TimerNodeBox'
+import { CodeNodeBox } from './CodeNodeBox'
 
 export type { ScenarioNodeBoxData, ScenarioNodeBoxType, ScenarioNodeCell } from './ScenarioNodeBoxBase'
 export { ScenarioNodeBoxBase } from './ScenarioNodeBoxBase'
@@ -78,6 +79,7 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   setVariable: SetVariableNodeBox,
   getVariable: GetVariableNodeBox,
   transform: TransformNodeBox,
+  code: CodeNodeBox,
   cast: CastNodeBox,
   regex: RegexNodeBox,
   json: JsonNodeBox,

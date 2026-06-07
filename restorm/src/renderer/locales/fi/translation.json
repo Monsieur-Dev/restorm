@@ -875,7 +875,8 @@
       "schema": "Schema validate",
       "readFile": "Read file",
       "writeFile": "Write file",
-      "timer": "Ajastin"
+      "timer": "Ajastin",
+      "code": "Koodi"
     },
     "comparator": {
       "result": "tulos"
@@ -1352,6 +1353,12 @@
       "duration": "kesto",
       "endDate": "päättymispäivä",
       "tick": "tikitys"
+    },
+    "code": {
+      "input": "syöte",
+      "code": "koodi (TypeScript)",
+      "modalTitle": "Muokkaa koodia",
+      "result": "tulos"
     }
   }
 }

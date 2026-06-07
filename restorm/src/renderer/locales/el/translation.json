@@ -875,7 +875,8 @@
       "schema": "Schema validate",
       "readFile": "Read file",
       "writeFile": "Write file",
-      "timer": "Χρονοδιακόπτης"
+      "timer": "Χρονοδιακόπτης",
+      "code": "Κώδικας"
     },
     "comparator": {
       "result": "αποτέλεσμα"
@@ -1352,6 +1353,12 @@
       "duration": "διάρκεια",
       "endDate": "ημερομηνία λήξης",
       "tick": "παλμός"
+    },
+    "code": {
+      "input": "είσοδος",
+      "code": "κώδικας (TypeScript)",
+      "modalTitle": "Επεξεργασία κώδικα",
+      "result": "αποτέλεσμα"
     }
   }
 }

@@ -876,7 +876,8 @@
       "schema": "Schema validate",
       "readFile": "Read file",
       "writeFile": "Write file",
-      "timer": "Тајмер"
+      "timer": "Тајмер",
+      "code": "Кôд"
     },
     "comparator": {
       "result": "резултат"
@@ -1353,6 +1354,12 @@
       "duration": "трајање",
       "endDate": "датум завршетка",
       "tick": "откуцај"
+    },
+    "code": {
+      "input": "улаз",
+      "code": "кôд (TypeScript)",
+      "modalTitle": "Уреди кôд",
+      "result": "резултат"
     }
   }
 }

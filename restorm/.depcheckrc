@@ -24,6 +24,10 @@
     "@vitest/*",
     "@testing-library/*",
     "jsdom",
-    "@milkdown/*"
+    "@milkdown/*",
+    "lodash",
+    "moment",
+    "uuid",
+    "nanoid"
   ]
 }

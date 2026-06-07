@@ -876,7 +876,8 @@
       "schema": "Schema validate",
       "readFile": "Read file",
       "writeFile": "Write file",
-      "timer": "Cronometru"
+      "timer": "Cronometru",
+      "code": "Cod"
     },
     "comparator": {
       "result": "rezultat"
@@ -1353,6 +1354,12 @@
       "duration": "durată",
       "endDate": "dată de sfârșit",
       "tick": "tic"
+    },
+    "code": {
+      "input": "intrare",
+      "code": "cod (TypeScript)",
+      "modalTitle": "Editează codul",
+      "result": "rezultat"
     }
   }
 }

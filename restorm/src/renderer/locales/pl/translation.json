@@ -877,7 +877,8 @@
       "schema": "Schema validate",
       "readFile": "Read file",
       "writeFile": "Write file",
-      "timer": "Czasomierz"
+      "timer": "Czasomierz",
+      "code": "Kod"
     },
     "comparator": {
       "result": "wynik"
@@ -1354,6 +1355,12 @@
       "duration": "czas trwania",
       "endDate": "data zakończenia",
       "tick": "tyknięcie"
+    },
+    "code": {
+      "input": "wejście",
+      "code": "kod (TypeScript)",
+      "modalTitle": "Edytuj kod",
+      "result": "wynik"
     }
   }
 }

@@ -877,7 +877,8 @@
       "schema": "Schema validate",
       "readFile": "Read file",
       "writeFile": "Write file",
-      "timer": "Časovač"
+      "timer": "Časovač",
+      "code": "Kód"
     },
     "comparator": {
       "result": "výsledek"
@@ -1354,6 +1355,12 @@
       "duration": "doba trvání",
       "endDate": "datum konce",
       "tick": "tik"
+    },
+    "code": {
+      "input": "vstup",
+      "code": "kód (TypeScript)",
+      "modalTitle": "Upravit kód",
+      "result": "výsledek"
     }
   }
 }

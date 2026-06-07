@@ -72,6 +72,7 @@ export const SCENARIO_NODE_CATALOGUE: ScenarioNodeKindMeta[] = [
   { kind: 'setVariable', labelKey: 'scenario.nodes.setVariable', defaultLabel: 'Set variable', icon: 'symbol-variable', category: 'compute' },
   { kind: 'getVariable', labelKey: 'scenario.nodes.getVariable', defaultLabel: 'Get variable', icon: 'symbol-variable', category: 'compute' },
   { kind: 'transform', labelKey: 'scenario.nodes.transform', defaultLabel: 'Transform template', icon: 'symbol-string', category: 'compute' },
+  { kind: 'code', labelKey: 'scenario.nodes.code', defaultLabel: 'Code (sandbox)', icon: 'code', category: 'compute' },
   { kind: 'cast', labelKey: 'scenario.nodes.cast', defaultLabel: 'Cast', icon: 'replace', category: 'compute' },
   { kind: 'regex', labelKey: 'scenario.nodes.regex', defaultLabel: 'Regex', icon: 'regex', category: 'compute' },
   // Data formats (grouped into a "Data formats" submenu)

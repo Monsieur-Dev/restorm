@@ -149,6 +149,10 @@ export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
     summary: 'Applies a Handlebars `expression` to its `value` input + run variables, emitting the rendered result on `out`. Wire the optional `expression` input to drive the template text from an upstream value instead of the inline editor.',
     config: { expression: 'Handlebars template (used when the `expression` input is not wired).' }
   },
+  code: {
+    summary: 'Runs the user TypeScript/JavaScript `code` in a QuickJS sandbox (no host / filesystem / network access). The wired `value` input is exposed as `input`, the run variables as `vars`, and a curated standard library as globals + `require()` (lodash/`_`, moment, uuid, nanoid, CryptoJS, Ajv). The body runs as an async function, so a top-level `return` and `await` (Promise / async-await) both work. Whatever the script returns flows out of `result`; `console.log(...)` lines appear in the run log; a script error or timeout routes to `error`.',
+    config: { code: 'TypeScript/JavaScript source — a function body that may `return` the result.', timeout: 'Execution budget in seconds (default 5, max 60).' }
+  },
   cast: {
     summary: 'Converts the `value` input (wired or inline) to `targetType` on `result`; an impossible cast (or a null value) routes to `error`. number↔boolean (0/1, truthiness), numeric/boolean string parsing, dates ISO; any → list wraps into [value].',
     config: { targetType: 'number | string | boolean | date | list', value: 'Inline value to cast (typed value) when not wired.' }

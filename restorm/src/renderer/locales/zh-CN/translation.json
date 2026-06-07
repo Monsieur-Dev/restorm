@@ -874,7 +874,8 @@
       "schema": "Schema validate",
       "readFile": "Read file",
       "writeFile": "Write file",
-      "timer": "定时器"
+      "timer": "定时器",
+      "code": "代码"
     },
     "comparator": {
       "result": "结果"
@@ -1351,6 +1352,12 @@
       "duration": "持续时间",
       "endDate": "结束日期",
       "tick": "滴答"
+    },
+    "code": {
+      "input": "输入",
+      "code": "代码 (TypeScript)",
+      "modalTitle": "编辑代码",
+      "result": "结果"
     }
   }
 }

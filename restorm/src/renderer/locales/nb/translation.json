@@ -875,7 +875,8 @@
       "schema": "Schema validate",
       "readFile": "Read file",
       "writeFile": "Write file",
-      "timer": "Tidsur"
+      "timer": "Tidsur",
+      "code": "Kode"
     },
     "comparator": {
       "result": "resultat"
@@ -1352,6 +1353,12 @@
       "duration": "varighet",
       "endDate": "sluttdato",
       "tick": "tikk"
+    },
+    "code": {
+      "input": "inndata",
+      "code": "kode (TypeScript)",
+      "modalTitle": "Rediger kode",
+      "result": "resultat"
     }
   }
 }

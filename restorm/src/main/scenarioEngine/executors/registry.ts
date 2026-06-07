@@ -42,6 +42,7 @@ import {
   throwExecutor
 } from './pureExecutors'
 import { schemaExecutor, readFileExecutor, writeFileExecutor } from './ioExecutors'
+import { codeExecutor } from './codeExecutor'
 import {
   waitExecutor,
   waitUntilExecutor,
@@ -176,6 +177,7 @@ function pickExecutor(kind: string): NodeExecutor {
     case 'addToList': return addToListExecutor
     case 'removeFromList': return removeFromListExecutor
     case 'transform': return transformExecutor
+    case 'code': return codeExecutor
     case 'cast': return castExecutor
     case 'regex': return regexExecutor
     case 'json': return jsonExecutor

@@ -877,7 +877,8 @@
       "schema": "Schema validate",
       "readFile": "Read file",
       "writeFile": "Write file",
-      "timer": "Таймер"
+      "timer": "Таймер",
+      "code": "Код"
     },
     "comparator": {
       "result": "результат"
@@ -1354,6 +1355,12 @@
       "duration": "тривалість",
       "endDate": "дата завершення",
       "tick": "тік"
+    },
+    "code": {
+      "input": "вхід",
+      "code": "код (TypeScript)",
+      "modalTitle": "Редагувати код",
+      "result": "результат"
     }
   }
 }

@@ -1,0 +1,132 @@
+- message: 🔵 [<time>] ▶ Code
+- message: ⚪ [<time>] start code
+  data:
+    code: |-
+      // Fixed dataset (no input needed — runs at start)
+      return [
+        { n: 'a', v: 3 },
+        { n: 'b', v: 1 },
+        { n: 'c', v: 2 }
+      ]
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      - n: a
+        v: 3
+      - n: b
+        v: 1
+      - n: c
+        v: 2
+- message: ⚪ [<time>] start code
+  data:
+    code: |-
+      // TypeScript types are stripped before running in the QuickJS sandbox.
+      // `input` = wired value; curated stdlib available as globals.
+      const total: number = _.sumBy(input, 'v')
+      const names: string[] = _.map(_.sortBy(input, 'v'), 'n')
+      const hash = CryptoJS.MD5('restorm').toString().slice(0, 8)
+      console.log('total =', total, '| names =', names.join(','))
+      return { total, names, hash, momentType: typeof moment }
+    value:
+      - n: a
+        v: 3
+      - n: b
+        v: 1
+      - n: c
+        v: 2
+- message: 🔵 [<time>] total = 6 | names = b,c,a
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      total: 6
+      names:
+        - b
+        - c
+        - a
+      hash: a8a6153a
+      momentType: function
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: "Code result: {{.}}"
+    data:
+      total: 6
+      names:
+        - b
+        - c
+        - a
+      hash: a8a6153a
+      momentType: function
+- message: "🔵 [<time>] Code result: [object Object]"
+  data:
+    total: 6
+    names:
+      - b
+      - c
+      - a
+    hash: a8a6153a
+    momentType: function
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      total: 6
+      names:
+        - b
+        - c
+        - a
+      hash: a8a6153a
+      momentType: function
+- message: ⚪ [<time>] start code
+  data:
+    code: |-
+      // `await` works: the body runs as an async function.
+      async function doubleAfterTick(n: number): Promise<number> {
+        await new Promise((r) => setTimeout(r, 5))
+        return n * 2
+      }
+      const doubled = await Promise.all(input.map((x) => doubleAfterTick(x.v)))
+      console.log('async doubled =', doubled.join(','))
+      return { doubled, asyncTotal: _.sum(doubled) }
+    value:
+      - n: a
+        v: 3
+      - n: b
+        v: 1
+      - n: c
+        v: 2
+    in: true
+- message: 🔵 [<time>] async doubled = 6,2,4
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      doubled:
+        - 6
+        - 2
+        - 4
+      asyncTotal: 12
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: "Async result: {{.}}"
+    data:
+      doubled:
+        - 6
+        - 2
+        - 4
+      asyncTotal: 12
+- message: "🔵 [<time>] Async result: [object Object]"
+  data:
+    doubled:
+      - 6
+      - 2
+      - 4
+    asyncTotal: 12
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      doubled:
+        - 6
+        - 2
+        - 4
+      asyncTotal: 12
+- message: 🔵 [<time>] ■ Code

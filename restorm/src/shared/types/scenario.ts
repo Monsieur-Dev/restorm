@@ -115,6 +115,9 @@ export type ScenarioNodeKind =
   | 'setVariable'
   | 'getVariable'
   | 'transform'
+  // Run user TypeScript/JavaScript in a sandbox (QuickJS) — transform/validate
+  // data with a curated stdlib; the returned value is the node's `result`.
+  | 'code'
   // Type conversion — explicit cast since comparisons / aggregates are strict.
   | 'cast'
   // Regular expressions — extract / match / replace / split on a string.

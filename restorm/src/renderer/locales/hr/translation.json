@@ -876,7 +876,8 @@
       "schema": "Schema validate",
       "readFile": "Read file",
       "writeFile": "Write file",
-      "timer": "Mjerač vremena"
+      "timer": "Mjerač vremena",
+      "code": "Kôd"
     },
     "comparator": {
       "result": "rezultat"
@@ -1353,6 +1354,12 @@
       "duration": "trajanje",
       "endDate": "datum završetka",
       "tick": "otkucaj"
+    },
+    "code": {
+      "input": "ulaz",
+      "code": "kôd (TypeScript)",
+      "modalTitle": "Uredi kôd",
+      "result": "rezultat"
     }
   }
 }

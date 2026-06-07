@@ -875,7 +875,8 @@
       "schema": "Schema validate",
       "readFile": "Read file",
       "writeFile": "Write file",
-      "timer": "Zamanlayıcı"
+      "timer": "Zamanlayıcı",
+      "code": "Kod"
     },
     "comparator": {
       "result": "sonuç"
@@ -1352,6 +1353,12 @@
       "duration": "süre",
       "endDate": "bitiş tarihi",
       "tick": "tik"
+    },
+    "code": {
+      "input": "girdi",
+      "code": "kod (TypeScript)",
+      "modalTitle": "Kodu düzenle",
+      "result": "sonuç"
     }
   }
 }
