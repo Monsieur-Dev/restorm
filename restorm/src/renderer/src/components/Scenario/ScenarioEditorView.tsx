@@ -2273,6 +2273,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     }
     return {
       id: n.id,
+      kind: n.data.kind,
       title,
       titleBadge,
       ...(n.data.note ? { note: n.data.note } : {}),

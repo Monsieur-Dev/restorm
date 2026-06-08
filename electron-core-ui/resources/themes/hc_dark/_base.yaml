@@ -11,6 +11,15 @@ colors:
     value: "#FFFFFF"
     description: Editor foreground color
 
+  # Hyperlink / inline-link text colour (URL-style links, e.g. ECUI Button link)
+  - id: textLink.foreground
+    value: "#3794ff"
+    description: Foreground color for links
+
+  - id: textLink.activeForeground
+    value: "#4daafc"
+    description: Foreground color for active / hovered links
+
   # Default widget background (for editors, panels, previews)
   - id: editorWidget.background
     value: "#000000"

@@ -52,6 +52,7 @@
     "@milkdown/kit": "^7.21.1",
     "@milkdown/react": "^7.21.1",
     "@monaco-editor/react": "^4.7.0",
+    "@phosphor-icons/react": "^2.1.10",
     "@vscode/codicons": "^0.0.45",
     "@xyflow/react": "^12.10.2",
     "@zip.js/zip.js": "^2.8.26",

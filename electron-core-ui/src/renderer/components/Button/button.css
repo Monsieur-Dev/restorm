@@ -352,6 +352,11 @@
 	padding: 0;
 	border: none;
 	background-color: transparent;
+
+	/* Theme-driven link colour (defined in every theme's base palette) so links
+	   stay readable on light themes instead of inheriting the white button
+	   foreground. */
+	color: var(--textLink-foreground);
 	justify-content: flex-start;
 	text-align: left;
 	cursor: pointer;
@@ -359,6 +364,7 @@
 
 .text-button.link-button:hover {
 	background-color: transparent;
+	color: var(--textLink-activeForeground, var(--textLink-foreground));
 }
 
 /* ONLY the text label is underlined — not the leading icon/badge, not the
