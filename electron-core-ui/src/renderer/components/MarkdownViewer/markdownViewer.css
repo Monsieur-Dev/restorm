@@ -263,3 +263,39 @@
 .markdown-viewer details > *:last-child {
   padding-bottom: 12px;
 }
+
+/* The bundled highlight.js theme (vs2015) is DARK — its base `.hljs` colour is a
+ * light grey that vanishes on a light editor background. Re-tie the base code
+ * colour to the editor foreground so it adapts to the active theme (the token
+ * spans keep vs2015's accent colours, which read fine on either background). */
+.markdown-viewer .markdown-code-block pre code.hljs {
+  color: var(--editor-foreground);
+}
+
+/* Compact mode: drop the document-style block spacing so a lone snippet (e.g. a
+ * single code block rendered inline) hugs its container. */
+.markdown-viewer--compact {
+  padding: 0;
+  overflow: visible;
+  background: transparent;
+}
+
+.markdown-viewer--compact .markdown-code-block {
+  margin: 0;
+}
+
+.markdown-viewer--compact .markdown-code-block pre {
+  padding: 4px 8px;
+}
+
+.markdown-viewer--compact p {
+  margin: 0.2em 0;
+}
+
+.markdown-viewer--compact > :first-child {
+  margin-top: 0;
+}
+
+.markdown-viewer--compact > :last-child {
+  margin-bottom: 0;
+}

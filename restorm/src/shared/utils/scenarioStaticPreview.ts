@@ -63,6 +63,26 @@ export function setEnvironmentPreviewResolver(fn: ((envId: string) => unknown) |
   environmentPreviewResolver = fn
 }
 
+/** Resolves a custom value list's label → its substituted value (e.g. the
+ * "Pet Colors" list maps `Rouge` → `FF0000`). Set by the renderer (from the
+ * live store) and by the headless engine (from the loaded project) so a
+ * `customList` / `customListMulti` resolves to its VALUE everywhere — the
+ * dispatch semantic — rather than the bare label. Returns `undefined` when the
+ * list / label is unknown (callers fall back to the label). */
+let customListResolver: ((listId: string, label: string) => string | undefined) | null = null
+export function setCustomListResolver(fn: ((listId: string, label: string) => string | undefined) | null): void {
+  customListResolver = fn
+}
+
+/** The value behind a custom-list label, or the label itself when there's no
+ * resolver / no match (so a registry-less context — unit tests, a preview
+ * before the project loads — still renders something sensible). */
+function customListValueOrLabel(listId: unknown, label: unknown): string {
+  const lbl = typeof label === 'string' ? label : ''
+  if (customListResolver === null || typeof listId !== 'string') return lbl
+  return customListResolver(listId, lbl) ?? lbl
+}
+
 export function concreteValue(persisted: unknown): unknown {
   if (persisted === null || persisted === undefined) return null
   if (typeof persisted !== 'object') return persisted
@@ -82,9 +102,14 @@ export function concreteValue(persisted: unknown): unknown {
     case 'boolean':
       return p.value === true || p.value === 'true'
     case 'customList':
-      return typeof p.label === 'string' ? p.label : ''
+      return customListValueOrLabel((p as { listId?: unknown }).listId, p.label)
     case 'customListMulti':
-      return Array.isArray(p.labels) ? p.labels.filter((v): v is string => typeof v === 'string').join(',') : ''
+      return Array.isArray(p.labels)
+        ? p.labels
+            .filter((v): v is string => typeof v === 'string')
+            .map((lbl) => customListValueOrLabel((p as { listId?: unknown }).listId, lbl))
+            .join(',')
+        : ''
     case 'variable':
       return typeof p.value === 'string' ? `{{${p.value}}}` : ''
     case 'environment': {
@@ -374,8 +399,12 @@ export function literalConfigItems(cfg: Record<string, unknown>): unknown[] | nu
  * which joins it to a display string. */
 export function listValueArray(v: unknown): unknown[] | null {
   if (v && typeof v === 'object') {
-    const p = v as { type?: unknown; labels?: unknown; value?: unknown }
-    if (p.type === 'customListMulti' && Array.isArray(p.labels)) return p.labels as unknown[]
+    const p = v as { type?: unknown; listId?: unknown; labels?: unknown; value?: unknown }
+    // A multi-select resolves each picked label to its custom-list VALUE (the
+    // dispatch semantic), mirroring `concreteValue`'s scalar path.
+    if (p.type === 'customListMulti' && Array.isArray(p.labels)) {
+      return p.labels.map((lbl) => customListValueOrLabel(p.listId, lbl))
+    }
     if (p.type === 'enumList' && Array.isArray(p.value)) return p.value as unknown[]
   }
   return null

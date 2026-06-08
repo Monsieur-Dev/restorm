@@ -1432,6 +1432,14 @@
       "pan": "déplacer",
       "boxSelect": "sélection rectangle",
       "select": "sélectionner / multi-sélection"
+    },
+    "cli": {
+      "title": "Lancer en ligne de commande",
+      "intro": "Exécutez ce scénario sans ouvrir l'application (CI, cron, script) :",
+      "byId": "Désigner par id",
+      "allLogs": "Tous les logs",
+      "note": "`--out fichier` écrit aussi le run-log dans un fichier.",
+      "projectPlaceholder": "<projet.restorm>"
     }
   }
 }

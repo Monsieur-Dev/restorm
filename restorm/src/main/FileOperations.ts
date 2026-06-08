@@ -15,6 +15,11 @@ import { promises as fs, existsSync, mkdirSync, readFileSync, writeFileSync, ren
 import { randomUUID } from 'crypto'
 import type { PersistenceFormat } from 'electron-core-ui'
 import { folderMappingService } from './services/FolderMappingService'
+import { collectionStore } from './services/CollectionStore'
+import { permissionService } from './services/firewall/PermissionService'
+import { collectProjectOrigins } from '../shared/firewall/collectProjectOrigins'
+import { formatIndex, sanitizeName } from '../shared/folderModeNaming'
+import type { FolderItem } from '../shared/types/collections'
 import { saveFolderSecretsEnvFile, applyFolderSecretsEnvFile } from './services/SecretsEnvFileService'
 import { normalizeDocumentValuesForPersistence } from '../shared/utils/valuePersistence'
 import { assertPathWithinParent } from './utils/pathSecurity'
@@ -71,36 +76,9 @@ function writeRestormConfig(folderPath: string, config: RestormConfig): void {
 // ==========================================================================
 
 /**
- * Calculate the padding width needed for numbering items
- * @param count Total number of items
- * @returns Number of digits needed (e.g., 9→1, 99→2, 999→3)
+ * Folder-mode naming (`<index> - <name>` per sibling) is shared with the
+ * headless-CLI scenario path/resolver — see `../shared/folderModeNaming`.
  */
-function getPaddingWidth(count: number): number {
-  if (count <= 0) return 1
-  return String(count).length
-}
-
-/**
- * Format an index number with dynamic padding based on total count
- * @param index 0-based index
- * @param count Total number of items
- * @returns Formatted string (e.g., "1", "01", "001")
- */
-function formatIndex(index: number, count: number): string {
-  const width = getPaddingWidth(count)
-  return String(index + 1).padStart(width, '0')
-}
-
-/**
- * Sanitize a name for use as a file/folder name
- */
-function sanitizeName(name: string): string {
-  return name
-    .replace(/[<>:"/\\|?*]/g, '_') // Replace invalid characters
-    .replace(/\s+/g, ' ')          // Normalize whitespace
-    .trim()
-    .slice(0, 100)                 // Limit length
-}
 
 // ==========================================================================
 // ID Generation & Mapping
@@ -793,6 +771,40 @@ async function loadSubFolder(
 /** `userData/drafts` — the root every project's draft dir lives under. */
 export function getDraftsRootDir(): string {
   return join(app.getPath('userData'), 'drafts')
+}
+
+/**
+ * Load a `.restorm` file or folder-mode project into the main-process
+ * {@link collectionStore} — the model the scenario engine reads from. Used by
+ * the headless CLI runner so a scenario can execute with NO renderer.
+ *
+ * Deliberately routes through the SAME `FileService.open` the interactive flow
+ * uses (single-file parse for a `.restorm`, the folder loader for a directory),
+ * so there is no second parser: the difference from the normal flow is only
+ * that here MAIN populates `collectionStore` directly instead of the renderer
+ * pushing it back via GraphQL. The top-level `FileService.onStateChanged`
+ * listener (in `index.ts`) still fires off this open, so the SettingsService
+ * workspace path (used by file-IO scenario nodes) is set exactly as usual.
+ */
+export async function loadProjectIntoStore(targetPath: string): Promise<void> {
+  if (!isFileServiceInitialized()) throw new Error('FileService is not initialized')
+  const result = await getFileService().open(
+    targetPath,
+    async (folderPath) => (await loadFolderStructure(folderPath))?.data
+  )
+  if (!result.success || result.content == null) {
+    throw new Error(`failed to load project: ${targetPath}`)
+  }
+  const collections = ((result.content as { collections?: unknown }).collections ?? []) as Parameters<typeof collectionStore.setCollections>[0]
+  collectionStore.setCollections(collections, 'file-load')
+  // Populate ContextService (per-environment `{{var}}` resolution) the way the
+  // renderer's per-document load events would — without a renderer here.
+  collectionStore.reemitAllEnvironmentsCreated()
+  // Seed the firewall's project-origins the way the renderer's
+  // `useFirewallProjectOriginsSync` hook does — so a scenario node calling a
+  // project URL (e.g. a `code` node's `pm.sendRequest`, which goes THROUGH the
+  // firewall) isn't denied for lack of a prompt in headless.
+  permissionService.setProjectOrigins(collectProjectOrigins(collections as unknown as FolderItem[]))
 }
 
 /**

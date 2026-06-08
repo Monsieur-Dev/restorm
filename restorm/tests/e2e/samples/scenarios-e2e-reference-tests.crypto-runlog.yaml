@@ -51,7 +51,6 @@
     op: hmacSha256
     key: key
     value: The quick brown fox jumps over the lazy dog
-    id: <uuid>
     in: true
 - message: ⚪ [<time>] done crypto
   data:

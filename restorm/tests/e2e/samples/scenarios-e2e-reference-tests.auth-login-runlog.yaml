@@ -3,7 +3,6 @@
   data:
     requestId: <uuid>
     label: Clear Logs
-    id: <uuid>
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
@@ -26,7 +25,6 @@
   data:
     requestId: <uuid>
     label: Clear Tokens
-    id: <uuid>
     in: true
 - message: ⚪ [<time>] done httpRequest
   data:
@@ -50,7 +48,6 @@
   data:
     requestId: d2000000-0000-0000-0000-00000000auth
     label: Get Pet by Id
-    id: <uuid>
     in: true
 - message: ⚪ [<time>] done httpRequest
   data:
@@ -85,7 +82,6 @@
   data:
     requestId: <uuid>
     label: Login Probe
-    id: <uuid>
     in: '{"id":1,"name":"Rex","status":"available","category":{"id":1,"name":"Dogs"},"tags":[{"id":1,"name":"friendly"}]}'
 - message: ⚪ [<time>] done httpRequest
   data:

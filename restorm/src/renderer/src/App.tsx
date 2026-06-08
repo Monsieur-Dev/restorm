@@ -110,6 +110,8 @@ import { useMcpFolderPatch } from './hooks/useMcpFolderPatch'
 import { useScenarioSuggestionsBridge } from './testing/scenarioSuggestionsBridge'
 import { RestormSidebar } from './components/MainView/Sidebar/RestormSidebar'
 import { RestormWorkbenchContainer } from './components/MainView/Workbench/RestormWorkbenchContainer'
+import { suggestRunTarget } from '../../shared/scenarioRunTarget'
+import { ScenarioCliInfoProvider } from './contexts/scenarioRunTargetContext'
 import { SaveOptionsModal } from './components/Modals/SaveOptionsModal'
 import { DeleteConfirmationModal } from './components/Modals/DeleteConfirmationModal'
 import { RequestScenarioDeleteModal, type RequestScenarioDeleteUsage } from './components/Modals/RequestScenarioDeleteModal'
@@ -312,6 +314,13 @@ const App: React.FC = () => {
   // serializes the unchanged current tree and silently writes nothing.
   const rootItemsRef = useRef(rootItems)
   useEffect(() => { rootItemsRef.current = rootItems }, [rootItems])
+
+  // The scenario inspector's CLI-command help asks for the shortest unambiguous
+  // `--run` value for a scenario; computed from the live project tree.
+  const suggestScenarioRunTarget = useCallback(
+    (scenarioId: string): string | null => suggestRunTarget(rootItemsRef.current, scenarioId),
+    []
+  )
 
   // Push the project's auto-derived origins (every request URL,
   // resolved against available env vars) to the main-process
@@ -705,7 +714,7 @@ const App: React.FC = () => {
     setIsOpenedAsFolder: _setIsOpenedAsFolder,
     folderFormat: _folderFormat,
     setFolderFormat: _setFolderFormat,
-    currentFolderPath: _currentFolderPath,
+    currentFolderPath,
     setCurrentFolderPath: _setCurrentFolderPath
   } = useFileManagement({
     rootItems,
@@ -2265,7 +2274,18 @@ const App: React.FC = () => {
     }
   }, [navigationEnabled, workbenchTree.groups, rootItems])
 
+  // Bundle the suggester with the open project's path so the inspector's
+  // CLI help can render a fully-formed `restorm --open <file> --run <target>`.
+  const scenarioCliInfo = useMemo(
+    () => ({
+      suggestRunTarget: suggestScenarioRunTarget,
+      projectPath: filePath ?? currentFolderPath ?? null
+    }),
+    [suggestScenarioRunTarget, filePath, currentFolderPath]
+  )
+
   return (
+    <ScenarioCliInfoProvider value={scenarioCliInfo}>
     <AvailableVariablesProvider>
       <VariableTransformProvider>
         <AuthRequestResolverContext.Provider value={resolveAuthRequestCb}>
@@ -2709,6 +2729,7 @@ const App: React.FC = () => {
         </AuthRequestResolverContext.Provider>
       </VariableTransformProvider>
     </AvailableVariablesProvider>
+    </ScenarioCliInfoProvider>
   )
 }
 

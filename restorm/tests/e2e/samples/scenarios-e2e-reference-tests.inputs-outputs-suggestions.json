@@ -17,8 +17,8 @@
         "name": "Sub-env"
       },
       "param6": "#000000",
-      "param5": "Bleu",
-      "param7": "Vert"
+      "param5": "0000FF",
+      "param7": "00FF00"
     },
     "source": "static"
   },
@@ -35,9 +35,9 @@
       "obj_param4": {
         "name": "Sub-env"
       },
-      "obj_param5": "Bleu",
+      "obj_param5": "0000FF",
       "obj_param6": "#000000",
-      "obj_param7": "Vert",
+      "obj_param7": "00FF00",
       "obj_SecondInput": "2026-06-02T10:18:27.766Z"
     },
     "source": "static"
@@ -59,9 +59,9 @@
         "obj_param4": {
           "name": "Sub-env"
         },
-        "obj_param5": "Bleu",
+        "obj_param5": "0000FF",
         "obj_param6": "#000000",
-        "obj_param7": "Vert",
+        "obj_param7": "00FF00",
         "obj_SecondInput": "2026-06-02T10:18:27.766Z"
       }
     },
@@ -125,9 +125,9 @@
         "obj_param4": {
           "name": "Sub-env"
         },
-        "obj_param5": "Bleu",
+        "obj_param5": "0000FF",
         "obj_param6": "#000000",
-        "obj_param7": "Vert",
+        "obj_param7": "00FF00",
         "obj_SecondInput": "2026-06-02T10:18:27.766Z"
       }
     },
@@ -139,7 +139,7 @@
     "suggestion": {
       "static_output": true,
       "env": null,
-      "color": "Bleu"
+      "color": "0000FF"
     },
     "source": "static"
   },
@@ -166,9 +166,9 @@
         "obj_param4": {
           "name": "Sub-env"
         },
-        "obj_param5": "Bleu",
+        "obj_param5": "0000FF",
         "obj_param6": "#000000",
-        "obj_param7": "Vert",
+        "obj_param7": "00FF00",
         "obj_SecondInput": "2026-06-02T10:18:27.766Z"
       }
     },

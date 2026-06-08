@@ -168,7 +168,7 @@ export type EngineEvent = (
   launcherScenarioId?: RuntimeId
 }
 
-/** One entry in the run log (engine-internal). Persistence is OYO-286. */
+/** One entry in the run log (engine-internal). Persisted via the run-log archive. */
 export interface RunLogEntry {
   ts: string
   /** Process-wide monotonic emission ordinal — the causal tiebreak when two
@@ -244,6 +244,10 @@ export interface ExecContext {
    * for resolving a `readFile`/`writeFile` relative path. Undefined in a
    * headless run with no open workspace → such paths resolve against cwd. */
   workspaceDir?: string
+  /** Run-tree-wide input overrides from the headless CLI (`--param name=value`).
+   * An `input` node whose param name appears here uses this value instead of
+   * prompting / its configured default — at any depth in the run tree. */
+  cliParams?: Record<string, unknown>
 }
 
 /**

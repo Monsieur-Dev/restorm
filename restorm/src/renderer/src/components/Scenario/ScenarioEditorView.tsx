@@ -2485,6 +2485,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       )}
       <ScenarioInspectorPanel
         scenarioId={scenario.id}
+        scenarioName={scenario.name}
         errors={workflowErrors}
         errorBoxCount={nodeErrors.size}
         onFocusNode={onLogFocus}

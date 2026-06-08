@@ -75,6 +75,9 @@ export interface InspectorPreviewNode {
 }
 export interface ScenarioInspectorPanelProps {
   scenarioId: string
+  /** The scenario's display name — drives the headless-CLI command shown in the
+   * empty-inspector help. Omitted in contexts without a single named scenario. */
+  scenarioName?: string
   /** Flat list of every box error (with the box title), for the errors section. */
   errors: { nodeId: string; title: string; error: ScenarioNodeError }[]
   /** Distinct boxes in error — drives the section header count. */
@@ -141,7 +144,7 @@ function scenarioRuntime(): ScenarioRuntime | undefined {
  * data + tree as the JSON-path selector's picker popover). Shown only when
  * exactly one box is selected.
  */
-export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ scenarioId, errors, errorBoxCount, onFocusNode, previewNode, onOpenItem, engineState, onEngineRun, onEnginePause, onEngineResume, onEngineStep, onEngineStepStart, onEngineStop, onEngineDebug, onEngineDebugContinue, hasBreakpoints, runLog, onClearRunLog, canUndo, canRedo, onUndo, onRedo }) => {
+export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ scenarioId, scenarioName, errors, errorBoxCount, onFocusNode, previewNode, onOpenItem, engineState, onEngineRun, onEnginePause, onEngineResume, onEngineStep, onEngineStepStart, onEngineStop, onEngineDebug, onEngineDebugContinue, hasBreakpoints, runLog, onClearRunLog, canUndo, canRedo, onUndo, onRedo }) => {
   const { t } = useTranslation()
   const { isMacintosh, isWindows } = usePlatform()
   const [result, setResult] = useState<Record<string, unknown> | null>(null)
@@ -510,13 +513,15 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
         </>
       )}
 
-      {/* Help legend — always present in the footer EXCEPT when the run-log view
-        * is showing (i.e. no box selected AND there are logs). So it backs the
-        * empty state, and sits below a selected box's help. */}
-      {(previewNode !== null || allLogs.length === 0) && (
+      {/* Help legend — ONLY in the truly empty inspector (no box selected AND no
+        * run-log). A selected box shows its preview instead (the legend would
+        * push it out of view); a run shows its logs. */}
+      {previewNode === null && allLogs.length === 0 && (
         <>
           <div className="scn-inspector-sep" />
-          <ScenarioInspectorLegend />
+          <ScenarioInspectorLegend
+            {...(scenarioName !== undefined ? { cliScenarioName: scenarioName, cliScenarioId: scenarioId } : {})}
+          />
         </>
       )}
     </div>

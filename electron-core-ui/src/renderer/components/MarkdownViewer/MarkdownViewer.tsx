@@ -72,6 +72,9 @@ export interface MarkdownViewerProps {
   value: string
   /** Enable Mermaid fenced code blocks ```mermaid */
   allowMermaid?: boolean
+  /** Tighten margins/padding — for rendering a small snippet (e.g. a single
+   * code block) inline, without the document-style block spacing. */
+  compact?: boolean
   /** Optional test id applied to the MarkdownViewer root element. */
   'data-testid'?: string
   /** Optional additional CSS class name */
@@ -213,12 +216,13 @@ function parseMarkdownViewerValue(markdown: string): { codeBlocks: string[]; mer
   return { codeBlocks, mermaidBlocks, httpLinks }
 }
 
-export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ value, allowMermaid = true, className, style, 'data-testid': dataTestId }) => {
+export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ value, allowMermaid = true, compact = false, className, style, 'data-testid': dataTestId }) => {
   const isDark = useIsDarkTheme()
   const parsed = React.useMemo(() => parseMarkdownViewerValue(value), [value])
   const rootClassName = [
     'markdown-viewer',
     isDark ? 'markdown-viewer-dark' : 'markdown-viewer-light',
+    compact ? 'markdown-viewer--compact' : '',
     className
   ]
     .filter(Boolean)

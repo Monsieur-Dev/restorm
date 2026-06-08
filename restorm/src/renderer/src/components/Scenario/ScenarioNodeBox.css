@@ -1573,10 +1573,21 @@
 
 /* Help legend (empty-state footer): colour key + navigation shortcuts. */
 .scn-inspector-legend {
+  /* The section is a flex column (from .scn-inspector-section); min-height:0 lets
+   * it shrink within the panel's definite height so the inner scroller — not the
+   * frame — absorbs an overflowing legend on a short canvas. */
+  min-height: 0;
+  opacity: 0.92;
+}
+/* Fills the (possibly shrunk) section and scrolls its content vertically. */
+.scn-inspector-legend-scroll {
+  min-height: 0;
+}
+/* The actual help content keeps the legend's column layout + spacing. */
+.scn-inspector-legend-body {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  opacity: 0.92;
 }
 .scn-legend-group-title {
   font-weight: 600;
@@ -1585,6 +1596,37 @@
   text-transform: uppercase;
   letter-spacing: 0.02em;
   margin-top: 2px;
+}
+.scn-cli-help {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+.scn-cli-help-intro,
+.scn-cli-help-note {
+  font-size: 11px;
+  opacity: 0.7;
+  margin: 0;
+  line-height: 1.4;
+}
+.scn-cli-help-md {
+  width: 100%;
+  min-width: 0;
+  font-size: 11px;
+}
+/* The MarkdownViewer renders the command as a fenced code block — make it wrap
+   inside the narrow inspector instead of overflowing/clipping. */
+.scn-cli-help-md pre,
+.scn-cli-help-md pre code {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.scn-cli-help-toggles {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 11px;
 }
 .scn-legend-list {
   list-style: none;

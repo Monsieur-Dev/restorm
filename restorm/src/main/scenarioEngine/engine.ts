@@ -10,6 +10,7 @@
 
 import { logger, getSettingsService, isSettingsServiceInitialized } from 'electron-core-ui/main'
 import { collectionStore } from '../services/CollectionStore'
+import { installScenarioValueResolvers } from '../../shared/scenarioValueResolvers'
 import { isScenario } from '../../shared/types/collections'
 import type { Scenario } from '../../shared/types/scenario'
 import { Scheduler, type RunOptions } from './scheduler'
@@ -42,6 +43,12 @@ export interface RunCallContext {
    * scenario id). Every (sub-)run executes against — and the archive keeps —
    * these copies, so editing a scenario mid-run never affects the run. */
   snapshots?: Map<RuntimeId, ScenarioRunSnapshot>
+  /** Live log sink shared by the whole run tree (headless CLI streaming).
+   * Inherited unchanged by every sub-run so the consumer sees the merged log. */
+  onLog?: (entry: RunLogEntry) => void
+  /** Tree-wide input fallbacks (headless CLI `--param`), inherited by every
+   * sub-run so a named input resolves at any depth. */
+  treeParams?: Record<string, unknown>
 }
 
 export class ScenarioEngine {
@@ -58,15 +65,16 @@ export class ScenarioEngine {
    * mid-run. Cleared once the run is persisted. */
   private readonly runSnapshots = new Map<RuntimeId, ScenarioRunSnapshot[]>()
 
-  /** Top-level run entry point. */
-  start(scenarioId: RuntimeId, options: RunOptions = {}): RunHandle {
+  /** Top-level run entry point. `onLog`, when given, receives every log entry
+   * across the whole run tree the instant it's emitted (headless CLI streaming). */
+  start(scenarioId: RuntimeId, options: RunOptions = {}, onLog?: (entry: RunLogEntry) => void): RunHandle {
     // Snapshot every referenced scenario NOW (deep copies) so the whole run
     // tree — and the persisted history — uses exactly these versions, immune
     // to edits made while the run is in flight.
     const snapshots = new Map<RuntimeId, ScenarioRunSnapshot>(
       collectReferencedScenarios(scenarioId).map((s) => [s.id, s])
     )
-    return this.startWithStack(scenarioId, options, { stack: new Set(), launcherScenarioId: scenarioId, snapshots })
+    return this.startWithStack(scenarioId, options, { stack: new Set(), launcherScenarioId: scenarioId, snapshots, ...(onLog ? { onLog } : {}), ...(options.params ? { treeParams: options.params } : {}) })
   }
 
   /** Fanout subscription — every event from every active scheduler
@@ -150,6 +158,8 @@ export class ScenarioEngine {
       executors,
       isSubScenario: callCtx.parentRunId !== undefined,
       ...(workspaceDir !== undefined ? { workspaceDir } : {}),
+      ...(callCtx.onLog ? { onLog: callCtx.onLog } : {}),
+      ...(callCtx.treeParams ? { treeParams: callCtx.treeParams } : {}),
       ...(parentSignal ? { parentSignal } : {}),
       runSubScenario: async (subId, params, subParentSignal) => {
         const subStack = new Set(callCtx.stack)
@@ -159,7 +169,7 @@ export class ScenarioEngine {
         // this run in the archive via `parentRunId`. The interactive flag
         // propagates too, so a mid-flow input inside a called scenario still
         // prompts the user (its entry inputs come from `params`, no prompt).
-        const handle = this.startWithStack(subId, { params, ...(options.interactive !== undefined ? { interactive: options.interactive } : {}) }, { stack: subStack, launcherScenarioId: callCtx.launcherScenarioId, parentRunId: scheduler.runId, ...(callCtx.snapshots ? { snapshots: callCtx.snapshots } : {}) }, subParentSignal)
+        const handle = this.startWithStack(subId, { params, ...(options.interactive !== undefined ? { interactive: options.interactive } : {}) }, { stack: subStack, launcherScenarioId: callCtx.launcherScenarioId, parentRunId: scheduler.runId, ...(callCtx.snapshots ? { snapshots: callCtx.snapshots } : {}), ...(callCtx.onLog ? { onLog: callCtx.onLog } : {}), ...(callCtx.treeParams ? { treeParams: callCtx.treeParams } : {}) }, subParentSignal)
         return handle.done
       }
     })
@@ -286,3 +296,10 @@ export class ScenarioEngine {
 /** Singleton — the main-process side wires its IPC handlers + MCP
  * tools to this instance. */
 export const scenarioEngine = new ScenarioEngine()
+
+// Resolve `customList` → its value and `environment` → `{ name, variables }`
+// from the live main-side project, so the engine's `concreteValue` (run-log,
+// input defaults, conditions) matches the renderer — for normal runs and
+// headless alike. Installed once on module load; the getter reads the current
+// store each call, so a later project load is picked up automatically.
+installScenarioValueResolvers(() => collectionStore.getCollections())

@@ -1431,6 +1431,14 @@
       "pan": "移动",
       "boxSelect": "矩形选择",
       "select": "选择 / 多选"
+    },
+    "cli": {
+      "title": "Run from the command line",
+      "intro": "Run this scenario without opening the app (CI, cron, script):",
+      "byId": "Designate by id",
+      "allLogs": "All logs",
+      "note": "`--out file` also writes the run-log to a file.",
+      "projectPlaceholder": "<project.restorm>"
     }
   }
 }

@@ -55,6 +55,7 @@ import {
 import { httpRequestExecutor } from './httpRequestExecutor'
 import { runScenarioExecutor } from './runScenarioExecutor'
 import { concreteValue } from '../../../shared/utils/scenarioStaticPreview'
+import { coerceCliParamValue } from '../../../shared/scenarioCliParams'
 import { readInputParams } from '../../../shared/scenarioInputParams'
 import { readOutputDecls } from '../../../shared/scenarioOutputDecls'
 
@@ -102,10 +103,18 @@ export const inputExecutor: NodeExecutor = async (act, ctx) => {
     const prefill = wiredObj && name in wiredObj
       ? wiredObj[name]
       : (params.length === 1 && wired !== undefined ? wired : configuredDefault)
+    // A headless CLI `--param name=value` overrides this input at any depth —
+    // before prompting or falling back to a default. The raw argv string is
+    // cast to the param's declared type (numeric/boolean/list/…) so it matches
+    // a UI/MCP-produced value rather than leaking a bare string downstream.
+    const cliRaw = ctx.cliParams !== undefined && name in ctx.cliParams ? ctx.cliParams[name] : undefined
+    const cliOverride = cliRaw !== undefined ? coerceCliParamValue(cliRaw, param.valueType) : undefined
     // A non-interactive run (MCP / headless e2e / a sub-scenario reached by a
     // headless parent) can't surface a prompt — it would await forever — so it
     // takes the prefill (wired value or configured default) straight through.
-    const value = ctx.interactive
+    const value = cliOverride !== undefined
+      ? cliOverride
+      : ctx.interactive
       ? await ctx.requestUserInput({
         name,
         defaultValue: prefill,

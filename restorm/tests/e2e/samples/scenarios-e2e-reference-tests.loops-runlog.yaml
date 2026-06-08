@@ -2,43 +2,43 @@
 - message: ⚪ [<time>] start forEach
   data:
     items:
-      - Rouge
-      - Vert
-      - Bleu
+      - FF0000
+      - 00FF00
+      - 0000FF
 - message: ⚪ [<time>] done forEach
 - message: "⚪ [<time>] forEach start: 3 items, batchSize=1, opening first 1"
 - message: ⚪ [<time>] forEach open item 0 (0/3 done, batch≤1)
 - message: ⚪ [<time>] start log
   data:
     message: ForEachOutput
-    data: Rouge
+    data: FF0000
 - message: 🔵 [<time>] ForEachOutput
-  data: Rouge
+  data: FF0000
 - message: ⚪ [<time>] done log
   data:
-    value: Rouge
+    value: FF0000
 - message: ⚪ [<time>] forEach item 0 closed (1/3 done)
 - message: ⚪ [<time>] forEach open item 1 (1/3 done, batch≤1)
 - message: ⚪ [<time>] start log
   data:
     message: ForEachOutput
-    data: Vert
+    data: 00FF00
 - message: 🔵 [<time>] ForEachOutput
-  data: Vert
+  data: 00FF00
 - message: ⚪ [<time>] done log
   data:
-    value: Vert
+    value: 00FF00
 - message: ⚪ [<time>] forEach item 1 closed (2/3 done)
 - message: ⚪ [<time>] forEach open item 2 (2/3 done, batch≤1)
 - message: ⚪ [<time>] start log
   data:
     message: ForEachOutput
-    data: Bleu
+    data: 0000FF
 - message: 🔵 [<time>] ForEachOutput
-  data: Bleu
+  data: 0000FF
 - message: ⚪ [<time>] done log
   data:
-    value: Bleu
+    value: 0000FF
 - message: ⚪ [<time>] forEach item 2 closed (3/3 done)
 - message: ⚪ [<time>] start log
   data:

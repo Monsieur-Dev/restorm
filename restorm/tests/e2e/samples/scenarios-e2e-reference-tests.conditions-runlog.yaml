@@ -56,14 +56,14 @@
   data:
     left: null
     operator: ">"
-    right: Rouge
+    right: FF0000
 - message: 🔴 [<time>] Operator ">" cannot order null values
 - message: ⚪ [<time>] start if
   data:
     right:
-      - Vert
-      - Bleu
-      - Rouge
+      - 00FF00
+      - 0000FF
+      - FF0000
     left: null
 - message: ⚪ [<time>] start if
   data:
@@ -107,7 +107,7 @@
 - message: 🔴 [<time>] Operator ">" cannot order null values
 - message: ⚪ [<time>] start if
   data:
-    left: Rouge
+    left: FF0000
     operator: ">"
     right: null
 - message: 🔴 [<time>] Operator ">" cannot order null values
@@ -115,9 +115,9 @@
   data:
     right: null
     left:
-      - Bleu
-      - Vert
-      - Rouge
+      - 0000FF
+      - 00FF00
+      - FF0000
 - message: ⚪ [<time>] start if
   data:
     right: null
@@ -256,9 +256,9 @@
     else:
       left: null
       right:
-        - Vert
-        - Bleu
-        - Rouge
+        - 00FF00
+        - 0000FF
+        - FF0000
 - message: ⚪ [<time>] done if
   data:
     else:
@@ -282,9 +282,9 @@
   data:
     else:
       left:
-        - Bleu
-        - Vert
-        - Rouge
+        - 0000FF
+        - 00FF00
+        - FF0000
       right: null
 - message: ⚪ [<time>] done if
   data:
@@ -553,9 +553,9 @@
 - message: ⚪ [<time>] start if
   data:
     left:
-      - Rouge
-      - Vert
-    right: Vert
+      - FF0000
+      - 00FF00
+    right: 00FF00
     operator: contains
     in: true
 - message: ⚪ [<time>] done if

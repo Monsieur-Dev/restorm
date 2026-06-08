@@ -17987,6 +17987,283 @@ collections:
             id: cfb401ce-df62-4d41-88e2-8989206abe2f
             name: Bestiary
             items: []
+          - tags: []
+            configuration: {}
+            items:
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 8bc84311-0694-47fd-b3ff-75ddba8e8cfe
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: Démarrage Scenario1 (A)
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 0
+                      'y': 0
+                  - id: bd86487d-1d41-4ce6-8544-475809a857bd
+                    kind: wait
+                    config:
+                      durationValue: 5
+                      unit: s
+                      durationMs: 5000
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: duration
+                        name: duration
+                        dataType: duration
+                    outputs:
+                      - id: out
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                    position:
+                      x: 280
+                      'y': 0
+                  - id: 87c25e72-45cc-4c10-baa7-8d051de277ea
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: Fin Scenario1 (A)
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 560
+                      'y': 0
+                edges:
+                  - id: 63b162b7-aace-4e55-9715-2af19f91dd04
+                    from:
+                      nodeId: 8bc84311-0694-47fd-b3ff-75ddba8e8cfe
+                      portId: done
+                    to:
+                      nodeId: bd86487d-1d41-4ce6-8544-475809a857bd
+                      portId: in
+                  - id: aca41056-cec1-4baa-822d-36c4c3932a3e
+                    from:
+                      nodeId: bd86487d-1d41-4ce6-8544-475809a857bd
+                      portId: out
+                    to:
+                      nodeId: 87c25e72-45cc-4c10-baa7-8d051de277ea
+                      portId: in
+                id: 1780946488258-6ayf3vz
+                name: Scenario1
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: bf8bc539-e22a-4eb1-b9bb-ff85089a7e87
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: Démarrage Scenario1 (B)
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 0
+                      'y': 0
+                  - id: 2723e16a-6a5e-4435-8c6e-f75974f5d235
+                    kind: wait
+                    config:
+                      durationValue: 5
+                      unit: s
+                      durationMs: 5000
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: duration
+                        name: duration
+                        dataType: duration
+                    outputs:
+                      - id: out
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                    position:
+                      x: 280
+                      'y': 0
+                  - id: 50b55ea6-5f96-4f6d-887b-2899cf6df124
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: Fin Scenario1 (B)
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 560
+                      'y': 0
+                edges:
+                  - id: 8b241a8e-19fd-488f-8f61-b0e6301dd82e
+                    from:
+                      nodeId: bf8bc539-e22a-4eb1-b9bb-ff85089a7e87
+                      portId: done
+                    to:
+                      nodeId: 2723e16a-6a5e-4435-8c6e-f75974f5d235
+                      portId: in
+                  - id: 821b38af-9ae5-4c22-b4c8-9c0220a349d4
+                    from:
+                      nodeId: 2723e16a-6a5e-4435-8c6e-f75974f5d235
+                      portId: out
+                    to:
+                      nodeId: 50b55ea6-5f96-4f6d-887b-2899cf6df124
+                      portId: in
+                id: 1780946504625-xn50kq3
+                name: Scenario1
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 79de58d5-beee-457a-afb1-2b13f7cafa48
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: Démarrage Scenario2
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 0
+                      'y': 0
+                  - id: 97536098-b5dc-4475-af3b-1ca5684e2b96
+                    kind: wait
+                    config:
+                      durationValue: 5
+                      unit: s
+                      durationMs: 5000
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: duration
+                        name: duration
+                        dataType: duration
+                    outputs:
+                      - id: out
+                        name: then
+                        dataType: any
+                        role: then
+                        flow: both
+                    position:
+                      x: 280
+                      'y': 0
+                  - id: e08ee11d-c161-42a2-b064-f2dfcbe9e834
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: string
+                        value: Fin Scenario2
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 560
+                      'y': 0
+                edges:
+                  - id: 0ad05e85-37cb-4596-b38c-2b2d7d425357
+                    from:
+                      nodeId: 79de58d5-beee-457a-afb1-2b13f7cafa48
+                      portId: done
+                    to:
+                      nodeId: 97536098-b5dc-4475-af3b-1ca5684e2b96
+                      portId: in
+                  - id: 0c1719bf-b8b5-428a-8bee-6206bca2b7ac
+                    from:
+                      nodeId: 97536098-b5dc-4475-af3b-1ca5684e2b96
+                      portId: out
+                    to:
+                      nodeId: e08ee11d-c161-42a2-b064-f2dfcbe9e834
+                      portId: in
+                id: 1780946514446-wv20jsc
+                name: Scenario2
+                items: []
+              - tags: []
+                configuration: {}
+                items: []
+                id: 1780946532536-vprhq8i
+                name: Sub-folder
+            id: 1780946470732-9tl851b
+            name: Scenario path tests
         id: f1000000-0000-0000-0000-00000000auth
         name: Pet API
       - documentation: ''

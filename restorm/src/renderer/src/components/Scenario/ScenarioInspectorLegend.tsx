@@ -1,22 +1,30 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import { ScrollableElement } from 'electron-core-ui/renderer'
 import {
   MouseScrollIcon,
   MouseLeftClickIcon,
   MouseMiddleClickIcon,
   ArrowsOutCardinalIcon
 } from '@phosphor-icons/react'
+import { ScenarioCliHelp } from './ScenarioCliHelp'
 
 /**
  * The help legend shown in the empty inspector (no run-log to display): what the
- * node / port colours mean, and the graph navigation shortcuts. Discreet, i18n.
- * Stays visible as a footer even when a single action is selected (its help sits
+ * node / port colours mean, the graph navigation shortcuts, and — when a scenario
+ * is identified — the command line to run it headlessly. Discreet, i18n. Stays
+ * visible as a footer even when a single action is selected (its help sits
  * above). Colours are representative of the box/port scheme, not theme-exact.
  */
-export const ScenarioInspectorLegend: React.FC = () => {
+export const ScenarioInspectorLegend: React.FC<{ cliScenarioName?: string; cliScenarioId?: string }> = ({ cliScenarioName, cliScenarioId }) => {
   const { t } = useTranslation()
   return (
     <div className="scn-inspector-section scn-inspector-legend" data-testid="scenario-inspector-legend">
+      {/* The help can be taller than the panel on a short canvas — its own
+        * scroller keeps it inside the frame (the section shrinks, this scrolls)
+        * instead of spilling past it. */}
+      <ScrollableElement className="scn-inspector-legend-scroll" options={{ horizontal: 'hidden' }}>
+      <div className="scn-inspector-legend-body">
       <div className="scn-inspector-section-title">{t('scenario.legend.title', 'Legend')}</div>
 
       <div className="scn-legend-group-title">{t('scenario.legend.portsTitle', 'Points d\'entrée')}</div>
@@ -112,6 +120,12 @@ export const ScenarioInspectorLegend: React.FC = () => {
           <span className="scn-legend-nav-label">{t('scenario.legend.select', 'sélectionner / multi-sélection')}</span>
         </li>
       </ul>
+
+      {cliScenarioName !== undefined && cliScenarioId !== undefined && (
+        <ScenarioCliHelp scenarioName={cliScenarioName} scenarioId={cliScenarioId} />
+      )}
+      </div>
+      </ScrollableElement>
     </div>
   )
 }

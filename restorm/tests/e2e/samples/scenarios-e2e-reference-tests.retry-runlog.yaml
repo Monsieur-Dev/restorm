@@ -3,7 +3,6 @@
   data:
     requestId: <uuid>
     label: Clear Flaky
-    id: <uuid>
 - message: ⚪ [<time>] done httpRequest
   data:
     response:
@@ -36,7 +35,6 @@
   data:
     requestId: <uuid>
     label: Flaky 503
-    id: <uuid>
     in: 1
 - message: ⚪ [<time>] done httpRequest
   data:
@@ -62,7 +60,6 @@
   data:
     requestId: <uuid>
     label: Flaky 503
-    id: <uuid>
     in: 2
 - message: ⚪ [<time>] done httpRequest
   data:
@@ -88,7 +85,6 @@
   data:
     requestId: <uuid>
     label: Flaky 503
-    id: <uuid>
     in: 3
 - message: ⚪ [<time>] done httpRequest
   data:
@@ -159,7 +155,6 @@
   data:
     requestId: <uuid>
     label: Clear Flaky
-    id: <uuid>
     in: true
 - message: ⚪ [<time>] done httpRequest
   data:
@@ -193,7 +188,6 @@
   data:
     requestId: <uuid>
     label: Flaky 500
-    id: <uuid>
     in: 1
 - message: ⚪ [<time>] done httpRequest
   data:
@@ -219,7 +213,6 @@
   data:
     requestId: <uuid>
     label: Flaky 500
-    id: <uuid>
     in: 2
 - message: ⚪ [<time>] done httpRequest
   data:
@@ -245,7 +238,6 @@
   data:
     requestId: <uuid>
     label: Flaky 500
-    id: <uuid>
     in: 3
 - message: ⚪ [<time>] done httpRequest
   data:

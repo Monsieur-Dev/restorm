@@ -198,6 +198,13 @@ export default defineConfig({
       name: 'scenario-runlog',
       testDir: scenarioRunlogTestDir,
       timeout: 180 * 1000 // 3 min — three scenarios, each opens a fresh app + runs the engine
+    },
+    {
+      // Headless CLI runner — a plain spec (no BDD/UI) that spawns the built app
+      // with `--run` and asserts stdout + exit code.
+      name: 'scenario-cli',
+      testDir: 'tests/e2e/scenario-cli',
+      timeout: 180 * 1000
     }
   ]
 })

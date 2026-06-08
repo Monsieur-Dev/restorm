@@ -32,6 +32,8 @@
     "test:complete": "pnpm run test:unit && pnpm run test:integration && pnpm run test:e2e",
     "test:ci": "pnpm run docker:up && pnpm run docker:wait && pnpm run test:all && pnpm run docker:down",
     "test:e2e": "bddgen && node scripts/run-e2e.mjs",
+    "headless": "node scripts/headless-run.mjs",
+    "headless:main": "node scripts/headless-run.mjs \"Auth Service/Pet API/Main\"",
     "test:e2e:ui": "bddgen && playwright test --ui",
     "test:e2e:debug": "bddgen && playwright test --debug",
     "coverage:clean": "node scripts/coverage/clean.js",
