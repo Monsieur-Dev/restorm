@@ -1,3 +1,8 @@
+// LOAD-ORDER CRITICAL (logger): inject ECUI's `--quiet` in headless CLI-run
+// mode BEFORE any module can create the logger, so stdout stays clean for the
+// run-log. Pure argv mutation — no network — so it's safe ahead of the firewall.
+import './cli/earlyQuiet'
+
 // LOAD-ORDER CRITICAL: install the main-process firewall
 // interceptor (Layer B) BEFORE any other module that might trigger
 // an outgoing HTTP / HTTPS / fetch call. The monkey-patches replace
@@ -48,7 +53,8 @@ import { registerRestormIPC } from './IPCHandlers'
 import { installScenarioEngineIPC } from './scenarioEngine/ipcBridge'
 import { registerApiUpdateIPC } from './services/apiUpdate/registerApiUpdateIPC'
 import { runApiUpdateApply } from './services/apiUpdate/orchestrateApply'
-import { loadFolderStructure, attachDraftStoreForFolder, attachDraftStoreForFile, getDraftsRootDir } from './FileOperations'
+import { loadFolderStructure, loadProjectIntoStore, attachDraftStoreForFolder, attachDraftStoreForFile, getDraftsRootDir } from './FileOperations'
+import { runScenarioHeadless } from './cli/headlessRunner'
 import { DEFAULT_UI_DELAY_MS } from '../shared/config/constants'
 import { applyUserDataOverride } from './userDataOverride'
 // DocumentEvents are handled by FileService internally for dirty state tracking
@@ -78,6 +84,18 @@ app.name = 'restorm'
 const cliArgs = parseCliArgs()
 if (cliArgs.clearSettings) {
   clearUserSettings()
+}
+
+// Headless CLI-run mode: keep restorm's own diagnostics off the console (only
+// the scenario run-log should reach stdout) by raising the logger to `error`
+// before anything else logs. `--run` requires `--open` to know which project
+// to load — fail fast with a clear message otherwise.
+if (cliArgs.cliRun) {
+  logger.setLevel('error')
+  if (cliArgs.open === undefined) {
+    process.stderr.write('--run requires --open <project> (the .restorm file/folder containing the scenario)\n')
+    app.exit(2)
+  }
 }
 
 const fileToOpenOnStart = cliArgs.open
@@ -446,7 +464,13 @@ const resourcesPath = getResourcesPath()
 const rendererPath = getRendererPath()
 const settingsConfigPath = getSettingsConfigPath()
 const featuresConfigPath = getFeaturesConfigPath()
-initializeApp('restorm', createWindow, resourcesPath, undefined, rendererPath || undefined, settingsConfigPath, featuresConfigPath)
+// A CLI run with `--headless` suppresses the window entirely (the engine +
+// collectionStore run window-free) while keeping all the service init
+// initializeApp performs (SettingsService, IPC, …) that the run depends on.
+// Without `--headless` the window is shown for visual feedback; the run still
+// executes in the main process and exits when done.
+const suppressWindow = cliArgs.cliRun?.headless === true
+initializeApp('restorm', suppressWindow ? () => { /* headless: no window */ } : createWindow, resourcesPath, undefined, rendererPath || undefined, settingsConfigPath, featuresConfigPath)
 
 // Wire the AutoSaveController once both SettingsService (initialized
 // inside `initializeApp` → `setupIPC` on `app.whenReady`) and
@@ -566,6 +590,32 @@ registerRestormIPC({ editorWindows, closeAllWindows })
 // every build, not only when the embedded MCP server is enabled. Idempotent:
 // the MCP setup path calls it again as a no-op.
 installScenarioEngineIPC()
+
+// Headless CLI-run: load the --open project into the main-side store, run the
+// named scenario through the real engine (no window), stream its run-log, and
+// exit with a status reflecting the outcome. Runs after `initializeApp` has
+// wired SettingsService (so the file-IO workspace path resolves) — we poll for
+// readiness rather than assume an ordering between async `whenReady` callbacks.
+if (cliArgs.cliRun && cliArgs.open !== undefined) {
+  const project = cliArgs.open
+  const cliRun = cliArgs.cliRun
+  void app.whenReady().then(async () => {
+    const settingsReady = async (): Promise<void> => {
+      for (let i = 0; i < 250 && !isSettingsServiceInitialized(); i++) {
+        await new Promise((resolve) => setTimeout(resolve, 20))
+      }
+    }
+    try {
+      await settingsReady()
+      await loadProjectIntoStore(project)
+      const code = await runScenarioHeadless(cliRun)
+      app.exit(code)
+    } catch (err) {
+      process.stderr.write(`${err instanceof Error ? err.message : String(err)}\n`)
+      app.exit(1)
+    }
+  })
+}
 
 // Wire the periodic API-update flow. The CollectionStore + persistence
 // hooks are passed in so this module stays unaware of where the data

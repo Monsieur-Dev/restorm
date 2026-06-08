@@ -1432,6 +1432,14 @@
       "pan": "mover",
       "boxSelect": "selección rectangular",
       "select": "seleccionar / selección múltiple"
+    },
+    "cli": {
+      "title": "Run from the command line",
+      "intro": "Run this scenario without opening the app (CI, cron, script):",
+      "byId": "Designate by id",
+      "allLogs": "All logs",
+      "note": "`--out file` also writes the run-log to a file.",
+      "projectPlaceholder": "<project.restorm>"
     }
   }
 }

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { stringify as yamlStringify } from 'yaml'
 import { Button, ListView, Toggle, Tooltip, ContextMenu, type ContextMenuItem, type ListViewItemData } from 'electron-core-ui/renderer'
+import { asText, serializeRunLogEntries, serializeRunLogEntry, type ScenarioRunLogLike } from '../../../../shared/scenarioRunLog/serializeRunLog'
 import { buildScenarioPathTree } from './scenarioPathTree'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 
@@ -69,30 +69,13 @@ const LogMessageCell: React.FC<{ ts: string; message: string }> = ({ ts, message
 const LEVELS = ['debug', 'info', 'warn', 'error'] as const
 type LogLevel = typeof LEVELS[number]
 
-// Status-dot colour rendered as an emoji for the plain-text (YAML) copy, so a
-// pasted log keeps the level cue without the styled `<span>` dot.
-const LEVEL_EMOJI: Record<LogLevel, string> = { debug: '⚪', info: '🔵', warn: '🟠', error: '🔴' }
-
 /** The level-filter map (which severities are shown). */
 export type LogLevelFilter = Record<LogLevel, boolean>
 const ALL_LEVELS_ON: LogLevelFilter = { debug: true, info: true, warn: true, error: true }
 
-/** Minimal log-entry shape the view needs — satisfied by both the live
- * `ScenarioLogEntry` (inspector) and the persisted `ScenarioRunLogEntry`
- * (run history). */
-export interface ScenarioRunLogLike {
-  ts: string
-  level?: 'debug' | 'info' | 'warn' | 'error'
-  source?: 'engine' | 'user' | 'run'
-  /** The node that emitted this entry — lets a click on the row focus +
-   * flash the box in the editor. */
-  nodeId?: string
-  /** The (sub-)scenario the entry came from — in the run-history a click
-   * selects this scenario in the graph before flashing the node. */
-  scenarioId?: string
-  message: string
-  data?: unknown
-}
+/** Minimal log-entry shape the view needs — defined once in the shared
+ * serializer module and re-exported here for existing consumers. */
+export type { ScenarioRunLogLike }
 
 export interface ScenarioRunLogViewProps {
   logs: readonly ScenarioRunLogLike[]
@@ -118,19 +101,6 @@ export interface ScenarioRunLogViewProps {
 }
 
 const logTs = (ts: string): string => (ts.length >= 23 ? ts.slice(11, 23) : ts)
-
-// Full, human-readable timestamp for the copied log (`YYYY-MM-DD HH:MM:SS.mmm`)
-// — unlike the row's time-only display, a pasted log may be read across days.
-const logDate = (ts: string): string => (ts.length >= 23 ? ts.slice(0, 23).replace('T', ' ') : ts)
-
-// Defensive: a log `message` may arrive as a non-string (e.g. a typed
-// ValueType `{ type, value }`); never hand a raw object to React.
-const asText = (v: unknown): string => {
-  if (typeof v === 'string') return v
-  if (v === null || v === undefined) return ''
-  if (typeof v === 'number' || typeof v === 'boolean' || typeof v === 'bigint') return String(v)
-  try { return JSON.stringify(v) } catch { return '[unserializable]' }
-}
 
 // Prefix tree ids per row so the same data shape across rows can't collide
 // on React keys.
@@ -191,17 +161,9 @@ export const ScenarioRunLogView: React.FC<ScenarioRunLogViewProps> = ({ logs, te
   })
 
   const copyLogs = (): void => {
-    // Serialize each entry as a YAML object: a single `message` line
-    // ("<level-emoji> [<date>] <text>") and, when present, the structured
-    // `data` object as a second property — far more human-readable when pasted
-    // than the previous inline-JSON-per-line form.
-    const entries = visibleLogs.map((e) => {
-      const level = e.level ?? 'info'
-      const message = `${LEVEL_EMOJI[level]} [${logDate(e.ts)}] ${asText(e.message)}`
-      return e.data !== undefined ? { message, data: e.data } : { message }
-    })
-    let text: string
-    try { text = yamlStringify(entries) } catch { text = '' }
+    // Serialize via the shared run-log serializer — the SAME output the
+    // headless CLI streams, so a copy-paste and a CLI run are byte-identical.
+    const text = serializeRunLogEntries(visibleLogs)
     void navigator.clipboard.writeText(text).then(() => {
       setCopied(true)
       setTimeout(() => { setCopied(false) }, 1500)
@@ -214,12 +176,7 @@ export const ScenarioRunLogView: React.FC<ScenarioRunLogViewProps> = ({ logs, te
     const idx = Number((rowId.split('/')[0] ?? '').replace('log-', ''))
     const e = Number.isInteger(idx) ? visibleLogs[idx] : undefined
     if (!e) return
-    const level = e.level ?? 'info'
-    const message = `${LEVEL_EMOJI[level]} [${logDate(e.ts)}] ${asText(e.message)}`
-    const entry = e.data !== undefined ? { message, data: e.data } : { message }
-    let text: string
-    try { text = yamlStringify(entry) } catch { text = '' }
-    void navigator.clipboard.writeText(text).catch(() => { /* clipboard denied — no-op */ })
+    void navigator.clipboard.writeText(serializeRunLogEntry(e)).catch(() => { /* clipboard denied — no-op */ })
   }
 
   return (

@@ -1,33 +1,13 @@
 import { createBdd } from 'playwright-bdd'
-import { copyFileSync, readFileSync, writeFileSync, existsSync } from 'fs'
-import { join, resolve } from 'path'
-import { parse as yamlParse, stringify as yamlStringify } from 'yaml'
+import { readFileSync, writeFileSync, existsSync } from 'fs'
 import type { ElectronApplication, Page, Locator } from '@playwright/test'
 import { configureNextOpenDialogForE2E } from 'electron-core-ui/testing'
 import { test, expect, SCENARIO_RUNLOG_TEMP_DIR } from '../../fixtures/scenario-runlog.fixture'
-
-const SAMPLES_DIR = resolve(__dirname, '../../../samples')
-const REFERENCE_SAMPLE = join(SAMPLES_DIR, 'scenarios-e2e-reference-tests.restorm')
-// The call-history zip the REST nodes back onto. The committed reference is the
-// stable `-history` copy; the runtime `.responses.zip` is gitignored (the dev
-// app + tests rewrite it per run). We copy this reference into the temp working
-// dir, so the samples tree never churns.
-const REFERENCE_RESPONSES = join(SAMPLES_DIR, 'scenarios-e2e-reference-tests.restorm.responses-history.zip')
-// Sidecar JSON the `Files` scenario's readFile loads via a RELATIVE path — it
-// must travel next to the working copy of the .restorm (the workspace dir).
-const REFERENCE_SIDECAR = join(SAMPLES_DIR, 'scenarios-e2e-reference-tests.pet-sample.json')
+import { goldenPathFor, normalizeRunLogYaml, setupReferenceWorkingCopy } from '../runLogShared'
 
 /** Folders/containers to expand (in order) to reach the leaf scenarios in the
  * reference project's tree: Auth Service > Pet API > Main > <scenario>. */
 const SCENARIO_TREE_PATH = ['Auth Service', 'Pet API', 'Main']
-
-/** One golden per scenario, next to the sample (committed + inspectable), NOT
- * under .features-gen (gitignored). Regenerate after an intentional change with
- * UPDATE_RUNLOG_GOLDEN=1. */
-function goldenPathFor(scenarioName: string): string {
-  const slug = scenarioName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
-  return join(SAMPLES_DIR, `scenarios-e2e-reference-tests.${slug}-runlog.yaml`)
-}
 
 const { Given, When, Then } = createBdd(test)
 
@@ -55,55 +35,6 @@ async function expandRowIfCollapsed(p: Page, name: string): Promise<void> {
   await expect(row).toBeVisible({ timeout: 15000 })
   const expanded = await row.getAttribute('aria-expanded')
   if (expanded !== 'true') await row.click()
-}
-
-/** Data keys whose value is an absolute wall-clock instant stamped per run (a
- * `log` of the current time, or the engine's error context). Placeholdered so
- * the golden stays stable; config-embedded dates live under OTHER keys (e.g.
- * `BTTFArrivalDate`) and are left intact so real value regressions surface. */
-const DYNAMIC_TIME_KEYS = new Set([
-  'timestamp', 'now', 'startedAt', 'finishedAt', 'endedAt', 'completedAt',
-  // HTTP-response noise stamped per run (an httpRequest node logs its full
-  // response): the round-trip latency and the server `Date` header.
-  'durationMs', 'date'
-])
-
-/** Header keys whose value is a per-run secret (a freshly-issued Bearer token an
- * auth route attaches) — masked so the auth-scenario golden stays stable. */
-const MASKED_VALUE_KEYS = new Set(['authorization'])
-
-/** The copied message is `<emoji> [<date>] <text>`; the bracketed run-time would
- * make the golden flaky. Replace just that leading date bracket. */
-function normalizeMessage(message: string): string {
-  return message.replace(/^(\S+ )\[[^\]]*\]/, '$1[<time>]')
-}
-/** A freshly-generated UUID (e.g. the crypto `uuid` op) is non-deterministic, so
- * mask any v4 UUID string to keep the golden stable. */
-const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-function normalizeData(v: unknown): unknown {
-  if (Array.isArray(v)) return v.map(normalizeData)
-  if (v !== null && typeof v === 'object') {
-    const out: Record<string, unknown> = {}
-    for (const [k, val] of Object.entries(v as Record<string, unknown>)) {
-      if (DYNAMIC_TIME_KEYS.has(k)) out[k] = '<dynamic-time>'
-      else if (MASKED_VALUE_KEYS.has(k.toLowerCase())) out[k] = '<masked>'
-      else out[k] = normalizeData(val)
-    }
-    return out
-  }
-  if (typeof v === 'string' && UUID_V4.test(v)) return '<uuid>'
-  return v
-}
-
-/** Parse the copied YAML, strip run-time, re-emit canonical YAML. Both the live
- * copy and the golden go through this, so they compare deterministically. */
-function normalizeRunLogYaml(raw: string): string {
-  const entries = yamlParse(raw) as { message: string; data?: unknown }[]
-  const normalized = entries.map((e) => {
-    const message = normalizeMessage(e.message)
-    return 'data' in e ? { message, data: normalizeData(e.data) } : { message }
-  })
-  return yamlStringify(normalized)
 }
 
 const INPUT_PROMPT = '[data-testid="scn-input-prompt"]'
@@ -227,14 +158,8 @@ Given('I open the scenarios reference-tests sample', async ({ launchApp }) => {
   electronApp = launched.app
   page = launched.page
 
-  // Copy the project AND its call-history zip side by side (the REST nodes back
-  // onto it; harmless for the pure log/arithmetic/loop scenarios under test).
-  const workingCopy = join(SCENARIO_RUNLOG_TEMP_DIR, 'scenarios-e2e-reference-tests.restorm')
-  copyFileSync(REFERENCE_SAMPLE, workingCopy)
-  copyFileSync(REFERENCE_RESPONSES, `${workingCopy}.responses.zip`)
-  // The `Files` scenario reads this sidecar by a relative path → place it in the
-  // same (temp) workspace dir as the .restorm.
-  copyFileSync(REFERENCE_SIDECAR, join(SCENARIO_RUNLOG_TEMP_DIR, 'scenarios-e2e-reference-tests.pet-sample.json'))
+  // Copy the project + its call-history zip + the readFile sidecar side by side.
+  const workingCopy = setupReferenceWorkingCopy(SCENARIO_RUNLOG_TEMP_DIR)
 
   await configureNextOpenDialogForE2E(requireApp(), { kind: 'openFile', path: workingCopy })
   await requirePage().locator('[data-testid="titlebar-menubar-item-file"]').click()

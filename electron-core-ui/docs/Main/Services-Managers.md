@@ -36,12 +36,22 @@ logger.debug('Debug message', { key: 'value' })
 logger.info('Info message')
 logger.warn('Warning message')
 logger.error('Error message', { error: err })
+
+// Raise/lower the active level at runtime, on the logger AND every transport.
+// Handy for a headless / CLI run that must keep diagnostics off stdout:
+logger.setLevel('error') // 'error' | 'warn' | 'info' | 'debug'
 ```
 
 **Command-line options:**
 - `--verbose` / `-v`: Enable console output in production
+- `--quiet` / `-q`: Never attach the console transport (even in dev / `--verbose`). Reserves stdout for program output — use for headless / CLI runs.
 - `--log-file <path>` / `-l <path>`: Write logs to file
 - `--log-format <format>` / `-lf <format>`: `json` or `plain`
+
+When no transport would otherwise be attached (a `--quiet` headless run with no `--log-file`, or a packaged production build), a **silent no-op transport** is added automatically. This avoids Winston's `Attempt to write logs with no transports, which can increase memory usage` warning, which it prints to stderr on every log call when the transport list is empty.
+
+**API:**
+- `setLevel(level)` — override the active level (`'error' | 'warn' | 'info' | 'debug'`) on the logger and all transports. Persists for the process; call again to restore.
 
 ---
 

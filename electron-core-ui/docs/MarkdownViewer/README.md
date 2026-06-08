@@ -6,8 +6,11 @@
 
 - `value: string`: Markdown content to render.
 - `allowMermaid?: boolean` (default: `true`): enables rendering of fenced code blocks with language `mermaid`.
+- `compact?: boolean` (default: `false`): tightens block margins/padding — for rendering a small snippet (e.g. a single code block) inline, without the document-style spacing.
 - `data-testid?: string`: optional test id applied to the root.
 - `className?: string`: optional CSS class on the root container.
+
+The syntax-highlight base text colour follows the active editor theme (so code is legible on both light and dark backgrounds).
 
 ## Behavior
 

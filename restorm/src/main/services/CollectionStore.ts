@@ -145,6 +145,31 @@ class CollectionStore {
   }
 
   /**
+   * Re-emit `ENVIRONMENT_CREATED` for every loaded environment so listeners
+   * (notably ContextService, which resolves `{{var}}` per environment) rebuild
+   * their context. The interactive flow gets these from the renderer's
+   * per-document load events; a headless load (`loadProjectIntoStore`, no
+   * renderer) has none, so it calls this right after `setCollections`. Parent
+   * environments are emitted before their `subEnvironments` so inheritance
+   * resolves in order.
+   */
+  reemitAllEnvironmentsCreated(): void {
+    const walkEnv = (env: Environment, folderId: string, parentEnvId?: string): void => {
+      this.emitEnvironmentCreated(env, folderId, parentEnvId)
+      for (const sub of env.subEnvironments ?? []) walkEnv(sub, folderId, env.id)
+    }
+    const walkFolder = (item: FolderItem): void => {
+      if (isEnvironmentFolder(item)) {
+        for (const env of item.environments) walkEnv(env, item.id)
+      }
+      if (isAnyFolder(item)) {
+        for (const child of item.items) walkFolder(child)
+      }
+    }
+    for (const c of this.collections) walkFolder(c)
+  }
+
+  /**
    * Clear all collections
    */
   clear(): void {

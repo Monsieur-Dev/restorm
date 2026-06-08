@@ -37,6 +37,7 @@ import type {
 import { ScopeRegistry, scopeKey } from './scopeRegistry'
 import { InputBuffer, type PortSpec } from './inputBuffer'
 import { resolveSelectorPath, concreteValue } from '../../shared/utils/scenarioStaticPreview'
+import { coerceCliParamValue } from '../../shared/scenarioCliParams'
 import { readInputParams } from '../../shared/scenarioInputParams'
 import { evaluateCondition, resolveOperand } from './conditionEval'
 import { CronExpressionParser } from 'cron-parser'
@@ -117,6 +118,17 @@ export interface SchedulerInit {
    * `readFile`/`writeFile` can resolve a relative path against the scenario's
    * own folder. */
   workspaceDir?: string
+  /** Optional live sink invoked for EVERY log entry the moment it is appended
+   * (after its `seq` is stamped). The engine wires the SAME sink into every
+   * scheduler of a run tree so a consumer (the headless CLI) receives the whole
+   * tree's entries in `seq` order — i.e. exactly the order the post-run merge
+   * would produce — enabling tail/streaming output without a post-hoc harvest. */
+  onLog?: (entry: RunLogEntry) => void
+  /** Run-tree-wide input values (headless CLI `--param name=value`). Applied as
+   * a fallback for ANY `input` node — at any depth — whose param isn't already
+   * supplied by this scheduler's own `params` (the runScenario wiring for a
+   * sub-scenario). Lets a CLI user set an input by name wherever it appears. */
+  treeParams?: Record<string, unknown>
 }
 
 type State = 'idle' | 'running' | 'paused' | 'completed' | 'cancelled' | 'failed'
@@ -154,6 +166,8 @@ export class Scheduler {
   /** True for a sub-scenario run (see {@link SchedulerInit.isSubScenario}). */
   private readonly isSubScenario: boolean
   private readonly workspaceDir?: string
+  private readonly onLog?: (entry: RunLogEntry) => void
+  private readonly treeParams: Record<string, unknown> = {}
   private breakpoints: ReadonlySet<RuntimeId> = new Set()
   /** Activations already released past their breakpoint (so resume/step runs
    * them instead of re-breaking). Per-activation — each forEach iteration is a
@@ -219,6 +233,8 @@ export class Scheduler {
     this.executors = init.executors
     this.isSubScenario = init.isSubScenario === true
     if (init.workspaceDir !== undefined) this.workspaceDir = init.workspaceDir
+    if (init.onLog) this.onLog = init.onLog
+    if (init.treeParams) this.treeParams = init.treeParams
     if (init.runSubScenario) this.runSubScenario = init.runSubScenario
     // Cascade a parent abort into this (sub-)run: cancelling the parent
     // scenario must stop everything it launched.
@@ -247,7 +263,12 @@ export class Scheduler {
    * restore causal order when two entries share a millisecond `ts`. EVERY log
    * write goes through here — never push to `this.log` directly. */
   private pushLog(entry: RunLogEntry): void {
-    this.log.push({ ...entry, seq: nextLogSeq() })
+    const stamped: RunLogEntry = { ...entry, seq: nextLogSeq() }
+    this.log.push(stamped)
+    // Live tree-wide sink (headless CLI streaming). Stamped `seq` is global +
+    // monotonic, so entries reach the sink in the same order the post-run merge
+    // would sort them. Never let a sink error derail the run.
+    if (this.onLog) { try { this.onLog(stamped) } catch { /* swallow */ } }
   }
 
   /** Current status snapshot. */
@@ -437,6 +458,12 @@ export class Scheduler {
     const params: Record<string, unknown> = {}
     for (const [k, v] of Object.entries(config)) {
       if (v === null || v === undefined) continue
+      // `id` is structural (a node/operand identifier the renderer's reactive
+      // wrapping may stamp onto config) — never a meaningful start param, and it
+      // would leak a non-deterministic value into the run-log. Skip it so the
+      // log is identical whether the config came via the renderer or a headless
+      // load (which carries plain, un-stamped config).
+      if (k === 'id') continue
       if (typeof v === 'object') {
         if (!Array.isArray(v) && 'type' in v) params[k] = resolveOperand(undefined, v, this.variables)
         // else: structural config (array / nested object) — skip.
@@ -482,7 +509,8 @@ export class Scheduler {
       requestUserInput: (req) => this.openUserInputRequest(act.nodeId, req),
       interactive: this.interactive,
       node: this.findNode(act.nodeId),
-      ...(this.workspaceDir !== undefined ? { workspaceDir: this.workspaceDir } : {})
+      ...(this.workspaceDir !== undefined ? { workspaceDir: this.workspaceDir } : {}),
+      ...(Object.keys(this.treeParams).length > 0 ? { cliParams: this.treeParams } : {})
     }
     const startedAt = now()
     void (async () => {
@@ -1112,7 +1140,7 @@ export class Scheduler {
    * actually wired, and a node wired to nothing fires immediately.
    * This matches the spec ("nodes without predecessors all start at
    * once; a node with predecessors waits for all its inputs"). */
-  private seedRoots(params: Record<string, unknown>, interactive: boolean): void {
+  private seedRoots(ownParams: Record<string, unknown>, interactive: boolean): void {
     for (const node of this.scenario.nodes) {
       if (this.nodesWithIncoming.has(node.id)) continue
       if (node.kind === 'input') {
@@ -1121,16 +1149,26 @@ export class Scheduler {
         // resolves identically.
         const inputParams = readInputParams(node.config)
         const paramName = (p: { name: string }): string => (p.name.trim() !== '' ? p.name.trim() : 'value')
+        // Resolve one declared param: a runScenario-wired value (`ownParams`,
+        // already a real typed value) wins; else a run-tree-wide CLI `--param`
+        // (a raw argv string) cast to the param's declared type; else not
+        // supplied (prompt / configured default downstream).
+        const resolveParam = (p: { name: string; valueType?: unknown }): { supplied: boolean; value?: unknown } => {
+          const n = paramName(p)
+          if (n in ownParams) return { supplied: true, value: ownParams[n] }
+          if (n in this.treeParams) return { supplied: true, value: coerceCliParamValue(this.treeParams[n] as string, p.valueType) }
+          return { supplied: false }
+        }
         const passthrough = (valueObj: Record<string, unknown>): void => {
           const act: InternalActivation = { nodeId: node.id, kind: node.kind, scope: [], inputs: { value: valueObj }, seeded: true }
           this.registerActivation(act, [])
           this.queue.push(act)
         }
-        const allSupplied = inputParams.every((p) => paramName(p) in params)
+        const allSupplied = inputParams.every((p) => resolveParam(p).supplied)
         if (allSupplied) {
           // Every param was supplied up-front — no prompt.
           const obj: Record<string, unknown> = {}
-          for (const p of inputParams) obj[paramName(p)] = params[paramName(p)]
+          for (const p of inputParams) obj[paramName(p)] = resolveParam(p).value
           passthrough(obj)
         } else if (interactive) {
           // UI run, missing value(s) — the input RUNS and prompts the user for
@@ -1144,8 +1182,10 @@ export class Scheduler {
           // fall back to each param's configured default; there's no UI.
           const obj: Record<string, unknown> = {}
           for (const p of inputParams) {
-            const n = paramName(p)
-            obj[n] = n in params ? params[n] : (p.valueType !== undefined && p.valueType !== null ? concreteValue(p.valueType) : undefined)
+            const resolved = resolveParam(p)
+            obj[paramName(p)] = resolved.supplied
+              ? resolved.value
+              : (p.valueType !== undefined && p.valueType !== null ? concreteValue(p.valueType) : undefined)
           }
           passthrough(obj)
         }

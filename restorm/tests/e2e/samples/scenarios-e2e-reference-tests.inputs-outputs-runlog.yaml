@@ -12,9 +12,9 @@
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
     param6: "#000000"
-    param5: Bleu
+    param5: 0000FF
     param7:
-      - Vert
+      - 00FF00
 - message: ⚪ [<time>] done input
   data:
     value:
@@ -30,8 +30,8 @@
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
       param6: "#abcdef"
-      param5: Rouge
-      param7: Vert,Rouge
+      param5: FF0000
+      param7: 00FF00,FF0000
 - message: ⚪ [<time>] start input
   data:
     SecondInput: 2026-06-02T10:18:27.766Z
@@ -51,9 +51,9 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
-    prop-1780469244879-3a6v38: Rouge
+    prop-1780469244879-3a6v38: FF0000
     prop-1780469259770-ffodx7: "#abcdef"
-    prop-1780469273581-zsg6rn: Vert,Rouge
+    prop-1780469273581-zsg6rn: 00FF00,FF0000
     prop-1780469304463-iq60rc: 2030-01-15T08:30:00.000Z
 - message: ⚪ [<time>] done object
   data:
@@ -68,9 +68,9 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
-      obj_param5: Rouge
+      obj_param5: FF0000
       obj_param6: "#abcdef"
-      obj_param7: Vert,Rouge
+      obj_param7: 00FF00,FF0000
       obj_SecondInput: 2030-01-15T08:30:00.000Z
 - message: ⚪ [<time>] start log
   data:
@@ -86,9 +86,9 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
-      obj_param5: Rouge
+      obj_param5: FF0000
       obj_param6: "#abcdef"
-      obj_param7: Vert,Rouge
+      obj_param7: 00FF00,FF0000
       obj_SecondInput: 2030-01-15T08:30:00.000Z
 - message: 🔵 [<time>] List of all values
   data:
@@ -102,9 +102,9 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
-    obj_param5: Rouge
+    obj_param5: FF0000
     obj_param6: "#abcdef"
-    obj_param7: Vert,Rouge
+    obj_param7: 00FF00,FF0000
     obj_SecondInput: 2030-01-15T08:30:00.000Z
 - message: ⚪ [<time>] done log
   data:
@@ -119,9 +119,9 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
-      obj_param5: Rouge
+      obj_param5: FF0000
       obj_param6: "#abcdef"
-      obj_param7: Vert,Rouge
+      obj_param7: 00FF00,FF0000
       obj_SecondInput: 2030-01-15T08:30:00.000Z
 - message: ⚪ [<time>] start output
   data:
@@ -141,9 +141,9 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
-      obj_param5: Rouge
+      obj_param5: FF0000
       obj_param6: "#abcdef"
-      obj_param7: Vert,Rouge
+      obj_param7: 00FF00,FF0000
       obj_SecondInput: 2030-01-15T08:30:00.000Z
     in: true
 - message: ⚪ [<time>] done output
@@ -163,9 +163,9 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
-      obj_param5: Rouge
+      obj_param5: FF0000
       obj_param6: "#abcdef"
-      obj_param7: Vert,Rouge
+      obj_param7: 00FF00,FF0000
       obj_SecondInput: 2030-01-15T08:30:00.000Z
 - message: ⚪ [<time>] start output
   data:
