@@ -97,3 +97,27 @@ describe('scenario inspector legend i18n', () => {
     expect(offenders).toEqual([])
   })
 })
+
+/**
+ * The empty-scenario onboarding (heading + tips shown over a node-less canvas)
+ * is fully translated — every locale carries the three `scenario.editor.*` keys.
+ */
+describe('scenario empty-state onboarding i18n', () => {
+  const EDITOR_KEYS = ['emptyTitle', 'emptyDragDrop', 'emptyRightClick']
+
+  const editorOf = (loc: unknown): Record<string, string> =>
+    (loc as { scenario?: { editor?: Record<string, string> } }).scenario?.editor ?? {}
+
+  it('every locale defines all empty-state keys with non-empty values', () => {
+    const offenders: string[] = []
+    for (const [locale, mod] of Object.entries(ALL_LOCALES)) {
+      const editor = editorOf(mod)
+      for (const key of EDITOR_KEYS) {
+        if (typeof editor[key] !== 'string' || editor[key].trim() === '') {
+          offenders.push(`${locale}.${key}`)
+        }
+      }
+    }
+    expect(offenders).toEqual([])
+  })
+})

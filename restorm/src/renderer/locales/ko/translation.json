@@ -765,7 +765,9 @@
   },
   "scenario": {
     "editor": {
-      "empty": "Empty scenario — right-click the canvas to add a node"
+      "emptyTitle": "여기는 비어 있어요…",
+      "emptyDragDrop": "왼쪽 트리에서 항목을 시나리오로 끌어다 놓아 여기에서 사용하세요. 한 시나리오를 다른 시나리오로 가져올 수도 있습니다!",
+      "emptyRightClick": "빈 공간을 마우스 오른쪽 버튼으로 클릭하여 시나리오에 작업을 추가하세요"
     },
     "pathSelector": {
       "placeholder": "JSON path",

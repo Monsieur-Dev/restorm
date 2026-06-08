@@ -766,7 +766,9 @@
   },
   "scenario": {
     "editor": {
-      "empty": "Empty scenario — right-click the canvas to add a node"
+      "emptyTitle": "It’s empty here…",
+      "emptyDragDrop": "Drag an item from the tree on the left into your scenario to use it here. You can even import one scenario into another!",
+      "emptyRightClick": "Right-click an empty spot to add actions to your scenario"
     },
     "tab": {
       "graph": "Scenario",

@@ -766,7 +766,9 @@
   },
   "scenario": {
     "editor": {
-      "empty": "Empty scenario — right-click the canvas to add a node"
+      "emptyTitle": "Burası boş…",
+      "emptyDragDrop": "Burada kullanmak için soldaki ağaçtan bir öğeyi senaryonuza sürükleyin. Hatta bir senaryoyu başka bir senaryoya aktarabilirsiniz!",
+      "emptyRightClick": "Senaryonuza eylem eklemek için boş bir noktaya sağ tıklayın"
     },
     "pathSelector": {
       "placeholder": "JSON path",

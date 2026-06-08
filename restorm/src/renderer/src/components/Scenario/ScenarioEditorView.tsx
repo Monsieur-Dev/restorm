@@ -2458,7 +2458,23 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     <div ref={wrapperRef} data-testid="scenario-editor" style={containerStyle} onDragOver={onDragOver} onDrop={onDrop}>
       {nodes.length === 0 && (
         <div data-testid="scenario-editor-empty" style={emptyStyle}>
-          {t('scenario.editor.empty', 'Empty scenario — right-click the canvas to add a node')}
+          <div className="scn-empty-onboarding">
+            <h1 className="scn-empty-title">{t('scenario.editor.emptyTitle', 'C\'est vide ici…')}</h1>
+            <ul className="scn-empty-tips">
+              <li>
+                {t(
+                  'scenario.editor.emptyDragDrop',
+                  'Glissez un élément depuis l\'arbre à gauche vers votre scénario pour les utiliser ici. Vous pouvez même importer un scénario dans un autre !'
+                )}
+              </li>
+              <li>
+                {t(
+                  'scenario.editor.emptyRightClick',
+                  'Faites un clic droit sur un emplacement vide pour ajouter des actions à votre scénario'
+                )}
+              </li>
+            </ul>
+          </div>
         </div>
       )}
       {locked && (
