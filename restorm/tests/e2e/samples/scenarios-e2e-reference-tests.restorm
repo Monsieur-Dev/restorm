@@ -16807,6 +16807,77 @@ collections:
                       x: 680
                       'y': 1060
                     note: ajv-formats — JSON-schema validation w/ formats
+                  - id: b288a934-4c8c-4830-9608-fc85f712dd16
+                    kind: code
+                    config:
+                      code: |-
+                        // Postman-style call to the Auth Service health probe — runs through the
+                        // restorm firewall (same network rules as an httpRequest node).
+                        return await new Promise((resolve, reject) => {
+                          pm.sendRequest({ url: 'http://localhost:5110/health', method: 'GET' }, (err, res) => {
+                            if (err) { reject(err); return }
+                            resolve({ status: res.code, body: res.text() })
+                          })
+                        })
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: -280
+                      'y': 1460
+                  - id: 1780931639758-mjcv6u
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: Result from pm.sendRequest
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 720
+                      'y': 1400
+                  - id: 1780931704179-32q3cz
+                    kind: log
+                    config:
+                      message:
+                        type: string
+                        value: Result from pm.sendRequest
+                      level: error
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 720
+                      'y': 1700
                 edges:
                   - id: 441b0bb7-1bf1-48c5-8d55-c9c46c7fa7e3
                     from:
@@ -16875,6 +16946,29 @@ collections:
                     to:
                       nodeId: 4b83cb0a-ac2b-44f4-ab36-11fb035fbcf6
                       portId: in
+                  - id: e-1780931625369-e916ks
+                    from:
+                      nodeId: 4b83cb0a-ac2b-44f4-ab36-11fb035fbcf6
+                      portId: done
+                    to:
+                      nodeId: b288a934-4c8c-4830-9608-fc85f712dd16
+                      portId: in
+                  - id: e-1780931660741-920rxw
+                    from:
+                      nodeId: b288a934-4c8c-4830-9608-fc85f712dd16
+                      portId: result
+                    to:
+                      nodeId: 1780931639758-mjcv6u
+                      portId: data
+                    selector: .
+                  - id: e-1780931724249-5a5hdw
+                    from:
+                      nodeId: b288a934-4c8c-4830-9608-fc85f712dd16
+                      portId: error
+                    to:
+                      nodeId: 1780931704179-32q3cz
+                      portId: data
+                    selector: .
                 id: 4a614aaf-83a0-478a-8b1f-42169cfdcbd4
                 name: Code
                 items: []

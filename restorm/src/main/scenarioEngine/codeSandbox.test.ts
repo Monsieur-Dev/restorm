@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest'
-import { runCodeInSandbox } from './codeSandbox'
+import { runCodeInSandbox, type SandboxNetworkBridge, type SandboxHttpResponse } from './codeSandbox'
 
 describe('codeSandbox', () => {
   it('runs plain JS and returns the value', async () => {
@@ -104,5 +104,100 @@ describe('codeSandbox', () => {
       })
       expect(result).toEqual([true, false])
     })
+  })
+})
+
+describe('codeSandbox network bridge', () => {
+  // An echoing bridge: reflects the request back as the response body.
+  const echoNet: SandboxNetworkBridge = (req) =>
+    Promise.resolve({
+      status: 200,
+      statusText: 'OK',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ echo: req.url, method: req.method, body: req.body ?? null })
+    })
+
+  it('stays fully offline when no bridge is supplied', async () => {
+    const { result } = await runCodeInSandbox({ code: 'return [typeof fetch, typeof pm]' })
+    expect(result).toEqual(['undefined', 'undefined'])
+  })
+
+  it('exposes an async fetch that delegates to the host bridge', async () => {
+    const { result } = await runCodeInSandbox({
+      code: 'const r = await fetch("https://api/test"); const j = await r.json(); return { status: r.status, ok: r.ok, echo: j.echo }',
+      network: echoNet
+    })
+    expect(result).toEqual({ status: 200, ok: true, echo: 'https://api/test' })
+  })
+
+  it('passes method + body through fetch init', async () => {
+    const { result } = await runCodeInSandbox({
+      code: 'const r = await fetch("https://api/p", { method: "POST", body: "hello" }); return (await r.json())',
+      network: echoNet
+    })
+    expect(result).toEqual({ echo: 'https://api/p', method: 'POST', body: 'hello' })
+  })
+
+  it('runs a Postman `pm.sendRequest(...)` script unchanged', async () => {
+    const { result } = await runCodeInSandbox({
+      code: `return await new Promise((resolve, reject) => {
+        pm.sendRequest({ url: "https://api/pm", method: "PUT" }, (err, res) => {
+          if (err) { reject(err); return }
+          resolve({ code: res.code, json: res.json(), same: pm.response === res })
+        })
+      })`,
+      network: echoNet
+    })
+    expect(result).toEqual({ code: 200, json: { echo: 'https://api/pm', method: 'PUT', body: null }, same: true })
+  })
+
+  it('ignores a host request that settles AFTER the run times out (no use-after-dispose)', async () => {
+    // A bridge that never settles on its own — we resolve it by hand AFTER the
+    // sandbox has timed out and torn its context down. With the post-dispose
+    // guard this is a silent no-op; without it, the late callback would touch a
+    // disposed QuickJS context and surface as an unhandled main-process rejection.
+    let settleLate: (r: SandboxHttpResponse) => void = () => undefined
+    const slowNet: SandboxNetworkBridge = () => new Promise((resolve) => { settleLate = resolve })
+
+    const rejections: unknown[] = []
+    const onRejection = (err: unknown): void => { rejections.push(err) }
+    process.on('unhandledRejection', onRejection)
+    try {
+      await expect(
+        runCodeInSandbox({ code: 'await fetch("https://slow/x"); return 1', network: slowNet, timeoutMs: 200 })
+      ).rejects.toThrow(/timed out/)
+      // Settle the host request now that the context is gone.
+      settleLate({ status: 200, statusText: 'OK', headers: {}, body: '{}' })
+      await new Promise((resolve) => setTimeout(resolve, 50))
+      expect(rejections).toEqual([])
+    } finally {
+      process.off('unhandledRejection', onRejection)
+    }
+  }, 5000)
+
+  it('aborts an in-flight host request when the run signal fires', async () => {
+    // A bridge that only settles when its AbortSignal fires (rejecting like a
+    // real aborted request) — proves the run signal reaches the in-flight fetch.
+    const abortableNet: SandboxNetworkBridge = (_req, sig) =>
+      new Promise((_resolve, reject) => {
+        sig.addEventListener('abort', () => { reject(new Error('aborted by run signal')) }, { once: true })
+      })
+    const controller = new AbortController()
+    const run = runCodeInSandbox({
+      code: 'await fetch("https://hang/x"); return "unreachable"',
+      network: abortableNet,
+      signal: controller.signal,
+      timeoutMs: 5000
+    })
+    setTimeout(() => { controller.abort() }, 30)
+    await expect(run).rejects.toThrow(/aborted by run signal/)
+  }, 5000)
+
+  it('surfaces a bridge error (firewall denial) as a clean in-sandbox throw', async () => {
+    const denyNet: SandboxNetworkBridge = () =>
+      Promise.resolve({ status: 0, statusText: '', headers: {}, body: '', error: 'host not allowed by firewall' })
+    await expect(
+      runCodeInSandbox({ code: 'await fetch("https://blocked/x"); return "unreachable"', network: denyNet })
+    ).rejects.toThrow(/firewall/)
   })
 })
