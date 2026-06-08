@@ -1417,6 +1417,7 @@
       "entryEventTrigger": "由事件触发的输入点",
       "entryDataTrigger": "由数据触发的输入点",
       "runWhenAllReceived": "一旦接收到所有事件和所有数据，操作即会执行",
+      "runOnLaunchNoPredecessor": "没有前驱的操作会在场景启动时立即执行",
       "outPortsTitle": "输出点",
       "outEmit": "发出触发事件并发送数据",
       "outEmitSignalOnly": "发出触发事件但不发送数据",

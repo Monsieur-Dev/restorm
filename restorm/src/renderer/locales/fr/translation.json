@@ -1418,6 +1418,7 @@
       "entryEventTrigger": "Point d'entrée déclenché par un évènement",
       "entryDataTrigger": "Point d'entrée déclenché par une donnée",
       "runWhenAllReceived": "Les actions sont exécutées dès que tous les évènements et toutes les données ont été reçues",
+      "runOnLaunchNoPredecessor": "Les actions sans prédécesseur sont exécutées dès le lancement du scénario",
       "outPortsTitle": "Points de sortie",
       "outEmit": "Émet un évènement déclencheur et envoie de la donnée",
       "outEmitSignalOnly": "Émet un évènement déclencheur sans envoyer de donnée",

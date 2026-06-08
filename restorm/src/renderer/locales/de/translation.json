@@ -1418,6 +1418,7 @@
       "entryEventTrigger": "Durch ein Ereignis ausgelöster Eingangspunkt",
       "entryDataTrigger": "Durch Daten ausgelöster Eingangspunkt",
       "runWhenAllReceived": "Aktionen werden ausgeführt, sobald alle Ereignisse und alle Daten eingegangen sind",
+      "runOnLaunchNoPredecessor": "Aktionen ohne Vorgänger werden gleich beim Start des Szenarios ausgeführt",
       "outPortsTitle": "Ausgangspunkte",
       "outEmit": "Sendet ein Auslöse-Ereignis und Daten",
       "outEmitSignalOnly": "Sendet ein Auslöse-Ereignis ohne Daten",

@@ -1418,6 +1418,7 @@
       "entryEventTrigger": "Bir olayla tetiklenen giriş noktası",
       "entryDataTrigger": "Bir veriyle tetiklenen giriş noktası",
       "runWhenAllReceived": "Tüm olaylar ve tüm veriler alınır alınmaz eylemler çalıştırılır",
+      "runOnLaunchNoPredecessor": "Öncülü olmayan eylemler, senaryo başladığı anda çalıştırılır",
       "outPortsTitle": "Çıkış noktaları",
       "outEmit": "Bir tetikleyici olay yayar ve veri gönderir",
       "outEmitSignalOnly": "Veri göndermeden bir tetikleyici olay yayar",

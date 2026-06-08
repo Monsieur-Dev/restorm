@@ -1418,6 +1418,7 @@
       "entryEventTrigger": "Esemény által kiváltott bemeneti pont",
       "entryDataTrigger": "Adat által kiváltott bemeneti pont",
       "runWhenAllReceived": "A műveletek azonnal végrehajtódnak, amint minden esemény és minden adat megérkezett",
+      "runOnLaunchNoPredecessor": "Az előzmény nélküli műveletek a forgatókönyv indításakor azonnal végrehajtódnak",
       "outPortsTitle": "Kimeneti pontok",
       "outEmit": "Kiváltó eseményt bocsát ki és adatot küld",
       "outEmitSignalOnly": "Kiváltó eseményt bocsát ki adat küldése nélkül",

@@ -1419,6 +1419,7 @@
       "entryEventTrigger": "Ulazna točka pokrenuta događajem",
       "entryDataTrigger": "Ulazna točka pokrenuta podatkom",
       "runWhenAllReceived": "Akcije se izvršavaju čim su primljeni svi događaji i svi podaci",
+      "runOnLaunchNoPredecessor": "Akcije bez prethodnika izvršavaju se čim se scenarij pokrene",
       "outPortsTitle": "Izlazne točke",
       "outEmit": "Emitira okidački događaj i šalje podatke",
       "outEmitSignalOnly": "Emitira okidački događaj bez slanja podataka",

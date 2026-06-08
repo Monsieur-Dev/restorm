@@ -1417,6 +1417,7 @@
       "entryEventTrigger": "Điểm vào được kích hoạt bởi một sự kiện",
       "entryDataTrigger": "Điểm vào được kích hoạt bởi dữ liệu",
       "runWhenAllReceived": "Các hành động chạy ngay khi tất cả sự kiện và tất cả dữ liệu đã được nhận",
+      "runOnLaunchNoPredecessor": "Các hành động không có hành động trước được chạy ngay khi kịch bản bắt đầu",
       "outPortsTitle": "Điểm ra",
       "outEmit": "Phát ra một sự kiện kích hoạt và gửi dữ liệu",
       "outEmitSignalOnly": "Phát ra một sự kiện kích hoạt mà không gửi dữ liệu",

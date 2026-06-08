@@ -1418,6 +1418,7 @@
       "entryEventTrigger": "Input point triggered by an event",
       "entryDataTrigger": "Input point triggered by data",
       "runWhenAllReceived": "Actions run as soon as all events and all data have been received",
+      "runOnLaunchNoPredecessor": "Actions with no predecessor run as soon as the scenario starts",
       "outPortsTitle": "Output points",
       "outEmit": "Emits a trigger event and sends data",
       "outEmitSignalOnly": "Emits a trigger event without sending data",

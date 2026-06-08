@@ -41,6 +41,12 @@ export const ScenarioInspectorLegend: React.FC = () => {
             'Les actions sont exécutées dès que tous les évènements et toutes les données ont été reçues'
           )}
         </li>
+        <li className="scn-legend-note">
+          {t(
+            'scenario.legend.runOnLaunchNoPredecessor',
+            'Les actions sans prédécesseur sont exécutées dès le lancement du scénario'
+          )}
+        </li>
       </ul>
 
       <div className="scn-legend-group-title">{t('scenario.legend.outPortsTitle', 'Points de sortie')}</div>

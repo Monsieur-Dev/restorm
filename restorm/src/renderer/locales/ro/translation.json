@@ -1419,6 +1419,7 @@
       "entryEventTrigger": "Punct de intrare declanșat de un eveniment",
       "entryDataTrigger": "Punct de intrare declanșat de o dată",
       "runWhenAllReceived": "Acțiunile se execută imediat ce toate evenimentele și toate datele au fost primite",
+      "runOnLaunchNoPredecessor": "Acțiunile fără predecesor se execută imediat ce scenariul pornește",
       "outPortsTitle": "Puncte de ieșire",
       "outEmit": "Emite un eveniment declanșator și trimite date",
       "outEmitSignalOnly": "Emite un eveniment declanșator fără a trimite date",

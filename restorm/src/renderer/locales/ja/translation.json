@@ -1417,6 +1417,7 @@
       "entryEventTrigger": "イベントによってトリガーされる入力ポイント",
       "entryDataTrigger": "データによってトリガーされる入力ポイント",
       "runWhenAllReceived": "すべてのイベントとすべてのデータが受信され次第、アクションが実行されます",
+      "runOnLaunchNoPredecessor": "先行アクションのないアクションは、シナリオの開始時にすぐに実行されます",
       "outPortsTitle": "出力ポイント",
       "outEmit": "トリガーイベントを発行し、データを送信します",
       "outEmitSignalOnly": "データを送信せずにトリガーイベントを発行します",

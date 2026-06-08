@@ -67,6 +67,7 @@ describe('scenario inspector legend i18n', () => {
     'entryEventTrigger',
     'entryDataTrigger',
     'runWhenAllReceived',
+    'runOnLaunchNoPredecessor',
     'outPortsTitle',
     'outEmit',
     'outEmitSignalOnly',

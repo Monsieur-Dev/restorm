@@ -1418,6 +1418,7 @@
       "entryEventTrigger": "Ingångspunkt utlöst av en händelse",
       "entryDataTrigger": "Ingångspunkt utlöst av data",
       "runWhenAllReceived": "Åtgärder körs så snart alla händelser och all data har tagits emot",
+      "runOnLaunchNoPredecessor": "Åtgärder utan föregångare körs så snart scenariot startar",
       "outPortsTitle": "Utgångspunkter",
       "outEmit": "Skickar en utlösarhändelse och skickar data",
       "outEmitSignalOnly": "Skickar en utlösarhändelse utan att skicka data",

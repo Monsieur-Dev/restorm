@@ -1418,6 +1418,7 @@
       "entryEventTrigger": "Punto de entrada activado por un evento",
       "entryDataTrigger": "Punto de entrada activado por un dato",
       "runWhenAllReceived": "Las acciones se ejecutan en cuanto se han recibido todos los eventos y todos los datos",
+      "runOnLaunchNoPredecessor": "Las acciones sin predecesor se ejecutan en cuanto se inicia el escenario",
       "outPortsTitle": "Puntos de salida",
       "outEmit": "Emite un evento desencadenante y envía datos",
       "outEmitSignalOnly": "Emite un evento desencadenante sin enviar datos",

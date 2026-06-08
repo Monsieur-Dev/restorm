@@ -1417,6 +1417,7 @@
       "entryEventTrigger": "由事件觸發的輸入點",
       "entryDataTrigger": "由資料觸發的輸入點",
       "runWhenAllReceived": "一旦接收到所有事件和所有資料，動作即會執行",
+      "runOnLaunchNoPredecessor": "沒有前置動作的動作會在情境啟動時立即執行",
       "outPortsTitle": "輸出點",
       "outEmit": "發出觸發事件並傳送資料",
       "outEmitSignalOnly": "發出觸發事件但不傳送資料",

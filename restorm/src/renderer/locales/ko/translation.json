@@ -1417,6 +1417,7 @@
       "entryEventTrigger": "이벤트로 트리거되는 입력 지점",
       "entryDataTrigger": "데이터로 트리거되는 입력 지점",
       "runWhenAllReceived": "모든 이벤트와 모든 데이터가 수신되는 즉시 작업이 실행됩니다",
+      "runOnLaunchNoPredecessor": "선행 작업이 없는 작업은 시나리오가 시작되는 즉시 실행됩니다",
       "outPortsTitle": "출력 지점",
       "outEmit": "트리거 이벤트를 내보내고 데이터를 전송합니다",
       "outEmitSignalOnly": "데이터를 전송하지 않고 트리거 이벤트를 내보냅니다",

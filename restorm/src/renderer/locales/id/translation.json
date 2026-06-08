@@ -1417,6 +1417,7 @@
       "entryEventTrigger": "Titik masukan dipicu oleh sebuah peristiwa",
       "entryDataTrigger": "Titik masukan dipicu oleh data",
       "runWhenAllReceived": "Aksi dijalankan segera setelah semua peristiwa dan semua data diterima",
+      "runOnLaunchNoPredecessor": "Aksi tanpa pendahulu dijalankan segera setelah skenario dimulai",
       "outPortsTitle": "Titik keluaran",
       "outEmit": "Memancarkan peristiwa pemicu dan mengirim data",
       "outEmitSignalOnly": "Memancarkan peristiwa pemicu tanpa mengirim data",

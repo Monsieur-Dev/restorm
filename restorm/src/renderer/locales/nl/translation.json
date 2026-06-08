@@ -1418,6 +1418,7 @@
       "entryEventTrigger": "Ingangspunt geactiveerd door een gebeurtenis",
       "entryDataTrigger": "Ingangspunt geactiveerd door gegevens",
       "runWhenAllReceived": "Acties worden uitgevoerd zodra alle gebeurtenissen en alle gegevens zijn ontvangen",
+      "runOnLaunchNoPredecessor": "Acties zonder voorganger worden uitgevoerd zodra het scenario start",
       "outPortsTitle": "Uitgangspunten",
       "outEmit": "Zendt een triggergebeurtenis uit en verstuurt gegevens",
       "outEmitSignalOnly": "Zendt een triggergebeurtenis uit zonder gegevens te versturen",

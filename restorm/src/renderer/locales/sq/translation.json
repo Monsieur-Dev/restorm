@@ -1418,6 +1418,7 @@
       "entryEventTrigger": "Pikë hyrjeje e nxitur nga një ngjarje",
       "entryDataTrigger": "Pikë hyrjeje e nxitur nga të dhënat",
       "runWhenAllReceived": "Veprimet ekzekutohen sapo të jenë marrë të gjitha ngjarjet dhe të gjitha të dhënat",
+      "runOnLaunchNoPredecessor": "Veprimet pa paraardhës ekzekutohen sapo të niset skenari",
       "outPortsTitle": "Pikat e daljes",
       "outEmit": "Lëshon një ngjarje nxitëse dhe dërgon të dhëna",
       "outEmitSignalOnly": "Lëshon një ngjarje nxitëse pa dërguar të dhëna",

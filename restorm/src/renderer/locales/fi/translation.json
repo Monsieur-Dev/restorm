@@ -1418,6 +1418,7 @@
       "entryEventTrigger": "Tapahtuman laukaisema tulopiste",
       "entryDataTrigger": "Datan laukaisema tulopiste",
       "runWhenAllReceived": "Toiminnot suoritetaan heti, kun kaikki tapahtumat ja kaikki data on vastaanotettu",
+      "runOnLaunchNoPredecessor": "Toiminnot, joilla ei ole edeltäjää, suoritetaan heti skenaarion käynnistyessä",
       "outPortsTitle": "Lähtöpisteet",
       "outEmit": "Lähettää laukaisutapahtuman ja dataa",
       "outEmitSignalOnly": "Lähettää laukaisutapahtuman lähettämättä dataa",

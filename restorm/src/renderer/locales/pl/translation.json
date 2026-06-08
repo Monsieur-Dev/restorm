@@ -1420,6 +1420,7 @@
       "entryEventTrigger": "Punkt wejścia wyzwalany przez zdarzenie",
       "entryDataTrigger": "Punkt wejścia wyzwalany przez dane",
       "runWhenAllReceived": "Akcje są wykonywane, gdy tylko zostaną odebrane wszystkie zdarzenia i wszystkie dane",
+      "runOnLaunchNoPredecessor": "Akcje bez poprzednika są wykonywane zaraz po uruchomieniu scenariusza",
       "outPortsTitle": "Punkty wyjścia",
       "outEmit": "Emituje zdarzenie wyzwalające i wysyła dane",
       "outEmitSignalOnly": "Emituje zdarzenie wyzwalające bez wysyłania danych",

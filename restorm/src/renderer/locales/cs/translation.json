@@ -1420,6 +1420,7 @@
       "entryEventTrigger": "Vstupní bod spuštěný událostí",
       "entryDataTrigger": "Vstupní bod spuštěný daty",
       "runWhenAllReceived": "Akce se provedou, jakmile jsou přijaty všechny události a všechna data",
+      "runOnLaunchNoPredecessor": "Akce bez předchůdce se spustí ihned po spuštění scénáře",
       "outPortsTitle": "Výstupní body",
       "outEmit": "Vysílá spouštěcí událost a odesílá data",
       "outEmitSignalOnly": "Vysílá spouštěcí událost bez odeslání dat",
