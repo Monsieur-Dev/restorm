@@ -766,7 +766,9 @@
   },
   "scenario": {
     "editor": {
-      "empty": "Empty scenario — right-click the canvas to add a node"
+      "emptyTitle": "Itt üres…",
+      "emptyDragDrop": "Húzzon egy elemet a bal oldali fából a forgatókönyvébe, hogy itt használja. Akár egy forgatókönyvet is importálhat egy másikba!",
+      "emptyRightClick": "Kattintson a jobb gombbal egy üres helyre, hogy műveleteket adjon a forgatókönyvéhez"
     },
     "pathSelector": {
       "placeholder": "JSON path",

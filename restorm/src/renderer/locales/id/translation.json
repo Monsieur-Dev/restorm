@@ -765,7 +765,9 @@
   },
   "scenario": {
     "editor": {
-      "empty": "Empty scenario — right-click the canvas to add a node"
+      "emptyTitle": "Di sini kosong…",
+      "emptyDragDrop": "Seret item dari pohon di sebelah kiri ke skenario Anda untuk menggunakannya di sini. Anda bahkan dapat mengimpor satu skenario ke dalam skenario lain!",
+      "emptyRightClick": "Klik kanan pada tempat kosong untuk menambahkan aksi ke skenario Anda"
     },
     "pathSelector": {
       "placeholder": "JSON path",

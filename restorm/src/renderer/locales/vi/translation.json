@@ -765,7 +765,9 @@
   },
   "scenario": {
     "editor": {
-      "empty": "Empty scenario — right-click the canvas to add a node"
+      "emptyTitle": "Ở đây trống trơn…",
+      "emptyDragDrop": "Kéo một mục từ cây bên trái vào kịch bản của bạn để sử dụng tại đây. Bạn thậm chí có thể nhập một kịch bản vào một kịch bản khác!",
+      "emptyRightClick": "Nhấp chuột phải vào chỗ trống để thêm hành động vào kịch bản của bạn"
     },
     "pathSelector": {
       "placeholder": "JSON path",

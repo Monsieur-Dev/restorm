@@ -766,7 +766,9 @@
   },
   "scenario": {
     "editor": {
-      "empty": "Empty scenario — right-click the canvas to add a node"
+      "emptyTitle": "Këtu është bosh…",
+      "emptyDragDrop": "Tërhiqni një element nga pema majtas në skenarin tuaj për ta përdorur këtu. Madje mund të importoni një skenar brenda një tjetri!",
+      "emptyRightClick": "Klikoni me të djathtën në një vend bosh për të shtuar veprime në skenarin tuaj"
     },
     "pathSelector": {
       "placeholder": "JSON path",

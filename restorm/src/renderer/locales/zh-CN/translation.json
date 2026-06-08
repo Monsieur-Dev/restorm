@@ -765,7 +765,9 @@
   },
   "scenario": {
     "editor": {
-      "empty": "Empty scenario — right-click the canvas to add a node"
+      "emptyTitle": "这里是空的…",
+      "emptyDragDrop": "将左侧树中的项目拖入您的场景即可在此使用。您甚至可以将一个场景导入另一个场景中！",
+      "emptyRightClick": "右键单击空白处即可向场景添加操作"
     },
     "pathSelector": {
       "placeholder": "JSON path",

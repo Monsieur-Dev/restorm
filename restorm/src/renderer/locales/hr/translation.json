@@ -767,7 +767,9 @@
   },
   "scenario": {
     "editor": {
-      "empty": "Empty scenario — right-click the canvas to add a node"
+      "emptyTitle": "Ovdje je prazno…",
+      "emptyDragDrop": "Povucite stavku iz stabla s lijeve strane u svoj scenarij da biste je ovdje koristili. Možete čak uvesti jedan scenarij u drugi!",
+      "emptyRightClick": "Desnom tipkom miša kliknite prazno mjesto da biste dodali akcije u svoj scenarij"
     },
     "pathSelector": {
       "placeholder": "JSON path",

@@ -770,7 +770,9 @@
       "notes": "Notes"
     },
     "editor": {
-      "empty": "Scénario vide — clic droit sur le canevas pour ajouter un nœud"
+      "emptyTitle": "C’est vide ici…",
+      "emptyDragDrop": "Glissez un élément depuis l’arbre à gauche vers votre scénario pour les utiliser ici. Vous pouvez même importer un scénario dans un autre !",
+      "emptyRightClick": "Faites un clic droit sur un emplacement vide pour ajouter des actions à votre scénario"
     },
     "node": {
       "menu": {
