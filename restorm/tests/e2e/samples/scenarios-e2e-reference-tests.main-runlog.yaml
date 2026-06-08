@@ -5664,6 +5664,40 @@
       library: ajv-formats
       ok: true
       bad: false
+- message: ⚪ [<time>] start code
+  data:
+    code: >-
+      // Postman-style call to the Auth Service health probe — runs through the
+
+      // restorm firewall (same network rules as an httpRequest node).
+
+      return await new Promise((resolve, reject) => {
+        pm.sendRequest({ url: 'http://localhost:5110/health', method: 'GET' }, (err, res) => {
+          if (err) { reject(err); return }
+          resolve({ status: res.code, body: res.text() })
+        })
+      })
+    in: true
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      status: 200
+      body: '{"status":"ok"}'
+- message: ⚪ [<time>] start log
+  data:
+    message: Result from pm.sendRequest
+    data:
+      status: 200
+      body: '{"status":"ok"}'
+- message: 🔵 [<time>] Result from pm.sendRequest
+  data:
+    status: 200
+    body: '{"status":"ok"}'
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      status: 200
+      body: '{"status":"ok"}'
 - message: 🔵 [<time>] ■ Code
 - message: ⚪ [<time>] done runScenario
   data:

@@ -24,11 +24,17 @@ export const codeExecutor: NodeExecutor = async (act, ctx) => {
   const variables = Object.fromEntries(ctx.variables.entries())
 
   const { runCodeInSandbox } = await import('../codeSandbox')
+  const { codeNetworkBridge } = await import('../codeNetworkBridge')
   const { result, logs } = await runCodeInSandbox({
     code,
     input,
     variables,
-    timeoutMs: Math.min(timeoutSec * 1000, 60_000)
+    timeoutMs: Math.min(timeoutSec * 1000, 60_000),
+    // `fetch` / `pm.sendRequest` inside the script route through the firewall
+    // (see codeNetworkBridge) — a non-whitelisted host triggers the prompt.
+    network: codeNetworkBridge,
+    // User Stop / scope abort cancels an in-flight sandbox request at once.
+    signal: ctx.signal
   })
   for (const line of logs) {
     ctx.log({ level: 'info', message: line, nodeId: act.nodeId, scope: act.scope, source: 'user' })

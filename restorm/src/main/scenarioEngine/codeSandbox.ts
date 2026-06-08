@@ -203,6 +203,109 @@ const SANDBOX_SHIMS = `
 })();
 `
 
+/** Network surface, evaluated ONLY when a host bridge is supplied. Built on the
+ * single async host primitive \`__hostFetch(reqJson) -> Promise<respJson>\`: a
+ * browser-ish \`fetch(url, init)\` and a minimal Postman \`pm\` (so a Postman
+ * \`pm.sendRequest(...)\` script runs unchanged). Everything here is pure sandbox
+ * JS — the host never builds VM objects, only resolves the JSON string. */
+const SANDBOX_NETWORK_SHIM = `
+(function(){
+  var g = globalThis;
+  function doFetch(req){
+    return g.__hostFetch(JSON.stringify(req)).then(function(s){
+      var r = JSON.parse(s);
+      if (r.error) throw new Error(r.error);
+      return r;
+    });
+  }
+  function normHeaders(h){
+    var out = {};
+    if (!h) return out;
+    if (Array.isArray(h)) { for (var i=0;i<h.length;i++){ var it=h[i]; if(it && it.key) out[String(it.key)] = String(it.value==null?'':it.value); } return out; }
+    if (typeof h === 'object') { for (var k in h){ if(Object.prototype.hasOwnProperty.call(h,k)) out[k]=String(h[k]); } }
+    return out;
+  }
+  function bodyToString(b){
+    if (b == null) return undefined;
+    if (typeof b === 'string') return b;
+    if (typeof b === 'object'){
+      if (b.mode === 'raw' && typeof b.raw === 'string') return b.raw;
+      if (b.raw != null) return String(b.raw);
+      try { return JSON.stringify(b); } catch(e){ return String(b); }
+    }
+    return String(b);
+  }
+  function headerBag(headers){
+    return { get: function(n){ n=String(n).toLowerCase(); for(var k in headers){ if(k.toLowerCase()===n) return headers[k]; } return null; }, raw: headers };
+  }
+  g.fetch = function(url, init){
+    init = init || {};
+    var req = { url: String(url), method: String(init.method || 'GET').toUpperCase(), headers: normHeaders(init.headers), body: bodyToString(init.body) };
+    return doFetch(req).then(function(r){
+      var headers = r.headers || {};
+      return {
+        status: r.status, statusText: r.statusText || '', ok: r.status >= 200 && r.status < 300,
+        url: req.url, headers: headerBag(headers),
+        text: function(){ return Promise.resolve(r.body); },
+        json: function(){ return Promise.resolve(JSON.parse(r.body)); }
+      };
+    });
+  };
+  function makePmResponse(r){
+    var headers = r.headers || {};
+    return {
+      code: r.status, status: r.statusText || '',
+      headers: { get: function(n){ n=String(n).toLowerCase(); for(var k in headers){ if(k.toLowerCase()===n) return headers[k]; } return undefined; }, all: function(){ return headers; } },
+      text: function(){ return r.body; },
+      json: function(){ return JSON.parse(r.body); }
+    };
+  }
+  g.pm = g.pm || {};
+  g.pm.expect = g.expect;
+  g.pm.response = undefined;
+  g.pm.sendRequest = function(reqArg, cb){
+    var r = typeof reqArg === 'string' ? { url: reqArg } : (reqArg || {});
+    var req = { url: String(r.url), method: String(r.method || 'GET').toUpperCase(), headers: normHeaders(r.header || r.headers), body: bodyToString(r.body) };
+    doFetch(req).then(function(resp){
+      var pmResp = makePmResponse(resp);
+      g.pm.response = pmResp;
+      if (typeof cb === 'function') cb(null, pmResp);
+    }, function(err){
+      if (typeof cb === 'function') cb(err); else throw err;
+    });
+  };
+})();
+`
+
+/** A network request the sandbox asks the trusted host to perform on its behalf
+ * (so it goes through restorm's firewall instead of a parallel HTTP stack). */
+export interface SandboxHttpRequest {
+  url: string
+  method: string
+  headers: Record<string, string>
+  /** Serialized request body (string), or undefined for none. */
+  body?: string
+}
+
+/** The serialized response handed back to the sandbox. A transport/firewall
+ * failure is reported as `error` (the sandbox shim turns it into a throw) rather
+ * than rejecting, so a denied host surfaces as a clean in-sandbox Error. */
+export interface SandboxHttpResponse {
+  status: number
+  statusText: string
+  headers: Record<string, string>
+  /** Response body as text. */
+  body: string
+  /** Set when the request could not complete (firewall denial, DNS, abort…). */
+  error?: string
+}
+
+/** Performs an HTTP request from the trusted host. Injected by the executor so
+ * the sandbox never holds a real network primitive; the host routes it through
+ * the firewall-instrumented HTTP layer. `signal` aborts an in-flight request
+ * when the run ends (timeout / completion). */
+export type SandboxNetworkBridge = (req: SandboxHttpRequest, signal: AbortSignal) => Promise<SandboxHttpResponse>
+
 export interface RunCodeOptions {
   /** The user's TypeScript/JavaScript source (treated as a function body that
    * may `return` the result). */
@@ -213,6 +316,15 @@ export interface RunCodeOptions {
   variables?: Record<string, unknown>
   /** Wall-clock execution budget; a runaway script is interrupted after it. */
   timeoutMs?: number
+  /** Optional host network bridge. When provided, the sandbox gains `fetch(...)`
+   * and a minimal Postman `pm` (`pm.sendRequest` / `pm.response` / `pm.expect`)
+   * that delegate to it — and thus to the firewall. Absent → the sandbox stays
+   * fully offline (no `fetch`, no `pm`), the safe default. */
+  network?: SandboxNetworkBridge
+  /** The run's cooperative-cancellation signal (user Stop / scope abort). When
+   * it fires, any in-flight host network request is aborted immediately rather
+   * than lingering until the wall-clock timeout. */
+  signal?: AbortSignal
 }
 
 export interface RunCodeResult {
@@ -225,7 +337,7 @@ export interface RunCodeResult {
 /** Transpile + run user code in the QuickJS sandbox. Rejects with a normal
  * Error (message from the sandboxed throw) on a script error or timeout. */
 export async function runCodeInSandbox(opts: RunCodeOptions): Promise<RunCodeResult> {
-  const { code, input, variables = {}, timeoutMs = 5000 } = opts
+  const { code, input, variables = {}, timeoutMs = 5000, network, signal } = opts
   // 1. Transpile TS -> JS (types stripped; isolatedModules-safe single file).
   // Wrap as an ASYNC function body BEFORE transpiling, so esbuild sees the
   // top-level `await` / `return` inside a function (valid) instead of at module
@@ -237,6 +349,22 @@ export async function runCodeInSandbox(opts: RunCodeOptions): Promise<RunCodeRes
   const QuickJS = await getQuickJS()
   const ctx: QuickJSContext = QuickJS.newContext()
   const logs: string[] = []
+  // Aborts any in-flight host network request when the run ends (timeout or
+  // completion) — so a sandbox that fires a slow `fetch` and then times out
+  // doesn't leak a request that outlives it.
+  const netAbort = network ? new AbortController() : null
+  // Forward the run's cancellation (user Stop) to the in-flight host request, so
+  // a slow `fetch` is cut loose at once instead of running out the full timeout.
+  const onRunAbort = (): void => { netAbort?.abort() }
+  if (netAbort && signal) {
+    if (signal.aborted) netAbort.abort()
+    else signal.addEventListener('abort', onRunAbort, { once: true })
+  }
+  // Set once the context is torn down (timeout / completion). A host network
+  // request that resolves AFTER teardown must not touch the dead context (its
+  // `newString` / `resolve` / `executePendingJobs` would throw, surfacing as an
+  // unhandled main-process rejection) — every post-await VM touch checks this.
+  let disposed = false
   try {
     // console.log bridge: collect into `logs`.
     const consoleHandle = ctx.newObject()
@@ -260,6 +388,46 @@ export async function runCodeInSandbox(opts: RunCodeOptions): Promise<RunCodeRes
     if (pre.error) { const e: unknown = ctx.dump(pre.error); pre.error.dispose(); throw new Error(`sandbox prelude failed: ${stringifyErr(e)}`) }
     pre.value.dispose()
 
+    // 2b. Network bridge (only when a host bridge is supplied): expose the single
+    //     async host primitive `__hostFetch(reqJson) -> Promise<respJson>`, then
+    //     eval the shim that builds `fetch` / `pm` on top of it. The host work
+    //     runs on the Node event loop; resolving the VM promise + pumping the job
+    //     queue (`promise.settled.then(executePendingJobs)`) is what lets a
+    //     sandbox `await fetch(...)` resume. The bridge routes through the
+    //     firewall, so a denied host comes back as `{ error }` → an in-sandbox throw.
+    if (network && netAbort) {
+      const hostFetchFn = ctx.newFunction('__hostFetch', (reqHandle) => {
+        const promise = ctx.newPromise()
+        // Resolve the VM promise with a JSON string — but only if the context is
+        // still alive. If the run already timed out / completed, the host result
+        // is irrelevant and touching `ctx` would throw on a disposed runtime.
+        const settle = (json: string): void => {
+          if (disposed) return
+          const s = ctx.newString(json)
+          promise.resolve(s)
+          s.dispose()
+        }
+        let parsed: SandboxHttpRequest | null = null
+        try { parsed = JSON.parse(ctx.getString(reqHandle)) as SandboxHttpRequest } catch { parsed = null }
+        if (!parsed || typeof parsed.url !== 'string') {
+          settle(JSON.stringify({ error: 'invalid sandbox network request' }))
+        } else {
+          network(parsed, netAbort.signal).then(
+            (resp) => { settle(safeJson(resp)) },
+            (err: unknown) => { settle(JSON.stringify({ error: errMessage(err) })) }
+          )
+        }
+        void promise.settled.then(() => { if (!disposed) ctx.runtime.executePendingJobs() })
+        return promise.handle
+      })
+      ctx.setProp(ctx.global, '__hostFetch', hostFetchFn)
+      hostFetchFn.dispose()
+
+      const net = ctx.evalCode(SANDBOX_NETWORK_SHIM)
+      if (net.error) { const e: unknown = ctx.dump(net.error); net.error.dispose(); throw new Error(`sandbox network shim failed: ${stringifyErr(e)}`) }
+      net.value.dispose()
+    }
+
     // 3. Inject input + variables as JSON (data only — no functions/dates).
     const injected = `globalThis.input = ${safeJson(input)}; globalThis.vars = ${safeJson(variables)};`
     const inj = ctx.evalCode(injected)
@@ -282,10 +450,25 @@ export async function runCodeInSandbox(opts: RunCodeOptions): Promise<RunCodeRes
     settled.dispose()
     return { result, logs }
   } finally {
+    // Mark the context dead BEFORE disposing, so any host network callback that
+    // settles after this point short-circuits instead of touching dead handles.
+    disposed = true
+    // Cut any in-flight host request loose (timeout or normal completion) and
+    // detach the run-abort listener so it can't accumulate across code nodes.
+    if (signal) signal.removeEventListener('abort', onRunAbort)
+    netAbort?.abort()
     // A timed-out async run can leave QuickJS promise handles undisposed, which
     // makes dispose() throw — that's fine, the whole context is being torn down.
     try { ctx.dispose() } catch { /* leaked handles on timeout */ }
   }
+}
+
+/** Message from an unknown thrown value (Error, string, …). */
+function errMessage(err: unknown): string {
+  if (err instanceof Error) return err.message
+  if (typeof err === 'string') return err
+  const s = safeJson(err)
+  return s === 'undefined' ? 'network request failed' : s
 }
 
 /** Settle a QuickJS promise: pump the job queue so pure-JS microtasks/promises
