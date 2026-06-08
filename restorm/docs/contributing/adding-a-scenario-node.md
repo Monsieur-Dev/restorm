@@ -31,7 +31,8 @@ A new kind `foo` is done when all of these are true:
 - [ ] **7. Catalogue** — entry in `scenarioNodeCatalogue.ts` (label, icon, category).
 - [ ] **8. Static preview** — opt into `STATIC_PREVIEW` in `src/shared/scenarioNodeCapabilities.ts` and/or `applyListOp` + the preview `switch` in `src/shared/utils/scenarioStaticPreview.ts`, plus the inspector wiring in `ScenarioEditorView.tsx` if it consumes an `items` list.
 - [ ] **9. MCP** — `foo` added to `SCENARIO_KINDS` in `src/main/mcp/tools/scenario.ts`, AND a `SCENARIO_KIND_DOCS` entry in `src/shared/scenarioKindDocs.ts` (purpose + config keys — `Record<ScenarioNodeKind>`, type-enforced) so `describe_scenario_kinds` exposes it to MCP clients.
-- [ ] **10. i18n** — port/field labels added to **every** locale under `src/renderer/locales/*/translation.json` (see step 10).
+- [ ] **9b. Help text** — a user-facing `scenario.help.foo` in **every** locale (see step 10): the inspector's "what this action does" line for a selected box. Seed `en` from the MCP `summary` (but friendlier / shorter), translate `fr` in vouvoiement. `scenarioNodeHelp.test.ts` fails until every kind has one.
+- [ ] **10. i18n** — port/field labels **and the `scenario.help.foo` help text** added to **every** locale under `src/renderer/locales/*/translation.json` (see step 10).
 - [ ] **11. Tests** — a `*.test.ts` exercising the executor + (if it fans out) an end-to-end scheduler run.
 - [ ] **12. Lint + typecheck + tests** green: `npm run lint && npm run typecheck && npx vitest run src/main/scenarioEngine`.
 - [ ] **13. Bestiary** — drop one box of the new kind into the **Bestiary** scenario so the catalogue stays visually complete (see step 13).
@@ -171,7 +172,12 @@ picked up on restart.)
 Port/field labels go under `scenario.<kind>.*` in **every**
 `src/renderer/locales/*/translation.json` — all 27, not just `en`/`fr`. A
 missing key silently falls back to `en`, so the bug is invisible in dev and
-only a `de`/`ja`/`cs` user sees it. Translate `fr` properly (vouvoiement /
+only a `de`/`ja`/`cs` user sees it.
+
+**Also add `scenario.help.<kind>`** — the one-line "what this action does" the
+inspector shows for a selected box. It's a hard requirement (`scenarioNodeHelp.test.ts`
+enforces one per kind); seed `en` from the kind's MCP `summary` but make it
+friendlier/shorter, and translate `fr` in vouvoiement. Translate `fr` properly (vouvoiement /
 match the surrounding tone); for languages you cannot translate, still add the
 **key** with an English placeholder so the JSON structure stays parallel. A
 small Node script that parses each file, sets the keys, and re-serialises with

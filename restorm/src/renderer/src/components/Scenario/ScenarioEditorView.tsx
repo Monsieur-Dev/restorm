@@ -2273,6 +2273,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     }
     return {
       id: n.id,
+      kind: n.data.kind,
       title,
       titleBadge,
       ...(n.data.note ? { note: n.data.note } : {}),
@@ -2525,7 +2526,11 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         // Only mount + measure the nodes inside the viewport — a scenario box is
         // a heavy DOM subtree, so rendering the whole graph at once froze the
         // editor for seconds on a large scenario. Off-screen boxes mount lazily.
-        onlyRenderVisibleElements
+        // BUT culling recomputes the visible set on every viewport change, so a
+        // pan/drag re-renders React Flow's whole subtree each pointer move — the
+        // dominant cost on small/medium graphs. Gate it on node count: small
+        // graphs render all (smooth pan, fast enough load); only big graphs cull.
+        onlyRenderVisibleElements={nodes.length > 60}
         onNodesChange={handleNodesChange}
         onEdgesChange={handleEdgesChange}
         onConnect={onConnect}

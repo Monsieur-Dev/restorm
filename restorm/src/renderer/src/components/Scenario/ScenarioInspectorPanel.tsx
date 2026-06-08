@@ -4,6 +4,7 @@ import { Button, ListView, usePlatform } from 'electron-core-ui/renderer'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
 import type { ScenarioLogEntry } from '../../hooks/useScenarioEngine'
 import { ScenarioRunLogView, type LogLevelFilter } from './ScenarioRunLogView'
+import { ScenarioInspectorLegend } from './ScenarioInspectorLegend'
 import type { ScenarioPort } from '../../../../shared/types/collections'
 import type { ScenarioNodeError } from '../../../../shared/scenarioValidation'
 import { buildScenarioPathTree } from './scenarioPathTree'
@@ -31,6 +32,9 @@ export interface InspectorListOp {
 /** The single selected node previewed in the panel. */
 export interface InspectorPreviewNode {
   id: string
+  /** The node's kind — drives the "what this action does" help text shown in
+   * the panel (i18n `scenario.help.<kind>`). */
+  kind: string
   title: string
   /** Optional badge (e.g. SCENARIO icon or HTTP method) rendered before the
    * title — mirrors what the node's box header shows. */
@@ -424,6 +428,20 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
               )}
             </div>
             {previewNode.note && <div className="scn-inspector-note">{previewNode.note}</div>}
+            {/* What this action does — the translatable per-kind help text.
+              * Always shown for the selected box (concise), with the legend
+              * still sitting in the footer below. */}
+            {(() => {
+              const helpText = t(`scenario.help.${previewNode.kind}`, '')
+              return helpText
+                ? (
+                  <div className="scn-inspector-help" data-testid="scenario-inspector-help">
+                    <div className="scn-inspector-help-title">{t('scenario.inspector.helpTitle', 'What this action does')}</div>
+                    <div className="scn-inspector-help-text">{helpText}</div>
+                  </div>
+                  )
+                : null
+            })()}
             {/* Inline play button — visible whenever the box is runnable AND
               * carries no real run result yet, both for the "no data at all"
               * case (fall back to the hint label) AND alongside a synthetic
@@ -489,6 +507,16 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
             </div>
             <ScenarioRunLogView logs={allLogs} testIdPrefix="scenario-inspector-logs" onFocusNode={onFocusNode} showAllLogs={showAllLogs} onShowAllLogsChange={setShowAllLogs} levels={logLevels} onLevelsChange={setLogLevels} {...(onClearRunLog ? { onClear: onClearRunLog } : {})} />
           </div>
+        </>
+      )}
+
+      {/* Help legend — always present in the footer EXCEPT when the run-log view
+        * is showing (i.e. no box selected AND there are logs). So it backs the
+        * empty state, and sits below a selected box's help. */}
+      {(previewNode !== null || allLogs.length === 0) && (
+        <>
+          <div className="scn-inspector-sep" />
+          <ScenarioInspectorLegend />
         </>
       )}
     </div>
