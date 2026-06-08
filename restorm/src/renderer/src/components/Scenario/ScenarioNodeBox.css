@@ -575,6 +575,27 @@
   font-style: italic;
 }
 
+/* PAN smoothness: React Flow transforms `.react-flow__viewport` on every pan/
+ * zoom. Without a persistent compositor layer the browser repaints the whole
+ * canvas on the FIRST frame of each pan burst (the "lag until it catches up,
+ * then it's smooth" feel) and discards the layer when motion stops — so a
+ * stop/restart re-pays it. Pin the layer with `will-change` so it's ready
+ * before the gesture and a pan is a pure GPU transform from frame one. */
+[data-testid="scenario-editor"] .react-flow__viewport {
+  will-change: transform;
+}
+
+/* DRAG smoothness: keep the selected node (the one you're about to drag) and
+ * the actively-dragged node on their own compositor layers, so the box moves as
+ * a GPU transform instead of repainting its heavy DOM each frame. Selecting a
+ * box (the click that precedes a drag) promotes it, so the layer is ready when
+ * the drag begins. (`:hover` is deliberately NOT used — it would churn layers as
+ * the pointer crosses every box.) */
+.react-flow__node.dragging,
+.react-flow__node.selected {
+  will-change: transform;
+}
+
 .scn-node {
   min-width: 160px;
   border: 1px solid var(--widget-border, #454545);
