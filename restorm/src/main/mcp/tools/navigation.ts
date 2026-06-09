@@ -52,13 +52,13 @@ export function registerNavigationTools(mcp: McpService): void {
     {
       title: 'Open item in workbench tab',
       description:
-        'Open a folder, env-folder or request in a new workbench tab — focuses the existing tab ' +
-        'if one already shows the item. Validates the id against the open project; returns a ' +
-        'clean error when unknown so the AI knows it picked the wrong reference. The tab opens ' +
-        'in the user\'s active window; multi-window setups receive the broadcast in every window ' +
-        'and the renderer picks the focused one.',
+        'Open a folder, env-folder, request or scenario in a new workbench tab — focuses the ' +
+        'existing tab if one already shows the item. Validates the id against the open project; ' +
+        'returns a clean error when unknown so the AI knows it picked the wrong reference. The tab ' +
+        'opens in the user\'s active window; multi-window setups receive the broadcast in every ' +
+        'window and the renderer picks the focused one.',
       inputSchema: {
-        itemId: z.string().min(1).describe('Folder / env-folder / request id to open.')
+        itemId: z.string().min(1).describe('Folder / env-folder / request / scenario id to open.')
       } as Record<string, unknown>
     },
     (args) => {
@@ -82,7 +82,7 @@ export function registerNavigationTools(mcp: McpService): void {
         'No-op when the item isn\'t currently open in any workbench tab — the renderer\'s close ' +
         'handler is forgiving on misses.',
       inputSchema: {
-        itemId: z.string().min(1).describe('Folder / env-folder / request id whose tab to close.')
+        itemId: z.string().min(1).describe('Folder / env-folder / request / scenario id whose tab to close.')
       } as Record<string, unknown>
     },
     (args) => {
@@ -105,7 +105,7 @@ export function registerNavigationTools(mcp: McpService): void {
         'Useful so the user can see what the AI is referring to without opening a tab. Validates ' +
         'the id against the open project.',
       inputSchema: {
-        itemId: z.string().min(1).describe('Folder / env-folder / request id to reveal.')
+        itemId: z.string().min(1).describe('Folder / env-folder / request / scenario id to reveal.')
       } as Record<string, unknown>
     },
     (args) => {

@@ -275,7 +275,7 @@ export function registerReadTools(mcp: McpService): void {
       title: 'Get current tab',
       description:
         'Return the currently active workbench tab: `{ tabId, itemId, kind }`. `kind` is one of ' +
-        '"request", "folder", "env-folder" — or `null` when no item is open (welcome screen, etc.). ' +
+        '"request", "scenario", "folder", "env-folder" — or `null` when no item is open (welcome screen, etc.). ' +
         'Driven by a renderer push: the renderer notifies main on every active-tab change so the ' +
         'value reads fresh without an IPC round-trip per call.',
       inputSchema: {} as Record<string, unknown>

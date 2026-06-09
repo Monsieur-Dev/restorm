@@ -874,7 +874,7 @@ contextBridge.exposeInMainWorld('restorm', {
     /** Push the active workbench tab to main so MCP tools (`get_current_tab`,
      * `restorm://active-tab`) can read it without a renderer round-trip.
      * Renderer fires this on every active-tab change; main caches it. */
-    pushMcpActiveTab: (payload: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | null }): void => {
+    pushMcpActiveTab: (payload: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | null }): void => {
       ipcRenderer.send('mcp:active-tab-changed', payload)
     },
     /** Push a per-env-folder selected-env id. `envId: null` clears the
@@ -956,7 +956,7 @@ contextBridge.exposeInMainWorld('restorm', {
     /** Full-snapshot push fired on renderer (re)load — useful after an
      * HMR cycle so main's cache is always consistent with the renderer. */
     pushMcpActiveStateBootstrap: (payload: {
-      tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | null }
+      tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | null }
       envByFolder: Record<string, string | null>
     }): void => {
       ipcRenderer.send('mcp:active-state-bootstrap', payload)

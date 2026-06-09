@@ -30,6 +30,12 @@ describe('activeState bridge', () => {
     expect(getCurrentTabSnapshot()).toEqual({ tabId: 't1', itemId: 'i1', kind: 'request' })
   })
 
+  it('captures a scenario tab snapshot', () => {
+    registerActiveStateBridge()
+    handlers['mcp:active-tab-changed']?.(null, { tabId: 't2', itemId: 'scn-1', kind: 'scenario' })
+    expect(getCurrentTabSnapshot()).toEqual({ tabId: 't2', itemId: 'scn-1', kind: 'scenario' })
+  })
+
   it('rejects unknown kind values, defaulting kind to null', () => {
     registerActiveStateBridge()
     handlers['mcp:active-tab-changed']?.(null, { tabId: 't1', itemId: 'i1', kind: 'wat' })

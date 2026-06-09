@@ -116,7 +116,7 @@ declare global {
           graphql: { endpoint: string }
         }>
         onMcpRequestReceived: (callback: () => void) => () => void
-        pushMcpActiveTab: (payload: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | null }) => void
+        pushMcpActiveTab: (payload: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | null }) => void
         pushMcpActiveEnv: (payload: { envFolderId: string; envId: string | null }) => void
         pushMcpFavorites: (payload: { projectUuid: string | null; favorites: { id: string; name: string; type: string }[] }) => void
         pushScenarioLayout: (payload: { scenarioId: string; rects: Record<string, { x: number; y: number; width: number; height: number }> }) => void
@@ -124,7 +124,7 @@ declare global {
         cancelScenarioNode: (scenarioId: string, nodeId: string) => Promise<{ cancelled: boolean; reason?: string }>
         getScenarioNodeResult: (scenarioId: string, nodeId: string) => Promise<Record<string, unknown> | null>
         pushMcpActiveStateBootstrap: (payload: {
-          tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | null }
+          tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | null }
           envByFolder: Record<string, string | null>
         }) => void
         onMcpOpenTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void) => () => void
