@@ -32,6 +32,8 @@ import {
   type BrunoRequestData,
   type BrunoSourceData
 } from './transformers/brunoToApiDocumentation'
+import { workflowToScenario, type WorkflowRequestStep } from './workflowToScenario'
+import type { Scenario } from '../../../shared/types/scenario'
 
 // ============================================================================
 // Bruno Types
@@ -489,9 +491,35 @@ export interface BrunoCollectionData {
   files: { path: string; content: string }[]
 }
 
+/** Build a workflow scenario from the (seq-sorted) Bruno requests — ONLY when at
+ * least one request carries a pre/post/test script. The post-response node runs
+ * the `post-response` block followed by the `tests` block (Bruno keeps them
+ * separate). Script-free collections return null. Ids match the importer's. */
+function buildBrunoWorkflowScenario(requests: { path: string; request: BrunoRequest }[], collectionName: string): Scenario | null {
+  const steps: WorkflowRequestStep[] = requests
+    .filter(({ request }) => !isGraphQLRequest(request))
+    .map(({ path, request }) => {
+      const post = [request.script?.postresponse, request.tests].filter((s) => (s ?? '').trim() !== '').join('\n')
+      return {
+        requestId: generateId(`bruno:request:${path}:${request.meta.name}`),
+        name: request.meta.name,
+        prerequest: request.script?.prerequest ?? '',
+        postresponse: post,
+        source: 'bruno' as const
+      }
+    })
+  const hasScripts = steps.some((s) => (s.prerequest ?? '').trim() !== '' || (s.postresponse ?? '').trim() !== '')
+  if (!hasScripts) return null
+  return workflowToScenario({
+    id: generateId(`bruno:scenario:${collectionName}`),
+    name: `${collectionName} — Workflow`,
+    steps
+  })
+}
+
 /**
  * Import a Bruno collection and convert it to a Folder structure
- * 
+ *
  * @param data Collection data including bruno.json metadata and .bru files
  * @param options Import options
  */
@@ -550,6 +578,12 @@ export function importBruno(
     const convertedRequest = convertBrunoRequest(request, path)
     parentItems.push(convertedRequest)
   }
+
+  // Detect a workflow (requests with pre/post/test scripts) → an executable
+  // scenario appended alongside the requests (in seq order). Script-free
+  // collections are unaffected.
+  const workflowScenario = buildBrunoWorkflowScenario(requests, collectionName)
+  if (workflowScenario) rootItems.push(workflowScenario)
 
   // Create environment
   const environment: Environment = {

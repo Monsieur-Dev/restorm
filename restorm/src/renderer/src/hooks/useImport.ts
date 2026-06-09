@@ -89,6 +89,26 @@ export function useImport(options: UseImportOptions): UseImportReturn {
       const remapAuthRefs = (item: FolderItem): FolderItem => {
         if ('items' in item) {
           let next: FolderItem = { ...item, items: item.items.map(remapAuthRefs) }
+          // A workflow scenario (from Postman/Bruno import) binds its
+          // `httpRequest` nodes to sibling requests by `config.requestId`. Those
+          // requests were just re-id'd by regenerateIds, so remap the bindings
+          // here too — otherwise the scenario points at requests that no longer
+          // exist. The scenario's internal node/edge ids are NOT FolderItems, so
+          // regenerateIds left them stable; only this cross-reference moves.
+          const scn = next as unknown as { type?: string; nodes?: { kind: string; config?: Record<string, unknown> }[] }
+          if (scn.type === 'scenario' && Array.isArray(scn.nodes)) {
+            next = {
+              ...next,
+              nodes: scn.nodes.map((n) => {
+                const rid = n.config?.['requestId']
+                if (typeof rid === 'string') {
+                  const remappedId = idMap.get(rid)
+                  if (remappedId !== undefined && remappedId !== rid) return { ...n, config: { ...n.config, requestId: remappedId } }
+                }
+                return n
+              })
+            } as unknown as FolderItem
+          }
           // Env folders may carry an `apiUpdate.authenticationRequestId`
           // that points at the auth request the import flow attached.
           // The regenerateIds pass above stamped a fresh id on the
