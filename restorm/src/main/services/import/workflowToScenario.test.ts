@@ -63,6 +63,57 @@ describe('workflowToScenario', () => {
     const wf = { id: 's5', name: 'Same', steps: [step({ requestId: 'r1', prerequest: 'x', postresponse: 'y' }), step({ requestId: 'r2' })] }
     expect(workflowToScenario(wf)).toEqual(workflowToScenario(wf))
   })
+
+  describe('setNextRequest flow control', () => {
+    const chainOf = (scn: ReturnType<typeof workflowToScenario>): string[][] =>
+      scn.edges.filter((e) => e.id.endsWith(':chain')).map((e) => [e.from.nodeId, e.to.nodeId])
+
+    it('redirects the chain to a statically-named request', () => {
+      const scn = workflowToScenario({
+        id: 's', name: 'Auth', steps: [
+          step({ requestId: 'login', name: 'Login', postresponse: 'pm.setNextRequest("Get Profile")' }),
+          step({ requestId: 'skip', name: 'Skipped' }),
+          step({ requestId: 'profile', name: 'Get Profile' })
+        ]
+      })
+      // login redirects to profile (skipping the linear next); skip is left
+      // unreachable from login (its own inert linear edge is harmless).
+      expect(chainOf(scn)).toContainEqual(['login:post', 'profile:http'])
+      expect(chainOf(scn)).not.toContainEqual(['login:post', 'skip:http'])
+    })
+
+    it('ends the run on setNextRequest(null) — no outgoing edge', () => {
+      const scn = workflowToScenario({
+        id: 's', name: 'Stop', steps: [
+          step({ requestId: 'a', name: 'A', postresponse: 'pm.execution.setNextRequest(null)' }),
+          step({ requestId: 'b', name: 'B' })
+        ]
+      })
+      expect(chainOf(scn)).toEqual([])
+    })
+
+    it('keeps linear order + annotates a dynamic setNextRequest', () => {
+      const scn = workflowToScenario({
+        id: 's', name: 'Dyn', steps: [
+          step({ requestId: 'a', name: 'A', postresponse: 'pm.setNextRequest(pm.variables.get("next"))' }),
+          step({ requestId: 'b', name: 'B' })
+        ]
+      })
+      expect(chainOf(scn)).toEqual([['a:post', 'b:http']])
+      expect(scn.nodes.find((n) => n.id === 'a:post')?.note).toContain('computed at run time')
+    })
+
+    it('falls back to linear + annotates when the named target is missing', () => {
+      const scn = workflowToScenario({
+        id: 's', name: 'Missing', steps: [
+          step({ requestId: 'a', name: 'A', postresponse: 'bru.setNextRequest("Nope")' }),
+          step({ requestId: 'b', name: 'B' })
+        ]
+      })
+      expect(chainOf(scn)).toEqual([['a:post', 'b:http']])
+      expect(scn.nodes.find((n) => n.id === 'a:post')?.note).toContain('target not found')
+    })
+  })
 })
 
 describe('toScriptContext (executor input → pm/bru context)', () => {

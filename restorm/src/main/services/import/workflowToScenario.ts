@@ -19,6 +19,12 @@
  * later requests resolve `{{var}}`. A request with no scripts becomes a bare
  * `httpRequest` node, so a script-free collection still imports cleanly.
  *
+ * Flow control: when a request's script statically calls
+ * `setNextRequest('Name')` (any dialect prefix) the chain edge is redirected to
+ * that request instead of the linear next; `setNextRequest(null)` ends the run;
+ * a computed / multiple call is left on the linear order with a note on the box
+ * (best-effort, never a silent jump).
+ *
  * Ids are derived from the request ids (not `Date.now()`), so re-importing the
  * same workflow produces the same graph — the idempotency the import pipeline
  * relies on.
@@ -88,14 +94,47 @@ function edge(id: string, from: string, fromPort: string, to: string, toPort: st
   }
 }
 
+/** A `setNextRequest` directive found in a step's scripts. */
+type NextDirective =
+  | { kind: 'linear' }            // no setNextRequest — fall through to the next request
+  | { kind: 'static'; name: string } // setNextRequest('Name') — a single string literal
+  | { kind: 'stop' }              // setNextRequest(null) — end the run here
+  | { kind: 'dynamic' }           // a computed / multiple setNextRequest — can't resolve statically
+
+/** Detect a static `setNextRequest` in a script (any prefix: `pm.` / `postman.`
+ * / `pm.execution.` / `bru.` / `bru.runner.`). A single string-literal argument
+ * is resolvable to a control edge; `null` ends the run; anything computed or
+ * more than one call is left to the linear order (annotated, never silently
+ * dropped). */
+function detectNext(script: string): NextDirective {
+  const calls = [...script.matchAll(/setNextRequest\s*\(([^)]*)\)/g)]
+  if (calls.length === 0) return { kind: 'linear' }
+  if (calls.length > 1) return { kind: 'dynamic' }
+  const arg = (calls[0][1] ?? '').trim()
+  if (arg === 'null' || arg === '') return { kind: 'stop' }
+  const lit = /^(['"`])(.*)\1$/.exec(arg)
+  if (lit) return { kind: 'static', name: lit[2] }
+  return { kind: 'dynamic' }
+}
+
+interface BuiltStep {
+  step: WorkflowRequestStep
+  head: string
+  tail: string
+  tailNode: ScenarioNode
+  next: NextDirective
+}
+
 /** Convert an ordered workflow into a runnable scenario graph. */
 export function workflowToScenario(input: WorkflowToScenarioInput): Scenario {
   const nodes: ScenarioNode[] = []
   const edges: ScenarioEdge[] = []
-  // The node a downstream `done`→`in` edge should chain FROM (the previous
-  // request's tail) — null for the first request (it runs at start).
-  let prevTail: string | null = null
+  const built: BuiltStep[] = []
+  // Resolve a `setNextRequest('Name')` to a request — last wins on duplicate names.
+  const indexByName = new Map<string, number>()
+  input.steps.forEach((step, i) => indexByName.set(step.name, i))
 
+  // Pass 1 — nodes + intra-request edges.
   input.steps.forEach((step, i) => {
     const x = i * COL_WIDTH
     // Keep the source verbatim; trim only to decide whether a script exists.
@@ -107,20 +146,50 @@ export function workflowToScenario(input: WorkflowToScenarioInput): Scenario {
     const httpId = `${step.requestId}:http`
     const postId = `${step.requestId}:post`
 
-    if (hasPre) nodes.push(codeNode(preId, preSrc, `${step.source}-prerequest`, x, ROW_PRE, `Pre-request — ${step.name}`))
-    nodes.push(httpNode(httpId, step.requestId, step.name, x, ROW_HTTP))
-    if (hasPost) nodes.push(codeNode(postId, postSrc, `${step.source}-postresponse`, x, ROW_POST, `Post-response — ${step.name}`))
+    const preNode = hasPre ? codeNode(preId, preSrc, `${step.source}-prerequest`, x, ROW_PRE, `Pre-request — ${step.name}`) : undefined
+    const httpNodeRef = httpNode(httpId, step.requestId, step.name, x, ROW_HTTP)
+    const postNode = hasPost ? codeNode(postId, postSrc, `${step.source}-postresponse`, x, ROW_POST, `Post-response — ${step.name}`) : undefined
+    if (preNode) nodes.push(preNode)
+    nodes.push(httpNodeRef)
+    if (postNode) nodes.push(postNode)
 
     // Intra-request wiring: pre runs first (sets variables) then the request;
     // the request's response feeds the post-response script.
     if (hasPre) edges.push(edge(`e:${step.requestId}:pre-http`, preId, 'done', httpId, 'in'))
     if (hasPost) edges.push(edge(`e:${step.requestId}:http-post`, httpId, 'response', postId, 'value', '.'))
 
-    // Cross-request chaining in execution order.
-    const head = hasPre ? preId : httpId
-    const tail = hasPost ? postId : httpId
-    if (prevTail !== null) edges.push(edge(`e:${step.requestId}:chain`, prevTail, 'done', head, 'in'))
-    prevTail = tail
+    built.push({
+      step,
+      head: hasPre ? preId : httpId,
+      tail: hasPost ? postId : httpId,
+      tailNode: postNode ?? httpNodeRef,
+      next: detectNext(`${preSrc}\n${postSrc}`)
+    })
+  })
+
+  // Pass 2 — chain edges in execution order, honouring static `setNextRequest`.
+  built.forEach((b, i) => {
+    let targetIndex = i + 1 // linear default
+    let annotation: string | null = null
+    switch (b.next.kind) {
+      case 'stop':
+        return // ends the run — no outgoing chain edge
+      case 'static': {
+        const idx = indexByName.get(b.next.name)
+        if (idx === undefined) annotation = `setNextRequest("${b.next.name}") — target not found, using linear order`
+        else targetIndex = idx
+        break
+      }
+      case 'dynamic':
+        annotation = 'setNextRequest is computed at run time — wired in linear order, verify the jump manually'
+        break
+      default:
+        break // linear
+    }
+    if (annotation) b.tailNode.note = b.tailNode.note ? `${b.tailNode.note} · ${annotation}` : annotation
+    if (targetIndex < built.length) {
+      edges.push(edge(`e:${b.step.requestId}:chain`, b.tail, 'done', built[targetIndex].head, 'in'))
+    }
   })
 
   return { type: 'scenario', id: input.id, name: input.name, tags: [], params: [], nodes, edges, items: [] }
