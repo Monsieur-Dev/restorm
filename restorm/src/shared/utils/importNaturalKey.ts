@@ -118,11 +118,18 @@ export function filterImportTreeBySelection(
   items: readonly FolderItem[],
   selection: ReadonlySet<string>
 ): FolderItem[] {
+  return dropOrphanWorkflowScenarios(pruneBySelection(items, selection))
+}
+
+function pruneBySelection(
+  items: readonly FolderItem[],
+  selection: ReadonlySet<string>
+): FolderItem[] {
   const out: FolderItem[] = []
   for (const item of items) {
     if (isAnyFolder(item)) {
       const folder: Folder | EnvironmentFolder = item
-      const filteredChildren = filterImportTreeBySelection(folder.items, selection)
+      const filteredChildren = pruneBySelection(folder.items, selection)
       // Keep the folder when at least one REAL (request) descendant survived. A
       // workflow scenario rides along with its sibling requests but never by
       // itself keeps an otherwise-emptied folder alive.
@@ -140,6 +147,33 @@ export function filterImportTreeBySelection(
     }
   }
   return out
+}
+
+/**
+ * After pruning, drop any workflow scenario whose `httpRequest` nodes bind a
+ * request that the user deselected — keeping it would leave the scenario with
+ * dangling `requestId`s (every such box flags `request-missing` → Run disabled).
+ * A scenario only makes sense when ALL the requests it orchestrates survive, so
+ * a partial deselection drops the workflow scenario rather than ship it broken.
+ */
+function dropOrphanWorkflowScenarios(items: FolderItem[]): FolderItem[] {
+  const surviving = new Set<string>()
+  const collect = (list: readonly FolderItem[]): void => {
+    for (const it of list) {
+      if (isAnyFolder(it)) collect(it.items)
+      else if (!isScenario(it) && typeof (it as { id?: unknown }).id === 'string') surviving.add((it as { id: string }).id)
+    }
+  }
+  collect(items)
+  const boundRequestIds = (scenario: FolderItem): string[] => {
+    const nodes = (scenario as unknown as { nodes?: { config?: Record<string, unknown> }[] }).nodes ?? []
+    return nodes.map((n) => n.config?.['requestId']).filter((x): x is string => typeof x === 'string')
+  }
+  const prune = (list: FolderItem[]): FolderItem[] =>
+    list
+      .filter((it) => !isScenario(it) || boundRequestIds(it).every((id) => surviving.has(id)))
+      .map((it) => (isAnyFolder(it) ? { ...it, items: prune(it.items) } : it))
+  return prune(items)
 }
 
 export function walkImportTreeWithKeys(

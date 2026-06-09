@@ -332,6 +332,21 @@ describe('codeSandbox network bridge', () => {
       expect(postman?.tests?.[0]?.error).toContain('404')
     })
 
+    it('pm.response.to.have.jsonBody(expected) deep-compares the parsed body', async () => {
+      const { bridge } = mapBridge()
+      const { postman } = await runCodeInSandbox({
+        variableBridge: bridge,
+        postman: { response: { code: 200, status: 'OK', headers: {}, body: '{"id":7,"tags":[{"id":1,"name":"a"}]}' } },
+        code: `
+          pm.test('matches', function(){ pm.response.to.have.jsonBody({ id: 7, tags: [{ id: 1, name: 'a' }] }) })
+          pm.test('mismatch', function(){ pm.response.to.have.jsonBody({ id: 8 }) })
+          return null
+        `
+      })
+      expect(postman?.tests?.find((t) => t.name === 'matches')?.passed).toBe(true)
+      expect(postman?.tests?.find((t) => t.name === 'mismatch')?.passed).toBe(false)
+    })
+
     it('captures pm.request mutations (pre-request script) on result.postman.request', async () => {
       const { store, bridge } = mapBridge({ token: 'secret' })
       const { postman } = await runCodeInSandbox({

@@ -7,7 +7,9 @@
  * - Authentication (oauth2, apikey, bearer, basic, digest, hawk, aws, ntlm)
  * - Nested folders
  * - Variables
- * - Pre-request and test scripts (stored in documentation)
+ * - Pre-request and test scripts (kept in documentation AND, when a collection
+ *   carries scripts, lowered into an executable workflow scenario whose `code`
+ *   nodes run them verbatim — see `buildPostmanWorkflowScenario`)
  * - Example responses
  */
 

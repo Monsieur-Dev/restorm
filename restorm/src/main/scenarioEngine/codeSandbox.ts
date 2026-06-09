@@ -341,10 +341,18 @@ const SANDBOX_POSTMAN_SHIM = `
       json: function(){ return JSON.parse(body); }
     };
     function fail(msg){ var e = new Error(msg); e.name='AssertionError'; throw e; }
+    function deepEq(a, b){
+      if (a === b) return true;
+      if (a === null || b === null || typeof a !== 'object' || typeof b !== 'object') return false;
+      var ka = Object.keys(a), kb = Object.keys(b);
+      if (ka.length !== kb.length) return false;
+      for (var i = 0; i < ka.length; i++){ if (!Object.prototype.hasOwnProperty.call(b, ka[i]) || !deepEq(a[ka[i]], b[ka[i]])) return false; }
+      return true;
+    }
     var have = {
       status: function(expected){ if (typeof expected === 'number'){ if (resp.code !== expected) fail('expected response code '+resp.code+' to be '+expected); } else { if (String(resp.status) !== String(expected)) fail('expected response status '+resp.status+' to be '+expected); } return resp.to; },
       header: function(name){ if (!resp.headers.has(name)) fail('expected response to have header '+name); return resp.to; },
-      jsonBody: function(){ try { var j = resp.json(); } catch(e){ fail('expected response body to be valid JSON'); } if (arguments.length){ /* deep-eq best effort */ } return resp.to; },
+      jsonBody: function(expected){ var j; try { j = resp.json(); } catch(e){ fail('expected response body to be valid JSON'); } if (arguments.length && !deepEq(j, expected)) fail('expected response json to deep-equal the expected value'); return resp.to; },
       body: function(expected){ if (expected !== undefined && resp.text() !== String(expected)) fail('expected body to equal '+expected); return resp.to; }
     };
     // Postman asserts on PROPERTY ACCESS for \`.to.be.ok\` (chai-style getter),

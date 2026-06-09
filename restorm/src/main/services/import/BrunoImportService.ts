@@ -9,7 +9,9 @@
  * - Authentication (bearer, basic, apikey, oauth2, awsv4, digest)
  * - Query and path parameters
  * - Headers
- * - Pre-request and test scripts (stored in documentation)
+ * - Pre-request and test scripts (kept in documentation AND, when a collection
+ *   carries scripts, lowered into an executable workflow scenario whose `code`
+ *   nodes run them verbatim — see `buildBrunoWorkflowScenario`)
  * - Variables
  */
 

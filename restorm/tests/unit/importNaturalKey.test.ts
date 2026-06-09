@@ -33,6 +33,17 @@ function scenario(name: string): FolderItem {
   return { type: 'scenario', id: 'irrelevant', name, tags: [], params: [], nodes: [], edges: [], items: [] } as unknown as FolderItem
 }
 
+/** An http request with an explicit id, so a workflow scenario can bind to it. */
+function httpId(id: string, method: HTTPRequest['method'], url: string): HTTPRequest {
+  return { type: 'http', id, name: `${method} ${url}`, method, url } as unknown as HTTPRequest
+}
+
+/** A workflow scenario whose `httpRequest` nodes bind the given request ids. */
+function scenarioBound(name: string, requestIds: string[]): FolderItem {
+  const nodes = requestIds.map((rid, i) => ({ id: `${rid}:http`, kind: 'httpRequest', config: { requestId: rid }, inputs: [], outputs: [], position: { x: i, y: 0 } }))
+  return { type: 'scenario', id: `scn:${name}`, name, tags: [], params: [], nodes, edges: [], items: [] } as unknown as FolderItem
+}
+
 function folder(name: string, items: FolderItem[] = []): Folder {
   return {
     id: 'irrelevant',
@@ -207,6 +218,37 @@ describe('walkImportTreeWithKeys', () => {
     const tree: FolderItem[] = [folder('pet', [http('POST', '/pet'), scenario('Pet API — Workflow')])]
     const filtered = filterImportTreeBySelection(tree, new Set<string>())
     expect(filtered).toHaveLength(0)
+  })
+
+  it('filterImportTreeBySelection drops a workflow scenario when one of its bound requests is deselected', () => {
+    const tree: FolderItem[] = [
+      folder('pet', [
+        httpId('r1', 'GET', '/a'),
+        httpId('r2', 'POST', '/b'),
+        scenarioBound('Flow', ['r1', 'r2'])
+      ])
+    ]
+    // Keep r1, drop r2 → the scenario binds a request that didn't survive, so it
+    // must be dropped (else its r2 box would dangle and disable Run).
+    const filtered = filterImportTreeBySelection(tree, new Set(['request:http:GET /a']))
+    const [root] = filtered
+    if (!root || !('items' in root)) throw new Error('unexpected shape')
+    expect(root.items.map((i) => (i as { name: string }).name)).toEqual(['GET /a'])
+    expect(root.items.some((i) => (i as { type?: string }).type === 'scenario')).toBe(false)
+  })
+
+  it('filterImportTreeBySelection keeps a workflow scenario when all its bound requests survive', () => {
+    const tree: FolderItem[] = [
+      folder('pet', [
+        httpId('r1', 'GET', '/a'),
+        httpId('r2', 'POST', '/b'),
+        scenarioBound('Flow', ['r1', 'r2'])
+      ])
+    ]
+    const filtered = filterImportTreeBySelection(tree, new Set(['request:http:GET /a', 'request:http:POST /b']))
+    const [root] = filtered
+    if (!root || !('items' in root)) throw new Error('unexpected shape')
+    expect(root.items.some((i) => (i as { type?: string }).type === 'scenario')).toBe(true)
   })
 
   it('filterImportTreeBySelection passes leaf request references through unchanged', () => {

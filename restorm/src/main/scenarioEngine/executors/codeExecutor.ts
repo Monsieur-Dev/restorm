@@ -150,7 +150,7 @@ export const codeExecutor: NodeExecutor = async (act, ctx) => {
   }
   // Bruno `bru.runRequest(name)`: resolve the named request + run it through the
   // real HTTP pipeline (auth/env/firewall), returning its response to the script.
-  const runRequestBridge = async (name: string): Promise<SandboxHttpResponse> => {
+  const runRequestBridge = async (name: string, signal: AbortSignal): Promise<SandboxHttpResponse> => {
     const target = findRequestByName(name)
     if (!target) return { status: 0, statusText: '', headers: {}, body: '', error: `bru.runRequest: no request named "${name}"` }
     const [{ flushRequestStateToContext }, { httpExecutionService }] = await Promise.all([
@@ -159,8 +159,23 @@ export const codeExecutor: NodeExecutor = async (act, ctx) => {
     ])
     const full = collectionStore.findById(target.id)
     if (full) flushRequestStateToContext(full)
-    const r = await httpExecutionService.execute({ requestId: target.id, method: target.method })
-    return { status: r.statusCode ?? 0, statusText: r.statusText ?? '', headers: r.headers ?? {}, body: r.body ?? '' }
+    // Honour the run's cancellation: a Stop / timeout aborts the in-flight call
+    // instead of leaving it running in the background after the script gave up.
+    const onAbort = (): void => { httpExecutionService.cancel(target.id) }
+    if (signal.aborted) onAbort()
+    else signal.addEventListener('abort', onAbort, { once: true })
+    try {
+      const r = await httpExecutionService.execute({ requestId: target.id, method: target.method })
+      const base = { status: r.statusCode ?? 0, statusText: r.statusText ?? '', headers: r.headers ?? {}, body: r.body ?? '' }
+      // A transport/protocol failure must surface as an error so the bru shim
+      // rejects, rather than resolving to a misleading empty 0/'' "success".
+      if (!r.success || r.error !== undefined) {
+        return { ...base, error: r.error ?? `bru.runRequest: request "${name}" failed` }
+      }
+      return base
+    } finally {
+      signal.removeEventListener('abort', onAbort)
+    }
   }
 
   const { result, logs, postman } = await runtime.run(code, {
