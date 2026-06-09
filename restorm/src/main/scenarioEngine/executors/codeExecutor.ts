@@ -5,22 +5,14 @@ import type { SandboxScriptContext, SandboxHttpResponse } from '../codeSandbox'
 import { SKIP_REQUEST_SENTINEL } from '../scriptSentinels'
 import { collectionStore } from '../../services/CollectionStore'
 import { isHTTPRequest } from '../../../shared/types/collections'
+import { resolveRequestByName } from './resolveRequestByName'
 
-/** Find an HTTP request by name (or by the leaf of a `folder/req` path) anywhere
- * in the open project — used to resolve a Bruno `bru.runRequest(name)` target. */
+/** Resolve a Bruno `bru.runRequest(target)` reference (id / name / `folder/req`
+ * path) to a concrete request in the open project. Matches the most specific
+ * name-form first rather than blindly splitting on `/` — so a request whose
+ * name literally contains a slash still resolves. See `resolveRequestByName`. */
 function findRequestByName(name: string): { id: string; method: string } | undefined {
-  const leaf = (name.split('/').pop() ?? name).trim()
-  const walk = (items: unknown[]): { id: string; method: string } | undefined => {
-    for (const it of items) {
-      const item = it as { name?: string; id?: string; method?: string; items?: unknown[] }
-      if (Array.isArray(item.items)) { const found = walk(item.items); if (found) return found }
-      else if (item.name === leaf && isHTTPRequest(item as never) && typeof item.id === 'string') {
-        return { id: item.id, method: item.method ?? 'GET' }
-      }
-    }
-    return undefined
-  }
-  return walk(collectionStore.getCollections() as unknown[])
+  return resolveRequestByName(collectionStore.getCollections() as unknown[], name)
 }
 
 interface KV { key: string; value?: unknown; enabled?: boolean }
