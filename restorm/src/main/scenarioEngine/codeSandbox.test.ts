@@ -361,4 +361,85 @@ describe('codeSandbox network bridge', () => {
       expect(result).toBe('undefined')
     })
   })
+
+  describe('bruno runtime (bru / req / res)', () => {
+    it('maps bru variable helpers to the scenario namespace + persists writes', async () => {
+      const { store, bridge } = mapBridge({ token: 'xyz' })
+      const { result } = await runCodeInSandbox({
+        variableBridge: bridge,
+        bruno: { info: { envName: 'staging', collectionName: 'Pet API' } },
+        code: `
+          bru.setVar('runtimeVar', 1)
+          bru.setEnvVar('base', 'https://api.test')
+          return {
+            token: bru.getVar('token'),
+            hasBase: bru.hasEnvVar('base'),
+            collectionVar: bru.getCollectionVar('token'),
+            env: bru.getEnvName(),
+            coll: bru.getCollectionName()
+          }
+        `
+      })
+      expect(store.get('runtimeVar')).toBe(1)
+      expect(store.get('base')).toBe('https://api.test')
+      expect(result).toEqual({ token: 'xyz', hasBase: true, collectionVar: 'xyz', env: 'staging', coll: 'Pet API' })
+    })
+
+    it('also exposes Bruno\'s `pm` compatibility layer', async () => {
+      const { store, bridge } = mapBridge()
+      const { result } = await runCodeInSandbox({
+        variableBridge: bridge,
+        bruno: {},
+        code: `pm.environment.set('viaPm', 42); return { pm: typeof pm, bru: typeof bru, viaPm: bru.getVar('viaPm') }`
+      })
+      expect(store.get('viaPm')).toBe(42)
+      expect(result).toEqual({ pm: 'object', bru: 'object', viaPm: 42 })
+    })
+
+    it('req.* reads and mutates the outgoing request (captured on result)', async () => {
+      const { bridge } = mapBridge({ token: 'secret' })
+      const { postman } = await runCodeInSandbox({
+        variableBridge: bridge,
+        bruno: { request: { url: 'https://api.test/pets', method: 'GET', headers: {} } },
+        code: `
+          req.setHeader('Authorization', 'Bearer ' + bru.getVar('token'))
+          req.setUrl(req.getUrl() + '?limit=5')
+          return null
+        `
+      })
+      expect(postman?.request).toMatchObject({ url: 'https://api.test/pets?limit=5', method: 'GET', headers: { Authorization: 'Bearer secret' } })
+    })
+
+    it('res.* reads the injected response + global test() collects results', async () => {
+      const { store, bridge } = mapBridge()
+      const { postman } = await runCodeInSandbox({
+        variableBridge: bridge,
+        bruno: { response: { code: 201, status: 'Created', headers: { 'x-id': '9' }, body: '{"id":9}', responseTime: 7 } },
+        code: `
+          test('created', function(){ expect(res.getStatus()).to.equal(201) })
+          bru.setVar('newId', res.getBody().id)
+          return null
+        `
+      })
+      expect(store.get('newId')).toBe(9)
+      expect(postman?.tests?.[0]).toEqual({ name: 'created', passed: true, error: null })
+    })
+
+    it('captures bru.setNextRequest and bru.runRequest for the importer', async () => {
+      const { bridge } = mapBridge()
+      const { postman } = await runCodeInSandbox({
+        variableBridge: bridge,
+        bruno: {},
+        code: `bru.setNextRequest('Get Token'); await bru.runRequest('auth/login'); return null`
+      })
+      expect(postman?.nextRequest).toBe('Get Token')
+      expect(postman?.runRequest).toBe('auth/login')
+    })
+
+    it('omits the bru runtime when no bruno context is supplied', async () => {
+      const { bridge } = mapBridge()
+      const { result } = await runCodeInSandbox({ variableBridge: bridge, code: `return typeof bru` })
+      expect(result).toBe('undefined')
+    })
+  })
 })

@@ -401,7 +401,74 @@ const SANDBOX_POSTMAN_SHIM = `
   g.postman.getResponseHeader = function(n){ return g.pm.response ? g.pm.response.headers.get(n) : undefined; };
 
   // Final state read back by the host after the script runs.
-  g.__pmFinal = function(){ return JSON.stringify({ request: g.pm.request, tests: g.__pmTests, nextRequest: g.__pmNext }); };
+  g.__pmFinal = function(){ return JSON.stringify({ request: g.pm.request, tests: g.__pmTests, nextRequest: g.__pmNext, runRequest: g.__pmRunRequest }); };
+})();
+`
+
+/** Bruno `bru` / `req` / `res` runtime, evaluated ONLY when a `bruno` context is
+ * supplied. Loaded AFTER the Postman shim (Bruno ships a `pm` compat layer), it
+ * reuses the shared mutable request (`pm.request`), injected response
+ * (`pm.response`) and test/next-request collectors — so `__pmFinal()` reads the
+ * outcome back identically. Variable scopes all map to the scenario namespace
+ * via `__vars`, so imported Bruno scripts interop with native variable nodes. */
+const SANDBOX_BRUNO_SHIM = `
+(function(){
+  var g = globalThis;
+  var V = g.__vars;
+  var rq = g.pm.request;
+  var info = (g.__pmContext || {}).info || {};
+  function hget(h, n){ n=String(n).toLowerCase(); for(var k in h){ if(Object.prototype.hasOwnProperty.call(h,k) && k.toLowerCase()===n) return h[k]; } return undefined; }
+  g.bru = {
+    getVar: function(k){ return V.get(String(k)); },
+    setVar: function(k, v){ V.set(String(k), v); },
+    deleteVar: function(k){ V['delete'](String(k)); },
+    getEnvVar: function(k){ return V.get(String(k)); },
+    setEnvVar: function(k, v){ V.set(String(k), v); },
+    hasEnvVar: function(k){ return V.has(String(k)); },
+    deleteEnvVar: function(k){ V['delete'](String(k)); },
+    getCollectionVar: function(k){ return V.get(String(k)); },
+    getFolderVar: function(k){ return V.get(String(k)); },
+    getRequestVar: function(k){ return V.get(String(k)); },
+    getProcessEnv: function(){ return undefined; },
+    getEnvName: function(){ return info.envName || ''; },
+    getCollectionName: function(){ return info.collectionName || ''; },
+    setNextRequest: function(n){ g.__pmNext = (n === null ? null : String(n)); },
+    runRequest: function(p){ g.__pmRunRequest = String(p); return Promise.resolve(undefined); },
+    sleep: function(ms){ return new Promise(function(r){ g.setTimeout(r, ms); }); },
+    disableParsingResponseJson: function(){},
+    cwd: function(){ return ''; },
+    runner: {
+      setNextRequest: function(n){ g.__pmNext = (n === null ? null : String(n)); },
+      stopExecution: function(){ g.__pmNext = '\\u0000stop'; },
+      skipRequest: function(){ g.__pmNext = '\\u0000skip'; }
+    }
+  };
+  g.req = {
+    getUrl: function(){ return rq.url; }, setUrl: function(u){ rq.url = String(u); },
+    getMethod: function(){ return rq.method; }, setMethod: function(m){ rq.method = String(m); },
+    getHeader: function(n){ return hget(rq.headers, n); },
+    getHeaders: function(){ return rq.headers; },
+    setHeader: function(n, v){ rq.headers[String(n)] = String(v); },
+    setHeaders: function(h){ rq.headers = h || {}; },
+    getBody: function(){ return rq.body; }, setBody: function(b){ rq.body = b; },
+    getAuthMode: function(){ return (rq.auth && rq.auth.mode) || 'none'; },
+    getTimeout: function(){ return rq.timeout || 0; }, setTimeout: function(t){ rq.timeout = t; },
+    setMaxRedirects: function(n){ rq.maxRedirects = n; },
+    getName: function(){ return rq.name || ''; },
+    disableParsingResponseJson: function(){}
+  };
+  var resp = g.pm.response;
+  g.res = resp ? {
+    getStatus: function(){ return resp.code; },
+    getStatusText: function(){ return resp.status; },
+    getHeader: function(n){ return resp.headers.get(n); },
+    getHeaders: function(){ return resp.headers.all(); },
+    getBody: function(){ try { return resp.json(); } catch(e){ return resp.text(); } },
+    setBody: function(b){ resp.__body = b; },
+    getResponseTime: function(){ return resp.responseTime; }
+  } : undefined;
+  // Bruno's global \`test()\` shares the pm collector; expect/assert are chai.
+  g.test = g.pm.test;
 })();
 `
 
@@ -475,6 +542,11 @@ export interface RunCodeOptions {
    * `variableBridge` for the variable scopes. Pre/post mutations + test results
    * come back on {@link RunCodeResult.postman}. */
   postman?: SandboxScriptContext
+  /** Optional Bruno context. Like {@link postman} but builds the Bruno
+   * `bru`/`req`/`res` runtime (plus Bruno's `pm` compat layer) so an unmodified
+   * Bruno script runs. Mutually exclusive with `postman`; outcome also on
+   * {@link RunCodeResult.postman}. */
+  bruno?: SandboxScriptContext
   /** The run's cooperative-cancellation signal (user Stop / scope abort). When
    * it fires, any in-flight host network request is aborted immediately rather
    * than lingering until the wall-clock timeout. */
@@ -502,6 +574,8 @@ export interface SandboxScriptOutcome {
   request?: SandboxScriptContext['request']
   tests?: { name: string; passed: boolean; error: string | null }[]
   nextRequest?: string | null
+  /** A Bruno `bru.runRequest(path)` target (→ a runScenario/httpRequest edge). */
+  runRequest?: string
 }
 
 export interface RunCodeResult {
@@ -517,7 +591,9 @@ export interface RunCodeResult {
 /** Transpile + run user code in the QuickJS sandbox. Rejects with a normal
  * Error (message from the sandboxed throw) on a script error or timeout. */
 export async function runCodeInSandbox(opts: RunCodeOptions): Promise<RunCodeResult> {
-  const { code, input, variables = {}, timeoutMs = 5000, network, variableBridge, postman, signal } = opts
+  const { code, input, variables = {}, timeoutMs = 5000, network, variableBridge, postman, bruno, signal } = opts
+  // A Postman or Bruno script shares one request/response/test context.
+  const scriptCtx = postman ?? bruno
   // 1. Transpile TS -> JS (types stripped; isolatedModules-safe single file).
   // Wrap as an ASYNC function body BEFORE transpiling, so esbuild sees the
   // top-level `await` / `return` inside a function (valid) instead of at module
@@ -640,16 +716,22 @@ export async function runCodeInSandbox(opts: RunCodeOptions): Promise<RunCodeRes
       vars.value.dispose()
     }
 
-    // 2d. Postman runtime (only when a `postman` context is supplied): inject the
-    //     request/response/info context as JSON, then build the `pm.*` surface on
-    //     top of `__vars` (P0) + the network shim. Requires the variable bridge.
-    if (postman) {
-      const pmCtx = ctx.evalCode(`globalThis.__pmContext = ${safeJson(postman)};`)
-      if (pmCtx.error) { const e: unknown = ctx.dump(pmCtx.error); pmCtx.error.dispose(); throw new Error(`sandbox pm context failed: ${stringifyErr(e)}`) }
+    // 2d. Postman / Bruno runtime (when a script context is supplied): inject the
+    //     request/response/info context, build the `pm.*` surface on top of
+    //     `__vars` (P0) + the network shim, then — for Bruno — the `bru`/`req`/
+    //     `res` surface on top of the shared pm state. Requires the variable bridge.
+    if (scriptCtx) {
+      const pmCtx = ctx.evalCode(`globalThis.__pmContext = ${safeJson(scriptCtx)};`)
+      if (pmCtx.error) { const e: unknown = ctx.dump(pmCtx.error); pmCtx.error.dispose(); throw new Error(`sandbox script context failed: ${stringifyErr(e)}`) }
       pmCtx.value.dispose()
       const pmShim = ctx.evalCode(SANDBOX_POSTMAN_SHIM)
       if (pmShim.error) { const e: unknown = ctx.dump(pmShim.error); pmShim.error.dispose(); throw new Error(`sandbox pm shim failed: ${stringifyErr(e)}`) }
       pmShim.value.dispose()
+      if (bruno) {
+        const bruShim = ctx.evalCode(SANDBOX_BRUNO_SHIM)
+        if (bruShim.error) { const e: unknown = ctx.dump(bruShim.error); bruShim.error.dispose(); throw new Error(`sandbox bru shim failed: ${stringifyErr(e)}`) }
+        bruShim.value.dispose()
+      }
     }
 
     // 3. Inject input + variables as JSON (data only — no functions/dates).
@@ -674,7 +756,7 @@ export async function runCodeInSandbox(opts: RunCodeOptions): Promise<RunCodeRes
     settled.dispose()
     // Read back the Postman/Bruno script outcome (mutated request, test results,
     // setNextRequest) — the script ran, so `__pmFinal()` is defined.
-    if (postman) {
+    if (scriptCtx) {
       const finalRes = ctx.evalCode('__pmFinal()')
       if (!finalRes.error) {
         const raw: unknown = ctx.dump(finalRes.value)
