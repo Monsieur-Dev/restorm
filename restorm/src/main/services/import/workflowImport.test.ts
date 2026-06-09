@@ -59,6 +59,42 @@ describe('Postman workflow import → scenario', () => {
     })
     expect(findScenario(importPostmanFromJson(plain))).toBeUndefined()
   })
+
+  it('inherits collection- and folder-level scripts in Postman run order', () => {
+    const json = JSON.stringify({
+      info: { name: 'Inherit', schema: 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json' },
+      event: [
+        { listen: 'prerequest', script: { exec: ['collPre()'] } },
+        { listen: 'test', script: { exec: ['collTest()'] } }
+      ],
+      item: [
+        {
+          name: 'Folder',
+          event: [
+            { listen: 'prerequest', script: { exec: ['folderPre()'] } },
+            { listen: 'test', script: { exec: ['folderTest()'] } }
+          ],
+          item: [
+            {
+              name: 'Req',
+              event: [
+                { listen: 'prerequest', script: { exec: ['reqPre()'] } },
+                { listen: 'test', script: { exec: ['reqTest()'] } }
+              ],
+              request: { method: 'GET', url: 'https://api.test/x' }
+            }
+          ]
+        }
+      ]
+    })
+    const scn = expectScenario(importPostmanFromJson(json))
+    const pre = scn.nodes.find((n) => n.kind === 'code' && (n.config as { scriptMode?: string }).scriptMode === 'postman-prerequest')
+    const post = scn.nodes.find((n) => n.kind === 'code' && (n.config as { scriptMode?: string }).scriptMode === 'postman-postresponse')
+    // pre: collection → folder → request
+    expect((pre?.config as { code: string }).code).toBe('collPre()\n\nfolderPre()\n\nreqPre()')
+    // test: request → folder → collection
+    expect((post?.config as { code: string }).code).toBe('reqTest()\n\nfolderTest()\n\ncollTest()')
+  })
 })
 
 describe('Bruno workflow import → scenario', () => {
@@ -88,6 +124,24 @@ describe('Bruno workflow import → scenario', () => {
     })
     expect(findScenario(folder)).toBeUndefined()
   })
+
+  it('inherits collection.bru scripts into each request', () => {
+    const collectionBru = 'script:pre-request {\n  collPre()\n}\n\nscript:post-response {\n  collPost()\n}\n'
+    const folder = importBruno({
+      collection: { name: 'Inherit', version: '1' },
+      files: [
+        { path: 'collection.bru', content: collectionBru },
+        { path: 'req.bru', content: bru('req', 1, '\nscript:pre-request {\n  reqPre()\n}\n\nscript:post-response {\n  reqPost()\n}\n') }
+      ]
+    })
+    const scn = expectScenario(folder)
+    // collection.bru itself must NOT become a request node.
+    expect(scn.nodes.filter((n) => n.kind === 'httpRequest')).toHaveLength(1)
+    const pre = scn.nodes.find((n) => n.kind === 'code' && (n.config as { scriptMode?: string }).scriptMode === 'bruno-prerequest')
+    const post = scn.nodes.find((n) => n.kind === 'code' && (n.config as { scriptMode?: string }).scriptMode === 'bruno-postresponse')
+    expect((pre?.config as { code: string }).code).toBe('collPre()\n\nreqPre()')
+    expect((post?.config as { code: string }).code).toBe('reqPost()\n\ncollPost()')
+  })
 })
 
 // A real Postman export (built in Postman via MCP from the docker petstore) — the
@@ -106,8 +160,12 @@ describe('real Postman export fixture (petstore workflow) → scenario', () => {
     // Pre/post scripts captured verbatim with the right scriptMode.
     const preModes = scn.nodes.filter((n) => n.kind === 'code' && (n.config as { scriptMode?: string }).scriptMode === 'postman-prerequest')
     const postModes = scn.nodes.filter((n) => n.kind === 'code' && (n.config as { scriptMode?: string }).scriptMode === 'postman-postresponse')
-    expect(preModes.length).toBe(2) // Create Pet (payload builder) + Delete Pet (sendRequest check)
+    // Every request inherits the collection-level pre-request script, so all 6
+    // get a pre node (Create Pet + Delete Pet also have their own).
+    expect(preModes.length).toBe(6)
     expect(postModes.length).toBe(6) // every request has a test script
+    // The inherited collection-level pre-request (pm.info) is prepended everywhere.
+    expect(preModes.every((n) => (n.config as { code: string }).code.includes('pm.info.requestName'))).toBe(true)
     // The verbatim pm.* surface + the REAL code (not just asserts) survived the round-trip.
     const allCode = scn.nodes.filter((n) => n.kind === 'code').map((n) => (n.config as { code: string }).code).join('\n')
     expect(allCode).toContain('pm.collectionVariables.set')

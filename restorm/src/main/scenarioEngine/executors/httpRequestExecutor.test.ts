@@ -30,7 +30,7 @@ vi.mock('../../services/ResponseHistoryService', () => ({
 vi.mock('../../mcp/tools/execute', () => ({ flushRequestStateToContext: (r: unknown) => { flushRequestStateToContext(r) } }))
 
 // Import AFTER the mocks are registered.
-const { httpRequestExecutor } = await import('./httpRequestExecutor')
+const { httpRequestExecutor, applyRequestOverride } = await import('./httpRequestExecutor')
 
 interface KV { key: string; value?: unknown; enabled?: boolean }
 
@@ -145,5 +145,49 @@ describe('httpRequestExecutor — slot short-circuit', () => {
     expect(out.response.status).toBe(200)
     expect(out.response.success).toBe(true)
     expect(out.response.body).toBe('{"ok":true}')
+  })
+
+  it('a wired `requestOverride` (pm.request mutation) merges over the bound request before dispatch', async () => {
+    await httpRequestExecutor(
+      makeActivation({ requestOverride: { url: 'https://api.test/override', method: 'put', headers: { Authorization: 'Bearer tok' } } }),
+      makeCtx(node())
+    )
+    const flushed = flushRequestStateToContext.mock.calls[0]?.[0] as { url: string; method: string; headers: KV[] }
+    expect(flushed.url).toBe('https://api.test/override')
+    expect(flushed.method).toBe('PUT')
+    // bound {{token}} header kept + Authorization added
+    expect(flushed.headers.find((kv) => kv.key === 'X-Env')?.value).toBe('{{token}}')
+    expect(flushed.headers.find((kv) => kv.key === 'Authorization')?.value).toBe('Bearer tok')
+  })
+})
+
+describe('applyRequestOverride (pm.request / req mutation → bound request)', () => {
+  const baseReq = (): Record<string, unknown> => ({
+    id: 'r', type: 'http', url: 'https://api.test/pets', method: 'GET',
+    headers: [{ key: 'Accept', value: 'application/json', enabled: true }] as KV[], params: [], pathParams: []
+  })
+
+  it('returns the request unchanged when there is no override', () => {
+    const r = baseReq() as never
+    expect(applyRequestOverride(r, undefined)).toBe(r)
+    expect(applyRequestOverride(r, null)).toBe(r)
+  })
+
+  it('replaces url/method (upper-cased) and MERGES headers, ignoring empty fields', () => {
+    const out = applyRequestOverride(baseReq() as never, { url: 'https://api.test/pets?limit=5', method: 'post', headers: { Authorization: 'Bearer xyz' } }) as unknown as { url: string; method: string; headers: KV[] }
+    expect(out.url).toBe('https://api.test/pets?limit=5')
+    expect(out.method).toBe('POST')
+    expect(out.headers.find((h) => h.key === 'Accept')?.value).toBe('application/json')
+    expect(out.headers.find((h) => h.key === 'Authorization')?.value).toBe('Bearer xyz')
+    const kept = applyRequestOverride(baseReq() as never, { url: '', method: '' }) as unknown as { url: string; method: string }
+    expect(kept.url).toBe('https://api.test/pets')
+    expect(kept.method).toBe('GET')
+  })
+
+  it('sets the body (stringifying a non-string) and does not mutate the original', () => {
+    const r = baseReq()
+    const out = applyRequestOverride(r as never, { body: { a: 1 }, headers: { X: '1' } }) as unknown as { body: unknown }
+    expect(out.body).toBe('{"a":1}')
+    expect((r.headers as KV[]).some((h) => h.key === 'X')).toBe(false)
   })
 })

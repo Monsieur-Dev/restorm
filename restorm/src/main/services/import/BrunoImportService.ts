@@ -491,20 +491,50 @@ export interface BrunoCollectionData {
   files: { path: string; content: string }[]
 }
 
+/** The pre-request + (post-response then tests) scripts a Bruno `.bru` carries. */
+function bruScripts(request: BrunoRequest): { pre: string; post: string } {
+  return {
+    pre: request.script?.prerequest ?? '',
+    post: [request.script?.postresponse, request.tests].map((s) => (s ?? '').trim()).filter((s) => s !== '').join('\n\n')
+  }
+}
+const isBase = (path: string, base: string): boolean => path === base || path.endsWith(`/${base}`)
+const dirOf = (path: string): string => { const i = path.lastIndexOf('/'); return i < 0 ? '' : path.slice(0, i) }
+const joinBru = (parts: string[]): string => parts.map((p) => p.trim()).filter((p) => p !== '').join('\n\n')
+
 /** Build a workflow scenario from the (seq-sorted) Bruno requests — ONLY when at
- * least one request carries a pre/post/test script. The post-response node runs
- * the `post-response` block followed by the `tests` block (Bruno keeps them
- * separate). Script-free collections return null. Ids match the importer's. */
+ * least one request carries a pre/post/test script. Inherits `collection.bru`
+ * and `folder.bru` scripts the way Bruno runs them (pre: collection → folders
+ * outer→inner → request; post: request → folders inner→outer → collection). The
+ * post node runs the `post-response` block then the `tests` block. Script-free
+ * collections return null. Ids match the importer's. */
 function buildBrunoWorkflowScenario(requests: { path: string; request: BrunoRequest }[], collectionName: string): Scenario | null {
+  // Separate the level files (collection.bru / folder.bru) from real requests.
+  const collection = requests.find(({ path }) => isBase(path, 'collection.bru'))
+  const collScripts = collection ? bruScripts(collection.request) : { pre: '', post: '' }
+  const folderScripts = new Map<string, { pre: string; post: string }>()
+  for (const { path, request } of requests) {
+    if (isBase(path, 'folder.bru')) folderScripts.set(dirOf(path), bruScripts(request))
+  }
+  // Folders that apply to a request path, outermost first.
+  const foldersFor = (path: string): { pre: string; post: string }[] => {
+    const dir = dirOf(path)
+    return [...folderScripts.keys()]
+      .filter((d) => d !== '' && (dir === d || dir.startsWith(`${d}/`)))
+      .sort((a, b) => a.split('/').length - b.split('/').length)
+      .map((d) => folderScripts.get(d) as { pre: string; post: string })
+  }
+
   const steps: WorkflowRequestStep[] = requests
-    .filter(({ request }) => !isGraphQLRequest(request))
+    .filter(({ path, request }) => !isGraphQLRequest(request) && !isBase(path, 'collection.bru') && !isBase(path, 'folder.bru'))
     .map(({ path, request }) => {
-      const post = [request.script?.postresponse, request.tests].filter((s) => (s ?? '').trim() !== '').join('\n')
+      const own = bruScripts(request)
+      const folders = foldersFor(path)
       return {
         requestId: generateId(`bruno:request:${path}:${request.meta.name}`),
         name: request.meta.name,
-        prerequest: request.script?.prerequest ?? '',
-        postresponse: post,
+        prerequest: joinBru([collScripts.pre, ...folders.map((f) => f.pre), own.pre]),
+        postresponse: joinBru([own.post, ...folders.map((f) => f.post).reverse(), collScripts.post]),
         source: 'bruno' as const
       }
     })

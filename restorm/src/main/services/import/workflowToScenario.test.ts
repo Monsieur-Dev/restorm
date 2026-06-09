@@ -59,6 +59,17 @@ describe('workflowToScenario', () => {
     expect(scn.nodes.find((n) => n.id === 'r:pre')).toMatchObject({ config: { scriptMode: 'bruno-prerequest' } })
   })
 
+  it('wires a pre-request node to the httpRequest `requestOverride` (pm.request mutation) + carries requestId', () => {
+    const scn = workflowToScenario({ id: 's', name: 'X', steps: [step({ requestId: 'r', name: 'R', prerequest: 'req.setUrl(req.getUrl() + "?x=1")' })] })
+    const pre = scn.nodes.find((n) => n.id === 'r:pre')
+    expect((pre?.config as { requestId?: string }).requestId).toBe('r')
+    expect(scn.edges).toContainEqual(expect.objectContaining({
+      from: { nodeId: 'r:pre', portId: 'result' },
+      to: { nodeId: 'r:http', portId: 'requestOverride' },
+      selector: '.request'
+    }))
+  })
+
   it('is idempotent — same workflow yields a deep-equal scenario', () => {
     const wf = { id: 's5', name: 'Same', steps: [step({ requestId: 'r1', prerequest: 'x', postresponse: 'y' }), step({ requestId: 'r2' })] }
     expect(workflowToScenario(wf)).toEqual(workflowToScenario(wf))

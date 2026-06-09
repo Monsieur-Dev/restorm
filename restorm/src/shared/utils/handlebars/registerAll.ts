@@ -14,6 +14,7 @@ import { registerObjectHelpers } from './object'
 import { registerURLHelpers } from './url'
 import { registerDateHelpers } from './date'
 import { registerMiscHelpers } from './misc'
+import { registerPostmanDynamicHelpers } from './postmanDynamic'
 
 // Flag to prevent registering helpers multiple times
 let helpersRegistered = false
@@ -34,4 +35,5 @@ export function registerHandlebarsHelpers(): void {
   registerURLHelpers(Handlebars)
   registerDateHelpers(Handlebars)
   registerMiscHelpers(Handlebars)
+  registerPostmanDynamicHelpers(Handlebars)
 }

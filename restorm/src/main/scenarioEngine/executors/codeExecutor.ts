@@ -1,5 +1,33 @@
 import type { NodeExecutor } from '../types'
 import type { SandboxScriptContext } from '../codeSandbox'
+import { collectionStore } from '../../services/CollectionStore'
+import { isHTTPRequest } from '../../../shared/types/collections'
+
+interface KV { key: string; value?: unknown; enabled?: boolean }
+
+/** Snapshot a bound request's url/method/headers/body so a pre-request script
+ * sees the real outgoing request in `pm.request` / `req` (and read-modify-write
+ * of the URL or body works, not just header additions). Templates stay raw —
+ * `{{vars}}` are resolved later, at send time, like Postman. */
+function boundRequestSnapshot(requestId: string): SandboxScriptContext['request'] | undefined {
+  const req = collectionStore.findById(requestId)
+  if (!req || !isHTTPRequest(req)) return undefined
+  const r = req as unknown as { url?: string; method?: string; headers?: KV[]; body?: { content?: unknown; raw?: unknown } | string }
+  const headers: Record<string, string> = {}
+  for (const h of r.headers ?? []) {
+    if (h.enabled === false || typeof h.key !== 'string' || h.key === '') continue
+    const v = h.value
+    headers[h.key] = typeof v === 'string' ? v : v == null ? '' : typeof v === 'object' ? JSON.stringify(v) : String(v as number | boolean)
+  }
+  let body: string | undefined
+  const b = r.body
+  if (typeof b === 'string') body = b
+  else if (b && typeof b === 'object') {
+    const raw = b.content ?? b.raw
+    body = typeof raw === 'string' ? raw : undefined
+  }
+  return { url: r.url ?? '', method: r.method ?? 'GET', headers, ...(body !== undefined ? { body } : {}) }
+}
 
 /** Build a Postman/Bruno script context from a `scriptMode` node's input. A
  * post-response node is wired from the upstream httpRequest's `response` output
@@ -52,12 +80,22 @@ export function toScriptContext(input: unknown): SandboxScriptContext {
  * node of that language actually executes.
  */
 export const codeExecutor: NodeExecutor = async (act, ctx) => {
-  const cfg = ctx.node.config as { code?: unknown; timeout?: unknown; language?: unknown; scriptMode?: unknown }
+  const cfg = ctx.node.config as { code?: unknown; timeout?: unknown; language?: unknown; scriptMode?: unknown; requestId?: unknown }
   const code = typeof cfg.code === 'string' ? cfg.code : ''
   const input = act.inputs['value']
   // Postman/Bruno verbatim-script mode (set by the workflow importer).
   const scriptMode = typeof cfg.scriptMode === 'string' ? cfg.scriptMode : undefined
-  const scriptCtx = scriptMode ? toScriptContext(input) : undefined
+  let scriptCtx: SandboxScriptContext | undefined
+  if (scriptMode) {
+    scriptCtx = toScriptContext(input)
+    // Pre-request scripts mutate `pm.request` / `req` — seed it from the bound
+    // request so read-modify-write of url/body works (not just header adds). The
+    // mutated request flows out on `result` → the httpRequest's `requestOverride`.
+    if (scriptMode.endsWith('prerequest') && typeof cfg.requestId === 'string') {
+      const bound = boundRequestSnapshot(cfg.requestId)
+      if (bound) scriptCtx = { ...scriptCtx, request: bound }
+    }
+  }
 
   // No script → pass the input straight through (a harmless no-op box).
   if (code.trim() === '') return { outputs: [{ port: 'result', value: input ?? null }] }

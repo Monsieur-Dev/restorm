@@ -70,7 +70,10 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   if: { inputs: [{ id: 'left', name: 'left' }, { id: 'right', name: 'right' }], outputs: [{ id: 'then', name: 'then', role: 'then', flow: 'both' }, { id: 'else', name: 'else', role: 'else', flow: 'both' }] },
   switch: { inputs: [{ id: 'on', name: 'on' }], outputs: [{ id: 'default', name: 'default', role: 'default', flow: 'both' }] },
   // Requests & composition
-  httpRequest: { inputs: [{ id: 'env', name: 'env', flow: 'value' }], outputs: [{ id: 'response', name: 'response', dataType: 'response', role: 'response', flow: 'both' }] },
+  // `requestOverride` accepts a whole-request patch `{ url?, method?, headers?, body? }`
+  // merged over the bound request before dispatch (used by an upstream Postman/Bruno
+  // pre-request `code` node that mutated `pm.request` / `req`).
+  httpRequest: { inputs: [{ id: 'env', name: 'env', flow: 'value' }, { id: 'requestOverride', name: 'override', dataType: 'object', flow: 'value' }], outputs: [{ id: 'response', name: 'response', dataType: 'response', role: 'response', flow: 'both' }] },
   runScenario: { inputs: [], outputs: [{ id: 'result', name: 'result', role: 'response', flow: 'both' }] },
   // Iteration & collections. `items` carries a value-selector fallback in the
   // editor (list-typed sources), so it isn't a hard-required port — like the

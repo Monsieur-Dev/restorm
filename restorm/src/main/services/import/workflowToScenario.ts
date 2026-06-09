@@ -60,12 +60,14 @@ const ROW_PRE = 0
 const ROW_HTTP = 180
 const ROW_POST = 360
 
-function codeNode(id: string, code: string, scriptMode: string, x: number, y: number, note: string): ScenarioNode {
+function codeNode(id: string, code: string, scriptMode: string, x: number, y: number, note: string, requestId?: string): ScenarioNode {
   const ports = defaultPortsForKind('code')
   return {
     id: id,
     kind: 'code',
-    config: { language: 'javascript', code, scriptMode },
+    // A pre-request node carries the bound `requestId` so the executor can seed
+    // `pm.request`/`req` from the real request (read-modify-write of url/body).
+    config: { language: 'javascript', code, scriptMode, ...(requestId !== undefined ? { requestId } : {}) },
     inputs: ports.inputs,
     outputs: ports.outputs,
     position: { x, y },
@@ -146,7 +148,7 @@ export function workflowToScenario(input: WorkflowToScenarioInput): Scenario {
     const httpId = `${step.requestId}:http`
     const postId = `${step.requestId}:post`
 
-    const preNode = hasPre ? codeNode(preId, preSrc, `${step.source}-prerequest`, x, ROW_PRE, `Pre-request — ${step.name}`) : undefined
+    const preNode = hasPre ? codeNode(preId, preSrc, `${step.source}-prerequest`, x, ROW_PRE, `Pre-request — ${step.name}`, step.requestId) : undefined
     const httpNodeRef = httpNode(httpId, step.requestId, step.name, x, ROW_HTTP)
     const postNode = hasPost ? codeNode(postId, postSrc, `${step.source}-postresponse`, x, ROW_POST, `Post-response — ${step.name}`) : undefined
     if (preNode) nodes.push(preNode)
@@ -154,8 +156,12 @@ export function workflowToScenario(input: WorkflowToScenarioInput): Scenario {
     if (postNode) nodes.push(postNode)
 
     // Intra-request wiring: pre runs first (sets variables) then the request;
+    // its mutated request (`pm.request`/`req`) flows to the request's override;
     // the request's response feeds the post-response script.
-    if (hasPre) edges.push(edge(`e:${step.requestId}:pre-http`, preId, 'done', httpId, 'in'))
+    if (hasPre) {
+      edges.push(edge(`e:${step.requestId}:pre-http`, preId, 'done', httpId, 'in'))
+      edges.push(edge(`e:${step.requestId}:pre-override`, preId, 'result', httpId, 'requestOverride', '.request'))
+    }
     if (hasPost) edges.push(edge(`e:${step.requestId}:http-post`, httpId, 'response', postId, 'value', '.'))
 
     built.push({
