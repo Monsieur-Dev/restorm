@@ -18,6 +18,8 @@ export const javascriptRuntime: CodeRuntime = {
       timeoutMs: ctx.timeoutMs,
       ...(ctx.network !== undefined ? { network: ctx.network } : {}),
       ...(ctx.variableBridge !== undefined ? { variableBridge: ctx.variableBridge } : {}),
+      ...(ctx.postman !== undefined ? { postman: ctx.postman } : {}),
+      ...(ctx.bruno !== undefined ? { bruno: ctx.bruno } : {}),
       ...(ctx.signal !== undefined ? { signal: ctx.signal } : {})
     })
   }
