@@ -3,12 +3,17 @@ import type { NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import { InputBox } from 'electron-core-ui/renderer'
 import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
-import { ScenarioCodeField } from './ScenarioCodeField'
+import { ScenarioCodeField, type ScenarioCodeLanguage } from './ScenarioCodeField'
+import { SegmentedToggle } from './SegmentedToggle'
+import { CODE_LANGUAGES, CODE_LANGUAGE_LABELS, DEFAULT_CODE_LANGUAGE } from '../../../../../shared/codeLanguages'
 
 /** Default + hard cap on the per-node execution budget (seconds), mirroring the
  * `codeExecutor` (which clamps `config.timeout` to [1, 60] s). */
 const DEFAULT_TIMEOUT_SEC = 5
 const MAX_TIMEOUT_SEC = 60
+
+/** Display labels parallel to {@link CODE_LANGUAGES}, for the language radio. */
+const CODE_LANGUAGE_LABEL_LIST = CODE_LANGUAGES.map((l) => CODE_LANGUAGE_LABELS[l])
 
 const DEFAULT_CODE = '// `input` = wired value, `vars` = run variables\n// curated stdlib: _, lodash, moment, uuid, nanoid, CryptoJS, Ajv\nreturn input'
 
@@ -21,6 +26,9 @@ export const CodeNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data
   const { t } = useTranslation()
   const config = data.config ?? {}
   const code = typeof config['code'] === 'string' ? config['code'] : ''
+  const language: ScenarioCodeLanguage = (CODE_LANGUAGES as readonly string[]).includes(config['language'] as string)
+    ? (config['language'] as ScenarioCodeLanguage)
+    : DEFAULT_CODE_LANGUAGE
   const timeoutSec = typeof config['timeout'] === 'number' && config['timeout'] > 0 ? config['timeout'] : DEFAULT_TIMEOUT_SEC
 
   const rows: ScenarioNodeCell[] = [
@@ -30,13 +38,28 @@ export const CodeNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data
       port: { id: 'value', type: 'target' }
     },
     {
+      id: 'language',
+      content: (
+        <div className="nodrag scn-code-language" onMouseDown={(e) => { e.stopPropagation() }}>
+          <div className="scn-field-caption">{t('scenario.code.language', 'Langage')}</div>
+          <SegmentedToggle
+            options={CODE_LANGUAGES}
+            labels={CODE_LANGUAGE_LABEL_LIST}
+            value={language}
+            onChange={(next) => { data.onSetConfig?.(id, { language: next }) }}
+            ariaLabel={t('scenario.code.language', 'Langage')}
+          />
+        </div>
+      )
+    },
+    {
       id: 'code',
       content: (
         <ScenarioCodeField
           value={code}
           onChange={(next) => { data.onSetConfig?.(id, { code: next }) }}
-          language="typescript"
-          caption={t('scenario.code.code', 'code (TypeScript)')}
+          language={language}
+          caption={t('scenario.code.code', 'code')}
           modalTitle={t('scenario.code.modalTitle', 'Edit code')}
           placeholder={DEFAULT_CODE}
           dataTestId={`scn-code-${id}`}

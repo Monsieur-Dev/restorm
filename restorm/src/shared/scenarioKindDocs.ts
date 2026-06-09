@@ -150,8 +150,8 @@ export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
     config: { expression: 'Handlebars template (used when the `expression` input is not wired).' }
   },
   code: {
-    summary: 'Runs the user TypeScript/JavaScript `code` in a QuickJS sandbox (no host / filesystem / network access). The wired `value` input is exposed as `input`, the run variables as `vars`, and a curated standard library as globals + `require()` (lodash/`_`, moment, uuid, nanoid, CryptoJS, Ajv). The body runs as an async function, so a top-level `return` and `await` (Promise / async-await) both work. Whatever the script returns flows out of `result`; `console.log(...)` lines appear in the run log; a script error or timeout routes to `error`.',
-    config: { code: 'TypeScript/JavaScript source — a function body that may `return` the result.', timeout: 'Execution budget in seconds (default 5, max 60).' }
+    summary: 'Runs the user `code` in a per-language WASM runtime selected by `language` (TypeScript/JavaScript → QuickJS, Python → Pyodide, Lua → wasmoon, Ruby → ruby.wasm, R → WebR) — no host / filesystem / network access. The wired `value` input is exposed as `input`, the run variables as `vars`, and (JS only) a curated standard library as globals + `require()` (lodash/`_`, moment, uuid, nanoid, CryptoJS, Ajv). For JS the body runs as an async function, so a top-level `return` and `await` both work; the other languages return their last expression. Whatever the script returns flows out of `result`; `console.log` / `print` / `puts` / `cat` lines appear in the run log; a script error or timeout routes to `error`.',
+    config: { language: 'typescript | javascript | python | lua | ruby | r (default typescript).', code: 'Source for the chosen language — a body that returns/yields the result.', timeout: 'Execution budget in seconds (default 5, max 60).' }
   },
   cast: {
     summary: 'Converts the `value` input (wired or inline) to `targetType` on `result`; an impossible cast (or a null value) routes to `error`. number↔boolean (0/1, truthiness), numeric/boolean string parsing, dates ISO; any → list wraps into [value].',

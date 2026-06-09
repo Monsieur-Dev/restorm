@@ -1359,7 +1359,8 @@
     },
     "code": {
       "input": "entrée",
-      "code": "code (TypeScript)",
+      "language": "Langage",
+      "code": "code",
       "modalTitle": "Éditer le code",
       "result": "résultat",
       "timeout": "Délai max (s)"
@@ -1391,7 +1392,7 @@
       "setVariable": "Stocke une valeur dans une variable du run.",
       "getVariable": "Lit la valeur d'une variable du run.",
       "transform": "Rend un gabarit Handlebars à partir de l'entrée et des variables.",
-      "code": "Exécute votre TypeScript/JavaScript dans une sandbox et renvoie le résultat.",
+      "code": "Exécute votre code (TypeScript, JavaScript, Python, Lua, Ruby ou R) dans une sandbox et renvoie le résultat.",
       "cast": "Convertit une valeur vers un autre type (nombre, texte, booléen, date, liste).",
       "regex": "Cherche, extrait, remplace ou découpe du texte avec une expression régulière.",
       "json": "Parse une chaîne JSON, ou sérialise une valeur en JSON.",

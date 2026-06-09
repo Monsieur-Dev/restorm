@@ -1358,7 +1358,8 @@
     },
     "code": {
       "input": "input",
-      "code": "kode (TypeScript)",
+      "language": "Bahasa",
+      "code": "kode",
       "modalTitle": "Edit kode",
       "result": "hasil",
       "timeout": "Batas waktu (s)"
@@ -1390,7 +1391,7 @@
       "setVariable": "Stores a value into a run variable.",
       "getVariable": "Reads a run variable's value.",
       "transform": "Renders a Handlebars template from the input and run variables.",
-      "code": "Runs your TypeScript/JavaScript in a sandbox and returns the result.",
+      "code": "Menjalankan kode Anda (TypeScript, JavaScript, Python, Lua, Ruby, atau R) di dalam sandbox dan mengembalikan hasilnya.",
       "cast": "Converts a value to another type (number, string, boolean, date, list).",
       "regex": "Matches, extracts, replaces or splits text with a regular expression.",
       "json": "Parses a JSON string, or serialises a value to JSON.",

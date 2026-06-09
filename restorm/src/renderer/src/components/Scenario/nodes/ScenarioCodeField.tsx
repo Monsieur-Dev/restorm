@@ -19,6 +19,12 @@ const CODE_NODE_GLOBALS_DTS = [
   'declare const nanoid: any;',
   'declare const CryptoJS: any;',
   'declare const Ajv: any;',
+  'declare const ajvFormats: any;',
+  'declare const chai: any;',
+  'declare const expect: any;  // chai.expect (Postman-style)',
+  'declare const assert: any;  // chai.assert',
+  'declare const cheerio: any;',
+  'declare const xml2js: any;',
   'declare function require(name: string): any;'
 ].join('\n')
 
@@ -40,7 +46,9 @@ function configureTsDefaults(monaco: typeof Monaco): void {
   if (!ts) return
   for (const defaults of [ts.typescriptDefaults, ts.javascriptDefaults]) {
     const current = defaults.getDiagnosticsOptions()
-    const ignore = new Set([...(current.diagnosticCodesToIgnore ?? []), 1108, 1375])
+    // 1108 = top-level `return`; 1308/1375/1378 = top-level `await` — both are
+    // valid here because the script body runs inside an `async function`.
+    const ignore = new Set([...(current.diagnosticCodesToIgnore ?? []), 1108, 1308, 1375, 1378])
     defaults.setDiagnosticsOptions({ ...current, diagnosticCodesToIgnore: [...ignore] })
     defaults.addExtraLib(CODE_NODE_GLOBALS_DTS, 'restorm-code-node-globals.d.ts')
   }
@@ -57,7 +65,7 @@ const configureMonacoForCodeNode: OnMount = (_editor, monaco) => { configureTsDe
 
 /** Languages the embedded editor knows how to highlight. Kept as a closed union
  * so callers pick a sensible Monaco mode for the content they edit. */
-export type ScenarioCodeLanguage = 'json' | 'xml' | 'yaml' | 'csv' | 'handlebars' | 'plaintext' | 'sql' | 'html' | 'typescript' | 'javascript'
+export type ScenarioCodeLanguage = 'json' | 'xml' | 'yaml' | 'csv' | 'handlebars' | 'plaintext' | 'sql' | 'html' | 'typescript' | 'javascript' | 'python' | 'lua' | 'ruby' | 'r'
 
 /** How many lines of the value to show in the collapsed preview. */
 const PREVIEW_LINES = 4

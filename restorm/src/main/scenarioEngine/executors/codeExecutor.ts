@@ -1,43 +1,55 @@
 import type { NodeExecutor } from '../types'
 
 /**
- * `code` node: runs the user's TypeScript/JavaScript in the QuickJS sandbox.
+ * `code` node: runs the user's source in the per-language WASM runtime selected
+ * by `config.language` (TypeScript/JavaScript → QuickJS, Python → Pyodide, …),
+ * resolved through the runtime registry (`../codeRuntimes`).
  *
  * The wired `value` input is exposed inside the script as `input`; the run's
- * variables as `vars`; a curated standard library (lodash, moment, uuid, …) as
- * globals + `require()`. Whatever the script `return`s flows out of `result`.
- * `console.log(...)` lines are surfaced as user run-log entries. A script error
- * or a timeout throws — the scheduler then routes to the node's `error` port.
+ * variables as `vars`; a curated standard library as globals (JS). Whatever the
+ * script returns flows out of `result`; stdout / print / `console.log(...)` are
+ * surfaced as user run-log entries. A script error or a timeout throws — the
+ * scheduler then routes to the node's `error` port.
  *
- * The sandbox module (esbuild + QuickJS-WASM) is imported lazily so those heavy
- * dependencies only load the first time a code node actually executes.
+ * The runtimes load their heavy WASM engines lazily, only the first time a code
+ * node of that language actually executes.
  */
 export const codeExecutor: NodeExecutor = async (act, ctx) => {
-  const cfg = ctx.node.config as { code?: unknown; timeout?: unknown }
+  const cfg = ctx.node.config as { code?: unknown; timeout?: unknown; language?: unknown }
   const code = typeof cfg.code === 'string' ? cfg.code : ''
   const input = act.inputs['value']
 
   // No script → pass the input straight through (a harmless no-op box).
   if (code.trim() === '') return { outputs: [{ port: 'result', value: input ?? null }] }
 
+  // Which language runtime to use — absent → TypeScript/JavaScript (the original
+  // default), so existing nodes keep their behaviour without a persisted key.
+  const language = typeof cfg.language === 'string' ? cfg.language : 'typescript'
   const timeoutSec = typeof cfg.timeout === 'number' && cfg.timeout > 0 ? cfg.timeout : 5
   const variables = Object.fromEntries(ctx.variables.entries())
 
-  const { runCodeInSandbox } = await import('../codeSandbox')
+  const { ensureCodeRuntimes, getCodeRuntime } = await import('../codeRuntimes')
+  ensureCodeRuntimes()
+  const runtime = getCodeRuntime(language)
+  if (runtime === undefined) throw new Error(`code node: no runtime for language '${language}'`)
+
   const { codeNetworkBridge } = await import('../codeNetworkBridge')
-  const { result, logs } = await runCodeInSandbox({
-    code,
+  const { result, logs } = await runtime.run(code, {
     input,
     variables,
     timeoutMs: Math.min(timeoutSec * 1000, 60_000),
-    // `fetch` / `pm.sendRequest` inside the script route through the firewall
-    // (see codeNetworkBridge) — a non-whitelisted host triggers the prompt.
+    // `fetch` / `pm.sendRequest` route through the firewall (codeNetworkBridge)
+    // for runtimes that support it (JS); others ignore it.
     network: codeNetworkBridge,
-    // User Stop / scope abort cancels an in-flight sandbox request at once.
+    // User Stop / scope abort cancels an in-flight run / network request at once.
     signal: ctx.signal
   })
   for (const line of logs) {
     ctx.log({ level: 'info', message: line, nodeId: act.nodeId, scope: act.scope, source: 'user' })
   }
+  // Record the freshest run so the inspector preview can show this box's last
+  // result/logs (code boxes have no on-disk history to read back from).
+  const { recordCodeRun } = await import('../codeRunCache')
+  recordCodeRun(act.nodeId, { result, logs, timestamp: new Date().toISOString() })
   return { outputs: [{ port: 'result', value: result }] }
 }

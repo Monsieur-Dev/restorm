@@ -204,11 +204,22 @@ const resolveRequestPreview: PreviewResolver = async (_scenarioId, node) => {
   }
 }
 
+/** `code`: the box's last run output (result + captured logs). Unlike a request
+ * there's no on-disk history, so the executor caches each run in memory and we
+ * read the freshest record back here. Null until the box has actually run. */
+const resolveCodePreview: PreviewResolver = async (_scenarioId, node) => {
+  const { getCodeRun } = await import('../../scenarioEngine/codeRunCache')
+  const run = getCodeRun(node.id)
+  if (!run) return null
+  return { nodeId: node.id, timestamp: run.timestamp, result: run.result, logs: run.logs }
+}
+
 /** Inspector-preview resolvers by node kind. Add a kind's resolver here to give
  * its preview real data as the runner gains the ability to execute that kind. */
 const previewResolvers: Partial<Record<ScenarioNode['kind'], PreviewResolver>> = {
   httpRequest: resolveRequestPreview,
-  request: resolveRequestPreview
+  request: resolveRequestPreview,
+  code: resolveCodePreview
 }
 
 /** A box's last run result as its output context, resolved per kind. Null when

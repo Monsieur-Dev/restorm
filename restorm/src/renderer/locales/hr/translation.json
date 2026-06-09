@@ -1360,7 +1360,8 @@
     },
     "code": {
       "input": "ulaz",
-      "code": "kôd (TypeScript)",
+      "language": "Jezik",
+      "code": "kôd",
       "modalTitle": "Uredi kôd",
       "result": "rezultat",
       "timeout": "Vremensko ograničenje (s)"
@@ -1392,7 +1393,7 @@
       "setVariable": "Stores a value into a run variable.",
       "getVariable": "Reads a run variable's value.",
       "transform": "Renders a Handlebars template from the input and run variables.",
-      "code": "Runs your TypeScript/JavaScript in a sandbox and returns the result.",
+      "code": "Pokreće vaš kôd (TypeScript, JavaScript, Python, Lua, Ruby ili R) u sandboxu i vraća rezultat.",
       "cast": "Converts a value to another type (number, string, boolean, date, list).",
       "regex": "Matches, extracts, replaces or splits text with a regular expression.",
       "json": "Parses a JSON string, or serialises a value to JSON.",
