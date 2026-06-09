@@ -86,6 +86,8 @@ interface BrunoRequest {
     prerequest?: KeyValue[]
     postresponse?: KeyValue[]
   }
+  /** Declarative `assert { expr: [op] value }` block (eq by default). */
+  assertions?: KeyValue[]
 }
 
 interface BrunoCollection {
@@ -174,7 +176,9 @@ function parseKeyValueBlock(content: string): KeyValue[] {
         value = value.slice(1, -1)
       }
       
-      pairs.push({ key, value })
+      // `~`-prefixed entries were already skipped above, so anything reaching
+      // here is enabled — make that explicit (downstream truthy-checks rely on it).
+      pairs.push({ key, value, enabled: true })
     }
   }
 
@@ -342,6 +346,11 @@ function parseBruFile(content: string): BrunoRequest {
         request.vars.postresponse = parseKeyValueBlock(block.content)
         break
       }
+
+      case 'assert': {
+        request.assertions = parseKeyValueBlock(block.content)
+        break
+      }
     }
   }
 
@@ -491,11 +500,72 @@ export interface BrunoCollectionData {
   files: { path: string; content: string }[]
 }
 
-/** The pre-request + (post-response then tests) scripts a Bruno `.bru` carries. */
+/** A parsed Bruno key/value carries its value as a raw string (the JS expression
+ * or the assert RHS); coerce defensively in case a typed value slipped in. */
+const kvStr = (x: KeyValue['value']): string => (typeof x === 'string' ? x : '')
+
+/** Bruno `vars:pre-request` / `vars:post-response` (key = JS expression) become
+ * `bru.setVar('key', <expr>)` lines, run at the matching point. */
+function varsToSetVar(vars: KeyValue[] | undefined): string {
+  return (vars ?? [])
+    .filter((v) => v.enabled && typeof v.key === 'string' && v.key !== '' && kvStr(v.value).trim() !== '')
+    .map((v) => `bru.setVar(${JSON.stringify(v.key)}, ${kvStr(v.value).trim()})`)
+    .join('\n')
+}
+
+/** Render a Bruno `assert` expected value: a number/boolean/null literal stays
+ * literal, anything else becomes a JS string literal. */
+function assertValue(raw: string): string {
+  const t = raw.trim()
+  if (t === '') return '""'
+  if (/^-?\d+(\.\d+)?$/.test(t) || t === 'true' || t === 'false' || t === 'null') return t
+  return JSON.stringify(t)
+}
+
+/** Translate a Bruno `assert` block (`expr: [op] value`, default op `eq`) into
+ * `test(...)` lines on chai. Common operators only; unknown ops fall back to eq. */
+function assertToTests(assertions: KeyValue[] | undefined): string {
+  const lines: string[] = []
+  for (const a of assertions ?? []) {
+    if (!a.enabled || typeof a.key !== 'string' || a.key.trim() === '') continue
+    const lhs = a.key.trim()
+    const raw = kvStr(a.value).trim()
+    const m = /^(eq|neq|gt|gte|lt|lte|contains|notContains|length|isString|isNumber|isBoolean|isArray|isUndefined|isDefined|isNull|isTruthy|isFalsy)\b\s*(.*)$/.exec(raw)
+    const op = m ? m[1] : 'eq'
+    const val = m ? m[2] : raw
+    let chai: string
+    switch (op) {
+      case 'neq': chai = `to.not.eql(${assertValue(val)})`; break
+      case 'gt': chai = `to.be.above(${assertValue(val)})`; break
+      case 'gte': chai = `to.be.at.least(${assertValue(val)})`; break
+      case 'lt': chai = `to.be.below(${assertValue(val)})`; break
+      case 'lte': chai = `to.be.at.most(${assertValue(val)})`; break
+      case 'contains': chai = `to.include(${assertValue(val)})`; break
+      case 'notContains': chai = `to.not.include(${assertValue(val)})`; break
+      case 'length': chai = `to.have.lengthOf(${assertValue(val)})`; break
+      case 'isString': chai = `to.be.a('string')`; break
+      case 'isNumber': chai = `to.be.a('number')`; break
+      case 'isBoolean': chai = `to.be.a('boolean')`; break
+      case 'isArray': chai = `to.be.an('array')`; break
+      case 'isUndefined': chai = `to.be.undefined`; break
+      case 'isDefined': chai = `to.not.be.undefined`; break
+      case 'isNull': chai = `to.be.null`; break
+      case 'isTruthy': chai = `to.be.ok`; break
+      case 'isFalsy': chai = `to.not.be.ok`; break
+      default: chai = `to.eql(${assertValue(val)})`
+    }
+    lines.push(`test(${JSON.stringify(`assert: ${lhs} ${raw}`.trim())}, function(){ expect(${lhs}).${chai} })`)
+  }
+  return lines.join('\n')
+}
+
+/** The pre-request + (post-response then tests) scripts a Bruno `.bru` carries,
+ * including the declarative `vars` and `assert` blocks lowered to script lines. */
 function bruScripts(request: BrunoRequest): { pre: string; post: string } {
   return {
-    pre: request.script?.prerequest ?? '',
-    post: [request.script?.postresponse, request.tests].map((s) => (s ?? '').trim()).filter((s) => s !== '').join('\n\n')
+    pre: [varsToSetVar(request.vars?.prerequest), request.script?.prerequest].map((s) => (s ?? '').trim()).filter((s) => s !== '').join('\n\n'),
+    post: [request.script?.postresponse, varsToSetVar(request.vars?.postresponse), request.tests, assertToTests(request.assertions)]
+      .map((s) => (s ?? '').trim()).filter((s) => s !== '').join('\n\n')
   }
 }
 const isBase = (path: string, base: string): boolean => path === base || path.endsWith(`/${base}`)
@@ -855,6 +925,32 @@ export function importBrunoFromJson(
   }
 
   const items = convertItems(data.items, '')
+
+  // Detect a workflow in the JSON export (requests with req/res/tests scripts) →
+  // an executable scenario appended alongside the requests. Mirrors the .bru path
+  // (collectionVariables → scenario variables, scripts run verbatim on the bru
+  // runtime). Ids match convertItems' `bruno:request:<path>/<name>`.
+  const workflowSteps: WorkflowRequestStep[] = []
+  const collectWorkflow = (nodes: typeof data.items, pathPrefix: string): void => {
+    for (const item of nodes ?? []) {
+      if (item.type === 'folder') {
+        collectWorkflow(item.items as typeof data.items, `${pathPrefix}/${item.name}`)
+      } else if (item.request) {
+        const s = item.request.script
+        workflowSteps.push({
+          requestId: generateId(`bruno:request:${pathPrefix}/${item.name}`),
+          name: item.name,
+          prerequest: s?.req ?? '',
+          postresponse: [s?.res, item.request.tests].map((x) => (x ?? '').trim()).filter((x) => x !== '').join('\n\n'),
+          source: 'bruno'
+        })
+      }
+    }
+  }
+  collectWorkflow(data.items, '')
+  if (workflowSteps.some((s) => (s.prerequest ?? '').trim() !== '' || (s.postresponse ?? '').trim() !== '')) {
+    items.push(workflowToScenario({ id: generateId(`bruno:scenario:${collectionName}`), name: `${collectionName} — Workflow`, steps: workflowSteps }))
+  }
 
   // Create environment
   const environment: Environment = {

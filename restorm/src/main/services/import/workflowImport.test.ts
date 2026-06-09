@@ -125,6 +125,18 @@ describe('Bruno workflow import → scenario', () => {
     expect(findScenario(folder)).toBeUndefined()
   })
 
+  it('lowers Bruno vars + assert blocks into bru.setVar / test() lines', () => {
+    const content = bru('login', 1,
+      '\nvars:post-response {\n  token: res.body.token\n}\n\nassert {\n  res.status: eq 200\n  res.body.name: isString\n}\n')
+    const folder = importBruno({ collection: { name: 'V', version: '1' }, files: [{ path: 'login.bru', content }] })
+    const scn = expectScenario(folder)
+    const post = scn.nodes.find((n) => n.kind === 'code' && (n.config as { scriptMode?: string }).scriptMode === 'bruno-postresponse')
+    const code = (post?.config as { code: string }).code
+    expect(code).toContain('bru.setVar("token", res.body.token)')
+    expect(code).toContain('expect(res.status).to.eql(200)')
+    expect(code).toContain("expect(res.body.name).to.be.a('string')")
+  })
+
   it('inherits collection.bru scripts into each request', () => {
     const collectionBru = 'script:pre-request {\n  collPre()\n}\n\nscript:post-response {\n  collPost()\n}\n'
     const folder = importBruno({

@@ -355,6 +355,20 @@ describe('codeSandbox network bridge', () => {
       expect(b.postman?.nextRequest).toBeNull()
     })
 
+    it('exposes pm.cookies + pm.cookies.jar() (in-sandbox store)', async () => {
+      const { bridge } = mapBridge()
+      const { result } = await runCodeInSandbox({
+        variableBridge: bridge,
+        postman: {},
+        code: `
+          var jar = pm.cookies.jar()
+          jar.set('https://api.test', 'session', 'abc123')
+          return { has: pm.cookies.has('session'), get: pm.cookies.get('session'), obj: pm.cookies.toObject() }
+        `
+      })
+      expect(result).toEqual({ has: true, get: 'abc123', obj: { session: 'abc123' } })
+    })
+
     it('omits the pm runtime when no postman context is supplied', async () => {
       const { bridge } = mapBridge()
       const { result } = await runCodeInSandbox({ variableBridge: bridge, code: `return typeof pm` })
@@ -434,6 +448,24 @@ describe('codeSandbox network bridge', () => {
       })
       expect(postman?.nextRequest).toBe('Get Token')
       expect(postman?.runRequest).toBe('auth/login')
+    })
+
+    it('bru.runRequest executes via the host bridge and returns a pm-style response', async () => {
+      const { bridge } = mapBridge()
+      const calls: string[] = []
+      const { result, postman } = await runCodeInSandbox({
+        variableBridge: bridge,
+        bruno: {},
+        runRequest: (name) => { calls.push(name); return Promise.resolve({ status: 201, statusText: 'Created', headers: { 'x-id': '7' }, body: '{"id":7}' }) },
+        code: `
+          var r = await bru.runRequest('Create Pet')
+          bru.setVar('newId', r.json().id)
+          return { code: r.code, id: r.json().id }
+        `
+      })
+      expect(calls).toEqual(['Create Pet'])
+      expect(result).toEqual({ code: 201, id: 7 })
+      expect(postman?.runRequest).toBe('Create Pet') // also recorded for the importer
     })
 
     it('omits the bru runtime when no bruno context is supplied', async () => {

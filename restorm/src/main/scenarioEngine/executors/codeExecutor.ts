@@ -1,7 +1,24 @@
 import type { NodeExecutor } from '../types'
-import type { SandboxScriptContext } from '../codeSandbox'
+import type { SandboxScriptContext, SandboxHttpResponse } from '../codeSandbox'
 import { collectionStore } from '../../services/CollectionStore'
 import { isHTTPRequest } from '../../../shared/types/collections'
+
+/** Find an HTTP request by name (or by the leaf of a `folder/req` path) anywhere
+ * in the open project — used to resolve a Bruno `bru.runRequest(name)` target. */
+function findRequestByName(name: string): { id: string; method: string } | undefined {
+  const leaf = (name.split('/').pop() ?? name).trim()
+  const walk = (items: unknown[]): { id: string; method: string } | undefined => {
+    for (const it of items) {
+      const item = it as { name?: string; id?: string; method?: string; items?: unknown[] }
+      if (Array.isArray(item.items)) { const found = walk(item.items); if (found) return found }
+      else if (item.name === leaf && isHTTPRequest(item as never) && typeof item.id === 'string') {
+        return { id: item.id, method: item.method ?? 'GET' }
+      }
+    }
+    return undefined
+  }
+  return walk(collectionStore.getCollections() as unknown[])
+}
 
 interface KV { key: string; value?: unknown; enabled?: boolean }
 
@@ -122,6 +139,21 @@ export const codeExecutor: NodeExecutor = async (act, ctx) => {
     delete: (name: string): void => { ctx.variables.delete(name) },
     names: (): string[] => Array.from(ctx.variables.keys())
   }
+  // Bruno `bru.runRequest(name)`: resolve the named request + run it through the
+  // real HTTP pipeline (auth/env/firewall), returning its response to the script.
+  const runRequestBridge = async (name: string): Promise<SandboxHttpResponse> => {
+    const target = findRequestByName(name)
+    if (!target) return { status: 0, statusText: '', headers: {}, body: '', error: `bru.runRequest: no request named "${name}"` }
+    const [{ flushRequestStateToContext }, { httpExecutionService }] = await Promise.all([
+      import('../../mcp/tools/execute'),
+      import('../../services/HTTPExecutionService')
+    ])
+    const full = collectionStore.findById(target.id)
+    if (full) flushRequestStateToContext(full)
+    const r = await httpExecutionService.execute({ requestId: target.id, method: target.method })
+    return { status: r.statusCode ?? 0, statusText: r.statusText ?? '', headers: r.headers ?? {}, body: r.body ?? '' }
+  }
+
   const { result, logs, postman } = await runtime.run(code, {
     input,
     variables,
@@ -132,7 +164,7 @@ export const codeExecutor: NodeExecutor = async (act, ctx) => {
     // Read/write scenario variables from the script (JS runtime only).
     variableBridge,
     // Verbatim Postman/Bruno script context (JS runtime only).
-    ...(scriptCtx && scriptMode?.startsWith('bru') ? { bruno: scriptCtx } : {}),
+    ...(scriptCtx && scriptMode?.startsWith('bru') ? { bruno: scriptCtx, runRequest: runRequestBridge } : {}),
     ...(scriptCtx && !scriptMode?.startsWith('bru') ? { postman: scriptCtx } : {}),
     // User Stop / scope abort cancels an in-flight run / network request at once.
     signal: ctx.signal

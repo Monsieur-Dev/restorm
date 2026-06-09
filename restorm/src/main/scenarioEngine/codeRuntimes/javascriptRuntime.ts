@@ -20,6 +20,7 @@ export const javascriptRuntime: CodeRuntime = {
       ...(ctx.variableBridge !== undefined ? { variableBridge: ctx.variableBridge } : {}),
       ...(ctx.postman !== undefined ? { postman: ctx.postman } : {}),
       ...(ctx.bruno !== undefined ? { bruno: ctx.bruno } : {}),
+      ...(ctx.runRequest !== undefined ? { runRequest: ctx.runRequest } : {}),
       ...(ctx.signal !== undefined ? { signal: ctx.signal } : {})
     })
   }

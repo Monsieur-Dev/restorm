@@ -11,7 +11,7 @@
  * user run-log lines. An error or a timeout rejects → the scheduler routes to
  * the node's `error` port.
  */
-import type { SandboxNetworkBridge, SandboxVariableBridge, SandboxScriptContext, SandboxScriptOutcome } from '../codeSandbox'
+import type { SandboxNetworkBridge, SandboxVariableBridge, SandboxScriptContext, SandboxScriptOutcome, SandboxHttpResponse } from '../codeSandbox'
 
 export interface CodeRunContext {
   /** The node's wired/inline input value, exposed to the script. */
@@ -35,6 +35,9 @@ export interface CodeRunContext {
   /** Optional Bruno script context — runs the code as a verbatim Bruno script
    * (`bru`/`req`/`res`). JS runtime only. */
   bruno?: SandboxScriptContext
+  /** Optional bridge for `bru.runRequest(name)` (resolve + execute a named
+   * request, return its response). JS runtime only. */
+  runRequest?: (name: string, signal: AbortSignal) => Promise<SandboxHttpResponse>
 }
 
 export interface CodeRunResult {

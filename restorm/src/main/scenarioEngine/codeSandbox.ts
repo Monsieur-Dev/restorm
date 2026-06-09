@@ -367,6 +367,28 @@ const SANDBOX_POSTMAN_SHIM = `
   g.pm.expect = g.expect;
   g.pm.info = ctx.info || { requestName: '', requestId: '', iteration: 0, iterationCount: 1, eventName: '' };
 
+  // pm.cookies + pm.cookies.jar() — an in-sandbox cookie store (per script run;
+  // restorm has no cross-request cookie jar yet). Both the sync accessors and
+  // the callback-style jar API are supported so a script that reads/sets cookies
+  // runs unchanged.
+  var __cookies = {};
+  function cookieList(){ var a = []; for (var k in __cookies){ if (Object.prototype.hasOwnProperty.call(__cookies, k)) a.push({ name: k, value: __cookies[k] }); } return a; }
+  g.pm.cookies = {
+    get: function(n){ return __cookies[String(n)]; },
+    has: function(n){ return Object.prototype.hasOwnProperty.call(__cookies, String(n)); },
+    toObject: function(){ var o = {}; for (var k in __cookies){ if (Object.prototype.hasOwnProperty.call(__cookies, k)) o[k] = __cookies[k]; } return o; },
+    all: cookieList,
+    jar: function(){
+      return {
+        get: function(url, name, cb){ var v = __cookies[String(name)]; if (typeof cb === 'function') cb(null, v); return v; },
+        set: function(url, name, value, cb){ __cookies[String(name)] = String((value && typeof value === 'object') ? (value.value != null ? value.value : '') : value); if (typeof cb === 'function') cb(null); },
+        getAll: function(url, cb){ var l = cookieList(); if (typeof cb === 'function') cb(null, l); return l; },
+        unset: function(url, name, cb){ delete __cookies[String(name)]; if (typeof cb === 'function') cb(null); },
+        clear: function(url, cb){ __cookies = {}; if (typeof cb === 'function') cb(null); }
+      };
+    }
+  };
+
   // Mutable outgoing request (pre-request scripts edit url/method/headers/body).
   var rq = ctx.request || {};
   g.pm.request = { url: rq.url || '', method: String(rq.method || 'GET'), headers: rq.headers || {}, body: rq.body };
@@ -433,7 +455,17 @@ const SANDBOX_BRUNO_SHIM = `
     getEnvName: function(){ return info.envName || ''; },
     getCollectionName: function(){ return info.collectionName || ''; },
     setNextRequest: function(n){ g.__pmNext = (n === null ? null : String(n)); },
-    runRequest: function(p){ g.__pmRunRequest = String(p); return Promise.resolve(undefined); },
+    runRequest: function(name){
+      g.__pmRunRequest = String(name);
+      if (typeof g.__hostRunRequest === 'function') {
+        return g.__hostRunRequest(String(name)).then(function(s){
+          var r = JSON.parse(s);
+          if (r.error) throw new Error(r.error);
+          return (typeof g.__makePmResponse === 'function') ? g.__makePmResponse(r) : r;
+        });
+      }
+      return Promise.resolve(undefined);
+    },
     sleep: function(ms){ return new Promise(function(r){ g.setTimeout(r, ms); }); },
     disableParsingResponseJson: function(){},
     cwd: function(){ return ''; },
@@ -458,14 +490,22 @@ const SANDBOX_BRUNO_SHIM = `
     disableParsingResponseJson: function(){}
   };
   var resp = g.pm.response;
+  function resBody(){ try { return resp.json(); } catch(e){ return resp.text(); } }
   g.res = resp ? {
     getStatus: function(){ return resp.code; },
     getStatusText: function(){ return resp.status; },
     getHeader: function(n){ return resp.headers.get(n); },
     getHeaders: function(){ return resp.headers.all(); },
-    getBody: function(){ try { return resp.json(); } catch(e){ return resp.text(); } },
+    getBody: resBody,
     setBody: function(b){ resp.__body = b; },
-    getResponseTime: function(){ return resp.responseTime; }
+    getResponseTime: function(){ return resp.responseTime; },
+    // Bruno's vars/assert expressions read these as PROPERTIES (res.status,
+    // res.body, …), not via getX() — expose both shapes.
+    status: resp.code,
+    statusText: resp.status,
+    headers: resp.headers.all(),
+    body: resBody(),
+    responseTime: resp.responseTime
   } : undefined;
   // Bruno's global \`test()\` shares the pm collector; expect/assert are chai.
   g.test = g.pm.test;
@@ -547,6 +587,10 @@ export interface RunCodeOptions {
    * Bruno script runs. Mutually exclusive with `postman`; outcome also on
    * {@link RunCodeResult.postman}. */
   bruno?: SandboxScriptContext
+  /** Optional host bridge for Bruno's `bru.runRequest(name)`: resolve a request
+   * by name in the collection, execute it, and resolve to its response. When
+   * absent, `bru.runRequest` just records the target (mapped to an edge later). */
+  runRequest?: (name: string, signal: AbortSignal) => Promise<SandboxHttpResponse>
   /** The run's cooperative-cancellation signal (user Stop / scope abort). When
    * it fires, any in-flight host network request is aborted immediately rather
    * than lingering until the wall-clock timeout. */
@@ -591,7 +635,7 @@ export interface RunCodeResult {
 /** Transpile + run user code in the QuickJS sandbox. Rejects with a normal
  * Error (message from the sandboxed throw) on a script error or timeout. */
 export async function runCodeInSandbox(opts: RunCodeOptions): Promise<RunCodeResult> {
-  const { code, input, variables = {}, timeoutMs = 5000, network, variableBridge, postman, bruno, signal } = opts
+  const { code, input, variables = {}, timeoutMs = 5000, network, variableBridge, postman, bruno, runRequest, signal } = opts
   // A Postman or Bruno script shares one request/response/test context.
   const scriptCtx = postman ?? bruno
   // 1. Transpile TS -> JS (types stripped; isolatedModules-safe single file).
@@ -608,7 +652,7 @@ export async function runCodeInSandbox(opts: RunCodeOptions): Promise<RunCodeRes
   // Aborts any in-flight host network request when the run ends (timeout or
   // completion) — so a sandbox that fires a slow `fetch` and then times out
   // doesn't leak a request that outlives it.
-  const netAbort = network ? new AbortController() : null
+  const netAbort = (network || runRequest) ? new AbortController() : null
   // Forward the run's cancellation (user Stop) to the in-flight host request, so
   // a slow `fetch` is cut loose at once instead of running out the full timeout.
   const onRunAbort = (): void => { netAbort?.abort() }
@@ -682,6 +726,30 @@ export async function runCodeInSandbox(opts: RunCodeOptions): Promise<RunCodeRes
       const net = ctx.evalCode(SANDBOX_NETWORK_SHIM)
       if (net.error) { const e: unknown = ctx.dump(net.error); net.error.dispose(); throw new Error(`sandbox network shim failed: ${stringifyErr(e)}`) }
       net.value.dispose()
+    }
+
+    // `bru.runRequest(name)` host bridge: resolve + execute a request by name on
+    // the host, resolve the VM promise with its response (same async plumbing as
+    // `__hostFetch`). The bru shim wraps it into a pm-style response object.
+    if (runRequest && netAbort) {
+      const runReqFn = ctx.newFunction('__hostRunRequest', (nameHandle) => {
+        const promise = ctx.newPromise()
+        const settle = (json: string): void => {
+          if (disposed) return
+          const s = ctx.newString(json)
+          promise.resolve(s)
+          s.dispose()
+        }
+        const name = ctx.getString(nameHandle)
+        runRequest(name, netAbort.signal).then(
+          (resp) => { settle(safeJson(resp)) },
+          (err: unknown) => { settle(JSON.stringify({ error: errMessage(err) })) }
+        )
+        void promise.settled.then(() => { if (!disposed) ctx.runtime.executePendingJobs() })
+        return promise.handle
+      })
+      ctx.setProp(ctx.global, '__hostRunRequest', runReqFn)
+      runReqFn.dispose()
     }
 
     // 2c. Variable bridge (only when supplied): five synchronous host primitives
