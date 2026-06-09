@@ -1,0 +1,89 @@
+- message: 🔵 [<time>] ▶ Code Ruby
+- message: ⚪ [<time>] start code
+  data:
+    language: ruby
+    code: >-
+      # Fixed dataset (no input → runs at start). puts → run log.
+
+      data = [{"n" => "a", "v" => 3}, {"n" => "b", "v" => 1}, {"n" => "c", "v"
+      => 2}]
+
+      puts "ruby: built #{data.length} rows"
+
+      data
+- message: "🔵 [<time>] ruby: built 3 rows"
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      - n: a
+        v: 3
+      - n: b
+        v: 1
+      - n: c
+        v: 2
+- message: ⚪ [<time>] start code
+  data:
+    language: ruby
+    code: |-
+      # `$input` = wired value (array of hashes). Enumerable aggregate.
+      total = $input.sum { |r| r["v"] }
+      names = $input.sort_by { |r| r["v"] }.map { |r| r["n"] }
+      puts "ruby: total = #{total} names = #{names.join(",")}"
+      { "total" => total, "names" => names }
+    value:
+      - n: a
+        v: 3
+      - n: b
+        v: 1
+      - n: c
+        v: 2
+- message: "🔵 [<time>] ruby: total = 6 names = b,c,a"
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      total: 6
+      names:
+        - b
+        - c
+        - a
+- message: ⚪ [<time>] start code
+  data:
+    language: ruby
+    code: |-
+      # String interpolation summary of the previous result.
+      summary = "#{$input["names"].length} items summing to #{$input["total"]}"
+      puts "ruby: #{summary}"
+      { "lang" => "ruby", "summary" => summary, "total" => $input["total"] }
+    value:
+      total: 6
+      names:
+        - b
+        - c
+        - a
+- message: "🔵 [<time>] ruby: 3 items summing to 6"
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      lang: ruby
+      summary: 3 items summing to 6
+      total: 6
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: "Ruby result: {{.}}"
+    data:
+      lang: ruby
+      summary: 3 items summing to 6
+      total: 6
+- message: "🔵 [<time>] Ruby result: [object Object]"
+  data:
+    lang: ruby
+    summary: 3 items summing to 6
+    total: 6
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      lang: ruby
+      summary: 3 items summing to 6
+      total: 6
+- message: 🔵 [<time>] ■ Code Ruby

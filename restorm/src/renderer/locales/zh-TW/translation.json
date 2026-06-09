@@ -1358,7 +1358,8 @@
     },
     "code": {
       "input": "輸入",
-      "code": "程式碼 (TypeScript)",
+      "language": "語言",
+      "code": "程式碼",
       "modalTitle": "編輯程式碼",
       "result": "結果",
       "timeout": "逾時 (秒)"
@@ -1390,7 +1391,7 @@
       "setVariable": "Stores a value into a run variable.",
       "getVariable": "Reads a run variable's value.",
       "transform": "Renders a Handlebars template from the input and run variables.",
-      "code": "Runs your TypeScript/JavaScript in a sandbox and returns the result.",
+      "code": "在沙箱中執行您的程式碼（TypeScript、JavaScript、Python、Lua、Ruby 或 R）並回傳結果。",
       "cast": "Converts a value to another type (number, string, boolean, date, list).",
       "regex": "Matches, extracts, replaces or splits text with a regular expression.",
       "json": "Parses a JSON string, or serialises a value to JSON.",

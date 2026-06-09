@@ -1,4 +1,4 @@
-- message: 🔵 [<time>] ▶ Code
+- message: 🔵 [<time>] ▶ Code TypeScript
 - message: ⚪ [<time>] start code
   data:
     code: |-
@@ -162,12 +162,12 @@
 
       const items = $('li').map((i, el) => $(el).text()).get()
 
-      console.log('cheerio items =', items.join(','))
+      console.log('Cheerio items =', items.join(','))
 
       return { library: 'cheerio', items, first: $('.first').text(), count:
       items.length }
     in: true
-- message: 🔵 [<time>] cheerio items = one,two,three
+- message: 🔵 [<time>] Cheerio items = one,two,three
 - message: ⚪ [<time>] done code
   data:
     result:
@@ -225,6 +225,7 @@
       console.log('ajv-formats: ok =', ok, '| bad =', bad)
 
       return { library: 'ajv-formats', ok, bad }
+    language: typescript
     in: true
 - message: "🔵 [<time>] ajv-formats: ok = true | bad = false"
 - message: ⚪ [<time>] done code
@@ -267,4 +268,4 @@
     value:
       status: 200
       body: '{"status":"ok"}'
-- message: 🔵 [<time>] ■ Code
+- message: 🔵 [<time>] ■ Code TypeScript

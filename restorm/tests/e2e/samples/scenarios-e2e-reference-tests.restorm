@@ -690,7 +690,7 @@ collections:
                 kind: runScenario
                 config:
                   scenarioId: 4a614aaf-83a0-478a-8b1f-42169cfdcbd4
-                  label: Code
+                  label: Code TypeScript
                 inputs:
                   - id: in
                     name: ''
@@ -705,6 +705,101 @@ collections:
                 position:
                   x: 800
                   'y': 1580
+              - id: b11e6b54-266f-4b9c-88a7-3fbe63f1329b
+                kind: runScenario
+                config:
+                  scenarioId: d495fdcc-3b5f-44b6-9b0d-09f844e43bc1
+                  label: Code Python
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 1020
+                  'y': 1580
+              - id: c6f8b513-7004-47a3-baad-1637b540bfea
+                kind: runScenario
+                config:
+                  scenarioId: ec6e8380-286f-4c9f-b096-817b45eb880f
+                  label: Code Lua
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 1240
+                  'y': 1580
+              - id: 86a4e805-1b06-4f4b-b699-2044c21ec805
+                kind: runScenario
+                config:
+                  scenarioId: e3e12658-f61a-4b7d-918d-957fe3b18f15
+                  label: Code Ruby
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 580
+                  'y': 1720
+              - id: 84986541-c95a-4ebb-a059-865b2b92a11f
+                kind: runScenario
+                config:
+                  scenarioId: ee605f22-b0bf-4485-8785-6f58bfb445e5
+                  label: Code R
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 800
+                  'y': 1720
+              - id: ec3ea5d2-2043-48f0-b9b9-a268c4e4f72a
+                kind: runScenario
+                config:
+                  scenarioId: 9c07e45e-4988-4b10-9e0f-3a5b4e5ad3a4
+                  label: Code JavaScript
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 580
+                  'y': 1860
             edges:
               - id: e-1780418276241-f2q3hz
                 from:
@@ -910,6 +1005,41 @@ collections:
                   portId: done
                 to:
                   nodeId: d33f8e17-abe7-438c-8951-408ada8bfba7
+                  portId: in
+              - id: 36c99241-cb05-4cb6-9fce-3f98e7a570dc
+                from:
+                  nodeId: b11e6b54-266f-4b9c-88a7-3fbe63f1329b
+                  portId: done
+                to:
+                  nodeId: c6f8b513-7004-47a3-baad-1637b540bfea
+                  portId: in
+              - id: 1cb67e76-beb9-4954-8f87-ef0137801f8a
+                from:
+                  nodeId: c6f8b513-7004-47a3-baad-1637b540bfea
+                  portId: done
+                to:
+                  nodeId: 86a4e805-1b06-4f4b-b699-2044c21ec805
+                  portId: in
+              - id: c2d29bd8-2131-47e5-b0ef-fbbd68bc1317
+                from:
+                  nodeId: 86a4e805-1b06-4f4b-b699-2044c21ec805
+                  portId: done
+                to:
+                  nodeId: 84986541-c95a-4ebb-a059-865b2b92a11f
+                  portId: in
+              - id: 70ecc9f3-f94e-4b91-a9ad-31a93a94162f
+                from:
+                  nodeId: d33f8e17-abe7-438c-8951-408ada8bfba7
+                  portId: done
+                to:
+                  nodeId: ec3ea5d2-2043-48f0-b9b9-a268c4e4f72a
+                  portId: in
+              - id: 9ec94ec1-0959-4137-8501-04da30f50c76
+                from:
+                  nodeId: ec3ea5d2-2043-48f0-b9b9-a268c4e4f72a
+                  portId: done
+                to:
+                  nodeId: b11e6b54-266f-4b9c-88a7-3fbe63f1329b
                   portId: in
             id: c1573ce0-985c-44b5-b5d4-e081de2d4303
             name: Main
@@ -16728,7 +16858,7 @@ collections:
                         // cheerio — jQuery-style HTML/XML scraping (server-side).
                         const $ = cheerio.load('<ul><li class="first">one</li><li>two</li><li>three</li></ul>')
                         const items = $('li').map((i, el) => $(el).text()).get()
-                        console.log('cheerio items =', items.join(','))
+                        console.log('Cheerio items =', items.join(','))
                         return { library: 'cheerio', items, first: $('.first').text(), count: items.length }
                     inputs:
                       - id: in
@@ -16745,7 +16875,7 @@ collections:
                         flow: both
                     position:
                       x: -240
-                      'y': 1060
+                      'y': 1120
                     note: cheerio — jQuery-style HTML scraping
                   - id: cecd6dc3-d342-40a6-b1b7-fe58a05159e9
                     kind: code
@@ -16790,6 +16920,7 @@ collections:
                         const bad = validate({ email: 'not-an-email', when: '2026-01-01' })
                         console.log('ajv-formats: ok =', ok, '| bad =', bad)
                         return { library: 'ajv-formats', ok, bad }
+                      language: typescript
                     inputs:
                       - id: in
                         name: ''
@@ -16805,7 +16936,7 @@ collections:
                         flow: both
                     position:
                       x: 680
-                      'y': 1060
+                      'y': 1120
                     note: ajv-formats — JSON-schema validation w/ formats
                   - id: b288a934-4c8c-4830-9608-fc85f712dd16
                     kind: code
@@ -16833,8 +16964,8 @@ collections:
                         dataType: any
                         flow: both
                     position:
-                      x: -280
-                      'y': 1460
+                      x: -240
+                      'y': 1480
                   - id: 1780931639758-mjcv6u
                     kind: log
                     config:
@@ -16855,7 +16986,7 @@ collections:
                     outputs: []
                     position:
                       x: 720
-                      'y': 1400
+                      'y': 1480
                   - id: 1780931704179-32q3cz
                     kind: log
                     config:
@@ -16877,7 +17008,7 @@ collections:
                     outputs: []
                     position:
                       x: 720
-                      'y': 1700
+                      'y': 1680
                 edges:
                   - id: 441b0bb7-1bf1-48c5-8d55-c9c46c7fa7e3
                     from:
@@ -16970,7 +17101,657 @@ collections:
                       portId: data
                     selector: .
                 id: 4a614aaf-83a0-478a-8b1f-42169cfdcbd4
-                name: Code
+                name: Code TypeScript
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: b6191579-bf48-4b2b-aa0f-7b3917d8d3d0
+                    kind: code
+                    config:
+                      language: python
+                      code: |-
+                        # Fixed dataset (no input → runs at start). print(...) → run log.
+                        data = [{"n": "a", "v": 3}, {"n": "b", "v": 1}, {"n": "c", "v": 2}]
+                        print("python: built", len(data), "rows")
+                        data
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: -340
+                      'y': 40
+                  - id: 2db73127-25bb-427e-abb0-5b8c79e14672
+                    kind: code
+                    config:
+                      language: python
+                      code: |-
+                        # `input` = wired value (list of dicts). Aggregate + sort.
+                        total = sum(r["v"] for r in input)
+                        names = [r["n"] for r in sorted(input, key=lambda r: r["v"])]
+                        print("python: total =", total, "names =", ",".join(names))
+                        {"total": total, "names": names}
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 300
+                      'y': 40
+                  - id: f5acad1d-9581-4e12-9137-afd6072326de
+                    kind: code
+                    config:
+                      language: python
+                      code: |-
+                        # f-strings + dict access on the previous result.
+                        summary = f"{len(input['names'])} items summing to {input['total']}"
+                        print("python:", summary)
+                        {"lang": "python", "summary": summary, "total": input["total"]}
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 300
+                      'y': 400
+                  - id: 59df1ffb-6d56-440c-a0aa-382e4313a456
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: expression
+                        value: 'Python result: {{.}}'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 940
+                      'y': 400
+                edges:
+                  - id: 04777b61-d8c4-4828-80ac-777d818409fe
+                    from:
+                      nodeId: b6191579-bf48-4b2b-aa0f-7b3917d8d3d0
+                      portId: result
+                    to:
+                      nodeId: 2db73127-25bb-427e-abb0-5b8c79e14672
+                      portId: value
+                    selector: .
+                  - id: 176070bd-be04-4353-ad7f-ada82df2dddd
+                    from:
+                      nodeId: 2db73127-25bb-427e-abb0-5b8c79e14672
+                      portId: result
+                    to:
+                      nodeId: f5acad1d-9581-4e12-9137-afd6072326de
+                      portId: value
+                    selector: .
+                  - id: 62d6291a-eb49-4ed0-905d-25bb4d07b052
+                    from:
+                      nodeId: f5acad1d-9581-4e12-9137-afd6072326de
+                      portId: result
+                    to:
+                      nodeId: 59df1ffb-6d56-440c-a0aa-382e4313a456
+                      portId: data
+                    selector: .
+                id: d495fdcc-3b5f-44b6-9b0d-09f844e43bc1
+                name: Code Python
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 0a6895e4-2d05-4010-bc8b-8750dd6f4199
+                    kind: code
+                    config:
+                      language: lua
+                      code: |-
+                        -- Fixed dataset (no input → runs at start). print(...) → run log.
+                        local data = { {n="a", v=3}, {n="b", v=1}, {n="c", v=2} }
+                        print(string.format("lua: built %d rows", #data))
+                        return data
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: -340
+                      'y': 40
+                  - id: d96bf423-180f-4f33-947d-f417cede12a4
+                    kind: code
+                    config:
+                      language: lua
+                      code: |-
+                        -- `input` = wired value (array of tables). ipairs aggregate.
+                        local total = 0
+                        for _, r in ipairs(input) do total = total + r.v end
+                        print(string.format("lua: total = %d", total))
+                        return { total = math.floor(total), count = #input }
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 300
+                      'y': 40
+                  - id: f2822b35-97b2-468e-9368-a8ffcd8779cf
+                    kind: code
+                    config:
+                      language: lua
+                      code: |-
+                        -- string.format summary of the previous result.
+                        local msg = string.format("%d items summing to %d", input.count, input.total)
+                        print("lua: " .. msg)
+                        return { lang = "lua", summary = msg, total = math.floor(input.total) }
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 300
+                      'y': 400
+                  - id: f6c97354-ef59-41bd-aa24-7dc626086322
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: expression
+                        value: 'Lua result: {{.}}'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1000
+                      'y': 400
+                edges:
+                  - id: f7cc87ac-28d6-495a-b434-403fac1daaef
+                    from:
+                      nodeId: 0a6895e4-2d05-4010-bc8b-8750dd6f4199
+                      portId: result
+                    to:
+                      nodeId: d96bf423-180f-4f33-947d-f417cede12a4
+                      portId: value
+                    selector: .
+                  - id: 7d731283-cdf9-45d5-a5db-b5680be72d92
+                    from:
+                      nodeId: d96bf423-180f-4f33-947d-f417cede12a4
+                      portId: result
+                    to:
+                      nodeId: f2822b35-97b2-468e-9368-a8ffcd8779cf
+                      portId: value
+                    selector: .
+                  - id: 19b640e5-3e07-441e-ac5e-1621d472f065
+                    from:
+                      nodeId: f2822b35-97b2-468e-9368-a8ffcd8779cf
+                      portId: result
+                    to:
+                      nodeId: f6c97354-ef59-41bd-aa24-7dc626086322
+                      portId: data
+                    selector: .
+                id: ec6e8380-286f-4c9f-b096-817b45eb880f
+                name: Code Lua
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: ad583a70-6f56-47f9-9bb1-005ed4580de6
+                    kind: code
+                    config:
+                      language: ruby
+                      code: |-
+                        # Fixed dataset (no input → runs at start). puts → run log.
+                        data = [{"n" => "a", "v" => 3}, {"n" => "b", "v" => 1}, {"n" => "c", "v" => 2}]
+                        puts "ruby: built #{data.length} rows"
+                        data
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: -420
+                      'y': 40
+                  - id: 4ecfcac5-a5ce-43ec-8bba-eeb5c709f928
+                    kind: code
+                    config:
+                      language: ruby
+                      code: |-
+                        # `$input` = wired value (array of hashes). Enumerable aggregate.
+                        total = $input.sum { |r| r["v"] }
+                        names = $input.sort_by { |r| r["v"] }.map { |r| r["n"] }
+                        puts "ruby: total = #{total} names = #{names.join(",")}"
+                        { "total" => total, "names" => names }
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 300
+                      'y': 40
+                  - id: 26d4d5fc-95c3-4499-bd5e-ab64ca4332c9
+                    kind: code
+                    config:
+                      language: ruby
+                      code: |-
+                        # String interpolation summary of the previous result.
+                        summary = "#{$input["names"].length} items summing to #{$input["total"]}"
+                        puts "ruby: #{summary}"
+                        { "lang" => "ruby", "summary" => summary, "total" => $input["total"] }
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 300
+                      'y': 400
+                  - id: c05bee15-27fc-4940-bd15-4c4e4256cff7
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: expression
+                        value: 'Ruby result: {{.}}'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 980
+                      'y': 400
+                edges:
+                  - id: 5168a5a3-6351-420e-96da-a0cd03bd9547
+                    from:
+                      nodeId: ad583a70-6f56-47f9-9bb1-005ed4580de6
+                      portId: result
+                    to:
+                      nodeId: 4ecfcac5-a5ce-43ec-8bba-eeb5c709f928
+                      portId: value
+                    selector: .
+                  - id: 597469b1-7ca6-45ab-9dd6-409aa6856d9a
+                    from:
+                      nodeId: 4ecfcac5-a5ce-43ec-8bba-eeb5c709f928
+                      portId: result
+                    to:
+                      nodeId: 26d4d5fc-95c3-4499-bd5e-ab64ca4332c9
+                      portId: value
+                    selector: .
+                  - id: f889f201-896f-46ec-831f-f831481da39f
+                    from:
+                      nodeId: 26d4d5fc-95c3-4499-bd5e-ab64ca4332c9
+                      portId: result
+                    to:
+                      nodeId: c05bee15-27fc-4940-bd15-4c4e4256cff7
+                      portId: data
+                    selector: .
+                id: e3e12658-f61a-4b7d-918d-957fe3b18f15
+                name: Code Ruby
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: cfb10544-1e08-470f-acdd-d30051d6574c
+                    kind: code
+                    config:
+                      language: r
+                      code: |-
+                        # Fixed numeric vector (no input → runs at start). cat → run log.
+                        vals <- c(3, 1, 2)
+                        cat(sprintf("r: built %d rows\n", length(vals)))
+                        vals
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: -340
+                      'y': 40
+                  - id: 10df65c1-f627-49c5-b0e0-a7abb095a667
+                    kind: code
+                    config:
+                      language: r
+                      code: |-
+                        # `input` = wired value. sort + sum, return a named list.
+                        nums <- sort(unlist(input))
+                        total <- sum(nums)
+                        cat(sprintf("r: total = %d\n", as.integer(total)))
+                        list(total = as.integer(total), sorted = as.integer(nums))
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 300
+                      'y': 40
+                  - id: 54935d04-08c7-400f-9377-aa1dbafd7fac
+                    kind: code
+                    config:
+                      language: r
+                      code: |-
+                        # sprintf summary of the previous result.
+                        summary <- sprintf("%d items summing to %d", length(input$sorted), as.integer(input$total))
+                        cat(sprintf("r: %s\n", summary))
+                        list(lang = "r", summary = summary, total = as.integer(input$total))
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 300
+                      'y': 400
+                  - id: bce4780a-f47b-4716-85ec-e11495cf309e
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: expression
+                        value: 'R result: {{.}}'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 1100
+                      'y': 400
+                edges:
+                  - id: 8934ff71-a711-4d32-909e-8e3bfc32a256
+                    from:
+                      nodeId: cfb10544-1e08-470f-acdd-d30051d6574c
+                      portId: result
+                    to:
+                      nodeId: 10df65c1-f627-49c5-b0e0-a7abb095a667
+                      portId: value
+                    selector: .
+                  - id: ca3b1389-4489-47db-82be-c2d88e189d26
+                    from:
+                      nodeId: 10df65c1-f627-49c5-b0e0-a7abb095a667
+                      portId: result
+                    to:
+                      nodeId: 54935d04-08c7-400f-9377-aa1dbafd7fac
+                      portId: value
+                    selector: .
+                  - id: bb1f3472-1aed-42ea-b566-e1c85fb7f03d
+                    from:
+                      nodeId: 54935d04-08c7-400f-9377-aa1dbafd7fac
+                      portId: result
+                    to:
+                      nodeId: bce4780a-f47b-4716-85ec-e11495cf309e
+                      portId: data
+                    selector: .
+                id: ee605f22-b0bf-4485-8785-6f58bfb445e5
+                name: Code R
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 40da7373-58ab-40f1-8890-d66dd89bd1f1
+                    kind: code
+                    config:
+                      language: javascript
+                      code: |-
+                        // Plain JavaScript (no type annotations). console.log → run log.
+                        const data = [{ n: 'a', v: 3 }, { n: 'b', v: 1 }, { n: 'c', v: 2 }]
+                        console.log('javascript: built', data.length, 'rows')
+                        return data
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: -340
+                      'y': 60
+                  - id: ef1be964-8444-416e-a6c1-957980ae44ea
+                    kind: code
+                    config:
+                      language: javascript
+                      code: |-
+                        // `input` = wired value. Curated stdlib (lodash) available as globals.
+                        const total = _.sumBy(input, 'v')
+                        const names = _.map(_.sortBy(input, 'v'), 'n')
+                        console.log('javascript: total =', total, 'names =', names.join(','))
+                        return { total, names }
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 300
+                      'y': 60
+                  - id: 741a7652-cc9b-43b8-80f1-efda648e9465
+                    kind: code
+                    config:
+                      language: javascript
+                      code: |-
+                        // Template literal summary of the previous result.
+                        const summary = `${input.names.length} items summing to ${input.total}`
+                        console.log('javascript:', summary)
+                        return { lang: 'javascript', summary, total: input.total }
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: input
+                        dataType: any
+                    outputs:
+                      - id: result
+                        name: result
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 300
+                      'y': 420
+                  - id: 99b65080-b336-40fa-9b66-36f314590b61
+                    kind: log
+                    config:
+                      level: info
+                      message:
+                        type: expression
+                        value: 'JavaScript result: {{.}}'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 960
+                      'y': 420
+                edges:
+                  - id: 25dfe687-2101-4f40-9b2a-08eec8ab86d5
+                    from:
+                      nodeId: 40da7373-58ab-40f1-8890-d66dd89bd1f1
+                      portId: result
+                    to:
+                      nodeId: ef1be964-8444-416e-a6c1-957980ae44ea
+                      portId: value
+                    selector: .
+                  - id: bfb98cf3-5405-42d2-99a7-6563a3f328e3
+                    from:
+                      nodeId: ef1be964-8444-416e-a6c1-957980ae44ea
+                      portId: result
+                    to:
+                      nodeId: 741a7652-cc9b-43b8-80f1-efda648e9465
+                      portId: value
+                    selector: .
+                  - id: b453679d-c0aa-424b-88e4-7ddac31dec65
+                    from:
+                      nodeId: 741a7652-cc9b-43b8-80f1-efda648e9465
+                      portId: result
+                    to:
+                      nodeId: 99b65080-b336-40fa-9b66-36f314590b61
+                      portId: data
+                    selector: .
+                name: Code JavaScript
+                id: 9c07e45e-4988-4b10-9e0f-3a5b4e5ad3a4
                 items: []
           - type: scenario
             tags: []

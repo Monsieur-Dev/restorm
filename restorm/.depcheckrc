@@ -32,6 +32,10 @@
     "chai",
     "cheerio",
     "xml2js",
-    "ajv-formats"
+    "ajv-formats",
+    "pyodide",
+    "wasmoon",
+    "webr",
+    "@ruby/*"
   ]
 }

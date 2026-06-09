@@ -48,5 +48,10 @@ Feature: Scenario run-log end-to-end
       | Schema         |
       | Files          |
       | Timer          |
-      | Code           |
+      | Code TypeScript |
+      | Code JavaScript |
+      | Code Python    |
+      | Code Lua       |
+      | Code Ruby      |
+      | Code R         |
       | Main           |
