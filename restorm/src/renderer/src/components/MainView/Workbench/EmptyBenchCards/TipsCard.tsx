@@ -62,6 +62,10 @@ const TIP_KEYS: string[] = [
   'customValueLists'
 ]
 
+/** Number of available tips — lets callers (e.g. the empty-board fallback)
+ *  seed several cards with distinct starting tips. */
+export const TIP_COUNT = TIP_KEYS.length
+
 /** TEMP — when this getter returns a non-null key, the card pins
  *  to that tip and the rotation timer is disabled. Used while
  *  iterating on a specific tip's content / illustration. Return
@@ -78,12 +82,17 @@ const ROTATION_INTERVAL_MS = 30_000
 const FADE_MS = 1000
 const RESIZE_MS = 1400
 
-function pickInitialIndex(): number {
+function pickInitialIndex(preferred?: number): number {
   if (TIP_KEYS.length === 0) return 0
   const pinned = getPinnedTipKey()
   if (pinned !== null) {
     const pinnedIdx = TIP_KEYS.indexOf(pinned)
     if (pinnedIdx !== -1) return pinnedIdx
+  }
+  // When several cards share the board (the empty-board fallback) the caller
+  // seeds each with a distinct starting tip so they don't open on the same one.
+  if (preferred !== undefined && preferred >= 0 && preferred < TIP_KEYS.length) {
+    return preferred
   }
   return Math.floor(Math.random() * TIP_KEYS.length)
 }
@@ -121,9 +130,15 @@ const TipIllustration: React.FC<{ tipKey: string }> = React.memo(({ tipKey }) =>
 })
 TipIllustration.displayName = 'TipIllustration'
 
-export const TipsCard: React.FC = () => {
+interface TipsCardProps {
+  /** Optional starting tip index. Used by the empty-board fallback to seed
+   *  several cards with distinct tips; omitted, the card picks at random. */
+  readonly initialIndex?: number
+}
+
+export const TipsCard: React.FC<TipsCardProps> = ({ initialIndex }) => {
   const { t } = useTranslation()
-  const [currentIndex, setCurrentIndex] = useState<number>(() => pickInitialIndex())
+  const [currentIndex, setCurrentIndex] = useState<number>(() => pickInitialIndex(initialIndex))
   const [phase, setPhase] = useState<RotatorPhase>('visible')
   const rotatorRef = useRef<HTMLDivElement | null>(null)
   const pinnedStartHeightRef = useRef<number | null>(null)

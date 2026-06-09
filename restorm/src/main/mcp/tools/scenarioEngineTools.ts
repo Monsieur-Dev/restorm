@@ -27,6 +27,7 @@ import type { TFunction } from 'i18next'
 import { scenarioEngine, type RunHandle } from '../../scenarioEngine/engine'
 import type { EngineEvent, RunLogEntry, RuntimeId } from '../../scenarioEngine/types'
 import { collectionStore } from '../../services/CollectionStore'
+import { scenarioUsageService } from '../../services'
 import { validateScenarioModel } from '../../../shared/scenarioValidation'
 import type { Scenario } from '../../../shared/models/Scenario'
 
@@ -145,6 +146,9 @@ export function registerScenarioEngineTools(mcp: McpService): void {
         const timeoutMs = typeof args['blockingTimeoutMs'] === 'number' && args['blockingTimeoutMs'] > 0
           ? args['blockingTimeoutMs']
           : DEFAULT_BLOCKING_TIMEOUT_MS
+        // Count this top-level run for the EmptyBench recent-activity lists,
+        // mirroring the UI's `scenario:engine:start` path.
+        scenarioUsageService.recordRun(scenarioId)
         const handle = scenarioEngine.start(scenarioId, { params, interactive })
         const runId = handle.scheduler.runId
         const entry: ActiveRun = { handle, output: null, state: 'running' }

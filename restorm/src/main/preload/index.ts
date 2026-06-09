@@ -824,6 +824,30 @@ contextBridge.exposeInMainWorld('restorm', {
       return () => { ipcRenderer.removeListener('request-usage:changed', handler) }
     }
   },
+  scenarioUsage: {
+    /** Fetch the full per-scenario usage map: count + lastRunAt + last
+     * 10 run timestamps, keyed by scenario id. The EmptyBench recent-activity
+     * lists merge this with `requestUsage` so recently-run scenarios show up
+     * next to recently-sent requests. */
+    get: async (): Promise<Record<string, { count: number; lastRunAt: string; history: string[] }>> => {
+      const result: unknown = await ipcRenderer.invoke('scenario-usage:get')
+      return result as Record<string, { count: number; lastRunAt: string; history: string[] }>
+    },
+    /** Subscribe to push events fired every time the map mutates (a new run
+     * recorded). The callback receives the fresh full snapshot. */
+    onChanged: (
+      callback: (map: Record<string, { count: number; lastRunAt: string; history: string[] }>) => void
+    ): (() => void) => {
+      const handler = (
+        _event: Electron.IpcRendererEvent,
+        map: Record<string, { count: number; lastRunAt: string; history: string[] }>
+      ): void => {
+        callback(map)
+      }
+      ipcRenderer.on('scenario-usage:changed', handler)
+      return () => { ipcRenderer.removeListener('scenario-usage:changed', handler) }
+    }
+  },
   runtime: {
     /** Per-boot runtime config (MCP + GraphQL endpoint). Both ports
      * are picked at startup — the renderer reads them once and caches

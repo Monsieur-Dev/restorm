@@ -288,6 +288,7 @@ export const responsesHistoryTogglePinArgs = z.tuple([z.string(), z.boolean()])
 // ==========================================================================
 
 export const requestUsageGetArgs = z.tuple([])
+export const scenarioUsageGetArgs = z.tuple([])
 
 // ==========================================================================
 // Import
