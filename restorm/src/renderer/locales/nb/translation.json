@@ -93,6 +93,50 @@
     "multiLanguage": {
       "title": "27 språk!",
       "body": "Restorm snakker 27 språk. Engelsk, fransk, spansk, tysk, italiensk, japansk, kinesisk, koreansk og mange flere — velg ditt i innstillingene!"
+    },
+    "fromPostman": {
+      "title": "Kommer du fra Postman eller Bruno?",
+      "body": "Vi hjelper deg med å bytte til Restorm — overgangen din gjort enkel ;)"
+    },
+    "chainRequests": {
+      "title": "Flere forespørsler som skal lenkes sammen?",
+      "body": "Bruk forespørslene dine inne i scenarioer, legg til betingelser, og nest til og med scenarioer inni andre scenarioer."
+    },
+    "stepByStep": {
+      "title": "Gå gjennom scenarioene dine steg for steg",
+      "body": "Ett steg om gangen, så du ser nøyaktig hva som skjer. Du kan til og med sette brytepunkter."
+    },
+    "cicd": {
+      "title": "Kjør scenarioene dine i CI/CD-pipelinene dine",
+      "body": "Start Restorm headless for å kjøre et scenario uten grensesnitt og samle inn loggene — automatiserte tester, bygget visuelt."
+    },
+    "nestedScenarios": {
+      "title": "Se hva som foregår i et scenario",
+      "body": "Et scenario kan kalle et annet. I inspektøren leser du hver eneste logg og hopper rett til scenarioet den kom fra."
+    },
+    "scenarioHistory": {
+      "title": "Men hva var det egentlig som skjedde?",
+      "body": "Bla i kjørehistorikken til scenarioene dine. Har et av dem endret seg siden? Ingen fare — vi tok vare på konfigurasjonen."
+    },
+    "codeSandbox": {
+      "title": "Scenarioer og sikkerhet",
+      "body": "Du kan skrive kode i scenarioene dine — men den kjører i en sikker sandkasse, uten tilgang til de lokale filene dine og uten direkte internettilgang. Den tryggeste måten å holde seg beskyttet på!"
+    },
+    "codeLanguages": {
+      "title": "Lyst til å skrive litt kode?",
+      "body": "Skriv kode rett inne i scenarioene dine — i TypeScript, JavaScript, Python, Lua, Ruby eller R!"
+    },
+    "scenarioAi": {
+      "title": "Scenarioer du kan styre med AI",
+      "body": "Claude, Cursor, Copilot … kjenner kodebasen din: be dem om skreddersydde scenarioer. Alt er eksponert over MCP for å opprette, redigere og kjøre scenarioer."
+    },
+    "interactiveScenarios": {
+      "title": "Interaktive scenarioer!",
+      "body": "Gjør scenarioene dine parameteriserbare, og spør gjerne brukeren hva som skal gjøres med dialogbokser."
+    },
+    "customValueLists": {
+      "title": "Gjenbrukbare verdilister",
+      "body": "Definer dine egne verdilister og gjenbruk dem i både forespørslene og scenarioene dine."
     }
   },
   "authFailureToast": {

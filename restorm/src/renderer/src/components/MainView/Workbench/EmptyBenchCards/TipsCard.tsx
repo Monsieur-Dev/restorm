@@ -48,7 +48,18 @@ const TIP_KEYS: string[] = [
   'protocols',
   'responseTree',
   'responseHistory',
-  'multiLanguage'
+  'multiLanguage',
+  'chainRequests',
+  'fromPostman',
+  'codeLanguages',
+  'stepByStep',
+  'interactiveScenarios',
+  'cicd',
+  'scenarioAi',
+  'nestedScenarios',
+  'scenarioHistory',
+  'codeSandbox',
+  'customValueLists'
 ]
 
 /** TEMP — when this getter returns a non-null key, the card pins
@@ -83,6 +94,32 @@ function pickNextIndex(current: number): number {
   if (next >= current) next += 1
   return next
 }
+
+/**
+ * The tip's illustration, isolated behind `React.memo` and keyed only on the
+ * tip key. This is critical: the card re-renders when async deps settle on a
+ * cold load (i18n resources, etc.), and without memoization that re-render
+ * rebuilt the inlined SVG DOM — restarting its CSS animation mid-flight (a
+ * visible reset on sequential animations). Memoized, the SVG is (re)built ONLY
+ * when the tip actually changes, never on an incidental parent re-render.
+ */
+const TipIllustration: React.FC<{ tipKey: string }> = React.memo(({ tipKey }) => {
+  const illustration = TIP_ILLUSTRATIONS[tipKey]
+  if (!illustration) return null
+  if (illustration.kind === 'svg') {
+    // The SVG markup is a build-time `?raw` import from a trusted file in this
+    // repo; inlining is required so the embedded `<style>` block can resolve
+    // theme CSS variables and currentColor from the parent context.
+    return <div className="empty-bench-tip-illustration-wrap" dangerouslySetInnerHTML={{ __html: illustration.markup }} />
+  }
+  const Component = illustration.Component
+  return (
+    <div className="empty-bench-tip-illustration-wrap">
+      <Component />
+    </div>
+  )
+})
+TipIllustration.displayName = 'TipIllustration'
 
 export const TipsCard: React.FC = () => {
   const { t } = useTranslation()
@@ -174,9 +211,6 @@ export const TipsCard: React.FC = () => {
     return null
   }
 
-  const illustration = TIP_ILLUSTRATIONS[currentKey]
-  const IllustrationComponent = illustration?.kind === 'component' ? illustration.Component : null
-
   return (
     <MosaicCard
       title={t('tips.cardTitle', 'Tips & tricks')}
@@ -195,21 +229,7 @@ export const TipsCard: React.FC = () => {
         <span className="empty-bench-tip__body">
           {t(`tips.${currentKey}.body`)}
         </span>
-        {illustration?.kind === 'svg' ? (
-          <div
-            className="empty-bench-tip-illustration-wrap"
-            // The SVG markup is a build-time `?raw` import from a
-            // trusted file in this repo; inlining is required so
-            // the embedded `<style>` block can resolve theme CSS
-            // variables and currentColor from the parent context.
-            dangerouslySetInnerHTML={{ __html: illustration.markup }}
-          />
-        ) : null}
-        {IllustrationComponent ? (
-          <div className="empty-bench-tip-illustration-wrap">
-            <IllustrationComponent />
-          </div>
-        ) : null}
+        <TipIllustration tipKey={currentKey} />
       </div>
     </MosaicCard>
   )

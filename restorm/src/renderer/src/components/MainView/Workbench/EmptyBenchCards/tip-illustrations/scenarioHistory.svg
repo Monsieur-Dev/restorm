@@ -1,0 +1,158 @@
+<svg viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg" class="empty-bench-tip-illustration" role="img" aria-hidden="true">
+  <style>
+    .sh-panel { fill: #0f172a; stroke: #475569; stroke-width: 1.5; }
+    .sh-row { fill: #1e293b; stroke: #475569; stroke-width: 1.5; }
+    .sh-label { fill: #94a3b8; }
+    .sh-box { fill: #1e293b; stroke: #475569; stroke-width: 1.8; }
+    .sh-edge { fill: none; stroke: #475569; stroke-width: 1.8; }
+    .sh-logbar { fill: #94a3b8; opacity: 0.7; }
+
+    /* moving highlight on the selected run row */
+    .sh-highlight { fill: #3794ff; opacity: 0.18; stroke: #3794ff; stroke-width: 1.5; animation: sh-hl 4.8s ease-in-out infinite; animation-play-state: paused; }
+
+    /* mouse cursor following the selection */
+    .sh-cursor { animation: sh-cursor 4.8s ease-in-out infinite; animation-play-state: paused; }
+    .sh-cursor-body { fill: #ffffff; stroke: #0f172a; stroke-width: 1.5; stroke-linejoin: round; }
+    .sh-ring { fill: none; stroke: #cbd5e1; stroke-width: 2; opacity: 0; animation: sh-ring 4.8s ease-in-out infinite; animation-play-state: paused; }
+
+    /* per-run log-dot variants — cross-fade between three runs */
+    .sh-dots-1 { animation: sh-fade1 4.8s ease-in-out infinite; animation-play-state: paused; }
+    .sh-dots-2 { animation: sh-fade2 4.8s ease-in-out infinite; animation-play-state: paused; }
+    .sh-dots-3 { animation: sh-fade3 4.8s ease-in-out infinite; animation-play-state: paused; }
+
+    /* per-run scenario thumbnails — same cross-fade as the dots */
+    .sh-graph-1 { animation: sh-fade1 4.8s ease-in-out infinite; animation-play-state: paused; }
+    .sh-graph-2 { animation: sh-fade2 4.8s ease-in-out infinite; animation-play-state: paused; }
+    .sh-graph-3 { animation: sh-fade3 4.8s ease-in-out infinite; animation-play-state: paused; }
+
+    .sh-d-blue   { fill: #3794ff; }
+    .sh-d-orange { fill: #e0a030; }
+    .sh-d-grey   { fill: #8a8a8a; }
+    .sh-d-red    { fill: #f14c4c; }
+
+    @keyframes sh-hl {
+      0%,4%    { transform: translateY(0px); }
+      30%      { transform: translateY(0px); }
+      36%,62%  { transform: translateY(23px); }
+      68%,96%  { transform: translateY(46px); }
+      100%     { transform: translateY(0px); }
+    }
+    @keyframes sh-cursor {
+      0%,4%    { transform: translateY(0px); }
+      30%      { transform: translateY(0px); }
+      36%,62%  { transform: translateY(23px); }
+      68%,96%  { transform: translateY(46px); }
+      100%     { transform: translateY(0px); }
+    }
+    @keyframes sh-ring {
+      0%,4%    { opacity: 0; r: 3; }
+      6%       { opacity: 0.9; r: 3; }
+      14%      { opacity: 0; r: 9; }
+      33%,35%  { opacity: 0; r: 3; }
+      37%      { opacity: 0.9; r: 3; }
+      45%      { opacity: 0; r: 9; }
+      65%,67%  { opacity: 0; r: 3; }
+      69%      { opacity: 0.9; r: 3; }
+      77%      { opacity: 0; r: 9; }
+      100%     { opacity: 0; }
+    }
+    @keyframes sh-fade1 {
+      0%,30%   { opacity: 1; }
+      34%,100% { opacity: 0; }
+    }
+    @keyframes sh-fade2 {
+      0%,32%   { opacity: 0; }
+      36%,62%  { opacity: 1; }
+      66%,100% { opacity: 0; }
+    }
+    @keyframes sh-fade3 {
+      0%,64%   { opacity: 0; }
+      68%,96%  { opacity: 1; }
+      100%     { opacity: 0; }
+    }
+  </style>
+
+  <!-- LEFT: run rows list -->
+  <rect class="sh-panel" x="8" y="14" width="68" height="122" rx="6" />
+  <rect class="sh-label" x="15" y="22" width="38" height="4" rx="2" opacity="0.9" />
+  <!-- moving selection highlight (behind rows' text) -->
+  <rect class="sh-highlight" x="13" y="34" width="58" height="20" rx="4" />
+  <!-- row 1 -->
+  <rect class="sh-label" x="19" y="41" width="14" height="3.5" rx="1.75" />
+  <rect class="sh-label" x="36" y="41" width="22" height="3.5" rx="1.75" opacity="0.5" />
+  <!-- row 2 -->
+  <rect class="sh-label" x="19" y="64" width="14" height="3.5" rx="1.75" />
+  <rect class="sh-label" x="36" y="64" width="20" height="3.5" rx="1.75" opacity="0.5" />
+  <!-- row 3 -->
+  <rect class="sh-label" x="19" y="87" width="14" height="3.5" rx="1.75" />
+  <rect class="sh-label" x="36" y="87" width="24" height="3.5" rx="1.75" opacity="0.5" />
+
+  <!-- CENTRE: log lines column -->
+  <rect class="sh-panel" x="82" y="14" width="58" height="122" rx="6" />
+  <rect class="sh-logbar" x="98" y="40" width="36" height="4" rx="2" />
+  <rect class="sh-logbar" x="98" y="56" width="30" height="4" rx="2" />
+  <rect class="sh-logbar" x="98" y="72" width="34" height="4" rx="2" />
+  <rect class="sh-logbar" x="98" y="88" width="28" height="4" rx="2" />
+  <rect class="sh-logbar" x="98" y="104" width="32" height="4" rx="2" />
+
+  <!-- status dots: 3 stacked variants, only one visible per run -->
+  <g class="sh-dots-1">
+    <circle class="sh-d-blue"   cx="90" cy="42" r="3.2" />
+    <circle class="sh-d-grey"   cx="90" cy="58" r="3.2" />
+    <circle class="sh-d-orange" cx="90" cy="74" r="3.2" />
+    <circle class="sh-d-grey"   cx="90" cy="90" r="3.2" />
+    <circle class="sh-d-blue"   cx="90" cy="106" r="3.2" />
+  </g>
+  <g class="sh-dots-2">
+    <circle class="sh-d-blue"   cx="90" cy="42" r="3.2" />
+    <circle class="sh-d-orange" cx="90" cy="58" r="3.2" />
+    <circle class="sh-d-red"    cx="90" cy="74" r="3.6" />
+    <circle class="sh-d-grey"   cx="90" cy="90" r="3.2" />
+    <circle class="sh-d-orange" cx="90" cy="106" r="3.2" />
+  </g>
+  <g class="sh-dots-3">
+    <circle class="sh-d-grey"   cx="90" cy="42" r="3.2" />
+    <circle class="sh-d-blue"   cx="90" cy="58" r="3.2" />
+    <circle class="sh-d-orange" cx="90" cy="74" r="3.2" />
+    <circle class="sh-d-red"    cx="90" cy="90" r="3.6" />
+    <circle class="sh-d-blue"   cx="90" cy="106" r="3.2" />
+  </g>
+
+  <!-- RIGHT: scenario thumbnail, changes per run -->
+  <rect class="sh-panel" x="146" y="14" width="66" height="122" rx="6" />
+  <rect class="sh-label" x="153" y="22" width="30" height="4" rx="2" opacity="0.9" />
+
+  <!-- Each edge connects one box's edge to another's (curved where it helps). -->
+  <g class="sh-graph-1">
+    <!-- b1(153-168,40-53) → b2(189-204,40-53) ; b2 → b3(171-186,88-101) -->
+    <path class="sh-edge" d="M168 46 H189" />
+    <path class="sh-edge" d="M196 53 C 196 72, 178 70, 178 88" />
+    <rect class="sh-box" x="153" y="40" width="15" height="13" rx="3" />
+    <rect class="sh-box" x="189" y="40" width="15" height="13" rx="3" />
+    <rect class="sh-box" x="171" y="88" width="15" height="13" rx="3" />
+  </g>
+  <g class="sh-graph-2">
+    <!-- b1(153-167)→b2(174-188)→b3(195-208) on top ; b2 → b4(174-188,86-99) -->
+    <path class="sh-edge" d="M167 56 H174" />
+    <path class="sh-edge" d="M188 56 H195" />
+    <path class="sh-edge" d="M181 63 V86" />
+    <rect class="sh-box" x="153" y="50" width="14" height="13" rx="3" />
+    <rect class="sh-box" x="174" y="50" width="14" height="13" rx="3" />
+    <rect class="sh-box" x="195" y="50" width="13" height="13" rx="3" />
+    <rect class="sh-box" x="174" y="86" width="14" height="13" rx="3" />
+  </g>
+  <g class="sh-graph-3">
+    <!-- b1(154-168,40-54) → b2(188-202,58-72) → b3(156-170,96-110), curved -->
+    <path class="sh-edge" d="M168 47 C 182 47, 188 52, 188 65" />
+    <path class="sh-edge" d="M195 72 C 195 90, 163 82, 163 96" />
+    <rect class="sh-box" x="154" y="40" width="14" height="14" rx="3" />
+    <rect class="sh-box" x="188" y="58" width="14" height="14" rx="3" />
+    <rect class="sh-box" x="156" y="96" width="14" height="14" rx="3" />
+  </g>
+
+  <!-- MOUSE cursor (over run rows) + click ring -->
+  <g class="sh-cursor">
+    <circle class="sh-ring" cx="60" cy="50" r="3" />
+    <path class="sh-cursor-body" d="M60 44 l0 17 l4.5 -4.5 l3 6.5 l3 -1.4 l-3 -6.4 l6.4 0 Z" />
+  </g>
+</svg>

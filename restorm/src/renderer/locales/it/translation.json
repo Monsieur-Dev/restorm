@@ -93,6 +93,50 @@
     "multiLanguage": {
       "title": "27 lingue!",
       "body": "Restorm parla 27 lingue. Inglese, francese, spagnolo, tedesco, italiano, giapponese, cinese, coreano e molte altre — scegli la tua nelle impostazioni!"
+    },
+    "fromPostman": {
+      "title": "Arrivi da Postman o Bruno?",
+      "body": "Ti aiutiamo a passare a Restorm — il tuo trasloco reso facile ;)"
+    },
+    "chainRequests": {
+      "title": "Diverse richieste da concatenare?",
+      "body": "Usa le tue richieste dentro gli scenari, aggiungi condizioni e annida persino scenari dentro altri scenari."
+    },
+    "stepByStep": {
+      "title": "Percorri i tuoi scenari passo dopo passo",
+      "body": "Un passo alla volta, per vedere esattamente cosa succede. Puoi anche impostare dei punti di interruzione."
+    },
+    "cicd": {
+      "title": "Esegui i tuoi scenari nelle tue pipeline CI/CD",
+      "body": "Avvia Restorm senza interfaccia per eseguire uno scenario senza UI e raccoglierne i log — test automatizzati, costruiti visivamente."
+    },
+    "nestedScenarios": {
+      "title": "Guarda cosa succede in uno scenario",
+      "body": "Uno scenario può chiamarne un altro. Nell'ispettore, leggi ogni log e salta direttamente allo scenario da cui proviene."
+    },
+    "scenarioHistory": {
+      "title": "Ma cos'è appena successo?",
+      "body": "Sfoglia la cronologia di esecuzione dei tuoi scenari. Uno di essi è cambiato nel frattempo? Nessun problema — ne abbiamo conservato la configurazione."
+    },
+    "codeSandbox": {
+      "title": "Scenari e sicurezza",
+      "body": "Puoi scrivere codice nei tuoi scenari — ma viene eseguito in una sandbox sicura, senza accesso ai tuoi file locali e senza accesso diretto a internet. Il modo più sicuro per restare protetto!"
+    },
+    "codeLanguages": {
+      "title": "Voglia di scrivere un po' di codice?",
+      "body": "Scrivi codice direttamente nei tuoi scenari — in TypeScript, JavaScript, Python, Lua, Ruby o R!"
+    },
+    "scenarioAi": {
+      "title": "Scenari pilotabili dall'IA",
+      "body": "Claude, Cursor, Copilot… conoscono il tuo codice: chiedi loro scenari su misura. Tutto è esposto tramite MCP per creare, modificare ed eseguire scenari."
+    },
+    "interactiveScenarios": {
+      "title": "Scenari interattivi!",
+      "body": "Rendi i tuoi scenari parametrizzabili e chiedi persino all'utente cosa fare con delle finestre di dialogo."
+    },
+    "customValueLists": {
+      "title": "Liste di valori riutilizzabili",
+      "body": "Definisci le tue liste di valori e riutilizzale sia nelle tue richieste sia nei tuoi scenari."
     }
   },
   "authFailureToast": {

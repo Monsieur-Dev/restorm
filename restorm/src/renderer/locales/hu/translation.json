@@ -93,6 +93,50 @@
     "multiLanguage": {
       "title": "27 nyelv!",
       "body": "A Restorm 27 nyelven beszél. Angol, francia, spanyol, német, olasz, japán, kínai, koreai és még sok más — válaszd ki a sajátodat a beállításokban!"
+    },
+    "fromPostman": {
+      "title": "Postmanből vagy Brunóból érkezel?",
+      "body": "Segítünk az átállásban a Restormra — könnyűvé tesszük a váltást ;)"
+    },
+    "chainRequests": {
+      "title": "Több kérést kell láncba fűzni?",
+      "body": "Használd a kéréseidet forgatókönyveken belül, adj hozzá feltételeket, sőt forgatókönyveket is ágyazhatsz más forgatókönyvekbe."
+    },
+    "stepByStep": {
+      "title": "Lépkedj végig a forgatókönyveiden",
+      "body": "Egyszerre egy lépés, hogy pontosan lásd, mi történik. Még töréspontokat is beállíthatsz."
+    },
+    "cicd": {
+      "title": "Futtasd a forgatókönyveidet a CI/CD-folyamataidban",
+      "body": "Indítsd el a Restormot felület nélkül, hogy egy forgatókönyvet UI nélkül futtass, és gyűjtsd be a naplóit — automatizált tesztek, vizuálisan felépítve."
+    },
+    "nestedScenarios": {
+      "title": "Lásd, mi történik egy forgatókönyvben",
+      "body": "Egy forgatókönyv meghívhat egy másikat. Az ellenőrzőben olvasd el minden naplót, és ugorj egyenesen ahhoz a forgatókönyvhöz, amelyből származik."
+    },
+    "scenarioHistory": {
+      "title": "De mi is történt az imént?",
+      "body": "Böngészd a forgatókönyveid futási előzményeit. Az egyikük azóta megváltozott? Semmi gond — elmentettük a konfigurációját."
+    },
+    "codeSandbox": {
+      "title": "Forgatókönyvek és biztonság",
+      "body": "Írhatsz kódot a forgatókönyveidben — de az egy biztonságos elszigetelt környezetben fut, a helyi fájljaidhoz való hozzáférés és közvetlen internetkapcsolat nélkül. A legbiztonságosabb módja annak, hogy védve maradj!"
+    },
+    "codeLanguages": {
+      "title": "Kedved támadt egy kis kódíráshoz?",
+      "body": "Írj kódot közvetlenül a forgatókönyveidben — TypeScript, JavaScript, Python, Lua, Ruby vagy R nyelven!"
+    },
+    "scenarioAi": {
+      "title": "Mesterséges intelligenciával vezérelhető forgatókönyvek",
+      "body": "A Claude, a Cursor, a Copilot… ismerik a kódbázisodat: kérj tőlük testreszabott forgatókönyveket. Minden elérhető MCP-n keresztül a forgatókönyvek létrehozásához, szerkesztéséhez és futtatásához."
+    },
+    "interactiveScenarios": {
+      "title": "Interaktív forgatókönyvek!",
+      "body": "Tedd a forgatókönyveidet paraméterezhetővé, sőt párbeszédablakokkal kérdezd meg a felhasználót, hogy mit tegyél."
+    },
+    "customValueLists": {
+      "title": "Újrafelhasználható értéklisták",
+      "body": "Határozd meg a saját értéklistáidat, és használd fel őket újra a kéréseidben és a forgatókönyveidben egyaránt."
     }
   },
   "authFailureToast": {

@@ -94,6 +94,50 @@
     "multiLanguage": {
       "title": "27 jezika!",
       "body": "Restorm govori 27 jezika. Engleski, francuski, španjolski, njemački, talijanski, japanski, kineski, korejski i mnogi drugi — odaberi svoj u postavkama!"
+    },
+    "fromPostman": {
+      "title": "Dolaziš iz Postmana ili Bruna?",
+      "body": "Pomažemo ti pri prelasku na Restorm — tvoj prijelaz učinjen jednostavnim ;)"
+    },
+    "chainRequests": {
+      "title": "Više zahtjeva za povezati u niz?",
+      "body": "Koristi svoje zahtjeve unutar scenarija, dodaj uvjete i čak ugnijezdi scenarije unutar drugih scenarija."
+    },
+    "stepByStep": {
+      "title": "Prođi kroz svoje scenarije korak po korak",
+      "body": "Korak po korak, da vidiš točno što se događa. Možeš čak postaviti i točke prekida."
+    },
+    "cicd": {
+      "title": "Pokreni svoje scenarije u svojim CI/CD cjevovodima",
+      "body": "Pokreni Restorm bez sučelja da izvršiš scenarij bez korisničkog sučelja i prikupiš njegove zapise — automatizirani testovi, izgrađeni vizualno."
+    },
+    "nestedScenarios": {
+      "title": "Vidi što se događa u scenariju",
+      "body": "Scenarij može pozvati drugi. U inspektoru pročitaj svaki zapis i skoči izravno na scenarij iz kojeg potječe."
+    },
+    "scenarioHistory": {
+      "title": "Ali što se upravo dogodilo?",
+      "body": "Pregledaj povijest izvođenja svojih scenarija. Neki od njih se u međuvremenu promijenio? Bez brige — sačuvali smo njegovu konfiguraciju."
+    },
+    "codeSandbox": {
+      "title": "Scenariji i sigurnost",
+      "body": "Možeš pisati kôd u svojim scenarijima — ali on se izvodi u sigurnom izoliranom okruženju, bez pristupa tvojim lokalnim datotekama i bez izravnog pristupa internetu. Najsigurniji način da ostaneš zaštićen!"
+    },
+    "codeLanguages": {
+      "title": "Imaš želju napisati malo koda?",
+      "body": "Piši kôd izravno unutar svojih scenarija — u TypeScript, JavaScript, Python, Lua, Ruby ili R!"
+    },
+    "scenarioAi": {
+      "title": "Scenariji vođeni umjetnom inteligencijom",
+      "body": "Claude, Cursor, Copilot… poznaju tvoju bazu koda: zatraži od njih scenarije po mjeri. Sve je izloženo putem MCP-a za stvaranje, uređivanje i pokretanje scenarija."
+    },
+    "interactiveScenarios": {
+      "title": "Interaktivni scenariji!",
+      "body": "Učini svoje scenarije parametrizirljivima i čak pitaj korisnika što učiniti pomoću dijaloških okvira."
+    },
+    "customValueLists": {
+      "title": "Ponovno upotrebljive liste vrijednosti",
+      "body": "Definiraj vlastite liste vrijednosti i ponovno ih koristi kako u svojim zahtjevima tako i u svojim scenarijima."
     }
   },
   "authFailureToast": {

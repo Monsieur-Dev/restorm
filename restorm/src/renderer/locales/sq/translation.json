@@ -93,6 +93,50 @@
     "multiLanguage": {
       "title": "27 gjuhë!",
       "body": "Restorm flet 27 gjuhë. Anglisht, frëngjisht, spanjisht, gjermanisht, italisht, japonisht, kinezisht, koreanisht dhe shumë të tjera — zgjidhni tuajën nga cilësimet!"
+    },
+    "fromPostman": {
+      "title": "Vini nga Postman ose Bruno?",
+      "body": "Ju ndihmojmë të kaloni te Restorm — tranzicioni juaj i bërë i lehtë ;)"
+    },
+    "chainRequests": {
+      "title": "Disa kërkesa për t'i lidhur në zinxhir?",
+      "body": "Përdorni kërkesat tuaja brenda skenarëve, shtoni kushte dhe madje futni skenarë brenda skenarëve të tjerë."
+    },
+    "stepByStep": {
+      "title": "Kaloni nëpër skenarët tuaj hap pas hapi",
+      "body": "Një hap në të njëjtën kohë, për të parë saktësisht çfarë ndodh. Mund madje të vendosni pika ndërprerjeje."
+    },
+    "cicd": {
+      "title": "Ekzekutoni skenarët tuaj në procedurat tuaja CI/CD",
+      "body": "Nisni Restorm-in në modalitet headless për të ekzekutuar një skenar pa ndërfaqe dhe për të mbledhur regjistrat e tij — teste të automatizuara, të ndërtuara në mënyrë vizuale."
+    },
+    "nestedScenarios": {
+      "title": "Shihni se çfarë po ndodh në një skenar",
+      "body": "Një skenar mund të thërrasë një tjetër. Në inspektor, lexoni çdo regjistër dhe kaloni drejt e te skenari nga i cili erdhi."
+    },
+    "scenarioHistory": {
+      "title": "Po çfarë sapo ndodhi?",
+      "body": "Shfletoni historikun e ekzekutimeve të skenarëve tuaj. Njëri prej tyre ka ndryshuar që atëherë? Pa merak — ne e ruajtëm konfigurimin e tij."
+    },
+    "codeSandbox": {
+      "title": "Skenarët dhe siguria",
+      "body": "Mund të shkruani kod në skenarët tuaj — por ai ekzekutohet në një sandbox të sigurt, pa qasje në skedarët tuaj lokalë dhe pa qasje të drejtpërdrejtë në internet. Mënyra më e sigurt për të qëndruar të mbrojtur!"
+    },
+    "codeLanguages": {
+      "title": "Keni dëshirë të shkruani pak kod?",
+      "body": "Shkruani kod drejtpërdrejt brenda skenarëve tuaj — në TypeScript, JavaScript, Python, Lua, Ruby ose R!"
+    },
+    "scenarioAi": {
+      "title": "Skenarë të drejtueshëm nga IA",
+      "body": "Claude, Cursor, Copilot… e njohin kodin tuaj: kërkojuni skenarë të bërë me porosi. Gjithçka është e ekspozuar përmes MCP për të krijuar, redaktuar dhe ekzekutuar skenarë."
+    },
+    "interactiveScenarios": {
+      "title": "Skenarë interaktivë!",
+      "body": "Bëjini skenarët tuaj të parametrizueshëm dhe madje pyeteni përdoruesin se çfarë të bëjë me kuti dialogu."
+    },
+    "customValueLists": {
+      "title": "Lista vlerash të ripërdorshme",
+      "body": "Përcaktoni listat tuaja të vlerave dhe ripërdorni ato si në kërkesat ashtu edhe në skenarët tuaj."
     }
   },
   "authFailureToast": {

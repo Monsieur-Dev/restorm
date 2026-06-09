@@ -92,6 +92,50 @@
     "multiLanguage": {
       "title": "27 bahasa!",
       "body": "Restorm berbicara 27 bahasa. Inggris, Prancis, Spanyol, Jerman, Italia, Jepang, Mandarin, Korea, dan banyak lainnya — pilih bahasamu di pengaturan!"
+    },
+    "fromPostman": {
+      "title": "Datang dari Postman atau Bruno?",
+      "body": "Kami bantu kamu beralih ke Restorm — perpindahanmu jadi mudah ;)"
+    },
+    "chainRequests": {
+      "title": "Beberapa permintaan untuk dirangkai?",
+      "body": "Gunakan permintaanmu di dalam skenario, tambahkan kondisi, bahkan sarangkan skenario di dalam skenario lain."
+    },
+    "stepByStep": {
+      "title": "Telusuri skenariomu langkah demi langkah",
+      "body": "Satu langkah dalam satu waktu, agar kamu melihat persis apa yang terjadi. Kamu bahkan bisa memasang titik henti."
+    },
+    "cicd": {
+      "title": "Jalankan skenariomu di alur CI/CD-mu",
+      "body": "Mulai Restorm tanpa tampilan untuk menjalankan skenario tanpa antarmuka dan mengumpulkan lognya — pengujian otomatis, dibangun secara visual."
+    },
+    "nestedScenarios": {
+      "title": "Lihat apa yang terjadi dalam sebuah skenario",
+      "body": "Sebuah skenario bisa memanggil skenario lain. Di inspektor, baca setiap log dan langsung lompat ke skenario asalnya."
+    },
+    "scenarioHistory": {
+      "title": "Tapi apa yang baru saja terjadi?",
+      "body": "Telusuri riwayat eksekusi skenariomu. Salah satunya berubah sejak itu? Tenang saja — kami menyimpan konfigurasinya."
+    },
+    "codeSandbox": {
+      "title": "Skenario dan keamanan",
+      "body": "Kamu bisa menulis kode dalam skenariomu — tapi kode itu berjalan dalam sandbox yang aman, tanpa akses ke berkas lokalmu dan tanpa akses internet langsung. Cara teraman untuk tetap terlindungi!"
+    },
+    "codeLanguages": {
+      "title": "Ingin menulis sedikit kode?",
+      "body": "Tulis kode langsung di dalam skenariomu — dalam TypeScript, JavaScript, Python, Lua, Ruby, atau R!"
+    },
+    "scenarioAi": {
+      "title": "Skenario yang bisa dikendalikan AI",
+      "body": "Claude, Cursor, Copilot… mengenal basis kodemu: minta mereka membuat skenario sesuai kebutuhanmu. Semuanya tersedia lewat MCP untuk membuat, menyunting, dan menjalankan skenario."
+    },
+    "interactiveScenarios": {
+      "title": "Skenario interaktif!",
+      "body": "Buat skenariomu bisa diparameterkan dan bahkan tanyakan kepada pengguna apa yang harus dilakukan lewat kotak dialog."
+    },
+    "customValueLists": {
+      "title": "Daftar nilai yang bisa dipakai ulang",
+      "body": "Tentukan daftar nilaimu sendiri dan pakai ulang baik dalam permintaanmu maupun dalam skenariomu."
     }
   },
   "authFailureToast": {

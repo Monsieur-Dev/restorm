@@ -93,6 +93,50 @@
     "multiLanguage": {
       "title": "27 Sprachen!",
       "body": "Restorm spricht 27 Sprachen. Englisch, Französisch, Spanisch, Deutsch, Italienisch, Japanisch, Chinesisch, Koreanisch und viele mehr — wähle deine in den Einstellungen!"
+    },
+    "fromPostman": {
+      "title": "Kommst du von Postman oder Bruno?",
+      "body": "Wir helfen dir beim Umstieg auf Restorm — dein Wechsel ganz leicht gemacht ;)"
+    },
+    "chainRequests": {
+      "title": "Mehrere Anfragen zu verketten?",
+      "body": "Nutze deine Anfragen in Szenarien, füge Bedingungen hinzu und verschachtle sogar Szenarien in anderen Szenarien."
+    },
+    "stepByStep": {
+      "title": "Geh deine Szenarien Schritt für Schritt durch",
+      "body": "Ein Schritt nach dem anderen, um genau zu sehen, was passiert. Du kannst sogar Breakpoints setzen."
+    },
+    "cicd": {
+      "title": "Führe deine Szenarien in deinen CI/CD-Pipelines aus",
+      "body": "Starte Restorm im Headless-Modus, um ein Szenario ohne Oberfläche auszuführen und seine Logs zu sammeln — automatisierte Tests, visuell gebaut."
+    },
+    "nestedScenarios": {
+      "title": "Sieh, was in einem Szenario passiert",
+      "body": "Ein Szenario kann ein anderes aufrufen. Lies im Inspektor jedes Log und spring direkt zu dem Szenario, aus dem es stammt."
+    },
+    "scenarioHistory": {
+      "title": "Aber was ist gerade passiert?",
+      "body": "Durchstöbere den Ausführungsverlauf deiner Szenarien. Eines davon hat sich seither geändert? Kein Problem — wir haben seine Konfiguration aufbewahrt."
+    },
+    "codeSandbox": {
+      "title": "Szenarien und Sicherheit",
+      "body": "Du kannst in deinen Szenarien Code schreiben — aber er läuft in einer sicheren Sandbox, ohne Zugriff auf deine lokalen Dateien und ohne direkten Internetzugang. Der sicherste Weg, geschützt zu bleiben!"
+    },
+    "codeLanguages": {
+      "title": "Lust, etwas Code zu schreiben?",
+      "body": "Schreibe Code direkt in deinen Szenarien — in TypeScript, JavaScript, Python, Lua, Ruby oder R!"
+    },
+    "scenarioAi": {
+      "title": "Per KI steuerbare Szenarien",
+      "body": "Claude, Cursor, Copilot… kennen deinen Code: bitte sie um maßgeschneiderte Szenarien. Alles wird über MCP bereitgestellt, um Szenarien zu erstellen, zu bearbeiten und auszuführen."
+    },
+    "interactiveScenarios": {
+      "title": "Interaktive Szenarien!",
+      "body": "Mach deine Szenarien parametrierbar und frag sogar den Nutzer mit Dialogfeldern, was zu tun ist."
+    },
+    "customValueLists": {
+      "title": "Wiederverwendbare Wertelisten",
+      "body": "Definiere deine eigenen Wertelisten und verwende sie in deinen Anfragen wie in deinen Szenarien."
     }
   },
   "authFailureToast": {

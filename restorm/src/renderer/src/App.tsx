@@ -91,10 +91,13 @@ import { findGroupIdForTab, hasGroupWithId, updateGroupById } from './utils/work
  * the underlying id, so close handlers triggered from those panes
  * must look through to `tab.request?.id` / `tab.folder?.id`.
  */
-type ItemBackedTab = EditorTab & { request?: { id?: string }; folder?: { id?: string } }
+type ItemBackedTab = EditorTab & { request?: { id?: string }; folder?: { id?: string }; scenario?: { id?: string } }
 const tabMatchesItem = (tab: EditorTab, itemId: string): boolean => {
   const t = tab as ItemBackedTab
-  return t.request?.id === itemId || t.folder?.id === itemId
+  // A tab is backed by a request, a (env-)folder, OR a scenario — match all
+  // three so MCP open/close/reveal-by-id works for scenario tabs too (their id
+  // lives on `scenario`, not `request`/`folder`).
+  return t.request?.id === itemId || t.folder?.id === itemId || t.scenario?.id === itemId
 }
 import { Onboarding } from './components/MainView/Workbench/Onboarding'
 import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
@@ -1327,6 +1330,7 @@ const App: React.FC = () => {
     openFolderTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
+    openScenarioEditorTab,
     closeTabByItemId: closeTabByItemIdStable
   })
   // Set to `true` by `useMcpTreeReplace` immediately before each MCP-

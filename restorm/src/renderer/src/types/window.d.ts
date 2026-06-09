@@ -121,10 +121,10 @@ declare global {
           tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | null }
           envByFolder: Record<string, string | null>
         }) => void
-        onMcpOpenTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void) => () => void
-        onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void) => () => void
+        onMcpOpenTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void) => () => void
+        onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void) => () => void
         onMcpTreeReplace: (callback: (payload: unknown) => void) => () => void
-        onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void) => () => void
+        onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void) => () => void
         onMcpRunRequest: (callback: (payload: { itemId: string }) => void) => () => void
         onMcpRequestUpdated: (callback: (payload: { itemId: string; patch: Record<string, unknown> }) => void) => () => void
         onMcpScenarioUpdated: (callback: (payload: { scenarioId: string; nodes: unknown[]; edges: unknown[]; name?: string; params?: unknown[] }) => void) => () => void

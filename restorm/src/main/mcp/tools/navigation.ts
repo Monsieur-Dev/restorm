@@ -17,7 +17,7 @@ import { z } from 'zod'
 import { BrowserWindow } from 'electron'
 import { McpService } from 'electron-core-ui'
 import { collectionStore } from '../../services/CollectionStore'
-import { isAnyFolder, isEnvironmentFolder, isRequest } from '../../../shared/models'
+import { isAnyFolder, isEnvironmentFolder, isRequest, isScenario } from '../../../shared/models'
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
   return { content: [{ type: 'text', text: JSON.stringify(value, null, 2) }] }
@@ -33,9 +33,13 @@ function broadcast(channel: string, payload: unknown): void {
   }
 }
 
-function describeKind(itemId: string): 'request' | 'folder' | 'env-folder' | null {
+function describeKind(itemId: string): 'request' | 'folder' | 'env-folder' | 'scenario' | null {
   const target = collectionStore.findById(itemId)
   if (!target) return null
+  // A scenario carries `configuration`, so it passes `isAnyFolder` — test it
+  // FIRST, else a scenario is mislabelled `folder` and open/reveal/close route
+  // it down the folder path (which can't find or open it).
+  if (isScenario(target)) return 'scenario'
   if (isRequest(target)) return 'request'
   if (isEnvironmentFolder(target)) return 'env-folder'
   if (isAnyFolder(target)) return 'folder'

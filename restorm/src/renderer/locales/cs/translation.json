@@ -95,6 +95,50 @@
     "multiLanguage": {
       "title": "27 jazyků!",
       "body": "Restorm mluví 27 jazyky. Angličtina, francouzština, španělština, němčina, italština, japonština, čínština, korejština a mnohé další — vyber si svůj v nastavení!"
+    },
+    "fromPostman": {
+      "title": "Přicházíte z Postmanu nebo Bruna?",
+      "body": "Pomůžeme vám přejít na Restorm — váš přechod hravě ;)"
+    },
+    "chainRequests": {
+      "title": "Potřebujete zřetězit několik požadavků?",
+      "body": "Používejte své požadavky uvnitř scénářů, přidávejte podmínky a dokonce vnořujte scénáře do jiných scénářů."
+    },
+    "stepByStep": {
+      "title": "Procházejte své scénáře krok za krokem",
+      "body": "Jeden krok po druhém, abyste viděli přesně, co se děje. Můžete si dokonce nastavit breakpointy."
+    },
+    "cicd": {
+      "title": "Spouštějte své scénáře ve svých CI/CD pipelinách",
+      "body": "Spusťte Restorm v headless režimu, abyste provedli scénář bez rozhraní a sebrali jeho logy — automatizované testy, sestavené vizuálně."
+    },
+    "nestedScenarios": {
+      "title": "Podívejte se, co se ve scénáři děje",
+      "body": "Scénář může volat jiný. V inspektoru si přečtěte každý log a skočte rovnou ke scénáři, ze kterého pochází."
+    },
+    "scenarioHistory": {
+      "title": "Ale co se to právě stalo?",
+      "body": "Procházejte historii spuštění svých scénářů. Jeden z nich se mezitím změnil? Žádný problém — jeho konfiguraci jsme uchovali."
+    },
+    "codeSandbox": {
+      "title": "Scénáře a bezpečnost",
+      "body": "Ve svých scénářích můžete psát kód — ale ten běží v zabezpečené sandboxu, bez přístupu k vašim lokálním souborům a bez přímého přístupu k internetu. Nejbezpečnější způsob, jak zůstat chráněni!"
+    },
+    "codeLanguages": {
+      "title": "Máte chuť psát kód?",
+      "body": "Pište kód přímo ve svých scénářích — v TypeScriptu, JavaScriptu, Pythonu, Lua, Ruby nebo R!"
+    },
+    "scenarioAi": {
+      "title": "Scénáře řiditelné umělou inteligencí",
+      "body": "Claude, Cursor, Copilot… znají váš kód: požádejte je o scénáře na míru. Vše je vystaveno přes MCP pro vytváření, úpravu a spouštění scénářů."
+    },
+    "interactiveScenarios": {
+      "title": "Interaktivní scénáře!",
+      "body": "Udělejte své scénáře parametrizovatelné a dokonce se uživatele zeptejte dialogovými okny, co má dělat."
+    },
+    "customValueLists": {
+      "title": "Znovupoužitelné seznamy hodnot",
+      "body": "Definujte si vlastní seznamy hodnot a používejte je ve svých požadavcích i ve svých scénářích."
     }
   },
   "authFailureToast": {

@@ -93,6 +93,50 @@
     "multiLanguage": {
       "title": "27 kieltä!",
       "body": "Restorm puhuu 27 kieltä. Englanti, ranska, espanja, saksa, italia, japani, kiina, korea ja monia muita — valitse omasi asetuksista!"
+    },
+    "fromPostman": {
+      "title": "Tuletko Postmanista tai Brunosta?",
+      "body": "Autamme sinua siirtymään Restormiin — vaihto sujuu helposti ;)"
+    },
+    "chainRequests": {
+      "title": "Useita pyyntöjä ketjutettavaksi?",
+      "body": "Käytä pyyntöjäsi skenaarioiden sisällä, lisää ehtoja ja voit jopa upottaa skenaarioita toisten skenaarioiden sisään."
+    },
+    "stepByStep": {
+      "title": "Käy skenaariosi läpi askel kerrallaan",
+      "body": "Yksi askel kerrallaan, jotta näet tarkalleen mitä tapahtuu. Voit jopa asettaa keskeytyskohtia."
+    },
+    "cicd": {
+      "title": "Aja skenaariosi CI/CD-putkissasi",
+      "body": "Käynnistä Restorm päättömänä ajaaksesi skenaarion ilman käyttöliittymää ja kerää sen lokit — automatisoidut testit, rakennettu visuaalisesti."
+    },
+    "nestedScenarios": {
+      "title": "Näe mitä skenaariossa tapahtuu",
+      "body": "Skenaario voi kutsua toista. Lue tarkastelussa jokainen loki ja hyppää suoraan siihen skenaarioon, josta se tuli."
+    },
+    "scenarioHistory": {
+      "title": "Mitä juuri tapahtui?",
+      "body": "Selaa skenaarioidesi suoritushistoriaa. Jokin niistä on muuttunut sittemmin? Ei hätää — tallensimme sen asetukset."
+    },
+    "codeSandbox": {
+      "title": "Skenaariot ja turvallisuus",
+      "body": "Voit kirjoittaa koodia skenaarioihisi — mutta se suoritetaan turvallisessa hiekkalaatikossa, ilman pääsyä paikallisiin tiedostoihisi ja ilman suoraa internet-yhteyttä. Turvallisin tapa pysyä suojattuna!"
+    },
+    "codeLanguages": {
+      "title": "Tekisikö mieli kirjoittaa koodia?",
+      "body": "Kirjoita koodia suoraan skenaarioihisi — kielillä TypeScript, JavaScript, Python, Lua, Ruby tai R!"
+    },
+    "scenarioAi": {
+      "title": "Tekoälyllä ohjattavat skenaariot",
+      "body": "Claude, Cursor, Copilot… tuntevat koodikantasi: pyydä niiltä räätälöityjä skenaarioita. Kaikki on saatavilla MCP:n kautta skenaarioiden luomiseen, muokkaamiseen ja ajamiseen."
+    },
+    "interactiveScenarios": {
+      "title": "Interaktiiviset skenaariot!",
+      "body": "Tee skenaarioistasi parametrisoitavia ja kysy jopa käyttäjältä mitä tehdä valintaikkunoilla."
+    },
+    "customValueLists": {
+      "title": "Uudelleenkäytettävät arvolistat",
+      "body": "Määrittele omat arvolistasi ja käytä niitä uudelleen niin pyynnöissäsi kuin skenaarioissasikin."
     }
   },
   "authFailureToast": {

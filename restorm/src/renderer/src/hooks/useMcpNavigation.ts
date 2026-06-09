@@ -15,13 +15,13 @@
 
 import { useEffect } from 'react'
 import { navigationService } from 'electron-core-ui/renderer'
-import type { FolderItem, Folder, EnvironmentFolder, Request, Environment } from '../../../shared/types/collections'
+import type { FolderItem, Folder, EnvironmentFolder, Request, Environment, Scenario } from '../../../shared/types/collections'
 import { isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest } from '../../../shared/types/collections'
-import { findFolderById, findEnvironmentFolderById, findRequestById, findItemWithBreadcrumbs, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
+import { findFolderById, findEnvironmentFolderById, findRequestById, findScenarioById, findItemWithBreadcrumbs, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
 import type { BreadcrumbItem } from '../../../shared/types/editor'
 import type { OpenTabOptions } from './useWorkbenchTabs'
 
-type ActiveKind = 'request' | 'folder' | 'env-folder'
+type ActiveKind = 'request' | 'folder' | 'env-folder' | 'scenario'
 
 interface RestormNavBridge {
   onMcpOpenTab: (cb: (payload: { itemId: string; kind: ActiveKind }) => void) => () => void
@@ -37,6 +37,7 @@ export interface UseMcpNavigationInput {
   openFolderTab: (folder: Folder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
   openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
   openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[], options?: OpenTabOptions) => void
+  openScenarioEditorTab: (scenario: Scenario, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
   closeTabByItemId: (itemId: string) => void
 }
 
@@ -65,6 +66,7 @@ export function useMcpNavigation(input: UseMcpNavigationInput): void {
     openFolderTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
+    openScenarioEditorTab,
     closeTabByItemId
   } = input
 
@@ -105,6 +107,13 @@ export function useMcpNavigation(input: UseMcpNavigationInput): void {
         setSelectedItemId(itemId)
         expandAncestors(itemId)
         navigationService.navigateTo(itemId, 'mcp', { type: 'environment-folder' })
+      } else if (kind === 'scenario') {
+        const s = findScenarioById(rootItems, itemId)
+        if (!s) return
+        openScenarioEditorTab(s, breadcrumbs)
+        setSelectedItemId(itemId)
+        expandAncestors(itemId)
+        navigationService.navigateTo(itemId, 'mcp', { type: 'scenario-editor' })
       } else {
         // kind === 'folder' (only remaining union arm — ActiveKind is exhaustive).
         const f = findFolderById(rootItems, itemId)
@@ -129,5 +138,5 @@ export function useMcpNavigation(input: UseMcpNavigationInput): void {
       offReveal()
       offClose()
     }
-  }, [enabled, rootItems, setExpandedIds, setSelectedItemId, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, closeTabByItemId])
+  }, [enabled, rootItems, setExpandedIds, setSelectedItemId, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, openScenarioEditorTab, closeTabByItemId])
 }

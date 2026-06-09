@@ -938,14 +938,14 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.send('mcp:active-state-bootstrap', payload)
     },
     /** Subscribe to MCP `open_tab` requests. Payload `{itemId, kind}`. */
-    onMcpOpenTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void): (() => void) => {
-      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) }
+    onMcpOpenTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) }
       ipcRenderer.on('mcp:open-tab', handler)
       return () => { ipcRenderer.off('mcp:open-tab', handler) }
     },
     /** Subscribe to MCP `reveal_in_tree` requests. */
-    onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void): (() => void) => {
-      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) }
+    onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) }
       ipcRenderer.on('mcp:reveal-in-tree', handler)
       return () => { ipcRenderer.off('mcp:reveal-in-tree', handler) }
     },
@@ -960,8 +960,8 @@ contextBridge.exposeInMainWorld('restorm', {
       return () => { ipcRenderer.off('mcp:tree-replace', handler) }
     },
     /** Subscribe to MCP `close_tab` requests. Payload `{itemId, kind}`. */
-    onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void): (() => void) => {
-      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) }
+    onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) }
       ipcRenderer.on('mcp:close-tab', handler)
       return () => { ipcRenderer.off('mcp:close-tab', handler) }
     },

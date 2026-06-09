@@ -93,6 +93,50 @@
     "multiLanguage": {
       "title": "27 språk!",
       "body": "Restorm talar 27 språk. Engelska, franska, spanska, tyska, italienska, japanska, kinesiska, koreanska och många fler — välj ditt i inställningarna!"
+    },
+    "fromPostman": {
+      "title": "Kommer du från Postman eller Bruno?",
+      "body": "Vi hjälper dig att byta till Restorm — din övergång görs enkel ;)"
+    },
+    "chainRequests": {
+      "title": "Flera förfrågningar att kedja ihop?",
+      "body": "Använd dina förfrågningar inuti scenarier, lägg till villkor och nästla till och med scenarier inuti andra scenarier."
+    },
+    "stepByStep": {
+      "title": "Stega igenom dina scenarier",
+      "body": "Ett steg i taget, för att se exakt vad som händer. Du kan till och med sätta brytpunkter."
+    },
+    "cicd": {
+      "title": "Kör dina scenarier i dina CI/CD-pipelines",
+      "body": "Starta Restorm i headless-läge för att köra ett scenario utan gränssnitt och samla in dess loggar — automatiserade tester, byggda visuellt."
+    },
+    "nestedScenarios": {
+      "title": "Se vad som pågår i ett scenario",
+      "body": "Ett scenario kan anropa ett annat. I inspektören läser du varje logg och hoppar rakt till scenariot den kom ifrån."
+    },
+    "scenarioHistory": {
+      "title": "Men vad var det som hände?",
+      "body": "Bläddra i körhistoriken för dina scenarier. Har något av dem ändrats sedan dess? Ingen fara — vi sparade dess konfiguration."
+    },
+    "codeSandbox": {
+      "title": "Scenarier och säkerhet",
+      "body": "Du kan skriva kod i dina scenarier — men den körs i en säker sandbox, utan åtkomst till dina lokala filer och utan direkt internetåtkomst. Det säkraste sättet att hålla dig skyddad!"
+    },
+    "codeLanguages": {
+      "title": "Sugen på att skriva lite kod?",
+      "body": "Skriv kod direkt i dina scenarier — i TypeScript, JavaScript, Python, Lua, Ruby eller R!"
+    },
+    "scenarioAi": {
+      "title": "Scenarier som kan styras av AI",
+      "body": "Claude, Cursor, Copilot… känner till din kodbas: be dem om skräddarsydda scenarier. Allt exponeras via MCP för att skapa, redigera och köra scenarier."
+    },
+    "interactiveScenarios": {
+      "title": "Interaktiva scenarier!",
+      "body": "Gör dina scenarier parametriserbara och fråga till och med användaren vad som ska göras med dialogrutor."
+    },
+    "customValueLists": {
+      "title": "Återanvändbara värdelistor",
+      "body": "Definiera dina egna värdelistor och återanvänd dem i både dina förfrågningar och dina scenarier."
     }
   },
   "authFailureToast": {

@@ -94,6 +94,50 @@
     "multiLanguage": {
       "title": "27 de limbi!",
       "body": "Restorm vorbește 27 de limbi. Engleză, franceză, spaniolă, germană, italiană, japoneză, chineză, coreeană și multe altele — alege-o pe a ta din setări!"
+    },
+    "fromPostman": {
+      "title": "Vii de la Postman sau Bruno?",
+      "body": "Te ajutăm să faci trecerea la Restorm — tranziția ta, ușor de făcut ;)"
+    },
+    "chainRequests": {
+      "title": "Mai multe cereri de înlănțuit?",
+      "body": "Folosește-ți cererile în cadrul scenariilor, adaugă condiții și chiar imbrică scenarii în alte scenarii."
+    },
+    "stepByStep": {
+      "title": "Parcurge-ți scenariile pas cu pas",
+      "body": "Un pas pe rând, ca să vezi exact ce se întâmplă. Poți chiar să setezi puncte de întrerupere."
+    },
+    "cicd": {
+      "title": "Rulează-ți scenariile în pipeline-urile tale CI/CD",
+      "body": "Pornește Restorm în mod headless ca să rulezi un scenariu fără interfață și să-i colectezi jurnalele — teste automate, construite vizual."
+    },
+    "nestedScenarios": {
+      "title": "Vezi ce se petrece într-un scenariu",
+      "body": "Un scenariu poate apela altul. În inspector, citește fiecare jurnal și sari direct la scenariul din care provine."
+    },
+    "scenarioHistory": {
+      "title": "Dar ce tocmai s-a întâmplat?",
+      "body": "Răsfoiește istoricul execuțiilor scenariilor tale. Unul dintre ele s-a schimbat între timp? Nicio grijă — i-am păstrat configurația."
+    },
+    "codeSandbox": {
+      "title": "Scenariile și securitatea",
+      "body": "Poți scrie cod în scenariile tale — dar rulează într-un sandbox securizat, fără acces la fișierele tale locale și fără acces direct la internet. Cel mai sigur mod de a rămâne protejat!"
+    },
+    "codeLanguages": {
+      "title": "Ai chef să scrii niște cod?",
+      "body": "Scrie cod direct în scenariile tale — în TypeScript, JavaScript, Python, Lua, Ruby sau R!"
+    },
+    "scenarioAi": {
+      "title": "Scenarii pilotabile de AI",
+      "body": "Claude, Cursor, Copilot… îți cunosc codul: cere-le scenarii făcute pe măsură. Totul este expus prin MCP pentru a crea, edita și rula scenarii."
+    },
+    "interactiveScenarios": {
+      "title": "Scenarii interactive!",
+      "body": "Fă-ți scenariile parametrizabile și chiar întreabă utilizatorul ce să facă prin casete de dialog."
+    },
+    "customValueLists": {
+      "title": "Liste de valori reutilizabile",
+      "body": "Definește-ți propriile liste de valori și reutilizează-le deopotrivă în cererile și în scenariile tale."
     }
   },
   "authFailureToast": {

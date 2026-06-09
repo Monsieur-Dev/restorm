@@ -93,6 +93,50 @@
     "multiLanguage": {
       "title": "¡27 idiomas!",
       "body": "Restorm habla 27 idiomas. Inglés, francés, español, alemán, italiano, japonés, chino, coreano y muchos más — elige el tuyo en los ajustes."
+    },
+    "fromPostman": {
+      "title": "¿Vienes de Postman o Bruno?",
+      "body": "Te ayudamos a pasarte a Restorm — tu transición hecha fácil ;)"
+    },
+    "chainRequests": {
+      "title": "¿Varias peticiones que encadenar?",
+      "body": "Usa tus peticiones dentro de escenarios, añade condiciones e incluso anida escenarios dentro de otros escenarios."
+    },
+    "stepByStep": {
+      "title": "Recorre tus escenarios paso a paso",
+      "body": "Un paso a la vez, para ver exactamente qué ocurre. Incluso puedes poner breakpoints."
+    },
+    "cicd": {
+      "title": "Ejecuta tus escenarios en tus pipelines de CI/CD",
+      "body": "Inicia Restorm en modo headless para ejecutar un escenario sin interfaz y recoger sus logs — pruebas automatizadas, construidas visualmente."
+    },
+    "nestedScenarios": {
+      "title": "Mira qué ocurre en un escenario",
+      "body": "Un escenario puede llamar a otro. En el inspector, lee cada log y salta directamente al escenario del que proviene."
+    },
+    "scenarioHistory": {
+      "title": "Pero ¿qué acaba de pasar?",
+      "body": "Explora el historial de ejecución de tus escenarios. ¿Alguno ha cambiado desde entonces? Sin problema — hemos conservado su configuración."
+    },
+    "codeSandbox": {
+      "title": "Escenarios y seguridad",
+      "body": "Puedes escribir código en tus escenarios — pero se ejecuta en un sandbox seguro, sin acceso a tus archivos locales y sin acceso directo a internet. ¡La forma más segura de estar protegido!"
+    },
+    "codeLanguages": {
+      "title": "¿Te apetece escribir algo de código?",
+      "body": "Escribe código directamente en tus escenarios — ¡en TypeScript, JavaScript, Python, Lua, Ruby o R!"
+    },
+    "scenarioAi": {
+      "title": "Escenarios manejables por IA",
+      "body": "Claude, Cursor, Copilot… conocen tu código: pídeles escenarios a medida. Todo se expone mediante MCP para crear, editar y ejecutar escenarios."
+    },
+    "interactiveScenarios": {
+      "title": "¡Escenarios interactivos!",
+      "body": "Haz que tus escenarios sean parametrizables e incluso pregunta al usuario qué hacer con cuadros de diálogo."
+    },
+    "customValueLists": {
+      "title": "Listas de valores reutilizables",
+      "body": "Define tus propias listas de valores y reutilízalas tanto en tus peticiones como en tus escenarios."
     }
   },
   "authFailureToast": {

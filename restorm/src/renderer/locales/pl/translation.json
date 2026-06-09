@@ -95,6 +95,50 @@
     "multiLanguage": {
       "title": "27 języków!",
       "body": "Restorm mówi w 27 językach. Angielski, francuski, hiszpański, niemiecki, włoski, japoński, chiński, koreański i wiele innych — wybierz swój w ustawieniach!"
+    },
+    "fromPostman": {
+      "title": "Przychodzisz z Postmana albo Bruno?",
+      "body": "Pomożemy Ci przesiąść się na Restorm — przejście proste jak nigdy ;)"
+    },
+    "chainRequests": {
+      "title": "Kilka żądań do połączenia w łańcuch?",
+      "body": "Używaj swoich żądań wewnątrz scenariuszy, dodawaj warunki, a nawet zagnieżdżaj scenariusze w innych scenariuszach."
+    },
+    "stepByStep": {
+      "title": "Przejdź przez scenariusze krok po kroku",
+      "body": "Krok po kroku, by dokładnie zobaczyć, co się dzieje. Możesz nawet ustawiać punkty wstrzymania."
+    },
+    "cicd": {
+      "title": "Uruchamiaj scenariusze w swoich pipeline'ach CI/CD",
+      "body": "Uruchom Restorm w trybie headless, aby wykonać scenariusz bez interfejsu i zebrać jego logi — testy automatyczne, zbudowane wizualnie."
+    },
+    "nestedScenarios": {
+      "title": "Zobacz, co dzieje się w scenariuszu",
+      "body": "Scenariusz może wywołać inny. W inspektorze przeczytasz każdy log i przeskoczysz prosto do scenariusza, z którego pochodzi."
+    },
+    "scenarioHistory": {
+      "title": "Ale co się przed chwilą wydarzyło?",
+      "body": "Przeglądaj historię uruchomień swoich scenariuszy. Jeden z nich się od tego czasu zmienił? Bez obaw — zachowaliśmy jego konfigurację."
+    },
+    "codeSandbox": {
+      "title": "Scenariusze i bezpieczeństwo",
+      "body": "Możesz pisać kod w swoich scenariuszach — ale działa on w bezpiecznym sandboksie, bez dostępu do Twoich lokalnych plików i bez bezpośredniego dostępu do internetu. Najbezpieczniejszy sposób, by pozostać chronionym!"
+    },
+    "codeLanguages": {
+      "title": "Masz ochotę napisać trochę kodu?",
+      "body": "Pisz kod prosto w swoich scenariuszach — w TypeScript, JavaScript, Python, Lua, Ruby lub R!"
+    },
+    "scenarioAi": {
+      "title": "Scenariusze sterowane przez AI",
+      "body": "Claude, Cursor, Copilot… znają Twój kod: poproś je o scenariusze szyte na miarę. Wszystko jest udostępnione przez MCP, by tworzyć, edytować i uruchamiać scenariusze."
+    },
+    "interactiveScenarios": {
+      "title": "Interaktywne scenariusze!",
+      "body": "Spraw, by Twoje scenariusze były parametryzowalne, a nawet pytaj użytkownika o decyzję za pomocą okien dialogowych."
+    },
+    "customValueLists": {
+      "title": "Wielokrotnego użytku listy wartości",
+      "body": "Zdefiniuj własne listy wartości i używaj ich ponownie zarówno w żądaniach, jak i w scenariuszach."
     }
   },
   "authFailureToast": {

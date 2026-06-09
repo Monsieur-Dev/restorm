@@ -93,6 +93,50 @@
     "multiLanguage": {
       "title": "27 sprog!",
       "body": "Restorm taler 27 sprog. Engelsk, fransk, spansk, tysk, italiensk, japansk, kinesisk, koreansk og mange flere — vælg dit i indstillingerne!"
+    },
+    "fromPostman": {
+      "title": "Kommer du fra Postman eller Bruno?",
+      "body": "Vi hjælper dig med at skifte til Restorm — din overgang gjort nem ;)"
+    },
+    "chainRequests": {
+      "title": "Flere forespørgsler, der skal kædes sammen?",
+      "body": "Brug dine forespørgsler inde i scenarier, tilføj betingelser, og indlejr endda scenarier i andre scenarier."
+    },
+    "stepByStep": {
+      "title": "Gennemgå dine scenarier trin for trin",
+      "body": "Et trin ad gangen, så du ser præcis, hvad der sker. Du kan endda sætte breakpoints."
+    },
+    "cicd": {
+      "title": "Kør dine scenarier i dine CI/CD-pipelines",
+      "body": "Start Restorm i headless-tilstand for at køre et scenarie uden brugerflade og indsamle dets logs — automatiserede tests, bygget visuelt."
+    },
+    "nestedScenarios": {
+      "title": "Se hvad der foregår i et scenarie",
+      "body": "Et scenarie kan kalde et andet. I inspektøren kan du læse hver log og springe direkte til det scenarie, den kom fra."
+    },
+    "scenarioHistory": {
+      "title": "Men hvad skete der lige?",
+      "body": "Gennemse udførelseshistorikken for dine scenarier. Et af dem er ændret siden? Bare rolig — vi har gemt dets konfiguration."
+    },
+    "codeSandbox": {
+      "title": "Scenarier og sikkerhed",
+      "body": "Du kan skrive kode i dine scenarier — men den kører i en sikker sandbox, uden adgang til dine lokale filer og uden direkte internetadgang. Den sikreste måde at være beskyttet på!"
+    },
+    "codeLanguages": {
+      "title": "Lyst til at skrive lidt kode?",
+      "body": "Skriv kode direkte i dine scenarier — i TypeScript, JavaScript, Python, Lua, Ruby eller R!"
+    },
+    "scenarioAi": {
+      "title": "Scenarier der kan styres af AI",
+      "body": "Claude, Cursor, Copilot… kender din kode: bed dem om skræddersyede scenarier. Alt er eksponeret via MCP til at oprette, redigere og køre scenarier."
+    },
+    "interactiveScenarios": {
+      "title": "Interaktive scenarier!",
+      "body": "Gør dine scenarier parametrerbare, og spørg endda brugeren, hvad der skal gøres, med dialogbokse."
+    },
+    "customValueLists": {
+      "title": "Genbrugelige værdilister",
+      "body": "Definér dine egne værdilister, og genbrug dem i både dine forespørgsler og dine scenarier."
     }
   },
   "authFailureToast": {
