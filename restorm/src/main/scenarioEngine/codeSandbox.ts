@@ -277,6 +277,27 @@ const SANDBOX_NETWORK_SHIM = `
 })();
 `
 
+/** Variable surface, evaluated ONLY when a host variable bridge is supplied.
+ * Built on five synchronous host primitives (`__hostGetVar` / `__hostSetVar` /
+ * `__hostHasVar` / `__hostDeleteVar` / `__hostVarNames`), it exposes an internal
+ * `globalThis.__vars` read/WRITE view of the scenario's run variables. Unlike the
+ * read-only `vars` snapshot, writes here persist back to the run — this is the
+ * foundation the Postman `pm.*` / Bruno `bru.*` variable scopes build on. Values
+ * round-trip as JSON wrapped in `{ v }` so `undefined` survives the boundary. */
+const SANDBOX_VARIABLE_SHIM = `
+(function(){
+  var g = globalThis;
+  function get(name){ try { return JSON.parse(g.__hostGetVar(String(name))).v; } catch(e){ return undefined; } }
+  function set(name, value){ g.__hostSetVar(String(name), JSON.stringify({ v: value })); return value; }
+  function has(name){ return !!g.__hostHasVar(String(name)); }
+  function del(name){ g.__hostDeleteVar(String(name)); }
+  function keys(){ try { return JSON.parse(g.__hostVarNames()) || []; } catch(e){ return []; } }
+  function toObject(){ var o = {}, k = keys(); for (var i=0;i<k.length;i++) o[k[i]] = get(k[i]); return o; }
+  function clear(){ var k = keys(); for (var i=0;i<k.length;i++) del(k[i]); }
+  g.__vars = { get: get, set: set, has: has, 'delete': del, unset: del, clear: clear, keys: keys, toObject: toObject };
+})();
+`
+
 /** A network request the sandbox asks the trusted host to perform on its behalf
  * (so it goes through restorm's firewall instead of a parallel HTTP stack). */
 export interface SandboxHttpRequest {
@@ -306,6 +327,21 @@ export interface SandboxHttpResponse {
  * when the run ends (timeout / completion). */
 export type SandboxNetworkBridge = (req: SandboxHttpRequest, signal: AbortSignal) => Promise<SandboxHttpResponse>
 
+/** Read/WRITE access to the scenario run's variables from inside the sandbox.
+ * Backed by the executor's live variable map, so a script that writes a variable
+ * (via `pm.environment.set` / `bru.setVar` / the internal `__vars`) persists it
+ * to the run — the bridge the imported Postman/Bruno scripts need to pass state
+ * between requests. All values are JSON-cloneable (functions/dates are dropped),
+ * matching how `setVariable` / `getVariable` nodes already store them. */
+export interface SandboxVariableBridge {
+  get(name: string): unknown
+  set(name: string, value: unknown): void
+  has(name: string): boolean
+  delete(name: string): void
+  /** The names of every variable currently set (for `toObject` / `clear`). */
+  names(): string[]
+}
+
 export interface RunCodeOptions {
   /** The user's TypeScript/JavaScript source (treated as a function body that
    * may `return` the result). */
@@ -321,6 +357,11 @@ export interface RunCodeOptions {
    * that delegate to it — and thus to the firewall. Absent → the sandbox stays
    * fully offline (no `fetch`, no `pm`), the safe default. */
   network?: SandboxNetworkBridge
+  /** Optional host variable bridge. When provided, the sandbox gains an internal
+   * `__vars` read/WRITE view of the run's variables (the foundation `pm.*` /
+   * `bru.*` variable scopes build on). Absent → the script only sees the
+   * read-only `vars` snapshot. */
+  variableBridge?: SandboxVariableBridge
   /** The run's cooperative-cancellation signal (user Stop / scope abort). When
    * it fires, any in-flight host network request is aborted immediately rather
    * than lingering until the wall-clock timeout. */
@@ -337,7 +378,7 @@ export interface RunCodeResult {
 /** Transpile + run user code in the QuickJS sandbox. Rejects with a normal
  * Error (message from the sandboxed throw) on a script error or timeout. */
 export async function runCodeInSandbox(opts: RunCodeOptions): Promise<RunCodeResult> {
-  const { code, input, variables = {}, timeoutMs = 5000, network, signal } = opts
+  const { code, input, variables = {}, timeoutMs = 5000, network, variableBridge, signal } = opts
   // 1. Transpile TS -> JS (types stripped; isolatedModules-safe single file).
   // Wrap as an ASYNC function body BEFORE transpiling, so esbuild sees the
   // top-level `await` / `return` inside a function (valid) instead of at module
@@ -426,6 +467,38 @@ export async function runCodeInSandbox(opts: RunCodeOptions): Promise<RunCodeRes
       const net = ctx.evalCode(SANDBOX_NETWORK_SHIM)
       if (net.error) { const e: unknown = ctx.dump(net.error); net.error.dispose(); throw new Error(`sandbox network shim failed: ${stringifyErr(e)}`) }
       net.value.dispose()
+    }
+
+    // 2c. Variable bridge (only when supplied): five synchronous host primitives
+    //     backing an internal `__vars` read/WRITE view of the run's variables.
+    //     Values cross the boundary as JSON wrapped in `{ v }` so `undefined`
+    //     survives. Writes mutate the executor's live variable map at once, so a
+    //     script can pass state to a later node (what imported pm/bru scripts do).
+    if (variableBridge) {
+      const getVarFn = ctx.newFunction('__hostGetVar', (nameH) =>
+        ctx.newString(safeJson({ v: variableBridge.get(ctx.getString(nameH)) })))
+      ctx.setProp(ctx.global, '__hostGetVar', getVarFn); getVarFn.dispose()
+
+      const setVarFn = ctx.newFunction('__hostSetVar', (nameH, valH) => {
+        let value: unknown
+        try { value = (JSON.parse(ctx.getString(valH)) as { v: unknown }).v } catch { value = undefined }
+        variableBridge.set(ctx.getString(nameH), value)
+      })
+      ctx.setProp(ctx.global, '__hostSetVar', setVarFn); setVarFn.dispose()
+
+      const hasVarFn = ctx.newFunction('__hostHasVar', (nameH) =>
+        variableBridge.has(ctx.getString(nameH)) ? ctx.true : ctx.false)
+      ctx.setProp(ctx.global, '__hostHasVar', hasVarFn); hasVarFn.dispose()
+
+      const delVarFn = ctx.newFunction('__hostDeleteVar', (nameH) => { variableBridge.delete(ctx.getString(nameH)) })
+      ctx.setProp(ctx.global, '__hostDeleteVar', delVarFn); delVarFn.dispose()
+
+      const namesFn = ctx.newFunction('__hostVarNames', () => ctx.newString(safeJson(variableBridge.names())))
+      ctx.setProp(ctx.global, '__hostVarNames', namesFn); namesFn.dispose()
+
+      const vars = ctx.evalCode(SANDBOX_VARIABLE_SHIM)
+      if (vars.error) { const e: unknown = ctx.dump(vars.error); vars.error.dispose(); throw new Error(`sandbox variable shim failed: ${stringifyErr(e)}`) }
+      vars.value.dispose()
     }
 
     // 3. Inject input + variables as JSON (data only — no functions/dates).

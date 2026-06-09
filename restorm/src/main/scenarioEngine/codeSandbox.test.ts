@@ -1,6 +1,22 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest'
-import { runCodeInSandbox, type SandboxNetworkBridge, type SandboxHttpResponse } from './codeSandbox'
+import { runCodeInSandbox, type SandboxNetworkBridge, type SandboxHttpResponse, type SandboxVariableBridge } from './codeSandbox'
+
+/** A variable bridge backed by a plain Map — the test stand-in for the
+ * executor's live run-variable map. */
+function mapBridge(init: Record<string, unknown> = {}): { store: Map<string, unknown>; bridge: SandboxVariableBridge } {
+  const store = new Map<string, unknown>(Object.entries(init))
+  return {
+    store,
+    bridge: {
+      get: (n) => store.get(n),
+      set: (n, v) => { store.set(n, v) },
+      has: (n) => store.has(n),
+      delete: (n) => { store.delete(n) },
+      names: () => Array.from(store.keys())
+    }
+  }
+}
 
 describe('codeSandbox', () => {
   it('runs plain JS and returns the value', async () => {
@@ -199,5 +215,50 @@ describe('codeSandbox network bridge', () => {
     await expect(
       runCodeInSandbox({ code: 'await fetch("https://blocked/x"); return "unreachable"', network: denyNet })
     ).rejects.toThrow(/firewall/)
+  })
+
+  describe('variable bridge (__vars)', () => {
+    it('reads, writes and lists run variables — writes persist to the host store', async () => {
+      const { store, bridge } = mapBridge({ counter: 1, greeting: 'hi' })
+      const { result } = await runCodeInSandbox({
+        variableBridge: bridge,
+        code: `
+          __vars.set('counter', __vars.get('counter') + 10)
+          __vars.set('name', 'restorm')
+          return { counter: __vars.get('counter'), greeting: __vars.get('greeting'), hasName: __vars.has('name'), keys: __vars.keys() }
+        `
+      })
+      // Writes reached the host map (so a later node sees them).
+      expect(store.get('counter')).toBe(11)
+      expect(store.get('name')).toBe('restorm')
+      // Reads (including live-after-write) work inside the script.
+      expect(result).toEqual({ counter: 11, greeting: 'hi', hasName: true, keys: ['counter', 'greeting', 'name'] })
+    })
+
+    it('round-trips objects and distinguishes unset (undefined) from null', async () => {
+      const { store, bridge } = mapBridge({ obj: { a: [1, 2], b: 'x' }, nil: null })
+      const { result } = await runCodeInSandbox({
+        variableBridge: bridge,
+        code: `return { obj: __vars.get('obj'), nil: __vars.get('nil'), missing: __vars.get('nope'), hasMissing: __vars.has('nope') }`
+      })
+      expect(result).toEqual({ obj: { a: [1, 2], b: 'x' }, nil: null, missing: undefined, hasMissing: false })
+      expect(store.get('obj')).toEqual({ a: [1, 2], b: 'x' })
+    })
+
+    it('delete / unset / clear remove variables from the host store', async () => {
+      const { store, bridge } = mapBridge({ a: 1, b: 2, c: 3 })
+      await runCodeInSandbox({
+        variableBridge: bridge,
+        code: `__vars.delete('a'); __vars.unset('b'); return __vars.keys()`
+      })
+      expect([...store.keys()]).toEqual(['c'])
+      await runCodeInSandbox({ variableBridge: bridge, code: `__vars.clear(); return null` })
+      expect(store.size).toBe(0)
+    })
+
+    it('omits `__vars` entirely when no bridge is supplied', async () => {
+      const { result } = await runCodeInSandbox({ code: `return typeof __vars` })
+      expect(result).toBe('undefined')
+    })
   })
 })

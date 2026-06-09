@@ -34,6 +34,15 @@ export const codeExecutor: NodeExecutor = async (act, ctx) => {
   if (runtime === undefined) throw new Error(`code node: no runtime for language '${language}'`)
 
   const { codeNetworkBridge } = await import('../codeNetworkBridge')
+  // Read/WRITE view of the run's live variable map, so a script (or an imported
+  // pm/bru script) that sets a variable persists it to the run for later nodes.
+  const variableBridge = {
+    get: (name: string): unknown => ctx.variables.get(name),
+    set: (name: string, value: unknown): void => { ctx.variables.set(name, value) },
+    has: (name: string): boolean => ctx.variables.has(name),
+    delete: (name: string): void => { ctx.variables.delete(name) },
+    names: (): string[] => Array.from(ctx.variables.keys())
+  }
   const { result, logs } = await runtime.run(code, {
     input,
     variables,
@@ -41,6 +50,8 @@ export const codeExecutor: NodeExecutor = async (act, ctx) => {
     // `fetch` / `pm.sendRequest` route through the firewall (codeNetworkBridge)
     // for runtimes that support it (JS); others ignore it.
     network: codeNetworkBridge,
+    // Read/write scenario variables from the script (JS runtime only).
+    variableBridge,
     // User Stop / scope abort cancels an in-flight run / network request at once.
     signal: ctx.signal
   })

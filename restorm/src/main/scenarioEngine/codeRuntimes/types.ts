@@ -11,7 +11,7 @@
  * user run-log lines. An error or a timeout rejects → the scheduler routes to
  * the node's `error` port.
  */
-import type { SandboxNetworkBridge } from '../codeSandbox'
+import type { SandboxNetworkBridge, SandboxVariableBridge } from '../codeSandbox'
 
 export interface CodeRunContext {
   /** The node's wired/inline input value, exposed to the script. */
@@ -25,6 +25,10 @@ export interface CodeRunContext {
   /** Optional host network bridge (firewall-routed `fetch` / `pm.sendRequest`).
    * Only runtimes that opt into network access use it; others ignore it. */
   network?: SandboxNetworkBridge
+  /** Optional host variable bridge — read/WRITE access to the run's variables
+   * (foundation for `pm.*` / `bru.*`). Only the JS sandbox uses it; others
+   * ignore it (Postman/Bruno scripts are JavaScript). */
+  variableBridge?: SandboxVariableBridge
 }
 
 export interface CodeRunResult {
