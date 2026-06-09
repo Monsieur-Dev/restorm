@@ -267,7 +267,9 @@ const SANDBOX_NETWORK_SHIM = `
     var r = typeof reqArg === 'string' ? { url: reqArg } : (reqArg || {});
     var req = { url: String(r.url), method: String(r.method || 'GET').toUpperCase(), headers: normHeaders(r.header || r.headers), body: bodyToString(r.body) };
     doFetch(req).then(function(resp){
-      var pmResp = makePmResponse(resp);
+      // Prefer the richer pm-runtime response (with .to.* assertions) when the
+      // Postman shim is loaded; fall back to the network-only builder otherwise.
+      var pmResp = (typeof g.__makePmResponse === 'function') ? g.__makePmResponse(resp) : makePmResponse(resp);
       g.pm.response = pmResp;
       if (typeof cb === 'function') cb(null, pmResp);
     }, function(err){
@@ -295,6 +297,111 @@ const SANDBOX_VARIABLE_SHIM = `
   function toObject(){ var o = {}, k = keys(); for (var i=0;i<k.length;i++) o[k[i]] = get(k[i]); return o; }
   function clear(){ var k = keys(); for (var i=0;i<k.length;i++) del(k[i]); }
   g.__vars = { get: get, set: set, has: has, 'delete': del, unset: del, clear: clear, keys: keys, toObject: toObject };
+})();
+`
+
+/** Postman `pm` runtime, evaluated ONLY when a `postman` context is supplied.
+ * Builds the `pm.*` surface so an UNMODIFIED Postman pre/post-request script
+ * runs: the variable scopes (`pm.variables`/`environment`/`globals`/
+ * `collectionVariables`) all map to the single scenario variable namespace via
+ * the P0 `__vars` bridge (so imported scripts interop with native
+ * setVariable/getVariable nodes); `pm.request` is the mutable outgoing request;
+ * `pm.response` the injected response (post-response scripts) with Postman's
+ * `.to.have.status()` / `.to.be.ok` / `.to.have.jsonBody()` / `.to.have.header()`
+ * assertions; `pm.test(name, fn)` runs an assertion block and reports PASS/FAIL
+ * to the run-log; `pm.expect` is chai. Final `pm.request` mutations + test
+ * results + `setNextRequest` are read back via `__pmFinal()` after the run.
+ *
+ * `pm.sendRequest` / network `pm.response` come from the network shim and are
+ * left intact; this shim only (re)builds the non-network surface. */
+const SANDBOX_POSTMAN_SHIM = `
+(function(){
+  var g = globalThis;
+  var V = g.__vars;
+  function asScope(){
+    return {
+      get: function(k){ return V.get(String(k)); },
+      set: function(k, v){ V.set(String(k), v); return v; },
+      has: function(k){ return V.has(String(k)); },
+      unset: function(k){ V['delete'](String(k)); },
+      clear: function(){ V.clear(); },
+      toObject: function(){ return V.toObject(); },
+      replaceIn: function(tpl){ return String(tpl).replace(/\\{\\{([^}]+)\\}\\}/g, function(m, n){ var x = V.get(String(n).trim()); return (x===undefined||x===null) ? '' : String(x); }); }
+    };
+  }
+  function headerGet(headers, n){ n=String(n).toLowerCase(); for(var k in headers){ if(Object.prototype.hasOwnProperty.call(headers,k) && k.toLowerCase()===n) return headers[k]; } return undefined; }
+  function makeResp(r){
+    r = r || {}; var headers = r.headers || {};
+    var body = (r.body === undefined || r.body === null) ? '' : String(r.body);
+    var resp = {
+      code: r.code != null ? r.code : r.status, status: r.status != null ? r.status : (r.statusText || ''),
+      responseTime: r.responseTime || 0, responseSize: body.length,
+      headers: { get: function(n){ return headerGet(headers, n); }, all: function(){ return headers; }, has: function(n){ return headerGet(headers, n) !== undefined; } },
+      text: function(){ return body; },
+      json: function(){ return JSON.parse(body); }
+    };
+    function fail(msg){ var e = new Error(msg); e.name='AssertionError'; throw e; }
+    var have = {
+      status: function(expected){ if (typeof expected === 'number'){ if (resp.code !== expected) fail('expected response code '+resp.code+' to be '+expected); } else { if (String(resp.status) !== String(expected)) fail('expected response status '+resp.status+' to be '+expected); } return resp.to; },
+      header: function(name){ if (!resp.headers.has(name)) fail('expected response to have header '+name); return resp.to; },
+      jsonBody: function(){ try { var j = resp.json(); } catch(e){ fail('expected response body to be valid JSON'); } if (arguments.length){ /* deep-eq best effort */ } return resp.to; },
+      body: function(expected){ if (expected !== undefined && resp.text() !== String(expected)) fail('expected body to equal '+expected); return resp.to; }
+    };
+    // Postman asserts on PROPERTY ACCESS for \`.to.be.ok\` (chai-style getter),
+    // but \`.to.have.status(code)\` is a method — match both shapes.
+    resp.to = {
+      have: have,
+      be: { get ok(){ if (!(resp.code >= 200 && resp.code < 300)) fail('expected response to be ok, got status '+resp.code); return resp.to; } }
+    };
+    return resp;
+  }
+  g.__makePmResponse = makeResp;
+
+  var ctx = g.__pmContext || {};
+  g.pm = g.pm || {};
+  g.pm.variables = asScope();
+  g.pm.environment = asScope();
+  g.pm.globals = asScope();
+  g.pm.collectionVariables = asScope();
+  g.pm.iterationData = { get: function(){ return undefined; }, toObject: function(){ return {}; } };
+  g.pm.expect = g.expect;
+  g.pm.info = ctx.info || { requestName: '', requestId: '', iteration: 0, iterationCount: 1, eventName: '' };
+
+  // Mutable outgoing request (pre-request scripts edit url/method/headers/body).
+  var rq = ctx.request || {};
+  g.pm.request = { url: rq.url || '', method: String(rq.method || 'GET'), headers: rq.headers || {}, body: rq.body };
+
+  // Injected response (post-response scripts). Network pm.response (sendRequest)
+  // is preserved when no response is injected.
+  if (ctx.response) g.pm.response = makeResp(ctx.response);
+
+  // pm.test → run-log + collected results.
+  g.__pmTests = [];
+  g.pm.test = function(name, fn){
+    var rec = { name: String(name), passed: true, error: null };
+    try { fn(); } catch(e){ rec.passed = false; rec.error = (e && e.message) ? String(e.message) : String(e); }
+    g.__pmTests.push(rec);
+    g.console.log((rec.passed ? '\\u2713 ' : '\\u2717 ') + rec.name + (rec.passed ? '' : ' \\u2014 ' + rec.error));
+    return rec.passed;
+  };
+  g.pm.test.skip = function(name){ g.console.log('\\u2298 ' + String(name) + ' (skipped)'); };
+
+  // Flow control → read back, mapped to a control edge by the importer.
+  g.__pmNext = undefined;
+  function setNext(n){ g.__pmNext = (n === null ? null : String(n)); }
+  g.pm.setNextRequest = setNext;
+  g.pm.execution = g.pm.execution || {};
+  g.pm.execution.setNextRequest = setNext;
+  g.pm.execution.skipRequest = function(){ g.__pmNext = '\\u0000skip'; };
+  g.pm.execution.location = ctx.location || [];
+
+  // Historical Postman global alias.
+  g.postman = g.postman || {};
+  g.postman.setNextRequest = setNext;
+  g.postman.getResponseHeader = function(n){ return g.pm.response ? g.pm.response.headers.get(n) : undefined; };
+
+  // Final state read back by the host after the script runs.
+  g.__pmFinal = function(){ return JSON.stringify({ request: g.pm.request, tests: g.__pmTests, nextRequest: g.__pmNext }); };
 })();
 `
 
@@ -362,10 +469,39 @@ export interface RunCodeOptions {
    * `bru.*` variable scopes build on). Absent → the script only sees the
    * read-only `vars` snapshot. */
   variableBridge?: SandboxVariableBridge
+  /** Optional Postman context. When provided, the sandbox builds the `pm.*`
+   * runtime so an unmodified Postman pre/post-request script runs (variables,
+   * `pm.test`, `pm.request`/`pm.response`, `setNextRequest`). Requires
+   * `variableBridge` for the variable scopes. Pre/post mutations + test results
+   * come back on {@link RunCodeResult.postman}. */
+  postman?: SandboxScriptContext
   /** The run's cooperative-cancellation signal (user Stop / scope abort). When
    * it fires, any in-flight host network request is aborted immediately rather
    * than lingering until the wall-clock timeout. */
   signal?: AbortSignal
+}
+
+/** The request/response/info context fed to a Postman (`pm`) or Bruno
+ * (`bru`/`req`/`res`) script — the outgoing request a pre-request script may
+ * mutate, the response a post-response script reads, and runner metadata. */
+export interface SandboxScriptContext {
+  /** The outgoing request (pre-request scripts mutate it). */
+  request?: { url?: string; method?: string; headers?: Record<string, string>; body?: unknown; name?: string; auth?: unknown }
+  /** The response (post-response scripts read it). */
+  response?: { code?: number; status?: number; statusText?: string; headers?: Record<string, string>; body?: string; responseTime?: number }
+  /** Runner metadata (`pm.info` / Bruno equivalents). */
+  info?: Record<string, unknown>
+  /** Runner location array (`pm.execution.location`). */
+  location?: unknown[]
+}
+
+/** What a Postman/Bruno script changed: the (possibly mutated) outgoing request,
+ * the `pm.test`/`test()` results, and a `setNextRequest` target (→ control edge
+ * by the importer). `nextRequest === null` clears it; `' skip'` = skip. */
+export interface SandboxScriptOutcome {
+  request?: SandboxScriptContext['request']
+  tests?: { name: string; passed: boolean; error: string | null }[]
+  nextRequest?: string | null
 }
 
 export interface RunCodeResult {
@@ -373,12 +509,15 @@ export interface RunCodeResult {
   result: unknown
   /** Anything the script wrote via `console.log(...)`. */
   logs: string[]
+  /** Present when a `postman` (or `bruno`) context was supplied: the script's
+   * request mutations, test results and `setNextRequest`. */
+  postman?: SandboxScriptOutcome
 }
 
 /** Transpile + run user code in the QuickJS sandbox. Rejects with a normal
  * Error (message from the sandboxed throw) on a script error or timeout. */
 export async function runCodeInSandbox(opts: RunCodeOptions): Promise<RunCodeResult> {
-  const { code, input, variables = {}, timeoutMs = 5000, network, variableBridge, signal } = opts
+  const { code, input, variables = {}, timeoutMs = 5000, network, variableBridge, postman, signal } = opts
   // 1. Transpile TS -> JS (types stripped; isolatedModules-safe single file).
   // Wrap as an ASYNC function body BEFORE transpiling, so esbuild sees the
   // top-level `await` / `return` inside a function (valid) instead of at module
@@ -501,6 +640,18 @@ export async function runCodeInSandbox(opts: RunCodeOptions): Promise<RunCodeRes
       vars.value.dispose()
     }
 
+    // 2d. Postman runtime (only when a `postman` context is supplied): inject the
+    //     request/response/info context as JSON, then build the `pm.*` surface on
+    //     top of `__vars` (P0) + the network shim. Requires the variable bridge.
+    if (postman) {
+      const pmCtx = ctx.evalCode(`globalThis.__pmContext = ${safeJson(postman)};`)
+      if (pmCtx.error) { const e: unknown = ctx.dump(pmCtx.error); pmCtx.error.dispose(); throw new Error(`sandbox pm context failed: ${stringifyErr(e)}`) }
+      pmCtx.value.dispose()
+      const pmShim = ctx.evalCode(SANDBOX_POSTMAN_SHIM)
+      if (pmShim.error) { const e: unknown = ctx.dump(pmShim.error); pmShim.error.dispose(); throw new Error(`sandbox pm shim failed: ${stringifyErr(e)}`) }
+      pmShim.value.dispose()
+    }
+
     // 3. Inject input + variables as JSON (data only — no functions/dates).
     const injected = `globalThis.input = ${safeJson(input)}; globalThis.vars = ${safeJson(variables)};`
     const inj = ctx.evalCode(injected)
@@ -521,6 +672,16 @@ export async function runCodeInSandbox(opts: RunCodeOptions): Promise<RunCodeRes
     const settled = await settlePromise(ctx, out.value, timeoutMs)
     const result: unknown = ctx.dump(settled)
     settled.dispose()
+    // Read back the Postman/Bruno script outcome (mutated request, test results,
+    // setNextRequest) — the script ran, so `__pmFinal()` is defined.
+    if (postman) {
+      const finalRes = ctx.evalCode('__pmFinal()')
+      if (!finalRes.error) {
+        const raw: unknown = ctx.dump(finalRes.value)
+        finalRes.value.dispose()
+        try { return { result, logs, postman: JSON.parse(String(raw)) as SandboxScriptOutcome } } catch { /* fall through */ }
+      } else { finalRes.error.dispose() }
+    }
     return { result, logs }
   } finally {
     // Mark the context dead BEFORE disposing, so any host network callback that

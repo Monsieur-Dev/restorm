@@ -261,4 +261,104 @@ describe('codeSandbox network bridge', () => {
       expect(result).toBe('undefined')
     })
   })
+
+  describe('postman runtime (pm)', () => {
+    it('maps every pm variable scope to the scenario namespace + persists writes', async () => {
+      const { store, bridge } = mapBridge({ token: 'abc' })
+      const { result } = await runCodeInSandbox({
+        variableBridge: bridge,
+        postman: {},
+        code: `
+          pm.environment.set('base', 'https://api.test')
+          pm.globals.set('flag', true)
+          pm.collectionVariables.set('count', 3)
+          return {
+            // all scopes read the one namespace
+            fromVars: pm.variables.get('base'),
+            token: pm.environment.get('token'),
+            flag: pm.globals.get('flag'),
+            replaced: pm.variables.replaceIn('{{base}}/v{{count}}')
+          }
+        `
+      })
+      expect(store.get('base')).toBe('https://api.test')
+      expect(store.get('flag')).toBe(true)
+      expect(store.get('count')).toBe(3)
+      expect(result).toEqual({ fromVars: 'https://api.test', token: 'abc', flag: true, replaced: 'https://api.test/v3' })
+    })
+
+    it('runs pm.test → run-log + result.postman.tests (pass and fail)', async () => {
+      const { bridge } = mapBridge()
+      const { logs, postman } = await runCodeInSandbox({
+        variableBridge: bridge,
+        postman: {},
+        code: `
+          pm.test('one plus one', function(){ pm.expect(1 + 1).to.equal(2) })
+          pm.test('always fails', function(){ pm.expect(1).to.equal(2) })
+        `
+      })
+      expect(postman?.tests?.[0]).toEqual({ name: 'one plus one', passed: true, error: null })
+      expect(postman?.tests?.[1]).toMatchObject({ name: 'always fails', passed: false })
+      expect(postman?.tests?.[1]?.error).toContain('expected 1 to equal 2')
+      expect(logs.some((l) => l.startsWith('✓ one plus one'))).toBe(true)
+      expect(logs.some((l) => l.startsWith('✗ always fails'))).toBe(true)
+    })
+
+    it('exposes an injected pm.response with Postman assertions', async () => {
+      const { bridge } = mapBridge()
+      const { result } = await runCodeInSandbox({
+        variableBridge: bridge,
+        postman: { response: { code: 200, status: 'OK', headers: { 'content-type': 'application/json' }, body: '{"id":7,"name":"rex"}', responseTime: 12 } },
+        code: `
+          pm.test('status is 200', function(){ pm.response.to.have.status(200) })
+          pm.test('is ok', function(){ pm.response.to.be.ok })
+          pm.test('has content-type', function(){ pm.response.to.have.header('Content-Type') })
+          var body = pm.response.json()
+          pm.environment.set('petId', body.id)
+          return { id: body.id, name: body.name, code: pm.response.code, time: pm.response.responseTime }
+        `
+      })
+      expect(result).toEqual({ id: 7, name: 'rex', code: 200, time: 12 })
+    })
+
+    it('reports a failing status assertion as a failed pm.test (no throw)', async () => {
+      const { bridge } = mapBridge()
+      const { postman } = await runCodeInSandbox({
+        variableBridge: bridge,
+        postman: { response: { code: 404, status: 'Not Found', headers: {}, body: '' } },
+        code: `pm.test('expects 200', function(){ pm.response.to.have.status(200) }); return null`
+      })
+      expect(postman?.tests?.[0]).toMatchObject({ name: 'expects 200', passed: false })
+      expect(postman?.tests?.[0]?.error).toContain('404')
+    })
+
+    it('captures pm.request mutations (pre-request script) on result.postman.request', async () => {
+      const { store, bridge } = mapBridge({ token: 'secret' })
+      const { postman } = await runCodeInSandbox({
+        variableBridge: bridge,
+        postman: { request: { url: 'https://api.test/pets', method: 'GET', headers: {} } },
+        code: `
+          pm.request.headers['Authorization'] = 'Bearer ' + pm.environment.get('token')
+          pm.request.url = pm.request.url + '?limit=10'
+          return null
+        `
+      })
+      expect(postman?.request).toEqual({ url: 'https://api.test/pets?limit=10', method: 'GET', headers: { Authorization: 'Bearer secret' } })
+      expect(store.get('token')).toBe('secret')
+    })
+
+    it('captures setNextRequest for the importer to map to a control edge', async () => {
+      const { bridge } = mapBridge()
+      const a = await runCodeInSandbox({ variableBridge: bridge, postman: {}, code: `pm.execution.setNextRequest('Login'); return null` })
+      expect(a.postman?.nextRequest).toBe('Login')
+      const b = await runCodeInSandbox({ variableBridge: bridge, postman: {}, code: `postman.setNextRequest(null); return null` })
+      expect(b.postman?.nextRequest).toBeNull()
+    })
+
+    it('omits the pm runtime when no postman context is supplied', async () => {
+      const { bridge } = mapBridge()
+      const { result } = await runCodeInSandbox({ variableBridge: bridge, code: `return typeof pm` })
+      expect(result).toBe('undefined')
+    })
+  })
 })
