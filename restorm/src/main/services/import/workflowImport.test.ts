@@ -1,5 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { importPostmanFromJson } from './PostmanImportService'
 import { importBruno } from './BrunoImportService'
 import type { EnvironmentFolder } from '../../../shared/models'
@@ -85,5 +87,66 @@ describe('Bruno workflow import → scenario', () => {
       files: [{ path: 'a.bru', content: bru('a', 1) }]
     })
     expect(findScenario(folder)).toBeUndefined()
+  })
+})
+
+// A real Postman export (built in Postman via MCP from the docker petstore) — the
+// end-to-end compat check: a genuine collection with the full pm.* surface must
+// import into a runnable workflow scenario.
+describe('real Postman export fixture (petstore workflow) → scenario', () => {
+  const fixture = readFileSync(join(__dirname, '../../../../tests/e2e/samples/petstore-workflow.postman_collection.json'), 'utf-8')
+
+  it('imports the exported workflow into a scenario with all 6 requests + their (real-code) scripts', () => {
+    const folder = importPostmanFromJson(fixture)
+    const scn = findScenario(folder)
+    if (!scn) throw new Error('expected a workflow scenario from the petstore export')
+    expect(scn.name).toBe('Petstore Workflows (restorm compat) — Workflow')
+    // 6 requests → 6 httpRequest nodes.
+    expect(scn.nodes.filter((n) => n.kind === 'httpRequest')).toHaveLength(6)
+    // Pre/post scripts captured verbatim with the right scriptMode.
+    const preModes = scn.nodes.filter((n) => n.kind === 'code' && (n.config as { scriptMode?: string }).scriptMode === 'postman-prerequest')
+    const postModes = scn.nodes.filter((n) => n.kind === 'code' && (n.config as { scriptMode?: string }).scriptMode === 'postman-postresponse')
+    expect(preModes.length).toBe(2) // Create Pet (payload builder) + Delete Pet (sendRequest check)
+    expect(postModes.length).toBe(6) // every request has a test script
+    // The verbatim pm.* surface + the REAL code (not just asserts) survived the round-trip.
+    const allCode = scn.nodes.filter((n) => n.kind === 'code').map((n) => (n.config as { code: string }).code).join('\n')
+    expect(allCode).toContain('pm.collectionVariables.set')
+    expect(allCode).toContain('pm.response.to.have.status(200)')
+    expect(allCode).toContain('pm.sendRequest(')
+    expect(allCode).toContain('pm.execution.setNextRequest')
+    // Real-code nodes: the programmatic payload builder + the inventory aggregator.
+    expect(allCode).toContain('categories.map(')
+    expect(allCode).toContain('.reduce(')
+  })
+
+  it('wires the full setNextRequest chain — a control edge between every box', () => {
+    const folder = importPostmanFromJson(fixture)
+    const scn = findScenario(folder)
+    if (!scn) throw new Error('expected a workflow scenario')
+    // request name → imported request id
+    const idByName = new Map<string, string>()
+    for (const item of folder.items) {
+      const name = (item as { name?: string }).name
+      const id = (item as { id?: string }).id
+      if (name && id) idByName.set(name, id)
+    }
+    const hasNode = (id: string): boolean => scn.nodes.some((n) => n.id === id)
+    // A request's chain head = its pre node if present, else its http node; tail = its post node.
+    const head = (name: string): string => {
+      const rid = idByName.get(name)
+      return hasNode(`${rid}:pre`) ? `${rid}:pre` : `${rid}:http`
+    }
+    const tail = (name: string): string => `${idByName.get(name)}:post`
+    const chainEdge = (from: string, to: string): boolean =>
+      scn.edges.some((e) => e.from.nodeId === tail(from) && e.from.portId === 'done' && e.to.nodeId === head(to))
+
+    // Login → Create Pet → Get Pet → Update Pet Status → Get Inventory Summary → Delete Pet.
+    expect(chainEdge('Login', 'Create Pet')).toBe(true)
+    expect(chainEdge('Create Pet', 'Get Pet')).toBe(true)
+    expect(chainEdge('Get Pet', 'Update Pet Status')).toBe(true)
+    expect(chainEdge('Update Pet Status', 'Get Inventory Summary')).toBe(true)
+    expect(chainEdge('Get Inventory Summary', 'Delete Pet')).toBe(true)
+    // Delete Pet ends the run (postman.setNextRequest(null)) → no outgoing chain edge.
+    expect(scn.edges.some((e) => e.from.nodeId === tail('Delete Pet') && e.from.portId === 'done')).toBe(false)
   })
 })
