@@ -17,6 +17,10 @@ export const javascriptRuntime: CodeRuntime = {
       ...(ctx.variables !== undefined ? { variables: ctx.variables } : {}),
       timeoutMs: ctx.timeoutMs,
       ...(ctx.network !== undefined ? { network: ctx.network } : {}),
+      ...(ctx.variableBridge !== undefined ? { variableBridge: ctx.variableBridge } : {}),
+      ...(ctx.postman !== undefined ? { postman: ctx.postman } : {}),
+      ...(ctx.bruno !== undefined ? { bruno: ctx.bruno } : {}),
+      ...(ctx.runRequest !== undefined ? { runRequest: ctx.runRequest } : {}),
       ...(ctx.signal !== undefined ? { signal: ctx.signal } : {})
     })
   }

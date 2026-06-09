@@ -38,7 +38,29 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
   // env + Handlebars resolution (incl. `{{name}}` path-param lookup)
   // sees the wired value — exactly the "résolution classique
   // court-circuitée slot par slot" the spec asks for.
-  const effectiveReq = applySlotOverrides(req, act.inputs)
+  // A whole-request override (from an upstream pre-request `code` node that
+  // mutated `pm.request` / `req`) is merged first, then per-slot wired inputs
+  // win on top.
+  // A pre-request script that called `pm.execution.skipRequest()` flags the
+  // request override with `__skipRequest`; honour it by emitting a synthetic
+  // "skipped" response and NOT hitting the network, so downstream nodes still
+  // get a (skipped, successful) response to flow from.
+  const override = act.inputs['requestOverride']
+  if (override && typeof override === 'object' && (override as { __skipRequest?: unknown }).__skipRequest === true) {
+    return {
+      outputs: [
+        {
+          port: 'response',
+          value: {
+            request: { url: req.url, method: req.method, headers: {} },
+            response: { status: 0, statusText: 'skipped', headers: {}, body: '', durationMs: 0, success: true, skipped: true }
+          }
+        }
+      ]
+    }
+  }
+
+  const effectiveReq = applySlotOverrides(applyRequestOverride(req, override), act.inputs)
   flushRequestStateToContext(effectiveReq)
 
   const authId = req.authenticationRequestId
@@ -122,6 +144,40 @@ function applySlotOverrides(req: Request, inputs: Record<string, unknown>): Requ
     const existing = arr.find((kv) => kv.key === key)
     if (existing) existing.value = stringifyToWire(value)
     else arr.push({ key, value: stringifyToWire(value), enabled: true })
+  }
+  return clone as unknown as Request
+}
+
+/**
+ * Merge a whole-request override `{ url?, method?, headers?, body? }` over the
+ * bound request (from a pre-request script that mutated `pm.request` / `req`).
+ * Empty/absent fields are ignored so an un-mutated field keeps the bound value;
+ * `headers` is a key→value MAP that's merged into (not replacing) the request's
+ * headers. Returns the request unchanged when there's no override.
+ */
+export function applyRequestOverride(req: Request, override: unknown): Request {
+  if (!override || typeof override !== 'object') return req
+  const o = override as { url?: unknown; method?: unknown; headers?: unknown; body?: unknown }
+  const http = req as unknown as { url?: string; method?: string; headers?: KV[]; body?: unknown }
+  const clone = Object.assign(Object.create(Object.getPrototypeOf(req) as object), req, {
+    headers: cloneKVs(http.headers)
+  }) as unknown as { url?: string; method?: string; headers: KV[]; body?: unknown }
+  if (typeof o.url === 'string' && o.url !== '') clone.url = o.url
+  if (typeof o.method === 'string' && o.method !== '') clone.method = o.method.toUpperCase()
+  if (o.headers && typeof o.headers === 'object' && !Array.isArray(o.headers)) {
+    for (const [key, value] of Object.entries(o.headers as Record<string, unknown>)) {
+      const existing = clone.headers.find((kv) => kv.key === key)
+      if (existing) { existing.value = stringifyToWire(value); existing.enabled = true }
+      else clone.headers.push({ key, value: stringifyToWire(value), enabled: true })
+    }
+  }
+  // A pm/bru pre-request script exposes `pm.request.body` / `req.getBody()` as a
+  // raw string, so an override body arrives as a string (or a JSON-able object).
+  // The HTTP body model is a tagged union — a bare string has no `type`, which
+  // the executor rejects ("Unknown body type: undefined"). Wrap it as a text
+  // body (how restorm sends raw / JSON payloads).
+  if (o.body !== undefined) {
+    clone.body = { type: 'text', content: typeof o.body === 'string' ? o.body : stringifyToWire(o.body) }
   }
   return clone as unknown as Request
 }

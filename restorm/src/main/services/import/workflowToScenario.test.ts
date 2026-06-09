@@ -1,0 +1,170 @@
+// @vitest-environment node
+import { describe, it, expect } from 'vitest'
+import { workflowToScenario, type WorkflowRequestStep } from './workflowToScenario'
+import { toScriptContext } from '../../scenarioEngine/executors/codeExecutor'
+
+const step = (over: Partial<WorkflowRequestStep> & { requestId: string }): WorkflowRequestStep => ({
+  name: over.name ?? over.requestId,
+  source: over.source ?? 'postman',
+  ...over
+})
+
+describe('workflowToScenario', () => {
+  it('emits a pre → http → post chain with verbatim scripts + scriptMode markers', () => {
+    const scn = workflowToScenario({
+      id: 's1',
+      name: 'Login flow',
+      steps: [step({ requestId: 'r1', name: 'Login', prerequest: 'pm.environment.set("t", 1)', postresponse: 'pm.test("ok", () => {})' })]
+    })
+    expect(scn.type).toBe('scenario')
+    const byId = Object.fromEntries(scn.nodes.map((n) => [n.id, n]))
+    expect(byId['r1:pre']).toMatchObject({ kind: 'code', config: { language: 'javascript', code: 'pm.environment.set("t", 1)', scriptMode: 'postman-prerequest' } })
+    expect(byId['r1:http']).toMatchObject({ kind: 'httpRequest', config: { requestId: 'r1', label: 'Login' } })
+    expect(byId['r1:post']).toMatchObject({ kind: 'code', config: { scriptMode: 'postman-postresponse' } })
+    // The pre node's mutated request flows into the request override — that DATA
+    // edge alone sequences http after pre (no `pre.done → http.in`, which would
+    // deadlock: `done` waits for the data subtree the `in` gate blocks). The
+    // request's response then feeds the post script.
+    expect(scn.edges).toEqual(expect.arrayContaining([
+      expect.objectContaining({ from: { nodeId: 'r1:pre', portId: 'result' }, to: { nodeId: 'r1:http', portId: 'requestOverride' }, selector: 'request' }),
+      expect.objectContaining({ from: { nodeId: 'r1:http', portId: 'response' }, to: { nodeId: 'r1:post', portId: 'value' }, selector: '.' })
+    ]))
+    // Explicitly assert the deadlocking signal edge is NOT emitted.
+    expect(scn.edges.some((e) => e.from.nodeId === 'r1:pre' && e.from.portId === 'done' && e.to.nodeId === 'r1:http')).toBe(false)
+  })
+
+  it('chains consecutive requests in execution order (tail.done → head.in)', () => {
+    const scn = workflowToScenario({
+      id: 's2',
+      name: 'Seq',
+      steps: [
+        step({ requestId: 'a', postresponse: 'pm.test("a", () => {})' }),
+        step({ requestId: 'b', prerequest: 'pm.variables.set("x", 1)' }),
+        step({ requestId: 'c' })
+      ]
+    })
+    // a ends at its post node; b starts at its pre node; c is bare http.
+    const chains = scn.edges.filter((e) => e.id.endsWith(':chain')).map((e) => [e.from.nodeId, e.from.portId, e.to.nodeId, e.to.portId])
+    expect(chains).toEqual([
+      ['a:post', 'done', 'b:pre', 'in'],
+      ['b:http', 'done', 'c:http', 'in']
+    ])
+    // No node for absent scripts.
+    expect(scn.nodes.find((n) => n.id === 'a:pre')).toBeUndefined()
+    expect(scn.nodes.find((n) => n.id === 'c:post')).toBeUndefined()
+  })
+
+  it('imports a script-free collection as bare httpRequest nodes', () => {
+    const scn = workflowToScenario({ id: 's3', name: 'Plain', steps: [step({ requestId: 'x' }), step({ requestId: 'y' })] })
+    expect(scn.nodes.map((n) => n.kind)).toEqual(['httpRequest', 'httpRequest'])
+    expect(scn.edges).toEqual([expect.objectContaining({ from: { nodeId: 'x:http', portId: 'done' }, to: { nodeId: 'y:http', portId: 'in' } })])
+  })
+
+  it('marks Bruno scripts with the bru-* scriptMode', () => {
+    const scn = workflowToScenario({ id: 's4', name: 'Bruno', steps: [step({ requestId: 'r', source: 'bruno', prerequest: 'bru.setVar("a",1)' })] })
+    expect(scn.nodes.find((n) => n.id === 'r:pre')).toMatchObject({ config: { scriptMode: 'bruno-prerequest' } })
+  })
+
+  it('wires a pre-request node to the httpRequest `requestOverride` (pm.request mutation) + carries requestId', () => {
+    const scn = workflowToScenario({ id: 's', name: 'X', steps: [step({ requestId: 'r', name: 'R', prerequest: 'req.setUrl(req.getUrl() + "?x=1")' })] })
+    const pre = scn.nodes.find((n) => n.id === 'r:pre')
+    expect((pre?.config as { requestId?: string }).requestId).toBe('r')
+    expect(scn.edges).toContainEqual(expect.objectContaining({
+      from: { nodeId: 'r:pre', portId: 'result' },
+      to: { nodeId: 'r:http', portId: 'requestOverride' },
+      selector: 'request'
+    }))
+  })
+
+  it('emits only validator-safe selectors (a field path is a bare root, never leading-dot)', () => {
+    // The scenario validator's `isValidSelectorPath` accepts the identity `.`
+    // OR a path whose ROOT is a bare identifier (`request`, `response.body`),
+    // and REJECTS a leading-dot field path (`.request`). A rejected selector
+    // flags every consuming box red and disables Run, so an imported workflow
+    // could never execute — assert the shape here (mirrors that rule without
+    // importing the validator, whose transitive deps break this node suite).
+    const scn = workflowToScenario({
+      id: 's', name: 'X', steps: [
+        step({ requestId: 'r1', name: 'R1', prerequest: 'x', postresponse: 'y' }),
+        step({ requestId: 'r2', name: 'R2', prerequest: 'z' })
+      ]
+    })
+    for (const e of scn.edges) {
+      if (e.selector !== undefined && e.selector !== '.') {
+        expect(e.selector.startsWith('.'), `selector "${e.selector}" on ${e.from.nodeId}→${e.to.nodeId} is a leading-dot field path the validator rejects`).toBe(false)
+      }
+    }
+  })
+
+  it('is idempotent — same workflow yields a deep-equal scenario', () => {
+    const wf = { id: 's5', name: 'Same', steps: [step({ requestId: 'r1', prerequest: 'x', postresponse: 'y' }), step({ requestId: 'r2' })] }
+    expect(workflowToScenario(wf)).toEqual(workflowToScenario(wf))
+  })
+
+  describe('setNextRequest flow control', () => {
+    const chainOf = (scn: ReturnType<typeof workflowToScenario>): string[][] =>
+      scn.edges.filter((e) => e.id.endsWith(':chain')).map((e) => [e.from.nodeId, e.to.nodeId])
+
+    it('redirects the chain to a statically-named request', () => {
+      const scn = workflowToScenario({
+        id: 's', name: 'Auth', steps: [
+          step({ requestId: 'login', name: 'Login', postresponse: 'pm.setNextRequest("Get Profile")' }),
+          step({ requestId: 'skip', name: 'Skipped' }),
+          step({ requestId: 'profile', name: 'Get Profile' })
+        ]
+      })
+      // login redirects to profile (skipping the linear next); skip is left
+      // unreachable from login (its own inert linear edge is harmless).
+      expect(chainOf(scn)).toContainEqual(['login:post', 'profile:http'])
+      expect(chainOf(scn)).not.toContainEqual(['login:post', 'skip:http'])
+    })
+
+    it('ends the run on setNextRequest(null) — no outgoing edge', () => {
+      const scn = workflowToScenario({
+        id: 's', name: 'Stop', steps: [
+          step({ requestId: 'a', name: 'A', postresponse: 'pm.execution.setNextRequest(null)' }),
+          step({ requestId: 'b', name: 'B' })
+        ]
+      })
+      expect(chainOf(scn)).toEqual([])
+    })
+
+    it('keeps linear order + annotates a dynamic setNextRequest', () => {
+      const scn = workflowToScenario({
+        id: 's', name: 'Dyn', steps: [
+          step({ requestId: 'a', name: 'A', postresponse: 'pm.setNextRequest(pm.variables.get("next"))' }),
+          step({ requestId: 'b', name: 'B' })
+        ]
+      })
+      expect(chainOf(scn)).toEqual([['a:post', 'b:http']])
+      expect(scn.nodes.find((n) => n.id === 'a:post')?.note).toContain('computed at run time')
+    })
+
+    it('falls back to linear + annotates when the named target is missing', () => {
+      const scn = workflowToScenario({
+        id: 's', name: 'Missing', steps: [
+          step({ requestId: 'a', name: 'A', postresponse: 'bru.setNextRequest("Nope")' }),
+          step({ requestId: 'b', name: 'B' })
+        ]
+      })
+      expect(chainOf(scn)).toEqual([['a:post', 'b:http']])
+      expect(scn.nodes.find((n) => n.id === 'a:post')?.note).toContain('target not found')
+    })
+  })
+})
+
+describe('toScriptContext (executor input → pm/bru context)', () => {
+  it('maps an httpRequest {request,response} envelope to the script context', () => {
+    const ctx = toScriptContext({
+      request: { url: 'https://api/pets', method: 'GET', headers: { a: '1' } },
+      response: { status: 201, statusText: 'Created', headers: { 'x-id': '9' }, body: '{"id":9}', durationMs: 12, success: true }
+    })
+    expect(ctx.request).toEqual({ url: 'https://api/pets', method: 'GET', headers: { a: '1' } })
+    expect(ctx.response).toEqual({ code: 201, statusText: 'Created', headers: { 'x-id': '9' }, body: '{"id":9}', responseTime: 12 })
+  })
+
+  it('stringifies a non-string body and tolerates a bare/empty input', () => {
+    expect(toScriptContext({ response: { status: 200, body: { ok: true } } }).response?.body).toBe('{"ok":true}')
+    expect(toScriptContext(undefined)).toEqual({ request: { url: '', method: 'GET', headers: {} } })
+  })
+})

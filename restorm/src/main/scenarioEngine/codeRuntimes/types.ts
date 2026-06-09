@@ -11,7 +11,7 @@
  * user run-log lines. An error or a timeout rejects → the scheduler routes to
  * the node's `error` port.
  */
-import type { SandboxNetworkBridge } from '../codeSandbox'
+import type { SandboxNetworkBridge, SandboxVariableBridge, SandboxScriptContext, SandboxScriptOutcome, SandboxHttpResponse } from '../codeSandbox'
 
 export interface CodeRunContext {
   /** The node's wired/inline input value, exposed to the script. */
@@ -25,6 +25,19 @@ export interface CodeRunContext {
   /** Optional host network bridge (firewall-routed `fetch` / `pm.sendRequest`).
    * Only runtimes that opt into network access use it; others ignore it. */
   network?: SandboxNetworkBridge
+  /** Optional host variable bridge — read/WRITE access to the run's variables
+   * (foundation for `pm.*` / `bru.*`). Only the JS sandbox uses it; others
+   * ignore it (Postman/Bruno scripts are JavaScript). */
+  variableBridge?: SandboxVariableBridge
+  /** Optional Postman script context — runs the code as a verbatim Postman
+   * pre/post-request script (`pm.*`). JS runtime only. */
+  postman?: SandboxScriptContext
+  /** Optional Bruno script context — runs the code as a verbatim Bruno script
+   * (`bru`/`req`/`res`). JS runtime only. */
+  bruno?: SandboxScriptContext
+  /** Optional bridge for `bru.runRequest(name)` (resolve + execute a named
+   * request, return its response). JS runtime only. */
+  runRequest?: (name: string, signal: AbortSignal) => Promise<SandboxHttpResponse>
 }
 
 export interface CodeRunResult {
@@ -32,6 +45,9 @@ export interface CodeRunResult {
   result: unknown
   /** Lines the script wrote to stdout / print / console — surfaced to run-log. */
   logs: string[]
+  /** Present for a Postman/Bruno script run: the request mutations, test results
+   * and `setNextRequest`/`runRequest` the script produced. */
+  postman?: SandboxScriptOutcome
 }
 
 export interface CodeRuntime {
