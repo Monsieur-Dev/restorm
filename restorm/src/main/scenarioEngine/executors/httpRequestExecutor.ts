@@ -41,7 +41,26 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
   // A whole-request override (from an upstream pre-request `code` node that
   // mutated `pm.request` / `req`) is merged first, then per-slot wired inputs
   // win on top.
-  const effectiveReq = applySlotOverrides(applyRequestOverride(req, act.inputs['requestOverride']), act.inputs)
+  // A pre-request script that called `pm.execution.skipRequest()` flags the
+  // request override with `__skipRequest`; honour it by emitting a synthetic
+  // "skipped" response and NOT hitting the network, so downstream nodes still
+  // get a (skipped, successful) response to flow from.
+  const override = act.inputs['requestOverride']
+  if (override && typeof override === 'object' && (override as { __skipRequest?: unknown }).__skipRequest === true) {
+    return {
+      outputs: [
+        {
+          port: 'response',
+          value: {
+            request: { url: req.url, method: req.method, headers: {} },
+            response: { status: 0, statusText: 'skipped', headers: {}, body: '', durationMs: 0, success: true, skipped: true }
+          }
+        }
+      ]
+    }
+  }
+
+  const effectiveReq = applySlotOverrides(applyRequestOverride(req, override), act.inputs)
   flushRequestStateToContext(effectiveReq)
 
   const authId = req.authenticationRequestId
@@ -152,7 +171,14 @@ export function applyRequestOverride(req: Request, override: unknown): Request {
       else clone.headers.push({ key, value: stringifyToWire(value), enabled: true })
     }
   }
-  if (o.body !== undefined) clone.body = typeof o.body === 'string' ? o.body : stringifyToWire(o.body)
+  // A pm/bru pre-request script exposes `pm.request.body` / `req.getBody()` as a
+  // raw string, so an override body arrives as a string (or a JSON-able object).
+  // The HTTP body model is a tagged union — a bare string has no `type`, which
+  // the executor rejects ("Unknown body type: undefined"). Wrap it as a text
+  // body (how restorm sends raw / JSON payloads).
+  if (o.body !== undefined) {
+    clone.body = { type: 'text', content: typeof o.body === 'string' ? o.body : stringifyToWire(o.body) }
+  }
   return clone as unknown as Request
 }
 

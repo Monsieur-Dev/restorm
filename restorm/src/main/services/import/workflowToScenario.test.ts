@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, it, expect } from 'vitest'
 import { workflowToScenario, type WorkflowRequestStep } from './workflowToScenario'
 import { toScriptContext } from '../../scenarioEngine/executors/codeExecutor'
@@ -20,11 +21,16 @@ describe('workflowToScenario', () => {
     expect(byId['r1:pre']).toMatchObject({ kind: 'code', config: { language: 'javascript', code: 'pm.environment.set("t", 1)', scriptMode: 'postman-prerequest' } })
     expect(byId['r1:http']).toMatchObject({ kind: 'httpRequest', config: { requestId: 'r1', label: 'Login' } })
     expect(byId['r1:post']).toMatchObject({ kind: 'code', config: { scriptMode: 'postman-postresponse' } })
-    // pre runs before the request; the request's response feeds the post script.
+    // The pre node's mutated request flows into the request override — that DATA
+    // edge alone sequences http after pre (no `pre.done → http.in`, which would
+    // deadlock: `done` waits for the data subtree the `in` gate blocks). The
+    // request's response then feeds the post script.
     expect(scn.edges).toEqual(expect.arrayContaining([
-      expect.objectContaining({ from: { nodeId: 'r1:pre', portId: 'done' }, to: { nodeId: 'r1:http', portId: 'in' } }),
+      expect.objectContaining({ from: { nodeId: 'r1:pre', portId: 'result' }, to: { nodeId: 'r1:http', portId: 'requestOverride' }, selector: 'request' }),
       expect.objectContaining({ from: { nodeId: 'r1:http', portId: 'response' }, to: { nodeId: 'r1:post', portId: 'value' }, selector: '.' })
     ]))
+    // Explicitly assert the deadlocking signal edge is NOT emitted.
+    expect(scn.edges.some((e) => e.from.nodeId === 'r1:pre' && e.from.portId === 'done' && e.to.nodeId === 'r1:http')).toBe(false)
   })
 
   it('chains consecutive requests in execution order (tail.done → head.in)', () => {
@@ -66,8 +72,28 @@ describe('workflowToScenario', () => {
     expect(scn.edges).toContainEqual(expect.objectContaining({
       from: { nodeId: 'r:pre', portId: 'result' },
       to: { nodeId: 'r:http', portId: 'requestOverride' },
-      selector: '.request'
+      selector: 'request'
     }))
+  })
+
+  it('emits only validator-safe selectors (a field path is a bare root, never leading-dot)', () => {
+    // The scenario validator's `isValidSelectorPath` accepts the identity `.`
+    // OR a path whose ROOT is a bare identifier (`request`, `response.body`),
+    // and REJECTS a leading-dot field path (`.request`). A rejected selector
+    // flags every consuming box red and disables Run, so an imported workflow
+    // could never execute — assert the shape here (mirrors that rule without
+    // importing the validator, whose transitive deps break this node suite).
+    const scn = workflowToScenario({
+      id: 's', name: 'X', steps: [
+        step({ requestId: 'r1', name: 'R1', prerequest: 'x', postresponse: 'y' }),
+        step({ requestId: 'r2', name: 'R2', prerequest: 'z' })
+      ]
+    })
+    for (const e of scn.edges) {
+      if (e.selector !== undefined && e.selector !== '.') {
+        expect(e.selector.startsWith('.'), `selector "${e.selector}" on ${e.from.nodeId}→${e.to.nodeId} is a leading-dot field path the validator rejects`).toBe(false)
+      }
+    }
   })
 
   it('is idempotent — same workflow yields a deep-equal scenario', () => {

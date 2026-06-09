@@ -159,6 +159,22 @@ describe('httpRequestExecutor — slot short-circuit', () => {
     expect(flushed.headers.find((kv) => kv.key === 'X-Env')?.value).toBe('{{token}}')
     expect(flushed.headers.find((kv) => kv.key === 'Authorization')?.value).toBe('Bearer tok')
   })
+
+  it('short-circuits to a synthetic skipped response when the override carries __skipRequest (pm.execution.skipRequest)', async () => {
+    const result = await httpRequestExecutor(
+      makeActivation({ requestOverride: { url: 'https://api.test/x', method: 'GET', headers: {}, __skipRequest: true } }),
+      makeCtx(node())
+    )
+    const out = result.outputs.find((o) => o.port === 'response')?.value as {
+      response: { status: number; statusText: string; success: boolean; skipped: boolean }
+    }
+    expect(out.response.skipped).toBe(true)
+    expect(out.response.success).toBe(true)
+    expect(out.response.statusText).toBe('skipped')
+    // the network was NOT hit
+    expect(execute).not.toHaveBeenCalled()
+    expect(flushRequestStateToContext).not.toHaveBeenCalled()
+  })
 })
 
 describe('applyRequestOverride (pm.request / req mutation → bound request)', () => {
@@ -184,10 +200,17 @@ describe('applyRequestOverride (pm.request / req mutation → bound request)', (
     expect(kept.method).toBe('GET')
   })
 
-  it('sets the body (stringifying a non-string) and does not mutate the original', () => {
+  it('sets the body as a text body (stringifying a non-string) and does not mutate the original', () => {
     const r = baseReq()
     const out = applyRequestOverride(r as never, { body: { a: 1 }, headers: { X: '1' } }) as unknown as { body: unknown }
-    expect(out.body).toBe('{"a":1}')
+    // Wrapped into the tagged text-body shape — a bare string would have no
+    // `type` and the executor would reject it ("Unknown body type").
+    expect(out.body).toEqual({ type: 'text', content: '{"a":1}' })
     expect((r.headers as KV[]).some((h) => h.key === 'X')).toBe(false)
+  })
+
+  it('wraps a string body override into a text body', () => {
+    const out = applyRequestOverride(baseReq() as never, { body: '{{petPayload}}' }) as unknown as { body: unknown }
+    expect(out.body).toEqual({ type: 'text', content: '{{petPayload}}' })
   })
 })

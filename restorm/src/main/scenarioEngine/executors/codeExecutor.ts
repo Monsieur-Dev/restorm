@@ -1,5 +1,8 @@
 import type { NodeExecutor } from '../types'
 import type { SandboxScriptContext, SandboxHttpResponse } from '../codeSandbox'
+// Import the sentinel from the light module — NOT codeSandbox — so the executor
+// (and the scheduler that registers it) doesn't eagerly load esbuild/QuickJS.
+import { SKIP_REQUEST_SENTINEL } from '../scriptSentinels'
 import { collectionStore } from '../../services/CollectionStore'
 import { isHTTPRequest } from '../../../shared/types/collections'
 
@@ -105,6 +108,12 @@ export const codeExecutor: NodeExecutor = async (act, ctx) => {
   let scriptCtx: SandboxScriptContext | undefined
   if (scriptMode) {
     scriptCtx = toScriptContext(input)
+    // Data-driven runs: a wired input row (a plain object) populates
+    // `pm.iterationData`, so a collection that reads `pm.iterationData.get(...)`
+    // sees the current row.
+    if (input && typeof input === 'object' && !Array.isArray(input)) {
+      scriptCtx = { ...scriptCtx, iterationData: input as Record<string, unknown> }
+    }
     // Pre-request scripts mutate `pm.request` / `req` — seed it from the bound
     // request so read-modify-write of url/body works (not just header adds). The
     // mutated request flows out on `result` → the httpRequest's `requestOverride`.
@@ -175,7 +184,16 @@ export const codeExecutor: NodeExecutor = async (act, ctx) => {
   // A pm/bru script emits its outcome (mutated request, test results,
   // setNextRequest) on `result`, with the script's return value under `value`;
   // a plain code node emits its return value directly.
-  const outValue: unknown = scriptMode ? { ...(postman ?? {}), value: result } : result
+  let outValue: unknown = result
+  if (scriptMode) {
+    const pm = { ...(postman ?? {}) }
+    // `pm.execution.skipRequest()` → flag the request the httpRequest pulls in
+    // via `requestOverride`, so it short-circuits its network call.
+    if (pm.nextRequest === SKIP_REQUEST_SENTINEL) {
+      pm.request = { ...(pm.request ?? {}), __skipRequest: true } as SandboxScriptContext['request']
+    }
+    outValue = { ...pm, value: result }
+  }
   // Record the freshest run so the inspector preview can show this box's last
   // result/logs (code boxes have no on-disk history to read back from).
   const { recordCodeRun } = await import('../codeRunCache')

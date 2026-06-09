@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest'
-import { runCodeInSandbox, type SandboxNetworkBridge, type SandboxHttpResponse, type SandboxVariableBridge } from './codeSandbox'
+import { runCodeInSandbox, SKIP_REQUEST_SENTINEL, type SandboxNetworkBridge, type SandboxHttpResponse, type SandboxVariableBridge } from './codeSandbox'
 
 /** A variable bridge backed by a plain Map — the test stand-in for the
  * executor's live run-variable map. */
@@ -367,6 +367,51 @@ describe('codeSandbox network bridge', () => {
         `
       })
       expect(result).toEqual({ has: true, get: 'abc123', obj: { session: 'abc123' } })
+    })
+
+    it('exposes pm.iterationData backed by the wired input row', async () => {
+      const { bridge } = mapBridge()
+      const { result } = await runCodeInSandbox({
+        variableBridge: bridge,
+        postman: { iterationData: { userId: 42, name: 'rex' } },
+        code: `return { id: pm.iterationData.get('userId'), has: pm.iterationData.has('name'), miss: pm.iterationData.has('nope'), obj: pm.iterationData.toObject() }`
+      })
+      expect(result).toEqual({ id: 42, has: true, miss: false, obj: { userId: 42, name: 'rex' } })
+    })
+
+    it('round-trips pm.vault through the variable namespace (vault: prefix)', async () => {
+      const { store, bridge } = mapBridge()
+      const { result } = await runCodeInSandbox({
+        variableBridge: bridge,
+        postman: {},
+        code: `
+          await pm.vault.set('apiKey', 's3cr3t')
+          var v = await pm.vault.get('apiKey')
+          return v
+        `
+      })
+      expect(result).toBe('s3cr3t')
+      expect(store.get('vault:apiKey')).toBe('s3cr3t')
+    })
+
+    it('captures pm.visualizer.set for the run-log', async () => {
+      const { bridge } = mapBridge()
+      const { postman } = await runCodeInSandbox({
+        variableBridge: bridge,
+        postman: {},
+        code: `pm.visualizer.set('<b>{{name}}</b>', { name: 'rex' }); return null`
+      })
+      expect(postman?.visualizer).toEqual({ template: '<b>{{name}}</b>', data: { name: 'rex' } })
+    })
+
+    it('captures the skip sentinel from pm.execution.skipRequest()', async () => {
+      const { bridge } = mapBridge()
+      const { postman } = await runCodeInSandbox({
+        variableBridge: bridge,
+        postman: {},
+        code: `pm.execution.skipRequest(); return null`
+      })
+      expect(postman?.nextRequest).toBe(SKIP_REQUEST_SENTINEL)
     })
 
     it('omits the pm runtime when no postman context is supplied', async () => {

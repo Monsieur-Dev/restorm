@@ -363,9 +363,35 @@ const SANDBOX_POSTMAN_SHIM = `
   g.pm.environment = asScope();
   g.pm.globals = asScope();
   g.pm.collectionVariables = asScope();
-  g.pm.iterationData = { get: function(){ return undefined; }, toObject: function(){ return {}; } };
+  // pm.iterationData: data-driven runs. Backed by the script context's
+  // iterationData (the wired input row when it's a plain object), so a
+  // collection that reads pm.iterationData.get('field') gets the current row.
+  var __iter = (ctx.iterationData && typeof ctx.iterationData === 'object') ? ctx.iterationData : {};
+  g.pm.iterationData = {
+    get: function(k){ return __iter[String(k)]; },
+    has: function(k){ return Object.prototype.hasOwnProperty.call(__iter, String(k)); },
+    toObject: function(){ var o = {}; for (var k in __iter){ if (Object.prototype.hasOwnProperty.call(__iter, k)) o[k] = __iter[k]; } return o; }
+  };
   g.pm.expect = g.expect;
   g.pm.info = ctx.info || { requestName: '', requestId: '', iteration: 0, iterationCount: 1, eventName: '' };
+
+  // pm.vault: an async secret store. restorm has no separate vault, so it is
+  // backed by the scenario variable namespace under a \`vault:\` prefix — get/set
+  // round-trip, and a script awaiting pm.vault.get(...) runs unchanged.
+  g.pm.vault = {
+    get: function(k){ return Promise.resolve(V.get('vault:' + String(k))); },
+    set: function(k, val){ V.set('vault:' + String(k), val); return Promise.resolve(); },
+    unset: function(k){ V['delete']('vault:' + String(k)); return Promise.resolve(); }
+  };
+
+  // pm.visualizer.set(template, data): capture the visualizer payload (read back
+  // via __pmFinal) and surface a run-log line, so a script that renders a
+  // visualization runs without error.
+  g.__pmVisualizer = undefined;
+  g.pm.visualizer = {
+    set: function(template, data){ g.__pmVisualizer = { template: String(template == null ? '' : template), data: (data === undefined ? null : data) }; g.console.log('\\u2261 visualizer set (' + String(template == null ? '' : template).length + ' chars)'); },
+    clear: function(){ g.__pmVisualizer = undefined; }
+  };
 
   // pm.cookies + pm.cookies.jar() — an in-sandbox cookie store (per script run;
   // restorm has no cross-request cookie jar yet). Both the sync accessors and
@@ -423,7 +449,7 @@ const SANDBOX_POSTMAN_SHIM = `
   g.postman.getResponseHeader = function(n){ return g.pm.response ? g.pm.response.headers.get(n) : undefined; };
 
   // Final state read back by the host after the script runs.
-  g.__pmFinal = function(){ return JSON.stringify({ request: g.pm.request, tests: g.__pmTests, nextRequest: g.__pmNext, runRequest: g.__pmRunRequest }); };
+  g.__pmFinal = function(){ return JSON.stringify({ request: g.pm.request, tests: g.__pmTests, nextRequest: g.__pmNext, runRequest: g.__pmRunRequest, visualizer: g.__pmVisualizer }); };
 })();
 `
 
@@ -609,7 +635,16 @@ export interface SandboxScriptContext {
   info?: Record<string, unknown>
   /** Runner location array (`pm.execution.location`). */
   location?: unknown[]
+  /** Data-driven iteration row (`pm.iterationData`) — the current input row a
+   * data-driven collection reads via `pm.iterationData.get(...)`. */
+  iterationData?: Record<string, unknown>
 }
+
+// Re-exported from a dependency-free module so consumers (e.g. the `code`
+// executor, and therefore the whole scheduler) can read the sentinel WITHOUT
+// importing this file — which statically pulls esbuild/QuickJS and would break
+// scheduler unit tests under jsdom.
+export { SKIP_REQUEST_SENTINEL } from './scriptSentinels'
 
 /** What a Postman/Bruno script changed: the (possibly mutated) outgoing request,
  * the `pm.test`/`test()` results, and a `setNextRequest` target (→ control edge
@@ -620,6 +655,8 @@ export interface SandboxScriptOutcome {
   nextRequest?: string | null
   /** A Bruno `bru.runRequest(path)` target (→ a runScenario/httpRequest edge). */
   runRequest?: string
+  /** A `pm.visualizer.set(template, data)` payload, captured for the run-log. */
+  visualizer?: { template: string; data: unknown }
 }
 
 export interface RunCodeResult {

@@ -123,10 +123,18 @@ export function filterImportTreeBySelection(
     if (isAnyFolder(item)) {
       const folder: Folder | EnvironmentFolder = item
       const filteredChildren = filterImportTreeBySelection(folder.items, selection)
-      if (filteredChildren.length > 0) {
+      // Keep the folder when at least one REAL (request) descendant survived. A
+      // workflow scenario rides along with its sibling requests but never by
+      // itself keeps an otherwise-emptied folder alive.
+      if (filteredChildren.some((c) => !isScenario(c))) {
         out.push({ ...folder, items: filteredChildren })
       }
-    } else if (!isScenario(item)) {
+    } else if (isScenario(item)) {
+      // A workflow scenario (Postman/Bruno script import) is a derived artifact
+      // of the requests it orchestrates — not independently selectable, so it
+      // always survives the prune; its nodes bind to sibling requests here.
+      out.push(item)
+    } else {
       const key = importNaturalKeyForRequest(item)
       if (selection.has(key)) out.push(item)
     }

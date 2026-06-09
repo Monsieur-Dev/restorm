@@ -27,6 +27,12 @@ function auth(method: string, url: string): AuthenticationRequest {
   return { type: 'auth', id: 'irrelevant', name: `${method} ${url}`, method, url } as unknown as AuthenticationRequest
 }
 
+function scenario(name: string): FolderItem {
+  // A Postman/Bruno workflow scenario as emitted by the importer: `type:'scenario'`
+  // with nodes/edges and an empty `items`, but no `configuration`.
+  return { type: 'scenario', id: 'irrelevant', name, tags: [], params: [], nodes: [], edges: [], items: [] } as unknown as FolderItem
+}
+
 function folder(name: string, items: FolderItem[] = []): Folder {
   return {
     id: 'irrelevant',
@@ -176,6 +182,31 @@ describe('walkImportTreeWithKeys', () => {
     const keep = new Set(['request:http:GET /a'])
     const filtered = filterImportTreeBySelection(tree, keep)
     expect(filtered.map((i) => (i as Folder).name)).toEqual(['keep'])
+  })
+
+  it('filterImportTreeBySelection keeps a workflow scenario alongside its selected sibling requests', () => {
+    const scn = scenario('Pet API — Workflow')
+    const tree: FolderItem[] = [
+      folder('pet', [
+        http('GET', '/pet/{petId}'),
+        http('POST', '/pet'),
+        scn
+      ])
+    ]
+    // The scenario has no selectable key, so it never appears in `selection`.
+    const keep = new Set(['request:http:GET /pet/{petId}'])
+    const filtered = filterImportTreeBySelection(tree, keep)
+    const [root] = filtered
+    if (!root || !('items' in root)) throw new Error('unexpected shape')
+    // The selected request + the scenario survive; the unchecked request is dropped.
+    expect(root.items.map((i) => (i as { name: string }).name)).toEqual(['GET /pet/{petId}', 'Pet API — Workflow'])
+    expect(root.items).toContain(scn)
+  })
+
+  it('filterImportTreeBySelection drops a folder kept alive only by a scenario (no selected requests)', () => {
+    const tree: FolderItem[] = [folder('pet', [http('POST', '/pet'), scenario('Pet API — Workflow')])]
+    const filtered = filterImportTreeBySelection(tree, new Set<string>())
+    expect(filtered).toHaveLength(0)
   })
 
   it('filterImportTreeBySelection passes leaf request references through unchanged', () => {

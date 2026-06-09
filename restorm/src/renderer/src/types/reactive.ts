@@ -9,7 +9,7 @@ import { eventBus, logger } from 'electron-core-ui/renderer'
 import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
 import type { Folder, HTTPRequest, FolderItem, Request, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, AuthenticationRequest, Environment } from '../../../shared/types/collections'
-import { isAnyFolder, isHTTPRequest, isRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isEnvironmentFolder } from '../../../shared/types/collections'
+import { isAnyFolder, isHTTPRequest, isRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isEnvironmentFolder, isScenario } from '../../../shared/types/collections'
 
 // ============================================================================
 // Indexable Properties Configuration
@@ -626,7 +626,13 @@ export function makeReactiveRequest(request: Request, parentFolderId?: string): 
  * `parentFolderId` may be omitted for root-level items.
  */
 export function makeReactiveFolderItem(item: FolderItem, parentFolderId?: string): FolderItem {
-  if (isAnyFolder(item)) {
+  // A scenario carries `configuration`, so `isAnyFolder` returns true for it —
+  // test `isScenario` FIRST, else a scenario nested in an imported folder gets
+  // mangled into a folder (its `nodes`/`edges` lost) and never renders as a
+  // scenario row. Returned as-is, mirroring the root-level import path.
+  if (isScenario(item)) {
+    return item
+  } else if (isAnyFolder(item)) {
     return makeReactiveFolder(item)
   } else if (isRequest(item)) {
     return makeReactiveRequest(item, parentFolderId)

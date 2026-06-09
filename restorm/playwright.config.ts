@@ -95,6 +95,15 @@ const scenarioRunlogTestDir = defineBddConfig({
   outputDir: '.features-gen/scenario-runlog'
 })
 
+const postmanImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/postman-import/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/postman-import/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/postman-import.fixture.ts'
+  ],
+  outputDir: '.features-gen/postman-import'
+})
+
 /**
  * Playwright configuration for Electron E2E tests using playwright-bdd.
  * Each test group has its own project with a dedicated fixture.
@@ -198,6 +207,11 @@ export default defineConfig({
       name: 'scenario-runlog',
       testDir: scenarioRunlogTestDir,
       timeout: 180 * 1000 // 3 min — three scenarios, each opens a fresh app + runs the engine
+    },
+    {
+      name: 'postman-import',
+      testDir: postmanImportTestDir,
+      timeout: 180 * 1000 // 3 min — opens a fresh app, imports + runs the workflow against docker
     },
     {
       // Headless CLI runner — a plain spec (no BDD/UI) that spawns the built app

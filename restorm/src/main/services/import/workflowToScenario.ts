@@ -155,12 +155,17 @@ export function workflowToScenario(input: WorkflowToScenarioInput): Scenario {
     nodes.push(httpNodeRef)
     if (postNode) nodes.push(postNode)
 
-    // Intra-request wiring: pre runs first (sets variables) then the request;
-    // its mutated request (`pm.request`/`req`) flows to the request's override;
-    // the request's response feeds the post-response script.
+    // Intra-request wiring: the pre-request node's mutated request
+    // (`pm.request`/`req`) flows into the httpRequest's `requestOverride`. That
+    // DATA edge alone sequences the request after its pre-script (the box runs
+    // when the override resolves). Deliberately NO `pre.done → http.in` signal
+    // edge: pairing it with the data edge is an AND-join the `done` half can
+    // never satisfy — a node's `done` fires only after its whole data subtree
+    // (here, the httpRequest itself) drains, but the httpRequest can't run until
+    // `in` fires, so the run deadlocks on the first request. The override edge
+    // is the single trigger.
     if (hasPre) {
-      edges.push(edge(`e:${step.requestId}:pre-http`, preId, 'done', httpId, 'in'))
-      edges.push(edge(`e:${step.requestId}:pre-override`, preId, 'result', httpId, 'requestOverride', '.request'))
+      edges.push(edge(`e:${step.requestId}:pre-override`, preId, 'result', httpId, 'requestOverride', 'request'))
     }
     if (hasPost) edges.push(edge(`e:${step.requestId}:http-post`, httpId, 'response', postId, 'value', '.'))
 
