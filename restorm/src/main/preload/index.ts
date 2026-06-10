@@ -824,6 +824,30 @@ contextBridge.exposeInMainWorld('restorm', {
       return () => { ipcRenderer.removeListener('request-usage:changed', handler) }
     }
   },
+  scenarioUsage: {
+    /** Fetch the full per-scenario usage map: count + lastRunAt + last
+     * 10 run timestamps, keyed by scenario id. The EmptyBench recent-activity
+     * lists merge this with `requestUsage` so recently-run scenarios show up
+     * next to recently-sent requests. */
+    get: async (): Promise<Record<string, { count: number; lastRunAt: string; history: string[] }>> => {
+      const result: unknown = await ipcRenderer.invoke('scenario-usage:get')
+      return result as Record<string, { count: number; lastRunAt: string; history: string[] }>
+    },
+    /** Subscribe to push events fired every time the map mutates (a new run
+     * recorded). The callback receives the fresh full snapshot. */
+    onChanged: (
+      callback: (map: Record<string, { count: number; lastRunAt: string; history: string[] }>) => void
+    ): (() => void) => {
+      const handler = (
+        _event: Electron.IpcRendererEvent,
+        map: Record<string, { count: number; lastRunAt: string; history: string[] }>
+      ): void => {
+        callback(map)
+      }
+      ipcRenderer.on('scenario-usage:changed', handler)
+      return () => { ipcRenderer.removeListener('scenario-usage:changed', handler) }
+    }
+  },
   runtime: {
     /** Per-boot runtime config (MCP + GraphQL endpoint). Both ports
      * are picked at startup — the renderer reads them once and caches
@@ -850,7 +874,7 @@ contextBridge.exposeInMainWorld('restorm', {
     /** Push the active workbench tab to main so MCP tools (`get_current_tab`,
      * `restorm://active-tab`) can read it without a renderer round-trip.
      * Renderer fires this on every active-tab change; main caches it. */
-    pushMcpActiveTab: (payload: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | null }): void => {
+    pushMcpActiveTab: (payload: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | null }): void => {
       ipcRenderer.send('mcp:active-tab-changed', payload)
     },
     /** Push a per-env-folder selected-env id. `envId: null` clears the
@@ -932,20 +956,20 @@ contextBridge.exposeInMainWorld('restorm', {
     /** Full-snapshot push fired on renderer (re)load — useful after an
      * HMR cycle so main's cache is always consistent with the renderer. */
     pushMcpActiveStateBootstrap: (payload: {
-      tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | null }
+      tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | null }
       envByFolder: Record<string, string | null>
     }): void => {
       ipcRenderer.send('mcp:active-state-bootstrap', payload)
     },
     /** Subscribe to MCP `open_tab` requests. Payload `{itemId, kind}`. */
-    onMcpOpenTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void): (() => void) => {
-      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) }
+    onMcpOpenTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) }
       ipcRenderer.on('mcp:open-tab', handler)
       return () => { ipcRenderer.off('mcp:open-tab', handler) }
     },
     /** Subscribe to MCP `reveal_in_tree` requests. */
-    onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void): (() => void) => {
-      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) }
+    onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) }
       ipcRenderer.on('mcp:reveal-in-tree', handler)
       return () => { ipcRenderer.off('mcp:reveal-in-tree', handler) }
     },
@@ -960,8 +984,8 @@ contextBridge.exposeInMainWorld('restorm', {
       return () => { ipcRenderer.off('mcp:tree-replace', handler) }
     },
     /** Subscribe to MCP `close_tab` requests. Payload `{itemId, kind}`. */
-    onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void): (() => void) => {
-      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) }
+    onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) }
       ipcRenderer.on('mcp:close-tab', handler)
       return () => { ipcRenderer.off('mcp:close-tab', handler) }
     },

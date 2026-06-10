@@ -93,6 +93,50 @@
     "multiLanguage": {
       "title": "27 idiomas!",
       "body": "O Restorm fala 27 idiomas. Inglês, francês, espanhol, alemão, italiano, japonês, chinês, coreano e muitos outros — escolha o seu nas configurações!"
+    },
+    "fromPostman": {
+      "title": "Vem do Postman ou do Bruno?",
+      "body": "A gente te ajuda a migrar para o Restorm — sua transição feita fácil ;)"
+    },
+    "chainRequests": {
+      "title": "Várias requisições para encadear?",
+      "body": "Use suas requisições dentro de cenários, adicione condições e até aninhe cenários dentro de outros cenários."
+    },
+    "stepByStep": {
+      "title": "Percorra seus cenários passo a passo",
+      "body": "Um passo de cada vez, para ver exatamente o que acontece. Você pode até definir pontos de interrupção."
+    },
+    "cicd": {
+      "title": "Execute seus cenários nos seus pipelines de CI/CD",
+      "body": "Inicie o Restorm em modo headless para rodar um cenário sem interface e coletar seus logs — testes automatizados, montados visualmente."
+    },
+    "nestedScenarios": {
+      "title": "Veja o que está acontecendo em um cenário",
+      "body": "Um cenário pode chamar outro. No inspetor, leia cada log e salte direto para o cenário de onde ele veio."
+    },
+    "scenarioHistory": {
+      "title": "Mas o que acabou de acontecer?",
+      "body": "Navegue pelo histórico de execução dos seus cenários. Algum deles mudou desde então? Sem problema — guardamos a configuração dele."
+    },
+    "codeSandbox": {
+      "title": "Cenários e segurança",
+      "body": "Você pode escrever código nos seus cenários — mas ele roda em uma sandbox segura, sem acesso aos seus arquivos locais e sem acesso direto à internet. A forma mais segura de se manter protegido!"
+    },
+    "codeLanguages": {
+      "title": "A fim de escrever um código?",
+      "body": "Escreva código direto nos seus cenários — em TypeScript, JavaScript, Python, Lua, Ruby ou R!"
+    },
+    "scenarioAi": {
+      "title": "Cenários pilotáveis por IA",
+      "body": "Claude, Cursor, Copilot… conhecem o seu código: peça a eles cenários sob medida. Tudo é exposto via MCP para criar, editar e executar cenários."
+    },
+    "interactiveScenarios": {
+      "title": "Cenários interativos!",
+      "body": "Torne seus cenários parametrizáveis e até pergunte ao usuário o que fazer com caixas de diálogo."
+    },
+    "customValueLists": {
+      "title": "Listas de valores reutilizáveis",
+      "body": "Defina suas próprias listas de valores e reutilize-as tanto nas suas requisições quanto nos seus cenários."
     }
   },
   "authFailureToast": {

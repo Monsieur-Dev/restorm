@@ -4,6 +4,8 @@ export { collectionStore } from './CollectionStore'
 export { responseHistoryService } from './ResponseHistoryService'
 export { requestUsageService } from './RequestUsageService'
 export type { RequestUsageEntry, RequestUsageMap } from './RequestUsageService'
+export { scenarioUsageService } from './ScenarioUsageService'
+export type { ScenarioUsageEntry, ScenarioUsageMap } from './ScenarioUsageService'
 export { authenticationCacheService } from './AuthenticationCacheService'
 export { DocumentEvents } from './DocumentEvents'
 export {

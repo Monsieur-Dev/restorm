@@ -93,6 +93,50 @@
     "multiLanguage": {
       "title": "27 languages!",
       "body": "Restorm speaks 27 languages. English, French, Spanish, German, Italian, Japanese, Chinese, Korean, and many more — pick yours in the settings!"
+    },
+    "fromPostman": {
+      "title": "Coming from Postman or Bruno?",
+      "body": "We help you make the switch to Restorm — your transition made easy ;)"
+    },
+    "chainRequests": {
+      "title": "Several requests to chain together?",
+      "body": "Use your requests inside scenarios, add conditions, and even nest scenarios within other scenarios."
+    },
+    "stepByStep": {
+      "title": "Step through your scenarios",
+      "body": "One step at a time, to see exactly what happens. You can even set breakpoints."
+    },
+    "cicd": {
+      "title": "Run your scenarios in your CI/CD pipelines",
+      "body": "Start Restorm headless to run a scenario with no UI and collect its logs — automated tests, built visually."
+    },
+    "nestedScenarios": {
+      "title": "See what's going on in a scenario",
+      "body": "A scenario can call another. In the inspector, read every log and jump straight to the scenario it came from."
+    },
+    "scenarioHistory": {
+      "title": "But what just happened?",
+      "body": "Browse the execution history of your scenarios. One of them changed since? No worries — we kept its configuration."
+    },
+    "codeSandbox": {
+      "title": "Scenarios and security",
+      "body": "You can write code in your scenarios — but it runs in a secure sandbox, with no access to your local files and no direct internet access. The safest way to stay protected!"
+    },
+    "codeLanguages": {
+      "title": "Fancy writing some code?",
+      "body": "Write code right inside your scenarios — in TypeScript, JavaScript, Python, Lua, Ruby or R!"
+    },
+    "scenarioAi": {
+      "title": "AI-drivable scenarios",
+      "body": "Claude, Cursor, Copilot… know your codebase: ask them for tailor-made scenarios. Everything is exposed over MCP to create, edit and run scenarios."
+    },
+    "interactiveScenarios": {
+      "title": "Interactive scenarios!",
+      "body": "Make your scenarios parameterisable and even ask the user what to do with dialog boxes."
+    },
+    "customValueLists": {
+      "title": "Reusable value lists",
+      "body": "Define your own value lists and reuse them in your requests and your scenarios alike."
     }
   },
   "authFailureToast": {

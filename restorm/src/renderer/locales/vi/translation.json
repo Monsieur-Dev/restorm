@@ -92,6 +92,50 @@
     "multiLanguage": {
       "title": "27 ngôn ngữ!",
       "body": "Restorm nói 27 ngôn ngữ. Tiếng Anh, Pháp, Tây Ban Nha, Đức, Ý, Nhật, Trung, Hàn và nhiều ngôn ngữ khác — chọn ngôn ngữ của bạn trong phần cài đặt!"
+    },
+    "fromPostman": {
+      "title": "Đến từ Postman hay Bruno?",
+      "body": "Chúng tôi giúp bạn chuyển sang Restorm — quá trình chuyển đổi của bạn trở nên dễ dàng ;)"
+    },
+    "chainRequests": {
+      "title": "Nhiều yêu cầu cần liên kết với nhau?",
+      "body": "Sử dụng các yêu cầu của bạn trong kịch bản, thêm điều kiện, và thậm chí lồng kịch bản này vào kịch bản khác."
+    },
+    "stepByStep": {
+      "title": "Chạy từng bước qua kịch bản của bạn",
+      "body": "Từng bước một, để thấy chính xác điều gì đang diễn ra. Bạn thậm chí có thể đặt điểm dừng (breakpoint)."
+    },
+    "cicd": {
+      "title": "Chạy kịch bản của bạn trong các pipeline CI/CD",
+      "body": "Khởi động Restorm ở chế độ headless để chạy một kịch bản mà không cần giao diện và thu thập nhật ký của nó — kiểm thử tự động, được dựng một cách trực quan."
+    },
+    "nestedScenarios": {
+      "title": "Xem điều gì đang diễn ra trong một kịch bản",
+      "body": "Một kịch bản có thể gọi kịch bản khác. Trong trình kiểm tra, đọc mọi nhật ký và nhảy thẳng đến kịch bản mà nó xuất phát."
+    },
+    "scenarioHistory": {
+      "title": "Nhưng vừa xảy ra chuyện gì vậy?",
+      "body": "Duyệt lịch sử thực thi các kịch bản của bạn. Một trong số đó đã thay đổi từ đó? Đừng lo — chúng tôi đã giữ lại cấu hình của nó."
+    },
+    "codeSandbox": {
+      "title": "Kịch bản và bảo mật",
+      "body": "Bạn có thể viết mã trong kịch bản của mình — nhưng nó chạy trong một sandbox an toàn, không truy cập được các tệp cục bộ và không truy cập internet trực tiếp. Cách an toàn nhất để được bảo vệ!"
+    },
+    "codeLanguages": {
+      "title": "Thích viết một chút mã chứ?",
+      "body": "Viết mã ngay bên trong các kịch bản của bạn — bằng TypeScript, JavaScript, Python, Lua, Ruby hoặc R!"
+    },
+    "scenarioAi": {
+      "title": "Kịch bản điều khiển được bằng AI",
+      "body": "Claude, Cursor, Copilot… hiểu cơ sở mã của bạn: hãy yêu cầu chúng tạo các kịch bản phù hợp riêng cho bạn. Mọi thứ được cung cấp qua MCP để tạo, chỉnh sửa và chạy kịch bản."
+    },
+    "interactiveScenarios": {
+      "title": "Kịch bản tương tác!",
+      "body": "Biến kịch bản của bạn thành có thể tham số hóa và thậm chí hỏi người dùng nên làm gì bằng các hộp thoại."
+    },
+    "customValueLists": {
+      "title": "Danh sách giá trị có thể tái sử dụng",
+      "body": "Định nghĩa danh sách giá trị của riêng bạn và tái sử dụng chúng trong cả các yêu cầu lẫn kịch bản của bạn."
     }
   },
   "authFailureToast": {

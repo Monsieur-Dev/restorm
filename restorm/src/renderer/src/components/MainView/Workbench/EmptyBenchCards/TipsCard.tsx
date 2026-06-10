@@ -48,8 +48,23 @@ const TIP_KEYS: string[] = [
   'protocols',
   'responseTree',
   'responseHistory',
-  'multiLanguage'
+  'multiLanguage',
+  'chainRequests',
+  'fromPostman',
+  'codeLanguages',
+  'stepByStep',
+  'interactiveScenarios',
+  'cicd',
+  'scenarioAi',
+  'nestedScenarios',
+  'scenarioHistory',
+  'codeSandbox',
+  'customValueLists'
 ]
+
+/** Number of available tips — lets callers (e.g. the empty-board fallback)
+ *  seed several cards with distinct starting tips. */
+export const TIP_COUNT = TIP_KEYS.length
 
 /** TEMP — when this getter returns a non-null key, the card pins
  *  to that tip and the rotation timer is disabled. Used while
@@ -67,12 +82,17 @@ const ROTATION_INTERVAL_MS = 30_000
 const FADE_MS = 1000
 const RESIZE_MS = 1400
 
-function pickInitialIndex(): number {
+function pickInitialIndex(preferred?: number): number {
   if (TIP_KEYS.length === 0) return 0
   const pinned = getPinnedTipKey()
   if (pinned !== null) {
     const pinnedIdx = TIP_KEYS.indexOf(pinned)
     if (pinnedIdx !== -1) return pinnedIdx
+  }
+  // When several cards share the board (the empty-board fallback) the caller
+  // seeds each with a distinct starting tip so they don't open on the same one.
+  if (preferred !== undefined && preferred >= 0 && preferred < TIP_KEYS.length) {
+    return preferred
   }
   return Math.floor(Math.random() * TIP_KEYS.length)
 }
@@ -84,9 +104,41 @@ function pickNextIndex(current: number): number {
   return next
 }
 
-export const TipsCard: React.FC = () => {
+/**
+ * The tip's illustration, isolated behind `React.memo` and keyed only on the
+ * tip key. This is critical: the card re-renders when async deps settle on a
+ * cold load (i18n resources, etc.), and without memoization that re-render
+ * rebuilt the inlined SVG DOM — restarting its CSS animation mid-flight (a
+ * visible reset on sequential animations). Memoized, the SVG is (re)built ONLY
+ * when the tip actually changes, never on an incidental parent re-render.
+ */
+const TipIllustration: React.FC<{ tipKey: string }> = React.memo(({ tipKey }) => {
+  const illustration = TIP_ILLUSTRATIONS[tipKey]
+  if (!illustration) return null
+  if (illustration.kind === 'svg') {
+    // The SVG markup is a build-time `?raw` import from a trusted file in this
+    // repo; inlining is required so the embedded `<style>` block can resolve
+    // theme CSS variables and currentColor from the parent context.
+    return <div className="empty-bench-tip-illustration-wrap" dangerouslySetInnerHTML={{ __html: illustration.markup }} />
+  }
+  const Component = illustration.Component
+  return (
+    <div className="empty-bench-tip-illustration-wrap">
+      <Component />
+    </div>
+  )
+})
+TipIllustration.displayName = 'TipIllustration'
+
+interface TipsCardProps {
+  /** Optional starting tip index. Used by the empty-board fallback to seed
+   *  several cards with distinct tips; omitted, the card picks at random. */
+  readonly initialIndex?: number
+}
+
+export const TipsCard: React.FC<TipsCardProps> = ({ initialIndex }) => {
   const { t } = useTranslation()
-  const [currentIndex, setCurrentIndex] = useState<number>(() => pickInitialIndex())
+  const [currentIndex, setCurrentIndex] = useState<number>(() => pickInitialIndex(initialIndex))
   const [phase, setPhase] = useState<RotatorPhase>('visible')
   const rotatorRef = useRef<HTMLDivElement | null>(null)
   const pinnedStartHeightRef = useRef<number | null>(null)
@@ -174,9 +226,6 @@ export const TipsCard: React.FC = () => {
     return null
   }
 
-  const illustration = TIP_ILLUSTRATIONS[currentKey]
-  const IllustrationComponent = illustration?.kind === 'component' ? illustration.Component : null
-
   return (
     <MosaicCard
       title={t('tips.cardTitle', 'Tips & tricks')}
@@ -195,21 +244,7 @@ export const TipsCard: React.FC = () => {
         <span className="empty-bench-tip__body">
           {t(`tips.${currentKey}.body`)}
         </span>
-        {illustration?.kind === 'svg' ? (
-          <div
-            className="empty-bench-tip-illustration-wrap"
-            // The SVG markup is a build-time `?raw` import from a
-            // trusted file in this repo; inlining is required so
-            // the embedded `<style>` block can resolve theme CSS
-            // variables and currentColor from the parent context.
-            dangerouslySetInnerHTML={{ __html: illustration.markup }}
-          />
-        ) : null}
-        {IllustrationComponent ? (
-          <div className="empty-bench-tip-illustration-wrap">
-            <IllustrationComponent />
-          </div>
-        ) : null}
+        <TipIllustration tipKey={currentKey} />
       </div>
     </MosaicCard>
   )

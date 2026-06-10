@@ -41,7 +41,7 @@ import { PROJECT_UUID_KEY } from '../shared/config/projectUuid'
 import type { PersistenceFormat } from 'electron-core-ui'
 import { dirname, join } from 'path'
 import { existsSync, statSync } from 'fs'
-import { searchIndexService, contextService, responseHistoryService, requestUsageService, authenticationCacheService } from './services'
+import { searchIndexService, contextService, responseHistoryService, requestUsageService, scenarioUsageService, authenticationCacheService } from './services'
 import { firewallService, permissionService, registerFirewallIpc, installWorkerPatcher } from './services/firewall'
 import { writeMcpDiscoveryFile, cleanupMcpDiscoveryFile } from './services/mcpDiscovery'
 import { registerRestormMcp } from './mcp'
@@ -448,6 +448,9 @@ logger.info('Response History Service initialized')
 // history, powers the EmptyBench "Top played" / "Recent activity"
 // surfaces). Persists to ECUI's user-level `StorageService`.
 requestUsageService.initialize()
+// Scenario run counts — the scenario counterpart, surfaced next to requests
+// in the EmptyBench recent-activity lists.
+scenarioUsageService.initialize()
 logger.info('Request Usage Service initialized')
 
 // Initialize Authentication Cache Service. We only need the subscription

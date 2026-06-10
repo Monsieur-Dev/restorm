@@ -18,6 +18,18 @@ import protocolsSvg from './protocols.svg?raw'
 import responseTreeSvg from './responseTree.svg?raw'
 import responseHistorySvg from './responseHistory.svg?raw'
 import multiLanguageSvg from './multiLanguage.svg?raw'
+// Scenario tips
+import chainRequestsSvg from './chainRequests.svg?raw'
+import fromPostmanSvg from './fromPostman.svg?raw'
+import codeLanguagesSvg from './codeLanguages.svg?raw'
+import stepByStepSvg from './stepByStep.svg?raw'
+import interactiveScenariosSvg from './interactiveScenarios.svg?raw'
+import cicdSvg from './cicd.svg?raw'
+import scenarioAiSvg from './scenarioAi.svg?raw'
+import nestedScenariosSvg from './nestedScenarios.svg?raw'
+import scenarioHistorySvg from './scenarioHistory.svg?raw'
+import codeSandboxSvg from './codeSandbox.svg?raw'
+import customValueListsSvg from './customValueLists.svg?raw'
 import { FavoritesIllustration } from './FavoritesIllustration'
 
 /**
@@ -56,5 +68,16 @@ export const TIP_ILLUSTRATIONS: Record<string, TipIllustration | undefined> = {
   protocols:       { kind: 'svg', markup: protocolsSvg },
   responseTree:    { kind: 'svg', markup: responseTreeSvg },
   responseHistory: { kind: 'svg', markup: responseHistorySvg },
-  multiLanguage:   { kind: 'svg', markup: multiLanguageSvg }
+  multiLanguage:   { kind: 'svg', markup: multiLanguageSvg },
+  chainRequests:        { kind: 'svg', markup: chainRequestsSvg },
+  fromPostman:          { kind: 'svg', markup: fromPostmanSvg },
+  codeLanguages:        { kind: 'svg', markup: codeLanguagesSvg },
+  stepByStep:           { kind: 'svg', markup: stepByStepSvg },
+  interactiveScenarios: { kind: 'svg', markup: interactiveScenariosSvg },
+  cicd:                 { kind: 'svg', markup: cicdSvg },
+  scenarioAi:           { kind: 'svg', markup: scenarioAiSvg },
+  nestedScenarios:      { kind: 'svg', markup: nestedScenariosSvg },
+  scenarioHistory:      { kind: 'svg', markup: scenarioHistorySvg },
+  codeSandbox:          { kind: 'svg', markup: codeSandboxSvg },
+  customValueLists:     { kind: 'svg', markup: customValueListsSvg }
 }

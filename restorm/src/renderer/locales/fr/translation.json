@@ -93,6 +93,50 @@
     "multiLanguage": {
       "title": "27 langues !",
       "body": "Restorm parle 27 langues. Anglais, français, espagnol, allemand, italien, japonais, chinois, coréen et bien d'autres — choisissez la vôtre dans les paramètres !"
+    },
+    "fromPostman": {
+      "title": "Vous venez de Postman ou Bruno ?",
+      "body": "On vous aide à passer sur Restorm pour votre transition ;)"
+    },
+    "chainRequests": {
+      "title": "Plusieurs requêtes à enchaîner ?",
+      "body": "Utilisez vos requêtes dans des scénarios, ajoutez des conditions, et même des scénarios dans d'autres scénarios."
+    },
+    "stepByStep": {
+      "title": "Faites du pas à pas dans vos scénarios",
+      "body": "Une étape après l'autre, pour mieux voir ce qui se passe. Vous pouvez même poser des points d'arrêt."
+    },
+    "cicd": {
+      "title": "Jouez vos scénarios dans vos pipelines CI/CD",
+      "body": "Lancez Restorm en mode headless pour exécuter un scénario sans interface et récupérer ses logs — des tests automatisés construits visuellement."
+    },
+    "nestedScenarios": {
+      "title": "Mieux voir ce qui se passe",
+      "body": "Un scénario peut en appeler un autre. Dans l'inspecteur, consultez chaque log et naviguez jusqu'au scénario dont il provient."
+    },
+    "scenarioHistory": {
+      "title": "Mais que s'est-il passé ?",
+      "body": "Consultez l'historique d'exécution de vos scénarios. L'un d'eux a changé depuis ? On a gardé sa configuration."
+    },
+    "codeSandbox": {
+      "title": "Scénarios et sécurité",
+      "body": "Vous pouvez faire du code dans vos scénarios... mais celui-ci sera exécuté dans une sandbox sécurisée, sans accès à vos fichiers locaux, et sans accès direct à internet. Le meilleur moyen de rester safe !"
+    },
+    "codeLanguages": {
+      "title": "Envie de coder un peu ?",
+      "body": "Écrivez du code directement dans vos scénarios, en TypeScript, JavaScript, Python, Lua, Ruby ou R !"
+    },
+    "scenarioAi": {
+      "title": "Des scénarios pilotables par IA",
+      "body": "Claude, Cursor, Copilot… connaissent votre code : demandez-leur des scénarios sur mesure. Tout est exposé en MCP pour créer, modifier et exécuter vos scénarios."
+    },
+    "interactiveScenarios": {
+      "title": "Des scénarios interactifs !",
+      "body": "Rendez vos scénarios paramétrables et demandez même à l'utilisateur ce qu'il veut faire grâce à des boîtes de dialogue."
+    },
+    "customValueLists": {
+      "title": "Des listes de valeurs réutilisables",
+      "body": "Définissez vos propres listes de valeurs et réutilisez-les aussi bien dans vos requêtes que dans vos scénarios."
     }
   },
   "authFailureToast": {

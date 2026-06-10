@@ -93,6 +93,50 @@
     "multiLanguage": {
       "title": "27 dil!",
       "body": "Restorm 27 dilde konuşur. İngilizce, Fransızca, İspanyolca, Almanca, İtalyanca, Japonca, Çince, Korece ve daha pek çoğu — ayarlardan kendi dilinizi seçin!"
+    },
+    "fromPostman": {
+      "title": "Postman veya Bruno'dan mı geliyorsunuz?",
+      "body": "Restorm'a geçişinizde size yardımcı oluyoruz — kolay bir geçiş için ;)"
+    },
+    "chainRequests": {
+      "title": "Birbirine bağlanacak birkaç istek mi var?",
+      "body": "İsteklerinizi senaryolar içinde kullanın, koşullar ekleyin, hatta senaryoları başka senaryoların içine yerleştirin."
+    },
+    "stepByStep": {
+      "title": "Senaryolarınızda adım adım ilerleyin",
+      "body": "Tam olarak ne olduğunu görmek için her seferinde bir adım. Hatta kesme noktaları (breakpoint) bile koyabilirsiniz."
+    },
+    "cicd": {
+      "title": "Senaryolarınızı CI/CD süreçlerinizde çalıştırın",
+      "body": "Bir senaryoyu arayüz olmadan çalıştırıp günlüklerini toplamak için Restorm'u headless modda başlatın — görsel olarak oluşturulmuş otomatik testler."
+    },
+    "nestedScenarios": {
+      "title": "Bir senaryoda neler olduğunu görün",
+      "body": "Bir senaryo başka birini çağırabilir. İnceleyicide her günlüğü okuyun ve doğrudan günlüğün geldiği senaryoya atlayın."
+    },
+    "scenarioHistory": {
+      "title": "Peki az önce ne oldu?",
+      "body": "Senaryolarınızın çalıştırma geçmişine göz atın. Senaryolardan biri o zamandan beri değişti mi? Merak etmeyin — onun yapılandırmasını sakladık."
+    },
+    "codeSandbox": {
+      "title": "Senaryolar ve güvenlik",
+      "body": "Senaryolarınızda kod yazabilirsiniz — ancak bu kod güvenli bir sandbox içinde çalışır, yerel dosyalarınıza erişimi ve doğrudan internet bağlantısı yoktur. Korunmanın en güvenli yolu!"
+    },
+    "codeLanguages": {
+      "title": "Biraz kod yazmaya ne dersiniz?",
+      "body": "Kodu doğrudan senaryolarınızın içine yazın — TypeScript, JavaScript, Python, Lua, Ruby veya R ile!"
+    },
+    "scenarioAi": {
+      "title": "Yapay zekâ ile yönetilebilen senaryolar",
+      "body": "Claude, Cursor, Copilot… kod tabanınızı bilir: onlardan size özel senaryolar isteyin. Senaryo oluşturmak, düzenlemek ve çalıştırmak için her şey MCP üzerinden sunulur."
+    },
+    "interactiveScenarios": {
+      "title": "Etkileşimli senaryolar!",
+      "body": "Senaryolarınızı parametrelenebilir hâle getirin, hatta iletişim kutularıyla kullanıcıya ne yapılacağını sorun."
+    },
+    "customValueLists": {
+      "title": "Yeniden kullanılabilir değer listeleri",
+      "body": "Kendi değer listelerinizi tanımlayın ve hem isteklerinizde hem de senaryolarınızda yeniden kullanın."
     }
   },
   "authFailureToast": {

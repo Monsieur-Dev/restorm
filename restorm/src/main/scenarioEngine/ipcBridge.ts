@@ -18,6 +18,7 @@
 import { BrowserWindow, ipcMain } from 'electron'
 import { scenarioEngine } from './engine'
 import { scenarioRunHistoryService } from '../services/ScenarioRunHistoryService'
+import { scenarioUsageService } from '../services'
 import type { EngineEvent, RuntimeId } from './types'
 
 let installed = false
@@ -41,6 +42,10 @@ export function installScenarioEngineIPC(): void {
     // mid-run, see `set-debug`), but only HONORED when `debug` is true — the
     // plain Play button passes `debug:false` and runs straight through.
     const debugOpts = breakpoints && breakpoints.length > 0 ? { breakpoints, debug: debug === true } : {}
+    // Record the run for the EmptyBench recent-activity lists. Only this
+    // top-level interactive entry counts — sub-scenarios start via the
+    // scheduler, not this IPC, so the fan-out isn't double-counted.
+    scenarioUsageService.recordRun(scenarioId)
     const handle = scenarioEngine.start(scenarioId, { ...(params ? { params } : {}), interactive: true, ...(startPaused === true ? { startPaused: true } : {}), ...debugOpts })
     // `done` is intentionally NOT awaited — the renderer observes
     // the run via events, not the IPC return value. We return the

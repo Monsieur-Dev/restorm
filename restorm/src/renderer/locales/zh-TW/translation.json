@@ -92,6 +92,50 @@
     "multiLanguage": {
       "title": "27 種語言!",
       "body": "Restorm 支援 27 種語言。英文、法文、西班牙文、德文、義大利文、日文、中文、韓文等等 — 在設定中挑選你的語言吧!"
+    },
+    "fromPostman": {
+      "title": "從 Postman 或 Bruno 過來的?",
+      "body": "我們幫你切換到 Restorm — 讓你的遷移輕鬆無憂 ;)"
+    },
+    "chainRequests": {
+      "title": "有好幾個請求要串起來?",
+      "body": "在場景中使用你的請求，加入條件，甚至把場景巢狀進其他場景裡。"
+    },
+    "stepByStep": {
+      "title": "逐步執行你的場景",
+      "body": "一次一步，精確地看清發生了什麼。你甚至可以設定中斷點。"
+    },
+    "cicd": {
+      "title": "在你的 CI/CD 流水線中執行場景",
+      "body": "以 headless 模式啟動 Restorm，無介面執行一個場景並收集它的日誌 — 以視覺化方式建構的自動化測試。"
+    },
+    "nestedScenarios": {
+      "title": "看看場景裡發生了什麼",
+      "body": "一個場景可以呼叫另一個。在檢查器中閱讀每一條日誌，並直接跳轉到它來自的場景。"
+    },
+    "scenarioHistory": {
+      "title": "可是剛剛發生了什麼?",
+      "body": "瀏覽你場景的執行歷史。其中某個之後改動了? 別擔心 — 我們保留了它當時的設定。"
+    },
+    "codeSandbox": {
+      "title": "場景與安全",
+      "body": "你可以在場景中撰寫程式碼 — 但它執行於安全的 sandbox 中，無法存取你的本機檔案，也無法直接存取網際網路。保持安全的最穩妥方式!"
+    },
+    "codeLanguages": {
+      "title": "想寫點程式碼?",
+      "body": "直接在你的場景裡寫程式碼 — 用 TypeScript、JavaScript、Python、Lua、Ruby 或 R!"
+    },
+    "scenarioAi": {
+      "title": "可由 AI 驅動的場景",
+      "body": "Claude、Cursor、Copilot… 了解你的程式碼庫：向它們索取量身打造的場景吧。一切都透過 MCP 公開出來，用於建立、編輯與執行場景。"
+    },
+    "interactiveScenarios": {
+      "title": "互動式場景!",
+      "body": "讓你的場景可參數化，甚至透過對話框詢問使用者該做什麼。"
+    },
+    "customValueLists": {
+      "title": "可重複使用的值清單",
+      "body": "定義你自己的值清單，並在請求與場景中一併重複使用它們。"
     }
   },
   "authFailureToast": {

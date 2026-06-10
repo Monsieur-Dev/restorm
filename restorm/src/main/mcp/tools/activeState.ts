@@ -39,7 +39,7 @@ export function registerActiveStateBridge(): void {
     tabSnapshot.tabId = typeof p['tabId'] === 'string' ? p['tabId'] : null
     tabSnapshot.itemId = typeof p['itemId'] === 'string' ? p['itemId'] : null
     const k = p['kind']
-    tabSnapshot.kind = k === 'request' || k === 'folder' || k === 'env-folder' ? k : null
+    tabSnapshot.kind = k === 'request' || k === 'folder' || k === 'env-folder' || k === 'scenario' ? k : null
   })
 
   ipcMain.on('mcp:active-env-changed', (_event, payload: unknown) => {
@@ -63,7 +63,7 @@ export function registerActiveStateBridge(): void {
       tabSnapshot.tabId = typeof t['tabId'] === 'string' ? t['tabId'] : null
       tabSnapshot.itemId = typeof t['itemId'] === 'string' ? t['itemId'] : null
       const k = t['kind']
-      tabSnapshot.kind = k === 'request' || k === 'folder' || k === 'env-folder' ? k : null
+      tabSnapshot.kind = k === 'request' || k === 'folder' || k === 'env-folder' || k === 'scenario' ? k : null
     }
     const envs = p['envByFolder']
     if (envs && typeof envs === 'object') {

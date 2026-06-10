@@ -92,6 +92,50 @@
     "multiLanguage": {
       "title": "27 种语言!",
       "body": "Restorm 支持 27 种语言。英语、法语、西班牙语、德语、意大利语、日语、汉语、韩语等等 — 在设置里选择你的语言吧!"
+    },
+    "fromPostman": {
+      "title": "从 Postman 或 Bruno 过来的?",
+      "body": "我们帮你切换到 Restorm — 让你的迁移轻松无忧 ;)"
+    },
+    "chainRequests": {
+      "title": "有好几个请求要串起来?",
+      "body": "在场景中使用你的请求，添加条件，甚至把场景嵌套进其他场景里。"
+    },
+    "stepByStep": {
+      "title": "逐步运行你的场景",
+      "body": "一次一步，精确地看清发生了什么。你甚至可以设置断点。"
+    },
+    "cicd": {
+      "title": "在你的 CI/CD 流水线中运行场景",
+      "body": "以 headless 模式启动 Restorm，无界面运行一个场景并收集它的日志 — 用可视化方式构建的自动化测试。"
+    },
+    "nestedScenarios": {
+      "title": "看看场景里发生了什么",
+      "body": "一个场景可以调用另一个。在检查器中阅读每一条日志，并直接跳转到它来自的场景。"
+    },
+    "scenarioHistory": {
+      "title": "可是刚刚发生了什么?",
+      "body": "浏览你场景的执行历史。其中某个之后改动了? 别担心 — 我们保留了它当时的配置。"
+    },
+    "codeSandbox": {
+      "title": "场景与安全",
+      "body": "你可以在场景中编写代码 — 但它运行在安全的 sandbox 中，无法访问你的本地文件，也无法直接访问互联网。保持安全的最稳妥方式!"
+    },
+    "codeLanguages": {
+      "title": "想写点代码?",
+      "body": "直接在你的场景里写代码 — 用 TypeScript、JavaScript、Python、Lua、Ruby 或 R!"
+    },
+    "scenarioAi": {
+      "title": "可由 AI 驱动的场景",
+      "body": "Claude、Cursor、Copilot… 了解你的代码库：向它们索要量身定制的场景吧。一切都通过 MCP 暴露出来，用于创建、编辑和运行场景。"
+    },
+    "interactiveScenarios": {
+      "title": "交互式场景!",
+      "body": "让你的场景可参数化，甚至通过对话框询问用户该做什么。"
+    },
+    "customValueLists": {
+      "title": "可复用的值列表",
+      "body": "定义你自己的值列表，并在请求和场景中一并复用它们。"
     }
   },
   "authFailureToast": {

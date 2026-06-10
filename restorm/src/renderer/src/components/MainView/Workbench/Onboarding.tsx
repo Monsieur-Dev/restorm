@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { MosaicLayout } from 'electron-core-ui/renderer'
-import { ImportCard, RecentActivityCard, ApiCard, TipsCard } from './EmptyBenchCards'
+import { ImportCard, RecentActivityCard, ApiCard, TipsCard, TIP_COUNT } from './EmptyBenchCards'
 import { isEnvironmentFolder, type EnvironmentFolder, type FolderItem } from '../../../../../shared/types/folderTypes'
 import './EmptyBench.css'
 
@@ -37,11 +37,39 @@ interface OnboardingProps {
   readonly onOpenRequest: (requestId: string) => void
 }
 
+/** When the board would otherwise be near-empty (no imported service, hence no
+ *  ApiCard and no recent activity), we pad it with several tip cards so the
+ *  onboarding surface stays full — at least this many tip blocks. */
+const EMPTY_BOARD_MIN_TIPS = 4
+
+/** Pick `count` distinct random tip indices (≤ the number of tips). Kept as a
+ *  module function so the randomness lives outside React's render (used from a
+ *  lazy `useState` initializer). */
+function pickDistinctTipSeeds(count: number): number[] {
+  const target = Math.min(count, TIP_COUNT)
+  const seeds: number[] = []
+  const used = new Set<number>()
+  while (seeds.length < target) {
+    const r = Math.floor(Math.random() * TIP_COUNT)
+    if (!used.has(r)) {
+      used.add(r)
+      seeds.push(r)
+    }
+  }
+  return seeds
+}
+
 export const Onboarding: React.FC<OnboardingProps> = ({ rootItems, projectUuid, onImport, onOpenRequest }) => {
   const envFolders = useMemo<EnvironmentFolder[]>(
     () => rootItems.filter(isEnvironmentFolder),
     [rootItems]
   )
+
+  // No imported service → no ApiCard, and recent activity only tracks items in
+  // the tree, so an empty project's board would show just Import + one tip.
+  // Fill it with several tip cards, each seeded to a distinct starting tip.
+  const isEmptyBoard = envFolders.length === 0
+  const [tipSeeds] = useState<number[]>(() => pickDistinctTipSeeds(EMPTY_BOARD_MIN_TIPS))
 
   return (
     <div className="empty-bench-container">
@@ -56,7 +84,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ rootItems, projectUuid, 
         {envFolders.map((folder) => (
           <ApiCard key={folder.id} folder={folder} projectUuid={projectUuid} onOpenRequest={onOpenRequest} />
         ))}
-        <TipsCard />
+        {isEmptyBoard
+          ? tipSeeds.map((seed) => <TipsCard key={`tips-${seed}`} initialIndex={seed} />)
+          : <TipsCard />}
       </MosaicLayout>
     </div>
   )

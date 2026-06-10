@@ -91,10 +91,13 @@ import { findGroupIdForTab, hasGroupWithId, updateGroupById } from './utils/work
  * the underlying id, so close handlers triggered from those panes
  * must look through to `tab.request?.id` / `tab.folder?.id`.
  */
-type ItemBackedTab = EditorTab & { request?: { id?: string }; folder?: { id?: string } }
+type ItemBackedTab = EditorTab & { request?: { id?: string }; folder?: { id?: string }; scenario?: { id?: string } }
 const tabMatchesItem = (tab: EditorTab, itemId: string): boolean => {
   const t = tab as ItemBackedTab
-  return t.request?.id === itemId || t.folder?.id === itemId
+  // A tab is backed by a request, a (env-)folder, OR a scenario — match all
+  // three so MCP open/close/reveal-by-id works for scenario tabs too (their id
+  // lives on `scenario`, not `request`/`folder`).
+  return t.request?.id === itemId || t.folder?.id === itemId || t.scenario?.id === itemId
 }
 import { Onboarding } from './components/MainView/Workbench/Onboarding'
 import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
@@ -849,7 +852,7 @@ const App: React.FC = () => {
   // Resolve a workbench tab id (e.g. `request-idx:0.1`, `request-id:uuid`,
   // or the legacy `request-<id>` form) to its item id.
   const resolveTabItemId = useCallback((tabId: string): string | null => {
-    const idxMatch = /^(folder|env-folder|request)-idx:([0-9]+(?:\.[0-9]+)*)$/.exec(tabId)
+    const idxMatch = /^(folder|env-folder|request|scenario)-idx:([0-9]+(?:\.[0-9]+)*)$/.exec(tabId)
     if (idxMatch?.[2]) {
       const indexPath = idxMatch[2].split('.').map((n) => Number(n))
       let cursor: unknown = rootItems[indexPath[0] ?? 0]
@@ -865,7 +868,7 @@ const App: React.FC = () => {
       }
       return null
     }
-    const legacyMatch = /^(folder|env-folder|request)-(?:id:)?(.+)$/.exec(tabId)
+    const legacyMatch = /^(folder|env-folder|request|scenario)-(?:id:)?(.+)$/.exec(tabId)
     return legacyMatch?.[2] ?? null
   }, [rootItems])
 
@@ -897,6 +900,17 @@ const App: React.FC = () => {
     const request = findRequestById(rootItems, itemId)
     if (!request) return null
     return { id: request.id, path: buildRequestPath(rootItems, request.id) }
+  }, [workbenchTree.groups, focusedGroupId, resolveTabItemId, rootItems])
+
+  // Active scenario-editor tab (if any), so the MCP `get_current_tab` snapshot
+  // can report `kind: 'scenario'` like it does for requests. Resolved the same
+  // way as `activeRequest` but narrowed to scenarios.
+  const activeScenarioId = useMemo<string | null>(() => {
+    const activeTabId = resolveActiveTabId(workbenchTree.groups, focusedGroupId)
+    if (!activeTabId) return null
+    const itemId = resolveTabItemId(activeTabId)
+    if (!itemId) return null
+    return findScenarioById(rootItems, itemId) ? itemId : null
   }, [workbenchTree.groups, focusedGroupId, resolveTabItemId, rootItems])
 
   // The nearest ancestor env folder of the active request — the
@@ -1308,8 +1322,8 @@ const App: React.FC = () => {
   useMcpActiveStateBridge({
     enabled: mcpEnabled,
     tabId: mcpActiveTabId,
-    itemId: activeRequest?.id ?? null,
-    kind: activeRequest ? 'request' : null,
+    itemId: activeRequest?.id ?? activeScenarioId ?? null,
+    kind: activeRequest ? 'request' : activeScenarioId ? 'scenario' : null,
     envByFolder: {}
   })
   // `handleCloseTabById` is declared further down (it depends on
@@ -1327,6 +1341,7 @@ const App: React.FC = () => {
     openFolderTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
+    openScenarioEditorTab,
     closeTabByItemId: closeTabByItemIdStable
   })
   // Set to `true` by `useMcpTreeReplace` immediately before each MCP-
