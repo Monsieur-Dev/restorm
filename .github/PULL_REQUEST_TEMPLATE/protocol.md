@@ -4,7 +4,7 @@
 > Required for any PR that adds an execution protocol or import format.
 > Reference playbook: [`restorm/docs/contributing/adding-a-protocol.md`](../../restorm/docs/contributing/adding-a-protocol.md).
 
-**Linear ticket:** OYO-…
+**Backlog task:** TASK-…
 
 ## Summary
 
@@ -53,11 +53,11 @@
 
 ## Imports (for import-only or import-plus-protocol PRs)
 
-- [ ] `ImportAdapter.extractNormalizedSpec` implemented (OYO-168) and
+- [ ] `ImportAdapter.extractNormalizedSpec` implemented and
       idempotent — re-import of the same spec is a no-op.
 - [ ] Auto-detection via content-sniffing in the adapter, not in
       `ImportManager`.
-- [ ] Enum reconciliation wired (OYO-184) when the format carries enums.
+- [ ] Enum reconciliation wired when the format carries enums.
 - [ ] Fixture under `restorm/tests/unit/fixtures/<format>/`.
 - [ ] Sample under `restorm/Samples/` and added to the
       `full-workflow.feature` import sweep.
