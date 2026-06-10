@@ -165,6 +165,46 @@ describe('AC3 — Aggregate scope-close collection', () => {
     expect(rescued).toBe(true)
   })
 
+  it('fires the `done` of the box feeding a streaming aggregate\'s items (obligation discharged)', async () => {
+    // The body node feeds `agg.items` AND wires its universal `done` port to a
+    // tally. Handing a token to a streaming aggregate must still discharge the
+    // emitter's `done` obligation, else `body.done` never fires and the tally
+    // (and any real continuation) deadlocks. One `done` per iteration → 3.
+    const scenario = buildScenario(
+      [
+        { id: 'src', kind: 'now', outputs: ['value'] },
+        { id: 'fe', kind: 'forEach', inputs: ['items'], outputs: ['each', 'done'], config: { parallelism: { enabled: true, count: 8 } } },
+        { id: 'body', kind: 'transform', inputs: ['item'], outputs: ['value'] },
+        { id: 'agg', kind: 'aggregate', inputs: ['items', 'in'], outputs: ['result'], config: { op: 'join', separator: ',' } },
+        { id: 'sink', kind: 'object', inputs: ['result'], outputs: [] },
+        { id: 'tally', kind: 'now', inputs: ['in'], outputs: [] }
+      ],
+      [
+        { from: ['src', 'value'], to: ['fe', 'items'] },
+        { from: ['fe', 'each'], to: ['body', 'item'] },
+        { from: ['body', 'value'], to: ['agg', 'items'] },
+        { from: ['body', 'done'], to: ['tally', 'in'] },
+        { from: ['fe', 'done'], to: ['agg', 'in'] },
+        { from: ['agg', 'result'], to: ['sink', 'result'] }
+      ]
+    )
+    let tallied = 0
+    let result: unknown
+    const executors = new Map<string, NodeExecutor>([
+      ['src', () => ({ outputs: [{ port: 'value', value: ['a', 'b', 'c'] }] })],
+      ['fe', forEachExecutor],
+      ['body', (act) => ({ outputs: [{ port: 'value', value: act.inputs['item'] }] })],
+      ['agg', aggregateExecutor],
+      ['sink', (act) => { result = act.inputs['result']; return { outputs: [] } }],
+      ['tally', () => { tallied += 1; return { outputs: [] } }]
+    ])
+    const s = new Scheduler({ scenario, executors })
+    await s.run()
+    expect(s.status().state).toBe('completed')
+    expect(result).toBe('a,b,c')
+    expect(tallied).toBe(3)
+  })
+
   it('aggregates per outer iteration when wired to a nested inner loop\'s `done`', async () => {
     // outer forEach [[1,2],[3,4]] → inner forEach over each sub-array → body →
     // agg.items ; inner.done → agg.in. The aggregate fires ONCE per outer

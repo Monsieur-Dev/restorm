@@ -49,11 +49,14 @@ function lockfilePath(pid: number): string {
  */
 export async function writeMcpDiscoveryFile(entry: McpDiscoveryEntry, extraPath?: string): Promise<void> {
   try {
-    await fs.mkdir(MCP_DISCOVERY_DIR, { recursive: true })
+    // The lockfile carries the MCP bearer `token`, so keep both the dir and
+    // the file owner-only (0700/0600) — on a shared host another local user
+    // could otherwise read the token and reach the loopback MCP endpoint.
+    await fs.mkdir(MCP_DISCOVERY_DIR, { recursive: true, mode: 0o700 })
     const json = JSON.stringify(entry)
     const target = lockfilePath(entry.pid)
     const tmp = `${target}.${String(process.pid)}.tmp`
-    await fs.writeFile(tmp, json, 'utf8')
+    await fs.writeFile(tmp, json, { encoding: 'utf8', mode: 0o600 })
     await fs.rename(tmp, target)
 
     if (extraPath && extraPath !== target) {
@@ -61,8 +64,8 @@ export async function writeMcpDiscoveryFile(entry: McpDiscoveryEntry, extraPath?
       // poll that exact path after spawning us — write it too. Same
       // atomic-rename pattern.
       const extraTmp = `${extraPath}.${String(process.pid)}.tmp`
-      await fs.mkdir(join(extraPath, '..'), { recursive: true })
-      await fs.writeFile(extraTmp, json, 'utf8')
+      await fs.mkdir(join(extraPath, '..'), { recursive: true, mode: 0o700 })
+      await fs.writeFile(extraTmp, json, { encoding: 'utf8', mode: 0o600 })
       await fs.rename(extraTmp, extraPath)
     }
   } catch (error) {

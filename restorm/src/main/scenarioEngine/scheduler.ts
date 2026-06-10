@@ -1103,6 +1103,14 @@ export class Scheduler {
     // (buffered, not buffered-into-an-activation) and fires once on close.
     if (this.streamingAggregates.has(token.toNodeId)) {
       this.collectForAggregate(token)
+      // The contribution is handed off to the aggregate's own buffer, so the
+      // emitter's obligation for this token is discharged HERE. Without this the
+      // box feeding `items` keeps a pending descendant forever and its own
+      // `done` port never fires (a wired `done → …` continuation would deadlock).
+      if (typeof token.emitter === 'number' && !this.consumedTokens.has(token)) {
+        this.consumedTokens.add(token)
+        this.releaseParents([token.emitter])
+      }
       return
     }
     const decision = this.buffer.put(token)

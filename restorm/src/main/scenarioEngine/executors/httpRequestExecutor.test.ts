@@ -147,6 +147,25 @@ describe('httpRequestExecutor — slot short-circuit', () => {
     expect(out.response.body).toBe('{"ok":true}')
   })
 
+  it('marks `response.success` false on a 4xx/5xx status (status-class, not transport)', async () => {
+    // The transport completed (the service reports `success: true`), but the
+    // HTTP status is 500 — `response.success` must reflect the status class so
+    // an `if`/`assert` on `.success` treats it as a failure.
+    execute.mockResolvedValue({ ...cannedResult(), success: true, statusCode: 500, statusText: 'Internal Server Error' })
+    const result = await httpRequestExecutor(makeActivation({}), makeCtx(node()))
+    const out = result.outputs.find((o) => o.port === 'response')?.value as {
+      response: { status: number; success: boolean }
+    }
+    expect(out.response.status).toBe(500)
+    expect(out.response.success).toBe(false)
+
+    // A 404 is likewise a failure.
+    execute.mockResolvedValue({ ...cannedResult(), success: true, statusCode: 404, statusText: 'Not Found' })
+    const r404 = await httpRequestExecutor(makeActivation({}), makeCtx(node()))
+    const o404 = r404.outputs.find((o) => o.port === 'response')?.value as { response: { success: boolean } }
+    expect(o404.response.success).toBe(false)
+  })
+
   it('a wired `requestOverride` (pm.request mutation) merges over the bound request before dispatch', async () => {
     await httpRequestExecutor(
       makeActivation({ requestOverride: { url: 'https://api.test/override', method: 'put', headers: { Authorization: 'Bearer tok' } } }),

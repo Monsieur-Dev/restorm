@@ -4815,7 +4815,7 @@
           transfer-encoding: chunked
         body: '{"attempt":1,"failing":true}'
         durationMs: <dynamic-time>
-        success: true
+        success: false
 - message: ⚪ [<time>] retry attempt 1 failed, waiting 10ms
 - message: ⚪ [<time>] retry attempt 2/5
 - message: ⚪ [<time>] start httpRequest
@@ -4840,7 +4840,7 @@
           transfer-encoding: chunked
         body: '{"attempt":2,"failing":true}'
         durationMs: <dynamic-time>
-        success: true
+        success: false
 - message: ⚪ [<time>] retry attempt 2 failed, waiting 10ms
 - message: ⚪ [<time>] retry attempt 3/5
 - message: ⚪ [<time>] start httpRequest
@@ -4968,7 +4968,7 @@
           transfer-encoding: chunked
         body: '{"attempt":1,"failing":true}'
         durationMs: <dynamic-time>
-        success: true
+        success: false
 - message: ⚪ [<time>] retry attempt 1 failed, waiting 5ms
 - message: ⚪ [<time>] retry attempt 2/3
 - message: ⚪ [<time>] start httpRequest
@@ -4993,7 +4993,7 @@
           transfer-encoding: chunked
         body: '{"attempt":2,"failing":true}'
         durationMs: <dynamic-time>
-        success: true
+        success: false
 - message: ⚪ [<time>] retry attempt 2 failed, waiting 5ms
 - message: ⚪ [<time>] retry attempt 3/3
 - message: ⚪ [<time>] start httpRequest
@@ -5018,7 +5018,7 @@
           transfer-encoding: chunked
         body: '{"attempt":3,"failing":true}'
         durationMs: <dynamic-time>
-        success: true
+        success: false
 - message: ⚪ [<time>] retry exhausted after 3 attempt(s)
 - message: ⚪ [<time>] start log
   data:

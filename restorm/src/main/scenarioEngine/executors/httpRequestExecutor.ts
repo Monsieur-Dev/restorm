@@ -105,7 +105,12 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
             headers: result.headers ?? {},
             body: result.body,
             durationMs: result.timings.durationMs,
-            success: result.success,
+            // `success` reflects the HTTP status class (2xx), like the web
+            // `Response.ok`, NOT mere transport completion — so an `if`/`assert`
+            // wired to `response.success` treats a 4xx/5xx as a failure. A
+            // transport error yields no/0 status, hence `success: false` too.
+            // (The classic Send button keeps its own transport-level `success`.)
+            success: (result.statusCode ?? 0) >= 200 && (result.statusCode ?? 0) < 300,
             ...(result.error !== undefined ? { error: result.error } : {})
           }
         }
