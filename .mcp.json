@@ -3,6 +3,13 @@
     "restorm": {
       "command": "node",
       "args": ["scripts/mcp-launcher.mjs"]
+    },
+    "backlog": {
+      "command": "npx",
+      "args": ["-y", "backlog.md", "mcp", "start"],
+      "env": {
+        "BACKLOG_CWD": "/home/yoann/git/gitable"
+      }
     }
   }
 }
