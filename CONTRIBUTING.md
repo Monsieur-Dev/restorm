@@ -14,7 +14,7 @@ right playbook.
 2. If you're touching `electron-core-ui/`, also read
    [`electron-core-ui/CLAUDE.md`](./electron-core-ui/CLAUDE.md) — the
    library-isolation rules are strict.
-3. Check the Linear ticket. Most architectural decisions live there.
+3. Check the Backlog.md task (in `backlog/`). Most architectural decisions live there.
 
 ## Playbooks (start here for ticket-driven work)
 
@@ -44,9 +44,9 @@ to the GitHub PR creation URL to load it.
 
 Read **[`restorm/docs/contributing/adding-an-import.md`](./restorm/docs/contributing/adding-an-import.md)**.
 Shorter than the protocol playbook — it covers the
-`ImportAdapter.extractNormalizedSpec` contract (OYO-168), auto-detection
-via content sniffing, idempotency, custom-vs-imported reconciliation
-(OYO-184), and the import-only E2E scenario set.
+`ImportAdapter.extractNormalizedSpec` contract, auto-detection
+via content sniffing, idempotency, custom-vs-imported reconciliation,
+and the import-only E2E scenario set.
 
 ### Adding a generic component or hook to `electron-core-ui`
 
@@ -72,7 +72,7 @@ hook fails, fix the underlying issue.
 
 ## Questions
 
-- Architecture: ping the relevant Linear ticket.
+- Architecture: check the relevant Backlog.md task (in `backlog/`).
 - Library isolation: see `electron-core-ui/CLAUDE.md`.
 - Anything missing from the playbooks above: file a doc bug — the
   playbooks are the source of truth, gaps in them are bugs.

@@ -1,5 +1,14 @@
 # Project Rules
 
+## Task backlog (Backlog.md submodule)
+
+The project backlog lives in **`backlog/`**, a **git submodule** → `https://github.com/oYo-fr/restorm-backlog`. Tasks are managed with [Backlog.md](https://backlog.md): one Markdown file per task under `backlog/tasks/` (active) or `backlog/completed/` (Done), YAML frontmatter, decimal IDs mirroring the epic → sub-ticket hierarchy (`TASK-70`, `TASK-70.1`, `TASK-92.4.1`). Statuses: `Backlog`, `Todo`, `In Progress`, `Done`, `Canceled`. `auto_commit: true`.
+
+- Board: `npx backlog.md browser --port 6420` (http://localhost:6420). `claude.sh` auto-starts it (idempotent) before launching Claude.
+- CLI: `npx backlog.md task list | create | edit …`.
+- **Commit policy for `restorm-backlog` — no ceremony**: commit and push **directly to `main`**. No branches, no PRs, no approval gate. When asked to add / edit / remove a ticket, just do it and push. (`auto_commit` already commits Backlog.md CLI/web operations; push manually after direct file edits.)
+- This is the **opposite** of the rest of this file: the restorm product repo keeps its full branch + PR + approval discipline (see below). Bumping the submodule pointer *inside the restorm repo* is a restorm change and follows restorm's normal PR flow.
+
 ## After any code change
 
 1. Run linter: `npm run lint` (use `npm run lint:fix` if possible)
@@ -81,7 +90,7 @@ A flake report to the user should include: the failing test name, the journal bl
 
 Before pushing a branch or asking for a merge, **always** run an independent code review of the diff. Use the `superpowers:code-reviewer` agent (or equivalent fresh-context agent) on the full PR scope and act on its findings — bugs, design smells, coverage gaps, stale comments, missed docs — before telling the user the PR is ready. Document agent findings that you're deliberately not addressing, don't silently skip them. Self-review applies even when the user hasn't explicitly asked for it; it's the last gate before human attention.
 
-**As the very first step of self-review, re-read the ticket against the diff.** Pull the ticket back up (Linear, GitHub issue, etc.) and walk every acceptance-criteria checkbox + every "Sub-tasks" item, asking out loud: "is this *actually* addressed in the diff, or did I skip it?" Don't trust your earlier judgment on whether something was in scope — the ticket text is authoritative, and it's easy to drift over the course of a long ticket. Common traps:
+**As the very first step of self-review, re-read the ticket against the diff.** Pull the task back up (the Backlog.md task in `backlog/`, GitHub issue, etc.) and walk every acceptance-criteria checkbox + every sub-task, asking out loud: "is this *actually* addressed in the diff, or did I skip it?" Don't trust your earlier judgment on whether something was in scope — the ticket text is authoritative, and it's easy to drift over the course of a long ticket. Common traps:
 
 - Acceptance items that map to UI surface you haven't touched yet (badges, tooltips, context-menu entries, errors-only paths).
 - Items phrased as "refactored X" that you satisfied with a parallel-implementation instead — those usually count as a gap.
