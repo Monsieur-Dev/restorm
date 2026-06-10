@@ -148,6 +148,10 @@
       "autoSaveDelay": {
         "title": "Vonesa e ruajtjes automatike",
         "description": "Kontrollon vonesën në milisekonda pas së cilës një editor i modifikuar ruhet automatikisht. Zbatohet vetëm kur Ruajtja automatike është vendosur në Pas vonesës."
+      },
+      "reopenLastFile": {
+        "title": "Rihap automatikisht skedarin e fundit të hapur",
+        "description": "Kur është aktive, rihap gjatë nisjes skedarin e fundit që kishit hapur — por vetëm nëse aplikacioni u mbyll ndërsa një skedar ishte i hapur."
       }
     }
   },

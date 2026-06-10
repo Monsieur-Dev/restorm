@@ -6,9 +6,9 @@ import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ListViewDropEventPayload, ListViewItemEventPayload } from 'electron-core-ui/renderer'
 import { isTabGroupNode } from 'electron-core-ui/renderer'
-import type { Environment, Folder, EnvironmentFolder, Request } from '../../../shared/types/collections'
+import type { Environment, Folder, EnvironmentFolder, Request, FolderItem } from '../../../shared/types/collections'
 import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
-import { isAnyFolder } from '../../../shared/types/collections'
+import { isAnyFolder, isScenario } from '../../../shared/types/collections'
 import {
   HTTPRequest,
   GraphQLRequest,
@@ -22,8 +22,9 @@ import type { HTTPMethod } from '../../../shared/models/types'
 import { findItemById, findItemWithBreadcrumbs, getFolderIcon, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
 import { generateUniqueId, cloneItemInTree, removeItemFromTree, insertItemIntoTree } from '../utils/treeManipulation'
-import type { WorkbenchTree } from 'electron-core-ui/renderer'
-import type { BreadcrumbItem, FolderTab, EnvironmentFolderTab, HTTPRequestTab } from '../../../shared/types/editor'
+import { mapAllWorkbenchTabs } from '../utils/workbenchTabs'
+import type { WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
+import type { BreadcrumbItem, FolderTab, EnvironmentFolderTab, HTTPRequestTab, ScenarioEditorTab } from '../../../shared/types/editor'
 import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
 import { DocumentEvents, type DocumentChangedPayload } from '../services/DocumentEvents'
 import { eventBus } from 'electron-core-ui/renderer'
@@ -31,8 +32,8 @@ import type { AddChildKind } from '../components/MainView/Sidebar/contextMenuBui
 import { removeFavorite as favoritesStoreRemove } from '../services/favoritesStore'
 
 export interface UseItemOperationsOptions {
-  rootItems: (EnvironmentFolder | Folder | Request)[]
-  setRootItems: React.Dispatch<React.SetStateAction<(EnvironmentFolder | Folder | Request)[]>>
+  rootItems: FolderItem[]
+  setRootItems: React.Dispatch<React.SetStateAction<FolderItem[]>>
   setExpandedIds: React.Dispatch<React.SetStateAction<string[]>>
   setSelectedItemId: React.Dispatch<React.SetStateAction<string | null>>
   setSidebarEditingItemId: React.Dispatch<React.SetStateAction<string | null>>
@@ -44,6 +45,7 @@ export interface UseItemOperationsOptions {
     isFolder: boolean
   }>>
   openFolderTab: (folder: Folder, breadcrumbs: import('../../../shared/types/editor').BreadcrumbItem[]) => void
+  openScenarioEditorTab: (scenario: import('../../../shared/types/collections').Scenario, breadcrumbs: BreadcrumbItem[]) => void
   openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: import('../../../shared/types/editor').BreadcrumbItem[]) => void
   openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[]) => void
   /** Project UUID. When the deleted subtree contains favorited items,
@@ -61,7 +63,7 @@ export interface UseItemOperationsReturn {
    * folder), wraps it reactive, pushes it into the parent's `items[]`,
    * fires the matching `*_CREATED` event so the save-unit registry
    * picks it up, and opens the new item in a workbench tab. */
-  handleAddChildItem: (parentId: string, kind: AddChildKind) => void
+  handleAddChildItem: (parentId: string, kind: AddChildKind, options?: { silent?: boolean }) => string | null
   handleDeleteItem: (itemId: string) => void
   confirmDelete: (itemId: string) => void
   cancelDelete: () => void
@@ -79,7 +81,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     setDeleteConfirmation,
     projectUuid
   } = options
-  const { openFolderTab, openEnvironmentFolderTab, openAnyRequestTab } = options
+  const { openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab } = options
   const { t } = useTranslation()
 
   // Handle drag & drop in the sidebar to reorder items
@@ -125,73 +127,69 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     // Force React re-render by creating new reference
     setRootItems((prevItems) => [...prevItems])
 
-    // Update breadcrumbs in open workbench tabs
-    setWorkbenchTree((prevTree) => {
-      const group = prevTree.groups[0]
-      if (!group || !isTabGroupNode(group)) return prevTree
-
-      const updatedTabs = group.tabs.map((tab) => {
-        const tabType = (tab as { tabType?: string }).tabType
-        // Singleton tabs (Console, Firewall) aren't tied to any
-        // tree item — skip them. Without this guard the `else`
-        // branch below would dereference `.request.id` on a tab
-        // that doesn't carry one and crash with "Cannot read
-        // properties of undefined (reading 'id')" the moment a
-        // sidebar drag-and-drop fires the breadcrumb refresh.
-        if (tabType === 'console' || tabType === 'firewall') {
-          return tab
-        }
-        const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
-
-        // Get the item ID from the tab
-        let itemId: string
-        if (restormTab.tabType === 'folder') {
-          itemId = restormTab.folder.id
-        } else if (restormTab.tabType === 'environment-folder') {
-          itemId = restormTab.folder.id
-        } else {
-          itemId = restormTab.request.id
-        }
-
-        // Recalculate breadcrumbs for this tab
-        const { breadcrumbs: newBreadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
-        if (newBreadcrumbs.length === 0) return tab
-
-        // For HTTP request tabs, also recalculate environments
-        if (restormTab.tabType === 'http-request') {
-          // This would need getNearestEnvironmentsForBreadcrumbs but we'll simplify for now
-          return {
-            ...restormTab,
-            breadcrumbs: newBreadcrumbs
-          }
-        }
-
-        return {
-          ...restormTab,
-          breadcrumbs: newBreadcrumbs
-        }
-      })
-
-      return {
-        ...prevTree,
-        groups: [{ ...group, tabs: updatedTabs }]
+    // Recalculate breadcrumbs for a single tab after the reorder. Returns
+    // the tab unchanged for singleton tabs (Console / Firewall, which aren't
+    // tied to a tree item) and when the item can no longer be located.
+    const refreshTabBreadcrumbs = (
+      tab: EditorTab
+    ): EditorTab | FolderTab | EnvironmentFolderTab | HTTPRequestTab | ScenarioEditorTab => {
+      const tabType = (tab as { tabType?: string }).tabType
+      // Singleton tabs (Console, Firewall) aren't tied to any tree item —
+      // skip them. Without this guard the `else` branch below would
+      // dereference `.request.id` on a tab that doesn't carry one and crash
+      // with "Cannot read properties of undefined (reading 'id')".
+      if (tabType === 'console' || tabType === 'firewall') {
+        return tab
       }
-    })
+      const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab | ScenarioEditorTab
+
+      // Get the item ID from the tab. Scenario-editor tabs carry their
+      // payload under `scenario` (not `request` / `folder`); without this
+      // branch the breadcrumb refresh after a sidebar drag-and-drop would
+      // hit the `else` and dereference `.request.id` on the wrong shape.
+      let itemId: string
+      if (restormTab.tabType === 'folder') {
+        itemId = restormTab.folder.id
+      } else if (restormTab.tabType === 'environment-folder') {
+        itemId = restormTab.folder.id
+      } else if (restormTab.tabType === 'scenario-editor') {
+        itemId = restormTab.scenario.id
+      } else {
+        itemId = restormTab.request.id
+      }
+
+      const { breadcrumbs: newBreadcrumbs } = findItemWithBreadcrumbs(rootItems, itemId)
+      if (newBreadcrumbs.length === 0) return tab
+
+      // For HTTP request tabs the environments are left as-is for now
+      // (recalculating them would need getNearestEnvironmentsForBreadcrumbs).
+      return {
+        ...restormTab,
+        breadcrumbs: newBreadcrumbs
+      }
+    }
+
+    // Update breadcrumbs in EVERY open workbench tab, recursing into the
+    // container nodes of split-pane layouts. The previous implementation only
+    // rewrote `groups[0]` and returned a single-element groups array, which
+    // silently dropped every other pane — so reordering a sidebar item with a
+    // side-by-side split open collapsed the second group.
+    setWorkbenchTree((prevTree) => ({
+      ...prevTree,
+      groups: mapAllWorkbenchTabs(prevTree.groups, refreshTabBreadcrumbs)
+    }))
   }, [rootItems, setRootItems, setWorkbenchTree])
 
-  // Handle "Clone" context menu action
+  // Handle "Clone" context menu action. Works for any item — including a
+  // ROOT-level folder / environment folder (cloneItemInTree inserts the deep
+  // copy back into the root list when there's no parent).
   const handleCloneItem = useCallback((itemId: string) => {
-    // Don't allow cloning root folders
-    const isRootItem = rootItems.some((f) => f.id === itemId)
-    if (isRootItem) return
-
-    // Clone the item
-    const clonedItem = cloneItemInTree(rootItems, itemId)
+    const clonedItem = cloneItemInTree(rootItems, itemId, t('sidebar.contextMenu.copySuffix', 'copy'))
     if (!clonedItem) return
 
     // Force React re-render by creating new reference
     setRootItems((prevItems) => [...prevItems])
-  }, [rootItems, setRootItems])
+  }, [rootItems, setRootItems, t])
 
   // Handle "Delete" context menu action - show confirmation
   const handleDeleteItem = useCallback((itemId: string) => {
@@ -389,10 +387,11 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       case 'websocket': return 'New WebSocket request'
       case 'odata': return 'New OData request'
       case 'auth': return 'New auth request'
+      case 'scenario': return 'New scenario'
     }
   }, [t])
 
-  const handleAddChildItem = useCallback((parentId: string, kind: AddChildKind) => {
+  const handleAddChildItem = useCallback((parentId: string, kind: AddChildKind, options?: { silent?: boolean }): string | null => {
     // `parentId === ''` is the ROOT sentinel — used by the empty-area
     // sidebar context menu so users can add a top-level folder /
     // request without first creating a parent. For non-root cases we
@@ -404,7 +403,10 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       ? null
       : findItemWithBreadcrumbs(rootItems, parentId)
     const parent = parentLookup?.item ?? null
-    if (!isRoot && (!parent || !isAnyFolder(parent))) return
+    // A parent can be a folder/env-folder OR a scenario (scenarios double as
+    // containers for requests authored inside them).
+    const parentIsContainer = !!parent && (isAnyFolder(parent) || isScenario(parent))
+    if (!isRoot && !parentIsContainer) return null
     const parentBreadcrumbs = parentLookup?.breadcrumbs ?? []
     const name = defaultNameFor(kind)
     const id = generateUniqueId()
@@ -418,19 +420,43 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     // identity, we still need to nudge React with `setRootItems((prev)
     // => [...prev])` so the sidebar's `.map(rootItems)` re-runs and
     // picks the new descendant up.
-    const mountChild = (reactive: Folder | Request): void => {
+    const mountChild = (reactive: FolderItem): void => {
       if (isRoot) {
         setRootItems((prev) => [...prev, reactive])
       } else if (parent && isAnyFolder(parent)) {
         parent.items.push(reactive)
+      } else if (parent && isScenario(parent)) {
+        // Scenario container: its `items` is optional — seed it then append.
+        const scn = parent as { items?: FolderItem[] }
+        scn.items ??= []
+        scn.items.push(reactive)
       }
     }
 
     // Build a plain item then wrap it reactive; mirrors the shapes
     // `useImport` produces on import so the save-unit registry /
     // serializer / executors all pick them up without special casing.
-    let pushedItem: Folder | Request
-    if (kind === 'folder') {
+    let pushedItem: FolderItem
+    if (kind === 'scenario') {
+      // A scenario is a plain tree item (no execution wiring yet in
+      // Phase 1). It syncs to main via `collections:sync` and reifies
+      // into a `Scenario` model there; no per-item document event is
+      // needed (there's no ContextService/search registration to do).
+      const scenario = {
+        type: 'scenario' as const,
+        id,
+        name,
+        tags: [] as string[],
+        params: [],
+        nodes: [],
+        edges: [],
+        // A scenario doubles as a folder-like container for requests authored
+        // inside it; starts empty.
+        items: [] as FolderItem[]
+      }
+      mountChild(scenario as unknown as FolderItem)
+      pushedItem = scenario as unknown as FolderItem
+    } else if (kind === 'folder') {
       const folder: Folder = {
         id,
         name,
@@ -487,7 +513,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       const request = built as Request
       const resolvedParentId = isRoot
         ? undefined
-        : (parent && isAnyFolder(parent) ? parent.id : undefined)
+        : (parent && (isAnyFolder(parent) || isScenario(parent)) ? parent.id : undefined)
       const reactive = resolvedParentId !== undefined
         ? makeReactiveRequest(request, resolvedParentId)
         : makeReactiveRequest(request)
@@ -502,28 +528,36 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       eventBus.emitSync(DocumentEvents.REQUEST_CREATED, createdPayload)
     }
 
-    // Expand the parent (no-op for root), then nudge React with a
-    // `[...prevItems]` snapshot — see the `mountChild` comment above
-    // for why this is needed for the folder path.
+    // `silent` (a request created inline in a scenario graph) skips ALL
+    // navigation — no parent expand, no sidebar selection, no tab — so the user
+    // stays on the graph and the sidebar doesn't jump. The tree still re-renders
+    // (the `[...prevItems]` nudge) so the new child shows once its parent is
+    // expanded; see the `mountChild` comment for why the nudge is needed.
+    const silent = options?.silent === true
     if (!isRoot) {
-      setExpandedIds((prev) => Array.from(new Set([...prev, parentId])))
+      if (!silent) setExpandedIds((prev) => Array.from(new Set([...prev, parentId])))
       setRootItems((prevItems) => [...prevItems])
     }
-    setSelectedItemId(id)
+    if (!silent) setSelectedItemId(id)
 
-    const newBreadcrumb: BreadcrumbItem = {
-      id,
-      label: name,
-      icon: isAnyFolder(pushedItem) ? getFolderIcon(pushedItem) : null
+    if (!silent) {
+      const newBreadcrumb: BreadcrumbItem = {
+        id,
+        label: name,
+        icon: isAnyFolder(pushedItem) ? getFolderIcon(pushedItem) : null
+      }
+      const breadcrumbs = [...parentBreadcrumbs, newBreadcrumb]
+      const envs = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
+      if (kind === 'folder' && isAnyFolder(pushedItem)) {
+        openFolderTab(pushedItem, breadcrumbs)
+      } else if (isScenario(pushedItem)) {
+        openScenarioEditorTab(pushedItem, breadcrumbs)
+      } else if (!isAnyFolder(pushedItem)) {
+        openAnyRequestTab(pushedItem, breadcrumbs, envs)
+      }
     }
-    const breadcrumbs = [...parentBreadcrumbs, newBreadcrumb]
-    const envs = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
-    if (kind === 'folder' && isAnyFolder(pushedItem)) {
-      openFolderTab(pushedItem, breadcrumbs)
-    } else if (!isAnyFolder(pushedItem)) {
-      openAnyRequestTab(pushedItem, breadcrumbs, envs)
-    }
-  }, [rootItems, setRootItems, setExpandedIds, setSelectedItemId, openFolderTab, openAnyRequestTab, defaultNameFor])
+    return id
+  }, [rootItems, setRootItems, setExpandedIds, setSelectedItemId, openFolderTab, openScenarioEditorTab, openAnyRequestTab, defaultNameFor])
 
   const handleCreateRootFolder = useCallback(() => {
     const newFolder: Folder = {

@@ -92,6 +92,50 @@
     "multiLanguage": {
       "title": "27 ngôn ngữ!",
       "body": "Restorm nói 27 ngôn ngữ. Tiếng Anh, Pháp, Tây Ban Nha, Đức, Ý, Nhật, Trung, Hàn và nhiều ngôn ngữ khác — chọn ngôn ngữ của bạn trong phần cài đặt!"
+    },
+    "fromPostman": {
+      "title": "Đến từ Postman hay Bruno?",
+      "body": "Chúng tôi giúp bạn chuyển sang Restorm — quá trình chuyển đổi của bạn trở nên dễ dàng ;)"
+    },
+    "chainRequests": {
+      "title": "Nhiều yêu cầu cần liên kết với nhau?",
+      "body": "Sử dụng các yêu cầu của bạn trong kịch bản, thêm điều kiện, và thậm chí lồng kịch bản này vào kịch bản khác."
+    },
+    "stepByStep": {
+      "title": "Chạy từng bước qua kịch bản của bạn",
+      "body": "Từng bước một, để thấy chính xác điều gì đang diễn ra. Bạn thậm chí có thể đặt điểm dừng (breakpoint)."
+    },
+    "cicd": {
+      "title": "Chạy kịch bản của bạn trong các pipeline CI/CD",
+      "body": "Khởi động Restorm ở chế độ headless để chạy một kịch bản mà không cần giao diện và thu thập nhật ký của nó — kiểm thử tự động, được dựng một cách trực quan."
+    },
+    "nestedScenarios": {
+      "title": "Xem điều gì đang diễn ra trong một kịch bản",
+      "body": "Một kịch bản có thể gọi kịch bản khác. Trong trình kiểm tra, đọc mọi nhật ký và nhảy thẳng đến kịch bản mà nó xuất phát."
+    },
+    "scenarioHistory": {
+      "title": "Nhưng vừa xảy ra chuyện gì vậy?",
+      "body": "Duyệt lịch sử thực thi các kịch bản của bạn. Một trong số đó đã thay đổi từ đó? Đừng lo — chúng tôi đã giữ lại cấu hình của nó."
+    },
+    "codeSandbox": {
+      "title": "Kịch bản và bảo mật",
+      "body": "Bạn có thể viết mã trong kịch bản của mình — nhưng nó chạy trong một sandbox an toàn, không truy cập được các tệp cục bộ và không truy cập internet trực tiếp. Cách an toàn nhất để được bảo vệ!"
+    },
+    "codeLanguages": {
+      "title": "Thích viết một chút mã chứ?",
+      "body": "Viết mã ngay bên trong các kịch bản của bạn — bằng TypeScript, JavaScript, Python, Lua, Ruby hoặc R!"
+    },
+    "scenarioAi": {
+      "title": "Kịch bản điều khiển được bằng AI",
+      "body": "Claude, Cursor, Copilot… hiểu cơ sở mã của bạn: hãy yêu cầu chúng tạo các kịch bản phù hợp riêng cho bạn. Mọi thứ được cung cấp qua MCP để tạo, chỉnh sửa và chạy kịch bản."
+    },
+    "interactiveScenarios": {
+      "title": "Kịch bản tương tác!",
+      "body": "Biến kịch bản của bạn thành có thể tham số hóa và thậm chí hỏi người dùng nên làm gì bằng các hộp thoại."
+    },
+    "customValueLists": {
+      "title": "Danh sách giá trị có thể tái sử dụng",
+      "body": "Định nghĩa danh sách giá trị của riêng bạn và tái sử dụng chúng trong cả các yêu cầu lẫn kịch bản của bạn."
     }
   },
   "authFailureToast": {
@@ -148,6 +192,7 @@
       "createEnvironmentFolder": "Tạo thư mục môi trường",
       "delete": "Xóa",
       "clone": "Nhân bản",
+      "copySuffix": "bản sao",
       "rename": "Đổi tên",
       "addToFavorites": "Thêm vào mục yêu thích",
       "removeFromFavorites": "Xóa khỏi mục yêu thích",
@@ -168,7 +213,8 @@
         "soap": "Yêu cầu SOAP",
         "websocket": "Yêu cầu WebSocket",
         "odata": "Yêu cầu OData",
-        "auth": "Yêu cầu xác thực HTTP"
+        "auth": "Yêu cầu xác thực HTTP",
+        "scenario": "Kịch bản"
       }
     },
     "deleteConfirm": {
@@ -177,6 +223,14 @@
       "itemMessage": "Bạn có chắc chắn muốn xóa \"{{name}}\" không?",
       "confirm": "Xóa",
       "cancel": "Hủy"
+    },
+    "scenarioDelete": {
+      "title": "Xóa một yêu cầu được kịch bản sử dụng",
+      "message": "\"{{name}}\" được dùng trong các kịch bản sau. Bạn muốn làm gì?",
+      "belongsTag": "thuộc về kịch bản này",
+      "moveInto": "Chuyển vào kịch bản này",
+      "affectsNote": "Xóa yêu cầu này cũng sẽ gỡ nó khỏi các kịch bản này.",
+      "deleteAnyway": "Vẫn xóa"
     }
   },
   "environment": {
@@ -248,7 +302,8 @@
     "addHeader": "Thêm header",
     "addParam": "Thêm tham số",
     "environmentSelector": {
-      "noEnvironment": "Không có môi trường"
+      "noEnvironment": "Không có môi trường",
+      "switchTooltip": "Chuyển môi trường"
     },
     "body": {
       "fileLabel": "Tệp hoặc URL:",
@@ -301,7 +356,11 @@
       "dateTime": "Ngày/giờ",
       "color": "Màu",
       "expression": "Biểu thức",
-      "boolean": "Boolean"
+      "boolean": "Boolean",
+      "null": "Null",
+      "list": "Danh sách",
+      "variables": "Biến",
+      "environment": "Môi trường"
     },
     "apiEnums": "Kiểu được định nghĩa bởi API",
     "customLists": "Loại tùy chỉnh",
@@ -354,11 +413,14 @@
       "folder": "Thư mục",
       "environment": "Môi trường",
       "settings": "Cài đặt",
-      "tag": "Thẻ"
+      "tag": "Thẻ",
+      "scenario": "Kịch bản"
     },
     "tooltip": {
       "noDetails": "Không có chi tiết",
-      "noContent": "Không có tài liệu hoặc ghi chú"
+      "noContent": "Không có tài liệu hoặc ghi chú",
+      "noScenario": "Kịch bản không khả dụng",
+      "scenarioKind": "kịch bản"
     }
   },
   "httpStatus": {
@@ -465,7 +527,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Bạn có chắc chắn muốn xóa \"{{fileName}}\" khỏi mục yêu thích không?",
-    "noFilesHint": "Mở một tệp hoặc tạo tệp mới để bắt đầu",
     "newAriaLabel": "Tạo bộ sưu tập mới",
     "openAriaLabel": "Mở bộ sưu tập từ đĩa",
     "landmarkLabel": "Chào mừng"
@@ -492,7 +553,9 @@
   },
   "common": {
     "cancel": "Hủy",
-    "save": "Lưu"
+    "save": "Lưu",
+    "remove": "Xóa",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -742,6 +805,685 @@
       "previousMatch": "Kết quả trước",
       "nextMatch": "Kết quả tiếp theo",
       "close": "Đóng"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "emptyTitle": "Ở đây trống trơn…",
+      "emptyDragDrop": "Kéo một mục từ cây bên trái vào kịch bản của bạn để sử dụng tại đây. Bạn thậm chí có thể nhập một kịch bản vào một kịch bản khác!",
+      "emptyRightClick": "Nhấp chuột phải vào chỗ trống để thêm hành động vào kịch bản của bạn"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "runOnEachEvent": "Chạy mỗi khi nhận sự kiện",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del",
+        "copy": "Sao chép",
+        "paste": "Dán"
+      },
+      "expand": "Mở rộng",
+      "collapse": "Thu gọn"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "locked": "Đã khóa chỉnh sửa khi kịch bản đang chạy",
+    "switch": {
+      "addCase": "Thêm trường hợp",
+      "removeCase": "Xóa trường hợp",
+      "case": "trường hợp"
+    },
+    "forEach": {
+      "items": "mục",
+      "each": "mỗi",
+      "done": "xong",
+      "parallelism": "song song"
+    },
+    "aggregate": {
+      "items": "mục",
+      "result": "kết quả",
+      "field": "trường",
+      "separator": "dấu phân cách",
+      "op": {
+        "count": "Đếm",
+        "sum": "Tổng",
+        "min": "Nhỏ nhất",
+        "max": "Lớn nhất",
+        "average": "Trung bình",
+        "join": "Nối"
+      }
+    },
+    "filter": {
+      "items": "mục",
+      "rejected": "bị loại",
+      "kept": "đã giữ",
+      "keepWhere": "giữ nếu"
+    },
+    "wait": {
+      "then": "rồi",
+      "duration": "thời lượng"
+    },
+    "waitUntil": {
+      "until": "đến",
+      "then": "rồi"
+    },
+    "arithmetic": {
+      "result": "kết quả"
+    },
+    "nodes": {
+      "arithmetic": "Số học",
+      "httpRequest": "Yêu cầu HTTP",
+      "runScenario": "Chạy kịch bản",
+      "wait": "Chờ",
+      "waitUntil": "Chờ đến",
+      "now": "Bây giờ",
+      "comparator": "Bộ so sánh",
+      "setVariable": "Đặt biến",
+      "getVariable": "Lấy biến",
+      "addToList": "Thêm vào danh sách",
+      "removeFromList": "Xóa khỏi danh sách",
+      "cast": "Cast",
+      "regex": "Regex",
+      "json": "JSON",
+      "xml": "XML",
+      "yaml": "YAML",
+      "crypto": "Crypto",
+      "jwt": "JWT",
+      "datetime": "Date math",
+      "objectOp": "Object ops",
+      "url": "URL",
+      "random": "Random",
+      "throw": "Throw",
+      "retry": "Retry",
+      "listOp": "List ops",
+      "csv": "CSV",
+      "math": "Math",
+      "schema": "Schema validate",
+      "readFile": "Read file",
+      "writeFile": "Write file",
+      "timer": "Bộ hẹn giờ",
+      "code": "Mã"
+    },
+    "comparator": {
+      "result": "kết quả"
+    },
+    "boolean": {
+      "result": "kết quả"
+    },
+    "map": {
+      "items": "mục",
+      "mapped": "đã ánh xạ"
+    },
+    "log": {
+      "message": "thông báo",
+      "data": "dữ liệu"
+    },
+    "assert": {
+      "message": "thông báo",
+      "operator": "operator",
+      "op": {
+        "eq": "equals",
+        "ne": "not equals",
+        "lt": "less than",
+        "lte": "less or equal",
+        "gt": "greater than",
+        "gte": "greater or equal",
+        "contains": "contains",
+        "isString": "is string",
+        "isNumber": "is number",
+        "isBoolean": "is boolean",
+        "isArray": "is array",
+        "isObject": "is object",
+        "isNull": "is null",
+        "exists": "exists",
+        "isEmpty": "is empty",
+        "matchesRegex": "matches regex",
+        "isOneOf": "is one of",
+        "deepEquals": "deep equals",
+        "lengthEq": "length ==",
+        "lengthGt": "length >",
+        "lengthLt": "length <"
+      }
+    },
+    "editRequest": "Sửa yêu cầu",
+    "editScenario": "Sửa kịch bản",
+    "object": {
+      "addProperty": "Thêm thuộc tính",
+      "removeProperty": "Xóa thuộc tính",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "output": {
+      "outputName": "Tên đầu ra",
+      "addOutput": "Thêm đầu ra",
+      "removeOutput": "Xóa"
+    },
+    "input": {
+      "name": "Name",
+      "defaultType": "Default / type",
+      "addParam": "Thêm tham số",
+      "removeParam": "Xóa"
+    },
+    "runScenario": {
+      "orphanInput": "Không có tham số \"{{name}}\" khớp trong kịch bản con",
+      "orphanOutput": "Không có đầu ra \"{{name}}\" khớp trong kịch bản con",
+      "then": "rồi"
+    },
+    "validation": {
+      "duplicateName": "Tên \"{{name}}\" đã được hành động khác sử dụng.",
+      "panelTitle": "{{count}} lỗi hành động",
+      "runBlocked": "Sửa {{count}} lỗi hành động trước khi chạy",
+      "focusBox": "Đến hành động này",
+      "showErrors": "Hiện lỗi",
+      "input": {
+        "missingName": "Tham số đầu vào này phải có tên."
+      },
+      "dataLink": {
+        "emptyPath": "Liên kết dữ liệu đến cần một đường dẫn (JSON path).",
+        "badPath": "Đường dẫn JSON \"{{path}}\" của liên kết dữ liệu không hợp lệ."
+      },
+      "output": {
+        "missingName": "Đầu ra này phải có tên.",
+        "duplicateName": "Tên \"{{name}}\" đã được đầu ra khác sử dụng."
+      },
+      "getVariable": {
+        "noSelection": "Phải chọn một biến.",
+        "unknown": "Biến \"{{name}}\" không tồn tại trong kịch bản."
+      },
+      "setVariable": {
+        "missingName": "Biến cần đặt phải có tên."
+      },
+      "object": {
+        "propMissingName": "Mỗi thuộc tính phải có tên.",
+        "propDuplicate": "Tên thuộc tính \"{{name}}\" bị trùng."
+      },
+      "arithmetic": {
+        "divisionByZero": "Không thể chia cho số không."
+      },
+      "switch": {
+        "caseDuplicate": "Giá trị case \"{{value}}\" bị trùng lặp."
+      },
+      "transform": {
+        "emptyTemplate": "Mẫu không được để trống.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "Yêu cầu được liên kết không còn tồn tại."
+      },
+      "runScenario": {
+        "missing": "Kịch bản được liên kết không còn tồn tại."
+      },
+      "file": {
+        "missingPath": "A file path is required."
+      }
+    },
+    "usage": {
+      "button": "Các kịch bản sử dụng yêu cầu này",
+      "title": "Yêu cầu này được dùng trong các kịch bản:"
+    },
+    "inspector": {
+      "run": "Chạy",
+      "debug": "Gỡ lỗi",
+      "undo": "Hoàn tác",
+      "redo": "Làm lại",
+      "step": "Từng bước",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "Tạm dừng",
+      "noRunsHint": "Chưa có lần chạy gần đây cho yêu cầu này — chạy nó từ đây để điền bản xem trước kịch bản.",
+      "syntheticInfo": "Dữ liệu mẫu được tạo từ tài liệu của yêu cầu này.",
+      "syntheticRunHint": "Dữ liệu mẫu — chạy yêu cầu để thay thế bằng kết quả thực.",
+      "stop": "Dừng",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "copyThisLog": "Sao chép log này",
+      "clearLogs": "Xóa nhật ký",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "Hiển thị log {{level}}",
+      "showLevelOnly": "Nhấp chuột phải: chỉ cấp độ này",
+      "noUserLogs": "No user logs (entries from the Log action) in this run.",
+      "helpTitle": "What this action does"
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Yêu cầu nhập liệu"
+    },
+    "runHistory": {
+      "title": "Lịch sử chạy",
+      "tooltip": "Lịch sử chạy",
+      "empty": "Chưa có lần chạy nào",
+      "noLogs": "Không có nhật ký cho lần chạy này",
+      "logsTab": "Logs",
+      "graphTab": "Đồ thị",
+      "noGraph": "Không có ảnh chụp kịch bản cho lần chạy này",
+      "pin": "Ghim",
+      "unpin": "Bỏ ghim"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "Thêm điểm dừng",
+      "remove": "Xóa điểm dừng",
+      "toggle": "Bật/tắt điểm dừng (F9)",
+      "reached": "Đã đến điểm dừng — hành động này chưa được thực thi. Nhấn F5 để tiếp tục, hoặc F7 để chạy từng bước.",
+      "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Bật/tắt minimap"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Thêm giá trị",
+      "removeValue": "Xóa giá trị",
+      "updateVariable": "Cập nhật biến nguồn"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
+    },
+    "regex": {
+      "value": "value",
+      "operation": "operation",
+      "pattern": "pattern",
+      "flags": "flags",
+      "replacement": "replacement",
+      "result": "result",
+      "op": {
+        "extract": "extract",
+        "extractAll": "extract all",
+        "test": "test",
+        "replace": "replace",
+        "split": "split"
+      },
+      "flag": {
+        "i": "Case-insensitive",
+        "m": "Multiline (^ and $ match line breaks)",
+        "s": "Dotall (. matches newlines)"
+      }
+    },
+    "json": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "xml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "yaml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "crypto": {
+      "value": "value",
+      "operation": "operation",
+      "key": "key",
+      "keyPlaceholder": "secret",
+      "result": "result",
+      "op": {
+        "base64Encode": "base64 encode",
+        "base64Decode": "base64 decode",
+        "md5": "MD5",
+        "sha1": "SHA-1",
+        "sha256": "SHA-256",
+        "sha512": "SHA-512",
+        "hmacSha256": "HMAC-SHA256",
+        "uuid": "UUID v4"
+      }
+    },
+    "jwt": {
+      "value": "token",
+      "result": "result"
+    },
+    "datetime": {
+      "value": "date",
+      "operation": "operation",
+      "amount": "amount",
+      "unitLabel": "unit",
+      "format": "format",
+      "other": "second date",
+      "result": "result",
+      "op": {
+        "add": "add",
+        "subtract": "subtract",
+        "format": "format",
+        "diff": "diff"
+      },
+      "unit": {
+        "milliseconds": "milliseconds",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months",
+        "years": "years"
+      }
+    },
+    "objectOp": {
+      "value": "object",
+      "operation": "operation",
+      "path": "path",
+      "keys": "keys",
+      "setValue": "value",
+      "mergeWith": "merge with",
+      "result": "result",
+      "op": {
+        "get": "get",
+        "set": "set",
+        "merge": "merge",
+        "pick": "pick",
+        "omit": "omit",
+        "keys": "keys",
+        "values": "values"
+      }
+    },
+    "url": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "op": {
+        "encode": "encode",
+        "decode": "decode",
+        "parseQuery": "parse query",
+        "buildQuery": "build query",
+        "parseUrl": "parse URL"
+      }
+    },
+    "random": {
+      "operation": "operation",
+      "min": "min",
+      "max": "max",
+      "length": "length",
+      "items": "items",
+      "seed": "seed (optional)",
+      "seedPlaceholder": "reproducible",
+      "result": "result",
+      "op": {
+        "int": "integer",
+        "float": "float",
+        "string": "string",
+        "boolean": "boolean",
+        "pick": "pick"
+      }
+    },
+    "throw": {
+      "message": "message"
+    },
+    "retry": {
+      "maxAttempts": "max attempts",
+      "backoff": "backoff",
+      "delay": "delay",
+      "factor": "factor",
+      "retryOnError": "retry on error",
+      "retryOnStatus": "retry on HTTP status",
+      "retryOnFailure": "retry on any non-2xx",
+      "attempt": "attempt",
+      "exhausted": "exhausted",
+      "backoffOpt": {
+        "fixed": "fixed",
+        "linear": "linear",
+        "exponential": "exponential"
+      }
+    },
+    "menuGroups": {
+      "lists": "Lists",
+      "math": "Math",
+      "dataFormats": "Data formats",
+      "encoding": "Encoding",
+      "time": "Hẹn giờ"
+    },
+    "listOp": {
+      "value": "list",
+      "operation": "operation",
+      "result": "result",
+      "key": "key",
+      "order": "order",
+      "depth": "depth",
+      "size": "size",
+      "start": "start",
+      "end": "end",
+      "op": {
+        "sort": "sort",
+        "unique": "unique",
+        "reverse": "reverse",
+        "flatten": "flatten",
+        "chunk": "chunk",
+        "slice": "slice",
+        "groupBy": "group by"
+      }
+    },
+    "csv": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "delimiter": "delimiter",
+      "header": "header row",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "math": {
+      "a": "value",
+      "operation": "operation",
+      "result": "result",
+      "b": "with",
+      "min": "min",
+      "max": "max",
+      "precision": "precision",
+      "op": {
+        "round": "round",
+        "floor": "floor",
+        "ceil": "ceil",
+        "trunc": "truncate",
+        "abs": "absolute",
+        "sign": "sign",
+        "sqrt": "square root",
+        "min": "min",
+        "max": "max",
+        "clamp": "clamp"
+      }
+    },
+    "schema": {
+      "value": "value",
+      "schema": "JSON Schema",
+      "valid": "valid",
+      "invalid": "invalid",
+      "errors": "errors",
+      "editTitle": "Edit JSON Schema"
+    },
+    "readFile": {
+      "path": "path",
+      "content": "content"
+    },
+    "writeFile": {
+      "path": "path",
+      "mode": "mode",
+      "content": "content"
+    },
+    "codeField": {
+      "title": "Edit",
+      "edit": "Open editor",
+      "moreLines": "+{{count}} lines",
+      "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "chế độ",
+      "modeOpt": {
+        "frequency": "tần suất",
+        "cron": "cron"
+      },
+      "frequency": "tần suất",
+      "unit": "đơn vị",
+      "cron": "cron",
+      "stop": "dừng sau",
+      "stopOpt": {
+        "none": "không bao giờ",
+        "duration": "thời lượng",
+        "endDate": "ngày kết thúc"
+      },
+      "duration": "thời lượng",
+      "endDate": "ngày kết thúc",
+      "tick": "tích tắc"
+    },
+    "code": {
+      "input": "đầu vào",
+      "language": "Ngôn ngữ",
+      "code": "mã",
+      "modalTitle": "Sửa mã",
+      "result": "kết quả",
+      "timeout": "Thời gian chờ (s)"
+    },
+    "help": {
+      "input": "Injects the scenario's input parameters and constants into the graph.",
+      "output": "Declares one of the scenario's named results, read by a parent Run-scenario.",
+      "if": "Branches the flow to then / else by comparing two operands.",
+      "switch": "Routes the input to a matching case, or to default.",
+      "httpRequest": "Runs a saved API request and emits its response.",
+      "runScenario": "Runs another scenario as a reusable sub-step.",
+      "forEach": "Runs the body once per item of a collection, then continues.",
+      "for": "Loops over a number range, running the body for each value.",
+      "while": "Repeats the body while a condition holds (tested first).",
+      "doWhile": "Repeats the body while a condition holds (runs at least once).",
+      "aggregate": "Reduces a collection to one value (count, sum, min, max, average, join).",
+      "map": "Transforms every item of a collection into a new list.",
+      "filter": "Keeps the items that match a condition; routes the rest aside.",
+      "addToList": "Appends values to a list.",
+      "removeFromList": "Removes matching values from a list.",
+      "wait": "Pauses for a duration, then continues.",
+      "waitUntil": "Pauses until a given date/time, then continues.",
+      "now": "Emits the current date and time.",
+      "timer": "Fires its body on a repeating interval or a cron schedule.",
+      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "comparator": "Compares two values and emits true or false.",
+      "boolean": "Combines booleans with and / or / xor / not.",
+      "object": "Builds an object from its named inputs.",
+      "setVariable": "Stores a value into a run variable.",
+      "getVariable": "Reads a run variable's value.",
+      "transform": "Renders a Handlebars template from the input and run variables.",
+      "code": "Chạy mã của bạn (TypeScript, JavaScript, Python, Lua, Ruby hoặc R) trong sandbox và trả về kết quả.",
+      "cast": "Converts a value to another type (number, string, boolean, date, list).",
+      "regex": "Matches, extracts, replaces or splits text with a regular expression.",
+      "json": "Parses a JSON string, or serialises a value to JSON.",
+      "xml": "Parses an XML string, or serialises a value to XML.",
+      "yaml": "Parses a YAML string, or serialises a value to YAML.",
+      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "jwt": "Decodes a JWT token into header, payload and signature.",
+      "datetime": "Shifts, formats or diffs a date.",
+      "retry": "Re-runs its body until it succeeds, with a backoff policy.",
+      "objectOp": "Reshapes an object (get/set a path, merge, pick, omit, keys, values).",
+      "url": "Encodes, decodes or parses URLs and query strings.",
+      "random": "Generates a random number, string, boolean or pick.",
+      "listOp": "Reshapes a list (sort, unique, reverse, flatten, chunk, slice, groupBy).",
+      "csv": "Parses a CSV string, or serialises a list to CSV.",
+      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "schema": "Validates a value against a JSON Schema.",
+      "readFile": "Reads a file's text content.",
+      "writeFile": "Writes or appends text to a file.",
+      "throw": "Deliberately fails with a message (for error branches and tests).",
+      "log": "Writes a message to the run log and passes the value through.",
+      "assert": "Checks a condition (chai-style) and routes to pass or fail."
+    },
+    "legend": {
+      "title": "Chú giải",
+      "portsTitle": "Điểm vào",
+      "entryEventTrigger": "Điểm vào được kích hoạt bởi một sự kiện",
+      "entryDataTrigger": "Điểm vào được kích hoạt bởi dữ liệu",
+      "runWhenAllReceived": "Các hành động chạy ngay khi tất cả sự kiện và tất cả dữ liệu đã được nhận",
+      "runOnLaunchNoPredecessor": "Các hành động không có hành động trước được chạy ngay khi kịch bản bắt đầu",
+      "outPortsTitle": "Điểm ra",
+      "outEmit": "Phát ra một sự kiện kích hoạt và gửi dữ liệu",
+      "outEmitSignalOnly": "Phát ra một sự kiện kích hoạt mà không gửi dữ liệu",
+      "genericOutPortsTitle": "Điểm ra chung",
+      "outDone": "Sự kiện kích hoạt được phát ra khi hành động hoàn tất",
+      "outError": "Sự kiện kích hoạt được kích hoạt khi hành động gặp lỗi",
+      "navTitle": "Điều hướng",
+      "zoom": "thu phóng",
+      "pan": "di chuyển",
+      "boxSelect": "chọn theo hình chữ nhật",
+      "select": "chọn / chọn nhiều"
+    },
+    "cli": {
+      "title": "Run from the command line",
+      "intro": "Run this scenario without opening the app (CI, cron, script):",
+      "byId": "Designate by id",
+      "allLogs": "All logs",
+      "note": "`--out file` also writes the run-log to a file.",
+      "projectPlaceholder": "<project.restorm>"
     }
   }
 }

@@ -94,6 +94,50 @@
     "multiLanguage": {
       "title": "27 jezika!",
       "body": "Restorm govori 27 jezika. Engleski, francuski, španjolski, njemački, talijanski, japanski, kineski, korejski i mnogi drugi — odaberi svoj u postavkama!"
+    },
+    "fromPostman": {
+      "title": "Dolaziš iz Postmana ili Bruna?",
+      "body": "Pomažemo ti pri prelasku na Restorm — tvoj prijelaz učinjen jednostavnim ;)"
+    },
+    "chainRequests": {
+      "title": "Više zahtjeva za povezati u niz?",
+      "body": "Koristi svoje zahtjeve unutar scenarija, dodaj uvjete i čak ugnijezdi scenarije unutar drugih scenarija."
+    },
+    "stepByStep": {
+      "title": "Prođi kroz svoje scenarije korak po korak",
+      "body": "Korak po korak, da vidiš točno što se događa. Možeš čak postaviti i točke prekida."
+    },
+    "cicd": {
+      "title": "Pokreni svoje scenarije u svojim CI/CD cjevovodima",
+      "body": "Pokreni Restorm bez sučelja da izvršiš scenarij bez korisničkog sučelja i prikupiš njegove zapise — automatizirani testovi, izgrađeni vizualno."
+    },
+    "nestedScenarios": {
+      "title": "Vidi što se događa u scenariju",
+      "body": "Scenarij može pozvati drugi. U inspektoru pročitaj svaki zapis i skoči izravno na scenarij iz kojeg potječe."
+    },
+    "scenarioHistory": {
+      "title": "Ali što se upravo dogodilo?",
+      "body": "Pregledaj povijest izvođenja svojih scenarija. Neki od njih se u međuvremenu promijenio? Bez brige — sačuvali smo njegovu konfiguraciju."
+    },
+    "codeSandbox": {
+      "title": "Scenariji i sigurnost",
+      "body": "Možeš pisati kôd u svojim scenarijima — ali on se izvodi u sigurnom izoliranom okruženju, bez pristupa tvojim lokalnim datotekama i bez izravnog pristupa internetu. Najsigurniji način da ostaneš zaštićen!"
+    },
+    "codeLanguages": {
+      "title": "Imaš želju napisati malo koda?",
+      "body": "Piši kôd izravno unutar svojih scenarija — u TypeScript, JavaScript, Python, Lua, Ruby ili R!"
+    },
+    "scenarioAi": {
+      "title": "Scenariji vođeni umjetnom inteligencijom",
+      "body": "Claude, Cursor, Copilot… poznaju tvoju bazu koda: zatraži od njih scenarije po mjeri. Sve je izloženo putem MCP-a za stvaranje, uređivanje i pokretanje scenarija."
+    },
+    "interactiveScenarios": {
+      "title": "Interaktivni scenariji!",
+      "body": "Učini svoje scenarije parametrizirljivima i čak pitaj korisnika što učiniti pomoću dijaloških okvira."
+    },
+    "customValueLists": {
+      "title": "Ponovno upotrebljive liste vrijednosti",
+      "body": "Definiraj vlastite liste vrijednosti i ponovno ih koristi kako u svojim zahtjevima tako i u svojim scenarijima."
     }
   },
   "authFailureToast": {
@@ -150,6 +194,7 @@
       "createEnvironmentFolder": "Stvori mapu okruženja",
       "delete": "Izbriši",
       "clone": "Kloniraj",
+      "copySuffix": "kopija",
       "rename": "Preimenuj",
       "addToFavorites": "Dodaj u favorite",
       "removeFromFavorites": "Ukloni iz favorita",
@@ -170,7 +215,8 @@
         "soap": "SOAP zahtjev",
         "websocket": "WebSocket zahtjev",
         "odata": "OData zahtjev",
-        "auth": "HTTP zahtjev za autentifikaciju"
+        "auth": "HTTP zahtjev za autentifikaciju",
+        "scenario": "Scenarij"
       }
     },
     "deleteConfirm": {
@@ -179,6 +225,14 @@
       "itemMessage": "Jeste li sigurni da želite izbrisati \"{{name}}\"?",
       "confirm": "Izbriši",
       "cancel": "Odustani"
+    },
+    "scenarioDelete": {
+      "title": "Izbriši zahtjev koji koriste scenariji",
+      "message": "„{{name}}“ se koristi u sljedećim scenarijima. Što želite učiniti?",
+      "belongsTag": "pripada ovom scenariju",
+      "moveInto": "Premjesti u ovaj scenarij",
+      "affectsNote": "Brisanjem ovog zahtjeva ukloniti će se i iz ovih scenarija.",
+      "deleteAnyway": "Svejedno izbriši"
     }
   },
   "environment": {
@@ -250,7 +304,8 @@
     "addHeader": "Dodaj zaglavlje",
     "addParam": "Dodaj parametar",
     "environmentSelector": {
-      "noEnvironment": "Bez okruženja"
+      "noEnvironment": "Bez okruženja",
+      "switchTooltip": "Promijeni okruženje"
     },
     "body": {
       "fileLabel": "Datoteka ili URL:",
@@ -303,7 +358,11 @@
       "dateTime": "Datum i vrijeme",
       "color": "Boja",
       "expression": "Izraz",
-      "boolean": "Booleova vrijednost"
+      "boolean": "Booleova vrijednost",
+      "null": "Null",
+      "list": "Popis",
+      "variables": "Varijable",
+      "environment": "Okruženje"
     },
     "apiEnums": "Tipovi definirani u API-ju",
     "customLists": "Prilagođeni tipovi",
@@ -356,11 +415,14 @@
       "folder": "Mape",
       "environment": "Okruženja",
       "settings": "Postavke",
-      "tag": "Oznake"
+      "tag": "Oznake",
+      "scenario": "Scenariji"
     },
     "tooltip": {
       "noDetails": "Nema dostupnih pojedinosti",
-      "noContent": "Nema dokumentacije ni bilješki"
+      "noContent": "Nema dokumentacije ni bilješki",
+      "noScenario": "Scenarij nedostupan",
+      "scenarioKind": "scenarij"
     }
   },
   "httpStatus": {
@@ -467,7 +529,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Jeste li sigurni da želite ukloniti \"{{fileName}}\" iz favorita?",
-    "noFilesHint": "Otvorite datoteku ili stvorite novu da biste započeli",
     "newAriaLabel": "Stvori novu kolekciju",
     "openAriaLabel": "Otvori kolekciju s diska",
     "landmarkLabel": "Dobrodošli"
@@ -494,7 +555,9 @@
   },
   "common": {
     "cancel": "Odustani",
-    "save": "Spremi"
+    "save": "Spremi",
+    "remove": "Ukloni",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -744,6 +807,685 @@
       "previousMatch": "Prethodno podudaranje",
       "nextMatch": "Sljedeće podudaranje",
       "close": "Zatvori"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "emptyTitle": "Ovdje je prazno…",
+      "emptyDragDrop": "Povucite stavku iz stabla s lijeve strane u svoj scenarij da biste je ovdje koristili. Možete čak uvesti jedan scenarij u drugi!",
+      "emptyRightClick": "Desnom tipkom miša kliknite prazno mjesto da biste dodali akcije u svoj scenarij"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "runOnEachEvent": "Pokreni pri svakom primljenom događaju",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del",
+        "copy": "Kopiraj",
+        "paste": "Zalijepi"
+      },
+      "expand": "Proširi",
+      "collapse": "Sažmi"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "locked": "Uređivanje zaključano dok se scenarij izvodi",
+    "switch": {
+      "addCase": "Dodaj slučaj",
+      "removeCase": "Ukloni slučaj",
+      "case": "slučaj"
+    },
+    "forEach": {
+      "items": "stavke",
+      "each": "svaki",
+      "done": "gotovo",
+      "parallelism": "paralelizam"
+    },
+    "aggregate": {
+      "items": "stavke",
+      "result": "rezultat",
+      "field": "polje",
+      "separator": "razdjelnik",
+      "op": {
+        "count": "Broj",
+        "sum": "Zbroj",
+        "min": "Min",
+        "max": "Maks",
+        "average": "Prosjek",
+        "join": "Spoji"
+      }
+    },
+    "filter": {
+      "items": "stavke",
+      "rejected": "odbačeni",
+      "kept": "zadržani",
+      "keepWhere": "zadrži ako"
+    },
+    "wait": {
+      "then": "zatim",
+      "duration": "trajanje"
+    },
+    "waitUntil": {
+      "until": "do",
+      "then": "zatim"
+    },
+    "arithmetic": {
+      "result": "rezultat"
+    },
+    "nodes": {
+      "arithmetic": "Aritmetika",
+      "httpRequest": "HTTP zahtjev",
+      "runScenario": "Pokreni scenarij",
+      "wait": "Čekaj",
+      "waitUntil": "Čekaj do",
+      "now": "Sada",
+      "comparator": "Usporednik",
+      "setVariable": "Postavi varijablu",
+      "getVariable": "Dohvati varijablu",
+      "addToList": "Dodaj na popis",
+      "removeFromList": "Ukloni s popisa",
+      "cast": "Cast",
+      "regex": "Regex",
+      "json": "JSON",
+      "xml": "XML",
+      "yaml": "YAML",
+      "crypto": "Crypto",
+      "jwt": "JWT",
+      "datetime": "Date math",
+      "objectOp": "Object ops",
+      "url": "URL",
+      "random": "Random",
+      "throw": "Throw",
+      "retry": "Retry",
+      "listOp": "List ops",
+      "csv": "CSV",
+      "math": "Math",
+      "schema": "Schema validate",
+      "readFile": "Read file",
+      "writeFile": "Write file",
+      "timer": "Mjerač vremena",
+      "code": "Kôd"
+    },
+    "comparator": {
+      "result": "rezultat"
+    },
+    "boolean": {
+      "result": "rezultat"
+    },
+    "map": {
+      "items": "stavke",
+      "mapped": "transformirano"
+    },
+    "log": {
+      "message": "poruka",
+      "data": "podaci"
+    },
+    "assert": {
+      "message": "poruka",
+      "operator": "operator",
+      "op": {
+        "eq": "equals",
+        "ne": "not equals",
+        "lt": "less than",
+        "lte": "less or equal",
+        "gt": "greater than",
+        "gte": "greater or equal",
+        "contains": "contains",
+        "isString": "is string",
+        "isNumber": "is number",
+        "isBoolean": "is boolean",
+        "isArray": "is array",
+        "isObject": "is object",
+        "isNull": "is null",
+        "exists": "exists",
+        "isEmpty": "is empty",
+        "matchesRegex": "matches regex",
+        "isOneOf": "is one of",
+        "deepEquals": "deep equals",
+        "lengthEq": "length ==",
+        "lengthGt": "length >",
+        "lengthLt": "length <"
+      }
+    },
+    "editRequest": "Uredi zahtjev",
+    "editScenario": "Uredi scenarij",
+    "object": {
+      "addProperty": "Dodaj svojstvo",
+      "removeProperty": "Ukloni svojstvo",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "output": {
+      "outputName": "Naziv izlaza",
+      "addOutput": "Dodaj izlaz",
+      "removeOutput": "Ukloni"
+    },
+    "input": {
+      "name": "Name",
+      "defaultType": "Default / type",
+      "addParam": "Dodaj parametar",
+      "removeParam": "Ukloni"
+    },
+    "runScenario": {
+      "orphanInput": "Nema odgovarajućeg parametra \"{{name}}\" u podscenariju",
+      "orphanOutput": "Nema odgovarajućeg izlaza \"{{name}}\" u podscenariju",
+      "then": "zatim"
+    },
+    "validation": {
+      "duplicateName": "Naziv „{{name}}“ već koristi druga akcija.",
+      "panelTitle": "{{count}} pogreška/e akcija",
+      "runBlocked": "Ispravite {{count}} pogrešaka radnje prije pokretanja",
+      "focusBox": "Idi na ovu akciju",
+      "showErrors": "Prikaži pogreške",
+      "input": {
+        "missingName": "Ovaj ulazni parametar mora imati naziv."
+      },
+      "dataLink": {
+        "emptyPath": "Dolazna podatkovna veza treba putanju (JSON path).",
+        "badPath": "JSON putanja „{{path}}“ podatkovne veze nije valjana."
+      },
+      "output": {
+        "missingName": "Ovaj izlaz mora imati naziv.",
+        "duplicateName": "Naziv „{{name}}“ već koristi drugi izlaz."
+      },
+      "getVariable": {
+        "noSelection": "Mora se odabrati varijabla.",
+        "unknown": "Varijabla „{{name}}“ ne postoji u scenariju."
+      },
+      "setVariable": {
+        "missingName": "Varijabla koja se postavlja mora imati naziv."
+      },
+      "object": {
+        "propMissingName": "Svako svojstvo mora imati naziv.",
+        "propDuplicate": "Naziv svojstva „{{name}}“ je dupliciran."
+      },
+      "arithmetic": {
+        "divisionByZero": "Dijeljenje s nulom nije moguće."
+      },
+      "switch": {
+        "caseDuplicate": "Vrijednost slučaja „{{value}}“ je duplicirana."
+      },
+      "transform": {
+        "emptyTemplate": "Predložak ne smije biti prazan.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "Povezani zahtjev više ne postoji."
+      },
+      "runScenario": {
+        "missing": "Povezani scenarij više ne postoji."
+      },
+      "file": {
+        "missingPath": "A file path is required."
+      }
+    },
+    "usage": {
+      "button": "Scenariji koji koriste ovaj zahtjev",
+      "title": "Ovaj zahtjev koristi se u scenarijima:"
+    },
+    "inspector": {
+      "run": "Pokreni",
+      "debug": "Otklanjanje pogrešaka",
+      "undo": "Poništi",
+      "redo": "Ponovi",
+      "step": "Korak po korak",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "Pauza",
+      "noRunsHint": "Nema nedavnog izvođenja ovog zahtjeva — pokreni ga odavde da popuniš pretpregled scenarija.",
+      "syntheticInfo": "Primjer podataka generiran iz dokumentacije ovog zahtjeva.",
+      "syntheticRunHint": "Primjer podataka — pokrenite zahtjev kako biste ih zamijenili stvarnim rezultatom.",
+      "stop": "Zaustavi",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "copyThisLog": "Kopiraj ovaj zapis",
+      "clearLogs": "Očisti zapise",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "Prikaži {{level}} zapise",
+      "showLevelOnly": "Desni klik: samo ova razina",
+      "noUserLogs": "No user logs (entries from the Log action) in this run.",
+      "helpTitle": "What this action does"
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Potreban unos"
+    },
+    "runHistory": {
+      "title": "Povijest izvođenja",
+      "tooltip": "Povijest izvođenja",
+      "empty": "Još nema zabilježenih izvođenja",
+      "noLogs": "Nema zapisa za ovo izvođenje",
+      "logsTab": "Logs",
+      "graphTab": "Graf",
+      "noGraph": "Nema snimke scenarija za ovo izvođenje",
+      "pin": "Prikvači",
+      "unpin": "Otkvači"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "Dodaj točku prekida",
+      "remove": "Ukloni točku prekida",
+      "toggle": "Uključi/isključi točku prekida (F9)",
+      "reached": "Dosegnuta točka prekida — ova radnja još nije izvršena. Pritisnite F5 za nastavak ili F7 za korak.",
+      "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Uključi/isključi minikartu"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Dodaj vrijednost",
+      "removeValue": "Ukloni vrijednost",
+      "updateVariable": "Ažuriraj izvornu varijablu"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
+    },
+    "regex": {
+      "value": "value",
+      "operation": "operation",
+      "pattern": "pattern",
+      "flags": "flags",
+      "replacement": "replacement",
+      "result": "result",
+      "op": {
+        "extract": "extract",
+        "extractAll": "extract all",
+        "test": "test",
+        "replace": "replace",
+        "split": "split"
+      },
+      "flag": {
+        "i": "Case-insensitive",
+        "m": "Multiline (^ and $ match line breaks)",
+        "s": "Dotall (. matches newlines)"
+      }
+    },
+    "json": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "xml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "yaml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "crypto": {
+      "value": "value",
+      "operation": "operation",
+      "key": "key",
+      "keyPlaceholder": "secret",
+      "result": "result",
+      "op": {
+        "base64Encode": "base64 encode",
+        "base64Decode": "base64 decode",
+        "md5": "MD5",
+        "sha1": "SHA-1",
+        "sha256": "SHA-256",
+        "sha512": "SHA-512",
+        "hmacSha256": "HMAC-SHA256",
+        "uuid": "UUID v4"
+      }
+    },
+    "jwt": {
+      "value": "token",
+      "result": "result"
+    },
+    "datetime": {
+      "value": "date",
+      "operation": "operation",
+      "amount": "amount",
+      "unitLabel": "unit",
+      "format": "format",
+      "other": "second date",
+      "result": "result",
+      "op": {
+        "add": "add",
+        "subtract": "subtract",
+        "format": "format",
+        "diff": "diff"
+      },
+      "unit": {
+        "milliseconds": "milliseconds",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months",
+        "years": "years"
+      }
+    },
+    "objectOp": {
+      "value": "object",
+      "operation": "operation",
+      "path": "path",
+      "keys": "keys",
+      "setValue": "value",
+      "mergeWith": "merge with",
+      "result": "result",
+      "op": {
+        "get": "get",
+        "set": "set",
+        "merge": "merge",
+        "pick": "pick",
+        "omit": "omit",
+        "keys": "keys",
+        "values": "values"
+      }
+    },
+    "url": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "op": {
+        "encode": "encode",
+        "decode": "decode",
+        "parseQuery": "parse query",
+        "buildQuery": "build query",
+        "parseUrl": "parse URL"
+      }
+    },
+    "random": {
+      "operation": "operation",
+      "min": "min",
+      "max": "max",
+      "length": "length",
+      "items": "items",
+      "seed": "seed (optional)",
+      "seedPlaceholder": "reproducible",
+      "result": "result",
+      "op": {
+        "int": "integer",
+        "float": "float",
+        "string": "string",
+        "boolean": "boolean",
+        "pick": "pick"
+      }
+    },
+    "throw": {
+      "message": "message"
+    },
+    "retry": {
+      "maxAttempts": "max attempts",
+      "backoff": "backoff",
+      "delay": "delay",
+      "factor": "factor",
+      "retryOnError": "retry on error",
+      "retryOnStatus": "retry on HTTP status",
+      "retryOnFailure": "retry on any non-2xx",
+      "attempt": "attempt",
+      "exhausted": "exhausted",
+      "backoffOpt": {
+        "fixed": "fixed",
+        "linear": "linear",
+        "exponential": "exponential"
+      }
+    },
+    "menuGroups": {
+      "lists": "Lists",
+      "math": "Math",
+      "dataFormats": "Data formats",
+      "encoding": "Encoding",
+      "time": "Tempiranje"
+    },
+    "listOp": {
+      "value": "list",
+      "operation": "operation",
+      "result": "result",
+      "key": "key",
+      "order": "order",
+      "depth": "depth",
+      "size": "size",
+      "start": "start",
+      "end": "end",
+      "op": {
+        "sort": "sort",
+        "unique": "unique",
+        "reverse": "reverse",
+        "flatten": "flatten",
+        "chunk": "chunk",
+        "slice": "slice",
+        "groupBy": "group by"
+      }
+    },
+    "csv": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "delimiter": "delimiter",
+      "header": "header row",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "math": {
+      "a": "value",
+      "operation": "operation",
+      "result": "result",
+      "b": "with",
+      "min": "min",
+      "max": "max",
+      "precision": "precision",
+      "op": {
+        "round": "round",
+        "floor": "floor",
+        "ceil": "ceil",
+        "trunc": "truncate",
+        "abs": "absolute",
+        "sign": "sign",
+        "sqrt": "square root",
+        "min": "min",
+        "max": "max",
+        "clamp": "clamp"
+      }
+    },
+    "schema": {
+      "value": "value",
+      "schema": "JSON Schema",
+      "valid": "valid",
+      "invalid": "invalid",
+      "errors": "errors",
+      "editTitle": "Edit JSON Schema"
+    },
+    "readFile": {
+      "path": "path",
+      "content": "content"
+    },
+    "writeFile": {
+      "path": "path",
+      "mode": "mode",
+      "content": "content"
+    },
+    "codeField": {
+      "title": "Edit",
+      "edit": "Open editor",
+      "moreLines": "+{{count}} lines",
+      "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "način",
+      "modeOpt": {
+        "frequency": "frekvencija",
+        "cron": "cron"
+      },
+      "frequency": "frekvencija",
+      "unit": "jedinica",
+      "cron": "cron",
+      "stop": "zaustavi nakon",
+      "stopOpt": {
+        "none": "nikad",
+        "duration": "trajanje",
+        "endDate": "datum završetka"
+      },
+      "duration": "trajanje",
+      "endDate": "datum završetka",
+      "tick": "otkucaj"
+    },
+    "code": {
+      "input": "ulaz",
+      "language": "Jezik",
+      "code": "kôd",
+      "modalTitle": "Uredi kôd",
+      "result": "rezultat",
+      "timeout": "Vremensko ograničenje (s)"
+    },
+    "help": {
+      "input": "Injects the scenario's input parameters and constants into the graph.",
+      "output": "Declares one of the scenario's named results, read by a parent Run-scenario.",
+      "if": "Branches the flow to then / else by comparing two operands.",
+      "switch": "Routes the input to a matching case, or to default.",
+      "httpRequest": "Runs a saved API request and emits its response.",
+      "runScenario": "Runs another scenario as a reusable sub-step.",
+      "forEach": "Runs the body once per item of a collection, then continues.",
+      "for": "Loops over a number range, running the body for each value.",
+      "while": "Repeats the body while a condition holds (tested first).",
+      "doWhile": "Repeats the body while a condition holds (runs at least once).",
+      "aggregate": "Reduces a collection to one value (count, sum, min, max, average, join).",
+      "map": "Transforms every item of a collection into a new list.",
+      "filter": "Keeps the items that match a condition; routes the rest aside.",
+      "addToList": "Appends values to a list.",
+      "removeFromList": "Removes matching values from a list.",
+      "wait": "Pauses for a duration, then continues.",
+      "waitUntil": "Pauses until a given date/time, then continues.",
+      "now": "Emits the current date and time.",
+      "timer": "Fires its body on a repeating interval or a cron schedule.",
+      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "comparator": "Compares two values and emits true or false.",
+      "boolean": "Combines booleans with and / or / xor / not.",
+      "object": "Builds an object from its named inputs.",
+      "setVariable": "Stores a value into a run variable.",
+      "getVariable": "Reads a run variable's value.",
+      "transform": "Renders a Handlebars template from the input and run variables.",
+      "code": "Pokreće vaš kôd (TypeScript, JavaScript, Python, Lua, Ruby ili R) u sandboxu i vraća rezultat.",
+      "cast": "Converts a value to another type (number, string, boolean, date, list).",
+      "regex": "Matches, extracts, replaces or splits text with a regular expression.",
+      "json": "Parses a JSON string, or serialises a value to JSON.",
+      "xml": "Parses an XML string, or serialises a value to XML.",
+      "yaml": "Parses a YAML string, or serialises a value to YAML.",
+      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "jwt": "Decodes a JWT token into header, payload and signature.",
+      "datetime": "Shifts, formats or diffs a date.",
+      "retry": "Re-runs its body until it succeeds, with a backoff policy.",
+      "objectOp": "Reshapes an object (get/set a path, merge, pick, omit, keys, values).",
+      "url": "Encodes, decodes or parses URLs and query strings.",
+      "random": "Generates a random number, string, boolean or pick.",
+      "listOp": "Reshapes a list (sort, unique, reverse, flatten, chunk, slice, groupBy).",
+      "csv": "Parses a CSV string, or serialises a list to CSV.",
+      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "schema": "Validates a value against a JSON Schema.",
+      "readFile": "Reads a file's text content.",
+      "writeFile": "Writes or appends text to a file.",
+      "throw": "Deliberately fails with a message (for error branches and tests).",
+      "log": "Writes a message to the run log and passes the value through.",
+      "assert": "Checks a condition (chai-style) and routes to pass or fail."
+    },
+    "legend": {
+      "title": "Legenda",
+      "portsTitle": "Ulazne točke",
+      "entryEventTrigger": "Ulazna točka pokrenuta događajem",
+      "entryDataTrigger": "Ulazna točka pokrenuta podatkom",
+      "runWhenAllReceived": "Akcije se izvršavaju čim su primljeni svi događaji i svi podaci",
+      "runOnLaunchNoPredecessor": "Akcije bez prethodnika izvršavaju se čim se scenarij pokrene",
+      "outPortsTitle": "Izlazne točke",
+      "outEmit": "Emitira okidački događaj i šalje podatke",
+      "outEmitSignalOnly": "Emitira okidački događaj bez slanja podataka",
+      "genericOutPortsTitle": "Opće izlazne točke",
+      "outDone": "Okidački događaj emitiran kada je akcija završena",
+      "outError": "Okidački događaj pokrenut u slučaju pogreške u akciji",
+      "navTitle": "Navigacija",
+      "zoom": "zumiranje",
+      "pan": "pomakni",
+      "boxSelect": "pravokutni odabir",
+      "select": "odaberi / višestruki odabir"
+    },
+    "cli": {
+      "title": "Run from the command line",
+      "intro": "Run this scenario without opening the app (CI, cron, script):",
+      "byId": "Designate by id",
+      "allLogs": "All logs",
+      "note": "`--out file` also writes the run-log to a file.",
+      "projectPlaceholder": "<project.restorm>"
     }
   }
 }

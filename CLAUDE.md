@@ -61,6 +61,22 @@ scripts/git-commit-timeout.sh -m "your message"
 
 If the script exits 124 (timeout), investigate before retrying — it usually points at flakiness, X-server contention, or a genuine perf regression in a Monaco-heavy panel.
 
+### Flaky tests — never just retry
+
+Every commit attempt — success or failure — prepends an entry to `.commit-flake-history.log` (newest-on-top, gitignored, repo root, written by `scripts/git-commit-timeout.sh`). Successful commits log a single `PASS` line; failed commits log a header block followed by the last 200 lines of hook output. So `head -200 .commit-flake-history.log` answers "what just broke and what was the failure pattern" without scrolling; `grep '^FAIL' .commit-flake-history.log | head` answers "how often does this branch flake".
+
+When `scripts/git-commit-timeout.sh` returns non-zero:
+
+1. **Open `.commit-flake-history.log` and read the most recent FAIL block** before deciding what to do. Cite the failing test + the assertion in your reply to the user — don't shrug it off as "probably a flake".
+2. **Scan the journal for the same failure signature in earlier blocks.** If you find the same test failing more than once across recent attempts (or more than once on the same branch), that's a recurring flake — stop, tell the user, and propose an investigation. Don't keep retrying.
+3. **First-time failure** is the only case where a single retry is acceptable. Even then, mention it to the user explicitly so they know to keep an eye on the test.
+4. **Never silently retry.** Flaky tests cost the user time on every commit and erode trust in the suite. The user's preference is explicit: investigate the root cause as soon as a pattern is visible, fix it, and validate the fix by re-running the suspect test many times back-to-back (the workflow used in the past has been "30 runs before / 30 runs after the fix").
+
+Common flake signatures already seen in this repo:
+- `electron.launch: Process failed to launch!` in any `tests/e2e/bdd/fixtures/*.fixture.ts` — the shared `bootstrap → SIGKILL → 300ms wait → relaunch` pattern is the usual culprit; the 300ms is too short on a loaded host.
+
+A flake report to the user should include: the failing test name, the journal block's timestamp, how many times the same signature already appears in the journal, and a one-sentence proposal of the next step.
+
 ## Self-review before push
 
 Before pushing a branch or asking for a merge, **always** run an independent code review of the diff. Use the `superpowers:code-reviewer` agent (or equivalent fresh-context agent) on the full PR scope and act on its findings — bugs, design smells, coverage gaps, stale comments, missed docs — before telling the user the PR is ready. Document agent findings that you're deliberately not addressing, don't silently skip them. Self-review applies even when the user hasn't explicitly asked for it; it's the last gate before human attention.
@@ -111,6 +127,14 @@ When a ticket asks you to add a new execution protocol (REST, GraphQL, gRPC, MQT
 The playbook is authoritative for: file layout, the three hard rules (UI reuse, Handlebars resolution, input debouncing), Docker mock conventions, the E2E scenario matrix, the response-panel UI checks, the documentation checklist, and the per-PR review checklist. Diverging from it without explicit ticket-level approval is a review-blocker.
 
 The matching PR template at [`.github/PULL_REQUEST_TEMPLATE/protocol.md`](.github/PULL_REQUEST_TEMPLATE/protocol.md) bundles the checklist — append `?template=protocol.md` to the PR URL when opening the PR.
+
+## Tooltips on ergonomic components
+
+For the hover label of **any** ergonomic component that accepts one (ECUI `Button`, `InputBox`, `Toggle`, `SelectBox`, icon buttons, …) — not just buttons — use the **electron-core-ui Tooltip**. In restorm, wrap the component in the `HeaderHoverTooltip` (`src/renderer/src/components/MainView/HeaderHoverTooltip.tsx`), which owns the hover state and anchors the ECUI `Tooltip`.
+
+**Keep `aria-label` / `ariaLabel`** — it's invisible (screen-reader name only), so it stays for accessibility. What you must NOT use for the hover text is the **`title`** attribute (`options.title` on the ECUI `Button`, or any `title=`): `title` renders the browser's native, unstyled tooltip, inconsistent with the rest of the app. Recipe: **keep `aria-label` (a11y) + drop `title` (native tooltip) + add the ECUI Tooltip (styled hover).** Never strip `aria-label` to "replace it with a tooltip" — that just removes the accessible name.
+
+`HeaderHoverTooltip` renders an `inline-flex` `<span>` wrapper. When the button lives in a flex layout whose CSS targets `.button-container` (order / margin / overflow), re-target those rules onto `.header-hover-tooltip` (the new flex item), e.g. `.toolbar > .header-hover-tooltip:has(.my-button-class) { … }`.
 
 ## Documentation
 

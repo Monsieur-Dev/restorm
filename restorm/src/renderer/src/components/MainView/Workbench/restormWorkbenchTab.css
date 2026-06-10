@@ -17,14 +17,123 @@
   background-color: var(--editor-background);
 }
 
-/* Pull the ribbon stack 8 px above the top of the workbench tab so
- * the signet's top edge sits flush with the tab-bar bottom border
- * rendered just above. Shift `right` from the default 20px to 44px
- * so the favorite-star toggle anchored at right:4px (32×32 + small
- * gap) fits beside the bookmarks. */
-.restorm-workbench-tab > .ecui-bookmark-ribbon-stack {
+/* Top-right cluster: [header actions] + [bookmark ribbon] flow in a
+ * single flex row so the ribbon's variable width can never collide with
+ * the header buttons. Anchored where the ribbon used to sit (8px above
+ * the tab top so the signets flush with the tab-bar border; right:44 to
+ * clear the favourite star at right:4). */
+.restorm-workbench-tab-top-right {
+  position: absolute;
   top: -8px;
   right: 44px;
+  z-index: 3;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+/* When the "used in scenarios" button is present, the whole cluster
+ * shifts left so the button sits between it and the favourite star. */
+.restorm-workbench-tab:has(> .request-scenario-usage-button) > .restorm-workbench-tab-top-right {
+  right: 80px;
+}
+
+/* The ribbon ships `position: absolute` by default — make it a normal
+ * flex item inside the cluster so it composes with the header actions. */
+.restorm-workbench-tab-top-right > .ecui-bookmark-ribbon-stack {
+  position: relative;
+  top: 0;
+  right: 0;
+}
+
+/* History modals (scenario runs, response history) scope their ECUI backdrop to
+ * `.restorm-workbench-tab`, so its default `inset: 0` overlay starts at the tab's
+ * content box. Two things live outside that box: the top-right cluster above
+ * (bookmark ribbon + scenario-usage button, anchored `top: -8px`), and the editor
+ * group's 6px of padding before its active-group border. Bleed the scoped overlay
+ * out over both so the blurred backdrop reaches the group border and dims those
+ * floating controls instead of leaving their tops poking above the blur. */
+.restorm-workbench-tab > .ecu-modal-overlay[data-scoped='true'] {
+  top: -8px;
+  right: -6px;
+  bottom: -6px;
+  left: -6px;
+}
+
+/* Header action cluster (request env selector + history button), anchored
+ * top-right to the LEFT of the bookmark ribbon. Grows leftward into the
+ * empty header space, so a wide env name never collides with the ribbon. */
+.restorm-workbench-tab-header-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  /* Nudge the toolbar buttons down from the tab-bar edge so they sit in
+   * the header zone, vertically near the ribbon bodies. */
+  margin-top: 5px;
+}
+
+/* Hover-tooltip wrapper around a header action button (the ECUI Tooltip
+ * info-bulle, not the native title). Stays inline so it doesn't disturb
+ * the flex row. */
+.header-hover-tooltip {
+  display: inline-flex;
+  align-items: center;
+}
+
+.header-hover-tooltip-label {
+  display: block;
+  white-space: nowrap;
+  padding: 2px 4px;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* Icon-only header action button (history). Matches the "used in
+ * scenarios" reverse-nav button's hover affordance. */
+.request-header-action-button {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-secondary, #cccccc);
+}
+
+.request-header-action-button:hover {
+  background: var(--list-hover-background, rgba(255, 255, 255, 0.08));
+}
+
+/* Env selector pill — bound the env name width so a long name truncates
+ * rather than pushing the cluster across the whole header. */
+.request-header-env-selector {
+  display: inline-flex;
+  min-width: 0;
+}
+
+/* Compact the default-size env Button (the `small` toolbar variant is
+ * intentionally avoided — it collapses to a 20px icon button). Trim the
+ * height / padding / font so the pill reads as a header affordance, and
+ * bound the width so a long env name truncates. */
+.request-header-env-button {
+  max-width: 220px;
+  height: 24px;
+  padding: 0 8px;
+  font-size: 12px;
+  line-height: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.request-header-env-popover {
+  min-width: 240px;
+  max-width: 360px;
 }
 
 .restorm-workbench-tab-callout {
@@ -52,6 +161,76 @@
   top: -8px;
   right: 4px;
   z-index: 3;
+}
+
+/* "Used in scenarios" reverse-nav button — between the bookmark ribbon and the
+ * favourite star (star at right:4 is 32×32, so anchor at right:40). */
+.request-scenario-usage-button {
+  position: absolute;
+  top: -8px;
+  right: 40px;
+  z-index: 3;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-secondary, #cccccc);
+}
+
+.request-scenario-usage-button:hover,
+.request-scenario-usage-button.is-open {
+  background: var(--list-hover-background, rgba(255, 255, 255, 0.08));
+}
+
+/* Popover body listing the scenarios that use the request. */
+.request-scenario-usage-popover {
+  min-width: 220px;
+  max-width: 340px;
+  padding: 4px 2px;
+}
+
+.request-scenario-usage-title {
+  padding: 4px 10px 8px 10px;
+  font-size: 12px;
+  color: var(--text-secondary, #cccccc);
+}
+
+.request-scenario-usage-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.request-scenario-usage-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.request-scenario-usage-link:hover {
+  background: var(--list-hover-background, rgba(255, 255, 255, 0.08));
+}
+
+.request-scenario-usage-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .restorm-workbench-tab-title {

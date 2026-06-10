@@ -1,0 +1,64 @@
+<svg viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg" class="empty-bench-tip-illustration" role="img" aria-hidden="true">
+  <style>
+    .cr-box { fill: #1e293b; stroke: #475569; stroke-width: 2; }
+    .cr-label { fill: #94a3b8; }
+    .cr-edge { fill: none; stroke: #475569; stroke-width: 2.5; }
+
+    /* The flow runs in three phases over one 4s cycle:
+       1) box 1 lights up — a single lap of its border (0–22%);
+       2) a beam travels down BOTH links leaving box 1 (25–48%);
+       3) boxes 2 AND 3 light up together — one lap each (52–78%);
+       then a short rest before the loop. Base opacity 0 so nothing flashes
+       before its phase (cold-load safe). */
+    .cr-beam { fill: none; stroke: #facc15; stroke-width: 3; stroke-linecap: round; filter: drop-shadow(0 0 3px #facc15); opacity: 0; animation-duration: 4s; animation-timing-function: linear; animation-iteration-count: infinite; animation-play-state: paused; }
+
+    .cr-beam-box { stroke-dasharray: 22 78; }
+    .cr-beam-edge { stroke-dasharray: 16 100; }
+
+    .cr-b1   { animation-name: cr-b1; }
+    .cr-edge-beam { animation-name: cr-edge; }
+    .cr-b23  { animation-name: cr-b23; }
+
+    @keyframes cr-b1 {
+      0%        { opacity: 1; stroke-dashoffset: 0; }
+      22%       { opacity: 1; stroke-dashoffset: -100; }
+      24%, 100% { opacity: 0; stroke-dashoffset: -100; }
+    }
+    @keyframes cr-edge {
+      0%, 25%   { opacity: 0; stroke-dashoffset: 16; }
+      27%       { opacity: 1; stroke-dashoffset: 12; }
+      48%       { opacity: 1; stroke-dashoffset: -100; }
+      50%, 100% { opacity: 0; stroke-dashoffset: -100; }
+    }
+    @keyframes cr-b23 {
+      0%, 52%   { opacity: 0; stroke-dashoffset: 0; }
+      54%       { opacity: 1; stroke-dashoffset: 0; }
+      78%       { opacity: 1; stroke-dashoffset: -100; }
+      80%, 100% { opacity: 0; stroke-dashoffset: -100; }
+    }
+  </style>
+
+  <!-- links (box 1 fans out to box 2 + box 3) -->
+  <path class="cr-edge" d="M66 72 C 110 72, 110 40, 150 40" />
+  <path class="cr-edge" d="M66 80 C 110 80, 110 112, 150 112" />
+  <path class="cr-beam cr-beam-edge cr-edge-beam" d="M66 72 C 110 72, 110 40, 150 40" pathLength="100" />
+  <path class="cr-beam cr-beam-edge cr-edge-beam" d="M66 80 C 110 80, 110 112, 150 112" pathLength="100" />
+
+  <!-- box 1 (source, left) -->
+  <rect class="cr-box" x="14" y="56" width="52" height="38" rx="8" />
+  <rect class="cr-label" x="22" y="67" width="34" height="4" rx="2" />
+  <rect class="cr-label" x="22" y="78" width="24" height="4" rx="2" />
+  <rect class="cr-beam cr-beam-box cr-b1" x="14" y="56" width="52" height="38" rx="8" pathLength="100" />
+
+  <!-- box 2 (top-right) -->
+  <rect class="cr-box" x="150" y="22" width="56" height="36" rx="8" />
+  <rect class="cr-label" x="158" y="32" width="38" height="4" rx="2" />
+  <rect class="cr-label" x="158" y="43" width="26" height="4" rx="2" />
+  <rect class="cr-beam cr-beam-box cr-b23" x="150" y="22" width="56" height="36" rx="8" pathLength="100" />
+
+  <!-- box 3 (bottom-right) -->
+  <rect class="cr-box" x="150" y="94" width="56" height="36" rx="8" />
+  <rect class="cr-label" x="158" y="104" width="38" height="4" rx="2" />
+  <rect class="cr-label" x="158" y="115" width="26" height="4" rx="2" />
+  <rect class="cr-beam cr-beam-box cr-b23" x="150" y="94" width="56" height="36" rx="8" pathLength="100" />
+</svg>

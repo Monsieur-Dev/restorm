@@ -11,10 +11,23 @@ colors:
     value: "#FFFFFF"
     description: Editor foreground color
 
+  # Hyperlink / inline-link text colour (URL-style links, e.g. ECUI Button link)
+  - id: textLink.foreground
+    value: "#3794ff"
+    description: Foreground color for links
+
+  - id: textLink.activeForeground
+    value: "#4daafc"
+    description: Foreground color for active / hovered links
+
   # Default widget background (for editors, panels, previews)
   - id: editorWidget.background
     value: "#000000"
     description: Editor widget background color
+
+  - id: editorWidget.border
+    value: "#FFFFFF"
+    description: Editor widget border color
 
   # Hover widget / tooltip colors
   - id: editorHoverWidget.background
@@ -183,6 +196,19 @@ colors:
   - id: focusBorder
     value: "#f38518"
     description: Focus border color (high contrast orange)
+
+  # Scenario graph nodes (scenario editor)
+  - id: scenarioNode.background
+    value: "#0d0d0d"
+    description: Scenario node body background
+
+  - id: scenarioNode.headerBackground
+    value: "#1c1c1c"
+    description: Scenario node header background
+
+  - id: scenarioNode.headerBackgroundSelected
+    value: "#04518a"
+    description: Scenario node header background when selected
 
   # Scrollbar colors
   - id: scrollbarSlider.background

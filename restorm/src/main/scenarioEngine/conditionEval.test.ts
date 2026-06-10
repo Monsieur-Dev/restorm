@@ -1,0 +1,178 @@
+import { describe, it, expect } from 'vitest'
+import { compareValues } from './conditionEval'
+
+/**
+ * Type-aware comparison: ordering (`< ≤ ≥ >`) is only meaningful for some
+ * types and THROWS otherwise (objects, lists, booleans, colours, mixed types);
+ * equality compares by structure (objects deep, lists as unordered sets);
+ * `∋` is subset / substring / membership. Operand kinds are inferred from the
+ * value, refined by a declared-type hint for string-backed subtypes
+ * (date / colour / enum) that all resolve to strings at runtime.
+ */
+describe('compareValues — ordering (< ≤ ≥ >)', () => {
+  it('compares numbers numerically', () => {
+    expect(compareValues('<', 1, 2)).toBe(true)
+    expect(compareValues('<', 2, 1)).toBe(false)
+    expect(compareValues('≥', 2, 2)).toBe(true)
+  })
+
+  it('compares plain strings lexicographically (NOT numerically)', () => {
+    expect(compareValues('<', 'apple', 'banana')).toBe(true)
+    expect(compareValues('<', '10', '2')).toBe(true) // lexicographic: "1" < "2"
+  })
+
+  it('compares dates chronologically when both are declared datetime', () => {
+    expect(compareValues('<', '2020-01-01', '2021-01-01', 'date', 'date')).toBe(true)
+    expect(compareValues('>', '2021-06-01T00:00:00Z', '2020-01-01', 'date', 'date')).toBe(true)
+  })
+
+  it('compares an all-numeric enum numerically, a label enum lexicographically', () => {
+    expect(compareValues('<', '2', '10', 'enum', 'enum')).toBe(true) // numeric: 2 < 10
+    expect(compareValues('<', 'Rouge', 'Vert', 'enum', 'enum')).toBe(true) // lexico
+  })
+
+  it('honours an explicit enumNumeric flag (whole-option-set decision)', () => {
+    // The option set is NOT all-numeric → lexicographic even for numeric values:
+    expect(compareValues('<', '2', '10', { kind: 'enum', enumNumeric: false }, { kind: 'enum', enumNumeric: false })).toBe(false) // "2" > "1..."
+    // The option set IS all-numeric → numeric:
+    expect(compareValues('<', '2', '10', { kind: 'enum', enumNumeric: true }, { kind: 'enum', enumNumeric: true })).toBe(true)
+  })
+
+  it('THROWS for objects, lists, booleans and colours', () => {
+    expect(() => compareValues('<', { a: 1 }, { a: 2 })).toThrow()
+    expect(() => compareValues('>', [1, 2], [3, 4])).toThrow()
+    expect(() => compareValues('<', true, false)).toThrow()
+    expect(() => compareValues('<', '#000000', '#ffffff', 'color', 'color')).toThrow()
+  })
+
+  it('THROWS for mixed types (number vs NON-numeric string)', () => {
+    expect(() => compareValues('<', 1, 'a')).toThrow()
+    expect(() => compareValues('<', 'a', 1)).toThrow()
+  })
+
+  it('coerces a NUMERIC string against a number and compares numerically', () => {
+    // A numeric literal is routinely stored as a string operand (e.g. a loop
+    // bound) — `counter < "3"` must stay a number comparison, not throw.
+    expect(compareValues('<', 0, '3')).toBe(true)
+    expect(compareValues('<', 5, '3')).toBe(false)
+    expect(compareValues('≥', 0, '0')).toBe(true)
+    expect(compareValues('>', '10', 2)).toBe(true) // "10" coerces to 10 > 2
+    // Two bare strings are still lexicographic, NOT coerced:
+    expect(compareValues('<', '10', '2')).toBe(true)
+  })
+})
+
+describe('compareValues — equality (= ≠)', () => {
+  it('compares objects by deep structure', () => {
+    expect(compareValues('=', { a: 1, b: 2 }, { b: 2, a: 1 })).toBe(true)
+    expect(compareValues('=', { a: 1 }, { a: 2 })).toBe(false)
+    expect(compareValues('≠', { a: 1 }, { a: 2 })).toBe(true)
+  })
+
+  it('compares lists as UNORDERED multisets', () => {
+    expect(compareValues('=', [1, 2, 3], [3, 1, 2])).toBe(true)
+    expect(compareValues('=', [1, 2], [1, 2, 3])).toBe(false)
+    expect(compareValues('=', [1, 1, 2], [1, 2, 2])).toBe(false) // multiset, counts matter
+    expect(compareValues('=', [{ a: 1 }], [{ a: 1 }])).toBe(true)
+  })
+
+  it('treats different types as not-equal (no throw)', () => {
+    expect(compareValues('=', '2', 2)).toBe(false)
+    expect(compareValues('≠', '2', 2)).toBe(true)
+    expect(compareValues('=', { a: 1 }, [1])).toBe(false)
+  })
+
+  it('compares dates by instant when declared', () => {
+    expect(compareValues('=', '2020-01-01T00:00:00Z', '2020-01-01T00:00:00.000Z', 'date', 'date')).toBe(true)
+  })
+
+  it('compares dates at SECOND precision — ignores sub-second (milliseconds)', () => {
+    // Same wall-clock second, different ms: equal (two `HH:mm:ss` values that
+    // render identically must compare equal even if one carries stray ms).
+    expect(compareValues('=', '2026-06-04T04:09:55.794Z', '2026-06-04T04:09:55.000Z', 'date', 'date')).toBe(true)
+    expect(compareValues('≠', '2026-06-04T04:09:55.794Z', '2026-06-04T04:09:55.000Z', 'date', 'date')).toBe(false)
+    // A different second is still not equal.
+    expect(compareValues('=', '2026-06-04T04:09:55.999Z', '2026-06-04T04:09:56.000Z', 'date', 'date')).toBe(false)
+    // Ordering stays consistent with equality: same second ⇒ neither strictly
+    // before/after, but ≤ / ≥ hold.
+    expect(compareValues('>', '2026-06-04T04:09:55.794Z', '2026-06-04T04:09:55.000Z', 'date', 'date')).toBe(false)
+    expect(compareValues('≥', '2026-06-04T04:09:55.794Z', '2026-06-04T04:09:55.000Z', 'date', 'date')).toBe(true)
+  })
+
+  it('promotes a hint-less date string (a `variable` operand) against a declared datetime', () => {
+    // The real `assert {{datetime}} == <datetime>` case: the variable side has
+    // NO hint (kind string), the expected side is declared `date`. The string
+    // parses as a date, so both compare as instants at second precision.
+    expect(compareValues('=', '2026-06-04T04:09:55.794Z', '2026-06-04T04:09:55.000Z', undefined, 'date')).toBe(true)
+    expect(compareValues('=', '2026-06-04T04:09:55.000Z', '2026-06-04T04:09:55.794Z', 'date', undefined)).toBe(true)
+    // Ordering across the promoted pair also works (no "cannot compare string with date").
+    expect(compareValues('>', '2026-06-04T04:10:00.000Z', '2026-06-04T04:09:55.000Z', undefined, 'date')).toBe(true)
+    // A non-date string vs a datetime stays a plain (unequal) comparison, no throw.
+    expect(compareValues('=', 'not-a-date', '2026-06-04T04:09:55.000Z', undefined, 'date')).toBe(false)
+  })
+})
+
+describe('compareValues — null', () => {
+  it('null is equal ONLY to null', () => {
+    expect(compareValues('=', null, null, 'null', 'null')).toBe(true)
+    expect(compareValues('≠', null, null, 'null', 'null')).toBe(false)
+    // anything else vs null → not equal (object, string, number, bool, and the
+    // EMPTY STRING — `""` is NOT null).
+    expect(compareValues('=', { a: 1 }, null, undefined, 'null')).toBe(false)
+    expect(compareValues('=', 'x', null, undefined, 'null')).toBe(false)
+    expect(compareValues('=', '', null, undefined, 'null')).toBe(false)
+    expect(compareValues('=', 0, null, undefined, 'null')).toBe(false)
+    expect(compareValues('≠', '', null, undefined, 'null')).toBe(true)
+  })
+
+  it('infers `null` from a raw null value (no hint needed — a wired null)', () => {
+    expect(compareValues('=', null, null)).toBe(true)
+    expect(compareValues('=', 'x', null)).toBe(false)
+  })
+
+  it('orders: `<` `>` always throw with null; `<=` `>=` only when both null', () => {
+    expect(() => compareValues('<', null, null, 'null', 'null')).toThrow()
+    expect(() => compareValues('>', null, null, 'null', 'null')).toThrow()
+    expect(() => compareValues('<', null, 5, 'null', undefined)).toThrow()
+    // ≤ / ≥ : both null is the reflexive equality → true (no throw).
+    expect(compareValues('≤', null, null, 'null', 'null')).toBe(true)
+    expect(compareValues('≥', null, null, 'null', 'null')).toBe(true)
+    // ≤ / ≥ with a null on ONE side → still throws (ordering a null vs a value).
+    expect(() => compareValues('≤', null, 5, 'null', undefined)).toThrow()
+    expect(() => compareValues('≥', 5, null, undefined, 'null')).toThrow()
+  })
+})
+
+describe('compareValues — contains (∋)', () => {
+  it('object ∋ object is subset (right ⊆ left, common props equal)', () => {
+    expect(compareValues('∋', { a: 1, b: 2 }, { a: 1 })).toBe(true)
+    expect(compareValues('∋', { a: 1, b: 2 }, { a: 2 })).toBe(false)
+    expect(compareValues('∋', { a: 1 }, { c: 1 })).toBe(false)
+  })
+
+  it('string ∋ string is substring', () => {
+    expect(compareValues('∋', 'hello world', 'o w')).toBe(true)
+    expect(compareValues('∋', 'hello', 'xyz')).toBe(false)
+  })
+
+  it('list ∋ x is membership by deep equality', () => {
+    expect(compareValues('∋', [1, 2, 3], 2)).toBe(true)
+    expect(compareValues('∋', [1, 2, 3], 5)).toBe(false)
+    expect(compareValues('∋', [{ a: 1 }], { a: 1 })).toBe(true)
+  })
+
+  it('multi-enum (comma-joined string) ∋ enum is substring', () => {
+    expect(compareValues('∋', 'Rouge,Vert', 'Vert', 'enum', 'enum')).toBe(true)
+  })
+
+  it('list ∋ list is multiset SUBSET — a multi-select contains another', () => {
+    expect(compareValues('∋', ['Vert', 'Rouge'], ['Vert'])).toBe(true)
+    expect(compareValues('∋', ['Vert', 'Rouge'], ['Vert', 'Rouge'])).toBe(true)
+    expect(compareValues('∋', ['Vert', 'Rouge'], ['Vert', 'Bleu'])).toBe(false)
+    expect(compareValues('∋', ['Vert'], ['Vert', 'Rouge'])).toBe(false)
+  })
+
+  it('THROWS for unsupported left kinds (e.g. boolean)', () => {
+    expect(() => compareValues('∋', true, false)).toThrow()
+  })
+})

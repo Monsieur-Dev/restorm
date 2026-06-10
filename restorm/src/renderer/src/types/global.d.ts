@@ -191,6 +191,12 @@ declare global {
           callback: (map: Record<string, { count: number; lastSentAt: string; history: string[] }>) => void
         ) => () => void
       }
+      scenarioUsage: {
+        get: () => Promise<Record<string, { count: number; lastRunAt: string; history: string[] }>>
+        onChanged: (
+          callback: (map: Record<string, { count: number; lastRunAt: string; history: string[] }>) => void
+        ) => () => void
+      }
     }
   }
 }

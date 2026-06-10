@@ -1,0 +1,273 @@
+- message: 🔵 [<time>] ▶ Arithmetics
+- message: ⚪ [<time>] start arithmetic
+  data:
+    b: 5
+    a: 5
+- message: ⚪ [<time>] done arithmetic
+  data:
+    result: 10
+- message: ⚪ [<time>] start log
+  data:
+    message: 5+5 = {{.}}
+    data: 10
+- message: 🔵 [<time>] 5+5 = 10
+  data: 10
+- message: ⚪ [<time>] done log
+  data:
+    value: 10
+- message: ⚪ [<time>] start arithmetic
+  data:
+    a: 10
+    operator: −
+    b: 5
+    in: true
+- message: ⚪ [<time>] done arithmetic
+  data:
+    result: 5
+- message: ⚪ [<time>] start log
+  data:
+    message: 10-5 = {{.}}
+    data: 5
+- message: 🔵 [<time>] 10-5 = 5
+  data: 5
+- message: ⚪ [<time>] done log
+  data:
+    value: 5
+- message: ⚪ [<time>] start arithmetic
+  data:
+    operator: ×
+    a: 5
+    b: 5
+    in: true
+- message: ⚪ [<time>] done arithmetic
+  data:
+    result: 25
+- message: ⚪ [<time>] start log
+  data:
+    message: 5x5 = {{.}}
+    data: 25
+- message: 🔵 [<time>] 5x5 = 25
+  data: 25
+- message: ⚪ [<time>] done log
+  data:
+    value: 25
+- message: ⚪ [<time>] start arithmetic
+  data:
+    operator: ÷
+    a: 25
+    b: 5
+    in: true
+- message: ⚪ [<time>] done arithmetic
+  data:
+    result: 5
+- message: ⚪ [<time>] start log
+  data:
+    message: 25/5 = {{.}}
+    data: 5
+- message: 🔵 [<time>] 25/5 = 5
+  data: 5
+- message: ⚪ [<time>] done log
+  data:
+    value: 5
+- message: ⚪ [<time>] start arithmetic
+  data:
+    a: 16
+    b: 5
+    operator: "%"
+    in: true
+- message: ⚪ [<time>] done arithmetic
+  data:
+    result: 1
+- message: ⚪ [<time>] start log
+  data:
+    message: 16%5 = {{.}}
+    data: 1
+- message: 🔵 [<time>] 16%5 = 1
+  data: 1
+- message: ⚪ [<time>] done log
+  data:
+    value: 1
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: N
+    value: 5
+    in: true
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] start arithmetic
+  data:
+    b: 5
+    a: 5
+    in: true
+- message: ⚪ [<time>] done arithmetic
+  data:
+    result: 10
+- message: ⚪ [<time>] start log
+  data:
+    message: 5+5 = {{.}}
+    level: warn
+    data: 10
+- message: 🟠 [<time>] 5+5 = 10
+  data: 10
+- message: ⚪ [<time>] done log
+  data:
+    value: 10
+- message: ⚪ [<time>] start arithmetic
+  data:
+    operator: −
+    b: 5
+    a: 10
+    in: true
+- message: ⚪ [<time>] done arithmetic
+  data:
+    result: 5
+- message: ⚪ [<time>] start log
+  data:
+    message: 10-5 = {{.}}
+    level: warn
+    data: 5
+- message: 🟠 [<time>] 10-5 = 5
+  data: 5
+- message: ⚪ [<time>] done log
+  data:
+    value: 5
+- message: ⚪ [<time>] start arithmetic
+  data:
+    operator: ×
+    b: 5
+    a: 5
+    in: true
+- message: ⚪ [<time>] done arithmetic
+  data:
+    result: 25
+- message: ⚪ [<time>] start log
+  data:
+    message: 5x5 = {{.}}
+    level: warn
+    data: 25
+- message: 🟠 [<time>] 5x5 = 25
+  data: 25
+- message: ⚪ [<time>] done log
+  data:
+    value: 25
+- message: ⚪ [<time>] start arithmetic
+  data:
+    operator: ÷
+    b: 5
+    a: 25
+    in: true
+- message: ⚪ [<time>] done arithmetic
+  data:
+    result: 5
+- message: ⚪ [<time>] start log
+  data:
+    message: 25/5 = {{.}}
+    level: warn
+    data: 5
+- message: 🟠 [<time>] 25/5 = 5
+  data: 5
+- message: ⚪ [<time>] done log
+  data:
+    value: 5
+- message: ⚪ [<time>] start arithmetic
+  data:
+    operator: "%"
+    b: 5
+    a: 16
+    in: true
+- message: ⚪ [<time>] done arithmetic
+  data:
+    result: 1
+- message: ⚪ [<time>] start log
+  data:
+    message: 16%5 = {{.}}
+    level: warn
+    data: 1
+- message: 🟠 [<time>] 16%5 = 1
+  data: 1
+- message: ⚪ [<time>] done log
+  data:
+    value: 1
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: zero
+    value: 0
+    in: true
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] start arithmetic
+  data:
+    a: 5
+    b: 0
+    operator: ÷
+    in: true
+- message: 🔴 [<time>] division by zero
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: Divide by zero properly catched
+    data:
+      message: division by zero
+      startedAt: <dynamic-time>
+- message: 🔵 [<time>] Divide by zero properly catched
+  data:
+    message: division by zero
+    startedAt: <dynamic-time>
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      message: division by zero
+      startedAt: <dynamic-time>
+- message: ⚪ [<time>] start getVariable
+  data:
+    value: 5
+    in: true
+- message: ⚪ [<time>] done getVariable
+  data:
+    value: 5
+- message: ⚪ [<time>] start arithmetic
+  data:
+    a: 5
+- message: ⚪ [<time>] done arithmetic
+  data:
+    result: 10
+- message: ⚪ [<time>] start log
+  data:
+    message: 5+5 = {{.}}
+    data: 10
+- message: 🔵 [<time>] 5+5 = 10
+  data: 10
+- message: ⚪ [<time>] done log
+  data:
+    value: 10
+- message: ⚪ [<time>] start setVariable
+  data:
+    name: stringvariable
+    value: aaa
+    in: true
+- message: ⚪ [<time>] done setVariable
+- message: ⚪ [<time>] start getVariable
+  data:
+    value: aaa
+    in: true
+- message: ⚪ [<time>] done getVariable
+  data:
+    value: aaa
+- message: ⚪ [<time>] start arithmetic
+  data:
+    b: aaa
+- message: '🔴 [<time>] arithmetic operand is not a number: "aaa"'
+- message: ⚪ [<time>] start log
+  data:
+    message: Error properly catched (wrong type in operand)
+    data:
+      message: 'arithmetic operand is not a number: "aaa"'
+      startedAt: <dynamic-time>
+- message: 🔵 [<time>] Error properly catched (wrong type in operand)
+  data:
+    message: 'arithmetic operand is not a number: "aaa"'
+    startedAt: <dynamic-time>
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      message: 'arithmetic operand is not a number: "aaa"'
+      startedAt: <dynamic-time>
+- message: 🔵 [<time>] ■ Arithmetics

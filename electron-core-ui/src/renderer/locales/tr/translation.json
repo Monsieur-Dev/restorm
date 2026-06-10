@@ -148,6 +148,10 @@
       "autoSaveDelay": {
         "title": "Otomatik kaydetme gecikmesi",
         "description": "Değiştirilmiş bir düzenleyicinin otomatik olarak kaydedilmesinden önceki gecikmeyi milisaniye cinsinden denetler. Yalnızca otomatik kaydetme « Belirli bir gecikmeden sonra » olarak ayarlandığında geçerlidir."
+      },
+      "reopenLastFile": {
+        "title": "Son açılan dosyayı otomatik olarak yeniden aç",
+        "description": "Etkinleştirildiğinde, başlangıçta en son açık olan dosyayı yeniden açar — ancak yalnızca uygulama bir dosya açıkken kapatılmışsa."
       }
     }
   },

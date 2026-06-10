@@ -1,10 +1,14 @@
 import React from 'react'
 import type { WorkbenchTree, RebuildTabCallback } from 'electron-core-ui/renderer'
 import { RestormWorkbench, type RestormWorkbenchHandle } from './RestormWorkbench'
+import type { AddChildKind } from '../Sidebar/contextMenuBuilder'
 import { EnvironmentValuesProvider } from '../../../contexts/EnvironmentValuesContext'
 import type { Icon } from 'electron-core-ui/types'
 import type { BreadcrumbItem } from '../../../../../shared/types/editor'
-import type { Request, Folder, EnvironmentFolder } from '../../../../../shared/types/collections'
+import type { Request, Folder, Scenario, EnvironmentFolder, ScenarioNode, ScenarioEdge } from '../../../../../shared/types/collections'
+import type { ScenarioRequestUsage, ScenarioScenarioUsage } from '../../../services/scenarioRequestUsage'
+import type { ResolveBoundItem, ResolveRequestEnv } from '../../Scenario/scenarioBoundResolver'
+import type { SyntheticRequestPreview } from '../../../../../shared/utils/syntheticRequestPreview'
 
 export interface RestormWorkbenchContainerProps {
   workbenchRef?: React.Ref<RestormWorkbenchHandle>
@@ -31,6 +35,16 @@ export interface RestormWorkbenchContainerProps {
   onTagsChange: (targetId: string, tags: string[]) => void
   onTagColorChange?: (envFolderId: string, tag: string, color: string | null) => void
   onFolderChange: (folderId: string, folder: Folder) => void
+  onScenarioChange?: (scenarioId: string, patch: { nodes?: ScenarioNode[]; edges?: ScenarioEdge[]; notes?: string }) => void
+  /** Create a new HTTP request as a child of the scenario (id) and return its
+   * id — used when a "Requête HTTP" node is added to the graph. */
+  onCreateScenarioRequest?: (scenarioId: string) => string | null
+  /** Create a child item of the given kind (request protocol or sub-scenario)
+   * under the scenario from the graph add-palette, returning its id. */
+  onCreateScenarioChild?: (scenarioId: string, kind: AddChildKind) => string | null
+  resolveBoundItem?: ResolveBoundItem
+  resolveRequestEnv?: ResolveRequestEnv
+  resolveSyntheticPreview?: (requestId: string) => SyntheticRequestPreview | null
   onEnvironmentFolderChange: (folderId: string, folder: EnvironmentFolder) => void
   onSizesChange: (nodeId: string, sizes: number[]) => void
   emptyFallback: React.ReactNode
@@ -46,7 +60,11 @@ export interface RestormWorkbenchContainerProps {
   onRebuildTab: RebuildTabCallback | undefined
   onStateRestored: (tree: WorkbenchTree | null) => void
   getRequestById: (id: string) => Request | undefined
+  getScenariosUsingRequest?: (requestId: string) => ScenarioRequestUsage[]
+  onOpenScenarioFromRequest?: (scenarioId: string, focusNodeId?: string) => void
+  getScenariosUsingScenario?: (scenarioId: string) => ScenarioScenarioUsage[]
   getFolderById: (id: string) => Folder | undefined
+  getScenarioById: (id: string) => Scenario | undefined
   getEnvironmentFolderById: (id: string) => EnvironmentFolder | undefined
   navigationEnabled?: boolean | undefined
   tabSwitcherAnchorSelector?: string | undefined
@@ -75,6 +93,12 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
   onTagsChange,
   onTagColorChange,
   onFolderChange,
+  onScenarioChange,
+  onCreateScenarioRequest,
+  onCreateScenarioChild,
+  resolveBoundItem,
+  resolveRequestEnv,
+  resolveSyntheticPreview,
   onEnvironmentFolderChange,
   onSizesChange,
   emptyFallback,
@@ -82,7 +106,11 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
   onRebuildTab,
   onStateRestored,
   getRequestById,
+  getScenariosUsingRequest,
+  getScenariosUsingScenario,
+  onOpenScenarioFromRequest,
   getFolderById,
+  getScenarioById,
   getEnvironmentFolderById,
   navigationEnabled,
   tabSwitcherAnchorSelector,
@@ -117,6 +145,12 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
           onTagsChange={onTagsChange}
           onTagColorChange={onTagColorChange}
           onFolderChange={onFolderChange}
+          {...(onScenarioChange ? { onScenarioChange } : {})}
+          {...(onCreateScenarioRequest ? { onCreateScenarioRequest } : {})}
+          {...(onCreateScenarioChild ? { onCreateScenarioChild } : {})}
+          {...(resolveBoundItem ? { resolveBoundItem } : {})}
+          {...(resolveRequestEnv ? { resolveRequestEnv } : {})}
+          {...(resolveSyntheticPreview ? { resolveSyntheticPreview } : {})}
           onEnvironmentFolderChange={onEnvironmentFolderChange}
           onSizesChange={onSizesChange}
           emptyFallback={emptyFallback}
@@ -126,7 +160,11 @@ export const RestormWorkbenchContainer: React.FC<RestormWorkbenchContainerProps>
           onRebuildTab={onRebuildTab}
           onStateRestored={onStateRestored}
           getRequestById={getRequestById}
+          getScenariosUsingRequest={getScenariosUsingRequest}
+          getScenariosUsingScenario={getScenariosUsingScenario}
+          onOpenScenarioFromRequest={onOpenScenarioFromRequest}
           getFolderById={getFolderById}
+          getScenarioById={getScenarioById}
           getEnvironmentFolderById={getEnvironmentFolderById}
           navigationEnabled={navigationEnabled}
           tabSwitcherAnchorSelector={tabSwitcherAnchorSelector}

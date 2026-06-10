@@ -32,3 +32,62 @@
   font-weight: 600;
   opacity: 1;
 }
+
+/* Embedded scenario graph preview — read-only thumbnail showing the
+ * scenario's nodes and edges inside the search tooltip. */
+.scn-preview-canvas {
+  background: var(--editor-background, #1e1e1e);
+  border: 1px solid var(--editorHoverWidget-border, #454545);
+  border-radius: 4px;
+  overflow: hidden;
+  /* `width: 100%` + a 1px border would otherwise make the border-box 2px
+   * wider than the parent (content-box default), so the right border gets
+   * clipped by the parent's `overflow: hidden`. */
+  box-sizing: border-box;
+}
+.scn-preview-node {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: var(--editorWidget-background, #252526);
+  border: 1px solid var(--editorWidget-border, #454545);
+  border-radius: 4px;
+  font-size: 11px;
+  min-width: 80px;
+  max-width: 200px;
+}
+.scn-preview-node .codicon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.scn-preview-node-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Scenario preview header — H1 + kind row, matching the
+ * `DocumentationHost` request preview's chrome (big title, then a
+ * single line that names the kind under it). */
+.search-tooltip-scenario-title {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0 0 4px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.search-tooltip-scenario-kind {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--descriptionForeground);
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}

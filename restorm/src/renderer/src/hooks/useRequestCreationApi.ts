@@ -11,8 +11,8 @@ import type { CreateFromOperationOptions, RequestCreationApi } from '../contexts
 import type { BreadcrumbItem } from '../../../shared/types/editor'
 
 interface UseRequestCreationApiOptions {
-  rootItems: (Folder | EnvironmentFolder | Request)[]
-  setRootItems: React.Dispatch<React.SetStateAction<(Folder | EnvironmentFolder | Request)[]>>
+  rootItems: FolderItem[]
+  setRootItems: React.Dispatch<React.SetStateAction<FolderItem[]>>
   setExpandedIds: React.Dispatch<React.SetStateAction<string[]>>
   setSelectedItemId: React.Dispatch<React.SetStateAction<string | null>>
   openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[]) => void
@@ -22,7 +22,7 @@ function generateId(seed: string): string {
   return `${seed}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`
 }
 
-function findEnvFolderById(items: (Folder | EnvironmentFolder | Request)[], id: string): EnvironmentFolder | null {
+function findEnvFolderById(items: FolderItem[], id: string): EnvironmentFolder | null {
   for (const item of items) {
     if (isEnvironmentFolder(item) && item.id === id) return item
   }
@@ -48,7 +48,7 @@ function findChildFolderByName(parent: Folder | EnvironmentFolder, name: string)
 }
 
 function buildBreadcrumbsForRequest(
-  rootItems: (Folder | EnvironmentFolder | Request)[],
+  rootItems: FolderItem[],
   envFolderId: string,
   parentFolderId: string | undefined,
   request: Request

@@ -94,6 +94,50 @@
     "multiLanguage": {
       "title": "27 de limbi!",
       "body": "Restorm vorbește 27 de limbi. Engleză, franceză, spaniolă, germană, italiană, japoneză, chineză, coreeană și multe altele — alege-o pe a ta din setări!"
+    },
+    "fromPostman": {
+      "title": "Vii de la Postman sau Bruno?",
+      "body": "Te ajutăm să faci trecerea la Restorm — tranziția ta, ușor de făcut ;)"
+    },
+    "chainRequests": {
+      "title": "Mai multe cereri de înlănțuit?",
+      "body": "Folosește-ți cererile în cadrul scenariilor, adaugă condiții și chiar imbrică scenarii în alte scenarii."
+    },
+    "stepByStep": {
+      "title": "Parcurge-ți scenariile pas cu pas",
+      "body": "Un pas pe rând, ca să vezi exact ce se întâmplă. Poți chiar să setezi puncte de întrerupere."
+    },
+    "cicd": {
+      "title": "Rulează-ți scenariile în pipeline-urile tale CI/CD",
+      "body": "Pornește Restorm în mod headless ca să rulezi un scenariu fără interfață și să-i colectezi jurnalele — teste automate, construite vizual."
+    },
+    "nestedScenarios": {
+      "title": "Vezi ce se petrece într-un scenariu",
+      "body": "Un scenariu poate apela altul. În inspector, citește fiecare jurnal și sari direct la scenariul din care provine."
+    },
+    "scenarioHistory": {
+      "title": "Dar ce tocmai s-a întâmplat?",
+      "body": "Răsfoiește istoricul execuțiilor scenariilor tale. Unul dintre ele s-a schimbat între timp? Nicio grijă — i-am păstrat configurația."
+    },
+    "codeSandbox": {
+      "title": "Scenariile și securitatea",
+      "body": "Poți scrie cod în scenariile tale — dar rulează într-un sandbox securizat, fără acces la fișierele tale locale și fără acces direct la internet. Cel mai sigur mod de a rămâne protejat!"
+    },
+    "codeLanguages": {
+      "title": "Ai chef să scrii niște cod?",
+      "body": "Scrie cod direct în scenariile tale — în TypeScript, JavaScript, Python, Lua, Ruby sau R!"
+    },
+    "scenarioAi": {
+      "title": "Scenarii pilotabile de AI",
+      "body": "Claude, Cursor, Copilot… îți cunosc codul: cere-le scenarii făcute pe măsură. Totul este expus prin MCP pentru a crea, edita și rula scenarii."
+    },
+    "interactiveScenarios": {
+      "title": "Scenarii interactive!",
+      "body": "Fă-ți scenariile parametrizabile și chiar întreabă utilizatorul ce să facă prin casete de dialog."
+    },
+    "customValueLists": {
+      "title": "Liste de valori reutilizabile",
+      "body": "Definește-ți propriile liste de valori și reutilizează-le deopotrivă în cererile și în scenariile tale."
     }
   },
   "authFailureToast": {
@@ -150,6 +194,7 @@
       "createEnvironmentFolder": "Creează folder de mediu",
       "delete": "Șterge",
       "clone": "Clonează",
+      "copySuffix": "copie",
       "rename": "Redenumește",
       "addToFavorites": "Adaugă la favorite",
       "removeFromFavorites": "Elimină din favorite",
@@ -170,7 +215,8 @@
         "soap": "Cerere SOAP",
         "websocket": "Cerere WebSocket",
         "odata": "Cerere OData",
-        "auth": "Cerere HTTP de autentificare"
+        "auth": "Cerere HTTP de autentificare",
+        "scenario": "Scenariu"
       }
     },
     "deleteConfirm": {
@@ -179,6 +225,14 @@
       "itemMessage": "Sigur doriți să ștergeți \"{{name}}\"?",
       "confirm": "Șterge",
       "cancel": "Anulează"
+    },
+    "scenarioDelete": {
+      "title": "Șterge o cerere folosită de scenarii",
+      "message": "„{{name}}” este folosită în următoarele scenarii. Ce doriți să faceți?",
+      "belongsTag": "aparține acestui scenariu",
+      "moveInto": "Mută în acest scenariu",
+      "affectsNote": "Ștergerea acestei cereri o va elimina și din aceste scenarii.",
+      "deleteAnyway": "Șterge oricum"
     }
   },
   "environment": {
@@ -250,7 +304,8 @@
     "addHeader": "Adaugă antet",
     "addParam": "Adaugă parametru",
     "environmentSelector": {
-      "noEnvironment": "Niciun mediu"
+      "noEnvironment": "Niciun mediu",
+      "switchTooltip": "Schimbă mediul"
     },
     "body": {
       "fileLabel": "Fișier sau URL:",
@@ -303,7 +358,11 @@
       "dateTime": "Dată și oră",
       "color": "Culoare",
       "expression": "Expresie",
-      "boolean": "Boolean"
+      "boolean": "Boolean",
+      "null": "Null",
+      "list": "Listă",
+      "variables": "Variabile",
+      "environment": "Mediu"
     },
     "apiEnums": "Tipuri definite de API",
     "customLists": "Tipuri personalizate",
@@ -356,11 +415,14 @@
       "folder": "Foldere",
       "environment": "Medii",
       "settings": "Setări",
-      "tag": "Etichete"
+      "tag": "Etichete",
+      "scenario": "Scenarii"
     },
     "tooltip": {
       "noDetails": "Niciun detaliu disponibil",
-      "noContent": "Nicio documentație sau notiță"
+      "noContent": "Nicio documentație sau notiță",
+      "noScenario": "Scenariu indisponibil",
+      "scenarioKind": "scenariu"
     }
   },
   "httpStatus": {
@@ -467,7 +529,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Sigur doriți să eliminați \"{{fileName}}\" din favorite?",
-    "noFilesHint": "Deschideți un fișier sau creați unul nou pentru a începe",
     "newAriaLabel": "Creează o colecție nouă",
     "openAriaLabel": "Deschide o colecție de pe disc",
     "landmarkLabel": "Bine ați venit"
@@ -494,7 +555,9 @@
   },
   "common": {
     "cancel": "Anulează",
-    "save": "Salvează"
+    "save": "Salvează",
+    "remove": "Elimină",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -744,6 +807,685 @@
       "previousMatch": "Potrivirea anterioară",
       "nextMatch": "Potrivirea următoare",
       "close": "Închide"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "emptyTitle": "Aici e gol…",
+      "emptyDragDrop": "Trageți un element din arborele din stânga în scenariul dvs. pentru a-l folosi aici. Puteți chiar importa un scenariu în altul!",
+      "emptyRightClick": "Faceți clic dreapta pe un loc gol pentru a adăuga acțiuni în scenariul dvs."
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "runOnEachEvent": "Rulează la fiecare eveniment primit",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del",
+        "copy": "Copiază",
+        "paste": "Lipește"
+      },
+      "expand": "Extinde",
+      "collapse": "Restrânge"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "locked": "Editare blocată în timp ce scenariul rulează",
+    "switch": {
+      "addCase": "Adaugă caz",
+      "removeCase": "Elimină caz",
+      "case": "caz"
+    },
+    "forEach": {
+      "items": "elemente",
+      "each": "fiecare",
+      "done": "gata",
+      "parallelism": "paralelism"
+    },
+    "aggregate": {
+      "items": "elemente",
+      "result": "rezultat",
+      "field": "câmp",
+      "separator": "separator",
+      "op": {
+        "count": "Număr",
+        "sum": "Sumă",
+        "min": "Min",
+        "max": "Max",
+        "average": "Medie",
+        "join": "Unește"
+      }
+    },
+    "filter": {
+      "items": "elemente",
+      "rejected": "respinse",
+      "kept": "păstrate",
+      "keepWhere": "păstrează dacă"
+    },
+    "wait": {
+      "then": "apoi",
+      "duration": "durată"
+    },
+    "waitUntil": {
+      "until": "până la",
+      "then": "apoi"
+    },
+    "arithmetic": {
+      "result": "rezultat"
+    },
+    "nodes": {
+      "arithmetic": "Aritmetică",
+      "httpRequest": "Cerere HTTP",
+      "runScenario": "Rulează scenariul",
+      "wait": "Așteaptă",
+      "waitUntil": "Așteaptă până la",
+      "now": "Acum",
+      "comparator": "Comparator",
+      "setVariable": "Setează variabila",
+      "getVariable": "Obține variabila",
+      "addToList": "Adaugă în listă",
+      "removeFromList": "Elimină din listă",
+      "cast": "Cast",
+      "regex": "Regex",
+      "json": "JSON",
+      "xml": "XML",
+      "yaml": "YAML",
+      "crypto": "Crypto",
+      "jwt": "JWT",
+      "datetime": "Date math",
+      "objectOp": "Object ops",
+      "url": "URL",
+      "random": "Random",
+      "throw": "Throw",
+      "retry": "Retry",
+      "listOp": "List ops",
+      "csv": "CSV",
+      "math": "Math",
+      "schema": "Schema validate",
+      "readFile": "Read file",
+      "writeFile": "Write file",
+      "timer": "Cronometru",
+      "code": "Cod"
+    },
+    "comparator": {
+      "result": "rezultat"
+    },
+    "boolean": {
+      "result": "rezultat"
+    },
+    "map": {
+      "items": "elemente",
+      "mapped": "transformate"
+    },
+    "log": {
+      "message": "mesaj",
+      "data": "date"
+    },
+    "assert": {
+      "message": "mesaj",
+      "operator": "operator",
+      "op": {
+        "eq": "equals",
+        "ne": "not equals",
+        "lt": "less than",
+        "lte": "less or equal",
+        "gt": "greater than",
+        "gte": "greater or equal",
+        "contains": "contains",
+        "isString": "is string",
+        "isNumber": "is number",
+        "isBoolean": "is boolean",
+        "isArray": "is array",
+        "isObject": "is object",
+        "isNull": "is null",
+        "exists": "exists",
+        "isEmpty": "is empty",
+        "matchesRegex": "matches regex",
+        "isOneOf": "is one of",
+        "deepEquals": "deep equals",
+        "lengthEq": "length ==",
+        "lengthGt": "length >",
+        "lengthLt": "length <"
+      }
+    },
+    "editRequest": "Editează cererea",
+    "editScenario": "Editează scenariul",
+    "object": {
+      "addProperty": "Adaugă proprietate",
+      "removeProperty": "Elimină proprietatea",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "output": {
+      "outputName": "Nume ieșire",
+      "addOutput": "Adaugă ieșire",
+      "removeOutput": "Elimină"
+    },
+    "input": {
+      "name": "Name",
+      "defaultType": "Default / type",
+      "addParam": "Adaugă parametru",
+      "removeParam": "Elimină"
+    },
+    "runScenario": {
+      "orphanInput": "Niciun parametru \"{{name}}\" corespunzător în subscenariu",
+      "orphanOutput": "Nicio ieșire \"{{name}}\" corespunzătoare în subscenariu",
+      "then": "apoi"
+    },
+    "validation": {
+      "duplicateName": "Numele „{{name}}” este deja folosit de altă acțiune.",
+      "panelTitle": "{{count}} acțiune/i cu erori",
+      "runBlocked": "Remediați {{count}} eroare/erori de acțiune înainte de rulare",
+      "focusBox": "Mergi la această acțiune",
+      "showErrors": "Afișează erorile",
+      "input": {
+        "missingName": "Acest parametru de intrare trebuie să aibă un nume."
+      },
+      "dataLink": {
+        "emptyPath": "Legătura de date primită necesită o cale (JSON path).",
+        "badPath": "Calea JSON „{{path}}” a legăturii de date este invalidă."
+      },
+      "output": {
+        "missingName": "Această ieșire trebuie să aibă un nume.",
+        "duplicateName": "Numele „{{name}}” este deja folosit de altă ieșire."
+      },
+      "getVariable": {
+        "noSelection": "Trebuie selectată o variabilă.",
+        "unknown": "Variabila „{{name}}” nu există în scenariu."
+      },
+      "setVariable": {
+        "missingName": "Variabila de setat trebuie să aibă un nume."
+      },
+      "object": {
+        "propMissingName": "Fiecare proprietate trebuie să aibă un nume.",
+        "propDuplicate": "Numele de proprietate „{{name}}” este duplicat."
+      },
+      "arithmetic": {
+        "divisionByZero": "Împărțirea la zero este imposibilă."
+      },
+      "switch": {
+        "caseDuplicate": "Valoarea cazului „{{value}}” este duplicată."
+      },
+      "transform": {
+        "emptyTemplate": "Șablonul nu trebuie să fie gol.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "Cererea asociată nu mai există."
+      },
+      "runScenario": {
+        "missing": "Scenariul asociat nu mai există."
+      },
+      "file": {
+        "missingPath": "A file path is required."
+      }
+    },
+    "usage": {
+      "button": "Scenarii care folosesc această cerere",
+      "title": "Această cerere este folosită în scenariile:"
+    },
+    "inspector": {
+      "run": "Rulează",
+      "debug": "Depanare",
+      "undo": "Anulează",
+      "redo": "Refă",
+      "step": "Pas cu pas",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "Pauză",
+      "noRunsHint": "Nicio rulare recentă pentru această cerere — rulează-o de aici ca să populezi previzualizarea scenariului.",
+      "syntheticInfo": "Date de exemplu generate din documentația acestei cereri.",
+      "syntheticRunHint": "Date de exemplu — rulați cererea pentru a le înlocui cu un rezultat real.",
+      "stop": "Oprește",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "copyThisLog": "Copiază acest jurnal",
+      "clearLogs": "Șterge jurnalele",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "Afișează jurnalele {{level}}",
+      "showLevelOnly": "Clic dreapta: doar acest nivel",
+      "noUserLogs": "No user logs (entries from the Log action) in this run.",
+      "helpTitle": "What this action does"
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Date solicitate"
+    },
+    "runHistory": {
+      "title": "Istoric execuții",
+      "tooltip": "Istoric execuții",
+      "empty": "Nicio execuție înregistrată încă",
+      "noLogs": "Niciun jurnal pentru această execuție",
+      "logsTab": "Logs",
+      "graphTab": "Grafic",
+      "noGraph": "Niciun instantaneu de scenariu pentru această execuție",
+      "pin": "Fixează",
+      "unpin": "Anulează fixarea"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "Adăugare punct de întrerupere",
+      "remove": "Eliminare punct de întrerupere",
+      "toggle": "Comutare punct de întrerupere (F9)",
+      "reached": "Punct de întrerupere atins — această acțiune nu a fost încă executată. Apăsați F5 pentru reluare sau F7 pentru pas cu pas.",
+      "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Comută minimapa"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Adaugă valoare",
+      "removeValue": "Elimină valoarea",
+      "updateVariable": "Actualizează variabila sursă"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
+    },
+    "regex": {
+      "value": "value",
+      "operation": "operation",
+      "pattern": "pattern",
+      "flags": "flags",
+      "replacement": "replacement",
+      "result": "result",
+      "op": {
+        "extract": "extract",
+        "extractAll": "extract all",
+        "test": "test",
+        "replace": "replace",
+        "split": "split"
+      },
+      "flag": {
+        "i": "Case-insensitive",
+        "m": "Multiline (^ and $ match line breaks)",
+        "s": "Dotall (. matches newlines)"
+      }
+    },
+    "json": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "xml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "yaml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "crypto": {
+      "value": "value",
+      "operation": "operation",
+      "key": "key",
+      "keyPlaceholder": "secret",
+      "result": "result",
+      "op": {
+        "base64Encode": "base64 encode",
+        "base64Decode": "base64 decode",
+        "md5": "MD5",
+        "sha1": "SHA-1",
+        "sha256": "SHA-256",
+        "sha512": "SHA-512",
+        "hmacSha256": "HMAC-SHA256",
+        "uuid": "UUID v4"
+      }
+    },
+    "jwt": {
+      "value": "token",
+      "result": "result"
+    },
+    "datetime": {
+      "value": "date",
+      "operation": "operation",
+      "amount": "amount",
+      "unitLabel": "unit",
+      "format": "format",
+      "other": "second date",
+      "result": "result",
+      "op": {
+        "add": "add",
+        "subtract": "subtract",
+        "format": "format",
+        "diff": "diff"
+      },
+      "unit": {
+        "milliseconds": "milliseconds",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months",
+        "years": "years"
+      }
+    },
+    "objectOp": {
+      "value": "object",
+      "operation": "operation",
+      "path": "path",
+      "keys": "keys",
+      "setValue": "value",
+      "mergeWith": "merge with",
+      "result": "result",
+      "op": {
+        "get": "get",
+        "set": "set",
+        "merge": "merge",
+        "pick": "pick",
+        "omit": "omit",
+        "keys": "keys",
+        "values": "values"
+      }
+    },
+    "url": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "op": {
+        "encode": "encode",
+        "decode": "decode",
+        "parseQuery": "parse query",
+        "buildQuery": "build query",
+        "parseUrl": "parse URL"
+      }
+    },
+    "random": {
+      "operation": "operation",
+      "min": "min",
+      "max": "max",
+      "length": "length",
+      "items": "items",
+      "seed": "seed (optional)",
+      "seedPlaceholder": "reproducible",
+      "result": "result",
+      "op": {
+        "int": "integer",
+        "float": "float",
+        "string": "string",
+        "boolean": "boolean",
+        "pick": "pick"
+      }
+    },
+    "throw": {
+      "message": "message"
+    },
+    "retry": {
+      "maxAttempts": "max attempts",
+      "backoff": "backoff",
+      "delay": "delay",
+      "factor": "factor",
+      "retryOnError": "retry on error",
+      "retryOnStatus": "retry on HTTP status",
+      "retryOnFailure": "retry on any non-2xx",
+      "attempt": "attempt",
+      "exhausted": "exhausted",
+      "backoffOpt": {
+        "fixed": "fixed",
+        "linear": "linear",
+        "exponential": "exponential"
+      }
+    },
+    "menuGroups": {
+      "lists": "Lists",
+      "math": "Math",
+      "dataFormats": "Data formats",
+      "encoding": "Encoding",
+      "time": "Sincronizare"
+    },
+    "listOp": {
+      "value": "list",
+      "operation": "operation",
+      "result": "result",
+      "key": "key",
+      "order": "order",
+      "depth": "depth",
+      "size": "size",
+      "start": "start",
+      "end": "end",
+      "op": {
+        "sort": "sort",
+        "unique": "unique",
+        "reverse": "reverse",
+        "flatten": "flatten",
+        "chunk": "chunk",
+        "slice": "slice",
+        "groupBy": "group by"
+      }
+    },
+    "csv": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "delimiter": "delimiter",
+      "header": "header row",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "math": {
+      "a": "value",
+      "operation": "operation",
+      "result": "result",
+      "b": "with",
+      "min": "min",
+      "max": "max",
+      "precision": "precision",
+      "op": {
+        "round": "round",
+        "floor": "floor",
+        "ceil": "ceil",
+        "trunc": "truncate",
+        "abs": "absolute",
+        "sign": "sign",
+        "sqrt": "square root",
+        "min": "min",
+        "max": "max",
+        "clamp": "clamp"
+      }
+    },
+    "schema": {
+      "value": "value",
+      "schema": "JSON Schema",
+      "valid": "valid",
+      "invalid": "invalid",
+      "errors": "errors",
+      "editTitle": "Edit JSON Schema"
+    },
+    "readFile": {
+      "path": "path",
+      "content": "content"
+    },
+    "writeFile": {
+      "path": "path",
+      "mode": "mode",
+      "content": "content"
+    },
+    "codeField": {
+      "title": "Edit",
+      "edit": "Open editor",
+      "moreLines": "+{{count}} lines",
+      "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "mod",
+      "modeOpt": {
+        "frequency": "frecvență",
+        "cron": "cron"
+      },
+      "frequency": "frecvență",
+      "unit": "unitate",
+      "cron": "cron",
+      "stop": "oprire după",
+      "stopOpt": {
+        "none": "niciodată",
+        "duration": "durată",
+        "endDate": "dată de sfârșit"
+      },
+      "duration": "durată",
+      "endDate": "dată de sfârșit",
+      "tick": "tic"
+    },
+    "code": {
+      "input": "intrare",
+      "language": "Limbaj",
+      "code": "cod",
+      "modalTitle": "Editează codul",
+      "result": "rezultat",
+      "timeout": "Timp limită (s)"
+    },
+    "help": {
+      "input": "Injects the scenario's input parameters and constants into the graph.",
+      "output": "Declares one of the scenario's named results, read by a parent Run-scenario.",
+      "if": "Branches the flow to then / else by comparing two operands.",
+      "switch": "Routes the input to a matching case, or to default.",
+      "httpRequest": "Runs a saved API request and emits its response.",
+      "runScenario": "Runs another scenario as a reusable sub-step.",
+      "forEach": "Runs the body once per item of a collection, then continues.",
+      "for": "Loops over a number range, running the body for each value.",
+      "while": "Repeats the body while a condition holds (tested first).",
+      "doWhile": "Repeats the body while a condition holds (runs at least once).",
+      "aggregate": "Reduces a collection to one value (count, sum, min, max, average, join).",
+      "map": "Transforms every item of a collection into a new list.",
+      "filter": "Keeps the items that match a condition; routes the rest aside.",
+      "addToList": "Appends values to a list.",
+      "removeFromList": "Removes matching values from a list.",
+      "wait": "Pauses for a duration, then continues.",
+      "waitUntil": "Pauses until a given date/time, then continues.",
+      "now": "Emits the current date and time.",
+      "timer": "Fires its body on a repeating interval or a cron schedule.",
+      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "comparator": "Compares two values and emits true or false.",
+      "boolean": "Combines booleans with and / or / xor / not.",
+      "object": "Builds an object from its named inputs.",
+      "setVariable": "Stores a value into a run variable.",
+      "getVariable": "Reads a run variable's value.",
+      "transform": "Renders a Handlebars template from the input and run variables.",
+      "code": "Rulează codul tău (TypeScript, JavaScript, Python, Lua, Ruby sau R) într-un sandbox și returnează rezultatul.",
+      "cast": "Converts a value to another type (number, string, boolean, date, list).",
+      "regex": "Matches, extracts, replaces or splits text with a regular expression.",
+      "json": "Parses a JSON string, or serialises a value to JSON.",
+      "xml": "Parses an XML string, or serialises a value to XML.",
+      "yaml": "Parses a YAML string, or serialises a value to YAML.",
+      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "jwt": "Decodes a JWT token into header, payload and signature.",
+      "datetime": "Shifts, formats or diffs a date.",
+      "retry": "Re-runs its body until it succeeds, with a backoff policy.",
+      "objectOp": "Reshapes an object (get/set a path, merge, pick, omit, keys, values).",
+      "url": "Encodes, decodes or parses URLs and query strings.",
+      "random": "Generates a random number, string, boolean or pick.",
+      "listOp": "Reshapes a list (sort, unique, reverse, flatten, chunk, slice, groupBy).",
+      "csv": "Parses a CSV string, or serialises a list to CSV.",
+      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "schema": "Validates a value against a JSON Schema.",
+      "readFile": "Reads a file's text content.",
+      "writeFile": "Writes or appends text to a file.",
+      "throw": "Deliberately fails with a message (for error branches and tests).",
+      "log": "Writes a message to the run log and passes the value through.",
+      "assert": "Checks a condition (chai-style) and routes to pass or fail."
+    },
+    "legend": {
+      "title": "Legendă",
+      "portsTitle": "Puncte de intrare",
+      "entryEventTrigger": "Punct de intrare declanșat de un eveniment",
+      "entryDataTrigger": "Punct de intrare declanșat de o dată",
+      "runWhenAllReceived": "Acțiunile se execută imediat ce toate evenimentele și toate datele au fost primite",
+      "runOnLaunchNoPredecessor": "Acțiunile fără predecesor se execută imediat ce scenariul pornește",
+      "outPortsTitle": "Puncte de ieșire",
+      "outEmit": "Emite un eveniment declanșator și trimite date",
+      "outEmitSignalOnly": "Emite un eveniment declanșator fără a trimite date",
+      "genericOutPortsTitle": "Puncte de ieșire generice",
+      "outDone": "Eveniment declanșator emis când acțiunea este finalizată",
+      "outError": "Eveniment declanșator activat în caz de eroare a acțiunii",
+      "navTitle": "Navigare",
+      "zoom": "zoom",
+      "pan": "mută",
+      "boxSelect": "selecție dreptunghiulară",
+      "select": "selectează / selecție multiplă"
+    },
+    "cli": {
+      "title": "Run from the command line",
+      "intro": "Run this scenario without opening the app (CI, cron, script):",
+      "byId": "Designate by id",
+      "allLogs": "All logs",
+      "note": "`--out file` also writes the run-log to a file.",
+      "projectPlaceholder": "<project.restorm>"
     }
   }
 }

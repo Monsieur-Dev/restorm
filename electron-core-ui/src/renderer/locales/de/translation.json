@@ -148,6 +148,10 @@
       "autoSaveDelay": {
         "title": "Verzögerung für automatisches Speichern",
         "description": "Bestimmt die Verzögerung in Millisekunden, nach der ein geänderter Editor automatisch gespeichert wird. Gilt nur, wenn das automatische Speichern auf „Nach Verzögerung“ eingestellt ist."
+      },
+      "reopenLastFile": {
+        "title": "Zuletzt geöffnete Datei automatisch wieder öffnen",
+        "description": "Wenn aktiviert, wird beim Start die zuletzt geöffnete Datei erneut geöffnet — aber nur, wenn die Anwendung geschlossen wurde, während eine Datei geöffnet war."
       }
     }
   },

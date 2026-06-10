@@ -123,3 +123,25 @@
 	height: 100%;
 	display: block;
 }
+
+/* `appearance="button"` — a small toolbar toggle button. Inherits the
+ * `.button.small-button` surface; the pressed (checked) state reuses the
+ * find-widget "active option" tokens so it reads as depressed/active. */
+.custom-toggle-button {
+	cursor: pointer;
+}
+
+.custom-toggle-button:hover {
+	background-color: var(--inputOption-hoverBackground);
+}
+
+.custom-toggle-button.custom-toggle-button-pressed {
+	background-color: var(--inputOption-activeBackground);
+	border: 1px solid var(--inputOption-activeBorder);
+	color: var(--inputOption-activeForeground);
+}
+
+.custom-toggle-button.disabled {
+	opacity: 0.5;
+	pointer-events: none;
+}

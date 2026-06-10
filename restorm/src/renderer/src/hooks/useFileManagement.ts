@@ -65,8 +65,8 @@ import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
 import { prepareForSerialization, processAfterDeserialization } from '../utils/serialization'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
 import { normalizeFileFormatVersion } from '../../../shared/config/fileFormatVersion'
-import type { Folder, EnvironmentFolder, Request, FolderItem, Environment } from '../../../shared/types/collections'
-import { isEnvironmentFolder, isAnyFolder } from '../../../shared/types/collections'
+import type { Folder, EnvironmentFolder, FolderItem, Environment } from '../../../shared/types/collections'
+import { isEnvironmentFolder, isAnyFolder, isScenario } from '../../../shared/types/collections'
 import type { PersistenceFormat, WorkbenchTree } from 'electron-core-ui/renderer'
 import type { SaveOptions } from '../components/Modals/SaveOptionsModal'
 import { collectPasswordSecretsFromCollections, applyPasswordSecretsToCollections } from '../../../shared/utils/passwordSecrets'
@@ -74,8 +74,8 @@ import { serializeEnvFile, parseEnvFileDetailed } from '../../../shared/utils/do
 import type { TFunction } from 'i18next'
 
 export interface UseFileManagementOptions {
-  rootItems: (EnvironmentFolder | Folder | Request)[]
-  setRootItems: React.Dispatch<React.SetStateAction<(EnvironmentFolder | Folder | Request)[]>>
+  rootItems: FolderItem[]
+  setRootItems: React.Dispatch<React.SetStateAction<FolderItem[]>>
   setWorkbenchTree: React.Dispatch<React.SetStateAction<WorkbenchTree>>
   clearTabDirtyState: () => void
   registerTabDirtyState: (id: string, checksum: string) => void
@@ -218,7 +218,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
    * the walk's `basePath`.
    */
   const hydrateSaveUnitsFromTree = useCallback(async (
-    items: (EnvironmentFolder | Folder | Request)[],
+    items: FolderItem[],
     /**
      * Optional basePath / format overrides. Pass these from
      * `handleFileOpened` where the freshly-known path is in scope but
@@ -950,10 +950,14 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
 
         await searchIndexService.initialize()
         for (const rootItem of reactiveItems) {
-          // `indexFolderTree` walks folders recursively; requests at
-          // the root need their own indexing path (no parent folder
+          // `indexFolderTree` walks folders recursively; scenarios go
+          // through their own indexer so the scenario itself + its
+          // child requests are tagged with the right category; requests
+          // at the root need their own indexing path (no parent folder
           // to hand off to).
-          if ('items' in rootItem) {
+          if (isScenario(rootItem)) {
+            await searchIndexService.indexScenarioTree(rootItem)
+          } else if ('items' in rootItem) {
             await searchIndexService.indexFolderTree(rootItem)
           } else {
             await searchIndexService.indexRootRequest(rootItem)

@@ -148,6 +148,10 @@
       "autoSaveDelay": {
         "title": "Autolagringsforsinkelse",
         "description": "Styrer forsinkelsen i millisekunder før en endret editor lagres automatisk. Gjelder bare når Autolagring er satt til Etter forsinkelse."
+      },
+      "reopenLastFile": {
+        "title": "Åpne sist åpnede fil automatisk på nytt",
+        "description": "Når dette er aktivert, åpnes den sist åpnede filen på nytt ved oppstart — men bare hvis programmet ble lukket mens en fil var åpen."
       }
     }
   },

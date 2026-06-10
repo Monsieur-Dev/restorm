@@ -110,6 +110,10 @@ export const BookmarkRibbonStack: React.FC<BookmarkRibbonStackProps> = ({
                 <InputBox
                   options={{ placeholder: 'Bookmark name' }}
                   value={addDraft}
+                  // `handleAddCommit` reads `addDraft` synchronously on Enter /
+                  // confirm-click, so the draft must track every keystroke; a
+                  // debounced onChange would leave it stale at commit time.
+                  changeDebounceMs={0}
                   onChange={(next) => { setAddDraft(next) }}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter') {

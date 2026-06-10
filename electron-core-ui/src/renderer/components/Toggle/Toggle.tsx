@@ -1,5 +1,6 @@
 import React, { Suspense, useCallback } from 'react'
 import './toggle.css'
+import { Button } from '../Button'
 import type { ToggleProps } from './types'
 import { defaultToggleStyles } from './types'
 import {
@@ -157,6 +158,39 @@ const ToggleInner: React.FC<ToggleProps> = ({
           </span>
         )}
       </div>
+    );
+  }
+
+  // `'button'` appearance: a small toolbar-style button rendered pressed
+  // (active) when checked, normal when unchecked. The children are the
+  // button content (icon / colored dot). Composes the real ECUI `Button`
+  // (role="checkbox" + aria-checked) so it inherits the themed button
+  // surface + `.button-container` layout instead of a hand-styled anchor.
+  // The pressed look comes from `custom-toggle-button(-pressed)` in
+  // `toggle.css`; Button's own keydown toggles on Enter / Space.
+  if (appearance === 'button') {
+    const pressed = effectiveState === 'checked';
+    const ariaLabel = ariaLabelProp ?? (typeof children === 'string' ? children : 'Toggle');
+    return (
+      <Button
+        small
+        {...(id !== undefined ? { id } : {})}
+        role="checkbox"
+        aria-checked={ariaChecked}
+        disabled={!enabled}
+        options={{ ariaLabel }}
+        onClick={handleClick}
+        {...(notFocusable ? { tabIndex: -1 } : {})}
+        className={[
+          'custom-toggle-button',
+          pressed ? 'custom-toggle-button-pressed' : '',
+          actionClassName ?? '',
+          className
+        ].filter(Boolean).join(' ')}
+        {...(dataTestId ? { 'data-testid': `${dataTestId}-action` } : {})}
+      >
+        {children}
+      </Button>
     );
   }
 

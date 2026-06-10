@@ -9,6 +9,11 @@ export const DEFAULT_ENV_COLOR = '#c75000'
 export interface FlatEnvRow {
 	env: Environment
 	depth: number
+	/** Optional group this row belongs to (e.g. its owning environment folder's
+	 * name). When set, the popover renders a header above the first row of each
+	 * group — used by the cross-folder picker; single-folder hosts leave it
+	 * unset, so no headers appear. */
+	groupLabel?: string
 }
 
 /** Flatten the env tree depth-first so the popover can render every

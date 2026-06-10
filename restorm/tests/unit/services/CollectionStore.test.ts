@@ -27,6 +27,7 @@ vi.mock('electron-core-ui/main', async (importOriginal) => {
 })
 
 import { collectionStore } from '../../../src/main/services/CollectionStore'
+import { Scenario } from '../../../src/shared/models'
 
 describe('CollectionStore', () => {
   beforeEach(() => {
@@ -209,6 +210,45 @@ describe('CollectionStore', () => {
       const found = collectionStore.findEnvironmentById(env.id)
       expect(found).toBeDefined()
       expect(found?.name).toBe('Find Me')
+    })
+  })
+
+  describe('Scenarios', () => {
+    it('reifies a plain scenario in items into a Scenario instance (not a request)', () => {
+      collectionStore.setCollections([
+        {
+          id: 'col-1',
+          name: 'Root',
+          folderType: 'environment',
+          fileFormatVersion: 1,
+          items: [
+            {
+              type: 'scenario',
+              id: 'scn-1',
+              name: 'Login flow',
+              tags: [],
+              params: [{ id: 'p1', name: 'user', dataType: 'string', required: true }],
+              nodes: [{ id: 'n1', kind: 'start', config: {}, inputs: [], outputs: [], position: { x: 0, y: 0 } }],
+              edges: []
+            }
+          ]
+        }
+      ] as unknown as Parameters<typeof collectionStore.setCollections>[0])
+
+      const root = collectionStore.getCollections()[0]
+      const item = root?.items[0]
+      // The bug guarded against: a scenario has `type` + no `items`, so
+      // the request factory used to mis-build it as an HTTPRequest.
+      expect(item).toBeInstanceOf(Scenario)
+      const scenario = item as Scenario
+      expect(scenario.type).toBe('scenario')
+      expect(scenario.nodes).toHaveLength(1)
+      expect(scenario.nodes[0]?.kind).toBe('start')
+      expect(scenario.params[0]?.name).toBe('user')
+      // Round-trips back to a plain object preserving the graph.
+      const plain = scenario.toPlainObject()
+      expect(plain.type).toBe('scenario')
+      expect((plain.edges as unknown[])).toEqual([])
     })
   })
 })

@@ -44,8 +44,13 @@ export type ToggleValue = boolean | 'indeterminate';
  *   and reverses on on→off (Twitter-style). The `icon`,
  *   `indeterminateIcon` and `styles` props have no effect — the
  *   `'indeterminate'` value is treated as `'unchecked'`.
+ * - `'button'`: a small toolbar-style button that renders **pressed**
+ *   (active/depressed) when checked and **normal** when unchecked — for
+ *   a row of filter toggles. The `children` are the button content (an
+ *   icon or colored dot); `icon` / `indeterminateIcon` / `styles` have
+ *   no effect and `'indeterminate'` reads as unchecked.
  */
-export type ToggleAppearance = 'switch' | 'star';
+export type ToggleAppearance = 'switch' | 'star' | 'button';
 
 export interface ToggleProps {
   /**

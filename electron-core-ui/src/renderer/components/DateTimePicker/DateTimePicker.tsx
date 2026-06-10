@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { DateTime } from 'luxon'
 import { Button } from '../Button'
 import { Tooltip } from '../Tooltip'
-import { InputBox } from '../InputBox'
+import { InputBox, MessageType, type IInputValidator } from '../InputBox'
+import { ControlGroup } from '../ControlGroup'
 import { CalendarGrid } from './CalendarGrid'
 import { TimePicker } from './TimePicker'
 import { OutputSettings } from './OutputSettings'
@@ -21,6 +22,70 @@ function formatOutput(date: Date, outputMode: 'pattern' | 'unix' | 'epoch' | 'is
     default:
       return DateTime.fromJSDate(date).toFormat(pattern)
   }
+}
+
+/** Best-effort parse of arbitrary date text, INDEPENDENT of the active output
+ * mode. Lets a user paste/type any common representation — an epoch number
+ * (Unix SECONDS or JS MILLISECONDS, disambiguated by magnitude: ≥ 1e12 is ms),
+ * an ISO 8601 string, a SQL-ish `YYYY-MM-DD HH:mm:ss`, or an RFC 2822 date —
+ * even when the field is configured for a different format. `null` when none
+ * match. */
+function parseFlexibleDate(trimmed: string): Date | null {
+  // A bare integer is an epoch ONLY when it's a plausible timestamp: ≥ 10 digits
+  // (≥ 1e9 ≈ year 2001). This keeps a mid-typing partial like a bare year
+  // ("2025") from prematurely committing as 1970-01-01T…+2025s. ≥ 1e12 → JS
+  // milliseconds, otherwise Unix seconds.
+  if (/^\d+$/.test(trimmed)) {
+    if (trimmed.length < 10) return null
+    const n = Number(trimmed)
+    if (!Number.isFinite(n)) return null
+    const dt = n >= 1e12 ? DateTime.fromMillis(n) : DateTime.fromSeconds(n)
+    return dt.isValid ? dt.toJSDate() : null
+  }
+  // A date string must carry a COMPLETE date (full `YYYY-MM-DD`), so a partial
+  // mid-edit value like "2025-03" doesn't commit as the 1st of the month. Accept
+  // a space OR `T` between the date and time by normalising to ISO (so both the
+  // ISO `…T08:45:00Z` and the SQL-ish `… 08:45:00` forms parse).
+  if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
+    const dt = DateTime.fromISO(trimmed.replace(' ', 'T'))
+    return dt.isValid ? dt.toJSDate() : null
+  }
+  return null
+}
+
+/** Inverse of {@link formatOutput}: parse user-typed text back into a Date.
+ * Tries the active output mode FIRST (so the configured format round-trips
+ * exactly), then falls back to {@link parseFlexibleDate} so typing an epoch or
+ * an ISO string still commits regardless of the field's mode. Returns null when
+ * the text isn't a complete, valid date — so a partial edit mid-typing never
+ * commits a wrong value. */
+function parseInput(text: string, outputMode: 'pattern' | 'unix' | 'epoch' | 'iso', pattern: string): Date | null {
+  const trimmed = text.trim()
+  if (trimmed === '') return null
+  let strict: Date | null = null
+  switch (outputMode) {
+    case 'unix': {
+      const n = Number(trimmed)
+      strict = Number.isFinite(n) && /^[-+]?\d+(?:\.\d+)?$/.test(trimmed) ? DateTime.fromSeconds(n).toJSDate() : null
+      break
+    }
+    case 'epoch': {
+      const n = Number(trimmed)
+      strict = Number.isFinite(n) && /^[-+]?\d+(?:\.\d+)?$/.test(trimmed) ? DateTime.fromMillis(n).toJSDate() : null
+      break
+    }
+    case 'iso': {
+      const dt = DateTime.fromISO(trimmed)
+      strict = dt.isValid ? dt.toJSDate() : null
+      break
+    }
+    default: {
+      const dt = DateTime.fromFormat(trimmed, pattern)
+      strict = dt.isValid ? dt.toJSDate() : null
+      break
+    }
+  }
+  return strict ?? parseFlexibleDate(trimmed)
 }
 
 const DateTimePickerInner: React.FC<DateTimePickerProps> = ({
@@ -85,6 +150,22 @@ const DateTimePickerInner: React.FC<DateTimePickerProps> = ({
     setIsOpen((prev) => !prev)
   }, [disabled])
 
+  // Commit a typed edit: parse the text the same way it's displayed and, when
+  // it's a complete valid date, push it up through `onChange`. Without this the
+  // input was display-only — a typed change was visible but never persisted.
+  const handleTextInput = useCallback((text: string): void => {
+    if (disabled) return
+    const parsed = parseInput(text, effectiveOutputMode, effectivePattern)
+    if (parsed) onChange(parsed)
+  }, [disabled, effectiveOutputMode, effectivePattern, onChange])
+
+  // Red-border feedback while the typed text isn't a parseable date. An empty
+  // field is "not yet a date", not an error, so it stays neutral.
+  const validateInput = useCallback<IInputValidator>(
+    (text) => (text.trim() !== '' && parseInput(text, effectiveOutputMode, effectivePattern) === null ? { type: MessageType.ERROR } : null),
+    [effectiveOutputMode, effectivePattern]
+  )
+
   useEffect(() => {
     if (!isOpen) return
 
@@ -100,9 +181,14 @@ const DateTimePickerInner: React.FC<DateTimePickerProps> = ({
       setIsOpen(false)
     }
 
-    document.addEventListener('mousedown', handleMouseDown)
+    // Capture phase: some hosts (e.g. a canvas/graph surface that owns pointer
+    // gestures) stop propagation on mousedown, so a bubble-phase listener never
+    // sees the click and the popover would stay open. Listening in capture runs
+    // before those handlers; the containment checks above still keep it open for
+    // clicks inside the trigger or the calendar.
+    document.addEventListener('mousedown', handleMouseDown, true)
     return () => {
-      document.removeEventListener('mousedown', handleMouseDown)
+      document.removeEventListener('mousedown', handleMouseDown, true)
     }
   }, [isOpen])
 
@@ -323,6 +409,7 @@ const DateTimePickerInner: React.FC<DateTimePickerProps> = ({
       data-output-mode={effectiveOutputMode}
       data-include-time={effectiveIncludeTime ? 'true' : 'false'}
     >
+      <ControlGroup className="ecu-date-time-picker-group">
       <div className="ecu-date-time-picker-input">
         <InputBox
           data-testid={`${testId}-input`}
@@ -332,19 +419,11 @@ const DateTimePickerInner: React.FC<DateTimePickerProps> = ({
             ...(inputOptions?.showPlaceholderOnFocus !== undefined
               ? { showPlaceholderOnFocus: inputOptions.showPlaceholderOnFocus }
               : {}),
+            validationOptions: { validation: validateInput },
             ariaLabel: inputOptions?.ariaLabel ?? t('dateTimePicker.ariaLabel')
           }}
           value={displayValue}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              handleToggle()
-              return
-            }
-            if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
-              e.preventDefault()
-            }
-          }}
+          onChange={handleTextInput}
           disabled={disabled}
         />
       </div>
@@ -369,6 +448,7 @@ const DateTimePickerInner: React.FC<DateTimePickerProps> = ({
           />
         </div>
       </div>
+      </ControlGroup>
 
       <Tooltip
         targetRef={targetRef as unknown as React.RefObject<HTMLElement | null>}

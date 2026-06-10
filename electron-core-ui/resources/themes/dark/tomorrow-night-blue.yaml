@@ -3,6 +3,9 @@ name: Tomorrow Night Blue
 type: dark
 
 colors:
+  scenarioNode.background: "#00306b"
+  scenarioNode.headerBackground: "#0a3d80"
+  scenarioNode.headerBackgroundSelected: "#1351a8"
   focusBorder: "#bbdaff"
   errorForeground: "#a92049"
   input.background: "#001733"

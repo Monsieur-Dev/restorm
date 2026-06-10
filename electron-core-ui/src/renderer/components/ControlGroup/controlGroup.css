@@ -72,13 +72,28 @@
 	max-width: none !important;
 }
 
-/* Non-last children: hide right border + right radius */
-.ecu-control-group--horizontal > *:not(:last-child),
-.ecu-control-group--horizontal > *:not(:last-child) > *,
-.ecu-control-group--horizontal > *:not(:last-child) > * > * {
+/* Non-last children: hide right border + right radius. A SelectBox combo, a
+ * checkbox, or a Toggle are payload controls — they should keep their own
+ * visible frame, not merge into the next item (which is usually an auxiliary
+ * action). The `:not(:has(…))` clauses opt them out of the seam treatment;
+ * their own descendants are still excluded by the `:not(.…)` filter on the
+ * inner selectors. */
+.ecu-control-group--horizontal > *:not(:last-child, .toggle-container, :has(.select-box.custom-trigger), :has(input[type="checkbox"]), :has(.toggle-container)),
+.ecu-control-group--horizontal > *:not(:last-child) > *:not(.select-box.custom-trigger, input[type="checkbox"], .toggle-container, .custom-toggle, :has(.select-box.custom-trigger), :has(input[type="checkbox"]), :has(.toggle-container)),
+.ecu-control-group--horizontal > *:not(:last-child) > * > *:not(.select-box.custom-trigger, input[type="checkbox"], .toggle-container, .custom-toggle) {
 	border-top-right-radius: 0 !important;
 	border-bottom-right-radius: 0 !important;
 	border-right-color: transparent !important;
+}
+
+/* A Toggle / checkbox dropped directly into a ControlGroup is a payload — it
+ * keeps its own frame (excluded from the seam treatment above) AND stretches
+ * to fill its slot, centring its inner control so the small switch sits in
+ * the middle of the available area rather than hugging the left edge. */
+.ecu-control-group--horizontal > .toggle-container,
+.ecu-control-group--horizontal > input[type="checkbox"] {
+	flex: 1 1 auto;
+	justify-content: center;
 }
 
 /* Non-first children: remove left radius only */

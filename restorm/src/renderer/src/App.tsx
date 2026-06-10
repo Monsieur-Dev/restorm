@@ -31,6 +31,8 @@ import {
 } from 'electron-core-ui/renderer'
 import { PROJECT_UUID_KEY } from '../../shared/config/projectUuid'
 import { preloadRequestPanelStates, removeRequestPanelState } from './services/requestPanelStateStore'
+import { preloadScenarioViewports } from './services/scenarioViewportStore'
+import { preloadScenarioBreakpoints } from './services/scenarioBreakpointStore'
 import { HTTPRequest } from '../../shared/models/requests/HTTPRequest'
 import { SoapRequest } from '../../shared/models/requests/SoapRequest'
 import { GrpcRequest } from '../../shared/models/requests/GrpcRequest'
@@ -47,6 +49,13 @@ import { Environment as EnvironmentClass } from '../../shared/models/Environment
  * produces on save — that's the invariant `commitIfDraftMatches`
  * relies on.
  */
+// Debounce handle + latest save-all callback for the scenario-edit autosave
+// (see handleScenarioChange). Module-scoped (single App instance) so the
+// debounced timer always invokes the current `handleMenuSaveAll` — capturing it
+// in the timer closure would save a stale `rootItems` snapshot.
+let scenarioSaveTimer: ReturnType<typeof setTimeout> | null = null
+let latestSaveAll: (() => Promise<boolean>) | null = null
+
 const classForDocument = (type: 'folder' | 'request' | 'environment', doc: Record<string, unknown>): object => {
   if (type === 'request') {
     const t = doc['type']
@@ -67,10 +76,10 @@ const classForDocument = (type: 'folder' | 'request' | 'environment', doc: Recor
   }
   return FolderClass
 }
-import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload, type RequestHistoryEventPayload } from './services/DocumentEvents'
-import { getResponseHistoryList } from './services/GraphQLIntegration'
+import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from './services/DocumentEvents'
 import type { EditorTab, WorkbenchTree, GroupNode, TabGroupNode, ContainerGroupNode } from 'electron-core-ui/renderer'
-import { isContainerNode, isTabGroupNode } from 'electron-core-ui/renderer'
+import { isContainerNode, isTabGroupNode, loadWorkbenchTabIds, useSetting } from 'electron-core-ui/renderer'
+import { REOPEN_LAST_FILE_STORAGE_KEY, REOPEN_LAST_FILE_SETTING_KEY } from '../../shared/config/reopenLastFile'
 import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, type ConsoleTab, type FirewallTab, type MiniBrowserTab } from '../../shared/types/editor'
 import { findGroupIdForTab, hasGroupWithId, updateGroupById } from './utils/workbenchHelpers'
 
@@ -82,12 +91,15 @@ import { findGroupIdForTab, hasGroupWithId, updateGroupById } from './utils/work
  * the underlying id, so close handlers triggered from those panes
  * must look through to `tab.request?.id` / `tab.folder?.id`.
  */
-type ItemBackedTab = EditorTab & { request?: { id?: string }; folder?: { id?: string } }
+type ItemBackedTab = EditorTab & { request?: { id?: string }; folder?: { id?: string }; scenario?: { id?: string } }
 const tabMatchesItem = (tab: EditorTab, itemId: string): boolean => {
   const t = tab as ItemBackedTab
-  return t.request?.id === itemId || t.folder?.id === itemId
+  // A tab is backed by a request, a (env-)folder, OR a scenario — match all
+  // three so MCP open/close/reveal-by-id works for scenario tabs too (their id
+  // lives on `scenario`, not `request`/`folder`).
+  return t.request?.id === itemId || t.folder?.id === itemId || t.scenario?.id === itemId
 }
-import { EmptyBench } from './components/MainView/Workbench/EmptyBench'
+import { Onboarding } from './components/MainView/Workbench/Onboarding'
 import { RestormTitlebar } from './components/MainView/Titlebar/RestormTitlebar'
 import { StatusbarMcpIndicator } from './components/MainView/StatusbarMcpIndicator'
 import { useMcpEnabled } from './hooks/useMcpEnabled'
@@ -98,19 +110,28 @@ import { useMcpRunRequest } from './hooks/useMcpRunRequest'
 import { useMcpRequestPatch } from './hooks/useMcpRequestPatch'
 import { useMcpWorkbenchTabsBridge } from './hooks/useMcpWorkbenchTabsBridge'
 import { useMcpFolderPatch } from './hooks/useMcpFolderPatch'
+import { useScenarioSuggestionsBridge } from './testing/scenarioSuggestionsBridge'
 import { RestormSidebar } from './components/MainView/Sidebar/RestormSidebar'
 import { RestormWorkbenchContainer } from './components/MainView/Workbench/RestormWorkbenchContainer'
+import { suggestRunTarget } from '../../shared/scenarioRunTarget'
+import { ScenarioCliInfoProvider } from './contexts/scenarioRunTargetContext'
 import { SaveOptionsModal } from './components/Modals/SaveOptionsModal'
 import { DeleteConfirmationModal } from './components/Modals/DeleteConfirmationModal'
+import { RequestScenarioDeleteModal, type RequestScenarioDeleteUsage } from './components/Modals/RequestScenarioDeleteModal'
+import { removeItemFromTree } from './utils/treeManipulation'
 import { ImportModal, type RefreshContext } from './components/Modals/ImportModal'
 import { allLeafKeys } from './components/Modals/importSelectionHelpers'
 import { ApiSpecRefreshFlow } from './components/Folders/ApiSpecRefreshFlow'
 import { AvailableVariablesProvider } from './contexts/AvailableVariablesContext'
 import { VariableTransformProvider } from './contexts/VariableTransformContext'
 import { AuthRequestResolverContext, type AuthRequestResolver } from './contexts/authRequestResolverContext'
-import { collectAllFolderIds } from './services/FolderToListView'
+import { collectExpandableIds } from './services/FolderToListView'
+import { findScenariosUsingRequest, findScenariosUsingScenario, collectRequestScenarioRelations } from './services/scenarioRequestUsage'
+import { diffScenarioPortRenames, remapCallerScenarioEdges, isEmptyRenameMap } from '../../shared/scenarioPortRename'
+import { requestScenarioNodeFocus } from './services/scenarioFocusBus'
 import {
   findFolderById,
+  findScenarioById,
   findEnvironmentFolderById,
   findRequestById,
   findItemWithBreadcrumbs,
@@ -118,11 +139,12 @@ import {
 } from './utils/treeSearch'
 import { DesktopIndicator } from './components/MainView/DesktopIndicator'
 import { findItemById } from './utils/treeSearch'
-import { EnvironmentProvider } from './contexts/EnvironmentContext'
-import { StatusbarEnvironmentSelector } from './components/MainView/StatusbarEnvironmentSelector'
+import { getSessionRequestOverride, getSessionFolderEnv, findEnvironmentById } from './services/environmentSelectionStore'
+import type { RequestEnvInfo } from './components/Scenario/scenarioBoundResolver'
 import { StatusbarAuthSelector } from './components/MainView/StatusbarAuthSelector'
 import { shouldShowAuthSelector } from './components/MainView/statusbarAuthHelpers'
 import { useItemOperations } from './hooks/useItemOperations'
+import type { AddChildKind } from './components/MainView/Sidebar/contextMenuBuilder'
 import { useRequestCreationApi } from './hooks/useRequestCreationApi'
 import { RequestCreationProvider } from './contexts/RequestCreationContext'
 import { useNavigation } from './hooks/useNavigation'
@@ -133,6 +155,7 @@ import { useFirewallProjectOriginsSync } from './hooks/useFirewallProjectOrigins
 import { useSidebarState } from './hooks/useSidebarState'
 import {
   isFavorite as favoritesStoreIsFavorite,
+  getFavorites as favoritesStoreGet,
   toggleFavorite as favoritesStoreToggle,
   addFavorite as favoritesStoreAdd,
   removeFavorite as favoritesStoreRemove,
@@ -149,15 +172,22 @@ import type {
   Folder,
   FolderItem,
   EnvironmentFolder,
-  Request
+  Request,
+  ScenarioNode,
+  ScenarioEdge
 } from '../../shared/types/collections'
 import {
   isRequest,
+  isScenario,
   isEnvironmentFolder,
   isAnyFolder,
   isAuthenticationRequest
 } from '../../shared/types/collections'
 import { buildRequestPath } from './utils/requestPath'
+import { findOperationForRoute } from '../../shared/utils/findOperationForRoute'
+import { routeFromRequest } from './hooks/routeFromRequest'
+import { synthesizeRequestPreview, type SyntheticRequestPreview } from '../../shared/utils/syntheticRequestPreview'
+import type { ApiDocumentation } from '../../shared/types/apiDocumentation'
 
 // Wire the ECUI Console feed to restorm's firewall IPC channel. The
 // store subscribes lazily on the first `useConsoleFeed` consumer, so
@@ -175,7 +205,7 @@ const WORKBENCH_ID = 'restorm-main-workbench'
 // Initial root items - empty at startup, populated when opening a file
 const initialRootItems: EnvironmentFolder[] = []
 
-const allFolderIds = initialRootItems.flatMap((folder) => collectAllFolderIds(folder))
+const allFolderIds = initialRootItems.flatMap((item) => collectExpandableIds(item))
 
 /**
  * Resolve the workbench's currently-active tab id. Walks the tree
@@ -278,7 +308,22 @@ const App: React.FC = () => {
 
   // Root items data (mutable for renaming)
   // Can contain EnvironmentFolders, Folders, or standalone Requests
-  const [rootItems, setRootItems] = useState<(EnvironmentFolder | Folder | Request)[]>(initialRootItems)
+  const [rootItems, setRootItems] = useState<FolderItem[]>(initialRootItems)
+  // Live-updating ref to the current tree. Several stable callbacks (the
+  // scenario-change handler, test helpers) must read the CURRENT collections
+  // without listing `rootItems` as a dep — otherwise their closure goes stale
+  // after an async re-seed (e.g. a hard renderer reload re-fetching from main),
+  // mutating an item that's no longer in the live tree, so the whole-file save
+  // serializes the unchanged current tree and silently writes nothing.
+  const rootItemsRef = useRef(rootItems)
+  useEffect(() => { rootItemsRef.current = rootItems }, [rootItems])
+
+  // The scenario inspector's CLI-command help asks for the shortest unambiguous
+  // `--run` value for a scenario; computed from the live project tree.
+  const suggestScenarioRunTarget = useCallback(
+    (scenarioId: string): string | null => suggestRunTarget(rootItemsRef.current, scenarioId),
+    []
+  )
 
   // Push the project's auto-derived origins (every request URL,
   // resolved against available env vars) to the main-process
@@ -317,13 +362,45 @@ const App: React.FC = () => {
     () => (projectUuid ? `${WORKBENCH_ID}:${projectUuid}` : undefined),
     [projectUuid]
   )
+
+  // Gate the project's onboarding placeholder so it doesn't flash during the
+  // async tab restore on load. We ask ECUI up front which tabs its mount-time
+  // restore will reopen (`loadWorkbenchTabIds`): while a restore that WILL
+  // reopen tabs is pending, the onboarding is held back; once it has settled
+  // (no persisted tabs, or ECUI reported the restore) it shows — which also
+  // re-shows it after the user closes the last tab. Keyed by workbench id so
+  // switching projects re-peeks and re-gates without a reset effect.
+  const [tabPeek, setTabPeek] = useState<{ id: string; count: number } | null>(null)
+  const [restoredWorkbenchId, setRestoredWorkbenchId] = useState<string | undefined>(undefined)
+  useEffect(() => {
+    if (!workbenchId) return
+    let cancelled = false
+    void loadWorkbenchTabIds(workbenchId)
+      .then((ids) => { if (!cancelled) setTabPeek({ id: workbenchId, count: ids.length }) })
+      .catch(() => { if (!cancelled) setTabPeek({ id: workbenchId, count: 0 }) })
+    return () => { cancelled = true }
+  }, [workbenchId])
+
+  // Pending (hold the onboarding back) while:
+  //  - a file is still loading (`isFileServiceLoading` is true from mount until
+  //    the read completes — covers the window before the project is even
+  //    identified, when `workbenchId` is briefly undefined), OR
+  //  - the peek for the current project hasn't resolved yet (don't know → a
+  //    restore may come), OR
+  //  - the peek found persisted tabs and ECUI hasn't reported the restore
+  //    (`restoredWorkbenchId`) for this project yet — the async reopen window.
+  // A stale peek (`tabPeek.id !== workbenchId`) also keeps it pending across a
+  // project switch until the re-peek resolves.
+  const onboardingRestorePending =
+    isFileServiceLoading ||
+    (workbenchId !== undefined &&
+      (tabPeek?.id !== workbenchId || (tabPeek.count > 0 && restoredWorkbenchId !== workbenchId)))
+
   const allFolderIdsRef = useRef<string[]>(allFolderIds)
   useEffect(() => {
     const ids: string[] = []
     for (const item of rootItems) {
-      if ('items' in item) {
-        ids.push(...collectAllFolderIds(item))
-      }
+      ids.push(...collectExpandableIds(item))
     }
     allFolderIdsRef.current = ids
   }, [rootItems])
@@ -348,6 +425,8 @@ const App: React.FC = () => {
   useEffect(() => {
     if (!projectUuid) return
     void preloadRequestPanelStates(projectUuid)
+    void preloadScenarioViewports(projectUuid)
+    void preloadScenarioBreakpoints(projectUuid)
   }, [projectUuid])
 
   // Persisted collapsed state for the Favorites + Opened sidebar panes,
@@ -588,7 +667,7 @@ const App: React.FC = () => {
     // have unsaved work on this folder document", not "something
     // somewhere below me is dirty".
     const cascadeParentById = new Map<string, string>()
-    const visit = (item: EnvironmentFolder | Folder | Request): void => {
+    const visit = (item: FolderItem): void => {
       if (!('items' in item)) return
       for (const child of item.items) visit(child)
       const itemIsEnvFolder = 'environments' in item && Array.isArray(item.environments)
@@ -638,7 +717,7 @@ const App: React.FC = () => {
     setIsOpenedAsFolder: _setIsOpenedAsFolder,
     folderFormat: _folderFormat,
     setFolderFormat: _setFolderFormat,
-    currentFolderPath: _currentFolderPath,
+    currentFolderPath,
     setCurrentFolderPath: _setCurrentFolderPath
   } = useFileManagement({
     rootItems,
@@ -658,6 +737,7 @@ const App: React.FC = () => {
     workbenchRef,
     hasRestoredWorkbenchRef,
     openFolderTab,
+    openScenarioEditorTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
     handleRebuildTab,
@@ -668,8 +748,17 @@ const App: React.FC = () => {
     rootItems,
     focusedGroupId,
     setWorkbenchTree,
-    registerTabDirtyState
+    registerTabDirtyState,
+    focusGroup: setFocusedGroupId
   })
+
+  // Record the restore against the current workbench id once ECUI has reported
+  // one (the tree it reopened, or `null` when there was nothing persisted) so
+  // the onboarding can render again without flashing mid-restore.
+  const handleStateRestoredGated = useCallback((restoredTree: WorkbenchTree | null) => {
+    handleStateRestored(restoredTree)
+    setRestoredWorkbenchId(workbenchId)
+  }, [handleStateRestored, workbenchId])
 
   // After an import lands, increment `pendingImportSave` so the effect
   // below triggers a whole-tree save once React has committed the new
@@ -763,7 +852,7 @@ const App: React.FC = () => {
   // Resolve a workbench tab id (e.g. `request-idx:0.1`, `request-id:uuid`,
   // or the legacy `request-<id>` form) to its item id.
   const resolveTabItemId = useCallback((tabId: string): string | null => {
-    const idxMatch = /^(folder|env-folder|request)-idx:([0-9]+(?:\.[0-9]+)*)$/.exec(tabId)
+    const idxMatch = /^(folder|env-folder|request|scenario)-idx:([0-9]+(?:\.[0-9]+)*)$/.exec(tabId)
     if (idxMatch?.[2]) {
       const indexPath = idxMatch[2].split('.').map((n) => Number(n))
       let cursor: unknown = rootItems[indexPath[0] ?? 0]
@@ -779,7 +868,7 @@ const App: React.FC = () => {
       }
       return null
     }
-    const legacyMatch = /^(folder|env-folder|request)-(?:id:)?(.+)$/.exec(tabId)
+    const legacyMatch = /^(folder|env-folder|request|scenario)-(?:id:)?(.+)$/.exec(tabId)
     return legacyMatch?.[2] ?? null
   }, [rootItems])
 
@@ -813,6 +902,17 @@ const App: React.FC = () => {
     return { id: request.id, path: buildRequestPath(rootItems, request.id) }
   }, [workbenchTree.groups, focusedGroupId, resolveTabItemId, rootItems])
 
+  // Active scenario-editor tab (if any), so the MCP `get_current_tab` snapshot
+  // can report `kind: 'scenario'` like it does for requests. Resolved the same
+  // way as `activeRequest` but narrowed to scenarios.
+  const activeScenarioId = useMemo<string | null>(() => {
+    const activeTabId = resolveActiveTabId(workbenchTree.groups, focusedGroupId)
+    if (!activeTabId) return null
+    const itemId = resolveTabItemId(activeTabId)
+    if (!itemId) return null
+    return findScenarioById(rootItems, itemId) ? itemId : null
+  }, [workbenchTree.groups, focusedGroupId, resolveTabItemId, rootItems])
+
   // The nearest ancestor env folder of the active request — the
   // primary storage grain for the env model. Walked from breadcrumbs
   // so it stays in sync with the workbench's active selection. `null`
@@ -830,75 +930,17 @@ const App: React.FC = () => {
     return null
   }, [activeRequest, rootItems])
 
-  // `EnvironmentProvider` expects `{ projectUuid, envFolderId, requestId }`
-  // to wire up persistence (workspace-scoped, survives file renames).
-  // Falls back to `undefined` when any field is missing — the provider
-  // then runs in in-memory-only mode.
-  const activeEnvPersistenceKey = useMemo(() => {
-    if (!activeRequest || !projectUuid || !activeEnvFolderId) return undefined
-    return { projectUuid, envFolderId: activeEnvFolderId, requestId: activeRequest.id }
-  }, [activeRequest, projectUuid, activeEnvFolderId])
-
-  // Reactive "does the active request have any history yet?" used to
-  // drive the statusbar button's disabled state. The probe is tagged
-  // with the `requestId` it was fetched for so the button only trusts
-  // a `hasHistory: true` that matches the currently-active request —
-  // otherwise a stale `true` from a previous request could briefly
-  // re-enable the button after switching to a fresh request whose
-  // fetch hasn't landed yet.
-  const [activeHistoryProbe, setActiveHistoryProbe] = useState<{ requestId: string; hasHistory: boolean } | null>(null)
-
-  // Re-fetch count whenever the active request changes or a tab
-  // records a new history entry for that request. The tab views emit
-  // `REQUEST_HISTORY_RECORDED` right after `setHistoryRefreshKey` so a
-  // freshly-sent request flips the button from disabled to enabled
-  // without a window reload.
-  const activeRequestId = activeRequest?.id ?? null
-  useEffect(() => {
-    // When no request tab is active, the button is unmounted anyway
-    // (see `{activeRequest && ...}` in the statusbar render), so the
-    // probe value is unread and left stale on purpose — avoids a
-    // setState-in-effect for a value nobody reads. The probe is tagged
-    // with the fetched request id so callers ignore it when stale.
-    if (!activeRequestId) return
-    const requestId = activeRequestId
-    let cancelled = false
-    const refresh = async (): Promise<void> => {
-      try {
-        const entries = await getResponseHistoryList(requestId)
-        if (!cancelled) setActiveHistoryProbe({ requestId, hasHistory: entries.length > 0 })
-      } catch (error) {
-        if (!cancelled) {
-          logger.warn('[App] getResponseHistoryList failed', { error: String(error), requestId })
-          setActiveHistoryProbe({ requestId, hasHistory: false })
-        }
-      }
-    }
-    void refresh()
-    const subscription = eventBus.subscribe<RequestHistoryEventPayload>(
-      DocumentEvents.REQUEST_HISTORY_RECORDED,
-      (payload) => { if (payload.requestId === requestId) void refresh() }
-    )
-    return () => {
-      cancelled = true
-      subscription.unsubscribe()
-    }
-  }, [activeRequestId])
-
-  // The probe is only meaningful when it matches the request we're
-  // currently looking at — otherwise it's stale data from a previous
-  // active request and must be treated as "unknown → keep disabled".
-  const activeRequestHasHistory = Boolean(
-    activeRequest &&
-    activeHistoryProbe?.requestId === activeRequest.id &&
-    activeHistoryProbe.hasHistory
-  )
-
-  const handleOpenActiveRequestHistory = useCallback((): void => {
-    if (!activeRequest) return
-    if (!activeRequestHasHistory) return
-    eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_OPEN, { requestId: activeRequest.id } as RequestHistoryEventPayload)
-  }, [activeRequest, activeRequestHasHistory])
+  // Whether the statusbar auth selector mounts for the active request.
+  // With the env selector + history button moved to the request tab
+  // header, the auth selector is the only request-context statusbar
+  // cell left — so it (or, when absent, the MCP/bell group) carries the
+  // `right-aligned` auto-margin that pushes the right group over.
+  const authSelectorShown = useMemo<boolean>(() => {
+    if (!activeRequest || !activeEnvFolderId) return false
+    const req = findRequestById(rootItems, activeRequest.id)
+    const folder = findFolderById(rootItems, activeEnvFolderId)
+    return !!(req && folder && shouldShowAuthSelector(req, folder.items))
+  }, [activeRequest, activeEnvFolderId, rootItems])
 
   // Window-level Ctrl+S / Ctrl+Shift+S fallback — only fires if the
   // menu-bar's KeyboardShortcutService didn't intercept (e.g. when the
@@ -925,14 +967,32 @@ const App: React.FC = () => {
   // Bridge the AutoSaveController's `'file:autosave-trigger'` IPC to
   // the existing save-all flow. The controller (in main) owns the
   // when; the renderer owns the how.
+  //
+  // The trigger must NOT call `handleMenuSaveAll()` synchronously from
+  // the IPC callback. The MCP write tools (e.g. a scenario node edit in
+  // `mcp/tools/scenario.ts`) fire, in one main-process tick,
+  // `mcp:tree-replace` (→ `setRootItems`, async) immediately followed by
+  // `file:autosave-trigger`. A synchronous save here would close over the
+  // *pre-replace* `rootItems` and write the stale tree — the MCP edit
+  // would never reach disk. So we bump a counter and let a post-commit
+  // effect run the save once React has applied the new `rootItems` (same
+  // discipline as the post-import save below).
+  const [pendingAutoSave, setPendingAutoSave] = useState(0)
   useEffect(() => {
     const unsub = window.api.file.onAutoSaveTrigger(() => {
-      void handleMenuSaveAll().catch((err: unknown) => {
-        logger.error('[App] Autosave failed', { error: String(err) })
-      })
+      setPendingAutoSave((c) => c + 1)
     })
     return () => { unsub() }
-  }, [handleMenuSaveAll])
+  }, [])
+  const lastAutoSaveRef = useRef(0)
+  useEffect(() => {
+    if (pendingAutoSave === 0) return
+    if (lastAutoSaveRef.current === pendingAutoSave) return
+    lastAutoSaveRef.current = pendingAutoSave
+    void handleMenuSaveAll().catch((err: unknown) => {
+      logger.error('[App] Autosave failed', { error: String(err) })
+    })
+  }, [pendingAutoSave, handleMenuSaveAll])
 
   // After an import, persist the fresh tree to disk so the registry's
   // initial hydration reference matches what's on disk. Without this,
@@ -977,6 +1037,15 @@ const App: React.FC = () => {
     isFolder: boolean
   }>({ isOpen: false, itemId: '', itemName: '', isFolder: false })
 
+  // Enhanced deletion dialog for a request referenced by scenarios (move it in,
+  // or delete + strip its boxes). Empty `usages` means the plain modal is used.
+  const [scenarioDelete, setScenarioDelete] = useState<{
+    isOpen: boolean
+    requestId: string
+    requestName: string
+    usages: RequestScenarioDeleteUsage[]
+  }>({ isOpen: false, requestId: '', requestName: '', usages: [] })
+
   // Use custom hooks for various concerns
   const {
     handleItemDrop,
@@ -997,6 +1066,7 @@ const App: React.FC = () => {
     setWorkbenchTree,
     setDeleteConfirmation,
     openFolderTab,
+    openScenarioEditorTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
     projectUuid
@@ -1023,62 +1093,200 @@ const App: React.FC = () => {
     setWorkbenchTree
   })
 
-  // Environments of the active request's nearest ancestor env-folder,
-  // used to feed the status-bar env selector. Empty when the active
-  // request has no env-folder ancestor (the selector then hides).
-  //
-  // `updateCount` ticks every time the reactive tree mutates in place
-  // (env color, icon, rename, etc.) — env-folder edits bump it via
-  // `handleEnvironmentFolderChange`. Without it the memo would keep
-  // returning the same `envs` array (proxy mutations are invisible to
-  // React's dep comparison), and the downstream `useMemo` that
-  // computes `envColor` inside `EnvironmentProvider` would never pick
-  // up a freshly-chosen color. Shallow-cloning each env below also
-  // gives the provider a new array reference on every bump so its
-  // own `envColor` memo re-runs.
-  const activeRequestEnvironments = useMemo(() => {
-    // Read `updateCount` so the memo re-runs when the reactive tree
-    // mutates in place — see the JSDoc above for the rationale. The
-    // value itself is unused; only its identity change matters.
-    void updateCount
-    if (!activeRequest) return []
-    const found = findItemWithBreadcrumbs(rootItems, activeRequest.id)
-    return getNearestEnvironmentsForBreadcrumbs(rootItems, found.breadcrumbs).map((env) => ({ ...env }))
-  }, [activeRequest, rootItems, updateCount])
+  // Persist scenario graph edits (add node, move node, …) made in the
+  // editor back onto the scenario in `rootItems`, then nudge React so the
+  // whole-file save picks the change up (verified: scenarios round-trip
+  // through the standard save path).
+  // Keep the module-scoped handle pointing at the current whole-file save so
+  // the scenario autosave timer always flushes the latest `rootItems`. Done in
+  // an effect (post-commit) rather than during render — reassigning a global
+  // mid-render is an impure side effect.
+  useEffect(() => { latestSaveAll = handleMenuSaveAll }, [handleMenuSaveAll])
+  const handleScenarioChange = useCallback((scenarioId: string, patch: { nodes?: ScenarioNode[]; edges?: ScenarioEdge[]; notes?: string }) => {
+    // Resolve against the CURRENT tree (via the ref), not this callback's
+    // closure — after an async re-seed (a hard renderer reload re-fetches the
+    // collections from main) a `rootItems`-keyed closure would find a stale
+    // item that's no longer in the live tree, so the in-place mutation lands on
+    // an orphan and the whole-file save sees no change (silent edit loss).
+    const item = findItemById(rootItemsRef.current, scenarioId)
+    if (item && isScenario(item)) {
+      // Detect output/input port renames (matched by stable decl id) BEFORE the
+      // nodes are overwritten, so we can follow them in the callers' edges.
+      const renames = patch.nodes !== undefined ? diffScenarioPortRenames(item.nodes, patch.nodes) : null
+      if (patch.nodes !== undefined) item.nodes = patch.nodes
+      if (patch.edges !== undefined) item.edges = patch.edges
+      if (patch.notes !== undefined) item.notes = patch.notes
+      // A renamed sub-scenario port (output:<name> / param:<name>) would orphan
+      // the edges of every `runScenario` box that calls it — the handle ids are
+      // name-based. Remap those caller edges so the connection follows the new
+      // name, and tell any OPEN caller editor to re-seed its live edges.
+      if (renames && !isEmptyRenameMap(renames)) {
+        for (const { scenario: caller } of findScenariosUsingScenario(rootItemsRef.current, scenarioId)) {
+          const remapped = remapCallerScenarioEdges(caller, scenarioId, renames)
+          if (remapped !== caller.edges) {
+            caller.edges = remapped
+            eventBus.emitLocalSync('restorm:scenario:edges-remapped', { scenarioId: caller.id, edges: remapped })
+          }
+        }
+      }
+      setRootItems((prev) => [...prev])
+      // Scenario node/edge/note edits mutate the tree in place, which doesn't
+      // trip the trackable dirty trap (those keys aren't indexable) — so unlike
+      // request/folder edits they never schedule an autosave, and the on-disk
+      // copy keeps its create-time state. The whole-file save serializes the
+      // live tree correctly, so debounce one here (via the always-current
+      // `latestSaveAll`) to push scenario edits — incl. those on MCP-created
+      // nodes — to disk.
+      if (scenarioSaveTimer) clearTimeout(scenarioSaveTimer)
+      scenarioSaveTimer = setTimeout(() => {
+        scenarioSaveTimer = null
+        void latestSaveAll?.().catch((err: unknown) => {
+          logger.error('[App] scenario autosave failed', { error: String(err) })
+        })
+      }, 600)
+    }
+  }, [setRootItems])
 
-  // All request ids that sit under the same env folder as the active
-  // request (including the active one). Passed to the statusbar env
-  // selector so the "Apply to all" toggle can propagate a selection
-  // across siblings without each tab needing to be mounted.
-  const activeEnvFolderRequestIds = useMemo<string[]>(() => {
-    if (!activeRequest) return []
-    const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, activeRequest.id)
-    // Walk breadcrumbs backwards to find the nearest ancestor that is
-    // an EnvironmentFolder — the ticket scopes selection to that
-    // folder's requests only.
+  // Deletion of a request referenced by scenarios. When a request is used, the
+  // plain confirm modal is replaced by one that offers to move the request into
+  // a scenario (for external references) or delete + strip the boxes.
+  const handleDeleteItemChecked = useCallback((itemId: string) => {
+    const item = findItemById(rootItems, itemId)
+    if (item && isRequest(item)) {
+      // Affected scenarios = bound-by-a-box OR holding the request in their
+      // subtree (a child request with no box still belongs to the scenario).
+      const usages: RequestScenarioDeleteUsage[] = collectRequestScenarioRelations(rootItems, itemId).map((u) => ({
+        scenarioId: u.scenario.id,
+        scenarioName: u.scenario.name,
+        inSubtree: u.inSubtree
+      }))
+      if (usages.length > 0) {
+        setScenarioDelete({ isOpen: true, requestId: itemId, requestName: item.name, usages })
+        return
+      }
+    }
+    handleDeleteItem(itemId)
+  }, [rootItems, handleDeleteItem])
+
+  // Move the request into a scenario's subtree instead of deleting it. The
+  // in-place `items` mutation isn't tracked by the dirty trap, so nudge a save.
+  const handleMoveRequestIntoScenario = useCallback((requestId: string, scenarioId: string) => {
+    const scenario = findItemById(rootItems, scenarioId)
+    if (!scenario || !isScenario(scenario)) return
+    const removed = removeItemFromTree(rootItems, requestId)
+    if (!removed) return
+    scenario.items = [...(scenario.items ?? []), removed]
+    setRootItems((prev) => [...prev])
+    if (scenarioSaveTimer) clearTimeout(scenarioSaveTimer)
+    scenarioSaveTimer = setTimeout(() => {
+      scenarioSaveTimer = null
+      void latestSaveAll?.().catch((err: unknown) => { logger.error('[App] move-into-scenario autosave failed', { error: String(err) }) })
+    }, 600)
+    setScenarioDelete((p) => ({ ...p, isOpen: false }))
+  }, [rootItems, setRootItems])
+
+  // Delete the request and strip every box that referenced it (plus the touched
+  // edges) from each using scenario, even if that leaves a scenario incomplete.
+  const handleDeleteRequestAnyway = useCallback(() => {
+    const requestId = scenarioDelete.requestId
+    if (!requestId) return
+    for (const u of findScenariosUsingRequest(rootItems, requestId)) {
+      const dropped = new Set(u.nodeIds)
+      const nodes = u.scenario.nodes.filter((n) => !dropped.has(n.id))
+      const edges = u.scenario.edges.filter((e) => !dropped.has(e.from.nodeId) && !dropped.has(e.to.nodeId))
+      handleScenarioChange(u.scenario.id, { nodes, edges })
+    }
+    setScenarioDelete((p) => ({ ...p, isOpen: false }))
+    confirmDeleteWithId(requestId)
+  }, [scenarioDelete.requestId, rootItems, handleScenarioChange, confirmDeleteWithId])
+
+  // Create a child item (request of any protocol, or a sub-scenario) under a
+  // scenario from the graph editor's add palette. `silent`: no sidebar
+  // selection/expand, no tab — stay on the graph so the user can keep editing
+  // without being whisked to the new item; the matching node is dropped by the
+  // editor. Returns the new item id (the editor binds its node to it).
+  const handleCreateScenarioChild = useCallback((scenarioId: string, kind: AddChildKind): string | null => {
+    const newId = handleAddChildItem(scenarioId, kind, { silent: true })
+    if (newId) {
+      if (scenarioSaveTimer) clearTimeout(scenarioSaveTimer)
+      scenarioSaveTimer = setTimeout(() => {
+        scenarioSaveTimer = null
+        void latestSaveAll?.().catch((err: unknown) => {
+          logger.error('[App] scenario child-item autosave failed', { error: String(err) })
+        })
+      }, 600)
+    }
+    return newId
+  }, [handleAddChildItem])
+  // Back-compat shim for the bare httpRequest node (link-drag auto-create path).
+  const handleCreateScenarioRequest = useCallback(
+    (scenarioId: string): string | null => handleCreateScenarioChild(scenarioId, 'http-get'),
+    [handleCreateScenarioChild]
+  )
+
+  // Resolve a tree item by id to its live object — used by the scenario editor
+  // both to decide what a sidebar drop creates (request/scenario/ignored) and
+  // to keep a request/sub-scenario node's badge + title in sync with renames.
+  // Depends on `rootItems` so the bound boxes re-resolve when the tree changes.
+  const resolveBoundItem = useCallback((itemId: string): FolderItem | null => {
+    return findItemById(rootItems, itemId) ?? null
+  }, [rootItems])
+
+  // A request's environment picture for its scenario node: the envs of its
+  // nearest ancestor env-folder + the env currently selected for the request
+  // (session override → folder default → first env). Null when the request
+  // has no ancestor env-folder, so the node hides its env-selector section.
+  const resolveRequestEnv = useCallback((requestId: string): RequestEnvInfo | null => {
+    const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, requestId)
+    const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
+    if (environments.length === 0) return null
     let envFolderId: string | undefined
     for (let i = breadcrumbs.length - 2; i >= 0; i -= 1) {
       const id = breadcrumbs[i]?.id
       if (!id) continue
       const folder = findFolderById(rootItems, id)
-      if (folder && isEnvironmentFolder(folder as FolderItem)) {
-        envFolderId = folder.id
-        break
-      }
+      if (folder && isEnvironmentFolder(folder as FolderItem)) { envFolderId = folder.id; break }
     }
-    if (!envFolderId) return [activeRequest.id]
-    const envFolder = findEnvironmentFolderById(rootItems, envFolderId)
-    if (!envFolder) return [activeRequest.id]
-    const ids: string[] = []
-    const walk = (items: FolderItem[]): void => {
-      for (const item of items) {
-        if ('items' in item) walk(item.items)
-        else if (isRequest(item)) ids.push(item.id)
-      }
+    let selectedEnvId = environments[0]?.id ?? null
+    if (projectUuid && envFolderId) {
+      const reqOverride = getSessionRequestOverride(projectUuid, requestId)
+      const folderEnv = getSessionFolderEnv(projectUuid, envFolderId)
+      if (reqOverride && findEnvironmentById(environments, reqOverride)) selectedEnvId = reqOverride
+      else if (folderEnv && findEnvironmentById(environments, folderEnv)) selectedEnvId = folderEnv
     }
-    walk(envFolder.items)
-    return ids
-  }, [activeRequest, rootItems])
+    return { environments, selectedEnvId }
+  }, [rootItems, projectUuid])
+
+  // Build a synthetic (documentation-derived) preview for a request that
+  // hasn't been run yet — the scenario inspector renders this in place of
+  // the "no recent run" prompt when the request's owning env-folder
+  // carries an imported spec. Pure lookup: walk the tree to find the
+  // request + its env-folder's `apiDocumentation`, match the operation,
+  // then call the shared synthesiser. Returns `null` when any link in
+  // the chain is missing (no request, no env-folder, no spec, no
+  // matching operation).
+  const resolveSyntheticPreview = useCallback((requestId: string): SyntheticRequestPreview | null => {
+    const request = findRequestById(rootItems, requestId)
+    if (!request) return null
+    const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, requestId)
+    let envFolder: EnvironmentFolder | undefined
+    for (let i = breadcrumbs.length - 2; i >= 0; i -= 1) {
+      const id = breadcrumbs[i]?.id
+      if (!id) continue
+      const f = findFolderById(rootItems, id)
+      if (f && isEnvironmentFolder(f as FolderItem)) { envFolder = f as EnvironmentFolder; break }
+    }
+    if (!envFolder) return null
+    const apiDoc = (envFolder as { apiDocumentation?: ApiDocumentation }).apiDocumentation
+    if (!apiDoc) return null
+    const route = routeFromRequest(request)
+    const operation = findOperationForRoute(apiDoc, route)
+    if (!operation) return null
+    return synthesizeRequestPreview(apiDoc, operation, {
+      ...(route.url !== undefined ? { url: route.url } : {}),
+      ...(route.method !== undefined ? { method: route.method } : {})
+    })
+  }, [rootItems])
 
   // Keep the ref in sync so __restormTestHelpers.setEnvFolderTagColor can
   // delegate to the live handler without re-listing hook deps below.
@@ -1114,8 +1322,8 @@ const App: React.FC = () => {
   useMcpActiveStateBridge({
     enabled: mcpEnabled,
     tabId: mcpActiveTabId,
-    itemId: activeRequest?.id ?? null,
-    kind: activeRequest ? 'request' : null,
+    itemId: activeRequest?.id ?? activeScenarioId ?? null,
+    kind: activeRequest ? 'request' : activeScenarioId ? 'scenario' : null,
     envByFolder: {}
   })
   // `handleCloseTabById` is declared further down (it depends on
@@ -1133,6 +1341,7 @@ const App: React.FC = () => {
     openFolderTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
+    openScenarioEditorTab,
     closeTabByItemId: closeTabByItemIdStable
   })
   // Set to `true` by `useMcpTreeReplace` immediately before each MCP-
@@ -1146,6 +1355,9 @@ const App: React.FC = () => {
   const bumpAllTabContentVersionsStable = useCallback((): void => { bumpAllTabContentVersionsRef.current() }, [])
   useMcpTreeReplace({ enabled: mcpEnabled, setRootItems, mcpDrivenRef, bumpAllTabContentVersions: bumpAllTabContentVersionsStable })
   useMcpRunRequest({ enabled: mcpEnabled })
+  // Read-only e2e automation hook: exposes window.__restormSuggestions to pull
+  // each action's inspector data suggestion for a scenario from the running app.
+  useScenarioSuggestionsBridge()
   // Forward-ref dance: `bumpTabContentVersionFor` is declared further
   // down (depends on `setWorkbenchTree`). Hand the patch hook a stable
   // wrapper that reads the ref so we can wire it up without restructuring
@@ -1212,6 +1424,33 @@ const App: React.FC = () => {
     })
     return () => { off?.() }
   }, [mcpEnabled])
+
+  // Push the resolved item-favorites to main so the MCP `list_favorites`
+  // tool can read them (the favorites store is renderer-only). Re-push on
+  // mount, on project / tree change, and on every favorites mutation.
+  useEffect(() => {
+    if (!mcpEnabled) return undefined
+    const push = (window as { restorm?: { runtime?: { pushMcpFavorites?: (p: { projectUuid: string | null; favorites: { id: string; name: string; type: string }[] }) => void } } }).restorm?.runtime?.pushMcpFavorites
+    if (!push) return undefined
+    const typeOf = (it: FolderItem): string => {
+      if ((it as { type?: unknown }).type === 'scenario') return 'scenario'
+      if ('folderType' in it && (it as { folderType?: unknown }).folderType === 'environment') return 'env-folder'
+      if ('items' in it) return 'folder'
+      return 'request'
+    }
+    const send = (): void => {
+      const ids = projectUuid ? favoritesStoreGet(projectUuid) : []
+      const favorites: { id: string; name: string; type: string }[] = []
+      for (const id of ids) {
+        const item = findItemById(rootItems, id)
+        if (item) favorites.push({ id, name: item.name, type: typeOf(item) })
+      }
+      push({ projectUuid, favorites })
+    }
+    send()
+    window.addEventListener('restorm:favorites-changed', send)
+    return () => { window.removeEventListener('restorm:favorites-changed', send) }
+  }, [mcpEnabled, projectUuid, rootItems])
 
   // Per-pane inline-edit targets so a rename triggered from Favorites
   // or Opened opens the input in that pane (not the Workspace tree row).
@@ -1344,7 +1583,7 @@ const App: React.FC = () => {
   useEffect(() => { closeTabByItemIdRef.current = handleCloseTabById }, [handleCloseTabById])
 
   // Close-others / close-to-the-right are scoped to the group containing
-  // the targeted tab — VSCode-style semantics. The Workspace stays
+  // the targeted tab — the usual editor semantics. The Workspace stays
   // intact across other split groups; if the user wants a global wipe
   // they call Close all.
   const handleCloseOtherTabsById = useCallback((itemId: string): void => {
@@ -1432,7 +1671,7 @@ const App: React.FC = () => {
     onRenameFavoriteItem: handleStartRenameInFavorites,
     onRenameOpenedItem: handleStartRenameInOpened,
     onCloneItem: handleCloneItem,
-    onDeleteItem: handleDeleteItem,
+    onDeleteItem: handleDeleteItemChecked,
     onToggleFavorite: handleToggleFavorite,
     onUnfavorite: handleUnfavorite,
     onCloseTab: handleCloseTabById,
@@ -1447,7 +1686,7 @@ const App: React.FC = () => {
     updateCount,
     onCloneItem: handleCloneItem,
     onAddChildItem: handleAddChildItem,
-    onDeleteItem: handleDeleteItem,
+    onDeleteItem: handleDeleteItemChecked,
     onRenameItem: handleSidebarRenameItem,
     isItemFavorite,
     onToggleFavorite: handleToggleFavorite,
@@ -1528,6 +1767,17 @@ const App: React.FC = () => {
       hasRestoredWorkbenchRef.current = false
       handleFileClosed()
 
+      // The user explicitly closed the file → forget the auto-reopen record.
+      // This is the ONLY place the record is cleared on a closed file: a
+      // genuine close broadcasts `file:closed`, whereas an app quit does not
+      // (neither `before-quit` nor the window `close` handler calls
+      // FileService.close()), so the record correctly survives a quit and is
+      // available to the main process on the next launch.
+      const storageOnClose = (window as unknown as {
+        api?: { storage?: { delete: (k: string) => Promise<unknown> } }
+      }).api?.storage
+      void storageOnClose?.delete(REOPEN_LAST_FILE_STORAGE_KEY)
+
       // Close all open tabs for the currently opened file.
       requestAnimationFrame(() => {
         setWorkbenchTree({
@@ -1543,6 +1793,34 @@ const App: React.FC = () => {
       unsubscribe2()
     }
   }, [handleFileOpened, handleFileClosed, filePath, hasRestoredWorkbenchRef])
+
+  // Auto-reopen-last-file: when the `files:reopenLastFile` user setting is on,
+  // record the currently-open file's path so the main process can reopen it on
+  // the next launch.
+  //
+  // The record is RECORDED here (setting on + a file open) and only CLEARED on
+  // two explicit user actions: closing the file (handled in the `onFileClosed`
+  // listener above) and turning the setting off (the `prev === true` branch
+  // below). It is deliberately NOT cleared just because `filePath` is null —
+  // that condition is also true on every fresh launch, before the main process
+  // has had a chance to reopen the file, so clearing on it would wipe the
+  // record out from under main's startup read and defeat the whole feature.
+  const [reopenLastFileSetting] = useSetting(REOPEN_LAST_FILE_SETTING_KEY)
+  const prevReopenSettingRef = useRef<boolean | undefined>(undefined)
+  useEffect(() => {
+    const storage = (window as unknown as {
+      api?: { storage?: { set: (k: string, v: unknown) => Promise<unknown>; delete: (k: string) => Promise<unknown> } }
+    }).api?.storage
+    if (!storage) return
+    const wasEnabled = prevReopenSettingRef.current
+    prevReopenSettingRef.current = reopenLastFileSetting === true
+    if (reopenLastFileSetting === true) {
+      if (filePath) void storage.set(REOPEN_LAST_FILE_STORAGE_KEY, filePath)
+    } else if (wasEnabled === true) {
+      // Setting was just turned off by the user → forget the recorded file.
+      void storage.delete(REOPEN_LAST_FILE_STORAGE_KEY)
+    }
+  }, [reopenLastFileSetting, filePath])
 
   // Restore workbench state after rootItems are available (autosave relies on onRebuildTab)
   useEffect(() => {
@@ -1573,6 +1851,7 @@ const App: React.FC = () => {
   // Stable lookup callbacks — avoids re-render cascade through RestormWorkbench → EditorGroupView
   const getRequestByIdCb = useCallback((id: string) => findRequestById(rootItems, id), [rootItems])
   const getFolderByIdCb = useCallback((id: string) => findFolderById(rootItems, id), [rootItems])
+  const getScenarioByIdCb = useCallback((id: string) => findScenarioById(rootItems, id), [rootItems])
   const getEnvironmentFolderByIdCb = useCallback((id: string) => findEnvironmentFolderById(rootItems, id), [rootItems])
 
   // Send-time hook: request tab views call this to resolve their
@@ -1606,13 +1885,6 @@ const App: React.FC = () => {
   useEffect(() => {
     handleFileOpenedRef.current = handleFileOpened
   }, [handleFileOpened])
-
-  // Keep a live-updating ref so the test-helper closure below always sees
-  // the current collections without listing `rootItems` as an effect dep.
-  const rootItemsRef = useRef(rootItems)
-  useEffect(() => {
-    rootItemsRef.current = rootItems
-  }, [rootItems])
 
   // Same pattern for `handleTagColorChange` — the closure below needs a
   // stable reference the helper can call without tracking the hook's
@@ -1656,12 +1928,12 @@ const App: React.FC = () => {
         // Use ref to ensure we call the latest version
         handleFileOpenedRef.current(fileState)
       },
-      setRootItems: (items: (EnvironmentFolder | Folder | Request)[]) => {
+      setRootItems: (items: FolderItem[]) => {
         // Folders/env-folders go through `makeReactiveFolder`; root-level
         // requests go through `makeReactiveRequest` (no parent id) so
         // edits emit `REQUEST_UPDATED` like nested requests.
         const reactiveItems = items.map((item) =>
-          'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
+          isScenario(item) ? item : 'items' in item ? makeReactiveFolder(item) : makeReactiveRequest(item)
         )
         setRootItems(reactiveItems)
         // Also trigger indexing
@@ -1669,7 +1941,9 @@ const App: React.FC = () => {
           await searchIndexService.clearIndex()
           await searchIndexService.initialize()
           for (const rootItem of reactiveItems) {
-            if ('items' in rootItem) {
+            if (isScenario(rootItem)) {
+              await searchIndexService.indexScenarioTree(rootItem)
+            } else if ('items' in rootItem) {
               await searchIndexService.indexFolderTree(rootItem)
             } else {
               await searchIndexService.indexRootRequest(rootItem)
@@ -1961,6 +2235,7 @@ const App: React.FC = () => {
   } = useNavigation({
     rootItems,
     openFolderTab,
+    openScenarioEditorTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
     setSelectedItemId,
@@ -1968,6 +2243,24 @@ const App: React.FC = () => {
     setFocusedGroupId,
     getNearestEnvironmentsForBreadcrumbs
   })
+
+  // Reverse navigation request → scenarios: list the scenarios using a request,
+  // and open one (optionally centring the bound box). Computed live from the
+  // tree, so deletes update it with no stored back-reference.
+  const getScenariosUsingRequestCb = useCallback(
+    (requestId: string) => findScenariosUsingRequest(rootItems, requestId),
+    [rootItems]
+  )
+  // Reverse navigation scenario → callers: same shape, but for sub-scenarios
+  // referenced by a `runScenario` node from another scenario.
+  const getScenariosUsingScenarioCb = useCallback(
+    (scenarioId: string) => findScenariosUsingScenario(rootItems, scenarioId),
+    [rootItems]
+  )
+  const openScenarioFromRequest = useCallback((scenarioId: string, focusNodeId?: string) => {
+    handleItemClick(scenarioId)
+    if (focusNodeId) requestScenarioNodeFocus(scenarioId, focusNodeId)
+  }, [handleItemClick])
 
   // Initialize navigation history with restored active tab only
   const hasInitializedNavRef = useRef(false)
@@ -1996,7 +2289,18 @@ const App: React.FC = () => {
     }
   }, [navigationEnabled, workbenchTree.groups, rootItems])
 
+  // Bundle the suggester with the open project's path so the inspector's
+  // CLI help can render a fully-formed `restorm --open <file> --run <target>`.
+  const scenarioCliInfo = useMemo(
+    () => ({
+      suggestRunTarget: suggestScenarioRunTarget,
+      projectPath: filePath ?? currentFolderPath ?? null
+    }),
+    [suggestScenarioRunTarget, filePath, currentFolderPath]
+  )
+
   return (
+    <ScenarioCliInfoProvider value={scenarioCliInfo}>
     <AvailableVariablesProvider>
       <VariableTransformProvider>
         <AuthRequestResolverContext.Provider value={resolveAuthRequestCb}>
@@ -2078,7 +2382,7 @@ const App: React.FC = () => {
                   }}
                   onItemDrop={handleItemDrop}
                   onItemRename={handleSidebarItemRename}
-                  onDeleteRequest={(payload) => { handleDeleteItem(payload.item.id) }}
+                  onDeleteRequest={(payload) => { handleDeleteItemChecked(payload.item.id) }}
                   onEditingStart={(itemId) => { setSidebarEditingItemId(itemId) }}
                   onEditingEnd={() => { setSidebarEditingItemId(null) }}
                   onAddRequest={() => { setShowImportModal(true) }}
@@ -2124,14 +2428,31 @@ const App: React.FC = () => {
               onTagsChange={handleTagsChange}
               onTagColorChange={handleTagColorChange}
               onFolderChange={handleFolderChange}
+              onScenarioChange={handleScenarioChange}
+              onCreateScenarioRequest={handleCreateScenarioRequest}
+              onCreateScenarioChild={handleCreateScenarioChild}
+              resolveBoundItem={resolveBoundItem}
+              resolveRequestEnv={resolveRequestEnv}
+              resolveSyntheticPreview={resolveSyntheticPreview}
               onEnvironmentFolderChange={handleEnvironmentFolderChange}
               onSizesChange={handleSizesChange}
-              emptyFallback={<EmptyBench rootItems={rootItems} projectUuid={projectUuid} onImport={() => { setShowImportModal(true) }} onOpenRequest={handleItemClick} />}
+              emptyFallback={
+                // Held back while a tab restore that will reopen tabs is still
+                // pending, so the onboarding never flashes during the async
+                // reopen on load. See `onboardingRestorePending`.
+                onboardingRestorePending
+                  ? null
+                  : <Onboarding rootItems={rootItems} projectUuid={projectUuid} onImport={() => { setShowImportModal(true) }} onOpenRequest={handleItemClick} />
+              }
               workbenchId={workbenchId}
               onRebuildTab={rootItems.length > 0 ? handleRebuildTab : undefined}
-              onStateRestored={handleStateRestored}
+              onStateRestored={handleStateRestoredGated}
               getRequestById={getRequestByIdCb}
+              getScenariosUsingRequest={getScenariosUsingRequestCb}
+              getScenariosUsingScenario={getScenariosUsingScenarioCb}
+              onOpenScenarioFromRequest={openScenarioFromRequest}
               getFolderById={getFolderByIdCb}
+              getScenarioById={getScenarioByIdCb}
               getEnvironmentFolderById={getEnvironmentFolderByIdCb}
               navigationEnabled={navigationEnabled}
               tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
@@ -2157,6 +2478,12 @@ const App: React.FC = () => {
             onItemIconChange={handleItemIconChange}
             onTagsChange={handleTagsChange}
             onFolderChange={handleFolderChange}
+            onScenarioChange={handleScenarioChange}
+            onCreateScenarioRequest={handleCreateScenarioRequest}
+            onCreateScenarioChild={handleCreateScenarioChild}
+            resolveBoundItem={resolveBoundItem}
+            resolveRequestEnv={resolveRequestEnv}
+            resolveSyntheticPreview={resolveSyntheticPreview}
             onEnvironmentFolderChange={handleEnvironmentFolderChange}
             onSizesChange={handleSizesChange}
             emptyFallback={
@@ -2165,7 +2492,6 @@ const App: React.FC = () => {
                 ariaLabel={t('welcome.landmarkLabel')}
                 onOpenFile={(path) => { void window.restorm?.file.openPath(path) }}
                 confirmRemoveFavorite={(fileName) => window.confirm(t('welcome.confirmRemoveFavorite', { fileName }))}
-                emptyStateHint={t('welcome.noFilesHint')}
               >
                 <Button
                   appearance="rainbow"
@@ -2191,7 +2517,11 @@ const App: React.FC = () => {
             onRebuildTab={handleRebuildTab}
             onStateRestored={handleStateRestored}
             getRequestById={(id) => findRequestById(rootItems, id)}
+            getScenariosUsingRequest={getScenariosUsingRequestCb}
+            getScenariosUsingScenario={getScenariosUsingScenarioCb}
+            onOpenScenarioFromRequest={openScenarioFromRequest}
             getFolderById={(id) => findFolderById(rootItems, id)}
+            getScenarioById={(id) => findScenarioById(rootItems, id)}
             getEnvironmentFolderById={(id) => findEnvironmentFolderById(rootItems, id)}
             navigationEnabled={navigationEnabled}
             tabSwitcherAnchorSelector='[data-testid="main-titlebar-searchbar-closed"]'
@@ -2210,11 +2540,10 @@ const App: React.FC = () => {
         {filePath && <StatusbarElement data-testid="app-statusbar-element" title={filePath} />}
         <DesktopIndicator />
         {(() => {
-          if (!activeRequest || !activeEnvFolderId) return null
+          if (!authSelectorShown || !activeRequest || !activeEnvFolderId) return null
           const reactiveActiveRequest = findRequestById(rootItems, activeRequest.id)
           const activeEnvFolder = findFolderById(rootItems, activeEnvFolderId)
           if (!reactiveActiveRequest || !activeEnvFolder) return null
-          if (!shouldShowAuthSelector(reactiveActiveRequest, activeEnvFolder.items)) return null
           return (
             <StatusbarAuthSelector
               activeRequest={reactiveActiveRequest}
@@ -2223,48 +2552,15 @@ const App: React.FC = () => {
             />
           )
         })()}
-        {(() => {
-          if (!activeRequest || activeRequestEnvironments.length === 0) return null
-          // Only push env right when no auth selector to its left.
-          const authActive = !!activeEnvFolderId && (() => {
-            const folder = findFolderById(rootItems, activeEnvFolderId)
-            const req = findRequestById(rootItems, activeRequest.id)
-            return !!(folder && req && shouldShowAuthSelector(req, folder.items))
-          })()
-          return (
-            <EnvironmentProvider
-              environments={activeRequestEnvironments}
-              persistenceKey={activeEnvPersistenceKey}
-            >
-              <StatusbarEnvironmentSelector
-                folderRequestIds={activeEnvFolderRequestIds}
-                projectUuid={projectUuid}
-                rightAligned={!authActive}
-              />
-            </EnvironmentProvider>
-          )
-        })()}
-        {activeRequest && (
-          <StatusbarElement
-            data-testid="statusbar-request-history"
-            className={activeRequestEnvironments.length > 0 ? '' : 'right-aligned'}
-            disabled={!activeRequestHasHistory}
-            onClick={handleOpenActiveRequestHistory}
-            icon={{ type: 'codicon', value: 'history' }}
-            title={t('statusbar.requestHistory')}
-          />
-        )}
-        {/* MCP indicator (only when restorm runs in MCP mode). When
-         * mounted and there's nothing else right-aligned, MCP carries
-         * the auto margin and the bell flows naturally to its right.
-         * The bell takes the auto margin only when MCP isn't going
-         * to render (mcp disabled) — otherwise both would each
-         * consume their own margin slot and MCP would be stranded
-         * mid-bar. */}
-        <StatusbarMcpIndicator rightAligned={!activeRequest} />
+        {/* The environment selector + request-history button now live in
+         * the request tab header (left of the bookmark ribbon), not here.
+         * MCP indicator (only when restorm runs in MCP mode). When the
+         * auth selector isn't shown, MCP carries the `right-aligned` auto
+         * margin; the bell takes it only when MCP won't render. */}
+        <StatusbarMcpIndicator rightAligned={!authSelectorShown} />
         <StatusBarBellButton
           toasterId="app"
-          {...(!activeRequest && !mcpEnabled ? { className: 'right-aligned' } : {})}
+          {...(!authSelectorShown && !mcpEnabled ? { className: 'right-aligned' } : {})}
         />
       </Statusbar>
 
@@ -2278,6 +2574,16 @@ const App: React.FC = () => {
         isFolder={deleteConfirmation.isFolder}
         onConfirm={confirmDelete}
         onCancel={cancelDelete}
+      />
+
+      {/* Deletion of a request used by scenarios: move it in, or delete + strip boxes. */}
+      <RequestScenarioDeleteModal
+        isOpen={scenarioDelete.isOpen}
+        requestName={scenarioDelete.requestName}
+        usages={scenarioDelete.usages}
+        onMoveIntoScenario={(scenarioId) => { handleMoveRequestIntoScenario(scenarioDelete.requestId, scenarioId) }}
+        onDeleteAnyway={handleDeleteRequestAnyway}
+        onCancel={() => { setScenarioDelete((p) => ({ ...p, isOpen: false })) }}
       />
 
           {/* Save Options Modal */}
@@ -2316,7 +2622,7 @@ const App: React.FC = () => {
               // return primitive values), so cast through `unknown`.
               const authReq = (apiUpdate?.authenticationRequestId
                 ? resolveAuthRequestCb(apiUpdate.authenticationRequestId)
-                : null) as RefreshContext['authenticationRequest'] | null
+                : null)
               // Pre-compute the natural keys of every request already
               // in the env folder so the modal can lock the matching
               // leaves in the fetched preview tree. Walks the folder's
@@ -2324,7 +2630,7 @@ const App: React.FC = () => {
               const existingLeafKeys = folder ? allLeafKeys(folder.items) : new Set<string>()
               const refreshContext: RefreshContext = {
                 sourceUrl,
-                ...(authReq ? { authenticationRequest: authReq } : {}),
+                ...(authReq ? { authenticationRequest: authReq as unknown as NonNullable<RefreshContext['authenticationRequest']> } : {}),
                 ...(apiUpdate?.sourceHeaders ? { sourceHeaders: apiUpdate.sourceHeaders } : {}),
                 targetFolderId: targetId,
                 ...(existingLeafKeys.size > 0 ? { existingLeafKeys } : {}),
@@ -2438,6 +2744,7 @@ const App: React.FC = () => {
         </AuthRequestResolverContext.Provider>
       </VariableTransformProvider>
     </AvailableVariablesProvider>
+    </ScenarioCliInfoProvider>
   )
 }
 

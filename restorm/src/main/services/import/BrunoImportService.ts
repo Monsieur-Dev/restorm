@@ -9,7 +9,9 @@
  * - Authentication (bearer, basic, apikey, oauth2, awsv4, digest)
  * - Query and path parameters
  * - Headers
- * - Pre-request and test scripts (stored in documentation)
+ * - Pre-request and test scripts (kept in documentation AND, when a collection
+ *   carries scripts, lowered into an executable workflow scenario whose `code`
+ *   nodes run them verbatim — see `buildBrunoWorkflowScenario`)
  * - Variables
  */
 
@@ -32,6 +34,8 @@ import {
   type BrunoRequestData,
   type BrunoSourceData
 } from './transformers/brunoToApiDocumentation'
+import { workflowToScenario, type WorkflowRequestStep } from './workflowToScenario'
+import type { Scenario } from '../../../shared/types/scenario'
 
 // ============================================================================
 // Bruno Types
@@ -84,6 +88,8 @@ interface BrunoRequest {
     prerequest?: KeyValue[]
     postresponse?: KeyValue[]
   }
+  /** Declarative `assert { expr: [op] value }` block (eq by default). */
+  assertions?: KeyValue[]
 }
 
 interface BrunoCollection {
@@ -172,7 +178,9 @@ function parseKeyValueBlock(content: string): KeyValue[] {
         value = value.slice(1, -1)
       }
       
-      pairs.push({ key, value })
+      // `~`-prefixed entries were already skipped above, so anything reaching
+      // here is enabled — make that explicit (downstream truthy-checks rely on it).
+      pairs.push({ key, value, enabled: true })
     }
   }
 
@@ -340,6 +348,11 @@ function parseBruFile(content: string): BrunoRequest {
         request.vars.postresponse = parseKeyValueBlock(block.content)
         break
       }
+
+      case 'assert': {
+        request.assertions = parseKeyValueBlock(block.content)
+        break
+      }
     }
   }
 
@@ -489,9 +502,126 @@ export interface BrunoCollectionData {
   files: { path: string; content: string }[]
 }
 
+/** A parsed Bruno key/value carries its value as a raw string (the JS expression
+ * or the assert RHS); coerce defensively in case a typed value slipped in. */
+const kvStr = (x: KeyValue['value']): string => (typeof x === 'string' ? x : '')
+
+/** Bruno `vars:pre-request` / `vars:post-response` (key = JS expression) become
+ * `bru.setVar('key', <expr>)` lines, run at the matching point. */
+function varsToSetVar(vars: KeyValue[] | undefined): string {
+  return (vars ?? [])
+    .filter((v) => v.enabled && typeof v.key === 'string' && v.key !== '' && kvStr(v.value).trim() !== '')
+    .map((v) => `bru.setVar(${JSON.stringify(v.key)}, ${kvStr(v.value).trim()})`)
+    .join('\n')
+}
+
+/** Render a Bruno `assert` expected value: a number/boolean/null literal stays
+ * literal, anything else becomes a JS string literal. */
+function assertValue(raw: string): string {
+  const t = raw.trim()
+  if (t === '') return '""'
+  if (/^-?\d+(\.\d+)?$/.test(t) || t === 'true' || t === 'false' || t === 'null') return t
+  return JSON.stringify(t)
+}
+
+/** Translate a Bruno `assert` block (`expr: [op] value`, default op `eq`) into
+ * `test(...)` lines on chai. Common operators only; unknown ops fall back to eq. */
+function assertToTests(assertions: KeyValue[] | undefined): string {
+  const lines: string[] = []
+  for (const a of assertions ?? []) {
+    if (!a.enabled || typeof a.key !== 'string' || a.key.trim() === '') continue
+    const lhs = a.key.trim()
+    const raw = kvStr(a.value).trim()
+    const m = /^(eq|neq|gt|gte|lt|lte|contains|notContains|length|isString|isNumber|isBoolean|isArray|isUndefined|isDefined|isNull|isTruthy|isFalsy)\b\s*(.*)$/.exec(raw)
+    const op = m ? m[1] : 'eq'
+    const val = m ? m[2] : raw
+    let chai: string
+    switch (op) {
+      case 'neq': chai = `to.not.eql(${assertValue(val)})`; break
+      case 'gt': chai = `to.be.above(${assertValue(val)})`; break
+      case 'gte': chai = `to.be.at.least(${assertValue(val)})`; break
+      case 'lt': chai = `to.be.below(${assertValue(val)})`; break
+      case 'lte': chai = `to.be.at.most(${assertValue(val)})`; break
+      case 'contains': chai = `to.include(${assertValue(val)})`; break
+      case 'notContains': chai = `to.not.include(${assertValue(val)})`; break
+      case 'length': chai = `to.have.lengthOf(${assertValue(val)})`; break
+      case 'isString': chai = `to.be.a('string')`; break
+      case 'isNumber': chai = `to.be.a('number')`; break
+      case 'isBoolean': chai = `to.be.a('boolean')`; break
+      case 'isArray': chai = `to.be.an('array')`; break
+      case 'isUndefined': chai = `to.be.undefined`; break
+      case 'isDefined': chai = `to.not.be.undefined`; break
+      case 'isNull': chai = `to.be.null`; break
+      case 'isTruthy': chai = `to.be.ok`; break
+      case 'isFalsy': chai = `to.not.be.ok`; break
+      default: chai = `to.eql(${assertValue(val)})`
+    }
+    lines.push(`test(${JSON.stringify(`assert: ${lhs} ${raw}`.trim())}, function(){ expect(${lhs}).${chai} })`)
+  }
+  return lines.join('\n')
+}
+
+/** The pre-request + (post-response then tests) scripts a Bruno `.bru` carries,
+ * including the declarative `vars` and `assert` blocks lowered to script lines. */
+function bruScripts(request: BrunoRequest): { pre: string; post: string } {
+  return {
+    pre: [varsToSetVar(request.vars?.prerequest), request.script?.prerequest].map((s) => (s ?? '').trim()).filter((s) => s !== '').join('\n\n'),
+    post: [request.script?.postresponse, varsToSetVar(request.vars?.postresponse), request.tests, assertToTests(request.assertions)]
+      .map((s) => (s ?? '').trim()).filter((s) => s !== '').join('\n\n')
+  }
+}
+const isBase = (path: string, base: string): boolean => path === base || path.endsWith(`/${base}`)
+const dirOf = (path: string): string => { const i = path.lastIndexOf('/'); return i < 0 ? '' : path.slice(0, i) }
+const joinBru = (parts: string[]): string => parts.map((p) => p.trim()).filter((p) => p !== '').join('\n\n')
+
+/** Build a workflow scenario from the (seq-sorted) Bruno requests — ONLY when at
+ * least one request carries a pre/post/test script. Inherits `collection.bru`
+ * and `folder.bru` scripts the way Bruno runs them (pre: collection → folders
+ * outer→inner → request; post: request → folders inner→outer → collection). The
+ * post node runs the `post-response` block then the `tests` block. Script-free
+ * collections return null. Ids match the importer's. */
+function buildBrunoWorkflowScenario(requests: { path: string; request: BrunoRequest }[], collectionName: string): Scenario | null {
+  // Separate the level files (collection.bru / folder.bru) from real requests.
+  const collection = requests.find(({ path }) => isBase(path, 'collection.bru'))
+  const collScripts = collection ? bruScripts(collection.request) : { pre: '', post: '' }
+  const folderScripts = new Map<string, { pre: string; post: string }>()
+  for (const { path, request } of requests) {
+    if (isBase(path, 'folder.bru')) folderScripts.set(dirOf(path), bruScripts(request))
+  }
+  // Folders that apply to a request path, outermost first.
+  const foldersFor = (path: string): { pre: string; post: string }[] => {
+    const dir = dirOf(path)
+    return [...folderScripts.keys()]
+      .filter((d) => d !== '' && (dir === d || dir.startsWith(`${d}/`)))
+      .sort((a, b) => a.split('/').length - b.split('/').length)
+      .map((d) => folderScripts.get(d) as { pre: string; post: string })
+  }
+
+  const steps: WorkflowRequestStep[] = requests
+    .filter(({ path, request }) => !isGraphQLRequest(request) && !isBase(path, 'collection.bru') && !isBase(path, 'folder.bru'))
+    .map(({ path, request }) => {
+      const own = bruScripts(request)
+      const folders = foldersFor(path)
+      return {
+        requestId: generateId(`bruno:request:${path}:${request.meta.name}`),
+        name: request.meta.name,
+        prerequest: joinBru([collScripts.pre, ...folders.map((f) => f.pre), own.pre]),
+        postresponse: joinBru([own.post, ...folders.map((f) => f.post).reverse(), collScripts.post]),
+        source: 'bruno' as const
+      }
+    })
+  const hasScripts = steps.some((s) => (s.prerequest ?? '').trim() !== '' || (s.postresponse ?? '').trim() !== '')
+  if (!hasScripts) return null
+  return workflowToScenario({
+    id: generateId(`bruno:scenario:${collectionName}`),
+    name: `${collectionName} — Workflow`,
+    steps
+  })
+}
+
 /**
  * Import a Bruno collection and convert it to a Folder structure
- * 
+ *
  * @param data Collection data including bruno.json metadata and .bru files
  * @param options Import options
  */
@@ -550,6 +680,12 @@ export function importBruno(
     const convertedRequest = convertBrunoRequest(request, path)
     parentItems.push(convertedRequest)
   }
+
+  // Detect a workflow (requests with pre/post/test scripts) → an executable
+  // scenario appended alongside the requests (in seq order). Script-free
+  // collections are unaffected.
+  const workflowScenario = buildBrunoWorkflowScenario(requests, collectionName)
+  if (workflowScenario) rootItems.push(workflowScenario)
 
   // Create environment
   const environment: Environment = {
@@ -791,6 +927,32 @@ export function importBrunoFromJson(
   }
 
   const items = convertItems(data.items, '')
+
+  // Detect a workflow in the JSON export (requests with req/res/tests scripts) →
+  // an executable scenario appended alongside the requests. Mirrors the .bru path
+  // (collectionVariables → scenario variables, scripts run verbatim on the bru
+  // runtime). Ids match convertItems' `bruno:request:<path>/<name>`.
+  const workflowSteps: WorkflowRequestStep[] = []
+  const collectWorkflow = (nodes: typeof data.items, pathPrefix: string): void => {
+    for (const item of nodes ?? []) {
+      if (item.type === 'folder') {
+        collectWorkflow(item.items as typeof data.items, `${pathPrefix}/${item.name}`)
+      } else if (item.request) {
+        const s = item.request.script
+        workflowSteps.push({
+          requestId: generateId(`bruno:request:${pathPrefix}/${item.name}`),
+          name: item.name,
+          prerequest: s?.req ?? '',
+          postresponse: [s?.res, item.request.tests].map((x) => (x ?? '').trim()).filter((x) => x !== '').join('\n\n'),
+          source: 'bruno'
+        })
+      }
+    }
+  }
+  collectWorkflow(data.items, '')
+  if (workflowSteps.some((s) => (s.prerequest ?? '').trim() !== '' || (s.postresponse ?? '').trim() !== '')) {
+    items.push(workflowToScenario({ id: generateId(`bruno:scenario:${collectionName}`), name: `${collectionName} — Workflow`, steps: workflowSteps }))
+  }
 
   // Create environment
   const environment: Environment = {

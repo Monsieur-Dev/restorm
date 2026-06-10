@@ -3,6 +3,9 @@ name: Monokai Dimmed
 type: dark
 
 colors:
+  scenarioNode.background: "#2a2a2a"
+  scenarioNode.headerBackground: "#353535"
+  scenarioNode.headerBackgroundSelected: "#36426e"
   dropdown.background: "#525252"
   list.activeSelectionBackground: "#707070"
   quickInputList.focusBackground: "#707070"

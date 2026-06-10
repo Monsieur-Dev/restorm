@@ -48,7 +48,7 @@ export const test = base.extend<DocumentationViewerFixtures>({
     const launcher = async (): Promise<LaunchedApp> => {
       const bootstrap = await electron.launch({
         executablePath: electronExePath,
-        args: ['--no-sandbox', '--ozone-platform=x11', mainJsPath, '--clear-settings'],
+        args: ['--no-sandbox', '--ozone-platform=x11', '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows', mainJsPath, '--clear-settings'],
         env: baseEnv
       })
       const userDataPath = await bootstrap.evaluate(({ app }) => app.getPath('userData'))
@@ -58,7 +58,7 @@ export const test = base.extend<DocumentationViewerFixtures>({
 
       const app = await electron.launch({
         executablePath: electronExePath,
-        args: ['--no-sandbox', '--ozone-platform=x11', mainJsPath],
+        args: ['--no-sandbox', '--ozone-platform=x11', '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows', mainJsPath],
         env: baseEnv
       })
 

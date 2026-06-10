@@ -19,7 +19,12 @@
       "Read(//tmp/**)",
       "Read(~/.claude/**)",
       "mcp__plugin_telegram_telegram__download_attachment",
-      "mcp__plugin_telegram_telegram__react"
+      "mcp__plugin_telegram_telegram__react",
+      "WebFetch(domain:www.electronjs.org)",
+      "Skill(superpowers:brainstorming)",
+      "Bash(rm -f .git/scn-nodebox-commit.txt)",
+      "Bash(git fetch *)",
+      "Bash(git push *)"
     ]
   },
   "enableAllProjectMcpServers": true,

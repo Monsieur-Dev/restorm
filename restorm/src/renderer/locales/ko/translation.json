@@ -92,6 +92,50 @@
     "multiLanguage": {
       "title": "27 개 언어!",
       "body": "Restorm 은 27 개 언어를 지원합니다. 영어, 프랑스어, 스페인어, 독일어, 이탈리아어, 일본어, 중국어, 한국어 등 그 밖에도 많아요 — 설정에서 원하는 언어를 골라보세요."
+    },
+    "fromPostman": {
+      "title": "Postman 이나 Bruno 에서 옮겨 오셨나요?",
+      "body": "Restorm 으로 갈아타는 것을 도와드릴게요 — 손쉬운 전환을 약속해요 ;)"
+    },
+    "chainRequests": {
+      "title": "여러 요청을 연결하고 싶나요?",
+      "body": "시나리오 안에서 요청을 사용하고, 조건을 추가하고, 시나리오 안에 다른 시나리오를 중첩할 수도 있어요."
+    },
+    "stepByStep": {
+      "title": "시나리오를 한 단계씩 실행해 보세요",
+      "body": "한 번에 한 단계씩 진행하며 무슨 일이 일어나는지 정확히 볼 수 있어요. 중단점도 설정할 수 있어요."
+    },
+    "cicd": {
+      "title": "CI/CD 파이프라인에서 시나리오를 실행하세요",
+      "body": "Restorm 을 헤드리스로 실행하면 UI 없이 시나리오를 돌리고 로그를 수집할 수 있어요. 시각적으로 구성한 자동화 테스트죠."
+    },
+    "nestedScenarios": {
+      "title": "시나리오에서 무슨 일이 일어나는지 살펴보세요",
+      "body": "시나리오는 다른 시나리오를 호출할 수 있어요. 인스펙터에서 모든 로그를 읽고, 그 로그가 나온 시나리오로 바로 이동할 수 있어요."
+    },
+    "scenarioHistory": {
+      "title": "그런데 방금 무슨 일이 있었지?",
+      "body": "시나리오의 실행 기록을 둘러볼 수 있어요. 그새 시나리오가 바뀌었다고요? 걱정 마세요 — 그때의 구성을 그대로 보관해 두었어요."
+    },
+    "codeSandbox": {
+      "title": "시나리오와 보안",
+      "body": "시나리오 안에 코드를 작성할 수 있지만, 안전한 샌드박스 안에서 실행돼요. 로컬 파일에 접근하지 못하고 인터넷에도 직접 연결되지 않아요. 가장 안전하게 보호받는 방법이에요!"
+    },
+    "codeLanguages": {
+      "title": "코드를 좀 작성해 볼까요?",
+      "body": "시나리오 안에 바로 코드를 작성하세요 — TypeScript, JavaScript, Python, Lua, Ruby, R 로요!"
+    },
+    "scenarioAi": {
+      "title": "AI 로 다룰 수 있는 시나리오",
+      "body": "Claude, Cursor, Copilot… 모두 여러분의 코드베이스를 알고 있어요. 딱 맞는 시나리오를 만들어 달라고 요청해 보세요. 시나리오의 생성·편집·실행이 모두 MCP 로 공개되어 있어요."
+    },
+    "interactiveScenarios": {
+      "title": "인터랙티브한 시나리오!",
+      "body": "시나리오를 매개변수화하고, 대화 상자로 사용자에게 무엇을 할지 물어볼 수도 있어요."
+    },
+    "customValueLists": {
+      "title": "재사용 가능한 값 목록",
+      "body": "나만의 값 목록을 정의하고 요청에서도 시나리오에서도 똑같이 재사용하세요."
     }
   },
   "authFailureToast": {
@@ -148,6 +192,7 @@
       "createEnvironmentFolder": "환경 폴더 만들기",
       "delete": "삭제",
       "clone": "복제",
+      "copySuffix": "복사본",
       "rename": "이름 바꾸기",
       "addToFavorites": "즐겨찾기에 추가",
       "removeFromFavorites": "즐겨찾기에서 제거",
@@ -168,7 +213,8 @@
         "soap": "SOAP 요청",
         "websocket": "WebSocket 요청",
         "odata": "OData 요청",
-        "auth": "HTTP 인증 요청"
+        "auth": "HTTP 인증 요청",
+        "scenario": "시나리오"
       }
     },
     "deleteConfirm": {
@@ -177,6 +223,14 @@
       "itemMessage": "\"{{name}}\"을(를) 삭제하시겠습니까?",
       "confirm": "삭제",
       "cancel": "취소"
+    },
+    "scenarioDelete": {
+      "title": "시나리오에서 사용 중인 요청 삭제",
+      "message": "\"{{name}}\"은(는) 다음 시나리오에서 사용됩니다. 어떻게 하시겠습니까?",
+      "belongsTag": "이 시나리오에 속함",
+      "moveInto": "이 시나리오로 이동",
+      "affectsNote": "이 요청을 삭제하면 이 시나리오들에서도 제거됩니다.",
+      "deleteAnyway": "그래도 삭제"
     }
   },
   "environment": {
@@ -248,7 +302,8 @@
     "addHeader": "헤더 추가",
     "addParam": "매개변수 추가",
     "environmentSelector": {
-      "noEnvironment": "환경 없음"
+      "noEnvironment": "환경 없음",
+      "switchTooltip": "환경 전환"
     },
     "body": {
       "fileLabel": "파일 또는 URL:",
@@ -301,7 +356,11 @@
       "dateTime": "날짜/시간",
       "color": "색상",
       "expression": "표현식",
-      "boolean": "부울"
+      "boolean": "부울",
+      "null": "Null",
+      "list": "목록",
+      "variables": "변수",
+      "environment": "환경"
     },
     "apiEnums": "API에서 정의한 형식",
     "customLists": "사용자 지정 유형",
@@ -354,11 +413,14 @@
       "folder": "폴더",
       "environment": "환경",
       "settings": "설정",
-      "tag": "태그"
+      "tag": "태그",
+      "scenario": "시나리오"
     },
     "tooltip": {
       "noDetails": "표시할 세부 정보가 없습니다",
-      "noContent": "문서나 메모가 없습니다"
+      "noContent": "문서나 메모가 없습니다",
+      "noScenario": "시나리오를 사용할 수 없습니다",
+      "scenarioKind": "시나리오"
     }
   },
   "httpStatus": {
@@ -465,7 +527,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "\"{{fileName}}\"을(를) 즐겨찾기에서 제거하시겠습니까?",
-    "noFilesHint": "기존 파일을 열거나 새 파일을 만들어 시작하세요",
     "newAriaLabel": "새 컬렉션 만들기",
     "openAriaLabel": "디스크에서 컬렉션 열기",
     "landmarkLabel": "시작 화면"
@@ -492,7 +553,9 @@
   },
   "common": {
     "cancel": "취소",
-    "save": "저장"
+    "save": "저장",
+    "remove": "제거",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -742,6 +805,685 @@
       "previousMatch": "이전 일치",
       "nextMatch": "다음 일치",
       "close": "닫기"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "emptyTitle": "여기는 비어 있어요…",
+      "emptyDragDrop": "왼쪽 트리에서 항목을 시나리오로 끌어다 놓아 여기에서 사용하세요. 한 시나리오를 다른 시나리오로 가져올 수도 있습니다!",
+      "emptyRightClick": "빈 공간을 마우스 오른쪽 버튼으로 클릭하여 시나리오에 작업을 추가하세요"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "runOnEachEvent": "이벤트를 받을 때마다 실행",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del",
+        "copy": "복사",
+        "paste": "붙여넣기"
+      },
+      "expand": "펼치기",
+      "collapse": "접기"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "locked": "시나리오 실행 중에는 편집이 잠깁니다",
+    "switch": {
+      "addCase": "케이스 추가",
+      "removeCase": "케이스 제거",
+      "case": "케이스"
+    },
+    "forEach": {
+      "items": "항목",
+      "each": "각 항목",
+      "done": "완료",
+      "parallelism": "병렬 처리"
+    },
+    "aggregate": {
+      "items": "항목",
+      "result": "결과",
+      "field": "필드",
+      "separator": "구분 기호",
+      "op": {
+        "count": "개수",
+        "sum": "합계",
+        "min": "최소",
+        "max": "최대",
+        "average": "평균",
+        "join": "연결"
+      }
+    },
+    "filter": {
+      "items": "항목",
+      "rejected": "제외됨",
+      "kept": "유지됨",
+      "keepWhere": "조건 유지"
+    },
+    "wait": {
+      "then": "다음",
+      "duration": "기간"
+    },
+    "waitUntil": {
+      "until": "까지",
+      "then": "다음"
+    },
+    "arithmetic": {
+      "result": "결과"
+    },
+    "nodes": {
+      "arithmetic": "산술",
+      "httpRequest": "HTTP 요청",
+      "runScenario": "시나리오 실행",
+      "wait": "대기",
+      "waitUntil": "까지 대기",
+      "now": "현재",
+      "comparator": "비교기",
+      "setVariable": "변수 설정",
+      "getVariable": "변수 가져오기",
+      "addToList": "목록에 추가",
+      "removeFromList": "목록에서 제거",
+      "cast": "Cast",
+      "regex": "Regex",
+      "json": "JSON",
+      "xml": "XML",
+      "yaml": "YAML",
+      "crypto": "Crypto",
+      "jwt": "JWT",
+      "datetime": "Date math",
+      "objectOp": "Object ops",
+      "url": "URL",
+      "random": "Random",
+      "throw": "Throw",
+      "retry": "Retry",
+      "listOp": "List ops",
+      "csv": "CSV",
+      "math": "Math",
+      "schema": "Schema validate",
+      "readFile": "Read file",
+      "writeFile": "Write file",
+      "timer": "타이머",
+      "code": "코드"
+    },
+    "comparator": {
+      "result": "결과"
+    },
+    "boolean": {
+      "result": "결과"
+    },
+    "map": {
+      "items": "항목",
+      "mapped": "변환됨"
+    },
+    "log": {
+      "message": "메시지",
+      "data": "데이터"
+    },
+    "assert": {
+      "message": "메시지",
+      "operator": "operator",
+      "op": {
+        "eq": "equals",
+        "ne": "not equals",
+        "lt": "less than",
+        "lte": "less or equal",
+        "gt": "greater than",
+        "gte": "greater or equal",
+        "contains": "contains",
+        "isString": "is string",
+        "isNumber": "is number",
+        "isBoolean": "is boolean",
+        "isArray": "is array",
+        "isObject": "is object",
+        "isNull": "is null",
+        "exists": "exists",
+        "isEmpty": "is empty",
+        "matchesRegex": "matches regex",
+        "isOneOf": "is one of",
+        "deepEquals": "deep equals",
+        "lengthEq": "length ==",
+        "lengthGt": "length >",
+        "lengthLt": "length <"
+      }
+    },
+    "editRequest": "요청 편집",
+    "editScenario": "시나리오 편집",
+    "object": {
+      "addProperty": "속성 추가",
+      "removeProperty": "속성 제거",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "output": {
+      "outputName": "출력 이름",
+      "addOutput": "출력 추가",
+      "removeOutput": "제거"
+    },
+    "input": {
+      "name": "Name",
+      "defaultType": "Default / type",
+      "addParam": "매개변수 추가",
+      "removeParam": "제거"
+    },
+    "runScenario": {
+      "orphanInput": "하위 시나리오에 일치하는 매개변수 \"{{name}}\"가 없습니다",
+      "orphanOutput": "하위 시나리오에 일치하는 출력 \"{{name}}\"가 없습니다",
+      "then": "다음"
+    },
+    "validation": {
+      "duplicateName": "이름 \"{{name}}\"은(는) 다른 액션에서 이미 사용 중입니다.",
+      "panelTitle": "액션 오류 {{count}}건",
+      "runBlocked": "실행하기 전에 {{count}}개의 작업 오류를 수정하세요",
+      "focusBox": "이 액션으로 이동",
+      "showErrors": "오류 표시",
+      "input": {
+        "missingName": "이 입력 매개변수에는 이름이 필요합니다."
+      },
+      "dataLink": {
+        "emptyPath": "들어오는 데이터 링크에는 JSON 경로가 필요합니다.",
+        "badPath": "데이터 링크의 JSON 경로 \"{{path}}\"가 잘못되었습니다."
+      },
+      "output": {
+        "missingName": "이 출력에는 이름이 필요합니다.",
+        "duplicateName": "이름 \"{{name}}\"은(는) 다른 출력에서 이미 사용 중입니다."
+      },
+      "getVariable": {
+        "noSelection": "변수를 선택해야 합니다.",
+        "unknown": "변수 \"{{name}}\"은(는) 시나리오에 존재하지 않습니다."
+      },
+      "setVariable": {
+        "missingName": "설정할 변수에는 이름이 필요합니다."
+      },
+      "object": {
+        "propMissingName": "각 속성에는 이름이 필요합니다.",
+        "propDuplicate": "속성 이름 \"{{name}}\"이(가) 중복되었습니다."
+      },
+      "arithmetic": {
+        "divisionByZero": "0으로 나눌 수 없습니다."
+      },
+      "switch": {
+        "caseDuplicate": "케이스 값 \"{{value}}\"이(가) 중복되었습니다."
+      },
+      "transform": {
+        "emptyTemplate": "템플릿은 비워 둘 수 없습니다.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "연결된 요청이 더 이상 존재하지 않습니다."
+      },
+      "runScenario": {
+        "missing": "연결된 시나리오가 더 이상 존재하지 않습니다."
+      },
+      "file": {
+        "missingPath": "A file path is required."
+      }
+    },
+    "usage": {
+      "button": "이 요청을 사용하는 시나리오",
+      "title": "이 요청은 다음 시나리오에서 사용됩니다:"
+    },
+    "inspector": {
+      "run": "실행",
+      "debug": "디버그",
+      "undo": "실행 취소",
+      "redo": "다시 실행",
+      "step": "단계 실행",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "일시 중지",
+      "noRunsHint": "이 요청의 최근 실행 결과가 없습니다 — 여기서 실행해 시나리오 미리보기를 채우세요.",
+      "syntheticInfo": "이 요청의 문서에서 생성된 예시 데이터입니다.",
+      "syntheticRunHint": "예시 데이터 — 실제 결과로 바꾸려면 요청을 실행하세요.",
+      "stop": "중지",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "copyThisLog": "이 로그 복사",
+      "clearLogs": "로그 지우기",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "{{level}} 로그 표시",
+      "showLevelOnly": "마우스 오른쪽 클릭: 이 수준만",
+      "noUserLogs": "No user logs (entries from the Log action) in this run.",
+      "helpTitle": "What this action does"
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "입력 필요"
+    },
+    "runHistory": {
+      "title": "실행 기록",
+      "tooltip": "실행 기록",
+      "empty": "기록된 실행이 없습니다",
+      "noLogs": "이 실행에 대한 로그가 없습니다",
+      "logsTab": "Logs",
+      "graphTab": "그래프",
+      "noGraph": "이 실행에 대한 시나리오 스냅샷이 없습니다",
+      "pin": "고정",
+      "unpin": "고정 해제"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "중단점 추가",
+      "remove": "중단점 제거",
+      "toggle": "중단점 전환 (F9)",
+      "reached": "중단점에 도달했습니다 — 이 작업은 아직 실행되지 않았습니다. F5를 눌러 계속하거나 F7으로 단계 실행하세요.",
+      "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "미니맵 토글"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "값 추가",
+      "removeValue": "값 제거",
+      "updateVariable": "원본 변수 업데이트"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
+    },
+    "regex": {
+      "value": "value",
+      "operation": "operation",
+      "pattern": "pattern",
+      "flags": "flags",
+      "replacement": "replacement",
+      "result": "result",
+      "op": {
+        "extract": "extract",
+        "extractAll": "extract all",
+        "test": "test",
+        "replace": "replace",
+        "split": "split"
+      },
+      "flag": {
+        "i": "Case-insensitive",
+        "m": "Multiline (^ and $ match line breaks)",
+        "s": "Dotall (. matches newlines)"
+      }
+    },
+    "json": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "xml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "yaml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "crypto": {
+      "value": "value",
+      "operation": "operation",
+      "key": "key",
+      "keyPlaceholder": "secret",
+      "result": "result",
+      "op": {
+        "base64Encode": "base64 encode",
+        "base64Decode": "base64 decode",
+        "md5": "MD5",
+        "sha1": "SHA-1",
+        "sha256": "SHA-256",
+        "sha512": "SHA-512",
+        "hmacSha256": "HMAC-SHA256",
+        "uuid": "UUID v4"
+      }
+    },
+    "jwt": {
+      "value": "token",
+      "result": "result"
+    },
+    "datetime": {
+      "value": "date",
+      "operation": "operation",
+      "amount": "amount",
+      "unitLabel": "unit",
+      "format": "format",
+      "other": "second date",
+      "result": "result",
+      "op": {
+        "add": "add",
+        "subtract": "subtract",
+        "format": "format",
+        "diff": "diff"
+      },
+      "unit": {
+        "milliseconds": "milliseconds",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months",
+        "years": "years"
+      }
+    },
+    "objectOp": {
+      "value": "object",
+      "operation": "operation",
+      "path": "path",
+      "keys": "keys",
+      "setValue": "value",
+      "mergeWith": "merge with",
+      "result": "result",
+      "op": {
+        "get": "get",
+        "set": "set",
+        "merge": "merge",
+        "pick": "pick",
+        "omit": "omit",
+        "keys": "keys",
+        "values": "values"
+      }
+    },
+    "url": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "op": {
+        "encode": "encode",
+        "decode": "decode",
+        "parseQuery": "parse query",
+        "buildQuery": "build query",
+        "parseUrl": "parse URL"
+      }
+    },
+    "random": {
+      "operation": "operation",
+      "min": "min",
+      "max": "max",
+      "length": "length",
+      "items": "items",
+      "seed": "seed (optional)",
+      "seedPlaceholder": "reproducible",
+      "result": "result",
+      "op": {
+        "int": "integer",
+        "float": "float",
+        "string": "string",
+        "boolean": "boolean",
+        "pick": "pick"
+      }
+    },
+    "throw": {
+      "message": "message"
+    },
+    "retry": {
+      "maxAttempts": "max attempts",
+      "backoff": "backoff",
+      "delay": "delay",
+      "factor": "factor",
+      "retryOnError": "retry on error",
+      "retryOnStatus": "retry on HTTP status",
+      "retryOnFailure": "retry on any non-2xx",
+      "attempt": "attempt",
+      "exhausted": "exhausted",
+      "backoffOpt": {
+        "fixed": "fixed",
+        "linear": "linear",
+        "exponential": "exponential"
+      }
+    },
+    "menuGroups": {
+      "lists": "Lists",
+      "math": "Math",
+      "dataFormats": "Data formats",
+      "encoding": "Encoding",
+      "time": "타이밍"
+    },
+    "listOp": {
+      "value": "list",
+      "operation": "operation",
+      "result": "result",
+      "key": "key",
+      "order": "order",
+      "depth": "depth",
+      "size": "size",
+      "start": "start",
+      "end": "end",
+      "op": {
+        "sort": "sort",
+        "unique": "unique",
+        "reverse": "reverse",
+        "flatten": "flatten",
+        "chunk": "chunk",
+        "slice": "slice",
+        "groupBy": "group by"
+      }
+    },
+    "csv": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "delimiter": "delimiter",
+      "header": "header row",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "math": {
+      "a": "value",
+      "operation": "operation",
+      "result": "result",
+      "b": "with",
+      "min": "min",
+      "max": "max",
+      "precision": "precision",
+      "op": {
+        "round": "round",
+        "floor": "floor",
+        "ceil": "ceil",
+        "trunc": "truncate",
+        "abs": "absolute",
+        "sign": "sign",
+        "sqrt": "square root",
+        "min": "min",
+        "max": "max",
+        "clamp": "clamp"
+      }
+    },
+    "schema": {
+      "value": "value",
+      "schema": "JSON Schema",
+      "valid": "valid",
+      "invalid": "invalid",
+      "errors": "errors",
+      "editTitle": "Edit JSON Schema"
+    },
+    "readFile": {
+      "path": "path",
+      "content": "content"
+    },
+    "writeFile": {
+      "path": "path",
+      "mode": "mode",
+      "content": "content"
+    },
+    "codeField": {
+      "title": "Edit",
+      "edit": "Open editor",
+      "moreLines": "+{{count}} lines",
+      "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "모드",
+      "modeOpt": {
+        "frequency": "빈도",
+        "cron": "cron"
+      },
+      "frequency": "빈도",
+      "unit": "단위",
+      "cron": "cron",
+      "stop": "정지 시점",
+      "stopOpt": {
+        "none": "안 함",
+        "duration": "기간",
+        "endDate": "종료 날짜"
+      },
+      "duration": "기간",
+      "endDate": "종료 날짜",
+      "tick": "틱"
+    },
+    "code": {
+      "input": "입력",
+      "language": "언어",
+      "code": "코드",
+      "modalTitle": "코드 편집",
+      "result": "결과",
+      "timeout": "시간 제한 (초)"
+    },
+    "help": {
+      "input": "Injects the scenario's input parameters and constants into the graph.",
+      "output": "Declares one of the scenario's named results, read by a parent Run-scenario.",
+      "if": "Branches the flow to then / else by comparing two operands.",
+      "switch": "Routes the input to a matching case, or to default.",
+      "httpRequest": "Runs a saved API request and emits its response.",
+      "runScenario": "Runs another scenario as a reusable sub-step.",
+      "forEach": "Runs the body once per item of a collection, then continues.",
+      "for": "Loops over a number range, running the body for each value.",
+      "while": "Repeats the body while a condition holds (tested first).",
+      "doWhile": "Repeats the body while a condition holds (runs at least once).",
+      "aggregate": "Reduces a collection to one value (count, sum, min, max, average, join).",
+      "map": "Transforms every item of a collection into a new list.",
+      "filter": "Keeps the items that match a condition; routes the rest aside.",
+      "addToList": "Appends values to a list.",
+      "removeFromList": "Removes matching values from a list.",
+      "wait": "Pauses for a duration, then continues.",
+      "waitUntil": "Pauses until a given date/time, then continues.",
+      "now": "Emits the current date and time.",
+      "timer": "Fires its body on a repeating interval or a cron schedule.",
+      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "comparator": "Compares two values and emits true or false.",
+      "boolean": "Combines booleans with and / or / xor / not.",
+      "object": "Builds an object from its named inputs.",
+      "setVariable": "Stores a value into a run variable.",
+      "getVariable": "Reads a run variable's value.",
+      "transform": "Renders a Handlebars template from the input and run variables.",
+      "code": "코드(TypeScript, JavaScript, Python, Lua, Ruby 또는 R)를 샌드박스에서 실행하고 결과를 반환합니다.",
+      "cast": "Converts a value to another type (number, string, boolean, date, list).",
+      "regex": "Matches, extracts, replaces or splits text with a regular expression.",
+      "json": "Parses a JSON string, or serialises a value to JSON.",
+      "xml": "Parses an XML string, or serialises a value to XML.",
+      "yaml": "Parses a YAML string, or serialises a value to YAML.",
+      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "jwt": "Decodes a JWT token into header, payload and signature.",
+      "datetime": "Shifts, formats or diffs a date.",
+      "retry": "Re-runs its body until it succeeds, with a backoff policy.",
+      "objectOp": "Reshapes an object (get/set a path, merge, pick, omit, keys, values).",
+      "url": "Encodes, decodes or parses URLs and query strings.",
+      "random": "Generates a random number, string, boolean or pick.",
+      "listOp": "Reshapes a list (sort, unique, reverse, flatten, chunk, slice, groupBy).",
+      "csv": "Parses a CSV string, or serialises a list to CSV.",
+      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "schema": "Validates a value against a JSON Schema.",
+      "readFile": "Reads a file's text content.",
+      "writeFile": "Writes or appends text to a file.",
+      "throw": "Deliberately fails with a message (for error branches and tests).",
+      "log": "Writes a message to the run log and passes the value through.",
+      "assert": "Checks a condition (chai-style) and routes to pass or fail."
+    },
+    "legend": {
+      "title": "범례",
+      "portsTitle": "입력 지점",
+      "entryEventTrigger": "이벤트로 트리거되는 입력 지점",
+      "entryDataTrigger": "데이터로 트리거되는 입력 지점",
+      "runWhenAllReceived": "모든 이벤트와 모든 데이터가 수신되는 즉시 작업이 실행됩니다",
+      "runOnLaunchNoPredecessor": "선행 작업이 없는 작업은 시나리오가 시작되는 즉시 실행됩니다",
+      "outPortsTitle": "출력 지점",
+      "outEmit": "트리거 이벤트를 내보내고 데이터를 전송합니다",
+      "outEmitSignalOnly": "데이터를 전송하지 않고 트리거 이벤트를 내보냅니다",
+      "genericOutPortsTitle": "일반 출력 지점",
+      "outDone": "작업이 완료되면 내보내지는 트리거 이벤트",
+      "outError": "작업 오류 시 발생하는 트리거 이벤트",
+      "navTitle": "탐색",
+      "zoom": "확대/축소",
+      "pan": "이동",
+      "boxSelect": "사각형 선택",
+      "select": "선택 / 다중 선택"
+    },
+    "cli": {
+      "title": "Run from the command line",
+      "intro": "Run this scenario without opening the app (CI, cron, script):",
+      "byId": "Designate by id",
+      "allLogs": "All logs",
+      "note": "`--out file` also writes the run-log to a file.",
+      "projectPlaceholder": "<project.restorm>"
     }
   }
 }

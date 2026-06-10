@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { Wallpaper, type WallpaperPattern } from '../Wallpaper'
 import { Wordmark, type WordmarkEffect } from '../Wordmark'
 import { RecentFilesVignette } from '../RecentFilesVignette'
-import { useFileService } from '../../hooks/useFileService'
 import type { VignetteDecoration } from '../Vignette'
 import './welcomeScreen.css'
 
@@ -26,12 +25,6 @@ export interface WelcomeScreenProps {
    * recents panel. Passed straight through to `RecentFilesVignette`.
    */
   onOpenFile: (path: string) => void
-  /**
-   * Optional hint rendered below the action stack when both favorites
-   * and recents are empty (e.g. first-run state). Plain string or
-   * full ReactNode — consumers handle their own i18n.
-   */
-  emptyStateHint?: React.ReactNode
   /**
    * Optional confirm hook called before removing a favorite — passed
    * straight through to `RecentFilesVignette`.
@@ -73,7 +66,6 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   name,
   children,
   onOpenFile,
-  emptyStateHint,
   confirmRemoveFavorite,
   wallpaperPattern = 'random',
   wordmarkEffect = 'random',
@@ -85,8 +77,6 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   'data-testid': dataTestId = 'welcome-screen'
 }) => {
   const { t } = useTranslation()
-  const { recentFiles, favorites } = useFileService()
-  const hasContent = recentFiles.length > 0 || favorites.length > 0
   const rootClassName = ['ecu-welcome-screen', className].filter(Boolean).join(' ')
 
   return (
@@ -115,9 +105,6 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
       </header>
       <div className="ecu-welcome-screen-content">
         <div className="ecu-welcome-screen-actions">{children}</div>
-        {!hasContent && emptyStateHint != null && (
-          <div className="ecu-welcome-screen-hint">{emptyStateHint}</div>
-        )}
       </div>
 
       <RecentFilesVignette

@@ -148,6 +148,10 @@
       "autoSaveDelay": {
         "title": "Délai de sauvegarde automatique",
         "description": "Contrôle le délai en millisecondes après lequel un éditeur modifié est sauvegardé automatiquement. Ne s'applique que lorsque la sauvegarde automatique est réglée sur « Après un délai »."
+      },
+      "reopenLastFile": {
+        "title": "Réouvrir automatiquement le dernier fichier ouvert",
+        "description": "Si activé, rouvre au démarrage le dernier fichier que vous aviez ouvert — uniquement si l'application a été fermée alors qu'un fichier était ouvert."
       }
     }
   },

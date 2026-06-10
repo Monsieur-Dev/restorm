@@ -8,7 +8,7 @@ import {
   isAuthenticationRequest,
   type Request
 } from '../types/requests'
-import { isAnyFolder, type Folder, type EnvironmentFolder, type FolderItem } from '../types/folderTypes'
+import { isAnyFolder, isScenario, type Folder, type EnvironmentFolder, type FolderItem } from '../types/folderTypes'
 
 /**
  * Stable identifier for a single item in a parsed-spec import preview
@@ -118,20 +118,62 @@ export function filterImportTreeBySelection(
   items: readonly FolderItem[],
   selection: ReadonlySet<string>
 ): FolderItem[] {
+  return dropOrphanWorkflowScenarios(pruneBySelection(items, selection))
+}
+
+function pruneBySelection(
+  items: readonly FolderItem[],
+  selection: ReadonlySet<string>
+): FolderItem[] {
   const out: FolderItem[] = []
   for (const item of items) {
     if (isAnyFolder(item)) {
       const folder: Folder | EnvironmentFolder = item
-      const filteredChildren = filterImportTreeBySelection(folder.items, selection)
-      if (filteredChildren.length > 0) {
+      const filteredChildren = pruneBySelection(folder.items, selection)
+      // Keep the folder when at least one REAL (request) descendant survived. A
+      // workflow scenario rides along with its sibling requests but never by
+      // itself keeps an otherwise-emptied folder alive.
+      if (filteredChildren.some((c) => !isScenario(c))) {
         out.push({ ...folder, items: filteredChildren })
       }
+    } else if (isScenario(item)) {
+      // A workflow scenario (Postman/Bruno script import) is a derived artifact
+      // of the requests it orchestrates — not independently selectable, so it
+      // always survives the prune; its nodes bind to sibling requests here.
+      out.push(item)
     } else {
       const key = importNaturalKeyForRequest(item)
       if (selection.has(key)) out.push(item)
     }
   }
   return out
+}
+
+/**
+ * After pruning, drop any workflow scenario whose `httpRequest` nodes bind a
+ * request that the user deselected — keeping it would leave the scenario with
+ * dangling `requestId`s (every such box flags `request-missing` → Run disabled).
+ * A scenario only makes sense when ALL the requests it orchestrates survive, so
+ * a partial deselection drops the workflow scenario rather than ship it broken.
+ */
+function dropOrphanWorkflowScenarios(items: FolderItem[]): FolderItem[] {
+  const surviving = new Set<string>()
+  const collect = (list: readonly FolderItem[]): void => {
+    for (const it of list) {
+      if (isAnyFolder(it)) collect(it.items)
+      else if (!isScenario(it) && typeof (it as { id?: unknown }).id === 'string') surviving.add((it as { id: string }).id)
+    }
+  }
+  collect(items)
+  const boundRequestIds = (scenario: FolderItem): string[] => {
+    const nodes = (scenario as unknown as { nodes?: { config?: Record<string, unknown> }[] }).nodes ?? []
+    return nodes.map((n) => n.config?.['requestId']).filter((x): x is string => typeof x === 'string')
+  }
+  const prune = (list: FolderItem[]): FolderItem[] =>
+    list
+      .filter((it) => !isScenario(it) || boundRequestIds(it).every((id) => surviving.has(id)))
+      .map((it) => (isAnyFolder(it) ? { ...it, items: prune(it.items) } : it))
+  return prune(items)
 }
 
 export function walkImportTreeWithKeys(
@@ -145,7 +187,7 @@ export function walkImportTreeWithKeys(
       const path = [...parentPath, folder.name]
       out.push({ key: importNaturalKeyForFolder(path), item, path })
       out.push(...walkImportTreeWithKeys(folder.items, path))
-    } else {
+    } else if (!isScenario(item)) {
       // Leaf request — its path is the parent's path; the key carries
       // the request kind + identity, not the path, since two routes
       // with the same method+url can't coexist anywhere in the tree.

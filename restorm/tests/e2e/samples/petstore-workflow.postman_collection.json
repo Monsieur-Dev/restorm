@@ -1,0 +1,233 @@
+{
+  "info": {
+    "_postman_id": "3fa7a306-a8f7-4798-beff-f9c915ae8ec1",
+    "name": "Petstore Workflows (restorm compat)",
+    "description": "Script-driven workflow over the docker Petstore (http://localhost:8080/api). Every request links to the next via setNextRequest (→ control edges on import), and two steps contain real code (a programmatic payload builder + an inventory aggregator). Exercises the pm.* surface for restorm OYO-293 compat.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Login",
+      "id": "10fe4ca8-ddc4-4c1d-9b8b-3f1ab7884591",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('login returns 200', function () { pm.response.to.have.status(200) })",
+              "var body = pm.response.json()",
+              "pm.test('session message present', function () { pm.expect(body.message).to.be.a('string') })",
+              "pm.collectionVariables.set('session', body.message)",
+              "pm.environment.set('loggedInUser', pm.collectionVariables.get('username'))",
+              "// link → next box",
+              "pm.execution.setNextRequest('Create Pet')"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/user/login?username={{username}}&password={{password}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["user", "login"],
+          "query": [
+            { "key": "username", "value": "{{username}}" },
+            { "key": "password", "value": "{{password}}" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Create Pet",
+      "id": "a87c5652-7c28-4f9f-a597-e9ec49d7837b",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// REAL CODE: build the pet payload programmatically (not just asserts).",
+              "var categories = ['dogs', 'cats', 'birds']",
+              "var tags = categories.map(function (name, i) { return { id: i + 1, name: name } })",
+              "var pet = {",
+              "  id: Number(pm.collectionVariables.get('petId')),",
+              "  name: pm.collectionVariables.get('petName'),",
+              "  status: 'available',",
+              "  category: { id: 1, name: 'restorm' },",
+              "  tags: tags,",
+              "  photoUrls: tags.map(function (t) { return 'https://img.test/' + t.name + '.png' })",
+              "}",
+              "pm.collectionVariables.set('petPayload', JSON.stringify(pet))",
+              "console.log('built pet payload with ' + tags.length + ' tags')"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('create returns 200', function () { pm.response.to.have.status(200) })",
+              "var pet = pm.response.json()",
+              "pm.test('name echoed back', function () { pm.expect(pet.name).to.eql(pm.collectionVariables.get('petName')) })",
+              "pm.test('three tags persisted', function () { pm.expect(pet.tags.length).to.eql(3) })",
+              "pm.collectionVariables.set('petId', String(pet.id))",
+              "pm.execution.setNextRequest('Get Pet')"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{{petPayload}}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": { "raw": "{{baseUrl}}/pet", "host": ["{{baseUrl}}"], "path": ["pet"] }
+      }
+    },
+    {
+      "name": "Get Pet",
+      "id": "5ccb6e5b-3bcc-44a4-b103-0496da7829d5",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('get returns 200', function () { pm.response.to.have.status(200) })",
+              "var pet = pm.response.json()",
+              "pm.test('id matches created', function () { pm.expect(pet.id).to.eql(Number(pm.collectionVariables.get('petId'))) })",
+              "// conditional flow control → control edge on import",
+              "if (pet.status === 'available') {",
+              "  pm.execution.setNextRequest('Update Pet Status')",
+              "} else {",
+              "  pm.execution.setNextRequest('Delete Pet')",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/pet/{{petId}}", "host": ["{{baseUrl}}"], "path": ["pet", "{{petId}}"] }
+      }
+    },
+    {
+      "name": "Update Pet Status",
+      "id": "aefbc172-c9d2-41b0-908a-9cdf01461186",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('update returns 200', function () { pm.response.to.have.status(200) })",
+              "pm.test('status is sold', function () { pm.expect(pm.response.json().status).to.eql(pm.collectionVariables.get('newStatus')) })",
+              "pm.collectionVariables.set('petStatus', pm.collectionVariables.get('newStatus'))",
+              "pm.execution.setNextRequest('Get Inventory Summary')"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": {{petId}},\n  \"name\": \"{{petName}}\",\n  \"status\": \"{{newStatus}}\",\n  \"photoUrls\": []\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": { "raw": "{{baseUrl}}/pet", "host": ["{{baseUrl}}"], "path": ["pet"] }
+      }
+    },
+    {
+      "name": "Get Inventory Summary",
+      "id": "b1b1b1b1-1111-4111-8111-111111111111",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('inventory returns 200', function () { pm.response.to.have.status(200) })",
+              "// REAL CODE: aggregate the inventory map (real reduce over the response).",
+              "var inv = pm.response.json()",
+              "var statuses = Object.keys(inv)",
+              "var total = statuses.reduce(function (sum, k) { var v = inv[k]; return sum + (typeof v === 'number' ? v : 0) }, 0)",
+              "pm.test('inventory has at least one status', function () { pm.expect(statuses.length).to.be.above(0) })",
+              "pm.collectionVariables.set('inventoryStatusCount', String(statuses.length))",
+              "console.log('inventory aggregated (total items computed = ' + (total >= 0) + ')')",
+              "pm.execution.setNextRequest('Delete Pet')"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/store/inventory", "host": ["{{baseUrl}}"], "path": ["store", "inventory"] }
+      }
+    },
+    {
+      "name": "Delete Pet",
+      "id": "f9d76b44-bf25-40a8-a80a-96466c7e2f3d",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// pm.sendRequest: confirm the pet exists before deleting.",
+              "pm.sendRequest(pm.collectionVariables.get('baseUrl') + '/pet/' + pm.collectionVariables.get('petId'), function (err, res) {",
+              "  if (!err) { console.log('pre-delete check, pet found with code ' + res.code) }",
+              "})"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('delete returns 200', function () { pm.response.to.have.status(200) })",
+              "// end the run (historical alias form)",
+              "postman.setNextRequest(null)"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/pet/{{petId}}", "host": ["{{baseUrl}}"], "path": ["pet", "{{petId}}"] }
+      }
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Collection-level pre-request: runs before every request.",
+          "console.log('▶ ' + pm.info.requestName)"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api" },
+    { "key": "petId", "value": "909090" },
+    { "key": "petName", "value": "restorm-rex" },
+    { "key": "newStatus", "value": "sold" },
+    { "key": "username", "value": "restorm-user" },
+    { "key": "password", "value": "s3cret" }
+  ]
+}

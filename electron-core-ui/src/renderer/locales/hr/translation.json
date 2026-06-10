@@ -148,6 +148,10 @@
       "autoSaveDelay": {
         "title": "Odgoda automatskog spremanja",
         "description": "Kontrolira odgodu u milisekundama nakon koje se izmijenjeni uređivač automatski sprema. Primjenjuje se samo kad je automatsko spremanje postavljeno na Nakon odgode."
+      },
+      "reopenLastFile": {
+        "title": "Automatski ponovno otvori posljednju otvorenu datoteku",
+        "description": "Kada je omogućeno, pri pokretanju ponovno otvara posljednju datoteku koju ste imali otvorenu — ali samo ako je aplikacija zatvorena dok je datoteka bila otvorena."
       }
     }
   },

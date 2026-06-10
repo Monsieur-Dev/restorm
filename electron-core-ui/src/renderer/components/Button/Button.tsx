@@ -11,23 +11,30 @@ const Button: React.FC<ButtonProps> = ({
   appearance = 'default',
   size,
   small = false,
+  medium = false,
   line = false,
+  link = false,
+  externalLink = false,
   emphasis = 0,
   fullWidth = false,
   backgroundColor,
   align,
   onClick,
+  onContextMenu,
   onMouseEnter,
   onMouseLeave,
   className = '',
   style,
   id,
+  role = 'button',
+  'aria-checked': ariaChecked,
+  tabIndex,
   'data-testid': dataTestId,
   children
 }) => {
-  // Resolve size — `size` prop wins; `small` is a shorthand alias for
-  // `size: 'sm'` kept for ergonomic call sites.
-  const effectiveSize = size ?? (small ? 'sm' : 'default')
+  // Resolve size — `size` prop wins; `small` / `medium` are shorthand aliases
+  // for `size: 'sm'` / `size: 'md'` kept for ergonomic call sites.
+  const effectiveSize = size ?? (small ? 'sm' : medium ? 'md' : 'default')
   const buttonRef = useRef<HTMLAnchorElement>(null)
 
   // Merge options with default styles
@@ -58,6 +65,13 @@ const Button: React.FC<ButtonProps> = ({
     }
   }, [disabled, onClick])
 
+  // Right-click — preventDefault (suppress the native menu) then delegate.
+  const handleContextMenu = useCallback((event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (disabled || !onContextMenu) return
+    event.preventDefault()
+    onContextMenu(event)
+  }, [disabled, onContextMenu])
+
   // No need for hover/focus state management - CSS handles it
 
   // Render icon if provided. String form is the codicon shorthand
@@ -66,10 +80,14 @@ const Button: React.FC<ButtonProps> = ({
   // (emoji, iconoir, phosphor, material, simpleicons, feather,
   // fontawesome) renders without the call site needing to wrap
   // its own `<IconView>`.
-  const renderIcon = (): React.JSX.Element | null => {
+  const renderIcon = (): React.ReactNode => {
     if (!icon) return null
     if (typeof icon === 'string') {
       return <span className={`codicon codicon-${icon}`} />
+    }
+    // A ready-made element (e.g. a `<Badge>`) renders verbatim in the leading slot.
+    if (React.isValidElement(icon)) {
+      return icon
     }
     return <IconView icon={icon} size={14} />
   }
@@ -107,10 +125,13 @@ const Button: React.FC<ButtonProps> = ({
     'button',
     'text-button',
     effectiveSize === 'sm' ? 'small-button' : '',
+    effectiveSize === 'md' ? 'medium-button' : '',
     effectiveSize === 'lg' ? 'large-button' : '',
     effectiveSize === 'xl' ? 'xl-button' : '',
     appearance !== 'default' ? `appearance-${appearance}` : '',
     line ? 'line-button' : '',
+    link || externalLink ? 'link-button' : '',
+    externalLink ? 'external-link-button' : '',
     secondary ? 'secondary' : '',
     disabled ? 'disabled' : '',
     fullWidth ? 'full-width' : '',
@@ -146,17 +167,20 @@ const Button: React.FC<ButtonProps> = ({
         className={buttonClasses}
         style={inlineStyles}
         onClick={handleClick}
+        {...(onContextMenu ? { onContextMenu: handleContextMenu } : {})}
         onKeyDown={handleKeyDown}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
         title={typeof mergedOptions.title === 'string' ? mergedOptions.title : undefined}
         aria-label={mergedOptions.ariaLabel}
-        role="button"
-        tabIndex={disabled ? -1 : 0}
+        role={role}
+        {...(ariaChecked !== undefined ? { 'aria-checked': ariaChecked } : {})}
+        tabIndex={tabIndex ?? (disabled ? -1 : 0)}
         aria-disabled={disabled}
       >
         {renderIcon()}
-        {renderChildren()}
+        {link || externalLink ? <span className="button-link-label">{renderChildren()}</span> : renderChildren()}
+        {externalLink && <span className="codicon codicon-link-external button-link-trailing-icon" aria-hidden="true" />}
       </a>
     </div>
   )

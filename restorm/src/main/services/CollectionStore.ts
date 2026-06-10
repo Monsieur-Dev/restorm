@@ -10,6 +10,7 @@ import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayloa
 import {
   Folder,
   EnvironmentFolder,
+  Scenario,
   Environment,
   KeyValue,
   HTTPRequest,
@@ -21,6 +22,7 @@ import {
   AuthenticationRequest,
   isEnvironmentFolder,
   isAnyFolder,
+  isScenario,
   type FolderItem,
   type Request
 } from '../../shared/models'
@@ -121,7 +123,7 @@ class CollectionStore {
   /**
    * Find parent folder of an item
    */
-  findParentFolder(itemId: string): Folder | EnvironmentFolder | null {
+  findParentFolder(itemId: string): Folder | EnvironmentFolder | Scenario | null {
     for (const collection of this.collections) {
       const parent = this.findParentInFolder(collection, itemId)
       if (parent) return parent
@@ -140,6 +142,31 @@ class CollectionStore {
     // Convert plain objects to class instances if needed
     this.collections = collections.map(c => this.ensureEnvironmentFolderInstance(c))
     logger.info('[CollectionStore] Collections set', { count: collections.length, source })
+  }
+
+  /**
+   * Re-emit `ENVIRONMENT_CREATED` for every loaded environment so listeners
+   * (notably ContextService, which resolves `{{var}}` per environment) rebuild
+   * their context. The interactive flow gets these from the renderer's
+   * per-document load events; a headless load (`loadProjectIntoStore`, no
+   * renderer) has none, so it calls this right after `setCollections`. Parent
+   * environments are emitted before their `subEnvironments` so inheritance
+   * resolves in order.
+   */
+  reemitAllEnvironmentsCreated(): void {
+    const walkEnv = (env: Environment, folderId: string, parentEnvId?: string): void => {
+      this.emitEnvironmentCreated(env, folderId, parentEnvId)
+      for (const sub of env.subEnvironments ?? []) walkEnv(sub, folderId, env.id)
+    }
+    const walkFolder = (item: FolderItem): void => {
+      if (isEnvironmentFolder(item)) {
+        for (const env of item.environments) walkEnv(env, item.id)
+      }
+      if (isAnyFolder(item)) {
+        for (const child of item.items) walkFolder(child)
+      }
+    }
+    for (const c of this.collections) walkFolder(c)
   }
 
   /**
@@ -180,10 +207,10 @@ class CollectionStore {
       return envFolder
     }
 
-    // Add to parent folder
+    // Add to parent folder (a scenario is a folder-like container too)
     const parent = this.findById(parentId)
-    if (parent && isAnyFolder(parent)) {
-      parent.items.push(newFolder)
+    if (parent && this.isContainer(parent)) {
+      this.childItemsForWrite(parent).push(newFolder)
     }
 
     // Emit events
@@ -245,9 +272,10 @@ class CollectionStore {
       return false
     }
 
-    const index = parent.items.findIndex(item => item.id === id)
+    const siblings = this.childItems(parent)
+    const index = siblings.findIndex(item => item.id === id)
     if (index !== -1) {
-      parent.items.splice(index, 1)
+      siblings.splice(index, 1)
       this.emitFolderDeleted(id)
       return true
     }
@@ -264,9 +292,10 @@ class CollectionStore {
     // Remove from current parent
     const currentParent = this.findParentFolder(id)
     if (currentParent) {
-      const currentIndex = currentParent.items.findIndex(item => item.id === id)
+      const currentSiblings = this.childItems(currentParent)
+      const currentIndex = currentSiblings.findIndex(item => item.id === id)
       if (currentIndex !== -1) {
-        currentParent.items.splice(currentIndex, 1)
+        currentSiblings.splice(currentIndex, 1)
       }
     } else {
       // It's a root collection
@@ -276,15 +305,58 @@ class CollectionStore {
       }
     }
 
-    // Add to new parent
+    // Add to new parent (a scenario is a folder-like container too)
     const newParent = this.findById(newParentId)
-    if (newParent && isAnyFolder(newParent)) {
-      newParent.items.splice(index, 0, folder)
+    if (newParent && this.isContainer(newParent)) {
+      this.childItemsForWrite(newParent).splice(index, 0, folder)
     }
 
     // Emit event
     this.emitFolderUpdated(folder)
     return folder
+  }
+
+  /**
+   * Delete a scenario by id. A scenario is a folder-like tree item, so this
+   * mirrors {@link deleteFolder}: remove it from its parent container (folder,
+   * env-folder, scenario, or the root) and emit a folder-deleted event so the
+   * sidebar drops it. Cascades to the scenario's child items implicitly (they
+   * leave the tree with it).
+   */
+  deleteScenario(id: string): boolean {
+    const parent = this.findParentFolder(id)
+    if (!parent) {
+      const index = this.collections.findIndex(c => c.id === id)
+      if (index !== -1) {
+        this.collections.splice(index, 1)
+        this.emitFolderDeleted(id)
+        return true
+      }
+      return false
+    }
+    const siblings = this.childItems(parent)
+    const index = siblings.findIndex(item => item.id === id)
+    if (index !== -1) {
+      siblings.splice(index, 1)
+      this.emitFolderDeleted(id)
+      return true
+    }
+    return false
+  }
+
+  /**
+   * Update a scenario's tree-level metadata (name / notes / tags). A scenario
+   * is a folder-like item, so this mirrors {@link updateFolder} and emits a
+   * folder-updated event so the sidebar relabels. Graph mutations (nodes /
+   * edges / config / params) go through the scenario authoring tools + the
+   * editor, never here.
+   */
+  updateScenario(id: string, updates: Partial<Scenario>): Scenario | null {
+    const scenario = this.findById(id)
+    if (!scenario || !isScenario(scenario)) return null
+    Object.assign(scenario, updates)
+    this.emitFolderUpdated(scenario)
+    return scenario
   }
 
   // ==========================================================================
@@ -299,13 +371,36 @@ class CollectionStore {
     newRequest.id = requestData.id ?? this.generateId()
 
     const parent = this.findById(parentId)
-    if (parent && isAnyFolder(parent)) {
-      parent.items.push(newRequest)
+    if (parent && this.isContainer(parent)) {
+      this.childItemsForWrite(parent).push(newRequest)
     }
 
     // Emit event
     this.emitRequestCreated(newRequest, parentId)
     return newRequest
+  }
+
+  /**
+   * Create a new scenario as a child of `parentId` (a folder-like container).
+   * Returns the inserted Scenario.
+   */
+  createScenario(parentId: string, scenarioData: Partial<Scenario> & { name: string }): Scenario {
+    const newScenario = new Scenario({
+      ...scenarioData,
+      id: scenarioData.id ?? this.generateId(),
+      name: scenarioData.name,
+      tags: scenarioData.tags ?? [],
+      params: scenarioData.params ?? [],
+      nodes: scenarioData.nodes ?? [],
+      edges: scenarioData.edges ?? [],
+      items: scenarioData.items ?? []
+    })
+    const parent = this.findById(parentId)
+    if (parent && this.isContainer(parent)) {
+      this.childItemsForWrite(parent).push(newScenario)
+    }
+    logger.debug('[CollectionStore] Scenario created', { id: newScenario.id, name: newScenario.name, parentId })
+    return newScenario
   }
 
   /**
@@ -330,9 +425,10 @@ class CollectionStore {
     const parent = this.findParentFolder(id)
     if (!parent) return false
 
-    const index = parent.items.findIndex(item => item.id === id)
+    const siblings = this.childItems(parent)
+    const index = siblings.findIndex(item => item.id === id)
     if (index !== -1) {
-      parent.items.splice(index, 1)
+      siblings.splice(index, 1)
       this.emitRequestDeleted(id)
       return true
     }
@@ -349,16 +445,17 @@ class CollectionStore {
     // Remove from current parent
     const currentParent = this.findParentFolder(id)
     if (currentParent) {
-      const currentIndex = currentParent.items.findIndex(item => item.id === id)
+      const currentSiblings = this.childItems(currentParent)
+      const currentIndex = currentSiblings.findIndex(item => item.id === id)
       if (currentIndex !== -1) {
-        currentParent.items.splice(currentIndex, 1)
+        currentSiblings.splice(currentIndex, 1)
       }
     }
 
-    // Add to new parent
+    // Add to new parent (a scenario is a folder-like container too)
     const newParent = this.findById(newParentId)
-    if (newParent && isAnyFolder(newParent)) {
-      newParent.items.splice(index, 0, request)
+    if (newParent && this.isContainer(newParent)) {
+      this.childItemsForWrite(newParent).splice(index, 0, request)
     }
 
     // Emit event
@@ -460,11 +557,31 @@ class CollectionStore {
   // Private Helpers
   // ==========================================================================
 
+  /** A folder-like container: a folder, env-folder, OR a scenario (which holds
+   * child items just like a folder). */
+  private isContainer(item: FolderItem): item is Folder | EnvironmentFolder | Scenario {
+    return isAnyFolder(item) || isScenario(item)
+  }
+
+  /** Live child-items array of a container (a scenario's `items` is optional —
+   * read as empty when absent). */
+  private childItems(item: Folder | EnvironmentFolder | Scenario): FolderItem[] {
+    if (isScenario(item)) return item.items ?? []
+    return item.items
+  }
+
+  /** Live child-items array of a container, initialising a scenario's `items`
+   * to `[]` when absent so callers can push into it. */
+  private childItemsForWrite(item: Folder | EnvironmentFolder | Scenario): FolderItem[] {
+    if (isScenario(item)) return (item.items ??= [])
+    return item.items
+  }
+
   private findInItems(items: FolderItem[], id: string): FolderItem | null {
     for (const item of items) {
       if (item.id === id) return item
-      if (isAnyFolder(item)) {
-        const found = this.findInItems(item.items, id)
+      if (this.isContainer(item)) {
+        const found = this.findInItems(this.childItems(item), id)
         if (found) return found
       }
     }
@@ -498,10 +615,10 @@ class CollectionStore {
     return null
   }
 
-  private findParentInFolder(folder: Folder | EnvironmentFolder, itemId: string): Folder | EnvironmentFolder | null {
-    for (const item of folder.items) {
+  private findParentInFolder(folder: Folder | EnvironmentFolder | Scenario, itemId: string): Folder | EnvironmentFolder | Scenario | null {
+    for (const item of this.childItems(folder)) {
       if (item.id === itemId) return folder
-      if (isAnyFolder(item)) {
+      if (this.isContainer(item)) {
         const found = this.findParentInFolder(item, itemId)
         if (found) return found
       }
@@ -564,7 +681,25 @@ class CollectionStore {
       item.items = item.items.map((c: FolderItem) => this.reifyItem(c))
       return item
     }
+    if (item instanceof Scenario) {
+      // A scenario is a folder-like container: reify its children too so the
+      // store exposes class instances (and the MCP can mutate its contents).
+      if (item.items) item.items = item.items.map((c) => this.reifyItem(c))
+      return item
+    }
     const rec = item as unknown as Record<string, unknown>
+    // Scenario leaf (plain object). Checked before the generic
+    // `type`-bearing request branch — a scenario also carries a `type`,
+    // and the request factory would otherwise mis-build it as an
+    // HTTPRequest, dropping its nodes/edges.
+    if (rec['type'] === 'scenario') {
+      const scenario = Scenario.fromPlain(rec as Parameters<typeof Scenario.fromPlain>[0])
+      // Carry + reify the scenario's child items (it behaves like a folder).
+      if (Array.isArray(rec['items'])) {
+        scenario.items = (rec['items'] as FolderItem[]).map((c) => this.reifyItem(c))
+      }
+      return scenario
+    }
     if (Array.isArray(rec['items'])) {
       // Nested folder (plain object). EnvironmentFolders only ever sit
       // at the root, so a nested `items` carrier is a plain Folder.
@@ -636,7 +771,7 @@ class CollectionStore {
     logger.debug('[CollectionStore] Folder created', { id: folder.id, name: folder.name })
   }
 
-  private emitFolderUpdated(folder: Folder | EnvironmentFolder): void {
+  private emitFolderUpdated(folder: Folder | EnvironmentFolder | Scenario): void {
     const payload: DocumentChangedPayload = {
       id: folder.id,
       type: 'folder',

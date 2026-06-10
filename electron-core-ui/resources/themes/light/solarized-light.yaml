@@ -3,6 +3,9 @@ name: Solarized (light)
 type: light
 
 colors:
+  scenarioNode.background: "#fdf6e3"
+  scenarioNode.headerBackground: "#eee8d5"
+  scenarioNode.headerBackgroundSelected: "#e6d79a"
   focusBorder: "#b49471"
   input.background: "#DDD6C1"
   input.foreground: "#3a4e54"

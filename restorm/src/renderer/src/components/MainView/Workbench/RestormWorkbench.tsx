@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
-import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, IconView, TabSwitcherOverlay, navigationService, useFeature, MiniBrowserPanel, ConsolePanel, type ContextMenuItem } from 'electron-core-ui/renderer'
+import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, IconView, TabSwitcherOverlay, navigationService, useFeature, MiniBrowserPanel, ConsolePanel, Tabs, MarkdownEditor, type Tab, type ContextMenuItem } from 'electron-core-ui/renderer'
 import { miniBrowserDriver } from '../../../services/miniBrowserDriver'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback, TabSwitcherItem } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
@@ -14,6 +14,7 @@ import {
   isWebSocketRequestTab,
   isODataRequestTab,
   isAuthenticationRequestTab,
+  isScenarioEditorTab,
   isConsoleTab,
   isFirewallTab,
   isMiniBrowserTab
@@ -28,15 +29,27 @@ import {
   ODataRequestTabView
 } from '../../RequestTabViews'
 import { EnvironmentProvider } from '../../../contexts/EnvironmentContext'
+import { WorkbenchActiveTabContext } from '../../../contexts/WorkbenchActiveTabContext'
+import { ScenarioEditorView } from '../../Scenario/ScenarioEditorView'
+import type { ResolveBoundItem, ResolveRequestEnv } from '../../Scenario/scenarioBoundResolver'
+import type { SyntheticRequestPreview } from '../../../../../shared/utils/syntheticRequestPreview'
+import type { AddChildKind } from '../Sidebar/contextMenuBuilder'
 import { FolderView } from '../../Folders/FolderView'
 import { EnvironmentFolderView } from '../../Folders/EnvironmentFolderView'
-import type { EnvironmentFolder, Folder, Request } from '../../../../../shared/types/collections'
+import type { EnvironmentFolder, Folder, Request, Scenario, ScenarioNode, ScenarioEdge } from '../../../../../shared/types/collections'
 import { getFolderIcon } from '../../../utils/treeSearch'
 import { Badge } from '../../common/Badge'
+import { ScenarioRunningBadge } from '../../common/ScenarioRunningBadge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { useTranslation } from 'react-i18next'
 import { RestormWorkbenchTab } from './RestormWorkbenchTab'
 import { DeprecationAwareRequestTab } from './DeprecationAwareRequestTab'
+import { RequestScenarioUsageButton } from './RequestScenarioUsageButton'
+import { RequestHeaderEnvSelector } from '../RequestHeaderEnvSelector'
+import { RequestHeaderHistoryButton } from '../RequestHeaderHistoryButton'
+import { ScenarioCallersButton } from './ScenarioCallersButton'
+import { ScenarioRunHistoryButton } from '../../Scenario/ScenarioRunHistoryButton'
+import type { ScenarioRequestUsage, ScenarioScenarioUsage } from '../../../services/scenarioRequestUsage'
 import { useTabSwitcher } from '../../../hooks/useTabSwitcher'
 
 /** Extract title string from EditorTab */
@@ -89,6 +102,21 @@ export interface RestormWorkbenchProps {
   onTagColorChange?: ((envFolderId: string, tag: string, color: string | null) => void) | undefined
   /** Callback fired when a folder's data changes (environments, etc.) */
   onFolderChange?: (folderId: string, folder: Folder) => void
+  /** Callback fired when a scenario's graph (nodes/edges) changes. */
+  onScenarioChange?: (scenarioId: string, patch: { nodes?: ScenarioNode[]; edges?: ScenarioEdge[]; notes?: string }) => void
+  /** Create a new HTTP request as a child of the scenario (id), return its id. */
+  onCreateScenarioRequest?: (scenarioId: string) => string | null
+  /** Create a child item of the given kind (request protocol or sub-scenario)
+   * under the scenario from the graph add-palette, returning its id. */
+  onCreateScenarioChild?: (scenarioId: string, kind: AddChildKind) => string | null
+  /** Resolve a tree item by id → live object, for drop + bound node sync. */
+  resolveBoundItem?: ResolveBoundItem
+  /** Resolve a request's environments + default selection (scenario env section). */
+  resolveRequestEnv?: ResolveRequestEnv
+  /** Synthesise a documentation-derived preview for a request — used by
+   * the scenario inspector to show example data when the request has
+   * never been run but its env folder carries an imported spec. */
+  resolveSyntheticPreview?: (requestId: string) => SyntheticRequestPreview | null
   /** Fallback component displayed when no tabs are open */
   emptyFallback?: React.ReactNode
   /** Callback fired when group sizes change (sash dragging) */
@@ -106,8 +134,20 @@ export interface RestormWorkbenchProps {
   onStateRestored?: (tree: WorkbenchTree | null) => void
   /** Get a reactive Request by ID (for reactivity support) */
   getRequestById?: (id: string) => Request | undefined
+  /** Scenarios that reference a request — drives the "used in scenarios"
+   * reverse-navigation button in the request editor's toolbar. */
+  getScenariosUsingRequest?: ((requestId: string) => ScenarioRequestUsage[]) | undefined
+  /** Open a scenario tab from a request; `focusNodeId` centres a box. */
+  onOpenScenarioFromRequest?: ((scenarioId: string, focusNodeId?: string) => void) | undefined
+  /** Scenarios that reference a sub-scenario via a `runScenario` node — drives
+   * the reverse-nav button on a sub-scenario's editor toolbar. */
+  getScenariosUsingScenario?: ((scenarioId: string) => ScenarioScenarioUsage[]) | undefined
   /** Get a reactive Folder by ID (for reactivity support) */
   getFolderById?: (id: string) => Folder | undefined
+  /** Get a reactive Scenario by ID (for reactivity support) — the editor tab
+   * re-fetches the live scenario from this rather than rendering its stored
+   * snapshot, so variable/port edits survive a hard refresh + tab restore. */
+  getScenarioById?: (id: string) => Scenario | undefined
   /** Check if a request is a favorite */
   isItemFavorite?: ((itemId: string) => boolean) | undefined
   /** Toggle favorite status on a request */
@@ -159,6 +199,12 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   onTagsChange,
   onTagColorChange,
   onFolderChange,
+  onScenarioChange,
+  onCreateScenarioRequest,
+  onCreateScenarioChild,
+  resolveBoundItem,
+  resolveRequestEnv,
+  resolveSyntheticPreview,
   onEnvironmentFolderChange,
   emptyFallback,
   onSizesChange,
@@ -168,12 +214,16 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   onStateRestored,
   getRequestById,
   getFolderById,
+  getScenarioById,
   getEnvironmentFolderById,
   navigationEnabled,
   tabSwitcherAnchorSelector,
   projectUuid,
   isItemFavorite,
-  onToggleFavorite
+  onToggleFavorite,
+  getScenariosUsingRequest,
+  onOpenScenarioFromRequest,
+  getScenariosUsingScenario
 }, ref) => {
   const { t } = useTranslation()
   const editorWorkbenchRef = useRef<EditorWorkbenchHandle>(null)
@@ -194,7 +244,30 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   // split pane (not just `groups[0]`) when the tree mutates
   // programmatically (e.g. via back/forward navigation).
   const lastActiveByGroupRef = useRef<Map<string, string>>(new Map())
-  
+
+  // Keep the per-group active-tab tracker in sync with EXTERNAL tree changes
+  // (e.g. a sidebar click opening a tab, which updates the controlled tree but
+  // never flows through `handleTreeChange`). Without this the tracker goes
+  // stale: closing an externally-opened tab reverts the active tab to its
+  // previous value, and because the stale "previous" still equals that value
+  // the revert looks like "no change" — so `onTabActivate` never fires and a
+  // sidebar that follows the active tab stays stuck on the just-closed item.
+  // We only refresh the tracker here (deliberately no `onTabActivate`):
+  // external opens already sync the sidebar through their own click handler,
+  // so firing again would double the navigation history.
+  useEffect(() => {
+    const syncTracker = (nodes: WorkbenchTree['groups']): void => {
+      for (const node of nodes) {
+        if (isTabGroupNode(node)) {
+          if (node.activeTabId) lastActiveByGroupRef.current.set(node.id, node.activeTabId)
+        } else if (isContainerNode(node)) {
+          syncTracker(node.groups)
+        }
+      }
+    }
+    syncTracker(tree.groups)
+  }, [tree])
+
   // Cache for tabs dropped from other windows (stores the full RestormEditorTab data)
   const droppedTabsCacheRef = useRef<Map<string, RestormEditorTab>>(new Map())
   
@@ -237,6 +310,9 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   const getTabItemId = useCallback((tab: RestormEditorTab): string | null => {
     if (isFolderTab(tab) || isEnvironmentFolderTab(tab)) {
       return tab.folder.id
+    }
+    if (isScenarioEditorTab(tab)) {
+      return tab.scenario.id
     }
     if (
       isHTTPRequestTab(tab) ||
@@ -287,6 +363,19 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <IconView icon={getFolderIcon(restormTab.folder)} size={14} />
           <span>{restormTab.folder.name}</span>
+          {renderDirtyIndicator(restormTab)}
+        </span>
+      )
+    }
+
+    // Scenario editor tab: show scenario badge + name
+    if (isScenarioEditorTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <ScenarioRunningBadge scenarioId={restormTab.scenario.id}>
+            <Badge type="SCENARIO" />
+          </ScenarioRunningBadge>
+          <span>{restormTab.scenario.name}</span>
           {renderDirtyIndicator(restormTab)}
         </span>
       )
@@ -588,6 +677,93 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       { id: 'root', label: 'Root' }
     ]
 
+    // Scenario editor tab — same chrome as a request tab: breadcrumb +
+    // editable title + bookmark ribbons + favourite star, then two
+    // sub-tabs (the graph + a Notes markdown editor).
+    if (isScenarioEditorTab(effectiveTab)) {
+      // Re-fetch the live scenario from `rootItems` (like folder/env-folder
+      // tabs do) instead of trusting the tab's stored snapshot. After a hard
+      // refresh + tab restore, `effectiveTab.scenario` is a fresh copy
+      // disconnected from the model, so in-place edits (renamed variables,
+      // new ports) would never reach the editor without this lookup.
+      const scenario = getScenarioById?.(effectiveTab.scenario.id) ?? effectiveTab.scenario
+      const scnTagColors = getTagColorsFromBreadcrumbs(breadcrumbs)
+      const scnEnvFolderId = getEnvFolderIdFromBreadcrumbs(breadcrumbs)
+      const handleScnTagColorChange = scnEnvFolderId && onTagColorChange
+        ? (tag: string, color: string | null): void => { onTagColorChange(scnEnvFolderId, tag, color) }
+        : undefined
+      const scnFav = onToggleFavorite
+        ? { isFavorite: isItemFavorite?.(scenario.id) ?? false, onToggleFavorite: () => { onToggleFavorite(scenario.id) } }
+        : {}
+      // Drop the breadcrumb icon on the scenario itself (the last
+      // crumb) — the `circuit-board` glyph next to the H1 title reads
+      // as noise here; the SCENARIO badge already conveys the kind
+      // wherever it matters (sidebar, search). Ancestor crumbs keep
+      // their folder icons.
+      const scnBreadcrumbs = breadcrumbs.map((crumb, i) =>
+        i === breadcrumbs.length - 1 ? { ...crumb, icon: null } : crumb
+      )
+      const scnTabs: Tab[] = [
+        {
+          id: 'graph',
+          label: t('scenario.tab.graph', 'Scenario'),
+          useScrollableElement: false,
+          content: (
+            <div style={{ height: '100%', minHeight: 0 }}>
+              <ScenarioEditorView
+                scenario={scenario}
+                tabId={effectiveTab.id}
+                {...(projectUuid ? { projectUuid } : {})}
+                {...(onScenarioChange ? { onScenarioChange } : {})}
+                {...(resolveBoundItem ? { resolveBoundItem } : {})}
+                {...(resolveRequestEnv ? { resolveRequestEnv } : {})}
+                {...(resolveSyntheticPreview ? { resolveSyntheticPreview } : {})}
+                {...(onRequestClick ? { onOpenItem: onRequestClick } : {})}
+                {...(onCreateScenarioRequest ? { onCreateRequest: onCreateScenarioRequest } : {})}
+                {...(onCreateScenarioChild ? { onCreateChild: onCreateScenarioChild } : {})}
+              />
+            </div>
+          )
+        },
+        {
+          id: 'notes',
+          label: t('scenario.tab.notes', 'Notes'),
+          useScrollableElement: false,
+          content: (
+            <MarkdownEditor
+              key={scenario.id}
+              initialValue={scenario.notes ?? ''}
+              onChange={(md: string) => { onScenarioChange?.(scenario.id, { notes: md }) }}
+              data-testid="scenario-notes-editor"
+            />
+          )
+        }
+      ]
+      const scenarioCallers = getScenariosUsingScenario?.(scenario.id) ?? []
+      const scenarioCallersAction = scenarioCallers.length > 0 && onOpenScenarioFromRequest
+        ? <ScenarioCallersButton usages={scenarioCallers} onOpenScenario={onOpenScenarioFromRequest} />
+        : null
+      return (
+        <RestormWorkbenchTab
+          breadcrumbs={scnBreadcrumbs}
+          onBreadcrumbClick={onBreadcrumbClick}
+          onBreadcrumbAuxClick={onBreadcrumbAuxClick}
+          onBreadcrumbRename={onItemRename}
+          onBreadcrumbIconChange={onItemIconChange}
+          tags={scenario.tags}
+          onTagsChange={(nextTags) => { onTagsChange?.(scenario.id, nextTags) }}
+          tagColors={scnTagColors}
+          {...(handleScnTagColorChange ? { onTagColorChange: handleScnTagColorChange } : {})}
+          tabId={effectiveTab.id}
+          headerActions={<ScenarioRunHistoryButton scenarioId={scenario.id} />}
+          {...(scenarioCallersAction ? { topRightAction: scenarioCallersAction } : {})}
+          {...scnFav}
+        >
+          <Tabs tabs={scnTabs} data-testid={`scenario-subtabs-${effectiveTab.id}`} />
+        </RestormWorkbenchTab>
+      )
+    }
+
     // Folder tab
     if (isFolderTab(effectiveTab)) {
       // Get reactive folder if available, otherwise use tab's copy
@@ -668,6 +844,13 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         ? { isFavorite: isItemFavorite?.(id) ?? false, onToggleFavorite: () => { onToggleFavorite(id) } }
         : {}
 
+    // "Used in scenarios" reverse-nav button for the request toolbar. Renders
+    // null when the request is used by no scenario (the button hides itself).
+    const scenarioUsageActionFor = (id: string): React.ReactNode =>
+      getScenariosUsingRequest && onOpenScenarioFromRequest
+        ? <RequestScenarioUsageButton usages={getScenariosUsingRequest(id)} onOpenScenario={onOpenScenarioFromRequest} />
+        : null
+
     // Shared tag color props for request tabs
     const requestTagColors = getTagColorsFromBreadcrumbs(breadcrumbs)
     const envFolderId = getEnvFolderIdFromBreadcrumbs(breadcrumbs)
@@ -718,6 +901,16 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       return ids
     })()
 
+    // Request tab-header action cluster (left of the bookmark ribbon):
+    // the env selector (reads the surrounding EnvironmentProvider) + the
+    // response-history button. Rendered for every request protocol.
+    const requestHeaderActionsFor = (id: string): React.ReactNode => (
+      <>
+        <RequestHeaderEnvSelector folderRequestIds={envFolderRequestIds ?? []} projectUuid={projectUuid ?? null} />
+        <RequestHeaderHistoryButton requestId={id} />
+      </>
+    )
+
     // HTTP request tab
     if (isHTTPRequestTab(effectiveTab)) {
       // Get reactive request if available, otherwise use tab's copy
@@ -738,6 +931,8 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id)}
+            topRightAction={scenarioUsageActionFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <HTTPRequestTabView
@@ -766,6 +961,8 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id)}
+            topRightAction={scenarioUsageActionFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <GraphQLRequestTabView
@@ -794,6 +991,8 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id)}
+            topRightAction={scenarioUsageActionFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <GrpcRequestTabView
@@ -822,6 +1021,8 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id)}
+            topRightAction={scenarioUsageActionFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <SoapRequestTabView
@@ -850,6 +1051,8 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id)}
+            topRightAction={scenarioUsageActionFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <WebSocketRequestTabView
@@ -878,6 +1081,8 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id)}
+            topRightAction={scenarioUsageActionFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <ODataRequestTabView request={request} />
@@ -905,6 +1110,8 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             onTagColorChange={handleRequestTagColorChange}
             tabId={effectiveTab.id}
             {...favoritePropsFor(request.id)}
+            headerActions={requestHeaderActionsFor(request.id)}
+            topRightAction={scenarioUsageActionFor(request.id)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <HTTPRequestTabView
@@ -948,7 +1155,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
 
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, updateMiniBrowserUrl])
+  }, [t, onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onScenarioChange, onCreateScenarioRequest, onCreateScenarioChild, resolveBoundItem, resolveRequestEnv, resolveSyntheticPreview, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getScenarioById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, getScenariosUsingRequest, onOpenScenarioFromRequest, getScenariosUsingScenario, updateMiniBrowserUrl])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(
@@ -1170,7 +1377,18 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     return { top: rect.top, left: rect.left, width: rect.width }
   }, [tabSwitcherOpen, tabSwitcherAnchorSelector])
 
+  // The focused split-group's active tab id — fed to descendants (the scenario
+  // editors) via context so each can tell if it's THE active tab. Keyboard
+  // shortcuts + the Delete key gate on this so they only ever act on the
+  // focused tab, never a background split.
+  const activeWorkbenchTabId = useMemo((): string | null => {
+    if (!focusedGroupId) return null
+    const node = findGroup(tree, focusedGroupId).node
+    return node && isTabGroupNode(node) ? (node.activeTabId ?? null) : null
+  }, [tree, focusedGroupId])
+
   return (
+    <WorkbenchActiveTabContext.Provider value={activeWorkbenchTabId}>
     <div
       style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', flex: 1, ...style }}
       className={className}
@@ -1202,6 +1420,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         {...callbacks}
       />
     </div>
+    </WorkbenchActiveTabContext.Provider>
   )
 })
 

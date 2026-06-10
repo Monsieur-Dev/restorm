@@ -1,0 +1,64 @@
+<svg viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg" class="empty-bench-tip-illustration" role="img" aria-hidden="true">
+  <style>
+    .cvl-panel { fill: #1e293b; stroke: #475569; stroke-width: 2; }
+    .cvl-title { fill: #94a3b8; }
+    .cvl-edge { fill: none; stroke: #475569; stroke-width: 1.5; stroke-dasharray: 3 3; }
+
+    .cvl-chip-green { fill: #22c55e; }
+    .cvl-chip-amber { fill: #f59e0b; }
+    .cvl-chip-slate { fill: #64748b; }
+
+    .cvl-fly-req {
+      fill: #f59e0b;
+      transform-box: fill-box; transform-origin: center;
+      animation: cvl-to-req 4.5s ease-in-out infinite;
+      animation-play-state: paused;
+    }
+    @keyframes cvl-to-req {
+      0%   { transform: translate(0,0); opacity: 0; }
+      8%   { transform: translate(0,0); opacity: 1; }
+      45%  { transform: translate(139px,-40px); opacity: 1; }
+      90%  { transform: translate(139px,-40px); opacity: 1; }
+      96%,100% { transform: translate(139px,-40px); opacity: 0; }
+    }
+
+    .cvl-fly-sce {
+      fill: #f59e0b;
+      transform-box: fill-box; transform-origin: center;
+      animation: cvl-to-sce 4.5s ease-in-out infinite;
+      animation-play-state: paused;
+    }
+    @keyframes cvl-to-sce {
+      0%   { transform: translate(0,0); opacity: 0; }
+      8%   { transform: translate(0,0); opacity: 1; }
+      45%  { transform: translate(139px,31px); opacity: 1; }
+      90%  { transform: translate(139px,31px); opacity: 1; }
+      96%,100% { transform: translate(139px,31px); opacity: 0; }
+    }
+  </style>
+
+  <!-- connector edges -->
+  <path class="cvl-edge" d="M84 64 C120 52 140 44 168 40" />
+  <path class="cvl-edge" d="M84 76 C120 90 142 100 168 106" />
+
+  <!-- source list panel "Statuts" -->
+  <rect class="cvl-panel" x="10" y="34" width="74" height="82" rx="7" />
+  <rect class="cvl-title" x="20" y="44" width="40" height="6" rx="3" />
+  <rect class="cvl-chip-green" x="20" y="60" width="54" height="13" rx="6" />
+  <rect class="cvl-chip-amber" x="20" y="80" width="54" height="13" rx="6" />
+  <rect class="cvl-chip-slate" x="20" y="100" width="54" height="13" rx="6" />
+
+  <!-- target 1: request input (top-right) -->
+  <rect class="cvl-panel" x="150" y="22" width="60" height="36" rx="6" />
+  <rect class="cvl-title" x="158" y="29" width="26" height="4" rx="2" />
+  <rect x="158" y="40" width="44" height="11" rx="5" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
+
+  <!-- target 2: scenario box (bottom-right) -->
+  <rect class="cvl-panel" x="150" y="92" width="60" height="40" rx="6" />
+  <rect class="cvl-title" x="158" y="99" width="30" height="4" rx="2" />
+  <rect x="158" y="110" width="44" height="13" rx="6" fill="#0f172a" stroke="#475569" stroke-width="1.5" />
+
+  <!-- flying duplicate chips (the "pending" amber chip, going to both) -->
+  <rect class="cvl-fly-req" x="20" y="80" width="40" height="11" rx="5.5" />
+  <rect class="cvl-fly-sce" x="20" y="80" width="40" height="11" rx="5.5" />
+</svg>

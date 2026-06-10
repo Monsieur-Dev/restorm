@@ -148,6 +148,10 @@
       "autoSaveDelay": {
         "title": "Ritardo del salvataggio automatico",
         "description": "Controlla il ritardo in millisecondi dopo il quale un editor modificato viene salvato automaticamente. Si applica solo quando il salvataggio automatico è impostato su «Dopo un ritardo»."
+      },
+      "reopenLastFile": {
+        "title": "Riapri automaticamente l'ultimo file aperto",
+        "description": "Se attivo, all'avvio riapre l'ultimo file che avevi aperto — ma solo se l'applicazione è stata chiusa mentre un file era aperto."
       }
     }
   },

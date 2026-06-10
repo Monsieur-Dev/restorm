@@ -321,6 +321,70 @@
 	outline: none;
 }
 
+/* Medium square icon button (28×28) — sized to line up flush with a 28px-tall
+   control (InputBox / SelectBox) inside a ControlGroup. Dimension-only: the
+   appearance (default / secondary / line / emphasis) supplies colour + border,
+   so `medium` composes with any variant. */
+.text-button.medium-button {
+	width: 28px;
+	min-width: 28px;
+	height: 28px;
+	min-height: 28px;
+	padding: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.text-button.medium-button .codicon {
+	margin: 0;
+	line-height: 1;
+	font-size: 14px;
+}
+
+/* Link appearance — reads as an inline link, not a chip: no background/border,
+   left-aligned, content-width, pointer cursor. `link` shows just the (un-
+   underlined) icon + underlined label; `external-link` adds a trailing
+   codicon-link-external a few pixels after the label. */
+.text-button.link-button {
+	width: auto;
+	max-width: 100%;
+	padding: 0;
+	border: none;
+	background-color: transparent;
+
+	/* Theme-driven link colour (defined in every theme's base palette) so links
+	   stay readable on light themes instead of inheriting the white button
+	   foreground. */
+	color: var(--textLink-foreground);
+	justify-content: flex-start;
+	text-align: left;
+	cursor: pointer;
+}
+
+.text-button.link-button:hover {
+	background-color: transparent;
+	color: var(--textLink-activeForeground, var(--textLink-foreground));
+}
+
+/* ONLY the text label is underlined — not the leading icon/badge, not the
+   trailing link glyph. */
+.text-button.link-button .button-link-label {
+	text-decoration: underline;
+}
+
+/* When a leading icon/badge precedes the label, separate them by a few px. */
+.text-button.link-button > .button-link-label:not(:first-child) {
+	margin-left: 6px;
+}
+
+/* The trailing link glyph sits a few px after the label and is NOT underlined
+   (an underline under an icon-font glyph reads as a stray line). */
+.text-button.link-button .button-link-trailing-icon {
+	margin-left: 4px;
+	font-size: 12px;
+}
+
 .text-button.small-button .codicon {
 	margin: 0;
 	line-height: 1;

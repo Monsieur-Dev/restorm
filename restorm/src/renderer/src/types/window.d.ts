@@ -104,24 +104,36 @@ declare global {
           callback: (map: Record<string, { count: number; lastSentAt: string; history: string[] }>) => void
         ) => () => void
       }
+      scenarioUsage: {
+        get: () => Promise<Record<string, { count: number; lastRunAt: string; history: string[] }>>
+        onChanged: (
+          callback: (map: Record<string, { count: number; lastRunAt: string; history: string[] }>) => void
+        ) => () => void
+      }
       runtime: {
         getConfig: () => Promise<{
           mcp: { enabled: boolean; port: number | null }
           graphql: { endpoint: string }
         }>
         onMcpRequestReceived: (callback: () => void) => () => void
-        pushMcpActiveTab: (payload: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | null }) => void
+        pushMcpActiveTab: (payload: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | null }) => void
         pushMcpActiveEnv: (payload: { envFolderId: string; envId: string | null }) => void
+        pushMcpFavorites: (payload: { projectUuid: string | null; favorites: { id: string; name: string; type: string }[] }) => void
+        pushScenarioLayout: (payload: { scenarioId: string; rects: Record<string, { x: number; y: number; width: number; height: number }> }) => void
+        runScenarioNode: (scenarioId: string, nodeId: string) => Promise<unknown>
+        cancelScenarioNode: (scenarioId: string, nodeId: string) => Promise<{ cancelled: boolean; reason?: string }>
+        getScenarioNodeResult: (scenarioId: string, nodeId: string) => Promise<Record<string, unknown> | null>
         pushMcpActiveStateBootstrap: (payload: {
-          tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | null }
+          tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | null }
           envByFolder: Record<string, string | null>
         }) => void
-        onMcpOpenTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void) => () => void
-        onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void) => () => void
+        onMcpOpenTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void) => () => void
+        onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void) => () => void
         onMcpTreeReplace: (callback: (payload: unknown) => void) => () => void
-        onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void) => () => void
+        onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void) => () => void
         onMcpRunRequest: (callback: (payload: { itemId: string }) => void) => () => void
         onMcpRequestUpdated: (callback: (payload: { itemId: string; patch: Record<string, unknown> }) => void) => () => void
+        onMcpScenarioUpdated: (callback: (payload: { scenarioId: string; nodes: unknown[]; edges: unknown[]; name?: string; params?: unknown[] }) => void) => () => void
         onMcpFolderUpdated: (callback: (payload: { itemId: string; patch: Record<string, unknown> }) => void) => () => void
         onMcpSetFavorite: (callback: (payload: { itemId: string; favorite: boolean | null }) => void) => () => void
       }

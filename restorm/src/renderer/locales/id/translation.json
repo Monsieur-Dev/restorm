@@ -92,6 +92,50 @@
     "multiLanguage": {
       "title": "27 bahasa!",
       "body": "Restorm berbicara 27 bahasa. Inggris, Prancis, Spanyol, Jerman, Italia, Jepang, Mandarin, Korea, dan banyak lainnya — pilih bahasamu di pengaturan!"
+    },
+    "fromPostman": {
+      "title": "Datang dari Postman atau Bruno?",
+      "body": "Kami bantu kamu beralih ke Restorm — perpindahanmu jadi mudah ;)"
+    },
+    "chainRequests": {
+      "title": "Beberapa permintaan untuk dirangkai?",
+      "body": "Gunakan permintaanmu di dalam skenario, tambahkan kondisi, bahkan sarangkan skenario di dalam skenario lain."
+    },
+    "stepByStep": {
+      "title": "Telusuri skenariomu langkah demi langkah",
+      "body": "Satu langkah dalam satu waktu, agar kamu melihat persis apa yang terjadi. Kamu bahkan bisa memasang titik henti."
+    },
+    "cicd": {
+      "title": "Jalankan skenariomu di alur CI/CD-mu",
+      "body": "Mulai Restorm tanpa tampilan untuk menjalankan skenario tanpa antarmuka dan mengumpulkan lognya — pengujian otomatis, dibangun secara visual."
+    },
+    "nestedScenarios": {
+      "title": "Lihat apa yang terjadi dalam sebuah skenario",
+      "body": "Sebuah skenario bisa memanggil skenario lain. Di inspektor, baca setiap log dan langsung lompat ke skenario asalnya."
+    },
+    "scenarioHistory": {
+      "title": "Tapi apa yang baru saja terjadi?",
+      "body": "Telusuri riwayat eksekusi skenariomu. Salah satunya berubah sejak itu? Tenang saja — kami menyimpan konfigurasinya."
+    },
+    "codeSandbox": {
+      "title": "Skenario dan keamanan",
+      "body": "Kamu bisa menulis kode dalam skenariomu — tapi kode itu berjalan dalam sandbox yang aman, tanpa akses ke berkas lokalmu dan tanpa akses internet langsung. Cara teraman untuk tetap terlindungi!"
+    },
+    "codeLanguages": {
+      "title": "Ingin menulis sedikit kode?",
+      "body": "Tulis kode langsung di dalam skenariomu — dalam TypeScript, JavaScript, Python, Lua, Ruby, atau R!"
+    },
+    "scenarioAi": {
+      "title": "Skenario yang bisa dikendalikan AI",
+      "body": "Claude, Cursor, Copilot… mengenal basis kodemu: minta mereka membuat skenario sesuai kebutuhanmu. Semuanya tersedia lewat MCP untuk membuat, menyunting, dan menjalankan skenario."
+    },
+    "interactiveScenarios": {
+      "title": "Skenario interaktif!",
+      "body": "Buat skenariomu bisa diparameterkan dan bahkan tanyakan kepada pengguna apa yang harus dilakukan lewat kotak dialog."
+    },
+    "customValueLists": {
+      "title": "Daftar nilai yang bisa dipakai ulang",
+      "body": "Tentukan daftar nilaimu sendiri dan pakai ulang baik dalam permintaanmu maupun dalam skenariomu."
     }
   },
   "authFailureToast": {
@@ -148,6 +192,7 @@
       "createEnvironmentFolder": "Buat folder lingkungan",
       "delete": "Hapus",
       "clone": "Klon",
+      "copySuffix": "salinan",
       "rename": "Ubah nama",
       "addToFavorites": "Tambah ke favorit",
       "removeFromFavorites": "Hapus dari favorit",
@@ -168,7 +213,8 @@
         "soap": "Permintaan SOAP",
         "websocket": "Permintaan WebSocket",
         "odata": "Permintaan OData",
-        "auth": "Permintaan autentikasi HTTP"
+        "auth": "Permintaan autentikasi HTTP",
+        "scenario": "Skenario"
       }
     },
     "deleteConfirm": {
@@ -177,6 +223,14 @@
       "itemMessage": "Apakah Anda yakin ingin menghapus \"{{name}}\"?",
       "confirm": "Hapus",
       "cancel": "Batal"
+    },
+    "scenarioDelete": {
+      "title": "Hapus permintaan yang dipakai skenario",
+      "message": "\"{{name}}\" digunakan dalam skenario berikut. Apa yang ingin Anda lakukan?",
+      "belongsTag": "milik skenario ini",
+      "moveInto": "Pindahkan ke skenario ini",
+      "affectsNote": "Menghapus permintaan ini juga akan menghapusnya dari skenario-skenario ini.",
+      "deleteAnyway": "Tetap hapus"
     }
   },
   "environment": {
@@ -248,7 +302,8 @@
     "addHeader": "Tambah header",
     "addParam": "Tambah parameter",
     "environmentSelector": {
-      "noEnvironment": "Tidak ada lingkungan"
+      "noEnvironment": "Tidak ada lingkungan",
+      "switchTooltip": "Ganti lingkungan"
     },
     "body": {
       "fileLabel": "File atau URL:",
@@ -301,7 +356,11 @@
       "dateTime": "Tanggal/waktu",
       "color": "Warna",
       "expression": "Ekspresi",
-      "boolean": "Boolean"
+      "boolean": "Boolean",
+      "null": "Null",
+      "list": "Daftar",
+      "variables": "Variabel",
+      "environment": "Lingkungan"
     },
     "apiEnums": "Tipe yang didefinisikan API",
     "customLists": "Tipe khusus",
@@ -354,11 +413,14 @@
       "folder": "Folder",
       "environment": "Lingkungan",
       "settings": "Pengaturan",
-      "tag": "Tag"
+      "tag": "Tag",
+      "scenario": "Skenario"
     },
     "tooltip": {
       "noDetails": "Tidak ada detail yang tersedia",
-      "noContent": "Tidak ada dokumentasi atau catatan"
+      "noContent": "Tidak ada dokumentasi atau catatan",
+      "noScenario": "Skenario tidak tersedia",
+      "scenarioKind": "skenario"
     }
   },
   "httpStatus": {
@@ -465,7 +527,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Apakah Anda yakin ingin menghapus \"{{fileName}}\" dari favorit?",
-    "noFilesHint": "Buka file atau buat yang baru untuk memulai",
     "newAriaLabel": "Buat koleksi baru",
     "openAriaLabel": "Buka koleksi dari disk",
     "landmarkLabel": "Selamat datang"
@@ -492,7 +553,9 @@
   },
   "common": {
     "cancel": "Batal",
-    "save": "Simpan"
+    "save": "Simpan",
+    "remove": "Hapus",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -742,6 +805,685 @@
       "previousMatch": "Kecocokan sebelumnya",
       "nextMatch": "Kecocokan berikutnya",
       "close": "Tutup"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "emptyTitle": "Di sini kosong…",
+      "emptyDragDrop": "Seret item dari pohon di sebelah kiri ke skenario Anda untuk menggunakannya di sini. Anda bahkan dapat mengimpor satu skenario ke dalam skenario lain!",
+      "emptyRightClick": "Klik kanan pada tempat kosong untuk menambahkan aksi ke skenario Anda"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "runOnEachEvent": "Jalankan pada setiap event yang diterima",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del",
+        "copy": "Salin",
+        "paste": "Tempel"
+      },
+      "expand": "Bentangkan",
+      "collapse": "Ciutkan"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "locked": "Pengeditan terkunci saat skenario berjalan",
+    "switch": {
+      "addCase": "Tambah kasus",
+      "removeCase": "Hapus kasus",
+      "case": "kasus"
+    },
+    "forEach": {
+      "items": "item",
+      "each": "tiap",
+      "done": "selesai",
+      "parallelism": "paralelisme"
+    },
+    "aggregate": {
+      "items": "item",
+      "result": "hasil",
+      "field": "bidang",
+      "separator": "pemisah",
+      "op": {
+        "count": "Jumlah",
+        "sum": "Total",
+        "min": "Min",
+        "max": "Maks",
+        "average": "Rata-rata",
+        "join": "Gabung"
+      }
+    },
+    "filter": {
+      "items": "item",
+      "rejected": "ditolak",
+      "kept": "disimpan",
+      "keepWhere": "simpan jika"
+    },
+    "wait": {
+      "then": "lalu",
+      "duration": "durasi"
+    },
+    "waitUntil": {
+      "until": "hingga",
+      "then": "lalu"
+    },
+    "arithmetic": {
+      "result": "hasil"
+    },
+    "nodes": {
+      "arithmetic": "Aritmatika",
+      "httpRequest": "Permintaan HTTP",
+      "runScenario": "Jalankan skenario",
+      "wait": "Tunggu",
+      "waitUntil": "Tunggu hingga",
+      "now": "Sekarang",
+      "comparator": "Pembanding",
+      "setVariable": "Atur variabel",
+      "getVariable": "Ambil variabel",
+      "addToList": "Tambahkan ke daftar",
+      "removeFromList": "Hapus dari daftar",
+      "cast": "Cast",
+      "regex": "Regex",
+      "json": "JSON",
+      "xml": "XML",
+      "yaml": "YAML",
+      "crypto": "Crypto",
+      "jwt": "JWT",
+      "datetime": "Date math",
+      "objectOp": "Object ops",
+      "url": "URL",
+      "random": "Random",
+      "throw": "Throw",
+      "retry": "Retry",
+      "listOp": "List ops",
+      "csv": "CSV",
+      "math": "Math",
+      "schema": "Schema validate",
+      "readFile": "Read file",
+      "writeFile": "Write file",
+      "timer": "Pengatur waktu",
+      "code": "Kode"
+    },
+    "comparator": {
+      "result": "hasil"
+    },
+    "boolean": {
+      "result": "hasil"
+    },
+    "map": {
+      "items": "item",
+      "mapped": "hasil map"
+    },
+    "log": {
+      "message": "pesan",
+      "data": "data"
+    },
+    "assert": {
+      "message": "pesan",
+      "operator": "operator",
+      "op": {
+        "eq": "equals",
+        "ne": "not equals",
+        "lt": "less than",
+        "lte": "less or equal",
+        "gt": "greater than",
+        "gte": "greater or equal",
+        "contains": "contains",
+        "isString": "is string",
+        "isNumber": "is number",
+        "isBoolean": "is boolean",
+        "isArray": "is array",
+        "isObject": "is object",
+        "isNull": "is null",
+        "exists": "exists",
+        "isEmpty": "is empty",
+        "matchesRegex": "matches regex",
+        "isOneOf": "is one of",
+        "deepEquals": "deep equals",
+        "lengthEq": "length ==",
+        "lengthGt": "length >",
+        "lengthLt": "length <"
+      }
+    },
+    "editRequest": "Edit permintaan",
+    "editScenario": "Edit skenario",
+    "object": {
+      "addProperty": "Tambah properti",
+      "removeProperty": "Hapus properti",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "output": {
+      "outputName": "Nama output",
+      "addOutput": "Tambah keluaran",
+      "removeOutput": "Hapus"
+    },
+    "input": {
+      "name": "Name",
+      "defaultType": "Default / type",
+      "addParam": "Tambah parameter",
+      "removeParam": "Hapus"
+    },
+    "runScenario": {
+      "orphanInput": "Tidak ada parameter \"{{name}}\" yang cocok di sub-skenario",
+      "orphanOutput": "Tidak ada output \"{{name}}\" yang cocok di sub-skenario",
+      "then": "lalu"
+    },
+    "validation": {
+      "duplicateName": "Nama \"{{name}}\" sudah dipakai oleh aksi lain.",
+      "panelTitle": "{{count}} kesalahan aksi",
+      "runBlocked": "Perbaiki {{count}} kesalahan tindakan sebelum menjalankan",
+      "focusBox": "Fokus ke aksi ini",
+      "showErrors": "Tampilkan kesalahan",
+      "input": {
+        "missingName": "Parameter masukan ini harus memiliki nama."
+      },
+      "dataLink": {
+        "emptyPath": "Tautan data masuk memerlukan jalur (JSON path).",
+        "badPath": "Jalur JSON \"{{path}}\" tautan data tidak valid."
+      },
+      "output": {
+        "missingName": "Keluaran ini harus memiliki nama.",
+        "duplicateName": "Nama \"{{name}}\" sudah dipakai oleh keluaran lain."
+      },
+      "getVariable": {
+        "noSelection": "Variabel harus dipilih.",
+        "unknown": "Variabel \"{{name}}\" tidak ada dalam skenario."
+      },
+      "setVariable": {
+        "missingName": "Variabel yang akan diatur harus memiliki nama."
+      },
+      "object": {
+        "propMissingName": "Setiap properti harus memiliki nama.",
+        "propDuplicate": "Nama properti \"{{name}}\" terduplikasi."
+      },
+      "arithmetic": {
+        "divisionByZero": "Pembagian dengan nol tidak mungkin."
+      },
+      "switch": {
+        "caseDuplicate": "Nilai kasus \"{{value}}\" terduplikasi."
+      },
+      "transform": {
+        "emptyTemplate": "Templat tidak boleh kosong.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "Permintaan yang ditautkan tidak ada lagi."
+      },
+      "runScenario": {
+        "missing": "Skenario yang ditautkan tidak ada lagi."
+      },
+      "file": {
+        "missingPath": "A file path is required."
+      }
+    },
+    "usage": {
+      "button": "Skenario yang menggunakan permintaan ini",
+      "title": "Permintaan ini digunakan dalam skenario:"
+    },
+    "inspector": {
+      "run": "Jalankan",
+      "debug": "Debug",
+      "undo": "Urungkan",
+      "redo": "Ulangi",
+      "step": "Langkah demi langkah",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "Jeda",
+      "noRunsHint": "Belum ada eksekusi terbaru untuk permintaan ini — jalankan dari sini untuk mengisi pratinjau skenario.",
+      "syntheticInfo": "Contoh data yang dihasilkan dari dokumentasi permintaan ini.",
+      "syntheticRunHint": "Contoh data — jalankan permintaan untuk menggantinya dengan hasil nyata.",
+      "stop": "Hentikan",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "copyThisLog": "Salin log ini",
+      "clearLogs": "Hapus log",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "Tampilkan log {{level}}",
+      "showLevelOnly": "Klik kanan: hanya level ini",
+      "noUserLogs": "No user logs (entries from the Log action) in this run.",
+      "helpTitle": "What this action does"
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Input diminta"
+    },
+    "runHistory": {
+      "title": "Riwayat eksekusi",
+      "tooltip": "Riwayat eksekusi",
+      "empty": "Belum ada eksekusi tercatat",
+      "noLogs": "Tidak ada log untuk eksekusi ini",
+      "logsTab": "Logs",
+      "graphTab": "Grafik",
+      "noGraph": "Tidak ada snapshot skenario untuk eksekusi ini",
+      "pin": "Sematkan",
+      "unpin": "Lepas sematan"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "Tambah breakpoint",
+      "remove": "Hapus breakpoint",
+      "toggle": "Alihkan breakpoint (F9)",
+      "reached": "Breakpoint tercapai — tindakan ini belum dijalankan. Tekan F5 untuk melanjutkan, atau F7 untuk melangkah.",
+      "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Alihkan minimap"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Tambah nilai",
+      "removeValue": "Hapus nilai",
+      "updateVariable": "Perbarui variabel sumber"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
+    },
+    "regex": {
+      "value": "value",
+      "operation": "operation",
+      "pattern": "pattern",
+      "flags": "flags",
+      "replacement": "replacement",
+      "result": "result",
+      "op": {
+        "extract": "extract",
+        "extractAll": "extract all",
+        "test": "test",
+        "replace": "replace",
+        "split": "split"
+      },
+      "flag": {
+        "i": "Case-insensitive",
+        "m": "Multiline (^ and $ match line breaks)",
+        "s": "Dotall (. matches newlines)"
+      }
+    },
+    "json": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "xml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "yaml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "crypto": {
+      "value": "value",
+      "operation": "operation",
+      "key": "key",
+      "keyPlaceholder": "secret",
+      "result": "result",
+      "op": {
+        "base64Encode": "base64 encode",
+        "base64Decode": "base64 decode",
+        "md5": "MD5",
+        "sha1": "SHA-1",
+        "sha256": "SHA-256",
+        "sha512": "SHA-512",
+        "hmacSha256": "HMAC-SHA256",
+        "uuid": "UUID v4"
+      }
+    },
+    "jwt": {
+      "value": "token",
+      "result": "result"
+    },
+    "datetime": {
+      "value": "date",
+      "operation": "operation",
+      "amount": "amount",
+      "unitLabel": "unit",
+      "format": "format",
+      "other": "second date",
+      "result": "result",
+      "op": {
+        "add": "add",
+        "subtract": "subtract",
+        "format": "format",
+        "diff": "diff"
+      },
+      "unit": {
+        "milliseconds": "milliseconds",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months",
+        "years": "years"
+      }
+    },
+    "objectOp": {
+      "value": "object",
+      "operation": "operation",
+      "path": "path",
+      "keys": "keys",
+      "setValue": "value",
+      "mergeWith": "merge with",
+      "result": "result",
+      "op": {
+        "get": "get",
+        "set": "set",
+        "merge": "merge",
+        "pick": "pick",
+        "omit": "omit",
+        "keys": "keys",
+        "values": "values"
+      }
+    },
+    "url": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "op": {
+        "encode": "encode",
+        "decode": "decode",
+        "parseQuery": "parse query",
+        "buildQuery": "build query",
+        "parseUrl": "parse URL"
+      }
+    },
+    "random": {
+      "operation": "operation",
+      "min": "min",
+      "max": "max",
+      "length": "length",
+      "items": "items",
+      "seed": "seed (optional)",
+      "seedPlaceholder": "reproducible",
+      "result": "result",
+      "op": {
+        "int": "integer",
+        "float": "float",
+        "string": "string",
+        "boolean": "boolean",
+        "pick": "pick"
+      }
+    },
+    "throw": {
+      "message": "message"
+    },
+    "retry": {
+      "maxAttempts": "max attempts",
+      "backoff": "backoff",
+      "delay": "delay",
+      "factor": "factor",
+      "retryOnError": "retry on error",
+      "retryOnStatus": "retry on HTTP status",
+      "retryOnFailure": "retry on any non-2xx",
+      "attempt": "attempt",
+      "exhausted": "exhausted",
+      "backoffOpt": {
+        "fixed": "fixed",
+        "linear": "linear",
+        "exponential": "exponential"
+      }
+    },
+    "menuGroups": {
+      "lists": "Lists",
+      "math": "Math",
+      "dataFormats": "Data formats",
+      "encoding": "Encoding",
+      "time": "Pewaktuan"
+    },
+    "listOp": {
+      "value": "list",
+      "operation": "operation",
+      "result": "result",
+      "key": "key",
+      "order": "order",
+      "depth": "depth",
+      "size": "size",
+      "start": "start",
+      "end": "end",
+      "op": {
+        "sort": "sort",
+        "unique": "unique",
+        "reverse": "reverse",
+        "flatten": "flatten",
+        "chunk": "chunk",
+        "slice": "slice",
+        "groupBy": "group by"
+      }
+    },
+    "csv": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "delimiter": "delimiter",
+      "header": "header row",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "math": {
+      "a": "value",
+      "operation": "operation",
+      "result": "result",
+      "b": "with",
+      "min": "min",
+      "max": "max",
+      "precision": "precision",
+      "op": {
+        "round": "round",
+        "floor": "floor",
+        "ceil": "ceil",
+        "trunc": "truncate",
+        "abs": "absolute",
+        "sign": "sign",
+        "sqrt": "square root",
+        "min": "min",
+        "max": "max",
+        "clamp": "clamp"
+      }
+    },
+    "schema": {
+      "value": "value",
+      "schema": "JSON Schema",
+      "valid": "valid",
+      "invalid": "invalid",
+      "errors": "errors",
+      "editTitle": "Edit JSON Schema"
+    },
+    "readFile": {
+      "path": "path",
+      "content": "content"
+    },
+    "writeFile": {
+      "path": "path",
+      "mode": "mode",
+      "content": "content"
+    },
+    "codeField": {
+      "title": "Edit",
+      "edit": "Open editor",
+      "moreLines": "+{{count}} lines",
+      "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "mode",
+      "modeOpt": {
+        "frequency": "frekuensi",
+        "cron": "cron"
+      },
+      "frequency": "frekuensi",
+      "unit": "satuan",
+      "cron": "cron",
+      "stop": "berhenti setelah",
+      "stopOpt": {
+        "none": "tidak pernah",
+        "duration": "durasi",
+        "endDate": "tanggal akhir"
+      },
+      "duration": "durasi",
+      "endDate": "tanggal akhir",
+      "tick": "tik"
+    },
+    "code": {
+      "input": "input",
+      "language": "Bahasa",
+      "code": "kode",
+      "modalTitle": "Edit kode",
+      "result": "hasil",
+      "timeout": "Batas waktu (s)"
+    },
+    "help": {
+      "input": "Injects the scenario's input parameters and constants into the graph.",
+      "output": "Declares one of the scenario's named results, read by a parent Run-scenario.",
+      "if": "Branches the flow to then / else by comparing two operands.",
+      "switch": "Routes the input to a matching case, or to default.",
+      "httpRequest": "Runs a saved API request and emits its response.",
+      "runScenario": "Runs another scenario as a reusable sub-step.",
+      "forEach": "Runs the body once per item of a collection, then continues.",
+      "for": "Loops over a number range, running the body for each value.",
+      "while": "Repeats the body while a condition holds (tested first).",
+      "doWhile": "Repeats the body while a condition holds (runs at least once).",
+      "aggregate": "Reduces a collection to one value (count, sum, min, max, average, join).",
+      "map": "Transforms every item of a collection into a new list.",
+      "filter": "Keeps the items that match a condition; routes the rest aside.",
+      "addToList": "Appends values to a list.",
+      "removeFromList": "Removes matching values from a list.",
+      "wait": "Pauses for a duration, then continues.",
+      "waitUntil": "Pauses until a given date/time, then continues.",
+      "now": "Emits the current date and time.",
+      "timer": "Fires its body on a repeating interval or a cron schedule.",
+      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "comparator": "Compares two values and emits true or false.",
+      "boolean": "Combines booleans with and / or / xor / not.",
+      "object": "Builds an object from its named inputs.",
+      "setVariable": "Stores a value into a run variable.",
+      "getVariable": "Reads a run variable's value.",
+      "transform": "Renders a Handlebars template from the input and run variables.",
+      "code": "Menjalankan kode Anda (TypeScript, JavaScript, Python, Lua, Ruby, atau R) di dalam sandbox dan mengembalikan hasilnya.",
+      "cast": "Converts a value to another type (number, string, boolean, date, list).",
+      "regex": "Matches, extracts, replaces or splits text with a regular expression.",
+      "json": "Parses a JSON string, or serialises a value to JSON.",
+      "xml": "Parses an XML string, or serialises a value to XML.",
+      "yaml": "Parses a YAML string, or serialises a value to YAML.",
+      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "jwt": "Decodes a JWT token into header, payload and signature.",
+      "datetime": "Shifts, formats or diffs a date.",
+      "retry": "Re-runs its body until it succeeds, with a backoff policy.",
+      "objectOp": "Reshapes an object (get/set a path, merge, pick, omit, keys, values).",
+      "url": "Encodes, decodes or parses URLs and query strings.",
+      "random": "Generates a random number, string, boolean or pick.",
+      "listOp": "Reshapes a list (sort, unique, reverse, flatten, chunk, slice, groupBy).",
+      "csv": "Parses a CSV string, or serialises a list to CSV.",
+      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "schema": "Validates a value against a JSON Schema.",
+      "readFile": "Reads a file's text content.",
+      "writeFile": "Writes or appends text to a file.",
+      "throw": "Deliberately fails with a message (for error branches and tests).",
+      "log": "Writes a message to the run log and passes the value through.",
+      "assert": "Checks a condition (chai-style) and routes to pass or fail."
+    },
+    "legend": {
+      "title": "Legenda",
+      "portsTitle": "Titik masukan",
+      "entryEventTrigger": "Titik masukan dipicu oleh sebuah peristiwa",
+      "entryDataTrigger": "Titik masukan dipicu oleh data",
+      "runWhenAllReceived": "Aksi dijalankan segera setelah semua peristiwa dan semua data diterima",
+      "runOnLaunchNoPredecessor": "Aksi tanpa pendahulu dijalankan segera setelah skenario dimulai",
+      "outPortsTitle": "Titik keluaran",
+      "outEmit": "Memancarkan peristiwa pemicu dan mengirim data",
+      "outEmitSignalOnly": "Memancarkan peristiwa pemicu tanpa mengirim data",
+      "genericOutPortsTitle": "Titik keluaran generik",
+      "outDone": "Peristiwa pemicu yang dipancarkan saat aksi selesai",
+      "outError": "Peristiwa pemicu yang dipicu saat terjadi kesalahan pada aksi",
+      "navTitle": "Navigasi",
+      "zoom": "zoom",
+      "pan": "pindahkan",
+      "boxSelect": "seleksi persegi panjang",
+      "select": "pilih / pilih ganda"
+    },
+    "cli": {
+      "title": "Run from the command line",
+      "intro": "Run this scenario without opening the app (CI, cron, script):",
+      "byId": "Designate by id",
+      "allLogs": "All logs",
+      "note": "`--out file` also writes the run-log to a file.",
+      "projectPlaceholder": "<project.restorm>"
     }
   }
 }

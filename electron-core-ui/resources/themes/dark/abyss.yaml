@@ -4,6 +4,9 @@ description: A dark theme with deep blue tones
 type: dark
 
 colors:
+  scenarioNode.background: "#15213c"
+  scenarioNode.headerBackground: "#1f2d4f"
+  scenarioNode.headerBackgroundSelected: "#0e4391"
   editor.background: "#000c18"
   editor.foreground: "#6688cc"
   focusBorder: "#596F99"

@@ -7,7 +7,9 @@
  * - Authentication (oauth2, apikey, bearer, basic, digest, hawk, aws, ntlm)
  * - Nested folders
  * - Variables
- * - Pre-request and test scripts (stored in documentation)
+ * - Pre-request and test scripts (kept in documentation AND, when a collection
+ *   carries scripts, lowered into an executable workflow scenario whose `code`
+ *   nodes run them verbatim — see `buildPostmanWorkflowScenario`)
  * - Example responses
  */
 
@@ -25,6 +27,8 @@ import { toHTTPMethod } from './httpMethodValidator'
 import { createTypedKeyValue } from '../../../shared/utils/createTypedKeyValue'
 import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
 import { postmanToApiDocumentation } from './transformers/postmanToApiDocumentation'
+import { workflowToScenario, type WorkflowRequestStep } from './workflowToScenario'
+import type { Scenario } from '../../../shared/types/scenario'
 
 // ============================================================================
 // Postman Collection v2.1.0 Types
@@ -510,6 +514,76 @@ export interface PostmanImportOptions {
 /**
  * Import a Postman Collection v2.1.0 and convert it to a Folder structure
  */
+/** Join a Postman event list's `exec` lines into a single verbatim script. */
+function eventsScript(events: PostmanEvent[] | undefined, listen: 'prerequest' | 'test'): string {
+  const exec = events?.find((e) => e.listen === listen)?.script?.exec
+  if (Array.isArray(exec)) return exec.join('\n')
+  return typeof exec === 'string' ? exec : ''
+}
+
+/** Concatenate the verbatim scripts that run at one point, dropping empties. */
+function joinScripts(parts: string[]): string {
+  return parts.map((p) => p.trim()).filter((p) => p !== '').join('\n\n')
+}
+
+/** Walk the Postman item tree in order (mirroring {@link convertItem}'s id +
+ * path logic) collecting one workflow step per HTTP request. Collection- and
+ * folder-level scripts are INHERITED into each request the way Postman runs them:
+ * pre-request = collection → folders (outer→inner) → request; test = request →
+ * folders (inner→outer) → collection. GraphQL requests are skipped. */
+function collectPostmanWorkflowSteps(
+  items: PostmanItem[],
+  pathPrefix: string,
+  out: WorkflowRequestStep[],
+  inheritedPre: string[],
+  inheritedTest: string[]
+): void {
+  for (const item of items) {
+    if (item.item && item.item.length > 0) {
+      // Folder: accumulate its level scripts for descendants.
+      collectPostmanWorkflowSteps(
+        item.item,
+        `${pathPrefix}/${item.name}`,
+        out,
+        [...inheritedPre, eventsScript(item.event, 'prerequest')],
+        [...inheritedTest, eventsScript(item.event, 'test')]
+      )
+    } else if (item.request && !isGraphQLRequest(item)) {
+      out.push({
+        requestId: generateId(`postman:request:${pathPrefix}:${item.name}`),
+        name: item.name,
+        // collection + folders (outer→inner) + request
+        prerequest: joinScripts([...inheritedPre, eventsScript(item.event, 'prerequest')]),
+        // request + folders (inner→outer) + collection
+        postresponse: joinScripts([eventsScript(item.event, 'test'), ...inheritedTest.slice().reverse()]),
+        source: 'postman'
+      })
+    }
+  }
+}
+
+/** Build a workflow scenario from a Postman collection — but ONLY when at least
+ * one request carries a pre/post script, INCLUDING inherited collection-/folder-
+ * level scripts (the "this is a workflow" signal). A fully script-free collection
+ * returns null (it imports as plain requests, unchanged). */
+function buildPostmanWorkflowScenario(collection: PostmanCollection): Scenario | null {
+  const steps: WorkflowRequestStep[] = []
+  collectPostmanWorkflowSteps(
+    collection.item,
+    '',
+    steps,
+    [eventsScript(collection.event, 'prerequest')],
+    [eventsScript(collection.event, 'test')]
+  )
+  const hasScripts = steps.some((s) => (s.prerequest ?? '').trim() !== '' || (s.postresponse ?? '').trim() !== '')
+  if (!hasScripts) return null
+  return workflowToScenario({
+    id: generateId(`postman:scenario:${collection.info.name}`),
+    name: `${collection.info.name} — Workflow`,
+    steps
+  })
+}
+
 export function importPostman(
   collection: PostmanCollection,
   options: PostmanImportOptions = {}
@@ -524,7 +598,11 @@ export function importPostman(
   const environment = extractEnvironment(collection, options.baseUrl)
 
   // Convert all items
-  const items = collection.item.map(item => convertItem(item, ''))
+  const baseItems = collection.item.map(item => convertItem(item, ''))
+  // Detect a workflow (requests with pre/post scripts) → an executable scenario
+  // appended alongside the requests; null for a script-free collection.
+  const workflowScenario = buildPostmanWorkflowScenario(collection)
+  const items = workflowScenario ? [...baseItems, workflowScenario] : baseItems
 
   // Case: parentFolder provided without environmentFolder - error
   if (options.parentFolder && !options.environmentFolder) {

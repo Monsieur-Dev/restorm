@@ -20,6 +20,7 @@ import {
   findFolderById,
   findEnvironmentFolderById,
   findRequestById,
+  findItemById,
   findItemWithBreadcrumbs,
   getNearestEnvironmentsForBreadcrumbs
 } from '../utils/treeSearch'
@@ -28,7 +29,8 @@ import type {
   FolderItem,
   EnvironmentFolder,
   Environment,
-  Request
+  Request,
+  Scenario
 } from '../../../shared/types/collections'
 import {
   isRequest,
@@ -40,7 +42,8 @@ import {
   isODataRequest,
   isAuthenticationRequest,
   isEnvironmentFolder,
-  isAnyFolder
+  isAnyFolder,
+  isScenario
 } from '../../../shared/types/collections'
 import type {
   FolderTab,
@@ -52,6 +55,7 @@ import type {
   WebSocketRequestTab,
   ODataRequestTab,
   AuthenticationRequestTab,
+  ScenarioEditorTab,
   ConsoleTab,
   FirewallTab,
   BreadcrumbItem
@@ -59,10 +63,14 @@ import type {
 import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, type MiniBrowserTab } from '../../../shared/types/editor'
 
 export interface UseWorkbenchTabsOptions {
-  rootItems: (EnvironmentFolder | Folder | Request)[]
+  rootItems: FolderItem[]
   focusedGroupId: string | null
   setWorkbenchTree: React.Dispatch<React.SetStateAction<WorkbenchTree>>
   registerTabDirtyState: (id: string, checksum: string) => void
+  /** Move workbench focus to a group. Called when a foreground open lands a tab
+   * in a group OTHER than the focused one (e.g. activating an already-open tab
+   * in a side-by-side split) so the destination pane actually gets selected. */
+  focusGroup?: (groupId: string) => void
 }
 
 /** Control whether opening a tab moves focus to it. Middle-click ("open in
@@ -76,8 +84,9 @@ export interface UseWorkbenchTabsReturn {
   workbenchRef: React.RefObject<RestormWorkbenchHandle | null>
   hasRestoredWorkbenchRef: React.RefObject<boolean>
   findIndexPathById: (items: FolderItem[], targetId: string) => number[] | null
-  buildTabId: (prefix: 'folder' | 'env-folder' | 'request', id: string) => string
+  buildTabId: (prefix: 'folder' | 'env-folder' | 'request' | 'scenario', id: string) => string
   openFolderTab: (folder: Folder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
+  openScenarioEditorTab: (scenario: Scenario, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
   openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => void
   openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[], options?: OpenTabOptions) => void
   handleRebuildTab: (tabId: string) => EditorTab | null
@@ -91,7 +100,8 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     rootItems,
     focusedGroupId,
     setWorkbenchTree,
-    registerTabDirtyState
+    registerTabDirtyState,
+    focusGroup
   } = options
 
   const workbenchRef = useRef<RestormWorkbenchHandle>(null)
@@ -155,7 +165,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
    * compat with already-persisted workbench state; new tabs are
    * always emitted as `request-id:<uuid>`.
    */
-  const buildTabId = useCallback((prefix: 'folder' | 'env-folder' | 'request', id: string): string => {
+  const buildTabId = useCallback((prefix: 'folder' | 'env-folder' | 'request' | 'scenario', id: string): string => {
     return `${prefix}-id:${id}`
   }, [])
 
@@ -187,6 +197,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     // content (the alternative is a blank workbench with a hidden tab
     // in an unreachable group).
     if (prev.groups.length === 0) {
+      if (focus && focusGroup) queueMicrotask(() => { focusGroup('restorm-main-group') })
       return {
         ...prev,
         groups: [
@@ -204,6 +215,9 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     const existingGroupId = findGroupIdForTab(prev.groups, tabId)
     if (existingGroupId) {
       if (!focus) return prev
+      // Move focus to the group that owns the tab, so a foreground open SELECTS
+      // it even when it already lives in another pane of a side-by-side split.
+      if (focusGroup) queueMicrotask(() => { focusGroup(existingGroupId) })
       return {
         ...prev,
         groups: updateGroupById(prev.groups, existingGroupId, (group) => ({
@@ -222,6 +236,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     if (typeof itemId === 'string' && itemId.length > 0) {
       const stale = findTabByItemId(prev.groups, itemId)
       if (stale !== null) {
+        if (focus && focusGroup) queueMicrotask(() => { focusGroup(stale.groupId) })
         const replacedGroups = updateGroupById(prev.groups, stale.groupId, (group) => {
           const nextActive = focus
             ? tabId
@@ -244,6 +259,8 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
       preferredGroupId && hasGroupWithId(prev.groups, preferredGroupId)
         ? preferredGroupId
         : findFirstTabGroupId(prev.groups) ?? 'restorm-main-group'
+
+    if (focus && focusGroup) queueMicrotask(() => { focusGroup(targetGroupId) })
 
     const updatedGroups = hasGroupWithId(prev.groups, targetGroupId)
       ? updateGroupById(prev.groups, targetGroupId, (group) => ({
@@ -270,7 +287,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
       ...prev,
       groups: updatedGroups
     }
-  }, [focusedGroupId, findTabByItemId])
+  }, [focusedGroupId, findTabByItemId, focusGroup])
 
   // Open a folder tab in the workbench
   const openFolderTab = useCallback((folder: Folder, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => {
@@ -292,6 +309,29 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
         allowFullscreen: true
       }
       return addTabToTree(prev, tabId, newTab, options, folder.id)
+    })
+  }, [buildTabId, registerTabDirtyState, setWorkbenchTree, addTabToTree])
+
+  // Open the scenario (dataflow graph) editor in the workbench
+  const openScenarioEditorTab = useCallback((scenario: Scenario, breadcrumbs: BreadcrumbItem[], options?: OpenTabOptions) => {
+    const tabId = buildTabId('scenario', scenario.id)
+
+    setTimeout(() => {
+      const scenarioChecksum = computeChecksum(JSON.parse(JSON.stringify(scenario)))
+      registerTabDirtyState(scenario.id, scenarioChecksum)
+    }, 500)
+
+    setWorkbenchTree((prev) => {
+      const newTab: ScenarioEditorTab = {
+        id: tabId,
+        tabType: 'scenario-editor',
+        title: scenario.name,
+        titleString: scenario.name,
+        scenario,
+        breadcrumbs,
+        allowFullscreen: true
+      }
+      return addTabToTree(prev, tabId, newTab, options, scenario.id)
     })
   }, [buildTabId, registerTabDirtyState, setWorkbenchTree, addTabToTree])
 
@@ -378,25 +418,25 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     [buildTabId, registerTabDirtyState, setWorkbenchTree, addTabToTree]
   )
 
-  const parseTabId = useCallback((tabId: string): { type: 'folder' | 'env-folder' | 'request'; indexPath?: number[]; legacyId?: string } | null => {
-    const indexMatch = /^(folder|env-folder|request)-idx:([0-9]+(?:\.[0-9]+)*)$/.exec(tabId)
+  const parseTabId = useCallback((tabId: string): { type: 'folder' | 'env-folder' | 'request' | 'scenario'; indexPath?: number[]; legacyId?: string } | null => {
+    const indexMatch = /^(folder|env-folder|request|scenario)-idx:([0-9]+(?:\.[0-9]+)*)$/.exec(tabId)
     if (indexMatch?.[1] && indexMatch[2]) {
       return {
-        type: indexMatch[1] as 'folder' | 'env-folder' | 'request',
+        type: indexMatch[1] as 'folder' | 'env-folder' | 'request' | 'scenario',
         indexPath: indexMatch[2].split('.').map((part) => Number(part))
       }
     }
-    const legacyMatch = /^(folder|env-folder|request)-id:(.+)$/.exec(tabId)
+    const legacyMatch = /^(folder|env-folder|request|scenario)-id:(.+)$/.exec(tabId)
     if (legacyMatch?.[1] && legacyMatch[2]) {
       return {
-        type: legacyMatch[1] as 'folder' | 'env-folder' | 'request',
+        type: legacyMatch[1] as 'folder' | 'env-folder' | 'request' | 'scenario',
         legacyId: legacyMatch[2]
       }
     }
-    const oldMatch = /^(folder|env-folder|request)-(.+)$/.exec(tabId)
+    const oldMatch = /^(folder|env-folder|request|scenario)-(.+)$/.exec(tabId)
     if (oldMatch?.[1] && oldMatch[2]) {
       return {
-        type: oldMatch[1] as 'folder' | 'env-folder' | 'request',
+        type: oldMatch[1] as 'folder' | 'env-folder' | 'request' | 'scenario',
         legacyId: oldMatch[2]
       }
     }
@@ -468,7 +508,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
 
     if (parsed.type === 'env-folder') {
       if (parsed.indexPath) {
-        const item = findItemByIndexPath(rootItems as FolderItem[], parsed.indexPath)
+        const item = findItemByIndexPath(rootItems, parsed.indexPath)
         if (item && isEnvironmentFolder(item)) {
           const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, item.id)
           return {
@@ -501,7 +541,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
 
     if (parsed.type === 'folder') {
       if (parsed.indexPath) {
-        const item = findItemByIndexPath(rootItems as FolderItem[], parsed.indexPath)
+        const item = findItemByIndexPath(rootItems, parsed.indexPath)
         if (item && isAnyFolder(item) && !isEnvironmentFolder(item)) {
           const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, item.id)
           return {
@@ -532,9 +572,28 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
       return null
     }
 
+    if (parsed.type === 'scenario') {
+      const item = parsed.indexPath
+        ? findItemByIndexPath(rootItems, parsed.indexPath)
+        : (parsed.legacyId ? findItemById(rootItems, parsed.legacyId) : null)
+      if (item && isScenario(item)) {
+        const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, item.id)
+        return {
+          id: tabId,
+          tabType: 'scenario-editor',
+          title: item.name,
+          titleString: item.name,
+          scenario: item,
+          breadcrumbs,
+          allowFullscreen: true
+        } as ScenarioEditorTab
+      }
+      return null
+    }
+
     let requestItem: FolderItem | null = null
     if (parsed.indexPath) {
-      requestItem = findItemByIndexPath(rootItems as FolderItem[], parsed.indexPath)
+      requestItem = findItemByIndexPath(rootItems, parsed.indexPath)
     } else if (parsed.legacyId) {
       requestItem = findRequestById(rootItems, parsed.legacyId) ?? null
     }
@@ -694,6 +753,7 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
     findIndexPathById,
     buildTabId,
     openFolderTab,
+    openScenarioEditorTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
     handleRebuildTab,

@@ -92,6 +92,50 @@
     "multiLanguage": {
       "title": "27 种语言!",
       "body": "Restorm 支持 27 种语言。英语、法语、西班牙语、德语、意大利语、日语、汉语、韩语等等 — 在设置里选择你的语言吧!"
+    },
+    "fromPostman": {
+      "title": "从 Postman 或 Bruno 过来的?",
+      "body": "我们帮你切换到 Restorm — 让你的迁移轻松无忧 ;)"
+    },
+    "chainRequests": {
+      "title": "有好几个请求要串起来?",
+      "body": "在场景中使用你的请求，添加条件，甚至把场景嵌套进其他场景里。"
+    },
+    "stepByStep": {
+      "title": "逐步运行你的场景",
+      "body": "一次一步，精确地看清发生了什么。你甚至可以设置断点。"
+    },
+    "cicd": {
+      "title": "在你的 CI/CD 流水线中运行场景",
+      "body": "以 headless 模式启动 Restorm，无界面运行一个场景并收集它的日志 — 用可视化方式构建的自动化测试。"
+    },
+    "nestedScenarios": {
+      "title": "看看场景里发生了什么",
+      "body": "一个场景可以调用另一个。在检查器中阅读每一条日志，并直接跳转到它来自的场景。"
+    },
+    "scenarioHistory": {
+      "title": "可是刚刚发生了什么?",
+      "body": "浏览你场景的执行历史。其中某个之后改动了? 别担心 — 我们保留了它当时的配置。"
+    },
+    "codeSandbox": {
+      "title": "场景与安全",
+      "body": "你可以在场景中编写代码 — 但它运行在安全的 sandbox 中，无法访问你的本地文件，也无法直接访问互联网。保持安全的最稳妥方式!"
+    },
+    "codeLanguages": {
+      "title": "想写点代码?",
+      "body": "直接在你的场景里写代码 — 用 TypeScript、JavaScript、Python、Lua、Ruby 或 R!"
+    },
+    "scenarioAi": {
+      "title": "可由 AI 驱动的场景",
+      "body": "Claude、Cursor、Copilot… 了解你的代码库：向它们索要量身定制的场景吧。一切都通过 MCP 暴露出来，用于创建、编辑和运行场景。"
+    },
+    "interactiveScenarios": {
+      "title": "交互式场景!",
+      "body": "让你的场景可参数化，甚至通过对话框询问用户该做什么。"
+    },
+    "customValueLists": {
+      "title": "可复用的值列表",
+      "body": "定义你自己的值列表，并在请求和场景中一并复用它们。"
     }
   },
   "authFailureToast": {
@@ -148,6 +192,7 @@
       "createEnvironmentFolder": "创建环境文件夹",
       "delete": "删除",
       "clone": "克隆",
+      "copySuffix": "副本",
       "rename": "重命名",
       "addToFavorites": "添加到收藏",
       "removeFromFavorites": "从收藏中移除",
@@ -168,7 +213,8 @@
         "soap": "SOAP 请求",
         "websocket": "WebSocket 请求",
         "odata": "OData 请求",
-        "auth": "HTTP 身份验证请求"
+        "auth": "HTTP 身份验证请求",
+        "scenario": "场景"
       }
     },
     "deleteConfirm": {
@@ -177,6 +223,14 @@
       "itemMessage": "确定要删除 \"{{name}}\" 吗？",
       "confirm": "删除",
       "cancel": "取消"
+    },
+    "scenarioDelete": {
+      "title": "删除被场景使用的请求",
+      "message": "「{{name}}」被用于以下场景。您想怎么做?",
+      "belongsTag": "属于此场景",
+      "moveInto": "移动到此场景",
+      "affectsNote": "删除此请求也会将其从这些场景中移除。",
+      "deleteAnyway": "仍然删除"
     }
   },
   "environment": {
@@ -248,7 +302,8 @@
     "addHeader": "添加请求头",
     "addParam": "添加参数",
     "environmentSelector": {
-      "noEnvironment": "无环境"
+      "noEnvironment": "无环境",
+      "switchTooltip": "切换环境"
     },
     "body": {
       "fileLabel": "文件或 URL：",
@@ -301,7 +356,11 @@
       "dateTime": "日期时间",
       "color": "颜色",
       "expression": "表达式",
-      "boolean": "布尔值"
+      "boolean": "布尔值",
+      "null": "Null",
+      "list": "列表",
+      "variables": "变量",
+      "environment": "环境"
     },
     "apiEnums": "API 定义的类型",
     "customLists": "自定义类型",
@@ -354,11 +413,14 @@
       "folder": "文件夹",
       "environment": "环境",
       "settings": "设置",
-      "tag": "标签"
+      "tag": "标签",
+      "scenario": "场景"
     },
     "tooltip": {
       "noDetails": "无可用详情",
-      "noContent": "无文档或笔记"
+      "noContent": "无文档或笔记",
+      "noScenario": "场景不可用",
+      "scenarioKind": "场景"
     }
   },
   "httpStatus": {
@@ -465,7 +527,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "确定要将 \"{{fileName}}\" 从收藏中移除吗？",
-    "noFilesHint": "打开一个文件或新建一个文件以开始",
     "newAriaLabel": "新建集合",
     "openAriaLabel": "从磁盘打开集合",
     "landmarkLabel": "欢迎"
@@ -492,7 +553,9 @@
   },
   "common": {
     "cancel": "取消",
-    "save": "保存"
+    "save": "保存",
+    "remove": "移除",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -667,7 +730,7 @@
         "trademark": "Postman 是 Postman, Inc. 的注册商标，此处仅用于兼容性参考。"
       },
       "insomnia": {
-        "description": "从 Insomnia 迁移过来？拖入你的导出文件。restorm 能识别其 v4 / v5 集合格式，将每个请求、请求头、正文和环境一并带过来，并以 restorm 树呈现。",
+        "description": "从 Insomnia 迁移过来？拖入您的导出文件。restorm 能识别其 v4 / v5 集合格式，将每个请求、请求头、正文和环境一并带过来，并以 restorm 树呈现。",
         "trademark": "Insomnia 是 Kong Inc. 的注册商标，此处仅用于兼容性参考。"
       },
       "bruno": {
@@ -675,7 +738,7 @@
         "trademark": "Bruno 是 Anoop M. D. 开发的开源软件（MIT），在此按其许可证条款使用。"
       },
       "graphql": {
-        "description": "粘贴 GraphQL SDL（.graphql / .gql 或从你的 GraphQL 客户端复制的内容），restorm 会为每个操作搭建一个请求，准确连接到对应的 query / mutation / subscription 类型，并已结构化变量。",
+        "description": "粘贴 GraphQL SDL（.graphql / .gql 或从您的 GraphQL 客户端复制的内容），restorm 会为每个操作搭建一个请求，准确连接到对应的 query / mutation / subscription 类型，并已结构化变量。",
         "trademark": "GraphQL 是 Joint Development Foundation 项目 GraphQL Foundation 的商标。"
       },
       "grpc": {
@@ -690,7 +753,7 @@
         "trademark": "WebSocket 是由 IETF（RFC 6455）和 W3C 标准化的协议。"
       },
       "kafka": {
-        "description": "粘贴 Apache Kafka bootstrap-server URL（或主题列表）——restorm 会按主题注册 consumer 与 producer，通过你的 Schema Registry 解码 Avro / Protobuf 载荷，并让你一键回放单个 offset。",
+        "description": "粘贴 Apache Kafka bootstrap-server URL（或主题列表）——restorm 会按主题注册 consumer 与 producer，通过您的 Schema Registry 解码 Avro / Protobuf 载荷，并让您一键回放单个 offset。",
         "trademark": "Apache Kafka 与 Kafka 标志是 Apache Software Foundation 的商标。"
       },
       "socketio": {
@@ -742,6 +805,685 @@
       "previousMatch": "上一个匹配",
       "nextMatch": "下一个匹配",
       "close": "关闭"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "emptyTitle": "这里是空的…",
+      "emptyDragDrop": "将左侧树中的项目拖入您的场景即可在此使用。您甚至可以将一个场景导入另一个场景中！",
+      "emptyRightClick": "右键单击空白处即可向场景添加操作"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "runOnEachEvent": "每次收到事件时执行",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del",
+        "copy": "复制",
+        "paste": "粘贴"
+      },
+      "expand": "展开",
+      "collapse": "折叠"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "locked": "场景运行时编辑已锁定",
+    "switch": {
+      "addCase": "添加分支",
+      "removeCase": "移除分支",
+      "case": "案例"
+    },
+    "forEach": {
+      "items": "项",
+      "each": "每项",
+      "done": "完成",
+      "parallelism": "并行度"
+    },
+    "aggregate": {
+      "items": "项",
+      "result": "结果",
+      "field": "字段",
+      "separator": "分隔符",
+      "op": {
+        "count": "计数",
+        "sum": "求和",
+        "min": "最小值",
+        "max": "最大值",
+        "average": "平均值",
+        "join": "连接"
+      }
+    },
+    "filter": {
+      "items": "项",
+      "rejected": "已排除",
+      "kept": "保留",
+      "keepWhere": "保留条件"
+    },
+    "wait": {
+      "then": "然后",
+      "duration": "时长"
+    },
+    "waitUntil": {
+      "until": "直到",
+      "then": "然后"
+    },
+    "arithmetic": {
+      "result": "结果"
+    },
+    "nodes": {
+      "arithmetic": "算术",
+      "httpRequest": "HTTP 请求",
+      "runScenario": "运行场景",
+      "wait": "等待",
+      "waitUntil": "等待至",
+      "now": "现在",
+      "comparator": "比较器",
+      "setVariable": "设置变量",
+      "getVariable": "获取变量",
+      "addToList": "添加到列表",
+      "removeFromList": "从列表移除",
+      "cast": "Cast",
+      "regex": "Regex",
+      "json": "JSON",
+      "xml": "XML",
+      "yaml": "YAML",
+      "crypto": "Crypto",
+      "jwt": "JWT",
+      "datetime": "Date math",
+      "objectOp": "Object ops",
+      "url": "URL",
+      "random": "Random",
+      "throw": "Throw",
+      "retry": "Retry",
+      "listOp": "List ops",
+      "csv": "CSV",
+      "math": "Math",
+      "schema": "Schema validate",
+      "readFile": "Read file",
+      "writeFile": "Write file",
+      "timer": "定时器",
+      "code": "代码"
+    },
+    "comparator": {
+      "result": "结果"
+    },
+    "boolean": {
+      "result": "结果"
+    },
+    "map": {
+      "items": "项",
+      "mapped": "已映射"
+    },
+    "log": {
+      "message": "消息",
+      "data": "数据"
+    },
+    "assert": {
+      "message": "消息",
+      "operator": "operator",
+      "op": {
+        "eq": "equals",
+        "ne": "not equals",
+        "lt": "less than",
+        "lte": "less or equal",
+        "gt": "greater than",
+        "gte": "greater or equal",
+        "contains": "contains",
+        "isString": "is string",
+        "isNumber": "is number",
+        "isBoolean": "is boolean",
+        "isArray": "is array",
+        "isObject": "is object",
+        "isNull": "is null",
+        "exists": "exists",
+        "isEmpty": "is empty",
+        "matchesRegex": "matches regex",
+        "isOneOf": "is one of",
+        "deepEquals": "deep equals",
+        "lengthEq": "length ==",
+        "lengthGt": "length >",
+        "lengthLt": "length <"
+      }
+    },
+    "editRequest": "编辑请求",
+    "editScenario": "编辑场景",
+    "object": {
+      "addProperty": "添加属性",
+      "removeProperty": "删除属性",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "output": {
+      "outputName": "输出名称",
+      "addOutput": "添加输出",
+      "removeOutput": "移除"
+    },
+    "input": {
+      "name": "Name",
+      "defaultType": "Default / type",
+      "addParam": "添加参数",
+      "removeParam": "移除"
+    },
+    "runScenario": {
+      "orphanInput": "子场景中没有匹配的参数“{{name}}”",
+      "orphanOutput": "子场景中没有匹配的输出“{{name}}”",
+      "then": "然后"
+    },
+    "validation": {
+      "duplicateName": "名称“{{name}}”已被另一个操作使用。",
+      "panelTitle": "{{count}} 个操作错误",
+      "runBlocked": "运行前请修复 {{count}} 个操作错误",
+      "focusBox": "定位到此操作",
+      "showErrors": "显示错误",
+      "input": {
+        "missingName": "此输入参数必须有名称。"
+      },
+      "dataLink": {
+        "emptyPath": "传入的数据连接需要一个 JSON 路径。",
+        "badPath": "数据连接的 JSON 路径“{{path}}”格式无效。"
+      },
+      "output": {
+        "missingName": "此输出必须有名称。",
+        "duplicateName": "名称“{{name}}”已被另一个输出使用。"
+      },
+      "getVariable": {
+        "noSelection": "必须选择一个变量。",
+        "unknown": "变量“{{name}}”在场景中不存在。"
+      },
+      "setVariable": {
+        "missingName": "要设置的变量必须有名称。"
+      },
+      "object": {
+        "propMissingName": "每个属性都必须有名称。",
+        "propDuplicate": "属性名“{{name}}”重复了。"
+      },
+      "arithmetic": {
+        "divisionByZero": "不能除以零。"
+      },
+      "switch": {
+        "caseDuplicate": "分支值「{{value}}」重复。"
+      },
+      "transform": {
+        "emptyTemplate": "模板不能为空。",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "关联的请求已不存在。"
+      },
+      "runScenario": {
+        "missing": "关联的场景已不存在。"
+      },
+      "file": {
+        "missingPath": "A file path is required."
+      }
+    },
+    "usage": {
+      "button": "使用此请求的场景",
+      "title": "此请求被用于以下场景:"
+    },
+    "inspector": {
+      "run": "运行",
+      "debug": "调试",
+      "undo": "撤销",
+      "redo": "重做",
+      "step": "单步",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "暂停",
+      "noRunsHint": "此请求暂无最近一次运行结果 — 从此处运行以填充场景预览。",
+      "syntheticInfo": "从此请求的文档生成的示例数据。",
+      "syntheticRunHint": "示例数据 — 执行请求以替换为真实结果。",
+      "stop": "停止",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "copyThisLog": "复制此日志",
+      "clearLogs": "清除日志",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "显示 {{level}} 日志",
+      "showLevelOnly": "右键单击：仅此级别",
+      "noUserLogs": "No user logs (entries from the Log action) in this run.",
+      "helpTitle": "What this action does"
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "需要输入"
+    },
+    "runHistory": {
+      "title": "运行历史",
+      "tooltip": "运行历史",
+      "empty": "暂无运行记录",
+      "noLogs": "此运行没有日志",
+      "logsTab": "Logs",
+      "graphTab": "图",
+      "noGraph": "此运行没有场景快照",
+      "pin": "固定",
+      "unpin": "取消固定"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "添加断点",
+      "remove": "移除断点",
+      "toggle": "切换断点 (F9)",
+      "reached": "已到达断点 — 此操作尚未执行。按 F5 继续，或按 F7 单步执行。",
+      "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "切换小地图"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "添加值",
+      "removeValue": "移除值",
+      "updateVariable": "更新源变量"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
+    },
+    "regex": {
+      "value": "value",
+      "operation": "operation",
+      "pattern": "pattern",
+      "flags": "flags",
+      "replacement": "replacement",
+      "result": "result",
+      "op": {
+        "extract": "extract",
+        "extractAll": "extract all",
+        "test": "test",
+        "replace": "replace",
+        "split": "split"
+      },
+      "flag": {
+        "i": "Case-insensitive",
+        "m": "Multiline (^ and $ match line breaks)",
+        "s": "Dotall (. matches newlines)"
+      }
+    },
+    "json": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "xml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "yaml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "crypto": {
+      "value": "value",
+      "operation": "operation",
+      "key": "key",
+      "keyPlaceholder": "secret",
+      "result": "result",
+      "op": {
+        "base64Encode": "base64 encode",
+        "base64Decode": "base64 decode",
+        "md5": "MD5",
+        "sha1": "SHA-1",
+        "sha256": "SHA-256",
+        "sha512": "SHA-512",
+        "hmacSha256": "HMAC-SHA256",
+        "uuid": "UUID v4"
+      }
+    },
+    "jwt": {
+      "value": "token",
+      "result": "result"
+    },
+    "datetime": {
+      "value": "date",
+      "operation": "operation",
+      "amount": "amount",
+      "unitLabel": "unit",
+      "format": "format",
+      "other": "second date",
+      "result": "result",
+      "op": {
+        "add": "add",
+        "subtract": "subtract",
+        "format": "format",
+        "diff": "diff"
+      },
+      "unit": {
+        "milliseconds": "milliseconds",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months",
+        "years": "years"
+      }
+    },
+    "objectOp": {
+      "value": "object",
+      "operation": "operation",
+      "path": "path",
+      "keys": "keys",
+      "setValue": "value",
+      "mergeWith": "merge with",
+      "result": "result",
+      "op": {
+        "get": "get",
+        "set": "set",
+        "merge": "merge",
+        "pick": "pick",
+        "omit": "omit",
+        "keys": "keys",
+        "values": "values"
+      }
+    },
+    "url": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "op": {
+        "encode": "encode",
+        "decode": "decode",
+        "parseQuery": "parse query",
+        "buildQuery": "build query",
+        "parseUrl": "parse URL"
+      }
+    },
+    "random": {
+      "operation": "operation",
+      "min": "min",
+      "max": "max",
+      "length": "length",
+      "items": "items",
+      "seed": "seed (optional)",
+      "seedPlaceholder": "reproducible",
+      "result": "result",
+      "op": {
+        "int": "integer",
+        "float": "float",
+        "string": "string",
+        "boolean": "boolean",
+        "pick": "pick"
+      }
+    },
+    "throw": {
+      "message": "message"
+    },
+    "retry": {
+      "maxAttempts": "max attempts",
+      "backoff": "backoff",
+      "delay": "delay",
+      "factor": "factor",
+      "retryOnError": "retry on error",
+      "retryOnStatus": "retry on HTTP status",
+      "retryOnFailure": "retry on any non-2xx",
+      "attempt": "attempt",
+      "exhausted": "exhausted",
+      "backoffOpt": {
+        "fixed": "fixed",
+        "linear": "linear",
+        "exponential": "exponential"
+      }
+    },
+    "menuGroups": {
+      "lists": "Lists",
+      "math": "Math",
+      "dataFormats": "Data formats",
+      "encoding": "Encoding",
+      "time": "定时"
+    },
+    "listOp": {
+      "value": "list",
+      "operation": "operation",
+      "result": "result",
+      "key": "key",
+      "order": "order",
+      "depth": "depth",
+      "size": "size",
+      "start": "start",
+      "end": "end",
+      "op": {
+        "sort": "sort",
+        "unique": "unique",
+        "reverse": "reverse",
+        "flatten": "flatten",
+        "chunk": "chunk",
+        "slice": "slice",
+        "groupBy": "group by"
+      }
+    },
+    "csv": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "delimiter": "delimiter",
+      "header": "header row",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "math": {
+      "a": "value",
+      "operation": "operation",
+      "result": "result",
+      "b": "with",
+      "min": "min",
+      "max": "max",
+      "precision": "precision",
+      "op": {
+        "round": "round",
+        "floor": "floor",
+        "ceil": "ceil",
+        "trunc": "truncate",
+        "abs": "absolute",
+        "sign": "sign",
+        "sqrt": "square root",
+        "min": "min",
+        "max": "max",
+        "clamp": "clamp"
+      }
+    },
+    "schema": {
+      "value": "value",
+      "schema": "JSON Schema",
+      "valid": "valid",
+      "invalid": "invalid",
+      "errors": "errors",
+      "editTitle": "Edit JSON Schema"
+    },
+    "readFile": {
+      "path": "path",
+      "content": "content"
+    },
+    "writeFile": {
+      "path": "path",
+      "mode": "mode",
+      "content": "content"
+    },
+    "codeField": {
+      "title": "Edit",
+      "edit": "Open editor",
+      "moreLines": "+{{count}} lines",
+      "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "模式",
+      "modeOpt": {
+        "frequency": "频率",
+        "cron": "cron"
+      },
+      "frequency": "频率",
+      "unit": "单位",
+      "cron": "cron",
+      "stop": "停止条件",
+      "stopOpt": {
+        "none": "从不",
+        "duration": "持续时间",
+        "endDate": "结束日期"
+      },
+      "duration": "持续时间",
+      "endDate": "结束日期",
+      "tick": "滴答"
+    },
+    "code": {
+      "input": "输入",
+      "language": "语言",
+      "code": "代码",
+      "modalTitle": "编辑代码",
+      "result": "结果",
+      "timeout": "超时 (秒)"
+    },
+    "help": {
+      "input": "Injects the scenario's input parameters and constants into the graph.",
+      "output": "Declares one of the scenario's named results, read by a parent Run-scenario.",
+      "if": "Branches the flow to then / else by comparing two operands.",
+      "switch": "Routes the input to a matching case, or to default.",
+      "httpRequest": "Runs a saved API request and emits its response.",
+      "runScenario": "Runs another scenario as a reusable sub-step.",
+      "forEach": "Runs the body once per item of a collection, then continues.",
+      "for": "Loops over a number range, running the body for each value.",
+      "while": "Repeats the body while a condition holds (tested first).",
+      "doWhile": "Repeats the body while a condition holds (runs at least once).",
+      "aggregate": "Reduces a collection to one value (count, sum, min, max, average, join).",
+      "map": "Transforms every item of a collection into a new list.",
+      "filter": "Keeps the items that match a condition; routes the rest aside.",
+      "addToList": "Appends values to a list.",
+      "removeFromList": "Removes matching values from a list.",
+      "wait": "Pauses for a duration, then continues.",
+      "waitUntil": "Pauses until a given date/time, then continues.",
+      "now": "Emits the current date and time.",
+      "timer": "Fires its body on a repeating interval or a cron schedule.",
+      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "comparator": "Compares two values and emits true or false.",
+      "boolean": "Combines booleans with and / or / xor / not.",
+      "object": "Builds an object from its named inputs.",
+      "setVariable": "Stores a value into a run variable.",
+      "getVariable": "Reads a run variable's value.",
+      "transform": "Renders a Handlebars template from the input and run variables.",
+      "code": "在沙箱中运行您的代码（TypeScript、JavaScript、Python、Lua、Ruby 或 R）并返回结果。",
+      "cast": "Converts a value to another type (number, string, boolean, date, list).",
+      "regex": "Matches, extracts, replaces or splits text with a regular expression.",
+      "json": "Parses a JSON string, or serialises a value to JSON.",
+      "xml": "Parses an XML string, or serialises a value to XML.",
+      "yaml": "Parses a YAML string, or serialises a value to YAML.",
+      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "jwt": "Decodes a JWT token into header, payload and signature.",
+      "datetime": "Shifts, formats or diffs a date.",
+      "retry": "Re-runs its body until it succeeds, with a backoff policy.",
+      "objectOp": "Reshapes an object (get/set a path, merge, pick, omit, keys, values).",
+      "url": "Encodes, decodes or parses URLs and query strings.",
+      "random": "Generates a random number, string, boolean or pick.",
+      "listOp": "Reshapes a list (sort, unique, reverse, flatten, chunk, slice, groupBy).",
+      "csv": "Parses a CSV string, or serialises a list to CSV.",
+      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "schema": "Validates a value against a JSON Schema.",
+      "readFile": "Reads a file's text content.",
+      "writeFile": "Writes or appends text to a file.",
+      "throw": "Deliberately fails with a message (for error branches and tests).",
+      "log": "Writes a message to the run log and passes the value through.",
+      "assert": "Checks a condition (chai-style) and routes to pass or fail."
+    },
+    "legend": {
+      "title": "图例",
+      "portsTitle": "输入点",
+      "entryEventTrigger": "由事件触发的输入点",
+      "entryDataTrigger": "由数据触发的输入点",
+      "runWhenAllReceived": "一旦接收到所有事件和所有数据，操作即会执行",
+      "runOnLaunchNoPredecessor": "没有前驱的操作会在场景启动时立即执行",
+      "outPortsTitle": "输出点",
+      "outEmit": "发出触发事件并发送数据",
+      "outEmitSignalOnly": "发出触发事件但不发送数据",
+      "genericOutPortsTitle": "通用输出点",
+      "outDone": "操作完成时发出的触发事件",
+      "outError": "操作出错时触发的事件",
+      "navTitle": "导航",
+      "zoom": "缩放",
+      "pan": "移动",
+      "boxSelect": "矩形选择",
+      "select": "选择 / 多选"
+    },
+    "cli": {
+      "title": "Run from the command line",
+      "intro": "Run this scenario without opening the app (CI, cron, script):",
+      "byId": "Designate by id",
+      "allLogs": "All logs",
+      "note": "`--out file` also writes the run-log to a file.",
+      "projectPlaceholder": "<project.restorm>"
     }
   }
 }

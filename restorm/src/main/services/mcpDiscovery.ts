@@ -5,10 +5,17 @@ import { logger } from 'electron-core-ui'
 
 /**
  * Where running restorm instances drop their per-pid lockfile so MCP
- * launchers can find them. Kept under `os.tmpdir()` so it's
- * cross-platform and self-cleaning on reboot.
+ * launchers can find them. `RESTORM_MCP_DIR` pins it to a fixed path; unset, it
+ * falls back to `os.tmpdir()` (cross-platform, self-cleaning on reboot).
+ *
+ * The resolution MUST stay identical to `DISCOVERY_DIR` in
+ * `scripts/mcp-launcher.mjs`: the launcher and restorm rendezvous here. When an
+ * embedder launches restorm with a `TMPDIR` different from the launcher's, the
+ * two `os.tmpdir()` values diverge and discovery silently fails — exporting the
+ * same `RESTORM_MCP_DIR` to both removes that race.
  */
-export const MCP_DISCOVERY_DIR = join(tmpdir(), 'restorm-mcp')
+const RESTORM_MCP_DIR = process.env.RESTORM_MCP_DIR?.trim()
+export const MCP_DISCOVERY_DIR = RESTORM_MCP_DIR !== undefined && RESTORM_MCP_DIR !== '' ? RESTORM_MCP_DIR : join(tmpdir(), 'restorm-mcp')
 
 export interface McpDiscoveryEntry {
   /** OS-picked port the MCP HTTP server is bound to. */
@@ -42,11 +49,14 @@ function lockfilePath(pid: number): string {
  */
 export async function writeMcpDiscoveryFile(entry: McpDiscoveryEntry, extraPath?: string): Promise<void> {
   try {
-    await fs.mkdir(MCP_DISCOVERY_DIR, { recursive: true })
+    // The lockfile carries the MCP bearer `token`, so keep both the dir and
+    // the file owner-only (0700/0600) — on a shared host another local user
+    // could otherwise read the token and reach the loopback MCP endpoint.
+    await fs.mkdir(MCP_DISCOVERY_DIR, { recursive: true, mode: 0o700 })
     const json = JSON.stringify(entry)
     const target = lockfilePath(entry.pid)
     const tmp = `${target}.${String(process.pid)}.tmp`
-    await fs.writeFile(tmp, json, 'utf8')
+    await fs.writeFile(tmp, json, { encoding: 'utf8', mode: 0o600 })
     await fs.rename(tmp, target)
 
     if (extraPath && extraPath !== target) {
@@ -54,8 +64,8 @@ export async function writeMcpDiscoveryFile(entry: McpDiscoveryEntry, extraPath?
       // poll that exact path after spawning us — write it too. Same
       // atomic-rename pattern.
       const extraTmp = `${extraPath}.${String(process.pid)}.tmp`
-      await fs.mkdir(join(extraPath, '..'), { recursive: true })
-      await fs.writeFile(extraTmp, json, 'utf8')
+      await fs.mkdir(join(extraPath, '..'), { recursive: true, mode: 0o700 })
+      await fs.writeFile(extraTmp, json, { encoding: 'utf8', mode: 0o600 })
       await fs.rename(extraTmp, extraPath)
     }
   } catch (error) {

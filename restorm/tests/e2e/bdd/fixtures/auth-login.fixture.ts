@@ -49,7 +49,7 @@ export const test = base.extend<AuthLoginFixtures>({
       // stay deterministic across re-runs.
       const bootstrap = await electron.launch({
         executablePath: electronExePath,
-        args: ['--no-sandbox', '--ozone-platform=x11', mainJsPath, '--clear-settings'],
+        args: ['--no-sandbox', '--ozone-platform=x11', '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows', mainJsPath, '--clear-settings'],
         env: baseEnv
       })
       bootstrap.process().kill('SIGKILL')
@@ -57,7 +57,7 @@ export const test = base.extend<AuthLoginFixtures>({
 
       const app = await electron.launch({
         executablePath: electronExePath,
-        args: ['--no-sandbox', '--ozone-platform=x11', mainJsPath],
+        args: ['--no-sandbox', '--ozone-platform=x11', '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows', mainJsPath],
         env: baseEnv
       })
 

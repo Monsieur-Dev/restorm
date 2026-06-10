@@ -289,7 +289,7 @@ export const LocalAuthenticationRequestForm: React.FC<LocalAuthenticationRequest
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
               color: 'var(--descriptionForeground)',
-              fontFamily: 'var(--vscode-editor-font-family, monospace)',
+              fontFamily: 'var(--editor-font-family, monospace)',
               fontSize: 12
             }}
             onMouseEnter={() => {

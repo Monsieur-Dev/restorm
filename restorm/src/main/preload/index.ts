@@ -824,6 +824,30 @@ contextBridge.exposeInMainWorld('restorm', {
       return () => { ipcRenderer.removeListener('request-usage:changed', handler) }
     }
   },
+  scenarioUsage: {
+    /** Fetch the full per-scenario usage map: count + lastRunAt + last
+     * 10 run timestamps, keyed by scenario id. The EmptyBench recent-activity
+     * lists merge this with `requestUsage` so recently-run scenarios show up
+     * next to recently-sent requests. */
+    get: async (): Promise<Record<string, { count: number; lastRunAt: string; history: string[] }>> => {
+      const result: unknown = await ipcRenderer.invoke('scenario-usage:get')
+      return result as Record<string, { count: number; lastRunAt: string; history: string[] }>
+    },
+    /** Subscribe to push events fired every time the map mutates (a new run
+     * recorded). The callback receives the fresh full snapshot. */
+    onChanged: (
+      callback: (map: Record<string, { count: number; lastRunAt: string; history: string[] }>) => void
+    ): (() => void) => {
+      const handler = (
+        _event: Electron.IpcRendererEvent,
+        map: Record<string, { count: number; lastRunAt: string; history: string[] }>
+      ): void => {
+        callback(map)
+      }
+      ipcRenderer.on('scenario-usage:changed', handler)
+      return () => { ipcRenderer.removeListener('scenario-usage:changed', handler) }
+    }
+  },
   runtime: {
     /** Per-boot runtime config (MCP + GraphQL endpoint). Both ports
      * are picked at startup — the renderer reads them once and caches
@@ -850,7 +874,7 @@ contextBridge.exposeInMainWorld('restorm', {
     /** Push the active workbench tab to main so MCP tools (`get_current_tab`,
      * `restorm://active-tab`) can read it without a renderer round-trip.
      * Renderer fires this on every active-tab change; main caches it. */
-    pushMcpActiveTab: (payload: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | null }): void => {
+    pushMcpActiveTab: (payload: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | null }): void => {
       ipcRenderer.send('mcp:active-tab-changed', payload)
     },
     /** Push a per-env-folder selected-env id. `envId: null` clears the
@@ -859,23 +883,93 @@ contextBridge.exposeInMainWorld('restorm', {
     pushMcpActiveEnv: (payload: { envFolderId: string; envId: string | null }): void => {
       ipcRenderer.send('mcp:active-env-changed', payload)
     },
+    /** Push the resolved item-favorites for the active project so the MCP
+     * `list_favorites` tool can read them (the favorites store lives in the
+     * renderer). Called on mount + whenever favorites change. */
+    pushMcpFavorites: (payload: { projectUuid: string | null; favorites: { id: string; name: string; type: string }[] }): void => {
+      ipcRenderer.send('mcp:favorites-changed', payload)
+    },
+    /** Push an open scenario editor's React-Flow-measured node rects (position
+     * + size) to main, so the scenario MCP read tools can report box sizes
+     * (size isn't persisted in the model). Lets an agent lay out a scenario
+     * without overlap, no screenshots needed. */
+    pushScenarioLayout: (payload: { scenarioId: string; rects: Record<string, { x: number; y: number; width: number; height: number }> }): void => {
+      ipcRenderer.send('scenario:layout', payload)
+    },
+    /** Run a scenario box (request / wait) through the main-process engine —
+     * the same path the MCP `run_scenario_node` tool uses. Resolves with the
+     * run summary; rejects (the thrown engine error) on failure / cancel. */
+    runScenarioNode: (scenarioId: string, nodeId: string): Promise<unknown> =>
+      ipcRenderer.invoke('scenario:run-node', scenarioId, nodeId),
+    /** Cancel a box's in-flight run. The awaiting `runScenarioNode` promise
+     * then rejects (`wait`) or settles (`request` abort), clearing the run. */
+    cancelScenarioNode: (scenarioId: string, nodeId: string): Promise<{ cancelled: boolean; reason?: string }> =>
+      ipcRenderer.invoke('scenario:cancel-node', scenarioId, nodeId) as Promise<{ cancelled: boolean; reason?: string }>,
+    /** A box's last run result as its output context (resolved request, raw
+     * request, response). Null if it hasn't run yet. Feeds the JSON-path
+     * selector popover on a data link's receiving input. */
+    getScenarioNodeResult: (scenarioId: string, nodeId: string): Promise<Record<string, unknown> | null> =>
+      ipcRenderer.invoke('scenario:node-result', scenarioId, nodeId) as Promise<Record<string, unknown> | null>,
+    /** Full-scenario engine (Phase 2): start a run end-to-end. Returns
+     * a runId the caller uses for subsequent pause / step / abort. */
+    scenarioEngineStart: (scenarioId: string, params?: Record<string, unknown>, startPaused?: boolean, breakpoints?: string[], debug?: boolean): Promise<{ runId: string }> =>
+      ipcRenderer.invoke('scenario:engine:start', scenarioId, params, startPaused, breakpoints, debug) as Promise<{ runId: string }>,
+    scenarioEnginePause: (runId: string): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke('scenario:engine:pause', runId) as Promise<{ ok: boolean }>,
+    scenarioEngineResume: (runId: string): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke('scenario:engine:resume', runId) as Promise<{ ok: boolean }>,
+    scenarioEngineStep: (runId: string): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke('scenario:engine:step', runId) as Promise<{ ok: boolean }>,
+    scenarioEngineSetDebug: (runId: string, enabled: boolean): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke('scenario:engine:set-debug', runId, enabled) as Promise<{ ok: boolean }>,
+    scenarioEngineSetBreakpoints: (runId: string, ids: string[]): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke('scenario:engine:set-breakpoints', runId, ids) as Promise<{ ok: boolean }>,
+    scenarioEngineAbort: (runId: string, reason?: string): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke('scenario:engine:abort', runId, reason) as Promise<{ ok: boolean }>,
+    scenarioEngineReadLog: (runId: string): Promise<unknown[]> =>
+      ipcRenderer.invoke('scenario:engine:read-log', runId) as Promise<unknown[]>,
+    /** The run + every sub-run it launched, each with metadata + log —
+     * powers the inspector's run-logs panel (incl. sub-scenario logs). */
+    scenarioEngineRunTree: (runId: string): Promise<unknown[]> =>
+      ipcRenderer.invoke('scenario:engine:run-tree', runId) as Promise<unknown[]>,
+    scenarioEngineResolveUserInput: (runId: string, requestId: string, value: unknown): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke('scenario:engine:resolve-user-input', runId, requestId, value) as Promise<{ ok: boolean }>,
+    scenarioEngineCancelUserInput: (runId: string, requestId: string): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke('scenario:engine:cancel-user-input', runId, requestId) as Promise<{ ok: boolean }>,
+    /** Persisted run history (disk archive). `list` returns lightweight
+     * entries for a scenario; `detail` the full logs + scenario snapshots;
+     * `togglePin` pins/unpins a run so it survives retention pruning. */
+    scenarioRunHistoryList: (scenarioId: string): Promise<unknown[]> =>
+      ipcRenderer.invoke('scenario:history:list', scenarioId) as Promise<unknown[]>,
+    scenarioRunHistoryDetail: (guid: string): Promise<unknown> =>
+      ipcRenderer.invoke('scenario:history:detail', guid) as Promise<unknown>,
+    scenarioRunHistoryTogglePin: (guid: string, pinned: boolean): Promise<boolean> =>
+      ipcRenderer.invoke('scenario:history:toggle-pin', guid, pinned) as Promise<boolean>,
+    /** Subscribe to engine events (node-started/-completed/data-flow/run-…).
+     * Returns an unsubscribe function. The renderer animates the graph
+     * + edge beams off these events. */
+    onScenarioEngineEvent: (cb: (event: unknown) => void): (() => void) => {
+      const handler = (_e: unknown, ev: unknown): void => { cb(ev) }
+      ipcRenderer.on('scenario:engine:event', handler)
+      return () => { ipcRenderer.off('scenario:engine:event', handler) }
+    },
     /** Full-snapshot push fired on renderer (re)load — useful after an
      * HMR cycle so main's cache is always consistent with the renderer. */
     pushMcpActiveStateBootstrap: (payload: {
-      tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | null }
+      tab: { tabId: string | null; itemId: string | null; kind: 'request' | 'folder' | 'env-folder' | 'scenario' | null }
       envByFolder: Record<string, string | null>
     }): void => {
       ipcRenderer.send('mcp:active-state-bootstrap', payload)
     },
     /** Subscribe to MCP `open_tab` requests. Payload `{itemId, kind}`. */
-    onMcpOpenTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void): (() => void) => {
-      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) }
+    onMcpOpenTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) }
       ipcRenderer.on('mcp:open-tab', handler)
       return () => { ipcRenderer.off('mcp:open-tab', handler) }
     },
     /** Subscribe to MCP `reveal_in_tree` requests. */
-    onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void): (() => void) => {
-      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) }
+    onMcpRevealInTree: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) }
       ipcRenderer.on('mcp:reveal-in-tree', handler)
       return () => { ipcRenderer.off('mcp:reveal-in-tree', handler) }
     },
@@ -890,8 +984,8 @@ contextBridge.exposeInMainWorld('restorm', {
       return () => { ipcRenderer.off('mcp:tree-replace', handler) }
     },
     /** Subscribe to MCP `close_tab` requests. Payload `{itemId, kind}`. */
-    onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) => void): (() => void) => {
-      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' }) }
+    onMcpCloseTab: (callback: (payload: { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; kind: 'request' | 'folder' | 'env-folder' | 'scenario' }) }
       ipcRenderer.on('mcp:close-tab', handler)
       return () => { ipcRenderer.off('mcp:close-tab', handler) }
     },
@@ -915,6 +1009,15 @@ contextBridge.exposeInMainWorld('restorm', {
       const handler = (_e: unknown, payload: unknown): void => { callback(payload as { itemId: string; patch: Record<string, unknown> }) }
       ipcRenderer.on('mcp:request-updated', handler)
       return () => { ipcRenderer.off('mcp:request-updated', handler) }
+    },
+    /** Subscribe to MCP scenario mutations (create/update/move/delete node,
+     * connect/disconnect). Carries the full nodes + edges so an open editor
+     * re-seeds its React Flow state in place (the seed effect otherwise
+     * guards against same-id re-seeds to protect in-progress edits). */
+    onMcpScenarioUpdated: (callback: (payload: { scenarioId: string; nodes: unknown[]; edges: unknown[]; name?: string; params?: unknown[] }) => void): (() => void) => {
+      const handler = (_e: unknown, payload: unknown): void => { callback(payload as { scenarioId: string; nodes: unknown[]; edges: unknown[]; name?: string; params?: unknown[] }) }
+      ipcRenderer.on('mcp:scenario-updated', handler)
+      return () => { ipcRenderer.off('mcp:scenario-updated', handler) }
     },
     /** Subscribe to MCP `update_folder`. Same shape as request-updated
      * but for Folder / EnvironmentFolder. Renderer applies the patch

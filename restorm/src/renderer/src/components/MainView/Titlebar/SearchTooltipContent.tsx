@@ -31,9 +31,11 @@ import { useRestormStore } from '../../../store/restormStore'
 import { findOperationForRoute, type RouteLike } from '../../../../../shared/utils/findOperationForRoute'
 import { routeFromRequest } from '../../../hooks/routeFromRequest'
 import { resolveUrlAgainstEnv, flattenEnvVars } from '../../../../../shared/utils/resolveUrlAgainstEnv'
-import { isEnvironmentFolder, isRequest } from '../../../../../shared/types/folderTypes'
-import type { EnvironmentFolder, Folder } from '../../../../../shared/types/collections'
+import { isEnvironmentFolder, isRequest, isAnyFolder } from '../../../../../shared/types/folderTypes'
+import { isScenario } from '../../../../../shared/types/collections'
+import type { EnvironmentFolder, Folder, Scenario } from '../../../../../shared/types/collections'
 import type { Request } from '../../../../../shared/types/collections'
+import { ScenarioGraphPreview } from './ScenarioGraphPreview'
 import './SearchTooltipContent.css'
 
 const compiledTemplate = Handlebars.compile(requestDetailsTemplate)
@@ -65,7 +67,7 @@ function findRequestWithParent(
 function walkFolder(folder: Folder | EnvironmentFolder, requestId: string): Request | null {
   for (const item of folder.items) {
     if (isRequest(item) && item.id === requestId) return item
-    if (!isRequest(item)) {
+    if (isAnyFolder(item)) {
       const inner = walkFolder(item, requestId)
       if (inner) return inner
     }
@@ -87,10 +89,63 @@ function findFolderInTree(
 
 function walkForFolder(folder: Folder | EnvironmentFolder, folderId: string): Folder | EnvironmentFolder | null {
   for (const item of folder.items) {
-    if (isRequest(item)) continue
+    if (!isAnyFolder(item)) continue
     if (item.id === folderId) return item
     const inner = walkForFolder(item, folderId)
     if (inner) return inner
+  }
+  return null
+}
+
+/** Walk the tree to find the scenario the result references.
+ * Scenarios can live at the root, inside an env-folder / folder,
+ * or nested inside another scenario (folder-like container). */
+function findScenarioInTree(
+  collections: EnvironmentFolder[],
+  scenarioId: string
+): Scenario | null {
+  for (const envFolder of collections) {
+    const found = walkForScenario(envFolder, scenarioId)
+    if (found) return found
+  }
+  return null
+}
+
+/** Walk the live tree to find the env-folder ancestor of an item
+ * (request, folder, or scenario), so the tooltip can read the
+ * always-fresh `tagColors` map straight from the model. The search
+ * index only caches tag labels, so we look the colours up here. */
+function findOwningEnvFolder(
+  collections: EnvironmentFolder[],
+  itemId: string
+): EnvironmentFolder | null {
+  for (const envFolder of collections) {
+    if (envFolder.id === itemId) return envFolder
+    if (containsItem(envFolder, itemId)) return envFolder
+  }
+  return null
+}
+
+function containsItem(folder: Folder | EnvironmentFolder | Scenario, itemId: string): boolean {
+  const items = 'items' in folder ? folder.items ?? [] : []
+  for (const item of items) {
+    if (item.id === itemId) return true
+    if ('items' in item && containsItem(item, itemId)) return true
+  }
+  return false
+}
+
+function walkForScenario(folder: Folder | EnvironmentFolder | Scenario, scenarioId: string): Scenario | null {
+  const items = 'items' in folder ? folder.items ?? [] : []
+  for (const item of items) {
+    if (isScenario(item) && item.id === scenarioId) return item
+    if (isScenario(item)) {
+      const inner = walkForScenario(item, scenarioId)
+      if (inner) return inner
+    } else if (isAnyFolder(item)) {
+      const inner = walkForScenario(item, scenarioId)
+      if (inner) return inner
+    }
   }
   return null
 }
@@ -121,9 +176,21 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
   const restormMetadata = metadata as RestormSearchMetadata | undefined
   const notes = restormMetadata?.notes
   const breadcrumb = restormMetadata?.breadcrumb ?? []
+  // Live tagColors lookup — the search index doesn't store colours
+  // (only labels), so we walk the tree from the result's owning
+  // env-folder at render time. That picks up colour edits the user
+  // made after the index was built without us having to re-index on
+  // every colour change.
+  const liveTagColors = useMemo<Record<string, string> | undefined>(() => {
+    const owning = findOwningEnvFolder(collections, resultId)
+    return owning?.tagColors
+  }, [collections, resultId])
   const ribbonBookmarks: Bookmark[] = useMemo(
-    () => (restormMetadata?.tags ?? []).map((label) => ({ label })),
-    [restormMetadata]
+    () => (restormMetadata?.tags ?? []).map((label) => {
+      const color = liveTagColors?.[label]
+      return color !== undefined ? { label, color } : { label }
+    }),
+    [restormMetadata, liveTagColors]
   )
 
   const requestDetailsMarkdown = useMemo(() => {
@@ -229,6 +296,45 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
         <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
           {docContent}
         </div>
+      </div>
+    )
+  }
+
+  if (category === 'scenario') {
+    // Scenario preview: same chrome as the request DocumentationHost
+    // branch — bookmark ribbon, breadcrumb, big H1 title, then a
+    // `[Badge SCENARIO] scenario` kind row right under it — followed
+    // by the (optional) notes and a read-only React Flow embed of
+    // the scenario's graph. Falls back to a notes-only panel when
+    // the scenario id doesn't resolve (stale index).
+    const scenario = findScenarioInTree(collections, resultId)
+    return (
+      <div
+        style={{
+          position: 'relative',
+          height: 'min(640px, calc(100vh - 90px))',
+          maxHeight: 'calc(100vh - 90px)',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden'
+        }}
+        onWheelCapture={(e) => { e.stopPropagation() }}
+        data-testid="search-tooltip-scenario"
+      >
+        {Header}
+        <h1 className="search-tooltip-scenario-title">{resultTitle}</h1>
+        <div className="search-tooltip-scenario-kind">
+          <Badge type="SCENARIO" />
+          <span>{t('search.tooltip.scenarioKind', 'scenario')}</span>
+        </div>
+        {notes && (
+          <div style={{ marginBottom: 8, flexShrink: 0 }}>
+            <MarkdownViewer value={notes} style={{ maxHeight: '40vh' }} data-testid="markdown-viewer-scenario-notes" />
+          </div>
+        )}
+        {scenario
+          ? <div style={{ flex: 1, minHeight: 0, minWidth: 0 }}><ScenarioGraphPreview scenario={scenario} /></div>
+          : <div style={{ flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.6 }}>{t('search.tooltip.noScenario', 'Scenario unavailable')}</div>}
       </div>
     )
   }

@@ -5,9 +5,10 @@
 import type { ListViewItemData } from 'electron-core-ui/renderer'
 import { IconView } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
-import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, AuthenticationRequest } from '../../../shared/types/collections'
-import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest } from '../../../shared/types/collections'
+import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, AuthenticationRequest, Scenario } from '../../../shared/types/collections'
+import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isScenario } from '../../../shared/types/collections'
 import React, { type ReactNode } from 'react'
+import { ScenarioRunningBadge } from '../components/common/ScenarioRunningBadge'
 
 /** Convert an Icon to a ListView-compatible icon (string for codicons, ReactNode for others) */
 function toListViewIcon(icon: Icon | undefined, fallback: string): string | ReactNode {
@@ -185,6 +186,35 @@ function authenticationRequestToListViewItem(
 }
 
 /**
+ * Convert a Scenario to a ListViewItemData. Renders the circuit-board
+ * scenario badge so dataflow graphs are visually distinct from requests.
+ * A scenario doubles as a folder-like container: its `items` (requests +
+ * sub-folders authored inside it) render as expandable children.
+ */
+function scenarioToListViewItem(
+  scenario: Scenario,
+  options: FolderToListViewOptions
+): ListViewItemData {
+  const badge = options.renderProtocolBadge?.('scenario', 'SCENARIO')
+  // Decorate the badge with the live-run border-beam (lit while the scenario
+  // has an in-flight run), the same orbiting trail the graph paints on a
+  // running node box.
+  const icon = badge != null
+    ? React.createElement(ScenarioRunningBadge, { scenarioId: scenario.id }, badge)
+    : badge
+  const isExpanded = options.expandedIds.has(scenario.id)
+  const children = (scenario.items ?? []).map((item) => folderItemToListViewItem(item, options))
+  return {
+    id: scenario.id,
+    title: scenario.name,
+    isExpandable: children.length > 0,
+    isExpanded,
+    icon,
+    children
+  }
+}
+
+/**
  * Convert a FolderItem (Folder, EnvironmentFolder, or Request) to ListViewItemData
  */
 export function folderItemToListViewItem(
@@ -213,6 +243,10 @@ export function folderItemToListViewItem(
     if (isAuthenticationRequest(item)) {
       return authenticationRequestToListViewItem(item, options)
     }
+  }
+
+  if (isScenario(item)) {
+    return scenarioToListViewItem(item, options)
   }
 
   if (isEnvironmentFolder(item)) {
@@ -308,4 +342,26 @@ export function collectAllFolderIds(folder: Folder | EnvironmentFolder): string[
   }
 
   return ids
+}
+
+/**
+ * Collect every expandable container id in a tree — folders, env-folders, and
+ * scenarios (which behave like folders, holding child items). Seeds the
+ * sidebar's persisted expand/collapse set, so a scenario's open/closed state
+ * survives a reload exactly like a folder's (a scenario excluded from the
+ * known set would have its persisted id filtered out on restore).
+ */
+export function collectExpandableIds(item: FolderItem): string[] {
+  // A scenario is a container too, but it carries `type:'scenario'` and an
+  // optional `items` — branch it first (an empty scenario isn't expandable).
+  if (isScenario(item)) {
+    return item.items && item.items.length > 0 ? [item.id, ...item.items.flatMap(collectExpandableIds)] : []
+  }
+  // Folders AND env-folders. Test `'items' in item` rather than `isAnyFolder`:
+  // the latter requires `configuration`, which env-folders lack, so it would
+  // drop a root env-folder and leave it collapsed on load.
+  if ('items' in item) {
+    return [item.id, ...item.items.flatMap(collectExpandableIds)]
+  }
+  return []
 }

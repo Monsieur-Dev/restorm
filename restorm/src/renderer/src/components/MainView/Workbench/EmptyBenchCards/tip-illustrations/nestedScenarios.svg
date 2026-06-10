@@ -1,0 +1,105 @@
+<svg viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg" class="empty-bench-tip-illustration" role="img" aria-hidden="true">
+  <style>
+    .ns-panel { fill: #0f172a; stroke: #475569; stroke-width: 1.5; }
+    .ns-box { fill: #1e293b; stroke: #475569; stroke-width: 2; }
+    .ns-run { fill: #1e293b; stroke: #a855f7; stroke-width: 2; }
+    .ns-label { fill: #94a3b8; }
+    .ns-edge { fill: none; stroke: #475569; stroke-width: 2; }
+    .ns-accent { fill: #a855f7; }
+    .ns-logbar { fill: #94a3b8; opacity: 0.7; }
+    .ns-dot-blue { fill: #3794ff; }
+    .ns-dot-orange { fill: #e0a030; }
+    .ns-dot-grey { fill: #8a8a8a; }
+    .ns-dot-red { fill: #f14c4c; animation: ns-redpulse 4.5s ease-in-out infinite; animation-play-state: paused; }
+
+    .ns-cursor { animation: ns-cursor-move 4.5s ease-in-out infinite; animation-play-state: paused; }
+    .ns-cursor-body { fill: #ffffff; stroke: #0f172a; stroke-width: 1.5; stroke-linejoin: round; }
+    .ns-click-ring { fill: none; stroke: #cbd5e1; stroke-width: 2; opacity: 0; animation: ns-click 4.5s ease-in-out infinite; animation-play-state: paused; }
+
+    .ns-popover { transform-box: fill-box; transform-origin: center; opacity: 0; transform: scale(0.4); animation: ns-pop 4.5s ease-in-out infinite; animation-play-state: paused; }
+    .ns-pop-panel { fill: #1e293b; stroke: #a855f7; stroke-width: 1.5; }
+    .ns-pop-box { fill: #0f172a; stroke: #94a3b8; stroke-width: 1.5; }
+    .ns-pop-edge { fill: none; stroke: #94a3b8; stroke-width: 1.5; }
+
+    @keyframes ns-cursor-move {
+      0%   { transform: translate(-46px, -34px); }
+      26%  { transform: translate(0px, 0px); }
+      30%  { transform: translate(0px, 0px); }
+      62%  { transform: translate(0px, 0px); }
+      100% { transform: translate(-46px, -34px); }
+    }
+    @keyframes ns-click {
+      0%,26% { opacity: 0; r: 4; }
+      30%    { opacity: 0.9; r: 4; }
+      40%    { opacity: 0; r: 11; }
+      100%   { opacity: 0; }
+    }
+    @keyframes ns-pop {
+      0%,32%  { opacity: 0; transform: scale(0.4); }
+      40%     { opacity: 1; transform: scale(1); }
+      80%     { opacity: 1; transform: scale(1); }
+      90%,100%{ opacity: 0; transform: scale(0.85); }
+    }
+    @keyframes ns-redpulse {
+      0%,28%   { opacity: 1; }
+      30%,80%  { opacity: 1; }
+      40%,60%  { opacity: 0.45; }
+      100%     { opacity: 1; }
+    }
+  </style>
+
+  <!-- LEFT: scenario surface -->
+  <rect class="ns-panel" x="8" y="14" width="120" height="122" rx="6" />
+  <!-- edges -->
+  <path class="ns-edge" d="M52 45 H70" />
+  <path class="ns-edge" d="M35 58 V98 H58" />
+  <!-- request box -->
+  <rect class="ns-box" x="18" y="32" width="34" height="26" rx="5" />
+  <rect class="ns-label" x="24" y="40" width="22" height="3.5" rx="1.75" />
+  <rect class="ns-label" x="24" y="47" width="15" height="3.5" rx="1.75" opacity="0.6" />
+  <!-- second box -->
+  <rect class="ns-box" x="70" y="32" width="34" height="26" rx="5" />
+  <rect class="ns-label" x="76" y="40" width="22" height="3.5" rx="1.75" />
+  <rect class="ns-label" x="76" y="47" width="13" height="3.5" rx="1.75" opacity="0.6" />
+  <!-- "Run scenario" box (rectangular like every action; the purple accent
+       marks it as a sub-scenario call) -->
+  <rect class="ns-run" x="58" y="84" width="42" height="28" rx="6" />
+  <circle class="ns-accent" cx="66" cy="98" r="3" />
+  <rect class="ns-label" x="73" y="93" width="19" height="3" rx="1.5" />
+  <rect class="ns-label" x="73" y="100" width="13" height="3" rx="1.5" opacity="0.6" />
+
+  <!-- RIGHT: inspector panel -->
+  <rect class="ns-panel" x="136" y="14" width="76" height="122" rx="6" />
+  <rect class="ns-label" x="144" y="22" width="34" height="4" rx="2" opacity="0.9" />
+  <!-- log lines -->
+  <circle class="ns-dot-blue"   cx="148" cy="40" r="3.2" />
+  <rect class="ns-logbar" x="156" y="38" width="48" height="4" rx="2" />
+  <circle class="ns-dot-grey"   cx="148" cy="54" r="3.2" />
+  <rect class="ns-logbar" x="156" y="52" width="42" height="4" rx="2" />
+  <circle class="ns-dot-orange" cx="148" cy="68" r="3.2" />
+  <rect class="ns-logbar" x="156" y="66" width="50" height="4" rx="2" />
+  <!-- the RED-dot line (target) -->
+  <circle class="ns-dot-red"    cx="148" cy="82" r="3.6" />
+  <rect class="ns-logbar" x="156" y="80" width="46" height="4" rx="2" opacity="0.95" />
+  <circle class="ns-dot-grey"   cx="148" cy="96" r="3.2" />
+  <rect class="ns-logbar" x="156" y="94" width="38" height="4" rx="2" />
+  <circle class="ns-dot-blue"   cx="148" cy="110" r="3.2" />
+  <rect class="ns-logbar" x="156" y="108" width="44" height="4" rx="2" />
+
+  <!-- POPOVER: a different-shaped mini sub-scenario, anchored near the red line -->
+  <g class="ns-popover">
+    <rect class="ns-pop-panel" x="118" y="60" width="74" height="46" rx="5" />
+    <path class="ns-pop-edge" d="M141 78 H150" />
+    <path class="ns-pop-edge" d="M166 78 H171" />
+    <rect class="ns-pop-box" x="125" y="71" width="16" height="14" rx="3" />
+    <rect class="ns-pop-box" x="150" y="71" width="16" height="14" rx="3" />
+    <rect class="ns-pop-box" x="171" y="71" width="14" height="14" rx="3" />
+    <rect class="ns-label" x="124" y="96" width="38" height="3" rx="1.5" opacity="0.7" />
+  </g>
+
+  <!-- MOUSE cursor + click ring -->
+  <g class="ns-cursor">
+    <circle class="ns-click-ring" cx="150" cy="82" r="4" />
+    <path class="ns-cursor-body" d="M150 82 l0 17 l4.5 -4.5 l3 6.5 l3 -1.4 l-3 -6.4 l6.4 0 Z" />
+  </g>
+</svg>

@@ -2,7 +2,7 @@
  * Helper functions for working with Value types
  */
 
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, type ValueType } from '../types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue, NullValue, ListValue, type ValueType } from '../types/collections'
 
 /**
  * Convert a ValueType to a string using its toString() method
@@ -68,10 +68,36 @@ export function isExpressionValue(value: ValueType): value is ExpressionValue {
 }
 
 /**
+ * Check if a value is a VariableValue (a reference to a scenario variable).
+ */
+export function isVariableValue(value: ValueType): value is VariableValue {
+  return value instanceof VariableValue || (value as { type?: string }).type === 'variable'
+}
+
+/**
+ * Check if a value is an EnvironmentValue (a reference to an environment by id).
+ */
+export function isEnvironmentValue(value: ValueType): value is EnvironmentValue {
+  return value instanceof EnvironmentValue || (value as { type?: string }).type === 'environment'
+}
+
+/**
  * Check if a value is a BooleanValue.
  */
 export function isBooleanValue(value: ValueType): value is BooleanValue {
   return value instanceof BooleanValue || (value as { type?: string }).type === 'boolean'
+}
+
+/**
+ * Check if a value is the explicit NullValue (a deliberate "no value").
+ */
+export function isNullValue(value: ValueType): value is NullValue {
+  return value instanceof NullValue || (value as { type?: string }).type === 'null'
+}
+
+/** Check if a value is a ListValue (an agnostic, untyped list of values). */
+export function isListValue(value: ValueType): value is ListValue {
+  return value instanceof ListValue || (value as { type?: string }).type === 'list'
 }
 
 /**

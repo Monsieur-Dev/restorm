@@ -1,0 +1,1769 @@
+:root {
+  /* Scenario port/edge flow colours — yellow = trigger (signal), purple = data
+   * (value). Centralised so the port rings, and the flow-coloured edges /
+   * legend that reuse them, all read the same source and can be retuned here. */
+  --scn-flow-signal: #facc15;
+  --scn-flow-value: #a855f7;
+}
+
+/* Slightly thicker edges so the links between boxes read clearly; a touch more
+ * on hover/selection for feedback. Wins over React Flow's 1px default via the
+ * extra `.react-flow__edge` qualifier. */
+.react-flow__edge .react-flow__edge-path {
+  stroke-width: 3px;
+}
+.react-flow__edge:hover .react-flow__edge-path,
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke-width: 2.75px;
+}
+
+/* Empty scenario surface keeps the default cursor — only actions / edges /
+ * handles get their own (pointer / grab). React Flow defaults the pane to
+ * `grab`; override it just inside the scenario editor so hovering an empty area
+ * doesn't show a grab hand. Active gestures (box-select, middle-drag pan) still
+ * set their own cursor while in progress. */
+[data-testid="scenario-editor"] .react-flow__pane {
+  cursor: default;
+}
+
+/* Empty-scenario onboarding (centered over a node-less canvas): a friendly
+ * heading + a couple of "how to add things" tips. The wrapping element already
+ * centers it and dims it (pointer-events off); these rules give the card its
+ * own type scale + a left-aligned tip list. */
+.scn-empty-onboarding {
+  max-width: 460px;
+  text-align: left;
+}
+.scn-empty-title {
+  margin: 0 0 12px;
+  font-size: 22px;
+  font-weight: 600;
+  text-align: center;
+}
+.scn-empty-tips {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  line-height: 1.45;
+}
+
+/* React Flow zoom/fit/minimap controls: theme them so the icons stay readable
+ * on EVERY theme (React Flow's default white icons vanish on a light control
+ * background). Panel-styled via the theme's own variables so the controls read
+ * as distinct from the canvas yet respect each theme — no per-theme hand-tuning
+ * needed; a theme can still override these vars. */
+[data-testid="scenario-editor"] .react-flow__controls {
+  background: var(--editorWidget-background, var(--editor-background, #252526));
+  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.22));
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+}
+[data-testid="scenario-editor"] .react-flow__controls-button {
+  background: var(--editorWidget-background, var(--editor-background, #252526));
+  border-bottom: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
+  color: var(--editor-foreground, #d4d4d4);
+}
+[data-testid="scenario-editor"] .react-flow__controls-button:hover {
+  background: var(--list-hoverBackground, rgba(127, 127, 127, 0.14));
+}
+[data-testid="scenario-editor"] .react-flow__controls-button svg {
+  fill: var(--editor-foreground, #d4d4d4);
+}
+/* The minimap toggle paints a codicon FONT glyph (not an SVG), so the global
+ * `.codicon { color: ... !important }` rule overrides the button's inherited
+ * colour. Pin it (with matching `!important`) to the same var the zoom SVGs
+ * fill with, so the map icon matches the zoom icons exactly. */
+[data-testid="scenario-editor"] .react-flow__controls-button .codicon {
+  color: var(--editor-foreground, #d4d4d4) !important;
+}
+[data-testid="scenario-editor"] .react-flow__controls-button[data-active="true"] {
+  color: var(--scn-flow-signal, #facc15);
+}
+[data-testid="scenario-editor"] .react-flow__controls-button[data-active="true"] .codicon {
+  color: var(--scn-flow-signal, #facc15) !important;
+}
+
+/* Minimap (bottom-right): themed panel + dimmed mask. */
+[data-testid="scenario-editor"] .scn-minimap {
+  background: var(--editorWidget-background, var(--editor-background, #252526));
+  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.22));
+  border-radius: 4px;
+}
+[data-testid="scenario-editor"] .scn-minimap .react-flow__minimap-mask {
+  fill: var(--editor-background, #1e1e1e);
+  fill-opacity: 0.6;
+}
+
+/* Sub-scenario log preview popover: a titled card hosting a read-only graph.
+ * The hosting ECUI Tooltip caps its own width (~max-content for a text tip),
+ * which would clip our wide graph — lift that cap for this specific tip. */
+.tooltip[data-testid="scenario-sublog-popover"],
+.tooltip[data-testid="scenario-sublog-popover"] .tooltip-content {
+  max-width: 92vw !important;
+}
+.scn-sublog-popover {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 880px;
+  max-width: 90vw;
+}
+.scn-sublog-popover-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 2px 2px 0;
+  margin: 0;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--textLink-foreground, #4daafc);
+  text-align: left;
+}
+.scn-sublog-popover-title:hover { text-decoration: underline; }
+.scn-sublog-popover-title .codicon { font-size: 13px; }
+.scn-sublog-popover-graph {
+  width: 100%;
+  height: 600px;
+  max-height: 75vh;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--widget-border, #454545);
+}
+
+/* Editor side panel: a run toolbar, the workflow errors, and the selected-box
+ * preview — stacked sections split by separators, anchored top-right. */
+.scn-inspector {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 5;
+  width: 320px;
+  /* Height is set in JS to min(content, available) — a definite pixel height,
+   * which is what lets the response tree's ListView scroll (max-height alone
+   * leaves the computed height `auto`, so height:100% never resolves). The
+   * max-height is a pre-measure fallback. */
+  max-height: calc(100% - 16px);
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  border-radius: 6px;
+  background: var(--editorWidget-background, #252526);
+  color: var(--foreground, #cccccc);
+  border: 1px solid var(--widget-border, #454545);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+.scn-inspector-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  flex: 0 0 auto;
+}
+
+/* Run button — reuses the old node-header "play" design: a bigger green disc
+ * with a white ring + drop shadow, standing PROUD of the compact debug/step/
+ * stop buttons. It overflows the toolbar row (negative margin on its Button
+ * container) so the toolbar keeps its original height. Green = runnable, grey =
+ * disabled, amber = running (offers Pause). */
+/* Round Stop (smaller, red) + round Play sit together at the RIGHT edge of the
+ * toolbar — debug/step stay on the left. Stop carries the `auto` left margin so
+ * the [stop][play] pair is pushed right as a group; Play follows it. Both
+ * overflow the row (negative block margins) so the toolbar keeps its height. */
+/* Each button is wrapped in a `.header-hover-tooltip` (inline-flex span) for its
+ * ECUI hover tooltip, so the toolbar's flex items are those wrappers — the
+ * order / overflow rules target them (not the inner `.button-container`). */
+.scn-inspector-toolbar > .header-hover-tooltip:has(.scn-inspector-stop-round) {
+  order: 1;
+  /* `auto` left pushes the [stop][step][play] trio right; the right margin
+   * opens a gap before the next disc. */
+  margin: -5px 8px -5px auto;
+  z-index: 2;
+}
+.scn-inspector-toolbar > .header-hover-tooltip:has(.scn-inspector-step-round) {
+  order: 2;
+  margin: -5px 8px -5px 0;
+  z-index: 2;
+}
+.scn-inspector-toolbar > .header-hover-tooltip:has(.scn-inspector-debug-round) {
+  order: 3;
+  margin: -5px 8px -5px 0;
+  z-index: 2;
+}
+.scn-inspector-toolbar > .header-hover-tooltip:has(.scn-inspector-run-round) {
+  order: 4;
+  margin: -8px 0;
+  z-index: 2;
+}
+/* Step — same disc as Stop (27px, white ring, shadow) but blue. */
+.scn-inspector-step-round.button.text-button {
+  width: 27px;
+  height: 27px;
+  min-width: 27px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  background: #3b82f6;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.scn-inspector-step-round.button.text-button:hover { background: #2563eb; }
+.scn-inspector-step-round.button.text-button.disabled {
+  background: #6b7280;
+  opacity: 0.55;
+}
+.scn-inspector-step-round .codicon {
+  color: #fff !important;
+  font-size: 14px !important;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  /* Nudge the step glyph 1px up-left to sit visually centred in the disc. */
+  transform: translate(-1px, -1px);
+}
+/* Debug — same disc as Stop/Step (27px, white ring, shadow) but violet. Runs
+ * the scenario honoring breakpoints; greyed when the scenario has none. */
+.scn-inspector-debug-round.button.text-button {
+  width: 27px;
+  height: 27px;
+  min-width: 27px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  background: #8b5cf6;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.scn-inspector-debug-round.button.text-button:hover { background: #7c3aed; }
+.scn-inspector-debug-round.button.text-button.disabled {
+  background: #6b7280;
+  opacity: 0.55;
+}
+.scn-inspector-debug-round .codicon {
+  color: #fff !important;
+  font-size: 14px !important;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  transform: translate(0.5px, -1.5px);
+}
+.scn-inspector-stop-round.button.text-button {
+  width: 27px;
+  height: 27px;
+  min-width: 27px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  background: #ef4444;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.scn-inspector-stop-round.button.text-button:hover { background: #dc2626; }
+.scn-inspector-stop-round.button.text-button.disabled {
+  background: #6b7280;
+  opacity: 0.55;
+}
+.scn-inspector-stop-round .codicon {
+  color: #fff !important;
+  font-size: 14px !important;
+  line-height: 1;
+  /* Center the glyph box, then nudge the `debug-stop` square up-left 1px — its
+   * codicon glyph sits a touch low-and-right inside its em box. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  transform: translate(-0.5px, -0.75px);
+}
+.scn-inspector-run-round.button.text-button {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  background: #22c55e;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.scn-inspector-run-round.button.text-button:hover { background: #16a34a; }
+.scn-inspector-run-round.button.text-button.disabled {
+  background: #6b7280;
+  opacity: 0.55;
+}
+.scn-inspector-run-round.scn-inspector-run-round-active.button.text-button { background: #eab308; }
+.scn-inspector-run-round.scn-inspector-run-round-active.button.text-button:hover { background: #d99e07; }
+.scn-inspector-run-round .codicon {
+  color: #fff !important;
+  font-size: 20px !important;
+}
+/* Undo / redo — flat, theme-coloured icon buttons sitting at the LEFT of the
+ * toolbar (no `order` → before the run/step/debug/stop discs). Secondary
+ * utility controls, so they're understated next to the coloured run discs. */
+.scn-inspector-undo-round.button.text-button,
+.scn-inspector-redo-round.button.text-button {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  padding: 0;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.scn-inspector-undo-round.button.text-button:hover,
+.scn-inspector-redo-round.button.text-button:hover {
+  background: var(--toolbar-hoverBackground, rgba(127, 127, 127, 0.2));
+}
+.scn-inspector-undo-round.button.text-button.disabled,
+.scn-inspector-redo-round.button.text-button.disabled {
+  opacity: 0.35;
+  background: transparent;
+}
+.scn-inspector-undo-round .codicon,
+.scn-inspector-redo-round .codicon {
+  color: var(--foreground, #ccc) !important;
+  font-size: 15px !important;
+}
+/* Vertical divider between the undo/redo pair and the run controls. */
+.scn-inspector-toolbar-sep {
+  width: 1px;
+  align-self: stretch;
+  margin: 4px 2px;
+  background: var(--widget-border, #454545);
+  flex: 0 0 auto;
+}
+
+.scn-inspector-sep {
+  border-top: 1px solid var(--widget-border, #454545);
+  flex: 0 0 auto;
+}
+.scn-inspector-section {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px;
+}
+/* Errors stay at natural height; the preview takes the remaining space so its
+ * tree can fill / scroll. */
+.scn-inspector-errors {
+  flex: 0 0 auto;
+}
+.scn-inspector-preview,
+.scn-inspector-logs {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.scn-inspector-section-title {
+  font-weight: 600;
+}
+.scn-inspector-errors-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--inputValidation-errorForeground, #f48771);
+}
+.scn-inspector-preview-header,
+.scn-inspector-note,
+.scn-inspector-output-label {
+  flex: 0 0 auto;
+}
+.scn-inspector-preview-header {
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Run-logs panel (shown when no box is selected). */
+.scn-inspector-logs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.scn-inspector-logs-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 12px;
+  opacity: 0.9;
+  margin: 4px 0;
+  cursor: pointer;
+}
+/* Right-side action cluster: per-level filter buttons + the copy button. */
+.scn-log-toggle-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+/* Regex flag toggles (i / m / s) sit unpressed by default — unlike the inspector
+ * log filters, which are almost always ON. An unpressed ECUI button-toggle has no
+ * border, so OFF flags read as bare letters. Give them a discreet outline (scoped
+ * to the regex node only) so OFF = outlined, ON = filled — like a real switch. The
+ * inspector filters are untouched. */
+.scn-regex-flags .custom-toggle-button:not(.custom-toggle-button-pressed) {
+  border: 1px solid var(--inputOption-activeBorder, var(--editorWidget-border, #454545));
+}
+.scn-log-actions-sep {
+  width: 1px;
+  align-self: stretch;
+  min-height: 16px;
+  margin: 0 2px;
+  background: var(--editorWidget-border, #454545);
+}
+.scn-log-line {
+  /* `flex` (not inline-flex) so the line fills the ListView title cell and the
+   * message can shrink + ellipsis instead of overflowing the panel. */
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+.scn-log-ts {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.55;
+  font-size: 11px;
+  flex: 0 0 auto;
+}
+.scn-log-msg {
+  min-width: 0; /* allow the flex item to shrink below its content → ellipsis */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Full message shown in the hover tooltip when the row is truncated — wraps so
+ * a long line stays readable. */
+.scn-log-tooltip {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 460px;
+  /* Re-enable pointer events so the provenance link inside is hoverable +
+   * clickable (tooltips are otherwise click-through). */
+  pointer-events: auto;
+}
+.scn-log-tooltip-msg {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.scn-log-tooltip-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  max-width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  color: var(--textLink-foreground, #3794ff);
+}
+.scn-log-tooltip-link:hover {
+  text-decoration: underline;
+  color: var(--textLink-activeForeground, #4daafc);
+}
+.scn-log-tooltip-link .codicon {
+  font-size: 13px;
+  flex: 0 0 auto;
+}
+.scn-log-tooltip-link > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Colored level dot rendered as the row's icon. */
+.scn-log-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--scn-log-dot-color, #888);
+}
+.scn-log-dot-debug { --scn-log-dot-color: #8a8a8a; }
+.scn-log-dot-info  { --scn-log-dot-color: #3794ff; }
+.scn-log-dot-warn  { --scn-log-dot-color: #e0a030; }
+.scn-log-dot-error { --scn-log-dot-color: #f14c4c; }
+.scn-inspector-note {
+  opacity: 0.8;
+  white-space: pre-wrap;
+}
+
+/* Small italic info banner above the preview tree — reminds the user that
+ * the rendered values are samples drawn from the last run results, not
+ * authoritative output. */
+.scn-inspector-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  opacity: 0.7;
+  font-style: italic;
+  margin-bottom: 4px;
+  flex: 0 0 auto;
+}
+.scn-inspector-info .codicon {
+  font-size: 14px;
+  flex-shrink: 0;
+  line-height: 1.2;
+}
+.scn-inspector-info > span {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+/* Navigation link at the top of the preview section — opens the box's
+ * bound item (request / sub-scenario) in a workbench tab. Sized like a
+ * normal-weight link, not a button, so it doesn't compete with the
+ * toolbar's actual buttons. */
+/* The preview title doubles as the "open this item" link. Keep the header's
+   type scale on the link (13px / 600) so it reads as the title, not a chip. */
+.scn-inspector-title-link.link-button {
+  font-size: 13px;
+}
+.scn-inspector-title-link .button-link-label {
+  font-weight: 600;
+}
+/* Replaces `.scn-inspector-info` when the previewed box is runnable AND
+ * has no recent result: a small play button + the same italic hint, so
+ * the user gets one clear next-step instead of an info row paired with
+ * an empty-state line. */
+.scn-inspector-run-prompt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  opacity: 0.85;
+  font-style: italic;
+  margin-bottom: 4px;
+  flex: 0 0 auto;
+}
+.scn-inspector-run-prompt > span {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.scn-inspector-output {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.scn-inspector-output-label {
+  opacity: 0.85;
+  font-family: var(--monospace-font, monospace);
+}
+/* The tree fills the remaining height (a definite height once the panel is
+ * capped, thanks to flex + min-height:0), so ListView's own ScrollableElement
+ * scrolls — same recipe the sidebar relies on. */
+.scn-inspector-tree {
+  border: 1px solid var(--widget-border, #454545);
+  border-radius: 4px;
+  overflow: hidden;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.scn-inspector-empty {
+  opacity: 0.6;
+  font-style: italic;
+}
+
+/* PAN smoothness: React Flow transforms `.react-flow__viewport` on every pan/
+ * zoom. Without a persistent compositor layer the browser repaints the whole
+ * canvas on the FIRST frame of each pan burst (the "lag until it catches up,
+ * then it's smooth" feel) and discards the layer when motion stops — so a
+ * stop/restart re-pays it. Pin the layer with `will-change` so it's ready
+ * before the gesture and a pan is a pure GPU transform from frame one. */
+[data-testid="scenario-editor"] .react-flow__viewport {
+  will-change: transform;
+}
+
+/* DRAG smoothness: keep the selected node (the one you're about to drag) and
+ * the actively-dragged node on their own compositor layers, so the box moves as
+ * a GPU transform instead of repainting its heavy DOM each frame. Selecting a
+ * box (the click that precedes a drag) promotes it, so the layer is ready when
+ * the drag begins. (`:hover` is deliberately NOT used — it would churn layers as
+ * the pointer crosses every box.) */
+.react-flow__node.dragging,
+.react-flow__node.selected {
+  will-change: transform;
+}
+
+.scn-node {
+  min-width: 160px;
+  border: 1px solid var(--widget-border, #454545);
+  border-radius: 6px;
+  background: var(--scenarioNode-background, #2d2d30);
+  color: var(--foreground, #cccccc);
+  font-size: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  /* visible so the edge anchors render as full circles (not clipped halves).
+   * The header rounds its own corners to keep the box outline clean. */
+  overflow: visible;
+  /* Anchor for the absolute-positioned port handles: their `top` is measured
+   * in box-local px so they line up with the rows regardless of React Flow
+   * viewport zoom (`scale(N)` would otherwise inflate `getBoundingClientRect`
+   * values while CSS `top` stays pre-transform). */
+  position: relative;
+}
+
+/* A box in a non-executable (error) state — red border (overrides selected). */
+.scn-node-error {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 1px #ef4444;
+}
+/* When also selected, keep the red ring but add the selection drop shadow. */
+.scn-node-error.scn-node-selected {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 1px #ef4444, 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+/* Workflow error panel rows (click to focus the box). */
+/* Error row is an ECUI `link` Button — background/underline/cursor come from
+   .link-button; keep only the error-list font size + the error text colour. */
+.scn-error-row.link-button {
+  padding: 1px 0;
+  margin: 0;
+  font-size: 12px;
+  color: var(--inputValidation-errorForeground, var(--errorForeground, #f48771));
+}
+
+/* Selected: the focus ring + a drop shadow so the box lifts off the canvas. */
+.scn-node-selected {
+  border-color: var(--focusBorder, #007fd4);
+  box-shadow: 0 0 0 1px var(--focusBorder, #007fd4), 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+/* A selected box also tints its header (themed token), so selection stays
+ * legible even when an error keeps the border red. */
+.scn-node-selected .scn-node-header {
+  background: var(--scenarioNode-headerBackgroundSelected, #2d5070);
+}
+
+/* Yellow frame on an action that JUST finished — a run-progress marker left
+ * behind once the running beam ends (so a paused run keeps the "where was I"
+ * cue). Cleared on the next play/resume, or when the node re-runs. Placed
+ * after the selected/error rules so the trail stays visible on top of them. */
+.scn-node.scn-node-finished {
+  border-color: var(--scn-flow-signal, #facc15);
+  box-shadow: 0 0 0 2px var(--scn-flow-signal, #facc15), 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+/* Read-only while the scenario runs: the box body + notes are inert so no
+ * field can be edited mid-run. The header stays live (collapse, play/cancel),
+ * and clicks on the (now pointer-events:none) body bubble to the node so it
+ * can still be selected for inspection. */
+.scn-node-locked .scn-node-body,
+.scn-node-locked .scn-node-notes {
+  pointer-events: none;
+}
+
+/* Flash overlay — pulses the box outline when the user clicks the run-log row
+ * emitted by this node. Mounted with a changing React key so the animation
+ * replays on every click; auto-unmounts when the editor clears the flash. */
+.scn-node-flash-ring {
+  position: absolute;
+  inset: -2px;
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 5;
+  animation: scn-node-flash 0.55s ease-out 2;
+}
+
+@keyframes scn-node-flash {
+  0%   { box-shadow: 0 0 0 0 rgba(55, 148, 255, 0.9), 0 0 0 0 rgba(55, 148, 255, 0.5); }
+  40%  { box-shadow: 0 0 0 3px rgba(55, 148, 255, 0.95), 0 0 14px 4px rgba(55, 148, 255, 0.55); }
+  100% { box-shadow: 0 0 0 0 rgba(55, 148, 255, 0), 0 0 0 0 rgba(55, 148, 255, 0); }
+}
+
+.scn-node-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px;
+  font-weight: 600;
+  color: var(--foreground, #cccccc);
+  background: var(--scenarioNode-headerBackground, #3a3a3d);
+  border-bottom: 1px solid var(--widget-border, #454545);
+  border-radius: 6px 6px 0 0;
+  position: relative;
+  /* Reserve room on the left for a potential launch anchor (keep fixed
+   * whether or not it's rendered, so the title/icon land at the same x
+   * across every kind), and a small right gutter so the error badge — and
+   * any later header affordance — doesn't sit flush against the corner. */
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+/* Generic "launch" input anchor: centred on the header's left border. Raised
+ * above the header content so it stays a clear connection drop target. */
+.scn-handle-launch.react-flow__handle {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+}
+
+/* The global `.codicon` rule forces icon colour with `!important` (~#3b3b3b),
+ * which is invisible on the dark header — override it so the kind icon +
+ * collapse chevron follow the header's foreground (auto-contrasted when the
+ * box is coloured). `!important` is required to beat the global rule. */
+.scn-node-header .scn-node-icon,
+.scn-node-collapse .codicon {
+  color: inherit !important;
+}
+
+.scn-node-collapsed .scn-node-header {
+  border-bottom: none;
+  border-radius: 6px;
+}
+
+.scn-node-icon {
+  font-size: 14px !important;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.scn-node-title {
+  /* Don't grow: keep the collapse chevron glued right after the title
+   * (dropdown-trigger style) instead of pushed to the far edge. */
+  flex: 0 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Header "!" error badge — red, on the right side of the header. Click opens
+ * the ECUI Tooltip listing the box's errors (neutral tooltip background). */
+/* Flex spacer between the header's left content and the right cluster (error
+ * badge + breakpoint) so the cluster hugs the right edge as one group. */
+.scn-node-header-spacer { flex: 1 1 auto; min-width: 0; }
+.scn-node-errbadge {
+  background: none; border: none; padding: 0;
+  margin-right: 2px;
+  color: #ef4444; cursor: pointer; display: inline-flex; align-items: center;
+}
+.scn-node-errbadge .codicon { font-size: 15px !important; color: #ef4444 !important; }
+.scn-node-errbadge:hover .codicon { color: #f87171 !important; }
+/* Debug breakpoint gutter glyph — sits at the head of the header row. Faint
+ * hollow circle by default (revealed a touch more on header hover so it's
+ * discoverable), a solid red disc when a breakpoint is set, and a pulsing red
+ * when the run is paused at it. */
+/* The glyph is wrapped in a `.header-hover-tooltip` (inline-flex span) — it sits
+ * at the header's right edge after the error badge (the spacer does the push). */
+.scn-node-header > .header-hover-tooltip:has(.scn-node-breakpoint) {
+  display: inline-flex;
+  align-items: center;
+}
+.scn-node-breakpoint {
+  background: none; border: none; padding: 0;
+  cursor: pointer; display: inline-flex; align-items: center;
+  flex: 0 0 auto;
+}
+.scn-node-breakpoint .codicon {
+  font-size: 12px !important;
+  color: #9aa0a6 !important;
+  opacity: 0.35;
+  transition: opacity 0.12s ease, color 0.12s ease;
+}
+.scn-node-header:hover .scn-node-breakpoint .codicon { opacity: 0.7; }
+.scn-node-breakpoint:hover .codicon { opacity: 1 !important; color: #ef4444 !important; }
+.scn-node-breakpoint.is-set .codicon { color: #e51400 !important; opacity: 1 !important; }
+.scn-node-breakpoint.is-paused .codicon {
+  color: #e51400 !important; opacity: 1 !important;
+  animation: scn-breakpoint-pulse 1s ease-in-out infinite;
+}
+@keyframes scn-breakpoint-pulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(229, 20, 0, 0.6)); }
+  50% { transform: scale(1.2); filter: drop-shadow(0 0 3px rgba(229, 20, 0, 0.9)); }
+}
+.scn-node-breakpoint-tip { font-size: 12px; white-space: normal; max-width: 260px; text-align: center; }
+
+.scn-node-errpopover-body { font-size: 12px; white-space: normal; max-width: 280px; }
+.scn-node-errpopover-row { padding: 1px 0; }
+.scn-node-errpopover-row + .scn-node-errpopover-row { margin-top: 2px; }
+
+/* A box field that is the target of a validation error — red outline. */
+.scn-field-invalid { border-radius: 4px; box-shadow: 0 0 0 1px #ef4444; }
+
+/* Chevron toggle uses ECUI Button (handles focus + variants) — we only need
+ * to nudge its background/opacity so it doesn't sit too loud inside the
+ * header. */
+.scn-node-collapse {
+  flex-shrink: 0;
+  background: transparent !important;
+  border-color: transparent !important;
+  opacity: 0.7;
+}
+.scn-node-collapse:hover { opacity: 1; }
+
+/* Collapsing body wrapper: animates the height (via `grid-template-rows`
+ * 1fr→0fr) and the opacity in sync. The wrapper stays mounted through the
+ * closing transition; the JSX flips `bodyMounted` to false only after the
+ * animation has finished, at which point the header-position handles take
+ * over. Inverse on expand: the wrapper mounts first (closed), the JSX flips
+ * `.scn-body-open` on the next frame so the browser runs the 0→1 transition.
+ *
+ * `min-height: 0` on the inner grid item is the standard escape hatch that
+ * lets the row shrink below the auto-computed height of its content. */
+/* Two-phase collapse/expand:
+ *   close →  phase 1 (0…200ms): inner content opacity 1 → 0;
+ *            phase 2 (2000…4000ms): grid row 1fr → 0fr (height + handles).
+ *   open  →  phase 1 (0…200ms): grid row 0fr → 1fr (height + handles);
+ *            phase 2 (2000…4000ms): inner content opacity 0 → 1.
+ * The `transition-delay` on each property orders the phases without any JS
+ * timer chaining — the runtime just toggles the `.scn-body-open` class.
+ *
+ * Clip only vertically so the body's height transitions cleanly to 0 while
+ * the inline handles (translated half-outside the box edge to sit on the
+ * border as connection points) stay visible. `overflow-y: clip` +
+ * `overflow-x: visible` is the modern combo that doesn't trigger an
+ * h-scrollbar. */
+.scn-node-collapsible {
+  display: grid;
+  grid-template-rows: 0fr;
+  overflow-x: visible;
+  overflow-y: clip;
+  /* No transition by default — only an explicit user click on the chevron
+   * unlocks the timed sequence (CSS gate via `data-animating="true"`). Any
+   * other source of a `collapsed` flip (parent hydration replaying the
+   * persisted state, MCP graph patch, …) snaps to the new layout. */
+  transition: none;
+}
+.scn-node-collapsible.scn-body-open {
+  grid-template-rows: 1fr;
+}
+.scn-node[data-animating="true"] .scn-node-collapsible {
+  transition: grid-template-rows 200ms ease 200ms;
+}
+.scn-node[data-animating="true"] .scn-node-collapsible.scn-body-open {
+  transition: grid-template-rows 200ms ease 0ms;
+}
+.scn-node-collapsible-inner {
+  min-height: 0;
+  overflow-x: visible;
+  overflow-y: clip;
+  opacity: 0;
+  transition: none;
+}
+.scn-node-collapsible.scn-body-open > .scn-node-collapsible-inner {
+  opacity: 1;
+}
+.scn-node[data-animating="true"] .scn-node-collapsible-inner {
+  transition: opacity 200ms ease 0ms;
+}
+.scn-node[data-animating="true"] .scn-node-collapsible.scn-body-open > .scn-node-collapsible-inner {
+  transition: opacity 200ms ease 200ms;
+}
+
+/* Notes section: free annotation between header and ports, its own band.
+ * The MarkdownViewer sits flush to the box edges (no band padding); a
+ * separator sits below it. The viewer is made transparent so it picks up
+ * the box body background instead of its own editor background. Keep the
+ * markdown compact so a note doesn't blow up the node. */
+.scn-node-notes {
+  border-bottom: 1px solid var(--editorHoverWidget-border, #454545);
+  /* Span the full box width so the separator line reaches the right
+   * edge of the box, matching the header separator above it. */
+  width: 100%;
+  box-sizing: border-box;
+}
+.scn-node-notes .markdown-viewer {
+  background-color: transparent;
+  font-size: 11px;
+}
+.scn-node-notes :is(p, ul, ol, pre, h1, h2, h3, h4, h5, h6) {
+  margin: 0 0 4px;
+}
+.scn-node-notes :is(p, ul, ol, pre, h1, h2, h3, h4, h5, h6):last-child {
+  margin-bottom: 0;
+}
+.scn-node-notes ul,
+.scn-node-notes ol {
+  padding-left: 16px;
+}
+.scn-node-notes :is(h1, h2, h3, h4, h5, h6) {
+  font-size: 12px;
+}
+
+/* Body: input column (left) + output column (right), each row a labelled
+ * port whose handle sits inline at the node edge. */
+.scn-node-body {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  /* Extra bottom padding so the bottom-edge handles (error / done) sit in clear
+   * space below the content instead of overlapping the last row. */
+  padding: 7px 0 16px;
+}
+
+.scn-node-col {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.scn-node-col-out {
+  align-items: flex-end;
+}
+
+/* A body row: an anchor + a cell. Min-height keeps rows aligned even when
+ * one column has fewer rows than the other. */
+.scn-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+}
+.scn-row-right {
+  justify-content: flex-end;
+}
+
+/* Rows without a port anchor (operator toggles, level radios, name/expression
+ * fields, …) get the anchor's footprint as a margin so their content lines up
+ * with the labels/fields of rows that do carry an anchor (the 12px dot, its
+ * flow ring, and the 6px row gap). Left column insets from the left, right
+ * column from the right, matching the side the missing bubble would sit on. */
+.scn-node-col-in .scn-row-left:not(:has(.scn-handle-inline)) {
+  margin-left: 22px;
+}
+.scn-node-col-out .scn-row-right:not(:has(.scn-handle-inline)) {
+  margin-right: 22px;
+}
+
+.scn-port-label {
+  font-size: 11px;
+  opacity: 0.85;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+/* Anchors: clearly visible coloured dots with a contrasting ring. */
+.scn-handle.react-flow__handle {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--scenarioNode-background, #2d2d30);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+/* Flow ring: a coloured halo behind the dot encoding the port's flow class —
+ * yellow = trigger (signal), purple = data (value), half-yellow/half-purple for
+ * `both` (carries data AND triggers). The dot's centre fill (role / required)
+ * is unchanged; this ring is the flow. */
+.scn-handle.react-flow__handle::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  /* Hollow ring: mask out the centre so the dot's role/required fill shows
+   * through, leaving only the flow-coloured halo around it. */
+  -webkit-mask: radial-gradient(circle, transparent 0 60%, #000 62%);
+  mask: radial-gradient(circle, transparent 0 60%, #000 62%);
+}
+.scn-handle--flow-signal.react-flow__handle::after { background: var(--scn-flow-signal); }
+.scn-handle--flow-value.react-flow__handle::after { background: var(--scn-flow-value); }
+.scn-handle--flow-both.react-flow__handle::after {
+  background: conic-gradient(var(--scn-flow-signal) 0 50%, var(--scn-flow-value) 50% 100%);
+}
+
+/* Inline handles flow with their row instead of being absolutely pinned to
+ * the node side; React Flow still derives connection geometry from the DOM
+ * rect, so wiring works. Pull them onto the node's outer edge. */
+/* Single set of port handles, positioned absolutely on the box. `top` is set
+ * inline (in px, measured at layout time from each row's `data-port-id`
+ * marker), so it transitions cleanly between expanded and collapsed states.
+ *
+ * The transition direction is driven by `.scn-node-collapsed`: closing waits
+ * for the body's opacity to fade out (2s) before sliding `top`; opening
+ * slides `top` first, then fades the content in. Both phases run 200ms. */
+.scn-handle-positioned.react-flow__handle {
+  position: absolute;
+  /* No transition by default — handles snap to whatever position the layout
+   * pass reports. The transition is only enabled while the user-triggered
+   * collapse/expand animation is in progress (`data-animating="true"`), so
+   * initial mount / scenario load / row re-measure never slide them. */
+  transition: none;
+}
+.scn-node[data-animating="true"] .scn-handle-positioned.react-flow__handle {
+  transition: top 200ms ease 200ms;
+}
+.scn-node[data-animating="true"]:not(.scn-node-collapsed) .scn-handle-positioned.react-flow__handle {
+  transition: top 200ms ease 0ms;
+}
+.scn-handle-positioned[data-handlepos="left"].react-flow__handle {
+  left: 0;
+  transform: translate(-50%, -50%);
+}
+.scn-handle-positioned[data-handlepos="right"].react-flow__handle {
+  right: 0;
+  transform: translate(50%, -50%);
+}
+
+/* Section-collapsed handle marker: a zero-width placeholder in the title row
+ * that the box-level layout measures to position handles at the title centre. */
+.scn-section-ball {
+  display: inline-block;
+  width: 0;
+  height: 0;
+}
+
+.scn-handle-error {
+  left: auto;
+  right: 46px;
+}
+/* Universal completion (`done`) handle: a GREEN dot to the RIGHT of the error
+ * ball on the bottom edge — the "classic" output colour, since completion is
+ * the normal/happy continuation. The yellow ring is the STANDARD flow halo (the
+ * `scn-handle--flow-signal` `::after`), so its thickness matches every other
+ * handle — only the centre dot colour is overridden here. */
+.scn-handle-done.react-flow__handle {
+  left: auto;
+  right: 12px;
+  background: #22c55e;
+}
+/* Collapsed = header only, so the bottom-centred error/done handles straddle
+ * the header. Don't move them — just send them BEHIND the header (z-index) so
+ * their top half tucks under the header instead of overlapping the content; the
+ * half sticking out below stays visible + connectable. */
+.scn-node-collapsed .scn-node-header {
+  position: relative;
+  z-index: 2;
+}
+.scn-node-collapsed .scn-handle-error.react-flow__handle,
+.scn-node-collapsed .scn-handle-done.react-flow__handle {
+  z-index: 1;
+}
+
+/* Collapsible left-column section (headers / params / body …). */
+.scn-section {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.scn-section-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.8;
+  min-height: 18px;
+  user-select: none;
+  position: relative;
+  /* Indent the title to line up with the row labels below (anchor + gap).
+   * The collapsed anchors overlay this leading region (absolute), so the
+   * title sits at the same x whether the section is open or collapsed. */
+  padding-left: 18px;
+}
+.scn-section-header:hover { opacity: 1; }
+.scn-section-chevron {
+  font-size: 12px !important;
+  color: inherit !important;
+  flex-shrink: 0;
+}
+.scn-section-title {
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.85;
+}
+.scn-section-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+/* Caption above an inline control (e.g. the input node's default-value
+ * ControlGroup). Mirrors the section-title's muted weight without the
+ * uppercasing, since it carries mixed-case text. */
+.scn-field-caption {
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  opacity: 0.6;
+  margin-bottom: 3px;
+}
+/* forEach parallelism config row (right column, no port): caption + enable
+ * toggle + a narrow bounded count field, laid out inline. */
+.scn-foreach-parallelism {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.scn-foreach-parallelism .scn-field-caption {
+  margin-bottom: 0;
+}
+.scn-foreach-parallelism .inputbox {
+  width: 56px;
+}
+/* AddToList/RemoveFromList "update the source variable" toggle row. */
+.scn-listmut-update {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.scn-listmut-update .scn-field-caption {
+  margin-bottom: 0;
+}
+/* When collapsed, the section's anchors gather on the title row. They keep
+ * the per-row edge alignment (first anchor centred on the node border), then
+ * flow rightward in front of the title. */
+/* Collapsed anchors overlay the header's leading region (out of flow, so the
+ * title doesn't shift) and stay edge-pinned on the node border like the row
+ * anchors. */
+.scn-section-balls {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* KV row: param name + value opposite each other. */
+.scn-kv {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+  justify-content: space-between;
+  flex: 1;
+}
+.scn-kv-value {
+  font-size: 11px;
+  opacity: 0.55;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+  font-family: var(--editor-font-family, monospace);
+}
+
+/* Environment-selector button cell (request node, nameless top section).
+ * Indented so its left edge lines up with the row text below (which is
+ * offset by the anchor + gap), since this row has no left anchor. */
+.scn-env-button {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  margin-left: 18px;
+}
+.scn-env-button .button {
+  width: 100%;
+  max-width: 220px;
+}
+
+/* Wait node — inline numeric duration field + unit toggle. */
+.scn-wait-duration {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+/* The duration field is an ECUI InputBox (number mode); just size it. */
+.scn-wait-duration .inputbox {
+  width: 72px;
+}
+.scn-unit-toggle {
+  display: inline-flex;
+  border: 1px solid var(--editorHoverWidget-border, #454545);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.scn-unit-option {
+  min-width: 18px;
+  padding: 1px 4px;
+  font-size: 10px;
+  line-height: 1.4;
+  background: transparent;
+  color: inherit;
+  border: none;
+  border-right: 1px solid var(--editorHoverWidget-border, #454545);
+  cursor: pointer;
+  opacity: 0.7;
+}
+.scn-unit-option:last-child { border-right: none; }
+.scn-unit-option:hover {
+  opacity: 1;
+  background: var(--list-hoverBackground, rgba(255, 255, 255, 0.06));
+}
+.scn-unit-option-active {
+  opacity: 1;
+  background: var(--focusBorder, #007fd4);
+  color: #fff;
+}
+
+/* Field controls in an action's input cells span the full available width
+ * instead of shrinking to their default/content size: the cell wrapper grows
+ * to fill the row, and the InputBox / SelectBox inside stretch to match. */
+.scn-node-col-in .scn-row-left > .nodrag {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+/* :where() keeps this at zero specificity, so a node that needs a compact field
+ * (wait duration, forEach parallelism) can still pin a narrower width with an
+ * ordinary class rule without fighting an !important-style cascade. */
+:where(.scn-node-col-in .scn-row-left .inputbox),
+:where(.scn-node-col-in .scn-row-left .select-container) {
+  width: 100%;
+}
+
+/* A "number + unit toggle" row (e.g. the retry delay): the numeric field keeps
+ * a 100px floor and the unit toggle fills the remaining space, spreading its
+ * options evenly across it. */
+.scn-num-unit-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+.scn-num-unit-row .scn-num-unit-field {
+  flex: 0 1 100px;
+  min-width: 100px;
+}
+.scn-num-unit-row .scn-unit-toggle-anchor {
+  flex: 1 1 auto;
+  display: inline-flex;
+}
+.scn-num-unit-row .scn-unit-toggle {
+  display: flex;
+  width: 100%;
+}
+.scn-num-unit-row .scn-unit-toggle .button {
+  flex: 1 1 0;
+  justify-content: center;
+}
+
+/* Multiline code field (schema JSON, …): a read-only preview in the node box +
+ * an edit button opening a full-screen CodeEditor modal. */
+.scn-code-field-wrap {
+  width: 100%;
+}
+
+/* Read-only preview of a multiline value + an edit button that opens the
+   full-screen CodeEditor modal (mirrors the calendar / colour pickers). */
+.scn-code-preview-row {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  width: 100%;
+}
+
+/* Text/value inputs in a node box never collapse below a readable width.
+   Specificity (0,3,0) beats `.tvf-control-group > :first-child { min-width: 0 }`
+   from typedValueField.css, which would otherwise crush the field. */
+.react-flow__node .tvf-control-group .inputbox,
+.react-flow__node .tvf-control-group .scn-code-preview {
+  min-width: 100px;
+}
+
+.scn-code-preview {
+  flex: 1 1 auto;
+  min-width: 100px;
+  margin: 0;
+  max-height: 72px;
+  overflow: hidden;
+  box-sizing: border-box;
+  font-family: var(--editor-font-family, monospace);
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: pre;
+  text-overflow: ellipsis;
+  background: var(--input-background, #2d2d30);
+  color: var(--input-foreground, #cccccc);
+  border: 1px solid var(--editorWidget-border, #454545);
+  border-radius: 4px;
+  padding: 4px 6px;
+}
+
+.scn-code-preview.is-placeholder {
+  color: var(--input-placeholderForeground, #888);
+  font-style: italic;
+}
+
+.scn-code-preview-more {
+  display: block;
+  margin-top: 2px;
+  color: var(--descriptionForeground, #999);
+  font-style: italic;
+}
+
+.scn-code-preview-row.scn-field-invalid .scn-code-preview {
+  border-color: var(--inputValidation-errorBorder, #be1100);
+}
+
+.scn-code-edit-button {
+  flex: 0 0 auto;
+  align-self: flex-start;
+}
+
+/* The CodeEditor must fill the modal body. */
+.scn-code-modal-body {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+}
+
+.scn-code-modal-body .ecui-code-editor {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Node name field (input / get-/set-variable) — a thin InputBox wrapper. The
+   field chrome (border / background) comes from InputBox's themed styles, so
+   this only sizes the wrapper and keeps the compact node font. */
+.scn-name-input {
+  width: 100%;
+}
+.scn-name-input .input {
+  font-size: 11px;
+  font-family: var(--editor-font-family, monospace);
+}
+
+/* Template's expression field gets a wider minimum so the Handlebars editor
+ * has room to read — the generic node selector min is narrower. */
+.scn-template-field .tvf-control-group {
+  min-width: 200px;
+}
+
+/* The log box's `data` payload is meant to capture whole JSON values, so its
+ * control group stretches to the cell's full width (the type-pick icon stays
+ * pinned right, the value editor fills the remaining space). */
+.scn-log-data-field {
+  width: 100%;
+}
+.scn-log-data-field .tvf-control-group {
+  width: 100%;
+  min-width: 220px;
+}
+
+/* The `now` box's timezone SelectBox lists IANA labels with their UTC offset
+ * (e.g. `America/Argentina/Buenos_Aires (UTC-03:00)`) — give the trigger and
+ * its dropdown enough room to show those entries without truncation. */
+.scn-now-timezone {
+  min-width: 280px;
+}
+
+[data-testid="scn-now-timezone-dropdown"] {
+  min-width: 320px !important;
+  width: 320px !important;
+}
+
+/* First body line on bound request / sub-scenario nodes: a link that opens the
+ * referenced item in a workbench tab. Styled as an inline link, not a button. */
+.scn-edit-link {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-size: 11px;
+  color: var(--textLink-foreground, #4daafc);
+  cursor: pointer;
+  text-align: left;
+}
+.scn-edit-link:hover {
+  text-decoration: underline;
+  color: var(--textLink-activeForeground, var(--textLink-foreground, #4daafc));
+}
+
+/* Stale port label on a runScenario whose sub-scenario param/output vanished. */
+.scn-orphan-port {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #ef4444;
+  font-size: 11px;
+}
+.scn-orphan-port .codicon {
+  font-size: 12px;
+}
+
+/* Object-builder property row: name field stacked above its value selector. */
+.scn-object-property {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Generic "stacked field" wrapper: caption above its control with the same
+ * tight spacing the path-selector / data-link labels use elsewhere — used by
+ * the `input` box's Name / Default+type rows so they don't sit visually
+ * higher than the equivalent labels on a path-selector row. */
+.scn-stacked-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  /* Fills the row's spare width so a typed-value editor (dropdown,
+   * env button, input) stretches to the row's right edge instead of
+   * sizing to its label / content. */
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* `if` / `comparator` operand value selector — grow to the row's full width so
+ * the typed-value editor (type dropdown + input + env button) spans the box
+ * instead of sizing to its current content. `min-width: 0` lets the inner input
+ * shrink inside the flex row. */
+.scn-operand-field {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* If operator toggle — compact segmented control. */
+.scn-operator-toggle {
+  display: inline-flex;
+  border: 1px solid var(--editorHoverWidget-border, #454545);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.scn-operator-option {
+  min-width: 20px;
+  padding: 1px 4px;
+  font-size: 11px;
+  line-height: 1.4;
+  background: transparent;
+  color: inherit;
+  border: none;
+  border-right: 1px solid var(--editorHoverWidget-border, #454545);
+  cursor: pointer;
+  opacity: 0.7;
+}
+.scn-operator-option:last-child {
+  border-right: none;
+}
+.scn-operator-option:hover {
+  opacity: 1;
+  background: var(--list-hoverBackground, rgba(255, 255, 255, 0.06));
+}
+.scn-operator-option-active {
+  opacity: 1;
+  background: var(--focusBorder, #007fd4);
+  color: #fff;
+}
+
+/* JSON-path selector — shown on a data link's receiving input. A label over a
+ * [textbox + target button] control group editing the edge's selector. */
+.scn-path-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+  /* Lets the selector fill the cell row — the input + target button
+   * grow with the box width so a long JSON path stays readable on a
+   * wide node. */
+  width: 100%;
+}
+.scn-path-label {
+  opacity: 0.85;
+}
+.scn-path-controls {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+/* The InputBox wrapper (ECUI renders it with no stable class) must grow to fill
+ * the control group, so the red error ring hugs the field instead of leaving a
+ * gap on the right when the group is wider than the input (e.g. capped at
+ * max-width on a wide request node). */
+.scn-path-controls > :first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.scn-path-controls .monaco-inputbox {
+  font-size: 11px;
+  width: 100%;
+}
+.scn-path-target {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+/* The picker popover holds the run-result tree at a fixed size — a definite
+ * width + height (set on the ListView) is what lets its own ECUI scroll widget
+ * work, exactly as in the sidebar. The popover sizes to that fixed ListView.
+ * No border / background / radius here: the ECUI Tooltip's own `.tooltip-content`
+ * already frames the content (avoids a doubled border). */
+.scn-path-popover {
+  display: flex;
+  flex-direction: column;
+  /* Clip the square list to the frame's rounded corners here (not on
+   * `.tooltip-content`, whose `overflow` must stay visible so the Tooltip's
+   * beak — drawn as `::before`/`::after` outside the content box — shows). */
+  border-radius: 3px;
+  overflow: hidden;
+}
+/* The ECUI Tooltip pads its content (`4px 8px`) for text tooltips; the picker
+ * fills edge-to-edge instead, so zero that padding. */
+.scn-path-tooltip .tooltip-content {
+  padding: 0;
+}
+.scn-path-popover-msg {
+  width: 300px;
+  box-sizing: border-box;
+  padding: 12px;
+  font-size: 12px;
+  opacity: 0.75;
+}
+.scn-path-popover-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  width: 300px;
+  box-sizing: border-box;
+  padding: 12px;
+  font-size: 12px;
+}
+
+/* "What this action does" — the per-kind help shown for the selected box. */
+.scn-inspector-help {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.scn-inspector-help-title {
+  font-weight: 600;
+  opacity: 0.7;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.scn-inspector-help-text {
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+/* Help legend (empty-state footer): colour key + navigation shortcuts. */
+.scn-inspector-legend {
+  /* The section is a flex column (from .scn-inspector-section); min-height:0 lets
+   * it shrink within the panel's definite height so the inner scroller — not the
+   * frame — absorbs an overflowing legend on a short canvas. */
+  min-height: 0;
+  opacity: 0.92;
+}
+/* Fills the (possibly shrunk) section and scrolls its content vertically. */
+.scn-inspector-legend-scroll {
+  min-height: 0;
+}
+/* The actual help content keeps the legend's column layout + spacing. */
+.scn-inspector-legend-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.scn-legend-group-title {
+  font-weight: 600;
+  opacity: 0.6;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-top: 2px;
+}
+.scn-cli-help {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+.scn-cli-help-intro,
+.scn-cli-help-note {
+  font-size: 11px;
+  opacity: 0.7;
+  margin: 0;
+  line-height: 1.4;
+}
+.scn-cli-help-md {
+  width: 100%;
+  min-width: 0;
+  font-size: 11px;
+}
+/* The MarkdownViewer renders the command as a fenced code block — make it wrap
+   inside the narrow inspector instead of overflowing/clipping. */
+.scn-cli-help-md pre,
+.scn-cli-help-md pre code {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.scn-cli-help-toggles {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 11px;
+}
+.scn-legend-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.scn-legend-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.3;
+}
+.scn-legend-nav li {
+  opacity: 0.85;
+  padding-left: 2px;
+}
+/* Phosphor mouse glyphs in the navigation rows — sized to sit inline with the
+ * row text (they fill with currentColor). */
+.scn-legend-nav-icon {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+}
+/* "+" joiner between a mouse glyph and its modifier (move arrows / kbd). */
+.scn-legend-nav-plus {
+  flex: 0 0 auto;
+  opacity: 0.6;
+  font-weight: 600;
+}
+.scn-legend-nav-kbd {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.scn-legend-nav-kbd kbd {
+  font-size: 0.78em;
+  padding: 1px 4px;
+}
+.scn-legend-nav-label {
+  margin-left: 2px;
+}
+
+/* Port-type rows: reproduce the box edge + a port handle, so the legend shows
+ * the real anchor visual (a node's left/right edge with a flow-coloured dot). */
+.scn-legend-ports li {
+  align-items: center;
+  gap: 10px;
+}
+.scn-legend-port {
+  position: relative;
+  flex: 0 0 auto;
+  width: 26px;
+  height: 31px;
+}
+/* The box border a port anchors on: a vertical LINE (no top/bottom cap), in the
+ * SAME colour as an action box's border on the canvas (`--widget-border`),
+ * running past the dot. Default is an INPUT port (box body + drop-shadow on the
+ * LEFT); `.scn-legend-port--out` mirrors the shadow for output ports. */
+.scn-legend-port-edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 12px;
+  width: 2px;
+  background: var(--widget-border, #454545);
+  box-shadow: -3px 0 6px 0 rgb(0 0 0 / 30%);
+}
+.scn-legend-port--out .scn-legend-port-edge {
+  box-shadow: 3px 0 6px 0 rgb(0 0 0 / 30%);
+}
+/* Bottom-edge ports (done / error): the box border the port anchors on runs
+ * HORIZONTALLY, with the drop-shadow falling DOWNWARD. */
+.scn-legend-port--bottom .scn-legend-port-edge {
+  top: 50%;
+  bottom: auto;
+  left: 0;
+  right: 0;
+  width: auto;
+  height: 2px;
+  box-shadow: 0 3px 6px 0 rgb(0 0 0 / 30%);
+}
+/* The port handle on the edge — a VERBATIM copy of the real canvas handle
+ * (`.scn-handle.react-flow__handle` + its flow `::after` halo): 12px content-box
+ * grey dot (`#9ca3af`), 2px node-background border (reads white on light
+ * themes), 1px black box-shadow, then the hollow-masked flow-coloured ring at
+ * `inset:-4px`. Centred on the line (centre x = line centre), vertically
+ * centred in the row. */
+.scn-legend-port-dot {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  box-sizing: content-box;
+  width: 12px;
+  height: 12px;
+  margin: -8px 0 0 -8px;
+  border-radius: 100%;
+  background: #9ca3af;
+  border: 2px solid var(--scenarioNode-background, #2d2d30);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 35%);
+}
+.scn-legend-port-dot::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  -webkit-mask: radial-gradient(circle, transparent 0 60%, #000 62%);
+  mask: radial-gradient(circle, transparent 0 60%, #000 62%);
+}
+.scn-legend-port-dot--signal::after {
+  background: var(--scn-flow-signal, #facc15);
+}
+.scn-legend-port-dot--value::after {
+  background: var(--scn-flow-value, #a855f7);
+}
+/* Output port carrying BOTH a trigger and data: split ring — purple (data) on
+ * the left half, yellow (signal) on the right — same conic split as the canvas
+ * `scn-handle--flow-both` handle. */
+.scn-legend-port-dot--both::after {
+  background: conic-gradient(
+    var(--scn-flow-signal, #facc15) 0 50%,
+    var(--scn-flow-value, #a855f7) 50% 100%
+  );
+}
+/* Centre-fill overrides matching the real generic output handles: `done` is
+ * green (the happy continuation), `error` is red. */
+.scn-legend-port-dot--done {
+  background: #22c55e;
+}
+.scn-legend-port-dot--error {
+  background: #ef4444;
+}
+/* Explanatory line with no port glyph — full-width text aligned with the row
+ * labels (no leading visual gutter). */
+.scn-legend-ports li.scn-legend-note {
+  display: block;
+}

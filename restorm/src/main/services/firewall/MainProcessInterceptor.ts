@@ -76,6 +76,20 @@ function patchHttpModule(mod: HttpLikeModule, source: RequestRecordSource): void
 		if (record === null) return realFn(args)
 		const originHint = captureOriginHint(2)
 		if (originHint !== null) record.originHint = originHint
+		// User-initiated outbound traffic (request runner, import, mini-browser)
+		// is pre-authorised via `withFirewallBypass` — the firewall gates
+		// background traffic, not the request the user just clicked Send / Run on.
+		// Mirror `patchFetch`: emit an `allow` record for audit, then forward to
+		// the real request without a verdict roundtrip. (Without this the http
+		// path ignored the bypass and prompted for any non-project-origin host,
+		// e.g. a resolved `{{baseUrl}}` the saved request never declared.)
+		if (isFirewallBypassed()) {
+			record.verdict = 'allow'
+			firewallService.emit(record)
+			const realRequest = realFn(args)
+			attachBodyCapture(realRequest, record)
+			return realRequest
+		}
 		const cls = permissionService.classify({
 			scheme: record.protocol,
 			host: record.host,

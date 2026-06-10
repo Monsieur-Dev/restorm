@@ -5,8 +5,8 @@
 import { useEffect, useCallback } from 'react'
 import { navigationService } from 'electron-core-ui/renderer'
 import type { NavigationEvent, SearchResult } from 'electron-core-ui/renderer'
-import type { Folder, EnvironmentFolder, Request, Environment } from '../../../shared/types/collections'
-import { isFolder, isRequest, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest } from '../../../shared/types/collections'
+import type { Folder, EnvironmentFolder, Request, Environment, FolderItem, Scenario } from '../../../shared/types/collections'
+import { isFolder, isRequest, isScenario, isEnvironmentFolder, isHTTPRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest } from '../../../shared/types/collections'
 import { findFolderById, findItemWithBreadcrumbs } from '../utils/treeSearch'
 import type { BreadcrumbItem } from '../../../shared/types/editor'
 
@@ -18,14 +18,15 @@ export interface OpenNavTabOptions {
 }
 
 export interface UseNavigationOptions {
-  rootItems: (EnvironmentFolder | Folder | Request)[]
+  rootItems: FolderItem[]
   openFolderTab: (folder: Folder, breadcrumbs: BreadcrumbItem[], options?: OpenNavTabOptions) => void
+  openScenarioEditorTab: (scenario: Scenario, breadcrumbs: BreadcrumbItem[], options?: OpenNavTabOptions) => void
   openEnvironmentFolderTab: (folder: EnvironmentFolder, breadcrumbs: BreadcrumbItem[], options?: OpenNavTabOptions) => void
   openAnyRequestTab: (request: Request, breadcrumbs: BreadcrumbItem[], environments?: Environment[], options?: OpenNavTabOptions) => void
   setSelectedItemId: React.Dispatch<React.SetStateAction<string | null>>
   setExpandedIds: React.Dispatch<React.SetStateAction<string[]>>
   setFocusedGroupId: React.Dispatch<React.SetStateAction<string | null>>
-  getNearestEnvironmentsForBreadcrumbs: (rootItems: (EnvironmentFolder | Folder | Request)[], breadcrumbs: BreadcrumbItem[]) => Environment[]
+  getNearestEnvironmentsForBreadcrumbs: (rootItems: FolderItem[], breadcrumbs: BreadcrumbItem[]) => Environment[]
 }
 
 export interface UseNavigationReturn {
@@ -54,6 +55,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
   const {
     rootItems,
     openFolderTab,
+    openScenarioEditorTab,
     openEnvironmentFolderTab,
     openAnyRequestTab,
     setSelectedItemId,
@@ -122,6 +124,12 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       return
     }
 
+    if (isScenario(item)) {
+      openScenarioEditorTab(item, breadcrumbs)
+      navigationService.navigateTo(itemId, 'sidebar', { type: 'scenario-editor' })
+      return
+    }
+
     if (isRequest(item)) {
       const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
       openAnyRequestTab(item, breadcrumbs, environments)
@@ -139,7 +147,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
         navigationService.navigateTo(itemId, 'sidebar', { type: 'odata-request' })
       }
     }
-  }, [rootItems, setSelectedItemId, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
+  }, [rootItems, setSelectedItemId, openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
 
   // Middle-click ("open in background") variant of `handleItemClick`.
   // Opens the corresponding workbench tab without focusing it, without
@@ -159,11 +167,16 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       return
     }
 
+    if (isScenario(item)) {
+      openScenarioEditorTab(item, breadcrumbs, { focus: false })
+      return
+    }
+
     if (isRequest(item)) {
       const environments = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
       openAnyRequestTab(item, breadcrumbs, environments, { focus: false })
     }
-  }, [rootItems, openFolderTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
+  }, [rootItems, openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab, getNearestEnvironmentsForBreadcrumbs])
 
   // Handle breadcrumb item click — open a workbench tab for the
   // clicked segment, not just update history. The old implementation
@@ -249,7 +262,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
   // Resolve an index path (e.g. "0.0.1") to an actual item ID by walking rootItems
   const resolveIndexPath = useCallback((indexPath: string): string | null => {
     const indices = indexPath.split('.').map(Number)
-    let current: (EnvironmentFolder | Folder | Request)[] = rootItems
+    let current: FolderItem[] = rootItems
     for (let i = 0; i < indices.length; i++) {
       const idx = indices[i]
       if (idx === undefined || idx >= current.length) return null
@@ -258,7 +271,7 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       if (i === indices.length - 1) return item.id
       // Navigate into children
       if ('items' in item && Array.isArray(item.items)) {
-        current = item.items as (EnvironmentFolder | Folder | Request)[]
+        current = item.items
       } else {
         return null
       }
@@ -268,20 +281,16 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
 
   // Parse a tab ID to extract the item ID and type
   const parseTabId = useCallback((tabId: string): { itemId: string | null; itemType: string | null } => {
-    const indexMatch = /^(env-folder|folder|request)-idx:(.+)$/.exec(tabId)
-    const idMatch = /^(env-folder|folder|request)-id:(.+)$/.exec(tabId)
+    const indexMatch = /^(env-folder|folder|request|scenario)-idx:(.+)$/.exec(tabId)
+    const idMatch = /^(env-folder|folder|request|scenario)-id:(.+)$/.exec(tabId)
+    const mapType = (prefix: string): string =>
+      prefix === 'request' ? 'http-request' : prefix === 'scenario' ? 'scenario-editor' : prefix
 
     if (indexMatch?.[1] && indexMatch[2]) {
-      return {
-        itemType: indexMatch[1] === 'request' ? 'http-request' : indexMatch[1],
-        itemId: resolveIndexPath(indexMatch[2])
-      }
+      return { itemType: mapType(indexMatch[1]), itemId: resolveIndexPath(indexMatch[2]) }
     }
     if (idMatch?.[1] && idMatch[2]) {
-      return {
-        itemType: idMatch[1] === 'request' ? 'http-request' : idMatch[1],
-        itemId: idMatch[2]
-      }
+      return { itemType: mapType(idMatch[1]), itemId: idMatch[2] }
     }
     return { itemId: null, itemType: null }
   }, [resolveIndexPath])
@@ -333,6 +342,8 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
       handleItemClick(result.navigation['requestId'] as string)
     } else if (result.navigation?.['type'] === 'folder' && result.navigation['folderId']) {
       handleItemClick(result.navigation['folderId'] as string)
+    } else if (result.navigation?.['type'] === 'scenario' && result.navigation['scenarioId']) {
+      handleItemClick(result.navigation['scenarioId'] as string)
     }
   }, [handleItemClick])
 

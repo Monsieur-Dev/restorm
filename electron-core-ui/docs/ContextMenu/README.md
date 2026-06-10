@@ -36,7 +36,37 @@ export interface ContextMenuItem {
   onClick?: () => void
   /** Optional submenu items */
   items?: ContextMenuItem[]
+  /**
+   * Optional test id applied to this item's row. The underlying
+   * `MenuItem` / `MenuItemSeparator` also derive sub-element ids from it
+   * (`${testId}-label`, `${testId}-submenu`, `${testId}-separator`, …).
+   */
+  'data-testid'?: string
 }
+```
+
+### `ContextMenuItem` props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `id` | `string` | Stable, semantic id for the entry. |
+| `label` | `string` | Visible label. |
+| `icon` | `string \| React.ReactNode` | Codicon name or custom glyph node. |
+| `shortcut` | `string` | Optional shortcut hint shown trailing. |
+| `isSeparator` | `boolean` | Render as a separator line. |
+| `disabled` | `boolean` | Disable the entry. |
+| `checked` | `boolean` | Show a checkmark. |
+| `opensDialog` | `boolean` | Append a trailing `…` to the label. |
+| `onClick` | `() => void` | Action fired on click. |
+| `items` | `ContextMenuItem[]` | Submenu entries. |
+| `data-testid` | `string` | Test id applied to this item's row; sub-element ids are derived from it. |
+
+```tsx
+items: [
+  { id: 'clone', label: 'Clone', icon: 'copy', 'data-testid': 'ctx-clone', onClick: () => {/* … */} },
+  { id: 'sep-1', isSeparator: true, label: '', 'data-testid': 'ctx-sep' },
+  { id: 'delete', label: 'Delete', icon: 'trash', 'data-testid': 'ctx-delete', onClick: () => {/* … */} }
+]
 ```
 
 The `icon` slot accepts either a codicon name (string) or any React

@@ -95,6 +95,50 @@
     "multiLanguage": {
       "title": "27 języków!",
       "body": "Restorm mówi w 27 językach. Angielski, francuski, hiszpański, niemiecki, włoski, japoński, chiński, koreański i wiele innych — wybierz swój w ustawieniach!"
+    },
+    "fromPostman": {
+      "title": "Przychodzisz z Postmana albo Bruno?",
+      "body": "Pomożemy Ci przesiąść się na Restorm — przejście proste jak nigdy ;)"
+    },
+    "chainRequests": {
+      "title": "Kilka żądań do połączenia w łańcuch?",
+      "body": "Używaj swoich żądań wewnątrz scenariuszy, dodawaj warunki, a nawet zagnieżdżaj scenariusze w innych scenariuszach."
+    },
+    "stepByStep": {
+      "title": "Przejdź przez scenariusze krok po kroku",
+      "body": "Krok po kroku, by dokładnie zobaczyć, co się dzieje. Możesz nawet ustawiać punkty wstrzymania."
+    },
+    "cicd": {
+      "title": "Uruchamiaj scenariusze w swoich pipeline'ach CI/CD",
+      "body": "Uruchom Restorm w trybie headless, aby wykonać scenariusz bez interfejsu i zebrać jego logi — testy automatyczne, zbudowane wizualnie."
+    },
+    "nestedScenarios": {
+      "title": "Zobacz, co dzieje się w scenariuszu",
+      "body": "Scenariusz może wywołać inny. W inspektorze przeczytasz każdy log i przeskoczysz prosto do scenariusza, z którego pochodzi."
+    },
+    "scenarioHistory": {
+      "title": "Ale co się przed chwilą wydarzyło?",
+      "body": "Przeglądaj historię uruchomień swoich scenariuszy. Jeden z nich się od tego czasu zmienił? Bez obaw — zachowaliśmy jego konfigurację."
+    },
+    "codeSandbox": {
+      "title": "Scenariusze i bezpieczeństwo",
+      "body": "Możesz pisać kod w swoich scenariuszach — ale działa on w bezpiecznym sandboksie, bez dostępu do Twoich lokalnych plików i bez bezpośredniego dostępu do internetu. Najbezpieczniejszy sposób, by pozostać chronionym!"
+    },
+    "codeLanguages": {
+      "title": "Masz ochotę napisać trochę kodu?",
+      "body": "Pisz kod prosto w swoich scenariuszach — w TypeScript, JavaScript, Python, Lua, Ruby lub R!"
+    },
+    "scenarioAi": {
+      "title": "Scenariusze sterowane przez AI",
+      "body": "Claude, Cursor, Copilot… znają Twój kod: poproś je o scenariusze szyte na miarę. Wszystko jest udostępnione przez MCP, by tworzyć, edytować i uruchamiać scenariusze."
+    },
+    "interactiveScenarios": {
+      "title": "Interaktywne scenariusze!",
+      "body": "Spraw, by Twoje scenariusze były parametryzowalne, a nawet pytaj użytkownika o decyzję za pomocą okien dialogowych."
+    },
+    "customValueLists": {
+      "title": "Wielokrotnego użytku listy wartości",
+      "body": "Zdefiniuj własne listy wartości i używaj ich ponownie zarówno w żądaniach, jak i w scenariuszach."
     }
   },
   "authFailureToast": {
@@ -151,6 +195,7 @@
       "createEnvironmentFolder": "Utwórz folder środowisk",
       "delete": "Usuń",
       "clone": "Klonuj",
+      "copySuffix": "kopia",
       "rename": "Zmień nazwę",
       "addToFavorites": "Dodaj do ulubionych",
       "removeFromFavorites": "Usuń z ulubionych",
@@ -171,7 +216,8 @@
         "soap": "Żądanie SOAP",
         "websocket": "Żądanie WebSocket",
         "odata": "Żądanie OData",
-        "auth": "Żądanie uwierzytelniania HTTP"
+        "auth": "Żądanie uwierzytelniania HTTP",
+        "scenario": "Scenariusz"
       }
     },
     "deleteConfirm": {
@@ -180,6 +226,14 @@
       "itemMessage": "Czy na pewno chcesz usunąć „{{name}}”?",
       "confirm": "Usuń",
       "cancel": "Anuluj"
+    },
+    "scenarioDelete": {
+      "title": "Usuń żądanie używane przez scenariusze",
+      "message": "„{{name}}” jest używane w następujących scenariuszach. Co chcesz zrobić?",
+      "belongsTag": "należy do tego scenariusza",
+      "moveInto": "Przenieś do tego scenariusza",
+      "affectsNote": "Usunięcie tego żądania usunie je również z tych scenariuszy.",
+      "deleteAnyway": "Usuń mimo to"
     }
   },
   "environment": {
@@ -251,7 +305,8 @@
     "addHeader": "Dodaj nagłówek",
     "addParam": "Dodaj parametr",
     "environmentSelector": {
-      "noEnvironment": "Brak środowiska"
+      "noEnvironment": "Brak środowiska",
+      "switchTooltip": "Przełącz środowisko"
     },
     "body": {
       "fileLabel": "Plik lub URL:",
@@ -304,7 +359,11 @@
       "dateTime": "Data/godzina",
       "color": "Kolor",
       "expression": "Wyrażenie",
-      "boolean": "Wartość logiczna"
+      "boolean": "Wartość logiczna",
+      "null": "Null",
+      "list": "Lista",
+      "variables": "Zmienne",
+      "environment": "Środowisko"
     },
     "apiEnums": "Typy zdefiniowane w API",
     "customLists": "Typy niestandardowe",
@@ -357,11 +416,14 @@
       "folder": "Foldery",
       "environment": "Środowiska",
       "settings": "Ustawienia",
-      "tag": "Tagi"
+      "tag": "Tagi",
+      "scenario": "Scenariusze"
     },
     "tooltip": {
       "noDetails": "Brak dostępnych szczegółów",
-      "noContent": "Brak dokumentacji lub notatek"
+      "noContent": "Brak dokumentacji lub notatek",
+      "noScenario": "Scenariusz niedostępny",
+      "scenarioKind": "scenariusz"
     }
   },
   "httpStatus": {
@@ -468,7 +530,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Czy na pewno chcesz usunąć „{{fileName}}” z ulubionych?",
-    "noFilesHint": "Otwórz plik lub utwórz nowy, aby rozpocząć",
     "newAriaLabel": "Utwórz nową kolekcję",
     "openAriaLabel": "Otwórz kolekcję z dysku",
     "landmarkLabel": "Witamy"
@@ -495,7 +556,9 @@
   },
   "common": {
     "cancel": "Anuluj",
-    "save": "Zapisz"
+    "save": "Zapisz",
+    "remove": "Usuń",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -658,19 +721,19 @@
         "trademark": "OpenAPI to projekt OpenAPI Initiative pod skrzydłami Linux Foundation."
       },
       "curl": {
-        "description": "Masz już żądanie działające w terminalu? Wklej pełne wywołanie curl — flagi, nagłówki, treść, query string — a Restorm odtworzy je jako prawdziwe żądanie, które możesz ponownie uruchomić, edytować i przypiąć.",
+        "description": "Macie już żądanie działające w terminalu? Wklejcie pełne wywołanie curl — flagi, nagłówki, treść, query string — a Restorm odtworzy je jako prawdziwe żądanie, które możecie ponownie uruchomić, edytować i przypiąć.",
         "trademark": "curl to oprogramowanie open source © Daniel Stenberg, używane tutaj na jego warunkach."
       },
       "powershell": {
-        "description": "Ten sam pomysł, w wersji PowerShell. Wklej polecenie Invoke-WebRequest lub Invoke-RestMethod, a Restorm odczyta URI, metodę, nagłówki i treść, aby utworzyć żądanie do dalszej iteracji w sposób wizualny.",
+        "description": "Ten sam pomysł, w wersji PowerShell. Wklejcie polecenie Invoke-WebRequest lub Invoke-RestMethod, a Restorm odczyta URI, metodę, nagłówki i treść, aby utworzyć żądanie do dalszej iteracji w sposób wizualny.",
         "trademark": "PowerShell jest zastrzeżonym znakiem towarowym Microsoft Corporation."
       },
       "postman": {
-        "description": "Masz w pracy zapisaną kolekcję Postmana? Wrzuć JSON — Restorm czyta każde żądanie, każdą przykładową odpowiedź i każdą zmienną środowiskową, a następnie odtwarza kolekcję jako drzewo Restorm, które możesz uruchamiać obok pozostałych API.",
+        "description": "Macie w pracy zapisaną kolekcję Postmana? Wrzućcie JSON — Restorm czyta każde żądanie, każdą przykładową odpowiedź i każdą zmienną środowiskową, a następnie odtwarza kolekcję jako drzewo Restorm, które możecie uruchamiać obok pozostałych API.",
         "trademark": "Postman jest zastrzeżonym znakiem towarowym Postman, Inc., używanym tutaj wyłącznie jako odniesienie do kompatybilności."
       },
       "insomnia": {
-        "description": "Przychodzisz z Insomnii? Wrzuć eksport. Restorm rozumie jej format kolekcji v4/v5, przenosi każde żądanie, nagłówek, treść i środowisko, a całość prezentuje jako drzewo Restorm.",
+        "description": "Przychodzicie z Insomnii? Wrzućcie eksport. Restorm rozumie jej format kolekcji v4/v5, przenosi każde żądanie, nagłówek, treść i środowisko, a całość prezentuje jako drzewo Restorm.",
         "trademark": "Insomnia jest zastrzeżonym znakiem towarowym Kong Inc., używanym tutaj wyłącznie jako odniesienie do kompatybilności."
       },
       "bruno": {
@@ -678,33 +741,33 @@
         "trademark": "Bruno to oprogramowanie open source (MIT) autorstwa Anoop M. D., używane tutaj na jego warunkach."
       },
       "graphql": {
-        "description": "Wklej GraphQL SDL (.graphql / .gql / wycinek z Twojego klienta GraphQL), a Restorm stworzy szkielet jednego żądania na operację, podpięty pod właściwy typ query/mutation/subscription, z już ustrukturyzowanymi zmiennymi.",
+        "description": "Wklejcie GraphQL SDL (.graphql / .gql / wycinek z Waszego klienta GraphQL), a Restorm stworzy szkielet jednego żądania na operację, podpięty pod właściwy typ query/mutation/subscription, z już ustrukturyzowanymi zmiennymi.",
         "trademark": "GraphQL jest znakiem towarowym GraphQL Foundation, projektu Joint Development Foundation."
       },
       "grpc": {
-        "description": "Wrzuć plik .proto (lub cały katalog) — Restorm przejdzie przez każdą usługę, każde RPC i każdą wiadomość, zamieniając każdą metodę w typowane żądanie, które możesz wysłać przez wykonawcę gRPC bez tknięcia codegen.",
+        "description": "Wrzućcie plik .proto (lub cały katalog) — Restorm przejdzie przez każdą usługę, każde RPC i każdą wiadomość, zamieniając każdą metodę w typowane żądanie, które możecie wysłać przez wykonawcę gRPC bez tknięcia codegen.",
         "trademark": "gRPC to projekt Cloud Native Computing Foundation."
       },
       "soap": {
-        "description": "Masz WSDL? Wklej go (lub jego URL) — Restorm parsuje każdy <port> i <operation> oraz tworzy gotowe do wysłania koperty SOAP z właściwym nagłówkiem SOAPAction, szkieletami treści typowanymi przez schemat oraz schematem uwierzytelniania zadeklarowanym w WSDL."
+        "description": "Macie WSDL? Wklejcie go (lub jego URL) — Restorm parsuje każdy <port> i <operation> oraz tworzy gotowe do wysłania koperty SOAP z właściwym nagłówkiem SOAPAction, szkieletami treści typowanymi przez schemat oraz schematem uwierzytelniania zadeklarowanym w WSDL."
       },
       "websocket": {
-        "description": "Wklej punkt końcowy WebSocket (ws:// lub wss://) — Restorm otwiera połączenie, przechwytuje ramki powitalne serwera i tworzy szkielety żądań send/subscribe z odtwarzalnymi szablonami payloadu.",
+        "description": "Wklejcie punkt końcowy WebSocket (ws:// lub wss://) — Restorm otwiera połączenie, przechwytuje ramki powitalne serwera i tworzy szkielety żądań send/subscribe z odtwarzalnymi szablonami payloadu.",
         "trademark": "WebSocket to protokół ustandaryzowany przez IETF (RFC 6455) i W3C."
       },
       "kafka": {
-        "description": "Wklej URL serwera bootstrap Apache Kafka (lub listę tematów) — Restorm rejestruje konsumentów i producentów na temat, dekoduje payloady Avro/Protobuf przez Twoje Schema Registry i pozwala odtworzyć poszczególne offsety jednym kliknięciem.",
+        "description": "Wklejcie URL serwera bootstrap Apache Kafka (lub listę tematów) — Restorm rejestruje konsumentów i producentów na temat, dekoduje payloady Avro/Protobuf przez Wasze Schema Registry i pozwala odtworzyć poszczególne offsety jednym kliknięciem.",
         "trademark": "Apache Kafka oraz logo Kafki są znakami towarowymi Apache Software Foundation."
       },
       "socketio": {
-        "description": "Wklej URL serwera Socket.IO — Restorm negocjuje handshake, listuje namespace'y i nazwy zdarzeń emitowanych przez serwer i daje Ci jedno żądanie na emit / on z walidacją payloadu.",
+        "description": "Wklejcie URL serwera Socket.IO — Restorm negocjuje handshake, listuje namespace'y i nazwy zdarzeń emitowanych przez serwer i daje Wam jedno żądanie na emit / on z walidacją payloadu.",
         "trademark": "Socket.IO to biblioteka open source wydana na licencji MIT; nazwa i logo są używane nominatywnie."
       },
       "odata": {
-        "description": "Wklej URL dokumentu usługi OData lub plik $metadata — Restorm odczyta CSDL, odtworzy zestawy encji, importy funkcji i akcje oraz wstępnie wypełni opcje zapytań $filter / $select / $top / $skip dla każdej operacji."
+        "description": "Wklejcie URL dokumentu usługi OData lub plik $metadata — Restorm odczyta CSDL, odtworzy zestawy encji, importy funkcji i akcje oraz wstępnie wypełni opcje zapytań $filter / $select / $top / $skip dla każdej operacji."
       },
       "mqtt": {
-        "description": "Wklej URL brokera MQTT lub katalog tematów — Restorm tworzy żądania publish/subscribe na temat, utrzymuje połączenie dla podglądu strumieniowego i zapamiętuje migawki wiadomości retained, aby można było je później odtworzyć.",
+        "description": "Wklejcie URL brokera MQTT lub katalog tematów — Restorm tworzy żądania publish/subscribe na temat, utrzymuje połączenie dla podglądu strumieniowego i zapamiętuje migawki wiadomości retained, aby można było je później odtworzyć.",
         "trademark": "MQTT to standard OASIS; nazwa i logo MQTT są znakami towarowymi OASIS Open."
       }
     },
@@ -745,6 +808,685 @@
       "previousMatch": "Poprzednie dopasowanie",
       "nextMatch": "Następne dopasowanie",
       "close": "Zamknij"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "emptyTitle": "Tu jest pusto…",
+      "emptyDragDrop": "Przeciągnij element z drzewa po lewej stronie do swojego scenariusza, aby go tu użyć. Możesz nawet zaimportować jeden scenariusz do drugiego!",
+      "emptyRightClick": "Kliknij prawym przyciskiem myszy puste miejsce, aby dodać akcje do scenariusza"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "runOnEachEvent": "Uruchom przy każdym otrzymanym zdarzeniu",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del",
+        "copy": "Kopiuj",
+        "paste": "Wklej"
+      },
+      "expand": "Rozwiń",
+      "collapse": "Zwiń"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "locked": "Edycja zablokowana podczas działania scenariusza",
+    "switch": {
+      "addCase": "Dodaj przypadek",
+      "removeCase": "Usuń przypadek",
+      "case": "przypadek"
+    },
+    "forEach": {
+      "items": "elementy",
+      "each": "każdy",
+      "done": "gotowe",
+      "parallelism": "równoległość"
+    },
+    "aggregate": {
+      "items": "elementy",
+      "result": "wynik",
+      "field": "pole",
+      "separator": "separator",
+      "op": {
+        "count": "Liczba",
+        "sum": "Suma",
+        "min": "Min",
+        "max": "Maks",
+        "average": "Średnia",
+        "join": "Połącz"
+      }
+    },
+    "filter": {
+      "items": "elementy",
+      "rejected": "odrzucone",
+      "kept": "zachowane",
+      "keepWhere": "zachowaj gdy"
+    },
+    "wait": {
+      "then": "potem",
+      "duration": "czas trwania"
+    },
+    "waitUntil": {
+      "until": "do",
+      "then": "potem"
+    },
+    "arithmetic": {
+      "result": "wynik"
+    },
+    "nodes": {
+      "arithmetic": "Arytmetyka",
+      "httpRequest": "Żądanie HTTP",
+      "runScenario": "Uruchom scenariusz",
+      "wait": "Czekaj",
+      "waitUntil": "Czekaj do",
+      "now": "Teraz",
+      "comparator": "Komparator",
+      "setVariable": "Ustaw zmienną",
+      "getVariable": "Pobierz zmienną",
+      "addToList": "Dodaj do listy",
+      "removeFromList": "Usuń z listy",
+      "cast": "Cast",
+      "regex": "Regex",
+      "json": "JSON",
+      "xml": "XML",
+      "yaml": "YAML",
+      "crypto": "Crypto",
+      "jwt": "JWT",
+      "datetime": "Date math",
+      "objectOp": "Object ops",
+      "url": "URL",
+      "random": "Random",
+      "throw": "Throw",
+      "retry": "Retry",
+      "listOp": "List ops",
+      "csv": "CSV",
+      "math": "Math",
+      "schema": "Schema validate",
+      "readFile": "Read file",
+      "writeFile": "Write file",
+      "timer": "Czasomierz",
+      "code": "Kod"
+    },
+    "comparator": {
+      "result": "wynik"
+    },
+    "boolean": {
+      "result": "wynik"
+    },
+    "map": {
+      "items": "elementy",
+      "mapped": "przekształcone"
+    },
+    "log": {
+      "message": "komunikat",
+      "data": "dane"
+    },
+    "assert": {
+      "message": "komunikat",
+      "operator": "operator",
+      "op": {
+        "eq": "equals",
+        "ne": "not equals",
+        "lt": "less than",
+        "lte": "less or equal",
+        "gt": "greater than",
+        "gte": "greater or equal",
+        "contains": "contains",
+        "isString": "is string",
+        "isNumber": "is number",
+        "isBoolean": "is boolean",
+        "isArray": "is array",
+        "isObject": "is object",
+        "isNull": "is null",
+        "exists": "exists",
+        "isEmpty": "is empty",
+        "matchesRegex": "matches regex",
+        "isOneOf": "is one of",
+        "deepEquals": "deep equals",
+        "lengthEq": "length ==",
+        "lengthGt": "length >",
+        "lengthLt": "length <"
+      }
+    },
+    "editRequest": "Edytuj żądanie",
+    "editScenario": "Edytuj scenariusz",
+    "object": {
+      "addProperty": "Dodaj właściwość",
+      "removeProperty": "Usuń właściwość",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "output": {
+      "outputName": "Nazwa wyjścia",
+      "addOutput": "Dodaj wyjście",
+      "removeOutput": "Usuń"
+    },
+    "input": {
+      "name": "Name",
+      "defaultType": "Default / type",
+      "addParam": "Dodaj parametr",
+      "removeParam": "Usuń"
+    },
+    "runScenario": {
+      "orphanInput": "Brak pasującego parametru „{{name}}\" w podscenariuszu",
+      "orphanOutput": "Brak pasującego wyjścia „{{name}}\" w podscenariuszu",
+      "then": "potem"
+    },
+    "validation": {
+      "duplicateName": "Nazwa „{{name}}” jest już używana przez inną akcję.",
+      "panelTitle": "{{count}} błąd(y) akcji",
+      "runBlocked": "Napraw {{count}} błąd(y) akcji przed uruchomieniem",
+      "focusBox": "Przejdź do tej akcji",
+      "showErrors": "Pokaż błędy",
+      "input": {
+        "missingName": "Ten parametr wejściowy musi mieć nazwę."
+      },
+      "dataLink": {
+        "emptyPath": "Przychodzące połączenie danych wymaga ścieżki (JSON path).",
+        "badPath": "Ścieżka JSON „{{path}}” połączenia danych jest nieprawidłowa."
+      },
+      "output": {
+        "missingName": "To wyjście musi mieć nazwę.",
+        "duplicateName": "Nazwa „{{name}}” jest już używana przez inne wyjście."
+      },
+      "getVariable": {
+        "noSelection": "Należy wybrać zmienną.",
+        "unknown": "Zmienna „{{name}}” nie istnieje w scenariuszu."
+      },
+      "setVariable": {
+        "missingName": "Ustawiana zmienna musi mieć nazwę."
+      },
+      "object": {
+        "propMissingName": "Każda właściwość musi mieć nazwę.",
+        "propDuplicate": "Nazwa właściwości „{{name}}” się powtarza."
+      },
+      "arithmetic": {
+        "divisionByZero": "Dzielenie przez zero jest niemożliwe."
+      },
+      "switch": {
+        "caseDuplicate": "Wartość przypadku „{{value}}” jest zduplikowana."
+      },
+      "transform": {
+        "emptyTemplate": "Szablon nie może być pusty.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "Powiązane żądanie już nie istnieje."
+      },
+      "runScenario": {
+        "missing": "Powiązany scenariusz już nie istnieje."
+      },
+      "file": {
+        "missingPath": "A file path is required."
+      }
+    },
+    "usage": {
+      "button": "Scenariusze używające tego żądania",
+      "title": "To żądanie jest używane w scenariuszach:"
+    },
+    "inspector": {
+      "run": "Uruchom",
+      "debug": "Debuguj",
+      "undo": "Cofnij",
+      "redo": "Ponów",
+      "step": "Krok po kroku",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "Wstrzymaj",
+      "noRunsHint": "Brak ostatniego wykonania dla tego żądania — uruchom je stąd, aby wypełnić podgląd scenariusza.",
+      "syntheticInfo": "Przykładowe dane wygenerowane z dokumentacji tego żądania.",
+      "syntheticRunHint": "Przykładowe dane — uruchom żądanie, aby zastąpić je rzeczywistym wynikiem.",
+      "stop": "Zatrzymaj",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "copyThisLog": "Kopiuj ten wpis",
+      "clearLogs": "Wyczyść logi",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "Pokaż logi {{level}}",
+      "showLevelOnly": "Kliknij prawym przyciskiem: tylko ten poziom",
+      "noUserLogs": "No user logs (entries from the Log action) in this run.",
+      "helpTitle": "What this action does"
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Wymagane dane"
+    },
+    "runHistory": {
+      "title": "Historia uruchomień",
+      "tooltip": "Historia uruchomień",
+      "empty": "Brak zarejestrowanych uruchomień",
+      "noLogs": "Brak dziennika dla tego uruchomienia",
+      "logsTab": "Logs",
+      "graphTab": "Graf",
+      "noGraph": "Brak migawki scenariusza dla tego uruchomienia",
+      "pin": "Przypnij",
+      "unpin": "Odepnij"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "Dodaj punkt przerwania",
+      "remove": "Usuń punkt przerwania",
+      "toggle": "Przełącz punkt przerwania (F9)",
+      "reached": "Osiągnięto punkt przerwania — ta akcja nie została jeszcze wykonana. Naciśnij F5, aby wznowić, lub F7, aby wykonać krok.",
+      "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Przełącz minimapę"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Dodaj wartość",
+      "removeValue": "Usuń wartość",
+      "updateVariable": "Zaktualizuj zmienną źródłową"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
+    },
+    "regex": {
+      "value": "value",
+      "operation": "operation",
+      "pattern": "pattern",
+      "flags": "flags",
+      "replacement": "replacement",
+      "result": "result",
+      "op": {
+        "extract": "extract",
+        "extractAll": "extract all",
+        "test": "test",
+        "replace": "replace",
+        "split": "split"
+      },
+      "flag": {
+        "i": "Case-insensitive",
+        "m": "Multiline (^ and $ match line breaks)",
+        "s": "Dotall (. matches newlines)"
+      }
+    },
+    "json": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "xml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "yaml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "crypto": {
+      "value": "value",
+      "operation": "operation",
+      "key": "key",
+      "keyPlaceholder": "secret",
+      "result": "result",
+      "op": {
+        "base64Encode": "base64 encode",
+        "base64Decode": "base64 decode",
+        "md5": "MD5",
+        "sha1": "SHA-1",
+        "sha256": "SHA-256",
+        "sha512": "SHA-512",
+        "hmacSha256": "HMAC-SHA256",
+        "uuid": "UUID v4"
+      }
+    },
+    "jwt": {
+      "value": "token",
+      "result": "result"
+    },
+    "datetime": {
+      "value": "date",
+      "operation": "operation",
+      "amount": "amount",
+      "unitLabel": "unit",
+      "format": "format",
+      "other": "second date",
+      "result": "result",
+      "op": {
+        "add": "add",
+        "subtract": "subtract",
+        "format": "format",
+        "diff": "diff"
+      },
+      "unit": {
+        "milliseconds": "milliseconds",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months",
+        "years": "years"
+      }
+    },
+    "objectOp": {
+      "value": "object",
+      "operation": "operation",
+      "path": "path",
+      "keys": "keys",
+      "setValue": "value",
+      "mergeWith": "merge with",
+      "result": "result",
+      "op": {
+        "get": "get",
+        "set": "set",
+        "merge": "merge",
+        "pick": "pick",
+        "omit": "omit",
+        "keys": "keys",
+        "values": "values"
+      }
+    },
+    "url": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "op": {
+        "encode": "encode",
+        "decode": "decode",
+        "parseQuery": "parse query",
+        "buildQuery": "build query",
+        "parseUrl": "parse URL"
+      }
+    },
+    "random": {
+      "operation": "operation",
+      "min": "min",
+      "max": "max",
+      "length": "length",
+      "items": "items",
+      "seed": "seed (optional)",
+      "seedPlaceholder": "reproducible",
+      "result": "result",
+      "op": {
+        "int": "integer",
+        "float": "float",
+        "string": "string",
+        "boolean": "boolean",
+        "pick": "pick"
+      }
+    },
+    "throw": {
+      "message": "message"
+    },
+    "retry": {
+      "maxAttempts": "max attempts",
+      "backoff": "backoff",
+      "delay": "delay",
+      "factor": "factor",
+      "retryOnError": "retry on error",
+      "retryOnStatus": "retry on HTTP status",
+      "retryOnFailure": "retry on any non-2xx",
+      "attempt": "attempt",
+      "exhausted": "exhausted",
+      "backoffOpt": {
+        "fixed": "fixed",
+        "linear": "linear",
+        "exponential": "exponential"
+      }
+    },
+    "menuGroups": {
+      "lists": "Lists",
+      "math": "Math",
+      "dataFormats": "Data formats",
+      "encoding": "Encoding",
+      "time": "Harmonogram"
+    },
+    "listOp": {
+      "value": "list",
+      "operation": "operation",
+      "result": "result",
+      "key": "key",
+      "order": "order",
+      "depth": "depth",
+      "size": "size",
+      "start": "start",
+      "end": "end",
+      "op": {
+        "sort": "sort",
+        "unique": "unique",
+        "reverse": "reverse",
+        "flatten": "flatten",
+        "chunk": "chunk",
+        "slice": "slice",
+        "groupBy": "group by"
+      }
+    },
+    "csv": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "delimiter": "delimiter",
+      "header": "header row",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "math": {
+      "a": "value",
+      "operation": "operation",
+      "result": "result",
+      "b": "with",
+      "min": "min",
+      "max": "max",
+      "precision": "precision",
+      "op": {
+        "round": "round",
+        "floor": "floor",
+        "ceil": "ceil",
+        "trunc": "truncate",
+        "abs": "absolute",
+        "sign": "sign",
+        "sqrt": "square root",
+        "min": "min",
+        "max": "max",
+        "clamp": "clamp"
+      }
+    },
+    "schema": {
+      "value": "value",
+      "schema": "JSON Schema",
+      "valid": "valid",
+      "invalid": "invalid",
+      "errors": "errors",
+      "editTitle": "Edit JSON Schema"
+    },
+    "readFile": {
+      "path": "path",
+      "content": "content"
+    },
+    "writeFile": {
+      "path": "path",
+      "mode": "mode",
+      "content": "content"
+    },
+    "codeField": {
+      "title": "Edit",
+      "edit": "Open editor",
+      "moreLines": "+{{count}} lines",
+      "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "tryb",
+      "modeOpt": {
+        "frequency": "częstotliwość",
+        "cron": "cron"
+      },
+      "frequency": "częstotliwość",
+      "unit": "jednostka",
+      "cron": "cron",
+      "stop": "zatrzymaj po",
+      "stopOpt": {
+        "none": "nigdy",
+        "duration": "czas trwania",
+        "endDate": "data zakończenia"
+      },
+      "duration": "czas trwania",
+      "endDate": "data zakończenia",
+      "tick": "tyknięcie"
+    },
+    "code": {
+      "input": "wejście",
+      "language": "Język",
+      "code": "kod",
+      "modalTitle": "Edytuj kod",
+      "result": "wynik",
+      "timeout": "Limit czasu (s)"
+    },
+    "help": {
+      "input": "Injects the scenario's input parameters and constants into the graph.",
+      "output": "Declares one of the scenario's named results, read by a parent Run-scenario.",
+      "if": "Branches the flow to then / else by comparing two operands.",
+      "switch": "Routes the input to a matching case, or to default.",
+      "httpRequest": "Runs a saved API request and emits its response.",
+      "runScenario": "Runs another scenario as a reusable sub-step.",
+      "forEach": "Runs the body once per item of a collection, then continues.",
+      "for": "Loops over a number range, running the body for each value.",
+      "while": "Repeats the body while a condition holds (tested first).",
+      "doWhile": "Repeats the body while a condition holds (runs at least once).",
+      "aggregate": "Reduces a collection to one value (count, sum, min, max, average, join).",
+      "map": "Transforms every item of a collection into a new list.",
+      "filter": "Keeps the items that match a condition; routes the rest aside.",
+      "addToList": "Appends values to a list.",
+      "removeFromList": "Removes matching values from a list.",
+      "wait": "Pauses for a duration, then continues.",
+      "waitUntil": "Pauses until a given date/time, then continues.",
+      "now": "Emits the current date and time.",
+      "timer": "Fires its body on a repeating interval or a cron schedule.",
+      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "comparator": "Compares two values and emits true or false.",
+      "boolean": "Combines booleans with and / or / xor / not.",
+      "object": "Builds an object from its named inputs.",
+      "setVariable": "Stores a value into a run variable.",
+      "getVariable": "Reads a run variable's value.",
+      "transform": "Renders a Handlebars template from the input and run variables.",
+      "code": "Uruchamia Twój kod (TypeScript, JavaScript, Python, Lua, Ruby lub R) w piaskownicy i zwraca wynik.",
+      "cast": "Converts a value to another type (number, string, boolean, date, list).",
+      "regex": "Matches, extracts, replaces or splits text with a regular expression.",
+      "json": "Parses a JSON string, or serialises a value to JSON.",
+      "xml": "Parses an XML string, or serialises a value to XML.",
+      "yaml": "Parses a YAML string, or serialises a value to YAML.",
+      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "jwt": "Decodes a JWT token into header, payload and signature.",
+      "datetime": "Shifts, formats or diffs a date.",
+      "retry": "Re-runs its body until it succeeds, with a backoff policy.",
+      "objectOp": "Reshapes an object (get/set a path, merge, pick, omit, keys, values).",
+      "url": "Encodes, decodes or parses URLs and query strings.",
+      "random": "Generates a random number, string, boolean or pick.",
+      "listOp": "Reshapes a list (sort, unique, reverse, flatten, chunk, slice, groupBy).",
+      "csv": "Parses a CSV string, or serialises a list to CSV.",
+      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "schema": "Validates a value against a JSON Schema.",
+      "readFile": "Reads a file's text content.",
+      "writeFile": "Writes or appends text to a file.",
+      "throw": "Deliberately fails with a message (for error branches and tests).",
+      "log": "Writes a message to the run log and passes the value through.",
+      "assert": "Checks a condition (chai-style) and routes to pass or fail."
+    },
+    "legend": {
+      "title": "Legenda",
+      "portsTitle": "Punkty wejścia",
+      "entryEventTrigger": "Punkt wejścia wyzwalany przez zdarzenie",
+      "entryDataTrigger": "Punkt wejścia wyzwalany przez dane",
+      "runWhenAllReceived": "Akcje są wykonywane, gdy tylko zostaną odebrane wszystkie zdarzenia i wszystkie dane",
+      "runOnLaunchNoPredecessor": "Akcje bez poprzednika są wykonywane zaraz po uruchomieniu scenariusza",
+      "outPortsTitle": "Punkty wyjścia",
+      "outEmit": "Emituje zdarzenie wyzwalające i wysyła dane",
+      "outEmitSignalOnly": "Emituje zdarzenie wyzwalające bez wysyłania danych",
+      "genericOutPortsTitle": "Ogólne punkty wyjścia",
+      "outDone": "Zdarzenie wyzwalające emitowane po zakończeniu akcji",
+      "outError": "Zdarzenie wyzwalające uruchamiane w przypadku błędu akcji",
+      "navTitle": "Nawigacja",
+      "zoom": "powiększenie",
+      "pan": "przesuń",
+      "boxSelect": "zaznaczenie prostokątne",
+      "select": "zaznacz / zaznaczanie wielokrotne"
+    },
+    "cli": {
+      "title": "Run from the command line",
+      "intro": "Run this scenario without opening the app (CI, cron, script):",
+      "byId": "Designate by id",
+      "allLogs": "All logs",
+      "note": "`--out file` also writes the run-log to a file.",
+      "projectPlaceholder": "<project.restorm>"
     }
   }
 }

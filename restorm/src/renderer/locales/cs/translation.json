@@ -95,6 +95,50 @@
     "multiLanguage": {
       "title": "27 jazyků!",
       "body": "Restorm mluví 27 jazyky. Angličtina, francouzština, španělština, němčina, italština, japonština, čínština, korejština a mnohé další — vyber si svůj v nastavení!"
+    },
+    "fromPostman": {
+      "title": "Přicházíte z Postmanu nebo Bruna?",
+      "body": "Pomůžeme vám přejít na Restorm — váš přechod hravě ;)"
+    },
+    "chainRequests": {
+      "title": "Potřebujete zřetězit několik požadavků?",
+      "body": "Používejte své požadavky uvnitř scénářů, přidávejte podmínky a dokonce vnořujte scénáře do jiných scénářů."
+    },
+    "stepByStep": {
+      "title": "Procházejte své scénáře krok za krokem",
+      "body": "Jeden krok po druhém, abyste viděli přesně, co se děje. Můžete si dokonce nastavit breakpointy."
+    },
+    "cicd": {
+      "title": "Spouštějte své scénáře ve svých CI/CD pipelinách",
+      "body": "Spusťte Restorm v headless režimu, abyste provedli scénář bez rozhraní a sebrali jeho logy — automatizované testy, sestavené vizuálně."
+    },
+    "nestedScenarios": {
+      "title": "Podívejte se, co se ve scénáři děje",
+      "body": "Scénář může volat jiný. V inspektoru si přečtěte každý log a skočte rovnou ke scénáři, ze kterého pochází."
+    },
+    "scenarioHistory": {
+      "title": "Ale co se to právě stalo?",
+      "body": "Procházejte historii spuštění svých scénářů. Jeden z nich se mezitím změnil? Žádný problém — jeho konfiguraci jsme uchovali."
+    },
+    "codeSandbox": {
+      "title": "Scénáře a bezpečnost",
+      "body": "Ve svých scénářích můžete psát kód — ale ten běží v zabezpečené sandboxu, bez přístupu k vašim lokálním souborům a bez přímého přístupu k internetu. Nejbezpečnější způsob, jak zůstat chráněni!"
+    },
+    "codeLanguages": {
+      "title": "Máte chuť psát kód?",
+      "body": "Pište kód přímo ve svých scénářích — v TypeScriptu, JavaScriptu, Pythonu, Lua, Ruby nebo R!"
+    },
+    "scenarioAi": {
+      "title": "Scénáře řiditelné umělou inteligencí",
+      "body": "Claude, Cursor, Copilot… znají váš kód: požádejte je o scénáře na míru. Vše je vystaveno přes MCP pro vytváření, úpravu a spouštění scénářů."
+    },
+    "interactiveScenarios": {
+      "title": "Interaktivní scénáře!",
+      "body": "Udělejte své scénáře parametrizovatelné a dokonce se uživatele zeptejte dialogovými okny, co má dělat."
+    },
+    "customValueLists": {
+      "title": "Znovupoužitelné seznamy hodnot",
+      "body": "Definujte si vlastní seznamy hodnot a používejte je ve svých požadavcích i ve svých scénářích."
     }
   },
   "authFailureToast": {
@@ -151,6 +195,7 @@
       "createEnvironmentFolder": "Vytvořit složku prostředí",
       "delete": "Smazat",
       "clone": "Duplikovat",
+      "copySuffix": "kopie",
       "rename": "Přejmenovat",
       "addToFavorites": "Přidat k oblíbeným",
       "removeFromFavorites": "Odebrat z oblíbených",
@@ -171,7 +216,8 @@
         "soap": "Požadavek SOAP",
         "websocket": "Požadavek WebSocket",
         "odata": "Požadavek OData",
-        "auth": "Ověřovací požadavek HTTP"
+        "auth": "Ověřovací požadavek HTTP",
+        "scenario": "Scénář"
       }
     },
     "deleteConfirm": {
@@ -180,6 +226,14 @@
       "itemMessage": "Opravdu chcete smazat „{{name}}“?",
       "confirm": "Smazat",
       "cancel": "Zrušit"
+    },
+    "scenarioDelete": {
+      "title": "Smazat požadavek používaný scénáři",
+      "message": "„{{name}}“ se používá v následujících scénářích. Co chcete udělat?",
+      "belongsTag": "patří k tomuto scénáři",
+      "moveInto": "Přesunout do tohoto scénáře",
+      "affectsNote": "Smazáním tohoto požadavku jej také odeberete z těchto scénářů.",
+      "deleteAnyway": "Přesto smazat"
     }
   },
   "environment": {
@@ -251,7 +305,8 @@
     "addHeader": "Přidat hlavičku",
     "addParam": "Přidat parametr",
     "environmentSelector": {
-      "noEnvironment": "Bez prostředí"
+      "noEnvironment": "Bez prostředí",
+      "switchTooltip": "Přepnout prostředí"
     },
     "body": {
       "fileLabel": "Soubor nebo URL:",
@@ -304,7 +359,11 @@
       "dateTime": "Datum a čas",
       "color": "Barva",
       "expression": "Výraz",
-      "boolean": "Boolean"
+      "boolean": "Boolean",
+      "null": "Null",
+      "list": "Seznam",
+      "variables": "Proměnné",
+      "environment": "Prostředí"
     },
     "apiEnums": "Typy definované v API",
     "customLists": "Vlastní typy",
@@ -357,11 +416,14 @@
       "folder": "Složky",
       "environment": "Prostředí",
       "settings": "Nastavení",
-      "tag": "Štítky"
+      "tag": "Štítky",
+      "scenario": "Scénáře"
     },
     "tooltip": {
       "noDetails": "Žádné podrobnosti k dispozici",
-      "noContent": "Žádná dokumentace ani poznámky"
+      "noContent": "Žádná dokumentace ani poznámky",
+      "noScenario": "Scénář není k dispozici",
+      "scenarioKind": "scénář"
     }
   },
   "httpStatus": {
@@ -468,7 +530,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Opravdu chcete odebrat „{{fileName}}“ z oblíbených?",
-    "noFilesHint": "Začněte otevřením souboru nebo vytvořením nového",
     "newAriaLabel": "Vytvořit novou kolekci",
     "openAriaLabel": "Otevřít kolekci z disku",
     "landmarkLabel": "Úvodní obrazovka"
@@ -495,7 +556,9 @@
   },
   "common": {
     "cancel": "Zrušit",
-    "save": "Uložit"
+    "save": "Uložit",
+    "remove": "Odebrat",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -658,19 +721,19 @@
         "trademark": "OpenAPI je projekt OpenAPI Initiative pod záštitou Linux Foundation."
       },
       "curl": {
-        "description": "Už máš požadavek spuštěný v terminálu? Vlož celý příkaz curl — flagy, hlavičky, tělo, query string — a Restorm ho znovu sestaví jako skutečný požadavek, který můžeš znovu spustit, upravit a připnout.",
+        "description": "Už máte požadavek spuštěný v terminálu? Vložte celý příkaz curl — flagy, hlavičky, tělo, query string — a Restorm ho znovu sestaví jako skutečný požadavek, který můžete znovu spustit, upravit a připnout.",
         "trademark": "curl je open source software © Daniel Stenberg, použitý zde dle jeho podmínek."
       },
       "powershell": {
-        "description": "Stejný princip, ale v PowerShellu. Vlož příkaz Invoke-WebRequest nebo Invoke-RestMethod a Restorm přečte URI, metodu, hlavičky a tělo, aby z nich vytvořil požadavek, který lze vizuálně upravovat.",
+        "description": "Stejný princip, ale v PowerShellu. Vložte příkaz Invoke-WebRequest nebo Invoke-RestMethod a Restorm přečte URI, metodu, hlavičky a tělo, aby z nich vytvořil požadavek, který lze vizuálně upravovat.",
         "trademark": "PowerShell je registrovaná ochranná známka Microsoft Corporation."
       },
       "postman": {
-        "description": "Máš v práci uloženou kolekci Postman? Pusť ji jako JSON — Restorm přečte každý požadavek, každý příklad odpovědi a každou proměnnou prostředí, a kolekci přestaví jako strom Restorm, který můžeš spouštět vedle zbytku svých API.",
+        "description": "Máte v práci uloženou kolekci Postman? Pusťte ji jako JSON — Restorm přečte každý požadavek, každý příklad odpovědi a každou proměnnou prostředí, a kolekci přestaví jako strom Restorm, který můžete spouštět vedle zbytku svých API.",
         "trademark": "Postman je registrovaná ochranná známka Postman, Inc., použitá zde pouze pro účely kompatibility."
       },
       "insomnia": {
-        "description": "Přicházíš z Insomnia? Pusť svůj export. Restorm rozumí formátu kolekcí v4 / v5, přenese každý požadavek, hlavičku, tělo i prostředí, a vše zobrazí jako strom Restorm.",
+        "description": "Přicházíte z Insomnia? Pusťte svůj export. Restorm rozumí formátu kolekcí v4 / v5, přenese každý požadavek, hlavičku, tělo i prostředí, a vše zobrazí jako strom Restorm.",
         "trademark": "Insomnia je registrovaná ochranná známka Kong Inc., použitá zde pouze pro účely kompatibility."
       },
       "bruno": {
@@ -678,33 +741,33 @@
         "trademark": "Bruno je open source software (MIT) Anoopa M. D., použitý zde dle jeho podmínek."
       },
       "graphql": {
-        "description": "Vlož GraphQL SDL (.graphql / .gql / vložení z tvého GraphQL klienta) a Restorm připraví jeden požadavek na každou operaci, navázaný na správný typ query / mutation / subscription s předem strukturovanými proměnnými.",
+        "description": "Vložte GraphQL SDL (.graphql / .gql / vložení z vašeho GraphQL klienta) a Restorm připraví jeden požadavek na každou operaci, navázaný na správný typ query / mutation / subscription s předem strukturovanými proměnnými.",
         "trademark": "GraphQL je ochranná známka GraphQL Foundation, projektu Joint Development Foundation."
       },
       "grpc": {
-        "description": "Pusť soubor .proto (nebo celý adresář s nimi) a Restorm projde každou službu, každé RPC, každou zprávu — z každé metody udělá typovaný požadavek, který lze odeslat přes gRPC exekutor bez nutnosti dotýkat se codegenu.",
+        "description": "Pusťte soubor .proto (nebo celý adresář s nimi) a Restorm projde každou službu, každé RPC, každou zprávu — z každé metody udělá typovaný požadavek, který lze odeslat přes gRPC exekutor bez nutnosti dotýkat se codegenu.",
         "trademark": "gRPC je projekt Cloud Native Computing Foundation."
       },
       "soap": {
-        "description": "Máš WSDL? Vlož ho (nebo jeho URL) — Restorm naparsuje každý <port> a každou <operation> a vytvoří SOAP obálky připravené k odeslání se správnou hlavičkou SOAPAction, skelety těla typované schématem a se schématem ověření, které WSDL deklaruje."
+        "description": "Máte WSDL? Vložte ho (nebo jeho URL) — Restorm naparsuje každý <port> a každou <operation> a vytvoří SOAP obálky připravené k odeslání se správnou hlavičkou SOAPAction, skelety těla typované schématem a se schématem ověření, které WSDL deklaruje."
       },
       "websocket": {
-        "description": "Vlož WebSocket endpoint (ws:// nebo wss://) — Restorm otevře spojení, zachytí uvítací rámce ze serveru a vytvoří požadavky send / subscribe s opakovatelnými šablonami payloadu.",
+        "description": "Vložte WebSocket endpoint (ws:// nebo wss://) — Restorm otevře spojení, zachytí uvítací rámce ze serveru a vytvoří požadavky send / subscribe s opakovatelnými šablonami payloadu.",
         "trademark": "WebSocket je protokol standardizovaný IETF (RFC 6455) a W3C."
       },
       "kafka": {
-        "description": "Vlož URL bootstrap-serveru Apache Kafka (nebo seznam topiků) — Restorm zaregistruje konzumenty a producenty pro každý topic, dekóduje payloady Avro / Protobuf přes tvůj Schema Registry a umožní jedním klikem přehrát konkrétní offset.",
+        "description": "Vložte URL bootstrap-serveru Apache Kafka (nebo seznam topiků) — Restorm zaregistruje konzumenty a producenty pro každý topic, dekóduje payloady Avro / Protobuf přes váš Schema Registry a umožní jedním klikem přehrát konkrétní offset.",
         "trademark": "Apache Kafka a logo Kafka jsou ochranné známky Apache Software Foundation."
       },
       "socketio": {
-        "description": "Vlož URL serveru Socket.IO — Restorm vyjedná handshake, vypíše namespaces a názvy událostí, které server vysílá, a poskytne ti jeden požadavek na každý emit / on s validací payloadu.",
+        "description": "Vložte URL serveru Socket.IO — Restorm vyjedná handshake, vypíše namespaces a názvy událostí, které server vysílá, a poskytne vám jeden požadavek na každý emit / on s validací payloadu.",
         "trademark": "Socket.IO je open-source knihovna vydaná pod licencí MIT; název a logo jsou použity nominativně."
       },
       "odata": {
-        "description": "Vlož URL OData service-document nebo soubor $metadata — Restorm přečte CSDL, znovu vytvoří entity sets, function imports a actions a předvyplní možnosti $filter / $select / $top / $skip u každé operace."
+        "description": "Vložte URL OData service-document nebo soubor $metadata — Restorm přečte CSDL, znovu vytvoří entity sets, function imports a actions a předvyplní možnosti $filter / $select / $top / $skip u každé operace."
       },
       "mqtt": {
-        "description": "Vlož URL MQTT brokeru nebo katalog topiků — Restorm vytvoří požadavky publish / subscribe pro každý topic, udržuje spojení živé pro náhledy streamování a pamatuje si snapshoty zachovaných zpráv, abys je mohl později přehrát.",
+        "description": "Vložte URL MQTT brokeru nebo katalog topiků — Restorm vytvoří požadavky publish / subscribe pro každý topic, udržuje spojení živé pro náhledy streamování a pamatuje si snapshoty zachovaných zpráv, abyste je mohli později přehrát.",
         "trademark": "MQTT je standard OASIS; název a logo MQTT jsou ochranné známky OASIS Open."
       }
     },
@@ -745,6 +808,685 @@
       "previousMatch": "Předchozí shoda",
       "nextMatch": "Další shoda",
       "close": "Zavřít"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "emptyTitle": "Tady je prázdno…",
+      "emptyDragDrop": "Přetáhněte položku ze stromu vlevo do svého scénáře, abyste ji zde použili. Můžete dokonce importovat jeden scénář do druhého!",
+      "emptyRightClick": "Klikněte pravým tlačítkem na prázdné místo a přidejte do scénáře akce"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "runOnEachEvent": "Spustit při každé přijaté události",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del",
+        "copy": "Kopírovat",
+        "paste": "Vložit"
+      },
+      "expand": "Rozbalit",
+      "collapse": "Sbalit"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "locked": "Úpravy uzamčeny během běhu scénáře",
+    "switch": {
+      "addCase": "Přidat případ",
+      "removeCase": "Odebrat případ",
+      "case": "případ"
+    },
+    "forEach": {
+      "items": "položky",
+      "each": "každý",
+      "done": "hotovo",
+      "parallelism": "paralelismus"
+    },
+    "aggregate": {
+      "items": "položky",
+      "result": "výsledek",
+      "field": "pole",
+      "separator": "oddělovač",
+      "op": {
+        "count": "Počet",
+        "sum": "Součet",
+        "min": "Min",
+        "max": "Max",
+        "average": "Průměr",
+        "join": "Spojit"
+      }
+    },
+    "filter": {
+      "items": "položky",
+      "rejected": "vyřazené",
+      "kept": "zachované",
+      "keepWhere": "zachovat když"
+    },
+    "wait": {
+      "then": "poté",
+      "duration": "doba trvání"
+    },
+    "waitUntil": {
+      "until": "do",
+      "then": "poté"
+    },
+    "arithmetic": {
+      "result": "výsledek"
+    },
+    "nodes": {
+      "arithmetic": "Aritmetika",
+      "httpRequest": "Požadavek HTTP",
+      "runScenario": "Spustit scénář",
+      "wait": "Čekat",
+      "waitUntil": "Čekat do",
+      "now": "Nyní",
+      "comparator": "Komparátor",
+      "setVariable": "Nastavit proměnnou",
+      "getVariable": "Získat proměnnou",
+      "addToList": "Přidat do seznamu",
+      "removeFromList": "Odebrat ze seznamu",
+      "cast": "Cast",
+      "regex": "Regex",
+      "json": "JSON",
+      "xml": "XML",
+      "yaml": "YAML",
+      "crypto": "Crypto",
+      "jwt": "JWT",
+      "datetime": "Date math",
+      "objectOp": "Object ops",
+      "url": "URL",
+      "random": "Random",
+      "throw": "Throw",
+      "retry": "Retry",
+      "listOp": "List ops",
+      "csv": "CSV",
+      "math": "Math",
+      "schema": "Schema validate",
+      "readFile": "Read file",
+      "writeFile": "Write file",
+      "timer": "Časovač",
+      "code": "Kód"
+    },
+    "comparator": {
+      "result": "výsledek"
+    },
+    "boolean": {
+      "result": "výsledek"
+    },
+    "map": {
+      "items": "položky",
+      "mapped": "transformované"
+    },
+    "log": {
+      "message": "zpráva",
+      "data": "data"
+    },
+    "assert": {
+      "message": "zpráva",
+      "operator": "operator",
+      "op": {
+        "eq": "equals",
+        "ne": "not equals",
+        "lt": "less than",
+        "lte": "less or equal",
+        "gt": "greater than",
+        "gte": "greater or equal",
+        "contains": "contains",
+        "isString": "is string",
+        "isNumber": "is number",
+        "isBoolean": "is boolean",
+        "isArray": "is array",
+        "isObject": "is object",
+        "isNull": "is null",
+        "exists": "exists",
+        "isEmpty": "is empty",
+        "matchesRegex": "matches regex",
+        "isOneOf": "is one of",
+        "deepEquals": "deep equals",
+        "lengthEq": "length ==",
+        "lengthGt": "length >",
+        "lengthLt": "length <"
+      }
+    },
+    "editRequest": "Upravit požadavek",
+    "editScenario": "Upravit scénář",
+    "object": {
+      "addProperty": "Přidat vlastnost",
+      "removeProperty": "Odebrat vlastnost",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "output": {
+      "outputName": "Název výstupu",
+      "addOutput": "Přidat výstup",
+      "removeOutput": "Odebrat"
+    },
+    "input": {
+      "name": "Name",
+      "defaultType": "Default / type",
+      "addParam": "Přidat parametr",
+      "removeParam": "Odebrat"
+    },
+    "runScenario": {
+      "orphanInput": "V dílčím scénáři chybí odpovídající parametr „{{name}}“",
+      "orphanOutput": "V dílčím scénáři chybí odpovídající výstup „{{name}}“",
+      "then": "poté"
+    },
+    "validation": {
+      "duplicateName": "Název „{{name}}“ už používá jiná akce.",
+      "panelTitle": "Chyby akcí: {{count}}",
+      "runBlocked": "Před spuštěním opravte {{count}} chyb akcí",
+      "focusBox": "Přejít na tuto akci",
+      "showErrors": "Zobrazit chyby",
+      "input": {
+        "missingName": "Tento vstupní parametr musí mít název."
+      },
+      "dataLink": {
+        "emptyPath": "Příchozí datový odkaz vyžaduje cestu (JSON path).",
+        "badPath": "Cesta JSON „{{path}}“ datového odkazu je neplatná."
+      },
+      "output": {
+        "missingName": "Tento výstup musí mít název.",
+        "duplicateName": "Název „{{name}}“ už používá jiný výstup."
+      },
+      "getVariable": {
+        "noSelection": "Je nutné vybrat proměnnou.",
+        "unknown": "Proměnná „{{name}}“ ve scénáři neexistuje."
+      },
+      "setVariable": {
+        "missingName": "Nastavovaná proměnná musí mít název."
+      },
+      "object": {
+        "propMissingName": "Každá vlastnost musí mít název.",
+        "propDuplicate": "Název vlastnosti „{{name}}“ je duplicitní."
+      },
+      "arithmetic": {
+        "divisionByZero": "Dělení nulou není možné."
+      },
+      "switch": {
+        "caseDuplicate": "Hodnota případu „{{value}}“ je duplicitní."
+      },
+      "transform": {
+        "emptyTemplate": "Šablona nesmí být prázdná.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "Propojený požadavek již neexistuje."
+      },
+      "runScenario": {
+        "missing": "Propojený scénář již neexistuje."
+      },
+      "file": {
+        "missingPath": "A file path is required."
+      }
+    },
+    "usage": {
+      "button": "Scénáře používající tento požadavek",
+      "title": "Tento požadavek se používá ve scénářích:"
+    },
+    "inspector": {
+      "run": "Spustit",
+      "debug": "Ladit",
+      "undo": "Zpět",
+      "redo": "Znovu",
+      "step": "Krok za krokem",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "Pozastavit",
+      "noRunsHint": "Žádné nedávné spuštění tohoto požadavku — spusťte jej zde a naplňte náhled scénáře.",
+      "syntheticInfo": "Příklad dat vygenerovaný z dokumentace tohoto požadavku.",
+      "syntheticRunHint": "Příklad dat — spusťte požadavek, abyste je nahradili skutečným výsledkem.",
+      "stop": "Zastavit",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "copyThisLog": "Kopírovat tento záznam",
+      "clearLogs": "Vymazat logy",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "Zobrazit logy {{level}}",
+      "showLevelOnly": "Klikněte pravým tlačítkem: pouze tato úroveň",
+      "noUserLogs": "No user logs (entries from the Log action) in this run.",
+      "helpTitle": "What this action does"
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Vyžadována vstupní data"
+    },
+    "runHistory": {
+      "title": "Historie běhů",
+      "tooltip": "Historie běhů",
+      "empty": "Zatím žádný běh",
+      "noLogs": "Žádný log pro tento běh",
+      "logsTab": "Logs",
+      "graphTab": "Graf",
+      "noGraph": "Žádný snímek scénáře pro tento běh",
+      "pin": "Připnout",
+      "unpin": "Odepnout"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "Přidat bod přerušení",
+      "remove": "Odebrat bod přerušení",
+      "toggle": "Přepnout bod přerušení (F9)",
+      "reached": "Dosažen bod přerušení – tato akce ještě nebyla provedena. Stiskněte F5 pro pokračování nebo F7 pro krokování.",
+      "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Přepnout minimapu"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Přidat hodnotu",
+      "removeValue": "Odebrat hodnotu",
+      "updateVariable": "Aktualizovat zdrojovou proměnnou"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
+    },
+    "regex": {
+      "value": "value",
+      "operation": "operation",
+      "pattern": "pattern",
+      "flags": "flags",
+      "replacement": "replacement",
+      "result": "result",
+      "op": {
+        "extract": "extract",
+        "extractAll": "extract all",
+        "test": "test",
+        "replace": "replace",
+        "split": "split"
+      },
+      "flag": {
+        "i": "Case-insensitive",
+        "m": "Multiline (^ and $ match line breaks)",
+        "s": "Dotall (. matches newlines)"
+      }
+    },
+    "json": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "xml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "yaml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "crypto": {
+      "value": "value",
+      "operation": "operation",
+      "key": "key",
+      "keyPlaceholder": "secret",
+      "result": "result",
+      "op": {
+        "base64Encode": "base64 encode",
+        "base64Decode": "base64 decode",
+        "md5": "MD5",
+        "sha1": "SHA-1",
+        "sha256": "SHA-256",
+        "sha512": "SHA-512",
+        "hmacSha256": "HMAC-SHA256",
+        "uuid": "UUID v4"
+      }
+    },
+    "jwt": {
+      "value": "token",
+      "result": "result"
+    },
+    "datetime": {
+      "value": "date",
+      "operation": "operation",
+      "amount": "amount",
+      "unitLabel": "unit",
+      "format": "format",
+      "other": "second date",
+      "result": "result",
+      "op": {
+        "add": "add",
+        "subtract": "subtract",
+        "format": "format",
+        "diff": "diff"
+      },
+      "unit": {
+        "milliseconds": "milliseconds",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months",
+        "years": "years"
+      }
+    },
+    "objectOp": {
+      "value": "object",
+      "operation": "operation",
+      "path": "path",
+      "keys": "keys",
+      "setValue": "value",
+      "mergeWith": "merge with",
+      "result": "result",
+      "op": {
+        "get": "get",
+        "set": "set",
+        "merge": "merge",
+        "pick": "pick",
+        "omit": "omit",
+        "keys": "keys",
+        "values": "values"
+      }
+    },
+    "url": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "op": {
+        "encode": "encode",
+        "decode": "decode",
+        "parseQuery": "parse query",
+        "buildQuery": "build query",
+        "parseUrl": "parse URL"
+      }
+    },
+    "random": {
+      "operation": "operation",
+      "min": "min",
+      "max": "max",
+      "length": "length",
+      "items": "items",
+      "seed": "seed (optional)",
+      "seedPlaceholder": "reproducible",
+      "result": "result",
+      "op": {
+        "int": "integer",
+        "float": "float",
+        "string": "string",
+        "boolean": "boolean",
+        "pick": "pick"
+      }
+    },
+    "throw": {
+      "message": "message"
+    },
+    "retry": {
+      "maxAttempts": "max attempts",
+      "backoff": "backoff",
+      "delay": "delay",
+      "factor": "factor",
+      "retryOnError": "retry on error",
+      "retryOnStatus": "retry on HTTP status",
+      "retryOnFailure": "retry on any non-2xx",
+      "attempt": "attempt",
+      "exhausted": "exhausted",
+      "backoffOpt": {
+        "fixed": "fixed",
+        "linear": "linear",
+        "exponential": "exponential"
+      }
+    },
+    "menuGroups": {
+      "lists": "Lists",
+      "math": "Math",
+      "dataFormats": "Data formats",
+      "encoding": "Encoding",
+      "time": "Časování"
+    },
+    "listOp": {
+      "value": "list",
+      "operation": "operation",
+      "result": "result",
+      "key": "key",
+      "order": "order",
+      "depth": "depth",
+      "size": "size",
+      "start": "start",
+      "end": "end",
+      "op": {
+        "sort": "sort",
+        "unique": "unique",
+        "reverse": "reverse",
+        "flatten": "flatten",
+        "chunk": "chunk",
+        "slice": "slice",
+        "groupBy": "group by"
+      }
+    },
+    "csv": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "delimiter": "delimiter",
+      "header": "header row",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "math": {
+      "a": "value",
+      "operation": "operation",
+      "result": "result",
+      "b": "with",
+      "min": "min",
+      "max": "max",
+      "precision": "precision",
+      "op": {
+        "round": "round",
+        "floor": "floor",
+        "ceil": "ceil",
+        "trunc": "truncate",
+        "abs": "absolute",
+        "sign": "sign",
+        "sqrt": "square root",
+        "min": "min",
+        "max": "max",
+        "clamp": "clamp"
+      }
+    },
+    "schema": {
+      "value": "value",
+      "schema": "JSON Schema",
+      "valid": "valid",
+      "invalid": "invalid",
+      "errors": "errors",
+      "editTitle": "Edit JSON Schema"
+    },
+    "readFile": {
+      "path": "path",
+      "content": "content"
+    },
+    "writeFile": {
+      "path": "path",
+      "mode": "mode",
+      "content": "content"
+    },
+    "codeField": {
+      "title": "Edit",
+      "edit": "Open editor",
+      "moreLines": "+{{count}} lines",
+      "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "režim",
+      "modeOpt": {
+        "frequency": "frekvence",
+        "cron": "cron"
+      },
+      "frequency": "frekvence",
+      "unit": "jednotka",
+      "cron": "cron",
+      "stop": "zastavit po",
+      "stopOpt": {
+        "none": "nikdy",
+        "duration": "doba trvání",
+        "endDate": "datum konce"
+      },
+      "duration": "doba trvání",
+      "endDate": "datum konce",
+      "tick": "tik"
+    },
+    "code": {
+      "input": "vstup",
+      "language": "Jazyk",
+      "code": "kód",
+      "modalTitle": "Upravit kód",
+      "result": "výsledek",
+      "timeout": "Časový limit (s)"
+    },
+    "help": {
+      "input": "Injects the scenario's input parameters and constants into the graph.",
+      "output": "Declares one of the scenario's named results, read by a parent Run-scenario.",
+      "if": "Branches the flow to then / else by comparing two operands.",
+      "switch": "Routes the input to a matching case, or to default.",
+      "httpRequest": "Runs a saved API request and emits its response.",
+      "runScenario": "Runs another scenario as a reusable sub-step.",
+      "forEach": "Runs the body once per item of a collection, then continues.",
+      "for": "Loops over a number range, running the body for each value.",
+      "while": "Repeats the body while a condition holds (tested first).",
+      "doWhile": "Repeats the body while a condition holds (runs at least once).",
+      "aggregate": "Reduces a collection to one value (count, sum, min, max, average, join).",
+      "map": "Transforms every item of a collection into a new list.",
+      "filter": "Keeps the items that match a condition; routes the rest aside.",
+      "addToList": "Appends values to a list.",
+      "removeFromList": "Removes matching values from a list.",
+      "wait": "Pauses for a duration, then continues.",
+      "waitUntil": "Pauses until a given date/time, then continues.",
+      "now": "Emits the current date and time.",
+      "timer": "Fires its body on a repeating interval or a cron schedule.",
+      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "comparator": "Compares two values and emits true or false.",
+      "boolean": "Combines booleans with and / or / xor / not.",
+      "object": "Builds an object from its named inputs.",
+      "setVariable": "Stores a value into a run variable.",
+      "getVariable": "Reads a run variable's value.",
+      "transform": "Renders a Handlebars template from the input and run variables.",
+      "code": "Spustí váš kód (TypeScript, JavaScript, Python, Lua, Ruby nebo R) v sandboxu a vrátí výsledek.",
+      "cast": "Converts a value to another type (number, string, boolean, date, list).",
+      "regex": "Matches, extracts, replaces or splits text with a regular expression.",
+      "json": "Parses a JSON string, or serialises a value to JSON.",
+      "xml": "Parses an XML string, or serialises a value to XML.",
+      "yaml": "Parses a YAML string, or serialises a value to YAML.",
+      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "jwt": "Decodes a JWT token into header, payload and signature.",
+      "datetime": "Shifts, formats or diffs a date.",
+      "retry": "Re-runs its body until it succeeds, with a backoff policy.",
+      "objectOp": "Reshapes an object (get/set a path, merge, pick, omit, keys, values).",
+      "url": "Encodes, decodes or parses URLs and query strings.",
+      "random": "Generates a random number, string, boolean or pick.",
+      "listOp": "Reshapes a list (sort, unique, reverse, flatten, chunk, slice, groupBy).",
+      "csv": "Parses a CSV string, or serialises a list to CSV.",
+      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "schema": "Validates a value against a JSON Schema.",
+      "readFile": "Reads a file's text content.",
+      "writeFile": "Writes or appends text to a file.",
+      "throw": "Deliberately fails with a message (for error branches and tests).",
+      "log": "Writes a message to the run log and passes the value through.",
+      "assert": "Checks a condition (chai-style) and routes to pass or fail."
+    },
+    "legend": {
+      "title": "Legenda",
+      "portsTitle": "Vstupní body",
+      "entryEventTrigger": "Vstupní bod spuštěný událostí",
+      "entryDataTrigger": "Vstupní bod spuštěný daty",
+      "runWhenAllReceived": "Akce se provedou, jakmile jsou přijaty všechny události a všechna data",
+      "runOnLaunchNoPredecessor": "Akce bez předchůdce se spustí ihned po spuštění scénáře",
+      "outPortsTitle": "Výstupní body",
+      "outEmit": "Vysílá spouštěcí událost a odesílá data",
+      "outEmitSignalOnly": "Vysílá spouštěcí událost bez odeslání dat",
+      "genericOutPortsTitle": "Obecné výstupní body",
+      "outDone": "Spouštěcí událost vyslaná po dokončení akce",
+      "outError": "Spouštěcí událost spuštěná při chybě akce",
+      "navTitle": "Navigace",
+      "zoom": "přiblížení",
+      "pan": "přesunout",
+      "boxSelect": "obdélníkový výběr",
+      "select": "vybrat / vícenásobný výběr"
+    },
+    "cli": {
+      "title": "Run from the command line",
+      "intro": "Run this scenario without opening the app (CI, cron, script):",
+      "byId": "Designate by id",
+      "allLogs": "All logs",
+      "note": "`--out file` also writes the run-log to a file.",
+      "projectPlaceholder": "<project.restorm>"
     }
   }
 }

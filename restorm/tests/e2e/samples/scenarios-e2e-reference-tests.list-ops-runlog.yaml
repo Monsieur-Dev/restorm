@@ -1,0 +1,148 @@
+- message: 🔵 [<time>] ▶ List ops
+- message: ⚪ [<time>] start json
+  data:
+    op: parse
+    value: "[3,1,2,2,1]"
+- message: ⚪ [<time>] done json
+  data:
+    result:
+      - 3
+      - 1
+      - 2
+      - 2
+      - 1
+- message: ⚪ [<time>] start listOp
+  data:
+    op: sort
+    value:
+      - 3
+      - 1
+      - 2
+      - 2
+      - 1
+- message: ⚪ [<time>] done listOp
+  data:
+    result:
+      - 1
+      - 1
+      - 2
+      - 2
+      - 3
+- message: ⚪ [<time>] start listOp
+  data:
+    op: unique
+    value:
+      - 1
+      - 1
+      - 2
+      - 2
+      - 3
+- message: ⚪ [<time>] done listOp
+  data:
+    result:
+      - 1
+      - 2
+      - 3
+- message: ⚪ [<time>] start listOp
+  data:
+    op: reverse
+    value:
+      - 1
+      - 2
+      - 3
+- message: ⚪ [<time>] done listOp
+  data:
+    result:
+      - 3
+      - 2
+      - 1
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: "reshaped: parse -> sort -> unique -> reverse"
+    data:
+      - 3
+      - 2
+      - 1
+- message: "🔵 [<time>] reshaped: parse -> sort -> unique -> reverse"
+  data:
+    - 3
+    - 2
+    - 1
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      - 3
+      - 2
+      - 1
+- message: ⚪ [<time>] start json
+  data:
+    op: parse
+    value: '[{"type":"dog","n":1},{"type":"cat","n":2},{"type":"dog","n":3}]'
+    in: true
+- message: ⚪ [<time>] done json
+  data:
+    result:
+      - type: dog
+        n: 1
+      - type: cat
+        n: 2
+      - type: dog
+        n: 3
+- message: ⚪ [<time>] start listOp
+  data:
+    op: groupBy
+    key: type
+    value:
+      - type: dog
+        n: 1
+      - type: cat
+        n: 2
+      - type: dog
+        n: 3
+- message: ⚪ [<time>] done listOp
+  data:
+    result:
+      dog:
+        - type: dog
+          n: 1
+        - type: dog
+          n: 3
+      cat:
+        - type: cat
+          n: 2
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: grouped by type
+    data:
+      dog:
+        - type: dog
+          n: 1
+        - type: dog
+          n: 3
+      cat:
+        - type: cat
+          n: 2
+- message: 🔵 [<time>] grouped by type
+  data:
+    dog:
+      - type: dog
+        n: 1
+      - type: dog
+        n: 3
+    cat:
+      - type: cat
+        n: 2
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      dog:
+        - type: dog
+          n: 1
+        - type: dog
+          n: 3
+      cat:
+        - type: cat
+          n: 2
+- message: 🔵 [<time>] ■ List ops

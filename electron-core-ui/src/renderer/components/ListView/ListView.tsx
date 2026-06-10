@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ScrollableElement } from '../ScrollableElement'
 import { ContextMenu, type ContextMenuItem } from '../ContextMenu/ContextMenu'
+import { startDragPreview } from '../../utils/dragPreview'
 import type {
   ListViewDropEventPayload,
   ListViewDropPosition,
@@ -637,9 +638,21 @@ const ListViewInner: React.FC<ListViewProps> = ({
   const handleDragStart = useCallback(
     (flat: FlatItem, event: React.DragEvent<HTMLDivElement>): void => {
       const payload: ListViewItemEventPayload = { item: flat.item, path: flat.path }
-      setDragSource(payload)
       event.dataTransfer.effectAllowed = 'move'
       event.dataTransfer.setData('text/plain', flat.item.id)
+      // Custom drag preview (native setDragImage is blank under Wayland).
+      const row = event.currentTarget
+      const rect = row.getBoundingClientRect()
+      const preview = row.cloneNode(true) as HTMLElement
+      preview.style.width = `${rect.width}px`
+      preview.classList.add('list-view-row-drag-ghost')
+      startDragPreview(event, {
+        preview,
+        offsetX: event.clientX - rect.left,
+        offsetY: event.clientY - rect.top,
+        mountInto: row.closest<HTMLElement>('.workbench')
+      })
+      setDragSource(payload)
     },
     []
   )

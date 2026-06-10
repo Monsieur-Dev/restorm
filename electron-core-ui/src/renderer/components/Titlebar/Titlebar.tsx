@@ -20,6 +20,7 @@ const Titlebar: React.FC<TitlebarProps> = ({
   onSearchResultClick,
   renderSearchTooltipContent,
   renderSearchBadge,
+  searchBadgedCategories,
   searchFn,
   searchBarTestId,
   searchTooltipHideDelayMs,
@@ -130,6 +131,7 @@ const Titlebar: React.FC<TitlebarProps> = ({
             {...(searchFn ? { searchFn } : {})}
             {...(renderSearchTooltipContent ? { renderTooltipContent: renderSearchTooltipContent } : {})}
             {...(renderSearchBadge ? { renderBadge: renderSearchBadge } : {})}
+            {...(searchBadgedCategories ? { badgedCategories: searchBadgedCategories } : {})}
             {...(searchTooltipHideDelayMs !== undefined ? { tooltipHideDelayMs: searchTooltipHideDelayMs } : {})}
           />
         ) : (

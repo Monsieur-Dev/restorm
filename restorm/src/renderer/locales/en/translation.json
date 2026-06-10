@@ -93,6 +93,50 @@
     "multiLanguage": {
       "title": "27 languages!",
       "body": "Restorm speaks 27 languages. English, French, Spanish, German, Italian, Japanese, Chinese, Korean, and many more — pick yours in the settings!"
+    },
+    "fromPostman": {
+      "title": "Coming from Postman or Bruno?",
+      "body": "We help you make the switch to Restorm — your transition made easy ;)"
+    },
+    "chainRequests": {
+      "title": "Several requests to chain together?",
+      "body": "Use your requests inside scenarios, add conditions, and even nest scenarios within other scenarios."
+    },
+    "stepByStep": {
+      "title": "Step through your scenarios",
+      "body": "One step at a time, to see exactly what happens. You can even set breakpoints."
+    },
+    "cicd": {
+      "title": "Run your scenarios in your CI/CD pipelines",
+      "body": "Start Restorm headless to run a scenario with no UI and collect its logs — automated tests, built visually."
+    },
+    "nestedScenarios": {
+      "title": "See what's going on in a scenario",
+      "body": "A scenario can call another. In the inspector, read every log and jump straight to the scenario it came from."
+    },
+    "scenarioHistory": {
+      "title": "But what just happened?",
+      "body": "Browse the execution history of your scenarios. One of them changed since? No worries — we kept its configuration."
+    },
+    "codeSandbox": {
+      "title": "Scenarios and security",
+      "body": "You can write code in your scenarios — but it runs in a secure sandbox, with no access to your local files and no direct internet access. The safest way to stay protected!"
+    },
+    "codeLanguages": {
+      "title": "Fancy writing some code?",
+      "body": "Write code right inside your scenarios — in TypeScript, JavaScript, Python, Lua, Ruby or R!"
+    },
+    "scenarioAi": {
+      "title": "AI-drivable scenarios",
+      "body": "Claude, Cursor, Copilot… know your codebase: ask them for tailor-made scenarios. Everything is exposed over MCP to create, edit and run scenarios."
+    },
+    "interactiveScenarios": {
+      "title": "Interactive scenarios!",
+      "body": "Make your scenarios parameterisable and even ask the user what to do with dialog boxes."
+    },
+    "customValueLists": {
+      "title": "Reusable value lists",
+      "body": "Define your own value lists and reuse them in your requests and your scenarios alike."
     }
   },
   "authFailureToast": {
@@ -149,6 +193,7 @@
       "createEnvironmentFolder": "Create environment folder",
       "delete": "Delete",
       "clone": "Clone",
+      "copySuffix": "copy",
       "rename": "Rename",
       "addToFavorites": "Add to favorites",
       "removeFromFavorites": "Remove from favorites",
@@ -169,7 +214,8 @@
         "soap": "SOAP request",
         "websocket": "WebSocket request",
         "odata": "OData request",
-        "auth": "HTTP authentication request"
+        "auth": "HTTP authentication request",
+        "scenario": "Scenario"
       }
     },
     "deleteConfirm": {
@@ -178,6 +224,14 @@
       "itemMessage": "Are you sure you want to delete \"{{name}}\"?",
       "confirm": "Delete",
       "cancel": "Cancel"
+    },
+    "scenarioDelete": {
+      "title": "Delete a request used by scenarios",
+      "message": "\"{{name}}\" is used in the following scenarios. What do you want to do?",
+      "belongsTag": "belongs to this scenario",
+      "moveInto": "Move into this scenario",
+      "affectsNote": "Deleting this request will also remove it from these scenarios.",
+      "deleteAnyway": "Delete anyway"
     }
   },
   "environment": {
@@ -249,7 +303,8 @@
     "addHeader": "Add header",
     "addParam": "Add param",
     "environmentSelector": {
-      "noEnvironment": "No environment"
+      "noEnvironment": "No environment",
+      "switchTooltip": "Switch environment"
     },
     "body": {
       "fileLabel": "File or URL:",
@@ -302,7 +357,11 @@
       "dateTime": "Date time",
       "color": "Color",
       "expression": "Expression",
-      "boolean": "Boolean"
+      "boolean": "Boolean",
+      "null": "Null",
+      "list": "List",
+      "variables": "Variables",
+      "environment": "Environment"
     },
     "apiEnums": "API defined types",
     "customLists": "Custom types",
@@ -355,11 +414,14 @@
       "folder": "Folders",
       "environment": "Environments",
       "settings": "Settings",
-      "tag": "Tags"
+      "tag": "Tags",
+      "scenario": "Scenarios"
     },
     "tooltip": {
       "noDetails": "No details available",
-      "noContent": "No documentation or notes"
+      "noContent": "No documentation or notes",
+      "noScenario": "Scenario unavailable",
+      "scenarioKind": "scenario"
     }
   },
   "httpStatus": {
@@ -466,7 +528,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Are you sure you want to remove \"{{fileName}}\" from favorites?",
-    "noFilesHint": "Open a file or create a new one to get started",
     "newAriaLabel": "Create a new collection",
     "openAriaLabel": "Open a collection from disk",
     "landmarkLabel": "Welcome"
@@ -493,7 +554,9 @@
   },
   "common": {
     "cancel": "Cancel",
-    "save": "Save"
+    "save": "Save",
+    "remove": "Remove",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -743,6 +806,685 @@
       "previousMatch": "Previous match",
       "nextMatch": "Next match",
       "close": "Close"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "emptyTitle": "It’s empty here…",
+      "emptyDragDrop": "Drag an item from the tree on the left into your scenario to use it here. You can even import one scenario into another!",
+      "emptyRightClick": "Right-click an empty spot to add actions to your scenario"
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "runOnEachEvent": "Play on each event received",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del",
+        "copy": "Copy",
+        "paste": "Paste"
+      },
+      "expand": "Expand",
+      "collapse": "Collapse"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "locked": "Editing locked while the scenario is running",
+    "switch": {
+      "addCase": "Add case",
+      "removeCase": "Remove case",
+      "case": "case"
+    },
+    "forEach": {
+      "items": "items",
+      "each": "each",
+      "done": "done",
+      "parallelism": "parallelism"
+    },
+    "aggregate": {
+      "items": "items",
+      "result": "result",
+      "field": "field",
+      "separator": "separator",
+      "op": {
+        "count": "Count",
+        "sum": "Sum",
+        "min": "Min",
+        "max": "Max",
+        "average": "Average",
+        "join": "Join"
+      }
+    },
+    "filter": {
+      "items": "items",
+      "rejected": "rejected",
+      "kept": "kept",
+      "keepWhere": "keep where"
+    },
+    "wait": {
+      "then": "then",
+      "duration": "duration"
+    },
+    "waitUntil": {
+      "until": "until",
+      "then": "then"
+    },
+    "arithmetic": {
+      "result": "result"
+    },
+    "nodes": {
+      "arithmetic": "Arithmetic",
+      "httpRequest": "HTTP Request",
+      "runScenario": "Run scenario",
+      "wait": "Wait",
+      "waitUntil": "Wait until",
+      "now": "Now",
+      "comparator": "Comparator",
+      "setVariable": "Set variable",
+      "getVariable": "Get variable",
+      "addToList": "Add to list",
+      "removeFromList": "Remove from list",
+      "cast": "Cast",
+      "regex": "Regex",
+      "json": "JSON",
+      "xml": "XML",
+      "yaml": "YAML",
+      "crypto": "Crypto",
+      "jwt": "JWT",
+      "datetime": "Date math",
+      "objectOp": "Object ops",
+      "url": "URL",
+      "random": "Random",
+      "throw": "Throw",
+      "retry": "Retry",
+      "listOp": "List ops",
+      "csv": "CSV",
+      "math": "Math",
+      "schema": "Schema validate",
+      "readFile": "Read file",
+      "writeFile": "Write file",
+      "timer": "Timer",
+      "code": "Code"
+    },
+    "comparator": {
+      "result": "result"
+    },
+    "boolean": {
+      "result": "result"
+    },
+    "map": {
+      "items": "items",
+      "mapped": "mapped"
+    },
+    "log": {
+      "message": "message",
+      "data": "data"
+    },
+    "assert": {
+      "message": "message",
+      "operator": "operator",
+      "op": {
+        "eq": "equals",
+        "ne": "not equals",
+        "lt": "less than",
+        "lte": "less or equal",
+        "gt": "greater than",
+        "gte": "greater or equal",
+        "contains": "contains",
+        "isString": "is string",
+        "isNumber": "is number",
+        "isBoolean": "is boolean",
+        "isArray": "is array",
+        "isObject": "is object",
+        "isNull": "is null",
+        "exists": "exists",
+        "isEmpty": "is empty",
+        "matchesRegex": "matches regex",
+        "isOneOf": "is one of",
+        "deepEquals": "deep equals",
+        "lengthEq": "length ==",
+        "lengthGt": "length >",
+        "lengthLt": "length <"
+      }
+    },
+    "editRequest": "Edit request",
+    "editScenario": "Edit scenario",
+    "object": {
+      "addProperty": "Add property",
+      "removeProperty": "Remove property",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "output": {
+      "outputName": "Output name",
+      "addOutput": "Add output",
+      "removeOutput": "Remove"
+    },
+    "input": {
+      "name": "Name",
+      "defaultType": "Default / type",
+      "addParam": "Add parameter",
+      "removeParam": "Remove"
+    },
+    "runScenario": {
+      "orphanInput": "No matching parameter \"{{name}}\" in the sub-scenario",
+      "orphanOutput": "No matching output \"{{name}}\" in the sub-scenario",
+      "then": "then"
+    },
+    "validation": {
+      "duplicateName": "The name \"{{name}}\" is already used by another action.",
+      "panelTitle": "{{count}} action error(s)",
+      "runBlocked": "Fix {{count}} action error(s) before running",
+      "focusBox": "Focus this action",
+      "showErrors": "Show errors",
+      "input": {
+        "missingName": "This input parameter must have a name."
+      },
+      "dataLink": {
+        "emptyPath": "The incoming data link needs a JSON path.",
+        "badPath": "The data link JSON path \"{{path}}\" is malformed."
+      },
+      "output": {
+        "missingName": "This output must have a name.",
+        "duplicateName": "The name \"{{name}}\" is already used by another output."
+      },
+      "getVariable": {
+        "noSelection": "A variable must be selected.",
+        "unknown": "The variable \"{{name}}\" does not exist in the scenario."
+      },
+      "setVariable": {
+        "missingName": "The variable to set must have a name."
+      },
+      "object": {
+        "propMissingName": "Each property must have a name.",
+        "propDuplicate": "The property name \"{{name}}\" is duplicated."
+      },
+      "arithmetic": {
+        "divisionByZero": "Division by zero is impossible."
+      },
+      "switch": {
+        "caseDuplicate": "The case value \"{{value}}\" is duplicated."
+      },
+      "transform": {
+        "emptyTemplate": "The template must not be empty.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "The bound request no longer exists."
+      },
+      "runScenario": {
+        "missing": "The bound scenario no longer exists."
+      },
+      "file": {
+        "missingPath": "A file path is required."
+      }
+    },
+    "usage": {
+      "button": "Scenarios using this request",
+      "title": "This request is used in the scenarios:"
+    },
+    "inspector": {
+      "run": "Run",
+      "debug": "Debug",
+      "undo": "Undo",
+      "redo": "Redo",
+      "step": "Step",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "Pause",
+      "noRunsHint": "No recent run for this request — run it from here to populate the scenario preview.",
+      "syntheticInfo": "Example data generated from this request's documentation.",
+      "syntheticRunHint": "Sample data — run the request to replace it with a real result.",
+      "stop": "Stop",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "copyThisLog": "Copy this log",
+      "clearLogs": "Clear logs",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "Show {{level}} logs",
+      "showLevelOnly": "Right-click: this level only",
+      "noUserLogs": "No user logs (entries from the Log action) in this run.",
+      "helpTitle": "What this action does"
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Input requested"
+    },
+    "runHistory": {
+      "title": "Run history",
+      "tooltip": "Run history",
+      "empty": "No run recorded yet",
+      "noLogs": "No log for this run",
+      "logsTab": "Logs",
+      "graphTab": "Graph",
+      "noGraph": "No scenario snapshot for this run",
+      "pin": "Pin",
+      "unpin": "Unpin"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "Add breakpoint",
+      "remove": "Remove breakpoint",
+      "toggle": "Toggle breakpoint (F9)",
+      "reached": "Breakpoint reached — this action has not run yet. Press F5 to resume, or F7 to step.",
+      "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Toggle minimap"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Add value",
+      "removeValue": "Remove value",
+      "updateVariable": "Update the source variable"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
+    },
+    "regex": {
+      "value": "value",
+      "operation": "operation",
+      "pattern": "pattern",
+      "flags": "flags",
+      "replacement": "replacement",
+      "result": "result",
+      "op": {
+        "extract": "extract",
+        "extractAll": "extract all",
+        "test": "test",
+        "replace": "replace",
+        "split": "split"
+      },
+      "flag": {
+        "i": "Case-insensitive",
+        "m": "Multiline (^ and $ match line breaks)",
+        "s": "Dotall (. matches newlines)"
+      }
+    },
+    "json": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "xml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "yaml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "crypto": {
+      "value": "value",
+      "operation": "operation",
+      "key": "key",
+      "keyPlaceholder": "secret",
+      "result": "result",
+      "op": {
+        "base64Encode": "base64 encode",
+        "base64Decode": "base64 decode",
+        "md5": "MD5",
+        "sha1": "SHA-1",
+        "sha256": "SHA-256",
+        "sha512": "SHA-512",
+        "hmacSha256": "HMAC-SHA256",
+        "uuid": "UUID v4"
+      }
+    },
+    "jwt": {
+      "value": "token",
+      "result": "result"
+    },
+    "datetime": {
+      "value": "date",
+      "operation": "operation",
+      "amount": "amount",
+      "unitLabel": "unit",
+      "format": "format",
+      "other": "second date",
+      "result": "result",
+      "op": {
+        "add": "add",
+        "subtract": "subtract",
+        "format": "format",
+        "diff": "diff"
+      },
+      "unit": {
+        "milliseconds": "milliseconds",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months",
+        "years": "years"
+      }
+    },
+    "objectOp": {
+      "value": "object",
+      "operation": "operation",
+      "path": "path",
+      "keys": "keys",
+      "setValue": "value",
+      "mergeWith": "merge with",
+      "result": "result",
+      "op": {
+        "get": "get",
+        "set": "set",
+        "merge": "merge",
+        "pick": "pick",
+        "omit": "omit",
+        "keys": "keys",
+        "values": "values"
+      }
+    },
+    "url": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "op": {
+        "encode": "encode",
+        "decode": "decode",
+        "parseQuery": "parse query",
+        "buildQuery": "build query",
+        "parseUrl": "parse URL"
+      }
+    },
+    "random": {
+      "operation": "operation",
+      "min": "min",
+      "max": "max",
+      "length": "length",
+      "items": "items",
+      "seed": "seed (optional)",
+      "seedPlaceholder": "reproducible",
+      "result": "result",
+      "op": {
+        "int": "integer",
+        "float": "float",
+        "string": "string",
+        "boolean": "boolean",
+        "pick": "pick"
+      }
+    },
+    "throw": {
+      "message": "message"
+    },
+    "retry": {
+      "maxAttempts": "max attempts",
+      "backoff": "backoff",
+      "delay": "delay",
+      "factor": "factor",
+      "retryOnError": "retry on error",
+      "retryOnStatus": "retry on HTTP status",
+      "retryOnFailure": "retry on any non-2xx",
+      "attempt": "attempt",
+      "exhausted": "exhausted",
+      "backoffOpt": {
+        "fixed": "fixed",
+        "linear": "linear",
+        "exponential": "exponential"
+      }
+    },
+    "menuGroups": {
+      "lists": "Lists",
+      "math": "Math",
+      "dataFormats": "Data formats",
+      "encoding": "Encoding",
+      "time": "Timing"
+    },
+    "listOp": {
+      "value": "list",
+      "operation": "operation",
+      "result": "result",
+      "key": "key",
+      "order": "order",
+      "depth": "depth",
+      "size": "size",
+      "start": "start",
+      "end": "end",
+      "op": {
+        "sort": "sort",
+        "unique": "unique",
+        "reverse": "reverse",
+        "flatten": "flatten",
+        "chunk": "chunk",
+        "slice": "slice",
+        "groupBy": "group by"
+      }
+    },
+    "csv": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "delimiter": "delimiter",
+      "header": "header row",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "math": {
+      "a": "value",
+      "operation": "operation",
+      "result": "result",
+      "b": "with",
+      "min": "min",
+      "max": "max",
+      "precision": "precision",
+      "op": {
+        "round": "round",
+        "floor": "floor",
+        "ceil": "ceil",
+        "trunc": "truncate",
+        "abs": "absolute",
+        "sign": "sign",
+        "sqrt": "square root",
+        "min": "min",
+        "max": "max",
+        "clamp": "clamp"
+      }
+    },
+    "schema": {
+      "value": "value",
+      "schema": "JSON Schema",
+      "valid": "valid",
+      "invalid": "invalid",
+      "errors": "errors",
+      "editTitle": "Edit JSON Schema"
+    },
+    "readFile": {
+      "path": "path",
+      "content": "content"
+    },
+    "writeFile": {
+      "path": "path",
+      "mode": "mode",
+      "content": "content"
+    },
+    "codeField": {
+      "title": "Edit",
+      "edit": "Open editor",
+      "moreLines": "+{{count}} lines",
+      "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "mode",
+      "modeOpt": {
+        "frequency": "frequency",
+        "cron": "cron"
+      },
+      "frequency": "frequency",
+      "unit": "unit",
+      "cron": "cron",
+      "stop": "stop after",
+      "stopOpt": {
+        "none": "never",
+        "duration": "duration",
+        "endDate": "end date"
+      },
+      "duration": "duration",
+      "endDate": "end date",
+      "tick": "tick"
+    },
+    "code": {
+      "input": "input",
+      "language": "Language",
+      "code": "code",
+      "modalTitle": "Edit code",
+      "result": "result",
+      "timeout": "Timeout (s)"
+    },
+    "help": {
+      "input": "Injects the scenario's input parameters and constants into the graph.",
+      "output": "Declares one of the scenario's named results, read by a parent Run-scenario.",
+      "if": "Branches the flow to then / else by comparing two operands.",
+      "switch": "Routes the input to a matching case, or to default.",
+      "httpRequest": "Runs a saved API request and emits its response.",
+      "runScenario": "Runs another scenario as a reusable sub-step.",
+      "forEach": "Runs the body once per item of a collection, then continues.",
+      "for": "Loops over a number range, running the body for each value.",
+      "while": "Repeats the body while a condition holds (tested first).",
+      "doWhile": "Repeats the body while a condition holds (runs at least once).",
+      "aggregate": "Reduces a collection to one value (count, sum, min, max, average, join).",
+      "map": "Transforms every item of a collection into a new list.",
+      "filter": "Keeps the items that match a condition; routes the rest aside.",
+      "addToList": "Appends values to a list.",
+      "removeFromList": "Removes matching values from a list.",
+      "wait": "Pauses for a duration, then continues.",
+      "waitUntil": "Pauses until a given date/time, then continues.",
+      "now": "Emits the current date and time.",
+      "timer": "Fires its body on a repeating interval or a cron schedule.",
+      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "comparator": "Compares two values and emits true or false.",
+      "boolean": "Combines booleans with and / or / xor / not.",
+      "object": "Builds an object from its named inputs.",
+      "setVariable": "Stores a value into a run variable.",
+      "getVariable": "Reads a run variable's value.",
+      "transform": "Renders a Handlebars template from the input and run variables.",
+      "code": "Runs your code (TypeScript, JavaScript, Python, Lua, Ruby or R) in a sandbox and returns the result.",
+      "cast": "Converts a value to another type (number, string, boolean, date, list).",
+      "regex": "Matches, extracts, replaces or splits text with a regular expression.",
+      "json": "Parses a JSON string, or serialises a value to JSON.",
+      "xml": "Parses an XML string, or serialises a value to XML.",
+      "yaml": "Parses a YAML string, or serialises a value to YAML.",
+      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "jwt": "Decodes a JWT token into header, payload and signature.",
+      "datetime": "Shifts, formats or diffs a date.",
+      "retry": "Re-runs its body until it succeeds, with a backoff policy.",
+      "objectOp": "Reshapes an object (get/set a path, merge, pick, omit, keys, values).",
+      "url": "Encodes, decodes or parses URLs and query strings.",
+      "random": "Generates a random number, string, boolean or pick.",
+      "listOp": "Reshapes a list (sort, unique, reverse, flatten, chunk, slice, groupBy).",
+      "csv": "Parses a CSV string, or serialises a list to CSV.",
+      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "schema": "Validates a value against a JSON Schema.",
+      "readFile": "Reads a file's text content.",
+      "writeFile": "Writes or appends text to a file.",
+      "throw": "Deliberately fails with a message (for error branches and tests).",
+      "log": "Writes a message to the run log and passes the value through.",
+      "assert": "Checks a condition (chai-style) and routes to pass or fail."
+    },
+    "legend": {
+      "title": "Legend",
+      "portsTitle": "Input points",
+      "entryEventTrigger": "Input point triggered by an event",
+      "entryDataTrigger": "Input point triggered by data",
+      "runWhenAllReceived": "Actions run as soon as all events and all data have been received",
+      "runOnLaunchNoPredecessor": "Actions with no predecessor run as soon as the scenario starts",
+      "outPortsTitle": "Output points",
+      "outEmit": "Emits a trigger event and sends data",
+      "outEmitSignalOnly": "Emits a trigger event without sending data",
+      "genericOutPortsTitle": "Generic output points",
+      "outDone": "Trigger event emitted when the action is complete",
+      "outError": "Trigger event fired when the action errors",
+      "navTitle": "Navigation",
+      "zoom": "zoom",
+      "pan": "move",
+      "boxSelect": "rectangle selection",
+      "select": "select / multi-select"
+    },
+    "cli": {
+      "title": "Run from the command line",
+      "intro": "Run this scenario without opening the app (CI, cron, script):",
+      "byId": "Designate by id",
+      "allLogs": "All logs",
+      "note": "`--out file` also writes the run-log to a file.",
+      "projectPlaceholder": "<project.restorm>"
     }
   }
 }

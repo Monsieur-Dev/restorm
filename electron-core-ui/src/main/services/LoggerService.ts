@@ -3,6 +3,9 @@ import { app } from 'electron'
 
 interface LoggerConfig {
   isVerbose: boolean
+  /** When true, NEVER attach a console transport — even in dev / `--verbose`.
+   * For a headless / CLI run whose stdout is reserved for program output. */
+  isQuiet: boolean
   logFile: string | null
   logFormat: 'json' | 'plain'
 }
@@ -14,18 +17,24 @@ function parseLoggerConfig(): LoggerConfig {
   const args = process.argv
   const config: LoggerConfig = {
     isVerbose: false,
+    isQuiet: false,
     logFile: null,
     logFormat: 'plain'
   }
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i]
-    
+
     // Check for verbose flag
     if (arg === '--verbose' || arg === '-v') {
       config.isVerbose = true
     }
-    
+
+    // Check for quiet flag (suppress the console transport entirely)
+    if (arg === '--quiet' || arg === '-q') {
+      config.isQuiet = true
+    }
+
     // Check for log file
     if ((arg === '--log-file' || arg === '-l') && i + 1 < args.length) {
       config.logFile = args[i + 1] ?? null
@@ -84,8 +93,9 @@ function createLogger(): winston.Logger {
   // Configure transports
   const transports: winston.transport[] = []
 
-  // Add console transport if in dev or verbose is enabled
-  if (isDev || config.isVerbose) {
+  // Add console transport if in dev or verbose is enabled — unless `--quiet`,
+  // which reserves stdout for program output (headless / CLI runs).
+  if ((isDev || config.isVerbose) && !config.isQuiet) {
     transports.push(
       new winston.transports.Console({
         format: consoleFormat,
@@ -105,6 +115,17 @@ function createLogger(): winston.Logger {
     )
   }
 
+  // Winston prints "Attempt to write logs with no transports, which can
+  // increase memory usage" — to stderr, on EVERY log call — whenever the
+  // transport list is empty. That happens in two real configurations: a
+  // headless `--quiet` run with no `--log-file`, and a packaged production
+  // build (no console in dev, not verbose, no file). Attach a silent no-op
+  // transport so the warning never fires; it discards every record, keeping
+  // stdout/stderr clean and adding no buffering.
+  if (transports.length === 0) {
+    transports.push(new winston.transports.Console({ silent: true }))
+  }
+
   return winston.createLogger({
     level,
     transports
@@ -122,12 +143,22 @@ function getLogger(): winston.Logger {
   return loggerInstance
 }
 
+/** Severity threshold accepted by {@link LoggerInterface.setLevel}. */
+export type LogLevel = 'error' | 'warn' | 'info' | 'debug'
+
 // Define logger interface for proper type inference
 export interface LoggerInterface {
   debug: (message: string, meta?: Record<string, unknown>) => void
   info: (message: string, meta?: Record<string, unknown>) => void
   warn: (message: string, meta?: Record<string, unknown>) => void
   error: (message: string, meta?: Record<string, unknown>) => void
+  /**
+   * Override the active log level at runtime, on the logger AND every transport
+   * (so a transport pinned to a lower level is raised too). Useful for a
+   * headless / CLI run that must keep diagnostic output off stdout — e.g.
+   * `logger.setLevel('error')` before the run so only errors surface.
+   */
+  setLevel: (level: LogLevel) => void
 }
 
 // Export logging functions
@@ -143,6 +174,11 @@ export const logger: LoggerInterface = {
   },
   error: (message: string, meta?: Record<string, unknown>): void => {
     getLogger().error(message, meta)
+  },
+  setLevel: (level: LogLevel): void => {
+    const instance = getLogger()
+    instance.level = level
+    for (const transport of instance.transports) transport.level = level
   }
 }
 

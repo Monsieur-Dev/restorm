@@ -1,0 +1,83 @@
+- message: 🔵 [<time>] ▶ Code Lua
+- message: ⚪ [<time>] start code
+  data:
+    language: lua
+    code: |-
+      -- Fixed dataset (no input → runs at start). print(...) → run log.
+      local data = { {n="a", v=3}, {n="b", v=1}, {n="c", v=2} }
+      print(string.format("lua: built %d rows", #data))
+      return data
+- message: "🔵 [<time>] lua: built 3 rows"
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      - n: a
+        v: 3
+      - n: b
+        v: 1
+      - n: c
+        v: 2
+- message: ⚪ [<time>] start code
+  data:
+    language: lua
+    code: |-
+      -- `input` = wired value (array of tables). ipairs aggregate.
+      local total = 0
+      for _, r in ipairs(input) do total = total + r.v end
+      print(string.format("lua: total = %d", total))
+      return { total = math.floor(total), count = #input }
+    value:
+      - n: a
+        v: 3
+      - n: b
+        v: 1
+      - n: c
+        v: 2
+- message: "🔵 [<time>] lua: total = 6"
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      count: 3
+      total: 6
+- message: ⚪ [<time>] start code
+  data:
+    language: lua
+    code: >-
+      -- string.format summary of the previous result.
+
+      local msg = string.format("%d items summing to %d", input.count,
+      input.total)
+
+      print("lua: " .. msg)
+
+      return { lang = "lua", summary = msg, total = math.floor(input.total) }
+    value:
+      count: 3
+      total: 6
+- message: "🔵 [<time>] lua: 3 items summing to 6"
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      lang: lua
+      summary: 3 items summing to 6
+      total: 6
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: "Lua result: {{.}}"
+    data:
+      lang: lua
+      summary: 3 items summing to 6
+      total: 6
+- message: "🔵 [<time>] Lua result: [object Object]"
+  data:
+    lang: lua
+    summary: 3 items summing to 6
+    total: 6
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      lang: lua
+      summary: 3 items summing to 6
+      total: 6
+- message: 🔵 [<time>] ■ Code Lua

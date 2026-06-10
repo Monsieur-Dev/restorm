@@ -9,7 +9,7 @@ import {
   type GroupNode,
   type WorkbenchTree
 } from 'electron-core-ui/renderer'
-import type { Folder, EnvironmentFolder, Request } from '../../../shared/types/collections'
+import type { FolderItem } from '../../../shared/types/collections'
 import { folderItemToListViewItem } from '../services/FolderToListView'
 import { Badge } from '../components/common/Badge'
 import { mapToBadgeType } from '../utils/badgeUtils'
@@ -21,7 +21,7 @@ import {
 } from '../components/MainView/Sidebar/contextMenuBuilder'
 
 export interface UseFavoritesAndOpenItemsOptions {
-  rootItems: (EnvironmentFolder | Folder | Request)[]
+  rootItems: FolderItem[]
   workbenchTree: WorkbenchTree
   projectUuid: string | null
   /** Counter incremented when items are mutated in-place (rename, etc.) */
@@ -54,7 +54,11 @@ export interface UseFavoritesAndOpenItemsReturn {
  * `tab.folder.id`, or — for tabs that wrap an environment — the env
  * folder id. Deduped, preserving order of first appearance.
  */
-type ItemBackedTab = EditorTab & { request?: { id?: string }; folder?: { id?: string } }
+type ItemBackedTab = EditorTab & {
+  request?: { id?: string }
+  folder?: { id?: string }
+  scenario?: { id?: string }
+}
 
 function collectOpenItemIds(tree: WorkbenchTree): { itemId: string; tabId: string }[] {
   const out: { itemId: string; tabId: string }[] = []
@@ -64,11 +68,11 @@ function collectOpenItemIds(tree: WorkbenchTree): { itemId: string; tabId: strin
       if (isTabGroupNode(node)) {
         for (const tab of node.tabs) {
           const t = tab as ItemBackedTab
-          // The Opened pane lists open *requests* only — folder /
-          // environment-folder tabs (Configuration / Docs / Notes
-          // surfaces) carry workbench state but aren't "documents"
-          // the user re-opens via this list.
-          const itemId = t.request?.id ?? null
+          // The Opened pane lists open requests + scenarios — both are
+          // "documents" the user re-opens; folder / environment-folder
+          // tabs (Configuration / Docs / Notes surfaces) carry
+          // workbench state but aren't items to surface here.
+          const itemId = t.request?.id ?? t.scenario?.id ?? null
           if (!itemId || seen.has(itemId)) continue
           seen.add(itemId)
           out.push({ itemId, tabId: tab.id })

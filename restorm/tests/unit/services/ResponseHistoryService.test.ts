@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import type {
-  ResponseHistoryDetail,
-  ResponseHistoryIndex
+  ResponseHistoryDetail
 } from '../../../src/shared/types/collections'
 
 vi.mock('fs', () => {
@@ -70,32 +69,49 @@ vi.mock('../../../src/shared/models', () => ({
   isRequest: vi.fn((i: Record<string, unknown>) => 'type' in i && !('items' in i))
 }))
 
+// The service delegates all archive I/O to the shared `historyArchive` module
+// (read / write / serialized write-queue), so the test drives a store-backed
+// stand-in for that module rather than the on-disk zip.
+vi.mock('../../../src/main/services/historyArchive', () => ({
+  getHistoryArchivePath: vi.fn(),
+  readHistoryArchive: vi.fn(),
+  writeHistoryArchive: vi.fn(),
+  queueHistoryWrite: vi.fn(),
+  INDEX_FILE_NAME: 'index.json',
+  RESPONSES_FOLDER: 'responses',
+  SCENARIO_RUNS_FOLDER: 'scenarioRuns'
+}))
+
 import { responseHistoryService } from '../../../src/main/services/ResponseHistoryService'
 import { existsSync } from 'fs'
 import { isFileServiceInitialized, getFileService } from 'electron-core-ui/main'
 import { collectionStore } from '../../../src/main/services/CollectionStore'
+import {
+  getHistoryArchivePath,
+  readHistoryArchive,
+  writeHistoryArchive,
+  queueHistoryWrite,
+  type HistoryArchiveIndex
+} from '../../../src/main/services/historyArchive'
 
 interface SI {
-  readArchive(p: string): Promise<{ index: ResponseHistoryIndex; entriesData: Map<string, string> }>
-  writeArchive(p: string, i: ResponseHistoryIndex, e: Map<string, string>): Promise<void>
   initialized: boolean
   subscriptions: { unsubscribe: () => void }[]
-  writeQueue: Promise<void>
 }
 
 const svc = responseHistoryService as unknown as SI
 const AP = '/tmp/test.json.responses.zip'
 let store: Map<string, Map<string, string>>
 
-function setA(path: string, idx: ResponseHistoryIndex, entries: Map<string, string>): void {
+function setA(path: string, idx: HistoryArchiveIndex, entries: Map<string, string>): void {
   const d = new Map<string, string>()
   d.set('index.json', JSON.stringify(idx))
   for (const [k, v] of entries) d.set(k, v)
   store.set(path, d)
 }
-function getIdx(path: string): ResponseHistoryIndex | null {
+function getIdx(path: string): HistoryArchiveIndex | null {
   const r = store.get(path)?.get('index.json')
-  return r ? (JSON.parse(r) as ResponseHistoryIndex) : null
+  return r ? (JSON.parse(r) as HistoryArchiveIndex) : null
 }
 function mkD(o: Partial<ResponseHistoryDetail> = {}): ResponseHistoryDetail {
   return {
@@ -123,12 +139,13 @@ function seed(_rp: string, es: { guid: string; timestamp: string; pinned?: boole
     list.push(e)
     buckets.set(id, list)
   }
-  const idx: ResponseHistoryIndex = {
+  const idx: HistoryArchiveIndex = {
     version: 2,
     requests: [...buckets.entries()].map(([requestId, list]) => ({
       requestId,
       entries: list.map((e) => ({ guid: e.guid, timestamp: e.timestamp, pinned: e.pinned ?? false, success: e.success ?? true }))
-    }))
+    })),
+    scenarios: []
   }
   const de = new Map<string, string>()
   for (const e of es) de.set('responses/' + e.guid + '.json', JSON.stringify(mkD({ guid: e.guid, requestId: e.requestId ?? 'req-1', timestamp: e.timestamp, pinned: e.pinned ?? false, success: e.success ?? true })))
@@ -144,20 +161,26 @@ function setupCols(): void {
 }
 function patch(): void {
   vi.mocked(existsSync).mockImplementation((p) => store.has(String(p)))
-  svc.readArchive = vi.fn((p: string) => {
+  // Mirror the real path resolver: no archive path until the file service is
+  // initialized (so "skips when not initialized" still short-circuits).
+  vi.mocked(getHistoryArchivePath).mockImplementation(() => (vi.mocked(isFileServiceInitialized)() ? AP : null))
+  // The real queue serializes writes; for the test just run the callback.
+  vi.mocked(queueHistoryWrite).mockImplementation((fn) => fn())
+  vi.mocked(readHistoryArchive).mockImplementation((p: string) => {
     const d = store.get(p)
-    if (!d) return { index: { version: 2 as const, requests: [] }, entriesData: new Map<string, string>() }
+    if (!d) return Promise.resolve({ index: { version: 2 as const, requests: [], scenarios: [] }, entriesData: new Map<string, string>() })
     const it = d.get('index.json')
-    const idx: ResponseHistoryIndex = it ? (JSON.parse(it) as ResponseHistoryIndex) : { version: 2, requests: [] }
+    const idx: HistoryArchiveIndex = it ? (JSON.parse(it) as HistoryArchiveIndex) : { version: 2, requests: [], scenarios: [] }
     const ed = new Map<string, string>()
     for (const [k, v] of d) ed.set(k, v)
-    return { index: idx, entriesData: ed }
+    return Promise.resolve({ index: idx, entriesData: ed })
   })
-  svc.writeArchive = vi.fn((p: string, idx: ResponseHistoryIndex, ed: Map<string, string>) => {
+  vi.mocked(writeHistoryArchive).mockImplementation((p: string, idx: HistoryArchiveIndex, ed: Map<string, string>) => {
     const d = new Map<string, string>()
     d.set('index.json', JSON.stringify(idx))
     for (const [k, v] of ed) { if (k !== 'index.json') d.set(k, v) }
     store.set(p, d)
+    return Promise.resolve()
   })
 }
 function mkHttp(ts: string): { requestId: string; success: boolean; statusCode: number; statusText: string; headers: Record<string, string | string[]>; body: string; timings: { startedAt: string; durationMs: number }; requestUrl: string } {
@@ -169,7 +192,6 @@ describe('ResponseHistoryService', () => {
     store = new Map()
     svc.initialized = false
     svc.subscriptions = []
-    svc.writeQueue = Promise.resolve()
     vi.mocked(isFileServiceInitialized).mockReturnValue(true)
     vi.mocked(getFileService).mockReturnValue({ getFilePath: vi.fn().mockReturnValue('/tmp/test.json') } as never)
     vi.mocked(collectionStore.getCollections).mockReturnValue([] as never)

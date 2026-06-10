@@ -194,6 +194,33 @@ export async function loadWorkbenchState(workbenchId: string): Promise<Persisted
 }
 
 /**
+ * Peek the persisted tab IDs for a workbench WITHOUT rebuilding any tabs.
+ *
+ * A lightweight read for consumers that need to know up front whether a
+ * mount-time restore will reopen any tabs — e.g. to decide whether to show an
+ * empty/onboarding placeholder immediately or hold it back until the restore
+ * has reopened the persisted tabs. Walks the persisted group tree (including
+ * split containers) and returns every tab id, in document order. Returns an
+ * empty array when nothing is persisted.
+ */
+export async function loadWorkbenchTabIds(workbenchId: string): Promise<string[]> {
+  const state = await loadWorkbenchState(workbenchId);
+  if (!state) return [];
+  const ids: string[] = [];
+  const walk = (nodes: PersistedGroupNode[]): void => {
+    for (const node of nodes) {
+      if (node.type === 'tabs') {
+        if (node.tabIds) ids.push(...node.tabIds);
+      } else if (node.children) {
+        walk(node.children);
+      }
+    }
+  };
+  walk(state.groups);
+  return ids;
+}
+
+/**
  * Clear workbench state from storage
  */
 export async function clearWorkbenchState(workbenchId: string): Promise<boolean> {

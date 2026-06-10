@@ -24,6 +24,18 @@
     "@vitest/*",
     "@testing-library/*",
     "jsdom",
-    "@milkdown/*"
+    "@milkdown/*",
+    "lodash",
+    "moment",
+    "uuid",
+    "nanoid",
+    "chai",
+    "cheerio",
+    "xml2js",
+    "ajv-formats",
+    "pyodide",
+    "wasmoon",
+    "webr",
+    "@ruby/*"
   ]
 }

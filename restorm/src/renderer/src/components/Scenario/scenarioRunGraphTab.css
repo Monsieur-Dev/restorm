@@ -1,0 +1,81 @@
+/*
+ * Run-history "Graphe" tab — read-only scenario snapshots captured at run
+ * time. Horizontal master strip of 200×200 thumbnails over a detail pane.
+ */
+.scn-graph-tab {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.scn-graph-empty {
+  padding: 12px 14px;
+  font-size: 12px;
+  color: var(--text-secondary, #999);
+}
+
+.scn-graph-master {
+  flex: 0 0 auto;
+  border-bottom: 1px solid var(--editorWidget-border, #454545);
+}
+
+.scn-graph-thumbs {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  padding: 10px;
+  align-items: flex-start;
+}
+
+.scn-graph-thumb {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 0 0 auto;
+  cursor: pointer;
+}
+
+/* Kill the focus ring around the whole [label + minimap] — selection is
+ * shown by the minimap's own border (below). The workbench ships a global
+ * `.workbench [tabindex="0"]:focus { outline: 1px solid focusBorder }`
+ * (specificity 0,3,0), so we must match/exceed it to suppress it here. */
+.scn-graph-thumb { outline: none; }
+.workbench .scn-graph-thumb[tabindex]:focus,
+.workbench .scn-graph-thumb[tabindex]:focus-visible {
+  outline: none;
+}
+
+.scn-graph-thumb-name {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  text-align: center;
+}
+
+.scn-graph-thumb-canvas {
+  display: block;
+  width: 200px;
+  height: 200px;
+  border: 1px solid var(--editorWidget-border, #454545);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--editor-background, #1e1e1e);
+  box-sizing: border-box;
+}
+
+/* Selection indicator = a blue border around the minimap (the canvas). */
+.scn-graph-thumb.is-selected .scn-graph-thumb-canvas {
+  border: 2px solid var(--focusBorder, #0078d4);
+}
+
+.scn-graph-detail {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  /* Breathing room around the main graph so it doesn't touch the panel edges. */
+  padding: 12px;
+  box-sizing: border-box;
+}

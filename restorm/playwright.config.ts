@@ -77,6 +77,33 @@ const exhaustiveDocViewerTestDir = defineBddConfig({
   outputDir: '.features-gen/exhaustive-doc-viewer'
 })
 
+const scenarioSuggestionsTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/scenario-suggestions/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/scenario-suggestions/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/scenario-suggestions.fixture.ts'
+  ],
+  outputDir: '.features-gen/scenario-suggestions'
+})
+
+const scenarioRunlogTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/scenario-runlog/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/scenario-runlog/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/scenario-runlog.fixture.ts'
+  ],
+  outputDir: '.features-gen/scenario-runlog'
+})
+
+const postmanImportTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/postman-import/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/postman-import/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/postman-import.fixture.ts'
+  ],
+  outputDir: '.features-gen/postman-import'
+})
+
 /**
  * Playwright configuration for Electron E2E tests using playwright-bdd.
  * Each test group has its own project with a dedicated fixture.
@@ -99,8 +126,13 @@ export default defineConfig({
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
 
-  /* Single worker for Electron tests */
-  workers: 1,
+  /* Electron projects run across workers (each project/file stays serial
+   * internally — `fullyParallel: false`), so the long-pole projects (scenario
+   * run-log, full-workflow) overlap instead of summing — a full run drops from
+   * ~24min serial to ~6min. The render-heavy doc-viewer no longer flakes at high
+   * worker counts now that its fixture disables renderer background-throttling
+   * (occluded windows on the shared Xvfb were getting their timers starved). */
+  workers: 4,
 
   /* Reporter */
   reporter: [
@@ -166,6 +198,27 @@ export default defineConfig({
       name: 'exhaustive-doc-viewer',
       testDir: exhaustiveDocViewerTestDir,
       timeout: 300 * 1000  // 5 min — many scenarios, each opens a fresh app
+    },
+    {
+      name: 'scenario-suggestions',
+      testDir: scenarioSuggestionsTestDir
+    },
+    {
+      name: 'scenario-runlog',
+      testDir: scenarioRunlogTestDir,
+      timeout: 180 * 1000 // 3 min — three scenarios, each opens a fresh app + runs the engine
+    },
+    {
+      name: 'postman-import',
+      testDir: postmanImportTestDir,
+      timeout: 180 * 1000 // 3 min — opens a fresh app, imports + runs the workflow against docker
+    },
+    {
+      // Headless CLI runner — a plain spec (no BDD/UI) that spawns the built app
+      // with `--run` and asserts stdout + exit code.
+      name: 'scenario-cli',
+      testDir: 'tests/e2e/scenario-cli',
+      timeout: 180 * 1000
     }
   ]
 })

@@ -1,0 +1,83 @@
+- message: 🔵 [<time>] ▶ Code R
+- message: ⚪ [<time>] start code
+  data:
+    language: r
+    code: |-
+      # Fixed numeric vector (no input → runs at start). cat → run log.
+      vals <- c(3, 1, 2)
+      cat(sprintf("r: built %d rows\n", length(vals)))
+      vals
+- message: "🔵 [<time>] r: built 3 rows"
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      - 3
+      - 1
+      - 2
+- message: ⚪ [<time>] start code
+  data:
+    language: r
+    code: |-
+      # `input` = wired value. sort + sum, return a named list.
+      nums <- sort(unlist(input))
+      total <- sum(nums)
+      cat(sprintf("r: total = %d\n", as.integer(total)))
+      list(total = as.integer(total), sorted = as.integer(nums))
+    value:
+      - 3
+      - 1
+      - 2
+- message: "🔵 [<time>] r: total = 6"
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      total: 6
+      sorted:
+        - 1
+        - 2
+        - 3
+- message: ⚪ [<time>] start code
+  data:
+    language: r
+    code: >-
+      # sprintf summary of the previous result.
+
+      summary <- sprintf("%d items summing to %d", length(input$sorted),
+      as.integer(input$total))
+
+      cat(sprintf("r: %s\n", summary))
+
+      list(lang = "r", summary = summary, total = as.integer(input$total))
+    value:
+      total: 6
+      sorted:
+        - 1
+        - 2
+        - 3
+- message: "🔵 [<time>] r: 3 items summing to 6"
+- message: ⚪ [<time>] done code
+  data:
+    result:
+      lang: r
+      summary: 3 items summing to 6
+      total: 6
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: "R result: {{.}}"
+    data:
+      lang: r
+      summary: 3 items summing to 6
+      total: 6
+- message: "🔵 [<time>] R result: [object Object]"
+  data:
+    lang: r
+    summary: 3 items summing to 6
+    total: 6
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      lang: r
+      summary: 3 items summing to 6
+      total: 6
+- message: 🔵 [<time>] ■ Code R

@@ -1,0 +1,10 @@
+/* Wrapper that hosts a scenario badge + its running border-beam overlay. The
+ * beam (`.ecu-border-effect`) is absolutely positioned `inset:0` and inherits
+ * this element's border-radius, so it must tightly hug the badge: an inline
+ * box sized to the badge, with the badge's own 3px corner radius. */
+.scn-running-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 3px;
+}

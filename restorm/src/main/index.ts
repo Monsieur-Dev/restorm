@@ -1,3 +1,8 @@
+// LOAD-ORDER CRITICAL (logger): inject ECUI's `--quiet` in headless CLI-run
+// mode BEFORE any module can create the logger, so stdout stays clean for the
+// run-log. Pure argv mutation — no network — so it's safe ahead of the firewall.
+import './cli/earlyQuiet'
+
 // LOAD-ORDER CRITICAL: install the main-process firewall
 // interceptor (Layer B) BEFORE any other module that might trigger
 // an outgoing HTTP / HTTPS / fetch call. The monkey-patches replace
@@ -22,7 +27,8 @@ installMainProcessInterceptor()
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { randomBytes } from 'node:crypto'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, initAutoSaveController, McpService } from 'electron-core-ui'
+import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, getStorageService, initAutoSaveController, McpService } from 'electron-core-ui'
+import { REOPEN_LAST_FILE_SETTING_KEY, REOPEN_LAST_FILE_STORAGE_KEY } from '../shared/config/reopenLastFile'
 // Restorm-specific renderer translations (notably the `behavior.*`
 // keys referenced by `restorm/resources/settings.yaml`). The main
 // process needs them so `SettingsService.reindexSearch()` and any
@@ -35,17 +41,20 @@ import { PROJECT_UUID_KEY } from '../shared/config/projectUuid'
 import type { PersistenceFormat } from 'electron-core-ui'
 import { dirname, join } from 'path'
 import { existsSync, statSync } from 'fs'
-import { searchIndexService, contextService, responseHistoryService, requestUsageService, authenticationCacheService } from './services'
+import { searchIndexService, contextService, responseHistoryService, requestUsageService, scenarioUsageService, authenticationCacheService } from './services'
 import { firewallService, permissionService, registerFirewallIpc, installWorkerPatcher } from './services/firewall'
 import { writeMcpDiscoveryFile, cleanupMcpDiscoveryFile } from './services/mcpDiscovery'
 import { registerRestormMcp } from './mcp'
+import { RESTORM_MCP_INSTRUCTIONS } from './mcp/instructions'
 import { graphQLService } from 'electron-core-ui/main'
 import { clearUserSettings, parseCliArgs } from './cli/args'
 import { setupGraphQL } from './GraphQLSetup'
 import { registerRestormIPC } from './IPCHandlers'
+import { installScenarioEngineIPC } from './scenarioEngine/ipcBridge'
 import { registerApiUpdateIPC } from './services/apiUpdate/registerApiUpdateIPC'
 import { runApiUpdateApply } from './services/apiUpdate/orchestrateApply'
-import { loadFolderStructure, attachDraftStoreForFolder, attachDraftStoreForFile, getDraftsRootDir } from './FileOperations'
+import { loadFolderStructure, loadProjectIntoStore, attachDraftStoreForFolder, attachDraftStoreForFile, getDraftsRootDir } from './FileOperations'
+import { runScenarioHeadless } from './cli/headlessRunner'
 import { DEFAULT_UI_DELAY_MS } from '../shared/config/constants'
 import { applyUserDataOverride } from './userDataOverride'
 // DocumentEvents are handled by FileService internally for dirty state tracking
@@ -75,6 +84,18 @@ app.name = 'restorm'
 const cliArgs = parseCliArgs()
 if (cliArgs.clearSettings) {
   clearUserSettings()
+}
+
+// Headless CLI-run mode: keep restorm's own diagnostics off the console (only
+// the scenario run-log should reach stdout) by raising the logger to `error`
+// before anything else logs. `--run` requires `--open` to know which project
+// to load — fail fast with a clear message otherwise.
+if (cliArgs.cliRun) {
+  logger.setLevel('error')
+  if (cliArgs.open === undefined) {
+    process.stderr.write('--run requires --open <project> (the .restorm file/folder containing the scenario)\n')
+    app.exit(2)
+  }
 }
 
 const fileToOpenOnStart = cliArgs.open
@@ -140,58 +161,77 @@ function createWindow(): void {
         mainWindow = null
       })
 
-      // Open file or folder from command line argument if specified
-      if (fileToOpenOnStart) {
-        // Use dom-ready which fires reliably with app:// protocol
-        mainWindow.webContents.on('dom-ready', () => {
-          logger.info('DOM ready, will open from command line:', { path: fileToOpenOnStart })
-          // Wait for the renderer React app to be fully initialized and hooks mounted
-          setTimeout(() => {
-            // Check if it's a file or directory
-            const isDirectory = existsSync(fileToOpenOnStart) && statSync(fileToOpenOnStart).isDirectory()
+      // Open a file or folder on startup. Handles both files and folders; the
+      // caller decides WHICH path (command line, or the reopen-last-file path).
+      const openPathOnStart = (targetPath: string): void => {
+        const isDirectory = existsSync(targetPath) && statSync(targetPath).isDirectory()
 
-            if (isDirectory) {
-              // Open as folder
-              logger.info('Opening folder...', { path: fileToOpenOnStart })
-              if (!isPersistenceServiceInitialized()) {
-                logger.warn('PersistenceService not initialized, cannot load folder')
-                return
-              }
-              void loadFolderStructure(fileToOpenOnStart).then(async (result) => {
-                if (result && mainWindow && isFileServiceInitialized()) {
-                  logger.info('Folder loaded, sending to renderer', {
-                    collectionsCount: (result.data as { collections?: unknown[] }).collections?.length,
-                    format: result.format
-                  })
-                  // Set the file state in FileService so the UI knows a file is open
-                  const fileService = getFileService() as { setOpenedFolder: (path: string, content: unknown, format?: string) => void }
-                  fileService.setOpenedFolder(fileToOpenOnStart, result.data, result.format)
-                  await attachDraftStoreForFolder(fileToOpenOnStart, result.format)
-                } else {
-                  logger.error('Failed to load folder from command line', { result })
-                }
+        if (isDirectory) {
+          logger.info('Opening folder...', { path: targetPath })
+          if (!isPersistenceServiceInitialized()) {
+            logger.warn('PersistenceService not initialized, cannot load folder')
+            return
+          }
+          void loadFolderStructure(targetPath).then(async (result) => {
+            if (result && mainWindow && isFileServiceInitialized()) {
+              logger.info('Folder loaded, sending to renderer', {
+                collectionsCount: (result.data as { collections?: unknown[] }).collections?.length,
+                format: result.format
               })
-            } else if (isFileServiceInitialized()) {
-              // Open as file — FileService itself stamps `_projectUuid`
-              // before broadcasting `file:opened` (configured via
-              // `uuidKey` on init), so this path stays a simple
-              // open + draft-store attach.
-              logger.info('Opening file...', { path: fileToOpenOnStart })
-              void getFileService().open(fileToOpenOnStart).then(async (result) => {
-                if (result.success) {
-                  logger.info('File opened successfully from command line')
-                  const format = (result as { format?: string }).format ?? 'yaml'
-                  await attachDraftStoreForFile(fileToOpenOnStart, format as PersistenceFormat)
-                } else {
-                  logger.error('Failed to open file from command line:', { path: fileToOpenOnStart })
-                }
-              })
+              // Set the file state in FileService so the UI knows a file is open
+              const fileService = getFileService() as { setOpenedFolder: (path: string, content: unknown, format?: string) => void }
+              fileService.setOpenedFolder(targetPath, result.data, result.format)
+              await attachDraftStoreForFolder(targetPath, result.format)
             } else {
-              logger.warn('FileService not initialized, cannot open file')
+              logger.error('Failed to load folder on startup', { result })
             }
-          }, DEFAULT_UI_DELAY_MS)
-        })
+          })
+        } else if (isFileServiceInitialized()) {
+          // FileService stamps `_projectUuid` before broadcasting `file:opened`
+          // (configured via `uuidKey` on init), so this stays a simple open +
+          // draft-store attach.
+          logger.info('Opening file...', { path: targetPath })
+          void getFileService().open(targetPath).then(async (result) => {
+            if (result.success) {
+              logger.info('File opened successfully on startup')
+              const format = (result as { format?: string }).format ?? 'yaml'
+              await attachDraftStoreForFile(targetPath, format as PersistenceFormat)
+            } else {
+              logger.error('Failed to open file on startup:', { path: targetPath })
+            }
+          })
+        } else {
+          logger.warn('FileService not initialized, cannot open file')
+        }
       }
+
+      // The "reopen last file" path: only when the `files:reopenLastFile` user
+      // setting is on AND the renderer-recorded path still exists on disk.
+      const resolveReopenLastFilePath = (): string | null => {
+        if (!isSettingsServiceInitialized()) return null
+        if (getSettingsService().get(REOPEN_LAST_FILE_SETTING_KEY) !== true) return null
+        const stored = getStorageService().get(REOPEN_LAST_FILE_STORAGE_KEY)
+        if (typeof stored !== 'string' || stored.length === 0) return null
+        return existsSync(stored) ? stored : null
+      }
+
+      // Open on startup via dom-ready (fires reliably with the app:// protocol).
+      // Command-line path wins; otherwise honour the reopen-last-file setting.
+      mainWindow.webContents.on('dom-ready', () => {
+        // Wait for the renderer React app to be fully initialized and hooks mounted.
+        setTimeout(() => {
+          if (fileToOpenOnStart) {
+            logger.info('Opening from command line', { path: fileToOpenOnStart })
+            openPathOnStart(fileToOpenOnStart)
+            return
+          }
+          const reopenPath = resolveReopenLastFilePath()
+          if (reopenPath) {
+            logger.info('Reopening last opened file', { path: reopenPath })
+            openPathOnStart(reopenPath)
+          }
+        }, DEFAULT_UI_DELAY_MS)
+      })
     }
 
     logger.info('Main window created successfully')
@@ -408,6 +448,9 @@ logger.info('Response History Service initialized')
 // history, powers the EmptyBench "Top played" / "Recent activity"
 // surfaces). Persists to ECUI's user-level `StorageService`.
 requestUsageService.initialize()
+// Scenario run counts — the scenario counterpart, surfaced next to requests
+// in the EmptyBench recent-activity lists.
+scenarioUsageService.initialize()
 logger.info('Request Usage Service initialized')
 
 // Initialize Authentication Cache Service. We only need the subscription
@@ -424,7 +467,13 @@ const resourcesPath = getResourcesPath()
 const rendererPath = getRendererPath()
 const settingsConfigPath = getSettingsConfigPath()
 const featuresConfigPath = getFeaturesConfigPath()
-initializeApp('restorm', createWindow, resourcesPath, undefined, rendererPath || undefined, settingsConfigPath, featuresConfigPath)
+// A CLI run with `--headless` suppresses the window entirely (the engine +
+// collectionStore run window-free) while keeping all the service init
+// initializeApp performs (SettingsService, IPC, …) that the run depends on.
+// Without `--headless` the window is shown for visual feedback; the run still
+// executes in the main process and exits when done.
+const suppressWindow = cliArgs.cliRun?.headless === true
+initializeApp('restorm', suppressWindow ? () => { /* headless: no window */ } : createWindow, resourcesPath, undefined, rendererPath || undefined, settingsConfigPath, featuresConfigPath)
 
 // Wire the AutoSaveController once both SettingsService (initialized
 // inside `initializeApp` → `setupIPC` on `app.whenReady`) and
@@ -455,6 +504,7 @@ void app.whenReady().then(() => {
 const mcpAuthToken = randomBytes(16).toString('hex')
 const mcpService = new McpService({
   serverInfo: { name: 'restorm', version: app.getVersion() },
+  instructions: RESTORM_MCP_INSTRUCTIONS,
   authToken: mcpAuthToken
 })
 void app.whenReady().then(async () => {
@@ -537,6 +587,38 @@ ipcMain.handle('runtime:get-config', () => ({
 
 // Register all restorm-specific IPC handlers
 registerRestormIPC({ editorWindows, closeAllWindows })
+
+// Wire the scenario execution engine's IPC bridge unconditionally — the Run /
+// Debug / Step controls in the scenario editor drive it, so it must exist in
+// every build, not only when the embedded MCP server is enabled. Idempotent:
+// the MCP setup path calls it again as a no-op.
+installScenarioEngineIPC()
+
+// Headless CLI-run: load the --open project into the main-side store, run the
+// named scenario through the real engine (no window), stream its run-log, and
+// exit with a status reflecting the outcome. Runs after `initializeApp` has
+// wired SettingsService (so the file-IO workspace path resolves) — we poll for
+// readiness rather than assume an ordering between async `whenReady` callbacks.
+if (cliArgs.cliRun && cliArgs.open !== undefined) {
+  const project = cliArgs.open
+  const cliRun = cliArgs.cliRun
+  void app.whenReady().then(async () => {
+    const settingsReady = async (): Promise<void> => {
+      for (let i = 0; i < 250 && !isSettingsServiceInitialized(); i++) {
+        await new Promise((resolve) => setTimeout(resolve, 20))
+      }
+    }
+    try {
+      await settingsReady()
+      await loadProjectIntoStore(project)
+      const code = await runScenarioHeadless(cliRun)
+      app.exit(code)
+    } catch (err) {
+      process.stderr.write(`${err instanceof Error ? err.message : String(err)}\n`)
+      app.exit(1)
+    }
+  })
+}
 
 // Wire the periodic API-update flow. The CollectionStore + persistence
 // hooks are passed in so this module stays unaware of where the data

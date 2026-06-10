@@ -9,7 +9,8 @@ import {
   importNaturalKeyForRequest
 } from '../../../../shared/utils/importNaturalKey'
 import type { FolderItem } from '../../../../shared/types/folderTypes'
-import { isAnyFolder, isRequest } from '../../../../shared/types/collections'
+import type { Scenario } from '../../../../shared/types/collections'
+import { isAnyFolder, isRequest, isScenario } from '../../../../shared/types/collections'
 import { mapToBadgeType } from '../../utils/badgeUtils'
 import { Badge } from '../common/Badge'
 
@@ -233,7 +234,9 @@ export const ImportSelectionTree: React.FC<ImportSelectionTreeProps> = ({
     // hazard). The renderer is purely derived from `visibleItems +
     // selection`, so it's safe to rebuild on each dependency change.
     const build = (subtree: readonly FolderItem[], path: readonly string[]): ListViewItemData[] => {
-      return subtree.map((item) => {
+      // Import trees only ever carry folders + requests; scenarios are
+      // never produced by a spec import, so filter them out defensively.
+      return subtree.filter((item): item is Exclude<FolderItem, Scenario> => !isScenario(item)).map((item) => {
         if (isAnyFolder(item)) {
           const childPath = [...path, item.name]
           const folderKey = importNaturalKeyForFolder(childPath)

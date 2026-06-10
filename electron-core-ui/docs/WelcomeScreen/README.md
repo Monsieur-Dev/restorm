@@ -9,7 +9,6 @@ Empty-state landing surface for an Electron workbench: animated wallpaper, loope
 - The brand `name` to render as the animated wordmark in the header.
 - Action buttons via `children` (typically two or three `<Button appearance="rainbow" size="xl">`).
 - An `onOpenFile(path)` callback dispatched when the user clicks a row in the files panel.
-- An optional `emptyStateHint` rendered below the actions when both favorites and recents are empty.
 
 Everything else (random pattern selection, animated wordmark cycle, frosted panel, responsive reflow at narrow viewports) is handled internally.
 
@@ -35,8 +34,6 @@ export interface WelcomeScreenProps {
   children?: React.ReactNode
   /** Called when the user activates a file row inside the favorites / recents panel. */
   onOpenFile: (path: string) => void
-  /** Optional hint shown below actions when favorites + recents are both empty. */
-  emptyStateHint?: React.ReactNode
   /** Optional confirm hook for removing a favorite — passed through to RecentFilesVignette. */
   confirmRemoveFavorite?: (fileName: string) => boolean | Promise<boolean>
   /** Wallpaper pattern. Defaults to `'random'`. */
@@ -98,7 +95,6 @@ export const Welcome: React.FC<{ onNew: () => void; onOpen: () => void }> = ({ o
     <WelcomeScreen
       name="Acme"
       onOpenFile={handleOpenFile}
-      emptyStateHint="Open a file or create a new one to get started"
     >
       <Button appearance="rainbow" size="xl" onClick={onNew} options={{ ariaLabel: 'Create a new collection' }}>
         New

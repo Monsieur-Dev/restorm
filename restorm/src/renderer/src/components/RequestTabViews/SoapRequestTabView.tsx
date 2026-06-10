@@ -18,7 +18,6 @@ import {
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
-import { useEnvFolderValueTypes } from '../../hooks/useEnvFolderValueTypes'
 import type { SoapRequest, SoapResponse, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { SOAPExecutionResult } from '../../types/global.d'
@@ -80,11 +79,6 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
   }, [projectUuid, request.id])
 
   const requestPath = useMemo(() => buildRequestPath(collections, request.id), [collections, request.id])
-
-  // Enum definitions + custom value lists from the nearest ancestor
-  // env-folder, so the KeyValue tables can offer the type submenus.
-
-  const { enumDefinitions, customValueLists } = useEnvFolderValueTypes(request.id)
   
   // Backend-provided resolved URL and code snippets
   const [resolvedUrl, setResolvedUrl] = useState<string>('')
@@ -299,8 +293,6 @@ export const SoapRequestTabView: React.FC<SoapRequestTabViewProps> = ({
           ref={headersRef}
           variables={emptyVariables}
           helpers={handlebarsHelpers}
-          enumDefinitions={enumDefinitions}
-          customValueLists={customValueLists}
           initialRows={request.headers}
           onRowsChange={handleHeadersChange}
           persistenceId={`soap-headers:${request.id}`}

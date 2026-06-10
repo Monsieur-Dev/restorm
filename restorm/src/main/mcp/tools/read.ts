@@ -24,7 +24,7 @@ import {
   isEnvironmentFolder,
   isRequest
 } from '../../../shared/models'
-import { flattenTree, listChildren } from '../tree'
+import { flattenTree, flattenScenarios, listChildren } from '../tree'
 
 const MAX_SEARCH_RESULTS = 50
 const ABS_MAX_SEARCH_RESULTS = 200
@@ -70,6 +70,20 @@ export function registerReadTools(mcp: McpService): void {
       }
       return jsonReply(listChildren(target).folders)
     }
+  )
+
+  mcp.registerTool(
+    'list_scenarios',
+    {
+      title: 'List scenarios',
+      description:
+        'List every scenario (dataflow graph) in the open restorm project. Returns ' +
+        '`[{ id, name, path, tags, nodeCount, edgeCount, parentId }]` — `path` is the folder-mode ' +
+        'breadcrumb ("<folder> / … / <name>"), a human-writable handle that avoids the uuid. ' +
+        'Use `get_scenario(id)` for the full graph, `run_scenario(id)` to execute it.',
+      inputSchema: {} as Record<string, unknown>
+    },
+    () => jsonReply(flattenScenarios(collectionStore.getCollections()))
   )
 
   mcp.registerTool(
@@ -130,15 +144,15 @@ export function registerReadTools(mcp: McpService): void {
     {
       title: 'Search project',
       description:
-        'Run a typed search across folders / requests / environments using restorm\'s in-memory ' +
-        'search index. Optional `kinds` filter narrows the result categories; `maxResults` caps ' +
+        'Run a typed search across folders / requests / environments / scenarios using restorm\'s ' +
+        'in-memory search index. Optional `kinds` filter narrows the result categories; `maxResults` caps ' +
         'the response length (default 50, max 200). Each match carries `{ id, title, category, ' +
         'description?, score }`; request-kind matches additionally carry `method` and `url` so ' +
         'callers can disambiguate hits (e.g. two requests named "List Users" on different paths) ' +
         'without a follow-up `get_request`.',
       inputSchema: {
         query: z.string().min(1).describe('Free-text query, e.g. "users" or "POST /pets".'),
-        kinds: z.array(z.enum(['request', 'folder', 'environment', 'tag', 'settings'])).optional().describe(
+        kinds: z.array(z.enum(['request', 'folder', 'environment', 'scenario', 'tag', 'settings'])).optional().describe(
           'Restrict matches to one or more categories. Omit for all kinds.'
         ),
         maxResults: z.coerce.number().int().min(1).max(ABS_MAX_SEARCH_RESULTS).optional().describe(
@@ -261,12 +275,25 @@ export function registerReadTools(mcp: McpService): void {
       title: 'Get current tab',
       description:
         'Return the currently active workbench tab: `{ tabId, itemId, kind }`. `kind` is one of ' +
-        '"request", "folder", "env-folder" — or `null` when no item is open (welcome screen, etc.). ' +
+        '"request", "scenario", "folder", "env-folder" — or `null` when no item is open (welcome screen, etc.). ' +
         'Driven by a renderer push: the renderer notifies main on every active-tab change so the ' +
         'value reads fresh without an IPC round-trip per call.',
       inputSchema: {} as Record<string, unknown>
     },
     () => jsonReply(getCurrentTabSnapshot())
+  )
+
+  mcp.registerTool(
+    'list_favorites',
+    {
+      title: 'List favorite items',
+      description:
+        'Return the user\'s starred (favorite) items in the open project: `{ projectUuid, favorites: [{ id, name, type }] }` ' +
+        '(type = request | folder | env-folder | scenario). These are the same favorites toggled with `set_favorite` and shown ' +
+        'in the sidebar Favorites pane. Driven by a renderer push (like `get_current_tab`); empty before a project is open.',
+      inputSchema: {} as Record<string, unknown>
+    },
+    () => jsonReply(getFavoritesSnapshot())
   )
 }
 
@@ -276,3 +303,4 @@ export function registerReadTools(mcp: McpService): void {
 // ---------------------------------------------------------------------------
 
 import { getCurrentTabSnapshot, pickSelectedEnvId } from './activeState'
+import { getFavoritesSnapshot } from '../favoritesBridge'

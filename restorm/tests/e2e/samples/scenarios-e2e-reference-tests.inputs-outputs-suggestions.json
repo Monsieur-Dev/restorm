@@ -1,0 +1,177 @@
+[
+  {
+    "id": "1780290664616-qdq134",
+    "kind": "input",
+    "suggestion": {
+      "param1": "string!",
+      "param3": true
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780290692642-heguvc",
+    "kind": "input",
+    "suggestion": {
+      "param2": 10,
+      "param4": {
+        "name": "Sub-env"
+      },
+      "param6": "#000000",
+      "param5": "0000FF",
+      "param7": "00FF00"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780290720988-a9nymy",
+    "kind": "object",
+    "suggestion": {
+      "obj_param1": "string!",
+      "obj_param3": {
+        "param1": "string!",
+        "param3": true
+      },
+      "obj_param2": 10,
+      "obj_param4": {
+        "name": "Sub-env"
+      },
+      "obj_param5": "0000FF",
+      "obj_param6": "#000000",
+      "obj_param7": "00FF00",
+      "obj_SecondInput": "2026-06-02T10:18:27.766Z"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780290752840-vsgq4n",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "List of all values",
+      "data": {
+        "obj_param1": "string!",
+        "obj_param3": {
+          "param1": "string!",
+          "param3": true
+        },
+        "obj_param2": 10,
+        "obj_param4": {
+          "name": "Sub-env"
+        },
+        "obj_param5": "0000FF",
+        "obj_param6": "#000000",
+        "obj_param7": "00FF00",
+        "obj_SecondInput": "2026-06-02T10:18:27.766Z"
+      }
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780290862498-v56qy9",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Run failed or cancelled 2",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780309092683-gzd75p",
+    "kind": "input",
+    "suggestion": {
+      "SecondInput": "2026-06-02T10:18:27.766Z"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780309544681-wuznn3",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Run failed or cancelled 1",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780309585119-sop24w",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "error",
+      "message": "Run failed or cancelled 3",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780310052383-xikuhr",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "Err",
+      "data": {
+        "obj_param1": "string!",
+        "obj_param3": {
+          "param1": "string!",
+          "param3": true
+        },
+        "obj_param2": 10,
+        "obj_param4": {
+          "name": "Sub-env"
+        },
+        "obj_param5": "0000FF",
+        "obj_param6": "#000000",
+        "obj_param7": "00FF00",
+        "obj_SecondInput": "2026-06-02T10:18:27.766Z"
+      }
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780421789097-rblttd",
+    "kind": "output",
+    "suggestion": {
+      "static_output": true,
+      "env": null,
+      "color": "0000FF"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780421829778-9wm8ei",
+    "kind": "output",
+    "suggestion": {
+      "first": "string!",
+      "second": 10
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780421853347-83orom",
+    "kind": "output",
+    "suggestion": {
+      "all": {
+        "obj_param1": "string!",
+        "obj_param3": {
+          "param1": "string!",
+          "param3": true
+        },
+        "obj_param2": 10,
+        "obj_param4": {
+          "name": "Sub-env"
+        },
+        "obj_param5": "0000FF",
+        "obj_param6": "#000000",
+        "obj_param7": "00FF00",
+        "obj_SecondInput": "2026-06-02T10:18:27.766Z"
+      }
+    },
+    "source": "static"
+  }
+]

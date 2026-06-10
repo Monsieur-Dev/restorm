@@ -1,5 +1,14 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import { InputBox } from '../InputBox'
+
+/** Parse an ECUI InputBox number string, clamping into `[min, max]`. An empty /
+ * non-numeric draft falls back to `min` so the field can never hold an
+ * out-of-range time (e.g. `28:85`). */
+function clampTimePart(raw: string, min: number, max: number): number {
+  const n = Number(raw)
+  return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : min
+}
 
 export interface TimePickerProps {
   /** Current hours value (0-23). */
@@ -25,36 +34,28 @@ const TimePickerInner: React.FC<TimePickerProps> = ({
 
   return (
     <div className="ecu-date-time-picker-time">
-      <input
+      <InputBox
         className="ecu-date-time-picker-time-input"
         data-testid={`${testId}-hours`}
-        type="number"
-        min={0}
-        max={23}
-        value={hours}
-        onChange={(e) => {
-          const h = Number(e.target.value)
-          const clamped = Number.isFinite(h) ? Math.min(23, Math.max(0, h)) : 0
-          onTimeChange(clamped, minutes)
-        }}
+        options={{ type: 'number', min: 0, max: 23, ariaLabel: t('dateTimePicker.hours') }}
+        value={String(hours)}
+        changeDebounceMs={0}
         disabled={disabled}
-        aria-label={t('dateTimePicker.hours')}
+        onChange={(v) => {
+          onTimeChange(clampTimePart(v, 0, 23), minutes)
+        }}
       />
       <span className="ecu-date-time-picker-time-sep">:</span>
-      <input
+      <InputBox
         className="ecu-date-time-picker-time-input"
         data-testid={`${testId}-minutes`}
-        type="number"
-        min={0}
-        max={59}
-        value={minutes}
-        onChange={(e) => {
-          const m = Number(e.target.value)
-          const clamped = Number.isFinite(m) ? Math.min(59, Math.max(0, m)) : 0
-          onTimeChange(hours, clamped)
-        }}
+        options={{ type: 'number', min: 0, max: 59, ariaLabel: t('dateTimePicker.minutes') }}
+        value={String(minutes)}
+        changeDebounceMs={0}
         disabled={disabled}
-        aria-label={t('dateTimePicker.minutes')}
+        onChange={(v) => {
+          onTimeChange(hours, clampTimePart(v, 0, 59))
+        }}
       />
     </div>
   )

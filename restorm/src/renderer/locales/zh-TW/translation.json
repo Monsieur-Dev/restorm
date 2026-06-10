@@ -92,6 +92,50 @@
     "multiLanguage": {
       "title": "27 種語言!",
       "body": "Restorm 支援 27 種語言。英文、法文、西班牙文、德文、義大利文、日文、中文、韓文等等 — 在設定中挑選你的語言吧!"
+    },
+    "fromPostman": {
+      "title": "從 Postman 或 Bruno 過來的?",
+      "body": "我們幫你切換到 Restorm — 讓你的遷移輕鬆無憂 ;)"
+    },
+    "chainRequests": {
+      "title": "有好幾個請求要串起來?",
+      "body": "在場景中使用你的請求，加入條件，甚至把場景巢狀進其他場景裡。"
+    },
+    "stepByStep": {
+      "title": "逐步執行你的場景",
+      "body": "一次一步，精確地看清發生了什麼。你甚至可以設定中斷點。"
+    },
+    "cicd": {
+      "title": "在你的 CI/CD 流水線中執行場景",
+      "body": "以 headless 模式啟動 Restorm，無介面執行一個場景並收集它的日誌 — 以視覺化方式建構的自動化測試。"
+    },
+    "nestedScenarios": {
+      "title": "看看場景裡發生了什麼",
+      "body": "一個場景可以呼叫另一個。在檢查器中閱讀每一條日誌，並直接跳轉到它來自的場景。"
+    },
+    "scenarioHistory": {
+      "title": "可是剛剛發生了什麼?",
+      "body": "瀏覽你場景的執行歷史。其中某個之後改動了? 別擔心 — 我們保留了它當時的設定。"
+    },
+    "codeSandbox": {
+      "title": "場景與安全",
+      "body": "你可以在場景中撰寫程式碼 — 但它執行於安全的 sandbox 中，無法存取你的本機檔案，也無法直接存取網際網路。保持安全的最穩妥方式!"
+    },
+    "codeLanguages": {
+      "title": "想寫點程式碼?",
+      "body": "直接在你的場景裡寫程式碼 — 用 TypeScript、JavaScript、Python、Lua、Ruby 或 R!"
+    },
+    "scenarioAi": {
+      "title": "可由 AI 驅動的場景",
+      "body": "Claude、Cursor、Copilot… 了解你的程式碼庫：向它們索取量身打造的場景吧。一切都透過 MCP 公開出來，用於建立、編輯與執行場景。"
+    },
+    "interactiveScenarios": {
+      "title": "互動式場景!",
+      "body": "讓你的場景可參數化，甚至透過對話框詢問使用者該做什麼。"
+    },
+    "customValueLists": {
+      "title": "可重複使用的值清單",
+      "body": "定義你自己的值清單，並在請求與場景中一併重複使用它們。"
     }
   },
   "authFailureToast": {
@@ -148,6 +192,7 @@
       "createEnvironmentFolder": "建立環境資料夾",
       "delete": "刪除",
       "clone": "複製",
+      "copySuffix": "複本",
       "rename": "重新命名",
       "addToFavorites": "加入我的最愛",
       "removeFromFavorites": "從我的最愛移除",
@@ -168,7 +213,8 @@
         "soap": "SOAP 請求",
         "websocket": "WebSocket 請求",
         "odata": "OData 請求",
-        "auth": "HTTP 驗證請求"
+        "auth": "HTTP 驗證請求",
+        "scenario": "場景"
       }
     },
     "deleteConfirm": {
@@ -177,6 +223,14 @@
       "itemMessage": "確定要刪除 \"{{name}}\" 嗎？",
       "confirm": "刪除",
       "cancel": "取消"
+    },
+    "scenarioDelete": {
+      "title": "刪除被場景使用的請求",
+      "message": "「{{name}}」被用於以下場景。您想怎麼做?",
+      "belongsTag": "屬於此場景",
+      "moveInto": "移動到此場景",
+      "affectsNote": "刪除此請求也會將其從這些場景中移除。",
+      "deleteAnyway": "仍然刪除"
     }
   },
   "environment": {
@@ -248,7 +302,8 @@
     "addHeader": "新增標頭",
     "addParam": "新增參數",
     "environmentSelector": {
-      "noEnvironment": "無環境"
+      "noEnvironment": "無環境",
+      "switchTooltip": "切換環境"
     },
     "body": {
       "fileLabel": "檔案或 URL：",
@@ -301,7 +356,11 @@
       "dateTime": "日期時間",
       "color": "顏色",
       "expression": "運算式",
-      "boolean": "布林值"
+      "boolean": "布林值",
+      "null": "Null",
+      "list": "清單",
+      "variables": "變數",
+      "environment": "環境"
     },
     "apiEnums": "API 定義的型別",
     "customLists": "自訂類型",
@@ -354,11 +413,14 @@
       "folder": "資料夾",
       "environment": "環境",
       "settings": "設定",
-      "tag": "標籤"
+      "tag": "標籤",
+      "scenario": "情境"
     },
     "tooltip": {
       "noDetails": "沒有可用的詳細資料",
-      "noContent": "沒有文件或備註"
+      "noContent": "沒有文件或備註",
+      "noScenario": "情境無法使用",
+      "scenarioKind": "情境"
     }
   },
   "httpStatus": {
@@ -465,7 +527,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "確定要將 \"{{fileName}}\" 從我的最愛中移除嗎？",
-    "noFilesHint": "開啟現有檔案或新增一個檔案以開始",
     "newAriaLabel": "建立新集合",
     "openAriaLabel": "從磁碟開啟集合",
     "landmarkLabel": "歡迎"
@@ -492,7 +553,9 @@
   },
   "common": {
     "cancel": "取消",
-    "save": "儲存"
+    "save": "儲存",
+    "remove": "移除",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -690,7 +753,7 @@
         "trademark": "WebSocket 為由 IETF（RFC 6455）與 W3C 制定的標準通訊協定。"
       },
       "kafka": {
-        "description": "貼上 Apache Kafka bootstrap-server URL（或主題清單）——restorm 會為每個主題註冊 consumer 與 producer，透過你的 Schema Registry 解碼 Avro / Protobuf 酬載，並讓你一鍵重播個別 offset。",
+        "description": "貼上 Apache Kafka bootstrap-server URL（或主題清單）——restorm 會為每個主題註冊 consumer 與 producer，透過您的 Schema Registry 解碼 Avro / Protobuf 酬載，並讓您一鍵重播個別 offset。",
         "trademark": "Apache Kafka 與 Kafka 標誌為 Apache Software Foundation 的商標。"
       },
       "socketio": {
@@ -742,6 +805,685 @@
       "previousMatch": "上一個相符項",
       "nextMatch": "下一個相符項",
       "close": "關閉"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "emptyTitle": "這裡是空的…",
+      "emptyDragDrop": "將左側樹狀結構中的項目拖入您的情境即可在此使用。您甚至可以將一個情境匯入另一個情境中！",
+      "emptyRightClick": "在空白處按一下右鍵即可為情境新增動作"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "runOnEachEvent": "每次收到事件時執行",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del",
+        "copy": "複製",
+        "paste": "貼上"
+      },
+      "expand": "展開",
+      "collapse": "摺疊"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "locked": "場景執行時編輯已鎖定",
+    "switch": {
+      "addCase": "新增分支",
+      "removeCase": "移除分支",
+      "case": "案例"
+    },
+    "forEach": {
+      "items": "項目",
+      "each": "每項",
+      "done": "完成",
+      "parallelism": "並行度"
+    },
+    "aggregate": {
+      "items": "項目",
+      "result": "結果",
+      "field": "欄位",
+      "separator": "分隔符",
+      "op": {
+        "count": "計數",
+        "sum": "總和",
+        "min": "最小值",
+        "max": "最大值",
+        "average": "平均值",
+        "join": "連接"
+      }
+    },
+    "filter": {
+      "items": "項目",
+      "rejected": "已排除",
+      "kept": "保留",
+      "keepWhere": "保留條件"
+    },
+    "wait": {
+      "then": "然後",
+      "duration": "時長"
+    },
+    "waitUntil": {
+      "until": "直到",
+      "then": "然後"
+    },
+    "arithmetic": {
+      "result": "結果"
+    },
+    "nodes": {
+      "arithmetic": "算術",
+      "httpRequest": "HTTP 請求",
+      "runScenario": "執行場景",
+      "wait": "等待",
+      "waitUntil": "等待至",
+      "now": "現在",
+      "comparator": "比較器",
+      "setVariable": "設定變數",
+      "getVariable": "取得變數",
+      "addToList": "新增至清單",
+      "removeFromList": "從清單移除",
+      "cast": "Cast",
+      "regex": "Regex",
+      "json": "JSON",
+      "xml": "XML",
+      "yaml": "YAML",
+      "crypto": "Crypto",
+      "jwt": "JWT",
+      "datetime": "Date math",
+      "objectOp": "Object ops",
+      "url": "URL",
+      "random": "Random",
+      "throw": "Throw",
+      "retry": "Retry",
+      "listOp": "List ops",
+      "csv": "CSV",
+      "math": "Math",
+      "schema": "Schema validate",
+      "readFile": "Read file",
+      "writeFile": "Write file",
+      "timer": "計時器",
+      "code": "程式碼"
+    },
+    "comparator": {
+      "result": "結果"
+    },
+    "boolean": {
+      "result": "結果"
+    },
+    "map": {
+      "items": "項目",
+      "mapped": "已映射"
+    },
+    "log": {
+      "message": "訊息",
+      "data": "資料"
+    },
+    "assert": {
+      "message": "訊息",
+      "operator": "operator",
+      "op": {
+        "eq": "equals",
+        "ne": "not equals",
+        "lt": "less than",
+        "lte": "less or equal",
+        "gt": "greater than",
+        "gte": "greater or equal",
+        "contains": "contains",
+        "isString": "is string",
+        "isNumber": "is number",
+        "isBoolean": "is boolean",
+        "isArray": "is array",
+        "isObject": "is object",
+        "isNull": "is null",
+        "exists": "exists",
+        "isEmpty": "is empty",
+        "matchesRegex": "matches regex",
+        "isOneOf": "is one of",
+        "deepEquals": "deep equals",
+        "lengthEq": "length ==",
+        "lengthGt": "length >",
+        "lengthLt": "length <"
+      }
+    },
+    "editRequest": "編輯請求",
+    "editScenario": "編輯場景",
+    "object": {
+      "addProperty": "新增屬性",
+      "removeProperty": "移除屬性",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "output": {
+      "outputName": "輸出名稱",
+      "addOutput": "新增輸出",
+      "removeOutput": "移除"
+    },
+    "input": {
+      "name": "Name",
+      "defaultType": "Default / type",
+      "addParam": "新增參數",
+      "removeParam": "移除"
+    },
+    "runScenario": {
+      "orphanInput": "子場景中沒有相符的參數「{{name}}」",
+      "orphanOutput": "子場景中沒有相符的輸出「{{name}}」",
+      "then": "然後"
+    },
+    "validation": {
+      "duplicateName": "名稱「{{name}}」已被另一個動作使用。",
+      "panelTitle": "{{count}} 個動作錯誤",
+      "runBlocked": "執行前請修正 {{count}} 個動作錯誤",
+      "focusBox": "定位到此動作",
+      "showErrors": "顯示錯誤",
+      "input": {
+        "missingName": "此輸入參數必須有名稱。"
+      },
+      "dataLink": {
+        "emptyPath": "傳入的資料連結需要一個 JSON 路徑。",
+        "badPath": "資料連結的 JSON 路徑「{{path}}」格式無效。"
+      },
+      "output": {
+        "missingName": "此輸出必須有名稱。",
+        "duplicateName": "名稱「{{name}}」已被另一個輸出使用。"
+      },
+      "getVariable": {
+        "noSelection": "必須選擇一個變數。",
+        "unknown": "變數「{{name}}」在場景中不存在。"
+      },
+      "setVariable": {
+        "missingName": "要設定的變數必須有名稱。"
+      },
+      "object": {
+        "propMissingName": "每個屬性都必須有名稱。",
+        "propDuplicate": "屬性名「{{name}}」重複了。"
+      },
+      "arithmetic": {
+        "divisionByZero": "無法除以零。"
+      },
+      "switch": {
+        "caseDuplicate": "分支值「{{value}}」重複。"
+      },
+      "transform": {
+        "emptyTemplate": "範本不能為空。",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "關聯的請求已不存在。"
+      },
+      "runScenario": {
+        "missing": "關聯的場景已不存在。"
+      },
+      "file": {
+        "missingPath": "A file path is required."
+      }
+    },
+    "usage": {
+      "button": "使用此請求的場景",
+      "title": "此請求被用於以下場景:"
+    },
+    "inspector": {
+      "run": "執行",
+      "debug": "偵錯",
+      "undo": "復原",
+      "redo": "重做",
+      "step": "單步",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "暫停",
+      "noRunsHint": "此請求尚無最近一次執行結果 — 從此處執行以填入情境預覽。",
+      "syntheticInfo": "從此請求的文件產生的範例資料。",
+      "syntheticRunHint": "範例資料 — 執行請求以替換為真實結果。",
+      "stop": "停止",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "copyThisLog": "複製此日誌",
+      "clearLogs": "清除記錄",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "顯示 {{level}} 日誌",
+      "showLevelOnly": "右鍵點選：僅此層級",
+      "noUserLogs": "No user logs (entries from the Log action) in this run.",
+      "helpTitle": "What this action does"
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "需要輸入"
+    },
+    "runHistory": {
+      "title": "執行歷史",
+      "tooltip": "執行歷史",
+      "empty": "尚無執行記錄",
+      "noLogs": "此執行沒有日誌",
+      "logsTab": "Logs",
+      "graphTab": "圖",
+      "noGraph": "此執行沒有場景快照",
+      "pin": "釘選",
+      "unpin": "取消釘選"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "新增中斷點",
+      "remove": "移除中斷點",
+      "toggle": "切換中斷點 (F9)",
+      "reached": "已到達中斷點 — 此動作尚未執行。按 F5 繼續，或按 F7 逐步執行。",
+      "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "切換縮圖"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "新增值",
+      "removeValue": "移除值",
+      "updateVariable": "更新來源變數"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
+    },
+    "regex": {
+      "value": "value",
+      "operation": "operation",
+      "pattern": "pattern",
+      "flags": "flags",
+      "replacement": "replacement",
+      "result": "result",
+      "op": {
+        "extract": "extract",
+        "extractAll": "extract all",
+        "test": "test",
+        "replace": "replace",
+        "split": "split"
+      },
+      "flag": {
+        "i": "Case-insensitive",
+        "m": "Multiline (^ and $ match line breaks)",
+        "s": "Dotall (. matches newlines)"
+      }
+    },
+    "json": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "xml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "yaml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "crypto": {
+      "value": "value",
+      "operation": "operation",
+      "key": "key",
+      "keyPlaceholder": "secret",
+      "result": "result",
+      "op": {
+        "base64Encode": "base64 encode",
+        "base64Decode": "base64 decode",
+        "md5": "MD5",
+        "sha1": "SHA-1",
+        "sha256": "SHA-256",
+        "sha512": "SHA-512",
+        "hmacSha256": "HMAC-SHA256",
+        "uuid": "UUID v4"
+      }
+    },
+    "jwt": {
+      "value": "token",
+      "result": "result"
+    },
+    "datetime": {
+      "value": "date",
+      "operation": "operation",
+      "amount": "amount",
+      "unitLabel": "unit",
+      "format": "format",
+      "other": "second date",
+      "result": "result",
+      "op": {
+        "add": "add",
+        "subtract": "subtract",
+        "format": "format",
+        "diff": "diff"
+      },
+      "unit": {
+        "milliseconds": "milliseconds",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months",
+        "years": "years"
+      }
+    },
+    "objectOp": {
+      "value": "object",
+      "operation": "operation",
+      "path": "path",
+      "keys": "keys",
+      "setValue": "value",
+      "mergeWith": "merge with",
+      "result": "result",
+      "op": {
+        "get": "get",
+        "set": "set",
+        "merge": "merge",
+        "pick": "pick",
+        "omit": "omit",
+        "keys": "keys",
+        "values": "values"
+      }
+    },
+    "url": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "op": {
+        "encode": "encode",
+        "decode": "decode",
+        "parseQuery": "parse query",
+        "buildQuery": "build query",
+        "parseUrl": "parse URL"
+      }
+    },
+    "random": {
+      "operation": "operation",
+      "min": "min",
+      "max": "max",
+      "length": "length",
+      "items": "items",
+      "seed": "seed (optional)",
+      "seedPlaceholder": "reproducible",
+      "result": "result",
+      "op": {
+        "int": "integer",
+        "float": "float",
+        "string": "string",
+        "boolean": "boolean",
+        "pick": "pick"
+      }
+    },
+    "throw": {
+      "message": "message"
+    },
+    "retry": {
+      "maxAttempts": "max attempts",
+      "backoff": "backoff",
+      "delay": "delay",
+      "factor": "factor",
+      "retryOnError": "retry on error",
+      "retryOnStatus": "retry on HTTP status",
+      "retryOnFailure": "retry on any non-2xx",
+      "attempt": "attempt",
+      "exhausted": "exhausted",
+      "backoffOpt": {
+        "fixed": "fixed",
+        "linear": "linear",
+        "exponential": "exponential"
+      }
+    },
+    "menuGroups": {
+      "lists": "Lists",
+      "math": "Math",
+      "dataFormats": "Data formats",
+      "encoding": "Encoding",
+      "time": "計時"
+    },
+    "listOp": {
+      "value": "list",
+      "operation": "operation",
+      "result": "result",
+      "key": "key",
+      "order": "order",
+      "depth": "depth",
+      "size": "size",
+      "start": "start",
+      "end": "end",
+      "op": {
+        "sort": "sort",
+        "unique": "unique",
+        "reverse": "reverse",
+        "flatten": "flatten",
+        "chunk": "chunk",
+        "slice": "slice",
+        "groupBy": "group by"
+      }
+    },
+    "csv": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "delimiter": "delimiter",
+      "header": "header row",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "math": {
+      "a": "value",
+      "operation": "operation",
+      "result": "result",
+      "b": "with",
+      "min": "min",
+      "max": "max",
+      "precision": "precision",
+      "op": {
+        "round": "round",
+        "floor": "floor",
+        "ceil": "ceil",
+        "trunc": "truncate",
+        "abs": "absolute",
+        "sign": "sign",
+        "sqrt": "square root",
+        "min": "min",
+        "max": "max",
+        "clamp": "clamp"
+      }
+    },
+    "schema": {
+      "value": "value",
+      "schema": "JSON Schema",
+      "valid": "valid",
+      "invalid": "invalid",
+      "errors": "errors",
+      "editTitle": "Edit JSON Schema"
+    },
+    "readFile": {
+      "path": "path",
+      "content": "content"
+    },
+    "writeFile": {
+      "path": "path",
+      "mode": "mode",
+      "content": "content"
+    },
+    "codeField": {
+      "title": "Edit",
+      "edit": "Open editor",
+      "moreLines": "+{{count}} lines",
+      "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "模式",
+      "modeOpt": {
+        "frequency": "頻率",
+        "cron": "cron"
+      },
+      "frequency": "頻率",
+      "unit": "單位",
+      "cron": "cron",
+      "stop": "停止條件",
+      "stopOpt": {
+        "none": "從不",
+        "duration": "持續時間",
+        "endDate": "結束日期"
+      },
+      "duration": "持續時間",
+      "endDate": "結束日期",
+      "tick": "滴答"
+    },
+    "code": {
+      "input": "輸入",
+      "language": "語言",
+      "code": "程式碼",
+      "modalTitle": "編輯程式碼",
+      "result": "結果",
+      "timeout": "逾時 (秒)"
+    },
+    "help": {
+      "input": "Injects the scenario's input parameters and constants into the graph.",
+      "output": "Declares one of the scenario's named results, read by a parent Run-scenario.",
+      "if": "Branches the flow to then / else by comparing two operands.",
+      "switch": "Routes the input to a matching case, or to default.",
+      "httpRequest": "Runs a saved API request and emits its response.",
+      "runScenario": "Runs another scenario as a reusable sub-step.",
+      "forEach": "Runs the body once per item of a collection, then continues.",
+      "for": "Loops over a number range, running the body for each value.",
+      "while": "Repeats the body while a condition holds (tested first).",
+      "doWhile": "Repeats the body while a condition holds (runs at least once).",
+      "aggregate": "Reduces a collection to one value (count, sum, min, max, average, join).",
+      "map": "Transforms every item of a collection into a new list.",
+      "filter": "Keeps the items that match a condition; routes the rest aside.",
+      "addToList": "Appends values to a list.",
+      "removeFromList": "Removes matching values from a list.",
+      "wait": "Pauses for a duration, then continues.",
+      "waitUntil": "Pauses until a given date/time, then continues.",
+      "now": "Emits the current date and time.",
+      "timer": "Fires its body on a repeating interval or a cron schedule.",
+      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "comparator": "Compares two values and emits true or false.",
+      "boolean": "Combines booleans with and / or / xor / not.",
+      "object": "Builds an object from its named inputs.",
+      "setVariable": "Stores a value into a run variable.",
+      "getVariable": "Reads a run variable's value.",
+      "transform": "Renders a Handlebars template from the input and run variables.",
+      "code": "在沙箱中執行您的程式碼（TypeScript、JavaScript、Python、Lua、Ruby 或 R）並回傳結果。",
+      "cast": "Converts a value to another type (number, string, boolean, date, list).",
+      "regex": "Matches, extracts, replaces or splits text with a regular expression.",
+      "json": "Parses a JSON string, or serialises a value to JSON.",
+      "xml": "Parses an XML string, or serialises a value to XML.",
+      "yaml": "Parses a YAML string, or serialises a value to YAML.",
+      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "jwt": "Decodes a JWT token into header, payload and signature.",
+      "datetime": "Shifts, formats or diffs a date.",
+      "retry": "Re-runs its body until it succeeds, with a backoff policy.",
+      "objectOp": "Reshapes an object (get/set a path, merge, pick, omit, keys, values).",
+      "url": "Encodes, decodes or parses URLs and query strings.",
+      "random": "Generates a random number, string, boolean or pick.",
+      "listOp": "Reshapes a list (sort, unique, reverse, flatten, chunk, slice, groupBy).",
+      "csv": "Parses a CSV string, or serialises a list to CSV.",
+      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "schema": "Validates a value against a JSON Schema.",
+      "readFile": "Reads a file's text content.",
+      "writeFile": "Writes or appends text to a file.",
+      "throw": "Deliberately fails with a message (for error branches and tests).",
+      "log": "Writes a message to the run log and passes the value through.",
+      "assert": "Checks a condition (chai-style) and routes to pass or fail."
+    },
+    "legend": {
+      "title": "圖例",
+      "portsTitle": "輸入點",
+      "entryEventTrigger": "由事件觸發的輸入點",
+      "entryDataTrigger": "由資料觸發的輸入點",
+      "runWhenAllReceived": "一旦接收到所有事件和所有資料，動作即會執行",
+      "runOnLaunchNoPredecessor": "沒有前置動作的動作會在情境啟動時立即執行",
+      "outPortsTitle": "輸出點",
+      "outEmit": "發出觸發事件並傳送資料",
+      "outEmitSignalOnly": "發出觸發事件但不傳送資料",
+      "genericOutPortsTitle": "通用輸出點",
+      "outDone": "動作完成時發出的觸發事件",
+      "outError": "動作發生錯誤時觸發的事件",
+      "navTitle": "導覽",
+      "zoom": "縮放",
+      "pan": "移動",
+      "boxSelect": "矩形選取",
+      "select": "選取 / 多選"
+    },
+    "cli": {
+      "title": "Run from the command line",
+      "intro": "Run this scenario without opening the app (CI, cron, script):",
+      "byId": "Designate by id",
+      "allLogs": "All logs",
+      "note": "`--out file` also writes the run-log to a file.",
+      "projectPlaceholder": "<project.restorm>"
     }
   }
 }

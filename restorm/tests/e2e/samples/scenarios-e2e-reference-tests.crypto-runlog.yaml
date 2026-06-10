@@ -1,0 +1,81 @@
+- message: 🔵 [<time>] ▶ Crypto
+- message: ⚪ [<time>] start crypto
+  data:
+    op: base64Encode
+    value: hello
+- message: ⚪ [<time>] done crypto
+  data:
+    result: aGVsbG8=
+- message: ⚪ [<time>] start crypto
+  data:
+    op: base64Decode
+    value: aGVsbG8=
+    in: true
+- message: ⚪ [<time>] done crypto
+  data:
+    result: hello
+- message: ⚪ [<time>] start crypto
+  data:
+    op: md5
+    value: abc
+    in: true
+- message: ⚪ [<time>] done crypto
+  data:
+    result: 900150983cd24fb0d6963f7d28e17f72
+- message: ⚪ [<time>] start crypto
+  data:
+    op: sha1
+    value: abc
+    in: true
+- message: ⚪ [<time>] done crypto
+  data:
+    result: a9993e364706816aba3e25717850c26c9cd0d89d
+- message: ⚪ [<time>] start crypto
+  data:
+    op: sha256
+    value: abc
+    in: true
+- message: ⚪ [<time>] done crypto
+  data:
+    result: ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
+- message: ⚪ [<time>] start crypto
+  data:
+    op: sha512
+    value: abc
+    in: true
+- message: ⚪ [<time>] done crypto
+  data:
+    result: ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f
+- message: ⚪ [<time>] start crypto
+  data:
+    op: hmacSha256
+    key: key
+    value: The quick brown fox jumps over the lazy dog
+    in: true
+- message: ⚪ [<time>] done crypto
+  data:
+    result: f7bc83f430538424b13298e6aa6fb143ef4d59a14946175997479dbc2d1a3cd8
+- message: ⚪ [<time>] start crypto
+  data:
+    op: uuid
+    in: true
+- message: ⚪ [<time>] done crypto
+  data:
+    result: <uuid>
+- message: ⚪ [<time>] start crypto
+  data:
+    op: base64Decode
+    value: //4=
+    in: true
+- message: 🔴 [<time>] Malformed UTF-8 data
+- message: ⚪ [<time>] start log
+  data:
+    level: error
+    message: "crypto error: bad base64"
+    in:
+      message: Malformed UTF-8 data
+      startedAt: <dynamic-time>
+- message: "🔴 [<time>] crypto error: bad base64"
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ Crypto

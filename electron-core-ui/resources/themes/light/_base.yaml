@@ -11,10 +11,23 @@ colors:
     value: "#000000"
     description: Editor foreground color
 
+  # Hyperlink / inline-link text colour (URL-style links, e.g. ECUI Button link)
+  - id: textLink.foreground
+    value: "#005FB8"
+    description: Foreground color for links
+
+  - id: textLink.activeForeground
+    value: "#0078D4"
+    description: Foreground color for active / hovered links
+
   # Default widget background (for editors, panels, previews)
   - id: editorWidget.background
     value: "#F8F8F8"
     description: Editor widget background color
+
+  - id: editorWidget.border
+    value: "#C8C8C8"
+    description: Editor widget border color
 
   # Hover widget / tooltip colors
   - id: editorHoverWidget.background
@@ -448,6 +461,19 @@ colors:
   - id: wco.iconForeground
     value: "#000000"
     description: WCO codicon foreground color
+
+  # Scenario graph nodes (scenario editor)
+  - id: scenarioNode.background
+    value: "#ffffff"
+    description: Scenario node body background
+
+  - id: scenarioNode.headerBackground
+    value: "#e8eaed"
+    description: Scenario node header background
+
+  - id: scenarioNode.headerBackgroundSelected
+    value: "#d3e6fb"
+    description: Scenario node header background when selected
 
   # Alert colors (info)
   - id: alert.info.background

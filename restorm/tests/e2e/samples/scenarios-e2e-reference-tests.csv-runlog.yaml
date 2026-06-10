@@ -1,0 +1,94 @@
+- message: 🔵 [<time>] ▶ CSV
+- message: ⚪ [<time>] start csv
+  data:
+    op: parse
+    header: true
+    value: |-
+      id,name,age
+      1,Rex,4
+      2,Fido,2
+- message: ⚪ [<time>] done csv
+  data:
+    result:
+      - id: "1"
+        name: Rex
+        age: "4"
+      - id: "2"
+        name: Fido
+        age: "2"
+- message: ⚪ [<time>] start csv
+  data:
+    op: stringify
+    header: true
+    value:
+      - id: "1"
+        name: Rex
+        age: "4"
+      - id: "2"
+        name: Fido
+        age: "2"
+- message: ⚪ [<time>] done csv
+  data:
+    result: |-
+      id,name,age
+      1,Rex,4
+      2,Fido,2
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: "round-trip: parse -> stringify"
+    data: |-
+      id,name,age
+      1,Rex,4
+      2,Fido,2
+- message: "🔵 [<time>] round-trip: parse -> stringify"
+  data: |-
+    id,name,age
+    1,Rex,4
+    2,Fido,2
+- message: ⚪ [<time>] done log
+  data:
+    value: |-
+      id,name,age
+      1,Rex,4
+      2,Fido,2
+- message: ⚪ [<time>] start csv
+  data:
+    op: parse
+    header: true
+    delimiter: ;
+    value: |-
+      sku;qty
+      A-1;10
+      B-2;5
+    in: true
+- message: ⚪ [<time>] done csv
+  data:
+    result:
+      - sku: A-1
+        qty: "10"
+      - sku: B-2
+        qty: "5"
+- message: ⚪ [<time>] start log
+  data:
+    level: info
+    message: parsed with ; delimiter
+    data:
+      - sku: A-1
+        qty: "10"
+      - sku: B-2
+        qty: "5"
+- message: 🔵 [<time>] parsed with ; delimiter
+  data:
+    - sku: A-1
+      qty: "10"
+    - sku: B-2
+      qty: "5"
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      - sku: A-1
+        qty: "10"
+      - sku: B-2
+        qty: "5"
+- message: 🔵 [<time>] ■ CSV

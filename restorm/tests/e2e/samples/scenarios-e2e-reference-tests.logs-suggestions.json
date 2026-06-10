@@ -1,0 +1,225 @@
+[
+  {
+    "id": "1780289475256-suvmxw",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "Hello world",
+      "data": {
+        "hello": "world",
+        "foo": "bar",
+        "Anwser to the universeA": 42,
+        "BTTFArrivalDate": "2025-10-21T14:29:00.000Z",
+        "🔥": true,
+        "color": "#000000",
+        "moulin": "FF0000",
+        "expression": "My expression",
+        "SelectedEnv": {
+          "name": "localhost",
+          "variables": {
+            "baseUrl": "http://localhost:5110",
+            "clientId": "VALID_CLIENT_ID"
+          }
+        }
+      }
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780289497914-vaslvd",
+    "kind": "object",
+    "suggestion": {
+      "hello": "world",
+      "foo": "bar",
+      "Anwser to the universeA": 42,
+      "BTTFArrivalDate": "2025-10-21T14:29:00.000Z",
+      "🔥": true,
+      "color": "#000000",
+      "moulin": "FF0000",
+      "expression": "My expression",
+      "SelectedEnv": {
+        "name": "localhost",
+        "variables": {
+          "baseUrl": "http://localhost:5110",
+          "clientId": "VALID_CLIENT_ID"
+        }
+      }
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780290957897-x639ht",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "foo bar",
+      "data": "bar"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780290977645-3nmegg",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "Anwser to the universe : ",
+      "data": {
+        "hello": "world",
+        "foo": "bar",
+        "Anwser to the universeA": 42,
+        "BTTFArrivalDate": "2025-10-21T14:29:00.000Z",
+        "🔥": true,
+        "color": "#000000",
+        "moulin": "FF0000",
+        "expression": "My expression",
+        "SelectedEnv": {
+          "name": "localhost",
+          "variables": {
+            "baseUrl": "http://localhost:5110",
+            "clientId": "VALID_CLIENT_ID"
+          }
+        }
+      }
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780291655759-lj9oe9",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "Marty ! It's time ! ",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780292630011-3vtl9m",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "Fire 🔥",
+      "data": {
+        "hello": "world",
+        "foo": "bar",
+        "Anwser to the universeA": 42,
+        "BTTFArrivalDate": "2025-10-21T14:29:00.000Z",
+        "🔥": true,
+        "color": "#000000",
+        "moulin": "FF0000",
+        "expression": "My expression",
+        "SelectedEnv": {
+          "name": "localhost",
+          "variables": {
+            "baseUrl": "http://localhost:5110",
+            "clientId": "VALID_CLIENT_ID"
+          }
+        }
+      }
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780292852611-83t4mk",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "Selected color: #000000",
+      "data": {
+        "hello": "world",
+        "foo": "bar",
+        "Anwser to the universeA": 42,
+        "BTTFArrivalDate": "2025-10-21T14:29:00.000Z",
+        "🔥": true,
+        "color": "#000000",
+        "moulin": "FF0000",
+        "expression": "My expression",
+        "SelectedEnv": {
+          "name": "localhost",
+          "variables": {
+            "baseUrl": "http://localhost:5110",
+            "clientId": "VALID_CLIENT_ID"
+          }
+        }
+      }
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780300215561-wwbtkd",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "Bienvenue au Moulin FF0000",
+      "data": {
+        "hello": "world",
+        "foo": "bar",
+        "Anwser to the universeA": 42,
+        "BTTFArrivalDate": "2025-10-21T14:29:00.000Z",
+        "🔥": true,
+        "color": "#000000",
+        "moulin": "FF0000",
+        "expression": "My expression",
+        "SelectedEnv": {
+          "name": "localhost",
+          "variables": {
+            "baseUrl": "http://localhost:5110",
+            "clientId": "VALID_CLIENT_ID"
+          }
+        }
+      }
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780300289869-2h5wir",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "Original expression: My expression",
+      "data": {
+        "hello": "world",
+        "foo": "bar",
+        "Anwser to the universeA": 42,
+        "BTTFArrivalDate": "2025-10-21T14:29:00.000Z",
+        "🔥": true,
+        "color": "#000000",
+        "moulin": "FF0000",
+        "expression": "My expression",
+        "SelectedEnv": {
+          "name": "localhost",
+          "variables": {
+            "baseUrl": "http://localhost:5110",
+            "clientId": "VALID_CLIENT_ID"
+          }
+        }
+      }
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780300412760-cuokfm",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "Selected environment : localhost",
+      "data": {
+        "name": "localhost",
+        "variables": {
+          "baseUrl": "http://localhost:5110",
+          "clientId": "VALID_CLIENT_ID"
+        }
+      }
+    },
+    "source": "static"
+  }
+]

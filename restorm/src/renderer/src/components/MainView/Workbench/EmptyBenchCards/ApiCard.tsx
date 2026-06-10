@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, eventBus, MosaicCard, Table, getColorFromString, type TableColumn } from 'electron-core-ui/renderer'
 import type { EnvironmentFolder, FolderItem } from '../../../../../../shared/types/folderTypes'
+import { isScenario } from '../../../../../../shared/types/folderTypes'
 import type { Request as RestormRequest } from '../../../../../../shared/types/requests'
 import {
   addFavorite,
@@ -13,6 +14,7 @@ import {
 import { DocumentEvents, type DocumentChangedPayload } from '../../../../services/DocumentEvents'
 import { setPendingEnvFolderSubTab } from '../../../../services/envFolderTabIntent'
 import { useRequestUsage, type RequestUsageMap } from '../../../../hooks/useRequestUsage'
+import { useScenarioUsage, type ScenarioUsageMap } from '../../../../hooks/useScenarioUsage'
 import { RequestListRow } from './RequestListRow'
 
 /**
@@ -41,17 +43,25 @@ export interface ApiCardProps {
 interface RequestRow {
   id: string
   name: string
+  /** Badge method for requests; 'scenario' for scenarios (→ scenario glyph). */
   method: string
+  kind: 'request' | 'scenario'
 }
 
 const TOP_PLAYED_LIMIT = 10
 const RECENT_LIMIT = 10
 
-function collectRequests(items: FolderItem[]): RequestRow[] {
+/** Collect both requests and scenarios under an env-folder. Scenarios are
+ *  folder-like (optional `items`); we index the scenario itself AND recurse
+ *  into its children. */
+function collectItems(items: FolderItem[]): RequestRow[] {
   const result: RequestRow[] = []
   for (const item of items) {
-    if ('items' in item) {
-      result.push(...collectRequests(item.items))
+    if (isScenario(item)) {
+      result.push({ id: item.id, name: item.name, method: 'scenario', kind: 'scenario' })
+      if (item.items) result.push(...collectItems(item.items))
+    } else if ('items' in item) {
+      result.push(...collectItems(item.items))
     } else {
       const req: RestormRequest = item
       const method = 'method' in req && typeof req.method === 'string'
@@ -59,25 +69,39 @@ function collectRequests(items: FolderItem[]): RequestRow[] {
         : 'type' in req
           ? req.type
           : ''
-      result.push({ id: req.id, name: req.name, method })
+      result.push({ id: req.id, name: req.name, method, kind: 'request' })
     }
   }
   return result
 }
 
-function rankTopPlayed(rows: RequestRow[], usage: RequestUsageMap): { row: RequestRow; count: number }[] {
+/** A row's run/send count, read from the map matching its kind. */
+function usageCount(row: RequestRow, requestUsage: RequestUsageMap, scenarioUsage: ScenarioUsageMap): number {
+  return row.kind === 'scenario'
+    ? scenarioUsage[row.id]?.count ?? 0
+    : requestUsage[row.id]?.count ?? 0
+}
+
+/** A row's last-activity ISO timestamp (request send / scenario run). */
+function usageAt(row: RequestRow, requestUsage: RequestUsageMap, scenarioUsage: ScenarioUsageMap): string {
+  return row.kind === 'scenario'
+    ? scenarioUsage[row.id]?.lastRunAt ?? ''
+    : requestUsage[row.id]?.lastSentAt ?? ''
+}
+
+function rankTopPlayed(rows: RequestRow[], requestUsage: RequestUsageMap, scenarioUsage: ScenarioUsageMap): { row: RequestRow; count: number }[] {
   return rows
-    .map((row) => ({ row, count: usage[row.id]?.count ?? 0 }))
+    .map((row) => ({ row, count: usageCount(row, requestUsage, scenarioUsage) }))
     .filter(({ count }) => count > 0)
     .sort((a, b) => b.count - a.count)
     .slice(0, TOP_PLAYED_LIMIT)
 }
 
-function rankRecent(rows: RequestRow[], usage: RequestUsageMap): { row: RequestRow; lastSentAt: string }[] {
+function rankRecent(rows: RequestRow[], requestUsage: RequestUsageMap, scenarioUsage: ScenarioUsageMap): { row: RequestRow; at: string }[] {
   return rows
-    .map((row) => ({ row, lastSentAt: usage[row.id]?.lastSentAt ?? '' }))
-    .filter(({ lastSentAt }) => lastSentAt !== '')
-    .sort((a, b) => b.lastSentAt.localeCompare(a.lastSentAt))
+    .map((row) => ({ row, at: usageAt(row, requestUsage, scenarioUsage) }))
+    .filter(({ at }) => at !== '')
+    .sort((a, b) => b.at.localeCompare(a.at))
     .slice(0, RECENT_LIMIT)
 }
 
@@ -85,6 +109,7 @@ export const ApiCard: React.FC<ApiCardProps> = ({ folder, projectUuid, onOpenReq
   const { t } = useTranslation()
   const [favVersion, setFavVersion] = useState(0)
   const usage = useRequestUsage()
+  const scenarioUsage = useScenarioUsage()
 
   // Bumped on every FOLDER_UPDATED event that names this env-folder
   // — `folder` itself is a reactive proxy that mutates in place, so
@@ -126,8 +151,13 @@ export const ApiCard: React.FC<ApiCardProps> = ({ folder, projectUuid, onOpenReq
     }
   }, [])
 
-  const allRequests = useMemo(() => collectRequests(folder.items), [folder.items])
-  const requestsById = useMemo(() => new Map(allRequests.map((r) => [r.id, r])), [allRequests])
+  const allItems = useMemo(() => collectItems(folder.items), [folder.items])
+  // Favourites are request-scoped (the env-folder favourites table only lists
+  // requests), so index just the request rows for the favourites lookup.
+  const requestsById = useMemo(
+    () => new Map(allItems.filter((r) => r.kind === 'request').map((r) => [r.id, r])),
+    [allItems]
+  )
 
   const favorites = useMemo<RequestRow[]>(() => {
     void favVersion
@@ -137,8 +167,8 @@ export const ApiCard: React.FC<ApiCardProps> = ({ folder, projectUuid, onOpenReq
     return favIds.map((id) => requestsById.get(id)).filter((r): r is RequestRow => r !== undefined)
   }, [projectUuid, requestsById, favVersion])
 
-  const topPlayed = useMemo(() => rankTopPlayed(allRequests, usage), [allRequests, usage])
-  const recent = useMemo(() => rankRecent(allRequests, usage), [allRequests, usage])
+  const topPlayed = useMemo(() => rankTopPlayed(allItems, usage, scenarioUsage), [allItems, usage, scenarioUsage])
+  const recent = useMemo(() => rankRecent(allItems, usage, scenarioUsage), [allItems, usage, scenarioUsage])
 
   const handleToggleFavorite = useCallback((requestId: string, next: boolean): void => {
     if (!projectUuid) return
@@ -177,7 +207,7 @@ export const ApiCard: React.FC<ApiCardProps> = ({ folder, projectUuid, onOpenReq
     }
   ], [renderRow])
 
-  const recentColumns = useMemo<TableColumn<{ row: RequestRow; lastSentAt: string }>[]>(() => [
+  const recentColumns = useMemo<TableColumn<{ row: RequestRow; at: string }>[]>(() => [
     { id: 'row', header: '', renderCell: ({ row }) => renderRow(row) }
   ], [renderRow])
 
@@ -218,16 +248,18 @@ export const ApiCard: React.FC<ApiCardProps> = ({ folder, projectUuid, onOpenReq
         >
           {t('emptyBench.apiCard.quickLinks.environments', 'Environments')}
         </Button>
-        <Button
-          secondary
-          onClick={() => {
-            setPendingEnvFolderSubTab(folder.id, 'docs')
-            onOpenRequest(folder.id)
-          }}
-          data-testid={`empty-bench-card-api-${folder.id}-quick-docs`}
-        >
-          {t('emptyBench.apiCard.quickLinks.docs', 'Documentation')}
-        </Button>
+        {folder.apiDocumentation ? (
+          <Button
+            secondary
+            onClick={() => {
+              setPendingEnvFolderSubTab(folder.id, 'docs')
+              onOpenRequest(folder.id)
+            }}
+            data-testid={`empty-bench-card-api-${folder.id}-quick-docs`}
+          >
+            {t('emptyBench.apiCard.quickLinks.docs', 'Documentation')}
+          </Button>
+        ) : null}
         <Button
           secondary
           onClick={() => {
@@ -269,7 +301,7 @@ export const ApiCard: React.FC<ApiCardProps> = ({ folder, projectUuid, onOpenReq
       {recent.length > 0 && (
         <section>
           <h3 className="empty-bench-subtitle">{t('emptyBench.apiCard.recent', 'Last played')}</h3>
-          <Table<{ row: RequestRow; lastSentAt: string }>
+          <Table<{ row: RequestRow; at: string }>
             columns={recentColumns}
             rows={recent}
             getRowId={(r) => r.row.id}

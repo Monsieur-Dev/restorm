@@ -92,6 +92,50 @@
     "multiLanguage": {
       "title": "27 言語!",
       "body": "Restorm は 27 言語に対応しています。英語、フランス語、スペイン語、ドイツ語、イタリア語、日本語、中国語、韓国語…ほか多数。設定で好きな言語を選んでください。"
+    },
+    "fromPostman": {
+      "title": "Postman や Bruno から移行ですか?",
+      "body": "Restorm への乗り換えをお手伝いします。スムーズに移行できますよ ;)"
+    },
+    "chainRequests": {
+      "title": "複数のリクエストをつなげたい?",
+      "body": "シナリオの中でリクエストを使い、条件を追加して、さらにシナリオの中に別のシナリオをネストすることもできます。"
+    },
+    "stepByStep": {
+      "title": "シナリオをステップ実行",
+      "body": "一歩ずつ進めて、何が起きているかをきちんと確認できます。ブレークポイントを設定することもできます。"
+    },
+    "cicd": {
+      "title": "CI/CD パイプラインでシナリオを実行",
+      "body": "Restorm をヘッドレスで起動すれば、UI なしでシナリオを実行してログを収集できます。ビジュアルで組み立てた自動テストです。"
+    },
+    "nestedScenarios": {
+      "title": "シナリオの中で何が起きているか確認",
+      "body": "シナリオは別のシナリオを呼び出せます。インスペクターであらゆるログを読み、そのログが出たシナリオへ直接ジャンプできます。"
+    },
+    "scenarioHistory": {
+      "title": "さっき何が起きたんだろう?",
+      "body": "シナリオの実行履歴を閲覧できます。あれから変更してしまった?ご心配なく — その時の設定もちゃんと保存してあります。"
+    },
+    "codeSandbox": {
+      "title": "シナリオとセキュリティ",
+      "body": "シナリオの中にコードを書けますが、安全なサンドボックスの中で実行されます。ローカルファイルへのアクセスも、インターネットへの直接アクセスもありません。安心して使える最良の方法です!"
+    },
+    "codeLanguages": {
+      "title": "コードを書いてみませんか?",
+      "body": "シナリオの中に直接コードを書けます。TypeScript、JavaScript、Python、Lua、Ruby、R が使えます!"
+    },
+    "scenarioAi": {
+      "title": "AI で操作できるシナリオ",
+      "body": "Claude、Cursor、Copilot… あなたのコードベースを把握しています。オーダーメイドのシナリオを頼んでみましょう。シナリオの作成・編集・実行はすべて MCP で公開されています。"
+    },
+    "interactiveScenarios": {
+      "title": "インタラクティブなシナリオ!",
+      "body": "シナリオをパラメーター化したり、ダイアログボックスでユーザーにどうするか尋ねたりできます。"
+    },
+    "customValueLists": {
+      "title": "再利用できる値のリスト",
+      "body": "独自の値のリストを定義して、リクエストでもシナリオでも同じように再利用できます。"
     }
   },
   "authFailureToast": {
@@ -148,6 +192,7 @@
       "createEnvironmentFolder": "環境フォルダを作成",
       "delete": "削除",
       "clone": "複製",
+      "copySuffix": "コピー",
       "rename": "名前を変更",
       "addToFavorites": "お気に入りに追加",
       "removeFromFavorites": "お気に入りから削除",
@@ -168,7 +213,8 @@
         "soap": "SOAP リクエスト",
         "websocket": "WebSocket リクエスト",
         "odata": "OData リクエスト",
-        "auth": "HTTP 認証リクエスト"
+        "auth": "HTTP 認証リクエスト",
+        "scenario": "シナリオ"
       }
     },
     "deleteConfirm": {
@@ -177,6 +223,14 @@
       "itemMessage": "\"{{name}}\" を削除してもよろしいですか？",
       "confirm": "削除",
       "cancel": "キャンセル"
+    },
+    "scenarioDelete": {
+      "title": "シナリオで使用中のリクエストを削除",
+      "message": "「{{name}}」は次のシナリオで使用されています。どうしますか?",
+      "belongsTag": "このシナリオに属しています",
+      "moveInto": "このシナリオに移動",
+      "affectsNote": "このリクエストを削除すると、これらのシナリオからも削除されます。",
+      "deleteAnyway": "それでも削除"
     }
   },
   "environment": {
@@ -248,7 +302,8 @@
     "addHeader": "ヘッダーを追加",
     "addParam": "パラメータを追加",
     "environmentSelector": {
-      "noEnvironment": "環境なし"
+      "noEnvironment": "環境なし",
+      "switchTooltip": "環境を切り替え"
     },
     "body": {
       "fileLabel": "ファイルまたは URL：",
@@ -301,7 +356,11 @@
       "dateTime": "日時",
       "color": "色",
       "expression": "式",
-      "boolean": "ブール値"
+      "boolean": "ブール値",
+      "null": "Null",
+      "list": "リスト",
+      "variables": "変数",
+      "environment": "環境"
     },
     "apiEnums": "API で定義された型",
     "customLists": "カスタム型",
@@ -354,11 +413,14 @@
       "folder": "フォルダ",
       "environment": "環境",
       "settings": "設定",
-      "tag": "タグ"
+      "tag": "タグ",
+      "scenario": "シナリオ"
     },
     "tooltip": {
       "noDetails": "詳細はありません",
-      "noContent": "ドキュメントやメモはありません"
+      "noContent": "ドキュメントやメモはありません",
+      "noScenario": "シナリオを利用できません",
+      "scenarioKind": "シナリオ"
     }
   },
   "httpStatus": {
@@ -465,7 +527,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "\"{{fileName}}\" をお気に入りから削除してもよろしいですか？",
-    "noFilesHint": "既存のファイルを開くか、新規ファイルを作成して開始してください",
     "newAriaLabel": "新しいコレクションを作成",
     "openAriaLabel": "ディスクからコレクションを開く",
     "landmarkLabel": "ようこそ"
@@ -492,7 +553,9 @@
   },
   "common": {
     "cancel": "キャンセル",
-    "save": "保存"
+    "save": "保存",
+    "remove": "削除",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -655,7 +718,7 @@
         "trademark": "OpenAPI は Linux Foundation 配下の OpenAPI Initiative のプロジェクトです。"
       },
       "curl": {
-        "description": "ターミナルで動いているリクエストがある？完全な curl コマンド（フラグ、ヘッダー、ボディ、クエリ文字列）を貼り付けるだけで、restorm は再実行・編集・ピン留めできる実際のリクエストとして組み立て直します。",
+        "description": "ターミナルで動いているリクエストはありますか？完全な curl コマンド（フラグ、ヘッダー、ボディ、クエリ文字列）を貼り付けるだけで、restorm は再実行・編集・ピン留めできる実際のリクエストとして組み立て直します。",
         "trademark": "curl は © Daniel Stenberg のオープンソースソフトウェアで、その条項に基づき使用しています。"
       },
       "powershell": {
@@ -742,6 +805,685 @@
       "previousMatch": "前の一致",
       "nextMatch": "次の一致",
       "close": "閉じる"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "emptyTitle": "ここは空っぽです…",
+      "emptyDragDrop": "左側のツリーから項目をシナリオにドラッグして、ここで使用できます。あるシナリオを別のシナリオにインポートすることもできます！",
+      "emptyRightClick": "空いている場所を右クリックして、シナリオにアクションを追加します"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "runOnEachEvent": "イベントを受信するたびに実行",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del",
+        "copy": "コピー",
+        "paste": "貼り付け"
+      },
+      "expand": "展開",
+      "collapse": "折りたたむ"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "locked": "シナリオの実行中は編集がロックされます",
+    "switch": {
+      "addCase": "ケースを追加",
+      "removeCase": "ケースを削除",
+      "case": "ケース"
+    },
+    "forEach": {
+      "items": "項目",
+      "each": "各要素",
+      "done": "完了",
+      "parallelism": "並列処理"
+    },
+    "aggregate": {
+      "items": "項目",
+      "result": "結果",
+      "field": "フィールド",
+      "separator": "区切り文字",
+      "op": {
+        "count": "件数",
+        "sum": "合計",
+        "min": "最小",
+        "max": "最大",
+        "average": "平均",
+        "join": "連結"
+      }
+    },
+    "filter": {
+      "items": "項目",
+      "rejected": "除外",
+      "kept": "保持",
+      "keepWhere": "条件で保持"
+    },
+    "wait": {
+      "then": "次へ",
+      "duration": "期間"
+    },
+    "waitUntil": {
+      "until": "まで",
+      "then": "次へ"
+    },
+    "arithmetic": {
+      "result": "結果"
+    },
+    "nodes": {
+      "arithmetic": "算術",
+      "httpRequest": "HTTPリクエスト",
+      "runScenario": "シナリオ実行",
+      "wait": "待機",
+      "waitUntil": "指定時刻まで待機",
+      "now": "現在",
+      "comparator": "比較",
+      "setVariable": "変数を設定",
+      "getVariable": "変数を取得",
+      "addToList": "リストに追加",
+      "removeFromList": "リストから削除",
+      "cast": "Cast",
+      "regex": "Regex",
+      "json": "JSON",
+      "xml": "XML",
+      "yaml": "YAML",
+      "crypto": "Crypto",
+      "jwt": "JWT",
+      "datetime": "Date math",
+      "objectOp": "Object ops",
+      "url": "URL",
+      "random": "Random",
+      "throw": "Throw",
+      "retry": "Retry",
+      "listOp": "List ops",
+      "csv": "CSV",
+      "math": "Math",
+      "schema": "Schema validate",
+      "readFile": "Read file",
+      "writeFile": "Write file",
+      "timer": "タイマー",
+      "code": "コード"
+    },
+    "comparator": {
+      "result": "結果"
+    },
+    "boolean": {
+      "result": "結果"
+    },
+    "map": {
+      "items": "項目",
+      "mapped": "変換後"
+    },
+    "log": {
+      "message": "メッセージ",
+      "data": "データ"
+    },
+    "assert": {
+      "message": "メッセージ",
+      "operator": "operator",
+      "op": {
+        "eq": "equals",
+        "ne": "not equals",
+        "lt": "less than",
+        "lte": "less or equal",
+        "gt": "greater than",
+        "gte": "greater or equal",
+        "contains": "contains",
+        "isString": "is string",
+        "isNumber": "is number",
+        "isBoolean": "is boolean",
+        "isArray": "is array",
+        "isObject": "is object",
+        "isNull": "is null",
+        "exists": "exists",
+        "isEmpty": "is empty",
+        "matchesRegex": "matches regex",
+        "isOneOf": "is one of",
+        "deepEquals": "deep equals",
+        "lengthEq": "length ==",
+        "lengthGt": "length >",
+        "lengthLt": "length <"
+      }
+    },
+    "editRequest": "リクエストを編集",
+    "editScenario": "シナリオを編集",
+    "object": {
+      "addProperty": "プロパティを追加",
+      "removeProperty": "プロパティを削除",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "output": {
+      "outputName": "出力名",
+      "addOutput": "出力を追加",
+      "removeOutput": "削除"
+    },
+    "input": {
+      "name": "Name",
+      "defaultType": "Default / type",
+      "addParam": "パラメータを追加",
+      "removeParam": "削除"
+    },
+    "runScenario": {
+      "orphanInput": "サブシナリオに一致するパラメーター「{{name}}」がありません",
+      "orphanOutput": "サブシナリオに一致する出力「{{name}}」がありません",
+      "then": "次へ"
+    },
+    "validation": {
+      "duplicateName": "名前「{{name}}」は別のアクションで既に使われています。",
+      "panelTitle": "アクションのエラー {{count}} 件",
+      "runBlocked": "実行する前に{{count}}件のアクションエラーを修正してください",
+      "focusBox": "このアクションへ移動",
+      "showErrors": "エラーを表示",
+      "input": {
+        "missingName": "この入力パラメーターには名前が必要です。"
+      },
+      "dataLink": {
+        "emptyPath": "入力データリンクには JSON パスが必要です。",
+        "badPath": "データリンクの JSON パス「{{path}}」が不正です。"
+      },
+      "output": {
+        "missingName": "この出力には名前が必要です。",
+        "duplicateName": "名前「{{name}}」は別の出力で既に使われています。"
+      },
+      "getVariable": {
+        "noSelection": "変数を選択する必要があります。",
+        "unknown": "変数「{{name}}」はシナリオに存在しません。"
+      },
+      "setVariable": {
+        "missingName": "設定する変数には名前が必要です。"
+      },
+      "object": {
+        "propMissingName": "各プロパティには名前が必要です。",
+        "propDuplicate": "プロパティ名「{{name}}」が重複しています。"
+      },
+      "arithmetic": {
+        "divisionByZero": "ゼロによる除算はできません。"
+      },
+      "switch": {
+        "caseDuplicate": "ケース値「{{value}}」が重複しています。"
+      },
+      "transform": {
+        "emptyTemplate": "テンプレートを空にすることはできません。",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "リンクされたリクエストは存在しません。"
+      },
+      "runScenario": {
+        "missing": "リンクされたシナリオは存在しません。"
+      },
+      "file": {
+        "missingPath": "A file path is required."
+      }
+    },
+    "usage": {
+      "button": "このリクエストを使用するシナリオ",
+      "title": "このリクエストは次のシナリオで使用されています:"
+    },
+    "inspector": {
+      "run": "実行",
+      "debug": "デバッグ",
+      "undo": "元に戻す",
+      "redo": "やり直し",
+      "step": "ステップ実行",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "一時停止",
+      "noRunsHint": "このリクエストの最近の実行がありません — ここから実行してシナリオのプレビューを埋めてください。",
+      "syntheticInfo": "このリクエストのドキュメントから生成されたサンプルデータです。",
+      "syntheticRunHint": "サンプルデータ — リクエストを実行して実際の結果に置き換えてください。",
+      "stop": "停止",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "copyThisLog": "このログをコピー",
+      "clearLogs": "ログをクリア",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "{{level}} ログを表示",
+      "showLevelOnly": "右クリック: このレベルのみ",
+      "noUserLogs": "No user logs (entries from the Log action) in this run.",
+      "helpTitle": "What this action does"
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "入力が必要です"
+    },
+    "runHistory": {
+      "title": "実行履歴",
+      "tooltip": "実行履歴",
+      "empty": "まだ実行記録がありません",
+      "noLogs": "この実行のログはありません",
+      "logsTab": "Logs",
+      "graphTab": "グラフ",
+      "noGraph": "この実行のシナリオスナップショットはありません",
+      "pin": "ピン留め",
+      "unpin": "ピン留め解除"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "ブレークポイントを追加",
+      "remove": "ブレークポイントを削除",
+      "toggle": "ブレークポイントの切り替え (F9)",
+      "reached": "ブレークポイントに到達しました — このアクションはまだ実行されていません。F5 で再開、F7 でステップ実行します。",
+      "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "ミニマップの切り替え"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "値を追加",
+      "removeValue": "値を削除",
+      "updateVariable": "元の変数を更新"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
+    },
+    "regex": {
+      "value": "value",
+      "operation": "operation",
+      "pattern": "pattern",
+      "flags": "flags",
+      "replacement": "replacement",
+      "result": "result",
+      "op": {
+        "extract": "extract",
+        "extractAll": "extract all",
+        "test": "test",
+        "replace": "replace",
+        "split": "split"
+      },
+      "flag": {
+        "i": "Case-insensitive",
+        "m": "Multiline (^ and $ match line breaks)",
+        "s": "Dotall (. matches newlines)"
+      }
+    },
+    "json": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "xml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "yaml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "crypto": {
+      "value": "value",
+      "operation": "operation",
+      "key": "key",
+      "keyPlaceholder": "secret",
+      "result": "result",
+      "op": {
+        "base64Encode": "base64 encode",
+        "base64Decode": "base64 decode",
+        "md5": "MD5",
+        "sha1": "SHA-1",
+        "sha256": "SHA-256",
+        "sha512": "SHA-512",
+        "hmacSha256": "HMAC-SHA256",
+        "uuid": "UUID v4"
+      }
+    },
+    "jwt": {
+      "value": "token",
+      "result": "result"
+    },
+    "datetime": {
+      "value": "date",
+      "operation": "operation",
+      "amount": "amount",
+      "unitLabel": "unit",
+      "format": "format",
+      "other": "second date",
+      "result": "result",
+      "op": {
+        "add": "add",
+        "subtract": "subtract",
+        "format": "format",
+        "diff": "diff"
+      },
+      "unit": {
+        "milliseconds": "milliseconds",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months",
+        "years": "years"
+      }
+    },
+    "objectOp": {
+      "value": "object",
+      "operation": "operation",
+      "path": "path",
+      "keys": "keys",
+      "setValue": "value",
+      "mergeWith": "merge with",
+      "result": "result",
+      "op": {
+        "get": "get",
+        "set": "set",
+        "merge": "merge",
+        "pick": "pick",
+        "omit": "omit",
+        "keys": "keys",
+        "values": "values"
+      }
+    },
+    "url": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "op": {
+        "encode": "encode",
+        "decode": "decode",
+        "parseQuery": "parse query",
+        "buildQuery": "build query",
+        "parseUrl": "parse URL"
+      }
+    },
+    "random": {
+      "operation": "operation",
+      "min": "min",
+      "max": "max",
+      "length": "length",
+      "items": "items",
+      "seed": "seed (optional)",
+      "seedPlaceholder": "reproducible",
+      "result": "result",
+      "op": {
+        "int": "integer",
+        "float": "float",
+        "string": "string",
+        "boolean": "boolean",
+        "pick": "pick"
+      }
+    },
+    "throw": {
+      "message": "message"
+    },
+    "retry": {
+      "maxAttempts": "max attempts",
+      "backoff": "backoff",
+      "delay": "delay",
+      "factor": "factor",
+      "retryOnError": "retry on error",
+      "retryOnStatus": "retry on HTTP status",
+      "retryOnFailure": "retry on any non-2xx",
+      "attempt": "attempt",
+      "exhausted": "exhausted",
+      "backoffOpt": {
+        "fixed": "fixed",
+        "linear": "linear",
+        "exponential": "exponential"
+      }
+    },
+    "menuGroups": {
+      "lists": "Lists",
+      "math": "Math",
+      "dataFormats": "Data formats",
+      "encoding": "Encoding",
+      "time": "タイミング"
+    },
+    "listOp": {
+      "value": "list",
+      "operation": "operation",
+      "result": "result",
+      "key": "key",
+      "order": "order",
+      "depth": "depth",
+      "size": "size",
+      "start": "start",
+      "end": "end",
+      "op": {
+        "sort": "sort",
+        "unique": "unique",
+        "reverse": "reverse",
+        "flatten": "flatten",
+        "chunk": "chunk",
+        "slice": "slice",
+        "groupBy": "group by"
+      }
+    },
+    "csv": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "delimiter": "delimiter",
+      "header": "header row",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "math": {
+      "a": "value",
+      "operation": "operation",
+      "result": "result",
+      "b": "with",
+      "min": "min",
+      "max": "max",
+      "precision": "precision",
+      "op": {
+        "round": "round",
+        "floor": "floor",
+        "ceil": "ceil",
+        "trunc": "truncate",
+        "abs": "absolute",
+        "sign": "sign",
+        "sqrt": "square root",
+        "min": "min",
+        "max": "max",
+        "clamp": "clamp"
+      }
+    },
+    "schema": {
+      "value": "value",
+      "schema": "JSON Schema",
+      "valid": "valid",
+      "invalid": "invalid",
+      "errors": "errors",
+      "editTitle": "Edit JSON Schema"
+    },
+    "readFile": {
+      "path": "path",
+      "content": "content"
+    },
+    "writeFile": {
+      "path": "path",
+      "mode": "mode",
+      "content": "content"
+    },
+    "codeField": {
+      "title": "Edit",
+      "edit": "Open editor",
+      "moreLines": "+{{count}} lines",
+      "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "モード",
+      "modeOpt": {
+        "frequency": "頻度",
+        "cron": "cron"
+      },
+      "frequency": "頻度",
+      "unit": "単位",
+      "cron": "cron",
+      "stop": "停止条件",
+      "stopOpt": {
+        "none": "なし",
+        "duration": "期間",
+        "endDate": "終了日"
+      },
+      "duration": "期間",
+      "endDate": "終了日",
+      "tick": "ティック"
+    },
+    "code": {
+      "input": "入力",
+      "language": "言語",
+      "code": "コード",
+      "modalTitle": "コードを編集",
+      "result": "結果",
+      "timeout": "タイムアウト (秒)"
+    },
+    "help": {
+      "input": "Injects the scenario's input parameters and constants into the graph.",
+      "output": "Declares one of the scenario's named results, read by a parent Run-scenario.",
+      "if": "Branches the flow to then / else by comparing two operands.",
+      "switch": "Routes the input to a matching case, or to default.",
+      "httpRequest": "Runs a saved API request and emits its response.",
+      "runScenario": "Runs another scenario as a reusable sub-step.",
+      "forEach": "Runs the body once per item of a collection, then continues.",
+      "for": "Loops over a number range, running the body for each value.",
+      "while": "Repeats the body while a condition holds (tested first).",
+      "doWhile": "Repeats the body while a condition holds (runs at least once).",
+      "aggregate": "Reduces a collection to one value (count, sum, min, max, average, join).",
+      "map": "Transforms every item of a collection into a new list.",
+      "filter": "Keeps the items that match a condition; routes the rest aside.",
+      "addToList": "Appends values to a list.",
+      "removeFromList": "Removes matching values from a list.",
+      "wait": "Pauses for a duration, then continues.",
+      "waitUntil": "Pauses until a given date/time, then continues.",
+      "now": "Emits the current date and time.",
+      "timer": "Fires its body on a repeating interval or a cron schedule.",
+      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "comparator": "Compares two values and emits true or false.",
+      "boolean": "Combines booleans with and / or / xor / not.",
+      "object": "Builds an object from its named inputs.",
+      "setVariable": "Stores a value into a run variable.",
+      "getVariable": "Reads a run variable's value.",
+      "transform": "Renders a Handlebars template from the input and run variables.",
+      "code": "コード（TypeScript、JavaScript、Python、Lua、Ruby、R）をサンドボックスで実行し、結果を返します。",
+      "cast": "Converts a value to another type (number, string, boolean, date, list).",
+      "regex": "Matches, extracts, replaces or splits text with a regular expression.",
+      "json": "Parses a JSON string, or serialises a value to JSON.",
+      "xml": "Parses an XML string, or serialises a value to XML.",
+      "yaml": "Parses a YAML string, or serialises a value to YAML.",
+      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "jwt": "Decodes a JWT token into header, payload and signature.",
+      "datetime": "Shifts, formats or diffs a date.",
+      "retry": "Re-runs its body until it succeeds, with a backoff policy.",
+      "objectOp": "Reshapes an object (get/set a path, merge, pick, omit, keys, values).",
+      "url": "Encodes, decodes or parses URLs and query strings.",
+      "random": "Generates a random number, string, boolean or pick.",
+      "listOp": "Reshapes a list (sort, unique, reverse, flatten, chunk, slice, groupBy).",
+      "csv": "Parses a CSV string, or serialises a list to CSV.",
+      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "schema": "Validates a value against a JSON Schema.",
+      "readFile": "Reads a file's text content.",
+      "writeFile": "Writes or appends text to a file.",
+      "throw": "Deliberately fails with a message (for error branches and tests).",
+      "log": "Writes a message to the run log and passes the value through.",
+      "assert": "Checks a condition (chai-style) and routes to pass or fail."
+    },
+    "legend": {
+      "title": "凡例",
+      "portsTitle": "入力ポイント",
+      "entryEventTrigger": "イベントによってトリガーされる入力ポイント",
+      "entryDataTrigger": "データによってトリガーされる入力ポイント",
+      "runWhenAllReceived": "すべてのイベントとすべてのデータが受信され次第、アクションが実行されます",
+      "runOnLaunchNoPredecessor": "先行アクションのないアクションは、シナリオの開始時にすぐに実行されます",
+      "outPortsTitle": "出力ポイント",
+      "outEmit": "トリガーイベントを発行し、データを送信します",
+      "outEmitSignalOnly": "データを送信せずにトリガーイベントを発行します",
+      "genericOutPortsTitle": "汎用出力ポイント",
+      "outDone": "アクションの完了時に発行されるトリガーイベント",
+      "outError": "アクションのエラー時に発火するトリガーイベント",
+      "navTitle": "ナビゲーション",
+      "zoom": "ズーム",
+      "pan": "移動",
+      "boxSelect": "矩形選択",
+      "select": "選択 / 複数選択"
+    },
+    "cli": {
+      "title": "Run from the command line",
+      "intro": "Run this scenario without opening the app (CI, cron, script):",
+      "byId": "Designate by id",
+      "allLogs": "All logs",
+      "note": "`--out file` also writes the run-log to a file.",
+      "projectPlaceholder": "<project.restorm>"
     }
   }
 }

@@ -24,6 +24,11 @@ export interface TitlebarProps {
   renderSearchTooltipContent?: (result: SearchResult) => React.ReactNode
   /** Custom renderer for method/type badge in search results */
   renderSearchBadge?: (method: string) => React.ReactNode
+  /** Forwarded to the internal SearchBar as `badgedCategories` — extra
+   * search categories whose items should render with the inline badge
+   * layout instead of the default icon + stacked breadcrumb. Defaults
+   * to `['request']` when omitted. */
+  searchBadgedCategories?: string[]
 
   /** Optional search function override for deterministic E2E tests. */
   searchFn?: (query: string) => Promise<GroupedResults[]>

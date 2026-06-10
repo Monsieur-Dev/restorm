@@ -95,6 +95,50 @@
     "multiLanguage": {
       "title": "27 мов!",
       "body": "Restorm розмовляє 27 мовами. Англійська, французька, іспанська, німецька, італійська, японська, китайська, корейська та багато інших — оберіть свою в налаштуваннях!"
+    },
+    "fromPostman": {
+      "title": "Переходите з Postman чи Bruno?",
+      "body": "Ми допоможемо вам перейти на Restorm — ваш перехід стане простим ;)"
+    },
+    "chainRequests": {
+      "title": "Кілька запитів, які треба пов'язати?",
+      "body": "Використовуйте свої запити всередині сценаріїв, додавайте умови та навіть вкладайте сценарії в інші сценарії."
+    },
+    "stepByStep": {
+      "title": "Проходьте сценарії крок за кроком",
+      "body": "По одному кроку за раз, щоб точно бачити, що відбувається. Ви навіть можете ставити точки зупину (breakpoint)."
+    },
+    "cicd": {
+      "title": "Запускайте сценарії у ваших CI/CD-конвеєрах",
+      "body": "Запустіть Restorm у headless-режимі, щоб виконати сценарій без інтерфейсу та зібрати його журнали — автоматизовані тести, побудовані візуально."
+    },
+    "nestedScenarios": {
+      "title": "Подивіться, що відбувається у сценарії",
+      "body": "Один сценарій може викликати інший. В інспекторі читайте кожен запис журналу та переходьте прямо до сценарію, з якого він походить."
+    },
+    "scenarioHistory": {
+      "title": "А що ж щойно сталося?",
+      "body": "Переглядайте історію виконання ваших сценаріїв. Якийсь із них відтоді змінився? Не хвилюйтеся — ми зберегли його конфігурацію."
+    },
+    "codeSandbox": {
+      "title": "Сценарії та безпека",
+      "body": "Ви можете писати код у своїх сценаріях — але він виконується в безпечному sandbox, без доступу до ваших локальних файлів і без прямого доступу до інтернету. Найбезпечніший спосіб залишатися захищеним!"
+    },
+    "codeLanguages": {
+      "title": "Маєте бажання написати трохи коду?",
+      "body": "Пишіть код просто всередині своїх сценаріїв — мовами TypeScript, JavaScript, Python, Lua, Ruby або R!"
+    },
+    "scenarioAi": {
+      "title": "Сценарії, керовані ШІ",
+      "body": "Claude, Cursor, Copilot… знають вашу кодову базу: попросіть у них сценарії, створені спеціально для вас. Усе доступне через MCP для створення, редагування та запуску сценаріїв."
+    },
+    "interactiveScenarios": {
+      "title": "Інтерактивні сценарії!",
+      "body": "Зробіть свої сценарії параметризованими та навіть запитуйте користувача, що робити, за допомогою діалогових вікон."
+    },
+    "customValueLists": {
+      "title": "Багаторазові списки значень",
+      "body": "Визначайте власні списки значень і повторно використовуйте їх як у запитах, так і в сценаріях."
     }
   },
   "authFailureToast": {
@@ -151,6 +195,7 @@
       "createEnvironmentFolder": "Створити теку середовищ",
       "delete": "Видалити",
       "clone": "Клонувати",
+      "copySuffix": "копія",
       "rename": "Перейменувати",
       "addToFavorites": "Додати до обраного",
       "removeFromFavorites": "Видалити з обраного",
@@ -171,7 +216,8 @@
         "soap": "Запит SOAP",
         "websocket": "Запит WebSocket",
         "odata": "Запит OData",
-        "auth": "Запит автентифікації HTTP"
+        "auth": "Запит автентифікації HTTP",
+        "scenario": "Сценарій"
       }
     },
     "deleteConfirm": {
@@ -180,6 +226,14 @@
       "itemMessage": "Ви дійсно хочете видалити «{{name}}»?",
       "confirm": "Видалити",
       "cancel": "Скасувати"
+    },
+    "scenarioDelete": {
+      "title": "Видалити запит, що використовується сценаріями",
+      "message": "«{{name}}» використовується в таких сценаріях. Що ви хочете зробити?",
+      "belongsTag": "належить цьому сценарію",
+      "moveInto": "Перемістити в цей сценарій",
+      "affectsNote": "Видалення цього запиту також прибере його з цих сценаріїв.",
+      "deleteAnyway": "Усе одно видалити"
     }
   },
   "environment": {
@@ -251,7 +305,8 @@
     "addHeader": "Додати заголовок",
     "addParam": "Додати параметр",
     "environmentSelector": {
-      "noEnvironment": "Немає середовища"
+      "noEnvironment": "Немає середовища",
+      "switchTooltip": "Змінити середовище"
     },
     "body": {
       "fileLabel": "Файл або URL:",
@@ -304,7 +359,11 @@
       "dateTime": "Дата/час",
       "color": "Колір",
       "expression": "Вираз",
-      "boolean": "Булеве"
+      "boolean": "Булеве",
+      "null": "Null",
+      "list": "Список",
+      "variables": "Змінні",
+      "environment": "Середовище"
     },
     "apiEnums": "Типи, визначені в API",
     "customLists": "Власні типи",
@@ -357,11 +416,14 @@
       "folder": "Теки",
       "environment": "Середовища",
       "settings": "Параметри",
-      "tag": "Теги"
+      "tag": "Теги",
+      "scenario": "Сценарії"
     },
     "tooltip": {
       "noDetails": "Деталі недоступні",
-      "noContent": "Немає документації або нотаток"
+      "noContent": "Немає документації або нотаток",
+      "noScenario": "Сценарій недоступний",
+      "scenarioKind": "сценарій"
     }
   },
   "httpStatus": {
@@ -468,7 +530,6 @@
   },
   "welcome": {
     "confirmRemoveFavorite": "Ви дійсно хочете видалити «{{fileName}}» з обраного?",
-    "noFilesHint": "Відкрийте файл або створіть новий, щоб почати",
     "newAriaLabel": "Створити нову колекцію",
     "openAriaLabel": "Відкрити колекцію з диска",
     "landmarkLabel": "Ласкаво просимо"
@@ -495,7 +556,9 @@
   },
   "common": {
     "cancel": "Скасувати",
-    "save": "Зберегти"
+    "save": "Зберегти",
+    "remove": "Вилучити",
+    "ok": "OK"
   },
   "helpers": {
     "categories": {
@@ -745,6 +808,685 @@
       "previousMatch": "Попередній збіг",
       "nextMatch": "Наступний збіг",
       "close": "Закрити"
+    }
+  },
+  "scenario": {
+    "editor": {
+      "emptyTitle": "Тут порожньо…",
+      "emptyDragDrop": "Перетягніть елемент із дерева ліворуч у свій сценарій, щоб використати його тут. Ви навіть можете імпортувати один сценарій в інший!",
+      "emptyRightClick": "Клацніть правою кнопкою миші на порожньому місці, щоб додати дії до сценарію"
+    },
+    "pathSelector": {
+      "placeholder": "JSON path",
+      "ariaLabel": "JSON path selector",
+      "pick": "Pick from result",
+      "loading": "Loading…",
+      "noResult": "Run the source action to pick a property from its result."
+    },
+    "tab": {
+      "graph": "Scenario",
+      "notes": "Notes"
+    },
+    "node": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "addNote": "Add / edit note",
+        "runOnEachEvent": "Запускати при кожній отриманій події",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "deleteShortcut": "Del",
+        "copy": "Копіювати",
+        "paste": "Вставити"
+      },
+      "expand": "Розгорнути",
+      "collapse": "Згорнути"
+    },
+    "edge": {
+      "menu": {
+        "changeColor": "Change colour",
+        "resetColor": "Reset colour",
+        "delete": "Delete"
+      }
+    },
+    "locked": "Редагування заблоковано під час виконання сценарію",
+    "switch": {
+      "addCase": "Додати випадок",
+      "removeCase": "Вилучити випадок",
+      "case": "випадок"
+    },
+    "forEach": {
+      "items": "елементи",
+      "each": "кожен",
+      "done": "готово",
+      "parallelism": "паралелізм"
+    },
+    "aggregate": {
+      "items": "елементи",
+      "result": "результат",
+      "field": "поле",
+      "separator": "роздільник",
+      "op": {
+        "count": "Кількість",
+        "sum": "Сума",
+        "min": "Мінімум",
+        "max": "Максимум",
+        "average": "Середнє",
+        "join": "Обʼєднати"
+      }
+    },
+    "filter": {
+      "items": "елементи",
+      "rejected": "відхилені",
+      "kept": "залишені",
+      "keepWhere": "залишити якщо"
+    },
+    "wait": {
+      "then": "потім",
+      "duration": "тривалість"
+    },
+    "waitUntil": {
+      "until": "до",
+      "then": "потім"
+    },
+    "arithmetic": {
+      "result": "результат"
+    },
+    "nodes": {
+      "arithmetic": "Арифметика",
+      "httpRequest": "HTTP-запит",
+      "runScenario": "Запустити сценарій",
+      "wait": "Очікувати",
+      "waitUntil": "Очікувати до",
+      "now": "Зараз",
+      "comparator": "Компаратор",
+      "setVariable": "Задати змінну",
+      "getVariable": "Отримати змінну",
+      "addToList": "Додати до списку",
+      "removeFromList": "Видалити зі списку",
+      "cast": "Cast",
+      "regex": "Regex",
+      "json": "JSON",
+      "xml": "XML",
+      "yaml": "YAML",
+      "crypto": "Crypto",
+      "jwt": "JWT",
+      "datetime": "Date math",
+      "objectOp": "Object ops",
+      "url": "URL",
+      "random": "Random",
+      "throw": "Throw",
+      "retry": "Retry",
+      "listOp": "List ops",
+      "csv": "CSV",
+      "math": "Math",
+      "schema": "Schema validate",
+      "readFile": "Read file",
+      "writeFile": "Write file",
+      "timer": "Таймер",
+      "code": "Код"
+    },
+    "comparator": {
+      "result": "результат"
+    },
+    "boolean": {
+      "result": "результат"
+    },
+    "map": {
+      "items": "елементи",
+      "mapped": "перетворені"
+    },
+    "log": {
+      "message": "повідомлення",
+      "data": "дані"
+    },
+    "assert": {
+      "message": "повідомлення",
+      "operator": "operator",
+      "op": {
+        "eq": "equals",
+        "ne": "not equals",
+        "lt": "less than",
+        "lte": "less or equal",
+        "gt": "greater than",
+        "gte": "greater or equal",
+        "contains": "contains",
+        "isString": "is string",
+        "isNumber": "is number",
+        "isBoolean": "is boolean",
+        "isArray": "is array",
+        "isObject": "is object",
+        "isNull": "is null",
+        "exists": "exists",
+        "isEmpty": "is empty",
+        "matchesRegex": "matches regex",
+        "isOneOf": "is one of",
+        "deepEquals": "deep equals",
+        "lengthEq": "length ==",
+        "lengthGt": "length >",
+        "lengthLt": "length <"
+      }
+    },
+    "editRequest": "Редагувати запит",
+    "editScenario": "Редагувати сценарій",
+    "object": {
+      "addProperty": "Додати властивість",
+      "removeProperty": "Видалити властивість",
+      "propertyName": "Property name",
+      "propertyValue": "value"
+    },
+    "output": {
+      "outputName": "Назва виходу",
+      "addOutput": "Додати вихід",
+      "removeOutput": "Видалити"
+    },
+    "input": {
+      "name": "Name",
+      "defaultType": "Default / type",
+      "addParam": "Додати параметр",
+      "removeParam": "Видалити"
+    },
+    "runScenario": {
+      "orphanInput": "Немає відповідного параметра «{{name}}» у підсценарії",
+      "orphanOutput": "Немає відповідного виходу «{{name}}» у підсценарії",
+      "then": "потім"
+    },
+    "validation": {
+      "duplicateName": "Назва «{{name}}» вже використовується іншою дією.",
+      "panelTitle": "{{count}} помилок дій",
+      "runBlocked": "Виправте {{count}} помилку(и) дії перед запуском",
+      "focusBox": "Перейти до цієї дії",
+      "showErrors": "Показати помилки",
+      "input": {
+        "missingName": "Цей вхідний параметр повинен мати назву."
+      },
+      "dataLink": {
+        "emptyPath": "Вхідне з’єднання даних потребує шляху (JSON path).",
+        "badPath": "Шлях JSON «{{path}}» з’єднання даних недійсний."
+      },
+      "output": {
+        "missingName": "Цей вихід повинен мати назву.",
+        "duplicateName": "Назва «{{name}}» вже використовується іншим виходом."
+      },
+      "getVariable": {
+        "noSelection": "Потрібно вибрати змінну.",
+        "unknown": "Змінна «{{name}}» не існує у сценарії."
+      },
+      "setVariable": {
+        "missingName": "Змінна, що встановлюється, повинна мати назву."
+      },
+      "object": {
+        "propMissingName": "Кожна властивість повинна мати назву.",
+        "propDuplicate": "Назва властивості «{{name}}» повторюється."
+      },
+      "arithmetic": {
+        "divisionByZero": "Ділення на нуль неможливе."
+      },
+      "switch": {
+        "caseDuplicate": "Значення випадку «{{value}}» дублюється."
+      },
+      "transform": {
+        "emptyTemplate": "Шаблон не може бути порожнім.",
+        "valueRequired": "The \"value\" input must be connected when the template references {{…}}."
+      },
+      "request": {
+        "missing": "Пов'язаний запит більше не існує."
+      },
+      "runScenario": {
+        "missing": "Пов'язаний сценарій більше не існує."
+      },
+      "file": {
+        "missingPath": "A file path is required."
+      }
+    },
+    "usage": {
+      "button": "Сценарії, що використовують цей запит",
+      "title": "Цей запит використовується у сценаріях:"
+    },
+    "inspector": {
+      "run": "Запустити",
+      "debug": "Налагодження",
+      "undo": "Скасувати",
+      "redo": "Повторити",
+      "step": "Крок за кроком",
+      "previewInfo": "Example data, based on previous request results.",
+      "pause": "Пауза",
+      "noRunsHint": "Немає недавнього виконання для цього запиту — запусти його звідси, щоб заповнити прев'ю сценарію.",
+      "syntheticInfo": "Приклад даних, згенерований з документації цього запиту.",
+      "syntheticRunHint": "Приклад даних — виконайте запит, щоб замінити їх реальним результатом.",
+      "stop": "Зупинити",
+      "logsTitle": "Run logs",
+      "copyLogs": "Copy logs",
+      "copyThisLog": "Копіювати цей запис",
+      "clearLogs": "Очистити журнали",
+      "logsShowAll": "Show all logs",
+      "showLevelLogs": "Показати логи {{level}}",
+      "showLevelOnly": "Клацніть правою кнопкою: лише цей рівень",
+      "noUserLogs": "No user logs (entries from the Log action) in this run.",
+      "helpTitle": "What this action does"
+    },
+    "now": {
+      "timezone": "Timezone",
+      "formatLabel": "Format",
+      "format": {
+        "datetime": "DateTime",
+        "epoch": "Epoch",
+        "string": "String"
+      }
+    },
+    "callers": {
+      "button": "Scenarios calling this scenario",
+      "title": "This scenario is called by:"
+    },
+    "runPrompt": {
+      "title": "Run parameters",
+      "run": "Run",
+      "midRunTitle": "Потрібен ввід"
+    },
+    "runHistory": {
+      "title": "Історія запусків",
+      "tooltip": "Історія запусків",
+      "empty": "Ще немає записаних запусків",
+      "noLogs": "Немає журналу для цього запуску",
+      "logsTab": "Logs",
+      "graphTab": "Граф",
+      "noGraph": "Немає знімка сценарію для цього запуску",
+      "pin": "Закріпити",
+      "unpin": "Відкріпити"
+    },
+    "for": {
+      "from": "from",
+      "to": "to",
+      "step": "step",
+      "index": "index",
+      "done": "done"
+    },
+    "while": {
+      "body": "body"
+    },
+    "doWhile": {
+      "loop": "loop"
+    },
+    "loop": {
+      "done": "done"
+    },
+    "breakpoint": {
+      "add": "Додати точку зупину",
+      "remove": "Видалити точку зупину",
+      "toggle": "Перемкнути точку зупину (F9)",
+      "reached": "Досягнуто точку зупину — цю дію ще не виконано. Натисніть F5, щоб продовжити, або F7 для покрокового виконання.",
+      "shortcut": "F9"
+    },
+    "minimap": {
+      "toggle": "Перемкнути мінікарту"
+    },
+    "listMutation": {
+      "list": "list",
+      "values": "values",
+      "result": "result",
+      "addValue": "Додати значення",
+      "removeValue": "Видалити значення",
+      "updateVariable": "Оновити вихідну змінну"
+    },
+    "cast": {
+      "value": "value",
+      "targetType": "cast to",
+      "result": "result",
+      "type": {
+        "number": "number",
+        "string": "string",
+        "boolean": "boolean",
+        "date": "date",
+        "list": "list"
+      }
+    },
+    "regex": {
+      "value": "value",
+      "operation": "operation",
+      "pattern": "pattern",
+      "flags": "flags",
+      "replacement": "replacement",
+      "result": "result",
+      "op": {
+        "extract": "extract",
+        "extractAll": "extract all",
+        "test": "test",
+        "replace": "replace",
+        "split": "split"
+      },
+      "flag": {
+        "i": "Case-insensitive",
+        "m": "Multiline (^ and $ match line breaks)",
+        "s": "Dotall (. matches newlines)"
+      }
+    },
+    "json": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "xml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "yaml": {
+      "value": "value",
+      "operation": "operation",
+      "indent": "indent",
+      "result": "result",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "crypto": {
+      "value": "value",
+      "operation": "operation",
+      "key": "key",
+      "keyPlaceholder": "secret",
+      "result": "result",
+      "op": {
+        "base64Encode": "base64 encode",
+        "base64Decode": "base64 decode",
+        "md5": "MD5",
+        "sha1": "SHA-1",
+        "sha256": "SHA-256",
+        "sha512": "SHA-512",
+        "hmacSha256": "HMAC-SHA256",
+        "uuid": "UUID v4"
+      }
+    },
+    "jwt": {
+      "value": "token",
+      "result": "result"
+    },
+    "datetime": {
+      "value": "date",
+      "operation": "operation",
+      "amount": "amount",
+      "unitLabel": "unit",
+      "format": "format",
+      "other": "second date",
+      "result": "result",
+      "op": {
+        "add": "add",
+        "subtract": "subtract",
+        "format": "format",
+        "diff": "diff"
+      },
+      "unit": {
+        "milliseconds": "milliseconds",
+        "seconds": "seconds",
+        "minutes": "minutes",
+        "hours": "hours",
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months",
+        "years": "years"
+      }
+    },
+    "objectOp": {
+      "value": "object",
+      "operation": "operation",
+      "path": "path",
+      "keys": "keys",
+      "setValue": "value",
+      "mergeWith": "merge with",
+      "result": "result",
+      "op": {
+        "get": "get",
+        "set": "set",
+        "merge": "merge",
+        "pick": "pick",
+        "omit": "omit",
+        "keys": "keys",
+        "values": "values"
+      }
+    },
+    "url": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "op": {
+        "encode": "encode",
+        "decode": "decode",
+        "parseQuery": "parse query",
+        "buildQuery": "build query",
+        "parseUrl": "parse URL"
+      }
+    },
+    "random": {
+      "operation": "operation",
+      "min": "min",
+      "max": "max",
+      "length": "length",
+      "items": "items",
+      "seed": "seed (optional)",
+      "seedPlaceholder": "reproducible",
+      "result": "result",
+      "op": {
+        "int": "integer",
+        "float": "float",
+        "string": "string",
+        "boolean": "boolean",
+        "pick": "pick"
+      }
+    },
+    "throw": {
+      "message": "message"
+    },
+    "retry": {
+      "maxAttempts": "max attempts",
+      "backoff": "backoff",
+      "delay": "delay",
+      "factor": "factor",
+      "retryOnError": "retry on error",
+      "retryOnStatus": "retry on HTTP status",
+      "retryOnFailure": "retry on any non-2xx",
+      "attempt": "attempt",
+      "exhausted": "exhausted",
+      "backoffOpt": {
+        "fixed": "fixed",
+        "linear": "linear",
+        "exponential": "exponential"
+      }
+    },
+    "menuGroups": {
+      "lists": "Lists",
+      "math": "Math",
+      "dataFormats": "Data formats",
+      "encoding": "Encoding",
+      "time": "Таймінг"
+    },
+    "listOp": {
+      "value": "list",
+      "operation": "operation",
+      "result": "result",
+      "key": "key",
+      "order": "order",
+      "depth": "depth",
+      "size": "size",
+      "start": "start",
+      "end": "end",
+      "op": {
+        "sort": "sort",
+        "unique": "unique",
+        "reverse": "reverse",
+        "flatten": "flatten",
+        "chunk": "chunk",
+        "slice": "slice",
+        "groupBy": "group by"
+      }
+    },
+    "csv": {
+      "value": "value",
+      "operation": "operation",
+      "result": "result",
+      "delimiter": "delimiter",
+      "header": "header row",
+      "op": {
+        "parse": "parse",
+        "stringify": "stringify"
+      }
+    },
+    "math": {
+      "a": "value",
+      "operation": "operation",
+      "result": "result",
+      "b": "with",
+      "min": "min",
+      "max": "max",
+      "precision": "precision",
+      "op": {
+        "round": "round",
+        "floor": "floor",
+        "ceil": "ceil",
+        "trunc": "truncate",
+        "abs": "absolute",
+        "sign": "sign",
+        "sqrt": "square root",
+        "min": "min",
+        "max": "max",
+        "clamp": "clamp"
+      }
+    },
+    "schema": {
+      "value": "value",
+      "schema": "JSON Schema",
+      "valid": "valid",
+      "invalid": "invalid",
+      "errors": "errors",
+      "editTitle": "Edit JSON Schema"
+    },
+    "readFile": {
+      "path": "path",
+      "content": "content"
+    },
+    "writeFile": {
+      "path": "path",
+      "mode": "mode",
+      "content": "content"
+    },
+    "codeField": {
+      "title": "Edit",
+      "edit": "Open editor",
+      "moreLines": "+{{count}} lines",
+      "editTemplate": "Edit template"
+    },
+    "timer": {
+      "mode": "режим",
+      "modeOpt": {
+        "frequency": "частота",
+        "cron": "cron"
+      },
+      "frequency": "частота",
+      "unit": "одиниця",
+      "cron": "cron",
+      "stop": "зупинити після",
+      "stopOpt": {
+        "none": "ніколи",
+        "duration": "тривалість",
+        "endDate": "дата завершення"
+      },
+      "duration": "тривалість",
+      "endDate": "дата завершення",
+      "tick": "тік"
+    },
+    "code": {
+      "input": "вхід",
+      "language": "Мова",
+      "code": "код",
+      "modalTitle": "Редагувати код",
+      "result": "результат",
+      "timeout": "Час очікування (с)"
+    },
+    "help": {
+      "input": "Injects the scenario's input parameters and constants into the graph.",
+      "output": "Declares one of the scenario's named results, read by a parent Run-scenario.",
+      "if": "Branches the flow to then / else by comparing two operands.",
+      "switch": "Routes the input to a matching case, or to default.",
+      "httpRequest": "Runs a saved API request and emits its response.",
+      "runScenario": "Runs another scenario as a reusable sub-step.",
+      "forEach": "Runs the body once per item of a collection, then continues.",
+      "for": "Loops over a number range, running the body for each value.",
+      "while": "Repeats the body while a condition holds (tested first).",
+      "doWhile": "Repeats the body while a condition holds (runs at least once).",
+      "aggregate": "Reduces a collection to one value (count, sum, min, max, average, join).",
+      "map": "Transforms every item of a collection into a new list.",
+      "filter": "Keeps the items that match a condition; routes the rest aside.",
+      "addToList": "Appends values to a list.",
+      "removeFromList": "Removes matching values from a list.",
+      "wait": "Pauses for a duration, then continues.",
+      "waitUntil": "Pauses until a given date/time, then continues.",
+      "now": "Emits the current date and time.",
+      "timer": "Fires its body on a repeating interval or a cron schedule.",
+      "arithmetic": "Computes a + − × ÷ … of two numbers.",
+      "comparator": "Compares two values and emits true or false.",
+      "boolean": "Combines booleans with and / or / xor / not.",
+      "object": "Builds an object from its named inputs.",
+      "setVariable": "Stores a value into a run variable.",
+      "getVariable": "Reads a run variable's value.",
+      "transform": "Renders a Handlebars template from the input and run variables.",
+      "code": "Запускає ваш код (TypeScript, JavaScript, Python, Lua, Ruby або R) у пісочниці та повертає результат.",
+      "cast": "Converts a value to another type (number, string, boolean, date, list).",
+      "regex": "Matches, extracts, replaces or splits text with a regular expression.",
+      "json": "Parses a JSON string, or serialises a value to JSON.",
+      "xml": "Parses an XML string, or serialises a value to XML.",
+      "yaml": "Parses a YAML string, or serialises a value to YAML.",
+      "crypto": "Hashes or encodes a string (base64, md5, sha…, hmac, uuid).",
+      "jwt": "Decodes a JWT token into header, payload and signature.",
+      "datetime": "Shifts, formats or diffs a date.",
+      "retry": "Re-runs its body until it succeeds, with a backoff policy.",
+      "objectOp": "Reshapes an object (get/set a path, merge, pick, omit, keys, values).",
+      "url": "Encodes, decodes or parses URLs and query strings.",
+      "random": "Generates a random number, string, boolean or pick.",
+      "listOp": "Reshapes a list (sort, unique, reverse, flatten, chunk, slice, groupBy).",
+      "csv": "Parses a CSV string, or serialises a list to CSV.",
+      "math": "Runs a scalar math op (round, abs, sqrt, min, max, clamp…).",
+      "schema": "Validates a value against a JSON Schema.",
+      "readFile": "Reads a file's text content.",
+      "writeFile": "Writes or appends text to a file.",
+      "throw": "Deliberately fails with a message (for error branches and tests).",
+      "log": "Writes a message to the run log and passes the value through.",
+      "assert": "Checks a condition (chai-style) and routes to pass or fail."
+    },
+    "legend": {
+      "title": "Легенда",
+      "portsTitle": "Точки входу",
+      "entryEventTrigger": "Точка входу, що активується подією",
+      "entryDataTrigger": "Точка входу, що активується даними",
+      "runWhenAllReceived": "Дії виконуються, щойно отримано всі події та всі дані",
+      "runOnLaunchNoPredecessor": "Дії без попередника виконуються щойно запускається сценарій",
+      "outPortsTitle": "Точки виходу",
+      "outEmit": "Випромінює подію-тригер і надсилає дані",
+      "outEmitSignalOnly": "Випромінює подію-тригер без надсилання даних",
+      "genericOutPortsTitle": "Загальні точки виходу",
+      "outDone": "Подія-тригер, що випромінюється після завершення дії",
+      "outError": "Подія-тригер, що активується в разі помилки дії",
+      "navTitle": "Навігація",
+      "zoom": "масштаб",
+      "pan": "перемістити",
+      "boxSelect": "прямокутне виділення",
+      "select": "вибрати / множинний вибір"
+    },
+    "cli": {
+      "title": "Run from the command line",
+      "intro": "Run this scenario without opening the app (CI, cron, script):",
+      "byId": "Designate by id",
+      "allLogs": "All logs",
+      "note": "`--out file` also writes the run-log to a file.",
+      "projectPlaceholder": "<project.restorm>"
     }
   }
 }

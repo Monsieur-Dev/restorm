@@ -7,3 +7,9 @@ restorm/tests/e2e/.tmp/
 # Claude Code's scheduler lock — touched on every /loop wake-up, so it
 # would otherwise show up as dirty in every working tree.
 .claude/scheduled_tasks.lock
+
+# Append-only flake journal written by `scripts/git-commit-timeout.sh`
+# on every failed commit — local to the worktree, never committed.
+.commit-flake-history.log
+# restorm scenario writeFile demo output (transient, written at run time)
+restorm/tests/e2e/samples/scenarios-e2e-reference-tests.writefile-out.json

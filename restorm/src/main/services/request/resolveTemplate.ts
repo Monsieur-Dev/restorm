@@ -3,7 +3,7 @@
  */
 
 import Handlebars from 'handlebars'
-import { registerHandlebarsHelpers } from '../../utils/handlebarsHelpers'
+import { registerHandlebarsHelpers } from '../../../shared/utils/handlebars/registerAll'
 
 // Ensure helpers are registered once
 registerHandlebarsHelpers()

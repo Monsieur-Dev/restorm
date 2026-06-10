@@ -4,7 +4,7 @@ import { isTabDetachEnabled } from './featureFlags'
 import { join, relative, dirname } from 'path'
 import { promises as fs, existsSync, statSync, rmSync } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
-import { contextService, responseHistoryService, requestUsageService } from './services'
+import { contextService, responseHistoryService, requestUsageService, scenarioUsageService } from './services'
 import { miniBrowserService } from './services/MiniBrowserService'
 import { assertPathWithinParent } from './utils/pathSecurity'
 import { saveFolderStructure, loadFolderStructure, attachDraftStoreForFolder, attachDraftStoreForFile } from './FileOperations'
@@ -43,6 +43,7 @@ import {
   responsesHistoryListArgs, responsesHistoryGetArgs,
   responsesHistoryTogglePinArgs,
   requestUsageGetArgs,
+  scenarioUsageGetArgs,
   importPreviewArgs, importImportArgs,
   miniBrowserCreateArgs, miniBrowserDestroyArgs, miniBrowserSetBoundsArgs,
   miniBrowserNavigateArgs, miniBrowserReloadArgs,
@@ -999,6 +1000,10 @@ export function registerRestormIPC(deps: {
 
   validatedHandle('request-usage:get', requestUsageGetArgs, () => {
     return requestUsageService.getAll()
+  })
+
+  validatedHandle('scenario-usage:get', scenarioUsageGetArgs, () => {
+    return scenarioUsageService.getAll()
   })
 
   // ==========================================================================

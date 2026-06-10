@@ -148,6 +148,10 @@
       "autoSaveDelay": {
         "title": "Auto Save Delay",
         "description": "Controls the delay in milliseconds after which a dirty editor is saved automatically. Only applies when Auto Save is set to After Delay."
+      },
+      "reopenLastFile": {
+        "title": "Automatically reopen the last opened file",
+        "description": "When enabled, reopens the last file you had open on startup — but only if the application was closed while a file was open."
       }
     }
   },

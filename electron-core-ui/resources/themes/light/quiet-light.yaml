@@ -3,6 +3,9 @@ name: Quiet Light
 type: light
 
 colors:
+  scenarioNode.background: "#ffffff"
+  scenarioNode.headerBackground: "#efeaf3"
+  scenarioNode.headerBackgroundSelected: "#ddd0ee"
   focusBorder: "#9769dc"
   pickerGroup.foreground: "#A6B39B"
   pickerGroup.border: "#749351"

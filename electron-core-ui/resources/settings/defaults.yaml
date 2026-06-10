@@ -151,3 +151,12 @@ groups:
             min: 100
             max: 60000
             integer: true
+      - setting:
+          id: "reopenLastFile"
+          titleKey: "settings.files.reopenLastFile.title"
+          descriptionKey: "settings.files.reopenLastFile.description"
+          type: "toggle"
+          default: false
+          # The "last opened file" is a per-machine convenience, not something
+          # a shared workspace should pin — keep it out of the workspace overlay.
+          userOnly: true

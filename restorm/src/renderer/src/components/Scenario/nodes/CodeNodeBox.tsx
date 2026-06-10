@@ -1,0 +1,95 @@
+import React from 'react'
+import type { NodeProps } from '@xyflow/react'
+import { useTranslation } from 'react-i18next'
+import { InputBox } from 'electron-core-ui/renderer'
+import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
+import { ScenarioCodeField, type ScenarioCodeLanguage } from './ScenarioCodeField'
+import { SegmentedToggle } from './SegmentedToggle'
+import { CODE_LANGUAGES, CODE_LANGUAGE_LABELS, DEFAULT_CODE_LANGUAGE } from '../../../../../shared/codeLanguages'
+
+/** Default + hard cap on the per-node execution budget (seconds), mirroring the
+ * `codeExecutor` (which clamps `config.timeout` to [1, 60] s). */
+const DEFAULT_TIMEOUT_SEC = 5
+const MAX_TIMEOUT_SEC = 60
+
+/** Display labels parallel to {@link CODE_LANGUAGES}, for the language radio. */
+const CODE_LANGUAGE_LABEL_LIST = CODE_LANGUAGES.map((l) => CODE_LANGUAGE_LABELS[l])
+
+const DEFAULT_CODE = '// `input` = wired value, `vars` = run variables\n// curated stdlib: _, lodash, moment, uuid, nanoid, CryptoJS, Ajv\nreturn input'
+
+/**
+ * `code` — runs user TypeScript/JavaScript in the QuickJS sandbox. The wired
+ * `value` input is exposed as `input`, run variables as `vars`, and the curated
+ * standard library as globals; whatever the script returns flows out of `result`.
+ */
+export const CodeNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
+  const { t } = useTranslation()
+  const config = data.config ?? {}
+  const code = typeof config['code'] === 'string' ? config['code'] : ''
+  const language: ScenarioCodeLanguage = (CODE_LANGUAGES as readonly string[]).includes(config['language'] as string)
+    ? (config['language'] as ScenarioCodeLanguage)
+    : DEFAULT_CODE_LANGUAGE
+  const timeoutSec = typeof config['timeout'] === 'number' && config['timeout'] > 0 ? config['timeout'] : DEFAULT_TIMEOUT_SEC
+
+  const rows: ScenarioNodeCell[] = [
+    {
+      id: 'value',
+      label: t('scenario.code.input', 'input'),
+      port: { id: 'value', type: 'target' }
+    },
+    {
+      id: 'language',
+      content: (
+        <div className="nodrag scn-code-language" onMouseDown={(e) => { e.stopPropagation() }}>
+          <div className="scn-field-caption">{t('scenario.code.language', 'Langage')}</div>
+          <SegmentedToggle
+            options={CODE_LANGUAGES}
+            labels={CODE_LANGUAGE_LABEL_LIST}
+            value={language}
+            onChange={(next) => { data.onSetConfig?.(id, { language: next }) }}
+            ariaLabel={t('scenario.code.language', 'Langage')}
+          />
+        </div>
+      )
+    },
+    {
+      id: 'code',
+      content: (
+        <ScenarioCodeField
+          value={code}
+          onChange={(next) => { data.onSetConfig?.(id, { code: next }) }}
+          language={language}
+          caption={t('scenario.code.code', 'code')}
+          modalTitle={t('scenario.code.modalTitle', 'Edit code')}
+          placeholder={DEFAULT_CODE}
+          dataTestId={`scn-code-${id}`}
+        />
+      )
+    },
+    {
+      id: 'timeout',
+      content: (
+        <div className="nodrag scn-code-timeout" onMouseDown={(e) => { e.stopPropagation() }}>
+          <div className="scn-field-caption">{t('scenario.code.timeout', 'Timeout (s)')}</div>
+          <InputBox
+            value={String(timeoutSec)}
+            onChange={(next) => {
+              const n = Math.min(MAX_TIMEOUT_SEC, Math.max(1, Math.floor(Number(next) || DEFAULT_TIMEOUT_SEC)))
+              data.onSetConfig?.(id, { timeout: n })
+            }}
+            options={{ type: 'number', min: 1, max: MAX_TIMEOUT_SEC, ariaLabel: t('scenario.code.timeout', 'Timeout (s)') }}
+            data-testid={`scn-code-${id}-timeout`}
+          />
+        </div>
+      )
+    }
+  ]
+
+  const left: ScenarioNodeSection[] = [{ id: 'main', rows }]
+  const right: ScenarioNodeCell[] = [
+    { id: 'result', label: t('scenario.code.result', 'result'), port: { id: 'result', type: 'source' } }
+  ]
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
+}
+
+export default CodeNodeBox

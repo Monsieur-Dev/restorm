@@ -148,6 +148,10 @@
       "autoSaveDelay": {
         "title": "Fördröjning för automatisk sparning",
         "description": "Styr fördröjningen i millisekunder efter vilken en ändrad editor sparas automatiskt. Gäller endast när automatisk sparning är inställd på Efter fördröjning."
+      },
+      "reopenLastFile": {
+        "title": "Återöppna automatiskt den senast öppnade filen",
+        "description": "När detta är aktiverat återöppnas den senast öppnade filen vid start — men bara om programmet stängdes medan en fil var öppen."
       }
     }
   },

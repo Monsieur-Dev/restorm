@@ -1,0 +1,224 @@
+[
+  {
+    "id": "1780324493299-z019qs",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780418232553-8cfmhw",
+    "kind": "setVariable",
+    "suggestion": {
+      "origin": "main"
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780420981592-6osi6r",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "Received in main",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780421882628-8oym4p",
+    "kind": "log",
+    "suggestion": {
+      "timestamp": "<dynamic-time>",
+      "level": "info",
+      "message": "statuc_output received in main",
+      "data": null
+    },
+    "source": "static"
+  },
+  {
+    "id": "1780482115336-0v2aq0",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780482218173-lsnebg",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780482287906-hje41a",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780482293466-yfntnl",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780558249766-gq42u7",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780566802666-s7yjvf",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780566962422-32dd3c",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "1780638522135-nqxwn6",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "a0a5db3a-449c-4fb3-970d-00983066ad53",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "98ba2f6d-ef0a-42b4-9c38-9dacfaef1582",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "35b1f372-380f-4274-8db2-5f4e9ad0d7bf",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "eecb3bb4-6cb7-4179-809e-52834891a835",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "7e852f31-d7df-4e7b-9278-f88df6656850",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "7b8355af-9f3e-43cd-96e4-4b7685a84b93",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "56ca0175-a6fd-4653-88f9-7be393a23075",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "83d62b4f-0a3e-46da-9e50-712459bbf736",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "35b9fd90-6241-44a4-bc07-9f36bfb42685",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "3e2c6312-90b9-400f-a67d-77883c30629b",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "ca5dbefc-13a8-4b25-9bcf-61863464b3fd",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "13851015-dd4b-4fec-b21f-9daa6793f025",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "d36843a0-7257-471d-8a08-c468c09d2a5b",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "77d8790a-9a64-47a9-b8cc-4359e7d5bd41",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "ba75fb9a-5c62-4304-a786-b65d7e03ee1f",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "3294bbcf-cade-4f60-97c0-557784ae134a",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "e0610fff-f0f4-49aa-9818-975ddd7bc993",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "d33f8e17-abe7-438c-8951-408ada8bfba7",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "b11e6b54-266f-4b9c-88a7-3fbe63f1329b",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "c6f8b513-7004-47a3-baad-1637b540bfea",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "86a4e805-1b06-4f4b-b699-2044c21ec805",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "84986541-c95a-4ebb-a059-865b2b92a11f",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  },
+  {
+    "id": "ec3ea5d2-2043-48f0-b9b9-a268c4e4f72a",
+    "kind": "runScenario",
+    "suggestion": null,
+    "source": "static"
+  }
+]
