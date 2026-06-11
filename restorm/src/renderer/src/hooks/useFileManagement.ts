@@ -69,7 +69,7 @@ import type { Folder, EnvironmentFolder, FolderItem, Environment } from '../../.
 import { isEnvironmentFolder, isAnyFolder, isScenario } from '../../../shared/types/collections'
 import type { PersistenceFormat, WorkbenchTree } from 'electron-core-ui/renderer'
 import type { SaveOptions } from '../components/Modals/SaveOptionsModal'
-import { collectPasswordSecretsFromCollections, applyPasswordSecretsToCollections } from '../../../shared/utils/passwordSecrets'
+import { collectEnvFileSecretsFromCollections, applyEnvFileSecretsToCollections } from '../../../shared/utils/envFileSecrets'
 import { serializeEnvFile, parseEnvFileDetailed } from '../../../shared/utils/dotenv'
 import type { TFunction } from 'i18next'
 
@@ -158,7 +158,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
   /**
    * Separate baseline for the password-sidecar content (`.restorm.env`
    * for single-file mode, `restorm.env` for folder mode). Password
-   * values are intentionally stripped by `PasswordValue.toJSON()`
+   * values are intentionally stripped by `SecretValue.toJSON()`
    * before persistence — which means they also disappear from the
    * `JSON.stringify`-based whole-doc checksum used by
    * `hasContentChanged`. Typing a JWT into an env-folder password
@@ -345,14 +345,14 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
 
     // Collect from the live in-memory tree (not `plainData`).
     // `JSON.parse(JSON.stringify(rootItems))` runs every
-    // `PasswordValue.toJSON()`, which strips the plaintext —
+    // `SecretValue.toJSON()`, which strips the plaintext —
     // collecting from `plainData` would always see an empty
     // string for every secret, even when the user just typed
     // a real value. The live tree still holds the plaintext on
-    // the `PasswordValue` instances; `isPasswordValueType` /
-    // `getPasswordString` accept both class instances and the
-    // POJO shape so the walker works on either.
-    const secrets = collectPasswordSecretsFromCollections({ collections: rootItems })
+    // the `SecretValue` instances (their non-persisted `resolved`
+    // field); the walker reads it off both class instances and the
+    // POJO shape so it works on either.
+    const secrets = collectEnvFileSecretsFromCollections({ collections: rootItems })
     const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
     const hasEnvChanged = envContent !== (savedEnvBaselineRef.current ?? '')
 
@@ -582,11 +582,11 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       if (!saved) return false
       if (filePath) {
         // Password values are stripped from the main-doc checksum by
-        // `PasswordValue.toJSON()`, so `hasRealChanges` can't see
+        // `SecretValue.toJSON()`, so `hasRealChanges` can't see
         // password-only edits. Compare the sidecar content against
         // its own baseline and write `.env` whenever the secrets
         // changed, regardless of the main-doc verdict.
-        const secrets = collectPasswordSecretsFromCollections({ collections: rootItems })
+        const secrets = collectEnvFileSecretsFromCollections({ collections: rootItems })
         const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
         const hasEnvChanged = envContent !== (savedEnvBaselineRef.current ?? '')
         if (hasRealChanges || hasEnvChanged) {
@@ -698,7 +698,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
             logger.info('[useFileManagement] File saved successfully', { path: result.path })
             setIsOpenedAsFolder(false)
             if (result.path) {
-              const secrets = collectPasswordSecretsFromCollections({ collections: rootItems })
+              const secrets = collectEnvFileSecretsFromCollections({ collections: rootItems })
               const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
               await window.restorm?.secrets.write(`${result.path}.env`, envContent)
               savedEnvBaselineRef.current = envContent
@@ -741,7 +741,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       const dataForSave = prepareForSerialization(plainData)
       const saved = await saveFile(dataForSave)
       if (saved && filePath) {
-        const secrets = collectPasswordSecretsFromCollections({ collections: rootItems })
+        const secrets = collectEnvFileSecretsFromCollections({ collections: rootItems })
         const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
         await window.restorm?.secrets.write(`${filePath}.env`, envContent)
       }
@@ -839,7 +839,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
                 duplicates: parsed.duplicates
               })
             }
-            applyPasswordSecretsToCollections(content, parsed.vars)
+            applyEnvFileSecretsToCollections(content, parsed.vars)
           }
         }
         // Capture the loaded env content as the sidecar baseline so
@@ -923,7 +923,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
             id: env.id,
             type: 'environment',
             // `cloneForEventBus` instead of `JSON.parse(JSON.stringify(...))`:
-            // `PasswordValue.toJSON()` strips the plaintext, so without
+            // `SecretValue.toJSON()` strips the plaintext, so without
             // this every secret loaded from the sidecar `.restorm.env`
             // would reach main-side ContextService as `""` — handlebars
             // would then resolve `{{token}}` to an empty string at
@@ -1034,7 +1034,7 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       const saved = await saveFile(dataForSave)
       if (saved) {
         if (filePath) {
-          const secrets = collectPasswordSecretsFromCollections({ collections: rootItems })
+          const secrets = collectEnvFileSecretsFromCollections({ collections: rootItems })
           const envContent = Object.keys(secrets).length > 0 ? serializeEnvFile(secrets) : ''
           await window.restorm?.secrets.write(`${filePath}.env`, envContent)
         }

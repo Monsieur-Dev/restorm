@@ -267,7 +267,7 @@ export const useRestormStore = create<RestormState>()(
         // Strip reactive proxies before sending over IPC — they
         // serialize fine but the receiving side wants plain objects.
         // `cloneForEventBus` instead of `JSON.parse(JSON.stringify(...))`
-        // so `PasswordValue.toJSON()` doesn't get called along the way
+        // so `SecretValue.toJSON()` doesn't get called along the way
         // — main needs the plaintext to resolve handlebars + to write
         // the `.restorm.env` sidecar correctly on the next save.
         void api.syncCollections(cloneForEventBus(collections) as unknown[])

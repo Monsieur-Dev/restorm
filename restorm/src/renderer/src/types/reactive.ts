@@ -253,7 +253,7 @@ function emitUpdate(
       id: docId,
       type: docType,
       // `cloneForEventBus` over `JSON.parse(JSON.stringify(…))`: the
-      // latter calls `PasswordValue.toJSON()` which strips the
+      // latter calls `SecretValue.toJSON()` which strips the
       // plaintext, so any main-side subscriber (e.g. ContextService
       // re-registering env vars on ENVIRONMENT_UPDATED) sees every
       // secret as an empty string — handlebars then substitutes
@@ -392,15 +392,15 @@ function createDocumentProxyHandler(
  *      `notes`/`documentation` were previously `undefined`.
  *   3. Structural deep-equal for objects/arrays — must run through
  *      `cloneForEventBus` first, then `JSON.stringify`. A raw
- *      `JSON.stringify` invokes `PasswordValue.toJSON()` which
- *      strips the plaintext, so two `PasswordValue` instances with
- *      different secrets stringify to the SAME `{"type":"password"}`
- *      shape — the proxy reports "no change" and `emitUpdate` is
- *      skipped, meaning a user typing into a password field never
- *      reaches `ContextService` / `CollectionStore` (and the save
- *      flow writes an empty `.env`). `cloneForEventBus` copies the
- *      `value` field as a normal property so the serialised diff
- *      actually sees the password change.
+ *      `JSON.stringify` invokes `SecretValue.toJSON()` which
+ *      strips the resolved plaintext, so two `SecretValue` instances
+ *      with different secrets but the same `source`/`params` stringify
+ *      to the SAME `{"type":"secret",…}` shape — the proxy reports
+ *      "no change" and `emitUpdate` is skipped, meaning a user typing
+ *      into a secret field never reaches `ContextService` /
+ *      `CollectionStore` (and the save flow writes an empty `.env`).
+ *      `cloneForEventBus` copies the `resolved` field as a normal
+ *      property so the serialised diff actually sees the secret change.
  */
 function sameProxyValue(a: unknown, b: unknown): boolean {
   if (a === b) return true
@@ -696,7 +696,7 @@ export function emitEnvironmentCreated(
     id: env.id,
     type: 'environment',
     // `cloneForEventBus` instead of JSON.stringify so
-    // `PasswordValue.toJSON()` doesn't strip the plaintext —
+    // `SecretValue.toJSON()` doesn't strip the plaintext —
     // ContextService needs the secret to substitute templated
     // headers / URLs against the env context.
     document: cloneForEventBus(env),

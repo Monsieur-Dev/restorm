@@ -21,6 +21,45 @@ import { isAnyFolder, isEnvironmentFolder, isRequest, isScenario, KeyValue, Envi
 import type { EnvironmentFolder, CustomValueList, CustomValueEntry } from '../../../shared/types/collections'
 import { broadcastTreeReplace } from './import'
 import { broadcastScenario } from './scenario'
+import { valueSourceRegistry } from '../../../shared/secrets/valueSourceRegistry'
+
+/**
+ * If `value` is a secret reference (`{ type: 'secret', … }`), validate its
+ * `source` against the registry of known value sources and require the params
+ * declared `required` by the source's `paramSchema`. Returns an error message
+ * to reply with, or `null` when the value is valid (or isn't a secret at all).
+ *
+ * This is the MCP write-path gate: `KeyValue.fromPlain` would otherwise build a
+ * `SecretValue` with an empty / bogus `source` that no resolver can satisfy,
+ * surfacing as a silent runtime resolution failure rather than a clear
+ * tool-call error. The registry is populated at main boot by
+ * `registerBuiltinSources`, so a future source is accepted automatically.
+ */
+function validateSecretValue(value: unknown): string | null {
+  if (value === null || typeof value !== 'object') return null
+  const v = value as { type?: unknown; source?: unknown; params?: unknown }
+  if (v.type !== 'secret') return null
+  const source = typeof v.source === 'string' ? v.source : ''
+  if (source === '') {
+    const ids = valueSourceRegistry.list().map((d) => d.id).join(', ')
+    return `secret value requires a non-empty "source" (one of: ${ids || 'none registered'})`
+  }
+  const descriptor = valueSourceRegistry.get(source)
+  if (!descriptor) {
+    const ids = valueSourceRegistry.list().map((d) => d.id).join(', ')
+    return `unknown secret source "${source}" (known: ${ids || 'none registered'})`
+  }
+  const params = v.params !== null && typeof v.params === 'object' ? (v.params as Record<string, unknown>) : {}
+  for (const field of descriptor.paramSchema ?? []) {
+    if (field.required === true) {
+      const val = params[field.key]
+      if (val === undefined || val === null || val === '') {
+        return `secret source "${source}" requires param "${field.key}"`
+      }
+    }
+  }
+  return null
+}
 
 /**
  * Walk a `update_request` patch and convert any plain-object key-value
@@ -350,7 +389,7 @@ export function registerWriteTools(mcp: McpService): void {
       // would corrupt the in-memory tree if changed.
       const { id: _id, items: _items, folderType: _folderType, ...rawPatch } = patchRaw as Record<string, unknown>
       // Reify `environments` so a JSON-only MCP caller can hand us
-      // `{ variables: [{key, value: {type:'password', value:'…'}}, …] }`
+      // `{ variables: [{key, value: {type:'string', value:'…'}}, …] }`
       // and the downstream `emitFolderUpdated` → `toPlainObject` chain
       // still works (it would otherwise crash on plain-object envs).
       const safePatch = reifyEnvironmentsArray(rawPatch)
@@ -520,9 +559,9 @@ export function registerWriteTools(mcp: McpService): void {
         'Upsert a single variable on the given `Environment`. If a variable with the same key ' +
         'already exists it is replaced (keeping its id), otherwise a new one is appended. The ' +
         '`value` field accepts the persisted `ValueType` POJO shape: ' +
-        '`{ type: "string" | "expression" | "password" | "numeric" | "boolean" | "color" | "datetime", value: ... }`. ' +
-        'For `password` variables, the plaintext travels through memory + lands in the sibling ' +
-        '`.restorm.env` file on save; the main `.restorm` document only carries `{ type: "password" }`. ' +
+        '`{ type: "string" | "expression" | "numeric" | "boolean" | "color" | "datetime", value: ... }`. ' +
+        'For `secret` variables, use `{ type: "secret", source: "<sourceId>", params: { … } }`; the ' +
+        'plaintext is resolved in the main process at run time and is never persisted or returned. ' +
         'Use `expression` (not `string`) when the value contains `{{handlebars}}` placeholders that ' +
         'should resolve against this environment\'s context — `StringValue` ships verbatim. ' +
         'Triggers an autosave so the change persists immediately.',
@@ -531,7 +570,7 @@ export function registerWriteTools(mcp: McpService): void {
         key: z.string().min(1).describe('Variable key (e.g. "JWTBearer_token").'),
         value: z
           .record(z.string(), z.unknown())
-          .describe('Persisted `ValueType` POJO, e.g. `{ "type": "password", "value": "<the-secret>" }` or `{ "type": "expression", "value": "Bearer {{token}}" }`. A bare string is rejected — wrap plain text in `{ "type": "string", "value": "…" }`.'),
+          .describe('Persisted `ValueType` POJO, e.g. `{ "type": "secret", "source": "envVar", "params": { "name": "API_TOKEN" } }` or `{ "type": "expression", "value": "Bearer {{token}}" }`. A bare string is rejected — wrap plain text in `{ "type": "string", "value": "…" }`.'),
         enabled: z.boolean().optional().describe('Default true.'),
         description: z.string().optional().describe('Free-text description shown next to the variable.')
       } as Record<string, unknown>
@@ -547,6 +586,8 @@ export function registerWriteTools(mcp: McpService): void {
       const enabled = typeof argRecord['enabled'] === 'boolean' ? argRecord['enabled'] : true
       const description = typeof argRecord['description'] === 'string' ? argRecord['description'] : undefined
       const valueRaw = argRecord['value']
+      const secretError = validateSecretValue(valueRaw)
+      if (secretError !== null) return errorReply(secretError)
       // KeyValue.fromPlain handles every ValueType shape + falls back to
       // a sensible empty StringValue when the caller omits `value`.
       const kv = KeyValue.fromPlain({

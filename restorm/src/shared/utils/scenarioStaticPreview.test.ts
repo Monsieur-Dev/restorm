@@ -3,6 +3,7 @@ import {
   staticScenarioPreview,
   concreteValue,
   setEnvironmentPreviewResolver,
+  setSecretPreviewResolver,
   type StaticPreviewNode,
   type StaticPreviewEdge
 } from './scenarioStaticPreview'
@@ -208,5 +209,37 @@ describe('concreteValue — environment', () => {
     setEnvironmentPreviewResolver((id) => ({ name: `env(${id})`, variables: {} }))
     expect(concreteValue({ type: 'environment', value: 'env-123' })).toEqual({ name: 'env(env-123)', variables: {} })
     setEnvironmentPreviewResolver(null)
+  })
+})
+
+describe('concreteValue — secret', () => {
+  it('renders empty when no resolver is installed (no plaintext on disk)', () => {
+    setSecretPreviewResolver(null)
+    expect(concreteValue({ type: 'secret', source: 'envVar', params: { name: 'PATH' } })).toBe('')
+  })
+
+  it('renders the resolved plaintext when the resolver knows the secret', () => {
+    setSecretPreviewResolver((source, params) =>
+      source === 'envVar' && params['name'] === 'PATH' ? '/home/me/bin' : undefined
+    )
+    expect(concreteValue({ type: 'secret', source: 'envVar', params: { name: 'PATH' } })).toBe('/home/me/bin')
+    setSecretPreviewResolver(null)
+  })
+
+  it('renders empty on a resolver miss (async value not cached yet)', () => {
+    setSecretPreviewResolver(() => undefined)
+    expect(concreteValue({ type: 'secret', source: 'envVar', params: { name: 'PATH' } })).toBe('')
+    setSecretPreviewResolver(null)
+  })
+
+  it('a set-variable node surfaces the resolved secret in its preview', () => {
+    setSecretPreviewResolver(() => '/home/me/bin')
+    const node: StaticPreviewNode = {
+      id: 'sv',
+      kind: 'setVariable',
+      config: { name: 'apiKey', value: { type: 'secret', source: 'envVar', params: { name: 'PATH' } } }
+    }
+    expect(staticScenarioPreview(node, [node], [])).toEqual({ apiKey: '/home/me/bin' })
+    setSecretPreviewResolver(null)
   })
 })

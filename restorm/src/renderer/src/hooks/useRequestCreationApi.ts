@@ -103,7 +103,7 @@ export function useRequestCreationApi(opts: UseRequestCreationApiOptions): Reque
           eventBus.emitSync(DocumentEvents.FOLDER_CREATED, {
             id: reactiveTagFolder.id,
             type: 'folder',
-            // `cloneForEventBus` preserves `PasswordValue` plaintext on
+            // `cloneForEventBus` preserves `SecretValue` plaintext on
             // the way to main (matters when an ancestor env carries
             // secrets the new folder inherits in handlebars scope).
             document: cloneForEventBus(reactiveTagFolder),

@@ -221,6 +221,24 @@ contextBridge.exposeInMainWorld('restorm', {
     write: async (filePath: string, content: string): Promise<{ success: boolean; error?: string }> => {
       const result: unknown = await ipcRenderer.invoke('restorm:secrets:write', filePath, content)
       return result as { success: boolean; error?: string }
+    },
+    /** Invalidate the main-side resolution cache for one secret source + params
+     * (the per-secret "refresh" action). Omitting `scopeId` clears the entry in
+     * every scope. */
+    invalidate: async (
+      args: { source: string; params: Record<string, unknown>; scopeId?: string }
+    ): Promise<{ success: boolean }> => {
+      const result: unknown = await ipcRenderer.invoke('restorm:secrets:invalidate', args)
+      return result as { success: boolean }
+    },
+    /** Resolve a single secret's plaintext on demand for a renderer preview.
+     * Returns `{ value }` on success or `{ error }` on failure — the resolved
+     * plaintext is never written into the persisted document. */
+    resolve: async (
+      args: { source: string; params: Record<string, unknown> }
+    ): Promise<{ value?: string; error?: string }> => {
+      const result: unknown = await ipcRenderer.invoke('restorm:secrets:resolve', args)
+      return result as { value?: string; error?: string }
     }
   },
   getEditorFile: async (): Promise<{ title: string; content?: string } | undefined> => {

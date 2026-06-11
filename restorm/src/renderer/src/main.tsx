@@ -8,7 +8,13 @@ import './app.css'
 import './components/common/Badge.css'
 import LoadingScreen from './components/Welcome/LoadingScreen'
 import { initializeGraphQL } from './services/GraphQLIntegration'
+import { registerRendererSources } from './secrets/registerRendererSources'
 import { DEFAULT_UI_DELAY_MS } from '../../shared/config/constants'
+
+// Populate the renderer's copy of the value-source registry (descriptors only;
+// resolvers stay main-side). Synchronous + idempotent — done once at module
+// load so the type-pick menu can enumerate secret sources before first render.
+registerRendererSources()
 
 const App = lazy(() => import('./App'))
 
@@ -187,7 +193,8 @@ function ensureRestormWebShim(): void {
     },
     secrets: {
       read: () => Promise.resolve(null),
-      write: () => Promise.resolve({ success: true })
+      write: () => Promise.resolve({ success: true }),
+      invalidate: () => Promise.resolve({ success: true })
     },
     context: {
       getAllTransformResults: () => Promise.resolve({}),

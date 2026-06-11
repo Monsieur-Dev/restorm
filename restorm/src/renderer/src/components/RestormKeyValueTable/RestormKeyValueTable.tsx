@@ -7,13 +7,15 @@ import {
   type CellRendererProps,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
-import { TypedValueField, resolveValueTypeKind } from '../TypedValueField'
+import { TypedValueField } from '../TypedValueField'
 import { useAllEnvValueTypeGroups } from '../../hooks/useAllEnvValueTypeGroups'
 import type { TranslatedHelperDefinition } from '../../utils/handlebarsHelpersDefinitions'
 import type { KeyValue, ValueType } from '../../../../shared/types/collections'
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue } from '../../../../shared/types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue } from '../../../../shared/types/collections'
+import { SecretValue } from '../../../../shared/types/valueTypes/SecretValue'
 import { inferValueFromString } from '../../../../shared/utils/valueCasting'
 import { normalizeValueType } from '../../utils/normalizeValueType'
+import { serializeValueShape } from './serializeValueShape'
 
 export type VariableContext = Record<string, string>
 
@@ -136,8 +138,10 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
         nextValue = Number.isFinite(parsed) ? new NumericValue(parsed, currentType.format) : currentType
       } else if (currentType instanceof ColorValue) {
         nextValue = new ColorValue(raw)
-      } else if (currentType instanceof PasswordValue) {
-        nextValue = new PasswordValue(raw)
+      } else if (currentType instanceof SecretValue) {
+        const updated = new SecretValue(currentType.source, currentType.params)
+        updated.resolved = raw
+        nextValue = updated
       } else if (currentType instanceof ExpressionValue) {
         nextValue = new ExpressionValue(raw)
       } else if (currentType instanceof BooleanValue) {
@@ -230,7 +234,7 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
       }
 
       const resolved = id ? (valueTypeByRowIdRef.current.get(id) ?? new StringValue(value)) : new StringValue(value)
-      const priorKind = resolveValueTypeKind(resolved)
+      const priorSerialized = serializeValueShape(resolved)
 
       return (
         <TypedValueField
@@ -238,12 +242,16 @@ const RestormKeyValueTableInner = React.forwardRef<KeyValueTableHandle, RestormK
           onChange={(next) => {
             if (id) valueTypeByRowIdRef.current.set(id, next)
             onChange(next.toString())
-            // A type change with an unchanged display string would otherwise
-            // not reach `onRowsChange` (the table only emits on string
-            // changes), so force the rebuild — mirroring what the old
-            // castToType did.
+            // The table only emits `onRowsChange` when the cell's display
+            // STRING changes. An edit that keeps the same string but mutates
+            // the underlying ValueType — a type recast (string → secret) OR an
+            // in-place config change that doesn't surface in `toString()` (e.g.
+            // editing a secret's `params.name`, whose `toString()` stays the
+            // resolved/empty value) — would otherwise never persist. Compare
+            // the serialized shapes and force the rebuild on ANY structural
+            // change, not just a kind change.
             const forceRebuild = onRowsChangeRef.current
-            if (resolveValueTypeKind(next) !== priorKind && id && initialRowsRef.current && forceRebuild) {
+            if (serializeValueShape(next) !== priorSerialized && id && initialRowsRef.current && forceRebuild) {
               const nextRows = initialRowsRef.current.map((r) => (r.id === id ? { ...r, value: next } : r))
               forceRebuild(nextRows)
             }

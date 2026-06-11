@@ -31,8 +31,10 @@ import { KeyValue as KeyValueModel } from '../../shared/models'
 import { StringValue, EnumListValue, CustomListValue, CustomListMultiValue } from '../../shared/types/collections'
 import type { CustomValueList } from '../../shared/types/collections'
 import { isEnvironmentFolder } from '../../shared/types/folderTypes'
-import { isExpressionValue, isCustomListValue, isCustomListMultiValue } from '../../shared/utils/valueHelpers'
+import { isExpressionValue, isCustomListValue, isCustomListMultiValue, isSecretValue } from '../../shared/utils/valueHelpers'
+import type { SecretValue } from '../../shared/types/valueTypes/SecretValue'
 import { resolveUrl } from './URLResolver'
+import { secretHydrationService } from './secrets/SecretHydrationService'
 import { compileSnippetTemplates, generateCodeSnippets, type CompiledSnippetTemplates } from './CodeSnippetGenerator'
 import type {
   KeyValue,
@@ -158,12 +160,19 @@ class ContextService {
       }
     }
 
-    // Calculate and store transformed context
+    // Calculate and store transformed context (synchronously, with secrets
+    // still masked) so a consumer reading immediately sees the structure.
     this.recalculateContext(envId)
 
     // If a request tab was opened before this environment was processed,
     // we must recalculate those requests now that the context exists.
     this.recalculateRequestsUsingEnvironment(envId)
+
+    // Hydrate this env's SecretValues into the context (async). Once the
+    // resolvers return, `recalculateContext` re-runs with the populated
+    // `.resolved` values and re-broadcasts so `{{secretVar}}` (and any
+    // expression composing it) resolves in the preview + downstream.
+    void this.hydrateEnvironmentSecrets(envId)
   }
 
   /**
@@ -187,6 +196,11 @@ class ContextService {
 
       // Recalculate context for this env and all descendants
       this.recalculateContextCascade(envId)
+
+      // Re-hydrate secrets for this env (a variable may have changed an
+      // env-var name / source params, or a new secret variable was added)
+      // and its descendants, then re-broadcast with resolved values.
+      void this.hydrateEnvironmentSecretsCascade(envId)
     }
   }
 
@@ -903,6 +917,121 @@ class ContextService {
   }
 
   /**
+   * Collect every `SecretValue` reachable through a request's active
+   * environment chain (the selected env-folder environment + all of its
+   * ancestors). These are the credentials that feed the transformed
+   * context a request reads from — a `SecretValue` used as an env-folder
+   * variable resolves to `''` until its `.resolved` is populated, exactly
+   * like the request's own KeyValue secrets. Enabled rows only: a disabled
+   * variable never reaches the context.
+   *
+   * The caller hydrates the returned secrets (which sets `.resolved` in
+   * place on the live `environmentMeta` rows) and then calls
+   * `refreshEnvironmentContext(requestId)` so the resolved plaintext lands
+   * in the request's `baseContext`.
+   */
+  collectEnvironmentSecrets(requestId: string): SecretValue[] {
+    const ctx = this.requestContexts.get(requestId)
+    if (!ctx?.environmentId) return []
+    return this.collectSecretsForEnvChain(ctx.environmentId)
+  }
+
+  /**
+   * Collect every enabled `SecretValue` reachable from an environment's
+   * own variables plus its ancestor chain (root → parent → self). Shared
+   * by the request path (`collectEnvironmentSecrets`) and the env-folder
+   * preview path (`hydrateEnvironmentSecrets`) so both resolve secrets
+   * through the exact same set — DRY, no parallel walk.
+   */
+  private collectSecretsForEnvChain(environmentId: string): SecretValue[] {
+    const secrets: SecretValue[] = []
+    const seen = new Set<string>()
+    const collectFrom = (envId: string): void => {
+      const meta = this.environmentMeta.get(envId)
+      if (!meta) return
+      for (const kv of meta.rawVariables) {
+        if (kv.enabled === false) continue
+        if (isSecretValue(kv.value)) secrets.push(kv.value)
+      }
+    }
+    // Active environment + its ancestor chain (root → parent).
+    for (const envId of [...this.getParentChain(environmentId), environmentId]) {
+      if (seen.has(envId)) continue
+      seen.add(envId)
+      collectFrom(envId)
+    }
+    return secrets
+  }
+
+  /**
+   * Hydrate every `SecretValue` reachable from an environment's chain
+   * (own + ancestors) and, once resolved, recompute + re-broadcast the
+   * environment's transformed context so `{{secretVar}}` and any
+   * expression composing it (`apiKey2 = {{apiKey}}`) resolve to the
+   * plaintext instead of the masked empty string.
+   *
+   * scopeId = the environment's own id: stable for the lifetime of the
+   * open file, so the per-scope cache in `SecretHydrationService` serves
+   * repeated recalcs without re-hitting the provider. (The request path
+   * uses requestId as its scope; both share the same hydrate logic, only
+   * the scope key differs.)
+   *
+   * Hydration is async; callers `void` it. The synchronous
+   * `recalculateContext` already ran (masked) before this resolves, so a
+   * reader that polls immediately gets structure now and the resolved
+   * values land on the follow-up broadcast.
+   */
+  private async hydrateEnvironmentSecrets(environmentId: string): Promise<void> {
+    const secrets = this.collectSecretsForEnvChain(environmentId)
+    if (secrets.length === 0) return
+    try {
+      await secretHydrationService.hydrate(environmentId, secrets)
+    } catch (error) {
+      logger.warn('[ContextService] env secret hydration failed', {
+        environmentId,
+        error: String(error)
+      })
+      return
+    }
+    // Resolved plaintext now lives on the live `environmentMeta` rows.
+    // Recompute this env (and the chain it depends on) so the context
+    // picks up `SecretValue.resolved` and re-broadcasts to the renderer.
+    for (const envId of [...this.getParentChain(environmentId), environmentId]) {
+      if (this.environmentMeta.has(envId)) this.recalculateContext(envId)
+    }
+    this.recalculateRequestsUsingEnvironment(environmentId)
+  }
+
+  /**
+   * Re-hydrate secrets for an environment and all its descendants. Used
+   * on ENVIRONMENT_UPDATED, mirroring `recalculateContextCascade`.
+   */
+  private async hydrateEnvironmentSecretsCascade(environmentId: string): Promise<void> {
+    await this.hydrateEnvironmentSecrets(environmentId)
+    const meta = this.environmentMeta.get(environmentId)
+    if (meta) {
+      for (const childId of meta.childIds) {
+        await this.hydrateEnvironmentSecretsCascade(childId)
+      }
+    }
+  }
+
+  /**
+   * Recompute the transformed context for a request's active environment
+   * chain and the request context itself. Called after env-folder secrets
+   * have been hydrated, so the freshly-populated `SecretValue.resolved`
+   * values flow into the context the executor reads.
+   */
+  refreshEnvironmentContext(requestId: string): void {
+    const ctx = this.requestContexts.get(requestId)
+    if (!ctx?.environmentId) return
+    for (const envId of [...this.getParentChain(ctx.environmentId), ctx.environmentId]) {
+      if (this.environmentMeta.has(envId)) this.recalculateContext(envId)
+    }
+    this.recalculateRequestContext(requestId)
+  }
+
+  /**
    * Resolve a single value using the request's environment context
    * Used by HTTPExecutionService to resolve headers, body, etc.
    *
@@ -931,7 +1060,7 @@ class ContextService {
   /**
    * Type-aware resolution of a `KeyValue`. Only an `ExpressionValue`
    * runs through Handlebars; every other ValueType (StringValue,
-   * PasswordValue, …) is returned literally via `toString()`.
+   * SecretValue, …) is returned literally via `toString()`.
    * Mirrors `resolveKeyValue` but exposed publicly so HTTP / SOAP /
    * GraphQL execution services can opt into the strict gate
    * instead of the always-resolves shortcut.

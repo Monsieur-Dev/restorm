@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { collectPasswordSecretsFromCollections, applyPasswordSecretsToCollections } from '../../src/shared/utils/passwordSecrets'
+import {
+  collectEnvFileSecretsFromCollections,
+  applyEnvFileSecretsToCollections
+} from '../../src/shared/utils/envFileSecrets'
 import { parseEnvFileDetailed, serializeEnvFile } from '../../src/shared/utils/dotenv'
 
 function makePaddingArray<T>(first: T, filler: () => T, count: number): T[] {
@@ -8,8 +11,12 @@ function makePaddingArray<T>(first: T, filler: () => T, count: number): T[] {
   return out
 }
 
-describe('Password secrets (.env) helpers', () => {
-  it('should collect and re-apply PasswordValue secrets using stable path keys', () => {
+function secretValue(resolved: string): Record<string, unknown> {
+  return { type: 'secret', source: 'envFileSecret', params: {}, resolved }
+}
+
+describe('envFileSecrets ↔ restorm.env round-trip', () => {
+  it('collects envFileSecret plaintext under padded positional keys and re-applies it', () => {
     const data: Record<string, unknown> = {
       collections: makePaddingArray(
         {
@@ -18,7 +25,7 @@ describe('Password secrets (.env) helpers', () => {
           environments: [
             {
               name: 'env parent',
-              variables: [{ key: 'password', value: { type: 'password', value: 's3cr3t' } }]
+              variables: [{ key: 'password', value: secretValue('s3cr3t') }]
             }
           ],
           items: makePaddingArray(
@@ -29,7 +36,7 @@ describe('Password secrets (.env) helpers', () => {
                   type: 'http',
                   name: 'GetUsers',
                   method: 'GET',
-                  headers: [{ key: 'Authorization', value: { type: 'password', value: 'tok\nline2' } }]
+                  headers: [{ key: 'Authorization', value: secretValue('tok\nline2') }]
                 },
                 () => ({ type: 'http', name: 'Unused', method: 'GET', headers: [] }),
                 10
@@ -44,35 +51,41 @@ describe('Password secrets (.env) helpers', () => {
       )
     }
 
-    const secrets = collectPasswordSecretsFromCollections(data)
+    const secrets = collectEnvFileSecretsFromCollections(data)
 
+    // 10 siblings → 2-digit zero-padded index in every positional segment.
     expect(secrets['01 - Dossier/env parent/password']).toBe('s3cr3t')
     expect(secrets['01 - Dossier/01 - Sub/01 - GetUsers/headers/Authorization']).toBe('tok\nline2')
 
+    // Plaintext (including newlines) survives the restorm.env serialize → parse round-trip.
     const envText = serializeEnvFile(secrets)
     const parsed = parseEnvFileDetailed(envText)
     expect(parsed.duplicates).toEqual([])
 
-    // Simulate persisted data where password values are removed
+    // Simulate persisted data where the resolved plaintext is stripped (as on disk).
     const persisted: Record<string, unknown> = JSON.parse(JSON.stringify(data))
-    // Remove values for password entries
     ;((persisted.collections as unknown[])[0] as Record<string, unknown>)['environments'] = [
-      { name: 'env parent', variables: [{ key: 'password', value: { type: 'password' } }] }
+      {
+        name: 'env parent',
+        variables: [{ key: 'password', value: { type: 'secret', source: 'envFileSecret', params: {} } }]
+      }
     ]
     const firstItems = ((persisted.collections as unknown[])[0] as Record<string, unknown>)['items'] as unknown[]
     const sub = firstItems[0] as Record<string, unknown>
     const subItems = sub['items'] as unknown[]
     const req = subItems[0] as Record<string, unknown>
-    req['headers'] = [{ key: 'Authorization', value: { type: 'password' } }]
+    req['headers'] = [
+      { key: 'Authorization', value: { type: 'secret', source: 'envFileSecret', params: {} } }
+    ]
 
-    applyPasswordSecretsToCollections(persisted, parsed.vars)
+    applyEnvFileSecretsToCollections(persisted, parsed.vars)
 
     const env0 = (((persisted.collections as unknown[])[0] as Record<string, unknown>)['environments'] as unknown[])[0] as Record<string, unknown>
     const envVar0 = (env0['variables'] as unknown[])[0] as Record<string, unknown>
-    expect((envVar0['value'] as Record<string, unknown>)['value']).toBe('s3cr3t')
+    expect((envVar0['value'] as Record<string, unknown>)['resolved']).toBe('s3cr3t')
 
     const req0 = (((((persisted.collections as unknown[])[0] as Record<string, unknown>)['items'] as unknown[])[0] as Record<string, unknown>)['items'] as unknown[])[0] as Record<string, unknown>
     const hdr0 = (req0['headers'] as unknown[])[0] as Record<string, unknown>
-    expect((hdr0['value'] as Record<string, unknown>)['value']).toBe('tok\nline2')
+    expect((hdr0['value'] as Record<string, unknown>)['resolved']).toBe('tok\nline2')
   })
 })

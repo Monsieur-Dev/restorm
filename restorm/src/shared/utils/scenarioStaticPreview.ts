@@ -83,6 +83,22 @@ function customListValueOrLabel(listId: unknown, label: unknown): string {
   return customListResolver(listId, lbl) ?? lbl
 }
 
+/** Resolves a `SecretValue`'s `(source, params)` to its plaintext for the
+ * inspector's static preview. Secret resolution is asynchronous (a main-process
+ * IPC), so the renderer installs a SYNCHRONOUS lookup over a cache it fills in
+ * the background: a cache HIT returns the plaintext; a MISS returns `undefined`
+ * (the preview shows `''` for that pass) AND lets the resolver kick off the
+ * async fetch + trigger a re-render once it lands — exactly the "render '' first,
+ * fill in next frame" behaviour of the environment preview. Absent (main-process
+ * / unit-test callers) → a secret operand stays empty, never leaking plaintext
+ * into a context that shouldn't have it. */
+let secretPreviewResolver: ((source: string, params: Record<string, unknown>) => string | undefined) | null = null
+export function setSecretPreviewResolver(
+  fn: ((source: string, params: Record<string, unknown>) => string | undefined) | null
+): void {
+  secretPreviewResolver = fn
+}
+
 export function concreteValue(persisted: unknown): unknown {
   if (persisted === null || persisted === undefined) return null
   if (typeof persisted !== 'object') return persisted
@@ -120,7 +136,17 @@ export function concreteValue(persisted: unknown): unknown {
       const resolved = environmentPreviewResolver?.(p.value)
       return resolved !== undefined ? resolved : `{{$${p.value}}}`
     }
-    // 'string' | 'expression' | 'password' | 'color' | 'datetime' | 'enum' |
+    case 'secret': {
+      // A persisted secret carries only `{ source, params }` (the plaintext is
+      // never on disk), so there's no `value` to render. Ask the renderer's
+      // resolver for the live plaintext; a cache miss / no resolver → `''`
+      // (filled on a later pass once the async resolve lands).
+      const source = (p as { source?: unknown }).source
+      const params = (p as { params?: unknown }).params
+      if (secretPreviewResolver === null || typeof source !== 'string') return ''
+      return secretPreviewResolver(source, params && typeof params === 'object' ? (params as Record<string, unknown>) : {}) ?? ''
+    }
+    // 'string' | 'expression' | 'color' | 'datetime' | 'enum' |
     // 'enumList' | unknown — value carries the renderable string.
     default:
       if (typeof p.value === 'string') return p.value

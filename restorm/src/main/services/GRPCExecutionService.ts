@@ -9,6 +9,8 @@
 import { BrowserWindow } from 'electron'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
+import { secretHydrationService } from './secrets/SecretHydrationService'
+import { collectRequestSecrets } from './secrets/collectRequestSecrets'
 
 /** gRPC request execution input */
 export interface GRPCExecutionInput {
@@ -47,7 +49,7 @@ class GRPCExecutionService {
   /**
    * Execute a gRPC request
    */
-  execute(input: GRPCExecutionInput): GRPCExecutionResult {
+  async execute(input: GRPCExecutionInput): Promise<GRPCExecutionResult> {
     const { requestId } = input
     const startTime = Date.now()
     const startedAt = new Date().toISOString()
@@ -77,6 +79,18 @@ class GRPCExecutionService {
     this.broadcastProgress(requestId, 'started')
 
     try {
+      // Resolve any SecretValues reachable from this request's KeyValue
+      // groups AND from the active env-folder variable chain BEFORE the
+      // synchronous resolution loop below.
+      const envSecrets = contextService.collectEnvironmentSecrets(requestId)
+      const secrets = [...collectRequestSecrets(requestContext?.keyValueGroups), ...envSecrets]
+      if (secrets.length > 0) {
+        await secretHydrationService.hydrate(requestId, secrets, abortController.signal)
+        if (envSecrets.length > 0) {
+          contextService.refreshEnvironmentContext(requestId)
+        }
+      }
+
       const durationMs = Date.now() - startTime
       
       // Build method name from service and method

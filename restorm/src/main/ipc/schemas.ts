@@ -64,6 +64,27 @@ export const saveAsFolderArgs = z.tuple([
 export const secretsReadArgs = z.tuple([z.string()])
 export const secretsWriteArgs = z.tuple([z.string(), z.string()])
 
+// Refresh (invalidate the resolution cache) for one secret source + params.
+// `scopeId` is optional: when omitted the cache entry is dropped across every
+// scope (the renderer rarely knows the exact run scope).
+export const secretsInvalidateArgs = z.tuple([
+  z.object({
+    source: z.string(),
+    params: z.record(z.string(), z.unknown()),
+    scopeId: z.string().optional()
+  })
+])
+
+// Resolve-on-demand: read back a single secret's plaintext so the renderer can
+// preview it (the user's own credential). Resolved value is returned to the
+// renderer but is still NEVER written into the `.restorm` document.
+export const secretsResolveArgs = z.tuple([
+  z.object({
+    source: z.string(),
+    params: z.record(z.string(), z.unknown())
+  })
+])
+
 // ==========================================================================
 // Open Path
 // ==========================================================================

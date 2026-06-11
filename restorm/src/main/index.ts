@@ -51,6 +51,8 @@ import { clearUserSettings, parseCliArgs } from './cli/args'
 import { setupGraphQL } from './GraphQLSetup'
 import { registerRestormIPC } from './IPCHandlers'
 import { installScenarioEngineIPC } from './scenarioEngine/ipcBridge'
+import { registerBuiltinSources } from './services/secrets/mainSourceRegistry'
+import { secretHydrationService } from './services/secrets/SecretHydrationService'
 import { registerApiUpdateIPC } from './services/apiUpdate/registerApiUpdateIPC'
 import { runApiUpdateApply } from './services/apiUpdate/orchestrateApply'
 import { loadFolderStructure, loadProjectIntoStore, attachDraftStoreForFolder, attachDraftStoreForFile, getDraftsRootDir } from './FileOperations'
@@ -430,6 +432,9 @@ void app.whenReady().then(() => {
 // requests hanging while the app is being torn down.
 app.on('before-quit', () => {
   permissionService.denyAllPending()
+  // Drop every resolved credential so no plaintext lingers in memory
+  // past the app's lifetime.
+  secretHydrationService.clearAll()
 })
 
 // Initialize Search Index Service (listens to document events from renderer)
@@ -593,6 +598,11 @@ registerRestormIPC({ editorWindows, closeAllWindows })
 // every build, not only when the embedded MCP server is enabled. Idempotent:
 // the MCP setup path calls it again as a no-op.
 installScenarioEngineIPC()
+
+// Register the built-in secret value sources (EnvVar, …) so the
+// SecretHydrationService can resolve a request's SecretValues before
+// dispatch. Idempotent — safe regardless of which startup path ran.
+registerBuiltinSources()
 
 // Headless CLI-run: load the --open project into the main-side store, run the
 // named scenario through the real engine (no window), stream its run-log, and

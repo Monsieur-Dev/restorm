@@ -17,7 +17,12 @@ describe('SecretsEnvFileService', () => {
           environments: [
             {
               name: 'env parent',
-              variables: [{ key: 'password', value: { type: 'password', value: 's3cr3t' } }]
+              variables: [
+                {
+                  key: 'password',
+                  value: { type: 'secret', source: 'envFileSecret', params: {}, resolved: 's3cr3t' }
+                }
+              ]
             }
           ],
           items: []
@@ -47,7 +52,12 @@ describe('SecretsEnvFileService', () => {
           environments: [
             {
               name: 'env parent',
-              variables: [{ key: 'password', value: { type: 'password', value: 's3cr3t' } }]
+              variables: [
+                {
+                  key: 'password',
+                  value: { type: 'secret', source: 'envFileSecret', params: {}, resolved: 's3cr3t' }
+                }
+              ]
             }
           ],
           items: []

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { serializeValueForPersistence } from './valuePersistence'
 import { EnvironmentValue, VariableValue, ListValue, NumericValue, StringValue } from '../types/collections'
+import { SecretValue } from '../types/valueTypes/SecretValue'
 
 describe('serializeValueForPersistence — environment', () => {
   it('serializes an EnvironmentValue instance to its persisted shape', () => {
@@ -52,5 +53,23 @@ describe('serializeValueForPersistence — list', () => {
 
   it('serializes an empty list', () => {
     expect(serializeValueForPersistence(new ListValue([]))).toEqual({ type: 'list', items: [] })
+  })
+})
+
+describe('serializeValueForPersistence — secret', () => {
+  it('persists SecretValue as {type, source, params}, never the resolved value', () => {
+    const v = new SecretValue('envVar', { name: 'GH_TOKEN' })
+    v.resolved = 'leak?'
+    expect(serializeValueForPersistence(v)).toEqual({ type: 'secret', source: 'envVar', params: { name: 'GH_TOKEN' } })
+  })
+
+  it('round-trips an already-persisted secret object (idempotent)', () => {
+    const persisted = { type: 'secret', source: 'envVar', params: { name: 'TOKEN' } }
+    expect(serializeValueForPersistence(persisted)).toEqual(persisted)
+  })
+
+  it('serializes a SecretValue with empty params', () => {
+    const v = new SecretValue('envVar')
+    expect(serializeValueForPersistence(v)).toEqual({ type: 'secret', source: 'envVar', params: {} })
   })
 })

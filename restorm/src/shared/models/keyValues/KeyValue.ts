@@ -5,9 +5,14 @@
 import { trackable } from 'electron-core-ui/decorators'
 import type { RuntimeId } from '../types'
 import type { ValueType } from '../../types/collections'
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue } from '../../types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue } from '../../types/collections'
+import { SecretValue } from '../../types/valueTypes/SecretValue'
 import { BaseKeyValue } from './BaseKeyValue'
 import { serializeValueForPersistence } from '../../utils/valuePersistence'
+
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return typeof v === 'object' && v !== null
+}
 
 @trackable()
 export class KeyValue extends BaseKeyValue {
@@ -28,7 +33,7 @@ export class KeyValue extends BaseKeyValue {
       obj.value instanceof ColorValue ||
       obj.value instanceof DateTimeValue ||
       obj.value instanceof NumericValue ||
-      obj.value instanceof PasswordValue ||
+      obj.value instanceof SecretValue ||
       obj.value instanceof ExpressionValue ||
       obj.value instanceof BooleanValue ||
       obj.value instanceof EnumValue ||
@@ -64,9 +69,14 @@ export class KeyValue extends BaseKeyValue {
           value = new DateTimeValue(d, typeof plain.format === 'string' ? plain.format : 'yyyy-MM-dd HH:mm:ss')
           break
         }
-        case 'password':
-          value = new PasswordValue(typeof plain.value === 'string' ? plain.value : '')
+        case 'secret': {
+          const p = plain as { source?: unknown; params?: unknown }
+          value = new SecretValue(
+            typeof p.source === 'string' ? p.source : '',
+            isRecord(p.params) ? p.params : {}
+          )
           break
+        }
         case 'expression':
           value = new ExpressionValue(typeof plain.value === 'string' ? plain.value : '')
           break

@@ -20,7 +20,12 @@ import {
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import type { TranslatedHelperDefinition } from '../../utils/handlebarsHelpersDefinitions'
 import type { ValueType, EnumDefinition, CustomValueList } from '../../../../shared/types/collections'
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue, NullValue, ListValue } from '../../../../shared/types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue, NullValue, ListValue } from '../../../../shared/types/collections'
+import { SecretValue } from '../../../../shared/types/valueTypes/SecretValue'
+import { valueSourceRegistry } from '../../../../shared/secrets/valueSourceRegistry'
+import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import { SecretSourceConfig } from './sources/SecretSourceConfig'
+import { SecretRetrievalModal } from './sources/SecretRetrievalModal'
 import { EnvironmentValueCell } from './EnvironmentValueCell'
 import { ListValueCell } from './ListValueCell'
 import type { EnvValueTypeGroup } from '../../hooks/collectEnvValueTypeGroups'
@@ -144,6 +149,104 @@ const ColorValueCell: React.FC<ColorValueCellProps> = ({ hex, onChangeHex, dataT
             />
           </div>
         }
+      />
+    </>
+  )
+}
+
+/**
+ * Read-only preview for an `envVar` {@link SecretValue}. Resolves the secret's
+ * plaintext on demand (on mount + on each refresh) via
+ * `window.restorm.secrets.resolve` and shows it as `$<name>=<resolvedValue>` in
+ * a non-editable {@link InputBox}. The resolved plaintext is shown to the user
+ * (their own secret) but never written back into the value / document. A pencil
+ * button opens the retrieval-edit modal (next slice).
+ */
+interface SecretEnvVarCellProps {
+  secret: SecretValue
+  /** Commit an edited secret back into the document (used by the retrieval modal). */
+  onChange: (next: SecretValue) => void
+  dataTestId?: string | undefined
+}
+
+const SecretEnvVarCell: React.FC<SecretEnvVarCellProps> = ({ secret, onChange, dataTestId }) => {
+  const { t } = useTranslation()
+  const name = typeof secret.params['name'] === 'string' ? secret.params['name'] : ''
+  const [resolved, setResolved] = useState<string | null>(null)
+  const [hasError, setHasError] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const refresh = useCallback(async (): Promise<void> => {
+    // Drop the main-side cache first so the preview re-fetches the live value.
+    await window.restorm?.secrets.invalidate({ source: secret.source, params: secret.params })
+    const result = await window.restorm?.secrets.resolve({ source: secret.source, params: secret.params })
+    if (result && typeof result.value === 'string') {
+      setResolved(result.value)
+      setHasError(false)
+    } else {
+      setResolved(null)
+      setHasError(true)
+    }
+  }, [secret.source, secret.params])
+
+  // Resolve on mount + whenever the targeted env-var name changes. The cancelled
+  // flag lives on a holder object (not a `let`) so the post-await `if` guard
+  // isn't narrowed to `false` — the cleanup closure flips it after the await.
+  useEffect(() => {
+    const state = { cancelled: false }
+    void (async () => {
+      const result = await window.restorm?.secrets.resolve({ source: secret.source, params: secret.params })
+      if (state.cancelled) return
+      if (result && typeof result.value === 'string') {
+        setResolved(result.value)
+        setHasError(false)
+      } else {
+        setResolved(null)
+        setHasError(true)
+      }
+    })()
+    return () => { state.cancelled = true }
+  }, [secret.source, secret.params, name])
+
+  const display = `$${name}=${resolved ?? ''}`
+
+  return (
+    <>
+      <InputBox
+        value={display}
+        disabled
+        options={{
+          type: 'text',
+          ...(hasError && { placeholder: t('secrets.envVarUnresolved', '(non résolu)') })
+        }}
+        {...(dataTestId && { 'data-testid': `${dataTestId}-secret-envvar-preview` })}
+      />
+      <HeaderHoverTooltip label={t('secrets.refresh', 'Rafraîchir le secret')}>
+        <Button
+          medium
+          secondary
+          icon="refresh"
+          onClick={() => { void refresh() }}
+          options={{ ariaLabel: t('secrets.refresh', 'Rafraîchir le secret') }}
+          {...(dataTestId && { 'data-testid': `${dataTestId}-secret-refresh` })}
+        />
+      </HeaderHoverTooltip>
+      <HeaderHoverTooltip label={t('secrets.editRetrieval', 'Éditer la récupération')}>
+        <Button
+          medium
+          secondary
+          icon="edit"
+          onClick={() => { setIsModalOpen(true) }}
+          options={{ ariaLabel: t('secrets.editRetrieval', 'Éditer la récupération') }}
+          {...(dataTestId && { 'data-testid': `${dataTestId}-secret-edit` })}
+        />
+      </HeaderHoverTooltip>
+      <SecretRetrievalModal
+        secret={secret}
+        isOpen={isModalOpen}
+        onClose={() => { setIsModalOpen(false) }}
+        onChange={onChange}
+        {...(dataTestId && { dataTestId })}
       />
     </>
   )
@@ -517,14 +620,27 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
         ...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-environment` })
       })
     }
+    // `secret` becomes an "Autres ▸" submenu: one child per registered value
+    // source (env-file secret, env var, …). Picking a child casts to a fresh
+    // `SecretValue(source, {})`; its per-source config UI then collects the
+    // params. The active source (if the value is already a secret) is checked.
     if (!isExcluded('secret')) {
-      tail.push({
-        id: 'secret',
-        label: t('keyValueTable.types.secret'),
-        checked: activeType === 'secret',
-        onClick: () => { cast('secret') },
-        ...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-secret` })
-      })
+      const activeSource = value instanceof SecretValue ? value.source : undefined
+      const sourceItems: ContextMenuItem[] = valueSourceRegistry.list().map((descriptor) => ({
+        id: `secret-source-${descriptor.id}`,
+        label: t(descriptor.labelKey, descriptor.id),
+        checked: activeType === 'secret' && activeSource === descriptor.id,
+        onClick: () => { onChange(new SecretValue(descriptor.id, {})); closeMenu() },
+        ...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-item-secret-${descriptor.id}` })
+      }))
+      if (sourceItems.length > 0) {
+        tail.push({
+          id: 'secret',
+          label: t('secrets.others', 'Others'),
+          items: sourceItems,
+          ...(dataTestId && { 'data-testid': `${dataTestId}-context-menu-secret` })
+        })
+      }
     }
     if (!isExcluded('expression')) {
       tail.push({
@@ -552,7 +668,7 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
     }
 
     return items
-  }, [t, cast, dataTestId, groups, activeType, activeDefId, isExcluded, variableNames, allowAllVariables, allowEnvironment, allowNull, allowList, value, onRemove, removeLabel])
+  }, [t, cast, dataTestId, groups, activeType, activeDefId, isExcluded, variableNames, allowAllVariables, allowEnvironment, allowNull, allowList, value, onChange, closeMenu, onRemove, removeLabel])
 
   // When the type-pick menu offers at most ONE selectable type, the choice is
   // forced: hide the type button (keep it for `lockType`, whose icon is purely
@@ -570,16 +686,47 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
   }, [typeLeaves])
 
   const widget = ((): React.ReactNode => {
-    if (value instanceof PasswordValue) {
+    if (value instanceof SecretValue) {
+      // Per-source config (param-schema fields or the source's custom config
+      // component) + a refresh button that drops the main-side resolution cache
+      // so the next run re-fetches the credential. Masking invariant: nothing
+      // here reads back resolved plaintext — the envFileSecret write-field only
+      // captures what the user types.
+      const secret = value
+      // envVar secrets render as a read-only `$NAME=value` preview (resolved on
+      // demand) with refresh + pencil (edit-retrieval) buttons; the lock icon
+      // stays the type indicator. Other sources keep their editable config.
+      if (secret.source === 'envVar') {
+        return withTypeControl(
+          <SecretEnvVarCell
+            secret={secret}
+            onChange={(next) => { onChange(next) }}
+            {...(dataTestId && { dataTestId })}
+          />,
+          { icon: 'lock', ariaLabel: 'Secret value', typeTestid: 'secret' }
+        )
+      }
       return withTypeControl(
-        <InputBox
-          value={value.toString()}
-          onChange={(next) => { onChange(new PasswordValue(next)) }}
-          options={{ type: 'text' }}
-          password
-          {...(dataTestId && { 'data-testid': `${dataTestId}-value-input-password` })}
-        />,
-        { icon: 'lock', ariaLabel: 'Password value', typeTestid: 'password' }
+        <span className="tvf-secret-config">
+          <SecretSourceConfig
+            value={secret}
+            onChange={(next) => { onChange(next) }}
+            {...(dataTestId && { dataTestId })}
+          />
+          <HeaderHoverTooltip label={t('secrets.refresh', 'Refresh secret')}>
+            <Button
+              medium
+              secondary
+              icon="refresh"
+              onClick={() => {
+                void window.restorm?.secrets.invalidate({ source: secret.source, params: secret.params })
+              }}
+              options={{ ariaLabel: t('secrets.refresh', 'Refresh secret') }}
+              {...(dataTestId && { 'data-testid': `${dataTestId}-secret-refresh` })}
+            />
+          </HeaderHoverTooltip>
+        </span>,
+        { icon: 'lock', ariaLabel: 'Secret value', typeTestid: 'secret' }
       )
     }
 

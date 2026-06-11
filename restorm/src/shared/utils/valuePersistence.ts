@@ -1,13 +1,14 @@
 import type { ValueTypeName } from '../types/valueTypes/BaseValueType'
 import type { ValueType } from '../types/collections'
-import { DateTimeValue, NumericValue, PasswordValue, StringValue, ColorValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue, NullValue, ListValue } from '../types/collections'
+import { DateTimeValue, NumericValue, StringValue, ColorValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue, NullValue, ListValue } from '../types/collections'
+import { SecretValue } from '../types/valueTypes/SecretValue'
 
 export type PersistedValue =
   | { type: 'string'; value: string }
   | { type: 'color'; value: string }
   | { type: 'numeric'; value: number; format: string }
   | { type: 'datetime'; value: string; format: string }
-  | { type: 'password' }
+  | { type: 'secret'; source: string; params: Record<string, unknown> }
   | { type: 'expression'; value: string }
   | { type: 'boolean'; value: boolean }
   | { type: 'enum'; value: string; enumDefinitionId: string }
@@ -24,12 +25,12 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function isValueTypeName(value: unknown): value is ValueTypeName {
-  return value === 'string' || value === 'color' || value === 'numeric' || value === 'datetime' || value === 'password' || value === 'expression' || value === 'boolean' || value === 'enum' || value === 'enumList' || value === 'customList' || value === 'customListMulti' || value === 'variable' || value === 'environment' || value === 'null' || value === 'list'
+  return value === 'string' || value === 'color' || value === 'numeric' || value === 'datetime' || value === 'secret' || value === 'expression' || value === 'boolean' || value === 'enum' || value === 'enumList' || value === 'customList' || value === 'customListMulti' || value === 'variable' || value === 'environment' || value === 'null' || value === 'list'
 }
 
 /**
  * Convert any ValueType (or legacy raw value) into a persisted object structure.
- * - PasswordValue is persisted without its actual value.
+ * - SecretValue is persisted without its resolved plaintext.
  * - DateTimeValue is persisted as ISO string to avoid Date serialization ambiguity.
  */
 export function serializeValueForPersistence(value: unknown): PersistedValue {
@@ -40,8 +41,8 @@ export function serializeValueForPersistence(value: unknown): PersistedValue {
     // Recurse: each item is itself a typed value (a list can nest lists).
     return { type: 'list', items: value.items.map(serializeValueForPersistence) }
   }
-  if (value instanceof PasswordValue) {
-    return { type: 'password' }
+  if (value instanceof SecretValue) {
+    return { type: 'secret', source: value.source, params: value.params }
   }
   if (value instanceof NumericValue) {
     return { type: 'numeric', value: value.value, format: value.format }
@@ -92,7 +93,11 @@ export function serializeValueForPersistence(value: unknown): PersistedValue {
       const items = (value as { items?: unknown }).items
       return { type: 'list', items: Array.isArray(items) ? items.map(serializeValueForPersistence) : [] }
     }
-    if (type === 'password') return { type: 'password' }
+    if (type === 'secret') {
+      const source = (value as { source?: unknown }).source
+      const params = (value as { params?: unknown }).params
+      return { type: 'secret', source: typeof source === 'string' ? source : '', params: isRecord(params) ? params : {} }
+    }
     if (type === 'numeric') {
       const raw = (value as { value?: unknown }).value
       const num = typeof raw === 'number' ? raw : typeof raw === 'string' ? Number(raw) : NaN

@@ -20,6 +20,7 @@ import { RestormKeyValueTable } from '../RestormKeyValueTable'
 import { CustomValueListsPanel } from './CustomValueListsPanel'
 import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import type { EnvironmentFolder, Environment, KeyValue, Icon } from '../../../../shared/types/collections'
+import { SecretValue } from '../../../../shared/types/valueTypes/SecretValue'
 import { makeReactiveEnvironment, emitEnvironmentCreated, emitEnvironmentDeleted, emitEnvironmentUpdated } from '../../types/reactive'
 
 // Helper to update reactive proxy properties (intentional mutation for reactive objects)
@@ -492,6 +493,12 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
   // (a separate memoized component) to avoid re-rendering the KV table
   // inputs when the resolved context updates during typing.
 
+  // Bumped on every persisted variable edit so the (otherwise non-rerendering)
+  // context-variables preview re-derives its secret descriptors and re-resolves
+  // them — e.g. after the retrieval modal commits a new env-var name, the
+  // resolved value below updates without a manual refresh.
+  const [variablesRevision, setVariablesRevision] = useState(0)
+
   // Handler for persisting variable changes to the environment
   // Updates the reactive object directly without triggering React re-renders
   const handleEnvironmentVariablesChange = useCallback(
@@ -500,9 +507,23 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
       // Directly mutate the reactive environment object from folder.environments
       // This will trigger the eventBus event via reactive.ts without re-rendering
       updateReactiveProperty(reactiveSelectedEnvironment, 'variables', newVariables)
+      setVariablesRevision((n) => n + 1)
     },
     [reactiveSelectedEnvironment]
   )
+
+  // Secret-typed variables of the selected environment, exposed to the preview
+  // panel so it can resolve their plaintext on demand (the resolved value is
+  // never persisted — display only). Re-derived whenever a variable edit bumps
+  // the revision (the variables array is mutated in place, so the revision is
+  // the dependency that signals a change — referencing it keeps the hook honest
+  // without disabling the exhaustive-deps lint).
+  const secretVariables = useMemo(() => {
+    void variablesRevision
+    return (reactiveSelectedEnvironment?.variables ?? [])
+      .filter((v): v is KeyValue & { value: SecretValue } => v.value instanceof SecretValue)
+      .map((v) => ({ key: v.key, source: v.value.source, params: v.value.params }))
+  }, [reactiveSelectedEnvironment, variablesRevision])
 
   return (
     <VerticalSashContainer
@@ -672,7 +693,7 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
                     data-testid="environment-folder-variables-table"
                   />
                 </div>
-                <ContextVariablesSection envId={selectedEnvId} />
+                <ContextVariablesSection envId={selectedEnvId} secretVariables={secretVariables} />
               </Pane>
             ) : (
               <Pane
@@ -714,10 +735,21 @@ const EnvironmentConfigPanel: React.FC<EnvironmentConfigPanelProps> = ({ folder,
  * parent panel (which holds the KV table inputs — re-rendering during
  * typing would steal focus).
  */
-const ContextVariablesSection = React.memo<{ envId: string | null }>(({ envId }) => {
+interface SecretVariableDescriptor {
+  key: string
+  source: string
+  params: Record<string, unknown>
+}
+
+const ContextVariablesSection = React.memo<{ envId: string | null; secretVariables: SecretVariableDescriptor[] }>(({ envId, secretVariables }) => {
   const { t } = useTranslation()
   const [contextVars, setContextVars] = useState<Record<string, string>>({})
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
+  // Renderer-side resolved plaintext for secret-typed variables — main's
+  // context never carries a secret's value (it's masked), so we resolve it on
+  // demand here for DISPLAY only and overlay it onto the table below. `null`
+  // means the resolve failed → show "(non résolu)".
+  const [resolvedSecrets, setResolvedSecrets] = useState<Record<string, string | null>>({})
 
   useEffect(() => {
     const ctx = window.restorm?.context
@@ -732,14 +764,50 @@ const ContextVariablesSection = React.memo<{ envId: string | null }>(({ envId })
     return () => { cancelled = true; unsubscribe() }
   }, [envId])
 
+  // Resolve each secret variable's plaintext on demand. Re-runs whenever the
+  // secret descriptors change (e.g. after the retrieval modal commits a new
+  // env-var name), so the preview's "Valeur résolue" stays current. The
+  // resolved value is held in component state only — never persisted.
+  useEffect(() => {
+    const state = { cancelled: false }
+    void (async () => {
+      const secrets = window.restorm?.secrets
+      const entries =
+        secrets && secretVariables.length > 0
+          ? await Promise.all(
+              secretVariables.map(async (s) => {
+                const result = await secrets.resolve({ source: s.source, params: s.params })
+                const value = typeof result.value === 'string' ? result.value : null
+                return [s.key, value] as const
+              })
+            )
+          : []
+      if (state.cancelled) return
+      setResolvedSecrets(Object.fromEntries(entries))
+    })()
+    return () => { state.cancelled = true }
+  }, [secretVariables])
+
   const handleCopy = useCallback((key: string) => {
     void navigator.clipboard.writeText(`{{${key}}}`)
     setCopiedKey(key)
     setTimeout(() => { setCopiedKey(null) }, 1500)
   }, [])
 
-  const keys = Object.keys(contextVars)
-  if (keys.length === 0) return null
+  // Which keys are secret-typed, for the value-column overlay below.
+  const secretKeys = useMemo(() => new Set(secretVariables.map((s) => s.key)), [secretVariables])
+
+  // Merge main's computed context with secret keys (main masks a secret's value,
+  // and may omit the key entirely) so every secret variable still shows a row,
+  // with its renderer-resolved plaintext.
+  const rows = useMemo(() => {
+    const merged = new Map<string, string>()
+    for (const [key, value] of Object.entries(contextVars)) merged.set(key, value)
+    for (const s of secretVariables) if (!merged.has(s.key)) merged.set(s.key, '')
+    return [...merged.entries()]
+  }, [contextVars, secretVariables])
+
+  if (rows.length === 0) return null
 
   return (
     <div data-testid="environment-folder-context-pane" style={{ marginTop: 16, padding: '0 4px' }}>
@@ -762,7 +830,13 @@ const ContextVariablesSection = React.memo<{ envId: string | null }>(({ envId })
           </tr>
         </thead>
         <tbody>
-          {Object.entries(contextVars).map(([key, value]) => (
+          {rows.map(([key, value]) => {
+            const isSecret = secretKeys.has(key)
+            const resolved = isSecret ? resolvedSecrets[key] : undefined
+            const displayValue = isSecret
+              ? (resolved ?? t('secrets.envVarUnresolved', '(non résolu)'))
+              : value
+            return (
             <tr
               key={key}
               style={{ borderBottom: '1px solid var(--panel-border)' }}
@@ -786,9 +860,13 @@ const ContextVariablesSection = React.memo<{ envId: string | null }>(({ envId })
                 </button>
               </td>
               <td style={{ padding: '3px 8px', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{`{{${key}}}`}</td>
-              <td style={{ padding: '3px 8px', fontFamily: 'monospace', opacity: 0.7, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 0 }}>{value}</td>
+              <td
+                style={{ padding: '3px 8px', fontFamily: 'monospace', opacity: isSecret && resolved == null ? 0.4 : 0.7, fontStyle: isSecret && resolved == null ? 'italic' : 'normal', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 0 }}
+                data-testid={`context-var-value-${key}`}
+              >{displayValue}</td>
             </tr>
-          ))}
+            )
+          })}
         </tbody>
       </table>
     </div>

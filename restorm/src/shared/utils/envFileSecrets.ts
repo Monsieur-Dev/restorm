@@ -1,8 +1,28 @@
+/**
+ * Bridges a document tree (collections / environments / requests) and a
+ * folder's `restorm.env` file for `envFileSecret` secrets.
+ *
+ * An env-file secret is a `SecretValue` whose `source` is `'envFileSecret'`.
+ * Its plaintext never lands in the JSON/YAML document — it lives in the
+ * sibling `restorm.env`, keyed by the value's *position* in the tree
+ * (`{collection}/{path}/{scope}/{field}`). The in-memory plaintext rides on
+ * `SecretValue.resolved` (a non-persisted field), exactly where the hydration
+ * pipeline expects it.
+ *
+ *   - `collect…` walks the tree, derives each secret's positional key, reads the
+ *     plaintext from `resolved`, and stamps `params.key` / `params.folderPath`
+ *     so on-demand resolution stays self-contained.
+ *   - `apply…` walks the tree, looks the plaintext up by positional key, writes
+ *     it into `resolved`, and stamps the same params.
+ */
+
 export type SecretsMap = Record<string, string>
 
 interface PlainValueType {
   type?: unknown
-  value?: unknown
+  source?: unknown
+  params?: unknown
+  resolved?: unknown
 }
 
 interface PlainKeyValue {
@@ -36,6 +56,8 @@ interface PlainRequest {
   metadata?: unknown
   body?: unknown
 }
+
+const ENV_FILE_SECRET_SOURCE = 'envFileSecret'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
@@ -72,16 +94,28 @@ function requestSegment(req: PlainRequest, index0: number, count: number): strin
   return `${formatIndex(index0, count)} - ${sanitizeName(name)}`
 }
 
-function isPasswordValueType(value: unknown): value is PlainValueType {
-  return isRecord(value) && (value as PlainValueType).type === 'password'
+function isEnvFileSecret(value: unknown): value is PlainValueType {
+  return (
+    isRecord(value) &&
+    (value as PlainValueType).type === 'secret' &&
+    (value as PlainValueType).source === ENV_FILE_SECRET_SOURCE
+  )
 }
 
-function getPasswordString(value: PlainValueType): string {
-  return typeof value.value === 'string' ? value.value : ''
+function getResolvedPlaintext(value: PlainValueType): string {
+  return typeof value.resolved === 'string' ? value.resolved : ''
 }
 
-function setPasswordString(value: PlainValueType, secret: string): void {
-  value.value = secret
+function setResolvedPlaintext(value: PlainValueType, secret: string): void {
+  value.resolved = secret
+}
+
+/** Stamp the positional identity onto `params` so the resolver is self-contained. */
+function stampParams(value: PlainValueType, key: string, folderPath: string | undefined): void {
+  const params = isRecord(value.params) ? value.params : {}
+  params['key'] = key
+  if (folderPath !== undefined) params['folderPath'] = folderPath
+  value.params = params
 }
 
 function isEnvironmentFolder(item: unknown): item is PlainEnvironmentFolder {
@@ -104,7 +138,8 @@ function collectFromKeyValues(
   keyValues: unknown,
   basePath: string,
   scope: string,
-  out: SecretsMap
+  out: SecretsMap,
+  folderPath: string | undefined
 ): void {
   if (!isArray(keyValues)) return
 
@@ -113,10 +148,11 @@ function collectFromKeyValues(
     const kv = kvRaw as PlainKeyValue
     const key = typeof kv.key === 'string' ? kv.key : ''
     if (!key) continue
-    if (!isPasswordValueType(kv.value)) continue
+    if (!isEnvFileSecret(kv.value)) continue
 
     const name = `${basePath}/${scope}/${key}`
-    out[name] = getPasswordString(kv.value)
+    out[name] = getResolvedPlaintext(kv.value)
+    stampParams(kv.value, name, folderPath)
   }
 }
 
@@ -124,7 +160,8 @@ function applyToKeyValues(
   keyValues: unknown,
   basePath: string,
   scope: string,
-  secrets: SecretsMap
+  secrets: SecretsMap,
+  folderPath: string | undefined
 ): void {
   if (!isArray(keyValues)) return
 
@@ -133,12 +170,13 @@ function applyToKeyValues(
     const kv = kvRaw as PlainKeyValue
     const key = typeof kv.key === 'string' ? kv.key : ''
     if (!key) continue
-    if (!isPasswordValueType(kv.value)) continue
+    if (!isEnvFileSecret(kv.value)) continue
 
     const name = `${basePath}/${scope}/${key}`
+    stampParams(kv.value, name, folderPath)
     const secret = secrets[name]
     if (typeof secret === 'string') {
-      setPasswordString(kv.value, secret)
+      setResolvedPlaintext(kv.value, secret)
     }
   }
 }
@@ -147,7 +185,8 @@ function collectFromEnvironment(
   envRaw: unknown,
   envFolderPath: string,
   envNameChain: string[],
-  out: SecretsMap
+  out: SecretsMap,
+  folderPath: string | undefined
 ): void {
   if (!isRecord(envRaw)) return
   const env = envRaw as PlainEnvironment
@@ -163,15 +202,16 @@ function collectFromEnvironment(
       const kv = kvRaw as PlainKeyValue
       const key = typeof kv.key === 'string' ? kv.key : ''
       if (!key) continue
-      if (!isPasswordValueType(kv.value)) continue
+      if (!isEnvFileSecret(kv.value)) continue
       const name = `${envPrefix}/${key}`
-      out[name] = getPasswordString(kv.value)
+      out[name] = getResolvedPlaintext(kv.value)
+      stampParams(kv.value, name, folderPath)
     }
   }
 
   if (isArray(env.subEnvironments)) {
     for (const child of env.subEnvironments) {
-      collectFromEnvironment(child, envFolderPath, nextChain, out)
+      collectFromEnvironment(child, envFolderPath, nextChain, out, folderPath)
     }
   }
 }
@@ -180,7 +220,8 @@ function applyToEnvironment(
   envRaw: unknown,
   envFolderPath: string,
   envNameChain: string[],
-  secrets: SecretsMap
+  secrets: SecretsMap,
+  folderPath: string | undefined
 ): void {
   if (!isRecord(envRaw)) return
   const env = envRaw as PlainEnvironment
@@ -196,52 +237,68 @@ function applyToEnvironment(
       const kv = kvRaw as PlainKeyValue
       const key = typeof kv.key === 'string' ? kv.key : ''
       if (!key) continue
-      if (!isPasswordValueType(kv.value)) continue
+      if (!isEnvFileSecret(kv.value)) continue
 
       const name = `${envPrefix}/${key}`
+      stampParams(kv.value, name, folderPath)
       const secret = secrets[name]
       if (typeof secret === 'string') {
-        setPasswordString(kv.value, secret)
+        setResolvedPlaintext(kv.value, secret)
       }
     }
   }
 
   if (isArray(env.subEnvironments)) {
     for (const child of env.subEnvironments) {
-      applyToEnvironment(child, envFolderPath, nextChain, secrets)
+      applyToEnvironment(child, envFolderPath, nextChain, secrets, folderPath)
     }
   }
 }
 
-function collectFromRequest(req: PlainRequest, requestPath: string, out: SecretsMap): void {
-  collectFromKeyValues(req.headers, requestPath, 'headers', out)
-  collectFromKeyValues(req.params, requestPath, 'params', out)
-  collectFromKeyValues(req.pathParams, requestPath, 'pathParams', out)
-  collectFromKeyValues(req.metadata, requestPath, 'metadata', out)
+function collectFromRequest(
+  req: PlainRequest,
+  requestPath: string,
+  out: SecretsMap,
+  folderPath: string | undefined
+): void {
+  collectFromKeyValues(req.headers, requestPath, 'headers', out, folderPath)
+  collectFromKeyValues(req.params, requestPath, 'params', out, folderPath)
+  collectFromKeyValues(req.pathParams, requestPath, 'pathParams', out, folderPath)
+  collectFromKeyValues(req.metadata, requestPath, 'metadata', out, folderPath)
 
   if (isRecord(req.body)) {
     const body = req.body as { fields?: unknown }
     if (isArray(body.fields)) {
-      collectFromKeyValues(body.fields, requestPath, 'body.fields', out)
+      collectFromKeyValues(body.fields, requestPath, 'body.fields', out, folderPath)
     }
   }
 }
 
-function applyToRequest(req: PlainRequest, requestPath: string, secrets: SecretsMap): void {
-  applyToKeyValues(req.headers, requestPath, 'headers', secrets)
-  applyToKeyValues(req.params, requestPath, 'params', secrets)
-  applyToKeyValues(req.pathParams, requestPath, 'pathParams', secrets)
-  applyToKeyValues(req.metadata, requestPath, 'metadata', secrets)
+function applyToRequest(
+  req: PlainRequest,
+  requestPath: string,
+  secrets: SecretsMap,
+  folderPath: string | undefined
+): void {
+  applyToKeyValues(req.headers, requestPath, 'headers', secrets, folderPath)
+  applyToKeyValues(req.params, requestPath, 'params', secrets, folderPath)
+  applyToKeyValues(req.pathParams, requestPath, 'pathParams', secrets, folderPath)
+  applyToKeyValues(req.metadata, requestPath, 'metadata', secrets, folderPath)
 
   if (isRecord(req.body)) {
     const body = req.body as { fields?: unknown }
     if (isArray(body.fields)) {
-      applyToKeyValues(body.fields, requestPath, 'body.fields', secrets)
+      applyToKeyValues(body.fields, requestPath, 'body.fields', secrets, folderPath)
     }
   }
 }
 
-function walkFolderItemsCollect(items: unknown, prefix: string, out: SecretsMap): void {
+function walkFolderItemsCollect(
+  items: unknown,
+  prefix: string,
+  out: SecretsMap,
+  folderPath: string | undefined
+): void {
   if (!isArray(items)) return
 
   for (let i = 0; i < items.length; i++) {
@@ -253,22 +310,27 @@ function walkFolderItemsCollect(items: unknown, prefix: string, out: SecretsMap)
 
       if (isEnvironmentFolder(child) && isArray(child.environments)) {
         for (const env of child.environments) {
-          collectFromEnvironment(env, nextPrefix, [], out)
+          collectFromEnvironment(env, nextPrefix, [], out, folderPath)
         }
       }
 
-      walkFolderItemsCollect(child.items, nextPrefix, out)
+      walkFolderItemsCollect(child.items, nextPrefix, out, folderPath)
       continue
     }
 
     if (isRequest(child)) {
       const reqPath = `${prefix}/${requestSegment(child, i, items.length)}`
-      collectFromRequest(child, reqPath, out)
+      collectFromRequest(child, reqPath, out, folderPath)
     }
   }
 }
 
-function walkFolderItemsApply(items: unknown, prefix: string, secrets: SecretsMap): void {
+function walkFolderItemsApply(
+  items: unknown,
+  prefix: string,
+  secrets: SecretsMap,
+  folderPath: string | undefined
+): void {
   if (!isArray(items)) return
 
   for (let i = 0; i < items.length; i++) {
@@ -280,22 +342,22 @@ function walkFolderItemsApply(items: unknown, prefix: string, secrets: SecretsMa
 
       if (isEnvironmentFolder(child) && isArray(child.environments)) {
         for (const env of child.environments) {
-          applyToEnvironment(env, nextPrefix, [], secrets)
+          applyToEnvironment(env, nextPrefix, [], secrets, folderPath)
         }
       }
 
-      walkFolderItemsApply(child.items, nextPrefix, secrets)
+      walkFolderItemsApply(child.items, nextPrefix, secrets, folderPath)
       continue
     }
 
     if (isRequest(child)) {
       const reqPath = `${prefix}/${requestSegment(child, i, items.length)}`
-      applyToRequest(child, reqPath, secrets)
+      applyToRequest(child, reqPath, secrets, folderPath)
     }
   }
 }
 
-export function collectPasswordSecretsFromCollections(data: unknown): SecretsMap {
+export function collectEnvFileSecretsFromCollections(data: unknown, folderPath?: string): SecretsMap {
   const out: SecretsMap = {}
   if (!isRecord(data)) return out
   const root = data as { collections?: unknown }
@@ -314,17 +376,21 @@ export function collectPasswordSecretsFromCollections(data: unknown): SecretsMap
 
     if (isEnvironmentFolder(collection) && isArray(collection.environments)) {
       for (const env of collection.environments) {
-        collectFromEnvironment(env, prefix, [], out)
+        collectFromEnvironment(env, prefix, [], out, folderPath)
       }
     }
 
-    walkFolderItemsCollect(collection.items, prefix, out)
+    walkFolderItemsCollect(collection.items, prefix, out, folderPath)
   }
 
   return out
 }
 
-export function applyPasswordSecretsToCollections(data: unknown, secrets: SecretsMap): void {
+export function applyEnvFileSecretsToCollections(
+  data: unknown,
+  secrets: SecretsMap,
+  folderPath?: string
+): void {
   if (!isRecord(data)) return
   const root = data as { collections?: unknown }
   if (!isArray(root.collections)) return
@@ -342,10 +408,10 @@ export function applyPasswordSecretsToCollections(data: unknown, secrets: Secret
 
     if (isEnvironmentFolder(collection) && isArray(collection.environments)) {
       for (const env of collection.environments) {
-        applyToEnvironment(env, prefix, [], secrets)
+        applyToEnvironment(env, prefix, [], secrets, folderPath)
       }
     }
 
-    walkFolderItemsApply(collection.items, prefix, secrets)
+    walkFolderItemsApply(collection.items, prefix, secrets, folderPath)
   }
 }

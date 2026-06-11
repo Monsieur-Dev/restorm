@@ -60,7 +60,7 @@ export function kindFromConfig(cfg: unknown): OperandKind | undefined {
     case 'datetime': return 'date'
     case 'color': return 'color'
     case 'enum': case 'enumList': case 'customList': case 'customListMulti': return 'enum'
-    case 'string': case 'password': case 'expression': return 'string'
+    case 'string': case 'secret': case 'expression': return 'string'
     case 'null': return 'null'
     default: return undefined
   }

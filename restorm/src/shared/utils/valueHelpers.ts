@@ -2,7 +2,8 @@
  * Helper functions for working with Value types
  */
 
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue, NullValue, ListValue, type ValueType } from '../types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue, NullValue, ListValue, type ValueType } from '../types/collections'
+import { SecretValue } from '../types/valueTypes/SecretValue'
 
 /**
  * Convert a ValueType to a string using its toString() method
@@ -51,13 +52,6 @@ export function isDateTimeValue(value: ValueType): value is DateTimeValue {
  */
 export function isNumericValue(value: ValueType): value is NumericValue {
   return value instanceof NumericValue || (value as { type?: string }).type === 'numeric'
-}
-
-/**
- * Check if a value is a PasswordValue
- */
-export function isPasswordValue(value: ValueType): value is PasswordValue {
-  return value instanceof PasswordValue || (value as { type?: string }).type === 'password'
 }
 
 /**
@@ -128,4 +122,11 @@ export function isCustomListValue(value: ValueType): value is CustomListValue {
  */
 export function isCustomListMultiValue(value: ValueType): value is CustomListMultiValue {
   return value instanceof CustomListMultiValue || (value as { type?: string }).type === 'customListMulti'
+}
+
+/**
+ * Check if a value is a SecretValue (resolved at run time from a named source).
+ */
+export function isSecretValue(value: ValueType): value is SecretValue {
+  return value instanceof SecretValue || (value as { type?: string }).type === 'secret'
 }

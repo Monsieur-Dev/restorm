@@ -48,6 +48,34 @@ Shorter than the protocol playbook — it covers the
 via content sniffing, idempotency, custom-vs-imported reconciliation,
 and the import-only E2E scenario set.
 
+### Adding a new scenario action to Restorm
+
+Read **[`restorm/docs/contributing/adding-a-scenario-node.md`](./restorm/docs/contributing/adding-a-scenario-node.md)**
+before writing any code. It covers the 13-step checklist for a new node kind:
+kind union, port declarations, executor, registry, scheduler (scope nodes),
+node box + component registration, catalogue, static preview, MCP wiring,
+i18n (all 27 locales, including the inspector help line), unit tests, the lint
+gate, and adding the new kind to the Bestiary scenario.
+
+### Adding a new value/secret source to Restorm
+
+Read **[`restorm/docs/contributing/adding-a-value-source.md`](./restorm/docs/contributing/adding-a-value-source.md)**
+end-to-end before writing the first line of code. It covers:
+
+- The shared descriptor (`ValueSourceDescriptor`) in `src/shared/secrets/sources/`.
+- The main-process resolver (`ValueSourceResolver`) in
+  `src/main/services/secrets/resolvers/`.
+- Registration in both `mainSourceRegistry.ts` (descriptor + resolver) and
+  `registerRendererSources.ts` (descriptor only) — and why the two bundles
+  need separate registration.
+- Why **no edits** to `KeyValue.fromPlain`, `valuePersistence.ts`, or
+  `castValue.ts` are needed (the `SecretValue` type handles persistence
+  automatically).
+- The `paramSchema` (automatic ECUI config fields) vs. `configComponent`
+  (custom React component) rendering paths, with masking invariants.
+- i18n across all 27 locales, resolver unit tests, component render tests,
+  and extending the growable e2e demo fixture with masking assertions.
+
 ### Adding a generic component or hook to `electron-core-ui`
 
 Read [`electron-core-ui/CLAUDE.md`](./electron-core-ui/CLAUDE.md) for

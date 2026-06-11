@@ -3,7 +3,7 @@
  * place so unit tests can assert against them without re-deriving
  * the field set from the implementation. Anything sent to the AI
  * client goes through `JSON.stringify` after these objects are
- * built; secrets (PasswordValue) are stripped one layer earlier in
+ * built; secrets (SecretValue) are stripped one layer earlier in
  * `CollectionStore.serializeRequest` via the `@NonSerialised`
  * decorator + `toJSON` chain.
  */
@@ -45,7 +45,7 @@ export interface CurrentTabInfo {
 
 export interface ResolvedEnvVariable {
   key: string
-  /** Raw template value (Handlebars source). Never a PasswordValue plaintext. */
+  /** Raw template value (Handlebars source). Never a SecretValue plaintext. */
   value: string
   /** Value after Handlebars resolution. Same masking guarantee. */
   resolved: string

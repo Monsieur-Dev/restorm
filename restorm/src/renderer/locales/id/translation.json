@@ -1,4 +1,17 @@
 {
+  "secrets": {
+    "others": "Others",
+    "refresh": "Refresh secret",
+    "source": {
+      "envVar": "Env var",
+      "envFileSecret": "Env file secret",
+      "envFileSecretPlaceholder": "Secret value"
+    },
+    "param": {
+      "envVarName": "Variable name",
+      "envVarNamePlaceholder": "MY_API_KEY"
+    }
+  },
   "app": {
     "title": "restorm",
     "openSettings": "Buka pengaturan",

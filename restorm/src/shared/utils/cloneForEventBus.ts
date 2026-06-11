@@ -1,11 +1,11 @@
 /**
  * Deep-clone a document tree for cross-process delivery (eventBus →
- * main, IPC payloads) while preserving `PasswordValue` plaintext.
+ * main, IPC payloads) while preserving `SecretValue` plaintext.
  *
  * Why not `JSON.parse(JSON.stringify(...))`: that path runs
- * `PasswordValue.toJSON()` which intentionally strips the secret —
+ * `SecretValue.toJSON()` which intentionally strips the secret —
  * great for disk writes (the canonical on-disk shape is
- * `{ type: 'password' }`) but breaks `ContextService` substitution,
+ * `{ type: 'secret', source, params }`) but breaks `ContextService` substitution,
  * which needs the plaintext to resolve `{{token}}` headers. Same
  * trap bites `broadcastTreeReplace`: the renderer then receives a
  * password-less tree, calls `setRootItems(reactiveWrap(tree))`, and

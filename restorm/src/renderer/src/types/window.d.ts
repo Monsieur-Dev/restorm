@@ -20,6 +20,8 @@ declare global {
       secrets: {
         read: (filePath: string) => Promise<string | null>
         write: (filePath: string, content: string) => Promise<{ success: boolean; error?: string }>
+        invalidate: (args: { source: string; params: Record<string, unknown>; scopeId?: string }) => Promise<{ success: boolean }>
+        resolve: (args: { source: string; params: Record<string, unknown> }) => Promise<{ value?: string; error?: string }>
       }
       forceClose: () => Promise<void>
       onSaveAndClose: (callback: () => void) => () => void

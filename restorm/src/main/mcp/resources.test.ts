@@ -127,14 +127,14 @@ describe('resources — restorm://request/{id}', () => {
     mockState.findById.mockReturnValue({ id: 'r1', name: 'r1', type: 'http' })
     mockState.serializeRequest.mockReturnValue({
       id: 'r1', name: 'r1', type: 'http',
-      headers: [{ key: 'Authorization', value: { type: 'password' } }]
+      headers: [{ key: 'Authorization', value: { type: 'secret', source: 'envFileSecret', params: {} } }]
     })
     const mcp = new FakeMcpService()
     registerResources(mcp as unknown as McpService)
     const { text } = await mcp.readBy('restorm://request/r1')
     const parsed = readJson(text)
     expect(parsed).toMatchObject({
-      headers: [{ key: 'Authorization', value: { type: 'password' } }]
+      headers: [{ key: 'Authorization', value: { type: 'secret', source: 'envFileSecret', params: {} } }]
     })
     expect(JSON.stringify(parsed)).not.toContain('plaintext-secret')
   })

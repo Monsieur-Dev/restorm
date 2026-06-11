@@ -2100,7 +2100,7 @@ const App: React.FC = () => {
     // deletes mirror into `markSaveUnitDeleted`. The draft is the
     // *cleansed* POJO (same shape the decomposer produces on save), so
     // `commitIfDraftMatches` actually matches when the node hasn't
-    // changed between mutate and save. `PasswordValue.toJSON` strips
+    // changed between mutate and save. `SecretValue.toJSON` strips
     // plaintext on the preceding JSON round trip.
     const kindForType = (type: 'folder' | 'request' | 'environment'): 'folder' | 'file' =>
       type === 'folder' ? 'folder' : 'file'

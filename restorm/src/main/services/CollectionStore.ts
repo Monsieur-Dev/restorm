@@ -840,7 +840,7 @@ class CollectionStore {
       type: 'environment',
       // Pass the live `Environment` (with real `KeyValue` instances)
       // instead of `toPlainObject()` — the latter calls
-      // `serializeValueForPersistence` which strips `PasswordValue`
+      // `serializeValueForPersistence` which strips `SecretValue`
       // plaintext. This emit is main-process-internal (handlers run
       // in-process, no IPC structured clone), so the consumers
       // (ContextService) see the secret-bearing instance and can
@@ -859,7 +859,7 @@ class CollectionStore {
       id: env.id,
       type: 'environment',
       // See `emitEnvironmentCreated` — pass the live instance so
-      // `PasswordValue` plaintext survives the eventBus hop.
+      // `SecretValue` plaintext survives the eventBus hop.
       document: env
     }
     void eventBusService.emit(DocumentEvents.ENVIRONMENT_UPDATED, payload)

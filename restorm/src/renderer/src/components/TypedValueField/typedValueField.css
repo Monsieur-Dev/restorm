@@ -1,5 +1,8 @@
 .tvf-control-group { width: 100%; min-width: 100px; }
 .tvf-control-group > :first-child { flex: 1 1 auto; min-width: 0; }
+/* Secret env-var cell flattened into the control group: each button (wrapped by a
+ * HeaderHoverTooltip span) stays compact next to the growing value input. */
+.tvf-control-group > .header-hover-tooltip { flex: 0 0 auto; display: inline-flex; }
 /* The colour swatch is a fixed-size trailing button — it must not grow/shrink,
  * so the hex field keeps the flex space. */
 .tvf-color-swatch { display: inline-flex; flex: 0 0 auto; }
@@ -23,6 +26,32 @@
   border-top-right-radius: 0 !important;
   border-bottom-right-radius: 0 !important;
   border-right-color: transparent !important;
+}
+
+/* A secret value's editor: the per-source config surface stretches to fill the
+ * field side of the control group, with the refresh button pinned beside it (no
+ * grow/shrink). The inner config div lays its fields out in a column when a
+ * source exposes more than one param. */
+.tvf-secret-config {
+  display: inline-flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: stretch;
+  gap: 4px;
+}
+.tvf-secret-config > .secret-source-config,
+.tvf-secret-config > .input-box {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.tvf-secret-config .secret-source-config {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tvf-secret-config > .header-hover-tooltip {
+  flex: 0 0 auto;
+  display: inline-flex;
 }
 
 /* A type-locked field (e.g. the run-parameters prompt): the indicator button

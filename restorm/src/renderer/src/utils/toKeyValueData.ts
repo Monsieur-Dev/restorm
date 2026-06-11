@@ -1,4 +1,4 @@
-import { isExpressionValue, isCustomListValue, isCustomListMultiValue } from '../../../shared/utils/valueHelpers'
+import { isExpressionValue, isCustomListValue, isCustomListMultiValue, isSecretValue } from '../../../shared/utils/valueHelpers'
 import { normalizeValueType } from './normalizeValueType'
 import type { KeyValue } from '../../../shared/types/baseTypes'
 import type { KeyValueData } from '../types/global'
@@ -41,6 +41,16 @@ export function toKeyValueData(kvs: readonly KeyValue[]): KeyValueData[] {
 		// correct whenever label === value).
 		else if (isCustomListValue(normalized)) out.customList = { listId: normalized.listId, label: normalized.label }
 		else if (isCustomListMultiValue(normalized)) out.customListMulti = { listId: normalized.listId, labels: normalized.labels }
+		// Secret values flatten to an empty `value` (the resolved plaintext
+		// never leaves main); ship the `source` + `params` so main can
+		// reconstruct the SecretValue and hydrate it from its source at
+		// dispatch instead of sending an empty header. Force the value to
+		// empty regardless of `toString()` so a stray renderer-side
+		// `resolved` plaintext can never ride the bridge.
+		else if (isSecretValue(normalized)) {
+			out.value = ''
+			out.secret = { source: normalized.source, params: normalized.params }
+		}
 		return out
 	})
 }

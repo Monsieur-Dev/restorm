@@ -5,7 +5,6 @@ import {
   ColorValue,
   DateTimeValue,
   NumericValue,
-  PasswordValue,
   ExpressionValue,
   BooleanValue,
   EnumValue,
@@ -14,12 +13,13 @@ import {
   CustomListMultiValue,
   NullValue
 } from '../../../../shared/types/collections'
+import { SecretValue } from '../../../../shared/types/valueTypes/SecretValue'
 import type { CustomValueList } from '../../../../shared/types/collections'
 
 describe('resolveValueTypeKind', () => {
   it('maps every concrete ValueType to its kind', () => {
     expect(resolveValueTypeKind(new StringValue('x'))).toBe('string')
-    expect(resolveValueTypeKind(new PasswordValue('x'))).toBe('secret')
+    expect(resolveValueTypeKind(new SecretValue('envFileSecret', {}))).toBe('secret')
     expect(resolveValueTypeKind(new NumericValue(1, 'decimal'))).toBe('number')
     expect(resolveValueTypeKind(new DateTimeValue(new Date(), 'iso'))).toBe('dateTime')
     expect(resolveValueTypeKind(new ColorValue('#fff'))).toBe('color')
@@ -59,10 +59,12 @@ describe('castValueToKind', () => {
     expect(next.toString()).toBe('42')
   })
 
-  it('casts to secret', () => {
+  it('casts to secret, seeding the resolved plaintext from the current text', () => {
     const next = castValueToKind(new StringValue('s3cr3t'), 'secret')
-    expect(next).toBeInstanceOf(PasswordValue)
-    expect((next as PasswordValue).value).toBe('s3cr3t')
+    expect(next).toBeInstanceOf(SecretValue)
+    expect((next as SecretValue).source).toBe('envFileSecret')
+    expect((next as SecretValue).resolved).toBe('s3cr3t')
+    expect(next.toString()).toBe('s3cr3t')
   })
 
   it('casts to number, parsing the seed', () => {

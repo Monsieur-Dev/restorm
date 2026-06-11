@@ -1,4 +1,19 @@
 {
+  "secrets": {
+    "others": "Autres",
+    "refresh": "Rafraîchir le secret",
+    "editRetrieval": "Éditer la récupération",
+    "envVarUnresolved": "(non résolu)",
+    "source": {
+      "envVar": "Variable d'environnement",
+      "envFileSecret": "Secret de fichier env",
+      "envFileSecretPlaceholder": "Valeur secrète"
+    },
+    "param": {
+      "envVarName": "Nom de la variable",
+      "envVarNamePlaceholder": "MA_CLE_API"
+    }
+  },
   "app": {
     "title": "restorm",
     "openSettings": "Ouvrir les paramètres",
