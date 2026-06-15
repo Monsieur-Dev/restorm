@@ -55,4 +55,5 @@ Feature: Scenario run-log end-to-end
       | Code Ruby      |
       | Code R         |
       | Socket.IO      |
+      | WebSocket      |
       | Main           |

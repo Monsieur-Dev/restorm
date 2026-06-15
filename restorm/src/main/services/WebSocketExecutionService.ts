@@ -307,6 +307,101 @@ class WebSocketExecutionService {
     }
   }
 
+  /**
+   * Raw-WebSocket counterpart of {@link connectStreaming} for the scenario
+   * engine: opens a long-lived `ws` connection and streams its lifecycle through
+   * the same callbacks. A raw WS has no events, so `onMessage` always gets
+   * `undefined` as the event name. `send(_channel, payload)` does a plain
+   * `ws.send(payload)` (the channel is ignored). Persists the session to history
+   * on close, like the socket.io path.
+   */
+  connectStreamingRaw(input: {
+    requestId: string
+    onConnect: () => void
+    onMessage: (event: string | undefined, payload: unknown) => void
+    onClose: (error?: string) => void
+    timeout?: number
+  }): { send: (channel: string, payload: string) => boolean; close: () => void; isOpen: () => boolean } {
+    const { requestId } = input
+    const ctl = { closedByCaller: false, connected: false, startTime: 0, startedAt: '', url: '' }
+    const frames: WebSocketMessage[] = []
+    let fired = false
+    const fireClose = (error?: string): void => {
+      if (fired) return
+      fired = true
+      if (ctl.startTime > 0) {
+        this.persistHistory(requestId, {
+          requestId,
+          success: ctl.connected && error === undefined,
+          connected: ctl.connected,
+          messages: frames,
+          ...(error !== undefined ? { error } : {}),
+          requestUrl: ctl.url,
+          timings: { startedAt: ctl.startedAt, durationMs: Date.now() - ctl.startTime }
+        })
+      }
+      input.onClose(error)
+    }
+
+    void (async () => {
+      let resolved: ResolvedExecution
+      try {
+        resolved = await this.resolveExecution(requestId, input.timeout ?? DEFAULT_WS_TIMEOUT_MS)
+      } catch (err) {
+        fireClose((err as Error).message)
+        return
+      }
+      if (ctl.closedByCaller) { fireClose(); return }
+      ctl.startTime = resolved.startTime
+      ctl.startedAt = resolved.startedAt
+      ctl.url = resolved.resolvedUrl
+
+      let ws: WebSocket
+      try {
+        ws = new WebSocket(resolved.resolvedUrl, { headers: resolved.headers })
+      } catch (err) {
+        fireClose((err as Error).message || 'Connection failed')
+        return
+      }
+
+      const connection: ActiveConnection = { requestId, kind: 'websocket', ws, startTime: resolved.startTime, messages: [] }
+      this.activeConnections.set(requestId, connection)
+      this.broadcastProgress(requestId, 'started')
+
+      ws.on('open', () => {
+        ctl.connected = true
+        logger.info('[WebSocketExecutionService] Connected (raw ws, streaming)', { requestId })
+        input.onConnect()
+      })
+      ws.on('message', (data: WebSocket.Data) => {
+        const str = typeof data === 'string' ? data : Buffer.isBuffer(data) ? data.toString('utf8') : JSON.stringify(data)
+        const msg: WebSocketMessage = { direction: 'received', data: str, timestamp: new Date().toISOString() }
+        connection.messages.push(msg)
+        frames.push(msg)
+        this.broadcastMessage(requestId, msg)
+        let parsed: unknown
+        try { parsed = JSON.parse(str) } catch { parsed = str }
+        input.onMessage(undefined, parsed)
+      })
+      ws.on('close', () => {
+        this.activeConnections.delete(requestId)
+        this.broadcastProgress(requestId, 'completed')
+        fireClose()
+      })
+      ws.on('error', (err: Error) => {
+        this.activeConnections.delete(requestId)
+        this.broadcastProgress(requestId, 'error')
+        fireClose(err.message || 'Connection error')
+      })
+    })()
+
+    return {
+      send: (_channel, payload) => this.send(requestId, payload),
+      close: () => { ctl.closedByCaller = true; this.disconnect(requestId) },
+      isOpen: () => this.isActive(requestId)
+    }
+  }
+
   /** Raw WebSocket one-shot: connect, send, collect frames until close/timeout. */
   private executeRawWebSocket(resolved: ResolvedExecution): Promise<WebSocketExecutionResult> {
     const { requestId, timeout, startTime, startedAt, resolvedUrl, headers, resolvedMessage, event } = resolved

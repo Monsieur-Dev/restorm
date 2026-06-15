@@ -69,6 +69,20 @@ services:
     ports:
       - "3001:3001"
 
+  # Raw WebSocket - Custom `ws`-based echo server. Socket.IO runs its own
+  # framing over raw WS, so a plain-WS client can't echo cleanly against it;
+  # this dedicated server gives raw `ws://` text/binary echo, subprotocol +
+  # header negotiation, ping/pong, and HTTP `/push` + `/close` trigger routes.
+  ws-echo:
+    image: node:20-alpine
+    container_name: restorm-ws-echo
+    working_dir: /app
+    volumes:
+      - ./ws-echo-server:/app
+    command: sh -c "npm install && node server.js"
+    ports:
+      - "3002:3002"
+
   # Auth - Custom .NET 9 minimal-API service used by the `auth-login`
   # e2e suite. Publishes `/login` (POST), `/pet/{id}` (GET, Bearer-gated)
   # and a pet-only `/swagger.json`. Same multi-stage Dockerfile pattern

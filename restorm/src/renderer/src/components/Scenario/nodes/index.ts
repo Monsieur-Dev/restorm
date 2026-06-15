@@ -41,6 +41,7 @@ import { SchemaNodeBox, ReadFileNodeBox, WriteFileNodeBox } from './IoNodeBoxes'
 import { TimerNodeBox } from './TimerNodeBox'
 import { CodeNodeBox } from './CodeNodeBox'
 import { SocketioConnectNodeBox, SocketioSendNodeBox, SocketioCloseNodeBox } from './SocketioNodeBoxes'
+import { WebsocketConnectNodeBox, WebsocketSendNodeBox, WebsocketCloseNodeBox } from './WebsocketNodeBoxes'
 
 export type { ScenarioNodeBoxData, ScenarioNodeBoxType, ScenarioNodeCell } from './ScenarioNodeBoxBase'
 export { ScenarioNodeBoxBase } from './ScenarioNodeBoxBase'
@@ -60,6 +61,9 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   switch: SwitchNodeBox,
   httpRequest: RequestNodeBox,
   runScenario: RunScenarioNodeBox,
+  websocketConnect: WebsocketConnectNodeBox,
+  websocketSend: WebsocketSendNodeBox,
+  websocketClose: WebsocketCloseNodeBox,
   socketioConnect: SocketioConnectNodeBox,
   socketioSend: SocketioSendNodeBox,
   socketioClose: SocketioCloseNodeBox,
