@@ -35,6 +35,11 @@ describe('socketioPreviewFromMessages', () => {
     expect(socketioPreviewFromMessages(msgs, ['echo'])).toEqual({ b: 2 })
   })
 
+  it('takes the latest received frame with no listened events (raw WebSocket — no named events)', () => {
+    const msgs = [recv(undefined as unknown as string, '{"hello":"world"}'), recv(undefined as unknown as string, '{"hello":"from HTTP"}')]
+    expect(socketioPreviewFromMessages(msgs, [])).toEqual({ hello: 'from HTTP' })
+  })
+
   it('ignores sent frames when picking', () => {
     const msgs = [sent('echo', '{"sent":true}'), recv('echo', '{"received":true}')]
     expect(socketioPreviewFromMessages(msgs, ['echo'])).toEqual({ received: true })

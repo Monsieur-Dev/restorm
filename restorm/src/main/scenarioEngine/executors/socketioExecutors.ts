@@ -42,11 +42,58 @@ export const socketioConnectExecutor: NodeExecutor = (_act, ctx) => {
     outputs: [],
     scopeAction: {
       type: 'openSocketioConnect',
+      transport: 'socketio',
       requestId: cfg.requestId,
       events: readSocketioEvents(ctx.node.config),
       connectionName
     }
   }
+}
+
+/** A (websocketConnect): raw WebSocket — same handoff as socketioConnect, but no
+ * events (every received frame routes to the single `message` port). */
+export const websocketConnectExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { requestId?: unknown; connectionName?: unknown }
+  if (typeof cfg.requestId !== 'string' || cfg.requestId === '') {
+    throw new Error(`websocketConnect node ${ctx.node.id} has no bound requestId`)
+  }
+  const connectionName = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== ''
+    ? cfg.connectionName.trim()
+    : cfg.requestId
+  return {
+    outputs: [],
+    scopeAction: { type: 'openSocketioConnect', transport: 'websocket', requestId: cfg.requestId, events: [], connectionName }
+  }
+}
+
+/** B (websocketSend): send a raw payload (no channel) on the referenced connection. */
+export const websocketSendExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { connectionNodeId?: unknown; payload?: unknown }
+  const connectionNodeId = typeof cfg.connectionNodeId === 'string' ? cfg.connectionNodeId : ''
+  if (connectionNodeId === '') throw new Error('websocketSend: no connection selected')
+  if (!ctx.socketio) throw new Error('websocketSend: socket bridge unavailable')
+  if (!ctx.socketio.has(connectionNodeId)) {
+    throw new Error('websocketSend: the referenced connection does not exist in this run')
+  }
+  const payload = toWire(resolveOperand(act.inputs['payload'], cfg.payload, ctx.variables))
+  // Raw WS has no channel/event — the empty channel makes `send` do a plain
+  // `ws.send(payload)` (vs socket.io's `emit(channel, payload)`).
+  const ok = ctx.socketio.send(connectionNodeId, '', payload)
+  if (!ok) throw new Error('websocketSend: the referenced connection is not open')
+  return { outputs: [] }
+}
+
+/** C (websocketClose): close the referenced connection (same as socketioClose). */
+export const websocketCloseExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { connectionNodeId?: unknown }
+  const connectionNodeId = typeof cfg.connectionNodeId === 'string' ? cfg.connectionNodeId : ''
+  if (connectionNodeId === '') throw new Error('websocketClose: no connection selected')
+  if (!ctx.socketio) throw new Error('websocketClose: socket bridge unavailable')
+  if (!ctx.socketio.has(connectionNodeId)) {
+    throw new Error('websocketClose: the referenced connection does not exist in this run')
+  }
+  ctx.socketio.close(connectionNodeId)
+  return { outputs: [] }
 }
 
 /** B (socketioSend): emit on the referenced connection. */

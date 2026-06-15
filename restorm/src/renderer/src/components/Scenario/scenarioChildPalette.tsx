@@ -34,7 +34,6 @@ export const SCENARIO_ADD_REQUEST_GROUPS: ScenarioAddEntry[][] = [
     { kind: 'graphql', badge: 'QUERY', labelKey: 'sidebar.contextMenu.add.graphql', defaultLabel: 'GraphQL request' },
     { kind: 'grpc', badge: 'UNARY', labelKey: 'sidebar.contextMenu.add.grpc', defaultLabel: 'gRPC request' },
     { kind: 'soap', badge: 'SOAP', labelKey: 'sidebar.contextMenu.add.soap', defaultLabel: 'SOAP request' },
-    { kind: 'websocket', badge: 'WS', labelKey: 'sidebar.contextMenu.add.websocket', defaultLabel: 'WebSocket request' },
     { kind: 'odata', badge: 'ODATA', labelKey: 'sidebar.contextMenu.add.odata', defaultLabel: 'OData request' }
   ],
   [
@@ -66,6 +65,20 @@ export const SCENARIO_ADD_SOCKETIO_ACTIONS: ScenarioAddActionEntry[] = [
   { kind: 'socketioClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.socketioClose', defaultLabel: 'Socket.IO close' }
 ]
 
+/** Raw-WebSocket action entries — same shape as the Socket.IO section, badged WS. */
+export interface ScenarioAddWsActionEntry {
+  kind: 'websocketConnect' | 'websocketSend' | 'websocketClose'
+  icon: string
+  labelKey: string
+  defaultLabel: string
+}
+
+export const SCENARIO_ADD_WEBSOCKET_ACTIONS: ScenarioAddWsActionEntry[] = [
+  { kind: 'websocketConnect', icon: 'plug', labelKey: 'scenario.nodes.websocketConnect', defaultLabel: 'WebSocket connect' },
+  { kind: 'websocketSend', icon: 'arrow-up', labelKey: 'scenario.nodes.websocketSend', defaultLabel: 'WebSocket send' },
+  { kind: 'websocketClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.websocketClose', defaultLabel: 'WebSocket close' }
+]
+
 /** The protocol/scenario badge glyph for a palette entry. */
 export function scenarioAddIcon(badge: BadgeType): ReactNode {
   return React.createElement(Badge, { type: badge })
@@ -74,4 +87,9 @@ export function scenarioAddIcon(badge: BadgeType): ReactNode {
 /** The green "SIO" badge with the action's codicon inside (Socket.IO section). */
 export function scenarioAddSocketioIcon(icon: string): ReactNode {
   return React.createElement(Badge, { type: 'SIO', icon })
+}
+
+/** The "WS" badge with the action's codicon inside (raw WebSocket section). */
+export function scenarioAddWebsocketIcon(icon: string): ReactNode {
+  return React.createElement(Badge, { type: 'WS', icon })
 }

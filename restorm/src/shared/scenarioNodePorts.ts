@@ -93,6 +93,15 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // connection named by `config.connectionNodeId` (firing that connect node's
   // `done`). Sequencing happens via the universal `done` port.
   socketioClose: { inputs: [], outputs: [] },
+  // Raw WebSocket connect: like socketioConnect but a raw WS has no named events,
+  // so every received frame re-emits on a SINGLE `message` port (no `event:<name>`
+  // derivation, no `others`). `connected` fires once open; `done` fires on close.
+  websocketConnect: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'message', name: 'message', flow: 'both' }] },
+  // Raw WebSocket send: sends `payload` (text) on the connection named by
+  // `config.connectionNodeId` — no channel/event. Sequences via `done`.
+  websocketSend: { inputs: [{ id: 'payload', name: 'payload' }], outputs: [] },
+  // Raw WebSocket close: closes the named connection. Sequences via `done`.
+  websocketClose: { inputs: [], outputs: [] },
   // Iteration & collections. `items` carries a value-selector fallback in the
   // editor (list-typed sources), so it isn't a hard-required port — like the
   // `if` operands; the editor flags it red only when no list type is available.
