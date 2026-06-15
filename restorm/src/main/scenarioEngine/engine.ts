@@ -10,6 +10,8 @@
 
 import { logger, getSettingsService, isSettingsServiceInitialized } from 'electron-core-ui/main'
 import { collectionStore } from '../services/CollectionStore'
+import { websocketExecutionService } from '../services/WebSocketExecutionService'
+import { flushRequestStateToContext } from '../mcp/tools/execute'
 import { installScenarioValueResolvers } from '../../shared/scenarioValueResolvers'
 import { setSecretPreviewResolver } from '../../shared/utils/scenarioStaticPreview'
 import { secretHydrationService } from '../services/secrets/SecretHydrationService'
@@ -163,6 +165,18 @@ export class ScenarioEngine {
       ...(callCtx.onLog ? { onLog: callCtx.onLog } : {}),
       ...(callCtx.treeParams ? { treeParams: callCtx.treeParams } : {}),
       ...(parentSignal ? { parentSignal } : {}),
+      // Bridge a `socketioConnect` node to the WebSocket execution service: flush
+      // the bound request into the ContextService (so its URL / headers /
+      // namespace resolve even when its tab isn't open, like httpRequest does),
+      // then open a streaming connection. The scheduler keeps the returned handle
+      // and drives send / close from it.
+      socketioConnect: (req) => {
+        const bound = collectionStore.findById(req.requestId)
+        if (bound && (bound as { type?: string }).type !== 'scenario') {
+          flushRequestStateToContext(bound as unknown as Parameters<typeof flushRequestStateToContext>[0])
+        }
+        return websocketExecutionService.connectStreaming(req)
+      },
       runSubScenario: async (subId, params, subParentSignal) => {
         const subStack = new Set(callCtx.stack)
         subStack.add(scenarioId)

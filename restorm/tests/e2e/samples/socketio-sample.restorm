@@ -1,0 +1,110 @@
+collections:
+  - folderType: environment
+    name: Socket.IO Playground
+    documentation: |-
+      # Socket.IO Playground
+
+      Connects to the local Socket.IO test server (docker-compose service
+      `socketio`, exposed on port 3001). Emit an event with a JSON payload and
+      observe the server's reply.
+
+      Available events on the default namespace `/`:
+      - `echo` → echoes the payload back
+      - `ping` → replies with `pong { timestamp }`
+      - `broadcast` → relays `{ from, data, timestamp }` to every client
+      - `join-room` / `leave-room` / `room-message`
+    tags: []
+    configuration: {}
+    environments:
+      - name: Default
+        variables:
+          - key: socketUrl
+            value:
+              type: string
+              value: http://localhost:3001
+            description: Socket.IO test server (docker-compose `socketio`)
+        id: d644f972-ba75-4a8a-adc0-4c0dd93f3e04
+    items:
+      - type: websocket
+        name: Echo
+        documentation: Emit `echo` and receive the same payload back.
+        tags:
+          - socketio
+        url: '{{socketUrl}}'
+        protocol: socketio
+        event: echo
+        message: |-
+          {
+            "hello": "world"
+          }
+        headers: []
+        id: 83ce3cdb-22e7-4e89-95eb-9e983fadb125
+      - type: websocket
+        name: Echo (copie)
+        documentation: Emit `echo` and receive the same payload back.
+        tags:
+          - socketio
+        url: '{{socketUrl}}'
+        protocol: socketio
+        event: echo
+        message: |-
+          {
+            "hello": "world"
+          }
+        headers: []
+        id: 1781499764769-2i8rh8h
+      - type: websocket
+        name: Ping
+        documentation: Emit `ping` and receive `pong { timestamp }`.
+        tags:
+          - socketio
+        url: '{{socketUrl}}'
+        protocol: socketio
+        event: ping
+        message: '{}'
+        headers: []
+        id: 89070fb6-e5f4-49a8-8bd3-34d119372859
+      - type: websocket
+        name: Broadcast
+        documentation: Emit `broadcast`; the server relays it to all clients.
+        tags:
+          - socketio
+        url: '{{socketUrl}}'
+        protocol: socketio
+        event: broadcast
+        message: |-
+          {
+            "text": "hello everyone"
+          }
+        headers: []
+        id: 62d2bf90-87ed-40aa-b97a-c7f318099dff
+      - type: http
+        name: Push to echo (HTTP)
+        documentation: |-
+          # Push to echo (HTTP)
+
+          Calls the mock's plain HTTP route `/emit` to push an event to every
+          connected client. Connect the **Echo** request first (listen on
+          `echo`), then run this — the pushed payload appears in Echo's stream.
+        tags:
+          - http
+          - trigger
+        method: GET
+        url: '{{socketUrl}}/emit'
+        headers: []
+        params:
+          - key: event
+            value:
+              type: string
+              value: echo
+            description: Event name to push to listeners
+          - key: data
+            value:
+              type: string
+              value: '{"hello":"from HTTP"}'
+            description: JSON payload to deliver
+        pathParams: []
+        id: 360e2010-ec01-4f7d-ba7f-0786cb62b709
+    id: d0c04fc1-a11f-459a-a25b-eb1791a50bf2
+    fileFormatVersion: 1
+_projectUuid: 370d3ca1-3211-4e4b-94f6-441c90c9a5de

@@ -32,6 +32,10 @@ import { DocumentationHost } from '../documentation/DocumentationHost'
 import { findOperationForRoute } from '../../../../shared/utils/findOperationForRoute'
 import { DEFAULT_WS_TIMEOUT_MS } from '../../../../shared/config/constants'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
+import { useIsWebsocketListening } from '../../services/websocketListeningStore'
+import { BeamWrap } from '../common/BeamWrap'
+import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import './WebSocketChat.css'
 
 export interface WebSocketRequestTabViewProps {
   request: WebSocketRequest
@@ -57,9 +61,14 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   const [url, setUrlState] = useState(request.url)
   const [event, setEventState] = useState(request.event ?? '')
   const [message, setMessageState] = useState(request.message)
-  const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<WebSocketResponse | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+  // Live frames for the current connection (appended as they arrive), so the
+  // chat updates in real time instead of only after the connection closes.
+  const [liveMessages, setLiveMessages] = useState<WebSocketMessage[]>([])
+  // Whether this request currently holds an open connection (drives the
+  // Connect↔Disconnect toggle, the Send button, and the listening beam).
+  const isListening = useIsWebsocketListening(request.id)
 
   // See HTTPRequestTabView for the contract.
   const [panelCollapsed, setPanelCollapsed] = useState<{ message: boolean; headers: boolean }>(() => {
@@ -92,6 +101,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     setEventState(request.event ?? '')
     setMessageState(request.message)
     setResponse(null)
+    setLiveMessages([])
   }, [request])
   useRequestReset(request, handleRequestReset)
 
@@ -118,6 +128,9 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     void window.restorm?.context.updateFullRequestData(requestId, {
       url: currentRequest.url,
       method: currentRequest.protocol,
+      protocol: currentRequest.protocol,
+      event: currentRequest.event,
+      message: currentRequest.message,
       requestType: 'websocket',
       headers: toKeyValueData(currentRequest.headers),
       body: { type: 'text', content: currentRequest.message }
@@ -175,11 +188,32 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     void window.restorm?.context.updateFullRequestData(request.id, {
       url,
       method: request.protocol,
+      protocol: request.protocol,
+      event,
+      message,
       requestType: 'websocket',
       headers: toKeyValueData(request.headers),
       body: { type: 'text', content: message }
     }, sourceIdRef.current)
-  }, [request.id, request.protocol, request.headers, url, message])
+  }, [request.id, request.protocol, request.event, request.headers, url, event, message])
+
+  // Live message + connection stream for this request: append frames as they
+  // arrive (chat updates in real time) and refresh history when it closes.
+  useEffect(() => {
+    const requestId = request.id
+    const unsubMsg = window.restorm?.websocket.onMessage(({ requestId: rid, message: m }) => {
+      if (rid !== requestId) return
+      setLiveMessages((prev) => [...prev, { direction: m.direction, data: m.data, event: m.event, timestamp: m.timestamp }])
+    })
+    const unsubProg = window.restorm?.websocket.onProgress(({ requestId: rid, status }) => {
+      if (rid !== requestId) return
+      if (status === 'started') setLiveMessages([])
+      if (status === 'completed' || status === 'cancelled' || status === 'error') {
+        setHistoryRefreshKey((k) => k + 1)
+      }
+    })
+    return () => { unsubMsg?.(); unsubProg?.() }
+  }, [request.id])
 
   // Sync state changes to reactive request object
   const setUrl = useCallback((value: string): void => {
@@ -209,18 +243,21 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     )
   }, [request])
 
-  const handleSend = (): void => {
-    if (isSending) return
-    setIsSending(true)
+  // Connect = open the connection and listen. It stays open (no timeout) until
+  // the user disconnects; the promise resolves on close. Emitting is a separate
+  // action (the Send button).
+  const handleConnect = (): void => {
+    if (isListening) return
+    setLiveMessages([])
     setResponse(null)
-    
+
     window.restorm?.websocket.connect({
       requestId: request.id,
       timeout: DEFAULT_WS_TIMEOUT_MS,
       ...(requestPath ? { requestPath } : {})
     })
       .then((res: WebSocketExecutionResult) => {
-        // Convert backend result to WebSocketResponse format
+        // Resolves when the connection closes (user disconnect or server drop).
         const wsResponse: WebSocketResponse = {
           id: `resp_${Date.now()}`,
           type: 'websocket',
@@ -240,24 +277,21 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         setResponse(wsResponse)
         setHistoryRefreshKey(prev => prev + 1)
         eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId: request.id } as RequestHistoryEventPayload)
-        logger.info('WebSocket request completed', { url: res.requestUrl, connected: res.connected })
+        logger.info('WebSocket connection closed', { url: res.requestUrl, connected: res.connected })
       })
       .catch((err: unknown) => {
-        logger.error('WebSocket request failed', { error: String(err) })
-      })
-      .finally(() => {
-        setIsSending(false)
+        logger.error('WebSocket connection failed', { error: String(err) })
       })
   }
-  
+
+  // Send = emit the current message/event on the open connection.
+  const handleSend = (): void => {
+    if (!isListening) return
+    void window.restorm?.websocket.send(request.id, message, event ? event : undefined)
+  }
+
   const handleDisconnect = (): void => {
     void window.restorm?.websocket.disconnect(request.id)
-  }
-  
-  const formatMessage = (msg: WebSocketMessage): string => {
-    const prefix = msg.direction === 'sent' ? '→' : '←'
-    const eventStr = msg.event ? `[${msg.event}] ` : ''
-    return `${prefix} ${eventStr}${msg.data}`
   }
 
   // Request content (SplitView with Message, Headers)
@@ -331,11 +365,58 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   // Use backend-provided code snippets
   const codeSnippetsContent = backendCodeSnippets || t('requestTab.codeSnippets.loading', 'Loading code snippets...')
 
+  // Chat-style transcript: received bubbles hug the left, sent bubbles the
+  // right. An acknowledgement frame (`<event> (ack)`) is not shown as its own
+  // bubble — it folds into a check badge on the originating sent bubble.
+  const renderChat = useCallback((messages: WebSocketMessage[]): React.ReactNode => {
+    interface ChatItem { direction: 'sent' | 'received'; data: string; event: string | undefined; acknowledged: boolean }
+    const items: ChatItem[] = []
+    for (const msg of messages) {
+      const ackMatch = msg.direction === 'received' && msg.event ? /^(.*) \(ack\)$/.exec(msg.event) : null
+      if (ackMatch) {
+        const baseEvent = ackMatch[1]
+        for (let j = items.length - 1; j >= 0; j--) {
+          const candidate = items[j]
+          if (candidate?.direction === 'sent' && !candidate.acknowledged && (candidate.event ?? '') === baseEvent) {
+            candidate.acknowledged = true
+            break
+          }
+        }
+        continue
+      }
+      items.push({ direction: msg.direction, data: msg.data, event: msg.event, acknowledged: false })
+    }
+    if (items.length === 0) {
+      return <div className="ws-chat-empty">{t('websocket.noMessages')}</div>
+    }
+    return (
+      <div className="ws-chat" data-testid="websocket-chat">
+        {items.map((item, i) => (
+          <div
+            key={i}
+            className={`ws-chat-bubble ${item.direction === 'sent' ? 'sent' : 'received'}`}
+            data-testid="ws-chat-bubble"
+            data-direction={item.direction}
+          >
+            {item.direction === 'sent' && item.acknowledged && (
+              <HeaderHoverTooltip label={t('websocket.acknowledged')} placement="above" className="ws-chat-ack-check">
+                <span className="codicon codicon-pass-filled" aria-label={t('websocket.acknowledged')} data-testid="ws-chat-ack-check" />
+              </HeaderHoverTooltip>
+            )}
+            {item.event && <span className="ws-chat-event">{item.event}</span>}
+            {item.data}
+          </div>
+        ))}
+      </div>
+    )
+  }, [t])
+
   const buildWebSocketResponseView = useCallback((
     resp: WebSocketResponse | null,
     meta?: { protocol?: string | undefined; event?: string | undefined }
   ) => {
-    const infosContent = resp ? (
+    if (!resp) return { infosContent: null, responseContent: null, jsonData: undefined }
+    const infosContent = (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }}>
         <div style={{ display: 'flex', gap: 8 }}>
           <span style={{ fontWeight: 600, minWidth: 100 }}>Status:</span>
@@ -343,10 +424,12 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
             {resp.connected ? t('websocket.connected') : t('websocket.disconnected')}
           </span>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <span style={{ fontWeight: 600, minWidth: 100 }}>Duration:</span>
-          <span>{resp.timings.durationMs}ms</span>
-        </div>
+        {resp.timings.durationMs > 0 && (
+          <div style={{ display: 'flex', gap: 8 }}>
+            <span style={{ fontWeight: 600, minWidth: 100 }}>Duration:</span>
+            <span>{resp.timings.durationMs}ms</span>
+          </div>
+        )}
         <div style={{ display: 'flex', gap: 8 }}>
           <span style={{ fontWeight: 600, minWidth: 100 }}>Protocol:</span>
           <span>{meta?.protocol ?? '-'}</span>
@@ -370,39 +453,30 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           </div>
         )}
       </div>
-    ) : null
+    )
 
-    const responseContent = resp && resp.messages.length > 0 ? (
-      <div style={{ height: '100%', overflow: 'auto', fontFamily: 'var(--editor-font-family)', fontSize: 12 }}>
-        {resp.messages.map((msg, i) => (
-          <div
-            key={i}
-            style={{
-              padding: '4px 8px',
-              marginBottom: 4,
-              borderRadius: 3,
-              background: msg.direction === 'sent' ? 'var(--editor-selectionBackground)' : 'var(--editor-inactiveSelectionBackground)',
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-all'
-            }}
-          >
-            {formatMessage(msg)}
-          </div>
-        ))}
-        {resp.messages.length === 0 && (
-          <div style={{ color: 'var(--descriptionForeground)' }}>
-            {t('websocket.noMessages')}
-          </div>
-        )}
-      </div>
-    ) : null
+    return { infosContent, responseContent: renderChat(resp.messages), jsonData: undefined }
+  }, [t, renderChat])
 
-    return { infosContent, responseContent, jsonData: undefined }
-  }, [t])
+  // Live view: prefer the streaming frames; fall back to the resolved response.
+  const liveResponse = useMemo<WebSocketResponse | null>(() => {
+    if (!isListening && liveMessages.length === 0) return response
+    return {
+      id: 'live',
+      type: 'websocket',
+      requestId: request.id,
+      requestUrl: resolvedUrl || url,
+      protocol: request.protocol,
+      connected: isListening || (response?.connected ?? false),
+      messages: liveMessages.length > 0 ? liveMessages : (response?.messages ?? []),
+      timings: response?.timings ?? { startedAt: '', durationMs: 0 },
+      ...(response?.error ? { error: response.error } : {})
+    }
+  }, [isListening, liveMessages, response, request.id, request.protocol, resolvedUrl, url])
 
   const { infosContent, responseContent } = useMemo(
-    () => buildWebSocketResponseView(response, { protocol: request.protocol, event: request.event }),
-    [buildWebSocketResponseView, response, request.protocol, request.event]
+    () => buildWebSocketResponseView(liveResponse, { protocol: request.protocol, event: request.event }),
+    [buildWebSocketResponseView, liveResponse, request.protocol, request.event]
   )
 
   const buildHistoryView = useCallback((detail: ResponseHistoryDetail) => {
@@ -442,17 +516,29 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         />
       </div>
       <SendButtonEnvSwitcher>
-        <Button
-          icon={isSending ? 'debug-disconnect' : 'plug'}
-          onClick={isSending ? handleDisconnect : handleSend}
-          {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-          options={{
-            title: isSending ? t('websocket.disconnect') : t('websocket.connect'),
-            ariaLabel: isSending ? t('websocket.disconnect') : t('websocket.connect')
-          }}
-          data-testid="websocket-connect-button"
-        />
+        <BeamWrap active={isListening} size={22} borderWidth={1.5}>
+          <Button
+            icon={isListening ? 'debug-disconnect' : 'plug'}
+            onClick={isListening ? handleDisconnect : handleConnect}
+            {...(isListening ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+            options={{
+              title: isListening ? t('websocket.disconnect') : t('websocket.connect'),
+              ariaLabel: isListening ? t('websocket.disconnect') : t('websocket.connect')
+            }}
+            data-testid="websocket-connect-button"
+          />
+        </BeamWrap>
       </SendButtonEnvSwitcher>
+      {request.protocol === 'socketio' && (
+        <Button
+          icon="send"
+          onClick={handleSend}
+          disabled={!isListening}
+          emphasis={1}
+          options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}
+          data-testid="websocket-send-button"
+        />
+      )}
     </ControlGroup>
   )
   
@@ -481,8 +567,8 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         {...(apiDocumentation && route && findOperationForRoute(apiDocumentation, route) ? { docsContent: <DocumentationHost apiDocumentation={apiDocumentation} filters={[route]} /> } : {})}
         notes={request.notes}
         onNotesChange={(md): void => { updateReactiveProperty(request, 'notes', md) }}
-        isLoading={isSending}
-        showResponse={response !== null}
+        isLoading={false}
+        showResponse={isListening || liveMessages.length > 0 || response !== null}
         infosContent={infosContent}
         responseContent={responseContent}
       />

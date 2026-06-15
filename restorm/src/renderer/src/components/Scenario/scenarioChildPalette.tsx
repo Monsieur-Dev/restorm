@@ -47,7 +47,31 @@ export const SCENARIO_ADD_SCENARIO_ENTRY: ScenarioAddEntry = {
   kind: 'scenario', badge: 'SCENARIO', labelKey: 'sidebar.contextMenu.add.scenario', defaultLabel: 'Scenario'
 }
 
+/** Socket.IO scenario ACTION entries (a section of the "Add" submenu). Unlike
+ * the request groups, these don't create a request — they drop the matching
+ * scenario action node directly. Their badge is the green "SIO" pill with the
+ * action's codicon inside (connect / send / close). */
+export interface ScenarioAddActionEntry {
+  /** The scenario node kind to create. */
+  kind: 'socketioConnect' | 'socketioSend' | 'socketioClose'
+  /** Codicon glyph shown inside the SIO badge. */
+  icon: string
+  labelKey: string
+  defaultLabel: string
+}
+
+export const SCENARIO_ADD_SOCKETIO_ACTIONS: ScenarioAddActionEntry[] = [
+  { kind: 'socketioConnect', icon: 'plug', labelKey: 'scenario.nodes.socketioConnect', defaultLabel: 'Socket.IO connect' },
+  { kind: 'socketioSend', icon: 'arrow-up', labelKey: 'scenario.nodes.socketioSend', defaultLabel: 'Socket.IO send' },
+  { kind: 'socketioClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.socketioClose', defaultLabel: 'Socket.IO close' }
+]
+
 /** The protocol/scenario badge glyph for a palette entry. */
 export function scenarioAddIcon(badge: BadgeType): ReactNode {
   return React.createElement(Badge, { type: badge })
+}
+
+/** The green "SIO" badge with the action's codicon inside (Socket.IO section). */
+export function scenarioAddSocketioIcon(icon: string): ReactNode {
+  return React.createElement(Badge, { type: 'SIO', icon })
 }

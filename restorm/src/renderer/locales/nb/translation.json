@@ -432,7 +432,9 @@
     "tabs": {
       "message": "Melding",
       "headers": "Headere"
-    }
+    },
+    "acknowledged": "Bekreftet",
+    "disconnect": "Koble fra"
   },
   "search": {
     "placeholder": "Søk...",
@@ -951,7 +953,10 @@
       "readFile": "Read file",
       "writeFile": "Write file",
       "timer": "Tidsur",
-      "code": "Kode"
+      "code": "Kode",
+      "socketioConnect": "Socket.IO connect",
+      "socketioSend": "Socket.IO send",
+      "socketioClose": "Socket.IO close"
     },
     "comparator": {
       "result": "resultat"
@@ -1486,7 +1491,10 @@
       "writeFile": "Writes or appends text to a file.",
       "throw": "Deliberately fails with a message (for error branches and tests).",
       "log": "Writes a message to the run log and passes the value through.",
-      "assert": "Checks a condition (chai-style) and routes to pass or fail."
+      "assert": "Checks a condition (chai-style) and routes to pass or fail.",
+      "socketioConnect": "Opens a Socket.IO connection and re-emits each received event on its port.",
+      "socketioSend": "Sends a message on an already-open Socket.IO connection.",
+      "socketioClose": "Closes an already-open Socket.IO connection."
     },
     "legend": {
       "title": "Forklaring",
@@ -1514,6 +1522,19 @@
       "allLogs": "All logs",
       "note": "`--out file` also writes the run-log to a file.",
       "projectPlaceholder": "<project.restorm>"
+    },
+    "socketio": {
+      "connectionNameLabel": "Connection name",
+      "connectionNamePlaceholder": "connection name",
+      "eventPlaceholder": "event",
+      "addEvent": "Add event",
+      "connected": "connected",
+      "others": "others",
+      "connection": "connection",
+      "pickConnection": "— pick a connection —",
+      "channelLabel": "Channel name",
+      "payload": "payload",
+      "payloadModalTitle": "Edit payload"
     }
   }
 }

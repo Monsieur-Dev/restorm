@@ -40,6 +40,7 @@ import { LogNodeBox, AssertNodeBox, NowNodeBox } from './UtilityNodeBoxes'
 import { SchemaNodeBox, ReadFileNodeBox, WriteFileNodeBox } from './IoNodeBoxes'
 import { TimerNodeBox } from './TimerNodeBox'
 import { CodeNodeBox } from './CodeNodeBox'
+import { SocketioConnectNodeBox, SocketioSendNodeBox, SocketioCloseNodeBox } from './SocketioNodeBoxes'
 
 export type { ScenarioNodeBoxData, ScenarioNodeBoxType, ScenarioNodeCell } from './ScenarioNodeBoxBase'
 export { ScenarioNodeBoxBase } from './ScenarioNodeBoxBase'
@@ -59,6 +60,9 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   switch: SwitchNodeBox,
   httpRequest: RequestNodeBox,
   runScenario: RunScenarioNodeBox,
+  socketioConnect: SocketioConnectNodeBox,
+  socketioSend: SocketioSendNodeBox,
+  socketioClose: SocketioCloseNodeBox,
   forEach: ForEachNodeBox,
   for: ForNodeBox,
   while: WhileNodeBox,

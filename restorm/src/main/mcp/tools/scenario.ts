@@ -17,13 +17,14 @@ import { McpService } from 'electron-core-ui'
 import { collectionStore } from '../../services/CollectionStore'
 import type { Scenario } from '../../../shared/models/Scenario'
 import type { ScenarioNode, ScenarioEdge, ScenarioNodeKind, ScenarioPort } from '../../../shared/types/scenario'
-import { defaultPortsForKind, isValidScenarioConnection, outputPortFlow, inputPortFlow, deriveRunScenarioPorts } from '../../../shared/scenarioNodePorts'
+import { defaultPortsForKind, isValidScenarioConnection, outputPortFlow, inputPortFlow, deriveRunScenarioPorts, socketioConnectEventPorts } from '../../../shared/scenarioNodePorts'
 import { SCENARIO_KIND_DOCS, VALUE_TYPE_DOCS } from '../../../shared/scenarioKindDocs'
 import { STATIC_PREVIEW_KINDS, staticScenarioPreview, singleDeepPath, singleTopLevelKey, portPreviewValue, expectsObjectInput, type StaticPreviewEdge } from '../../../shared/utils/scenarioStaticPreview'
 import { broadcastTreeReplace } from './import'
 
 const SCENARIO_KINDS = [
-  'input', 'output', 'if', 'switch', 'httpRequest', 'runScenario', 'forEach', 'for', 'while', 'doWhile',
+  'input', 'output', 'if', 'switch', 'httpRequest', 'runScenario',
+  'socketioConnect', 'socketioSend', 'socketioClose', 'forEach', 'for', 'while', 'doWhile',
   'aggregate', 'map', 'filter', 'addToList', 'removeFromList', 'wait', 'waitUntil', 'now', 'timer', 'arithmetic', 'comparator', 'boolean', 'object',
   'setVariable', 'getVariable', 'transform', 'code', 'cast', 'regex', 'json', 'xml', 'yaml', 'crypto', 'jwt', 'datetime',
   'objectOp', 'url', 'random', 'listOp', 'csv', 'math', 'schema', 'readFile', 'writeFile', 'retry', 'log', 'assert', 'throw'
@@ -61,6 +62,12 @@ function effectivePorts(node: ScenarioNode): { inputs: ScenarioPort[]; outputs: 
     const sub = subId ? findScenario(subId) : null
     const derived = deriveRunScenarioPorts(sub as unknown as Parameters<typeof deriveRunScenarioPorts>[0])
     return { inputs: [...node.inputs, ...derived.inputs], outputs: [...node.outputs, ...derived.outputs] }
+  }
+  if (node.kind === 'socketioConnect') {
+    // The listened-event ports are derived from `config.events` (switch-like),
+    // so authoring can wire a specific event without them being persisted on the
+    // node's `outputs` array.
+    return { inputs: node.inputs, outputs: [...node.outputs, ...socketioConnectEventPorts(node.config)] }
   }
   if (node.kind === 'httpRequest' || node.kind === 'request') {
     // Each writable slot of the bound request (path param / header /

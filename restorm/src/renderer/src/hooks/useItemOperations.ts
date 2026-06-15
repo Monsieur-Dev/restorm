@@ -5,10 +5,10 @@
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ListViewDropEventPayload, ListViewItemEventPayload } from 'electron-core-ui/renderer'
-import { isTabGroupNode } from 'electron-core-ui/renderer'
+import { isTabGroupNode, isContainerNode } from 'electron-core-ui/renderer'
 import type { Environment, Folder, EnvironmentFolder, Request, FolderItem } from '../../../shared/types/collections'
 import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
-import { isAnyFolder, isScenario } from '../../../shared/types/collections'
+import { isAnyFolder, isScenario, isEnvironmentFolder, isFolder, isRequest } from '../../../shared/types/collections'
 import {
   HTTPRequest,
   GraphQLRequest,
@@ -189,7 +189,22 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
 
     // Force React re-render by creating new reference
     setRootItems((prevItems) => [...prevItems])
-  }, [rootItems, setRootItems, t])
+
+    // Open the clone in the workbench, as a click on it would.
+    const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, clonedItem.id)
+    if (breadcrumbs.length > 0) {
+      if (isScenario(clonedItem)) {
+        openScenarioEditorTab(clonedItem, breadcrumbs)
+      } else if (isEnvironmentFolder(clonedItem)) {
+        openEnvironmentFolderTab(clonedItem, breadcrumbs)
+      } else if (isFolder(clonedItem)) {
+        openFolderTab(clonedItem, breadcrumbs)
+      } else if (isRequest(clonedItem)) {
+        const envs = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
+        openAnyRequestTab(clonedItem, breadcrumbs, envs)
+      }
+    }
+  }, [rootItems, setRootItems, t, openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab])
 
   // Handle "Delete" context menu action - show confirmation
   const handleDeleteItem = useCallback((itemId: string) => {
@@ -230,34 +245,41 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       setRootItems((prev) => prev.filter((f) => f.id !== itemId))
     }
 
-    // Close any tabs that reference the deleted item (all groups)
-    setWorkbenchTree((prevTree) => {
-      const updatedGroups = prevTree.groups.map((group) => {
-        if (!isTabGroupNode(group)) return group
-
-        const filteredTabs = group.tabs.filter((tab) => {
-          const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
-
-          if (restormTab.tabType === 'folder' && restormTab.folder.id === itemId) return false
-          if (restormTab.tabType === 'environment-folder' && restormTab.folder.id === itemId) return false
-          if (restormTab.tabType === 'http-request' && restormTab.request.id === itemId) return false
-
-          if (restormTab.breadcrumbs?.some((bc) => bc.id === itemId)) return false
-
-          return true
-        })
-
-        let newActiveTabId: string = group.activeTabId ?? ''
-        if (!filteredTabs.some((t) => t.id === group.activeTabId)) {
-          const firstTabId = filteredTabs[0]?.id
-          newActiveTabId = firstTabId ?? ''
+    // Close any tabs that reference the deleted item — in EVERY group,
+    // including tab-groups nested inside split containers (a tab dragged into
+    // a lower group must still close). Recurse into container nodes and prune
+    // emptied tab-groups + emptied containers.
+    const tabReferencesDeleted = (tab: EditorTab): boolean => {
+      const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
+      if (restormTab.tabType === 'folder' && restormTab.folder.id === itemId) return true
+      if (restormTab.tabType === 'environment-folder' && restormTab.folder.id === itemId) return true
+      if (restormTab.tabType === 'http-request' && restormTab.request.id === itemId) return true
+      if (restormTab.breadcrumbs?.some((bc) => bc.id === itemId)) return true
+      return false
+    }
+    const pruneGroups = (nodes: WorkbenchTree['groups']): WorkbenchTree['groups'] => {
+      const result: WorkbenchTree['groups'] = []
+      for (const node of nodes) {
+        if (isContainerNode(node)) {
+          const prunedChildren = pruneGroups(node.groups)
+          if (prunedChildren.length > 0) result.push({ ...node, groups: prunedChildren })
+          continue
         }
-
-        return { ...group, tabs: filteredTabs, activeTabId: newActiveTabId }
-      }).filter((group) => !isTabGroupNode(group) || group.tabs.length > 0)
-
-      return { ...prevTree, groups: updatedGroups }
-    })
+        if (!isTabGroupNode(node)) {
+          result.push(node)
+          continue
+        }
+        const filteredTabs = node.tabs.filter((tab) => !tabReferencesDeleted(tab))
+        if (filteredTabs.length === 0) continue
+        let newActiveTabId: string = node.activeTabId ?? ''
+        if (!filteredTabs.some((t) => t.id === node.activeTabId)) {
+          newActiveTabId = filteredTabs[0]?.id ?? ''
+        }
+        result.push({ ...node, tabs: filteredTabs, activeTabId: newActiveTabId })
+      }
+      return result
+    }
+    setWorkbenchTree((prevTree) => ({ ...prevTree, groups: pruneGroups(prevTree.groups) }))
 
     // Force React re-render
     setRootItems((prevItems) => [...prevItems])

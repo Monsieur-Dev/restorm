@@ -4,9 +4,9 @@ import type { ExecResult } from '../types'
 
 /**
  * `wait` / `waitUntil` sleep cooperatively: they resolve after a timer,
- * scale a wired duration by the node's unit, pass the trigger value
- * through, and reject (so the scheduler routes/aborts) on cancellation.
- * Fake timers keep the suite instant.
+ * scale a wired duration by the node's unit, emit NO value output (sequencing is
+ * the universal `done` port), and reject (so the scheduler aborts) on
+ * cancellation. Fake timers keep the suite instant.
  */
 
 function makeCtx(signal: AbortSignal, config: Record<string, unknown>): never {
@@ -28,14 +28,14 @@ beforeEach(() => { vi.useFakeTimers() })
 afterEach(() => { vi.useRealTimers() })
 
 describe('waitExecutor', () => {
-  it('scales a wired duration by the input unit (s → ms) and passes the trigger through', async () => {
+  it('scales a wired duration by the input unit (s → ms) and emits no value output', async () => {
     const p = waitExecutor(act({ duration: 2, in: 'sig' }), makeCtx(new AbortController().signal, { inputUnit: 's' })) as Promise<ExecResult>
     let done = false
     void p.then(() => { done = true })
     await vi.advanceTimersByTimeAsync(1999)
     expect(done).toBe(false)
     await vi.advanceTimersByTimeAsync(1)
-    expect(await p).toEqual({ outputs: [{ port: 'out', value: 'sig' }] })
+    expect(await p).toEqual({ outputs: [] })
   })
 
   it('throws when the wired duration is null (no silent default)', () => {
@@ -69,7 +69,7 @@ describe('waitUntilExecutor', () => {
     const past = new Date(Date.now() - 5000).toISOString()
     const p = waitUntilExecutor(act({ until: past, in: 'sig' }), makeCtx(new AbortController().signal, {})) as Promise<ExecResult>
     await vi.advanceTimersByTimeAsync(0)
-    expect(await p).toEqual({ outputs: [{ port: 'out', value: 'sig' }] })
+    expect(await p).toEqual({ outputs: [] })
   })
 
   it('waits until an epoch-ms target', async () => {

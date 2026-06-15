@@ -29,6 +29,7 @@ import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { AuthenticationConfigurationTab } from './AuthenticationConfigurationTab'
 import { Badge } from '../common/Badge'
+import { BeamWrap } from '../common/BeamWrap'
 import { mapToBadgeType } from '../../utils/badgeUtils'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
@@ -954,24 +955,29 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
           data-testid="http-request-url-input"
         />
       </div>
-      {isSending ? (
-        <Button
-          icon="close"
-          onClick={handleCancel}
-          options={{ title: t('requestTab.cancel'), ariaLabel: t('requestTab.cancel') }}
-          data-testid="http-request-cancel-button"
-        />
-      ) : (
-        <SendButtonEnvSwitcher>
+      {/* One persistent BeamWrap around both states so the beam finishes its
+       * lap when the request ends (the cancel↔send toggle inside doesn't remount
+       * the wrapper, which would otherwise cut the beam mid-orbit). */}
+      <BeamWrap active={isSending} size={22} borderWidth={1.5}>
+        {isSending ? (
           <Button
-            icon="send"
-            onClick={handleSend}
-            {...(sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-            options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}
-            data-testid="http-request-send-button"
+            icon="close"
+            onClick={handleCancel}
+            options={{ title: t('requestTab.cancel'), ariaLabel: t('requestTab.cancel') }}
+            data-testid="http-request-cancel-button"
           />
-        </SendButtonEnvSwitcher>
-      )}
+        ) : (
+          <SendButtonEnvSwitcher>
+            <Button
+              icon="send"
+              onClick={handleSend}
+              {...(sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+              options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}
+              data-testid="http-request-send-button"
+            />
+          </SendButtonEnvSwitcher>
+        )}
+      </BeamWrap>
     </ControlGroup>
     </div>
   )
