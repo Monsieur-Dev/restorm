@@ -32,6 +32,7 @@ A new kind `foo` is done when all of these are true:
 - [ ] **8. Static preview** — opt into `STATIC_PREVIEW` in `src/shared/scenarioNodeCapabilities.ts` and/or `applyListOp` + the preview `switch` in `src/shared/utils/scenarioStaticPreview.ts`, plus the inspector wiring in `ScenarioEditorView.tsx` if it consumes an `items` list.
 - [ ] **9. MCP** — `foo` added to `SCENARIO_KINDS` in `src/main/mcp/tools/scenario.ts`, AND a `SCENARIO_KIND_DOCS` entry in `src/shared/scenarioKindDocs.ts` (purpose + config keys — `Record<ScenarioNodeKind>`, type-enforced) so `describe_scenario_kinds` exposes it to MCP clients.
 - [ ] **9b. Help text** — a user-facing `scenario.help.foo` in **every** locale (see step 10): the inspector's "what this action does" line for a selected box. Seed `en` from the MCP `summary` (but friendlier / shorter), translate `fr` in vouvoiement. `scenarioNodeHelp.test.ts` fails until every kind has one.
+- [ ] **9c. Role-aware help** — if the action behaves differently as a SERVER vs a client (e.g. connect → "starts a server" vs "opens a connection"; send → "broadcasts to clients"; close → "stops the server"), add a `scenario.help.fooServer` per-role variant and have the inspector pick it via `helpKey` when the bound (or referenced) request is a server. See step 10 → "Role-aware help text".
 - [ ] **10. i18n** — port/field labels **and the `scenario.help.foo` help text** added to **every** locale under `src/renderer/locales/*/translation.json` (see step 10).
 - [ ] **11. Tests** — a `*.test.ts` exercising the executor + (if it fans out) an end-to-end scheduler run.
 - [ ] **12. Lint + typecheck + tests** green: `npm run lint && npm run typecheck && npx vitest run src/main/scenarioEngine`.
@@ -193,6 +194,33 @@ match the surrounding tone); for languages you cannot translate, still add the
 small Node script that parses each file, sets the keys, and re-serialises with
 `JSON.stringify(obj, null, 2) + "\n"` keeps the diff additive (the files are
 all 2-space + trailing-newline).
+
+### Role-aware help text (server vs client actions)
+
+A single kind can describe **two roles** — e.g. a connect node bound to a
+client request *opens a connection*, but bound to a SERVER request (restorm
+hosts it) it *starts a server*. A "what this action does" written for one role
+is wrong for the other. When a kind is role-dependent, ship a **per-role help
+text**, don't settle for a one-size-fits-all blurb:
+
+1. **Add a role-specific key** alongside the default — e.g.
+   `scenario.help.<kind>Server` next to `scenario.help.<kind>` — in **every**
+   locale, describing the server behaviour in its own terms ("starts a server
+   on port + route", "ACKs every received event", "broadcasts to connected
+   clients"). The inspector resolves `scenario.help.${helpKey ?? kind}`, so the
+   editor just sets `helpKey = '<kind>Server'` on the preview node when the
+   bound request is a server (see `ScenarioEditorView`'s `previewNode` memo +
+   `InspectorPreviewNode.helpKey`). Never overload the `kind` itself — the
+   override key keeps the default intact.
+
+2. **Propagate the role to the satellite actions.** A connect node's *send* and
+   *close* siblings reference the connection by node id, so they inherit its
+   role: a send on a server connection *broadcasts to clients* (not "sends on a
+   connection"), and a close *stops the server* (not "closes a connection").
+   Resolve the referenced connection node → its bound request → role, and pick
+   `scenario.help.<sendKind>Server` / `<closeKind>Server` the same way. Don't
+   leave the dependent actions describing the client role when the connection
+   they act on is a server.
 
 ## Step 11 — Tests
 

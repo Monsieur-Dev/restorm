@@ -246,7 +246,8 @@
         "websocket": "WebSocket 요청",
         "odata": "OData 요청",
         "auth": "HTTP 인증 요청",
-        "scenario": "시나리오"
+        "scenario": "시나리오",
+        "socketioServer": "Socket.IO 서버"
       }
     },
     "deleteConfirm": {
@@ -445,7 +446,10 @@
       "headers": "헤더"
     },
     "acknowledged": "확인됨",
-    "disconnect": "연결 끊기"
+    "disconnect": "연결 끊기",
+    "startListening": "수신 시작",
+    "stopListening": "수신 중지",
+    "routePlaceholder": "경로 (선택)"
   },
   "search": {
     "placeholder": "검색...",
@@ -1517,7 +1521,10 @@
       "websocketClose": "Closes an already-open WebSocket connection.",
       "grpcConnect": "Opens a streaming gRPC call and re-emits each received frame on its message port.",
       "grpcSend": "Writes a request message on an already-open streaming gRPC call.",
-      "grpcClose": "Half-closes an already-open streaming gRPC call."
+      "grpcClose": "Half-closes an already-open streaming gRPC call.",
+      "socketioConnectServer": "Socket.IO 서버(포트 + 경로)를 시작합니다. 수신한 각 이벤트를 확인 응답하고 해당 포트로 다시 전송합니다. 보내기는 연결된 클라이언트에 브로드캐스트합니다.",
+      "socketioSendServer": "참조된 Socket.IO 서버에 연결된 모든 클라이언트에 메시지를 브로드캐스트합니다.",
+      "socketioCloseServer": "참조된 Socket.IO 서버를 중지하고 해당 클라이언트의 연결을 끊습니다."
     },
     "legend": {
       "title": "범례",
@@ -1557,7 +1564,8 @@
       "pickConnection": "— pick a connection —",
       "channelLabel": "Channel name",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload"
+      "payloadModalTitle": "Edit payload",
+      "started": "시작됨"
     },
     "websocket": {
       "message": "message"

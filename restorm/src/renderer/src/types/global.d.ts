@@ -485,6 +485,8 @@ export interface FullRequestData {
   protocol?: string | undefined
   event?: string | undefined
   message?: string | undefined
+  /** WebSocket/Socket.IO: when true, restorm HOSTS a server instead of connecting. */
+  server?: boolean | undefined
 }
 
 export {}

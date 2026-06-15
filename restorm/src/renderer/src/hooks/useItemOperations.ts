@@ -410,6 +410,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       case 'grpc-bidi': return 'New gRPC bidirectional request'
       case 'soap': return 'New SOAP request'
       case 'websocket': return 'New WebSocket request'
+      case 'socketio-server': return 'New Socket.IO server'
       case 'odata': return 'New OData request'
       case 'auth': return 'New auth request'
       case 'scenario': return 'New scenario'
@@ -535,6 +536,10 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         built = new SoapRequest({ id, name })
       } else if (kind === 'websocket') {
         built = new WebSocketRequest({ id, name })
+      } else if (kind === 'socketio-server') {
+        // restorm acts as a Socket.IO server: socketio protocol + server flag,
+        // host forced to localhost, default port pre-filled.
+        built = new WebSocketRequest({ id, name, protocol: 'socketio', server: true, url: 'localhost:3001' })
       } else if (kind === 'odata') {
         built = new ODataRequest({ id, name })
       } else {

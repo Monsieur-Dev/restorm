@@ -178,8 +178,11 @@ export class ScenarioEngine {
           flushRequestStateToContext(bound as unknown as Parameters<typeof flushRequestStateToContext>[0])
         }
         if (req.transport === 'grpc') return grpcExecutionService.connectStreaming(req)
-        return req.transport === 'websocket'
-          ? websocketExecutionService.connectStreamingRaw(req)
+        if (req.transport === 'websocket') return websocketExecutionService.connectStreamingRaw(req)
+        // Socket.IO: a request flagged `server` HOSTS the server (restorm acts as
+        // the server); otherwise it connects as a client.
+        return (bound as { server?: boolean } | undefined)?.server === true
+          ? websocketExecutionService.connectStreamingServer(req)
           : websocketExecutionService.connectStreaming(req)
       },
       runSubScenario: async (subId, params, subParentSignal) => {

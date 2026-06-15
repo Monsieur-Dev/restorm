@@ -115,8 +115,8 @@ export function useFavoritesAndOpenItems(
   const renderOptions = useMemo(() => ({
     expandedIds: new Set<string>(),
     renderMethodBadge: (method: string) => React.createElement(Badge, { type: mapToBadgeType(method) }),
-    renderProtocolBadge: (protocol: string, label?: string) =>
-      React.createElement(Badge, { type: mapToBadgeType(protocol), label }),
+    renderProtocolBadge: (protocol: string, label?: string, mode?: 'client' | 'server') =>
+      React.createElement(Badge, { type: mapToBadgeType(protocol), label, mode }),
     renderRemovedTitle: (name: string) =>
       React.createElement('span', { style: { textDecoration: 'line-through', opacity: 0.6 } }, name)
   }), [])

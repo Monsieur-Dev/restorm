@@ -247,7 +247,8 @@
         "websocket": "WebSocket-pyyntö",
         "odata": "OData-pyyntö",
         "auth": "HTTP-todennuspyyntö",
-        "scenario": "Skenaario"
+        "scenario": "Skenaario",
+        "socketioServer": "Socket.IO-palvelin"
       }
     },
     "deleteConfirm": {
@@ -446,7 +447,10 @@
       "headers": "Otsakkeet"
     },
     "acknowledged": "Vahvistettu",
-    "disconnect": "Katkaise yhteys"
+    "disconnect": "Katkaise yhteys",
+    "startListening": "Aloita kuuntelu",
+    "stopListening": "Lopeta kuuntelu",
+    "routePlaceholder": "Reitti (valinnainen)"
   },
   "search": {
     "placeholder": "Etsi...",
@@ -1518,7 +1522,10 @@
       "websocketClose": "Closes an already-open WebSocket connection.",
       "grpcConnect": "Opens a streaming gRPC call and re-emits each received frame on its message port.",
       "grpcSend": "Writes a request message on an already-open streaming gRPC call.",
-      "grpcClose": "Half-closes an already-open streaming gRPC call."
+      "grpcClose": "Half-closes an already-open streaming gRPC call.",
+      "socketioConnectServer": "Käynnistää Socket.IO-palvelimen (portti + reitti); kuittaa jokaisen vastaanotetun tapahtuman ja lähettää sen uudelleen portissaan. Lähetys lähettää yhdistetyille asiakkaille.",
+      "socketioSendServer": "Lähettää viestin kaikille viitattuun Socket.IO-palvelimeen yhdistetyille asiakkaille.",
+      "socketioCloseServer": "Pysäyttää viitatun Socket.IO-palvelimen ja katkaisee sen asiakkaiden yhteydet."
     },
     "legend": {
       "title": "Selite",
@@ -1558,7 +1565,8 @@
       "pickConnection": "— pick a connection —",
       "channelLabel": "Channel name",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload"
+      "payloadModalTitle": "Edit payload",
+      "started": "käynnistetty"
     },
     "websocket": {
       "message": "message"

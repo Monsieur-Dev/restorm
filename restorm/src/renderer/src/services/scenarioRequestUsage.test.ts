@@ -4,7 +4,8 @@ import {
   findScenariosUsingRequest,
   findScenariosUsingScenario,
   isRequestInScenarioSubtree,
-  collectRequestScenarioRelations
+  collectRequestScenarioRelations,
+  requestScenarioDeleteUsages
 } from './scenarioRequestUsage'
 
 // Minimal fixtures — only the fields the walkers read. An env-folder (which
@@ -173,5 +174,23 @@ describe('collectRequestScenarioRelations', () => {
 
   it('returns nothing for a request unrelated to any scenario', () => {
     expect(collectRequestScenarioRelations(rootItems, 'req-absent')).toHaveLength(0)
+  })
+})
+
+describe('requestScenarioDeleteUsages (delete-dialog trigger)', () => {
+  it('keeps a box-bound request (the dialog should fire)', () => {
+    const rel = requestScenarioDeleteUsages(rootItems, 'req-bound')
+    expect(rel).toHaveLength(1)
+    expect(rel[0]?.nodeIds).toEqual(['n1', 'n2'])
+  })
+
+  it('drops a subtree-only child request with no box (no dialog — it deletes normally)', () => {
+    // A request merely filed under a scenario folder, wired into no box, is not
+    // a usage: deleting it must NOT raise the "used in scenarios" dialog.
+    expect(requestScenarioDeleteUsages(rootItems, 'req-child')).toHaveLength(0)
+  })
+
+  it('returns nothing for a request unrelated to any scenario', () => {
+    expect(requestScenarioDeleteUsages(rootItems, 'req-absent')).toHaveLength(0)
   })
 })

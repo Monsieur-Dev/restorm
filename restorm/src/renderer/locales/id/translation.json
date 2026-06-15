@@ -246,7 +246,8 @@
         "websocket": "Permintaan WebSocket",
         "odata": "Permintaan OData",
         "auth": "Permintaan autentikasi HTTP",
-        "scenario": "Skenario"
+        "scenario": "Skenario",
+        "socketioServer": "Server Socket.IO"
       }
     },
     "deleteConfirm": {
@@ -445,7 +446,10 @@
       "headers": "Header"
     },
     "acknowledged": "Dikonfirmasi",
-    "disconnect": "Putuskan koneksi"
+    "disconnect": "Putuskan koneksi",
+    "startListening": "Mulai mendengarkan",
+    "stopListening": "Berhenti mendengarkan",
+    "routePlaceholder": "Rute (opsional)"
   },
   "search": {
     "placeholder": "Cari...",
@@ -1517,7 +1521,10 @@
       "websocketClose": "Closes an already-open WebSocket connection.",
       "grpcConnect": "Opens a streaming gRPC call and re-emits each received frame on its message port.",
       "grpcSend": "Writes a request message on an already-open streaming gRPC call.",
-      "grpcClose": "Half-closes an already-open streaming gRPC call."
+      "grpcClose": "Half-closes an already-open streaming gRPC call.",
+      "socketioConnectServer": "Memulai server Socket.IO (port + rute); mengakui setiap peristiwa yang diterima dan memancarkannya kembali di portnya. Kirim menyiarkan ke klien yang terhubung.",
+      "socketioSendServer": "Menyiarkan pesan ke setiap klien yang terhubung ke server Socket.IO yang dirujuk.",
+      "socketioCloseServer": "Menghentikan server Socket.IO yang dirujuk dan memutuskan koneksi kliennya."
     },
     "legend": {
       "title": "Legenda",
@@ -1557,7 +1564,8 @@
       "pickConnection": "— pick a connection —",
       "channelLabel": "Channel name",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload"
+      "payloadModalTitle": "Edit payload",
+      "started": "dimulai"
     },
     "websocket": {
       "message": "message"

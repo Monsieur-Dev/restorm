@@ -40,6 +40,7 @@ export type AddChildKind =
   | 'grpc-bidi'
   | 'soap'
   | 'websocket'
+  | 'socketio-server'
   | 'odata'
   | 'auth'
   | 'scenario'
@@ -158,6 +159,12 @@ export const buildAddSubmenu = (
     label: t('sidebar.contextMenu.add.websocket'),
     icon: React.createElement(Badge, { type: 'WS' }),
     onClick: () => { onAddChildItem(parentId, 'websocket') }
+  },
+  {
+    id: `add-socketio-server-${parentId}`,
+    label: t('sidebar.contextMenu.add.socketioServer'),
+    icon: React.createElement(Badge, { type: 'SIO', mode: 'server' }),
+    onClick: () => { onAddChildItem(parentId, 'socketio-server') }
   },
   {
     id: `add-odata-${parentId}`,

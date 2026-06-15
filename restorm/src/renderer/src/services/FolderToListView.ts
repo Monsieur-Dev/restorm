@@ -42,8 +42,10 @@ export interface FolderToListViewOptions {
   expandedIds: Set<string>
   /** Function to render HTTP method badge as leftActions */
   renderMethodBadge: (method: string) => ReactNode
-  /** Function to render protocol badge as leftActions */
-  renderProtocolBadge?: (protocol: string, label?: string) => ReactNode
+  /** Function to render protocol badge as leftActions. `mode` lets a request
+   * that restorm HOSTS (server) render the uniform server variant of its
+   * protocol badge. */
+  renderProtocolBadge?: (protocol: string, label?: string, mode?: 'client' | 'server') => ReactNode
   /** Function to render removed-from-spec request title — strikethrough. */
   renderRemovedTitle?: (name: string) => ReactNode
   /** Set of request ids whose URL resolves to a deprecated operation
@@ -162,7 +164,7 @@ function websocketRequestToListViewItem(
   request: WebSocketRequest,
   options: FolderToListViewOptions
 ): ListViewItemData {
-  const badge = options.renderProtocolBadge?.(request.protocol)
+  const badge = options.renderProtocolBadge?.(request.protocol, undefined, request.server === true ? 'server' : undefined)
   return {
     id: request.id,
     title: request.name,

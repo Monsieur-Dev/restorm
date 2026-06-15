@@ -246,7 +246,8 @@
         "websocket": "Yêu cầu WebSocket",
         "odata": "Yêu cầu OData",
         "auth": "Yêu cầu xác thực HTTP",
-        "scenario": "Kịch bản"
+        "scenario": "Kịch bản",
+        "socketioServer": "Máy chủ Socket.IO"
       }
     },
     "deleteConfirm": {
@@ -445,7 +446,10 @@
       "headers": "Header"
     },
     "acknowledged": "Đã xác nhận",
-    "disconnect": "Ngắt kết nối"
+    "disconnect": "Ngắt kết nối",
+    "startListening": "Bắt đầu lắng nghe",
+    "stopListening": "Dừng lắng nghe",
+    "routePlaceholder": "Tuyến (tùy chọn)"
   },
   "search": {
     "placeholder": "Tìm kiếm...",
@@ -1517,7 +1521,10 @@
       "websocketClose": "Closes an already-open WebSocket connection.",
       "grpcConnect": "Opens a streaming gRPC call and re-emits each received frame on its message port.",
       "grpcSend": "Writes a request message on an already-open streaming gRPC call.",
-      "grpcClose": "Half-closes an already-open streaming gRPC call."
+      "grpcClose": "Half-closes an already-open streaming gRPC call.",
+      "socketioConnectServer": "Khởi động máy chủ Socket.IO (cổng + tuyến); xác nhận mỗi sự kiện nhận được và phát lại trên cổng của nó. Gửi sẽ phát tới các máy khách đã kết nối.",
+      "socketioSendServer": "Phát một thông điệp tới mọi máy khách đang kết nối với máy chủ Socket.IO được tham chiếu.",
+      "socketioCloseServer": "Dừng máy chủ Socket.IO được tham chiếu và ngắt kết nối các máy khách của nó."
     },
     "legend": {
       "title": "Chú giải",
@@ -1557,7 +1564,8 @@
       "pickConnection": "— pick a connection —",
       "channelLabel": "Channel name",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload"
+      "payloadModalTitle": "Edit payload",
+      "started": "đã khởi động"
     },
     "websocket": {
       "message": "message"

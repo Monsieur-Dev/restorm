@@ -9,4 +9,7 @@ export interface WebSocketRequest extends BaseRequest {
   event?: string | undefined
   message: string
   headers: KeyValue[]
+  /** When true, restorm hosts a socket.io server (localhost:port[/route])
+   * instead of connecting as a client. */
+  server?: boolean | undefined
 }

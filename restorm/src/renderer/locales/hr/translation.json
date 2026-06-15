@@ -248,7 +248,8 @@
         "websocket": "WebSocket zahtjev",
         "odata": "OData zahtjev",
         "auth": "HTTP zahtjev za autentifikaciju",
-        "scenario": "Scenarij"
+        "scenario": "Scenarij",
+        "socketioServer": "Socket.IO poslužitelj"
       }
     },
     "deleteConfirm": {
@@ -447,7 +448,10 @@
       "headers": "Zaglavlja"
     },
     "acknowledged": "Potvrđeno",
-    "disconnect": "Prekini vezu"
+    "disconnect": "Prekini vezu",
+    "startListening": "Počni slušati",
+    "stopListening": "Zaustavi slušanje",
+    "routePlaceholder": "Ruta (neobavezno)"
   },
   "search": {
     "placeholder": "Pretraži...",
@@ -1519,7 +1523,10 @@
       "websocketClose": "Closes an already-open WebSocket connection.",
       "grpcConnect": "Opens a streaming gRPC call and re-emits each received frame on its message port.",
       "grpcSend": "Writes a request message on an already-open streaming gRPC call.",
-      "grpcClose": "Half-closes an already-open streaming gRPC call."
+      "grpcClose": "Half-closes an already-open streaming gRPC call.",
+      "socketioConnectServer": "Pokreće Socket.IO poslužitelj (port + ruta); potvrđuje svaki primljeni događaj i ponovno ga emitira na svom portu. Slanje emitira povezanim klijentima.",
+      "socketioSendServer": "Emitira poruku svim klijentima povezanima na navedeni Socket.IO poslužitelj.",
+      "socketioCloseServer": "Zaustavlja navedeni Socket.IO poslužitelj i prekida vezu s njegovim klijentima."
     },
     "legend": {
       "title": "Legenda",
@@ -1559,7 +1566,8 @@
       "pickConnection": "— pick a connection —",
       "channelLabel": "Channel name",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload"
+      "payloadModalTitle": "Edit payload",
+      "started": "pokrenuto"
     },
     "websocket": {
       "message": "message"

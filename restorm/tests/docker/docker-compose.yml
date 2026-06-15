@@ -58,16 +58,10 @@ services:
       - "9000:9000"
       - "9002:9001"
 
-  # Socket.IO - Custom test server
-  socketio:
-    image: node:20-alpine
-    container_name: restorm-socketio
-    working_dir: /app
-    volumes:
-      - ./socketio-server:/app
-    command: sh -c "npm install && node server.js"
-    ports:
-      - "3001:3001"
+  # NOTE: there is intentionally no Socket.IO mock service. restorm hosts its
+  # own Socket.IO server (a "server mode" request) and connects to it as a
+  # client in the same instance, so the Socket.IO E2E + scenarios self-connect
+  # — no external mock to run or maintain.
 
   # Raw WebSocket - Custom `ws`-based echo server. Socket.IO runs its own
   # framing over raw WS, so a plain-WS client can't echo cleanly against it;
