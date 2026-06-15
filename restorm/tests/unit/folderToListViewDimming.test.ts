@@ -54,13 +54,17 @@ describe('folderItemToListViewItem — deprecated dim', () => {
     const req = makeHttpRequest({ id: 'r-ok' })
     const item = folderItemToListViewItem(req, { ...baseOptions })
     expect(item.title).toBe(req.name)
-    // Icon goes through whatever `renderMethodBadge` returned — no
-    // dim wrapper layered on top.
+    // Icon is wrapped in the execution-beam badge (for the running beam); the
+    // method badge is its child, with no dim layered on.
     expect(React.isValidElement(item.icon)).toBe(true)
     if (React.isValidElement(item.icon)) {
-      const props = item.icon.props as { 'data-testid'?: string; style?: React.CSSProperties }
-      expect(props['data-testid']).toBe('badge')
-      expect(props.style?.opacity).toBeUndefined()
+      const inner = (item.icon.props as { children?: unknown }).children
+      expect(React.isValidElement(inner)).toBe(true)
+      if (React.isValidElement(inner)) {
+        const props = inner.props as { 'data-testid'?: string; style?: React.CSSProperties }
+        expect(props['data-testid']).toBe('badge')
+        expect(props.style?.opacity).toBeUndefined()
+      }
     }
   })
 
@@ -77,8 +81,13 @@ describe('folderItemToListViewItem — deprecated dim', () => {
     }
     expect(React.isValidElement(item.icon)).toBe(true)
     if (React.isValidElement(item.icon)) {
-      const props = item.icon.props as { style?: React.CSSProperties }
-      expect(props.style?.opacity).toBe(0.5)
+      // The dim span is the child of the execution-beam wrapper.
+      const inner = (item.icon.props as { children?: unknown }).children
+      expect(React.isValidElement(inner)).toBe(true)
+      if (React.isValidElement(inner)) {
+        const props = inner.props as { style?: React.CSSProperties }
+        expect(props.style?.opacity).toBe(0.5)
+      }
     }
   })
 

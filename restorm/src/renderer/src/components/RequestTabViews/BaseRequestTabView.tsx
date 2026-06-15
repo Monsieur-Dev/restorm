@@ -5,10 +5,11 @@ import {
   MarkdownViewer,
   MarkdownEditor,
   VerticalSashContainer,
-  ProgressBar,
   JsonViewer,
+  eventBus,
   type Tab
 } from 'electron-core-ui/renderer'
+import { DocumentEvents } from '../../services/DocumentEvents'
 
 // ============================================================================
 // Types
@@ -124,6 +125,15 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
 
   const onNotesChangeRef = useRef(onNotesChange)
   useEffect(() => { onNotesChangeRef.current = onNotesChange }, [onNotesChange])
+
+  // In-flight indicator: announce execution start/end (on `isLoading`) so the
+  // request's sidebar badge runs the border-beam. The in-tab progress bar was
+  // removed in favour of the beam (Send button + sidebar badge).
+  useEffect(() => {
+    if (!isLoading) return undefined
+    eventBus.emitLocalSync(DocumentEvents.REQUEST_EXECUTION_STARTED, { requestId })
+    return () => { eventBus.emitLocalSync(DocumentEvents.REQUEST_EXECUTION_ENDED, { requestId }) }
+  }, [isLoading, requestId])
 
   const handleNotesChange = useCallback((md: string) => {
     onNotesChangeRef.current?.(md)
@@ -467,16 +477,11 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
         boxSizing: 'border-box'
       }}
     >
-      {/* The URL section (verb select + URL input + send/run) is now
-       * rendered inside the Request tab itself — see `requestTabs`
-       * above. Progress bar only reserves vertical space while a
-       * request is in flight; otherwise the title row sits directly
-       * above the tab strip with just the container gap between. */}
-      {isLoading && (
-        <div style={{ width: '100%', height: 4 }}>
-          <ProgressBar mode="infinite" data-testid="base-request-progress-bar" />
-        </div>
-      )}
+      {/* The URL section (verb select + URL input + send/run) is rendered
+       * inside the Request tab itself — see `requestTabs` above. The in-flight
+       * indicator is no longer a progress bar here: it's the border-beam on the
+       * Send button + on the request's sidebar badge (driven by `isLoading`
+       * via REQUEST_EXECUTION_* events, see the effect above). */}
 
       {useCompactLayout ? (
         /* Compact: single tab group with all tabs merged */
