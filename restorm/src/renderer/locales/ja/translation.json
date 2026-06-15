@@ -1,4 +1,33 @@
 {
+  "secrets": {
+    "others": "その他",
+    "refresh": "シークレットを更新",
+    "source": {
+      "envVar": "環境変数",
+      "envFileSecret": "env ファイルシークレット",
+      "envFileSecretPlaceholder": "シークレット値",
+      "envFileSecretLabel": "シークレット値"
+    },
+    "param": {
+      "envVarName": "変数名",
+      "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "取得を編集",
+    "envVarUnresolved": "（未解決）",
+    "resolving": "解決中…",
+    "resolveError": "シークレットの解決に失敗しました",
+    "resolveErrorEnv": "少なくとも 1 つの変数を取得できず、エラー状態です。",
+    "resolveErrorItem": "この項目のシークレットのうち少なくとも 1 つを取得できませんでした。",
+    "fetchFailed": "取得に失敗しました",
+    "retrievalModal": {
+      "title": "シークレットの取得",
+      "value": "値:",
+      "fetch": "取得",
+      "fetchFailed": "取得に失敗しました",
+      "ok": "OK",
+      "cancel": "キャンセル"
+    }
+  },
   "app": {
     "title": "restorm",
     "openSettings": "設定を開く",

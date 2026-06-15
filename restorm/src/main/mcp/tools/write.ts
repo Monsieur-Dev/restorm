@@ -17,10 +17,50 @@ import { z } from 'zod'
 import { BrowserWindow } from 'electron'
 import { McpService } from 'electron-core-ui'
 import { collectionStore } from '../../services/CollectionStore'
+import { contextService } from '../../services/ContextService'
 import { isAnyFolder, isEnvironmentFolder, isRequest, isScenario, KeyValue, Environment } from '../../../shared/models'
 import type { EnvironmentFolder, CustomValueList, CustomValueEntry } from '../../../shared/types/collections'
 import { broadcastTreeReplace } from './import'
 import { broadcastScenario } from './scenario'
+import { valueSourceRegistry } from '../../../shared/secrets/valueSourceRegistry'
+
+/**
+ * If `value` is a secret reference (`{ type: 'secret', … }`), validate its
+ * `source` against the registry of known value sources and require the params
+ * declared `required` by the source's `paramSchema`. Returns an error message
+ * to reply with, or `null` when the value is valid (or isn't a secret at all).
+ *
+ * This is the MCP write-path gate: `KeyValue.fromPlain` would otherwise build a
+ * `SecretValue` with an empty / bogus `source` that no resolver can satisfy,
+ * surfacing as a silent runtime resolution failure rather than a clear
+ * tool-call error. The registry is populated at main boot by
+ * `registerBuiltinSources`, so a future source is accepted automatically.
+ */
+function validateSecretValue(value: unknown): string | null {
+  if (value === null || typeof value !== 'object') return null
+  const v = value as { type?: unknown; source?: unknown; params?: unknown }
+  if (v.type !== 'secret') return null
+  const source = typeof v.source === 'string' ? v.source : ''
+  if (source === '') {
+    const ids = valueSourceRegistry.list().map((d) => d.id).join(', ')
+    return `secret value requires a non-empty "source" (one of: ${ids || 'none registered'})`
+  }
+  const descriptor = valueSourceRegistry.get(source)
+  if (!descriptor) {
+    const ids = valueSourceRegistry.list().map((d) => d.id).join(', ')
+    return `unknown secret source "${source}" (known: ${ids || 'none registered'})`
+  }
+  const params = v.params !== null && typeof v.params === 'object' ? (v.params as Record<string, unknown>) : {}
+  for (const field of descriptor.paramSchema ?? []) {
+    if (field.required === true) {
+      const val = params[field.key]
+      if (val === undefined || val === null || val === '') {
+        return `secret source "${source}" requires param "${field.key}"`
+      }
+    }
+  }
+  return null
+}
 
 /**
  * Walk a `update_request` patch and convert any plain-object key-value
@@ -350,7 +390,7 @@ export function registerWriteTools(mcp: McpService): void {
       // would corrupt the in-memory tree if changed.
       const { id: _id, items: _items, folderType: _folderType, ...rawPatch } = patchRaw as Record<string, unknown>
       // Reify `environments` so a JSON-only MCP caller can hand us
-      // `{ variables: [{key, value: {type:'password', value:'…'}}, …] }`
+      // `{ variables: [{key, value: {type:'string', value:'…'}}, …] }`
       // and the downstream `emitFolderUpdated` → `toPlainObject` chain
       // still works (it would otherwise crash on plain-object envs).
       const safePatch = reifyEnvironmentsArray(rawPatch)
@@ -520,9 +560,9 @@ export function registerWriteTools(mcp: McpService): void {
         'Upsert a single variable on the given `Environment`. If a variable with the same key ' +
         'already exists it is replaced (keeping its id), otherwise a new one is appended. The ' +
         '`value` field accepts the persisted `ValueType` POJO shape: ' +
-        '`{ type: "string" | "expression" | "password" | "numeric" | "boolean" | "color" | "datetime", value: ... }`. ' +
-        'For `password` variables, the plaintext travels through memory + lands in the sibling ' +
-        '`.restorm.env` file on save; the main `.restorm` document only carries `{ type: "password" }`. ' +
+        '`{ type: "string" | "expression" | "numeric" | "boolean" | "color" | "datetime", value: ... }`. ' +
+        'For `secret` variables, use `{ type: "secret", source: "<sourceId>", params: { … } }`; the ' +
+        'plaintext is resolved in the main process at run time and is never persisted or returned. ' +
         'Use `expression` (not `string`) when the value contains `{{handlebars}}` placeholders that ' +
         'should resolve against this environment\'s context — `StringValue` ships verbatim. ' +
         'Triggers an autosave so the change persists immediately.',
@@ -531,7 +571,7 @@ export function registerWriteTools(mcp: McpService): void {
         key: z.string().min(1).describe('Variable key (e.g. "JWTBearer_token").'),
         value: z
           .record(z.string(), z.unknown())
-          .describe('Persisted `ValueType` POJO, e.g. `{ "type": "password", "value": "<the-secret>" }` or `{ "type": "expression", "value": "Bearer {{token}}" }`. A bare string is rejected — wrap plain text in `{ "type": "string", "value": "…" }`.'),
+          .describe('Persisted `ValueType` POJO, e.g. `{ "type": "secret", "source": "envVar", "params": { "name": "API_TOKEN" } }` or `{ "type": "expression", "value": "Bearer {{token}}" }`. A bare string is rejected — wrap plain text in `{ "type": "string", "value": "…" }`.'),
         enabled: z.boolean().optional().describe('Default true.'),
         description: z.string().optional().describe('Free-text description shown next to the variable.')
       } as Record<string, unknown>
@@ -547,6 +587,8 @@ export function registerWriteTools(mcp: McpService): void {
       const enabled = typeof argRecord['enabled'] === 'boolean' ? argRecord['enabled'] : true
       const description = typeof argRecord['description'] === 'string' ? argRecord['description'] : undefined
       const valueRaw = argRecord['value']
+      const secretError = validateSecretValue(valueRaw)
+      if (secretError !== null) return errorReply(secretError)
       // KeyValue.fromPlain handles every ValueType shape + falls back to
       // a sensible empty StringValue when the caller omits `value`.
       const kv = KeyValue.fromPlain({
@@ -638,6 +680,167 @@ export function registerWriteTools(mcp: McpService): void {
         triggerSave()
       }
       return jsonReply({ envId, key, removed })
+    }
+  )
+
+  // ────────────────────────────────────────────────────────────────────
+  // Environments + sub-environments (structure CRUD). Variables are handled
+  // by set/delete/list_env_variable above; these manage the environment NODES
+  // themselves, symmetric to the env-folder UI. Sub-environments live embedded
+  // in their parent env's content (not their own save unit), so every change
+  // routes through `collectionStore` (which emits the env events ContextService
+  // needs) plus a folder refresh + autosave.
+  // ────────────────────────────────────────────────────────────────────
+
+  /** Owner env-folder id of an environment (top-level or nested), or undefined. */
+  const ownerEnvFolderId = (envId: string): string | undefined => {
+    const contains = (e: Environment): boolean =>
+      e.id === envId || (e.subEnvironments?.some(contains) ?? false)
+    for (const folder of collectionStore.getCollections()) {
+      if (!isEnvironmentFolder(folder)) continue
+      if (folder.environments.some(contains)) return folder.id
+    }
+    return undefined
+  }
+
+  /** Persist + refresh the renderer after an environment-structure change. */
+  const refreshEnvFolderAndSave = (folderId: string): void => {
+    collectionStore.updateFolder(folderId, {} as never)
+    for (const win of BrowserWindow.getAllWindows()) {
+      if (!win.isDestroyed()) {
+        win.webContents.send('mcp:folder-updated', { itemId: folderId, patch: {} })
+      }
+    }
+    broadcastTreeReplace()
+    triggerSave()
+  }
+
+  mcp.registerTool(
+    'list_environments',
+    {
+      title: 'List the environments of an env-folder',
+      description:
+        'Return the environment tree of an env-folder: every top-level environment with its ' +
+        'nested `subEnvironments`, each as `{ id, name, subEnvironments? }`. Use the returned ' +
+        'ids with `set_env_variable` / `rename_environment` / `delete_environment` and as ' +
+        '`parentEnvironmentId` for `create_environment`.',
+      inputSchema: {
+        envFolderId: z.string().min(1).describe('Env-folder id (from `list_folders`, `kind: "env-folder"`).')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const folderId = typeof args['envFolderId'] === 'string' ? args['envFolderId'] : ''
+      if (!folderId) return errorReply('envFolderId is required')
+      const folder = collectionStore.findById(folderId)
+      if (!folder || !isEnvironmentFolder(folder)) return errorReply(`No env-folder with id ${folderId}`)
+      const mapEnv = (e: Environment): Record<string, unknown> => ({
+        id: e.id,
+        name: e.name,
+        ...(e.subEnvironments && e.subEnvironments.length > 0
+          ? { subEnvironments: e.subEnvironments.map(mapEnv) }
+          : {})
+      })
+      return jsonReply({ envFolderId: folderId, environments: folder.environments.map(mapEnv) })
+    }
+  )
+
+  mcp.registerTool(
+    'create_environment',
+    {
+      title: 'Create an environment or sub-environment',
+      description:
+        'Add a new environment to an env-folder. Omit `parentEnvironmentId` for a top-level ' +
+        'environment, or pass an existing environment id to nest the new one as its ' +
+        'sub-environment. The new environment starts with no variables — populate it with ' +
+        '`set_env_variable`. Triggers an autosave.',
+      inputSchema: {
+        envFolderId: z.string().min(1).describe('Env-folder id (from `list_folders`).'),
+        name: z.string().min(1).optional().describe('Environment name. Defaults to "New environment".'),
+        parentEnvironmentId: z.string().min(1).optional().describe('When set, create the env as a sub-environment of this environment (must live in the same env-folder).')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const folderId = typeof args['envFolderId'] === 'string' ? args['envFolderId'] : ''
+      if (!folderId) return errorReply('envFolderId is required')
+      const folder = collectionStore.findById(folderId)
+      if (!folder || !isEnvironmentFolder(folder)) return errorReply(`No env-folder with id ${folderId}`)
+      const name = typeof args['name'] === 'string' && args['name'].length > 0 ? args['name'] : 'New environment'
+      const parentEnvironmentId = typeof args['parentEnvironmentId'] === 'string' ? args['parentEnvironmentId'] : undefined
+      if (parentEnvironmentId !== undefined && ownerEnvFolderId(parentEnvironmentId) !== folderId) {
+        return errorReply(`parentEnvironmentId ${parentEnvironmentId} is not an environment of env-folder ${folderId}`)
+      }
+      const env = collectionStore.createEnvironment(folderId, { name }, parentEnvironmentId)
+      refreshEnvFolderAndSave(folderId)
+      return jsonReply({ id: env.id, name: env.name, envFolderId: folderId, ...(parentEnvironmentId !== undefined ? { parentEnvironmentId } : {}) })
+    }
+  )
+
+  mcp.registerTool(
+    'rename_environment',
+    {
+      title: 'Rename an environment',
+      description: 'Rename an environment or sub-environment by id. Triggers an autosave.',
+      inputSchema: {
+        envId: z.string().min(1).describe('Environment id (from `list_environments`).'),
+        name: z.string().min(1).describe('New name.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const envId = typeof args['envId'] === 'string' ? args['envId'] : ''
+      const name = typeof args['name'] === 'string' ? args['name'] : ''
+      if (!envId) return errorReply('envId is required')
+      if (!name) return errorReply('name is required')
+      if (!findEnvById(envId)) return errorReply(`No environment with id ${envId}`)
+      collectionStore.updateEnvironment(envId, { name })
+      const folderId = ownerEnvFolderId(envId)
+      if (folderId !== undefined) refreshEnvFolderAndSave(folderId)
+      return jsonReply({ envId, name })
+    }
+  )
+
+  mcp.registerTool(
+    'delete_environment',
+    {
+      title: 'Delete an environment or sub-environment',
+      description:
+        'Remove an environment (and, recursively, its sub-environments) by id. Returns ' +
+        '`removed: false` when the id isn\'t found. Triggers an autosave on success.',
+      inputSchema: {
+        envId: z.string().min(1).describe('Environment id (from `list_environments`).')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const envId = typeof args['envId'] === 'string' ? args['envId'] : ''
+      if (!envId) return errorReply('envId is required')
+      // Capture the owner folder BEFORE deletion — afterwards the env is gone.
+      const folderId = ownerEnvFolderId(envId)
+      const removed = collectionStore.deleteEnvironment(envId)
+      if (removed && folderId !== undefined) refreshEnvFolderAndSave(folderId)
+      return jsonReply({ envId, removed })
+    }
+  )
+
+  mcp.registerTool(
+    'refresh_environment',
+    {
+      title: 'Re-resolve an environment\'s secret variables',
+      description:
+        'Force a re-resolution of every secret variable the environment OWNS: drops the ' +
+        'resolution cache, blanks the resolved plaintext, and re-fetches from each provider — ' +
+        'the env-level equivalent of the per-secret refresh button. The resolved values + any ' +
+        'expression composing them update live in the app; nothing is written to disk (resolved ' +
+        'plaintext is never persisted). Resolution is async (a slow provider keeps the spinner ' +
+        'up), so this returns immediately with the count of secrets it kicked off.',
+      inputSchema: {
+        envId: z.string().min(1).describe('Environment id (from `list_environments`). Sub-environments are supported.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const envId = typeof args['envId'] === 'string' ? args['envId'] : ''
+      if (!envId) return errorReply('envId is required')
+      if (!findEnvById(envId)) return errorReply(`No environment with id ${envId}`)
+      const secretsRefreshed = contextService.refreshEnvironmentSecrets(envId)
+      return jsonReply({ envId, secretsRefreshed })
     }
   )
 

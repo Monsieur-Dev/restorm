@@ -29,7 +29,7 @@ function displayValue(v: unknown): string {
   if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') return String(v)
   if (typeof v === 'object') {
     const o = v as Record<string, unknown>
-    if (o['type'] === 'password') return '••••••'
+    if (o['type'] === 'secret') return '••••••'
     if (typeof o['label'] === 'string') return o['label'] // CustomListValue
     const inner = o['value']
     if (typeof inner === 'string' || typeof inner === 'number' || typeof inner === 'boolean') return String(inner)

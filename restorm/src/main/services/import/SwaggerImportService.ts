@@ -19,7 +19,6 @@ import {
   StringValue,
   NumericValue,
   DateTimeValue,
-  PasswordValue,
   ExpressionValue,
   EnumValue,
   EnumListValue,
@@ -27,6 +26,7 @@ import {
   type EnumDefinition,
   type EnumMatchingRule
 } from '../../../shared/types/collections'
+import { SecretValue } from '../../../shared/types/valueTypes/SecretValue'
 import { toHTTPMethod } from './httpMethodValidator'
 import { swaggerToApiDocumentation } from './transformers/swaggerToApiDocumentation'
 import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
@@ -192,7 +192,7 @@ function buildTypedValueFromSwaggerType(type: string | undefined, format: string
         return new DateTimeValue(new Date(), datePattern)
       }
       if (format === 'password') {
-        return new PasswordValue('')
+        return new SecretValue('envFileSecret', {})
       }
       return new StringValue(typeof defaultValue === 'string' ? defaultValue : '')
     default:
@@ -789,11 +789,11 @@ function createSwaggerEnvironment(spec: SwaggerSpec, overrideBaseUrl: string | u
   // `<schemeName>_credentials` (basic), or `<schemeName>` (apiKey).
   // See `applySwaggerSecurityToRequest` for the matching header
   // template that consumes these.
-  // Seeded as `PasswordValue` (same rationale as the OpenAPI 3.x
-  // importer): plaintext lands in `.restorm.env`, masked in the UI.
+  // Seeded as an env-file `SecretValue` (same rationale as the OpenAPI 3.x
+  // importer): plaintext lands in `restorm.env`, masked in the UI.
   for (const varName of collectSwaggerSecuritySchemeVariableNames(spec.securityDefinitions)) {
     if (rootVariables.some((kv) => kv.key === varName)) continue
-    rootVariables.push(kvOfType(varName, new PasswordValue('')))
+    rootVariables.push(kvOfType(varName, new SecretValue('envFileSecret', {})))
   }
 
   // Sub-environments only override `scheme`. Skip sub-envs whose variables

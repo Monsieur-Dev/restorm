@@ -633,7 +633,7 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
     // can run its cache-or-fetch + header-inject flow before firing
     // this request. The auth coming out of `rootItems` is a reactive
     // Proxy wrapping an `AuthenticationRequest` class instance with
-    // `KeyValue` / `StringValue` / `PasswordValue` fields — structured
+    // `KeyValue` / `StringValue` / `SecretValue` fields — structured
     // clone (which Electron IPC uses) rejects those. We run
     // `toPlainObject()` to flatten the class graph into persisted
     // form, then a JSON round-trip to strip any stray class instances

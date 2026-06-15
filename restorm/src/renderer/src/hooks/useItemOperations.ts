@@ -470,7 +470,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       // Strip the proxy before sending over IPC — `eventBus.emitSync`
       // goes through `structuredClone` which can't ferry Proxy
       // wrappers. `cloneForEventBus` rather than the JSON round-trip
-      // so `PasswordValue.toJSON()` doesn't strip the plaintext on
+      // so `SecretValue.toJSON()` doesn't strip the plaintext on
       // its way to main (matters when the folder being created
       // carries an environment with secrets — main needs them for
       // handlebars resolution and for the next `.restorm.env` write).

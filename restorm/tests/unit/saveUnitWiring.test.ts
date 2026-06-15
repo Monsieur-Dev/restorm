@@ -10,7 +10,7 @@
  *
  * We wire the real lib (no mocks) and assert the shapes stay aligned
  * across a realistic request model (HTTPRequest) with headers that
- * include a `PasswordValue` — which must never emit plaintext.
+ * include a `SecretValue` whose resolved plaintext must never emit.
  */
 
 import { describe, it, expect } from 'vitest'
@@ -23,7 +23,7 @@ import { HTTPRequest } from '../../src/shared/models/requests/HTTPRequest'
 import { Folder as FolderClass } from '../../src/shared/models/Folder'
 import { EnvironmentFolder as EnvironmentFolderClass } from '../../src/shared/models/EnvironmentFolder'
 import { KeyValue } from '../../src/shared/models/KeyValue'
-import { PasswordValue } from '../../src/shared/types/valueTypes/PasswordValue'
+import { SecretValue } from '../../src/shared/types/valueTypes/SecretValue'
 import { StringValue } from '../../src/shared/types/valueTypes/StringValue'
 
 const classResolver = (item: Record<string, unknown>, parentClass: object | undefined): object | undefined => {
@@ -41,9 +41,11 @@ describe('save-unit wiring (restorm ↔ lib)', () => {
     request.type = 'http'
     request.method = 'POST'
     request.url = 'https://api.example.com/login'
+    const secret = new SecretValue('envVar', { name: 'TOKEN' })
+    secret.resolved = 'bearer-leak-me-not'
     request.headers = [
       new KeyValue({ key: 'X-Trace', value: new StringValue('abc') }),
-      new KeyValue({ key: 'Authorization', value: new PasswordValue('bearer-leak-me-not') })
+      new KeyValue({ key: 'Authorization', value: secret })
     ]
 
     const folder = new EnvironmentFolderClass({
@@ -53,7 +55,7 @@ describe('save-unit wiring (restorm ↔ lib)', () => {
     })
 
     // JSON-round-trip mirrors what useFileManagement does before feeding
-    // the decomposer. `PasswordValue.toJSON` strips plaintext here.
+    // the decomposer. `SecretValue.toJSON` strips the resolved plaintext here.
     const rootPojo = JSON.parse(JSON.stringify(folder)) as Record<string, unknown>
 
     const decomposed = decomposeForPersistence({

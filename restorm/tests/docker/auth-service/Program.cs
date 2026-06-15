@@ -158,6 +158,33 @@ app.MapGet("/releaselogins", () =>
     return Results.Ok(new { released = true });
 });
 
+// Reflection endpoint for the secrets-sources e2e. NOT auth-gated and NOT
+// logged in the gated log store. Echoes back the request headers, query
+// string and raw body so a test can assert that a resolved secret value
+// actually reached the wire (e.g. a `X-Api-Key` header whose value was a
+// `{ type: 'secret', source: 'envVar', params: { name: 'RESTORM_E2E_SECRET' } }`
+// resolves to the process env var on the main side before dispatch).
+// Accepts any verb so a request and a scenario httpRequest node can both
+// point at it regardless of method.
+app.MapMethods("/echo", new[] { "GET", "POST", "PUT", "PATCH", "DELETE" }, async (HttpRequest req) =>
+{
+    var headers = req.Headers.ToDictionary(h => h.Key, h => h.Value.ToString());
+    var query = req.Query.ToDictionary(q => q.Key, q => q.Value.ToString());
+    string body = string.Empty;
+    using (var reader = new StreamReader(req.Body))
+    {
+        body = await reader.ReadToEndAsync();
+    }
+    return Results.Json(new
+    {
+        method = req.Method,
+        path = req.Path.Value,
+        headers,
+        query,
+        body
+    });
+});
+
 app.MapGet("/pet/{id:int}", (int id, HttpRequest req) =>
 {
     if (!TryGetBearerToken(req, out var token) || !TokenStore.Contains(token))

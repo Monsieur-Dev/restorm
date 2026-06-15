@@ -1,4 +1,33 @@
 {
+  "secrets": {
+    "others": "기타",
+    "refresh": "비밀 새로 고침",
+    "source": {
+      "envVar": "환경 변수",
+      "envFileSecret": "env 파일 비밀",
+      "envFileSecretPlaceholder": "비밀 값",
+      "envFileSecretLabel": "비밀 값"
+    },
+    "param": {
+      "envVarName": "변수 이름",
+      "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "검색 편집",
+    "envVarUnresolved": "(해결되지 않음)",
+    "resolving": "해결 중…",
+    "resolveError": "비밀 해결 실패",
+    "resolveErrorEnv": "하나 이상의 변수를 가져올 수 없어 오류 상태입니다.",
+    "resolveErrorItem": "이 항목의 비밀 중 하나 이상을 가져올 수 없습니다.",
+    "fetchFailed": "가져오기 실패",
+    "retrievalModal": {
+      "title": "비밀 가져오기",
+      "value": "값:",
+      "fetch": "가져오기",
+      "fetchFailed": "가져오기 실패",
+      "ok": "확인",
+      "cancel": "취소"
+    }
+  },
   "app": {
     "title": "restorm",
     "openSettings": "설정 열기",

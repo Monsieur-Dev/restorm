@@ -305,6 +305,16 @@ export async function saveFolderStructure(
   const ext = format === 'json5' ? 'json5' : format
 
   try {
+    // Harvest env-file secrets BEFORE normalization: the in-memory plaintext
+    // rides on `SecretValue.resolved`, which `normalizeDocumentValuesForPersistence`
+    // strips along with every other non-persisted field. Writing `restorm.env`
+    // first keeps the secrets while the document tree is serialized without them.
+    try {
+      await saveFolderSecretsEnvFile(folderPath, data)
+    } catch (error) {
+      logger.warn('Failed to save restorm.env secrets file', { error: String(error) })
+    }
+
     normalizeDocumentValuesForPersistence(data)
     // Start save session to track what's being saved
     folderMappingService.startSaveSession()
@@ -410,13 +420,6 @@ export async function saveFolderStructure(
 
     // Commit the save session
     folderMappingService.commitSaveSession()
-
-    // Save PasswordValue secrets to restorm.env at the root of the folder
-    try {
-      await saveFolderSecretsEnvFile(folderPath, data)
-    } catch (error) {
-      logger.warn('Failed to save restorm.env secrets file', { error: String(error) })
-    }
 
     return { success: true, path: folderPath }
   } catch (error) {
@@ -561,7 +564,7 @@ export async function loadFolderStructure(
     // re-stamp it here regardless of which branch populated `data`.
     data[PROJECT_UUID_KEY] = projectUuid
 
-    // Apply PasswordValue secrets from restorm.env (if present)
+    // Apply env-file secrets from restorm.env (if present)
     await applyFolderSecretsEnvFile(folderPath, data)
 
     // Generate runtime IDs for all objects

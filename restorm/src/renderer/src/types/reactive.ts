@@ -253,7 +253,7 @@ function emitUpdate(
       id: docId,
       type: docType,
       // `cloneForEventBus` over `JSON.parse(JSON.stringify(…))`: the
-      // latter calls `PasswordValue.toJSON()` which strips the
+      // latter calls `SecretValue.toJSON()` which strips the
       // plaintext, so any main-side subscriber (e.g. ContextService
       // re-registering env vars on ENVIRONMENT_UPDATED) sees every
       // secret as an empty string — handlebars then substitutes
@@ -392,15 +392,15 @@ function createDocumentProxyHandler(
  *      `notes`/`documentation` were previously `undefined`.
  *   3. Structural deep-equal for objects/arrays — must run through
  *      `cloneForEventBus` first, then `JSON.stringify`. A raw
- *      `JSON.stringify` invokes `PasswordValue.toJSON()` which
- *      strips the plaintext, so two `PasswordValue` instances with
- *      different secrets stringify to the SAME `{"type":"password"}`
- *      shape — the proxy reports "no change" and `emitUpdate` is
- *      skipped, meaning a user typing into a password field never
- *      reaches `ContextService` / `CollectionStore` (and the save
- *      flow writes an empty `.env`). `cloneForEventBus` copies the
- *      `value` field as a normal property so the serialised diff
- *      actually sees the password change.
+ *      `JSON.stringify` invokes `SecretValue.toJSON()` which
+ *      strips the resolved plaintext, so two `SecretValue` instances
+ *      with different secrets but the same `source`/`params` stringify
+ *      to the SAME `{"type":"secret",…}` shape — the proxy reports
+ *      "no change" and `emitUpdate` is skipped, meaning a user typing
+ *      into a secret field never reaches `ContextService` /
+ *      `CollectionStore` (and the save flow writes an empty `.env`).
+ *      `cloneForEventBus` copies the `resolved` field as a normal
+ *      property so the serialised diff actually sees the secret change.
  */
 function sameProxyValue(a: unknown, b: unknown): boolean {
   if (a === b) return true
@@ -641,10 +641,25 @@ export function makeReactiveFolderItem(item: FolderItem, parentFolderId?: string
 }
 
 /**
+ * Deliver a created / deleted document event to BOTH sides, like `emitUpdate`
+ * does for updates: `emitSync` reaches main-process subscribers only
+ * (ContextService, FileService), and `emitLocalSync` reaches renderer-local
+ * subscribers — in particular the save-unit bridge in App.tsx, which marks the
+ * right unit dirty so autosave persists structural changes (new / deleted
+ * env, request, folder). Main-only delivery left that bridge deaf: a sub-env
+ * add / delete never marked anything dirty, so autosave never ran and closing
+ * prompted for "unsaved" changes it could never have saved.
+ */
+function emitBoth(event: string, payload: DocumentChangedPayload | Record<string, unknown>): void {
+  eventBus.emitSync(event, payload)
+  eventBus.emitLocalSync(event, payload)
+}
+
+/**
  * Emit a folder created event
  */
 export function emitFolderCreated(folder: Folder): void {
-  eventBus.emitSync(DocumentEvents.FOLDER_CREATED, {
+  emitBoth(DocumentEvents.FOLDER_CREATED, {
     id: folder.id,
     type: 'folder',
     document: folder
@@ -655,7 +670,7 @@ export function emitFolderCreated(folder: Folder): void {
  * Emit a folder deleted event
  */
 export function emitFolderDeleted(folderId: string): void {
-  eventBus.emitSync(DocumentEvents.FOLDER_DELETED, {
+  emitBoth(DocumentEvents.FOLDER_DELETED, {
     id: folderId,
     type: 'folder'
   })
@@ -665,7 +680,7 @@ export function emitFolderDeleted(folderId: string): void {
  * Emit a request created event
  */
 export function emitRequestCreated(request: Request, parentFolderId: string): void {
-  eventBus.emitSync(DocumentEvents.REQUEST_CREATED, {
+  emitBoth(DocumentEvents.REQUEST_CREATED, {
     id: request.id,
     type: 'request',
     document: request,
@@ -677,7 +692,7 @@ export function emitRequestCreated(request: Request, parentFolderId: string): vo
  * Emit a request deleted event
  */
 export function emitRequestDeleted(requestId: string, parentFolderId: string): void {
-  eventBus.emitSync(DocumentEvents.REQUEST_DELETED, {
+  emitBoth(DocumentEvents.REQUEST_DELETED, {
     id: requestId,
     type: 'request',
     parentFolderId
@@ -692,11 +707,11 @@ export function emitEnvironmentCreated(
   parentFolderId: string,
   parentEnvironmentId?: string
 ): void {
-  eventBus.emitSync(DocumentEvents.ENVIRONMENT_CREATED, {
+  emitBoth(DocumentEvents.ENVIRONMENT_CREATED, {
     id: env.id,
     type: 'environment',
     // `cloneForEventBus` instead of JSON.stringify so
-    // `PasswordValue.toJSON()` doesn't strip the plaintext —
+    // `SecretValue.toJSON()` doesn't strip the plaintext —
     // ContextService needs the secret to substitute templated
     // headers / URLs against the env context.
     document: cloneForEventBus(env),
@@ -713,7 +728,7 @@ export function emitEnvironmentUpdated(
   parentFolderId: string,
   parentEnvironmentId?: string
 ): void {
-  eventBus.emitSync(DocumentEvents.ENVIRONMENT_UPDATED, {
+  emitBoth(DocumentEvents.ENVIRONMENT_UPDATED, {
     id: env.id,
     type: 'environment',
     document: cloneForEventBus(env),
@@ -730,7 +745,7 @@ export function emitEnvironmentDeleted(
   parentFolderId: string,
   parentEnvironmentId?: string
 ): void {
-  eventBus.emitSync(DocumentEvents.ENVIRONMENT_DELETED, {
+  emitBoth(DocumentEvents.ENVIRONMENT_DELETED, {
     id: envId,
     type: 'environment',
     parentFolderId,

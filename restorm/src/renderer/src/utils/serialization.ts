@@ -164,7 +164,7 @@ function shouldHaveId(obj: Record<string, unknown>): boolean {
 export function prepareForSerialization<T>(data: T): T {
   const stripped = stripIds(data)
   // Ensure ValueType objects are persisted as { type, ... } and never as plain strings.
-  // Also ensures PasswordValue never persists its actual value in the main file.
+  // Also ensures SecretValue never persists its resolved plaintext in the main file.
   normalizeDocumentValuesForPersistence(stripped)
   return stripped
 }

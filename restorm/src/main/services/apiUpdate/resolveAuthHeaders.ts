@@ -56,7 +56,7 @@ function findRequestById(items: FolderItem[], id: string): AuthRequestLike | nul
 /**
  * Pull a string out of whatever shape the IPC marshal turned the
  * KV `value` into: a plain string, an `ExpressionValue` /
- * `StringValue` / `PasswordValue` class instance (still has a
+ * `StringValue` / `SecretValue` class instance (still has a
  * meaningful `toString`), or the persisted `{ type, value }` shape
  * the renderer-→-main collection sync sends through
  * `JSON.parse(JSON.stringify(...))`.

@@ -33,7 +33,7 @@ export const VALUE_TYPE_DOCS: Record<string, { shape: string; summary: string }>
   datetime: { shape: '{ type: "datetime", value: "<ISO-8601>", format: "<fmt>" }', summary: 'A date/time (ISO string).' },
   color: { shape: '{ type: "color", value: "#rrggbb" }', summary: 'A colour (hex string).' },
   expression: { shape: '{ type: "expression", value: "{{handlebars}}" }', summary: 'A Handlebars template rendered at runtime against inputs + run variables.' },
-  password: { shape: '{ type: "password" }', summary: 'A secret/password value (the secret itself is held out-of-band, not in the graph).' },
+  secret: { shape: '{ type: "secret", source: "<sourceId>", params: { … } }', summary: 'A reference to a value resolved from an external source (env var, sibling env file, …). The plaintext is resolved in the main process at run time and never persisted or returned to a client. Call `list_value_sources` for the available `source` ids and their `params`.' },
   null: { shape: '{ type: "null" }', summary: 'The null value. Equal only to another null (no coercion).' },
   list: { shape: '{ type: "list", items: [ <PersistedValue>, … ] }', summary: 'An agnostic, untyped list — an array of any typed values (lists can nest).' },
   enum: { shape: '{ type: "enum", value: "<option>", enumDefinitionId: "<id>" }', summary: 'A single pick from an enum definition.' },

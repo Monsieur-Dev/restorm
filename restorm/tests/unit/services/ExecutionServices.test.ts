@@ -33,7 +33,12 @@ vi.mock('../../../src/main/services/ContextService', () => {
         const raw = typeof kv.value === 'string' ? kv.value : String(kv.value)
         return resolveValueMock(raw)
       }),
-      transformAllValues: vi.fn()
+      transformAllValues: vi.fn(),
+      // Secrets foundation: execution services hydrate environment-folder
+      // secrets before resolving values. The mock has no environment, so
+      // there are no env secrets to collect and the context refresh is a no-op.
+      collectEnvironmentSecrets: vi.fn(() => []),
+      refreshEnvironmentContext: vi.fn(() => undefined)
     }
   }
 })
@@ -264,22 +269,22 @@ describe('GRPCExecutionService', () => {
     vi.clearAllMocks()
   })
 
-  it('returns error when no resolved URL is found', () => {
+  it('returns error when no resolved URL is found', async () => {
     mockedContextService.getResolvedUrl.mockReturnValue(undefined as never)
 
-    const result = grpcExecutionService.execute({ requestId: 'g1' })
+    const result = await grpcExecutionService.execute({ requestId: 'g1' })
 
     expect(result.success).toBe(false)
     expect(result.error).toContain('No resolved URL')
   })
 
-  it('returns UNIMPLEMENTED placeholder (status 12)', () => {
+  it('returns UNIMPLEMENTED placeholder (status 12)', async () => {
     setupResolvedUrl('grpc://localhost:50051')
     setupRequestContext({
       fullData: { service: 'mypackage.MyService', grpcMethod: 'SayHello', requestMessage: '{"name":"world"}' }
     })
 
-    const result = grpcExecutionService.execute({ requestId: 'g2' })
+    const result = await grpcExecutionService.execute({ requestId: 'g2' })
 
     expect(result.success).toBe(false)
     expect(result.statusCode).toBe(12)

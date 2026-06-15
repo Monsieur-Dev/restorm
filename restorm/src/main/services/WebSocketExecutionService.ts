@@ -7,6 +7,8 @@ import WebSocket from 'ws'
 import { BrowserWindow } from 'electron'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
+import { secretHydrationService } from './secrets/SecretHydrationService'
+import { collectRequestSecrets } from './secrets/collectRequestSecrets'
 import { DEFAULT_WS_TIMEOUT_MS } from '../../shared/config/constants'
 
 /** WebSocket request execution input */
@@ -72,7 +74,7 @@ class WebSocketExecutionService {
       }
     }
 
-    const resolvedUrl = urlResult.resolvedUrl
+    let resolvedUrl = urlResult.resolvedUrl
     logger.info('[WebSocketExecutionService] Connecting', { requestId, url: resolvedUrl })
 
     // Get request context
@@ -80,6 +82,19 @@ class WebSocketExecutionService {
 
     // Broadcast that connection started
     this.broadcastProgress(requestId, 'started')
+
+    // Resolve any SecretValues reachable from this request's KeyValue
+    // groups AND from the active env-folder variable chain BEFORE the
+    // synchronous header-resolution inside the WebSocket constructor.
+    const envSecrets = contextService.collectEnvironmentSecrets(requestId)
+    const secrets = [...collectRequestSecrets(requestContext?.keyValueGroups), ...envSecrets]
+    if (secrets.length > 0) {
+      await secretHydrationService.hydrate(requestId, secrets)
+      if (envSecrets.length > 0) {
+        contextService.refreshEnvironmentContext(requestId)
+        resolvedUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? resolvedUrl
+      }
+    }
 
     return new Promise((resolve) => {
       const messages: WebSocketMessage[] = []

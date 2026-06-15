@@ -11,6 +11,8 @@
 import { logger, getSettingsService, isSettingsServiceInitialized } from 'electron-core-ui/main'
 import { collectionStore } from '../services/CollectionStore'
 import { installScenarioValueResolvers } from '../../shared/scenarioValueResolvers'
+import { setSecretPreviewResolver } from '../../shared/utils/scenarioStaticPreview'
+import { secretHydrationService } from '../services/secrets/SecretHydrationService'
 import { isScenario } from '../../shared/types/collections'
 import type { Scenario } from '../../shared/types/scenario'
 import { Scheduler, type RunOptions } from './scheduler'
@@ -303,3 +305,13 @@ export const scenarioEngine = new ScenarioEngine()
 // headless alike. Installed once on module load; the getter reads the current
 // store each call, so a later project load is picked up automatically.
 installScenarioValueResolvers(() => collectionStore.getCollections())
+
+// A `secret` operand (a `setVariable`/`assert`/… config referencing a
+// `SecretValue`) resolves to its real plaintext at run time — the renderer
+// installs its own async-cache resolver, but the main-process engine needs one
+// too, else `concreteValue`'s `secret` case has no resolver and yields `''`.
+// The scheduler hydrates a node's secrets (via the same `SecretHydrationService`
+// the request path uses) just before the executor runs, so this synchronous
+// lookup reads an already-populated per-run cache. The plaintext stays in
+// memory; it's never written back to the scenario document.
+setSecretPreviewResolver((source, params) => secretHydrationService.peekResolved(source, params))

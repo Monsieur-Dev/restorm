@@ -507,13 +507,30 @@ const ListViewInner: React.FC<ListViewProps> = ({
     setEditingValue('')
   }, [setEditingItemId, setEditingValue])
 
-  // Focus the rename input when editing starts
+  // Focus the rename input when editing starts. Two complementary paths:
+  //
+  // 1. The effect handles "editingItemId changed while the input is already
+  //    mounted".
+  // 2. The callback ref handles "the input mounts AFTER the effect ran" —
+  //    e.g. creating the FIRST child of a previously-leaf parent drops the new
+  //    row into edit mode, but that row only renders once the parent's
+  //    expansion state lands, a commit after the editingItemId effect fired
+  //    with a null ref. Focusing at attach time makes the behavior immune to
+  //    that ordering: whenever the rename input enters the DOM, it grabs
+  //    focus and selects its text so the user can type the name right away.
   useEffect(() => {
     if (editingItemId && renameInputRef.current) {
       renameInputRef.current.focus()
       renameInputRef.current.select()
     }
   }, [editingItemId])
+  const attachRenameInput = useCallback((el: HTMLInputElement | null): void => {
+    renameInputRef.current = el
+    if (el) {
+      el.focus()
+      el.select()
+    }
+  }, [])
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>): void => {
@@ -797,7 +814,7 @@ const ListViewInner: React.FC<ListViewProps> = ({
             const isEditing = editingItemId === item.id
             const titleContent = isEditing ? (
               <input
-                ref={renameInputRef}
+                ref={attachRenameInput}
                 type="text"
                 className="list-view-rename-input"
                 data-testid={`${rootTestId}-rename-input`}

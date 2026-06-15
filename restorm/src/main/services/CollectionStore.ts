@@ -75,6 +75,15 @@ type Collection = EnvironmentFolder
  */
 class CollectionStore {
   private collections: Collection[] = []
+  /** Listeners fired after the whole collection tree is (re)set — e.g. on load.
+   * Lets higher layers (ContextService) react without CollectionStore importing
+   * them (no downward dependency). */
+  private collectionsSetListeners: (() => void)[] = []
+
+  /** Register a callback fired after every `setCollections` (load / replace). */
+  onCollectionsSet(cb: () => void): void {
+    this.collectionsSetListeners.push(cb)
+  }
 
   // ==========================================================================
   // Getters
@@ -142,6 +151,7 @@ class CollectionStore {
     // Convert plain objects to class instances if needed
     this.collections = collections.map(c => this.ensureEnvironmentFolderInstance(c))
     logger.info('[CollectionStore] Collections set', { count: collections.length, source })
+    for (const cb of this.collectionsSetListeners) cb()
   }
 
   /**
@@ -840,7 +850,7 @@ class CollectionStore {
       type: 'environment',
       // Pass the live `Environment` (with real `KeyValue` instances)
       // instead of `toPlainObject()` — the latter calls
-      // `serializeValueForPersistence` which strips `PasswordValue`
+      // `serializeValueForPersistence` which strips `SecretValue`
       // plaintext. This emit is main-process-internal (handlers run
       // in-process, no IPC structured clone), so the consumers
       // (ContextService) see the secret-bearing instance and can
@@ -859,7 +869,7 @@ class CollectionStore {
       id: env.id,
       type: 'environment',
       // See `emitEnvironmentCreated` — pass the live instance so
-      // `PasswordValue` plaintext survives the eventBus hop.
+      // `SecretValue` plaintext survives the eventBus hop.
       document: env
     }
     void eventBusService.emit(DocumentEvents.ENVIRONMENT_UPDATED, payload)

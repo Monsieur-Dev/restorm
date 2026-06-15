@@ -696,7 +696,7 @@ export const ODataRequestTabView: React.FC<ODataRequestTabViewProps> = ({ reques
       ? (attachedAuth as unknown as { toPlainObject?: () => unknown }).toPlainObject?.() ?? attachedAuth
       : undefined
     // JSON round-trip flattens any residual class instances
-    // (`StringValue`, `PasswordValue`, reactive Proxy wrappers) —
+    // (`StringValue`, `SecretValue`, reactive Proxy wrappers) —
     // structured clone over IPC rejects those directly.
     const authRequestPayload = authPlain !== undefined
       ? JSON.parse(JSON.stringify(authPlain)) as unknown

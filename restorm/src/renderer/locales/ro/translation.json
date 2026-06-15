@@ -1,4 +1,33 @@
 {
+  "secrets": {
+    "others": "Altele",
+    "refresh": "Reîmprospătează secretul",
+    "source": {
+      "envVar": "Variabilă de mediu",
+      "envFileSecret": "Secret din fișier env",
+      "envFileSecretPlaceholder": "Valoarea secretului",
+      "envFileSecretLabel": "Valoarea secretului"
+    },
+    "param": {
+      "envVarName": "Nume variabilă",
+      "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "Editează preluarea",
+    "envVarUnresolved": "(nerezolvat)",
+    "resolving": "Se rezolvă…",
+    "resolveError": "Rezolvarea secretului a eșuat",
+    "resolveErrorEnv": "Cel puțin o variabilă nu a putut fi preluată și este în eroare.",
+    "resolveErrorItem": "Cel puțin unul dintre secretele acestui element nu a putut fi preluat.",
+    "fetchFailed": "Preluarea a eșuat",
+    "retrievalModal": {
+      "title": "Preluarea secretului",
+      "value": "valoare:",
+      "fetch": "Preia",
+      "fetchFailed": "Preluarea a eșuat",
+      "ok": "OK",
+      "cancel": "Anulează"
+    }
+  },
   "app": {
     "title": "restorm",
     "openSettings": "Deschide setările",

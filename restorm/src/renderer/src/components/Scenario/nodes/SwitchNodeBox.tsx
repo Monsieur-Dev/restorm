@@ -71,7 +71,7 @@ function blankOfSameType(prev: PersistedValue): PersistedValue {
     case 'enumList': return { type: 'enumList', value: [], enumDefinitionId: prev.enumDefinitionId }
     case 'customList': return { type: 'customList', listId: prev.listId, label: '' }
     case 'customListMulti': return { type: 'customListMulti', listId: prev.listId, labels: [] }
-    case 'password': return { type: 'password' }
+    case 'secret': return { type: 'secret', source: prev.source, params: prev.params }
     case 'expression': return { type: 'expression', value: '' }
     case 'variable': return { type: 'variable', value: '' }
     case 'environment': return { type: 'environment', value: '' }

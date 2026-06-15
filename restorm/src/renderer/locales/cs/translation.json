@@ -1,4 +1,33 @@
 {
+  "secrets": {
+    "others": "Ostatní",
+    "refresh": "Obnovit tajemství",
+    "source": {
+      "envVar": "Proměnná prostředí",
+      "envFileSecret": "Tajemství ze souboru env",
+      "envFileSecretPlaceholder": "Hodnota tajemství",
+      "envFileSecretLabel": "Hodnota tajemství"
+    },
+    "param": {
+      "envVarName": "Název proměnné",
+      "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "Upravit načtení",
+    "envVarUnresolved": "(nevyřešeno)",
+    "resolving": "Řešení…",
+    "resolveError": "Vyřešení tajemství selhalo",
+    "resolveErrorEnv": "Alespoň jednu proměnnou se nepodařilo načíst a je v chybovém stavu.",
+    "resolveErrorItem": "Alespoň jedno z tajemství této položky se nepodařilo načíst.",
+    "fetchFailed": "Načtení selhalo",
+    "retrievalModal": {
+      "title": "Načtení tajemství",
+      "value": "hodnota:",
+      "fetch": "Načíst",
+      "fetchFailed": "Načtení selhalo",
+      "ok": "OK",
+      "cancel": "Zrušit"
+    }
+  },
   "app": {
     "title": "restorm",
     "openSettings": "Otevřít nastavení",

@@ -30,10 +30,15 @@ interface FakeFolder {
 
 const mockState = {
   findById: vi.fn<(id: string) => unknown>(),
-  createScenario: vi.fn<(parentId: string, init: { name: string }) => FakeScenario>()
+  createScenario: vi.fn<(parentId: string, init: { name: string }) => FakeScenario>(),
+  getCollections: vi.fn<() => unknown[]>(() => [])
 }
 
 const updateScenarioSpy = vi.fn<(id: string, updates: Record<string, unknown>) => unknown>()
+const updateEnvironmentSpy = vi.fn<(id: string, patch: Record<string, unknown>) => unknown>()
+const updateFolderSpy = vi.fn<(id: string, patch: Record<string, unknown>) => unknown>()
+const createEnvironmentSpy = vi.fn<(parentId: string, data: { name: string }, parentEnvironmentId?: string) => { id: string; name: string }>()
+const deleteEnvironmentSpy = vi.fn<(id: string) => boolean>()
 
 const broadcastSpy = vi.fn<() => void>()
 const getAllWindowsSpy = vi.fn<() => unknown[]>(() => [])
@@ -46,7 +51,19 @@ vi.mock('../../services/CollectionStore', () => ({
   collectionStore: {
     findById: (id: string) => mockState.findById(id),
     createScenario: (parentId: string, init: { name: string }) => mockState.createScenario(parentId, init),
-    updateScenario: (id: string, updates: Record<string, unknown>) => updateScenarioSpy(id, updates)
+    updateScenario: (id: string, updates: Record<string, unknown>) => updateScenarioSpy(id, updates),
+    getCollections: () => mockState.getCollections(),
+    updateEnvironment: (id: string, patch: Record<string, unknown>) => updateEnvironmentSpy(id, patch),
+    updateFolder: (id: string, patch: Record<string, unknown>) => updateFolderSpy(id, patch),
+    createEnvironment: (parentId: string, data: { name: string }, parentEnvironmentId?: string) => createEnvironmentSpy(parentId, data, parentEnvironmentId),
+    deleteEnvironment: (id: string) => deleteEnvironmentSpy(id)
+  }
+}))
+
+const refreshEnvironmentSecretsSpy = vi.fn<(envId: string) => number>(() => 0)
+vi.mock('../../services/ContextService', () => ({
+  contextService: {
+    refreshEnvironmentSecrets: (envId: string) => refreshEnvironmentSecretsSpy(envId)
   }
 }))
 
@@ -55,6 +72,12 @@ vi.mock('./import', () => ({
 }))
 
 vi.mock('./scenario', () => ({ broadcastScenario: () => { broadcastSpy() } }))
+
+import { valueSourceRegistry } from '../../../shared/secrets/valueSourceRegistry'
+import { envVarDescriptor } from '../../../shared/secrets/sources/envVar.descriptor'
+import { envFileSecretDescriptor } from '../../../shared/secrets/sources/envFileSecret.descriptor'
+import { KeyValue } from '../../../shared/models'
+import { serializeValueForPersistence } from '../../../shared/utils/valuePersistence'
 
 function parse(result: { content: { type: 'text'; text: string }[] }): Record<string, unknown> {
   return JSON.parse(result.content[0]?.text ?? '{}') as Record<string, unknown>
@@ -139,5 +162,217 @@ describe('create_scenario MCP tool', () => {
     expect(scenario.name).toBe('New')
     // broadcastScenario (mocked onto broadcastSpy) repaints editor + sidebar.
     expect(broadcastSpy).toHaveBeenCalled()
+  })
+})
+
+describe('set_env_variable — secret value source', () => {
+  let mcp: FakeMcpService
+
+  // An env-folder fixture whose single environment holds the variable list the
+  // tool mutates in place. `getCollections` returns it so `findEnvById` +
+  // the owner-folder lookup resolve.
+  function makeFixture(): { id: string; name: string; variables: KeyValue[]; subEnvironments: unknown[] } {
+    const env = { id: 'env-1', name: 'staging', variables: [] as KeyValue[], subEnvironments: [] }
+    const folder = { id: 'ef-1', name: 'EF', folderType: 'environment', environments: [env], items: [] }
+    mockState.getCollections.mockReturnValue([folder])
+    return env
+  }
+
+  beforeEach(async () => {
+    for (const fn of Object.values(mockState)) fn.mockReset()
+    updateScenarioSpy.mockReset(); updateEnvironmentSpy.mockReset(); updateFolderSpy.mockReset()
+    broadcastSpy.mockReset(); getAllWindowsSpy.mockReset(); getAllWindowsSpy.mockImplementation(() => [])
+    mockState.getCollections.mockReturnValue([])
+    // Register the built-in descriptors so source validation has a registry.
+    valueSourceRegistry.register(envVarDescriptor)
+    valueSourceRegistry.register(envFileSecretDescriptor)
+    mcp = new FakeMcpService()
+    const { registerWriteTools } = await import('./write')
+    registerWriteTools(mcp as unknown as McpService)
+  })
+
+  it('accepts a valid secret reference and stores it without plaintext', () => {
+    const env = makeFixture()
+    const res = mcp.invoke('set_env_variable', {
+      envId: 'env-1',
+      key: 'API_TOKEN',
+      value: { type: 'secret', source: 'envVar', params: { name: 'API_TOKEN' } }
+    })
+    expect(res.isError).toBeUndefined()
+    expect(parse(res)).toMatchObject({ envId: 'env-1', key: 'API_TOKEN', type: 'secret' })
+    // The stored KeyValue serializes back to the reference shape — no resolved
+    // plaintext field survives the persistence boundary the read tools use.
+    const stored = env.variables.find((v) => v.key === 'API_TOKEN')
+    expect(stored).toBeDefined()
+    const persisted = serializeValueForPersistence(stored?.value)
+    expect(persisted).toEqual({ type: 'secret', source: 'envVar', params: { name: 'API_TOKEN' } })
+    expect(JSON.stringify(persisted)).not.toContain('resolved')
+  })
+
+  it('rejects an unknown secret source', () => {
+    makeFixture()
+    const res = mcp.invoke('set_env_variable', {
+      envId: 'env-1',
+      key: 'X',
+      value: { type: 'secret', source: 'nope', params: {} }
+    })
+    expect(res.isError).toBe(true)
+    expect(res.content[0]?.text).toContain('unknown secret source')
+  })
+
+  it('rejects a secret missing a required param', () => {
+    makeFixture()
+    const res = mcp.invoke('set_env_variable', {
+      envId: 'env-1',
+      key: 'X',
+      value: { type: 'secret', source: 'envVar', params: {} }
+    })
+    expect(res.isError).toBe(true)
+    expect(res.content[0]?.text).toContain('requires param "name"')
+  })
+
+  it('rejects a secret with an empty source', () => {
+    makeFixture()
+    const res = mcp.invoke('set_env_variable', {
+      envId: 'env-1',
+      key: 'X',
+      value: { type: 'secret', source: '', params: {} }
+    })
+    expect(res.isError).toBe(true)
+    expect(res.content[0]?.text).toContain('non-empty "source"')
+  })
+})
+
+describe('secret value MCP round-trip (write -> read serialization)', () => {
+  it('preserves the reference and never exposes resolved plaintext', () => {
+    // The MCP write path builds a value via KeyValue.fromPlain; the MCP read
+    // path serializes via serializeValueForPersistence (and SecretValue.toJSON).
+    // Simulate a hydrated SecretValue (main sets `.resolved` at run time) and
+    // prove neither serialization channel leaks it.
+    const kv = KeyValue.fromPlain({
+      key: 'Authorization',
+      value: { type: 'secret', source: 'envFileSecret', params: { key: 'a/b', folderPath: '/p' } }
+    })
+    ;(kv.value as unknown as { resolved?: string }).resolved = 'plaintext-secret-DO-NOT-LEAK'
+
+    const persisted = serializeValueForPersistence(kv.value)
+    expect(persisted).toEqual({ type: 'secret', source: 'envFileSecret', params: { key: 'a/b', folderPath: '/p' } })
+    expect(JSON.stringify(persisted)).not.toContain('plaintext-secret')
+
+    // The JSON.stringify channel (what jsonReply uses) also masks via toJSON.
+    expect(JSON.stringify(kv.value)).not.toContain('plaintext-secret')
+    expect(JSON.parse(JSON.stringify(kv.value))).toEqual({
+      type: 'secret', source: 'envFileSecret', params: { key: 'a/b', folderPath: '/p' }
+    })
+  })
+})
+
+describe('environment structure tools (create / rename / delete / list)', () => {
+  let mcp: FakeMcpService
+
+  // ef-1 ─ A ─ B  (B nested under A);  D top-level
+  function makeFolder(): { id: string; environments: unknown[] } {
+    const B = { id: 'env-B', name: 'B', variables: [], subEnvironments: [] }
+    const A = { id: 'env-A', name: 'A', variables: [], subEnvironments: [B] }
+    const D = { id: 'env-D', name: 'D', variables: [], subEnvironments: [] }
+    const folder = { id: 'ef-1', name: 'EF', folderType: 'environment', environments: [A, D], items: [] }
+    mockState.getCollections.mockReturnValue([folder])
+    mockState.findById.mockImplementation((id: string) => (id === 'ef-1' ? folder : undefined))
+    return folder
+  }
+
+  beforeEach(async () => {
+    for (const fn of Object.values(mockState)) fn.mockReset()
+    updateScenarioSpy.mockReset(); updateEnvironmentSpy.mockReset(); updateFolderSpy.mockReset()
+    createEnvironmentSpy.mockReset(); deleteEnvironmentSpy.mockReset()
+    broadcastSpy.mockReset(); getAllWindowsSpy.mockReset(); getAllWindowsSpy.mockImplementation(() => [])
+    mockState.getCollections.mockReturnValue([])
+    mcp = new FakeMcpService()
+    const { registerWriteTools } = await import('./write')
+    registerWriteTools(mcp as unknown as McpService)
+  })
+
+  it('lists the environment tree (top-level + nested sub-envs)', () => {
+    makeFolder()
+    const res = mcp.invoke('list_environments', { envFolderId: 'ef-1' })
+    expect(res.isError).toBeUndefined()
+    expect(parse(res)).toEqual({
+      envFolderId: 'ef-1',
+      environments: [
+        { id: 'env-A', name: 'A', subEnvironments: [{ id: 'env-B', name: 'B' }] },
+        { id: 'env-D', name: 'D' }
+      ]
+    })
+  })
+
+  it('creates a top-level environment + autosaves', () => {
+    makeFolder()
+    createEnvironmentSpy.mockReturnValue({ id: 'env-new', name: 'staging' })
+    const res = mcp.invoke('create_environment', { envFolderId: 'ef-1', name: 'staging' })
+    expect(res.isError).toBeUndefined()
+    expect(createEnvironmentSpy).toHaveBeenCalledWith('ef-1', { name: 'staging' }, undefined)
+    expect(parse(res)).toEqual({ id: 'env-new', name: 'staging', envFolderId: 'ef-1' })
+    expect(broadcastSpy).toHaveBeenCalled()
+  })
+
+  it('creates a sub-environment under an existing env in the same folder', () => {
+    makeFolder()
+    createEnvironmentSpy.mockReturnValue({ id: 'env-sub', name: 'eu-west' })
+    const res = mcp.invoke('create_environment', { envFolderId: 'ef-1', name: 'eu-west', parentEnvironmentId: 'env-A' })
+    expect(res.isError).toBeUndefined()
+    expect(createEnvironmentSpy).toHaveBeenCalledWith('ef-1', { name: 'eu-west' }, 'env-A')
+    expect(parse(res)).toMatchObject({ id: 'env-sub', parentEnvironmentId: 'env-A' })
+  })
+
+  it('rejects a parentEnvironmentId that lives in another folder', () => {
+    makeFolder()
+    const res = mcp.invoke('create_environment', { envFolderId: 'ef-1', name: 'x', parentEnvironmentId: 'env-elsewhere' })
+    expect(res.isError).toBe(true)
+    expect(createEnvironmentSpy).not.toHaveBeenCalled()
+  })
+
+  it('renames an environment + autosaves', () => {
+    makeFolder()
+    const res = mcp.invoke('rename_environment', { envId: 'env-B', name: 'renamed' })
+    expect(res.isError).toBeUndefined()
+    expect(updateEnvironmentSpy).toHaveBeenCalledWith('env-B', { name: 'renamed' })
+    expect(parse(res)).toEqual({ envId: 'env-B', name: 'renamed' })
+    expect(broadcastSpy).toHaveBeenCalled()
+  })
+
+  it('deletes a sub-environment + autosaves (owner folder resolved before delete)', () => {
+    makeFolder()
+    deleteEnvironmentSpy.mockReturnValue(true)
+    const res = mcp.invoke('delete_environment', { envId: 'env-B' })
+    expect(res.isError).toBeUndefined()
+    expect(deleteEnvironmentSpy).toHaveBeenCalledWith('env-B')
+    expect(parse(res)).toEqual({ envId: 'env-B', removed: true })
+    expect(broadcastSpy).toHaveBeenCalled()
+  })
+
+  it('returns removed:false for an unknown env and does not autosave', () => {
+    makeFolder()
+    deleteEnvironmentSpy.mockReturnValue(false)
+    const res = mcp.invoke('delete_environment', { envId: 'env-ghost' })
+    expect(res.isError).toBeUndefined()
+    expect(parse(res)).toEqual({ envId: 'env-ghost', removed: false })
+    expect(broadcastSpy).not.toHaveBeenCalled()
+  })
+
+  it('refresh_environment re-resolves the env secrets and returns the count', () => {
+    makeFolder()
+    refreshEnvironmentSecretsSpy.mockReturnValue(2)
+    const res = mcp.invoke('refresh_environment', { envId: 'env-A' })
+    expect(res.isError).toBeUndefined()
+    expect(refreshEnvironmentSecretsSpy).toHaveBeenCalledWith('env-A')
+    expect(parse(res)).toEqual({ envId: 'env-A', secretsRefreshed: 2 })
+  })
+
+  it('refresh_environment rejects an unknown env', () => {
+    makeFolder()
+    refreshEnvironmentSecretsSpy.mockReset()
+    const res = mcp.invoke('refresh_environment', { envId: 'env-ghost' })
+    expect(res.isError).toBe(true)
+    expect(refreshEnvironmentSecretsSpy).not.toHaveBeenCalled()
   })
 })

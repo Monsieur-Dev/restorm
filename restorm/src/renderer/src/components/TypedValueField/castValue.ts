@@ -1,6 +1,7 @@
 import type { ValueType, CustomValueList } from '../../../../shared/types/collections'
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue, NullValue, ListValue } from '../../../../shared/types/collections'
-import { isPasswordValue, isNumericValue, isDateTimeValue, isColorValue, isExpressionValue, isBooleanValue, isEnumValue, isEnumListValue, isCustomListValue, isCustomListMultiValue, isVariableValue, isEnvironmentValue, isNullValue, isListValue } from '../../../../shared/utils/valueHelpers'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue, NullValue, ListValue } from '../../../../shared/types/collections'
+import { SecretValue } from '../../../../shared/types/valueTypes/SecretValue'
+import { isSecretValue, isNumericValue, isDateTimeValue, isColorValue, isExpressionValue, isBooleanValue, isEnumValue, isEnumListValue, isCustomListValue, isCustomListMultiValue, isVariableValue, isEnvironmentValue, isNullValue, isListValue } from '../../../../shared/utils/valueHelpers'
 import { isHexColorString, tryParseDateString, tryParseNumberString } from '../../../../shared/utils/valueCasting'
 
 export type ValueTypeKind =
@@ -27,7 +28,7 @@ export function resolveValueTypeKind(value: ValueType | undefined): ValueTypeKin
   if (isListValue(value)) return 'list'
   if (isVariableValue(value)) return 'variable'
   if (isEnvironmentValue(value)) return 'environment'
-  if (isPasswordValue(value)) return 'secret'
+  if (isSecretValue(value)) return 'secret'
   if (isNumericValue(value)) return 'number'
   if (isDateTimeValue(value)) return 'dateTime'
   if (isColorValue(value)) return 'color'
@@ -82,8 +83,14 @@ export function castValueToKind(
       return new ListValue([])
     case 'string':
       return new StringValue(raw)
-    case 'secret':
-      return new PasswordValue(raw)
+    case 'secret': {
+      // Default to an env-file secret seeded with the current text as its
+      // in-memory plaintext; on save the plaintext lands in `restorm.env`
+      // (positionally keyed) and the document keeps only the descriptor.
+      const secret = new SecretValue('envFileSecret', {})
+      if (raw) secret.resolved = raw
+      return secret
+    }
     case 'number': {
       const parsed = tryParseNumberString(raw.trim())
       return new NumericValue(parsed ?? 0, 'decimal')

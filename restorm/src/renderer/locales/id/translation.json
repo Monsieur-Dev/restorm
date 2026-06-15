@@ -1,4 +1,33 @@
 {
+  "secrets": {
+    "others": "Lainnya",
+    "refresh": "Segarkan rahasia",
+    "source": {
+      "envVar": "Variabel lingkungan",
+      "envFileSecret": "Rahasia berkas env",
+      "envFileSecretPlaceholder": "Nilai rahasia",
+      "envFileSecretLabel": "Nilai rahasia"
+    },
+    "param": {
+      "envVarName": "Nama variabel",
+      "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "Edit pengambilan",
+    "envVarUnresolved": "(belum terselesaikan)",
+    "resolving": "Menyelesaikan…",
+    "resolveError": "Gagal menyelesaikan rahasia",
+    "resolveErrorEnv": "Setidaknya satu variabel tidak dapat diambil dan dalam keadaan galat.",
+    "resolveErrorItem": "Setidaknya satu rahasia item ini tidak dapat diambil.",
+    "fetchFailed": "Pengambilan gagal",
+    "retrievalModal": {
+      "title": "Pengambilan rahasia",
+      "value": "nilai:",
+      "fetch": "Ambil",
+      "fetchFailed": "Pengambilan gagal",
+      "ok": "OK",
+      "cancel": "Batal"
+    }
+  },
   "app": {
     "title": "restorm",
     "openSettings": "Buka pengaturan",

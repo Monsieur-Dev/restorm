@@ -45,12 +45,15 @@ import { searchIndexService, contextService, responseHistoryService, requestUsag
 import { firewallService, permissionService, registerFirewallIpc, installWorkerPatcher } from './services/firewall'
 import { writeMcpDiscoveryFile, cleanupMcpDiscoveryFile } from './services/mcpDiscovery'
 import { registerRestormMcp } from './mcp'
+import { registerActiveStateBridge } from './mcp/tools/activeState'
 import { RESTORM_MCP_INSTRUCTIONS } from './mcp/instructions'
 import { graphQLService } from 'electron-core-ui/main'
 import { clearUserSettings, parseCliArgs } from './cli/args'
 import { setupGraphQL } from './GraphQLSetup'
 import { registerRestormIPC } from './IPCHandlers'
 import { installScenarioEngineIPC } from './scenarioEngine/ipcBridge'
+import { registerBuiltinSources } from './services/secrets/mainSourceRegistry'
+import { secretHydrationService } from './services/secrets/SecretHydrationService'
 import { registerApiUpdateIPC } from './services/apiUpdate/registerApiUpdateIPC'
 import { runApiUpdateApply } from './services/apiUpdate/orchestrateApply'
 import { loadFolderStructure, loadProjectIntoStore, attachDraftStoreForFolder, attachDraftStoreForFile, getDraftsRootDir } from './FileOperations'
@@ -430,6 +433,9 @@ void app.whenReady().then(() => {
 // requests hanging while the app is being torn down.
 app.on('before-quit', () => {
   permissionService.denyAllPending()
+  // Drop every resolved credential so no plaintext lingers in memory
+  // past the app's lifetime.
+  secretHydrationService.clearAll()
 })
 
 // Initialize Search Index Service (listens to document events from renderer)
@@ -439,6 +445,12 @@ logger.info('Search Index Service initialized')
 // Initialize Context Service (manages Handlebars context and resolved values)
 contextService.initialize()
 logger.info('Context Service initialized')
+
+// Mirror the renderer's per-env-folder active-environment selection into the
+// main process — unconditionally, NOT only under --mcp. ContextService needs it
+// to decide which environment an item inherits for its secret badge (the active
+// env, not just the first one). Idempotent; the MCP path also calls it.
+registerActiveStateBridge()
 
 // Initialize Response History Service (stores executed responses)
 responseHistoryService.initialize()
@@ -593,6 +605,11 @@ registerRestormIPC({ editorWindows, closeAllWindows })
 // every build, not only when the embedded MCP server is enabled. Idempotent:
 // the MCP setup path calls it again as a no-op.
 installScenarioEngineIPC()
+
+// Register the built-in secret value sources (EnvVar, …) so the
+// SecretHydrationService can resolve a request's SecretValues before
+// dispatch. Idempotent — safe regardless of which startup path ran.
+registerBuiltinSources()
 
 // Headless CLI-run: load the --open project into the main-side store, run the
 // named scenario through the real engine (no window), stream its run-log, and
