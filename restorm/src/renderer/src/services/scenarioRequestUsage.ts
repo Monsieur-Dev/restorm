@@ -29,10 +29,10 @@ function walkScenarios(items: FolderItem[], visit: (scenario: Scenario) => void)
 
 /** Scenario node kinds that bind a sidebar request through `config.requestId` —
  * the one-shot `httpRequest` plus the long-lived streaming connect nodes
- * (Socket.IO / raw WebSocket). Any request-bound kind must be listed here so the
- * request ties to the scenario for BOTH the "used in scenarios" reverse-nav and
- * the delete → move-into-scenario flow. gRPC streaming will join this list. */
-const REQUEST_BINDING_KINDS = new Set(['httpRequest', 'socketioConnect', 'websocketConnect'])
+ * (Socket.IO / raw WebSocket / gRPC). Any request-bound kind must be listed here
+ * so the request ties to the scenario for BOTH the "used in scenarios"
+ * reverse-nav and the delete → move-into-scenario flow. */
+const REQUEST_BINDING_KINDS = new Set(['httpRequest', 'socketioConnect', 'websocketConnect', 'grpcConnect'])
 
 /** Whether a scenario node binds `requestId` (via `config.requestId`). */
 function nodeBindsRequest(node: { kind: string; config: Record<string, unknown> }, requestId: string): boolean {
@@ -66,9 +66,13 @@ export function isRequestInScenarioSubtree(scenario: Scenario, requestId: string
     if (!items) return false
     for (const item of items) {
       if (item.id === requestId) return true
-      if (isScenario(item)) {
-        if (walk(item.items)) return true
-      } else if ('items' in item && Array.isArray((item as { items?: unknown }).items)) {
+      // A NESTED scenario owns its own children — a request authored inside it
+      // belongs to THAT scenario, not to this ancestor. Stop at the boundary so
+      // a request in `Main / Sub` isn't reported as belonging to both `Sub` and
+      // `Main` (which over-warned in the delete dialog). Plain folders /
+      // env-folders are not scenario boundaries, so we still descend them.
+      if (isScenario(item)) continue
+      if ('items' in item && Array.isArray((item as { items?: unknown }).items)) {
         if (walk((item as { items: FolderItem[] }).items)) return true
       }
     }

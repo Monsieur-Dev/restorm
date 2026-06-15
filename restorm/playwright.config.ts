@@ -62,6 +62,12 @@ const websocketExecutionTestDir = defineBddConfig({
   outputDir: '.features-gen/websocket-execution'
 })
 
+const grpcExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/grpc-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/grpc-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/grpc-execution'
+})
+
 const fullyDocumentedPetstoreTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/fully-documented-petstore/features/**/*.feature',
   steps: [
@@ -214,6 +220,11 @@ export default defineConfig({
     {
       name: 'websocket-execution',
       testDir: websocketExecutionTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'grpc-execution',
+      testDir: grpcExecutionTestDir,
       timeout: 180 * 1000
     },
     {

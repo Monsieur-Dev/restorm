@@ -42,6 +42,7 @@ import { TimerNodeBox } from './TimerNodeBox'
 import { CodeNodeBox } from './CodeNodeBox'
 import { SocketioConnectNodeBox, SocketioSendNodeBox, SocketioCloseNodeBox } from './SocketioNodeBoxes'
 import { WebsocketConnectNodeBox, WebsocketSendNodeBox, WebsocketCloseNodeBox } from './WebsocketNodeBoxes'
+import { GrpcConnectNodeBox, GrpcSendNodeBox, GrpcCloseNodeBox } from './GrpcNodeBoxes'
 
 export type { ScenarioNodeBoxData, ScenarioNodeBoxType, ScenarioNodeCell } from './ScenarioNodeBoxBase'
 export { ScenarioNodeBoxBase } from './ScenarioNodeBoxBase'
@@ -64,6 +65,9 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   websocketConnect: WebsocketConnectNodeBox,
   websocketSend: WebsocketSendNodeBox,
   websocketClose: WebsocketCloseNodeBox,
+  grpcConnect: GrpcConnectNodeBox,
+  grpcSend: GrpcSendNodeBox,
+  grpcClose: GrpcCloseNodeBox,
   socketioConnect: SocketioConnectNodeBox,
   socketioSend: SocketioSendNodeBox,
   socketioClose: SocketioCloseNodeBox,

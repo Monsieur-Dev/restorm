@@ -137,9 +137,13 @@ declare global {
       }
       grpc: {
         execute: (input: GRPCExecutionInput) => Promise<GRPCExecutionResult>
+        connect: (input: GRPCExecutionInput) => Promise<{ started: boolean }>
+        send: (requestId: string, message: string) => Promise<boolean>
+        disconnect: (requestId: string) => Promise<boolean>
         cancel: (requestId: string) => Promise<boolean>
         isActive: (requestId: string) => Promise<boolean>
         onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
+        onMessage: (callback: (data: GrpcMessageData) => void) => (() => void)
       }
       websocket: {
         connect: (input: WebSocketExecutionInput) => Promise<WebSocketExecutionResult>
@@ -394,9 +398,11 @@ export interface GRPCExecutionInput {
 export interface GRPCExecutionResult {
   requestId: string
   success: boolean
+  connected?: boolean
   statusCode?: number
   statusMessage?: string
   responseMessage?: string
+  messages?: GrpcMessageItem[]
   metadata?: Record<string, string>
   error?: string
   timings: {
@@ -405,6 +411,19 @@ export interface GRPCExecutionResult {
   }
   requestUrl?: string
   requestMethod?: string
+}
+
+/** A single streamed gRPC frame (sent or received). */
+export interface GrpcMessageItem {
+  direction: 'sent' | 'received'
+  data: string
+  timestamp: string
+}
+
+/** Payload of the `grpc:message` broadcast (a streamed frame for a request). */
+export interface GrpcMessageData {
+  requestId: string
+  message: GrpcMessageItem
 }
 
 /** WebSocket execution input */

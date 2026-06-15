@@ -93,6 +93,18 @@ export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
     summary: 'Closes an already-open raw WebSocket connection (declared by a websocketConnect node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
     config: { connectionNodeId: 'Id of the websocketConnect node whose connection to close.' }
   },
+  grpcConnect: {
+    summary: 'Opens a long-lived streaming gRPC call from a bound request (server / client / bidi, inferred from the request call type) and listens. `connected` fires once the call is open; EVERY received frame re-emits on the single `message` output (a streaming RPC has no named events). For server-streaming the request message is sent automatically on open; for client/bidi use grpcSend. The call stays open until a grpcClose targets it (or the run is stopped), then `done` fires.',
+    config: { requestId: 'Id of the gRPC request to connect (its resolved address/metadata + service/method/call type).', connectionName: 'Unique-per-scenario name a grpcSend/grpcClose references for display (defaults to the request name).', label: 'Display label on the box.' }
+  },
+  grpcSend: {
+    summary: 'Writes a request message on an already-open streaming gRPC call (declared by a grpcConnect node) — client or bidi only, no channel. Pure-event action: triggered on `in`, sequences the next node via `done`. Errors (to `error`) when no connection is selected or it is not open.',
+    config: { connectionNodeId: 'Id of the grpcConnect node whose call to write on.', payload: 'Request message (a code editor; or wire `payload`).' }
+  },
+  grpcClose: {
+    summary: 'Half-closes an already-open streaming gRPC call (declared by a grpcConnect node), letting the server\'s final frames/response arrive and firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
+    config: { connectionNodeId: 'Id of the grpcConnect node whose call to close.' }
+  },
   forEach: {
     summary: 'Iterates a collection: fans out `each` item, then fires `done` once every iteration\'s sub-graph has finished. `items` is wired or taken from a configured list.',
     config: { parallelism: '`{ enabled, count }` — bounded concurrent iterations (count≥2). Off = sequential.' }

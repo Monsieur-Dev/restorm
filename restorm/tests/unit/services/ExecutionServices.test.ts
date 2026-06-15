@@ -11,7 +11,10 @@ vi.mock('electron', () => ({
 }))
 
 vi.mock('electron-core-ui/main', () => ({
-  logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() }
+  logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+  // GRPCExecutionService now imports ResponseHistoryService, which pulls in
+  // CollectionStore's `createPubSub(...)` at module load — provide it here.
+  createPubSub: () => ({ publish: vi.fn(), subscribe: vi.fn(), asyncIterator: vi.fn() })
 }))
 
 vi.mock('../../../src/main/services/ContextService', () => {
@@ -278,20 +281,22 @@ describe('GRPCExecutionService', () => {
     expect(result.error).toContain('No resolved URL')
   })
 
-  it('returns UNIMPLEMENTED placeholder (status 12)', async () => {
+  it('fails with a descriptive error when the bound service is not in the proto descriptor', async () => {
+    // No inline proto / protoPath → the bundled grpcbin descriptor is used, which
+    // does not define `mypackage.MyService`, so dynamic client resolution fails.
+    // (Real unary/stream execution against a real service is covered by the
+    // grpc-execution e2e + the grpcProtoLoader unit test.)
     setupResolvedUrl('grpc://localhost:50051')
     setupRequestContext({
-      fullData: { service: 'mypackage.MyService', grpcMethod: 'SayHello', requestMessage: '{"name":"world"}' }
+      fullData: { service: 'mypackage.MyService', grpcMethod: 'SayHello', callType: 'unary', requestMessage: '{"name":"world"}' }
     })
 
     const result = await grpcExecutionService.execute({ requestId: 'g2' })
 
     expect(result.success).toBe(false)
-    expect(result.statusCode).toBe(12)
-    expect(result.statusMessage).toContain('gRPC')
-    expect(result.requestUrl).toBe('grpc://localhost:50051')
+    expect(result.error).toContain('mypackage.MyService')
+    expect(result.requestUrl).toBe('localhost:50051')
     expect(result.requestMethod).toBe('mypackage.MyService/SayHello')
-    expect(result.error).toContain('not fully implemented')
     expect(result.timings.durationMs).toBeGreaterThanOrEqual(0)
   })
 

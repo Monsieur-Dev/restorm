@@ -197,12 +197,20 @@ export function generateCodeSnippets(
 
     case 'websocket': {
       const message = data.message ? transformValue(data.message, envContext) : ''
+      // The template branches on per-transport booleans (NOT a `protocol`
+      // string) + uses `headers` and, for MQTT, `topic` — pass them all or every
+      // branch evaluates false and the snippet renders empty.
+      const protocol = data.protocol ?? 'websocket'
 
       if (templates.websocketSnippetTemplate) {
         markdown = templates.websocketSnippetTemplate({
           url: resolvedUrl,
-          protocol: data.protocol ?? 'websocket',
+          isNativeWebSocket: protocol === 'websocket',
+          isSocketIO: protocol === 'socketio',
+          isMqtt: protocol === 'mqtt',
           event: data.event ?? '',
+          topic: data.event ?? '',
+          headers: headers.length > 0 ? headers : null,
           message: message || null
         })
       }
@@ -218,9 +226,14 @@ export function generateCodeSnippets(
           value: transformValue(m.value, envContext)
         }))
 
+      // Insecure unless the URL opts into TLS (grpcs:// / https://) — matches
+      // GRPCExecutionService. grpcurl defaults to TLS, so a plaintext server
+      // (the common local/dev case) needs the `-plaintext` flag to be correct.
+      const plaintext = !/^(?:grpcs|https):\/\//i.test(resolvedUrl)
       if (templates.grpcSnippetTemplate) {
         markdown = templates.grpcSnippetTemplate({
           host,
+          plaintext,
           service: data.service ?? '',
           method: data.grpcMethod ?? '',
           callType: data.callType ?? 'unary',

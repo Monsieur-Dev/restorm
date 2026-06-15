@@ -90,9 +90,13 @@ declare global {
       }
       grpc: {
         execute: (input: unknown) => Promise<unknown>
+        connect: (input: unknown) => Promise<unknown>
+        send: (requestId: string, message: string) => Promise<boolean>
+        disconnect: (requestId: string) => Promise<boolean>
         cancel: (requestId: string) => Promise<boolean>
         isActive: (requestId: string) => Promise<boolean>
         onProgress: (callback: (data: unknown) => void) => () => void
+        onMessage: (callback: (data: unknown) => void) => () => void
       }
       websocket: {
         connect: (input: unknown) => Promise<unknown>

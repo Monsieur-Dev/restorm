@@ -10,7 +10,12 @@ import {
 } from 'electron-core-ui/decorators'
 import { BaseRequest } from './BaseRequest'
 import { KeyValue } from '../KeyValue'
-import type { GrpcCallType, RequestType, RuntimeId, Icon } from '../types'
+import type { RequestType, RuntimeId, Icon } from '../types'
+// The stored / runtime call-type representation is the hyphenated
+// `GrpcCallType` from `requestPrimitives` (what the plain request interface,
+// the import service, the samples and the execution service all use). The
+// camelCase `GRPC_CALL_TYPES` in `../types` exists only for the GraphQL enum.
+import type { GrpcCallType } from '../../types/requestPrimitives'
 
 /**
  * gRPC request definition with service, method, and message.

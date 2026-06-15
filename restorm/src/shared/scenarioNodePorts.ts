@@ -102,6 +102,15 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   websocketSend: { inputs: [{ id: 'payload', name: 'payload' }], outputs: [] },
   // Raw WebSocket close: closes the named connection. Sequences via `done`.
   websocketClose: { inputs: [], outputs: [] },
+  // gRPC streaming connect: like websocketConnect — a streaming RPC has no named
+  // events, so every received frame re-emits on a SINGLE `message` port.
+  // `connected` fires once the call opens; `done` fires when the stream ends.
+  grpcConnect: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'message', name: 'message', flow: 'both' }] },
+  // gRPC send: writes `payload` (a request message) on the connection named by
+  // `config.connectionNodeId` (client / bidi) — no channel. Sequences via `done`.
+  grpcSend: { inputs: [{ id: 'payload', name: 'payload' }], outputs: [] },
+  // gRPC close: half-closes the named streaming call. Sequences via `done`.
+  grpcClose: { inputs: [], outputs: [] },
   // Iteration & collections. `items` carries a value-selector fallback in the
   // editor (list-typed sources), so it isn't a hard-required port — like the
   // `if` operands; the editor flags it red only when no list type is available.
