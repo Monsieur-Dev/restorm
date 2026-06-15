@@ -25,6 +25,7 @@ Before you open the PR, all of these must be true:
 - [ ] CI integration confirmed — [Section 6](#section-6--ci-integration).
 - [ ] E2E feature file covers every scenario in [Section 7](#section-7--e2e-scenario-template-the-full-matrix), including the debounce assertion.
 - [ ] Response panel assertions per [Section 8](#section-8--ui-verifications-the-e2e-must-hit) covered.
+- [ ] **Code-snippet examples are relevant** — the request panel's "code examples" tab renders a correct, env-/Handlebars-resolved snippet for the protocol in EVERY listed language (no empty output, no literal `{{var}}`, the right host/method/headers). Add a `CodeSnippetGenerator` template + wire its template variables, and verify each entry — [Section 8](#section-8--ui-verifications-the-e2e-must-hit).
 - [ ] Response history builder added in `ResponseHistoryService`.
 - [ ] **Scenario-graph integration complete** — action nodes, MCP, the request↔scenario links, demo scenario + goldens, palette/Bestiary — [Section 13](#section-13--scenario-graph-integration-streaming--bound-protocols) (the part most easily forgotten).
 - [ ] User-facing + dev docs updated — [Section 10](#section-10--documentation-checklist).
@@ -506,6 +507,28 @@ breaks under i18n, and the project ships in multiple languages.
 When in doubt about the exact selector, grep the existing HTTP / OData /
 GraphQL tab views — they are the reference implementations
 ([Section 12](#section-12--reference-implementations)).
+
+### 8.1 — Code-snippet examples must be relevant (not just present)
+
+The request panel's **"code examples"** tab renders, per protocol, a set of
+ready-to-run snippets in several languages from a Handlebars template in
+`CodeSnippetGenerator` (`src/main/resources/templates/code-snippets-<proto>.hbs`).
+A new protocol must add its template AND wire its template variables in
+`generateCodeSnippets`. **Verify every language entry actually renders a correct
+snippet** — this is a recurring trap:
+
+* **No empty output.** The template branches on the exact variables the generator
+  passes. A name mismatch (generator passes `protocol`, template tests
+  `isNativeWebSocket`) makes every branch silently evaluate false and the snippet
+  renders blank. Open the tab for a real request and read each entry.
+* **Values are resolved.** Every interpolated field (URL/host, method, message,
+  headers/metadata, topic/event, …) must go through `transformValue` so the
+  snippet shows the env-/Handlebars-resolved value, never a literal `{{var}}`.
+* **Protocol-correct flags.** e.g. a gRPC `grpcurl` snippet needs `-plaintext`
+  for an insecure server; a streaming call should read sensibly per call type.
+
+Treat the snippet tab as a first-class output surface — a blank or `{{var}}`-leaking
+snippet is a bug, exactly like a blank response panel.
 
 ---
 

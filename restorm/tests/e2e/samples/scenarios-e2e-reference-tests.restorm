@@ -844,6 +844,82 @@ collections:
                 position:
                   x: 1020
                   'y': 1860
+              - id: 0f8c224a-ca30-490b-86d3-f5ea48dd9da8
+                kind: runScenario
+                config:
+                  scenarioId: 30ebc0cf-f5d3-44a2-830d-1a78f42bfaa5
+                  label: gRPC bidi
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 1240
+                  'y': 1860
+              - id: d2e34d0a-f49e-4bf5-bc10-33f91f6251c8
+                kind: runScenario
+                config:
+                  scenarioId: 0c92d588-6d9f-4fb9-94d7-2ee3d47c64dc
+                  label: gRPC server stream
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 1460
+                  'y': 1860
+              - id: 976a855d-9d47-4f7c-b9e2-181e1c881bb7
+                kind: runScenario
+                config:
+                  scenarioId: ca738e94-52e9-4fc4-a22b-50d2de140f49
+                  label: gRPC unary
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 1680
+                  'y': 1860
+              - id: adb271c8-6fba-47b8-a5b1-e36acdee72b4
+                kind: runScenario
+                config:
+                  scenarioId: cce969f6-eca8-41e8-8f18-77ac6bc0a946
+                  label: gRPC client stream
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 1900
+                  'y': 1860
             edges:
               - id: e-1780418276241-f2q3hz
                 from:
@@ -1098,6 +1174,34 @@ collections:
                   portId: done
                 to:
                   nodeId: 5b32be01-1d00-4a44-a2ba-14801cd8c10b
+                  portId: in
+              - id: 41abbacb-242d-48e0-a1a8-80c726485199
+                from:
+                  nodeId: 5b32be01-1d00-4a44-a2ba-14801cd8c10b
+                  portId: done
+                to:
+                  nodeId: 0f8c224a-ca30-490b-86d3-f5ea48dd9da8
+                  portId: in
+              - id: bdddfea6-71e9-4249-9bd9-bc96f9eeac66
+                from:
+                  nodeId: 0f8c224a-ca30-490b-86d3-f5ea48dd9da8
+                  portId: done
+                to:
+                  nodeId: d2e34d0a-f49e-4bf5-bc10-33f91f6251c8
+                  portId: in
+              - id: 09430c60-8497-428f-98de-23d554a7a52a
+                from:
+                  nodeId: d2e34d0a-f49e-4bf5-bc10-33f91f6251c8
+                  portId: done
+                to:
+                  nodeId: 976a855d-9d47-4f7c-b9e2-181e1c881bb7
+                  portId: in
+              - id: bec797d0-5fba-43d5-9540-96c68bdd6370
+                from:
+                  nodeId: 976a855d-9d47-4f7c-b9e2-181e1c881bb7
+                  portId: done
+                to:
+                  nodeId: adb271c8-6fba-47b8-a5b1-e36acdee72b4
                   portId: in
             id: c1573ce0-985c-44b5-b5d4-e081de2d4303
             name: Main
@@ -18305,6 +18409,440 @@ collections:
                 id: 86bda47f-9f3d-44e0-859e-0337877f0baa
                 name: WebSocket
                 items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 3ab66012-a9da-47e6-9ff2-bec0ae3aafef
+                    kind: grpcConnect
+                    config:
+                      requestId: 71a51cb0-d3b4-48ba-9614-ed5fbddb437d
+                      connectionName: Echo
+                      label: Echo connect
+                      id: ce4c1c87-fee1-471d-9830-7235d10e9fa2
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: connected
+                        name: connected
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: any
+                        flow: both
+                    position:
+                      x: -120
+                      'y': 80
+                  - id: 120bc87b-d142-4232-b486-b67e6a3e54d3
+                    kind: grpcSend
+                    config:
+                      connectionNodeId: 3ab66012-a9da-47e6-9ff2-bec0ae3aafef
+                      payload:
+                        type: string
+                        value: '{"f_string":"hello"}'
+                      label: send to Echo
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: payload
+                        name: payload
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 240
+                      'y': -100
+                  - id: f13be59f-3938-4b48-bccb-621f821a9726
+                    kind: wait
+                    config:
+                      durationMs: 500
+                      label: let the echo arrive
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: duration
+                        name: duration
+                        dataType: duration
+                    outputs: []
+                    position:
+                      x: 500
+                      'y': 80
+                  - id: 398250f2-4439-489b-9966-f1c0fa2cea25
+                    kind: grpcClose
+                    config:
+                      connectionNodeId: 3ab66012-a9da-47e6-9ff2-bec0ae3aafef
+                      label: close Echo
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs: []
+                    position:
+                      x: 820
+                      'y': 80
+                  - id: 76cae18c-9010-4bbb-8d6e-4a6a9321bcac
+                    kind: log
+                    config:
+                      message: frame gRPC reçue
+                      level: info
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 500
+                      'y': 220
+                  - id: 45776d01-5cfc-4810-91e6-e109be6c0d10
+                    kind: log
+                    config:
+                      message: stream gRPC fermé
+                      level: info
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 500
+                      'y': 440
+                edges:
+                  - id: a3cbc128-f4c8-4618-b2a7-805c436e9d6c
+                    from:
+                      nodeId: 3ab66012-a9da-47e6-9ff2-bec0ae3aafef
+                      portId: connected
+                    to:
+                      nodeId: 120bc87b-d142-4232-b486-b67e6a3e54d3
+                      portId: in
+                  - id: 930f09e1-71b7-4a85-bb87-e37543323bbd
+                    from:
+                      nodeId: 3ab66012-a9da-47e6-9ff2-bec0ae3aafef
+                      portId: message
+                    to:
+                      nodeId: 76cae18c-9010-4bbb-8d6e-4a6a9321bcac
+                      portId: data
+                    selector: .
+                  - id: 473204b8-27ab-4212-96ed-6589828a95c2
+                    from:
+                      nodeId: 3ab66012-a9da-47e6-9ff2-bec0ae3aafef
+                      portId: done
+                    to:
+                      nodeId: 45776d01-5cfc-4810-91e6-e109be6c0d10
+                      portId: in
+                  - id: f500ef62-91a0-461b-b119-36278c1ea61a
+                    from:
+                      nodeId: 120bc87b-d142-4232-b486-b67e6a3e54d3
+                      portId: done
+                    to:
+                      nodeId: f13be59f-3938-4b48-bccb-621f821a9726
+                      portId: in
+                  - id: da76f255-60fb-46cd-84b1-c53ba54fa1e0
+                    from:
+                      nodeId: f13be59f-3938-4b48-bccb-621f821a9726
+                      portId: done
+                    to:
+                      nodeId: 398250f2-4439-489b-9966-f1c0fa2cea25
+                      portId: in
+                id: 30ebc0cf-f5d3-44a2-830d-1a78f42bfaa5
+                name: gRPC bidi
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: a20bd432-ff3a-4eac-8d73-08165ac98830
+                    kind: grpcConnect
+                    config:
+                      requestId: e6244d9b-a0a7-4525-bd0a-f72d7b1f440b
+                      connectionName: Ticks
+                      label: Server stream connect
+                      id: 4d400e50-0f51-4d77-a9ee-3d2d442ea4ac
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: connected
+                        name: connected
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: any
+                        flow: both
+                    position:
+                      x: -280
+                      'y': 80
+                    note: |
+                      En server-streaming, c'est le SERVEUR qui clôt le flux après ses N trames (grpcbin en envoie 10)
+
+                      ce qui déclenche le port `done`. Aucun nœud de fermeture côté client n'est nécessaire ;
+
+                      le scénario se termine quand le serveur ferme.
+                  - id: 1a0484ef-bdb3-4b47-963f-7de27a979f86
+                    kind: log
+                    config:
+                      message: trame reçue
+                      level: info
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 300
+                      'y': 80
+                  - id: 29876e06-6c15-4441-9855-dc6fc6a880cf
+                    kind: log
+                    config:
+                      message: server stream terminé
+                      level: info
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 300
+                      'y': 280
+                edges:
+                  - id: 29d46d54-b9d2-4b57-86b8-392309eb4f0a
+                    from:
+                      nodeId: a20bd432-ff3a-4eac-8d73-08165ac98830
+                      portId: message
+                    to:
+                      nodeId: 1a0484ef-bdb3-4b47-963f-7de27a979f86
+                      portId: data
+                    selector: .
+                  - id: 397a5d21-07c6-4fff-a04f-959b638dd797
+                    from:
+                      nodeId: a20bd432-ff3a-4eac-8d73-08165ac98830
+                      portId: done
+                    to:
+                      nodeId: 29876e06-6c15-4441-9855-dc6fc6a880cf
+                      portId: in
+                id: 0c92d588-6d9f-4fb9-94d7-2ee3d47c64dc
+                name: gRPC server stream
+                items:
+                  - documentation: ''
+                    tags: []
+                    id: 1781543871414-4xmemxk
+                    name: New gRPC request
+                    url: ''
+                    service: ''
+                    method: ''
+                    callType: unary
+                    requestMessage: ''
+                    metadata: []
+                    type: grpc
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 45971676-9831-4d60-822d-4478ceb5dbdb
+                    kind: httpRequest
+                    config:
+                      requestId: bf888f6d-b844-4058-88d1-8c9a33c19f80
+                      label: gRPC unary call
+                      id: 00b8bbae-1fa1-4079-88ae-d5be0c02ed82
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: env
+                        name: env
+                        dataType: any
+                        flow: value
+                      - id: requestOverride
+                        name: override
+                        dataType: object
+                        flow: value
+                    outputs:
+                      - id: response
+                        name: response
+                        dataType: response
+                        role: response
+                        flow: both
+                    position:
+                      x: -100
+                      'y': 80
+                  - id: 1e16f1fa-cd03-4b85-b1ac-2da1501bd6f6
+                    kind: log
+                    config:
+                      message: réponse unary
+                      level: info
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 320
+                      'y': 80
+                edges:
+                  - id: 77e9fa0a-6fd7-442f-ba50-90e554ab7adb
+                    from:
+                      nodeId: 45971676-9831-4d60-822d-4478ceb5dbdb
+                      portId: response
+                    to:
+                      nodeId: 1e16f1fa-cd03-4b85-b1ac-2da1501bd6f6
+                      portId: data
+                    selector: response.body
+                id: ca738e94-52e9-4fc4-a22b-50d2de140f49
+                name: gRPC unary
+                items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 49716139-baf9-4257-bf3e-5ae108ebc6e7
+                    kind: grpcConnect
+                    config:
+                      requestId: 2c4c88a4-f2e9-4ff0-922a-a8903c93a7f5
+                      connectionName: Chunks
+                      label: Client stream connect
+                      id: 474a415b-36c3-4e2f-a80e-09be790ac373
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: connected
+                        name: connected
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: any
+                        flow: both
+                    position:
+                      x: -120
+                      'y': 80
+                  - id: e7b3ea9a-99f5-439e-8187-ee9fa6f7ddea
+                    kind: grpcSend
+                    config:
+                      connectionNodeId: 49716139-baf9-4257-bf3e-5ae108ebc6e7
+                      payload:
+                        type: string
+                        value: '{"f_string":"chunk"}'
+                      label: send chunk
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: payload
+                        name: payload
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 240
+                      'y': -60
+                  - id: 4729540f-61d1-4e28-8391-16e9f9483489
+                    kind: grpcClose
+                    config:
+                      connectionNodeId: 49716139-baf9-4257-bf3e-5ae108ebc6e7
+                      label: half-close
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs: []
+                    position:
+                      x: 560
+                      'y': -60
+                  - id: 3413e25a-59e5-48d6-9ae5-8098e0d36a6b
+                    kind: log
+                    config:
+                      message: client stream terminé (statut grpcbin)
+                      level: info
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 320
+                      'y': 180
+                edges:
+                  - id: 53707bfd-b07a-4f73-af62-8b7b404a6943
+                    from:
+                      nodeId: 49716139-baf9-4257-bf3e-5ae108ebc6e7
+                      portId: connected
+                    to:
+                      nodeId: e7b3ea9a-99f5-439e-8187-ee9fa6f7ddea
+                      portId: in
+                  - id: 63cf40dd-0ede-40e2-9bbf-760c67162330
+                    from:
+                      nodeId: e7b3ea9a-99f5-439e-8187-ee9fa6f7ddea
+                      portId: done
+                    to:
+                      nodeId: 4729540f-61d1-4e28-8391-16e9f9483489
+                      portId: in
+                  - id: 9dc654ea-6df5-46b4-ae5d-a79912c536f2
+                    from:
+                      nodeId: 49716139-baf9-4257-bf3e-5ae108ebc6e7
+                      portId: done
+                    to:
+                      nodeId: 3413e25a-59e5-48d6-9ae5-8098e0d36a6b
+                      portId: in
+                id: cce969f6-eca8-41e8-8f18-77ac6bc0a946
+                name: gRPC client stream
+                items: []
           - type: scenario
             tags: []
             params: []
@@ -19025,6 +19563,7 @@ collections:
                 config:
                   requestId: d2000000-0000-0000-0000-00000000auth
                   label: Get Pet by Id
+                  id: f4de0ee8-8a02-48c4-951d-70c47a053068
                 inputs:
                   - id: in
                     name: ''
@@ -19443,6 +19982,61 @@ collections:
                 position:
                   x: 1000
                   'y': 4180
+              - id: d480bb07-5505-4dc2-989e-c25acd9c7097
+                kind: grpcConnect
+                config:
+                  requestId: 71a51cb0-d3b4-48ba-9614-ed5fbddb437d
+                  connectionName: Echo
+                  label: gRPC connect
+                  id: e687fec3-40c4-4bf9-80a2-325c43b3d92e
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: connected
+                    name: connected
+                    dataType: any
+                    flow: signal
+                  - id: message
+                    name: message
+                    dataType: any
+                    flow: both
+                position:
+                  x: 40
+                  'y': 3600
+              - id: 32c8b53b-899c-4868-9e75-85289a84f7e2
+                kind: grpcSend
+                config:
+                  connectionNodeId: d480bb07-5505-4dc2-989e-c25acd9c7097
+                  label: gRPC send
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                  - id: payload
+                    name: payload
+                    dataType: any
+                outputs: []
+                position:
+                  x: 520
+                  'y': 3600
+              - id: e109b353-371d-491f-87d3-479f04666a89
+                kind: grpcClose
+                config:
+                  connectionNodeId: d480bb07-5505-4dc2-989e-c25acd9c7097
+                  label: gRPC close
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs: []
+                position:
+                  x: 1000
+                  'y': 3600
             edges: []
             id: cfb401ce-df62-4d41-88e2-8989206abe2f
             name: Bestiary
@@ -19748,6 +20342,50 @@ collections:
             pathParams: []
             deprecated: false
             type: http
+          - documentation: ''
+            tags: []
+            id: 71a51cb0-d3b4-48ba-9614-ed5fbddb437d
+            name: gRPC Echo
+            url: localhost:9000
+            service: grpcbin.GRPCBin
+            method: DummyBidirectionalStreamStream
+            callType: bidirectional-stream
+            requestMessage: '{"f_string":"hello"}'
+            metadata: []
+            type: grpc
+          - documentation: ''
+            tags: []
+            id: e6244d9b-a0a7-4525-bd0a-f72d7b1f440b
+            name: gRPC Server Stream
+            url: localhost:9000
+            service: grpcbin.GRPCBin
+            method: DummyServerStream
+            callType: server-stream
+            requestMessage: '{"f_string":"tick"}'
+            metadata: []
+            type: grpc
+          - documentation: ''
+            tags: []
+            id: bf888f6d-b844-4058-88d1-8c9a33c19f80
+            name: gRPC Unary
+            url: localhost:9000
+            service: grpcbin.GRPCBin
+            method: DummyUnary
+            callType: unary
+            requestMessage: '{"f_string":"ping"}'
+            metadata: []
+            type: grpc
+          - documentation: ''
+            tags: []
+            id: 2c4c88a4-f2e9-4ff0-922a-a8903c93a7f5
+            name: gRPC Client Stream
+            url: localhost:9000
+            service: grpcbin.GRPCBin
+            method: DummyClientStream
+            callType: client-stream
+            requestMessage: '{"f_string":"chunk"}'
+            metadata: []
+            type: grpc
         id: f1000000-0000-0000-0000-00000000auth
         name: Pet API
       - documentation: ''

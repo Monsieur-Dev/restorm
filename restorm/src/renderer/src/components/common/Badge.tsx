@@ -9,6 +9,8 @@ export type BadgeType =
   | 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS'
   // gRPC call types
   | 'UNARY' | 'S-STR' | 'C-STR' | 'BIDI'
+  // gRPC protocol (scenario action nodes)
+  | 'GRPC'
   // GraphQL
   | 'GQL' | 'QUERY' | 'MUTATION' | 'SUBSCRIPTION'
   // SOAP

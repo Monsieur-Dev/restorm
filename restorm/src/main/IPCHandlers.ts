@@ -39,7 +39,7 @@ import {
   authPrefetchArgs,
   graphqlExecuteArgs, graphqlCancelArgs, graphqlIsActiveArgs,
   soapExecuteArgs, soapCancelArgs, soapIsActiveArgs,
-  grpcExecuteArgs, grpcCancelArgs, grpcIsActiveArgs,
+  grpcExecuteArgs, grpcConnectArgs, grpcSendArgs, grpcDisconnectArgs, grpcCancelArgs, grpcIsActiveArgs,
   websocketConnectArgs, websocketDisconnectArgs, websocketSendArgs, websocketIsActiveArgs,
   responsesHistoryListArgs, responsesHistoryGetArgs,
   responsesHistoryTogglePinArgs,
@@ -999,12 +999,37 @@ export function registerRestormIPC(deps: {
   // ==========================================================================
 
   validatedHandle('grpc:execute', grpcExecuteArgs, async (_event, [input]) => {
+    // `execute()` persists the call to history itself (so direct + streaming
+    // callers behave the same); the handler only records usage.
     const result = await grpcExecutionService.execute(input as GRPCExecutionInput)
     setImmediate(() => {
-      void responseHistoryService.storeExecutionResult(input.requestId, 'grpc', result)
       requestUsageService.recordSend(input.requestId)
     })
     return result
+  })
+
+  validatedHandle('grpc:connect', grpcConnectArgs, (_event, [input]) => {
+    // Open a long-lived streaming call (server / client / bidi). Frames +
+    // lifecycle reach the renderer via the `grpc:message` / `grpc:request-progress`
+    // broadcasts the service fires internally, so the callbacks are no-ops.
+    const noop = (): void => { /* lifecycle is delivered via the IPC broadcasts */ }
+    grpcExecutionService.connectStreaming({
+      requestId: input.requestId,
+      onConnect: noop,
+      onMessage: noop,
+      onClose: noop,
+      ...(input.timeout !== undefined ? { timeout: input.timeout } : {})
+    })
+    setImmediate(() => { requestUsageService.recordSend(input.requestId) })
+    return { started: true }
+  })
+
+  validatedHandle('grpc:send', grpcSendArgs, (_event, [requestId, message]) => {
+    return grpcExecutionService.send(requestId, message)
+  })
+
+  validatedHandle('grpc:disconnect', grpcDisconnectArgs, (_event, [requestId]) => {
+    return grpcExecutionService.disconnect(requestId)
   })
 
   validatedHandle('grpc:cancel', grpcCancelArgs, (_event, [requestId]) => {

@@ -686,6 +686,22 @@ contextBridge.exposeInMainWorld('restorm', {
         requestMethod?: string
       }
     },
+    /** Open a long-lived streaming gRPC call (server / client / bidi). Frames +
+     * lifecycle arrive via `onMessage` / `onProgress`. */
+    connect: async (input: { requestId: string; timeout?: number }): Promise<{ started: boolean }> => {
+      const result: unknown = await ipcRenderer.invoke('grpc:connect', input)
+      return result as { started: boolean }
+    },
+    /** Write a request message on an active streaming call (client / bidi). */
+    send: async (requestId: string, message: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('grpc:send', requestId, message)
+      return result as boolean
+    },
+    /** End an active streaming call (half-close for client / bidi). */
+    disconnect: async (requestId: string): Promise<boolean> => {
+      const result: unknown = await ipcRenderer.invoke('grpc:disconnect', requestId)
+      return result as boolean
+    },
     /** Cancel a gRPC request */
     cancel: async (requestId: string): Promise<boolean> => {
       const result: unknown = await ipcRenderer.invoke('grpc:cancel', requestId)
@@ -704,6 +720,16 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.on('grpc:request-progress', handler)
       return () => {
         ipcRenderer.removeListener('grpc:request-progress', handler)
+      }
+    },
+    /** Listen for streamed gRPC frames (sent + received). */
+    onMessage: (callback: (data: { requestId: string; message: { direction: 'sent' | 'received'; data: string; timestamp: string } }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; message: { direction: 'sent' | 'received'; data: string; timestamp: string } }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('grpc:message', handler)
+      return () => {
+        ipcRenderer.removeListener('grpc:message', handler)
       }
     }
   },
