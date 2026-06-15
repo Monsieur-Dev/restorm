@@ -431,7 +431,9 @@
     "tabs": {
       "message": "Pesan",
       "headers": "Header"
-    }
+    },
+    "acknowledged": "Dikonfirmasi",
+    "disconnect": "Putuskan koneksi"
   },
   "search": {
     "placeholder": "Cari...",

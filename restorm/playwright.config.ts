@@ -50,6 +50,12 @@ const mcpServerTestDir = defineBddConfig({
   outputDir: '.features-gen/mcp-server'
 })
 
+const socketioExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/socketio-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/socketio-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/socketio-execution'
+})
+
 const fullyDocumentedPetstoreTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/fully-documented-petstore/features/**/*.feature',
   steps: [
@@ -201,6 +207,11 @@ export default defineConfig({
     {
       name: 'mcp-server',
       testDir: mcpServerTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'socketio-execution',
+      testDir: socketioExecutionTestDir,
       timeout: 180 * 1000
     },
     {

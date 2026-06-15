@@ -432,7 +432,9 @@
     "tabs": {
       "message": "Mesaj",
       "headers": "Başlıklar"
-    }
+    },
+    "acknowledged": "Onaylandı",
+    "disconnect": "Bağlantıyı kes"
   },
   "search": {
     "placeholder": "Ara...",

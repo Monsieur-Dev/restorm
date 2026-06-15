@@ -431,7 +431,9 @@
     "tabs": {
       "message": "メッセージ",
       "headers": "ヘッダー"
-    }
+    },
+    "acknowledged": "確認済み",
+    "disconnect": "切断"
   },
   "search": {
     "placeholder": "検索...",

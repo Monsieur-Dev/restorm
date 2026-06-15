@@ -432,7 +432,9 @@
     "tabs": {
       "message": "Üzenet",
       "headers": "Fejlécek"
-    }
+    },
+    "acknowledged": "Visszaigazolva",
+    "disconnect": "Leválasztás"
   },
   "search": {
     "placeholder": "Keresés...",

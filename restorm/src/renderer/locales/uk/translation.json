@@ -434,7 +434,9 @@
     "tabs": {
       "message": "Повідомлення",
       "headers": "Заголовки"
-    }
+    },
+    "acknowledged": "Підтверджено",
+    "disconnect": "Відключити"
   },
   "search": {
     "placeholder": "Пошук...",

@@ -432,7 +432,9 @@
     "tabs": {
       "message": "Bericht",
       "headers": "Headers"
-    }
+    },
+    "acknowledged": "Bevestigd",
+    "disconnect": "Verbinding verbreken"
   },
   "search": {
     "placeholder": "Zoeken...",

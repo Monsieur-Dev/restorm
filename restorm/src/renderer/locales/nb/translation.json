@@ -432,7 +432,9 @@
     "tabs": {
       "message": "Melding",
       "headers": "Headere"
-    }
+    },
+    "acknowledged": "Bekreftet",
+    "disconnect": "Koble fra"
   },
   "search": {
     "placeholder": "Søk...",

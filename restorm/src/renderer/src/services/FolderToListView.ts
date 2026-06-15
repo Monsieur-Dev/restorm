@@ -9,6 +9,7 @@ import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest
 import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isScenario } from '../../../shared/types/collections'
 import React, { type ReactNode } from 'react'
 import { ScenarioRunningBadge } from '../components/common/ScenarioRunningBadge'
+import { WebsocketListeningBadge } from '../components/common/WebsocketListeningBadge'
 import { SecretResolvingSpinner } from '../components/common/SecretResolvingSpinner'
 import { SecretErrorIndicator } from '../components/common/SecretErrorIndicator'
 import { ItemSecretBadges } from '../components/common/ItemSecretBadges'
@@ -159,7 +160,7 @@ function websocketRequestToListViewItem(
   return {
     id: request.id,
     title: request.name,
-    icon: badge
+    icon: badge ? React.createElement(WebsocketListeningBadge, { requestId: request.id }, badge) : badge
   }
 }
 

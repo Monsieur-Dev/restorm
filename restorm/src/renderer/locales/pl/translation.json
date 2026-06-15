@@ -434,7 +434,9 @@
     "tabs": {
       "message": "Wiadomość",
       "headers": "Nagłówki"
-    }
+    },
+    "acknowledged": "Potwierdzono",
+    "disconnect": "Rozłącz"
   },
   "search": {
     "placeholder": "Szukaj...",

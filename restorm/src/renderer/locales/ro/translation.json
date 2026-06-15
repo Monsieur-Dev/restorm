@@ -433,7 +433,9 @@
     "tabs": {
       "message": "Mesaj",
       "headers": "Antete"
-    }
+    },
+    "acknowledged": "Confirmat",
+    "disconnect": "Deconectează"
   },
   "search": {
     "placeholder": "Caută...",

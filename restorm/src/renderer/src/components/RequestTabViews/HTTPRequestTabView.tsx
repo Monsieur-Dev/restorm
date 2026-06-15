@@ -29,6 +29,7 @@ import { BaseRequestTabView } from './BaseRequestTabView'
 import { ResponseHistoryModal } from '../Modals/ResponseHistoryModal'
 import { AuthenticationConfigurationTab } from './AuthenticationConfigurationTab'
 import { Badge } from '../common/Badge'
+import { BeamWrap } from '../common/BeamWrap'
 import { mapToBadgeType } from '../../utils/badgeUtils'
 import { useRestormStore } from '../../store/restormStore'
 import { buildRequestPath } from '../../utils/requestPath'
@@ -955,12 +956,14 @@ export const HTTPRequestTabView: React.FC<HTTPRequestTabViewProps> = ({
         />
       </div>
       {isSending ? (
-        <Button
-          icon="close"
-          onClick={handleCancel}
-          options={{ title: t('requestTab.cancel'), ariaLabel: t('requestTab.cancel') }}
-          data-testid="http-request-cancel-button"
-        />
+        <BeamWrap active size={22} borderWidth={1.5}>
+          <Button
+            icon="close"
+            onClick={handleCancel}
+            options={{ title: t('requestTab.cancel'), ariaLabel: t('requestTab.cancel') }}
+            data-testid="http-request-cancel-button"
+          />
+        </BeamWrap>
       ) : (
         <SendButtonEnvSwitcher>
           <Button
