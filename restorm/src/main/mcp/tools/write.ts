@@ -289,7 +289,7 @@ export function registerWriteTools(mcp: McpService): void {
         patch: z.record(z.string(), z.unknown()).describe(
           'Partial request shape. Whitelisted top-level keys: url, method, headers, params, ' +
           'pathParams, body, name, description, query, variables, service, callType, ' +
-          'requestMessage, metadata, soapAction, operation, soapBody, protocol, event, message. ' +
+          'requestMessage, metadata, soapAction, operation, soapBody, protocol, event, message, server. ' +
           '`id` and `type` are dropped silently — protected. `body.type` must be one of ' +
           '`text` / `file` / `form-data` / `x-www-form-urlencoded` (the canonical HTTPRequestBody ' +
           'discriminator values); to send a JSON payload use `{type: "text", content: "{…json…}"}`.'

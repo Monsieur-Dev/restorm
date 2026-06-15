@@ -737,6 +737,10 @@ export function registerRestormIPC(deps: {
 
   ipcMain.handle('context:clear-all', () => {
     contextService.clearAll()
+    // File close — tear down every live connection AND any hosted Socket.IO
+    // server. A server is collection-scoped: closing the file must release its
+    // port, otherwise it keeps listening with no UI left to stop it.
+    websocketExecutionService.closeAll()
     // File close — the auth token cache is scoped to the open
     // collection, so flush it here. Opening a different file (or the
     // same one again) must force a fresh round of token fetches.

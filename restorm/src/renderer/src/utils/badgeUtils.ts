@@ -20,6 +20,16 @@ export function requestBadgeType(request: Request): BadgeType {
 }
 
 /**
+ * Badge `mode` for a saved request: `server` when restorm HOSTS the protocol
+ * (a Socket.IO server request), otherwise `client`. Pair with
+ * {@link requestBadgeType} so a hosted request renders the uniform server
+ * variant of its protocol badge.
+ */
+export function requestBadgeMode(request: Request): 'client' | 'server' {
+  return request.type === 'websocket' && request.server === true ? 'server' : 'client'
+}
+
+/**
  * Map raw protocol/type values to BadgeType
  */
 export function mapToBadgeType(value: string): BadgeType {

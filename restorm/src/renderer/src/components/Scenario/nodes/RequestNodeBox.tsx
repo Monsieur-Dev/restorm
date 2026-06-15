@@ -5,7 +5,7 @@ import { Button } from 'electron-core-ui/renderer'
 import { isRequest } from '../../../../../shared/types/collections'
 import type { KeyValue } from '../../../../../shared/types/baseTypes'
 import { Badge } from '../../common/Badge'
-import { requestBadgeType } from '../../../utils/badgeUtils'
+import { requestBadgeType, requestBadgeMode } from '../../../utils/badgeUtils'
 import { useScenarioBoundResolver, useScenarioRequestEnv } from '../scenarioBoundResolver'
 import { TypedValueField } from '../../TypedValueField'
 import type { ValueTypeKind } from '../../TypedValueField/castValue'
@@ -72,7 +72,7 @@ export const RequestNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, d
 
   const fallbackLabel = typeof data.config?.['label'] === 'string' ? data.config['label'] : undefined
   const title = request?.name ?? fallbackLabel
-  const headerIcon = request ? <Badge type={requestBadgeType(request)} /> : undefined
+  const headerIcon = request ? <Badge type={requestBadgeType(request)} mode={requestBadgeMode(request)} /> : undefined
 
   // Protocols carry these arrays under common names; read defensively so a
   // non-HTTP request simply yields no sections rather than throwing.

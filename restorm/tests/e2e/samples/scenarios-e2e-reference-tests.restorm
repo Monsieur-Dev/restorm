@@ -24,7 +24,7 @@ collections:
             value:
               type: string
               value: http://localhost:3001
-            description: Socket.IO test server (docker-compose `socketio`)
+            description: The Socket.IO server restorm hosts in-scenario (Echo Server)
         id: 6c323ee6-0513-42a0-9d9a-68b329b405b4
         name: localhost
         subEnvironments:
@@ -17976,34 +17976,6 @@ collections:
                     position:
                       x: 240
                       'y': -160
-                  - id: d4e0c269-af96-414d-a422-4c65028c3fff
-                    kind: httpRequest
-                    config:
-                      requestId: b109592b-128d-4621-be18-bca45d08b0bf
-                      label: Push to echo (HTTP)
-                      id: 69088c8b-1a10-4e70-a000-2080ebedd934
-                    inputs:
-                      - id: in
-                        name: ''
-                        dataType: any
-                        flow: signal
-                      - id: env
-                        name: env
-                        dataType: any
-                        flow: value
-                      - id: requestOverride
-                        name: override
-                        dataType: object
-                        flow: value
-                    outputs:
-                      - id: response
-                        name: response
-                        dataType: response
-                        role: response
-                        flow: both
-                    position:
-                      x: 840
-                      'y': 220
                   - id: 075002b1-dffc-42d5-a9cb-73a59c678efa
                     kind: wait
                     config:
@@ -18101,6 +18073,73 @@ collections:
                     position:
                       x: 520
                       'y': 80
+                  - id: e69f6c7c-ba8d-4c2b-88d0-ed15db151753
+                    kind: socketioConnect
+                    config:
+                      requestId: 09cf5ac0-a489-420f-a947-c6193823c76b
+                      connectionName: Server
+                      events:
+                        - echo
+                      label: Server listen
+                      id: 8aee70da-8091-46ed-b68c-0489c3f576fc
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: connected
+                        name: connected
+                        dataType: any
+                        flow: signal
+                      - id: others
+                        name: others
+                        dataType: any
+                        role: default
+                        flow: both
+                    position:
+                      x: -800
+                      'y': 80
+                  - id: dabf9a97-8c09-4e19-afe4-bcd474e7ab3b
+                    kind: socketioSend
+                    config:
+                      connectionNodeId: e69f6c7c-ba8d-4c2b-88d0-ed15db151753
+                      channel:
+                        type: string
+                        value: echo
+                      payload:
+                        type: string
+                        value: '{"hello":"from server"}'
+                      label: broadcast from server
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: channel
+                        name: channel
+                        dataType: string
+                      - id: payload
+                        name: payload
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 840
+                      'y': 220
+                  - id: 2dbac6ce-478a-4075-a3e8-10f8c857ea46
+                    kind: socketioClose
+                    config:
+                      connectionNodeId: e69f6c7c-ba8d-4c2b-88d0-ed15db151753
+                      label: close Server
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs: []
+                    position:
+                      x: 1180
+                      'y': 600
                 edges:
                   - id: 15602496-9fd5-4595-93c0-d7ed3116b0b0
                     from:
@@ -18117,13 +18156,6 @@ collections:
                       nodeId: de2260aa-976b-46c5-9947-ef312cb32e8f
                       portId: data
                     selector: .
-                  - id: 5efeac9b-3a8e-430e-9b9f-5effd140ebf3
-                    from:
-                      nodeId: d4e0c269-af96-414d-a422-4c65028c3fff
-                      portId: response
-                    to:
-                      nodeId: 075002b1-dffc-42d5-a9cb-73a59c678efa
-                      portId: in
                   - id: 9dc6b29d-43af-4400-8882-0cfdc6ed153f
                     from:
                       nodeId: 05f7def0-9542-41fc-a9d2-fe0fa8474afc
@@ -18145,12 +18177,33 @@ collections:
                     to:
                       nodeId: 16364b96-545e-4e28-81bc-f0c199584998
                       portId: in
-                  - id: 5e225fed-9d1d-4d01-abbb-825223177107
+                  - id: 6b582b4a-9417-4902-a540-9e859d6a7769
+                    from:
+                      nodeId: e69f6c7c-ba8d-4c2b-88d0-ed15db151753
+                      portId: connected
+                    to:
+                      nodeId: 05f7def0-9542-41fc-a9d2-fe0fa8474afc
+                      portId: in
+                  - id: dc3ae5de-86e1-4f96-9c83-c6cad68c2e85
                     from:
                       nodeId: 16364b96-545e-4e28-81bc-f0c199584998
                       portId: done
                     to:
-                      nodeId: d4e0c269-af96-414d-a422-4c65028c3fff
+                      nodeId: dabf9a97-8c09-4e19-afe4-bcd474e7ab3b
+                      portId: in
+                  - id: e1a8b31b-6a84-4b23-9bd1-633926816a43
+                    from:
+                      nodeId: dabf9a97-8c09-4e19-afe4-bcd474e7ab3b
+                      portId: done
+                    to:
+                      nodeId: 075002b1-dffc-42d5-a9cb-73a59c678efa
+                      portId: in
+                  - id: 41c7bf67-f0e3-4181-b0f0-ab3668d3f5a6
+                    from:
+                      nodeId: 3d05093f-e688-421d-9228-276fd0282a6f
+                      portId: done
+                    to:
+                      nodeId: 2dbac6ce-478a-4075-a3e8-10f8c857ea46
                       portId: in
                 id: ef9d6fcf-b006-43cb-8a06-7dc70f60fe97
                 name: Socket.IO
@@ -18170,27 +18223,15 @@ collections:
                     type: websocket
                   - documentation: ''
                     tags: []
-                    id: b109592b-128d-4621-be18-bca45d08b0bf
-                    name: Push to echo (HTTP)
-                    method: GET
-                    url: '{{socketUrl}}/emit'
+                    name: Echo Server
+                    url: localhost:3001
+                    protocol: socketio
+                    message: '{"hello":"from server"}'
                     headers: []
-                    params:
-                      - key: event
-                        enabled: true
-                        value:
-                          type: string
-                          value: echo
-                        description: Event name to push to listeners
-                      - key: data
-                        enabled: true
-                        value:
-                          type: string
-                          value: '{"hello":"from HTTP"}'
-                        description: JSON payload to deliver
-                    pathParams: []
-                    deprecated: false
-                    type: http
+                    type: websocket
+                    id: 09cf5ac0-a489-420f-a947-c6193823c76b
+                    server: true
+                    event: greet
               - type: scenario
                 tags: []
                 params: []
@@ -18660,18 +18701,7 @@ collections:
                       portId: in
                 id: 0c92d588-6d9f-4fb9-94d7-2ee3d47c64dc
                 name: gRPC server stream
-                items:
-                  - documentation: ''
-                    tags: []
-                    id: 1781543871414-4xmemxk
-                    name: New gRPC request
-                    url: ''
-                    service: ''
-                    method: ''
-                    callType: unary
-                    requestMessage: ''
-                    metadata: []
-                    type: grpc
+                items: []
               - type: scenario
                 tags: []
                 params: []

@@ -249,7 +249,8 @@
         "websocket": "Запит WebSocket",
         "odata": "Запит OData",
         "auth": "Запит автентифікації HTTP",
-        "scenario": "Сценарій"
+        "scenario": "Сценарій",
+        "socketioServer": "Сервер Socket.IO"
       }
     },
     "deleteConfirm": {
@@ -448,7 +449,10 @@
       "headers": "Заголовки"
     },
     "acknowledged": "Підтверджено",
-    "disconnect": "Відключити"
+    "disconnect": "Відключити",
+    "startListening": "Почати слухати",
+    "stopListening": "Зупинити прослуховування",
+    "routePlaceholder": "Маршрут (необов'язково)"
   },
   "search": {
     "placeholder": "Пошук...",
@@ -1520,7 +1524,10 @@
       "websocketClose": "Closes an already-open WebSocket connection.",
       "grpcConnect": "Opens a streaming gRPC call and re-emits each received frame on its message port.",
       "grpcSend": "Writes a request message on an already-open streaming gRPC call.",
-      "grpcClose": "Half-closes an already-open streaming gRPC call."
+      "grpcClose": "Half-closes an already-open streaming gRPC call.",
+      "socketioConnectServer": "Запускає сервер Socket.IO (порт + маршрут); підтверджує кожну отриману подію та повторно надсилає її на своєму порту. Надсилання транслює підключеним клієнтам.",
+      "socketioSendServer": "Транслює повідомлення всім клієнтам, підключеним до вказаного сервера Socket.IO.",
+      "socketioCloseServer": "Зупиняє вказаний сервер Socket.IO та відключає його клієнтів."
     },
     "legend": {
       "title": "Легенда",
@@ -1560,7 +1567,8 @@
       "pickConnection": "— pick a connection —",
       "channelLabel": "Channel name",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload"
+      "payloadModalTitle": "Edit payload",
+      "started": "запущено"
     },
     "websocket": {
       "message": "message"

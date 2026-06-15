@@ -26,7 +26,7 @@ import { Button, ContextMenu, Tooltip, ColorPicker, Modal, MarkdownEditor, event
 import type { Scenario, ScenarioNode, ScenarioEdge, ScenarioNodeKind, ScenarioPort } from '../../../../shared/types/collections'
 import { isRequest, isScenario, isWebSocketRequest, isGrpcRequest } from '../../../../shared/types/collections'
 import { Badge } from '../common/Badge'
-import { requestBadgeType } from '../../utils/badgeUtils'
+import { requestBadgeType, requestBadgeMode } from '../../utils/badgeUtils'
 import { ScenarioBoundResolverContext, ScenarioRequestEnvContext, type ResolveBoundItem, type ResolveRequestEnv } from './scenarioBoundResolver'
 import type { SyntheticRequestPreview } from '../../../../shared/utils/syntheticRequestPreview'
 import { ScenarioEdgeSelectorContext, type ScenarioEdgeSelectorApi } from './scenarioEdgeSelector'
@@ -2263,6 +2263,9 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     // semantic badge (SCENARIO icon / HTTP method) so the inspector shows the
     // exact same identity the user sees on the box header.
     let title = t(meta.labelKey, meta.defaultLabel)
+    // A Socket.IO connect bound to a SERVER request reads "starts a server",
+    // not "opens a connection" — pick a role-specific help key for it.
+    let helpKey: string | undefined
     let titleBadge: React.ReactNode = <i className={`codicon codicon-${meta.icon}`} aria-hidden="true" />
     if (n.data.kind === 'runScenario') {
       const boundId = typeof cfg['scenarioId'] === 'string' ? cfg['scenarioId'] : null
@@ -2276,7 +2279,20 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       const boundItem = boundId ? (resolveBoundItem?.(boundId) ?? null) : null
       if (boundItem && isRequest(boundItem)) {
         title = boundItem.name
-        titleBadge = <Badge type={requestBadgeType(boundItem)} />
+        titleBadge = <Badge type={requestBadgeType(boundItem)} mode={requestBadgeMode(boundItem)} />
+        if (n.data.kind === 'socketioConnect' && requestBadgeMode(boundItem) === 'server') {
+          helpKey = 'socketioConnectServer'
+        }
+      }
+    } else if (n.data.kind === 'socketioSend' || n.data.kind === 'socketioClose') {
+      // Send/close reference a connection NODE — if that node hosts a server,
+      // the blurb should read "broadcast to clients" / "stop the server".
+      const connId = typeof cfg['connectionNodeId'] === 'string' ? cfg['connectionNodeId'] : null
+      const connNode = connId ? nodes.find((x) => x.id === connId) : null
+      const connReqId = typeof connNode?.data.config?.['requestId'] === 'string' ? connNode.data.config['requestId'] : null
+      const connReq = connReqId ? (resolveBoundItem?.(connReqId) ?? null) : null
+      if (connReq && isRequest(connReq) && requestBadgeMode(connReq) === 'server') {
+        helpKey = `${n.data.kind}Server`
       }
     }
     const outputs = [...n.data.outputs, ...(derivedPortsOf(n.data)?.outputs ?? [])]
@@ -2356,6 +2372,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     return {
       id: n.id,
       kind: n.data.kind,
+      ...(helpKey ? { helpKey } : {}),
       title,
       titleBadge,
       ...(n.data.note ? { note: n.data.note } : {}),

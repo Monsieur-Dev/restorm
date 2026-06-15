@@ -247,7 +247,8 @@
         "websocket": "Αίτημα WebSocket",
         "odata": "Αίτημα OData",
         "auth": "Αίτημα HTTP ταυτοποίησης",
-        "scenario": "Σενάριο"
+        "scenario": "Σενάριο",
+        "socketioServer": "Διακομιστής Socket.IO"
       }
     },
     "deleteConfirm": {
@@ -446,7 +447,10 @@
       "headers": "Κεφαλίδες"
     },
     "acknowledged": "Επιβεβαιώθηκε",
-    "disconnect": "Αποσύνδεση"
+    "disconnect": "Αποσύνδεση",
+    "startListening": "Έναρξη ακρόασης",
+    "stopListening": "Διακοπή ακρόασης",
+    "routePlaceholder": "Διαδρομή (προαιρετικό)"
   },
   "search": {
     "placeholder": "Αναζήτηση...",
@@ -1518,7 +1522,10 @@
       "websocketClose": "Closes an already-open WebSocket connection.",
       "grpcConnect": "Opens a streaming gRPC call and re-emits each received frame on its message port.",
       "grpcSend": "Writes a request message on an already-open streaming gRPC call.",
-      "grpcClose": "Half-closes an already-open streaming gRPC call."
+      "grpcClose": "Half-closes an already-open streaming gRPC call.",
+      "socketioConnectServer": "Εκκινεί έναν διακομιστή Socket.IO (θύρα + διαδρομή)· επιβεβαιώνει κάθε συμβάν που λαμβάνει και το αναμεταδίδει στη θύρα του. Η αποστολή μεταδίδει στους συνδεδεμένους πελάτες.",
+      "socketioSendServer": "Μεταδίδει ένα μήνυμα σε όλους τους πελάτες που είναι συνδεδεμένοι στον αναφερόμενο διακομιστή Socket.IO.",
+      "socketioCloseServer": "Σταματά τον αναφερόμενο διακομιστή Socket.IO και αποσυνδέει τους πελάτες του."
     },
     "legend": {
       "title": "Υπόμνημα",
@@ -1558,7 +1565,8 @@
       "pickConnection": "— pick a connection —",
       "channelLabel": "Channel name",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload"
+      "payloadModalTitle": "Edit payload",
+      "started": "ξεκίνησε"
     },
     "websocket": {
       "message": "message"

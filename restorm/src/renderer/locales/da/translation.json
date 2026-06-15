@@ -247,7 +247,8 @@
         "websocket": "WebSocket-anmodning",
         "odata": "OData-anmodning",
         "auth": "HTTP-godkendelsesanmodning",
-        "scenario": "Scenarie"
+        "scenario": "Scenarie",
+        "socketioServer": "Socket.IO-server"
       }
     },
     "deleteConfirm": {
@@ -446,7 +447,10 @@
       "headers": "Headere"
     },
     "acknowledged": "Bekræftet",
-    "disconnect": "Afbryd"
+    "disconnect": "Afbryd",
+    "startListening": "Begynd at lytte",
+    "stopListening": "Stop med at lytte",
+    "routePlaceholder": "Rute (valgfri)"
   },
   "search": {
     "placeholder": "Søg...",
@@ -1518,7 +1522,10 @@
       "websocketClose": "Closes an already-open WebSocket connection.",
       "grpcConnect": "Opens a streaming gRPC call and re-emits each received frame on its message port.",
       "grpcSend": "Writes a request message on an already-open streaming gRPC call.",
-      "grpcClose": "Half-closes an already-open streaming gRPC call."
+      "grpcClose": "Half-closes an already-open streaming gRPC call.",
+      "socketioConnectServer": "Starter en Socket.IO-server (port + rute); kvitterer hver modtaget hændelse og gensender den på sin port. Send udsender til forbundne klienter.",
+      "socketioSendServer": "Udsender en besked til alle klienter, der er forbundet til den refererede Socket.IO-server.",
+      "socketioCloseServer": "Stopper den refererede Socket.IO-server og afbryder dens klienter."
     },
     "legend": {
       "title": "Forklaring",
@@ -1558,7 +1565,8 @@
       "pickConnection": "— pick a connection —",
       "channelLabel": "Channel name",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload"
+      "payloadModalTitle": "Edit payload",
+      "started": "startet"
     },
     "websocket": {
       "message": "message"

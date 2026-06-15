@@ -134,3 +134,15 @@ export function collectRequestScenarioRelations(rootItems: FolderItem[], request
   })
   return out
 }
+
+/**
+ * The scenarios whose deletion dialog should fire when deleting `requestId`:
+ * ONLY those that BIND it through a box (`nodeIds` non-empty). A request that
+ * merely lives inside a scenario's folder subtree but is wired into no box is
+ * NOT a usage — deleting it just removes a filed-away request, so it must not
+ * raise the "used in scenarios" dialog. Each kept entry still carries
+ * `inSubtree` so the dialog can offer move-in vs strip-box per scenario.
+ */
+export function requestScenarioDeleteUsages(rootItems: FolderItem[], requestId: string): ScenarioRequestRelation[] {
+  return collectRequestScenarioRelations(rootItems, requestId).filter((r) => r.nodeIds.length > 0)
+}

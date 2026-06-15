@@ -35,6 +35,10 @@ export interface InspectorPreviewNode {
   /** The node's kind — drives the "what this action does" help text shown in
    * the panel (i18n `scenario.help.<kind>`). */
   kind: string
+  /** Optional override for the help-text key (i18n `scenario.help.<helpKey>`)
+   * when one kind needs a role-specific blurb — e.g. a `socketioConnect` bound
+   * to a SERVER request reads "starts a server", not "opens a connection". */
+  helpKey?: string
   title: string
   /** Optional badge (e.g. SCENARIO icon or HTTP method) rendered before the
    * title — mirrors what the node's box header shows. */
@@ -435,7 +439,7 @@ export const ScenarioInspectorPanel: React.FC<ScenarioInspectorPanelProps> = ({ 
               * Always shown for the selected box (concise), with the legend
               * still sitting in the footer below. */}
             {(() => {
-              const helpText = t(`scenario.help.${previewNode.kind}`, '')
+              const helpText = t(`scenario.help.${previewNode.helpKey ?? previewNode.kind}`, '')
               return helpText
                 ? (
                   <div className="scn-inspector-help" data-testid="scenario-inspector-help">

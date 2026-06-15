@@ -247,7 +247,8 @@
         "websocket": "WebSocket-kérés",
         "odata": "OData-kérés",
         "auth": "HTTP-hitelesítési kérés",
-        "scenario": "Forgatókönyv"
+        "scenario": "Forgatókönyv",
+        "socketioServer": "Socket.IO kiszolgáló"
       }
     },
     "deleteConfirm": {
@@ -446,7 +447,10 @@
       "headers": "Fejlécek"
     },
     "acknowledged": "Visszaigazolva",
-    "disconnect": "Leválasztás"
+    "disconnect": "Leválasztás",
+    "startListening": "Hallgatás indítása",
+    "stopListening": "Hallgatás leállítása",
+    "routePlaceholder": "Útvonal (nem kötelező)"
   },
   "search": {
     "placeholder": "Keresés...",
@@ -1518,7 +1522,10 @@
       "websocketClose": "Closes an already-open WebSocket connection.",
       "grpcConnect": "Opens a streaming gRPC call and re-emits each received frame on its message port.",
       "grpcSend": "Writes a request message on an already-open streaming gRPC call.",
-      "grpcClose": "Half-closes an already-open streaming gRPC call."
+      "grpcClose": "Half-closes an already-open streaming gRPC call.",
+      "socketioConnectServer": "Elindít egy Socket.IO-kiszolgálót (port + útvonal); nyugtáz minden beérkező eseményt, és újraküldi a portján. A küldés a csatlakozott klienseknek sugároz.",
+      "socketioSendServer": "Üzenetet sugároz a hivatkozott Socket.IO-kiszolgálóhoz csatlakozott összes kliensnek.",
+      "socketioCloseServer": "Leállítja a hivatkozott Socket.IO-kiszolgálót, és lekapcsolja a klienseit."
     },
     "legend": {
       "title": "Jelmagyarázat",
@@ -1558,7 +1565,8 @@
       "pickConnection": "— pick a connection —",
       "channelLabel": "Channel name",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload"
+      "payloadModalTitle": "Edit payload",
+      "started": "elindítva"
     },
     "websocket": {
       "message": "message"
