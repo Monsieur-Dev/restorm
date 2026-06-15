@@ -1,0 +1,65 @@
+.ws-chat {
+  height: 100%;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+}
+
+.ws-chat-bubble {
+  position: relative;
+  max-width: 78%;
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-family: var(--editor-font-family);
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Sent bubbles reserve room on the right for the acknowledgement check. */
+.ws-chat-bubble.sent {
+  padding-right: 22px;
+}
+
+/* Sent messages hug the right edge, received hug the left — a chat layout. */
+.ws-chat-bubble.sent {
+  align-self: flex-end;
+  background: var(--button-background, #0e639c);
+  color: var(--button-foreground, #ffffff);
+  border-bottom-right-radius: 2px;
+}
+
+.ws-chat-bubble.received {
+  align-self: flex-start;
+  background: var(--editor-inactiveSelectionBackground, #2a2d2e);
+  border-bottom-left-radius: 2px;
+}
+
+.ws-chat-event {
+  display: block;
+  font-size: 10px;
+  opacity: 0.7;
+  margin-bottom: 2px;
+}
+
+/* Acknowledgement check in the top-right corner of a sent bubble. */
+.ws-chat-ack-check {
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.ws-chat-ack-check .codicon {
+  font-size: 13px;
+  color: var(--testing-iconPassed, #22c55e);
+}
+
+.ws-chat-empty {
+  color: var(--descriptionForeground);
+  padding: 8px;
+  font-size: 12px;
+}

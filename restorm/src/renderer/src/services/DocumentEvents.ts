@@ -73,7 +73,15 @@ export const DocumentEvents = {
    * env). Emitted by the status-bar picker when the "Apply to all"
    * checkbox is ticked.
    */
-  ENV_FOLDER_ENV_CHANGED: 'env-folder:env:changed'
+  ENV_FOLDER_ENV_CHANGED: 'env-folder:env:changed',
+  /**
+   * A request started / finished executing. Drives the running beam on the
+   * request's sidebar badge (and replaces the in-tab progress bar). Emitted by
+   * `BaseRequestTabView` whenever its `isLoading` flips; consumed by
+   * `requestExecutingStore`.
+   */
+  REQUEST_EXECUTION_STARTED: 'request:execution:started',
+  REQUEST_EXECUTION_ENDED: 'request:execution:ended'
 } as const
 
 export type DocumentEventName = (typeof DocumentEvents)[keyof typeof DocumentEvents]

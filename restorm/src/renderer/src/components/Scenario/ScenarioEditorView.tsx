@@ -24,7 +24,7 @@ import '@xyflow/react/dist/style.css'
 import { useTranslation } from 'react-i18next'
 import { Button, ContextMenu, Tooltip, ColorPicker, Modal, MarkdownEditor, eventBus, isUndoKeyEvent, isRedoKeyEvent, type ContextMenuItem } from 'electron-core-ui/renderer'
 import type { Scenario, ScenarioNode, ScenarioEdge, ScenarioNodeKind, ScenarioPort } from '../../../../shared/types/collections'
-import { isRequest, isScenario } from '../../../../shared/types/collections'
+import { isRequest, isScenario, isWebSocketRequest } from '../../../../shared/types/collections'
 import { Badge } from '../common/Badge'
 import { requestBadgeType } from '../../utils/badgeUtils'
 import { ScenarioBoundResolverContext, ScenarioRequestEnvContext, type ResolveBoundItem, type ResolveRequestEnv } from './scenarioBoundResolver'
@@ -50,7 +50,7 @@ import './scenarioEnvPreview'
 // Side-effect: registers the secret → plaintext resolver (async cache) so the
 // inspector's static preview resolves a SecretValue operand to its live value.
 import { useSecretPreviewVersion } from './scenarioSecretPreview'
-import { SCENARIO_ADD_REQUEST_GROUPS, SCENARIO_ADD_SCENARIO_ENTRY, scenarioAddIcon } from './scenarioChildPalette'
+import { SCENARIO_ADD_REQUEST_GROUPS, SCENARIO_ADD_SCENARIO_ENTRY, SCENARIO_ADD_SOCKETIO_ACTIONS, scenarioAddIcon, scenarioAddSocketioIcon } from './scenarioChildPalette'
 import type { AddChildKind } from '../MainView/Sidebar/contextMenuBuilder'
 import type { TFunction } from 'i18next'
 import { ScenarioGraphPreview } from '../MainView/Titlebar/ScenarioGraphPreview'
@@ -58,6 +58,7 @@ import { validateScenarioGraph, targetKey, type ScenarioNodeError, type Scenario
 import { readInputParams } from '../../../../shared/scenarioInputParams'
 import { ScenarioErrorsContext } from './scenarioErrorsContext'
 import { ScenarioInternalsContext } from './scenarioInternalsContext'
+import { ScenarioConnectionsContext, type ScenarioConnectionRef } from './scenarioConnectionsContext'
 import { ScenarioInspectorPanel, type InspectorPreviewNode } from './ScenarioInspectorPanel'
 import { useScenarioEngine } from '../../hooks/useScenarioEngine'
 import { ScenarioInputPrompt } from './ScenarioInputPrompt'
@@ -277,19 +278,33 @@ function buildScenarioPaletteItems(p: PaletteBuildParams): ContextMenuItem[] {
   const items = PALETTE_ENTRIES.flatMap((e, i): ContextMenuItem[] => {
     if ('separator' in e) return [sep(`sep-${i}`)]
     if (p.withAddSubmenu && e.kind === 'runScenario') return [] // folds into "Add"
+    // The Socket.IO actions fold into the "Add" submenu (their own section) too.
+    if (p.withAddSubmenu && (e.kind === 'socketioConnect' || e.kind === 'socketioSend' || e.kind === 'socketioClose')) return []
     if (p.withAddSubmenu && e.kind === 'httpRequest') {
-      const reqItems = SCENARIO_ADD_REQUEST_GROUPS.flatMap((group, gi): ContextMenuItem[] => {
-        const picked = group.flatMap((c): ContextMenuItem[] => {
+      const groupItems = (group: typeof SCENARIO_ADD_REQUEST_GROUPS[number]): ContextMenuItem[] =>
+        group.flatMap((c): ContextMenuItem[] => {
           const cb = p.pickChild(c.kind)
           return cb ? [{ id: `add-${c.kind}`, label: p.t(c.labelKey, c.defaultLabel), icon: scenarioAddIcon(c.badge), onClick: cb }] : []
         })
-        return picked.length > 0 ? [...(gi > 0 ? [sep(`add-rsep-${gi}`)] : []), ...picked] : []
+      // The auth request sits in its own (last) group; the Socket.IO action
+      // section is inserted JUST BEFORE it.
+      const requestGroups = SCENARIO_ADD_REQUEST_GROUPS.slice(0, -1).map(groupItems).filter((g) => g.length > 0)
+      const authItems = groupItems(SCENARIO_ADD_REQUEST_GROUPS[SCENARIO_ADD_REQUEST_GROUPS.length - 1] ?? [])
+      // Socket.IO actions — their own section, each a "SIO" badge + the action's
+      // codicon. These drop a scenario action node directly (pickNode), unlike
+      // the request entries (which create a request).
+      const sioItems = SCENARIO_ADD_SOCKETIO_ACTIONS.flatMap((a): ContextMenuItem[] => {
+        const cb = p.pickNode(a.kind)
+        return cb ? [{ id: `add-${a.kind}`, label: p.t(a.labelKey, a.defaultLabel), icon: scenarioAddSocketioIcon(a.icon), onClick: cb }] : []
       })
       const scnCb = p.pickChild(SCENARIO_ADD_SCENARIO_ENTRY.kind)
       const scnItems: ContextMenuItem[] = scnCb
-        ? [...(reqItems.length > 0 ? [sep('add-scn-sep')] : []), { id: `add-${SCENARIO_ADD_SCENARIO_ENTRY.kind}`, label: p.t(SCENARIO_ADD_SCENARIO_ENTRY.labelKey, SCENARIO_ADD_SCENARIO_ENTRY.defaultLabel), icon: scenarioAddIcon(SCENARIO_ADD_SCENARIO_ENTRY.badge), onClick: scnCb }]
+        ? [{ id: `add-${SCENARIO_ADD_SCENARIO_ENTRY.kind}`, label: p.t(SCENARIO_ADD_SCENARIO_ENTRY.labelKey, SCENARIO_ADD_SCENARIO_ENTRY.defaultLabel), icon: scenarioAddIcon(SCENARIO_ADD_SCENARIO_ENTRY.badge), onClick: scnCb }]
         : []
-      const sub = [...reqItems, ...scnItems]
+      // Sections in order: request protocols, Socket.IO actions, auth, scenario —
+      // each separated by a divider (orphan separators are tidied later).
+      const sections = [...requestGroups, sioItems, authItems, scnItems].filter((s) => s.length > 0)
+      const sub = sections.flatMap((section, si) => (si > 0 ? [sep(`add-sec-${si}`), ...section] : section))
       return sub.length > 0 ? [{ id: 'scenario-add', label: p.t('sidebar.contextMenu.add.title', 'Add'), icon: 'add', items: sub }] : []
     }
     const submenu = SCENARIO_SUBMENU_CATEGORIES[e.category]
@@ -1699,9 +1714,22 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     if (!item) return
     // Request → `request` node, Scenario → `runScenario`; folders/env-folders
     // (anything else) are ignored. The bound id + a fallback label go in config.
+    // A Socket.IO request is special: it maps to a `socketioConnect` (the
+    // long-lived listener), seeding the connection name + the listened event
+    // from the request — NOT to a one-shot httpRequest node.
     let kind: ScenarioNodeKind
     let config: Record<string, unknown>
-    if (isRequest(item)) { kind = 'httpRequest'; config = { requestId: item.id, label: item.name } }
+    if (isRequest(item) && isWebSocketRequest(item) && (item as { protocol?: string }).protocol === 'socketio') {
+      const event = (item as { event?: unknown }).event
+      kind = 'socketioConnect'
+      config = {
+        requestId: item.id,
+        connectionName: item.name,
+        events: typeof event === 'string' && event.trim() !== '' ? [event.trim()] : [],
+        label: item.name
+      }
+    }
+    else if (isRequest(item)) { kind = 'httpRequest'; config = { requestId: item.id, label: item.name } }
     else if (isScenario(item)) { kind = 'runScenario'; config = { scenarioId: item.id, label: item.name } }
     else return
     event.preventDefault()
@@ -2426,6 +2454,31 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     return [...byName.values()]
   }, [scenario.nodes])
 
+  // The Socket.IO connections declared in this scenario — one entry per
+  // `socketioConnect` node — fed to the send/close boxes' connection picker.
+  // Derived from the persisted `scenario.nodes` (stable mid-drag, like the
+  // variables list above).
+  const scenarioConnections = useMemo<ScenarioConnectionRef[]>(() => {
+    const out: ScenarioConnectionRef[] = []
+    for (const node of scenario.nodes) {
+      if (node.kind !== 'socketioConnect') continue
+      const cfg = node.config as { connectionName?: unknown; requestId?: unknown }
+      const name = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== '' ? cfg.connectionName.trim() : node.id
+      // Pull the linked request's event + message so a send node can pre-fill its
+      // channel + payload when this connection is selected.
+      const req = typeof cfg.requestId === 'string' && resolveBoundItem ? resolveBoundItem(cfg.requestId) : null
+      const event = req && isRequest(req) ? (req as { event?: unknown }).event : undefined
+      const message = req && isRequest(req) ? (req as { message?: unknown }).message : undefined
+      out.push({
+        id: node.id,
+        name,
+        ...(typeof event === 'string' && event.trim() !== '' ? { defaultChannel: event } : {}),
+        ...(typeof message === 'string' && message.trim() !== '' ? { defaultPayload: message } : {})
+      })
+    }
+    return out
+  }, [scenario.nodes, resolveBoundItem])
+
   // STABLE React Flow event handlers. React Flow's `NodeRenderer` + `NodeWrapper`
   // are `memo()`'d and receive `onNodeClick` (and friends) as props; passing a
   // fresh inline closure on every editor render — which happens on EVERY drag
@@ -2463,6 +2516,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
 
   return (
     <ScenarioInternalsContext.Provider value={requestNodeInternals}>
+    <ScenarioConnectionsContext.Provider value={scenarioConnections}>
     <ScenarioBoundResolverContext.Provider value={resolveBoundItem ?? null}>
     <ScenarioRequestEnvContext.Provider value={resolveRequestEnv ?? null}>
     <ScenarioVariablesContext.Provider value={scenarioVariables}>
@@ -2916,6 +2970,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     </ScenarioVariablesContext.Provider>
     </ScenarioRequestEnvContext.Provider>
     </ScenarioBoundResolverContext.Provider>
+    </ScenarioConnectionsContext.Provider>
     </ScenarioInternalsContext.Provider>
   )
 }

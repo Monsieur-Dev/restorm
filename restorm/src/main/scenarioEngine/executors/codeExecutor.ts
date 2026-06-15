@@ -93,7 +93,10 @@ export function toScriptContext(input: unknown): SandboxScriptContext {
  */
 export const codeExecutor: NodeExecutor = async (act, ctx) => {
   const cfg = ctx.node.config as { code?: unknown; timeout?: unknown; language?: unknown; scriptMode?: unknown; requestId?: unknown }
-  const code = typeof cfg.code === 'string' ? cfg.code : ''
+  // A wired `code` input (the script text supplied by an upstream node) wins over
+  // the inline editor's code.
+  const wiredCode = act.inputs['code']
+  const code = typeof wiredCode === 'string' ? wiredCode : (typeof cfg.code === 'string' ? cfg.code : '')
   const input = act.inputs['value']
   // Postman/Bruno verbatim-script mode (set by the workflow importer).
   const scriptMode = typeof cfg.scriptMode === 'string' ? cfg.scriptMode : undefined

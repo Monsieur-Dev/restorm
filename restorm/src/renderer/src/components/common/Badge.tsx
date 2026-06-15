@@ -33,12 +33,15 @@ export interface BadgeProps {
   label?: string | undefined
   /** Optional additional CSS class */
   className?: string | undefined
+  /** Optional codicon glyph name (without the `codicon-` prefix) rendered before
+   * the text — e.g. a Socket.IO action badge shows the action's glyph + "SIO". */
+  icon?: string | undefined
 }
 
 /**
  * A unified badge component for displaying protocol/method indicators
  */
-export const Badge: React.FC<BadgeProps> = ({ type, label, className }) => {
+export const Badge: React.FC<BadgeProps> = ({ type, label, className, icon }) => {
   const typeClass = `badge-${type.toLowerCase().replace('-', '')}`
 
   // Auth badges display an icon instead of text: the codicon-key
@@ -63,6 +66,7 @@ export const Badge: React.FC<BadgeProps> = ({ type, label, className }) => {
   const displayText = label ?? type
   return (
     <span className={`badge ${typeClass} ${className ?? ''}`}>
+      {icon !== undefined && <i className={`codicon codicon-${icon}`} aria-hidden="true" style={{ marginRight: 3 }} />}
       {displayText}
     </span>
   )

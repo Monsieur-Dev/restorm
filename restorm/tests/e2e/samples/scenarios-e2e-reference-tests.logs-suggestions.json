@@ -19,7 +19,8 @@
           "name": "localhost",
           "variables": {
             "baseUrl": "http://localhost:5110",
-            "clientId": "VALID_CLIENT_ID"
+            "clientId": "VALID_CLIENT_ID",
+            "socketUrl": "http://localhost:3001"
           }
         }
       }
@@ -42,7 +43,8 @@
         "name": "localhost",
         "variables": {
           "baseUrl": "http://localhost:5110",
-          "clientId": "VALID_CLIENT_ID"
+          "clientId": "VALID_CLIENT_ID",
+          "socketUrl": "http://localhost:3001"
         }
       }
     },
@@ -79,7 +81,8 @@
           "name": "localhost",
           "variables": {
             "baseUrl": "http://localhost:5110",
-            "clientId": "VALID_CLIENT_ID"
+            "clientId": "VALID_CLIENT_ID",
+            "socketUrl": "http://localhost:3001"
           }
         }
       }
@@ -117,7 +120,8 @@
           "name": "localhost",
           "variables": {
             "baseUrl": "http://localhost:5110",
-            "clientId": "VALID_CLIENT_ID"
+            "clientId": "VALID_CLIENT_ID",
+            "socketUrl": "http://localhost:3001"
           }
         }
       }
@@ -144,7 +148,8 @@
           "name": "localhost",
           "variables": {
             "baseUrl": "http://localhost:5110",
-            "clientId": "VALID_CLIENT_ID"
+            "clientId": "VALID_CLIENT_ID",
+            "socketUrl": "http://localhost:3001"
           }
         }
       }
@@ -171,7 +176,8 @@
           "name": "localhost",
           "variables": {
             "baseUrl": "http://localhost:5110",
-            "clientId": "VALID_CLIENT_ID"
+            "clientId": "VALID_CLIENT_ID",
+            "socketUrl": "http://localhost:3001"
           }
         }
       }
@@ -198,7 +204,8 @@
           "name": "localhost",
           "variables": {
             "baseUrl": "http://localhost:5110",
-            "clientId": "VALID_CLIENT_ID"
+            "clientId": "VALID_CLIENT_ID",
+            "socketUrl": "http://localhost:3001"
           }
         }
       }
@@ -216,7 +223,8 @@
         "name": "localhost",
         "variables": {
           "baseUrl": "http://localhost:5110",
-          "clientId": "VALID_CLIENT_ID"
+          "clientId": "VALID_CLIENT_ID",
+          "socketUrl": "http://localhost:3001"
         }
       }
     },

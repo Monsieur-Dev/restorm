@@ -86,6 +86,14 @@ export type ScenarioNodeKind =
   // Requests & composition
   | 'httpRequest'
   | 'runScenario'
+  // Socket.IO — a long-lived connection (`socketioConnect`) that re-emits each
+  // received event on its matching output port (switch-like), plus the two
+  // actions that drive an already-declared connection: `socketioSend` emits a
+  // message on it, `socketioClose` stops it. Send / close reference the connect
+  // node by id.
+  | 'socketioConnect'
+  | 'socketioSend'
+  | 'socketioClose'
   // Iteration & collections
   | 'forEach'
   | 'aggregate'
