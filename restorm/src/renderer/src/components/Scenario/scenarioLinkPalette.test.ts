@@ -41,11 +41,11 @@ describe('linkPaletteEntries — drag from an output', () => {
     expect(kinds).toContain('output') // the sink can be sequenced now too
   })
 
-  // Example 4: an untyped (`any`) `both` output (waitUntil's `out`) is
+  // Example 4: an untyped (`any`) `both` output (transform's `out`) is
   // compatible with every data input, so it wires to each kind's FIRST data
   // input — `wait`'s `duration`, `aggregate`'s `items` — not the event input.
   it('an `any` output wires to each kind`s first data input', () => {
-    const entries = linkPaletteEntries(srcOf('waitUntil'), 'out', true)
+    const entries = linkPaletteEntries(srcOf('transform'), 'out', true)
     expect(entries.find((e) => e.kind === 'wait')?.wirePort).toBe('duration')
     expect(entries.find((e) => e.kind === 'aggregate')?.wirePort).toBe('items')
   })

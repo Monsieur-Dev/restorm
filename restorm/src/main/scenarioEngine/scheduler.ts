@@ -131,6 +131,34 @@ export interface SchedulerInit {
    * supplied by this scheduler's own `params` (the runScenario wiring for a
    * sub-scenario). Lets a CLI user set an input by name wherever it appears. */
   treeParams?: Record<string, unknown>
+  /** Open a long-lived Socket.IO connection for a `socketioConnect` node. Wired
+   * by the engine container (it bridges to `WebSocketExecutionService`) so the
+   * scheduler stays unaware of the transport. Returns a handle the scheduler
+   * keeps in its per-run connection registry for the matching send / close
+   * nodes. Absent → socketioConnect nodes fail at run time with a clear error. */
+  socketioConnect?: (req: SocketioConnectRequest) => SocketioConnHandle
+}
+
+/** Callbacks the scheduler hands the socketio bridge so it can drive the
+ * matching `socketioConnect` node's ports as the connection's life unfolds. */
+export interface SocketioConnectRequest {
+  requestId: string
+  /** Fired once the socket is open. */
+  onConnect: () => void
+  /** Fired for every server-pushed event (event name + already-parsed payload). */
+  onMessage: (event: string | undefined, data: unknown) => void
+  /** Fired once when the connection ends (closed by us, the server, or an error). */
+  onClose: (error?: string) => void
+}
+
+/** Live handle to one open Socket.IO connection. */
+export interface SocketioConnHandle {
+  /** Emit `payload` on `channel`; false when not open. */
+  send: (channel: string, payload: string) => boolean
+  /** Close the connection (idempotent). */
+  close: () => void
+  /** Whether the socket is open right now. */
+  isOpen: () => boolean
 }
 
 type State = 'idle' | 'running' | 'paused' | 'completed' | 'cancelled' | 'failed'
@@ -156,6 +184,11 @@ export class Scheduler {
   private readonly abortCtl = new AbortController()
   private readonly outgoingByPort = new Map<string, { edgeId: string; toNodeId: string; toPort: string; selector?: string }[]>()
   private readonly runSubScenario?: SchedulerInit['runSubScenario']
+  private readonly socketioConnectBridge?: SchedulerInit['socketioConnect']
+  /** Live Socket.IO connections opened by `socketioConnect` nodes, keyed by the
+   * node id (so `socketioSend` / `socketioClose` reach them by `connectionNodeId`).
+   * Cleared as each connection closes. */
+  private readonly socketConnections = new Map<RuntimeId, SocketioConnHandle>()
 
   private queue: InternalActivation[] = []
   private state: State = 'idle'
@@ -238,6 +271,7 @@ export class Scheduler {
     if (init.onLog) this.onLog = init.onLog
     if (init.treeParams) this.treeParams = init.treeParams
     if (init.runSubScenario) this.runSubScenario = init.runSubScenario
+    if (init.socketioConnect) this.socketioConnectBridge = init.socketioConnect
     // Cascade a parent abort into this (sub-)run: cancelling the parent
     // scenario must stop everything it launched.
     if (init.parentSignal) {
@@ -512,7 +546,13 @@ export class Scheduler {
       interactive: this.interactive,
       node: this.findNode(act.nodeId),
       ...(this.workspaceDir !== undefined ? { workspaceDir: this.workspaceDir } : {}),
-      ...(Object.keys(this.treeParams).length > 0 ? { cliParams: this.treeParams } : {})
+      ...(Object.keys(this.treeParams).length > 0 ? { cliParams: this.treeParams } : {}),
+      socketio: {
+        has: (id) => this.socketConnections.has(id),
+        isOpen: (id) => this.socketConnections.get(id)?.isOpen() === true,
+        send: (id, channel, payload) => this.socketConnections.get(id)?.send(channel, payload) === true,
+        close: (id) => { const h = this.socketConnections.get(id); if (!h) return false; h.close(); return true }
+      }
     }
     const startedAt = now()
     void (async () => {
@@ -542,7 +582,7 @@ export class Scheduler {
         // `node-completed` fires once every iteration scope has closed (and,
         // for a loop, the condition has turned false).
         const sa = result.scopeAction?.type
-        if (sa !== 'openForEach' && sa !== 'conditionalLoop' && sa !== 'openRetry' && sa !== 'openTimer') {
+        if (sa !== 'openForEach' && sa !== 'conditionalLoop' && sa !== 'openRetry' && sa !== 'openTimer' && sa !== 'openSocketioConnect') {
           // Record an httpRequest response's status against the enclosing retry
           // attempt (for the status-based retry condition), before completion.
           this.recordRetryStatus(act, result)
@@ -618,6 +658,10 @@ export class Scheduler {
     }
     if (action?.type === 'openRetry') {
       this.runRetry(act, action)
+      return
+    }
+    if (action?.type === 'openSocketioConnect') {
+      this.runSocketioConnect(act, action)
       return
     }
     if (action?.type === 'openTimer') {
@@ -1103,6 +1147,100 @@ export class Scheduler {
     if (first === undefined || (endBound !== undefined && first > endBound)) { fireDone(); return }
     this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `timer start (interval ${action.intervalMs}ms${action.cron !== undefined ? `, cron ${action.cron}` : ''}${endBound !== undefined ? `, until +${endBound - start}ms` : ''})` })
     scheduleNext(first)
+  }
+
+  /**
+   * Drive a `socketioConnect` node's long-lived connection (the
+   * `openSocketioConnect` scope action). Mirrors {@link runTimer}: the
+   * connection counts as `pendingReentry` so the run isn't reported done while
+   * it listens; the universal `done` port fires when the connection ends (a
+   * `socketioClose`, the server, or a Stop). Each received event re-emits its
+   * payload on the matching `event:<name>` port (or `others`) in its own child
+   * scope; `connected` fires once the socket opens.
+   */
+  private runSocketioConnect(
+    act: InternalActivation,
+    action: { requestId: string; events: string[]; connectionName: string }
+  ): void {
+    if (!this.socketioConnectBridge) { this.fail('socketio bridge not wired'); return }
+    let iter = 0
+    let ended = false
+    // The abort listener (set below) — removed on a NORMAL close so it doesn't
+    // accumulate on the shared per-run signal across many open/close cycles.
+    let abortHandler: (() => void) | undefined = undefined
+
+    // Emit a value on one of the node's output ports inside a fresh child scope
+    // (so the downstream chain runs + completes independently, like a timer tick).
+    const emitOnPort = (port: string, value: unknown): void => {
+      if (this.abortCtl.signal.aborted) return
+      const edges = this.outgoingByPort.get(`${act.nodeId}:${port}`) ?? []
+      if (edges.length === 0) return
+      const i = iter
+      iter += 1
+      const child: ScopeStack = [...act.scope, { scopeNodeId: act.nodeId, index: i }]
+      for (const edge of edges) {
+        const routed = edge.selector !== undefined && edge.selector !== ''
+          ? resolveSelectorPath(value, edge.selector)
+          : value
+        this.enqueueToken({ value: deepClone(routed), fromNodeId: act.nodeId, fromPort: port, toNodeId: edge.toNodeId, toPort: edge.toPort, scope: child, tokenId: ++this.tokenSeq })
+        this.emit({ type: 'data-flow-emitted', runId: this.runId, edgeId: edge.edgeId, tokenId: this.tokenSeq, at: now() })
+      }
+    }
+
+    const endConnection = (error?: string): void => {
+      if (ended) return
+      ended = true
+      if (abortHandler) this.abortCtl.signal.removeEventListener('abort', abortHandler)
+      this.socketConnections.delete(act.nodeId)
+      this.pendingReentry -= 1
+      // A Stop closed the connection (abort) — don't fire `done`; just let the
+      // run wind down (the abort path already drives termination).
+      if (this.abortCtl.signal.aborted) { this.terminateIfDone(); return }
+      if (error !== undefined) {
+        this.pushLog({ ts: now(), runId: this.runId, level: 'warn', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `socketio "${action.connectionName}" closed on error: ${error}` })
+      } else {
+        this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `socketio "${action.connectionName}" closed` })
+      }
+      // Fire the universal `done` port, then release the box from its parents.
+      const doneEdges = this.outgoingByPort.get(`${act.nodeId}:done`) ?? []
+      for (const edge of doneEdges) {
+        this.enqueueToken({ value: true, fromNodeId: act.nodeId, fromPort: 'done', toNodeId: edge.toNodeId, toPort: edge.toPort, scope: act.scope, tokenId: ++this.tokenSeq })
+        this.emit({ type: 'data-flow-emitted', runId: this.runId, edgeId: edge.edgeId, tokenId: this.tokenSeq, at: now() })
+      }
+      this.emit({ type: 'node-completed', runId: this.runId, nodeId: act.nodeId, scope: act.scope, at: now(), outputs: [] })
+      this.completeLoop(act)
+      this.tick()
+    }
+
+    // Keep the run alive for the whole connection lifetime.
+    this.pendingReentry += 1
+    const handle = this.socketioConnectBridge({
+      requestId: action.requestId,
+      onConnect: () => {
+        if (this.abortCtl.signal.aborted) return
+        this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `socketio "${action.connectionName}" connected` })
+        emitOnPort('connected', true)
+        this.tick()
+      },
+      onMessage: (eventName, data) => {
+        if (this.abortCtl.signal.aborted) return
+        // Route to the matching `event:<name>` port when listened + wired,
+        // else the `others` catch-all (the switch `default` analogue).
+        const named = eventName !== undefined && action.events.includes(eventName)
+          ? `event:${eventName}`
+          : 'others'
+        const port = (this.outgoingByPort.get(`${act.nodeId}:${named}`)?.length ?? 0) > 0 ? named : 'others'
+        emitOnPort(port, data)
+        this.tick()
+      },
+      onClose: (error) => { endConnection(error) }
+    })
+    this.socketConnections.set(act.nodeId, handle)
+    // A Stop must close the socket so the server frees it.
+    abortHandler = (): void => { handle.close() }
+    if (this.abortCtl.signal.aborted) abortHandler()
+    else this.abortCtl.signal.addEventListener('abort', abortHandler, { once: true })
+    this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `socketio "${action.connectionName}" connecting` })
   }
 
   /** Push a token into the buffer; if a node becomes fireable, queue

@@ -43,6 +43,9 @@ export const SCENARIO_NODE_CATALOGUE: ScenarioNodeKindMeta[] = [
   // Requests & composition
   { kind: 'httpRequest', labelKey: 'scenario.nodes.httpRequest', defaultLabel: 'HTTP Request', icon: 'globe', category: 'composition' },
   { kind: 'runScenario', labelKey: 'scenario.nodes.runScenario', defaultLabel: 'Run scenario', icon: 'circuit-board', category: 'composition' },
+  { kind: 'socketioConnect', labelKey: 'scenario.nodes.socketioConnect', defaultLabel: 'Socket.IO connect', icon: 'plug', category: 'composition' },
+  { kind: 'socketioSend', labelKey: 'scenario.nodes.socketioSend', defaultLabel: 'Socket.IO send', icon: 'arrow-up', category: 'composition' },
+  { kind: 'socketioClose', labelKey: 'scenario.nodes.socketioClose', defaultLabel: 'Socket.IO close', icon: 'debug-disconnect', category: 'composition' },
   // Lists (grouped into a "Lists" submenu)
   { kind: 'aggregate', labelKey: 'scenario.nodes.aggregate', defaultLabel: 'Aggregate', icon: 'combine', category: 'lists' },
   { kind: 'map', labelKey: 'scenario.nodes.map', defaultLabel: 'Map', icon: 'arrow-swap', category: 'lists' },

@@ -2,7 +2,7 @@ import React from 'react'
 import type { NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
 import { DateTimePicker } from 'electron-core-ui/renderer'
-import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
+import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeSection } from './ScenarioNodeBoxBase'
 import { DateTimeValue } from '../../../../../shared/types/collections'
 import { normalizeValueType } from '../../../utils/normalizeValueType'
 import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
@@ -53,10 +53,8 @@ export const WaitUntilNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id,
       ]
     }
   ]
-  const right: ScenarioNodeCell[] = [
-    { id: 'out', label: t('scenario.waitUntil.then', 'then'), port: { id: 'out', role: 'then', type: 'source' } }
-  ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
+  // No explicit output — sequences via the universal `done` port.
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} />
 }
 
 export default WaitUntilNodeBox
