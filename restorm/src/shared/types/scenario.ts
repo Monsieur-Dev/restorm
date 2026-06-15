@@ -94,6 +94,13 @@ export type ScenarioNodeKind =
   | 'socketioConnect'
   | 'socketioSend'
   | 'socketioClose'
+  // Raw WebSocket — the same connect/send/close trio as Socket.IO, but a raw WS
+  // has no named events: `websocketConnect` re-emits EVERY received frame on a
+  // single `message` output (no per-event ports), `websocketSend` sends a raw
+  // payload (no channel), `websocketClose` stops it.
+  | 'websocketConnect'
+  | 'websocketSend'
+  | 'websocketClose'
   // Iteration & collections
   | 'forEach'
   | 'aggregate'

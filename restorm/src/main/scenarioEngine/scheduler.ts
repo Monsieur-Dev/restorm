@@ -139,13 +139,15 @@ export interface SchedulerInit {
   socketioConnect?: (req: SocketioConnectRequest) => SocketioConnHandle
 }
 
-/** Callbacks the scheduler hands the socketio bridge so it can drive the
- * matching `socketioConnect` node's ports as the connection's life unfolds. */
+/** Callbacks the scheduler hands the connection bridge so it can drive the
+ * matching connect node's ports as the connection's life unfolds. */
 export interface SocketioConnectRequest {
   requestId: string
+  /** Wire transport — `socketio` opens a socket.io client, `websocket` a raw WS. */
+  transport: 'socketio' | 'websocket'
   /** Fired once the socket is open. */
   onConnect: () => void
-  /** Fired for every server-pushed event (event name + already-parsed payload). */
+  /** Fired for every received frame (event name — undefined for raw WS — + payload). */
   onMessage: (event: string | undefined, data: unknown) => void
   /** Fired once when the connection ends (closed by us, the server, or an error). */
   onClose: (error?: string) => void
@@ -1160,7 +1162,7 @@ export class Scheduler {
    */
   private runSocketioConnect(
     act: InternalActivation,
-    action: { requestId: string; events: string[]; connectionName: string }
+    action: { transport: 'socketio' | 'websocket'; requestId: string; events: string[]; connectionName: string }
   ): void {
     if (!this.socketioConnectBridge) { this.fail('socketio bridge not wired'); return }
     let iter = 0
@@ -1197,9 +1199,9 @@ export class Scheduler {
       // run wind down (the abort path already drives termination).
       if (this.abortCtl.signal.aborted) { this.terminateIfDone(); return }
       if (error !== undefined) {
-        this.pushLog({ ts: now(), runId: this.runId, level: 'warn', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `socketio "${action.connectionName}" closed on error: ${error}` })
+        this.pushLog({ ts: now(), runId: this.runId, level: 'warn', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `${action.transport} "${action.connectionName}" closed on error: ${error}` })
       } else {
-        this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `socketio "${action.connectionName}" closed` })
+        this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `${action.transport} "${action.connectionName}" closed` })
       }
       // Fire the universal `done` port, then release the box from its parents.
       const doneEdges = this.outgoingByPort.get(`${act.nodeId}:done`) ?? []
@@ -1216,20 +1218,27 @@ export class Scheduler {
     this.pendingReentry += 1
     const handle = this.socketioConnectBridge({
       requestId: action.requestId,
+      transport: action.transport,
       onConnect: () => {
         if (this.abortCtl.signal.aborted) return
-        this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `socketio "${action.connectionName}" connected` })
+        this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `${action.transport} "${action.connectionName}" connected` })
         emitOnPort('connected', true)
         this.tick()
       },
       onMessage: (eventName, data) => {
         if (this.abortCtl.signal.aborted) return
-        // Route to the matching `event:<name>` port when listened + wired,
-        // else the `others` catch-all (the switch `default` analogue).
-        const named = eventName !== undefined && action.events.includes(eventName)
-          ? `event:${eventName}`
-          : 'others'
-        const port = (this.outgoingByPort.get(`${act.nodeId}:${named}`)?.length ?? 0) > 0 ? named : 'others'
+        // Raw WebSocket has no events → every frame goes to the single `message`
+        // port. Socket.IO routes to the matching `event:<name>` port when listened
+        // + wired, else the `others` catch-all (the switch `default` analogue).
+        let port: string
+        if (action.transport === 'websocket') {
+          port = 'message'
+        } else {
+          const named = eventName !== undefined && action.events.includes(eventName)
+            ? `event:${eventName}`
+            : 'others'
+          port = (this.outgoingByPort.get(`${act.nodeId}:${named}`)?.length ?? 0) > 0 ? named : 'others'
+        }
         emitOnPort(port, data)
         this.tick()
       },
@@ -1240,7 +1249,7 @@ export class Scheduler {
     abortHandler = (): void => { handle.close() }
     if (this.abortCtl.signal.aborted) abortHandler()
     else this.abortCtl.signal.addEventListener('abort', abortHandler, { once: true })
-    this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `socketio "${action.connectionName}" connecting` })
+    this.pushLog({ ts: now(), runId: this.runId, level: 'debug', source: 'engine', nodeId: act.nodeId, scope: act.scope, message: `${action.transport} "${action.connectionName}" connecting` })
   }
 
   /** Push a token into the buffer; if a node becomes fireable, queue

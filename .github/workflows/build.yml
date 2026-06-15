@@ -146,10 +146,11 @@ jobs:
           cd restorm
           pnpm install --frozen-lockfile
 
-      - name: Start GraphQL and Socket.IO servers
+      - name: Start GraphQL, Socket.IO and raw-WebSocket servers
         run: |
           cd restorm/tests/docker/graphql-server && npm install && node server.js &
           cd restorm/tests/docker/socketio-server && npm install && node server.js &
+          cd restorm/tests/docker/ws-echo-server && npm install && node server.js &
           sleep 10
 
       - name: Start OData Pet Store

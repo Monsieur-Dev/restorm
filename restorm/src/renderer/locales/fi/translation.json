@@ -956,7 +956,10 @@
       "code": "Koodi",
       "socketioConnect": "Socket.IO connect",
       "socketioSend": "Socket.IO send",
-      "socketioClose": "Socket.IO close"
+      "socketioClose": "Socket.IO close",
+      "websocketConnect": "WebSocket connect",
+      "websocketSend": "WebSocket send",
+      "websocketClose": "WebSocket close"
     },
     "comparator": {
       "result": "tulos"
@@ -1494,7 +1497,10 @@
       "assert": "Checks a condition (chai-style) and routes to pass or fail.",
       "socketioConnect": "Opens a Socket.IO connection and re-emits each received event on its port.",
       "socketioSend": "Sends a message on an already-open Socket.IO connection.",
-      "socketioClose": "Closes an already-open Socket.IO connection."
+      "socketioClose": "Closes an already-open Socket.IO connection.",
+      "websocketConnect": "Opens a raw WebSocket connection and re-emits each received message on its port.",
+      "websocketSend": "Sends a payload on an already-open WebSocket connection.",
+      "websocketClose": "Closes an already-open WebSocket connection."
     },
     "legend": {
       "title": "Selite",
@@ -1535,6 +1541,9 @@
       "channelLabel": "Channel name",
       "payload": "payload",
       "payloadModalTitle": "Edit payload"
+    },
+    "websocket": {
+      "message": "message"
     }
   }
 }

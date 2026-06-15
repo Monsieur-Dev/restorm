@@ -80,6 +80,16 @@ only when an edge points at it. So operands with an inline value fallback (the
 `if`/`for` pattern) are not "required" — the box flags them red only when there
 is genuinely nothing to pick.
 
+**Port ↔ data coherence — verify it against a real run.** A port's `flow` and
+its data shape must match what the executor actually reads/emits on it: a data
+input must be `value`/`both` and accept the value the executor consumes; an
+output that carries a received payload (a stream frame, an HTTP `response`) must
+be `both` and emit exactly the parsed object a downstream JSON-path picker binds
+against; a completion that carries nothing is `signal`, not a data port. A
+mismatch is silent — wired nodes get empty/garbled data and the inspector
+preview lies — so confirm the real value flows on the real port before trusting
+it (the streaming `message` port was validated this way).
+
 ## Step 3 — Executor
 
 A `NodeExecutor` (`src/main/scenarioEngine/types.ts`):

@@ -2,13 +2,13 @@ import type { FolderItem, Scenario } from '../../../shared/types/collections'
 import { isScenario } from '../../../shared/types/collections'
 
 /**
- * Where a request is referenced by a scenario: the scenario plus the ids of its
- * `httpRequest` nodes bound to that request. A scenario may bind the same
+ * Where a request is referenced by a scenario: the scenario plus the ids of its request-binding
+ * (httpRequest / socketioConnect / websocketConnect) nodes bound to that request. A scenario may bind the same
  * request from several boxes, hence a list of node ids.
  */
 export interface ScenarioRequestUsage {
   scenario: Scenario
-  /** `httpRequest` node ids in this scenario whose `config.requestId` matches. */
+  /** Request-binding node ids in this scenario whose `config.requestId` matches. */
   nodeIds: string[]
 }
 
@@ -27,9 +27,21 @@ function walkScenarios(items: FolderItem[], visit: (scenario: Scenario) => void)
   }
 }
 
+/** Scenario node kinds that bind a sidebar request through `config.requestId` —
+ * the one-shot `httpRequest` plus the long-lived streaming connect nodes
+ * (Socket.IO / raw WebSocket). Any request-bound kind must be listed here so the
+ * request ties to the scenario for BOTH the "used in scenarios" reverse-nav and
+ * the delete → move-into-scenario flow. gRPC streaming will join this list. */
+const REQUEST_BINDING_KINDS = new Set(['httpRequest', 'socketioConnect', 'websocketConnect'])
+
+/** Whether a scenario node binds `requestId` (via `config.requestId`). */
+function nodeBindsRequest(node: { kind: string; config: Record<string, unknown> }, requestId: string): boolean {
+  return REQUEST_BINDING_KINDS.has(node.kind) && node.config['requestId'] === requestId
+}
+
 /**
- * Every scenario (across all projects) that references `requestId` through an
- * `httpRequest` node, with the matching node ids. Drives the request editor's
+ * Every scenario (across all projects) that references `requestId` through a
+ * request-binding node, with the matching node ids. Drives the request editor's
  * "used in scenarios" reverse-navigation button. Computed live from the tree,
  * so deleting a scenario (or a node) updates the result with no stored
  * back-reference to maintain.
@@ -38,7 +50,7 @@ export function findScenariosUsingRequest(rootItems: FolderItem[], requestId: st
   const out: ScenarioRequestUsage[] = []
   walkScenarios(rootItems, (scenario) => {
     const nodeIds = scenario.nodes
-      .filter((n) => n.kind === 'httpRequest' && n.config['requestId'] === requestId)
+      .filter((n) => nodeBindsRequest(n, requestId))
       .map((n) => n.id)
     if (nodeIds.length > 0) out.push({ scenario, nodeIds })
   })
@@ -94,7 +106,7 @@ export function findScenariosUsingScenario(rootItems: FolderItem[], subScenarioI
 }
 
 /** A scenario's relationship to a request being deleted: it binds the request
- * through `httpRequest` nodes (`nodeIds`), holds it in its subtree
+ * through request-binding nodes (`nodeIds`), holds it in its subtree
  * (`inSubtree`), or both. Drives the deletion dialog. */
 export interface ScenarioRequestRelation {
   scenario: Scenario
@@ -111,7 +123,7 @@ export function collectRequestScenarioRelations(rootItems: FolderItem[], request
   const out: ScenarioRequestRelation[] = []
   walkScenarios(rootItems, (scenario) => {
     const nodeIds = scenario.nodes
-      .filter((n) => n.kind === 'httpRequest' && n.config['requestId'] === requestId)
+      .filter((n) => nodeBindsRequest(n, requestId))
       .map((n) => n.id)
     const inSubtree = isRequestInScenarioSubtree(scenario, requestId)
     if (nodeIds.length > 0 || inSubtree) out.push({ scenario, nodeIds, inSubtree })

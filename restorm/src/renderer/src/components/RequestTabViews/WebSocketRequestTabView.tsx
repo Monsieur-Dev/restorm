@@ -529,7 +529,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           />
         </BeamWrap>
       </SendButtonEnvSwitcher>
-      {request.protocol === 'socketio' && (
+      {(request.protocol === 'socketio' || request.protocol === 'websocket') && (
         <Button
           icon="send"
           onClick={handleSend}

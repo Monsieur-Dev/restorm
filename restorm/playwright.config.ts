@@ -56,6 +56,12 @@ const socketioExecutionTestDir = defineBddConfig({
   outputDir: '.features-gen/socketio-execution'
 })
 
+const websocketExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/websocket-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/websocket-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/websocket-execution'
+})
+
 const fullyDocumentedPetstoreTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/fully-documented-petstore/features/**/*.feature',
   steps: [
@@ -203,6 +209,11 @@ export default defineConfig({
     {
       name: 'socketio-execution',
       testDir: socketioExecutionTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'websocket-execution',
+      testDir: websocketExecutionTestDir,
       timeout: 180 * 1000
     },
     {
