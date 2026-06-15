@@ -434,7 +434,9 @@
     "tabs": {
       "message": "Zpráva",
       "headers": "Hlavičky"
-    }
+    },
+    "acknowledged": "Potvrzeno",
+    "disconnect": "Odpojit"
   },
   "search": {
     "placeholder": "Hledat...",

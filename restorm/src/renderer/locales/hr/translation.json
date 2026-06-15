@@ -433,7 +433,9 @@
     "tabs": {
       "message": "Poruka",
       "headers": "Zaglavlja"
-    }
+    },
+    "acknowledged": "Potvrđeno",
+    "disconnect": "Prekini vezu"
   },
   "search": {
     "placeholder": "Pretraži...",

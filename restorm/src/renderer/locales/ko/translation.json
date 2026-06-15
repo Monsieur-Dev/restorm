@@ -431,7 +431,9 @@
     "tabs": {
       "message": "메시지",
       "headers": "헤더"
-    }
+    },
+    "acknowledged": "확인됨",
+    "disconnect": "연결 끊기"
   },
   "search": {
     "placeholder": "검색...",

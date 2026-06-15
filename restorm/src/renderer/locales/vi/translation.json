@@ -431,7 +431,9 @@
     "tabs": {
       "message": "Thông điệp",
       "headers": "Header"
-    }
+    },
+    "acknowledged": "Đã xác nhận",
+    "disconnect": "Ngắt kết nối"
   },
   "search": {
     "placeholder": "Tìm kiếm...",

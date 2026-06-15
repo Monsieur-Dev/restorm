@@ -432,7 +432,9 @@
     "tabs": {
       "message": "Nachricht",
       "headers": "Header"
-    }
+    },
+    "acknowledged": "Bestätigt",
+    "disconnect": "Trennen"
   },
   "search": {
     "placeholder": "Suchen...",

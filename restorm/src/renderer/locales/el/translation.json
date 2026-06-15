@@ -432,7 +432,9 @@
     "tabs": {
       "message": "Μήνυμα",
       "headers": "Κεφαλίδες"
-    }
+    },
+    "acknowledged": "Επιβεβαιώθηκε",
+    "disconnect": "Αποσύνδεση"
   },
   "search": {
     "placeholder": "Αναζήτηση...",

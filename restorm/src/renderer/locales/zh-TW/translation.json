@@ -431,7 +431,9 @@
     "tabs": {
       "message": "訊息",
       "headers": "標頭"
-    }
+    },
+    "acknowledged": "已確認",
+    "disconnect": "中斷連線"
   },
   "search": {
     "placeholder": "搜尋...",

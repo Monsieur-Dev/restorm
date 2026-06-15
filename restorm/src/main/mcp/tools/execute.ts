@@ -349,6 +349,7 @@ export function flushRequestStateToContext(req: Request): void {
   } else if (isWebSocketRequest(req)) {
     const ws = req as WebSocketRequest
     data.requestType = 'websocket'
+    data.protocol = ws.protocol
     if ('event' in ws) (data as { event?: unknown }).event = (ws as { event?: unknown }).event
     if ('message' in ws) (data as { message?: unknown }).message = (ws as { message?: unknown }).message
   }
@@ -722,6 +723,55 @@ export function registerExecutionTools(mcp: McpService): void {
         done: !active,
         ...(cursorReset ? { cursorReset: true } : {}),
         continuationToken: encodeStreamToken(requestId, newCursor)
+      })
+    }
+  )
+
+  mcp.registerTool(
+    'send_message',
+    {
+      title: 'Send a message on an open WebSocket / Socket.IO connection',
+      description:
+        'Emit a message on a connection already opened with `run_request`. For Socket.IO, `event` ' +
+        'is the event name to emit; a server acknowledgement is captured as a received ' +
+        '`<event> (ack)` frame, and a server that re-emits the event is captured too. Returns a ' +
+        '`continuationToken` positioned just before this send, so `read_stream(continuationToken)` ' +
+        'returns the sent frame plus any replies (echo / ack / pushed events). Errors if the ' +
+        'request is not currently connected — call `run_request` first.',
+      inputSchema: {
+        id: z.string().min(1).describe('Request id of the open WebSocket / Socket.IO connection.'),
+        message: z.string().describe('Message payload to send (JSON or raw text).'),
+        event: z.string().optional().describe('Socket.IO event name to emit on. Ignored for raw WebSocket.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const argRecord = args
+      const id = typeof argRecord['id'] === 'string' ? argRecord['id'] : ''
+      if (!id) return errorReply('id is required')
+      const message = typeof argRecord['message'] === 'string' ? argRecord['message'] : ''
+      const event = typeof argRecord['event'] === 'string' ? argRecord['event'] : undefined
+
+      const target: FolderItem | null = collectionStore.findById(id)
+      if (target === null || !isRequest(target)) return errorReply(`No request with id ${id}`)
+      const req = target as Request
+      if (req.type !== 'websocket') {
+        return errorReply(`send_message: request ${id} is not a WebSocket/Socket.IO request (type "${req.type}")`)
+      }
+      if (!websocketExecutionService.isActive(id)) {
+        return errorReply(`send_message: request ${id} is not connected. Call run_request first to open the connection.`)
+      }
+
+      // Capture the buffer position before the send so the returned token's
+      // read_stream yields the sent frame + the replies that follow.
+      const before = websocketExecutionService.getMessages(id)?.total ?? 0
+      const sent = websocketExecutionService.send(id, message, event)
+      return jsonReply({
+        requestId: id,
+        sent,
+        continuationToken: encodeStreamToken(id, before),
+        note: sent
+          ? 'Message sent. Use `read_stream(continuationToken)` to read the sent frame + any replies (echo / ack / pushed events).'
+          : 'Send failed — the connection may have just closed.'
       })
     }
   )

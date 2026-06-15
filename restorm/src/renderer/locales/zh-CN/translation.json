@@ -431,7 +431,9 @@
     "tabs": {
       "message": "消息",
       "headers": "请求头"
-    }
+    },
+    "acknowledged": "已确认",
+    "disconnect": "断开连接"
   },
   "search": {
     "placeholder": "搜索...",

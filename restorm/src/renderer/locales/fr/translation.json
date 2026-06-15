@@ -432,7 +432,9 @@
     "tabs": {
       "message": "Message",
       "headers": "En-têtes"
-    }
+    },
+    "acknowledged": "Accusé de réception",
+    "disconnect": "Déconnecter"
   },
   "search": {
     "placeholder": "Rechercher...",
