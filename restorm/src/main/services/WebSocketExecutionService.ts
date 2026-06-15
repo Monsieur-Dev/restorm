@@ -12,6 +12,7 @@ import { io, type Socket } from 'socket.io-client'
 import { BrowserWindow } from 'electron'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
+import { responseHistoryService } from './ResponseHistoryService'
 import { secretHydrationService } from './secrets/SecretHydrationService'
 import { collectRequestSecrets } from './secrets/collectRequestSecrets'
 import { DEFAULT_WS_TIMEOUT_MS } from '../../shared/config/constants'
@@ -64,6 +65,8 @@ interface ResolvedExecution {
   headers: Record<string, string>
   resolvedMessage: string
   event: string | undefined
+  /** Wire transport: `socketio` | `websocket` (from `fullData.protocol`). */
+  protocol: string | undefined
 }
 
 /** Serialize an arbitrary Socket.IO payload to the string message model. */
@@ -105,30 +108,53 @@ class WebSocketExecutionService {
     const startTime = Date.now()
     const startedAt = new Date().toISOString()
 
-    // Get resolved URL from ContextService
-    const urlResult = contextService.getResolvedUrl(requestId)
-    if (!urlResult) {
+    let resolved: ResolvedExecution
+    try {
+      resolved = await this.resolveExecution(requestId, timeout)
+    } catch (err) {
       return {
         requestId,
         success: false,
         connected: false,
         messages: [],
-        error: 'No resolved URL found for this request. Make sure the request is registered.',
+        error: (err as Error).message,
         timings: { startedAt, durationMs: Date.now() - startTime }
       }
     }
 
-    let resolvedUrl = urlResult.resolvedUrl
-
-    // Get request context
-    const requestContext = contextService.getRequestContext(requestId)
-
     // Broadcast that connection started
     this.broadcastProgress(requestId, 'started')
 
-    // Resolve any SecretValues reachable from this request's KeyValue
-    // groups AND from the active env-folder variable chain BEFORE the
-    // synchronous header-resolution below.
+    if (resolved.protocol === 'socketio') {
+      logger.info('[WebSocketExecutionService] Connecting (socket.io)', { requestId, url: resolved.resolvedUrl })
+      return this.executeSocketIO(resolved)
+    }
+
+    logger.info('[WebSocketExecutionService] Connecting (websocket)', { requestId, url: resolved.resolvedUrl })
+    return this.executeRawWebSocket(resolved)
+  }
+
+  /**
+   * Resolve a request into the everything-resolved shape both the one-shot
+   * `execute()` and the streaming `connectStreaming()` need: the env-resolved
+   * URL (with secrets hydrated), the resolved headers, the message + event, and
+   * the wire protocol. Throws when the request isn't registered (no resolved URL).
+   */
+  private async resolveExecution(requestId: string, timeout: number): Promise<ResolvedExecution> {
+    const startTime = Date.now()
+    const startedAt = new Date().toISOString()
+
+    const urlResult = contextService.getResolvedUrl(requestId)
+    if (!urlResult) {
+      throw new Error('No resolved URL found for this request. Make sure the request is registered.')
+    }
+    let resolvedUrl = urlResult.resolvedUrl
+
+    const requestContext = contextService.getRequestContext(requestId)
+
+    // Resolve any SecretValues reachable from this request's KeyValue groups AND
+    // from the active env-folder variable chain BEFORE the synchronous
+    // header-resolution below.
     const envSecrets = contextService.collectEnvironmentSecrets(requestId)
     const secrets = [...collectRequestSecrets(requestContext?.keyValueGroups), ...envSecrets]
     if (secrets.length > 0) {
@@ -144,7 +170,6 @@ class WebSocketExecutionService {
     const headersGroup = requestContext?.keyValueGroups.get('headers')
     if (headersGroup) {
       for (const h of headersGroup) {
-        // Skip disabled headers (enabled defaults to true if undefined)
         if (h.enabled === false) continue
         if (h.key) {
           // Type-aware: see `HTTPExecutionService`.
@@ -164,24 +189,122 @@ class WebSocketExecutionService {
     // mirrors it onto `fullData.method`, so accept either.
     const protocol = requestContext?.fullData?.protocol ?? requestContext?.fullData?.method
 
-    const resolved: ResolvedExecution = {
-      requestId,
-      timeout,
-      startTime,
-      startedAt,
-      resolvedUrl,
-      headers,
-      resolvedMessage,
-      event
+    return { requestId, timeout, startTime, startedAt, resolvedUrl, headers, resolvedMessage, event, protocol }
+  }
+
+  /**
+   * Open a long-lived Socket.IO connection for the scenario engine and stream
+   * its lifecycle through callbacks: `onConnect` once the socket opens,
+   * `onMessage(event, payload)` for every server-pushed event (payload already
+   * parsed from the wire), and `onClose(error?)` once it ends. Registers the
+   * connection in the active map (so `send` / `disconnect` / the UI badge beam
+   * all work) and returns a handle to drive + close it.
+   *
+   * Returns synchronously; the underlying resolution + connection happen async,
+   * so `send` before `onConnect` is a no-op (returns false). `close()` is
+   * idempotent.
+   */
+  connectStreaming(input: {
+    requestId: string
+    onConnect: () => void
+    onMessage: (event: string | undefined, payload: unknown) => void
+    onClose: (error?: string) => void
+    timeout?: number
+  }): { send: (channel: string, payload: string) => boolean; close: () => void; isOpen: () => boolean } {
+    const { requestId } = input
+    // A mutable holder (not a bare `let`): the caller's `close()` flips it from a
+    // closure defined after the async body, so TS/eslint can't prove the read
+    // below is always-false the way it would for a captured primitive.
+    const ctl = { closedByCaller: false, connected: false, startTime: 0, startedAt: '', url: '' }
+    const frames: WebSocketMessage[] = []
+    let fired = false
+    const fireClose = (error?: string): void => {
+      if (fired) return
+      fired = true
+      // Persist the streamed session to history (received frames included) so a
+      // scenario socketioConnect node's preview can read it, mirroring http.
+      if (ctl.startTime > 0) {
+        this.persistHistory(requestId, {
+          requestId,
+          success: ctl.connected && error === undefined,
+          connected: ctl.connected,
+          messages: frames,
+          ...(error !== undefined ? { error } : {}),
+          requestUrl: ctl.url,
+          timings: { startedAt: ctl.startedAt, durationMs: Date.now() - ctl.startTime }
+        })
+      }
+      input.onClose(error)
     }
 
-    if (protocol === 'socketio') {
-      logger.info('[WebSocketExecutionService] Connecting (socket.io)', { requestId, url: resolvedUrl })
-      return this.executeSocketIO(resolved)
-    }
+    void (async () => {
+      let resolved: ResolvedExecution
+      try {
+        resolved = await this.resolveExecution(requestId, input.timeout ?? DEFAULT_WS_TIMEOUT_MS)
+      } catch (err) {
+        fireClose((err as Error).message)
+        return
+      }
+      if (ctl.closedByCaller) { fireClose(); return }
+      ctl.startTime = resolved.startTime
+      ctl.startedAt = resolved.startedAt
+      ctl.url = resolved.resolvedUrl
 
-    logger.info('[WebSocketExecutionService] Connecting (websocket)', { requestId, url: resolvedUrl })
-    return this.executeRawWebSocket(resolved)
+      let socket: Socket
+      try {
+        socket = io(resolved.resolvedUrl, {
+          extraHeaders: Object.keys(resolved.headers).length > 0 ? resolved.headers : undefined,
+          forceNew: true,
+          reconnection: false,
+          timeout: resolved.timeout
+        })
+      } catch (err) {
+        fireClose((err as Error).message || 'Connection failed')
+        return
+      }
+
+      const connection: ActiveConnection = { requestId, kind: 'socketio', socket, startTime: resolved.startTime, messages: [] }
+      this.activeConnections.set(requestId, connection)
+      this.broadcastProgress(requestId, 'started')
+
+      socket.on('connect', () => {
+        ctl.connected = true
+        logger.info('[WebSocketExecutionService] Connected (socket.io, streaming)', { requestId })
+        input.onConnect()
+      })
+
+      socket.onAny((eventName: string, ...args: unknown[]) => {
+        const raw = args.length <= 1 ? args[0] : args
+        const msg: WebSocketMessage = {
+          direction: 'received',
+          data: stringifyPayload(raw),
+          event: eventName,
+          timestamp: new Date().toISOString()
+        }
+        connection.messages.push(msg)
+        frames.push(msg)
+        this.broadcastMessage(requestId, msg)
+        input.onMessage(eventName, raw)
+      })
+
+      socket.on('disconnect', () => {
+        this.activeConnections.delete(requestId)
+        this.broadcastProgress(requestId, 'completed')
+        fireClose()
+      })
+
+      socket.on('connect_error', (err: Error) => {
+        this.activeConnections.delete(requestId)
+        this.broadcastProgress(requestId, 'error')
+        fireClose(err.message || 'Connection error')
+      })
+    })()
+
+    return {
+      send: (channel, payload) => this.send(requestId, payload, channel),
+      close: () => { ctl.closedByCaller = true; this.disconnect(requestId) },
+      isOpen: () => this.isActive(requestId)
+    }
   }
 
   /** Raw WebSocket one-shot: connect, send, collect frames until close/timeout. */
@@ -337,7 +460,7 @@ class WebSocketExecutionService {
         }
         this.activeConnections.delete(requestId)
         this.broadcastProgress(requestId, error ? 'error' : 'completed')
-        resolve({
+        const result: WebSocketExecutionResult = {
           requestId,
           success,
           connected,
@@ -345,7 +468,11 @@ class WebSocketExecutionService {
           ...(error ? { error } : {}),
           requestUrl: resolvedUrl,
           timings: { startedAt, durationMs: Date.now() - startTime }
-        })
+        }
+        // Persist the session (incl. received frames) to history so the response
+        // panel + a scenario socketioConnect node's preview can read it later.
+        this.persistHistory(requestId, result)
+        resolve(result)
       }
 
       // No idle timeout: the connection stays open (listening) until the user
@@ -494,6 +621,18 @@ class WebSocketExecutionService {
     for (const win of windows) {
       win.webContents.send('websocket:message', { requestId, message })
     }
+  }
+
+  /**
+   * Persist a finished session to the response history (fire-and-forget) so the
+   * response panel + a scenario `socketioConnect` node's preview can read the
+   * received frames later — the WebSocket analogue of an HTTP response history
+   * entry. Failures are swallowed: history is best-effort, never blocks a run.
+   */
+  private persistHistory(requestId: string, result: WebSocketExecutionResult): void {
+    void responseHistoryService.storeExecutionResult(requestId, 'websocket', result).catch(() => {
+      // best-effort; a history write must never surface as a connection error
+    })
   }
 }
 

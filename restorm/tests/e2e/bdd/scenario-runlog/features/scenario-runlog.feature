@@ -54,4 +54,5 @@ Feature: Scenario run-log end-to-end
       | Code Lua       |
       | Code Ruby      |
       | Code R         |
+      | Socket.IO      |
       | Main           |

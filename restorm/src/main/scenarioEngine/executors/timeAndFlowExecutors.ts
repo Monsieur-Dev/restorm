@@ -34,12 +34,12 @@ export const waitExecutor: NodeExecutor = (act, ctx) => {
     : (typeof cfg.durationMs === 'number' && cfg.durationMs > 0
       ? cfg.durationMs
       : (typeof cfg.duration === 'number' && cfg.duration > 0 ? cfg.duration : 1000))
-  // Passthrough the trigger value; output port id is `out` (name "then").
-  const value = act.inputs['in']
+  // No value passthrough — the wait sequences the next node via the universal
+  // `done` port (fired by the scheduler once this resolves).
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       ctx.signal.removeEventListener('abort', onAbort)
-      resolve({ outputs: [{ port: 'out', value }] })
+      resolve({ outputs: [] })
     }, ms)
     const onAbort = (): void => {
       clearTimeout(timer)
@@ -60,11 +60,11 @@ export const waitUntilExecutor: NodeExecutor = (act, ctx) => {
   else if (typeof target === 'string') untilMs = new Date(target).getTime()
   else untilMs = Date.now()
   const ms = Math.max(0, untilMs - Date.now())
-  const value = act.inputs['in']
+  // No value passthrough — sequences via the universal `done` port.
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       ctx.signal.removeEventListener('abort', onAbort)
-      resolve({ outputs: [{ port: 'out', value }] })
+      resolve({ outputs: [] })
     }, ms)
     const onAbort = (): void => {
       clearTimeout(timer)

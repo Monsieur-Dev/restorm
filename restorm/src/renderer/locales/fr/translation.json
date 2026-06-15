@@ -953,7 +953,10 @@
       "readFile": "Lire fichier",
       "writeFile": "Écrire fichier",
       "timer": "Minuteur",
-      "code": "Code"
+      "code": "Code",
+      "socketioConnect": "Socket.IO connexion",
+      "socketioSend": "Socket.IO envoi",
+      "socketioClose": "Socket.IO fermeture"
     },
     "comparator": {
       "result": "résultat"
@@ -1488,7 +1491,10 @@
       "writeFile": "Écrit ou ajoute du texte dans un fichier.",
       "throw": "Échoue volontairement avec un message (branches d'erreur et tests).",
       "log": "Écrit un message dans le journal du run et laisse passer la valeur.",
-      "assert": "Vérifie une condition (style chai) et aiguille vers réussite ou échec."
+      "assert": "Vérifie une condition (style chai) et aiguille vers réussite ou échec.",
+      "socketioConnect": "Ouvre une connexion Socket.IO et réémet chaque évènement reçu sur son port.",
+      "socketioSend": "Envoie un message sur une connexion Socket.IO déjà ouverte.",
+      "socketioClose": "Ferme une connexion Socket.IO déjà ouverte."
     },
     "legend": {
       "title": "Légende",
@@ -1516,6 +1522,19 @@
       "allLogs": "Tous les logs",
       "note": "`--out fichier` écrit aussi le run-log dans un fichier.",
       "projectPlaceholder": "<projet.restorm>"
+    },
+    "socketio": {
+      "connectionNameLabel": "Nom de la connexion",
+      "connectionNamePlaceholder": "nom de la connexion",
+      "eventPlaceholder": "évènement",
+      "addEvent": "Ajouter un évènement",
+      "connected": "connecté",
+      "others": "autres",
+      "connection": "connexion",
+      "pickConnection": "— choisir une connexion —",
+      "channelLabel": "Nom du canal",
+      "payload": "payload",
+      "payloadModalTitle": "Modifier le payload"
     }
   }
 }

@@ -17,6 +17,13 @@ vi.mock('electron-core-ui/main', () => ({
   logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() }
 }))
 
+// The execution service persists finished sessions to history; that pulls the
+// real ResponseHistoryService (and its `electron-core-ui/main` deps) into the
+// graph. This test only exercises the socket transport, so stub it out.
+vi.mock('../../../src/main/services/ResponseHistoryService', () => ({
+  responseHistoryService: { storeExecutionResult: vi.fn().mockResolvedValue(undefined) }
+}))
+
 vi.mock('../../../src/main/services/ContextService', () => {
   const resolveValueMock = vi.fn((v: string) => v)
   return {
@@ -38,8 +45,10 @@ vi.mock('../../../src/main/services/ContextService', () => {
 // ---------------------------------------------------------------------------
 import { websocketExecutionService } from '../../../src/main/services/WebSocketExecutionService'
 import { contextService } from '../../../src/main/services/ContextService'
+import { responseHistoryService } from '../../../src/main/services/ResponseHistoryService'
 
 const mockedContextService = vi.mocked(contextService)
+const mockedHistory = vi.mocked(responseHistoryService)
 
 // ---------------------------------------------------------------------------
 // In-process Socket.IO server (no Docker dependency for the unit suite).
@@ -137,6 +146,7 @@ describe('WebSocketExecutionService — Socket.IO', () => {
     mockedContextService.getResolvedUrl.mockReset()
     mockedContextService.getRequestContext.mockReset()
     mockedContextService.resolveValue.mockImplementation((v: string) => v)
+    mockedHistory.storeExecutionResult.mockClear()
   })
 
   it('connects (listen), then send() emits and captures echo + ack', async () => {
@@ -157,6 +167,59 @@ describe('WebSocketExecutionService — Socket.IO', () => {
     expect(received.length).toBeGreaterThanOrEqual(2)
     expect(received.some((m) => m.data.includes('there'))).toBe(true)
     expect(received.some((m) => m.event === 'echo (ack)')).toBe(true)
+  })
+
+  it('persists the finished session (received frames) to response history', async () => {
+    setupRequest(baseUrl, { protocol: 'socketio' })
+
+    const run = websocketExecutionService.execute({ requestId: 'sio-persist' })
+    await waitFor(() => websocketExecutionService.isActive('sio-persist'))
+    websocketExecutionService.send('sio-persist', '{"hi":"persist"}', 'echo')
+    await waitFor(() => frameCount('sio-persist') >= 2)
+    websocketExecutionService.disconnect('sio-persist')
+    await run
+
+    // The session is saved as a `websocket` history entry, including the
+    // received frames — that's what a scenario `socketioConnect` preview reads.
+    expect(mockedHistory.storeExecutionResult).toHaveBeenCalledWith(
+      'sio-persist',
+      'websocket',
+      expect.objectContaining({
+        connected: true,
+        messages: expect.arrayContaining([expect.objectContaining({ direction: 'received' })])
+      })
+    )
+  })
+
+  it('connectStreaming streams events to the callbacks and persists on close', async () => {
+    setupRequest(baseUrl, { protocol: 'socketio' })
+
+    const received: { event: string | undefined; data: unknown }[] = []
+    let connected = false
+    let closed = false
+    const handle = websocketExecutionService.connectStreaming({
+      requestId: 'sio-stream',
+      onConnect: () => { connected = true },
+      onMessage: (event, data) => { received.push({ event, data }) },
+      onClose: () => { closed = true }
+    })
+
+    await waitFor(() => connected)
+    expect(handle.isOpen()).toBe(true)
+    // handle.send(channel, payload) — emit on the `echo` event.
+    handle.send('echo', '{"hi":"stream"}')
+    await waitFor(() => received.some((m) => m.event === 'echo'))
+    handle.close()
+    await waitFor(() => closed)
+
+    expect(received.some((m) => m.event === 'echo')).toBe(true)
+    expect(mockedHistory.storeExecutionResult).toHaveBeenCalledWith(
+      'sio-stream',
+      'websocket',
+      expect.objectContaining({
+        messages: expect.arrayContaining([expect.objectContaining({ event: 'echo', direction: 'received' })])
+      })
+    )
   })
 
   it('treats fullData.method as the transport when protocol is absent (renderer convention)', async () => {
