@@ -2,7 +2,7 @@ import { join } from 'path'
 import { existsSync, rmSync } from 'fs'
 import { promises as fs } from 'fs'
 import { logger } from 'electron-core-ui/main'
-import { collectPasswordSecretsFromCollections, applyPasswordSecretsToCollections } from '../../shared/utils/passwordSecrets'
+import { collectEnvFileSecretsFromCollections, applyEnvFileSecretsToCollections } from '../../shared/utils/envFileSecrets'
 import { parseEnvFileDetailed, serializeEnvFile } from '../../shared/utils/dotenv'
 
 const RESTORM_ENV_FILE = 'restorm.env'
@@ -16,7 +16,7 @@ export async function saveFolderSecretsEnvFile(
   data: Record<string, unknown>
 ): Promise<void> {
   const envPath = getFolderSecretsEnvPath(folderPath)
-  const secrets = collectPasswordSecretsFromCollections(data)
+  const secrets = collectEnvFileSecretsFromCollections(data, folderPath)
   const keys = Object.keys(secrets)
 
   if (keys.length === 0) {
@@ -41,15 +41,29 @@ export async function loadFolderSecretsEnvFile(folderPath: string): Promise<Reco
   return parsed.vars
 }
 
+/**
+ * Insert or update a single entry in a folder's `restorm.env`, preserving every
+ * other entry. Used by the `envFileSecret` resolver's `write` path.
+ */
+export async function upsertFolderSecretsEnvEntry(
+  folderPath: string,
+  key: string,
+  value: string
+): Promise<void> {
+  const existing = (await loadFolderSecretsEnvFile(folderPath)) ?? {}
+  existing[key] = value
+  await fs.writeFile(getFolderSecretsEnvPath(folderPath), serializeEnvFile(existing), 'utf-8')
+}
+
 export async function applyFolderSecretsEnvFile(
   folderPath: string,
   data: Record<string, unknown>
 ): Promise<void> {
   try {
     const vars = await loadFolderSecretsEnvFile(folderPath)
-    if (vars) {
-      applyPasswordSecretsToCollections(data, vars)
-    }
+    // Stamp params (key + folderPath) even when there is no env file yet, so
+    // freshly-created secrets carry their identity for later resolution.
+    applyEnvFileSecretsToCollections(data, vars ?? {}, folderPath)
   } catch (error) {
     logger.warn('Failed to read/apply restorm.env secrets file', { error: String(error) })
   }

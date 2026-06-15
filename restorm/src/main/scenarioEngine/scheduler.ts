@@ -41,6 +41,8 @@ import { coerceCliParamValue } from '../../shared/scenarioCliParams'
 import { readInputParams } from '../../shared/scenarioInputParams'
 import { evaluateCondition, resolveOperand } from './conditionEval'
 import { CronExpressionParser } from 'cron-parser'
+import { collectConfigSecrets } from '../services/secrets/collectConfigSecrets'
+import { secretHydrationService } from '../services/secrets/SecretHydrationService'
 
 /**
  * No activation cap by default — a scenario can loop intentionally for as
@@ -515,6 +517,17 @@ export class Scheduler {
     const startedAt = now()
     void (async () => {
       try {
+        // Resolve any `SecretValue` this node's config references into the
+        // per-run hydration cache BEFORE the executor runs, so the synchronous
+        // `secretPreviewResolver` (see `engine.ts`) — reached via `resolveOperand`
+        // → `concreteValue` — finds the plaintext instead of yielding `''`. The
+        // httpRequest path hydrates its own KeyValue secrets separately; this
+        // covers the operand/config secrets the pure executors read.
+        const secrets = collectConfigSecrets(ctx.node.config)
+        if (secrets.length > 0) {
+          await secretHydrationService.hydrate(this.runId, secrets, this.abortCtl.signal)
+          if (this.abortCtl.signal.aborted) return
+        }
         const result = await executor(act, ctx)
         if (this.abortCtl.signal.aborted) {
           // run was cancelled while we awaited — silently land.

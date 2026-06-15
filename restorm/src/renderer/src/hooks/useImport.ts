@@ -148,7 +148,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
         parentEnvironmentId: string | null
       ): void => {
         // `cloneForEventBus` instead of `JSON.parse(JSON.stringify(...))`:
-        // the latter calls `PasswordValue.toJSON()` which drops the
+        // the latter calls `SecretValue.toJSON()` which drops the
         // plaintext, so main-side `ContextService` would receive every
         // secret as an empty string and templated headers like
         // `Bearer {{JWTBearer_token}}` would substitute to `Bearer `
@@ -201,7 +201,7 @@ export function useImport(options: UseImportOptions): UseImportReturn {
             id: folder.id,
             type: 'folder',
             // See `emitEnvironmentTree` — `cloneForEventBus` preserves
-            // PasswordValue secrets so main-side ContextService can
+            // SecretValue secrets so main-side ContextService can
             // substitute templated headers correctly.
             document: cloneForEventBus(folder)
           })

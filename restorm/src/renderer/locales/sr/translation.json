@@ -1,4 +1,33 @@
 {
+  "secrets": {
+    "others": "Остало",
+    "refresh": "Освежи тајну",
+    "source": {
+      "envVar": "Променљива окружења",
+      "envFileSecret": "Тајна из env датотеке",
+      "envFileSecretPlaceholder": "Вредност тајне",
+      "envFileSecretLabel": "Вредност тајне"
+    },
+    "param": {
+      "envVarName": "Назив променљиве",
+      "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "Уреди преузимање",
+    "envVarUnresolved": "(неразрешено)",
+    "resolving": "Разрешавање…",
+    "resolveError": "Разрешавање тајне није успело",
+    "resolveErrorEnv": "Најмање једну променљиву није било могуће преузети и у стању је грешке.",
+    "resolveErrorItem": "Најмање једну тајну ове ставке није било могуће преузети.",
+    "fetchFailed": "Преузимање није успело",
+    "retrievalModal": {
+      "title": "Преузимање тајне",
+      "value": "вредност:",
+      "fetch": "Преузми",
+      "fetchFailed": "Преузимање није успело",
+      "ok": "У реду",
+      "cancel": "Откажи"
+    }
+  },
   "app": {
     "title": "restorm",
     "openSettings": "Otvori podešavanja",

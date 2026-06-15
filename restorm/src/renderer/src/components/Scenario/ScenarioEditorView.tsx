@@ -47,6 +47,9 @@ import { linkPaletteEntries } from './scenarioLinkPalette'
 // Side-effect: registers the env → { name, variables } resolver used by the
 // inspector's static preview (mirrors the runtime's env resolution).
 import './scenarioEnvPreview'
+// Side-effect: registers the secret → plaintext resolver (async cache) so the
+// inspector's static preview resolves a SecretValue operand to its live value.
+import { useSecretPreviewVersion } from './scenarioSecretPreview'
 import { SCENARIO_ADD_REQUEST_GROUPS, SCENARIO_ADD_SCENARIO_ENTRY, scenarioAddIcon } from './scenarioChildPalette'
 import type { AddChildKind } from '../MainView/Sidebar/contextMenuBuilder'
 import type { TFunction } from 'i18next'
@@ -2175,6 +2178,11 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     return out
   }, [nodeErrors, validationNodes, t])
 
+  // Bumps when a SecretValue operand finishes resolving in the background, so
+  // the preview memo recomputes with the now-cached plaintext (it renders ''
+  // on the first pass, fills in once the async resolve lands).
+  const secretPreviewVersion = useSecretPreviewVersion()
+
   // The single selected box, previewed in the inspector panel (name, note, and
   // each output's value). Null when zero or several boxes are selected.
   const previewNode = useMemo<InspectorPreviewNode | null>(() => {
@@ -2214,6 +2222,12 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       const sel = typeof e.data?.['selector'] === 'string' ? e.data['selector'] : undefined
       return [{ from: { nodeId: e.source, portId: e.sourceHandle }, to: { nodeId: e.target, portId: e.targetHandle }, ...(sel !== undefined ? { selector: sel } : {}) }]
     })
+    // `staticScenarioPreview` reads the secret-preview cache synchronously: a
+    // SecretValue operand resolves to '' on the first pass (cache miss) and to
+    // its plaintext once the background resolve lands. Reading the version tick
+    // here makes this memo recompute `staticData` when that happens, so the
+    // inspector picks up the now-cached plaintext on the next frame.
+    void secretPreviewVersion
     // `runScenario` lives across scenarios — its outputs are the sub-scenario's
     // named Output nodes resolved statically. The shared static-preview can't
     // see across scenarios, so the editor branches it through a dedicated
@@ -2286,7 +2300,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       ...(syntheticPreview ? { syntheticPreview } : {}),
       ...(openItemId && openItemKind ? { openItemId, openItemKind } : {})
     }
-  }, [nodes, edges, t, derivedPortsOf, resolveBoundItem, resolveSyntheticPreview])
+  }, [nodes, edges, t, derivedPortsOf, resolveBoundItem, resolveSyntheticPreview, secretPreviewVersion])
 
   // Edges propagated to React Flow with a transient `data.debugToken` mirroring
   // any edge that received a token bump from the engine (`engine.edgeTokens`).

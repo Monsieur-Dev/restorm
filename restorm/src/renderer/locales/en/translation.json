@@ -1,4 +1,33 @@
 {
+  "secrets": {
+    "others": "Others",
+    "refresh": "Refresh secret",
+    "resolving": "Resolving…",
+    "resolveError": "Secret resolution failed",
+    "resolveErrorEnv": "At least one variable could not be retrieved and is in error.",
+    "resolveErrorItem": "At least one of this item's secrets could not be retrieved.",
+    "fetchFailed": "Retrieval failed",
+    "source": {
+      "envVar": "Env var",
+      "envFileSecret": "Env file secret",
+      "envFileSecretPlaceholder": "Secret value",
+      "envFileSecretLabel": "Secret value"
+    },
+    "param": {
+      "envVarName": "Variable name",
+      "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "Edit retrieval",
+    "envVarUnresolved": "(unresolved)",
+    "retrievalModal": {
+      "title": "Secret retrieval",
+      "value": "value:",
+      "fetch": "Fetch",
+      "fetchFailed": "Retrieval failed",
+      "ok": "OK",
+      "cancel": "Cancel"
+    }
+  },
   "app": {
     "title": "restorm",
     "openSettings": "Open settings",

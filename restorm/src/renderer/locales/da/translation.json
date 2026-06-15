@@ -1,4 +1,33 @@
 {
+  "secrets": {
+    "others": "Andre",
+    "refresh": "Opdater hemmelighed",
+    "source": {
+      "envVar": "Miljøvariabel",
+      "envFileSecret": "Env-filhemmelighed",
+      "envFileSecretPlaceholder": "Hemmelig værdi",
+      "envFileSecretLabel": "Hemmelig værdi"
+    },
+    "param": {
+      "envVarName": "Variabelnavn",
+      "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "Rediger hentning",
+    "envVarUnresolved": "(ikke løst)",
+    "resolving": "Løser…",
+    "resolveError": "Kunne ikke løse hemmeligheden",
+    "resolveErrorEnv": "Mindst én variabel kunne ikke hentes og er i fejltilstand.",
+    "resolveErrorItem": "Mindst én af dette elements hemmeligheder kunne ikke hentes.",
+    "fetchFailed": "Hentningen mislykkedes",
+    "retrievalModal": {
+      "title": "Hentning af hemmelighed",
+      "value": "værdi:",
+      "fetch": "Hent",
+      "fetchFailed": "Hentningen mislykkedes",
+      "ok": "OK",
+      "cancel": "Annuller"
+    }
+  },
   "app": {
     "title": "restorm",
     "openSettings": "Åbn indstillinger",

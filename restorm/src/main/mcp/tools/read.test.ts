@@ -62,6 +62,9 @@ vi.mock('./activeState', () => ({
 
 // Imported after mocks are in place.
 import { registerReadTools } from './read'
+import { valueSourceRegistry } from '../../../shared/secrets/valueSourceRegistry'
+import { envVarDescriptor } from '../../../shared/secrets/sources/envVar.descriptor'
+import { envFileSecretDescriptor } from '../../../shared/secrets/sources/envFileSecret.descriptor'
 
 interface ReplyText { content: { type: 'text'; text: string }[]; isError?: true }
 function parseReply(reply: unknown): { text: string; isError: boolean; payload: unknown } {
@@ -135,26 +138,26 @@ describe('read tools — list_requests', () => {
 })
 
 describe('read tools — get_request', () => {
-  it('returns the serialised request payload (PasswordValue masking happens in serializeRequest)', () => {
+  it('returns the serialised request payload (secret masking happens in serializeRequest)', () => {
     const fakeReq = { id: 'r1', name: 'r1', type: 'http' }
     mockState.findById.mockReturnValue(fakeReq)
     // Simulate what CollectionStore.serializeRequest produces — the
-    // password field comes back as `{type:'password'}` (PasswordValue.toJSON)
-    // rather than the original plaintext, proving the masking runs
-    // before the tool reply. We assert the tool returns the masked
-    // form unchanged — no double-serialisation that could re-leak.
+    // secret field comes back as `{type:'secret', source, params}`
+    // (SecretValue.toJSON) rather than the resolved plaintext, proving
+    // the masking runs before the tool reply. We assert the tool returns
+    // the masked form unchanged — no double-serialisation that could re-leak.
     mockState.serializeRequest.mockReturnValue({
       id: 'r1',
       name: 'r1',
       type: 'http',
-      headers: [{ key: 'Authorization', value: { type: 'password' } }]
+      headers: [{ key: 'Authorization', value: { type: 'secret', source: 'envFileSecret', params: {} } }]
     })
     const mcp = new FakeMcpService()
     registerReadTools(mcp as unknown as McpService)
     const { payload, isError } = parseReply(mcp.invoke('get_request', { id: 'r1' }))
     expect(isError).toBe(false)
     expect(payload).toMatchObject({
-      headers: [{ key: 'Authorization', value: { type: 'password' } }]
+      headers: [{ key: 'Authorization', value: { type: 'secret', source: 'envFileSecret', params: {} } }]
     })
     expect(JSON.stringify(payload)).not.toContain('plaintext-secret')
   })
@@ -307,5 +310,37 @@ describe('read tools — get_current_tab', () => {
     registerReadTools(mcp as unknown as McpService)
     const { payload } = parseReply(mcp.invoke('get_current_tab'))
     expect(payload).toEqual({ tabId: 'tab-1', itemId: 'item-1', kind: 'request' })
+  })
+})
+
+describe('read tools — list_value_sources', () => {
+  beforeEach(() => {
+    // The discoverability tool is registry-driven; register the built-in
+    // descriptors so the tool reports them (resolvers are main-only and not
+    // needed to enumerate descriptors).
+    valueSourceRegistry.register(envVarDescriptor)
+    valueSourceRegistry.register(envFileSecretDescriptor)
+  })
+
+  it('lists the registered secret value sources with their params', () => {
+    const mcp = new FakeMcpService()
+    registerReadTools(mcp as unknown as McpService)
+    const { payload, isError } = parseReply(mcp.invoke('list_value_sources')) as {
+      payload: { sources: { id: string; labelKey: string; params: { key: string; required: boolean }[] }[] }
+      isError: boolean
+    }
+    expect(isError).toBe(false)
+    const ids = payload.sources.map((s) => s.id)
+    expect(ids).toContain('envVar')
+    expect(ids).toContain('envFileSecret')
+    const envVar = payload.sources.find((s) => s.id === 'envVar')
+    expect(envVar?.params).toContainEqual(expect.objectContaining({ key: 'name', required: true }))
+  })
+
+  it('never leaks resolved plaintext (descriptors carry no value)', () => {
+    const mcp = new FakeMcpService()
+    registerReadTools(mcp as unknown as McpService)
+    const { text } = parseReply(mcp.invoke('list_value_sources'))
+    expect(text).not.toContain('resolved')
   })
 })

@@ -25,7 +25,6 @@ import {
   StringValue,
   NumericValue,
   DateTimeValue,
-  PasswordValue,
   ExpressionValue,
   EnumValue,
   EnumListValue,
@@ -33,6 +32,7 @@ import {
   type EnumDefinition,
   type EnumMatchingRule
 } from '../../../shared/types/collections'
+import { SecretValue } from '../../../shared/types/valueTypes/SecretValue'
 import { toHTTPMethod } from './httpMethodValidator'
 import { openapi3ToApiDocumentation, type OAS3Spec, type OAS3Server, type OAS3SecurityScheme, expandServerVariables, pickPrimaryContentType } from './transformers/openapi3ToApiDocumentation'
 import { openapi31ToApiDocumentation, type OAS31Spec } from './transformers/openapi31ToApiDocumentation'
@@ -143,7 +143,7 @@ function buildTypedValue(type: string | string[] | undefined, format: string | u
         const datePattern = format === 'date' ? 'yyyy-MM-dd' : 'yyyy-MM-dd HH:mm:ss'
         return new DateTimeValue(new Date(), datePattern)
       }
-      if (format === 'password') return new PasswordValue('')
+      if (format === 'password') return new SecretValue('envFileSecret', {})
       return new StringValue(typeof defaultValue === 'string' ? defaultValue : '')
     default:
       return new StringValue(typeof defaultValue === 'string' ? defaultValue : '')
@@ -808,14 +808,13 @@ function createOpenApi3Environment(spec: OAS3Spec, overrideBaseUrl?: string, sou
   // request's `Authorization` header. Empty default — the user fills
   // it in once after import.
   //
-  // Seeded as `PasswordValue` so the plaintext lands in the sibling
-  // `.restorm.env` on save (and is masked in the UI), matching the
-  // rest of restorm's secret-handling story. A `StringValue` would
-  // round-trip through the main `.restorm` document and leave the
-  // token sitting in plaintext on disk.
+  // Seeded as an env-file `SecretValue` so the plaintext lands in the sibling
+  // `restorm.env` on save (and is masked in the UI), matching the rest of
+  // restorm's secret-handling story. A `StringValue` would round-trip through
+  // the main document and leave the token sitting in plaintext on disk.
   for (const varName of collectSecuritySchemeVariableNames(spec.components?.securitySchemes)) {
     if (rootVariables.some((kv) => kv.key === varName)) continue
-    rootVariables.push(kvOfType(varName, new PasswordValue('')))
+    rootVariables.push(kvOfType(varName, new SecretValue('envFileSecret', {})))
   }
 
   const subEnvironments: Environment['subEnvironments'] = servers.slice(1).map((server, idx) => {

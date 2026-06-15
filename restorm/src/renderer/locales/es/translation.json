@@ -1,4 +1,33 @@
 {
+  "secrets": {
+    "others": "Otros",
+    "refresh": "Actualizar secreto",
+    "source": {
+      "envVar": "Variable de entorno",
+      "envFileSecret": "Secreto de archivo env",
+      "envFileSecretPlaceholder": "Valor secreto",
+      "envFileSecretLabel": "Valor secreto"
+    },
+    "param": {
+      "envVarName": "Nombre de variable",
+      "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "Editar recuperación",
+    "envVarUnresolved": "(sin resolver)",
+    "resolving": "Resolviendo…",
+    "resolveError": "Error al resolver el secreto",
+    "resolveErrorEnv": "No se pudo recuperar al menos una variable y está en error.",
+    "resolveErrorItem": "No se pudo recuperar al menos uno de los secretos de este elemento.",
+    "fetchFailed": "Error de recuperación",
+    "retrievalModal": {
+      "title": "Recuperación de secreto",
+      "value": "valor:",
+      "fetch": "Recuperar",
+      "fetchFailed": "Error de recuperación",
+      "ok": "OK",
+      "cancel": "Cancelar"
+    }
+  },
   "app": {
     "title": "restorm",
     "openSettings": "Abrir ajustes",

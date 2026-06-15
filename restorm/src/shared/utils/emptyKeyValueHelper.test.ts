@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { isKeyValueValueEmpty, disableEmptyKeyValues } from './emptyKeyValueHelper'
-import { StringValue, PasswordValue, NumericValue, BooleanValue, ExpressionValue } from '../types/collections'
+import { StringValue, NumericValue, BooleanValue, ExpressionValue } from '../types/collections'
+import { SecretValue } from '../types/valueTypes/SecretValue'
 
 describe('isKeyValueValueEmpty', () => {
   it('treats StringValue("") as empty', () => {
@@ -15,8 +16,8 @@ describe('isKeyValueValueEmpty', () => {
     expect(isKeyValueValueEmpty({ key: 'k', value: new StringValue('hello') })).toBe(false)
   })
 
-  it('treats PasswordValue("") as empty', () => {
-    expect(isKeyValueValueEmpty({ key: 'k', value: new PasswordValue('') })).toBe(true)
+  it('treats an unresolved SecretValue as empty', () => {
+    expect(isKeyValueValueEmpty({ key: 'k', value: new SecretValue('envFileSecret', {}) })).toBe(true)
   })
 
   it('treats NumericValue(0) as non-empty (toString() => "0")', () => {

@@ -40,6 +40,10 @@ import type { EnvironmentFolder, Folder, Request, Scenario, ScenarioNode, Scenar
 import { getFolderIcon } from '../../../utils/treeSearch'
 import { Badge } from '../../common/Badge'
 import { ScenarioRunningBadge } from '../../common/ScenarioRunningBadge'
+import { SecretResolvingSpinner } from '../../common/SecretResolvingSpinner'
+import { SecretErrorIndicator } from '../../common/SecretErrorIndicator'
+import { ItemSecretBadges } from '../../common/ItemSecretBadges'
+import { collectFolderEnvIds } from '../../../services/FolderToListView'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
 import { useTranslation } from 'react-i18next'
 import { RestormWorkbenchTab } from './RestormWorkbenchTab'
@@ -363,6 +367,8 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <IconView icon={getFolderIcon(restormTab.folder)} size={14} />
           <span>{restormTab.folder.name}</span>
+          <SecretResolvingSpinner environmentIds={collectFolderEnvIds(restormTab.folder.environments)} />
+          <SecretErrorIndicator environmentIds={collectFolderEnvIds(restormTab.folder.environments)} />
           {renderDirtyIndicator(restormTab)}
         </span>
       )
@@ -376,6 +382,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             <Badge type="SCENARIO" />
           </ScenarioRunningBadge>
           <span>{restormTab.scenario.name}</span>
+          <ItemSecretBadges itemId={restormTab.scenario.id} />
           {renderDirtyIndicator(restormTab)}
         </span>
       )
@@ -387,6 +394,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <Badge type={mapToBadgeType(restormTab.request.method)} />
           <span>{restormTab.request.name}</span>
+          <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}
         </span>
       )
@@ -398,6 +406,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <Badge type="GQL" />
           <span>{restormTab.request.name}</span>
+          <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}
         </span>
       )
@@ -409,6 +418,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <Badge type={mapToBadgeType(restormTab.request.callType)} />
           <span>{restormTab.request.name}</span>
+          <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}
         </span>
       )
@@ -420,6 +430,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <Badge type="SOAP" />
           <span>{restormTab.request.name}</span>
+          <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}
         </span>
       )
@@ -431,6 +442,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <Badge type={mapToBadgeType(restormTab.request.protocol)} />
           <span>{restormTab.request.name}</span>
+          <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}
         </span>
       )
@@ -445,6 +457,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <Badge type="ODATA" />
           <span>{restormTab.request.name}</span>
+          <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}
         </span>
       )
@@ -455,6 +468,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <Badge type="AUTH" />
           <span>{restormTab.request.name}</span>
+          <ItemSecretBadges itemId={restormTab.request.id} />
           {renderDirtyIndicator(restormTab)}
         </span>
       )

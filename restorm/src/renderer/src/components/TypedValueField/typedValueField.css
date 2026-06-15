@@ -1,5 +1,25 @@
 .tvf-control-group { width: 100%; min-width: 100px; }
 .tvf-control-group > :first-child { flex: 1 1 auto; min-width: 0; }
+/* A secret cell whose resolution failed: ring the whole joined control group in
+ * the error colour. `outline` (not `border`) keeps the group's internal sizing
+ * and joined-edge borders intact; the negative offset tucks the ring just inside
+ * the rounded corners. */
+.tvf-control-group--secret-error {
+  /* Ring the WHOLE joined group. Offset OUTWARD (not inset): the group's buttons
+   * are ECUI anchors that establish their own stacking contexts and paint over an
+   * inset outline, leaving only the input portion ringed. An outward offset sits
+   * beyond every child box, so the red encloses input + buttons uniformly. */
+  outline: 1px solid var(--inputValidation-errorForeground, #f48771);
+  outline-offset: 1px;
+  border-radius: 3px;
+}
+/* The error tooltip wraps the FULL control group (not a single button), so the
+ * anchor span must stretch to the cell width instead of the default inline-flex
+ * shrink — otherwise the field would collapse to its content width. */
+.tvf-secret-error-tooltip.header-hover-tooltip { display: flex; width: 100%; }
+/* Secret env-var cell flattened into the control group: each button (wrapped by a
+ * HeaderHoverTooltip span) stays compact next to the growing value input. */
+.tvf-control-group > .header-hover-tooltip { flex: 0 0 auto; display: inline-flex; }
 /* The colour swatch is a fixed-size trailing button — it must not grow/shrink,
  * so the hex field keeps the flex space. */
 .tvf-color-swatch { display: inline-flex; flex: 0 0 auto; }
@@ -23,6 +43,22 @@
   border-top-right-radius: 0 !important;
   border-bottom-right-radius: 0 !important;
   border-right-color: transparent !important;
+}
+
+/* Secret cell: while a resolution is in flight the refresh button is replaced by
+ * a spinner occupying the same 28×28 box so the row doesn't reflow. */
+.tvf-secret-spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  color: var(--foreground);
+  opacity: 0.7;
+}
+.tvf-secret-spinner .codicon {
+  font-size: 16px;
 }
 
 /* A type-locked field (e.g. the run-parameters prompt): the indicator button

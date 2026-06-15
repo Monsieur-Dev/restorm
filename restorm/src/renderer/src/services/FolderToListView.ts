@@ -5,10 +5,23 @@
 import type { ListViewItemData } from 'electron-core-ui/renderer'
 import { IconView } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
-import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, AuthenticationRequest, Scenario } from '../../../shared/types/collections'
+import type { Folder, FolderItem, HTTPRequest, EnvironmentFolder, GraphQLRequest, GrpcRequest, SoapRequest, WebSocketRequest, ODataRequest, AuthenticationRequest, Scenario, Environment } from '../../../shared/types/collections'
 import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest, isAuthenticationRequest, isScenario } from '../../../shared/types/collections'
 import React, { type ReactNode } from 'react'
 import { ScenarioRunningBadge } from '../components/common/ScenarioRunningBadge'
+import { SecretResolvingSpinner } from '../components/common/SecretResolvingSpinner'
+import { SecretErrorIndicator } from '../components/common/SecretErrorIndicator'
+import { ItemSecretBadges } from '../components/common/ItemSecretBadges'
+
+/** Collect every environment id under a folder (own + nested sub-environments). */
+export function collectFolderEnvIds(environments: Environment[]): string[] {
+  const ids: string[] = []
+  for (const env of environments) {
+    ids.push(env.id)
+    if (env.subEnvironments) ids.push(...collectFolderEnvIds(env.subEnvironments))
+  }
+  return ids
+}
 
 /** Convert an Icon to a ListView-compatible icon (string for codicons, ReactNode for others) */
 function toListViewIcon(icon: Icon | undefined, fallback: string): string | ReactNode {
@@ -221,32 +234,25 @@ export function folderItemToListViewItem(
   item: FolderItem,
   options: FolderToListViewOptions
 ): ListViewItemData {
+  // Requests + scenarios carry a secret badge (spinner / red error) just after
+  // their name, driven by the per-item status (own direct secrets + the active
+  // env they inherit). Computed once here so every protocol picks it up.
+  const secretBadges = (id: string): ReactNode => React.createElement(ItemSecretBadges, { itemId: id })
+
   if (isRequest(item)) {
-    if (isHTTPRequest(item)) {
-      return httpRequestToListViewItem(item, options)
-    }
-    if (isGraphQLRequest(item)) {
-      return graphqlRequestToListViewItem(item, options)
-    }
-    if (isGrpcRequest(item)) {
-      return grpcRequestToListViewItem(item, options)
-    }
-    if (isSoapRequest(item)) {
-      return soapRequestToListViewItem(item, options)
-    }
-    if (isWebSocketRequest(item)) {
-      return websocketRequestToListViewItem(item, options)
-    }
-    if (isODataRequest(item)) {
-      return odataRequestToListViewItem(item, options)
-    }
-    if (isAuthenticationRequest(item)) {
-      return authenticationRequestToListViewItem(item, options)
-    }
+    let base: ListViewItemData | null = null
+    if (isHTTPRequest(item)) base = httpRequestToListViewItem(item, options)
+    else if (isGraphQLRequest(item)) base = graphqlRequestToListViewItem(item, options)
+    else if (isGrpcRequest(item)) base = grpcRequestToListViewItem(item, options)
+    else if (isSoapRequest(item)) base = soapRequestToListViewItem(item, options)
+    else if (isWebSocketRequest(item)) base = websocketRequestToListViewItem(item, options)
+    else if (isODataRequest(item)) base = odataRequestToListViewItem(item, options)
+    else if (isAuthenticationRequest(item)) base = authenticationRequestToListViewItem(item, options)
+    if (base) return { ...base, rightActions: secretBadges(item.id) }
   }
 
   if (isScenario(item)) {
-    return scenarioToListViewItem(item, options)
+    return { ...scenarioToListViewItem(item, options), rightActions: secretBadges(item.id) }
   }
 
   if (isEnvironmentFolder(item)) {
@@ -281,6 +287,14 @@ function environmentFolderToListViewItem(
     isExpandable: children.length > 0,
     isExpanded,
     icon: toListViewIcon(folder.icon, 'folder-library'),
+    // Spinner (while any env resolves) + error badge (if any env's resolution
+    // failed) just after the env-folder name.
+    rightActions: React.createElement(
+      React.Fragment,
+      null,
+      React.createElement(SecretResolvingSpinner, { environmentIds: collectFolderEnvIds(folder.environments) }),
+      React.createElement(SecretErrorIndicator, { environmentIds: collectFolderEnvIds(folder.environments) })
+    ),
     children
   }
 }

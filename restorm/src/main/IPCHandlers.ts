@@ -7,13 +7,14 @@ import { EditorWindow } from './windows/EditorWindow'
 import { contextService, responseHistoryService, requestUsageService, scenarioUsageService } from './services'
 import { miniBrowserService } from './services/MiniBrowserService'
 import { assertPathWithinParent } from './utils/pathSecurity'
+import { secretHydrationService } from './services/secrets/SecretHydrationService'
 import { saveFolderStructure, loadFolderStructure, attachDraftStoreForFolder, attachDraftStoreForFile } from './FileOperations'
 import type { PersistenceFormat } from 'electron-core-ui'
 import { resolveRequestURL, type URLResolutionInput } from './services/request/HTTPRequestService'
 import { httpExecutionService, type HTTPExecutionInput } from './services/HTTPExecutionService'
 import { authPrefetchOneShot, resolveProducedHeaders } from './services/AuthenticationPrefetch'
 import { AuthenticationRequest } from '../shared/models/requests/AuthenticationRequest'
-import { StringValue, ExpressionValue, CustomListValue, CustomListMultiValue } from '../shared/types/valueTypes'
+import { StringValue, ExpressionValue, CustomListValue, CustomListMultiValue, SecretValue } from '../shared/types/valueTypes'
 import type { KeyValue } from '../shared/types/baseTypes'
 import { authenticationCacheService } from './services/AuthenticationCacheService'
 import { graphqlExecutionService, type GraphQLExecutionInput } from './services/GraphQLExecutionService'
@@ -24,7 +25,7 @@ import { importFrom } from './services/import/ImportManager'
 import {
   openEditorArgs,
   saveAsFileArgs, saveAsFolderArgs,
-  secretsReadArgs, secretsWriteArgs,
+  secretsReadArgs, secretsWriteArgs, secretsInvalidateArgs, secretsResolveArgs, secretsRefreshArgs,
   openPathArgs,
   projectReadFileArgs,
   contextRegisterRequestArgs, contextUnregisterRequestArgs,
@@ -77,6 +78,7 @@ interface KeyValueRowFromIpc {
   isExpression?: boolean | undefined
   customList?: { listId: string; label: string } | undefined
   customListMulti?: { listId: string; labels: string[] } | undefined
+  secret?: { source: string; params: Record<string, unknown> } | undefined
 }
 
 /**
@@ -92,13 +94,15 @@ function rehydrateKeyValueRow(row: KeyValueRowFromIpc): KeyValue {
   // Custom-list rows carry the structured shape so the dispatch
   // resolver can substitute the entry value; the flat `value` (the
   // label) is only a display fallback.
-  const value = row.customList
-    ? new CustomListValue(row.customList.listId, row.customList.label)
-    : row.customListMulti
-      ? new CustomListMultiValue(row.customListMulti.listId, row.customListMulti.labels)
-      : row.isExpression === true
-        ? new ExpressionValue(row.value)
-        : new StringValue(row.value)
+  const value = row.secret
+    ? new SecretValue(row.secret.source, row.secret.params)
+    : row.customList
+      ? new CustomListValue(row.customList.listId, row.customList.label)
+      : row.customListMulti
+        ? new CustomListMultiValue(row.customListMulti.listId, row.customListMulti.labels)
+        : row.isExpression === true
+          ? new ExpressionValue(row.value)
+          : new StringValue(row.value)
   return {
     ...(row.id !== undefined ? { id: row.id } : {}),
     key: row.key,
@@ -506,6 +510,45 @@ export function registerRestormIPC(deps: {
     }
   })
 
+  // Drop the resolution cache for one secret source + params so the next
+  // resolution re-fetches from the provider. Honors a `scopeId` when the caller
+  // knows it; otherwise clears the entry across every scope.
+  validatedHandle('restorm:secrets:invalidate', secretsInvalidateArgs, (_event, [{ source, params, scopeId }]) => {
+    if (scopeId) {
+      secretHydrationService.invalidate(scopeId, source, params)
+    } else {
+      secretHydrationService.invalidateAll(source, params)
+    }
+    return { success: true }
+  })
+
+  // Resolve a single secret on demand and return its plaintext for a renderer
+  // preview. Errors are returned as `{ error }` rather than thrown so a failed
+  // resolution (missing env var, etc.) doesn't reject across the IPC boundary.
+  validatedHandle('restorm:secrets:resolve', secretsResolveArgs, async (_event, [{ source, params }]) => {
+    // Reuse an already-resolved value (the env / item hydration likely just
+    // fetched this exact credential) instead of hitting the provider again — so
+    // the cell preview doesn't re-run a slow secret the env table already
+    // resolved. A `refresh` invalidates every scope first, so this never serves
+    // stale. (Concurrent in-flight fetches are deduped inside the service.)
+    const cached = secretHydrationService.peekResolved(source, params)
+    if (cached !== undefined) return { value: cached }
+    try {
+      const value = await secretHydrationService.resolveOne('preview', source, params)
+      return { value }
+    } catch (error) {
+      return { error: String(error instanceof Error ? error.message : error) }
+    }
+  })
+
+  // Refresh a secret used as an env-folder variable: invalidate the cache, blank
+  // its resolved value, recompute the affected env contexts (so the secret and
+  // any expression composing it go empty immediately), then re-hydrate.
+  validatedHandle('restorm:secrets:refresh', secretsRefreshArgs, (_event, [{ source, params }]) => {
+    contextService.refreshEnvSecret(source, params)
+    return { success: true }
+  })
+
   // ==========================================================================
   // Open Path IPC Handler
   // ==========================================================================
@@ -624,6 +667,27 @@ export function registerRestormIPC(deps: {
     return contextService.getContext(environmentId) ?? {}
   })
 
+  // Snapshot of which environments are currently resolving secrets, so a UI
+  // mounting mid-resolution can show its spinner without waiting for the next
+  // `context:env-secrets-resolving` broadcast.
+  ipcMain.handle('context:get-resolving-environments', () => {
+    return contextService.getResolvingEnvironmentIds()
+  })
+
+  // Snapshot of which environments last failed to resolve a secret, so a UI
+  // mounting after a failure can show its error badge without waiting for the
+  // next `context:env-secrets-error` broadcast.
+  ipcMain.handle('context:get-errored-environments', () => {
+    return contextService.getErroredEnvironmentIds()
+  })
+
+  // Snapshot of every item's effective secret status (direct + inherited), so a
+  // UI mounting mid-resolution can badge requests / scenarios without waiting
+  // for the next `context:item-secrets-status` broadcast.
+  ipcMain.handle('context:get-item-secret-statuses', () => {
+    return contextService.getItemSecretStatuses()
+  })
+
   validatedHandle('context:register-request', contextRegisterRequestArgs, (_event, [requestId, environmentId, requestData]) => {
     // The IPC payload carries `value: string` plus an optional
     // `isExpression` flag — rehydrate each row to a real KeyValue
@@ -677,6 +741,9 @@ export function registerRestormIPC(deps: {
     // collection, so flush it here. Opening a different file (or the
     // same one again) must force a fresh round of token fetches.
     authenticationCacheService.clear()
+    // Resolved secrets are equally collection-scoped: drop every cached
+    // credential so a freshly opened file re-fetches from its providers.
+    secretHydrationService.clearAll()
   })
 
   // ==========================================================================
@@ -931,8 +998,8 @@ export function registerRestormIPC(deps: {
   // gRPC Execution IPC Handlers
   // ==========================================================================
 
-  validatedHandle('grpc:execute', grpcExecuteArgs, (_event, [input]) => {
-    const result = grpcExecutionService.execute(input as GRPCExecutionInput)
+  validatedHandle('grpc:execute', grpcExecuteArgs, async (_event, [input]) => {
+    const result = await grpcExecutionService.execute(input as GRPCExecutionInput)
     setImmediate(() => {
       void responseHistoryService.storeExecutionResult(input.requestId, 'grpc', result)
       requestUsageService.recordSend(input.requestId)

@@ -31,6 +31,9 @@ export interface DocumentChangedPayload extends DocumentEventPayload {
 export interface DocumentDeletedPayload extends DocumentEventPayload {
   /** Parent folder ID (for requests) */
   parentFolderId?: string
+  /** Parent environment ID (for sub-environments) — lets the save-unit bridge
+   * redirect a deleted sub-env onto its top-level environment's unit. */
+  parentEnvironmentId?: string
 }
 
 /** Document event names */

@@ -14,7 +14,7 @@
  */
 
 import { BrowserWindow } from 'electron'
-import Handlebars from 'handlebars'
+import { resolveWithContextPriority } from '../../shared/utils/handlebars/resolveWithContextPriority'
 import {
   eventBusService,
   type Subscription,
@@ -30,9 +30,15 @@ import { pubsub, PUBSUB_TOPICS, collectionStore } from './CollectionStore'
 import { KeyValue as KeyValueModel } from '../../shared/models'
 import { StringValue, EnumListValue, CustomListValue, CustomListMultiValue } from '../../shared/types/collections'
 import type { CustomValueList } from '../../shared/types/collections'
-import { isEnvironmentFolder } from '../../shared/types/folderTypes'
-import { isExpressionValue, isCustomListValue, isCustomListMultiValue } from '../../shared/utils/valueHelpers'
+import { isEnvironmentFolder, isRequest, isScenario, isAnyFolder } from '../../shared/types/folderTypes'
+import type { Folder, EnvironmentFolder, FolderItem } from '../../shared/types/folderTypes'
+import type { Scenario } from '../../shared/types/scenario'
+import { isExpressionValue, isCustomListValue, isCustomListMultiValue, isSecretValue } from '../../shared/utils/valueHelpers'
+import type { SecretValue } from '../../shared/types/valueTypes/SecretValue'
+import { collectItemDirectSecrets, collectItemReferencedVars } from '../../shared/secrets/collectItemSecrets'
+import { pickSelectedEnvId, setActiveEnvChangeListener } from '../mcp/tools/activeState'
 import { resolveUrl } from './URLResolver'
+import { secretHydrationService, canonicalStringify } from './secrets/SecretHydrationService'
 import { compileSnippetTemplates, generateCodeSnippets, type CompiledSnippetTemplates } from './CodeSnippetGenerator'
 import type {
   KeyValue,
@@ -123,6 +129,29 @@ class ContextService {
       })
     )
 
+    // Per-item direct-secret resolution: (re)resolve an item's own secrets when
+    // it is created or edited, forget it when deleted. Scenarios travel on the
+    // FOLDER_* channel (a scenario is a folder-like container).
+    const onItemChanged = (payload: DocumentChangedPayload): void => {
+      const item = payload.document as FolderItem | undefined
+      if (item && (isRequest(item) || isScenario(item))) void this.hydrateItemSecrets(item)
+    }
+    this.subscriptions.push(
+      eventBusService.subscribe<DocumentChangedPayload>(DocumentEvents.REQUEST_CREATED, onItemChanged),
+      eventBusService.subscribe<DocumentChangedPayload>(DocumentEvents.REQUEST_UPDATED, onItemChanged),
+      eventBusService.subscribe<DocumentChangedPayload>(DocumentEvents.FOLDER_UPDATED, onItemChanged),
+      eventBusService.subscribe<DocumentDeletedPayload>(DocumentEvents.REQUEST_DELETED, (p) => { this.forgetItemSecrets(p.id) }),
+      eventBusService.subscribe<DocumentDeletedPayload>(DocumentEvents.FOLDER_DELETED, (p) => { this.forgetItemSecrets(p.id) })
+    )
+
+    // Switching the active environment changes which env an item inherits, so
+    // recompute every item's badge when the renderer reports a new selection.
+    setActiveEnvChangeListener(() => { this.recomputeAllItemStatuses() })
+
+    // On every full (re)load of the tree, eagerly resolve each item's own
+    // secrets so request / scenario badges are correct before any editor opens.
+    collectionStore.onCollectionsSet(() => { this.hydrateAllItemSecrets() })
+
     this.initialized = true
     logger.info('[ContextService] Initialized - listening to environment events')
   }
@@ -158,12 +187,19 @@ class ContextService {
       }
     }
 
-    // Calculate and store transformed context
+    // Calculate and store transformed context (synchronously, with secrets
+    // still masked) so a consumer reading immediately sees the structure.
     this.recalculateContext(envId)
 
     // If a request tab was opened before this environment was processed,
     // we must recalculate those requests now that the context exists.
     this.recalculateRequestsUsingEnvironment(envId)
+
+    // Hydrate this env's SecretValues into the context (async). Once the
+    // resolvers return, `recalculateContext` re-runs with the populated
+    // `.resolved` values and re-broadcasts so `{{secretVar}}` (and any
+    // expression composing it) resolves in the preview + downstream.
+    void this.hydrateEnvironmentSecrets(envId)
   }
 
   /**
@@ -187,6 +223,11 @@ class ContextService {
 
       // Recalculate context for this env and all descendants
       this.recalculateContextCascade(envId)
+
+      // Re-hydrate secrets for this env (a variable may have changed an
+      // env-var name / source params, or a new secret variable was added)
+      // and its descendants, then re-broadcast with resolved values.
+      void this.hydrateEnvironmentSecretsCascade(envId)
     }
   }
 
@@ -210,6 +251,16 @@ class ContextService {
     if (!meta) {
       return
     }
+
+    // Abort any in-flight secret hydration for this env, drop its resolution
+    // cache, and clear its spinner state — the env is going away.
+    this.envHydrationAborters.get(envId)?.abort()
+    this.envHydrationAborters.delete(envId)
+    secretHydrationService.clearScope(envId)
+    this.resolvingEnvSecretVars.delete(envId)
+    this.erroredEnvSecretVars.delete(envId)
+    this.setEnvironmentResolving(envId, false)
+    this.setEnvironmentError(envId, false)
 
     // First, recursively delete all children
     for (const childId of meta.childIds) {
@@ -430,8 +481,7 @@ class ContextService {
     }
 
     try {
-      const template = Handlebars.compile(rawValue, { noEscape: true })
-      return template(context)
+      return resolveWithContextPriority(rawValue, context)
     } catch (error) {
       logger.warn('[ContextService] Handlebars transform error', {
         value: rawValue,
@@ -903,6 +953,489 @@ class ContextService {
   }
 
   /**
+   * Collect every `SecretValue` reachable through a request's active
+   * environment chain (the selected env-folder environment + all of its
+   * ancestors). These are the credentials that feed the transformed
+   * context a request reads from — a `SecretValue` used as an env-folder
+   * variable resolves to `''` until its `.resolved` is populated, exactly
+   * like the request's own KeyValue secrets. Enabled rows only: a disabled
+   * variable never reaches the context.
+   *
+   * The caller hydrates the returned secrets (which sets `.resolved` in
+   * place on the live `environmentMeta` rows) and then calls
+   * `refreshEnvironmentContext(requestId)` so the resolved plaintext lands
+   * in the request's `baseContext`.
+   */
+  collectEnvironmentSecrets(requestId: string): SecretValue[] {
+    const ctx = this.requestContexts.get(requestId)
+    if (!ctx?.environmentId) return []
+    return this.collectSecretsForEnvChain(ctx.environmentId)
+  }
+
+  /**
+   * Collect every enabled `SecretValue` reachable from an environment's
+   * own variables plus its ancestor chain (root → parent → self). Shared
+   * by the request path (`collectEnvironmentSecrets`) and the env-folder
+   * preview path (`hydrateEnvironmentSecrets`) so both resolve secrets
+   * through the exact same set — DRY, no parallel walk.
+   */
+  private collectSecretsForEnvChain(environmentId: string): SecretValue[] {
+    const secrets: SecretValue[] = []
+    const seen = new Set<string>()
+    const collectFrom = (envId: string): void => {
+      const meta = this.environmentMeta.get(envId)
+      if (!meta) return
+      for (const kv of meta.rawVariables) {
+        if (kv.enabled === false) continue
+        if (isSecretValue(kv.value)) secrets.push(kv.value)
+      }
+    }
+    // Active environment + its ancestor chain (root → parent).
+    for (const envId of [...this.getParentChain(environmentId), environmentId]) {
+      if (seen.has(envId)) continue
+      seen.add(envId)
+      collectFrom(envId)
+    }
+    return secrets
+  }
+
+  /**
+   * Hydrate every `SecretValue` reachable from an environment's chain
+   * (own + ancestors) and, once resolved, recompute + re-broadcast the
+   * environment's transformed context so `{{secretVar}}` and any
+   * expression composing it (`apiKey2 = {{apiKey}}`) resolve to the
+   * plaintext instead of the masked empty string.
+   *
+   * scopeId = the environment's own id: stable for the lifetime of the
+   * open file, so the per-scope cache in `SecretHydrationService` serves
+   * repeated recalcs without re-hitting the provider. (The request path
+   * uses requestId as its scope; both share the same hydrate logic, only
+   * the scope key differs.)
+   *
+   * Hydration is async; callers `void` it. The synchronous
+   * `recalculateContext` already ran (masked) before this resolves, so a
+   * reader that polls immediately gets structure now and the resolved
+   * values land on the follow-up broadcast.
+   */
+  private async hydrateEnvironmentSecrets(environmentId: string): Promise<void> {
+    // Only this env's OWN secrets — NOT inherited ones. An inherited secret is
+    // resolved once by its owning ancestor and flows into this env's context
+    // through inheritance; re-resolving it here would re-fetch the SAME
+    // credential under a different cache scope (a per-env cache miss), so a
+    // child env with no secrets of its own would needlessly re-run a slow
+    // ancestor secret. The descendants' contexts are refreshed below.
+    // Own enabled secrets WITH their variable names — the names let an item that
+    // references `{{thatVar}}` light its inherited badge only for the secrets it
+    // actually uses (reference-aware), not for any secret in the env.
+    const meta = this.environmentMeta.get(environmentId)
+    const secretEntries = (meta?.rawVariables ?? [])
+      .filter((kv) => kv.enabled !== false && isSecretValue(kv.value))
+      .map((kv) => ({ key: kv.key, sv: kv.value as SecretValue }))
+    if (secretEntries.length === 0) return
+
+    // A fresh hydration supersedes any in-flight one for this env, and closing
+    // the env / project aborts it (see deleteEnvironmentCascade / clearAll), so
+    // a slow resolver — a long network / file fetch, or the cancellable sleep —
+    // stops instead of running to completion after the env is gone.
+    this.envHydrationAborters.get(environmentId)?.abort()
+    const aborter = new AbortController()
+    this.envHydrationAborters.set(environmentId, aborter)
+
+    // Signal "this env is resolving its secrets" for the duration so the UI can
+    // show a spinner (env tab, env-folder sidebar entry, env list row, …) while
+    // at least one variable is in flight. Clear any stale error first — we are
+    // (re)attempting, so the previous failure no longer reflects reality until
+    // this batch finishes. The per-variable resolving set drives the
+    // reference-aware item badges.
+    this.resolvingEnvSecretVars.set(environmentId, new Set(secretEntries.map((e) => e.key)))
+    this.erroredEnvSecretVars.set(environmentId, new Set())
+    this.setEnvironmentResolving(environmentId, true)
+    this.setEnvironmentError(environmentId, false)
+    const failedKeys = new Set<string>()
+    try {
+      // Hydrate each secret INDEPENDENTLY: a single failing secret (e.g. an env
+      // var that isn't set, whose resolver rejects) must not abort the whole
+      // batch — the others still resolve, and the failing one just stays empty.
+      // A shared batch hydrate would reject on the first failure and skip every
+      // secret after it plus the rebroadcast below.
+      await Promise.all(
+        secretEntries.map(async ({ key, sv }) => {
+          try {
+            await secretHydrationService.hydrate(environmentId, [sv], aborter.signal)
+          } catch (error) {
+            if (aborter.signal.aborted) return // expected on close / supersede
+            failedKeys.add(key)
+            logger.warn('[ContextService] env secret hydration failed', {
+              environmentId,
+              source: sv.source,
+              error: String(error)
+            })
+          }
+        })
+      )
+    } finally {
+      if (this.envHydrationAborters.get(environmentId) === aborter) {
+        this.envHydrationAborters.delete(environmentId)
+      }
+      if (!aborter.signal.aborted) {
+        // Per-variable verdict (drives reference-aware item badges) set BEFORE the
+        // env-level setters, which trigger the per-item recompute that reads it.
+        this.resolvingEnvSecretVars.set(environmentId, new Set())
+        this.erroredEnvSecretVars.set(environmentId, failedKeys)
+      }
+      this.setEnvironmentResolving(environmentId, false)
+      // Don't stamp an error verdict on an aborted run (env closed / superseded);
+      // the cleared-at-start state stays, and a newer hydration owns the verdict.
+      if (!aborter.signal.aborted) this.setEnvironmentError(environmentId, failedKeys.size > 0)
+    }
+
+    // Aborted (env closed / superseded) → don't recompute: the env may be gone,
+    // and a newer hydration owns the recompute.
+    if (aborter.signal.aborted) return
+
+    // Resolved plaintext now lives on the live `environmentMeta` rows. Recompute
+    // this env AND its descendants (`recalculateContextCascade`) so a child env
+    // inherits the freshly-resolved value WITHOUT re-fetching it itself.
+    this.recalculateContextCascade(environmentId)
+    this.recalculateRequestsUsingEnvironment(environmentId)
+  }
+
+  /**
+   * Collect an environment's OWN enabled `SecretValue`s (NOT inherited from
+   * ancestors). Inherited secrets are resolved by their owning ancestor and
+   * reach this env through context inheritance, so hydrating only the own set
+   * keeps each credential fetched exactly once. Contrast with
+   * `collectSecretsForEnvChain` (own + ancestors), which the request path uses
+   * to gather everything a request reads.
+   */
+  private collectOwnEnvSecrets(environmentId: string): SecretValue[] {
+    const meta = this.environmentMeta.get(environmentId)
+    if (!meta) return []
+    const secrets: SecretValue[] = []
+    for (const kv of meta.rawVariables) {
+      if (kv.enabled === false) continue
+      if (isSecretValue(kv.value)) secrets.push(kv.value)
+    }
+    return secrets
+  }
+
+  /** Environments currently hydrating at least one secret (drives the UI spinners). */
+  private readonly resolvingEnvironments = new Set<string>()
+
+  /** In-flight secret-hydration aborters, keyed by environment id. Aborted when
+   * a newer hydration supersedes, the env is deleted, or the project closes. */
+  private readonly envHydrationAborters = new Map<string, AbortController>()
+
+  /** Mark an environment as (not) resolving its secrets and broadcast the change. */
+  private setEnvironmentResolving(environmentId: string, resolving: boolean): void {
+    const had = this.resolvingEnvironments.has(environmentId)
+    if (resolving === had) return
+    if (resolving) this.resolvingEnvironments.add(environmentId)
+    else this.resolvingEnvironments.delete(environmentId)
+    this.broadcastToRenderer('context:env-secrets-resolving', { environmentId, resolving })
+    // Items inheriting this env (active env + chain) reflect its resolving state.
+    this.recomputeAllItemStatuses()
+  }
+
+  /** Snapshot of the environments currently resolving secrets (initial UI sync). */
+  getResolvingEnvironmentIds(): string[] {
+    return [...this.resolvingEnvironments]
+  }
+
+  /** Environments whose last secret hydration left AT LEAST ONE own secret
+   * unresolved (resolver rejected, e.g. a missing env var). Drives the error
+   * badge in the same places as the resolving spinner. */
+  private readonly erroredEnvironments = new Set<string>()
+
+  /** Mark an environment as (not) having a secret-resolution error and broadcast. */
+  private setEnvironmentError(environmentId: string, hasError: boolean): void {
+    const had = this.erroredEnvironments.has(environmentId)
+    if (hasError === had) return
+    if (hasError) this.erroredEnvironments.add(environmentId)
+    else this.erroredEnvironments.delete(environmentId)
+    this.broadcastToRenderer('context:env-secrets-error', { environmentId, hasError })
+    // Items inheriting this env reflect its error state.
+    this.recomputeAllItemStatuses()
+  }
+
+  /** Snapshot of the environments with a secret-resolution error (initial UI sync). */
+  getErroredEnvironmentIds(): string[] {
+    return [...this.erroredEnvironments]
+  }
+
+  // ──────────────────────────────────────────────────────────────────────
+  // Per-ITEM secret status (requests, all protocols + scenarios)
+  //
+  // An item's effective status combines two sources:
+  //   • DIRECT — secrets the item holds in its own fields (a header / param /
+  //     auth / body value, a scenario node operand). These are resolved EAGERLY
+  //     here on load + on every edit, so the badge shows even on an item the
+  //     user never opened.
+  //   • INHERITED — the secrets of the ACTIVE environment (+ its parent chain)
+  //     the item resolves {{variables}} against. Reuses the per-env sets above.
+  //
+  // A single `context:item-secrets-status` broadcast per item lets the renderer
+  // badge every surface (tab title, sidebar row, scenario node) with one hook.
+  // ──────────────────────────────────────────────────────────────────────
+
+  /** Items currently resolving at least one of their OWN (direct) secrets. */
+  private readonly directResolvingItems = new Set<string>()
+  /** Items whose last OWN-secret resolution left at least one unresolved. */
+  private readonly directErroredItems = new Set<string>()
+  /** In-flight direct-secret hydration aborters, keyed by item id. */
+  private readonly itemHydrationAborters = new Map<string, AbortController>()
+  /** Every item we've walked (for a full recompute when an env toggles). */
+  private readonly knownItemIds = new Set<string>()
+  /** Last effective status broadcast per item, to dedupe re-broadcasts. */
+  private readonly itemEffectiveStatus = new Map<string, { resolving: boolean; error: boolean }>()
+  /** Per-env secret VARIABLE names currently resolving / left in error — the
+   * reference-aware counterpart of `resolvingEnvironments`/`erroredEnvironments`
+   * (which stay per-env booleans for the env-folder's own blanket badge). */
+  private readonly resolvingEnvSecretVars = new Map<string, Set<string>>()
+  private readonly erroredEnvSecretVars = new Map<string, Set<string>>()
+  /** The env-variable names each item references via `{{…}}` (cached per item),
+   * so its inherited badge lights only for secrets it actually uses. */
+  private readonly itemReferencedVars = new Map<string, Set<string>>()
+
+  /** All env ids under an env-folder (own + nested sub-environments). */
+  private collectEnvFolderEnvIds(environments: Environment[]): string[] {
+    const ids: string[] = []
+    for (const env of environments) {
+      ids.push(env.id)
+      if (env.subEnvironments) ids.push(...this.collectEnvFolderEnvIds(env.subEnvironments))
+    }
+    return ids
+  }
+
+  /**
+   * The environment ids an item inherits — its nearest ancestor env-folder's
+   * ACTIVE environment plus that environment's parent chain. Empty when the item
+   * lives outside any env-folder. The active env is the renderer-selected one
+   * (falls back to the folder's first environment).
+   */
+  private getInheritedEnvChainForItem(itemId: string): string[] {
+    let folder: Folder | EnvironmentFolder | Scenario | null = collectionStore.findParentFolder(itemId)
+    while (folder && !isEnvironmentFolder(folder)) {
+      folder = collectionStore.findParentFolder(folder.id)
+    }
+    if (!folder || !isEnvironmentFolder(folder)) return []
+    const envFolder = folder
+    const liveEnvIds = this.collectEnvFolderEnvIds(envFolder.environments)
+    const activeId = pickSelectedEnvId(envFolder.id, liveEnvIds) ?? envFolder.environments[0]?.id
+    if (activeId === undefined) return []
+    return [...this.getParentChain(activeId), activeId]
+  }
+
+  /** Recompute an item's effective status; broadcast on change. Effective =
+   * DIRECT (a secret the item holds in its own fields) ∪ INHERITED-and-REFERENCED
+   * (a secret variable of the item's active env chain that the item actually
+   * references via `{{…}}`). The inherited half is reference-aware: an env having
+   * a failing secret does NOT light an item that doesn't use it. */
+  private computeItemEffectiveStatus(itemId: string): void {
+    const chain = this.getInheritedEnvChainForItem(itemId)
+    const refs = this.itemReferencedVars.get(itemId)
+    const referencesAny = (envVars: Set<string> | undefined): boolean =>
+      envVars !== undefined && refs !== undefined && [...envVars].some((v) => refs.has(v))
+    const inheritedResolving = chain.some((e) => referencesAny(this.resolvingEnvSecretVars.get(e)))
+    const inheritedError = chain.some((e) => referencesAny(this.erroredEnvSecretVars.get(e)))
+    const resolving = this.directResolvingItems.has(itemId) || inheritedResolving
+    const error = this.directErroredItems.has(itemId) || inheritedError
+    const prev = this.itemEffectiveStatus.get(itemId)
+    if (prev?.resolving === resolving && prev.error === error) return
+    this.itemEffectiveStatus.set(itemId, { resolving, error })
+    this.broadcastToRenderer('context:item-secrets-status', { itemId, resolving, error })
+  }
+
+  /** Recompute every known item — used when an env's status flips or the
+   * active environment changes (which env an item inherits). Cheap: a handful
+   * of items, each a set lookup + a short parent-chain walk. */
+  recomputeAllItemStatuses(): void {
+    for (const itemId of this.knownItemIds) this.computeItemEffectiveStatus(itemId)
+  }
+
+  /** Snapshot of every item's effective secret status (initial UI sync). */
+  getItemSecretStatuses(): { itemId: string; resolving: boolean; error: boolean }[] {
+    return [...this.itemEffectiveStatus].map(([itemId, s]) => ({ itemId, resolving: s.resolving, error: s.error }))
+  }
+
+  /**
+   * Eagerly (re)resolve an item's OWN direct secrets and refresh its badge.
+   * Per-secret resilient (one failing secret doesn't abort the rest); a fresh
+   * call supersedes any in-flight one for the same item. Items with no direct
+   * secret still get a status recompute so their INHERITED badge is correct.
+   */
+  private async hydrateItemSecrets(item: FolderItem): Promise<void> {
+    const itemId = item.id
+    this.knownItemIds.add(itemId)
+    // Cache which env vars this item references, for the reference-aware
+    // inherited badge (recomputed here so an edit that adds/removes a `{{var}}`
+    // is reflected).
+    this.itemReferencedVars.set(itemId, collectItemReferencedVars(item))
+    const secrets = collectItemDirectSecrets(item)
+
+    // Supersede any in-flight resolution for this item.
+    this.itemHydrationAborters.get(itemId)?.abort()
+
+    if (secrets.length === 0) {
+      this.itemHydrationAborters.delete(itemId)
+      this.directResolvingItems.delete(itemId)
+      this.directErroredItems.delete(itemId)
+      this.computeItemEffectiveStatus(itemId)
+      return
+    }
+
+    const aborter = new AbortController()
+    this.itemHydrationAborters.set(itemId, aborter)
+    this.directResolvingItems.add(itemId)
+    this.directErroredItems.delete(itemId)
+    this.computeItemEffectiveStatus(itemId)
+
+    let anyFailed = false
+    await Promise.all(
+      secrets.map(async (sv) => {
+        try {
+          await secretHydrationService.hydrate(itemId, [sv], aborter.signal)
+        } catch (error) {
+          if (aborter.signal.aborted) return
+          anyFailed = true
+          logger.warn('[ContextService] item secret hydration failed', { itemId, source: sv.source, error: String(error) })
+        }
+      })
+    )
+
+    if (aborter.signal.aborted) return
+    this.itemHydrationAborters.delete(itemId)
+    this.directResolvingItems.delete(itemId)
+    this.setItemDirectError(itemId, anyFailed)
+    this.computeItemEffectiveStatus(itemId)
+  }
+
+  /** Toggle an item's direct-secret error membership (param keeps the boolean
+   * honest so flow analysis doesn't narrow a closure-set flag to a literal). */
+  private setItemDirectError(itemId: string, hasError: boolean): void {
+    if (hasError) this.directErroredItems.add(itemId)
+    else this.directErroredItems.delete(itemId)
+  }
+
+  /** Forget an item's per-item state (on delete / project close). */
+  private forgetItemSecrets(itemId: string): void {
+    this.itemHydrationAborters.get(itemId)?.abort()
+    this.itemHydrationAborters.delete(itemId)
+    this.directResolvingItems.delete(itemId)
+    this.directErroredItems.delete(itemId)
+    this.knownItemIds.delete(itemId)
+    this.itemReferencedVars.delete(itemId)
+    secretHydrationService.clearScope(itemId)
+    if (this.itemEffectiveStatus.delete(itemId)) {
+      this.broadcastToRenderer('context:item-secrets-status', { itemId, resolving: false, error: false })
+    }
+  }
+
+  /**
+   * Walk the whole tree and eagerly resolve every request's / scenario's direct
+   * secrets. Called once after a project loads (the per-env hydration already
+   * ran), so badges are correct before any editor opens.
+   */
+  hydrateAllItemSecrets(): void {
+    const walk = (item: FolderItem): void => {
+      if (isRequest(item) || isScenario(item)) void this.hydrateItemSecrets(item)
+      // Walk children exactly once. A runtime scenario also satisfies the folder
+      // guards (it carries `items`), so test it FIRST to avoid walking its
+      // children twice (and re-hydrating each child request twice on load).
+      const children = isScenario(item) ? (item.items ?? []) : isAnyFolder(item) ? item.items : []
+      for (const child of children) walk(child)
+    }
+    for (const collection of collectionStore.getCollections()) walk(collection)
+  }
+
+  /**
+   * Re-resolve every (secret) variable an environment OWNS: drop their
+   * resolution cache, blank the in-memory plaintext, recompute the env + its
+   * descendants (so the secrets — and any expression composing them — go empty
+   * immediately), then re-hydrate. The env-level equivalent of the per-secret
+   * "refresh" button. Returns the number of own secrets refreshed (0 when the
+   * env isn't registered / has no secret variables). Does NOT touch the
+   * persisted document — resolved plaintext is never saved.
+   */
+  refreshEnvironmentSecrets(environmentId: string): number {
+    const secrets = this.collectOwnEnvSecrets(environmentId)
+    for (const sv of secrets) {
+      secretHydrationService.invalidateAll(sv.source, sv.params)
+      sv.resolved = undefined
+    }
+    // Recompute now (secrets blank) so the preview clears, then re-hydrate.
+    this.recalculateContextCascade(environmentId)
+    void this.hydrateEnvironmentSecretsCascade(environmentId)
+    return secrets.length
+  }
+
+  /**
+   * Re-hydrate secrets for an environment and all its descendants. Used
+   * on ENVIRONMENT_UPDATED, mirroring `recalculateContextCascade`.
+   */
+  private async hydrateEnvironmentSecretsCascade(environmentId: string): Promise<void> {
+    await this.hydrateEnvironmentSecrets(environmentId)
+    const meta = this.environmentMeta.get(environmentId)
+    if (meta) {
+      for (const childId of meta.childIds) {
+        await this.hydrateEnvironmentSecretsCascade(childId)
+      }
+    }
+  }
+
+  /**
+   * Refresh a secret wherever it is used as an env-folder variable: drop the
+   * main-side resolution cache, blank the in-memory `resolved` plaintext, and
+   * recompute the affected environment contexts so the secret — and any
+   * expression composing it (e.g. `{{secret}}`) — goes empty IMMEDIATELY, then
+   * re-hydrate asynchronously so the freshly fetched value flows back in.
+   *
+   * This is what the per-secret "refresh" button expects: invalidate → blank →
+   * re-resolve, with the context preview reflecting the in-flight refresh
+   * rather than holding the stale value.
+   */
+  refreshEnvSecret(source: string, params: Record<string, unknown>): void {
+    secretHydrationService.invalidateAll(source, params)
+
+    const target = canonicalStringify(params)
+    const affected: string[] = []
+    for (const [envId, meta] of this.environmentMeta) {
+      let touched = false
+      for (const kv of meta.rawVariables) {
+        if (
+          isSecretValue(kv.value) &&
+          kv.value.source === source &&
+          canonicalStringify(kv.value.params) === target
+        ) {
+          kv.value.resolved = undefined
+          touched = true
+        }
+      }
+      if (touched) affected.push(envId)
+    }
+
+    // Recompute now (secret blank) so the preview clears during the refresh,
+    // then re-hydrate so the fresh value flows back once the resolver returns.
+    for (const envId of affected) this.recalculateContextCascade(envId)
+    for (const envId of affected) void this.hydrateEnvironmentSecretsCascade(envId)
+  }
+
+  /**
+   * Recompute the transformed context for a request's active environment
+   * chain and the request context itself. Called after env-folder secrets
+   * have been hydrated, so the freshly-populated `SecretValue.resolved`
+   * values flow into the context the executor reads.
+   */
+  refreshEnvironmentContext(requestId: string): void {
+    const ctx = this.requestContexts.get(requestId)
+    if (!ctx?.environmentId) return
+    for (const envId of [...this.getParentChain(ctx.environmentId), ctx.environmentId]) {
+      if (this.environmentMeta.has(envId)) this.recalculateContext(envId)
+    }
+    this.recalculateRequestContext(requestId)
+  }
+
+  /**
    * Resolve a single value using the request's environment context
    * Used by HTTPExecutionService to resolve headers, body, etc.
    *
@@ -931,7 +1464,7 @@ class ContextService {
   /**
    * Type-aware resolution of a `KeyValue`. Only an `ExpressionValue`
    * runs through Handlebars; every other ValueType (StringValue,
-   * PasswordValue, …) is returned literally via `toString()`.
+   * SecretValue, …) is returned literally via `toString()`.
    * Mirrors `resolveKeyValue` but exposed publicly so HTTP / SOAP /
    * GraphQL execution services can opt into the strict gate
    * instead of the always-resolves shortcut.
@@ -1175,6 +1708,24 @@ class ContextService {
    */
   clearAll(): void {
     logger.info('[ContextService] Clearing all data...')
+    // Abort every in-flight secret hydration so a slow resolver doesn't keep
+    // running after the file is closed, then drop the resolution cache + the
+    // spinner state.
+    for (const aborter of this.envHydrationAborters.values()) aborter.abort()
+    this.envHydrationAborters.clear()
+    this.resolvingEnvironments.clear()
+    this.erroredEnvironments.clear()
+    // Per-item secret state.
+    for (const aborter of this.itemHydrationAborters.values()) aborter.abort()
+    this.itemHydrationAborters.clear()
+    this.directResolvingItems.clear()
+    this.directErroredItems.clear()
+    this.knownItemIds.clear()
+    this.itemEffectiveStatus.clear()
+    this.resolvingEnvSecretVars.clear()
+    this.erroredEnvSecretVars.clear()
+    this.itemReferencedVars.clear()
+    secretHydrationService.clearAll()
     this.environmentMeta.clear()
     this.transformedContexts.clear()
     this.variableTransformResults.clear()

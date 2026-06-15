@@ -1,4 +1,33 @@
 {
+  "secrets": {
+    "others": "其他",
+    "refresh": "刷新密钥",
+    "source": {
+      "envVar": "环境变量",
+      "envFileSecret": "env 文件密钥",
+      "envFileSecretPlaceholder": "密钥值",
+      "envFileSecretLabel": "密钥值"
+    },
+    "param": {
+      "envVarName": "变量名",
+      "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "编辑获取",
+    "envVarUnresolved": "（未解析）",
+    "resolving": "正在解析…",
+    "resolveError": "密钥解析失败",
+    "resolveErrorEnv": "至少有一个变量无法获取并处于错误状态。",
+    "resolveErrorItem": "此项目的密钥中至少有一个无法获取。",
+    "fetchFailed": "获取失败",
+    "retrievalModal": {
+      "title": "密钥获取",
+      "value": "值：",
+      "fetch": "获取",
+      "fetchFailed": "获取失败",
+      "ok": "确定",
+      "cancel": "取消"
+    }
+  },
   "app": {
     "title": "restorm",
     "openSettings": "打开设置",

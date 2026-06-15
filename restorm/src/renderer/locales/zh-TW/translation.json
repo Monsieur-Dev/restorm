@@ -1,4 +1,33 @@
 {
+  "secrets": {
+    "others": "其他",
+    "refresh": "重新整理密鑰",
+    "source": {
+      "envVar": "環境變數",
+      "envFileSecret": "env 檔案密鑰",
+      "envFileSecretPlaceholder": "密鑰值",
+      "envFileSecretLabel": "密鑰值"
+    },
+    "param": {
+      "envVarName": "變數名稱",
+      "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "編輯擷取",
+    "envVarUnresolved": "（未解析）",
+    "resolving": "正在解析…",
+    "resolveError": "密鑰解析失敗",
+    "resolveErrorEnv": "至少有一個變數無法擷取並處於錯誤狀態。",
+    "resolveErrorItem": "此項目的密鑰中至少有一個無法擷取。",
+    "fetchFailed": "擷取失敗",
+    "retrievalModal": {
+      "title": "密鑰擷取",
+      "value": "值：",
+      "fetch": "擷取",
+      "fetchFailed": "擷取失敗",
+      "ok": "確定",
+      "cancel": "取消"
+    }
+  },
   "app": {
     "title": "restorm",
     "openSettings": "開啟設定",

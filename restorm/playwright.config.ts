@@ -104,6 +104,15 @@ const postmanImportTestDir = defineBddConfig({
   outputDir: '.features-gen/postman-import'
 })
 
+const secretsSourcesTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/secrets-sources/features/**/*.feature',
+  steps: [
+    'tests/e2e/bdd/secrets-sources/steps/**/*.ts',
+    'tests/e2e/bdd/fixtures/secrets-sources.fixture.ts'
+  ],
+  outputDir: '.features-gen/secrets-sources'
+})
+
 /**
  * Playwright configuration for Electron E2E tests using playwright-bdd.
  * Each test group has its own project with a dedicated fixture.
@@ -212,6 +221,11 @@ export default defineConfig({
       name: 'postman-import',
       testDir: postmanImportTestDir,
       timeout: 180 * 1000 // 3 min — opens a fresh app, imports + runs the workflow against docker
+    },
+    {
+      name: 'secrets-sources',
+      testDir: secretsSourcesTestDir,
+      timeout: 120 * 1000 // opens a fresh app, runs one secret-bearing request against docker
     },
     {
       // Headless CLI runner — a plain spec (no BDD/UI) that spawns the built app

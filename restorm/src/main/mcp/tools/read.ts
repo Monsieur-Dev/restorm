@@ -8,10 +8,10 @@
  * tools are stored in a registry and re-instantiated on every HTTP
  * request (see ECUI docs/McpService/README.md "stateless transport").
  *
- * Secrets (PasswordValue) never leak: every Request / Folder /
+ * Secrets (SecretValue) never leak: every Request / Folder /
  * Environment goes through `CollectionStore.serialize*` which respects
- * the `@NonSerialised` decorator + `toJSON` chain, so plaintext is
- * stripped one layer below the tool handler.
+ * the `@NonSerialised` decorator + `toJSON` chain, so the resolved
+ * plaintext is stripped one layer below the tool handler.
  */
 
 import { z } from 'zod'
@@ -25,6 +25,7 @@ import {
   isRequest
 } from '../../../shared/models'
 import { flattenTree, flattenScenarios, listChildren } from '../tree'
+import { valueSourceRegistry } from '../../../shared/secrets/valueSourceRegistry'
 
 const MAX_SEARCH_RESULTS = 50
 const ABS_MAX_SEARCH_RESULTS = 200
@@ -122,7 +123,7 @@ export function registerReadTools(mcp: McpService): void {
       description:
         'Return the full typed JSON of a request: URL, method, headers, params, body, ' +
         'protocol-specific fields (GraphQL query, gRPC service, SOAP envelope, …). ' +
-        'Secrets (`PasswordValue`) are masked — plaintext never leaves the main process.',
+        'Secrets (`SecretValue`) are masked — plaintext never leaves the main process.',
       inputSchema: {
         id: z.string().min(1).describe('Request id to fetch.')
       } as Record<string, unknown>
@@ -294,6 +295,37 @@ export function registerReadTools(mcp: McpService): void {
       inputSchema: {} as Record<string, unknown>
     },
     () => jsonReply(getFavoritesSnapshot())
+  )
+
+  mcp.registerTool(
+    'list_value_sources',
+    {
+      title: 'List secret value sources',
+      description:
+        'List the registered sources a `{ type: "secret", source, params }` value can reference. A ' +
+        'secret value never carries plaintext in the document tree — it points at one of these sources, ' +
+        'and the main process resolves the plaintext at run time (it is never returned to a client). ' +
+        'Returns `{ sources: [{ id, labelKey, canWrite, isObject, params: [{ key, kind, required }] }] }`. ' +
+        'Use an `id` as the `source` and fill `params` per its `paramSchema` when calling ' +
+        '`set_env_variable`, `create_request` / `update_request`, or the scenario authoring tools with a ' +
+        'secret value. The list is registry-driven: a source added to the app appears here automatically.',
+      inputSchema: {} as Record<string, unknown>
+    },
+    () => jsonReply({
+      sources: valueSourceRegistry.list().map((d) => ({
+        id: d.id,
+        labelKey: d.labelKey,
+        canWrite: d.canWrite,
+        isObject: d.isObject,
+        params: (d.paramSchema ?? []).map((p) => ({
+          key: p.key,
+          labelKey: p.labelKey,
+          kind: p.kind,
+          required: p.required === true,
+          ...(p.options !== undefined ? { options: p.options } : {})
+        }))
+      }))
+    })
   )
 }
 

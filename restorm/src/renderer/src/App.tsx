@@ -82,6 +82,7 @@ import { isContainerNode, isTabGroupNode, loadWorkbenchTabIds, useSetting } from
 import { REOPEN_LAST_FILE_STORAGE_KEY, REOPEN_LAST_FILE_SETTING_KEY } from '../../shared/config/reopenLastFile'
 import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, type ConsoleTab, type FirewallTab, type MiniBrowserTab } from '../../shared/types/editor'
 import { findGroupIdForTab, hasGroupWithId, updateGroupById } from './utils/workbenchHelpers'
+import { findTopLevelEnvironment } from './utils/envSaveUnit'
 
 /**
  * Match a workbench tab by the underlying item id (request / folder /
@@ -2100,7 +2101,7 @@ const App: React.FC = () => {
     // deletes mirror into `markSaveUnitDeleted`. The draft is the
     // *cleansed* POJO (same shape the decomposer produces on save), so
     // `commitIfDraftMatches` actually matches when the node hasn't
-    // changed between mutate and save. `PasswordValue.toJSON` strips
+    // changed between mutate and save. `SecretValue.toJSON` strips
     // plaintext on the preceding JSON round trip.
     const kindForType = (type: 'folder' | 'request' | 'environment'): 'folder' | 'file' =>
       type === 'folder' ? 'folder' : 'file'
@@ -2116,26 +2117,52 @@ const App: React.FC = () => {
     const UPSERT_DEBOUNCE_MS = 300
     const doUpsert = (payload: DocumentChangedPayload): void => {
       if (!payload.id) return
+
+      // A sub-environment isn't its own save-unit — it lives embedded in its
+      // top-level environment's content (`environments` is @separateFolders,
+      // `subEnvironments` is not). Redirect the upsert onto the top-level env's
+      // unit so the change is actually saved + committed; registering a
+      // per-sub-env unit would create a phantom the decomposer never produces,
+      // leaving the doc permanently dirty and the change unsaved despite
+      // autosave. When the top-level owner can't be resolved (e.g. the event
+      // raced the tree state), SKIP rather than register that phantom.
+      // (See utils/envSaveUnit.ts.)
+      let runtimeId = payload.id
+      let document: unknown = payload.document
+      let parentId = payload.parentFolderId
+      if (payload.type === 'environment' && payload.parentEnvironmentId !== undefined) {
+        const topEnv = payload.parentFolderId !== undefined
+          ? findTopLevelEnvironment(rootItems, payload.parentFolderId, payload.id)
+          : null
+        if (!topEnv || topEnv.id === payload.id) {
+          logger.warn('[App] upsertSaveUnit: sub-env owner not resolved, skipping', { id: payload.id })
+          return
+        }
+        runtimeId = topEnv.id
+        document = topEnv
+        parentId = payload.parentFolderId
+      }
+
       let draft: Record<string, unknown>
       try {
-        const raw = JSON.parse(JSON.stringify(payload.document)) as Record<string, unknown>
+        const raw = JSON.parse(JSON.stringify(document)) as Record<string, unknown>
         const cls = classForDocument(payload.type, raw)
         draft = cleanseForPersistence(raw, cls)
       } catch (err) {
         logger.warn('[App] upsertSaveUnit: failed to cleanse document', {
-          id: payload.id,
+          id: runtimeId,
           error: String(err)
         })
         return
       }
       void upsertSaveUnit({
-        runtimeId: payload.id,
+        runtimeId,
         kind: kindForType(payload.type),
         draft,
         reason: 'modify',
-        ...(payload.parentFolderId !== undefined && { parentId: payload.parentFolderId })
+        ...(parentId !== undefined && { parentId })
       }).catch((err: unknown) => {
-        logger.warn('[App] upsertSaveUnit failed', { id: payload.id, error: String(err) })
+        logger.warn('[App] upsertSaveUnit failed', { id: runtimeId, error: String(err) })
       })
     }
 
@@ -2158,6 +2185,24 @@ const App: React.FC = () => {
 
     const handleDelete = (payload: DocumentDeletedPayload): void => {
       if (!payload.id) return
+
+      // A deleted SUB-environment isn't its own save-unit — its top-level
+      // environment's content just lost a sub-env. Mark THAT unit dirty (so the
+      // deletion is saved + committed) instead of recording a phantom delete
+      // the save can never reconcile. Top-level env / folder / request deletes
+      // fall through to the real tombstone path below.
+      if (
+        payload.type === 'environment' &&
+        payload.parentEnvironmentId !== undefined &&
+        payload.parentFolderId !== undefined
+      ) {
+        const topEnv = findTopLevelEnvironment(rootItems, payload.parentFolderId, payload.parentEnvironmentId)
+        if (topEnv) {
+          doUpsert({ id: topEnv.id, type: 'environment', document: topEnv, parentFolderId: payload.parentFolderId })
+          return
+        }
+      }
+
       void markSaveUnitDeleted(payload.id).catch((err: unknown) => {
         logger.warn('[App] markSaveUnitDeleted failed', { id: payload.id, error: String(err) })
       })

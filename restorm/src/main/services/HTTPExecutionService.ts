@@ -10,6 +10,8 @@ import { BrowserWindow } from 'electron'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
 import { authenticationCacheService, type ResolvedAuthShape } from './AuthenticationCacheService'
+import { secretHydrationService } from './secrets/SecretHydrationService'
+import { collectRequestSecrets } from './secrets/collectRequestSecrets'
 import { withFirewallBypass } from './firewall/firewallBypass'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../shared/config/constants'
 import type { AuthenticationRequest } from '../../shared/models/requests/AuthenticationRequest'
@@ -81,29 +83,6 @@ class HTTPExecutionService {
     const startTime = Date.now()
     const startedAt = new Date().toISOString()
 
-    let resolvedUrl: string
-    if (urlOverride !== undefined && urlOverride !== '') {
-      // Skip the ContextService URL composition: the caller already
-      // has a fully-formed URL (server-returned nextLink, navigation
-      // link, etc.) and we must dispatch it verbatim.
-      resolvedUrl = urlOverride
-    } else {
-      const urlResult = contextService.getResolvedUrl(requestId)
-      if (!urlResult) {
-        return {
-          requestId,
-          success: false,
-          error: 'No resolved URL found for this request. Make sure the request is registered.',
-          timings: { startedAt, durationMs: Date.now() - startTime }
-        }
-      }
-      resolvedUrl = urlResult.resolvedUrl
-    }
-    logger.info('[HTTPExecutionService] Executing request', { requestId, method, url: resolvedUrl })
-
-    // Get request context for headers and body
-    const requestContext = contextService.getRequestContext(requestId)
-    
     // Create abort controller for cancellation
     const abortController = new AbortController()
     this.activeRequests.set(requestId, { requestId, abortController, startTime })
@@ -111,7 +90,57 @@ class HTTPExecutionService {
     // Broadcast that request started
     this.broadcastProgress(requestId, 'started')
 
+    // Declared before the try so the catch's error responses can report
+    // the URL even if resolution itself threw.
+    let resolvedUrl = ''
+
     try {
+      // Resolve any SecretValues reachable from this request's KeyValue
+      // groups (headers / params / path) AND from the active env-folder
+      // variable chain BEFORE the URL / context is read below. The sync
+      // resolution path (`resolveKeyValueForRequest`) returns
+      // `value.toString()`, which is empty for an un-hydrated secret;
+      // hydration populates each `SecretValue.resolved` in place so the
+      // verbatim row ships its plaintext. Scope the cache by requestId —
+      // the single funnel shared by the classic Send button and the
+      // scenario httpRequest node. A resolver failure aborts the dispatch
+      // rather than sending a request with an empty secret.
+      const requestContextForSecrets = contextService.getRequestContext(requestId)
+      const envSecrets = contextService.collectEnvironmentSecrets(requestId)
+      const secrets = [...collectRequestSecrets(requestContextForSecrets?.keyValueGroups), ...envSecrets]
+      if (secrets.length > 0) {
+        await secretHydrationService.hydrate(requestId, secrets, abortController.signal)
+        // Env-folder secrets feed the transformed context (and the
+        // pre-computed resolved URL), not the request's KeyValue rows in
+        // place — re-resolve the context so the freshly-hydrated plaintext
+        // reaches the request's baseContext + resolved URL read below.
+        if (envSecrets.length > 0) {
+          contextService.refreshEnvironmentContext(requestId)
+        }
+      }
+
+      if (urlOverride !== undefined && urlOverride !== '') {
+        // Skip the ContextService URL composition: the caller already
+        // has a fully-formed URL (server-returned nextLink, navigation
+        // link, etc.) and we must dispatch it verbatim.
+        resolvedUrl = urlOverride
+      } else {
+        const urlResult = contextService.getResolvedUrl(requestId)
+        if (!urlResult) {
+          return {
+            requestId,
+            success: false,
+            error: 'No resolved URL found for this request. Make sure the request is registered.',
+            timings: { startedAt, durationMs: Date.now() - startTime }
+          }
+        }
+        resolvedUrl = urlResult.resolvedUrl
+      }
+      logger.info('[HTTPExecutionService] Executing request', { requestId, method, url: resolvedUrl })
+
+      // Get request context for headers and body
+      const requestContext = contextService.getRequestContext(requestId)
+
       // Parse URL
       let parsedUrl: URL
       try {
@@ -569,7 +598,7 @@ class HTTPExecutionService {
     }
     const headerSource = authCtx?.keyValueGroups.get('headers') ?? authRequest.headers
     // After IPC marshal the fallback path sees `{ type, value }`
-    // objects instead of `StringValue` / `PasswordValue` instances;
+    // objects instead of `StringValue` / `SecretValue` instances;
     // `.toString()` on those returns `[object Object]`.
     const extractString = (v: unknown): string => {
       if (typeof v === 'string') return v
@@ -577,7 +606,7 @@ class HTTPExecutionService {
       if (v && typeof v === 'object') {
         const obj = v as { toString?: () => string; value?: unknown }
         if (typeof obj.toString === 'function' && obj.toString !== Object.prototype.toString) {
-          // Class instances (`StringValue`, `PasswordValue`, …) still
+          // Class instances (`StringValue`, `SecretValue`, …) still
           // round-trip through here in the ContextService path.
           return obj.toString()
         }
@@ -643,7 +672,7 @@ class HTTPExecutionService {
         body = resolveForAuth(authBody.content)
       } else if (authBody.type === 'x-www-form-urlencoded') {
         const params = new URLSearchParams()
-        // IPC marshal turns every `StringValue` / `PasswordValue` /
+        // IPC marshal turns every `StringValue` / `SecretValue` /
         // etc. into the persisted `{ type, value }` shape — the
         // class-instance `.toString()` path is gone by the time we
         // run here. Extract the string payload manually.

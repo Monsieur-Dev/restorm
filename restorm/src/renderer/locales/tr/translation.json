@@ -1,4 +1,33 @@
 {
+  "secrets": {
+    "others": "Diğer",
+    "refresh": "Gizli bilgiyi yenile",
+    "source": {
+      "envVar": "Ortam değişkeni",
+      "envFileSecret": "Env dosyası gizli bilgisi",
+      "envFileSecretPlaceholder": "Gizli değer",
+      "envFileSecretLabel": "Gizli değer"
+    },
+    "param": {
+      "envVarName": "Değişken adı",
+      "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "Almayı düzenle",
+    "envVarUnresolved": "(çözümlenmedi)",
+    "resolving": "Çözümleniyor…",
+    "resolveError": "Gizli bilgi çözümlenemedi",
+    "resolveErrorEnv": "En az bir değişken alınamadı ve hata durumunda.",
+    "resolveErrorItem": "Bu öğenin gizli bilgilerinden en az biri alınamadı.",
+    "fetchFailed": "Alma başarısız",
+    "retrievalModal": {
+      "title": "Gizli bilgi alma",
+      "value": "değer:",
+      "fetch": "Al",
+      "fetchFailed": "Alma başarısız",
+      "ok": "Tamam",
+      "cancel": "İptal"
+    }
+  },
   "app": {
     "title": "restorm",
     "openSettings": "Ayarları aç",

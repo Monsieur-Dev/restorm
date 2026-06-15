@@ -67,11 +67,20 @@ declare global {
       secrets: {
         read: (filePath: string) => Promise<string | null>
         write: (filePath: string, content: string) => Promise<{ success: boolean; error?: string }>
+        invalidate: (args: { source: string; params: Record<string, unknown>; scopeId?: string }) => Promise<{ success: boolean }>
+        resolve: (args: { source: string; params: Record<string, unknown> }) => Promise<{ value?: string; error?: string }>
+        refresh: (args: { source: string; params: Record<string, unknown> }) => Promise<{ success: boolean }>
       }
       context: {
         getAllTransformResults: () => Promise<Record<string, VariableTransformResult>>
         getEnvironmentContext: (environmentId: string) => Promise<Record<string, string>>
         onEnvironmentContextChanged: (callback: (result: { environmentId: string; context: Record<string, string> }) => void) => (() => void)
+        getResolvingEnvironments: () => Promise<string[]>
+        onEnvSecretsResolving: (callback: (result: { environmentId: string; resolving: boolean }) => void) => (() => void)
+        getErroredEnvironments: () => Promise<string[]>
+        onEnvSecretsError: (callback: (result: { environmentId: string; hasError: boolean }) => void) => (() => void)
+        getItemSecretStatuses: () => Promise<{ itemId: string; resolving: boolean; error: boolean }[]>
+        onItemSecretsStatus: (callback: (result: { itemId: string; resolving: boolean; error: boolean }) => void) => (() => void)
         onVariableTransformed: (callback: (result: VariableTransformResult) => void) => (() => void)
         registerRequest: (
           requestId: string,
@@ -232,6 +241,13 @@ export interface KeyValueData {
   customList?: { listId: string; label: string } | undefined
   /** Multi-select counterpart — a `CustomListMultiValue`. */
   customListMulti?: { listId: string; labels: string[] } | undefined
+  /**
+   * Set when the value is a `SecretValue`. `value` is always the empty
+   * string (the resolved plaintext is never serialised to the renderer
+   * bridge); main reconstructs the `SecretValue` from `source` + `params`
+   * and the SecretHydrationService resolves it before dispatch.
+   */
+  secret?: { source: string; params: Record<string, unknown> } | undefined
 }
 
 /** Variable transformation result from context service */

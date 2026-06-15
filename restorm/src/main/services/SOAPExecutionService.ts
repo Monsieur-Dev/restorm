@@ -9,6 +9,8 @@ import { URL } from 'url'
 import { BrowserWindow } from 'electron'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
+import { secretHydrationService } from './secrets/SecretHydrationService'
+import { collectRequestSecrets } from './secrets/collectRequestSecrets'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../shared/config/constants'
 
 /** SOAP request execution input */
@@ -103,10 +105,24 @@ class SOAPExecutionService {
     this.broadcastProgress(requestId, 'started')
 
     try {
+      // Resolve any SecretValues reachable from this request's KeyValue
+      // groups AND from the active env-folder variable chain BEFORE the
+      // synchronous resolution loop below.
+      const envSecrets = contextService.collectEnvironmentSecrets(requestId)
+      const secrets = [...collectRequestSecrets(requestContext?.keyValueGroups), ...envSecrets]
+      let effectiveUrl = resolvedUrl
+      if (secrets.length > 0) {
+        await secretHydrationService.hydrate(requestId, secrets, abortController.signal)
+        if (envSecrets.length > 0) {
+          contextService.refreshEnvironmentContext(requestId)
+          effectiveUrl = contextService.getResolvedUrl(requestId)?.resolvedUrl ?? resolvedUrl
+        }
+      }
+
       // Parse URL
       let parsedUrl: URL
       try {
-        parsedUrl = new URL(resolvedUrl)
+        parsedUrl = new URL(effectiveUrl)
       } catch {
         return {
           requestId,

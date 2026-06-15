@@ -1,4 +1,5 @@
-import { StringValue, ColorValue, DateTimeValue, NumericValue, PasswordValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue, NullValue, ListValue, type ValueType } from '../../../shared/types/collections'
+import { StringValue, ColorValue, DateTimeValue, NumericValue, ExpressionValue, BooleanValue, EnumValue, EnumListValue, CustomListValue, CustomListMultiValue, VariableValue, EnvironmentValue, NullValue, ListValue, type ValueType } from '../../../shared/types/collections'
+import { SecretValue } from '../../../shared/types/valueTypes/SecretValue'
 
 export function normalizeValueType(input: unknown): ValueType {
   if (
@@ -6,7 +7,7 @@ export function normalizeValueType(input: unknown): ValueType {
     input instanceof ColorValue ||
     input instanceof DateTimeValue ||
     input instanceof NumericValue ||
-    input instanceof PasswordValue ||
+    input instanceof SecretValue ||
     input instanceof ExpressionValue ||
     input instanceof BooleanValue ||
     input instanceof EnumValue ||
@@ -58,8 +59,13 @@ export function normalizeValueType(input: unknown): ValueType {
               : new Date()
         return new DateTimeValue(d, typeof plain.format === 'string' ? plain.format : 'yyyy-MM-dd HH:mm:ss')
       }
-      case 'password':
-        return new PasswordValue(typeof plain.value === 'string' ? plain.value : '')
+      case 'secret': {
+        const p = plain as { source?: unknown; params?: unknown }
+        return new SecretValue(
+          typeof p.source === 'string' ? p.source : '',
+          p.params && typeof p.params === 'object' ? (p.params as Record<string, unknown>) : {}
+        )
+      }
       case 'expression':
         return new ExpressionValue(typeof plain.value === 'string' ? plain.value : '')
       case 'variable':

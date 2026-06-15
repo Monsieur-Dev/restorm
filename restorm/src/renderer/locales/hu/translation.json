@@ -1,4 +1,33 @@
 {
+  "secrets": {
+    "others": "Egyéb",
+    "refresh": "Titok frissítése",
+    "source": {
+      "envVar": "Környezeti változó",
+      "envFileSecret": "Env fájl titok",
+      "envFileSecretPlaceholder": "Titok értéke",
+      "envFileSecretLabel": "Titok értéke"
+    },
+    "param": {
+      "envVarName": "Változó neve",
+      "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "Lekérés szerkesztése",
+    "envVarUnresolved": "(feloldatlan)",
+    "resolving": "Feloldás…",
+    "resolveError": "A titok feloldása sikertelen",
+    "resolveErrorEnv": "Legalább egy változót nem sikerült lekérni, és hibás állapotban van.",
+    "resolveErrorItem": "Az elem titkai közül legalább egyet nem sikerült lekérni.",
+    "fetchFailed": "A lekérés sikertelen",
+    "retrievalModal": {
+      "title": "Titok lekérése",
+      "value": "érték:",
+      "fetch": "Lekérés",
+      "fetchFailed": "A lekérés sikertelen",
+      "ok": "OK",
+      "cancel": "Mégse"
+    }
+  },
   "app": {
     "title": "restorm",
     "openSettings": "Beállítások megnyitása",

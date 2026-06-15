@@ -23,7 +23,7 @@ import type { KeyValue } from '../types/baseTypes'
 /**
  * Returns `true` when the row's value resolves to an empty string.
  * Uses `toString()` (defined on every `ValueType` subclass) so the
- * predicate handles `StringValue`, `PasswordValue`, `ExpressionValue`,
+ * predicate handles `StringValue`, `SecretValue`, `ExpressionValue`,
  * `NumericValue`, etc. uniformly. Whitespace-only values count as
  * empty since trailing whitespace in a query param is rarely
  * intentional and usually a paste artefact.

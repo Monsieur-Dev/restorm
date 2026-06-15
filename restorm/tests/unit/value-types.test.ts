@@ -5,7 +5,6 @@ import {
   ColorValue,
   DateTimeValue,
   NumericValue,
-  PasswordValue,
   ExpressionValue,
   BooleanValue,
   EnumValue,
@@ -17,7 +16,6 @@ import {
   isColorValue,
   isDateTimeValue,
   isNumericValue,
-  isPasswordValue,
   isExpressionValue,
   isBooleanValue,
   isEnumValue,
@@ -28,11 +26,10 @@ import {
 import { serializeValueForPersistence } from '../../src/shared/utils/valuePersistence'
 
 describe('ValueType serialization round-trips', () => {
-  const cases: { name: string; value: InstanceType<typeof StringValue | typeof ColorValue | typeof DateTimeValue | typeof NumericValue | typeof PasswordValue | typeof ExpressionValue | typeof BooleanValue | typeof EnumValue | typeof EnumListValue | typeof CustomListValue | typeof CustomListMultiValue>; expectedType: string }[] = [
+  const cases: { name: string; value: InstanceType<typeof StringValue | typeof ColorValue | typeof DateTimeValue | typeof NumericValue | typeof ExpressionValue | typeof BooleanValue | typeof EnumValue | typeof EnumListValue | typeof CustomListValue | typeof CustomListMultiValue>; expectedType: string }[] = [
     { name: 'StringValue', value: new StringValue('hello'), expectedType: 'string' },
     { name: 'ColorValue', value: new ColorValue('#ff0000'), expectedType: 'color' },
     { name: 'NumericValue', value: new NumericValue(42, 'decimal'), expectedType: 'numeric' },
-    { name: 'PasswordValue', value: new PasswordValue(''), expectedType: 'password' },
     { name: 'ExpressionValue', value: new ExpressionValue('{{scheme}}://{{host}}'), expectedType: 'expression' },
     { name: 'BooleanValue', value: new BooleanValue(true), expectedType: 'boolean' },
     { name: 'EnumValue', value: new EnumValue('available', 'status-enum-id'), expectedType: 'enum' },
@@ -137,7 +134,6 @@ describe('valueHelpers type guards', () => {
     expect(isColorValue(str)).toBe(false)
     expect(isDateTimeValue(str)).toBe(false)
     expect(isNumericValue(str)).toBe(false)
-    expect(isPasswordValue(str)).toBe(false)
     expect(isExpressionValue(str)).toBe(false)
     expect(isBooleanValue(str)).toBe(false)
     expect(isEnumValue(str)).toBe(false)

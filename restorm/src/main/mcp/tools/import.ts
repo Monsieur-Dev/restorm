@@ -50,7 +50,7 @@ function triggerSave(): void {
  */
 export function broadcastTreeReplace(): void {
   // `cloneForEventBus` over `JSON.parse(JSON.stringify(...))`: the
-  // latter calls `PasswordValue.toJSON()` which strips the plaintext,
+  // latter calls `SecretValue.toJSON()` which strips the plaintext,
   // so the renderer would receive a password-less tree and
   // `setRootItems(reactiveWrap(tree))` would orphan every plaintext
   // the user had typed into the previous reactive tree. The custom
