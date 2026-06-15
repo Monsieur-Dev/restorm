@@ -125,11 +125,20 @@ export interface ResponseHistoryGrpcResponse {
   statusMessage: string
   responseMessage: string
   responseMetadata: ResponseHistoryKeyValue[]
+  /** Every frame exchanged on a streaming call (sent + received), in order.
+   * Empty for a unary call (its single response is `responseMessage`). */
+  messages?: ResponseHistoryGrpcMessage[]
   timings: {
     startedAt: string
     durationMs: number
   }
   error?: string
+}
+
+export interface ResponseHistoryGrpcMessage {
+  direction: 'sent' | 'received'
+  data: string
+  timestamp: string
 }
 
 export interface ResponseHistorySoapResponse {

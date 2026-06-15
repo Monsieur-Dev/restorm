@@ -284,6 +284,14 @@ export const grpcExecuteArgs = z.tuple([
   }).loose()
 ])
 
+export const grpcConnectArgs = z.tuple([
+  z.object({
+    requestId: z.string(),
+    timeout: z.number().optional()
+  }).loose()
+])
+export const grpcSendArgs = z.tuple([requestIdArg, z.string()])
+export const grpcDisconnectArgs = z.tuple([requestIdArg])
 export const grpcCancelArgs = z.tuple([requestIdArg])
 export const grpcIsActiveArgs = z.tuple([requestIdArg])
 

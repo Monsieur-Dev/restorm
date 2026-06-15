@@ -575,6 +575,15 @@ class ResponseHistoryService {
     const requestMessage = this.getRequestBodyContent(requestId)
     const requestMetadata = this.getResolvedKeyValues(requestId, 'headers')
 
+    const responseMetadata = result.metadata
+      ? Object.entries(result.metadata).map(([key, value]) => ({ key, value, enabled: true }))
+      : []
+    const messages = result.messages.map((m) => ({
+      direction: m.direction,
+      data: m.data,
+      timestamp: m.timestamp
+    }))
+
     return {
       type: 'grpc',
       requestUrl: resolvedUrl,
@@ -584,7 +593,8 @@ class ResponseHistoryService {
       statusCode: result.statusCode ?? 12,
       statusMessage: result.statusMessage ?? '',
       responseMessage: result.responseMessage ?? '',
-      responseMetadata: [],
+      responseMetadata,
+      ...(messages.length > 0 ? { messages } : {}),
       timings: result.timings,
       ...(result.error ? { error: result.error } : {})
     }

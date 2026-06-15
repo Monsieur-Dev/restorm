@@ -35,6 +35,9 @@ export type AddChildKind =
   | 'http-delete'
   | 'graphql'
   | 'grpc'
+  | 'grpc-server-stream'
+  | 'grpc-client-stream'
+  | 'grpc-bidi'
   | 'soap'
   | 'websocket'
   | 'odata'
@@ -112,17 +115,37 @@ export const buildAddSubmenu = (
     onClick: () => { onAddChildItem(parentId, 'http-delete') }
   },
   { id: `sep-add-http-${parentId}`, isSeparator: true, label: '' },
-  {
-    id: `add-graphql-${parentId}`,
-    label: t('sidebar.contextMenu.add.graphql'),
-    icon: React.createElement(Badge, { type: 'QUERY' }),
-    onClick: () => { onAddChildItem(parentId, 'graphql') }
-  },
+  // gRPC — its own group (the four call types) right after HTTP.
   {
     id: `add-grpc-${parentId}`,
     label: t('sidebar.contextMenu.add.grpc'),
     icon: React.createElement(Badge, { type: 'UNARY' }),
     onClick: () => { onAddChildItem(parentId, 'grpc') }
+  },
+  {
+    id: `add-grpc-server-stream-${parentId}`,
+    label: t('sidebar.contextMenu.add.grpcServerStream'),
+    icon: React.createElement(Badge, { type: 'S-STR' }),
+    onClick: () => { onAddChildItem(parentId, 'grpc-server-stream') }
+  },
+  {
+    id: `add-grpc-client-stream-${parentId}`,
+    label: t('sidebar.contextMenu.add.grpcClientStream'),
+    icon: React.createElement(Badge, { type: 'C-STR' }),
+    onClick: () => { onAddChildItem(parentId, 'grpc-client-stream') }
+  },
+  {
+    id: `add-grpc-bidi-${parentId}`,
+    label: t('sidebar.contextMenu.add.grpcBidi'),
+    icon: React.createElement(Badge, { type: 'BIDI' }),
+    onClick: () => { onAddChildItem(parentId, 'grpc-bidi') }
+  },
+  { id: `sep-add-grpc-${parentId}`, isSeparator: true, label: '' },
+  {
+    id: `add-graphql-${parentId}`,
+    label: t('sidebar.contextMenu.add.graphql'),
+    icon: React.createElement(Badge, { type: 'QUERY' }),
+    onClick: () => { onAddChildItem(parentId, 'graphql') }
   },
   {
     id: `add-soap-${parentId}`,

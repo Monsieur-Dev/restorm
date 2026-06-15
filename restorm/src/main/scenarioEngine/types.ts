@@ -138,12 +138,12 @@ export interface ExecResult {
     // received frame in a child scope, and fires `done` when the connection
     // closes (a close node, the run being stopped, or the server dropping it).
     // `transport` picks the wire + the routing: `socketio` routes each frame to
-    // its `event:<name>` / `others` port (by event name); `websocket` (raw) has
-    // no events, so every frame goes to the single `message` port (`events` is
-    // empty).
+    // its `event:<name>` / `others` port (by event name); `websocket` (raw) and
+    // `grpc` (streaming RPC) have no events, so every frame goes to the single
+    // `message` port (`events` is empty).
     | {
         type: 'openSocketioConnect'
-        transport: 'socketio' | 'websocket'
+        transport: 'socketio' | 'websocket' | 'grpc'
         requestId: string
         events: string[]
         connectionName: string

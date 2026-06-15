@@ -25,7 +25,8 @@ import { broadcastTreeReplace } from './import'
 const SCENARIO_KINDS = [
   'input', 'output', 'if', 'switch', 'httpRequest', 'runScenario',
   'socketioConnect', 'socketioSend', 'socketioClose',
-  'websocketConnect', 'websocketSend', 'websocketClose', 'forEach', 'for', 'while', 'doWhile',
+  'websocketConnect', 'websocketSend', 'websocketClose',
+  'grpcConnect', 'grpcSend', 'grpcClose', 'forEach', 'for', 'while', 'doWhile',
   'aggregate', 'map', 'filter', 'addToList', 'removeFromList', 'wait', 'waitUntil', 'now', 'timer', 'arithmetic', 'comparator', 'boolean', 'object',
   'setVariable', 'getVariable', 'transform', 'code', 'cast', 'regex', 'json', 'xml', 'yaml', 'crypto', 'jwt', 'datetime',
   'objectOp', 'url', 'random', 'listOp', 'csv', 'math', 'schema', 'readFile', 'writeFile', 'retry', 'log', 'assert', 'throw'

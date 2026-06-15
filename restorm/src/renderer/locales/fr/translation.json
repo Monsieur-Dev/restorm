@@ -240,6 +240,9 @@
         "httpDelete": "Requête HTTP – DELETE",
         "graphql": "Requête GraphQL",
         "grpc": "Requête gRPC",
+        "grpcServerStream": "Requête gRPC server-streaming",
+        "grpcClientStream": "Requête gRPC client-streaming",
+        "grpcBidi": "Requête gRPC bidirectionnelle",
         "soap": "Requête SOAP",
         "websocket": "Requête WebSocket",
         "odata": "Requête OData",
@@ -411,6 +414,15 @@
     "tabs": {
       "message": "Message",
       "metadata": "Métadonnées"
+    },
+    "connect": "Se connecter",
+    "disconnect": "Se déconnecter",
+    "noFrames": "Aucune trame pour le moment.",
+    "callType": {
+      "unary": "Unaire",
+      "serverStream": "Streaming serveur",
+      "clientStream": "Streaming client",
+      "bidi": "Streaming bidirectionnel"
     }
   },
   "soap": {
@@ -959,7 +971,10 @@
       "socketioClose": "Socket.IO fermeture",
       "websocketConnect": "WebSocket connexion",
       "websocketSend": "WebSocket envoi",
-      "websocketClose": "WebSocket fermeture"
+      "websocketClose": "WebSocket fermeture",
+      "grpcConnect": "Connexion gRPC",
+      "grpcSend": "Envoi gRPC",
+      "grpcClose": "Fermeture gRPC"
     },
     "comparator": {
       "result": "résultat"
@@ -1500,7 +1515,10 @@
       "socketioClose": "Ferme une connexion Socket.IO déjà ouverte.",
       "websocketConnect": "Ouvre une connexion WebSocket brute et réémet chaque message reçu sur son port.",
       "websocketSend": "Envoie un payload sur une connexion WebSocket déjà ouverte.",
-      "websocketClose": "Ferme une connexion WebSocket déjà ouverte."
+      "websocketClose": "Ferme une connexion WebSocket déjà ouverte.",
+      "grpcConnect": "Ouvre un appel gRPC en streaming et réémet chaque trame reçue sur son port message.",
+      "grpcSend": "Écrit un message de requête sur un appel gRPC en streaming déjà ouvert.",
+      "grpcClose": "Ferme partiellement (half-close) un appel gRPC en streaming déjà ouvert."
     },
     "legend": {
       "title": "Légende",
@@ -1543,6 +1561,9 @@
       "payloadModalTitle": "Modifier le payload"
     },
     "websocket": {
+      "message": "message"
+    },
+    "grpc": {
       "message": "message"
     }
   }

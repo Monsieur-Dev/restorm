@@ -241,6 +241,9 @@
         "httpDelete": "Cerere HTTP – DELETE",
         "graphql": "Cerere GraphQL",
         "grpc": "Cerere gRPC",
+        "grpcServerStream": "gRPC server-streaming request",
+        "grpcClientStream": "gRPC client-streaming request",
+        "grpcBidi": "gRPC bidirectional request",
         "soap": "Cerere SOAP",
         "websocket": "Cerere WebSocket",
         "odata": "Cerere OData",
@@ -412,6 +415,15 @@
     "tabs": {
       "message": "Mesaj",
       "metadata": "Metadate"
+    },
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "noFrames": "No frames yet.",
+    "callType": {
+      "unary": "Unary",
+      "serverStream": "Server streaming",
+      "clientStream": "Client streaming",
+      "bidi": "Bidirectional streaming"
     }
   },
   "soap": {
@@ -960,7 +972,10 @@
       "socketioClose": "Socket.IO close",
       "websocketConnect": "WebSocket connect",
       "websocketSend": "WebSocket send",
-      "websocketClose": "WebSocket close"
+      "websocketClose": "WebSocket close",
+      "grpcConnect": "gRPC connect",
+      "grpcSend": "gRPC send",
+      "grpcClose": "gRPC close"
     },
     "comparator": {
       "result": "rezultat"
@@ -1501,7 +1516,10 @@
       "socketioClose": "Closes an already-open Socket.IO connection.",
       "websocketConnect": "Opens a raw WebSocket connection and re-emits each received message on its port.",
       "websocketSend": "Sends a payload on an already-open WebSocket connection.",
-      "websocketClose": "Closes an already-open WebSocket connection."
+      "websocketClose": "Closes an already-open WebSocket connection.",
+      "grpcConnect": "Opens a streaming gRPC call and re-emits each received frame on its message port.",
+      "grpcSend": "Writes a request message on an already-open streaming gRPC call.",
+      "grpcClose": "Half-closes an already-open streaming gRPC call."
     },
     "legend": {
       "title": "Legendă",
@@ -1544,6 +1562,9 @@
       "payloadModalTitle": "Edit payload"
     },
     "websocket": {
+      "message": "message"
+    },
+    "grpc": {
       "message": "message"
     }
   }

@@ -18,17 +18,22 @@
 
 import { collectionStore } from '../../services/CollectionStore'
 import { httpExecutionService, type HTTPExecutionInput } from '../../services/HTTPExecutionService'
+import { grpcExecutionService } from '../../services/GRPCExecutionService'
 import { responseHistoryService } from '../../services/ResponseHistoryService'
 import { flushRequestStateToContext } from '../../mcp/tools/execute'
-import { isHTTPRequest, isAuthenticationRequest } from '../../../shared/types/collections'
+import { isHTTPRequest, isAuthenticationRequest, isGrpcRequest } from '../../../shared/types/collections'
 import type { Request } from '../../../shared/types/collections'
-import type { NodeExecutor } from '../types'
+import type { NodeExecutor, ExecResult } from '../types'
 
 export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
   const cfg = ctx.node.config as { requestId?: string }
   if (typeof cfg.requestId !== 'string') throw new Error(`httpRequest node ${ctx.node.id} has no bound requestId`)
   const req = collectionStore.findById(cfg.requestId)
   if (!req) throw new Error(`bound request ${cfg.requestId} not found`)
+  // A one-shot gRPC request (a unary call binds to this generic request node,
+  // like httpRequest; streaming gRPC binds a grpcConnect instead) runs through
+  // the gRPC execution service and emits the same `{ request, response }` shape.
+  if (isGrpcRequest(req)) return runGrpcUnary(req, ctx)
   if (!isHTTPRequest(req)) throw new Error(`bound request ${cfg.requestId} is not HTTP (${(req as { type?: string }).type})`)
 
   // Slot short-circuit: a wired input port whose id is `pathParams:<key>`
@@ -111,6 +116,37 @@ export const httpRequestExecutor: NodeExecutor = async (act, ctx) => {
             // transport error yields no/0 status, hence `success: false` too.
             // (The classic Send button keeps its own transport-level `success`.)
             success: (result.statusCode ?? 0) >= 200 && (result.statusCode ?? 0) < 300,
+            ...(result.error !== undefined ? { error: result.error } : {})
+          }
+        }
+      }
+    ]
+  }
+}
+
+/** Run a bound gRPC request (a unary one-shot in scenario terms) and shape its
+ * result onto the `response` port like an HTTP request node. */
+async function runGrpcUnary(req: Request, ctx: Parameters<NodeExecutor>[1]): Promise<ExecResult> {
+  flushRequestStateToContext(req)
+  const onAbort = (): void => { grpcExecutionService.cancel(req.id) }
+  if (ctx.signal.aborted) onAbort()
+  else ctx.signal.addEventListener('abort', onAbort, { once: true })
+  const result = await grpcExecutionService.execute({ requestId: req.id })
+  ctx.signal.removeEventListener('abort', onAbort)
+  // `execute()` persists the call to history itself.
+  return {
+    outputs: [
+      {
+        port: 'response',
+        value: {
+          request: { url: result.requestUrl ?? '', method: result.requestMethod ?? '', headers: {} },
+          response: {
+            status: result.statusCode ?? 0,
+            statusText: result.statusMessage ?? '',
+            headers: {},
+            body: result.responseMessage ?? '',
+            durationMs: result.timings.durationMs,
+            success: result.success,
             ...(result.error !== undefined ? { error: result.error } : {})
           }
         }

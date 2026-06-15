@@ -231,8 +231,15 @@ const resolveStreamConnectPreview: PreviewResolver = async (_scenarioId, node) =
   const entry = freshestSuccessfulEntry(entries)
   if (!entry) return null
   const detail = await responseHistoryService.getDetail(entry.guid)
-  if (detail?.response.type !== 'websocket') return null
-  return socketioPreviewFromMessages(detail.response.messages, readSocketioEvents(node.config))
+  const resp = detail?.response
+  if (resp?.type === 'websocket') {
+    return socketioPreviewFromMessages(resp.messages, readSocketioEvents(node.config))
+  }
+  // gRPC streaming: no event names, so the latest received frame wins (like raw WS).
+  if (resp?.type === 'grpc') {
+    return socketioPreviewFromMessages(resp.messages ?? [], [])
+  }
+  return null
 }
 
 /** `code`: the box's last run output (result + captured logs). Unlike a request
@@ -252,6 +259,7 @@ const previewResolvers: Partial<Record<ScenarioNode['kind'], PreviewResolver>> =
   request: resolveRequestPreview,
   socketioConnect: resolveStreamConnectPreview,
   websocketConnect: resolveStreamConnectPreview,
+  grpcConnect: resolveStreamConnectPreview,
   code: resolveCodePreview
 }
 

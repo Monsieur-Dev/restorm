@@ -24,7 +24,7 @@ import '@xyflow/react/dist/style.css'
 import { useTranslation } from 'react-i18next'
 import { Button, ContextMenu, Tooltip, ColorPicker, Modal, MarkdownEditor, eventBus, isUndoKeyEvent, isRedoKeyEvent, type ContextMenuItem } from 'electron-core-ui/renderer'
 import type { Scenario, ScenarioNode, ScenarioEdge, ScenarioNodeKind, ScenarioPort } from '../../../../shared/types/collections'
-import { isRequest, isScenario, isWebSocketRequest } from '../../../../shared/types/collections'
+import { isRequest, isScenario, isWebSocketRequest, isGrpcRequest } from '../../../../shared/types/collections'
 import { Badge } from '../common/Badge'
 import { requestBadgeType } from '../../utils/badgeUtils'
 import { ScenarioBoundResolverContext, ScenarioRequestEnvContext, type ResolveBoundItem, type ResolveRequestEnv } from './scenarioBoundResolver'
@@ -50,7 +50,7 @@ import './scenarioEnvPreview'
 // Side-effect: registers the secret → plaintext resolver (async cache) so the
 // inspector's static preview resolves a SecretValue operand to its live value.
 import { useSecretPreviewVersion } from './scenarioSecretPreview'
-import { SCENARIO_ADD_REQUEST_GROUPS, SCENARIO_ADD_SCENARIO_ENTRY, SCENARIO_ADD_SOCKETIO_ACTIONS, SCENARIO_ADD_WEBSOCKET_ACTIONS, scenarioAddIcon, scenarioAddSocketioIcon, scenarioAddWebsocketIcon } from './scenarioChildPalette'
+import { SCENARIO_ADD_REQUEST_GROUPS, SCENARIO_ADD_SCENARIO_ENTRY, SCENARIO_ADD_SOCKETIO_ACTIONS, SCENARIO_ADD_WEBSOCKET_ACTIONS, SCENARIO_ADD_GRPC_ACTIONS, scenarioAddIcon, scenarioAddSocketioIcon, scenarioAddWebsocketIcon, scenarioAddGrpcIcon } from './scenarioChildPalette'
 import type { AddChildKind } from '../MainView/Sidebar/contextMenuBuilder'
 import type { TFunction } from 'i18next'
 import { ScenarioGraphPreview } from '../MainView/Titlebar/ScenarioGraphPreview'
@@ -109,6 +109,10 @@ export interface ScenarioEditorViewProps {
 }
 
 type NodeData = ScenarioNodeBoxData
+
+/** Streaming gRPC request kinds — dropped from the palette they create a
+ * `grpcConnect` (the long-lived listener), not a one-shot request node. */
+const GRPC_STREAM_CHILD_KINDS = new Set<AddChildKind>(['grpc-server-stream', 'grpc-client-stream', 'grpc-bidi'])
 
 const nodeTypes = { scenarioNode: ScenarioNodeView }
 // Every persisted scenario edge defaults to the bezier shape — overriding
@@ -279,7 +283,7 @@ function buildScenarioPaletteItems(p: PaletteBuildParams): ContextMenuItem[] {
     if ('separator' in e) return [sep(`sep-${i}`)]
     if (p.withAddSubmenu && e.kind === 'runScenario') return [] // folds into "Add"
     // The Socket.IO actions fold into the "Add" submenu (their own section) too.
-    if (p.withAddSubmenu && (e.kind === 'socketioConnect' || e.kind === 'socketioSend' || e.kind === 'socketioClose' || e.kind === 'websocketConnect' || e.kind === 'websocketSend' || e.kind === 'websocketClose')) return []
+    if (p.withAddSubmenu && (e.kind === 'socketioConnect' || e.kind === 'socketioSend' || e.kind === 'socketioClose' || e.kind === 'websocketConnect' || e.kind === 'websocketSend' || e.kind === 'websocketClose' || e.kind === 'grpcConnect' || e.kind === 'grpcSend' || e.kind === 'grpcClose')) return []
     if (p.withAddSubmenu && e.kind === 'httpRequest') {
       const groupItems = (group: typeof SCENARIO_ADD_REQUEST_GROUPS[number]): ContextMenuItem[] =>
         group.flatMap((c): ContextMenuItem[] => {
@@ -288,11 +292,22 @@ function buildScenarioPaletteItems(p: PaletteBuildParams): ContextMenuItem[] {
         })
       // The auth request sits in its own (last) group; the Socket.IO action
       // section is inserted JUST BEFORE it.
-      const requestGroups = SCENARIO_ADD_REQUEST_GROUPS.slice(0, -1).map(groupItems).filter((g) => g.length > 0)
+      // gRPC send/close ACTION items (pickNode). There's no "connect" action: a
+      // gRPC connection is created by the gRPC request entries (streaming → a
+      // bound grpcConnect) or by dragging a request — a standalone connect action
+      // would only add an unbound, redundant node.
+      const grpcActionItems = SCENARIO_ADD_GRPC_ACTIONS.flatMap((a): ContextMenuItem[] => {
+        const cb = p.pickNode(a.kind)
+        return cb ? [{ id: `add-${a.kind}`, label: p.t(a.labelKey, a.defaultLabel), icon: scenarioAddGrpcIcon(a.icon), onClick: cb }] : []
+      })
+      // Request-protocol groups. The gRPC group also carries the gRPC send/close
+      // action items so ALL gRPC entries sit together as one contiguous block.
+      const requestGroups = SCENARIO_ADD_REQUEST_GROUPS.slice(0, -1)
+        .map((group) => (group[0]?.kind === 'grpc' ? [...groupItems(group), ...grpcActionItems] : groupItems(group)))
+        .filter((g) => g.length > 0)
       const authItems = groupItems(SCENARIO_ADD_REQUEST_GROUPS[SCENARIO_ADD_REQUEST_GROUPS.length - 1] ?? [])
-      // Socket.IO actions — their own section, each a "SIO" badge + the action's
-      // codicon. These drop a scenario action node directly (pickNode), unlike
-      // the request entries (which create a request).
+      // Socket.IO + raw WebSocket actions — their own sections (pickNode drops the
+      // node directly, unlike the request entries which create a request).
       const sioItems = SCENARIO_ADD_SOCKETIO_ACTIONS.flatMap((a): ContextMenuItem[] => {
         const cb = p.pickNode(a.kind)
         return cb ? [{ id: `add-${a.kind}`, label: p.t(a.labelKey, a.defaultLabel), icon: scenarioAddSocketioIcon(a.icon), onClick: cb }] : []
@@ -305,8 +320,9 @@ function buildScenarioPaletteItems(p: PaletteBuildParams): ContextMenuItem[] {
       const scnItems: ContextMenuItem[] = scnCb
         ? [{ id: `add-${SCENARIO_ADD_SCENARIO_ENTRY.kind}`, label: p.t(SCENARIO_ADD_SCENARIO_ENTRY.labelKey, SCENARIO_ADD_SCENARIO_ENTRY.defaultLabel), icon: scenarioAddIcon(SCENARIO_ADD_SCENARIO_ENTRY.badge), onClick: scnCb }]
         : []
-      // Sections in order: request protocols, Socket.IO actions, raw WebSocket
-      // actions, auth, scenario — each separated by a divider (orphans tidied).
+      // Sections in order: request protocols (the gRPC group already includes its
+      // send/close actions), Socket.IO actions, raw WebSocket actions, auth,
+      // scenario — each separated by a divider (orphans tidied).
       const sections = [...requestGroups, sioItems, wsItems, authItems, scnItems].filter((s) => s.length > 0)
       const sub = sections.flatMap((section, si) => (si > 0 ? [sep(`add-sec-${si}`), ...section] : section))
       return sub.length > 0 ? [{ id: 'scenario-add', label: p.t('sidebar.contextMenu.add.title', 'Add'), icon: 'add', items: sub }] : []
@@ -1579,6 +1595,9 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     const newId = onCreateChild?.(scenario.id, kind) ?? null
     if (!newId) { setPalette(null); return }
     if (kind === 'scenario') addNode('runScenario', flow, { scenarioId: newId })
+    // A streaming gRPC request maps to a `grpcConnect` (the long-lived listener);
+    // unary gRPC + everything else is a one-shot request node.
+    else if (GRPC_STREAM_CHILD_KINDS.has(kind)) addNode('grpcConnect', flow, { requestId: newId })
     else addNode('httpRequest', flow, { requestId: newId })
   }, [onCreateChild, scenario.id, addNode])
 
@@ -1696,6 +1715,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     const newId = onCreateChild?.(scenario.id, kind) ?? null
     if (!newId) { setLinkPalette(null); return }
     if (kind === 'scenario') addLinkedNode('runScenario', wirePort === 'result' ? 'done' : wirePort, { scenarioId: newId })
+    else if (GRPC_STREAM_CHILD_KINDS.has(kind)) addLinkedNode('grpcConnect', wirePort, { requestId: newId })
     else addLinkedNode('httpRequest', wirePort, { requestId: newId })
   }, [onCreateChild, scenario.id, addLinkedNode])
 
@@ -1738,6 +1758,13 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       // `websocketConnect` — same long-lived listener, but a single `message`
       // port (no named events / channels).
       kind = 'websocketConnect'
+      config = { requestId: item.id, connectionName: item.name, label: item.name }
+    }
+    else if (isRequest(item) && isGrpcRequest(item) && item.callType !== 'unary') {
+      // A streaming gRPC request (server / client / bidi) maps to a `grpcConnect`
+      // — the long-lived listener; every received frame re-emits on `message`. A
+      // unary gRPC request falls through to a one-shot `httpRequest`-style node.
+      kind = 'grpcConnect'
       config = { requestId: item.id, connectionName: item.name, label: item.name }
     }
     else if (isRequest(item)) { kind = 'httpRequest'; config = { requestId: item.id, label: item.name } }
@@ -2244,7 +2271,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         title = boundItem.name
         titleBadge = <Badge type="SCENARIO" />
       }
-    } else if (n.data.kind === 'httpRequest' || n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect') {
+    } else if (n.data.kind === 'httpRequest' || n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'grpcConnect') {
       const boundId = typeof cfg['requestId'] === 'string' ? cfg['requestId'] : null
       const boundItem = boundId ? (resolveBoundItem?.(boundId) ?? null) : null
       if (boundItem && isRequest(boundItem)) {
@@ -2308,7 +2335,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     // backing item in a workbench tab from the inspector's top row.
     let openItemId: string | undefined
     let openItemKind: 'request' | 'scenario' | undefined
-    if (n.data.kind === 'httpRequest' || n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect') {
+    if (n.data.kind === 'httpRequest' || n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'grpcConnect') {
       // A streaming connect node binds a request the same way httpRequest does
       // (`config.requestId`), so it gets the same open-the-request navigation.
       const reqId = typeof cfg['requestId'] === 'string' ? cfg['requestId'] : undefined
@@ -2474,14 +2501,17 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   const scenarioConnections = useMemo<ScenarioConnectionRef[]>(() => {
     const out: ScenarioConnectionRef[] = []
     for (const node of scenario.nodes) {
-      if (node.kind !== 'socketioConnect' && node.kind !== 'websocketConnect') continue
+      if (node.kind !== 'socketioConnect' && node.kind !== 'websocketConnect' && node.kind !== 'grpcConnect') continue
       const cfg = node.config as { connectionName?: unknown; requestId?: unknown }
       const name = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== '' ? cfg.connectionName.trim() : node.id
       // Pull the linked request's event + message so a send node can pre-fill its
-      // channel + payload when this connection is selected.
+      // channel + payload when this connection is selected. gRPC carries its
+      // payload on `requestMessage` (no event/channel concept).
       const req = typeof cfg.requestId === 'string' && resolveBoundItem ? resolveBoundItem(cfg.requestId) : null
       const event = req && isRequest(req) ? (req as { event?: unknown }).event : undefined
-      const message = req && isRequest(req) ? (req as { message?: unknown }).message : undefined
+      const message = req && isRequest(req)
+        ? (node.kind === 'grpcConnect' ? (req as { requestMessage?: unknown }).requestMessage : (req as { message?: unknown }).message)
+        : undefined
       out.push({
         id: node.id,
         name,
