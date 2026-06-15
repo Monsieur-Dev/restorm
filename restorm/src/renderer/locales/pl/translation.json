@@ -1,15 +1,31 @@
 {
   "secrets": {
-    "others": "Others",
-    "refresh": "Refresh secret",
+    "others": "Inne",
+    "refresh": "Odśwież sekret",
     "source": {
-      "envVar": "Env var",
-      "envFileSecret": "Env file secret",
-      "envFileSecretPlaceholder": "Secret value"
+      "envVar": "Zmienna środowiskowa",
+      "envFileSecret": "Sekret z pliku env",
+      "envFileSecretPlaceholder": "Wartość sekretu",
+      "envFileSecretLabel": "Wartość sekretu"
     },
     "param": {
-      "envVarName": "Variable name",
+      "envVarName": "Nazwa zmiennej",
       "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "Edytuj pobieranie",
+    "envVarUnresolved": "(nierozwiązane)",
+    "resolving": "Rozwiązywanie…",
+    "resolveError": "Nie udało się rozwiązać sekretu",
+    "resolveErrorEnv": "Co najmniej jednej zmiennej nie udało się pobrać i jest w stanie błędu.",
+    "resolveErrorItem": "Nie udało się pobrać co najmniej jednego z sekretów tego elementu.",
+    "fetchFailed": "Pobieranie nie powiodło się",
+    "retrievalModal": {
+      "title": "Pobieranie sekretu",
+      "value": "wartość:",
+      "fetch": "Pobierz",
+      "fetchFailed": "Pobieranie nie powiodło się",
+      "ok": "OK",
+      "cancel": "Anuluj"
     }
   },
   "app": {

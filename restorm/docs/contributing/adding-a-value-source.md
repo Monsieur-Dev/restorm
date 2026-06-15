@@ -67,7 +67,10 @@ import type { ValueSourceDescriptor } from '../ValueSource'
 export const awsSecretsManagerDescriptor: ValueSourceDescriptor = {
   id: 'awsSecretsManager',
   labelKey: 'secrets.source.awsSecretsManager',
-  icon: 'cloud',          // optional codicon name
+  // Bare string → codicon shorthand. A full ECUI Icon pulls from any library
+  // (e.g. a brand mark absent from codicons):
+  //   icon: { type: 'fontawesome', value: 'faAws' }
+  icon: { type: 'fontawesome', value: 'faAws' },
   canWrite: false,        // true only when the resolver implements write()
   isObject: true,         // the AWS response is a JSON blob; sub-key extraction
                           // is needed (see "isObject" below)
@@ -103,7 +106,7 @@ export const awsSecretsManagerDescriptor: ValueSourceDescriptor = {
 | --- | --- | --- |
 | `id` | `string` | Stable identifier persisted in every `SecretValue` in `.restorm` files. **Never rename after release** — existing persisted values reference it. |
 | `labelKey` | `string` | i18n key used in the "Others ▸" menu item and the type badge. |
-| `icon` | `string \| undefined` | Optional [codicon](https://microsoft.github.io/vscode-codicons/) glyph shown next to the menu label. |
+| `icon` | `string \| Icon \| undefined` | Glyph shown for the source both in the "Others ▸" menu and on the value's type-indicator button (replacing the generic lock). A bare string is a [codicon](https://microsoft.github.io/vscode-codicons/) name (`'cloud'`); a full ECUI `Icon` (`{ type: 'fontawesome', value: 'faAws' }`) pulls from any library `IconView` supports (codicon, fontawesome, material, simpleicons, phosphor, …) — use it for brand marks absent from codicons. Defaults to a lock when omitted. |
 | `canWrite` | `boolean` | Whether the resolver also implements `write`. Controls whether the execution engine attempts to call `write` after a variable assignment. |
 | `isObject` | `boolean` | When `true`, the resolver's `read` returns a JSON object. `SecretHydrationService` extracts the string at `params.path` via dot-path navigation (e.g. `token.access` → `payload.token.access`). The user sets `path` in the `paramSchema` or custom config. When `false`, `read` returns a plain string and `params.path` is ignored. |
 | `paramSchema` | `ParamField[] \| undefined` | Declares config fields. When present and non-empty, `SecretSourceConfig.tsx` renders them as ECUI controls automatically — no React code needed. |
@@ -238,6 +241,19 @@ change — the shape is the same; only the `source` string and `params` content
 differ. Existing loaded files keep working even before the new source is
 registered (the SecretValue is deserialized, just unresolvable until the source
 is registered).
+
+### Loading / error feedback is automatic too
+
+You do not wire any UI to surface a source's resolving spinner or error badge.
+`ContextService` (main) eagerly hydrates every item's direct secrets — and the
+secrets referenced through the *active* environment — then broadcasts per-item
+and per-variable status (`resolving` / `errored`) over
+`context:item-secrets-status`. The renderer stores (`secretResolutionStore`,
+`secretErrorStore`, `secretItemStatusStore`) drive the spinner + error glyph on
+the KV-table cell, the workbench tab, and the sidebar tree for **any** source.
+A resolver that throws a human-readable `Error` (Step 2) is all it takes for the
+red error contour + tooltip to show that exact message. The only contract you
+owe is: `read` resolves for success, rejects with a clear `Error` for failure.
 
 ---
 
@@ -428,6 +444,16 @@ describe('registerBuiltinSources with <id>', () => {
   })
 })
 ```
+
+> **Exercising cancellation / slow I/O.** When you need a slow,
+> abort-honouring resolver to test that `SecretHydrationService` cancels
+> in-flight fetches, do **not** ship a fake source in the production registry.
+> Register a throwaway resolver inside the test via the test-only hook
+> `registerResolverForTests(resolver)` from `mainSourceRegistry.ts` — it sets
+> the resolver by id without touching the descriptor registry. The hydration
+> cancellation tests in
+> `restorm/src/main/services/secrets/envFolderSecretHydration.test.ts` use this
+> pattern with an inline `slowTest` resolver that honours `ctx.signal`.
 
 ### 8.3 — Component render test
 

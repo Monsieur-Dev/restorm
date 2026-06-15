@@ -1,3 +1,5 @@
+import type { Icon } from 'electron-core-ui/types'
+
 export interface ParamField {
   key: string
   labelKey: string
@@ -11,7 +13,15 @@ export interface ParamField {
 export interface ValueSourceDescriptor {
   id: string
   labelKey: string
-  icon?: string
+  /**
+   * Glyph shown for this source in the value-type menu AND on the value's
+   * type-indicator button (in place of the generic lock). A bare string is the
+   * codicon shorthand (`'lock'`); a full {@link Icon} pulls from any ECUI icon
+   * library — e.g. a brand mark not in codicons (`{ type: 'fontawesome', value:
+   * 'faAws' }`). Rendered through `IconView`, so anything `IconView` supports
+   * works. Defaults to a lock when omitted.
+   */
+  icon?: string | Icon
   canWrite: boolean
   isObject: boolean
   paramSchema?: ParamField[]

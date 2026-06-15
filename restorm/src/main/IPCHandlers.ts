@@ -25,7 +25,7 @@ import { importFrom } from './services/import/ImportManager'
 import {
   openEditorArgs,
   saveAsFileArgs, saveAsFolderArgs,
-  secretsReadArgs, secretsWriteArgs, secretsInvalidateArgs, secretsResolveArgs,
+  secretsReadArgs, secretsWriteArgs, secretsInvalidateArgs, secretsResolveArgs, secretsRefreshArgs,
   openPathArgs,
   projectReadFileArgs,
   contextRegisterRequestArgs, contextUnregisterRequestArgs,
@@ -526,12 +526,27 @@ export function registerRestormIPC(deps: {
   // preview. Errors are returned as `{ error }` rather than thrown so a failed
   // resolution (missing env var, etc.) doesn't reject across the IPC boundary.
   validatedHandle('restorm:secrets:resolve', secretsResolveArgs, async (_event, [{ source, params }]) => {
+    // Reuse an already-resolved value (the env / item hydration likely just
+    // fetched this exact credential) instead of hitting the provider again — so
+    // the cell preview doesn't re-run a slow secret the env table already
+    // resolved. A `refresh` invalidates every scope first, so this never serves
+    // stale. (Concurrent in-flight fetches are deduped inside the service.)
+    const cached = secretHydrationService.peekResolved(source, params)
+    if (cached !== undefined) return { value: cached }
     try {
       const value = await secretHydrationService.resolveOne('preview', source, params)
       return { value }
     } catch (error) {
       return { error: String(error instanceof Error ? error.message : error) }
     }
+  })
+
+  // Refresh a secret used as an env-folder variable: invalidate the cache, blank
+  // its resolved value, recompute the affected env contexts (so the secret and
+  // any expression composing it go empty immediately), then re-hydrate.
+  validatedHandle('restorm:secrets:refresh', secretsRefreshArgs, (_event, [{ source, params }]) => {
+    contextService.refreshEnvSecret(source, params)
+    return { success: true }
   })
 
   // ==========================================================================
@@ -650,6 +665,27 @@ export function registerRestormIPC(deps: {
 
   ipcMain.handle('context:get-environment-context', (_event, environmentId: string) => {
     return contextService.getContext(environmentId) ?? {}
+  })
+
+  // Snapshot of which environments are currently resolving secrets, so a UI
+  // mounting mid-resolution can show its spinner without waiting for the next
+  // `context:env-secrets-resolving` broadcast.
+  ipcMain.handle('context:get-resolving-environments', () => {
+    return contextService.getResolvingEnvironmentIds()
+  })
+
+  // Snapshot of which environments last failed to resolve a secret, so a UI
+  // mounting after a failure can show its error badge without waiting for the
+  // next `context:env-secrets-error` broadcast.
+  ipcMain.handle('context:get-errored-environments', () => {
+    return contextService.getErroredEnvironmentIds()
+  })
+
+  // Snapshot of every item's effective secret status (direct + inherited), so a
+  // UI mounting mid-resolution can badge requests / scenarios without waiting
+  // for the next `context:item-secrets-status` broadcast.
+  ipcMain.handle('context:get-item-secret-statuses', () => {
+    return contextService.getItemSecretStatuses()
   })
 
   validatedHandle('context:register-request', contextRegisterRequestArgs, (_event, [requestId, environmentId, requestData]) => {

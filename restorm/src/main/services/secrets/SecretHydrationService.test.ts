@@ -43,6 +43,31 @@ describe('SecretHydrationService', () => {
     expect(sv.resolved).toBe('secret-value')
   })
 
+  it('shares ONE provider call across concurrent resolutions of the same credential (different scopes)', async () => {
+    // Deferred resolver: completes only when released, so the two hydrate calls
+    // genuinely overlap (the env-folder scope AND the cell 'preview' scope) before
+    // either finishes — the case that double-fetched a slow secret on file open.
+    let release: (v: unknown) => void = () => undefined
+    const deferred = {
+      id: 'env',
+      callCount: 0,
+      read(_p: Record<string, unknown>, _ctx: { scopeId: string; signal?: AbortSignal }): Promise<unknown> {
+        deferred.callCount++
+        return new Promise<unknown>((res) => { release = res })
+      }
+    }
+    const s = new SecretHydrationService((id) => (id === 'env' ? deferred : undefined))
+    const a = new SecretValue('env', { name: 'X' })
+    const b = new SecretValue('env', { name: 'X' })
+    const p1 = s.hydrate('scope-a', [a])
+    const p2 = s.hydrate('scope-b', [b])
+    release('shared-value')
+    await Promise.all([p1, p2])
+    expect(deferred.callCount).toBe(1)
+    expect(a.resolved).toBe('shared-value')
+    expect(b.resolved).toBe('shared-value')
+  })
+
   // -------------------------------------------------------------------------
   // 2. Cache: same source+params in same scope → resolver called once
   // -------------------------------------------------------------------------

@@ -165,19 +165,31 @@ describe('TypedValueField — Autres (secret sources) submenu', () => {
     expect(next.params).toEqual({})
   })
 
-  it('renders the read-only $NAME=value preview + refresh/edit actions for a SecretValue(envVar)', () => {
+  // The refresh slot is a button when idle, or a spinner while a resolution is
+  // in flight — on mount the cell kicks off a resolve, so either may be present.
+  const hasRefreshAffordance = (container: HTMLElement): boolean =>
+    Boolean(
+      container.querySelector(`[data-testid="${TID}-secret-refresh"]`) ??
+        container.querySelector(`[data-testid="${TID}-secret-refreshing"]`)
+    )
+
+  it('renders the unified read-only preview + refresh/edit actions for a SecretValue(envVar)', () => {
     const { container } = renderField(new SecretValue('envVar', { name: 'PATH' }))
-    // The envVar cell shows a read-only preview ($NAME=value), not an inline name
-    // field — editing the variable name now lives in the pencil (edit) modal.
-    expect(container.querySelector(`[data-testid="${TID}-secret-envvar-preview"]`)).toBeTruthy()
-    expect(container.querySelector(`[data-testid="${TID}-secret-refresh"]`)).toBeTruthy()
+    // Every source shows the same default chrome: a read-only resolved-value
+    // preview + refresh + an always-present pencil. Configuring the retrieval
+    // (the env-var name) lives in the pencil modal, not inline in the cell.
+    expect(container.querySelector(`[data-testid="${TID}-secret-preview"]`)).toBeTruthy()
+    expect(hasRefreshAffordance(container)).toBe(true)
     expect(container.querySelector(`[data-testid="${TID}-secret-edit"]`)).toBeTruthy()
-    // The inline param field is gone (it moved into the retrieval modal).
     expect(container.querySelector(`[data-testid="${TID}-config-param-name"]`)).toBeNull()
   })
 
-  it('renders the envFileSecret masked write-field (custom config component)', () => {
+  it('uses the same default chrome for a custom-config source (envFileSecret) — config moved to the modal', () => {
     const { container } = renderField(new SecretValue('envFileSecret', {}))
-    expect(container.querySelector(`[data-testid="${TID}-config-envfilesecret"]`)).toBeTruthy()
+    expect(container.querySelector(`[data-testid="${TID}-secret-preview"]`)).toBeTruthy()
+    expect(hasRefreshAffordance(container)).toBe(true)
+    expect(container.querySelector(`[data-testid="${TID}-secret-edit"]`)).toBeTruthy()
+    // The masked write-field is no longer inline; it lives in the (closed) modal.
+    expect(container.querySelector(`[data-testid="${TID}-config-envfilesecret"]`)).toBeNull()
   })
 })

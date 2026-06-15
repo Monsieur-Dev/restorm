@@ -45,6 +45,7 @@ import { searchIndexService, contextService, responseHistoryService, requestUsag
 import { firewallService, permissionService, registerFirewallIpc, installWorkerPatcher } from './services/firewall'
 import { writeMcpDiscoveryFile, cleanupMcpDiscoveryFile } from './services/mcpDiscovery'
 import { registerRestormMcp } from './mcp'
+import { registerActiveStateBridge } from './mcp/tools/activeState'
 import { RESTORM_MCP_INSTRUCTIONS } from './mcp/instructions'
 import { graphQLService } from 'electron-core-ui/main'
 import { clearUserSettings, parseCliArgs } from './cli/args'
@@ -444,6 +445,12 @@ logger.info('Search Index Service initialized')
 // Initialize Context Service (manages Handlebars context and resolved values)
 contextService.initialize()
 logger.info('Context Service initialized')
+
+// Mirror the renderer's per-env-folder active-environment selection into the
+// main process — unconditionally, NOT only under --mcp. ContextService needs it
+// to decide which environment an item inherits for its secret badge (the active
+// env, not just the first one). Idempotent; the MCP path also calls it.
+registerActiveStateBridge()
 
 // Initialize Response History Service (stores executed responses)
 responseHistoryService.initialize()

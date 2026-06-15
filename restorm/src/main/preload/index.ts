@@ -239,6 +239,16 @@ contextBridge.exposeInMainWorld('restorm', {
     ): Promise<{ value?: string; error?: string }> => {
       const result: unknown = await ipcRenderer.invoke('restorm:secrets:resolve', args)
       return result as { value?: string; error?: string }
+    },
+    /** Refresh a secret used as an env-folder variable: invalidate the cache,
+     * blank the resolved value + recompute the affected env contexts (so the
+     * secret and any expression composing it go empty), then re-hydrate. Drives
+     * the env-folder context preview to reflect the in-flight refresh. */
+    refresh: async (
+      args: { source: string; params: Record<string, unknown> }
+    ): Promise<{ success: boolean }> => {
+      const result: unknown = await ipcRenderer.invoke('restorm:secrets:refresh', args)
+      return result as { success: boolean }
     }
   },
   getEditorFile: async (): Promise<{ title: string; content?: string } | undefined> => {
@@ -282,6 +292,55 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.on('context:environment-context-changed', handler)
       return () => {
         ipcRenderer.removeListener('context:environment-context-changed', handler)
+      }
+    },
+    /** Snapshot of environments currently resolving secrets (initial UI sync). */
+    getResolvingEnvironments: async (): Promise<string[]> => {
+      const result: unknown = await ipcRenderer.invoke('context:get-resolving-environments')
+      return Array.isArray(result) ? (result as string[]) : []
+    },
+    /** Listen for "an environment started/stopped resolving its secrets" so the
+     * UI can show a spinner while at least one variable is in flight. */
+    onEnvSecretsResolving: (callback: (result: { environmentId: string; resolving: boolean }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, result: { environmentId: string; resolving: boolean }): void => {
+        callback(result)
+      }
+      ipcRenderer.on('context:env-secrets-resolving', handler)
+      return () => {
+        ipcRenderer.removeListener('context:env-secrets-resolving', handler)
+      }
+    },
+    /** Snapshot of environments whose last secret resolution failed (initial UI sync). */
+    getErroredEnvironments: async (): Promise<string[]> => {
+      const result: unknown = await ipcRenderer.invoke('context:get-errored-environments')
+      return Array.isArray(result) ? (result as string[]) : []
+    },
+    /** Listen for "an environment's secret resolution failed/recovered" so the UI
+     * can show an error badge next to a failing env wherever it appears. */
+    onEnvSecretsError: (callback: (result: { environmentId: string; hasError: boolean }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, result: { environmentId: string; hasError: boolean }): void => {
+        callback(result)
+      }
+      ipcRenderer.on('context:env-secrets-error', handler)
+      return () => {
+        ipcRenderer.removeListener('context:env-secrets-error', handler)
+      }
+    },
+    /** Snapshot of every item's effective secret status (direct + inherited). */
+    getItemSecretStatuses: async (): Promise<{ itemId: string; resolving: boolean; error: boolean }[]> => {
+      const result: unknown = await ipcRenderer.invoke('context:get-item-secret-statuses')
+      return Array.isArray(result) ? (result as { itemId: string; resolving: boolean; error: boolean }[]) : []
+    },
+    /** Listen for "a request/scenario's effective secret status changed" so the
+     * UI can badge its tab / sidebar row / node (spinner while resolving, red on
+     * error) from a single per-item signal. */
+    onItemSecretsStatus: (callback: (result: { itemId: string; resolving: boolean; error: boolean }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, result: { itemId: string; resolving: boolean; error: boolean }): void => {
+        callback(result)
+      }
+      ipcRenderer.on('context:item-secrets-status', handler)
+      return () => {
+        ipcRenderer.removeListener('context:item-secrets-status', handler)
       }
     },
     /** Listen for variable transformation updates */

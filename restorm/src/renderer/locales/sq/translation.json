@@ -1,15 +1,31 @@
 {
   "secrets": {
-    "others": "Others",
-    "refresh": "Refresh secret",
+    "others": "Të tjera",
+    "refresh": "Rifresko sekretin",
     "source": {
-      "envVar": "Env var",
-      "envFileSecret": "Env file secret",
-      "envFileSecretPlaceholder": "Secret value"
+      "envVar": "Variabël mjedisi",
+      "envFileSecret": "Sekret nga skedari env",
+      "envFileSecretPlaceholder": "Vlera e sekretit",
+      "envFileSecretLabel": "Vlera e sekretit"
     },
     "param": {
-      "envVarName": "Variable name",
+      "envVarName": "Emri i variablës",
       "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "Modifiko marrjen",
+    "envVarUnresolved": "(i pazgjidhur)",
+    "resolving": "Duke u zgjidhur…",
+    "resolveError": "Zgjidhja e sekretit dështoi",
+    "resolveErrorEnv": "Të paktën një variabël nuk mund të merrej dhe është në gabim.",
+    "resolveErrorItem": "Të paktën një nga sekretet e këtij elementi nuk mund të merrej.",
+    "fetchFailed": "Marrja dështoi",
+    "retrievalModal": {
+      "title": "Marrja e sekretit",
+      "value": "vlera:",
+      "fetch": "Merr",
+      "fetchFailed": "Marrja dështoi",
+      "ok": "OK",
+      "cancel": "Anulo"
     }
   },
   "app": {

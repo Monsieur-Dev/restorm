@@ -1,15 +1,31 @@
 {
   "secrets": {
-    "others": "Others",
-    "refresh": "Refresh secret",
+    "others": "Άλλα",
+    "refresh": "Ανανέωση μυστικού",
     "source": {
-      "envVar": "Env var",
-      "envFileSecret": "Env file secret",
-      "envFileSecretPlaceholder": "Secret value"
+      "envVar": "Μεταβλητή περιβάλλοντος",
+      "envFileSecret": "Μυστικό αρχείου env",
+      "envFileSecretPlaceholder": "Τιμή μυστικού",
+      "envFileSecretLabel": "Τιμή μυστικού"
     },
     "param": {
-      "envVarName": "Variable name",
+      "envVarName": "Όνομα μεταβλητής",
       "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "Επεξεργασία ανάκτησης",
+    "envVarUnresolved": "(μη επιλυμένο)",
+    "resolving": "Επίλυση…",
+    "resolveError": "Η επίλυση του μυστικού απέτυχε",
+    "resolveErrorEnv": "Τουλάχιστον μία μεταβλητή δεν ήταν δυνατό να ανακτηθεί και βρίσκεται σε σφάλμα.",
+    "resolveErrorItem": "Τουλάχιστον ένα από τα μυστικά αυτού του στοιχείου δεν ήταν δυνατό να ανακτηθεί.",
+    "fetchFailed": "Η ανάκτηση απέτυχε",
+    "retrievalModal": {
+      "title": "Ανάκτηση μυστικού",
+      "value": "τιμή:",
+      "fetch": "Ανάκτηση",
+      "fetchFailed": "Η ανάκτηση απέτυχε",
+      "ok": "OK",
+      "cancel": "Άκυρο"
     }
   },
   "app": {

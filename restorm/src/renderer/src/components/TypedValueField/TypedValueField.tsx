@@ -17,6 +17,7 @@ import {
   type ContextMenuItem,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
+import type { Icon } from 'electron-core-ui/types'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import type { TranslatedHelperDefinition } from '../../utils/handlebarsHelpersDefinitions'
 import type { ValueType, EnumDefinition, CustomValueList } from '../../../../shared/types/collections'
@@ -24,7 +25,6 @@ import { StringValue, ColorValue, DateTimeValue, NumericValue, ExpressionValue, 
 import { SecretValue } from '../../../../shared/types/valueTypes/SecretValue'
 import { valueSourceRegistry } from '../../../../shared/secrets/valueSourceRegistry'
 import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
-import { SecretSourceConfig } from './sources/SecretSourceConfig'
 import { SecretRetrievalModal } from './sources/SecretRetrievalModal'
 import { EnvironmentValueCell } from './EnvironmentValueCell'
 import { ListValueCell } from './ListValueCell'
@@ -40,7 +40,9 @@ import './typedValueField.css'
  * menu.
  */
 interface TypeIndicatorProps {
-  icon: string
+  // A codicon shorthand string, or a full ECUI Icon (library glyph) — the ECUI
+  // Button renders either via IconView.
+  icon: string | Icon
   ariaLabel: string
   dataTestId?: string | undefined
   onMenuOpen?: (e: React.MouseEvent) => void
@@ -162,74 +164,188 @@ const ColorValueCell: React.FC<ColorValueCellProps> = ({ hex, onChangeHex, dataT
  * (their own secret) but never written back into the value / document. A pencil
  * button opens the retrieval-edit modal (next slice).
  */
-interface SecretEnvVarCellProps {
+/**
+ * The precise resolution-error message to surface, taken verbatim from the
+ * provider (e.g. "environment variable RESTORM_E2E_SECRET is not set") — the
+ * same text the retrieval modal shows. Falls back to a generic message when the
+ * resolve IPC returned no error string (e.g. it never reached the provider).
+ */
+function secretErrorText(
+  result: { value?: string; error?: string } | undefined,
+  t: (key: string, fallback: string) => string
+): string {
+  const err = result?.error
+  return err !== undefined && err !== '' ? err : t('secrets.fetchFailed', 'Récupération impossible')
+}
+
+interface SecretCellProps {
   secret: SecretValue
   /** Commit an edited secret back into the document (used by the retrieval modal). */
   onChange: (next: SecretValue) => void
+  /** Report the current resolution error (the precise provider message) up to the
+   * field, which outlines the whole control group in red + shows it as a tooltip.
+   * `null` clears the error (resolving / success). */
+  onErrorChange?: (message: string | null) => void
+  /** Report whether the retrieval modal is open, so the field can suppress the
+   * error tooltip while editing — otherwise its stuck hover state leaves the
+   * bubble floating over the modal. */
+  onModalOpenChange?: (open: boolean) => void
   dataTestId?: string | undefined
 }
 
-const SecretEnvVarCell: React.FC<SecretEnvVarCellProps> = ({ secret, onChange, dataTestId }) => {
+/**
+ * The default chrome for a secret value, identical for EVERY source: a
+ * read-only input previewing the resolved plaintext, stretched inside the
+ * control group up to a refresh button and an always-present pencil (edit)
+ * button. Configuring HOW the secret is fetched (env-var name, fake value,
+ * env-file write-field, …) lives entirely in the pencil's retrieval modal —
+ * the cell itself is purely a preview, whatever the source.
+ *
+ * The resolved plaintext is shown to the user (their own credential) but never
+ * written back into the value / document — it is fetched on demand here.
+ */
+const SecretCell: React.FC<SecretCellProps> = ({ secret, onChange, onErrorChange, onModalOpenChange, dataTestId }) => {
   const { t } = useTranslation()
-  const name = typeof secret.params['name'] === 'string' ? secret.params['name'] : ''
   const [resolved, setResolved] = useState<string | null>(null)
   const [hasError, setHasError] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  // Mirror the modal-open state up so the field suppresses the error tooltip
+  // while editing (the click leaves the tooltip's hover state stuck otherwise).
+  const onModalOpenChangeRef = useRef(onModalOpenChange)
+  onModalOpenChangeRef.current = onModalOpenChange
+  useEffect(() => { onModalOpenChangeRef.current?.(isModalOpen) }, [isModalOpen])
+  // True while a resolution is in flight (mount, param change, or refresh) — the
+  // refresh button becomes a spinner for the duration.
+  const [isResolving, setIsResolving] = useState(false)
+
+  // `onErrorChange` is reported through a ref so the resolve effect doesn't list
+  // it as a dependency (a fresh closure on every parent render would otherwise
+  // re-run the resolution). The cell pushes its error verdict up; the field
+  // turns it into the red control-group outline + the precise tooltip.
+  const onErrorChangeRef = useRef(onErrorChange)
+  onErrorChangeRef.current = onErrorChange
+
+  // Re-resolve when the source or its params change (e.g. after the retrieval
+  // modal commits). Serialising the lookup descriptor gives a stable effect dep
+  // that survives the params object being recreated on each edit.
+  const lookupKey = JSON.stringify({ source: secret.source, params: secret.params })
+
+  // The resolve effect keys off `lookupKey` ALONE (a stable string). The live
+  // secret + `t` are read through refs so the effect never re-runs merely
+  // because the parent re-rendered with a new `secret.params` object identity —
+  // a re-run would cancel the in-flight resolve and, since reporting an error up
+  // (`onErrorChange`) re-renders the parent, spin a feedback loop that pins the
+  // cell on its "resolving" spinner forever.
+  const secretRef = useRef(secret)
+  secretRef.current = secret
+  const tRef = useRef(t)
+  tRef.current = t
 
   const refresh = useCallback(async (): Promise<void> => {
-    // Drop the main-side cache first so the preview re-fetches the live value.
-    await window.restorm?.secrets.invalidate({ source: secret.source, params: secret.params })
-    const result = await window.restorm?.secrets.resolve({ source: secret.source, params: secret.params })
-    if (result && typeof result.value === 'string') {
-      setResolved(result.value)
-      setHasError(false)
-    } else {
-      setResolved(null)
-      setHasError(true)
+    // Blank the preview immediately so the cell reflects the in-flight refresh.
+    setResolved(null)
+    setHasError(false)
+    onErrorChangeRef.current?.(null)
+    setIsResolving(true)
+    try {
+      // `refresh` drops the main-side cache AND recomputes every env context
+      // that uses this secret (so the context preview + any expression composing
+      // it clear during the re-resolution); then re-resolve this cell's preview.
+      await window.restorm?.secrets.refresh({ source: secret.source, params: secret.params })
+      const result = await window.restorm?.secrets.resolve({ source: secret.source, params: secret.params })
+      if (result && typeof result.value === 'string') {
+        setResolved(result.value)
+        setHasError(false)
+        onErrorChangeRef.current?.(null)
+      } else {
+        setResolved(null)
+        setHasError(true)
+        onErrorChangeRef.current?.(secretErrorText(result, t))
+      }
+    } finally {
+      setIsResolving(false)
     }
-  }, [secret.source, secret.params])
+  }, [secret.source, secret.params, t])
 
-  // Resolve on mount + whenever the targeted env-var name changes. The cancelled
+  // Resolve on mount + whenever the lookup descriptor changes. The cancelled
   // flag lives on a holder object (not a `let`) so the post-await `if` guard
   // isn't narrowed to `false` — the cleanup closure flips it after the await.
   useEffect(() => {
     const state = { cancelled: false }
     void (async () => {
-      const result = await window.restorm?.secrets.resolve({ source: secret.source, params: secret.params })
+      // Blank the previous result up front so a source/params change doesn't keep
+      // the old preview + stale red error outline visible until the new resolve
+      // lands (mirrors the refresh path).
+      setResolved(null)
+      setHasError(false)
+      onErrorChangeRef.current?.(null)
+      setIsResolving(true)
+      const s = secretRef.current
+      const result = await window.restorm?.secrets.resolve({ source: s.source, params: s.params })
       if (state.cancelled) return
       if (result && typeof result.value === 'string') {
         setResolved(result.value)
         setHasError(false)
+        onErrorChangeRef.current?.(null)
       } else {
         setResolved(null)
         setHasError(true)
+        onErrorChangeRef.current?.(secretErrorText(result, tRef.current))
       }
+      setIsResolving(false)
     })()
     return () => { state.cancelled = true }
-  }, [secret.source, secret.params, name])
+    // Keyed on the serialised descriptor only — see `secretRef` note above.
+  }, [lookupKey])
 
-  const display = `$${name}=${resolved ?? ''}`
+  // Clear the field's error verdict when the secret cell goes away (recast to a
+  // non-secret type), so a stale red outline doesn't linger on the new widget.
+  useEffect(() => () => { onErrorChangeRef.current?.(null) }, [])
+
+  // Collapsed preview: `$<name>=<resolved>`. The env-var name (the lookup key,
+  // not a secret) is known immediately; the resolved value fills in once
+  // resolution lands. Empty until then so the placeholder + spinner show.
+  const name = typeof secret.params['name'] === 'string' ? secret.params['name'] : ''
+  const value = resolved !== null ? `$${name}=${resolved}` : ''
+  // Show a placeholder while the value is empty — either still resolving / not
+  // yet configured, or a genuine resolution error.
+  const showPlaceholder = hasError || value === ''
 
   return (
     <>
       <InputBox
-        value={display}
+        value={value}
         disabled
         options={{
           type: 'text',
-          ...(hasError && { placeholder: t('secrets.envVarUnresolved', '(non résolu)') })
+          // Suppress the native `title` tooltip ECUI derives from the placeholder
+          // — otherwise it stacks under the ECUI error tooltip (two overlapping
+          // bubbles) and the styled hover label is the one we want.
+          tooltip: '',
+          ...(showPlaceholder && { placeholder: t('secrets.envVarUnresolved', '(non résolu)') })
         }}
-        {...(dataTestId && { 'data-testid': `${dataTestId}-secret-envvar-preview` })}
+        {...(dataTestId && { 'data-testid': `${dataTestId}-secret-preview` })}
       />
-      <HeaderHoverTooltip label={t('secrets.refresh', 'Rafraîchir le secret')}>
-        <Button
-          medium
-          secondary
-          icon="refresh"
-          onClick={() => { void refresh() }}
-          options={{ ariaLabel: t('secrets.refresh', 'Rafraîchir le secret') }}
-          {...(dataTestId && { 'data-testid': `${dataTestId}-secret-refresh` })}
-        />
+      <HeaderHoverTooltip label={isResolving ? t('secrets.resolving', 'Résolution…') : t('secrets.refresh', 'Rafraîchir le secret')}>
+        {isResolving ? (
+          <span
+            className="tvf-secret-spinner"
+            role="status"
+            aria-label={t('secrets.resolving', 'Résolution…')}
+            {...(dataTestId && { 'data-testid': `${dataTestId}-secret-refreshing` })}
+          >
+            <i className="codicon codicon-loading codicon-modifier-spin" aria-hidden="true" />
+          </span>
+        ) : (
+          <Button
+            medium
+            secondary
+            icon="refresh"
+            onClick={() => { void refresh() }}
+            options={{ ariaLabel: t('secrets.refresh', 'Rafraîchir le secret') }}
+            {...(dataTestId && { 'data-testid': `${dataTestId}-secret-refresh` })}
+          />
+        )}
       </HeaderHoverTooltip>
       <HeaderHoverTooltip label={t('secrets.editRetrieval', 'Éditer la récupération')}>
         <Button
@@ -380,6 +496,13 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
   )
 
   const [menu, setMenu] = useState<{ visible: boolean; x: number; y: number } | null>(null)
+  // Precise secret-resolution error for the current value (null when healthy /
+  // not a secret). Reported up by the SecretCell; drives the red control-group
+  // outline + the exact-message tooltip on the cell.
+  const [secretError, setSecretError] = useState<string | null>(null)
+  // Whether the secret's retrieval modal is open — suppresses the error tooltip
+  // while editing so it doesn't float over the modal with its hover state stuck.
+  const [secretModalOpen, setSecretModalOpen] = useState(false)
 
   const closeMenu = useCallback((): void => {
     setMenu((prev) => (prev ? { ...prev, visible: false } : null))
@@ -423,21 +546,47 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
 
   const withTypeControl = (
     editor: React.ReactNode,
-    o: { icon: string; ariaLabel: string; typeTestid: string }
-  ): React.ReactNode => (
-    <ControlGroup className="tvf-control-group">
-      {editor}
-      {trailingControls}
-      {!hideTypeButton && (
-        <TypeIndicator
-          icon={o.icon}
-          ariaLabel={o.ariaLabel}
-          {...(!lockType && { onMenuOpen: openMenu })}
-          {...(dataTestId && { dataTestId: `${dataTestId}-value-type-${o.typeTestid}` })}
-        />
-      )}
-    </ControlGroup>
-  )
+    o: { icon: string | Icon; ariaLabel: string; typeTestid: string },
+    // Present ONLY for a secret cell (whatever its health) — its `.message` is the
+    // precise resolution error, or null when healthy. When present, the control
+    // group is ALWAYS wrapped in the (possibly suppressed) error tooltip so the
+    // tree shape never toggles between renders: a conditional wrap/unwrap would
+    // remount the SecretCell on every error↔healthy flip and spin a resolve loop.
+    // `modalOpen` suppresses the tooltip while the retrieval modal edits the
+    // secret (the click that opened it left the hover state stuck).
+    secretError?: { message: string | null; modalOpen: boolean }
+  ): React.ReactNode => {
+    const errorMessage = secretError?.message
+    const inError = errorMessage !== null && errorMessage !== undefined && errorMessage !== ''
+    const group = (
+      <ControlGroup className={inError ? 'tvf-control-group tvf-control-group--secret-error' : 'tvf-control-group'}>
+        {editor}
+        {trailingControls}
+        {!hideTypeButton && (
+          <TypeIndicator
+            icon={o.icon}
+            ariaLabel={o.ariaLabel}
+            {...(!lockType && { onMenuOpen: openMenu })}
+            {...(dataTestId && { dataTestId: `${dataTestId}-value-type-${o.typeTestid}` })}
+          />
+        )}
+      </ControlGroup>
+    )
+    // Non-secret types: no wrapper (their structure stays stable on its own).
+    if (!secretError) return group
+    // Secret types: always wrapped, tooltip suppressed while healthy.
+    return (
+      <HeaderHoverTooltip
+        className="tvf-secret-error-tooltip"
+        label={errorMessage ?? ''}
+        suppressed={!inError || secretError.modalOpen}
+        placement="above"
+        {...(dataTestId && { 'data-testid': `${dataTestId}-secret-error-tooltip` })}
+      >
+        {group}
+      </HeaderHoverTooltip>
+    )
+  }
 
   const menuItems = useMemo<ContextMenuItem[]>(() => {
     const listWord = t('keyValueTable.listSuffix')
@@ -626,6 +775,9 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
     // params. The active source (if the value is already a secret) is checked.
     if (!isExcluded('secret')) {
       const activeSource = value instanceof SecretValue ? value.source : undefined
+      // NB: no per-source `icon` on these menu items — the menu's icon slot is
+      // the active-type checkmark, and a source glyph there would mask it. The
+      // source icon lives only on the type-indicator button that opens the menu.
       const sourceItems: ContextMenuItem[] = valueSourceRegistry.list().map((descriptor) => ({
         id: `secret-source-${descriptor.id}`,
         label: t(descriptor.labelKey, descriptor.id),
@@ -687,46 +839,23 @@ export const TypedValueField: React.FC<TypedValueFieldProps> = ({
 
   const widget = ((): React.ReactNode => {
     if (value instanceof SecretValue) {
-      // Per-source config (param-schema fields or the source's custom config
-      // component) + a refresh button that drops the main-side resolution cache
-      // so the next run re-fetches the credential. Masking invariant: nothing
-      // here reads back resolved plaintext — the envFileSecret write-field only
-      // captures what the user types.
+      // Every secret source renders the same default chrome: a read-only
+      // resolved-value preview + refresh + an always-present pencil. The lock
+      // icon is the type indicator; configuring the retrieval lives in the
+      // pencil's modal (per-source surface), not inline.
       const secret = value
-      // envVar secrets render as a read-only `$NAME=value` preview (resolved on
-      // demand) with refresh + pencil (edit-retrieval) buttons; the lock icon
-      // stays the type indicator. Other sources keep their editable config.
-      if (secret.source === 'envVar') {
-        return withTypeControl(
-          <SecretEnvVarCell
-            secret={secret}
-            onChange={(next) => { onChange(next) }}
-            {...(dataTestId && { dataTestId })}
-          />,
-          { icon: 'lock', ariaLabel: 'Secret value', typeTestid: 'secret' }
-        )
-      }
       return withTypeControl(
-        <span className="tvf-secret-config">
-          <SecretSourceConfig
-            value={secret}
-            onChange={(next) => { onChange(next) }}
-            {...(dataTestId && { dataTestId })}
-          />
-          <HeaderHoverTooltip label={t('secrets.refresh', 'Refresh secret')}>
-            <Button
-              medium
-              secondary
-              icon="refresh"
-              onClick={() => {
-                void window.restorm?.secrets.invalidate({ source: secret.source, params: secret.params })
-              }}
-              options={{ ariaLabel: t('secrets.refresh', 'Refresh secret') }}
-              {...(dataTestId && { 'data-testid': `${dataTestId}-secret-refresh` })}
-            />
-          </HeaderHoverTooltip>
-        </span>,
-        { icon: 'lock', ariaLabel: 'Secret value', typeTestid: 'secret' }
+        <SecretCell
+          secret={secret}
+          onChange={(next) => { onChange(next) }}
+          onErrorChange={setSecretError}
+          onModalOpenChange={setSecretModalOpen}
+          {...(dataTestId && { dataTestId })}
+        />,
+        // Each source paints its own glyph on the type button (a brand mark, a
+        // codicon, …); fall back to the generic lock when it declares none.
+        { icon: valueSourceRegistry.get(secret.source)?.icon ?? 'lock', ariaLabel: 'Secret value', typeTestid: 'secret' },
+        { message: secretError, modalOpen: secretModalOpen }
       )
     }
 

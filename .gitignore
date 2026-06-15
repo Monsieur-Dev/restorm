@@ -13,3 +13,6 @@ restorm/tests/e2e/.tmp/
 .commit-flake-history.log
 # restorm scenario writeFile demo output (transient, written at run time)
 restorm/tests/e2e/samples/scenarios-e2e-reference-tests.writefile-out.json
+
+# Superpowers working docs (plans, not shipped)
+/docs/

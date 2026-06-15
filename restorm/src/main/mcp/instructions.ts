@@ -15,7 +15,7 @@ OBJECT MODEL
 - Folder / env-folder: containers. An *env-folder* additionally owns environments + variables (the scope where {{variables}} resolve). A request inherits the environment of its nearest env-folder.
 - Request: one API call (method/url/headers/body/auth), protocol REST/GraphQL/gRPC/WebSocket.
 - Scenario: a dataflow graph of *nodes* (boxes) wired by *edges*. Not a script — a node runs once all its wired inputs resolve; independent nodes run in parallel. See "Scenarios" below.
-- Environment + variables: values referenced anywhere via Handlebars {{name}}. Set/read with set_env_variable / list_env_variables; the active env is get_active_env.
+- Environment + variables: values referenced anywhere via Handlebars {{name}}. Manage the environments themselves (incl. nested sub-environments) with list_environments / create_environment (pass parentEnvironmentId to nest) / rename_environment / delete_environment; set/read their variables with set_env_variable / list_env_variables / delete_env_variable; the active env is get_active_env.
 
 START HERE (discovery — call these before guessing)
 - get_current_tab: what the user is looking at right now.

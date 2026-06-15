@@ -1,15 +1,31 @@
 {
   "secrets": {
-    "others": "Others",
-    "refresh": "Refresh secret",
+    "others": "Otros",
+    "refresh": "Actualizar secreto",
     "source": {
-      "envVar": "Env var",
-      "envFileSecret": "Env file secret",
-      "envFileSecretPlaceholder": "Secret value"
+      "envVar": "Variable de entorno",
+      "envFileSecret": "Secreto de archivo env",
+      "envFileSecretPlaceholder": "Valor secreto",
+      "envFileSecretLabel": "Valor secreto"
     },
     "param": {
-      "envVarName": "Variable name",
+      "envVarName": "Nombre de variable",
       "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "Editar recuperación",
+    "envVarUnresolved": "(sin resolver)",
+    "resolving": "Resolviendo…",
+    "resolveError": "Error al resolver el secreto",
+    "resolveErrorEnv": "No se pudo recuperar al menos una variable y está en error.",
+    "resolveErrorItem": "No se pudo recuperar al menos uno de los secretos de este elemento.",
+    "fetchFailed": "Error de recuperación",
+    "retrievalModal": {
+      "title": "Recuperación de secreto",
+      "value": "valor:",
+      "fetch": "Recuperar",
+      "fetchFailed": "Error de recuperación",
+      "ok": "OK",
+      "cancel": "Cancelar"
     }
   },
   "app": {

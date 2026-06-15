@@ -1,15 +1,31 @@
 {
   "secrets": {
-    "others": "Others",
-    "refresh": "Refresh secret",
+    "others": "Інше",
+    "refresh": "Оновити секрет",
     "source": {
-      "envVar": "Env var",
-      "envFileSecret": "Env file secret",
-      "envFileSecretPlaceholder": "Secret value"
+      "envVar": "Змінна середовища",
+      "envFileSecret": "Секрет із env-файлу",
+      "envFileSecretPlaceholder": "Значення секрету",
+      "envFileSecretLabel": "Значення секрету"
     },
     "param": {
-      "envVarName": "Variable name",
+      "envVarName": "Назва змінної",
       "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "Редагувати отримання",
+    "envVarUnresolved": "(не розв’язано)",
+    "resolving": "Розв’язання…",
+    "resolveError": "Не вдалося розв’язати секрет",
+    "resolveErrorEnv": "Принаймні одну змінну не вдалося отримати, і вона має помилку.",
+    "resolveErrorItem": "Не вдалося отримати принаймні один із секретів цього елемента.",
+    "fetchFailed": "Не вдалося отримати",
+    "retrievalModal": {
+      "title": "Отримання секрету",
+      "value": "значення:",
+      "fetch": "Отримати",
+      "fetchFailed": "Не вдалося отримати",
+      "ok": "OK",
+      "cancel": "Скасувати"
     }
   },
   "app": {

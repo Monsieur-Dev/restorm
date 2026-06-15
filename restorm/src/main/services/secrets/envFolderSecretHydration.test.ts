@@ -39,7 +39,7 @@ vi.mock('electron-core-ui/main', () => ({
 
 const { contextService } = await import('../ContextService')
 const { secretHydrationService } = await import('./SecretHydrationService')
-const { registerBuiltinSources } = await import('./mainSourceRegistry')
+const { registerBuiltinSources, registerResolverForTests } = await import('./mainSourceRegistry')
 const { DocumentEvents } = await import('../DocumentEvents')
 const { KeyValue } = await import('../../../shared/models/KeyValue')
 const { SecretValue } = await import('../../../shared/types/valueTypes/SecretValue')
@@ -177,5 +177,202 @@ describe('env-folder secret hydration into the environment context (open path)',
       expect(contextService.getContext(ENV_ID)?.apiKey).toBe('open-path-secret-value')
       expect(contextService.getContext(ENV_ID)?.apiKey2).toBe('open-path-secret-value')
     })
+  })
+})
+
+/**
+ * One failing secret must not poison the whole env's hydration. The repro: an
+ * env with a secret that can't resolve (a missing env var → the resolver
+ * rejects) defined BEFORE a healthy secret. A non-resilient batch hydrate aborts
+ * on the first rejection, so the healthy secret never resolves and the context
+ * is never rebroadcast. Resilience: each secret resolves independently — the
+ * failing one stays empty, the healthy one still fills in.
+ */
+describe('env-folder secret hydration resilience (one failing secret)', () => {
+  const ENV_ID = 'env-folder-secret-resilience-env'
+  const GOOD_ENV = 'RESTORM_RESILIENCE_GOOD_TOKEN'
+  const MISSING_ENV = 'RESTORM_RESILIENCE_MISSING_TOKEN_UNSET'
+
+  beforeEach(() => {
+    contextService.initialize() // idempotent
+    registerBuiltinSources() // idempotent
+    process.env[GOOD_ENV] = 'good-secret-value'
+    Reflect.deleteProperty(process.env, MISSING_ENV)
+    secretHydrationService.clearScope(ENV_ID)
+  })
+
+  afterEach(() => {
+    Reflect.deleteProperty(process.env, GOOD_ENV)
+    secretHydrationService.clearScope(ENV_ID)
+    void testEventBus.emit(DocumentEvents.ENVIRONMENT_DELETED, { id: ENV_ID, type: 'environment' })
+  })
+
+  it('still resolves a healthy secret when an earlier secret fails to resolve', async () => {
+    // `failing` (missing env var → resolver rejects) is defined BEFORE `good`.
+    void testEventBus.emit(DocumentEvents.ENVIRONMENT_CREATED, {
+      id: ENV_ID,
+      type: 'environment',
+      parentEnvironmentId: null,
+      document: {
+        id: ENV_ID,
+        name: 'Secrets',
+        variables: [
+          new KeyValue({ key: 'failing', value: new SecretValue('envVar', { name: MISSING_ENV }) }),
+          new KeyValue({ key: 'good', value: new SecretValue('envVar', { name: GOOD_ENV }) })
+        ]
+      }
+    })
+
+    // The healthy secret resolves despite the earlier failure...
+    await vi.waitFor(() => {
+      expect(contextService.getContext(ENV_ID)?.good).toBe('good-secret-value')
+    })
+    // ...and the failing one is simply empty (not blocking the rest).
+    expect(contextService.getContext(ENV_ID)?.failing).toBe('')
+  })
+})
+
+/**
+ * A slow secret fetch must be ABORTED when its environment is deleted or the
+ * project is closed — otherwise the resolver (a long network / file fetch)
+ * keeps running and then recomputes / spins for a gone environment. A
+ * test-local `slowTest` resolver honours the abort signal, so a deleted /
+ * cleared env stops resolving immediately and never lands its value.
+ */
+describe('env-folder secret hydration cancellation on close', () => {
+  const ENV_ID = 'env-folder-secret-cancel-env'
+  // Long enough that the fetch is still pending when we delete / clear.
+  const SLOW_PARAMS = { value: 'slow-cancel-value', delayMs: '5000' }
+
+  // A deliberately-slow, abort-honouring resolver, registered only for these
+  // tests (the production registry ships no such source).
+  const slowResolver = {
+    id: 'slowTest',
+    read(params: Record<string, unknown>, ctx: { signal?: AbortSignal }): Promise<string> {
+      return new Promise<string>((resolve, reject) => {
+        if (ctx.signal?.aborted) { reject(new DOMException('Aborted', 'AbortError')); return }
+        const delay = typeof params.delayMs === 'string' ? Number(params.delayMs) : 5000
+        const timer = setTimeout(() => {
+          resolve(typeof params.value === 'string' ? params.value : 'slow')
+        }, delay)
+        ctx.signal?.addEventListener('abort', () => { clearTimeout(timer); reject(new DOMException('Aborted', 'AbortError')) }, { once: true })
+      })
+    }
+  }
+
+  beforeEach(() => {
+    contextService.initialize() // idempotent
+    registerBuiltinSources() // idempotent
+    registerResolverForTests(slowResolver)
+    secretHydrationService.clearScope(ENV_ID)
+  })
+
+  afterEach(() => {
+    secretHydrationService.clearScope(ENV_ID)
+    void testEventBus.emit(DocumentEvents.ENVIRONMENT_DELETED, { id: ENV_ID, type: 'environment' })
+  })
+
+  const openEnvWithSlowSecret = (): void => {
+    void testEventBus.emit(DocumentEvents.ENVIRONMENT_CREATED, {
+      id: ENV_ID,
+      type: 'environment',
+      parentEnvironmentId: null,
+      document: {
+        id: ENV_ID,
+        name: 'Secrets',
+        variables: [new KeyValue({ key: 'slow', value: new SecretValue('slowTest', SLOW_PARAMS) })]
+      }
+    })
+  }
+
+  it('aborts an in-flight hydration and clears the resolving state when the env is deleted', async () => {
+    openEnvWithSlowSecret()
+    await vi.waitFor(() => {
+      expect(contextService.getResolvingEnvironmentIds()).toContain(ENV_ID)
+    })
+
+    void testEventBus.emit(DocumentEvents.ENVIRONMENT_DELETED, { id: ENV_ID, type: 'environment' })
+
+    // No leaked spinner: the env is no longer reported as resolving...
+    expect(contextService.getResolvingEnvironmentIds()).not.toContain(ENV_ID)
+    // ...and the cancelled fetch never populated the cache (the 5s sleep was
+    // aborted, so it never returned its value).
+    expect(secretHydrationService.peekResolved('slowTest', SLOW_PARAMS)).toBeUndefined()
+  })
+
+  it('clearAll() (file close) aborts in-flight hydrations and clears resolving state', async () => {
+    openEnvWithSlowSecret()
+    await vi.waitFor(() => {
+      expect(contextService.getResolvingEnvironmentIds()).toContain(ENV_ID)
+    })
+
+    contextService.clearAll()
+
+    expect(contextService.getResolvingEnvironmentIds()).toEqual([])
+    expect(secretHydrationService.peekResolved('slowTest', SLOW_PARAMS)).toBeUndefined()
+  })
+})
+
+/**
+ * A secret owned by a PARENT env must be resolved once and INHERITED by a child
+ * sub-env through context — the child must NOT re-resolve (re-fetch) it under
+ * its own cache scope. The regression: hydrating a child collected the whole
+ * ancestor chain's secrets, so a child with no secrets of its own re-ran the
+ * parent's slow secret (a second loading), and the per-scope cache never hit.
+ */
+describe('nested env-folder secret inheritance (child does not re-fetch the parent secret)', () => {
+  const PARENT_ID = 'env-nested-parent'
+  const CHILD_ID = 'env-nested-child'
+  const ENV_NAME = 'RESTORM_NESTED_SECRET'
+
+  beforeEach(() => {
+    contextService.initialize() // idempotent
+    registerBuiltinSources() // idempotent
+    process.env[ENV_NAME] = 'nested-secret-value'
+    secretHydrationService.clearScope(PARENT_ID)
+    secretHydrationService.clearScope(CHILD_ID)
+  })
+
+  afterEach(() => {
+    Reflect.deleteProperty(process.env, ENV_NAME)
+    secretHydrationService.clearScope(PARENT_ID)
+    secretHydrationService.clearScope(CHILD_ID)
+    void testEventBus.emit(DocumentEvents.ENVIRONMENT_DELETED, { id: CHILD_ID, type: 'environment' })
+    void testEventBus.emit(DocumentEvents.ENVIRONMENT_DELETED, { id: PARENT_ID, type: 'environment' })
+  })
+
+  it('a child sub-env inherits the parent secret via context without hydrating it itself', async () => {
+    // Parent OWNS the secret; child (sub-env) owns nothing but composes it.
+    void testEventBus.emit(DocumentEvents.ENVIRONMENT_CREATED, {
+      id: PARENT_ID,
+      type: 'environment',
+      parentEnvironmentId: null,
+      document: {
+        id: PARENT_ID,
+        name: 'parent',
+        variables: [new KeyValue({ key: 'apiKey', value: new SecretValue('envVar', { name: ENV_NAME }) })]
+      }
+    })
+    void testEventBus.emit(DocumentEvents.ENVIRONMENT_CREATED, {
+      id: CHILD_ID,
+      type: 'environment',
+      parentEnvironmentId: PARENT_ID,
+      document: {
+        id: CHILD_ID,
+        name: 'child',
+        variables: [new KeyValue({ key: 'header', value: new ExpressionValue('Bearer {{apiKey}}') })]
+      }
+    })
+
+    // The parent resolves the secret, and the child inherits it (the secret AND
+    // an expression composing it) purely through context inheritance.
+    await vi.waitFor(() => {
+      expect(contextService.getContext(CHILD_ID)?.apiKey).toBe('nested-secret-value')
+      expect(contextService.getContext(CHILD_ID)?.header).toBe('Bearer nested-secret-value')
+    })
+
+    // The child has no secret of its own, so it never enters the resolving set —
+    // it does not re-fetch the inherited credential.
+    expect(contextService.getResolvingEnvironmentIds()).not.toContain(CHILD_ID)
   })
 })

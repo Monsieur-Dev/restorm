@@ -1,15 +1,31 @@
 {
   "secrets": {
-    "others": "Others",
-    "refresh": "Refresh secret",
+    "others": "Övriga",
+    "refresh": "Uppdatera hemlighet",
     "source": {
-      "envVar": "Env var",
-      "envFileSecret": "Env file secret",
-      "envFileSecretPlaceholder": "Secret value"
+      "envVar": "Miljövariabel",
+      "envFileSecret": "Env-filhemlighet",
+      "envFileSecretPlaceholder": "Hemligt värde",
+      "envFileSecretLabel": "Hemligt värde"
     },
     "param": {
-      "envVarName": "Variable name",
+      "envVarName": "Variabelnamn",
       "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "Redigera hämtning",
+    "envVarUnresolved": "(ej upplöst)",
+    "resolving": "Löser upp…",
+    "resolveError": "Det gick inte att lösa upp hemligheten",
+    "resolveErrorEnv": "Minst en variabel kunde inte hämtas och är i feltillstånd.",
+    "resolveErrorItem": "Minst en av det här objektets hemligheter kunde inte hämtas.",
+    "fetchFailed": "Hämtningen misslyckades",
+    "retrievalModal": {
+      "title": "Hämtning av hemlighet",
+      "value": "värde:",
+      "fetch": "Hämta",
+      "fetchFailed": "Hämtningen misslyckades",
+      "ok": "OK",
+      "cancel": "Avbryt"
     }
   },
   "app": {

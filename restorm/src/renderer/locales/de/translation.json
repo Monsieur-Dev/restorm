@@ -1,15 +1,31 @@
 {
   "secrets": {
-    "others": "Others",
-    "refresh": "Refresh secret",
+    "others": "Andere",
+    "refresh": "Geheimnis aktualisieren",
     "source": {
-      "envVar": "Env var",
-      "envFileSecret": "Env file secret",
-      "envFileSecretPlaceholder": "Secret value"
+      "envVar": "Umgebungsvariable",
+      "envFileSecret": "Env-Datei-Geheimnis",
+      "envFileSecretPlaceholder": "Geheimer Wert",
+      "envFileSecretLabel": "Geheimer Wert"
     },
     "param": {
-      "envVarName": "Variable name",
+      "envVarName": "Variablenname",
       "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "Abruf bearbeiten",
+    "envVarUnresolved": "(nicht aufgelöst)",
+    "resolving": "Wird aufgelöst…",
+    "resolveError": "Auflösung des Geheimnisses fehlgeschlagen",
+    "resolveErrorEnv": "Mindestens eine Variable konnte nicht abgerufen werden und ist fehlerhaft.",
+    "resolveErrorItem": "Mindestens ein Geheimnis dieses Elements konnte nicht abgerufen werden.",
+    "fetchFailed": "Abruf fehlgeschlagen",
+    "retrievalModal": {
+      "title": "Geheimnis-Abruf",
+      "value": "Wert:",
+      "fetch": "Abrufen",
+      "fetchFailed": "Abruf fehlgeschlagen",
+      "ok": "OK",
+      "cancel": "Abbrechen"
     }
   },
   "app": {

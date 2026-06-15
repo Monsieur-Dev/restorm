@@ -7,6 +7,12 @@ export interface HeaderHoverTooltipProps {
   /** When true, the tooltip is suppressed (e.g. while the trigger's own
    * click-popover is open, so the two overlays never stack). */
   suppressed?: boolean
+  /** Extra class on the anchor span — lets a caller restyle the inline-flex
+   * wrapper (e.g. stretch it to wrap a full-width control group). */
+  className?: string
+  /** Vertical placement of the tooltip relative to the anchor (default below).
+   * Use 'above' to keep it clear of a sibling tooltip rendered below. */
+  placement?: 'auto' | 'above' | 'below'
   'data-testid'?: string
   children: React.ReactNode
 }
@@ -19,6 +25,8 @@ export interface HeaderHoverTooltipProps {
 export const HeaderHoverTooltip: React.FC<HeaderHoverTooltipProps> = ({
   label,
   suppressed = false,
+  className,
+  placement = 'below',
   'data-testid': dataTestId,
   children
 }) => {
@@ -27,7 +35,7 @@ export const HeaderHoverTooltip: React.FC<HeaderHoverTooltipProps> = ({
   return (
     <span
       ref={anchorRef}
-      className="header-hover-tooltip"
+      className={className ? `header-hover-tooltip ${className}` : 'header-hover-tooltip'}
       onMouseEnter={() => { setHover(true) }}
       onMouseLeave={() => { setHover(false) }}
     >
@@ -35,7 +43,7 @@ export const HeaderHoverTooltip: React.FC<HeaderHoverTooltipProps> = ({
       <Tooltip
         targetRef={anchorRef}
         show={hover && !suppressed}
-        placement="below"
+        placement={placement}
         {...(dataTestId ? { 'data-testid': dataTestId } : {})}
         content={<span className="header-hover-tooltip-label" style={{ whiteSpace: 'pre-line' }}>{label}</span>}
       />

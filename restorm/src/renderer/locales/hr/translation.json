@@ -1,15 +1,31 @@
 {
   "secrets": {
-    "others": "Others",
-    "refresh": "Refresh secret",
+    "others": "Ostalo",
+    "refresh": "Osvježi tajnu",
     "source": {
-      "envVar": "Env var",
-      "envFileSecret": "Env file secret",
-      "envFileSecretPlaceholder": "Secret value"
+      "envVar": "Varijabla okruženja",
+      "envFileSecret": "Tajna iz env datoteke",
+      "envFileSecretPlaceholder": "Vrijednost tajne",
+      "envFileSecretLabel": "Vrijednost tajne"
     },
     "param": {
-      "envVarName": "Variable name",
+      "envVarName": "Naziv varijable",
       "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "Uredi dohvaćanje",
+    "envVarUnresolved": "(neriješeno)",
+    "resolving": "Rješavanje…",
+    "resolveError": "Rješavanje tajne nije uspjelo",
+    "resolveErrorEnv": "Najmanje jednu varijablu nije bilo moguće dohvatiti i u stanju je pogreške.",
+    "resolveErrorItem": "Najmanje jednu tajnu ove stavke nije bilo moguće dohvatiti.",
+    "fetchFailed": "Dohvaćanje nije uspjelo",
+    "retrievalModal": {
+      "title": "Dohvaćanje tajne",
+      "value": "vrijednost:",
+      "fetch": "Dohvati",
+      "fetchFailed": "Dohvaćanje nije uspjelo",
+      "ok": "U redu",
+      "cancel": "Odustani"
     }
   },
   "app": {

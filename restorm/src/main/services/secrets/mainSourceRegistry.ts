@@ -24,3 +24,12 @@ export function registerBuiltinSources(): void {
 export function getResolver(id: string): ValueSourceResolver | undefined {
   return resolvers.get(id)
 }
+
+/**
+ * TEST-ONLY: register an extra resolver into the main registry (e.g. a slow,
+ * abort-honouring stub used to exercise hydration cancellation). Never called
+ * from production code.
+ */
+export function registerResolverForTests(resolver: ValueSourceResolver): void {
+  resolvers.set(resolver.id, resolver)
+}

@@ -19,6 +19,7 @@ Read-only tools that give the AI awareness of the open project. None mutate stat
 | `search` | Typed search across folders / requests / environments via the in-memory index. `kinds` filter + `maxResults` cap. |
 | `get_active_env` | Active env-folder selection + resolved Handlebars variables. |
 | `get_current_tab` | `{ tabId, itemId, kind }` for the active workbench tab. |
+| `list_value_sources` | List the registered secret value sources a `{ type: "secret", source, params }` value can reference (`{ id, label, canWrite, isObject, params }`). The plaintext is resolved main-side at run time and is never returned. |
 
 Source: [`restorm/src/main/mcp/tools/read.ts`](../../src/main/mcp/tools/read.ts).
 
@@ -72,6 +73,25 @@ The full patch surface mirrors the request shape. Useful keys:
 - Protocol-specific fields (e.g. `query` / `variables` for GraphQL, `service` / `rpcMethod` for gRPC, `soapAction` for SOAP, `event` / `protocol` for WebSocket)
 
 The server strips `id` and `type` from the patch before applying it (those are immutable per request).
+
+## Environments & secrets
+
+Manage the environment tree of an env-folder and the variables each environment ships. Every write triggers the autosave path. Secret variables persist only `{ type: "secret", source, params }` — the resolved plaintext is produced main-side at run time and is never written to disk or returned to a client.
+
+| Tool | Summary |
+|---|---|
+| `list_environments` | Return the environment tree of an env-folder: every top-level environment with its nested `subEnvironments`, each as `{ id, name, subEnvironments? }`. |
+| `create_environment` | Add a new environment to an env-folder. Omit `parentEnvironmentId` for a top-level environment, or pass an existing environment id to nest the new one under it. |
+| `rename_environment` | Rename an environment (or sub-environment) by id. |
+| `delete_environment` | Remove an environment and, recursively, its sub-environments by id. Returns `removed: false` when the id isn't found. |
+| `refresh_environment` | Force a re-resolution of every secret variable the environment **owns**: drops the resolution cache, blanks the resolved plaintext, and re-fetches from each provider. The renderer's spinner / error badges update from the broadcast status. |
+| `list_env_variables` | Return every key + serialised value for the given environment. Secret values come back as `{ type: "secret", source, params }` — never the plaintext. |
+| `set_env_variable` | Upsert one variable on an environment (replaces by key, keeping the id; appends otherwise). `value` takes the persisted `ValueType` POJO — `{ type: "string"\|"expression"\|"numeric"\|"boolean"\|"color"\|"datetime", value }`, or `{ type: "secret", source: "<sourceId>", params: { … } }` for a secret. |
+| `delete_env_variable` | Remove a variable by key from an environment. No-op (`removed: false`) when the key isn't present. |
+
+Pair these with [`list_value_sources`](#read) to discover the available `source` ids and their param shape before writing a secret variable.
+
+Source: [`restorm/src/main/mcp/tools/write.ts`](../../src/main/mcp/tools/write.ts).
 
 ## Import
 

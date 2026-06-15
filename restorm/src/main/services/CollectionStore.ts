@@ -75,6 +75,15 @@ type Collection = EnvironmentFolder
  */
 class CollectionStore {
   private collections: Collection[] = []
+  /** Listeners fired after the whole collection tree is (re)set — e.g. on load.
+   * Lets higher layers (ContextService) react without CollectionStore importing
+   * them (no downward dependency). */
+  private collectionsSetListeners: (() => void)[] = []
+
+  /** Register a callback fired after every `setCollections` (load / replace). */
+  onCollectionsSet(cb: () => void): void {
+    this.collectionsSetListeners.push(cb)
+  }
 
   // ==========================================================================
   // Getters
@@ -142,6 +151,7 @@ class CollectionStore {
     // Convert plain objects to class instances if needed
     this.collections = collections.map(c => this.ensureEnvironmentFolderInstance(c))
     logger.info('[CollectionStore] Collections set', { count: collections.length, source })
+    for (const cb of this.collectionsSetListeners) cb()
   }
 
   /**

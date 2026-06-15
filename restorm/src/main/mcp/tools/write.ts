@@ -17,6 +17,7 @@ import { z } from 'zod'
 import { BrowserWindow } from 'electron'
 import { McpService } from 'electron-core-ui'
 import { collectionStore } from '../../services/CollectionStore'
+import { contextService } from '../../services/ContextService'
 import { isAnyFolder, isEnvironmentFolder, isRequest, isScenario, KeyValue, Environment } from '../../../shared/models'
 import type { EnvironmentFolder, CustomValueList, CustomValueEntry } from '../../../shared/types/collections'
 import { broadcastTreeReplace } from './import'
@@ -679,6 +680,167 @@ export function registerWriteTools(mcp: McpService): void {
         triggerSave()
       }
       return jsonReply({ envId, key, removed })
+    }
+  )
+
+  // ────────────────────────────────────────────────────────────────────
+  // Environments + sub-environments (structure CRUD). Variables are handled
+  // by set/delete/list_env_variable above; these manage the environment NODES
+  // themselves, symmetric to the env-folder UI. Sub-environments live embedded
+  // in their parent env's content (not their own save unit), so every change
+  // routes through `collectionStore` (which emits the env events ContextService
+  // needs) plus a folder refresh + autosave.
+  // ────────────────────────────────────────────────────────────────────
+
+  /** Owner env-folder id of an environment (top-level or nested), or undefined. */
+  const ownerEnvFolderId = (envId: string): string | undefined => {
+    const contains = (e: Environment): boolean =>
+      e.id === envId || (e.subEnvironments?.some(contains) ?? false)
+    for (const folder of collectionStore.getCollections()) {
+      if (!isEnvironmentFolder(folder)) continue
+      if (folder.environments.some(contains)) return folder.id
+    }
+    return undefined
+  }
+
+  /** Persist + refresh the renderer after an environment-structure change. */
+  const refreshEnvFolderAndSave = (folderId: string): void => {
+    collectionStore.updateFolder(folderId, {} as never)
+    for (const win of BrowserWindow.getAllWindows()) {
+      if (!win.isDestroyed()) {
+        win.webContents.send('mcp:folder-updated', { itemId: folderId, patch: {} })
+      }
+    }
+    broadcastTreeReplace()
+    triggerSave()
+  }
+
+  mcp.registerTool(
+    'list_environments',
+    {
+      title: 'List the environments of an env-folder',
+      description:
+        'Return the environment tree of an env-folder: every top-level environment with its ' +
+        'nested `subEnvironments`, each as `{ id, name, subEnvironments? }`. Use the returned ' +
+        'ids with `set_env_variable` / `rename_environment` / `delete_environment` and as ' +
+        '`parentEnvironmentId` for `create_environment`.',
+      inputSchema: {
+        envFolderId: z.string().min(1).describe('Env-folder id (from `list_folders`, `kind: "env-folder"`).')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const folderId = typeof args['envFolderId'] === 'string' ? args['envFolderId'] : ''
+      if (!folderId) return errorReply('envFolderId is required')
+      const folder = collectionStore.findById(folderId)
+      if (!folder || !isEnvironmentFolder(folder)) return errorReply(`No env-folder with id ${folderId}`)
+      const mapEnv = (e: Environment): Record<string, unknown> => ({
+        id: e.id,
+        name: e.name,
+        ...(e.subEnvironments && e.subEnvironments.length > 0
+          ? { subEnvironments: e.subEnvironments.map(mapEnv) }
+          : {})
+      })
+      return jsonReply({ envFolderId: folderId, environments: folder.environments.map(mapEnv) })
+    }
+  )
+
+  mcp.registerTool(
+    'create_environment',
+    {
+      title: 'Create an environment or sub-environment',
+      description:
+        'Add a new environment to an env-folder. Omit `parentEnvironmentId` for a top-level ' +
+        'environment, or pass an existing environment id to nest the new one as its ' +
+        'sub-environment. The new environment starts with no variables — populate it with ' +
+        '`set_env_variable`. Triggers an autosave.',
+      inputSchema: {
+        envFolderId: z.string().min(1).describe('Env-folder id (from `list_folders`).'),
+        name: z.string().min(1).optional().describe('Environment name. Defaults to "New environment".'),
+        parentEnvironmentId: z.string().min(1).optional().describe('When set, create the env as a sub-environment of this environment (must live in the same env-folder).')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const folderId = typeof args['envFolderId'] === 'string' ? args['envFolderId'] : ''
+      if (!folderId) return errorReply('envFolderId is required')
+      const folder = collectionStore.findById(folderId)
+      if (!folder || !isEnvironmentFolder(folder)) return errorReply(`No env-folder with id ${folderId}`)
+      const name = typeof args['name'] === 'string' && args['name'].length > 0 ? args['name'] : 'New environment'
+      const parentEnvironmentId = typeof args['parentEnvironmentId'] === 'string' ? args['parentEnvironmentId'] : undefined
+      if (parentEnvironmentId !== undefined && ownerEnvFolderId(parentEnvironmentId) !== folderId) {
+        return errorReply(`parentEnvironmentId ${parentEnvironmentId} is not an environment of env-folder ${folderId}`)
+      }
+      const env = collectionStore.createEnvironment(folderId, { name }, parentEnvironmentId)
+      refreshEnvFolderAndSave(folderId)
+      return jsonReply({ id: env.id, name: env.name, envFolderId: folderId, ...(parentEnvironmentId !== undefined ? { parentEnvironmentId } : {}) })
+    }
+  )
+
+  mcp.registerTool(
+    'rename_environment',
+    {
+      title: 'Rename an environment',
+      description: 'Rename an environment or sub-environment by id. Triggers an autosave.',
+      inputSchema: {
+        envId: z.string().min(1).describe('Environment id (from `list_environments`).'),
+        name: z.string().min(1).describe('New name.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const envId = typeof args['envId'] === 'string' ? args['envId'] : ''
+      const name = typeof args['name'] === 'string' ? args['name'] : ''
+      if (!envId) return errorReply('envId is required')
+      if (!name) return errorReply('name is required')
+      if (!findEnvById(envId)) return errorReply(`No environment with id ${envId}`)
+      collectionStore.updateEnvironment(envId, { name })
+      const folderId = ownerEnvFolderId(envId)
+      if (folderId !== undefined) refreshEnvFolderAndSave(folderId)
+      return jsonReply({ envId, name })
+    }
+  )
+
+  mcp.registerTool(
+    'delete_environment',
+    {
+      title: 'Delete an environment or sub-environment',
+      description:
+        'Remove an environment (and, recursively, its sub-environments) by id. Returns ' +
+        '`removed: false` when the id isn\'t found. Triggers an autosave on success.',
+      inputSchema: {
+        envId: z.string().min(1).describe('Environment id (from `list_environments`).')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const envId = typeof args['envId'] === 'string' ? args['envId'] : ''
+      if (!envId) return errorReply('envId is required')
+      // Capture the owner folder BEFORE deletion — afterwards the env is gone.
+      const folderId = ownerEnvFolderId(envId)
+      const removed = collectionStore.deleteEnvironment(envId)
+      if (removed && folderId !== undefined) refreshEnvFolderAndSave(folderId)
+      return jsonReply({ envId, removed })
+    }
+  )
+
+  mcp.registerTool(
+    'refresh_environment',
+    {
+      title: 'Re-resolve an environment\'s secret variables',
+      description:
+        'Force a re-resolution of every secret variable the environment OWNS: drops the ' +
+        'resolution cache, blanks the resolved plaintext, and re-fetches from each provider — ' +
+        'the env-level equivalent of the per-secret refresh button. The resolved values + any ' +
+        'expression composing them update live in the app; nothing is written to disk (resolved ' +
+        'plaintext is never persisted). Resolution is async (a slow provider keeps the spinner ' +
+        'up), so this returns immediately with the count of secrets it kicked off.',
+      inputSchema: {
+        envId: z.string().min(1).describe('Environment id (from `list_environments`). Sub-environments are supported.')
+      } as Record<string, unknown>
+    },
+    (args) => {
+      const envId = typeof args['envId'] === 'string' ? args['envId'] : ''
+      if (!envId) return errorReply('envId is required')
+      if (!findEnvById(envId)) return errorReply(`No environment with id ${envId}`)
+      const secretsRefreshed = contextService.refreshEnvironmentSecrets(envId)
+      return jsonReply({ envId, secretsRefreshed })
     }
   )
 

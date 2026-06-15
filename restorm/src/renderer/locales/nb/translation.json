@@ -1,15 +1,31 @@
 {
   "secrets": {
-    "others": "Others",
-    "refresh": "Refresh secret",
+    "others": "Andre",
+    "refresh": "Oppdater hemmelighet",
     "source": {
-      "envVar": "Env var",
-      "envFileSecret": "Env file secret",
-      "envFileSecretPlaceholder": "Secret value"
+      "envVar": "Miljøvariabel",
+      "envFileSecret": "Env-filhemmelighet",
+      "envFileSecretPlaceholder": "Hemmelig verdi",
+      "envFileSecretLabel": "Hemmelig verdi"
     },
     "param": {
-      "envVarName": "Variable name",
+      "envVarName": "Variabelnavn",
       "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "Rediger henting",
+    "envVarUnresolved": "(uløst)",
+    "resolving": "Løser…",
+    "resolveError": "Kunne ikke løse hemmeligheten",
+    "resolveErrorEnv": "Minst én variabel kunne ikke hentes og er i feiltilstand.",
+    "resolveErrorItem": "Minst én av hemmelighetene til dette elementet kunne ikke hentes.",
+    "fetchFailed": "Henting mislyktes",
+    "retrievalModal": {
+      "title": "Henting av hemmelighet",
+      "value": "verdi:",
+      "fetch": "Hent",
+      "fetchFailed": "Henting mislyktes",
+      "ok": "OK",
+      "cancel": "Avbryt"
     }
   },
   "app": {

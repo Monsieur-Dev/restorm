@@ -25,6 +25,17 @@ const selectedEnvByFolder = new Map<string, string | null>()
 
 let registered = false
 
+/** Fired after the active-env selection changes (or is bootstrapped), so a
+ * consumer can react — e.g. ContextService recomputing per-item secret badges,
+ * since switching the active env changes which env an item inherits. Registered
+ * via {@link setActiveEnvChangeListener} to avoid an import cycle. */
+let onActiveEnvChange: (() => void) | null = null
+
+/** Register the active-env-change listener (idempotent — last one wins). */
+export function setActiveEnvChangeListener(cb: () => void): void {
+  onActiveEnvChange = cb
+}
+
 /**
  * Wire IPC listeners. Idempotent: safe to call once during boot or
  * multiple times during tests (the second call just no-ops).
@@ -49,6 +60,7 @@ export function registerActiveStateBridge(): void {
     if (!envFolderId) return
     const envId = typeof p['envId'] === 'string' ? p['envId'] : null
     selectedEnvByFolder.set(envFolderId, envId)
+    onActiveEnvChange?.()
   })
 
   ipcMain.on('mcp:active-state-bootstrap', (_event, payload: unknown) => {
@@ -66,7 +78,11 @@ export function registerActiveStateBridge(): void {
       tabSnapshot.kind = k === 'request' || k === 'folder' || k === 'env-folder' || k === 'scenario' ? k : null
     }
     const envs = p['envByFolder']
-    if (envs && typeof envs === 'object') {
+    // Only replace the cache from a NON-EMPTY snapshot. An empty `envByFolder`
+    // (the MCP bridge's stub — per-folder selections are reported directly by
+    // each EnvironmentProvider, not aggregated here) must NOT wipe those live
+    // reports.
+    if (envs && typeof envs === 'object' && Object.keys(envs).length > 0) {
       selectedEnvByFolder.clear()
       for (const [k, v] of Object.entries(envs as Record<string, unknown>)) {
         if (typeof v === 'string') selectedEnvByFolder.set(k, v)
@@ -74,6 +90,7 @@ export function registerActiveStateBridge(): void {
       }
     }
     logger.debug('[mcp/activeState] bootstrap received', { tab: tabSnapshot, envCount: selectedEnvByFolder.size })
+    onActiveEnvChange?.()
   })
 }
 

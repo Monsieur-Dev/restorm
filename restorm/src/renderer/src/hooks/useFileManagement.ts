@@ -314,6 +314,11 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
           currentFolderPath
         )
         if (!result?.success) return false
+        // End-of-save-all contract (see FileService.clearAllDrafts): the tree
+        // is now fully on disk, so bulk-clear drafts AND force-clean the
+        // registry — including delete tombstones of removed units, which the
+        // re-hydration below can't reach (their ids are gone from the tree).
+        await window.restorm?.file.clearDrafts()
       } else {
         // No whole-file delta, but orphan `.draft.*` files may
         // still live under `userData/drafts/<uuid>/` from earlier
@@ -359,10 +364,6 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
     if (hasRealChanges) {
       const saved = await saveFile(dataForChecksum)
       if (!saved) return false
-    } else if (!hasEnvChanged) {
-      // Neither the main doc nor any password changed — bulk-clear
-      // orphan drafts and skip both file writes.
-      await window.restorm?.file.clearDrafts()
     }
     // Always write `.env` when its content drifted from the last
     // saved baseline, even if `hasContentChanged` reports no main-doc
@@ -372,6 +373,10 @@ export function useFileManagement(options: UseFileManagementOptions): UseFileMan
       await window.restorm?.secrets.write(`${filePath}.env`, envContent)
       savedEnvBaselineRef.current = envContent
     }
+    // Force-clean the save-unit registry on EVERY save-all path — a real save, a
+    // password-only `.env` write, or a no-op clean — so delete tombstones (a
+    // removed top-level env / request) never outlive the save that made them moot.
+    await window.restorm?.file.clearDrafts()
     void setContentChecksum(currentChecksum)
     savedBaselineRef.current = currentChecksum
     markAllTabsSaved()

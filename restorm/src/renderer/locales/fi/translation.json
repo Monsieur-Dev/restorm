@@ -1,15 +1,31 @@
 {
   "secrets": {
-    "others": "Others",
-    "refresh": "Refresh secret",
+    "others": "Muut",
+    "refresh": "Päivitä salaisuus",
     "source": {
-      "envVar": "Env var",
-      "envFileSecret": "Env file secret",
-      "envFileSecretPlaceholder": "Secret value"
+      "envVar": "Ympäristömuuttuja",
+      "envFileSecret": "Env-tiedoston salaisuus",
+      "envFileSecretPlaceholder": "Salainen arvo",
+      "envFileSecretLabel": "Salainen arvo"
     },
     "param": {
-      "envVarName": "Variable name",
+      "envVarName": "Muuttujan nimi",
       "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "Muokkaa noutoa",
+    "envVarUnresolved": "(ratkaisematta)",
+    "resolving": "Ratkaistaan…",
+    "resolveError": "Salaisuuden ratkaiseminen epäonnistui",
+    "resolveErrorEnv": "Ainakin yhtä muuttujaa ei voitu noutaa ja se on virhetilassa.",
+    "resolveErrorItem": "Ainakin yhtä tämän kohteen salaisuutta ei voitu noutaa.",
+    "fetchFailed": "Nouto epäonnistui",
+    "retrievalModal": {
+      "title": "Salaisuuden nouto",
+      "value": "arvo:",
+      "fetch": "Nouda",
+      "fetchFailed": "Nouto epäonnistui",
+      "ok": "OK",
+      "cancel": "Peruuta"
     }
   },
   "app": {

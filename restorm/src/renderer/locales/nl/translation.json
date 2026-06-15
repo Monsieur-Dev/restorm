@@ -1,15 +1,31 @@
 {
   "secrets": {
-    "others": "Others",
-    "refresh": "Refresh secret",
+    "others": "Overige",
+    "refresh": "Geheim vernieuwen",
     "source": {
-      "envVar": "Env var",
-      "envFileSecret": "Env file secret",
-      "envFileSecretPlaceholder": "Secret value"
+      "envVar": "Omgevingsvariabele",
+      "envFileSecret": "Env-bestandsgeheim",
+      "envFileSecretPlaceholder": "Geheime waarde",
+      "envFileSecretLabel": "Geheime waarde"
     },
     "param": {
-      "envVarName": "Variable name",
+      "envVarName": "Variabelenaam",
       "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "Ophalen bewerken",
+    "envVarUnresolved": "(niet opgelost)",
+    "resolving": "Bezig met oplossen…",
+    "resolveError": "Oplossen van geheim mislukt",
+    "resolveErrorEnv": "Ten minste één variabele kon niet worden opgehaald en bevat een fout.",
+    "resolveErrorItem": "Ten minste één van de geheimen van dit item kon niet worden opgehaald.",
+    "fetchFailed": "Ophalen mislukt",
+    "retrievalModal": {
+      "title": "Geheim ophalen",
+      "value": "waarde:",
+      "fetch": "Ophalen",
+      "fetchFailed": "Ophalen mislukt",
+      "ok": "OK",
+      "cancel": "Annuleren"
     }
   },
   "app": {

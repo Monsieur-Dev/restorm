@@ -13,7 +13,7 @@ import { getResolver as defaultGetResolver } from './mainSourceRegistry'
  * insertion order. Arrays keep their order (it is significant); primitives go
  * through `JSON.stringify` untouched.
  */
-function canonicalStringify(value: unknown): string {
+export function canonicalStringify(value: unknown): string {
   if (Array.isArray(value)) {
     return '[' + value.map(canonicalStringify).join(',') + ']'
   }
@@ -51,7 +51,61 @@ export class SecretHydrationService {
   /** cache[scopeId][hash] = resolved payload */
   private readonly cache = new Map<string, Map<string, unknown>>()
 
+  /**
+   * In-flight resolver calls, keyed by `(source, params)` hash — scope-INDEPENDENT.
+   * Two concurrent resolutions of the SAME credential under different scopes (e.g.
+   * the env-folder hydration under the env id AND the cell preview under
+   * `'preview'`) share ONE provider call instead of fetching twice. Ref-counted so
+   * the shared call is aborted only when EVERY waiter has aborted — a single
+   * waiter cancelling (env supersede / one closed tab) never strands the others.
+   */
+  private readonly inFlight = new Map<string, { promise: Promise<unknown>; controller: AbortController; refs: number }>()
+
   constructor(private readonly getResolver: (id: string) => ValueSourceResolver | undefined) {}
+
+  /**
+   * Resolve `(source, params)` through the shared in-flight registry: the first
+   * caller starts the provider fetch (under its own merged AbortController), later
+   * callers await the same promise. Each caller's `signal` decrements the ref on
+   * abort; the shared fetch is aborted only when the count reaches zero.
+   */
+  private resolveDeduped(
+    source: string,
+    params: Record<string, unknown>,
+    hash: string,
+    scopeId: string,
+    signal?: AbortSignal
+  ): Promise<unknown> {
+    let entry = this.inFlight.get(hash)
+    if (!entry) {
+      const resolver = this.getResolver(source)
+      if (!resolver) return Promise.reject(new Error(`unknown secret source: ${source}`))
+      const controller = new AbortController()
+      const promise = Promise.resolve(resolver.read(params, { scopeId, signal: controller.signal }))
+      entry = { promise, controller, refs: 0 }
+      this.inFlight.set(hash, entry)
+      // Drop the entry once settled so the next resolution re-fetches fresh.
+      void promise.catch(() => undefined).finally(() => {
+        if (this.inFlight.get(hash) === entry) this.inFlight.delete(hash)
+      })
+    }
+    const e = entry
+    e.refs += 1
+    let released = false
+    const release = (): void => {
+      if (released) return
+      released = true
+      e.refs -= 1
+      if (e.refs <= 0) e.controller.abort()
+    }
+    if (signal) {
+      if (signal.aborted) release()
+      else signal.addEventListener('abort', release, { once: true })
+    }
+    return e.promise.finally(() => {
+      if (signal) signal.removeEventListener('abort', release)
+    })
+  }
 
   /**
    * Populate `value.resolved` for every entry in `values`.
@@ -72,11 +126,9 @@ export class SecretHydrationService {
       if (scopeCache.has(hash)) {
         payload = scopeCache.get(hash)
       } else {
-        const resolver = this.getResolver(sv.source)
-        if (!resolver) {
-          throw new Error(`unknown secret source: ${sv.source}`)
-        }
-        payload = await resolver.read(sv.params, { scopeId, signal })
+        // Share a concurrent fetch of the SAME credential (any scope) so a slow
+        // secret shown in both the env table AND its cell preview resolves once.
+        payload = await this.resolveDeduped(sv.source, sv.params, hash, scopeId, signal)
         scopeCache.set(hash, payload)
       }
 

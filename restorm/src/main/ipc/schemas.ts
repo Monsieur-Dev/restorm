@@ -85,6 +85,16 @@ export const secretsResolveArgs = z.tuple([
   })
 ])
 
+// Refresh a secret used as an env-folder variable: drop the cache, blank the
+// in-memory resolved value, recompute the affected env contexts (so the secret
+// and any expression composing it go empty), then re-hydrate.
+export const secretsRefreshArgs = z.tuple([
+  z.object({
+    source: z.string(),
+    params: z.record(z.string(), z.unknown())
+  })
+])
+
 // ==========================================================================
 // Open Path
 // ==========================================================================

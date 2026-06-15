@@ -157,6 +157,16 @@ export const EnvironmentProvider: React.FC<EnvironmentProviderProps> = ({
     return () => { cancelRef.current = true }
   }, [environments, projectUuid, envFolderId, requestId])
 
+  // Mirror this folder's active environment to the main process so the secret
+  // badges resolve an item's INHERITED env against the user's actual selection
+  // (the active env), not just the first one. Fire-and-forget; main de-dupes by
+  // folder and recomputes item statuses on change. Always on (not MCP-gated).
+  useEffect(() => {
+    if (!envFolderId || !selectedEnvId) return
+    const runtime = (window as { restorm?: { runtime?: { pushMcpActiveEnv?: (p: { envFolderId: string; envId: string | null }) => void } } }).restorm?.runtime
+    runtime?.pushMcpActiveEnv?.({ envFolderId, envId: selectedEnvId })
+  }, [envFolderId, selectedEnvId])
+
   // Apply folder default to every mounted provider in that folder +
   // clear any request-level override that would still shadow it.
   const setFolderEnv = useCallback((envId: string): void => {

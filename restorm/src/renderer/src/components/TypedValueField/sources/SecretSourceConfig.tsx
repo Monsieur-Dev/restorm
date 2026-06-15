@@ -50,20 +50,25 @@ function cloneSecret(value: SecretValue, params: Record<string, unknown>): Secre
 const EnvFileSecretConfig: React.FC<ConfigComponentProps> = ({ value, onChange, dataTestId }) => {
   const { t } = useTranslation()
   return (
-    <InputBox
-      value={value.resolved ?? ''}
-      password
-      onChange={(next) => {
-        const updated = cloneSecret(value, value.params)
-        updated.resolved = next
-        onChange(updated)
-      }}
-      options={{
-        type: 'text',
-        placeholder: t('secrets.source.envFileSecretPlaceholder', 'Secret value')
-      }}
-      {...(dataTestId && { 'data-testid': `${dataTestId}-config-envfilesecret` })}
-    />
+    <div className="secret-source-field">
+      <label className="secret-source-field-label">
+        {t('secrets.source.envFileSecretLabel', 'Valeur du secret')}
+      </label>
+      <InputBox
+        value={value.resolved ?? ''}
+        password
+        onChange={(next) => {
+          const updated = cloneSecret(value, value.params)
+          updated.resolved = next
+          onChange(updated)
+        }}
+        options={{
+          type: 'text',
+          placeholder: t('secrets.source.envFileSecretPlaceholder', 'Secret value')
+        }}
+        {...(dataTestId && { 'data-testid': `${dataTestId}-config-envfilesecret` })}
+      />
+    </div>
   )
 }
 
@@ -88,32 +93,36 @@ const ParamFieldControl: React.FC<{
 
   const testId = dataTestId ? `${dataTestId}-config-param-${field.key}` : undefined
 
-  if (field.kind === 'select') {
-    const options = (field.options ?? []).map((o) => ({ text: t(o.labelKey, o.value) }))
-    const selectedIndex = Math.max(0, (field.options ?? []).findIndex((o) => o.value === current))
-    return (
+  const control =
+    field.kind === 'select' ? (
       <SelectBox
-        options={options}
-        selected={selectedIndex >= 0 ? selectedIndex : 0}
+        options={(field.options ?? []).map((o) => ({ text: t(o.labelKey, o.value) }))}
+        selected={Math.max(0, (field.options ?? []).findIndex((o) => o.value === current))}
         onDidSelect={(data) => { setParam(field.options?.[data.index]?.value ?? '') }}
         className=""
         id={`secret-param-${field.key}`}
         {...(testId && { 'data-testid': testId })}
       />
+    ) : (
+      <InputBox
+        value={current}
+        {...(field.kind === 'password' && { password: true })}
+        onChange={setParam}
+        options={{
+          type: 'text',
+          placeholder: field.placeholderKey ? t(field.placeholderKey, '') : t(field.labelKey, field.key)
+        }}
+        {...(testId && { 'data-testid': testId })}
+      />
     )
-  }
 
   return (
-    <InputBox
-      value={current}
-      {...(field.kind === 'password' && { password: true })}
-      onChange={setParam}
-      options={{
-        type: 'text',
-        placeholder: field.placeholderKey ? t(field.placeholderKey, '') : t(field.labelKey, field.key)
-      }}
-      {...(testId && { 'data-testid': testId })}
-    />
+    <div className="secret-source-field">
+      <label className="secret-source-field-label" htmlFor={`secret-param-${field.key}`}>
+        {t(field.labelKey, field.key)}
+      </label>
+      {control}
+    </div>
   )
 }
 

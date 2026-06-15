@@ -1,15 +1,31 @@
 {
   "secrets": {
-    "others": "Others",
-    "refresh": "Refresh secret",
+    "others": "Khác",
+    "refresh": "Làm mới bí mật",
     "source": {
-      "envVar": "Env var",
-      "envFileSecret": "Env file secret",
-      "envFileSecretPlaceholder": "Secret value"
+      "envVar": "Biến môi trường",
+      "envFileSecret": "Bí mật từ tệp env",
+      "envFileSecretPlaceholder": "Giá trị bí mật",
+      "envFileSecretLabel": "Giá trị bí mật"
     },
     "param": {
-      "envVarName": "Variable name",
+      "envVarName": "Tên biến",
       "envVarNamePlaceholder": "MY_API_KEY"
+    },
+    "editRetrieval": "Chỉnh sửa truy xuất",
+    "envVarUnresolved": "(chưa phân giải)",
+    "resolving": "Đang phân giải…",
+    "resolveError": "Phân giải bí mật thất bại",
+    "resolveErrorEnv": "Có ít nhất một biến không thể truy xuất và đang ở trạng thái lỗi.",
+    "resolveErrorItem": "Không thể truy xuất ít nhất một trong các bí mật của mục này.",
+    "fetchFailed": "Truy xuất thất bại",
+    "retrievalModal": {
+      "title": "Truy xuất bí mật",
+      "value": "giá trị:",
+      "fetch": "Truy xuất",
+      "fetchFailed": "Truy xuất thất bại",
+      "ok": "OK",
+      "cancel": "Hủy"
     }
   },
   "app": {

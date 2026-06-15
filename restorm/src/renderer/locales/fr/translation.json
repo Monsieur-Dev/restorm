@@ -4,14 +4,28 @@
     "refresh": "Rafraîchir le secret",
     "editRetrieval": "Éditer la récupération",
     "envVarUnresolved": "(non résolu)",
+    "resolving": "Résolution…",
+    "resolveError": "Échec de résolution du secret",
+    "resolveErrorEnv": "Au moins une variable n'a pas pu être récupérée et est en erreur.",
+    "resolveErrorItem": "Au moins un secret de cet élément n'a pas pu être récupéré.",
+    "fetchFailed": "Récupération impossible",
     "source": {
       "envVar": "Variable d'environnement",
       "envFileSecret": "Secret de fichier env",
-      "envFileSecretPlaceholder": "Valeur secrète"
+      "envFileSecretPlaceholder": "Valeur secrète",
+      "envFileSecretLabel": "Valeur secrète"
     },
     "param": {
       "envVarName": "Nom de la variable",
       "envVarNamePlaceholder": "MA_CLE_API"
+    },
+    "retrievalModal": {
+      "title": "Récupération du secret",
+      "value": "valeur :",
+      "fetch": "Récupérer",
+      "fetchFailed": "Récupération impossible",
+      "ok": "OK",
+      "cancel": "Annuler"
     }
   },
   "app": {
