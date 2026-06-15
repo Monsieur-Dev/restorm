@@ -10,6 +10,12 @@ import { isFolder, isRequest, isHTTPRequest, isEnvironmentFolder, isAnyFolder, i
 import React, { type ReactNode } from 'react'
 import { ScenarioRunningBadge } from '../components/common/ScenarioRunningBadge'
 import { WebsocketListeningBadge } from '../components/common/WebsocketListeningBadge'
+import { RequestExecutingBadge } from '../components/common/RequestExecutingBadge'
+
+/** Wrap a request badge so it runs the running-beam while the request executes. */
+function withExecutingBeam(requestId: string, badge: ReactNode): ReactNode {
+  return badge != null ? React.createElement(RequestExecutingBadge, { requestId }, badge) : badge
+}
 import { SecretResolvingSpinner } from '../components/common/SecretResolvingSpinner'
 import { SecretErrorIndicator } from '../components/common/SecretErrorIndicator'
 import { ItemSecretBadges } from '../components/common/ItemSecretBadges'
@@ -100,7 +106,7 @@ function httpRequestToListViewItem(
   return {
     id: request.id,
     title: decorated.title,
-    icon: decorated.icon
+    icon: withExecutingBeam(request.id, decorated.icon)
   }
 }
 
@@ -115,7 +121,7 @@ function graphqlRequestToListViewItem(
   return {
     id: request.id,
     title: request.name,
-    icon: badge
+    icon: withExecutingBeam(request.id, badge)
   }
 }
 
@@ -130,7 +136,7 @@ function grpcRequestToListViewItem(
   return {
     id: request.id,
     title: request.name,
-    icon: badge
+    icon: withExecutingBeam(request.id, badge)
   }
 }
 
@@ -145,7 +151,7 @@ function soapRequestToListViewItem(
   return {
     id: request.id,
     title: request.name,
-    icon: badge
+    icon: withExecutingBeam(request.id, badge)
   }
 }
 
@@ -178,7 +184,7 @@ function odataRequestToListViewItem(
   return {
     id: request.id,
     title: request.name,
-    icon: badge
+    icon: withExecutingBeam(request.id, badge)
   }
 }
 
@@ -195,7 +201,7 @@ function authenticationRequestToListViewItem(
   return {
     id: request.id,
     title: request.name,
-    icon: badge
+    icon: withExecutingBeam(request.id, badge)
   }
 }
 

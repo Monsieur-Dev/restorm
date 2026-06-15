@@ -30,6 +30,7 @@ import { useApiDocumentationFromRequest } from '../../hooks/useApiDocumentationF
 import { DocumentationHost } from '../documentation/DocumentationHost'
 import { findOperationForRoute } from '../../../../shared/utils/findOperationForRoute'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
+import { BeamWrap } from '../common/BeamWrap'
 
 export interface GrpcRequestTabViewProps {
   request: GrpcRequest
@@ -405,16 +406,18 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
           />
         </div>
         <SendButtonEnvSwitcher>
-          <Button
-            icon={isSending ? 'close' : 'send'}
-            onClick={isSending ? handleCancel : handleSend}
-            {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-            options={{
-              title: isSending ? t('cancel') : t('grpc.send'),
-              ariaLabel: isSending ? t('cancel') : t('grpc.send')
-            }}
-            data-testid="grpc-send-button"
-          />
+          <BeamWrap active={isSending} size={22} borderWidth={1.5}>
+            <Button
+              icon={isSending ? 'close' : 'send'}
+              onClick={isSending ? handleCancel : handleSend}
+              {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+              options={{
+                title: isSending ? t('cancel') : t('grpc.send'),
+                ariaLabel: isSending ? t('cancel') : t('grpc.send')
+              }}
+              data-testid="grpc-send-button"
+            />
+          </BeamWrap>
         </SendButtonEnvSwitcher>
       </ControlGroup>
       <div style={{ fontSize: 12, color: 'var(--descriptionForeground)' }}>
