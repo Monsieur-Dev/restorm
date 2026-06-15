@@ -132,14 +132,18 @@ export interface ExecResult {
         durationMs?: number
         endDateMs?: number
       }
-    // A `socketioConnect`: the scheduler opens a long-lived Socket.IO connection
-    // (registered under the node id so `socketioSend` / `socketioClose` can reach
-    // it), fires `connected` when the socket opens, re-emits each received event
-    // on its `event:<name>` / `others` port in a child scope, and fires `done`
-    // when the connection closes (via a `socketioClose`, the run being stopped,
-    // or the server dropping it).
+    // A `socketioConnect` / `websocketConnect`: the scheduler opens a long-lived
+    // connection (registered under the node id so the matching send / close nodes
+    // can reach it), fires `connected` when the socket opens, re-emits each
+    // received frame in a child scope, and fires `done` when the connection
+    // closes (a close node, the run being stopped, or the server dropping it).
+    // `transport` picks the wire + the routing: `socketio` routes each frame to
+    // its `event:<name>` / `others` port (by event name); `websocket` (raw) has
+    // no events, so every frame goes to the single `message` port (`events` is
+    // empty).
     | {
         type: 'openSocketioConnect'
+        transport: 'socketio' | 'websocket'
         requestId: string
         events: string[]
         connectionName: string

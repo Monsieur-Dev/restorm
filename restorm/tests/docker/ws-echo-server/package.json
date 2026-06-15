@@ -1,0 +1,9 @@
+{
+  "name": "restorm-ws-echo-test-server",
+  "version": "1.0.0",
+  "description": "Raw WebSocket echo test server for Restorm",
+  "main": "server.js",
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

@@ -13,17 +13,9 @@ import { normalizeValueType } from '../../../utils/normalizeValueType'
 import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
 import { readSocketioEvents } from '../../../../../shared/scenarioNodePorts'
 import { useScenarioConnections } from '../scenarioConnectionsContext'
+import { readCodeString } from './scenarioCodeValue'
 
 const stop = (e: React.MouseEvent): void => { e.stopPropagation() }
-
-/** The payload is stored as a plain code string, but a scenario authored before
- * the code editor (or via MCP) may carry a `{ type:'string', value }` typed
- * value — read either shape back into the editor. */
-function readCodeString(v: unknown): string {
-  if (typeof v === 'string') return v
-  const inner = (v as { value?: unknown } | null | undefined)?.value
-  return typeof inner === 'string' ? inner : ''
-}
 
 /**
  * A (socketioConnect) — declares + opens a long-lived Socket.IO connection.
@@ -38,10 +30,29 @@ export const SocketioConnectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = 
   const config = data.config ?? {}
   const events = readSocketioEvents(config)
   const connectionName = typeof config['connectionName'] === 'string' ? config['connectionName'] : ''
+  const requestId = typeof config['requestId'] === 'string' ? config['requestId'] : undefined
 
   const setEvents = (next: string[]): void => { data.onSetConfig?.(id, { events: next }) }
 
   const left: ScenarioNodeSection[] = [
+    ...(requestId && data.onOpenItem
+      ? [{
+          id: 'edit',
+          rows: [{
+            id: 'edit',
+            content: (
+              <Button
+                externalLink
+                className="nodrag"
+                data-testid="scn-request-edit-link"
+                onClick={(e: React.MouseEvent) => { e.stopPropagation(); data.onOpenItem?.(requestId) }}
+              >
+                {t('scenario.editRequest', 'Edit request')}
+              </Button>
+            )
+          }]
+        }]
+      : []),
     {
       id: 'main',
       rows: [
@@ -116,14 +127,15 @@ function isBlankValue(v: unknown): boolean {
   return typeof inner === 'string' ? inner.trim() === '' : inner === undefined
 }
 
-/** A SelectBox-like connection picker shared by send / close. Falls back to a
- * read-only label when rendered outside the editor (no connections context).
- * When `prefill` is set, selecting a connection seeds the send node's
+/** A SelectBox-like connection picker shared by send / close (Socket.IO + raw
+ * WebSocket). Filters the connections to the matching transport `kind`. Falls
+ * back to a read-only label when rendered outside the editor (no connections
+ * context). When `prefill` is set, selecting a connection seeds the send node's
  * channel/payload from the connect node's linked request (only when blank, so a
  * user edit is never clobbered). */
-const ConnectionPicker: React.FC<{ id: string; data: ScenarioNodeBoxType['data']; prefill?: boolean }> = ({ id, data, prefill }) => {
+export const ConnectionPicker: React.FC<{ id: string; data: ScenarioNodeBoxType['data']; kind: 'socketioConnect' | 'websocketConnect'; prefill?: boolean }> = ({ id, data, kind, prefill }) => {
   const { t } = useTranslation()
-  const connections = useScenarioConnections()
+  const connections = useScenarioConnections().filter((c) => c.kind === kind)
   const config = data.config ?? {}
   const selectedId = typeof config['connectionNodeId'] === 'string' ? config['connectionNodeId'] : ''
   // A leading placeholder row + one row per declared connection. The display
@@ -138,7 +150,7 @@ const ConnectionPicker: React.FC<{ id: string; data: ScenarioNodeBoxType['data']
     <div className="nodrag" onMouseDown={stop}>
       <div className="scn-field-caption">{t('scenario.socketio.connection', 'connection')}</div>
       <SelectBox
-        id={`scn-socketio-connection-${id}`}
+        id={`scn-stream-connection-${id}`}
         className=""
         options={options}
         selected={selectedIndex}
@@ -178,7 +190,7 @@ export const SocketioSendNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ 
     {
       id: 'main',
       rows: [
-        { id: 'connection', content: <ConnectionPicker id={id} data={data} prefill /> },
+        { id: 'connection', content: <ConnectionPicker id={id} data={data} kind="socketioConnect" prefill /> },
         {
           id: 'channel',
           port: { id: 'channel', type: 'target' },
@@ -225,7 +237,7 @@ export const SocketioSendNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ 
 /** C (socketioClose) — closes a declared connection; sequences via `done`. */
 export const SocketioCloseNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data, selected }) => {
   const left: ScenarioNodeSection[] = [
-    { id: 'main', rows: [{ id: 'connection', content: <ConnectionPicker id={id} data={data} /> }] }
+    { id: 'main', rows: [{ id: 'connection', content: <ConnectionPicker id={id} data={data} kind="socketioConnect" /> }] }
   ]
   // No explicit output — the action sequences via the universal `done` port.
   return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} headerIcon={<Badge type="SIO" icon="debug-disconnect" />} />

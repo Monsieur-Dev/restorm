@@ -216,12 +216,13 @@ const resolveRequestPreview: PreviewResolver = async (_scenarioId, node) => {
   }
 }
 
-/** `socketioConnect`: the bound Socket.IO request's latest received message,
- * read from its history — the analogue of the httpRequest preview, so an edge
- * leaving an `event:<name>` port gets a JSON-path picker over a real message.
- * Prefers the most recent received frame on a listened event; falls back to the
- * latest received frame. Null until the connection has run at least once. */
-const resolveSocketioConnectPreview: PreviewResolver = async (_scenarioId, node) => {
+/** `socketioConnect` / `websocketConnect`: the bound streaming request's latest
+ * received message, read from its history — the analogue of the httpRequest
+ * preview, so an edge leaving an `event:<name>` / `message` port gets a JSON-path
+ * picker over a real frame. Prefers the most recent received frame on a listened
+ * event (Socket.IO); a raw WebSocket has no events so it always takes the latest
+ * received frame. Null until the connection has run at least once. */
+const resolveStreamConnectPreview: PreviewResolver = async (_scenarioId, node) => {
   const requestId = boundRequestId(node)
   if (!requestId) return null
   const entries = await responseHistoryService.list(requestId)
@@ -249,7 +250,8 @@ const resolveCodePreview: PreviewResolver = async (_scenarioId, node) => {
 const previewResolvers: Partial<Record<ScenarioNode['kind'], PreviewResolver>> = {
   httpRequest: resolveRequestPreview,
   request: resolveRequestPreview,
-  socketioConnect: resolveSocketioConnectPreview,
+  socketioConnect: resolveStreamConnectPreview,
+  websocketConnect: resolveStreamConnectPreview,
   code: resolveCodePreview
 }
 

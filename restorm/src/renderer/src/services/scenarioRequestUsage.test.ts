@@ -57,6 +57,33 @@ describe('findScenariosUsingRequest', () => {
   })
 })
 
+describe('streaming connect nodes bind a request too (Socket.IO / WebSocket)', () => {
+  // A streaming connect node ties its bound request to the scenario exactly like
+  // an httpRequest node — so the reverse-nav link + delete/move flow must see it.
+  const streamNode = (id: string, kind: string, requestId: string): { id: string; kind: string; config: { requestId: string }; inputs: never[]; outputs: never[]; position: { x: number; y: number } } =>
+    ({ id, kind, config: { requestId }, inputs: [], outputs: [], position: { x: 0, y: 0 } })
+  const wsReq = { type: 'websocket', id: 'req-ws', name: 'WS Echo' }
+  const streamScenario = {
+    type: 'scenario', id: 'scn-stream', name: 'Streaming', tags: [], params: [],
+    nodes: [streamNode('w1', 'websocketConnect', 'req-ws'), streamNode('s1', 'socketioConnect', 'req-ws')],
+    edges: [], items: []
+  }
+  const env = { folderType: 'environment', id: 'env', name: 'Env', configuration: {}, environments: [], items: [streamScenario, wsReq] }
+  const root = [env] as unknown as FolderItem[]
+
+  it('findScenariosUsingRequest finds a request bound by websocketConnect + socketioConnect nodes', () => {
+    const usages = findScenariosUsingRequest(root, 'req-ws')
+    expect(usages).toHaveLength(1)
+    expect(usages[0]?.nodeIds.sort()).toEqual(['s1', 'w1'])
+  })
+
+  it('collectRequestScenarioRelations reports streaming-bound requests for the delete/move flow', () => {
+    const rel = collectRequestScenarioRelations(root, 'req-ws')
+    expect(rel).toHaveLength(1)
+    expect(rel[0]?.nodeIds.sort()).toEqual(['s1', 'w1'])
+  })
+})
+
 describe('isRequestInScenarioSubtree', () => {
   it('is true for a request authored as a scenario child', () => {
     expect(isRequestInScenarioSubtree(scn, 'req-child')).toBe(true)

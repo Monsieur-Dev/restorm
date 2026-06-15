@@ -956,7 +956,10 @@
       "code": "Code",
       "socketioConnect": "Socket.IO connexion",
       "socketioSend": "Socket.IO envoi",
-      "socketioClose": "Socket.IO fermeture"
+      "socketioClose": "Socket.IO fermeture",
+      "websocketConnect": "WebSocket connexion",
+      "websocketSend": "WebSocket envoi",
+      "websocketClose": "WebSocket fermeture"
     },
     "comparator": {
       "result": "résultat"
@@ -1494,7 +1497,10 @@
       "assert": "Vérifie une condition (style chai) et aiguille vers réussite ou échec.",
       "socketioConnect": "Ouvre une connexion Socket.IO et réémet chaque évènement reçu sur son port.",
       "socketioSend": "Envoie un message sur une connexion Socket.IO déjà ouverte.",
-      "socketioClose": "Ferme une connexion Socket.IO déjà ouverte."
+      "socketioClose": "Ferme une connexion Socket.IO déjà ouverte.",
+      "websocketConnect": "Ouvre une connexion WebSocket brute et réémet chaque message reçu sur son port.",
+      "websocketSend": "Envoie un payload sur une connexion WebSocket déjà ouverte.",
+      "websocketClose": "Ferme une connexion WebSocket déjà ouverte."
     },
     "legend": {
       "title": "Légende",
@@ -1535,6 +1541,9 @@
       "channelLabel": "Nom du canal",
       "payload": "payload",
       "payloadModalTitle": "Modifier le payload"
+    },
+    "websocket": {
+      "message": "message"
     }
   }
 }
