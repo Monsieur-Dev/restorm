@@ -37,12 +37,12 @@ jobs:
       - name: Run electron-core-ui linter (ESLint + Stylelint)
         run: |
           cd electron-core-ui
-          pnpm run lint
+          NODE_OPTIONS="--max-old-space-size=4096" pnpm run lint
       
       - name: Run electron-core-ui type check
         run: |
           cd electron-core-ui
-          pnpm run typecheck
+          NODE_OPTIONS="--max-old-space-size=4096" pnpm run typecheck
       
       - name: Validate theme contrast ratios
         run: |
@@ -67,12 +67,12 @@ jobs:
       - name: Run restorm linter
         run: |
           cd restorm
-          pnpm run lint
+          NODE_OPTIONS="--max-old-space-size=4096" pnpm run lint
 
       - name: Run restorm type check
         run: |
           cd restorm
-          pnpm run typecheck
+          NODE_OPTIONS="--max-old-space-size=4096" pnpm run typecheck
 
       - name: Run restorm unit and integration tests
         run: |
