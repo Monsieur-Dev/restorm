@@ -1,0 +1,30 @@
+- message: 🔵 [<time>] ▶ gRPC unary
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: gRPC unary call
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: localhost:9000
+        method: grpcbin.GRPCBin/DummyUnary
+        headers: {}
+      response:
+        status: 0
+        statusText: OK
+        headers: {}
+        body: '{"f_strings":[],"f_enums":[],"f_subs":[],"f_bools":[],"f_int32s":[],"f_int64s":[],"f_bytess":[],"f_floats":[],"f_string":"ping","f_enum":"ENUM_0","f_sub":null,"f_bool":false,"f_int32":0,"f_int64":"0","f_bytes":{"type":"Buffer","data":[]},"f_float":0}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start log
+  data:
+    message: réponse unary
+    level: info
+    data: '{"f_strings":[],"f_enums":[],"f_subs":[],"f_bools":[],"f_int32s":[],"f_int64s":[],"f_bytess":[],"f_floats":[],"f_string":"ping","f_enum":"ENUM_0","f_sub":null,"f_bool":false,"f_int32":0,"f_int64":"0","f_bytes":{"type":"Buffer","data":[]},"f_float":0}'
+- message: 🔵 [<time>] réponse unary
+  data: '{"f_strings":[],"f_enums":[],"f_subs":[],"f_bools":[],"f_int32s":[],"f_int64s":[],"f_bytess":[],"f_floats":[],"f_string":"ping","f_enum":"ENUM_0","f_sub":null,"f_bool":false,"f_int32":0,"f_int64":"0","f_bytes":{"type":"Buffer","data":[]},"f_float":0}'
+- message: ⚪ [<time>] done log
+  data:
+    value: '{"f_strings":[],"f_enums":[],"f_subs":[],"f_bools":[],"f_int32s":[],"f_int64s":[],"f_bytess":[],"f_floats":[],"f_string":"ping","f_enum":"ENUM_0","f_sub":null,"f_bool":false,"f_int32":0,"f_int64":"0","f_bytes":{"type":"Buffer","data":[]},"f_float":0}'
+- message: 🔵 [<time>] ■ gRPC unary

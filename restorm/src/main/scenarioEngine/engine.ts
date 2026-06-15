@@ -11,6 +11,7 @@
 import { logger, getSettingsService, isSettingsServiceInitialized } from 'electron-core-ui/main'
 import { collectionStore } from '../services/CollectionStore'
 import { websocketExecutionService } from '../services/WebSocketExecutionService'
+import { grpcExecutionService } from '../services/GRPCExecutionService'
 import { flushRequestStateToContext } from '../mcp/tools/execute'
 import { installScenarioValueResolvers } from '../../shared/scenarioValueResolvers'
 import { setSecretPreviewResolver } from '../../shared/utils/scenarioStaticPreview'
@@ -176,6 +177,7 @@ export class ScenarioEngine {
         if (bound && (bound as { type?: string }).type !== 'scenario') {
           flushRequestStateToContext(bound as unknown as Parameters<typeof flushRequestStateToContext>[0])
         }
+        if (req.transport === 'grpc') return grpcExecutionService.connectStreaming(req)
         return req.transport === 'websocket'
           ? websocketExecutionService.connectStreamingRaw(req)
           : websocketExecutionService.connectStreaming(req)

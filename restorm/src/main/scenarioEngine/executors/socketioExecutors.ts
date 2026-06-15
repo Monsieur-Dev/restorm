@@ -96,6 +96,53 @@ export const websocketCloseExecutor: NodeExecutor = (_act, ctx) => {
   return { outputs: [] }
 }
 
+/** A (grpcConnect): gRPC streaming — same handoff as websocketConnect. The
+ * call type (server / client / bidi) is inferred from the bound request, so
+ * every received frame routes to the single `message` port. */
+export const grpcConnectExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { requestId?: unknown; connectionName?: unknown }
+  if (typeof cfg.requestId !== 'string' || cfg.requestId === '') {
+    throw new Error(`grpcConnect node ${ctx.node.id} has no bound requestId`)
+  }
+  const connectionName = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== ''
+    ? cfg.connectionName.trim()
+    : cfg.requestId
+  return {
+    outputs: [],
+    scopeAction: { type: 'openSocketioConnect', transport: 'grpc', requestId: cfg.requestId, events: [], connectionName }
+  }
+}
+
+/** B (grpcSend): write a request message (no channel) on the referenced call. */
+export const grpcSendExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { connectionNodeId?: unknown; payload?: unknown }
+  const connectionNodeId = typeof cfg.connectionNodeId === 'string' ? cfg.connectionNodeId : ''
+  if (connectionNodeId === '') throw new Error('grpcSend: no connection selected')
+  if (!ctx.socketio) throw new Error('grpcSend: socket bridge unavailable')
+  if (!ctx.socketio.has(connectionNodeId)) {
+    throw new Error('grpcSend: the referenced connection does not exist in this run')
+  }
+  const payload = toWire(resolveOperand(act.inputs['payload'], cfg.payload, ctx.variables))
+  // gRPC has no channel — the empty channel makes the bridge do a plain
+  // `grpc.send(payload)` (a stream write), like raw WS.
+  const ok = ctx.socketio.send(connectionNodeId, '', payload)
+  if (!ok) throw new Error('grpcSend: the referenced connection is not open')
+  return { outputs: [] }
+}
+
+/** C (grpcClose): half-close the referenced streaming call. */
+export const grpcCloseExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { connectionNodeId?: unknown }
+  const connectionNodeId = typeof cfg.connectionNodeId === 'string' ? cfg.connectionNodeId : ''
+  if (connectionNodeId === '') throw new Error('grpcClose: no connection selected')
+  if (!ctx.socketio) throw new Error('grpcClose: socket bridge unavailable')
+  if (!ctx.socketio.has(connectionNodeId)) {
+    throw new Error('grpcClose: the referenced connection does not exist in this run')
+  }
+  ctx.socketio.close(connectionNodeId)
+  return { outputs: [] }
+}
+
 /** B (socketioSend): emit on the referenced connection. */
 export const socketioSendExecutor: NodeExecutor = (act, ctx) => {
   const cfg = ctx.node.config as { connectionNodeId?: unknown; channel?: unknown; payload?: unknown }

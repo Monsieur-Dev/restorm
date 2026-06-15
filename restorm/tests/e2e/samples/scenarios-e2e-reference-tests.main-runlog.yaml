@@ -6458,4 +6458,794 @@
 - message: ⚪ [<time>] done runScenario
   data:
     result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: gRPC bidi
+    in: true
+- message: 🔵 [<time>] ▶ gRPC bidi
+- message: ⚪ [<time>] start grpcConnect
+  data:
+    requestId: <uuid>
+    connectionName: Echo
+    label: Echo connect
+- message: ⚪ [<time>] done grpcConnect
+- message: ⚪ [<time>] grpc "Echo" connecting
+- message: ⚪ [<time>] grpc "Echo" connected
+- message: ⚪ [<time>] start grpcSend
+  data:
+    connectionNodeId: <uuid>
+    payload: '{"f_string":"hello"}'
+    label: send to Echo
+    in: true
+- message: ⚪ [<time>] done grpcSend
+- message: ⚪ [<time>] start wait
+  data:
+    durationMs: <dynamic-time>
+    label: let the echo arrive
+    in: true
+- message: ⚪ [<time>] start log
+  data:
+    message: frame gRPC reçue
+    level: info
+    data:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: hello
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: 🔵 [<time>] frame gRPC reçue
+  data:
+    f_strings: []
+    f_enums: []
+    f_subs: []
+    f_bools: []
+    f_int32s: []
+    f_int64s: []
+    f_bytess: []
+    f_floats: []
+    f_string: hello
+    f_enum: ENUM_0
+    f_sub: null
+    f_bool: false
+    f_int32: 0
+    f_int64: "0"
+    f_bytes: []
+    f_float: 0
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: hello
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: ⚪ [<time>] done wait
+- message: ⚪ [<time>] start grpcClose
+  data:
+    connectionNodeId: <uuid>
+    label: close Echo
+    in: true
+- message: ⚪ [<time>] done grpcClose
+- message: ⚪ [<time>] grpc "Echo" closed
+- message: ⚪ [<time>] start log
+  data:
+    message: stream gRPC fermé
+    level: info
+    in: true
+- message: 🔵 [<time>] stream gRPC fermé
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ gRPC bidi
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: gRPC server stream
+    in: true
+- message: 🔵 [<time>] ▶ gRPC server stream
+- message: ⚪ [<time>] start grpcConnect
+  data:
+    requestId: <uuid>
+    connectionName: Ticks
+    label: Server stream connect
+- message: ⚪ [<time>] done grpcConnect
+- message: ⚪ [<time>] grpc "Ticks" connecting
+- message: ⚪ [<time>] grpc "Ticks" connected
+- message: ⚪ [<time>] start log
+  data:
+    message: trame reçue
+    level: info
+    data:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: 🔵 [<time>] trame reçue
+  data:
+    f_strings: []
+    f_enums: []
+    f_subs: []
+    f_bools: []
+    f_int32s: []
+    f_int64s: []
+    f_bytess: []
+    f_floats: []
+    f_string: tick
+    f_enum: ENUM_0
+    f_sub: null
+    f_bool: false
+    f_int32: 0
+    f_int64: "0"
+    f_bytes: []
+    f_float: 0
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: ⚪ [<time>] start log
+  data:
+    message: trame reçue
+    level: info
+    data:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: 🔵 [<time>] trame reçue
+  data:
+    f_strings: []
+    f_enums: []
+    f_subs: []
+    f_bools: []
+    f_int32s: []
+    f_int64s: []
+    f_bytess: []
+    f_floats: []
+    f_string: tick
+    f_enum: ENUM_0
+    f_sub: null
+    f_bool: false
+    f_int32: 0
+    f_int64: "0"
+    f_bytes: []
+    f_float: 0
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: ⚪ [<time>] start log
+  data:
+    message: trame reçue
+    level: info
+    data:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: 🔵 [<time>] trame reçue
+  data:
+    f_strings: []
+    f_enums: []
+    f_subs: []
+    f_bools: []
+    f_int32s: []
+    f_int64s: []
+    f_bytess: []
+    f_floats: []
+    f_string: tick
+    f_enum: ENUM_0
+    f_sub: null
+    f_bool: false
+    f_int32: 0
+    f_int64: "0"
+    f_bytes: []
+    f_float: 0
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: ⚪ [<time>] start log
+  data:
+    message: trame reçue
+    level: info
+    data:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: 🔵 [<time>] trame reçue
+  data:
+    f_strings: []
+    f_enums: []
+    f_subs: []
+    f_bools: []
+    f_int32s: []
+    f_int64s: []
+    f_bytess: []
+    f_floats: []
+    f_string: tick
+    f_enum: ENUM_0
+    f_sub: null
+    f_bool: false
+    f_int32: 0
+    f_int64: "0"
+    f_bytes: []
+    f_float: 0
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: ⚪ [<time>] start log
+  data:
+    message: trame reçue
+    level: info
+    data:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: 🔵 [<time>] trame reçue
+  data:
+    f_strings: []
+    f_enums: []
+    f_subs: []
+    f_bools: []
+    f_int32s: []
+    f_int64s: []
+    f_bytess: []
+    f_floats: []
+    f_string: tick
+    f_enum: ENUM_0
+    f_sub: null
+    f_bool: false
+    f_int32: 0
+    f_int64: "0"
+    f_bytes: []
+    f_float: 0
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: ⚪ [<time>] start log
+  data:
+    message: trame reçue
+    level: info
+    data:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: 🔵 [<time>] trame reçue
+  data:
+    f_strings: []
+    f_enums: []
+    f_subs: []
+    f_bools: []
+    f_int32s: []
+    f_int64s: []
+    f_bytess: []
+    f_floats: []
+    f_string: tick
+    f_enum: ENUM_0
+    f_sub: null
+    f_bool: false
+    f_int32: 0
+    f_int64: "0"
+    f_bytes: []
+    f_float: 0
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: ⚪ [<time>] start log
+  data:
+    message: trame reçue
+    level: info
+    data:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: 🔵 [<time>] trame reçue
+  data:
+    f_strings: []
+    f_enums: []
+    f_subs: []
+    f_bools: []
+    f_int32s: []
+    f_int64s: []
+    f_bytess: []
+    f_floats: []
+    f_string: tick
+    f_enum: ENUM_0
+    f_sub: null
+    f_bool: false
+    f_int32: 0
+    f_int64: "0"
+    f_bytes: []
+    f_float: 0
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: ⚪ [<time>] start log
+  data:
+    message: trame reçue
+    level: info
+    data:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: 🔵 [<time>] trame reçue
+  data:
+    f_strings: []
+    f_enums: []
+    f_subs: []
+    f_bools: []
+    f_int32s: []
+    f_int64s: []
+    f_bytess: []
+    f_floats: []
+    f_string: tick
+    f_enum: ENUM_0
+    f_sub: null
+    f_bool: false
+    f_int32: 0
+    f_int64: "0"
+    f_bytes: []
+    f_float: 0
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: ⚪ [<time>] start log
+  data:
+    message: trame reçue
+    level: info
+    data:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: 🔵 [<time>] trame reçue
+  data:
+    f_strings: []
+    f_enums: []
+    f_subs: []
+    f_bools: []
+    f_int32s: []
+    f_int64s: []
+    f_bytess: []
+    f_floats: []
+    f_string: tick
+    f_enum: ENUM_0
+    f_sub: null
+    f_bool: false
+    f_int32: 0
+    f_int64: "0"
+    f_bytes: []
+    f_float: 0
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: ⚪ [<time>] start log
+  data:
+    message: trame reçue
+    level: info
+    data:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: 🔵 [<time>] trame reçue
+  data:
+    f_strings: []
+    f_enums: []
+    f_subs: []
+    f_bools: []
+    f_int32s: []
+    f_int64s: []
+    f_bytess: []
+    f_floats: []
+    f_string: tick
+    f_enum: ENUM_0
+    f_sub: null
+    f_bool: false
+    f_int32: 0
+    f_int64: "0"
+    f_bytes: []
+    f_float: 0
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: ⚪ [<time>] grpc "Ticks" closed
+- message: ⚪ [<time>] start log
+  data:
+    message: server stream terminé
+    level: info
+    in: true
+- message: 🔵 [<time>] server stream terminé
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ gRPC server stream
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: gRPC unary
+    in: true
+- message: 🔵 [<time>] ▶ gRPC unary
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: gRPC unary call
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: localhost:9000
+        method: grpcbin.GRPCBin/DummyUnary
+        headers: {}
+      response:
+        status: 0
+        statusText: OK
+        headers: {}
+        body: '{"f_strings":[],"f_enums":[],"f_subs":[],"f_bools":[],"f_int32s":[],"f_int64s":[],"f_bytess":[],"f_floats":[],"f_string":"ping","f_enum":"ENUM_0","f_sub":null,"f_bool":false,"f_int32":0,"f_int64":"0","f_bytes":{"type":"Buffer","data":[]},"f_float":0}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start log
+  data:
+    message: réponse unary
+    level: info
+    data: '{"f_strings":[],"f_enums":[],"f_subs":[],"f_bools":[],"f_int32s":[],"f_int64s":[],"f_bytess":[],"f_floats":[],"f_string":"ping","f_enum":"ENUM_0","f_sub":null,"f_bool":false,"f_int32":0,"f_int64":"0","f_bytes":{"type":"Buffer","data":[]},"f_float":0}'
+- message: 🔵 [<time>] réponse unary
+  data: '{"f_strings":[],"f_enums":[],"f_subs":[],"f_bools":[],"f_int32s":[],"f_int64s":[],"f_bytess":[],"f_floats":[],"f_string":"ping","f_enum":"ENUM_0","f_sub":null,"f_bool":false,"f_int32":0,"f_int64":"0","f_bytes":{"type":"Buffer","data":[]},"f_float":0}'
+- message: ⚪ [<time>] done log
+  data:
+    value: '{"f_strings":[],"f_enums":[],"f_subs":[],"f_bools":[],"f_int32s":[],"f_int64s":[],"f_bytess":[],"f_floats":[],"f_string":"ping","f_enum":"ENUM_0","f_sub":null,"f_bool":false,"f_int32":0,"f_int64":"0","f_bytes":{"type":"Buffer","data":[]},"f_float":0}'
+- message: 🔵 [<time>] ■ gRPC unary
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: gRPC client stream
+    in: true
+- message: 🔵 [<time>] ▶ gRPC client stream
+- message: ⚪ [<time>] start grpcConnect
+  data:
+    requestId: <uuid>
+    connectionName: Chunks
+    label: Client stream connect
+- message: ⚪ [<time>] done grpcConnect
+- message: ⚪ [<time>] grpc "Chunks" connecting
+- message: ⚪ [<time>] grpc "Chunks" connected
+- message: ⚪ [<time>] start grpcSend
+  data:
+    connectionNodeId: <uuid>
+    payload: '{"f_string":"chunk"}'
+    label: send chunk
+    in: true
+- message: ⚪ [<time>] done grpcSend
+- message: ⚪ [<time>] start grpcClose
+  data:
+    connectionNodeId: <uuid>
+    label: half-close
+    in: true
+- message: ⚪ [<time>] done grpcClose
+- message: '🟠 [<time>] grpc "Chunks" closed on error: grpc: error while
+    marshaling: proto: Marshal called with nil'
+- message: ⚪ [<time>] start log
+  data:
+    message: client stream terminé (statut grpcbin)
+    level: info
+    in: true
+- message: 🔵 [<time>] client stream terminé (statut grpcbin)
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ gRPC client stream
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
 - message: 🔵 [<time>] ■ Main

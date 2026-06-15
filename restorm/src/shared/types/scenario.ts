@@ -101,6 +101,14 @@ export type ScenarioNodeKind =
   | 'websocketConnect'
   | 'websocketSend'
   | 'websocketClose'
+  // gRPC streaming — the same connect/send/close trio. A `grpcConnect` opens a
+  // streaming RPC (server / client / bidi, inferred from the bound request's
+  // call type) and re-emits EVERY received frame on a single `message` output;
+  // `grpcSend` writes a request message (client / bidi), `grpcClose` half-closes
+  // it. Send / close reference the connect node by id.
+  | 'grpcConnect'
+  | 'grpcSend'
+  | 'grpcClose'
   // Iteration & collections
   | 'forEach'
   | 'aggregate'

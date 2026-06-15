@@ -92,6 +92,24 @@ describe('isRequestInScenarioSubtree', () => {
   it('is false for a request referenced from outside the subtree', () => {
     expect(isRequestInScenarioSubtree(scn, 'req-bound')).toBe(false)
   })
+
+  it('does not cross into a NESTED scenario — a request authored in a sub-scenario belongs to that sub-scenario, not its parent', () => {
+    const deepReq = { type: 'grpc', id: 'req-deep', name: 'Lives in the sub-scenario' }
+    const subScenario = { type: 'scenario', id: 'sub', name: 'Sub', tags: [], params: [], nodes: [], edges: [], items: [deepReq] }
+    const parentScenario = { type: 'scenario', id: 'parent', name: 'Parent', tags: [], params: [], nodes: [], edges: [], items: [subScenario] } as unknown as Parameters<typeof isRequestInScenarioSubtree>[0]
+    const sub = subScenario as unknown as Parameters<typeof isRequestInScenarioSubtree>[0]
+    // The nearest scenario owns it…
+    expect(isRequestInScenarioSubtree(sub, 'req-deep')).toBe(true)
+    // …the ancestor scenario does NOT (no transitive over-reporting).
+    expect(isRequestInScenarioSubtree(parentScenario, 'req-deep')).toBe(false)
+  })
+
+  it('still descends plain folders inside a scenario (folders are not scenario boundaries)', () => {
+    const fReq = { type: 'http', id: 'req-in-folder', name: 'In a folder' }
+    const folder = { id: 'fold', name: 'Folder', configuration: {}, items: [fReq] }
+    const scnWithFolder = { type: 'scenario', id: 'swf', name: 'With folder', tags: [], params: [], nodes: [], edges: [], items: [folder] } as unknown as Parameters<typeof isRequestInScenarioSubtree>[0]
+    expect(isRequestInScenarioSubtree(scnWithFolder, 'req-in-folder')).toBe(true)
+  })
 })
 
 describe('findScenariosUsingScenario', () => {

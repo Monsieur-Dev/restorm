@@ -1,0 +1,96 @@
+- message: 🔵 [<time>] ▶ gRPC bidi
+- message: ⚪ [<time>] start grpcConnect
+  data:
+    requestId: <uuid>
+    connectionName: Echo
+    label: Echo connect
+- message: ⚪ [<time>] done grpcConnect
+- message: ⚪ [<time>] grpc "Echo" connecting
+- message: ⚪ [<time>] grpc "Echo" connected
+- message: ⚪ [<time>] start grpcSend
+  data:
+    connectionNodeId: <uuid>
+    payload: '{"f_string":"hello"}'
+    label: send to Echo
+    in: true
+- message: ⚪ [<time>] done grpcSend
+- message: ⚪ [<time>] start wait
+  data:
+    durationMs: <dynamic-time>
+    label: let the echo arrive
+    in: true
+- message: ⚪ [<time>] start log
+  data:
+    message: frame gRPC reçue
+    level: info
+    data:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: hello
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: 🔵 [<time>] frame gRPC reçue
+  data:
+    f_strings: []
+    f_enums: []
+    f_subs: []
+    f_bools: []
+    f_int32s: []
+    f_int64s: []
+    f_bytess: []
+    f_floats: []
+    f_string: hello
+    f_enum: ENUM_0
+    f_sub: null
+    f_bool: false
+    f_int32: 0
+    f_int64: "0"
+    f_bytes: []
+    f_float: 0
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: hello
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: ⚪ [<time>] done wait
+- message: ⚪ [<time>] start grpcClose
+  data:
+    connectionNodeId: <uuid>
+    label: close Echo
+    in: true
+- message: ⚪ [<time>] done grpcClose
+- message: ⚪ [<time>] grpc "Echo" closed
+- message: ⚪ [<time>] start log
+  data:
+    message: stream gRPC fermé
+    level: info
+    in: true
+- message: 🔵 [<time>] stream gRPC fermé
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ gRPC bidi

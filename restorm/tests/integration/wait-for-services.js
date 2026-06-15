@@ -6,6 +6,7 @@
  */
 
 const http = require('http')
+const net = require('net')
 
 const SERVICES = [
   { name: 'Petstore', url: 'http://localhost:8080/api/pet/findByStatus?status=available' },
@@ -15,13 +16,26 @@ const SERVICES = [
   { name: 'Socket.IO', url: 'http://localhost:3001' },
   { name: 'WS Echo', url: 'http://localhost:3002/health' },
   { name: 'OData PetStore', url: 'http://localhost:5100/health' },
-  { name: 'Auth Service', url: 'http://localhost:5110/health' }
+  { name: 'Auth Service', url: 'http://localhost:5110/health' },
+  // gRPC (moul/grpcbin) speaks HTTP/2 on 9000 — not HTTP/1, so probe the raw TCP
+  // port instead of an HTTP endpoint.
+  { name: 'gRPC (grpcbin)', tcp: { host: 'localhost', port: 9000 } }
 ]
 
 const MAX_RETRIES = 60
 const RETRY_DELAY = 2000
 
 async function checkService(service) {
+  if (service.tcp) {
+    return new Promise((resolve) => {
+      const socket = net.connect(service.tcp.port, service.tcp.host)
+      const done = (ok) => { socket.destroy(); resolve(ok) }
+      socket.setTimeout(5000)
+      socket.once('connect', () => done(true))
+      socket.once('error', () => done(false))
+      socket.once('timeout', () => done(false))
+    })
+  }
   return new Promise((resolve) => {
     const url = new URL(service.url)
     const options = {

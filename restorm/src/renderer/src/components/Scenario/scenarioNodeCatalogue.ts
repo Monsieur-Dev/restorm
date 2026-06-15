@@ -49,6 +49,9 @@ export const SCENARIO_NODE_CATALOGUE: ScenarioNodeKindMeta[] = [
   { kind: 'websocketConnect', labelKey: 'scenario.nodes.websocketConnect', defaultLabel: 'WebSocket connect', icon: 'plug', category: 'composition' },
   { kind: 'websocketSend', labelKey: 'scenario.nodes.websocketSend', defaultLabel: 'WebSocket send', icon: 'arrow-up', category: 'composition' },
   { kind: 'websocketClose', labelKey: 'scenario.nodes.websocketClose', defaultLabel: 'WebSocket close', icon: 'debug-disconnect', category: 'composition' },
+  { kind: 'grpcConnect', labelKey: 'scenario.nodes.grpcConnect', defaultLabel: 'gRPC connect', icon: 'plug', category: 'composition' },
+  { kind: 'grpcSend', labelKey: 'scenario.nodes.grpcSend', defaultLabel: 'gRPC send', icon: 'arrow-up', category: 'composition' },
+  { kind: 'grpcClose', labelKey: 'scenario.nodes.grpcClose', defaultLabel: 'gRPC close', icon: 'debug-disconnect', category: 'composition' },
   // Lists (grouped into a "Lists" submenu)
   { kind: 'aggregate', labelKey: 'scenario.nodes.aggregate', defaultLabel: 'Aggregate', icon: 'combine', category: 'lists' },
   { kind: 'map', labelKey: 'scenario.nodes.map', defaultLabel: 'Map', icon: 'arrow-swap', category: 'lists' },

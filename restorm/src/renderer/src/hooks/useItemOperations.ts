@@ -405,6 +405,9 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       case 'http-delete': return 'New DELETE request'
       case 'graphql': return 'New GraphQL request'
       case 'grpc': return 'New gRPC request'
+      case 'grpc-server-stream': return 'New gRPC server-streaming request'
+      case 'grpc-client-stream': return 'New gRPC client-streaming request'
+      case 'grpc-bidi': return 'New gRPC bidirectional request'
       case 'soap': return 'New SOAP request'
       case 'websocket': return 'New WebSocket request'
       case 'odata': return 'New OData request'
@@ -521,8 +524,13 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         built = new HTTPRequest({ id, name, method: httpMethod })
       } else if (kind === 'graphql') {
         built = new GraphQLRequest({ id, name })
-      } else if (kind === 'grpc') {
-        built = new GrpcRequest({ id, name })
+      } else if (kind === 'grpc' || kind === 'grpc-server-stream' || kind === 'grpc-client-stream' || kind === 'grpc-bidi') {
+        const callType =
+          kind === 'grpc-server-stream' ? 'server-stream' :
+            kind === 'grpc-client-stream' ? 'client-stream' :
+              kind === 'grpc-bidi' ? 'bidirectional-stream' :
+                'unary'
+        built = new GrpcRequest({ id, name, callType })
       } else if (kind === 'soap') {
         built = new SoapRequest({ id, name })
       } else if (kind === 'websocket') {
