@@ -33,6 +33,10 @@ This folder contains:
   - `onRebuildTab?: (tabId: string, data?: unknown) => EditorTab | null` — receives the optional per-tab `persistedState` round-tripped through the autosave (see below).
   - `onStateRestored?: (tree: WorkbenchTree | null) => void`
 
+#### Switching `workbenchId` on a live mount
+
+`workbenchId` keys the persisted tree, so a host that reuses ONE `EditorWorkbench` across documents — e.g. opening a different file over the current one, without remounting — can simply change `workbenchId`. ECUI detects the change and treats it as a document swap: it re-arms the restore for the new id (so its saved tabs reopen) and empties the tree first, so the previous document's tabs don't linger when the new id has nothing saved. Crucially, the autosave writer is suspended until the new restore completes, so the *previous* tree is never written back under the *new* id (which would corrupt the incoming document's saved workbench). Only a genuine id→id swap triggers this; initial mount (`undefined`→id) and teardown (id→`undefined`) are left to their own paths. If you'd rather force a clean slate, remounting via `key={workbenchId}` also works, at the cost of rebuilding all tab content.
+
 #### Round-tripping per-tab state
 
 Each `EditorTab` may set an opt-in `persistedState?: unknown` field. ECUI captures it on every autosave (parallel array next to `tabIds`) and feeds it back into the second argument of `onRebuildTab(tabId, data)` on restore. Use it for tab-local state that doesn't belong in the tab id — e.g. a Mini browser's current URL, a markdown preview's scroll position, the active sub-tab inside a multi-pane editor. The payload must be JSON-serialisable; ECUI treats it as opaque.

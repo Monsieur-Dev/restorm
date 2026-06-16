@@ -249,7 +249,9 @@
         "odata": "Cerere OData",
         "auth": "Cerere HTTP de autentificare",
         "scenario": "Scenariu",
-        "socketioServer": "Server Socket.IO"
+        "socketioServer": "Server Socket.IO",
+        "websocketServer": "Server WebSocket",
+        "socketio": "Cerere Socket.IO"
       }
     },
     "deleteConfirm": {
@@ -451,7 +453,9 @@
     "disconnect": "Deconectează",
     "startListening": "Începe ascultarea",
     "stopListening": "Oprește ascultarea",
-    "routePlaceholder": "Rută (opțional)"
+    "routePlaceholder": "Rută (opțional)",
+    "clientsConnected": "{{count}} client(i) conectat(i)",
+    "notListening": "Nu ascultă"
   },
   "search": {
     "placeholder": "Caută...",
@@ -1526,7 +1530,10 @@
       "grpcClose": "Half-closes an already-open streaming gRPC call.",
       "socketioConnectServer": "Pornește un server Socket.IO (port + rută); confirmă fiecare eveniment primit și îl reemite pe portul său. Trimiterea difuzează către clienții conectați.",
       "socketioSendServer": "Difuzează un mesaj către toți clienții conectați la serverul Socket.IO referențiat.",
-      "socketioCloseServer": "Oprește serverul Socket.IO referențiat și deconectează clienții săi."
+      "socketioCloseServer": "Oprește serverul Socket.IO referențiat și deconectează clienții săi.",
+      "websocketConnectServer": "Pornește un server WebSocket brut (port + cale); înregistrează fiecare frame trimis de un client și îl reemite pe portul său message. Trimiterea difuzează către clienții conectați.",
+      "websocketSendServer": "Difuzează un frame către toți clienții conectați la serverul WebSocket referențiat.",
+      "websocketCloseServer": "Oprește serverul WebSocket referențiat și deconectează clienții săi."
     },
     "legend": {
       "title": "Legendă",

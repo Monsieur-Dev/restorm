@@ -105,6 +105,7 @@ declare global {
         isActive: (requestId: string) => Promise<boolean>
         onProgress: (callback: (data: unknown) => void) => () => void
         onMessage: (callback: (data: unknown) => void) => () => void
+        onServerClients: (callback: (data: { requestId: string; count: number }) => void) => () => void
       }
       responsesHistory: {
         list: (requestId: string) => Promise<ResponseHistoryEntry[]>

@@ -248,7 +248,9 @@
         "odata": "OData-förfrågan",
         "auth": "HTTP-autentiseringsförfrågan",
         "scenario": "Scenario",
-        "socketioServer": "Socket.IO-server"
+        "socketioServer": "Socket.IO-server",
+        "websocketServer": "WebSocket-server",
+        "socketio": "Socket.IO-begäran"
       }
     },
     "deleteConfirm": {
@@ -450,7 +452,9 @@
     "disconnect": "Koppla från",
     "startListening": "Börja lyssna",
     "stopListening": "Sluta lyssna",
-    "routePlaceholder": "Rutt (valfritt)"
+    "routePlaceholder": "Rutt (valfritt)",
+    "clientsConnected": "{{count}} klient(er) anslutna",
+    "notListening": "Lyssnar inte"
   },
   "search": {
     "placeholder": "Sök...",
@@ -1525,7 +1529,10 @@
       "grpcClose": "Half-closes an already-open streaming gRPC call.",
       "socketioConnectServer": "Startar en Socket.IO-server (port + rutt); bekräftar varje mottagen händelse och sänder den igen på sin port. Skicka sänder till anslutna klienter.",
       "socketioSendServer": "Sänder ett meddelande till alla klienter som är anslutna till den refererade Socket.IO-servern.",
-      "socketioCloseServer": "Stoppar den refererade Socket.IO-servern och kopplar från dess klienter."
+      "socketioCloseServer": "Stoppar den refererade Socket.IO-servern och kopplar från dess klienter.",
+      "websocketConnectServer": "Startar en rå WebSocket-server (port + sökväg); registrerar varje mottagen frame och sänder den igen på sin message-port. Skicka sänder till anslutna klienter.",
+      "websocketSendServer": "Sänder en frame till alla klienter som är anslutna till den refererade WebSocket-servern.",
+      "websocketCloseServer": "Stoppar den refererade WebSocket-servern och kopplar från dess klienter."
     },
     "legend": {
       "title": "Förklaring",

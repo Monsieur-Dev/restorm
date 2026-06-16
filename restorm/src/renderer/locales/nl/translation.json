@@ -248,7 +248,9 @@
         "odata": "OData-verzoek",
         "auth": "HTTP-authenticatieverzoek",
         "scenario": "Scenario",
-        "socketioServer": "Socket.IO-server"
+        "socketioServer": "Socket.IO-server",
+        "websocketServer": "WebSocket-server",
+        "socketio": "Socket.IO-verzoek"
       }
     },
     "deleteConfirm": {
@@ -450,7 +452,9 @@
     "disconnect": "Verbinding verbreken",
     "startListening": "Begin met luisteren",
     "stopListening": "Stop met luisteren",
-    "routePlaceholder": "Route (optioneel)"
+    "routePlaceholder": "Route (optioneel)",
+    "clientsConnected": "{{count}} client(s) verbonden",
+    "notListening": "Luistert niet"
   },
   "search": {
     "placeholder": "Zoeken...",
@@ -1525,7 +1529,10 @@
       "grpcClose": "Half-closes an already-open streaming gRPC call.",
       "socketioConnectServer": "Start een Socket.IO-server (poort + route); bevestigt elke ontvangen gebeurtenis en zendt deze opnieuw uit op zijn poort. Verzenden zendt uit naar verbonden clients.",
       "socketioSendServer": "Zendt een bericht uit naar elke client die is verbonden met de gerefereerde Socket.IO-server.",
-      "socketioCloseServer": "Stopt de gerefereerde Socket.IO-server en verbreekt de verbinding met zijn clients."
+      "socketioCloseServer": "Stopt de gerefereerde Socket.IO-server en verbreekt de verbinding met zijn clients.",
+      "websocketConnectServer": "Start een ruwe WebSocket-server (poort + pad); registreert elke ontvangen frame en zendt deze opnieuw uit op de message-poort. Verzenden zendt uit naar verbonden clients.",
+      "websocketSendServer": "Zendt een frame uit naar elke client die is verbonden met de gerefereerde WebSocket-server.",
+      "websocketCloseServer": "Stopt de gerefereerde WebSocket-server en verbreekt de verbinding met zijn clients."
     },
     "legend": {
       "title": "Legenda",

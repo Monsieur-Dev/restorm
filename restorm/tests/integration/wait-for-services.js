@@ -13,8 +13,7 @@ const SERVICES = [
   { name: 'Petstore OpenAPI 3.0', url: 'http://localhost:8081/openapi.json' },
   { name: 'GraphQL', url: 'http://localhost:4000', method: 'POST', body: '{"query":"{ __typename }"}', headers: { 'Content-Type': 'application/json' } },
   { name: 'SOAP', url: 'http://localhost:8090/castlemock/web' },
-  // No Socket.IO mock: restorm self-hosts its Socket.IO server in-instance.
-  { name: 'WS Echo', url: 'http://localhost:3002/health' },
+  // No Socket.IO / WS mock: restorm self-hosts those servers in-instance.
   { name: 'OData PetStore', url: 'http://localhost:5100/health' },
   { name: 'Auth Service', url: 'http://localhost:5110/health' },
   // gRPC (moul/grpcbin) speaks HTTP/2 on 9000 — not HTTP/1, so probe the raw TCP

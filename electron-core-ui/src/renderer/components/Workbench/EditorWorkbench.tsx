@@ -628,6 +628,32 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 	// had a chance to run.
 	const restoreCompleteRef = useRef(false);
 
+	// Re-arm persistence when the workbench id changes underneath a live mount.
+	// `workbenchId` keys the persisted state, so a host that reuses ONE workbench
+	// across documents (e.g. opening a different file over the current one) flips
+	// the id without remounting. Left alone, `restoredRef` stays set so the new
+	// id's tabs are never restored, AND the autosave writer below persists the
+	// PREVIOUS id's tree under the new id — corrupting the incoming document's
+	// saved workbench while its stale tabs linger on screen. Declared before the
+	// restore + autosave effects so it runs first in commit order: reset the
+	// gates (re-restore + suspend autosave until that completes) and drop the old
+	// tree now, so its tabs vanish even when the new id has nothing saved (the
+	// restore only calls `onChange` when it finds a saved tree). Only a genuine
+	// document→document swap (both ids defined and different) needs this; initial
+	// mount (undefined→id) and teardown (id→undefined) are handled by their own
+	// paths and must not trigger a spurious clear.
+	const prevWorkbenchIdRef = useRef(workbenchId);
+	useEffect(() => {
+		const prev = prevWorkbenchIdRef.current;
+		prevWorkbenchIdRef.current = workbenchId;
+		if (prev === undefined || workbenchId === undefined || prev === workbenchId) {
+			return;
+		}
+		restoredRef.current = false;
+		restoreCompleteRef.current = false;
+		onChange?.({ orientation: treeRef.current.orientation, groups: [] });
+	}, [workbenchId, onChange]);
+
 	// Autosave: restore state on mount
 	useEffect(() => {
 		if (!autosave || !workbenchId || !onRebuildTab || restoredRef.current) {

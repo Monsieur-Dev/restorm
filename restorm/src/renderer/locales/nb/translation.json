@@ -248,7 +248,9 @@
         "odata": "OData-forespørsel",
         "auth": "HTTP-autentiseringsforespørsel",
         "scenario": "Scenario",
-        "socketioServer": "Socket.IO-server"
+        "socketioServer": "Socket.IO-server",
+        "websocketServer": "WebSocket-server",
+        "socketio": "Socket.IO-forespørsel"
       }
     },
     "deleteConfirm": {
@@ -450,7 +452,9 @@
     "disconnect": "Koble fra",
     "startListening": "Begynn å lytte",
     "stopListening": "Slutt å lytte",
-    "routePlaceholder": "Rute (valgfritt)"
+    "routePlaceholder": "Rute (valgfritt)",
+    "clientsConnected": "{{count}} klient(er) tilkoblet",
+    "notListening": "Lytter ikke"
   },
   "search": {
     "placeholder": "Søk...",
@@ -1525,7 +1529,10 @@
       "grpcClose": "Half-closes an already-open streaming gRPC call.",
       "socketioConnectServer": "Starter en Socket.IO-server (port + rute); kvitterer hver mottatt hendelse og sender den på nytt på porten sin. Send kringkaster til tilkoblede klienter.",
       "socketioSendServer": "Kringkaster en melding til alle klienter som er koblet til den refererte Socket.IO-serveren.",
-      "socketioCloseServer": "Stopper den refererte Socket.IO-serveren og kobler fra klientene."
+      "socketioCloseServer": "Stopper den refererte Socket.IO-serveren og kobler fra klientene.",
+      "websocketConnectServer": "Starter en rå WebSocket-server (port + sti); registrerer hver mottatt frame og sender den på nytt på message-porten. Send kringkaster til tilkoblede klienter.",
+      "websocketSendServer": "Kringkaster en frame til alle klienter som er koblet til den refererte WebSocket-serveren.",
+      "websocketCloseServer": "Stopper den refererte WebSocket-serveren og kobler fra klientene."
     },
     "legend": {
       "title": "Forklaring",
