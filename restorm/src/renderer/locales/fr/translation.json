@@ -1581,5 +1581,20 @@
     "grpc": {
       "message": "message"
     }
+  },
+  "mqtt": {
+    "qos": "QoS",
+    "retain": "Conserver",
+    "subscribeOnConnect": "S’abonner à la connexion",
+    "clientId": "ID client",
+    "clientIdPlaceholder": "auto-généré si vide",
+    "username": "Nom d’utilisateur",
+    "password": "Mot de passe",
+    "keepalive": "Keepalive (s)",
+    "lwt": "Dernière volonté (LWT)",
+    "topic": "Sujet",
+    "lwtTopicPlaceholder": "sujet/volonté",
+    "lwtPayload": "Charge utile",
+    "lwtPayloadPlaceholder": "message de volonté"
   }
 }

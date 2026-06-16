@@ -42,6 +42,11 @@ services:
       - "9001:9001"
     volumes:
       - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+      # Pre-hashed password file (restorm / restorm) for the auth scenarios.
+      # Mosquitto 2 only accepts hashed passwords; regenerate with
+      #   docker run --rm --entrypoint sh eclipse-mosquitto:2 \
+      #     -c "mosquitto_passwd -b -c /tmp/pw restorm restorm && cat /tmp/pw"
+      - ./mosquitto-passwd:/mosquitto/config/passwd:ro
 
   # SOAP - Castle Mock server
   soap:

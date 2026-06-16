@@ -1583,5 +1583,20 @@
     "grpc": {
       "message": "message"
     }
+  },
+  "mqtt": {
+    "qos": "QoS",
+    "retain": "Retain",
+    "subscribeOnConnect": "Subscribe on connect",
+    "clientId": "Client ID",
+    "clientIdPlaceholder": "auto-generated if empty",
+    "username": "Username",
+    "password": "Password",
+    "keepalive": "Keepalive (s)",
+    "lwt": "Last Will & Testament",
+    "topic": "Topic",
+    "lwtTopicPlaceholder": "will/topic",
+    "lwtPayload": "Payload",
+    "lwtPayloadPlaceholder": "will message"
   }
 }
