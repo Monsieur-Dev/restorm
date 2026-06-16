@@ -101,6 +101,14 @@ export type ScenarioNodeKind =
   | 'websocketConnect'
   | 'websocketSend'
   | 'websocketClose'
+  // MQTT — the same connect/publish/close trio as raw WebSocket (no named
+  // events). `mqttConnect` opens a long-lived broker connection AND subscribes
+  // to the bound request's topic, re-emitting EVERY received message on a single
+  // `message` output; `mqttSend` publishes a payload to the connection's topic;
+  // `mqttClose` stops it.
+  | 'mqttConnect'
+  | 'mqttSend'
+  | 'mqttClose'
   // gRPC streaming — the same connect/send/close trio. A `grpcConnect` opens a
   // streaming RPC (server / client / bidi, inferred from the bound request's
   // call type) and re-emits EVERY received frame on a single `message` output;

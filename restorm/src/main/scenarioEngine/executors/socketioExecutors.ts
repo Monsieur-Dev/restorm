@@ -96,6 +96,52 @@ export const websocketCloseExecutor: NodeExecutor = (_act, ctx) => {
   return { outputs: [] }
 }
 
+/** A (mqttConnect): MQTT — same handoff as websocketConnect (no events; every
+ * received message routes to the single `message` port). The bridge subscribes
+ * to the bound request's topic on connect. */
+export const mqttConnectExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { requestId?: unknown; connectionName?: unknown }
+  if (typeof cfg.requestId !== 'string' || cfg.requestId === '') {
+    throw new Error(`mqttConnect node ${ctx.node.id} has no bound requestId`)
+  }
+  const connectionName = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== ''
+    ? cfg.connectionName.trim()
+    : cfg.requestId
+  return {
+    outputs: [],
+    scopeAction: { type: 'openSocketioConnect', transport: 'mqtt', requestId: cfg.requestId, events: [], connectionName }
+  }
+}
+
+/** B (mqttSend): publish a payload on the referenced connection (to its topic). */
+export const mqttSendExecutor: NodeExecutor = (act, ctx) => {
+  const cfg = ctx.node.config as { connectionNodeId?: unknown; payload?: unknown }
+  const connectionNodeId = typeof cfg.connectionNodeId === 'string' ? cfg.connectionNodeId : ''
+  if (connectionNodeId === '') throw new Error('mqttSend: no connection selected')
+  if (!ctx.socketio) throw new Error('mqttSend: socket bridge unavailable')
+  if (!ctx.socketio.has(connectionNodeId)) {
+    throw new Error('mqttSend: the referenced connection does not exist in this run')
+  }
+  const payload = toWire(resolveOperand(act.inputs['payload'], cfg.payload, ctx.variables))
+  // Empty channel → publish to the connection's own topic (set at connect).
+  const ok = ctx.socketio.send(connectionNodeId, '', payload)
+  if (!ok) throw new Error('mqttSend: the referenced connection is not open')
+  return { outputs: [] }
+}
+
+/** C (mqttClose): close the referenced connection (same as websocketClose). */
+export const mqttCloseExecutor: NodeExecutor = (_act, ctx) => {
+  const cfg = ctx.node.config as { connectionNodeId?: unknown }
+  const connectionNodeId = typeof cfg.connectionNodeId === 'string' ? cfg.connectionNodeId : ''
+  if (connectionNodeId === '') throw new Error('mqttClose: no connection selected')
+  if (!ctx.socketio) throw new Error('mqttClose: socket bridge unavailable')
+  if (!ctx.socketio.has(connectionNodeId)) {
+    throw new Error('mqttClose: the referenced connection does not exist in this run')
+  }
+  ctx.socketio.close(connectionNodeId)
+  return { outputs: [] }
+}
+
 /** A (grpcConnect): gRPC streaming — same handoff as websocketConnect. The
  * call type (server / client / bidi) is inferred from the bound request, so
  * every received frame routes to the single `message` port. */

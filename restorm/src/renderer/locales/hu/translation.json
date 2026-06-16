@@ -982,7 +982,10 @@
       "websocketClose": "WebSocket close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
-      "grpcClose": "gRPC close"
+      "grpcClose": "gRPC close",
+      "mqttConnect": "MQTT connect",
+      "mqttSend": "MQTT publish",
+      "mqttClose": "MQTT close"
     },
     "comparator": {
       "result": "eredmény"
@@ -1532,7 +1535,10 @@
       "socketioCloseServer": "Leállítja a hivatkozott Socket.IO-kiszolgálót, és lekapcsolja a klienseit.",
       "websocketConnectServer": "Elindít egy nyers WebSocket-kiszolgálót (port + útvonal); rögzít minden beérkező frame-et, és újraküldi a message portján. A küldés a csatlakozott klienseknek sugároz.",
       "websocketSendServer": "Frame-et sugároz a hivatkozott WebSocket-kiszolgálóhoz csatlakozott összes kliensnek.",
-      "websocketCloseServer": "Leállítja a hivatkozott WebSocket-kiszolgálót, és lekapcsolja a klienseit."
+      "websocketCloseServer": "Leállítja a hivatkozott WebSocket-kiszolgálót, és lekapcsolja a klienseit.",
+      "mqttConnect": "Opens a long-lived MQTT connection from a bound request and subscribes to its topic; re-emits each received message on its `message` port.",
+      "mqttSend": "Publishes a payload on an already-open MQTT connection (to its topic).",
+      "mqttClose": "Closes an already-open MQTT connection."
     },
     "legend": {
       "title": "Jelmagyarázat",

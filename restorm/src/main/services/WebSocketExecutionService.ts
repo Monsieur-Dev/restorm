@@ -861,6 +861,137 @@ class WebSocketExecutionService {
   }
 
   /**
+   * MQTT counterpart of {@link connectStreamingRaw} for the scenario engine:
+   * connect to the broker, SUBSCRIBE to the bound request's topic, and stream the
+   * lifecycle through the callbacks — `onConnect` once subscribed, `onMessage`
+   * for every received message (event always `undefined`, like raw WS), `onClose`
+   * when the connection ends. `send(_, payload)` publishes to the connection's
+   * topic. mqtt.js auto-reconnects with backoff (and re-subscribes); `timeout`
+   * bounds only the INITIAL connect.
+   */
+  connectStreamingMqtt(input: {
+    requestId: string
+    onConnect: () => void
+    onMessage: (event: string | undefined, payload: unknown) => void
+    onClose: (error?: string) => void
+    timeout?: number
+  }): { send: (channel: string, payload: string) => boolean; close: () => void; isOpen: () => boolean } {
+    const { requestId } = input
+    const ctl = { closedByCaller: false, connected: false, startTime: 0, startedAt: '', url: '' }
+    const frames: WebSocketMessage[] = []
+    let fired = false
+    const fireClose = (error?: string): void => {
+      if (fired) return
+      fired = true
+      if (ctl.startTime > 0) {
+        this.persistHistory(requestId, {
+          requestId,
+          success: ctl.connected && error === undefined,
+          connected: ctl.connected,
+          messages: frames,
+          ...(error !== undefined ? { error } : {}),
+          requestUrl: ctl.url,
+          timings: { startedAt: ctl.startedAt, durationMs: Date.now() - ctl.startTime }
+        })
+      }
+      input.onClose(error)
+    }
+
+    void (async () => {
+      let resolved: ResolvedExecution
+      try {
+        resolved = await this.resolveExecution(requestId, input.timeout ?? DEFAULT_WS_TIMEOUT_MS)
+      } catch (err) {
+        fireClose((err as Error).message)
+        return
+      }
+      if (ctl.closedByCaller) { fireClose(); return }
+      ctl.startTime = resolved.startTime
+      ctl.startedAt = resolved.startedAt
+      ctl.url = resolved.resolvedUrl
+
+      const cfg = resolved.mqtt ?? { qos: 0 as const, retain: false, subscribe: true }
+      const topic = resolved.event && resolved.event.length > 0 ? resolved.event : undefined
+
+      try {
+        const opts: IClientOptions = {
+          connectTimeout: resolved.timeout,
+          reconnectPeriod: 1000,
+          ...(cfg.clientId ? { clientId: cfg.clientId } : {}),
+          ...(cfg.username ? { username: cfg.username } : {}),
+          ...(cfg.password ? { password: cfg.password } : {}),
+          ...(cfg.keepalive !== undefined ? { keepalive: cfg.keepalive } : {}),
+          ...(cfg.will ? { will: { topic: cfg.will.topic, payload: Buffer.from(cfg.will.payload), qos: cfg.will.qos, retain: cfg.will.retain } } : {})
+        }
+        const client = mqtt.connect(resolved.resolvedUrl, opts)
+
+        const connection: ActiveConnection = {
+          requestId, kind: 'mqtt', mqttClient: client, startTime: resolved.startTime, messages: [],
+          mqttQos: cfg.qos, mqttRetain: cfg.retain, ...(topic ? { mqttTopic: topic } : {})
+        }
+        this.activeConnections.set(requestId, connection)
+        this.broadcastProgress(requestId, 'started')
+
+        const connectTimer = setTimeout(() => {
+          if (!ctl.connected) {
+            this.activeConnections.delete(requestId)
+            this.broadcastProgress(requestId, 'error')
+            try { client.end(true) } catch { /* already ended */ }
+            fireClose('Connection timed out')
+          }
+        }, resolved.timeout)
+
+        client.on('connect', () => {
+          ctl.connected = true
+          clearTimeout(connectTimer)
+          logger.info('[WebSocketExecutionService] Connected (mqtt, streaming)', { requestId })
+          if (cfg.subscribe && topic) {
+            client.subscribe(topic, { qos: cfg.qos }, (err) => {
+              if (err) logger.warn('[WebSocketExecutionService] mqtt subscribe failed', { requestId, error: err.message })
+            })
+          }
+          input.onConnect()
+        })
+        client.on('message', (t: string, payload: Buffer) => {
+          const str = payload.toString('utf8')
+          const msg: WebSocketMessage = { direction: 'received', data: str, event: t, timestamp: new Date().toISOString() }
+          connection.messages.push(msg)
+          frames.push(msg)
+          this.broadcastMessage(requestId, msg)
+          let parsed: unknown
+          try { parsed = JSON.parse(str) } catch { parsed = str }
+          input.onMessage(undefined, parsed)
+        })
+        client.on('error', (err: Error) => {
+          // Pre-connect error (auth / unreachable) is terminal; post-connect
+          // errors are transient (reconnect handles them).
+          if (!ctl.connected) {
+            clearTimeout(connectTimer)
+            this.activeConnections.delete(requestId)
+            this.broadcastProgress(requestId, 'error')
+            fireClose(err.message)
+          }
+        })
+        // 'end' (explicit disconnect / timeout / error) is the terminal signal;
+        // 'close' is not (reconnect may follow).
+        client.on('end', () => {
+          this.activeConnections.delete(requestId)
+          this.broadcastProgress(requestId, 'completed')
+          fireClose()
+        })
+      } catch (err) {
+        fireClose((err as Error).message || 'Connection failed')
+      }
+    })()
+
+    return {
+      send: (_channel, payload) => this.send(requestId, payload),
+      close: () => { ctl.closedByCaller = true; this.disconnect(requestId) },
+      isOpen: () => this.isActive(requestId)
+    }
+  }
+
+  /**
    * SERVER-MODE counterpart of {@link connectStreaming} for the scenario engine:
    * HOST a socket.io server on `localhost:<port>[/namespace]` and stream its
    * lifecycle through the same callbacks. `onConnect` fires once the server is

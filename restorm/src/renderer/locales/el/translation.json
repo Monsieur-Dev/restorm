@@ -982,7 +982,10 @@
       "websocketClose": "WebSocket close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
-      "grpcClose": "gRPC close"
+      "grpcClose": "gRPC close",
+      "mqttConnect": "MQTT connect",
+      "mqttSend": "MQTT publish",
+      "mqttClose": "MQTT close"
     },
     "comparator": {
       "result": "αποτέλεσμα"
@@ -1532,7 +1535,10 @@
       "socketioCloseServer": "Σταματά τον αναφερόμενο διακομιστή Socket.IO και αποσυνδέει τους πελάτες του.",
       "websocketConnectServer": "Εκκινεί έναν ωμό διακομιστή WebSocket (θύρα + διαδρομή)· καταγράφει κάθε frame που λαμβάνει και το αναμεταδίδει στη θύρα message. Η αποστολή μεταδίδει στους συνδεδεμένους πελάτες.",
       "websocketSendServer": "Μεταδίδει ένα frame σε όλους τους πελάτες που είναι συνδεδεμένοι στον αναφερόμενο διακομιστή WebSocket.",
-      "websocketCloseServer": "Σταματά τον αναφερόμενο διακομιστή WebSocket και αποσυνδέει τους πελάτες του."
+      "websocketCloseServer": "Σταματά τον αναφερόμενο διακομιστή WebSocket και αποσυνδέει τους πελάτες του.",
+      "mqttConnect": "Opens a long-lived MQTT connection from a bound request and subscribes to its topic; re-emits each received message on its `message` port.",
+      "mqttSend": "Publishes a payload on an already-open MQTT connection (to its topic).",
+      "mqttClose": "Closes an already-open MQTT connection."
     },
     "legend": {
       "title": "Υπόμνημα",

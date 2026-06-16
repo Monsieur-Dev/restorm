@@ -90,6 +90,20 @@ export const SCENARIO_ADD_WEBSOCKET_ACTIONS: ScenarioAddWsActionEntry[] = [
   { kind: 'websocketClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.websocketClose', defaultLabel: 'WebSocket close' }
 ]
 
+/** MQTT action entries — same connect/publish/close trio, badged MQTT. */
+export interface ScenarioAddMqttActionEntry {
+  kind: 'mqttConnect' | 'mqttSend' | 'mqttClose'
+  icon: string
+  labelKey: string
+  defaultLabel: string
+}
+
+export const SCENARIO_ADD_MQTT_ACTIONS: ScenarioAddMqttActionEntry[] = [
+  { kind: 'mqttConnect', icon: 'plug', labelKey: 'scenario.nodes.mqttConnect', defaultLabel: 'MQTT connect' },
+  { kind: 'mqttSend', icon: 'arrow-up', labelKey: 'scenario.nodes.mqttSend', defaultLabel: 'MQTT publish' },
+  { kind: 'mqttClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.mqttClose', defaultLabel: 'MQTT close' }
+]
+
 /** gRPC streaming action entries — send / close only (badged GRPC). The CONNECT
  * is NOT an action here: a gRPC connection is created by the gRPC request entries
  * (streaming → a bound `grpcConnect`) or by dragging a request, so a separate
@@ -125,4 +139,9 @@ export function scenarioAddWebsocketIcon(icon: string): ReactNode {
 /** The "GRPC" badge with the action's codicon inside (gRPC streaming section). */
 export function scenarioAddGrpcIcon(icon: string): ReactNode {
   return React.createElement(Badge, { type: 'GRPC', icon })
+}
+
+/** The "MQTT" badge with the action's codicon inside (MQTT section). */
+export function scenarioAddMqttIcon(icon: string): ReactNode {
+  return React.createElement(Badge, { type: 'MQTT', icon })
 }

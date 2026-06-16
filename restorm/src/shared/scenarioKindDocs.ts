@@ -93,6 +93,18 @@ export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
     summary: 'Closes an already-open raw WebSocket connection (declared by a websocketConnect node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
     config: { connectionNodeId: 'Id of the websocketConnect node whose connection to close.' }
   },
+  mqttConnect: {
+    summary: 'Opens a long-lived MQTT connection from a bound request and SUBSCRIBES to its topic. `connected` fires once subscribed; EVERY received message re-emits on the single `message` output (MQTT has no named events). The connection stays open until an mqttClose targets it (or the run is stopped), then `done` fires.',
+    config: { requestId: 'Id of the MQTT request to connect (resolved URL/topic/QoS/auth/LWT).', connectionName: 'Unique-per-scenario name an mqttSend/mqttClose references for display (defaults to the request name).', label: 'Display label on the box.' }
+  },
+  mqttSend: {
+    summary: 'Publishes a payload on an already-open MQTT connection (declared by an mqttConnect node), to that connection\'s topic (QoS/retain from the request). Pure-event action: triggered on `in`, sequences the next node via `done`. Errors (to `error`) when no connection is selected or it is not open.',
+    config: { connectionNodeId: 'Id of the mqttConnect node whose connection to publish on.', payload: 'Message payload (a code editor; or wire `payload`).' }
+  },
+  mqttClose: {
+    summary: 'Closes an already-open MQTT connection (declared by an mqttConnect node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
+    config: { connectionNodeId: 'Id of the mqttConnect node whose connection to close.' }
+  },
   grpcConnect: {
     summary: 'Opens a long-lived streaming gRPC call from a bound request (server / client / bidi, inferred from the request call type) and listens. `connected` fires once the call is open; EVERY received frame re-emits on the single `message` output (a streaming RPC has no named events). For server-streaming the request message is sent automatically on open; for client/bidi use grpcSend. The call stays open until a grpcClose targets it (or the run is stopped), then `done` fires.',
     config: { requestId: 'Id of the gRPC request to connect (its resolved address/metadata + service/method/call type).', connectionName: 'Unique-per-scenario name a grpcSend/grpcClose references for display (defaults to the request name).', label: 'Display label on the box.' }

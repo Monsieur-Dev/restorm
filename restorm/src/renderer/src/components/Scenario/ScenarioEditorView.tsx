@@ -50,7 +50,7 @@ import './scenarioEnvPreview'
 // Side-effect: registers the secret → plaintext resolver (async cache) so the
 // inspector's static preview resolves a SecretValue operand to its live value.
 import { useSecretPreviewVersion } from './scenarioSecretPreview'
-import { SCENARIO_ADD_REQUEST_GROUPS, SCENARIO_ADD_SCENARIO_ENTRY, SCENARIO_ADD_SOCKETIO_ACTIONS, SCENARIO_ADD_WEBSOCKET_ACTIONS, SCENARIO_ADD_GRPC_ACTIONS, scenarioAddIcon, scenarioAddSocketioIcon, scenarioAddWebsocketIcon, scenarioAddGrpcIcon } from './scenarioChildPalette'
+import { SCENARIO_ADD_REQUEST_GROUPS, SCENARIO_ADD_SCENARIO_ENTRY, SCENARIO_ADD_SOCKETIO_ACTIONS, SCENARIO_ADD_WEBSOCKET_ACTIONS, SCENARIO_ADD_MQTT_ACTIONS, SCENARIO_ADD_GRPC_ACTIONS, scenarioAddIcon, scenarioAddSocketioIcon, scenarioAddWebsocketIcon, scenarioAddMqttIcon, scenarioAddGrpcIcon } from './scenarioChildPalette'
 import type { AddChildKind } from '../MainView/Sidebar/contextMenuBuilder'
 import type { TFunction } from 'i18next'
 import { ScenarioGraphPreview } from '../MainView/Titlebar/ScenarioGraphPreview'
@@ -283,7 +283,7 @@ function buildScenarioPaletteItems(p: PaletteBuildParams): ContextMenuItem[] {
     if ('separator' in e) return [sep(`sep-${i}`)]
     if (p.withAddSubmenu && e.kind === 'runScenario') return [] // folds into "Add"
     // The Socket.IO actions fold into the "Add" submenu (their own section) too.
-    if (p.withAddSubmenu && (e.kind === 'socketioConnect' || e.kind === 'socketioSend' || e.kind === 'socketioClose' || e.kind === 'websocketConnect' || e.kind === 'websocketSend' || e.kind === 'websocketClose' || e.kind === 'grpcConnect' || e.kind === 'grpcSend' || e.kind === 'grpcClose')) return []
+    if (p.withAddSubmenu && (e.kind === 'socketioConnect' || e.kind === 'socketioSend' || e.kind === 'socketioClose' || e.kind === 'websocketConnect' || e.kind === 'websocketSend' || e.kind === 'websocketClose' || e.kind === 'mqttConnect' || e.kind === 'mqttSend' || e.kind === 'mqttClose' || e.kind === 'grpcConnect' || e.kind === 'grpcSend' || e.kind === 'grpcClose')) return []
     if (p.withAddSubmenu && e.kind === 'httpRequest') {
       const groupItems = (group: typeof SCENARIO_ADD_REQUEST_GROUPS[number]): ContextMenuItem[] =>
         group.flatMap((c): ContextMenuItem[] => {
@@ -316,6 +316,10 @@ function buildScenarioPaletteItems(p: PaletteBuildParams): ContextMenuItem[] {
         const cb = p.pickNode(a.kind)
         return cb ? [{ id: `add-${a.kind}`, label: p.t(a.labelKey, a.defaultLabel), icon: scenarioAddWebsocketIcon(a.icon), onClick: cb }] : []
       })
+      const mqttItems = SCENARIO_ADD_MQTT_ACTIONS.flatMap((a): ContextMenuItem[] => {
+        const cb = p.pickNode(a.kind)
+        return cb ? [{ id: `add-${a.kind}`, label: p.t(a.labelKey, a.defaultLabel), icon: scenarioAddMqttIcon(a.icon), onClick: cb }] : []
+      })
       const scnCb = p.pickChild(SCENARIO_ADD_SCENARIO_ENTRY.kind)
       const scnItems: ContextMenuItem[] = scnCb
         ? [{ id: `add-${SCENARIO_ADD_SCENARIO_ENTRY.kind}`, label: p.t(SCENARIO_ADD_SCENARIO_ENTRY.labelKey, SCENARIO_ADD_SCENARIO_ENTRY.defaultLabel), icon: scenarioAddIcon(SCENARIO_ADD_SCENARIO_ENTRY.badge), onClick: scnCb }]
@@ -323,7 +327,7 @@ function buildScenarioPaletteItems(p: PaletteBuildParams): ContextMenuItem[] {
       // Sections in order: request protocols (the gRPC group already includes its
       // send/close actions), Socket.IO actions, raw WebSocket actions, auth,
       // scenario — each separated by a divider (orphans tidied).
-      const sections = [...requestGroups, sioItems, wsItems, authItems, scnItems].filter((s) => s.length > 0)
+      const sections = [...requestGroups, sioItems, wsItems, mqttItems, authItems, scnItems].filter((s) => s.length > 0)
       const sub = sections.flatMap((section, si) => (si > 0 ? [sep(`add-sec-${si}`), ...section] : section))
       return sub.length > 0 ? [{ id: 'scenario-add', label: p.t('sidebar.contextMenu.add.title', 'Add'), icon: 'add', items: sub }] : []
     }
@@ -1753,8 +1757,14 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         label: item.name
       }
     }
+    else if (isRequest(item) && isWebSocketRequest(item) && (item as { protocol?: string }).protocol === 'mqtt') {
+      // An MQTT request maps to an `mqttConnect` — long-lived listener that
+      // subscribes to its topic; every received message re-emits on `message`.
+      kind = 'mqttConnect'
+      config = { requestId: item.id, connectionName: item.name, label: item.name }
+    }
     else if (isRequest(item) && isWebSocketRequest(item)) {
-      // A raw WebSocket request (protocol !== 'socketio') maps to a
+      // A raw WebSocket request (protocol !== 'socketio' / 'mqtt') maps to a
       // `websocketConnect` — same long-lived listener, but a single `message`
       // port (no named events / channels).
       kind = 'websocketConnect'
@@ -2274,7 +2284,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         title = boundItem.name
         titleBadge = <Badge type="SCENARIO" />
       }
-    } else if (n.data.kind === 'httpRequest' || n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'grpcConnect') {
+    } else if (n.data.kind === 'httpRequest' || n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'mqttConnect' || n.data.kind === 'grpcConnect') {
       const boundId = typeof cfg['requestId'] === 'string' ? cfg['requestId'] : null
       const boundItem = boundId ? (resolveBoundItem?.(boundId) ?? null) : null
       if (boundItem && isRequest(boundItem)) {
@@ -2284,7 +2294,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
           helpKey = `${n.data.kind}Server`
         }
       }
-    } else if (n.data.kind === 'socketioSend' || n.data.kind === 'socketioClose' || n.data.kind === 'websocketSend' || n.data.kind === 'websocketClose') {
+    } else if (n.data.kind === 'socketioSend' || n.data.kind === 'socketioClose' || n.data.kind === 'websocketSend' || n.data.kind === 'websocketClose' || n.data.kind === 'mqttSend' || n.data.kind === 'mqttClose') {
       // Send/close reference a connection NODE — if that node hosts a server,
       // the blurb should read "broadcast to clients" / "stop the server".
       const connId = typeof cfg['connectionNodeId'] === 'string' ? cfg['connectionNodeId'] : null
@@ -2351,7 +2361,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     // backing item in a workbench tab from the inspector's top row.
     let openItemId: string | undefined
     let openItemKind: 'request' | 'scenario' | undefined
-    if (n.data.kind === 'httpRequest' || n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'grpcConnect') {
+    if (n.data.kind === 'httpRequest' || n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'mqttConnect' || n.data.kind === 'grpcConnect') {
       // A streaming connect node binds a request the same way httpRequest does
       // (`config.requestId`), so it gets the same open-the-request navigation.
       const reqId = typeof cfg['requestId'] === 'string' ? cfg['requestId'] : undefined
@@ -2518,7 +2528,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   const scenarioConnections = useMemo<ScenarioConnectionRef[]>(() => {
     const out: ScenarioConnectionRef[] = []
     for (const node of scenario.nodes) {
-      if (node.kind !== 'socketioConnect' && node.kind !== 'websocketConnect' && node.kind !== 'grpcConnect') continue
+      if (node.kind !== 'socketioConnect' && node.kind !== 'websocketConnect' && node.kind !== 'mqttConnect' && node.kind !== 'grpcConnect') continue
       const cfg = node.config as { connectionName?: unknown; requestId?: unknown }
       const name = typeof cfg.connectionName === 'string' && cfg.connectionName.trim() !== '' ? cfg.connectionName.trim() : node.id
       // Pull the linked request's event + message so a send node can pre-fill its
