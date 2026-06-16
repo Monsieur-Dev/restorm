@@ -248,7 +248,9 @@
         "odata": "OData isteği",
         "auth": "HTTP kimlik doğrulama isteği",
         "scenario": "Senaryo",
-        "socketioServer": "Socket.IO sunucusu"
+        "socketioServer": "Socket.IO sunucusu",
+        "websocketServer": "WebSocket sunucusu",
+        "socketio": "Socket.IO isteği"
       }
     },
     "deleteConfirm": {
@@ -450,7 +452,9 @@
     "disconnect": "Bağlantıyı kes",
     "startListening": "Dinlemeyi başlat",
     "stopListening": "Dinlemeyi durdur",
-    "routePlaceholder": "Rota (isteğe bağlı)"
+    "routePlaceholder": "Rota (isteğe bağlı)",
+    "clientsConnected": "{{count}} istemci bağlı",
+    "notListening": "Dinlemiyor"
   },
   "search": {
     "placeholder": "Ara...",
@@ -1525,7 +1529,10 @@
       "grpcClose": "Half-closes an already-open streaming gRPC call.",
       "socketioConnectServer": "Bir Socket.IO sunucusu başlatır (bağlantı noktası + rota); alınan her olayı onaylar ve kendi bağlantı noktasında yeniden yayar. Gönder, bağlı istemcilere yayın yapar.",
       "socketioSendServer": "Başvurulan Socket.IO sunucusuna bağlı her istemciye bir mesaj yayınlar.",
-      "socketioCloseServer": "Başvurulan Socket.IO sunucusunu durdurur ve istemcilerinin bağlantısını keser."
+      "socketioCloseServer": "Başvurulan Socket.IO sunucusunu durdurur ve istemcilerinin bağlantısını keser.",
+      "websocketConnectServer": "Ham bir WebSocket sunucusu başlatır (bağlantı noktası + yol); bir istemcinin gönderdiği her frame’i kaydeder ve message bağlantı noktasında yeniden yayar. Gönder, bağlı istemcilere yayın yapar.",
+      "websocketSendServer": "Başvurulan WebSocket sunucusuna bağlı her istemciye bir frame yayınlar.",
+      "websocketCloseServer": "Başvurulan WebSocket sunucusunu durdurur ve istemcilerinin bağlantısını keser."
     },
     "legend": {
       "title": "Gösterge",

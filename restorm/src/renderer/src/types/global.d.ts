@@ -152,6 +152,7 @@ declare global {
         isActive: (requestId: string) => Promise<boolean>
         onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
         onMessage: (callback: (data: WebSocketMessageData) => void) => (() => void)
+        onServerClients: (callback: (data: { requestId: string; count: number }) => void) => (() => void)
       }
       odata: {
         execute: (input: ODataExecutionInput) => Promise<HTTPExecutionResult>

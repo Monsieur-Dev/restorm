@@ -250,7 +250,9 @@
         "odata": "Požadavek OData",
         "auth": "Ověřovací požadavek HTTP",
         "scenario": "Scénář",
-        "socketioServer": "Server Socket.IO"
+        "socketioServer": "Server Socket.IO",
+        "websocketServer": "Server WebSocket",
+        "socketio": "Požadavek Socket.IO"
       }
     },
     "deleteConfirm": {
@@ -452,7 +454,9 @@
     "disconnect": "Odpojit",
     "startListening": "Začít naslouchat",
     "stopListening": "Zastavit naslouchání",
-    "routePlaceholder": "Trasa (volitelné)"
+    "routePlaceholder": "Trasa (volitelné)",
+    "clientsConnected": "{{count}} klient(ů) připojeno",
+    "notListening": "Neposlouchá"
   },
   "search": {
     "placeholder": "Hledat...",
@@ -1527,7 +1531,10 @@
       "grpcClose": "Half-closes an already-open streaming gRPC call.",
       "socketioConnectServer": "Spustí Socket.IO server (port + cesta); potvrzuje každou přijatou událost a znovu ji odešle na svůj port. Odeslání rozešle připojeným klientům.",
       "socketioSendServer": "Rozešle zprávu všem klientům připojeným k odkazovanému serveru Socket.IO.",
-      "socketioCloseServer": "Zastaví odkazovaný server Socket.IO a odpojí jeho klienty."
+      "socketioCloseServer": "Zastaví odkazovaný server Socket.IO a odpojí jeho klienty.",
+      "websocketConnectServer": "Spustí surový WebSocket server (port + cesta); zaznamená každou přijatou frame a znovu ji odešle na svůj port message. Odeslání rozešle připojeným klientům.",
+      "websocketSendServer": "Rozešle frame všem klientům připojeným k odkazovanému WebSocket serveru.",
+      "websocketCloseServer": "Zastaví odkazovaný WebSocket server a odpojí jeho klienty."
     },
     "legend": {
       "title": "Legenda",

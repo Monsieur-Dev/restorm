@@ -7,7 +7,7 @@
  * active-connection registry.
  */
 
-import WebSocket from 'ws'
+import WebSocket, { WebSocketServer } from 'ws'
 import { io, type Socket } from 'socket.io-client'
 import { Server as SocketIOServer, type Socket as ServerSocket } from 'socket.io'
 import { createServer, type Server as HttpServer } from 'node:http'
@@ -52,12 +52,13 @@ export interface WebSocketExecutionResult {
  * per-port server (see {@link PortServer}). */
 interface ActiveConnection {
   requestId: string
-  kind: 'websocket' | 'socketio' | 'socketio-server'
+  kind: 'websocket' | 'socketio' | 'socketio-server' | 'websocket-server'
   ws?: WebSocket
   socket?: Socket
   /** Port this server route listens on (server mode). */
   port?: number
-  /** Socket.IO namespace this route hosts (server mode), e.g. `/` or `/chat`. */
+  /** The hosted route on that port (server mode): a Socket.IO namespace for a
+   * `socketio-server`, or a URL path for a raw `websocket-server`. */
   namespace?: string
   /** Tear down + resolve this server route's run (server mode). Idempotent. */
   serverSettle?: (success: boolean, error?: string) => void
@@ -65,16 +66,31 @@ interface ActiveConnection {
   messages: WebSocketMessage[]
 }
 
-/** A single socket.io server bound to ONE port, shared by every server route
- * (namespace) listening on that port. restorm hosts at most one OS socket per
- * port: many routes (e.g. `/` and `/chat`, or — for HTTP later — GET and POST)
- * coexist as distinct namespaces; only two routes with the SAME namespace on
- * the same port collide (the second fails to start). */
-interface PortServer {
+/** One hosted raw-WebSocket route: its connected client sockets + the handler
+ * that wires a freshly-upgraded socket (record/broadcast/forward frames). */
+interface WsRoute {
+  sockets: Set<WebSocket>
+  onConnection: (ws: WebSocket) => void
+}
+
+/** ONE shared http server bound to a port, that EVERY server-mode protocol
+ * attaches to — so a Socket.IO server, a raw-WebSocket server (and, later, HTTP
+ * / GraphQL / SOAP / OData) can coexist on the SAME port:
+ * - Socket.IO attaches an `ioServer` (claims `/socket.io/` + its namespaces),
+ * - raw WS attaches a `noServer` `wss` + an `upgrade` dispatcher routing by PATH.
+ * restorm holds at most one OS socket per port. A route collides only with
+ * another route of the SAME role on the SAME path/namespace + port. The port is
+ * released when its LAST route (across all protocols) stops. */
+interface PortHost {
   httpServer: HttpServer
-  ioServer: SocketIOServer
-  /** Namespaces currently hosted on this port (the live routes). */
-  routes: Set<string>
+  /** Lazily attached on the first Socket.IO route on this port. */
+  ioServer?: SocketIOServer
+  /** Lazily attached (noServer) on the first raw-WS route on this port. */
+  wss?: WebSocketServer
+  /** Live Socket.IO namespaces hosted here. */
+  sioRoutes: Set<string>
+  /** Live raw-WS routes (URL path → its sockets + connection handler). */
+  wsRoutes: Map<string, WsRoute>
 }
 
 /** Resolved inputs shared by both transport paths. */
@@ -123,11 +139,12 @@ function parsePayload(raw: string): unknown {
  */
 class WebSocketExecutionService {
   private activeConnections = new Map<string, ActiveConnection>()
-  /** One hosted socket.io server per port (server mode), shared across routes. */
-  private portServers = new Map<number, PortServer>()
-  /** In-flight port-server creations, so concurrent route starts on the same
-   * port share ONE bind attempt instead of racing into EADDRINUSE. */
-  private pendingPortServers = new Map<number, Promise<PortServer>>()
+  /** One shared http host per port (server mode) — every protocol's routes
+   * attach here, so SIO + raw-WS (+ future HTTP) coexist on one port. */
+  private portHosts = new Map<number, PortHost>()
+  /** In-flight host creations, so concurrent route starts on the same port
+   * share ONE bind attempt instead of racing into EADDRINUSE. */
+  private pendingPortHosts = new Map<number, Promise<PortHost>>()
 
   /**
    * Resolve the request, hydrate secrets, then dispatch to the transport
@@ -156,8 +173,12 @@ class WebSocketExecutionService {
     this.broadcastProgress(requestId, 'started')
 
     if (resolved.server) {
-      logger.info('[WebSocketExecutionService] Listening (socket.io server)', { requestId, url: resolved.resolvedUrl })
-      return this.listenSocketIOServer(resolved)
+      if (resolved.protocol === 'socketio') {
+        logger.info('[WebSocketExecutionService] Listening (socket.io server)', { requestId, url: resolved.resolvedUrl })
+        return this.listenSocketIOServer(resolved)
+      }
+      logger.info('[WebSocketExecutionService] Listening (websocket server)', { requestId, url: resolved.resolvedUrl })
+      return this.listenRawWebSocketServer(resolved)
     }
 
     if (resolved.protocol === 'socketio') {
@@ -208,21 +229,21 @@ class WebSocketExecutionService {
       }
 
       void (async () => {
-        let portServer: PortServer
+        let host: PortHost
         try {
-          portServer = await this.acquirePortServer(port)
+          host = await this.acquirePortHost(port)
         } catch (err) {
           finish(false, (err as Error).message || `Failed to listen on port ${port}`)
           return
         }
         // Route collision: the same namespace is already hosted on this port.
-        if (portServer.routes.has(namespace)) {
-          finish(false, this.routeBusyMessage(port, namespace))
+        if (host.sioRoutes.has(namespace)) {
+          finish(false, this.routeBusyMessage('Socket.IO', port, namespace))
           return
         }
-        portServer.routes.add(namespace)
+        host.sioRoutes.add(namespace)
         listening = true
-        this.registerServerNamespace(portServer.ioServer, namespace, requestId, messages)
+        this.registerServerNamespace(this.ensureIoServer(host), namespace, requestId, messages)
         const connection: ActiveConnection = { requestId, kind: 'socketio-server', port, namespace, startTime, messages, serverSettle: finish }
         this.activeConnections.set(requestId, connection)
         logger.info('[WebSocketExecutionService] Socket.IO server route listening', { requestId, port, namespace })
@@ -231,31 +252,168 @@ class WebSocketExecutionService {
     })
   }
 
-  /** Get-or-create the single socket.io server bound to `port`. Resolves once it
-   * is listening; rejects if the OS port can't be bound (EADDRINUSE etc.). */
-  private acquirePortServer(port: number): Promise<PortServer> {
-    const existing = this.portServers.get(port)
+  /**
+   * SERVER MODE (raw WebSocket): host a `ws://localhost:<port><path>` route and
+   * stay listening until `disconnect`. Each frame a connected client sends is
+   * recorded (no ACK — raw WS has none); `send()` broadcasts the configured
+   * payload to every client on this route. Shares the port host with any other
+   * protocol's routes, so a raw-WS server and a Socket.IO server coexist on one
+   * port (routed by path vs `/socket.io/`).
+   */
+  private listenRawWebSocketServer(resolved: ResolvedExecution): Promise<WebSocketExecutionResult> {
+    const { requestId, startTime, startedAt, resolvedUrl } = resolved
+    const { port, namespace: path } = this.parseServerAddress(resolvedUrl)
+
+    return new Promise((resolve) => {
+      const messages: WebSocketMessage[] = []
+      let listening = false
+      let settled = false
+      const finish = (success: boolean, error?: string): void => {
+        if (settled) return
+        settled = true
+        this.releaseServerRoute(requestId)
+        this.activeConnections.delete(requestId)
+        this.broadcastProgress(requestId, error ? 'error' : 'completed')
+        const result: WebSocketExecutionResult = {
+          requestId,
+          success,
+          connected: listening,
+          messages,
+          ...(error ? { error } : {}),
+          requestUrl: resolved.resolvedUrl,
+          timings: { startedAt, durationMs: Date.now() - startTime }
+        }
+        this.persistHistory(requestId, result)
+        resolve(result)
+      }
+
+      void (async () => {
+        let host: PortHost
+        try {
+          host = await this.acquirePortHost(port)
+        } catch (err) {
+          finish(false, (err as Error).message || `Failed to listen on port ${port}`)
+          return
+        }
+        if (host.wsRoutes.has(path)) {
+          finish(false, this.routeBusyMessage('WebSocket', port, path))
+          return
+        }
+        this.ensureWss(host)
+        host.wsRoutes.set(path, this.makeWsRoute(requestId, messages))
+        listening = true
+        const connection: ActiveConnection = { requestId, kind: 'websocket-server', port, namespace: path, startTime, messages, serverSettle: finish }
+        this.activeConnections.set(requestId, connection)
+        logger.info('[WebSocketExecutionService] WebSocket server route listening', { requestId, port, path })
+      })()
+    })
+  }
+
+  /** Build a raw-WS route: each upgraded client socket is tracked, and its frames
+   * are recorded + broadcast to the renderer + forwarded to `onMessage` (the
+   * scenario-engine streaming callback) when provided. */
+  private makeWsRoute(
+    requestId: string,
+    frames: WebSocketMessage[],
+    onMessage?: (event: string | undefined, payload: unknown) => void
+  ): WsRoute {
+    const route: WsRoute = {
+      sockets: new Set<WebSocket>(),
+      onConnection: (ws: WebSocket): void => {
+        route.sockets.add(ws)
+        const connected: WebSocketMessage = { direction: 'received', data: 'client connected', event: 'connection', timestamp: new Date().toISOString() }
+        frames.push(connected)
+        this.broadcastMessage(requestId, connected)
+        this.broadcastServerClients(requestId, route.sockets.size)
+        ws.on('message', (data: WebSocket.Data) => {
+          const str = typeof data === 'string' ? data : Buffer.isBuffer(data) ? data.toString('utf8') : JSON.stringify(data)
+          const msg: WebSocketMessage = { direction: 'received', data: str, timestamp: new Date().toISOString() }
+          frames.push(msg)
+          this.broadcastMessage(requestId, msg)
+          let parsed: unknown
+          try { parsed = JSON.parse(str) } catch { parsed = str }
+          onMessage?.(undefined, parsed)
+        })
+        ws.on('close', () => {
+          route.sockets.delete(ws)
+          const left: WebSocketMessage = { direction: 'received', data: 'client disconnected', event: 'disconnect', timestamp: new Date().toISOString() }
+          frames.push(left)
+          this.broadcastMessage(requestId, left)
+          this.broadcastServerClients(requestId, route.sockets.size)
+        })
+        ws.on('error', (err: Error) => {
+          logger.warn('[WebSocketExecutionService] server client socket error', { requestId, error: err.message })
+          route.sockets.delete(ws)
+          this.broadcastServerClients(requestId, route.sockets.size)
+        })
+      }
+    }
+    return route
+  }
+
+  /** Get-or-create the shared http host bound to `port` — no protocol attached
+   * yet (SIO / raw-WS attach lazily). Resolves once listening; rejects if the OS
+   * port can't be bound (EADDRINUSE etc.). Concurrent first-time acquires share
+   * ONE bind attempt (else two routes starting at once race into EADDRINUSE). */
+  private acquirePortHost(port: number): Promise<PortHost> {
+    const existing = this.portHosts.get(port)
     if (existing) return Promise.resolve(existing)
-    // Coalesce concurrent first-time acquires so they share ONE bind attempt
-    // (otherwise two routes starting at once each try to listen → EADDRINUSE).
-    const inFlight = this.pendingPortServers.get(port)
+    const inFlight = this.pendingPortHosts.get(port)
     if (inFlight) return inFlight
-    const promise = new Promise<PortServer>((resolve, reject) => {
+    const promise = new Promise<PortHost>((resolve, reject) => {
       const httpServer = createServer()
-      const ioServer = new SocketIOServer(httpServer, { cors: { origin: '*' } })
       const onError = (err: Error): void => { reject(err) }
       httpServer.once('error', onError)
       httpServer.listen(port, '127.0.0.1', () => {
         httpServer.removeListener('error', onError)
-        const server: PortServer = { httpServer, ioServer, routes: new Set() }
-        this.portServers.set(port, server)
-        logger.info('[WebSocketExecutionService] Port server listening', { port })
-        resolve(server)
+        const host: PortHost = { httpServer, sioRoutes: new Set(), wsRoutes: new Map() }
+        this.portHosts.set(port, host)
+        logger.info('[WebSocketExecutionService] Port host listening', { port })
+        resolve(host)
       })
     })
-    this.pendingPortServers.set(port, promise)
-    void promise.catch(() => undefined).finally(() => { this.pendingPortServers.delete(port) })
+    this.pendingPortHosts.set(port, promise)
+    void promise.catch(() => undefined).finally(() => { this.pendingPortHosts.delete(port) })
     return promise
+  }
+
+  /** Attach a Socket.IO server to the host on first use (claims `/socket.io/`). */
+  private ensureIoServer(host: PortHost): SocketIOServer {
+    host.ioServer ??= new SocketIOServer(host.httpServer, { cors: { origin: '*' } })
+    return host.ioServer
+  }
+
+  /** Attach a `noServer` raw-WS server + the path-routing `upgrade` dispatcher on
+   * first use. Socket.IO (when present) owns `/socket.io/` upgrades; engine.io
+   * leaves other paths alone, so this dispatcher claims them by path. An unknown
+   * path with no socket.io to take it is rejected. */
+  private ensureWss(host: PortHost): WebSocketServer {
+    if (host.wss) return host.wss
+    const wss = new WebSocketServer({ noServer: true })
+    host.wss = wss
+    host.httpServer.on('upgrade', (req, socket, head) => {
+      const path = this.parsePathname(req.url ?? '/')
+      const route = host.wsRoutes.get(path)
+      if (route) {
+        wss.handleUpgrade(req, socket, head, (ws) => { route.onConnection(ws) })
+      } else if (!host.ioServer) {
+        socket.destroy()
+      }
+      // else: leave it for socket.io (it owns `/socket.io/`).
+    })
+    return wss
+  }
+
+  /** Total live routes on a port across every protocol (drives port teardown). */
+  private hostRouteCount(host: PortHost): number {
+    return host.sioRoutes.size + host.wsRoutes.size
+  }
+
+  /** Extract just the pathname from a request URL (drop the query). */
+  private parsePathname(url: string): string {
+    const q = url.indexOf('?')
+    const path = q >= 0 ? url.slice(0, q) : url
+    return path.length > 0 ? path : '/'
   }
 
   /** Attach the per-connection handlers to a namespace: record + broadcast every
@@ -268,12 +426,15 @@ class WebSocketExecutionService {
     frames: WebSocketMessage[],
     onMessage?: (event: string | undefined, payload: unknown) => void
   ): void {
+    let clients = 0
     ioServer.of(namespace).on('connection', (socket: ServerSocket) => {
+      clients += 1
       const connected: WebSocketMessage = {
         direction: 'received', data: `client ${socket.id} connected`, event: 'connection', timestamp: new Date().toISOString()
       }
       frames.push(connected)
       this.broadcastMessage(requestId, connected)
+      this.broadcastServerClients(requestId, clients)
 
       // ACK every received event on reception (so a client emit-with-ack
       // resolves) + record it as a received frame.
@@ -292,11 +453,13 @@ class WebSocketExecutionService {
       })
 
       socket.on('disconnect', () => {
+        clients = Math.max(0, clients - 1)
         const left: WebSocketMessage = {
           direction: 'received', data: `client ${socket.id} disconnected`, event: 'disconnect', timestamp: new Date().toISOString()
         }
         frames.push(left)
         this.broadcastMessage(requestId, left)
+        this.broadcastServerClients(requestId, clients)
       })
     })
   }
@@ -306,34 +469,56 @@ class WebSocketExecutionService {
    * port server. Safe to call for a non-server / unknown request. */
   private releaseServerRoute(requestId: string): void {
     const conn = this.activeConnections.get(requestId)
-    if (conn?.kind !== 'socketio-server' || conn.port === undefined || conn.namespace === undefined) return
-    const portServer = this.portServers.get(conn.port)
-    if (!portServer) return
-    try {
-      const nsp = portServer.ioServer.of(conn.namespace)
-      nsp.removeAllListeners('connection')
-      nsp.disconnectSockets(true)
-    } catch { /* namespace already torn down */ }
-    portServer.routes.delete(conn.namespace)
-    this.closePortServerIfIdle(conn.port)
+    if (conn?.port === undefined || conn.namespace === undefined) return
+    const host = this.portHosts.get(conn.port)
+    if (!host) return
+    if (conn.kind === 'socketio-server' && host.ioServer) {
+      try {
+        const nsp = host.ioServer.of(conn.namespace)
+        nsp.removeAllListeners('connection')
+        nsp.disconnectSockets(true)
+      } catch { /* namespace already torn down */ }
+      host.sioRoutes.delete(conn.namespace)
+    } else if (conn.kind === 'websocket-server') {
+      const route = host.wsRoutes.get(conn.namespace)
+      if (route) {
+        for (const ws of route.sockets) { try { ws.terminate() } catch { /* already gone */ } }
+        route.sockets.clear()
+      }
+      host.wsRoutes.delete(conn.namespace)
+    }
+    this.closePortHostIfIdle(conn.port)
   }
 
-  /** Close + drop the port server only when no route holds it any more — the
-   * last route leaving releases the OS socket. No-op while routes remain. */
-  private closePortServerIfIdle(port: number): void {
-    const portServer = this.portServers.get(port)
-    if (!portServer || portServer.routes.size > 0) return
-    try { portServer.httpServer.closeAllConnections() } catch { /* already closed */ }
-    try { void portServer.ioServer.close() } catch { /* already closed */ }
-    this.portServers.delete(port)
-    logger.info('[WebSocketExecutionService] Port server closed (no routes left)', { port })
+  /** Close + drop the shared port host only when no route (ANY protocol) holds it
+   * any more — the last route leaving releases the OS socket. No-op otherwise. */
+  private closePortHostIfIdle(port: number): void {
+    const host = this.portHosts.get(port)
+    if (!host || this.hostRouteCount(host) > 0) return
+    this.tearDownPortHost(host)
+    this.portHosts.delete(port)
+    logger.info('[WebSocketExecutionService] Port host closed (no routes left)', { port })
   }
 
-  /** Human message for a route-collision (same namespace already on the port). */
-  private routeBusyMessage(port: number, namespace: string): string {
-    return namespace === '/'
-      ? `A Socket.IO server is already listening on port ${port}`
-      : `A Socket.IO server is already listening on ${namespace} (port ${port})`
+  /** Close a host's OS socket + attached protocol servers. `ioServer.close()`
+   * ALSO closes the underlying http server (socket.io owns it); for a host with
+   * NO socket.io we must close the http server ourselves — a `noServer` `ws`
+   * server does not own it, so `wss.close()` alone would leak the bound port. */
+  private tearDownPortHost(host: PortHost): void {
+    try { host.httpServer.closeAllConnections() } catch { /* already closed */ }
+    try { host.wss?.close() } catch { /* already closed */ }
+    if (host.ioServer) {
+      try { void host.ioServer.close() } catch { /* already closed */ }
+    } else {
+      try { host.httpServer.close() } catch { /* already closed */ }
+    }
+  }
+
+  /** Human message for a route-collision (same route already on the port). */
+  private routeBusyMessage(label: string, port: number, route: string): string {
+    return route === '/'
+      ? `A ${label} server is already listening on port ${port}`
+      : `A ${label} server is already listening on ${route} (port ${port})`
   }
 
   /**
@@ -402,7 +587,11 @@ class WebSocketExecutionService {
     const stripped = resolvedUrl.replace(/^[a-z]+:\/\//i, '')
     const slash = stripped.indexOf('/')
     const hostPort = slash >= 0 ? stripped.slice(0, slash) : stripped
-    const namespace = slash >= 0 ? stripped.slice(slash) : '/'
+    // Drop any `?query` so the registered route key matches what the http
+    // `upgrade` dispatcher looks up via `parsePathname` (which strips it too) —
+    // otherwise a `localhost:3002/chat?x=1` server never matches a `/chat` upgrade.
+    const rawNamespace = slash >= 0 ? stripped.slice(slash) : '/'
+    const namespace = this.parsePathname(rawNamespace)
     const portStr = hostPort.split(':')[1] ?? ''
     const port = Number.parseInt(portStr, 10)
     return { port: Number.isFinite(port) && port > 0 ? port : 3001, namespace: namespace || '/' }
@@ -678,29 +867,29 @@ class WebSocketExecutionService {
       ctl.url = resolved.resolvedUrl
 
       const { port, namespace } = this.parseServerAddress(resolved.resolvedUrl)
-      let portServer: PortServer
+      let host: PortHost
       try {
-        portServer = await this.acquirePortServer(port)
+        host = await this.acquirePortHost(port)
       } catch (err) {
         fireClose((err as Error).message || `Failed to listen on port ${port}`)
         return
       }
       // The caller may have hit Stop while we were binding — the connection
       // wasn't tracked yet, so its close()/disconnect() no-op'd. Bail before
-      // registering the route, and release the just-acquired port server if no
+      // registering the route, and release the just-acquired port host if no
       // other route holds it (else it would listen forever, leaked).
       if (stopped()) {
-        this.closePortServerIfIdle(port)
+        this.closePortHostIfIdle(port)
         fireClose()
         return
       }
-      if (portServer.routes.has(namespace)) {
-        fireClose(this.routeBusyMessage(port, namespace))
+      if (host.sioRoutes.has(namespace)) {
+        fireClose(this.routeBusyMessage('Socket.IO', port, namespace))
         return
       }
-      portServer.routes.add(namespace)
+      host.sioRoutes.add(namespace)
       ctl.listening = true
-      this.registerServerNamespace(portServer.ioServer, namespace, requestId, messages, input.onMessage)
+      this.registerServerNamespace(this.ensureIoServer(host), namespace, requestId, messages, input.onMessage)
       const connection: ActiveConnection = { requestId, kind: 'socketio-server', port, namespace, startTime: resolved.startTime, messages, serverSettle: (_ok, error) => { fireClose(error) } }
       this.activeConnections.set(requestId, connection)
       this.broadcastProgress(requestId, 'started')
@@ -710,6 +899,94 @@ class WebSocketExecutionService {
 
     return {
       send: (channel, payload) => this.send(requestId, payload, channel),
+      close: () => { ctl.closedByCaller = true; this.disconnect(requestId) },
+      isOpen: () => this.isActive(requestId)
+    }
+  }
+
+  /**
+   * SERVER-MODE counterpart of {@link connectStreamingRaw} for the scenario
+   * engine: HOST a raw-WebSocket route on `localhost:<port><path>` and stream its
+   * lifecycle through the callbacks. `onConnect` fires once listening;
+   * `onMessage(undefined, payload)` fires for each frame a client sends (raw WS
+   * has no event name); `onClose()` once stopped. `send(_channel, payload)`
+   * broadcasts to every client on the route. Shares the port host with any other
+   * protocol's routes.
+   */
+  connectStreamingRawServer(input: {
+    requestId: string
+    onConnect: () => void
+    onMessage: (event: string | undefined, payload: unknown) => void
+    onClose: (error?: string) => void
+    timeout?: number
+  }): { send: (channel: string, payload: string) => boolean; close: () => void; isOpen: () => boolean } {
+    const { requestId } = input
+    const ctl = { closedByCaller: false, listening: false, startTime: 0, startedAt: '', url: '' }
+    const stopped = (): boolean => ctl.closedByCaller
+    const messages: WebSocketMessage[] = []
+    let fired = false
+    const fireClose = (error?: string): void => {
+      if (fired) return
+      fired = true
+      this.releaseServerRoute(requestId)
+      this.activeConnections.delete(requestId)
+      this.broadcastProgress(requestId, error ? 'error' : 'completed')
+      if (ctl.startTime > 0) {
+        this.persistHistory(requestId, {
+          requestId,
+          success: ctl.listening && error === undefined,
+          connected: ctl.listening,
+          messages,
+          ...(error !== undefined ? { error } : {}),
+          requestUrl: ctl.url,
+          timings: { startedAt: ctl.startedAt, durationMs: Date.now() - ctl.startTime }
+        })
+      }
+      input.onClose(error)
+    }
+
+    void (async () => {
+      let resolved: ResolvedExecution
+      try {
+        resolved = await this.resolveExecution(requestId, input.timeout ?? DEFAULT_WS_TIMEOUT_MS)
+      } catch (err) {
+        fireClose((err as Error).message)
+        return
+      }
+      if (stopped()) { fireClose(); return }
+      ctl.startTime = resolved.startTime
+      ctl.startedAt = resolved.startedAt
+      ctl.url = resolved.resolvedUrl
+
+      const { port, namespace: path } = this.parseServerAddress(resolved.resolvedUrl)
+      let host: PortHost
+      try {
+        host = await this.acquirePortHost(port)
+      } catch (err) {
+        fireClose((err as Error).message || `Failed to listen on port ${port}`)
+        return
+      }
+      if (stopped()) {
+        this.closePortHostIfIdle(port)
+        fireClose()
+        return
+      }
+      if (host.wsRoutes.has(path)) {
+        fireClose(this.routeBusyMessage('WebSocket', port, path))
+        return
+      }
+      this.ensureWss(host)
+      host.wsRoutes.set(path, this.makeWsRoute(requestId, messages, input.onMessage))
+      ctl.listening = true
+      const connection: ActiveConnection = { requestId, kind: 'websocket-server', port, namespace: path, startTime: resolved.startTime, messages, serverSettle: (_ok, error) => { fireClose(error) } }
+      this.activeConnections.set(requestId, connection)
+      this.broadcastProgress(requestId, 'started')
+      logger.info('[WebSocketExecutionService] WebSocket server route listening (streaming)', { requestId, port, path })
+      input.onConnect()
+    })()
+
+    return {
+      send: (_channel, payload) => this.send(requestId, payload),
       close: () => { ctl.closedByCaller = true; this.disconnect(requestId) },
       isOpen: () => this.isActive(requestId)
     }
@@ -929,11 +1206,11 @@ class WebSocketExecutionService {
     logger.info('[WebSocketExecutionService] Disconnecting', { requestId })
     if (connection.kind === 'websocket') {
       connection.ws?.close()
-    } else if (connection.kind === 'socketio-server') {
+    } else if (connection.kind === 'socketio-server' || connection.kind === 'websocket-server') {
       // Stop listening on this route. `serverSettle` runs releaseServerRoute()
-      // (drops the namespace + closes the shared port server when it was the
-      // last route), resolves the run, broadcasts 'completed' and drops the
-      // connection from the active map.
+      // (drops the route + closes the shared port host when it was the last
+      // route, any protocol), resolves the run, broadcasts 'completed' and drops
+      // the connection from the active map.
       connection.serverSettle?.(true)
     } else {
       connection.socket?.close()
@@ -948,22 +1225,22 @@ class WebSocketExecutionService {
    * it (a leaked server would keep its port bound with no UI to stop it).
    */
   closeAll(): void {
-    const count = this.activeConnections.size + this.portServers.size
-    // Disconnect each tracked connection (a server route's disconnect closes
-    // its shared port server once it was the last route). Snapshot the keys —
+    const count = this.activeConnections.size + this.portHosts.size
+    // Disconnect each tracked connection (a server route's disconnect closes its
+    // shared port host once it was the last route). Snapshot the keys —
     // disconnect mutates the map.
     for (const requestId of [...this.activeConnections.keys()]) {
       try { this.disconnect(requestId) } catch { /* best-effort teardown */ }
     }
-    // Defensive sweep: force-close any port server still bound (e.g. one whose
+    // Defensive sweep: force-close any port host still bound (e.g. one whose
     // backing connection was already dropped from the active map).
-    for (const port of [...this.portServers.keys()]) {
-      const ps = this.portServers.get(port)
-      if (!ps) continue
-      ps.routes.clear()
-      try { ps.httpServer.closeAllConnections() } catch { /* already closed */ }
-      try { void ps.ioServer.close() } catch { /* already closed */ }
-      this.portServers.delete(port)
+    for (const port of [...this.portHosts.keys()]) {
+      const host = this.portHosts.get(port)
+      if (!host) continue
+      host.sioRoutes.clear()
+      host.wsRoutes.clear()
+      this.tearDownPortHost(host)
+      this.portHosts.delete(port)
     }
     if (count > 0) logger.info('[WebSocketExecutionService] Closed all connections + servers', { count })
   }
@@ -984,10 +1261,19 @@ class WebSocketExecutionService {
       // route's namespace. There's no ack to collect (clients receive a
       // broadcast, they don't reply), so this is purely outbound.
       if (connection.port === undefined) return false
-      const portServer = this.portServers.get(connection.port)
-      if (!portServer) return false
+      const host = this.portHosts.get(connection.port)
+      if (!host?.ioServer) return false
       const channel = event && event.length > 0 ? event : 'message'
-      portServer.ioServer.of(connection.namespace ?? '/').emit(channel, parsePayload(message))
+      host.ioServer.of(connection.namespace ?? '/').emit(channel, parsePayload(message))
+    } else if (connection.kind === 'websocket-server') {
+      // SERVER MODE (raw WS): broadcast the GUI payload to every client on this
+      // route's path. Raw frames, no event envelope, no ack.
+      if (connection.port === undefined || connection.namespace === undefined) return false
+      const route = this.portHosts.get(connection.port)?.wsRoutes.get(connection.namespace)
+      if (!route) return false
+      for (const ws of route.sockets) {
+        if (ws.readyState === WebSocket.OPEN) ws.send(message)
+      }
     } else {
       if (!connection.socket?.connected) return false
       const channel = event && event.length > 0 ? event : 'message'
@@ -1031,7 +1317,11 @@ class WebSocketExecutionService {
       return connection.ws?.readyState === WebSocket.OPEN
     }
     if (connection.kind === 'socketio-server') {
-      return connection.port !== undefined && this.portServers.has(connection.port)
+      return connection.port !== undefined && this.portHosts.has(connection.port)
+    }
+    if (connection.kind === 'websocket-server') {
+      return connection.port !== undefined && connection.namespace !== undefined
+        && this.portHosts.get(connection.port)?.wsRoutes.has(connection.namespace) === true
     }
     return connection.socket?.connected === true
   }
@@ -1073,6 +1363,18 @@ class WebSocketExecutionService {
     const windows = BrowserWindow.getAllWindows()
     for (const win of windows) {
       win.webContents.send('websocket:message', { requestId, message })
+    }
+  }
+
+  /**
+   * Broadcast a hosted server's live CONNECTED-CLIENT count to the renderer — the
+   * request panel shows "N clients connected" while listening. Fired on every
+   * client connect / disconnect for a server-mode route.
+   */
+  private broadcastServerClients(requestId: string, count: number): void {
+    const windows = BrowserWindow.getAllWindows()
+    for (const win of windows) {
+      win.webContents.send('websocket:server-clients', { requestId, count })
     }
   }
 
