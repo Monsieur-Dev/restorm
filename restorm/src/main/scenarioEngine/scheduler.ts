@@ -145,7 +145,7 @@ export interface SocketioConnectRequest {
   requestId: string
   /** Wire transport — `socketio` opens a socket.io client, `websocket` a raw WS,
    * `grpc` a streaming RPC (server / client / bidi). */
-  transport: 'socketio' | 'websocket' | 'grpc'
+  transport: 'socketio' | 'websocket' | 'grpc' | 'mqtt'
   /** Fired once the socket is open. */
   onConnect: () => void
   /** Fired for every received frame (event name — undefined for raw WS — + payload). */
@@ -1163,7 +1163,7 @@ export class Scheduler {
    */
   private runSocketioConnect(
     act: InternalActivation,
-    action: { transport: 'socketio' | 'websocket' | 'grpc'; requestId: string; events: string[]; connectionName: string }
+    action: { transport: 'socketio' | 'websocket' | 'grpc' | 'mqtt'; requestId: string; events: string[]; connectionName: string }
   ): void {
     if (!this.socketioConnectBridge) { this.fail('socketio bridge not wired'); return }
     let iter = 0
@@ -1232,7 +1232,7 @@ export class Scheduler {
         // port. Socket.IO routes to the matching `event:<name>` port when listened
         // + wired, else the `others` catch-all (the switch `default` analogue).
         let port: string
-        if (action.transport === 'websocket' || action.transport === 'grpc') {
+        if (action.transport === 'websocket' || action.transport === 'grpc' || action.transport === 'mqtt') {
           port = 'message'
         } else {
           const named = eventName !== undefined && action.events.includes(eventName)

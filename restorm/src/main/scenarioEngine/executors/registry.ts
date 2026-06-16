@@ -54,7 +54,7 @@ import {
 } from './timeAndFlowExecutors'
 import { httpRequestExecutor } from './httpRequestExecutor'
 import { runScenarioExecutor } from './runScenarioExecutor'
-import { socketioConnectExecutor, socketioSendExecutor, socketioCloseExecutor, websocketConnectExecutor, websocketSendExecutor, websocketCloseExecutor, grpcConnectExecutor, grpcSendExecutor, grpcCloseExecutor } from './socketioExecutors'
+import { socketioConnectExecutor, socketioSendExecutor, socketioCloseExecutor, websocketConnectExecutor, websocketSendExecutor, websocketCloseExecutor, mqttConnectExecutor, mqttSendExecutor, mqttCloseExecutor, grpcConnectExecutor, grpcSendExecutor, grpcCloseExecutor } from './socketioExecutors'
 import { concreteValue } from '../../../shared/utils/scenarioStaticPreview'
 import { coerceCliParamValue } from '../../../shared/scenarioCliParams'
 import { readInputParams } from '../../../shared/scenarioInputParams'
@@ -227,6 +227,9 @@ function pickExecutor(kind: string): NodeExecutor {
     case 'websocketConnect': return websocketConnectExecutor
     case 'websocketSend': return websocketSendExecutor
     case 'websocketClose': return websocketCloseExecutor
+    case 'mqttConnect': return mqttConnectExecutor
+    case 'mqttSend': return mqttSendExecutor
+    case 'mqttClose': return mqttCloseExecutor
     case 'grpcConnect': return grpcConnectExecutor
     case 'grpcSend': return grpcSendExecutor
     case 'grpcClose': return grpcCloseExecutor

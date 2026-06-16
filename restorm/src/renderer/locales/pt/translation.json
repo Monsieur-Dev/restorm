@@ -982,7 +982,10 @@
       "websocketClose": "WebSocket close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
-      "grpcClose": "gRPC close"
+      "grpcClose": "gRPC close",
+      "mqttConnect": "MQTT connect",
+      "mqttSend": "MQTT publish",
+      "mqttClose": "MQTT close"
     },
     "comparator": {
       "result": "resultado"
@@ -1532,7 +1535,10 @@
       "socketioCloseServer": "Para o servidor Socket.IO referenciado e desconecta os seus clientes.",
       "websocketConnectServer": "Inicia um servidor WebSocket bruto (porta + caminho); regista cada frame que um cliente envia e reemite-o na sua porta message. Enviar transmite aos clientes conectados.",
       "websocketSendServer": "Transmite um frame a todos os clientes conectados ao servidor WebSocket referenciado.",
-      "websocketCloseServer": "Para o servidor WebSocket referenciado e desconecta os seus clientes."
+      "websocketCloseServer": "Para o servidor WebSocket referenciado e desconecta os seus clientes.",
+      "mqttConnect": "Opens a long-lived MQTT connection from a bound request and subscribes to its topic; re-emits each received message on its `message` port.",
+      "mqttSend": "Publishes a payload on an already-open MQTT connection (to its topic).",
+      "mqttClose": "Closes an already-open MQTT connection."
     },
     "legend": {
       "title": "Legenda",

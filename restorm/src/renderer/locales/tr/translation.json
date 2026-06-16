@@ -982,7 +982,10 @@
       "websocketClose": "WebSocket close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
-      "grpcClose": "gRPC close"
+      "grpcClose": "gRPC close",
+      "mqttConnect": "MQTT connect",
+      "mqttSend": "MQTT publish",
+      "mqttClose": "MQTT close"
     },
     "comparator": {
       "result": "sonuç"
@@ -1532,7 +1535,10 @@
       "socketioCloseServer": "Başvurulan Socket.IO sunucusunu durdurur ve istemcilerinin bağlantısını keser.",
       "websocketConnectServer": "Ham bir WebSocket sunucusu başlatır (bağlantı noktası + yol); bir istemcinin gönderdiği her frame’i kaydeder ve message bağlantı noktasında yeniden yayar. Gönder, bağlı istemcilere yayın yapar.",
       "websocketSendServer": "Başvurulan WebSocket sunucusuna bağlı her istemciye bir frame yayınlar.",
-      "websocketCloseServer": "Başvurulan WebSocket sunucusunu durdurur ve istemcilerinin bağlantısını keser."
+      "websocketCloseServer": "Başvurulan WebSocket sunucusunu durdurur ve istemcilerinin bağlantısını keser.",
+      "mqttConnect": "Opens a long-lived MQTT connection from a bound request and subscribes to its topic; re-emits each received message on its `message` port.",
+      "mqttSend": "Publishes a payload on an already-open MQTT connection (to its topic).",
+      "mqttClose": "Closes an already-open MQTT connection."
     },
     "legend": {
       "title": "Gösterge",

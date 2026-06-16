@@ -981,7 +981,10 @@
       "websocketClose": "WebSocket close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
-      "grpcClose": "gRPC close"
+      "grpcClose": "gRPC close",
+      "mqttConnect": "MQTT connect",
+      "mqttSend": "MQTT publish",
+      "mqttClose": "MQTT close"
     },
     "comparator": {
       "result": "kết quả"
@@ -1531,7 +1534,10 @@
       "socketioCloseServer": "Dừng máy chủ Socket.IO được tham chiếu và ngắt kết nối các máy khách của nó.",
       "websocketConnectServer": "Khởi động máy chủ WebSocket thô (cổng + đường dẫn); ghi lại mỗi khung mà một máy khách gửi và phát lại trên cổng message của nó. Gửi sẽ phát tới các máy khách đã kết nối.",
       "websocketSendServer": "Phát một khung tới mọi máy khách đang kết nối với máy chủ WebSocket được tham chiếu.",
-      "websocketCloseServer": "Dừng máy chủ WebSocket được tham chiếu và ngắt kết nối các máy khách của nó."
+      "websocketCloseServer": "Dừng máy chủ WebSocket được tham chiếu và ngắt kết nối các máy khách của nó.",
+      "mqttConnect": "Opens a long-lived MQTT connection from a bound request and subscribes to its topic; re-emits each received message on its `message` port.",
+      "mqttSend": "Publishes a payload on an already-open MQTT connection (to its topic).",
+      "mqttClose": "Closes an already-open MQTT connection."
     },
     "legend": {
       "title": "Chú giải",

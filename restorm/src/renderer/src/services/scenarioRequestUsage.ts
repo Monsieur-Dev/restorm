@@ -32,7 +32,7 @@ function walkScenarios(items: FolderItem[], visit: (scenario: Scenario) => void)
  * (Socket.IO / raw WebSocket / gRPC). Any request-bound kind must be listed here
  * so the request ties to the scenario for BOTH the "used in scenarios"
  * reverse-nav and the delete → move-into-scenario flow. */
-const REQUEST_BINDING_KINDS = new Set(['httpRequest', 'socketioConnect', 'websocketConnect', 'grpcConnect'])
+const REQUEST_BINDING_KINDS = new Set(['httpRequest', 'socketioConnect', 'websocketConnect', 'mqttConnect', 'grpcConnect'])
 
 /** Whether a scenario node binds `requestId` (via `config.requestId`). */
 function nodeBindsRequest(node: { kind: string; config: Record<string, unknown> }, requestId: string): boolean {

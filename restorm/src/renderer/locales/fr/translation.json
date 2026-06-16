@@ -982,7 +982,10 @@
       "websocketClose": "WebSocket fermeture",
       "grpcConnect": "Connexion gRPC",
       "grpcSend": "Envoi gRPC",
-      "grpcClose": "Fermeture gRPC"
+      "grpcClose": "Fermeture gRPC",
+      "mqttConnect": "Connexion MQTT",
+      "mqttSend": "Publication MQTT",
+      "mqttClose": "Fermeture MQTT"
     },
     "comparator": {
       "result": "résultat"
@@ -1532,7 +1535,10 @@
       "socketioCloseServer": "Arrête le serveur Socket.IO référencé et déconnecte ses clients.",
       "websocketConnectServer": "Démarre un serveur WebSocket brut (port + chemin) ; enregistre chaque frame reçue d’un client et la réémet sur son port message. L’envoi diffuse aux clients connectés.",
       "websocketSendServer": "Diffuse une frame à tous les clients connectés au serveur WebSocket brut référencé.",
-      "websocketCloseServer": "Arrête le serveur WebSocket brut référencé et déconnecte ses clients."
+      "websocketCloseServer": "Arrête le serveur WebSocket brut référencé et déconnecte ses clients.",
+      "mqttConnect": "Ouvre une connexion MQTT durable depuis une requête liée et s’abonne à son sujet ; ré-émet chaque message reçu sur son port `message`.",
+      "mqttSend": "Publie une charge utile sur une connexion MQTT déjà ouverte (vers son sujet).",
+      "mqttClose": "Ferme une connexion MQTT déjà ouverte."
     },
     "legend": {
       "title": "Légende",

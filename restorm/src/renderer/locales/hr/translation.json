@@ -983,7 +983,10 @@
       "websocketClose": "WebSocket close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
-      "grpcClose": "gRPC close"
+      "grpcClose": "gRPC close",
+      "mqttConnect": "MQTT connect",
+      "mqttSend": "MQTT publish",
+      "mqttClose": "MQTT close"
     },
     "comparator": {
       "result": "rezultat"
@@ -1533,7 +1536,10 @@
       "socketioCloseServer": "Zaustavlja navedeni Socket.IO poslužitelj i prekida vezu s njegovim klijentima.",
       "websocketConnectServer": "Pokreće sirovi WebSocket poslužitelj (port + putanja); bilježi svaki primljeni frame i ponovno ga emitira na svom message portu. Slanje emitira povezanim klijentima.",
       "websocketSendServer": "Emitira frame svim klijentima povezanima na navedeni WebSocket poslužitelj.",
-      "websocketCloseServer": "Zaustavlja navedeni WebSocket poslužitelj i prekida vezu s njegovim klijentima."
+      "websocketCloseServer": "Zaustavlja navedeni WebSocket poslužitelj i prekida vezu s njegovim klijentima.",
+      "mqttConnect": "Opens a long-lived MQTT connection from a bound request and subscribes to its topic; re-emits each received message on its `message` port.",
+      "mqttSend": "Publishes a payload on an already-open MQTT connection (to its topic).",
+      "mqttClose": "Closes an already-open MQTT connection."
     },
     "legend": {
       "title": "Legenda",

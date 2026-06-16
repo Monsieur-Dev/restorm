@@ -188,6 +188,9 @@ export class ScenarioEngine {
           flushRequestStateToContext(bound as unknown as Parameters<typeof flushRequestStateToContext>[0])
         }
         if (req.transport === 'grpc') return grpcExecutionService.connectStreaming(req)
+        // MQTT connects to a broker (no server-mode split) and subscribes to the
+        // bound request's topic — every received message re-emits on `message`.
+        if (req.transport === 'mqtt') return websocketExecutionService.connectStreamingMqtt(req)
         // A request flagged `server` HOSTS the server (restorm acts as the
         // server); otherwise it connects as a client — same split for raw WS and
         // Socket.IO.
