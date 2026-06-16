@@ -248,7 +248,9 @@
         "odata": "Αίτημα OData",
         "auth": "Αίτημα HTTP ταυτοποίησης",
         "scenario": "Σενάριο",
-        "socketioServer": "Διακομιστής Socket.IO"
+        "socketioServer": "Διακομιστής Socket.IO",
+        "websocketServer": "Διακομιστής WebSocket",
+        "socketio": "Αίτημα Socket.IO"
       }
     },
     "deleteConfirm": {
@@ -450,7 +452,9 @@
     "disconnect": "Αποσύνδεση",
     "startListening": "Έναρξη ακρόασης",
     "stopListening": "Διακοπή ακρόασης",
-    "routePlaceholder": "Διαδρομή (προαιρετικό)"
+    "routePlaceholder": "Διαδρομή (προαιρετικό)",
+    "clientsConnected": "{{count}} πελάτης/ες συνδεδεμένος/οι",
+    "notListening": "Δεν ακούει"
   },
   "search": {
     "placeholder": "Αναζήτηση...",
@@ -1525,7 +1529,10 @@
       "grpcClose": "Half-closes an already-open streaming gRPC call.",
       "socketioConnectServer": "Εκκινεί έναν διακομιστή Socket.IO (θύρα + διαδρομή)· επιβεβαιώνει κάθε συμβάν που λαμβάνει και το αναμεταδίδει στη θύρα του. Η αποστολή μεταδίδει στους συνδεδεμένους πελάτες.",
       "socketioSendServer": "Μεταδίδει ένα μήνυμα σε όλους τους πελάτες που είναι συνδεδεμένοι στον αναφερόμενο διακομιστή Socket.IO.",
-      "socketioCloseServer": "Σταματά τον αναφερόμενο διακομιστή Socket.IO και αποσυνδέει τους πελάτες του."
+      "socketioCloseServer": "Σταματά τον αναφερόμενο διακομιστή Socket.IO και αποσυνδέει τους πελάτες του.",
+      "websocketConnectServer": "Εκκινεί έναν ωμό διακομιστή WebSocket (θύρα + διαδρομή)· καταγράφει κάθε frame που λαμβάνει και το αναμεταδίδει στη θύρα message. Η αποστολή μεταδίδει στους συνδεδεμένους πελάτες.",
+      "websocketSendServer": "Μεταδίδει ένα frame σε όλους τους πελάτες που είναι συνδεδεμένοι στον αναφερόμενο διακομιστή WebSocket.",
+      "websocketCloseServer": "Σταματά τον αναφερόμενο διακομιστή WebSocket και αποσυνδέει τους πελάτες του."
     },
     "legend": {
       "title": "Υπόμνημα",

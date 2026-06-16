@@ -247,7 +247,9 @@
         "odata": "Permintaan OData",
         "auth": "Permintaan autentikasi HTTP",
         "scenario": "Skenario",
-        "socketioServer": "Server Socket.IO"
+        "socketioServer": "Server Socket.IO",
+        "websocketServer": "Server WebSocket",
+        "socketio": "Permintaan Socket.IO"
       }
     },
     "deleteConfirm": {
@@ -449,7 +451,9 @@
     "disconnect": "Putuskan koneksi",
     "startListening": "Mulai mendengarkan",
     "stopListening": "Berhenti mendengarkan",
-    "routePlaceholder": "Rute (opsional)"
+    "routePlaceholder": "Rute (opsional)",
+    "clientsConnected": "{{count}} klien terhubung",
+    "notListening": "Tidak mendengarkan"
   },
   "search": {
     "placeholder": "Cari...",
@@ -1524,7 +1528,10 @@
       "grpcClose": "Half-closes an already-open streaming gRPC call.",
       "socketioConnectServer": "Memulai server Socket.IO (port + rute); mengakui setiap peristiwa yang diterima dan memancarkannya kembali di portnya. Kirim menyiarkan ke klien yang terhubung.",
       "socketioSendServer": "Menyiarkan pesan ke setiap klien yang terhubung ke server Socket.IO yang dirujuk.",
-      "socketioCloseServer": "Menghentikan server Socket.IO yang dirujuk dan memutuskan koneksi kliennya."
+      "socketioCloseServer": "Menghentikan server Socket.IO yang dirujuk dan memutuskan koneksi kliennya.",
+      "websocketConnectServer": "Memulai server WebSocket mentah (port + path); merekam setiap frame yang dikirim klien dan memancarkannya kembali di port message. Kirim menyiarkan ke klien yang terhubung.",
+      "websocketSendServer": "Menyiarkan frame ke setiap klien yang terhubung ke server WebSocket yang dirujuk.",
+      "websocketCloseServer": "Menghentikan server WebSocket yang dirujuk dan memutuskan koneksi kliennya."
     },
     "legend": {
       "title": "Legenda",

@@ -4,13 +4,15 @@ collections:
     documentation: |-
       # WebSocket Playground
 
-      Connects to the local raw WebSocket echo server (docker-compose service
-      `ws-echo`, exposed on port 3002). Send a JSON payload and observe the
-      server echo it straight back. Unlike Socket.IO there are no named events
-      or acknowledgements — every received frame is a plain message.
+      A self-contained raw-WebSocket playground: restorm hosts the server AND
+      connects to it as a client — no external mock needed.
 
-      The plain HTTP `/push` route pushes a frame to every connected client, so
-      an external trigger can deliver a server→client message.
+      - **WS Echo Server** hosts a raw WebSocket server on `localhost:3002`. It
+        records every frame a client sends, and its Send button broadcasts the
+        configured payload to every connected client.
+      - **WS Echo** is a client that connects to `ws://localhost:3002`, sends a
+        frame, and shows whatever the server broadcasts. Raw WS has no named
+        events or acknowledgements — every received frame is a plain message.
     tags: []
     configuration: {}
     environments:
@@ -19,8 +21,26 @@ collections:
         id: fed4ba93-ea01-4844-bb88-cc03264379f0
     items:
       - type: websocket
+        name: WS Echo Server
+        documentation: |-
+          Hosts a raw WebSocket server on `localhost:3002`. Start listening, then
+          connect the **WS Echo** client. Records every received frame; its Send
+          button broadcasts to all connected clients.
+        tags:
+          - websocket
+          - server
+        url: localhost:3002
+        protocol: websocket
+        server: true
+        message: |-
+          {
+            "hello": "from server"
+          }
+        headers: []
+        id: a8d16c1c-879f-4acd-834c-c5d2092e9601
+      - type: websocket
         name: WS Echo
-        documentation: Send a payload and receive the same frame echoed back.
+        documentation: Connect to the local WS Echo Server, send a frame, see the broadcast.
         tags:
           - websocket
         url: ws://localhost:3002
@@ -31,28 +51,6 @@ collections:
           }
         headers: []
         id: a8d16c1c-879f-4acd-834c-c5d2092e967e
-      - type: http
-        name: Push to WS echo (HTTP)
-        documentation: |-
-          # Push to WS echo (HTTP)
-
-          Calls the mock's plain HTTP route `/push` to send a frame to every
-          connected client. Connect **WS Echo** first, then run this — the
-          pushed payload appears in WS Echo's stream.
-        tags:
-          - http
-          - trigger
-        method: GET
-        url: http://localhost:3002/push
-        headers: []
-        params:
-          - key: data
-            value:
-              type: string
-              value: '{"hello":"from HTTP"}'
-            description: Raw frame to push to listeners
-        pathParams: []
-        id: 0a932ed1-13d0-45a7-85ee-4a69f137de42
     id: 7cebefcd-058c-41ad-946e-8e3b2cf6ba39
     fileFormatVersion: 1
 _projectUuid: 87743c3c-74c8-408c-b00d-a22338ddc23e

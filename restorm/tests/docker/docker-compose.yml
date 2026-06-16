@@ -58,24 +58,11 @@ services:
       - "9000:9000"
       - "9002:9001"
 
-  # NOTE: there is intentionally no Socket.IO mock service. restorm hosts its
-  # own Socket.IO server (a "server mode" request) and connects to it as a
-  # client in the same instance, so the Socket.IO E2E + scenarios self-connect
-  # — no external mock to run or maintain.
-
-  # Raw WebSocket - Custom `ws`-based echo server. Socket.IO runs its own
-  # framing over raw WS, so a plain-WS client can't echo cleanly against it;
-  # this dedicated server gives raw `ws://` text/binary echo, subprotocol +
-  # header negotiation, ping/pong, and HTTP `/push` + `/close` trigger routes.
-  ws-echo:
-    image: node:20-alpine
-    container_name: restorm-ws-echo
-    working_dir: /app
-    volumes:
-      - ./ws-echo-server:/app
-    command: sh -c "npm install && node server.js"
-    ports:
-      - "3002:3002"
+  # NOTE: there is intentionally no Socket.IO nor raw-WebSocket mock service.
+  # restorm hosts its OWN Socket.IO + raw-WebSocket servers (a "server mode"
+  # request) and connects to them as a client in the same instance, so the
+  # Socket.IO / WebSocket E2E + scenarios self-connect — no external mock to
+  # run or maintain.
 
   # Auth - Custom .NET 9 minimal-API service used by the `auth-login`
   # e2e suite. Publishes `/login` (POST), `/pet/{id}` (GET, Bearer-gated)

@@ -250,7 +250,9 @@
         "odata": "Запит OData",
         "auth": "Запит автентифікації HTTP",
         "scenario": "Сценарій",
-        "socketioServer": "Сервер Socket.IO"
+        "socketioServer": "Сервер Socket.IO",
+        "websocketServer": "Сервер WebSocket",
+        "socketio": "Запит Socket.IO"
       }
     },
     "deleteConfirm": {
@@ -452,7 +454,9 @@
     "disconnect": "Відключити",
     "startListening": "Почати слухати",
     "stopListening": "Зупинити прослуховування",
-    "routePlaceholder": "Маршрут (необов'язково)"
+    "routePlaceholder": "Маршрут (необов'язково)",
+    "clientsConnected": "{{count}} клієнт(ів) підключено",
+    "notListening": "Не слухає"
   },
   "search": {
     "placeholder": "Пошук...",
@@ -1527,7 +1531,10 @@
       "grpcClose": "Half-closes an already-open streaming gRPC call.",
       "socketioConnectServer": "Запускає сервер Socket.IO (порт + маршрут); підтверджує кожну отриману подію та повторно надсилає її на своєму порту. Надсилання транслює підключеним клієнтам.",
       "socketioSendServer": "Транслює повідомлення всім клієнтам, підключеним до вказаного сервера Socket.IO.",
-      "socketioCloseServer": "Зупиняє вказаний сервер Socket.IO та відключає його клієнтів."
+      "socketioCloseServer": "Зупиняє вказаний сервер Socket.IO та відключає його клієнтів.",
+      "websocketConnectServer": "Запускає сирий сервер WebSocket (порт + шлях); записує кожен отриманий кадр і повторно надсилає його на своєму порту message. Надсилання транслює підключеним клієнтам.",
+      "websocketSendServer": "Транслює кадр усім клієнтам, підключеним до вказаного сервера WebSocket.",
+      "websocketCloseServer": "Зупиняє вказаний сервер WebSocket та відключає його клієнтів."
     },
     "legend": {
       "title": "Легенда",

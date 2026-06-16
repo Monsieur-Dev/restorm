@@ -248,7 +248,9 @@
         "odata": "Pedido OData",
         "auth": "Pedido de autenticação HTTP",
         "scenario": "Cenário",
-        "socketioServer": "Servidor Socket.IO"
+        "socketioServer": "Servidor Socket.IO",
+        "websocketServer": "Servidor WebSocket",
+        "socketio": "Requisição Socket.IO"
       }
     },
     "deleteConfirm": {
@@ -450,7 +452,9 @@
     "disconnect": "Desconectar",
     "startListening": "Começar a escutar",
     "stopListening": "Parar de escutar",
-    "routePlaceholder": "Rota (opcional)"
+    "routePlaceholder": "Rota (opcional)",
+    "clientsConnected": "{{count}} cliente(s) conectado(s)",
+    "notListening": "Sem escutar"
   },
   "search": {
     "placeholder": "Pesquisar...",
@@ -1525,7 +1529,10 @@
       "grpcClose": "Half-closes an already-open streaming gRPC call.",
       "socketioConnectServer": "Inicia um servidor Socket.IO (porta + rota); confirma cada evento recebido e o reemite na sua porta. Enviar transmite aos clientes conectados.",
       "socketioSendServer": "Transmite uma mensagem a todos os clientes conectados ao servidor Socket.IO referenciado.",
-      "socketioCloseServer": "Para o servidor Socket.IO referenciado e desconecta os seus clientes."
+      "socketioCloseServer": "Para o servidor Socket.IO referenciado e desconecta os seus clientes.",
+      "websocketConnectServer": "Inicia um servidor WebSocket bruto (porta + caminho); regista cada frame que um cliente envia e reemite-o na sua porta message. Enviar transmite aos clientes conectados.",
+      "websocketSendServer": "Transmite um frame a todos os clientes conectados ao servidor WebSocket referenciado.",
+      "websocketCloseServer": "Para o servidor WebSocket referenciado e desconecta os seus clientes."
     },
     "legend": {
       "title": "Legenda",

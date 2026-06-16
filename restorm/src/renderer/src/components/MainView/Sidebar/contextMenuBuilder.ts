@@ -40,7 +40,9 @@ export type AddChildKind =
   | 'grpc-bidi'
   | 'soap'
   | 'websocket'
+  | 'socketio'
   | 'socketio-server'
+  | 'websocket-server'
   | 'odata'
   | 'auth'
   | 'scenario'
@@ -154,6 +156,8 @@ export const buildAddSubmenu = (
     icon: React.createElement(Badge, { type: 'SOAP' }),
     onClick: () => { onAddChildItem(parentId, 'soap') }
   },
+  { id: `sep-add-ws-${parentId}`, isSeparator: true, label: '' },
+  // WebSocket group: client + server together.
   {
     id: `add-websocket-${parentId}`,
     label: t('sidebar.contextMenu.add.websocket'),
@@ -161,11 +165,26 @@ export const buildAddSubmenu = (
     onClick: () => { onAddChildItem(parentId, 'websocket') }
   },
   {
+    id: `add-websocket-server-${parentId}`,
+    label: t('sidebar.contextMenu.add.websocketServer'),
+    icon: React.createElement(Badge, { type: 'WS', mode: 'server' }),
+    onClick: () => { onAddChildItem(parentId, 'websocket-server') }
+  },
+  { id: `sep-add-sio-${parentId}`, isSeparator: true, label: '' },
+  // Socket.IO group: client + server together.
+  {
+    id: `add-socketio-${parentId}`,
+    label: t('sidebar.contextMenu.add.socketio'),
+    icon: React.createElement(Badge, { type: 'SIO' }),
+    onClick: () => { onAddChildItem(parentId, 'socketio') }
+  },
+  {
     id: `add-socketio-server-${parentId}`,
     label: t('sidebar.contextMenu.add.socketioServer'),
     icon: React.createElement(Badge, { type: 'SIO', mode: 'server' }),
     onClick: () => { onAddChildItem(parentId, 'socketio-server') }
   },
+  { id: `sep-add-odata-${parentId}`, isSeparator: true, label: '' },
   {
     id: `add-odata-${parentId}`,
     label: t('sidebar.contextMenu.add.odata'),

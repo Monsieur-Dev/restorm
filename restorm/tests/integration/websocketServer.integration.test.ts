@@ -11,9 +11,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { createServer } from 'node:net'
 import { io as clientIo, type Socket } from 'socket.io-client'
+import WebSocket from 'ws'
 
+// Capture renderer broadcasts (webContents.send) so a test can assert the
+// hosted-server client-count events without a real window.
+const sentEvents = vi.hoisted(() => [] as { channel: string; payload: unknown }[])
 vi.mock('electron', () => ({
-  BrowserWindow: { getAllWindows: () => [] },
+  BrowserWindow: {
+    getAllWindows: () => [{ webContents: { send: (channel: string, payload: unknown) => { sentEvents.push({ channel, payload }) } } }]
+  },
   app: { isPackaged: false, getPath: () => '/tmp' }
 }))
 vi.mock('electron-core-ui/main', () => ({
@@ -108,10 +114,14 @@ function stubServerRequest(id: string, url: string, message = '{}'): void {
 
 describe('WebSocketExecutionService — Socket.IO server mode', () => {
   const clients: Socket[] = []
+  const wsClients: WebSocket[] = []
   beforeEach(() => { installContextStubs() })
   afterEach(() => {
     for (const c of clients) { try { c.close() } catch { /* noop */ } }
+    for (const w of wsClients) { try { w.terminate() } catch { /* noop */ } }
     clients.length = 0
+    wsClients.length = 0
+    sentEvents.length = 0
     stubbed.clear()
     vi.clearAllMocks()
   })
@@ -335,5 +345,155 @@ describe('WebSocketExecutionService — Socket.IO server mode', () => {
     websocketExecutionService.disconnect('rt-zzz')
     await waitFor(() => !websocketExecutionService.isActive('rt-zzz'))
     await waitForPortFree(p2, true)
+  })
+
+  it('connectStreamingRawServer: records client frames + broadcasts to clients', async () => {
+    const port = await freePort()
+    stubServerRequest('ws-srv', `localhost:${port}/chat`)
+    const received: unknown[] = []
+    let up = false, closed = false
+    const handle = websocketExecutionService.connectStreamingRawServer({
+      requestId: 'ws-srv', onConnect: () => { up = true }, onMessage: (_e, p) => { received.push(p) }, onClose: () => { closed = true }
+    })
+    await waitFor(() => up)
+    expect(websocketExecutionService.isActive('ws-srv')).toBe(true)
+
+    const client = new WebSocket(`ws://127.0.0.1:${port}/chat`)
+    wsClients.push(client)
+    await new Promise<void>((resolve, reject) => { client.on('open', () => { resolve() }); client.on('error', reject) })
+
+    // A client frame is recorded + forwarded (JSON parsed).
+    client.send(JSON.stringify({ hello: 'ws' }))
+    await waitFor(() => received.length >= 1)
+    expect(received[0]).toEqual({ hello: 'ws' })
+
+    // The server's Send broadcasts a raw frame to the client.
+    const broadcast = await new Promise<string>((resolve) => {
+      client.on('message', (d: WebSocket.RawData) => { resolve(Buffer.from(d as Buffer).toString('utf8')) })
+      expect(handle.send('', 'from-server')).toBe(true)
+    })
+    expect(broadcast).toBe('from-server')
+
+    handle.close()
+    await waitFor(() => closed)
+    expect(websocketExecutionService.isActive('ws-srv')).toBe(false)
+    // A raw-WS host has no socket.io to close the http server, so the teardown
+    // must close it explicitly — otherwise the OS port leaks (regression guard).
+    await waitForPortFree(port, true)
+  })
+
+  it('two IDENTICAL raw-WS routes (same path + port) collide: the first listens, the second fails', async () => {
+    const port = await freePort()
+    stubServerRequest('raw-a', `localhost:${port}/chat`)
+    stubServerRequest('raw-b', `localhost:${port}/chat`) // same port + same path
+
+    let aUp = false
+    websocketExecutionService.connectStreamingRawServer({
+      requestId: 'raw-a', onConnect: () => { aUp = true }, onMessage: noop, onClose: noop
+    })
+    await waitFor(() => aUp)
+
+    let bErr: string | undefined
+    let bClosed = false
+    let bUp = false
+    websocketExecutionService.connectStreamingRawServer({
+      requestId: 'raw-b', onConnect: () => { bUp = true }, onMessage: noop, onClose: (e) => { bClosed = true; bErr = e }
+    })
+    await waitFor(() => bClosed)
+    expect(bUp).toBe(false)
+    expect(bErr).toMatch(/already listening/i)
+    // The first route is untouched and still listening.
+    expect(websocketExecutionService.isActive('raw-a')).toBe(true)
+
+    websocketExecutionService.disconnect('raw-a')
+    await waitFor(() => !websocketExecutionService.isActive('raw-a'))
+    await waitForPortFree(port, true)
+  })
+
+  it('closeAll() tears down a hosted raw-WS server and frees its port (file close / quit)', async () => {
+    const port = await freePort()
+    stubServerRequest('raw-close', `localhost:${port}/ws`)
+    let up = false, closed = false
+    websocketExecutionService.connectStreamingRawServer({
+      requestId: 'raw-close', onConnect: () => { up = true }, onMessage: noop, onClose: () => { closed = true }
+    })
+    await waitFor(() => up)
+
+    websocketExecutionService.closeAll()
+    await waitFor(() => closed)
+    expect(websocketExecutionService.isActive('raw-close')).toBe(false)
+    // The raw-WS host owns the bare http server; closeAll must close it so the
+    // OS port is released (no socket.io to do it implicitly).
+    await waitForPortFree(port, true)
+  })
+
+  it('a Socket.IO server and a raw WebSocket server COEXIST on the same port', async () => {
+    const port = await freePort()
+    stubServerRequest('sio-x', `localhost:${port}`)       // Socket.IO namespace "/"
+    stubServerRequest('ws-x', `localhost:${port}/raw`)    // raw WS path "/raw"
+    let sioUp = false, wsUp = false
+    const sioMsgs: unknown[] = []
+    const wsMsgs: unknown[] = []
+    websocketExecutionService.connectStreamingServer({
+      requestId: 'sio-x', onConnect: () => { sioUp = true }, onMessage: (_e, p) => { sioMsgs.push(p) }, onClose: noop
+    })
+    websocketExecutionService.connectStreamingRawServer({
+      requestId: 'ws-x', onConnect: () => { wsUp = true }, onMessage: (_e, p) => { wsMsgs.push(p) }, onClose: noop
+    })
+    await waitFor(() => sioUp && wsUp)
+    expect(websocketExecutionService.isActive('sio-x')).toBe(true)
+    expect(websocketExecutionService.isActive('ws-x')).toBe(true)
+
+    // A Socket.IO client reaches the SIO server on this port…
+    const sioClient = clientIo(`http://127.0.0.1:${port}`, { reconnection: false, forceNew: true })
+    clients.push(sioClient)
+    await waitFor(() => sioClient.connected)
+    await new Promise((r) => { sioClient.emit('hi', { a: 1 }, r) })
+    await waitFor(() => sioMsgs.length >= 1)
+    expect(sioMsgs[0]).toEqual({ a: 1 })
+
+    // …AND a raw WS client reaches the raw-WS server on the SAME port (proves
+    // socket.io + raw WS coexist on one http host, routed by path).
+    const wsClient = new WebSocket(`ws://127.0.0.1:${port}/raw`)
+    wsClients.push(wsClient)
+    await new Promise<void>((resolve, reject) => { wsClient.on('open', () => { resolve() }); wsClient.on('error', reject) })
+    wsClient.send(JSON.stringify({ b: 2 }))
+    await waitFor(() => wsMsgs.length >= 1)
+    expect(wsMsgs[0]).toEqual({ b: 2 })
+
+    // Closing the SIO route leaves the WS route AND the shared port up.
+    websocketExecutionService.disconnect('sio-x')
+    await waitFor(() => !websocketExecutionService.isActive('sio-x'))
+    expect(websocketExecutionService.isActive('ws-x')).toBe(true)
+    expect(await isPortFree(port)).toBe(false)
+
+    // The LAST route (ws) leaving frees the shared port.
+    websocketExecutionService.disconnect('ws-x')
+    await waitFor(() => !websocketExecutionService.isActive('ws-x'))
+    await waitForPortFree(port, true)
+  })
+
+  it('broadcasts the connected-client count on connect + disconnect', async () => {
+    const port = await freePort()
+    stubServerRequest('ws-count', `localhost:${port}/c`)
+    let up = false
+    websocketExecutionService.connectStreamingRawServer({
+      requestId: 'ws-count', onConnect: () => { up = true }, onMessage: noop, onClose: noop
+    })
+    await waitFor(() => up)
+    const counts = (): number[] => sentEvents
+      .filter((e) => e.channel === 'websocket:server-clients' && (e.payload as { requestId: string }).requestId === 'ws-count')
+      .map((e) => (e.payload as { count: number }).count)
+
+    const client = new WebSocket(`ws://127.0.0.1:${port}/c`)
+    wsClients.push(client)
+    await new Promise<void>((resolve, reject) => { client.on('open', () => { resolve() }); client.on('error', reject) })
+    await waitFor(() => counts().includes(1)) // 1 client connected
+
+    client.close()
+    await waitFor(() => counts().includes(0)) // back to 0 on disconnect
+
+    websocketExecutionService.disconnect('ws-count')
+    await waitFor(() => !websocketExecutionService.isActive('ws-count'))
   })
 })
