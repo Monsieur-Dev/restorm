@@ -25,7 +25,6 @@ defaultContentType: application/json
 channels:
   #
   # Socket.IO Channels (port 3001)
-  # Matches: restorm/tests/docker/socketio-server/server.js
   #
   
   echo:

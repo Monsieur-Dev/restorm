@@ -57,7 +57,7 @@ export function useSidebarState(options: UseSidebarStateOptions): UseSidebarStat
     const renderOptions = {
       expandedIds: expandedSet,
       renderMethodBadge: (method: string) => React.createElement(Badge, { type: mapToBadgeType(method) }),
-      renderProtocolBadge: (protocol: string, label?: string) => React.createElement(Badge, { type: mapToBadgeType(protocol), label }),
+      renderProtocolBadge: (protocol: string, label?: string, mode?: 'client' | 'server') => React.createElement(Badge, { type: mapToBadgeType(protocol), label, mode }),
       // Removed (vanished from the spec) renders strikethrough.
       // Deprecated rows are dimmed via the per-id set passed alongside
       // — the wrapper applies opacity to the whole row visual rather

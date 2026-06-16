@@ -247,7 +247,8 @@
         "websocket": "WebSocket-förfrågan",
         "odata": "OData-förfrågan",
         "auth": "HTTP-autentiseringsförfrågan",
-        "scenario": "Scenario"
+        "scenario": "Scenario",
+        "socketioServer": "Socket.IO-server"
       }
     },
     "deleteConfirm": {
@@ -446,7 +447,10 @@
       "headers": "Headers"
     },
     "acknowledged": "Bekräftad",
-    "disconnect": "Koppla från"
+    "disconnect": "Koppla från",
+    "startListening": "Börja lyssna",
+    "stopListening": "Sluta lyssna",
+    "routePlaceholder": "Rutt (valfritt)"
   },
   "search": {
     "placeholder": "Sök...",
@@ -1518,7 +1522,10 @@
       "websocketClose": "Closes an already-open WebSocket connection.",
       "grpcConnect": "Opens a streaming gRPC call and re-emits each received frame on its message port.",
       "grpcSend": "Writes a request message on an already-open streaming gRPC call.",
-      "grpcClose": "Half-closes an already-open streaming gRPC call."
+      "grpcClose": "Half-closes an already-open streaming gRPC call.",
+      "socketioConnectServer": "Startar en Socket.IO-server (port + rutt); bekräftar varje mottagen händelse och sänder den igen på sin port. Skicka sänder till anslutna klienter.",
+      "socketioSendServer": "Sänder ett meddelande till alla klienter som är anslutna till den refererade Socket.IO-servern.",
+      "socketioCloseServer": "Stoppar den refererade Socket.IO-servern och kopplar från dess klienter."
     },
     "legend": {
       "title": "Förklaring",
@@ -1558,7 +1565,8 @@
       "pickConnection": "— pick a connection —",
       "channelLabel": "Channel name",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload"
+      "payloadModalTitle": "Edit payload",
+      "started": "startad"
     },
     "websocket": {
       "message": "message"

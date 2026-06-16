@@ -247,7 +247,8 @@
         "websocket": "Richiesta WebSocket",
         "odata": "Richiesta OData",
         "auth": "Richiesta HTTP di autenticazione",
-        "scenario": "Scenario"
+        "scenario": "Scenario",
+        "socketioServer": "Server Socket.IO"
       }
     },
     "deleteConfirm": {
@@ -446,7 +447,10 @@
       "headers": "Header"
     },
     "acknowledged": "Confermato",
-    "disconnect": "Disconnetti"
+    "disconnect": "Disconnetti",
+    "startListening": "Inizia ad ascoltare",
+    "stopListening": "Smetti di ascoltare",
+    "routePlaceholder": "Percorso (facoltativo)"
   },
   "search": {
     "placeholder": "Cerca...",
@@ -1518,7 +1522,10 @@
       "websocketClose": "Closes an already-open WebSocket connection.",
       "grpcConnect": "Opens a streaming gRPC call and re-emits each received frame on its message port.",
       "grpcSend": "Writes a request message on an already-open streaming gRPC call.",
-      "grpcClose": "Half-closes an already-open streaming gRPC call."
+      "grpcClose": "Half-closes an already-open streaming gRPC call.",
+      "socketioConnectServer": "Avvia un server Socket.IO (porta + percorso); conferma ogni evento ricevuto e lo riemette sulla sua porta. Invia trasmette ai client connessi.",
+      "socketioSendServer": "Trasmette un messaggio a tutti i client connessi al server Socket.IO di riferimento.",
+      "socketioCloseServer": "Arresta il server Socket.IO di riferimento e disconnette i suoi client."
     },
     "legend": {
       "title": "Legenda",
@@ -1558,7 +1565,8 @@
       "pickConnection": "— pick a connection —",
       "channelLabel": "Channel name",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload"
+      "payloadModalTitle": "Edit payload",
+      "started": "avviato"
     },
     "websocket": {
       "message": "message"

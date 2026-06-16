@@ -458,6 +458,9 @@ importers:
       react-i18next:
         specifier: ^17.0.8
         version: 17.0.8(i18next@26.2.0(typescript@6.0.3))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(typescript@6.0.3)
+      socket.io:
+        specifier: ^4.7.2
+        version: 4.8.3
       socket.io-client:
         specifier: ^4.7.2
         version: 4.8.3
@@ -594,9 +597,6 @@ importers:
       playwright-bdd:
         specifier: ^8.5.1
         version: 8.5.1(@playwright/test@1.60.0)
-      socket.io:
-        specifier: ^4.7.2
-        version: 4.8.3
       typescript:
         specifier: ^6.0.3
         version: 6.0.3

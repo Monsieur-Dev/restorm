@@ -44,6 +44,14 @@ export class WebSocketRequest extends BaseRequest {
   @graphqlField({ type: 'KeyValue', isArray: true })
   headers: KeyValue[] = []
 
+  /** When true, restorm ACTS AS the server (hosts a socket.io server on
+   * localhost) instead of connecting as a client. The URL then carries only
+   * `localhost:<port>[/<route>]` (host is fixed). Server mode has no env / auth /
+   * docs. */
+  @graphqlField({ type: 'Boolean', nullable: true })
+  @TreatEmptyAsUndefined()
+  server?: boolean
+
   constructor(init?: Partial<WebSocketRequest>) {
     super(init)
     if (init) {
@@ -72,6 +80,7 @@ export class WebSocketRequest extends BaseRequest {
     event?: string
     message?: string
     headers?: Parameters<typeof KeyValue.fromPlain>[0][]
+    server?: boolean
   }): WebSocketRequest {
     return new WebSocketRequest({
       ...(obj.id !== undefined && { id: obj.id }),
@@ -85,7 +94,8 @@ export class WebSocketRequest extends BaseRequest {
       protocol: obj.protocol ?? 'websocket',
       ...(obj.event !== undefined && { event: obj.event }),
       message: obj.message ?? '',
-      headers: (obj.headers ?? []) as KeyValue[]
+      headers: (obj.headers ?? []) as KeyValue[],
+      ...(obj.server !== undefined && { server: obj.server })
     })
   }
 
@@ -106,7 +116,8 @@ export class WebSocketRequest extends BaseRequest {
       protocol: this.protocol,
       event: this.event,
       message: this.message,
-      headers: this.headers.map(h => h.toPlainObject())
+      headers: this.headers.map(h => h.toPlainObject()),
+      ...(this.server !== undefined && { server: this.server })
     }
   }
 }

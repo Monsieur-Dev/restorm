@@ -2,8 +2,17 @@
 - message: ⚪ [<time>] start socketioConnect
   data:
     requestId: <uuid>
+    connectionName: Server
+    label: Server listen
+- message: ⚪ [<time>] done socketioConnect
+- message: ⚪ [<time>] socketio "Server" connecting
+- message: ⚪ [<time>] socketio "Server" connected
+- message: ⚪ [<time>] start socketioConnect
+  data:
+    requestId: <uuid>
     connectionName: Echo
     label: Echo connect
+    in: true
 - message: ⚪ [<time>] done socketioConnect
 - message: ⚪ [<time>] socketio "Echo" connecting
 - message: ⚪ [<time>] socketio "Echo" connected
@@ -20,80 +29,33 @@
     durationMs: <dynamic-time>
     label: let the send echo arrive first
     in: true
-- message: ⚪ [<time>] start log
-  data:
-    message: echo reçu
-    level: info
-    data:
-      hello: world
-- message: 🔵 [<time>] echo reçu
-  data:
-    hello: world
-- message: ⚪ [<time>] done log
-  data:
-    value:
-      hello: world
 - message: ⚪ [<time>] done wait
-- message: ⚪ [<time>] start httpRequest
+- message: ⚪ [<time>] start socketioSend
   data:
-    requestId: <uuid>
-    label: Push to echo (HTTP)
+    connectionNodeId: <uuid>
+    channel: echo
+    payload: '{"hello":"from server"}'
+    label: broadcast from server
+    in: true
+- message: ⚪ [<time>] done socketioSend
+- message: ⚪ [<time>] start wait
+  data:
+    durationMs: <dynamic-time>
+    label: let the pushed echo arrive
     in: true
 - message: ⚪ [<time>] start log
   data:
     message: echo reçu
     level: info
     data:
-      hello: from HTTP
+      hello: from server
 - message: 🔵 [<time>] echo reçu
   data:
-    hello: from HTTP
+    hello: from server
 - message: ⚪ [<time>] done log
   data:
     value:
-      hello: from HTTP
-- message: ⚪ [<time>] done httpRequest
-  data:
-    response:
-      request:
-        url: http://localhost:3001/emit?event=echo&data=%7B%22hello%22%3A%22from%20HTTP%22%7D
-        method: GET
-        headers: {}
-      response:
-        status: 200
-        statusText: OK
-        headers:
-          content-type: application/json
-          date: <dynamic-time>
-          connection: keep-alive
-          keep-alive: timeout=5
-          transfer-encoding: chunked
-        body: '{"ok":true,"emitted":{"ns":"/","event":"echo","data":{"hello":"from
-          HTTP"}}}'
-        durationMs: <dynamic-time>
-        success: true
-- message: ⚪ [<time>] start wait
-  data:
-    durationMs: <dynamic-time>
-    label: let the pushed echo arrive
-    in:
-      request:
-        url: http://localhost:3001/emit?event=echo&data=%7B%22hello%22%3A%22from%20HTTP%22%7D
-        method: GET
-        headers: {}
-      response:
-        status: 200
-        statusText: OK
-        headers:
-          content-type: application/json
-          date: <dynamic-time>
-          connection: keep-alive
-          keep-alive: timeout=5
-          transfer-encoding: chunked
-        body: '{"ok":true,"emitted":{"ns":"/","event":"echo","data":{"hello":"from
-          HTTP"}}}'
-        durationMs: <dynamic-time>
-        success: true
+      hello: from server
 - message: ⚪ [<time>] done wait
 - message: ⚪ [<time>] start socketioClose
   data:
@@ -109,5 +71,12 @@
 - message: 🔵 [<time>] connexion Socket.IO fermée
 - message: ⚪ [<time>] done log
   data: {}
+- message: ⚪ [<time>] done socketioClose
+- message: ⚪ [<time>] start socketioClose
+  data:
+    connectionNodeId: <uuid>
+    label: close Server
+    in: true
+- message: ⚪ [<time>] socketio "Server" closed
 - message: ⚪ [<time>] done socketioClose
 - message: 🔵 [<time>] ■ Socket.IO

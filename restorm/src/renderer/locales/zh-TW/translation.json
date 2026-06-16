@@ -246,7 +246,8 @@
         "websocket": "WebSocket 請求",
         "odata": "OData 請求",
         "auth": "HTTP 驗證請求",
-        "scenario": "場景"
+        "scenario": "場景",
+        "socketioServer": "Socket.IO 伺服器"
       }
     },
     "deleteConfirm": {
@@ -445,7 +446,10 @@
       "headers": "標頭"
     },
     "acknowledged": "已確認",
-    "disconnect": "中斷連線"
+    "disconnect": "中斷連線",
+    "startListening": "開始監聽",
+    "stopListening": "停止監聽",
+    "routePlaceholder": "路由（選用）"
   },
   "search": {
     "placeholder": "搜尋...",
@@ -1517,7 +1521,10 @@
       "websocketClose": "Closes an already-open WebSocket connection.",
       "grpcConnect": "Opens a streaming gRPC call and re-emits each received frame on its message port.",
       "grpcSend": "Writes a request message on an already-open streaming gRPC call.",
-      "grpcClose": "Half-closes an already-open streaming gRPC call."
+      "grpcClose": "Half-closes an already-open streaming gRPC call.",
+      "socketioConnectServer": "啟動 Socket.IO 伺服器（連接埠 + 路由）；確認收到的每個事件並在其連接埠上重新發出。傳送會向已連線的用戶端廣播。",
+      "socketioSendServer": "向連線到所參考的 Socket.IO 伺服器的每個用戶端廣播訊息。",
+      "socketioCloseServer": "停止所參考的 Socket.IO 伺服器並中斷其用戶端的連線。"
     },
     "legend": {
       "title": "圖例",
@@ -1557,7 +1564,8 @@
       "pickConnection": "— pick a connection —",
       "channelLabel": "Channel name",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload"
+      "payloadModalTitle": "Edit payload",
+      "started": "已啟動"
     },
     "websocket": {
       "message": "message"

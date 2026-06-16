@@ -247,7 +247,8 @@
         "websocket": "Kërkesë WebSocket",
         "odata": "Kërkesë OData",
         "auth": "Kërkesë HTTP për vërtetim",
-        "scenario": "Skenari"
+        "scenario": "Skenari",
+        "socketioServer": "Server Socket.IO"
       }
     },
     "deleteConfirm": {
@@ -446,7 +447,10 @@
       "headers": "Kokat"
     },
     "acknowledged": "Konfirmuar",
-    "disconnect": "Shkëput"
+    "disconnect": "Shkëput",
+    "startListening": "Fillo dëgjimin",
+    "stopListening": "Ndalo dëgjimin",
+    "routePlaceholder": "Rruga (opsionale)"
   },
   "search": {
     "placeholder": "Kërko...",
@@ -1518,7 +1522,10 @@
       "websocketClose": "Closes an already-open WebSocket connection.",
       "grpcConnect": "Opens a streaming gRPC call and re-emits each received frame on its message port.",
       "grpcSend": "Writes a request message on an already-open streaming gRPC call.",
-      "grpcClose": "Half-closes an already-open streaming gRPC call."
+      "grpcClose": "Half-closes an already-open streaming gRPC call.",
+      "socketioConnectServer": "Nis një server Socket.IO (porta + rruga); konfirmon çdo ngjarje të marrë dhe e riemton në portën e tij. Dërgimi transmeton te klientët e lidhur.",
+      "socketioSendServer": "Transmeton një mesazh te të gjithë klientët e lidhur me serverin Socket.IO të referuar.",
+      "socketioCloseServer": "Ndalon serverin Socket.IO të referuar dhe shkëput klientët e tij."
     },
     "legend": {
       "title": "Legjenda",
@@ -1558,7 +1565,8 @@
       "pickConnection": "— pick a connection —",
       "channelLabel": "Channel name",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload"
+      "payloadModalTitle": "Edit payload",
+      "started": "filloi"
     },
     "websocket": {
       "message": "message"
