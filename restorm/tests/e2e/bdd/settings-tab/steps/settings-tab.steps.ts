@@ -1,0 +1,117 @@
+import { createBdd } from 'playwright-bdd'
+import { test, expect } from '../../fixtures/settings-tab.fixture'
+import { defineSystemModalsBddSteps } from 'electron-core-ui/testing/playwright-bdd'
+import { listViewRowSelectorByTitle, configureNextOpenDialogForE2E } from 'electron-core-ui/testing'
+
+const bdd = createBdd(test)
+const { Given, When, Then } = bdd
+
+defineSystemModalsBddSteps(bdd)
+
+// The Settings workbench tab is a singleton with this stable id; the
+// EditorWorkbench composes every tab header's data-testid as
+// `…-tab-<tabId>`, so an attribute-suffix selector finds the header
+// regardless of which group it lives in.
+const SETTINGS_TAB_HEADER_SELECTOR = '[data-testid$="-tab-settings:singleton"]'
+const SETTINGS_TAB_CONTENT_SELECTOR = '[data-testid="settings-tab-content"]'
+const SETTINGS_MODAL_SELECTOR = '[data-testid="settings-modal"]'
+const SETTINGS_BUTTON_SELECTOR = '[data-testid="titlebar-settings-button"]'
+
+Given('no file is open', async ({ page }) => {
+  await expect(page.locator('[data-testid="welcome-new-button"]')).toBeVisible({ timeout: 15000 })
+})
+
+Given('a project folder is open', async ({ page, electronApp, petstoreFolderPath }) => {
+  await configureNextOpenDialogForE2E(electronApp, { kind: 'openFolder', path: petstoreFolderPath })
+  const result = await page.evaluate(async () => {
+    interface OpenFolderResult { success: boolean; error?: string }
+    const w = window as unknown as { restorm?: { file?: { openFolder?: () => Promise<OpenFolderResult> } } }
+    const fn = w.restorm?.file?.openFolder
+    if (typeof fn !== 'function') throw new Error('window.restorm.file.openFolder is not available')
+    return await fn()
+  })
+  if (!(result as { success?: boolean }).success) {
+    throw new Error(`openFolder returned success=false (${String((result as { error?: unknown }).error)})`)
+  }
+  // A workbench is active once the sidebar shows the loaded collections.
+  await expect(page.locator(listViewRowSelectorByTitle('sidebar-listview', 'Swagger Petstore')).first())
+    .toBeVisible({ timeout: 15000 })
+})
+
+When('I open Settings from the gear button', async ({ page }) => {
+  await page.locator(SETTINGS_BUTTON_SELECTOR).click()
+  // Let the modal mount / tab activate before assertions.
+  await page.waitForTimeout(300)
+})
+
+When('I open Settings from the View menu', async ({ page }) => {
+  const menubarTestId = 'titlebar-menubar'
+  const settingsItem = page.locator('[data-testid="titlebar-menu-item-settings"]')
+
+  // The responsive MenuBar lays out in `full`, `overflow`, or
+  // `hamburger` mode depending on width. In `full` mode the View
+  // entry sits directly on the bar; otherwise it is folded behind the
+  // overflow / hamburger button as a nested submenu. Drive whichever
+  // path matches the current mode so the test is layout-agnostic.
+  const mode = await page.locator(`[data-testid="${menubarTestId}"]`).getAttribute('data-mode')
+
+  if (mode === 'full') {
+    // Hover-open the View menu, then click Settings.
+    await page.locator('[data-testid="titlebar-menubar-item-view"]').hover()
+    await settingsItem.waitFor({ state: 'visible', timeout: 5000 })
+    await settingsItem.click({ force: true })
+  } else {
+    // Open the overflow / hamburger bucket, then hover the folded
+    // View entry (its testid gains an `-overflow` suffix) to expand
+    // its submenu, then click Settings.
+    const overflowBtn = page.locator(`[data-testid="${menubarTestId}-overflow-button"], [data-testid="${menubarTestId}-hamburger-button"]`).first()
+    await overflowBtn.click({ force: true })
+    const viewEntry = page.locator('[data-testid="titlebar-menubar-item-view-overflow"]')
+    await viewEntry.waitFor({ state: 'visible', timeout: 5000 })
+    await viewEntry.hover()
+    await settingsItem.waitFor({ state: 'visible', timeout: 5000 })
+    await settingsItem.click({ force: true })
+  }
+  await page.waitForTimeout(300)
+})
+
+When('I reload the window', async ({ page }) => {
+  await page.reload()
+  await page.waitForLoadState('load')
+  await page.waitForSelector('[data-testid="titlebar-menubar"]', { timeout: 15000 })
+  await page.waitForTimeout(800)
+})
+
+Then('the Settings modal should be visible', async ({ page }) => {
+  await expect(page.locator(SETTINGS_MODAL_SELECTOR)).toBeVisible({ timeout: 5000 })
+})
+
+Then('the Settings modal should not be visible', async ({ page }) => {
+  await expect(page.locator(SETTINGS_MODAL_SELECTOR)).toHaveCount(0, { timeout: 5000 })
+})
+
+Then('a Settings tab should be open', async ({ page }) => {
+  await expect(page.locator(SETTINGS_TAB_HEADER_SELECTOR).first()).toBeVisible({ timeout: 10000 })
+  await expect(page.locator(SETTINGS_TAB_CONTENT_SELECTOR)).toBeVisible({ timeout: 10000 })
+})
+
+Then('no Settings tab should be open', async ({ page }) => {
+  await expect(page.locator(SETTINGS_TAB_HEADER_SELECTOR)).toHaveCount(0, { timeout: 5000 })
+})
+
+Then('exactly one Settings tab should be open', async ({ page }) => {
+  await expect(page.locator(SETTINGS_TAB_HEADER_SELECTOR)).toHaveCount(1, { timeout: 10000 })
+})
+
+Then('the Settings tab should not appear in the opened-items list', async ({ page }) => {
+  // The opened-items pane only lists request / scenario documents; the
+  // Settings singleton carries neither, so it must not surface there.
+  // (When only a Settings tab is open the pane is absent entirely — a
+  // count of zero matching rows holds in both cases.)
+  const openedRows = page.locator('[data-testid="sidebar-open-documents-listview"] [role="listitem"]')
+  const count = await openedRows.count()
+  for (let i = 0; i < count; i += 1) {
+    const text = (await openedRows.nth(i).innerText()).trim()
+    expect(text).not.toContain('Settings')
+  }
+})

@@ -58,9 +58,10 @@ import type {
   ScenarioEditorTab,
   ConsoleTab,
   FirewallTab,
+  SettingsTab,
   BreadcrumbItem
 } from '../../../shared/types/editor'
-import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, type MiniBrowserTab } from '../../../shared/types/editor'
+import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, SETTINGS_TAB_ID, type MiniBrowserTab } from '../../../shared/types/editor'
 
 export interface UseWorkbenchTabsOptions {
   rootItems: FolderItem[]
@@ -502,6 +503,18 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
         allowFullscreen: true,
         ...(url !== undefined ? { url, persistedState: { url } } : {})
       } as MiniBrowserTab
+    }
+    // Settings singleton — same singleton-shell pattern as Console /
+    // Firewall: not tied to any tree item, content owned by
+    // `RestormWorkbench`'s `tabType: 'settings'` branch.
+    if (tabId === SETTINGS_TAB_ID) {
+      return {
+        id: SETTINGS_TAB_ID,
+        tabType: 'settings',
+        title: 'Settings',
+        titleString: 'Settings',
+        allowFullscreen: true
+      } as SettingsTab
     }
     const parsed = parseTabId(tabId)
     if (!parsed) return null

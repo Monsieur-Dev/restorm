@@ -80,7 +80,7 @@ import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayloa
 import type { EditorTab, WorkbenchTree, GroupNode, TabGroupNode, ContainerGroupNode } from 'electron-core-ui/renderer'
 import { isContainerNode, isTabGroupNode, loadWorkbenchTabIds, useSetting } from 'electron-core-ui/renderer'
 import { REOPEN_LAST_FILE_STORAGE_KEY, REOPEN_LAST_FILE_SETTING_KEY } from '../../shared/config/reopenLastFile'
-import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, type ConsoleTab, type FirewallTab, type MiniBrowserTab } from '../../shared/types/editor'
+import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, SETTINGS_TAB_ID, type ConsoleTab, type FirewallTab, type MiniBrowserTab, type SettingsTab } from '../../shared/types/editor'
 import { findGroupIdForTab, hasGroupWithId, updateGroupById } from './utils/workbenchHelpers'
 import { findTopLevelEnvironment } from './utils/envSaveUnit'
 
@@ -631,6 +631,61 @@ const App: React.FC = () => {
         id: `firewall-group-${String(Date.now())}-${crypto.randomUUID().slice(0, 8)}`,
         tabs: [firewallTab],
         activeTabId: FIREWALL_TAB_ID
+      }
+      return { ...prev, groups: [newGroup] }
+    })
+  }, [setWorkbenchTree, focusedGroupId])
+
+  /**
+   * Settings handler used when a workbench is active. Singleton tab
+   * (id = `settings:singleton`), same focus-or-create pattern as
+   * Firewall / Mini browser. When no file is open the titlebar opens
+   * the full-screen Settings modal instead — this handler is only
+   * wired to that workbench-active branch.
+   */
+  const handleOpenSettingsTab = useCallback(() => {
+    setWorkbenchTree(prev => {
+      const existingGroupId = findGroupIdForTab(prev.groups, SETTINGS_TAB_ID)
+      if (existingGroupId !== null) {
+        return {
+          ...prev,
+          groups: updateGroupById(prev.groups, existingGroupId, group => ({ ...group, activeTabId: SETTINGS_TAB_ID }))
+        }
+      }
+      const settingsTab: SettingsTab = {
+        id: SETTINGS_TAB_ID,
+        tabType: 'settings',
+        title: 'Settings',
+        titleString: 'Settings',
+        allowFullscreen: true
+      }
+      const findFirstTabGroup = (nodes: GroupNode[]): TabGroupNode | null => {
+        for (const node of nodes) {
+          if (isTabGroupNode(node)) return node
+          if (isContainerNode(node)) {
+            const inner = findFirstTabGroup(node.groups)
+            if (inner !== null) return inner
+          }
+        }
+        return null
+      }
+      const targetId = focusedGroupId !== null && hasGroupWithId(prev.groups, focusedGroupId)
+        ? focusedGroupId
+        : (findFirstTabGroup(prev.groups)?.id ?? null)
+      if (targetId !== null) {
+        return {
+          ...prev,
+          groups: updateGroupById(prev.groups, targetId, group => ({
+            ...group,
+            tabs: [...group.tabs, settingsTab],
+            activeTabId: SETTINGS_TAB_ID
+          }))
+        }
+      }
+      const newGroup: TabGroupNode = {
+        id: `settings-group-${String(Date.now())}-${crypto.randomUUID().slice(0, 8)}`,
+        tabs: [settingsTab],
+        activeTabId: SETTINGS_TAB_ID
       }
       return { ...prev, groups: [newGroup] }
     })
@@ -2377,6 +2432,8 @@ const App: React.FC = () => {
         onOpenConsole={handleOpenConsole}
         onOpenFirewall={handleOpenFirewall}
         onOpenMiniBrowser={handleOpenMiniBrowser}
+        workbenchActive={fileName !== null}
+        onOpenSettingsTab={handleOpenSettingsTab}
       />
 
       {fileName ? (

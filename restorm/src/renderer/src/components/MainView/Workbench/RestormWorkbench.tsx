@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
-import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, IconView, TabSwitcherOverlay, navigationService, useFeature, MiniBrowserPanel, ConsolePanel, Tabs, MarkdownEditor, type Tab, type ContextMenuItem } from 'electron-core-ui/renderer'
+import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, IconView, TabSwitcherOverlay, navigationService, useFeature, MiniBrowserPanel, ConsolePanel, SettingsPage, Tabs, MarkdownEditor, type Tab, type ContextMenuItem } from 'electron-core-ui/renderer'
 import { miniBrowserDriver } from '../../../services/miniBrowserDriver'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback, TabSwitcherItem } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
@@ -17,7 +17,8 @@ import {
   isScenarioEditorTab,
   isConsoleTab,
   isFirewallTab,
-  isMiniBrowserTab
+  isMiniBrowserTab,
+  isSettingsTab
 } from '../../../../../shared/types/editor'
 import { FirewallPanel } from '../../Firewall'
 import {
@@ -510,8 +511,20 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       )
     }
 
+    // Settings tab — codicon `settings-gear` + "Settings" label.
+    // Singleton, no dirty indicator (settings persist through the
+    // main-process settings store, not workbench autosave).
+    if (isSettingsTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <IconView icon={{ type: 'codicon', value: 'settings-gear' }} size={14} />
+          <span>{t('settings.title', 'Settings')}</span>
+        </span>
+      )
+    }
+
     return null
-  }, [renderDirtyIndicator])
+  }, [renderDirtyIndicator, t])
 
   // Build tab switcher items from workbench tree tabs, sorted by navigation history
   const buildTabSwitcherItems = useCallback((): TabSwitcherItem[] => {
@@ -1164,6 +1177,18 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
           onUrlChange={(url) => { updateMiniBrowserUrl(effectiveTab.id, url) }}
           driver={miniBrowserDriver}
         />
+      )
+    }
+
+    // Settings tab — singleton, identified by `tabType: 'settings'`.
+    // Mounts the shared `<SettingsPage />` (User / Workspace sections)
+    // — the same content as the full-screen Settings modal. No
+    // breadcrumbs for the same reason as Console / Firewall.
+    if (isSettingsTab(effectiveTab)) {
+      return (
+        <div style={{ height: '100%', overflow: 'auto' }} data-testid="settings-tab-content">
+          <SettingsPage />
+        </div>
       )
     }
 

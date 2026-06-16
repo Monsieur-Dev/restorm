@@ -2320,14 +2320,20 @@ When('I append {string} to the active request URL', async ({}, suffix: string) =
 
 When('I open the settings modal', async () => {
   if (!page) throw new Error('app must be launched')
+  // These scenarios always have a file open, so the gear button opens
+  // Settings as a workbench tab (the modal is reserved for the
+  // welcome screen). The settings content (`settings-page`) is the
+  // same in both surfaces, so the downstream content steps are
+  // unaffected.
   await page.locator('[data-testid="titlebar-settings-button"]').click()
-  await expect(page.locator('[data-testid="settings-modal"]')).toBeVisible({ timeout: 5000 })
+  await expect(page.locator('[data-testid="settings-page"]')).toBeVisible({ timeout: 5000 })
 })
 
 When('I close the settings modal', async () => {
   if (!page) throw new Error('app must be launched')
-  await page.keyboard.press('Escape')
-  await expect(page.locator('[data-testid="settings-modal"]')).toHaveCount(0, { timeout: 5000 })
+  // Close the Settings workbench tab via its close affordance.
+  await page.locator('[data-testid$="-tab-settings:singleton-close"]').first().click()
+  await expect(page.locator('[data-testid="settings-page"]')).toHaveCount(0, { timeout: 5000 })
 })
 
 /**
