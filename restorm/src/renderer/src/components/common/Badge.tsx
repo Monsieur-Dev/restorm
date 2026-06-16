@@ -38,13 +38,32 @@ export interface BadgeProps {
   /** Optional codicon glyph name (without the `codicon-` prefix) rendered before
    * the text — e.g. a Socket.IO action badge shows the action's glyph + "SIO". */
   icon?: string | undefined
+  /** Client (default) vs server. In `server` mode the badge becomes a two-part
+   * "capsule": a dark "SRV" segment (left) glued to the protocol's normal
+   * coloured badge (right) — a reusable norm for ANY hosted protocol
+   * (SIO / WS / MQTT / gRPC / HTTP methods…), no per-protocol entry. */
+  mode?: 'client' | 'server' | undefined
 }
 
 /**
  * A unified badge component for displaying protocol/method indicators
  */
-export const Badge: React.FC<BadgeProps> = ({ type, label, className, icon }) => {
+export const Badge: React.FC<BadgeProps> = ({ type, label, className, icon, mode }) => {
   const typeClass = `badge-${type.toLowerCase().replace('-', '')}`
+
+  // Server mode: a two-part capsule. The dark "SRV" segment (rounded on its
+  // LEFT only) is glued to the protocol's normal coloured badge (rounded on its
+  // RIGHT only) with no radius where they meet — like a two-tone pill. The
+  // right segment keeps the protocol's own colour class, so POST stays blue,
+  // SIO teal, etc. This is the shared norm for every hosted protocol.
+  if (mode === 'server') {
+    return (
+      <span className={`badge-capsule ${className ?? ''}`} aria-label={label ?? `${type} server`}>
+        <span className="badge-capsule-glyph">SRV</span>
+        <span className={`badge ${typeClass} badge-capsule-body`}>{label ?? type}</span>
+      </span>
+    )
+  }
 
   // Auth badges display an icon instead of text: the codicon-key
   // glyph is more recognisable than a three-letter acronym.

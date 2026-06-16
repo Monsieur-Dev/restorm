@@ -13,7 +13,7 @@ const SERVICES = [
   { name: 'Petstore OpenAPI 3.0', url: 'http://localhost:8081/openapi.json' },
   { name: 'GraphQL', url: 'http://localhost:4000', method: 'POST', body: '{"query":"{ __typename }"}', headers: { 'Content-Type': 'application/json' } },
   { name: 'SOAP', url: 'http://localhost:8090/castlemock/web' },
-  { name: 'Socket.IO', url: 'http://localhost:3001' },
+  // No Socket.IO mock: restorm self-hosts its Socket.IO server in-instance.
   { name: 'WS Echo', url: 'http://localhost:3002/health' },
   { name: 'OData PetStore', url: 'http://localhost:5100/health' },
   { name: 'Auth Service', url: 'http://localhost:5110/health' },

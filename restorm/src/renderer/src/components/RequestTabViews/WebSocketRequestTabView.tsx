@@ -132,6 +132,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       event: currentRequest.event,
       message: currentRequest.message,
       requestType: 'websocket',
+      ...(currentRequest.server === true ? { server: true } : {}),
       headers: toKeyValueData(currentRequest.headers),
       body: { type: 'text', content: currentRequest.message }
     }, sourceIdRef.current)
@@ -192,10 +193,11 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       event,
       message,
       requestType: 'websocket',
+      ...(request.server === true ? { server: true } : {}),
       headers: toKeyValueData(request.headers),
       body: { type: 'text', content: message }
     }, sourceIdRef.current)
-  }, [request.id, request.protocol, request.event, request.headers, url, event, message])
+  }, [request.id, request.protocol, request.server, request.event, request.headers, url, event, message])
 
   // Live message + connection stream for this request: append frames as they
   // arrive (chat updates in real time) and refresh history when it closes.
@@ -229,6 +231,30 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     updateReactiveProperty(request, 'message', value)
   }, [request])
   
+  // SERVER MODE: restorm hosts a socket.io server. The host is forced to
+  // localhost — only the port + route (namespace) are user-configurable — and
+  // there's no environment / auth / docs. The Connect↔Disconnect toggle becomes
+  // Start↔Stop listening; the Send button broadcasts to connected clients.
+  const isServer = request.server === true
+  const { serverPort, serverRoute } = useMemo(() => {
+    const stripped = url.replace(/^[a-z]+:\/\//i, '')
+    const slash = stripped.indexOf('/')
+    const hostPort = slash >= 0 ? stripped.slice(0, slash) : stripped
+    const route = slash >= 0 ? stripped.slice(slash + 1) : ''
+    const port = hostPort.split(':')[1] ?? ''
+    return { serverPort: port, serverRoute: route }
+  }, [url])
+  const composeServerUrl = useCallback((port: string, routePart: string): string => {
+    const cleanRoute = routePart.replace(/^\/+/, '')
+    return `localhost:${port}${cleanRoute ? `/${cleanRoute}` : ''}`
+  }, [])
+  const setServerPort = useCallback((p: string): void => {
+    setUrl(composeServerUrl(p.replace(/[^0-9]/g, ''), serverRoute))
+  }, [composeServerUrl, serverRoute, setUrl])
+  const setServerRoute = useCallback((r: string): void => {
+    setUrl(composeServerUrl(serverPort, r))
+  }, [composeServerUrl, serverPort, setUrl])
+
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
 
@@ -502,33 +528,68 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     return buildWebSocketResponseView(historyResponse, detail.requestMeta)
   }, [buildWebSocketResponseView, request.id])
   
-  // URL section
+  // Connect/listen toggle. In server mode the toggle is Start↔Stop listening
+  // and is NOT wrapped in the env switcher (server mode ignores environments).
+  const connectButton = (
+    <BeamWrap active={isListening} size={22} borderWidth={1.5}>
+      <Button
+        icon={isListening ? 'debug-disconnect' : 'plug'}
+        onClick={isListening ? handleDisconnect : handleConnect}
+        {...(isListening ? { emphasis: 0 } : (!isServer && sendButtonStyle) ? { style: sendButtonStyle } : { emphasis: 1 })}
+        options={{
+          title: isServer
+            ? (isListening ? t('websocket.stopListening') : t('websocket.startListening'))
+            : (isListening ? t('websocket.disconnect') : t('websocket.connect')),
+          ariaLabel: isServer
+            ? (isListening ? t('websocket.stopListening') : t('websocket.startListening'))
+            : (isListening ? t('websocket.disconnect') : t('websocket.connect'))
+        }}
+        data-testid="websocket-connect-button"
+      />
+    </BeamWrap>
+  )
+
+  // URL section. Server mode forces host=localhost and exposes only port + route
+  // (no free URL, no environment variables); client mode keeps the full URL input.
   const urlSection = (
     <ControlGroup data-testid="websocket-url-section">
-      <div style={{ flex: 1, minWidth: 0 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
-        <RestormVariableInputBox
-          value={url}
-          onChange={setUrl}
-          variables={emptyVariables}
-          helpers={handlebarsHelpers}
-          placeholder={t('websocket.urlPlaceholder')}
-          data-testid="websocket-url-input"
-        />
-      </div>
-      <SendButtonEnvSwitcher>
-        <BeamWrap active={isListening} size={22} borderWidth={1.5}>
-          <Button
-            icon={isListening ? 'debug-disconnect' : 'plug'}
-            onClick={isListening ? handleDisconnect : handleConnect}
-            {...(isListening ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-            options={{
-              title: isListening ? t('websocket.disconnect') : t('websocket.connect'),
-              ariaLabel: isListening ? t('websocket.disconnect') : t('websocket.connect')
-            }}
-            data-testid="websocket-connect-button"
-          />
-        </BeamWrap>
-      </SendButtonEnvSwitcher>
+      {isServer ? (
+        <>
+          <span style={{ display: 'flex', alignItems: 'center', padding: '0 8px', color: 'var(--foreground-muted)', whiteSpace: 'nowrap' }} data-testid="websocket-server-host">localhost:</span>
+          <div style={{ width: 90, minWidth: 60 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
+            <InputBox
+              value={serverPort}
+              onChange={setServerPort}
+              options={{ placeholder: '3001' }}
+              data-testid="websocket-server-port-input"
+            />
+          </div>
+          <span style={{ display: 'flex', alignItems: 'center', padding: '0 2px', color: 'var(--foreground-muted)' }}>/</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <InputBox
+              value={serverRoute}
+              onChange={setServerRoute}
+              options={{ placeholder: t('websocket.routePlaceholder') }}
+              data-testid="websocket-server-route-input"
+            />
+          </div>
+          {connectButton}
+        </>
+      ) : (
+        <>
+          <div style={{ flex: 1, minWidth: 0 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
+            <RestormVariableInputBox
+              value={url}
+              onChange={setUrl}
+              variables={emptyVariables}
+              helpers={handlebarsHelpers}
+              placeholder={t('websocket.urlPlaceholder')}
+              data-testid="websocket-url-input"
+            />
+          </div>
+          <SendButtonEnvSwitcher>{connectButton}</SendButtonEnvSwitcher>
+        </>
+      )}
       {(request.protocol === 'socketio' || request.protocol === 'websocket') && (
         <Button
           icon="send"
@@ -564,7 +625,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         urlSection={urlSection}
         requestContent={requestContent}
         codeSnippetsContent={codeSnippetsContent}
-        {...(apiDocumentation && route && findOperationForRoute(apiDocumentation, route) ? { docsContent: <DocumentationHost apiDocumentation={apiDocumentation} filters={[route]} /> } : {})}
+        {...(!isServer && apiDocumentation && route && findOperationForRoute(apiDocumentation, route) ? { docsContent: <DocumentationHost apiDocumentation={apiDocumentation} filters={[route]} /> } : {})}
         notes={request.notes}
         onNotesChange={(md): void => { updateReactiveProperty(request, 'notes', md) }}
         isLoading={false}

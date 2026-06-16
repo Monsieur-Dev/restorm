@@ -246,7 +246,8 @@
         "websocket": "WebSocket リクエスト",
         "odata": "OData リクエスト",
         "auth": "HTTP 認証リクエスト",
-        "scenario": "シナリオ"
+        "scenario": "シナリオ",
+        "socketioServer": "Socket.IO サーバー"
       }
     },
     "deleteConfirm": {
@@ -445,7 +446,10 @@
       "headers": "ヘッダー"
     },
     "acknowledged": "確認済み",
-    "disconnect": "切断"
+    "disconnect": "切断",
+    "startListening": "リッスン開始",
+    "stopListening": "リッスン停止",
+    "routePlaceholder": "ルート (任意)"
   },
   "search": {
     "placeholder": "検索...",
@@ -1517,7 +1521,10 @@
       "websocketClose": "Closes an already-open WebSocket connection.",
       "grpcConnect": "Opens a streaming gRPC call and re-emits each received frame on its message port.",
       "grpcSend": "Writes a request message on an already-open streaming gRPC call.",
-      "grpcClose": "Half-closes an already-open streaming gRPC call."
+      "grpcClose": "Half-closes an already-open streaming gRPC call.",
+      "socketioConnectServer": "Socket.IO サーバー（ポート + ルート）を起動します。受信した各イベントを確認応答し、対応するポートに再送します。送信は接続中のクライアントへブロードキャストします。",
+      "socketioSendServer": "参照先の Socket.IO サーバーに接続しているすべてのクライアントにメッセージをブロードキャストします。",
+      "socketioCloseServer": "参照先の Socket.IO サーバーを停止し、そのクライアントを切断します。"
     },
     "legend": {
       "title": "凡例",
@@ -1557,7 +1564,8 @@
       "pickConnection": "— pick a connection —",
       "channelLabel": "Channel name",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload"
+      "payloadModalTitle": "Edit payload",
+      "started": "起動済み"
     },
     "websocket": {
       "message": "message"

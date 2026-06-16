@@ -248,7 +248,8 @@
         "websocket": "Cerere WebSocket",
         "odata": "Cerere OData",
         "auth": "Cerere HTTP de autentificare",
-        "scenario": "Scenariu"
+        "scenario": "Scenariu",
+        "socketioServer": "Server Socket.IO"
       }
     },
     "deleteConfirm": {
@@ -447,7 +448,10 @@
       "headers": "Antete"
     },
     "acknowledged": "Confirmat",
-    "disconnect": "Deconectează"
+    "disconnect": "Deconectează",
+    "startListening": "Începe ascultarea",
+    "stopListening": "Oprește ascultarea",
+    "routePlaceholder": "Rută (opțional)"
   },
   "search": {
     "placeholder": "Caută...",
@@ -1519,7 +1523,10 @@
       "websocketClose": "Closes an already-open WebSocket connection.",
       "grpcConnect": "Opens a streaming gRPC call and re-emits each received frame on its message port.",
       "grpcSend": "Writes a request message on an already-open streaming gRPC call.",
-      "grpcClose": "Half-closes an already-open streaming gRPC call."
+      "grpcClose": "Half-closes an already-open streaming gRPC call.",
+      "socketioConnectServer": "Pornește un server Socket.IO (port + rută); confirmă fiecare eveniment primit și îl reemite pe portul său. Trimiterea difuzează către clienții conectați.",
+      "socketioSendServer": "Difuzează un mesaj către toți clienții conectați la serverul Socket.IO referențiat.",
+      "socketioCloseServer": "Oprește serverul Socket.IO referențiat și deconectează clienții săi."
     },
     "legend": {
       "title": "Legendă",
@@ -1559,7 +1566,8 @@
       "pickConnection": "— pick a connection —",
       "channelLabel": "Channel name",
       "payload": "payload",
-      "payloadModalTitle": "Edit payload"
+      "payloadModalTitle": "Edit payload",
+      "started": "pornit"
     },
     "websocket": {
       "message": "message"

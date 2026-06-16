@@ -13,6 +13,8 @@ import { normalizeValueType } from '../../../utils/normalizeValueType'
 import { serializeValueForPersistence } from '../../../../../shared/utils/valuePersistence'
 import { readSocketioEvents } from '../../../../../shared/scenarioNodePorts'
 import { useScenarioConnections } from '../scenarioConnectionsContext'
+import { useScenarioBoundResolver } from '../scenarioBoundResolver'
+import { isRequest } from '../../../../../shared/types/collections'
 import { readCodeString } from './scenarioCodeValue'
 
 const stop = (e: React.MouseEvent): void => { e.stopPropagation() }
@@ -31,6 +33,13 @@ export const SocketioConnectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = 
   const events = readSocketioEvents(config)
   const connectionName = typeof config['connectionName'] === 'string' ? config['connectionName'] : ''
   const requestId = typeof config['requestId'] === 'string' ? config['requestId'] : undefined
+
+  // When the bound request is a Socket.IO SERVER (restorm hosts it), the node
+  // header shows the "SRV" server capsule so a server connect reads distinctly
+  // from a client connect at a glance.
+  const resolve = useScenarioBoundResolver()
+  const boundItem = requestId && resolve ? resolve(requestId) : null
+  const isServerBound = !!boundItem && isRequest(boundItem) && (boundItem as { server?: boolean }).server === true
 
   const setEvents = (next: string[]): void => { data.onSetConfig?.(id, { events: next }) }
 
@@ -75,7 +84,7 @@ export const SocketioConnectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = 
   ]
 
   const right: ScenarioNodeCell[] = [
-    { id: 'connected', label: t('scenario.socketio.connected', 'connected'), port: { id: 'connected', type: 'source', flow: 'signal' } },
+    { id: 'connected', label: isServerBound ? t('scenario.socketio.started', 'started') : t('scenario.socketio.connected', 'connected'), port: { id: 'connected', type: 'source', flow: 'signal' } },
     // A single caption over the channel (event) inputs — not one per input.
     { id: 'channel-caption', content: <div className="scn-field-caption" style={{ textAlign: 'right' }}>{t('scenario.socketio.channelLabel', 'Channel name')}</div> },
     ...events.map((name, i): ScenarioNodeCell => ({
@@ -115,7 +124,8 @@ export const SocketioConnectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = 
     { id: 'others', label: t('scenario.socketio.others', 'others'), port: { id: 'others', role: 'default', type: 'source' } }
   ]
 
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} headerIcon={<Badge type="SIO" icon="plug" />} />
+  const headerIcon = isServerBound ? <Badge type="SIO" mode="server" /> : <Badge type="SIO" icon="plug" />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} headerIcon={headerIcon} />
 }
 
 /** True when a persisted typed value carries no usable content (unset, or an

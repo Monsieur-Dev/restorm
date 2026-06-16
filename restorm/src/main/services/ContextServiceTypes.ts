@@ -93,6 +93,8 @@ export interface FullRequestData {
   protocol?: string
   event?: string
   message?: string
+  /** Socket.IO: when true, restorm HOSTS a server instead of connecting. */
+  server?: boolean
 
   // OData specific — carried verbatim through URLResolver, which
   // appends the system query options ($filter / $select / $top /
