@@ -5,10 +5,10 @@
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ListViewDropEventPayload, ListViewItemEventPayload } from 'electron-core-ui/renderer'
-import { isTabGroupNode } from 'electron-core-ui/renderer'
+import { isTabGroupNode, isContainerNode } from 'electron-core-ui/renderer'
 import type { Environment, Folder, EnvironmentFolder, Request, FolderItem } from '../../../shared/types/collections'
 import { CURRENT_FILE_FORMAT_VERSION } from '../../../shared/config/fileFormatVersion'
-import { isAnyFolder, isScenario } from '../../../shared/types/collections'
+import { isAnyFolder, isScenario, isEnvironmentFolder, isFolder, isRequest } from '../../../shared/types/collections'
 import {
   HTTPRequest,
   GraphQLRequest,
@@ -189,7 +189,22 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
 
     // Force React re-render by creating new reference
     setRootItems((prevItems) => [...prevItems])
-  }, [rootItems, setRootItems, t])
+
+    // Open the clone in the workbench, as a click on it would.
+    const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, clonedItem.id)
+    if (breadcrumbs.length > 0) {
+      if (isScenario(clonedItem)) {
+        openScenarioEditorTab(clonedItem, breadcrumbs)
+      } else if (isEnvironmentFolder(clonedItem)) {
+        openEnvironmentFolderTab(clonedItem, breadcrumbs)
+      } else if (isFolder(clonedItem)) {
+        openFolderTab(clonedItem, breadcrumbs)
+      } else if (isRequest(clonedItem)) {
+        const envs = getNearestEnvironmentsForBreadcrumbs(rootItems, breadcrumbs)
+        openAnyRequestTab(clonedItem, breadcrumbs, envs)
+      }
+    }
+  }, [rootItems, setRootItems, t, openFolderTab, openScenarioEditorTab, openEnvironmentFolderTab, openAnyRequestTab])
 
   // Handle "Delete" context menu action - show confirmation
   const handleDeleteItem = useCallback((itemId: string) => {
@@ -230,34 +245,41 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       setRootItems((prev) => prev.filter((f) => f.id !== itemId))
     }
 
-    // Close any tabs that reference the deleted item (all groups)
-    setWorkbenchTree((prevTree) => {
-      const updatedGroups = prevTree.groups.map((group) => {
-        if (!isTabGroupNode(group)) return group
-
-        const filteredTabs = group.tabs.filter((tab) => {
-          const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
-
-          if (restormTab.tabType === 'folder' && restormTab.folder.id === itemId) return false
-          if (restormTab.tabType === 'environment-folder' && restormTab.folder.id === itemId) return false
-          if (restormTab.tabType === 'http-request' && restormTab.request.id === itemId) return false
-
-          if (restormTab.breadcrumbs?.some((bc) => bc.id === itemId)) return false
-
-          return true
-        })
-
-        let newActiveTabId: string = group.activeTabId ?? ''
-        if (!filteredTabs.some((t) => t.id === group.activeTabId)) {
-          const firstTabId = filteredTabs[0]?.id
-          newActiveTabId = firstTabId ?? ''
+    // Close any tabs that reference the deleted item — in EVERY group,
+    // including tab-groups nested inside split containers (a tab dragged into
+    // a lower group must still close). Recurse into container nodes and prune
+    // emptied tab-groups + emptied containers.
+    const tabReferencesDeleted = (tab: EditorTab): boolean => {
+      const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
+      if (restormTab.tabType === 'folder' && restormTab.folder.id === itemId) return true
+      if (restormTab.tabType === 'environment-folder' && restormTab.folder.id === itemId) return true
+      if (restormTab.tabType === 'http-request' && restormTab.request.id === itemId) return true
+      if (restormTab.breadcrumbs?.some((bc) => bc.id === itemId)) return true
+      return false
+    }
+    const pruneGroups = (nodes: WorkbenchTree['groups']): WorkbenchTree['groups'] => {
+      const result: WorkbenchTree['groups'] = []
+      for (const node of nodes) {
+        if (isContainerNode(node)) {
+          const prunedChildren = pruneGroups(node.groups)
+          if (prunedChildren.length > 0) result.push({ ...node, groups: prunedChildren })
+          continue
         }
-
-        return { ...group, tabs: filteredTabs, activeTabId: newActiveTabId }
-      }).filter((group) => !isTabGroupNode(group) || group.tabs.length > 0)
-
-      return { ...prevTree, groups: updatedGroups }
-    })
+        if (!isTabGroupNode(node)) {
+          result.push(node)
+          continue
+        }
+        const filteredTabs = node.tabs.filter((tab) => !tabReferencesDeleted(tab))
+        if (filteredTabs.length === 0) continue
+        let newActiveTabId: string = node.activeTabId ?? ''
+        if (!filteredTabs.some((t) => t.id === node.activeTabId)) {
+          newActiveTabId = filteredTabs[0]?.id ?? ''
+        }
+        result.push({ ...node, tabs: filteredTabs, activeTabId: newActiveTabId })
+      }
+      return result
+    }
+    setWorkbenchTree((prevTree) => ({ ...prevTree, groups: pruneGroups(prevTree.groups) }))
 
     // Force React re-render
     setRootItems((prevItems) => [...prevItems])
@@ -383,8 +405,15 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       case 'http-delete': return 'New DELETE request'
       case 'graphql': return 'New GraphQL request'
       case 'grpc': return 'New gRPC request'
+      case 'grpc-server-stream': return 'New gRPC server-streaming request'
+      case 'grpc-client-stream': return 'New gRPC client-streaming request'
+      case 'grpc-bidi': return 'New gRPC bidirectional request'
       case 'soap': return 'New SOAP request'
       case 'websocket': return 'New WebSocket request'
+      case 'socketio': return 'New Socket.IO request'
+      case 'socketio-server': return 'New Socket.IO server'
+      case 'websocket-server': return 'New WebSocket server'
+      case 'mqtt': return 'New MQTT request'
       case 'odata': return 'New OData request'
       case 'auth': return 'New auth request'
       case 'scenario': return 'New scenario'
@@ -499,12 +528,31 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         built = new HTTPRequest({ id, name, method: httpMethod })
       } else if (kind === 'graphql') {
         built = new GraphQLRequest({ id, name })
-      } else if (kind === 'grpc') {
-        built = new GrpcRequest({ id, name })
+      } else if (kind === 'grpc' || kind === 'grpc-server-stream' || kind === 'grpc-client-stream' || kind === 'grpc-bidi') {
+        const callType =
+          kind === 'grpc-server-stream' ? 'server-stream' :
+            kind === 'grpc-client-stream' ? 'client-stream' :
+              kind === 'grpc-bidi' ? 'bidirectional-stream' :
+                'unary'
+        built = new GrpcRequest({ id, name, callType })
       } else if (kind === 'soap') {
         built = new SoapRequest({ id, name })
       } else if (kind === 'websocket') {
         built = new WebSocketRequest({ id, name })
+      } else if (kind === 'socketio') {
+        // Socket.IO CLIENT request (connects to a Socket.IO server).
+        built = new WebSocketRequest({ id, name, protocol: 'socketio' })
+      } else if (kind === 'socketio-server') {
+        // restorm acts as a Socket.IO server: socketio protocol + server flag,
+        // host forced to localhost, default port pre-filled.
+        built = new WebSocketRequest({ id, name, protocol: 'socketio', server: true, url: 'localhost:3001' })
+      } else if (kind === 'websocket-server') {
+        // restorm acts as a raw WebSocket server: websocket protocol + server
+        // flag, host forced to localhost, default port pre-filled.
+        built = new WebSocketRequest({ id, name, protocol: 'websocket', server: true, url: 'localhost:3002' })
+      } else if (kind === 'mqtt') {
+        // MQTT CLIENT request (connects to a broker); default subscribe-on-connect.
+        built = new WebSocketRequest({ id, name, protocol: 'mqtt', url: 'mqtt://localhost:1883' })
       } else if (kind === 'odata') {
         built = new ODataRequest({ id, name })
       } else {

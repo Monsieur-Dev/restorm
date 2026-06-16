@@ -51,7 +51,15 @@ function collectRequests(items: FolderItem[]): Request[] {
       for (const child of item.items) visit(child)
       return
     }
-    if (isScenario(item)) return
+    // A scenario is a folder-like container too: requests authored INSIDE it
+    // (`scenario.items`) must be collected like any other request, else a
+    // request nested under a scenario isn't recognised as a known origin and the
+    // firewall prompts for it. Recurse into its children (which may include
+    // sub-scenarios), then stop — the scenario itself has no URL.
+    if (isScenario(item)) {
+      for (const child of item.items ?? []) visit(child)
+      return
+    }
     if (isHTTPRequest(item) || isGraphQLRequest(item) || isSoapRequest(item) || isWebSocketRequest(item) || isODataRequest(item) || isAuthenticationRequest(item) || isGrpcRequest(item)) {
       out.push(item as Request)
     }

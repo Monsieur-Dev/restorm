@@ -18,6 +18,7 @@ import {
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { MqttOptionsPanel } from './MqttOptionsPanel'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { WebSocketRequest, WebSocketResponse, WebSocketMessage, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
@@ -32,9 +33,32 @@ import { DocumentationHost } from '../documentation/DocumentationHost'
 import { findOperationForRoute } from '../../../../shared/utils/findOperationForRoute'
 import { DEFAULT_WS_TIMEOUT_MS } from '../../../../shared/config/constants'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
+import { useIsWebsocketListening } from '../../services/websocketListeningStore'
+import { BeamWrap } from '../common/BeamWrap'
+import { HeaderHoverTooltip } from '../MainView/HeaderHoverTooltip'
+import './WebSocketChat.css'
 
 export interface WebSocketRequestTabViewProps {
   request: WebSocketRequest
+}
+
+/** The MQTT-specific slice of `fullData` (only for `protocol === 'mqtt'`).
+ * Returns an empty object for other protocols so the spread is a no-op. */
+function buildMqttFullData(req: WebSocketRequest): Record<string, unknown> {
+  if (req.protocol !== 'mqtt') return {}
+  const out: Record<string, unknown> = {}
+  if (req.qos !== undefined) out['qos'] = req.qos
+  if (req.retain !== undefined) out['retain'] = req.retain
+  if (req.clientId !== undefined) out['clientId'] = req.clientId
+  if (req.username !== undefined) out['username'] = req.username
+  if (req.password !== undefined) out['password'] = req.password
+  if (req.keepalive !== undefined) out['keepalive'] = req.keepalive
+  if (req.mqttSubscribe !== undefined) out['mqttSubscribe'] = req.mqttSubscribe
+  if (req.lwtTopic !== undefined) out['lwtTopic'] = req.lwtTopic
+  if (req.lwtPayload !== undefined) out['lwtPayload'] = req.lwtPayload
+  if (req.lwtQos !== undefined) out['lwtQos'] = req.lwtQos
+  if (req.lwtRetain !== undefined) out['lwtRetain'] = req.lwtRetain
+  return out
 }
 
 export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = ({
@@ -57,9 +81,17 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   const [url, setUrlState] = useState(request.url)
   const [event, setEventState] = useState(request.event ?? '')
   const [message, setMessageState] = useState(request.message)
-  const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<WebSocketResponse | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+  // Live frames for the current connection (appended as they arrive), so the
+  // chat updates in real time instead of only after the connection closes.
+  const [liveMessages, setLiveMessages] = useState<WebSocketMessage[]>([])
+  // Server mode: live count of clients connected to the hosted server (driven by
+  // the main-process `websocket:server-clients` broadcast on each connect/close).
+  const [serverClientCount, setServerClientCount] = useState(0)
+  // Whether this request currently holds an open connection (drives the
+  // Connect↔Disconnect toggle, the Send button, and the listening beam).
+  const isListening = useIsWebsocketListening(request.id)
 
   // See HTTPRequestTabView for the contract.
   const [panelCollapsed, setPanelCollapsed] = useState<{ message: boolean; headers: boolean }>(() => {
@@ -92,6 +124,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     setEventState(request.event ?? '')
     setMessageState(request.message)
     setResponse(null)
+    setLiveMessages([])
   }, [request])
   useRequestReset(request, handleRequestReset)
 
@@ -118,7 +151,12 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     void window.restorm?.context.updateFullRequestData(requestId, {
       url: currentRequest.url,
       method: currentRequest.protocol,
+      protocol: currentRequest.protocol,
+      event: currentRequest.event,
+      message: currentRequest.message,
       requestType: 'websocket',
+      ...(currentRequest.server === true ? { server: true } : {}),
+      ...buildMqttFullData(currentRequest),
       headers: toKeyValueData(currentRequest.headers),
       body: { type: 'text', content: currentRequest.message }
     }, sourceIdRef.current)
@@ -175,11 +213,42 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     void window.restorm?.context.updateFullRequestData(request.id, {
       url,
       method: request.protocol,
+      protocol: request.protocol,
+      event,
+      message,
       requestType: 'websocket',
+      ...(request.server === true ? { server: true } : {}),
+      ...buildMqttFullData(request),
       headers: toKeyValueData(request.headers),
       body: { type: 'text', content: message }
     }, sourceIdRef.current)
-  }, [request.id, request.protocol, request.headers, url, message])
+    // `request` (whole object) is in deps because buildMqttFullData reads many of
+    // its fields; url/event/message are the separately-tracked local input state.
+  }, [request, url, event, message])
+
+  // Live message + connection stream for this request: append frames as they
+  // arrive (chat updates in real time) and refresh history when it closes.
+  useEffect(() => {
+    const requestId = request.id
+    const unsubMsg = window.restorm?.websocket.onMessage(({ requestId: rid, message: m }) => {
+      if (rid !== requestId) return
+      setLiveMessages((prev) => [...prev, { direction: m.direction, data: m.data, event: m.event, timestamp: m.timestamp }])
+    })
+    const unsubProg = window.restorm?.websocket.onProgress(({ requestId: rid, status }) => {
+      if (rid !== requestId) return
+      if (status === 'started') { setLiveMessages([]); setServerClientCount(0) }
+      if (status === 'completed' || status === 'cancelled' || status === 'error') {
+        setHistoryRefreshKey((k) => k + 1)
+        setServerClientCount(0)
+      }
+    })
+    // Server mode: live count of clients connected to the hosted server.
+    const unsubClients = window.restorm?.websocket.onServerClients(({ requestId: rid, count }) => {
+      if (rid !== requestId) return
+      setServerClientCount(count)
+    })
+    return () => { unsubMsg?.(); unsubProg?.(); unsubClients?.() }
+  }, [request.id])
 
   // Sync state changes to reactive request object
   const setUrl = useCallback((value: string): void => {
@@ -195,6 +264,30 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     updateReactiveProperty(request, 'message', value)
   }, [request])
   
+  // SERVER MODE: restorm hosts a socket.io server. The host is forced to
+  // localhost — only the port + route (namespace) are user-configurable — and
+  // there's no environment / auth / docs. The Connect↔Disconnect toggle becomes
+  // Start↔Stop listening; the Send button broadcasts to connected clients.
+  const isServer = request.server === true
+  const { serverPort, serverRoute } = useMemo(() => {
+    const stripped = url.replace(/^[a-z]+:\/\//i, '')
+    const slash = stripped.indexOf('/')
+    const hostPort = slash >= 0 ? stripped.slice(0, slash) : stripped
+    const route = slash >= 0 ? stripped.slice(slash + 1) : ''
+    const port = hostPort.split(':')[1] ?? ''
+    return { serverPort: port, serverRoute: route }
+  }, [url])
+  const composeServerUrl = useCallback((port: string, routePart: string): string => {
+    const cleanRoute = routePart.replace(/^\/+/, '')
+    return `localhost:${port}${cleanRoute ? `/${cleanRoute}` : ''}`
+  }, [])
+  const setServerPort = useCallback((p: string): void => {
+    setUrl(composeServerUrl(p.replace(/[^0-9]/g, ''), serverRoute))
+  }, [composeServerUrl, serverRoute, setUrl])
+  const setServerRoute = useCallback((r: string): void => {
+    setUrl(composeServerUrl(serverPort, r))
+  }, [composeServerUrl, serverPort, setUrl])
+
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
 
@@ -209,18 +302,21 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     )
   }, [request])
 
-  const handleSend = (): void => {
-    if (isSending) return
-    setIsSending(true)
+  // Connect = open the connection and listen. It stays open (no timeout) until
+  // the user disconnects; the promise resolves on close. Emitting is a separate
+  // action (the Send button).
+  const handleConnect = (): void => {
+    if (isListening) return
+    setLiveMessages([])
     setResponse(null)
-    
+
     window.restorm?.websocket.connect({
       requestId: request.id,
       timeout: DEFAULT_WS_TIMEOUT_MS,
       ...(requestPath ? { requestPath } : {})
     })
       .then((res: WebSocketExecutionResult) => {
-        // Convert backend result to WebSocketResponse format
+        // Resolves when the connection closes (user disconnect or server drop).
         const wsResponse: WebSocketResponse = {
           id: `resp_${Date.now()}`,
           type: 'websocket',
@@ -240,24 +336,21 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         setResponse(wsResponse)
         setHistoryRefreshKey(prev => prev + 1)
         eventBus.emitLocalSync(DocumentEvents.REQUEST_HISTORY_RECORDED, { requestId: request.id } as RequestHistoryEventPayload)
-        logger.info('WebSocket request completed', { url: res.requestUrl, connected: res.connected })
+        logger.info('WebSocket connection closed', { url: res.requestUrl, connected: res.connected })
       })
       .catch((err: unknown) => {
-        logger.error('WebSocket request failed', { error: String(err) })
-      })
-      .finally(() => {
-        setIsSending(false)
+        logger.error('WebSocket connection failed', { error: String(err) })
       })
   }
-  
+
+  // Send = emit the current message/event on the open connection.
+  const handleSend = (): void => {
+    if (!isListening) return
+    void window.restorm?.websocket.send(request.id, message, event ? event : undefined)
+  }
+
   const handleDisconnect = (): void => {
     void window.restorm?.websocket.disconnect(request.id)
-  }
-  
-  const formatMessage = (msg: WebSocketMessage): string => {
-    const prefix = msg.direction === 'sent' ? '→' : '←'
-    const eventStr = msg.event ? `[${msg.event}] ` : ''
-    return `${prefix} ${eventStr}${msg.data}`
   }
 
   // Request content (SplitView with Message, Headers)
@@ -282,6 +375,9 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
                 />
               </div>
             </div>
+          )}
+          {request.protocol === 'mqtt' && (
+            <MqttOptionsPanel request={request} variables={emptyVariables} helpers={handlebarsHelpers} />
           )}
           <div style={{ flex: 1, border: '1px solid var(--panel-border)', borderRadius: 3 }}>
             <CodeEditor
@@ -331,11 +427,58 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   // Use backend-provided code snippets
   const codeSnippetsContent = backendCodeSnippets || t('requestTab.codeSnippets.loading', 'Loading code snippets...')
 
+  // Chat-style transcript: received bubbles hug the left, sent bubbles the
+  // right. An acknowledgement frame (`<event> (ack)`) is not shown as its own
+  // bubble — it folds into a check badge on the originating sent bubble.
+  const renderChat = useCallback((messages: WebSocketMessage[]): React.ReactNode => {
+    interface ChatItem { direction: 'sent' | 'received'; data: string; event: string | undefined; acknowledged: boolean }
+    const items: ChatItem[] = []
+    for (const msg of messages) {
+      const ackMatch = msg.direction === 'received' && msg.event ? /^(.*) \(ack\)$/.exec(msg.event) : null
+      if (ackMatch) {
+        const baseEvent = ackMatch[1]
+        for (let j = items.length - 1; j >= 0; j--) {
+          const candidate = items[j]
+          if (candidate?.direction === 'sent' && !candidate.acknowledged && (candidate.event ?? '') === baseEvent) {
+            candidate.acknowledged = true
+            break
+          }
+        }
+        continue
+      }
+      items.push({ direction: msg.direction, data: msg.data, event: msg.event, acknowledged: false })
+    }
+    if (items.length === 0) {
+      return <div className="ws-chat-empty">{t('websocket.noMessages')}</div>
+    }
+    return (
+      <div className="ws-chat" data-testid="websocket-chat">
+        {items.map((item, i) => (
+          <div
+            key={i}
+            className={`ws-chat-bubble ${item.direction === 'sent' ? 'sent' : 'received'}`}
+            data-testid="ws-chat-bubble"
+            data-direction={item.direction}
+          >
+            {item.direction === 'sent' && item.acknowledged && (
+              <HeaderHoverTooltip label={t('websocket.acknowledged')} placement="above" className="ws-chat-ack-check">
+                <span className="codicon codicon-pass-filled" aria-label={t('websocket.acknowledged')} data-testid="ws-chat-ack-check" />
+              </HeaderHoverTooltip>
+            )}
+            {item.event && <span className="ws-chat-event">{item.event}</span>}
+            {item.data}
+          </div>
+        ))}
+      </div>
+    )
+  }, [t])
+
   const buildWebSocketResponseView = useCallback((
     resp: WebSocketResponse | null,
     meta?: { protocol?: string | undefined; event?: string | undefined }
   ) => {
-    const infosContent = resp ? (
+    if (!resp) return { infosContent: null, responseContent: null, jsonData: undefined }
+    const infosContent = (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }}>
         <div style={{ display: 'flex', gap: 8 }}>
           <span style={{ fontWeight: 600, minWidth: 100 }}>Status:</span>
@@ -343,10 +486,12 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
             {resp.connected ? t('websocket.connected') : t('websocket.disconnected')}
           </span>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <span style={{ fontWeight: 600, minWidth: 100 }}>Duration:</span>
-          <span>{resp.timings.durationMs}ms</span>
-        </div>
+        {resp.timings.durationMs > 0 && (
+          <div style={{ display: 'flex', gap: 8 }}>
+            <span style={{ fontWeight: 600, minWidth: 100 }}>Duration:</span>
+            <span>{resp.timings.durationMs}ms</span>
+          </div>
+        )}
         <div style={{ display: 'flex', gap: 8 }}>
           <span style={{ fontWeight: 600, minWidth: 100 }}>Protocol:</span>
           <span>{meta?.protocol ?? '-'}</span>
@@ -370,40 +515,51 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           </div>
         )}
       </div>
-    ) : null
+    )
 
-    const responseContent = resp && resp.messages.length > 0 ? (
-      <div style={{ height: '100%', overflow: 'auto', fontFamily: 'var(--editor-font-family)', fontSize: 12 }}>
-        {resp.messages.map((msg, i) => (
-          <div
-            key={i}
-            style={{
-              padding: '4px 8px',
-              marginBottom: 4,
-              borderRadius: 3,
-              background: msg.direction === 'sent' ? 'var(--editor-selectionBackground)' : 'var(--editor-inactiveSelectionBackground)',
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-all'
-            }}
-          >
-            {formatMessage(msg)}
-          </div>
-        ))}
-        {resp.messages.length === 0 && (
-          <div style={{ color: 'var(--descriptionForeground)' }}>
-            {t('websocket.noMessages')}
-          </div>
-        )}
-      </div>
-    ) : null
+    return { infosContent, responseContent: renderChat(resp.messages), jsonData: undefined }
+  }, [t, renderChat])
 
-    return { infosContent, responseContent, jsonData: undefined }
-  }, [t])
+  // Live view: prefer the streaming frames; fall back to the resolved response.
+  const liveResponse = useMemo<WebSocketResponse | null>(() => {
+    if (!isListening && liveMessages.length === 0) return response
+    return {
+      id: 'live',
+      type: 'websocket',
+      requestId: request.id,
+      requestUrl: resolvedUrl || url,
+      protocol: request.protocol,
+      connected: isListening || (response?.connected ?? false),
+      messages: liveMessages.length > 0 ? liveMessages : (response?.messages ?? []),
+      timings: response?.timings ?? { startedAt: '', durationMs: 0 },
+      ...(response?.error ? { error: response.error } : {})
+    }
+  }, [isListening, liveMessages, response, request.id, request.protocol, resolvedUrl, url])
 
   const { infosContent, responseContent } = useMemo(
-    () => buildWebSocketResponseView(response, { protocol: request.protocol, event: request.event }),
-    [buildWebSocketResponseView, response, request.protocol, request.event]
+    () => buildWebSocketResponseView(liveResponse, { protocol: request.protocol, event: request.event }),
+    [buildWebSocketResponseView, liveResponse, request.protocol, request.event]
   )
+
+  // Server mode: a live "N clients connected" banner at the top of the Response
+  // tab, above the message stream. Hidden when not hosting.
+  const serverResponseContent = useMemo<React.ReactNode>(() => {
+    if (!isServer) return responseContent
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <div
+          data-testid="websocket-server-client-count"
+          style={{ padding: '4px 8px', fontSize: 12, color: 'var(--foreground-muted)', borderBottom: '1px solid var(--panel-border)', display: 'flex', alignItems: 'center', gap: 6 }}
+        >
+          <span className={`codicon codicon-${isListening ? 'broadcast' : 'circle-slash'}`} aria-hidden="true" />
+          {isListening
+            ? t('websocket.clientsConnected', { count: serverClientCount, defaultValue: '{{count}} client(s) connected' })
+            : t('websocket.notListening', 'Not listening')}
+        </div>
+        <div style={{ flex: 1, minHeight: 0, overflow: 'auto' }}>{responseContent}</div>
+      </div>
+    )
+  }, [isServer, isListening, serverClientCount, responseContent, t])
 
   const buildHistoryView = useCallback((detail: ResponseHistoryDetail) => {
     if (detail.response.type !== 'websocket') {
@@ -428,31 +584,78 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     return buildWebSocketResponseView(historyResponse, detail.requestMeta)
   }, [buildWebSocketResponseView, request.id])
   
-  // URL section
+  // Connect/listen toggle. In server mode the toggle is Start↔Stop listening
+  // and is NOT wrapped in the env switcher (server mode ignores environments).
+  const connectButton = (
+    <BeamWrap active={isListening} size={22} borderWidth={1.5}>
+      <Button
+        icon={isListening ? 'debug-disconnect' : 'plug'}
+        onClick={isListening ? handleDisconnect : handleConnect}
+        {...(isListening ? { emphasis: 0 } : (!isServer && sendButtonStyle) ? { style: sendButtonStyle } : { emphasis: 1 })}
+        options={{
+          title: isServer
+            ? (isListening ? t('websocket.stopListening') : t('websocket.startListening'))
+            : (isListening ? t('websocket.disconnect') : t('websocket.connect')),
+          ariaLabel: isServer
+            ? (isListening ? t('websocket.stopListening') : t('websocket.startListening'))
+            : (isListening ? t('websocket.disconnect') : t('websocket.connect'))
+        }}
+        data-testid="websocket-connect-button"
+      />
+    </BeamWrap>
+  )
+
+  // URL section. Server mode forces host=localhost and exposes only port + route
+  // (no free URL, no environment variables); client mode keeps the full URL input.
   const urlSection = (
     <ControlGroup data-testid="websocket-url-section">
-      <div style={{ flex: 1, minWidth: 0 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
-        <RestormVariableInputBox
-          value={url}
-          onChange={setUrl}
-          variables={emptyVariables}
-          helpers={handlebarsHelpers}
-          placeholder={t('websocket.urlPlaceholder')}
-          data-testid="websocket-url-input"
-        />
-      </div>
-      <SendButtonEnvSwitcher>
-        <Button
-          icon={isSending ? 'debug-disconnect' : 'plug'}
-          onClick={isSending ? handleDisconnect : handleSend}
-          {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-          options={{
-            title: isSending ? t('websocket.disconnect') : t('websocket.connect'),
-            ariaLabel: isSending ? t('websocket.disconnect') : t('websocket.connect')
-          }}
-          data-testid="websocket-connect-button"
-        />
-      </SendButtonEnvSwitcher>
+      {isServer ? (
+        <>
+          <span style={{ display: 'flex', alignItems: 'center', padding: '0 8px', color: 'var(--foreground-muted)', whiteSpace: 'nowrap' }} data-testid="websocket-server-host">localhost:</span>
+          <div style={{ width: 90, minWidth: 60 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
+            <InputBox
+              value={serverPort}
+              onChange={setServerPort}
+              options={{ placeholder: '3001' }}
+              data-testid="websocket-server-port-input"
+            />
+          </div>
+          <span style={{ display: 'flex', alignItems: 'center', padding: '0 2px', color: 'var(--foreground-muted)' }}>/</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <InputBox
+              value={serverRoute}
+              onChange={setServerRoute}
+              options={{ placeholder: t('websocket.routePlaceholder') }}
+              data-testid="websocket-server-route-input"
+            />
+          </div>
+          {connectButton}
+        </>
+      ) : (
+        <>
+          <div style={{ flex: 1, minWidth: 0 }} title={resolvedUrl || url} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
+            <RestormVariableInputBox
+              value={url}
+              onChange={setUrl}
+              variables={emptyVariables}
+              helpers={handlebarsHelpers}
+              placeholder={t('websocket.urlPlaceholder')}
+              data-testid="websocket-url-input"
+            />
+          </div>
+          <SendButtonEnvSwitcher>{connectButton}</SendButtonEnvSwitcher>
+        </>
+      )}
+      {/* Every WebSocket-family protocol (websocket / socketio / mqtt) has a Send
+          button: it sends a frame, emits an event, or publishes to a topic. */}
+      <Button
+        icon="send"
+        onClick={handleSend}
+        disabled={!isListening}
+        emphasis={1}
+        options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}
+        data-testid="websocket-send-button"
+      />
     </ControlGroup>
   )
   
@@ -478,13 +681,13 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         urlSection={urlSection}
         requestContent={requestContent}
         codeSnippetsContent={codeSnippetsContent}
-        {...(apiDocumentation && route && findOperationForRoute(apiDocumentation, route) ? { docsContent: <DocumentationHost apiDocumentation={apiDocumentation} filters={[route]} /> } : {})}
+        {...(!isServer && apiDocumentation && route && findOperationForRoute(apiDocumentation, route) ? { docsContent: <DocumentationHost apiDocumentation={apiDocumentation} filters={[route]} /> } : {})}
         notes={request.notes}
         onNotesChange={(md): void => { updateReactiveProperty(request, 'notes', md) }}
-        isLoading={isSending}
-        showResponse={response !== null}
+        isLoading={false}
+        showResponse={isListening || liveMessages.length > 0 || response !== null}
         infosContent={infosContent}
-        responseContent={responseContent}
+        responseContent={serverResponseContent}
       />
       <ResponseHistoryModal
         isOpen={historyModalOpen}

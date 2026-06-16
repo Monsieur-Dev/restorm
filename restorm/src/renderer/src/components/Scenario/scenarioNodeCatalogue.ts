@@ -43,6 +43,18 @@ export const SCENARIO_NODE_CATALOGUE: ScenarioNodeKindMeta[] = [
   // Requests & composition
   { kind: 'httpRequest', labelKey: 'scenario.nodes.httpRequest', defaultLabel: 'HTTP Request', icon: 'globe', category: 'composition' },
   { kind: 'runScenario', labelKey: 'scenario.nodes.runScenario', defaultLabel: 'Run scenario', icon: 'circuit-board', category: 'composition' },
+  { kind: 'socketioConnect', labelKey: 'scenario.nodes.socketioConnect', defaultLabel: 'Socket.IO connect', icon: 'plug', category: 'composition' },
+  { kind: 'socketioSend', labelKey: 'scenario.nodes.socketioSend', defaultLabel: 'Socket.IO send', icon: 'arrow-up', category: 'composition' },
+  { kind: 'socketioClose', labelKey: 'scenario.nodes.socketioClose', defaultLabel: 'Socket.IO close', icon: 'debug-disconnect', category: 'composition' },
+  { kind: 'websocketConnect', labelKey: 'scenario.nodes.websocketConnect', defaultLabel: 'WebSocket connect', icon: 'plug', category: 'composition' },
+  { kind: 'websocketSend', labelKey: 'scenario.nodes.websocketSend', defaultLabel: 'WebSocket send', icon: 'arrow-up', category: 'composition' },
+  { kind: 'websocketClose', labelKey: 'scenario.nodes.websocketClose', defaultLabel: 'WebSocket close', icon: 'debug-disconnect', category: 'composition' },
+  { kind: 'mqttConnect', labelKey: 'scenario.nodes.mqttConnect', defaultLabel: 'MQTT connect', icon: 'plug', category: 'composition' },
+  { kind: 'mqttSend', labelKey: 'scenario.nodes.mqttSend', defaultLabel: 'MQTT publish', icon: 'arrow-up', category: 'composition' },
+  { kind: 'mqttClose', labelKey: 'scenario.nodes.mqttClose', defaultLabel: 'MQTT close', icon: 'debug-disconnect', category: 'composition' },
+  { kind: 'grpcConnect', labelKey: 'scenario.nodes.grpcConnect', defaultLabel: 'gRPC connect', icon: 'plug', category: 'composition' },
+  { kind: 'grpcSend', labelKey: 'scenario.nodes.grpcSend', defaultLabel: 'gRPC send', icon: 'arrow-up', category: 'composition' },
+  { kind: 'grpcClose', labelKey: 'scenario.nodes.grpcClose', defaultLabel: 'gRPC close', icon: 'debug-disconnect', category: 'composition' },
   // Lists (grouped into a "Lists" submenu)
   { kind: 'aggregate', labelKey: 'scenario.nodes.aggregate', defaultLabel: 'Aggregate', icon: 'combine', category: 'lists' },
   { kind: 'map', labelKey: 'scenario.nodes.map', defaultLabel: 'Map', icon: 'arrow-swap', category: 'lists' },

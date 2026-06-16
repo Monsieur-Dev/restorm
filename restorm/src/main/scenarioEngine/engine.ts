@@ -10,6 +10,9 @@
 
 import { logger, getSettingsService, isSettingsServiceInitialized } from 'electron-core-ui/main'
 import { collectionStore } from '../services/CollectionStore'
+import { websocketExecutionService } from '../services/WebSocketExecutionService'
+import { grpcExecutionService } from '../services/GRPCExecutionService'
+import { flushRequestStateToContext } from '../mcp/tools/execute'
 import { installScenarioValueResolvers } from '../../shared/scenarioValueResolvers'
 import { setSecretPreviewResolver } from '../../shared/utils/scenarioStaticPreview'
 import { secretHydrationService } from '../services/secrets/SecretHydrationService'
@@ -128,6 +131,16 @@ export class ScenarioEngine {
   setDebug(runId: RuntimeId, enabled: boolean): void { this.activeRuns.get(runId)?.setDebug(enabled) }
   setBreakpoints(runId: RuntimeId, ids: readonly RuntimeId[]): void { this.activeRuns.get(runId)?.setBreakpoints(ids) }
   abort(runId: RuntimeId, reason?: string): void { this.activeRuns.get(runId)?.abort(reason) }
+
+  /** Abort every live run (each scheduler propagates the abort to its own
+   * sub-runs). Called when the open project is torn down — closing a file, or
+   * opening another over it, must stop everything that file launched, exactly
+   * as if the user had stopped each run by hand. No-op when nothing is running. */
+  abortAll(reason = 'project closed'): void {
+    for (const scheduler of this.activeRuns.values()) {
+      try { scheduler.abort(reason) } catch { /* run already settling — ignore */ }
+    }
+  }
   resolveUserInput(runId: RuntimeId, requestId: string, value: unknown): void { this.activeRuns.get(runId)?.resolveUserInput(requestId, value) }
 
   cancelUserInput(runId: RuntimeId, requestId: string): void { this.activeRuns.get(runId)?.cancelUserInput(requestId) }
@@ -163,6 +176,34 @@ export class ScenarioEngine {
       ...(callCtx.onLog ? { onLog: callCtx.onLog } : {}),
       ...(callCtx.treeParams ? { treeParams: callCtx.treeParams } : {}),
       ...(parentSignal ? { parentSignal } : {}),
+      // Bridge a connect node (`socketioConnect` / `websocketConnect`) to the
+      // WebSocket execution service: flush the bound request into the
+      // ContextService (so its URL / headers / namespace resolve even when its
+      // tab isn't open, like httpRequest does), then open a streaming connection
+      // on the matching transport. The scheduler keeps the returned handle and
+      // drives send / close from it.
+      socketioConnect: (req) => {
+        const bound = collectionStore.findById(req.requestId)
+        if (bound && (bound as { type?: string }).type !== 'scenario') {
+          flushRequestStateToContext(bound as unknown as Parameters<typeof flushRequestStateToContext>[0])
+        }
+        if (req.transport === 'grpc') return grpcExecutionService.connectStreaming(req)
+        // MQTT connects to a broker (no server-mode split) and subscribes to the
+        // bound request's topic — every received message re-emits on `message`.
+        if (req.transport === 'mqtt') return websocketExecutionService.connectStreamingMqtt(req)
+        // A request flagged `server` HOSTS the server (restorm acts as the
+        // server); otherwise it connects as a client — same split for raw WS and
+        // Socket.IO.
+        const isServer = (bound as { server?: boolean } | undefined)?.server === true
+        if (req.transport === 'websocket') {
+          return isServer
+            ? websocketExecutionService.connectStreamingRawServer(req)
+            : websocketExecutionService.connectStreamingRaw(req)
+        }
+        return isServer
+          ? websocketExecutionService.connectStreamingServer(req)
+          : websocketExecutionService.connectStreaming(req)
+      },
       runSubScenario: async (subId, params, subParentSignal) => {
         const subStack = new Set(callCtx.stack)
         subStack.add(scenarioId)

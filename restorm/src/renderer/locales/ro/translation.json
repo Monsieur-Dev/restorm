@@ -241,11 +241,18 @@
         "httpDelete": "Cerere HTTP – DELETE",
         "graphql": "Cerere GraphQL",
         "grpc": "Cerere gRPC",
+        "grpcServerStream": "gRPC server-streaming request",
+        "grpcClientStream": "gRPC client-streaming request",
+        "grpcBidi": "gRPC bidirectional request",
         "soap": "Cerere SOAP",
         "websocket": "Cerere WebSocket",
         "odata": "Cerere OData",
         "auth": "Cerere HTTP de autentificare",
-        "scenario": "Scenariu"
+        "scenario": "Scenariu",
+        "socketioServer": "Server Socket.IO",
+        "websocketServer": "Server WebSocket",
+        "socketio": "Cerere Socket.IO",
+        "mqtt": "MQTT request"
       }
     },
     "deleteConfirm": {
@@ -412,6 +419,15 @@
     "tabs": {
       "message": "Mesaj",
       "metadata": "Metadate"
+    },
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "noFrames": "No frames yet.",
+    "callType": {
+      "unary": "Unary",
+      "serverStream": "Server streaming",
+      "clientStream": "Client streaming",
+      "bidi": "Bidirectional streaming"
     }
   },
   "soap": {
@@ -433,7 +449,14 @@
     "tabs": {
       "message": "Mesaj",
       "headers": "Antete"
-    }
+    },
+    "acknowledged": "Confirmat",
+    "disconnect": "Deconectează",
+    "startListening": "Începe ascultarea",
+    "stopListening": "Oprește ascultarea",
+    "routePlaceholder": "Rută (opțional)",
+    "clientsConnected": "{{count}} client(i) conectat(i)",
+    "notListening": "Nu ascultă"
   },
   "search": {
     "placeholder": "Caută...",
@@ -952,7 +975,19 @@
       "readFile": "Read file",
       "writeFile": "Write file",
       "timer": "Cronometru",
-      "code": "Cod"
+      "code": "Cod",
+      "socketioConnect": "Socket.IO connect",
+      "socketioSend": "Socket.IO send",
+      "socketioClose": "Socket.IO close",
+      "websocketConnect": "WebSocket connect",
+      "websocketSend": "WebSocket send",
+      "websocketClose": "WebSocket close",
+      "grpcConnect": "gRPC connect",
+      "grpcSend": "gRPC send",
+      "grpcClose": "gRPC close",
+      "mqttConnect": "MQTT connect",
+      "mqttSend": "MQTT publish",
+      "mqttClose": "MQTT close"
     },
     "comparator": {
       "result": "rezultat"
@@ -1487,7 +1522,25 @@
       "writeFile": "Writes or appends text to a file.",
       "throw": "Deliberately fails with a message (for error branches and tests).",
       "log": "Writes a message to the run log and passes the value through.",
-      "assert": "Checks a condition (chai-style) and routes to pass or fail."
+      "assert": "Checks a condition (chai-style) and routes to pass or fail.",
+      "socketioConnect": "Opens a Socket.IO connection and re-emits each received event on its port.",
+      "socketioSend": "Sends a message on an already-open Socket.IO connection.",
+      "socketioClose": "Closes an already-open Socket.IO connection.",
+      "websocketConnect": "Opens a raw WebSocket connection and re-emits each received message on its port.",
+      "websocketSend": "Sends a payload on an already-open WebSocket connection.",
+      "websocketClose": "Closes an already-open WebSocket connection.",
+      "grpcConnect": "Opens a streaming gRPC call and re-emits each received frame on its message port.",
+      "grpcSend": "Writes a request message on an already-open streaming gRPC call.",
+      "grpcClose": "Half-closes an already-open streaming gRPC call.",
+      "socketioConnectServer": "Pornește un server Socket.IO (port + rută); confirmă fiecare eveniment primit și îl reemite pe portul său. Trimiterea difuzează către clienții conectați.",
+      "socketioSendServer": "Difuzează un mesaj către toți clienții conectați la serverul Socket.IO referențiat.",
+      "socketioCloseServer": "Oprește serverul Socket.IO referențiat și deconectează clienții săi.",
+      "websocketConnectServer": "Pornește un server WebSocket brut (port + cale); înregistrează fiecare frame trimis de un client și îl reemite pe portul său message. Trimiterea difuzează către clienții conectați.",
+      "websocketSendServer": "Difuzează un frame către toți clienții conectați la serverul WebSocket referențiat.",
+      "websocketCloseServer": "Oprește serverul WebSocket referențiat și deconectează clienții săi.",
+      "mqttConnect": "Opens a long-lived MQTT connection from a bound request and subscribes to its topic; re-emits each received message on its `message` port.",
+      "mqttSend": "Publishes a payload on an already-open MQTT connection (to its topic).",
+      "mqttClose": "Closes an already-open MQTT connection."
     },
     "legend": {
       "title": "Legendă",
@@ -1515,6 +1568,41 @@
       "allLogs": "All logs",
       "note": "`--out file` also writes the run-log to a file.",
       "projectPlaceholder": "<project.restorm>"
+    },
+    "socketio": {
+      "connectionNameLabel": "Connection name",
+      "connectionNamePlaceholder": "connection name",
+      "eventPlaceholder": "event",
+      "addEvent": "Add event",
+      "connected": "connected",
+      "others": "others",
+      "connection": "connection",
+      "pickConnection": "— pick a connection —",
+      "channelLabel": "Channel name",
+      "payload": "payload",
+      "payloadModalTitle": "Edit payload",
+      "started": "pornit"
+    },
+    "websocket": {
+      "message": "message"
+    },
+    "grpc": {
+      "message": "message"
     }
+  },
+  "mqtt": {
+    "qos": "QoS",
+    "retain": "Retain",
+    "subscribeOnConnect": "Subscribe on connect",
+    "clientId": "Client ID",
+    "clientIdPlaceholder": "auto-generated if empty",
+    "username": "Username",
+    "password": "Password",
+    "keepalive": "Keepalive (s)",
+    "lwt": "Last Will & Testament",
+    "topic": "Topic",
+    "lwtTopicPlaceholder": "will/topic",
+    "lwtPayload": "Payload",
+    "lwtPayloadPlaceholder": "will message"
   }
 }

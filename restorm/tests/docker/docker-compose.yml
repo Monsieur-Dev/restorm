@@ -42,6 +42,11 @@ services:
       - "9001:9001"
     volumes:
       - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+      # Pre-hashed password file (restorm / restorm) for the auth scenarios.
+      # Mosquitto 2 only accepts hashed passwords; regenerate with
+      #   docker run --rm --entrypoint sh eclipse-mosquitto:2 \
+      #     -c "mosquitto_passwd -b -c /tmp/pw restorm restorm && cat /tmp/pw"
+      - ./mosquitto-passwd:/mosquitto/config/passwd:ro
 
   # SOAP - Castle Mock server
   soap:
@@ -58,16 +63,11 @@ services:
       - "9000:9000"
       - "9002:9001"
 
-  # Socket.IO - Custom test server
-  socketio:
-    image: node:20-alpine
-    container_name: restorm-socketio
-    working_dir: /app
-    volumes:
-      - ./socketio-server:/app
-    command: sh -c "npm install && node server.js"
-    ports:
-      - "3001:3001"
+  # NOTE: there is intentionally no Socket.IO nor raw-WebSocket mock service.
+  # restorm hosts its OWN Socket.IO + raw-WebSocket servers (a "server mode"
+  # request) and connects to them as a client in the same instance, so the
+  # Socket.IO / WebSocket E2E + scenarios self-connect — no external mock to
+  # run or maintain.
 
   # Auth - Custom .NET 9 minimal-API service used by the `auth-login`
   # e2e suite. Publishes `/login` (POST), `/pet/{id}` (GET, Bearer-gated)

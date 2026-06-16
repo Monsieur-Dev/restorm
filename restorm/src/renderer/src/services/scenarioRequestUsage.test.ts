@@ -4,7 +4,8 @@ import {
   findScenariosUsingRequest,
   findScenariosUsingScenario,
   isRequestInScenarioSubtree,
-  collectRequestScenarioRelations
+  collectRequestScenarioRelations,
+  requestScenarioDeleteUsages
 } from './scenarioRequestUsage'
 
 // Minimal fixtures — only the fields the walkers read. An env-folder (which
@@ -57,6 +58,33 @@ describe('findScenariosUsingRequest', () => {
   })
 })
 
+describe('streaming connect nodes bind a request too (Socket.IO / WebSocket)', () => {
+  // A streaming connect node ties its bound request to the scenario exactly like
+  // an httpRequest node — so the reverse-nav link + delete/move flow must see it.
+  const streamNode = (id: string, kind: string, requestId: string): { id: string; kind: string; config: { requestId: string }; inputs: never[]; outputs: never[]; position: { x: number; y: number } } =>
+    ({ id, kind, config: { requestId }, inputs: [], outputs: [], position: { x: 0, y: 0 } })
+  const wsReq = { type: 'websocket', id: 'req-ws', name: 'WS Echo' }
+  const streamScenario = {
+    type: 'scenario', id: 'scn-stream', name: 'Streaming', tags: [], params: [],
+    nodes: [streamNode('w1', 'websocketConnect', 'req-ws'), streamNode('s1', 'socketioConnect', 'req-ws')],
+    edges: [], items: []
+  }
+  const env = { folderType: 'environment', id: 'env', name: 'Env', configuration: {}, environments: [], items: [streamScenario, wsReq] }
+  const root = [env] as unknown as FolderItem[]
+
+  it('findScenariosUsingRequest finds a request bound by websocketConnect + socketioConnect nodes', () => {
+    const usages = findScenariosUsingRequest(root, 'req-ws')
+    expect(usages).toHaveLength(1)
+    expect(usages[0]?.nodeIds.sort()).toEqual(['s1', 'w1'])
+  })
+
+  it('collectRequestScenarioRelations reports streaming-bound requests for the delete/move flow', () => {
+    const rel = collectRequestScenarioRelations(root, 'req-ws')
+    expect(rel).toHaveLength(1)
+    expect(rel[0]?.nodeIds.sort()).toEqual(['s1', 'w1'])
+  })
+})
+
 describe('isRequestInScenarioSubtree', () => {
   it('is true for a request authored as a scenario child', () => {
     expect(isRequestInScenarioSubtree(scn, 'req-child')).toBe(true)
@@ -64,6 +92,24 @@ describe('isRequestInScenarioSubtree', () => {
 
   it('is false for a request referenced from outside the subtree', () => {
     expect(isRequestInScenarioSubtree(scn, 'req-bound')).toBe(false)
+  })
+
+  it('does not cross into a NESTED scenario — a request authored in a sub-scenario belongs to that sub-scenario, not its parent', () => {
+    const deepReq = { type: 'grpc', id: 'req-deep', name: 'Lives in the sub-scenario' }
+    const subScenario = { type: 'scenario', id: 'sub', name: 'Sub', tags: [], params: [], nodes: [], edges: [], items: [deepReq] }
+    const parentScenario = { type: 'scenario', id: 'parent', name: 'Parent', tags: [], params: [], nodes: [], edges: [], items: [subScenario] } as unknown as Parameters<typeof isRequestInScenarioSubtree>[0]
+    const sub = subScenario as unknown as Parameters<typeof isRequestInScenarioSubtree>[0]
+    // The nearest scenario owns it…
+    expect(isRequestInScenarioSubtree(sub, 'req-deep')).toBe(true)
+    // …the ancestor scenario does NOT (no transitive over-reporting).
+    expect(isRequestInScenarioSubtree(parentScenario, 'req-deep')).toBe(false)
+  })
+
+  it('still descends plain folders inside a scenario (folders are not scenario boundaries)', () => {
+    const fReq = { type: 'http', id: 'req-in-folder', name: 'In a folder' }
+    const folder = { id: 'fold', name: 'Folder', configuration: {}, items: [fReq] }
+    const scnWithFolder = { type: 'scenario', id: 'swf', name: 'With folder', tags: [], params: [], nodes: [], edges: [], items: [folder] } as unknown as Parameters<typeof isRequestInScenarioSubtree>[0]
+    expect(isRequestInScenarioSubtree(scnWithFolder, 'req-in-folder')).toBe(true)
   })
 })
 
@@ -128,5 +174,23 @@ describe('collectRequestScenarioRelations', () => {
 
   it('returns nothing for a request unrelated to any scenario', () => {
     expect(collectRequestScenarioRelations(rootItems, 'req-absent')).toHaveLength(0)
+  })
+})
+
+describe('requestScenarioDeleteUsages (delete-dialog trigger)', () => {
+  it('keeps a box-bound request (the dialog should fire)', () => {
+    const rel = requestScenarioDeleteUsages(rootItems, 'req-bound')
+    expect(rel).toHaveLength(1)
+    expect(rel[0]?.nodeIds).toEqual(['n1', 'n2'])
+  })
+
+  it('drops a subtree-only child request with no box (no dialog — it deletes normally)', () => {
+    // A request merely filed under a scenario folder, wired into no box, is not
+    // a usage: deleting it must NOT raise the "used in scenarios" dialog.
+    expect(requestScenarioDeleteUsages(rootItems, 'req-child')).toHaveLength(0)
+  })
+
+  it('returns nothing for a request unrelated to any scenario', () => {
+    expect(requestScenarioDeleteUsages(rootItems, 'req-absent')).toHaveLength(0)
   })
 })

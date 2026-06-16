@@ -75,6 +75,51 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // pre-request `code` node that mutated `pm.request` / `req`).
   httpRequest: { inputs: [{ id: 'env', name: 'env', flow: 'value' }, { id: 'requestOverride', name: 'override', dataType: 'object', flow: 'value' }], outputs: [{ id: 'response', name: 'response', dataType: 'response', role: 'response', flow: 'both' }] },
   runScenario: { inputs: [], outputs: [{ id: 'result', name: 'result', role: 'response', flow: 'both' }] },
+  // Socket.IO connect: a long-lived listener. `connected` fires once the socket
+  // is open (a pure signal). Each listened event re-emits on its OWN derived
+  // port (`event:<name>` — switch-like, added from `config.events`); any other
+  // server-pushed event lands on the `others` catch-all (the switch `default`
+  // analogue). The connection stays open until a `socketioClose` (or a Stop)
+  // ends it, at which point the universal `done` port fires. The per-event ports
+  // are derived (see {@link socketioConnectEventPorts}), not stamped here.
+  socketioConnect: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'others', name: 'others', role: 'default', flow: 'both' }] },
+  // Socket.IO send: a pure-event action. Triggered on `in`, it emits `payload`
+  // on the `channel` event of the connection named by `config.connectionNodeId`.
+  // Sequencing happens via the universal `done` port (there's no separate value
+  // output — the action's outcome IS its completion). Both `channel` and
+  // `payload` carry inline fallbacks, so they aren't hard-required.
+  socketioSend: { inputs: [{ id: 'channel', name: 'channel', dataType: 'string' }, { id: 'payload', name: 'payload' }], outputs: [] },
+  // Socket.IO close: a pure-event action. Triggered on `in`, it closes the
+  // connection named by `config.connectionNodeId` (firing that connect node's
+  // `done`). Sequencing happens via the universal `done` port.
+  socketioClose: { inputs: [], outputs: [] },
+  // Raw WebSocket connect: like socketioConnect but a raw WS has no named events,
+  // so every received frame re-emits on a SINGLE `message` port (no `event:<name>`
+  // derivation, no `others`). `connected` fires once open; `done` fires on close.
+  websocketConnect: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'message', name: 'message', flow: 'both' }] },
+  // Raw WebSocket send: sends `payload` (text) on the connection named by
+  // `config.connectionNodeId` — no channel/event. Sequences via `done`.
+  websocketSend: { inputs: [{ id: 'payload', name: 'payload' }], outputs: [] },
+  // Raw WebSocket close: closes the named connection. Sequences via `done`.
+  websocketClose: { inputs: [], outputs: [] },
+  // MQTT connect: like websocketConnect — MQTT has no named events, so every
+  // received message re-emits on a SINGLE `message` port. `connected` fires once
+  // the broker accepts + the topic is subscribed; `done` fires on close.
+  mqttConnect: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'message', name: 'message', flow: 'both' }] },
+  // MQTT publish: publishes `payload` on the connection named by
+  // `config.connectionNodeId` (to that connection's topic). Sequences via `done`.
+  mqttSend: { inputs: [{ id: 'payload', name: 'payload' }], outputs: [] },
+  // MQTT close: closes the named connection. Sequences via `done`.
+  mqttClose: { inputs: [], outputs: [] },
+  // gRPC streaming connect: like websocketConnect — a streaming RPC has no named
+  // events, so every received frame re-emits on a SINGLE `message` port.
+  // `connected` fires once the call opens; `done` fires when the stream ends.
+  grpcConnect: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'message', name: 'message', flow: 'both' }] },
+  // gRPC send: writes `payload` (a request message) on the connection named by
+  // `config.connectionNodeId` (client / bidi) — no channel. Sequences via `done`.
+  grpcSend: { inputs: [{ id: 'payload', name: 'payload' }], outputs: [] },
+  // gRPC close: half-closes the named streaming call. Sequences via `done`.
+  grpcClose: { inputs: [], outputs: [] },
   // Iteration & collections. `items` carries a value-selector fallback in the
   // editor (list-typed sources), so it isn't a hard-required port — like the
   // `if` operands; the editor flags it red only when no list type is available.
@@ -121,11 +166,14 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // pass; there's no per-iteration value to carry (unlike a forEach `each` item).
   while: { inputs: [{ id: 'left', name: 'left' }, { id: 'right', name: 'right' }], outputs: [{ id: 'then', name: 'body', role: 'then', flow: 'signal' }] },
   doWhile: { inputs: [{ id: 'left', name: 'left' }, { id: 'right', name: 'right' }], outputs: [{ id: 'then', name: 'loop', role: 'then', flow: 'signal' }] },
-  // Time
-  wait: { inputs: [{ id: 'duration', name: 'duration', dataType: 'duration' }], outputs: [{ id: 'out', name: 'then', role: 'then', flow: 'both' }] },
+  // Time. No explicit output — `wait` sequences the next node via the universal
+  // `done` port (which fires once the delay elapses). A value to carry past the
+  // delay is held in a run variable / wired around the wait, not passed through.
+  wait: { inputs: [{ id: 'duration', name: 'duration', dataType: 'duration' }], outputs: [] },
   // Aligned on `wait`: an inline value fallback (a date-time picker) on `until`,
   // so it isn't a hard-required port and the node is runnable on its own.
-  waitUntil: { inputs: [{ id: 'until', name: 'until' }], outputs: [{ id: 'out', name: 'then', role: 'then', flow: 'both' }] },
+  // Sequences via `done` (no value passthrough), like `wait`.
+  waitUntil: { inputs: [{ id: 'until', name: 'until' }], outputs: [] },
   now: { inputs: [], outputs: [{ id: 'value', name: 'now', dataType: 'string', flow: 'both' }] },
   // `timer` fires its `tick` body on each interval (a frequency number+unit OR a
   // cron), optionally bounded by a total duration / end date, until it stops.
@@ -154,8 +202,10 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   // expression determines the output type.
   transform: { inputs: [{ id: 'value', name: 'value' }, { id: 'expression', name: 'expression' }], outputs: [{ id: 'out', name: 'value', flow: 'both' }] },
   // `code` runs user TS/JS: its `value` input is exposed as `input`, the script's
-  // return value flows out of `result`.
-  code: { inputs: [{ id: 'value', name: 'input' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
+  // return value flows out of `result`. The `code` input lets the SCRIPT TEXT
+  // itself be wired (an upstream node can supply the code); unwired, the inline
+  // editor's code is used.
+  code: { inputs: [{ id: 'value', name: 'input' }, { id: 'code', name: 'code', dataType: 'string' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
   // `cast` converts its `value` input to the configured target type (the output
   // type is the chosen target, so no fixed dataType is stamped here).
   cast: { inputs: [{ id: 'value', name: 'value' }], outputs: [{ id: 'result', name: 'result', flow: 'both' }] },
@@ -234,6 +284,33 @@ export function defaultPortsForKind(kind: ScenarioNodeKind): { inputs: ScenarioP
   const spec = PORTS[kind] ?? FALLBACK
   const inputs = acceptsInputEvent(kind) ? [IN, ...spec.inputs] : spec.inputs
   return { inputs: inputs.map(p), outputs: spec.outputs.map(p) }
+}
+
+/** The listened event names of a `socketioConnect` node, read from
+ * `config.events` (a string[]). Empty/garbage → no events. Duplicates and
+ * blanks are dropped so each event maps to exactly one port. */
+export function readSocketioEvents(config: Record<string, unknown> | undefined): string[] {
+  const raw = config?.['events']
+  if (!Array.isArray(raw)) return []
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const e of raw) {
+    if (typeof e !== 'string') continue
+    const name = e.trim()
+    if (name === '' || seen.has(name)) continue
+    seen.add(name)
+    out.push(name)
+  }
+  return out
+}
+
+/** Derived output ports for a `socketioConnect` node's listened events — one
+ * `event:<name>` port per entry in `config.events` (switch-like, like the
+ * switch's `case-…` ports). The static `connected` / `others` ports come from
+ * {@link defaultPortsForKind}; these are added on top by the editor render and
+ * the MCP authoring path (so a link can target a specific event). */
+export function socketioConnectEventPorts(config: Record<string, unknown> | undefined): ScenarioPort[] {
+  return readSocketioEvents(config).map((name) => p({ id: `event:${name}`, name, dataType: 'any', flow: 'both' }))
 }
 
 /** Map a persisted value-type kind (an `input` node's `valueType`) to a port

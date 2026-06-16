@@ -770,9 +770,15 @@ When('I hover the first property of the {string} node', async ({}, modelName: st
   await expect(node).toBeVisible({ timeout: 10000 })
   const firstProp = node.locator('.documentation-host-model-node__property').first()
   await expect(firstProp).toBeVisible({ timeout: 10000 })
-  await firstProp.hover()
-  // DelayedTooltip waits 1s before popping.
-  await p.waitForTimeout(1300)
+  // The DelayedTooltip pops 1s after a STABLE hover. A single hover + fixed wait
+  // races on the initial graph layout (a re-layout or a lost pointer drops the
+  // hover, so the 1s timer never completes) — re-hover until the tooltip is
+  // actually up, which fixes a long-standing flake on this step.
+  const tooltip = p.locator('.documentation-host-model-node__tooltip').first()
+  await expect(async () => {
+    await firstProp.hover()
+    await expect(tooltip).toBeVisible({ timeout: 1500 })
+  }).toPass({ timeout: 20000 })
 })
 
 Then('a documentation tooltip should be visible', async () => {

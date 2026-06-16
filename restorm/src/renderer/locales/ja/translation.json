@@ -239,11 +239,18 @@
         "httpDelete": "HTTP – DELETE リクエスト",
         "graphql": "GraphQL リクエスト",
         "grpc": "gRPC リクエスト",
+        "grpcServerStream": "gRPC server-streaming request",
+        "grpcClientStream": "gRPC client-streaming request",
+        "grpcBidi": "gRPC bidirectional request",
         "soap": "SOAP リクエスト",
         "websocket": "WebSocket リクエスト",
         "odata": "OData リクエスト",
         "auth": "HTTP 認証リクエスト",
-        "scenario": "シナリオ"
+        "scenario": "シナリオ",
+        "socketioServer": "Socket.IO サーバー",
+        "websocketServer": "WebSocket サーバー",
+        "socketio": "Socket.IO リクエスト",
+        "mqtt": "MQTT request"
       }
     },
     "deleteConfirm": {
@@ -410,6 +417,15 @@
     "tabs": {
       "message": "メッセージ",
       "metadata": "メタデータ"
+    },
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "noFrames": "No frames yet.",
+    "callType": {
+      "unary": "Unary",
+      "serverStream": "Server streaming",
+      "clientStream": "Client streaming",
+      "bidi": "Bidirectional streaming"
     }
   },
   "soap": {
@@ -431,7 +447,14 @@
     "tabs": {
       "message": "メッセージ",
       "headers": "ヘッダー"
-    }
+    },
+    "acknowledged": "確認済み",
+    "disconnect": "切断",
+    "startListening": "リッスン開始",
+    "stopListening": "リッスン停止",
+    "routePlaceholder": "ルート (任意)",
+    "clientsConnected": "{{count}} クライアント接続中",
+    "notListening": "リッスンしていません"
   },
   "search": {
     "placeholder": "検索...",
@@ -950,7 +973,19 @@
       "readFile": "Read file",
       "writeFile": "Write file",
       "timer": "タイマー",
-      "code": "コード"
+      "code": "コード",
+      "socketioConnect": "Socket.IO connect",
+      "socketioSend": "Socket.IO send",
+      "socketioClose": "Socket.IO close",
+      "websocketConnect": "WebSocket connect",
+      "websocketSend": "WebSocket send",
+      "websocketClose": "WebSocket close",
+      "grpcConnect": "gRPC connect",
+      "grpcSend": "gRPC send",
+      "grpcClose": "gRPC close",
+      "mqttConnect": "MQTT connect",
+      "mqttSend": "MQTT publish",
+      "mqttClose": "MQTT close"
     },
     "comparator": {
       "result": "結果"
@@ -1485,7 +1520,25 @@
       "writeFile": "Writes or appends text to a file.",
       "throw": "Deliberately fails with a message (for error branches and tests).",
       "log": "Writes a message to the run log and passes the value through.",
-      "assert": "Checks a condition (chai-style) and routes to pass or fail."
+      "assert": "Checks a condition (chai-style) and routes to pass or fail.",
+      "socketioConnect": "Opens a Socket.IO connection and re-emits each received event on its port.",
+      "socketioSend": "Sends a message on an already-open Socket.IO connection.",
+      "socketioClose": "Closes an already-open Socket.IO connection.",
+      "websocketConnect": "Opens a raw WebSocket connection and re-emits each received message on its port.",
+      "websocketSend": "Sends a payload on an already-open WebSocket connection.",
+      "websocketClose": "Closes an already-open WebSocket connection.",
+      "grpcConnect": "Opens a streaming gRPC call and re-emits each received frame on its message port.",
+      "grpcSend": "Writes a request message on an already-open streaming gRPC call.",
+      "grpcClose": "Half-closes an already-open streaming gRPC call.",
+      "socketioConnectServer": "Socket.IO サーバー（ポート + ルート）を起動します。受信した各イベントを確認応答し、対応するポートに再送します。送信は接続中のクライアントへブロードキャストします。",
+      "socketioSendServer": "参照先の Socket.IO サーバーに接続しているすべてのクライアントにメッセージをブロードキャストします。",
+      "socketioCloseServer": "参照先の Socket.IO サーバーを停止し、そのクライアントを切断します。",
+      "websocketConnectServer": "生の WebSocket サーバー（ポート + パス）を起動します。クライアントが送る各フレームを記録し、message ポートに再送します。送信は接続中のクライアントへブロードキャストします。",
+      "websocketSendServer": "参照先の WebSocket サーバーに接続しているすべてのクライアントにフレームをブロードキャストします。",
+      "websocketCloseServer": "参照先の WebSocket サーバーを停止し、そのクライアントを切断します。",
+      "mqttConnect": "Opens a long-lived MQTT connection from a bound request and subscribes to its topic; re-emits each received message on its `message` port.",
+      "mqttSend": "Publishes a payload on an already-open MQTT connection (to its topic).",
+      "mqttClose": "Closes an already-open MQTT connection."
     },
     "legend": {
       "title": "凡例",
@@ -1513,6 +1566,41 @@
       "allLogs": "All logs",
       "note": "`--out file` also writes the run-log to a file.",
       "projectPlaceholder": "<project.restorm>"
+    },
+    "socketio": {
+      "connectionNameLabel": "Connection name",
+      "connectionNamePlaceholder": "connection name",
+      "eventPlaceholder": "event",
+      "addEvent": "Add event",
+      "connected": "connected",
+      "others": "others",
+      "connection": "connection",
+      "pickConnection": "— pick a connection —",
+      "channelLabel": "Channel name",
+      "payload": "payload",
+      "payloadModalTitle": "Edit payload",
+      "started": "起動済み"
+    },
+    "websocket": {
+      "message": "message"
+    },
+    "grpc": {
+      "message": "message"
     }
+  },
+  "mqtt": {
+    "qos": "QoS",
+    "retain": "Retain",
+    "subscribeOnConnect": "Subscribe on connect",
+    "clientId": "Client ID",
+    "clientIdPlaceholder": "auto-generated if empty",
+    "username": "Username",
+    "password": "Password",
+    "keepalive": "Keepalive (s)",
+    "lwt": "Last Will & Testament",
+    "topic": "Topic",
+    "lwtTopicPlaceholder": "will/topic",
+    "lwtPayload": "Payload",
+    "lwtPayloadPlaceholder": "will message"
   }
 }

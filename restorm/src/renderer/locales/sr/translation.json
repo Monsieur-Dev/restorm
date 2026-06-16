@@ -241,11 +241,18 @@
         "httpDelete": "HTTP – DELETE zahtev",
         "graphql": "GraphQL zahtev",
         "grpc": "gRPC zahtev",
+        "grpcServerStream": "gRPC server-streaming request",
+        "grpcClientStream": "gRPC client-streaming request",
+        "grpcBidi": "gRPC bidirectional request",
         "soap": "SOAP zahtev",
         "websocket": "WebSocket zahtev",
         "odata": "OData zahtev",
         "auth": "HTTP zahtev za autentifikaciju",
-        "scenario": "Сценарио"
+        "scenario": "Сценарио",
+        "socketioServer": "Socket.IO сервер",
+        "websocketServer": "WebSocket сервер",
+        "socketio": "Socket.IO захтев",
+        "mqtt": "MQTT request"
       }
     },
     "deleteConfirm": {
@@ -412,6 +419,15 @@
     "tabs": {
       "message": "Poruka",
       "metadata": "Metapodaci"
+    },
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "noFrames": "No frames yet.",
+    "callType": {
+      "unary": "Unary",
+      "serverStream": "Server streaming",
+      "clientStream": "Client streaming",
+      "bidi": "Bidirectional streaming"
     }
   },
   "soap": {
@@ -433,7 +449,14 @@
     "tabs": {
       "message": "Poruka",
       "headers": "Zaglavlja"
-    }
+    },
+    "acknowledged": "Потврђено",
+    "disconnect": "Прекини везу",
+    "startListening": "Почни слушање",
+    "stopListening": "Заустави слушање",
+    "routePlaceholder": "Рута (опционо)",
+    "clientsConnected": "{{count}} клијент(а) повезано",
+    "notListening": "Не слуша"
   },
   "search": {
     "placeholder": "Pretraži...",
@@ -952,7 +975,19 @@
       "readFile": "Read file",
       "writeFile": "Write file",
       "timer": "Тајмер",
-      "code": "Кôд"
+      "code": "Кôд",
+      "socketioConnect": "Socket.IO connect",
+      "socketioSend": "Socket.IO send",
+      "socketioClose": "Socket.IO close",
+      "websocketConnect": "WebSocket connect",
+      "websocketSend": "WebSocket send",
+      "websocketClose": "WebSocket close",
+      "grpcConnect": "gRPC connect",
+      "grpcSend": "gRPC send",
+      "grpcClose": "gRPC close",
+      "mqttConnect": "MQTT connect",
+      "mqttSend": "MQTT publish",
+      "mqttClose": "MQTT close"
     },
     "comparator": {
       "result": "резултат"
@@ -1487,7 +1522,25 @@
       "writeFile": "Writes or appends text to a file.",
       "throw": "Deliberately fails with a message (for error branches and tests).",
       "log": "Writes a message to the run log and passes the value through.",
-      "assert": "Checks a condition (chai-style) and routes to pass or fail."
+      "assert": "Checks a condition (chai-style) and routes to pass or fail.",
+      "socketioConnect": "Opens a Socket.IO connection and re-emits each received event on its port.",
+      "socketioSend": "Sends a message on an already-open Socket.IO connection.",
+      "socketioClose": "Closes an already-open Socket.IO connection.",
+      "websocketConnect": "Opens a raw WebSocket connection and re-emits each received message on its port.",
+      "websocketSend": "Sends a payload on an already-open WebSocket connection.",
+      "websocketClose": "Closes an already-open WebSocket connection.",
+      "grpcConnect": "Opens a streaming gRPC call and re-emits each received frame on its message port.",
+      "grpcSend": "Writes a request message on an already-open streaming gRPC call.",
+      "grpcClose": "Half-closes an already-open streaming gRPC call.",
+      "socketioConnectServer": "Покреће Socket.IO сервер (порт + рута); потврђује сваки примљени догађај и поново га емитује на свом порту. Слање емитује повезаним клијентима.",
+      "socketioSendServer": "Емитује поруку свим клијентима повезаним на наведени Socket.IO сервер.",
+      "socketioCloseServer": "Зауставља наведени Socket.IO сервер и прекида везу са његовим клијентима.",
+      "websocketConnectServer": "Покреће сирови WebSocket сервер (порт + путања); бележи сваки примљени frame и поново га емитује на свом message порту. Слање емитује повезаним клијентима.",
+      "websocketSendServer": "Емитује frame свим клијентима повезаним на наведени WebSocket сервер.",
+      "websocketCloseServer": "Зауставља наведени WebSocket сервер и прекида везу са његовим клијентима.",
+      "mqttConnect": "Opens a long-lived MQTT connection from a bound request and subscribes to its topic; re-emits each received message on its `message` port.",
+      "mqttSend": "Publishes a payload on an already-open MQTT connection (to its topic).",
+      "mqttClose": "Closes an already-open MQTT connection."
     },
     "legend": {
       "title": "Легенда",
@@ -1515,6 +1568,41 @@
       "allLogs": "All logs",
       "note": "`--out file` also writes the run-log to a file.",
       "projectPlaceholder": "<project.restorm>"
+    },
+    "socketio": {
+      "connectionNameLabel": "Connection name",
+      "connectionNamePlaceholder": "connection name",
+      "eventPlaceholder": "event",
+      "addEvent": "Add event",
+      "connected": "connected",
+      "others": "others",
+      "connection": "connection",
+      "pickConnection": "— pick a connection —",
+      "channelLabel": "Channel name",
+      "payload": "payload",
+      "payloadModalTitle": "Edit payload",
+      "started": "покренуто"
+    },
+    "websocket": {
+      "message": "message"
+    },
+    "grpc": {
+      "message": "message"
     }
+  },
+  "mqtt": {
+    "qos": "QoS",
+    "retain": "Retain",
+    "subscribeOnConnect": "Subscribe on connect",
+    "clientId": "Client ID",
+    "clientIdPlaceholder": "auto-generated if empty",
+    "username": "Username",
+    "password": "Password",
+    "keepalive": "Keepalive (s)",
+    "lwt": "Last Will & Testament",
+    "topic": "Topic",
+    "lwtTopicPlaceholder": "will/topic",
+    "lwtPayload": "Payload",
+    "lwtPayloadPlaceholder": "will message"
   }
 }

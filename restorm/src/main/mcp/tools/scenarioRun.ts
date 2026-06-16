@@ -24,6 +24,8 @@ import { responseHistoryService, requestUsageService } from '../../services'
 import { isHTTPRequest, isAuthenticationRequest } from '../../../shared/types/collections'
 import type { Scenario } from '../../../shared/models/Scenario'
 import type { ScenarioNode } from '../../../shared/types/scenario'
+import { readSocketioEvents } from '../../../shared/scenarioNodePorts'
+import { socketioPreviewFromMessages } from '../../../shared/utils/socketioPreview'
 import { flushRequestStateToContext } from './execute'
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
@@ -166,14 +168,24 @@ export function cancelScenarioNode(scenarioId: string, nodeId: string): { cancel
  * serialized node model. A kind with no resolver has no preview yet. */
 type PreviewResolver = (scenarioId: string, node: ScenarioNode) => Promise<Record<string, unknown> | null>
 
-/** `httpRequest` (and legacy `request`): the bound request's last send result —
- * resolved request, raw restorm model, and response — read from its history. */
+/** The freshest history entry that did NOT fail — so a preview shows a real
+ * successful result (an HTTP 2xx, a connected socket) instead of the latest
+ * error. Entries arrive newest-first, so the first `success` is the freshest.
+ * Falls back to the latest entry when none succeeded (better a stale error than
+ * an empty preview). Shared by every protocol's preview resolver. */
+function freshestSuccessfulEntry<T extends { success?: boolean }>(entries: readonly T[]): T | undefined {
+  return entries.find((e) => e.success === true) ?? entries[0]
+}
+
+/** `httpRequest` (and legacy `request`): the bound request's last SUCCESSFUL
+ * send result — resolved request, raw restorm model, and response — from history. */
 const resolveRequestPreview: PreviewResolver = async (_scenarioId, node) => {
   const requestId = boundRequestId(node)
   if (!requestId) return null
   const entries = await responseHistoryService.list(requestId)
-  if (entries.length === 0) return null
-  const detail = await responseHistoryService.getDetail(entries[0].guid)
+  const entry = freshestSuccessfulEntry(entries)
+  if (!entry) return null
+  const detail = await responseHistoryService.getDetail(entry.guid)
   if (detail?.response.type !== 'http') return null
   const r = detail.response
   const raw = collectionStore.findById(requestId)
@@ -204,6 +216,32 @@ const resolveRequestPreview: PreviewResolver = async (_scenarioId, node) => {
   }
 }
 
+/** `socketioConnect` / `websocketConnect`: the bound streaming request's latest
+ * received message, read from its history — the analogue of the httpRequest
+ * preview, so an edge leaving an `event:<name>` / `message` port gets a JSON-path
+ * picker over a real frame. Prefers the most recent received frame on a listened
+ * event (Socket.IO); a raw WebSocket has no events so it always takes the latest
+ * received frame. Null until the connection has run at least once. */
+const resolveStreamConnectPreview: PreviewResolver = async (_scenarioId, node) => {
+  const requestId = boundRequestId(node)
+  if (!requestId) return null
+  const entries = await responseHistoryService.list(requestId)
+  // Freshest CONNECTED session (a failed/refused connection has no useful
+  // received frames) — falls back to the latest if none succeeded.
+  const entry = freshestSuccessfulEntry(entries)
+  if (!entry) return null
+  const detail = await responseHistoryService.getDetail(entry.guid)
+  const resp = detail?.response
+  if (resp?.type === 'websocket') {
+    return socketioPreviewFromMessages(resp.messages, readSocketioEvents(node.config))
+  }
+  // gRPC streaming: no event names, so the latest received frame wins (like raw WS).
+  if (resp?.type === 'grpc') {
+    return socketioPreviewFromMessages(resp.messages ?? [], [])
+  }
+  return null
+}
+
 /** `code`: the box's last run output (result + captured logs). Unlike a request
  * there's no on-disk history, so the executor caches each run in memory and we
  * read the freshest record back here. Null until the box has actually run. */
@@ -219,6 +257,10 @@ const resolveCodePreview: PreviewResolver = async (_scenarioId, node) => {
 const previewResolvers: Partial<Record<ScenarioNode['kind'], PreviewResolver>> = {
   httpRequest: resolveRequestPreview,
   request: resolveRequestPreview,
+  socketioConnect: resolveStreamConnectPreview,
+  websocketConnect: resolveStreamConnectPreview,
+  mqttConnect: resolveStreamConnectPreview,
+  grpcConnect: resolveStreamConnectPreview,
   code: resolveCodePreview
 }
 

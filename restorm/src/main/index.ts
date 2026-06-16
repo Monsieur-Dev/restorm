@@ -54,6 +54,7 @@ import { registerRestormIPC } from './IPCHandlers'
 import { installScenarioEngineIPC } from './scenarioEngine/ipcBridge'
 import { registerBuiltinSources } from './services/secrets/mainSourceRegistry'
 import { secretHydrationService } from './services/secrets/SecretHydrationService'
+import { websocketExecutionService } from './services/WebSocketExecutionService'
 import { registerApiUpdateIPC } from './services/apiUpdate/registerApiUpdateIPC'
 import { runApiUpdateApply } from './services/apiUpdate/orchestrateApply'
 import { loadFolderStructure, loadProjectIntoStore, attachDraftStoreForFolder, attachDraftStoreForFile, getDraftsRootDir } from './FileOperations'
@@ -436,6 +437,10 @@ app.on('before-quit', () => {
   // Drop every resolved credential so no plaintext lingers in memory
   // past the app's lifetime.
   secretHydrationService.clearAll()
+  // Gracefully close every live connection + any hosted Socket.IO server so a
+  // server route doesn't linger past quit (process exit would reclaim the port,
+  // but this flushes history + closes clients cleanly).
+  websocketExecutionService.closeAll()
 })
 
 // Initialize Search Index Service (listens to document events from renderer)

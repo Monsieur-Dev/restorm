@@ -63,10 +63,9 @@ export const WaitNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data
       ]
 
   const left: ScenarioNodeSection[] = [{ id: 'main', rows }]
-  const right: ScenarioNodeCell[] = [
-    { id: 'out', label: t('scenario.wait.then', 'then'), port: { id: 'out', role: 'then', type: 'source' } }
-  ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} />
+  // No explicit output — the wait sequences the next node via the universal
+  // `done` port (drawn by the box chrome).
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={[]} />
 }
 
 export default WaitNodeBox

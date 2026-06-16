@@ -10,15 +10,17 @@ import {
   SplitView,
   Pane,
   ControlGroup,
+  SelectBox,
   eventBus,
   logger,
   getContrastColor,
+  type ISelectData,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
-import type { GrpcRequest, GrpcResponse, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
+import type { GrpcRequest, GrpcResponse, GrpcCallType, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
 import type { GRPCExecutionResult } from '../../types/global.d'
 import { BaseRequestTabView } from './BaseRequestTabView'
@@ -30,6 +32,21 @@ import { useApiDocumentationFromRequest } from '../../hooks/useApiDocumentationF
 import { DocumentationHost } from '../documentation/DocumentationHost'
 import { findOperationForRoute } from '../../../../shared/utils/findOperationForRoute'
 import { SendButtonEnvSwitcher } from './SendButtonEnvSwitcher'
+import { BeamWrap } from '../common/BeamWrap'
+import { useIsGrpcListening } from '../../services/grpcListeningStore'
+import './WebSocketChat.css'
+
+/** One streamed gRPC frame surfaced in the live chat view. */
+interface GrpcFrameItem {
+  direction: 'sent' | 'received'
+  data: string
+  timestamp: string
+}
+
+/** Call types that exchange a stream of frames (drive the Connect/Send/Disconnect UI). */
+const STREAMING_CALL_TYPES: ReadonlySet<GrpcCallType> = new Set<GrpcCallType>(['server-stream', 'client-stream', 'bidirectional-stream'])
+/** Call types where the client pushes request messages (the Send button shows). */
+const CLIENT_WRITE_CALL_TYPES: ReadonlySet<GrpcCallType> = new Set<GrpcCallType>(['client-stream', 'bidirectional-stream'])
 
 export interface GrpcRequestTabViewProps {
   request: GrpcRequest
@@ -54,9 +71,17 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
 
   const [url, setUrlState] = useState(request.url)
   const [requestMessage, setRequestMessageState] = useState(request.requestMessage)
+  const [callType, setCallTypeState] = useState<GrpcCallType>(request.callType)
   const [isSending, setIsSending] = useState(false)
   const [response, setResponse] = useState<GrpcResponse | null>(null)
+  const [liveMessages, setLiveMessages] = useState<GrpcFrameItem[]>([])
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+
+  const isStreaming = STREAMING_CALL_TYPES.has(callType)
+  const showSendButton = CLIENT_WRITE_CALL_TYPES.has(callType)
+  // The connection-listening beam (a streaming call is open) — drives the
+  // Connect↔Disconnect toggle + the Send button's enabled state.
+  const isListening = useIsGrpcListening(request.id)
 
   // See HTTPRequestTabView for the contract.
   const [panelCollapsed, setPanelCollapsed] = useState<{ message: boolean; metadata: boolean }>(() => {
@@ -87,7 +112,9 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
   const handleRequestReset = useCallback(() => {
     setUrlState(request.url)
     setRequestMessageState(request.requestMessage)
+    setCallTypeState(request.callType)
     setResponse(null)
+    setLiveMessages([])
   }, [request])
   useRequestReset(request, handleRequestReset)
 
@@ -110,11 +137,17 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
       headers: toKeyValueData(currentRequest.metadata)
     })
 
-    // Send full request data for URL and code snippet calculation
+    // Send full request data for URL + code snippets AND for execution: the
+    // gRPC execution service reads service / method / call type / message from
+    // fullData to build the dynamic client.
     void window.restorm?.context.updateFullRequestData(requestId, {
       url: currentRequest.url,
       method: currentRequest.callType,
       requestType: 'grpc',
+      service: currentRequest.service,
+      grpcMethod: currentRequest.method,
+      callType: currentRequest.callType,
+      requestMessage: currentRequest.requestMessage,
       headers: toKeyValueData(currentRequest.metadata),
       body: { type: 'text', content: currentRequest.requestMessage }
     }, sourceIdRef.current)
@@ -170,12 +203,16 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
 
     void window.restorm?.context.updateFullRequestData(request.id, {
       url,
-      method: request.callType,
+      method: callType,
       requestType: 'grpc',
+      service: request.service,
+      grpcMethod: request.method,
+      callType,
+      requestMessage,
       headers: toKeyValueData(request.metadata),
       body: { type: 'text', content: requestMessage }
     }, sourceIdRef.current)
-  }, [request.id, request.callType, request.metadata, url, requestMessage])
+  }, [request.id, request.service, request.method, callType, request.metadata, url, requestMessage])
 
   // Sync state changes to reactive request object
   const setUrl = useCallback((value: string): void => {
@@ -186,6 +223,31 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
     setRequestMessageState(value)
     updateReactiveProperty(request, 'requestMessage', value)
   }, [request])
+  const setCallType = useCallback((value: GrpcCallType): void => {
+    setCallTypeState(value)
+    updateReactiveProperty(request, 'callType', value)
+  }, [request])
+
+  // Stream lifecycle + frames: subscribe to the gRPC progress + message streams
+  // so a live streaming call (server / client / bidi) shows its frames as they
+  // arrive, mirroring the WebSocket chat. Unary calls don't use these.
+  useEffect(() => {
+    const requestId = request.id
+    const unsubMsg = window.restorm?.grpc.onMessage((data) => {
+      const { requestId: rid, message: m } = data as { requestId: string; message: GrpcFrameItem }
+      if (rid !== requestId) return
+      setLiveMessages((prev) => [...prev, { direction: m.direction, data: m.data, timestamp: m.timestamp }])
+    })
+    const unsubProg = window.restorm?.grpc.onProgress((data) => {
+      const { requestId: rid, status } = data as { requestId: string; status: string }
+      if (rid !== requestId) return
+      if (status === 'started') setLiveMessages([])
+      if (status === 'completed' || status === 'cancelled' || status === 'error') {
+        setHistoryRefreshKey((k) => k + 1)
+      }
+    })
+    return () => { unsubMsg?.(); unsubProg?.() }
+  }, [request.id])
   
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
@@ -242,6 +304,22 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
   
   const handleCancel = (): void => {
     void window.restorm?.grpc.cancel(request.id)
+  }
+
+  // Streaming controls (server / client / bidi). Connect opens a long-lived call;
+  // Send writes a request message (client / bidi); Disconnect half-closes it.
+  const handleConnect = (): void => {
+    setLiveMessages([])
+    void window.restorm?.grpc.connect({
+      requestId: request.id,
+      ...(requestPath ? { requestPath } : {})
+    })
+  }
+  const handleDisconnect = (): void => {
+    void window.restorm?.grpc.disconnect(request.id)
+  }
+  const handleStreamSend = (): void => {
+    void window.restorm?.grpc.send(request.id, requestMessage)
   }
 
   // Request content (SplitView with Message, Metadata)
@@ -364,9 +442,36 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
   }, [])
 
   const { infosContent, responseContent, jsonData } = useMemo(
-    () => buildGrpcResponseView(response, { service: request.service, method: request.method, callType: request.callType }),
-    [buildGrpcResponseView, response, request.service, request.method, request.callType]
+    () => buildGrpcResponseView(response, { service: request.service, method: request.method, callType }),
+    [buildGrpcResponseView, response, request.service, request.method, callType]
   )
+
+  // Streaming frame view (server / client / bidi): each exchanged frame as a
+  // direction-tagged bubble, reusing the WebSocket chat styling.
+  const streamingChat = useMemo((): React.ReactNode => {
+    if (liveMessages.length === 0) {
+      return <div className="ws-chat-empty">{t('grpc.noFrames', 'No frames yet.')}</div>
+    }
+    return (
+      <div className="ws-chat" data-testid="grpc-chat">
+        {liveMessages.map((item, i) => (
+          <div
+            key={i}
+            className={`ws-chat-bubble ${item.direction === 'sent' ? 'sent' : 'received'}`}
+            data-testid="grpc-chat-bubble"
+            data-direction={item.direction}
+          >
+            {item.data}
+          </div>
+        ))}
+      </div>
+    )
+  }, [liveMessages, t])
+
+  const effectiveResponseContent = isStreaming ? streamingChat : responseContent
+  const effectiveInfosContent = isStreaming ? undefined : infosContent
+  const effectiveJsonData = isStreaming ? undefined : jsonData
+  const effectiveShowResponse = isStreaming ? (isListening || liveMessages.length > 0) : response !== null
 
   const buildHistoryView = useCallback((detail: ResponseHistoryDetail) => {
     if (detail.response.type !== 'grpc') {
@@ -390,6 +495,15 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
     return buildGrpcResponseView(historyResponse, detail.requestMeta)
   }, [buildGrpcResponseView, request.id])
   
+  // Call-type options for the selector (order = unary → server → client → bidi).
+  const callTypeOptions: { value: GrpcCallType; label: string }[] = [
+    { value: 'unary', label: t('grpc.callType.unary', 'Unary') },
+    { value: 'server-stream', label: t('grpc.callType.serverStream', 'Server streaming') },
+    { value: 'client-stream', label: t('grpc.callType.clientStream', 'Client streaming') },
+    { value: 'bidirectional-stream', label: t('grpc.callType.bidi', 'Bidirectional streaming') }
+  ]
+  const callTypeIndex = Math.max(0, callTypeOptions.findIndex((o) => o.value === callType))
+
   // URL section
   const urlSection = (
     <>
@@ -404,17 +518,60 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
             data-testid="grpc-url-input"
           />
         </div>
-        <SendButtonEnvSwitcher>
-          <Button
-            icon={isSending ? 'close' : 'send'}
-            onClick={isSending ? handleCancel : handleSend}
-            {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
-            options={{
-              title: isSending ? t('cancel') : t('grpc.send'),
-              ariaLabel: isSending ? t('cancel') : t('grpc.send')
+        <div style={{ minWidth: 150 }}>
+          <SelectBox
+            id={`grpc-call-type-${request.id}`}
+            className=""
+            options={callTypeOptions.map((o) => ({ text: o.value, label: o.label }))}
+            selected={callTypeIndex}
+            onDidSelect={(d: ISelectData) => {
+              const picked = callTypeOptions[d.index]
+              if (picked) setCallType(picked.value)
             }}
-            data-testid="grpc-send-button"
+            data-testid="grpc-call-type-select"
           />
+        </div>
+        <SendButtonEnvSwitcher>
+          {isStreaming ? (
+            <div style={{ display: 'flex', gap: 4 }}>
+              <BeamWrap active={isListening} size={22} borderWidth={1.5}>
+                <Button
+                  icon={isListening ? 'debug-disconnect' : 'plug'}
+                  onClick={isListening ? handleDisconnect : handleConnect}
+                  {...(isListening ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+                  options={{
+                    title: isListening ? t('grpc.disconnect', 'Disconnect') : t('grpc.connect', 'Connect'),
+                    ariaLabel: isListening ? t('grpc.disconnect', 'Disconnect') : t('grpc.connect', 'Connect')
+                  }}
+                  data-testid="grpc-connect-button"
+                />
+              </BeamWrap>
+              {/* Send appears only for client / bidi streaming (server-streaming has no
+                  client writes) — and is enabled only while the call is open. */}
+              {showSendButton && (
+                <Button
+                  icon="arrow-up"
+                  disabled={!isListening}
+                  onClick={handleStreamSend}
+                  options={{ title: t('grpc.send'), ariaLabel: t('grpc.send') }}
+                  data-testid="grpc-stream-send-button"
+                />
+              )}
+            </div>
+          ) : (
+            <BeamWrap active={isSending} size={22} borderWidth={1.5}>
+              <Button
+                icon={isSending ? 'close' : 'send'}
+                onClick={isSending ? handleCancel : handleSend}
+                {...(isSending ? { emphasis: 0 } : sendButtonStyle ? { style: sendButtonStyle } : { emphasis: 1 })}
+                options={{
+                  title: isSending ? t('cancel') : t('grpc.send'),
+                  ariaLabel: isSending ? t('cancel') : t('grpc.send')
+                }}
+                data-testid="grpc-send-button"
+              />
+            </BeamWrap>
+          )}
         </SendButtonEnvSwitcher>
       </ControlGroup>
       <div style={{ fontSize: 12, color: 'var(--descriptionForeground)' }}>
@@ -448,11 +605,11 @@ export const GrpcRequestTabView: React.FC<GrpcRequestTabViewProps> = ({
         {...(apiDocumentation && route && findOperationForRoute(apiDocumentation, route) ? { docsContent: <DocumentationHost apiDocumentation={apiDocumentation} filters={[route]} /> } : {})}
         notes={request.notes}
         onNotesChange={(md): void => { updateReactiveProperty(request, 'notes', md) }}
-        isLoading={isSending}
-        showResponse={response !== null}
-        infosContent={infosContent}
-        responseContent={responseContent}
-        jsonData={jsonData}
+        isLoading={isSending || (isStreaming && isListening)}
+        showResponse={effectiveShowResponse}
+        infosContent={effectiveInfosContent}
+        responseContent={effectiveResponseContent}
+        jsonData={effectiveJsonData}
       />
       <ResponseHistoryModal
         isOpen={historyModalOpen}

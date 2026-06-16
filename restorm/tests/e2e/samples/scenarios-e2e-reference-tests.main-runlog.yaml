@@ -22,6 +22,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
     param6: "#d01d1d"
     param5: 00FF00
     param7:
@@ -41,6 +42,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
       param6: "#d01d1d"
       param5: 00FF00
       param7:
@@ -65,6 +67,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
     prop-1780469244879-3a6v38: 00FF00
     prop-1780469259770-ffodx7: "#d01d1d"
     prop-1780469273581-zsg6rn:
@@ -84,6 +87,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
       obj_param5: 00FF00
       obj_param6: "#d01d1d"
       obj_param7:
@@ -104,6 +108,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
       obj_param5: 00FF00
       obj_param6: "#d01d1d"
       obj_param7:
@@ -122,6 +127,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
     obj_param5: 00FF00
     obj_param6: "#d01d1d"
     obj_param7:
@@ -141,6 +147,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
       obj_param5: 00FF00
       obj_param6: "#d01d1d"
       obj_param7:
@@ -165,6 +172,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
       obj_param5: 00FF00
       obj_param6: "#d01d1d"
       obj_param7:
@@ -189,6 +197,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
       obj_param5: 00FF00
       obj_param6: "#d01d1d"
       obj_param7:
@@ -220,6 +229,7 @@
           variables:
             baseUrl: http://localhost:5110
             clientId: VALID_CLIENT_ID
+            socketUrl: http://localhost:3001
         obj_param5: 00FF00
         obj_param6: "#d01d1d"
         obj_param7:
@@ -242,6 +252,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
       obj_param5: 00FF00
       obj_param6: "#d01d1d"
       obj_param7:
@@ -266,6 +277,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
       obj_param5: 00FF00
       obj_param6: "#d01d1d"
       obj_param7:
@@ -284,6 +296,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
     obj_param5: 00FF00
     obj_param6: "#d01d1d"
     obj_param7:
@@ -310,6 +323,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
       obj_param5: 00FF00
       obj_param6: "#d01d1d"
       obj_param7:
@@ -935,6 +949,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
 - message: ⚪ [<time>] start log
   data:
     message: Hello {{hello}}
@@ -952,6 +967,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
 - message: 🔵 [<time>] Hello world
   data:
     hello: world
@@ -967,6 +983,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: ⚪ [<time>] done log
   data:
     value:
@@ -983,6 +1000,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
 - message: ⚪ [<time>] start log
   data:
     message: foo {{.}}
@@ -1010,6 +1028,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
     in: true
 - message: "🔵 [<time>] Anwser to the universe : "
   data:
@@ -1026,6 +1045,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: ⚪ [<time>] done log
   data:
     value:
@@ -1042,6 +1062,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
 - message: ⚪ [<time>] start log
   data:
     message: "Marty ! It's time ! "
@@ -1066,6 +1087,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
     in: true
 - message: 🔵 [<time>] Fire 🔥
   data:
@@ -1082,6 +1104,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: ⚪ [<time>] done log
   data:
     value:
@@ -1098,6 +1121,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
 - message: ⚪ [<time>] start log
   data:
     message: "Selected color: {{color}}"
@@ -1116,6 +1140,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
 - message: "🔵 [<time>] Selected color: #000000"
   data:
     hello: world
@@ -1131,6 +1156,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: ⚪ [<time>] done log
   data:
     value:
@@ -1147,6 +1173,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
 - message: ⚪ [<time>] start log
   data:
     message: Bienvenue au Moulin {{moulin}}
@@ -1165,6 +1192,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
 - message: 🔵 [<time>] Bienvenue au Moulin FF0000
   data:
     hello: world
@@ -1180,6 +1208,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: ⚪ [<time>] done log
   data:
     value:
@@ -1196,6 +1225,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
 - message: ⚪ [<time>] start log
   data:
     message: "Original expression: {{expression}}"
@@ -1214,6 +1244,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
 - message: "🔵 [<time>] Original expression: My expression"
   data:
     hello: world
@@ -1229,6 +1260,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: ⚪ [<time>] done log
   data:
     value:
@@ -1245,6 +1277,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
 - message: ⚪ [<time>] start log
   data:
     message: "Selected environment : {{name}}"
@@ -1254,12 +1287,14 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: "🔵 [<time>] Selected environment : localhost"
   data:
     name: localhost
     variables:
       baseUrl: http://localhost:5110
       clientId: VALID_CLIENT_ID
+      socketUrl: http://localhost:3001
 - message: ⚪ [<time>] done log
   data:
     value:
@@ -1267,6 +1302,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: 🔵 [<time>] ■ Logs
 - message: ⚪ [<time>] done runScenario
   data:
@@ -1358,6 +1394,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
     left: null
 - message: ⚪ [<time>] start if
   data:
@@ -1412,6 +1449,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: ⚪ [<time>] start switch
   data:
     on: null
@@ -1437,6 +1475,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: ⚪ [<time>] start switch
   data:
     on:
@@ -1444,6 +1483,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: ⚪ [<time>] start switch
   data:
     on:
@@ -1451,6 +1491,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: ⚪ [<time>] start if
   data:
     right: null
@@ -1556,6 +1597,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
 - message: ⚪ [<time>] done if
   data:
     else:
@@ -1582,6 +1624,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
       right: null
 - message: ⚪ [<time>] done switch
   data:
@@ -1608,6 +1651,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: ⚪ [<time>] done switch
   data:
     default:
@@ -1615,6 +1659,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: ⚪ [<time>] done switch
   data:
     case-1780563106757-232n5w:
@@ -1622,6 +1667,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: ⚪ [<time>] done if
   data:
     else:
@@ -2029,6 +2075,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
     name: env
 - message: ⚪ [<time>] done setVariable
 - message: ⚪ [<time>] done setVariable
@@ -2091,11 +2138,13 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
     b:
       name: localhost
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
     message: env should be localhost
     in: true
 - message: ⚪ [<time>] done assert
@@ -2326,6 +2375,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
     message: env should be not null
     operator: ≠
     in: true
@@ -2537,12 +2587,14 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: "🔵 [<time>] Environment name: localhost"
   data:
     name: localhost
     variables:
       baseUrl: http://localhost:5110
       clientId: VALID_CLIENT_ID
+      socketUrl: http://localhost:3001
 - message: ⚪ [<time>] start object
 - message: ⚪ [<time>] done log
   data:
@@ -2551,6 +2603,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: ⚪ [<time>] done object
   data:
     object:
@@ -2559,6 +2612,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
       color: "#bd10e0"
 - message: ⚪ [<time>] start transform
   data:
@@ -2569,6 +2623,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
       color: "#bd10e0"
 - message: ⚪ [<time>] done transform
   data:
@@ -2583,6 +2638,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
       color: "#bd10e0"
     in: true
 - message: "🔵 [<time>] env Sub-env is #bd10e0"
@@ -2592,6 +2648,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
     color: "#bd10e0"
 - message: ⚪ [<time>] done log
   data:
@@ -2601,6 +2658,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
       color: "#bd10e0"
 - message: 🔵 [<time>] ■ Templates
 - message: ⚪ [<time>] done runScenario
@@ -2649,6 +2707,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
       - - 0000FF
         - 00FF00
       - ""
@@ -2668,6 +2727,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
       - - 0000FF
         - 00FF00
       - ""
@@ -2688,6 +2748,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
       - - 0000FF
         - 00FF00
       - ""
@@ -2708,6 +2769,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
       - - 0000FF
         - 00FF00
       - ""
@@ -2782,6 +2844,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
       - - 0000FF
         - 00FF00
       - ""
@@ -2803,6 +2866,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
       - - 0000FF
         - 00FF00
       - ""
@@ -6155,4 +6219,1032 @@
 - message: ⚪ [<time>] done runScenario
   data:
     result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: Socket.IO
+    in: true
+- message: 🔵 [<time>] ▶ Socket.IO
+- message: ⚪ [<time>] start socketioConnect
+  data:
+    requestId: <uuid>
+    connectionName: Server
+    label: Server listen
+- message: ⚪ [<time>] done socketioConnect
+- message: ⚪ [<time>] socketio "Server" connecting
+- message: ⚪ [<time>] socketio "Server" connected
+- message: ⚪ [<time>] start socketioConnect
+  data:
+    requestId: <uuid>
+    connectionName: Echo
+    label: Echo connect
+    in: true
+- message: ⚪ [<time>] done socketioConnect
+- message: ⚪ [<time>] socketio "Echo" connecting
+- message: ⚪ [<time>] socketio "Echo" connected
+- message: ⚪ [<time>] start socketioSend
+  data:
+    connectionNodeId: <uuid>
+    channel: echo
+    payload: '{"hello":"world"}'
+    label: send to Echo
+    in: true
+- message: ⚪ [<time>] done socketioSend
+- message: ⚪ [<time>] start wait
+  data:
+    durationMs: <dynamic-time>
+    label: let the send echo arrive first
+    in: true
+- message: ⚪ [<time>] done wait
+- message: ⚪ [<time>] start socketioSend
+  data:
+    connectionNodeId: <uuid>
+    channel: echo
+    payload: '{"hello":"from server"}'
+    label: broadcast from server
+    in: true
+- message: ⚪ [<time>] done socketioSend
+- message: ⚪ [<time>] start wait
+  data:
+    durationMs: <dynamic-time>
+    label: let the pushed echo arrive
+    in: true
+- message: ⚪ [<time>] start log
+  data:
+    message: echo reçu
+    level: info
+    data:
+      hello: from server
+- message: 🔵 [<time>] echo reçu
+  data:
+    hello: from server
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      hello: from server
+- message: ⚪ [<time>] done wait
+- message: ⚪ [<time>] start socketioClose
+  data:
+    connectionNodeId: <uuid>
+    label: close Echo
+    in: true
+- message: ⚪ [<time>] socketio "Echo" closed
+- message: ⚪ [<time>] start log
+  data:
+    message: connexion Socket.IO fermée
+    level: info
+    in: true
+- message: 🔵 [<time>] connexion Socket.IO fermée
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] done socketioClose
+- message: ⚪ [<time>] start socketioClose
+  data:
+    connectionNodeId: <uuid>
+    label: close Server
+    in: true
+- message: ⚪ [<time>] socketio "Server" closed
+- message: ⚪ [<time>] done socketioClose
+- message: 🔵 [<time>] ■ Socket.IO
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: WebSocket
+    in: true
+- message: 🔵 [<time>] ▶ WebSocket
+- message: ⚪ [<time>] start websocketConnect
+  data:
+    requestId: <uuid>
+    connectionName: Server
+    label: Server listen
+- message: ⚪ [<time>] done websocketConnect
+- message: ⚪ [<time>] websocket "Server" connecting
+- message: ⚪ [<time>] websocket "Server" connected
+- message: ⚪ [<time>] start websocketConnect
+  data:
+    requestId: <uuid>
+    connectionName: Echo
+    label: Echo connect
+    in: true
+- message: ⚪ [<time>] done websocketConnect
+- message: ⚪ [<time>] websocket "Echo" connecting
+- message: ⚪ [<time>] websocket "Echo" connected
+- message: ⚪ [<time>] start websocketSend
+  data:
+    connectionNodeId: <uuid>
+    payload: '{"hello":"world"}'
+    label: send to Echo
+    in: true
+- message: ⚪ [<time>] done websocketSend
+- message: ⚪ [<time>] start wait
+  data:
+    durationMs: <dynamic-time>
+    label: let the send echo arrive first
+    in: true
+- message: ⚪ [<time>] done wait
+- message: ⚪ [<time>] start websocketSend
+  data:
+    connectionNodeId: <uuid>
+    payload: '{"hello":"from server"}'
+    label: broadcast from server
+    in: true
+- message: ⚪ [<time>] done websocketSend
+- message: ⚪ [<time>] start wait
+  data:
+    durationMs: <dynamic-time>
+    label: let the pushed echo arrive
+    in: true
+- message: ⚪ [<time>] start log
+  data:
+    message: message reçu
+    level: info
+    data:
+      hello: from server
+- message: 🔵 [<time>] message reçu
+  data:
+    hello: from server
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      hello: from server
+- message: ⚪ [<time>] done wait
+- message: ⚪ [<time>] start websocketClose
+  data:
+    connectionNodeId: <uuid>
+    label: close Echo
+    in: true
+- message: ⚪ [<time>] done websocketClose
+- message: ⚪ [<time>] start websocketClose
+  data:
+    connectionNodeId: <uuid>
+    label: close Server
+    in: true
+- message: ⚪ [<time>] websocket "Server" closed
+- message: ⚪ [<time>] done websocketClose
+- message: ⚪ [<time>] websocket "Echo" closed
+- message: ⚪ [<time>] start log
+  data:
+    message: connexion WebSocket fermée
+    level: info
+    in: true
+- message: 🔵 [<time>] connexion WebSocket fermée
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ WebSocket
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: gRPC bidi
+    in: true
+- message: 🔵 [<time>] ▶ gRPC bidi
+- message: ⚪ [<time>] start grpcConnect
+  data:
+    requestId: <uuid>
+    connectionName: Echo
+    label: Echo connect
+- message: ⚪ [<time>] done grpcConnect
+- message: ⚪ [<time>] grpc "Echo" connecting
+- message: ⚪ [<time>] grpc "Echo" connected
+- message: ⚪ [<time>] start grpcSend
+  data:
+    connectionNodeId: <uuid>
+    payload: '{"f_string":"hello"}'
+    label: send to Echo
+    in: true
+- message: ⚪ [<time>] done grpcSend
+- message: ⚪ [<time>] start wait
+  data:
+    durationMs: <dynamic-time>
+    label: let the echo arrive
+    in: true
+- message: ⚪ [<time>] start log
+  data:
+    message: frame gRPC reçue
+    level: info
+    data:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: hello
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: 🔵 [<time>] frame gRPC reçue
+  data:
+    f_strings: []
+    f_enums: []
+    f_subs: []
+    f_bools: []
+    f_int32s: []
+    f_int64s: []
+    f_bytess: []
+    f_floats: []
+    f_string: hello
+    f_enum: ENUM_0
+    f_sub: null
+    f_bool: false
+    f_int32: 0
+    f_int64: "0"
+    f_bytes: []
+    f_float: 0
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: hello
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: ⚪ [<time>] done wait
+- message: ⚪ [<time>] start grpcClose
+  data:
+    connectionNodeId: <uuid>
+    label: close Echo
+    in: true
+- message: ⚪ [<time>] done grpcClose
+- message: ⚪ [<time>] grpc "Echo" closed
+- message: ⚪ [<time>] start log
+  data:
+    message: stream gRPC fermé
+    level: info
+    in: true
+- message: 🔵 [<time>] stream gRPC fermé
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ gRPC bidi
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: gRPC server stream
+    in: true
+- message: 🔵 [<time>] ▶ gRPC server stream
+- message: ⚪ [<time>] start grpcConnect
+  data:
+    requestId: <uuid>
+    connectionName: Ticks
+    label: Server stream connect
+- message: ⚪ [<time>] done grpcConnect
+- message: ⚪ [<time>] grpc "Ticks" connecting
+- message: ⚪ [<time>] grpc "Ticks" connected
+- message: ⚪ [<time>] start log
+  data:
+    message: trame reçue
+    level: info
+    data:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: 🔵 [<time>] trame reçue
+  data:
+    f_strings: []
+    f_enums: []
+    f_subs: []
+    f_bools: []
+    f_int32s: []
+    f_int64s: []
+    f_bytess: []
+    f_floats: []
+    f_string: tick
+    f_enum: ENUM_0
+    f_sub: null
+    f_bool: false
+    f_int32: 0
+    f_int64: "0"
+    f_bytes: []
+    f_float: 0
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: ⚪ [<time>] start log
+  data:
+    message: trame reçue
+    level: info
+    data:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: 🔵 [<time>] trame reçue
+  data:
+    f_strings: []
+    f_enums: []
+    f_subs: []
+    f_bools: []
+    f_int32s: []
+    f_int64s: []
+    f_bytess: []
+    f_floats: []
+    f_string: tick
+    f_enum: ENUM_0
+    f_sub: null
+    f_bool: false
+    f_int32: 0
+    f_int64: "0"
+    f_bytes: []
+    f_float: 0
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: ⚪ [<time>] start log
+  data:
+    message: trame reçue
+    level: info
+    data:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: 🔵 [<time>] trame reçue
+  data:
+    f_strings: []
+    f_enums: []
+    f_subs: []
+    f_bools: []
+    f_int32s: []
+    f_int64s: []
+    f_bytess: []
+    f_floats: []
+    f_string: tick
+    f_enum: ENUM_0
+    f_sub: null
+    f_bool: false
+    f_int32: 0
+    f_int64: "0"
+    f_bytes: []
+    f_float: 0
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: ⚪ [<time>] start log
+  data:
+    message: trame reçue
+    level: info
+    data:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: 🔵 [<time>] trame reçue
+  data:
+    f_strings: []
+    f_enums: []
+    f_subs: []
+    f_bools: []
+    f_int32s: []
+    f_int64s: []
+    f_bytess: []
+    f_floats: []
+    f_string: tick
+    f_enum: ENUM_0
+    f_sub: null
+    f_bool: false
+    f_int32: 0
+    f_int64: "0"
+    f_bytes: []
+    f_float: 0
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: ⚪ [<time>] start log
+  data:
+    message: trame reçue
+    level: info
+    data:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: 🔵 [<time>] trame reçue
+  data:
+    f_strings: []
+    f_enums: []
+    f_subs: []
+    f_bools: []
+    f_int32s: []
+    f_int64s: []
+    f_bytess: []
+    f_floats: []
+    f_string: tick
+    f_enum: ENUM_0
+    f_sub: null
+    f_bool: false
+    f_int32: 0
+    f_int64: "0"
+    f_bytes: []
+    f_float: 0
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: ⚪ [<time>] start log
+  data:
+    message: trame reçue
+    level: info
+    data:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: 🔵 [<time>] trame reçue
+  data:
+    f_strings: []
+    f_enums: []
+    f_subs: []
+    f_bools: []
+    f_int32s: []
+    f_int64s: []
+    f_bytess: []
+    f_floats: []
+    f_string: tick
+    f_enum: ENUM_0
+    f_sub: null
+    f_bool: false
+    f_int32: 0
+    f_int64: "0"
+    f_bytes: []
+    f_float: 0
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: ⚪ [<time>] start log
+  data:
+    message: trame reçue
+    level: info
+    data:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: 🔵 [<time>] trame reçue
+  data:
+    f_strings: []
+    f_enums: []
+    f_subs: []
+    f_bools: []
+    f_int32s: []
+    f_int64s: []
+    f_bytess: []
+    f_floats: []
+    f_string: tick
+    f_enum: ENUM_0
+    f_sub: null
+    f_bool: false
+    f_int32: 0
+    f_int64: "0"
+    f_bytes: []
+    f_float: 0
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: ⚪ [<time>] start log
+  data:
+    message: trame reçue
+    level: info
+    data:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: 🔵 [<time>] trame reçue
+  data:
+    f_strings: []
+    f_enums: []
+    f_subs: []
+    f_bools: []
+    f_int32s: []
+    f_int64s: []
+    f_bytess: []
+    f_floats: []
+    f_string: tick
+    f_enum: ENUM_0
+    f_sub: null
+    f_bool: false
+    f_int32: 0
+    f_int64: "0"
+    f_bytes: []
+    f_float: 0
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: ⚪ [<time>] start log
+  data:
+    message: trame reçue
+    level: info
+    data:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: 🔵 [<time>] trame reçue
+  data:
+    f_strings: []
+    f_enums: []
+    f_subs: []
+    f_bools: []
+    f_int32s: []
+    f_int64s: []
+    f_bytess: []
+    f_floats: []
+    f_string: tick
+    f_enum: ENUM_0
+    f_sub: null
+    f_bool: false
+    f_int32: 0
+    f_int64: "0"
+    f_bytes: []
+    f_float: 0
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: ⚪ [<time>] start log
+  data:
+    message: trame reçue
+    level: info
+    data:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: 🔵 [<time>] trame reçue
+  data:
+    f_strings: []
+    f_enums: []
+    f_subs: []
+    f_bools: []
+    f_int32s: []
+    f_int64s: []
+    f_bytess: []
+    f_floats: []
+    f_string: tick
+    f_enum: ENUM_0
+    f_sub: null
+    f_bool: false
+    f_int32: 0
+    f_int64: "0"
+    f_bytes: []
+    f_float: 0
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      f_strings: []
+      f_enums: []
+      f_subs: []
+      f_bools: []
+      f_int32s: []
+      f_int64s: []
+      f_bytess: []
+      f_floats: []
+      f_string: tick
+      f_enum: ENUM_0
+      f_sub: null
+      f_bool: false
+      f_int32: 0
+      f_int64: "0"
+      f_bytes: []
+      f_float: 0
+- message: ⚪ [<time>] grpc "Ticks" closed
+- message: ⚪ [<time>] start log
+  data:
+    message: server stream terminé
+    level: info
+    in: true
+- message: 🔵 [<time>] server stream terminé
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ gRPC server stream
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: gRPC unary
+    in: true
+- message: 🔵 [<time>] ▶ gRPC unary
+- message: ⚪ [<time>] start httpRequest
+  data:
+    requestId: <uuid>
+    label: gRPC unary call
+- message: ⚪ [<time>] done httpRequest
+  data:
+    response:
+      request:
+        url: localhost:9000
+        method: grpcbin.GRPCBin/DummyUnary
+        headers: {}
+      response:
+        status: 0
+        statusText: OK
+        headers: {}
+        body: '{"f_strings":[],"f_enums":[],"f_subs":[],"f_bools":[],"f_int32s":[],"f_int64s":[],"f_bytess":[],"f_floats":[],"f_string":"ping","f_enum":"ENUM_0","f_sub":null,"f_bool":false,"f_int32":0,"f_int64":"0","f_bytes":{"type":"Buffer","data":[]},"f_float":0}'
+        durationMs: <dynamic-time>
+        success: true
+- message: ⚪ [<time>] start log
+  data:
+    message: réponse unary
+    level: info
+    data: '{"f_strings":[],"f_enums":[],"f_subs":[],"f_bools":[],"f_int32s":[],"f_int64s":[],"f_bytess":[],"f_floats":[],"f_string":"ping","f_enum":"ENUM_0","f_sub":null,"f_bool":false,"f_int32":0,"f_int64":"0","f_bytes":{"type":"Buffer","data":[]},"f_float":0}'
+- message: 🔵 [<time>] réponse unary
+  data: '{"f_strings":[],"f_enums":[],"f_subs":[],"f_bools":[],"f_int32s":[],"f_int64s":[],"f_bytess":[],"f_floats":[],"f_string":"ping","f_enum":"ENUM_0","f_sub":null,"f_bool":false,"f_int32":0,"f_int64":"0","f_bytes":{"type":"Buffer","data":[]},"f_float":0}'
+- message: ⚪ [<time>] done log
+  data:
+    value: '{"f_strings":[],"f_enums":[],"f_subs":[],"f_bools":[],"f_int32s":[],"f_int64s":[],"f_bytess":[],"f_floats":[],"f_string":"ping","f_enum":"ENUM_0","f_sub":null,"f_bool":false,"f_int32":0,"f_int64":"0","f_bytes":{"type":"Buffer","data":[]},"f_float":0}'
+- message: 🔵 [<time>] ■ gRPC unary
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: gRPC client stream
+    in: true
+- message: 🔵 [<time>] ▶ gRPC client stream
+- message: ⚪ [<time>] start grpcConnect
+  data:
+    requestId: <uuid>
+    connectionName: Chunks
+    label: Client stream connect
+- message: ⚪ [<time>] done grpcConnect
+- message: ⚪ [<time>] grpc "Chunks" connecting
+- message: ⚪ [<time>] grpc "Chunks" connected
+- message: ⚪ [<time>] start grpcSend
+  data:
+    connectionNodeId: <uuid>
+    payload: '{"f_string":"chunk"}'
+    label: send chunk
+    in: true
+- message: ⚪ [<time>] done grpcSend
+- message: ⚪ [<time>] start grpcClose
+  data:
+    connectionNodeId: <uuid>
+    label: half-close
+    in: true
+- message: ⚪ [<time>] done grpcClose
+- message: '🟠 [<time>] grpc "Chunks" closed on error: grpc: error while
+    marshaling: proto: Marshal called with nil'
+- message: ⚪ [<time>] start log
+  data:
+    message: client stream terminé (statut grpcbin)
+    level: info
+    in: true
+- message: 🔵 [<time>] client stream terminé (statut grpcbin)
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ gRPC client stream
+- message: ⚪ [<time>] done runScenario
+  data:
+    result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: MQTT
+    in: true
+- message: 🔵 [<time>] ▶ MQTT
+- message: ⚪ [<time>] start mqttConnect
+  data:
+    requestId: <uuid>
+    connectionName: Chat
+    label: MQTT Chat
+- message: ⚪ [<time>] done mqttConnect
+- message: ⚪ [<time>] mqtt "Chat" connecting
+- message: ⚪ [<time>] mqtt "Chat" connected
+- message: ⚪ [<time>] start mqttSend
+  data:
+    connectionNodeId: <uuid>
+    payload: '{"hello":"from mqtt scenario"}'
+    in: true
+- message: ⚪ [<time>] done mqttSend
+- message: ⚪ [<time>] start wait
+  data:
+    durationMs: <dynamic-time>
+    in: true
+- message: ⚪ [<time>] start log
+  data:
+    message: received
+    data:
+      hello: from mqtt scenario
+- message: 🔵 [<time>] received
+  data:
+    hello: from mqtt scenario
+- message: ⚪ [<time>] start output
+  data:
+    name: lastMessage
+    value:
+      hello: from mqtt scenario
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      hello: from mqtt scenario
+- message: ⚪ [<time>] done output
+  data:
+    output:lastMessage:
+      hello: from mqtt scenario
+- message: ⚪ [<time>] done wait
+- message: ⚪ [<time>] start mqttClose
+  data:
+    connectionNodeId: <uuid>
+    in: true
+- message: ⚪ [<time>] done mqttClose
+- message: ⚪ [<time>] mqtt "Chat" closed
+- message: 🔵 [<time>] ■ MQTT
+- message: ⚪ [<time>] done runScenario
+  data:
+    result:
+      lastMessage:
+        hello: from mqtt scenario
+    output:lastMessage:
+      hello: from mqtt scenario
 - message: 🔵 [<time>] ■ Main

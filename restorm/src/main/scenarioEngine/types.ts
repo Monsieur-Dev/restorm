@@ -132,6 +132,22 @@ export interface ExecResult {
         durationMs?: number
         endDateMs?: number
       }
+    // A `socketioConnect` / `websocketConnect`: the scheduler opens a long-lived
+    // connection (registered under the node id so the matching send / close nodes
+    // can reach it), fires `connected` when the socket opens, re-emits each
+    // received frame in a child scope, and fires `done` when the connection
+    // closes (a close node, the run being stopped, or the server dropping it).
+    // `transport` picks the wire + the routing: `socketio` routes each frame to
+    // its `event:<name>` / `others` port (by event name); `websocket` (raw) and
+    // `grpc` (streaming RPC) have no events, so every frame goes to the single
+    // `message` port (`events` is empty).
+    | {
+        type: 'openSocketioConnect'
+        transport: 'socketio' | 'websocket' | 'grpc'
+        requestId: string
+        events: string[]
+        connectionName: string
+      }
 }
 
 /**
@@ -248,6 +264,21 @@ export interface ExecContext {
    * An `input` node whose param name appears here uses this value instead of
    * prompting / its configured default — at any depth in the run tree. */
   cliParams?: Record<string, unknown>
+  /** Bridge to the run's live Socket.IO connections — keyed by the
+   * `socketioConnect` node id that opened them. `socketioSend` / `socketioClose`
+   * executors use it to drive an already-declared connection. Provided by the
+   * scheduler; absent in a run with no socketio nodes. */
+  socketio?: {
+    /** Emit `payload` on `channel` of the named connection. False if the
+     * connection isn't open (yet). */
+    send: (connectionNodeId: string, channel: string, payload: string) => boolean
+    /** Close the named connection (fires its connect node's `done`). */
+    close: (connectionNodeId: string) => boolean
+    /** Whether the named connection exists in this run (open or connecting). */
+    has: (connectionNodeId: string) => boolean
+    /** Whether the named connection is open right now. */
+    isOpen: (connectionNodeId: string) => boolean
+  }
 }
 
 /**

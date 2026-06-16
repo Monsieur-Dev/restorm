@@ -84,6 +84,11 @@
   color: #ffffff;
 }
 
+.badge-grpc {
+  background-color: #3949ab;
+  color: #ffffff;
+}
+
 /* ============================================================================
  * GraphQL
  * ============================================================================ */
@@ -134,6 +139,37 @@
 .badge-sio {
   background-color: #00897b;
   color: #ffffff;
+}
+
+/* Server mode (restorm HOSTS the protocol): a two-part "capsule" norm shared by
+ * every hosted protocol. A dark "SRV" segment (rounded LEFT only) glued to the
+ * protocol's normal coloured badge (rounded RIGHT only), no radius where they
+ * meet — like a two-tone gel pill. */
+.badge-capsule {
+  display: inline-flex;
+  align-items: stretch;
+  max-height: 14px;
+}
+
+.badge-capsule-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: purple;
+  color: #ffffff;
+  padding: 2px 5px;
+  border-radius: 3px 0 0 3px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-transform: uppercase;
+  font-family: var(--font-family);
+}
+
+/* The protocol segment keeps its own colour class; only square off its left
+ * corners so it butts flush against the "SRV" segment. */
+.badge.badge-capsule-body {
+  border-radius: 0 3px 3px 0;
 }
 
 /* ============================================================================

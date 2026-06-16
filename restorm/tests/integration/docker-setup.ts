@@ -48,10 +48,6 @@ export const SERVICES = {
     host: 'localhost:9000',
     webHost: 'localhost:9002'
   },
-  socketio: {
-    name: 'Socket.IO Server',
-    baseUrl: 'http://localhost:3001'
-  },
   mqtt: {
     name: 'MQTT Broker (Mosquitto)',
     host: 'localhost:1883',
@@ -153,11 +149,8 @@ export async function waitForServices(): Promise<void> {
       name: 'SOAP (Castle Mock)',
       url: `${SERVICES.soap.baseUrl}/castlemock/web`,
       retries: 40 // Castle Mock takes longer to start
-    },
-    {
-      name: 'Socket.IO',
-      url: SERVICES.socketio.baseUrl
     }
+    // No Socket.IO check: restorm self-hosts its Socket.IO server in-instance.
   ]
 
   const results = await Promise.all(checks.map(waitForService))

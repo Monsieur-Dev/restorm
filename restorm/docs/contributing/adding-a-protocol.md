@@ -25,7 +25,9 @@ Before you open the PR, all of these must be true:
 - [ ] CI integration confirmed — [Section 6](#section-6--ci-integration).
 - [ ] E2E feature file covers every scenario in [Section 7](#section-7--e2e-scenario-template-the-full-matrix), including the debounce assertion.
 - [ ] Response panel assertions per [Section 8](#section-8--ui-verifications-the-e2e-must-hit) covered.
+- [ ] **Code-snippet examples are relevant** — the request panel's "code examples" tab renders a correct, env-/Handlebars-resolved snippet for the protocol in EVERY listed language (no empty output, no literal `{{var}}`, the right host/method/headers). Add a `CodeSnippetGenerator` template + wire its template variables, and verify each entry — [Section 8](#section-8--ui-verifications-the-e2e-must-hit).
 - [ ] Response history builder added in `ResponseHistoryService`.
+- [ ] **Scenario-graph integration complete** — action nodes, MCP, the request↔scenario links, demo scenario + goldens, palette/Bestiary — [Section 13](#section-13--scenario-graph-integration-streaming--bound-protocols) (the part most easily forgotten).
 - [ ] User-facing + dev docs updated — [Section 10](#section-10--documentation-checklist).
 - [ ] Protocol PR template ([Section 11](#section-11--pr-review-checklist)) populated and ticked.
 
@@ -316,10 +318,23 @@ a stable `data-testid` of `<protocol>-request-url-input`.
 
 ## Section 5 — Docker mock service
 
-Every new execution protocol ships a reproducible mock in
+Every new execution protocol needs a reproducible mock in
 `restorm/tests/docker/docker-compose.yml`.
 
-### 5.1 — Image selection
+### 5.0 — Reuse an existing service FIRST (hard preference)
+
+**Before adding any new container, check what's already in
+`docker-compose.yml` and use it.** Several services already cover broad
+surface and exist precisely for protocol testing — e.g. `moul/grpcbin`
+(port 9000) provides unary **and** server/client/bidi **streaming** gRPC
+echo, so a gRPC ticket should drive grpcbin directly and **not** add a new
+mock. Only add a dedicated mock when an existing service genuinely cannot
+exercise the behaviour you need, and say *why* in the PR. (raw WebSocket was
+a legitimate case: a plain-WS client cannot echo against the Socket.IO
+server's framing, so a tiny `ws-echo` server was added — but that was the
+exception, justified in the ticket, not the default.)
+
+### 5.1 — Image selection (only if 5.0 has no fit)
 
 Prefer an official or widely-used image:
 
@@ -493,6 +508,28 @@ When in doubt about the exact selector, grep the existing HTTP / OData /
 GraphQL tab views — they are the reference implementations
 ([Section 12](#section-12--reference-implementations)).
 
+### 8.1 — Code-snippet examples must be relevant (not just present)
+
+The request panel's **"code examples"** tab renders, per protocol, a set of
+ready-to-run snippets in several languages from a Handlebars template in
+`CodeSnippetGenerator` (`src/main/resources/templates/code-snippets-<proto>.hbs`).
+A new protocol must add its template AND wire its template variables in
+`generateCodeSnippets`. **Verify every language entry actually renders a correct
+snippet** — this is a recurring trap:
+
+* **No empty output.** The template branches on the exact variables the generator
+  passes. A name mismatch (generator passes `protocol`, template tests
+  `isNativeWebSocket`) makes every branch silently evaluate false and the snippet
+  renders blank. Open the tab for a real request and read each entry.
+* **Values are resolved.** Every interpolated field (URL/host, method, message,
+  headers/metadata, topic/event, …) must go through `transformValue` so the
+  snippet shows the env-/Handlebars-resolved value, never a literal `{{var}}`.
+* **Protocol-correct flags.** e.g. a gRPC `grpcurl` snippet needs `-plaintext`
+  for an insecure server; a streaming call should read sensibly per call type.
+
+Treat the snippet tab as a first-class output surface — a blank or `{{var}}`-leaking
+snippet is a bug, exactly like a blank response panel.
+
 ---
 
 ## Section 9 — Import adapter specifics
@@ -567,8 +604,8 @@ reference files alongside this playbook:
 | --- | --- |
 | REST / HTTP | `restorm/src/main/services/HTTPExecutionService.ts`, `restorm/src/renderer/src/components/RequestTabViews/HTTPRequestTabView.tsx` |
 | GraphQL | `restorm/src/main/services/GraphQLExecutionService.ts`, `restorm/src/renderer/src/components/RequestTabViews/GraphQLRequestTabView.tsx`, `restorm/src/main/services/import/GraphQLImportService.ts` |
-| raw WebSocket | `restorm/src/main/services/WebSocketExecutionService.ts`, `restorm/src/renderer/src/components/RequestTabViews/WebSocketRequestTabView.tsx` |
-| Socket.IO | _planned_ — follow the raw WebSocket pattern when implementing. |
+| raw WebSocket | `restorm/src/main/services/WebSocketExecutionService.ts` (`connectStreamingRaw`), `restorm/src/renderer/src/components/RequestTabViews/WebSocketRequestTabView.tsx`. Scenario slice (the [Section 13](#section-13--scenario-graph-integration-streaming--bound-protocols) reference): `nodes/WebsocketNodeBoxes.tsx`, `tests/e2e/bdd/websocket-execution/`, `tests/docker/ws-echo-server/`. |
+| Socket.IO | `WebSocketExecutionService.ts` (`connectStreaming`, `socketio` protocol) + `WebSocketRequestTabView.tsx`; scenario nodes in `nodes/SocketioNodeBoxes.tsx`, `tests/e2e/bdd/socketio-execution/`. The canonical streaming reference for a NEW protocol's [Section 13](#section-13--scenario-graph-integration-streaming--bound-protocols) work. |
 | MQTT | _planned_ — uses the `eclipse-mosquitto:2` mock in `restorm/tests/docker/docker-compose.yml`. |
 | SOAP | `restorm/src/main/services/SOAPExecutionService.ts`, `restorm/src/main/services/import/SoapImportService.ts`, `restorm/src/renderer/src/components/RequestTabViews/SoapRequestTabView.tsx` |
 | gRPC | `restorm/src/main/services/GRPCExecutionService.ts`, `restorm/src/main/services/import/GrpcImportService.ts`, `restorm/src/renderer/src/components/RequestTabViews/GrpcRequestTabView.tsx` |
@@ -578,6 +615,131 @@ Pick the closest semantic match (HTTP-shaped → OData; streaming →
 WebSocket; binary → gRPC) and use it as a structural guide, not a
 copy-paste template. The shape evolves; the rules in Sections 2–4 do
 not.
+
+---
+
+## Section 13 — Scenario-graph integration (streaming & bound protocols)
+
+A protocol is not "done" when its request panel executes. It must also be a
+first-class citizen of the **scenario graph** — the same vertical slice Socket.IO
+(TASK-66.1) and raw WebSocket (TASK-66.6) shipped. This is the section most
+easily forgotten; every item below was a real gap caught in review on those two.
+
+See also the companion playbook
+[`adding-a-scenario-node.md`](./adding-a-scenario-node.md) for the per-node
+mechanics. **A request-bound protocol shows up in a scenario one of two ways:**
+
+- **Unary / one-shot** (HTTP, GraphQL, SOAP, OData, gRPC-unary): binds like an
+  `httpRequest` node — one box, `config.requestId`, a `response` output.
+- **Streaming / long-lived** (Socket.IO, raw WebSocket, gRPC server/client/bidi,
+  MQTT): a **connect** node opens a long-lived connection and re-emits each
+  received frame on a `message` port; for **bidirectional** transports add a
+  **send** node (push a payload, no channel) and a **close** node — the
+  `connect / send / close` triplet, mirroring `websocketConnect/Send/Close`.
+
+### 13.1 — Scenario action nodes + engine
+
+- [ ] Add the kind(s) to the `ScenarioNodeKind` union (`shared/types/scenario.ts`)
+      and their ports (`shared/scenarioNodePorts.ts`). A raw connect has a single
+      `message` output (no named events); a multiplexed one (Socket.IO) derives
+      `event:<name>` ports + an `others` catch-all.
+- [ ] **Port ↔ data coherence (check this deliberately).** Every input/output
+      port must match the data the action actually sends or receives — both its
+      direction (`value` / `signal` / `both`) and the shape downstream/upstream
+      nodes expect. A `send` node's `payload` input must accept the payload type;
+      a connect node's received-frame output (`message` / `event:<name>`) must
+      emit exactly the parsed frame a JSON-path picker will bind against; a
+      signal-only completion is a `signal` port, not a data port. A mismatched or
+      mislabelled port silently produces empty/garbled data in wired nodes and a
+      misleading inspector preview — verify against a real run before freezing
+      anything.
+- [ ] Executors (`scenarioEngine/executors/`) + registry. A connect executor
+      hands the scheduler a scope-action carrying a **transport/mode
+      discriminator** (cf. `transport: 'socketio' | 'websocket'`); the scheduler
+      routes received frames to the `message` port and the engine bridge picks
+      the matching streaming service method (`connectStreaming` /
+      `connectStreamingRaw` / …).
+- [ ] **Stop / abort must cancel the live connection** (close the socket / cancel
+      the RPC) — reuse the universal `done`/abort machinery; never leak a socket.
+- [ ] Kind docs in `shared/scenarioKindDocs.ts` + the MCP `describe_scenario_kinds`
+      catalogue (`SCENARIO_KINDS`), so `create_scenario_node` / `connect_scenario_nodes`
+      can author the nodes.
+
+### 13.2 — Inspector preview from history
+
+- [ ] Register the connect kind in `previewResolvers` (`mcp/tools/scenarioRun.ts`)
+      — reuse `resolveStreamConnectPreview`. It reads the **freshest SUCCESSFUL**
+      entry from the bound request's history (`freshestSuccessfulEntry` — the
+      first `success === true`, NOT just the latest) and surfaces the latest
+      received frame, so an edge leaving the `message` port gets a JSON-path
+      picker over real data. (Forgetting to register the kind = a blank preview;
+      this was missed first on `websocketConnect`.)
+- [ ] The executor must persist received frames to `ResponseHistoryService`
+      (`storeExecutionResult`) — that history is what feeds the preview, the
+      request panel's replay, AND the golden's data.
+
+### 13.3 — Request ↔ scenario navigation (BOTH directions)
+
+- [ ] **Node → request**: on the connect node box, an "Edit request" link
+      (`Button externalLink`, `data-testid="scn-request-edit-link"`,
+      `data.onOpenItem(requestId)`) as `RequestNodeBox` renders; and in the
+      inspector, register the kind in the `openItemId` / title+badge branches of
+      `ScenarioEditorView` so the inspector header links to the bound request.
+- [ ] **Request → scenarios**: add the kind to `REQUEST_BINDING_KINDS` in
+      `services/scenarioRequestUsage.ts`. That single set drives BOTH the request
+      panel's "used in scenarios" reverse-nav button AND the generic
+      delete → move-request-into-scenario flow (`collectRequestScenarioRelations`).
+      The button + flow are already protocol-agnostic; only the node-kind scan
+      needs the new kind. **A request bound only by a non-listed node kind has no
+      back-link and silently won't trigger the move-on-delete dialog.**
+
+### 13.4 — Palette, catalogue, drag-drop, i18n
+
+- [ ] `onDrop` (`ScenarioEditorView`): dragging a request of this protocol maps
+      to the right node kind (streaming → connect node; unary → request node).
+- [ ] `scenarioNodeCatalogue.ts` + the node-component registry (`nodes/index.ts`).
+- [ ] Add an **action** section to the scenario "Add" palette
+      (`scenarioChildPalette.tsx`) — same badge as the sidebar, a `connect / send /
+      close` badge triplet for bidirectional transports. Do **not** add a
+      request-creation entry for a streaming protocol (it's redundant with the
+      action nodes — the WebSocket one was removed for exactly this reason).
+- [ ] **Palette coherence audit**: no duplicate entries, all expected entries
+      present, badges consistent with the sidebar + board headers.
+- [ ] i18n: `scenario.nodes.<kind>` + `scenario.help.<kind>` (test-enforced) +
+      any new port labels, across **all 27 locales** — translate `fr`, English
+      placeholder elsewhere (mirrors the existing streaming kinds).
+
+### 13.5 — Demo scenario, Bestiary, goldens
+
+- [ ] A **valid demo scenario** exercising the protocol — bidirectional →
+      WebSocket/Socket.IO-style connect→send→receive→close; unary → an HTTP-style
+      request. Serialize any async frames with `wait` nodes so the run-log is
+      **deterministic** (otherwise the golden flakes).
+- [ ] Chain the demo into the **Main** orchestrator scenario.
+- [ ] Add the new action boxes to the **Bestiary** catalogue scenario.
+- [ ] **Play the request(s) at least once to populate history, and confirm the
+      data surfaces in the scenario editor's inspector preview BEFORE freezing**
+      the golden (the whole point — a golden over empty data proves nothing).
+- [ ] Add the demo to the run-log E2E feature list and regenerate **both**
+      `…main-runlog.yaml` AND `…main-suggestions.json` (Main gains a node).
+      Goldens via `UPDATE_RUNLOG_GOLDEN=1` / `UPDATE_SUGGESTIONS_GOLDEN=1`.
+
+### 13.6 — Request-execution E2E + close-out
+
+- [ ] A request-panel execution E2E (new Playwright project + a dedicated
+      `<proto>-sample.restorm`), mirroring `tests/e2e/bdd/socketio-execution` /
+      `websocket-execution`: connect/start, send + receive, server-push, cancel/
+      disconnect, asserting button states + stream bubbles. Gitignore the
+      runtime `*.responses.zip`.
+- [ ] **Fix any gap found while writing the tests, here** (same clause as the
+      execution matrix). The raw-WS Send button (rendered only for `socketio`)
+      and the missing navigation links were both found exactly this way.
+- [ ] `lint` + `typecheck` + an independent PR review over the whole diff.
+
+> Reference files for this section: `services/scenarioRequestUsage.ts`,
+> `components/Scenario/nodes/SocketioNodeBoxes.tsx` +
+> `WebsocketNodeBoxes.tsx`, `mcp/tools/scenarioRun.ts` (preview resolvers),
+> `tests/e2e/bdd/{socketio,websocket}-execution/`, `tests/docker/ws-echo-server/`.
 
 ---
 

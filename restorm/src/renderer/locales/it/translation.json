@@ -240,11 +240,18 @@
         "httpDelete": "Richiesta HTTP – DELETE",
         "graphql": "Richiesta GraphQL",
         "grpc": "Richiesta gRPC",
+        "grpcServerStream": "gRPC server-streaming request",
+        "grpcClientStream": "gRPC client-streaming request",
+        "grpcBidi": "gRPC bidirectional request",
         "soap": "Richiesta SOAP",
         "websocket": "Richiesta WebSocket",
         "odata": "Richiesta OData",
         "auth": "Richiesta HTTP di autenticazione",
-        "scenario": "Scenario"
+        "scenario": "Scenario",
+        "socketioServer": "Server Socket.IO",
+        "websocketServer": "Server WebSocket",
+        "socketio": "Richiesta Socket.IO",
+        "mqtt": "MQTT request"
       }
     },
     "deleteConfirm": {
@@ -411,6 +418,15 @@
     "tabs": {
       "message": "Messaggio",
       "metadata": "Metadati"
+    },
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "noFrames": "No frames yet.",
+    "callType": {
+      "unary": "Unary",
+      "serverStream": "Server streaming",
+      "clientStream": "Client streaming",
+      "bidi": "Bidirectional streaming"
     }
   },
   "soap": {
@@ -432,7 +448,14 @@
     "tabs": {
       "message": "Messaggio",
       "headers": "Header"
-    }
+    },
+    "acknowledged": "Confermato",
+    "disconnect": "Disconnetti",
+    "startListening": "Inizia ad ascoltare",
+    "stopListening": "Smetti di ascoltare",
+    "routePlaceholder": "Percorso (facoltativo)",
+    "clientsConnected": "{{count}} client connessi",
+    "notListening": "Non in ascolto"
   },
   "search": {
     "placeholder": "Cerca...",
@@ -951,7 +974,19 @@
       "readFile": "Read file",
       "writeFile": "Write file",
       "timer": "Timer",
-      "code": "Codice"
+      "code": "Codice",
+      "socketioConnect": "Socket.IO connect",
+      "socketioSend": "Socket.IO send",
+      "socketioClose": "Socket.IO close",
+      "websocketConnect": "WebSocket connect",
+      "websocketSend": "WebSocket send",
+      "websocketClose": "WebSocket close",
+      "grpcConnect": "gRPC connect",
+      "grpcSend": "gRPC send",
+      "grpcClose": "gRPC close",
+      "mqttConnect": "MQTT connect",
+      "mqttSend": "MQTT publish",
+      "mqttClose": "MQTT close"
     },
     "comparator": {
       "result": "risultato"
@@ -1486,7 +1521,25 @@
       "writeFile": "Writes or appends text to a file.",
       "throw": "Deliberately fails with a message (for error branches and tests).",
       "log": "Writes a message to the run log and passes the value through.",
-      "assert": "Checks a condition (chai-style) and routes to pass or fail."
+      "assert": "Checks a condition (chai-style) and routes to pass or fail.",
+      "socketioConnect": "Opens a Socket.IO connection and re-emits each received event on its port.",
+      "socketioSend": "Sends a message on an already-open Socket.IO connection.",
+      "socketioClose": "Closes an already-open Socket.IO connection.",
+      "websocketConnect": "Opens a raw WebSocket connection and re-emits each received message on its port.",
+      "websocketSend": "Sends a payload on an already-open WebSocket connection.",
+      "websocketClose": "Closes an already-open WebSocket connection.",
+      "grpcConnect": "Opens a streaming gRPC call and re-emits each received frame on its message port.",
+      "grpcSend": "Writes a request message on an already-open streaming gRPC call.",
+      "grpcClose": "Half-closes an already-open streaming gRPC call.",
+      "socketioConnectServer": "Avvia un server Socket.IO (porta + percorso); conferma ogni evento ricevuto e lo riemette sulla sua porta. Invia trasmette ai client connessi.",
+      "socketioSendServer": "Trasmette un messaggio a tutti i client connessi al server Socket.IO di riferimento.",
+      "socketioCloseServer": "Arresta il server Socket.IO di riferimento e disconnette i suoi client.",
+      "websocketConnectServer": "Avvia un server WebSocket grezzo (porta + percorso); registra ogni frame inviato da un client e lo riemette sulla sua porta message. Invia trasmette ai client connessi.",
+      "websocketSendServer": "Trasmette un frame a tutti i client connessi al server WebSocket di riferimento.",
+      "websocketCloseServer": "Arresta il server WebSocket di riferimento e disconnette i suoi client.",
+      "mqttConnect": "Opens a long-lived MQTT connection from a bound request and subscribes to its topic; re-emits each received message on its `message` port.",
+      "mqttSend": "Publishes a payload on an already-open MQTT connection (to its topic).",
+      "mqttClose": "Closes an already-open MQTT connection."
     },
     "legend": {
       "title": "Legenda",
@@ -1514,6 +1567,41 @@
       "allLogs": "All logs",
       "note": "`--out file` also writes the run-log to a file.",
       "projectPlaceholder": "<project.restorm>"
+    },
+    "socketio": {
+      "connectionNameLabel": "Connection name",
+      "connectionNamePlaceholder": "connection name",
+      "eventPlaceholder": "event",
+      "addEvent": "Add event",
+      "connected": "connected",
+      "others": "others",
+      "connection": "connection",
+      "pickConnection": "— pick a connection —",
+      "channelLabel": "Channel name",
+      "payload": "payload",
+      "payloadModalTitle": "Edit payload",
+      "started": "avviato"
+    },
+    "websocket": {
+      "message": "message"
+    },
+    "grpc": {
+      "message": "message"
     }
+  },
+  "mqtt": {
+    "qos": "QoS",
+    "retain": "Retain",
+    "subscribeOnConnect": "Subscribe on connect",
+    "clientId": "Client ID",
+    "clientIdPlaceholder": "auto-generated if empty",
+    "username": "Username",
+    "password": "Password",
+    "keepalive": "Keepalive (s)",
+    "lwt": "Last Will & Testament",
+    "topic": "Topic",
+    "lwtTopicPlaceholder": "will/topic",
+    "lwtPayload": "Payload",
+    "lwtPayloadPlaceholder": "will message"
   }
 }

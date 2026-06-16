@@ -21,6 +21,7 @@ import { graphqlExecutionService, type GraphQLExecutionInput } from './services/
 import { soapExecutionService, type SOAPExecutionInput } from './services/SOAPExecutionService'
 import { grpcExecutionService, type GRPCExecutionInput } from './services/GRPCExecutionService'
 import { websocketExecutionService, type WebSocketExecutionInput } from './services/WebSocketExecutionService'
+import { scenarioEngine } from './scenarioEngine/engine'
 import { importFrom } from './services/import/ImportManager'
 import {
   openEditorArgs,
@@ -39,7 +40,7 @@ import {
   authPrefetchArgs,
   graphqlExecuteArgs, graphqlCancelArgs, graphqlIsActiveArgs,
   soapExecuteArgs, soapCancelArgs, soapIsActiveArgs,
-  grpcExecuteArgs, grpcCancelArgs, grpcIsActiveArgs,
+  grpcExecuteArgs, grpcConnectArgs, grpcSendArgs, grpcDisconnectArgs, grpcCancelArgs, grpcIsActiveArgs,
   websocketConnectArgs, websocketDisconnectArgs, websocketSendArgs, websocketIsActiveArgs,
   responsesHistoryListArgs, responsesHistoryGetArgs,
   responsesHistoryTogglePinArgs,
@@ -737,6 +738,14 @@ export function registerRestormIPC(deps: {
 
   ipcMain.handle('context:clear-all', () => {
     contextService.clearAll()
+    // File close — stop every running scenario. Runs are project-scoped: closing
+    // the file (or opening another over it) must halt anything still executing,
+    // exactly as if the user had stopped each run by hand. Sub-runs included.
+    scenarioEngine.abortAll()
+    // File close — tear down every live connection AND any hosted WebSocket /
+    // Socket.IO server. A server is collection-scoped: closing the file must
+    // release its port, otherwise it keeps listening with no UI left to stop it.
+    websocketExecutionService.closeAll()
     // File close — the auth token cache is scoped to the open
     // collection, so flush it here. Opening a different file (or the
     // same one again) must force a fresh round of token fetches.
@@ -999,12 +1008,37 @@ export function registerRestormIPC(deps: {
   // ==========================================================================
 
   validatedHandle('grpc:execute', grpcExecuteArgs, async (_event, [input]) => {
+    // `execute()` persists the call to history itself (so direct + streaming
+    // callers behave the same); the handler only records usage.
     const result = await grpcExecutionService.execute(input as GRPCExecutionInput)
     setImmediate(() => {
-      void responseHistoryService.storeExecutionResult(input.requestId, 'grpc', result)
       requestUsageService.recordSend(input.requestId)
     })
     return result
+  })
+
+  validatedHandle('grpc:connect', grpcConnectArgs, (_event, [input]) => {
+    // Open a long-lived streaming call (server / client / bidi). Frames +
+    // lifecycle reach the renderer via the `grpc:message` / `grpc:request-progress`
+    // broadcasts the service fires internally, so the callbacks are no-ops.
+    const noop = (): void => { /* lifecycle is delivered via the IPC broadcasts */ }
+    grpcExecutionService.connectStreaming({
+      requestId: input.requestId,
+      onConnect: noop,
+      onMessage: noop,
+      onClose: noop,
+      ...(input.timeout !== undefined ? { timeout: input.timeout } : {})
+    })
+    setImmediate(() => { requestUsageService.recordSend(input.requestId) })
+    return { started: true }
+  })
+
+  validatedHandle('grpc:send', grpcSendArgs, (_event, [requestId, message]) => {
+    return grpcExecutionService.send(requestId, message)
+  })
+
+  validatedHandle('grpc:disconnect', grpcDisconnectArgs, (_event, [requestId]) => {
+    return grpcExecutionService.disconnect(requestId)
   })
 
   validatedHandle('grpc:cancel', grpcCancelArgs, (_event, [requestId]) => {

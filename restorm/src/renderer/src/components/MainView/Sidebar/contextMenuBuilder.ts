@@ -35,8 +35,15 @@ export type AddChildKind =
   | 'http-delete'
   | 'graphql'
   | 'grpc'
+  | 'grpc-server-stream'
+  | 'grpc-client-stream'
+  | 'grpc-bidi'
   | 'soap'
   | 'websocket'
+  | 'socketio'
+  | 'socketio-server'
+  | 'websocket-server'
+  | 'mqtt'
   | 'odata'
   | 'auth'
   | 'scenario'
@@ -112,12 +119,7 @@ export const buildAddSubmenu = (
     onClick: () => { onAddChildItem(parentId, 'http-delete') }
   },
   { id: `sep-add-http-${parentId}`, isSeparator: true, label: '' },
-  {
-    id: `add-graphql-${parentId}`,
-    label: t('sidebar.contextMenu.add.graphql'),
-    icon: React.createElement(Badge, { type: 'QUERY' }),
-    onClick: () => { onAddChildItem(parentId, 'graphql') }
-  },
+  // gRPC — its own group (the four call types) right after HTTP.
   {
     id: `add-grpc-${parentId}`,
     label: t('sidebar.contextMenu.add.grpc'),
@@ -125,17 +127,73 @@ export const buildAddSubmenu = (
     onClick: () => { onAddChildItem(parentId, 'grpc') }
   },
   {
+    id: `add-grpc-server-stream-${parentId}`,
+    label: t('sidebar.contextMenu.add.grpcServerStream'),
+    icon: React.createElement(Badge, { type: 'S-STR' }),
+    onClick: () => { onAddChildItem(parentId, 'grpc-server-stream') }
+  },
+  {
+    id: `add-grpc-client-stream-${parentId}`,
+    label: t('sidebar.contextMenu.add.grpcClientStream'),
+    icon: React.createElement(Badge, { type: 'C-STR' }),
+    onClick: () => { onAddChildItem(parentId, 'grpc-client-stream') }
+  },
+  {
+    id: `add-grpc-bidi-${parentId}`,
+    label: t('sidebar.contextMenu.add.grpcBidi'),
+    icon: React.createElement(Badge, { type: 'BIDI' }),
+    onClick: () => { onAddChildItem(parentId, 'grpc-bidi') }
+  },
+  { id: `sep-add-grpc-${parentId}`, isSeparator: true, label: '' },
+  {
+    id: `add-graphql-${parentId}`,
+    label: t('sidebar.contextMenu.add.graphql'),
+    icon: React.createElement(Badge, { type: 'QUERY' }),
+    onClick: () => { onAddChildItem(parentId, 'graphql') }
+  },
+  {
     id: `add-soap-${parentId}`,
     label: t('sidebar.contextMenu.add.soap'),
     icon: React.createElement(Badge, { type: 'SOAP' }),
     onClick: () => { onAddChildItem(parentId, 'soap') }
   },
+  { id: `sep-add-ws-${parentId}`, isSeparator: true, label: '' },
+  // WebSocket group: client + server together.
   {
     id: `add-websocket-${parentId}`,
     label: t('sidebar.contextMenu.add.websocket'),
     icon: React.createElement(Badge, { type: 'WS' }),
     onClick: () => { onAddChildItem(parentId, 'websocket') }
   },
+  {
+    id: `add-websocket-server-${parentId}`,
+    label: t('sidebar.contextMenu.add.websocketServer'),
+    icon: React.createElement(Badge, { type: 'WS', mode: 'server' }),
+    onClick: () => { onAddChildItem(parentId, 'websocket-server') }
+  },
+  { id: `sep-add-sio-${parentId}`, isSeparator: true, label: '' },
+  // Socket.IO group: client + server together.
+  {
+    id: `add-socketio-${parentId}`,
+    label: t('sidebar.contextMenu.add.socketio'),
+    icon: React.createElement(Badge, { type: 'SIO' }),
+    onClick: () => { onAddChildItem(parentId, 'socketio') }
+  },
+  {
+    id: `add-socketio-server-${parentId}`,
+    label: t('sidebar.contextMenu.add.socketioServer'),
+    icon: React.createElement(Badge, { type: 'SIO', mode: 'server' }),
+    onClick: () => { onAddChildItem(parentId, 'socketio-server') }
+  },
+  { id: `sep-add-mqtt-${parentId}`, isSeparator: true, label: '' },
+  // MQTT (client only — restorm connects to a broker).
+  {
+    id: `add-mqtt-${parentId}`,
+    label: t('sidebar.contextMenu.add.mqtt'),
+    icon: React.createElement(Badge, { type: 'MQTT' }),
+    onClick: () => { onAddChildItem(parentId, 'mqtt') }
+  },
+  { id: `sep-add-odata-${parentId}`, isSeparator: true, label: '' },
   {
     id: `add-odata-${parentId}`,
     label: t('sidebar.contextMenu.add.odata'),

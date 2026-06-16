@@ -69,6 +69,54 @@ export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
     summary: 'Runs another scenario as a sub-scenario. Wired `param:<name>` inputs feed its inputs; emits `output:<name>` per output node, plus `done` when it has none.',
     config: { scenarioId: 'Id of the scenario to run.', label: 'Display label on the box.' }
   },
+  socketioConnect: {
+    summary: 'Opens a long-lived Socket.IO connection from a bound request and listens. `connected` fires once the socket is open; each listened event re-emits its payload on a derived `event:<name>` output (switch-like), any other server-pushed event on `others`. The connection stays open until a socketioClose targets it (or the run is stopped), then `done` fires.',
+    config: { requestId: 'Id of the Socket.IO request to connect (its resolved URL/headers/namespace).', connectionName: 'Unique-per-scenario name a socketioSend/socketioClose references for display (defaults to the request name).', events: 'Array of event names to listen for — each gets an `event:<name>` output port. The bound request\'s own event is seeded by default; add more for the switch-like fan-out.', label: 'Display label on the box.' }
+  },
+  socketioSend: {
+    summary: 'Emits a message on an already-open Socket.IO connection (declared by a socketioConnect node). Pure-event action: triggered on `in`, it sends `payload` on the `channel` event, then sequences the next node via its `done` port. Errors (to the `error` port) when no connection is selected or it is not open.',
+    config: { connectionNodeId: 'Id of the socketioConnect node whose connection to send on.', channel: 'Event name to emit (typed value; or wire `channel`). Defaults from the connect node\'s request.', payload: 'Message payload (a JSON code editor; or wire `payload`). Defaults from the connect node\'s request.' }
+  },
+  socketioClose: {
+    summary: 'Closes an already-open Socket.IO connection (declared by a socketioConnect node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences the next node via its own `done` port. Errors (to the `error` port) when no connection is selected.',
+    config: { connectionNodeId: 'Id of the socketioConnect node whose connection to close.' }
+  },
+  websocketConnect: {
+    summary: 'Opens a long-lived raw WebSocket connection from a bound request and listens. `connected` fires once the socket is open; EVERY received frame re-emits on the single `message` output (a raw WS has no named events). The connection stays open until a websocketClose targets it (or the run is stopped), then `done` fires.',
+    config: { requestId: 'Id of the WebSocket request to connect (its resolved URL/headers).', connectionName: 'Unique-per-scenario name a websocketSend/websocketClose references for display (defaults to the request name).', label: 'Display label on the box.' }
+  },
+  websocketSend: {
+    summary: 'Sends a raw payload on an already-open WebSocket connection (declared by a websocketConnect node) — no channel/event. Pure-event action: triggered on `in`, sequences the next node via `done`. Errors (to `error`) when no connection is selected or it is not open.',
+    config: { connectionNodeId: 'Id of the websocketConnect node whose connection to send on.', payload: 'Message payload (a code editor; or wire `payload`).' }
+  },
+  websocketClose: {
+    summary: 'Closes an already-open raw WebSocket connection (declared by a websocketConnect node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
+    config: { connectionNodeId: 'Id of the websocketConnect node whose connection to close.' }
+  },
+  mqttConnect: {
+    summary: 'Opens a long-lived MQTT connection from a bound request and SUBSCRIBES to its topic. `connected` fires once subscribed; EVERY received message re-emits on the single `message` output (MQTT has no named events). The connection stays open until an mqttClose targets it (or the run is stopped), then `done` fires.',
+    config: { requestId: 'Id of the MQTT request to connect (resolved URL/topic/QoS/auth/LWT).', connectionName: 'Unique-per-scenario name an mqttSend/mqttClose references for display (defaults to the request name).', label: 'Display label on the box.' }
+  },
+  mqttSend: {
+    summary: 'Publishes a payload on an already-open MQTT connection (declared by an mqttConnect node), to that connection\'s topic (QoS/retain from the request). Pure-event action: triggered on `in`, sequences the next node via `done`. Errors (to `error`) when no connection is selected or it is not open.',
+    config: { connectionNodeId: 'Id of the mqttConnect node whose connection to publish on.', payload: 'Message payload (a code editor; or wire `payload`).' }
+  },
+  mqttClose: {
+    summary: 'Closes an already-open MQTT connection (declared by an mqttConnect node), firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
+    config: { connectionNodeId: 'Id of the mqttConnect node whose connection to close.' }
+  },
+  grpcConnect: {
+    summary: 'Opens a long-lived streaming gRPC call from a bound request (server / client / bidi, inferred from the request call type) and listens. `connected` fires once the call is open; EVERY received frame re-emits on the single `message` output (a streaming RPC has no named events). For server-streaming the request message is sent automatically on open; for client/bidi use grpcSend. The call stays open until a grpcClose targets it (or the run is stopped), then `done` fires.',
+    config: { requestId: 'Id of the gRPC request to connect (its resolved address/metadata + service/method/call type).', connectionName: 'Unique-per-scenario name a grpcSend/grpcClose references for display (defaults to the request name).', label: 'Display label on the box.' }
+  },
+  grpcSend: {
+    summary: 'Writes a request message on an already-open streaming gRPC call (declared by a grpcConnect node) — client or bidi only, no channel. Pure-event action: triggered on `in`, sequences the next node via `done`. Errors (to `error`) when no connection is selected or it is not open.',
+    config: { connectionNodeId: 'Id of the grpcConnect node whose call to write on.', payload: 'Request message (a code editor; or wire `payload`).' }
+  },
+  grpcClose: {
+    summary: 'Half-closes an already-open streaming gRPC call (declared by a grpcConnect node), letting the server\'s final frames/response arrive and firing that node\'s `done`. Pure-event action: triggered on `in`, sequences via its own `done`. Errors (to `error`) when no connection is selected.',
+    config: { connectionNodeId: 'Id of the grpcConnect node whose call to close.' }
+  },
   forEach: {
     summary: 'Iterates a collection: fans out `each` item, then fires `done` once every iteration\'s sub-graph has finished. `items` is wired or taken from a configured list.',
     config: { parallelism: '`{ enabled, count }` — bounded concurrent iterations (count≥2). Off = sequential.' }
@@ -106,11 +154,11 @@ export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
     config: { list: 'Target list: a list-typed variable reference `{ type:"variable", value:"<name>" }`, or wire a list into the `list` port. (No inline list literal.)', values: 'Rows of values to remove: `{ id, value }[]` (like object properties); each row gets a `<id>` input port to wire.', updateSourceVariable: 'When true AND `list` is an un-wired variable, also writes the new list back into that variable. Default false (pure).' }
   },
   wait: {
-    summary: 'Sleeps for a duration, then passes the trigger through. Aborts cleanly on Stop.',
+    summary: 'Sleeps for a duration, then sequences the next node via its `done` port (no value passthrough). Aborts cleanly on Stop.',
     config: { duration: 'Duration value.', inputUnit: 'ms | s | min | h — unit for a wired `duration` (default s).', durationMs: 'Alternative fixed duration in ms.' }
   },
   waitUntil: {
-    summary: 'Sleeps until a target time (ISO string or epoch ms); a past time fires immediately.',
+    summary: 'Sleeps until a target time (ISO string or epoch ms); a past time fires immediately. Sequences via `done` (no value passthrough).',
     config: { until: 'Target time (or wire the `until` port).' }
   },
   now: {
@@ -151,7 +199,7 @@ export const SCENARIO_KIND_DOCS: Record<ScenarioNodeKind, ScenarioKindDoc> = {
   },
   code: {
     summary: 'Runs the user `code` in a per-language WASM runtime selected by `language` (TypeScript/JavaScript → QuickJS, Python → Pyodide, Lua → wasmoon, Ruby → ruby.wasm, R → WebR) — no host / filesystem / network access. The wired `value` input is exposed as `input`, the run variables as `vars`, and (JS only) a curated standard library as globals + `require()` (lodash/`_`, moment, uuid, nanoid, CryptoJS, Ajv). For JS the body runs as an async function, so a top-level `return` and `await` both work; the other languages return their last expression. Whatever the script returns flows out of `result`; `console.log` / `print` / `puts` / `cat` lines appear in the run log; a script error or timeout routes to `error`.',
-    config: { language: 'typescript | javascript | python | lua | ruby | r (default typescript).', code: 'Source for the chosen language — a body that returns/yields the result.', timeout: 'Execution budget in seconds (default 5, max 60).' }
+    config: { language: 'typescript | javascript | python | lua | ruby | r (default typescript).', code: 'Source for the chosen language — a body that returns/yields the result. Can also be supplied via the `code` input port (a wired script text wins over this inline value).', timeout: 'Execution budget in seconds (default 5, max 60).' }
   },
   cast: {
     summary: 'Converts the `value` input (wired or inline) to `targetType` on `result`; an impossible cast (or a null value) routes to `error`. number↔boolean (0/1, truthiness), numeric/boolean string parsing, dates ISO; any → list wraps into [value].',

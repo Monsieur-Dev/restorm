@@ -155,6 +155,7 @@ Do not create documentation files (`/docs/`, README, etc.) unless explicitly req
 - Don't explain what you're about to do, just do it
 - Don't confirm success when the output already shows it
 - Use bullet points over paragraphs
+- **When the user writes via Telegram, ALWAYS reply via Telegram** — every answer, progress update, AND any question/choice you need them to make. Never ask via the CLI `AskUserQuestion` tool when the conversation is on Telegram: the user doesn't see the CLI, so a CLI question silently stalls the work.
 
 ## Checks command
 

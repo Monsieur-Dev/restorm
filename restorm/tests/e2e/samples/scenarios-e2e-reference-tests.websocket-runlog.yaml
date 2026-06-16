@@ -1,0 +1,80 @@
+- message: 🔵 [<time>] ▶ WebSocket
+- message: ⚪ [<time>] start websocketConnect
+  data:
+    requestId: <uuid>
+    connectionName: Server
+    label: Server listen
+- message: ⚪ [<time>] done websocketConnect
+- message: ⚪ [<time>] websocket "Server" connecting
+- message: ⚪ [<time>] websocket "Server" connected
+- message: ⚪ [<time>] start websocketConnect
+  data:
+    requestId: <uuid>
+    connectionName: Echo
+    label: Echo connect
+    in: true
+- message: ⚪ [<time>] done websocketConnect
+- message: ⚪ [<time>] websocket "Echo" connecting
+- message: ⚪ [<time>] websocket "Echo" connected
+- message: ⚪ [<time>] start websocketSend
+  data:
+    connectionNodeId: <uuid>
+    payload: '{"hello":"world"}'
+    label: send to Echo
+    in: true
+- message: ⚪ [<time>] done websocketSend
+- message: ⚪ [<time>] start wait
+  data:
+    durationMs: <dynamic-time>
+    label: let the send echo arrive first
+    in: true
+- message: ⚪ [<time>] done wait
+- message: ⚪ [<time>] start websocketSend
+  data:
+    connectionNodeId: <uuid>
+    payload: '{"hello":"from server"}'
+    label: broadcast from server
+    in: true
+- message: ⚪ [<time>] done websocketSend
+- message: ⚪ [<time>] start wait
+  data:
+    durationMs: <dynamic-time>
+    label: let the pushed echo arrive
+    in: true
+- message: ⚪ [<time>] start log
+  data:
+    message: message reçu
+    level: info
+    data:
+      hello: from server
+- message: 🔵 [<time>] message reçu
+  data:
+    hello: from server
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      hello: from server
+- message: ⚪ [<time>] done wait
+- message: ⚪ [<time>] start websocketClose
+  data:
+    connectionNodeId: <uuid>
+    label: close Echo
+    in: true
+- message: ⚪ [<time>] done websocketClose
+- message: ⚪ [<time>] start websocketClose
+  data:
+    connectionNodeId: <uuid>
+    label: close Server
+    in: true
+- message: ⚪ [<time>] websocket "Server" closed
+- message: ⚪ [<time>] done websocketClose
+- message: ⚪ [<time>] websocket "Echo" closed
+- message: ⚪ [<time>] start log
+  data:
+    message: connexion WebSocket fermée
+    level: info
+    in: true
+- message: 🔵 [<time>] connexion WebSocket fermée
+- message: ⚪ [<time>] done log
+  data: {}
+- message: 🔵 [<time>] ■ WebSocket

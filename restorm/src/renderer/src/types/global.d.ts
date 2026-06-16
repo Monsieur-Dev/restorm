@@ -137,9 +137,13 @@ declare global {
       }
       grpc: {
         execute: (input: GRPCExecutionInput) => Promise<GRPCExecutionResult>
+        connect: (input: GRPCExecutionInput) => Promise<{ started: boolean }>
+        send: (requestId: string, message: string) => Promise<boolean>
+        disconnect: (requestId: string) => Promise<boolean>
         cancel: (requestId: string) => Promise<boolean>
         isActive: (requestId: string) => Promise<boolean>
         onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
+        onMessage: (callback: (data: GrpcMessageData) => void) => (() => void)
       }
       websocket: {
         connect: (input: WebSocketExecutionInput) => Promise<WebSocketExecutionResult>
@@ -148,6 +152,7 @@ declare global {
         isActive: (requestId: string) => Promise<boolean>
         onProgress: (callback: (data: RequestProgressData) => void) => (() => void)
         onMessage: (callback: (data: WebSocketMessageData) => void) => (() => void)
+        onServerClients: (callback: (data: { requestId: string; count: number }) => void) => (() => void)
       }
       odata: {
         execute: (input: ODataExecutionInput) => Promise<HTTPExecutionResult>
@@ -394,9 +399,11 @@ export interface GRPCExecutionInput {
 export interface GRPCExecutionResult {
   requestId: string
   success: boolean
+  connected?: boolean
   statusCode?: number
   statusMessage?: string
   responseMessage?: string
+  messages?: GrpcMessageItem[]
   metadata?: Record<string, string>
   error?: string
   timings: {
@@ -405,6 +412,19 @@ export interface GRPCExecutionResult {
   }
   requestUrl?: string
   requestMethod?: string
+}
+
+/** A single streamed gRPC frame (sent or received). */
+export interface GrpcMessageItem {
+  direction: 'sent' | 'received'
+  data: string
+  timestamp: string
+}
+
+/** Payload of the `grpc:message` broadcast (a streamed frame for a request). */
+export interface GrpcMessageData {
+  requestId: string
+  message: GrpcMessageItem
 }
 
 /** WebSocket execution input */
@@ -466,6 +486,20 @@ export interface FullRequestData {
   protocol?: string | undefined
   event?: string | undefined
   message?: string | undefined
+  /** WebSocket/Socket.IO: when true, restorm HOSTS a server instead of connecting. */
+  server?: boolean | undefined
+  // MQTT specific (protocol === 'mqtt'; `event` carries the topic)
+  qos?: number | undefined
+  retain?: boolean | undefined
+  clientId?: string | undefined
+  username?: string | undefined
+  password?: string | undefined
+  keepalive?: number | undefined
+  mqttSubscribe?: boolean | undefined
+  lwtTopic?: string | undefined
+  lwtPayload?: string | undefined
+  lwtQos?: number | undefined
+  lwtRetain?: boolean | undefined
 }
 
 export {}

@@ -50,6 +50,30 @@ const mcpServerTestDir = defineBddConfig({
   outputDir: '.features-gen/mcp-server'
 })
 
+const socketioExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/socketio-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/socketio-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/socketio-execution'
+})
+
+const websocketExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/websocket-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/websocket-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/websocket-execution'
+})
+
+const grpcExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/grpc-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/grpc-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/grpc-execution'
+})
+
+const mqttExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/mqtt-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/mqtt-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/mqtt-execution'
+})
+
 const fullyDocumentedPetstoreTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/fully-documented-petstore/features/**/*.feature',
   steps: [
@@ -201,6 +225,26 @@ export default defineConfig({
     {
       name: 'mcp-server',
       testDir: mcpServerTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'socketio-execution',
+      testDir: socketioExecutionTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'websocket-execution',
+      testDir: websocketExecutionTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'grpc-execution',
+      testDir: grpcExecutionTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'mqtt-execution',
+      testDir: mqttExecutionTestDir,
       timeout: 180 * 1000
     },
     {

@@ -54,6 +54,9 @@ export const CodeNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> = ({ id, data
     },
     {
       id: 'code',
+      // The script text can also be wired in (the `code` input port wins at run
+      // time over this inline editor).
+      port: { id: 'code', type: 'target' },
       content: (
         <ScenarioCodeField
           value={code}

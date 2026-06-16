@@ -112,6 +112,7 @@ import { useMcpRequestPatch } from './hooks/useMcpRequestPatch'
 import { useMcpWorkbenchTabsBridge } from './hooks/useMcpWorkbenchTabsBridge'
 import { useMcpFolderPatch } from './hooks/useMcpFolderPatch'
 import { useScenarioSuggestionsBridge } from './testing/scenarioSuggestionsBridge'
+import { useE2eDocumentUpdateBridge } from './testing/e2eDocumentUpdateBridge'
 import { RestormSidebar } from './components/MainView/Sidebar/RestormSidebar'
 import { RestormWorkbenchContainer } from './components/MainView/Workbench/RestormWorkbenchContainer'
 import { suggestRunTarget } from '../../shared/scenarioRunTarget'
@@ -127,7 +128,7 @@ import { AvailableVariablesProvider } from './contexts/AvailableVariablesContext
 import { VariableTransformProvider } from './contexts/VariableTransformContext'
 import { AuthRequestResolverContext, type AuthRequestResolver } from './contexts/authRequestResolverContext'
 import { collectExpandableIds } from './services/FolderToListView'
-import { findScenariosUsingRequest, findScenariosUsingScenario, collectRequestScenarioRelations } from './services/scenarioRequestUsage'
+import { findScenariosUsingRequest, findScenariosUsingScenario, requestScenarioDeleteUsages } from './services/scenarioRequestUsage'
 import { diffScenarioPortRenames, remapCallerScenarioEdges, isEmptyRenameMap } from '../../shared/scenarioPortRename'
 import { requestScenarioNodeFocus } from './services/scenarioFocusBus'
 import {
@@ -139,7 +140,7 @@ import {
   getNearestEnvironmentsForBreadcrumbs
 } from './utils/treeSearch'
 import { DesktopIndicator } from './components/MainView/DesktopIndicator'
-import { findItemById } from './utils/treeSearch'
+import { findItemById, findItemWithParent } from './utils/treeSearch'
 import { getSessionRequestOverride, getSessionFolderEnv, findEnvironmentById } from './services/environmentSelectionStore'
 import type { RequestEnvInfo } from './components/Scenario/scenarioBoundResolver'
 import { StatusbarAuthSelector } from './components/MainView/StatusbarAuthSelector'
@@ -1209,9 +1210,10 @@ const App: React.FC = () => {
   const handleDeleteItemChecked = useCallback((itemId: string) => {
     const item = findItemById(rootItems, itemId)
     if (item && isRequest(item)) {
-      // Affected scenarios = bound-by-a-box OR holding the request in their
-      // subtree (a child request with no box still belongs to the scenario).
-      const usages: RequestScenarioDeleteUsage[] = collectRequestScenarioRelations(rootItems, itemId).map((u) => ({
+      // Affected scenarios = those that BIND the request through a box. A
+      // request merely filed under a scenario's folder (no box wiring it) is
+      // not a usage — it deletes like any other request, no dialog.
+      const usages: RequestScenarioDeleteUsage[] = requestScenarioDeleteUsages(rootItems, itemId).map((u) => ({
         scenarioId: u.scenario.id,
         scenarioName: u.scenario.name,
         inSubtree: u.inSubtree
@@ -1414,6 +1416,7 @@ const App: React.FC = () => {
   // Read-only e2e automation hook: exposes window.__restormSuggestions to pull
   // each action's inspector data suggestion for a scenario from the running app.
   useScenarioSuggestionsBridge()
+  useE2eDocumentUpdateBridge()
   // Forward-ref dance: `bumpTabContentVersionFor` is declared further
   // down (depends on `setWorkbenchTree`). Hand the patch hook a stable
   // wrapper that reads the ref so we can wire it up without restructuring
@@ -1750,10 +1753,30 @@ const App: React.FC = () => {
     onRefreshFromSource
   })
 
+  // Delete an item and, when it lived DIRECTLY under a scenario, nudge the
+  // whole-file save. A scenario's `items` aren't a reactive proxy (unlike a
+  // folder's), so splicing a child out of one doesn't trip the dirty trap —
+  // no autosave fires and the file stays dirty, prompting to save on close
+  // and risking a lost deletion. Mirrors the scenario-edit autosave nudge so a
+  // request deleted from a scenario behaves exactly like one deleted from a
+  // folder.
+  const confirmDeleteAndPersist = useCallback((itemId: string) => {
+    const parent = findItemWithParent(rootItems, itemId).parent
+    const parentIsScenario = !!parent && isScenario(parent as FolderItem)
+    confirmDeleteWithId(itemId)
+    if (parentIsScenario) {
+      if (scenarioSaveTimer) clearTimeout(scenarioSaveTimer)
+      scenarioSaveTimer = setTimeout(() => {
+        scenarioSaveTimer = null
+        void latestSaveAll?.().catch((err: unknown) => { logger.error('[App] scenario child-delete autosave failed', { error: String(err) }) })
+      }, 600)
+    }
+  }, [rootItems, confirmDeleteWithId])
+
   // Wrapper for confirmDelete that uses deleteConfirmation.itemId
   const confirmDelete = useCallback(() => {
-    confirmDeleteWithId(deleteConfirmation.itemId)
-  }, [confirmDeleteWithId, deleteConfirmation.itemId])
+    confirmDeleteAndPersist(deleteConfirmation.itemId)
+  }, [confirmDeleteAndPersist, deleteConfirmation.itemId])
 
   // File save handlers (after rootItems is defined)
   // Deep clone to remove Proxy wrappers before IPC serialization

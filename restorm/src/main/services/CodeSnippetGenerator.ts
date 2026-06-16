@@ -197,13 +197,45 @@ export function generateCodeSnippets(
 
     case 'websocket': {
       const message = data.message ? transformValue(data.message, envContext) : ''
+      // The template branches on per-transport booleans (NOT a `protocol`
+      // string) + uses `headers` and, for MQTT, `topic` — pass them all or every
+      // branch evaluates false and the snippet renders empty.
+      const protocol = data.protocol ?? 'websocket'
+      const isMqtt = protocol === 'mqtt'
+
+      // The MQTT (paho) snippet connects by host+port, not a URL — parse them
+      // from the broker URL (mqtt:// → 1883, mqtts:// → 8883 by default).
+      let mqttHost = host
+      let mqttPort = 1883
+      if (isMqtt) {
+        try {
+          const u = new URL(resolvedUrl)
+          mqttHost = u.hostname || host
+          mqttPort = u.port ? Number(u.port) : (u.protocol === 'mqtts:' || u.protocol === 'wss:' ? 8883 : 1883)
+        } catch {
+          mqttHost = host
+        }
+      }
 
       if (templates.websocketSnippetTemplate) {
         markdown = templates.websocketSnippetTemplate({
           url: resolvedUrl,
-          protocol: data.protocol ?? 'websocket',
+          isNativeWebSocket: protocol === 'websocket',
+          isSocketIO: protocol === 'socketio',
+          // Template branches on `isMQTT` / `isSubscribe` / `isPublish` — a
+          // request both subscribes to its topic (unless opted out) and can
+          // publish its payload via the Send button, so surface both.
+          isMQTT: isMqtt,
+          isSubscribe: data.mqttSubscribe !== false,
+          isPublish: !!message,
           event: data.event ?? '',
-          message: message || null
+          topic: data.event ?? '',
+          headers: headers.length > 0 ? headers : null,
+          message: message || null,
+          username: data.username ? transformValue(data.username, envContext) : null,
+          password: data.password ? transformValue(data.password, envContext) : '',
+          host: mqttHost,
+          port: mqttPort
         })
       }
       break
@@ -218,9 +250,14 @@ export function generateCodeSnippets(
           value: transformValue(m.value, envContext)
         }))
 
+      // Insecure unless the URL opts into TLS (grpcs:// / https://) — matches
+      // GRPCExecutionService. grpcurl defaults to TLS, so a plaintext server
+      // (the common local/dev case) needs the `-plaintext` flag to be correct.
+      const plaintext = !/^(?:grpcs|https):\/\//i.test(resolvedUrl)
       if (templates.grpcSnippetTemplate) {
         markdown = templates.grpcSnippetTemplate({
           host,
+          plaintext,
           service: data.service ?? '',
           method: data.grpcMethod ?? '',
           callType: data.callType ?? 'unary',

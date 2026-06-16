@@ -1,0 +1,82 @@
+- message: 🔵 [<time>] ▶ Socket.IO
+- message: ⚪ [<time>] start socketioConnect
+  data:
+    requestId: <uuid>
+    connectionName: Server
+    label: Server listen
+- message: ⚪ [<time>] done socketioConnect
+- message: ⚪ [<time>] socketio "Server" connecting
+- message: ⚪ [<time>] socketio "Server" connected
+- message: ⚪ [<time>] start socketioConnect
+  data:
+    requestId: <uuid>
+    connectionName: Echo
+    label: Echo connect
+    in: true
+- message: ⚪ [<time>] done socketioConnect
+- message: ⚪ [<time>] socketio "Echo" connecting
+- message: ⚪ [<time>] socketio "Echo" connected
+- message: ⚪ [<time>] start socketioSend
+  data:
+    connectionNodeId: <uuid>
+    channel: echo
+    payload: '{"hello":"world"}'
+    label: send to Echo
+    in: true
+- message: ⚪ [<time>] done socketioSend
+- message: ⚪ [<time>] start wait
+  data:
+    durationMs: <dynamic-time>
+    label: let the send echo arrive first
+    in: true
+- message: ⚪ [<time>] done wait
+- message: ⚪ [<time>] start socketioSend
+  data:
+    connectionNodeId: <uuid>
+    channel: echo
+    payload: '{"hello":"from server"}'
+    label: broadcast from server
+    in: true
+- message: ⚪ [<time>] done socketioSend
+- message: ⚪ [<time>] start wait
+  data:
+    durationMs: <dynamic-time>
+    label: let the pushed echo arrive
+    in: true
+- message: ⚪ [<time>] start log
+  data:
+    message: echo reçu
+    level: info
+    data:
+      hello: from server
+- message: 🔵 [<time>] echo reçu
+  data:
+    hello: from server
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      hello: from server
+- message: ⚪ [<time>] done wait
+- message: ⚪ [<time>] start socketioClose
+  data:
+    connectionNodeId: <uuid>
+    label: close Echo
+    in: true
+- message: ⚪ [<time>] socketio "Echo" closed
+- message: ⚪ [<time>] start log
+  data:
+    message: connexion Socket.IO fermée
+    level: info
+    in: true
+- message: 🔵 [<time>] connexion Socket.IO fermée
+- message: ⚪ [<time>] done log
+  data: {}
+- message: ⚪ [<time>] done socketioClose
+- message: ⚪ [<time>] start socketioClose
+  data:
+    connectionNodeId: <uuid>
+    label: close Server
+    in: true
+- message: ⚪ [<time>] socketio "Server" closed
+- message: ⚪ [<time>] done socketioClose
+- message: 🔵 [<time>] ■ Socket.IO

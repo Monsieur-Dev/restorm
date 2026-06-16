@@ -239,11 +239,18 @@
         "httpDelete": "HTTP – DELETE 请求",
         "graphql": "GraphQL 请求",
         "grpc": "gRPC 请求",
+        "grpcServerStream": "gRPC server-streaming request",
+        "grpcClientStream": "gRPC client-streaming request",
+        "grpcBidi": "gRPC bidirectional request",
         "soap": "SOAP 请求",
         "websocket": "WebSocket 请求",
         "odata": "OData 请求",
         "auth": "HTTP 身份验证请求",
-        "scenario": "场景"
+        "scenario": "场景",
+        "socketioServer": "Socket.IO 服务器",
+        "websocketServer": "WebSocket 服务器",
+        "socketio": "Socket.IO 请求",
+        "mqtt": "MQTT request"
       }
     },
     "deleteConfirm": {
@@ -410,6 +417,15 @@
     "tabs": {
       "message": "消息",
       "metadata": "元数据"
+    },
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "noFrames": "No frames yet.",
+    "callType": {
+      "unary": "Unary",
+      "serverStream": "Server streaming",
+      "clientStream": "Client streaming",
+      "bidi": "Bidirectional streaming"
     }
   },
   "soap": {
@@ -431,7 +447,14 @@
     "tabs": {
       "message": "消息",
       "headers": "请求头"
-    }
+    },
+    "acknowledged": "已确认",
+    "disconnect": "断开连接",
+    "startListening": "开始监听",
+    "stopListening": "停止监听",
+    "routePlaceholder": "路由（可选）",
+    "clientsConnected": "{{count}} 个客户端已连接",
+    "notListening": "未在监听"
   },
   "search": {
     "placeholder": "搜索...",
@@ -950,7 +973,19 @@
       "readFile": "Read file",
       "writeFile": "Write file",
       "timer": "定时器",
-      "code": "代码"
+      "code": "代码",
+      "socketioConnect": "Socket.IO connect",
+      "socketioSend": "Socket.IO send",
+      "socketioClose": "Socket.IO close",
+      "websocketConnect": "WebSocket connect",
+      "websocketSend": "WebSocket send",
+      "websocketClose": "WebSocket close",
+      "grpcConnect": "gRPC connect",
+      "grpcSend": "gRPC send",
+      "grpcClose": "gRPC close",
+      "mqttConnect": "MQTT connect",
+      "mqttSend": "MQTT publish",
+      "mqttClose": "MQTT close"
     },
     "comparator": {
       "result": "结果"
@@ -1485,7 +1520,25 @@
       "writeFile": "Writes or appends text to a file.",
       "throw": "Deliberately fails with a message (for error branches and tests).",
       "log": "Writes a message to the run log and passes the value through.",
-      "assert": "Checks a condition (chai-style) and routes to pass or fail."
+      "assert": "Checks a condition (chai-style) and routes to pass or fail.",
+      "socketioConnect": "Opens a Socket.IO connection and re-emits each received event on its port.",
+      "socketioSend": "Sends a message on an already-open Socket.IO connection.",
+      "socketioClose": "Closes an already-open Socket.IO connection.",
+      "websocketConnect": "Opens a raw WebSocket connection and re-emits each received message on its port.",
+      "websocketSend": "Sends a payload on an already-open WebSocket connection.",
+      "websocketClose": "Closes an already-open WebSocket connection.",
+      "grpcConnect": "Opens a streaming gRPC call and re-emits each received frame on its message port.",
+      "grpcSend": "Writes a request message on an already-open streaming gRPC call.",
+      "grpcClose": "Half-closes an already-open streaming gRPC call.",
+      "socketioConnectServer": "启动 Socket.IO 服务器（端口 + 路由）；对收到的每个事件进行确认并在其端口上重新发出。发送会向已连接的客户端广播。",
+      "socketioSendServer": "向连接到所引用的 Socket.IO 服务器的每个客户端广播消息。",
+      "socketioCloseServer": "停止所引用的 Socket.IO 服务器并断开其客户端的连接。",
+      "websocketConnectServer": "启动原始 WebSocket 服务器（端口 + 路径）；记录客户端发送的每个帧并在其 message 端口上重新发出。发送会向已连接的客户端广播。",
+      "websocketSendServer": "向连接到所引用的 WebSocket 服务器的每个客户端广播一个帧。",
+      "websocketCloseServer": "停止所引用的 WebSocket 服务器并断开其客户端的连接。",
+      "mqttConnect": "Opens a long-lived MQTT connection from a bound request and subscribes to its topic; re-emits each received message on its `message` port.",
+      "mqttSend": "Publishes a payload on an already-open MQTT connection (to its topic).",
+      "mqttClose": "Closes an already-open MQTT connection."
     },
     "legend": {
       "title": "图例",
@@ -1513,6 +1566,41 @@
       "allLogs": "All logs",
       "note": "`--out file` also writes the run-log to a file.",
       "projectPlaceholder": "<project.restorm>"
+    },
+    "socketio": {
+      "connectionNameLabel": "Connection name",
+      "connectionNamePlaceholder": "connection name",
+      "eventPlaceholder": "event",
+      "addEvent": "Add event",
+      "connected": "connected",
+      "others": "others",
+      "connection": "connection",
+      "pickConnection": "— pick a connection —",
+      "channelLabel": "Channel name",
+      "payload": "payload",
+      "payloadModalTitle": "Edit payload",
+      "started": "已启动"
+    },
+    "websocket": {
+      "message": "message"
+    },
+    "grpc": {
+      "message": "message"
     }
+  },
+  "mqtt": {
+    "qos": "QoS",
+    "retain": "Retain",
+    "subscribeOnConnect": "Subscribe on connect",
+    "clientId": "Client ID",
+    "clientIdPlaceholder": "auto-generated if empty",
+    "username": "Username",
+    "password": "Password",
+    "keepalive": "Keepalive (s)",
+    "lwt": "Last Will & Testament",
+    "topic": "Topic",
+    "lwtTopicPlaceholder": "will/topic",
+    "lwtPayload": "Payload",
+    "lwtPayloadPlaceholder": "will message"
   }
 }

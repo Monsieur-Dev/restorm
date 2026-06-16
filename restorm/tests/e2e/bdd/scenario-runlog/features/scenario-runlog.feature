@@ -54,4 +54,11 @@ Feature: Scenario run-log end-to-end
       | Code Lua       |
       | Code Ruby      |
       | Code R         |
+      | Socket.IO      |
+      | WebSocket      |
+      | gRPC unary     |
+      | gRPC server stream |
+      | gRPC client stream |
+      | gRPC bidi      |
+      | MQTT           |
       | Main           |

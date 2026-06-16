@@ -86,6 +86,37 @@ export type ScenarioNodeKind =
   // Requests & composition
   | 'httpRequest'
   | 'runScenario'
+  // Socket.IO — a long-lived connection (`socketioConnect`) that re-emits each
+  // received event on its matching output port (switch-like), plus the two
+  // actions that drive an already-declared connection: `socketioSend` emits a
+  // message on it, `socketioClose` stops it. Send / close reference the connect
+  // node by id.
+  | 'socketioConnect'
+  | 'socketioSend'
+  | 'socketioClose'
+  // Raw WebSocket — the same connect/send/close trio as Socket.IO, but a raw WS
+  // has no named events: `websocketConnect` re-emits EVERY received frame on a
+  // single `message` output (no per-event ports), `websocketSend` sends a raw
+  // payload (no channel), `websocketClose` stops it.
+  | 'websocketConnect'
+  | 'websocketSend'
+  | 'websocketClose'
+  // MQTT — the same connect/publish/close trio as raw WebSocket (no named
+  // events). `mqttConnect` opens a long-lived broker connection AND subscribes
+  // to the bound request's topic, re-emitting EVERY received message on a single
+  // `message` output; `mqttSend` publishes a payload to the connection's topic;
+  // `mqttClose` stops it.
+  | 'mqttConnect'
+  | 'mqttSend'
+  | 'mqttClose'
+  // gRPC streaming — the same connect/send/close trio. A `grpcConnect` opens a
+  // streaming RPC (server / client / bidi, inferred from the bound request's
+  // call type) and re-emits EVERY received frame on a single `message` output;
+  // `grpcSend` writes a request message (client / bidi), `grpcClose` half-closes
+  // it. Send / close reference the connect node by id.
+  | 'grpcConnect'
+  | 'grpcSend'
+  | 'grpcClose'
   // Iteration & collections
   | 'forEach'
   | 'aggregate'

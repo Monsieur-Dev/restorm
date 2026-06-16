@@ -16,6 +16,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
 - message: ⚪ [<time>] start log
   data:
     message: Hello {{hello}}
@@ -33,6 +34,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
 - message: 🔵 [<time>] Hello world
   data:
     hello: world
@@ -48,6 +50,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: ⚪ [<time>] done log
   data:
     value:
@@ -64,6 +67,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
 - message: ⚪ [<time>] start log
   data:
     message: foo {{.}}
@@ -91,6 +95,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
     in: true
 - message: "🔵 [<time>] Anwser to the universe : "
   data:
@@ -107,6 +112,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: ⚪ [<time>] done log
   data:
     value:
@@ -123,6 +129,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
 - message: ⚪ [<time>] start log
   data:
     message: "Marty ! It's time ! "
@@ -147,6 +154,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
     in: true
 - message: 🔵 [<time>] Fire 🔥
   data:
@@ -163,6 +171,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: ⚪ [<time>] done log
   data:
     value:
@@ -179,6 +188,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
 - message: ⚪ [<time>] start log
   data:
     message: "Selected color: {{color}}"
@@ -197,6 +207,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
 - message: "🔵 [<time>] Selected color: #000000"
   data:
     hello: world
@@ -212,6 +223,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: ⚪ [<time>] done log
   data:
     value:
@@ -228,6 +240,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
 - message: ⚪ [<time>] start log
   data:
     message: Bienvenue au Moulin {{moulin}}
@@ -246,6 +259,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
 - message: 🔵 [<time>] Bienvenue au Moulin FF0000
   data:
     hello: world
@@ -261,6 +275,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: ⚪ [<time>] done log
   data:
     value:
@@ -277,6 +292,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
 - message: ⚪ [<time>] start log
   data:
     message: "Original expression: {{expression}}"
@@ -295,6 +311,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
 - message: "🔵 [<time>] Original expression: My expression"
   data:
     hello: world
@@ -310,6 +327,7 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: ⚪ [<time>] done log
   data:
     value:
@@ -326,6 +344,7 @@
         variables:
           baseUrl: http://localhost:5110
           clientId: VALID_CLIENT_ID
+          socketUrl: http://localhost:3001
 - message: ⚪ [<time>] start log
   data:
     message: "Selected environment : {{name}}"
@@ -335,12 +354,14 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: "🔵 [<time>] Selected environment : localhost"
   data:
     name: localhost
     variables:
       baseUrl: http://localhost:5110
       clientId: VALID_CLIENT_ID
+      socketUrl: http://localhost:3001
 - message: ⚪ [<time>] done log
   data:
     value:
@@ -348,4 +369,5 @@
       variables:
         baseUrl: http://localhost:5110
         clientId: VALID_CLIENT_ID
+        socketUrl: http://localhost:3001
 - message: 🔵 [<time>] ■ Logs
