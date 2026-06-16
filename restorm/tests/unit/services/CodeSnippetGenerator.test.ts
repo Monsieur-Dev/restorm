@@ -83,3 +83,37 @@ describe('CodeSnippetGenerator — WebSocket / Socket.IO', () => {
     expect(md).toContain('chat')
   })
 })
+
+describe('CodeSnippetGenerator — MQTT', () => {
+  const base: Partial<FullRequestData> = {
+    requestType: 'websocket', url: 'mqtt://localhost:1883', headers: [],
+    protocol: 'mqtt', event: 'restorm/demo/chat', message: '{"hello":"world"}'
+  }
+
+  // Guards the casing/flag trap: the template branches on `isMQTT` / `isSubscribe`
+  // / `isPublish`, so a generator that forgets any of them renders an empty block.
+  it('renders a non-empty MQTT snippet with subscribe + publish on the topic', () => {
+    const md = run(base, 'mqtt://localhost:1883')
+    expect(md).toContain("import mqtt from 'mqtt'")
+    expect(md).toContain("client.subscribe('restorm/demo/chat'")
+    expect(md).toContain("client.publish('restorm/demo/chat'")
+  })
+
+  it('parses host + port for the paho (Python) connect call', () => {
+    const md = run(base, 'mqtt://localhost:1883')
+    expect(md).toContain('client.connect("localhost", 1883')
+  })
+
+  it('omits the subscribe block when the request opts out of subscribing', () => {
+    const md = run({ ...base, mqttSubscribe: false }, 'mqtt://localhost:1883')
+    // (the template still carries a commented `// client.subscribe('topic')`
+    // example — assert the real topic subscribe call is gone, not the comment)
+    expect(md).not.toContain("client.subscribe('restorm/demo/chat'")
+    expect(md).toContain("client.publish('restorm/demo/chat'")
+  })
+
+  it('wires username/password into the paho auth call', () => {
+    const md = run({ ...base, username: 'restorm', password: 'restorm' }, 'mqtt://localhost:1883')
+    expect(md).toContain('client.username_pw_set("restorm", "restorm")')
+  })
+})

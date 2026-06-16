@@ -920,6 +920,25 @@ collections:
                 position:
                   x: 1900
                   'y': 1860
+              - id: c0e256d1-88c4-4263-93ba-49d91bf20858
+                kind: runScenario
+                config:
+                  scenarioId: 45ea68ab-98b8-47f5-9120-33d24eaa3b2b
+                  label: MQTT
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: result
+                    name: result
+                    dataType: any
+                    role: response
+                    flow: both
+                position:
+                  x: 580
+                  'y': 2000
             edges:
               - id: e-1780418276241-f2q3hz
                 from:
@@ -1202,6 +1221,13 @@ collections:
                   portId: done
                 to:
                   nodeId: adb271c8-6fba-47b8-a5b1-e36acdee72b4
+                  portId: in
+              - id: 43336c19-a82d-40b9-8317-2e67fe071a6e
+                from:
+                  nodeId: adb271c8-6fba-47b8-a5b1-e36acdee72b4
+                  portId: done
+                to:
+                  nodeId: c0e256d1-88c4-4263-93ba-49d91bf20858
                   portId: in
             id: c1573ce0-985c-44b5-b5d4-e081de2d4303
             name: Main
@@ -18374,6 +18400,7 @@ collections:
                       requestId: 12bb3851-cecd-4e53-bf25-05236b82d6d0
                       connectionName: Server
                       label: Server listen
+                      id: a52655ab-55a9-4c58-b06a-038e184f7636
                     inputs:
                       - id: in
                         name: ''
@@ -18495,14 +18522,14 @@ collections:
                 items:
                   - documentation: ''
                     tags: []
+                    id: 12bb3851-cecd-4e53-bf25-05236b82d6d0
                     name: WS Echo Server
                     url: localhost:3002
                     protocol: websocket
                     message: '{"hello":"from server"}'
                     headers: []
-                    type: websocket
-                    id: 12bb3851-cecd-4e53-bf25-05236b82d6d0
                     server: true
+                    type: websocket
               - type: scenario
                 tags: []
                 params: []
@@ -18926,6 +18953,165 @@ collections:
                 id: cce969f6-eca8-41e8-8f18-77ac6bc0a946
                 name: gRPC client stream
                 items: []
+              - type: scenario
+                tags: []
+                params: []
+                nodes:
+                  - id: 23af045a-5282-45f2-9bdf-86cb17c0c42c
+                    kind: mqttConnect
+                    config:
+                      requestId: 73a4402e-f5ab-4470-8e2a-4e485034eac7
+                      connectionName: Chat
+                      label: MQTT Chat
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: connected
+                        name: connected
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 12
+                      'y': 259
+                  - id: b5757e26-c59a-46c8-8d7b-d4246c0378d4
+                    kind: mqttSend
+                    config:
+                      connectionNodeId: 23af045a-5282-45f2-9bdf-86cb17c0c42c
+                      payload: '{"hello":"from mqtt scenario"}'
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: payload
+                        name: payload
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 419
+                      'y': 245
+                  - id: c6b21f87-18b8-4fcd-8d06-ad8088e55ed3
+                    kind: log
+                    config:
+                      message: received
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: string
+                      - id: data
+                        name: data
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 419
+                      'y': 12
+                  - id: bdf0e643-f7f7-4ff1-b082-4de2419174be
+                    kind: wait
+                    config:
+                      durationMs: 500
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: duration
+                        name: duration
+                        dataType: duration
+                    outputs: []
+                    position:
+                      x: 813
+                      'y': 283
+                  - id: 330c8b06-d4b3-461f-93a7-3d033532e8d7
+                    kind: mqttClose
+                    config:
+                      connectionNodeId: 23af045a-5282-45f2-9bdf-86cb17c0c42c
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs: []
+                    position:
+                      x: 1177
+                      'y': 273
+                  - id: 0ef1eb56-c399-4145-afea-b1f798409246
+                    kind: output
+                    config:
+                      name: lastMessage
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: value
+                        name: value
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 419
+                      'y': 456
+                edges:
+                  - id: 77eaca7d-eb26-4798-9e50-0bb13b1dd601
+                    from:
+                      nodeId: 23af045a-5282-45f2-9bdf-86cb17c0c42c
+                      portId: connected
+                    to:
+                      nodeId: b5757e26-c59a-46c8-8d7b-d4246c0378d4
+                      portId: in
+                  - id: 2eb61dc0-7c12-4c6b-aebd-cd8a332fa3b5
+                    from:
+                      nodeId: 23af045a-5282-45f2-9bdf-86cb17c0c42c
+                      portId: message
+                    to:
+                      nodeId: c6b21f87-18b8-4fcd-8d06-ad8088e55ed3
+                      portId: data
+                    selector: .
+                  - id: 212c4483-ccbf-4a6e-aa4c-96f59237c7b1
+                    from:
+                      nodeId: b5757e26-c59a-46c8-8d7b-d4246c0378d4
+                      portId: done
+                    to:
+                      nodeId: bdf0e643-f7f7-4ff1-b082-4de2419174be
+                      portId: in
+                  - id: 9a988190-a16d-4d0e-ab89-207f0e5b980e
+                    from:
+                      nodeId: bdf0e643-f7f7-4ff1-b082-4de2419174be
+                      portId: done
+                    to:
+                      nodeId: 330c8b06-d4b3-461f-93a7-3d033532e8d7
+                      portId: in
+                  - id: b5cf03e4-a795-4980-a064-ab181eaf8545
+                    from:
+                      nodeId: 23af045a-5282-45f2-9bdf-86cb17c0c42c
+                      portId: message
+                    to:
+                      nodeId: 0ef1eb56-c399-4145-afea-b1f798409246
+                      portId: value
+                    selector: .
+                id: 45ea68ab-98b8-47f5-9120-33d24eaa3b2b
+                name: MQTT
+                items:
+                  - documentation: ''
+                    tags: []
+                    id: 73a4402e-f5ab-4470-8e2a-4e485034eac7
+                    name: MQTT Chat
+                    url: mqtt://localhost:1883
+                    protocol: mqtt
+                    event: restorm/demo/chat
+                    message: '{"hello":"from mqtt scenario"}'
+                    headers: []
+                    type: websocket
           - type: scenario
             tags: []
             params: []
@@ -19767,7 +19953,10 @@ collections:
                   'y': 2800
               - id: ea72d492-7219-4247-bb22-6f0289edebc5
                 kind: listOp
-                config: {}
+                config:
+                  value:
+                    type: variable
+                    value: test
                 inputs:
                   - id: in
                     name: ''
@@ -20120,6 +20309,57 @@ collections:
                 position:
                   x: 1000
                   'y': 3600
+              - id: 33870105-9881-4f35-b2da-8b72f78ced7d
+                kind: mqttConnect
+                config:
+                  connectionName: Chat
+                  label: MQTT connect
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs:
+                  - id: connected
+                    name: connected
+                    dataType: any
+                    flow: signal
+                  - id: message
+                    name: message
+                    dataType: any
+                    flow: both
+                position:
+                  x: 40
+                  'y': 4640
+              - id: 2dbf018a-0d8c-4d7b-af83-da00749324b1
+                kind: mqttSend
+                config:
+                  label: MQTT send
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                  - id: payload
+                    name: payload
+                    dataType: any
+                outputs: []
+                position:
+                  x: 520
+                  'y': 4640
+              - id: 46c20d9e-8f6f-4749-9e19-81c0890f267c
+                kind: mqttClose
+                config:
+                  label: MQTT close
+                inputs:
+                  - id: in
+                    name: ''
+                    dataType: any
+                    flow: signal
+                outputs: []
+                position:
+                  x: 1000
+                  'y': 4640
             edges: []
             id: cfb401ce-df62-4d41-88e2-8989206abe2f
             name: Bestiary

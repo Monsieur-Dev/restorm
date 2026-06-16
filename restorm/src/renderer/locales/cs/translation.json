@@ -252,7 +252,8 @@
         "scenario": "Scénář",
         "socketioServer": "Server Socket.IO",
         "websocketServer": "Server WebSocket",
-        "socketio": "Požadavek Socket.IO"
+        "socketio": "Požadavek Socket.IO",
+        "mqtt": "MQTT request"
       }
     },
     "deleteConfirm": {

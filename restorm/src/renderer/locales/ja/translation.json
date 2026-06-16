@@ -249,7 +249,8 @@
         "scenario": "シナリオ",
         "socketioServer": "Socket.IO サーバー",
         "websocketServer": "WebSocket サーバー",
-        "socketio": "Socket.IO リクエスト"
+        "socketio": "Socket.IO リクエスト",
+        "mqtt": "MQTT request"
       }
     },
     "deleteConfirm": {

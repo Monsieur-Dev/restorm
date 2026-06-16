@@ -249,7 +249,8 @@
         "scenario": "场景",
         "socketioServer": "Socket.IO 服务器",
         "websocketServer": "WebSocket 服务器",
-        "socketio": "Socket.IO 请求"
+        "socketio": "Socket.IO 请求",
+        "mqtt": "MQTT request"
       }
     },
     "deleteConfirm": {

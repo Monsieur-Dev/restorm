@@ -60,4 +60,5 @@ Feature: Scenario run-log end-to-end
       | gRPC server stream |
       | gRPC client stream |
       | gRPC bidi      |
+      | MQTT           |
       | Main           |

@@ -250,7 +250,8 @@
         "scenario": "Σενάριο",
         "socketioServer": "Διακομιστής Socket.IO",
         "websocketServer": "Διακομιστής WebSocket",
-        "socketio": "Αίτημα Socket.IO"
+        "socketio": "Αίτημα Socket.IO",
+        "mqtt": "MQTT request"
       }
     },
     "deleteConfirm": {

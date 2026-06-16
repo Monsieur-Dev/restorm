@@ -1,0 +1,42 @@
+collections:
+  - folderType: environment
+    name: MQTT Playground
+    documentation: |-
+      # MQTT Playground
+
+      A self-contained MQTT playground that talks to the Mosquitto broker the
+      test stack hosts on `localhost:1883` (`tests/docker`).
+
+      - **MQTT Chat** connects to the broker, subscribes to its topic
+        `restorm/e2e/chat` on connect, and its Send button publishes the
+        configured payload to that same topic — which round-trips straight back
+        through the subscription, so a single request both sends and receives.
+    tags: []
+    configuration: {}
+    environments:
+      - name: Default
+        variables:
+          - key: brokerUrl
+            value:
+              type: string
+              value: mqtt://localhost:1883
+            description: The locally-hosted Mosquitto broker
+        id: f4d1b2c0-7e3a-4c19-9b6e-2a8d51e0c7a1
+    items:
+      - type: websocket
+        name: MQTT Chat
+        documentation: Connect to the local broker, subscribe + publish on `restorm/e2e/chat`.
+        tags:
+          - mqtt
+        url: '{{brokerUrl}}'
+        protocol: mqtt
+        event: restorm/e2e/chat
+        message: |-
+          {
+            "hello": "from mqtt"
+          }
+        headers: []
+        id: 9c1f0a52-3b6d-4e88-bb70-1d6f4a2e9c33
+    id: c8e2a9d4-5f17-43b0-8c2a-6e9b7d3f1a02
+    fileFormatVersion: 1
+_projectUuid: a1b2c3d4-e5f6-4708-9a0b-1c2d3e4f5061

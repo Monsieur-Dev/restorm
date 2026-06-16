@@ -15,6 +15,9 @@ import type { AddChildKind } from '../MainView/Sidebar/contextMenuBuilder'
 export interface ScenarioAddEntry {
   kind: AddChildKind
   badge: BadgeType
+  /** Server-mode badge (the two-part "hosts a server" pill) — set for the
+   * websocket-server / socketio-server entries, matching the sidebar menu. */
+  mode?: 'server'
   /** i18n key (shared with the sidebar menu) + English fallback. */
   labelKey: string
   defaultLabel: string
@@ -42,6 +45,18 @@ export const SCENARIO_ADD_REQUEST_GROUPS: ScenarioAddEntry[][] = [
     { kind: 'grpc-client-stream', badge: 'C-STR', labelKey: 'sidebar.contextMenu.add.grpcClientStream', defaultLabel: 'gRPC client-streaming request' },
     { kind: 'grpc-bidi', badge: 'BIDI', labelKey: 'sidebar.contextMenu.add.grpcBidi', defaultLabel: 'gRPC bidirectional request' }
   ],
+  // Streaming protocols — their CONNECT comes from creating a request (client or
+  // SERVER), mirroring both the sidebar menu and the gRPC entries above: the
+  // matching `*Connect` node is dropped bound to the new request (a connect node
+  // is useless unbound — its executor throws without a `requestId`). The
+  // send/close actions below drive an ALREADY-declared connection.
+  [
+    { kind: 'websocket', badge: 'WS', labelKey: 'sidebar.contextMenu.add.websocket', defaultLabel: 'WebSocket request' },
+    { kind: 'websocket-server', badge: 'WS', mode: 'server', labelKey: 'sidebar.contextMenu.add.websocketServer', defaultLabel: 'WebSocket server' },
+    { kind: 'socketio', badge: 'SIO', labelKey: 'sidebar.contextMenu.add.socketio', defaultLabel: 'Socket.IO request' },
+    { kind: 'socketio-server', badge: 'SIO', mode: 'server', labelKey: 'sidebar.contextMenu.add.socketioServer', defaultLabel: 'Socket.IO server' },
+    { kind: 'mqtt', badge: 'MQTT', labelKey: 'sidebar.contextMenu.add.mqtt', defaultLabel: 'MQTT request' }
+  ],
   [
     { kind: 'graphql', badge: 'QUERY', labelKey: 'sidebar.contextMenu.add.graphql', defaultLabel: 'GraphQL request' },
     { kind: 'soap', badge: 'SOAP', labelKey: 'sidebar.contextMenu.add.soap', defaultLabel: 'SOAP request' },
@@ -59,11 +74,15 @@ export const SCENARIO_ADD_SCENARIO_ENTRY: ScenarioAddEntry = {
 
 /** Socket.IO scenario ACTION entries (a section of the "Add" submenu). Unlike
  * the request groups, these don't create a request — they drop the matching
- * scenario action node directly. Their badge is the green "SIO" pill with the
- * action's codicon inside (connect / send / close). */
+ * scenario action node directly, driving an ALREADY-declared connection. Their
+ * badge is the green "SIO" pill with the action's codicon inside. There is no
+ * `connect` action: a connection is created by the Socket.IO request entries
+ * (client / server) above — a standalone connect node is useless (its executor
+ * throws without a bound `requestId`), so connect mirrors gRPC's request-only
+ * creation. */
 export interface ScenarioAddActionEntry {
   /** The scenario node kind to create. */
-  kind: 'socketioConnect' | 'socketioSend' | 'socketioClose'
+  kind: 'socketioSend' | 'socketioClose'
   /** Codicon glyph shown inside the SIO badge. */
   icon: string
   labelKey: string
@@ -71,35 +90,33 @@ export interface ScenarioAddActionEntry {
 }
 
 export const SCENARIO_ADD_SOCKETIO_ACTIONS: ScenarioAddActionEntry[] = [
-  { kind: 'socketioConnect', icon: 'plug', labelKey: 'scenario.nodes.socketioConnect', defaultLabel: 'Socket.IO connect' },
   { kind: 'socketioSend', icon: 'arrow-up', labelKey: 'scenario.nodes.socketioSend', defaultLabel: 'Socket.IO send' },
   { kind: 'socketioClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.socketioClose', defaultLabel: 'Socket.IO close' }
 ]
 
-/** Raw-WebSocket action entries — same shape as the Socket.IO section, badged WS. */
+/** Raw-WebSocket action entries — same shape as the Socket.IO section, badged WS
+ * (send / close only; connect comes from the request entries). */
 export interface ScenarioAddWsActionEntry {
-  kind: 'websocketConnect' | 'websocketSend' | 'websocketClose'
+  kind: 'websocketSend' | 'websocketClose'
   icon: string
   labelKey: string
   defaultLabel: string
 }
 
 export const SCENARIO_ADD_WEBSOCKET_ACTIONS: ScenarioAddWsActionEntry[] = [
-  { kind: 'websocketConnect', icon: 'plug', labelKey: 'scenario.nodes.websocketConnect', defaultLabel: 'WebSocket connect' },
   { kind: 'websocketSend', icon: 'arrow-up', labelKey: 'scenario.nodes.websocketSend', defaultLabel: 'WebSocket send' },
   { kind: 'websocketClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.websocketClose', defaultLabel: 'WebSocket close' }
 ]
 
-/** MQTT action entries — same connect/publish/close trio, badged MQTT. */
+/** MQTT action entries — publish / close (connect comes from the request entry), badged MQTT. */
 export interface ScenarioAddMqttActionEntry {
-  kind: 'mqttConnect' | 'mqttSend' | 'mqttClose'
+  kind: 'mqttSend' | 'mqttClose'
   icon: string
   labelKey: string
   defaultLabel: string
 }
 
 export const SCENARIO_ADD_MQTT_ACTIONS: ScenarioAddMqttActionEntry[] = [
-  { kind: 'mqttConnect', icon: 'plug', labelKey: 'scenario.nodes.mqttConnect', defaultLabel: 'MQTT connect' },
   { kind: 'mqttSend', icon: 'arrow-up', labelKey: 'scenario.nodes.mqttSend', defaultLabel: 'MQTT publish' },
   { kind: 'mqttClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.mqttClose', defaultLabel: 'MQTT close' }
 ]
@@ -121,9 +138,10 @@ export const SCENARIO_ADD_GRPC_ACTIONS: ScenarioAddGrpcActionEntry[] = [
   { kind: 'grpcClose', icon: 'debug-disconnect', labelKey: 'scenario.nodes.grpcClose', defaultLabel: 'gRPC close' }
 ]
 
-/** The protocol/scenario badge glyph for a palette entry. */
-export function scenarioAddIcon(badge: BadgeType): ReactNode {
-  return React.createElement(Badge, { type: badge })
+/** The protocol/scenario badge glyph for a palette entry — `mode: 'server'`
+ * renders the two-part "hosts a server" pill (websocket-server / socketio-server). */
+export function scenarioAddIcon(badge: BadgeType, mode?: 'server'): ReactNode {
+  return React.createElement(Badge, { type: badge, ...(mode ? { mode } : {}) })
 }
 
 /** The green "SIO" badge with the action's codicon inside (Socket.IO section). */

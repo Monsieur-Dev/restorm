@@ -85,3 +85,4 @@ tests/e2e/samples/scenarios-e2e-reference-tests.restorm.responses.zip
 tests/e2e/samples/secrets-sources-demo.restorm.responses.zip
 tests/e2e/samples/ws-sample.restorm.responses.zip
 tests/e2e/samples/grpc-sample.restorm.responses.zip
+tests/e2e/samples/mqtt-sample.restorm.responses.zip

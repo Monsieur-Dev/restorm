@@ -250,7 +250,8 @@
         "scenario": "Scénario",
         "socketioServer": "Serveur Socket.IO",
         "websocketServer": "Serveur WebSocket",
-        "socketio": "Requête Socket.IO"
+        "socketio": "Requête Socket.IO",
+        "mqtt": "Requête MQTT"
       }
     },
     "deleteConfirm": {

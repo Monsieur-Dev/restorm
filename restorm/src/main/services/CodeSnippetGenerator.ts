@@ -201,17 +201,41 @@ export function generateCodeSnippets(
       // string) + uses `headers` and, for MQTT, `topic` — pass them all or every
       // branch evaluates false and the snippet renders empty.
       const protocol = data.protocol ?? 'websocket'
+      const isMqtt = protocol === 'mqtt'
+
+      // The MQTT (paho) snippet connects by host+port, not a URL — parse them
+      // from the broker URL (mqtt:// → 1883, mqtts:// → 8883 by default).
+      let mqttHost = host
+      let mqttPort = 1883
+      if (isMqtt) {
+        try {
+          const u = new URL(resolvedUrl)
+          mqttHost = u.hostname || host
+          mqttPort = u.port ? Number(u.port) : (u.protocol === 'mqtts:' || u.protocol === 'wss:' ? 8883 : 1883)
+        } catch {
+          mqttHost = host
+        }
+      }
 
       if (templates.websocketSnippetTemplate) {
         markdown = templates.websocketSnippetTemplate({
           url: resolvedUrl,
           isNativeWebSocket: protocol === 'websocket',
           isSocketIO: protocol === 'socketio',
-          isMqtt: protocol === 'mqtt',
+          // Template branches on `isMQTT` / `isSubscribe` / `isPublish` — a
+          // request both subscribes to its topic (unless opted out) and can
+          // publish its payload via the Send button, so surface both.
+          isMQTT: isMqtt,
+          isSubscribe: data.mqttSubscribe !== false,
+          isPublish: !!message,
           event: data.event ?? '',
           topic: data.event ?? '',
           headers: headers.length > 0 ? headers : null,
-          message: message || null
+          message: message || null,
+          username: data.username ? transformValue(data.username, envContext) : null,
+          password: data.password ? transformValue(data.password, envContext) : '',
+          host: mqttHost,
+          port: mqttPort
         })
       }
       break
