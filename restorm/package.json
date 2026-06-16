@@ -80,6 +80,7 @@
     "luxon": "^3.7.2",
     "moment": "^2.30.1",
     "monaco-editor": "^0.55.1",
+    "mqtt": "^5.15.1",
     "nanoid": "^5.1.11",
     "pyodide": "^0.29.4",
     "quickjs-emscripten": "^0.32.0",

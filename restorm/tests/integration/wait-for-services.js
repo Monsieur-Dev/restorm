@@ -18,7 +18,10 @@ const SERVICES = [
   { name: 'Auth Service', url: 'http://localhost:5110/health' },
   // gRPC (moul/grpcbin) speaks HTTP/2 on 9000 — not HTTP/1, so probe the raw TCP
   // port instead of an HTTP endpoint.
-  { name: 'gRPC (grpcbin)', tcp: { host: 'localhost', port: 9000 } }
+  { name: 'gRPC (grpcbin)', tcp: { host: 'localhost', port: 9000 } },
+  // MQTT (eclipse-mosquitto) speaks the MQTT protocol on 1883 — not HTTP, so
+  // probe the raw TCP port.
+  { name: 'MQTT (mosquitto)', tcp: { host: 'localhost', port: 1883 } }
 ]
 
 const MAX_RETRIES = 60

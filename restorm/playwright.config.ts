@@ -68,6 +68,12 @@ const grpcExecutionTestDir = defineBddConfig({
   outputDir: '.features-gen/grpc-execution'
 })
 
+const mqttExecutionTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/mqtt-execution/features/**/*.feature',
+  steps: ['tests/e2e/bdd/mqtt-execution/steps/**/*.ts', 'tests/e2e/bdd/fixtures/mcp-server.fixture.ts'],
+  outputDir: '.features-gen/mqtt-execution'
+})
+
 const fullyDocumentedPetstoreTestDir = defineBddConfig({
   features: 'tests/e2e/bdd/fully-documented-petstore/features/**/*.feature',
   steps: [
@@ -234,6 +240,11 @@ export default defineConfig({
     {
       name: 'grpc-execution',
       testDir: grpcExecutionTestDir,
+      timeout: 180 * 1000
+    },
+    {
+      name: 'mqtt-execution',
+      testDir: mqttExecutionTestDir,
       timeout: 180 * 1000
     },
     {

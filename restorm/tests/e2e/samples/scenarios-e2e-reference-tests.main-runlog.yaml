@@ -7187,4 +7187,64 @@
 - message: ⚪ [<time>] done runScenario
   data:
     result: {}
+- message: ⚪ [<time>] start runScenario
+  data:
+    scenarioId: <uuid>
+    label: MQTT
+    in: true
+- message: 🔵 [<time>] ▶ MQTT
+- message: ⚪ [<time>] start mqttConnect
+  data:
+    requestId: <uuid>
+    connectionName: Chat
+    label: MQTT Chat
+- message: ⚪ [<time>] done mqttConnect
+- message: ⚪ [<time>] mqtt "Chat" connecting
+- message: ⚪ [<time>] mqtt "Chat" connected
+- message: ⚪ [<time>] start mqttSend
+  data:
+    connectionNodeId: <uuid>
+    payload: '{"hello":"from mqtt scenario"}'
+    in: true
+- message: ⚪ [<time>] done mqttSend
+- message: ⚪ [<time>] start wait
+  data:
+    durationMs: <dynamic-time>
+    in: true
+- message: ⚪ [<time>] start log
+  data:
+    message: received
+    data:
+      hello: from mqtt scenario
+- message: 🔵 [<time>] received
+  data:
+    hello: from mqtt scenario
+- message: ⚪ [<time>] start output
+  data:
+    name: lastMessage
+    value:
+      hello: from mqtt scenario
+- message: ⚪ [<time>] done log
+  data:
+    value:
+      hello: from mqtt scenario
+- message: ⚪ [<time>] done output
+  data:
+    output:lastMessage:
+      hello: from mqtt scenario
+- message: ⚪ [<time>] done wait
+- message: ⚪ [<time>] start mqttClose
+  data:
+    connectionNodeId: <uuid>
+    in: true
+- message: ⚪ [<time>] done mqttClose
+- message: ⚪ [<time>] mqtt "Chat" closed
+- message: 🔵 [<time>] ■ MQTT
+- message: ⚪ [<time>] done runScenario
+  data:
+    result:
+      lastMessage:
+        hello: from mqtt scenario
+    output:lastMessage:
+      hello: from mqtt scenario
 - message: 🔵 [<time>] ■ Main

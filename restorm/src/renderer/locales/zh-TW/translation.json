@@ -249,7 +249,8 @@
         "scenario": "場景",
         "socketioServer": "Socket.IO 伺服器",
         "websocketServer": "WebSocket 伺服器",
-        "socketio": "Socket.IO 要求"
+        "socketio": "Socket.IO 要求",
+        "mqtt": "MQTT request"
       }
     },
     "deleteConfirm": {
@@ -981,7 +982,10 @@
       "websocketClose": "WebSocket close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
-      "grpcClose": "gRPC close"
+      "grpcClose": "gRPC close",
+      "mqttConnect": "MQTT connect",
+      "mqttSend": "MQTT publish",
+      "mqttClose": "MQTT close"
     },
     "comparator": {
       "result": "結果"
@@ -1531,7 +1535,10 @@
       "socketioCloseServer": "停止所參考的 Socket.IO 伺服器並中斷其用戶端的連線。",
       "websocketConnectServer": "啟動原始 WebSocket 伺服器（連接埠 + 路徑）；記錄用戶端傳送的每個訊框並在其 message 連接埠上重新發出。傳送會向已連線的用戶端廣播。",
       "websocketSendServer": "向連線到所參考的 WebSocket 伺服器的每個用戶端廣播一個訊框。",
-      "websocketCloseServer": "停止所參考的 WebSocket 伺服器並中斷其用戶端的連線。"
+      "websocketCloseServer": "停止所參考的 WebSocket 伺服器並中斷其用戶端的連線。",
+      "mqttConnect": "Opens a long-lived MQTT connection from a bound request and subscribes to its topic; re-emits each received message on its `message` port.",
+      "mqttSend": "Publishes a payload on an already-open MQTT connection (to its topic).",
+      "mqttClose": "Closes an already-open MQTT connection."
     },
     "legend": {
       "title": "圖例",
@@ -1580,5 +1587,20 @@
     "grpc": {
       "message": "message"
     }
+  },
+  "mqtt": {
+    "qos": "QoS",
+    "retain": "Retain",
+    "subscribeOnConnect": "Subscribe on connect",
+    "clientId": "Client ID",
+    "clientIdPlaceholder": "auto-generated if empty",
+    "username": "Username",
+    "password": "Password",
+    "keepalive": "Keepalive (s)",
+    "lwt": "Last Will & Testament",
+    "topic": "Topic",
+    "lwtTopicPlaceholder": "will/topic",
+    "lwtPayload": "Payload",
+    "lwtPayloadPlaceholder": "will message"
   }
 }

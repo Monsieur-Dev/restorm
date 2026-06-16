@@ -249,7 +249,8 @@
         "scenario": "시나리오",
         "socketioServer": "Socket.IO 서버",
         "websocketServer": "WebSocket 서버",
-        "socketio": "Socket.IO 요청"
+        "socketio": "Socket.IO 요청",
+        "mqtt": "MQTT request"
       }
     },
     "deleteConfirm": {
@@ -981,7 +982,10 @@
       "websocketClose": "WebSocket close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
-      "grpcClose": "gRPC close"
+      "grpcClose": "gRPC close",
+      "mqttConnect": "MQTT connect",
+      "mqttSend": "MQTT publish",
+      "mqttClose": "MQTT close"
     },
     "comparator": {
       "result": "결과"
@@ -1531,7 +1535,10 @@
       "socketioCloseServer": "참조된 Socket.IO 서버를 중지하고 해당 클라이언트의 연결을 끊습니다.",
       "websocketConnectServer": "원시 WebSocket 서버(포트 + 경로)를 시작합니다. 클라이언트가 보낸 각 프레임을 기록하고 message 포트로 다시 전송합니다. 보내기는 연결된 클라이언트에 브로드캐스트합니다.",
       "websocketSendServer": "참조된 WebSocket 서버에 연결된 모든 클라이언트에 프레임을 브로드캐스트합니다.",
-      "websocketCloseServer": "참조된 WebSocket 서버를 중지하고 해당 클라이언트의 연결을 끊습니다."
+      "websocketCloseServer": "참조된 WebSocket 서버를 중지하고 해당 클라이언트의 연결을 끊습니다.",
+      "mqttConnect": "Opens a long-lived MQTT connection from a bound request and subscribes to its topic; re-emits each received message on its `message` port.",
+      "mqttSend": "Publishes a payload on an already-open MQTT connection (to its topic).",
+      "mqttClose": "Closes an already-open MQTT connection."
     },
     "legend": {
       "title": "범례",
@@ -1580,5 +1587,20 @@
     "grpc": {
       "message": "message"
     }
+  },
+  "mqtt": {
+    "qos": "QoS",
+    "retain": "Retain",
+    "subscribeOnConnect": "Subscribe on connect",
+    "clientId": "Client ID",
+    "clientIdPlaceholder": "auto-generated if empty",
+    "username": "Username",
+    "password": "Password",
+    "keepalive": "Keepalive (s)",
+    "lwt": "Last Will & Testament",
+    "topic": "Topic",
+    "lwtTopicPlaceholder": "will/topic",
+    "lwtPayload": "Payload",
+    "lwtPayloadPlaceholder": "will message"
   }
 }

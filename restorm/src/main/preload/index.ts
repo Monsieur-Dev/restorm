@@ -150,6 +150,19 @@ interface FullRequestData {
   protocol?: string
   event?: string
   message?: string
+  server?: boolean
+  // MQTT specific (protocol === 'mqtt'; `event` carries the topic)
+  qos?: number
+  retain?: boolean
+  clientId?: string
+  username?: string
+  password?: string
+  keepalive?: number
+  mqttSubscribe?: boolean
+  lwtTopic?: string
+  lwtPayload?: string
+  lwtQos?: number
+  lwtRetain?: boolean
 }
 
 /** Save result type */

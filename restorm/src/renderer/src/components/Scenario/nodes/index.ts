@@ -42,6 +42,7 @@ import { TimerNodeBox } from './TimerNodeBox'
 import { CodeNodeBox } from './CodeNodeBox'
 import { SocketioConnectNodeBox, SocketioSendNodeBox, SocketioCloseNodeBox } from './SocketioNodeBoxes'
 import { WebsocketConnectNodeBox, WebsocketSendNodeBox, WebsocketCloseNodeBox } from './WebsocketNodeBoxes'
+import { MqttConnectNodeBox, MqttSendNodeBox, MqttCloseNodeBox } from './MqttNodeBoxes'
 import { GrpcConnectNodeBox, GrpcSendNodeBox, GrpcCloseNodeBox } from './GrpcNodeBoxes'
 
 export type { ScenarioNodeBoxData, ScenarioNodeBoxType, ScenarioNodeCell } from './ScenarioNodeBoxBase'
@@ -65,6 +66,9 @@ const SCENARIO_NODE_COMPONENTS: Record<ScenarioNodeKind, NodeBoxComponent> = {
   websocketConnect: WebsocketConnectNodeBox,
   websocketSend: WebsocketSendNodeBox,
   websocketClose: WebsocketCloseNodeBox,
+  mqttConnect: MqttConnectNodeBox,
+  mqttSend: MqttSendNodeBox,
+  mqttClose: MqttCloseNodeBox,
   grpcConnect: GrpcConnectNodeBox,
   grpcSend: GrpcSendNodeBox,
   grpcClose: GrpcCloseNodeBox,

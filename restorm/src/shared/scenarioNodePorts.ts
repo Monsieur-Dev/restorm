@@ -102,6 +102,15 @@ const PORTS: Partial<Record<ScenarioNodeKind, KindPorts>> = {
   websocketSend: { inputs: [{ id: 'payload', name: 'payload' }], outputs: [] },
   // Raw WebSocket close: closes the named connection. Sequences via `done`.
   websocketClose: { inputs: [], outputs: [] },
+  // MQTT connect: like websocketConnect — MQTT has no named events, so every
+  // received message re-emits on a SINGLE `message` port. `connected` fires once
+  // the broker accepts + the topic is subscribed; `done` fires on close.
+  mqttConnect: { inputs: [], outputs: [{ id: 'connected', name: 'connected', flow: 'signal' }, { id: 'message', name: 'message', flow: 'both' }] },
+  // MQTT publish: publishes `payload` on the connection named by
+  // `config.connectionNodeId` (to that connection's topic). Sequences via `done`.
+  mqttSend: { inputs: [{ id: 'payload', name: 'payload' }], outputs: [] },
+  // MQTT close: closes the named connection. Sequences via `done`.
+  mqttClose: { inputs: [], outputs: [] },
   // gRPC streaming connect: like websocketConnect — a streaming RPC has no named
   // events, so every received frame re-emits on a SINGLE `message` port.
   // `connected` fires once the call opens; `done` fires when the stream ends.

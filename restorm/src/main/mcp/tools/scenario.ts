@@ -18,6 +18,7 @@ import { collectionStore } from '../../services/CollectionStore'
 import type { Scenario } from '../../../shared/models/Scenario'
 import type { ScenarioNode, ScenarioEdge, ScenarioNodeKind, ScenarioPort } from '../../../shared/types/scenario'
 import { defaultPortsForKind, isValidScenarioConnection, outputPortFlow, inputPortFlow, deriveRunScenarioPorts, socketioConnectEventPorts } from '../../../shared/scenarioNodePorts'
+import { layoutScenarioGraph, SCENARIO_NODE_FALLBACK_WIDTH, SCENARIO_NODE_FALLBACK_HEIGHT } from '../../../shared/scenarioGraphLayout'
 import { SCENARIO_KIND_DOCS, VALUE_TYPE_DOCS } from '../../../shared/scenarioKindDocs'
 import { STATIC_PREVIEW_KINDS, staticScenarioPreview, singleDeepPath, singleTopLevelKey, portPreviewValue, expectsObjectInput, type StaticPreviewEdge } from '../../../shared/utils/scenarioStaticPreview'
 import { broadcastTreeReplace } from './import'
@@ -26,6 +27,7 @@ const SCENARIO_KINDS = [
   'input', 'output', 'if', 'switch', 'httpRequest', 'runScenario',
   'socketioConnect', 'socketioSend', 'socketioClose',
   'websocketConnect', 'websocketSend', 'websocketClose',
+  'mqttConnect', 'mqttSend', 'mqttClose',
   'grpcConnect', 'grpcSend', 'grpcClose', 'forEach', 'for', 'while', 'doWhile',
   'aggregate', 'map', 'filter', 'addToList', 'removeFromList', 'wait', 'waitUntil', 'now', 'timer', 'arithmetic', 'comparator', 'boolean', 'object',
   'setVariable', 'getVariable', 'transform', 'code', 'cast', 'regex', 'json', 'xml', 'yaml', 'crypto', 'jwt', 'datetime',
@@ -163,6 +165,33 @@ function describeScenarioKind(kind: ScenarioNodeKind): Record<string, unknown> {
   }
 }
 
+/** Lay out every node in a scenario with an ELK layered (left→right) pass,
+ * mutating each node's position in place. Prefers the open editor's measured
+ * rects (pushed into `layoutCache`); for an unopened scenario it estimates each
+ * box from its port counts — so an agent can tidy a graph it just built without
+ * the tab being open (the renderer re-runs the measured layout on open anyway).
+ * Returns the number of nodes that actually moved. */
+async function arrangeScenario(scenario: Scenario): Promise<number> {
+  const rects = layoutCache.get(scenario.id)
+  const inputNodes = scenario.nodes.map((n) => {
+    const measured = rects?.[n.id]
+    if (measured && measured.width > 0 && measured.height > 0) {
+      return { id: n.id, width: measured.width, height: measured.height }
+    }
+    const { inputs, outputs } = effectivePorts(n)
+    const rows = Math.max(inputs.length, outputs.length, 1)
+    return { id: n.id, width: SCENARIO_NODE_FALLBACK_WIDTH, height: Math.max(SCENARIO_NODE_FALLBACK_HEIGHT, 56 + rows * 34) }
+  })
+  const inputEdges = scenario.edges.map((e) => ({ id: e.id, source: e.from.nodeId, target: e.to.nodeId }))
+  const positions = await layoutScenarioGraph(inputNodes, inputEdges)
+  let moved = 0
+  for (const n of scenario.nodes) {
+    const p = positions.get(n.id)
+    if (p && (n.position.x !== p.x || n.position.y !== p.y)) { n.position = { x: p.x, y: p.y }; moved++ }
+  }
+  return moved
+}
+
 export function registerScenarioTools(mcp: McpService): void {
   mcp.registerTool(
     'describe_scenario_kinds',
@@ -280,12 +309,15 @@ export function registerScenarioTools(mcp: McpService): void {
         '**Call `describe_scenario_kinds` first** for each kind\'s purpose, ports, and `config` keys. ' +
         'Default input/output ports for the kind are stamped automatically. `config` is the per-kind ' +
         'bag — e.g. an `httpRequest` node binds via `{ requestId, label }`, `runScenario` via `{ scenarioId, label }`. ' +
-        'Returns `{ nodeId, kind, position, inputs, outputs }`.',
+        '`x`/`y` are optional — omit them (or pass `arrange: true`) to let the layout place the box: with `arrange` the ' +
+        'whole graph is re-laid out left→right after the box is added, so you can build a scenario without computing ' +
+        'positions. Returns `{ nodeId, kind, position, inputs, outputs, arranged }`.',
       inputSchema: {
         scenarioId: z.string().min(1).describe('Scenario to add the node to.'),
         kind: z.enum(SCENARIO_KINDS).describe('Node kind.'),
-        x: z.coerce.number().optional().describe('X position in graph coords (default 0).'),
-        y: z.coerce.number().optional().describe('Y position in graph coords (default 0).'),
+        x: z.coerce.number().optional().describe('X position in graph coords (default 0; ignored when arrange=true).'),
+        y: z.coerce.number().optional().describe('Y position in graph coords (default 0; ignored when arrange=true).'),
+        arrange: z.boolean().optional().describe('Re-run the ELK left→right auto-layout over the whole scenario after adding the box (positions become automatic).'),
         config: z.record(z.string(), z.unknown()).optional().describe('Per-kind config bag.')
       } as Record<string, unknown>
     },
@@ -302,8 +334,38 @@ export function registerScenarioTools(mcp: McpService): void {
       const { inputs, outputs } = defaultPortsForKind(kind)
       const node: ScenarioNode = { id: randomUUID(), kind, config, inputs, outputs, position: { x, y } }
       scenario.nodes.push(node)
+      const reply = (arranged: boolean): ReturnType<typeof jsonReply> =>
+        jsonReply({ nodeId: node.id, kind, position: node.position, inputs, outputs, arranged })
+      // Fast path stays synchronous (the layout is async); only `arrange`
+      // returns a Promise — the MCP SDK awaits either.
+      if (args['arrange'] === true) {
+        return arrangeScenario(scenario).then(() => { broadcastScenario(scenario); return reply(true) })
+      }
       broadcastScenario(scenario)
-      return jsonReply({ nodeId: node.id, kind, position: node.position, inputs, outputs })
+      return reply(false)
+    }
+  )
+
+  mcp.registerTool(
+    'arrange_scenario',
+    {
+      title: 'Auto-arrange a scenario',
+      description:
+        'Re-lay out an entire scenario with an ELK layered (left→right) pass so boxes never overlap and the flow reads ' +
+        'in execution order — entry points on the left, downstream actions to the right. Uses the open editor\'s measured ' +
+        'box sizes when the scenario is open, else estimates each box from its port count. Ideal right after building a ' +
+        'graph node-by-node (every box defaulted to 0,0). Returns `{ scenarioId, moved }` (how many boxes were repositioned).',
+      inputSchema: {
+        scenarioId: z.string().min(1).describe('Scenario to auto-arrange.')
+      } as Record<string, unknown>
+    },
+    async (args) => {
+      const id = typeof args['scenarioId'] === 'string' ? args['scenarioId'] : ''
+      const scenario = findScenario(id)
+      if (!scenario) return errorReply(`No scenario with id ${id}`)
+      const moved = await arrangeScenario(scenario)
+      broadcastScenario(scenario)
+      return jsonReply({ scenarioId: id, moved })
     }
   )
 

@@ -251,7 +251,8 @@
         "scenario": "Сценарио",
         "socketioServer": "Socket.IO сервер",
         "websocketServer": "WebSocket сервер",
-        "socketio": "Socket.IO захтев"
+        "socketio": "Socket.IO захтев",
+        "mqtt": "MQTT request"
       }
     },
     "deleteConfirm": {
@@ -983,7 +984,10 @@
       "websocketClose": "WebSocket close",
       "grpcConnect": "gRPC connect",
       "grpcSend": "gRPC send",
-      "grpcClose": "gRPC close"
+      "grpcClose": "gRPC close",
+      "mqttConnect": "MQTT connect",
+      "mqttSend": "MQTT publish",
+      "mqttClose": "MQTT close"
     },
     "comparator": {
       "result": "резултат"
@@ -1533,7 +1537,10 @@
       "socketioCloseServer": "Зауставља наведени Socket.IO сервер и прекида везу са његовим клијентима.",
       "websocketConnectServer": "Покреће сирови WebSocket сервер (порт + путања); бележи сваки примљени frame и поново га емитује на свом message порту. Слање емитује повезаним клијентима.",
       "websocketSendServer": "Емитује frame свим клијентима повезаним на наведени WebSocket сервер.",
-      "websocketCloseServer": "Зауставља наведени WebSocket сервер и прекида везу са његовим клијентима."
+      "websocketCloseServer": "Зауставља наведени WebSocket сервер и прекида везу са његовим клијентима.",
+      "mqttConnect": "Opens a long-lived MQTT connection from a bound request and subscribes to its topic; re-emits each received message on its `message` port.",
+      "mqttSend": "Publishes a payload on an already-open MQTT connection (to its topic).",
+      "mqttClose": "Closes an already-open MQTT connection."
     },
     "legend": {
       "title": "Легенда",
@@ -1582,5 +1589,20 @@
     "grpc": {
       "message": "message"
     }
+  },
+  "mqtt": {
+    "qos": "QoS",
+    "retain": "Retain",
+    "subscribeOnConnect": "Subscribe on connect",
+    "clientId": "Client ID",
+    "clientIdPlaceholder": "auto-generated if empty",
+    "username": "Username",
+    "password": "Password",
+    "keepalive": "Keepalive (s)",
+    "lwt": "Last Will & Testament",
+    "topic": "Topic",
+    "lwtTopicPlaceholder": "will/topic",
+    "lwtPayload": "Payload",
+    "lwtPayloadPlaceholder": "will message"
   }
 }
