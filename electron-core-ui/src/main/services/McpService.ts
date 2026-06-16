@@ -1,4 +1,5 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http'
+import { Readable } from 'node:stream'
 import { timingSafeEqual } from 'node:crypto'
 import { AsyncLocalStorage } from 'node:async_hooks'
 import { readFileSync, writeFileSync } from 'node:fs'
@@ -9,6 +10,7 @@ import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mc
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 import { z } from 'zod'
 import { logger } from './LoggerService'
+import { MCP_SESSION_ROUTING_KEY, MCP_FORWARDED_HEADER, forwardToNamedSession } from './mcpDiscovery'
 import {
   MINI_BROWSER_OPEN_CHANNEL,
   MINI_BROWSER_EXECUTE_CHANNEL,
@@ -17,6 +19,11 @@ import {
   CONSOLE_CLEAR_CHANNEL,
   SET_TAB_MAXIMIZED_CHANNEL
 } from '../../types/ipcChannels'
+
+// Re-exported for consumers that reference the bridge contract via the
+// McpService surface; the definitions live in ./mcpDiscovery (shared with the
+// transport so there's no import cycle).
+export { MCP_SESSION_ROUTING_KEY, MCP_FORWARDED_HEADER } from './mcpDiscovery'
 
 export interface McpServiceOptions {
   /**
@@ -50,6 +57,37 @@ export interface McpServiceOptions {
    * so the MCP launcher reads it back transparently).
    */
   authToken?: string
+
+  /**
+   * Optional human-readable name identifying THIS MCP instance. When set,
+   * the raw-request layer reads an optional reserved `__session` routing
+   * key off a `tools/call`'s `arguments`: if it's absent or equals this
+   * name, the key is stripped and the call runs locally (unchanged); if
+   * it names a DIFFERENT instance, the call is forwarded to the peer that
+   * owns that name (discovered in {@link discoveryDir}). The match is
+   * verbatim (the consumer chooses the identity — a full ticket name with
+   * spaces is fine).
+   *
+   * Omitted → no routing layer at all (every call runs locally, and a
+   * stray `__session` key is left untouched for the tool to ignore).
+   */
+  sessionName?: string
+
+  /**
+   * Discovery directory holding the per-pid lockfiles of every live instance
+   * of this app (see {@link resolveMcpDiscoveryDir}). When set together with
+   * {@link sessionName}, the cross-instance bridge is active: a `tools/call`
+   * naming another instance via `__session` is resolved against this dir and
+   * forwarded to its loopback MCP endpoint (port + bearer token from its
+   * lockfile), the response relayed verbatim. Unknown / dead / unreachable
+   * name → a clean JSON-RPC error, never a hang.
+   *
+   * The app is responsible for WRITING its own lockfile into this dir on
+   * startup (via {@link writeMcpDiscoveryFile}, with the bound port + token)
+   * and cleaning it up on quit — McpService only consumes the dir for
+   * forwarding. Omitted → no bridge (every call runs locally).
+   */
+  discoveryDir?: string
 }
 
 /**
@@ -1942,6 +1980,32 @@ export class McpService {
     // those that error out below. No payload; the event is opaque.
     this.notifyRequestListeners()
 
+    // Cross-instance routing bridge. Only kicks in when this instance
+    // was given a `sessionName` AND a `discoveryDir`. We buffer the
+    // body once so we can (a) read the reserved `__session` routing key
+    // off a `tools/call`, (b) strip it before the SDK ever validates the
+    // tool's args, and (c) forward the original JSON-RPC verbatim to a
+    // named peer. Without both options set, the body stream is left
+    // untouched and handed straight to the SDK below (zero overhead for
+    // consumers that never opted in).
+    let bodyForSdk: Buffer | null = null
+    if (this.options.sessionName !== undefined && this.options.discoveryDir) {
+      let raw: Buffer
+      try {
+        raw = await readRequestBody(req)
+      } catch (err) {
+        logger.error('McpService failed to read request body for routing', { error: String(err) })
+        res.statusCode = 400
+        res.end('Bad Request')
+        return
+      }
+      const routed = await this.maybeRouteRequest(raw, req, res)
+      if (routed.handled) return
+      // Either no routing key, or it named us: dispatch the (possibly
+      // key-stripped) body locally by replaying it to the SDK.
+      bodyForSdk = routed.localBody
+    }
+
     // Wrap the per-request server lifecycle in an
     // `AsyncLocalStorage.run` so any `dialog.show*` call made by a
     // tool handler (transitively, even deep through the consuming
@@ -2013,10 +2077,23 @@ export class McpService {
           {} as ConstructorParameters<typeof StreamableHTTPServerTransport>[0]
         )
         await server.connect(transport as unknown as Parameters<typeof server.connect>[0])
-        // Pass `req` through untouched — the SDK (via Hono's
+        // Normally pass `req` through untouched — the SDK (via Hono's
         // `getRequestListener`) converts `IncomingMessage` to a Web
         // Standard `Request` itself and needs the body stream intact.
-        await transport.handleRequest(req, res)
+        //
+        // When the routing bridge already drained the body (to peel the
+        // `__session` key), the original stream is exhausted. We then (a)
+        // replay the buffered bytes through a synthetic readable so Hono
+        // can still build the web `Request`, and (b) hand the parsed
+        // payload to `handleRequest` as `parsedBody` so the SDK uses it
+        // directly instead of re-reading the stream.
+        if (bodyForSdk !== null) {
+          const sdkReq = replayRequest(req, bodyForSdk)
+          const parsed: unknown = JSON.parse(bodyForSdk.toString('utf8'))
+          await transport.handleRequest(sdkReq, res, parsed)
+        } else {
+          await transport.handleRequest(req, res)
+        }
       } catch (err) {
         logger.error('McpService request failed', { error: String(err) })
         if (!res.headersSent) {
@@ -2030,6 +2107,105 @@ export class McpService {
         if (server) await server.close().catch(() => undefined)
       }
     })
+  }
+
+  /**
+   * Inspect a buffered request body for the reserved `__session` routing
+   * key and decide how to dispatch it. Returns either:
+   *
+   *   - `{ handled: true }` — the request was fully answered here (it
+   *     was forwarded to a named peer and the response relayed, or the
+   *     target couldn't be resolved and a JSON-RPC error was written).
+   *   - `{ handled: false, localBody }` — run it locally; `localBody` is
+   *     the body with the routing key stripped (or the untouched body
+   *     when there was no key / it named us).
+   *
+   * Only ever called when `sessionName` + `discoveryDir` are set.
+   */
+  private async maybeRouteRequest(
+    raw: Buffer,
+    req: IncomingMessage,
+    res: ServerResponse
+  ): Promise<{ handled: true } | { handled: false; localBody: Buffer }> {
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(raw.toString('utf8'))
+    } catch {
+      // Not JSON we can route (or empty) — hand the original body to the
+      // SDK, which will produce its own parse error if appropriate.
+      return { handled: false, localBody: raw }
+    }
+
+    // Only `tools/call` carries per-tool `arguments`; every other method
+    // (initialize, tools/list, notifications/…) has no routing key.
+    const msg = parsed as { method?: unknown; id?: unknown; params?: { arguments?: unknown } }
+    const args = msg.params?.arguments
+    if (msg.method !== 'tools/call' || typeof args !== 'object' || args === null) {
+      return { handled: false, localBody: raw }
+    }
+
+    const argRecord = args as Record<string, unknown>
+    if (!(MCP_SESSION_ROUTING_KEY in argRecord)) {
+      return { handled: false, localBody: raw }
+    }
+
+    const targetRaw = argRecord[MCP_SESSION_ROUTING_KEY]
+    const target = typeof targetRaw === 'string' ? targetRaw.trim() : ''
+
+    // Strip the routing key in all cases so individual tools never see
+    // it (their Zod schemas are strict and would reject the unknown key).
+    const { [MCP_SESSION_ROUTING_KEY]: _routingKey, ...strippedArgs } = argRecord
+    void _routingKey
+    const localBody = Buffer.from(
+      JSON.stringify({ ...(parsed as Record<string, unknown>), params: { ...msg.params, arguments: strippedArgs } }),
+      'utf8'
+    )
+
+    // Empty / own name → run locally with the key removed.
+    if (target === '' || target === this.options.sessionName) {
+      return { handled: false, localBody }
+    }
+
+    // Loop guard: a request that already crossed one bridge hop must not
+    // forward again, even if its `__session` somehow still names a peer.
+    // Run it locally (key stripped) instead of bouncing it onward.
+    const alreadyForwarded = req.headers[MCP_FORWARDED_HEADER] !== undefined
+    if (alreadyForwarded) {
+      logger.warn('McpService refusing to re-forward an already-forwarded request', { target })
+      return { handled: false, localBody }
+    }
+
+    // Names another instance → forward verbatim (with the key still IN,
+    // so the destination strips it itself). Discovery + transport + the
+    // timeout/error bounding all live in ./mcpDiscovery; a missing dir
+    // would have skipped this whole block (guarded at the call site).
+    const id = msg.id ?? null
+    let result: { status: number; body: string; contentType?: string } | null
+    try {
+      result = this.options.discoveryDir
+        ? await forwardToNamedSession(this.options.discoveryDir, target, raw.toString('utf8'))
+        : null
+    } catch (err) {
+      logger.error('McpService cross-instance forward threw', { target, error: String(err) })
+      result = null
+    }
+
+    if (result === null) {
+      writeJsonRpcError(res, id, -32001, `No live MCP session named "${target}" is reachable.`)
+      return { handled: true }
+    }
+
+    // Relay the peer's HTTP response verbatim: same status + same
+    // `Content-Type` + same body, so the caller's transport parses it
+    // exactly as if it had talked to the peer directly. Fall back to a
+    // status-derived guess only if the peer didn't report a content type.
+    res.statusCode = result.status
+    res.setHeader(
+      'Content-Type',
+      result.contentType ?? (result.status >= 200 && result.status < 300 ? 'text/event-stream' : 'application/json')
+    )
+    res.end(result.body)
+    return { handled: true }
   }
 
 }
@@ -2131,6 +2307,76 @@ function jsonOrNative<T extends z.ZodType>(inner: T): z.ZodType<z.infer<T>> {
     if (typeof val !== 'string') return val
     try { return JSON.parse(val) as unknown } catch { return val }
   }, inner) as z.ZodType<z.infer<T>>
+}
+
+/**
+ * Drain an `IncomingMessage` body into a single Buffer. Used by the
+ * cross-instance routing bridge so it can peek at the `__session` key
+ * before the SDK consumes the stream. Bounded so a runaway body can't
+ * exhaust memory — the JSON-RPC payloads we route are small.
+ */
+function readRequestBody(req: IncomingMessage, maxBytes = 8 * 1024 * 1024): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = []
+    let total = 0
+    req.on('data', (c: Buffer) => {
+      total += c.length
+      if (total > maxBytes) {
+        req.destroy()
+        reject(new Error('request body exceeds limit'))
+        return
+      }
+      chunks.push(c)
+    })
+    req.on('end', () => { resolve(Buffer.concat(chunks)) })
+    req.on('error', reject)
+  })
+}
+
+/**
+ * Build a synthetic `IncomingMessage` that replays `body` while carrying
+ * the original request's method / url / headers (with a corrected
+ * `content-length`). Needed because the routing bridge drains the real
+ * stream to inspect it, leaving it exhausted — the SDK transport (via
+ * `@hono/node-server`'s `getRequestListener`) still builds a web
+ * `Request` from this object downstream.
+ *
+ * Hono reads `rawHeaders` (NOT just `headers`) and, when present, a
+ * `rawBody` Buffer — so we set both: `rawBody` is the path Hono actually
+ * takes (it prefers a `rawBody` Buffer over reading the stream), and
+ * `rawHeaders` is the array form Hono iterates pairwise. The `Readable`
+ * base only exists to satisfy the `IncomingMessage` type + the
+ * remote-address re-check; it is not the body source on this path.
+ */
+function replayRequest(original: IncomingMessage, body: Buffer): IncomingMessage {
+  const replay = Readable.from([body]) as unknown as IncomingMessage & { rawBody?: Buffer }
+  const headers = { ...original.headers, 'content-length': String(body.length) }
+  replay.headers = headers
+  // Hono iterates `rawHeaders` as a flat [key, value, key, value, …]
+  // array. Rebuild it from the (corrected) headers map so the lengths
+  // stay consistent with `content-length`.
+  const rawHeaders: string[] = []
+  for (const [k, v] of Object.entries(headers)) {
+    if (Array.isArray(v)) for (const item of v) rawHeaders.push(k, item)
+    else if (v !== undefined) rawHeaders.push(k, v)
+  }
+  replay.rawHeaders = rawHeaders
+  replay.rawBody = body
+  replay.method = original.method
+  replay.url = original.url
+  replay.httpVersion = original.httpVersion
+  // Preserve the socket so any downstream remote-address / loopback
+  // re-check still sees the real peer.
+  ;(replay as { socket?: unknown }).socket = original.socket
+  return replay
+}
+
+/** Write a JSON-RPC error response on the raw HTTP socket. */
+function writeJsonRpcError(res: ServerResponse, id: unknown, code: number, message: string): void {
+  if (res.headersSent) return
+  res.statusCode = 200
+  res.setHeader('Content-Type', 'application/json')
+  res.end(JSON.stringify({ jsonrpc: '2.0', id: id ?? null, error: { code, message } }))
 }
 
 function isLoopbackAddress(addr: string | undefined): boolean {

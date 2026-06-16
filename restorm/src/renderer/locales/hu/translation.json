@@ -39,6 +39,10 @@
     "requestHistory": "Kérések előzményei",
     "envSelector": {
       "applyToAll": "Alkalmazás az összes kérésre"
+    },
+    "mcp": {
+      "serverRunningOnPort": "Az MCP-kiszolgáló a(z) {{port}} porton fut",
+      "sessionName": "Munkamenet: {{name}}"
     }
   },
   "tips": {

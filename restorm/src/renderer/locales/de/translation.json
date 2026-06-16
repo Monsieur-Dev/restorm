@@ -39,6 +39,10 @@
     "requestHistory": "Anfrageverlauf",
     "envSelector": {
       "applyToAll": "Auf alle Anfragen anwenden"
+    },
+    "mcp": {
+      "serverRunningOnPort": "MCP-Server läuft auf Port {{port}}",
+      "sessionName": "Sitzung: {{name}}"
     }
   },
   "tips": {

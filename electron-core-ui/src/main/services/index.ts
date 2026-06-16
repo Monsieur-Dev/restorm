@@ -125,3 +125,17 @@ export type {
 // from a CLI flag. See docs/McpService/README.md for the full surface.
 export { McpService } from './McpService'
 export type { McpServiceOptions, McpToolConfig, McpToolHandler, McpResourceConfig, McpResourceHandler } from './McpService'
+
+// MCP cross-instance bridge — generic named-session discovery + transport.
+// Lets multiple `--mcp` instances of the same app coexist and route
+// `tools/call`s to a specific instance by name. See docs/McpService/README.md.
+export {
+  MCP_SESSION_ROUTING_KEY,
+  MCP_FORWARDED_HEADER,
+  resolveMcpDiscoveryDir,
+  writeMcpDiscoveryFile,
+  cleanupMcpDiscoveryFile,
+  findLiveSessionByName,
+  forwardToNamedSession
+} from './mcpDiscovery'
+export type { McpDiscoveryEntry } from './mcpDiscovery'

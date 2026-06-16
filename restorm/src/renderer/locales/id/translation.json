@@ -38,6 +38,10 @@
     "requestHistory": "Riwayat permintaan",
     "envSelector": {
       "applyToAll": "Terapkan ke semua permintaan"
+    },
+    "mcp": {
+      "serverRunningOnPort": "Server MCP berjalan di port {{port}}",
+      "sessionName": "Sesi: {{name}}"
     }
   },
   "tips": {

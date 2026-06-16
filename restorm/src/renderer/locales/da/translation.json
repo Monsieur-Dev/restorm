@@ -39,6 +39,10 @@
     "requestHistory": "Anmodningshistorik",
     "envSelector": {
       "applyToAll": "Anvend på alle anmodninger"
+    },
+    "mcp": {
+      "serverRunningOnPort": "MCP-server kører på port {{port}}",
+      "sessionName": "Session: {{name}}"
     }
   },
   "tips": {

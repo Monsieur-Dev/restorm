@@ -71,8 +71,16 @@ export {
 export type { AutoSaveMode, AutoSaveControllerOptions } from './services'
 
 // MCP service (Streamable HTTP, off by default)
-export { McpService } from './services'
+export { McpService, MCP_SESSION_ROUTING_KEY, MCP_FORWARDED_HEADER } from './services'
 export type { McpServiceOptions, McpToolConfig, McpToolHandler, McpResourceConfig, McpResourceHandler } from './services'
+export {
+  resolveMcpDiscoveryDir,
+  writeMcpDiscoveryFile,
+  cleanupMcpDiscoveryFile,
+  findLiveSessionByName,
+  forwardToNamedSession
+} from './services'
+export type { McpDiscoveryEntry } from './services'
 
 // Save-unit / draft-store (file service v2)
 export {

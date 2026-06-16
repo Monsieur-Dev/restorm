@@ -979,12 +979,12 @@ contextBridge.exposeInMainWorld('restorm', {
      * are picked at startup — the renderer reads them once and caches
      * them for the lifetime of the window. */
     getConfig: async (): Promise<{
-      mcp: { enabled: boolean; port: number | null }
+      mcp: { enabled: boolean; port: number | null; sessionName: string }
       graphql: { endpoint: string }
     }> => {
       const result: unknown = await ipcRenderer.invoke('runtime:get-config')
       return result as {
-        mcp: { enabled: boolean; port: number | null }
+        mcp: { enabled: boolean; port: number | null; sessionName: string }
         graphql: { endpoint: string }
       }
     },

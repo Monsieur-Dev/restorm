@@ -38,6 +38,10 @@
     "requestHistory": "Lịch sử yêu cầu",
     "envSelector": {
       "applyToAll": "Áp dụng cho tất cả yêu cầu"
+    },
+    "mcp": {
+      "serverRunningOnPort": "Máy chủ MCP đang chạy trên cổng {{port}}",
+      "sessionName": "Phiên: {{name}}"
     }
   },
   "tips": {

@@ -39,6 +39,10 @@
     "requestHistory": "Pyyntöhistoria",
     "envSelector": {
       "applyToAll": "Käytä kaikkiin pyyntöihin"
+    },
+    "mcp": {
+      "serverRunningOnPort": "MCP-palvelin käynnissä portissa {{port}}",
+      "sessionName": "Istunto: {{name}}"
     }
   },
   "tips": {

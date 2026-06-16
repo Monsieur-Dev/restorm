@@ -38,6 +38,10 @@
     "requestHistory": "請求歷史紀錄",
     "envSelector": {
       "applyToAll": "套用至所有請求"
+    },
+    "mcp": {
+      "serverRunningOnPort": "MCP 伺服器正在連接埠 {{port}} 上執行",
+      "sessionName": "工作階段：{{name}}"
     }
   },
   "tips": {

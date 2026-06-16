@@ -38,6 +38,10 @@
     "requestHistory": "请求历史",
     "envSelector": {
       "applyToAll": "应用到所有请求"
+    },
+    "mcp": {
+      "serverRunningOnPort": "MCP 服务器正在端口 {{port}} 上运行",
+      "sessionName": "会话：{{name}}"
     }
   },
   "tips": {
