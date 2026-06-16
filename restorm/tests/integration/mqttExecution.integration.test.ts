@@ -10,7 +10,8 @@
  * surrounding singletons (ContextService / history / secrets / electron /
  * logger) are stubbed.
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest'
+import net from 'node:net'
 import mqtt, { type MqttClient } from 'mqtt'
 
 vi.mock('electron', () => ({
@@ -107,8 +108,25 @@ function rawClient(): Promise<MqttClient> {
   })
 }
 
+/** TCP-probe the broker so the suite is a no-op when it's absent (the CI
+ * "Build and Test" job runs the integration config with NO services) — the same
+ * dependency-gating `services.integration.test.ts` uses. The dedicated
+ * Integration-Tests job DOES start Mosquitto, so the tests really run there. */
+function brokerReachable(): Promise<boolean> {
+  return new Promise((resolve) => {
+    const sock = net.connect(1883, 'localhost')
+    const done = (ok: boolean): void => { sock.destroy(); resolve(ok) }
+    sock.setTimeout(2000)
+    sock.once('connect', () => { done(true) })
+    sock.once('error', () => { done(false) })
+    sock.once('timeout', () => { done(false) })
+  })
+}
+
 describe('WebSocketExecutionService — MQTT execution', () => {
   const raws: MqttClient[] = []
+  let brokerAvailable = false
+  beforeAll(async () => { brokerAvailable = await brokerReachable() })
   beforeEach(() => { installStubs() })
   afterEach(async () => {
     for (const id of [...stubbed.keys()]) { try { websocketExecutionService.disconnect(id) } catch { /* noop */ } }
@@ -121,6 +139,7 @@ describe('WebSocketExecutionService — MQTT execution', () => {
   })
 
   it('connects, subscribes to its topic, and surfaces a published message (QoS 1)', async () => {
+    if (!brokerAvailable) return
     const topic = `restorm/it/echo-${Date.now()}`
     stub('m1', { topic, qos: 1 })
     const run = websocketExecutionService.execute({ requestId: 'm1' })
@@ -138,6 +157,7 @@ describe('WebSocketExecutionService — MQTT execution', () => {
   })
 
   it('subscribes + receives an exactly-once (QoS 2) message', async () => {
+    if (!brokerAvailable) return
     const topic = `restorm/it/qos2-${Date.now()}`
     stub('m8', { topic, qos: 2 })
     const run = websocketExecutionService.execute({ requestId: 'm8' })
@@ -153,6 +173,7 @@ describe('WebSocketExecutionService — MQTT execution', () => {
   })
 
   it('publishes the configured Last Will & Testament when the connection drops ungracefully', async () => {
+    if (!brokerAvailable) return
     const willTopic = `restorm/it/lwt-${Date.now()}`
     // A bystander subscriber waiting for the broker to fire the will.
     const sub = await rawClient(); raws.push(sub)
@@ -173,6 +194,7 @@ describe('WebSocketExecutionService — MQTT execution', () => {
   })
 
   it('the Send button publishes to the topic (round-trips back via the subscription)', async () => {
+    if (!brokerAvailable) return
     const topic = `restorm/it/send-${Date.now()}`
     stub('m2', { topic, qos: 0 })
     const run = websocketExecutionService.execute({ requestId: 'm2' })
@@ -187,6 +209,7 @@ describe('WebSocketExecutionService — MQTT execution', () => {
   })
 
   it('receives messages on a single-level (+) and multi-level (#) wildcard subscription', async () => {
+    if (!brokerAvailable) return
     const base = `restorm/it/wild-${Date.now()}`
     stub('m3', { topic: `${base}/+/leaf`, qos: 0 })
     const run = websocketExecutionService.execute({ requestId: 'm3' })
@@ -209,6 +232,7 @@ describe('WebSocketExecutionService — MQTT execution', () => {
   })
 
   it('receives a retained message published before it subscribed', async () => {
+    if (!brokerAvailable) return
     const topic = `restorm/it/retain-${Date.now()}`
     const pub = await rawClient(); raws.push(pub)
     pub.publish(topic, 'retained-payload', { qos: 1, retain: true })
@@ -224,6 +248,7 @@ describe('WebSocketExecutionService — MQTT execution', () => {
   })
 
   it('connects with valid username/password', async () => {
+    if (!brokerAvailable) return
     const topic = `restorm/it/auth-${Date.now()}`
     stub('m6', { topic, username: 'restorm', password: 'restorm' })
     const run = websocketExecutionService.execute({ requestId: 'm6' })
@@ -235,6 +260,7 @@ describe('WebSocketExecutionService — MQTT execution', () => {
   })
 
   it('surfaces an auth error for bad credentials (and does not retry forever)', async () => {
+    if (!brokerAvailable) return
     stub('m7', { topic: 'restorm/it/bad', username: 'restorm', password: 'wrong' })
     const result: WebSocketExecutionResult = await websocketExecutionService.execute({ requestId: 'm7', timeout: 4000 })
     expect(result.connected).toBe(false)

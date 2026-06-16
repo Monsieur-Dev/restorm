@@ -865,6 +865,31 @@ async function handleLine(text) {
     return
   }
 
+  // Startup `tools/list`: if a restorm is ALREADY running (discoverable via the
+  // lockfile, no spawn), forward to it so a fresh session gets the CURRENT tool
+  // set. Without this the synthetic reply below serves the on-disk cache, which
+  // shadows a just-added tool / param until the first tool *call* forces a live
+  // refresh — so a brand-new session never sees it. We deliberately do NOT spawn
+  // here (that would make Claude's startup heavy); only an instance already up
+  // is adopted. On any probe/forward failure we fall through to the cache.
+  if (parsed.method === 'tools/list' && !lastSeenUp) {
+    try {
+      const existing = await discoverRunningRestorm()
+      if (existing) {
+        currentPort = existing.port
+        currentToken = existing.token
+        lastSeenUp = true
+        const reply = await forward(text)
+        if (reply !== null) writeReply(reply)
+        if (Array.isArray(reply?.result?.tools)) void cacheTools(reply.result.tools)
+        return
+      }
+    } catch (err) {
+      lastSeenUp = false
+      log('startup tools/list live-probe failed, serving cached fallback', { error: String(err) })
+    }
+  }
+
   const synthetic = trySyntheticReply(parsed)
   if (synthetic === undefined) return // notification swallowed
   if (synthetic !== null) {
