@@ -248,7 +248,9 @@
         "odata": "Requête OData",
         "auth": "Requête HTTP d'authentification",
         "scenario": "Scénario",
-        "socketioServer": "Serveur Socket.IO"
+        "socketioServer": "Serveur Socket.IO",
+        "websocketServer": "Serveur WebSocket",
+        "socketio": "Requête Socket.IO"
       }
     },
     "deleteConfirm": {
@@ -450,7 +452,9 @@
     "disconnect": "Déconnecter",
     "startListening": "Démarrer l'écoute",
     "stopListening": "Arrêter l'écoute",
-    "routePlaceholder": "Route (facultatif)"
+    "routePlaceholder": "Route (facultatif)",
+    "clientsConnected": "{{count}} client(s) connecté(s)",
+    "notListening": "Pas à l'écoute"
   },
   "search": {
     "placeholder": "Rechercher...",
@@ -1525,7 +1529,10 @@
       "grpcClose": "Ferme partiellement (half-close) un appel gRPC en streaming déjà ouvert.",
       "socketioConnectServer": "Démarre un serveur Socket.IO (port + route) ; accuse réception de chaque évènement reçu et le réémet sur son port. L’envoi diffuse aux clients connectés.",
       "socketioSendServer": "Diffuse un message à tous les clients connectés au serveur Socket.IO référencé.",
-      "socketioCloseServer": "Arrête le serveur Socket.IO référencé et déconnecte ses clients."
+      "socketioCloseServer": "Arrête le serveur Socket.IO référencé et déconnecte ses clients.",
+      "websocketConnectServer": "Démarre un serveur WebSocket brut (port + chemin) ; enregistre chaque frame reçue d’un client et la réémet sur son port message. L’envoi diffuse aux clients connectés.",
+      "websocketSendServer": "Diffuse une frame à tous les clients connectés au serveur WebSocket brut référencé.",
+      "websocketCloseServer": "Arrête le serveur WebSocket brut référencé et déconnecte ses clients."
     },
     "legend": {
       "title": "Légende",

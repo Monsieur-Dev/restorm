@@ -885,6 +885,16 @@ contextBridge.exposeInMainWorld('restorm', {
       return () => {
         ipcRenderer.removeListener('websocket:message', handler)
       }
+    },
+    /** Listen for a hosted server's live connected-client count (server mode). */
+    onServerClients: (callback: (data: { requestId: string; count: number }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: { requestId: string; count: number }): void => {
+        callback(data)
+      }
+      ipcRenderer.on('websocket:server-clients', handler)
+      return () => {
+        ipcRenderer.removeListener('websocket:server-clients', handler)
+      }
     }
   },
   responsesHistory: {

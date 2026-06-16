@@ -131,6 +131,16 @@ export class ScenarioEngine {
   setDebug(runId: RuntimeId, enabled: boolean): void { this.activeRuns.get(runId)?.setDebug(enabled) }
   setBreakpoints(runId: RuntimeId, ids: readonly RuntimeId[]): void { this.activeRuns.get(runId)?.setBreakpoints(ids) }
   abort(runId: RuntimeId, reason?: string): void { this.activeRuns.get(runId)?.abort(reason) }
+
+  /** Abort every live run (each scheduler propagates the abort to its own
+   * sub-runs). Called when the open project is torn down — closing a file, or
+   * opening another over it, must stop everything that file launched, exactly
+   * as if the user had stopped each run by hand. No-op when nothing is running. */
+  abortAll(reason = 'project closed'): void {
+    for (const scheduler of this.activeRuns.values()) {
+      try { scheduler.abort(reason) } catch { /* run already settling — ignore */ }
+    }
+  }
   resolveUserInput(runId: RuntimeId, requestId: string, value: unknown): void { this.activeRuns.get(runId)?.resolveUserInput(requestId, value) }
 
   cancelUserInput(runId: RuntimeId, requestId: string): void { this.activeRuns.get(runId)?.cancelUserInput(requestId) }
@@ -178,10 +188,16 @@ export class ScenarioEngine {
           flushRequestStateToContext(bound as unknown as Parameters<typeof flushRequestStateToContext>[0])
         }
         if (req.transport === 'grpc') return grpcExecutionService.connectStreaming(req)
-        if (req.transport === 'websocket') return websocketExecutionService.connectStreamingRaw(req)
-        // Socket.IO: a request flagged `server` HOSTS the server (restorm acts as
-        // the server); otherwise it connects as a client.
-        return (bound as { server?: boolean } | undefined)?.server === true
+        // A request flagged `server` HOSTS the server (restorm acts as the
+        // server); otherwise it connects as a client — same split for raw WS and
+        // Socket.IO.
+        const isServer = (bound as { server?: boolean } | undefined)?.server === true
+        if (req.transport === 'websocket') {
+          return isServer
+            ? websocketExecutionService.connectStreamingRawServer(req)
+            : websocketExecutionService.connectStreamingRaw(req)
+        }
+        return isServer
           ? websocketExecutionService.connectStreamingServer(req)
           : websocketExecutionService.connectStreaming(req)
       },

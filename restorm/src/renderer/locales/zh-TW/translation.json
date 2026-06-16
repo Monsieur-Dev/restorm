@@ -247,7 +247,9 @@
         "odata": "OData 請求",
         "auth": "HTTP 驗證請求",
         "scenario": "場景",
-        "socketioServer": "Socket.IO 伺服器"
+        "socketioServer": "Socket.IO 伺服器",
+        "websocketServer": "WebSocket 伺服器",
+        "socketio": "Socket.IO 要求"
       }
     },
     "deleteConfirm": {
@@ -449,7 +451,9 @@
     "disconnect": "中斷連線",
     "startListening": "開始監聽",
     "stopListening": "停止監聽",
-    "routePlaceholder": "路由（選用）"
+    "routePlaceholder": "路由（選用）",
+    "clientsConnected": "{{count}} 個用戶端已連線",
+    "notListening": "未在監聽"
   },
   "search": {
     "placeholder": "搜尋...",
@@ -1524,7 +1528,10 @@
       "grpcClose": "Half-closes an already-open streaming gRPC call.",
       "socketioConnectServer": "啟動 Socket.IO 伺服器（連接埠 + 路由）；確認收到的每個事件並在其連接埠上重新發出。傳送會向已連線的用戶端廣播。",
       "socketioSendServer": "向連線到所參考的 Socket.IO 伺服器的每個用戶端廣播訊息。",
-      "socketioCloseServer": "停止所參考的 Socket.IO 伺服器並中斷其用戶端的連線。"
+      "socketioCloseServer": "停止所參考的 Socket.IO 伺服器並中斷其用戶端的連線。",
+      "websocketConnectServer": "啟動原始 WebSocket 伺服器（連接埠 + 路徑）；記錄用戶端傳送的每個訊框並在其 message 連接埠上重新發出。傳送會向已連線的用戶端廣播。",
+      "websocketSendServer": "向連線到所參考的 WebSocket 伺服器的每個用戶端廣播一個訊框。",
+      "websocketCloseServer": "停止所參考的 WebSocket 伺服器並中斷其用戶端的連線。"
     },
     "legend": {
       "title": "圖例",

@@ -247,7 +247,9 @@
         "odata": "OData 请求",
         "auth": "HTTP 身份验证请求",
         "scenario": "场景",
-        "socketioServer": "Socket.IO 服务器"
+        "socketioServer": "Socket.IO 服务器",
+        "websocketServer": "WebSocket 服务器",
+        "socketio": "Socket.IO 请求"
       }
     },
     "deleteConfirm": {
@@ -449,7 +451,9 @@
     "disconnect": "断开连接",
     "startListening": "开始监听",
     "stopListening": "停止监听",
-    "routePlaceholder": "路由（可选）"
+    "routePlaceholder": "路由（可选）",
+    "clientsConnected": "{{count}} 个客户端已连接",
+    "notListening": "未在监听"
   },
   "search": {
     "placeholder": "搜索...",
@@ -1524,7 +1528,10 @@
       "grpcClose": "Half-closes an already-open streaming gRPC call.",
       "socketioConnectServer": "启动 Socket.IO 服务器（端口 + 路由）；对收到的每个事件进行确认并在其端口上重新发出。发送会向已连接的客户端广播。",
       "socketioSendServer": "向连接到所引用的 Socket.IO 服务器的每个客户端广播消息。",
-      "socketioCloseServer": "停止所引用的 Socket.IO 服务器并断开其客户端的连接。"
+      "socketioCloseServer": "停止所引用的 Socket.IO 服务器并断开其客户端的连接。",
+      "websocketConnectServer": "启动原始 WebSocket 服务器（端口 + 路径）；记录客户端发送的每个帧并在其 message 端口上重新发出。发送会向已连接的客户端广播。",
+      "websocketSendServer": "向连接到所引用的 WebSocket 服务器的每个客户端广播一个帧。",
+      "websocketCloseServer": "停止所引用的 WebSocket 服务器并断开其客户端的连接。"
     },
     "legend": {
       "title": "图例",

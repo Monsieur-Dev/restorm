@@ -250,7 +250,9 @@
         "odata": "Żądanie OData",
         "auth": "Żądanie uwierzytelniania HTTP",
         "scenario": "Scenariusz",
-        "socketioServer": "Serwer Socket.IO"
+        "socketioServer": "Serwer Socket.IO",
+        "websocketServer": "Serwer WebSocket",
+        "socketio": "Żądanie Socket.IO"
       }
     },
     "deleteConfirm": {
@@ -452,7 +454,9 @@
     "disconnect": "Rozłącz",
     "startListening": "Rozpocznij nasłuchiwanie",
     "stopListening": "Zatrzymaj nasłuchiwanie",
-    "routePlaceholder": "Trasa (opcjonalnie)"
+    "routePlaceholder": "Trasa (opcjonalnie)",
+    "clientsConnected": "{{count}} klient(ów) połączono",
+    "notListening": "Nie nasłuchuje"
   },
   "search": {
     "placeholder": "Szukaj...",
@@ -1527,7 +1531,10 @@
       "grpcClose": "Half-closes an already-open streaming gRPC call.",
       "socketioConnectServer": "Uruchamia serwer Socket.IO (port + trasa); potwierdza każde odebrane zdarzenie i ponownie wysyła je na swoim porcie. Wysyłanie rozgłasza do podłączonych klientów.",
       "socketioSendServer": "Rozgłasza wiadomość do wszystkich klientów podłączonych do wskazanego serwera Socket.IO.",
-      "socketioCloseServer": "Zatrzymuje wskazany serwer Socket.IO i rozłącza jego klientów."
+      "socketioCloseServer": "Zatrzymuje wskazany serwer Socket.IO i rozłącza jego klientów.",
+      "websocketConnectServer": "Uruchamia surowy serwer WebSocket (port + ścieżka); rejestruje każdą odebraną ramkę i ponownie wysyła ją na swoim porcie message. Wysyłanie rozgłasza do podłączonych klientów.",
+      "websocketSendServer": "Rozgłasza ramkę do wszystkich klientów podłączonych do wskazanego serwera WebSocket.",
+      "websocketCloseServer": "Zatrzymuje wskazany serwer WebSocket i rozłącza jego klientów."
     },
     "legend": {
       "title": "Legenda",

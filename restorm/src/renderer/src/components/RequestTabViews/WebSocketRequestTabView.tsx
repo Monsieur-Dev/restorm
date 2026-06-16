@@ -66,6 +66,9 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   // Live frames for the current connection (appended as they arrive), so the
   // chat updates in real time instead of only after the connection closes.
   const [liveMessages, setLiveMessages] = useState<WebSocketMessage[]>([])
+  // Server mode: live count of clients connected to the hosted server (driven by
+  // the main-process `websocket:server-clients` broadcast on each connect/close).
+  const [serverClientCount, setServerClientCount] = useState(0)
   // Whether this request currently holds an open connection (drives the
   // Connect↔Disconnect toggle, the Send button, and the listening beam).
   const isListening = useIsWebsocketListening(request.id)
@@ -209,12 +212,18 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     })
     const unsubProg = window.restorm?.websocket.onProgress(({ requestId: rid, status }) => {
       if (rid !== requestId) return
-      if (status === 'started') setLiveMessages([])
+      if (status === 'started') { setLiveMessages([]); setServerClientCount(0) }
       if (status === 'completed' || status === 'cancelled' || status === 'error') {
         setHistoryRefreshKey((k) => k + 1)
+        setServerClientCount(0)
       }
     })
-    return () => { unsubMsg?.(); unsubProg?.() }
+    // Server mode: live count of clients connected to the hosted server.
+    const unsubClients = window.restorm?.websocket.onServerClients(({ requestId: rid, count }) => {
+      if (rid !== requestId) return
+      setServerClientCount(count)
+    })
+    return () => { unsubMsg?.(); unsubProg?.(); unsubClients?.() }
   }, [request.id])
 
   // Sync state changes to reactive request object
@@ -505,6 +514,26 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     [buildWebSocketResponseView, liveResponse, request.protocol, request.event]
   )
 
+  // Server mode: a live "N clients connected" banner at the top of the Response
+  // tab, above the message stream. Hidden when not hosting.
+  const serverResponseContent = useMemo<React.ReactNode>(() => {
+    if (!isServer) return responseContent
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <div
+          data-testid="websocket-server-client-count"
+          style={{ padding: '4px 8px', fontSize: 12, color: 'var(--foreground-muted)', borderBottom: '1px solid var(--panel-border)', display: 'flex', alignItems: 'center', gap: 6 }}
+        >
+          <span className={`codicon codicon-${isListening ? 'broadcast' : 'circle-slash'}`} aria-hidden="true" />
+          {isListening
+            ? t('websocket.clientsConnected', { count: serverClientCount, defaultValue: '{{count}} client(s) connected' })
+            : t('websocket.notListening', 'Not listening')}
+        </div>
+        <div style={{ flex: 1, minHeight: 0, overflow: 'auto' }}>{responseContent}</div>
+      </div>
+    )
+  }, [isServer, isListening, serverClientCount, responseContent, t])
+
   const buildHistoryView = useCallback((detail: ResponseHistoryDetail) => {
     if (detail.response.type !== 'websocket') {
       return { infosContent: undefined, responseContent: undefined, jsonData: undefined }
@@ -631,7 +660,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         isLoading={false}
         showResponse={isListening || liveMessages.length > 0 || response !== null}
         infosContent={infosContent}
-        responseContent={responseContent}
+        responseContent={serverResponseContent}
       />
       <ResponseHistoryModal
         isOpen={historyModalOpen}

@@ -249,7 +249,9 @@
         "odata": "OData zahtjev",
         "auth": "HTTP zahtjev za autentifikaciju",
         "scenario": "Scenarij",
-        "socketioServer": "Socket.IO poslužitelj"
+        "socketioServer": "Socket.IO poslužitelj",
+        "websocketServer": "WebSocket poslužitelj",
+        "socketio": "Socket.IO zahtjev"
       }
     },
     "deleteConfirm": {
@@ -451,7 +453,9 @@
     "disconnect": "Prekini vezu",
     "startListening": "Počni slušati",
     "stopListening": "Zaustavi slušanje",
-    "routePlaceholder": "Ruta (neobavezno)"
+    "routePlaceholder": "Ruta (neobavezno)",
+    "clientsConnected": "{{count}} klijent(a) povezano",
+    "notListening": "Ne sluša"
   },
   "search": {
     "placeholder": "Pretraži...",
@@ -1526,7 +1530,10 @@
       "grpcClose": "Half-closes an already-open streaming gRPC call.",
       "socketioConnectServer": "Pokreće Socket.IO poslužitelj (port + ruta); potvrđuje svaki primljeni događaj i ponovno ga emitira na svom portu. Slanje emitira povezanim klijentima.",
       "socketioSendServer": "Emitira poruku svim klijentima povezanima na navedeni Socket.IO poslužitelj.",
-      "socketioCloseServer": "Zaustavlja navedeni Socket.IO poslužitelj i prekida vezu s njegovim klijentima."
+      "socketioCloseServer": "Zaustavlja navedeni Socket.IO poslužitelj i prekida vezu s njegovim klijentima.",
+      "websocketConnectServer": "Pokreće sirovi WebSocket poslužitelj (port + putanja); bilježi svaki primljeni frame i ponovno ga emitira na svom message portu. Slanje emitira povezanim klijentima.",
+      "websocketSendServer": "Emitira frame svim klijentima povezanima na navedeni WebSocket poslužitelj.",
+      "websocketCloseServer": "Zaustavlja navedeni WebSocket poslužitelj i prekida vezu s njegovim klijentima."
     },
     "legend": {
       "title": "Legenda",

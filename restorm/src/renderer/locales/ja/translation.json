@@ -247,7 +247,9 @@
         "odata": "OData リクエスト",
         "auth": "HTTP 認証リクエスト",
         "scenario": "シナリオ",
-        "socketioServer": "Socket.IO サーバー"
+        "socketioServer": "Socket.IO サーバー",
+        "websocketServer": "WebSocket サーバー",
+        "socketio": "Socket.IO リクエスト"
       }
     },
     "deleteConfirm": {
@@ -449,7 +451,9 @@
     "disconnect": "切断",
     "startListening": "リッスン開始",
     "stopListening": "リッスン停止",
-    "routePlaceholder": "ルート (任意)"
+    "routePlaceholder": "ルート (任意)",
+    "clientsConnected": "{{count}} クライアント接続中",
+    "notListening": "リッスンしていません"
   },
   "search": {
     "placeholder": "検索...",
@@ -1524,7 +1528,10 @@
       "grpcClose": "Half-closes an already-open streaming gRPC call.",
       "socketioConnectServer": "Socket.IO サーバー（ポート + ルート）を起動します。受信した各イベントを確認応答し、対応するポートに再送します。送信は接続中のクライアントへブロードキャストします。",
       "socketioSendServer": "参照先の Socket.IO サーバーに接続しているすべてのクライアントにメッセージをブロードキャストします。",
-      "socketioCloseServer": "参照先の Socket.IO サーバーを停止し、そのクライアントを切断します。"
+      "socketioCloseServer": "参照先の Socket.IO サーバーを停止し、そのクライアントを切断します。",
+      "websocketConnectServer": "生の WebSocket サーバー（ポート + パス）を起動します。クライアントが送る各フレームを記録し、message ポートに再送します。送信は接続中のクライアントへブロードキャストします。",
+      "websocketSendServer": "参照先の WebSocket サーバーに接続しているすべてのクライアントにフレームをブロードキャストします。",
+      "websocketCloseServer": "参照先の WebSocket サーバーを停止し、そのクライアントを切断します。"
     },
     "legend": {
       "title": "凡例",

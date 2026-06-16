@@ -7,6 +7,8 @@ import { ScenarioNodeBoxBase, type ScenarioNodeBoxType, type ScenarioNodeCell, t
 import { ScenarioNameInput } from './ScenarioNameInput'
 import { ScenarioCodeField } from './ScenarioCodeField'
 import { ConnectionPicker } from './SocketioNodeBoxes'
+import { useScenarioBoundResolver } from '../scenarioBoundResolver'
+import { isRequest } from '../../../../../shared/types/collections'
 import { readCodeString } from './scenarioCodeValue'
 
 const stop = (e: React.MouseEvent): void => { e.stopPropagation() }
@@ -22,6 +24,12 @@ export const WebsocketConnectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> =
   const config = data.config ?? {}
   const connectionName = typeof config['connectionName'] === 'string' ? config['connectionName'] : ''
   const requestId = typeof config['requestId'] === 'string' ? config['requestId'] : undefined
+
+  // When the bound request HOSTS a server, the node header shows the "SRV"
+  // server capsule + a "started" port label, distinct from a client connect.
+  const resolve = useScenarioBoundResolver()
+  const boundItem = requestId && resolve ? resolve(requestId) : null
+  const isServerBound = !!boundItem && isRequest(boundItem) && (boundItem as { server?: boolean }).server === true
 
   const left: ScenarioNodeSection[] = [
     ...(requestId && data.onOpenItem
@@ -63,10 +71,11 @@ export const WebsocketConnectNodeBox: React.FC<NodeProps<ScenarioNodeBoxType>> =
     }
   ]
   const right: ScenarioNodeCell[] = [
-    { id: 'connected', label: t('scenario.socketio.connected', 'connected'), port: { id: 'connected', type: 'source', flow: 'signal' } },
+    { id: 'connected', label: isServerBound ? t('scenario.socketio.started', 'started') : t('scenario.socketio.connected', 'connected'), port: { id: 'connected', type: 'source', flow: 'signal' } },
     { id: 'message', label: t('scenario.websocket.message', 'message'), port: { id: 'message', type: 'source' } }
   ]
-  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} headerIcon={<Badge type="WS" icon="plug" />} />
+  const headerIcon = isServerBound ? <Badge type="WS" mode="server" /> : <Badge type="WS" icon="plug" />
+  return <ScenarioNodeBoxBase id={id} data={data} selected={selected} left={left} right={right} headerIcon={headerIcon} />
 }
 
 /** B (websocketSend) — sends a raw payload on a declared connection (no channel). */

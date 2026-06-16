@@ -18223,15 +18223,15 @@ collections:
                     type: websocket
                   - documentation: ''
                     tags: []
+                    id: 09cf5ac0-a489-420f-a947-c6193823c76b
                     name: Echo Server
                     url: localhost:3001
                     protocol: socketio
+                    event: greet
                     message: '{"hello":"from server"}'
                     headers: []
-                    type: websocket
-                    id: 09cf5ac0-a489-420f-a947-c6193823c76b
                     server: true
-                    event: greet
+                    type: websocket
               - type: scenario
                 tags: []
                 params: []
@@ -18280,34 +18280,6 @@ collections:
                     position:
                       x: 240
                       'y': -100
-                  - id: fd28f12c-b717-4c9f-a606-683f150ae9b9
-                    kind: httpRequest
-                    config:
-                      requestId: 7c836bce-6a6a-4eee-8fcb-e27abfa1334e
-                      label: Push to WS echo (HTTP)
-                      id: d6aaa2b4-374a-4a41-b3b0-a47c5e04aa33
-                    inputs:
-                      - id: in
-                        name: ''
-                        dataType: any
-                        flow: signal
-                      - id: env
-                        name: env
-                        dataType: any
-                        flow: value
-                      - id: requestOverride
-                        name: override
-                        dataType: object
-                        flow: value
-                    outputs:
-                      - id: response
-                        name: response
-                        dataType: response
-                        role: response
-                        flow: both
-                    position:
-                      x: 820
-                      'y': 220
                   - id: abc63258-da82-48b8-b9ff-057d13d7d068
                     kind: wait
                     config:
@@ -18396,6 +18368,63 @@ collections:
                     position:
                       x: 500
                       'y': 80
+                  - id: df7080a6-c267-4faa-a62d-9a413ccd2875
+                    kind: websocketConnect
+                    config:
+                      requestId: 12bb3851-cecd-4e53-bf25-05236b82d6d0
+                      connectionName: Server
+                      label: Server listen
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: connected
+                        name: connected
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: any
+                        flow: both
+                    position:
+                      x: -500
+                      'y': 80
+                  - id: 1ed1384a-e703-46d7-8640-0f01c37dd076
+                    kind: websocketSend
+                    config:
+                      connectionNodeId: df7080a6-c267-4faa-a62d-9a413ccd2875
+                      payload:
+                        type: string
+                        value: '{"hello":"from server"}'
+                      label: broadcast from server
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                      - id: payload
+                        name: payload
+                        dataType: any
+                    outputs: []
+                    position:
+                      x: 820
+                      'y': 220
+                  - id: 4b3b54f7-b56c-4dd9-82b4-f238ab3cef87
+                    kind: websocketClose
+                    config:
+                      connectionNodeId: df7080a6-c267-4faa-a62d-9a413ccd2875
+                      label: close Server
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs: []
+                    position:
+                      x: 1160
+                      'y': 560
                 edges:
                   - id: 3cc77146-b1e9-4700-8ddc-fdd02b2f6285
                     from:
@@ -18426,20 +18455,6 @@ collections:
                     to:
                       nodeId: c15aba5d-fb96-497a-8ca9-59e87665bd1f
                       portId: in
-                  - id: 253d3372-f2b0-4302-b0e4-c60344c7781e
-                    from:
-                      nodeId: c15aba5d-fb96-497a-8ca9-59e87665bd1f
-                      portId: done
-                    to:
-                      nodeId: fd28f12c-b717-4c9f-a606-683f150ae9b9
-                      portId: in
-                  - id: 0118a37b-f223-48b3-b1b1-73c78606a4ce
-                    from:
-                      nodeId: fd28f12c-b717-4c9f-a606-683f150ae9b9
-                      portId: response
-                    to:
-                      nodeId: abc63258-da82-48b8-b9ff-057d13d7d068
-                      portId: in
                   - id: 739c7d8a-5508-4247-9061-631f419f020a
                     from:
                       nodeId: abc63258-da82-48b8-b9ff-057d13d7d068
@@ -18447,9 +18462,47 @@ collections:
                     to:
                       nodeId: 8bb4f0a5-40f8-470a-b0f5-22739964e759
                       portId: in
+                  - id: 1f1b95ee-688c-470f-ac0d-6946fa32300f
+                    from:
+                      nodeId: df7080a6-c267-4faa-a62d-9a413ccd2875
+                      portId: connected
+                    to:
+                      nodeId: e8a66b28-e5e1-45ea-ac38-05195cef384e
+                      portId: in
+                  - id: 3498b058-c359-4b8b-ad48-58f7fae04ac9
+                    from:
+                      nodeId: c15aba5d-fb96-497a-8ca9-59e87665bd1f
+                      portId: done
+                    to:
+                      nodeId: 1ed1384a-e703-46d7-8640-0f01c37dd076
+                      portId: in
+                  - id: bd26c020-6887-4f51-9736-58e7d4fe5526
+                    from:
+                      nodeId: 1ed1384a-e703-46d7-8640-0f01c37dd076
+                      portId: done
+                    to:
+                      nodeId: abc63258-da82-48b8-b9ff-057d13d7d068
+                      portId: in
+                  - id: e61a6f3b-58c2-4735-8be6-e5dbcb95f074
+                    from:
+                      nodeId: 8bb4f0a5-40f8-470a-b0f5-22739964e759
+                      portId: done
+                    to:
+                      nodeId: 4b3b54f7-b56c-4dd9-82b4-f238ab3cef87
+                      portId: in
                 id: 86bda47f-9f3d-44e0-859e-0337877f0baa
                 name: WebSocket
-                items: []
+                items:
+                  - documentation: ''
+                    tags: []
+                    name: WS Echo Server
+                    url: localhost:3002
+                    protocol: websocket
+                    message: '{"hello":"from server"}'
+                    headers: []
+                    type: websocket
+                    id: 12bb3851-cecd-4e53-bf25-05236b82d6d0
+                    server: true
               - type: scenario
                 tags: []
                 params: []
@@ -20355,23 +20408,6 @@ collections:
               }
             headers: []
             type: websocket
-          - documentation: ''
-            tags: []
-            id: 7c836bce-6a6a-4eee-8fcb-e27abfa1334e
-            name: Push to WS echo (HTTP)
-            method: GET
-            url: http://localhost:3002/push
-            headers: []
-            params:
-              - key: data
-                enabled: true
-                value:
-                  type: string
-                  value: '{"hello":"from HTTP"}'
-                description: Raw frame to push to listeners
-            pathParams: []
-            deprecated: false
-            type: http
           - documentation: ''
             tags: []
             id: 71a51cb0-d3b4-48ba-9614-ed5fbddb437d

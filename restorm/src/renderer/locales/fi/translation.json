@@ -248,7 +248,9 @@
         "odata": "OData-pyyntö",
         "auth": "HTTP-todennuspyyntö",
         "scenario": "Skenaario",
-        "socketioServer": "Socket.IO-palvelin"
+        "socketioServer": "Socket.IO-palvelin",
+        "websocketServer": "WebSocket-palvelin",
+        "socketio": "Socket.IO-pyyntö"
       }
     },
     "deleteConfirm": {
@@ -450,7 +452,9 @@
     "disconnect": "Katkaise yhteys",
     "startListening": "Aloita kuuntelu",
     "stopListening": "Lopeta kuuntelu",
-    "routePlaceholder": "Reitti (valinnainen)"
+    "routePlaceholder": "Reitti (valinnainen)",
+    "clientsConnected": "{{count}} asiakas/asiakkaita yhdistetty",
+    "notListening": "Ei kuuntele"
   },
   "search": {
     "placeholder": "Etsi...",
@@ -1525,7 +1529,10 @@
       "grpcClose": "Half-closes an already-open streaming gRPC call.",
       "socketioConnectServer": "Käynnistää Socket.IO-palvelimen (portti + reitti); kuittaa jokaisen vastaanotetun tapahtuman ja lähettää sen uudelleen portissaan. Lähetys lähettää yhdistetyille asiakkaille.",
       "socketioSendServer": "Lähettää viestin kaikille viitattuun Socket.IO-palvelimeen yhdistetyille asiakkaille.",
-      "socketioCloseServer": "Pysäyttää viitatun Socket.IO-palvelimen ja katkaisee sen asiakkaiden yhteydet."
+      "socketioCloseServer": "Pysäyttää viitatun Socket.IO-palvelimen ja katkaisee sen asiakkaiden yhteydet.",
+      "websocketConnectServer": "Käynnistää raa’an WebSocket-palvelimen (portti + polku); tallentaa jokaisen vastaanotetun framen ja lähettää sen uudelleen message-portissaan. Lähetys lähettää yhdistetyille asiakkaille.",
+      "websocketSendServer": "Lähettää framen kaikille viitattuun WebSocket-palvelimeen yhdistetyille asiakkaille.",
+      "websocketCloseServer": "Pysäyttää viitatun WebSocket-palvelimen ja katkaisee sen asiakkaiden yhteydet."
     },
     "legend": {
       "title": "Selite",

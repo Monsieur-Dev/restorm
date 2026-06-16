@@ -21,6 +21,7 @@ import { graphqlExecutionService, type GraphQLExecutionInput } from './services/
 import { soapExecutionService, type SOAPExecutionInput } from './services/SOAPExecutionService'
 import { grpcExecutionService, type GRPCExecutionInput } from './services/GRPCExecutionService'
 import { websocketExecutionService, type WebSocketExecutionInput } from './services/WebSocketExecutionService'
+import { scenarioEngine } from './scenarioEngine/engine'
 import { importFrom } from './services/import/ImportManager'
 import {
   openEditorArgs,
@@ -737,9 +738,13 @@ export function registerRestormIPC(deps: {
 
   ipcMain.handle('context:clear-all', () => {
     contextService.clearAll()
-    // File close — tear down every live connection AND any hosted Socket.IO
-    // server. A server is collection-scoped: closing the file must release its
-    // port, otherwise it keeps listening with no UI left to stop it.
+    // File close — stop every running scenario. Runs are project-scoped: closing
+    // the file (or opening another over it) must halt anything still executing,
+    // exactly as if the user had stopped each run by hand. Sub-runs included.
+    scenarioEngine.abortAll()
+    // File close — tear down every live connection AND any hosted WebSocket /
+    // Socket.IO server. A server is collection-scoped: closing the file must
+    // release its port, otherwise it keeps listening with no UI left to stop it.
     websocketExecutionService.closeAll()
     // File close — the auth token cache is scoped to the open
     // collection, so flush it here. Opening a different file (or the

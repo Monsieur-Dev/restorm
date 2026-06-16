@@ -2280,11 +2280,11 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       if (boundItem && isRequest(boundItem)) {
         title = boundItem.name
         titleBadge = <Badge type={requestBadgeType(boundItem)} mode={requestBadgeMode(boundItem)} />
-        if (n.data.kind === 'socketioConnect' && requestBadgeMode(boundItem) === 'server') {
-          helpKey = 'socketioConnectServer'
+        if ((n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect') && requestBadgeMode(boundItem) === 'server') {
+          helpKey = `${n.data.kind}Server`
         }
       }
-    } else if (n.data.kind === 'socketioSend' || n.data.kind === 'socketioClose') {
+    } else if (n.data.kind === 'socketioSend' || n.data.kind === 'socketioClose' || n.data.kind === 'websocketSend' || n.data.kind === 'websocketClose') {
       // Send/close reference a connection NODE — if that node hosts a server,
       // the blurb should read "broadcast to clients" / "stop the server".
       const connId = typeof cfg['connectionNodeId'] === 'string' ? cfg['connectionNodeId'] : null

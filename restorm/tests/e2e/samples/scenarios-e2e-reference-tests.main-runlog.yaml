@@ -6318,8 +6318,17 @@
 - message: ⚪ [<time>] start websocketConnect
   data:
     requestId: <uuid>
+    connectionName: Server
+    label: Server listen
+- message: ⚪ [<time>] done websocketConnect
+- message: ⚪ [<time>] websocket "Server" connecting
+- message: ⚪ [<time>] websocket "Server" connected
+- message: ⚪ [<time>] start websocketConnect
+  data:
+    requestId: <uuid>
     connectionName: Echo
     label: Echo connect
+    in: true
 - message: ⚪ [<time>] done websocketConnect
 - message: ⚪ [<time>] websocket "Echo" connecting
 - message: ⚪ [<time>] websocket "Echo" connected
@@ -6335,84 +6344,45 @@
     durationMs: <dynamic-time>
     label: let the send echo arrive first
     in: true
-- message: ⚪ [<time>] start log
-  data:
-    message: message reçu
-    level: info
-    data:
-      hello: world
-- message: 🔵 [<time>] message reçu
-  data:
-    hello: world
-- message: ⚪ [<time>] done log
-  data:
-    value:
-      hello: world
 - message: ⚪ [<time>] done wait
-- message: ⚪ [<time>] start httpRequest
+- message: ⚪ [<time>] start websocketSend
   data:
-    requestId: <uuid>
-    label: Push to WS echo (HTTP)
+    connectionNodeId: <uuid>
+    payload: '{"hello":"from server"}'
+    label: broadcast from server
+    in: true
+- message: ⚪ [<time>] done websocketSend
+- message: ⚪ [<time>] start wait
+  data:
+    durationMs: <dynamic-time>
+    label: let the pushed echo arrive
     in: true
 - message: ⚪ [<time>] start log
   data:
     message: message reçu
     level: info
     data:
-      hello: from HTTP
+      hello: from server
 - message: 🔵 [<time>] message reçu
   data:
-    hello: from HTTP
+    hello: from server
 - message: ⚪ [<time>] done log
   data:
     value:
-      hello: from HTTP
-- message: ⚪ [<time>] done httpRequest
-  data:
-    response:
-      request:
-        url: http://localhost:3002/push?data=%7B%22hello%22%3A%22from%20HTTP%22%7D
-        method: GET
-        headers: {}
-      response:
-        status: 200
-        statusText: OK
-        headers:
-          content-type: application/json
-          date: <dynamic-time>
-          connection: keep-alive
-          keep-alive: timeout=5
-          transfer-encoding: chunked
-        body: '{"ok":true,"pushed":"{\"hello\":\"from HTTP\"}","clients":1}'
-        durationMs: <dynamic-time>
-        success: true
-- message: ⚪ [<time>] start wait
-  data:
-    durationMs: <dynamic-time>
-    label: let the pushed echo arrive
-    in:
-      request:
-        url: http://localhost:3002/push?data=%7B%22hello%22%3A%22from%20HTTP%22%7D
-        method: GET
-        headers: {}
-      response:
-        status: 200
-        statusText: OK
-        headers:
-          content-type: application/json
-          date: <dynamic-time>
-          connection: keep-alive
-          keep-alive: timeout=5
-          transfer-encoding: chunked
-        body: '{"ok":true,"pushed":"{\"hello\":\"from HTTP\"}","clients":1}'
-        durationMs: <dynamic-time>
-        success: true
+      hello: from server
 - message: ⚪ [<time>] done wait
 - message: ⚪ [<time>] start websocketClose
   data:
     connectionNodeId: <uuid>
     label: close Echo
     in: true
+- message: ⚪ [<time>] done websocketClose
+- message: ⚪ [<time>] start websocketClose
+  data:
+    connectionNodeId: <uuid>
+    label: close Server
+    in: true
+- message: ⚪ [<time>] websocket "Server" closed
 - message: ⚪ [<time>] done websocketClose
 - message: ⚪ [<time>] websocket "Echo" closed
 - message: ⚪ [<time>] start log
