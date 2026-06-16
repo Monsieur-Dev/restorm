@@ -1,7 +1,7 @@
 import { promises as fs, readdirSync, readFileSync } from 'node:fs'
 import { request as httpRequest } from 'node:http'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { join, dirname } from 'node:path'
 import { logger } from './LoggerService'
 
 /**
@@ -100,7 +100,7 @@ export async function writeMcpDiscoveryFile(dir: string, entry: McpDiscoveryEntr
 
     if (extraPath && extraPath !== target) {
       const extraTmp = `${extraPath}.${String(process.pid)}.tmp`
-      await fs.mkdir(join(extraPath, '..'), { recursive: true, mode: 0o700 })
+      await fs.mkdir(dirname(extraPath), { recursive: true, mode: 0o700 })
       await fs.writeFile(extraTmp, json, { encoding: 'utf8', mode: 0o600 })
       await fs.rename(extraTmp, extraPath)
     }

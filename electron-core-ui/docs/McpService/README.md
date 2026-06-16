@@ -659,7 +659,7 @@ The token closes two attacks loopback alone leaves open:
 1. **Other local processes** — any process on the same machine can POST to `http://127.0.0.1:<port>/` and call tools. Without a token, a rogue script gets full control over the user's app.
 2. **CSRF from a browser tab** — a malicious site can issue `fetch('http://127.0.0.1:<port>/', { method: 'POST', mode: 'no-cors' })` and trigger mutations even though it can't read the response. The bearer header is blocked by CORS, so requiring it shuts the vector down.
 
-The recommended propagation channel is "consuming app generates a per-process random token, writes it into a discovery file, the launcher reads it back and injects the header." See restorm's `mcpDiscovery.ts` + `scripts/mcp-launcher.mjs` for a worked example. The token rotates on every app restart — no persistent secret on disk.
+The recommended propagation channel is "consuming app generates a per-process random token, writes it into a discovery file, the launcher reads it back and injects the header." See the restorm consumer (`restorm/src/main/index.ts`, which calls the discovery helpers above) + `scripts/mcp-launcher.mjs` for a worked example. The token rotates on every app restart — no persistent secret on disk.
 
 ## Discovery from Claude Code
 
