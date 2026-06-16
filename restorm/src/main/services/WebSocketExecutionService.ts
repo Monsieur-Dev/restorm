@@ -389,6 +389,10 @@ class WebSocketExecutionService {
       httpServer.once('error', onError)
       httpServer.listen(port, '127.0.0.1', () => {
         httpServer.removeListener('error', onError)
+        // Permanent runtime handler: once the bind-error listener above is
+        // removed, a later socket 'error' would otherwise be unhandled and throw
+        // in the main process. Log + swallow instead.
+        httpServer.on('error', (e: Error) => { logger.warn('[WebSocketExecutionService] port host runtime error', { port, error: e.message }) })
         const host: PortHost = { httpServer, sioRoutes: new Set(), wsRoutes: new Map() }
         this.portHosts.set(port, host)
         logger.info('[WebSocketExecutionService] Port host listening', { port })

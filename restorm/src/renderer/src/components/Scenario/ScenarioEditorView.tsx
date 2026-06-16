@@ -919,6 +919,10 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     const firstOpen = layoutScenarioRef.current !== scenario.id
     if (!firstOpen && sig === lastLayoutSigRef.current) return
     lastLayoutSigRef.current = sig
+    // Guards a post-unmount / re-run setState: the cleanup flips this and the
+    // async body bails after its `await` (closing the tab during the debounce
+    // otherwise fires setNodes/persist/fitView on a torn-down component).
+    let cancelled = false
     if (autoLayoutTimerRef.current) clearTimeout(autoLayoutTimerRef.current)
     // Debounce so a burst of node/edge creations lays out once, and so freshly
     // created boxes have a frame to be measured by React Flow before we read sizes.
@@ -963,7 +967,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         const inputNodes = rects.map((r) => ({ id: r.id, width: r.width, height: r.height }))
         const inputEdges = edgesRef.current.map((e) => ({ id: e.id, source: e.source, target: e.target }))
         const positions = await layoutScenarioGraph(inputNodes, inputEdges)
-        if (positions.size === 0) return
+        if (cancelled || positions.size === 0) return
         const before = nodesRef.current
         const laid = before.map((n) => {
           const p = positions.get(n.id)
@@ -976,6 +980,10 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         void fitView({ duration: 300, padding: 0.2 })
       })()
     }, 200)
+    return () => {
+      cancelled = true
+      if (autoLayoutTimerRef.current) { clearTimeout(autoLayoutTimerRef.current); autoLayoutTimerRef.current = null }
+    }
   }, [nodes, edges, scenario.id, setNodes, persist, fitView])
 
   // The JSON-path selector on a data link reads + writes that edge's `selector`
