@@ -249,7 +249,8 @@
         "scenario": "Kịch bản",
         "socketioServer": "Máy chủ Socket.IO",
         "websocketServer": "Máy chủ WebSocket",
-        "socketio": "Yêu cầu Socket.IO"
+        "socketio": "Yêu cầu Socket.IO",
+        "mqtt": "MQTT request"
       }
     },
     "deleteConfirm": {

@@ -250,7 +250,8 @@
         "scenario": "Forgatókönyv",
         "socketioServer": "Socket.IO kiszolgáló",
         "websocketServer": "WebSocket-kiszolgáló",
-        "socketio": "Socket.IO-kérés"
+        "socketio": "Socket.IO-kérés",
+        "mqtt": "MQTT request"
       }
     },
     "deleteConfirm": {

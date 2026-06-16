@@ -53,6 +53,10 @@ interface MqttStub {
   username?: string
   password?: string
   mqttSubscribe?: boolean
+  lwtTopic?: string
+  lwtPayload?: string
+  lwtQos?: number
+  lwtRetain?: boolean
 }
 
 const stubbed = new Map<string, MqttStub>()
@@ -73,7 +77,11 @@ function installStubs(): void {
           ...(s.retain !== undefined ? { retain: s.retain } : {}),
           ...(s.username !== undefined ? { username: s.username } : {}),
           ...(s.password !== undefined ? { password: s.password } : {}),
-          ...(s.mqttSubscribe !== undefined ? { mqttSubscribe: s.mqttSubscribe } : {})
+          ...(s.mqttSubscribe !== undefined ? { mqttSubscribe: s.mqttSubscribe } : {}),
+          ...(s.lwtTopic !== undefined ? { lwtTopic: s.lwtTopic } : {}),
+          ...(s.lwtPayload !== undefined ? { lwtPayload: s.lwtPayload } : {}),
+          ...(s.lwtQos !== undefined ? { lwtQos: s.lwtQos } : {}),
+          ...(s.lwtRetain !== undefined ? { lwtRetain: s.lwtRetain } : {})
         },
         keyValueGroups: new Map()
       } as never
@@ -127,6 +135,41 @@ describe('WebSocketExecutionService — MQTT execution', () => {
     const result = await run
     expect(result.connected).toBe(true)
     expect(result.messages.some((m) => m.event === topic && m.data.includes('mqtt'))).toBe(true)
+  })
+
+  it('subscribes + receives an exactly-once (QoS 2) message', async () => {
+    const topic = `restorm/it/qos2-${Date.now()}`
+    stub('m8', { topic, qos: 2 })
+    const run = websocketExecutionService.execute({ requestId: 'm8' })
+    await waitFor(() => websocketExecutionService.isActive('m8'))
+
+    const pub = await rawClient(); raws.push(pub)
+    pub.publish(topic, JSON.stringify({ hello: 'qos2' }), { qos: 2 })
+
+    await waitFor(() => (websocketExecutionService.getMessages('m8')?.frames ?? []).some((m) => m.event === topic && m.data.includes('qos2')))
+    websocketExecutionService.disconnect('m8')
+    const result = await run
+    expect(result.messages.some((m) => m.event === topic && m.data.includes('qos2'))).toBe(true)
+  })
+
+  it('publishes the configured Last Will & Testament when the connection drops ungracefully', async () => {
+    const willTopic = `restorm/it/lwt-${Date.now()}`
+    // A bystander subscriber waiting for the broker to fire the will.
+    const sub = await rawClient(); raws.push(sub)
+    const willMsgs: string[] = []
+    sub.on('message', (t, p) => { if (t === willTopic) willMsgs.push(p.toString()) })
+    await new Promise<void>((res, rej) => { sub.subscribe(willTopic, { qos: 1 }, (e) => { if (e) rej(e); else res() }) })
+
+    // The service connects with a will registered on `willTopic`.
+    stub('m9', { topic: `restorm/it/lwt-data-${Date.now()}`, qos: 0, lwtTopic: willTopic, lwtPayload: 'client-gone' })
+    const run = websocketExecutionService.execute({ requestId: 'm9' })
+    await waitFor(() => websocketExecutionService.isActive('m9'))
+
+    // disconnect() force-closes the socket (`end(true)`) WITHOUT a clean
+    // DISCONNECT packet, so the broker treats it as a drop and fires the will.
+    websocketExecutionService.disconnect('m9')
+    await waitFor(() => willMsgs.includes('client-gone'))
+    await run // drain the execution promise (the will assertion is the waitFor above)
   })
 
   it('the Send button publishes to the topic (round-trips back via the subscription)', async () => {

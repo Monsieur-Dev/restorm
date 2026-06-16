@@ -250,7 +250,8 @@
         "scenario": "Skenaario",
         "socketioServer": "Socket.IO-palvelin",
         "websocketServer": "WebSocket-palvelin",
-        "socketio": "Socket.IO-pyyntö"
+        "socketio": "Socket.IO-pyyntö",
+        "mqtt": "MQTT request"
       }
     },
     "deleteConfirm": {

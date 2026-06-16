@@ -80,6 +80,36 @@ describe('scenario MCP tools', () => {
     expect(res.isError).toBe(true)
   })
 
+  it('arrange_scenario spreads a stacked graph left→right', async () => {
+    // Three boxes, all defaulted to 0,0 (the shape an agent builds without
+    // computing positions), wired into a chain.
+    const a = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'now' }))
+    const b = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'log' }))
+    const c = parse(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'log' }))
+    mcp.invoke('connect_scenario_nodes', { scenarioId: 's1', fromNodeId: a['nodeId'], fromPortId: 'value', toNodeId: b['nodeId'], toPortId: 'data' })
+    mcp.invoke('connect_scenario_nodes', { scenarioId: 's1', fromNodeId: b['nodeId'], fromPortId: 'done', toNodeId: c['nodeId'], toPortId: 'in' })
+    expect(scenario.nodes.every((n) => n.position.x === 0 && n.position.y === 0)).toBe(true)
+
+    const res = parse(await Promise.resolve(mcp.invoke('arrange_scenario', { scenarioId: 's1' })))
+    expect(res['moved']).toBeGreaterThan(0)
+    // The chained boxes step rightwards (layered RIGHT direction).
+    const byId = new Map(scenario.nodes.map((n) => [n.id, n.position]))
+    const ax = byId.get(a['nodeId'] as string)?.x ?? 0
+    const bx = byId.get(b['nodeId'] as string)?.x ?? 0
+    const cx = byId.get(c['nodeId'] as string)?.x ?? 0
+    expect(bx).toBeGreaterThan(ax)
+    expect(cx).toBeGreaterThan(bx)
+  })
+
+  it('create_scenario_node with arrange=true repositions the whole graph', async () => {
+    mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'now' })
+    const res = parse(await Promise.resolve(mcp.invoke('create_scenario_node', { scenarioId: 's1', kind: 'log', arrange: true, config: {} })))
+    expect(res['arranged']).toBe(true)
+    // Two boxes can't both stay at the same origin after a layout pass.
+    const coords = new Set(scenario.nodes.map((n) => `${n.position.x},${n.position.y}`))
+    expect(coords.size).toBe(2)
+  })
+
   it('update_scenario patches name / notes / tags, leaving the graph untouched', () => {
     scenario.nodes.push({ id: 'n', kind: 'log', config: {}, inputs: [], outputs: [], position: { x: 0, y: 0 } })
     const res = parse(mcp.invoke('update_scenario', { scenarioId: 's1', name: 'Renamed', notes: 'hi', tags: ['a', 'b'] }))

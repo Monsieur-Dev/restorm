@@ -249,7 +249,8 @@
         "scenario": "Skenario",
         "socketioServer": "Server Socket.IO",
         "websocketServer": "Server WebSocket",
-        "socketio": "Permintaan Socket.IO"
+        "socketio": "Permintaan Socket.IO",
+        "mqtt": "MQTT request"
       }
     },
     "deleteConfirm": {

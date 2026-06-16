@@ -413,6 +413,7 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
       case 'socketio': return 'New Socket.IO request'
       case 'socketio-server': return 'New Socket.IO server'
       case 'websocket-server': return 'New WebSocket server'
+      case 'mqtt': return 'New MQTT request'
       case 'odata': return 'New OData request'
       case 'auth': return 'New auth request'
       case 'scenario': return 'New scenario'
@@ -549,6 +550,9 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
         // restorm acts as a raw WebSocket server: websocket protocol + server
         // flag, host forced to localhost, default port pre-filled.
         built = new WebSocketRequest({ id, name, protocol: 'websocket', server: true, url: 'localhost:3002' })
+      } else if (kind === 'mqtt') {
+        // MQTT CLIENT request (connects to a broker); default subscribe-on-connect.
+        built = new WebSocketRequest({ id, name, protocol: 'mqtt', url: 'mqtt://localhost:1883' })
       } else if (kind === 'odata') {
         built = new ODataRequest({ id, name })
       } else {

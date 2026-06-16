@@ -251,7 +251,8 @@
         "scenario": "Scenarij",
         "socketioServer": "Socket.IO poslužitelj",
         "websocketServer": "WebSocket poslužitelj",
-        "socketio": "Socket.IO zahtjev"
+        "socketio": "Socket.IO zahtjev",
+        "mqtt": "MQTT request"
       }
     },
     "deleteConfirm": {
