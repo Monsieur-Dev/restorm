@@ -62,7 +62,7 @@ This is non-negotiable for fixes that wire across processes (main ↔ renderer �
 
 Pre-commit hooks run the full test suite, which takes a long time (~5–6 min on a healthy host). **NEVER** interrupt or cancel a commit in progress — wait for it to finish, even if it seems slow.
 
-**Always commit through `scripts/git-commit-timeout.sh`** rather than calling `git commit` directly. The script wraps the commit with a hard 15-minute timeout so a flaky e2e + hung Monaco editor can't pin an automated agent for an hour. Pass through any `git commit` args you'd normally use, e.g.:
+**Always commit through `scripts/git-commit-timeout.sh`** rather than calling `git commit` directly. The script wraps the commit with a hard 20-minute timeout so a flaky e2e + hung Monaco editor can't pin an automated agent for an hour. Pass through any `git commit` args you'd normally use, e.g.:
 
 ```bash
 scripts/git-commit-timeout.sh -m "your message"
@@ -70,9 +70,13 @@ scripts/git-commit-timeout.sh -m "your message"
 
 If the script exits 124 (timeout), investigate before retrying — it usually points at flakiness, X-server contention, or a genuine perf regression in a Monaco-heavy panel.
 
+The wrapper also **guards against silently skipping the suite**. git runs no hook when `core.hooksPath` targets a directory that doesn't exist — exactly the state of a freshly-created worktree, whose husky wrappers (`.husky/_`, gitignored) only appear after `pnpm install`. Before committing, the wrapper detects this and self-heals: it regenerates the husky wrappers (cheap when deps are present) or runs a one-time `pnpm install` when `node_modules` is missing. If hooks still can't be activated, the commit proceeds but its journal entry is tagged **`HOOKS SKIPPED`**, so a 0-second "PASS" is never mistaken for a validated build.
+
 ### Flaky tests — never just retry
 
-Every commit attempt — success or failure — prepends an entry to `.commit-flake-history.log` (newest-on-top, gitignored, repo root, written by `scripts/git-commit-timeout.sh`). Successful commits log a single `PASS` line; failed commits log a header block followed by the last 200 lines of hook output. So `head -200 .commit-flake-history.log` answers "what just broke and what was the failure pattern" without scrolling; `grep '^FAIL' .commit-flake-history.log | head` answers "how often does this branch flake".
+Every commit attempt — success or failure — prepends an entry to `.commit-flake-history.log` (newest-on-top, gitignored, written by `scripts/git-commit-timeout.sh`). The journal is **shared across worktrees**: it lives once at the MAIN working-tree root, so every linked worktree (each delegated agent's checkout) appends to the SAME file and the whole history is answerable from one `head -200 .commit-flake-history.log` in the main checkout. Each entry is written exactly once at the very end of the run, serialized under an flock, so parallel-agent commits can't interleave or clobber. Successful commits log a single `PASS` line; failed commits log a header block followed by the last 200 lines of hook output. `head -200 .commit-flake-history.log` answers "what just broke and what was the failure pattern" without scrolling; `grep '^FAIL' .commit-flake-history.log | head` answers "how often does this branch flake".
+
+Each entry's header is stamped with the committing **agent identity**: a delegated worktree agent exports `RESTORM_COMMIT_AGENT="<full ticket name>"` before invoking the wrapper, and that string lands in the `PASS`/`FAIL` header next to the branch + worktree (a human committing on the main checkout leaves it unset → `(local)`). So a flake is attributable to the agent/worktree that produced it. The per-run live hook output is buffered separately in each worktree's own git dir (`commit-timeout.log`), never shared, so concurrent runs don't interleave their live logs.
 
 When `scripts/git-commit-timeout.sh` returns non-zero:
 
