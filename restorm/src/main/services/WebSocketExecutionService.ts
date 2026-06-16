@@ -8,6 +8,7 @@
  */
 
 import WebSocket, { WebSocketServer } from 'ws'
+import mqtt, { type MqttClient, type IClientOptions } from 'mqtt'
 import { io, type Socket } from 'socket.io-client'
 import { Server as SocketIOServer, type Socket as ServerSocket } from 'socket.io'
 import { createServer, type Server as HttpServer } from 'node:http'
@@ -52,9 +53,15 @@ export interface WebSocketExecutionResult {
  * per-port server (see {@link PortServer}). */
 interface ActiveConnection {
   requestId: string
-  kind: 'websocket' | 'socketio' | 'socketio-server' | 'websocket-server'
+  kind: 'websocket' | 'socketio' | 'socketio-server' | 'websocket-server' | 'mqtt'
   ws?: WebSocket
   socket?: Socket
+  /** MQTT client (kind 'mqtt'). */
+  mqttClient?: MqttClient
+  /** Default publish topic + QoS/retain for this MQTT request's Send button. */
+  mqttTopic?: string
+  mqttQos?: 0 | 1 | 2
+  mqttRetain?: boolean
   /** Port this server route listens on (server mode). */
   port?: number
   /** The hosted route on that port (server mode): a Socket.IO namespace for a
@@ -108,6 +115,17 @@ interface ResolvedExecution {
   /** When true, restorm HOSTS a socket.io server (localhost:port[/namespace])
    * instead of connecting as a client. */
   server: boolean
+  /** MQTT-only resolved fields (protocol === 'mqtt'; `event` carries the topic). */
+  mqtt?: {
+    qos: 0 | 1 | 2
+    retain: boolean
+    clientId?: string
+    username?: string
+    password?: string
+    keepalive?: number
+    subscribe: boolean
+    will?: { topic: string; payload: string; qos: 0 | 1 | 2; retain: boolean }
+  }
 }
 
 /** Serialize an arbitrary Socket.IO payload to the string message model. */
@@ -179,6 +197,11 @@ class WebSocketExecutionService {
       }
       logger.info('[WebSocketExecutionService] Listening (websocket server)', { requestId, url: resolved.resolvedUrl })
       return this.listenRawWebSocketServer(resolved)
+    }
+
+    if (resolved.protocol === 'mqtt') {
+      logger.info('[WebSocketExecutionService] Connecting (mqtt)', { requestId, url: resolved.resolvedUrl })
+      return this.executeMqtt(resolved)
     }
 
     if (resolved.protocol === 'socketio') {
@@ -577,7 +600,37 @@ class WebSocketExecutionService {
     const protocol = requestContext?.fullData?.protocol ?? requestContext?.fullData?.method
     const server = requestContext?.fullData?.server === true
 
-    return { requestId, timeout, startTime, startedAt, resolvedUrl, headers, resolvedMessage, event, protocol, server }
+    // MQTT: resolve handlebars on the connection-shaping fields (topic lives on
+    // `event`, already captured above) + normalise QoS to 0|1|2. Only built when
+    // this is an MQTT request so the websocket/socketio paths stay untouched.
+    let mqttConfig: ResolvedExecution['mqtt']
+    if (protocol === 'mqtt') {
+      const fd = requestContext?.fullData
+      const resolveOpt = (v: string | undefined): string | undefined =>
+        v !== undefined && v !== '' ? contextService.resolveValue(v, requestId) : undefined
+      const normQos = (q: number | undefined): 0 | 1 | 2 => (q === 1 || q === 2 ? q : 0)
+      const willTopic = resolveOpt(fd?.lwtTopic)
+      mqttConfig = {
+        qos: normQos(fd?.qos),
+        retain: fd?.retain === true,
+        ...(resolveOpt(fd?.clientId) !== undefined ? { clientId: resolveOpt(fd?.clientId) } : {}),
+        ...(resolveOpt(fd?.username) !== undefined ? { username: resolveOpt(fd?.username) } : {}),
+        ...(resolveOpt(fd?.password) !== undefined ? { password: resolveOpt(fd?.password) } : {}),
+        ...(fd?.keepalive !== undefined ? { keepalive: fd.keepalive } : {}),
+        // Subscribe to the request's topic on connect unless explicitly disabled.
+        subscribe: fd?.mqttSubscribe !== false,
+        ...(willTopic !== undefined ? {
+          will: {
+            topic: willTopic,
+            payload: resolveOpt(fd?.lwtPayload) ?? '',
+            qos: normQos(fd?.lwtQos),
+            retain: fd?.lwtRetain === true
+          }
+        } : {})
+      }
+    }
+
+    return { requestId, timeout, startTime, startedAt, resolvedUrl, headers, resolvedMessage, event, protocol, server, ...(mqttConfig ? { mqtt: mqttConfig } : {}) }
   }
 
   /** Parse `localhost:<port>[/<namespace>]` into a port + socket.io namespace.
@@ -1198,6 +1251,114 @@ class WebSocketExecutionService {
   }
 
   /**
+   * MQTT: connect to the broker, SUBSCRIBE to the request's topic (so received
+   * messages stream to the renderer), and stay connected — mqtt.js auto-reconnects
+   * with backoff and re-subscribes on reconnect — until the caller disconnects.
+   * `timeout` bounds only the INITIAL connect; PUBLISH is a separate `send()` (the
+   * UI's Send button). Auth failure / unreachable broker resolve the run with an
+   * error. The whole session (sent publishes + received frames) persists to
+   * history for the response panel + a scenario node's preview.
+   */
+  private executeMqtt(resolved: ResolvedExecution): Promise<WebSocketExecutionResult> {
+    const { requestId, timeout, startTime, startedAt, resolvedUrl, event } = resolved
+    const cfg = resolved.mqtt ?? { qos: 0 as const, retain: false, subscribe: true }
+    const topic = event && event.length > 0 ? event : undefined
+
+    return new Promise((resolve) => {
+      const messages: WebSocketMessage[] = []
+      let connected = false
+      let settled = false
+
+      const record = (data: string, evt: string | undefined): void => {
+        const msg: WebSocketMessage = { direction: 'received', data, event: evt, timestamp: new Date().toISOString() }
+        messages.push(msg)
+        this.broadcastMessage(requestId, msg)
+      }
+
+      let client: MqttClient | undefined
+      const finish = (success: boolean, error?: string): void => {
+        if (settled) return
+        settled = true
+        try { client?.end(true) } catch { /* already ended */ }
+        this.activeConnections.delete(requestId)
+        this.broadcastProgress(requestId, error ? 'error' : 'completed')
+        const result: WebSocketExecutionResult = {
+          requestId,
+          success,
+          connected,
+          messages,
+          ...(error ? { error } : {}),
+          requestUrl: resolvedUrl,
+          timings: { startedAt, durationMs: Date.now() - startTime }
+        }
+        this.persistHistory(requestId, result)
+        resolve(result)
+      }
+
+      try {
+        const opts: IClientOptions = {
+          connectTimeout: timeout,
+          // Reconnect with backoff; mqtt.js re-subscribes on reconnect by default.
+          reconnectPeriod: 1000,
+          ...(cfg.clientId ? { clientId: cfg.clientId } : {}),
+          ...(cfg.username ? { username: cfg.username } : {}),
+          ...(cfg.password ? { password: cfg.password } : {}),
+          ...(cfg.keepalive !== undefined ? { keepalive: cfg.keepalive } : {}),
+          ...(cfg.will ? { will: { topic: cfg.will.topic, payload: Buffer.from(cfg.will.payload), qos: cfg.will.qos, retain: cfg.will.retain } } : {})
+        }
+        const c = mqtt.connect(resolvedUrl, opts)
+        client = c
+
+        const connection: ActiveConnection = {
+          requestId, kind: 'mqtt', mqttClient: c, startTime, messages,
+          mqttQos: cfg.qos, mqttRetain: cfg.retain, ...(topic ? { mqttTopic: topic } : {})
+        }
+        this.activeConnections.set(requestId, connection)
+
+        // Bound the INITIAL connect: if the broker never accepts us within the
+        // timeout (down / unreachable), fail rather than retry forever.
+        const connectTimer = setTimeout(() => { if (!connected) finish(false, 'Connection timed out') }, timeout)
+
+        c.on('connect', () => {
+          connected = true
+          clearTimeout(connectTimer)
+          logger.info('[WebSocketExecutionService] Connected (mqtt)', { requestId })
+          record(topic ? `connected; subscribing to ${topic}` : 'connected', 'connect')
+          if (cfg.subscribe && topic) {
+            c.subscribe(topic, { qos: cfg.qos }, (err, granted) => {
+              if (err) { record(`subscribe error: ${err.message}`, 'error'); return }
+              const grantedQos = granted?.map((g) => g.qos).join(',')
+              record(`subscribed ${topic}${grantedQos !== undefined ? ` (qos ${grantedQos})` : ''}`, 'subscribe')
+            })
+          }
+        })
+
+        c.on('message', (t: string, payload: Buffer) => {
+          record(payload.toString('utf8'), t)
+        })
+
+        c.on('reconnect', () => { record('reconnecting…', 'reconnect') })
+
+        c.on('error', (err: Error) => {
+          // Auth failure / protocol error: surface it. If it happened before we
+          // ever connected, the run can't proceed — fail (which also ends the
+          // client, stopping the retry loop).
+          record(`error: ${err.message}`, 'error')
+          if (!connected) { clearTimeout(connectTimer); finish(false, err.message) }
+        })
+
+        // 'close' fires on every dropped connection; with reconnect on it is NOT
+        // terminal (a 'reconnect' → 'connect' follows), so we don't finish here.
+        // 'end' fires only when the client is explicitly ended (disconnect / timeout
+        // / error) — that is the terminal signal.
+        c.on('end', () => { finish(connected) })
+      } catch (err) {
+        finish(false, (err as Error).message || 'Connection failed')
+      }
+    })
+  }
+
+  /**
    * Disconnect an active connection
    */
   disconnect(requestId: string): boolean {
@@ -1206,6 +1367,9 @@ class WebSocketExecutionService {
     logger.info('[WebSocketExecutionService] Disconnecting', { requestId })
     if (connection.kind === 'websocket') {
       connection.ws?.close()
+    } else if (connection.kind === 'mqtt') {
+      // force-end stops mqtt.js's auto-reconnect loop and fires 'end' → finish().
+      connection.mqttClient?.end(true)
     } else if (connection.kind === 'socketio-server' || connection.kind === 'websocket-server') {
       // Stop listening on this route. `serverSettle` runs releaseServerRoute()
       // (drops the route + closes the shared port host when it was the last
@@ -1274,6 +1438,13 @@ class WebSocketExecutionService {
       for (const ws of route.sockets) {
         if (ws.readyState === WebSocket.OPEN) ws.send(message)
       }
+    } else if (connection.kind === 'mqtt') {
+      // PUBLISH the GUI payload. `event` carries the publish topic (falls back to
+      // the request's own topic); QoS + retain come from the request config.
+      if (connection.mqttClient?.connected !== true) return false
+      const topic = event && event.length > 0 ? event : connection.mqttTopic
+      if (!topic) return false
+      connection.mqttClient.publish(topic, message, { qos: connection.mqttQos ?? 0, retain: connection.mqttRetain ?? false })
     } else {
       if (!connection.socket?.connected) return false
       const channel = event && event.length > 0 ? event : 'message'
@@ -1315,6 +1486,9 @@ class WebSocketExecutionService {
     if (!connection) return false
     if (connection.kind === 'websocket') {
       return connection.ws?.readyState === WebSocket.OPEN
+    }
+    if (connection.kind === 'mqtt') {
+      return connection.mqttClient?.connected === true
     }
     if (connection.kind === 'socketio-server') {
       return connection.port !== undefined && this.portHosts.has(connection.port)

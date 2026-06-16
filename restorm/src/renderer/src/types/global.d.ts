@@ -488,6 +488,18 @@ export interface FullRequestData {
   message?: string | undefined
   /** WebSocket/Socket.IO: when true, restorm HOSTS a server instead of connecting. */
   server?: boolean | undefined
+  // MQTT specific (protocol === 'mqtt'; `event` carries the topic)
+  qos?: number | undefined
+  retain?: boolean | undefined
+  clientId?: string | undefined
+  username?: string | undefined
+  password?: string | undefined
+  keepalive?: number | undefined
+  mqttSubscribe?: boolean | undefined
+  lwtTopic?: string | undefined
+  lwtPayload?: string | undefined
+  lwtQos?: number | undefined
+  lwtRetain?: boolean | undefined
 }
 
 export {}

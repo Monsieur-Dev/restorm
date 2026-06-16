@@ -18,6 +18,7 @@ import {
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
 import { RestormVariableInputBox } from '../RestormVariableInputBox'
+import { MqttOptionsPanel } from './MqttOptionsPanel'
 import { RestormKeyValueTable, type KeyValueTableHandle } from '../RestormKeyValueTable'
 import type { WebSocketRequest, WebSocketResponse, WebSocketMessage, KeyValue, ResponseHistoryDetail } from '../../../../shared/types/collections'
 import { useEnvironmentContext } from '../../contexts/useEnvironmentContext'
@@ -39,6 +40,25 @@ import './WebSocketChat.css'
 
 export interface WebSocketRequestTabViewProps {
   request: WebSocketRequest
+}
+
+/** The MQTT-specific slice of `fullData` (only for `protocol === 'mqtt'`).
+ * Returns an empty object for other protocols so the spread is a no-op. */
+function buildMqttFullData(req: WebSocketRequest): Record<string, unknown> {
+  if (req.protocol !== 'mqtt') return {}
+  const out: Record<string, unknown> = {}
+  if (req.qos !== undefined) out['qos'] = req.qos
+  if (req.retain !== undefined) out['retain'] = req.retain
+  if (req.clientId !== undefined) out['clientId'] = req.clientId
+  if (req.username !== undefined) out['username'] = req.username
+  if (req.password !== undefined) out['password'] = req.password
+  if (req.keepalive !== undefined) out['keepalive'] = req.keepalive
+  if (req.mqttSubscribe !== undefined) out['mqttSubscribe'] = req.mqttSubscribe
+  if (req.lwtTopic !== undefined) out['lwtTopic'] = req.lwtTopic
+  if (req.lwtPayload !== undefined) out['lwtPayload'] = req.lwtPayload
+  if (req.lwtQos !== undefined) out['lwtQos'] = req.lwtQos
+  if (req.lwtRetain !== undefined) out['lwtRetain'] = req.lwtRetain
+  return out
 }
 
 export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = ({
@@ -136,6 +156,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       message: currentRequest.message,
       requestType: 'websocket',
       ...(currentRequest.server === true ? { server: true } : {}),
+      ...buildMqttFullData(currentRequest),
       headers: toKeyValueData(currentRequest.headers),
       body: { type: 'text', content: currentRequest.message }
     }, sourceIdRef.current)
@@ -197,10 +218,13 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       message,
       requestType: 'websocket',
       ...(request.server === true ? { server: true } : {}),
+      ...buildMqttFullData(request),
       headers: toKeyValueData(request.headers),
       body: { type: 'text', content: message }
     }, sourceIdRef.current)
-  }, [request.id, request.protocol, request.server, request.event, request.headers, url, event, message])
+    // `request` (whole object) is in deps because buildMqttFullData reads many of
+    // its fields; url/event/message are the separately-tracked local input state.
+  }, [request, url, event, message])
 
   // Live message + connection stream for this request: append frames as they
   // arrive (chat updates in real time) and refresh history when it closes.
@@ -351,6 +375,9 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
                 />
               </div>
             </div>
+          )}
+          {request.protocol === 'mqtt' && (
+            <MqttOptionsPanel request={request} variables={emptyVariables} helpers={handlebarsHelpers} />
           )}
           <div style={{ flex: 1, border: '1px solid var(--panel-border)', borderRadius: 3 }}>
             <CodeEditor
@@ -619,16 +646,16 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
           <SendButtonEnvSwitcher>{connectButton}</SendButtonEnvSwitcher>
         </>
       )}
-      {(request.protocol === 'socketio' || request.protocol === 'websocket') && (
-        <Button
-          icon="send"
-          onClick={handleSend}
-          disabled={!isListening}
-          emphasis={1}
-          options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}
-          data-testid="websocket-send-button"
-        />
-      )}
+      {/* Every WebSocket-family protocol (websocket / socketio / mqtt) has a Send
+          button: it sends a frame, emits an event, or publishes to a topic. */}
+      <Button
+        icon="send"
+        onClick={handleSend}
+        disabled={!isListening}
+        emphasis={1}
+        options={{ title: t('requestTab.send'), ariaLabel: t('requestTab.send') }}
+        data-testid="websocket-send-button"
+      />
     </ControlGroup>
   )
   

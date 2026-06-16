@@ -1,0 +1,31 @@
+feat(mqtt): MQTT execution + request-panel UI (WIP checkpoint)
+
+Real MQTT execution (mqtt.js) through WebSocketExecutionService, dispatched by
+`protocol === 'mqtt'` alongside the websocket / socketio paths:
+
+- Connect (mqtt:// / mqtts:// / ws:// / wss://), subscribe to the request's topic
+  on connect (so received messages stream to the response panel), publish via the
+  Send button. QoS 0/1/2, retain, wildcard subscriptions (+ and #), retained
+  messages, username/password auth, keepalive, Last Will & Testament,
+  reconnect-with-backoff (mqtt.js auto re-subscribes), clean disconnect.
+- Model: MQTT fields on WebSocketRequest (qos / retain / clientId / username /
+  password / keepalive / mqttSubscribe / lwt*) + fromPlain/toPlainObject
+  round-trip + fullData plumbing (renderer → ContextService → execution).
+- UI: MqttOptionsPanel (QoS select, retain + subscribe-on-connect toggles, client
+  id, username/password, keepalive, and a Last Will section) — ECUI components,
+  Handlebars-aware (VariableInputBox), debounced. The Send button now renders for
+  mqtt. New `mqtt.*` i18n keys across all 27 locales (en/fr translated).
+- Mock: Mosquitto auth — committed pre-hashed password file (restorm / restorm),
+  allow_anonymous kept for the credential-free matrix; wait-for-services TCP probe
+  on 1883.
+- Tests: mqttExecution.integration.test.ts — 6 tests against the live Docker
+  broker (connect+subscribe+receive QoS1, Send-button publish round-trip, +/#
+  wildcards, retained message, valid auth, bad-credentials error). Also
+  live-verified in-app: connect → subscribe → received frame in the Response tab.
+
+WIP checkpoint — still to come for TASK-66.2: scenario-graph nodes
+(mqttConnect/Publish/Subscribe/Close + executors + preview + nav + palette + demo
++ Bestiary + goldens), code-snippet isSubscribe/isPublish flags, request-panel
+E2E feature, and the protocol doc.
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>

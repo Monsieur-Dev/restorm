@@ -52,6 +52,64 @@ export class WebSocketRequest extends BaseRequest {
   @TreatEmptyAsUndefined()
   server?: boolean
 
+  // ----------------------------------------------------------------------
+  // MQTT-specific (protocol === 'mqtt'). All optional so the websocket /
+  // socketio paths are unaffected. `event` carries the MQTT topic.
+  // ----------------------------------------------------------------------
+
+  /** QoS level (0 | 1 | 2) used for both publish and the on-connect subscribe. */
+  @graphqlField({ type: 'Int', nullable: true })
+  @TreatEmptyAsUndefined()
+  qos?: number
+
+  /** Publish retain flag. */
+  @graphqlField({ type: 'Boolean', nullable: true })
+  @TreatEmptyAsUndefined()
+  retain?: boolean
+
+  /** Client id (handlebars-resolved; the client auto-generates one when empty). */
+  @graphqlField({ type: 'String', nullable: true })
+  @TreatEmptyAsUndefined()
+  clientId?: string
+
+  /** Auth username (handlebars-resolved). */
+  @graphqlField({ type: 'String', nullable: true })
+  @TreatEmptyAsUndefined()
+  username?: string
+
+  /** Auth password (handlebars-resolved; may resolve from a secret). */
+  @graphqlField({ type: 'String', nullable: true })
+  @TreatEmptyAsUndefined()
+  password?: string
+
+  /** Keepalive interval in seconds. */
+  @graphqlField({ type: 'Int', nullable: true })
+  @TreatEmptyAsUndefined()
+  keepalive?: number
+
+  /** Subscribe to the request's topic on connect so received messages stream
+   * into the response panel. Defaults to true; turn off for a pure publisher. */
+  @graphqlField({ type: 'Boolean', nullable: true })
+  @TreatEmptyAsUndefined()
+  mqttSubscribe?: boolean
+
+  /** Last Will & Testament — the broker publishes this if the client drops. */
+  @graphqlField({ type: 'String', nullable: true })
+  @TreatEmptyAsUndefined()
+  lwtTopic?: string
+
+  @graphqlField({ type: 'String', nullable: true })
+  @TreatEmptyAsUndefined()
+  lwtPayload?: string
+
+  @graphqlField({ type: 'Int', nullable: true })
+  @TreatEmptyAsUndefined()
+  lwtQos?: number
+
+  @graphqlField({ type: 'Boolean', nullable: true })
+  @TreatEmptyAsUndefined()
+  lwtRetain?: boolean
+
   constructor(init?: Partial<WebSocketRequest>) {
     super(init)
     if (init) {
@@ -81,6 +139,17 @@ export class WebSocketRequest extends BaseRequest {
     message?: string
     headers?: Parameters<typeof KeyValue.fromPlain>[0][]
     server?: boolean
+    qos?: number
+    retain?: boolean
+    clientId?: string
+    username?: string
+    password?: string
+    keepalive?: number
+    mqttSubscribe?: boolean
+    lwtTopic?: string
+    lwtPayload?: string
+    lwtQos?: number
+    lwtRetain?: boolean
   }): WebSocketRequest {
     return new WebSocketRequest({
       ...(obj.id !== undefined && { id: obj.id }),
@@ -95,7 +164,18 @@ export class WebSocketRequest extends BaseRequest {
       ...(obj.event !== undefined && { event: obj.event }),
       message: obj.message ?? '',
       headers: (obj.headers ?? []) as KeyValue[],
-      ...(obj.server !== undefined && { server: obj.server })
+      ...(obj.server !== undefined && { server: obj.server }),
+      ...(obj.qos !== undefined && { qos: obj.qos }),
+      ...(obj.retain !== undefined && { retain: obj.retain }),
+      ...(obj.clientId !== undefined && { clientId: obj.clientId }),
+      ...(obj.username !== undefined && { username: obj.username }),
+      ...(obj.password !== undefined && { password: obj.password }),
+      ...(obj.keepalive !== undefined && { keepalive: obj.keepalive }),
+      ...(obj.mqttSubscribe !== undefined && { mqttSubscribe: obj.mqttSubscribe }),
+      ...(obj.lwtTopic !== undefined && { lwtTopic: obj.lwtTopic }),
+      ...(obj.lwtPayload !== undefined && { lwtPayload: obj.lwtPayload }),
+      ...(obj.lwtQos !== undefined && { lwtQos: obj.lwtQos }),
+      ...(obj.lwtRetain !== undefined && { lwtRetain: obj.lwtRetain })
     })
   }
 
@@ -117,7 +197,18 @@ export class WebSocketRequest extends BaseRequest {
       event: this.event,
       message: this.message,
       headers: this.headers.map(h => h.toPlainObject()),
-      ...(this.server !== undefined && { server: this.server })
+      ...(this.server !== undefined && { server: this.server }),
+      ...(this.qos !== undefined && { qos: this.qos }),
+      ...(this.retain !== undefined && { retain: this.retain }),
+      ...(this.clientId !== undefined && { clientId: this.clientId }),
+      ...(this.username !== undefined && { username: this.username }),
+      ...(this.password !== undefined && { password: this.password }),
+      ...(this.keepalive !== undefined && { keepalive: this.keepalive }),
+      ...(this.mqttSubscribe !== undefined && { mqttSubscribe: this.mqttSubscribe }),
+      ...(this.lwtTopic !== undefined && { lwtTopic: this.lwtTopic }),
+      ...(this.lwtPayload !== undefined && { lwtPayload: this.lwtPayload }),
+      ...(this.lwtQos !== undefined && { lwtQos: this.lwtQos }),
+      ...(this.lwtRetain !== undefined && { lwtRetain: this.lwtRetain })
     }
   }
 }

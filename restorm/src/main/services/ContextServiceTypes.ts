@@ -96,6 +96,19 @@ export interface FullRequestData {
   /** Socket.IO: when true, restorm HOSTS a server instead of connecting. */
   server?: boolean
 
+  // MQTT specific (protocol === 'mqtt'; `event` carries the topic)
+  qos?: number
+  retain?: boolean
+  clientId?: string
+  username?: string
+  password?: string
+  keepalive?: number
+  mqttSubscribe?: boolean
+  lwtTopic?: string
+  lwtPayload?: string
+  lwtQos?: number
+  lwtRetain?: boolean
+
   // OData specific — carried verbatim through URLResolver, which
   // appends the system query options ($filter / $select / $top /
   // $skip / $count) to the resolved URL as a final step.
