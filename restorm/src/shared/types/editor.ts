@@ -143,6 +143,16 @@ export interface MiniBrowserTab extends BaseRestormTab {
   url?: string
 }
 
+/** Tab displaying the application settings (User / Workspace
+ * sections — the same content as the full-screen Settings modal).
+ * Singleton, identified by `tabId` `settings:singleton`. Mounted by
+ * `RestormWorkbench`'s `renderTabContent` branch to the shared
+ * `<SettingsPage />`. Opened when a workbench is already active; when
+ * no file is open the Settings modal is shown instead. */
+export interface SettingsTab extends BaseRestormTab {
+  tabType: 'settings'
+}
+
 /** Legacy tab type for backward compatibility */
 export interface LegacyTab extends BaseRestormTab {
   tabType?: undefined
@@ -164,6 +174,7 @@ export type RestormEditorTab =
   | ConsoleTab
   | FirewallTab
   | MiniBrowserTab
+  | SettingsTab
   | LegacyTab
 
 /** Stable singleton id for the Console workbench tab.
@@ -177,6 +188,11 @@ export const FIREWALL_TAB_ID = 'firewall:singleton'
 /** Stable singleton id for the Mini browser workbench tab.
  * `View → Mini browser` and the focus-or-create logic both key off this. */
 export const MINI_BROWSER_TAB_ID = 'mini-browser:singleton'
+
+/** Stable singleton id for the Settings workbench tab. The gear
+ * button + `View → Settings` open-or-focus this tab when a workbench
+ * is active (and the modal otherwise). */
+export const SETTINGS_TAB_ID = 'settings:singleton'
 
 /** @deprecated Use RestormEditorTab instead */
 export type restormEditorTab = RestormEditorTab
@@ -244,4 +260,9 @@ export function isFirewallTab(tab: RestormEditorTab): tab is FirewallTab {
 /** Type guard for MiniBrowserTab */
 export function isMiniBrowserTab(tab: RestormEditorTab): tab is MiniBrowserTab {
   return tab.tabType === 'mini-browser'
+}
+
+/** Type guard for SettingsTab */
+export function isSettingsTab(tab: RestormEditorTab): tab is SettingsTab {
+  return tab.tabType === 'settings'
 }

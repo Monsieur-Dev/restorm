@@ -52,6 +52,14 @@ export interface RestormTitlebarProps {
    * `View → Mini browser`. Same singleton-or-focus pattern as
    * Firewall. */
   onOpenMiniBrowser: () => void
+  /** Whether a workbench (an open file) is currently active. When
+   * true, the gear button and `View → Settings` open Settings as a
+   * singleton workbench tab; when false they fall back to the
+   * full-screen Settings modal. */
+  workbenchActive: boolean
+  /** Open / focus the Settings singleton tab. Used only when
+   * `workbenchActive` is true; otherwise the modal is shown. */
+  onOpenSettingsTab: () => void
 }
 
 /**
@@ -75,11 +83,23 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   onSearchResultClick,
   onOpenConsole,
   onOpenFirewall,
-  onOpenMiniBrowser
+  onOpenMiniBrowser,
+  workbenchActive,
+  onOpenSettingsTab
 }) => {
   const { t } = useTranslation()
   const { showSettingsModal } = useSettingsModal()
   const { isEnabled: navigationEnabled } = useFeature('navigation')
+
+  // Settings opens as a workbench tab when a file is open, or as the
+  // full-screen modal on the welcome screen (no workbench).
+  const handleOpenSettings = useCallback(() => {
+    if (workbenchActive) {
+      onOpenSettingsTab()
+    } else {
+      showSettingsModal()
+    }
+  }, [workbenchActive, onOpenSettingsTab, showSettingsModal])
 
   const handleMenuNew = useCallback(() => {
     onNew()
@@ -248,7 +268,8 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
             <MenuItem
               data-testid="titlebar-menu-item-settings"
               title={t('menuBar.settings')}
-              onClick={() => { showSettingsModal() }}
+              icon={<span className="codicon codicon-settings-gear" aria-hidden="true" />}
+              onClick={handleOpenSettings}
             />
             <MenuItemSeparator data-testid="titlebar-menu-separator-view-3" />
             <MenuItem data-testid="titlebar-menu-item-toggle-devtools" title={t('menuBar.toggleDevTools')} disabled />
@@ -277,9 +298,7 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
           small
           secondary
           icon="gear"
-          onClick={() => {
-            showSettingsModal()
-          }}
+          onClick={handleOpenSettings}
           options={{
             ariaLabel: t('app.openSettings'),
             title: t('app.openSettings')
