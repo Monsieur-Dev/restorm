@@ -50,6 +50,7 @@ import './scenarioEnvPreview'
 // Side-effect: registers the secret → plaintext resolver (async cache) so the
 // inspector's static preview resolves a SecretValue operand to its live value.
 import { useSecretPreviewVersion } from './scenarioSecretPreview'
+import { layoutScenarioGraph, SCENARIO_NODE_FALLBACK_WIDTH, SCENARIO_NODE_FALLBACK_HEIGHT } from './scenarioGraphLayout'
 import { SCENARIO_ADD_REQUEST_GROUPS, SCENARIO_ADD_SCENARIO_ENTRY, SCENARIO_ADD_SOCKETIO_ACTIONS, SCENARIO_ADD_WEBSOCKET_ACTIONS, SCENARIO_ADD_GRPC_ACTIONS, scenarioAddIcon, scenarioAddSocketioIcon, scenarioAddWebsocketIcon, scenarioAddGrpcIcon } from './scenarioChildPalette'
 import type { AddChildKind } from '../MainView/Sidebar/contextMenuBuilder'
 import type { TFunction } from 'i18next'
@@ -878,6 +879,60 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       setCanRedo(false)
     })
   }, [onScenarioChange, scenario.id])
+
+  // ── Auto-layout ────────────────────────────────────────────────────────────
+  // Re-run an ELK layered layout whenever the scenario's STRUCTURE changes (a
+  // node or edge added / removed) so boxes never overlap and the flow reads
+  // left→right — the agent / user just drops boxes and the graph tidies itself.
+  // Position-only changes (dragging) don't change the signature, so a manual
+  // nudge is left alone until the next structural edit. The baseline is seeded
+  // (without laying out) when a scenario first opens, so opening an existing
+  // hand-arranged scenario doesn't reshuffle it.
+  const lastLayoutSigRef = useRef<string>('')
+  const layoutScenarioRef = useRef<string>('')
+  const autoLayoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => {
+    if (nodes.length === 0) return
+    const sig = nodes.map((n) => n.id).sort().join(',') + '|' +
+      edges.map((e) => `${e.source}>${e.target}:${e.sourceHandle ?? ''}>${e.targetHandle ?? ''}`).sort().join(',')
+    if (layoutScenarioRef.current !== scenario.id) {
+      layoutScenarioRef.current = scenario.id
+      lastLayoutSigRef.current = sig
+      return
+    }
+    if (sig === lastLayoutSigRef.current) return
+    lastLayoutSigRef.current = sig
+    if (autoLayoutTimerRef.current) clearTimeout(autoLayoutTimerRef.current)
+    // Debounce so a burst of node/edge creations lays out once, and so freshly
+    // created boxes have a frame to be measured by React Flow before we read sizes.
+    autoLayoutTimerRef.current = setTimeout(() => {
+      void (async () => {
+        const current = nodesRef.current
+        if (current.length === 0) return
+        const inputNodes = current.map((n) => {
+          const m = (n as { measured?: { width?: number; height?: number } }).measured
+          return {
+            id: n.id,
+            width: m?.width ?? n.width ?? SCENARIO_NODE_FALLBACK_WIDTH,
+            height: m?.height ?? n.height ?? SCENARIO_NODE_FALLBACK_HEIGHT
+          }
+        })
+        const inputEdges = edgesRef.current.map((e) => ({ id: e.id, source: e.source, target: e.target }))
+        const positions = await layoutScenarioGraph(inputNodes, inputEdges)
+        if (positions.size === 0) return
+        const before = nodesRef.current
+        const laid = before.map((n) => {
+          const p = positions.get(n.id)
+          if (!p || (n.position.x === p.x && n.position.y === p.y)) return n
+          return { ...n, position: p }
+        })
+        if (laid.every((n, i) => n === before[i])) return // no box moved
+        setNodes(laid)
+        persist(laid, edgesRef.current)
+        void fitView({ duration: 300, padding: 0.2 })
+      })()
+    }, 200)
+  }, [nodes, edges, scenario.id, setNodes, persist, fitView])
 
   // The JSON-path selector on a data link reads + writes that edge's `selector`
   // through this api; the write mutates the authoritative edge store, mirrors it
