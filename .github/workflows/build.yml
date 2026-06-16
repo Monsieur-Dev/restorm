@@ -173,6 +173,17 @@ jobs:
           docker build -t restorm-auth-service .
           docker run -d --name restorm-auth-service -p 5110:5110 restorm-auth-service
 
+      - name: Start MQTT broker (Mosquitto)
+        # eclipse-mosquitto:2 on :1883, mirroring tests/docker/docker-compose.yml.
+        # allow_anonymous=true + a pre-hashed passwd file (restorm/restorm) drive
+        # the MQTT publish/subscribe + auth integration tests.
+        run: |
+          cd restorm/tests/docker
+          docker run -d --name restorm-mqtt -p 1883:1883 \
+            -v "$(pwd)/mosquitto.conf:/mosquitto/config/mosquitto.conf" \
+            -v "$(pwd)/mosquitto-passwd:/mosquitto/config/passwd:ro" \
+            eclipse-mosquitto:2
+
       - name: Wait for services
         run: |
           cd restorm
