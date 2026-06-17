@@ -156,6 +156,15 @@ export type { IconViewProps } from './IconView'
 export { JsonViewer } from './JsonViewer'
 export type { JsonViewerProps } from './JsonViewer'
 
+// GraphCanvas exports
+export { GraphCanvas } from './GraphCanvas'
+export type {
+  GraphCanvasProps,
+  GraphCanvasPanMode,
+  GraphCanvasMinimapOptions,
+  GraphCanvasBackgroundOptions
+} from './GraphCanvas'
+
 // TabSwitcherOverlay exports
 export { TabSwitcherOverlay } from './TabSwitcherOverlay'
 export type { TabSwitcherOverlayProps, TabSwitcherItem } from './TabSwitcherOverlay'
