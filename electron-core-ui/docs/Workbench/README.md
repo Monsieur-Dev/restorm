@@ -55,6 +55,15 @@ Use it to decide up front whether a restore will reopen tabs: a consumer that sh
   - `onGetTabContent?: (tabId: string) => string | undefined`
   - `onDetachToNewWindow?: (tabId: string, groupId: string, cursorX?: number, cursorY?: number) => void`
   - `onWorkbenchTabDropped?: (tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }) => boolean | Promise<boolean>`
+  - `getTabNavKey?: (tab: EditorTab) => string | null` — maps a tab to the key it is tracked under in the [`navigationService`](../../src/renderer/services/NavigationService.ts) most-recently-used history (see below).
+
+#### Closing the active tab returns to the most-recently-used tab
+
+When the active tab is closed, `EditorWorkbench` activates the **most-recently-used remaining tab across all groups** (VSCode-style), rather than the adjacent one. It ranks every surviving tab in the workbench by its position in `navigationService.getHistory()`, mapping each tab to its history key via `getTabNavKey`. Tabs whose key has no recorded activation (or that return `null`) sort last; if none qualifies, it falls back to the first remaining tab in the closed tab's own group. Omit `getTabNavKey` entirely to keep the plain first-remaining-tab behaviour.
+
+Because the ranking spans every group, the most-recently-used tab may live in a **different** group than the one being closed. In that case `EditorWorkbench` activates it there and moves focus to that group — keeping close-to-previous consistent with the Ctrl+Tab switcher (which also ranks globally). The closed tab's own group is always left pointing at a valid remaining tab (or emptied + pruned), regardless of where focus lands.
+
+The host owns the tab→key mapping, so the same key it records on activation (`navigationService.navigateTo(key, …)`) is what drives both this close behaviour and any most-recently-used tab switcher built on the same history. Singleton / special tabs that have no underlying item can return their own stable tab id as the key, so they participate in the ordering like any other tab.
 
 #### Imperative handle (`EditorWorkbenchHandle`)
 

@@ -10,6 +10,7 @@ import { computeDropIndex } from './dnd';
 import { getCurrentWindowBounds } from './ipc';
 import { onWorkbenchTabDropped } from './ipc';
 import { logger } from '../../services/logger';
+import { navigationService } from '../../services/NavigationService';
 import { Sash } from '../Sash';
 import type { SashEvent, IVerticalSashLayoutProvider, IHorizontalSashLayoutProvider } from '../Sash';
 import { saveWorkbenchState, loadWorkbenchState, clearWorkbenchState, rebuildWorkbenchTree } from './persistence';
@@ -901,10 +902,58 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 		return (): void => { window.removeEventListener('keydown', onKeyDown); };
 	}, []);
 
+	// The host's tab→navigation-key resolver, read off the callbacks rest.
+	// `handleClose` depends on it, so the close handler re-binds only when
+	// the resolver identity changes.
+	const getTabNavKey = extCallbacks.getTabNavKey;
+
 	const handleClose = useCallback((tabId: string, groupId: string) => {
-		const { tree: t } = removeTab(tree, groupId, tabId);
+		// Closing the active tab activates the most-recently-used remaining
+		// tab ACROSS ALL GROUPS (VSCode-style), so close-to-previous stays
+		// consistent with the Ctrl+Tab switcher (which also ranks globally).
+		// Rank every survivor by its position in the navigation history,
+		// keyed via the host's `getTabNavKey`. Tabs with no key / no recorded
+		// activation sort after those that do; if none qualifies, `removeTab`
+		// falls back to the first remaining tab in the closed tab's own group.
+		const pickNextActive = getTabNavKey
+			? (remaining: EditorTab[]): string | undefined => {
+				const history = navigationService.getHistory();
+				const rankByKey = new Map<string, number>();
+				for (let i = history.length - 1; i >= 0; i--) {
+					const entry = history[i];
+					if (entry && !rankByKey.has(entry.key)) {
+						rankByKey.set(entry.key, rankByKey.size);
+					}
+				}
+				let bestId: string | undefined;
+				let bestRank = Number.POSITIVE_INFINITY;
+				for (const tab of remaining) {
+					const key = getTabNavKey(tab);
+					const rank = key !== null ? rankByKey.get(key) : undefined;
+					if (rank !== undefined && rank < bestRank) {
+						bestRank = rank;
+						bestId = tab.id;
+					}
+				}
+				return bestId;
+			}
+			: undefined;
+		const { tree: t, nextActiveGroupId } = removeTab(tree, groupId, tabId, pickNextActive);
+		// When the MRU-previous tab lives in a different group, move focus to
+		// it so the activated tab is the focused one (matches the switcher).
+		// The closed group's own active tab also changes (it's repaired to its
+		// first remaining tab), which would make the auto-focus effect steal
+		// focus back to the closed group — so suppress that effect for this
+		// tree change and set focus explicitly to the cross-group target.
+		const moveFocusCrossGroup = nextActiveGroupId !== undefined && nextActiveGroupId !== groupId;
+		if (moveFocusCrossGroup) {
+			skipNextAutoFocusRef.current = true;
+		}
 		change(t);
-	}, [tree, change]);
+		if (moveFocusCrossGroup) {
+			setFocus(nextActiveGroupId);
+		}
+	}, [tree, change, getTabNavKey, setFocus]);
 
 	const handleCloseOthersInGroup = useCallback((tabId: string, groupId: string) => {
 		const next: WorkbenchTree = cloneTree(tree);

@@ -135,23 +135,72 @@ export function getContainerAtPath(tree: WorkbenchTree, path: number[]): Contain
 	return container;
 }
 
-export function removeTab(tree: WorkbenchTree, fromGroupId: string, tabId: string): { tree: WorkbenchTree; tab?: EditorTab } {
+/**
+ * Pick which remaining tab becomes active after the active tab is
+ * closed. Receives EVERY tab left in the workbench (across all groups,
+ * the closed one already removed) and returns the id to activate, or
+ * `undefined` to defer to the default (first remaining tab in the closed
+ * tab's own group). Lets the host drive a most-recently-used choice —
+ * including activating a tab in a DIFFERENT group — without coupling this
+ * module to the navigation history.
+ */
+export type PickNextActiveTab = (remainingTabs: EditorTab[]) => string | undefined;
+
+export function removeTab(
+	tree: WorkbenchTree,
+	fromGroupId: string,
+	tabId: string,
+	pickNextActive?: PickNextActiveTab
+): { tree: WorkbenchTree; tab?: EditorTab; nextActiveGroupId?: string } {
 	const draft = cloneTree(tree);
 	const loc = findGroup(draft, fromGroupId);
 	if (!loc.node || !isTabGroupNode(loc.node)) {
 		return { tree: draft };
 	}
-	const tab = loc.node.tabs.find(t => t.id === tabId);
-	loc.node.tabs = loc.node.tabs.filter(t => t.id !== tabId);
-	if (loc.node.activeTabId === tabId) {
-		if (loc.node.tabs[0]) {
-			loc.node.activeTabId = loc.node.tabs[0].id;
+	const closedGroup = loc.node;
+	const tab = closedGroup.tabs.find(t => t.id === tabId);
+	const wasActive = closedGroup.activeTabId === tabId;
+	closedGroup.tabs = closedGroup.tabs.filter(t => t.id !== tabId);
+
+	let nextActiveGroupId: string | undefined;
+	if (wasActive) {
+		// First, keep the closed tab's OWN group internally consistent: its
+		// `activeTabId` pointed at the now-removed tab, so repair it to the
+		// first remaining tab (or drop it when the group is now empty). This
+		// holds regardless of where focus ends up — the group must never be
+		// left pointing at a tab that no longer exists.
+		if (closedGroup.tabs[0]) {
+			closedGroup.activeTabId = closedGroup.tabs[0].id;
 		} else {
-			delete (loc.node as { activeTabId?: string }).activeTabId;
+			delete (closedGroup as { activeTabId?: string }).activeTabId;
+		}
+
+		// Then pick the most-recently-used remaining tab ACROSS ALL GROUPS
+		// (VSCode-style), so close-to-previous stays consistent with the
+		// Ctrl+Tab switcher. The host ranks every surviving tab by navigation
+		// history; the winner may live in another group, in which case we
+		// activate it there and report that group so the caller can move
+		// focus to it. With no resolver / a decline / a missing pick, we fall
+		// back to the first remaining tab in the closed group (set above).
+		const picked = pickNextActive?.(flattenTabs(draft));
+		const targetGroupId = picked !== undefined ? findGroupContainingTab(draft, picked) : null;
+		const targetGroup = targetGroupId !== null ? findGroup(draft, targetGroupId).node : null;
+		if (picked !== undefined && targetGroup && isTabGroupNode(targetGroup)) {
+			targetGroup.activeTabId = picked;
+			nextActiveGroupId = targetGroup.id;
+		} else if (closedGroup.tabs[0]) {
+			nextActiveGroupId = closedGroup.id;
 		}
 	}
 	const normalized = normalizeTree(draft);
-	return tab ? { tree: normalized, tab } : { tree: normalized };
+	const result: { tree: WorkbenchTree; tab?: EditorTab; nextActiveGroupId?: string } = { tree: normalized };
+	if (tab) result.tab = tab;
+	// Only report the next-active group when it still exists after
+	// normalization (an emptied group is pruned).
+	if (nextActiveGroupId !== undefined && findGroup(normalized, nextActiveGroupId).node) {
+		result.nextActiveGroupId = nextActiveGroupId;
+	}
+	return result;
 }
 
 export function insertTabAt(

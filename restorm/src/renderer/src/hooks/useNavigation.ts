@@ -69,6 +69,14 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
     const unsubscribe = navigationService.onNavigate((event: NavigationEvent) => {
       const { key, source, params, isHistoryNavigation } = event
 
+      // Special / singleton tabs (Console, Firewall, …) are tracked in the
+      // MRU history (so they take a real spot in the Ctrl+Tab switcher and
+      // in close-returns-to-previous) but have no project-tree item. They
+      // deliberately never drive sidebar selection or a tree-item reopen,
+      // including on back/forward — those buttons skip over special-tab
+      // entries rather than try to re-focus a tab with no item behind it.
+      if (params.type === 'special') return
+
       // Update sidebar selection:
       // - Always for history navigation (back/forward buttons)
       // - Always for non-workbench sources (sidebar, breadcrumb, etc.)
@@ -299,8 +307,22 @@ export function useNavigation(options: UseNavigationOptions): UseNavigationRetur
   const handleTabActivate = useCallback((tabId: string) => {
     const { itemId, itemType } = parseTabId(tabId)
 
+    // A tab id `parseTabId` can't resolve to a project-tree item is a
+    // special / singleton tab (Console, Firewall, …) — its id is a stable
+    // `<type>:singleton` value. Record its activation under that id so it
+    // takes a real spot in the MRU history. Deriving "special" from the
+    // absence of an item id (rather than a hardcoded list) means a new
+    // singleton tab type is MRU-tracked automatically. Type `'special'` is
+    // inert: the history listener skips these on back/forward (no tree item
+    // to reopen) and they never drive sidebar selection, so return early.
+    if (!itemId) {
+      navigationService.navigateTo(tabId, 'workbench', { type: 'special' })
+      return
+    }
+
     // Always record navigation for tab switcher history ordering
-    if (itemId && itemType) {
+    // (itemId is guaranteed non-null here — the special-tab path returned above)
+    if (itemType) {
       navigationService.navigateTo(itemId, 'workbench', { type: itemType })
     }
 
