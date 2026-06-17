@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { MenuItem, MenuItemSeparator } from '../MenuBar'
+import { useOverlayPresence } from '../../hooks/useOverlayPresence'
 import { registerOpenContextMenu } from './openContextMenuRegistry'
 
 export interface ContextMenuItem {
@@ -59,6 +60,14 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   // into the viewport when it would overflow the bottom / right edge, so a
   // right-click low on the screen doesn't clip the last entries.
   const [pos, setPos] = useState<{ top: number; left: number }>({ top: y, left: x })
+
+  // Register with the overlay-presence service while open so a
+  // main-process compositor view (the Mini browser's `WebContentsView`)
+  // collapses out from under the menu instead of painting on top of it —
+  // a `position: fixed` HTML overlay can't otherwise out-stack a native
+  // view. Same hook every other ECUI portal (Modal, Tooltip, submenu …)
+  // uses; the rect is read lazily from `containerRef`.
+  useOverlayPresence(containerRef, visible)
 
   useLayoutEffect(() => {
     if (!visible) return

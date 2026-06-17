@@ -1,6 +1,7 @@
 import React, { forwardRef, useRef, useState, useEffect, useLayoutEffect, useMemo } from 'react'
 import { ScrollableElement } from '../ScrollableElement'
 import { keyboardShortcutService } from '../../services/KeyboardShortcutService'
+import { useOverlayPresence } from '../../hooks/useOverlayPresence'
 
 interface MenuBarItemProps {
   /**
@@ -76,6 +77,13 @@ const MenuBarItem = forwardRef<HTMLDivElement, MenuBarItemProps>(({
   const [activeHeight, setActiveHeight] = useState<string | null>(null)
   const [menuPosition, setMenuPosition] = useState({ left: 0, top: 0 })
   const scrollableRef = useRef<HTMLDivElement>(null)
+
+  // While the dropdown is open, register it with the overlay-presence
+  // service so a main-process compositor view (the Mini browser's
+  // `WebContentsView`) collapses out from under the fixed-position menu
+  // instead of painting on top of it. Mirrors the submenu registration
+  // in `MenuItem`.
+  useOverlayPresence(scrollableRef, isActive)
 
   // Extract shortcuts from children and register them globally
   const shortcuts = useMemo(() => extractShortcuts(children), [children])

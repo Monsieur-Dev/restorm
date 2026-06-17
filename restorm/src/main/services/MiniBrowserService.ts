@@ -56,6 +56,10 @@ interface MiniBrowserViewState {
 	ownerWindow: BrowserWindow
 	lastBounds: { x: number; y: number; width: number; height: number } | null
 	isAttached: boolean
+	// Mirror of the view's `setVisible` state so visibility toggles are
+	// idempotent (Electron has no getter). A freshly created view starts
+	// hidden until the renderer pushes its first non-zero rect.
+	isVisible: boolean
 }
 
 export interface MiniBrowserBounds {
@@ -67,6 +71,11 @@ export interface MiniBrowserBounds {
 
 class MiniBrowserService {
 	private views = new Map<string, MiniBrowserViewState>()
+	// Owner windows we've already wired a navigation-start listener on,
+	// so the listener is attached at most once per window regardless of
+	// how many Mini-Browser tabs it hosts. Entries are dropped when the
+	// window is destroyed.
+	private navHookedWindows = new WeakSet<BrowserWindow>()
 
 	/**
 	 * Create a `WebContentsView` for a Mini-Browser tab. Idempotent — a
@@ -99,15 +108,22 @@ class MiniBrowserService {
 		// of transparent compositing artefact between the moment the
 		// view is attached and its first paint.
 		view.setBackgroundColor('#ffffff')
+		// Start hidden: the view has no bounds yet, and the renderer's
+		// layout effect pushes the real rect immediately after `create`.
+		// Hiding until then avoids a one-frame flash of an unpositioned
+		// (0,0)-anchored view.
+		view.setVisible(false)
 		ownerWindow.contentView.addChildView(view)
 		const state: MiniBrowserViewState = {
 			view,
 			ownerWindow,
 			lastBounds: null,
-			isAttached: true
+			isAttached: true,
+			isVisible: false
 		}
 		this.views.set(tabId, state)
 		this.wireEvents(tabId, state)
+		this.ensureWindowNavHidden(ownerWindow)
 		if (initialUrl) {
 			void view.webContents.loadURL(initialUrl).catch((err: unknown) => {
 				logger.warn('[MiniBrowserService] initial loadURL failed', { tabId, url: initialUrl, error: String(err) })
@@ -130,6 +146,7 @@ class MiniBrowserService {
 		newOwner.contentView.addChildView(state.view)
 		state.ownerWindow = newOwner
 		state.isAttached = true
+		this.ensureWindowNavHidden(newOwner)
 	}
 
 	/**
@@ -151,12 +168,81 @@ class MiniBrowserService {
 			width: Math.max(0, Math.round(bounds.width)),
 			height: Math.max(0, Math.round(bounds.height))
 		}
+		// Reconcile visibility on EVERY call, even when the rect is
+		// unchanged: a zero-size rect (collapsed pane, tab switched away,
+		// or the renderer's overlay/drag hide-path) hides the view via
+		// `setVisible(false)` so it stops compositing above the renderer;
+		// any non-zero rect shows it again. This must run before the
+		// bounds-dedup early-return below — otherwise a view hidden out of
+		// band (e.g. `hideAllForWindow` on a renderer refresh) would never
+		// be re-shown when the remounted renderer re-pushes the SAME rect
+		// it last sent.
+		this.setViewVisible(state, rounded.width > 0 && rounded.height > 0)
 		const prev = state.lastBounds
 		if (prev?.x === rounded.x && prev.y === rounded.y && prev.width === rounded.width && prev.height === rounded.height) {
 			return
 		}
 		state.view.setBounds(rounded)
 		state.lastBounds = rounded
+	}
+
+	/**
+	 * Show / hide a view via `setVisible`, idempotently. Hiding stops the
+	 * native `WebContentsView` from compositing above the renderer —
+	 * used both for collapsed/zero-size slots and, crucially, while the
+	 * renderer is reloading (`hideAllForWindow`) so the embedded page
+	 * doesn't keep painting on screen after the rest of the UI is gone.
+	 */
+	private setViewVisible(state: MiniBrowserViewState, visible: boolean): void {
+		if (state.isVisible === visible) return
+		state.view.setVisible(visible)
+		state.isVisible = visible
+	}
+
+	/**
+	 * Hide every view owned by `ownerWindow`. Wired to the window's
+	 * top-frame navigation start: when the renderer reloads (Cmd+R,
+	 * DevTools reload, a programmatic `location.reload()`, or crash
+	 * recovery), it navigates away WITHOUT running React unmount cleanup,
+	 * so the main-process views would otherwise keep painting over the
+	 * blank/reloading renderer. Hiding here clears them instantly; once
+	 * the renderer re-mounts, the panel's layout effect re-pushes real
+	 * bounds through `setBounds`, which re-shows each view at the correct
+	 * position.
+	 */
+	private hideAllForWindow(ownerWindow: BrowserWindow): void {
+		for (const state of this.views.values()) {
+			if (state.ownerWindow === ownerWindow && state.isAttached) {
+				this.setViewVisible(state, false)
+			}
+		}
+	}
+
+	/**
+	 * Attach a one-time-per-window listener that hides this window's
+	 * Mini-Browser views the instant its top frame starts navigating —
+	 * i.e. on any renderer reload. `did-start-navigation` fires for the
+	 * main frame before the old document tears down, so the native views
+	 * disappear together with the rest of the UI instead of lingering on
+	 * the reloading page. The remounted renderer restores them via
+	 * `setBounds`. The hook is idempotent (guarded by `navHookedWindows`)
+	 * and self-removes on window destroy.
+	 */
+	private ensureWindowNavHidden(ownerWindow: BrowserWindow): void {
+		if (this.navHookedWindows.has(ownerWindow)) return
+		this.navHookedWindows.add(ownerWindow)
+		const wc = ownerWindow.webContents
+		wc.on('did-start-navigation', (details) => {
+			// Only a real main-frame document load should hide the views;
+			// ignore sub-frame loads and same-document (history / hash /
+			// pushState) changes, which don't blank the renderer.
+			if (details.isMainFrame && !details.isSameDocument) {
+				this.hideAllForWindow(ownerWindow)
+			}
+		})
+		wc.once('destroyed', () => {
+			this.navHookedWindows.delete(ownerWindow)
+		})
 	}
 
 	navigate(tabId: string, url: string): void {
