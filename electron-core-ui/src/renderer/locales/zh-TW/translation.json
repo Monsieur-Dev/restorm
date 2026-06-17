@@ -328,5 +328,11 @@
       "X": "Unix 時間戳記（秒）",
       "x": "Unix 時間戳記（毫秒）"
     }
+  },
+  "statusbar": {
+    "mcp": {
+      "serverRunningOnPort": "MCP 伺服器正在連接埠 {{port}} 上執行",
+      "sessionName": "工作階段：{{name}}"
+    }
   }
 }

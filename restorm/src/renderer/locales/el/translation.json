@@ -39,10 +39,6 @@
     "requestHistory": "Ιστορικό αιτημάτων",
     "envSelector": {
       "applyToAll": "Εφαρμογή σε όλα τα αιτήματα"
-    },
-    "mcp": {
-      "serverRunningOnPort": "Ο διακομιστής MCP εκτελείται στη θύρα {{port}}",
-      "sessionName": "Συνεδρία: {{name}}"
     }
   },
   "tips": {

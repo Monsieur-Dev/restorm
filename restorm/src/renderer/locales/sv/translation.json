@@ -39,10 +39,6 @@
     "requestHistory": "Förfrågningshistorik",
     "envSelector": {
       "applyToAll": "Använd på alla förfrågningar"
-    },
-    "mcp": {
-      "serverRunningOnPort": "MCP-servern körs på port {{port}}",
-      "sessionName": "Session: {{name}}"
     }
   },
   "tips": {

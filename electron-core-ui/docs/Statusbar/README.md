@@ -209,6 +209,38 @@ const onAuthEvent = (phase: 'started' | 'failed') => {
 />
 ```
 
+### `StatusbarMcpIndicator` (embedded MCP server cell)
+
+A ready-made cell for apps that embed the electron-core-ui `McpService`. It
+renders an `mcp · <session name>` label (just `mcp` when unnamed), a
+click-popover showing the live port + session, and an activity ripple per
+served request. Purely presentational — the app feeds it runtime state; the
+component owns the rendering + the `statusbar.mcp.*` i18n strings (shipped with
+electron-core-ui).
+
+| Prop | Type | Notes |
+| --- | --- | --- |
+| `enabled` | `boolean` | `false` → renders nothing. |
+| `port` | `number \| null` | `null` → renders nothing (port not yet bound). |
+| `sessionName` | `string?` | Inline `mcp · <name>`; empty → just `mcp`. |
+| `pulseSignal` | `number?` | Bump on each served MCP request to fire one ripple. |
+| `rightAligned` | `boolean?` | Take the `margin-left:auto` (right) slot. |
+
+```tsx
+import { StatusbarMcpIndicator } from 'electron-core-ui/renderer'
+
+// The app reads its own runtime config + per-request activity and passes them in:
+<StatusbarMcpIndicator
+  enabled={mcp.enabled}
+  port={mcp.port}
+  sessionName={mcp.sessionName}
+  pulseSignal={requestCount}
+/>
+```
+
+`data-testid`s: `statusbar-mcp-indicator` (the cell), `statusbar-mcp-popover`
+(the popover body), `statusbar-mcp-popover-session` (the session line).
+
 ## Behavior
 
 - `Statusbar` lays out its children horizontally; a CSS `gap` + separator

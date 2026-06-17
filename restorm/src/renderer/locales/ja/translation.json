@@ -38,10 +38,6 @@
     "requestHistory": "リクエスト履歴",
     "envSelector": {
       "applyToAll": "すべてのリクエストに適用"
-    },
-    "mcp": {
-      "serverRunningOnPort": "MCP サーバーはポート {{port}} で実行中です",
-      "sessionName": "セッション: {{name}}"
     }
   },
   "tips": {

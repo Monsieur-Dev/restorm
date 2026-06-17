@@ -40,10 +40,6 @@
     "requestHistory": "Istoricul cererilor",
     "envSelector": {
       "applyToAll": "Aplică la toate cererile"
-    },
-    "mcp": {
-      "serverRunningOnPort": "Serverul MCP rulează pe portul {{port}}",
-      "sessionName": "Sesiune: {{name}}"
     }
   },
   "tips": {

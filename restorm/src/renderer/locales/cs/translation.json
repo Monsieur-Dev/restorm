@@ -41,10 +41,6 @@
     "requestHistory": "Historie požadavků",
     "envSelector": {
       "applyToAll": "Použít na všechny požadavky"
-    },
-    "mcp": {
-      "serverRunningOnPort": "Server MCP běží na portu {{port}}",
-      "sessionName": "Relace: {{name}}"
     }
   },
   "tips": {

@@ -328,5 +328,11 @@
       "X": "marca de tiempo unix en segundos",
       "x": "marca de tiempo unix en milisegundos"
     }
+  },
+  "statusbar": {
+    "mcp": {
+      "serverRunningOnPort": "Servidor MCP ejecutándose en el puerto {{port}}",
+      "sessionName": "Sesión: {{name}}"
+    }
   }
 }

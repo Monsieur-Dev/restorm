@@ -170,11 +170,17 @@ export default defineConfig({
 
   /* Electron projects run across workers (each project/file stays serial
    * internally — `fullyParallel: false`), so the long-pole projects (scenario
-   * run-log, full-workflow) overlap instead of summing — a full run drops from
-   * ~24min serial to ~6min. The render-heavy doc-viewer no longer flakes at high
-   * worker counts now that its fixture disables renderer background-throttling
-   * (occluded windows on the shared Xvfb were getting their timers starved). */
-  workers: 4,
+   * run-log, full-workflow) overlap instead of summing.
+   *
+   * Capped at 2 workers: each Electron worker is a full Chromium instance
+   * (~300-500 MB), so 4 in parallel — on top of the build, a running restorm
+   * and a browser — exhausts physical RAM on a 16 GB host and pushes it into
+   * heavy swap. Swap thrashing intermittently starves renderer timers, which
+   * surfaces as flaky `waitFor`/`toBeVisible` timeouts on menu/submenu
+   * rendering (the failure mode was NOT CPU-bound — load stayed ~11%). Two
+   * workers keep the peak resident set within physical RAM; a full run is
+   * slower than at 4 but stable. CI runners with dedicated RAM can raise this. */
+  workers: 2,
 
   /* Reporter */
   reporter: [

@@ -39,10 +39,6 @@
     "requestHistory": "Histórico de pedidos",
     "envSelector": {
       "applyToAll": "Aplicar a todos os pedidos"
-    },
-    "mcp": {
-      "serverRunningOnPort": "Servidor MCP em execução na porta {{port}}",
-      "sessionName": "Sessão: {{name}}"
     }
   },
   "tips": {

@@ -38,10 +38,6 @@
     "requestHistory": "요청 기록",
     "envSelector": {
       "applyToAll": "모든 요청에 적용"
-    },
-    "mcp": {
-      "serverRunningOnPort": "MCP 서버가 포트 {{port}}에서 실행 중입니다",
-      "sessionName": "세션: {{name}}"
     }
   },
   "tips": {

@@ -328,5 +328,11 @@
       "X": "marcaj temporal unix în secunde",
       "x": "marcaj temporal unix în milisecunde"
     }
+  },
+  "statusbar": {
+    "mcp": {
+      "serverRunningOnPort": "Serverul MCP rulează pe portul {{port}}",
+      "sessionName": "Sesiune: {{name}}"
+    }
   }
 }

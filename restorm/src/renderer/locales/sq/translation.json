@@ -39,10 +39,6 @@
     "requestHistory": "Historiku i kërkesave",
     "envSelector": {
       "applyToAll": "Zbato te të gjitha kërkesat"
-    },
-    "mcp": {
-      "serverRunningOnPort": "Serveri MCP po ekzekutohet në portën {{port}}",
-      "sessionName": "Sesioni: {{name}}"
     }
   },
   "tips": {

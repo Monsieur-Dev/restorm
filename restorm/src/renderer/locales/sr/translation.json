@@ -40,10 +40,6 @@
     "requestHistory": "Istorija zahteva",
     "envSelector": {
       "applyToAll": "Primeni na sve zahteve"
-    },
-    "mcp": {
-      "serverRunningOnPort": "MCP сервер ради на порту {{port}}",
-      "sessionName": "Сесија: {{name}}"
     }
   },
   "tips": {

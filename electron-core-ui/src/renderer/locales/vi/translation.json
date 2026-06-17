@@ -328,5 +328,11 @@
       "X": "dấu thời gian unix tính bằng giây",
       "x": "dấu thời gian unix tính bằng mili giây"
     }
+  },
+  "statusbar": {
+    "mcp": {
+      "serverRunningOnPort": "Máy chủ MCP đang chạy trên cổng {{port}}",
+      "sessionName": "Phiên: {{name}}"
+    }
   }
 }

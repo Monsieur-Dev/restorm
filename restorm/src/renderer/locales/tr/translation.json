@@ -39,10 +39,6 @@
     "requestHistory": "İstek geçmişi",
     "envSelector": {
       "applyToAll": "Tüm isteklere uygula"
-    },
-    "mcp": {
-      "serverRunningOnPort": "MCP sunucusu {{port}} bağlantı noktasında çalışıyor",
-      "sessionName": "Oturum: {{name}}"
     }
   },
   "tips": {

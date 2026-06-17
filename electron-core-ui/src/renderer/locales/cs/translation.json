@@ -328,5 +328,11 @@
       "X": "unix časové razítko v sekundách",
       "x": "unix časové razítko v milisekundách"
     }
+  },
+  "statusbar": {
+    "mcp": {
+      "serverRunningOnPort": "Server MCP běží na portu {{port}}",
+      "sessionName": "Relace: {{name}}"
+    }
   }
 }

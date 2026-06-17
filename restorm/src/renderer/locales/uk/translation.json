@@ -41,10 +41,6 @@
     "requestHistory": "Історія запитів",
     "envSelector": {
       "applyToAll": "Застосувати до всіх запитів"
-    },
-    "mcp": {
-      "serverRunningOnPort": "Сервер MCP працює на порту {{port}}",
-      "sessionName": "Сеанс: {{name}}"
     }
   },
   "tips": {

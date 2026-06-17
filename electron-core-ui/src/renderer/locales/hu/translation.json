@@ -328,5 +328,11 @@
       "X": "unix időbélyeg másodpercben",
       "x": "unix időbélyeg ezredmásodpercben"
     }
+  },
+  "statusbar": {
+    "mcp": {
+      "serverRunningOnPort": "Az MCP-kiszolgáló a(z) {{port}} porton fut",
+      "sessionName": "Munkamenet: {{name}}"
+    }
   }
 }

@@ -1,33 +1,19 @@
 import React, { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { StatusbarElement } from 'electron-core-ui/renderer'
+import { StatusbarMcpIndicator as EcuiStatusbarMcpIndicator } from 'electron-core-ui/renderer'
 
 export interface StatusbarMcpIndicatorProps {
-  /** When true, render with `right-aligned` so this cell takes the
-   * `margin-left: auto` slot (jumps to the right side of the statusbar
-   * just before the bell). Use only when no other right-side cell is
-   * rendered before it. */
+  /** See the electron-core-ui StatusbarMcpIndicator — passed straight through. */
   rightAligned?: boolean
 }
 
 /**
- * Surfaces the embedded MCP server's runtime state in the statusbar.
- * Mounted only when restorm was launched with `--mcp` (or `ECUI_MCP=1`)
- * — the renderer reads the runtime config once on mount; the port is
- * stable for the lifetime of the process.
- *
- * Lives immediately to the left of the bell so the meta-info zone of
- * the statusbar (env, MCP, notifications) clusters together.
- *
- * The session name is rendered inline next to the `mcp` label (always
- * visible, no hover needed) so the user can tell instances apart at a
- * glance — `mcp · <session name>`. Click → click-triggered popover with
- * the live port. Each incoming MCP request from the main process bumps
- * `pulseSignal`, which fires one ripple animation on the statusbar
- * element (handled by ECUI's `StatusbarElement` itself).
+ * restorm container around the generic electron-core-ui `StatusbarMcpIndicator`.
+ * The presentational element (label `mcp · <name>`, popover, ripple) lives in
+ * ECUI; this wrapper only reads restorm's app-specific runtime config (whether
+ * MCP is on, the bound port, the session name) and bumps `pulseSignal` on each
+ * incoming MCP request, then hands them to the ECUI component.
  */
 export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({ rightAligned = false }) => {
-  const { t } = useTranslation()
   const [port, setPort] = useState<number | null>(null)
   const [sessionName, setSessionName] = useState<string>('')
   const [enabled, setEnabled] = useState(false)
@@ -61,36 +47,14 @@ export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({ ri
     })
   }, [enabled])
 
-  if (!enabled || port === null) return null
-
-  // Inline label: `mcp` plus the session name to its right (always
-  // visible) so multiple concurrent instances are distinguishable at a
-  // glance. The leading `mcp` token stays untranslated (it's the
-  // protocol name); the session name is the verbatim instance identity.
-  const label = sessionName ? `mcp · ${sessionName}` : 'mcp'
-
   return (
-    <StatusbarElement
-      data-testid="statusbar-mcp-indicator"
-      className={rightAligned ? 'right-aligned' : ''}
-      icon={{ type: 'codicon', value: 'mcp' }}
-      title={label}
-      tooltipTrigger="click"
-      tooltipPlacement="above"
+    <EcuiStatusbarMcpIndicator
+      enabled={enabled}
+      port={port}
+      sessionName={sessionName}
       pulseSignal={pulseSignal}
-    >
-      <div
-        data-testid="statusbar-mcp-popover"
-        style={{ padding: '8px 12px', whiteSpace: 'nowrap' }}
-      >
-        <div>{t('statusbar.mcp.serverRunningOnPort', { port })}</div>
-        {sessionName && (
-          <div data-testid="statusbar-mcp-popover-session" style={{ marginTop: 4, opacity: 0.8 }}>
-            {t('statusbar.mcp.sessionName', { name: sessionName })}
-          </div>
-        )}
-      </div>
-    </StatusbarElement>
+      rightAligned={rightAligned}
+    />
   )
 }
 

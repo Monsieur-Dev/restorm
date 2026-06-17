@@ -328,5 +328,11 @@
       "X": "carimbo Unix em segundos",
       "x": "carimbo Unix em milissegundos"
     }
+  },
+  "statusbar": {
+    "mcp": {
+      "serverRunningOnPort": "Servidor MCP em execução na porta {{port}}",
+      "sessionName": "Sessão: {{name}}"
+    }
   }
 }

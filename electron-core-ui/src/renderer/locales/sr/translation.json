@@ -328,5 +328,11 @@
       "X": "unix timestamp u sekundama",
       "x": "unix timestamp u milisekundama"
     }
+  },
+  "statusbar": {
+    "mcp": {
+      "serverRunningOnPort": "MCP сервер ради на порту {{port}}",
+      "sessionName": "Сесија: {{name}}"
+    }
   }
 }
