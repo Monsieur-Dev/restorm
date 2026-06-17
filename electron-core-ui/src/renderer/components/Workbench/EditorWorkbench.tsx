@@ -909,11 +909,12 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 
 	const handleClose = useCallback((tabId: string, groupId: string) => {
 		// Closing the active tab activates the most-recently-used remaining
-		// tab in the same group (VSCode-style), not the adjacent one. Rank
-		// the survivors by their position in the navigation history, keyed
-		// via the host's `getTabNavKey`. Tabs with no key / no recorded
+		// tab ACROSS ALL GROUPS (VSCode-style), so close-to-previous stays
+		// consistent with the Ctrl+Tab switcher (which also ranks globally).
+		// Rank every survivor by its position in the navigation history,
+		// keyed via the host's `getTabNavKey`. Tabs with no key / no recorded
 		// activation sort after those that do; if none qualifies, `removeTab`
-		// falls back to the first remaining tab.
+		// falls back to the first remaining tab in the closed tab's own group.
 		const pickNextActive = getTabNavKey
 			? (remaining: EditorTab[]): string | undefined => {
 				const history = navigationService.getHistory();
@@ -937,9 +938,22 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 				return bestId;
 			}
 			: undefined;
-		const { tree: t } = removeTab(tree, groupId, tabId, pickNextActive);
+		const { tree: t, nextActiveGroupId } = removeTab(tree, groupId, tabId, pickNextActive);
+		// When the MRU-previous tab lives in a different group, move focus to
+		// it so the activated tab is the focused one (matches the switcher).
+		// The closed group's own active tab also changes (it's repaired to its
+		// first remaining tab), which would make the auto-focus effect steal
+		// focus back to the closed group — so suppress that effect for this
+		// tree change and set focus explicitly to the cross-group target.
+		const moveFocusCrossGroup = nextActiveGroupId !== undefined && nextActiveGroupId !== groupId;
+		if (moveFocusCrossGroup) {
+			skipNextAutoFocusRef.current = true;
+		}
 		change(t);
-	}, [tree, change, getTabNavKey]);
+		if (moveFocusCrossGroup) {
+			setFocus(nextActiveGroupId);
+		}
+	}, [tree, change, getTabNavKey, setFocus]);
 
 	const handleCloseOthersInGroup = useCallback((tabId: string, groupId: string) => {
 		const next: WorkbenchTree = cloneTree(tree);

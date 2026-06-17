@@ -406,4 +406,89 @@ describe('removeTab — close-returns-to-most-recently-used (VSCode-style)', () 
     const g = next.groups[0] as TabGroupNode
     expect(g.activeTabId).toBe('console:singleton')
   })
+
+  // The picker now receives EVERY remaining tab across all groups, and the
+  // chosen tab may live in another group — close-to-previous must match the
+  // global Ctrl+Tab MRU, not just the closed tab's own group.
+  describe('across multiple groups (global MRU)', () => {
+    const twoGroupTree = (): WorkbenchTree => ({
+      orientation: 'vertical',
+      groups: [
+        { id: 'top', tabs: [tab('pet'), tab('store')], activeTabId: 'store' },
+        { id: 'bottom', tabs: [tab('asyncapi')], activeTabId: 'asyncapi' }
+      ]
+    })
+
+    it('activates the global MRU-previous tab in ANOTHER group and reports that group', () => {
+      // MRU: store (newest) → asyncapi → pet. Closing the active "store" in
+      // the top group must activate "asyncapi" (global MRU-previous, bottom
+      // group), NOT "pet" (top-group MRU). Reports bottom as next-active.
+      const { tree: next, nextActiveGroupId } = removeTab(
+        twoGroupTree(),
+        'top',
+        'store',
+        pickByMru(['store', 'asyncapi', 'pet'])
+      )
+      expect(nextActiveGroupId).toBe('bottom')
+      const top = next.groups[0] as TabGroupNode
+      const bottom = next.groups[1] as TabGroupNode
+      expect(bottom.activeTabId).toBe('asyncapi')
+      // The top group's active tab is untouched (still its own remaining tab).
+      expect(top.activeTabId).toBe('pet')
+    })
+
+    it('crosses groups regardless of split orientation (horizontal left/right)', () => {
+      // The picker walks the group tree + global MRU, never the layout
+      // orientation, so a horizontal (left/right) split behaves identically
+      // to a vertical (top/bottom) one. Same MRU + close as the case above.
+      const horizontalTree: WorkbenchTree = {
+        orientation: 'horizontal',
+        groups: [
+          { id: 'left', tabs: [tab('pet'), tab('store')], activeTabId: 'store' },
+          { id: 'right', tabs: [tab('asyncapi')], activeTabId: 'asyncapi' }
+        ]
+      }
+      const { tree: next, nextActiveGroupId } = removeTab(
+        horizontalTree,
+        'left',
+        'store',
+        pickByMru(['store', 'asyncapi', 'pet'])
+      )
+      expect(nextActiveGroupId).toBe('right')
+      const right = next.groups[1] as TabGroupNode
+      expect(right.activeTabId).toBe('asyncapi')
+      const left = next.groups[0] as TabGroupNode
+      expect(left.activeTabId).toBe('pet')
+    })
+
+    it('stays in the same group when the global MRU-previous is local', () => {
+      // MRU: store (newest) → pet → asyncapi. Closing "store" returns to
+      // "pet" (same top group); no cross-group focus move.
+      const { tree: next, nextActiveGroupId } = removeTab(
+        twoGroupTree(),
+        'top',
+        'store',
+        pickByMru(['store', 'pet', 'asyncapi'])
+      )
+      expect(nextActiveGroupId).toBe('top')
+      const top = next.groups[0] as TabGroupNode
+      expect(top.activeTabId).toBe('pet')
+    })
+
+    it('does not report a next-active group whose last tab was the one closed', () => {
+      // Closing the only tab of the bottom group empties + prunes it; the
+      // global MRU-previous is in the surviving top group.
+      const { tree: next, nextActiveGroupId } = removeTab(
+        twoGroupTree(),
+        'bottom',
+        'asyncapi',
+        pickByMru(['asyncapi', 'store', 'pet'])
+      )
+      expect(nextActiveGroupId).toBe('top')
+      // Bottom group pruned (was a single-tab group).
+      expect(next.groups.some(g => (g as TabGroupNode).id === 'bottom')).toBe(false)
+      const top = next.groups[0] as TabGroupNode
+      expect(top.activeTabId).toBe('store')
+    })
+  })
 })

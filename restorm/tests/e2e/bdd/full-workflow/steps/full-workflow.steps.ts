@@ -1606,6 +1606,20 @@ Then('the active tab title should be {string}', async ({}, title: string) => {
   await expect(activeTab).toBeVisible({ timeout: 5000 })
 })
 
+Then('the focused group active tab title should be {string}', async ({}, title: string) => {
+  if (!page) throw new Error('app must be launched')
+  // Scope to the FOCUSED editor group: in a split layout every group keeps
+  // its own `aria-selected` tab, so an unscoped match would pass on any
+  // group's active tab. The focused group carries `data-has-focus="true"` —
+  // asserting against it verifies both the active tab AND that focus landed
+  // on the right group (e.g. close-returns-to-previous ACROSS groups).
+  const focusedActiveTab = page
+    .locator('[data-has-focus="true"] [role="tab"][aria-selected="true"]')
+    .filter({ has: page.getByText(title, { exact: true }) })
+    .first()
+  await expect(focusedActiveTab).toBeVisible({ timeout: 5000 })
+})
+
 When('I press Ctrl+Tab', async () => {
   if (!page) throw new Error('app must be launched')
   // Keep Ctrl held while tapping Tab, then release — matches the real
@@ -1979,7 +1993,13 @@ When('I release Ctrl', async () => {
 
 When('I close the active tab', async () => {
   if (!page) throw new Error('app must be launched')
-  const activeTab = page.locator('.tab[role="tab"][aria-selected="true"]').first()
+  // Scope to the FOCUSED group's active tab — in a split layout every group
+  // has its own `aria-selected` tab, so an unscoped `.first()` would close
+  // the wrong group's tab.
+  const focused = page.locator('[data-has-focus="true"]')
+  const activeTab = (await focused.count()) > 0
+    ? focused.locator('.tab[role="tab"][aria-selected="true"]').first()
+    : page.locator('.tab[role="tab"][aria-selected="true"]').first()
   await expect(activeTab).toBeVisible({ timeout: 5000 })
   await activeTab.locator('button[aria-label="Close"]').first().click()
 })

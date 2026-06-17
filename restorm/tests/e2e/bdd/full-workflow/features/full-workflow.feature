@@ -780,15 +780,16 @@ Feature: Full workflow end-to-end scenario
   # tabs (Console, Firewall) as first-class: they interleave with regular
   # request tabs in true MRU order rather than being forced to the end.
   # Closing the active tab returns to the most-recently-used previous tab
-  # in the same editor group (VSCode-style).
+  # ACROSS ALL GROUPS (VSCode-style) — consistent with the switcher.
   Scenario: Ctrl+Tab MRU + close-returns-to-previous across regular and special tabs
     Given a fresh app seeded with the main window at x=10 y=10
     When I create a new single-file YAML collection named "mru-tabs-collection"
     And I import the URL "http://localhost:8080/api/swagger.json"
     And I save all with Ctrl+Shift+S
 
-    # Two regular request tabs in one group, then the two special tabs
-    # (Console / Firewall). Most-recent activation order ends up:
+    # Two regular request tabs (one group), then the two special tabs
+    # (Console / Firewall open in a separate split group). Most-recent
+    # activation order ends up:
     # Firewall, Console, Finds Pets by status, Find pet by ID.
     When I open the sidebar request "Find pet by ID"
     And I open the sidebar request "Finds Pets by status"
@@ -804,11 +805,22 @@ Feature: Full workflow end-to-end scenario
     And the tab switcher item at index 3 should contain "Find pet by ID"
     When I release Ctrl
 
-    # Closing the active special tab returns to the most-recently-used
-    # previous tab in its group (Firewall → Console), not the adjacent one.
-    Then the active tab title should be "Firewall"
+    # Re-activate across the split: click a special tab (bottom group), then
+    # a request tab (top group). MRU is now:
+    # Finds Pets by status > Console > Firewall > Find pet by ID.
+    When I focus the "Console" tab
+    And I focus the "Finds Pets by status" tab
+
+    # Closing the active "Finds Pets by status" closes a tab in a group that
+    # SURVIVES (its sibling "Find pet by ID" remains), yet the GLOBAL
+    # MRU-previous is "Console" in the OTHER group — focus must MOVE there,
+    # not fall back to the adjacent "Find pet by ID" in the closed group.
+    # Asserting against the FOCUSED group (each split group keeps its own
+    # active tab) is what proves focus actually crossed groups — this is the
+    # exact regression: close-to-previous must match the global switcher MRU.
+    Then the focused group active tab title should be "Finds Pets by status"
     When I close the active tab
-    Then the active tab title should be "Console"
+    Then the focused group active tab title should be "Console"
 
     When I close the app
     Then no errors should have been logged
