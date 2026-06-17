@@ -11,7 +11,24 @@ export abstract class BaseWindow {
     private window: BrowserWindow | null = null
     private storageService = getStorageService()
     protected iconPath: string | undefined = undefined
-  
+
+    /**
+     * Callbacks fired once the window is ready to be shown. When the window
+     * is created with `showWhenReady`, these run on the Electron
+     * `ready-to-show` event, just before the window is revealed — the splash
+     * handoff registers here to close the splash right before the main
+     * window appears. If the window is shown immediately (no `showWhenReady`)
+     * they fire as soon as the renderer finishes loading.
+     */
+    private readyToShowCallbacks: (() => void)[] = []
+
+    /**
+     * Set once the ready-to-show callbacks have fired, so a callback
+     * registered after readiness still runs immediately instead of waiting
+     * for an event that already passed.
+     */
+    private isReadyToShow = false
+
     /**
      * Configuration for this window
      */
@@ -50,6 +67,39 @@ export abstract class BaseWindow {
      */
     getWindow(): BrowserWindow | null {
       return this.window
+    }
+
+    /**
+     * Register a callback fired once the window is ready to be shown. If the
+     * window is already past readiness, the callback runs synchronously. Used
+     * to hand off from a splash screen (close the splash) right before the
+     * main window becomes visible.
+     */
+    onReadyToShow(callback: () => void): void {
+      if (this.isReadyToShow) {
+        callback()
+        return
+      }
+      this.readyToShowCallbacks.push(callback)
+    }
+
+    /**
+     * Fire (once) every ready-to-show callback and clear the queue.
+     */
+    private fireReadyToShow(): void {
+      if (this.isReadyToShow) {
+        return
+      }
+      this.isReadyToShow = true
+      const callbacks = this.readyToShowCallbacks
+      this.readyToShowCallbacks = []
+      for (const callback of callbacks) {
+        try {
+          callback()
+        } catch (error) {
+          logger.error('ready-to-show callback failed', { error: String(error) })
+        }
+      }
     }
   
     /**
@@ -460,6 +510,10 @@ export abstract class BaseWindow {
         x: state.x,
         y: state.y,
         frame: false,
+        // Create hidden when the caller wants to defer the reveal until the
+        // renderer is ready to paint (splash handoff) — avoids the flash of
+        // an unstyled / half-loaded window.
+        ...(this.configuration.showWhenReady ? { show: false } : {}),
         ...(this.iconPath && { icon: this.iconPath }),
         /*titleBarStyle: 'hidden',
         titleBarOverlay: 
@@ -521,6 +575,48 @@ export abstract class BaseWindow {
       // Set fullscreen state if saved
       if (state.fullscreen) {
         window.setFullScreen(true)
+      }
+
+      // Reveal-when-ready handoff (splash). When created hidden, wait for the
+      // renderer to signal it is FULLY mounted (real UI painted, not just the
+      // window's first paint), run the ready-to-show callbacks (e.g. close the
+      // splash), then show the window — a clean, flash-free transition with no
+      // intermediate loading state ever visible.
+      //
+      // The signal is an explicit `app:renderer-ready` IPC the renderer fires
+      // after its app has mounted (e.g. once a lazy/Suspense root has
+      // resolved), NOT Electron's `ready-to-show`: `ready-to-show` fires on the
+      // window's FIRST paint, which for a Suspense-based app is the loading
+      // fallback — showing it would defeat the splash. `app:renderer-ready` is
+      // exposed to the renderer as `window.electronAPI.notifyReady()`.
+      //
+      // When shown immediately (no `showWhenReady`), still fire the callbacks
+      // once the renderer finishes loading so consumers get a single readiness
+      // signal either way.
+      if (this.configuration.showWhenReady) {
+        const webContentsId = window.webContents.id
+        const onRendererReady = (event: Electron.IpcMainEvent): void => {
+          // Scope to THIS window — the channel is shared across all windows.
+          if (event.sender.id !== webContentsId) {
+            return
+          }
+          ipcMain.removeListener('app:renderer-ready', onRendererReady)
+          if (window.isDestroyed()) {
+            return
+          }
+          logger.info('BaseWindow: renderer signalled ready, revealing window')
+          this.fireReadyToShow()
+          window.show()
+        }
+        ipcMain.on('app:renderer-ready', onRendererReady)
+        // Stop listening if the window goes away before the renderer signals.
+        window.once('closed', () => {
+          ipcMain.removeListener('app:renderer-ready', onRendererReady)
+        })
+      } else {
+        window.webContents.once('did-finish-load', () => {
+          this.fireReadyToShow()
+        })
       }
 
       // Register window with manager (this will setup DevTools and listeners)

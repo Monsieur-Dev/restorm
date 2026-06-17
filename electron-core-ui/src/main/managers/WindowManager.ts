@@ -22,6 +22,13 @@ export interface WindowConfiguration {
   file: string
   preloadScript?: string // Optional custom preload script path
   iconPath?: string // Optional icon path (without extension, auto-detected by platform)
+  /**
+   * When true the window is created hidden (`show: false`) and revealed
+   * only once its renderer is ready to paint (`ready-to-show`), avoiding
+   * the flash of an unstyled / half-loaded window. Used by the splash
+   * handoff so the main window appears only when it's fully ready.
+   */
+  showWhenReady?: boolean
 }
 
 /**

@@ -28,24 +28,9 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
         alt="Restorm"
         style={{
           width: '200px',
-          height: 'auto',
-          animation: 'pulse 2s ease-in-out infinite'
+          height: 'auto'
         }}
       />
-      <style>
-        {`
-          @keyframes pulse {
-            0%, 100% {
-              opacity: 1;
-              transform: scale(1);
-            }
-            50% {
-              opacity: 0.8;
-              transform: scale(0.98);
-            }
-          }
-        `}
-      </style>
     </div>
   )
 }

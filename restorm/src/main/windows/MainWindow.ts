@@ -14,7 +14,10 @@ export class MainWindow extends RestormWindow {
       defaultHeight: 800,
       url: process.env['ELECTRON_RENDERER_URL'],
       file: join(__dirname, '../renderer/index.html'),
-      iconPath: join(__dirname, '../../assets/icons/icon')
+      iconPath: join(__dirname, '../../assets/icons/icon'),
+      // Stay hidden until the renderer is ready to paint so the splash can
+      // hand off to a fully-ready window with no flash of an unstyled view.
+      showWhenReady: true
     })
     super(configuration)
   }

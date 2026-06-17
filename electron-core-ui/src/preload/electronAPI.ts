@@ -35,5 +35,16 @@ export const createElectronAPI = (): Record<string, unknown> => ({
    */
   isDevMode: (): Promise<boolean> => {
     return ipcRenderer.invoke('is-dev-mode');
+  },
+  /**
+   * Signal that the renderer is FULLY mounted (real UI painted, e.g. once a
+   * lazy/Suspense root has resolved and i18n is ready) — not merely that the
+   * page finished its first paint. The main process uses this to reveal a
+   * window created with `showWhenReady` and close the boot splash, so the user
+   * never sees an intermediate loading state. Call once, from the real app's
+   * first mount, after the loading fallback is gone.
+   */
+  notifyReady: (): void => {
+    ipcRenderer.send('app:renderer-ready');
   }
 })

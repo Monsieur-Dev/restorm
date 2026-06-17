@@ -110,10 +110,12 @@ if (fileToOpenOnStart) {
 let mainWindow: BrowserWindow | null = null
 const editorWindows = new Set<BrowserWindow>()
 
-function createWindow(): void {
+function createWindow(): MainWindow | undefined {
   logger.info('Creating main window...')
   try {
-    // Create main window (instance is stored in WindowManager singleton)
+    // Create main window (instance is stored in WindowManager singleton).
+    // Returned to `initializeApp` so the splash handoff can hook the
+    // window's ready-to-show (close the splash right before it appears).
     const mainWin = new MainWindow()
     mainWindow = mainWin.getWindow()
 
@@ -238,6 +240,7 @@ function createWindow(): void {
     }
 
     logger.info('Main window created successfully')
+    return mainWin
   } catch (error) {
     logger.error('Failed to create main window:', { error: String(error) })
     throw error
@@ -489,7 +492,34 @@ const featuresConfigPath = getFeaturesConfigPath()
 // Without `--headless` the window is shown for visual feedback; the run still
 // executes in the main process and exits when done.
 const suppressWindow = cliArgs.cliRun?.headless === true
-initializeApp('restorm', suppressWindow ? () => { /* headless: no window */ } : createWindow, resourcesPath, undefined, rendererPath || undefined, settingsConfigPath, featuresConfigPath)
+// Suppress the splash under the Playwright e2e harness. The fixtures grab the
+// app's FIRST BrowserWindow (`electronApp.firstWindow()`); since the splash is
+// created before the main window, it would otherwise become that first window
+// and every test would drive the frameless logo splash instead of the app.
+// `RESTORM_USER_DATA_OVERRIDE` is the harness's per-launch signal (set by the
+// e2e launch helper, same gate the firewall's E2E bypass reads) — never set in
+// real launches, so the splash stays intact for users.
+const isE2E = typeof process.env['RESTORM_USER_DATA_OVERRIDE'] === 'string' && process.env['RESTORM_USER_DATA_OVERRIDE'].length > 0
+const suppressSplash = suppressWindow || isE2E
+// restorm's splash content: the static logo. The window + mechanics
+// (centered, frameless, whole-surface drag, show-main-only-when-ready) live
+// in electron-core-ui — restorm just points it at the asset. `__dirname` is
+// `dist/main`, so `../../assets` reaches the project's `assets/` dir (same
+// anchor as the window icon path). Suppressed in headless CLI runs (no UI) and
+// under the e2e harness (keeps the main window as the first window).
+initializeApp('restorm', {
+  createWindow: suppressWindow ? () => { /* headless: no window */ } : createWindow,
+  devResourcesPath: resourcesPath,
+  rendererPath: rendererPath || undefined,
+  appSettingsConfigPath: settingsConfigPath,
+  appFeaturesConfigPath: featuresConfigPath,
+  ...(suppressSplash ? {} : {
+    splash: {
+      logoPath: join(__dirname, '../../assets/imgs/logo_400.png'),
+      background: '#1a1a2e'
+    }
+  })
+})
 
 // Wire the AutoSaveController once both SettingsService (initialized
 // inside `initializeApp` → `setupIPC` on `app.whenReady`) and
