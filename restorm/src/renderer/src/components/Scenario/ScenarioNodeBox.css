@@ -49,18 +49,10 @@
   line-height: 1.45;
 }
 
-/* The zoom/fit/minimap control + minimap styling is owned by the shared ECUI
- * GraphCanvas (graphCanvas.css). The scenario editor only tints the active
- * minimap-toggle with its own flow-signal accent, since the generic component
- * uses the workbench focus colour by default. The extra `.ecui-graph-canvas`
- * qualifier raises specificity above the ECUI default rule so this accent wins
- * regardless of stylesheet load order. */
-[data-testid="scenario-editor"] .ecui-graph-canvas .react-flow__controls-button[data-active="true"] {
-  color: var(--scn-flow-signal, #facc15);
-}
-[data-testid="scenario-editor"] .ecui-graph-canvas .react-flow__controls-button[data-active="true"] .codicon {
-  color: var(--scn-flow-signal, #facc15) !important;
-}
+/* The zoom/fit/minimap control + minimap styling — including the active
+ * minimap-toggle's yellow accent — is owned by the shared ECUI GraphCanvas
+ * (graphCanvas.css), which now defaults to the same warm yellow on every
+ * surface. No scenario-specific override is needed. */
 
 /* Sub-scenario log preview popover: a titled card hosting a read-only graph.
  * The hosting ECUI Tooltip caps its own width (~max-content for a text tip),

@@ -95,6 +95,7 @@ export type GraphCanvasPanMode =
  * consumer realistically tunes. `false` (the default) hides it. */
 export interface GraphCanvasMinimapOptions {
   nodeColor?: MiniMapProps['nodeColor']
+  maskColor?: MiniMapProps['maskColor']
   pannable?: boolean
   zoomable?: boolean
 }
@@ -133,6 +134,10 @@ export interface GraphCanvasProps<NodeType extends Node = Node, EdgeType extends
    * shows / hides the minimap. The label is passed by the consumer so
    * the library stays locale-free. Requires `minimap` to be set. */
   minimapToggle?: { label: string; testId?: string }
+  /** Extra props spread onto the control bar's `<Controls>` — e.g. an
+   * `onFitView` override (so the fit-view button can also re-arm a
+   * consumer's auto-fit) or `fitViewOptions` for the button's framing. */
+  controlsProps?: Partial<React.ComponentProps<typeof Controls>>
   /** Extra control buttons appended after the minimap toggle (the
    * consumer's own `<ControlButton>`s). */
   extraControls?: React.ReactNode
@@ -344,6 +349,7 @@ function GraphCanvasInner<NodeType extends Node = Node, EdgeType extends Edge = 
   background = false,
   minimap = false,
   minimapToggle,
+  controlsProps,
   extraControls,
   fitView,
   fitViewOptions,
@@ -403,7 +409,7 @@ function GraphCanvasInner<NodeType extends Node = Node, EdgeType extends Edge = 
           />
         )}
         {controlsVisible && (
-          <Controls showInteractive={false}>
+          <Controls showInteractive={false} {...controlsProps}>
             {minimapToggle && minimapOptions && (
               <ControlButton
                 onClick={() => {
@@ -425,6 +431,7 @@ function GraphCanvasInner<NodeType extends Node = Node, EdgeType extends Edge = 
             pannable={minimapOptions.pannable ?? true}
             zoomable={minimapOptions.zoomable ?? true}
             {...(minimapOptions.nodeColor !== undefined ? { nodeColor: minimapOptions.nodeColor } : {})}
+            {...(minimapOptions.maskColor !== undefined ? { maskColor: minimapOptions.maskColor } : {})}
           />
         )}
         {children}

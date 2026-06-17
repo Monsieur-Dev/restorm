@@ -38,9 +38,15 @@ import '@xyflow/react/dist/style.css' // (GraphCanvas imports this itself)
   edges={edges}
   nodeTypes={NODE_TYPES}
   panMode="pointerLock"
-  minimap={{ nodeColor: 'var(--focusBorder)' }}
+  minimap={{ nodeColor: () => '#569cd6' }}
 />
 ```
+
+> **`nodeColor` must resolve to a concrete colour.** React Flow assigns a
+> string `nodeColor` straight to each minimap rect's SVG `fill`, where an
+> unresolved CSS custom property (`var(--…)`) paints nothing — the minimap
+> then renders as an empty rectangle. Pass a literal colour (or a function
+> returning one per node); don't pass a `var(...)` string.
 
 ### With a persisted viewport, a grid, and a minimap toggle
 
@@ -107,8 +113,9 @@ request is denied.)
 | `panMode` | `'editor' \| 'classic' \| 'pointerLock' \| 'static'` | `'classic'` | Panning / zoom preset (see above). |
 | `showControls` | `boolean` | `true` | Show the zoom / fit control bar (forced off when `panMode === 'static'`). |
 | `background` | `boolean \| { gap?, offset?, id? }` | `false` | Dotted background grid. Pass a unique `id` per mounted canvas (React Flow derives its `<pattern>` id from it). |
-| `minimap` | `false \| { nodeColor?, pannable?, zoomable? }` | `false` | Minimap. Shown when truthy (and toggled on, if `minimapToggle` is set). |
-| `minimapToggle` | `{ label: string; testId?: string }` | — | Adds a toggle button at the bottom of the control stack. **The `label` is passed by the consumer** so the library stays locale-free. Requires `minimap`. |
+| `minimap` | `false \| { nodeColor?, maskColor?, pannable?, zoomable? }` | `false` | Minimap. Shown when truthy (and toggled on, if `minimapToggle` is set). `nodeColor` must resolve to a concrete colour — see the note above. |
+| `minimapToggle` | `{ label: string; testId?: string }` | — | Adds a toggle button at the bottom of the control stack. **The `label` is passed by the consumer** so the library stays locale-free. Requires `minimap`. The active (minimap-shown) toggle reads in a warm yellow (`--ecui-graph-canvas-active`, default `#facc15`) on every surface. |
+| `controlsProps` | `Partial<ComponentProps<typeof Controls>>` | — | Extra props spread onto the control bar (e.g. `onFitView` to re-arm a consumer's auto-fit, `fitViewOptions` for the button's framing). |
 | `extraControls` | `ReactNode` | — | Extra `<ControlButton>`s appended to the control stack. |
 | `fitView` | `boolean` | — | Fit the graph to the viewport on mount. |
 | `fitViewOptions` | `FitViewOptions` | — | Options shared by the auto-fit and the Fit View button. |

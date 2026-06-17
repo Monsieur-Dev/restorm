@@ -29,6 +29,11 @@ export interface ModelGraphProps {
   models: ModelDocumentation[]
   /** Optional test id stamped on the React Flow container. */
   testId?: string
+  /** Show the minimap toggle in the control cluster. The full doc /
+   * object view enables it; the compact search-result popover leaves it
+   * off (no room, and the reader is scanning a single result, not
+   * navigating a large diagram). Defaults to `false`. */
+  showMinimap?: boolean
 }
 
 const NODE_TYPES: NodeTypes = { umlClass: ModelNode }
@@ -39,6 +44,14 @@ const EDGE_TYPES: EdgeTypes = { modelEdge: ModelEdge }
 // "snap" the first time the user reaches for the button.
 const FIT_VIEW_PADDING = 0.1
 const FIT_VIEW_OPTIONS = { padding: FIT_VIEW_PADDING } as const
+// Minimap node + mask colours. A solid accent for the node boxes plus a
+// translucent dark mask keeps them legible against the themed minimap panel.
+// (The node boxes only paint at all once each node carries an explicit size —
+// see the `initialWidth` / `initialHeight` seeding in `modelGraphLayout.ts`,
+// which React Flow's MiniMap reads from the original node object, not from the
+// ResizeObserver-filled `measured` field.)
+const MINIMAP_NODE_COLOR = '#569cd6'
+const MINIMAP_MASK_COLOR = 'rgba(30, 30, 30, 0.6)'
 
 /**
  * UML-style class diagram of every model the documentation host
@@ -48,14 +61,14 @@ const FIT_VIEW_OPTIONS = { padding: FIT_VIEW_PADDING } as const
  * cycle handling via feedback-edge selection).
  */
 export const ModelGraph = React.forwardRef<ModelGraphHandle, ModelGraphProps>(
-  ({ models, testId }, ref) => {
+  ({ models, testId, showMinimap = false }, ref) => {
     return (
       <div
         className="documentation-host-model-graph"
         data-testid={testId ?? 'documentation-host-model-graph'}
       >
         <ReactFlowProvider>
-          <ModelGraphCanvas models={models} forwardedRef={ref} />
+          <ModelGraphCanvas models={models} forwardedRef={ref} showMinimap={showMinimap} />
         </ReactFlowProvider>
       </div>
     )
@@ -66,7 +79,8 @@ ModelGraph.displayName = 'ModelGraph'
 const ModelGraphCanvas: React.FC<{
   models: ModelDocumentation[]
   forwardedRef: React.ForwardedRef<ModelGraphHandle>
-}> = ({ models, forwardedRef }) => {
+  showMinimap: boolean
+}> = ({ models, forwardedRef, showMinimap }) => {
   const [nodes, setNodes] = useState<Node[]>([])
   const [edges, setEdges] = useState<Edge[]>([])
   const [layoutReady, setLayoutReady] = useState(false)
@@ -193,8 +207,23 @@ const ModelGraphCanvas: React.FC<{
         // Share the fit-view options with the auto-fit so the Controls
         // button reproduces the same framing the user sees on load.
         fitViewOptions={FIT_VIEW_OPTIONS}
-        minimap={{ nodeColor: 'var(--focusBorder, #569cd6)' }}
-        minimapToggle={{ label: t('scenario.minimap.toggle', 'Toggle minimap'), testId: 'documentation-host-model-graph-minimap-toggle' }}
+        // Minimap is opt-in per surface: the full doc / object view turns it
+        // on, the compact search-result popover leaves it off.
+        {...(showMinimap
+          ? {
+              // Node colour is a function (not a `var(...)` string): React Flow
+              // hands a string `nodeColor` straight to the SVG rect's `fill`,
+              // and an unresolved CSS custom property there paints nothing — so
+              // the minimap renders as an empty rectangle. Returning a concrete
+              // colour per node (mirroring the scenario minimap) guarantees the
+              // node boxes actually paint.
+              minimap: {
+                nodeColor: () => MINIMAP_NODE_COLOR,
+                maskColor: MINIMAP_MASK_COLOR
+              },
+              minimapToggle: { label: t('scenario.minimap.toggle', 'Toggle minimap'), testId: 'documentation-host-model-graph-minimap-toggle' }
+            }
+          : {})}
         reactFlowProps={{
           nodesDraggable: false,
           nodesConnectable: false,

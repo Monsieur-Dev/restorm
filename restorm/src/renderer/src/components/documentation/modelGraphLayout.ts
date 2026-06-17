@@ -175,6 +175,15 @@ export async function buildModelGraphElements(
       id: laid.id,
       type: 'umlClass',
       position: { x: laid.x ?? 0, y: laid.y ?? 0 },
+      // Seed each node with the laid-out size. React Flow's MiniMap sizes
+      // its rects from the *original* node object (`internals.userNode`),
+      // not the ResizeObserver-filled `measured` field — so without an
+      // explicit width/height here the minimap treats every node as
+      // dimensionless and renders nothing (an empty rectangle). The values
+      // match what ELK used for layout and what the DOM measures to, so the
+      // live canvas is unaffected; only the minimap gains its node boxes.
+      initialWidth: MODEL_NODE_WIDTH,
+      initialHeight: nodeHeight,
       data: model ? { model, incomingEdgeIds, nodeHeight } : {},
       draggable: true,
       selectable: true
