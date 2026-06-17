@@ -64,8 +64,11 @@ echo "📦 restorm: unit tests"
 pnpm run test:all || exit 1
 echo "📦 restorm: build"
 NODE_OPTIONS="--max-old-space-size=4096" pnpm run build || exit 1
-echo "📦 restorm: e2e tests"
-pnpm run test:e2e || exit 1
 cd ..
+
+# NOTE: the full Playwright e2e suite is intentionally NOT run here. It is the
+# heavy gate (~11-18 min, launches Electron instances) and lives at PUSH time
+# (.husky/pre-push) instead, so commits stay fast and parallelizable. See
+# scripts/ship.sh + .husky/README.md for the commit-fast / ship-gates-e2e flow.
 
 echo "✅ All pre-commit checks passed!"
