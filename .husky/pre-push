@@ -81,3 +81,26 @@ done
 
 echo "✅ All lint checks passed!"
 
+# ── Full e2e suite (the heavy quality gate) ────────────────────────────
+# The Playwright e2e suite used to run in the pre-commit hook, which made
+# every commit slow (~11-18 min) and impossible to parallelize (each run
+# launches Electron instances → memory contention → flakes). It now runs
+# HERE, at push time: commits stay fast, but the suite still can't be
+# forgotten — a plain `git push` runs it automatically and aborts the push
+# on failure. Only `git push --no-verify` skips it, and that is forbidden
+# by project rules.
+#
+# `pnpm --filter restorm test:e2e` runs scripts/run-e2e.mjs, which wraps
+# Playwright in `xvfb-run` on Linux (isolated virtual display → the proven
+# flake-free recipe). scripts/ship.sh is the orchestrator that drives this
+# (rebase → push [this hook] → wait CI → merge); it relies on this hook for
+# the e2e and never re-runs it.
+echo "🧪 Running full e2e suite (xvfb) before push..."
+pnpm --filter restorm run test:e2e || {
+    echo "❌ ERROR: e2e suite failed — push aborted."
+    echo "Inspect restorm/test-results/ for the failing test, then fix and re-push."
+    exit 1
+}
+
+echo "✅ e2e suite passed!"
+

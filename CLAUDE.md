@@ -58,17 +58,45 @@ If you can't reach a green test before commit, **say so in the chat**: explain w
 
 This is non-negotiable for fixes that wire across processes (main ↔ renderer ↔ IPC), touch the firewall pipeline, or change persistence — those are the paths where lint+typecheck have historically lied and the bug only surfaces under live execution.
 
-## Commits
+## Commits and shipping
 
-Pre-commit hooks run the full test suite, which takes a long time (~5–6 min on a healthy host). **NEVER** interrupt or cancel a commit in progress — wait for it to finish, even if it seems slow.
+Quality gates are split by speed: **commit = fast checks**, **push/ship = the
+heavy e2e suite**. Commits stay quick and parallelizable; the e2e gate moves to
+push time so it can't be forgotten.
 
-**Always commit through `scripts/git-commit-timeout.sh`** rather than calling `git commit` directly. The script wraps the commit with a hard 20-minute timeout so a flaky e2e + hung Monaco editor can't pin an automated agent for an hour. Pass through any `git commit` args you'd normally use, e.g.:
+**Commit (fast).** The pre-commit hook runs only the fast checks — forbidden
+patterns, per-package depcheck/lint/typecheck/build, and restorm unit +
+integration tests (`test:all`). It does **not** run the Playwright e2e suite
+anymore, so a commit completes in ~2-3 min and several commits can run in
+parallel. **NEVER** interrupt or cancel a commit in progress.
+
+**Always commit through `scripts/git-commit-timeout.sh`** rather than calling `git commit` directly. The script wraps the commit with a hard 20-minute timeout so a hung Monaco editor or a slow build can't pin an automated agent for an hour. Pass through any `git commit` args you'd normally use, e.g.:
 
 ```bash
 scripts/git-commit-timeout.sh -m "your message"
 ```
 
 If the script exits 124 (timeout), investigate before retrying — it usually points at flakiness, X-server contention, or a genuine perf regression in a Monaco-heavy panel.
+
+**Ship (the e2e gate).** The full Playwright e2e suite runs at **push** time:
+the `.husky/pre-push` hook runs `pnpm --filter restorm test:e2e` (xvfb-wrapped,
+the flake-free recipe) and aborts the push on failure — so a plain `git push`
+can't bypass it (only the forbidden `--no-verify` skips it). To land a branch,
+use **`scripts/ship.sh`**, which orchestrates: rebase onto `origin/main` → push
+(the pre-push hook runs the e2e under xvfb) → wait for CI green → merge the PR
+(merge commit) + delete the branch. It is gated **1-ship-at-a-time** (an flock;
+the host is RAM-bound), wraps the push in the same 20-min timeout + flake-journal
+mechanics as the commit wrapper (entries stamped `SHIP`), aborts cleanly on e2e
+failure (no push) or CI red (no merge), and is re-runnable from any step:
+
+```bash
+scripts/ship.sh                 # rebase → push → wait CI → merge (base: main)
+scripts/ship.sh --base <epic>   # ship onto a different base branch
+scripts/ship.sh --no-merge      # stop after CI-green, hand the merge off
+```
+
+Run `ship.sh` only after the change has been reviewed / manually tested — that
+"go" is the merge approval.
 
 The wrapper also **guards against silently skipping the suite**. git runs no hook when `core.hooksPath` targets a directory that doesn't exist — exactly the state of a freshly-created worktree, whose husky wrappers (`.husky/_`, gitignored) only appear after `pnpm install`. Before committing, the wrapper detects this and self-heals: it regenerates the husky wrappers (cheap when deps are present) or runs a one-time `pnpm install` when `node_modules` is missing. If hooks still can't be activated, the commit proceeds but its journal entry is tagged **`HOOKS SKIPPED`**, so a 0-second "PASS" is never mistaken for a validated build.
 
