@@ -1,15 +1,16 @@
 /**
- * Steps for the `mqtt-execution` BDD scenario. restorm connects to the Docker
- * Mosquitto broker (`tests/docker`, :1883) as a client — no self-hosted server
- * (unlike the raw-WebSocket / Socket.IO playgrounds). The request subscribes to
- * its topic on connect, and the Send button publishes to that same topic, so a
- * single publish round-trips straight back through the subscription: the same
- * payload shows as both a sent and a received bubble.
+ * Steps for the `mqtt-execution` BDD scenario. restorm HOSTS a local MQTT broker
+ * (aedes) AND connects to it as a client — no external Mosquitto. The broker
+ * subscribes internally to its topic (surfacing every published frame) and its
+ * Send button publishes to that topic; the client subscribes to the same topic
+ * on connect and its Send publishes there too — so a client publish round-trips
+ * straight back through its own subscription (sent + received bubble) and a
+ * broker Send reaches the connected client.
  *
  * Reuses the MCP fixture to launch restorm with `--mcp` and open the sample +
- * tab, then drives the REAL UI. MQTT reuses `WebSocketRequestTabView`, so the
- * Connect / Send / chat-bubble testids are the shared `websocket-*` / `ws-chat-*`
- * ones.
+ * tabs, then drives the REAL UI. MQTT reuses `WebSocketRequestTabView`, so the
+ * Connect / Send / chat-bubble / server-client-count testids are the shared
+ * `websocket-*` / `ws-chat-*` ones.
  */
 
 import { createBdd } from 'playwright-bdd'
@@ -114,6 +115,13 @@ Then('the Connect button shows the connected state', async () => {
 Then('the Connect button shows the disconnected state', async () => {
   if (page === null) throw new Error('launch first')
   await expect(page.locator(`${CONNECT_BTN} .codicon-plug`)).toBeVisible({ timeout: 10_000 })
+})
+
+Then('the server shows {int} connected client', async ({}, n: number) => {
+  if (page === null) throw new Error('launch first')
+  // The broker's Response tab banner shows the live connected-client count.
+  await expect(page.locator('[data-testid="websocket-server-client-count"]:visible'))
+    .toContainText(String(n), { timeout: 10_000 })
 })
 
 Then(

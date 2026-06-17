@@ -44,6 +44,7 @@ export type AddChildKind =
   | 'socketio-server'
   | 'websocket-server'
   | 'mqtt'
+  | 'mqtt-server'
   | 'odata'
   | 'auth'
   | 'scenario'
@@ -186,12 +187,18 @@ export const buildAddSubmenu = (
     onClick: () => { onAddChildItem(parentId, 'socketio-server') }
   },
   { id: `sep-add-mqtt-${parentId}`, isSeparator: true, label: '' },
-  // MQTT (client only — restorm connects to a broker).
+  // MQTT group: client (connects to a broker) + server (restorm hosts a broker).
   {
     id: `add-mqtt-${parentId}`,
     label: t('sidebar.contextMenu.add.mqtt'),
     icon: React.createElement(Badge, { type: 'MQTT' }),
     onClick: () => { onAddChildItem(parentId, 'mqtt') }
+  },
+  {
+    id: `add-mqtt-server-${parentId}`,
+    label: t('sidebar.contextMenu.add.mqttServer'),
+    icon: React.createElement(Badge, { type: 'MQTT', mode: 'server' }),
+    onClick: () => { onAddChildItem(parentId, 'mqtt-server') }
   },
   { id: `sep-add-odata-${parentId}`, isSeparator: true, label: '' },
   {

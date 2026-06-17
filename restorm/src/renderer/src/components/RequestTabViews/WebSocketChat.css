@@ -1,6 +1,6 @@
+/* The themed scrollbar is owned by the wrapping ECUI ScrollableElement; this
+ * inner list just lays the bubbles out and grows to fit its content. */
 .ws-chat {
-  height: 100%;
-  overflow: auto;
   display: flex;
   flex-direction: column;
   gap: 6px;

@@ -10,6 +10,11 @@ export interface MqttOptionsPanelProps {
   request: WebSocketRequest
   variables: VariableDefinition[]
   helpers: TranslatedHelperDefinition[]
+  /** When restorm HOSTS the broker (`server: true`): only the publish QoS +
+   * retain apply — the client-connection fields (clientId / auth / keepalive /
+   * subscribe-on-connect / Last Will) are hidden, as the broker doesn't connect
+   * as a client. */
+  server?: boolean
 }
 
 const QOS_OPTIONS = [{ text: '0', label: 'QoS 0' }, { text: '1', label: 'QoS 1' }, { text: '2', label: 'QoS 2' }]
@@ -29,7 +34,7 @@ const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, 
  * `fullData` exactly like the topic / message. QoS + retain drive both the
  * on-connect subscribe and the Send-button publish.
  */
-export const MqttOptionsPanel: React.FC<MqttOptionsPanelProps> = ({ request, variables, helpers }) => {
+export const MqttOptionsPanel: React.FC<MqttOptionsPanelProps> = ({ request, variables, helpers, server = false }) => {
   const { t } = useTranslation()
 
   const [qos, setQosState] = useState(request.qos ?? 0)
@@ -77,50 +82,56 @@ export const MqttOptionsPanel: React.FC<MqttOptionsPanelProps> = ({ request, var
           <Toggle checked={retain} onChange={setRetain} aria-label={t('mqtt.retain')} data-testid="mqtt-retain-toggle" />
           {t('mqtt.retain')}
         </label>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
-          <Toggle checked={subscribe} onChange={setSubscribe} aria-label={t('mqtt.subscribeOnConnect')} data-testid="mqtt-subscribe-toggle" />
-          {t('mqtt.subscribeOnConnect')}
-        </label>
-      </div>
-
-      <Field label={t('mqtt.clientId')}>
-        <RestormVariableInputBox value={clientId} onChange={setClientId} variables={variables} helpers={helpers} placeholder={t('mqtt.clientIdPlaceholder')} data-testid="mqtt-clientid-input" />
-      </Field>
-      <Field label={t('mqtt.username')}>
-        <RestormVariableInputBox value={username} onChange={setUsername} variables={variables} helpers={helpers} placeholder={t('mqtt.username')} data-testid="mqtt-username-input" />
-      </Field>
-      <Field label={t('mqtt.password')}>
-        <RestormVariableInputBox value={password} onChange={setPassword} variables={variables} helpers={helpers} placeholder={t('mqtt.password')} data-testid="mqtt-password-input" />
-      </Field>
-      <Field label={t('mqtt.keepalive')}>
-        <InputBox value={keepalive} onChange={setKeepalive} options={{ placeholder: '60' }} data-testid="mqtt-keepalive-input" />
-      </Field>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 2, paddingTop: 6, borderTop: '1px solid var(--panel-border)' }}>
-        <span style={{ fontSize: 11, color: 'var(--foreground-muted)' }}>{t('mqtt.lwt')}</span>
-        <Field label={t('mqtt.topic')}>
-          <RestormVariableInputBox value={lwtTopic} onChange={setLwtTopic} variables={variables} helpers={helpers} placeholder={t('mqtt.lwtTopicPlaceholder')} data-testid="mqtt-lwt-topic-input" />
-        </Field>
-        <Field label={t('mqtt.lwtPayload')}>
-          <RestormVariableInputBox value={lwtPayload} onChange={setLwtPayload} variables={variables} helpers={helpers} placeholder={t('mqtt.lwtPayloadPlaceholder')} data-testid="mqtt-lwt-payload-input" />
-        </Field>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <Field label={t('mqtt.qos')}>
-            <SelectBox
-              id={`mqtt-lwt-qos-${request.id}`}
-              className=""
-              options={QOS_OPTIONS}
-              selected={lwtQos}
-              onDidSelect={(d: ISelectData) => { setLwtQos(d.index) }}
-              data-testid="mqtt-lwt-qos-select"
-            />
-          </Field>
+        {!server && (
           <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
-            <Toggle checked={lwtRetain} onChange={setLwtRetain} aria-label={t('mqtt.retain')} data-testid="mqtt-lwt-retain-toggle" />
-            {t('mqtt.retain')}
+            <Toggle checked={subscribe} onChange={setSubscribe} aria-label={t('mqtt.subscribeOnConnect')} data-testid="mqtt-subscribe-toggle" />
+            {t('mqtt.subscribeOnConnect')}
           </label>
-        </div>
+        )}
       </div>
+
+      {!server && (
+        <>
+          <Field label={t('mqtt.clientId')}>
+            <RestormVariableInputBox value={clientId} onChange={setClientId} variables={variables} helpers={helpers} placeholder={t('mqtt.clientIdPlaceholder')} data-testid="mqtt-clientid-input" />
+          </Field>
+          <Field label={t('mqtt.username')}>
+            <RestormVariableInputBox value={username} onChange={setUsername} variables={variables} helpers={helpers} placeholder={t('mqtt.username')} data-testid="mqtt-username-input" />
+          </Field>
+          <Field label={t('mqtt.password')}>
+            <RestormVariableInputBox value={password} onChange={setPassword} variables={variables} helpers={helpers} placeholder={t('mqtt.password')} data-testid="mqtt-password-input" />
+          </Field>
+          <Field label={t('mqtt.keepalive')}>
+            <InputBox value={keepalive} onChange={setKeepalive} options={{ placeholder: '60' }} data-testid="mqtt-keepalive-input" />
+          </Field>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 2, paddingTop: 6, borderTop: '1px solid var(--panel-border)' }}>
+            <span style={{ fontSize: 11, color: 'var(--foreground-muted)' }}>{t('mqtt.lwt')}</span>
+            <Field label={t('mqtt.topic')}>
+              <RestormVariableInputBox value={lwtTopic} onChange={setLwtTopic} variables={variables} helpers={helpers} placeholder={t('mqtt.lwtTopicPlaceholder')} data-testid="mqtt-lwt-topic-input" />
+            </Field>
+            <Field label={t('mqtt.lwtPayload')}>
+              <RestormVariableInputBox value={lwtPayload} onChange={setLwtPayload} variables={variables} helpers={helpers} placeholder={t('mqtt.lwtPayloadPlaceholder')} data-testid="mqtt-lwt-payload-input" />
+            </Field>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+              <Field label={t('mqtt.qos')}>
+                <SelectBox
+                  id={`mqtt-lwt-qos-${request.id}`}
+                  className=""
+                  options={QOS_OPTIONS}
+                  selected={lwtQos}
+                  onDidSelect={(d: ISelectData) => { setLwtQos(d.index) }}
+                  data-testid="mqtt-lwt-qos-select"
+                />
+              </Field>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
+                <Toggle checked={lwtRetain} onChange={setLwtRetain} aria-label={t('mqtt.retain')} data-testid="mqtt-lwt-retain-toggle" />
+                {t('mqtt.retain')}
+              </label>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }

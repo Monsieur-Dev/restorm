@@ -4,10 +4,13 @@ collections:
     documentation: |-
       # MQTT Playground
 
-      A self-contained MQTT playground that talks to the Mosquitto broker the
-      test stack hosts on `localhost:1883` (`tests/docker`).
+      A self-contained MQTT playground: restorm HOSTS a local MQTT broker AND
+      connects to it as a client — no external Mosquitto needed.
 
-      - **MQTT Chat** connects to the broker, subscribes to its topic
+      - **MQTT Broker** hosts an aedes broker on `mqtt://localhost:1899`. It
+        subscribes internally to `restorm/e2e/chat` (so every published frame
+        surfaces in its chat) and its Send button publishes to that topic.
+      - **MQTT Chat** connects to the hosted broker, subscribes to
         `restorm/e2e/chat` on connect, and its Send button publishes the
         configured payload to that same topic — which round-trips straight back
         through the subscription, so a single request both sends and receives.
@@ -19,13 +22,28 @@ collections:
           - key: brokerUrl
             value:
               type: string
-              value: mqtt://localhost:1883
-            description: The locally-hosted Mosquitto broker
+              value: mqtt://localhost:1899
+            description: The restorm-hosted MQTT broker
         id: f4d1b2c0-7e3a-4c19-9b6e-2a8d51e0c7a1
     items:
       - type: websocket
+        name: MQTT Broker
+        documentation: Host a local MQTT broker on `mqtt://localhost:1899`; surface + publish on `restorm/e2e/chat`.
+        tags:
+          - mqtt
+        url: mqtt://localhost:1899
+        protocol: mqtt
+        server: true
+        event: restorm/e2e/chat
+        message: |-
+          {
+            "hello": "from broker"
+          }
+        headers: []
+        id: 7a0e3f91-2c4b-4d76-9a18-5b3e0c7d2f44
+      - type: websocket
         name: MQTT Chat
-        documentation: Connect to the local broker, subscribe + publish on `restorm/e2e/chat`.
+        documentation: Connect to the hosted broker, subscribe + publish on `restorm/e2e/chat`.
         tags:
           - mqtt
         url: '{{brokerUrl}}'

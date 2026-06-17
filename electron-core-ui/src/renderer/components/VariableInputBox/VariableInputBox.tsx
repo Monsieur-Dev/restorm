@@ -427,6 +427,12 @@ const VariableInputBox: React.FC<VariableInputBoxProps> = (props) => {
                 top: 5,
                 left: 8,
                 right: 8,
+                // Render above the Monaco editor layer: the editor paints an
+                // opaque background, so without this the absolutely-positioned
+                // placeholder is occluded and only a faint sliver bleeds through
+                // (an inconsistent smudge per placeholder text). `pointerEvents:
+                // none` keeps clicks/typing flowing to the editor underneath.
+                zIndex: 1,
                 pointerEvents: 'none',
                 opacity: 0.5,
                 whiteSpace: 'nowrap',

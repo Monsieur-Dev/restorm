@@ -251,7 +251,8 @@
         "socketioServer": "Socket.IO 服务器",
         "websocketServer": "WebSocket 服务器",
         "socketio": "Socket.IO 请求",
-        "mqtt": "MQTT request"
+        "mqtt": "MQTT request",
+        "mqttServer": "MQTT 代理"
       }
     },
     "deleteConfirm": {
@@ -1539,7 +1540,10 @@
       "websocketCloseServer": "停止所引用的 WebSocket 服务器并断开其客户端的连接。",
       "mqttConnect": "Opens a long-lived MQTT connection from a bound request and subscribes to its topic; re-emits each received message on its `message` port.",
       "mqttSend": "Publishes a payload on an already-open MQTT connection (to its topic).",
-      "mqttClose": "Closes an already-open MQTT connection."
+      "mqttClose": "Closes an already-open MQTT connection.",
+      "mqttConnectServer": "Starts a local MQTT broker (port + topic filter); subscribes to its topic filter and re-emits each received message on its `message` port. Send publishes to connected subscribers.",
+      "mqttSendServer": "Publishes a message to every subscriber of the referenced MQTT broker.",
+      "mqttCloseServer": "Stops the referenced MQTT broker and disconnects its clients."
     },
     "legend": {
       "title": "图例",

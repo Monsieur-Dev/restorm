@@ -252,7 +252,8 @@
         "socketioServer": "Serveur Socket.IO",
         "websocketServer": "Serveur WebSocket",
         "socketio": "Requête Socket.IO",
-        "mqtt": "Requête MQTT"
+        "mqtt": "Requête MQTT",
+        "mqttServer": "Courtier MQTT"
       }
     },
     "deleteConfirm": {
@@ -1540,7 +1541,10 @@
       "websocketCloseServer": "Arrête le serveur WebSocket brut référencé et déconnecte ses clients.",
       "mqttConnect": "Ouvre une connexion MQTT durable depuis une requête liée et s’abonne à son sujet ; ré-émet chaque message reçu sur son port `message`.",
       "mqttSend": "Publie une charge utile sur une connexion MQTT déjà ouverte (vers son sujet).",
-      "mqttClose": "Ferme une connexion MQTT déjà ouverte."
+      "mqttClose": "Ferme une connexion MQTT déjà ouverte.",
+      "mqttConnectServer": "Démarre un courtier MQTT local (port + filtre de sujet) ; s’abonne à son filtre de sujet et ré-émet chaque message reçu sur son port `message`. L’envoi publie aux abonnés connectés.",
+      "mqttSendServer": "Publie un message à chaque abonné du courtier MQTT référencé.",
+      "mqttCloseServer": "Arrête le courtier MQTT référencé et déconnecte ses clients."
     },
     "legend": {
       "title": "Légende",

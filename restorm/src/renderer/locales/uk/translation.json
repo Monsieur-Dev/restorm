@@ -254,7 +254,8 @@
         "socketioServer": "Сервер Socket.IO",
         "websocketServer": "Сервер WebSocket",
         "socketio": "Запит Socket.IO",
-        "mqtt": "MQTT request"
+        "mqtt": "MQTT request",
+        "mqttServer": "MQTT-брокер"
       }
     },
     "deleteConfirm": {
@@ -1542,7 +1543,10 @@
       "websocketCloseServer": "Зупиняє вказаний сервер WebSocket та відключає його клієнтів.",
       "mqttConnect": "Opens a long-lived MQTT connection from a bound request and subscribes to its topic; re-emits each received message on its `message` port.",
       "mqttSend": "Publishes a payload on an already-open MQTT connection (to its topic).",
-      "mqttClose": "Closes an already-open MQTT connection."
+      "mqttClose": "Closes an already-open MQTT connection.",
+      "mqttConnectServer": "Starts a local MQTT broker (port + topic filter); subscribes to its topic filter and re-emits each received message on its `message` port. Send publishes to connected subscribers.",
+      "mqttSendServer": "Publishes a message to every subscriber of the referenced MQTT broker.",
+      "mqttCloseServer": "Stops the referenced MQTT broker and disconnects its clients."
     },
     "legend": {
       "title": "Легенда",

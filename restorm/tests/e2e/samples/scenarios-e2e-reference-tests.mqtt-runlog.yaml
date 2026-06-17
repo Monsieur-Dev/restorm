@@ -2,8 +2,17 @@
 - message: ⚪ [<time>] start mqttConnect
   data:
     requestId: <uuid>
+    connectionName: Broker
+    label: Broker listen
+- message: ⚪ [<time>] done mqttConnect
+- message: ⚪ [<time>] mqtt "Broker" connecting
+- message: ⚪ [<time>] mqtt "Broker" connected
+- message: ⚪ [<time>] start mqttConnect
+  data:
+    requestId: <uuid>
     connectionName: Chat
     label: MQTT Chat
+    in: true
 - message: ⚪ [<time>] done mqttConnect
 - message: ⚪ [<time>] mqtt "Chat" connecting
 - message: ⚪ [<time>] mqtt "Chat" connected
@@ -43,6 +52,13 @@
   data:
     connectionNodeId: <uuid>
     in: true
+- message: ⚪ [<time>] done mqttClose
+- message: ⚪ [<time>] start mqttClose
+  data:
+    connectionNodeId: <uuid>
+    label: close Broker
+    in: true
+- message: ⚪ [<time>] mqtt "Broker" closed
 - message: ⚪ [<time>] done mqttClose
 - message: ⚪ [<time>] mqtt "Chat" closed
 - message: 🔵 [<time>] ■ MQTT

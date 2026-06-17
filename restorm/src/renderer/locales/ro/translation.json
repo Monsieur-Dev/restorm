@@ -253,7 +253,8 @@
         "socketioServer": "Server Socket.IO",
         "websocketServer": "Server WebSocket",
         "socketio": "Cerere Socket.IO",
-        "mqtt": "MQTT request"
+        "mqtt": "MQTT request",
+        "mqttServer": "Broker MQTT"
       }
     },
     "deleteConfirm": {
@@ -1541,7 +1542,10 @@
       "websocketCloseServer": "Oprește serverul WebSocket referențiat și deconectează clienții săi.",
       "mqttConnect": "Opens a long-lived MQTT connection from a bound request and subscribes to its topic; re-emits each received message on its `message` port.",
       "mqttSend": "Publishes a payload on an already-open MQTT connection (to its topic).",
-      "mqttClose": "Closes an already-open MQTT connection."
+      "mqttClose": "Closes an already-open MQTT connection.",
+      "mqttConnectServer": "Starts a local MQTT broker (port + topic filter); subscribes to its topic filter and re-emits each received message on its `message` port. Send publishes to connected subscribers.",
+      "mqttSendServer": "Publishes a message to every subscriber of the referenced MQTT broker.",
+      "mqttCloseServer": "Stops the referenced MQTT broker and disconnects its clients."
     },
     "legend": {
       "title": "Legendă",
