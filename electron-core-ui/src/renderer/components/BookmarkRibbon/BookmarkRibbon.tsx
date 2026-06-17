@@ -56,6 +56,21 @@ type AnimAction =
 
 const initialAnimState: AnimState = { phase: 'idle', leaveRequested: false }
 
+/** Self-heal budgets (ms). The choreography is driven by CSS
+ * `transitionend` events, but those are not guaranteed to fire — a
+ * coalesced/cancelled transition, a backgrounded tab, or a re-render
+ * that interrupts the transition all swallow the event, and the state
+ * machine would then deadlock in `opening` / `closing` and the ribbon
+ * would stay visually extended forever (the reported "stuck open"
+ * bug). Each phase therefore arms a watchdog that dispatches the same
+ * terminal action the missing `transitionend` would have, generously
+ * past the CSS budget so it never pre-empts the real animation.
+ *
+ * Entry CSS budget: 0.4 s height + 0.3 s opacity = 0.7 s.
+ * Exit CSS budget: 3.3 s grace + 0.4 s height = 3.7 s. */
+const ENTRY_WATCHDOG_MS = 1500
+const EXIT_WATCHDOG_MS = 5000
+
 function animReducer(state: AnimState, action: AnimAction): AnimState {
   switch (action.type) {
     case 'ENTER':
@@ -131,6 +146,40 @@ export const BookmarkRibbon: React.FC<BookmarkRibbonProps> = ({
   useEffect(() => {
     dispatch({ type: wantsOpen ? 'ENTER' : 'LEAVE' })
   }, [wantsOpen])
+
+  // Self-heal watchdog. `handleTransitionEnd` is the normal driver out
+  // of the `opening` / `closing` phases, but a dropped `transitionend`
+  // (coalesced / cancelled transition, hidden tab, mid-transition
+  // re-render) would otherwise leave the machine wedged in a transient
+  // phase and the ribbon stuck extended. Arm a timer per transient
+  // phase that fires the same terminal action the missing event would
+  // have. Re-armed on every phase change; cleared when we reach a
+  // settled phase (`idle` / `open`).
+  useEffect(() => {
+    if (animState.phase === 'opening') {
+      const t = setTimeout(() => { dispatch({ type: 'ENTRY_DONE' }) }, ENTRY_WATCHDOG_MS)
+      return () => { clearTimeout(t) }
+    }
+    if (animState.phase === 'closing') {
+      const t = setTimeout(() => { dispatch({ type: 'EXIT_DONE' }) }, EXIT_WATCHDOG_MS)
+      return () => { clearTimeout(t) }
+    }
+    return undefined
+  }, [animState.phase])
+
+  // Hard guard against a persistent stuck-open state: the ribbon must
+  // never stay visually extended (`opening` / `open` / `closing`) while
+  // there is no "wants-open" signal. The reducer + watchdogs already
+  // route every transient phase toward collapse, but `open` with no
+  // pending LEAVE is the one settled phase that could otherwise linger
+  // if its triggering LEAVE was somehow never dispatched. Force the
+  // exit here so collapse is guaranteed whenever the pointer/focus has
+  // left and the editor is closed.
+  useEffect(() => {
+    if (!wantsOpen && animState.phase === 'open') {
+      dispatch({ type: 'LEAVE' })
+    }
+  }, [wantsOpen, animState.phase])
 
   // Close the editor tooltip when the user clicks outside of the
   // ribbon button + the tooltip content. `mousedown` runs before
