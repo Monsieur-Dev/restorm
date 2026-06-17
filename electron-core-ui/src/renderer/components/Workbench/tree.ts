@@ -135,7 +135,22 @@ export function getContainerAtPath(tree: WorkbenchTree, path: number[]): Contain
 	return container;
 }
 
-export function removeTab(tree: WorkbenchTree, fromGroupId: string, tabId: string): { tree: WorkbenchTree; tab?: EditorTab } {
+/**
+ * Pick which remaining tab becomes active after the active tab is
+ * closed. Receives the tabs left in the group (closed one already
+ * removed, original order preserved) and returns the id to activate, or
+ * `undefined` to defer to the default (first remaining tab). Lets the
+ * host drive a most-recently-used choice without coupling this module to
+ * the navigation history.
+ */
+export type PickNextActiveTab = (remainingTabs: EditorTab[]) => string | undefined;
+
+export function removeTab(
+	tree: WorkbenchTree,
+	fromGroupId: string,
+	tabId: string,
+	pickNextActive?: PickNextActiveTab
+): { tree: WorkbenchTree; tab?: EditorTab } {
 	const draft = cloneTree(tree);
 	const loc = findGroup(draft, fromGroupId);
 	if (!loc.node || !isTabGroupNode(loc.node)) {
@@ -145,7 +160,13 @@ export function removeTab(tree: WorkbenchTree, fromGroupId: string, tabId: strin
 	loc.node.tabs = loc.node.tabs.filter(t => t.id !== tabId);
 	if (loc.node.activeTabId === tabId) {
 		if (loc.node.tabs[0]) {
-			loc.node.activeTabId = loc.node.tabs[0].id;
+			// Let the host pick the most-recently-used remaining tab
+			// (VSCode-style). Fall back to the first remaining tab when no
+			// resolver is supplied or it declines / names a tab that no
+			// longer exists in this group.
+			const picked = pickNextActive?.(loc.node.tabs);
+			const exists = picked !== undefined && loc.node.tabs.some(t => t.id === picked);
+			loc.node.activeTabId = exists ? picked : loc.node.tabs[0].id;
 		} else {
 			delete (loc.node as { activeTabId?: string }).activeTabId;
 		}

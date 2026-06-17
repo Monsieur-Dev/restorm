@@ -1977,6 +1977,13 @@ When('I release Ctrl', async () => {
   await page.waitForTimeout(300)
 })
 
+When('I close the active tab', async () => {
+  if (!page) throw new Error('app must be launched')
+  const activeTab = page.locator('.tab[role="tab"][aria-selected="true"]').first()
+  await expect(activeTab).toBeVisible({ timeout: 5000 })
+  await activeTab.locator('button[aria-label="Close"]').first().click()
+})
+
 // ---------------------------------------------------------------------------
 // Sidebar collapse + sync with workbench tab focus
 // ---------------------------------------------------------------------------

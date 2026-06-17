@@ -333,6 +333,20 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     return null
   }, [])
 
+  // Stable key every tab is tracked under in the navigation (MRU)
+  // history. Regular tabs reuse their underlying item id (the key the
+  // sidebar / breadcrumb / workbench navigation already records).
+  // Any tab without an item id is a special / singleton tab (Console,
+  // Firewall, Mini browser, Settings, …): it falls back to the tab's own
+  // id — which for these is a fixed singleton id (e.g. `console:singleton`),
+  // never reused. Deriving the key generically from `tab.id` means a new
+  // singleton tab type is MRU-tracked automatically, with no change here.
+  // Drives both the switcher sort and the close-returns-to-previous
+  // selection in the workbench.
+  const getTabNavKey = useCallback((tab: RestormEditorTab): string | null => {
+    return getTabItemId(tab) ?? tab.id
+  }, [getTabItemId])
+
   const renderDirtyIndicator = useCallback((tab: RestormEditorTab): React.ReactNode => {
     const itemId = getTabItemId(tab)
     if (!itemId || !dirtyItemIdsSet?.has(itemId)) return null
@@ -555,12 +569,15 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       }
     }
 
-    // Sort by navigation order (most recent first), tabs without history at the end
+    // Sort by navigation order (most recent first), tabs without history at the end.
+    // Keying on `getTabNavKey` (not `getTabItemId`) means special / singleton
+    // tabs — which now record activations under their singleton id — interleave
+    // in true MRU order instead of being forced to the back.
     const sorted = [...allTabs].sort((a, b) => {
-      const aItemId = getTabItemId(a)
-      const bItemId = getTabItemId(b)
-      const aOrder = (aItemId ? historyOrder.get(aItemId) : undefined) ?? 999
-      const bOrder = (bItemId ? historyOrder.get(bItemId) : undefined) ?? 999
+      const aKey = getTabNavKey(a)
+      const bKey = getTabNavKey(b)
+      const aOrder = (aKey ? historyOrder.get(aKey) : undefined) ?? 999
+      const bOrder = (bKey ? historyOrder.get(bKey) : undefined) ?? 999
       return aOrder - bOrder
     })
 
@@ -572,7 +589,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         icon: rendered
       }
     })
-  }, [tree.groups, renderTabTitle, getTabItemId])
+  }, [tree.groups, renderTabTitle, getTabNavKey])
 
   const {
     isOpen: tabSwitcherOpen,
@@ -1335,9 +1352,12 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       // repeat fire is safe.
       onActivateTab: (tabId) => {
         onTabActivate?.(tabId)
-      }
+      },
+      // Drives the close-returns-to-most-recently-used-tab behaviour in
+      // the workbench: the same stable key the Ctrl+Tab switcher sorts by.
+      getTabNavKey: (tab: EditorTab) => getTabNavKey(tab as RestormEditorTab)
     }
-  }, [handleTabDropped, workbenchRenderTabContent, renderTabTitle, handleDetachToNewWindow, getTabContextMenuItems, getTabContent, onTabActivate, tabDetachEnabled])
+  }, [handleTabDropped, workbenchRenderTabContent, renderTabTitle, handleDetachToNewWindow, getTabContextMenuItems, getTabContent, onTabActivate, tabDetachEnabled, getTabNavKey])
 
   const handleTreeChange = useCallback(
     (newTree: WorkbenchTree) => {

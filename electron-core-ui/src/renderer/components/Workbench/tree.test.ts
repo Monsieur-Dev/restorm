@@ -324,3 +324,86 @@ describe('cloneTree preserves tab references (Monaco-stability invariant)', () =
     expect(nextGroup.tabs[2]).toBe(tabA)
   })
 })
+
+describe('removeTab — close-returns-to-most-recently-used (VSCode-style)', () => {
+  // Simulate an MRU history: keys earlier in the array are MORE recent
+  // (matching the rank-by-position the workbench builds from the
+  // navigation history). The picker returns the highest-ranked remaining
+  // tab; here tab id === nav key for simplicity.
+  function pickByMru(order: string[]) {
+    return (remaining: EditorTab[]): string | undefined => {
+      for (const key of order) {
+        const hit = remaining.find(t => t.id === key)
+        if (hit) return hit.id
+      }
+      return undefined
+    }
+  }
+
+  it('activates the MRU-previous remaining tab, not the adjacent first one', () => {
+    const tree: WorkbenchTree = {
+      orientation: 'horizontal',
+      groups: [{ id: 'g1', tabs: [tab('A'), tab('B'), tab('C')], activeTabId: 'C' }]
+    }
+    // User most recently visited C (closing), then B, then A. After
+    // closing C the previous tab is B — even though A is tabs[0].
+    const { tree: next } = removeTab(tree, 'g1', 'C', pickByMru(['C', 'B', 'A']))
+    const g = next.groups[0] as TabGroupNode
+    expect(g.activeTabId).toBe('B')
+  })
+
+  it('falls back to the first remaining tab when no resolver is supplied', () => {
+    const tree: WorkbenchTree = {
+      orientation: 'horizontal',
+      groups: [{ id: 'g1', tabs: [tab('A'), tab('B'), tab('C')], activeTabId: 'C' }]
+    }
+    const { tree: next } = removeTab(tree, 'g1', 'C')
+    const g = next.groups[0] as TabGroupNode
+    expect(g.activeTabId).toBe('A')
+  })
+
+  it('falls back to the first remaining tab when the resolver declines', () => {
+    const tree: WorkbenchTree = {
+      orientation: 'horizontal',
+      groups: [{ id: 'g1', tabs: [tab('A'), tab('B')], activeTabId: 'B' }]
+    }
+    // No remaining tab has any history → resolver returns undefined.
+    const { tree: next } = removeTab(tree, 'g1', 'B', () => undefined)
+    const g = next.groups[0] as TabGroupNode
+    expect(g.activeTabId).toBe('A')
+  })
+
+  it('does not consult the resolver when closing a non-active tab', () => {
+    const tree: WorkbenchTree = {
+      orientation: 'horizontal',
+      groups: [{ id: 'g1', tabs: [tab('A'), tab('B'), tab('C')], activeTabId: 'A' }]
+    }
+    let called = false
+    const { tree: next } = removeTab(tree, 'g1', 'C', () => { called = true; return 'B' })
+    const g = next.groups[0] as TabGroupNode
+    expect(g.activeTabId).toBe('A')
+    expect(called).toBe(false)
+  })
+
+  it('interleaves special / singleton tabs by their nav key in MRU order', () => {
+    // Special tabs carry stable singleton ids and are tracked under those
+    // ids — so closing the active regular tab can return to a special tab
+    // when it was the more recent visit.
+    const tree: WorkbenchTree = {
+      orientation: 'horizontal',
+      groups: [{
+        id: 'g1',
+        tabs: [tab('request-1'), tab('console:singleton'), tab('settings:singleton')],
+        activeTabId: 'settings:singleton'
+      }]
+    }
+    const { tree: next } = removeTab(
+      tree,
+      'g1',
+      'settings:singleton',
+      pickByMru(['settings:singleton', 'console:singleton', 'request-1'])
+    )
+    const g = next.groups[0] as TabGroupNode
+    expect(g.activeTabId).toBe('console:singleton')
+  })
+})

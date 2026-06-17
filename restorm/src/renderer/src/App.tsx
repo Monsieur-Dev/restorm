@@ -485,6 +485,9 @@ const App: React.FC = () => {
    * branching above guarantees we never end up with two.
    */
   const handleOpenConsole = useCallback(() => {
+    // Record the activation so this singleton tab takes its place in the
+    // Ctrl+Tab MRU history even when opened from the menu (not clicked).
+    navigationService.navigateTo(CONSOLE_TAB_ID, 'workbench', { type: 'special' })
     setWorkbenchTree(prev => {
       const existingGroupId = findGroupIdForTab(prev.groups, CONSOLE_TAB_ID)
       if (existingGroupId !== null) {
@@ -537,6 +540,7 @@ const App: React.FC = () => {
    * `TabGroupNode` if no focus). Activate-existing-or-create.
    */
   const handleOpenMiniBrowser = useCallback(() => {
+    navigationService.navigateTo(MINI_BROWSER_TAB_ID, 'workbench', { type: 'special' })
     setWorkbenchTree(prev => {
       const existingGroupId = findGroupIdForTab(prev.groups, MINI_BROWSER_TAB_ID)
       if (existingGroupId !== null) {
@@ -585,6 +589,7 @@ const App: React.FC = () => {
   }, [setWorkbenchTree, focusedGroupId])
 
   const handleOpenFirewall = useCallback(() => {
+    navigationService.navigateTo(FIREWALL_TAB_ID, 'workbench', { type: 'special' })
     setWorkbenchTree(prev => {
       const existingGroupId = findGroupIdForTab(prev.groups, FIREWALL_TAB_ID)
       if (existingGroupId !== null) {
@@ -645,6 +650,7 @@ const App: React.FC = () => {
    * wired to that workbench-active branch.
    */
   const handleOpenSettingsTab = useCallback(() => {
+    navigationService.navigateTo(SETTINGS_TAB_ID, 'workbench', { type: 'special' })
     setWorkbenchTree(prev => {
       const existingGroupId = findGroupIdForTab(prev.groups, SETTINGS_TAB_ID)
       if (existingGroupId !== null) {

@@ -775,3 +775,40 @@ Feature: Full workflow end-to-end scenario
     When I close the current file and discard changes
     And I close the app
     Then no errors should have been logged
+
+  # Ctrl+Tab most-recently-used ordering must treat special / singleton
+  # tabs (Console, Firewall) as first-class: they interleave with regular
+  # request tabs in true MRU order rather than being forced to the end.
+  # Closing the active tab returns to the most-recently-used previous tab
+  # in the same editor group (VSCode-style).
+  Scenario: Ctrl+Tab MRU + close-returns-to-previous across regular and special tabs
+    Given a fresh app seeded with the main window at x=10 y=10
+    When I create a new single-file YAML collection named "mru-tabs-collection"
+    And I import the URL "http://localhost:8080/api/swagger.json"
+    And I save all with Ctrl+Shift+S
+
+    # Two regular request tabs in one group, then the two special tabs
+    # (Console / Firewall). Most-recent activation order ends up:
+    # Firewall, Console, Finds Pets by status, Find pet by ID.
+    When I open the sidebar request "Find pet by ID"
+    And I open the sidebar request "Finds Pets by status"
+    And I open the console via the view menu
+    And I open the firewall panel via the view menu
+
+    # The switcher lists every tab type interleaved by MRU — special tabs
+    # are NOT dumped to the end (the reported bug).
+    When I hold Ctrl and press Tab to open the tab switcher
+    Then the tab switcher item at index 0 should contain "Firewall"
+    And the tab switcher item at index 1 should contain "Console"
+    And the tab switcher item at index 2 should contain "Finds Pets by status"
+    And the tab switcher item at index 3 should contain "Find pet by ID"
+    When I release Ctrl
+
+    # Closing the active special tab returns to the most-recently-used
+    # previous tab in its group (Firewall → Console), not the adjacent one.
+    Then the active tab title should be "Firewall"
+    When I close the active tab
+    Then the active tab title should be "Console"
+
+    When I close the app
+    Then no errors should have been logged

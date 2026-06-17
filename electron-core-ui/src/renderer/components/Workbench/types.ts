@@ -77,6 +77,17 @@ export interface EditorWorkbenchCallbacks {
 	onCloseOthersInGroup?: (tabId: string, groupId: string) => void;
 	onDetachToNewWindow?: (tabId: string, groupId: string, cursorX?: number, cursorY?: number) => void;
 	onActivateTab?: (tabId: string, groupId: string) => void;
+	/**
+	 * Map a tab to the stable key it is tracked under in the
+	 * {@link navigationService} most-recently-used history. Used when
+	 * closing the active tab: the workbench activates the most-recently-
+	 * used *remaining* tab in the same group (VSCode-style) rather than
+	 * the adjacent one. Return `null` for tabs that aren't tracked — they
+	 * are treated as having no recorded activation and fall to the back of
+	 * the MRU ordering. When omitted entirely, close falls back to the
+	 * first remaining tab in the group.
+	 */
+	getTabNavKey?: (tab: EditorTab) => string | null;
 	renderTabContent?: (tab: EditorTab) => React.ReactNode;
 	/**
 	 * Render the title of a tab. If provided, this will be used instead of the tab's title property.
