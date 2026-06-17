@@ -84,6 +84,10 @@ export interface RestormWorkbenchProps {
   focusedGroupId?: string | null
   /** Callback fired whenever the focused group changes */
   onFocusedGroupChange?: (groupId: string | null) => void
+  /** Callback fired whenever the maximized (fullscreen) tab changes —
+   * forwarded from `EditorWorkbench` so the host can track the
+   * workbench-wide maximized state (it lives outside the tree). */
+  onFullscreenTabIdChange?: ((tabId: string | null) => void) | undefined
   /** Callback fired when a tab is activated (clicked or selected) */
   onTabActivate?: (tabId: string) => void
   /** Open a request by id — passed through to env-folder home tabs so
@@ -196,6 +200,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   style,
   focusedGroupId,
   onFocusedGroupChange,
+  onFullscreenTabIdChange,
   onTabActivate,
   onRequestClick,
   onRequestAuxClick,
@@ -1535,6 +1540,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         onChange={handleTreeChange}
         focusedGroupId={focusedGroupId ?? undefined}
         onFocusedGroupChange={onFocusedGroupChange}
+        onFullscreenTabIdChange={onFullscreenTabIdChange}
         emptyFallback={emptyFallback}
         onSizesChange={onSizesChange}
         workbenchId={workbenchId}

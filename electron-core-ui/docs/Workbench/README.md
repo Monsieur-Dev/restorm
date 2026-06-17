@@ -57,6 +57,19 @@ Use it to decide up front whether a restore will reopen tabs: a consumer that sh
   - `onWorkbenchTabDropped?: (tabData: { tabId: string; title: string; groupId: string; content?: string; cursorX?: number; cursorY?: number }) => boolean | Promise<boolean>`
   - `getTabNavKey?: (tab: EditorTab) => string | null` — maps a tab to the key it is tracked under in the [`navigationService`](../../src/renderer/services/NavigationService.ts) most-recently-used history (see below).
 
+#### Serializable layout get/set (`serializeWorkbenchLayout` / `applyWorkbenchLayout`)
+
+`WorkbenchTree` carries each tab's `title` / `content` as live React nodes, so it can't cross an IPC boundary or be inspected by an automation client. The `layout` module converts to/from a flat, JSON-safe `WorkbenchLayout` that mirrors the tree's structure — the split tree, per-split `orientation`, sash `sizes`, each group's ordered tabs + `activeTabId` — plus two workbench-level fields the tree itself doesn't hold (`focusedGroupId`, `maximizedTabId`). Each tab becomes a `LayoutTab` (`{ id, tabType, title, itemId, data? }`).
+
+It is deliberately **host-agnostic**: it knows nothing about any app's tab types. The caller injects the mapping both ways.
+
+- `serializeWorkbenchLayout(tree, serializeTab, state?): WorkbenchLayout` — walk a live tree into the flat shape. `serializeTab(tab)` returns `{ tabType?, title, itemId?, data? }` for one tab (`itemId` is the tree-item id for tree-backed tabs, `null`/omitted for singleton specials; `data` defaults to the tab's `persistedState`). `state` threads in `{ focusedGroupId, maximizedTabId }`.
+- `applyWorkbenchLayout(layout, rebuildTab): { tree, focusedGroupId?, maximizedTabId? }` — rebuild a live tree from the flat shape. `rebuildTab(layoutTab)` reconstructs / opens the backing item and returns an `EditorTab`, or `null` to drop a tab that can no longer be rebuilt (e.g. its item was deleted). The apply prunes empty groups + single-child containers, repairs each group's `activeTabId` to a surviving tab, drops `sizes` when a container's child count changed, and validates `focusedGroupId` / `maximizedTabId` against the survivors.
+
+The pair round-trips structurally: `serialize → apply → serialize` yields an equivalent layout (group / container ids are positional and may differ, but orientation, sizes, tab order, `tabType` / `itemId`, and the active-tab-by-position are preserved). Use it to expose programmatic get/set of the whole workbench layout (e.g. wired to MCP `get_workbench_layout` / `set_workbench_layout` tools), so split layouts can be read and reconstructed without drag & drop.
+
+The renderer-side orchestration around this pair is itself reusable: `useMcpWorkbenchLayoutBridge(input)` (in `hooks/`) owns the full get/set wiring — it pushes the serialized layout to the host's IPC bridge on every tree / focus / maximized change (read side), and on a broadcast spec it applies it, swaps the tree / focus / maximized state in, and re-activates the focused group's active tab (write side). It stays host-agnostic: the host injects the IPC `bridge` (`{ pushWorkbenchLayout, onMcpSetWorkbenchLayout }`), the `serializeTab` / `rebuildTab` mappers (the only app-specific part), the tree / focus / maximized setters, and an `onTabActivate` callback. So a host only wires its MCP route to this hook — it doesn't re-implement the orchestration.
+
 #### Closing the active tab returns to the most-recently-used tab
 
 When the active tab is closed, `EditorWorkbench` activates the **most-recently-used remaining tab across all groups** (VSCode-style), rather than the adjacent one. It ranks every surviving tab in the workbench by its position in `navigationService.getHistory()`, mapping each tab to its history key via `getTabNavKey`. Tabs whose key has no recorded activation (or that return `null`) sort last; if none qualifies, it falls back to the first remaining tab in the closed tab's own group. Omit `getTabNavKey` entirely to keep the plain first-remaining-tab behaviour.
@@ -73,6 +86,7 @@ The host owns the tab→key mapping, so the same key it records on activation (`
 - `loadState(): Promise<WorkbenchTree | null>` — manually restore from storage.
 - `clearState(): Promise<boolean>` — drop the persisted state.
 - `setFullscreenTabId(tabId: string | null): void` — maximize a tab into the fullscreen modal (`tabId`), or restore whatever is maximized (`null`). Mirrors a double-click on the tab: same `allowFullscreen` gate, same modal. The maximized and normal views share one React instance — relocated by `appendChild`, never remounted — so no editor / response / scroll state is lost in either direction. Use this to drive maximize from outside the workbench (e.g. wired to the MCP `set_tab_maximized` tool).
+To track the maximized state reactively (it's workbench-wide and **not** part of `WorkbenchTree`), pass the `onFullscreenTabIdChange?: (tabId: string | null) => void` prop — it fires with the maximized tab id whenever a tab is maximized, and with `null` on restore. Use it to keep a serializable layout snapshot's `maximizedTabId` (see `serializeWorkbenchLayout`) fresh rather than polling.
 
 #### Maximizing a tab (`allowFullscreen`)
 

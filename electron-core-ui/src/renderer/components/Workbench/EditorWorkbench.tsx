@@ -34,6 +34,15 @@ export interface EditorWorkbenchProps extends EditorWorkbenchCallbacks {
 	 */
 	onFocusedGroupChange?: ((groupId: string | null) => void) | undefined;
 	/**
+	 * Called whenever the maximized (fullscreen) tab changes — the id of
+	 * the tab now shown fullscreen, or `null` when restored. The maximized
+	 * state is workbench-wide and not part of `WorkbenchTree`, so a
+	 * consumer that needs to track it reactively (e.g. to keep a
+	 * serializable layout snapshot fresh) subscribes here rather than
+	 * polling `getFullscreenTabId`.
+	 */
+	onFullscreenTabIdChange?: ((tabId: string | null) => void) | undefined;
+	/**
 	 * Optional fallback component to display when no tabs are open.
 	 * If not provided, nothing is displayed.
 	 */
@@ -365,6 +374,7 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 	onChange,
 	focusedGroupId,
 	onFocusedGroupChange,
+	onFullscreenTabIdChange,
 	onActivateTab: externalOnActivateTab,
 	emptyFallback,
 	onSizesChange,
@@ -383,6 +393,17 @@ export const EditorWorkbench = forwardRef<EditorWorkbenchHandle, EditorWorkbench
 	// be driven imperatively via the handle, e.g. by the
 	// `set_tab_maximized` MCP tool.
 	const [fullscreenTabId, setFullscreenTabId] = useState<string | null>(null);
+	// Mirror `fullscreenTabId` into a ref so the imperative `getFullscreenTabId`
+	// getter reads the latest value without recreating the handle on every
+	// maximize/restore (which would churn every ref consumer).
+	// Notify a subscriber whenever the maximized tab changes, so it can
+	// track the workbench-wide fullscreen state reactively (it lives
+	// outside the tree).
+	const onFullscreenTabIdChangeRef = useRef(onFullscreenTabIdChange);
+	onFullscreenTabIdChangeRef.current = onFullscreenTabIdChange;
+	useEffect(() => {
+		onFullscreenTabIdChangeRef.current?.(fullscreenTabId);
+	}, [fullscreenTabId]);
 	// `modalOwnerTabId` is "the tab whose content currently lives in the
 	// modal body": adopted from `fullscreenTabId`, but only released once
 	// the modal's close animation has finished — so the content stays

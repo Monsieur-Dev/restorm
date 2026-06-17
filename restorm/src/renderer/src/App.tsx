@@ -116,6 +116,7 @@ import { useMcpTreeReplace } from './hooks/useMcpTreeReplace'
 import { useMcpRunRequest } from './hooks/useMcpRunRequest'
 import { useMcpRequestPatch } from './hooks/useMcpRequestPatch'
 import { useMcpWorkbenchTabsBridge } from './hooks/useMcpWorkbenchTabsBridge'
+import { useMcpWorkbenchLayout } from './hooks/useMcpWorkbenchLayout'
 import { useMcpFolderPatch } from './hooks/useMcpFolderPatch'
 import { useScenarioSuggestionsBridge } from './testing/scenarioSuggestionsBridge'
 import { useE2eDocumentUpdateBridge } from './testing/e2eDocumentUpdateBridge'
@@ -516,6 +517,10 @@ const App: React.FC = () => {
 
   // Focused group ID in the workbench
   const [focusedGroupId, setFocusedGroupId] = useState<string | null>(null)
+  // Id of the maximized (fullscreen) workbench tab, or null. Lives
+  // outside the tree (EditorWorkbench owns it); mirrored here so the MCP
+  // `get_workbench_layout` snapshot stays fresh across maximize/restore.
+  const [maximizedTabId, setMaximizedTabId] = useState<string | null>(null)
 
   // Workbench tree state (starts with no groups)
   const [workbenchTree, setWorkbenchTree] = useState<WorkbenchTree>({
@@ -1574,6 +1579,39 @@ const App: React.FC = () => {
     openFirewall: handleOpenFirewall,
     setTabMaximized: handleSetTabMaximized
   })
+  // Forward-ref for `handleTabActivate` (declared via `useNavigation`
+  // further down) so the layout hook can sync the active tab after a set
+  // without a temporal-dead-zone reference.
+  const tabActivateForLayoutRef = useRef<(tabId: string) => void>(() => { /* not yet wired */ })
+  const tabActivateForLayoutStable = useCallback((tabId: string) => { tabActivateForLayoutRef.current(tabId) }, [])
+  // Drive the workbench-wide fullscreen tab through `EditorWorkbench`'s
+  // imperative handle when an incoming layout spec maximizes a tab (the
+  // same handle `set_tab_maximized` / a double-click uses).
+  const setMaximizedTabIdForLayout = useCallback((tabId: string | null) => {
+    workbenchRef.current?.setFullscreenTabId(tabId)
+  }, [workbenchRef])
+  // MCP `get_workbench_layout` / `set_workbench_layout` — push the
+  // serialized layout to main for reads, and reconstruct the tree from a
+  // broadcast spec on writes (reusing `handleRebuildTab` to open tabs).
+  // The generic orchestration lives in electron-core-ui
+  // (`useMcpWorkbenchLayoutBridge`); this wires the restorm-specific
+  // mapping + IPC bridge to it.
+  useMcpWorkbenchLayout({
+    enabled: mcpEnabled,
+    tree: workbenchTree,
+    focusedGroupId,
+    maximizedTabId,
+    setMaximizedTabId: setMaximizedTabIdForLayout,
+    setWorkbenchTree,
+    setFocusedGroupId,
+    handleRebuildTab,
+    // `handleTabActivate` is declared further down (it comes from
+    // `useNavigation`). Route through a stable forward-ref so the hook
+    // can sync the active tab after a layout swap without hitting the
+    // temporal dead zone. The ref is patched by an effect once
+    // `handleTabActivate` exists (same trick as `closeTabByItemIdRef`).
+    onTabActivate: tabActivateForLayoutStable
+  })
   useMcpFolderPatch({ enabled: mcpEnabled, rootItems, bumpTabContentVersionFor: bumpTabContentVersionStable })
   // MCP `set_favorite` listener — call the same toggle/remove path the
   // sidebar buttons use, then bump the tab content version so the H1
@@ -2472,6 +2510,10 @@ const App: React.FC = () => {
     getNearestEnvironmentsForBreadcrumbs
   })
 
+  // Patch the forward-reference ref consumed by `useMcpWorkbenchLayout`
+  // (above) now that `handleTabActivate` exists.
+  useEffect(() => { tabActivateForLayoutRef.current = handleTabActivate }, [handleTabActivate])
+
   // Reverse navigation request → scenarios: list the scenarios using a request,
   // and open one (optionally centring the bound box). Computed live from the
   // tree, so deletes update it with no stored back-reference.
@@ -2649,6 +2691,7 @@ const App: React.FC = () => {
               onTreeChange={handleTreeChange}
               focusedGroupId={focusedGroupId}
               onFocusedGroupChange={setFocusedGroupId}
+              onFullscreenTabIdChange={setMaximizedTabId}
               onTabActivate={handleTabActivate}
               onRequestClick={handleItemClick}
               onRequestAuxClick={handleItemAuxClick}
@@ -2702,6 +2745,7 @@ const App: React.FC = () => {
             onTreeChange={handleTreeChange}
             focusedGroupId={focusedGroupId}
             onFocusedGroupChange={setFocusedGroupId}
+            onFullscreenTabIdChange={setMaximizedTabId}
             onTabActivate={handleTabActivate}
             onBreadcrumbClick={handleBreadcrumbClick}
             onBreadcrumbAuxClick={handleBreadcrumbAuxClick}

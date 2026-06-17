@@ -21,4 +21,6 @@ export { useFilterableDropdown, applyDropdownFilter, DEFAULT_FILTER_THRESHOLD } 
 export type { UseFilterableDropdownOptions, UseFilterableDropdownResult } from './useFilterableDropdown'
 export { useMcpMiniBrowserBridge } from './useMcpMiniBrowserBridge'
 export type { UseMcpMiniBrowserBridgeInput, MiniBrowserBridgeApi } from './useMcpMiniBrowserBridge'
+export { useMcpWorkbenchLayoutBridge } from './useMcpWorkbenchLayoutBridge'
+export type { UseMcpWorkbenchLayoutBridgeInput, WorkbenchLayoutBridgeApi } from './useMcpWorkbenchLayoutBridge'
 export { useOverlayPresence } from './useOverlayPresence'
