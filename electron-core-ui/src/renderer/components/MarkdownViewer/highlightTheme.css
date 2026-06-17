@@ -1,0 +1,185 @@
+/*
+ * Theme-aware highlight.js token colours. Replaces the fixed
+ * `highlight.js/styles/vs2015.css` import so syntax highlighting tracks the
+ * active workbench theme (light / dark / high-contrast) instead of staying
+ * dark-only.
+ *
+ * Two layers, both keyed to the SAME `--hljs-*` variables:
+ *   1. This stylesheet seeds the variables per theme family via
+ *      `:root[data-theme=…]` selectors, so highlighting is correct the instant
+ *      the theme attribute flips — no main-process reload required.
+ *   2. The theme YAML (base.yaml + the family `_base.yaml`) also defines the
+ *      same `--hljs-*` ids; those land as inline styles on the documentElement,
+ *      overriding layer 1, so a specific theme can still retune the palette.
+ *
+ * Token grouping mirrors the upstream vs2015 stylesheet so every class hljs can
+ * emit is covered.
+ */
+
+/* Layer 1 — per-family palette seeds. Dark / HC-dark inherit the dark palette
+ * (the `:root` default below); light / HC-light get a legible light palette. */
+:root,
+:root[data-theme="dark"],
+:root[data-theme="hcDark"] {
+  --hljs-foreground: #dcdcdc;
+  --hljs-keyword: #569cd6;
+  --hljs-type: #4ec9b0;
+  --hljs-number: #b8d7a3;
+  --hljs-string: #d69d85;
+  --hljs-regexp: #9a5334;
+  --hljs-comment: #57a64a;
+  --hljs-meta: #9b9b9b;
+  --hljs-variable: #bd63c5;
+  --hljs-attr: #9cdcfe;
+  --hljs-section: #d7ba7d;
+  --hljs-selector: #d7ba7d;
+  --hljs-addition-background: #144212;
+  --hljs-deletion-background: #600;
+}
+
+:root[data-theme="light"] {
+  --hljs-foreground: #1f1f1f;
+  --hljs-keyword: #00f;
+  --hljs-type: #267f99;
+  --hljs-number: #098658;
+  --hljs-string: #a31515;
+  --hljs-regexp: #811f3f;
+  --hljs-comment: #008000;
+  --hljs-meta: #808080;
+  --hljs-variable: #9b46b0;
+  --hljs-attr: #0451a5;
+  --hljs-section: #800000;
+  --hljs-selector: #800000;
+  --hljs-addition-background: #dafbe1;
+  --hljs-deletion-background: #ffd7d5;
+}
+
+:root[data-theme="hcLight"] {
+  --hljs-foreground: #000;
+  --hljs-keyword: #0000c0;
+  --hljs-type: #0f5d63;
+  --hljs-number: #0a5e2a;
+  --hljs-string: #9b0000;
+  --hljs-regexp: #7a0030;
+  --hljs-comment: #006400;
+  --hljs-meta: #5a5a5a;
+  --hljs-variable: #7a1f99;
+  --hljs-attr: #003a8c;
+  --hljs-section: #6a0000;
+  --hljs-selector: #6a0000;
+  --hljs-addition-background: #c8f0d0;
+  --hljs-deletion-background: #ffc9c6;
+}
+
+pre code.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 1em;
+}
+
+code.hljs {
+  padding: 3px 5px;
+}
+
+.hljs {
+  color: var(--hljs-foreground, #dcdcdc);
+}
+
+.hljs-keyword,
+.hljs-literal,
+.hljs-symbol,
+.hljs-name {
+  color: var(--hljs-keyword, #569cd6);
+}
+
+.hljs-link {
+  color: var(--hljs-keyword, #569cd6);
+  text-decoration: underline;
+}
+
+.hljs-built_in,
+.hljs-type {
+  color: var(--hljs-type, #4ec9b0);
+}
+
+.hljs-number,
+.hljs-class {
+  color: var(--hljs-number, #b8d7a3);
+}
+
+.hljs-string,
+.hljs-meta .hljs-string {
+  color: var(--hljs-string, #d69d85);
+}
+
+.hljs-regexp,
+.hljs-template-tag {
+  color: var(--hljs-regexp, #9a5334);
+}
+
+.hljs-subst,
+.hljs-function,
+.hljs-title,
+.hljs-params,
+.hljs-formula {
+  color: var(--hljs-foreground, #dcdcdc);
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: var(--hljs-comment, #57a64a);
+  font-style: italic;
+}
+
+.hljs-doctag {
+  color: var(--hljs-comment, #608b4e);
+}
+
+.hljs-meta,
+.hljs-meta .hljs-keyword,
+.hljs-tag {
+  color: var(--hljs-meta, #9b9b9b);
+}
+
+.hljs-variable,
+.hljs-template-variable {
+  color: var(--hljs-variable, #bd63c5);
+}
+
+.hljs-attr,
+.hljs-attribute {
+  color: var(--hljs-attr, #9cdcfe);
+}
+
+.hljs-section {
+  color: var(--hljs-section, gold);
+}
+
+.hljs-bullet,
+.hljs-selector-tag,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-selector-attr,
+.hljs-selector-pseudo {
+  color: var(--hljs-selector, #d7ba7d);
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}
+
+.hljs-addition {
+  background-color: var(--hljs-addition-background, #144212);
+  display: inline-block;
+  width: 100%;
+}
+
+.hljs-deletion {
+  background-color: var(--hljs-deletion-background, #600);
+  display: inline-block;
+  width: 100%;
+}

@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
-import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, IconView, TabSwitcherOverlay, navigationService, useFeature, MiniBrowserPanel, ConsolePanel, SettingsPage, Tabs, MarkdownEditor, type Tab, type ContextMenuItem } from 'electron-core-ui/renderer'
+import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, IconView, TabSwitcherOverlay, navigationService, useFeature, MiniBrowserPanel, ConsolePanel, SettingsPage, McpLogsPanel, Tabs, MarkdownEditor, type Tab, type ContextMenuItem, type McpLogsLabels } from 'electron-core-ui/renderer'
 import { miniBrowserDriver } from '../../../services/miniBrowserDriver'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback, TabSwitcherItem } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
@@ -18,7 +18,8 @@ import {
   isConsoleTab,
   isFirewallTab,
   isMiniBrowserTab,
-  isSettingsTab
+  isSettingsTab,
+  isMcpLogsTab
 } from '../../../../../shared/types/editor'
 import { FirewallPanel } from '../../Firewall'
 import {
@@ -231,6 +232,24 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   getScenariosUsingScenario
 }, ref) => {
   const { t } = useTranslation()
+  // Localized labels for the generic ECUI MCP-logs viewer (it ships no copy).
+  // Memoized so the panel isn't handed a fresh object on every render.
+  const mcpLogsLabels = useMemo<McpLogsLabels>(() => ({
+    title: t('mcpLogs.title'),
+    empty: t('mcpLogs.empty'),
+    clear: t('mcpLogs.clear'),
+    tool: t('mcpLogs.tool'),
+    time: t('mcpLogs.time'),
+    payload: t('mcpLogs.payload'),
+    truncated: t('mcpLogs.truncated'),
+    screenshot: t('mcpLogs.screenshot'),
+    screencast: t('mcpLogs.screencast'),
+    captureEvicted: t('mcpLogs.captureEvicted'),
+    copy: t('mcpLogs.copy'),
+    closePreview: t('mcpLogs.closePreview'),
+    captureImageTitle: t('mcpLogs.captureImageTitle'),
+    captureVideoTitle: t('mcpLogs.captureVideoTitle')
+  }), [t])
   const editorWorkbenchRef = useRef<EditorWorkbenchHandle>(null)
   const isControlled = onTreeChange !== undefined
   const [localTree, setLocalTree] = useState<WorkbenchTree>(initialTree)
@@ -533,6 +552,17 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <IconView icon={{ type: 'codicon', value: 'settings-gear' }} size={14} />
           <span>{t('settings.title', 'Settings')}</span>
+        </span>
+      )
+    }
+
+    // MCP logs tab — codicon `mcp` + "MCP logs" label. Singleton, no dirty
+    // indicator (the call log is a live, read-only feed from the main process).
+    if (isMcpLogsTab(restormTab)) {
+      return (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <IconView icon={{ type: 'codicon', value: 'mcp' }} size={14} />
+          <span>{t('mcpLogs.title')}</span>
         </span>
       )
     }
@@ -1209,9 +1239,22 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       )
     }
 
+    // MCP logs tab — singleton, identified by `tabType: 'mcp-logs'`. Mounts
+    // the shared ECUI `<McpLogsPanel />`, which pulls the served-call buffer
+    // from the source restorm wired at bootstrap. Localized labels passed in
+    // so the generic ECUI component carries no copy. No breadcrumbs for the
+    // same reason as Console / Firewall / Settings.
+    if (isMcpLogsTab(effectiveTab)) {
+      return (
+        <div style={{ height: '100%', overflow: 'hidden' }} data-testid="mcp-logs-tab-content">
+          <McpLogsPanel labels={mcpLogsLabels} translateToolTitle={t} />
+        </div>
+      )
+    }
+
     // Legacy/empty tab fallback (should not happen with typed tabs)
     return null
-  }, [t, onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onScenarioChange, onCreateScenarioRequest, onCreateScenarioChild, resolveBoundItem, resolveRequestEnv, resolveSyntheticPreview, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getScenarioById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, getScenariosUsingRequest, onOpenScenarioFromRequest, getScenariosUsingScenario, updateMiniBrowserUrl])
+  }, [t, mcpLogsLabels, onBreadcrumbClick, onBreadcrumbAuxClick, onItemRename, onItemIconChange, onTagsChange, onTagColorChange, onFolderChange, onScenarioChange, onCreateScenarioRequest, onCreateScenarioChild, resolveBoundItem, resolveRequestEnv, resolveSyntheticPreview, onEnvironmentFolderChange, onRequestClick, onRequestAuxClick, getRequestById, getFolderById, getScenarioById, getEnvironmentFolderById, getTagColorsFromBreadcrumbs, getEnvFolderIdFromBreadcrumbs, projectUuid, isItemFavorite, onToggleFavorite, getScenariosUsingRequest, onOpenScenarioFromRequest, getScenariosUsingScenario, updateMiniBrowserUrl])
 
   // Handle tab detach to new window
   const handleDetachToNewWindow = useCallback(

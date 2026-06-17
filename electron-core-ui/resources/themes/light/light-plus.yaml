@@ -3,6 +3,24 @@ name: Light+
 description: Extended light theme based on Visual Studio Light
 
 colors:
+  # Chat-bubble tints: faint grey lift + the classic VS blue accent.
+  chat-bubble.incoming.background: "rgb(0, 0, 0, 0.05)"
+  chat-bubble.outgoing.background: "rgb(0, 122, 204, 0.15)"
+  # Syntax palette: classic VS Code Light+ token identity.
+  hljs.foreground: "#000000"
+  hljs.keyword: "#0000ff"
+  hljs.type: "#267f99"
+  hljs.number: "#098658"
+  hljs.string: "#a31515"
+  hljs.regexp: "#811f3f"
+  hljs.comment: "#008000"
+  hljs.meta: "#808080"
+  hljs.variable: "#001080"
+  hljs.attr: "#0451a5"
+  hljs.section: "#800000"
+  hljs.selector: "#800000"
+  hljs.addition.background: "#dafbe1"
+  hljs.deletion.background: "#ffd7d5"
   # Tag colors for Light+ (use soft blue)
   tag.background: "#d0e5ff"
   tag.background-hover: "#bddbff"

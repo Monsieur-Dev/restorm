@@ -52,7 +52,8 @@
     "documentation": "Documentație",
     "keyboardShortcuts": "Scurtături de tastatură",
     "releaseNotes": "Note de lansare",
-    "reportIssue": "Raportează o problemă"
+    "reportIssue": "Raportează o problemă",
+    "mcpLogs": "Jurnale MCP"
   },
   "settings": {
     "title": "Setări",
@@ -332,7 +333,38 @@
   "statusbar": {
     "mcp": {
       "serverRunningOnPort": "Serverul MCP rulează pe portul {{port}}",
-      "sessionName": "Sesiune: {{name}}"
+      "sessionName": "Sesiune: {{name}}",
+      "viewLogs": "Vizualizează jurnalele"
     }
+  },
+  "mcpToolTitles": {
+    "screenshot": "Captură de ecran",
+    "screencastStart": "Pornește înregistrarea ecranului",
+    "screencastStop": "Oprește înregistrarea ecranului",
+    "refresh": "Reîncarcă fereastra",
+    "domQuery": "Interoghează DOM-ul",
+    "consoleLogs": "Citește jurnalele consolei",
+    "dispatchEvent": "Trimite un eveniment DOM",
+    "typeText": "Tastează text",
+    "evaluate": "Execută JavaScript",
+    "exit": "Închide aplicația",
+    "waitFor": "Așteaptă o condiție",
+    "keyboardShortcut": "Apasă o scurtătură de tastatură",
+    "devtools": "Comută DevTools",
+    "windowInfo": "Informații fereastră",
+    "storage": "Citește/scrie stocarea",
+    "scrollIntoView": "Derulează în vizor",
+    "injectCss": "Injectează CSS",
+    "wait": "Așteaptă",
+    "getComputedStyle": "Obține stilul calculat",
+    "getWindows": "Listează ferestrele",
+    "dragDrop": "Trage și plasează",
+    "mouseInput": "Intrare mouse",
+    "batch": "Execută un lot de instrumente",
+    "openMiniBrowser": "Deschide mini browserul",
+    "miniBrowserExecute": "Execută cod în mini browser",
+    "openConsole": "Deschide consola",
+    "consoleClear": "Golește consola",
+    "setTabMaximized": "Maximizează/restaurează fila"
   }
 }

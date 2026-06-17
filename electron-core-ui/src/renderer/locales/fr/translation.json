@@ -52,7 +52,8 @@
     "documentation": "Documentation",
     "keyboardShortcuts": "Raccourcis clavier",
     "releaseNotes": "Notes de version",
-    "reportIssue": "Signaler un bug"
+    "reportIssue": "Signaler un bug",
+    "mcpLogs": "Journaux MCP"
   },
   "settings": {
     "title": "Paramètres",
@@ -332,7 +333,38 @@
   "statusbar": {
     "mcp": {
       "serverRunningOnPort": "Serveur MCP en cours d'exécution sur le port {{port}}",
-      "sessionName": "Session : {{name}}"
+      "sessionName": "Session : {{name}}",
+      "viewLogs": "Voir les journaux"
     }
+  },
+  "mcpToolTitles": {
+    "screenshot": "Capture d'écran",
+    "screencastStart": "Démarrer l'enregistrement",
+    "screencastStop": "Arrêter l'enregistrement",
+    "refresh": "Recharger la fenêtre",
+    "domQuery": "Interroger le DOM",
+    "consoleLogs": "Lire les journaux de la console",
+    "dispatchEvent": "Déclencher un évènement DOM",
+    "typeText": "Saisir du texte",
+    "evaluate": "Exécuter du JavaScript",
+    "exit": "Quitter l'application",
+    "waitFor": "Attendre une condition",
+    "keyboardShortcut": "Appuyer sur un raccourci clavier",
+    "devtools": "Afficher/masquer les outils de développement",
+    "windowInfo": "Infos sur la fenêtre",
+    "storage": "Lire/écrire le stockage",
+    "scrollIntoView": "Faire défiler jusqu'à l'élément",
+    "injectCss": "Injecter du CSS",
+    "wait": "Attendre",
+    "getComputedStyle": "Obtenir le style calculé",
+    "getWindows": "Lister les fenêtres",
+    "dragDrop": "Glisser-déposer",
+    "mouseInput": "Entrée souris",
+    "batch": "Exécuter un lot d'outils",
+    "openMiniBrowser": "Ouvrir le mini navigateur",
+    "miniBrowserExecute": "Exécuter du code dans le mini navigateur",
+    "openConsole": "Ouvrir la console",
+    "consoleClear": "Effacer la console",
+    "setTabMaximized": "Agrandir/restaurer l'onglet"
   }
 }

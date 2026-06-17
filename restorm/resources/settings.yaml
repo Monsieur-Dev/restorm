@@ -35,3 +35,26 @@ groups:
                 labelKey: "console.requestFormat.curl"
               - value: "powershell"
                 labelKey: "console.requestFormat.powershell"
+  - id: "mcp"
+    titleKey: "mcp.title"
+    items:
+      - setting:
+          id: "logsRetentionCap"
+          titleKey: "mcp.logsRetentionCap"
+          descriptionKey: "mcp.logsRetentionCapDescription"
+          type: "number"
+          default: 100
+          params:
+            min: 0
+            max: 10000
+            integer: true
+      - setting:
+          id: "captureRetentionCap"
+          titleKey: "mcp.captureRetentionCap"
+          descriptionKey: "mcp.captureRetentionCapDescription"
+          type: "number"
+          default: 20
+          params:
+            min: 0
+            max: 10000
+            integer: true

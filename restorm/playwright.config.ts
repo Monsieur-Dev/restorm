@@ -146,6 +146,24 @@ const settingsTabTestDir = defineBddConfig({
   outputDir: '.features-gen/settings-tab'
 })
 
+const mcpLogsTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/mcp-logs/features/mcp-logs.feature',
+  steps: [
+    'tests/e2e/bdd/mcp-logs/steps/mcp-logs.steps.ts',
+    'tests/e2e/bdd/fixtures/mcp-logs.fixture.ts'
+  ],
+  outputDir: '.features-gen/mcp-logs'
+})
+
+const mcpLogsDisabledTestDir = defineBddConfig({
+  features: 'tests/e2e/bdd/mcp-logs/features/mcp-logs-disabled.feature',
+  steps: [
+    'tests/e2e/bdd/mcp-logs/steps/mcp-logs-disabled.steps.ts',
+    'tests/e2e/bdd/fixtures/mcp-logs-disabled.fixture.ts'
+  ],
+  outputDir: '.features-gen/mcp-logs-disabled'
+})
+
 /**
  * Playwright configuration for Electron E2E tests using playwright-bdd.
  * Each test group has its own project with a dedicated fixture.
@@ -290,6 +308,16 @@ export default defineConfig({
       name: 'settings-tab',
       testDir: settingsTabTestDir,
       timeout: 120 * 1000
+    },
+    {
+      name: 'mcp-logs',
+      testDir: mcpLogsTestDir,
+      timeout: 120 * 1000 // launches with --mcp; opens the viewer as tab + modal
+    },
+    {
+      name: 'mcp-logs-disabled',
+      testDir: mcpLogsDisabledTestDir,
+      timeout: 120 * 1000 // launches without --mcp; asserts the menu entry is disabled
     },
     {
       // Headless CLI runner — a plain spec (no BDD/UI) that spawns the built app

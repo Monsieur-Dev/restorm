@@ -292,6 +292,7 @@ export function registerScenarioRunTools(mcp: McpService): void {
   mcp.registerTool(
     'run_scenario_node',
     {
+      titleKey: 'mcpToolTitles.runScenarioNode',
       title: 'Run a scenario box',
       description:
         'Execute one box of a scenario by node id. A box bound to a sidebar request runs through the same ' +
@@ -312,6 +313,7 @@ export function registerScenarioRunTools(mcp: McpService): void {
   mcp.registerTool(
     'get_scenario_node_result',
     {
+      titleKey: 'mcpToolTitles.getScenarioNodeResult',
       title: 'Get a scenario box result',
       description:
         'Read a box\'s last run result as its output context. For a `request` box this comes from the bound ' +
@@ -333,6 +335,7 @@ export function registerScenarioRunTools(mcp: McpService): void {
   mcp.registerTool(
     'get_scenario_node_status',
     {
+      titleKey: 'mcpToolTitles.getScenarioNodeStatus',
       title: 'Scenario box run status',
       description: 'Whether a box is currently running (`running` / `idle`), and since when.',
       inputSchema: ids as Record<string, unknown>
@@ -349,6 +352,7 @@ export function registerScenarioRunTools(mcp: McpService): void {
   mcp.registerTool(
     'cancel_scenario_node',
     {
+      titleKey: 'mcpToolTitles.cancelScenarioNode',
       title: 'Cancel a scenario box run',
       description: 'Cancel a box\'s in-flight run. For a `request` box this aborts the live HTTP dispatch.',
       inputSchema: ids as Record<string, unknown>

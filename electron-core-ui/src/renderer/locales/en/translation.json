@@ -52,7 +52,8 @@
     "documentation": "Documentation",
     "keyboardShortcuts": "Keyboard Shortcuts",
     "releaseNotes": "Release Notes",
-    "reportIssue": "Report Issue"
+    "reportIssue": "Report Issue",
+    "mcpLogs": "MCP logs"
   },
   "settings": {
     "title": "Settings",
@@ -332,7 +333,38 @@
   "statusbar": {
     "mcp": {
       "serverRunningOnPort": "MCP server running on port {{port}}",
-      "sessionName": "Session: {{name}}"
+      "sessionName": "Session: {{name}}",
+      "viewLogs": "View logs"
     }
+  },
+  "mcpToolTitles": {
+    "screenshot": "Screenshot",
+    "screencastStart": "Start screencast",
+    "screencastStop": "Stop screencast",
+    "refresh": "Reload window",
+    "domQuery": "Query the DOM",
+    "consoleLogs": "Read console logs",
+    "dispatchEvent": "Dispatch a DOM event",
+    "typeText": "Type text",
+    "evaluate": "Run JavaScript",
+    "exit": "Quit the app",
+    "waitFor": "Wait for a condition",
+    "keyboardShortcut": "Press a keyboard shortcut",
+    "devtools": "Toggle DevTools",
+    "windowInfo": "Window info",
+    "storage": "Read/write storage",
+    "scrollIntoView": "Scroll into view",
+    "injectCss": "Inject CSS",
+    "wait": "Wait",
+    "getComputedStyle": "Get computed style",
+    "getWindows": "List windows",
+    "dragDrop": "Drag and drop",
+    "mouseInput": "Mouse input",
+    "batch": "Run a batch of tools",
+    "openMiniBrowser": "Open the mini browser",
+    "miniBrowserExecute": "Run code in the mini browser",
+    "openConsole": "Open the console",
+    "consoleClear": "Clear the console",
+    "setTabMaximized": "Maximize/restore the tab"
   }
 }

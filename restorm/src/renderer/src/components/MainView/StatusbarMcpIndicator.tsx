@@ -4,6 +4,9 @@ import { StatusbarMcpIndicator as EcuiStatusbarMcpIndicator } from 'electron-cor
 export interface StatusbarMcpIndicatorProps {
   /** See the electron-core-ui StatusbarMcpIndicator — passed straight through. */
   rightAligned?: boolean
+  /** Open the MCP call-logs viewer (the popover "view logs" link). When
+   * omitted, the link is hidden. */
+  onViewLogs?: () => void
 }
 
 /**
@@ -13,7 +16,7 @@ export interface StatusbarMcpIndicatorProps {
  * MCP is on, the bound port, the session name) and bumps `pulseSignal` on each
  * incoming MCP request, then hands them to the ECUI component.
  */
-export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({ rightAligned = false }) => {
+export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({ rightAligned = false, onViewLogs }) => {
   const [port, setPort] = useState<number | null>(null)
   const [sessionName, setSessionName] = useState<string>('')
   const [enabled, setEnabled] = useState(false)
@@ -54,6 +57,7 @@ export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({ ri
       sessionName={sessionName}
       pulseSignal={pulseSignal}
       rightAligned={rightAligned}
+      {...(onViewLogs ? { onViewLogs } : {})}
     />
   )
 }

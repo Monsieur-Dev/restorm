@@ -118,6 +118,7 @@ export function registerImportTools(mcp: McpService): void {
   mcp.registerTool(
     'import_from_url',
     {
+      titleKey: 'mcpToolTitles.importFromUrl',
       title: 'Import API spec from URL',
       description:
         'Fetch a spec (Swagger / OpenAPI / GraphQL SDL / Postman / Bruno / curl / …) from a URL ' +

@@ -3,6 +3,24 @@ name: Monokai
 type: dark
 
 colors:
+  # Chat-bubble tints: olive surface lift + the Monokai grey-green accent.
+  chat-bubble.incoming.background: "rgb(248, 248, 242, 0.06)"
+  chat-bubble.outgoing.background: "rgb(117, 113, 94, 0.45)"
+  # Syntax palette: the vivid classic Monokai tokens.
+  hljs.foreground: "#f8f8f2"
+  hljs.keyword: "#f92672"
+  hljs.type: "#66d9ef"
+  hljs.number: "#ae81ff"
+  hljs.string: "#e6db74"
+  hljs.regexp: "#e6db74"
+  hljs.comment: "#75715e"
+  hljs.meta: "#75715e"
+  hljs.variable: "#fd971f"
+  hljs.attr: "#a6e22e"
+  hljs.section: "#a6e22e"
+  hljs.selector: "#a6e22e"
+  hljs.addition.background: "#27341c"
+  hljs.deletion.background: "#3a1721"
   scenarioNode.background: "#2f302a"
   scenarioNode.headerBackground: "#3b3c33"
   scenarioNode.headerBackgroundSelected: "#5b5a44"

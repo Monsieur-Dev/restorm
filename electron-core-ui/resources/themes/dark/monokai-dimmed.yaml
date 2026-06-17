@@ -3,6 +3,24 @@ name: Monokai Dimmed
 type: dark
 
 colors:
+  # Chat-bubble tints: neutral grey surface + the dimmed blue accent.
+  chat-bubble.incoming.background: "rgb(255, 255, 255, 0.06)"
+  chat-bubble.outgoing.background: "rgb(54, 85, 181, 0.38)"
+  # Syntax palette: Monokai Dimmed (desaturated Monokai tones).
+  hljs.foreground: "#c5c8c6"
+  hljs.keyword: "#9872a2"
+  hljs.type: "#9b0000"
+  hljs.number: "#6089b4"
+  hljs.string: "#9aa83a"
+  hljs.regexp: "#9aa83a"
+  hljs.comment: "#9a9b99"
+  hljs.meta: "#868989"
+  hljs.variable: "#6089b4"
+  hljs.attr: "#6089b4"
+  hljs.section: "#ce6700"
+  hljs.selector: "#ce6700"
+  hljs.addition.background: "#2c3318"
+  hljs.deletion.background: "#3a1414"
   scenarioNode.background: "#2a2a2a"
   scenarioNode.headerBackground: "#353535"
   scenarioNode.headerBackgroundSelected: "#36426e"

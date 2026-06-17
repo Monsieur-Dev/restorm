@@ -3,6 +3,24 @@ name: Red
 type: dark
 
 colors:
+  # Chat-bubble tints: warm lift over the deep-red surface.
+  chat-bubble.incoming.background: "rgb(248, 248, 248, 0.07)"
+  chat-bubble.outgoing.background: "rgb(170, 0, 0, 0.45)"
+  # Syntax palette: the VS Code Red theme tones (warm reds, tan, gold).
+  hljs.foreground: "#f8f8f8"
+  hljs.keyword: "#f12727"
+  hljs.type: "#fb9a4b"
+  hljs.number: "#facd22"
+  hljs.string: "#cd8d8d"
+  hljs.regexp: "#cd8d8d"
+  hljs.comment: "#e7c0c0"
+  hljs.meta: "#fb9a4b"
+  hljs.variable: "#ffb454"
+  hljs.attr: "#ff7733"
+  hljs.section: "#fec758"
+  hljs.selector: "#fec758"
+  hljs.addition.background: "#1f3a1f"
+  hljs.deletion.background: "#5a0d0d"
   scenarioNode.background: "#400a0a"
   scenarioNode.headerBackground: "#5a1414"
   scenarioNode.headerBackgroundSelected: "#8a1e1e"

@@ -47,6 +47,7 @@ export function registerReadTools(mcp: McpService): void {
   mcp.registerTool(
     'list_folders',
     {
+      titleKey: 'mcpToolTitles.listFolders',
       title: 'List folders',
       description:
         'List folders in the open restorm project. With `parentId`, return the direct subfolders ' +
@@ -76,6 +77,7 @@ export function registerReadTools(mcp: McpService): void {
   mcp.registerTool(
     'list_scenarios',
     {
+      titleKey: 'mcpToolTitles.listScenarios',
       title: 'List scenarios',
       description:
         'List every scenario (dataflow graph) in the open restorm project. Returns ' +
@@ -90,6 +92,7 @@ export function registerReadTools(mcp: McpService): void {
   mcp.registerTool(
     'list_requests',
     {
+      titleKey: 'mcpToolTitles.listRequests',
       title: 'List requests',
       description:
         'List requests in the open restorm project. With `folderId`, return the direct request ' +
@@ -119,6 +122,7 @@ export function registerReadTools(mcp: McpService): void {
   mcp.registerTool(
     'get_request',
     {
+      titleKey: 'mcpToolTitles.getRequest',
       title: 'Get request',
       description:
         'Return the full typed JSON of a request: URL, method, headers, params, body, ' +
@@ -143,6 +147,7 @@ export function registerReadTools(mcp: McpService): void {
   mcp.registerTool(
     'search',
     {
+      titleKey: 'mcpToolTitles.search',
       title: 'Search project',
       description:
         'Run a typed search across folders / requests / environments / scenarios using restorm\'s ' +
@@ -216,6 +221,7 @@ export function registerReadTools(mcp: McpService): void {
   mcp.registerTool(
     'get_active_env',
     {
+      titleKey: 'mcpToolTitles.getActiveEnv',
       title: 'Get active environment',
       description:
         'Return the active environment for an env-folder along with its resolved Handlebars ' +
@@ -273,6 +279,7 @@ export function registerReadTools(mcp: McpService): void {
   mcp.registerTool(
     'get_current_tab',
     {
+      titleKey: 'mcpToolTitles.getCurrentTab',
       title: 'Get current tab',
       description:
         'Return the currently active workbench tab: `{ tabId, itemId, kind }`. `kind` is one of ' +
@@ -287,6 +294,7 @@ export function registerReadTools(mcp: McpService): void {
   mcp.registerTool(
     'list_favorites',
     {
+      titleKey: 'mcpToolTitles.listFavorites',
       title: 'List favorite items',
       description:
         'Return the user\'s starred (favorite) items in the open project: `{ projectUuid, favorites: [{ id, name, type }] }` ' +
@@ -300,6 +308,7 @@ export function registerReadTools(mcp: McpService): void {
   mcp.registerTool(
     'list_value_sources',
     {
+      titleKey: 'mcpToolTitles.listValueSources',
       title: 'List secret value sources',
       description:
         'List the registered sources a `{ type: "secret", source, params }` value can reference. A ' +

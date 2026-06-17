@@ -523,6 +523,13 @@ const mcpAuthToken = randomBytes(16).toString('hex')
 // (RESTORM_MCP_DIR pins it; unset → os.tmpdir()/restorm-mcp) so restorm and
 // the standalone launcher rendezvous on the same path.
 const MCP_DISCOVERY_DIR = resolveMcpDiscoveryDir('restorm-mcp', process.env.RESTORM_MCP_DIR)
+
+/** Settings storage key (`<groupId>:<settingId>`) for the served-MCP-call
+ * retention cap — see the `mcp` group in `resources/settings.yaml`. */
+const MCP_LOGS_RETENTION_CAP_KEY = 'mcp:logsRetentionCap'
+/** Settings key for how many recent entries keep their heavy capture payload
+ * (image base64 / video temp file) — see the `mcp` group in settings.yaml. */
+const MCP_CAPTURE_RETENTION_CAP_KEY = 'mcp:captureRetentionCap'
 const mcpService = new McpService({
   serverInfo: { name: 'restorm', version: app.getVersion() },
   instructions: RESTORM_MCP_INSTRUCTIONS,
@@ -574,6 +581,34 @@ void app.whenReady().then(async () => {
       }
     })
 
+    // Broadcast served-call buffer changes to every renderer so an open MCP
+    // logs viewer refreshes live (a call recorded, the buffer cleared, or
+    // trimmed by a cap change).
+    mcpService.onServedCall(() => {
+      for (const win of BrowserWindow.getAllWindows()) {
+        if (!win.isDestroyed()) win.webContents.send('mcp:logs-changed')
+      }
+    })
+
+    // Apply the configurable retention cap from settings, and keep the buffer
+    // sized as the user changes it. The setting is read defensively (number
+    // only); a missing / non-numeric value leaves the service default (100).
+    if (isSettingsServiceInitialized()) {
+      const settings = getSettingsService()
+      const applyCap = (value: unknown): void => {
+        if (typeof value === 'number') mcpService.setLogRetentionCap(value)
+      }
+      applyCap(settings.get(MCP_LOGS_RETENTION_CAP_KEY))
+      settings.onSettingChanged(MCP_LOGS_RETENTION_CAP_KEY, applyCap)
+      // Same plumbing for the media-capture retention count (how many recent
+      // entries keep their image base64 / video temp file).
+      const applyCaptureCap = (value: unknown): void => {
+        if (typeof value === 'number') mcpService.setCaptureRetentionCap(value)
+      }
+      applyCaptureCap(settings.get(MCP_CAPTURE_RETENTION_CAP_KEY))
+      settings.onSettingChanged(MCP_CAPTURE_RETENTION_CAP_KEY, applyCaptureCap)
+    }
+
     // Refresh the discovery file when the active project changes so
     // launchers that route by project path see the up-to-date value.
     // First-live-wins routing doesn't need this today, but it's cheap
@@ -614,6 +649,13 @@ ipcMain.handle('runtime:get-config', () => ({
     endpoint: graphQLService.getEndpoint()
   }
 }))
+
+// MCP call-logs viewer bridge: the buffer lives in the main process (ECUI
+// McpService). The renderer pulls a snapshot, refreshes on `mcp:logs-changed`
+// (broadcast from the served-call listener wired in `whenReady`), and clears
+// it on demand.
+ipcMain.handle('mcp:get-logs', () => mcpService.getServedCalls())
+ipcMain.handle('mcp:clear-logs', () => { mcpService.clearServedCalls() })
 
 // Register all restorm-specific IPC handlers
 registerRestormIPC({ editorWindows, closeAllWindows })

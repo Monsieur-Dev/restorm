@@ -11,6 +11,61 @@ colors:
     value: "#000000"
     description: Editor foreground color
 
+  # Chat-bubble tints for light themes (incoming = received/left,
+  # outgoing = sent/right). → --chat-bubble-incoming/outgoing-background
+  - id: chat-bubble.incoming.background
+    value: "rgb(0, 0, 0, 0.06)"
+    description: Incoming chat-bubble background (light themes)
+
+  - id: chat-bubble.outgoing.background
+    value: "rgb(0, 120, 215, 0.16)"
+    description: Outgoing chat-bubble background (light themes)
+
+  # highlight.js syntax token colours for LIGHT themes (VS / GitHub-light-ish
+  # palette — dark text so tokens stay legible on a light background).
+  - id: hljs.foreground
+    value: "#1f1f1f"
+    description: "Syntax highlight: default code foreground (light)"
+  - id: hljs.keyword
+    value: "#0000ff"
+    description: "Syntax highlight: keywords / literals / names (light)"
+  - id: hljs.type
+    value: "#267f99"
+    description: "Syntax highlight: built-ins / types (light)"
+  - id: hljs.number
+    value: "#098658"
+    description: "Syntax highlight: numbers / classes (light)"
+  - id: hljs.string
+    value: "#a31515"
+    description: "Syntax highlight: strings (light)"
+  - id: hljs.regexp
+    value: "#811f3f"
+    description: "Syntax highlight: regexps / template tags (light)"
+  - id: hljs.comment
+    value: "#008000"
+    description: "Syntax highlight: comments / quotes / doctags (light)"
+  - id: hljs.meta
+    value: "#808080"
+    description: "Syntax highlight: meta / tags (light)"
+  - id: hljs.variable
+    value: "#9b46b0"
+    description: "Syntax highlight: variables (light)"
+  - id: hljs.attr
+    value: "#0451a5"
+    description: "Syntax highlight: attributes / JSON keys (light)"
+  - id: hljs.section
+    value: "#800000"
+    description: "Syntax highlight: sections / headings (light)"
+  - id: hljs.selector
+    value: "#800000"
+    description: "Syntax highlight: CSS selectors / bullets (light)"
+  - id: hljs.addition.background
+    value: "#dafbe1"
+    description: "Syntax highlight: diff addition background (light)"
+  - id: hljs.deletion.background
+    value: "#ffd7d5"
+    description: "Syntax highlight: diff deletion background (light)"
+
   # Hyperlink / inline-link text colour (URL-style links, e.g. ECUI Button link)
   - id: textLink.foreground
     value: "#005FB8"

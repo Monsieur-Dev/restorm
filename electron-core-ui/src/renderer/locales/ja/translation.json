@@ -52,7 +52,8 @@
     "documentation": "ドキュメント",
     "keyboardShortcuts": "キーボードショートカット",
     "releaseNotes": "リリースノート",
-    "reportIssue": "問題を報告"
+    "reportIssue": "問題を報告",
+    "mcpLogs": "MCP ログ"
   },
   "settings": {
     "title": "設定",
@@ -332,7 +333,38 @@
   "statusbar": {
     "mcp": {
       "serverRunningOnPort": "MCP サーバーはポート {{port}} で実行中です",
-      "sessionName": "セッション: {{name}}"
+      "sessionName": "セッション: {{name}}",
+      "viewLogs": "ログを表示"
     }
+  },
+  "mcpToolTitles": {
+    "screenshot": "スクリーンショット",
+    "screencastStart": "画面録画を開始",
+    "screencastStop": "画面録画を停止",
+    "refresh": "ウィンドウを再読み込み",
+    "domQuery": "DOM を照会",
+    "consoleLogs": "コンソールログを読む",
+    "dispatchEvent": "DOM イベントを送出",
+    "typeText": "テキストを入力",
+    "evaluate": "JavaScript を実行",
+    "exit": "アプリを終了",
+    "waitFor": "条件を待機",
+    "keyboardShortcut": "キーボードショートカットを押す",
+    "devtools": "開発者ツールを切り替え",
+    "windowInfo": "ウィンドウ情報",
+    "storage": "ストレージの読み書き",
+    "scrollIntoView": "表示位置までスクロール",
+    "injectCss": "CSS を注入",
+    "wait": "待機",
+    "getComputedStyle": "計算済みスタイルを取得",
+    "getWindows": "ウィンドウを一覧表示",
+    "dragDrop": "ドラッグ＆ドロップ",
+    "mouseInput": "マウス入力",
+    "batch": "ツールを一括実行",
+    "openMiniBrowser": "ミニブラウザーを開く",
+    "miniBrowserExecute": "ミニブラウザーでコードを実行",
+    "openConsole": "コンソールを開く",
+    "consoleClear": "コンソールをクリア",
+    "setTabMaximized": "タブを最大化/元に戻す"
   }
 }

@@ -196,6 +196,7 @@ export function registerScenarioTools(mcp: McpService): void {
   mcp.registerTool(
     'describe_scenario_kinds',
     {
+      titleKey: 'mcpToolTitles.describeScenarioKinds',
       title: 'Describe scenario node kinds',
       description:
         'Self-describing catalogue for authoring scenario graphs: for each node kind, its purpose (`summary`), its default ' +
@@ -228,6 +229,7 @@ export function registerScenarioTools(mcp: McpService): void {
   mcp.registerTool(
     'get_scenario',
     {
+      titleKey: 'mcpToolTitles.getScenario',
       title: 'Read a scenario graph',
       description:
         'Return the full scenario graph: `{ id, name, notes, tags, params, nodes[], edges[] }`. ' +
@@ -255,6 +257,7 @@ export function registerScenarioTools(mcp: McpService): void {
   mcp.registerTool(
     'update_scenario',
     {
+      titleKey: 'mcpToolTitles.updateScenario',
       title: 'Update a scenario\'s metadata',
       description:
         'Patch a scenario\'s tree-level metadata: `name`, `notes`, and `tags` (tags REPLACE the list ' +
@@ -286,6 +289,7 @@ export function registerScenarioTools(mcp: McpService): void {
   mcp.registerTool(
     'list_scenario_nodes',
     {
+      titleKey: 'mcpToolTitles.listScenarioNodes',
       title: 'List a scenario\'s nodes',
       description:
         'List the boxes of a scenario with their kind, position and ports — a lighter view than ' +
@@ -303,6 +307,7 @@ export function registerScenarioTools(mcp: McpService): void {
   mcp.registerTool(
     'create_scenario_node',
     {
+      titleKey: 'mcpToolTitles.createScenarioNode',
       title: 'Add a box to a scenario',
       description:
         'Create a node (box) in a scenario. `kind` is one of: ' + SCENARIO_KINDS.join(', ') + '. ' +
@@ -349,6 +354,7 @@ export function registerScenarioTools(mcp: McpService): void {
   mcp.registerTool(
     'arrange_scenario',
     {
+      titleKey: 'mcpToolTitles.arrangeScenario',
       title: 'Auto-arrange a scenario',
       description:
         'Re-lay out an entire scenario with an ELK layered (left→right) pass so boxes never overlap and the flow reads ' +
@@ -372,6 +378,7 @@ export function registerScenarioTools(mcp: McpService): void {
   mcp.registerTool(
     'update_scenario_node',
     {
+      titleKey: 'mcpToolTitles.updateScenarioNode',
       title: 'Update a scenario box',
       description:
         'Patch a node\'s properties. `config` is shallow-merged into the existing config (pass a key ' +
@@ -414,6 +421,7 @@ export function registerScenarioTools(mcp: McpService): void {
   mcp.registerTool(
     'move_scenario_node',
     {
+      titleKey: 'mcpToolTitles.moveScenarioNode',
       title: 'Move a scenario box',
       description: 'Set a node\'s position (top-left) in graph coords. Convenience over `update_scenario_node`.',
       inputSchema: {
@@ -439,6 +447,7 @@ export function registerScenarioTools(mcp: McpService): void {
   mcp.registerTool(
     'delete_scenario_node',
     {
+      titleKey: 'mcpToolTitles.deleteScenarioNode',
       title: 'Delete a scenario box',
       description: 'Remove a node and every edge that touches it. Returns the removed node + edge ids.',
       inputSchema: {
@@ -463,6 +472,7 @@ export function registerScenarioTools(mcp: McpService): void {
   mcp.registerTool(
     'connect_scenario_nodes',
     {
+      titleKey: 'mcpToolTitles.connectScenarioNodes',
       title: 'Connect two scenario boxes',
       description:
         'Create an edge from an output port of one node to an input port of another. `fromPortId` must be ' +
@@ -561,6 +571,7 @@ export function registerScenarioTools(mcp: McpService): void {
   mcp.registerTool(
     'disconnect_scenario_nodes',
     {
+      titleKey: 'mcpToolTitles.disconnectScenarioNodes',
       title: 'Remove a scenario edge',
       description: 'Delete an edge by its id (from `get_scenario`). Returns the removed edge id.',
       inputSchema: {
@@ -583,6 +594,7 @@ export function registerScenarioTools(mcp: McpService): void {
   mcp.registerTool(
     'set_edge_selector',
     {
+      titleKey: 'mcpToolTitles.setEdgeSelector',
       title: 'Set or clear an edge selector',
       description:
         'Set the JSON selector applied to the value as it flows along an edge (e.g. ' +
@@ -613,6 +625,7 @@ export function registerScenarioTools(mcp: McpService): void {
   mcp.registerTool(
     'define_param',
     {
+      titleKey: 'mcpToolTitles.defineParam',
       title: 'Define a scenario input parameter',
       description:
         'Declare a named run parameter by adding an `input` node — the engine seeds `run_scenario` params ' +

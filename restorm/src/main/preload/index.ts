@@ -997,6 +997,25 @@ contextBridge.exposeInMainWorld('restorm', {
       ipcRenderer.on('mcp:request-received', handler)
       return () => { ipcRenderer.off('mcp:request-received', handler) }
     },
+    /** Fetch the served-MCP-call buffer (newest-first) for the logs
+     * viewer. Each entry carries the tool name, timestamp, payload and
+     * any inline capture. */
+    getMcpLogs: async (): Promise<unknown[]> => {
+      const result: unknown = await ipcRenderer.invoke('mcp:get-logs')
+      return Array.isArray(result) ? (result as unknown[]) : []
+    },
+    /** Subscribe to served-call buffer changes (a call recorded, the
+     * buffer cleared, or trimmed by a cap change) so the viewer can
+     * refresh live. Returns an unsubscribe function. */
+    onMcpLogsChanged: (callback: () => void): (() => void) => {
+      const handler = (): void => { callback() }
+      ipcRenderer.on('mcp:logs-changed', handler)
+      return () => { ipcRenderer.off('mcp:logs-changed', handler) }
+    },
+    /** Clear the served-call buffer (the viewer's "clear" action). */
+    clearMcpLogs: async (): Promise<void> => {
+      await ipcRenderer.invoke('mcp:clear-logs')
+    },
     /** Push the active workbench tab to main so MCP tools (`get_current_tab`,
      * `restorm://active-tab`) can read it without a renderer round-trip.
      * Renderer fires this on every active-tab change; main caches it. */

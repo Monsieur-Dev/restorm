@@ -58,6 +58,7 @@ export function registerWorkbenchTabTools(mcp: McpService): void {
   mcp.registerTool(
     'open_firewall',
     {
+      titleKey: 'mcpToolTitles.openFirewall',
       title: 'Open the Firewall workbench tab',
       description:
         'Open (or focus, if already open) the singleton Firewall tab. The Firewall panel shows ' +
@@ -74,6 +75,7 @@ export function registerWorkbenchTabTools(mcp: McpService): void {
   mcp.registerTool(
     'firewall_list_rules',
     {
+      titleKey: 'mcpToolTitles.firewallListRules',
       title: 'List firewall whitelist + blacklist',
       description:
         'Return the active firewall rules: `{ whitelist: FirewallOrigin[], blacklist: FirewallOrigin[] }`. ' +
@@ -92,6 +94,7 @@ export function registerWorkbenchTabTools(mcp: McpService): void {
   mcp.registerTool(
     'firewall_allow',
     {
+      titleKey: 'mcpToolTitles.firewallAllow',
       title: 'Add an origin to the firewall whitelist',
       description:
         'Add the given origin to the firewall whitelist so future requests to it pass through ' +
@@ -114,6 +117,7 @@ export function registerWorkbenchTabTools(mcp: McpService): void {
   mcp.registerTool(
     'firewall_deny',
     {
+      titleKey: 'mcpToolTitles.firewallDeny',
       title: 'Add an origin to the firewall blacklist',
       description:
         'Add the given origin to the firewall blacklist so future requests to it are denied ' +
@@ -137,6 +141,7 @@ export function registerWorkbenchTabTools(mcp: McpService): void {
   mcp.registerTool(
     'firewall_list_pending_prompts',
     {
+      titleKey: 'mcpToolTitles.firewallListPendingPrompts',
       title: 'List firewall prompts awaiting a user decision',
       description:
         'Return every outbound-request prompt currently waiting on the user to click Allow / Deny ' +
@@ -155,6 +160,7 @@ export function registerWorkbenchTabTools(mcp: McpService): void {
   mcp.registerTool(
     'firewall_resolve_prompt',
     {
+      titleKey: 'mcpToolTitles.firewallResolvePrompt',
       title: 'Resolve a pending firewall prompt programmatically',
       description:
         'Answer a single firewall prompt without waiting for the user to click. Pass the ' +

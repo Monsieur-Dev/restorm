@@ -52,7 +52,8 @@
     "documentation": "Τεκμηρίωση",
     "keyboardShortcuts": "Συντομεύσεις πληκτρολογίου",
     "releaseNotes": "Σημειώσεις έκδοσης",
-    "reportIssue": "Αναφορά προβλήματος"
+    "reportIssue": "Αναφορά προβλήματος",
+    "mcpLogs": "Αρχεία καταγραφής MCP"
   },
   "settings": {
     "title": "Ρυθμίσεις",
@@ -332,7 +333,38 @@
   "statusbar": {
     "mcp": {
       "serverRunningOnPort": "Ο διακομιστής MCP εκτελείται στη θύρα {{port}}",
-      "sessionName": "Συνεδρία: {{name}}"
+      "sessionName": "Συνεδρία: {{name}}",
+      "viewLogs": "Προβολή αρχείων καταγραφής"
     }
+  },
+  "mcpToolTitles": {
+    "screenshot": "Στιγμιότυπο οθόνης",
+    "screencastStart": "Έναρξη εγγραφής οθόνης",
+    "screencastStop": "Διακοπή εγγραφής οθόνης",
+    "refresh": "Επαναφόρτωση παραθύρου",
+    "domQuery": "Ερώτημα στο DOM",
+    "consoleLogs": "Ανάγνωση αρχείων κονσόλας",
+    "dispatchEvent": "Αποστολή συμβάντος DOM",
+    "typeText": "Πληκτρολόγηση κειμένου",
+    "evaluate": "Εκτέλεση JavaScript",
+    "exit": "Έξοδος από την εφαρμογή",
+    "waitFor": "Αναμονή για συνθήκη",
+    "keyboardShortcut": "Πάτημα συντόμευσης πληκτρολογίου",
+    "devtools": "Εναλλαγή DevTools",
+    "windowInfo": "Πληροφορίες παραθύρου",
+    "storage": "Ανάγνωση/εγγραφή αποθήκευσης",
+    "scrollIntoView": "Κύλιση σε προβολή",
+    "injectCss": "Εισαγωγή CSS",
+    "wait": "Αναμονή",
+    "getComputedStyle": "Λήψη υπολογισμένου στυλ",
+    "getWindows": "Λίστα παραθύρων",
+    "dragDrop": "Μεταφορά και απόθεση",
+    "mouseInput": "Είσοδος ποντικιού",
+    "batch": "Εκτέλεση δέσμης εργαλείων",
+    "openMiniBrowser": "Άνοιγμα μίνι προγράμματος περιήγησης",
+    "miniBrowserExecute": "Εκτέλεση κώδικα στο μίνι πρόγραμμα περιήγησης",
+    "openConsole": "Άνοιγμα κονσόλας",
+    "consoleClear": "Εκκαθάριση κονσόλας",
+    "setTabMaximized": "Μεγιστοποίηση/επαναφορά καρτέλας"
   }
 }

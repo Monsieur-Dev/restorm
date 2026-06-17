@@ -482,6 +482,7 @@ export function registerExecutionTools(mcp: McpService): void {
   mcp.registerTool(
     'run_request',
     {
+      titleKey: 'mcpToolTitles.runRequest',
       title: 'Run a request',
       description:
         'Execute the request with the given id and return its structured response. ' +
@@ -533,6 +534,7 @@ export function registerExecutionTools(mcp: McpService): void {
   mcp.registerTool(
     'cancel_request',
     {
+      titleKey: 'mcpToolTitles.cancelRequest',
       title: 'Cancel an in-flight request',
       description:
         'Abort a request currently being executed. Routes to the matching protocol\'s ' +
@@ -585,6 +587,7 @@ export function registerExecutionTools(mcp: McpService): void {
   mcp.registerTool(
     'run_request_batch',
     {
+      titleKey: 'mcpToolTitles.runRequestBatch',
       title: 'Run a list of requests sequentially',
       description:
         'Convenience wrapper around `run_request` for a list of request ids. Runs them one at ' +
@@ -645,6 +648,7 @@ export function registerExecutionTools(mcp: McpService): void {
   mcp.registerTool(
     'read_stream',
     {
+      titleKey: 'mcpToolTitles.readStream',
       title: 'Read more frames from a streaming request',
       description:
         'Pull more frames from a streaming request started by `run_request`. Pass the ' +
@@ -730,6 +734,7 @@ export function registerExecutionTools(mcp: McpService): void {
   mcp.registerTool(
     'send_message',
     {
+      titleKey: 'mcpToolTitles.sendMessage',
       title: 'Send a message on an open WebSocket / Socket.IO connection',
       description:
         'Emit a message on a connection already opened with `run_request`. For Socket.IO, `event` ' +
@@ -779,6 +784,7 @@ export function registerExecutionTools(mcp: McpService): void {
   mcp.registerTool(
     'get_response_history',
     {
+      titleKey: 'mcpToolTitles.getResponseHistory',
       title: 'Get a request\'s response history',
       description:
         'Return the most recent stored responses for a request. Each entry is a lightweight ' +
@@ -806,6 +812,7 @@ export function registerExecutionTools(mcp: McpService): void {
   mcp.registerTool(
     'get_response',
     {
+      titleKey: 'mcpToolTitles.getResponse',
       title: 'Get the full payload of a stored response',
       description:
         'Return the full body + headers of a stored response entry. The payload is already ' +

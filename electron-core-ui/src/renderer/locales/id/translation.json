@@ -52,7 +52,8 @@
     "documentation": "Dokumentasi",
     "keyboardShortcuts": "Pintasan keyboard",
     "releaseNotes": "Catatan rilis",
-    "reportIssue": "Laporkan masalah"
+    "reportIssue": "Laporkan masalah",
+    "mcpLogs": "Log MCP"
   },
   "settings": {
     "title": "Pengaturan",
@@ -332,7 +333,38 @@
   "statusbar": {
     "mcp": {
       "serverRunningOnPort": "Server MCP berjalan di port {{port}}",
-      "sessionName": "Sesi: {{name}}"
+      "sessionName": "Sesi: {{name}}",
+      "viewLogs": "Lihat log"
     }
+  },
+  "mcpToolTitles": {
+    "screenshot": "Tangkapan layar",
+    "screencastStart": "Mulai rekam layar",
+    "screencastStop": "Hentikan rekam layar",
+    "refresh": "Muat ulang jendela",
+    "domQuery": "Kueri DOM",
+    "consoleLogs": "Baca log konsol",
+    "dispatchEvent": "Kirim peristiwa DOM",
+    "typeText": "Ketik teks",
+    "evaluate": "Jalankan JavaScript",
+    "exit": "Keluar dari aplikasi",
+    "waitFor": "Tunggu suatu kondisi",
+    "keyboardShortcut": "Tekan pintasan keyboard",
+    "devtools": "Alihkan DevTools",
+    "windowInfo": "Info jendela",
+    "storage": "Baca/tulis penyimpanan",
+    "scrollIntoView": "Gulir ke tampilan",
+    "injectCss": "Suntik CSS",
+    "wait": "Tunggu",
+    "getComputedStyle": "Dapatkan gaya terkomputasi",
+    "getWindows": "Daftar jendela",
+    "dragDrop": "Seret dan lepas",
+    "mouseInput": "Masukan tetikus",
+    "batch": "Jalankan sekumpulan alat",
+    "openMiniBrowser": "Buka peramban mini",
+    "miniBrowserExecute": "Jalankan kode di peramban mini",
+    "openConsole": "Buka konsol",
+    "consoleClear": "Bersihkan konsol",
+    "setTabMaximized": "Maksimalkan/pulihkan tab"
   }
 }

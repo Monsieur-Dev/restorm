@@ -3,6 +3,63 @@
 # They are not theme-specific but can be overridden by themes.
 
 variables:
+  # Chat-bubble tints (incoming = received/left, outgoing = sent/right).
+  # Universal fallbacks; each theme family overrides these in its _base.yaml
+  # so the conversation surfaces (e.g. the MCP logs viewer) stay coherent.
+  - id: chat-bubble-incoming-background
+    value: "rgb(128, 128, 128, 0.12)"
+    description: "Background tint of an incoming (received, left-aligned) chat bubble"
+
+  - id: chat-bubble-outgoing-background
+    value: "rgb(64, 110, 180, 0.35)"
+    description: "Background tint of an outgoing (sent, right-aligned) chat bubble"
+
+  # highlight.js syntax token colours (MarkdownViewer). Universal defaults are
+  # the VS-2015 dark palette; each theme family overrides them in its _base.yaml
+  # so syntax highlighting tracks light / dark / high-contrast.
+  - id: hljs-foreground
+    value: "#dcdcdc"
+    description: "Syntax highlight: default code foreground"
+  - id: hljs-keyword
+    value: "#569cd6"
+    description: "Syntax highlight: keywords / literals / names"
+  - id: hljs-type
+    value: "#4ec9b0"
+    description: "Syntax highlight: built-ins / types"
+  - id: hljs-number
+    value: "#b8d7a3"
+    description: "Syntax highlight: numbers / classes"
+  - id: hljs-string
+    value: "#d69d85"
+    description: "Syntax highlight: strings"
+  - id: hljs-regexp
+    value: "#9a5334"
+    description: "Syntax highlight: regexps / template tags"
+  - id: hljs-comment
+    value: "#57a64a"
+    description: "Syntax highlight: comments / quotes / doctags"
+  - id: hljs-meta
+    value: "#9b9b9b"
+    description: "Syntax highlight: meta / tags"
+  - id: hljs-variable
+    value: "#bd63c5"
+    description: "Syntax highlight: variables"
+  - id: hljs-attr
+    value: "#9cdcfe"
+    description: "Syntax highlight: attributes (JSON keys)"
+  - id: hljs-section
+    value: "#d7ba7d"
+    description: "Syntax highlight: sections / headings"
+  - id: hljs-selector
+    value: "#d7ba7d"
+    description: "Syntax highlight: CSS selectors / bullets"
+  - id: hljs-addition-background
+    value: "#144212"
+    description: "Syntax highlight: diff addition background"
+  - id: hljs-deletion-background
+    value: "#660000"
+    description: "Syntax highlight: diff deletion background"
+
   - id: dropdown-padding-top
     value: "1px"
     description: "Padding top for dropdown items (mac: 3px)"

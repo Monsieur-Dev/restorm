@@ -52,7 +52,8 @@
     "documentation": "Dokumentation",
     "keyboardShortcuts": "Kortkommandon",
     "releaseNotes": "Versionsinformation",
-    "reportIssue": "Rapportera ett problem"
+    "reportIssue": "Rapportera ett problem",
+    "mcpLogs": "MCP-loggar"
   },
   "settings": {
     "title": "Inställningar",
@@ -332,7 +333,38 @@
   "statusbar": {
     "mcp": {
       "serverRunningOnPort": "MCP-servern körs på port {{port}}",
-      "sessionName": "Session: {{name}}"
+      "sessionName": "Session: {{name}}",
+      "viewLogs": "Visa loggar"
     }
+  },
+  "mcpToolTitles": {
+    "screenshot": "Skärmbild",
+    "screencastStart": "Starta skärminspelning",
+    "screencastStop": "Stoppa skärminspelning",
+    "refresh": "Läs in fönstret igen",
+    "domQuery": "Fråga DOM",
+    "consoleLogs": "Läs konsolloggar",
+    "dispatchEvent": "Skicka en DOM-händelse",
+    "typeText": "Skriv text",
+    "evaluate": "Kör JavaScript",
+    "exit": "Avsluta appen",
+    "waitFor": "Vänta på ett villkor",
+    "keyboardShortcut": "Tryck på ett kortkommando",
+    "devtools": "Växla DevTools",
+    "windowInfo": "Fönsterinfo",
+    "storage": "Läs/skriv lagring",
+    "scrollIntoView": "Rulla till vy",
+    "injectCss": "Injicera CSS",
+    "wait": "Vänta",
+    "getComputedStyle": "Hämta beräknad stil",
+    "getWindows": "Lista fönster",
+    "dragDrop": "Dra och släpp",
+    "mouseInput": "Musinmatning",
+    "batch": "Kör en grupp verktyg",
+    "openMiniBrowser": "Öppna minibläddraren",
+    "miniBrowserExecute": "Kör kod i minibläddraren",
+    "openConsole": "Öppna konsolen",
+    "consoleClear": "Rensa konsolen",
+    "setTabMaximized": "Maximera/återställ fliken"
   }
 }

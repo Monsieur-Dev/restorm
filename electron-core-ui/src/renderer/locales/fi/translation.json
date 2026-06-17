@@ -52,7 +52,8 @@
     "documentation": "Dokumentaatio",
     "keyboardShortcuts": "Pikanäppäimet",
     "releaseNotes": "Julkaisutiedot",
-    "reportIssue": "Ilmoita ongelmasta"
+    "reportIssue": "Ilmoita ongelmasta",
+    "mcpLogs": "MCP-lokit"
   },
   "settings": {
     "title": "Asetukset",
@@ -332,7 +333,38 @@
   "statusbar": {
     "mcp": {
       "serverRunningOnPort": "MCP-palvelin käynnissä portissa {{port}}",
-      "sessionName": "Istunto: {{name}}"
+      "sessionName": "Istunto: {{name}}",
+      "viewLogs": "Näytä lokit"
     }
+  },
+  "mcpToolTitles": {
+    "screenshot": "Kuvakaappaus",
+    "screencastStart": "Aloita näyttötallennus",
+    "screencastStop": "Lopeta näyttötallennus",
+    "refresh": "Lataa ikkuna uudelleen",
+    "domQuery": "Kysele DOM:ia",
+    "consoleLogs": "Lue konsolin lokit",
+    "dispatchEvent": "Lähetä DOM-tapahtuma",
+    "typeText": "Kirjoita tekstiä",
+    "evaluate": "Suorita JavaScript",
+    "exit": "Lopeta sovellus",
+    "waitFor": "Odota ehtoa",
+    "keyboardShortcut": "Paina pikanäppäintä",
+    "devtools": "Vaihda DevTools",
+    "windowInfo": "Ikkunan tiedot",
+    "storage": "Lue/kirjoita tallennustila",
+    "scrollIntoView": "Vieritä näkyviin",
+    "injectCss": "Lisää CSS",
+    "wait": "Odota",
+    "getComputedStyle": "Hae laskettu tyyli",
+    "getWindows": "Luettele ikkunat",
+    "dragDrop": "Vedä ja pudota",
+    "mouseInput": "Hiiren syöte",
+    "batch": "Suorita työkaluerä",
+    "openMiniBrowser": "Avaa miniselain",
+    "miniBrowserExecute": "Suorita koodi miniselaimessa",
+    "openConsole": "Avaa konsoli",
+    "consoleClear": "Tyhjennä konsoli",
+    "setTabMaximized": "Suurenna/palauta välilehti"
   }
 }

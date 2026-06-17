@@ -52,7 +52,8 @@
     "documentation": "Dokumentation",
     "keyboardShortcuts": "Tastenkürzel",
     "releaseNotes": "Versionshinweise",
-    "reportIssue": "Problem melden"
+    "reportIssue": "Problem melden",
+    "mcpLogs": "MCP-Protokolle"
   },
   "settings": {
     "title": "Einstellungen",
@@ -332,7 +333,38 @@
   "statusbar": {
     "mcp": {
       "serverRunningOnPort": "MCP-Server läuft auf Port {{port}}",
-      "sessionName": "Sitzung: {{name}}"
+      "sessionName": "Sitzung: {{name}}",
+      "viewLogs": "Protokolle anzeigen"
     }
+  },
+  "mcpToolTitles": {
+    "screenshot": "Bildschirmfoto",
+    "screencastStart": "Bildschirmaufnahme starten",
+    "screencastStop": "Bildschirmaufnahme beenden",
+    "refresh": "Fenster neu laden",
+    "domQuery": "DOM abfragen",
+    "consoleLogs": "Konsolenprotokolle lesen",
+    "dispatchEvent": "DOM-Ereignis auslösen",
+    "typeText": "Text eingeben",
+    "evaluate": "JavaScript ausführen",
+    "exit": "App beenden",
+    "waitFor": "Auf Bedingung warten",
+    "keyboardShortcut": "Tastenkürzel drücken",
+    "devtools": "DevTools umschalten",
+    "windowInfo": "Fensterinfo",
+    "storage": "Speicher lesen/schreiben",
+    "scrollIntoView": "In den Sichtbereich scrollen",
+    "injectCss": "CSS einfügen",
+    "wait": "Warten",
+    "getComputedStyle": "Berechneten Stil abrufen",
+    "getWindows": "Fenster auflisten",
+    "dragDrop": "Ziehen und ablegen",
+    "mouseInput": "Mauseingabe",
+    "batch": "Werkzeug-Stapel ausführen",
+    "openMiniBrowser": "Mini-Browser öffnen",
+    "miniBrowserExecute": "Code im Mini-Browser ausführen",
+    "openConsole": "Konsole öffnen",
+    "consoleClear": "Konsole leeren",
+    "setTabMaximized": "Tab maximieren/wiederherstellen"
   }
 }

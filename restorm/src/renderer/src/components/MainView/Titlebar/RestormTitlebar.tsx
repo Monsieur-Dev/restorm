@@ -14,6 +14,7 @@ import {
 import { renderSearchTooltipContent } from './renderSearchTooltipContent'
 import { Badge } from '../../common/Badge'
 import { mapToBadgeType } from '../../../utils/badgeUtils'
+import { useMcpEnabled } from '../../../hooks/useMcpEnabled'
 
 /** Categories whose search results render with the single-line badge
  * layout (method/protocol pill + title + breadcrumb on one row). The
@@ -52,6 +53,10 @@ export interface RestormTitlebarProps {
    * `View → Mini browser`. Same singleton-or-focus pattern as
    * Firewall. */
   onOpenMiniBrowser: () => void
+  /** Open the MCP call-logs viewer (tab when a file is open, modal
+   * otherwise). Wired to `View → MCP logs`; the entry is disabled when
+   * the embedded MCP server isn't running. */
+  onOpenMcpLogs: () => void
   /** Whether a workbench (an open file) is currently active. When
    * true, the gear button and `View → Settings` open Settings as a
    * singleton workbench tab; when false they fall back to the
@@ -84,12 +89,16 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
   onOpenConsole,
   onOpenFirewall,
   onOpenMiniBrowser,
+  onOpenMcpLogs,
   workbenchActive,
   onOpenSettingsTab
 }) => {
   const { t } = useTranslation()
   const { showSettingsModal } = useSettingsModal()
   const { isEnabled: navigationEnabled } = useFeature('navigation')
+  // The MCP-logs menu entry is disabled when the embedded MCP server isn't
+  // running — there'd be nothing to view.
+  const mcpEnabled = useMcpEnabled()
 
   // Settings opens as a workbench tab when a file is open, or as the
   // full-screen modal on the welcome screen (no workbench).
@@ -259,6 +268,13 @@ export const RestormTitlebar: React.FC<RestormTitlebarProps> = ({
               title={t('menuBar.miniBrowser', 'Mini browser')}
               icon={<span className="codicon codicon-browser" aria-hidden="true" />}
               onClick={onOpenMiniBrowser}
+            />
+            <MenuItem
+              data-testid="titlebar-menu-item-mcp-logs"
+              title={t('menuBar.mcpLogs')}
+              icon={<span className="codicon codicon-mcp" aria-hidden="true" />}
+              onClick={onOpenMcpLogs}
+              disabled={!mcpEnabled}
             />
             <MenuItemSeparator data-testid="titlebar-menu-separator-view-1" />
             <MenuItem data-testid="titlebar-menu-item-zoom-in" title={t('menuBar.zoomIn')} shortcut="Ctrl++" disabled />

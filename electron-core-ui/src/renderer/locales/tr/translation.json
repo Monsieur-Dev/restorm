@@ -52,7 +52,8 @@
     "documentation": "Belgeler",
     "keyboardShortcuts": "Klavye Kısayolları",
     "releaseNotes": "Sürüm Notları",
-    "reportIssue": "Sorun Bildir"
+    "reportIssue": "Sorun Bildir",
+    "mcpLogs": "MCP günlükleri"
   },
   "settings": {
     "title": "Ayarlar",
@@ -332,7 +333,38 @@
   "statusbar": {
     "mcp": {
       "serverRunningOnPort": "MCP sunucusu {{port}} bağlantı noktasında çalışıyor",
-      "sessionName": "Oturum: {{name}}"
+      "sessionName": "Oturum: {{name}}",
+      "viewLogs": "Günlükleri görüntüle"
     }
+  },
+  "mcpToolTitles": {
+    "screenshot": "Ekran görüntüsü",
+    "screencastStart": "Ekran kaydını başlat",
+    "screencastStop": "Ekran kaydını durdur",
+    "refresh": "Pencereyi yeniden yükle",
+    "domQuery": "DOM'u sorgula",
+    "consoleLogs": "Konsol günlüklerini oku",
+    "dispatchEvent": "DOM olayı gönder",
+    "typeText": "Metin yaz",
+    "evaluate": "JavaScript çalıştır",
+    "exit": "Uygulamadan çık",
+    "waitFor": "Bir koşulu bekle",
+    "keyboardShortcut": "Klavye kısayoluna bas",
+    "devtools": "DevTools'u aç/kapat",
+    "windowInfo": "Pencere bilgisi",
+    "storage": "Depolamayı oku/yaz",
+    "scrollIntoView": "Görünüme kaydır",
+    "injectCss": "CSS ekle",
+    "wait": "Bekle",
+    "getComputedStyle": "Hesaplanan stili al",
+    "getWindows": "Pencereleri listele",
+    "dragDrop": "Sürükle ve bırak",
+    "mouseInput": "Fare girişi",
+    "batch": "Bir grup aracı çalıştır",
+    "openMiniBrowser": "Mini tarayıcıyı aç",
+    "miniBrowserExecute": "Mini tarayıcıda kod çalıştır",
+    "openConsole": "Konsolu aç",
+    "consoleClear": "Konsolu temizle",
+    "setTabMaximized": "Sekmeyi büyüt/geri yükle"
   }
 }

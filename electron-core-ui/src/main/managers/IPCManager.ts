@@ -15,9 +15,13 @@ import {
 // Register custom protocol schemes BEFORE app.whenReady()
 // This is required for the app:// protocol to work correctly
 // Guard for unit tests where electron is mocked (process.type is undefined in tests)
+// `ecui-media` serves on-disk media (e.g. screencast .webm temp files) to the
+// renderer — the renderer BLOCKS `file://`, so a `<video src=file://…>` never
+// loads; an `ecui-media://` URL does. Registered by McpService's handler.
 if (process.type === 'browser') {
   protocol.registerSchemesAsPrivileged([
-    { scheme: 'app', privileges: { secure: true, standard: true, supportFetchAPI: true } }
+    { scheme: 'app', privileges: { secure: true, standard: true, supportFetchAPI: true } },
+    { scheme: 'ecui-media', privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true, bypassCSP: true } }
   ])
 }
 

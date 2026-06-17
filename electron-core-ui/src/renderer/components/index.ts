@@ -70,6 +70,18 @@ export type { MiniBrowserPanelProps, MiniBrowserDriver } from './MiniBrowser'
 export { ConsolePanel, Console, ConsoleToolbar, useConsoleFeed, registerConsoleFeedSource, clearConsoleFeed, ConsoleFeedStore, renderRecord } from './Console'
 export type { ConsolePanelProps, ConsoleProps, ConsoleToolbarProps, ConsoleFeedSource, ConsoleRecord, ConsoleShell, RecordRenderer } from './Console'
 
+// McpLogs exports
+export { McpLogsPanel, useMcpLogsFeed, registerMcpLogsSource, getMcpLogsSource } from './McpLogs'
+export type { McpLogsPanelProps, McpLogEntry, McpLogCapture, McpLogsSource, McpLogsLabels, TranslateToolTitle } from './McpLogs'
+
+// Thumbnail exports
+export { Thumbnail } from './Thumbnail'
+export type { ThumbnailProps, ThumbnailMedia, ThumbnailMediaKind, ThumbnailLabels } from './Thumbnail'
+
+// ChatBubble exports
+export { ChatBubble } from './ChatBubble'
+export type { ChatBubbleProps, ChatBubbleVariant } from './ChatBubble'
+
 // Settings exports
 export { SettingsPage, SettingsModalProvider, useSettingsModal } from './Settings'
 

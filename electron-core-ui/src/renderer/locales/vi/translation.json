@@ -52,7 +52,8 @@
     "documentation": "Tài liệu",
     "keyboardShortcuts": "Phím tắt",
     "releaseNotes": "Ghi chú phát hành",
-    "reportIssue": "Báo cáo sự cố"
+    "reportIssue": "Báo cáo sự cố",
+    "mcpLogs": "Nhật ký MCP"
   },
   "settings": {
     "title": "Cài đặt",
@@ -332,7 +333,38 @@
   "statusbar": {
     "mcp": {
       "serverRunningOnPort": "Máy chủ MCP đang chạy trên cổng {{port}}",
-      "sessionName": "Phiên: {{name}}"
+      "sessionName": "Phiên: {{name}}",
+      "viewLogs": "Xem nhật ký"
     }
+  },
+  "mcpToolTitles": {
+    "screenshot": "Ảnh chụp màn hình",
+    "screencastStart": "Bắt đầu quay màn hình",
+    "screencastStop": "Dừng quay màn hình",
+    "refresh": "Tải lại cửa sổ",
+    "domQuery": "Truy vấn DOM",
+    "consoleLogs": "Đọc nhật ký bảng điều khiển",
+    "dispatchEvent": "Gửi sự kiện DOM",
+    "typeText": "Nhập văn bản",
+    "evaluate": "Chạy JavaScript",
+    "exit": "Thoát ứng dụng",
+    "waitFor": "Chờ điều kiện",
+    "keyboardShortcut": "Nhấn phím tắt",
+    "devtools": "Bật/tắt DevTools",
+    "windowInfo": "Thông tin cửa sổ",
+    "storage": "Đọc/ghi bộ nhớ",
+    "scrollIntoView": "Cuộn vào tầm nhìn",
+    "injectCss": "Chèn CSS",
+    "wait": "Chờ",
+    "getComputedStyle": "Lấy kiểu đã tính",
+    "getWindows": "Liệt kê cửa sổ",
+    "dragDrop": "Kéo và thả",
+    "mouseInput": "Nhập bằng chuột",
+    "batch": "Chạy một loạt công cụ",
+    "openMiniBrowser": "Mở trình duyệt mini",
+    "miniBrowserExecute": "Chạy mã trong trình duyệt mini",
+    "openConsole": "Mở bảng điều khiển",
+    "consoleClear": "Xóa bảng điều khiển",
+    "setTabMaximized": "Phóng to/khôi phục tab"
   }
 }

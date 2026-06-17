@@ -123,8 +123,16 @@ export type {
 // MCP service — embeds an MCP server (Streamable HTTP) for AI-tooling
 // integrations. Off by default; the consuming app starts it explicitly
 // from a CLI flag. See docs/McpService/README.md for the full surface.
-export { McpService } from './McpService'
-export type { McpServiceOptions, McpToolConfig, McpToolHandler, McpResourceConfig, McpResourceHandler } from './McpService'
+export { McpService, DEFAULT_SERVED_CALL_CAP, DEFAULT_CAPTURE_RETENTION_CAP } from './McpService'
+export type {
+  McpServiceOptions,
+  McpToolConfig,
+  McpToolHandler,
+  McpResourceConfig,
+  McpResourceHandler,
+  McpServedCallEntry,
+  McpServedCapture
+} from './McpService'
 
 // MCP cross-instance bridge — generic named-session discovery + transport.
 // Lets multiple `--mcp` instances of the same app coexist and route
