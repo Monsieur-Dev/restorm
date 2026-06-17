@@ -328,5 +328,11 @@
       "X": "saniye cinsinden unix zaman damgası",
       "x": "milisaniye cinsinden unix zaman damgası"
     }
+  },
+  "statusbar": {
+    "mcp": {
+      "serverRunningOnPort": "MCP sunucusu {{port}} bağlantı noktasında çalışıyor",
+      "sessionName": "Oturum: {{name}}"
+    }
   }
 }

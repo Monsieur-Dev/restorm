@@ -328,5 +328,11 @@
       "X": "Unix 타임스탬프(초)",
       "x": "Unix 타임스탬프(밀리초)"
     }
+  },
+  "statusbar": {
+    "mcp": {
+      "serverRunningOnPort": "MCP 서버가 포트 {{port}}에서 실행 중입니다",
+      "sessionName": "세션: {{name}}"
+    }
   }
 }

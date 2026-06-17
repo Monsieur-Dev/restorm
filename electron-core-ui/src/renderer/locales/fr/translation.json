@@ -328,5 +328,11 @@
       "X": "horodatage unix en secondes",
       "x": "horodatage unix en millisecondes"
     }
+  },
+  "statusbar": {
+    "mcp": {
+      "serverRunningOnPort": "Serveur MCP en cours d'exécution sur le port {{port}}",
+      "sessionName": "Session : {{name}}"
+    }
   }
 }

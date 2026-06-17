@@ -60,7 +60,98 @@ interface McpServiceOptions {
    * reads back" — see consuming app `restorm` for a worked example.
    */
   authToken?: string
+
+  /**
+   * Optional human-readable name for THIS instance. Enables the
+   * cross-instance routing bridge: a `tools/call` may carry a reserved
+   * `__session` key in its `arguments`. Absent / equal to this name →
+   * the key is stripped and the call runs locally (unchanged). Names a
+   * DIFFERENT instance → forwarded to the peer that owns that name
+   * (resolved in `discoveryDir`). Omitted → no routing layer at all.
+   */
+  sessionName?: string
+
+  /**
+   * Discovery directory holding the per-pid lockfiles of every live
+   * instance of this app (see `resolveMcpDiscoveryDir`). Set together with
+   * `sessionName` to activate the bridge: a `__session` naming another
+   * instance is resolved here and forwarded to its loopback MCP endpoint
+   * (port + bearer token from its lockfile), the response relayed verbatim.
+   * The app writes its OWN lockfile into this dir on startup (see the
+   * discovery helpers below); McpService only consumes it for forwarding.
+   */
+  discoveryDir?: string
 }
+```
+
+#### Cross-instance routing bridge
+
+Multiple `--mcp` instances of the **same** app can run at once (parallel
+agents, multiple checkouts). The bridge lets a single MCP client reach a
+specific one by name. The whole mechanism — discovery, transport, and the
+routing-key plumbing — lives in ECUI, so any consuming app gets it by
+setting two options + writing its lockfile.
+
+When both `sessionName` and `discoveryDir` are set, `McpService` peels an
+optional reserved key off each `tools/call` **before** per-tool Zod
+validation:
+
+- The key is `MCP_SESSION_ROUTING_KEY` (`"__session"`), exported alongside
+  `McpService`. A client adds it to a tool's `arguments`, e.g.
+  `{ "name": "screenshot", "arguments": { "__session": "agent-b" } }`.
+- Absent, empty, or equal to this instance's `sessionName` → the key is
+  stripped and the call runs locally. Individual tools never see it.
+- Naming another instance → the original JSON-RPC is forwarded to the peer
+  whose lockfile in `discoveryDir` records that exact name (port + bearer
+  token from the lockfile), and the peer's HTTP response is relayed verbatim.
+- An unknown / dead / unreachable target → a JSON-RPC error
+  (`code -32001`), never a hang (bounded timeout).
+- Forwarded requests carry the `MCP_FORWARDED_HEADER`
+  (`x-mcp-forwarded`) header; a request that already crossed one hop is
+  never forwarded again (loop break, on top of the self-name check).
+
+Consumers that never set these options are unaffected — the request body
+is handed straight to the SDK with zero added overhead.
+
+#### Discovery helpers (lockfile lifecycle)
+
+The lockfile mechanism is generic and exported so any app reuses it without
+re-coding it. The app owns *when* to write (it knows its bound port + token
++ what it has open); ECUI owns *how*.
+
+- `resolveMcpDiscoveryDir(appDirName, override?)` → the conventional dir:
+  the `override` (an env var both the app and its launcher read) pins a
+  fixed path; otherwise `os.tmpdir()/<appDirName>`. App + launcher must
+  resolve to the same path.
+- `writeMcpDiscoveryFile(dir, entry, extraPath?)` → atomically write this
+  instance's lockfile (owner-only perms; carries the bearer token). Call it
+  on startup once the port is bound, and again whenever the open-document
+  path changes. `extraPath` writes a second copy at an exact path (e.g. a
+  launcher polling a known file).
+- `cleanupMcpDiscoveryFile(dir, pid, extraPath?)` → remove the lockfile(s)
+  on quit.
+- `findLiveSessionByName(dir, name)` / `forwardToNamedSession(dir, name,
+  jsonRpcText, timeoutMs?)` → the discovery + transport the bridge uses
+  internally; exported for advanced consumers.
+
+`McpDiscoveryEntry` is the on-disk shape (`port`, `pid`, `startedAt`,
+`token`, `name`, `projectPath`). Treat it as a stable contract: external
+launchers read it without importing this module, so keep the JSON shape
+backward-compatible.
+
+```typescript
+import {
+  resolveMcpDiscoveryDir, writeMcpDiscoveryFile, cleanupMcpDiscoveryFile
+} from 'electron-core-ui'
+
+const discoveryDir = resolveMcpDiscoveryDir('myapp-mcp', process.env.MYAPP_MCP_DIR)
+const mcp = new McpService({ authToken, sessionName: 'agent-a', discoveryDir })
+await mcp.start(0)
+await writeMcpDiscoveryFile(discoveryDir, {
+  port: mcp.getPort()!, projectPath: null, pid: process.pid,
+  startedAt: new Date().toISOString(), token: authToken, name: 'agent-a'
+})
+app.on('before-quit', () => { void cleanupMcpDiscoveryFile(discoveryDir, process.pid) })
 ```
 
 ### `start(port: number | undefined): Promise<void>`
@@ -568,7 +659,7 @@ The token closes two attacks loopback alone leaves open:
 1. **Other local processes** — any process on the same machine can POST to `http://127.0.0.1:<port>/` and call tools. Without a token, a rogue script gets full control over the user's app.
 2. **CSRF from a browser tab** — a malicious site can issue `fetch('http://127.0.0.1:<port>/', { method: 'POST', mode: 'no-cors' })` and trigger mutations even though it can't read the response. The bearer header is blocked by CORS, so requiring it shuts the vector down.
 
-The recommended propagation channel is "consuming app generates a per-process random token, writes it into a discovery file, the launcher reads it back and injects the header." See restorm's `mcpDiscovery.ts` + `scripts/mcp-launcher.mjs` for a worked example. The token rotates on every app restart — no persistent secret on disk.
+The recommended propagation channel is "consuming app generates a per-process random token, writes it into a discovery file, the launcher reads it back and injects the header." See the restorm consumer (`restorm/src/main/index.ts`, which calls the discovery helpers above) + `scripts/mcp-launcher.mjs` for a worked example. The token rotates on every app restart — no persistent secret on disk.
 
 ## Discovery from Claude Code
 

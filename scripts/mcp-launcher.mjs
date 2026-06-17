@@ -54,9 +54,10 @@ const PROBE_INTERVAL_MS = 250
 const HTTP_PROBE_TIMEOUT_MS = 800
 const PROTOCOL_VERSION = '2025-03-26'
 
-// Where running restorm instances drop their per-pid lockfile. Must
-// match `MCP_DISCOVERY_DIR` in `restorm/src/main/services/mcpDiscovery.ts`
-// — the launcher and restorm rendezvous here, so the resolution MUST be
+// Where running restorm instances drop their per-pid lockfile. Must match
+// the discovery dir restorm resolves at startup — `resolveMcpDiscoveryDir`
+// (from electron-core-ui) called in `restorm/src/main/index.ts` — the
+// launcher and restorm rendezvous here, so the resolution MUST be
 // identical on both sides.
 //
 // `RESTORM_MCP_DIR` pins it to a fixed, deterministic path. When an embedder

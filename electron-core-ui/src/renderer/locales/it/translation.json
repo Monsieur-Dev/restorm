@@ -328,5 +328,11 @@
       "X": "timestamp unix in secondi",
       "x": "timestamp unix in millisecondi"
     }
+  },
+  "statusbar": {
+    "mcp": {
+      "serverRunningOnPort": "Server MCP in esecuzione sulla porta {{port}}",
+      "sessionName": "Sessione: {{name}}"
+    }
   }
 }

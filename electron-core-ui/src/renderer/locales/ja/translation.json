@@ -328,5 +328,11 @@
       "X": "Unix タイムスタンプ（秒）",
       "x": "Unix タイムスタンプ（ミリ秒）"
     }
+  },
+  "statusbar": {
+    "mcp": {
+      "serverRunningOnPort": "MCP サーバーはポート {{port}} で実行中です",
+      "sessionName": "セッション: {{name}}"
+    }
   }
 }

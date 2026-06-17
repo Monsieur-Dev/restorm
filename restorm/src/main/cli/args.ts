@@ -40,6 +40,15 @@ export interface CliArgs {
    */
   mcpEnabled: boolean
   /**
+   * Human-readable name identifying this MCP session. Always set (a
+   * sensible auto-default is derived when neither `--mcp-session-name`
+   * nor `RESTORM_MCP_SESSION_NAME` is given) so every instance is
+   * addressable by name through the cross-instance bridge. The name is
+   * written into the per-pid lockfile and matched verbatim when a
+   * `tools/call` carries a `__session` routing key.
+   */
+  mcpSessionName: string
+  /**
    * Optional path the launcher requested restorm to write its chosen
    * MCP port to (in addition to the per-pid lockfile). The launcher
    * polls this exact file after spawning restorm so it can resolve
@@ -54,6 +63,7 @@ interface ParsedArgs {
   open?: string
   clearSettings?: boolean
   mcp?: boolean
+  mcpSessionName?: string
   mcpDiscoveryFile?: string
   run?: string
   by?: string
@@ -85,6 +95,10 @@ export function parseCliArgs(): CliArgs {
       type: 'boolean',
       default: false,
       describe: 'Start the embedded MCP server (loopback only) on a free OS-picked port. Omit to keep MCP off.'
+    })
+    .option('mcp-session-name', {
+      type: 'string',
+      describe: 'Human-readable name for this MCP session (e.g. a ticket name). Written into the lockfile and matched verbatim when a tool call targets a specific instance via the `__session` routing key. Defaults to a stable auto name when omitted (env: RESTORM_MCP_SESSION_NAME).'
     })
     .option('mcp-discovery-file', {
       type: 'string',
@@ -131,7 +145,8 @@ export function parseCliArgs(): CliArgs {
 
   const result: CliArgs = {
     clearSettings: Boolean(argv.clearSettings),
-    mcpEnabled
+    mcpEnabled,
+    mcpSessionName: resolveMcpSessionName(argv.mcpSessionName, argv.open)
   }
   if (argv.open !== undefined) result.open = argv.open
   if (typeof argv.mcpDiscoveryFile === 'string' && argv.mcpDiscoveryFile.length > 0) {
@@ -160,6 +175,33 @@ export function parseCliArgs(): CliArgs {
     result.cliRun = cliRun
   }
   return result
+}
+
+/**
+ * Resolve the MCP session name with a stable fallback so every instance
+ * always has one. Precedence: the `--mcp-session-name` flag → the
+ * `RESTORM_MCP_SESSION_NAME` env var → an auto name derived from the
+ * `--open` target's basename → a short generated id. The name is matched
+ * verbatim by the cross-instance bridge, so a human-readable string
+ * (spaces included) is fine. Exported for unit testing.
+ */
+export function resolveMcpSessionName(flagValue: string | undefined, openTarget: string | undefined): string {
+  const flag = flagValue?.trim()
+  if (flag !== undefined && flag !== '') return flag
+  const env = process.env['RESTORM_MCP_SESSION_NAME']?.trim()
+  if (env !== undefined && env !== '') return env
+  const open = openTarget?.trim()
+  if (open !== undefined && open !== '') {
+    // Strip directory + a trailing `.restorm`/other extension so the
+    // name reads like the project, not its path.
+    const base = open.replace(/[\\/]+$/, '').split(/[\\/]/).pop() ?? ''
+    const withoutExt = base.replace(/\.[^.]+$/, '')
+    const cleaned = (withoutExt || base).trim()
+    if (cleaned !== '') return `restorm:${cleaned}`
+  }
+  // No project to name after — fall back to a short pid-derived id so two
+  // anonymous instances still get distinct, stable names.
+  return `restorm-${String(process.pid)}`
 }
 
 export function clearUserSettings(): void {

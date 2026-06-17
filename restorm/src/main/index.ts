@@ -27,7 +27,7 @@ installMainProcessInterceptor()
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { randomBytes } from 'node:crypto'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, getStorageService, initAutoSaveController, McpService } from 'electron-core-ui'
+import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, getStorageService, initAutoSaveController, McpService, resolveMcpDiscoveryDir, writeMcpDiscoveryFile, cleanupMcpDiscoveryFile } from 'electron-core-ui'
 import { REOPEN_LAST_FILE_SETTING_KEY, REOPEN_LAST_FILE_STORAGE_KEY } from '../shared/config/reopenLastFile'
 // Restorm-specific renderer translations (notably the `behavior.*`
 // keys referenced by `restorm/resources/settings.yaml`). The main
@@ -43,7 +43,6 @@ import { dirname, join } from 'path'
 import { existsSync, statSync } from 'fs'
 import { searchIndexService, contextService, responseHistoryService, requestUsageService, scenarioUsageService, authenticationCacheService } from './services'
 import { firewallService, permissionService, registerFirewallIpc, installWorkerPatcher } from './services/firewall'
-import { writeMcpDiscoveryFile, cleanupMcpDiscoveryFile } from './services/mcpDiscovery'
 import { registerRestormMcp } from './mcp'
 import { registerActiveStateBridge } from './mcp/tools/activeState'
 import { RESTORM_MCP_INSTRUCTIONS } from './mcp/instructions'
@@ -519,10 +518,21 @@ void app.whenReady().then(() => {
 // discovery file and injects `Authorization: Bearer <token>` on every
 // forwarded request — totally transparent for Claude Code / Cursor.
 const mcpAuthToken = randomBytes(16).toString('hex')
+// Shared discovery dir where every live restorm instance drops its lockfile.
+// MUST resolve identically to `DISCOVERY_DIR` in scripts/mcp-launcher.mjs
+// (RESTORM_MCP_DIR pins it; unset → os.tmpdir()/restorm-mcp) so restorm and
+// the standalone launcher rendezvous on the same path.
+const MCP_DISCOVERY_DIR = resolveMcpDiscoveryDir('restorm-mcp', process.env.RESTORM_MCP_DIR)
 const mcpService = new McpService({
   serverInfo: { name: 'restorm', version: app.getVersion() },
   instructions: RESTORM_MCP_INSTRUCTIONS,
-  authToken: mcpAuthToken
+  authToken: mcpAuthToken,
+  // Name this instance + point at the shared discovery dir so a `tools/call`
+  // carrying `__session: "<other-name>"` is routed to the peer that owns that
+  // name (ECUI resolves it in the lockfile dir + forwards). No `__session` /
+  // our own name → runs locally, unchanged.
+  sessionName: cliArgs.mcpSessionName,
+  discoveryDir: MCP_DISCOVERY_DIR
 })
 void app.whenReady().then(async () => {
   if (!cliArgs.mcpEnabled) return
@@ -544,12 +554,13 @@ void app.whenReady().then(async () => {
     // OTHER localhost port still goes through the regular
     // whitelist / blacklist gates.
     permissionService.setInfraPorts({ mcpPort: port })
-    await writeMcpDiscoveryFile({
+    await writeMcpDiscoveryFile(MCP_DISCOVERY_DIR, {
       port,
       projectPath: null,
       pid: process.pid,
       startedAt: new Date().toISOString(),
-      token: mcpAuthToken
+      token: mcpAuthToken,
+      name: cliArgs.mcpSessionName
     }, cliArgs.mcpDiscoveryFile)
 
     // Forward every incoming MCP request as an IPC `mcp:request-received`
@@ -570,12 +581,13 @@ void app.whenReady().then(async () => {
     getFileService().onStateChanged((state) => {
       const livePort = mcpService.getPort()
       if (livePort === null) return
-      void writeMcpDiscoveryFile({
+      void writeMcpDiscoveryFile(MCP_DISCOVERY_DIR, {
         port: livePort,
         projectPath: state.currentFile.path,
         pid: process.pid,
         startedAt: new Date().toISOString(),
-        token: mcpAuthToken
+        token: mcpAuthToken,
+        name: cliArgs.mcpSessionName
       }, cliArgs.mcpDiscoveryFile)
     })
   } catch (error) {
@@ -584,7 +596,7 @@ void app.whenReady().then(async () => {
 })
 app.on('before-quit', () => {
   if (cliArgs.mcpEnabled) {
-    void cleanupMcpDiscoveryFile(process.pid, cliArgs.mcpDiscoveryFile)
+    void cleanupMcpDiscoveryFile(MCP_DISCOVERY_DIR, process.pid, cliArgs.mcpDiscoveryFile)
   }
   void mcpService.stop()
 })
@@ -595,7 +607,8 @@ app.on('before-quit', () => {
 ipcMain.handle('runtime:get-config', () => ({
   mcp: {
     enabled: cliArgs.mcpEnabled,
-    port: mcpService.getPort()
+    port: mcpService.getPort(),
+    sessionName: cliArgs.mcpSessionName
   },
   graphql: {
     endpoint: graphQLService.getEndpoint()

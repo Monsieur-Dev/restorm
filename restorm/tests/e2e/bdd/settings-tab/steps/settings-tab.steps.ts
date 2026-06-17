@@ -55,21 +55,28 @@ When('I open Settings from the View menu', async ({ page }) => {
   // path matches the current mode so the test is layout-agnostic.
   const mode = await page.locator(`[data-testid="${menubarTestId}"]`).getAttribute('data-mode')
 
+  // Generous menu timeout: the menu opens deterministically (click), but the
+  // submenu item render can still exceed 5s when the host is under memory
+  // pressure (heavy swap intermittently starves renderer timers), so wait
+  // longer for the item itself.
+  const MENU_TIMEOUT = 15000
   if (mode === 'full') {
-    // Hover-open the View menu, then click Settings.
-    await page.locator('[data-testid="titlebar-menubar-item-view"]').hover()
-    await settingsItem.waitFor({ state: 'visible', timeout: 5000 })
+    // Click-open the View menu (a bare hover can race the menubar becoming
+    // active), then click Settings.
+    await page.locator('[data-testid="titlebar-menubar-item-view"]').click({ force: true })
+    await settingsItem.waitFor({ state: 'visible', timeout: MENU_TIMEOUT })
     await settingsItem.click({ force: true })
   } else {
-    // Open the overflow / hamburger bucket, then hover the folded
-    // View entry (its testid gains an `-overflow` suffix) to expand
-    // its submenu, then click Settings.
+    // Open the overflow / hamburger bucket, then open the folded View entry
+    // (its testid gains an `-overflow` suffix) to expand its submenu, then
+    // click Settings. Hover + click so the submenu opens deterministically.
     const overflowBtn = page.locator(`[data-testid="${menubarTestId}-overflow-button"], [data-testid="${menubarTestId}-hamburger-button"]`).first()
     await overflowBtn.click({ force: true })
     const viewEntry = page.locator('[data-testid="titlebar-menubar-item-view-overflow"]')
-    await viewEntry.waitFor({ state: 'visible', timeout: 5000 })
+    await viewEntry.waitFor({ state: 'visible', timeout: MENU_TIMEOUT })
     await viewEntry.hover()
-    await settingsItem.waitFor({ state: 'visible', timeout: 5000 })
+    await viewEntry.click({ force: true })
+    await settingsItem.waitFor({ state: 'visible', timeout: MENU_TIMEOUT })
     await settingsItem.click({ force: true })
   }
   await page.waitForTimeout(300)

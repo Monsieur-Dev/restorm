@@ -328,5 +328,11 @@
       "X": "unix-tijdstempel in seconden",
       "x": "unix-tijdstempel in milliseconden"
     }
+  },
+  "statusbar": {
+    "mcp": {
+      "serverRunningOnPort": "MCP-server draait op poort {{port}}",
+      "sessionName": "Sessie: {{name}}"
+    }
   }
 }

@@ -328,5 +328,11 @@
       "X": "часова мітка unix у секундах",
       "x": "часова мітка unix у мілісекундах"
     }
+  },
+  "statusbar": {
+    "mcp": {
+      "serverRunningOnPort": "Сервер MCP працює на порту {{port}}",
+      "sessionName": "Сеанс: {{name}}"
+    }
   }
 }

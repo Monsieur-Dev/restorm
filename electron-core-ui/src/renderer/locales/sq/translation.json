@@ -328,5 +328,11 @@
       "X": "timestamp unix në sekonda",
       "x": "timestamp unix në milisekonda"
     }
+  },
+  "statusbar": {
+    "mcp": {
+      "serverRunningOnPort": "Serveri MCP po ekzekutohet në portën {{port}}",
+      "sessionName": "Sesioni: {{name}}"
+    }
   }
 }

@@ -328,5 +328,11 @@
       "X": "znacznik czasu unix w sekundach",
       "x": "znacznik czasu unix w milisekundach"
     }
+  },
+  "statusbar": {
+    "mcp": {
+      "serverRunningOnPort": "Serwer MCP działa na porcie {{port}}",
+      "sessionName": "Sesja: {{name}}"
+    }
   }
 }
