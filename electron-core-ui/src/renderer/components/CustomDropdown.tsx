@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useLayoutEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { useFilterableDropdown } from '../hooks/useFilterableDropdown'
+import { useOverlayPresence } from '../hooks/useOverlayPresence'
 import { DropdownFilterRow } from './DropdownFilterRow'
 import { ScrollableElement } from './ScrollableElement'
 
@@ -54,6 +55,13 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
   const listRef = useRef<HTMLDivElement>(null)
   const popupRef = useRef<HTMLDivElement>(null)
   const [listPos, setListPos] = useState({ top: 0, left: 0, width: 0 })
+
+  // While the popup is open, register it with the overlay-presence
+  // service so a main-process compositor view (the Mini browser's
+  // `WebContentsView`) collapses out from under it — a fixed-position
+  // HTML dropdown can't otherwise out-stack a native view. Mirrors the
+  // SelectBox / Tooltip / Modal registrations.
+  useOverlayPresence(popupRef, isOpen)
 
   const selectedOption = options.find(opt => opt.value === value)
 

@@ -8,6 +8,7 @@ import { ScrollableElement } from '../ScrollableElement'
 import type { Icon, IconType } from '../../../types/icon'
 import { IconView } from '../IconView'
 import { Button } from '../Button'
+import { useOverlayPresence } from '../../hooks/useOverlayPresence'
 import {
   getIconoirNames,
   getPhosphorNames,
@@ -198,6 +199,12 @@ const IconSelectInner: React.FC<IconSelectProps> = ({
   const containerRef = useRef<HTMLDivElement | null>(null)
   const pickerRef = useRef<HTMLDivElement | null>(null)
   const buttonRef = useRef<HTMLDivElement | null>(null)
+
+  // Register the open picker with the overlay-presence service so a
+  // main-process compositor view (the Mini browser's `WebContentsView`)
+  // collapses out from under it instead of painting on top of the
+  // fixed-position picker. Same hook as the other ECUI popovers.
+  useOverlayPresence(pickerRef, isOpen)
 
   // Search states for tabs without grouping
   const [materialSearch, setMaterialSearch] = useState('')
