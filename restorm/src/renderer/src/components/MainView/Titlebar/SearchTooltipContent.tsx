@@ -213,6 +213,7 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
         <DocumentationHost
           apiDocumentation={apiDoc}
           filters={[route]}
+          showModelGraphMinimap={false}
           testId="search-tooltip-documentation-host"
         />
       )
@@ -231,6 +232,7 @@ export const SearchTooltipContent: React.FC<SearchTooltipContentProps> = ({ resu
           apiDocumentation={apiDoc}
           scopeTitle={folder.name}
           showApiInfo
+          showModelGraphMinimap={false}
           testId="search-tooltip-documentation-host"
         />
       )

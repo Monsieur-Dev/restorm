@@ -16,8 +16,13 @@
  *      intermittently because the lib gave no reliable "ready"
  *      signal.
  *
+ * The graph surface + control chrome come from the shared ECUI
+ * `GraphCanvas`, so this call-result graph matches the scenario and
+ * documentation graphs (same themed zoom/fit/minimap cluster, same
+ * yellow active toggle, no focus frame).
+ *
  * Features:
- * - Zoom in / zoom out / fit-view buttons
+ * - Themed zoom / fit-view / minimap-toggle control cluster (GraphCanvas)
  * - Mouse wheel zoom (React Flow's native handling)
  * - Auto-fit on mount + every JSON content change (deterministic now
  *   that we own the layout)
@@ -33,8 +38,6 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-	Controls,
-	ReactFlow,
 	ReactFlowProvider,
 	useReactFlow,
 	type Edge,
@@ -43,6 +46,7 @@ import {
 	type NodeTypes
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
+import { GraphCanvas } from '../GraphCanvas/GraphCanvas'
 import { JsonNode } from './JsonNode'
 import { buildJsonGraphElements, ToggleCollapsedContext, type ToggleCollapsedFn } from './jsonGraphLayout'
 import './jsonViewer.css'
@@ -56,9 +60,19 @@ export interface JsonViewerProps {
 	 * implementation, currently a no-op — node theming comes from CSS
 	 * variables that already track the workbench theme. */
 	darkTheme?: boolean
+	/** Localised label for the minimap toggle. Passed by the consumer so
+	 * this library stays locale-free; when omitted the minimap toggle is
+	 * still rendered (the label is its accessible name only). */
+	minimapToggleLabel?: string
 	/** Test ID prefix for E2E selectors. */
 	'data-testid'?: string
 }
+
+// Minimap node + mask colours. Concrete strings (not `var(...)`): React Flow
+// assigns a string `nodeColor` to the rect's SVG `fill`, where an unresolved
+// custom property paints nothing.
+const MINIMAP_NODE_COLOR = '#569cd6'
+const MINIMAP_MASK_COLOR = 'rgba(30, 30, 30, 0.6)'
 
 const NODE_TYPES: NodeTypes = { jsonNode: JsonNode }
 const EDGE_TYPES: EdgeTypes = {}
@@ -102,7 +116,7 @@ export const JsonViewer: React.FC<JsonViewerProps> = (props) => {
 	)
 }
 
-const JsonViewerCanvas: React.FC<JsonViewerProps> = ({ json, 'data-testid': testId }) => {
+const JsonViewerCanvas: React.FC<JsonViewerProps> = ({ json, minimapToggleLabel, 'data-testid': testId }) => {
 	const { fitView, getNode, getViewport, setViewport } = useReactFlow()
 	const containerRef = useRef<HTMLDivElement | null>(null)
 	const [collapsedKeys, setCollapsedKeys] = useState<ReadonlySet<string>>(() => new Set<string>())
@@ -237,41 +251,43 @@ const JsonViewerCanvas: React.FC<JsonViewerProps> = ({ json, 'data-testid': test
 	return (
 		<div ref={containerRef} className="json-viewer-canvas" style={{ width: '100%', height: '100%', position: 'relative' }}>
 			<ToggleCollapsedContext.Provider value={toggleCollapsed}>
-				<ReactFlow
+				{/*
+				 * The shared ECUI GraphCanvas owns the themed control
+				 * cluster + minimap so this call-result graph matches the
+				 * scenario / documentation graphs (same dark buttons, same
+				 * yellow active toggle, no focus frame). `withoutProvider`
+				 * because this canvas keeps its own ReactFlowProvider above
+				 * for the `useReactFlow()` access the auto-fit + collapse
+				 * focus logic needs. `controlsProps.onFitView` overrides the
+				 * fit button so clicking it also re-arms auto-fit (the
+				 * user's explicit "re-frame" signal), matching the
+				 * auto-fit branch in the post-layout effect.
+				 */}
+				<GraphCanvas
+					withoutProvider
 					nodes={nodes}
 					edges={edges}
 					nodeTypes={NODE_TYPES}
 					edgeTypes={EDGE_TYPES}
+					panMode="classic"
 					fitView
 					fitViewOptions={INITIAL_FIT_VIEW_OPTIONS}
 					minZoom={0.05}
 					maxZoom={3}
-					nodesDraggable={false}
-					nodesConnectable={false}
-					elementsSelectable={false}
-					panOnDrag
-					zoomOnScroll
-					onMove={handleMove}
-					proOptions={{ hideAttribution: true }}
-					{...(testId ? { 'data-testid': testId } : {})}
-				>
-					{/*
-					 * React Flow's built-in Controls: visual consistency
-					 * with the doc viewer (`ModelGraph`) which uses the
-					 * same component. `showInteractive={false}` hides the
-					 * lock toggle — relevant for editable graphs, noise
-					 * here. `onFitView` overrides the default fit so we
-					 * can also reset `userMovedRef`: clicking Center View
-					 * is the user's explicit "re-arm auto-fit" signal,
-					 * matching how the auto-fit branch in the post-layout
-					 * effect re-engages.
-					 */}
-					<Controls
-						showInteractive={false}
-						fitViewOptions={FIT_VIEW_OPTIONS}
-						onFitView={handleCenterView}
-					/>
-				</ReactFlow>
+					minimap={{ nodeColor: () => MINIMAP_NODE_COLOR, maskColor: MINIMAP_MASK_COLOR }}
+					minimapToggle={{
+						label: minimapToggleLabel ?? 'Toggle minimap',
+						...(testId ? { testId: `${testId}-minimap-toggle` } : {})
+					}}
+					controlsProps={{ fitViewOptions: FIT_VIEW_OPTIONS, onFitView: handleCenterView }}
+					reactFlowProps={{
+						nodesDraggable: false,
+						nodesConnectable: false,
+						elementsSelectable: false,
+						onMove: handleMove,
+						...(testId ? { 'data-testid': testId } : {})
+					}}
+				/>
 			</ToggleCollapsedContext.Provider>
 		</div>
 	)

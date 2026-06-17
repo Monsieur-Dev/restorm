@@ -1,0 +1,98 @@
+/*
+ * GraphCanvas — the single control-cluster + minimap look for every
+ * node graph in the app.
+ *
+ * Theme the React Flow zoom / fit / minimap controls so the icons stay
+ * readable on EVERY theme (React Flow's default white icons vanish on a
+ * light control background). Everything is driven by the workbench
+ * theme variables, so no per-theme hand-tuning is needed — a theme can
+ * still override these vars. Scoped to `.ecui-graph-canvas` so the
+ * styling rides with the component wherever it is mounted.
+ */
+
+.ecui-graph-canvas .react-flow__controls {
+  background: var(--editorWidget-background, var(--editor-background, #252526));
+  border: 1px solid var(--panel-border, rgb(127, 127, 127, 0.22));
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgb(0, 0, 0, 0.18);
+}
+
+.ecui-graph-canvas .react-flow__controls-button {
+  background: var(--editorWidget-background, var(--editor-background, #252526));
+  border-bottom: 1px solid var(--panel-border, rgb(127, 127, 127, 0.18));
+  color: var(--editor-foreground, #d4d4d4);
+}
+
+.ecui-graph-canvas .react-flow__controls-button:hover {
+  background: var(--list-hoverBackground, rgb(127, 127, 127, 0.14));
+}
+
+/* React Flow gives a clicked control button a focus outline, which on these
+ * small icon controls reads as an unwanted square frame around whichever
+ * button was last pressed (e.g. the minimap toggle after toggling it). These
+ * are pure icon affordances driven by mouse, so suppress the visible focus
+ * ring — the active state (yellow `data-active` tint) already shows the
+ * meaningful "on" feedback, and keyboard focus elsewhere is unaffected. */
+.ecui-graph-canvas .react-flow__controls-button:focus,
+.ecui-graph-canvas .react-flow__controls-button:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.ecui-graph-canvas .react-flow__controls-button svg {
+  fill: var(--editor-foreground, #d4d4d4);
+}
+
+/* The minimap toggle paints a codicon FONT glyph (not an SVG). React Flow
+ * caps its built-in zoom / fit SVGs at 12px (`.react-flow__controls-button
+ * svg { max-width/height: 12px }`), but a codicon defaults to 16px — so
+ * without this the map glyph renders visibly larger than the three icons
+ * above it and the cluster looks uneven. Pin the glyph to the same 12px box
+ * + centre it so all four buttons read as one consistent set on every
+ * surface. The colour is pinned too (with `!important`) because the global
+ * `.codicon { color: … !important }` rule would otherwise override the
+ * button's inherited colour. */
+.ecui-graph-canvas .react-flow__controls-button .codicon[class*='codicon-'] {
+  color: var(--editor-foreground, #d4d4d4) !important;
+
+  /* A global `.codicon { font-size: 16px !important }` rule pins every
+   * codicon to 16px, while React Flow caps its built-in zoom / fit SVGs at
+   * 12px — so the map glyph renders larger than the three icons above it. The
+   * `!important` here is required to win against that global rule and bring
+   * the glyph down to the same 12px, keeping all four buttons one size. */
+  font-size: 12px !important;
+  line-height: 1;
+  width: 12px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Active control (e.g. the minimap toggle while the minimap is shown) reads
+ * in a warm yellow on EVERY surface — the scenario editor's accent, promoted
+ * here to the one consistent "on" colour for the whole app. A theme can still
+ * override `--ecui-graph-canvas-active`, but the default is the yellow rather
+ * than the (per-theme, usually blue) focus border, so the toggle looks the
+ * same in the scenario graph, the documentation/object graph, and the
+ * call-result graph. */
+.ecui-graph-canvas .react-flow__controls-button[data-active='true'] {
+  color: var(--ecui-graph-canvas-active, #facc15);
+}
+
+.ecui-graph-canvas .react-flow__controls-button[data-active='true'] .codicon {
+  color: var(--ecui-graph-canvas-active, #facc15) !important;
+}
+
+/* Minimap (bottom-right): themed panel + dimmed mask. */
+.ecui-graph-canvas .ecui-graph-minimap {
+  background: var(--editorWidget-background, var(--editor-background, #252526));
+  border: 1px solid var(--panel-border, rgb(127, 127, 127, 0.22));
+  border-radius: 4px;
+}
+
+.ecui-graph-canvas .ecui-graph-minimap .react-flow__minimap-mask {
+  fill: var(--editor-background, #1e1e1e);
+  fill-opacity: 0.6;
+}

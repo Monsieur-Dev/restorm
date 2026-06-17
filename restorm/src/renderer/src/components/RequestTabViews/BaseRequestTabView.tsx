@@ -392,6 +392,7 @@ export const BaseRequestTabView: React.FC<BaseRequestTabViewProps> = ({
           <JsonViewer
             json={formattedJson}
             darkTheme={isDarkTheme}
+            minimapToggleLabel={t('scenario.minimap.toggle')}
             data-testid="base-request-graph"
           />
         ) : loadingPlaceholder

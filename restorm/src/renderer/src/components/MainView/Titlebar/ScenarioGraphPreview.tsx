@@ -14,9 +14,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ReactFlow,
   ReactFlowProvider,
-  Controls,
   useReactFlow,
   useStore,
   type Edge,
@@ -24,6 +22,7 @@ import {
   type NodeTypes
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
+import { GraphCanvas } from 'electron-core-ui/renderer'
 import type { Scenario, ScenarioNode as PersistedNode, ScenarioEdge, FolderItem } from '../../../../../shared/types/collections'
 import { ScenarioNodeView, type ScenarioNodeBoxData } from '../../Scenario/nodes'
 import { ScenarioBoundResolverContext } from '../../Scenario/scenarioBoundResolver'
@@ -74,10 +73,8 @@ const ScenarioGraphPreviewCanvas: React.FC<{ scenario: Scenario; testId?: string
   }, [scenario, focusNode])
   const edges = useMemo(() => scenario.edges.map(toReactFlowEdge), [scenario])
   const [fitGeneration, setFitGeneration] = useState(0)
-  const { fitView, getViewport, setViewport } = useReactFlow()
-  const wrapperRef = useRef<HTMLDivElement>(null)
+  const { fitView } = useReactFlow()
   const fittedGenerationRef = useRef(-1)
-  const isPanningRef = useRef(false)
   // Re-fit once the container reaches a positive size (the popover
   // can mount with `display: none` while the parent transitions).
   const viewportWidth = useStore((s) => s.width)
@@ -122,94 +119,35 @@ const ScenarioGraphPreviewCanvas: React.FC<{ scenario: Scenario; testId?: string
     void fitView({ nodes: [{ id: focusNode.nodeId }], duration: 300, maxZoom: 1.2 })
   }, [focusNode, nodesReady, viewportWidth, viewportHeight, fitView])
 
-  // Pointer-lock pan — same recipe as `ModelGraph`. Cursor disappears
-  // for the drag, so the popover never registers a `mouseleave`
-  // mid-pan. Skipped for a static (non-interactive) thumbnail AND for
-  // `panMode === 'classic'`, where React Flow's own drag-pan is used
-  // instead (a docked panel has no hover popover to keep alive).
-  useEffect(() => {
-    if (!interactive || panMode !== 'pointerLock') return
-    const wrapper = wrapperRef.current
-    if (!wrapper) return
-    const pane = wrapper.querySelector<HTMLElement>('.react-flow__pane')
-    if (!pane) return
-
-    const onPointerDown = (e: PointerEvent): void => {
-      if (e.button !== 0) return
-      const target = e.target
-      if (!(target instanceof Element)) return
-      if (target.closest('.react-flow__controls')) return
-      if (target.closest('button, a, input, select, textarea, [role="button"]')) return
-      isPanningRef.current = true
-      try { pane.setPointerCapture(e.pointerId) } catch { /* ignore */ }
-      const lockResult = pane.requestPointerLock() as Promise<void> | undefined
-      if (lockResult && typeof lockResult.catch === 'function') {
-        lockResult.catch(() => { /* fall back to setPointerCapture */ })
-      }
-      e.preventDefault()
-    }
-    const onPointerMove = (e: PointerEvent): void => {
-      if (!isPanningRef.current) return
-      const vp = getViewport()
-      void setViewport({ x: vp.x + e.movementX, y: vp.y + e.movementY, zoom: vp.zoom })
-    }
-    const endPan = (e?: PointerEvent): void => {
-      if (!isPanningRef.current) return
-      isPanningRef.current = false
-      if (document.pointerLockElement === pane) document.exitPointerLock()
-      if (e && pane.hasPointerCapture(e.pointerId)) pane.releasePointerCapture(e.pointerId)
-    }
-    const onLockChange = (): void => {
-      if (document.pointerLockElement !== pane) isPanningRef.current = false
-    }
-    pane.addEventListener('pointerdown', onPointerDown)
-    document.addEventListener('pointermove', onPointerMove)
-    document.addEventListener('pointerup', endPan)
-    document.addEventListener('pointerlockchange', onLockChange)
-    return () => {
-      pane.removeEventListener('pointerdown', onPointerDown)
-      document.removeEventListener('pointermove', onPointerMove)
-      document.removeEventListener('pointerup', endPan)
-      document.removeEventListener('pointerlockchange', onLockChange)
-      if (document.pointerLockElement === pane) document.exitPointerLock()
-    }
-  }, [getViewport, setViewport, interactive, panMode])
+  // Pointer-lock pan (cursor disappears so the search popover never
+  // registers a `mouseleave` mid-pan) is owned by the shared
+  // GraphCanvas `pointerLock` preset. A static thumbnail uses the
+  // `static` preset (no pan/zoom/controls); a docked panel uses
+  // `classic` (React Flow's own drag-pan + plain-wheel zoom).
+  const graphPanMode = !interactive ? 'static' : panMode === 'classic' ? 'classic' : 'pointerLock'
 
   return (
     <div
-      ref={wrapperRef}
       className="scn-preview-canvas"
       data-testid={testId ?? 'scenario-search-tooltip-graph'}
       style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', minHeight: 0 }}
     >
-      <ReactFlow
+      <GraphCanvas
+        withoutProvider
         nodes={nodes}
         edges={edges}
         nodeTypes={NODE_TYPES}
-        fitViewOptions={FIT_VIEW_OPTIONS}
-        proOptions={{ hideAttribution: true }}
+        panMode={graphPanMode}
+        showControls={interactive}
         minZoom={0.2}
         maxZoom={2}
-        panOnScroll={false}
-        zoomOnScroll={interactive}
-        // Classic: plain wheel zooms (the editor's feel). Pointer-lock:
-        // Ctrl/⌘+wheel, so a stray wheel inside the search bubble doesn't zoom.
-        zoomActivationKeyCode={panMode === 'classic' ? null : ['Control', 'Meta']}
-        zoomOnPinch={interactive}
-        // Classic captures the wheel for zoom; pointer-lock lets the page scroll.
-        preventScrolling={interactive && panMode === 'classic'}
-        // Classic uses React Flow's own drag-pan; pointer-lock wires its own.
-        panOnDrag={interactive && panMode === 'classic'}
-        nodesDraggable={false}
-        nodesConnectable={false}
-        elementsSelectable={false}
-        panActivationKeyCode={null}
-        deleteKeyCode={null}
-        selectionKeyCode={null}
-        multiSelectionKeyCode={null}
-      >
-        {interactive && <Controls showInteractive={false} />}
-      </ReactFlow>
+        fitViewOptions={FIT_VIEW_OPTIONS}
+        reactFlowProps={{
+          nodesDraggable: false,
+          nodesConnectable: false,
+          elementsSelectable: false
+        }}
+      />
     </div>
   )
 }

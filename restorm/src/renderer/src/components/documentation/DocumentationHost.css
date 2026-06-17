@@ -232,26 +232,9 @@
   fill: var(--editor-foreground);
 }
 
-.documentation-host-model-graph .react-flow__controls,
-.documentation-host-model-graph .react-flow__minimap {
-  background: var(--editorWidget-background, var(--editor-background));
-  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
-  box-shadow: none;
-}
-
-.documentation-host-model-graph .react-flow__controls-button {
-  background: transparent;
-  color: var(--editor-foreground);
-  border-bottom: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
-}
-
-.documentation-host-model-graph .react-flow__controls-button:hover {
-  background: var(--list-hover-background, rgba(127, 127, 127, 0.1));
-}
-
-.documentation-host-model-graph .react-flow__controls-button svg {
-  fill: var(--editor-foreground);
-}
+/* The zoom/fit/minimap control + minimap styling is owned by the shared
+ * ECUI GraphCanvas (graphCanvas.css) — a single dark look for every graph
+ * surface in the app. */
 
 /* ──────────────────────────────────────────────────────────────────
  * UML class card (custom React Flow node)

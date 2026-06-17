@@ -1,11 +1,6 @@
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type CSSProperties } from 'react'
 import {
-  ReactFlow,
   ReactFlowProvider,
-  Background,
-  Controls,
-  ControlButton,
-  MiniMap,
   useNodesState,
   useEdgesState,
   useReactFlow,
@@ -22,7 +17,7 @@ import {
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { useTranslation } from 'react-i18next'
-import { Button, ContextMenu, Tooltip, ColorPicker, Modal, MarkdownEditor, eventBus, isUndoKeyEvent, isRedoKeyEvent, type ContextMenuItem } from 'electron-core-ui/renderer'
+import { Button, ContextMenu, Tooltip, ColorPicker, Modal, MarkdownEditor, GraphCanvas, eventBus, isUndoKeyEvent, isRedoKeyEvent, type ContextMenuItem } from 'electron-core-ui/renderer'
 import type { Scenario, ScenarioNode, ScenarioEdge, ScenarioNodeKind, ScenarioPort } from '../../../../shared/types/collections'
 import { isRequest, isScenario, isWebSocketRequest, isGrpcRequest } from '../../../../shared/types/collections'
 import { Badge } from '../common/Badge'
@@ -140,10 +135,7 @@ const containerStyle: CSSProperties = { width: '100%', height: '100%', position:
 // tick, via `setNodes`) churns the store and cascades a re-render into every
 // node — turning one box move into "re-render all boxes" each pointer move.
 // Hoisting the stable values to module scope keeps their identity constant.
-const PAN_ON_DRAG = [1]
-const MULTI_SELECTION_KEYS = ['Control', 'Meta']
 const DELETE_KEYS = ['Delete', 'Backspace']
-const PRO_OPTIONS = { hideAttribution: true }
 // Grid pitch shared by the dotted Background and snap-to-grid, so dropped /
 // dragged boxes land on the visible dots. Matches React Flow's default gap.
 const GRID_SIZE = 20
@@ -793,7 +785,6 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
   const [edges, setEdges, onEdgesChange] = useEdgesState([] as Edge[])
   useEffect(() => { edgesRef.current = edges }, [edges])
   const [palette, setPalette] = useState<{ x: number; y: number; flow: { x: number; y: number } } | null>(null)
-  const [showMinimap, setShowMinimap] = useState(false)
   const [nodeMenu, setNodeMenu] = useState<{ nodeId: string; x: number; y: number } | null>(null)
   // Bulk menu for a MULTI-selection right-click (change colour / delete), and
   // the cursor-anchored colour picker it opens (applied to every selected box).
@@ -2780,91 +2771,68 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
         onUndo={undo}
         onRedo={redo}
       />
-      <ReactFlow
+      <GraphCanvas
+        withoutProvider
+        data-testid="scenario-graph-canvas"
         nodes={presentationalNodes}
         edges={presentationalEdges}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
-        // Only mount + measure the nodes inside the viewport — a scenario box is
-        // a heavy DOM subtree, so rendering the whole graph at once froze the
-        // editor for seconds on a large scenario. Off-screen boxes mount lazily.
-        // BUT culling recomputes the visible set on every viewport change, so a
-        // pan/drag re-renders React Flow's whole subtree each pointer move — the
-        // dominant cost on small/medium graphs. Gate it on node count: small
-        // graphs render all (smooth pan, fast enough load); only big graphs cull.
-        onlyRenderVisibleElements={nodes.length > 60}
-        onNodesChange={handleNodesChange}
-        onEdgesChange={handleEdgesChange}
-        onConnect={onConnect}
-        onConnectStart={onConnectStart}
-        onConnectEnd={onConnectEnd}
-        isValidConnection={validateConnection}
-        nodesDraggable={!locked}
-        nodesConnectable={!locked}
-        deleteKeyCode={(!locked && isActiveTab) ? DELETE_KEYS : null}
-        multiSelectionKeyCode={MULTI_SELECTION_KEYS}
-        // React Flow's default `selectionKeyCode='Shift'` registers a
-        // window-level `keydown` listener that calls `event.preventDefault()`
-        // on EVERY Shift press (Shift is a modifier, so its internal
-        // `preventDefault` guard always fires) — globally, for every tab. On
-        // Linux that `preventDefault` on a bare modifier keydown wedges
-        // Chromium's input pipeline into a composition-like state that
-        // swallows the next printable character, so the first letter of every
-        // capital (Shift + letter) is eaten in every text field on the page.
-        // Disabling the Shift selection activator removes the global listener.
-        // To keep rubber-band selection without a (modifier) keyboard key, it
-        // moves onto the mouse: left-drag on the pane box-selects
-        // (`selectionOnDrag`), and panning moves to the middle mouse button
-        // (`panOnDrag={[1]}`) so left-drag is free. Click + Ctrl/Meta+click
-        // single/multi-select still work; right-drag stays the context menu.
-        selectionKeyCode={null}
-        selectionOnDrag
-        snapToGrid
-        snapGrid={SNAP_GRID}
-        panOnDrag={PAN_ON_DRAG}
-        onPaneContextMenu={onPaneContextMenu}
-        onEdgeContextMenu={onEdgeContextMenu}
-        onSelectionContextMenu={onSelectionContextMenuStable}
-        onPaneClick={onPaneClickStable}
-        onNodeClick={onCanvasItemClickStable}
-        onEdgeClick={onCanvasItemClickStable}
-        onMoveStart={onMoveStartStable}
-        onMove={onMoveStable}
-        onNodeDragStart={onNodeDragStartStable}
+        // `editor` preset disables the Shift-selection activator (its
+        // window-level `preventDefault` on a bare Shift keydown wedges
+        // Chromium on Linux into a composition-like state that swallows the
+        // first uppercase letter typed into any input on the page), moves
+        // rubber-band selection to left-drag and panning to the middle mouse
+        // button. Click + Ctrl/Meta+click single/multi-select still work.
+        panMode="editor"
+        // Unique pattern id per scenario: React Flow's Background derives its
+        // SVG <pattern> id from this, and with several scenario tabs mounted at
+        // once a shared id makes `url(#pattern-…)` resolve to the first (often a
+        // hidden 0×0 tab), leaving the visible grid blank.
+        // `offset={GRID_SIZE}` cancels React Flow's default half-cell dot
+        // centering, so the dots sit on the cell CORNERS — exactly the multiples
+        // of `GRID_SIZE` that `snapGrid` snaps a box's top-left to.
+        background={{ id: scenario.id, gap: GRID_SIZE, offset: GRID_SIZE }}
+        minimap={{
+          nodeColor: (n) =>
+            typeof (n.data as { color?: unknown }).color === 'string'
+              ? (n.data as { color: string }).color
+              : '#a855f7'
+        }}
+        minimapToggle={{ label: t('scenario.minimap.toggle', 'Toggle minimap'), testId: 'scenario-minimap-toggle' }}
         {...(savedViewport ? { defaultViewport: savedViewport } : { fitView: true })}
-        proOptions={PRO_OPTIONS}
-      >
-        {/* Unique pattern id per scenario: React Flow's Background derives its
-            SVG <pattern> id from this, and with several scenario tabs mounted
-            at once a shared id makes `url(#pattern-…)` resolve to the first
-            (often a hidden 0×0 tab), leaving the visible grid blank. */}
-        {/* `offset={GRID_SIZE}` cancels React Flow's default half-cell dot
-            centering, so the dots sit on the cell CORNERS — i.e. exactly the
-            multiples of `GRID_SIZE` that `snapGrid` snaps a box's top-left to.
-            A snapped box then lands its top-left corner right on a dot. */}
-        <Background id={scenario.id} gap={GRID_SIZE} offset={GRID_SIZE} />
-        <Controls showInteractive={false}>
-          {/* Minimap toggle sits at the bottom of the control stack — i.e. just
-            * below the fit-to-view button. */}
-          <ControlButton
-            onClick={() => { setShowMinimap((v) => !v) }}
-            title={t('scenario.minimap.toggle', 'Toggle minimap')}
-            aria-label={t('scenario.minimap.toggle', 'Toggle minimap')}
-            data-testid="scenario-minimap-toggle"
-            data-active={showMinimap ? 'true' : 'false'}
-          >
-            <span className="codicon codicon-map" aria-hidden="true" />
-          </ControlButton>
-        </Controls>
-        {showMinimap && (
-          <MiniMap
-            pannable
-            zoomable
-            className="scn-minimap"
-            nodeColor={(n) => (typeof (n.data as { color?: unknown }).color === 'string' ? (n.data as { color: string }).color : '#a855f7')}
-          />
-        )}
-      </ReactFlow>
+        reactFlowProps={{
+          // Only mount + measure the nodes inside the viewport — a scenario box
+          // is a heavy DOM subtree, so rendering the whole graph at once froze
+          // the editor for seconds on a large scenario. Off-screen boxes mount
+          // lazily. BUT culling recomputes the visible set on every viewport
+          // change, so a pan/drag re-renders React Flow's whole subtree each
+          // pointer move — the dominant cost on small/medium graphs. Gate it on
+          // node count: small graphs render all (smooth pan, fast enough load);
+          // only big graphs cull.
+          onlyRenderVisibleElements: nodes.length > 60,
+          onNodesChange: handleNodesChange,
+          onEdgesChange: handleEdgesChange,
+          onConnect,
+          onConnectStart,
+          onConnectEnd,
+          isValidConnection: validateConnection,
+          nodesDraggable: !locked,
+          nodesConnectable: !locked,
+          deleteKeyCode: (!locked && isActiveTab) ? DELETE_KEYS : null,
+          snapToGrid: true,
+          snapGrid: SNAP_GRID,
+          onPaneContextMenu,
+          onEdgeContextMenu,
+          onSelectionContextMenu: onSelectionContextMenuStable,
+          onPaneClick: onPaneClickStable,
+          onNodeClick: onCanvasItemClickStable,
+          onEdgeClick: onCanvasItemClickStable,
+          onMoveStart: onMoveStartStable,
+          onMove: onMoveStable,
+          onNodeDragStart: onNodeDragStartStable
+        }}
+      />
       {/* One prompt for every pending input — up-front params (all pending at
         * run start) and mid-run inputs (pending when the flow reaches them)
         * surface through the same modal, driven by `engine.pendingInputs`. */}

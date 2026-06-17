@@ -1,8 +1,6 @@
 import React, { useEffect, useImperativeHandle, useRef, useState } from 'react'
 import {
-  ReactFlow,
   ReactFlowProvider,
-  Controls,
   useReactFlow,
   useStore,
   type Edge,
@@ -11,6 +9,8 @@ import {
   type NodeTypes
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
+import { useTranslation } from 'react-i18next'
+import { GraphCanvas } from 'electron-core-ui/renderer'
 import type { ModelDocumentation } from '../../../../shared/types/apiDocumentation'
 import { ModelNode } from './ModelNode'
 import { ModelEdge } from './ModelEdge'
@@ -29,6 +29,11 @@ export interface ModelGraphProps {
   models: ModelDocumentation[]
   /** Optional test id stamped on the React Flow container. */
   testId?: string
+  /** Show the minimap toggle in the control cluster. The full doc /
+   * object view enables it; the compact search-result popover leaves it
+   * off (no room, and the reader is scanning a single result, not
+   * navigating a large diagram). Defaults to `false`. */
+  showMinimap?: boolean
 }
 
 const NODE_TYPES: NodeTypes = { umlClass: ModelNode }
@@ -39,6 +44,14 @@ const EDGE_TYPES: EdgeTypes = { modelEdge: ModelEdge }
 // "snap" the first time the user reaches for the button.
 const FIT_VIEW_PADDING = 0.1
 const FIT_VIEW_OPTIONS = { padding: FIT_VIEW_PADDING } as const
+// Minimap node + mask colours. A solid accent for the node boxes plus a
+// translucent dark mask keeps them legible against the themed minimap panel.
+// (The node boxes only paint at all once each node carries an explicit size —
+// see the `initialWidth` / `initialHeight` seeding in `modelGraphLayout.ts`,
+// which React Flow's MiniMap reads from the original node object, not from the
+// ResizeObserver-filled `measured` field.)
+const MINIMAP_NODE_COLOR = '#569cd6'
+const MINIMAP_MASK_COLOR = 'rgba(30, 30, 30, 0.6)'
 
 /**
  * UML-style class diagram of every model the documentation host
@@ -48,14 +61,14 @@ const FIT_VIEW_OPTIONS = { padding: FIT_VIEW_PADDING } as const
  * cycle handling via feedback-edge selection).
  */
 export const ModelGraph = React.forwardRef<ModelGraphHandle, ModelGraphProps>(
-  ({ models, testId }, ref) => {
+  ({ models, testId, showMinimap = false }, ref) => {
     return (
       <div
         className="documentation-host-model-graph"
         data-testid={testId ?? 'documentation-host-model-graph'}
       >
         <ReactFlowProvider>
-          <ModelGraphCanvas models={models} forwardedRef={ref} />
+          <ModelGraphCanvas models={models} forwardedRef={ref} showMinimap={showMinimap} />
         </ReactFlowProvider>
       </div>
     )
@@ -66,24 +79,15 @@ ModelGraph.displayName = 'ModelGraph'
 const ModelGraphCanvas: React.FC<{
   models: ModelDocumentation[]
   forwardedRef: React.ForwardedRef<ModelGraphHandle>
-}> = ({ models, forwardedRef }) => {
+  showMinimap: boolean
+}> = ({ models, forwardedRef, showMinimap }) => {
   const [nodes, setNodes] = useState<Node[]>([])
   const [edges, setEdges] = useState<Edge[]>([])
   const [layoutReady, setLayoutReady] = useState(false)
   const [fitViewGeneration, setFitViewGeneration] = useState(0)
-  const { fitView, setCenter, getNode, getViewport, setViewport } = useReactFlow()
+  const { fitView, setCenter, getNode } = useReactFlow()
+  const { t } = useTranslation()
   const reactFlowWrapperRef = useRef<HTMLDivElement | null>(null)
-  // Pan with cursor invisibility via Pointer Lock — solves the
-  // "popover closes mid-drag" problem when the model graph lives
-  // inside a tooltip / popover. xyflow's built-in d3-zoom pan reads
-  // `clientX/Y`, which freezes once the pointer is locked, so we
-  // disable `panOnDrag` and drive the viewport ourselves from the
-  // `movementX/Y` deltas that pointer-lock still delivers. As a
-  // side benefit, the cursor disappears for the duration of the
-  // drag (the user explicitly asked for this — it makes the
-  // limitlessly-large canvas feel less constrained by the popover
-  // bounds).
-  const isPanningRef = useRef(false)
   // The graph mounts inside a workbench tab body that the parent
   // toggles between `display: none` and visible. While the tab is
   // hidden the wrapper measures 0x0, so a `fitView()` call there
@@ -180,158 +184,57 @@ const ModelGraphCanvas: React.FC<{
     }
   }), [getNode, setCenter])
 
-  // Pointer-lock pan: replaces xyflow's `panOnDrag` (which reads
-  // `clientX/Y` through d3-zoom — those freeze the moment we lock
-  // the pointer). We capture `pointerdown` on the React Flow pane,
-  // request lock, accumulate `movementX/Y` deltas into the
-  // viewport, and release on `pointerup`. While locked, the
-  // cursor is invisible and pinned, so the user can drag the
-  // canvas an arbitrary distance without the surrounding popover
-  // ever registering a `mouseleave` and closing.
-  useEffect(() => {
-    const wrapper = reactFlowWrapperRef.current
-    if (!wrapper) return
-    const pane = wrapper.querySelector<HTMLElement>('.react-flow__pane')
-    if (!pane) return
-
-    const onPointerDown = (e: PointerEvent): void => {
-      if (e.button !== 0) return
-      const target = e.target
-      if (!(target instanceof Element)) return
-      // Skip the Controls bar and minimap so their click handlers
-      // (zoom buttons, viewport thumbnail) fire normally.
-      if (target.closest('.react-flow__controls')) return
-      if (target.closest('.react-flow__minimap')) return
-      // Skip clicks on interactive elements inside nodes — most
-      // notably `ModelRefLink` buttons that cross-reference other
-      // models. Without this guard we `preventDefault`+capture the
-      // pointer, swallowing the click and the user sees nothing
-      // happen when they hit the link.
-      if (target.closest('button, a, input, select, textarea, [role="button"]')) return
-      isPanningRef.current = true
-      // Capture the pointer so move/up events stay routed to the
-      // pane even when the physical cursor would leave its bounds
-      // — this is what keeps the surrounding popover from closing
-      // mid-drag. Pointer Lock layers on top to make the cursor
-      // disappear + freeze in place. If the lock request is denied
-      // (e.g. document isn't focused), the capture still handles
-      // the "drag past the edge" case, just with a visible cursor.
-      try {
-        pane.setPointerCapture(e.pointerId)
-      } catch {
-        // Some hosts reject setPointerCapture if the pointer is
-        // released between the test and the call — non-fatal.
-      }
-      const lockResult = pane.requestPointerLock() as Promise<void> | undefined
-      if (lockResult && typeof lockResult.catch === 'function') {
-        lockResult.catch(() => { /* keep panning via setPointerCapture */ })
-      }
-      e.preventDefault()
-    }
-
-    const onPointerMove = (e: PointerEvent): void => {
-      if (!isPanningRef.current) return
-      // `movementX/Y` is the delta from the previous event
-      // regardless of whether the pointer is locked, so the pan
-      // works identically in both cases. Without pointer lock the
-      // cursor remains visible but `setPointerCapture` keeps
-      // mousemove events flowing past the popover boundary.
-      const vp = getViewport()
-      void setViewport({
-        x: vp.x + e.movementX,
-        y: vp.y + e.movementY,
-        zoom: vp.zoom
-      })
-    }
-
-    const endPan = (e?: PointerEvent): void => {
-      if (!isPanningRef.current) return
-      isPanningRef.current = false
-      if (document.pointerLockElement === pane) {
-        document.exitPointerLock()
-      }
-      if (e && pane.hasPointerCapture(e.pointerId)) {
-        pane.releasePointerCapture(e.pointerId)
-      }
-    }
-
-    pane.addEventListener('pointerdown', onPointerDown)
-    document.addEventListener('pointermove', onPointerMove)
-    document.addEventListener('pointerup', endPan)
-    // `pointerlockchange` fires when the user presses Escape (the
-    // browser-imposed unlock shortcut) — clear our flag so the
-    // next mousedown re-locks instead of thinking we're still
-    // dragging.
-    const onLockChange = (): void => {
-      if (document.pointerLockElement !== pane) {
-        isPanningRef.current = false
-      }
-    }
-    document.addEventListener('pointerlockchange', onLockChange)
-
-    return (): void => {
-      pane.removeEventListener('pointerdown', onPointerDown)
-      document.removeEventListener('pointermove', onPointerMove)
-      document.removeEventListener('pointerup', endPan)
-      document.removeEventListener('pointerlockchange', onLockChange)
-      if (document.pointerLockElement === pane) {
-        document.exitPointerLock()
-      }
-    }
-  }, [getViewport, setViewport, layoutReady])
-
+  // Pointer-lock pan (cursor disappears so a hosting popover doesn't
+  // close mid-drag) is owned by the shared GraphCanvas `pointerLock`
+  // preset. The doc viewer is read-only, so the preset's disabled
+  // delete / selection / pan-activation shortcuts (which would
+  // otherwise swallow keystrokes from a Monaco editor in a sibling
+  // tab) are exactly what this surface wants.
   return (
     <div
       ref={reactFlowWrapperRef}
       style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', minHeight: 0 }}
     >
-    <ReactFlow
-      nodes={nodes}
-      edges={edges}
-      nodeTypes={NODE_TYPES}
-      edgeTypes={EDGE_TYPES}
-      proOptions={{ hideAttribution: true }}
-      // Share the fit-view options with the auto-fit so the
-      // Controls button reproduces the same framing the user
-      // sees on initial load.
-      fitViewOptions={FIT_VIEW_OPTIONS}
-      minZoom={0.2}
-      maxZoom={2}
-      // Wheel passes through to the page so the documentation
-      // surface scrolls naturally even when the cursor sits over
-      // the canvas. With `zoomActivationKeyCode` set, the wheel
-      // only zooms while Ctrl/Cmd is held — plain wheel events
-      // bubble to the outer ScrollableElement.
-      panOnScroll={false}
-      zoomOnScroll
-      zoomActivationKeyCode={['Control', 'Meta']}
-      zoomOnPinch
-      preventScrolling={false}
-      // Disable xyflow's built-in pan — we drive panning ourselves
-      // via Pointer Lock + `movementX/Y` (see the effect above).
-      // Leaving this on would race with our custom handler and
-      // produce double-applied deltas.
-      panOnDrag={false}
-      nodesDraggable={false}
-      nodesConnectable={false}
-      elementsSelectable={false}
-      // React Flow registers a window-level key handler that
-      // hijacks Space (default `panActivationKeyCode`) and
-      // Backspace / Delete (`deleteKeyCode`). When this graph is
-      // mounted inside a hidden Tabs panel — e.g. the request's
-      // Docs tab while the user is typing in the URL Monaco —
-      // those shortcuts still fire on the renderer-wide window,
-      // swallowing keystrokes the user expects to land in the
-      // active editor. Disable the graph-level shortcuts entirely
-      // — the doc viewer is read-only, so we never need them.
-      panActivationKeyCode={null}
-      deleteKeyCode={null}
-      selectionKeyCode={null}
-      multiSelectionKeyCode={null}
-      data-layout-ready={layoutReady ? 'true' : 'false'}
-    >
-      <Controls showInteractive={false} />
-    </ReactFlow>
+      <GraphCanvas
+        withoutProvider
+        nodes={nodes}
+        edges={edges}
+        nodeTypes={NODE_TYPES}
+        edgeTypes={EDGE_TYPES}
+        panMode="pointerLock"
+        minZoom={0.2}
+        maxZoom={2}
+        // Share the fit-view options with the auto-fit so the Controls
+        // button reproduces the same framing the user sees on load.
+        fitViewOptions={FIT_VIEW_OPTIONS}
+        // Minimap is opt-in per surface: the full doc / object view turns it
+        // on, the compact search-result popover leaves it off.
+        {...(showMinimap
+          ? {
+              // Node colour is a function (not a `var(...)` string): React Flow
+              // hands a string `nodeColor` straight to the SVG rect's `fill`,
+              // and an unresolved CSS custom property there paints nothing — so
+              // the minimap renders as an empty rectangle. Returning a concrete
+              // colour per node (mirroring the scenario minimap) guarantees the
+              // node boxes actually paint.
+              minimap: {
+                nodeColor: () => MINIMAP_NODE_COLOR,
+                maskColor: MINIMAP_MASK_COLOR
+              },
+              minimapToggle: { label: t('scenario.minimap.toggle', 'Toggle minimap'), testId: 'documentation-host-model-graph-minimap-toggle' }
+            }
+          : {})}
+        reactFlowProps={{
+          nodesDraggable: false,
+          nodesConnectable: false,
+          elementsSelectable: false,
+          // Layout-ready flag the doc-viewer e2e waits on, stamped on the
+          // `.react-flow` element so the existing selector keeps working.
+          // React Flow's prop type doesn't list arbitrary data-* attrs but
+          // forwards them to the root element, so widen the literal here.
+          ...({ 'data-layout-ready': layoutReady ? 'true' : 'false' } as Record<string, string>)
+        }}
+      />
     </div>
   )
 }

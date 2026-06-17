@@ -49,53 +49,10 @@
   line-height: 1.45;
 }
 
-/* React Flow zoom/fit/minimap controls: theme them so the icons stay readable
- * on EVERY theme (React Flow's default white icons vanish on a light control
- * background). Panel-styled via the theme's own variables so the controls read
- * as distinct from the canvas yet respect each theme — no per-theme hand-tuning
- * needed; a theme can still override these vars. */
-[data-testid="scenario-editor"] .react-flow__controls {
-  background: var(--editorWidget-background, var(--editor-background, #252526));
-  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.22));
-  border-radius: 4px;
-  overflow: hidden;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
-}
-[data-testid="scenario-editor"] .react-flow__controls-button {
-  background: var(--editorWidget-background, var(--editor-background, #252526));
-  border-bottom: 1px solid var(--panel-border, rgba(127, 127, 127, 0.18));
-  color: var(--editor-foreground, #d4d4d4);
-}
-[data-testid="scenario-editor"] .react-flow__controls-button:hover {
-  background: var(--list-hoverBackground, rgba(127, 127, 127, 0.14));
-}
-[data-testid="scenario-editor"] .react-flow__controls-button svg {
-  fill: var(--editor-foreground, #d4d4d4);
-}
-/* The minimap toggle paints a codicon FONT glyph (not an SVG), so the global
- * `.codicon { color: ... !important }` rule overrides the button's inherited
- * colour. Pin it (with matching `!important`) to the same var the zoom SVGs
- * fill with, so the map icon matches the zoom icons exactly. */
-[data-testid="scenario-editor"] .react-flow__controls-button .codicon {
-  color: var(--editor-foreground, #d4d4d4) !important;
-}
-[data-testid="scenario-editor"] .react-flow__controls-button[data-active="true"] {
-  color: var(--scn-flow-signal, #facc15);
-}
-[data-testid="scenario-editor"] .react-flow__controls-button[data-active="true"] .codicon {
-  color: var(--scn-flow-signal, #facc15) !important;
-}
-
-/* Minimap (bottom-right): themed panel + dimmed mask. */
-[data-testid="scenario-editor"] .scn-minimap {
-  background: var(--editorWidget-background, var(--editor-background, #252526));
-  border: 1px solid var(--panel-border, rgba(127, 127, 127, 0.22));
-  border-radius: 4px;
-}
-[data-testid="scenario-editor"] .scn-minimap .react-flow__minimap-mask {
-  fill: var(--editor-background, #1e1e1e);
-  fill-opacity: 0.6;
-}
+/* The zoom/fit/minimap control + minimap styling — including the active
+ * minimap-toggle's yellow accent — is owned by the shared ECUI GraphCanvas
+ * (graphCanvas.css), which now defaults to the same warm yellow on every
+ * surface. No scenario-specific override is needed. */
 
 /* Sub-scenario log preview popover: a titled card hosting a read-only graph.
  * The hosting ECUI Tooltip caps its own width (~max-content for a text tip),

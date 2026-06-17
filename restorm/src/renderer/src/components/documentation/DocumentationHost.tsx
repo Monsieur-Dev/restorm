@@ -61,6 +61,10 @@ export interface DocumentationHostProps {
   tagColors?: Record<string, string>
   /** Optional test id stamped on the root container. */
   testId?: string
+  /** Show the minimap on the model graph. The full doc / object view
+   * leaves this at its default (`true`); the compact search-result
+   * popover passes `false` so the model graph stays minimal. */
+  showModelGraphMinimap?: boolean
 }
 
 /**
@@ -88,7 +92,8 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
   hideAddRequest = false,
   showApiInfo = false,
   tagColors,
-  testId
+  testId,
+  showModelGraphMinimap = true
 }) => {
   /** Resolve the effective `onAddRequest` once: when `hideAddRequest`
    * is set, force-drop the callback even if a parent wired one. The
@@ -352,7 +357,7 @@ export const DocumentationHost: React.FC<DocumentationHostProps> = ({
           {topLevelSectionLevel === 1
             ? <h1 className="documentation-host__section-title">Models</h1>
             : <h2 className="documentation-host__section-title">Models</h2>}
-          <ModelGraph ref={modelGraphRef} models={structuralModels} />
+          <ModelGraph ref={modelGraphRef} models={structuralModels} showMinimap={showModelGraphMinimap} />
           <ModelGraphLegend />
         </section>
       ) : null}
