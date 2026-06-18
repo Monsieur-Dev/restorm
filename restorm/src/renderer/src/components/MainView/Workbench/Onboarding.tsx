@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { MosaicLayout } from 'electron-core-ui/renderer'
+import { MosaicLayout, ScrollableElement } from 'electron-core-ui/renderer'
 import { ImportCard, RecentActivityCard, ApiCard, TipsCard, TIP_COUNT } from './EmptyBenchCards'
 import { isEnvironmentFolder, type EnvironmentFolder, type FolderItem } from '../../../../../shared/types/folderTypes'
 import './EmptyBench.css'
@@ -72,22 +72,36 @@ export const Onboarding: React.FC<OnboardingProps> = ({ rootItems, projectUuid, 
   const [tipSeeds] = useState<number[]>(() => pickDistinctTipSeeds(EMPTY_BOARD_MIN_TIPS))
 
   return (
+    // The outer wrapper fills the workbench's empty slot (a flex column) but
+    // does NOT scroll itself — the themed ECUI `ScrollableElement` owns the
+    // scroll so overflow shows the app-consistent scrollbar instead of the
+    // native OS one. `flex:1; minHeight:0` on the ScrollableElement gives it a
+    // definite measured height, so its inner `height:100%` content resolves and
+    // scrolls; the visual padding/centering lives on the inner content wrapper
+    // so the scrollbar sits at the panel edge.
     <div className="empty-bench-container">
-      <img
-        src="/imgs/logo_400.png"
-        alt="Restorm"
-        className="empty-bench-logo"
-      />
-      <MosaicLayout data-testid="empty-bench-mosaic">
-        <ImportCard onImport={onImport} />
-        <RecentActivityCard rootItems={rootItems} onOpenRequest={onOpenRequest} projectUuid={projectUuid} />
-        {envFolders.map((folder) => (
-          <ApiCard key={folder.id} folder={folder} projectUuid={projectUuid} onOpenRequest={onOpenRequest} />
-        ))}
-        {isEmptyBoard
-          ? tipSeeds.map((seed) => <TipsCard key={`tips-${seed}`} initialIndex={seed} />)
-          : <TipsCard />}
-      </MosaicLayout>
+      <ScrollableElement
+        data-testid="empty-bench-scroll"
+        style={{ flex: 1, minHeight: 0 }}
+      >
+        <div className="empty-bench-scroll-inner">
+          <img
+            src="/imgs/logo_400.png"
+            alt="Restorm"
+            className="empty-bench-logo"
+          />
+          <MosaicLayout data-testid="empty-bench-mosaic">
+            <ImportCard onImport={onImport} />
+            <RecentActivityCard rootItems={rootItems} onOpenRequest={onOpenRequest} projectUuid={projectUuid} />
+            {envFolders.map((folder) => (
+              <ApiCard key={folder.id} folder={folder} projectUuid={projectUuid} onOpenRequest={onOpenRequest} />
+            ))}
+            {isEmptyBoard
+              ? tipSeeds.map((seed) => <TipsCard key={`tips-${seed}`} initialIndex={seed} />)
+              : <TipsCard />}
+          </MosaicLayout>
+        </div>
+      </ScrollableElement>
     </div>
   )
 }
