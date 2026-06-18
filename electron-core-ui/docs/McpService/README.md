@@ -234,6 +234,22 @@ Invokes a registered tool by name from inside the host process, returning whatev
 const result = await Promise.resolve(mcp.invokeTool('screenshot', {}))
 ```
 
+### Served-call log buffer
+
+The service retains a ring buffer of the `tools/call`s it executed **locally**, so a host can surface "what MCP calls has this app served" in a viewer (see the [McpLogs](../McpLogs/README.md) component). A call the cross-instance bridge **forwards** to a peer is answered before local dispatch, so passthrough calls are never recorded — only this instance's own traffic.
+
+| Member | Notes |
+|--------|-------|
+| `getServedCalls(): McpServedCallEntry[]` | Snapshot, newest-first. |
+| `onServedCall(cb): () => void` | Fires on record / clear / cap-trim. Returns an unsubscribe fn. |
+| `getLogRetentionCap(): number` | Current cap (default `DEFAULT_SERVED_CALL_CAP` = 100). |
+| `setLogRetentionCap(cap: number)` | Floored to a non-negative integer; lowering it evicts the oldest entries immediately. `0` disables retention and drops the buffer. |
+| `getCaptureRetentionCap(): number` | Current capture-retention cap (default `DEFAULT_CAPTURE_RETENTION_CAP` = 20) — how many recent entries keep their heavy capture payload (image base64 / video temp file). |
+| `setCaptureRetentionCap(cap: number)` | Floored to a non-negative integer; lowering it prunes now — older captures drop their payload and a video's on-disk temp file is deleted. `0` keeps no capture payloads. |
+| `clearServedCalls()` | Empties the buffer. |
+
+Each `McpServedCallEntry` carries `timestamp`, `tool`, `payload` (JSON-stringified arguments, truncated past ~8 KB with a `…(truncated)` marker + the original `payloadBytes`), and — for `screenshot` / `screencast-stop` — an inline `capture` (base64 PNG or temp video path). Capture payloads are kept only for the most recent few entries to bound memory.
+
 ## Built-in tools
 
 ### `screenshot`

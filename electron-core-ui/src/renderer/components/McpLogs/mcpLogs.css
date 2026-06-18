@@ -1,0 +1,171 @@
+/*
+ * MCP call-logs viewer. A scannable list of the `tools/call`s the embedded
+ * MCP server executed locally — tool name, timestamp, payload, and any
+ * inline screenshot / screencast capture. Colours pull from the workbench
+ * theme tokens so the surface matches the rest of the app.
+ */
+
+.ecui-mcp-logs-panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  color: var(--foreground);
+}
+
+.ecui-mcp-logs-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--panel-border, var(--editorGroup-border, rgb(128, 128, 128, 0.2)));
+  flex: 0 0 auto;
+}
+
+.ecui-mcp-logs-title {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.ecui-mcp-logs-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.6;
+  font-size: 13px;
+  padding: 24px;
+  text-align: center;
+}
+
+.ecui-mcp-logs-scroll {
+  flex: 1;
+  min-height: 0;
+}
+
+.ecui-mcp-logs-list {
+  display: flex;
+  flex-direction: column;
+
+  /* Keep the timestamp + bubbles clear of the ECUI scrollbar on the right
+   * (pairs with the response bubble being full-width-minus-100px). */
+  padding-right: 30px;
+}
+
+.ecui-mcp-logs-row {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--panel-border, var(--editorGroup-border, rgb(128, 128, 128, 0.12)));
+}
+
+.ecui-mcp-logs-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ecui-mcp-logs-tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+/* Human-readable title — primary. */
+.ecui-mcp-logs-tool-title {
+  font-weight: 600;
+}
+
+/* Raw tool name — secondary subtitle for power users. */
+.ecui-mcp-logs-tool-raw {
+  font-size: 10.5px;
+  font-weight: 400;
+  opacity: 0.55;
+  font-family: var(--monospace-font, monospace);
+}
+
+.ecui-mcp-logs-time {
+  font-size: 11px;
+  opacity: 0.65;
+  font-family: var(--monospace-font, monospace);
+  white-space: nowrap;
+}
+
+/* Chat-style layout: the request (client args) and the response (tool result)
+ * sit on opposite sides, like a conversation. Empty payloads are hidden by the
+ * component, so an argument-less call shows only its response (and vice-versa). */
+.ecui-mcp-logs-chat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+/* The payload is the shared ECUI ChatBubble (it owns tint / padding / radius /
+ * alignment). McpLogs only owns the conversation sizing below + blending the
+ * MarkdownViewer code block into the bubble. */
+.ecui-mcp-logs-payload-scroll {
+  min-height: 0;
+}
+
+/* Strip the MarkdownViewer code-block's own frame so it blends into the chat
+ * bubble: transparent background, no border/margin, wrap long JSON lines. */
+.ecui-mcp-logs-payload .markdown-code-block,
+.ecui-mcp-logs-payload .markdown-code-block-inner,
+.ecui-mcp-logs-payload .markdown-code-block pre {
+  margin: 0;
+  border: none;
+  background: transparent;
+}
+
+.ecui-mcp-logs-payload .markdown-code-block pre {
+  padding: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+
+/* Request = the client's `tools/call` arguments. Stays narrow — args are
+ * small. (Alignment + tint come from the ChatBubble outgoing variant.) */
+.ecui-mcp-logs-request {
+  max-width: 85%;
+}
+
+/* Response = the tool's result. Takes nearly the full row width (minus a small
+ * right gutter) so the JSON has room to render readably instead of wrapping
+ * one token per line. (Alignment + tint come from the ChatBubble incoming
+ * variant.) */
+.ecui-mcp-logs-response {
+  width: calc(100% - 100px);
+}
+
+.ecui-mcp-logs-truncated {
+  opacity: 0.55;
+  font-style: italic;
+}
+
+.ecui-mcp-logs-capture {
+  margin-top: 8px;
+}
+
+.ecui-mcp-logs-capture-caption {
+  font-size: 11px;
+  opacity: 0.65;
+  margin-bottom: 4px;
+}
+
+.ecui-mcp-logs-capture-evicted {
+  font-size: 11px;
+  opacity: 0.55;
+  font-style: italic;
+}
+
+/* Icon + caption shown as the enlarged-view modal title. */
+.ecui-mcp-logs-capture-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

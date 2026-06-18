@@ -52,7 +52,8 @@
     "documentation": "Dokumentáció",
     "keyboardShortcuts": "Billentyűparancsok",
     "releaseNotes": "Kiadási megjegyzések",
-    "reportIssue": "Hiba bejelentése"
+    "reportIssue": "Hiba bejelentése",
+    "mcpLogs": "MCP naplók"
   },
   "settings": {
     "title": "Beállítások",
@@ -332,7 +333,38 @@
   "statusbar": {
     "mcp": {
       "serverRunningOnPort": "Az MCP-kiszolgáló a(z) {{port}} porton fut",
-      "sessionName": "Munkamenet: {{name}}"
+      "sessionName": "Munkamenet: {{name}}",
+      "viewLogs": "Naplók megtekintése"
     }
+  },
+  "mcpToolTitles": {
+    "screenshot": "Képernyőkép",
+    "screencastStart": "Képernyőfelvétel indítása",
+    "screencastStop": "Képernyőfelvétel leállítása",
+    "refresh": "Ablak újratöltése",
+    "domQuery": "DOM lekérdezése",
+    "consoleLogs": "Konzolnaplók olvasása",
+    "dispatchEvent": "DOM-esemény küldése",
+    "typeText": "Szöveg beírása",
+    "evaluate": "JavaScript futtatása",
+    "exit": "Kilépés az alkalmazásból",
+    "waitFor": "Várakozás feltételre",
+    "keyboardShortcut": "Billentyűparancs lenyomása",
+    "devtools": "DevTools be/ki",
+    "windowInfo": "Ablakinformációk",
+    "storage": "Tároló olvasása/írása",
+    "scrollIntoView": "Görgetés a nézetbe",
+    "injectCss": "CSS beszúrása",
+    "wait": "Várakozás",
+    "getComputedStyle": "Számított stílus lekérése",
+    "getWindows": "Ablakok listázása",
+    "dragDrop": "Fogd és vidd",
+    "mouseInput": "Egérbevitel",
+    "batch": "Eszközköteg futtatása",
+    "openMiniBrowser": "Miniböngésző megnyitása",
+    "miniBrowserExecute": "Kód futtatása a miniböngészőben",
+    "openConsole": "Konzol megnyitása",
+    "consoleClear": "Konzol törlése",
+    "setTabMaximized": "Lap teljes méret/visszaállítás"
   }
 }

@@ -52,7 +52,8 @@
     "documentation": "文档",
     "keyboardShortcuts": "键盘快捷键",
     "releaseNotes": "发行说明",
-    "reportIssue": "报告问题"
+    "reportIssue": "报告问题",
+    "mcpLogs": "MCP 日志"
   },
   "settings": {
     "title": "设置",
@@ -332,7 +333,38 @@
   "statusbar": {
     "mcp": {
       "serverRunningOnPort": "MCP 服务器正在端口 {{port}} 上运行",
-      "sessionName": "会话：{{name}}"
+      "sessionName": "会话：{{name}}",
+      "viewLogs": "查看日志"
     }
+  },
+  "mcpToolTitles": {
+    "screenshot": "截图",
+    "screencastStart": "开始录屏",
+    "screencastStop": "停止录屏",
+    "refresh": "重新加载窗口",
+    "domQuery": "查询 DOM",
+    "consoleLogs": "读取控制台日志",
+    "dispatchEvent": "派发 DOM 事件",
+    "typeText": "输入文本",
+    "evaluate": "运行 JavaScript",
+    "exit": "退出应用",
+    "waitFor": "等待条件",
+    "keyboardShortcut": "按下键盘快捷键",
+    "devtools": "切换开发者工具",
+    "windowInfo": "窗口信息",
+    "storage": "读写存储",
+    "scrollIntoView": "滚动到可见区域",
+    "injectCss": "注入 CSS",
+    "wait": "等待",
+    "getComputedStyle": "获取计算样式",
+    "getWindows": "列出窗口",
+    "dragDrop": "拖放",
+    "mouseInput": "鼠标输入",
+    "batch": "批量运行工具",
+    "openMiniBrowser": "打开迷你浏览器",
+    "miniBrowserExecute": "在迷你浏览器中运行代码",
+    "openConsole": "打开控制台",
+    "consoleClear": "清空控制台",
+    "setTabMaximized": "最大化/还原标签页"
   }
 }

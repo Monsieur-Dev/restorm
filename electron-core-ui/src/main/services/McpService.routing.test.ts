@@ -29,7 +29,7 @@ vi.mock('./LoggerService', () => ({
 }))
 
 import { z } from 'zod'
-import { McpService, MCP_SESSION_ROUTING_KEY, MCP_FORWARDED_HEADER } from './McpService'
+import { McpService, MCP_SESSION_ROUTING_KEY, MCP_FORWARDED_HEADER, type McpToolConfig } from './McpService'
 import { writeMcpDiscoveryFile, cleanupMcpDiscoveryFile } from './mcpDiscovery'
 
 interface ProbeResult { status: number; body: string }
@@ -102,9 +102,10 @@ describe('McpService cross-instance routing bridge', () => {
   const serviceA = new McpService({ sessionName: 'session-a', discoveryDir: DIR })
   let portA: number
 
-  const echoTool = (label: string): [string, Record<string, unknown>, (args: Record<string, unknown>) => unknown] => [
+  const echoTool = (label: string): [string, McpToolConfig, (args: Record<string, unknown>) => unknown] => [
     'echo',
     {
+      titleKey: 'mcpToolTitles.echo',
       title: 'Echo',
       description: 'Echo received args + which instance ran.',
       // Declare `foo` so the SDK's Zod validation keeps it (an empty

@@ -3,6 +3,24 @@ name: Solarized (dark)
 type: dark
 
 colors:
+  # Chat-bubble tints: Solarized base content + cyan accent over base03.
+  chat-bubble.incoming.background: "rgb(131, 148, 150, 0.10)"
+  chat-bubble.outgoing.background: "rgb(42, 161, 152, 0.32)"
+  # Syntax palette: the canonical Solarized accent set.
+  hljs.foreground: "#839496"
+  hljs.keyword: "#859900"
+  hljs.type: "#b58900"
+  hljs.number: "#2aa198"
+  hljs.string: "#2aa198"
+  hljs.regexp: "#dc322f"
+  hljs.comment: "#586e75"
+  hljs.meta: "#268bd2"
+  hljs.variable: "#268bd2"
+  hljs.attr: "#268bd2"
+  hljs.section: "#cb4b16"
+  hljs.selector: "#cb4b16"
+  hljs.addition.background: "#19402a"
+  hljs.deletion.background: "#42201f"
   scenarioNode.background: "#073642"
   scenarioNode.headerBackground: "#0a4350"
   scenarioNode.headerBackgroundSelected: "#00566b"

@@ -4,6 +4,24 @@ description: A dark theme with deep blue tones
 type: dark
 
 colors:
+  # Chat-bubble tints drawn from the Abyss navy surface + blue accent.
+  chat-bubble.incoming.background: "rgb(102, 136, 204, 0.10)"
+  chat-bubble.outgoing.background: "rgb(56, 90, 156, 0.42)"
+  # Syntax palette from the Abyss editor identity (blues, magenta, gold).
+  hljs.foreground: "#6688cc"
+  hljs.keyword: "#225588"
+  hljs.type: "#9966b8"
+  hljs.number: "#46a609"
+  hljs.string: "#22aa44"
+  hljs.regexp: "#e9ad3b"
+  hljs.comment: "#384887"
+  hljs.meta: "#5588aa"
+  hljs.variable: "#2277ff"
+  hljs.attr: "#9966b8"
+  hljs.section: "#ddbb88"
+  hljs.selector: "#ddbb88"
+  hljs.addition.background: "#10301f"
+  hljs.deletion.background: "#3a0d12"
   scenarioNode.background: "#15213c"
   scenarioNode.headerBackground: "#1f2d4f"
   scenarioNode.headerBackgroundSelected: "#0e4391"

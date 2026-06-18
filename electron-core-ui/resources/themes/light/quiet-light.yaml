@@ -3,6 +3,24 @@ name: Quiet Light
 type: light
 
 colors:
+  # Chat-bubble tints: soft grey lift + the Quiet Light violet accent.
+  chat-bubble.incoming.background: "rgb(0, 0, 0, 0.045)"
+  chat-bubble.outgoing.background: "rgb(112, 86, 151, 0.16)"
+  # Syntax palette: the pastel Quiet Light token set.
+  hljs.foreground: "#333333"
+  hljs.keyword: "#4b69c6"
+  hljs.type: "#4f76ac"
+  hljs.number: "#ad95b8"
+  hljs.string: "#448c27"
+  hljs.regexp: "#4b69c6"
+  hljs.comment: "#aaaaaa"
+  hljs.meta: "#7a3e9d"
+  hljs.variable: "#7a3e9d"
+  hljs.attr: "#9b6700"
+  hljs.section: "#a44185"
+  hljs.selector: "#a44185"
+  hljs.addition.background: "#dafbe1"
+  hljs.deletion.background: "#ffd7d5"
   scenarioNode.background: "#ffffff"
   scenarioNode.headerBackground: "#efeaf3"
   scenarioNode.headerBackgroundSelected: "#ddd0ee"

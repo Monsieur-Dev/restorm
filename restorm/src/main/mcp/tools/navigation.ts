@@ -50,6 +50,7 @@ export function registerNavigationTools(mcp: McpService): void {
   mcp.registerTool(
     'open_tab',
     {
+      titleKey: 'mcpToolTitles.openTab',
       title: 'Open item in workbench tab',
       description:
         'Open a folder, env-folder, request or scenario in a new workbench tab — focuses the ' +
@@ -75,6 +76,7 @@ export function registerNavigationTools(mcp: McpService): void {
   mcp.registerTool(
     'close_tab',
     {
+      titleKey: 'mcpToolTitles.closeTab',
       title: 'Close a workbench tab',
       description:
         'Close the workbench tab showing the given item. Validates the id against the open ' +
@@ -99,6 +101,7 @@ export function registerNavigationTools(mcp: McpService): void {
   mcp.registerTool(
     'reveal_in_tree',
     {
+      titleKey: 'mcpToolTitles.revealInTree',
       title: 'Reveal item in sidebar tree',
       description:
         'Expand the sidebar ancestors of the item, scroll the tree to the node, and select it. ' +

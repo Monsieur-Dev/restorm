@@ -3,6 +3,24 @@ name: Default Dark Modern
 description: A modern dark theme with refined colors
 
 colors:
+  # Chat-bubble tints: neutral surface lift + the modern azure accent.
+  chat-bubble.incoming.background: "rgb(255, 255, 255, 0.07)"
+  chat-bubble.outgoing.background: "rgb(0, 120, 212, 0.34)"
+  # Syntax palette: VS Code Dark Modern token identity.
+  hljs.foreground: "#cccccc"
+  hljs.keyword: "#569cd6"
+  hljs.type: "#4ec9b0"
+  hljs.number: "#b5cea8"
+  hljs.string: "#ce9178"
+  hljs.regexp: "#d16969"
+  hljs.comment: "#6a9955"
+  hljs.meta: "#9b9b9b"
+  hljs.variable: "#9cdcfe"
+  hljs.attr: "#9cdcfe"
+  hljs.section: "#dcdcaa"
+  hljs.selector: "#d7ba7d"
+  hljs.addition.background: "#16301c"
+  hljs.deletion.background: "#431b1b"
   scenarioNode.background: "#232323"
   scenarioNode.headerBackground: "#2d2d2d"
   scenarioNode.headerBackgroundSelected: "#0e4a7b"

@@ -52,7 +52,8 @@
     "documentation": "Documentatie",
     "keyboardShortcuts": "Sneltoetsen",
     "releaseNotes": "Release-opmerkingen",
-    "reportIssue": "Probleem melden"
+    "reportIssue": "Probleem melden",
+    "mcpLogs": "MCP-logboeken"
   },
   "settings": {
     "title": "Instellingen",
@@ -332,7 +333,38 @@
   "statusbar": {
     "mcp": {
       "serverRunningOnPort": "MCP-server draait op poort {{port}}",
-      "sessionName": "Sessie: {{name}}"
+      "sessionName": "Sessie: {{name}}",
+      "viewLogs": "Logboeken bekijken"
     }
+  },
+  "mcpToolTitles": {
+    "screenshot": "Schermafbeelding",
+    "screencastStart": "Schermopname starten",
+    "screencastStop": "Schermopname stoppen",
+    "refresh": "Venster herladen",
+    "domQuery": "DOM bevragen",
+    "consoleLogs": "Consolelogboeken lezen",
+    "dispatchEvent": "Een DOM-gebeurtenis verzenden",
+    "typeText": "Tekst typen",
+    "evaluate": "JavaScript uitvoeren",
+    "exit": "App afsluiten",
+    "waitFor": "Wachten op een voorwaarde",
+    "keyboardShortcut": "Een sneltoets indrukken",
+    "devtools": "DevTools in-/uitschakelen",
+    "windowInfo": "Vensterinfo",
+    "storage": "Opslag lezen/schrijven",
+    "scrollIntoView": "In beeld scrollen",
+    "injectCss": "CSS injecteren",
+    "wait": "Wachten",
+    "getComputedStyle": "Berekende stijl ophalen",
+    "getWindows": "Vensters opsommen",
+    "dragDrop": "Slepen en neerzetten",
+    "mouseInput": "Muisinvoer",
+    "batch": "Een reeks tools uitvoeren",
+    "openMiniBrowser": "De minibrowser openen",
+    "miniBrowserExecute": "Code uitvoeren in de minibrowser",
+    "openConsole": "De console openen",
+    "consoleClear": "De console wissen",
+    "setTabMaximized": "Tabblad maximaliseren/herstellen"
   }
 }

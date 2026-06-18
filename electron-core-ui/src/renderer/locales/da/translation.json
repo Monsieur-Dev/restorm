@@ -52,7 +52,8 @@
     "documentation": "Dokumentation",
     "keyboardShortcuts": "Tastaturgenveje",
     "releaseNotes": "Udgivelsesnoter",
-    "reportIssue": "Rapportér problem"
+    "reportIssue": "Rapportér problem",
+    "mcpLogs": "MCP-logge"
   },
   "settings": {
     "title": "Indstillinger",
@@ -332,7 +333,38 @@
   "statusbar": {
     "mcp": {
       "serverRunningOnPort": "MCP-server kører på port {{port}}",
-      "sessionName": "Session: {{name}}"
+      "sessionName": "Session: {{name}}",
+      "viewLogs": "Vis logge"
     }
+  },
+  "mcpToolTitles": {
+    "screenshot": "Skærmbillede",
+    "screencastStart": "Start skærmoptagelse",
+    "screencastStop": "Stop skærmoptagelse",
+    "refresh": "Genindlæs vindue",
+    "domQuery": "Forespørg DOM",
+    "consoleLogs": "Læs konsollogfiler",
+    "dispatchEvent": "Udsend en DOM-hændelse",
+    "typeText": "Skriv tekst",
+    "evaluate": "Kør JavaScript",
+    "exit": "Afslut appen",
+    "waitFor": "Vent på en betingelse",
+    "keyboardShortcut": "Tryk på en tastaturgenvej",
+    "devtools": "Slå DevTools til/fra",
+    "windowInfo": "Vinduesinfo",
+    "storage": "Læs/skriv lager",
+    "scrollIntoView": "Rul ind i visning",
+    "injectCss": "Indsæt CSS",
+    "wait": "Vent",
+    "getComputedStyle": "Hent beregnet typografi",
+    "getWindows": "Vis vinduer",
+    "dragDrop": "Træk og slip",
+    "mouseInput": "Museinput",
+    "batch": "Kør en serie værktøjer",
+    "openMiniBrowser": "Åbn minibrowseren",
+    "miniBrowserExecute": "Kør kode i minibrowseren",
+    "openConsole": "Åbn konsollen",
+    "consoleClear": "Ryd konsollen",
+    "setTabMaximized": "Maksimer/gendan fanen"
   }
 }

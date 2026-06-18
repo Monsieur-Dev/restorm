@@ -129,6 +129,7 @@ export function registerWriteTools(mcp: McpService): void {
   mcp.registerTool(
     'create_folder',
     {
+      titleKey: 'mcpToolTitles.createFolder',
       title: 'Create folder',
       description:
         'Create a new folder. With `parentId` null (or omitted), creates a root env-folder. ' +
@@ -164,6 +165,7 @@ export function registerWriteTools(mcp: McpService): void {
   mcp.registerTool(
     'create_request',
     {
+      titleKey: 'mcpToolTitles.createRequest',
       title: 'Create request',
       description:
         'Create a new request in a folder. `protocol` picks the request type (http / graphql / ' +
@@ -200,6 +202,7 @@ export function registerWriteTools(mcp: McpService): void {
   mcp.registerTool(
     'create_scenario',
     {
+      titleKey: 'mcpToolTitles.createScenario',
       title: 'Create scenario',
       description:
         'Create a new scenario (the dataflow-graph tree item) as a child of a folder, env-folder, or ' +
@@ -231,6 +234,7 @@ export function registerWriteTools(mcp: McpService): void {
   mcp.registerTool(
     'rename_item',
     {
+      titleKey: 'mcpToolTitles.renameItem',
       title: 'Rename a folder, request or scenario',
       description:
         'Update the `name` of an existing folder, env-folder, request or scenario. The new name ' +
@@ -275,6 +279,7 @@ export function registerWriteTools(mcp: McpService): void {
   mcp.registerTool(
     'update_request',
     {
+      titleKey: 'mcpToolTitles.updateRequest',
       title: 'Update arbitrary fields on a request',
       description:
         'Apply a partial-patch to an existing request: any field on the typed request shape is ' +
@@ -360,6 +365,7 @@ export function registerWriteTools(mcp: McpService): void {
   mcp.registerTool(
     'update_folder',
     {
+      titleKey: 'mcpToolTitles.updateFolder',
       title: 'Update arbitrary fields on a folder or env-folder',
       description:
         'Apply a partial-patch to an existing folder. Whitelisted fields cover both Folder and ' +
@@ -413,6 +419,7 @@ export function registerWriteTools(mcp: McpService): void {
   mcp.registerTool(
     'set_favorite',
     {
+      titleKey: 'mcpToolTitles.setFavorite',
       title: 'Toggle (or set) the favorite flag on an item',
       description:
         'Mark a folder, env-folder or request as favorite (or remove it). Favorites are a ' +
@@ -446,6 +453,7 @@ export function registerWriteTools(mcp: McpService): void {
   mcp.registerTool(
     'delete_item',
     {
+      titleKey: 'mcpToolTitles.deleteItem',
       title: 'Delete a folder or request',
       description:
         'Delete a folder, env-folder or request by id. Folder deletes cascade to all child items. ' +
@@ -523,6 +531,7 @@ export function registerWriteTools(mcp: McpService): void {
   mcp.registerTool(
     'list_env_variables',
     {
+      titleKey: 'mcpToolTitles.listEnvVariables',
       title: 'List variables of an environment',
       description:
         'Return every key + serialised value for the given `Environment`. Use this to discover ' +
@@ -555,6 +564,7 @@ export function registerWriteTools(mcp: McpService): void {
   mcp.registerTool(
     'set_env_variable',
     {
+      titleKey: 'mcpToolTitles.setEnvVariable',
       title: 'Create or update one environment variable',
       description:
         'Upsert a single variable on the given `Environment`. If a variable with the same key ' +
@@ -652,6 +662,7 @@ export function registerWriteTools(mcp: McpService): void {
   mcp.registerTool(
     'delete_env_variable',
     {
+      titleKey: 'mcpToolTitles.deleteEnvVariable',
       title: 'Delete one environment variable',
       description:
         'Remove a variable by key from the given `Environment`. No-op when the key isn\'t present ' +
@@ -718,6 +729,7 @@ export function registerWriteTools(mcp: McpService): void {
   mcp.registerTool(
     'list_environments',
     {
+      titleKey: 'mcpToolTitles.listEnvironments',
       title: 'List the environments of an env-folder',
       description:
         'Return the environment tree of an env-folder: every top-level environment with its ' +
@@ -747,6 +759,7 @@ export function registerWriteTools(mcp: McpService): void {
   mcp.registerTool(
     'create_environment',
     {
+      titleKey: 'mcpToolTitles.createEnvironment',
       title: 'Create an environment or sub-environment',
       description:
         'Add a new environment to an env-folder. Omit `parentEnvironmentId` for a top-level ' +
@@ -778,6 +791,7 @@ export function registerWriteTools(mcp: McpService): void {
   mcp.registerTool(
     'rename_environment',
     {
+      titleKey: 'mcpToolTitles.renameEnvironment',
       title: 'Rename an environment',
       description: 'Rename an environment or sub-environment by id. Triggers an autosave.',
       inputSchema: {
@@ -801,6 +815,7 @@ export function registerWriteTools(mcp: McpService): void {
   mcp.registerTool(
     'delete_environment',
     {
+      titleKey: 'mcpToolTitles.deleteEnvironment',
       title: 'Delete an environment or sub-environment',
       description:
         'Remove an environment (and, recursively, its sub-environments) by id. Returns ' +
@@ -823,6 +838,7 @@ export function registerWriteTools(mcp: McpService): void {
   mcp.registerTool(
     'refresh_environment',
     {
+      titleKey: 'mcpToolTitles.refreshEnvironment',
       title: 'Re-resolve an environment\'s secret variables',
       description:
         'Force a re-resolution of every secret variable the environment OWNS: drops the ' +
@@ -887,6 +903,7 @@ export function registerWriteTools(mcp: McpService): void {
   mcp.registerTool(
     'list_custom_value_lists',
     {
+      titleKey: 'mcpToolTitles.listCustomValueLists',
       title: 'List the custom value lists of an env folder',
       description:
         'Return every user-defined custom value list (label → value maps) on the given environment ' +
@@ -908,6 +925,7 @@ export function registerWriteTools(mcp: McpService): void {
   mcp.registerTool(
     'create_custom_value_list',
     {
+      titleKey: 'mcpToolTitles.createCustomValueList',
       title: 'Create a custom value list',
       description:
         'Append a new named custom value list to the env folder. Example: name "Couleur" with ' +
@@ -935,6 +953,7 @@ export function registerWriteTools(mcp: McpService): void {
   mcp.registerTool(
     'update_custom_value_list',
     {
+      titleKey: 'mcpToolTitles.updateCustomValueList',
       title: 'Update a custom value list',
       description:
         'Rename a custom value list and/or replace its entries. Omit `name` to keep the current ' +
@@ -971,6 +990,7 @@ export function registerWriteTools(mcp: McpService): void {
   mcp.registerTool(
     'delete_custom_value_list',
     {
+      titleKey: 'mcpToolTitles.deleteCustomValueList',
       title: 'Delete a custom value list',
       description:
         'Remove a custom value list from the env folder by id. Returns `removed: false` when the ' +

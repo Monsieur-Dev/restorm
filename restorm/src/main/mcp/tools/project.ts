@@ -32,6 +32,7 @@ export function registerProjectTools(mcp: McpService): void {
   mcp.registerTool(
     'list_recent_projects',
     {
+      titleKey: 'mcpToolTitles.listRecentProjects',
       title: 'List recently opened projects',
       description:
         'List the recently opened .restorm projects (most recent first), so a client can discover what to open ' +
@@ -49,6 +50,7 @@ export function registerProjectTools(mcp: McpService): void {
   mcp.registerTool(
     'create_project',
     {
+      titleKey: 'mcpToolTitles.createProject',
       title: 'Create new project',
       description:
         'Create a new empty restorm project file at the given absolute path and open it. ' +
@@ -88,6 +90,7 @@ export function registerProjectTools(mcp: McpService): void {
   mcp.registerTool(
     'open_project',
     {
+      titleKey: 'mcpToolTitles.openProject',
       title: 'Open an existing project',
       description:
         'Open an existing .restorm file (single-file or folder-structure). Triggers the same ' +
@@ -115,6 +118,7 @@ export function registerProjectTools(mcp: McpService): void {
   mcp.registerTool(
     'save_project',
     {
+      titleKey: 'mcpToolTitles.saveProject',
       title: 'Save the open project',
       description:
         'Trigger the autosave pipeline so any pending in-memory changes (from the MCP write tools, ' +

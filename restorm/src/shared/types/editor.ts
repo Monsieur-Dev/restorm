@@ -153,6 +153,16 @@ export interface SettingsTab extends BaseRestormTab {
   tabType: 'settings'
 }
 
+/** Tab displaying the MCP call-logs viewer (the calls the embedded MCP
+ * server has executed locally — tool / timestamp / payload, plus inline
+ * captures). Singleton, identified by `tabId` `mcp-logs:singleton`. Mounted
+ * by `RestormWorkbench`'s `renderTabContent` branch to the shared ECUI
+ * `<McpLogsPanel />`. Opened from the status-bar `mcp` tooltip link and the
+ * `View → MCP logs` menu item; same tab-or-modal pattern as Settings. */
+export interface McpLogsTab extends BaseRestormTab {
+  tabType: 'mcp-logs'
+}
+
 /** Legacy tab type for backward compatibility */
 export interface LegacyTab extends BaseRestormTab {
   tabType?: undefined
@@ -175,6 +185,7 @@ export type RestormEditorTab =
   | FirewallTab
   | MiniBrowserTab
   | SettingsTab
+  | McpLogsTab
   | LegacyTab
 
 /** Stable singleton id for the Console workbench tab.
@@ -193,6 +204,12 @@ export const MINI_BROWSER_TAB_ID = 'mini-browser:singleton'
  * button + `View → Settings` open-or-focus this tab when a workbench
  * is active (and the modal otherwise). */
 export const SETTINGS_TAB_ID = 'settings:singleton'
+
+/** Stable singleton id for the MCP call-logs workbench tab. The status-bar
+ * `mcp` tooltip link + `View → MCP logs` open-or-focus this tab when a
+ * workbench is active (and a full-screen modal otherwise). Deriving the nav
+ * key from this stable id keeps the tab in the Ctrl+Tab MRU ordering. */
+export const MCP_LOGS_TAB_ID = 'mcp-logs:singleton'
 
 /** @deprecated Use RestormEditorTab instead */
 export type restormEditorTab = RestormEditorTab
@@ -265,4 +282,8 @@ export function isMiniBrowserTab(tab: RestormEditorTab): tab is MiniBrowserTab {
 /** Type guard for SettingsTab */
 export function isSettingsTab(tab: RestormEditorTab): tab is SettingsTab {
   return tab.tabType === 'settings'
+}
+
+export function isMcpLogsTab(tab: RestormEditorTab): tab is McpLogsTab {
+  return tab.tabType === 'mcp-logs'
 }

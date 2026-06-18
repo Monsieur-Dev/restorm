@@ -52,7 +52,8 @@
     "documentation": "문서",
     "keyboardShortcuts": "키보드 단축키",
     "releaseNotes": "릴리스 노트",
-    "reportIssue": "문제 신고"
+    "reportIssue": "문제 신고",
+    "mcpLogs": "MCP 로그"
   },
   "settings": {
     "title": "설정",
@@ -332,7 +333,38 @@
   "statusbar": {
     "mcp": {
       "serverRunningOnPort": "MCP 서버가 포트 {{port}}에서 실행 중입니다",
-      "sessionName": "세션: {{name}}"
+      "sessionName": "세션: {{name}}",
+      "viewLogs": "로그 보기"
     }
+  },
+  "mcpToolTitles": {
+    "screenshot": "스크린샷",
+    "screencastStart": "화면 녹화 시작",
+    "screencastStop": "화면 녹화 중지",
+    "refresh": "창 새로 고침",
+    "domQuery": "DOM 조회",
+    "consoleLogs": "콘솔 로그 읽기",
+    "dispatchEvent": "DOM 이벤트 전달",
+    "typeText": "텍스트 입력",
+    "evaluate": "JavaScript 실행",
+    "exit": "앱 종료",
+    "waitFor": "조건 대기",
+    "keyboardShortcut": "키보드 단축키 누르기",
+    "devtools": "개발자 도구 전환",
+    "windowInfo": "창 정보",
+    "storage": "저장소 읽기/쓰기",
+    "scrollIntoView": "화면에 보이도록 스크롤",
+    "injectCss": "CSS 주입",
+    "wait": "대기",
+    "getComputedStyle": "계산된 스타일 가져오기",
+    "getWindows": "창 목록",
+    "dragDrop": "드래그 앤 드롭",
+    "mouseInput": "마우스 입력",
+    "batch": "도구 일괄 실행",
+    "openMiniBrowser": "미니 브라우저 열기",
+    "miniBrowserExecute": "미니 브라우저에서 코드 실행",
+    "openConsole": "콘솔 열기",
+    "consoleClear": "콘솔 지우기",
+    "setTabMaximized": "탭 최대화/복원"
   }
 }

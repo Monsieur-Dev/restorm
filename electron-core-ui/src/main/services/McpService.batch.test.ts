@@ -49,11 +49,11 @@ describe('McpService — batch tool', () => {
   it('runs steps sequentially and aggregates their content parts in order', async () => {
     const service = new McpService()
     const calls: string[] = []
-    service.registerTool('alpha', { title: 'a' }, (args) => {
+    service.registerTool('alpha', { titleKey: 'mcpToolTitles.test', title: 'a' }, (args) => {
       calls.push(`alpha:${JSON.stringify(args)}`)
       return { content: [{ type: 'text', text: 'a-out' }] }
     })
-    service.registerTool('beta', { title: 'b' }, (args) => {
+    service.registerTool('beta', { titleKey: 'mcpToolTitles.test', title: 'b' }, (args) => {
       calls.push(`beta:${JSON.stringify(args)}`)
       return { content: [{ type: 'text', text: 'b-out' }] }
     })
@@ -87,15 +87,15 @@ describe('McpService — batch tool', () => {
   it('aborts at the first failing step and skips subsequent ones', async () => {
     const service = new McpService()
     const calls: string[] = []
-    service.registerTool('ok1', { title: '1' }, () => {
+    service.registerTool('ok1', { titleKey: 'mcpToolTitles.test', title: '1' }, () => {
       calls.push('ok1')
       return { content: [{ type: 'text', text: 'first' }] }
     })
-    service.registerTool('boom', { title: 'b' }, () => {
+    service.registerTool('boom', { titleKey: 'mcpToolTitles.test', title: 'b' }, () => {
       calls.push('boom')
       return { content: [{ type: 'text', text: 'kaboom' }], isError: true }
     })
-    service.registerTool('skipped', { title: 's' }, () => {
+    service.registerTool('skipped', { titleKey: 'mcpToolTitles.test', title: 's' }, () => {
       calls.push('skipped')
       return { content: [] }
     })
@@ -119,8 +119,8 @@ describe('McpService — batch tool', () => {
 
   it('aborts when a step handler throws', async () => {
     const service = new McpService()
-    service.registerTool('throws', { title: 't' }, () => { throw new Error('nope') })
-    service.registerTool('after', { title: 'a' }, () => ({ content: [] }))
+    service.registerTool('throws', { titleKey: 'mcpToolTitles.test', title: 't' }, () => { throw new Error('nope') })
+    service.registerTool('after', { titleKey: 'mcpToolTitles.test', title: 'a' }, () => ({ content: [] }))
 
     const out = await Promise.resolve(service.invokeTool('batch', {
       steps: [{ name: 'throws' }, { name: 'after' }],
@@ -144,7 +144,7 @@ describe('McpService — batch tool', () => {
 
   it('rejects a step missing a non-empty name', async () => {
     const service = new McpService()
-    service.registerTool('present', { title: 'p' }, () => ({ content: [] }))
+    service.registerTool('present', { titleKey: 'mcpToolTitles.test', title: 'p' }, () => ({ content: [] }))
     const out = await Promise.resolve(service.invokeTool('batch', {
       steps: [{ name: '' }],
       skipImplicitSettle: true
@@ -158,7 +158,7 @@ describe('McpService — batch tool', () => {
   it('honours `waitFor: { ms }` between steps', async () => {
     const service = new McpService()
     const ts: number[] = []
-    service.registerTool('mark', { title: 'm' }, () => {
+    service.registerTool('mark', { titleKey: 'mcpToolTitles.test', title: 'm' }, () => {
       ts.push(Date.now())
       return { content: [{ type: 'text', text: String(ts.length) }] }
     })

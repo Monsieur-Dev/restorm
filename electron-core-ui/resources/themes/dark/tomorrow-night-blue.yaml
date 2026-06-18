@@ -3,6 +3,24 @@ name: Tomorrow Night Blue
 type: dark
 
 colors:
+  # Chat-bubble tints: bright lift + a lighter blue accent over the navy base.
+  chat-bubble.incoming.background: "rgb(255, 255, 255, 0.08)"
+  chat-bubble.outgoing.background: "rgb(0, 63, 142, 0.48)"
+  # Syntax palette: the Tomorrow Night Blue accent set.
+  hljs.foreground: "#ffffff"
+  hljs.keyword: "#ebbbff"
+  hljs.type: "#ffeead"
+  hljs.number: "#ffc58f"
+  hljs.string: "#d1f1a9"
+  hljs.regexp: "#d1f1a9"
+  hljs.comment: "#7285b7"
+  hljs.meta: "#bbdaff"
+  hljs.variable: "#ff9da4"
+  hljs.attr: "#bbdaff"
+  hljs.section: "#ffc58f"
+  hljs.selector: "#ffc58f"
+  hljs.addition.background: "#1f3d22"
+  hljs.deletion.background: "#451d22"
   scenarioNode.background: "#00306b"
   scenarioNode.headerBackground: "#0a3d80"
   scenarioNode.headerBackgroundSelected: "#1351a8"

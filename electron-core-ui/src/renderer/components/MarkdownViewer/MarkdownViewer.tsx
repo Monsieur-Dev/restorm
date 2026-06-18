@@ -4,7 +4,11 @@ import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
 import rehypeHighlight from 'rehype-highlight'
 import './markdownViewer.css'
-import 'highlight.js/styles/vs2015.css'
+// Theme-aware syntax highlighting: instead of a fixed highlight.js stylesheet
+// (which hardcodes dark colors), the `.hljs-*` token classes are coloured from
+// theme CSS variables so they track light / dark / high-contrast. See
+// highlightTheme.css + the `--hljs-*` vars defined per theme family.
+import './highlightTheme.css'
 
 type MermaidAPI = typeof import('mermaid').default
 let mermaidInstance: MermaidAPI | undefined

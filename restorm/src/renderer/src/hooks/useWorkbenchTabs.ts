@@ -59,9 +59,10 @@ import type {
   ConsoleTab,
   FirewallTab,
   SettingsTab,
+  McpLogsTab,
   BreadcrumbItem
 } from '../../../shared/types/editor'
-import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, SETTINGS_TAB_ID, type MiniBrowserTab } from '../../../shared/types/editor'
+import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, SETTINGS_TAB_ID, MCP_LOGS_TAB_ID, type MiniBrowserTab } from '../../../shared/types/editor'
 
 export interface UseWorkbenchTabsOptions {
   rootItems: FolderItem[]
@@ -515,6 +516,17 @@ export function useWorkbenchTabs(options: UseWorkbenchTabsOptions): UseWorkbench
         titleString: 'Settings',
         allowFullscreen: true
       } as SettingsTab
+    }
+    // MCP logs singleton — same pattern as Settings: content owned by
+    // `RestormWorkbench`'s `tabType: 'mcp-logs'` branch.
+    if (tabId === MCP_LOGS_TAB_ID) {
+      return {
+        id: MCP_LOGS_TAB_ID,
+        tabType: 'mcp-logs',
+        title: 'MCP logs',
+        titleString: 'MCP logs',
+        allowFullscreen: true
+      } as McpLogsTab
     }
     const parsed = parseTabId(tabId)
     if (!parsed) return null

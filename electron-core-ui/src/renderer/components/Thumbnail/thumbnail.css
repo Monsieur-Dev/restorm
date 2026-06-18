@@ -1,0 +1,70 @@
+/*
+ * Thumbnail — a compact preview of an image / video that opens large in a
+ * full-window overlay on click. Colours pull from the workbench theme tokens
+ * so it sits naturally on any ECUI surface.
+ */
+
+.ecu-thumbnail {
+  position: relative;
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+  border: 1px solid var(--panel-border, rgb(128, 128, 128, 0.25));
+  border-radius: 4px;
+  background: transparent;
+  cursor: zoom-in;
+  overflow: hidden;
+  line-height: 0;
+  max-width: 100%;
+}
+
+.ecu-thumbnail:focus-visible {
+  outline: 1px solid var(--focusBorder, rgb(64, 110, 180, 0.8));
+  outline-offset: 1px;
+}
+
+.ecu-thumbnail-media {
+  display: block;
+  max-width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+}
+
+/* Play badge over a video thumbnail. */
+.ecu-thumbnail-play {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  color: rgb(255, 255, 255, 0.92);
+  text-shadow: 0 1px 4px rgb(0, 0, 0, 0.6);
+}
+
+.ecu-thumbnail-play .codicon {
+  font-size: 36px;
+}
+
+/* ── Enlarged view (inside the ECUI Modal body) ───────────────────────── */
+
+/* The media fills the modal body, centered. */
+.ecu-thumbnail-enlarged-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.ecu-thumbnail-enlarged-media {
+  display: block;
+
+  /* Fill the available modal space (scaling up small clips too) while keeping
+   * the aspect ratio via `contain`. */
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}

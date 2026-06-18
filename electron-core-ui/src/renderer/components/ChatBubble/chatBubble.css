@@ -1,0 +1,28 @@
+/*
+ * ChatBubble — reusable incoming / outgoing speech bubble. Alignment + tint
+ * per variant; the tint comes from per-theme CSS variables so it stays
+ * coherent across every theme family. The host owns width / max-width.
+ */
+
+.ecu-chat-bubble {
+  box-sizing: border-box;
+  padding: 6px 8px;
+  border-radius: 8px;
+  overflow: hidden;
+  color: var(--foreground);
+}
+
+/* Outgoing = a message you sent, aligned right; squared bottom-right corner.
+ * Fallback tints keep it readable if a theme predates the chat-bubble vars. */
+.ecu-chat-bubble-outgoing {
+  align-self: flex-end;
+  background: var(--chat-bubble-outgoing-background, rgb(64, 110, 180, 0.35));
+  border-bottom-right-radius: 2px;
+}
+
+/* Incoming = a received message, aligned left; squared bottom-left corner. */
+.ecu-chat-bubble-incoming {
+  align-self: flex-start;
+  background: var(--chat-bubble-incoming-background, rgb(128, 128, 128, 0.12));
+  border-bottom-left-radius: 2px;
+}

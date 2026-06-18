@@ -26,8 +26,14 @@ import {
   useMcpMiniBrowserBridge,
   clearConsoleFeed,
   registerConsoleFeedSource,
+  registerMcpLogsSource,
+  McpLogsPanel,
+  Modal,
   type MiniBrowserBridgeApi,
-  type ConsoleFeedSource
+  type ConsoleFeedSource,
+  type McpLogsSource,
+  type McpLogsLabels,
+  type McpLogEntry
 } from 'electron-core-ui/renderer'
 import { PROJECT_UUID_KEY } from '../../shared/config/projectUuid'
 import { preloadRequestPanelStates, removeRequestPanelState } from './services/requestPanelStateStore'
@@ -80,7 +86,7 @@ import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayloa
 import type { EditorTab, WorkbenchTree, GroupNode, TabGroupNode, ContainerGroupNode } from 'electron-core-ui/renderer'
 import { isContainerNode, isTabGroupNode, loadWorkbenchTabIds, useSetting } from 'electron-core-ui/renderer'
 import { REOPEN_LAST_FILE_STORAGE_KEY, REOPEN_LAST_FILE_SETTING_KEY } from '../../shared/config/reopenLastFile'
-import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, SETTINGS_TAB_ID, type ConsoleTab, type FirewallTab, type MiniBrowserTab, type SettingsTab } from '../../shared/types/editor'
+import { CONSOLE_TAB_ID, FIREWALL_TAB_ID, MINI_BROWSER_TAB_ID, SETTINGS_TAB_ID, MCP_LOGS_TAB_ID, type ConsoleTab, type FirewallTab, type MiniBrowserTab, type SettingsTab, type McpLogsTab } from '../../shared/types/editor'
 import { findGroupIdForTab, hasGroupWithId, updateGroupById } from './utils/workbenchHelpers'
 import { findTopLevelEnvironment } from './utils/envSaveUnit'
 
@@ -199,6 +205,27 @@ import type { ApiDocumentation } from '../../shared/types/apiDocumentation'
 const firewallFeed = (window as unknown as { api?: { firewall?: ConsoleFeedSource } }).api?.firewall
 if (firewallFeed) registerConsoleFeedSource(firewallFeed)
 
+// Wire the ECUI MCP-logs viewer to restorm's runtime IPC. The viewer pulls
+// the served-call buffer on demand (`getMcpLogs`) and refreshes on
+// `onMcpLogsChanged`; `clearMcpLogs` is optional and gates the Clear button.
+const mcpLogsRuntime = (window as unknown as {
+  restorm?: {
+    runtime?: {
+      getMcpLogs?: () => Promise<McpLogEntry[]>
+      onMcpLogsChanged?: (cb: () => void) => () => void
+      clearMcpLogs?: () => Promise<void>
+    }
+  }
+}).restorm?.runtime
+if (mcpLogsRuntime?.getMcpLogs && mcpLogsRuntime.onMcpLogsChanged) {
+  const source: McpLogsSource = {
+    getLogs: mcpLogsRuntime.getMcpLogs,
+    onChange: mcpLogsRuntime.onMcpLogsChanged,
+    ...(mcpLogsRuntime.clearMcpLogs ? { clear: mcpLogsRuntime.clearMcpLogs } : {})
+  }
+  registerMcpLogsSource(source)
+}
+
 const MIN_LEFT_WIDTH = 180
 
 /** Workbench ID for persistence */
@@ -245,6 +272,25 @@ function resolveActiveTabId(groups: GroupNode[], focusedGroupId: string | null):
 
 const App: React.FC = () => {
   const { t } = useTranslation()
+  // Localized labels for the generic ECUI MCP-logs viewer (modal path). The
+  // tab path builds its own copy inside RestormWorkbench; both stay in sync
+  // via the same `mcpLogs.*` keys.
+  const mcpLogsLabels = useMemo<McpLogsLabels>(() => ({
+    title: t('mcpLogs.title'),
+    empty: t('mcpLogs.empty'),
+    clear: t('mcpLogs.clear'),
+    tool: t('mcpLogs.tool'),
+    time: t('mcpLogs.time'),
+    payload: t('mcpLogs.payload'),
+    truncated: t('mcpLogs.truncated'),
+    screenshot: t('mcpLogs.screenshot'),
+    screencast: t('mcpLogs.screencast'),
+    captureEvicted: t('mcpLogs.captureEvicted'),
+    copy: t('mcpLogs.copy'),
+    closePreview: t('mcpLogs.closePreview'),
+    captureImageTitle: t('mcpLogs.captureImageTitle'),
+    captureVideoTitle: t('mcpLogs.captureVideoTitle')
+  }), [t])
   const { isEnabled: navigationEnabled } = useFeature('navigation')
   const setCollections = useRestormStore((state) => state.setCollections)
   const {
@@ -697,6 +743,79 @@ const App: React.FC = () => {
       return { ...prev, groups: [newGroup] }
     })
   }, [setWorkbenchTree, focusedGroupId])
+
+  // MCP call-logs viewer modal — shown when no file is open (no workbench
+  // to host a tab). Same tab-or-modal split as Settings.
+  const [mcpLogsModalOpen, setMcpLogsModalOpen] = useState(false)
+
+  /**
+   * Open / focus the MCP logs singleton workbench tab. Modelled on
+   * `handleOpenSettingsTab` — focus-or-create off `MCP_LOGS_TAB_ID`. The
+   * `navigateTo(..., { type: 'special' })` records the tab in the Ctrl+Tab
+   * MRU history (the nav-listener skips `special` for sidebar/tree side
+   * effects) so opening from the menu — not just clicking it — is tracked.
+   */
+  const handleOpenMcpLogsTab = useCallback(() => {
+    navigationService.navigateTo(MCP_LOGS_TAB_ID, 'workbench', { type: 'special' })
+    setWorkbenchTree(prev => {
+      const existingGroupId = findGroupIdForTab(prev.groups, MCP_LOGS_TAB_ID)
+      if (existingGroupId !== null) {
+        return {
+          ...prev,
+          groups: updateGroupById(prev.groups, existingGroupId, group => ({ ...group, activeTabId: MCP_LOGS_TAB_ID }))
+        }
+      }
+      const mcpLogsTab: McpLogsTab = {
+        id: MCP_LOGS_TAB_ID,
+        tabType: 'mcp-logs',
+        title: 'MCP logs',
+        titleString: 'MCP logs',
+        allowFullscreen: true
+      }
+      const findFirstTabGroup = (nodes: GroupNode[]): TabGroupNode | null => {
+        for (const node of nodes) {
+          if (isTabGroupNode(node)) return node
+          if (isContainerNode(node)) {
+            const inner = findFirstTabGroup(node.groups)
+            if (inner !== null) return inner
+          }
+        }
+        return null
+      }
+      const targetId = focusedGroupId !== null && hasGroupWithId(prev.groups, focusedGroupId)
+        ? focusedGroupId
+        : (findFirstTabGroup(prev.groups)?.id ?? null)
+      if (targetId !== null) {
+        return {
+          ...prev,
+          groups: updateGroupById(prev.groups, targetId, group => ({
+            ...group,
+            tabs: [...group.tabs, mcpLogsTab],
+            activeTabId: MCP_LOGS_TAB_ID
+          }))
+        }
+      }
+      const newGroup: TabGroupNode = {
+        id: `mcp-logs-group-${String(Date.now())}-${crypto.randomUUID().slice(0, 8)}`,
+        tabs: [mcpLogsTab],
+        activeTabId: MCP_LOGS_TAB_ID
+      }
+      return { ...prev, groups: [newGroup] }
+    })
+  }, [setWorkbenchTree, focusedGroupId])
+
+  /**
+   * Entry-point shared by the status-bar `mcp` tooltip link and the
+   * `View → MCP logs` menu item: open the logs as a workbench tab when a
+   * file is open, or as a full-screen modal on the welcome screen.
+   */
+  const handleOpenMcpLogs = useCallback(() => {
+    if (fileName !== null) {
+      handleOpenMcpLogsTab()
+    } else {
+      setMcpLogsModalOpen(true)
+    }
+  }, [fileName, handleOpenMcpLogsTab])
 
   // Per-tab dirty state tracking — the legacy checksum store is still
   // wired through `useFileManagement` for backward compat on the
@@ -2461,6 +2580,7 @@ const App: React.FC = () => {
         onOpenConsole={handleOpenConsole}
         onOpenFirewall={handleOpenFirewall}
         onOpenMiniBrowser={handleOpenMiniBrowser}
+        onOpenMcpLogs={handleOpenMcpLogs}
         workbenchActive={fileName !== null}
         onOpenSettingsTab={handleOpenSettingsTab}
       />
@@ -2688,7 +2808,7 @@ const App: React.FC = () => {
          * MCP indicator (only when restorm runs in MCP mode). When the
          * auth selector isn't shown, MCP carries the `right-aligned` auto
          * margin; the bell takes it only when MCP won't render. */}
-        <StatusbarMcpIndicator rightAligned={!authSelectorShown} />
+        <StatusbarMcpIndicator rightAligned={!authSelectorShown} onViewLogs={handleOpenMcpLogs} />
         <StatusBarBellButton
           toasterId="app"
           {...(!authSelectorShown && !mcpEnabled ? { className: 'right-aligned' } : {})}
@@ -2706,6 +2826,20 @@ const App: React.FC = () => {
         onConfirm={confirmDelete}
         onCancel={cancelDelete}
       />
+
+      {/* MCP call-logs viewer — full-screen modal shown on the welcome
+          screen (no workbench to host a tab). When a file is open the
+          status-bar link / View menu open it as a workbench tab instead. */}
+      <Modal
+        data-testid="mcp-logs-modal"
+        isOpen={mcpLogsModalOpen}
+        title={mcpLogsLabels.title}
+        onClose={() => { setMcpLogsModalOpen(false) }}
+      >
+        <div style={{ height: '60vh', minHeight: 320, overflow: 'hidden' }}>
+          <McpLogsPanel labels={mcpLogsLabels} translateToolTitle={t} />
+        </div>
+      </Modal>
 
       {/* Deletion of a request used by scenarios: move it in, or delete + strip boxes. */}
       <RequestScenarioDeleteModal

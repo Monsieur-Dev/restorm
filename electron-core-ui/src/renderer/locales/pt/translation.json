@@ -52,7 +52,8 @@
     "documentation": "Documentação",
     "keyboardShortcuts": "Atalhos de teclado",
     "releaseNotes": "Notas da versão",
-    "reportIssue": "Reportar problema"
+    "reportIssue": "Reportar problema",
+    "mcpLogs": "Registos MCP"
   },
   "settings": {
     "title": "Definições",
@@ -332,7 +333,38 @@
   "statusbar": {
     "mcp": {
       "serverRunningOnPort": "Servidor MCP em execução na porta {{port}}",
-      "sessionName": "Sessão: {{name}}"
+      "sessionName": "Sessão: {{name}}",
+      "viewLogs": "Ver registos"
     }
+  },
+  "mcpToolTitles": {
+    "screenshot": "Captura de ecrã",
+    "screencastStart": "Iniciar gravação de ecrã",
+    "screencastStop": "Parar gravação de ecrã",
+    "refresh": "Recarregar janela",
+    "domQuery": "Consultar o DOM",
+    "consoleLogs": "Ler registos da consola",
+    "dispatchEvent": "Despachar um evento DOM",
+    "typeText": "Escrever texto",
+    "evaluate": "Executar JavaScript",
+    "exit": "Sair da aplicação",
+    "waitFor": "Aguardar uma condição",
+    "keyboardShortcut": "Premir um atalho de teclado",
+    "devtools": "Alternar DevTools",
+    "windowInfo": "Informações da janela",
+    "storage": "Ler/escrever armazenamento",
+    "scrollIntoView": "Deslocar até à vista",
+    "injectCss": "Injetar CSS",
+    "wait": "Aguardar",
+    "getComputedStyle": "Obter estilo calculado",
+    "getWindows": "Listar janelas",
+    "dragDrop": "Arrastar e largar",
+    "mouseInput": "Entrada do rato",
+    "batch": "Executar um lote de ferramentas",
+    "openMiniBrowser": "Abrir o mini navegador",
+    "miniBrowserExecute": "Executar código no mini navegador",
+    "openConsole": "Abrir a consola",
+    "consoleClear": "Limpar a consola",
+    "setTabMaximized": "Maximizar/restaurar o separador"
   }
 }

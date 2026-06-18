@@ -52,7 +52,8 @@
     "documentation": "Dokumentacioni",
     "keyboardShortcuts": "Shkurtoret e tastierës",
     "releaseNotes": "Shënimet e versionit",
-    "reportIssue": "Raporto një problem"
+    "reportIssue": "Raporto një problem",
+    "mcpLogs": "Regjistrat MCP"
   },
   "settings": {
     "title": "Parametrat",
@@ -332,7 +333,38 @@
   "statusbar": {
     "mcp": {
       "serverRunningOnPort": "Serveri MCP po ekzekutohet në portën {{port}}",
-      "sessionName": "Sesioni: {{name}}"
+      "sessionName": "Sesioni: {{name}}",
+      "viewLogs": "Shiko regjistrat"
     }
+  },
+  "mcpToolTitles": {
+    "screenshot": "Pamje ekrani",
+    "screencastStart": "Fillo regjistrimin e ekranit",
+    "screencastStop": "Ndalo regjistrimin e ekranit",
+    "refresh": "Ringarko dritaren",
+    "domQuery": "Pyet DOM-in",
+    "consoleLogs": "Lexo regjistrat e konsolës",
+    "dispatchEvent": "Dërgo një ngjarje DOM",
+    "typeText": "Shkruaj tekst",
+    "evaluate": "Ekzekuto JavaScript",
+    "exit": "Dil nga aplikacioni",
+    "waitFor": "Prit një kusht",
+    "keyboardShortcut": "Shtyp një shkurtore tastiere",
+    "devtools": "Ndërro DevTools",
+    "windowInfo": "Informacione dritareje",
+    "storage": "Lexo/shkruaj ruajtjen",
+    "scrollIntoView": "Rrëshqit në pamje",
+    "injectCss": "Injekto CSS",
+    "wait": "Prit",
+    "getComputedStyle": "Merr stilin e llogaritur",
+    "getWindows": "Listo dritaret",
+    "dragDrop": "Tërhiq dhe lësho",
+    "mouseInput": "Hyrje me mi",
+    "batch": "Ekzekuto një grup mjetesh",
+    "openMiniBrowser": "Hap mini shfletuesin",
+    "miniBrowserExecute": "Ekzekuto kod në mini shfletuesin",
+    "openConsole": "Hap konsolën",
+    "consoleClear": "Pastro konsolën",
+    "setTabMaximized": "Maksimizo/rikthe skedën"
   }
 }

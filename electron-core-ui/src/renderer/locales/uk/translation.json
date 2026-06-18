@@ -52,7 +52,8 @@
     "documentation": "Документація",
     "keyboardShortcuts": "Сполучення клавіш",
     "releaseNotes": "Примітки до випуску",
-    "reportIssue": "Повідомити про проблему"
+    "reportIssue": "Повідомити про проблему",
+    "mcpLogs": "Журнали MCP"
   },
   "settings": {
     "title": "Параметри",
@@ -332,7 +333,38 @@
   "statusbar": {
     "mcp": {
       "serverRunningOnPort": "Сервер MCP працює на порту {{port}}",
-      "sessionName": "Сеанс: {{name}}"
+      "sessionName": "Сеанс: {{name}}",
+      "viewLogs": "Переглянути журнали"
     }
+  },
+  "mcpToolTitles": {
+    "screenshot": "Знімок екрана",
+    "screencastStart": "Почати запис екрана",
+    "screencastStop": "Зупинити запис екрана",
+    "refresh": "Перезавантажити вікно",
+    "domQuery": "Запит до DOM",
+    "consoleLogs": "Читати журнали консолі",
+    "dispatchEvent": "Надіслати подію DOM",
+    "typeText": "Ввести текст",
+    "evaluate": "Виконати JavaScript",
+    "exit": "Вийти з застосунку",
+    "waitFor": "Очікувати умову",
+    "keyboardShortcut": "Натиснути комбінацію клавіш",
+    "devtools": "Перемкнути DevTools",
+    "windowInfo": "Інформація про вікно",
+    "storage": "Читати/записувати сховище",
+    "scrollIntoView": "Прокрутити до елемента",
+    "injectCss": "Впровадити CSS",
+    "wait": "Очікувати",
+    "getComputedStyle": "Отримати обчислений стиль",
+    "getWindows": "Список вікон",
+    "dragDrop": "Перетягнути",
+    "mouseInput": "Введення мишею",
+    "batch": "Виконати пакет інструментів",
+    "openMiniBrowser": "Відкрити міні-браузер",
+    "miniBrowserExecute": "Виконати код у міні-браузері",
+    "openConsole": "Відкрити консоль",
+    "consoleClear": "Очистити консоль",
+    "setTabMaximized": "Розгорнути/відновити вкладку"
   }
 }

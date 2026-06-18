@@ -1,6 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import StatusbarElement from './StatusbarElement'
+import { Button } from '../Button'
 
 export interface StatusbarMcpIndicatorProps {
   /** Whether the embedded MCP server is enabled / running. When false (or
@@ -19,6 +20,9 @@ export interface StatusbarMcpIndicatorProps {
    * `margin-left: auto` slot (jumps to the right of the statusbar before the
    * bell). Use only when no other right-side cell renders before it. */
   rightAligned?: boolean
+  /** When provided, the popover shows a "view logs" link that calls this —
+   * the host opens its MCP-logs viewer (tab or modal). Omitted → no link. */
+  onViewLogs?: () => void
 }
 
 /**
@@ -36,7 +40,8 @@ export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({
   port,
   sessionName = '',
   pulseSignal = 0,
-  rightAligned = false
+  rightAligned = false,
+  onViewLogs
 }) => {
   const { t } = useTranslation()
 
@@ -62,6 +67,18 @@ export const StatusbarMcpIndicator: React.FC<StatusbarMcpIndicatorProps> = ({
         {sessionName && (
           <div data-testid="statusbar-mcp-popover-session" style={{ marginTop: 4, opacity: 0.8 }}>
             {t('statusbar.mcp.sessionName', { name: sessionName })}
+          </div>
+        )}
+        {onViewLogs && (
+          <div style={{ marginTop: 6 }}>
+            <Button
+              link
+              icon="output"
+              onClick={() => { onViewLogs() }}
+              data-testid="statusbar-mcp-view-logs"
+            >
+              {t('statusbar.mcp.viewLogs')}
+            </Button>
           </div>
         )}
       </div>

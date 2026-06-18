@@ -52,7 +52,8 @@
     "documentation": "Dokumentace",
     "keyboardShortcuts": "Klávesové zkratky",
     "releaseNotes": "Poznámky k vydání",
-    "reportIssue": "Nahlásit problém"
+    "reportIssue": "Nahlásit problém",
+    "mcpLogs": "Protokoly MCP"
   },
   "settings": {
     "title": "Nastavení",
@@ -332,7 +333,38 @@
   "statusbar": {
     "mcp": {
       "serverRunningOnPort": "Server MCP běží na portu {{port}}",
-      "sessionName": "Relace: {{name}}"
+      "sessionName": "Relace: {{name}}",
+      "viewLogs": "Zobrazit protokoly"
     }
+  },
+  "mcpToolTitles": {
+    "screenshot": "Snímek obrazovky",
+    "screencastStart": "Spustit záznam obrazovky",
+    "screencastStop": "Zastavit záznam obrazovky",
+    "refresh": "Znovu načíst okno",
+    "domQuery": "Dotaz na DOM",
+    "consoleLogs": "Číst protokoly konzole",
+    "dispatchEvent": "Odeslat událost DOM",
+    "typeText": "Zadat text",
+    "evaluate": "Spustit JavaScript",
+    "exit": "Ukončit aplikaci",
+    "waitFor": "Čekat na podmínku",
+    "keyboardShortcut": "Stisknout klávesovou zkratku",
+    "devtools": "Přepnout DevTools",
+    "windowInfo": "Informace o okně",
+    "storage": "Čtení/zápis úložiště",
+    "scrollIntoView": "Posunout do zobrazení",
+    "injectCss": "Vložit CSS",
+    "wait": "Čekat",
+    "getComputedStyle": "Získat vypočtený styl",
+    "getWindows": "Vypsat okna",
+    "dragDrop": "Přetáhnout",
+    "mouseInput": "Vstup myší",
+    "batch": "Spustit dávku nástrojů",
+    "openMiniBrowser": "Otevřít mini prohlížeč",
+    "miniBrowserExecute": "Spustit kód v mini prohlížeči",
+    "openConsole": "Otevřít konzoli",
+    "consoleClear": "Vymazat konzoli",
+    "setTabMaximized": "Maximalizovat/obnovit kartu"
   }
 }

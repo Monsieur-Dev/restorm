@@ -2,10 +2,12 @@ import { createServer, type IncomingMessage, type Server, type ServerResponse } 
 import { Readable } from 'node:stream'
 import { timingSafeEqual } from 'node:crypto'
 import { AsyncLocalStorage } from 'node:async_hooks'
-import { readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync, existsSync, rmSync, readdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join as pathJoin } from 'node:path'
-import { app, BrowserWindow, ipcMain, dialog as electronDialog } from 'electron'
+import { join as pathJoin, basename as pathBasename } from 'node:path'
+import { pathToFileURL } from 'node:url'
+import { spawnSync } from 'node:child_process'
+import { app, BrowserWindow, ipcMain, dialog as electronDialog, protocol, net } from 'electron'
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 import { z } from 'zod'
@@ -24,6 +26,27 @@ import {
 // McpService surface; the definitions live in ./mcpDiscovery (shared with the
 // transport so there's no import cycle).
 export { MCP_SESSION_ROUTING_KEY, MCP_FORWARDED_HEADER } from './mcpDiscovery'
+
+/** Default cap on the served-MCP-call ring buffer (overridable at runtime). */
+export const DEFAULT_SERVED_CALL_CAP = 100
+
+/**
+ * Max byte length of a served call's stringified arguments kept verbatim;
+ * anything longer is elided with a `…(truncated)` marker so a large request
+ * body can't grow the buffer without bound.
+ */
+const MCP_SERVED_PAYLOAD_MAX = 8_192
+
+/**
+ * Default for how many of the most-recent served-call entries keep their heavy
+ * capture payload (image base64 / video temp file). Older entries drop the
+ * payload (+ delete the temp file) but keep the capture metadata, bounding
+ * memory + disk for the screenshot/screencast bonus. Overridable at runtime via
+ * {@link McpService.setCaptureRetentionCap} (a user setting). Heavier than the
+ * log-text cap since each capture is a file/blob, but far smaller than the
+ * call-count cap.
+ */
+export const DEFAULT_CAPTURE_RETENTION_CAP = 20
 
 export interface McpServiceOptions {
   /**
@@ -105,6 +128,15 @@ export interface McpToolConfig {
   outputSchema?: Record<string, unknown>
   annotations?: Record<string, unknown>
   _meta?: Record<string, unknown>
+  /**
+   * i18n KEY for a human-readable title shown in the MCP logs viewer (e.g.
+   * `mcpToolTitles.evaluate`). REQUIRED — every registered tool must declare
+   * one, so the viewer never falls back to a raw, opaque tool name and no
+   * separate name→title map can drift out of sync. ECUI ships only the key;
+   * the host resolves it through its i18n catalogue. The key rides on each
+   * served-call log entry ({@link McpServedCallEntry.titleKey}).
+   */
+  titleKey: string
 }
 
 /**
@@ -173,6 +205,57 @@ interface ConsoleLogEntry {
 }
 
 /**
+ * One captured visual artefact (a PNG screenshot or a WebM screencast)
+ * a tool produced, kept alongside the served-call entry so a viewer can
+ * render it inline. Held only for the most recent few entries to bound
+ * memory — older entries keep their metadata but drop the heavy payload.
+ */
+export interface McpServedCapture {
+  /** `image` for a base64 PNG (data URI-able), `video` for a screencast file. */
+  kind: 'image' | 'video'
+  /** MIME type, e.g. `image/png` or `video/webm`. */
+  mimeType: string
+  /** Inline base64 payload (PNG bytes for `image`, WebM bytes for `video`) so
+   * the renderer can show it via a `data:` URL. Absent once evicted to save
+   * memory. Video carries it because the renderer blocks `file://`. */
+  base64?: string
+  /** On-disk path for `video` (a temp file written by `screencast-stop`).
+   * Kept for the MCP text result + as a fallback once `base64` is evicted. */
+  path?: string
+}
+
+/**
+ * One entry in the served-MCP-call ring buffer. Records a `tools/call`
+ * that THIS instance executed locally (forwarded / passthrough calls are
+ * never recorded — see {@link McpService.recordServedCall}). Payloads are
+ * truncated past a size cap so a large request body can't grow the buffer
+ * without bound.
+ */
+export interface McpServedCallEntry {
+  /** Epoch milliseconds when the call was received. */
+  timestamp: number
+  /** The MCP tool name (the `name` of the `tools/call`). */
+  tool: string
+  /** The call arguments, JSON-stringified + truncated past the cap. */
+  payload: string
+  /** True when {@link payload} was elided because it exceeded the cap. */
+  payloadTruncated: boolean
+  /** Original payload byte length before truncation. */
+  payloadBytes: number
+  /** The tool's result, JSON-stringified + truncated past the cap. Absent
+   * until the local handler resolves (captured by {@link attachResponseToLatest}). */
+  response?: string
+  /** True when {@link response} was elided because it exceeded the cap. */
+  responseTruncated?: boolean
+  /** A visual artefact this call produced, when the tool is a capture tool. */
+  capture?: McpServedCapture
+  /** i18n KEY for the tool's human-readable title, copied from the tool's
+   * registration ({@link McpToolConfig.titleKey}). The viewer resolves it via
+   * the host's i18n; absent only if the tool somehow wasn't in the registry. */
+  titleKey?: string
+}
+
+/**
  * Marker stored via `AsyncLocalStorage` while an MCP tool handler is
  * in flight. Used by the dialog-bypass wrapper to know whether a
  * `dialog.showSave/Open/MessageBox` call is happening because of an
@@ -184,6 +267,138 @@ interface McpToolContext {
 }
 
 const mcpToolContext = new AsyncLocalStorage<McpToolContext>()
+
+/**
+ * Pull the readable text payload out of a standard MCP `CallToolResult`
+ * (`{ content: [{ type: 'text', text }] }`) so the served-call log shows the
+ * actual response rather than the JSON-RPC envelope. Joins multiple text parts;
+ * returns the whole result untouched when it isn't that shape.
+ */
+function extractResultText(result: unknown): unknown {
+  if (result === null || typeof result !== 'object' || !('content' in result)) return result
+  const content = (result as { content?: unknown }).content
+  if (!Array.isArray(content)) return result
+  const texts = content
+    .filter(
+      (c): c is { type: string; text: string } =>
+        c !== null &&
+        typeof c === 'object' &&
+        (c as { type?: unknown }).type === 'text' &&
+        typeof (c as { text?: unknown }).text === 'string'
+    )
+    .map((c) => c.text)
+  if (texts.length === 0) return result
+  return texts.length === 1 ? texts[0] : texts.join('\n')
+}
+
+/** URL prefix the logs viewer uses to load a screencast clip the renderer
+ * can't reach over `file://`. Resolved by {@link installScreencastMediaProtocol}. */
+export const SCREENCAST_MEDIA_URL_PREFIX = 'ecui-media://screencast/'
+
+/** True for a screencast temp-file basename we own (mp4 remux or raw webm).
+ * Used to guard both protocol serving and temp-file cleanup against path
+ * traversal / unrelated files. */
+function isScreencastTempName(name: string): boolean {
+  return name.startsWith('ecu-screencast-') && (name.endsWith('.mp4') || name.endsWith('.webm'))
+}
+
+let screencastMediaProtocolInstalled = false
+/**
+ * Register the `ecui-media://screencast/<file>` protocol handler that streams a
+ * screencast `.webm` from the OS temp dir to the renderer. The renderer BLOCKS
+ * `file://` resources, so a `<video src=file://…>` never loads; this privileged
+ * scheme (declared in IPCManager's pre-ready list) does. Idempotent.
+ *
+ * Security: only serves files directly inside `tmpdir()` whose name matches the
+ * screencast prefix — the path is reduced to its basename so `..` / nested
+ * paths can't escape the temp dir.
+ */
+function installScreencastMediaProtocol(): void {
+  if (screencastMediaProtocolInstalled) return
+  screencastMediaProtocolInstalled = true
+  protocol.handle('ecui-media', (request) => {
+    try {
+      const url = new URL(request.url)
+      // host is the namespace ("screencast"); pathname is "/<basename>".
+      const name = pathBasename(decodeURIComponent(url.pathname))
+      if (url.host !== 'screencast' || !isScreencastTempName(name)) {
+        return new Response('Not found', { status: 404 })
+      }
+      const filePath = pathJoin(tmpdir(), name)
+      if (!existsSync(filePath)) return new Response('Gone', { status: 410 })
+      return net.fetch(pathToFileURL(filePath).toString())
+    } catch (err) {
+      logger.warn('ecui-media protocol: failed to serve', { error: String(err) })
+      return new Response('Error', { status: 500 })
+    }
+  })
+  logger.info('McpService: ecui-media screencast protocol registered')
+}
+
+/**
+ * Best-effort sweep of leftover `ecu-screencast-*.{webm,mp4}` temp files from a
+ * previously CRASHED run. The on-exit + eviction cleanups handle the normal
+ * case, but a SIGKILL / power loss skips them, leaving orphans in the OS temp
+ * dir. Run once at startup. Basename-guarded so it only ever touches our own
+ * screencast temp files.
+ */
+function sweepOrphanScreencastFiles(): void {
+  const dir = tmpdir()
+  let names: string[]
+  try {
+    names = readdirSync(dir)
+  } catch {
+    return
+  }
+  let removed = 0
+  for (const name of names) {
+    if (!isScreencastTempName(name)) continue
+    try {
+      rmSync(pathJoin(dir, name), { force: true })
+      removed++
+    } catch { /* best-effort */ }
+  }
+  if (removed > 0) logger.info('McpService: swept orphan screencast temp files', { removed })
+}
+
+/**
+ * Remux a freshly-captured screencast `.webm` into a seekable, correctly-timed
+ * MP4 (H.264 / yuv420p / +faststart) via ffmpeg.
+ *
+ * Why: the `MediaRecorder` WebM has no Duration in its container header, so a
+ * `<video>` reports duration `Infinity` until fully buffered (scrubber / time
+ * wrong at first). The MP4 carries a real duration + moov-at-front so it's
+ * correct from the start and plays everywhere. Returns the mp4 path on success,
+ * or `null` when ffmpeg is unavailable / fails — the caller then falls back to
+ * serving the raw webm (still viewable; the duration just self-corrects as it
+ * buffers). The packaged-build ffmpeg availability is tracked as a follow-up.
+ */
+function remuxScreencastToMp4(webmPath: string, mp4Path: string): string | null {
+  try {
+    const res = spawnSync(
+      'ffmpeg',
+      [
+        '-y',
+        '-i', webmPath,
+        '-c:v', 'libx264',
+        '-preset', 'veryfast',
+        '-pix_fmt', 'yuv420p',
+        '-movflags', '+faststart',
+        '-an', // screencasts have no audio track
+        mp4Path
+      ],
+      { stdio: 'ignore', timeout: 60_000 }
+    )
+    if (res.status === 0 && existsSync(mp4Path)) return mp4Path
+    logger.warn('screencast: ffmpeg remux failed; serving raw webm', {
+      status: res.status, error: res.error ? String(res.error) : undefined
+    })
+    return null
+  } catch (err) {
+    logger.warn('screencast: ffmpeg remux threw; serving raw webm', { error: String(err) })
+    return null
+  }
+}
 
 let dialogBypassInstalled = false
 /**
@@ -283,6 +498,20 @@ export class McpService {
   private windowCreatedHandler: ((event: Electron.Event, win: BrowserWindow) => void) | null = null
   private readonly requestListeners = new Set<() => void>()
 
+  /**
+   * Ring buffer of `tools/call`s this instance executed LOCALLY. Forwarded
+   * (cross-instance bridge) calls are never recorded — see
+   * {@link recordServedCall}. Oldest entries are evicted once the buffer
+   * exceeds {@link servedCallCap}.
+   */
+  private readonly servedCalls: McpServedCallEntry[] = []
+  /** Configurable cap on {@link servedCalls}; default 100, clamped ≥ 0. */
+  private servedCallCap = DEFAULT_SERVED_CALL_CAP
+  /** Configurable count of most-recent entries that keep their heavy capture
+   * payload (image base64 / video temp file); default 20, clamped ≥ 0. */
+  private captureRetentionCap = DEFAULT_CAPTURE_RETENTION_CAP
+  private readonly servedCallListeners = new Set<() => void>()
+
   constructor(options: McpServiceOptions = {}) {
     this.options = options
     this.registerBuiltinTools()
@@ -313,6 +542,234 @@ export class McpService {
   }
 
   /**
+   * The served-MCP-call ring buffer, newest first. Each entry records a
+   * `tools/call` this instance executed LOCALLY (forwarded calls excluded).
+   * Returns a shallow copy so callers can't mutate the internal buffer.
+   */
+  getServedCalls(): McpServedCallEntry[] {
+    // Newest-first matches the console-logs convention + reads naturally
+    // in a log viewer (most recent at the top).
+    return [...this.servedCalls].reverse()
+  }
+
+  /** Clear the served-call buffer (e.g. a "clear logs" button in the viewer). */
+  clearServedCalls(): void {
+    this.disposeEvictedMedia(this.servedCalls)
+    this.servedCalls.length = 0
+    this.notifyServedCallListeners()
+  }
+
+  /** The current served-call retention cap. */
+  getLogRetentionCap(): number {
+    return this.servedCallCap
+  }
+
+  /**
+   * Set the served-call retention cap. Values are floored to a non-negative
+   * integer; a smaller cap evicts the oldest entries immediately so the
+   * buffer never exceeds the new size. A cap of 0 disables retention (and
+   * drops anything currently buffered).
+   */
+  setLogRetentionCap(cap: number): void {
+    const next = Number.isFinite(cap) ? Math.max(0, Math.floor(cap)) : DEFAULT_SERVED_CALL_CAP
+    this.servedCallCap = next
+    if (this.servedCalls.length > next) {
+      const dropped = this.servedCalls.splice(0, this.servedCalls.length - next)
+      this.disposeEvictedMedia(dropped)
+      this.notifyServedCallListeners()
+    }
+  }
+
+  /** The current capture-retention cap (entries that keep their heavy payload). */
+  getCaptureRetentionCap(): number {
+    return this.captureRetentionCap
+  }
+
+  /**
+   * Set how many of the most-recent entries keep their heavy capture payload
+   * (image base64 / video temp file). Floored to a non-negative integer. A
+   * smaller value prunes now — older captures drop their payload (and their
+   * on-disk screencast temp file is deleted). Mirrors {@link setLogRetentionCap}.
+   */
+  setCaptureRetentionCap(cap: number): void {
+    this.captureRetentionCap = Number.isFinite(cap) ? Math.max(0, Math.floor(cap)) : DEFAULT_CAPTURE_RETENTION_CAP
+    this.pruneOldCaptures()
+    this.notifyServedCallListeners()
+  }
+
+  /**
+   * Subscribe to served-call buffer changes (a call recorded, the buffer
+   * cleared, or trimmed by a cap change). Used by the viewer to refresh
+   * live. Returns an unsubscribe function; listener errors are isolated.
+   */
+  onServedCall(listener: () => void): () => void {
+    this.servedCallListeners.add(listener)
+    return () => { this.servedCallListeners.delete(listener) }
+  }
+
+  private notifyServedCallListeners(): void {
+    for (const fn of this.servedCallListeners) {
+      try { fn() } catch (err) {
+        logger.warn('McpService served-call listener threw', { error: String(err) })
+      }
+    }
+  }
+
+  /**
+   * Record a locally-executed `tools/call` in the ring buffer. Called from
+   * {@link handleRequest} ONLY on the local-dispatch path — a request the
+   * cross-instance bridge forwarded to a peer is answered before this runs,
+   * so passthrough calls are never recorded (AC: passthrough exclusion).
+   *
+   * The `parsedBody` is the JSON-RPC envelope already parsed by the handler.
+   * Non-`tools/call` methods (initialize / tools/list / notifications) and
+   * malformed bodies are ignored. Large argument payloads are truncated past
+   * {@link MCP_SERVED_PAYLOAD_MAX} so one big body can't bloat the buffer.
+   */
+  /**
+   * Parse a buffered request body and record it if it's a `tools/call`.
+   * A non-JSON / non-`tools/call` body is silently ignored. Wraps
+   * {@link recordServedCall} so the buffering paths in {@link handleRequest}
+   * stay terse.
+   */
+  private recordServedCallFromBuffer(raw: Buffer): void {
+    if (this.servedCallCap <= 0) return
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(raw.toString('utf8'))
+    } catch {
+      return
+    }
+    this.recordServedCall(parsed)
+  }
+
+  private recordServedCall(parsedBody: unknown): void {
+    if (this.servedCallCap <= 0) return
+    if (typeof parsedBody !== 'object' || parsedBody === null) return
+    const msg = parsedBody as { method?: unknown; params?: { name?: unknown; arguments?: unknown } }
+    if (msg.method !== 'tools/call') return
+    const tool = typeof msg.params?.name === 'string' ? msg.params.name : ''
+    if (!tool) return
+
+    const args = msg.params?.arguments
+    let payloadFull: string
+    try {
+      payloadFull = args === undefined ? '' : JSON.stringify(args)
+    } catch {
+      payloadFull = '"[unserialisable arguments]"'
+    }
+    const payloadBytes = Buffer.byteLength(payloadFull, 'utf8')
+    const truncated = payloadBytes > MCP_SERVED_PAYLOAD_MAX
+    const payload = truncated
+      ? `${payloadFull.slice(0, MCP_SERVED_PAYLOAD_MAX)}…(truncated)`
+      : payloadFull
+
+    // Carry the tool's registered human-title i18n key onto the entry so the
+    // viewer resolves it without any name→title map of its own.
+    const titleKey = this.tools.find((t) => t.name === tool)?.config.titleKey
+    const entry: McpServedCallEntry = {
+      timestamp: Date.now(),
+      tool,
+      payload,
+      payloadTruncated: truncated,
+      payloadBytes,
+      ...(titleKey !== undefined && { titleKey })
+    }
+    this.servedCalls.push(entry)
+    if (this.servedCalls.length > this.servedCallCap) {
+      const dropped = this.servedCalls.splice(0, this.servedCalls.length - this.servedCallCap)
+      this.disposeEvictedMedia(dropped)
+    }
+    // Drop heavy capture payloads on all but the most recent few entries so
+    // base64 PNGs / video paths don't accumulate unbounded in memory.
+    this.pruneOldCaptures()
+    this.notifyServedCallListeners()
+  }
+
+  /**
+   * Attach a captured artefact (screenshot PNG / screencast video) to the
+   * MOST RECENT served-call entry. Called by the capture tools after they
+   * produce their result so a viewer can render it inline. No-op when the
+   * buffer is empty (the tool ran but retention is off / nothing recorded).
+   */
+  private attachCaptureToLatest(capture: McpServedCapture): void {
+    const latest = this.servedCalls[this.servedCalls.length - 1]
+    if (!latest) return
+    latest.capture = capture
+    this.pruneOldCaptures()
+    this.notifyServedCallListeners()
+  }
+
+  /**
+   * Attach the result of a `tools/call` to the MOST RECENT served-call entry.
+   * The request was recorded by {@link recordServedCall} immediately before the
+   * SDK invoked the handler, so the latest entry IS this call (same assumption
+   * as {@link attachCaptureToLatest}). Surfaces the readable text payload of a
+   * standard MCP `CallToolResult` (`content:[{type:'text',text}]`) so the viewer
+   * shows the actual response, not the envelope; falls back to the whole result.
+   * Truncated past the same cap as the request. No-op when retention is off /
+   * the buffer is empty.
+   */
+  private attachResponseToLatest(result: unknown): void {
+    if (this.servedCallCap <= 0) return
+    const latest = this.servedCalls[this.servedCalls.length - 1]
+    if (!latest) return
+    const readable = extractResultText(result)
+    let full: string
+    try {
+      full = readable === undefined ? '' : typeof readable === 'string' ? readable : JSON.stringify(readable)
+    } catch {
+      full = '"[unserialisable result]"'
+    }
+    const truncated = Buffer.byteLength(full, 'utf8') > MCP_SERVED_PAYLOAD_MAX
+    latest.response = truncated ? `${full.slice(0, MCP_SERVED_PAYLOAD_MAX)}…(truncated)` : full
+    latest.responseTruncated = truncated
+    this.notifyServedCallListeners()
+  }
+
+  /**
+   * Bound capture memory + disk to the most-recent {@link captureRetentionCap}
+   * entries: any older capture drops its heavy payload — image `base64` is
+   * cleared, and a video's `path` (an `ecui-media://` URL) is dropped AND its
+   * on-disk temp file deleted. Only the capture metadata (kind / mimeType)
+   * stays, so the viewer shows "capture no longer available". Called after
+   * every record / capture-attach and on a cap change.
+   */
+  private pruneOldCaptures(): void {
+    const keepFrom = this.servedCalls.length - this.captureRetentionCap
+    for (let i = 0; i < keepFrom; i++) {
+      const e = this.servedCalls[i]
+      if (!e?.capture) continue
+      const { kind, mimeType, base64, path } = e.capture
+      if (base64 === undefined && path === undefined) continue // already pruned
+      // Delete the backing screencast temp file (video) before dropping the ref.
+      this.disposeEvictedMedia([e])
+      e.capture = { kind, mimeType }
+    }
+  }
+
+  /**
+   * Delete the on-disk screencast temp files backing the given evicted entries
+   * so `/tmp` doesn't grow unbounded. A video capture's `path` is an
+   * `ecui-media://screencast/<file>` URL → its temp file is `tmpdir()/<file>`.
+   * Best-effort: a missing file or an unparsable path is ignored. Call with the
+   * entries being dropped from the buffer (cap overflow / cap lowered / clear).
+   */
+  private disposeEvictedMedia(evicted: readonly McpServedCallEntry[]): void {
+    for (const e of evicted) {
+      const url = e.capture?.kind === 'video' ? e.capture.path : undefined
+      if (!url?.startsWith(SCREENCAST_MEDIA_URL_PREFIX)) continue
+      const name = pathBasename(url.slice(SCREENCAST_MEDIA_URL_PREFIX.length))
+      if (!isScreencastTempName(name)) continue
+      try {
+        rmSync(pathJoin(tmpdir(), name), { force: true })
+      } catch (err) {
+        logger.warn('McpService: failed to delete evicted screencast temp file', { name, error: String(err) })
+      }
+    }
+  }
+
+  /**
    * Start listening on `127.0.0.1:port`. Throws if already running.
    * `port = 0` (or omitted) tells the OS to pick a free ephemeral port
    * — the consumer reads the actual bound value back via `getPort()`
@@ -332,6 +789,8 @@ export class McpService {
     // McpService instances in the same process (rare; tests) doesn't
     // double-wrap the dialog API.
     installDialogBypass()
+    installScreencastMediaProtocol()
+    sweepOrphanScreencastFiles()
     this.attachConsoleSubscriptions()
 
     const httpServer = createServer((req, res) => {
@@ -385,6 +844,9 @@ export class McpService {
       this.httpServer = null
       await new Promise<void>((resolve) => { server.close(() => { resolve() }) })
     }
+    // Clean up any screencast temp files still referenced by the buffer so
+    // `/tmp` doesn't accumulate webm files across runs.
+    this.disposeEvictedMedia(this.servedCalls)
     logger.info('McpService stopped')
   }
 
@@ -437,6 +899,15 @@ export class McpService {
   }
 
   /**
+   * The `(name, titleKey)` pair of every registered tool. Exposed so a host can
+   * assert each title i18n key resolves in its locale catalogue (a CI guard
+   * against "declared the key but forgot the translation").
+   */
+  getRegisteredToolTitleKeys(): { name: string; titleKey: string }[] {
+    return this.tools.map((t) => ({ name: t.name, titleKey: t.config.titleKey }))
+  }
+
+  /**
    * Invoke a registered tool by name from inside the host process. The
    * built-in `batch` tool uses this to chain calls without going back
    * out through the HTTP transport. Throws if the tool is unknown.
@@ -479,6 +950,7 @@ export class McpService {
     this.registerTool(
       'screenshot',
       {
+        titleKey: 'mcpToolTitles.screenshot',
         title: 'Screenshot',
         description:
           'Capture an Electron window as a PNG and return it base64-encoded. ' +
@@ -492,6 +964,10 @@ export class McpService {
         if (!win) return noWindowError(windowId)
         const image = await win.webContents.capturePage()
         const base64 = image.toPNG().toString('base64')
+        // Surface the capture inline in the logs viewer (bonus). Attached to
+        // the most-recent served-call entry — i.e. this very `screenshot`
+        // call — and auto-evicted for older entries to bound memory.
+        this.attachCaptureToLatest({ kind: 'image', mimeType: 'image/png', base64 })
         return {
           content: [{ type: 'image', data: base64, mimeType: 'image/png' }]
         }
@@ -501,6 +977,7 @@ export class McpService {
     this.registerTool(
       'screencast-start',
       {
+        titleKey: 'mcpToolTitles.screencastStart',
         title: 'Start screencast',
         description:
           'Begin recording the target Electron window as a WebM video. The clip is held in renderer memory ' +
@@ -598,6 +1075,7 @@ export class McpService {
     this.registerTool(
       'screencast-stop',
       {
+        titleKey: 'mcpToolTitles.screencastStop',
         title: 'Stop screencast',
         description:
           'Stop the active screencast on the target window, flush the accumulated WebM chunks to a temp ' +
@@ -658,18 +1136,43 @@ export class McpService {
         }
 
         const buffer = Buffer.from(result.base64, 'base64')
-        const tmpPath = pathJoin(tmpdir(), `ecu-screencast-${Date.now()}.webm`)
-        writeFileSync(tmpPath, buffer)
+        const stamp = Date.now()
+        const webmPath = pathJoin(tmpdir(), `ecu-screencast-${String(stamp)}.webm`)
+        writeFileSync(webmPath, buffer)
+
+        // The MediaRecorder webm has no Duration in its header, so a <video>
+        // reports Infinity until fully buffered. Remux to a seekable MP4 with a
+        // real duration (ffmpeg); serve that when it succeeds (and drop the
+        // webm), else fall back to the raw webm.
+        const mp4Path = pathJoin(tmpdir(), `ecu-screencast-${String(stamp)}.mp4`)
+        const remuxed = remuxScreencastToMp4(webmPath, mp4Path)
+        const servePath = remuxed ?? webmPath
+        const serveMime = remuxed ? 'video/mp4' : result.mimeType
+        if (remuxed) {
+          try { rmSync(webmPath, { force: true }) } catch { /* best-effort */ }
+        }
+
+        // Surface the clip inline in the logs viewer (bonus). A clip can be
+        // multiple MB, so we do NOT inline its base64 in the bounded buffer
+        // (that bloated memory + every getLogs IPC, and the clip evicted within
+        // a few calls). Instead the renderer loads it on demand from disk via
+        // the `ecui-media://` protocol — the renderer blocks `file://`, but the
+        // privileged scheme streams the temp file. `path` carries that URL.
+        this.attachCaptureToLatest({
+          kind: 'video',
+          mimeType: serveMime,
+          path: `${SCREENCAST_MEDIA_URL_PREFIX}${pathBasename(servePath)}`
+        })
 
         return {
           content: [
             {
               type: 'text',
               text: JSON.stringify({
-                path: tmpPath,
+                path: servePath,
                 byteLength: result.byteLength,
                 durationMs: result.durationMs,
-                mimeType: result.mimeType
+                mimeType: serveMime
               })
             }
           ]
@@ -680,6 +1183,7 @@ export class McpService {
     this.registerTool(
       'refresh',
       {
+        titleKey: 'mcpToolTitles.refresh',
         title: 'Refresh',
         description:
           'Reload an Electron window\'s renderer. Equivalent to Ctrl+R / Cmd+R. ' +
@@ -706,6 +1210,7 @@ export class McpService {
     this.registerTool(
       'dom-query',
       {
+        titleKey: 'mcpToolTitles.domQuery',
         title: 'Query DOM',
         description:
           'Run a CSS selector against the active renderer window and return matching elements as ' +
@@ -771,6 +1276,7 @@ export class McpService {
     this.registerTool(
       'console-logs',
       {
+        titleKey: 'mcpToolTitles.consoleLogs',
         title: 'Renderer console logs',
         description:
           'Return recent renderer-process console messages (info / warn / error / debug / verbose). ' +
@@ -820,6 +1326,7 @@ export class McpService {
     this.registerTool(
       'dispatch-event',
       {
+        titleKey: 'mcpToolTitles.dispatchEvent',
         title: 'Dispatch DOM event',
         description:
           'Dispatch a synthetic event of any type on a CSS-selected element in the active renderer. ' +
@@ -898,6 +1405,7 @@ export class McpService {
     this.registerTool(
       'type-text',
       {
+        titleKey: 'mcpToolTitles.typeText',
         title: 'Type text into input',
         description:
           'Set the value of an `<input>`, `<textarea>` or `[contenteditable]` element and fire `input`+`change` events. ' +
@@ -958,6 +1466,7 @@ export class McpService {
     this.registerTool(
       'evaluate',
       {
+        titleKey: 'mcpToolTitles.evaluate',
         title: 'Evaluate JS in renderer',
         description:
           'Power-tool escape hatch: run an arbitrary JavaScript expression in the active renderer\'s main world ' +
@@ -1002,6 +1511,7 @@ export class McpService {
     this.registerTool(
       'exit',
       {
+        titleKey: 'mcpToolTitles.exit',
         title: 'Quit the app',
         description:
           'Gracefully quit the Electron app via `app.quit()`. Pending file-dirty / before-quit handlers still run, ' +
@@ -1020,6 +1530,7 @@ export class McpService {
     this.registerTool(
       'wait-for',
       {
+        titleKey: 'mcpToolTitles.waitFor',
         title: 'Wait for DOM condition',
         description:
           'Poll the renderer DOM until a condition is met (or `timeoutMs` elapses). Eliminates ' +
@@ -1095,6 +1606,7 @@ export class McpService {
     this.registerTool(
       'keyboard-shortcut',
       {
+        titleKey: 'mcpToolTitles.keyboardShortcut',
         title: 'Send keyboard shortcut',
         description:
           'Send an OS-level keyboard event via `webContents.sendInputEvent` so Electron menu accelerators ' +
@@ -1142,6 +1654,7 @@ export class McpService {
     this.registerTool(
       'devtools',
       {
+        titleKey: 'mcpToolTitles.devtools',
         title: 'Toggle Chromium DevTools',
         description:
           'Open / close / toggle the renderer\'s DevTools panel. Useful when you need to inspect the DOM, ' +
@@ -1187,6 +1700,7 @@ export class McpService {
     this.registerTool(
       'window-info',
       {
+        titleKey: 'mcpToolTitles.windowInfo',
         title: 'Window info',
         description:
           'Return a snapshot of a BrowserWindow: bounds, content size, title, focus / minimize / maximize / fullscreen / visible flags. ' +
@@ -1222,6 +1736,7 @@ export class McpService {
     this.registerTool(
       'storage',
       {
+        titleKey: 'mcpToolTitles.storage',
         title: 'Renderer localStorage',
         description:
           'Read or modify the renderer\'s `localStorage`. Useful to set up app state (recent files, settings, ' +
@@ -1278,6 +1793,7 @@ export class McpService {
     this.registerTool(
       'scroll-into-view',
       {
+        titleKey: 'mcpToolTitles.scrollIntoView',
         title: 'Scroll element into view',
         description:
           'Call `el.scrollIntoView(...)` on a CSS-selected element so a downstream `screenshot` / `dispatch-event` ' +
@@ -1324,6 +1840,7 @@ export class McpService {
     this.registerTool(
       'inject-css',
       {
+        titleKey: 'mcpToolTitles.injectCss',
         title: 'Inject CSS rules',
         description:
           'Append a `<style>` tag with arbitrary CSS rules into the renderer\'s document head. Useful to debug ' +
@@ -1371,6 +1888,7 @@ export class McpService {
     this.registerTool(
       'wait',
       {
+        titleKey: 'mcpToolTitles.wait',
         title: 'Sleep',
         description:
           'Block for `ms` milliseconds. Use only when nothing else fits — prefer `wait-for` (DOM condition) ' +
@@ -1391,6 +1909,7 @@ export class McpService {
     this.registerTool(
       'get-computed-style',
       {
+        titleKey: 'mcpToolTitles.getComputedStyle',
         title: 'Read computed CSS',
         description:
           'Return `getComputedStyle` values for a CSS-selected element. Pass a `properties` array to filter — ' +
@@ -1443,6 +1962,7 @@ export class McpService {
     this.registerTool(
       'get-windows',
       {
+        titleKey: 'mcpToolTitles.getWindows',
         title: 'List BrowserWindows',
         description:
           'Return every active BrowserWindow with its `id` (= `webContents.id`), `title`, `bounds`, and ' +
@@ -1477,6 +1997,7 @@ export class McpService {
     this.registerTool(
       'drag-drop',
       {
+        titleKey: 'mcpToolTitles.dragDrop',
         title: 'Drag and drop',
         description:
           'Simulate an HTML5 drag-and-drop from a source element to a target element. Fires the full event ' +
@@ -1571,6 +2092,7 @@ export class McpService {
     this.registerTool(
       'mouse-input',
       {
+        titleKey: 'mcpToolTitles.mouseInput',
         title: 'Trusted mouse input',
         description:
           'Inject OS-level, *trusted* (`isTrusted=true`) mouse input via `webContents.sendInputEvent` — the ' +
@@ -1672,6 +2194,7 @@ export class McpService {
     this.registerTool(
       'batch',
       {
+        titleKey: 'mcpToolTitles.batch',
         title: 'Chain MCP tool calls in one request',
         description:
           'Run a sequence of MCP tool calls in order, with an implicit "1 frame + 1 microtask" ' +
@@ -1823,6 +2346,7 @@ export class McpService {
     this.registerTool(
       'open_mini_browser',
       {
+        titleKey: 'mcpToolTitles.openMiniBrowser',
         title: 'Open the Mini browser workbench tab',
         description:
           'Open (or focus, if already open) the singleton Mini browser tab in the active window. ' +
@@ -1849,6 +2373,7 @@ export class McpService {
     this.registerTool(
       'mini_browser_execute',
       {
+        titleKey: 'mcpToolTitles.miniBrowserExecute',
         title: 'Run a script inside the Mini browser guest',
         description:
           'Execute a JavaScript expression inside the Mini browser\'s `<webview>` guest context ' +
@@ -1882,6 +2407,7 @@ export class McpService {
     this.registerTool(
       'open_console',
       {
+        titleKey: 'mcpToolTitles.openConsole',
         title: 'Open the Console workbench tab',
         description:
           'Open (or focus, if already open) the host app\'s Console panel. The Console shows the ' +
@@ -1900,6 +2426,7 @@ export class McpService {
     this.registerTool(
       'console_clear',
       {
+        titleKey: 'mcpToolTitles.consoleClear',
         title: 'Clear the Console panel',
         description:
           'Wipe the renderer-side Console feed buffer. Same effect as clicking the toolbar ' +
@@ -1918,6 +2445,7 @@ export class McpService {
     this.registerTool(
       'set_tab_maximized',
       {
+        titleKey: 'mcpToolTitles.setTabMaximized',
         title: 'Maximize or restore a workbench tab',
         description:
           'Open a workbench tab fullscreen (in the same modal a double-click on the tab opens), ' +
@@ -2002,8 +2530,26 @@ export class McpService {
       const routed = await this.maybeRouteRequest(raw, req, res)
       if (routed.handled) return
       // Either no routing key, or it named us: dispatch the (possibly
-      // key-stripped) body locally by replaying it to the SDK.
+      // key-stripped) body locally by replaying it to the SDK. A forwarded
+      // (passthrough) call returned `handled: true` above, so we only ever
+      // reach here for a LOCAL dispatch — record it for the logs viewer.
       bodyForSdk = routed.localBody
+      this.recordServedCallFromBuffer(bodyForSdk)
+    } else if (this.servedCallCap > 0 && req.method === 'POST') {
+      // No routing bridge, but served-call retention is on: a `tools/call`
+      // arrives as an HTTP POST, so buffer ONLY POST bodies to read the
+      // payload, then replay them to the SDK. GET/DELETE (the transport's
+      // SSE / session-close verbs) carry no body and are left untouched —
+      // replaying an empty body would break their streams.
+      try {
+        bodyForSdk = await readRequestBody(req)
+      } catch (err) {
+        logger.error('McpService failed to read request body for logs', { error: String(err) })
+        res.statusCode = 400
+        res.end('Bad Request')
+        return
+      }
+      this.recordServedCallFromBuffer(bodyForSdk)
     }
 
     // Wrap the per-request server lifecycle in an
@@ -2031,7 +2577,24 @@ export class McpService {
             config: unknown,
             handler: unknown
           ) => unknown
-          ;(server.registerTool.bind(server) as SdkRegisterTool)(tool.name, tool.config, tool.handler)
+          // Wrap the handler so the local tool RESULT is captured into the
+          // served-call log: `recordServedCall` recorded the request just above,
+          // so the latest buffer entry IS this call (same assumption as the
+          // capture tools). Forwarded calls never reach here — the bridge
+          // answered them — matching `recordServedCall`'s local-only scope.
+          const baseHandler = tool.handler as (a: unknown, e: unknown) => unknown
+          const loggedHandler = (a: unknown, e: unknown): unknown => {
+            const out: unknown = baseHandler(a, e)
+            if (out instanceof Promise) {
+              return (out as Promise<unknown>).then((r: unknown): unknown => {
+                this.attachResponseToLatest(r)
+                return r
+              })
+            }
+            this.attachResponseToLatest(out)
+            return out
+          }
+          ;(server.registerTool.bind(server) as SdkRegisterTool)(tool.name, tool.config, loggedHandler)
         }
         for (const resource of this.resources) {
           // Static URI vs templated URI: the SDK has different overloads

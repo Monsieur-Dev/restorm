@@ -11,6 +11,16 @@ colors:
     value: "#d4d4d4"
     description: Editor foreground color
 
+  # Chat-bubble tints for dark themes (incoming = received/left,
+  # outgoing = sent/right). → --chat-bubble-incoming/outgoing-background
+  - id: chat-bubble.incoming.background
+    value: "rgb(255, 255, 255, 0.08)"
+    description: Incoming chat-bubble background (dark themes)
+
+  - id: chat-bubble.outgoing.background
+    value: "rgb(70, 118, 190, 0.40)"
+    description: Outgoing chat-bubble background (dark themes)
+
   # Hyperlink / inline-link text colour (URL-style links, e.g. ECUI Button link)
   - id: textLink.foreground
     value: "#3794ff"

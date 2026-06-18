@@ -119,6 +119,7 @@ export function registerScenarioEngineTools(mcp: McpService): void {
   mcp.registerTool(
     'run_scenario',
     {
+      titleKey: 'mcpToolTitles.runScenario',
       title: 'Run a scenario through the engine',
       description:
         'Execute a scenario end-to-end via the main-process engine. Blocking mode awaits the result up to ' +
@@ -179,6 +180,7 @@ export function registerScenarioEngineTools(mcp: McpService): void {
   mcp.registerTool(
     'get_scenario_run_status',
     {
+      titleKey: 'mcpToolTitles.getScenarioRunStatus',
       title: 'Get a scenario run\'s status',
       description:
         'Returns a run\'s state + chronological log, DURING and AFTER execution (logs are archived per runId, not lost on completion). ' +
@@ -228,6 +230,7 @@ export function registerScenarioEngineTools(mcp: McpService): void {
   mcp.registerTool(
     'list_scenario_runs',
     {
+      titleKey: 'mcpToolTitles.listScenarioRuns',
       title: 'List recent scenario runs',
       description:
         'List the engine\'s retained runs (most recent first) — top-level AND sub-scenario runs — so you can discover the runId of a run you did NOT start yourself (e.g. one launched from the UI Play button), then pass it to `get_scenario_run_status` / `stop_scenario_run`. Each item: `{ runId, scenarioId, launcherScenarioId, parentRunId?, status, live, startedAt, endedAt? }`. Bounded by the same archive limits as the logs.',
@@ -259,6 +262,7 @@ export function registerScenarioEngineTools(mcp: McpService): void {
   mcp.registerTool(
     'stop_scenario_run',
     {
+      titleKey: 'mcpToolTitles.stopScenarioRun',
       title: 'Stop a scenario run',
       description: 'Abort a running scenario. Returns the new state.',
       inputSchema: {
@@ -278,6 +282,7 @@ export function registerScenarioEngineTools(mcp: McpService): void {
   mcp.registerTool(
     'answer_scenario_input',
     {
+      titleKey: 'mcpToolTitles.answerScenarioInput',
       title: 'Answer a scenario input prompt',
       description:
         'Answer (or cancel) an input prompt an interactive run is waiting on. Discover pending prompts via `get_scenario_run_status` → `pendingInputs[]` (each has `runId`, `requestId`, `name`, `defaultValue`, `hint`, `valueType?`). ' +

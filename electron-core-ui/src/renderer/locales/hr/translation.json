@@ -52,7 +52,8 @@
     "documentation": "Dokumentacija",
     "keyboardShortcuts": "Tipkovni prečaci",
     "releaseNotes": "Bilješke o izdanju",
-    "reportIssue": "Prijavi problem"
+    "reportIssue": "Prijavi problem",
+    "mcpLogs": "MCP zapisi"
   },
   "settings": {
     "title": "Postavke",
@@ -332,7 +333,38 @@
   "statusbar": {
     "mcp": {
       "serverRunningOnPort": "MCP poslužitelj radi na priključku {{port}}",
-      "sessionName": "Sesija: {{name}}"
+      "sessionName": "Sesija: {{name}}",
+      "viewLogs": "Prikaži zapise"
     }
+  },
+  "mcpToolTitles": {
+    "screenshot": "Snimka zaslona",
+    "screencastStart": "Pokreni snimanje zaslona",
+    "screencastStop": "Zaustavi snimanje zaslona",
+    "refresh": "Ponovno učitaj prozor",
+    "domQuery": "Upit na DOM",
+    "consoleLogs": "Čitaj zapise konzole",
+    "dispatchEvent": "Pošalji DOM događaj",
+    "typeText": "Upiši tekst",
+    "evaluate": "Pokreni JavaScript",
+    "exit": "Zatvori aplikaciju",
+    "waitFor": "Čekaj uvjet",
+    "keyboardShortcut": "Pritisni tipkovni prečac",
+    "devtools": "Uključi/isključi DevTools",
+    "windowInfo": "Informacije o prozoru",
+    "storage": "Čitaj/piši pohranu",
+    "scrollIntoView": "Pomakni u vidokrug",
+    "injectCss": "Ubaci CSS",
+    "wait": "Čekaj",
+    "getComputedStyle": "Dohvati izračunati stil",
+    "getWindows": "Popiši prozore",
+    "dragDrop": "Povuci i ispusti",
+    "mouseInput": "Unos mišem",
+    "batch": "Pokreni skup alata",
+    "openMiniBrowser": "Otvori mini preglednik",
+    "miniBrowserExecute": "Pokreni kôd u mini pregledniku",
+    "openConsole": "Otvori konzolu",
+    "consoleClear": "Očisti konzolu",
+    "setTabMaximized": "Uvećaj/vrati karticu"
   }
 }

@@ -3,6 +3,24 @@ name: Kimbie Dark
 type: dark
 
 colors:
+  # Chat-bubble tints: warm amber lift over the Kimbie brown surface.
+  chat-bubble.incoming.background: "rgb(211, 175, 134, 0.10)"
+  chat-bubble.outgoing.background: "rgb(165, 122, 76, 0.40)"
+  # Syntax palette from the canonical Kimbie warm tones.
+  hljs.foreground: "#d3af86"
+  hljs.keyword: "#98676a"
+  hljs.type: "#f06431"
+  hljs.number: "#7e602c"
+  hljs.string: "#889b4a"
+  hljs.regexp: "#c3902f"
+  hljs.comment: "#a57a4c"
+  hljs.meta: "#84613d"
+  hljs.variable: "#dc3958"
+  hljs.attr: "#f79a32"
+  hljs.section: "#f06431"
+  hljs.selector: "#f06431"
+  hljs.addition.background: "#2c3318"
+  hljs.deletion.background: "#3a160f"
   scenarioNode.background: "#2a2013"
   scenarioNode.headerBackground: "#392c1a"
   scenarioNode.headerBackgroundSelected: "#6e4a1f"
