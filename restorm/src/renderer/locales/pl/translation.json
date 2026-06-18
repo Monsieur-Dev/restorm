@@ -41,6 +41,11 @@
     "requestHistory": "Historia żądań",
     "envSelector": {
       "applyToAll": "Zastosuj do wszystkich żądań"
+    },
+    "auth": {
+      "noAuth": "Brak uwierzytelniania",
+      "popoverLabel": "Trasa uwierzytelniania",
+      "unnamed": "Bez nazwy"
     }
   },
   "tips": {

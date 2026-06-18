@@ -41,6 +41,11 @@
     "requestHistory": "Historie požadavků",
     "envSelector": {
       "applyToAll": "Použít na všechny požadavky"
+    },
+    "auth": {
+      "noAuth": "Bez ověření",
+      "popoverLabel": "Ověřovací trasa",
+      "unnamed": "Bez názvu"
     }
   },
   "tips": {

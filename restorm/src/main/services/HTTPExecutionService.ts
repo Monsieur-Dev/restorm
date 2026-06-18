@@ -10,6 +10,7 @@ import { BrowserWindow } from 'electron'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
 import { authenticationCacheService, type ResolvedAuthShape } from './AuthenticationCacheService'
+import { responseHistoryService } from './ResponseHistoryService'
 import { secretHydrationService } from './secrets/SecretHydrationService'
 import { collectRequestSecrets } from './secrets/collectRequestSecrets'
 import { withFirewallBypass } from './firewall/firewallBypass'
@@ -711,27 +712,59 @@ class HTTPExecutionService {
   ): Promise<HTTPExecutionResult> {
     const startTime = Date.now()
     const startedAt = new Date().toISOString()
+    // Record the auth (login) call in the LOGIN route's OWN response history —
+    // the same place a user-sent request lands. The auth sub-call goes on the
+    // wire here directly (it never passes through the request IPC handler that
+    // normally calls `storeExecutionResult`), so without this the login route's
+    // history stayed empty even though it was really called. We record EVERY
+    // outcome (success, HTTP error, or transport failure) so the route's
+    // history mirrors what the user saw (the key's pulse fires on every
+    // attempt). Fire-and-forget off the hot path — a history-write hiccup must
+    // never break the auth flow.
+    const recordAuthHistory = (authResult: HTTPExecutionResult): void => {
+      setImmediate(() => {
+        void responseHistoryService.storeExecutionResult(authRequest.id, 'http', authResult)
+      })
+    }
     let parsedUrl: URL
     try {
       parsedUrl = new URL(shape.url)
     } catch {
-      return {
+      const invalid: HTTPExecutionResult = {
         requestId: authRequest.id,
         success: false,
         error: `Invalid auth URL: ${shape.url}`,
+        requestUrl: shape.url,
         timings: { startedAt, durationMs: Date.now() - startTime }
       }
+      recordAuthHistory(invalid)
+      return invalid
     }
-    const result = await this.makeRequest({
-      url: parsedUrl,
-      method: shape.method,
-      headers: shape.headers,
-      ...(shape.body !== undefined ? { body: shape.body } : {}),
-      timeout: DEFAULT_REQUEST_TIMEOUT_MS,
-      signal: parentSignal
-    })
+    let result: Awaited<ReturnType<HTTPExecutionService['makeRequest']>>
+    try {
+      result = await this.makeRequest({
+        url: parsedUrl,
+        method: shape.method,
+        headers: shape.headers,
+        ...(shape.body !== undefined ? { body: shape.body } : {}),
+        timeout: DEFAULT_REQUEST_TIMEOUT_MS,
+        signal: parentSignal
+      })
+    } catch (err) {
+      // Transport failure (connection refused, timeout, firewall block, …).
+      // Record the failed attempt, then rethrow so the auth cache marks the
+      // refresh failed and the downstream request aborts as before.
+      recordAuthHistory({
+        requestId: authRequest.id,
+        success: false,
+        error: err instanceof Error ? err.message : String(err),
+        requestUrl: shape.url,
+        timings: { startedAt, durationMs: Date.now() - startTime }
+      })
+      throw err
+    }
     const durationMs = Date.now() - startTime
-    return {
+    const authResult: HTTPExecutionResult = {
       requestId: authRequest.id,
       success: true,
       statusCode: result.statusCode,
@@ -741,6 +774,8 @@ class HTTPExecutionService {
       requestUrl: shape.url,
       timings: { startedAt, durationMs }
     }
+    recordAuthHistory(authResult)
+    return authResult
   }
 }
 

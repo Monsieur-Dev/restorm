@@ -43,8 +43,39 @@ Feature: Authentication routes end-to-end
     And I add a sub-environment "invalid environnement" with "client_id" set to "INVALID_CLIENT_ID"
     And I switch the imported authentication body client_id to the expression "{{client_id}}"
     And I open the pet request in a tab
-    And I send the pet request twice
+    # Importing the auth route into the pet request's env folder makes the
+    # tab-header key APPEAR on the already-open request (reactive — it had
+    # none before the import), attached to the imported route.
+    Then the tab-header auth key should show a route attached
+    When I send the pet request twice
+    # The chosen auth route is actually CALLED — the gate'd pet payload only
+    # returns once the Bearer from the auth route is applied.
     Then the pet response body should contain "Rex"
+    # The auth (login) call the pet request triggered must be recorded in the
+    # auth route's OWN response history — same store a user-sent request lands
+    # in — so the login call is visible in the route's history panel.
+    And the "Authentication route" auth route history should contain the auth call
+
+    # Tab-header auth selector is an icon-only key button. Opening it lists
+    # the available auth route; picking an option writes the active request's
+    # attached route, CLOSES the popover, flips the key to its pressed/active
+    # state, and updates the hover tooltip — all LIVE (no tab reopen).
+    # Detaching then re-attaching round-trips the choice through the reactive
+    # state.
+    When I open the tab-header auth selector
+    Then the tab-header auth selector popover should list the "Authentication route" route
+    When I pick "No auth" in the tab-header auth selector
+    Then the tab-header auth selector popover should close
+    And the tab-header auth key should show no auth attached
+    And the tab-header auth tooltip should read "No auth"
+    When I open the tab-header auth selector
+    And I pick the "Authentication route" route in the tab-header auth selector
+    Then the tab-header auth selector popover should close
+    And the tab-header auth key should show a route attached
+    # The pointer is still over the key right after the pick, but the hover
+    # tooltip must NOT pop as a side effect of selecting.
+    And the tab-header auth tooltip should not be showing
+    And the tab-header auth tooltip should read "Authentication route"
 
     # Per-tab env pinning regression: pet on "Valid environnement",
     # auth route on "invalid environnement". The auth-resolver should
@@ -60,7 +91,7 @@ Feature: Authentication routes end-to-end
 
     When I clear the issued tokens
     And I re-send the pet request
-    Then the statusbar auth indicator should show the running feedback
+    Then the tab-header auth indicator should show the running feedback
     When I release the pending login
     Then the pet response body should still contain "Rex"
 
@@ -85,3 +116,11 @@ Feature: Authentication routes end-to-end
     When I send the authentication request directly
     And I release the pending login
     Then no authentication-failure toast should appear
+
+    # Reactive disappearance: with the pet request focused its tab-header
+    # key is shown; deleting the LAST in-scope auth route makes the key
+    # vanish live (no reopen), since there is no route left to attach.
+    When I focus the "Find pet by ID" request tab
+    Then the tab-header auth key should show a route attached
+    When I delete the "Authentication route" auth request from the sidebar
+    Then the tab-header auth key should be hidden

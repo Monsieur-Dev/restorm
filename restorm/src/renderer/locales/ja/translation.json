@@ -38,6 +38,11 @@
     "requestHistory": "リクエスト履歴",
     "envSelector": {
       "applyToAll": "すべてのリクエストに適用"
+    },
+    "auth": {
+      "noAuth": "認証なし",
+      "popoverLabel": "認証ルート",
+      "unnamed": "名称未設定"
     }
   },
   "tips": {

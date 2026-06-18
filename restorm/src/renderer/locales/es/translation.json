@@ -39,6 +39,11 @@
     "requestHistory": "Historial de peticiones",
     "envSelector": {
       "applyToAll": "Aplicar a todas las peticiones"
+    },
+    "auth": {
+      "noAuth": "Sin autenticación",
+      "popoverLabel": "Ruta de autenticación",
+      "unnamed": "Sin nombre"
     }
   },
   "tips": {

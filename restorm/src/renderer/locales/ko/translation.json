@@ -38,6 +38,11 @@
     "requestHistory": "요청 기록",
     "envSelector": {
       "applyToAll": "모든 요청에 적용"
+    },
+    "auth": {
+      "noAuth": "인증 없음",
+      "popoverLabel": "인증 경로",
+      "unnamed": "이름 없음"
     }
   },
   "tips": {

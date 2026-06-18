@@ -24,6 +24,7 @@ const StatusbarElement: React.FC<StatusbarElementProps> = ({
   children,
   tooltipTrigger = 'hover',
   tooltipPlacement = 'auto',
+  onOpenChange,
   pulseSignal,
   pulseColor,
   'data-testid': dataTestId
@@ -187,6 +188,13 @@ const StatusbarElement: React.FC<StatusbarElementProps> = ({
   // env-select but stays open while the user toggles "Apply to all".
   const closeTooltip = useCallback((): void => { setShowTooltip(false) }, [])
   const tooltipContextValue = useMemo(() => ({ closeTooltip }), [closeTooltip])
+
+  // Click-mode: report open/close so a host can coordinate sibling
+  // overlays (e.g. suppress its hover tooltip while this popover is open).
+  useEffect(() => {
+    if (!clickMode) return
+    onOpenChange?.(showTooltip)
+  }, [clickMode, showTooltip, onOpenChange])
 
   const hasIcon = icon !== undefined && icon !== null && icon.type !== 'none'
   const hasTitle = title !== undefined && title !== null && title !== ''

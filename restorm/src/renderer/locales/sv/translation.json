@@ -39,6 +39,11 @@
     "requestHistory": "Förfrågningshistorik",
     "envSelector": {
       "applyToAll": "Använd på alla förfrågningar"
+    },
+    "auth": {
+      "noAuth": "Ingen autentisering",
+      "popoverLabel": "Autentiseringsväg",
+      "unnamed": "Namnlös"
     }
   },
   "tips": {

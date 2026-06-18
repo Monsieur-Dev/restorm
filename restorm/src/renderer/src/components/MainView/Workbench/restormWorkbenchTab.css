@@ -38,6 +38,68 @@
   right: 80px;
 }
 
+/* Auth-route key selector — the rightmost item of the top-right cluster,
+ * so it flows snug (via the cluster's 8px gap) after the env pill /
+ * history / ribbon and lands immediately to the LEFT of the favourite
+ * star with no reserved-slot gap. Icon-only (no text label), so it's a
+ * fixed 24px square that the cluster's `top` anchoring + the
+ * header-actions `margin-top` line up with the env pill. The selector is
+ * wrapped in a HeaderHoverTooltip, so the slot's flex child is the
+ * `.header-hover-tooltip` span. */
+.restorm-workbench-tab-star-left-action {
+  display: flex;
+  align-items: center;
+  margin-top: 5px;
+}
+
+/* The auth key reuses ECUI's StatusbarElement (a `.statusbar-item`) for the
+ * click popover + the `auth:running` pulse ripple. Visually it should read
+ * as a small toolbar toggle BUTTON — same surface + pressed look as the
+ * scenario-inspector log-filter toggles (`Toggle appearance="button"`), so
+ * the key always sits on a button background (visible on every theme — no
+ * bare-glyph-vanishes-on-dark problem) and "a route is attached" reads as
+ * the depressed/active state rather than a colour swap. No label any more —
+ * just the key glyph centred in a 24px square button. */
+.restorm-workbench-tab-star-left-action .statusbar-item {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: var(--icon-foreground, var(--foreground));
+}
+
+/* Drop the statusbar-tuned `translateY(-2px)` nudge so the glyph sits
+ * optically centred in the 24px header square (align-items: center). */
+.restorm-workbench-tab-star-left-action .statusbar-item-icon {
+  transform: none;
+}
+
+/* Hover affordance — same token the other header icon buttons use, with a
+ * translucent fallback for themes that don't define it. */
+.restorm-workbench-tab-star-left-action .statusbar-item.clickable:hover {
+  background-color: var(--list-hover-background, rgba(255, 255, 255, 0.08));
+}
+
+/* Pressed / active state = a route is attached. Reuses the exact find-widget
+ * "active option" tokens the ECUI toggle-button uses for its checked state,
+ * and flips LIVE as the selection changes (the component toggles
+ * `data-has-auth` on the reactivity tick). No literal colour — the depressed
+ * surface is the signal, theme-correct everywhere. */
+.request-header-auth-selector[data-has-auth='true'] .statusbar-item {
+  background-color: var(--inputOption-activeBackground);
+  border-color: var(--inputOption-activeBorder);
+  color: var(--inputOption-activeForeground);
+}
+
+/* Auth-route popover rows: the ECUI Button renders its key glyph flush
+ * against the label ("🔑Login route"). Add a small gap so the icon and the
+ * route name don't touch. Scoped to the popover's option buttons. */
+[data-testid='request-header-auth-popover'] .button .codicon {
+  margin-right: 6px;
+}
+
 /* The ribbon ships `position: absolute` by default — make it a normal
  * flex item inside the cluster so it composes with the header actions. */
 .restorm-workbench-tab-top-right > .ecui-bookmark-ribbon-stack {

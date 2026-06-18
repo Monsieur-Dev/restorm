@@ -149,8 +149,6 @@ import { DesktopIndicator } from './components/MainView/DesktopIndicator'
 import { findItemById, findItemWithParent } from './utils/treeSearch'
 import { getSessionRequestOverride, getSessionFolderEnv, findEnvironmentById } from './services/environmentSelectionStore'
 import type { RequestEnvInfo } from './components/Scenario/scenarioBoundResolver'
-import { StatusbarAuthSelector } from './components/MainView/StatusbarAuthSelector'
-import { shouldShowAuthSelector } from './components/MainView/statusbarAuthHelpers'
 import { useItemOperations } from './hooks/useItemOperations'
 import type { AddChildKind } from './components/MainView/Sidebar/contextMenuBuilder'
 import { useRequestCreationApi } from './hooks/useRequestCreationApi'
@@ -1105,35 +1103,6 @@ const App: React.FC = () => {
     if (!itemId) return null
     return findScenarioById(rootItems, itemId) ? itemId : null
   }, [workbenchTree.groups, focusedGroupId, resolveTabItemId, rootItems])
-
-  // The nearest ancestor env folder of the active request — the
-  // primary storage grain for the env model. Walked from breadcrumbs
-  // so it stays in sync with the workbench's active selection. `null`
-  // when no env-folder ancestor exists (the selector then runs
-  // without persistence).
-  const activeEnvFolderId = useMemo<string | null>(() => {
-    if (!activeRequest) return null
-    const { breadcrumbs } = findItemWithBreadcrumbs(rootItems, activeRequest.id)
-    for (let i = breadcrumbs.length - 2; i >= 0; i -= 1) {
-      const id = breadcrumbs[i]?.id
-      if (!id) continue
-      const folder = findFolderById(rootItems, id)
-      if (folder && isEnvironmentFolder(folder as FolderItem)) return folder.id
-    }
-    return null
-  }, [activeRequest, rootItems])
-
-  // Whether the statusbar auth selector mounts for the active request.
-  // With the env selector + history button moved to the request tab
-  // header, the auth selector is the only request-context statusbar
-  // cell left — so it (or, when absent, the MCP/bell group) carries the
-  // `right-aligned` auto-margin that pushes the right group over.
-  const authSelectorShown = useMemo<boolean>(() => {
-    if (!activeRequest || !activeEnvFolderId) return false
-    const req = findRequestById(rootItems, activeRequest.id)
-    const folder = findFolderById(rootItems, activeEnvFolderId)
-    return !!(req && folder && shouldShowAuthSelector(req, folder.items))
-  }, [activeRequest, activeEnvFolderId, rootItems])
 
   // Window-level Ctrl+S / Ctrl+Shift+S fallback — only fires if the
   // menu-bar's KeyboardShortcutService didn't intercept (e.g. when the
@@ -2801,28 +2770,14 @@ const App: React.FC = () => {
       <Statusbar data-testid="app-statusbar">
         {filePath && <StatusbarElement data-testid="app-statusbar-element" title={filePath} />}
         <DesktopIndicator />
-        {(() => {
-          if (!authSelectorShown || !activeRequest || !activeEnvFolderId) return null
-          const reactiveActiveRequest = findRequestById(rootItems, activeRequest.id)
-          const activeEnvFolder = findFolderById(rootItems, activeEnvFolderId)
-          if (!reactiveActiveRequest || !activeEnvFolder) return null
-          return (
-            <StatusbarAuthSelector
-              activeRequest={reactiveActiveRequest}
-              envFolderItems={activeEnvFolder.items}
-              rightAligned
-            />
-          )
-        })()}
-        {/* The environment selector + request-history button now live in
-         * the request tab header (left of the bookmark ribbon), not here.
-         * MCP indicator (only when restorm runs in MCP mode). When the
-         * auth selector isn't shown, MCP carries the `right-aligned` auto
-         * margin; the bell takes it only when MCP won't render. */}
-        <StatusbarMcpIndicator rightAligned={!authSelectorShown} onViewLogs={handleOpenMcpLogs} />
+        {/* The environment selector, request-history button and auth-route
+         * selector now all live in the request tab header, not here. The
+         * MCP indicator carries the `right-aligned` auto margin when it
+         * mounts (MCP mode); the bell takes it only when MCP won't render. */}
+        <StatusbarMcpIndicator rightAligned onViewLogs={handleOpenMcpLogs} />
         <StatusBarBellButton
           toasterId="app"
-          {...(!authSelectorShown && !mcpEnabled ? { className: 'right-aligned' } : {})}
+          {...(!mcpEnabled ? { className: 'right-aligned' } : {})}
         />
       </Statusbar>
 

@@ -481,16 +481,17 @@ When('I re-send the pet request', async () => {
   await p.locator('[data-testid="http-request-send-button"]:visible').click()
 })
 
-Then('the statusbar auth indicator should show the running feedback', async () => {
+Then('the tab-header auth indicator should show the running feedback', async () => {
   const p = requirePage()
-  // `StatusbarAuthSelector` fires a ripple via ECUI's `pulseSignal`
-  // API on the `auth:running` event's `started` phase. The cell
-  // gains the `statusbar-item--pulsing` class while the ripple is
-  // animating (~800 ms). The pulse is short-lived, so wait for the
-  // class to appear with a tight inner timeout but generous outer
-  // wait — the auth event itself can take a moment to fire.
-  const statusbar = p.locator('[data-testid="statusbar-auth-selector"]')
-  await expect(statusbar).toHaveClass(/statusbar-item--pulsing/, { timeout: 10000 })
+  // `RequestHeaderAuthSelector` (in the workbench tab header) fires a
+  // ripple via ECUI's `pulseSignal` API on the `auth:running` event's
+  // `started` phase. The element gains the `statusbar-item--pulsing`
+  // class while the ripple is animating (~800 ms). The pulse is
+  // short-lived, so wait for the class to appear with a tight inner
+  // timeout but generous outer wait — the auth event itself can take a
+  // moment to fire.
+  const indicator = p.locator('[data-testid="request-header-auth-selector"]:visible')
+  await expect(indicator).toHaveClass(/statusbar-item--pulsing/, { timeout: 10000 })
 })
 
 When('I release the pending login', async () => {
@@ -501,6 +502,177 @@ When('I release the pending login', async () => {
 Then('the pet response body should still contain {string}', async ({}, expected: string) => {
   const p = requirePage()
   await expect(p.locator('[data-testid="http-response-body-editor"]:visible')).toContainText(expected, { timeout: 15000 })
+})
+
+When('I open the tab-header auth selector', async () => {
+  const p = requirePage()
+  // Click the key-icon trigger in the workbench tab header to toggle
+  // its popover open. The cell is an ECUI StatusbarElement reused in
+  // the header; `aria-expanded` reflects the open state.
+  const trigger = p.locator('[data-testid="request-header-auth-selector"]:visible')
+  await expect(trigger).toBeVisible({ timeout: 5000 })
+  await trigger.click()
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true', { timeout: 5000 })
+  await expect(p.locator('[data-testid="request-header-auth-popover"]:visible')).toBeVisible({ timeout: 5000 })
+})
+
+Then(
+  'the tab-header auth selector popover should list the {string} route',
+  async ({}, routeName: string) => {
+    const p = requirePage()
+    const popover = p.locator('[data-testid="request-header-auth-popover"]:visible')
+    // A route option carries a leading `key` codicon whose glyph leaks into
+    // the option's accessible name (e.g. "Authentication route"), so an
+    // `exact` name match fails — use a substring (non-exact) name match, which
+    // still cannot collide with the icon-less "No auth" row.
+    await expect(
+      popover.getByRole('button', { name: routeName })
+    ).toBeVisible({ timeout: 5000 })
+  }
+)
+
+When('I pick {string} in the tab-header auth selector', async ({}, optionLabel: string) => {
+  const p = requirePage()
+  const popover = p.locator('[data-testid="request-header-auth-popover"]:visible')
+  await popover.getByRole('button', { name: optionLabel, exact: true }).click()
+})
+
+When('I pick the {string} route in the tab-header auth selector', async ({}, routeName: string) => {
+  const p = requirePage()
+  const popover = p.locator('[data-testid="request-header-auth-popover"]:visible')
+  // Non-exact name match — the route option's leading `key` codicon glyph
+  // leaks into the accessible name (see the "should list" step).
+  await popover.getByRole('button', { name: routeName }).click()
+})
+
+Then('the tab-header auth selector popover should close', async () => {
+  const p = requirePage()
+  // Picking an option dismisses the popover (the inner row calls
+  // `closeTooltip`). The trigger's `aria-expanded` flips back to false
+  // and the popover body detaches.
+  const trigger = p.locator('[data-testid="request-header-auth-selector"]:visible')
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false', { timeout: 5000 })
+  await expect(p.locator('[data-testid="request-header-auth-popover"]')).toHaveCount(0, { timeout: 5000 })
+})
+
+Then('the tab-header auth key should show no auth attached', async () => {
+  const p = requirePage()
+  // Icon-only key button: no route attached → the wrapper carries
+  // `data-has-auth="false"`, so the button sits in its normal (un-pressed)
+  // state. Must reflect the live selection without reopening the tab.
+  const key = p.locator('.request-header-auth-selector[data-has-auth="false"]:visible')
+  await expect(key).toBeVisible({ timeout: 5000 })
+})
+
+Then(
+  'the tab-header auth key should show a route attached',
+  async () => {
+    const p = requirePage()
+    // A route attached → the wrapper flips to `data-has-auth="true"`, which
+    // drives the button's pressed/active state (the find-widget active-option
+    // surface). Live, no reopen.
+    const key = p.locator('.request-header-auth-selector[data-has-auth="true"]:visible')
+    await expect(key).toBeVisible({ timeout: 5000 })
+  }
+)
+
+Then(
+  'the tab-header auth tooltip should read {string}',
+  async ({}, expected: string) => {
+    const p = requirePage()
+    // After a pick the hover tooltip is latched OFF (it must not fire as a
+    // side effect of selecting); the latch only releases once the pointer
+    // genuinely LEAVES the key. Mirror the real idle-hover gesture as an
+    // enter → leave → re-enter cycle: hover the key (enter), move the pointer
+    // away (the leave that releases the latch), then hover back — only then
+    // does the HeaderHoverTooltip show the CURRENT selection's label.
+    const key = p.locator('.request-header-auth-selector:visible')
+    await key.hover()
+    await p.mouse.move(0, 0)
+    await key.hover()
+    await expect(
+      p.locator('[data-testid="request-header-auth-tooltip"] .header-hover-tooltip-label')
+    ).toHaveText(expected, { timeout: 5000 })
+  }
+)
+
+Then('the tab-header auth tooltip should not be showing', async () => {
+  const p = requirePage()
+  // Right after a selection the pointer is still over the key, but the hover
+  // tooltip must stay suppressed (it only appears on a genuine idle hover, not
+  // as a side effect of picking). Assert no tooltip label is rendered.
+  await expect(
+    p.locator('[data-testid="request-header-auth-tooltip"] .header-hover-tooltip-label')
+  ).toHaveCount(0, { timeout: 2000 })
+})
+
+Then(
+  'the {string} auth route history should contain the auth call',
+  async ({}, routeName: string) => {
+    const p = requirePage()
+    // When a request uses an auth route, the auth (login) call goes on the
+    // wire from the main process directly — so it must be recorded in the
+    // LOGIN route's own response history, the same store a user-sent request
+    // lands in. Resolve the route's id from its sidebar row (`data-item-id`),
+    // then query the same history IPC the UI reads.
+    const row = sidebarRowByName(p, routeName)
+    await expect(row).toBeVisible({ timeout: 5000 })
+    const rawRouteId = await row.getAttribute('data-item-id')
+    if (rawRouteId === null || rawRouteId === '') {
+      throw new Error(`sidebar row "${routeName}" should carry a data-item-id`)
+    }
+    const routeId: string = rawRouteId
+    await expect.poll(
+      async () => {
+        const entries = await p.evaluate(
+          async (id) => {
+            const api = (window as unknown as {
+              restorm?: { responsesHistory?: { list?: (rid: string) => Promise<unknown> } }
+            }).restorm?.responsesHistory
+            if (!api?.list) return -1
+            const res = await api.list(id) as { entries?: unknown[] } | unknown[] | null
+            if (Array.isArray(res)) return res.length
+            return (res?.entries ?? []).length
+          },
+          routeId
+        )
+        return entries
+      },
+      { timeout: 10000 }
+    ).toBeGreaterThanOrEqual(1)
+  }
+)
+
+When('I delete the {string} auth request from the sidebar', async ({}, name: string) => {
+  const p = requirePage()
+  // Right-click the auth-route row in the collection tree → "Delete" →
+  // confirm. Deleting the last in-scope auth route is what drives the
+  // key's reactive disappearance on the open request tab.
+  const row = sidebarRowByName(p, name)
+  await expect(row).toBeVisible({ timeout: 5000 })
+  await row.click({ button: 'right' })
+  // Let the context menu portal in before querying it (mirrors the proven
+  // sidebar right-click pattern in the full-workflow suite).
+  await p.waitForTimeout(200)
+  // Context-menu items render as `.action-menu-item` / `[role="menuitem"]`.
+  // The Delete entry's text carries a trailing keyboard-shortcut hint
+  // (e.g. "Delete Suppr"), so match the label as a substring (en "Delete" /
+  // fr "Supprimer") rather than requiring an exact whole-text match.
+  const deleteItem = p.locator('.action-menu-item, [role="menuitem"]')
+    .filter({ hasText: /Delete|Supprimer/ }).first()
+  await expect(deleteItem).toBeVisible({ timeout: 5000 })
+  await deleteItem.click()
+  // A confirmation modal guards the destructive delete.
+  await p.locator('[data-testid="delete-confirmation-confirm-button"]').click()
+  await expect(row).toHaveCount(0, { timeout: 5000 })
+})
+
+Then('the tab-header auth key should be hidden', async () => {
+  const p = requirePage()
+  // No in-scope auth route left → the selector renders nothing. The key
+  // must disappear LIVE on the open tab (reactive), not linger until a
+  // reopen.
+  await expect(p.locator('.request-header-auth-selector')).toHaveCount(0, { timeout: 5000 })
 })
 
 When('I focus the {string} request tab', async ({}, tabName: string) => {

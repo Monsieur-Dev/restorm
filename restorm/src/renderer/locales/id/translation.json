@@ -38,6 +38,11 @@
     "requestHistory": "Riwayat permintaan",
     "envSelector": {
       "applyToAll": "Terapkan ke semua permintaan"
+    },
+    "auth": {
+      "noAuth": "Tanpa autentikasi",
+      "popoverLabel": "Rute autentikasi",
+      "unnamed": "Tanpa nama"
     }
   },
   "tips": {

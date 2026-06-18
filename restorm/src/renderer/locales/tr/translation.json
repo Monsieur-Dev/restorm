@@ -39,6 +39,11 @@
     "requestHistory": "İstek geçmişi",
     "envSelector": {
       "applyToAll": "Tüm isteklere uygula"
+    },
+    "auth": {
+      "noAuth": "Kimlik doğrulama yok",
+      "popoverLabel": "Kimlik doğrulama rotası",
+      "unnamed": "Adsız"
     }
   },
   "tips": {
