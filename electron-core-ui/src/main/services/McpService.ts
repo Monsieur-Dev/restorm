@@ -111,6 +111,23 @@ export interface McpServiceOptions {
    * forwarding. Omitted → no bridge (every call runs locally).
    */
   discoveryDir?: string
+
+  /**
+   * Optional path to an `ffmpeg` executable used to remux a captured
+   * screencast WebM into a seekable, correctly-timed MP4 (see
+   * {@link remuxScreencastToMp4}). ECUI never bundles ffmpeg — provisioning
+   * a binary is a packaging concern of the consuming app, so an app that
+   * wants the MP4 path to work without a system install ships its own
+   * ffmpeg and passes the resolved on-disk path here.
+   *
+   * Omitted → ECUI invokes a bare `ffmpeg`, i.e. whatever is on the
+   * process `PATH`. When no ffmpeg is reachable (neither an injected path
+   * nor one on PATH), the remux degrades gracefully: `screencast-stop`
+   * serves the raw WebM instead (still viewable; only the `<video>`
+   * duration self-corrects as it buffers). So MP4 is a best-effort upgrade,
+   * never a hard dependency.
+   */
+  ffmpegPath?: string
 }
 
 /**
@@ -371,12 +388,25 @@ function sweepOrphanScreencastFiles(): void {
  * correct from the start and plays everywhere. Returns the mp4 path on success,
  * or `null` when ffmpeg is unavailable / fails — the caller then falls back to
  * serving the raw webm (still viewable; the duration just self-corrects as it
- * buffers). The packaged-build ffmpeg availability is tracked as a follow-up.
+ * buffers).
+ *
+ * `ffmpegPath` is the executable to run: an app-injected absolute path
+ * ({@link McpServiceOptions.ffmpegPath}) when the consumer ships its own ffmpeg,
+ * else a bare `'ffmpeg'` resolved off `PATH`. A missing binary makes `spawnSync`
+ * fail with `ENOENT`, which is caught here and reported as `null` (→ webm
+ * fallback), so neither an absent system ffmpeg nor an absent injected one ever
+ * throws out of `screencast-stop`.
+ *
+ * Exported so unit tests can exercise the remux / fallback branches directly.
  */
-function remuxScreencastToMp4(webmPath: string, mp4Path: string): string | null {
+export function remuxScreencastToMp4(
+  webmPath: string,
+  mp4Path: string,
+  ffmpegPath = 'ffmpeg'
+): string | null {
   try {
     const res = spawnSync(
-      'ffmpeg',
+      ffmpegPath,
       [
         '-y',
         '-i', webmPath,
@@ -1145,7 +1175,7 @@ export class McpService {
         // real duration (ffmpeg); serve that when it succeeds (and drop the
         // webm), else fall back to the raw webm.
         const mp4Path = pathJoin(tmpdir(), `ecu-screencast-${String(stamp)}.mp4`)
-        const remuxed = remuxScreencastToMp4(webmPath, mp4Path)
+        const remuxed = remuxScreencastToMp4(webmPath, mp4Path, this.options.ffmpegPath)
         const servePath = remuxed ?? webmPath
         const serveMime = remuxed ? 'video/mp4' : result.mimeType
         if (remuxed) {

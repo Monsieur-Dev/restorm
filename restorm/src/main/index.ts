@@ -570,6 +570,13 @@ const mcpService = new McpService({
   // our own name → runs locally, unchanged.
   sessionName: cliArgs.mcpSessionName,
   discoveryDir: MCP_DISCOVERY_DIR
+  // No `ffmpegPath`: restorm deliberately does NOT bundle a static ffmpeg.
+  // The screencast MP4 remux uses a system `ffmpeg` when one is on PATH and
+  // degrades to serving the raw WebM otherwise. Bundling a per-OS binary would
+  // add ~70-90 MB per installer and a libx264/GPL licensing burden that isn't
+  // justified for a dev/agent-centric capture feature. Revisit only if a
+  // user-facing video feature ever ships. (See McpServiceOptions.ffmpegPath —
+  // the injection point exists so an app that DOES bundle ffmpeg can wire it.)
 })
 void app.whenReady().then(async () => {
   if (!cliArgs.mcpEnabled) return
