@@ -43,20 +43,25 @@ function paramFingerprint(op: NormalizedOperation): string {
   return ''
 }
 
-function existingRequestFingerprint(request: Request): string {
+export function existingRequestFingerprint(request: Request): string {
   // Mirror the param fingerprint used on the pipeline side. Requests
   // store their headers / params on dedicated KeyValue arrays; the
   // pipeline's `mergeRequestShape` reads from `parameters` (path /
   // query / header / body) — we reuse the same set here.
+  // The Request model stores path params on `pathParams` and query
+  // params on `params` (NOT pathParameters/queryParameters). Reading the
+  // wrong names made every fingerprint empty, so the merged-count guard
+  // (`opFp && existingFp && …`) never fired and re-import never detected
+  // a shape change.
   interface RequestLike {
-    pathParameters?: { key: string }[]
-    queryParameters?: { key: string }[]
+    pathParams?: { key: string }[]
+    params?: { key: string }[]
     headers?: { key: string }[]
   }
   const r = request as unknown as RequestLike
   const all: string[] = []
-  for (const p of r.pathParameters ?? []) all.push(`path:${p.key}`)
-  for (const p of r.queryParameters ?? []) all.push(`query:${p.key}`)
+  for (const p of r.pathParams ?? []) all.push(`path:${p.key}`)
+  for (const p of r.params ?? []) all.push(`query:${p.key}`)
   for (const p of r.headers ?? []) all.push(`header:${p.key}`)
   return all.sort().join('|')
 }

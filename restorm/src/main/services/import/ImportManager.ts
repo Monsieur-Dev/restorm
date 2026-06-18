@@ -136,14 +136,17 @@ export function detectFormat(content: string, filePath?: string): string | null 
     return 'graphql'
   }
   
-  // Detect gRPC proto files
-  if (trimmed.includes('syntax = "proto') || trimmed.includes('service ') && trimmed.includes('rpc ') ||
+  // Detect gRPC proto files. Parenthesise the `&&` group explicitly:
+  // `A || B && C || D` parses as `A || (B && C) || D` — correct, but the
+  // implicit precedence is a foot-gun on edit, so make it visible.
+  if (trimmed.includes('syntax = "proto') || (trimmed.includes('service ') && trimmed.includes('rpc ')) ||
       filePath?.endsWith('.proto')) {
     return 'grpc'
   }
-  
-  // Detect SOAP WSDL
-  if (trimmed.includes('<wsdl:definitions') || trimmed.includes('<definitions') && trimmed.includes('wsdl') ||
+
+  // Detect SOAP WSDL. Same explicit grouping: a bare `<definitions` only
+  // counts as SOAP when it ALSO mentions `wsdl`.
+  if (trimmed.includes('<wsdl:definitions') || (trimmed.includes('<definitions') && trimmed.includes('wsdl')) ||
       filePath?.endsWith('.wsdl')) {
     return 'soap'
   }

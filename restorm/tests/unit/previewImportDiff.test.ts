@@ -76,7 +76,11 @@ describe('previewImportDiff', () => {
 
   it('detects parameter shape changes via fingerprint', () => {
     const existing = httpReq('GET /x', {
-      queryParameters: [{ key: 'limit' }]
+      // `params` is the Request model's query-param field (NOT
+      // queryParameters, which never existed on the model — the
+      // fingerprint used to read that wrong name and always come back
+      // empty, so a shape change was never detected).
+      params: [{ key: 'limit' }]
     })
     const target = folder([existing])
     const sp: NormalizedSpec = {

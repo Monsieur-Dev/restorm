@@ -11,6 +11,26 @@ export function getFolderSecretsEnvPath(folderPath: string): string {
   return join(folderPath, RESTORM_ENV_FILE)
 }
 
+/**
+ * Per-env-file write queue. Writing `restorm.env` is a load → mutate →
+ * write cycle (upsert) or a whole-file replace (save). Two concurrent
+ * un-serialised writers — e.g. two secret upserts in the same tick, or
+ * an upsert racing a save — both read the pre-mutation file and the
+ * second write clobbers the first (a TOCTOU lost-update). Chaining every
+ * write for a given path onto the previous one serialises them.
+ */
+const envWriteChains = new Map<string, Promise<void>>()
+
+function runSerializedEnvWrite(envPath: string, task: () => Promise<void>): Promise<void> {
+  const prev = envWriteChains.get(envPath) ?? Promise.resolve()
+  const next = prev.catch(() => undefined).then(task)
+  envWriteChains.set(envPath, next)
+  void next.catch(() => undefined).finally(() => {
+    if (envWriteChains.get(envPath) === next) envWriteChains.delete(envPath)
+  })
+  return next
+}
+
 export async function saveFolderSecretsEnvFile(
   folderPath: string,
   data: Record<string, unknown>
@@ -19,14 +39,15 @@ export async function saveFolderSecretsEnvFile(
   const secrets = collectEnvFileSecretsFromCollections(data, folderPath)
   const keys = Object.keys(secrets)
 
-  if (keys.length === 0) {
-    if (existsSync(envPath)) {
-      rmSync(envPath, { force: true })
+  return runSerializedEnvWrite(envPath, async () => {
+    if (keys.length === 0) {
+      if (existsSync(envPath)) {
+        rmSync(envPath, { force: true })
+      }
+      return
     }
-    return
-  }
-
-  await fs.writeFile(envPath, serializeEnvFile(secrets), 'utf-8')
+    await fs.writeFile(envPath, serializeEnvFile(secrets), 'utf-8')
+  })
 }
 
 export async function loadFolderSecretsEnvFile(folderPath: string): Promise<Record<string, string> | null> {
@@ -50,9 +71,15 @@ export async function upsertFolderSecretsEnvEntry(
   key: string,
   value: string
 ): Promise<void> {
-  const existing = (await loadFolderSecretsEnvFile(folderPath)) ?? {}
-  existing[key] = value
-  await fs.writeFile(getFolderSecretsEnvPath(folderPath), serializeEnvFile(existing), 'utf-8')
+  const envPath = getFolderSecretsEnvPath(folderPath)
+  // The whole load → mutate → write runs inside the serialized task so a
+  // concurrent upsert/save can't read the same pre-mutation file and
+  // clobber this entry.
+  return runSerializedEnvWrite(envPath, async () => {
+    const existing = (await loadFolderSecretsEnvFile(folderPath)) ?? {}
+    existing[key] = value
+    await fs.writeFile(envPath, serializeEnvFile(existing), 'utf-8')
+  })
 }
 
 export async function applyFolderSecretsEnvFile(

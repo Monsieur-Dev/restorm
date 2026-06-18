@@ -200,10 +200,71 @@ export async function writeHistoryArchive(
 }
 
 // Single write queue shared by every domain that mutates the archive, so
-// a response write + a scenario-run write can never interleave.
+// a response write + a scenario-run write can never interleave WITHIN this
+// process.
 let writeQueue: Promise<unknown> = Promise.resolve()
+
+/**
+ * Cross-PROCESS lock around the archive read-modify-write. The in-process
+ * `writeQueue` only serialises this instance; two restorm instances with
+ * the same project open would each read → mutate → atomic-rename and the
+ * last rename would clobber the other's entries. A `<archive>.lock`
+ * directory (mkdir is atomic on every platform) held for the duration of
+ * the RMW makes the whole cycle mutually exclusive across instances.
+ * Best-effort: a stale lock (older than the timeout, from a crashed
+ * instance) is reclaimed, and if locking can't be established at all we
+ * proceed rather than dead-lock the feature.
+ */
+const LOCK_STALE_MS = 30_000
+const LOCK_RETRY_MS = 50
+const LOCK_MAX_WAIT_MS = 10_000
+
+async function acquireArchiveLock(lockDir: string): Promise<boolean> {
+  const deadline = Date.now() + LOCK_MAX_WAIT_MS
+  for (;;) {
+    try {
+      await fs.mkdir(lockDir)
+      return true
+    } catch {
+      // Held by someone else (or us). Reclaim if stale.
+      try {
+        const age = Date.now() - statSync(lockDir).mtimeMs
+        if (age > LOCK_STALE_MS) {
+          await fs.rm(lockDir, { recursive: true, force: true })
+          continue
+        }
+      } catch {
+        // The lock vanished between mkdir-fail and stat — retry immediately.
+        continue
+      }
+      if (Date.now() > deadline) return false
+      await new Promise((r) => setTimeout(r, LOCK_RETRY_MS))
+    }
+  }
+}
+
+async function releaseArchiveLock(lockDir: string): Promise<void> {
+  try {
+    await fs.rm(lockDir, { recursive: true, force: true })
+  } catch {
+    // Nothing to do — a failed release just means the next acquirer
+    // reclaims it as stale after the timeout.
+  }
+}
+
 export function queueHistoryWrite<T>(fn: () => Promise<T>): Promise<T> {
-  const next = writeQueue.then(fn, fn)
+  const guarded = async (): Promise<T> => {
+    const archivePath = getHistoryArchivePath()
+    if (!archivePath) return fn()
+    const lockDir = `${archivePath}.lock`
+    const locked = await acquireArchiveLock(lockDir)
+    try {
+      return await fn()
+    } finally {
+      if (locked) await releaseArchiveLock(lockDir)
+    }
+  }
+  const next = writeQueue.then(guarded, guarded)
   writeQueue = next.then(() => undefined, () => undefined)
   return next
 }
