@@ -7,6 +7,7 @@
 
 import { eventBusService, logger, createPubSub, serializeWithDecorators } from 'electron-core-ui/main'
 import { DocumentEvents, type DocumentChangedPayload, type DocumentDeletedPayload } from './DocumentEvents'
+import { sanitizeUpdatePatch } from './sanitizeUpdatePatch'
 import {
   Folder,
   EnvironmentFolder,
@@ -243,8 +244,9 @@ class CollectionStore {
     const patchTouchesEnvironments = isEnvironmentFolder(folder)
       && Object.prototype.hasOwnProperty.call(updates as Record<string, unknown>, 'environments')
 
-    // Apply updates
-    Object.assign(folder, updates)
+    // Apply updates — never let a patch re-key the node (`id`) or
+    // replace its children (`items`).
+    Object.assign(folder, sanitizeUpdatePatch(updates, ['items']))
 
     // Emit event
     this.emitFolderUpdated(folder)
@@ -364,7 +366,7 @@ class CollectionStore {
   updateScenario(id: string, updates: Partial<Scenario>): Scenario | null {
     const scenario = this.findById(id)
     if (!scenario || !isScenario(scenario)) return null
-    Object.assign(scenario, updates)
+    Object.assign(scenario, sanitizeUpdatePatch(updates, ['items']))
     this.emitFolderUpdated(scenario)
     return scenario
   }
@@ -420,8 +422,8 @@ class CollectionStore {
     const request = this.findById(id) as Request | null
     if (!request || !('type' in request) || isAnyFolder(request)) return null
 
-    // Apply updates
-    Object.assign(request, updates)
+    // Apply updates — never let a patch re-key the request (`id`).
+    Object.assign(request, sanitizeUpdatePatch(updates))
 
     // Emit event
     this.emitRequestUpdated(request)
@@ -515,8 +517,8 @@ class CollectionStore {
     const env = this.findEnvironmentById(id)
     if (!env) return null
 
-    // Apply updates
-    Object.assign(env, updates)
+    // Apply updates — never let a patch re-key the environment (`id`).
+    Object.assign(env, sanitizeUpdatePatch(updates))
 
     // Emit event
     this.emitEnvironmentUpdated(env)

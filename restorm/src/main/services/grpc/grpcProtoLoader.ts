@@ -14,9 +14,9 @@
  */
 
 import { createHash } from 'node:crypto'
-import { mkdtempSync, writeFileSync, existsSync } from 'node:fs'
+import { mkdtempSync, writeFileSync, existsSync, statSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { join, resolve, isAbsolute, extname } from 'node:path'
 import * as protoLoader from '@grpc/proto-loader'
 import * as grpc from '@grpc/grpc-js'
 import type { ServiceClientConstructor } from '@grpc/grpc-js'
@@ -105,14 +105,38 @@ function loadFromContent(content: string): grpc.GrpcObject {
   return grpcObj
 }
 
+/**
+ * Validate a renderer/IPC-supplied `protoPath` before it reaches the
+ * filesystem. The path is user-chosen (the feature is "point at a
+ * .proto on disk"), so we don't confine it to the project root — but we
+ * DO require an absolute, normalised path to a regular `.proto` file so
+ * a traversal string or a non-proto target (e.g. /etc/passwd) can't be
+ * loaded and parsed as a descriptor. Returns the resolved absolute path
+ * or throws a descriptive error.
+ */
+export function assertValidProtoPath(protoPath: string): string {
+  if (!isAbsolute(protoPath)) {
+    throw new Error(`gRPC protoPath must be an absolute path: "${protoPath}"`)
+  }
+  const resolved = resolve(protoPath)
+  if (extname(resolved).toLowerCase() !== '.proto') {
+    throw new Error(`gRPC protoPath must point at a .proto file: "${protoPath}"`)
+  }
+  if (!existsSync(resolved) || !statSync(resolved).isFile()) {
+    throw new Error(`gRPC protoPath not found or not a file: "${protoPath}"`)
+  }
+  return resolved
+}
+
 /** Load a proto from a `.proto` file on disk. Cached by path for the process
  * lifetime (editing the file on disk won't be picked up until restart). */
 function loadFromPath(path: string): grpc.GrpcObject {
-  const cached = definitionCache.get(`path:${path}`)
+  const resolved = assertValidProtoPath(path)
+  const cached = definitionCache.get(`path:${resolved}`)
   if (cached) return cached
-  const pkgDef = protoLoader.loadSync(path, LOAD_OPTIONS)
+  const pkgDef = protoLoader.loadSync(resolved, LOAD_OPTIONS)
   const grpcObj = grpc.loadPackageDefinition(pkgDef)
-  definitionCache.set(`path:${path}`, grpcObj)
+  definitionCache.set(`path:${resolved}`, grpcObj)
   return grpcObj
 }
 
@@ -184,7 +208,9 @@ export function resolveGrpcMethod(
   let root: grpc.GrpcObject
   if (source.protoContent && source.protoContent.trim() !== '') {
     root = loadFromContent(source.protoContent)
-  } else if (source.protoPath && existsSync(source.protoPath)) {
+  } else if (source.protoPath && source.protoPath.trim() !== '') {
+    // loadFromPath validates the path (absolute, .proto, real file) and
+    // throws a descriptive error the caller surfaces as a gRPC failure.
     root = loadFromPath(source.protoPath)
   } else {
     root = loadFromContent(GRPCBIN_PROTO)
