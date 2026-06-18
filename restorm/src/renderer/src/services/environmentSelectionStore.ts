@@ -65,6 +65,29 @@ async function writeAll(key: string, selections: Selections): Promise<void> {
   await api.set(key, selections)
 }
 
+/**
+ * Per-storage-key write queue. A persisted selection is a read-all →
+ * mutate → write-all cycle; two concurrent un-awaited writers (a folder
+ * default + a request override flipped in the same tick) would each
+ * read the pre-mutation map and the second write would clobber the
+ * first. Chaining every mutation for a given key onto the previous one
+ * serialises the RMW so no update is lost.
+ */
+const writeChains = new Map<string, Promise<void>>()
+
+function runSerialized(key: string, task: () => Promise<void>): Promise<void> {
+  const prev = writeChains.get(key) ?? Promise.resolve()
+  // Swallow a prior rejection so one failed write doesn't poison the chain.
+  const next = prev.catch(() => undefined).then(task)
+  writeChains.set(key, next)
+  // Drop the chain entry once it's the tail and settled, to avoid an
+  // unbounded map of resolved promises.
+  void next.catch(() => undefined).finally(() => {
+    if (writeChains.get(key) === next) writeChains.delete(key)
+  })
+  return next
+}
+
 // ---------- Environment tree lookup ----------
 
 /** Find an environment (including nested sub-envs) by its id. */
@@ -110,10 +133,14 @@ export async function getStoredFolderEnv(projectUuid: string, envFolderId: strin
 
 export async function setStoredFolderEnv(projectUuid: string, envFolderId: string, envId: string): Promise<void> {
   if (!projectUuid || !envFolderId) return
-  const selections = await readAll(folderStorageKey(projectUuid))
-  if (selections[envFolderId] === envId) return
-  selections[envFolderId] = envId
-  await writeAll(folderStorageKey(projectUuid), selections)
+  const key = folderStorageKey(projectUuid)
+  // Serialise the read-mutate-write so a concurrent writer can't clobber.
+  return runSerialized(key, async () => {
+    const selections = await readAll(key)
+    if (selections[envFolderId] === envId) return
+    selections[envFolderId] = envId
+    await writeAll(key, selections)
+  })
 }
 
 // ---------- Per-request override API ----------
@@ -142,17 +169,21 @@ export async function setStoredRequestOverride(
   envId: string | null
 ): Promise<void> {
   if (!projectUuid || !requestId) return
-  const selections = await readAll(overrideStorageKey(projectUuid))
-  if (envId === null) {
-    if (!(requestId in selections)) return
-    const { [requestId]: _removed, ...rest } = selections
-    void _removed
-    await writeAll(overrideStorageKey(projectUuid), rest)
-    return
-  }
-  if (selections[requestId] === envId) return
-  selections[requestId] = envId
-  await writeAll(overrideStorageKey(projectUuid), selections)
+  const key = overrideStorageKey(projectUuid)
+  // Serialise the read-mutate-write so a concurrent writer can't clobber.
+  return runSerialized(key, async () => {
+    const selections = await readAll(key)
+    if (envId === null) {
+      if (!(requestId in selections)) return
+      const { [requestId]: _removed, ...rest } = selections
+      void _removed
+      await writeAll(key, rest)
+      return
+    }
+    if (selections[requestId] === envId) return
+    selections[requestId] = envId
+    await writeAll(key, selections)
+  })
 }
 
 /** Synchronously wipe per-request override *session* entries for a
@@ -180,16 +211,20 @@ export async function clearStoredRequestOverridesForRequests(
   requestIds: string[]
 ): Promise<void> {
   if (!projectUuid || requestIds.length === 0) return
-  const selections = await readAll(overrideStorageKey(projectUuid))
-  const clear = new Set(requestIds)
-  let changed = false
-  const next: Selections = {}
-  for (const [id, envId] of Object.entries(selections)) {
-    if (clear.has(id)) {
-      changed = true
-      continue
+  const key = overrideStorageKey(projectUuid)
+  // Serialise against the per-request override setter on the same key.
+  return runSerialized(key, async () => {
+    const selections = await readAll(key)
+    const clear = new Set(requestIds)
+    let changed = false
+    const next: Selections = {}
+    for (const [id, envId] of Object.entries(selections)) {
+      if (clear.has(id)) {
+        changed = true
+        continue
+      }
+      next[id] = envId
     }
-    next[id] = envId
-  }
-  if (changed) await writeAll(overrideStorageKey(projectUuid), next)
+    if (changed) await writeAll(key, next)
+  })
 }
