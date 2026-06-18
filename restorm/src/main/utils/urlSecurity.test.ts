@@ -23,6 +23,13 @@ describe('assertSafeFetchUrl', () => {
     expect(() => assertSafeFetchUrl('http://foo.localhost/x')).toThrow(/loopback/)
   })
 
+  it('rejects a trailing-dot FQDN that resolves to loopback/private', () => {
+    // `new URL` keeps the trailing dot on a NAME, so these would bypass
+    // the named-loopback / private-IP checks without normalisation.
+    expect(() => assertSafeFetchUrl('http://localhost./x')).toThrow(/loopback/)
+    expect(isSafeFetchUrl('http://127.0.0.1./x')).toBe(false)
+  })
+
   it('rejects the cloud metadata endpoint', () => {
     expect(() => assertSafeFetchUrl('http://169.254.169.254/latest/meta-data/')).toThrow(/private|loopback/)
   })

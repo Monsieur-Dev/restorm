@@ -23,6 +23,11 @@ function normaliseHost(host: string): string {
   if (h.startsWith('[') && h.endsWith(']')) h = h.slice(1, -1)
   const zone = h.indexOf('%')
   if (zone !== -1) h = h.slice(0, zone)
+  // Strip a trailing root-label dot: WHATWG `new URL` normalises numeric
+  // IPs but keeps a trailing dot on a NAME, so `localhost.` /
+  // `127.0.0.1.` would otherwise slip the loopback/private checks below
+  // yet still resolve to loopback.
+  if (h.endsWith('.')) h = h.slice(0, -1)
   return h
 }
 
