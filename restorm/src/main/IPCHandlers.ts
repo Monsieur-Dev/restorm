@@ -71,6 +71,29 @@ function getE2EMockedFolderPath(): string | null {
   return process.env['E2E_MOCK_SAVE_FOLDER'] ?? null
 }
 
+/**
+ * Containment root for renderer-supplied secrets / save paths. Secrets
+ * live either inside the opened project FOLDER (folder mode) or next to
+ * the opened `.restorm` FILE as `<file>.env` (single-file mode — the
+ * renderer writes `${filePath}.env`). So the legitimate root is the
+ * opened folder when present, otherwise the opened file's directory.
+ * Returns `null` only when nothing is open at all — the genuine
+ * fail-closed case (refuse rather than touch a raw renderer path).
+ * Single-file secret access stays SUPPORTED; containment just forbids
+ * `..` / absolute escapes out of that directory.
+ */
+function getSecretsContainmentRoot(): string | null {
+  if (!isFileServiceInitialized()) return null
+  const fileService = getFileService() as {
+    getOpenedFolderPath?: () => string | null
+    getFilePath?: () => string | null
+  }
+  const folder = fileService.getOpenedFolderPath?.() ?? null
+  if (folder) return folder
+  const file = fileService.getFilePath?.() ?? null
+  return file ? dirname(file) : null
+}
+
 interface KeyValueRowFromIpc {
   id?: string | undefined
   key: string
@@ -460,15 +483,14 @@ export function registerRestormIPC(deps: {
       if (!filePath || !existsSync(filePath)) return null
 
       // Path-containment must FAIL CLOSED: a secrets file is only ever
-      // legitimate inside the opened project folder, so if we can't
-      // establish that folder (service not initialised, or no folder
-      // open / single-file mode) we refuse rather than let a raw
-      // renderer path read an arbitrary file.
-      const openedFolder = isFileServiceInitialized()
-        ? (getFileService() as { getOpenedFolderPath?: () => string | null }).getOpenedFolderPath?.() ?? null
-        : null
-      if (!isPathContained(openedFolder, filePath)) {
-        logger.warn('Blocked secrets:read - path not contained in opened folder', { filePath })
+      // legitimate inside the opened project folder (folder mode) or
+      // next to the opened `.restorm` file (single-file mode). Contain
+      // to that root; refuse only when nothing is open at all. This
+      // forbids `..`/absolute escapes without disabling single-file
+      // secret access.
+      const root = getSecretsContainmentRoot()
+      if (!isPathContained(root, filePath)) {
+        logger.warn('Blocked secrets:read - path not contained in the open project', { filePath })
         return null
       }
 
@@ -483,14 +505,13 @@ export function registerRestormIPC(deps: {
     try {
       if (!filePath) return { success: false, error: 'Missing path' }
 
-      // Path-containment must FAIL CLOSED (see secrets:read): refuse to
-      // write when no opened project folder bounds the target path.
-      const openedFolder = isFileServiceInitialized()
-        ? (getFileService() as { getOpenedFolderPath?: () => string | null }).getOpenedFolderPath?.() ?? null
-        : null
-      if (!isPathContained(openedFolder, filePath)) {
-        logger.warn('Blocked secrets:write - path not contained in opened folder', { filePath })
-        return { success: false, error: openedFolder ? 'Path traversal detected' : 'No opened folder' }
+      // Path-containment must FAIL CLOSED (see secrets:read): contain to
+      // the opened folder, or the opened single-file's directory; refuse
+      // only when nothing is open.
+      const root = getSecretsContainmentRoot()
+      if (!isPathContained(root, filePath)) {
+        logger.warn('Blocked secrets:write - path not contained in the open project', { filePath })
+        return { success: false, error: root ? 'Path traversal detected' : 'No open project' }
       }
 
       await fs.mkdir(dirname(filePath), { recursive: true })
