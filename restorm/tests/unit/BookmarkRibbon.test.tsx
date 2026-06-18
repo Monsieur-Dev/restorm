@@ -266,6 +266,71 @@ describe('BookmarkRibbon', () => {
       expect(btn.className).not.toMatch(/--opening|--open|--closing/)
     })
 
+    it('self-heals out of opening when the entry transitionend never fires (stuck-open guard)', () => {
+      vi.useFakeTimers()
+      try {
+        render(<BookmarkRibbon label="api" data-testid="rib" />)
+        const btn = screen.getByTestId('rib')
+
+        // Hover then leave WITHOUT ever firing the entry transitionend —
+        // mirrors a dropped/coalesced CSS event. The reducer defers the
+        // leave (stays `--opening`), and without a fallback it would wedge
+        // here forever, leaving the ribbon visually extended.
+        act(() => { fireEvent.mouseEnter(btn) })
+        act(() => { fireEvent.mouseLeave(btn) })
+        expect(btn.classList.contains('ecui-bookmark-ribbon--opening')).toBe(true)
+
+        // The entry watchdog fires the missing ENTRY_DONE; the deferred
+        // leave is honored and the ribbon proceeds to close.
+        act(() => { vi.advanceTimersByTime(1500) })
+        expect(btn.className).toContain('ecui-bookmark-ribbon--closing')
+        expect(btn.classList.contains('ecui-bookmark-ribbon--opening')).toBe(false)
+
+        // The exit watchdog then heals the missing exit transitionend,
+        // returning the ribbon all the way to idle (collapsed).
+        act(() => { vi.advanceTimersByTime(5000) })
+        expect(btn.className).not.toMatch(/--opening|--open|--closing/)
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('self-heals out of closing when the exit transitionend never fires (stuck-open guard)', () => {
+      vi.useFakeTimers()
+      try {
+        render(<BookmarkRibbon label="api" data-testid="rib" />)
+        const btn = screen.getByTestId('rib')
+
+        // Open and settle, then leave to enter the exit phase.
+        act(() => { fireEvent.mouseEnter(btn) })
+        act(() => { fireEntryDone(btn) })
+        act(() => { fireEvent.mouseLeave(btn) })
+        expect(btn.className).toContain('ecui-bookmark-ribbon--closing')
+
+        // The exit transitionend never arrives — without a fallback the
+        // ribbon would stay extended. The watchdog collapses it.
+        act(() => { vi.advanceTimersByTime(5000) })
+        expect(btn.className).not.toMatch(/--opening|--open|--closing/)
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('force-collapses a settled-open ribbon the moment no wants-open signal remains', () => {
+      render(<BookmarkRibbon label="api" data-testid="rib" />)
+      const btn = screen.getByTestId('rib')
+
+      // Reach the settled `--open` phase.
+      act(() => { fireEvent.mouseEnter(btn) })
+      act(() => { fireEntryDone(btn) })
+      expect(btn.className).toContain('ecui-bookmark-ribbon--open')
+
+      // Pointer leaves — the hard guard guarantees the exit starts even
+      // independent of the per-callsite LEAVE dispatch.
+      act(() => { fireEvent.mouseLeave(btn) })
+      expect(btn.className).toContain('ecui-bookmark-ribbon--closing')
+    })
+
     it('locks the ribbon open while the editor tooltip is open, then resumes the exit on outside click', async () => {
       const user = userEvent.setup()
       render(
