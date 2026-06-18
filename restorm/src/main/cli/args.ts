@@ -55,6 +55,16 @@ export interface CliArgs {
    * the new instance's port without scanning the dir.
    */
   mcpDiscoveryFile?: string
+  /**
+   * Reveal the main window without taking OS focus. When true the window
+   * appears via `showInactive()` (visible — so automation/MCP screenshots
+   * still work — but NOT focused, activated, raised, or desktop-switching)
+   * instead of the focusing `show()`. Set it for programmatically-launched
+   * instances (the `--mcp` dev instances, agent windows) so they don't steal
+   * the user's focus. Defaults to false — the user's normal launch focuses
+   * as usual. The flag is handled in electron-core-ui's window manager.
+   */
+  inactiveWindow: boolean
   /** Set when `--run` was passed — see {@link CliRunOptions}. */
   cliRun?: CliRunOptions
 }
@@ -65,6 +75,7 @@ interface ParsedArgs {
   mcp?: boolean
   mcpSessionName?: string
   mcpDiscoveryFile?: string
+  inactiveWindow?: boolean
   run?: string
   by?: string
   allLogs?: boolean
@@ -103,6 +114,11 @@ export function parseCliArgs(): CliArgs {
     .option('mcp-discovery-file', {
       type: 'string',
       describe: 'Internal: written-to by restorm with `{port,projectPath,pid,startedAt}` once the MCP server is up. The MCP launcher passes this so it can poll a known file after spawning restorm.'
+    })
+    .option('inactive-window', {
+      type: 'boolean',
+      default: false,
+      describe: 'Reveal the main window without taking OS focus (showInactive): visible — so MCP screenshots/automation still work — but NOT focused, activated, raised, or desktop-switching. For programmatic launches (--mcp dev instances, agent windows) so they don\'t steal the user\'s focus. Omit it for the normal focusing launch.'
     })
     .option('run', {
       type: 'string',
@@ -146,7 +162,8 @@ export function parseCliArgs(): CliArgs {
   const result: CliArgs = {
     clearSettings: Boolean(argv.clearSettings),
     mcpEnabled,
-    mcpSessionName: resolveMcpSessionName(argv.mcpSessionName, argv.open)
+    mcpSessionName: resolveMcpSessionName(argv.mcpSessionName, argv.open),
+    inactiveWindow: Boolean(argv.inactiveWindow)
   }
   if (argv.open !== undefined) result.open = argv.open
   if (typeof argv.mcpDiscoveryFile === 'string' && argv.mcpDiscoveryFile.length > 0) {

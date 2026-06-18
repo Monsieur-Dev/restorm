@@ -2,11 +2,22 @@ import { join } from 'path'
 import type { BrowserWindowConstructorOptions } from 'electron'
 import { RestormWindow } from './RestormWindow'
 
+/** Options for the main application window. */
+export interface MainWindowOptions {
+  /**
+   * Reveal the window without taking OS focus (showInactive) instead of the
+   * focusing show(). Set for programmatic launches (--mcp dev instances, agent
+   * windows) so they appear without stealing the user's focus or switching
+   * their active virtual desktop. Defaults to false (normal focusing launch).
+   */
+  revealInactive?: boolean
+}
+
 /**
  * MainWindow - Main application window
  */
 export class MainWindow extends RestormWindow {
-  constructor() {
+  constructor(options: MainWindowOptions = {}) {
     // Create configuration object using restormWindow static helper
     const configuration = RestormWindow.createConfiguration({
       name: 'main',
@@ -17,7 +28,9 @@ export class MainWindow extends RestormWindow {
       iconPath: join(__dirname, '../../assets/icons/icon'),
       // Stay hidden until the renderer is ready to paint so the splash can
       // hand off to a fully-ready window with no flash of an unstyled view.
-      showWhenReady: true
+      showWhenReady: true,
+      // Reveal without focus when launched for automation/agents (--inactive-window).
+      revealInactive: options.revealInactive
     })
     super(configuration)
   }

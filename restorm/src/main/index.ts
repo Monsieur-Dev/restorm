@@ -116,7 +116,7 @@ function createWindow(): MainWindow | undefined {
     // Create main window (instance is stored in WindowManager singleton).
     // Returned to `initializeApp` so the splash handoff can hook the
     // window's ready-to-show (close the splash right before it appears).
-    const mainWin = new MainWindow()
+    const mainWin = new MainWindow({ revealInactive: cliArgs.inactiveWindow })
     mainWindow = mainWin.getWindow()
 
     if (mainWindow) {

@@ -3,6 +3,7 @@ import { join } from 'path'
 import { pathToFileURL } from 'url'
 import { getThemeService, getStorageService, initSettingsService, initFeatureService, logger } from '../services'
 import type { BaseWindow } from './BaseWindow'
+import { isInactiveRevealRequested, clearStartupActivationEnv } from './WindowManager'
 import { createSplashWindow, SplashWindowHandle, SplashWindowOptions } from './SplashWindow'
 import {
   registerThemeHandlers,
@@ -47,6 +48,38 @@ export function configureCommandLineSwitches(): void {
     app.commandLine.appendSwitch('disable-gpu')
     app.commandLine.appendSwitch('disable-software-rasterizer')
     app.commandLine.appendSwitch('disable-gpu-compositing')
+  }
+
+  if (isInactiveRevealRequested()) {
+    // Make `--inactive-window` actually keep focus on a native Wayland session.
+    //
+    // `showInactive()` is an X11 mechanism. Under Ozone-Wayland it is silently
+    // ignored: a Wayland window cannot focus itself, and Chromium's
+    // WaylandToplevelWindow requests activation on its first map — using an
+    // inherited `XDG_ACTIVATION_TOKEN` if present, else calling
+    // `RequestNewToken()` to ask the compositor for a fresh one — so the window
+    // still grabs focus regardless of `showInactive()`. There is no public
+    // switch to suppress that self-activation.
+    //
+    // Forcing the **X11 backend (XWayland)** sidesteps it entirely: under
+    // XWayland `showInactive()` works exactly as it does on a native X11
+    // session (verified), so both the splash and the main window reveal without
+    // focus. These instances are launched for automation / agent / background
+    // use, where running on XWayland instead of native Wayland is an acceptable
+    // tradeoff (the cost is no native-Wayland niceties like per-monitor
+    // fractional scaling — irrelevant for a background window). On an X11
+    // session this switch is a no-op.
+    app.commandLine.appendSwitch('ozone-platform', 'x11')
+    logger.info('Inactive launch: forcing the X11/XWayland backend so showInactive() suppresses focus on Wayland')
+
+    // Belt-and-suspenders: also drop any inherited activation token so the
+    // backend has nothing to redeem even before the XWayland path takes over.
+    // `clearStartupActivationEnv` uses `delete` (unsetenv), not an `= undefined`
+    // assignment that Node would store as the literal string "undefined".
+    const cleared = clearStartupActivationEnv()
+    if (cleared.length > 0) {
+      logger.info(`Inactive launch: cleared ${cleared.join(', ')} (inherited activation token)`)
+    }
   }
 
   logger.info('✅ Command line switches configured')
