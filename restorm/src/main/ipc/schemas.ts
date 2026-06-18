@@ -170,8 +170,19 @@ export const httpExecuteArgs = z.tuple([
   z.object({
     requestId: z.string(),
     method: z.string(),
-    timeout: z.number().optional()
-  }).loose()
+    timeout: z.number().optional(),
+    // Optional raw-body / URL overrides the OData path forwards through
+    // http:execute (see HTTPExecutionInput).
+    rawBody: z.string().optional(),
+    rawBodyContentType: z.string().optional(),
+    urlOverride: z.string().optional(),
+    // The renderer hands over the attached AuthenticationRequest as a
+    // POJO; the handler re-validates it via isPlainAuthPayload +
+    // AuthenticationRequest.fromPlain, so accept it as an opaque object
+    // here (that guard stays authoritative) rather than a structural
+    // schema. Enumerating it explicitly is what lets us drop `.loose()`.
+    authRequest: z.unknown().optional()
+  })
 ])
 
 export const httpCancelArgs = z.tuple([requestIdArg])
@@ -200,8 +211,12 @@ export const odataExecuteArgs = z.tuple([
      * dispatches to that URL verbatim instead of composing one from
      * the registered request. Used for `@odata.nextLink` pagination
      * and clickable navigation links. */
-    urlOverride: z.string().optional()
-  }).loose()
+    urlOverride: z.string().optional(),
+    /** Attached AuthenticationRequest POJO — re-validated in the handler
+     * via isPlainAuthPayload + fromPlain (that guard stays
+     * authoritative), so opaque here. */
+    authRequest: z.unknown().optional()
+  })
 ])
 
 export const odataCancelArgs = z.tuple([requestIdArg])
@@ -242,7 +257,7 @@ export const authPrefetchArgs = z.tuple([
       enabled: z.boolean().optional()
     })),
     expirationExpression: z.string().optional()
-  }).loose()
+  })
 ])
 
 // ==========================================================================
@@ -253,7 +268,7 @@ export const graphqlExecuteArgs = z.tuple([
   z.object({
     requestId: z.string(),
     timeout: z.number().optional()
-  }).loose()
+  })
 ])
 
 export const graphqlCancelArgs = z.tuple([requestIdArg])
@@ -379,7 +394,18 @@ export const apiUpdateRefreshFetchArgs = z.tuple([folderIdArg])
  * without reaching back through IPC. The renderer is the source of
  * truth for the project tree; this handler just mirrors it into the
  * main-side CollectionStore. */
-export const collectionsSyncArgs = z.tuple([z.array(z.unknown())])
+/** Each synced collection node must at least be a non-null object with a
+ * string `id` (every tree item — folder / env-folder / request /
+ * scenario — carries one). This rejects primitives / null / arrays from
+ * a malformed or hostile renderer payload before it reaches
+ * `setCollections`; the richer recursive shape is validated by the
+ * store's reify path. The audit flagged this as the renderer-controlled
+ * source-of-truth that ultimately drives the apiUpdate SSRF sourceUrl,
+ * so it shouldn't be a bare `z.unknown()`. Extra fields pass through
+ * (`.loose()`) — the node shape is too rich to enumerate here and reify
+ * owns the rest. */
+const syncedCollectionNode = z.object({ id: z.string() }).loose()
+export const collectionsSyncArgs = z.tuple([z.array(syncedCollectionNode)])
 
 /** `[folderId, customValueLists]` — targeted update of one env-folder's
  * custom value lists. Lists pass through as `unknown` (no strip) so the
