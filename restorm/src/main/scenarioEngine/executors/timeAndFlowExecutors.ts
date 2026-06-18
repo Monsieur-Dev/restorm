@@ -29,7 +29,10 @@ export const waitExecutor: NodeExecutor = (act, ctx) => {
   // ms / s / min / h on the node's unit toggle. The config fallback
   // (`durationMs` / `duration`) is always already in ms.
   const inputUnitMs = WAIT_UNIT_MS[cfg.inputUnit ?? 's'] ?? 1000
-  const ms = typeof fromInput === 'number' && fromInput > 0
+  // A WIRED numeric duration is authoritative, including 0 (= no wait):
+  // `> 0` wrongly let a wired 0 fall through to the default 1000ms. Only
+  // when there's no numeric input do we use the config fallbacks.
+  const ms = typeof fromInput === 'number' && fromInput >= 0
     ? fromInput * inputUnitMs
     : (typeof cfg.durationMs === 'number' && cfg.durationMs > 0
       ? cfg.durationMs
@@ -88,7 +91,15 @@ function buildRange(from: number, to: number, step: number, op: string): number[
   const out: number[] = []
   if (!Number.isFinite(from) || !Number.isFinite(to)) return out
   const s = Number.isFinite(step) && step !== 0 ? step : 1
-  for (let i = from; compareValues(op, i, to) && out.length < FOR_MAX_ITERATIONS; i += s) out.push(i)
+  for (let i = from; compareValues(op, i, to); i += s) {
+    if (out.length >= FOR_MAX_ITERATIONS) {
+      // Throw rather than silently truncate: a range that would expand
+      // past the cap (e.g. 0..1e9) used to clip to 100k with the user
+      // none the wiser — surface it in the run-log instead.
+      throw new Error(`for-range exceeds the ${FOR_MAX_ITERATIONS}-iteration limit (from=${from}, to=${to}, step=${s}, op=${op})`)
+    }
+    out.push(i)
+  }
   return out
 }
 

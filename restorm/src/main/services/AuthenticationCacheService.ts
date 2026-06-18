@@ -19,6 +19,21 @@ import type { HTTPExecutionResult } from './HTTPExecutionService'
 /** Phase values emitted on `auth:running`. */
 export type AuthPhase = 'started' | 'succeeded' | 'failed'
 
+/**
+ * Map a rendered expiry expression to a cache TTL in ms.
+ * - `expressionConfigured === false` → `undefined` (no TTL; never expires).
+ * - configured but the rendered value is empty / NaN / <= 0 → `0`
+ *   (immediately stale, so the next use refetches — NOT "never expires",
+ *   which would cache a token forever on a bad expression).
+ * - a positive number of seconds → that many ms.
+ */
+export function expiryTtlMs(rendered: string | undefined, expressionConfigured: boolean): number | undefined {
+  if (!expressionConfigured) return undefined
+  const seconds = Number(rendered)
+  if (!rendered || !Number.isFinite(seconds) || seconds <= 0) return 0
+  return Math.floor(seconds * 1000)
+}
+
 interface CacheEntry {
   /** Resolved header map, keyed case-insensitively by the caller. */
   headers: Record<string, string>
@@ -312,12 +327,9 @@ class AuthenticationCacheService {
     expression: string | undefined,
     body: unknown
   ): number | undefined {
-    if (!expression?.trim()) return undefined
-    const rendered = this.safeRender(expression, body)
-    if (!rendered) return undefined
-    const seconds = Number(rendered)
-    if (!Number.isFinite(seconds) || seconds <= 0) return undefined
-    return Math.floor(seconds * 1000)
+    const trimmed = expression?.trim()
+    if (!trimmed) return expiryTtlMs(undefined, false)
+    return expiryTtlMs(this.safeRender(trimmed, body), true)
   }
 
   private safeRender(template: string, context: unknown): string {

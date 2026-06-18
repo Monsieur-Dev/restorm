@@ -331,7 +331,12 @@ class HTTPExecutionService {
 
       return {
         requestId,
-        success: true,
+        // A response WAS received, so this is NOT an error-port outcome
+        // (the catch below owns transport/throw failures). `success`
+        // reflects the HTTP status per the status-routing design: a
+        // 4xx/5xx is a successful round-trip with success:false, NOT an
+        // error. (cf docs/contributing/adding-a-protocol.md.)
+        success: result.statusCode < 400,
         statusCode: result.statusCode,
         statusText: result.statusText,
         headers: result.headers,

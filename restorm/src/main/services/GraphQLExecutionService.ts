@@ -182,7 +182,11 @@ class GraphQLExecutionService {
 
       return {
         requestId,
-        success: !errors || errors.length === 0,
+        // GraphQL success = a 2xx/3xx transport AND no GraphQL `errors`.
+        // GraphQL conventionally returns 200 with an `errors` array, so
+        // the errors check alone isn't enough — a transport 4xx/5xx (e.g.
+        // a 500 with no GraphQL body) must also be success:false.
+        success: result.statusCode < 400 && (!errors || errors.length === 0),
         statusCode: result.statusCode,
         data,
         errors,
