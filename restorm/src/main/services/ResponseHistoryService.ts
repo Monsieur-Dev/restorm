@@ -38,7 +38,7 @@ import type { GRPCExecutionResult } from './GRPCExecutionService'
 import type { SOAPExecutionResult } from './SOAPExecutionService'
 import type { WebSocketExecutionResult } from './WebSocketExecutionService'
 import { normalizeODataResponse } from '../../shared/utils/odataResponse'
-import { redactTokensFromBody } from './AuthenticationRedaction'
+import { redactTokensFromBody, collectTokenValues, redactTokensFromHeaders } from './AuthenticationRedaction'
 import { isAuthenticationRequest } from '../../shared/types/collections'
 
 const DEFAULT_MAX_PER_REQUEST = 10
@@ -418,7 +418,7 @@ class ResponseHistoryService {
     const requestBodyData = this.getRequestBodyData(requestId)
     const requestBody = requestBodyData ? this.buildHttpBody(requestId, requestBodyData) : undefined
 
-    const responseHeaders = this.headersRecordToKeyValues(result.headers)
+    let responseHeaders = this.headersRecordToKeyValues(result.headers)
     const contentTypeHeader = result.headers?.['content-type']
     const contentType = Array.isArray(contentTypeHeader) ? contentTypeHeader[0] : contentTypeHeader
     const contentLengthHeader = result.headers?.['content-length']
@@ -432,14 +432,18 @@ class ResponseHistoryService {
     let responseBody = result.body ?? ''
     const collectionItem = collectionStore.findById(requestId)
     if (collectionItem && isRequest(collectionItem) && isAuthenticationRequest(collectionItem)) {
-      responseBody = redactTokensFromBody(
-        responseBody,
-        collectionItem.producedHeaders.map((h) => ({
-          key: h.key,
-          value: h.value.toString(),
-          enabled: h.enabled
-        }))
-      )
+      const produced = collectionItem.producedHeaders.map((h) => ({
+        key: h.key,
+        value: h.value.toString(),
+        enabled: h.enabled
+      }))
+      // Capture the resolved token VALUES from the JSON body so they
+      // can be scrubbed from the (non-JSON) body AND the response
+      // headers — a token often echoes back in a Set-Cookie / custom
+      // header, which used to persist in clear on disk.
+      const tokenValues = collectTokenValues(responseBody, produced)
+      responseBody = redactTokensFromBody(responseBody, produced, tokenValues)
+      responseHeaders = redactTokensFromHeaders(responseHeaders, tokenValues)
     }
 
     return {

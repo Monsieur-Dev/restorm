@@ -51,7 +51,9 @@ export async function authPrefetchOneShot(input: AuthPrefetchInput): Promise<Aut
   logger.info('[AuthPrefetch] wire-level request', {
     method: input.method,
     host: parsed.host,
-    path: `${parsed.pathname}${parsed.search}`,
+    // pathname only — the query string can carry OAuth secrets
+    // (client_secret / code / assertion).
+    path: parsed.pathname,
     headerKeys: Object.keys(headers),
     bodyLength: input.body?.length ?? 0
   })

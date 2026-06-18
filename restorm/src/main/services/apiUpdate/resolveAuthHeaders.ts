@@ -3,6 +3,13 @@ import type { EnvironmentFolder, FolderItem } from '../../../shared/types/folder
 import { isAnyFolder, isRequest } from '../../../shared/types/folderTypes'
 import { authPrefetchOneShot, resolveProducedHeaders } from '../AuthenticationPrefetch'
 
+/** Drop the query string (and fragment) from a URL for safe logging —
+ * OAuth token endpoints carry client_secret / code / assertion there. */
+function urlWithoutQuery(url: string): string {
+  const cut = url.search(/[?#]/)
+  return cut === -1 ? url : url.slice(0, cut)
+}
+
 /**
  * Run the env folder's attached auth route to produce the headers
  * the spec fetch needs. Mirrors the import-modal flow: walks the
@@ -156,9 +163,12 @@ export async function resolveAuthHeadersForFolder(
 
   logger.info('[apiUpdate.resolveAuth] dispatching prefetch', {
     method: auth.method,
-    url,
+    // Strip the query string + drop the body preview: an OAuth token
+    // request carries client_secret / code / assertion in both, and
+    // the response body carries the minted tokens.
+    url: urlWithoutQuery(url),
     bodyType: auth.body?.type,
-    bodyPreview: body?.slice(0, 200),
+    bodyLength: body?.length ?? 0,
     variableKeys: Object.keys(variables),
     producedHeaderKeys: (auth.producedHeaders ?? []).map((h) => h.key)
   })
@@ -171,10 +181,9 @@ export async function resolveAuthHeadersForFolder(
   })
   if (!result.success || result.statusCode === undefined || result.statusCode >= 400) {
     logger.warn('[apiUpdate.resolveAuth] prefetch failed', {
-      url,
+      url: urlWithoutQuery(url),
       statusCode: result.statusCode,
-      error: result.error,
-      bodyPreview: result.body?.slice(0, 200)
+      error: result.error
     })
     return {}
   }

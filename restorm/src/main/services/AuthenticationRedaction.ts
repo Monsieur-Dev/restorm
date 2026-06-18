@@ -25,23 +25,11 @@ export function collectHandlebarsReferences(template: string): string[] {
   return out
 }
 
-/**
- * Redact JSON-encoded body: every `producedHeaders` value is parsed
- * for `{{field.path}}` references, and each path is overwritten with
- * `"***"` in the body. Non-JSON bodies are returned unchanged.
- */
-export function redactTokensFromBody(
-  rawBody: string,
-  producedHeaders: readonly { key: string; value: string; enabled?: boolean }[]
-): string {
-  if (!rawBody) return rawBody
-  let parsed: unknown
-  try {
-    parsed = JSON.parse(rawBody)
-  } catch {
-    return rawBody
-  }
+const REDACTED = '***'
 
+function referencedPaths(
+  producedHeaders: readonly { key: string; value: string; enabled?: boolean }[]
+): Set<string> {
   const paths = new Set<string>()
   for (const kv of producedHeaders) {
     if (kv.enabled === false) continue
@@ -53,12 +41,102 @@ export function redactTokensFromBody(
       paths.add(ref)
     }
   }
-  if (paths.size === 0) return rawBody
+  return paths
+}
+
+/** Read the string value at `a.b.c` in a parsed JSON object, or undefined. */
+function valueAtPath(target: unknown, segments: readonly string[]): string | undefined {
+  let cur: unknown = target
+  for (const seg of segments) {
+    if (cur === null || typeof cur !== 'object') return undefined
+    cur = (cur as Record<string, unknown>)[seg]
+  }
+  return typeof cur === 'string' ? cur : undefined
+}
+
+/**
+ * Redact token-bearing fields from a response body before it lands in
+ * the on-disk history archive.
+ *
+ * - JSON body: every `producedHeaders` `{{field.path}}` is overwritten
+ *   with `***`.
+ * - Non-JSON body (form-encoded `access_token=…`, a bare token, …):
+ *   JSON.parse fails, so there are no paths to walk — but a token can
+ *   still be sitting in clear. We substring-redact any known token
+ *   VALUES (collected from JSON sibling responses isn't possible here,
+ *   so we fall back to the `extraSecretValues` the caller supplies).
+ */
+export function redactTokensFromBody(
+  rawBody: string,
+  producedHeaders: readonly { key: string; value: string; enabled?: boolean }[],
+  extraSecretValues: readonly string[] = []
+): string {
+  if (!rawBody) return rawBody
+
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(rawBody)
+  } catch {
+    // Non-JSON body: substring-redact any known secret values.
+    return redactSecretSubstrings(rawBody, extraSecretValues)
+  }
+
+  const paths = referencedPaths(producedHeaders)
+  if (paths.size === 0) return redactSecretSubstrings(rawBody, extraSecretValues)
 
   for (const path of paths) {
     redactPath(parsed, path.split('.'))
   }
-  return JSON.stringify(parsed)
+  let out = JSON.stringify(parsed)
+  if (extraSecretValues.length > 0) out = redactSecretSubstrings(out, extraSecretValues)
+  return out
+}
+
+/**
+ * Collect the resolved token VALUES at the producedHeaders paths in a
+ * JSON body. These are the strings that must not survive in clear in
+ * the persisted response headers (an auth response often echoes the
+ * token in a `Set-Cookie` / custom header too).
+ */
+export function collectTokenValues(
+  rawBody: string,
+  producedHeaders: readonly { key: string; value: string; enabled?: boolean }[]
+): string[] {
+  if (!rawBody) return []
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(rawBody)
+  } catch {
+    return []
+  }
+  const out: string[] = []
+  for (const path of referencedPaths(producedHeaders)) {
+    const v = valueAtPath(parsed, path.split('.'))
+    if (v && v.length >= 4) out.push(v)
+  }
+  return out
+}
+
+/** Replace every occurrence of each secret value with `***`. */
+export function redactSecretSubstrings(text: string, secretValues: readonly string[]): string {
+  let out = text
+  for (const secret of secretValues) {
+    if (!secret || secret.length < 4) continue
+    out = out.split(secret).join(REDACTED)
+  }
+  return out
+}
+
+/**
+ * Redact known token values out of a persisted header set. Returns a
+ * fresh array; never mutates the input.
+ */
+export function redactTokensFromHeaders<T extends { key: string; value: string }>(
+  headers: readonly T[],
+  secretValues: readonly string[]
+): T[] {
+  if (secretValues.length === 0) return headers.slice()
+  return headers.map((h) => ({ ...h, value: redactSecretSubstrings(h.value, secretValues) }))
 }
 
 function redactPath(target: unknown, segments: readonly string[]): void {
