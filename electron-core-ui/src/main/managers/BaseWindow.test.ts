@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 // --- Hoisted mocks (accessible inside vi.mock factories) ---
 
@@ -19,7 +19,17 @@ const { mockStorageGet, mockStorageSet, MockBrowserWindow } = vi.hoisted(() => {
     setFullScreen = vi.fn()
     on = vi.fn()
     once = vi.fn()
-    show = vi.fn()
+    // Model Electron's real focus contract: show() focuses the window,
+    // showInactive() reveals it WITHOUT focus, so isFocused() reflects which
+    // reveal path ran. This lets tests assert focus deterministically.
+    _focused = false
+    show = vi.fn(() => {
+      this._focused = true
+    })
+    showInactive = vi.fn(() => {
+      this._focused = false
+    })
+    isFocused = vi.fn(() => this._focused)
     loadURL = vi.fn(() => Promise.resolve())
     loadFile = vi.fn(() => Promise.resolve())
     webContents = mockWebContents
@@ -323,6 +333,74 @@ describe('BaseWindow', () => {
 
       fireWebContentsOnce(win, 'did-finish-load')
       expect(cb).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('revealInactive (no-focus reveal)', () => {
+    /** Fire the captured `app:renderer-ready` ipcMain handler for this window. */
+    function fireRendererReady(senderId = 1): void {
+      const ipc = electron.ipcMain as unknown as { on: { mock: { calls: [string, (e: unknown) => void][] } } }
+      const call = ipc.on.mock.calls.find((c) => c[0] === 'app:renderer-ready')
+      expect(call).toBeDefined()
+      call?.[1]({ sender: { id: senderId } })
+    }
+
+    const ORIGINAL_ARGV = process.argv
+
+    afterEach(() => {
+      process.argv = ORIGINAL_ARGV
+    })
+
+    it('reveals with show() (focus) by default', () => {
+      mockStorageGet.mockReturnValue(undefined)
+      const win = new TestWindow({ ...defaultConfig, showWhenReady: true })
+      const bw = win.getWindow() as unknown as InstanceType<typeof MockBrowserWindow>
+
+      fireRendererReady()
+
+      expect(bw.show).toHaveBeenCalledTimes(1)
+      expect(bw.showInactive).not.toHaveBeenCalled()
+      // Deterministic focus contract: show() focuses.
+      expect(bw.isFocused()).toBe(true)
+    })
+
+    it('reveals with showInactive() (no focus) when revealInactive is set', () => {
+      mockStorageGet.mockReturnValue(undefined)
+      const win = new TestWindow({ ...defaultConfig, showWhenReady: true, revealInactive: true })
+      const bw = win.getWindow() as unknown as InstanceType<typeof MockBrowserWindow>
+
+      fireRendererReady()
+
+      expect(bw.showInactive).toHaveBeenCalledTimes(1)
+      expect(bw.show).not.toHaveBeenCalled()
+      // The whole point of the flag: the revealed window is NOT focused.
+      expect(bw.isFocused()).toBe(false)
+    })
+
+    it('reveals with showInactive() when the --inactive-window flag is present', () => {
+      mockStorageGet.mockReturnValue(undefined)
+      process.argv = [...ORIGINAL_ARGV, '--inactive-window']
+      const win = new TestWindow({ ...defaultConfig, showWhenReady: true })
+      const bw = win.getWindow() as unknown as InstanceType<typeof MockBrowserWindow>
+
+      fireRendererReady()
+
+      expect(bw.showInactive).toHaveBeenCalledTimes(1)
+      expect(bw.show).not.toHaveBeenCalled()
+      expect(bw.isFocused()).toBe(false)
+    })
+
+    it('an explicit revealInactive:false wins over the --inactive-window flag', () => {
+      mockStorageGet.mockReturnValue(undefined)
+      process.argv = [...ORIGINAL_ARGV, '--inactive-window']
+      const win = new TestWindow({ ...defaultConfig, showWhenReady: true, revealInactive: false })
+      const bw = win.getWindow() as unknown as InstanceType<typeof MockBrowserWindow>
+
+      fireRendererReady()
+
+      expect(bw.show).toHaveBeenCalledTimes(1)
+      expect(bw.showInactive).not.toHaveBeenCalled()
+      expect(bw.isFocused()).toBe(true)
     })
   })
 })

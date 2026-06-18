@@ -158,6 +158,88 @@ readiness). When `showWhenReady` is off, `onReadyToShow` fires once on the
 renderer's `did-finish-load`, so consumers get a single readiness signal either
 way.
 
+### `BaseWindow` — `revealInactive` (reveal without focus)
+
+By default the `showWhenReady` reveal calls `window.show()`, which makes the
+window visible **and** takes OS focus, raises it, and (on most platforms)
+switches to its virtual desktop. For a **programmatically-launched** instance —
+one no human asked to bring forward (an automation / agent window, an embedded
+control instance) — that focus steal is disruptive: it yanks focus away from
+whatever the user is doing.
+
+Set `revealInactive: true` in the window's `WindowConfiguration` to reveal it
+with `window.showInactive()` instead: the window becomes **visible** (so
+screenshots / CDP / input automation still work) but is **not focused,
+activated, or raised**, and the active virtual desktop does not change. When the
+flag is absent, behaviour is unchanged — the window shows and takes focus as
+before.
+
+The preference can also be driven globally from the command line: pass
+`--inactive-window` and every window reveals inactively without any per-window
+configuration. The resolution order is **per-window `revealInactive` (when
+explicitly set) → the `--inactive-window` flag → focusing `show()`**, exposed as
+`isInactiveRevealRequested()` from the library's main entry:
+
+```ts
+import { isInactiveRevealRequested } from 'electron-core-ui/main'
+
+// e.g. let a launcher pass --inactive-window for automation instances:
+const configuration = {
+  name: 'main',
+  // …
+  showWhenReady: true,
+  revealInactive: isInactiveRevealRequested() // or a value from your own CLI parser
+}
+```
+
+`revealInactive` builds on the `showWhenReady` reveal path — it changes how the
+ready window is revealed, not when. A window shown immediately (no
+`showWhenReady`) relies on Electron's default `show: true` and is unaffected.
+
+### The splash honours the same preference
+
+The splash window appears **first** in the boot sequence — before the main
+window exists — so if it grabbed focus, the launch would steal focus even when
+the main window reveals inactively. `createSplashWindow` therefore honours the
+same preference: pass `revealInactive: true` in `SplashWindowOptions`, or let it
+default to the `--inactive-window` flag. When inactive, the splash is
+constructed hidden (`show: false`) and revealed with `showInactive()` — visible
+and still always-on-top, but never focused. The resolution order matches the
+main window: **per-splash `revealInactive` (when explicitly set) → the
+`--inactive-window` flag → focusing `show: true`**. So a single
+`--inactive-window` on the command line keeps **both** the splash and the main
+window from stealing the user's focus.
+
+### Wayland needs more than `showInactive()` — force XWayland
+
+`showInactive()` is an **X11** mechanism. Under **Ozone-Wayland** it is silently
+ignored: a Wayland window cannot focus itself, and Chromium's
+`WaylandToplevelWindow` requests activation on its **first map** — using an
+inherited `XDG_ACTIVATION_TOKEN` (the X11 startup-notification analogue is
+`DESKTOP_STARTUP_ID`) if one is present, and otherwise calling
+`RequestNewToken()` to ask the compositor for a **fresh** token. So simply not
+inheriting a token is not enough: the backend self-activates anyway, and there
+is no public switch to suppress that self-activation. The window still grabs
+focus on native Wayland regardless of `showInactive()`.
+
+The fix for an inactive launch is to force the **X11 backend (XWayland)** with
+`app.commandLine.appendSwitch('ozone-platform', 'x11')` in
+`configureCommandLineSwitches()`. Under XWayland `showInactive()` behaves
+exactly as on a native X11 session, so both the splash and the main window
+reveal without focus. `--inactive-window` instances are launched for automation
+/ agent / background use, where running on XWayland rather than native Wayland
+is an acceptable tradeoff (the only cost is native-Wayland niceties such as
+per-monitor fractional scaling — irrelevant for a background window). On an X11
+session the switch is a no-op.
+
+As belt-and-suspenders the launch also calls `clearStartupActivationEnv()`
+(exported from the library's main entry) to `delete` any inherited
+`XDG_ACTIVATION_TOKEN` / `DESKTOP_STARTUP_ID` before a window maps — `delete`
+maps to `unsetenv`, removing it from the real process environment the native
+`getenv` reads (an `= undefined` assignment would instead store the literal
+string `"undefined"`). A launcher that spawns the instance can also strip the
+tokens from the child's environment so it never inherits them at all.
+
 ## Notes
 
 - The **entire splash surface is draggable** (`-webkit-app-region: drag` in the

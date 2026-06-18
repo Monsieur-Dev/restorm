@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 // --- Hoisted mocks (accessible inside vi.mock factories) ---
 
@@ -9,6 +9,18 @@ const { MockBrowserWindow, mockCreateFromPath, instances } = vi.hoisted(() => {
     _constructorOptions: Record<string, unknown>
     loadURL = vi.fn((_url: string) => Promise.resolve())
     center = vi.fn()
+    // Model Electron's focus contract: `show: true` at construction focuses
+    // the window; show() focuses; showInactive() reveals without focus. So
+    // isFocused() reflects how the splash was revealed and the test can assert
+    // focus deterministically rather than eyeballing it.
+    _focused = false
+    show = vi.fn(() => {
+      this._focused = true
+    })
+    showInactive = vi.fn(() => {
+      this._focused = false
+    })
+    isFocused = vi.fn(() => this._focused)
     _destroyed = false
     close = vi.fn(() => {
       this._destroyed = true
@@ -16,6 +28,8 @@ const { MockBrowserWindow, mockCreateFromPath, instances } = vi.hoisted(() => {
     isDestroyed = vi.fn(() => this._destroyed)
     constructor(opts: Record<string, unknown>) {
       this._constructorOptions = opts
+      // `show: true` (the focusing default) focuses at construction.
+      this._focused = opts['show'] === true
       instances.push(this)
     }
   }
@@ -39,7 +53,10 @@ vi.mock('../services', () => ({
 
 vi.mock('electron', () => ({
   BrowserWindow: MockBrowserWindow,
-  nativeImage: { createFromPath: mockCreateFromPath }
+  nativeImage: { createFromPath: mockCreateFromPath },
+  // WindowManager (imported transitively for isInactiveRevealRequested) reads
+  // `app` only inside isDevToolsEnabled(), which these tests never call.
+  app: { isPackaged: false }
 }))
 
 import { createSplashWindow } from './SplashWindow'
@@ -126,5 +143,53 @@ describe('createSplashWindow', () => {
     createSplashWindow({ logoPath: '/tmp/missing.png' })
 
     expect(lastHtml()).not.toContain('<img')
+  })
+
+  describe('revealInactive (no-focus reveal)', () => {
+    const ORIGINAL_ARGV = process.argv
+
+    afterEach(() => {
+      process.argv = ORIGINAL_ARGV
+    })
+
+    it('shows immediately with focus by default (show:true, no showInactive)', () => {
+      createSplashWindow({ logoPath: '/tmp/logo.png' })
+
+      const win = instances[instances.length - 1]
+      expect(lastOptions()['show']).toBe(true)
+      expect(win?.showInactive).not.toHaveBeenCalled()
+      // Deterministic focus contract: the default splash takes focus.
+      expect(win?.isFocused()).toBe(true)
+    })
+
+    it('reveals without focus (show:false + showInactive) when revealInactive is set', () => {
+      createSplashWindow({ logoPath: '/tmp/logo.png', revealInactive: true })
+
+      const win = instances[instances.length - 1]
+      expect(lastOptions()['show']).toBe(false)
+      expect(win?.showInactive).toHaveBeenCalledTimes(1)
+      // The whole point: the splash is revealed WITHOUT focus.
+      expect(win?.isFocused()).toBe(false)
+    })
+
+    it('reveals without focus when the --inactive-window flag is present', () => {
+      process.argv = [...ORIGINAL_ARGV, '--inactive-window']
+      createSplashWindow({ logoPath: '/tmp/logo.png' })
+
+      const win = instances[instances.length - 1]
+      expect(lastOptions()['show']).toBe(false)
+      expect(win?.showInactive).toHaveBeenCalledTimes(1)
+      expect(win?.isFocused()).toBe(false)
+    })
+
+    it('an explicit revealInactive:false wins over the --inactive-window flag', () => {
+      process.argv = [...ORIGINAL_ARGV, '--inactive-window']
+      createSplashWindow({ logoPath: '/tmp/logo.png', revealInactive: false })
+
+      const win = instances[instances.length - 1]
+      expect(lastOptions()['show']).toBe(true)
+      expect(win?.showInactive).not.toHaveBeenCalled()
+      expect(win?.isFocused()).toBe(true)
+    })
   })
 })

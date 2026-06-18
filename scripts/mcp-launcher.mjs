@@ -94,6 +94,24 @@ let currentToken = null
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 
+// Environment for an inactive (`--inactive-window`) restorm launch: a copy of
+// ours with the desktop **activation tokens** stripped. On a native Wayland
+// session a window cannot focus itself — the compositor only lets it when the
+// app redeems an `xdg-activation` token, which a focused launcher hands down
+// via `XDG_ACTIVATION_TOKEN` (its X11 startup-notification analogue is
+// `DESKTOP_STARTUP_ID`). If the child inherits that token, Chromium's
+// Ozone/Wayland backend redeems it and focuses the first window — defeating
+// `showInactive()`. Not propagating the token leaves the compositor's
+// focus-stealing-prevention in charge, so the window stays in the background.
+// (ECUI also clears these in-process as a belt-and-suspenders; doing it here
+// too means the child never even inherits them.)
+function inactiveLaunchEnv() {
+  const env = { ...process.env }
+  delete env.XDG_ACTIVATION_TOKEN
+  delete env.DESKTOP_STARTUP_ID
+  return env
+}
+
 // stderr is the only safe place to log — stdout is the JSON-RPC
 // channel Claude Code reads from.
 function log(msg, extra) {
@@ -630,14 +648,19 @@ function spawnRestormDetached(discoveryFile) {
   // `electron-vite dev`. The `--` separator passes flags through to
   // the Electron main process. Restorm writes its chosen port to
   // `discoveryFile` once bound.
+  //
+  // `--inactive-window`: this is a programmatic launch (no human asked for it),
+  // so reveal the window WITHOUT stealing OS focus or switching the user's
+  // active virtual desktop — it just appears in the background.
   const child = spawn(
     'pnpm',
-    ['dev:restorm', '--', '--mcp', `--mcp-discovery-file=${discoveryFile}`],
+    ['dev:restorm', '--', '--mcp', '--inactive-window', `--mcp-discovery-file=${discoveryFile}`],
     {
       cwd: repoRoot,
       detached: true,
       stdio: 'ignore',
-      env: { ...process.env }
+      // Strip the activation tokens so the window doesn't grab focus on Wayland.
+      env: inactiveLaunchEnv()
     }
   )
   child.unref()
@@ -954,10 +977,15 @@ async function runManualMode() {
   const extraArgs = rawArgs[0] === '--' ? rawArgs.slice(1) : rawArgs
   log('manual mode (TTY) — running cleanup then spawning restorm in foreground', extraArgs.length > 0 ? { extraArgs } : undefined)
   await gcStaleDiscoveryFiles()
+  // `--inactive-window`: reveal the window WITHOUT stealing OS focus or
+  // switching the active virtual desktop — `dev:restorm:mcp` is launched for
+  // automation/agent use, so it should appear in the background rather than
+  // grabbing the user's focus.
   const child = spawn(
     'pnpm',
-    ['dev:restorm', '--', '--mcp', ...extraArgs],
-    { cwd: repoRoot, stdio: 'inherit', env: { ...process.env } }
+    ['dev:restorm', '--', '--mcp', '--inactive-window', ...extraArgs],
+    // Strip the activation tokens so the window doesn't grab focus on Wayland.
+    { cwd: repoRoot, stdio: 'inherit', env: inactiveLaunchEnv() }
   )
   // Forward Ctrl-C cleanly: kill the child, let it shut down restorm,
   // then exit ourselves. SIGTERM follows the same path.

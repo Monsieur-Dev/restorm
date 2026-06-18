@@ -1,5 +1,6 @@
 import { BrowserWindow, nativeImage } from 'electron'
 import { logger } from '../services'
+import { isInactiveRevealRequested } from './WindowManager'
 
 /**
  * Options describing the splash screen an application wants to show while it
@@ -35,6 +36,18 @@ export interface SplashWindowOptions {
    * The logo keeps its aspect ratio (`height: auto`).
    */
   logoMaxWidth?: number
+  /**
+   * When true the splash is revealed with `showInactive()` — visible but NOT
+   * focused/activated/raised, and the active virtual desktop does not change.
+   * Use it for programmatically-launched instances (automation / agent
+   * windows) so the splash, which appears before the main window, does not
+   * steal the user's focus on startup. When left unset it defaults to the
+   * `--inactive-window` command-line flag (see {@link isInactiveRevealRequested}),
+   * so a launch can opt in via argv alone — keeping the splash and the main
+   * window's reveal behaviour in sync. Absent / false → focusing `show()` as
+   * before.
+   */
+  revealInactive?: boolean
 }
 
 /**
@@ -130,6 +143,12 @@ export function createSplashWindow(options: SplashWindowOptions): SplashWindowHa
   const background = options.background ?? 'transparent'
   const logoMaxWidth = options.logoMaxWidth ?? DEFAULT_LOGO_MAX_WIDTH
   const transparent = background === 'transparent'
+  // Reveal without focus when the splash was launched for an automation /
+  // agent instance. A per-splash `revealInactive` wins when explicitly set;
+  // otherwise the global `--inactive-window` flag decides — mirroring the main
+  // window's reveal so the splash, shown first in the boot sequence, never
+  // steals the user's focus on a programmatic launch.
+  const inactive = options.revealInactive ?? isInactiveRevealRequested()
 
   const splash = new BrowserWindow({
     width,
@@ -146,7 +165,10 @@ export function createSplashWindow(options: SplashWindowOptions): SplashWindowHa
     fullscreenable: false,
     skipTaskbar: true,
     alwaysOnTop: true,
-    show: true,
+    // When revealing inactively, stay hidden at construction and reveal via
+    // `showInactive()` below so the splash never grabs focus. Otherwise show
+    // immediately (focus + raise) as before.
+    show: !inactive,
     webPreferences: {
       // Static HTML only — no preload, no node integration needed.
       nodeIntegration: false,
@@ -158,6 +180,11 @@ export function createSplashWindow(options: SplashWindowOptions): SplashWindowHa
   // display, but call it explicitly so the splash is centered even if the
   // platform ignored the constructor hint.
   splash.center()
+
+  if (inactive) {
+    logger.info('Splash window revealed without focus (showInactive)')
+    splash.showInactive()
+  }
 
   const logoDataUrl = resolveLogoDataUrl(options)
   const html = buildSplashHtml(logoDataUrl, background, logoMaxWidth)

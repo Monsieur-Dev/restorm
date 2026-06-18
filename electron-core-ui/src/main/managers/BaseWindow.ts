@@ -1,7 +1,7 @@
 import { BrowserWindow, screen, BrowserWindowConstructorOptions, ipcMain, nativeImage, Menu } from "electron"
 import { join } from "path"
 import { getStorageService, logger } from "../services"
-import { WindowConfiguration, WindowState, isDevToolsEnabled } from "./WindowManager"
+import { WindowConfiguration, WindowState, isDevToolsEnabled, isInactiveRevealRequested } from "./WindowManager"
 
 /**
  * BaseWindow handles window state persistence and restoration
@@ -101,7 +101,26 @@ export abstract class BaseWindow {
         }
       }
     }
-  
+
+    /**
+     * Reveal the window, honouring the inactive-reveal preference: when
+     * `revealInactive` is set (or the `--inactive-window` flag is present),
+     * use `showInactive()` so the window becomes visible WITHOUT taking OS
+     * focus, being activated/raised, or switching the active virtual desktop;
+     * otherwise `show()` (focus + raise as usual). A per-window
+     * `revealInactive` configuration flag, when explicitly set, takes
+     * precedence over the global flag.
+     */
+    private revealWindow(window: BrowserWindow): void {
+      const inactive = this.configuration.revealInactive ?? isInactiveRevealRequested()
+      if (inactive) {
+        logger.info('BaseWindow: revealing window without focus (showInactive)')
+        window.showInactive()
+      } else {
+        window.show()
+      }
+    }
+
     /**
      * Set the BrowserWindow instance and setup DevTools
      */
@@ -606,7 +625,7 @@ export abstract class BaseWindow {
           }
           logger.info('BaseWindow: renderer signalled ready, revealing window')
           this.fireReadyToShow()
-          window.show()
+          this.revealWindow(window)
         }
         ipcMain.on('app:renderer-ready', onRendererReady)
         // Stop listening if the window goes away before the renderer signals.
