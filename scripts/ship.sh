@@ -223,12 +223,17 @@ if [ "${DO_MERGE}" -ne 1 ]; then
   exit 0
 fi
 
-echo "🔀 Merging PR (merge commit) + deleting the branch…"
-if ! gh pr merge "${BRANCH}" --merge --delete-branch; then
+echo "🔀 Merging PR (merge commit)…"
+# NOTE: no --delete-branch. gh's local cleanup tries to switch the checkout to the
+# base branch, which is held by another worktree (we ship from linked worktrees),
+# failing with "'main' is already used by worktree". The repo is configured to
+# auto-delete the remote branch on merge, and the lead's teardown removes the local
+# branch + worktree — so --delete-branch is both unnecessary and harmful here.
+if ! gh pr merge "${BRANCH}" --merge; then
   die "gh pr merge failed — the PR may need a human merge (branch protection / conflict). CI was green; check 'gh pr view ${BRANCH}'."
 fi
 
 trap - EXIT
 journal "PASS at $(date -Is) — SHIP merged — agent ${AGENT} — branch ${BRANCH} → ${BASE} — worktree ${WORKTREE} — took $(elapsed)"
-echo "🎉 Shipped: ${BRANCH} merged into ${BASE} (took $(elapsed)). The branch was deleted; tear down the worktree."
+echo "🎉 Shipped: ${BRANCH} merged into ${BASE} (took $(elapsed)). Remote branch auto-deleted; tear down the worktree."
 exit 0
