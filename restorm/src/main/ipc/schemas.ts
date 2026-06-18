@@ -398,10 +398,16 @@ const miniBrowserBoundsSchema = z.object({
   height: z.number()
 })
 
-export const miniBrowserCreateArgs = z.tuple([tabIdArg, z.string().optional()])
+/** Only http(s) URLs may be embedded; empty string = "no initial URL". */
+const httpUrlOrEmpty = z.string().refine(
+  (v) => v === '' || /^https?:\/\//i.test(v),
+  { message: 'mini-browser URL must be http(s)' }
+)
+
+export const miniBrowserCreateArgs = z.tuple([tabIdArg, httpUrlOrEmpty.optional()])
 export const miniBrowserDestroyArgs = z.tuple([tabIdArg])
 export const miniBrowserSetBoundsArgs = z.tuple([tabIdArg, miniBrowserBoundsSchema])
-export const miniBrowserNavigateArgs = z.tuple([tabIdArg, z.string()])
+export const miniBrowserNavigateArgs = z.tuple([tabIdArg, httpUrlOrEmpty])
 export const miniBrowserReloadArgs = z.tuple([tabIdArg])
 export const miniBrowserGoBackArgs = z.tuple([tabIdArg])
 export const miniBrowserGoForwardArgs = z.tuple([tabIdArg])
