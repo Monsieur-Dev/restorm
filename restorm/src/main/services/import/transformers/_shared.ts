@@ -541,12 +541,19 @@ export function buildOperationDocumentation(op: OperationDocumentationInput): Op
  * pass the already-parsed root and rely on the segments differing between
  * 2.0 (`#/definitions/...`) and 3.x (`#/components/schemas/...`).
  */
+/** JSON-pointer segments that would climb the prototype chain. A `$ref`
+ * naming one is hostile / malformed — reject rather than resolve it. */
+const FORBIDDEN_POINTER_SEGMENTS = new Set(['__proto__', 'prototype', 'constructor'])
+
 export function resolveJsonPointer(root: unknown, pointer: string): unknown {
   if (!pointer.startsWith('#/')) return undefined
   const path = pointer.slice(2).split('/').map(decodeJsonPointerSegment)
   let current: unknown = root
   for (const segment of path) {
-    if (current && typeof current === 'object' && segment in (current as Record<string, unknown>)) {
+    if (FORBIDDEN_POINTER_SEGMENTS.has(segment)) return undefined
+    // `hasOwnProperty` (not `in`) so a segment can't resolve through the
+    // prototype chain — `in` would let `#/__proto__/...` walk Object.prototype.
+    if (current && typeof current === 'object' && Object.prototype.hasOwnProperty.call(current, segment)) {
       current = (current as Record<string, unknown>)[segment]
     } else {
       return undefined

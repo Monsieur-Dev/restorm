@@ -6,9 +6,12 @@ import type { FolderItem } from '../../../shared/types/collections'
 import { isAnyFolder, isScenario, isEnvironmentFolder } from '../../../shared/types/collections'
 import { findItemWithParent } from './treeSearch'
 
-/** Generate a unique ID */
+/** Generate a unique ID. Uses crypto.randomUUID (collision-free) rather
+ * than Date.now()+Math.random(), which collides for two ids minted in the
+ * same millisecond — fatal here since these ids key the per-request
+ * stores. Matches serialization.ts's generateId(). */
 export function generateUniqueId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
+  return crypto.randomUUID()
 }
 
 /** A container's children array, created in place if missing. Scenarios carry

@@ -93,9 +93,12 @@ export async function executeSoapRequest(input: SoapRequestInput): Promise<SoapR
   const resolvedHeaders = resolveKeyValues(input.headers, context)
   const headersObj = headersToObject(resolvedHeaders)
   
-  // Ensure Content-Type and SOAPAction are set
-  headersObj['Content-Type'] ??= 'text/xml; charset=utf-8'
-  if (resolvedSoapAction && !headersObj.SOAPAction) {
+  // Ensure Content-Type and SOAPAction are set — case-insensitive
+  // presence checks so a user header in any casing suppresses the
+  // default (else the request carries duplicate headers).
+  const headerKeysLower = new Set(Object.keys(headersObj).map((k) => k.toLowerCase()))
+  if (!headerKeysLower.has('content-type')) headersObj['Content-Type'] = 'text/xml; charset=utf-8'
+  if (resolvedSoapAction && !headerKeysLower.has('soapaction')) {
     headersObj.SOAPAction = resolvedSoapAction
   }
   

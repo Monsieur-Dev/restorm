@@ -1,6 +1,16 @@
 import { describe, it, expect } from 'vitest'
 import type { FolderItem, Scenario } from '../../../shared/types/collections'
-import { deepCloneItem, cloneItemInTree } from './treeManipulation'
+import { deepCloneItem, cloneItemInTree, generateUniqueId } from './treeManipulation'
+
+describe('generateUniqueId', () => {
+  it('produces a UUID, never colliding within a tight loop', () => {
+    const ids = new Set<string>()
+    for (let i = 0; i < 10_000; i++) ids.add(generateUniqueId())
+    // Date.now()+Math.random() collided within a millisecond; crypto.randomUUID never does.
+    expect(ids.size).toBe(10_000)
+    expect(generateUniqueId()).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
+  })
+})
 
 /**
  * Cloning a tree item (sidebar "Clone") must produce a FULLY independent copy:

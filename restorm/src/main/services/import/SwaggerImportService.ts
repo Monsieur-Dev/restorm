@@ -344,7 +344,10 @@ function resolveSchemaRef(ref: string, spec: SwaggerSpec): SwaggerSchema | undef
   let current: unknown = spec as unknown
 
   for (const segment of path) {
-    if (current && typeof current === 'object' && segment in (current as Record<string, unknown>)) {
+    // Reject prototype-climbing segments + use hasOwnProperty (not `in`)
+    // so a hostile `$ref` can't walk the prototype chain.
+    if (segment === '__proto__' || segment === 'prototype' || segment === 'constructor') return undefined
+    if (current && typeof current === 'object' && Object.prototype.hasOwnProperty.call(current, segment)) {
       current = (current as Record<string, unknown>)[segment]
     } else {
       return undefined

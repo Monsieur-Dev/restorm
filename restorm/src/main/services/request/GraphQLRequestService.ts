@@ -79,8 +79,11 @@ export async function executeGraphQLRequest(input: GraphQLRequestInput): Promise
   const resolvedHeaders = resolveKeyValues(input.headers, context)
   const headersObj = headersToObject(resolvedHeaders)
   
-  // Ensure Content-Type is set
-  headersObj['Content-Type'] ??= 'application/json'
+  // Ensure Content-Type is set — case-insensitive presence check so a
+  // user header in any casing suppresses the default (no duplicate).
+  if (!Object.keys(headersObj).some((k) => k.toLowerCase() === 'content-type')) {
+    headersObj['Content-Type'] = 'application/json'
+  }
   
   // Parse variables
   let variables: Record<string, unknown> = {}

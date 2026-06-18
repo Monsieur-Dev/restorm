@@ -233,7 +233,11 @@ export async function executeHTTPRequest(input: HTTPRequestInput): Promise<HTTPR
 
   // Build body
   const { data, contentType } = buildRequestBody(input, context)
-  if (contentType && !headersObj['Content-Type']) {
+  // Case-insensitive presence check: a user header `content-type` (any
+  // casing) must suppress the default, else the request carries two
+  // Content-Type headers.
+  const hasContentType = Object.keys(headersObj).some((k) => k.toLowerCase() === 'content-type')
+  if (contentType && !hasContentType) {
     headersObj['Content-Type'] = contentType
   }
 
