@@ -22,3 +22,30 @@ export function mapAllWorkbenchTabs(
     return node
   })
 }
+
+/** A workbench tab backed by a tree item carries the item's id on one of
+ * `request` / `folder` / `scenario` depending on its kind. */
+type ItemBackedTab = EditorTab & {
+  request?: { id?: string }
+  folder?: { id?: string }
+  scenario?: { id?: string }
+  breadcrumbs?: { id?: string }[]
+}
+
+/**
+ * True when a workbench tab is backed by (or nested under) the tree item
+ * `itemId`. A tab is backed by a request (any protocol), a (env-)folder,
+ * OR a scenario — each puts the id on a different field — and an item can
+ * also appear in a tab's breadcrumb trail (a child of the deleted folder).
+ * Matching all of these is what lets delete/close/reveal-by-id work for
+ * scenario-editor tabs and non-HTTP request tabs, not just http-request /
+ * folder tabs.
+ */
+export function tabReferencesItem(tab: EditorTab, itemId: string): boolean {
+  const t = tab as ItemBackedTab
+  if (t.request?.id === itemId) return true
+  if (t.folder?.id === itemId) return true
+  if (t.scenario?.id === itemId) return true
+  if (t.breadcrumbs?.some((bc) => bc.id === itemId)) return true
+  return false
+}

@@ -22,7 +22,7 @@ import type { HTTPMethod } from '../../../shared/models/types'
 import { findItemById, findItemWithBreadcrumbs, getFolderIcon, getNearestEnvironmentsForBreadcrumbs } from '../utils/treeSearch'
 import { cloneForEventBus } from '../utils/cloneForEventBus'
 import { generateUniqueId, cloneItemInTree, removeItemFromTree, insertItemIntoTree } from '../utils/treeManipulation'
-import { mapAllWorkbenchTabs } from '../utils/workbenchTabs'
+import { mapAllWorkbenchTabs, tabReferencesItem } from '../utils/workbenchTabs'
 import type { WorkbenchTree, EditorTab } from 'electron-core-ui/renderer'
 import type { BreadcrumbItem, FolderTab, EnvironmentFolderTab, HTTPRequestTab, ScenarioEditorTab } from '../../../shared/types/editor'
 import { makeReactiveFolder, makeReactiveRequest } from '../types/reactive'
@@ -248,15 +248,11 @@ export function useItemOperations(options: UseItemOperationsOptions): UseItemOpe
     // Close any tabs that reference the deleted item — in EVERY group,
     // including tab-groups nested inside split containers (a tab dragged into
     // a lower group must still close). Recurse into container nodes and prune
-    // emptied tab-groups + emptied containers.
-    const tabReferencesDeleted = (tab: EditorTab): boolean => {
-      const restormTab = tab as FolderTab | EnvironmentFolderTab | HTTPRequestTab
-      if (restormTab.tabType === 'folder' && restormTab.folder.id === itemId) return true
-      if (restormTab.tabType === 'environment-folder' && restormTab.folder.id === itemId) return true
-      if (restormTab.tabType === 'http-request' && restormTab.request.id === itemId) return true
-      if (restormTab.breadcrumbs?.some((bc) => bc.id === itemId)) return true
-      return false
-    }
+    // emptied tab-groups + emptied containers. `tabReferencesItem` matches
+    // request (any protocol) / folder / scenario tabs + breadcrumb trails —
+    // the old local check missed scenario-editor tabs and non-HTTP requests,
+    // leaving their tabs open (and editable) after the item was deleted.
+    const tabReferencesDeleted = (tab: EditorTab): boolean => tabReferencesItem(tab, itemId)
     const pruneGroups = (nodes: WorkbenchTree['groups']): WorkbenchTree['groups'] => {
       const result: WorkbenchTree['groups'] = []
       for (const node of nodes) {
