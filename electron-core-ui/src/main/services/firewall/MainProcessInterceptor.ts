@@ -1,7 +1,7 @@
 import http, { type ClientRequest, type RequestOptions, type OutgoingHttpHeaders } from 'node:http'
 import https from 'node:https'
 import { randomUUID } from 'node:crypto'
-import { logger, graphQLService, MCP_FORWARDED_HEADER } from 'electron-core-ui'
+import { logger } from '../LoggerService'
 import { firewallService } from './FirewallService'
 import { permissionService } from './PermissionService'
 import { isFirewallBypassed } from './firewallBypass'
@@ -9,11 +9,12 @@ import { DeniedClientRequest } from './DeniedClientRequest'
 import { BufferingClientRequest } from './BufferingClientRequest'
 import { captureOriginHint } from './stackOrigin'
 import { detectWireProtocol } from './protocolDetect'
+import { isInternalEndpoint, isInternalRequest } from './firewallConfig'
 import type {
 	RequestRecord,
 	RequestRecordProtocol,
 	RequestRecordSource
-} from '../../../shared/types/firewall'
+} from '../../../types/firewall'
 
 /**
  * Layer B of the firewall. Every outgoing call from the main
@@ -74,13 +75,13 @@ function patchHttpModule(mod: HttpLikeModule, source: RequestRecordSource): void
 	): ClientRequest => {
 		const record = recordFromHttpArgs(args, source)
 		if (record === null) return realFn(args)
-		// The cross-instance MCP bridge forwards a `tools/call` to a peer
-		// instance over loopback, tagged with `MCP_FORWARDED_HEADER`. That's
-		// internal infrastructure between our own `--mcp` instances, never
-		// user-facing API traffic — exempt it from the firewall so a peer call
-		// is never blocked/prompted (which would break `__session` routing and
-		// pile up "outbound request blocked" prompts on the bridging instance).
-		if (carriesMcpBridgeHeader(args)) {
+		// The host app can flag a request as its own internal infrastructure
+		// traffic (e.g. a loopback call between its processes/instances carrying
+		// an app-private routing header). That's never user-facing API traffic —
+		// exempt it from the firewall so such a call is never blocked/prompted
+		// (which would break the app's internal routing and pile up "outbound
+		// request blocked" prompts on the originating process).
+		if (isInternalRequest(args)) {
 			record.verdict = 'allow'
 			firewallService.emit(record)
 			const realRequest = realFn(args)
@@ -289,7 +290,7 @@ function recordFromHttpArgs(args: unknown[], source: RequestRecordSource): Reque
 		}
 	}
 
-	if (isInternalGraphqlEndpoint(fullUrl)) return null
+	if (isInternalEndpoint(fullUrl)) return null
 
 	const refinedProtocol = detectWireProtocol({ url: fullUrl, headers, baseProtocol: protocol })
 	return {
@@ -319,39 +320,6 @@ function extractHeadersFromArgs(args: unknown[]): OutgoingHttpHeaders | undefine
 		if (opts.headers !== undefined) return opts.headers
 	}
 	return undefined
-}
-
-/**
- * True when the outbound request carries {@link MCP_FORWARDED_HEADER} — i.e.
- * it's the cross-instance MCP bridge forwarding a `tools/call` to a peer
- * `--mcp` instance over loopback. Such calls are internal infrastructure and
- * must skip the firewall (header key match is case-insensitive — Node
- * lowercases outgoing header names, but be defensive).
- */
-function carriesMcpBridgeHeader(args: unknown[]): boolean {
-	const headers = extractHeadersFromArgs(args)
-	if (headers === undefined) return false
-	for (const key of Object.keys(headers)) {
-		if (key.toLowerCase() === MCP_FORWARDED_HEADER) return true
-	}
-	return false
-}
-
-/**
- * Skip records whose destination is the in-process GraphQL bridge
- * (`http://localhost:<port>/graphql`). Mirror of the same filter
- * in `FirewallService` (Layer A) — the renderer ↔ main IPC traffic
- * would drown the audit feed otherwise.
- */
-function isInternalGraphqlEndpoint(rawUrl: string): boolean {
-	try {
-		const requested = new URL(rawUrl)
-		const internal = new URL(graphQLService.getEndpoint())
-		if (requested.host !== internal.host) return false
-		return requested.pathname === internal.pathname || requested.pathname.startsWith(`${internal.pathname}/`)
-	} catch {
-		return false
-	}
 }
 
 function isFunction(v: unknown): boolean {
@@ -479,7 +447,7 @@ function recordFromFetchArgs(input: RequestInfo | URL, init: RequestInit | undef
 	// (with the full base64 payload echoed back). Drop it cleanly.
 	const lowerProtocol = parsed.protocol.toLowerCase()
 	if (lowerProtocol !== 'http:' && lowerProtocol !== 'https:') return null
-	if (isInternalGraphqlEndpoint(raw)) return null
+	if (isInternalEndpoint(raw)) return null
 	const host = parsed.hostname.toLowerCase()
 	const protocol: RequestRecordProtocol = parsed.protocol === 'https:' ? 'https' : 'http'
 	const port = parsed.port !== '' ? Number(parsed.port) : (protocol === 'https' ? 443 : 80)

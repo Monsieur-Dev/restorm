@@ -1,13 +1,13 @@
 /**
  * Walk the V8 stack at the point of an intercepted call and produce a
  * short, human-meaningful caller hint — e.g. `npm package "axios"` or
- * `restorm/main/services/HTTPExecutionService.ts:42`. Used to enrich
- * the toast prompt's "from <hint>" line and the `RequestRecord`'s
- * `originHint` field.
+ * `main/services/HttpExecutionService.ts:42`. Used to enrich the toast
+ * prompt's "from <hint>" line and the `RequestRecord`'s `originHint`
+ * field.
  *
  * The walk skips:
  *   - Node internals (`node:`, `internal/`).
- *   - Restorm's own firewall layer (this file + `MainProcessInterceptor`
+ *   - The firewall layer itself (this file + `MainProcessInterceptor`
  *     + `BufferingClientRequest` + `FirewallService`) — every call
  *     inevitably passes through them, so they'd always win.
  *   - The first `skipFrames` frames the caller wants ignored (its own

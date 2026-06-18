@@ -4,12 +4,12 @@ import type { ClientRequest } from 'node:http'
 import { BufferingClientRequest } from './BufferingClientRequest'
 
 class FakeClientRequest extends EventEmitter {
-	public readonly writes: { chunk: unknown; encoding?: string }[] = []
+	public readonly writes: { chunk: unknown; encoding?: string | undefined }[] = []
 	public ended = false
 	public destroyedWith: Error | undefined
-	public timeout: { ms: number; cb?: () => void } | undefined
+	public timeout: { ms: number; cb?: (() => void) | undefined } | undefined
 	public noDelay: boolean | undefined
-	public socketKeepAlive: { enable?: boolean; initialDelay?: number } | undefined
+	public socketKeepAlive: { enable?: boolean | undefined; initialDelay?: number | undefined } | undefined
 	public destroyed = false
 	public aborted = false
 	public writable = true

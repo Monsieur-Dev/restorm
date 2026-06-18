@@ -32,9 +32,10 @@ export const FIREWALL_REQUEST_RECORD_CHANNEL = 'firewall:request-record'
  *      set to main on every project change.
  *   3. Explicit user blacklist (persisted, editable).
  *
- * Plus a fourth narrow exemption for restorm's own infrastructure
- * ports on localhost (graphql bridge, Vite dev server, MCP) — see
- * `PermissionService` for the resolution.
+ * Plus a fourth narrow exemption for the host app's own
+ * infrastructure ports on localhost (e.g. a GraphQL bridge, a Vite
+ * dev server, an embedded MCP server) — see `PermissionService` for
+ * the resolution.
  *
  * Origins are normalised on insert: scheme + host lower-cased, port
  * numeric (defaulted from the scheme when absent — 80 / 443 / 80 /
@@ -126,10 +127,10 @@ export type RequestRecordVerdict = 'allow' | 'deny' | 'pending'
  * content, but the console's format renderer needs to know whether
  * to emit `curl`, `grpcurl`, `wscat`, etc.
  *
- * `internal` is reserved for Restorm's own renderer ↔ main bridge
- * traffic (the in-process GraphQL server). The console UI hides
- * internal calls by default so the user log isn't drowned in the
- * app's plumbing.
+ * `internal` is reserved for the host app's own renderer ↔ main
+ * bridge traffic (e.g. an in-process GraphQL server). The console UI
+ * hides internal calls by default so the user log isn't drowned in
+ * the app's plumbing.
  */
 export type RequestRecordProtocol = 'http' | 'https' | 'graphql' | 'grpc' | 'soap' | 'odata' | 'websocket' | 'internal'
 
@@ -214,7 +215,7 @@ export interface RequestRecord {
 	 * URL instead. */
 	originHint?: string
 
-	/** Set by the renderer when the call comes from Restorm's own
+	/** Set by the renderer when the call comes from the host app's own
 	 * request execution path — links the record back to the
 	 * persisted request the user can re-open via the console's
 	 * click-through behaviour. */

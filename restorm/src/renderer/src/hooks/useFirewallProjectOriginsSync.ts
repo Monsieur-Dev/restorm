@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import type { FolderItem } from '../../../shared/types/collections'
-import type { FirewallOrigin } from '../../../shared/types/firewall'
+import type { FirewallOrigin } from 'electron-core-ui/renderer'
 import { collectProjectOrigins } from '../../../shared/firewall/collectProjectOrigins'
 
 interface FirewallProjectApi {

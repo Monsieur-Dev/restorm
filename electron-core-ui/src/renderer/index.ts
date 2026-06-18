@@ -39,6 +39,22 @@ export type {
   IpcErrorCode
 } from '../errors'
 
+// Firewall shared types + IPC channel constants (consumed by the
+// renderer firewall UI + a host app's preload bridge).
+export {
+  FIREWALL_IPC,
+  FIREWALL_REQUEST_RECORD_CHANNEL
+} from '../types/firewall'
+export type {
+  FirewallOrigin,
+  FirewallPromptPayload,
+  FirewallPromptResolution,
+  RequestRecord,
+  RequestRecordSource,
+  RequestRecordVerdict,
+  RequestRecordProtocol
+} from '../types/firewall'
+
 export type { ThemeInfo, ThemeDefinition, ThemeVariables } from '../types/theme'
 export type {
   FeatureStrategyType,

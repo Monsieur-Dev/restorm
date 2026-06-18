@@ -1,4 +1,4 @@
-import type { RequestRecordProtocol } from '../../../shared/types/firewall'
+import type { RequestRecordProtocol } from '../../../types/firewall'
 
 /**
  * Best-effort wire-protocol classifier. Both interception layers fall
@@ -32,7 +32,7 @@ const GRAPHQL_PATH_SUFFIXES = ['/graphql', '/api/graphql', '/v1/graphql']
 interface DetectInput {
 	url: string
 	headers: Record<string, string>
-	body?: string
+	body?: string | undefined
 	baseProtocol: RequestRecordProtocol
 }
 

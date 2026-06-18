@@ -1,0 +1,49 @@
+/* Firewall pending-permission toast body. Rendered inside the
+ * app-level toaster by `useFirewallPromptToasts`. Keeps the shape
+ * compact since toasts are width-bounded; the action buttons wrap
+ * onto a second row on narrow toasters. */
+.firewall-prompt-toast {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.firewall-prompt-toast__destination code {
+  font-size: 12px;
+  background: var(--toolbar-hover-background, rgb(127, 127, 127, 0.12));
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.firewall-prompt-toast__source {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.firewall-prompt-toast__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.firewall-prompt-toast__actions button {
+  flex: 1 1 auto;
+  min-width: 80px;
+  padding: 4px 8px;
+  font-size: 12px;
+  background: transparent;
+  border: 1px solid var(--button-background, #2c4156);
+  color: var(--editor-foreground);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.firewall-prompt-toast__actions button:hover {
+  background: var(--list-hover-background, rgb(127, 127, 127, 0.12));
+}
+
+.firewall-prompt-toast__actions .firewall-prompt-toast__primary {
+  background: var(--button-background, #2c4156);
+  color: var(--button-foreground, white);
+}

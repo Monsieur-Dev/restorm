@@ -27,8 +27,11 @@ export const TAB_DETACH_FEATURE = 'workbench.tabDetach'
  * button that does nothing meaningful and could even raise concerns
  * about the app initiating outbound traffic.
  *
+ * Passed to the generic ECUI `FirewallPanel` as its `testButtonFeature`
+ * prop (the panel is app-agnostic and only shows the CTA when a flag
+ * name is supplied + enabled).
+ *
  * @see restorm/resources/features.yaml
- * @see restorm/src/renderer/src/components/Firewall/FirewallPanel.tsx
  */
 export const FIREWALL_TEST_BUTTON_FEATURE = 'firewall.testButton'
 

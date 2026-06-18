@@ -1,13 +1,12 @@
 import { describe, it, expect, vi } from 'vitest'
 
 vi.mock('electron', () => ({
-	app: { getPath: (): string => '/tmp/restorm-test-userdata' },
+	app: { getPath: (): string => '/tmp/ecui-firewall-test-userdata' },
 	BrowserWindow: { getAllWindows: (): never[] => [] }
 }))
 
-vi.mock('electron-core-ui', () => ({
-	logger: { warn: vi.fn(), info: vi.fn(), debug: vi.fn(), error: vi.fn() },
-	graphQLService: { getEndpoint: (): string => 'http://localhost:9100/graphql' }
+vi.mock('../LoggerService', () => ({
+	logger: { warn: vi.fn(), info: vi.fn(), debug: vi.fn(), error: vi.fn() }
 }))
 
 import http from 'node:http'

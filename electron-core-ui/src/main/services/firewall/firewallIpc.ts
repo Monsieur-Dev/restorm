@@ -4,7 +4,7 @@ import {
 	FIREWALL_IPC,
 	type FirewallOrigin,
 	type FirewallPromptResolution
-} from '../../../shared/types/firewall'
+} from '../../../types/firewall'
 
 /**
  * Idempotent guard. `ipcMain.handle` throws if a channel is

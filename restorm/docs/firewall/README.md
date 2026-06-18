@@ -12,7 +12,7 @@ This doc covers:
 6. [Worker / child-process posture](#worker--child-process-posture)
 7. [Runbook — "the firewall blocked something I need"](#runbook--the-firewall-blocked-something-i-need)
 
-Source code lives in [`restorm/src/main/services/firewall/`](../../src/main/services/firewall/).
+The firewall engine + UI are a **generic, reusable feature of `electron-core-ui`** — restorm keeps only its configuration (infra ports, project origins, the internal GraphQL-bridge endpoint to skip, copy/wording). The library's source lives in [`electron-core-ui/src/main/services/firewall/`](../../electron-core-ui/src/main/services/firewall/) + [`electron-core-ui/src/renderer/components/Firewall/`](../../electron-core-ui/src/renderer/components/Firewall/); its public surface is documented in [`electron-core-ui/docs/Firewall/README.md`](../../electron-core-ui/docs/Firewall/README.md). This page describes how restorm **wires + uses** it.
 
 ---
 
@@ -32,9 +32,9 @@ At the very top of `main/index.ts`, before any other import, the firewall monkey
 - `https.request` / `https.get`
 - `globalThis.fetch` (Node 18+ undici path)
 
-Every later require / dynamic import inherits the patches. A `RequestRecord` is built for each call and routed through the same `PermissionService`. Calls denied at this layer fail with `EFIREWALLDENIED`; calls in the `prompt` state are parked in a [`BufferingClientRequest`](../../src/main/services/firewall/BufferingClientRequest.ts) that buffers writes / headers / timeouts until the user picks Allow or Deny.
+Every later require / dynamic import inherits the patches. A `RequestRecord` is built for each call and routed through the same `PermissionService`. Calls denied at this layer fail with `EFIREWALLDENIED`; calls in the `prompt` state are parked in a [`BufferingClientRequest`](../../electron-core-ui/src/main/services/firewall/BufferingClientRequest.ts) that buffers writes / headers / timeouts until the user picks Allow or Deny.
 
-`net.Socket.connect` / `dns.lookup` / `dgram.send` are scaffolded in [`HardenInterceptor.ts`](../../src/main/services/firewall/HardenInterceptor.ts) but **not wired** at boot — undici's path through `net.Socket.prototype.connect` interacts poorly with the wrap. The http/https/fetch coverage handles ~95% of what restorm and its dependencies actually do; the harden interceptor is staged for a follow-up that decodes every undici signature variant.
+`net.Socket.connect` / `dns.lookup` / `dgram.send` are scaffolded in [`HardenInterceptor.ts`](../../electron-core-ui/src/main/services/firewall/HardenInterceptor.ts) but **not wired** at boot — undici's path through `net.Socket.prototype.connect` interacts poorly with the wrap. The http/https/fetch coverage handles ~95% of what restorm and its dependencies actually do; the harden interceptor is staged for a follow-up that decodes every undici signature variant.
 
 ---
 
@@ -73,7 +73,7 @@ When `classify()` returns `prompt` and a renderer window is available, a toast p
 
 - The destination origin (`https://example.com:443`).
 - The capturing layer (`main-https`, `renderer-webrequest`, etc.).
-- A **best-effort caller hint** — for Layer A the Chromium initiator URL; for Layer B a stack-trace walk that names the originating npm package or first-party file. See [`stackOrigin.ts`](../../src/main/services/firewall/stackOrigin.ts).
+- A **best-effort caller hint** — for Layer A the Chromium initiator URL; for Layer B a stack-trace walk that names the originating npm package or first-party file. See [`stackOrigin.ts`](../../electron-core-ui/src/main/services/firewall/stackOrigin.ts).
 - Two buttons:
   - **Allow** → adds the origin to the whitelist + lets the request through.
   - **Deny** → adds the origin to the blacklist + fails the request with `EFIREWALLDENIED`.
@@ -131,7 +131,7 @@ If the entry isn't visible in the blacklist:
 
 ### Symptom: I want to allow ALL traffic to a host regardless of port
 
-Not currently supported. Wildcards (`*.example.com`, `example.com:*`) are out of scope for the v1 firewall — every entry is a strict triple. Tracked as a follow-up.
+Add a **port wildcard** entry: `https://api.example.com:*` matches any port on that host. A **single-level subdomain wildcard** is also supported: `https://*.example.com` matches `api.example.com` (but not the bare `example.com`, and not `a.b.example.com`). The scheme is always matched exactly.
 
 ### Symptom: I want to inspect what was blocked recently
 
@@ -145,12 +145,12 @@ There's no kill switch — by design. The closest equivalent is to whitelist `0.
 
 ## Tests
 
-Unit tests live alongside the sources:
+Unit tests live alongside the sources in `electron-core-ui`:
 
-- [`PermissionService.test.ts`](../../src/main/services/firewall/PermissionService.test.ts)
-- [`BufferingClientRequest.test.ts`](../../src/main/services/firewall/BufferingClientRequest.test.ts)
-- [`MainProcessInterceptor.test.ts`](../../src/main/services/firewall/MainProcessInterceptor.test.ts) (idempotency)
-- [`stackOrigin.test.ts`](../../src/main/services/firewall/stackOrigin.test.ts)
-- [`protocolDetect.test.ts`](../../src/main/services/firewall/protocolDetect.test.ts)
+- [`PermissionService.test.ts`](../../electron-core-ui/src/main/services/firewall/PermissionService.test.ts)
+- [`BufferingClientRequest.test.ts`](../../electron-core-ui/src/main/services/firewall/BufferingClientRequest.test.ts)
+- [`MainProcessInterceptor.test.ts`](../../electron-core-ui/src/main/services/firewall/MainProcessInterceptor.test.ts) (idempotency)
+- [`stackOrigin.test.ts`](../../electron-core-ui/src/main/services/firewall/stackOrigin.test.ts)
+- [`protocolDetect.test.ts`](../../electron-core-ui/src/main/services/firewall/protocolDetect.test.ts)
 
-Run them with `pnpm test` (full suite) or `npx vitest run src/main/services/firewall` (firewall only).
+Run them from the `electron-core-ui` package with `npx vitest run src/main/services/firewall`.

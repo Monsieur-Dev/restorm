@@ -20,7 +20,7 @@ import {
   type FirewallOrigin,
   type FirewallPromptPayload,
   type RequestRecord
-} from '../../shared/types/firewall'
+} from '../../../../electron-core-ui/src/types/firewall'
 
 // Expose core-ui APIs (imported from core-ui preload modules) and extend with restorm project API
 const coreUIAPI = createCoreUIAPI()

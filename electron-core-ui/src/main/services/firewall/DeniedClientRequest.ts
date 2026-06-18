@@ -24,9 +24,8 @@ import { EventEmitter } from 'node:events'
  */
 export class DeniedClientRequest extends EventEmitter {
 	private destroyed = false
-	private aborted = false
 
-	constructor(private readonly reason: string) {
+	constructor(reason: string) {
 		super()
 		setImmediate(() => {
 			if (this.destroyed) return
@@ -56,7 +55,6 @@ export class DeniedClientRequest extends EventEmitter {
 	}
 
 	abort(): void {
-		this.aborted = true
 		this.destroy()
 	}
 

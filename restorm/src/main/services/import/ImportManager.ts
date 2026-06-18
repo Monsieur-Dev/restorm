@@ -14,7 +14,7 @@ import { logger } from 'electron-core-ui/main'
 import type { EnvironmentFolder, FolderItem } from '../../../shared/models'
 import { isRequest, isAnyFolder, isHTTPRequest, isAuthenticationRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest } from '../../../shared/types/collections'
 import { disableEmptyKeyValues } from '../../../shared/utils/emptyKeyValueHelper'
-import { withFirewallBypass } from '../firewall/firewallBypass'
+import { withFirewallBypass } from 'electron-core-ui'
 
 // ============================================================================
 // Types
