@@ -4,7 +4,8 @@ import { join } from 'node:path'
 import * as nodeWorkerThreads from 'node:worker_threads'
 import * as nodeChildProcess from 'node:child_process'
 import { app } from 'electron'
-import { logger } from 'electron-core-ui'
+import { logger } from '../LoggerService'
+import { getWorkerBootstrapPrefix } from './firewallConfig'
 
 /**
  * Worker / child-process firewall extension. The main-process
@@ -23,8 +24,8 @@ import { logger } from 'electron-core-ui'
  * a dep that shouldn't be talking to the network at all surface
  * `EFIREWALLDENIED` than silently get a free pass.
  *
- * Restorm itself does NOT spawn workers or fork children today, so
- * this is a defensive measure: if a future npm package starts
+ * The host app may not spawn workers or fork children itself today,
+ * so this is a defensive measure: if a future npm package starts
  * doing it, the firewall posture stays intact without anyone
  * having to remember to re-arm it.
  *
@@ -93,7 +94,7 @@ const BOOTSTRAP_CODE = String.raw`
  */
 function ensureBootstrapPath(): string {
 	if (bootstrapPath !== null) return bootstrapPath
-	const path = join(tmpdir(), `restorm-firewall-bootstrap-${String(process.pid)}.cjs`)
+	const path = join(tmpdir(), `${getWorkerBootstrapPrefix()}-${String(process.pid)}.cjs`)
 	writeFileSync(path, BOOTSTRAP_CODE, 'utf8')
 	bootstrapPath = path
 	app.on('before-quit', () => {
@@ -126,8 +127,8 @@ export function installWorkerPatcher(): void {
 	// `TypeError: Cannot set property Worker of [object Module]
 	// which has only a getter`. We try `Object.defineProperty`
 	// with `configurable: true` first, then fall back to a logged
-	// warning. Restorm itself doesn't spawn workers / child
-	// processes, so the defensive patch silently degrading to a
+	// warning. When the host app doesn't spawn workers / child
+	// processes itself, the defensive patch silently degrading to a
 	// no-op is acceptable.
 	const workerOk = patchWorkerConstructor(requireFlag)
 	const forkOk = patchChildProcessFork(requireFlag)
@@ -156,13 +157,13 @@ function patchWorkerConstructor(requireFlag: string[]): boolean {
 		})
 		return true
 	} catch (err) {
-		// Downgraded from warn → debug: Restorm does not spawn workers,
-		// so this patch is defensive-only. Surfacing it at WARN level
-		// added noise to every startup without flagging any actual
+		// Downgraded from warn → debug: when the host app doesn't spawn
+		// workers, this patch is defensive-only. Surfacing it at WARN
+		// level added noise to every startup without flagging any actual
 		// problem (Electron sometimes locks `worker_threads.Worker` to
 		// non-configurable). If a future feature starts spawning workers,
 		// re-elevate this and re-audit the inheritance contract.
-		logger.debug('FirewallService: could not patch worker_threads.Worker; spawned workers will not inherit the firewall (defensive-only, Restorm does not spawn workers)', { error: String(err) })
+		logger.debug('FirewallService: could not patch worker_threads.Worker; spawned workers will not inherit the firewall (defensive-only when the host app does not spawn workers)', { error: String(err) })
 		return false
 	}
 }
@@ -196,11 +197,11 @@ function patchChildProcessFork(requireFlag: string[]): boolean {
 		})
 		return true
 	} catch (err) {
-		// Same rationale as the `worker_threads` patch above — Restorm
-		// doesn't fork its own children, so this is defensive-only.
+		// Same rationale as the `worker_threads` patch above — when the
+		// host app doesn't fork its own children, this is defensive-only.
 		// Logged at debug level to keep startup quiet; re-elevate if a
 		// feature starts forking.
-		logger.debug('FirewallService: could not patch child_process.fork; forked children will not inherit the firewall (defensive-only, Restorm does not fork children)', { error: String(err) })
+		logger.debug('FirewallService: could not patch child_process.fork; forked children will not inherit the firewall (defensive-only when the host app does not fork children)', { error: String(err) })
 		return false
 	}
 }

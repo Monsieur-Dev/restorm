@@ -26,13 +26,8 @@ import type { Verdict } from './PermissionService'
 
 interface Bufferable {
 	chunk: string | Buffer | Uint8Array
-	encoding?: BufferEncoding
-	cb?: (err?: Error | null) => void
-}
-
-interface ForwardListener {
-	event: string
-	listener: (...args: unknown[]) => void
+	encoding?: BufferEncoding | undefined
+	cb?: ((err?: Error | null) => void) | undefined
 }
 
 const FORWARDED_EVENTS = [
@@ -60,13 +55,12 @@ export class BufferingClientRequest extends EventEmitter {
 	 */
 	private readonly pendingHeaders = new Map<string, string | string[] | number>()
 	private readonly headerKeys = new Map<string, string>()
-	private pendingTimeout: { ms: number; cb?: () => void } | null = null
+	private pendingTimeout: { ms: number; cb?: (() => void) | undefined } | null = null
 	private pendingNoDelay: boolean | null = null
-	private pendingSocketKeepAlive: { enable?: boolean; initialDelay?: number } | null = null
+	private pendingSocketKeepAlive: { enable?: boolean | undefined; initialDelay?: number | undefined } | null = null
 	private ended = false
 	private terminated = false
 	private real: ClientRequest | null = null
-	private fwd: ForwardListener[] | null = null
 
 	/**
 	 * Read-only mirrors of the `ClientRequest` properties consumers
@@ -127,7 +121,13 @@ export class BufferingClientRequest extends EventEmitter {
 						real.setSocketKeepAlive(this.pendingSocketKeepAlive.enable, this.pendingSocketKeepAlive.initialDelay)
 					}
 					this.bridgeEvents(real)
-					for (const w of this.writes) real.write(w.chunk, w.encoding, w.cb)
+					for (const w of this.writes) {
+						// Node's `write` overloads don't accept an explicit
+						// `undefined` encoding in the 3-arg form — pick the
+						// 2-arg `(chunk, cb)` shape when no encoding was staged.
+						if (w.encoding === undefined) real.write(w.chunk, w.cb)
+						else real.write(w.chunk, w.encoding, w.cb)
+					}
 					if (this.ended) real.end()
 				} catch (err) {
 					this.terminated = true
@@ -257,15 +257,12 @@ export class BufferingClientRequest extends EventEmitter {
 	}
 
 	private bridgeEvents(real: ClientRequest): void {
-		const fwd: ForwardListener[] = []
 		for (const event of FORWARDED_EVENTS) {
 			const listener = (...payload: unknown[]): void => {
 				this.emit(event, ...payload)
 			}
 			real.on(event, listener)
-			fwd.push({ event, listener })
 		}
-		this.fwd = fwd
 	}
 
 	/**

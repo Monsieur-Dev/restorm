@@ -13,7 +13,7 @@ import { authenticationCacheService, type ResolvedAuthShape } from './Authentica
 import { responseHistoryService } from './ResponseHistoryService'
 import { secretHydrationService } from './secrets/SecretHydrationService'
 import { collectRequestSecrets } from './secrets/collectRequestSecrets'
-import { withFirewallBypass } from './firewall/firewallBypass'
+import { withFirewallBypass } from 'electron-core-ui/main'
 import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../shared/config/constants'
 import type { AuthenticationRequest } from '../../shared/models/requests/AuthenticationRequest'
 

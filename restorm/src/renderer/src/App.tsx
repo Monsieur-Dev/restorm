@@ -156,7 +156,7 @@ import { RequestCreationProvider } from './contexts/RequestCreationContext'
 import { useNavigation } from './hooks/useNavigation'
 import { useWorkbenchUpdates } from './hooks/useWorkbenchUpdates'
 import { useWorkbenchTabs } from './hooks/useWorkbenchTabs'
-import { useFirewallPromptToasts } from './hooks/useFirewallPromptToasts'
+import { useFirewallPromptToasts } from 'electron-core-ui/renderer'
 import { useFirewallProjectOriginsSync } from './hooks/useFirewallProjectOriginsSync'
 import { useSidebarState } from './hooks/useSidebarState'
 import {

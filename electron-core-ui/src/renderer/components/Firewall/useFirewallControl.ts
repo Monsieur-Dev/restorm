@@ -1,5 +1,5 @@
 import { useCallback, useSyncExternalStore } from 'react'
-import type { FirewallOrigin } from '../../../../shared/types/firewall'
+import type { FirewallOrigin } from '../../../types/firewall'
 
 /**
  * Renderer-side mutator hook for the firewall control plane. Reads
@@ -67,7 +67,7 @@ class FirewallControlStore {
 	}
 }
 
-const STORE_GLOBAL_KEY = '__restormFirewallControlStore__'
+const STORE_GLOBAL_KEY = '__ecuiFirewallControlStore__'
 const globalRef = globalThis as unknown as Record<string, FirewallControlStore | undefined>
 const store: FirewallControlStore = globalRef[STORE_GLOBAL_KEY] ?? (globalRef[STORE_GLOBAL_KEY] = new FirewallControlStore())
 

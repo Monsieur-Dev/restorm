@@ -147,3 +147,29 @@ export {
   forwardToNamedSession
 } from './mcpDiscovery'
 export type { McpDiscoveryEntry } from './mcpDiscovery'
+
+// Firewall — generic outbound-network gating: intercept → permission
+// model → user prompt → allow/deny rules. The host app injects its
+// config (internal-endpoint skip, infra ports, e2e bypass) via
+// `configureFirewall` + `setInfraPorts`; everything else is generic.
+// See docs/Firewall/README.md for the full surface.
+export {
+  firewallService,
+  permissionService,
+  installMainProcessInterceptor,
+  installHardenInterceptor,
+  installWorkerPatcher,
+  registerFirewallIpc,
+  withFirewallBypass,
+  isFirewallBypassed,
+  configureFirewall,
+  resetFirewallConfig
+} from './firewall'
+export type {
+  Verdict,
+  Classification,
+  CheckInput,
+  InfraPorts,
+  PendingPromptSnapshot,
+  FirewallConfig
+} from './firewall'

@@ -16,7 +16,7 @@
 	flex-direction: column;
 	min-height: 100%;
 	box-sizing: border-box;
-	padding: 0 0 24px 0;
+	padding: 0 0 24px;
 }
 
 .firewall-panel__header {
@@ -24,8 +24,8 @@
 	grid-template-columns: auto 1fr;
 	column-gap: 20px;
 	align-items: start;
-	padding: 24px 20px 16px 20px;
-	border-bottom: 1px solid var(--toolbar-hover-background, rgba(127, 127, 127, 0.12));
+	padding: 24px 20px 16px;
+	border-bottom: 1px solid var(--toolbar-hover-background, rgb(127, 127, 127, 0.12));
 }
 
 .firewall-panel__header-icon {
@@ -37,7 +37,7 @@
 	width: 96px;
 	height: 96px;
 	border-radius: 8px;
-	background: var(--toolbar-hover-background, rgba(127, 127, 127, 0.08));
+	background: var(--toolbar-hover-background, rgb(127, 127, 127, 0.08));
 }
 
 .firewall-panel__header-icon .codicon {
@@ -75,7 +75,7 @@
 
 .firewall-panel__intro code,
 .firewall-panel__hint code {
-	background: var(--toolbar-hover-background, rgba(127, 127, 127, 0.12));
+	background: var(--toolbar-hover-background, rgb(127, 127, 127, 0.12));
 	padding: 1px 4px;
 	border-radius: 3px;
 	font-family: var(--monospace-font);
@@ -124,9 +124,11 @@
 	flex: 1 1 auto;
 	min-width: 0;
 }
+
 .firewall-panel__group > *:first-child > .inputbox {
 	width: 100%;
 }
+
 .firewall-panel__group > .button-container {
 	flex: 0 0 auto;
 }
@@ -151,7 +153,7 @@
 	align-items: center;
 	padding: 6px 10px;
 	background: var(--input-background, var(--editor-background, transparent));
-	border: 1px solid var(--input-border, rgba(127, 127, 127, 0.3));
+	border: 1px solid var(--input-border, rgb(127, 127, 127, 0.3));
 	border-radius: 3px;
 	overflow: hidden;
 }

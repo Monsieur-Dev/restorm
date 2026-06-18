@@ -82,6 +82,43 @@ export {
 } from './services'
 export type { McpDiscoveryEntry } from './services'
 
+// Firewall — generic outbound-network gating (intercept → permission
+// model → user prompt → allow/deny rules). See docs/Firewall/README.md.
+export {
+  firewallService,
+  permissionService,
+  installMainProcessInterceptor,
+  installHardenInterceptor,
+  installWorkerPatcher,
+  registerFirewallIpc,
+  withFirewallBypass,
+  isFirewallBypassed,
+  configureFirewall,
+  resetFirewallConfig
+} from './services'
+export type {
+  Verdict,
+  Classification,
+  CheckInput,
+  InfraPorts,
+  PendingPromptSnapshot,
+  FirewallConfig
+} from './services'
+// Firewall shared types (origins, IPC channels, request records)
+export {
+  FIREWALL_IPC,
+  FIREWALL_REQUEST_RECORD_CHANNEL
+} from '../types/firewall'
+export type {
+  FirewallOrigin,
+  FirewallPromptPayload,
+  FirewallPromptResolution,
+  RequestRecord,
+  RequestRecordSource,
+  RequestRecordVerdict,
+  RequestRecordProtocol
+} from '../types/firewall'
+
 // Save-unit / draft-store (file service v2)
 export {
   SaveUnitRegistry,

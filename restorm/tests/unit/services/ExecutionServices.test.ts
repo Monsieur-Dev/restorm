@@ -14,7 +14,11 @@ vi.mock('electron-core-ui/main', () => ({
   logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   // GRPCExecutionService now imports ResponseHistoryService, which pulls in
   // CollectionStore's `createPubSub(...)` at module load — provide it here.
-  createPubSub: () => ({ publish: vi.fn(), subscribe: vi.fn(), asyncIterator: vi.fn() })
+  createPubSub: () => ({ publish: vi.fn(), subscribe: vi.fn(), asyncIterator: vi.fn() }),
+  // The Send-button dispatch wraps the http.request call in the firewall
+  // bypass so a user-initiated outbound never re-prompts. The mock just runs
+  // the wrapped fn straight through.
+  withFirewallBypass: <T>(fn: () => T): T => fn()
 }))
 
 vi.mock('../../../src/main/services/ContextService', () => {

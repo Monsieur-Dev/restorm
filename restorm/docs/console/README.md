@@ -39,7 +39,7 @@ The dispatcher in [`formatters/index.ts`](../../src/renderer/src/components/Cons
 | grpc                | `grpcurl -plaintext -H … -d … host:port pkg.Svc/Method` | fallback to `grpcurl` with comment header   |
 | websocket           | `wscat -c <url> -H …`                             | fallback to `wscat` with comment header           |
 
-Wire-protocol detection runs at emission time in [`protocolDetect.ts`](../../src/main/services/firewall/protocolDetect.ts). It bumps records up from the base `http`/`https` to `graphql` / `soap` / `odata` / `grpc` based on URL patterns + content-type + body shape. Detection is conservative — anything ambiguous stays on the base scheme.
+Wire-protocol detection runs at emission time in [`protocolDetect.ts`](../../electron-core-ui/src/main/services/firewall/protocolDetect.ts). It bumps records up from the base `http`/`https` to `graphql` / `soap` / `odata` / `grpc` based on URL patterns + content-type + body shape. Detection is conservative — anything ambiguous stays on the base scheme.
 
 ## Internal GraphQL filter
 

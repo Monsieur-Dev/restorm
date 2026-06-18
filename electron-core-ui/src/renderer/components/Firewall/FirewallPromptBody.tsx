@@ -1,4 +1,5 @@
-import type { FirewallPromptPayload } from '../../../shared/types/firewall'
+import type { FirewallPromptPayload } from '../../../types/firewall'
+import './firewallPromptToast.css'
 
 interface FirewallPromptBodyProps {
 	payload: FirewallPromptPayload

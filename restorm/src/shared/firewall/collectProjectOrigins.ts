@@ -4,7 +4,7 @@ import {
   isHTTPRequest, isGraphQLRequest, isSoapRequest, isWebSocketRequest,
   isODataRequest, isAuthenticationRequest, isGrpcRequest
 } from '../types/collections'
-import type { FirewallOrigin } from '../types/firewall'
+import type { FirewallOrigin } from 'electron-core-ui/types/firewall'
 
 /**
  * Walk the project tree, collect every request's URL, resolve any `{{var}}`

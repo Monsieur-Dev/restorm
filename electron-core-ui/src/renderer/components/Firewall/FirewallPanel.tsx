@@ -1,12 +1,31 @@
 import React, { useCallback, useMemo, useState } from 'react'
-import { Tabs, ControlGroup, InputBox, Button, IconView, ScrollableElement, useFeature, type Tab } from 'electron-core-ui/renderer'
+import { Tabs, type Tab } from '../Tabs'
+import { ControlGroup } from '../ControlGroup'
+import { InputBox } from '../InputBox'
+import { Button } from '../Button'
+import { IconView } from '../IconView'
+import { ScrollableElement } from '../ScrollableElement'
+import { useFeature } from '../../hooks/useFeature'
 import { useFirewallControl } from './useFirewallControl'
-import { FIREWALL_TEST_BUTTON_FEATURE } from '../../../../main/featureFlags'
 import './firewallPanel.css'
-import type { FirewallOrigin } from '../../../../shared/types/firewall'
+import type { FirewallOrigin } from '../../../types/firewall'
 
-interface FirewallPanelProps {
+export interface FirewallPanelProps {
 	'data-testid'?: string
+	/**
+	 * The host application's display name, interpolated into the panel's
+	 * intro copy ("<appName> intercepts every outbound …"). No app name
+	 * is baked into this generic component — the consumer supplies it.
+	 * Defaults to a neutral "This application".
+	 */
+	appName?: string
+	/**
+	 * Feature-flag name that gates the developer-only "Test outbound"
+	 * CTA. When omitted, the button is never shown. The consuming app
+	 * passes its own flag name (backed by its feature service) so the
+	 * button only appears in the builds it wants.
+	 */
+	testButtonFeature?: string
 }
 
 /**
@@ -14,7 +33,7 @@ interface FirewallPanelProps {
  * always-on prompting:
  *
  *   - Known destinations (whitelist OR project-derived origins
- *     OR restorm infra ports) pass silently.
+ *     OR the host app's infra ports) pass silently.
  *   - Blacklisted destinations deny silently.
  *   - Anything else triggers a toast prompt the user resolves.
  *
@@ -22,10 +41,12 @@ interface FirewallPanelProps {
  * description), then a `Tabs` strip with `Whitelist (X)` /
  * `Blacklist (Y)` and a "Test outbound" CTA. Each table row is a
  * `ControlGroup` (label + remove icon button) — same chrome the
- * rest of restorm uses for joined input strips.
+ * rest of the library uses for joined input strips.
  */
 export const FirewallPanel: React.FC<FirewallPanelProps> = ({
-	'data-testid': dataTestId
+	'data-testid': dataTestId,
+	appName,
+	testButtonFeature
 }) => {
 	const {
 		whitelist,
@@ -40,7 +61,12 @@ export const FirewallPanel: React.FC<FirewallPanelProps> = ({
 	const [whitelistDraft, setWhitelistDraft] = useState('')
 	const [blacklistDraft, setBlacklistDraft] = useState('')
 	const [activeTabId, setActiveTabId] = useState<string>('whitelist')
-	const { isEnabled: testButtonEnabled } = useFeature(FIREWALL_TEST_BUTTON_FEATURE)
+	// `useFeature` must run unconditionally (rules of hooks); pass an
+	// empty flag name when the consumer didn't supply one — the empty
+	// flag resolves to disabled, and we gate the button on the name
+	// being present anyway.
+	const { isEnabled: testFlagEnabled } = useFeature(testButtonFeature ?? '')
+	const testButtonEnabled = testButtonFeature !== undefined && testButtonFeature !== '' && testFlagEnabled
 
 	const handleAddWhitelist = useCallback((): void => {
 		const origin = parseOriginInput(whitelistDraft)
@@ -131,14 +157,14 @@ export const FirewallPanel: React.FC<FirewallPanelProps> = ({
 					<div className="firewall-panel__header-text">
 						<h1 className="firewall-panel__title">Firewall</h1>
 						<p className="firewall-panel__intro">
-							Restorm intercepts every outbound HTTP / HTTPS / fetch
-							call at a low level (Chromium webRequest + main-
-							process http/https/fetch monkey-patches) so a
-							compromised npm dependency can&apos;t quietly exfiltrate
-							your secrets, tokens or project data through a
-							supply-chain attack. Unknown destinations trigger a
-							toast prompt — your decision adds the origin to the
-							matching list below.
+							{appName ?? 'This application'} intercepts every
+							outbound HTTP / HTTPS / fetch call at a low level
+							(Chromium webRequest + main-process http/https/fetch
+							monkey-patches) so a compromised npm dependency
+							can&apos;t quietly exfiltrate your secrets, tokens or
+							project data through a supply-chain attack. Unknown
+							destinations trigger a toast prompt — your decision
+							adds the origin to the matching list below.
 						</p>
 						{testButtonEnabled && (
 							<div className="firewall-panel__header-test">

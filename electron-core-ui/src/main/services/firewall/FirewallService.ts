@@ -1,13 +1,14 @@
 import { BrowserWindow, session, type OnBeforeRequestListenerDetails } from 'electron'
 import { randomUUID } from 'node:crypto'
-import { logger, graphQLService } from 'electron-core-ui'
+import { logger } from '../LoggerService'
 import {
 	FIREWALL_REQUEST_RECORD_CHANNEL,
 	type RequestRecord,
 	type RequestRecordProtocol
-} from '../../../shared/types/firewall'
+} from '../../../types/firewall'
 import { permissionService } from './PermissionService'
 import { detectWireProtocol } from './protocolDetect'
+import { isInternalEndpoint } from './firewallConfig'
 
 /**
  * `FirewallService` — Layer A (renderer / Chromium webRequest).
@@ -55,12 +56,14 @@ class FirewallService {
 				callback({ cancel: false })
 				return
 			}
-			// Skip the in-process GraphQL bridge — every renderer ↔
-			// main IPC call rides over `http://localhost:<port>/graphql`,
-			// so the audit feed would be drowned in chatter the user
-			// can't act on. Pass the request through unchanged
-			// (allow-and-forget; not even broadcast as a record).
-			if (isInternalGraphqlEndpoint(details.url)) {
+			// Skip the host app's internal bridge endpoint (when one is
+			// injected via `configureFirewall`) — e.g. an in-process
+			// renderer ↔ main GraphQL bridge whose every IPC call would
+			// otherwise drown the audit feed in chatter the user can't
+			// act on. Pass the request through unchanged (allow-and-
+			// forget; not even broadcast as a record). No-op when the
+			// consuming app didn't declare an internal endpoint.
+			if (isInternalEndpoint(details.url)) {
 				callback({ cancel: false })
 				return
 			}
@@ -76,14 +79,15 @@ class FirewallService {
 				callback({ cancel: false })
 				return
 			}
-			// Skip requests originating from the Mini browser's
-			// `<iframe>` — the firewall is meant to gate restorm's
-			// own outbound calls (HTTP / GraphQL / WebSocket
-			// executions, auth prefetch, import fetches), not
-			// arbitrary third-party browsing inside the embedded
-			// iframe. Without this bypass the user would have to
-			// click "Allow" for every CSS / font / XHR an embedded
-			// page makes — dozens of prompts per page load.
+			// Skip requests originating from an embedded webview /
+			// `<iframe>` that renders arbitrary third-party content —
+			// the firewall is meant to gate the host app's OWN outbound
+			// calls (HTTP / WebSocket executions, prefetch, import
+			// fetches), not arbitrary browsing inside an embedded
+			// surface the user opened on purpose. Without this bypass
+			// the user would have to click "Allow" for every CSS /
+			// font / XHR an embedded page makes — dozens of prompts
+			// per page load.
 			//
 			// Heuristic: the request's owning frame is a non-main
 			// frame whose document URL is an external `http(s)://`
@@ -92,7 +96,7 @@ class FirewallService {
 			// load via `vscode-resource:` / `devtools://` and don't
 			// match. The top-level renderer document is always the
 			// main frame, so it short-circuits cleanly here too.
-			if (isMiniBrowserIframeRequest(details)) {
+			if (isEmbeddedWebviewRequest(details)) {
 				callback({ cancel: false })
 				return
 			}
@@ -111,7 +115,7 @@ class FirewallService {
 			}
 			// Route through PermissionService. Three resolutions:
 			//   - immediate `allow` (whitelist hit, project-origins
-			//     hit, or restorm infra port);
+			//     hit, or host-app infra port);
 			//   - immediate `deny` (blacklist hit);
 			//   - async `allow` / `deny` after the user clicks one
 			//     of the two toast buttons (Allow → adds to
@@ -234,25 +238,6 @@ function isNetworkScheme(rawUrl: string): boolean {
 }
 
 /**
- * True for the in-process GraphQL bridge endpoint. Compares against
- * the live `graphQLService.getEndpoint()` so a port change between
- * boots (free-port lottery) is picked up automatically. Only matches
- * the `/graphql` path (and trailing variants like `/graphql/something`)
- * so a future user-defined GraphQL request hosted on the same port
- * wouldn't be silently swallowed.
- */
-function isInternalGraphqlEndpoint(rawUrl: string): boolean {
-	try {
-		const requested = new URL(rawUrl)
-		const internal = new URL(graphQLService.getEndpoint())
-		if (requested.host !== internal.host) return false
-		return requested.pathname === internal.pathname || requested.pathname.startsWith(`${internal.pathname}/`)
-	} catch {
-		return false
-	}
-}
-
-/**
  * True for any URL whose origin matches the electron-vite dev-server.
  * `ELECTRON_RENDERER_URL` is set by electron-vite at dev boot
  * (`http://localhost:5173`). In production builds it's undefined, so
@@ -273,52 +258,52 @@ function isViteDevOrigin(rawUrl: string): boolean {
 }
 
 /**
- * Detect requests that originated from the Mini browser surface
- * (rendering arbitrary third-party content like the artifactsmmo
- * game UI). The firewall stays out of those — the user opened the
- * Mini browser explicitly, prompting for every CSS/font/XHR the
- * embedded page makes would be unworkable.
+ * Detect requests that originated from an embedded webview / iframe
+ * rendering arbitrary third-party content. The firewall stays out of
+ * those — the user opened the embedded surface explicitly, and
+ * prompting for every CSS/font/XHR the embedded page makes would be
+ * unworkable.
  *
- * The Mini browser uses Electron's `<webview>` tag. The tag is its
- * own top-level browsing context (so `frame.top === frame` for any
- * request originating from inside it), but the request still flows
- * through the host BrowserWindow's webRequest listener with the
+ * An embedded surface typically uses Electron's `<webview>` tag. The
+ * tag is its own top-level browsing context (so `frame.top === frame`
+ * for any request originating from inside it), but the request still
+ * flows through the host BrowserWindow's webRequest listener with the
  * webview's URL set on `frame.url`.
  *
  * Single reliable signal across both legacy iframe + current webview
  * shapes: the originating `frame.url` is an external `http(s)://`
- * origin. Restorm's own main frame lives at the Vite / app origin
- * which `isExternalHttpUrl` filters out, so any frame URL that gets
- * past that test is a Mini browser surface. Internal Chromium frames
- * (Monaco / devtools at `vscode-resource:` / `devtools://`) don't
- * match the http(s) test either.
+ * origin. The host app's own main frame lives at the Vite / app
+ * origin which `isExternalHttpUrl` filters out, so any frame URL that
+ * gets past that test is an embedded third-party surface. Internal
+ * Chromium frames (Monaco / devtools at `vscode-resource:` /
+ * `devtools://`) don't match the http(s) test either.
  */
-function isMiniBrowserIframeRequest(details: OnBeforeRequestListenerDetails): boolean {
+function isEmbeddedWebviewRequest(details: OnBeforeRequestListenerDetails): boolean {
 	// (1) Navigation request itself — the very first fetch that loads
-	//     the Mini browser surface's main HTML document. With an
+	//     the embedded surface's main HTML document. With an
 	//     `<iframe>` `resourceType === 'subFrame'`; with an Electron
 	//     `<webview>` it's `mainFrame` (the webview is its own
-	//     top-level browsing context, not a subframe of restorm's
+	//     top-level browsing context, not a subframe of the host
 	//     renderer). In both shapes, `details.frame.url` is still
 	//     `about:blank` at this point so the frame-based check below
 	//     would miss it. Use the resource-type + destination-URL
-	//     signal instead: only the Mini browser surface ever points
+	//     signal instead: only an embedded surface ever points
 	//     a top-level / sub-frame navigation at an external http(s)
-	//     origin (restorm's own renderer never navigates away from
-	//     the Vite / app origin).
+	//     origin (the host app's own renderer never navigates away
+	//     from the Vite / app origin).
 	if ((details.resourceType === 'subFrame' || details.resourceType === 'mainFrame') && isExternalHttpUrl(details.url)) {
 		return true
 	}
-	// (2) Sub-resource of an already-loaded Mini browser surface (CSS,
-	//     JS, font, XHR, fetch, WS, …). When the Mini browser uses an
+	// (2) Sub-resource of an already-loaded embedded surface (CSS,
+	//     JS, font, XHR, fetch, WS, …). When the surface uses an
 	//     `<iframe>`, `details.frame` is the iframe's frame (not the
 	//     parent). When it uses an Electron `<webview>`, the tag is
 	//     its own *top-level* browsing context so `frame.top === frame`
 	//     — there's no parent to compare to. Both paths share one
 	//     reliable signal: `frame.url` is an external http(s) origin.
-	//     Restorm's own main frame lives at the Vite / app origin which
-	//     `isExternalHttpUrl` filters out, so any frame URL that gets
-	//     past that test is a Mini browser surface (no other restorm
+	//     The host app's own main frame lives at the Vite / app origin
+	//     which `isExternalHttpUrl` filters out, so any frame URL that
+	//     gets past that test is an embedded surface (no other app
 	//     surface points a frame at a remote http URL).
 	const frame = details.frame
 	if (!frame) return false
@@ -329,9 +314,9 @@ function isMiniBrowserIframeRequest(details: OnBeforeRequestListenerDetails): bo
 
 /**
  * `true` iff the URL parses as http(s) AND its origin is NOT the
- * Vite dev origin. Used to distinguish a third-party page (which the
- * Mini browser is meant to load) from restorm's own renderer / dev
- * assets / internal `vscode-resource:` / `devtools://` URLs.
+ * Vite dev origin. Used to distinguish a third-party page (which an
+ * embedded webview is meant to load) from the host app's own renderer
+ * / dev assets / internal `vscode-resource:` / `devtools://` URLs.
  */
 function isExternalHttpUrl(rawUrl: string): boolean {
 	let parsed: URL

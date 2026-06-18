@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
-import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, IconView, TabSwitcherOverlay, navigationService, useFeature, MiniBrowserPanel, ConsolePanel, SettingsPage, McpLogsPanel, Tabs, MarkdownEditor, type Tab, type ContextMenuItem, type McpLogsLabels } from 'electron-core-ui/renderer'
+import { EditorWorkbench, findGroup, isTabGroupNode, isContainerNode, logger, IconView, TabSwitcherOverlay, navigationService, useFeature, MiniBrowserPanel, ConsolePanel, SettingsPage, McpLogsPanel, Tabs, MarkdownEditor, FirewallPanel, type Tab, type ContextMenuItem, type McpLogsLabels } from 'electron-core-ui/renderer'
 import { miniBrowserDriver } from '../../../services/miniBrowserDriver'
 import type { EditorWorkbenchCallbacks, WorkbenchTree, EditorTab, EditorWorkbenchHandle, RebuildTabCallback, TabSwitcherItem } from 'electron-core-ui/renderer'
 import type { Icon } from 'electron-core-ui/types'
@@ -21,7 +21,7 @@ import {
   isSettingsTab,
   isMcpLogsTab
 } from '../../../../../shared/types/editor'
-import { FirewallPanel } from '../../Firewall'
+import { FIREWALL_TEST_BUTTON_FEATURE } from '../../../../../main/featureFlags'
 import {
   HTTPRequestTabView,
   GraphQLRequestTabView,
@@ -1233,7 +1233,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
     // Mounts the `<FirewallPanel />` (mode picker + allowlist editor).
     // No breadcrumbs for the same reason as Console.
     if (isFirewallTab(effectiveTab)) {
-      return <FirewallPanel />
+      return <FirewallPanel appName="Restorm" testButtonFeature={FIREWALL_TEST_BUTTON_FEATURE} />
     }
 
     // Mini browser tab — singleton, identified by `tabType: 'mini-browser'`.

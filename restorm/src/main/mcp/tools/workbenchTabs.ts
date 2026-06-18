@@ -11,9 +11,8 @@
 
 import { z } from 'zod'
 import { BrowserWindow } from 'electron'
-import { McpService } from 'electron-core-ui'
-import { permissionService } from '../../services/firewall/PermissionService'
-import type { FirewallOrigin } from '../../../shared/types/firewall'
+import { McpService, permissionService } from 'electron-core-ui'
+import type { FirewallOrigin } from 'electron-core-ui'
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
   return { content: [{ type: 'text', text: JSON.stringify(value, null, 2) }] }

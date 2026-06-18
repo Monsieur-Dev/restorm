@@ -13,21 +13,54 @@ import './cli/earlyQuiet'
 // captured too.
 //
 // `installHardenInterceptor` (the deeper net.Socket / dns / dgram
-// patches + the lockdown) is implemented in
-// `./services/firewall/HardenInterceptor.ts` but NOT wired here:
-// undici's path through `net.Socket.prototype.connect` interacts
-// poorly with the wrap (Duplex internals expect `this` to carry a
-// pre-initialised timer symbol that the patch reaches before the
-// Socket constructor finishes). Re-enable once the connect-args
+// patches + the lockdown) lives in electron-core-ui's firewall but is
+// NOT wired here: undici's path through `net.Socket.prototype.connect`
+// interacts poorly with the wrap (Duplex internals expect `this` to
+// carry a pre-initialised timer symbol that the patch reaches before
+// the Socket constructor finishes). Re-enable once the connect-args
 // shape is fully decoded for every undici signature variant — see
 // the `[harden]` follow-up ticket.
-import { installMainProcessInterceptor } from './services/firewall'
+//
+// `configureFirewall` injects restorm's app-specific decisions into
+// the generic engine BEFORE the interceptor arms: the internal-bridge
+// endpoint to skip from the audit feed (the in-process GraphQL
+// bridge), the worker-bootstrap temp-file prefix, the e2e bypass
+// (set by the Playwright fixture via `RESTORM_USER_DATA_OVERRIDE` so
+// tests against ephemeral mock servers don't deadlock on a toast), and
+// the internal-request predicate that exempts cross-instance MCP-bridge
+// traffic (a `tools/call` forwarded to a peer `--mcp` instance over
+// loopback, tagged with `MCP_FORWARDED_HEADER`) — never user-facing
+// API traffic, so it must skip the firewall or `__session` routing
+// breaks and the bridging instance piles up "blocked" prompts.
+import { installMainProcessInterceptor, configureFirewall, MCP_FORWARDED_HEADER } from 'electron-core-ui'
+import { graphQLService as firewallGraphQLService } from 'electron-core-ui/main'
+configureFirewall({
+  internalEndpointProvider: () => firewallGraphQLService.getEndpoint(),
+  workerBootstrapPrefix: 'restorm-firewall-bootstrap',
+  e2eBypass: ((): boolean => {
+    const v = process.env['RESTORM_USER_DATA_OVERRIDE']
+    return typeof v === 'string' && v.length > 0
+  })(),
+  // The header key match is case-insensitive — Node lowercases outgoing
+  // header names, but be defensive against a caller that set it raw.
+  internalRequestPredicate: (args: unknown[]): boolean => {
+    for (const arg of args) {
+      if (typeof arg !== 'object' || arg === null || arg instanceof URL || typeof arg === 'function') continue
+      const headers = (arg as { headers?: Record<string, unknown> | null }).headers
+      if (headers === undefined || headers === null) continue
+      for (const key of Object.keys(headers)) {
+        if (key.toLowerCase() === MCP_FORWARDED_HEADER) return true
+      }
+    }
+    return false
+  }
+})
 installMainProcessInterceptor()
 
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { randomBytes } from 'node:crypto'
 import { MainWindow } from './windows/MainWindow'
-import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, getStorageService, initAutoSaveController, McpService, resolveMcpDiscoveryDir, writeMcpDiscoveryFile, cleanupMcpDiscoveryFile } from 'electron-core-ui'
+import { initializeApp, logger, initFileService, getFileService, isFileServiceInitialized, i18nService, initPersistenceService, isPersistenceServiceInitialized, FileService, getSettingsService, isSettingsServiceInitialized, getStorageService, initAutoSaveController, McpService, resolveMcpDiscoveryDir, writeMcpDiscoveryFile, cleanupMcpDiscoveryFile, firewallService, permissionService, registerFirewallIpc, installWorkerPatcher } from 'electron-core-ui'
 import { REOPEN_LAST_FILE_SETTING_KEY, REOPEN_LAST_FILE_STORAGE_KEY } from '../shared/config/reopenLastFile'
 // Restorm-specific renderer translations (notably the `behavior.*`
 // keys referenced by `restorm/resources/settings.yaml`). The main
@@ -42,7 +75,6 @@ import type { PersistenceFormat } from 'electron-core-ui'
 import { dirname, join } from 'path'
 import { existsSync, statSync } from 'fs'
 import { searchIndexService, contextService, responseHistoryService, requestUsageService, scenarioUsageService, authenticationCacheService } from './services'
-import { firewallService, permissionService, registerFirewallIpc, installWorkerPatcher } from './services/firewall'
 import { registerRestormMcp } from './mcp'
 import { registerActiveStateBridge } from './mcp/tools/activeState'
 import { RESTORM_MCP_INSTRUCTIONS } from './mcp/instructions'

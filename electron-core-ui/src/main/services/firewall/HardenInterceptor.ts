@@ -4,10 +4,10 @@ import net, { type Socket as NetSocket } from 'node:net'
 import dns, { type LookupAddress, type LookupOptions } from 'node:dns'
 import dgram, { type Socket as DgramSocket, type RemoteInfo } from 'node:dgram'
 import { randomUUID } from 'node:crypto'
-import { logger } from 'electron-core-ui'
+import { logger } from '../LoggerService'
 import { firewallService } from './FirewallService'
 import { permissionService } from './PermissionService'
-import type { RequestRecord } from '../../../shared/types/firewall'
+import type { RequestRecord } from '../../../types/firewall'
 
 /**
  * Harden Layer B beyond the http / https / fetch chokepoints.

@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { mkdtempSync } from 'node:fs'
 
 vi.mock('electron', () => {
-	const path = mkdtempSync(join(tmpdir(), 'restorm-fw-test-'))
+	const path = mkdtempSync(join(tmpdir(), 'ecui-fw-test-'))
 	return {
 		app: {
 			getPath: (): string => path
@@ -15,7 +15,7 @@ vi.mock('electron', () => {
 	}
 })
 
-vi.mock('electron-core-ui', () => ({
+vi.mock('../LoggerService', () => ({
 	logger: { warn: vi.fn(), info: vi.fn(), debug: vi.fn(), error: vi.fn() }
 }))
 

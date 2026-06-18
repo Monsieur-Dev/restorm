@@ -2,14 +2,15 @@ import { app, BrowserWindow } from 'electron'
 import { randomUUID } from 'node:crypto'
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
-import { logger } from 'electron-core-ui'
-import { FIREWALL_IPC, type FirewallOrigin, type FirewallPromptPayload } from '../../../shared/types/firewall'
+import { logger } from '../LoggerService'
+import { FIREWALL_IPC, type FirewallOrigin, type FirewallPromptPayload } from '../../../types/firewall'
+import { isFirewallE2EBypass } from './firewallConfig'
 
 /**
  * Verdict the `PermissionService` returns. Strict / log-only / lockdown
  * are gone — there is one comportement, always-on prompting:
  *   - Origin is in the whitelist OR matches a project-derived origin
- *     OR is one of restorm's own infrastructure localhost ports →
+ *     OR is one of the host app's own infrastructure localhost ports →
  *     `allow` immediately.
  *   - Origin is in the blacklist → `deny` immediately, no prompt.
  *   - Otherwise → broadcast a toast prompt to the renderer; the
@@ -51,17 +52,18 @@ export interface CheckInput {
 }
 
 /**
- * Restorm's own infrastructure ports on localhost. The renderer ↔
- * main GraphQL bridge, the Vite dev server in dev, and the MCP
- * server when launched with `--mcp` all live on `localhost:<port>`
- * with ports picked at boot time. Any traffic targeting these
- * gets auto-allowed regardless of the whitelist — they're internal
- * plumbing the user can't disable. A malicious package on
- * `localhost:1234` does NOT benefit from this exemption: the
- * scope is restricted to the exact ports `RestormInfraPorts`
- * holds at decision time.
+ * The host app's own infrastructure ports on localhost. Typical
+ * occupants are an in-process renderer ↔ main bridge (GraphQL), a
+ * dev server (Vite) in development, and an embedded MCP server — all
+ * bound to `localhost:<port>` with ports picked at boot time. Any
+ * traffic targeting these gets auto-allowed regardless of the
+ * whitelist: they're internal plumbing the user can't disable. A
+ * malicious package on `localhost:1234` does NOT benefit from this
+ * exemption — the scope is restricted to the exact ports
+ * `InfraPorts` holds at decision time. Slots the consuming app
+ * doesn't use stay `null` (auto-allow disabled).
  */
-export interface RestormInfraPorts {
+export interface InfraPorts {
 	graphqlPort: number | null
 	mcpPort: number | null
 	viteDevPort: number | null
@@ -141,22 +143,6 @@ function isValidHostPattern(host: string): boolean {
 	return true
 }
 
-/**
- * E2E test bypass — when restorm boots under Playwright with an
- * isolated user-data dir, the fixture sets `RESTORM_USER_DATA_OVERRIDE`
- * (see `tests/e2e/bdd/fixtures/*.fixture.ts`). Tests start mock
- * HTTP servers on ephemeral localhost ports that cannot be in any
- * whitelist (the port is allocated AFTER the user-data dir is set),
- * so without the bypass every test that imports a swagger from a
- * mock server would deadlock waiting on a toast that nobody can
- * click in headless mode. The bypass is observed once at module
- * load — flipping the env var at runtime won't re-arm the firewall.
- */
-const E2E_BYPASS = ((): boolean => {
-	const v = process.env['RESTORM_USER_DATA_OVERRIDE']
-	return typeof v === 'string' && v.length > 0
-})()
-
 class PermissionService {
 	private readonly whitelist: FirewallOrigin[] = []
 	private readonly blacklist: FirewallOrigin[] = []
@@ -171,12 +157,12 @@ class PermissionService {
 	private projectOrigins: FirewallOrigin[] = []
 
 	/**
-	 * Restorm's own infrastructure ports. Populated on app boot
-	 * (graphql, vite-dev) and after MCP server start (mcp). The
-	 * three are read at every check; if any becomes `null` the
-	 * matching auto-allow is disabled.
+	 * The host app's own infrastructure ports. Populated by the
+	 * consuming app on boot (graphql, vite-dev) and after any embedded
+	 * MCP server starts (mcp). The three are read at every check; if
+	 * any becomes `null` the matching auto-allow is disabled.
 	 */
-	private infraPorts: RestormInfraPorts = { graphqlPort: null, mcpPort: null, viteDevPort: null }
+	private infraPorts: InfraPorts = { graphqlPort: null, mcpPort: null, viteDevPort: null }
 
 	/**
 	 * Pending toast prompts keyed by promptId. The renderer
@@ -373,24 +359,24 @@ class PermissionService {
 	}
 
 	/**
-	 * Update the restorm-internal port set. Called once per port at
-	 * app boot (graphql, vite-dev) and once when the MCP server
-	 * starts (mcp). Setting any field to `null` disables the
+	 * Update the host app's internal port set. Called once per port at
+	 * app boot (graphql, vite-dev) and once when any embedded MCP
+	 * server starts (mcp). Setting any field to `null` disables the
 	 * corresponding auto-allow.
 	 */
-	setInfraPorts(patch: Partial<RestormInfraPorts>): void {
+	setInfraPorts(patch: Partial<InfraPorts>): void {
 		this.infraPorts = { ...this.infraPorts, ...patch }
 	}
 
-	getInfraPorts(): RestormInfraPorts {
+	getInfraPorts(): InfraPorts {
 		return { ...this.infraPorts }
 	}
 
 	/**
 	 * True if the origin is `localhost:<port>` and `<port>` matches
-	 * one of restorm's known infrastructure ports. Localhost on any
-	 * other port is NOT auto-allowed — this is the explicit narrow
-	 * exception the user asked for.
+	 * one of the host app's known infrastructure ports. Localhost on
+	 * any other port is NOT auto-allowed — this is a deliberately
+	 * narrow exception for the app's own plumbing.
 	 */
 	private isInfraOrigin(origin: FirewallOrigin): boolean {
 		if (!LOCALHOST_HOSTS.has(origin.host)) return false
@@ -407,7 +393,7 @@ class PermissionService {
 	 * resolves.
 	 */
 	classify(input: CheckInput): Classification {
-		if (E2E_BYPASS) return 'allow'
+		if (isFirewallE2EBypass()) return 'allow'
 		this.loadIfNeeded()
 		const origin: FirewallOrigin = {
 			scheme: input.scheme.toLowerCase(),

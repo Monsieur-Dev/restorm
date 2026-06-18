@@ -82,6 +82,11 @@ export type { ThumbnailProps, ThumbnailMedia, ThumbnailMediaKind, ThumbnailLabel
 export { ChatBubble } from './ChatBubble'
 export type { ChatBubbleProps, ChatBubbleVariant } from './ChatBubble'
 
+// Firewall exports — generic outbound-network gating UI (admin panel
+// + permission-prompt toasts). See docs/Firewall/README.md.
+export { FirewallPanel, useFirewallControl, refreshFirewallControl, useFirewallPromptToasts, FirewallPromptBody } from './Firewall'
+export type { FirewallPanelProps } from './Firewall'
+
 // Settings exports
 export { SettingsPage, SettingsModalProvider, useSettingsModal } from './Settings'
 

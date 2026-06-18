@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react'
-import { toasterService } from 'electron-core-ui/renderer'
-import type { FirewallPromptPayload } from '../../../shared/types/firewall'
+import { toasterService } from '../Toaster/ToasterService'
+import type { FirewallPromptPayload } from '../../../types/firewall'
 import { FirewallPromptBody } from './FirewallPromptBody'
-import { refreshFirewallControl } from '../components/Firewall'
+import { refreshFirewallControl } from './useFirewallControl'
 
 /**
  * Subscribe to `firewall:prompt-show` and surface each pending
