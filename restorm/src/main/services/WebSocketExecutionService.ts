@@ -23,6 +23,36 @@ import { secretHydrationService } from './secrets/SecretHydrationService'
 import { collectRequestSecrets } from './secrets/collectRequestSecrets'
 import { DEFAULT_WS_TIMEOUT_MS } from '../../shared/config/constants'
 
+/**
+ * Lifetime cap on mqtt.js auto-reconnect attempts for a streaming MQTT
+ * connection. mqtt.js retries forever on `reconnectPeriod`, so a flapping
+ * / never-bindable broker would otherwise keep the client + the
+ * activeConnections entry alive indefinitely (the connect timer was
+ * cleared on the first successful connect and is never re-armed). After
+ * this many reconnect attempts we end the client and settle with an
+ * error instead of leaking.
+ */
+const MQTT_MAX_RECONNECT_ATTEMPTS = 10
+
+/**
+ * Reconnect budget for a streaming MQTT connection. `onReconnect()`
+ * counts an attempt and returns `true` once the cap is exceeded (the
+ * caller should then end the client + settle with an error).
+ * `onConnect()` resets the budget so a long-lived stream that drops once
+ * isn't penalised by an earlier flap. Extracted as a pure unit so the
+ * cap boundary is testable without standing up the whole service.
+ */
+export function makeReconnectBudget(max: number): { onReconnect: () => boolean; onConnect: () => void } {
+  let attempts = 0
+  return {
+    onReconnect: () => {
+      attempts += 1
+      return attempts > max
+    },
+    onConnect: () => { attempts = 0 }
+  }
+}
+
 /** WebSocket request execution input */
 export interface WebSocketExecutionInput {
   requestId: string
@@ -1303,8 +1333,27 @@ class WebSocketExecutionService {
           }
         }, resolved.timeout)
 
+        // Cap auto-reconnects: a flapping / never-bindable broker would
+        // otherwise have mqtt.js retry forever (the connect timer is
+        // cleared on the first connect and never re-armed), leaking the
+        // client + the activeConnections entry and never settling the
+        // one-shot. After the cap, end the client and settle with an error.
+        const reconnectBudget = makeReconnectBudget(MQTT_MAX_RECONNECT_ATTEMPTS)
+        client.on('reconnect', () => {
+          if (reconnectBudget.onReconnect()) {
+            clearTimeout(connectTimer)
+            this.activeConnections.delete(requestId)
+            this.broadcastProgress(requestId, 'error')
+            try { client.end(true) } catch { /* already ended */ }
+            fireClose(`MQTT reconnect limit reached (${MQTT_MAX_RECONNECT_ATTEMPTS} attempts)`)
+          }
+        })
+
         client.on('connect', () => {
           ctl.connected = true
+          // A successful (re)connect resets the reconnect budget so a
+          // long-lived stream that drops once isn't penalised later.
+          reconnectBudget.onConnect()
           clearTimeout(connectTimer)
           logger.info('[WebSocketExecutionService] Connected (mqtt, streaming)', { requestId })
           if (cfg.subscribe && topic) {
