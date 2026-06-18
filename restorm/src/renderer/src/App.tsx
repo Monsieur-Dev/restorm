@@ -2331,7 +2331,7 @@ const App: React.FC = () => {
         return null
       }
 
-      for (const rootFolder of rootItems) {
+      for (const rootFolder of rootItemsRef.current) {
         if (rootFolder.id === parentFolderId) {
           scheduleChecksumUpdate(parentFolderId, () => computeChecksum(JSON.parse(JSON.stringify(rootFolder)) as EnvironmentFolder | Folder | Request))
           return
@@ -2383,7 +2383,7 @@ const App: React.FC = () => {
       let parentId = payload.parentFolderId
       if (payload.type === 'environment' && payload.parentEnvironmentId !== undefined) {
         const topEnv = payload.parentFolderId !== undefined
-          ? findTopLevelEnvironment(rootItems, payload.parentFolderId, payload.id)
+          ? findTopLevelEnvironment(rootItemsRef.current, payload.parentFolderId, payload.id)
           : null
         if (!topEnv || topEnv.id === payload.id) {
           logger.warn('[App] upsertSaveUnit: sub-env owner not resolved, skipping', { id: payload.id })
@@ -2447,7 +2447,7 @@ const App: React.FC = () => {
         payload.parentEnvironmentId !== undefined &&
         payload.parentFolderId !== undefined
       ) {
-        const topEnv = findTopLevelEnvironment(rootItems, payload.parentFolderId, payload.parentEnvironmentId)
+        const topEnv = findTopLevelEnvironment(rootItemsRef.current, payload.parentFolderId, payload.parentEnvironmentId)
         if (topEnv) {
           doUpsert({ id: topEnv.id, type: 'environment', document: topEnv, parentFolderId: payload.parentFolderId })
           return
@@ -2515,7 +2515,12 @@ const App: React.FC = () => {
       }
       upsertTimers.clear()
     }
-  }, [updateTabDirtyChecksum, rootItems, environmentFolderCollections, filePath, projectUuid])
+    // `rootItems` is intentionally NOT a dep: the handlers read the live
+    // tree via `rootItemsRef.current`, so this 15-subscription effect
+    // mounts ONCE per file/project instead of tearing down + re-subscribing
+    // on every tree keystroke (audit #92). `environmentFolderCollections`
+    // isn't read in the effect body at all, so it's dropped too.
+  }, [updateTabDirtyChecksum, filePath, projectUuid])
 
   // Dirty state is now handled by FileService in the main process
   // It subscribes to DocumentEvents and compares checksums automatically
