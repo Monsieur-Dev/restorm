@@ -3,16 +3,36 @@
  * `MosaicCard`; only the surrounding wrapper + the per-card body
  * content classes stay here. */
 
+/* Fills the workbench's empty slot. The scroll is delegated to the inner
+ * ECUI ScrollableElement (themed scrollbar), so this wrapper never scrolls
+ * itself — no native OS scrollbar. */
 .empty-bench-container {
 	display: flex;
 	flex-direction: column;
 	flex: 1;
 	min-height: 0;
+	background-color: var(--editor-background);
+}
+
+/* The actual content laid out inside the ScrollableElement. Holds the page
+ * padding + centering so the themed scrollbar sits flush at the panel edge
+ * (not inside the padding).
+ *
+ * `min-height: 100%` makes this fill the full panel height even when the
+ * content is shorter than the viewport (otherwise it would collapse to its
+ * natural height and leave dead space below). With `box-sizing: border-box`
+ * the padding stays inside that 100%. `justify-content: center` then balances
+ * short content vertically; when the content is taller than the viewport the
+ * box grows past 100% and scrolls from the top with nothing clipped. */
+.empty-bench-scroll-inner {
+	display: flex;
+	flex-direction: column;
 	align-items: center;
+	justify-content: center;
 	gap: 24px;
 	padding: 32px 24px;
-	overflow-y: auto;
-	background-color: var(--editor-background);
+	min-height: 100%;
+	box-sizing: border-box;
 }
 
 .empty-bench-logo {
