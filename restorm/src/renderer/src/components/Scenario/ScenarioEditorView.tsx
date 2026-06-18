@@ -119,7 +119,8 @@ const STREAM_CONNECT_FOR_CHILD: Partial<Record<AddChildKind, ScenarioNodeKind>> 
   'websocket-server': 'websocketConnect',
   socketio: 'socketioConnect',
   'socketio-server': 'socketioConnect',
-  mqtt: 'mqttConnect'
+  mqtt: 'mqttConnect',
+  'mqtt-server': 'mqttConnect'
 }
 
 const nodeTypes = { scenarioNode: ScenarioNodeView }
@@ -2370,8 +2371,9 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
     // semantic badge (SCENARIO icon / HTTP method) so the inspector shows the
     // exact same identity the user sees on the box header.
     let title = t(meta.labelKey, meta.defaultLabel)
-    // A Socket.IO connect bound to a SERVER request reads "starts a server",
-    // not "opens a connection" — pick a role-specific help key for it.
+    // A Socket.IO / WebSocket / MQTT connect bound to a SERVER request reads
+    // "starts a server / broker", not "opens a connection" — pick a
+    // role-specific help key for it.
     let helpKey: string | undefined
     let titleBadge: React.ReactNode = <i className={`codicon codicon-${meta.icon}`} aria-hidden="true" />
     if (n.data.kind === 'runScenario') {
@@ -2387,7 +2389,7 @@ const ScenarioEditorCanvas: React.FC<ScenarioEditorViewProps> = ({ scenario, tab
       if (boundItem && isRequest(boundItem)) {
         title = boundItem.name
         titleBadge = <Badge type={requestBadgeType(boundItem)} mode={requestBadgeMode(boundItem)} />
-        if ((n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect') && requestBadgeMode(boundItem) === 'server') {
+        if ((n.data.kind === 'socketioConnect' || n.data.kind === 'websocketConnect' || n.data.kind === 'mqttConnect') && requestBadgeMode(boundItem) === 'server') {
           helpKey = `${n.data.kind}Server`
         }
       }

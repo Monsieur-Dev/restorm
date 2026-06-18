@@ -1,16 +1,24 @@
-Feature: MQTT execution end-to-end (Docker Mosquitto broker)
-  restorm connects to the Mosquitto broker the test stack hosts on
-  `localhost:1883` (`tests/docker`). On connect the request subscribes to its
-  topic `restorm/e2e/chat`; the Send button publishes the configured payload to
-  that same topic, which round-trips straight back through the subscription —
-  so a single request both sends and receives. Boots restorm with `--mcp`, opens
-  the sample, connects the MQTT Chat request (assert Connect toggles to the
-  connected state + enables Send), publishes, asserts the payload shows as both a
-  sent bubble AND a received bubble, then disconnects.
+Feature: MQTT execution end-to-end (self-hosted broker)
+  restorm HOSTS a local MQTT broker AND connects to it as a client — no external
+  Mosquitto. Boots restorm with `--mcp`, opens the sample, starts the MQTT Broker
+  (assert Start listening toggles to the listening state + enables Send), opens
+  the MQTT Chat client and connects it (which subscribes to `restorm/e2e/chat`),
+  publishes from the client (asserting the payload shows as a sent bubble that
+  gains a delivery check — its own publish round-trips back through its
+  subscription and folds into a delivery confirmation on the sent bubble, not a
+  duplicate inbound bubble), then broadcasts from the broker's Send button and
+  asserts the client receives it as an inbound bubble, and finally disconnects
+  the client.
 
-  Scenario: Connect to the broker, publish, receive the round-trip, then disconnect
+  Scenario: Host a broker, connect a client, publish, receive the round-trip, broadcast, then disconnect
     Given I launch restorm with the MCP server enabled
     And I open the MQTT sample via MCP
+
+    When I open the "MQTT Broker" request tab via MCP
+    Then the Send button is disabled
+    When I click the Connect button
+    Then the Connect button shows the connected state
+    And the Send button is enabled
 
     When I open the "MQTT Chat" request tab via MCP
     Then the Send button is disabled
@@ -20,7 +28,13 @@ Feature: MQTT execution end-to-end (Docker Mosquitto broker)
 
     When I click the Send button
     Then the chat shows a sent message matching "from mqtt"
-    And the chat shows a received message matching "from mqtt"
+    And that sent message shows a delivery check
+
+    When I open the "MQTT Broker" request tab via MCP
+    Then the server shows 1 connected client
+    When I click the Send button
+    When I open the "MQTT Chat" request tab via MCP
+    Then the chat shows a received message matching "from broker"
 
     When I click the Disconnect button
     Then the Connect button shows the disconnected state

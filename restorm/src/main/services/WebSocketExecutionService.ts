@@ -7,11 +7,14 @@
  * active-connection registry.
  */
 
-import WebSocket, { WebSocketServer } from 'ws'
+import WebSocket, { WebSocketServer, createWebSocketStream } from 'ws'
 import mqtt, { type MqttClient, type IClientOptions } from 'mqtt'
 import { io, type Socket } from 'socket.io-client'
 import { Server as SocketIOServer, type Socket as ServerSocket } from 'socket.io'
 import { createServer, type Server as HttpServer } from 'node:http'
+import { createServer as createTcpServer, type Server as TcpServer } from 'node:net'
+import { Aedes } from 'aedes'
+import type { AedesPublishPacket } from 'aedes'
 import { BrowserWindow } from 'electron'
 import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
@@ -53,11 +56,13 @@ export interface WebSocketExecutionResult {
  * per-port server (see {@link PortServer}). */
 interface ActiveConnection {
   requestId: string
-  kind: 'websocket' | 'socketio' | 'socketio-server' | 'websocket-server' | 'mqtt'
+  kind: 'websocket' | 'socketio' | 'socketio-server' | 'websocket-server' | 'mqtt' | 'mqtt-server'
   ws?: WebSocket
   socket?: Socket
   /** MQTT client (kind 'mqtt'). */
   mqttClient?: MqttClient
+  /** Hosted aedes broker instance (kind 'mqtt-server'). */
+  mqttBroker?: Aedes
   /** Default publish topic + QoS/retain for this MQTT request's Send button. */
   mqttTopic?: string
   mqttQos?: 0 | 1 | 2
@@ -98,6 +103,22 @@ interface PortHost {
   sioRoutes: Set<string>
   /** Live raw-WS routes (URL path → its sockets + connection handler). */
   wsRoutes: Map<string, WsRoute>
+  /** When this port also hosts an MQTT broker over WebSocket, the ws path that
+   * bridges incoming upgrades into the broker (`aedes.handle(stream)`). At most
+   * one MQTT-over-WS bridge per port (one broker per port). */
+  mqttWsPath?: string
+  /** The aedes broker behind {@link mqttWsPath} (set together). */
+  mqttWsBroker?: Aedes
+}
+
+/** One hosted MQTT broker bound to a port: an aedes engine plus its raw-TCP
+ * listener (`mqtt://`). MQTT-over-WebSocket (`ws://`) bridges the shared
+ * {@link PortHost} on the same port instead (see {@link PortHost.mqttWsPath}).
+ * One broker per port — the engine is shared by both transports. */
+interface MqttBroker {
+  aedes: Aedes
+  /** Raw-TCP listener for `mqtt://` clients; absent for a ws-only broker. */
+  tcpServer?: TcpServer
 }
 
 /** Resolved inputs shared by both transport paths. */
@@ -141,6 +162,50 @@ function stringifyPayload(value: unknown): string {
   }
 }
 
+/** The URL path an MQTT-over-WebSocket broker listens on. A broker URL carries
+ * a topic (not a path), so the bridge accepts any path the client connects to:
+ * mqtt.js' ws transport defaults to `/mqtt`, mosquitto to `/`. We register the
+ * single path the URL spells out, defaulting to `/mqtt`. */
+function topicFilterToWsPath(resolvedUrl: string): string {
+  const stripped = resolvedUrl.replace(/^[a-z]+:\/\//i, '')
+  const slash = stripped.indexOf('/')
+  if (slash < 0) return '/mqtt'
+  const q = stripped.indexOf('?', slash)
+  const path = q >= 0 ? stripped.slice(slash, q) : stripped.slice(slash)
+  return path.length > 1 ? path : '/mqtt'
+}
+
+/** Turn an MQTT connect failure into an actionable message. mqtt.js surfaces a
+ * bare socket error whose `.message` is often empty (e.g. a refused TCP connect
+ * carries `code: 'ECONNREFUSED'` but no message), which would otherwise render
+ * as just "error" in the Response panel. Map the common Node socket codes to a
+ * human sentence naming the broker, and fall back to the raw message / code. */
+export function describeMqttConnectError(err: unknown, brokerUrl: string): string {
+  const e = err as { message?: string; code?: string; errno?: number } | undefined
+  const code = typeof e?.code === 'string' ? e.code : undefined
+  const at = brokerUrl ? ` at ${brokerUrl}` : ''
+  switch (code) {
+    case 'ECONNREFUSED':
+      return `Connection refused — no MQTT broker is listening${at}.`
+    case 'ENOTFOUND':
+    case 'EAI_AGAIN':
+      return `Host not found — the MQTT broker address${at} could not be resolved.`
+    case 'ETIMEDOUT':
+      return `Connection timed out — the MQTT broker${at} did not respond.`
+    case 'ECONNRESET':
+      return `Connection reset — the MQTT broker${at} closed the connection.`
+    case 'EHOSTUNREACH':
+    case 'ENETUNREACH':
+      return `Network unreachable — cannot reach the MQTT broker${at}.`
+    default:
+      break
+  }
+  const msg = typeof e?.message === 'string' ? e.message.trim() : ''
+  if (msg.length > 0) return msg
+  if (code) return `MQTT connection failed (${code})${at}.`
+  return `MQTT connection failed${at}.`
+}
+
 /** Parse a user-typed message into a JSON value, falling back to the raw string. */
 function parsePayload(raw: string): unknown {
   const trimmed = raw.trim()
@@ -163,6 +228,10 @@ class WebSocketExecutionService {
   /** In-flight host creations, so concurrent route starts on the same port
    * share ONE bind attempt instead of racing into EADDRINUSE. */
   private pendingPortHosts = new Map<number, Promise<PortHost>>()
+  /** One hosted MQTT broker per port (server mode). The raw-TCP listener
+   * (`mqtt://`) lives here; the `ws://` transport bridges the shared port host
+   * (`portHosts`) on the same port — see {@link listenMqttBroker}. */
+  private mqttBrokers = new Map<number, MqttBroker>()
 
   /**
    * Resolve the request, hydrate secrets, then dispatch to the transport
@@ -191,6 +260,10 @@ class WebSocketExecutionService {
     this.broadcastProgress(requestId, 'started')
 
     if (resolved.server) {
+      if (resolved.protocol === 'mqtt') {
+        logger.info('[WebSocketExecutionService] Listening (mqtt broker)', { requestId, url: resolved.resolvedUrl })
+        return this.listenMqttBroker(resolved)
+      }
       if (resolved.protocol === 'socketio') {
         logger.info('[WebSocketExecutionService] Listening (socket.io server)', { requestId, url: resolved.resolvedUrl })
         return this.listenSocketIOServer(resolved)
@@ -374,6 +447,280 @@ class WebSocketExecutionService {
     return route
   }
 
+  /**
+   * SERVER MODE (MQTT): host a local MQTT broker (aedes) on `localhost:<port>`
+   * and stay listening until `disconnect`. The URL scheme picks the transport:
+   * `mqtt://` opens a dedicated per-port raw-TCP listener; `ws://` bridges the
+   * shared http port host (MQTT-over-WebSocket), coexisting with WS / Socket.IO
+   * on that port. One broker per port. The broker internally subscribes to the
+   * request's topic-filter (the "route", default `#`) so every published frame
+   * surfaces in the response chat (topic carried on `event`); `send()` publishes
+   * the GUI payload to that topic. Mirrors {@link listenRawWebSocketServer}
+   * (same active-connection registry, broadcasts, history), but restorm is the
+   * broker. aedes handles wildcards (`+`/`#`), retained messages, QoS 0/1/2 and
+   * Last-Will publication natively.
+   */
+  private listenMqttBroker(resolved: ResolvedExecution): Promise<WebSocketExecutionResult> {
+    const { requestId, startTime, startedAt } = resolved
+
+    return new Promise((resolve) => {
+      const messages: WebSocketMessage[] = []
+      let listening = false
+      let settled = false
+      const finish = (success: boolean, error?: string): void => {
+        if (settled) return
+        settled = true
+        this.releaseMqttBroker(requestId)
+        this.activeConnections.delete(requestId)
+        this.broadcastProgress(requestId, error ? 'error' : 'completed')
+        const result: WebSocketExecutionResult = {
+          requestId,
+          success,
+          connected: listening,
+          messages,
+          ...(error ? { error } : {}),
+          requestUrl: resolved.resolvedUrl,
+          timings: { startedAt, durationMs: Date.now() - startTime }
+        }
+        this.persistHistory(requestId, result)
+        resolve(result)
+      }
+
+      void (async () => {
+        const r = await this.bringUpMqttBroker(resolved, messages, finish)
+        if (r.ok) { listening = true }
+        else { finish(false, r.error) }
+      })()
+    })
+  }
+
+  /**
+   * Bring up an aedes broker for `resolved` (a `server: true` MQTT request) and
+   * register it as the request's active `mqtt-server` connection. Shared by the
+   * one-shot request-panel path ({@link listenMqttBroker}) and the streaming
+   * scenario-engine path ({@link connectStreamingMqttServer}): one broker per
+   * port, the broker self-subscribes to the request's topic-filter so published
+   * frames surface as `received` messages, and `serverSettle` is the caller's
+   * teardown (release broker + resolve / fireClose). Resolves `{ ok: true }`
+   * once listening, or `{ ok: false, error }` on collision / bind failure.
+   */
+  private async bringUpMqttBroker(
+    resolved: ResolvedExecution,
+    messages: WebSocketMessage[],
+    serverSettle: (success: boolean, error?: string) => void,
+    onReceive?: (topic: string, payload: unknown) => void
+  ): Promise<{ ok: true } | { ok: false; error: string }> {
+    const { requestId, resolvedUrl, event } = resolved
+    const { port, topicFilter, transport } = this.parseMqttBrokerAddress(resolvedUrl, event)
+
+    // One broker per port, regardless of transport: a raw-TCP broker already
+    // bound here, or a ws bridge already on the shared host — either collides.
+    if (this.mqttBrokers.has(port) || this.portHosts.get(port)?.mqttWsBroker) {
+      return { ok: false, error: this.routeBusyMessage('MQTT', port, '/') }
+    }
+
+    // The async factory waits for aedes' internal persistence/mq to be ready;
+    // `new Aedes()` would silently drop clients that connect before then.
+    const broker = await Aedes.createBroker()
+    // Surface every published frame in the chat: subscribe the broker itself
+    // to the topic-filter (default `#` = all topics). aedes routes wildcards.
+    broker.subscribe(topicFilter, (packet: AedesPublishPacket, cb: () => void) => {
+      // Skip aedes' internal `$SYS/...` housekeeping topics — only real
+      // client/GUI traffic belongs in the response chat.
+      if (!packet.topic.startsWith('$SYS/')) {
+        const data = Buffer.isBuffer(packet.payload) ? packet.payload.toString('utf8') : packet.payload
+        const msg: WebSocketMessage = { direction: 'received', data, event: packet.topic, timestamp: new Date().toISOString() }
+        messages.push(msg)
+        this.broadcastMessage(requestId, msg)
+        if (onReceive) {
+          let parsed: unknown
+          try { parsed = JSON.parse(data) } catch { parsed = data }
+          onReceive(packet.topic, parsed)
+        }
+      }
+      cb()
+    }, () => undefined)
+
+    // Live client count: aedes fires `clientReady` once a client's CONNECT is
+    // accepted and `clientDisconnect` when it leaves.
+    let clients = 0
+    broker.on('clientReady', (client) => {
+      clients += 1
+      const m: WebSocketMessage = { direction: 'received', data: `client ${client.id} connected`, event: 'connection', timestamp: new Date().toISOString() }
+      messages.push(m)
+      this.broadcastMessage(requestId, m)
+      this.broadcastServerClients(requestId, clients)
+    })
+    broker.on('clientDisconnect', (client) => {
+      clients = Math.max(0, clients - 1)
+      const m: WebSocketMessage = { direction: 'received', data: `client ${client.id} disconnected`, event: 'disconnect', timestamp: new Date().toISOString() }
+      messages.push(m)
+      this.broadcastMessage(requestId, m)
+      this.broadcastServerClients(requestId, clients)
+    })
+
+    if (transport === 'ws') {
+      // MQTT-over-WebSocket: bridge the shared http host's `upgrade` on a path.
+      let host: PortHost
+      try {
+        host = await this.acquirePortHost(port)
+      } catch (err) {
+        try { broker.close() } catch { /* not started */ }
+        return { ok: false, error: (err as Error).message || `Failed to listen on port ${port}` }
+      }
+      const path = topicFilterToWsPath(resolvedUrl)
+      this.ensureWss(host)
+      host.mqttWsPath = path
+      host.mqttWsBroker = broker
+    } else {
+      // Raw-TCP `mqtt://`: a dedicated per-port listener feeds aedes.
+      const tcpServer = createTcpServer((socket) => { broker.handle(socket) })
+      try {
+        await new Promise<void>((res, rej) => {
+          const onError = (err: Error): void => { rej(err) }
+          tcpServer.once('error', onError)
+          tcpServer.listen(port, '127.0.0.1', () => {
+            tcpServer.removeListener('error', onError)
+            tcpServer.on('error', (e: Error) => { logger.warn('[WebSocketExecutionService] mqtt broker runtime error', { port, error: e.message }) })
+            res()
+          })
+        })
+      } catch (err) {
+        try { broker.close() } catch { /* not started */ }
+        return { ok: false, error: (err as Error).message || `Failed to listen on port ${port}` }
+      }
+      this.mqttBrokers.set(port, { aedes: broker, tcpServer })
+    }
+
+    const connection: ActiveConnection = {
+      requestId, kind: 'mqtt-server', mqttBroker: broker, port, namespace: topicFilter,
+      mqttQos: resolved.mqtt?.qos ?? 0, mqttRetain: resolved.mqtt?.retain ?? false,
+      startTime: resolved.startTime, messages, serverSettle
+    }
+    this.activeConnections.set(requestId, connection)
+    const ready: WebSocketMessage = { direction: 'received', data: `MQTT broker listening on ${transport === 'ws' ? 'ws://' : 'mqtt://'}localhost:${port}`, event: 'listening', timestamp: new Date().toISOString() }
+    messages.push(ready)
+    this.broadcastMessage(requestId, ready)
+    logger.info('[WebSocketExecutionService] MQTT broker listening', { requestId, port, transport, topicFilter })
+    return { ok: true }
+  }
+
+  /**
+   * MQTT broker counterpart of {@link connectStreamingRawServer} for the scenario
+   * engine: HOST a local aedes broker (a `server: true` mqtt request) and stay
+   * listening until the close node / Stop. `onConnect` fires once listening,
+   * `onMessage` re-emits every published frame (topic carried as the event name)
+   * on the connect node's `message` port, `onClose` when the broker stops.
+   * `send(_, payload)` publishes the GUI/scenario payload to the broker's topic.
+   */
+  connectStreamingMqttServer(input: {
+    requestId: string
+    onConnect: () => void
+    onMessage: (event: string | undefined, payload: unknown) => void
+    onClose: (error?: string) => void
+    timeout?: number
+  }): { send: (channel: string, payload: string) => boolean; close: () => void; isOpen: () => boolean } {
+    const { requestId } = input
+    const ctl = { closedByCaller: false, listening: false, startTime: 0, startedAt: '', url: '' }
+    const stopped = (): boolean => ctl.closedByCaller
+    const messages: WebSocketMessage[] = []
+    let fired = false
+    const fireClose = (error?: string): void => {
+      if (fired) return
+      fired = true
+      this.releaseMqttBroker(requestId)
+      this.activeConnections.delete(requestId)
+      this.broadcastProgress(requestId, error ? 'error' : 'completed')
+      if (ctl.startTime > 0) {
+        this.persistHistory(requestId, {
+          requestId,
+          success: ctl.listening && error === undefined,
+          connected: ctl.listening,
+          messages,
+          ...(error !== undefined ? { error } : {}),
+          requestUrl: ctl.url,
+          timings: { startedAt: ctl.startedAt, durationMs: Date.now() - ctl.startTime }
+        })
+      }
+      input.onClose(error)
+    }
+
+    void (async () => {
+      let resolved: ResolvedExecution
+      try {
+        resolved = await this.resolveExecution(requestId, input.timeout ?? DEFAULT_WS_TIMEOUT_MS)
+      } catch (err) {
+        fireClose((err as Error).message)
+        return
+      }
+      if (stopped()) { fireClose(); return }
+      ctl.startTime = resolved.startTime
+      ctl.startedAt = resolved.startedAt
+      ctl.url = resolved.resolvedUrl
+
+      // Re-emit each broker-received frame on the connect node's `message` port
+      // (topic carried as the event name), on top of the chat-surfacing the
+      // shared bring-up already does.
+      const r = await this.bringUpMqttBroker(
+        resolved,
+        messages,
+        (_ok, error) => { fireClose(error) },
+        // MQTT has no named events — a single `message` port, like the client
+        // connect — so the topic is dropped from the port routing (event undefined).
+        (_topic, payload) => { input.onMessage(undefined, payload) }
+      )
+      if (!r.ok) { fireClose(r.error); return }
+      ctl.listening = true
+      this.broadcastProgress(requestId, 'started')
+      input.onConnect()
+    })()
+
+    return {
+      send: (_channel, payload) => this.send(requestId, payload),
+      close: () => { ctl.closedByCaller = true; this.disconnect(requestId) },
+      isOpen: () => this.isActive(requestId)
+    }
+  }
+
+  /** Parse an MQTT broker URL into `{ port, topicFilter, transport }`. The scheme
+   * picks the transport (`ws://` → MQTT-over-WebSocket bridge, anything else →
+   * raw TCP). Host is ignored (broker always binds localhost); a missing port
+   * falls back to the default MQTT port. The broker-side subscribe topic-filter
+   * comes from `event` (the request's topic, e.g. `restorm/demo/#`); empty → `#`
+   * (surface every topic in the chat). */
+  private parseMqttBrokerAddress(resolvedUrl: string, event: string | undefined): { port: number; topicFilter: string; transport: 'tcp' | 'ws' } {
+    const transport: 'tcp' | 'ws' = /^wss?:\/\//i.test(resolvedUrl) ? 'ws' : 'tcp'
+    const stripped = resolvedUrl.replace(/^[a-z]+:\/\//i, '')
+    const slash = stripped.indexOf('/')
+    const hostPort = slash >= 0 ? stripped.slice(0, slash) : stripped
+    const portStr = hostPort.split(':')[1] ?? ''
+    const port = Number.parseInt(portStr, 10)
+    const topicFilter = event && event.length > 0 ? event : '#'
+    return { port: Number.isFinite(port) && port > 0 ? port : 1883, topicFilter, transport }
+  }
+
+  /** Stop hosting an MQTT broker: close the aedes engine + its raw-TCP listener
+   * (or drop its ws bridge from the shared port host) and release the port. Safe
+   * to call for a non-broker / unknown request. */
+  private releaseMqttBroker(requestId: string): void {
+    const conn = this.activeConnections.get(requestId)
+    if (conn?.kind !== 'mqtt-server' || conn.port === undefined) return
+    const port = conn.port
+    const tcp = this.mqttBrokers.get(port)
+    if (tcp) {
+      try { tcp.aedes.close() } catch { /* already closed */ }
+      try { tcp.tcpServer?.close() } catch { /* already closed */ }
+      this.mqttBrokers.delete(port)
+    }
+    const host = this.portHosts.get(port)
+    if (host?.mqttWsBroker && host.mqttWsBroker === conn.mqttBroker) {
+      try { host.mqttWsBroker.close() } catch { /* already closed */ }
+      delete host.mqttWsPath
+      delete host.mqttWsBroker
+      this.closePortHostIfIdle(port)
+    }
+  }
+
   /** Get-or-create the shared http host bound to `port` — no protocol attached
    * yet (SIO / raw-WS attach lazily). Resolves once listening; rejects if the OS
    * port can't be bound (EADDRINUSE etc.). Concurrent first-time acquires share
@@ -423,6 +770,12 @@ class WebSocketExecutionService {
       const route = host.wsRoutes.get(path)
       if (route) {
         wss.handleUpgrade(req, socket, head, (ws) => { route.onConnection(ws) })
+      } else if (host.mqttWsBroker && (path === host.mqttWsPath || host.mqttWsPath === undefined)) {
+        // MQTT-over-WebSocket: wrap the upgraded socket as a duplex stream and
+        // hand it to aedes (which speaks MQTT over the stream).
+        wss.handleUpgrade(req, socket, head, (ws) => {
+          host.mqttWsBroker?.handle(createWebSocketStream(ws), req)
+        })
       } else if (!host.ioServer) {
         socket.destroy()
       }
@@ -433,7 +786,7 @@ class WebSocketExecutionService {
 
   /** Total live routes on a port across every protocol (drives port teardown). */
   private hostRouteCount(host: PortHost): number {
-    return host.sioRoutes.size + host.wsRoutes.size
+    return host.sioRoutes.size + host.wsRoutes.size + (host.mqttWsBroker ? 1 : 0)
   }
 
   /** Extract just the pathname from a request URL (drop the query). */
@@ -598,7 +951,12 @@ class WebSocketExecutionService {
     const message =
       requestContext?.fullData?.message ?? (typeof bodyContent === 'string' ? bodyContent : undefined) ?? '{}'
     const resolvedMessage = contextService.resolveValue(message, requestId)
-    const event = requestContext?.fullData?.event
+    // Resolve handlebars on the event/topic too — for MQTT it is the publish /
+    // subscribe topic (e.g. `restorm/{{env}}/chat`), for Socket.IO the event
+    // name; both are user input and must resolve like the URL / headers / body.
+    // A literal with no `{{}}` round-trips unchanged.
+    const rawEvent = requestContext?.fullData?.event
+    const event = typeof rawEvent === 'string' ? contextService.resolveValue(rawEvent, requestId) : rawEvent
     // The transport lives on `fullData.protocol`; the renderer historically
     // mirrors it onto `fullData.method`, so accept either.
     const protocol = requestContext?.fullData?.protocol ?? requestContext?.fullData?.method
@@ -973,7 +1331,7 @@ class WebSocketExecutionService {
             clearTimeout(connectTimer)
             this.activeConnections.delete(requestId)
             this.broadcastProgress(requestId, 'error')
-            fireClose(err.message)
+            fireClose(describeMqttConnectError(err, resolved.resolvedUrl))
           }
         })
         // 'end' (explicit disconnect / timeout / error) is the terminal signal;
@@ -1452,7 +1810,7 @@ class WebSocketExecutionService {
 
         // Bound the INITIAL connect: if the broker never accepts us within the
         // timeout (down / unreachable), fail rather than retry forever.
-        const connectTimer = setTimeout(() => { if (!connected) finish(false, 'Connection timed out') }, timeout)
+        const connectTimer = setTimeout(() => { if (!connected) finish(false, `Connection timed out — the MQTT broker${resolvedUrl ? ` at ${resolvedUrl}` : ''} did not respond.`) }, timeout)
 
         c.on('connect', () => {
           connected = true
@@ -1477,9 +1835,11 @@ class WebSocketExecutionService {
         c.on('error', (err: Error) => {
           // Auth failure / protocol error: surface it. If it happened before we
           // ever connected, the run can't proceed — fail (which also ends the
-          // client, stopping the retry loop).
-          record(`error: ${err.message}`, 'error')
-          if (!connected) { clearTimeout(connectTimer); finish(false, err.message) }
+          // client, stopping the retry loop). mqtt.js' socket errors often carry
+          // an empty message (just a `code`), so humanize it before surfacing.
+          const detail = describeMqttConnectError(err, resolvedUrl)
+          record(detail, 'error')
+          if (!connected) { clearTimeout(connectTimer); finish(false, detail) }
         })
 
         // 'close' fires on every dropped connection; with reconnect on it is NOT
@@ -1505,11 +1865,11 @@ class WebSocketExecutionService {
     } else if (connection.kind === 'mqtt') {
       // force-end stops mqtt.js's auto-reconnect loop and fires 'end' → finish().
       connection.mqttClient?.end(true)
-    } else if (connection.kind === 'socketio-server' || connection.kind === 'websocket-server') {
-      // Stop listening on this route. `serverSettle` runs releaseServerRoute()
-      // (drops the route + closes the shared port host when it was the last
-      // route, any protocol), resolves the run, broadcasts 'completed' and drops
-      // the connection from the active map.
+    } else if (connection.kind === 'socketio-server' || connection.kind === 'websocket-server' || connection.kind === 'mqtt-server') {
+      // Stop listening on this route. `serverSettle` runs the matching release
+      // (drops the route / closes the broker + frees the port when it was the
+      // last route), resolves the run, broadcasts 'completed' and drops the
+      // connection from the active map.
       connection.serverSettle?.(true)
     } else {
       connection.socket?.close()
@@ -1524,10 +1884,10 @@ class WebSocketExecutionService {
    * it (a leaked server would keep its port bound with no UI to stop it).
    */
   closeAll(): void {
-    const count = this.activeConnections.size + this.portHosts.size
+    const count = this.activeConnections.size + this.portHosts.size + this.mqttBrokers.size
     // Disconnect each tracked connection (a server route's disconnect closes its
-    // shared port host once it was the last route). Snapshot the keys —
-    // disconnect mutates the map.
+    // shared port host / MQTT broker once it was the last route). Snapshot the
+    // keys — disconnect mutates the map.
     for (const requestId of [...this.activeConnections.keys()]) {
       try { this.disconnect(requestId) } catch { /* best-effort teardown */ }
     }
@@ -1538,8 +1898,19 @@ class WebSocketExecutionService {
       if (!host) continue
       host.sioRoutes.clear()
       host.wsRoutes.clear()
+      try { host.mqttWsBroker?.close() } catch { /* already closed */ }
+      delete host.mqttWsBroker
+      delete host.mqttWsPath
       this.tearDownPortHost(host)
       this.portHosts.delete(port)
+    }
+    // Defensive sweep: force-close any raw-TCP MQTT broker still bound.
+    for (const port of [...this.mqttBrokers.keys()]) {
+      const b = this.mqttBrokers.get(port)
+      if (!b) continue
+      try { b.aedes.close() } catch { /* already closed */ }
+      try { b.tcpServer?.close() } catch { /* already closed */ }
+      this.mqttBrokers.delete(port)
     }
     if (count > 0) logger.info('[WebSocketExecutionService] Closed all connections + servers', { count })
   }
@@ -1580,6 +1951,18 @@ class WebSocketExecutionService {
       const topic = event && event.length > 0 ? event : connection.mqttTopic
       if (!topic) return false
       connection.mqttClient.publish(topic, message, { qos: connection.mqttQos ?? 0, retain: connection.mqttRetain ?? false })
+    } else if (connection.kind === 'mqtt-server') {
+      // SERVER MODE (MQTT broker): publish the GUI payload to the topic so every
+      // subscribed client receives it. `event` carries the publish topic (falls
+      // back to the broker's subscribe filter); QoS + retain from the config.
+      // aedes' own subscription surfaces the frame back in the chat.
+      if (!connection.mqttBroker) return false
+      const topic = event && event.length > 0 ? event : connection.namespace
+      if (!topic || topic === '#' || topic.includes('+')) return false
+      connection.mqttBroker.publish(
+        { cmd: 'publish', topic, payload: Buffer.from(message), qos: connection.mqttQos ?? 0, retain: connection.mqttRetain ?? false, dup: false },
+        () => undefined
+      )
     } else {
       if (!connection.socket?.connected) return false
       const channel = event && event.length > 0 ? event : 'message'

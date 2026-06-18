@@ -16,7 +16,8 @@ export interface ScenarioAddEntry {
   kind: AddChildKind
   badge: BadgeType
   /** Server-mode badge (the two-part "hosts a server" pill) — set for the
-   * websocket-server / socketio-server entries, matching the sidebar menu. */
+   * websocket-server / socketio-server / mqtt-server entries, matching the
+   * sidebar menu. */
   mode?: 'server'
   /** i18n key (shared with the sidebar menu) + English fallback. */
   labelKey: string
@@ -55,7 +56,8 @@ export const SCENARIO_ADD_REQUEST_GROUPS: ScenarioAddEntry[][] = [
     { kind: 'websocket-server', badge: 'WS', mode: 'server', labelKey: 'sidebar.contextMenu.add.websocketServer', defaultLabel: 'WebSocket server' },
     { kind: 'socketio', badge: 'SIO', labelKey: 'sidebar.contextMenu.add.socketio', defaultLabel: 'Socket.IO request' },
     { kind: 'socketio-server', badge: 'SIO', mode: 'server', labelKey: 'sidebar.contextMenu.add.socketioServer', defaultLabel: 'Socket.IO server' },
-    { kind: 'mqtt', badge: 'MQTT', labelKey: 'sidebar.contextMenu.add.mqtt', defaultLabel: 'MQTT request' }
+    { kind: 'mqtt', badge: 'MQTT', labelKey: 'sidebar.contextMenu.add.mqtt', defaultLabel: 'MQTT request' },
+    { kind: 'mqtt-server', badge: 'MQTT', mode: 'server', labelKey: 'sidebar.contextMenu.add.mqttServer', defaultLabel: 'MQTT broker' }
   ],
   [
     { kind: 'graphql', badge: 'QUERY', labelKey: 'sidebar.contextMenu.add.graphql', defaultLabel: 'GraphQL request' },

@@ -1,15 +1,16 @@
 /**
- * Steps for the `mqtt-execution` BDD scenario. restorm connects to the Docker
- * Mosquitto broker (`tests/docker`, :1883) as a client — no self-hosted server
- * (unlike the raw-WebSocket / Socket.IO playgrounds). The request subscribes to
- * its topic on connect, and the Send button publishes to that same topic, so a
- * single publish round-trips straight back through the subscription: the same
- * payload shows as both a sent and a received bubble.
+ * Steps for the `mqtt-execution` BDD scenario. restorm HOSTS a local MQTT broker
+ * (aedes) AND connects to it as a client — no external Mosquitto. The broker
+ * subscribes internally to its topic (surfacing every published frame) and its
+ * Send button publishes to that topic; the client subscribes to the same topic
+ * on connect and its Send publishes there too — so a client publish round-trips
+ * straight back through its own subscription (sent + received bubble) and a
+ * broker Send reaches the connected client.
  *
  * Reuses the MCP fixture to launch restorm with `--mcp` and open the sample +
- * tab, then drives the REAL UI. MQTT reuses `WebSocketRequestTabView`, so the
- * Connect / Send / chat-bubble testids are the shared `websocket-*` / `ws-chat-*`
- * ones.
+ * tabs, then drives the REAL UI. MQTT reuses `WebSocketRequestTabView`, so the
+ * Connect / Send / chat-bubble / server-client-count testids are the shared
+ * `websocket-*` / `ws-chat-*` ones.
  */
 
 import { createBdd } from 'playwright-bdd'
@@ -22,6 +23,9 @@ const { Given, When, Then } = createBdd(test)
 let discovery: McpDiscovery | null = null
 let page: Page | null = null
 let requestsByName = new Map<string, string>()
+// The payload of the most recently asserted sent bubble — so a follow-up step
+// can assert the delivery check on that same bubble ("that sent message …").
+let lastSentNeedle: string | null = null
 
 // `:visible` → the active tab (inactive tabs are mounted but 0×0).
 const CONNECT_BTN = '[data-testid="websocket-connect-button"]:visible'
@@ -39,6 +43,7 @@ Given(
     discovery = launched.discovery
     page = launched.page
     requestsByName = new Map()
+    lastSentNeedle = null
   }
 )
 
@@ -116,6 +121,13 @@ Then('the Connect button shows the disconnected state', async () => {
   await expect(page.locator(`${CONNECT_BTN} .codicon-plug`)).toBeVisible({ timeout: 10_000 })
 })
 
+Then('the server shows {int} connected client', async ({}, n: number) => {
+  if (page === null) throw new Error('launch first')
+  // The broker's Response tab banner shows the live connected-client count.
+  await expect(page.locator('[data-testid="websocket-server-client-count"]:visible'))
+    .toContainText(String(n), { timeout: 10_000 })
+})
+
 Then(
   'the chat shows a sent message matching {string}',
   async ({}, needle: string) => {
@@ -125,6 +137,26 @@ Then(
       .filter({ hasText: needle })
       .first()
     await expect(sentBubble).toBeVisible({ timeout: 10_000 })
+    lastSentNeedle = needle
+  }
+)
+
+Then(
+  // The client publishes to a topic it is itself subscribed to, so its own
+  // publish round-trips back through the subscription. The chat folds that
+  // round-trip into a delivery check on the originating sent bubble (the same
+  // confirmation UX as a Socket.IO ack) rather than rendering a duplicate
+  // inbound bubble — assert the check on the sent bubble from the prior step.
+  'that sent message shows a delivery check',
+  async () => {
+    if (page === null) throw new Error('launch first')
+    if (lastSentNeedle === null) throw new Error('assert a sent message first')
+    const ackCheck = page
+      .locator('[data-testid="ws-chat-bubble"][data-direction="sent"]:visible')
+      .filter({ hasText: lastSentNeedle })
+      .first()
+      .locator('[data-testid="ws-chat-ack-check"]')
+    await expect(ackCheck).toBeVisible({ timeout: 10_000 })
   }
 )
 

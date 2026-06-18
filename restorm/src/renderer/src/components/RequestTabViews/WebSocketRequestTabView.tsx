@@ -7,13 +7,16 @@ import { useHandlebarsHelpers } from '../../hooks/useHandlebarsHelpers'
 import {
   Button,
   InputBox,
+  SelectBox,
   CodeEditor,
   SplitView,
   Pane,
+  ScrollableElement,
   ControlGroup,
   eventBus,
   logger,
   getContrastColor,
+  type ISelectData,
   type VariableDefinition
 } from 'electron-core-ui/renderer'
 import { DocumentEvents, type RequestHistoryEventPayload } from '../../services/DocumentEvents'
@@ -288,6 +291,19 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
     setUrl(composeServerUrl(serverPort, r))
   }, [composeServerUrl, serverPort, setUrl])
 
+  // MQTT broker mode: the URL keeps its scheme (`mqtt://` raw TCP vs `ws://`
+  // MQTT-over-WebSocket — the main process picks the transport from it) + a
+  // localhost port. The topic FILTER (the "route") lives on `event`, not the URL.
+  const isMqttServer = isServer && request.protocol === 'mqtt'
+  const mqttScheme = useMemo(() => (/^wss?:\/\//i.test(url) ? 'ws://' : 'mqtt://'), [url])
+  const composeMqttBrokerUrl = useCallback((scheme: string, port: string): string => `${scheme}localhost:${port}`, [])
+  const setMqttScheme = useCallback((s: string): void => {
+    setUrl(composeMqttBrokerUrl(s, serverPort))
+  }, [composeMqttBrokerUrl, serverPort, setUrl])
+  const setMqttServerPort = useCallback((p: string): void => {
+    setUrl(composeMqttBrokerUrl(mqttScheme, p.replace(/[^0-9]/g, '')))
+  }, [composeMqttBrokerUrl, mqttScheme, setUrl])
+
   // Stable empty array for components that get variables via their own variableId
   const emptyVariables = useMemo<VariableDefinition[]>(() => [], [])
 
@@ -367,17 +383,19 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 4px' }}>
               <span style={{ fontSize: 12 }}>{request.protocol === 'mqtt' ? t('websocket.topic') : t('websocket.event')}:</span>
               <div style={{ flex: 1 }}>
-                <InputBox
+                <RestormVariableInputBox
                   value={event}
                   onChange={setEvent}
-                  options={{ placeholder: request.protocol === 'mqtt' ? 'topic/name' : 'event-name' }}
+                  variables={emptyVariables}
+                  helpers={handlebarsHelpers}
+                  placeholder={request.protocol === 'mqtt' ? (isMqttServer ? 'restorm/demo/#' : 'topic/name') : 'event-name'}
                   data-testid="websocket-event-input"
                 />
               </div>
             </div>
           )}
           {request.protocol === 'mqtt' && (
-            <MqttOptionsPanel request={request} variables={emptyVariables} helpers={handlebarsHelpers} />
+            <MqttOptionsPanel request={request} variables={emptyVariables} helpers={handlebarsHelpers} server={isServer} />
           )}
           <div style={{ flex: 1, border: '1px solid var(--panel-border)', borderRadius: 3 }}>
             <CodeEditor
@@ -428,11 +446,18 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   const codeSnippetsContent = backendCodeSnippets || t('requestTab.codeSnippets.loading', 'Loading code snippets...')
 
   // Chat-style transcript: received bubbles hug the left, sent bubbles the
-  // right. An acknowledgement frame (`<event> (ack)`) is not shown as its own
-  // bubble — it folds into a check badge on the originating sent bubble.
-  const renderChat = useCallback((messages: WebSocketMessage[]): React.ReactNode => {
+  // right. A delivery confirmation is not shown as its own bubble — it folds
+  // into a check badge on the originating sent bubble. Two confirmation shapes:
+  // - Socket.IO: an explicit acknowledgement frame (`<event> (ack)`).
+  // - MQTT: a published message that round-trips back through the broker (the
+  //   request is subscribed to a topic it also publishes to), arriving as a
+  //   received frame with the SAME topic + payload as a prior sent bubble. That
+  //   is the correct pub/sub delivery, so mark the sent bubble delivered rather
+  //   than duplicating it as a fresh inbound bubble.
+  const renderChat = useCallback((messages: WebSocketMessage[], protocol?: string): React.ReactNode => {
     interface ChatItem { direction: 'sent' | 'received'; data: string; event: string | undefined; acknowledged: boolean }
     const items: ChatItem[] = []
+    const isMqtt = protocol === 'mqtt'
     for (const msg of messages) {
       const ackMatch = msg.direction === 'received' && msg.event ? /^(.*) \(ack\)$/.exec(msg.event) : null
       if (ackMatch) {
@@ -446,13 +471,33 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
         }
         continue
       }
+      // MQTT round-trip: a received frame matching a still-unconfirmed sent
+      // bubble (same payload — and same topic when the sent frame recorded one)
+      // is that publish coming back via the subscription. Fold it into a
+      // delivery check instead of a duplicate inbound bubble. The payload is the
+      // round-trip identity; a sent bubble that didn't record its topic still
+      // matches (publishes always go to the request's own topic).
+      if (isMqtt && msg.direction === 'received') {
+        const match = items.find(
+          (c) =>
+            c.direction === 'sent' &&
+            !c.acknowledged &&
+            c.data === msg.data &&
+            (!c.event || c.event === msg.event)
+        )
+        if (match) { match.acknowledged = true; continue }
+      }
       items.push({ direction: msg.direction, data: msg.data, event: msg.event, acknowledged: false })
     }
     if (items.length === 0) {
       return <div className="ws-chat-empty">{t('websocket.noMessages')}</div>
     }
     return (
-      <div className="ws-chat" data-testid="websocket-chat">
+      <ScrollableElement
+        options={{ vertical: 'auto', horizontal: 'hidden', useShadows: true }}
+        style={{ flex: 1, minHeight: 0 }}
+      >
+        <div className="ws-chat" data-testid="websocket-chat">
         {items.map((item, i) => (
           <div
             key={i}
@@ -469,7 +514,8 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
             {item.data}
           </div>
         ))}
-      </div>
+        </div>
+      </ScrollableElement>
     )
   }, [t])
 
@@ -517,7 +563,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
       </div>
     )
 
-    return { infosContent, responseContent: renderChat(resp.messages), jsonData: undefined }
+    return { infosContent, responseContent: renderChat(resp.messages, meta?.protocol), jsonData: undefined }
   }, [t, renderChat])
 
   // Live view: prefer the streaming frames; fall back to the resolved response.
@@ -556,7 +602,7 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
             ? t('websocket.clientsConnected', { count: serverClientCount, defaultValue: '{{count}} client(s) connected' })
             : t('websocket.notListening', 'Not listening')}
         </div>
-        <div style={{ flex: 1, minHeight: 0, overflow: 'auto' }}>{responseContent}</div>
+        <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>{responseContent}</div>
       </div>
     )
   }, [isServer, isListening, serverClientCount, responseContent, t])
@@ -609,7 +655,30 @@ export const WebSocketRequestTabView: React.FC<WebSocketRequestTabViewProps> = (
   // (no free URL, no environment variables); client mode keeps the full URL input.
   const urlSection = (
     <ControlGroup data-testid="websocket-url-section">
-      {isServer ? (
+      {isMqttServer ? (
+        <>
+          <div style={{ width: 96, minWidth: 80 }} data-testid="mqtt-broker-scheme">
+            <SelectBox
+              id={`mqtt-broker-scheme-${request.id}`}
+              className=""
+              options={[{ text: 'mqtt://' }, { text: 'ws://' }]}
+              selected={mqttScheme === 'ws://' ? 1 : 0}
+              onDidSelect={(d: ISelectData): void => { setMqttScheme(d.index === 1 ? 'ws://' : 'mqtt://') }}
+              data-testid="mqtt-broker-scheme-select"
+            />
+          </div>
+          <span style={{ display: 'flex', alignItems: 'center', padding: '0 8px', color: 'var(--foreground-muted)', whiteSpace: 'nowrap' }} data-testid="mqtt-broker-host">localhost:</span>
+          <div style={{ width: 90, minWidth: 60 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>
+            <InputBox
+              value={serverPort}
+              onChange={setMqttServerPort}
+              options={{ placeholder: '1883' }}
+              data-testid="websocket-server-port-input"
+            />
+          </div>
+          {connectButton}
+        </>
+      ) : isServer ? (
         <>
           <span style={{ display: 'flex', alignItems: 'center', padding: '0 8px', color: 'var(--foreground-muted)', whiteSpace: 'nowrap' }} data-testid="websocket-server-host">localhost:</span>
           <div style={{ width: 90, minWidth: 60 }} data-testid="url-container" data-url-resolved={resolvedUrl ? 'true' : 'false'}>

@@ -18963,6 +18963,7 @@ collections:
                       requestId: 73a4402e-f5ab-4470-8e2a-4e485034eac7
                       connectionName: Chat
                       label: MQTT Chat
+                      id: 31ee413c-81fc-4d42-860e-2f5e97ae3ef8
                     inputs:
                       - id: in
                         name: ''
@@ -19061,6 +19062,43 @@ collections:
                     position:
                       x: 419
                       'y': 456
+                  - id: 52cc48a3-a169-43d3-b115-2436ee065e08
+                    kind: mqttConnect
+                    config:
+                      requestId: 00565580-0c6a-444d-8655-dd2551ddc754
+                      connectionName: Broker
+                      label: Broker listen
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs:
+                      - id: connected
+                        name: connected
+                        dataType: any
+                        flow: signal
+                      - id: message
+                        name: message
+                        dataType: any
+                        flow: both
+                    position:
+                      x: 0
+                      'y': 0
+                  - id: 9915ab4a-4218-4187-ae66-541e46cf1e0c
+                    kind: mqttClose
+                    config:
+                      connectionNodeId: 52cc48a3-a169-43d3-b115-2436ee065e08
+                      label: close Broker
+                    inputs:
+                      - id: in
+                        name: ''
+                        dataType: any
+                        flow: signal
+                    outputs: []
+                    position:
+                      x: 0
+                      'y': 0
                 edges:
                   - id: 77eaca7d-eb26-4798-9e50-0bb13b1dd601
                     from:
@@ -19099,6 +19137,20 @@ collections:
                       nodeId: 0ef1eb56-c399-4145-afea-b1f798409246
                       portId: value
                     selector: .
+                  - id: 42f063a1-8b9b-4c3a-a666-d21a40573bbd
+                    from:
+                      nodeId: 52cc48a3-a169-43d3-b115-2436ee065e08
+                      portId: connected
+                    to:
+                      nodeId: 23af045a-5282-45f2-9bdf-86cb17c0c42c
+                      portId: in
+                  - id: 7c4e73e8-fb49-4ac1-819c-7e7bc26662a7
+                    from:
+                      nodeId: 330c8b06-d4b3-461f-93a7-3d033532e8d7
+                      portId: done
+                    to:
+                      nodeId: 9915ab4a-4218-4187-ae66-541e46cf1e0c
+                      portId: in
                 id: 45ea68ab-98b8-47f5-9120-33d24eaa3b2b
                 name: MQTT
                 items:
@@ -19106,12 +19158,23 @@ collections:
                     tags: []
                     id: 73a4402e-f5ab-4470-8e2a-4e485034eac7
                     name: MQTT Chat
-                    url: mqtt://localhost:1883
+                    url: mqtt://localhost:1899
                     protocol: mqtt
                     event: restorm/demo/chat
                     message: '{"hello":"from mqtt scenario"}'
                     headers: []
                     type: websocket
+                  - documentation: ''
+                    tags: []
+                    name: MQTT Broker
+                    url: mqtt://localhost:1899
+                    protocol: mqtt
+                    message: ''
+                    headers: []
+                    type: websocket
+                    id: 00565580-0c6a-444d-8655-dd2551ddc754
+                    server: true
+                    event: restorm/demo/#
           - type: scenario
             tags: []
             params: []

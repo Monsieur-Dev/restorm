@@ -188,13 +188,17 @@ export class ScenarioEngine {
           flushRequestStateToContext(bound as unknown as Parameters<typeof flushRequestStateToContext>[0])
         }
         if (req.transport === 'grpc') return grpcExecutionService.connectStreaming(req)
-        // MQTT connects to a broker (no server-mode split) and subscribes to the
-        // bound request's topic — every received message re-emits on `message`.
-        if (req.transport === 'mqtt') return websocketExecutionService.connectStreamingMqtt(req)
-        // A request flagged `server` HOSTS the server (restorm acts as the
-        // server); otherwise it connects as a client — same split for raw WS and
-        // Socket.IO.
+        // A request flagged `server` HOSTS the server / broker (restorm acts as
+        // the server); otherwise it connects as a client — same split for raw WS,
+        // Socket.IO and MQTT.
         const isServer = (bound as { server?: boolean } | undefined)?.server === true
+        // MQTT: a client SUBSCRIBES to the bound request's topic (every received
+        // message re-emits on `message`); a server HOSTS a local aedes broker.
+        if (req.transport === 'mqtt') {
+          return isServer
+            ? websocketExecutionService.connectStreamingMqttServer(req)
+            : websocketExecutionService.connectStreamingMqtt(req)
+        }
         if (req.transport === 'websocket') {
           return isServer
             ? websocketExecutionService.connectStreamingRawServer(req)
