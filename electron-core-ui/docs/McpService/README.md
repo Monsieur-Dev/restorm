@@ -81,8 +81,41 @@ interface McpServiceOptions {
    * discovery helpers below); McpService only consumes it for forwarding.
    */
   discoveryDir?: string
+
+  /**
+   * Optional path to an `ffmpeg` executable used to remux a captured
+   * screencast WebM into a seekable, correctly-timed MP4 (see
+   * `screencast-stop`). ECUI never bundles ffmpeg — that is a packaging
+   * concern of the consuming app. Omitted → ECUI runs a bare `ffmpeg`, i.e.
+   * whatever is on `PATH`. When no ffmpeg is reachable, the remux degrades
+   * gracefully and the raw WebM is served instead. So MP4 is a best-effort
+   * upgrade, never a hard dependency.
+   */
+  ffmpegPath?: string
 }
 ```
+
+#### ffmpeg / screencast MP4 remux (optional, used-if-present)
+
+`screencast-stop` records via `MediaRecorder` (WebM). A WebM has no duration in
+its container header, so a `<video>` reports `Infinity` until fully buffered. To
+fix that, the service remuxes the WebM into an MP4 (H.264 / yuv420p /
+`+faststart`) with a real duration, and serves the MP4 when the remux succeeds.
+
+The remux shells out to **ffmpeg**, resolved in this order:
+
+1. `options.ffmpegPath` — an absolute path the consuming app injects (only an
+   app that chooses to bundle its own ffmpeg sets this; ECUI itself never
+   bundles one — bundling per-OS static binaries adds ~70-90 MB per installer
+   and a libx264/GPL licensing burden).
+2. A bare `ffmpeg` on the process `PATH` — i.e. a system install.
+3. **Graceful fallback** — when neither is reachable (or the remux fails for any
+   reason), `screencast-stop` serves the **raw WebM**. It still plays; only the
+   `<video>` duration self-corrects as it buffers.
+
+So ffmpeg is an **optional** dependency: install it (or have it on `PATH`) for
+the cleaner MP4, otherwise the feature still works on WebM. Restorm relies on a
+system ffmpeg and does not bundle one.
 
 #### Cross-instance routing bridge
 

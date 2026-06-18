@@ -16,7 +16,12 @@ vi.mock('electron', () => ({
     showSaveDialog: vi.fn(),
     showOpenDialog: vi.fn(),
     showMessageBox: vi.fn()
-  }
+  },
+  // start() registers the ecui-media:// screencast protocol handler, which
+  // touches protocol.handle + net.fetch — stub both so the routing tests
+  // below can drive start() without the real Electron protocol module.
+  protocol: { handle: vi.fn() },
+  net: { fetch: vi.fn() }
 }))
 
 vi.mock('./LoggerService', () => ({

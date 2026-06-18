@@ -93,6 +93,7 @@ Brutal but reliable.
 - **WebSocket buffer isn't replayed across reconnects.** If a WS connection drops mid-stream and the server reconnects, `read_stream` flips `cursorReset: true` and starts again from index 0 of the new buffer. The AI is responsible for diffing if it needs to detect lost frames.
 - **Run-batch has no top-level deadline.** A batch with several timeouts can pin the MCP channel for `n × timeoutMs`. Pass per-call `timeoutMs` to bound it.
 - **No per-tool confirmation modal at the Restorm side.** The MCP client owns the approval flow. See [safety.md](./safety.md) for rationale.
+- **Screencast MP4 needs a system `ffmpeg` (optional).** `screencast-stop` remuxes the recorded WebM into a seekable MP4 (correct duration, plays/seeks everywhere) via `ffmpeg` if one is on `PATH`. Restorm does **not** bundle ffmpeg, so when it's absent the tool falls back to serving the raw WebM — still viewable, but the `<video>` duration only self-corrects as it buffers. Install ffmpeg (`apt install ffmpeg`, `brew install ffmpeg`, …) for the cleaner MP4.
 
 These are known limitations for v1 — none are blockers, follow-up work is scoped separately.
 
