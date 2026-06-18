@@ -46,6 +46,18 @@ Feature: Authentication routes end-to-end
     And I send the pet request twice
     Then the pet response body should contain "Rex"
 
+    # Tab-header auth selector is interactive: opening it lists the
+    # available auth route, and picking an option writes the active
+    # request's attached auth route (the popover marks the new pick
+    # selected). Detaching then re-attaching round-trips the choice.
+    When I open the tab-header auth selector
+    Then the tab-header auth selector popover should list the "Authentication route" route
+    When I pick "No auth" in the tab-header auth selector
+    Then the tab-header auth selector should show "No auth" selected
+    When I open the tab-header auth selector
+    And I pick the "Authentication route" route in the tab-header auth selector
+    Then the tab-header auth selector should show the "Authentication route" route selected
+
     # Per-tab env pinning regression: pet on "Valid environnement",
     # auth route on "invalid environnement". The auth-resolver should
     # inherit the calling request's env (Valid) when sending the pet
@@ -60,7 +72,7 @@ Feature: Authentication routes end-to-end
 
     When I clear the issued tokens
     And I re-send the pet request
-    Then the statusbar auth indicator should show the running feedback
+    Then the tab-header auth indicator should show the running feedback
     When I release the pending login
     Then the pet response body should still contain "Rex"
 

@@ -53,6 +53,7 @@ import { DeprecationAwareRequestTab } from './DeprecationAwareRequestTab'
 import { RequestScenarioUsageButton } from './RequestScenarioUsageButton'
 import { RequestHeaderEnvSelector } from '../RequestHeaderEnvSelector'
 import { RequestHeaderHistoryButton } from '../RequestHeaderHistoryButton'
+import { RequestHeaderAuthSelector } from '../RequestHeaderAuthSelector'
 import { ScenarioCallersButton } from './ScenarioCallersButton'
 import { ScenarioRunHistoryButton } from '../../Scenario/ScenarioRunHistoryButton'
 import type { ScenarioRequestUsage, ScenarioScenarioUsage } from '../../../services/scenarioRequestUsage'
@@ -985,6 +986,21 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
       </>
     )
 
+    // Auth-route key selector, anchored immediately to the LEFT of the
+    // favourite star. Hides itself when the env folder has no auth route
+    // (or the request is itself an auth request). Needs the reactive
+    // Request (to write `authenticationRequestId`) + the env-folder item
+    // tree (to enumerate available auth routes), both in scope here.
+    const starLeftActionFor = (request: Request): React.ReactNode =>
+      reactiveEnvFolder
+        ? (
+          <RequestHeaderAuthSelector
+            activeRequest={request}
+            envFolderItems={reactiveEnvFolder.items}
+          />
+        )
+        : null
+
     // HTTP request tab
     if (isHTTPRequestTab(effectiveTab)) {
       // Get reactive request if available, otherwise use tab's copy
@@ -1007,6 +1023,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             {...favoritePropsFor(request.id)}
             headerActions={requestHeaderActionsFor(request.id)}
             topRightAction={scenarioUsageActionFor(request.id)}
+            starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <HTTPRequestTabView
@@ -1037,6 +1054,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             {...favoritePropsFor(request.id)}
             headerActions={requestHeaderActionsFor(request.id)}
             topRightAction={scenarioUsageActionFor(request.id)}
+            starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <GraphQLRequestTabView
@@ -1067,6 +1085,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             {...favoritePropsFor(request.id)}
             headerActions={requestHeaderActionsFor(request.id)}
             topRightAction={scenarioUsageActionFor(request.id)}
+            starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <GrpcRequestTabView
@@ -1097,6 +1116,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             {...favoritePropsFor(request.id)}
             headerActions={requestHeaderActionsFor(request.id)}
             topRightAction={scenarioUsageActionFor(request.id)}
+            starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <SoapRequestTabView
@@ -1127,6 +1147,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             {...favoritePropsFor(request.id)}
             headerActions={requestHeaderActionsFor(request.id)}
             topRightAction={scenarioUsageActionFor(request.id)}
+            starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <WebSocketRequestTabView
@@ -1157,6 +1178,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             {...favoritePropsFor(request.id)}
             headerActions={requestHeaderActionsFor(request.id)}
             topRightAction={scenarioUsageActionFor(request.id)}
+            starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <ODataRequestTabView request={request} />
@@ -1186,6 +1208,7 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
             {...favoritePropsFor(request.id)}
             headerActions={requestHeaderActionsFor(request.id)}
             topRightAction={scenarioUsageActionFor(request.id)}
+            starLeftAction={starLeftActionFor(request)}
           >
             <div style={{ flex: 1, minHeight: 0, minWidth: 0, padding: '0 16px 8px 16px' }}>
               <HTTPRequestTabView

@@ -481,16 +481,17 @@ When('I re-send the pet request', async () => {
   await p.locator('[data-testid="http-request-send-button"]:visible').click()
 })
 
-Then('the statusbar auth indicator should show the running feedback', async () => {
+Then('the tab-header auth indicator should show the running feedback', async () => {
   const p = requirePage()
-  // `StatusbarAuthSelector` fires a ripple via ECUI's `pulseSignal`
-  // API on the `auth:running` event's `started` phase. The cell
-  // gains the `statusbar-item--pulsing` class while the ripple is
-  // animating (~800 ms). The pulse is short-lived, so wait for the
-  // class to appear with a tight inner timeout but generous outer
-  // wait — the auth event itself can take a moment to fire.
-  const statusbar = p.locator('[data-testid="statusbar-auth-selector"]')
-  await expect(statusbar).toHaveClass(/statusbar-item--pulsing/, { timeout: 10000 })
+  // `RequestHeaderAuthSelector` (in the workbench tab header) fires a
+  // ripple via ECUI's `pulseSignal` API on the `auth:running` event's
+  // `started` phase. The element gains the `statusbar-item--pulsing`
+  // class while the ripple is animating (~800 ms). The pulse is
+  // short-lived, so wait for the class to appear with a tight inner
+  // timeout but generous outer wait — the auth event itself can take a
+  // moment to fire.
+  const indicator = p.locator('[data-testid="request-header-auth-selector"]:visible')
+  await expect(indicator).toHaveClass(/statusbar-item--pulsing/, { timeout: 10000 })
 })
 
 When('I release the pending login', async () => {
@@ -502,6 +503,57 @@ Then('the pet response body should still contain {string}', async ({}, expected:
   const p = requirePage()
   await expect(p.locator('[data-testid="http-response-body-editor"]:visible')).toContainText(expected, { timeout: 15000 })
 })
+
+When('I open the tab-header auth selector', async () => {
+  const p = requirePage()
+  // Click the key-icon trigger in the workbench tab header to toggle
+  // its popover open. The cell is an ECUI StatusbarElement reused in
+  // the header; `aria-expanded` reflects the open state.
+  const trigger = p.locator('[data-testid="request-header-auth-selector"]:visible')
+  await expect(trigger).toBeVisible({ timeout: 5000 })
+  await trigger.click()
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true', { timeout: 5000 })
+  await expect(p.locator('[data-testid="request-header-auth-popover"]:visible')).toBeVisible({ timeout: 5000 })
+})
+
+Then(
+  'the tab-header auth selector popover should list the {string} route',
+  async ({}, routeName: string) => {
+    const p = requirePage()
+    const popover = p.locator('[data-testid="request-header-auth-popover"]:visible')
+    await expect(popover.getByRole('button', { name: routeName, exact: true })).toBeVisible({ timeout: 5000 })
+  }
+)
+
+When('I pick {string} in the tab-header auth selector', async ({}, optionLabel: string) => {
+  const p = requirePage()
+  const popover = p.locator('[data-testid="request-header-auth-popover"]:visible')
+  await popover.getByRole('button', { name: optionLabel, exact: true }).click()
+})
+
+When('I pick the {string} route in the tab-header auth selector', async ({}, routeName: string) => {
+  const p = requirePage()
+  const popover = p.locator('[data-testid="request-header-auth-popover"]:visible')
+  await popover.getByRole('button', { name: routeName, exact: true }).click()
+})
+
+Then('the tab-header auth selector should show {string} selected', async ({}, label: string) => {
+  const p = requirePage()
+  // The trigger's label mirrors the attached route's name (or "No
+  // auth" when none). Re-open to read the marked option too: the
+  // selected option carries `aria-selected="true"` on its row.
+  const trigger = p.locator('[data-testid="request-header-auth-selector"]:visible')
+  await expect(trigger.locator('[data-testid="request-header-auth-selector-label"]')).toHaveText(label, { timeout: 5000 })
+})
+
+Then(
+  'the tab-header auth selector should show the {string} route selected',
+  async ({}, routeName: string) => {
+    const p = requirePage()
+    const trigger = p.locator('[data-testid="request-header-auth-selector"]:visible')
+    await expect(trigger.locator('[data-testid="request-header-auth-selector-label"]')).toHaveText(routeName, { timeout: 5000 })
+  }
+)
 
 When('I focus the {string} request tab', async ({}, tabName: string) => {
   const p = requirePage()

@@ -53,6 +53,11 @@ export interface RestormWorkbenchTabProps {
    * bookmark ribbon and the favourite star (e.g. the "used in scenarios"
    * button). Brings its own absolute positioning. */
   topRightAction?: React.ReactNode
+  /** Optional action anchored in the tab's top-right toolbar, immediately
+   * to the LEFT of the favourite star (e.g. the auth-route key selector).
+   * Positioned by the `.restorm-workbench-tab-star-left-action` wrapper
+   * this renders it in. */
+  starLeftAction?: React.ReactNode
   /** Optional callout to display at the top of the tab */
   callout?: RestormWorkbenchTabCallout | undefined
   /** Optional tab ID for stable test IDs */
@@ -78,6 +83,7 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
   headerRight,
   headerActions,
   topRightAction,
+  starLeftAction,
   callout,
   tabId,
   isFavorite,
@@ -150,6 +156,20 @@ export const RestormWorkbenchTab: React.FC<RestormWorkbenchTabProps> = ({
           onAdd={handleRibbonAdd}
           data-testid={`${testIdPrefix}-bookmarks`}
         />
+        {/* Star-left action (e.g. the auth-route key selector): the
+         * rightmost item of the cluster, so it flows snug after the env
+         * pill / history / ribbon and lands immediately to the LEFT of
+         * the favourite star — no fixed-width reserved slot, no gap. */}
+        {starLeftAction ? (
+          <span
+            className="restorm-workbench-tab-star-left-action"
+            data-testid={`${testIdPrefix}-star-left-action`}
+            onClick={(e) => { e.stopPropagation() }}
+            onMouseDown={(e) => { e.stopPropagation() }}
+          >
+            {starLeftAction}
+          </span>
+        ) : null}
       </div>
       {/* Top-right action (e.g. "used in scenarios"), sitting between the
        * bookmark ribbon and the favourite star. Self-positioned. */}
