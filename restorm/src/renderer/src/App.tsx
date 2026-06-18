@@ -2092,16 +2092,24 @@ const App: React.FC = () => {
     [rootItems]
   )
 
-  // Stable lookup callbacks — avoids re-render cascade through RestormWorkbench → EditorGroupView
-  const getRequestByIdCb = useCallback((id: string) => findRequestById(rootItems, id), [rootItems])
-  const getFolderByIdCb = useCallback((id: string) => findFolderById(rootItems, id), [rootItems])
-  const getScenarioByIdCb = useCallback((id: string) => findScenarioById(rootItems, id), [rootItems])
-  const getEnvironmentFolderByIdCb = useCallback((id: string) => findEnvironmentFolderById(rootItems, id), [rootItems])
+  // Stable lookup callbacks — avoids re-render cascade through
+  // RestormWorkbench → EditorGroupView. Read the tree via `rootItemsRef`
+  // (kept current by the effect above) with EMPTY deps so the callback
+  // identities never change on a tree edit; the `[rootItems]` deps made
+  // them rebuild on every mutation, which is the cascade this comment
+  // was always meant to prevent.
+  const getRequestByIdCb = useCallback((id: string) => findRequestById(rootItemsRef.current, id), [])
+  const getFolderByIdCb = useCallback((id: string) => findFolderById(rootItemsRef.current, id), [])
+  const getScenarioByIdCb = useCallback((id: string) => findScenarioById(rootItemsRef.current, id), [])
+  const getEnvironmentFolderByIdCb = useCallback((id: string) => findEnvironmentFolderById(rootItemsRef.current, id), [])
 
   // Send-time hook: request tab views call this to resolve their
   // `authenticationRequestId` back to the AuthenticationRequest
   // sitting in `rootItems`, so the IPC call carries the full auth
-  // document the main-process executor needs.
+  // document the main-process executor needs. Reads `rootItems` (state),
+  // not the ref + [] deps the lookup callbacks above use — this one is
+  // also invoked DURING RENDER (the ImportModal refresh-context IIFE),
+  // where react-hooks/refs forbids reading a ref.
   const resolveAuthRequestCb = useCallback<AuthRequestResolver>((id) => {
     const found = findRequestById(rootItems, id)
     return found && isAuthenticationRequest(found) ? found : null
