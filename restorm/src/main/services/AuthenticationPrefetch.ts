@@ -14,6 +14,7 @@ import https from 'https'
 import { URL } from 'url'
 import Handlebars from 'handlebars'
 import { logger } from 'electron-core-ui/main'
+import { MAX_RESPONSE_BYTES } from '../../shared/config/constants'
 
 export interface AuthPrefetchInput {
   method: string
@@ -66,7 +67,17 @@ export async function authPrefetchOneShot(input: AuthPrefetchInput): Promise<Aut
       },
       (res) => {
         const chunks: Buffer[] = []
-        res.on('data', (c: Buffer) => chunks.push(c))
+        let received = 0
+        res.on('data', (c: Buffer) => {
+          received += c.length
+          if (received > MAX_RESPONSE_BYTES) {
+            // Bound main-process memory on a runaway token endpoint.
+            req.destroy()
+            resolve({ success: false, error: `Response exceeded the ${MAX_RESPONSE_BYTES}-byte limit` })
+            return
+          }
+          chunks.push(c)
+        })
         res.on('end', () => {
           const body = Buffer.concat(chunks).toString('utf8')
           resolve({

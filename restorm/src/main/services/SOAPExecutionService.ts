@@ -11,7 +11,7 @@ import { logger } from 'electron-core-ui/main'
 import { contextService } from './ContextService'
 import { secretHydrationService } from './secrets/SecretHydrationService'
 import { collectRequestSecrets } from './secrets/collectRequestSecrets'
-import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../shared/config/constants'
+import { DEFAULT_REQUEST_TIMEOUT_MS, MAX_RESPONSE_BYTES } from '../../shared/config/constants'
 
 /** SOAP request execution input */
 export interface SOAPExecutionInput {
@@ -281,8 +281,16 @@ class SOAPExecutionService {
 
       const request = httpModule.request(requestOptions, (response) => {
         const chunks: Buffer[] = []
+        let received = 0
 
         response.on('data', (chunk: Buffer) => {
+          received += chunk.length
+          if (received > MAX_RESPONSE_BYTES) {
+            signal.removeEventListener('abort', abortHandler)
+            request.destroy()
+            reject(new Error(`Response exceeded the ${MAX_RESPONSE_BYTES}-byte limit`))
+            return
+          }
           chunks.push(chunk)
         })
 

@@ -14,7 +14,7 @@ import { responseHistoryService } from './ResponseHistoryService'
 import { secretHydrationService } from './secrets/SecretHydrationService'
 import { collectRequestSecrets } from './secrets/collectRequestSecrets'
 import { withFirewallBypass } from 'electron-core-ui/main'
-import { DEFAULT_REQUEST_TIMEOUT_MS } from '../../shared/config/constants'
+import { DEFAULT_REQUEST_TIMEOUT_MS, MAX_RESPONSE_BYTES } from '../../shared/config/constants'
 import type { AuthenticationRequest } from '../../shared/models/requests/AuthenticationRequest'
 
 /** HTTP request execution input */
@@ -435,8 +435,18 @@ class HTTPExecutionService {
 
       const request = httpModule.request(requestOptions, (response) => {
         const chunks: Buffer[] = []
+        let received = 0
 
         response.on('data', (chunk: Buffer) => {
+          received += chunk.length
+          if (received > MAX_RESPONSE_BYTES) {
+            // Bound main-process memory: destroy the socket and reject
+            // rather than keep buffering an unbounded body.
+            signal.removeEventListener('abort', abortHandler)
+            request.destroy()
+            reject(new Error(`Response exceeded the ${MAX_RESPONSE_BYTES}-byte limit`))
+            return
+          }
           chunks.push(chunk)
         })
 
