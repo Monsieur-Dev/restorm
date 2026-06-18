@@ -58,7 +58,10 @@ export const arithmeticExecutor: NodeExecutor = (act, ctx) => {
   const a = toNumber(ra)
   const b = toNumber(rb)
   const rawOp = cfg.operator ?? cfg.op
-  const op = (rawOp !== undefined ? ARITH_OP_ALIASES[rawOp] : undefined) ?? 'add'
+  // No silent `?? 'add'` fallback: an unknown / unset persisted
+  // operator used to compute ADDITION, masking a corrupt node. Throw
+  // instead so the run-log surfaces the bad operator.
+  const op = rawOp !== undefined ? ARITH_OP_ALIASES[rawOp] : undefined
   let value: number
   switch (op) {
     case 'add': value = a + b; break
@@ -70,6 +73,8 @@ export const arithmeticExecutor: NodeExecutor = (act, ctx) => {
       break
     case 'mod': value = a % b; break
     case 'pow': value = a ** b; break
+    default:
+      throw new Error(`unknown arithmetic operator: ${String(rawOp)}`)
   }
   return { outputs: [{ port: 'result', value }] }
 }

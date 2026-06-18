@@ -566,6 +566,11 @@ describe('arithmeticExecutor', () => {
     expect(runPure(arithmeticExecutor, { operator: '÷' }, { a: 6, b: 2 }).outputs[0]?.value).toBe(3)
     expect(runPure(arithmeticExecutor, { operator: '%' }, { a: 7, b: 3 }).outputs[0]?.value).toBe(1)
   })
+
+  it('throws on an unknown / unset operator instead of silently adding', () => {
+    expect(() => runPure(arithmeticExecutor, { operator: 'bogus' }, { a: 2, b: 3 })).toThrow(/unknown arithmetic operator/)
+    expect(() => runPure(arithmeticExecutor, {}, { a: 2, b: 3 })).toThrow(/unknown arithmetic operator/)
+  })
 })
 
 describe('booleanExecutor', () => {

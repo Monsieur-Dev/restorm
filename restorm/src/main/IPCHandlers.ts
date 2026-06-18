@@ -6,7 +6,7 @@ import { promises as fs, existsSync, statSync, rmSync } from 'fs'
 import { EditorWindow } from './windows/EditorWindow'
 import { contextService, responseHistoryService, requestUsageService, scenarioUsageService } from './services'
 import { miniBrowserService } from './services/MiniBrowserService'
-import { assertPathWithinParent } from './utils/pathSecurity'
+import { assertPathWithinParent, isPathContained } from './utils/pathSecurity'
 import { secretHydrationService } from './services/secrets/SecretHydrationService'
 import { saveFolderStructure, loadFolderStructure, attachDraftStoreForFolder, attachDraftStoreForFile } from './FileOperations'
 import type { PersistenceFormat } from 'electron-core-ui'
@@ -304,18 +304,18 @@ export function registerRestormIPC(deps: {
       let folderPath: string
 
       if (targetPath) {
-        // Use provided path directly (for Ctrl+S on already opened folder)
-        // Path traversal protection: targetPath from renderer must be an absolute real path
-        if (isFileServiceInitialized()) {
-          const openedFolder = (getFileService() as { getOpenedFolderPath?: () => string | null }).getOpenedFolderPath?.()
-          if (openedFolder) {
-            try {
-              assertPathWithinParent(dirname(openedFolder), targetPath)
-            } catch {
-              logger.warn('Blocked save-as-folder - path traversal detected', { targetPath })
-              return { success: false, error: 'Path traversal detected' }
-            }
-          }
+        // Re-saving into an already-opened folder (Ctrl+S). The target
+        // must stay WITHIN that folder — not merely under its parent,
+        // which would let a renderer-supplied path clobber sibling
+        // projects. Fail CLOSED when no opened folder bounds it.
+        const openedFolder = isFileServiceInitialized()
+          ? (getFileService() as { getOpenedFolderPath?: () => string | null }).getOpenedFolderPath?.() ?? null
+          : null
+        // `targetPath` may legitimately equal `openedFolder` itself
+        // (a plain re-save); containment is satisfied in that case.
+        if (!isPathContained(openedFolder, targetPath)) {
+          logger.warn('Blocked save-as-folder - path not contained in opened folder', { targetPath })
+          return { success: false, error: openedFolder ? 'Path traversal detected' : 'No opened folder' }
         }
         folderPath = targetPath
       } else {
@@ -459,17 +459,17 @@ export function registerRestormIPC(deps: {
     try {
       if (!filePath || !existsSync(filePath)) return null
 
-      // Path traversal protection: secrets must be within the opened folder
-      if (isFileServiceInitialized()) {
-        const openedFolder = (getFileService() as { getOpenedFolderPath?: () => string | null }).getOpenedFolderPath?.()
-        if (openedFolder) {
-          try {
-            assertPathWithinParent(openedFolder, filePath)
-          } catch {
-            logger.warn('Blocked secrets:read - path traversal detected', { filePath })
-            return null
-          }
-        }
+      // Path-containment must FAIL CLOSED: a secrets file is only ever
+      // legitimate inside the opened project folder, so if we can't
+      // establish that folder (service not initialised, or no folder
+      // open / single-file mode) we refuse rather than let a raw
+      // renderer path read an arbitrary file.
+      const openedFolder = isFileServiceInitialized()
+        ? (getFileService() as { getOpenedFolderPath?: () => string | null }).getOpenedFolderPath?.() ?? null
+        : null
+      if (!isPathContained(openedFolder, filePath)) {
+        logger.warn('Blocked secrets:read - path not contained in opened folder', { filePath })
+        return null
       }
 
       return await fs.readFile(filePath, 'utf-8')
@@ -483,17 +483,14 @@ export function registerRestormIPC(deps: {
     try {
       if (!filePath) return { success: false, error: 'Missing path' }
 
-      // Path traversal protection: secrets must be within the opened folder
-      if (isFileServiceInitialized()) {
-        const openedFolder = (getFileService() as { getOpenedFolderPath?: () => string | null }).getOpenedFolderPath?.()
-        if (openedFolder) {
-          try {
-            assertPathWithinParent(openedFolder, filePath)
-          } catch {
-            logger.warn('Blocked secrets:write - path traversal detected', { filePath })
-            return { success: false, error: 'Path traversal detected' }
-          }
-        }
+      // Path-containment must FAIL CLOSED (see secrets:read): refuse to
+      // write when no opened project folder bounds the target path.
+      const openedFolder = isFileServiceInitialized()
+        ? (getFileService() as { getOpenedFolderPath?: () => string | null }).getOpenedFolderPath?.() ?? null
+        : null
+      if (!isPathContained(openedFolder, filePath)) {
+        logger.warn('Blocked secrets:write - path not contained in opened folder', { filePath })
+        return { success: false, error: openedFolder ? 'Path traversal detected' : 'No opened folder' }
       }
 
       await fs.mkdir(dirname(filePath), { recursive: true })

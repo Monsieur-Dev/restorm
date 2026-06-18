@@ -24,6 +24,7 @@ import { DocumentEvents, type DocumentChangedPayload } from '../../services/Docu
 import { importFrom } from '../../services/import/ImportManager'
 import { isAnyFolder, isEnvironmentFolder, isRequest, type FolderItem, type EnvironmentFolder, type Environment } from '../../../shared/models'
 import { cloneForEventBus } from '../../../shared/utils/cloneForEventBus'
+import { assertSafeFetchUrl } from '../../utils/urlSecurity'
 
 function jsonReply(value: unknown): { content: { type: 'text'; text: string }[] } {
   return { content: [{ type: 'text', text: JSON.stringify(value, null, 2) }] }
@@ -137,6 +138,14 @@ export function registerImportTools(mcp: McpService): void {
       const argRecord = args
       const url = typeof argRecord['url'] === 'string' ? argRecord['url'] : ''
       if (!url) return errorReply('url is required')
+      // SSRF guard: the URL comes from a semi-trusted agent over
+      // loopback and the import fetch bypasses the firewall, so reject
+      // loopback / link-local / private targets up front.
+      try {
+        assertSafeFetchUrl(url)
+      } catch (error) {
+        return errorReply(error instanceof Error ? error.message : String(error))
+      }
       const parentIdRaw = argRecord['parentFolderId']
       const parentId = typeof parentIdRaw === 'string' && parentIdRaw.length > 0 ? parentIdRaw : null
 

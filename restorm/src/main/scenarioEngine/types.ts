@@ -143,7 +143,7 @@ export interface ExecResult {
     // `message` port (`events` is empty).
     | {
         type: 'openSocketioConnect'
-        transport: 'socketio' | 'websocket' | 'grpc'
+        transport: 'socketio' | 'websocket' | 'grpc' | 'mqtt'
         requestId: string
         events: string[]
         connectionName: string

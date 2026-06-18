@@ -15,6 +15,7 @@ import type { EnvironmentFolder, FolderItem } from '../../../shared/models'
 import { isRequest, isAnyFolder, isHTTPRequest, isAuthenticationRequest, isGraphQLRequest, isGrpcRequest, isSoapRequest, isWebSocketRequest, isODataRequest } from '../../../shared/types/collections'
 import { disableEmptyKeyValues } from '../../../shared/utils/emptyKeyValueHelper'
 import { withFirewallBypass } from 'electron-core-ui'
+import { assertSafeFetchUrl } from '../../utils/urlSecurity'
 
 // ============================================================================
 // Types
@@ -347,6 +348,11 @@ export async function importFrom(
       source = input
 
       try {
+        // SSRF guard: a spec URL is user/agent-supplied and this fetch
+        // bypasses the firewall, so reject loopback / link-local /
+        // private targets (cloud metadata, localhost admin ports, …)
+        // before dispatching.
+        assertSafeFetchUrl(input)
         const fetchInit: RequestInit = options.extraHeaders && Object.keys(options.extraHeaders).length > 0
           ? { headers: options.extraHeaders }
           : {}
@@ -471,7 +477,8 @@ export async function tryAllImports(
       source = input
       // Same firewall bypass rationale as `importFromUrl` above —
       // user typed / dropped the URL, that's the authorisation
-      // signal.
+      // signal. The SSRF guard still applies (bypass ≠ unrestricted).
+      assertSafeFetchUrl(input)
       const response = await withFirewallBypass(() => fetch(input))
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`)
