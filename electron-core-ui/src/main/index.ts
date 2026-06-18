@@ -161,8 +161,8 @@ export type {
   GraphQLFieldConfig,
   AllMetadata
 } from './decorators'
-export { BaseWindow, setupIPC, setupAppLifecycle, initializeApp, configureCommandLineSwitches, setupAppProtocol } from './managers'
-export type { WindowConfiguration, WindowState } from './managers'
+export { BaseWindow, setupIPC, setupAppLifecycle, initializeApp, configureCommandLineSwitches, setupAppProtocol, createSplashWindow } from './managers'
+export type { WindowConfiguration, WindowState, InitializeAppOptions, SplashWindowOptions, SplashWindowHandle } from './managers'
 
 // IPC validation
 export { validatedHandle } from './ipc/validate'

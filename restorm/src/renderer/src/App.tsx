@@ -313,6 +313,17 @@ const App: React.FC = () => {
     document.title = title
   }, [fileName, isDirty])
 
+  // Tell the main process the real UI is mounted so it can close the boot
+  // splash and reveal the (until-now hidden) main window. This fires only once
+  // App has actually rendered — i.e. i18n is ready and the lazy App chunk has
+  // resolved, so the Suspense loading fallback is already gone. Using this
+  // explicit signal (not the window's first paint) guarantees the user never
+  // sees the loading screen behind the splash.
+  useEffect(() => {
+    const electronAPI = (window as unknown as { electronAPI?: { notifyReady?: () => void } }).electronAPI
+    electronAPI?.notifyReady?.()
+  }, [])
+
   // Surface a toast whenever the main process restores crash-recovery
   // drafts at project open. The handler comes from the lib — we just
   // bind it to the app-level toaster.

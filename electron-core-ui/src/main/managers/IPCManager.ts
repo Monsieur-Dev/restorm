@@ -2,6 +2,8 @@ import { BrowserWindow, app, protocol, net } from 'electron'
 import { join } from 'path'
 import { pathToFileURL } from 'url'
 import { getThemeService, getStorageService, initSettingsService, initFeatureService, logger } from '../services'
+import type { BaseWindow } from './BaseWindow'
+import { createSplashWindow, SplashWindowHandle, SplashWindowOptions } from './SplashWindow'
 import {
   registerThemeHandlers,
   registerFileHandlers,
@@ -130,25 +132,81 @@ export function setupAppProtocol(rendererPath: string): void {
 }
 
 /**
- * Initialize Electron application
- * @param appName - Name of the application (for logging)
- * @param createWindow - Function to create the main window
- * @param devResourcesPath - Optional path to resources directory in development mode
- * @param onActivate - Optional function to handle macOS activate event
- * @param rendererPath - Optional path to renderer directory for static assets (used for app:// protocol)
- * @param appSettingsConfigPath - Optional path to app-specific settings YAML (loaded after defaults)
- * @param appFeaturesConfigPath - Optional path to app-specific features YAML (loaded after defaults)
+ * Upper bound on how long the splash may stay up waiting for the main window
+ * to become ready. If the renderer hangs / crashes / fails to load before its
+ * first paint, this prevents a frozen always-on-top splash from lingering.
+ */
+const SPLASH_SAFETY_TIMEOUT_MS = 30_000
+
+/**
+ * Options for {@link initializeApp}. Kept as a single object so the splash
+ * config + the various optional paths/callbacks don't grow into a long,
+ * order-sensitive positional list.
+ */
+export interface InitializeAppOptions {
+  /**
+   * Create the main window. May return the {@link BaseWindow} instance so the
+   * splash handoff can hook its `ready-to-show` (close the splash right before
+   * the main window appears). When it returns nothing, the splash is closed on
+   * the first window's `ready-to-show` as a fallback.
+   */
+  createWindow: () => BaseWindow | undefined
+  /** Optional path to resources directory in development mode. */
+  devResourcesPath?: string
+  /** Optional handler for the macOS `activate` event. */
+  onActivate?: () => void
+  /** Optional renderer directory for static assets (used for the app:// protocol). */
+  rendererPath?: string
+  /** Optional app-specific settings YAML (loaded after defaults). */
+  appSettingsConfigPath?: string
+  /** Optional app-specific features YAML (loaded after defaults). */
+  appFeaturesConfigPath?: string
+  /**
+   * Splash screen shown while the app boots. When set, the library shows the
+   * splash immediately (before the main window exists), keeps the main window
+   * hidden until its renderer is ready to paint, then closes the splash and
+   * reveals the main window — a flash-free handoff. The app provides only the
+   * content (its logo); the window + mechanics live here. Requires the main
+   * window to be created with `showWhenReady: true` in its configuration.
+   */
+  splash?: SplashWindowOptions
+}
+
+/**
+ * Initialize Electron application.
+ *
+ * Two call forms are supported:
+ * - object form: `initializeApp(appName, { createWindow, splash, … })` — use
+ *   this to opt into the splash screen + other options;
+ * - legacy positional form: `initializeApp(appName, createWindow, devResourcesPath, …)`
+ *   — kept working for existing callers.
  */
 export function initializeApp(
   appName: string,
-  createWindow: () => void,
+  optionsOrCreateWindow: InitializeAppOptions | (() => BaseWindow | undefined),
   devResourcesPath?: string,
   onActivate?: () => void,
   rendererPath?: string,
   appSettingsConfigPath?: string,
   appFeaturesConfigPath?: string
 ): void {
+  // Normalize the two call forms into a single options object. With
+  // `exactOptionalPropertyTypes`, only include the optional keys that are
+  // actually defined rather than assigning `undefined`.
+  const options: InitializeAppOptions = typeof optionsOrCreateWindow === 'function'
+    ? {
+        createWindow: optionsOrCreateWindow,
+        ...(devResourcesPath !== undefined ? { devResourcesPath } : {}),
+        ...(onActivate !== undefined ? { onActivate } : {}),
+        ...(rendererPath !== undefined ? { rendererPath } : {}),
+        ...(appSettingsConfigPath !== undefined ? { appSettingsConfigPath } : {}),
+        ...(appFeaturesConfigPath !== undefined ? { appFeaturesConfigPath } : {})
+      }
+    : optionsOrCreateWindow
+
   configureCommandLineSwitches()
+
+  let splash: SplashWindowHandle | null = null
 
   app.whenReady().then(() => {
     logger.info(`🚀 ${appName} application starting...`)
@@ -156,30 +214,82 @@ export function initializeApp(
     logger.info(`Node version: ${process.versions.node}`)
     logger.info(`Electron version: ${process.versions.electron}`)
 
-    if (rendererPath) {
-      setupAppProtocol(rendererPath)
+    // Show the splash as early as possible — before the main window exists —
+    // so the user gets immediate feedback while services + the renderer boot.
+    if (options.splash) {
+      splash = createSplashWindow(options.splash)
+    }
+
+    if (options.rendererPath) {
+      setupAppProtocol(options.rendererPath)
     }
 
     logger.info('🔧 Starting setupIPC...')
-    setupIPC(devResourcesPath, appSettingsConfigPath, appFeaturesConfigPath)
+    setupIPC(options.devResourcesPath, options.appSettingsConfigPath, options.appFeaturesConfigPath)
     logger.info('🔧 setupIPC completed')
 
     logger.info('🔧 Starting setupAppLifecycle...')
     setupAppLifecycle()
     logger.info('🔧 setupAppLifecycle completed')
 
+    // Close the splash exactly once, however the handoff resolves. Idempotent
+    // so the throw / never-ready / normal paths can all call it safely.
+    let splashSafetyTimer: ReturnType<typeof setTimeout> | null = null
+    const closeSplash = (): void => {
+      if (splashSafetyTimer) {
+        clearTimeout(splashSafetyTimer)
+        splashSafetyTimer = null
+      }
+      splash?.close()
+      splash = null
+    }
+
     logger.info('🪟 Starting createWindow...')
-    createWindow()
+    let mainWindow: BaseWindow | undefined
+    try {
+      mainWindow = options.createWindow()
+    } catch (error) {
+      // A failed window creation must not leave the always-on-top splash
+      // orphaned over a broken boot. Close it, then surface the error.
+      closeSplash()
+      throw error
+    }
     logger.info('🪟 createWindow completed')
+
+    // Hand off from splash to main window. When the main window reports
+    // ready-to-show (its renderer painted), close the splash just before it
+    // becomes visible — no overlap, no flash. Prefer the BaseWindow's
+    // readiness callback (precise); fall back to the BrowserWindow event when
+    // the app didn't return its window instance.
+    if (splash) {
+      // Safety net: if the renderer never reaches ready-to-show (hang / crash
+      // / load failure), don't leave a frozen always-on-top splash up forever.
+      splashSafetyTimer = setTimeout(() => {
+        logger.warn('Splash safety timeout reached before window was ready; closing splash')
+        closeSplash()
+      }, SPLASH_SAFETY_TIMEOUT_MS)
+
+      if (mainWindow) {
+        mainWindow.onReadyToShow(closeSplash)
+      } else {
+        const win = BrowserWindow.getAllWindows().find((w) => w !== splash?.getWindow())
+        if (win) {
+          win.once('ready-to-show', closeSplash)
+        } else {
+          // No window to hook — don't leave the splash up forever.
+          closeSplash()
+        }
+      }
+    }
 
     logger.info(`✅ ${appName} application started successfully`)
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) {
-        if (onActivate) {
-          onActivate()
+        if (options.onActivate) {
+          options.onActivate()
         } else {
-          createWindow()
+          options.createWindow()
         }
       }
     })

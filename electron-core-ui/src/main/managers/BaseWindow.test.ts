@@ -18,6 +18,8 @@ const { mockStorageGet, mockStorageSet, MockBrowserWindow } = vi.hoisted(() => {
     isMaximized = vi.fn(() => false)
     setFullScreen = vi.fn()
     on = vi.fn()
+    once = vi.fn()
+    show = vi.fn()
     loadURL = vi.fn(() => Promise.resolve())
     loadFile = vi.fn(() => Promise.resolve())
     webContents = mockWebContents
@@ -53,7 +55,7 @@ vi.mock('electron', () => ({
       workAreaSize: { width: 1920, height: 1080 }
     })
   },
-  ipcMain: { handle: vi.fn(), removeHandler: vi.fn(), on: vi.fn() },
+  ipcMain: { handle: vi.fn(), removeHandler: vi.fn(), on: vi.fn(), removeListener: vi.fn() },
   nativeImage: { createFromPath: vi.fn(() => ({})) },
   Menu: { setApplicationMenu: vi.fn() },
   app: { isPackaged: false }
@@ -63,6 +65,7 @@ vi.mock('path', () => ({
   join: (...args: string[]) => args.join('/')
 }))
 
+import * as electron from 'electron'
 import { BaseWindow } from './BaseWindow'
 import type { WindowConfiguration, WindowState } from './WindowManager'
 
@@ -221,6 +224,105 @@ describe('BaseWindow', () => {
       expect(persisted.y).toBe(savedY)
       expect(persisted.width).toBe(savedWidth)
       expect(persisted.height).toBe(savedHeight)
+    })
+  })
+
+  describe('showWhenReady (splash handoff)', () => {
+    /**
+     * Fire the captured `app:renderer-ready` ipcMain handler with an event
+     * whose sender matches this window's webContents id (the mock uses id 1).
+     */
+    function fireRendererReady(senderId = 1): void {
+      const ipc = electron.ipcMain as unknown as { on: { mock: { calls: [string, (e: unknown) => void][] } } }
+      const call = ipc.on.mock.calls.find((c) => c[0] === 'app:renderer-ready')
+      expect(call).toBeDefined()
+      call?.[1]({ sender: { id: senderId } })
+    }
+
+    /** Find and invoke the webContents-level `once(event, …)` handler. */
+    function fireWebContentsOnce(win: TestWindow, event: string): void {
+      const bw = win.getWindow() as unknown as InstanceType<typeof MockBrowserWindow>
+      const wc = bw.webContents as unknown as { once: { mock: { calls: [string, () => void][] } } }
+      const call = wc.once.mock.calls.find((c) => c[0] === event)
+      expect(call).toBeDefined()
+      call?.[1]()
+    }
+
+    it('creates the window hidden when showWhenReady is set', () => {
+      mockStorageGet.mockReturnValue(undefined)
+      const win = new TestWindow({ ...defaultConfig, showWhenReady: true })
+      expect(getWindowOptions(win)['show']).toBe(false)
+    })
+
+    it('does not set show:false by default', () => {
+      mockStorageGet.mockReturnValue(undefined)
+      const win = new TestWindow(defaultConfig)
+      expect(getWindowOptions(win)['show']).toBeUndefined()
+    })
+
+    it('does NOT show the window on ready-to-show alone (only on renderer-ready)', () => {
+      mockStorageGet.mockReturnValue(undefined)
+      const win = new TestWindow({ ...defaultConfig, showWhenReady: true })
+      const bw = win.getWindow() as unknown as InstanceType<typeof MockBrowserWindow>
+      // No `ready-to-show` listener should drive the reveal — that fires too
+      // early (on the loading fallback's first paint).
+      const readyToShow = (bw.once.mock.calls as [string, () => void][]).find((c) => c[0] === 'ready-to-show')
+      expect(readyToShow).toBeUndefined()
+      expect(bw.show).not.toHaveBeenCalled()
+    })
+
+    it('shows the window and fires ready callbacks on renderer-ready IPC', () => {
+      mockStorageGet.mockReturnValue(undefined)
+      const win = new TestWindow({ ...defaultConfig, showWhenReady: true })
+      const cb = vi.fn()
+      win.onReadyToShow(cb)
+
+      const bw = win.getWindow() as unknown as InstanceType<typeof MockBrowserWindow>
+      expect(bw.show).not.toHaveBeenCalled()
+      expect(cb).not.toHaveBeenCalled()
+
+      fireRendererReady()
+
+      // Callback runs (close splash) BEFORE the window is shown.
+      expect(cb).toHaveBeenCalledTimes(1)
+      expect(bw.show).toHaveBeenCalledTimes(1)
+      const cbOrder = cb.mock.invocationCallOrder[0] ?? Number.POSITIVE_INFINITY
+      const showOrder = bw.show.mock.invocationCallOrder[0] ?? Number.NEGATIVE_INFINITY
+      expect(cbOrder).toBeLessThan(showOrder)
+    })
+
+    it('ignores a renderer-ready IPC from a different window', () => {
+      mockStorageGet.mockReturnValue(undefined)
+      const win = new TestWindow({ ...defaultConfig, showWhenReady: true })
+      const bw = win.getWindow() as unknown as InstanceType<typeof MockBrowserWindow>
+
+      // Event from another webContents (id 999) must not reveal this window.
+      fireRendererReady(999)
+      expect(bw.show).not.toHaveBeenCalled()
+
+      // The matching sender does.
+      fireRendererReady(1)
+      expect(bw.show).toHaveBeenCalledTimes(1)
+    })
+
+    it('runs a late-registered callback immediately once already ready', () => {
+      mockStorageGet.mockReturnValue(undefined)
+      const win = new TestWindow({ ...defaultConfig, showWhenReady: true })
+      fireRendererReady()
+
+      const cb = vi.fn()
+      win.onReadyToShow(cb)
+      expect(cb).toHaveBeenCalledTimes(1)
+    })
+
+    it('fires ready callbacks on did-finish-load when shown immediately', () => {
+      mockStorageGet.mockReturnValue(undefined)
+      const win = new TestWindow(defaultConfig)
+      const cb = vi.fn()
+      win.onReadyToShow(cb)
+
+      fireWebContentsOnce(win, 'did-finish-load')
+      expect(cb).toHaveBeenCalledTimes(1)
     })
   })
 })

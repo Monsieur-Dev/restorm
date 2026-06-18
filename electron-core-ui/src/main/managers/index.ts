@@ -1,3 +1,6 @@
 export * from './WindowManager'
 export * from './BaseWindow'
 export { setupIPC, setupAppLifecycle, initializeApp, configureCommandLineSwitches, setupAppProtocol } from './IPCManager'
+export type { InitializeAppOptions } from './IPCManager'
+export { createSplashWindow } from './SplashWindow'
+export type { SplashWindowOptions, SplashWindowHandle } from './SplashWindow'
