@@ -14,6 +14,7 @@ import {
   isWebSocketRequestTab,
   isODataRequestTab,
   isAuthenticationRequestTab,
+  isAnyRequestTab,
   isScenarioEditorTab,
   isConsoleTab,
   isFirewallTab,
@@ -1323,9 +1324,12 @@ export const RestormWorkbench = forwardRef<RestormWorkbenchHandle, RestormWorkbe
   const getTabContextMenuItems = useCallback(
     (tab: EditorTab, _groupId: string, actions: { close: () => void; closeOthersInGroup: () => void }): ContextMenuItem[] => {
       const items: ContextMenuItem[] = []
-      const typed = tab as { request?: { id: string }; tabType?: string }
-      const isRequest = typed.tabType?.includes('request')
-      const requestId = typed.request?.id
+      // Use the type guard, not a `tabType.includes('request')` substring
+      // sniff: isAnyRequestTab matches the exact request-tab discriminants
+      // and narrows to the union that carries `request`.
+      const restormTab = tab as RestormEditorTab
+      const isRequest = isAnyRequestTab(restormTab)
+      const requestId = isRequest ? restormTab.request.id : undefined
 
       if (isRequest && requestId && isItemFavorite && onToggleFavorite) {
         const isFav = isItemFavorite(requestId)
