@@ -3,10 +3,12 @@ Feature: MQTT execution end-to-end (self-hosted broker)
   Mosquitto. Boots restorm with `--mcp`, opens the sample, starts the MQTT Broker
   (assert Start listening toggles to the listening state + enables Send), opens
   the MQTT Chat client and connects it (which subscribes to `restorm/e2e/chat`),
-  publishes from the client (asserting the payload shows as both a sent bubble
-  AND a received bubble — it round-trips through its own subscription), then
-  broadcasts from the broker's Send button and asserts the client receives it,
-  and finally disconnects the client.
+  publishes from the client (asserting the payload shows as a sent bubble that
+  gains a delivery check — its own publish round-trips back through its
+  subscription and folds into a delivery confirmation on the sent bubble, not a
+  duplicate inbound bubble), then broadcasts from the broker's Send button and
+  asserts the client receives it as an inbound bubble, and finally disconnects
+  the client.
 
   Scenario: Host a broker, connect a client, publish, receive the round-trip, broadcast, then disconnect
     Given I launch restorm with the MCP server enabled
@@ -26,7 +28,7 @@ Feature: MQTT execution end-to-end (self-hosted broker)
 
     When I click the Send button
     Then the chat shows a sent message matching "from mqtt"
-    And the chat shows a received message matching "from mqtt"
+    And that sent message shows a delivery check
 
     When I open the "MQTT Broker" request tab via MCP
     Then the server shows 1 connected client

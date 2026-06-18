@@ -23,6 +23,9 @@ const { Given, When, Then } = createBdd(test)
 let discovery: McpDiscovery | null = null
 let page: Page | null = null
 let requestsByName = new Map<string, string>()
+// The payload of the most recently asserted sent bubble — so a follow-up step
+// can assert the delivery check on that same bubble ("that sent message …").
+let lastSentNeedle: string | null = null
 
 // `:visible` → the active tab (inactive tabs are mounted but 0×0).
 const CONNECT_BTN = '[data-testid="websocket-connect-button"]:visible'
@@ -40,6 +43,7 @@ Given(
     discovery = launched.discovery
     page = launched.page
     requestsByName = new Map()
+    lastSentNeedle = null
   }
 )
 
@@ -133,6 +137,26 @@ Then(
       .filter({ hasText: needle })
       .first()
     await expect(sentBubble).toBeVisible({ timeout: 10_000 })
+    lastSentNeedle = needle
+  }
+)
+
+Then(
+  // The client publishes to a topic it is itself subscribed to, so its own
+  // publish round-trips back through the subscription. The chat folds that
+  // round-trip into a delivery check on the originating sent bubble (the same
+  // confirmation UX as a Socket.IO ack) rather than rendering a duplicate
+  // inbound bubble — assert the check on the sent bubble from the prior step.
+  'that sent message shows a delivery check',
+  async () => {
+    if (page === null) throw new Error('launch first')
+    if (lastSentNeedle === null) throw new Error('assert a sent message first')
+    const ackCheck = page
+      .locator('[data-testid="ws-chat-bubble"][data-direction="sent"]:visible')
+      .filter({ hasText: lastSentNeedle })
+      .first()
+      .locator('[data-testid="ws-chat-ack-check"]')
+    await expect(ackCheck).toBeVisible({ timeout: 10_000 })
   }
 )
 
