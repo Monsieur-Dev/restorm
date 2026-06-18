@@ -39,6 +39,11 @@
     "requestHistory": "Anmodningshistorik",
     "envSelector": {
       "applyToAll": "Anvend på alle anmodninger"
+    },
+    "auth": {
+      "noAuth": "Ingen godkendelse",
+      "popoverLabel": "Godkendelsesrute",
+      "unnamed": "Uden navn"
     }
   },
   "tips": {

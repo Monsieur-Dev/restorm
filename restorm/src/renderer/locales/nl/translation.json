@@ -39,6 +39,11 @@
     "requestHistory": "Geschiedenis van verzoeken",
     "envSelector": {
       "applyToAll": "Toepassen op alle verzoeken"
+    },
+    "auth": {
+      "noAuth": "Geen authenticatie",
+      "popoverLabel": "Authenticatieroute",
+      "unnamed": "Naamloos"
     }
   },
   "tips": {

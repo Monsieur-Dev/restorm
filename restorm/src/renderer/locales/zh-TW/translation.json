@@ -38,6 +38,11 @@
     "requestHistory": "請求歷史紀錄",
     "envSelector": {
       "applyToAll": "套用至所有請求"
+    },
+    "auth": {
+      "noAuth": "無驗證",
+      "popoverLabel": "驗證路由",
+      "unnamed": "未命名"
     }
   },
   "tips": {

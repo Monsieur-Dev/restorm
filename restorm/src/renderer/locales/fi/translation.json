@@ -39,6 +39,11 @@
     "requestHistory": "Pyyntöhistoria",
     "envSelector": {
       "applyToAll": "Käytä kaikkiin pyyntöihin"
+    },
+    "auth": {
+      "noAuth": "Ei todennusta",
+      "popoverLabel": "Todennusreitti",
+      "unnamed": "Nimetön"
     }
   },
   "tips": {

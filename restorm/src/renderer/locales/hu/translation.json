@@ -39,6 +39,11 @@
     "requestHistory": "Kérések előzményei",
     "envSelector": {
       "applyToAll": "Alkalmazás az összes kérésre"
+    },
+    "auth": {
+      "noAuth": "Nincs hitelesítés",
+      "popoverLabel": "Hitelesítési útvonal",
+      "unnamed": "Névtelen"
     }
   },
   "tips": {

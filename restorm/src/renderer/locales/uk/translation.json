@@ -41,6 +41,11 @@
     "requestHistory": "Історія запитів",
     "envSelector": {
       "applyToAll": "Застосувати до всіх запитів"
+    },
+    "auth": {
+      "noAuth": "Без автентифікації",
+      "popoverLabel": "Маршрут автентифікації",
+      "unnamed": "Без назви"
     }
   },
   "tips": {

@@ -39,6 +39,11 @@
     "requestHistory": "Historique des requêtes",
     "envSelector": {
       "applyToAll": "Appliquer à toutes les requêtes"
+    },
+    "auth": {
+      "noAuth": "Aucune authentification",
+      "popoverLabel": "Route d'authentification",
+      "unnamed": "Sans nom"
     }
   },
   "tips": {

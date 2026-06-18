@@ -39,6 +39,11 @@
     "requestHistory": "Historiku i kërkesave",
     "envSelector": {
       "applyToAll": "Zbato te të gjitha kërkesat"
+    },
+    "auth": {
+      "noAuth": "Pa vërtetim",
+      "popoverLabel": "Rruga e vërtetimit",
+      "unnamed": "Pa emër"
     }
   },
   "tips": {

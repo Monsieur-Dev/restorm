@@ -40,6 +40,11 @@
     "requestHistory": "Istoricul cererilor",
     "envSelector": {
       "applyToAll": "Aplică la toate cererile"
+    },
+    "auth": {
+      "noAuth": "Fără autentificare",
+      "popoverLabel": "Rută de autentificare",
+      "unnamed": "Fără nume"
     }
   },
   "tips": {

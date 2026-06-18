@@ -39,6 +39,11 @@
     "requestHistory": "Histórico de pedidos",
     "envSelector": {
       "applyToAll": "Aplicar a todos os pedidos"
+    },
+    "auth": {
+      "noAuth": "Sem autenticação",
+      "popoverLabel": "Rota de autenticação",
+      "unnamed": "Sem nome"
     }
   },
   "tips": {

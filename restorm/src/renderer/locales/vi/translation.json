@@ -38,6 +38,11 @@
     "requestHistory": "Lịch sử yêu cầu",
     "envSelector": {
       "applyToAll": "Áp dụng cho tất cả yêu cầu"
+    },
+    "auth": {
+      "noAuth": "Không xác thực",
+      "popoverLabel": "Tuyến xác thực",
+      "unnamed": "Chưa đặt tên"
     }
   },
   "tips": {

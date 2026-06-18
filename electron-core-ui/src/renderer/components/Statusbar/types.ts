@@ -60,6 +60,14 @@ export interface StatusbarElementProps {
   /** Forwarded to the underlying `<Tooltip>` — see `TooltipProps.placement`. */
   tooltipPlacement?: 'auto' | 'above' | 'below'
   /**
+   * Click-mode only: fired whenever the popover opens / closes (cell
+   * click toggle, outside-click / Escape dismiss, or an inner action
+   * calling `closeTooltip`). Lets a host coordinate sibling overlays —
+   * e.g. suppress its own hover tooltip while this popover is open so
+   * the two never stack. No-op in hover mode.
+   */
+  onOpenChange?: (open: boolean) => void
+  /**
    * Activity indicator: a counter the consumer increments to fire one
    * ripple animation per increment. Each new value pushes a fresh
    * ripple onto the queue; the cell renders concurrent ripples in a

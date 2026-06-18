@@ -40,6 +40,11 @@
     "requestHistory": "Istorija zahteva",
     "envSelector": {
       "applyToAll": "Primeni na sve zahteve"
+    },
+    "auth": {
+      "noAuth": "Без аутентификације",
+      "popoverLabel": "Рута аутентификације",
+      "unnamed": "Без назива"
     }
   },
   "tips": {

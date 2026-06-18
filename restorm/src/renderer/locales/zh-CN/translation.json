@@ -38,6 +38,11 @@
     "requestHistory": "请求历史",
     "envSelector": {
       "applyToAll": "应用到所有请求"
+    },
+    "auth": {
+      "noAuth": "无认证",
+      "popoverLabel": "认证路由",
+      "unnamed": "未命名"
     }
   },
   "tips": {
