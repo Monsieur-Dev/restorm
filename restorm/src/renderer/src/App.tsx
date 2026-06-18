@@ -62,6 +62,20 @@ import { Environment as EnvironmentClass } from '../../shared/models/Environment
 let scenarioSaveTimer: ReturnType<typeof setTimeout> | null = null
 let latestSaveAll: (() => Promise<boolean>) | null = null
 
+/**
+ * Cancel any pending scenario-edit autosave. MUST run on file-close and
+ * on App unmount: otherwise the module-scoped debounce timer can fire
+ * AFTER teardown and serialize the just-closed (or a previous) project's
+ * tree over the freshly-opened one. Also drops the stale save callback.
+ */
+function cancelScenarioSaveTimer(): void {
+  if (scenarioSaveTimer) {
+    clearTimeout(scenarioSaveTimer)
+    scenarioSaveTimer = null
+  }
+  latestSaveAll = null
+}
+
 const classForDocument = (type: 'folder' | 'request' | 'environment', doc: Record<string, unknown>): object => {
   if (type === 'request') {
     const t = doc['type']
@@ -1987,6 +2001,9 @@ const App: React.FC = () => {
       // Reset restore flags when file is closed
       hasRestoredFileRef.current = false
       hasRestoredWorkbenchRef.current = false
+      // Drop any pending scenario autosave so it can't fire after the
+      // file is gone and serialize the closed project's tree.
+      cancelScenarioSaveTimer()
       handleFileClosed()
 
       // The user explicitly closed the file → forget the auto-reopen record.
@@ -2015,6 +2032,11 @@ const App: React.FC = () => {
       unsubscribe2()
     }
   }, [handleFileOpened, handleFileClosed, filePath, hasRestoredWorkbenchRef])
+
+  // Cancel any pending scenario autosave on App unmount — the timer is
+  // module-scoped, so without this it can fire after teardown and
+  // serialize a stale tree.
+  useEffect(() => cancelScenarioSaveTimer, [])
 
   // Auto-reopen-last-file: when the `files:reopenLastFile` user setting is on,
   // record the currently-open file's path so the main process can reopen it on
