@@ -752,12 +752,26 @@ export class Scheduler {
   }
 
   /** Decrement each parent's pending-descendant count; a parent that reaches
-   * 0 after its executor already returned has now fully drained → cascade. */
+   * 0 after its executor already returned has now fully drained → cascade.
+   *
+   * The count is CLAMPED at 0: a double-release (the same obligation
+   * discharged twice — e.g. a sync onClose firing before the handle is
+   * registered, or a token both routed and aggregate-consumed) used to
+   * drive `n` negative, and `n <= 0` then fired `onSubtreeDrained` while
+   * descendants were still in flight, ending the run early. We only
+   * cascade on the exact 0→drained transition, and never below 0. */
   private releaseParents(parents: number[]): void {
     for (const p of parents) {
-      const n = (this.pending.get(p) ?? 0) - 1
+      const prev = this.pending.get(p) ?? 0
+      if (prev <= 0) {
+        // Already drained / never had this obligation — a redundant
+        // release. Don't go negative and don't re-fire the cascade.
+        this.pushLog({ ts: now(), runId: this.runId, level: 'warn', source: 'engine', message: `releaseParents: redundant release ignored for node-slot ${p} (pending was ${prev})` })
+        continue
+      }
+      const n = prev - 1
       this.pending.set(p, n)
-      if (n <= 0 && this.returned.has(p)) this.onSubtreeDrained(p)
+      if (n === 0 && this.returned.has(p)) this.onSubtreeDrained(p)
     }
   }
 
@@ -1167,7 +1181,11 @@ export class Scheduler {
   ): void {
     if (!this.socketioConnectBridge) { this.fail('socketio bridge not wired'); return }
     let iter = 0
-    let ended = false
+    // Holder (not a bare `let`) so TS doesn't narrow it to `false` at the
+    // post-bridge guard: `endConnection` can flip it SYNCHRONOUSLY from
+    // inside the `socketioConnectBridge(...)` call (a broker that fails to
+    // bind on the spot), which TS's control-flow analysis can't see.
+    const conn = { ended: false }
     // The abort listener (set below) — removed on a NORMAL close so it doesn't
     // accumulate on the shared per-run signal across many open/close cycles.
     let abortHandler: (() => void) | undefined = undefined
@@ -1191,8 +1209,8 @@ export class Scheduler {
     }
 
     const endConnection = (error?: string): void => {
-      if (ended) return
-      ended = true
+      if (conn.ended) return
+      conn.ended = true
       if (abortHandler) this.abortCtl.signal.removeEventListener('abort', abortHandler)
       this.socketConnections.delete(act.nodeId)
       this.pendingReentry -= 1
@@ -1245,6 +1263,16 @@ export class Scheduler {
       },
       onClose: (error) => { endConnection(error) }
     })
+    // The bridge may have invoked `onClose` SYNCHRONOUSLY (e.g. an MQTT
+    // broker that fails to bind on the spot), in which case
+    // `endConnection` already ran (`conn.ended` is set) and tore
+    // everything down. Registering the handle / abort listener now would
+    // leak a dead handle in `socketConnections` forever and double-count
+    // the completion. Only wire them up when the connection is still live.
+    if (conn.ended) {
+      handle.close()
+      return
+    }
     this.socketConnections.set(act.nodeId, handle)
     // A Stop must close the socket so the server frees it.
     abortHandler = (): void => { handle.close() }
