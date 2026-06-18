@@ -20,6 +20,19 @@ import type { CodeRunResult } from './types'
 interface WorkerOk { ok: true; result: unknown; logs: string[] }
 interface WorkerErr { ok: false; error: string; logs?: string[] }
 
+/**
+ * Memory ceiling for a code-runtime worker. Without `resourceLimits` a
+ * runaway allocator (a script that grows an array forever) OOMs the
+ * whole host before the time-based `terminate()` can fire — the wall
+ * clock doesn't help when a single synchronous allocation explodes. V8
+ * aborts the worker (exit/error event) once its old-gen heap passes this
+ * cap, which the harness surfaces as a normal rejection. 512 MiB is
+ * generous for a WASM interpreter + a user script while still bounding
+ * the blast radius far below host RAM.
+ */
+const WORKER_MAX_OLD_GEN_MB = 512
+const WORKER_MAX_YOUNG_GEN_MB = 64
+
 export interface WorkerRunOptions {
   input: unknown
   variables: Record<string, unknown>
@@ -34,7 +47,16 @@ export function runCodeWorker(workerSrc: string, code: string, opts: WorkerRunOp
   // 1-byte SIGINT mailbox shared with the worker (graceful interrupt for engines
   // that poll it; harmless for those that don't — terminate is the backstop).
   const interruptBuffer = new Uint8Array(new SharedArrayBuffer(1))
-  const worker = new Worker(workerSrc, { eval: true, workerData: { ...opts.workerData, interruptBuffer } })
+  const worker = new Worker(workerSrc, {
+    eval: true,
+    workerData: { ...opts.workerData, interruptBuffer },
+    // Bound worker memory so a runaway allocation can't OOM the host
+    // before the timeout/Stop terminate fires.
+    resourceLimits: {
+      maxOldGenerationSizeMb: WORKER_MAX_OLD_GEN_MB,
+      maxYoungGenerationSizeMb: WORKER_MAX_YOUNG_GEN_MB
+    }
+  })
 
   return new Promise<CodeRunResult>((resolve, reject) => {
     let settled = false
