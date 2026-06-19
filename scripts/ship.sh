@@ -298,6 +298,9 @@ FAILING_CHECKS="$(gh pr checks "${BRANCH}" --json name,bucket,state,link 2>/dev/
   python3 -c '
 import json, sys
 checks = json.load(sys.stdin)
+if not checks:
+    print("  FAIL: no checks reported — cannot verify CI is green")
+    sys.exit(1)
 bad = [c for c in checks if c.get("bucket","") != "pass"]
 for c in bad:
     print("  FAIL: {} — state: {} (bucket: {}) — {}".format(
