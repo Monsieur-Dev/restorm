@@ -235,36 +235,6 @@ function deleteItemFromFolder(items: FolderItem[], id: string): FolderItem[] {
 }
 
 // ============================================================================
-// Main-side collection mirror
-// ============================================================================
-
-/**
- * Mirror the tree onto the main-side CollectionStore (so apiUpdate
- * apply/preview can look up folders by id). Skipped when the tree reference
- * is unchanged since the last mirror — a no-op setCollections (same array
- * identity) needn't re-clone + resend, which removes the per-keystroke clone
- * cost for edits that don't replace the array. Runs SYNCHRONOUSLY (not
- * debounced): the main store is also written directly by mcp-sourced imports
- * (which skip this mirror via the `source === 'mcp'` early-return), so a
- * deferred mirror could fire AFTER an import and clobber the freshly-imported
- * tree with a stale empty snapshot — ordering must stay synchronous.
- * Fire-and-forget + idempotent; the renderer doesn't gate on it.
- */
-let lastMirroredRef: unknown = null
-
-function mirrorCollections(collections: EnvironmentFolder[]): void {
-  if (collections === lastMirroredRef) return
-  lastMirroredRef = collections
-  const api = (window as unknown as { restorm?: { apiUpdate?: { syncCollections?: (c: unknown[]) => Promise<void> } } }).restorm?.apiUpdate
-  if (api?.syncCollections) {
-    // `cloneForEventBus` (not JSON round-trip) so SecretValue.toJSON()
-    // isn't called — main needs the plaintext to resolve handlebars +
-    // write the `.restorm.env` sidecar on the next save.
-    void api.syncCollections(cloneForEventBus(collections) as unknown[])
-  }
-}
-
-// ============================================================================
 // Store
 // ============================================================================
 
@@ -288,10 +258,18 @@ export const useRestormStore = create<RestormState>()(
       if (source === 'mcp') return
       // Mirror the tree onto the main-side CollectionStore so the
       // apiUpdate apply / preview orchestrators can look up folders by
-      // id. Reference-skipped (see mirrorCollections) so a no-op
-      // setCollections doesn't re-clone + resend. Fire-and-forget +
-      // idempotent; the renderer doesn't gate on it.
-      mirrorCollections(collections)
+      // id. Without this sync the main-side store stays empty and every
+      // "Refresh from source" fails with "folder not found". Synchronous
+      // (no debounce) so it can't reorder against an mcp import's direct
+      // main-store write. Fire-and-forget — the handler is idempotent and
+      // the renderer doesn't gate on the round-trip.
+      const api = (window as unknown as { restorm?: { apiUpdate?: { syncCollections?: (c: unknown[]) => Promise<void> } } }).restorm?.apiUpdate
+      if (api?.syncCollections) {
+        // `cloneForEventBus` (not JSON round-trip) so SecretValue.toJSON()
+        // isn't called — main needs the plaintext to resolve handlebars +
+        // to write the `.restorm.env` sidecar correctly on the next save.
+        void api.syncCollections(cloneForEventBus(collections) as unknown[])
+      }
     },
     
     // Update a collection
