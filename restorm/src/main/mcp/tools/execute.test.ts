@@ -166,6 +166,27 @@ describe('execute tools — run_request (unary)', () => {
     })
   }
 
+  it("reports protocol 'unknown' (not 'http') when the history entry has no type", async () => {
+    vi.useFakeTimers()
+    mockState.findById.mockReturnValue({ id: 'r1', name: 'r', type: 'http' })
+    mockState.list
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ guid: 'g-new' }])
+    mockState.getDetail.mockResolvedValue({
+      requestId: 'r1',
+      success: true,
+      // No `type` on the response — a malformed/legacy entry. Must surface
+      // 'unknown' rather than silently claiming http.
+      response: { statusCode: 200, statusText: 'OK', timings: { durationMs: 1 } }
+    })
+    const mcp = new FakeMcpService()
+    registerExecutionTools(mcp as unknown as McpService)
+    const promise = mcp.invoke('run_request', { id: 'r1' }) as Promise<unknown>
+    await vi.advanceTimersByTimeAsync(700)
+    const { payload } = parseReply(await promise) as { payload: { protocol: string } }
+    expect(payload.protocol).toBe('unknown')
+  })
+
   it('returns parsed { data, errors } for graphql', async () => {
     vi.useFakeTimers()
     mockState.findById.mockReturnValue({ id: 'r1', name: 'r', type: 'graphql' })

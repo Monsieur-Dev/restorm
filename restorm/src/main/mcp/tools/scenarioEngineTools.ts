@@ -137,6 +137,9 @@ export function registerScenarioEngineTools(mcp: McpService): void {
     async (args) => {
       try {
         const scenarioId = String(args['scenarioId'])
+        // The scenario must exist before we do anything else — otherwise we'd
+        // record a usage entry (and try to start the engine) for a bogus id.
+        if (!findScenarioModel(scenarioId)) return errorReply(`No scenario found with id "${scenarioId}".`)
         // Refuse a scenario with editor-level validation errors — same gate as
         // the disabled Play button, so MCP can't bypass it.
         const invalid = blockingValidationSummary(scenarioId)
@@ -147,11 +150,12 @@ export function registerScenarioEngineTools(mcp: McpService): void {
         const timeoutMs = typeof args['blockingTimeoutMs'] === 'number' && args['blockingTimeoutMs'] > 0
           ? args['blockingTimeoutMs']
           : DEFAULT_BLOCKING_TIMEOUT_MS
-        // Count this top-level run for the EmptyBench recent-activity lists,
-        // mirroring the UI's `scenario:engine:start` path.
-        scenarioUsageService.recordRun(scenarioId)
         const handle = scenarioEngine.start(scenarioId, { params, interactive })
         const runId = handle.scheduler.runId
+        // Count this top-level run for the EmptyBench recent-activity lists,
+        // mirroring the UI's `scenario:engine:start` path — only AFTER the run
+        // actually started, so a failed start never inflates the usage list.
+        scenarioUsageService.recordRun(scenarioId)
         const entry: ActiveRun = { handle, output: null, state: 'running' }
         recentRuns.set(runId, entry)
         pruneRecentRuns()

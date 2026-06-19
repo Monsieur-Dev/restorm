@@ -212,7 +212,10 @@ function shapeHistoryDetail(detail: unknown): unknown {
   // We gate the grpc-specific extras on `protocol === 'grpc'` so an
   // HTTP response doesn't end up with a misleading `grpcMethod: "GET"`.
   const requestMeta = (d['requestMeta'] ?? {}) as Record<string, unknown>
-  const protocol = response['type'] ?? 'http'
+  // Every history entry stamps its real `type` (http/grpc/websocket/…). If it
+  // is ever missing, surface 'unknown' rather than silently claiming 'http' —
+  // mislabelling a grpc/ws entry as http is worse than admitting we don't know.
+  const protocol = response['type'] ?? 'unknown'
   const isGrpc = protocol === 'grpc'
   const sentRequest = {
     method: response['requestMethod'] ?? requestMeta['method'],
